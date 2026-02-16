@@ -38,7 +38,7 @@ export function SubscriptionGate({ feature, children, fallback }: SubscriptionGa
     return <>{fallback}</>
   }
 
-  const tierNames: Record<string, string> = { free: 'Free', basic: 'Plus', premium: 'Pro' }
+  const tierNames: Record<string, string> = { free: 'Free', basic: 'Plus', premium: 'Pro', enterprise: 'Elite', premier: 'Premier' }
   const tierLabel = tierNames[requiredTier(feature)] ?? requiredTier(feature)
   const label = featureLabel(feature)
 
@@ -73,6 +73,22 @@ export function SubscriptionGate({ feature, children, fallback }: SubscriptionGa
                     <FeatureItem text="Voice synthesis" />
                     <FeatureItem text="3 Wisdom Journeys" />
                     <FeatureItem text="Starting at $4.99/month" />
+                  </>
+                ) : tierLabel === 'Elite' ? (
+                  <>
+                    <FeatureItem text="800 KIAAN questions/month" />
+                    <FeatureItem text="All Pro features" />
+                    <FeatureItem text="Unlimited Wisdom Journeys" />
+                    <FeatureItem text="Dedicated support" />
+                    <FeatureItem text="Starting at $15/month" />
+                  </>
+                ) : tierLabel === 'Premier' ? (
+                  <>
+                    <FeatureItem text="Unlimited KIAAN questions" />
+                    <FeatureItem text="All Elite features" />
+                    <FeatureItem text="Unlimited everything" />
+                    <FeatureItem text="Dedicated support" />
+                    <FeatureItem text="Starting at $25/month" />
                   </>
                 ) : (
                   <>

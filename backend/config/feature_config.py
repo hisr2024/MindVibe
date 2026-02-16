@@ -85,9 +85,33 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         "kiaan_voice_synthesis": True,
         "kiaan_quantum_dive": True,
     },
-    # NOTE: Enterprise tier is no longer offered to new subscribers.
-    # Kept here for backward compatibility with existing enterprise users.
+    # Elite tier (uses ENTERPRISE enum in DB for backward compatibility)
     SubscriptionTier.ENTERPRISE: {
+        "kiaan_questions_monthly": 800,
+        "encrypted_journal": True,
+        "mood_tracking": True,
+        "wisdom_access": True,
+        "advanced_analytics": True,
+        "priority_support": True,
+        "offline_access": True,
+        "white_label": False,
+        "sso": False,
+        "dedicated_support": True,
+        "data_retention_days": -1,  # Unlimited retention
+        # Wisdom Journeys - Unlimited for Elite
+        "wisdom_journeys": True,
+        "wisdom_journeys_limit": -1,  # Unlimited active journeys
+        # KIAAN Ecosystem - Full access
+        "kiaan_divine_chat": True,
+        "kiaan_friend_mode": True,
+        "kiaan_voice_companion": True,
+        "kiaan_agent": True,
+        "kiaan_soul_reading": True,
+        "kiaan_voice_synthesis": True,
+        "kiaan_quantum_dive": True,
+    },
+    # Premier tier — unlimited everything
+    SubscriptionTier.PREMIER: {
         "kiaan_questions_monthly": -1,  # Unlimited
         "encrypted_journal": True,
         "mood_tracking": True,
@@ -95,14 +119,14 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         "advanced_analytics": True,
         "priority_support": True,
         "offline_access": True,
-        "white_label": True,
-        "sso": True,
+        "white_label": False,
+        "sso": False,
         "dedicated_support": True,
         "data_retention_days": -1,  # Unlimited retention
-        # Wisdom Journeys - Unlimited for Enterprise
+        # Wisdom Journeys - Unlimited
         "wisdom_journeys": True,
         "wisdom_journeys_limit": -1,  # Unlimited active journeys
-        # KIAAN Ecosystem - Full unlimited access
+        # KIAAN Ecosystem - Full access
         "kiaan_divine_chat": True,
         "kiaan_friend_mode": True,
         "kiaan_voice_companion": True,

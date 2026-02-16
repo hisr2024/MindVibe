@@ -60,14 +60,26 @@ class TestFeatureConfig:
         assert features["offline_access"] is True
 
     def test_tier_features_enterprise(self):
-        """Test ENTERPRISE tier features."""
+        """Test ENTERPRISE (Elite) tier features."""
         from backend.config.feature_config import get_tier_features
-        
+
         features = get_tier_features(SubscriptionTier.ENTERPRISE)
+        assert features["kiaan_questions_monthly"] == 800
+        assert features["white_label"] is False
+        assert features["sso"] is False
+        assert features["dedicated_support"] is True
+        assert features["wisdom_journeys_limit"] == -1  # Unlimited
+
+    def test_tier_features_premier(self):
+        """Test PREMIER tier features."""
+        from backend.config.feature_config import get_tier_features
+
+        features = get_tier_features(SubscriptionTier.PREMIER)
         assert features["kiaan_questions_monthly"] == -1  # Unlimited
         assert features["white_label"] is True
         assert features["sso"] is True
         assert features["dedicated_support"] is True
+        assert features["wisdom_journeys_limit"] == -1  # Unlimited
 
     def test_has_feature_access(self):
         """Test has_feature_access function."""
@@ -89,7 +101,8 @@ class TestFeatureConfig:
         assert get_kiaan_quota(SubscriptionTier.FREE) == 15
         assert get_kiaan_quota(SubscriptionTier.BASIC) == 150
         assert get_kiaan_quota(SubscriptionTier.PREMIUM) == 300
-        assert get_kiaan_quota(SubscriptionTier.ENTERPRISE) == -1  # Legacy tier, still in DB enum
+        assert get_kiaan_quota(SubscriptionTier.ENTERPRISE) == 800  # Elite tier
+        assert get_kiaan_quota(SubscriptionTier.PREMIER) == -1  # Premier — unlimited
 
 
 class TestSubscriptionModels:
@@ -220,3 +233,4 @@ class TestSubscriptionTierEnum:
         assert SubscriptionTier.BASIC.value == "basic"
         assert SubscriptionTier.PREMIUM.value == "premium"
         assert SubscriptionTier.ENTERPRISE.value == "enterprise"
+        assert SubscriptionTier.PREMIER.value == "premier"

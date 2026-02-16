@@ -21,6 +21,7 @@ class SubscriptionTier(str, enum.Enum):
     BASIC = "basic"
     PREMIUM = "premium"
     ENTERPRISE = "enterprise"
+    PREMIER = "premier"
 
 
 class SoftDeleteMixin:

@@ -30,6 +30,8 @@ const tierQuotas: Record<string, number> = {
   free: 15,
   basic: 150,
   premium: 300,
+  enterprise: 800,
+  premier: -1, // unlimited
 }
 
 export function useKiaanQuota(tier: string = 'free'): UseKiaanQuotaResult {

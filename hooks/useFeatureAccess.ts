@@ -7,15 +7,17 @@ import { useSubscription } from './useSubscription'
  * Feature access definitions by tier.
  *
  * Mirrors backend/config/feature_config.py — keep in sync when tiers change.
- * Tiers are ordered: free < basic < premium
+ * Tiers are ordered: free < basic < premium < enterprise < premier
  */
 
-type TierId = 'free' | 'basic' | 'premium'
+type TierId = 'free' | 'basic' | 'premium' | 'enterprise' | 'premier'
 
 const TIER_RANK: Record<TierId, number> = {
   free: 0,
   basic: 1,
   premium: 2,
+  enterprise: 3,
+  premier: 4,
 }
 
 interface FeatureDef {
@@ -44,18 +46,22 @@ const FEATURE_MAP: Record<string, FeatureDef> = {
   offline_access: { minTier: 'premium', label: 'Offline Access' },
 }
 
-/** KIAAN question quotas by tier */
+/** KIAAN question quotas by tier (-1 = unlimited) */
 const TIER_QUOTAS: Record<TierId, number> = {
   free: 15,
-  basic: 150,    // Plus
-  premium: 300,  // Pro
+  basic: 150,      // Plus
+  premium: 300,    // Pro
+  enterprise: 800, // Elite
+  premier: -1,     // Premier — unlimited
 }
 
-/** Wisdom Journey limits by tier */
+/** Wisdom Journey limits by tier (-1 = unlimited) */
 const JOURNEY_LIMITS: Record<TierId, number> = {
   free: 1,
   basic: 3,
   premium: 10,
+  enterprise: -1,  // Elite — unlimited
+  premier: -1,     // Premier — unlimited
 }
 
 export interface FeatureAccessResult {

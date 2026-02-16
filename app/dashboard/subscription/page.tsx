@@ -103,7 +103,7 @@ export default function SubscriptionDashboardPage() {
         <UpgradePrompt
           variant="banner"
           title="Unlock More Features"
-          description="Upgrade to Plus ($4.99/mo) or Pro ($9.99/mo) for more KIAAN questions and all features."
+          description="Upgrade to Plus ($4.99/mo), Pro ($9.99/mo), Elite ($15/mo), or Premier ($25/mo) for more KIAAN questions and all features."
           ctaText="View Plans"
           ctaLink="/pricing"
           className="mb-8"
@@ -125,7 +125,7 @@ export default function SubscriptionDashboardPage() {
             ) : (
               <div className="space-y-3">
                 {[
-                  { date: new Date(), amount: subscription.isYearly ? ({ basic: 49.99, premium: 99.99 }[subscription.tierId] ?? 0) : ({ basic: 4.99, premium: 9.99 }[subscription.tierId] ?? 0), status: 'paid' },
+                  { date: new Date(), amount: subscription.isYearly ? ({ basic: 49.99, premium: 99.99, enterprise: 150.00, premier: 250.00 }[subscription.tierId] ?? 0) : ({ basic: 4.99, premium: 9.99, enterprise: 15.00, premier: 25.00 }[subscription.tierId] ?? 0), status: 'paid' },
                 ].map((invoice, i) => (
                   <div key={i} className="flex items-center justify-between py-2 border-b border-orange-500/10 last:border-0">
                     <div>

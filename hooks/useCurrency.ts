@@ -21,6 +21,8 @@ export const BASE_PRICES_USD: Record<string, number> = {
   free: 0,
   basic: 4.99,       // Plus
   premium: 9.99,     // Pro
+  enterprise: 15.00, // Elite
+  premier: 25.00,    // Premier
 }
 
 /** Yearly prices in USD (2 months free) */
@@ -28,6 +30,8 @@ export const YEARLY_PRICES_USD: Record<string, number> = {
   free: 0,
   basic: 49.99,      // Plus yearly
   premium: 99.99,    // Pro yearly
+  enterprise: 150.00, // Elite yearly
+  premier: 250.00,   // Premier yearly
 }
 
 // Conversion + discount rules

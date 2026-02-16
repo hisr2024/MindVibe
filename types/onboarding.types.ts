@@ -75,7 +75,7 @@ export interface PreferencesData {
 }
 
 /** Subscription tier identifiers */
-export type SubscriptionTierId = 'free' | 'basic' | 'premium' | 'enterprise'
+export type SubscriptionTierId = 'free' | 'basic' | 'premium' | 'enterprise' | 'premier'
 
 /** Billing cycle options */
 export type BillingCycle = 'monthly' | 'yearly'

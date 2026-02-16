@@ -8,7 +8,7 @@ import { useSubscription } from '@/hooks/useSubscription'
 import { useCurrency, CURRENCIES, type Currency } from '@/hooks/useCurrency'
 
 // Pricing tiers aligned with backend SubscriptionTier enum:
-// FREE, BASIC (Plus), PREMIUM (Pro)
+// FREE, BASIC (Plus), PREMIUM (Pro), ENTERPRISE (Elite), PREMIER
 const createPricingTiers = (
   currency: Currency,
   formatPrice: (amount: number, options?: { showDecimals?: boolean }) => string,
@@ -73,53 +73,88 @@ const createPricingTiers = (
     cta: 'Start 15-day free trial',
     trialAvailable: true,
   },
+  {
+    id: 'enterprise',
+    name: 'Elite',
+    description: '800 KIAAN questions with unlimited Wisdom Journeys',
+    monthlyPrice: getMonthlyPrice('enterprise'),
+    yearlyPrice: getYearlyPrice('enterprise'),
+    kiaanQuota: 800,
+    features: [
+      '800 KIAAN questions/month',
+      'All Pro features',
+      'Unlimited Wisdom Journeys',
+      'Dedicated support',
+    ],
+    cta: 'Start 15-day free trial',
+    trialAvailable: true,
+  },
+  {
+    id: 'premier',
+    name: 'Premier',
+    description: 'Unlimited KIAAN with unlimited access to everything',
+    monthlyPrice: getMonthlyPrice('premier'),
+    yearlyPrice: getYearlyPrice('premier'),
+    kiaanQuota: 'unlimited',
+    badge: 'Best Value',
+    features: [
+      'Unlimited KIAAN questions',
+      'All Elite features',
+      'Unlimited everything',
+      'Dedicated support',
+    ],
+    cta: 'Start 15-day free trial',
+    trialAvailable: true,
+  },
 ]
 
 const comparisonFeatures = [
   {
     category: 'KIAAN Chat',
     items: [
-      { name: 'Monthly Questions', values: { free: '15', basic: '150', premium: '300' } },
-      { name: 'Response Quality', values: { free: 'Same for all', basic: 'Same for all', premium: 'Same for all' } },
-      { name: 'Conversation History', values: { free: true, basic: true, premium: true } },
+      { name: 'Monthly Questions', values: { free: '15', basic: '150', premium: '300', enterprise: '800', premier: 'Unlimited' } },
+      { name: 'Response Quality', values: { free: 'Same for all', basic: 'Same for all', premium: 'Same for all', enterprise: 'Same for all', premier: 'Same for all' } },
+      { name: 'Conversation History', values: { free: true, basic: true, premium: true, enterprise: true, premier: true } },
     ],
   },
   {
     category: 'Assistants',
     items: [
-      { name: 'Ardha Reframing', values: { free: false, basic: true, premium: true } },
-      { name: 'Viyoga Detachment', values: { free: false, basic: true, premium: true } },
-      { name: 'Relationship Compass', values: { free: false, basic: false, premium: true } },
-      { name: 'Emotional Reset Guide', values: { free: false, basic: false, premium: true } },
+      { name: 'Ardha Reframing', values: { free: false, basic: true, premium: true, enterprise: true, premier: true } },
+      { name: 'Viyoga Detachment', values: { free: false, basic: true, premium: true, enterprise: true, premier: true } },
+      { name: 'Relationship Compass', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
+      { name: 'Emotional Reset Guide', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
     ],
   },
   {
     category: 'KIAAN Ecosystem',
     items: [
-      { name: 'Divine Chat', values: { free: true, basic: true, premium: true } },
-      { name: 'Friend Mode', values: { free: true, basic: true, premium: true } },
-      { name: 'Voice Synthesis', values: { free: false, basic: true, premium: true } },
-      { name: 'Voice Companion', values: { free: false, basic: false, premium: true } },
-      { name: 'Soul Reading', values: { free: false, basic: false, premium: true } },
-      { name: 'Quantum Dive', values: { free: false, basic: false, premium: true } },
-      { name: 'KIAAN Agent', values: { free: false, basic: false, premium: true } },
+      { name: 'Divine Chat', values: { free: true, basic: true, premium: true, enterprise: true, premier: true } },
+      { name: 'Friend Mode', values: { free: true, basic: true, premium: true, enterprise: true, premier: true } },
+      { name: 'Voice Synthesis', values: { free: false, basic: true, premium: true, enterprise: true, premier: true } },
+      { name: 'Voice Companion', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
+      { name: 'Soul Reading', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
+      { name: 'Quantum Dive', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
+      { name: 'KIAAN Agent', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
     ],
   },
   {
     category: 'Features',
     items: [
-      { name: 'Encrypted Journal', values: { free: false, basic: true, premium: true } },
-      { name: 'Mood Tracking', values: { free: true, basic: true, premium: true } },
-      { name: 'Daily Wisdom', values: { free: true, basic: true, premium: true } },
-      { name: 'Advanced Analytics', values: { free: false, basic: false, premium: true } },
+      { name: 'Encrypted Journal', values: { free: false, basic: true, premium: true, enterprise: true, premier: true } },
+      { name: 'Mood Tracking', values: { free: true, basic: true, premium: true, enterprise: true, premier: true } },
+      { name: 'Daily Wisdom', values: { free: true, basic: true, premium: true, enterprise: true, premier: true } },
+      { name: 'Advanced Analytics', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
+      { name: 'Unlimited Journeys', values: { free: false, basic: false, premium: false, enterprise: true, premier: true } },
     ],
   },
   {
     category: 'Support',
     items: [
-      { name: 'Community Access', values: { free: true, basic: true, premium: true } },
-      { name: 'Email Support', values: { free: false, basic: true, premium: true } },
-      { name: 'Priority Support', values: { free: false, basic: false, premium: true } },
+      { name: 'Community Access', values: { free: true, basic: true, premium: true, enterprise: true, premier: true } },
+      { name: 'Email Support', values: { free: false, basic: true, premium: true, enterprise: true, premier: true } },
+      { name: 'Priority Support', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
+      { name: 'Dedicated Support', values: { free: false, basic: false, premium: false, enterprise: true, premier: true } },
     ],
   },
 ]
@@ -480,7 +515,7 @@ export default function PricingPage() {
         tabIndex={0}
         role="region"
         aria-label="Pricing plans carousel"
-        className={`subscription-scroll grid gap-6 pb-6 mb-16 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-lg sm:grid-cols-2 xl:grid-cols-3 ${
+        className={`subscription-scroll grid gap-6 pb-6 mb-16 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-lg sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 ${
           isScrolling ? 'scrolling' : ''
         }`}
         style={{

@@ -63,6 +63,8 @@ INFRA_COST_PER_TIER: dict[str, float] = {
     "free":       0.00,   # Subsidized by paid tiers
     "basic":      1.50,   # Shared infra allocation
     "premium":    3.00,   # Higher resource allocation
+    "enterprise": 5.00,   # Elite tier — higher usage allocation
+    "premier":    8.00,   # Premier tier — highest usage
 }
 
 # Default profit margin percentages by tier
@@ -70,6 +72,8 @@ DEFAULT_PROFIT_MARGINS: dict[str, float] = {
     "free":       0.0,    # 0% - loss leader / acquisition funnel
     "basic":      60.0,   # 60% margin target
     "premium":    65.0,   # 65% margin target
+    "enterprise": 65.0,   # 65% margin target (Elite)
+    "premier":    70.0,   # 70% margin target (Premier)
 }
 
 # Tier quota definitions (mirrors feature_config.py, kept here for standalone use)
@@ -77,6 +81,8 @@ TIER_QUOTAS: dict[str, int] = {
     "free":       15,
     "basic":      150,   # Plus tier
     "premium":    300,   # Pro tier
+    "enterprise": 800,   # Elite tier
+    "premier":    2000,  # Premier tier — unlimited, estimate for costing
 }
 
 
@@ -165,7 +171,7 @@ def calculate_tier_cost(
     """Calculate the full cost breakdown for a subscription tier.
 
     Args:
-        tier: Tier name (free, basic, premium).
+        tier: Tier name (free, basic, premium, enterprise, premier).
         cost_per_question: OpenAI cost per single KIAAN question.
         monthly_questions: Expected monthly questions for the tier.
         infra_cost: Monthly infrastructure cost allocation.
@@ -247,6 +253,8 @@ def calculate_subscription_costs(
         "free": 0.00,
         "basic": 4.99,      # Plus tier
         "premium": 9.99,    # Pro tier
+        "enterprise": 15.00,  # Elite tier
+        "premier": 25.00,    # Premier tier
     }
     infra = {**INFRA_COST_PER_TIER, **(infra_costs or {})}
     quotas = {**TIER_QUOTAS, **(tier_quotas or {})}
@@ -263,7 +271,7 @@ def calculate_subscription_costs(
     total_revenue = 0.0
     total_cost = 0.0
 
-    for tier_name in ["free", "basic", "premium"]:
+    for tier_name in ["free", "basic", "premium", "enterprise", "premier"]:
         monthly_q = quotas.get(tier_name, 0)
 
         breakdown = calculate_tier_cost(

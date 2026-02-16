@@ -82,7 +82,7 @@ export function SubscriptionTierSelection({
       </div>
 
       {/* Tiers grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {tiers.map((tier) => {
           const isSelected = selectedTier === tier.id
           const price = getPrice(tier)

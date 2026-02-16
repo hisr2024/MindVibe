@@ -321,6 +321,7 @@ class WisdomJourneysAccessRequired:
     - FREE: Trial access - 1 journey, limited to 3 days
     - BASIC: Up to 3 active journeys (full duration)
     - PREMIUM: Up to 10 active journeys
+    - ENTERPRISE/PREMIER: Unlimited journeys
     """
 
     def __init__(self, check_limit: bool = False, requested_count: int = 1):
