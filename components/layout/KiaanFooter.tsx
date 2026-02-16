@@ -163,7 +163,7 @@ export function KiaanFooter() {
   return (
     <div
       ref={popupRef}
-      className="fixed bottom-[calc(88px+env(safe-area-inset-bottom,0px))] right-3 z-[60] p-2 md:bottom-8 md:right-8 md:p-0"
+      className="fixed bottom-[calc(88px+env(safe-area-inset-bottom,0px))] left-3 z-[60] p-2 md:bottom-8 md:left-auto md:right-8 md:p-0"
     >
       {/* Popup panel */}
       <AnimatePresence mode="wait">
