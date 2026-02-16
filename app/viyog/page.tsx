@@ -204,7 +204,7 @@ export default function ViyogaPage() {
   const lastAssistantMessage = assistantMessages[assistantMessages.length - 1]
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0a0a0e] to-[#0d0907] text-white p-4 md:p-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0a0a0e] to-[#0d0907] text-white px-4 py-4 sm:px-6 md:px-8 md:py-8 pb-28 sm:pb-20 md:pb-10">
       <div className="max-w-5xl mx-auto space-y-6">
         <PathwayMap />
 
@@ -263,7 +263,7 @@ export default function ViyogaPage() {
                               </span>
                             )}
                           </div>
-                          <span className="text-[10px] text-orange-100/40">
+                          <span className="text-[10px] text-orange-100/50">
                             {new Date(msg.timestamp).toLocaleTimeString([], {
                               hour: '2-digit',
                               minute: '2-digit',
@@ -335,7 +335,7 @@ export default function ViyogaPage() {
                   </button>
                 )}
 
-                <span className="text-[10px] text-orange-100/30 ml-auto">
+                <span className="text-[10px] text-orange-100/50 ml-auto">
                   Enter to send &bull; Shift+Enter for new line
                 </span>
               </div>

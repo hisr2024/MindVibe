@@ -19,6 +19,22 @@ vi.mock('next/navigation', async () => {
   }
 })
 
+// Mock useFeatureAccess so SubscriptionGate renders children instead of loading spinner
+vi.mock('@/hooks/useFeatureAccess', () => ({
+  useFeatureAccess: () => ({
+    tier: 'premier',
+    hasAccess: () => true,
+    requiredTier: () => 'free',
+    featureLabel: () => '',
+    isPaid: true,
+    isPremium: true,
+    kiaanQuota: -1,
+    isKiaanUnlimited: true,
+    journeyLimit: -1,
+    loading: false,
+  }),
+}))
+
 // Mock fetch for pages that use it
 global.fetch = vi.fn(() =>
   Promise.reject(new Error('Network error'))

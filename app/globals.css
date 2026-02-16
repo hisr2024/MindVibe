@@ -2437,3 +2437,61 @@ button:not(.no-highlight) {
     z-index: 65;
   }
 }
+
+/* ─── Prefers Reduced Motion ─── */
+/* Respect user's motion preferences for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Keep functional opacity transitions but instant */
+  .animate-spin,
+  .animate-pulse,
+  .animate-bounce {
+    animation: none !important;
+  }
+}
+
+/* ─── Enhanced Focus Styles ─── */
+/* Visible focus rings for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.8);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remove default outline for mouse clicks */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ─── Selection Colors ─── */
+::selection {
+  background: rgba(251, 146, 60, 0.3);
+  color: #fff;
+}
+
+/* ─── Smooth Scrollbar Styling ─── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}

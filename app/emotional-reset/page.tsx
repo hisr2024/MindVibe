@@ -19,7 +19,7 @@ export default function EmotionalResetPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-3 sm:p-4 md:p-8 pb-28 sm:pb-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-8 pb-28 sm:pb-20 md:pb-10">
       <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
         {/* Pathway Map */}
         <PathwayMap />

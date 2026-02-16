@@ -155,7 +155,7 @@ Respond using the four-part format with brief, grounded insights.`
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white px-4 py-4 sm:px-6 md:px-8 md:py-8 pb-28 sm:pb-20 md:pb-10">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Pathway Map */}
         <PathwayMap />
@@ -218,7 +218,7 @@ Respond using the four-part format with brief, grounded insights.`
                         <span className="text-lg">{option.emoji}</span>
                         <span className="text-sm font-semibold">{option.label}</span>
                       </div>
-                      <div className="text-xs text-orange-100/60 mt-1">{option.description}</div>
+                      <div className="text-xs text-orange-100/70 mt-1">{option.description}</div>
                     </button>
                   ))}
                 </div>

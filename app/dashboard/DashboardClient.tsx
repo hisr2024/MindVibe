@@ -235,7 +235,7 @@ export default function DashboardClient() {
   }, [triggerHaptic])
 
   return (
-    <main className="mx-auto max-w-7xl space-y-6 sm:space-y-8 px-3 sm:px-4 pb-28 sm:pb-16 lg:px-6">
+    <main className="mx-auto max-w-6xl space-y-6 sm:space-y-8 px-4 sm:px-6 pb-28 sm:pb-20 md:pb-10 lg:px-8">
       <FadeIn>
         <motion.div
           variants={containerVariants}
@@ -422,7 +422,7 @@ export default function DashboardClient() {
                   </AnimatePresence>
                 </div>
 
-                <p className="mt-3 text-sm text-violet-200/50">
+                <p className="mt-3 text-sm text-violet-200/60">
                   Tap to begin your soul check-in
                 </p>
               </motion.div>
@@ -461,7 +461,7 @@ export default function DashboardClient() {
                     <h3 className="text-base font-semibold text-white/80">
                       Your Divine Friend is here
                     </h3>
-                    <p className="mt-0.5 text-xs text-orange-300/50">
+                    <p className="mt-0.5 text-xs text-orange-300/60">
                       Talk to KIAAN — voice or text
                     </p>
                   </div>
@@ -499,7 +499,7 @@ export default function DashboardClient() {
                       <span className="text-xl sm:text-2xl md:text-3xl">{tool.icon}</span>
                     </div>
                     <span className="text-xs sm:text-sm font-medium text-white/80 text-center leading-tight">{tool.title}</span>
-                    <span className="mt-0.5 text-[9px] sm:text-[10px] text-white/40 text-center leading-tight">{tool.subtitle}</span>
+                    <span className="mt-0.5 text-[9px] sm:text-[10px] text-white/50 text-center leading-tight">{tool.subtitle}</span>
                   </Link>
                 </motion.div>
               ))}

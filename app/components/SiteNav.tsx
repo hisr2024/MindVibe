@@ -32,6 +32,16 @@ export default function SiteNav() {
     }
   }, [open])
 
+  // Close mobile menu on Escape key
+  useEffect(() => {
+    if (!open) return
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [open])
+
   const links = useMemo(() => [
     { href: '/introduction', label: t('navigation.mainNav.introduction', 'Introduction'), divine: true },
     { href: '/', label: t('navigation.mainNav.home', 'Home') },
@@ -79,7 +89,8 @@ export default function SiteNav() {
               >
                 <Link
                   href={link.href}
-                  className={`block rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                  aria-current={active ? 'page' : undefined}
+                  className={`block rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
                     active
                       ? isDivine
                         ? 'border-2 border-amber-400 text-amber-300 shadow-lg shadow-amber-500/20'
@@ -215,7 +226,8 @@ export default function SiteNav() {
                       <Link
                         href={link.href}
                         onClick={() => setOpen(false)}
-                        className={`flex min-h-[48px] items-center rounded-xl px-4 py-3 text-base font-medium transition-all focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                        aria-current={active ? 'page' : undefined}
+                        className={`flex min-h-[48px] items-center rounded-xl px-4 py-3 text-base font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
                           active
                             ? isDivine
                               ? 'border-2 border-amber-400 text-amber-300 shadow-lg shadow-amber-500/20'

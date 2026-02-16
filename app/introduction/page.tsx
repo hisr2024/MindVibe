@@ -170,13 +170,19 @@ export default function IntroductionPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
+              onClick={completeDarshan}
+              onKeyDown={(e) => { if (e.key === 'Escape') completeDarshan() }}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Morning Darshan"
             >
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                className="max-w-lg w-full max-h-[90vh] overflow-y-auto"
+                className="max-w-lg w-full max-h-[85vh] overflow-y-auto rounded-2xl"
+                onClick={(e) => e.stopPropagation()}
               >
                 <KrishnaMorningDarshan
                   onComplete={completeDarshan}
@@ -198,7 +204,7 @@ export default function IntroductionPage() {
 
         {/* Main Container - Responsive padding with CSS containment to prevent layout thrashing */}
         <main
-          className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 pb-28 sm:pb-20 md:pb-16"
+          className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-28 sm:pb-20 md:pb-10"
           style={{ contain: 'layout style', touchAction: 'manipulation' }}
         >
           {/* ==================== HERO SECTION ==================== */}
@@ -215,12 +221,12 @@ export default function IntroductionPage() {
             </div>
 
             {/* Title - Responsive typography */}
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white/90 mb-2 sm:mb-3 px-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2 sm:mb-3 px-2">
               Welcome to Divine Presence
             </h1>
 
             {/* Subtitle */}
-            <p className="text-white/60 text-sm sm:text-base md:text-lg max-w-md sm:max-w-lg md:max-w-xl mx-auto px-4 leading-relaxed">
+            <p className="text-white/55 text-sm sm:text-base md:text-lg max-w-md sm:max-w-lg md:max-w-xl mx-auto px-4 leading-relaxed">
               Experience the loving guidance of Krishna. You are never alone on this journey.
             </p>
 
@@ -476,10 +482,10 @@ export default function IntroductionPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8 }}
           >
-            <p className="text-white/40 text-xs sm:text-sm italic max-w-md mx-auto px-4">
+            <p className="text-white/50 text-xs sm:text-sm italic font-sacred max-w-md mx-auto px-4 leading-relaxed">
               &quot;I am the Self seated in the hearts of all beings. I am the beginning, the middle, and the end.&quot;
             </p>
-            <p className="text-amber-400/50 text-xs mt-2">— Bhagavad Gita 10.20</p>
+            <p className="text-amber-400/60 text-xs mt-2 font-medium">— Bhagavad Gita 10.20</p>
           </motion.section>
 
           {/* ==================== FLOATING ELEMENTS ==================== */}
