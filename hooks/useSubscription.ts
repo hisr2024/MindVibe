@@ -21,6 +21,7 @@ interface UseSubscriptionResult {
 }
 
 const SUBSCRIPTION_STORAGE_KEY = 'mindvibe_subscription'
+const AUTH_USER_KEY = 'mindvibe_auth_user'
 
 interface ApiSubscriptionPlan {
   id: number | string
@@ -70,10 +71,25 @@ function getCachedSubscription(): Subscription {
   }
 }
 
+/**
+ * Check if a user profile exists in localStorage.
+ * If no profile is stored, the user has never logged in and there's no session cookie,
+ * so API calls requiring authentication will fail with 401.
+ */
+function isUserLikelyAuthenticated(): boolean {
+  if (typeof window === 'undefined') return false
+  return localStorage.getItem(AUTH_USER_KEY) !== null
+}
+
 async function fetchSubscriptionFromApi(): Promise<Subscription> {
   const response = await apiFetch('/api/subscriptions/current', {
     method: 'GET',
   })
+
+  // Handle 401 gracefully — user's session expired or they're not logged in
+  if (response.status === 401) {
+    return getDefaultSubscription()
+  }
 
   if (!response.ok) {
     throw new Error('Failed to fetch subscription from API')
@@ -126,6 +142,13 @@ export function useSubscription(): UseSubscriptionResult {
     setLoading(true)
     setError(null)
 
+    // Skip API call for unauthenticated users — avoids 401 console errors
+    if (!isUserLikelyAuthenticated()) {
+      setSubscription(getDefaultSubscription())
+      setLoading(false)
+      return
+    }
+
     try {
       const latest = await fetchSubscriptionFromApi()
       setSubscription(latest)
@@ -146,17 +169,21 @@ export function useSubscription(): UseSubscriptionResult {
   useEffect(() => {
     const handleUpdate = () => fetchSubscription()
     const handleStorage = (event: StorageEvent) => {
-      if (event.key === SUBSCRIPTION_STORAGE_KEY) {
+      if (event.key === SUBSCRIPTION_STORAGE_KEY || event.key === AUTH_USER_KEY) {
         fetchSubscription()
       }
     }
+    // Refetch when auth state changes (login/logout)
+    const handleAuthChanged = () => fetchSubscription()
 
     window.addEventListener('subscription-updated', handleUpdate)
     window.addEventListener('storage', handleStorage)
+    window.addEventListener('auth-changed', handleAuthChanged)
 
     return () => {
       window.removeEventListener('subscription-updated', handleUpdate)
       window.removeEventListener('storage', handleStorage)
+      window.removeEventListener('auth-changed', handleAuthChanged)
     }
   }, [fetchSubscription])
 

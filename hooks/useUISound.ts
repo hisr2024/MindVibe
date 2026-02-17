@@ -1,13 +1,14 @@
 /**
  * useUISound Hook
  *
- * Provides UI sound feedback for components.
- * A lightweight alternative to the full audio context.
+ * Provides UI sound feedback for components using Web Audio API synthesis.
+ * No external MP3 files needed — sounds are generated in the browser.
  */
 
 'use client'
 
-import { useCallback, useRef } from 'react'
+import { useCallback } from 'react'
+import { playSynthSound, type SynthSoundType } from '@/utils/audio/webAudioSounds'
 
 export type UISound =
   | 'click'
@@ -22,24 +23,6 @@ export type UISound =
   | 'close'
   | 'complete'
 
-// Sound file mappings
-const SOUND_FILES: Record<UISound, string> = {
-  click: '/sounds/click.mp3',
-  toggle: '/sounds/toggle.mp3',
-  select: '/sounds/select.mp3',
-  deselect: '/sounds/deselect.mp3',
-  success: '/sounds/success.mp3',
-  error: '/sounds/error.mp3',
-  notification: '/sounds/notification.mp3',
-  transition: '/sounds/transition.mp3',
-  open: '/sounds/open.mp3',
-  close: '/sounds/close.mp3',
-  complete: '/sounds/complete.mp3',
-}
-
-// Fallback to click sound for missing files
-const FALLBACK_SOUND = '/sounds/click.mp3'
-
 export interface UseUISoundReturn {
   playSound: (sound: UISound) => void
   playBell: () => void
@@ -50,76 +33,28 @@ export interface UseUISoundReturn {
 }
 
 export function useUISound(): UseUISoundReturn {
-  const audioCache = useRef<Map<string, HTMLAudioElement>>(new Map())
-
   const playSound = useCallback((sound: UISound) => {
-    try {
-      const soundPath = SOUND_FILES[sound] || FALLBACK_SOUND
-      let audio = audioCache.current.get(soundPath)
-
-      if (!audio) {
-        audio = new Audio(soundPath)
-        audio.volume = 0.3
-        audioCache.current.set(soundPath, audio)
-      }
-
-      audio.currentTime = 0
-      audio.play().catch(() => {
-        // Silently fail if audio can't play
-      })
-    } catch {
-      // Silently fail
-    }
+    playSynthSound(sound as SynthSoundType, 0.3)
   }, [])
 
   const playBell = useCallback(() => {
-    try {
-      const audio = new Audio('/sounds/bell.mp3')
-      audio.volume = 0.5
-      audio.play().catch(() => {})
-    } catch {
-      // Silently fail
-    }
+    playSynthSound('bell', 0.5)
   }, [])
 
   const playSingingBowl = useCallback(() => {
-    try {
-      const audio = new Audio('/sounds/singing-bowl.mp3')
-      audio.volume = 0.5
-      audio.play().catch(() => {})
-    } catch {
-      // Silently fail
-    }
+    playSynthSound('singing-bowl', 0.5)
   }, [])
 
   const playOm = useCallback(() => {
-    try {
-      const audio = new Audio('/sounds/om.mp3')
-      audio.volume = 0.5
-      audio.play().catch(() => {})
-    } catch {
-      // Silently fail
-    }
+    playSynthSound('om', 0.5)
   }, [])
 
   const playGong = useCallback(() => {
-    try {
-      const audio = new Audio('/sounds/gong.mp3')
-      audio.volume = 0.5
-      audio.play().catch(() => {})
-    } catch {
-      // Silently fail
-    }
+    playSynthSound('gong', 0.5)
   }, [])
 
   const playChime = useCallback(() => {
-    try {
-      const audio = new Audio('/sounds/chime.mp3')
-      audio.volume = 0.5
-      audio.play().catch(() => {})
-    } catch {
-      // Silently fail
-    }
+    playSynthSound('chime', 0.5)
   }, [])
 
   return {
