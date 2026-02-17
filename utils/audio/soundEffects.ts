@@ -1,44 +1,39 @@
 /**
  * Sound Effects Utility
  *
- * Provides UI sound feedback for the application.
- * These are simple interaction sounds, not the music player.
+ * Provides UI sound feedback for the application using Web Audio API synthesis.
+ * These are simple interaction sounds, not the music player or KIAAN voice system.
  */
 
-// Audio cache to avoid re-loading sounds
-const audioCache: Map<string, HTMLAudioElement> = new Map()
+import { playSynthSound, cleanupSynthAudio, type SynthSoundType } from './webAudioSounds'
 
-// Sound definitions with fallback to silence
-const SOUNDS: Record<string, string> = {
-  click: '/sounds/click.mp3',
-  success: '/sounds/success.mp3',
-  error: '/sounds/error.mp3',
-  notification: '/sounds/notification.mp3',
-  om: '/sounds/om.mp3',
-  bell: '/sounds/bell.mp3',
-  chime: '/sounds/chime.mp3',
+// Map sound names to synth types
+const SOUND_MAP: Record<string, SynthSoundType> = {
+  click: 'click',
+  success: 'success',
+  error: 'error',
+  notification: 'notification',
+  om: 'om',
+  bell: 'bell',
+  chime: 'chime',
+  toggle: 'toggle',
+  select: 'select',
+  deselect: 'deselect',
+  transition: 'transition',
+  open: 'open',
+  close: 'close',
+  complete: 'complete',
+  gong: 'gong',
+  'singing-bowl': 'singing-bowl',
 }
 
 /**
  * Play a UI sound effect
  */
-export function playSound(soundName: keyof typeof SOUNDS | string, volume = 0.5): void {
-  try {
-    const soundPath = SOUNDS[soundName] || soundName
-
-    let audio = audioCache.get(soundPath)
-    if (!audio) {
-      audio = new Audio(soundPath)
-      audioCache.set(soundPath, audio)
-    }
-
-    audio.volume = Math.max(0, Math.min(1, volume))
-    audio.currentTime = 0
-    audio.play().catch(() => {
-      // Silently fail - user hasn't interacted yet or sound not found
-    })
-  } catch {
-    // Silently fail
+export function playSound(soundName: string, volume = 0.5): void {
+  const synthType = SOUND_MAP[soundName]
+  if (synthType) {
+    playSynthSound(synthType, volume)
   }
 }
 
@@ -50,7 +45,7 @@ export function playSound(soundName: keyof typeof SOUNDS | string, volume = 0.5)
  * - playSoundWithHaptic('click', 0.5, 'medium') - sound name, volume, and haptic type
  */
 export function playSoundWithHaptic(
-  soundName: keyof typeof SOUNDS | string,
+  soundName: string,
   volumeOrHaptic: number | 'light' | 'medium' | 'heavy' = 0.5,
   hapticType?: 'light' | 'medium' | 'heavy'
 ): void {
@@ -89,11 +84,7 @@ export function playOmChime(volume = 0.6): void {
  * Clean up audio resources
  */
 export function cleanupAudio(): void {
-  audioCache.forEach((audio) => {
-    audio.pause()
-    audio.src = ''
-  })
-  audioCache.clear()
+  cleanupSynthAudio()
 }
 
 export default {
