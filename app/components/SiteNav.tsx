@@ -109,7 +109,6 @@ export default function SiteNav() {
                     whileTap={{ scale: 0.95 }}
                     className="block flex items-center gap-1"
                   >
-                    {isDivine && <span className="text-xs">🙏</span>}
                     {link.label}
                   </motion.span>
                 </Link>
@@ -241,13 +240,7 @@ export default function SiteNav() {
                             : 'text-white/80 hover:bg-white/5 hover:text-white'
                         }`}
                       >
-                        {isDivine && <span className="mr-2">🙏</span>}
                         {link.label}
-                        {isDivine && !active && (
-                          <span className="ml-auto rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-300">
-                            Divine
-                          </span>
-                        )}
                         {isHighlight && !active && (
                           <span className="ml-auto rounded-full bg-orange-500/20 px-2 py-0.5 text-xs text-orange-300">
                             AI
