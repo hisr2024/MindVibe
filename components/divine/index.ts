@@ -49,6 +49,14 @@ export {
 } from './SakhaMode';
 
 // ========================================
+// Divine Home Page - Celestial Experience
+// ========================================
+export { DivineCelestialBackground } from './DivineCelestialBackground';
+export { DivineAbhyaasVerse } from './DivineAbhyaasVerse';
+export { DivineKrishnaPresence } from './DivineKrishnaPresence';
+export { DivineSacredActions } from './DivineSacredActions';
+
+// ========================================
 // Types
 // ========================================
 export type { EmotionalState, AtmosphereType, BreathingPattern } from '@/contexts/DivineConsciousnessContext';
