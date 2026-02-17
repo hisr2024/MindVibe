@@ -130,13 +130,13 @@ export function NamasteIcon({
           return (
             <g key={`outer-${i}`} transform={`rotate(${angle} 60 60)`}>
               <path
-                d="M60 18 C64 26, 67 36, 66 44 C65 48, 63 50, 60 51 C57 50, 55 48, 54 44 C53 36, 56 26, 60 18Z"
+                d="M60 12 C66 22, 71 34, 69 44 C67 50, 64 56, 60 60 C56 56, 53 50, 51 44 C49 34, 54 22, 60 12Z"
                 fill="url(#lotus-gold)"
                 opacity="0.7"
               />
               {/* Petal vein */}
               <path
-                d="M60 22 C60 30, 60 40, 60 48"
+                d="M60 16 C60 28, 60 42, 60 56"
                 stroke="rgba(255,255,255,0.15)"
                 strokeWidth="0.4"
                 fill="none"
@@ -145,13 +145,13 @@ export function NamasteIcon({
           );
         })}
 
-        {/* Five inner petals — smaller, brighter */}
-        {Array.from({ length: 5 }).map((_, i) => {
-          const angle = i * 72 + 18;
+        {/* Eight inner petals — between outer petals, brighter */}
+        {Array.from({ length: 8 }).map((_, i) => {
+          const angle = i * 45 + 22.5;
           return (
             <g key={`inner-${i}`} transform={`rotate(${angle} 60 60)`}>
               <path
-                d="M60 32 C63 38, 64 44, 63 48 C62 50, 61 51, 60 51 C59 51, 58 50, 57 48 C56 44, 57 38, 60 32Z"
+                d="M60 28 C64 35, 67 43, 66 49 C65 53, 63 57, 60 60 C57 57, 55 53, 54 49 C53 43, 56 35, 60 28Z"
                 fill="url(#lotus-inner)"
                 opacity="0.85"
                 filter="url(#lotus-glow)"
@@ -163,7 +163,7 @@ export function NamasteIcon({
         {/* Divine luminous core */}
         <motion.circle
           cx="60"
-          cy="52"
+          cy="60"
           r="8"
           fill="url(#lotus-core)"
           filter="url(#lotus-glow)"
@@ -176,26 +176,8 @@ export function NamasteIcon({
         />
 
         {/* Inner light point */}
-        <circle cx="60" cy="51" r="3" fill="#fffef5" opacity="0.9" />
-        <circle cx="59" cy="50" r="1.2" fill="#ffffff" opacity="0.95" />
-
-        {/* Lotus seat curve at bottom */}
-        <path
-          d="M42 68 Q51 74, 60 72 Q69 74, 78 68"
-          stroke="url(#lotus-gold)"
-          strokeWidth="1"
-          fill="none"
-          opacity="0.35"
-          strokeLinecap="round"
-        />
-        <path
-          d="M46 72 Q53 77, 60 76 Q67 77, 74 72"
-          stroke="url(#lotus-gold)"
-          strokeWidth="0.7"
-          fill="none"
-          opacity="0.2"
-          strokeLinecap="round"
-        />
+        <circle cx="60" cy="60" r="3" fill="#fffef5" opacity="0.9" />
+        <circle cx="59" cy="59" r="1.2" fill="#ffffff" opacity="0.95" />
       </motion.svg>
     </motion.div>
   );
