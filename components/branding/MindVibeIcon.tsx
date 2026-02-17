@@ -27,7 +27,6 @@ export function MindVibeIcon({
   const isAnimated = animated && !shouldReduceMotion
 
   const themeGold = theme === 'ocean' ? '#6ad7ff' : theme === 'aurora' ? '#c2a5ff' : '#d4a44c'
-  const themeGoldLight = theme === 'ocean' ? '#9ae8ff' : theme === 'aurora' ? '#e8d3ff' : '#f0c96d'
 
   return (
     <motion.div
