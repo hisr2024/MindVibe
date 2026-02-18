@@ -17,10 +17,6 @@ import {
   Compass,
   BookOpen,
   Heart,
-  Star,
-  Settings,
-  Trash2,
-  Check,
   CheckCheck,
 } from 'lucide-react'
 

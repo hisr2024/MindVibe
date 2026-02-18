@@ -22,14 +22,10 @@ import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import { useRouter, usePathname } from 'next/navigation'
 import {
   Home,
-  MessageCircle,
-  BookOpen,
-  Heart,
   User,
   Sparkles,
   Compass,
   PenLine,
-  Settings,
   Bell,
   Wifi,
   WifiOff,

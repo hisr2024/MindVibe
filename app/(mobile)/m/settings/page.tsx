@@ -21,19 +21,17 @@ import {
   User,
   Shield,
   Bell,
-  Moon,
   Globe,
   Lock,
   Fingerprint,
   Eye,
-  EyeOff,
   Download,
   Trash2,
   LogOut,
   ChevronRight,
-  Check,
   AlertTriangle,
   Smartphone,
+  Monitor,
   Wifi,
   WifiOff,
   HelpCircle,
@@ -392,6 +390,15 @@ export default function MobileSettingsPage() {
                 <WifiOff className="w-4 h-4 text-orange-400" />
               )
             }
+          />
+          <SettingRow
+            icon={<Monitor className="w-4 h-4 text-slate-400" />}
+            label="Switch to Desktop"
+            description="Use the full desktop experience"
+            onClick={() => {
+              document.cookie = 'prefer-desktop=true;path=/;max-age=31536000'
+              router.push('/dashboard')
+            }}
           />
         </SettingSection>
 

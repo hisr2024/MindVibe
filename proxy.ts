@@ -7,7 +7,42 @@ import { NextRequest, NextResponse } from 'next/server';
  * - Generates a per-request cryptographic nonce for Content Security Policy
  * - Sets CSP header with nonce-based script-src (no 'unsafe-inline')
  * - Passes nonce to layout via x-nonce request header
+ * - Auto-detects mobile devices and redirects to /m/* routes
  */
+
+// Routes that should never be redirected to mobile
+const MOBILE_SKIP_PATTERNS = [
+  '/m/',
+  '/m',
+  '/api/',
+  '/_next/',
+  '/admin',
+  '/login',
+  '/signup',
+  '/introduction',
+  '/onboarding',
+  '/favicon',
+  '/manifest',
+  '/sw.',
+  '/icons/',
+];
+
+// Desktop route -> mobile route mapping
+const MOBILE_ROUTE_MAP: Record<string, string> = {
+  '/dashboard': '/m',
+  '/kiaan/chat': '/m/kiaan',
+  '/kiaan': '/m/kiaan',
+  '/journeys': '/m/journeys',
+  '/sacred-reflections': '/m/journal',
+  '/profile': '/m/profile',
+  '/settings': '/m/settings',
+  '/tools': '/m/tools',
+};
+
+function isMobileUserAgent(userAgent: string): boolean {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(userAgent);
+}
+
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
@@ -23,6 +58,33 @@ export function proxy(request: NextRequest) {
     pathname === '/manifest.json'
   ) {
     return NextResponse.next();
+  }
+
+  // Mobile auto-detection and redirect
+  const preferDesktop = request.cookies.get('prefer-desktop')?.value;
+  if (preferDesktop !== 'true') {
+    const userAgent = request.headers.get('user-agent') || '';
+    if (isMobileUserAgent(userAgent)) {
+      // Check if already on mobile route
+      const isAlreadyMobile = MOBILE_SKIP_PATTERNS.some(pattern => pathname.startsWith(pattern));
+
+      if (!isAlreadyMobile) {
+        // Find matching mobile route
+        const mobileRoute = MOBILE_ROUTE_MAP[pathname];
+        if (mobileRoute) {
+          const url = request.nextUrl.clone();
+          url.pathname = mobileRoute;
+          return NextResponse.redirect(url);
+        }
+
+        // Redirect home/root to mobile home
+        if (pathname === '/' || pathname === '/home') {
+          const url = request.nextUrl.clone();
+          url.pathname = '/m';
+          return NextResponse.redirect(url);
+        }
+      }
+    }
   }
 
   // Generate a per-request nonce for CSP
