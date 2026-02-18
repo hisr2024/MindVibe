@@ -721,10 +721,43 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Admin Backend Logs router: {e}")
 
+try:
+    from backend.routes.admin.teams import router as admin_teams_router
+    app.include_router(admin_teams_router)
+    admin_routers_loaded.append("teams")
+    startup_logger.info("   • GET    /api/admin/teams - List all teams")
+    startup_logger.info("   • GET    /api/admin/teams/{id} - Team details")
+    startup_logger.info("   • PATCH  /api/admin/teams/{id} - Update team")
+    startup_logger.info("   • DELETE /api/admin/teams/{id} - Delete team")
+    startup_logger.info("   • POST   /api/admin/teams/{id}/members - Add member")
+    startup_logger.info("   • PATCH  /api/admin/teams/{id}/members/{uid}/role - Update role")
+    startup_logger.info("   • DELETE /api/admin/teams/{id}/members/{uid} - Remove member")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Admin Teams router: {e}")
+
 if admin_routers_loaded:
     startup_logger.info(f"✅ [SUCCESS] Admin routers loaded: {', '.join(admin_routers_loaded)}")
 else:
     startup_logger.info("❌ [ERROR] No Admin routers were loaded")
+
+# Load Teams router (Team access and collaboration)
+startup_logger.info("\n[Teams] Attempting to import Teams router...")
+try:
+    from backend.routes.teams import router as teams_router
+    app.include_router(teams_router)
+    startup_logger.info("✅ [SUCCESS] Teams router loaded (Team access & collaboration)")
+    startup_logger.info("   • POST   /api/teams - Create team")
+    startup_logger.info("   • GET    /api/teams - List my teams")
+    startup_logger.info("   • GET    /api/teams/{id} - Get team details")
+    startup_logger.info("   • PATCH  /api/teams/{id} - Update team")
+    startup_logger.info("   • DELETE /api/teams/{id} - Delete team")
+    startup_logger.info("   • GET    /api/teams/{id}/members - List members")
+    startup_logger.info("   • POST   /api/teams/{id}/invitations - Invite member")
+    startup_logger.info("   • POST   /api/teams/invitations/accept - Accept invitation")
+    startup_logger.info("   • GET    /api/teams/{id}/permissions - My permissions")
+    startup_logger.info("   • GET    /api/teams/{id}/audit-logs - Team audit logs")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Teams router: {e}")
 
 # Load GDPR/Compliance routers
 startup_logger.info("\n[Compliance] Attempting to import Compliance routers...")

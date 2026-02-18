@@ -10,6 +10,7 @@ from backend.routes.admin.ab_tests import router as ab_tests_router
 from backend.routes.admin.audit_logs import router as audit_logs_router
 from backend.routes.admin.export import router as export_router
 from backend.routes.admin.kiaan_analytics import router as kiaan_analytics_router
+from backend.routes.admin.teams import router as teams_router
 
 __all__ = [
     "auth_router",
@@ -22,4 +23,5 @@ __all__ = [
     "audit_logs_router",
     "export_router",
     "kiaan_analytics_router",
+    "teams_router",
 ]

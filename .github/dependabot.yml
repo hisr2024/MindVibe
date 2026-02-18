@@ -9,6 +9,7 @@ updates:
     open-pull-requests-limit: 10
     reviewers:
       - "hisr2024"
+      - "MindVibe/frontend-team"
     labels:
       - "dependencies"
       - "javascript"
@@ -23,6 +24,7 @@ updates:
     open-pull-requests-limit: 10
     reviewers:
       - "hisr2024"
+      - "MindVibe/backend-team"
     labels:
       - "dependencies"
       - "python"
@@ -34,6 +36,9 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    reviewers:
+      - "hisr2024"
+      - "MindVibe/devops-team"
     labels:
       - "dependencies"
       - "ci"
