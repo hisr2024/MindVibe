@@ -429,7 +429,7 @@ export default function AdminTeamsPage() {
                       >
                         <div>
                           <div className="text-sm font-medium text-gray-900">
-                            {inv.invitee_email || inv.invitee_user_id?.slice(0, 12) + '...'}
+                            {inv.invitee_email || (inv.invitee_user_id ? inv.invitee_user_id.slice(0, 12) + '...' : 'Unknown invitee')}
                           </div>
                           <div className="text-xs text-gray-500">
                             Role: {inv.role} &middot; Expires{' '}

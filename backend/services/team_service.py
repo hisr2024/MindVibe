@@ -10,7 +10,6 @@ import datetime
 import logging
 import re
 import uuid
-from typing import Optional
 
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,7 +24,6 @@ from backend.models.team import (
     TeamRole,
     TEAM_ROLE_PERMISSIONS,
 )
-from backend.models.user import User
 
 logger = logging.getLogger(__name__)
 
@@ -215,6 +213,7 @@ async def update_team(
         "name", "description", "avatar_url", "settings",
         "max_members", "is_active", "kiaan_enabled",
         "journeys_shared", "analytics_shared", "voice_enabled",
+        "subscription_tier",
     }
 
     applied = {}
@@ -468,7 +467,11 @@ async def accept_invitation(
     invitation_id: str,
     user_id: str,
 ) -> TeamMember | None:
-    """Accept a team invitation and add user as member."""
+    """Accept a team invitation and add user as member.
+
+    Uses a single transaction to ensure invitation status and member
+    creation are committed atomically — no partial state on failure.
+    """
     result = await db.execute(
         select(TeamInvitation).where(
             TeamInvitation.id == invitation_id,
@@ -490,26 +493,59 @@ async def accept_invitation(
     if invitation.invitee_user_id and invitation.invitee_user_id != user_id:
         return None
 
-    # Mark invitation as accepted
+    # Pre-check: can the user actually be added? (avoid marking accepted then failing)
+    existing_member = await get_team_member(db, invitation.team_id, user_id)
+    if existing_member:
+        return None
+
+    team = await get_team_by_id(db, invitation.team_id)
+    if not team:
+        return None
+
+    current_count = await db.execute(
+        select(func.count(TeamMember.id)).where(
+            TeamMember.team_id == invitation.team_id,
+            TeamMember.deleted_at.is_(None),
+            TeamMember.is_active.is_(True),
+        )
+    )
+    if current_count.scalar() >= team.max_members:
+        logger.warning(
+            f"Team {invitation.team_id} full ({team.max_members}), "
+            f"cannot accept invitation {invitation_id}"
+        )
+        return None
+
+    # All checks passed — mark accepted and add member in one transaction
     invitation.status = InvitationStatus.ACCEPTED
     invitation.accepted_at = datetime.datetime.now(datetime.UTC)
 
-    # Add as team member
-    member = await add_team_member(
-        db,
+    member = TeamMember(
         team_id=invitation.team_id,
         user_id=user_id,
         role=invitation.role,
+        is_active=True,
         invited_by=invitation.invited_by,
     )
+    db.add(member)
 
-    if not member:
-        # Could happen if already a member or team is full
-        invitation.status = InvitationStatus.PENDING
-        await db.commit()
-        return None
+    audit = TeamAuditLog(
+        team_id=invitation.team_id,
+        actor_id=invitation.invited_by or user_id,
+        action="member_added",
+        resource_type="team_member",
+        resource_id=user_id,
+        details={"role": invitation.role.value, "via": "invitation"},
+    )
+    db.add(audit)
 
     await db.commit()
+    await db.refresh(member)
+
+    logger.info(
+        f"User {user_id} accepted invitation {invitation_id} and joined "
+        f"team {invitation.team_id} as {invitation.role.value}"
+    )
     return member
 
 

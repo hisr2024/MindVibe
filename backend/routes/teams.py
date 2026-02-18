@@ -7,7 +7,6 @@ and permission checking. All endpoints require JWT authentication.
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
@@ -209,6 +208,64 @@ async def list_my_teams(
         members = await team_service.get_team_members(db, team.id)
         result.append(_team_to_response(team, len(members)))
     return {"teams": result, "count": len(result)}
+
+
+# --- User-facing invitation actions ---
+# IMPORTANT: These routes MUST be defined before /{team_id} to avoid
+# FastAPI matching "invitations" as a team_id path parameter.
+
+
+@router.get("/invitations/pending")
+async def my_pending_invitations(
+    user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """List all pending invitations for the current user."""
+    invitations = await team_service.get_user_pending_invitations(db, user_id)
+    return {
+        "invitations": [_invitation_to_response(i) for i in invitations],
+        "count": len(invitations),
+    }
+
+
+@router.post("/invitations/accept")
+async def accept_invitation(
+    request: AcceptInvitationRequest,
+    user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Accept a team invitation by token or invitation ID."""
+    member = None
+    if request.token:
+        member = await team_service.accept_invitation_by_token(
+            db, request.token, user_id
+        )
+    elif request.invitation_id:
+        member = await team_service.accept_invitation(
+            db, request.invitation_id, user_id
+        )
+
+    if not member:
+        raise HTTPException(
+            status_code=400,
+            detail="Invitation not found, expired, or already processed",
+        )
+
+    return {"success": True, "member": _member_to_response(member)}
+
+
+@router.post("/invitations/{invitation_id}/decline")
+async def decline_invitation(
+    invitation_id: str,
+    user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Decline a team invitation."""
+    success = await team_service.decline_invitation(db, invitation_id, user_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Invitation not found or not pending")
+
+    return {"success": True, "message": "Invitation declined"}
 
 
 @router.get("/{team_id}")
@@ -459,62 +516,6 @@ async def revoke_invitation(
         raise HTTPException(status_code=404, detail="Invitation not found or not pending")
 
     return {"success": True, "message": "Invitation revoked"}
-
-
-# --- User-facing invitation actions ---
-
-
-@router.get("/invitations/pending")
-async def my_pending_invitations(
-    user_id: str = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    """List all pending invitations for the current user."""
-    invitations = await team_service.get_user_pending_invitations(db, user_id)
-    return {
-        "invitations": [_invitation_to_response(i) for i in invitations],
-        "count": len(invitations),
-    }
-
-
-@router.post("/invitations/accept")
-async def accept_invitation(
-    request: AcceptInvitationRequest,
-    user_id: str = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    """Accept a team invitation by token or invitation ID."""
-    member = None
-    if request.token:
-        member = await team_service.accept_invitation_by_token(
-            db, request.token, user_id
-        )
-    elif request.invitation_id:
-        member = await team_service.accept_invitation(
-            db, request.invitation_id, user_id
-        )
-
-    if not member:
-        raise HTTPException(
-            status_code=400,
-            detail="Invitation not found, expired, or already processed",
-        )
-
-    return {"success": True, "member": _member_to_response(member)}
-
-
-@router.post("/invitations/{invitation_id}/decline")
-async def decline_invitation(
-    invitation_id: str,
-    user_id: str = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    """Decline a team invitation."""
-    success = await team_service.decline_invitation(db, invitation_id, user_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Invitation not found or not pending")
-
-    return {"success": True, "message": "Invitation declined"}
 
 
 # --- Audit Logs ---
