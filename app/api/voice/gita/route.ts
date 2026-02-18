@@ -148,7 +148,8 @@ export async function POST(request: NextRequest) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          cookie: request.headers.get('cookie') || '',
+          'Authorization': request.headers.get('authorization') || '',
+          'Cookie': request.headers.get('cookie') || '',
         },
         body: JSON.stringify({
           shloka: sanitizedShloka,
@@ -205,7 +206,8 @@ async function tryShlokaSynthesis(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        cookie: request.headers.get('cookie') || '',
+        'Authorization': request.headers.get('authorization') || '',
+        'Cookie': request.headers.get('cookie') || '',
       },
       body: JSON.stringify({
         shloka: text,
@@ -252,7 +254,8 @@ async function synthesizeViaBackend(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        cookie: request.headers.get('cookie') || '',
+        'Authorization': request.headers.get('authorization') || '',
+        'Cookie': request.headers.get('cookie') || '',
       },
       body: JSON.stringify({
         text,
