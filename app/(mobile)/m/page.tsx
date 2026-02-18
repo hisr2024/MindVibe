@@ -119,7 +119,7 @@ function HomeSkeleton() {
   return (
     <div className="px-4 pt-2 pb-8 space-y-6 animate-pulse">
       {/* Greeting skeleton */}
-      <div className="pt-safe">
+      <div className="pt-safe-top">
         <div className="h-4 w-28 bg-white/[0.06] rounded-lg" />
         <div className="h-7 w-48 bg-white/[0.08] rounded-lg mt-2" />
       </div>
@@ -302,7 +302,7 @@ export default function MobileHomePage() {
         <motion.header
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="pt-safe"
+          className="pt-safe-top"
         >
           <p className="text-sm text-slate-400">{getGreeting()}</p>
           <h1 className="text-2xl font-bold text-white mt-1">

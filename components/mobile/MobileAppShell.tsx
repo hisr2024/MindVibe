@@ -6,19 +6,20 @@
  * The main container for the mobile app experience. Provides:
  * - Bottom navigation with haptic feedback
  * - Safe area handling for notched devices
- * - Smooth page transitions
  * - Network status awareness
  * - Offline mode banner
- * - Pull-to-refresh support
+ * - Pull-to-refresh via native touch events
  *
- * @example
- * <MobileAppShell activeTab="home" onTabChange={handleTabChange}>
- *   <HomeContent />
- * </MobileAppShell>
+ * SCROLL FIX: Uses a plain <main> element instead of motion.main with
+ * onPan handlers. Framer Motion's pan gesture intercepts pointer events and
+ * blocks native scroll on mobile.
+ *
+ * PADDING FIX: MobileHeader renders its own spacer div when sticky=true, so
+ * we do NOT add paddingTop to <main>. Only paddingBottom is needed for tab bar.
  */
 
 import { forwardRef, ReactNode, useState, useEffect, useCallback, useMemo } from 'react'
-import { motion, AnimatePresence, PanInfo } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter, usePathname } from 'next/navigation'
 import {
   Home,
@@ -35,7 +36,6 @@ import { MobileTabBar, TabItem } from './MobileTabBar'
 import { MobileHeader, HeaderAction } from './MobileHeader'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
-import { useAuth } from '@/hooks/useAuth'
 
 // Tab configuration for the app
 const DEFAULT_TABS: TabItem[] = [
@@ -90,35 +90,20 @@ const ROUTE_TO_TAB: Record<string, string> = {
 }
 
 export interface MobileAppShellProps {
-  /** Child content to render */
   children: ReactNode
-  /** Custom tab configuration */
   tabs?: TabItem[]
-  /** Header title */
   title?: string
-  /** Header subtitle */
   subtitle?: string
-  /** Show back button */
   showBack?: boolean
-  /** Back button handler */
   onBack?: () => void
-  /** Right header actions */
   rightActions?: ReactNode
-  /** Show header */
   showHeader?: boolean
-  /** Show tab bar */
   showTabBar?: boolean
-  /** Large title mode (iOS-style) */
   largeTitle?: boolean
-  /** Transparent header initially */
   transparentHeader?: boolean
-  /** Hide header on scroll */
   hideHeaderOnScroll?: boolean
-  /** Enable pull-to-refresh */
   enablePullToRefresh?: boolean
-  /** Pull-to-refresh handler */
   onRefresh?: () => Promise<void>
-  /** Custom className */
   className?: string
 }
 
@@ -147,19 +132,15 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
     const pathname = usePathname()
     const { triggerHaptic } = useHapticFeedback()
     const { isOnline, connectionType } = useNetworkStatus()
-    const { user, isAuthenticated } = useAuth()
 
     const [isRefreshing, setIsRefreshing] = useState(false)
-    const [pullDistance, setPullDistance] = useState(0)
     const [showOfflineBanner, setShowOfflineBanner] = useState(false)
 
     // Determine active tab from current route
     const activeTab = useMemo(() => {
-      // Check for exact match first
       if (ROUTE_TO_TAB[pathname]) {
         return ROUTE_TO_TAB[pathname]
       }
-      // Check for prefix match (for nested routes)
       for (const [route, tab] of Object.entries(ROUTE_TO_TAB)) {
         if (pathname.startsWith(route) && route !== '/m') {
           return tab
@@ -192,69 +173,61 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
       if (!isOnline) {
         setShowOfflineBanner(true)
       } else {
-        // Delay hiding to show "Back online" message
         const timer = setTimeout(() => setShowOfflineBanner(false), 2000)
         return () => clearTimeout(timer)
       }
     }, [isOnline])
 
-    // Pull-to-refresh handler
-    const handlePan = useCallback((event: PointerEvent, info: PanInfo) => {
-      if (!enablePullToRefresh || isRefreshing) return
+    // Pull-to-refresh via native touch events (NOT Framer onPan which kills scroll)
+    useEffect(() => {
+      if (!enablePullToRefresh || !onRefresh) return
 
-      const scrollTop = window.scrollY || document.documentElement.scrollTop
-      if (scrollTop > 0) return
+      let startY = 0
+      let pulling = false
 
-      const distance = Math.max(0, Math.min(info.offset.y, 150))
-      setPullDistance(distance)
-    }, [enablePullToRefresh, isRefreshing])
-
-    const handlePanEnd = useCallback(async (event: PointerEvent, info: PanInfo) => {
-      if (!enablePullToRefresh || isRefreshing) return
-
-      if (pullDistance > 80 && onRefresh) {
-        setIsRefreshing(true)
-        triggerHaptic('medium')
-
-        try {
-          await onRefresh()
-        } finally {
-          setIsRefreshing(false)
-          setPullDistance(0)
+      const onTouchStart = (e: TouchEvent) => {
+        if (window.scrollY <= 0) {
+          startY = e.touches[0].clientY
         }
-      } else {
-        setPullDistance(0)
-      }
-    }, [enablePullToRefresh, isRefreshing, pullDistance, onRefresh, triggerHaptic])
-
-    // Calculate content padding based on visible elements
-    const contentPadding = useMemo(() => {
-      let paddingTop = 0
-      let paddingBottom = 0
-
-      if (showHeader) {
-        paddingTop = largeTitle ? 100 : 56
       }
 
-      if (showTabBar) {
-        paddingBottom = 80 // Tab bar height + safe area
+      const onTouchMove = (e: TouchEvent) => {
+        if (window.scrollY > 0) return
+        const diff = e.touches[0].clientY - startY
+        if (diff > 80 && !pulling && !isRefreshing) {
+          pulling = true
+        }
       }
 
-      return { paddingTop, paddingBottom }
-    }, [showHeader, showTabBar, largeTitle])
+      const onTouchEnd = async () => {
+        if (pulling && !isRefreshing) {
+          pulling = false
+          setIsRefreshing(true)
+          triggerHaptic('medium')
+          try {
+            await onRefresh()
+          } finally {
+            setIsRefreshing(false)
+          }
+        }
+        pulling = false
+      }
+
+      window.addEventListener('touchstart', onTouchStart, { passive: true })
+      window.addEventListener('touchmove', onTouchMove, { passive: true })
+      window.addEventListener('touchend', onTouchEnd, { passive: true })
+
+      return () => {
+        window.removeEventListener('touchstart', onTouchStart)
+        window.removeEventListener('touchmove', onTouchMove)
+        window.removeEventListener('touchend', onTouchEnd)
+      }
+    }, [enablePullToRefresh, onRefresh, isRefreshing, triggerHaptic])
 
     return (
       <div
         ref={ref}
-        className={`
-          min-h-screen
-          bg-[#0b0b0f]
-          text-white
-          ${className}
-        `}
-        style={{
-          paddingTop: 'env(safe-area-inset-top, 0px)',
-        }}
+        className={`mobile-app-root bg-[#0b0b0f] text-white min-h-[100dvh] flex flex-col ${className}`.trim()}
       >
         {/* Offline Banner */}
         <AnimatePresence>
@@ -287,7 +260,7 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
           )}
         </AnimatePresence>
 
-        {/* Header */}
+        {/* Header — MobileHeader is position:fixed and renders its own spacer div */}
         {showHeader && (
           <MobileHeader
             title={title}
@@ -311,53 +284,43 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
         )}
 
         {/* Pull-to-refresh indicator */}
-        {enablePullToRefresh && (
-          <motion.div
-            className="fixed left-1/2 -translate-x-1/2 z-30 pointer-events-none"
-            style={{
-              top: showHeader ? (largeTitle ? 100 : 56) + 8 : 8,
-            }}
-            animate={{
-              y: pullDistance > 0 ? pullDistance - 40 : -40,
-              opacity: pullDistance > 40 ? 1 : 0,
-              rotate: isRefreshing ? 360 : (pullDistance / 80) * 180,
-            }}
-            transition={{
-              rotate: isRefreshing
-                ? { duration: 1, repeat: Infinity, ease: 'linear' }
-                : { duration: 0 },
-            }}
-          >
-            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-              <motion.div
-                className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full"
-              />
-            </div>
-          </motion.div>
-        )}
-
-        {/* Main Content Area */}
-        <motion.main
-          className="relative min-h-screen"
-          style={{
-            paddingTop: contentPadding.paddingTop,
-            paddingBottom: contentPadding.paddingBottom,
-          }}
-          onPan={handlePan as any}
-          onPanEnd={handlePanEnd as any}
-        >
-          <AnimatePresence mode="wait">
+        <AnimatePresence>
+          {isRefreshing && (
             <motion.div
-              key={pathname}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.15 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="fixed left-1/2 -translate-x-1/2 z-30 pointer-events-none"
+              style={{ top: showHeader ? (largeTitle ? 108 : 64) : 8 }}
             >
-              {children}
+              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                <motion.div
+                  className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                />
+              </div>
             </motion.div>
-          </AnimatePresence>
-        </motion.main>
+          )}
+        </AnimatePresence>
+
+        {/*
+          Main Content Area
+          - NO paddingTop: MobileHeader already renders a spacer <div>.
+          - paddingBottom: accounts for the fixed bottom tab bar + safe area.
+          - Plain <main> instead of motion.main: onPan blocks native scroll.
+          - NO AnimatePresence keyed on pathname: causes scroll-killing remounts.
+        */}
+        <main
+          className="relative flex-1 flex flex-col min-h-0"
+          style={{
+            paddingBottom: showTabBar
+              ? 'calc(80px + env(safe-area-inset-bottom, 0px))'
+              : undefined,
+          }}
+        >
+          {children}
+        </main>
 
         {/* Bottom Tab Bar */}
         {showTabBar && (

@@ -118,7 +118,7 @@ export default function MobileProfilePage() {
         <motion.section
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center pt-safe pt-4"
+          className="flex flex-col items-center pt-safe-top pt-4"
         >
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-amber-400 flex items-center justify-center mb-3 shadow-lg shadow-orange-500/20">
             <span className="text-3xl font-bold text-white">{userInitial}</span>

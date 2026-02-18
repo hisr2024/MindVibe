@@ -446,7 +446,7 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
                 className="
                   fixed bottom-0 left-0 right-0 z-50
                   bg-[#1a1a1f] rounded-t-3xl
-                  p-4 pb-safe
+                  p-4 pb-safe-bottom
                 "
               >
                 <div className="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4" />
@@ -543,7 +543,7 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
                 className="
                   fixed bottom-0 left-0 right-0 z-50
                   bg-[#1a1a1f] rounded-t-3xl
-                  p-4 pb-safe
+                  p-4 pb-safe-bottom
                 "
               >
                 <div className="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4" />

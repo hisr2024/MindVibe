@@ -340,7 +340,7 @@ export const MobileMoodTracker = forwardRef<HTMLDivElement, MobileMoodTrackerPro
                 className="
                   fixed bottom-0 left-0 right-0 z-50
                   bg-[#1a1a1f] rounded-t-3xl
-                  p-4 pb-safe
+                  p-4 pb-safe-bottom
                 "
               >
                 {/* Handle */}

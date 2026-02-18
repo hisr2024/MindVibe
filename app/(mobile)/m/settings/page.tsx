@@ -299,7 +299,7 @@ export default function MobileSettingsPage() {
       onBack={() => router.back()}
       showTabBar={false}
     >
-      <div className="px-4 py-4 pb-safe">
+      <div className="px-4 py-4 pb-safe-bottom">
         {/* Profile Section */}
         <SettingSection title="Account">
           <SettingRow
