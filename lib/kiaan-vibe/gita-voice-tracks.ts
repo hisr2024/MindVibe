@@ -119,6 +119,21 @@ export function createVerseTrack(
     text: synthesisText,
   }).toString()}`
 
+  // Map language codes to BCP-47 for browser Speech Synthesis
+  const speechLangMap: Record<string, string> = {
+    sa: 'hi-IN', // Sanskrit uses Hindi voice (closest phonetic match)
+    hi: 'hi-IN',
+    en: 'en-US',
+    ta: 'ta-IN',
+    te: 'te-IN',
+    bn: 'bn-IN',
+    mr: 'mr-IN',
+    gu: 'gu-IN',
+    kn: 'kn-IN',
+    ml: 'ml-IN',
+    pa: 'pa-IN',
+  }
+
   return {
     id: trackId,
     title: `${chapterMeta?.nameSanskrit || `Chapter ${chapter}`} - Verse ${verseNumber}`,
@@ -130,6 +145,12 @@ export function createVerseTrack(
     tags: ['gita', 'divine-voice', `chapter-${chapter}`, language, voiceStyle],
     category: 'spiritual',
     createdAt: Date.now(),
+    ttsMetadata: {
+      text: synthesisText,
+      language: speechLangMap[language] || 'en-US',
+      rate: speed || styleParams.speed,
+      pitch: 1.0,
+    },
   }
 }
 
@@ -205,6 +226,12 @@ export function createBilingualVerseTrack(
     translation: translation,
   }).toString()}`
 
+  // Map language codes to BCP-47 for browser Speech Synthesis
+  const speechLangMap: Record<string, string> = {
+    sa: 'hi-IN', hi: 'hi-IN', en: 'en-US', ta: 'ta-IN', te: 'te-IN',
+    bn: 'bn-IN', mr: 'mr-IN', gu: 'gu-IN', kn: 'kn-IN', ml: 'ml-IN', pa: 'pa-IN',
+  }
+
   return {
     id: trackId,
     title: `${chapterMeta?.nameSanskrit || `Ch.${chapter}`} ${verseNumber} (Sanskrit + ${langInfo?.nativeName || targetLanguage})`,
@@ -214,6 +241,12 @@ export function createBilingualVerseTrack(
     tags: ['gita', 'divine-voice', 'bilingual', `chapter-${chapter}`, targetLanguage, voiceStyle],
     category: 'spiritual',
     createdAt: Date.now(),
+    ttsMetadata: {
+      text: bilingualText,
+      language: speechLangMap[targetLanguage] || 'en-US',
+      rate: 0.85,
+      pitch: 1.0,
+    },
   }
 }
 

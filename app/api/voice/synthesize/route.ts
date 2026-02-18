@@ -10,7 +10,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { text, language = 'en', voice_type = 'friendly', voice_id, speed = 1.0 } = body
+    const { text, language = 'en', voice_type = 'friendly', speed = 1.0 } = body
 
     if (!text || typeof text !== 'string') {
       return NextResponse.json(
@@ -28,27 +28,29 @@ export async function POST(request: NextRequest) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          cookie: request.headers.get('cookie') || '',
+          'Authorization': request.headers.get('authorization') || '',
+          'Cookie': request.headers.get('cookie') || '',
         },
         body: JSON.stringify({
           text: sanitizedText,
           language,
           voice_type,
-          voice_id,
           speed,
         }),
       })
 
       if (response.ok) {
-        // Return audio blob
-        const audioBlob = await response.blob()
-        return new NextResponse(audioBlob, {
-          status: 200,
-          headers: {
-            'Content-Type': 'audio/mpeg',
-            'Cache-Control': 'public, max-age=3600',
-          },
-        })
+        const contentType = response.headers.get('content-type') || ''
+        if (contentType.includes('audio/')) {
+          const audioBlob = await response.blob()
+          return new NextResponse(audioBlob, {
+            status: 200,
+            headers: {
+              'Content-Type': 'audio/mpeg',
+              'Cache-Control': 'public, max-age=3600',
+            },
+          })
+        }
       }
     } catch (backendError) {
       console.warn('[Voice API] Backend TTS failed, using browser fallback:', backendError)

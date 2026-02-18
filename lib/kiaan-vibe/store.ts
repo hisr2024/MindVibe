@@ -50,6 +50,116 @@ function getAudioElement(): HTMLAudioElement {
   return audioElement
 }
 
+// Track active blob URLs for cleanup to prevent memory leaks
+let activeBlobUrl: string | null = null
+
+function cleanupBlobUrl(): void {
+  if (activeBlobUrl) {
+    URL.revokeObjectURL(activeBlobUrl)
+    activeBlobUrl = null
+  }
+}
+
+// Browser Speech Synthesis instance for TTS fallback
+let activeSpeechUtterance: SpeechSynthesisUtterance | null = null
+
+function cancelBrowserTTS(): void {
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    window.speechSynthesis.cancel()
+  }
+  activeSpeechUtterance = null
+}
+
+/**
+ * Check if a track source is an API endpoint that needs pre-fetching.
+ * Gita voice tracks use API URLs like /api/voice/gita?...
+ * These can return JSON fallback instead of audio, which the <audio> element can't play.
+ */
+function isApiSourceTrack(track: Track): boolean {
+  return track.src.startsWith('/api/voice/')
+}
+
+/**
+ * Pre-fetch audio from an API source track.
+ * Returns a blob URL if audio is received, or null if a fallback response is returned.
+ */
+async function prefetchTrackAudio(track: Track): Promise<string | null> {
+  try {
+    const response = await fetch(track.src, {
+      credentials: 'include',
+      signal: AbortSignal.timeout(15000),
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    const contentType = response.headers.get('content-type') || ''
+    if (contentType.includes('audio/')) {
+      // Received audio data - create a blob URL for the audio element
+      const blob = await response.blob()
+      if (blob.size > 0) {
+        return URL.createObjectURL(blob)
+      }
+    }
+
+    // Response is JSON (fallback indicator) or empty - not playable audio
+    return null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Play a track's text content using browser Speech Synthesis API.
+ * Used as fallback when backend TTS is unavailable.
+ * Returns a Promise that resolves when speech completes.
+ */
+function playViaBrowserTTS(
+  track: Track,
+  onEnd: () => void,
+): boolean {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    return false
+  }
+
+  const meta = track.ttsMetadata
+  if (!meta?.text) {
+    return false
+  }
+
+  cancelBrowserTTS()
+
+  const utterance = new SpeechSynthesisUtterance(meta.text)
+  utterance.lang = meta.language || 'en-US'
+  utterance.rate = meta.rate ?? 0.9
+  utterance.pitch = meta.pitch ?? 1.0
+
+  // Try to select the best available voice for the language
+  const voices = window.speechSynthesis.getVoices()
+  const langPrefix = utterance.lang.split('-')[0]
+  const matchingVoices = voices.filter(v => v.lang.startsWith(langPrefix))
+  if (matchingVoices.length > 0) {
+    // Prefer non-local (cloud/neural) voices for better quality
+    const cloudVoice = matchingVoices.find(v => !v.localService)
+    utterance.voice = cloudVoice || matchingVoices[0]
+  }
+
+  utterance.onend = () => {
+    activeSpeechUtterance = null
+    onEnd()
+  }
+
+  utterance.onerror = () => {
+    activeSpeechUtterance = null
+    onEnd()
+  }
+
+  activeSpeechUtterance = utterance
+  window.speechSynthesis.speak(utterance)
+  return true
+}
+
 // Shuffle utility
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array]
@@ -58,6 +168,21 @@ function shuffleArray<T>(array: T[]): T[] {
     ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
   }
   return shuffled
+}
+
+/** Update Media Session metadata for lock screen / OS controls */
+function updateMediaSession(track: Track): void {
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: track.title,
+      artist: track.artist || 'KIAAN Vibe',
+      album: 'Meditation Music',
+      artwork: track.albumArt
+        ? [{ src: track.albumArt, sizes: '512x512', type: 'image/png' }]
+        : [],
+    })
+    navigator.mediaSession.playbackState = 'playing'
+  }
 }
 
 export const usePlayerStore = create<PlayerStore>()(
@@ -70,37 +195,108 @@ export const usePlayerStore = create<PlayerStore>()(
       const state = get()
       const audio = getAudioElement()
 
-      // If track provided, set it as current
+      // Cancel any active browser TTS before starting new playback
+      cancelBrowserTTS()
+
+      // Determine which track to play
+      let targetTrack: Track | null = null
+      const isNewTrack = !!track
       if (track) {
-        set({ currentTrack: track, isLoading: true })
-        audio.src = track.src
+        targetTrack = track
       } else if (!state.currentTrack && state.queue.length > 0) {
-        // No current track, play first from queue
-        const firstTrack = state.queue[state.queueIndex]
-        set({ currentTrack: firstTrack, isLoading: true })
-        audio.src = firstTrack.src
-      } else if (!state.currentTrack) {
-        // Nothing to play
+        targetTrack = state.queue[state.queueIndex]
+      } else if (state.currentTrack) {
+        // Resuming current track
+        targetTrack = state.currentTrack
+      }
+
+      if (!targetTrack) return
+
+      // If resuming the same track (no new track provided), try to play directly
+      const isResuming = !isNewTrack && state.currentTrack?.id === targetTrack.id
+      if (isResuming) {
+        try {
+          await audio.play()
+          set({ isPlaying: true, isLoading: false })
+          updateMediaSession(targetTrack)
+        } catch {
+          // Resume failed - will fall through to full play logic below
+        }
         return
       }
+
+      set({ currentTrack: targetTrack, isLoading: true, audioError: null })
+
+      // Cleanup previous blob URL before creating a new one
+      cleanupBlobUrl()
+
+      // For Gita voice / API-sourced tracks: pre-fetch to handle JSON fallback
+      if (isApiSourceTrack(targetTrack)) {
+        const blobUrl = await prefetchTrackAudio(targetTrack)
+
+        if (blobUrl) {
+          // Audio received from API - play via <audio> element with blob URL
+          activeBlobUrl = blobUrl
+          audio.src = blobUrl
+
+          try {
+            await audio.play()
+            set({ isPlaying: true, isLoading: false })
+            markTrackAvailable(targetTrack.id)
+            updateMediaSession(targetTrack)
+          } catch (error) {
+            console.error('[PlayerStore] Play error:', error)
+            // If audio blob play fails, try browser TTS
+            cleanupBlobUrl()
+            const ttsStarted = playViaBrowserTTS(targetTrack, () => {
+              usePlayerStore.getState().next()
+            })
+            if (ttsStarted) {
+              set({ isPlaying: true, isLoading: false })
+              markTrackAvailable(targetTrack.id)
+              updateMediaSession(targetTrack)
+            } else {
+              set({ isPlaying: false, isLoading: false })
+              markTrackUnavailable(targetTrack.id)
+            }
+          }
+        } else {
+          // API returned JSON fallback or failed - use browser Speech Synthesis
+          const ttsStarted = playViaBrowserTTS(targetTrack, () => {
+            usePlayerStore.getState().next()
+          })
+
+          if (ttsStarted) {
+            set({ isPlaying: true, isLoading: false })
+            markTrackAvailable(targetTrack.id)
+            resetFailureCounter()
+            updateMediaSession(targetTrack)
+          } else {
+            markTrackUnavailable(targetTrack.id)
+            set({
+              isPlaying: false,
+              isLoading: false,
+              audioError: 'Voice reading requires a browser that supports speech synthesis. Please try a different browser.',
+            })
+
+            // Try next track in queue if available
+            if (state.queue.length > 1) {
+              setTimeout(() => {
+                usePlayerStore.getState().next()
+              }, 500)
+            }
+          }
+        }
+        return
+      }
+
+      // Standard tracks (meditation music, etc.) - direct audio element playback
+      audio.src = targetTrack.src
 
       try {
         await audio.play()
         set({ isPlaying: true, isLoading: false })
-
-        // Update Media Session
-        const current = get().currentTrack
-        if (current && 'mediaSession' in navigator) {
-          navigator.mediaSession.metadata = new MediaMetadata({
-            title: current.title,
-            artist: current.artist || 'KIAAN Vibe',
-            album: 'Meditation Music',
-            artwork: current.albumArt
-              ? [{ src: current.albumArt, sizes: '512x512', type: 'image/png' }]
-              : [],
-          })
-          navigator.mediaSession.playbackState = 'playing'
-        }
+        updateMediaSession(targetTrack)
       } catch (error) {
         console.error('[PlayerStore] Play error:', error)
         set({ isPlaying: false, isLoading: false })
@@ -110,6 +306,7 @@ export const usePlayerStore = create<PlayerStore>()(
     pause: () => {
       const audio = getAudioElement()
       audio.pause()
+      cancelBrowserTTS()
       set({ isPlaying: false })
 
       if ('mediaSession' in navigator) {
@@ -130,6 +327,8 @@ export const usePlayerStore = create<PlayerStore>()(
       const audio = getAudioElement()
       audio.pause()
       audio.currentTime = 0
+      cancelBrowserTTS()
+      cleanupBlobUrl()
       set({ isPlaying: false, position: 0 })
 
       if ('mediaSession' in navigator) {
@@ -244,6 +443,8 @@ export const usePlayerStore = create<PlayerStore>()(
 
     clearQueue: () => {
       get().stop()
+      cleanupBlobUrl()
+      cancelBrowserTTS()
       set({
         queue: [],
         queueIndex: 0,
@@ -307,6 +508,8 @@ export const usePlayerStore = create<PlayerStore>()(
     retryPlayback: async () => {
       // Reset the failure counter and clear errors
       resetFailureCounter()
+      cleanupBlobUrl()
+      cancelBrowserTTS()
       set({ audioError: null, hasAudioIssues: false })
 
       // Try to play the current track again
@@ -361,45 +564,40 @@ if (typeof window !== 'undefined') {
       usePlayerStore.getState().next()
     })
 
-    audio.addEventListener('error', (e) => {
+    audio.addEventListener('error', () => {
       const currentTrack = usePlayerStore.getState().currentTrack
-      const errorCode = audio.error?.code
-      const errorMessage = audio.error?.message || 'Unknown error'
 
-      console.warn('[Audio] Error loading track:', {
-        track: currentTrack?.title,
-        src: currentTrack?.src,
-        errorCode,
-        errorMessage: errorCode === 4 ? 'MEDIA_ELEMENT_ERROR: Format error or source unavailable' : errorMessage,
-      })
+      // For API-sourced tracks (Gita voice), errors are already handled in play()
+      // via pre-fetch + browser TTS fallback. Ignore audio element errors for these.
+      if (currentTrack && isApiSourceTrack(currentTrack)) {
+        return
+      }
 
-      // Mark this track as unavailable to avoid retrying
+      // For standard tracks (meditation music, etc.), handle normally
       if (currentTrack?.id) {
         markTrackUnavailable(currentTrack.id)
       }
 
       // Check if we're having systemic issues (many consecutive failures)
       if (hasSystemicAudioIssues()) {
-        console.warn('[Audio] Multiple consecutive failures detected - stopping auto-retry')
         usePlayerStore.setState({
           isPlaying: false,
           isLoading: false,
           audioError: 'Unable to load audio tracks. This may be due to network issues or audio source availability. Please try again later.',
           hasAudioIssues: true,
         })
-        return // Don't try to skip to next track
+        return
       }
 
       usePlayerStore.setState({ isPlaying: false, isLoading: false })
 
-      // If track failed to load, try next track in queue (but not infinitely)
+      // If track failed to load, try next track in queue
       const state = usePlayerStore.getState()
       if (state.queue.length > 1 && state.queueIndex < state.queue.length - 1) {
         setTimeout(() => {
           usePlayerStore.getState().next()
-        }, 500) // Reduced delay
+        }, 500)
       } else {
-        // No more tracks to try
         usePlayerStore.setState({
           audioError: 'Unable to load this track. The audio source may be temporarily unavailable.',
         })
