@@ -23,7 +23,6 @@ import {
   TrendingUp,
   Calendar,
   Zap,
-  Heart,
 } from 'lucide-react'
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'

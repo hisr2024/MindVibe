@@ -20,7 +20,6 @@ import {
   Flame,
   Leaf,
   Sun,
-  Filter,
   Search,
 } from 'lucide-react'
 
@@ -326,7 +325,7 @@ export default function MobileJourneysPage() {
                         </div>
                         <div className="flex items-center gap-1 text-xs text-slate-500">
                           <Star className="w-3 h-3 text-amber-400" />
-                          <span>{journey.rating.toFixed(1)}</span>
+                          <span>{(journey.rating ?? 0).toFixed(1)}</span>
                         </div>
                         <span className={`text-[10px] px-2 py-0.5 rounded-full border ${difficultyColors[journey.difficulty]}`}>
                           {journey.difficulty}
