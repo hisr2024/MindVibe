@@ -11,11 +11,18 @@
  * Provider Priority:
  *   Sanskrit/Hindi → /api/voice/divine/shloka (Sarvam AI) → /api/voice/synthesize (fallback)
  *   English/Others → /api/voice/synthesize (Google Neural2 / ElevenLabs)
+ *
+ * When all TTS providers are unavailable, returns JSON with { fallback: true }
+ * The KIAAN Vibe Player pre-fetches and detects this, falling back to browser
+ * Speech Synthesis API for a seamless reading experience.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+/** Timeout for backend TTS calls (8s to keep UX responsive) */
+const BACKEND_TIMEOUT_MS = 8000
 
 /** Voice style to backend voice_type mapping */
 const STYLE_TO_VOICE_TYPE: Record<string, string> = {
@@ -36,8 +43,33 @@ const STYLE_TO_SPEED: Record<string, number> = {
 }
 
 /**
+ * Create a JSON fallback response with proper headers.
+ * The player detects non-audio content-type and uses browser TTS instead.
+ */
+function createFallbackResponse(text: string, language: string): NextResponse {
+  return NextResponse.json(
+    {
+      fallback: true,
+      text,
+      language,
+      message: 'Use browser Speech Synthesis API as fallback',
+    },
+    {
+      headers: {
+        'X-Fallback': 'true',
+        'Cache-Control': 'no-cache',
+      },
+    }
+  )
+}
+
+/**
  * GET handler - Stream synthesized audio for a Gita verse.
  * Used as the Track.src URL by the KIAAN Vibe Player.
+ *
+ * The player pre-fetches this URL via fetch() and checks the content-type.
+ * If audio/* is returned, it creates a blob URL for the <audio> element.
+ * If JSON is returned (fallback), it uses browser Speech Synthesis instead.
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -83,20 +115,12 @@ export async function GET(request: NextRequest) {
     )
     if (audioResponse) return audioResponse
 
-    // Fallback: return indicator for browser-based TTS
-    return NextResponse.json({
-      fallback: true,
-      text: sanitizedText,
-      language: ttsLanguage,
-      message: 'Use browser Speech Synthesis API as fallback',
-    })
+    // Fallback: signal to client to use browser Speech Synthesis
+    return createFallbackResponse(sanitizedText, ttsLanguage)
 
   } catch (error) {
     console.error('[GitaVoice API] Synthesis error:', error)
-    return NextResponse.json(
-      { error: 'Failed to synthesize Gita verse audio', fallback: true },
-      { status: 500 }
-    )
+    return createFallbackResponse(sanitizedText, ttsLanguage)
   }
 }
 
@@ -107,7 +131,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { shloka, chandas = 'anushtubh', with_meaning, meaning_text, mode } = body
+    const { shloka, chandas = 'anushtubh', with_meaning, meaning_text } = body
 
     if (!shloka || typeof shloka !== 'string') {
       return NextResponse.json(
@@ -132,18 +156,21 @@ export async function POST(request: NextRequest) {
           with_meaning: with_meaning || false,
           meaning_text: meaning_text || '',
         }),
-        signal: AbortSignal.timeout(15000),
+        signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS),
       })
 
       if (response.ok) {
-        const audioBlob = await response.blob()
-        return new NextResponse(audioBlob, {
-          status: 200,
-          headers: {
-            'Content-Type': response.headers.get('content-type') || 'audio/mpeg',
-            'Cache-Control': 'public, max-age=2592000', // 30 days (verses don't change)
-          },
-        })
+        const contentType = response.headers.get('content-type') || ''
+        if (contentType.includes('audio/')) {
+          const audioBlob = await response.blob()
+          return new NextResponse(audioBlob, {
+            status: 200,
+            headers: {
+              'Content-Type': contentType,
+              'Cache-Control': 'public, max-age=2592000',
+            },
+          })
+        }
       }
     } catch (shlokaError) {
       console.warn('[GitaVoice API] Divine shloka endpoint failed:', shlokaError)
@@ -155,19 +182,11 @@ export async function POST(request: NextRequest) {
     )
     if (fallbackResult) return fallbackResult
 
-    return NextResponse.json({
-      fallback: true,
-      text: sanitizedShloka,
-      language: 'hi',
-      message: 'Use browser Speech Synthesis API for Sanskrit',
-    })
+    return createFallbackResponse(sanitizedShloka, 'hi')
 
   } catch (error) {
     console.error('[GitaVoice API] POST error:', error)
-    return NextResponse.json(
-      { error: 'Failed to synthesize shloka', fallback: true },
-      { status: 500 }
-    )
+    return createFallbackResponse('', 'hi')
   }
 }
 
@@ -193,7 +212,7 @@ async function tryShlokaSynthesis(
         chandas: 'anushtubh',
         with_meaning: false,
       }),
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS),
     })
 
     if (response.ok) {
@@ -241,7 +260,7 @@ async function synthesizeViaBackend(
         voice_type: voiceType,
         speed,
       }),
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS),
     })
 
     if (response.ok) {
@@ -252,7 +271,7 @@ async function synthesizeViaBackend(
           status: 200,
           headers: {
             'Content-Type': 'audio/mpeg',
-            'Cache-Control': 'public, max-age=604800', // 7 days
+            'Cache-Control': 'public, max-age=604800',
           },
         })
       }
@@ -277,7 +296,6 @@ async function synthesizeBilingual(
   speed: number,
 ): Promise<NextResponse> {
   // Try to synthesize the combined bilingual text
-  // The backend handles Sanskrit → pause → translation flow
   const bilingualText = `${sanskrit}\n\n${translation}`
   const ttsLanguage = targetLanguage === 'sa' ? 'hi' : targetLanguage
 
@@ -296,10 +314,5 @@ async function synthesizeBilingual(
   )
   if (fallbackResult) return fallbackResult
 
-  return NextResponse.json({
-    fallback: true,
-    text: bilingualText,
-    language: ttsLanguage,
-    message: 'Use browser Speech Synthesis API',
-  })
+  return createFallbackResponse(bilingualText, ttsLanguage)
 }

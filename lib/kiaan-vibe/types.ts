@@ -19,6 +19,17 @@ export interface Track {
   category?: MeditationCategory
   createdAt: number // timestamp
   albumArt?: string
+  /**
+   * TTS fallback metadata for Gita voice tracks.
+   * When the backend TTS API is unavailable, the player uses browser
+   * Speech Synthesis API to read the verse text stored here.
+   */
+  ttsMetadata?: {
+    text: string       // Text to speak (Sanskrit, translation, etc.)
+    language: string   // BCP-47 language code for Speech Synthesis
+    rate?: number      // Speech rate (0.5-2.0)
+    pitch?: number     // Speech pitch (0-2)
+  }
 }
 
 // ============ Playlist Types ============
