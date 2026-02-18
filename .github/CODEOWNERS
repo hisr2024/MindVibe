@@ -1,51 +1,63 @@
 # CODEOWNERS file for MindVibe
 # This file defines who owns different parts of the codebase
 # and will automatically request reviews from the owners when PRs are opened
+#
+# Team Access: All team members have full review access.
+# Add new GitHub usernames to the team list below.
 
 # Default owners for everything in the repo
-* @hisr2024
+* @hisr2024 @MindVibe/developers
 
 # Backend (Python/FastAPI)
-*.py @hisr2024
-/backend/ @hisr2024
-/routes/ @hisr2024
-/models/ @hisr2024
-/services/ @hisr2024
-/core/ @hisr2024
-requirements*.txt @hisr2024
-pyproject.toml @hisr2024
-Dockerfile @hisr2024
+*.py @hisr2024 @MindVibe/backend-team
+/backend/ @hisr2024 @MindVibe/backend-team
+/routes/ @hisr2024 @MindVibe/backend-team
+/models/ @hisr2024 @MindVibe/backend-team
+/services/ @hisr2024 @MindVibe/backend-team
+/core/ @hisr2024 @MindVibe/backend-team
+requirements*.txt @hisr2024 @MindVibe/backend-team
+pyproject.toml @hisr2024 @MindVibe/backend-team
+Dockerfile @hisr2024 @MindVibe/devops-team
 
 # Frontend (Next.js/React/TypeScript)
-*.ts @hisr2024
-*.tsx @hisr2024
-*.js @hisr2024
-*.jsx @hisr2024
-package.json @hisr2024
-tsconfig.json @hisr2024
-next.config.js @hisr2024
-tailwind.config.ts @hisr2024
+*.ts @hisr2024 @MindVibe/frontend-team
+*.tsx @hisr2024 @MindVibe/frontend-team
+*.js @hisr2024 @MindVibe/frontend-team
+*.jsx @hisr2024 @MindVibe/frontend-team
+package.json @hisr2024 @MindVibe/frontend-team
+tsconfig.json @hisr2024 @MindVibe/frontend-team
+next.config.js @hisr2024 @MindVibe/frontend-team
+tailwind.config.ts @hisr2024 @MindVibe/frontend-team
+
+# Mobile (Android)
+/mobile/ @hisr2024 @MindVibe/mobile-team
 
 # Tests
-/tests/ @hisr2024
-*.test.* @hisr2024
-*.spec.* @hisr2024
+/tests/ @hisr2024 @MindVibe/developers
+*.test.* @hisr2024 @MindVibe/developers
+*.spec.* @hisr2024 @MindVibe/developers
 
 # Documentation
-*.md @hisr2024
-/docs/ @hisr2024
+*.md @hisr2024 @MindVibe/developers
+/docs/ @hisr2024 @MindVibe/developers
 
 # CI/CD and DevOps
-/.github/ @hisr2024
-docker-compose.yml @hisr2024
-*.yml @hisr2024
-*.yaml @hisr2024
+/.github/ @hisr2024 @MindVibe/devops-team
+docker-compose.yml @hisr2024 @MindVibe/devops-team
+*.yml @hisr2024 @MindVibe/devops-team
+*.yaml @hisr2024 @MindVibe/devops-team
 
-# Security
+# Security (restricted to lead + security team)
 SECURITY.md @hisr2024
 /security/ @hisr2024
-/.github/dependabot.yml @hisr2024
+/.github/dependabot.yml @hisr2024 @MindVibe/devops-team
 
 # Configuration
-.gitignore @hisr2024
-.env.example @hisr2024
+.gitignore @hisr2024 @MindVibe/developers
+.env.example @hisr2024 @MindVibe/developers
+
+# Team & collaboration module
+/backend/models/team.py @hisr2024 @MindVibe/backend-team
+/backend/services/team_service.py @hisr2024 @MindVibe/backend-team
+/backend/routes/teams.py @hisr2024 @MindVibe/backend-team
+/backend/routes/admin/teams.py @hisr2024 @MindVibe/backend-team

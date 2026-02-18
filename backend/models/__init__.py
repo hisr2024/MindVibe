@@ -145,6 +145,18 @@ from backend.models.admin import (
     FlaggedContent,
 )
 
+# Team & collaboration models
+from backend.models.team import (
+    TeamRole,
+    TeamPermission,
+    InvitationStatus,
+    TEAM_ROLE_PERMISSIONS,
+    Team,
+    TeamMember,
+    TeamInvitation,
+    TeamAuditLog,
+)
+
 # Compliance & GDPR models
 from backend.models.compliance import (
     ConsentType,
@@ -348,4 +360,13 @@ __all__ = [
     "CompanionMessage",
     "CompanionMemory",
     "CompanionProfile",
+    # Team & collaboration models
+    "TeamRole",
+    "TeamPermission",
+    "InvitationStatus",
+    "TEAM_ROLE_PERMISSIONS",
+    "Team",
+    "TeamMember",
+    "TeamInvitation",
+    "TeamAuditLog",
 ]
