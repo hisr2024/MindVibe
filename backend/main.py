@@ -322,7 +322,13 @@ async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JS
 @app.on_event("startup")
 async def startup():
     try:
-        # Step 1: Run SQL migrations
+        # Step 1: Ensure ORM tables exist FIRST (other steps reference them)
+        startup_logger.info("\n🔧 Ensuring ORM tables exist...")
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        startup_logger.info("✅ Database schema ready")
+
+        # Step 2: Run SQL migrations (these ALTER/extend ORM-created tables)
         if RUN_MIGRATIONS_ON_STARTUP:
             migration_result = await apply_sql_migrations(engine)
             if migration_result.applied:
@@ -337,7 +343,7 @@ async def startup():
             else:
                 startup_logger.info("ℹ️ RUN_MIGRATIONS_ON_STARTUP disabled; no pending migrations")
 
-        # Step 2: Run manual Python migrations
+        # Step 3: Run manual Python migrations
         startup_logger.info("\n🔧 Running manual migrations...")
         try:
             from backend.core.manual_migrations import run_manual_migrations
@@ -348,13 +354,6 @@ async def startup():
         except Exception as manual_error:
             startup_logger.info(f"⚠️ Manual migrations had issues: {manual_error}")
             # Don't fail startup - manual migrations are supplementary
-
-        # Step 3: Ensure ORM tables exist (standard SQLAlchemy approach)
-        startup_logger.info("\n🔧 Ensuring ORM tables exist...")
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
-        startup_logger.info("✅ Database schema ready")
 
         # Step 4: Seed subscription plans if they don't exist
         startup_logger.info("\n🔧 Ensuring subscription plans exist...")
