@@ -29,7 +29,7 @@ from backend.schemas.journal import (
 # Import subscription access control - optional for backwards compatibility
 try:
     from backend.services.subscription_service import check_journal_access, get_or_create_free_subscription
-    from backend.middleware.feature_access import get_current_user_id
+    from backend.middleware.feature_access import get_current_user_id, is_developer
     SUBSCRIPTION_ENABLED = True
 except ImportError:
     SUBSCRIPTION_ENABLED = False
@@ -55,6 +55,7 @@ async def _check_journal_permission(request: Request, db: AsyncSession, premium:
 
     Basic encrypted journaling is free; advanced premium-only features can
     opt-in to the stricter check via ``premium=True``.
+    Developers bypass all journal access restrictions.
     """
     if not SUBSCRIPTION_ENABLED:
         return  # Allow access if subscription system is not enabled
@@ -64,6 +65,10 @@ async def _check_journal_permission(request: Request, db: AsyncSession, premium:
 
         # Ensure user has a subscription
         await get_or_create_free_subscription(db, user_id)
+
+        # Developer bypass — full journal access
+        if await is_developer(db, user_id):
+            return
 
         # Only enforce the premium gate when required
         if premium:

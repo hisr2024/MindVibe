@@ -44,9 +44,9 @@ class SubscriptionPlanCreate(BaseModel):
 
 class UserSubscriptionOut(BaseModel):
     """Output schema for a user's subscription."""
-    
+
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: int
     user_id: str
     plan: SubscriptionPlanOut
@@ -56,6 +56,8 @@ class UserSubscriptionOut(BaseModel):
     cancel_at_period_end: bool = False
     canceled_at: datetime | None = None
     created_at: datetime
+    is_developer: bool = False
+    effective_tier: SubscriptionTier | None = None
 
 
 class UsageStatsOut(BaseModel):

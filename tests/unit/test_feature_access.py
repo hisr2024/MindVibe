@@ -73,18 +73,18 @@ class TestQuotaEnforcement:
     """Test quota enforcement logic."""
 
     def test_free_tier_limit(self):
-        """Test that free tier has 20 questions limit."""
+        """Test that free tier has 15 questions limit."""
         from backend.config.feature_config import get_kiaan_quota
 
         quota = get_kiaan_quota(SubscriptionTier.FREE)
-        assert quota == 20
+        assert quota == 15
 
     def test_basic_tier_limit(self):
-        """Test that basic tier has 50 questions limit."""
+        """Test that basic tier has 150 questions limit."""
         from backend.config.feature_config import get_kiaan_quota
 
         quota = get_kiaan_quota(SubscriptionTier.BASIC)
-        assert quota == 50
+        assert quota == 150
 
     def test_premium_tier_limit(self):
         """Test that premium tier has 300 questions limit."""
@@ -93,11 +93,18 @@ class TestQuotaEnforcement:
         quota = get_kiaan_quota(SubscriptionTier.PREMIUM)
         assert quota == 300
 
-    def test_enterprise_tier_unlimited(self):
-        """Test that enterprise tier has unlimited questions."""
+    def test_enterprise_tier_limit(self):
+        """Test that enterprise/elite tier has 800 questions limit."""
         from backend.config.feature_config import get_kiaan_quota
 
         quota = get_kiaan_quota(SubscriptionTier.ENTERPRISE)
+        assert quota == 800
+
+    def test_premier_tier_unlimited(self):
+        """Test that premier tier has unlimited questions."""
+        from backend.config.feature_config import get_kiaan_quota
+
+        quota = get_kiaan_quota(SubscriptionTier.PREMIER)
         assert quota == -1  # -1 means unlimited
 
 
@@ -183,17 +190,19 @@ class TestFeatureAccessMatrix:
         assert has_feature_access(SubscriptionTier.PREMIUM, "sso") is False
 
     def test_enterprise_tier_features(self):
-        """Test all features for enterprise tier."""
+        """Test features for enterprise/elite tier."""
         from backend.config.feature_config import has_feature_access
-        
-        # Should have ALL features
+
+        # Should have most premium features
         assert has_feature_access(SubscriptionTier.ENTERPRISE, "encrypted_journal") is True
         assert has_feature_access(SubscriptionTier.ENTERPRISE, "advanced_analytics") is True
         assert has_feature_access(SubscriptionTier.ENTERPRISE, "priority_support") is True
         assert has_feature_access(SubscriptionTier.ENTERPRISE, "offline_access") is True
-        assert has_feature_access(SubscriptionTier.ENTERPRISE, "white_label") is True
-        assert has_feature_access(SubscriptionTier.ENTERPRISE, "sso") is True
         assert has_feature_access(SubscriptionTier.ENTERPRISE, "dedicated_support") is True
+
+        # Enterprise/Elite does NOT include white_label or sso (Premier only)
+        assert has_feature_access(SubscriptionTier.ENTERPRISE, "white_label") is False
+        assert has_feature_access(SubscriptionTier.ENTERPRISE, "sso") is False
 
 
 class TestKiaanResponseQuality:
@@ -242,7 +251,7 @@ class TestWisdomJourneysAccess:
         assert get_wisdom_journeys_trial_days(SubscriptionTier.FREE) == 3
 
     def test_basic_tier_wisdom_journeys(self):
-        """Test that BASIC tier has full Wisdom Journeys access."""
+        """Test that BASIC tier has full Wisdom Journeys access with 3 journeys."""
         from backend.config.feature_config import (
             get_wisdom_journeys_limit,
             is_wisdom_journeys_trial,
@@ -250,18 +259,18 @@ class TestWisdomJourneysAccess:
         )
 
         assert has_feature_access(SubscriptionTier.BASIC, "wisdom_journeys") is True
-        assert get_wisdom_journeys_limit(SubscriptionTier.BASIC) == 1
+        assert get_wisdom_journeys_limit(SubscriptionTier.BASIC) == 3
         assert is_wisdom_journeys_trial(SubscriptionTier.BASIC) is False
 
     def test_premium_tier_wisdom_journeys(self):
-        """Test that PREMIUM tier has 5 active journeys."""
+        """Test that PREMIUM tier has 10 active journeys."""
         from backend.config.feature_config import (
             get_wisdom_journeys_limit,
             has_feature_access,
         )
 
         assert has_feature_access(SubscriptionTier.PREMIUM, "wisdom_journeys") is True
-        assert get_wisdom_journeys_limit(SubscriptionTier.PREMIUM) == 5
+        assert get_wisdom_journeys_limit(SubscriptionTier.PREMIUM) == 10
 
     def test_enterprise_tier_unlimited_journeys(self):
         """Test that ENTERPRISE tier has unlimited journeys."""
