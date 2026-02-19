@@ -13,7 +13,6 @@ import { useRouter } from 'next/navigation'
 import {
   Flame,
   Leaf,
-  Heart,
   TreePine,
   Footprints,
   Compass,
@@ -21,7 +20,6 @@ import {
   BookOpen,
   Sparkles,
   Users,
-  Zap,
   Brain,
   Volume2,
   Lock,
@@ -215,7 +213,7 @@ export default function MobileToolsPage() {
       onBack={() => router.back()}
       showTabBar={false}
     >
-      <div className="px-4 pb-safe space-y-6">
+      <div className="px-4 pb-safe-bottom space-y-6">
         <ToolsSection title="Core" tools={CORE_TOOLS} onToolPress={handleToolPress} baseDelay={0.05} />
         <ToolsSection title="Emotional Wellness" tools={EMOTIONAL_TOOLS} onToolPress={handleToolPress} baseDelay={0.2} />
         <ToolsSection title="Growth & Discovery" tools={GROWTH_TOOLS} onToolPress={handleToolPress} baseDelay={0.35} />

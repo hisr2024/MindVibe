@@ -10,7 +10,7 @@ import {
 } from 'react'
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
-import { ArrowLeft, MoreVertical } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 
 export interface MobileHeaderProps {
   /** Title text */
@@ -106,7 +106,7 @@ export const MobileHeader = forwardRef<HTMLElement, MobileHeaderProps>(
 
     // Track scroll for background opacity
     const { scrollY } = useScroll({
-      container: scrollContainerRef as React.RefObject<HTMLElement>,
+      ...(scrollContainerRef ? { container: scrollContainerRef } : {}),
     })
 
     const backgroundOpacity = useTransform(

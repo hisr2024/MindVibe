@@ -2079,7 +2079,7 @@ img {
 
 /* Dedicated mobile app root for /m/* routes - full viewport, no desktop constraints */
 .mobile-app-root {
-  min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   position: relative;
   -webkit-overflow-scrolling: touch;

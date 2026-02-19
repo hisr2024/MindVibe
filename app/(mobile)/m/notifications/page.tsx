@@ -201,7 +201,7 @@ export default function MobileNotificationsPage() {
         ) : undefined
       }
     >
-      <div className="pb-safe">
+      <div className="pb-safe-bottom">
         {isLoading ? (
           <div className="px-4 space-y-3 pt-2">
             {[1, 2, 3].map((i) => (

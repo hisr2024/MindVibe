@@ -159,7 +159,7 @@ export default function MobileKiaanPage() {
         onSaveToJournal={handleSaveToJournal}
         isLoading={isLoading}
         placeholder="Share what's on your mind..."
-        className="h-[calc(100vh-80px)]"
+        className="flex-1 min-h-0"
       />
     </MobileAppShell>
   )

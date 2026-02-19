@@ -174,7 +174,7 @@ export default function MobileJourneysPage() {
         </motion.button>
       }
     >
-      <div className="pb-safe">
+      <div className="pb-safe-bottom">
         {/* Search bar */}
         <AnimatePresence>
           {showSearch && (

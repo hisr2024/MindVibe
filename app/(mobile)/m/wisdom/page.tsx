@@ -171,7 +171,7 @@ export default function MobileWisdomPage() {
       enablePullToRefresh
       onRefresh={handleRefresh}
     >
-      <div className="px-4 pb-safe space-y-6">
+      <div className="px-4 pb-safe-bottom space-y-6">
         {/* Daily Verse Card */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
