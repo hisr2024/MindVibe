@@ -183,22 +183,34 @@ async def get_all_plans(db: AsyncSession) -> list[SubscriptionPlan]:
 
 
 async def get_user_tier(db: AsyncSession, user_id: str) -> SubscriptionTier:
-    """Get the subscription tier for a user.
-    
+    """Get the effective subscription tier for a user.
+
+    Developers (configured via DEVELOPER_EMAILS env var) are treated as PREMIER tier
+    with full unlimited access, regardless of their actual subscription record.
+
     Args:
         db: Database session.
         user_id: The user's ID.
-        
+
     Returns:
-        SubscriptionTier: The user's current tier (FREE if no subscription).
+        SubscriptionTier: The user's effective tier (PREMIER for developers, FREE if no subscription).
     """
+    # Check for developer access — developers get highest tier
+    from backend.middleware.feature_access import is_developer
+    try:
+        if await is_developer(db, user_id):
+            return SubscriptionTier.PREMIER
+    except Exception:
+        # If developer check fails, fall through to normal tier logic
+        pass
+
     subscription = await get_user_subscription(db, user_id)
     if not subscription or subscription.status != SubscriptionStatus.ACTIVE:
         return SubscriptionTier.FREE
-    
+
     if subscription.plan:
         return subscription.plan.tier
-    
+
     return SubscriptionTier.FREE
 
 

@@ -22,6 +22,7 @@ from backend.deps import get_db
 from backend.models import User, SubscriptionTier
 from backend.middleware.feature_access import (
     get_current_user_id,
+    is_developer,
     require_subscription,
 )
 from backend.schemas.subscription import (
@@ -91,21 +92,40 @@ async def get_current_subscription(
     db: AsyncSession = Depends(get_db),
 ) -> UserSubscriptionOut | None:
     """Get the current user's subscription.
-    
+
     If the user doesn't have a subscription, one will be created with the free tier.
-    
+    Developers (configured via DEVELOPER_EMAILS) get an effective tier of PREMIER
+    with all features unlocked, regardless of their actual subscription record.
+
     Returns:
         UserSubscriptionOut: The user's current subscription details.
     """
     user_id = await get_current_user_id(request)
-    
+
     # Auto-assign free tier if no subscription exists
     subscription = await get_or_create_free_subscription(db, user_id)
-    
-    return UserSubscriptionOut(
-        id=subscription.id,
-        user_id=subscription.user_id,
-        plan=SubscriptionPlanOut(
+
+    # Check if user is a developer — they get full premium access
+    user_is_developer = await is_developer(db, user_id)
+
+    # Build plan output — developers see PREMIER-level features
+    if user_is_developer:
+        from backend.config.feature_config import get_tier_features, get_kiaan_quota
+        premier_features = get_tier_features(SubscriptionTier.PREMIER)
+        plan_out = SubscriptionPlanOut(
+            id=subscription.plan.id,
+            tier=SubscriptionTier.PREMIER,
+            name="Developer (All Access)",
+            description="Full unlimited access for developers",
+            price_monthly=subscription.plan.price_monthly,
+            price_yearly=subscription.plan.price_yearly,
+            features=premier_features,
+            kiaan_questions_monthly=-1,
+            encrypted_journal=True,
+            data_retention_days=-1,
+        )
+    else:
+        plan_out = SubscriptionPlanOut(
             id=subscription.plan.id,
             tier=subscription.plan.tier,
             name=subscription.plan.name,
@@ -116,13 +136,20 @@ async def get_current_subscription(
             kiaan_questions_monthly=subscription.plan.kiaan_questions_monthly,
             encrypted_journal=subscription.plan.encrypted_journal,
             data_retention_days=subscription.plan.data_retention_days,
-        ),
+        )
+
+    return UserSubscriptionOut(
+        id=subscription.id,
+        user_id=subscription.user_id,
+        plan=plan_out,
         status=subscription.status,
         current_period_start=subscription.current_period_start,
         current_period_end=subscription.current_period_end,
         cancel_at_period_end=subscription.cancel_at_period_end,
         canceled_at=subscription.canceled_at,
         created_at=subscription.created_at,
+        is_developer=user_is_developer,
+        effective_tier=SubscriptionTier.PREMIER if user_is_developer else subscription.plan.tier,
     )
 
 
@@ -500,17 +527,38 @@ async def get_current_usage(
     db: AsyncSession = Depends(get_db),
 ) -> UsageStatsOut:
     """Get the current user's usage statistics.
-    
+
+    Developers get unlimited usage reported regardless of actual tracking records.
+
     Returns:
         UsageStatsOut: Current usage for KIAAN questions.
     """
     user_id = await get_current_user_id(request)
-    
+
     # Ensure user has a subscription
     await get_or_create_free_subscription(db, user_id)
-    
+
+    # Developers get unlimited usage
+    if await is_developer(db, user_id):
+        from datetime import datetime, timedelta, UTC
+        now = datetime.now(UTC)
+        period_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if now.month == 12:
+            period_end = period_start.replace(year=now.year + 1, month=1)
+        else:
+            period_end = period_start.replace(month=now.month + 1)
+        return UsageStatsOut(
+            feature="kiaan_questions",
+            period_start=period_start,
+            period_end=period_end,
+            usage_count=0,
+            usage_limit=-1,
+            remaining=-1,
+            is_unlimited=True,
+        )
+
     stats = await get_usage_stats(db, user_id, "kiaan_questions")
-    
+
     return UsageStatsOut(**stats)
 
 
