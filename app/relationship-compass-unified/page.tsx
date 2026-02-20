@@ -685,7 +685,7 @@ export default function RelationshipCompassUnifiedPage() {
             {/* Navigation Links */}
             <div className="flex flex-wrap gap-2">
               <Link
-                href="/relationship-compass"
+                href="/tools/relationship-compass"
                 className="px-4 py-2 rounded-xl bg-white/5 border border-slate-700/30 text-slate-400 text-xs font-semibold hover:border-slate-500/50 transition"
               >
                 Gita-Grounded Mode
@@ -703,7 +703,7 @@ export default function RelationshipCompassUnifiedPage() {
                 Talk to KIAAN
               </Link>
               <Link
-                href="/viyog"
+                href="/tools/viyog"
                 className="px-4 py-2 rounded-xl bg-white/5 border border-slate-700/30 text-slate-400 text-xs font-semibold hover:border-slate-500/50 transition"
               >
                 Detachment Coach

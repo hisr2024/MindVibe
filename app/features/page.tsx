@@ -178,7 +178,7 @@ export default function FeaturesPage() {
               </p>
             </div>
             <Link
-              href="/karmic-tree"
+              href="/tools/karmic-tree"
               className="rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-400 px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-lg shadow-emerald-500/25 transition hover:scale-[1.02] whitespace-nowrap text-center"
             >
               View Karmic Tree

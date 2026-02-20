@@ -59,10 +59,10 @@ export default function KarmicTreePageClient() {
           <div className="rounded-2xl border border-orange-500/15 bg-black/40 p-4">
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Link
-                href="/karmic-tree"
+                href="/tools/karmic-tree"
                 className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-3 py-1.5 border border-orange-500/20"
               >
-                Original Karmic Tree Page
+                Karmic Tree
               </Link>
               <Link
                 href="/tools/karma-footprint"
