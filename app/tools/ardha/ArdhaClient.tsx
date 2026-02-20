@@ -344,7 +344,7 @@ export default function ArdhaClient() {
 
             <div className="rounded-2xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 to-transparent p-4">
               <p className="text-xs text-orange-100/80">
-                <strong className="text-orange-50">Boundaries:</strong> Ardha is not a therapist. No medical, legal, or crisis advice. It transforms distorted thoughts into balanced clarity through cognitive reframing.
+                <strong className="text-orange-50">The Gift of Balance:</strong> Ardha draws from the Gita&apos;s wisdom on equanimity — transforming turbulent thoughts into balanced clarity. As Krishna teaches: &quot;The self-controlled soul attains peace.&quot;
               </p>
             </div>
 

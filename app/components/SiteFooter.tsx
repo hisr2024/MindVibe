@@ -24,7 +24,7 @@ export default function SiteFooter() {
             <span className="text-orange-100/60">{t('common.app.taglineSuffix', 'Companion')}</span>
           </p>
           <p className="text-sm leading-relaxed text-white/50">
-            {t('navigation.footer.description', 'Designed for calm, privacy-first spiritual wellness support. Built with a focus on WCAG accessibility, encryption, and a gentle experience.')}
+            {t('navigation.footer.description', 'Your spiritual companion and divine friend — rooted in the Bhagavad Gita. Walk with Krishna through sacred wisdom, guided journeys, and inner peace.')}
           </p>
         </div>
         <div className="grid grid-cols-2 gap-8 md:grid-cols-3">
@@ -57,19 +57,19 @@ export default function SiteFooter() {
             </div>
           </nav>
           <div className="space-y-3 text-sm">
-            <p className="text-xs font-semibold uppercase tracking-widest text-white/40">{t('navigation.footer.safety', 'Safety')}</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-white/40">{t('navigation.footer.safety', 'Sacred Trust')}</p>
             <div className="flex flex-col gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs text-white/70">
-                <svg className="h-3 w-3 text-emerald-400/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                {t('common.privacy.private', 'Private by design')}
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#d4a44c]/10 bg-[#d4a44c]/[0.03] px-2.5 py-1 text-xs text-white/70">
+                <svg className="h-3 w-3 text-[#d4a44c]/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                {t('common.privacy.private', 'Sacred and private')}
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs text-white/70">
-                <svg className="h-3 w-3 text-emerald-400/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                {t('navigation.footer.encryptedJournals', 'Encrypted journals')}
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#d4a44c]/10 bg-[#d4a44c]/[0.03] px-2.5 py-1 text-xs text-white/70">
+                <svg className="h-3 w-3 text-[#d4a44c]/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                {t('navigation.footer.encryptedJournals', 'Encrypted reflections')}
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs text-white/70">
-                <svg className="h-3 w-3 text-emerald-400/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                {t('navigation.footer.noTracking', 'No tracking ads')}
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#d4a44c]/10 bg-[#d4a44c]/[0.03] px-2.5 py-1 text-xs text-white/70">
+                <svg className="h-3 w-3 text-[#d4a44c]/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                {t('navigation.footer.noTracking', 'Your journey, your privacy')}
               </span>
             </div>
           </div>

@@ -278,7 +278,7 @@ export default function RelationshipCompassClient() {
 
             <div className="rounded-2xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 to-transparent p-4">
               <p className="text-xs text-orange-100/80">
-                <strong className="text-orange-50">Boundaries:</strong> No therapy, legal, medical, or financial advice. No side-taking. If safety is a concern, reach out to a trusted person.
+                <strong className="text-orange-50">Guided by Dharma:</strong> The Relationship Compass draws from the Gita&apos;s teachings on righteous conduct and compassion. It illuminates your path with clarity, never taking sides — always honoring truth.
               </p>
             </div>
 

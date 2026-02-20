@@ -1,6 +1,6 @@
 export const metadata = {
   title: 'Features | MindVibe',
-  description: 'Explore journaling, guided chats, dashboards, and accessibility-first design for calmer support.'
+  description: 'Discover MindVibe&apos;s sacred tools — KIAAN divine companion, wisdom journeys, sacred reflections, and spiritual growth features rooted in the Bhagavad Gita.'
 }
 
 export default function FeaturesLayout({

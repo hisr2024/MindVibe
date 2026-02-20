@@ -223,20 +223,19 @@ export function PostComposer({
             exit={{ height: 0, opacity: 0 }}
             className="mb-4 overflow-hidden"
           >
-            {/* Crisis Warning */}
+            {/* Compassionate Care Notice */}
             {moderationFeedback.flags.includes('crisis') && (
-              <div className="mb-3 rounded-2xl border border-red-400/30 bg-red-950/30 p-4">
+              <div className="mb-3 rounded-2xl border border-[#d4a44c]/30 bg-[#d4a44c]/5 p-4">
                 <div className="flex items-start gap-2">
-                  <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
+                  <AlertCircle className="h-5 w-5 text-[#d4a44c] flex-shrink-0 mt-0.5" />
                   <div>
-                    <h5 className="text-sm font-semibold text-red-100 mb-1">Crisis Support Needed</h5>
-                    <p className="text-xs text-red-100/80 mb-2">
-                      We noticed language that suggests you may be in crisis. Please reach out for
-                      immediate support:
+                    <h5 className="text-sm font-semibold text-[#d4a44c] mb-1">You Are Not Alone</h5>
+                    <p className="text-xs text-orange-100/80 mb-2">
+                      Your feelings matter deeply. If you need support beyond the spiritual path, caring souls are ready to help:
                     </p>
-                    <div className="space-y-1 text-xs text-red-100/90">
-                      <p>📞 <strong>988</strong> - Suicide & Crisis Lifeline (US)</p>
-                      <p>💬 <strong>Text HOME to 741741</strong> - Crisis Text Line</p>
+                    <div className="space-y-1 text-xs text-orange-100/90">
+                      <p>📞 <strong>988</strong> - Support Line (US)</p>
+                      <p>💬 <strong>Text HOME to 741741</strong> - Text Support</p>
                     </div>
                   </div>
                 </div>
@@ -338,11 +337,11 @@ export function PostComposer({
         )}
       </div>
 
-      {/* Disclaimer */}
-      <div className="mt-4 p-3 rounded-2xl border border-orange-500/10 bg-orange-950/10">
+      {/* Community Guidelines */}
+      <div className="mt-4 p-3 rounded-2xl border border-[#d4a44c]/10 bg-[#d4a44c]/5">
         <p className="text-xs text-orange-100/60 leading-relaxed">
-          <strong>Note:</strong> All posts are reviewed by AI moderation for safety. Your identity
-          remains anonymous. Crisis content will be flagged for immediate support.
+          <strong>Sacred Space:</strong> All posts are reviewed to maintain a compassionate and respectful community. Your identity
+          remains anonymous. This is a space of spiritual fellowship and mutual support.
         </p>
       </div>
     </div>

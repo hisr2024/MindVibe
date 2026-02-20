@@ -1,6 +1,6 @@
 export const metadata = {
   title: 'About MindVibe',
-  description: 'Our mission is to deliver calm, privacy-first spiritual wellness support with ethical guardrails.'
+  description: 'MindVibe is your spiritual companion and divine friend — rooted in the Bhagavad Gita. Discover how KIAAN walks beside you with sacred wisdom and inner peace.'
 }
 
 export default function AboutLayout({

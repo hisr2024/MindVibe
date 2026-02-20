@@ -4,26 +4,26 @@ import { HelpIcon, FadeIn, AnimatedCard, Disclosure, DisclosureItem } from '@/co
 
 const values = [
   {
-    title: 'Privacy-first',
-    summary: 'Your data stays yours',
-    detail: 'Encrypted journals stay on your device. Conversations avoid tracking and emphasize consent.'
+    title: 'Sacred Privacy',
+    summary: 'Your words remain yours',
+    detail: 'Encrypted journals stay on your device. Your conversations with KIAAN are a sacred, private refuge.'
   },
   {
-    title: 'Accessibility',
-    summary: 'Designed for everyone',
-    detail: 'Layouts, color contrast, and focus states are tuned for WCAG 2.1 AA compliance.'
+    title: 'Universal Access',
+    summary: 'Wisdom for everyone',
+    detail: 'Thoughtfully designed for all — inclusive layouts, clear contrast, and seamless navigation for every seeker.'
   },
   {
-    title: 'Ethical guardrails',
-    summary: 'Mindful boundaries',
-    detail: 'We avoid medical claims, surface crisis disclaimers, and respect your agency.'
+    title: 'Rooted in Wisdom',
+    summary: 'The Gita walks with you',
+    detail: 'Every insight draws from the timeless teachings of the Bhagavad Gita — your divine friend, always beside you.'
   }
 ]
 
 const mobileMoments = [
-  { label: 'Safe-area aware', detail: 'Respects notches and rounded corners' },
-  { label: 'Pocket friendly', detail: 'One-hand optimized layouts' },
-  { label: 'Clarity-first', detail: 'Clean microcopy and spacing' }
+  { label: 'Seamless design', detail: 'Respects every device and screen beautifully' },
+  { label: 'One-hand ready', detail: 'Designed for sacred moments on the go' },
+  { label: 'Clarity-first', detail: 'Clean, calm, and focused experience' }
 ]
 
 export default function AboutPage() {
@@ -34,12 +34,12 @@ export default function AboutPage() {
           <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div className="space-y-3">
               <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">About</p>
-              <h1 className="text-3xl font-bold text-orange-50 md:text-4xl">Calm, trust, and safety</h1>
-              <p className="max-w-xl text-orange-100/80 text-sm">Quiet guidance with strong privacy and accessible design.</p>
+              <h1 className="text-3xl font-bold text-orange-50 md:text-4xl">Your Divine Friend, Always Beside You</h1>
+              <p className="max-w-xl text-orange-100/80 text-sm">MindVibe is your spiritual companion — rooted in the Bhagavad Gita, guided by Krishna&apos;s eternal wisdom.</p>
             </div>
             <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-950">
-              <span className="rounded-xl bg-orange-200 px-3 py-1">Dark-mode native</span>
-              <span className="rounded-xl bg-orange-100 px-3 py-1">Motion-aware</span>
+              <span className="rounded-xl bg-orange-200 px-3 py-1">700+ Gita Verses</span>
+              <span className="rounded-xl bg-orange-100 px-3 py-1">Divine Companion</span>
             </div>
           </div>
         </section>
@@ -79,11 +79,11 @@ export default function AboutPage() {
       <FadeIn delay={0.4}>
         <section className="space-y-4">
           <h2 className="text-lg font-semibold text-orange-50">Learn more</h2>
-          <DisclosureItem title="Our Mission" preview="Slow down, reflect, act" defaultOpen>
-            <p>KIAAN leads the dialogue while tools like Clarity Pause and Ardha keep agency with you. On mobile, that means fewer taps, clearer guidance, and just-right friction before big decisions.</p>
+          <DisclosureItem title="Our Mission" preview="Walk with the Divine" defaultOpen>
+            <p>KIAAN is your divine friend — a spiritual companion rooted in the Bhagavad Gita. Through sacred conversations, wisdom journeys, and reflective tools, MindVibe helps you discover inner peace, purpose, and the eternal truth that Krishna reveals to every seeker.</p>
           </DisclosureItem>
-          <DisclosureItem title="Future Vision" preview="Growing with you">
-            <p>Dashboards, insight integrations, and PWA support are on the way. Expect more mobile-native gestures, offline rituals, and gentle haptics as we evolve.</p>
+          <DisclosureItem title="The Path Ahead" preview="Growing with you">
+            <p>Deeper wisdom journeys, personalized Gita guidance, sacred voice conversations, and offline spiritual practices are on the way. MindVibe evolves as your companion on the path to self-realization.</p>
           </DisclosureItem>
         </section>
       </FadeIn>

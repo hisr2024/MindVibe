@@ -270,12 +270,10 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
         </div>
       )}
 
-      {/* Disclaimer */}
-      <div className="mt-4 p-3 rounded-2xl border border-yellow-400/20 bg-yellow-950/10">
-        <p className="text-xs text-yellow-100/70 leading-relaxed">
-          ⚠️ <strong>Important:</strong> This assessment is for informational purposes only and is not a medical
-          diagnosis. If you&apos;re experiencing a crisis, please contact a professional or call your local
-          crisis hotline.
+      {/* Spiritual Guidance Note */}
+      <div className="mt-4 p-3 rounded-2xl border border-[#d4a44c]/20 bg-[#d4a44c]/5">
+        <p className="text-xs text-[#d4a44c]/70 leading-relaxed">
+          This reflection is drawn from your spiritual journey patterns and is meant to guide your self-awareness. For matters beyond the spiritual path, always seek guidance from qualified professionals.
         </p>
       </div>
 

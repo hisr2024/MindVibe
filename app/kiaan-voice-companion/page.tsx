@@ -1012,7 +1012,7 @@ export default function KiaanVoiceCompanionPage() {
             </div>
 
             <p className="text-[10px] text-white/15 text-center mt-2">
-              KIAAN is your Divine Friend, not a therapist. If you&apos;re in crisis, please call your local emergency line.
+              KIAAN is your Divine Friend — sharing sacred wisdom from the Bhagavad Gita with love.
             </p>
           </div>
         </footer>
