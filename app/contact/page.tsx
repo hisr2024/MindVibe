@@ -1,6 +1,6 @@
 export const metadata = {
   title: 'Contact | MindVibe',
-  description: 'Reach the MindVibe team for support, accessibility requests, or privacy questions.'
+  description: 'Reach the MindVibe team — your spiritual companion. Share feedback, seek guidance, or connect with us.'
 }
 
 export default function ContactPage() {
@@ -9,7 +9,7 @@ export default function ContactPage() {
       <section className="rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#0b0b0f]/80 to-[#0f0a08]/90 p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
         <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Contact</p>
         <h1 className="text-3xl font-bold text-orange-50">We’re here to help</h1>
-        <p className="mt-4 text-orange-100/80">Share feedback, request accessibility support, or report a concern—responses stay private.</p>
+        <p className="mt-4 text-orange-100/80">Share your thoughts, request support, or connect with our team — every response is treated with reverence and care.</p>
       </section>
 
       <section className="rounded-3xl border border-orange-500/15 bg-black/40 p-6">
@@ -52,7 +52,7 @@ export default function ContactPage() {
               name="message"
               required
               className="min-h-[140px] w-full rounded-2xl border border-orange-500/25 bg-slate-950/60 px-3 py-2 outline-none focus:ring-2 focus:ring-orange-400/70"
-              placeholder="Share details (please avoid personal health information)."
+              placeholder="Share what's on your heart — we're here to listen."
             />
           </label>
           <button
@@ -62,7 +62,7 @@ export default function ContactPage() {
             Send securely
           </button>
         </form>
-        <p className="mt-4 text-xs text-orange-100/70">Please avoid medical emergencies or protected health info. For urgent needs, contact local emergency services.</p>
+        <p className="mt-4 text-xs text-orange-100/70">We cherish your trust. For matters beyond the spiritual path, please seek guidance from qualified professionals.</p>
       </section>
     </main>
   )

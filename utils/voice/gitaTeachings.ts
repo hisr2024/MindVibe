@@ -285,7 +285,7 @@ export const GITA_CHAPTERS: ChapterTeaching[] = [
         transliteration: 'Uddhared atmanatmanam natmanam avasadayet',
         translation: 'One must elevate oneself by one\'s own mind, not degrade oneself. The mind can be the friend or the enemy of the self.',
         practicalWisdom: 'You have the power to lift yourself up. Not through external help alone, but through your own mind. Choose to be your own best friend, not your harshest critic.',
-        applicablesituations: ['self_doubt', 'mental_health', 'self_improvement', 'negative_self_talk'],
+        applicablesituations: ['self_doubt', 'spiritual_wellness', 'self_improvement', 'negative_self_talk'],
         emotions: ['sadness', 'hope', 'anxiety'],
         keywords: ['mind', 'self', 'uplift', 'friend', 'enemy', 'inner critic'],
       },

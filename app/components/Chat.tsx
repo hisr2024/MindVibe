@@ -179,7 +179,7 @@ export default function Chat() {
           {loading ? <span>Sending...</span> : <span>Send</span>}
         </button>
       </div>
-      <p className="text-xs text-orange-100/70">We do not store chats long-term; avoid crisis information and call local services in emergencies.</p>
+      <p className="text-xs text-orange-100/70">Your conversations are sacred and private. KIAAN walks beside you as a divine friend.</p>
     </div>
   )
 }

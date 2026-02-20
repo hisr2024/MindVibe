@@ -27,7 +27,7 @@ export default function EmotionalResetClient() {
           <ToolHeader
             icon="💫"
             title="Emotional Reset"
-            subtitle="A calming 7-step flow to process emotions, find inner peace, and reset your mental state with gentle guidance."
+            subtitle="A calming 7-step flow to process emotions, find inner peace, and restore your spirit with gentle guidance."
             backLink={{ label: 'Back to dashboard', href: '/dashboard' }}
           />
         </FadeIn>

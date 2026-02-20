@@ -1,7 +1,7 @@
 {
-  "name": "MindVibe — Your Guide to Inner Peace",
+  "name": "MindVibe — Your Spiritual Companion & Divine Friend",
   "short_name": "MindVibe",
-  "description": "AI guide rooted in Ancient Wisdom for spiritual wellness. Experience personalized mindfulness, meditation guidance, and spiritual growth with KIAAN.",
+  "description": "The best spiritual companion and divine friend — rooted in the Bhagavad Gita. Experience sacred wisdom, guided journeys, and KIAAN, your AI spiritual guide for inner peace and self-discovery.",
   "theme_color": "#0b0b0f",
   "background_color": "#050505",
   "display": "standalone",
@@ -11,7 +11,7 @@
   "orientation": "any",
   "lang": "en",
   "dir": "ltr",
-  "categories": ["health", "lifestyle", "wellness", "productivity"],
+  "categories": ["spirituality", "lifestyle", "wisdom", "self-discovery"],
   "icons": [
     {
       "src": "/icons/icon.svg",

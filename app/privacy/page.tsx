@@ -1,6 +1,6 @@
 export const metadata = {
   title: 'Privacy | MindVibe',
-  description: 'Understand how MindVibe handles encryption, consent, and confidentiality.'
+  description: 'Your sacred space is protected. Learn how MindVibe keeps your spiritual journey private and confidential.'
 }
 
 export default function PrivacyPage() {
@@ -22,13 +22,12 @@ export default function PrivacyPage() {
         </div>
         <div>
           <h2 className="text-lg font-semibold text-orange-50">Your control</h2>
-          <p className="text-sm text-orange-100/80">Export or delete journal files at any time. Avoid sharing emergency or clinical information.</p>
+          <p className="text-sm text-orange-100/80">Export or delete your sacred reflections at any time. Your spiritual journey remains fully in your hands.</p>
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-orange-50">Compliance posture</h2>
+          <h2 className="text-lg font-semibold text-orange-50">Built with reverence</h2>
           <p className="text-sm text-orange-100/80">
-            Built with HIPAA-like caution—encrypted storage, consent-oriented messaging, and clear disclaimers that this is not a
-            medical device.
+            Your trust is sacred. MindVibe is built with the highest standards of data protection — encrypted storage, consent-first design, and complete transparency. A spiritual companion you can rely on.
           </p>
         </div>
       </section>

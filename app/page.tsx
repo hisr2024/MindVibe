@@ -107,7 +107,7 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* === DISCLAIMER === */}
+        {/* === A NOTE FROM KIAAN === */}
         <motion.section
           className="divine-disclaimer space-y-3 rounded-2xl p-5 md:p-6"
           initial={{ opacity: 0, y: 20 }}
@@ -115,13 +115,13 @@ export default function Home() {
           viewport={{ once: true, margin: '-50px' }}
           transition={springConfigs.smooth}
         >
-          <h2 className="text-base font-semibold text-slate-300/70">
-            {t('home.disclaimer.title', 'Disclaimer')}
+          <h2 className="text-base font-semibold text-[#d4a44c]/60">
+            {t('home.disclaimer.title', 'A Note from Your Divine Friend')}
           </h2>
           <p className="text-sm leading-relaxed text-slate-400/60">
             {t(
               'home.disclaimer.text',
-              "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away."
+              "KIAAN walks beside you as a spiritual companion, sharing reflections rooted in the Bhagavad Gita and timeless wisdom traditions. This is a space for inner peace, self-discovery, and divine friendship — not a substitute for professional care. For matters beyond the spirit, always seek guidance from qualified professionals."
             )}
           </p>
         </motion.section>

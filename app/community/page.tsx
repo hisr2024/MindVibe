@@ -248,7 +248,7 @@ export default function CommunityPage() {
             {t('community.features.moderated.title', 'AI Moderated')}
           </h3>
           <p className="text-xs text-orange-100/60">
-            {t('community.features.moderated.description', 'Every post is screened for safety. Crisis detection ensures immediate support when needed.')}
+            {t('community.features.moderated.description', 'Every post is nurtured for compassion and respect. A sacred space where seekers support one another.')}
           </p>
         </motion.div>
 

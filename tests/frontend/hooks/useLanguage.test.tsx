@@ -20,7 +20,7 @@ function renderUseLanguage() {
 // Mock fetch for translation files
 const mockTranslations: Record<string, Record<string, any>> = {
   'en/common.json': {
-    app: { name: 'MindVibe', tagline: 'Spiritual Wellness App' },
+    app: { name: 'MindVibe', tagline: 'Your Spiritual Companion & Divine Friend' },
     buttons: { submit: 'Submit', cancel: 'Cancel' }
   },
   'en/navigation.json': {

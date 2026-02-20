@@ -273,13 +273,13 @@ export function CircleList({
           <li className="flex items-start gap-2">
             <span className="text-indigo-400 mt-0.5">•</span>
             <span>
-              <strong>AI moderation:</strong> All posts are screened for safety and compassion
+              <strong>Mindful moderation:</strong> All posts are nurtured for compassion and respect
             </span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-indigo-400 mt-0.5">•</span>
             <span>
-              <strong>Crisis support:</strong> Immediate resources provided if concerning content detected
+              <strong>Compassionate care:</strong> Gentle support resources provided when someone needs extra care
             </span>
           </li>
           <li className="flex items-start gap-2">

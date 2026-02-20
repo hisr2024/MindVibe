@@ -25,9 +25,34 @@ export const viewport: Viewport = {
 }
 
 export const metadata = {
-  title: 'MindVibe - Your Spiritual Companion',
-  description: 'A divine friend rooted in the Bhagavad Gita — 700+ verses, spiritual tools, guided wisdom journeys, and KIAAN, your AI companion for inner peace.',
+  title: 'MindVibe — Your Spiritual Companion & Best Divine Friend | Bhagavad Gita Wisdom',
+  description: 'MindVibe is the best spiritual companion and divine friend — powered by 700+ Bhagavad Gita verses, KIAAN AI guide, sacred wisdom journeys, and tools for inner peace, self-discovery, and spiritual growth. Walk with Krishna.',
   metadataBase: new URL('https://mindvibe.life'),
+  keywords: ['spiritual companion', 'divine friend', 'Bhagavad Gita', 'KIAAN', 'spiritual growth', 'inner peace', 'Krishna wisdom', 'sacred journeys', 'Gita verses', 'self-discovery', 'spiritual guide', 'MindVibe'],
+  openGraph: {
+    title: 'MindVibe — Your Spiritual Companion & Best Divine Friend',
+    description: 'Walk with Krishna. 700+ Bhagavad Gita verses, KIAAN AI spiritual guide, sacred wisdom journeys, and divine tools for inner peace and self-discovery.',
+    url: 'https://mindvibe.life',
+    siteName: 'MindVibe',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'MindVibe — Your Spiritual Companion & Divine Friend',
+    description: 'The best spiritual companion rooted in the Bhagavad Gita. KIAAN AI guide, sacred wisdom journeys, and tools for inner peace.',
+  },
+  alternates: {
+    canonical: 'https://mindvibe.life',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

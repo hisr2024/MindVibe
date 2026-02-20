@@ -814,7 +814,7 @@ export default function CompanionPage() {
             </div>
 
             <p className="text-[10px] text-white/20 text-center mt-2">
-              KIAAN is your friend, not a therapist. If you&apos;re in crisis, please call your local emergency line.
+              KIAAN is your divine friend, walking beside you with wisdom from the Bhagavad Gita.
             </p>
           </div>
         </footer>

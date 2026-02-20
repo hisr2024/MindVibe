@@ -191,7 +191,7 @@ export default function ViyogClient() {
           <ToolActionCard
             icon="⏱️"
             title="60-Second Reset"
-            description="A quick mental reset when worry about outcomes feels overwhelming."
+            description="A quick inner reset when worry about outcomes feels overwhelming."
             ctaLabel="Start Reset"
             href="/tools/viyog#clarity-pause"
             gradient="from-cyan-500/10 to-blue-500/10"
@@ -371,7 +371,7 @@ export default function ViyogClient() {
 
             <div className="rounded-2xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 to-transparent p-4">
               <p className="text-xs text-orange-100/80">
-                <strong className="text-orange-50">Note:</strong> Viyoga is here for everyday worries about outcomes - it&apos;s not a substitute for therapy, crisis support, or professional help. It simply helps redirect anxious energy toward calm action.
+                <strong className="text-orange-50">The Path of Detachment:</strong> Viyoga draws from the Gita&apos;s timeless teaching — let go of attachment to outcomes and find peace in right action. As Krishna teaches: &quot;You have the right to perform your actions, but not to the fruits thereof.&quot;
               </p>
             </div>
 

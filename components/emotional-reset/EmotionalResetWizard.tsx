@@ -474,11 +474,11 @@ export function EmotionalResetWizard({
 
   const renderCrisisModal = () => (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-900 border border-red-500/30 rounded-2xl p-6 max-w-md w-full space-y-4">
+      <div className="bg-slate-900 border border-[#d4a44c]/30 rounded-2xl p-6 max-w-md w-full space-y-4">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">🆘</span>
-          <h3 className="text-lg font-semibold text-red-400">
-            Your Safety Matters
+          <span className="text-2xl">🙏</span>
+          <h3 className="text-lg font-semibold text-[#d4a44c]">
+            Krishna Cares for You
           </h3>
         </div>
         <div className="text-orange-100/90 whitespace-pre-wrap leading-relaxed">

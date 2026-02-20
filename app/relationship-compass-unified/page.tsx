@@ -438,8 +438,8 @@ export default function RelationshipCompassUnifiedPage() {
                       </span>
                     )}
                     {result.analysis?.safety_concern && (
-                      <span className="px-2 py-1 rounded-md bg-red-500/15 border border-red-500/30 text-[11px] text-red-300 font-semibold">
-                        safety concern detected
+                      <span className="px-2 py-1 rounded-md bg-[#d4a44c]/15 border border-[#d4a44c]/30 text-[11px] text-[#d4a44c] font-semibold">
+                        gentle care needed
                       </span>
                     )}
                     {result.wisdom_metadata && result.wisdom_metadata.total_sources > 0 && (
@@ -673,12 +673,11 @@ export default function RelationshipCompassUnifiedPage() {
               </div>
             )}
 
-            {/* Disclaimer */}
-            <div className="rounded-2xl border border-slate-600/20 bg-gradient-to-br from-slate-500/5 to-transparent p-4">
-              <p className="text-xs text-slate-500 leading-relaxed">
-                <strong className="text-slate-400">Not therapy.</strong> This tool provides clarity, not clinical intervention.
-                It draws from philosophical principles about human nature and self-mastery.
-                If you&apos;re experiencing abuse or a crisis, please reach out to a professional.
+            {/* Spiritual Guidance Note */}
+            <div className="rounded-2xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#d4a44c]/5 to-transparent p-4">
+              <p className="text-xs text-[#d4a44c]/60 leading-relaxed">
+                <strong className="text-[#d4a44c]/80">Guided by Dharma.</strong> This tool draws from the Gita&apos;s timeless wisdom on righteous relationships and self-mastery.
+                It illuminates your path with clarity and compassion, always honoring truth.
               </p>
             </div>
 

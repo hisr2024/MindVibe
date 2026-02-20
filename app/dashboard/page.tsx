@@ -3,7 +3,7 @@ import DashboardClient from './DashboardClient'
 export const metadata = {
   title: 'MindVibe Dashboard | KIAAN — Your Spiritual Companion',
   description:
-    'MindVibe Dashboard: your control center with 16 integrated tools. Launch guided chat, capture private notes, and explore every tool with KIAAN — Your Guide to Inner Peace.'
+    'Your sacred space with KIAAN — your divine friend and spiritual companion. Access wisdom journeys, sacred reflections, and all spiritual tools for inner peace and self-discovery.'
 }
 
 export default function DashboardPage() {

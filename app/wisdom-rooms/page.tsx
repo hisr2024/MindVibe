@@ -11,7 +11,7 @@ const defaultRooms: RoomSummary[] = [
   { id: 'grounding', slug: 'grounding', name: 'Calm Grounding', theme: 'Gentle check-ins and deep breaths' },
   { id: 'gratitude', slug: 'gratitude', name: 'Gratitude Garden', theme: 'Sharing what is going well today' },
   { id: 'courage', slug: 'courage', name: 'Courage Circle', theme: 'Encouragement for challenging moments' },
-  { id: 'clarity', slug: 'clarity', name: 'Clarity Corner', theme: 'Finding mental stillness' },
+  { id: 'clarity', slug: 'clarity', name: 'Clarity Corner', theme: 'Finding inner stillness' },
   { id: 'compassion', slug: 'compassion', name: 'Compassion Cave', theme: 'Self-kindness and acceptance' }
 ]
 

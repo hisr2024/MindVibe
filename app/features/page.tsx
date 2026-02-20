@@ -8,7 +8,7 @@ const featureCards = [
   {
     title: 'KIAAN Emotional Reset',
     summary: '7-step guided wellness',
-    detail: 'Process emotions, find calm, and reset your mental state with ancient wisdom in a guided 7-step flow with breathing exercises.',
+    detail: 'Process emotions, find calm, and restore your inner peace with ancient wisdom in a guided 7-step flow with breathing exercises.',
     icon: '🕉️',
     videoPlaceholder: '🧘',
     featured: true,
