@@ -86,10 +86,47 @@ class Settings(BaseSettings):
 
         return v
     
+    # Spiritual Wellness Data Encryption (enforced by default)
+    MINDVIBE_REQUIRE_ENCRYPTION: bool = os.getenv("MINDVIBE_REQUIRE_ENCRYPTION", "true").lower() == "true"
+    MINDVIBE_REFLECTION_KEY: str = os.getenv("MINDVIBE_REFLECTION_KEY", "")
+
+    @field_validator("MINDVIBE_REFLECTION_KEY")
+    @classmethod
+    def validate_encryption_key(cls, v: str) -> str:
+        """Enforce encryption key in production when REQUIRE_ENCRYPTION is true."""
+        import logging
+
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        require_encryption = os.getenv("MINDVIBE_REQUIRE_ENCRYPTION", "true").lower() == "true"
+
+        if require_encryption and not v:
+            if environment in ("production", "prod"):
+                error_msg = (
+                    "SECURITY ERROR: MINDVIBE_REFLECTION_KEY is required when "
+                    "MINDVIBE_REQUIRE_ENCRYPTION=true. Spiritual wellness data MUST be encrypted. "
+                    "Generate a key with: python -c 'from cryptography.fernet import Fernet; "
+                    "print(Fernet.generate_key().decode())'"
+                )
+                logging.critical(error_msg)
+                raise ValueError(error_msg)
+            else:
+                logging.warning(
+                    "MINDVIBE_REFLECTION_KEY not set — spiritual data will NOT be encrypted. "
+                    "This is only acceptable in development."
+                )
+        return v
+
+    # Chat Data Encryption — encrypt user messages stored in database
+    ENCRYPT_CHAT_DATA: bool = os.getenv("ENCRYPT_CHAT_DATA", "true").lower() == "true"
+
+    # Data Retention Policy — auto-purge soft-deleted chat data
+    CHAT_RETENTION_DAYS: int = int(os.getenv("CHAT_RETENTION_DAYS", "90"))
+    RETENTION_CLEANUP_ENABLED: bool = os.getenv("RETENTION_CLEANUP_ENABLED", "true").lower() == "true"
+
     # Session settings
     SESSION_EXPIRE_DAYS: int = 7
     SESSION_TOUCH_INTERVAL_MINUTES: int = 5
-    
+
     # Redis Configuration
     REDIS_ENABLED: bool = os.getenv("REDIS_ENABLED", "false").lower() == "true"
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")

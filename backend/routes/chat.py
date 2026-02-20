@@ -25,6 +25,11 @@ from backend.deps import get_db, get_current_user
 from backend.middleware.rate_limiter import CHAT_RATE_LIMIT, limiter
 from backend.models import KiaanChatMessage, KiaanChatSession
 
+# Security services
+from backend.services.pii_redactor import pii_redactor
+from backend.services.prompt_injection_detector import detect_prompt_injection
+from backend.services.chat_data_encryption import encrypt_chat_field, decrypt_chat_field
+
 # Subscription system enabled - plans are seeded via migration
 # See: migrations/20251202_add_subscription_system.sql
 SUBSCRIPTION_ENABLED = True
@@ -515,6 +520,17 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
                 yield "data: [DONE]\n\n"
                 return
 
+            # Security: Prompt injection detection for streaming
+            injection_check = detect_prompt_injection(message)
+            if injection_check.should_block:
+                logger.warning(f"Stream prompt injection blocked: {injection_check.threats}")
+                yield f"data: I noticed something unusual in your message. Could you rephrase that? I'm here to help. 💙\n\n"
+                yield "data: [DONE]\n\n"
+                return
+
+            # Security: PII redaction for streaming
+            stream_clean_message, stream_pii_mapping = pii_redactor.redact(message)
+
             # Check for crisis keywords
             crisis_keywords = ["suicide", "kill myself", "end it", "harm myself", "want to die"]
             if any(word in message.lower() for word in crisis_keywords):
@@ -545,12 +561,15 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
             from backend.services.kiaan_core import kiaan_core
 
             async for chunk in kiaan_core.get_kiaan_response_streaming(
-                message=message,
+                message=stream_clean_message,
                 user_id=stream_user_id,
                 db=db,
                 context="general",
                 language=language
             ):
+                # Restore any PII placeholders in the chunk
+                if stream_pii_mapping:
+                    chunk = pii_redactor.restore(chunk, stream_pii_mapping)
                 # Escape newlines for SSE format
                 escaped_chunk = chunk.replace('\n', '\\n')
                 yield f"data: {escaped_chunk}\n\n"
@@ -587,6 +606,22 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
         message = chat.message.strip()
         if not message:
             return {"status": "error", "response": "What's on your mind? 💙"}
+
+        # --- Security Layer 1: Prompt injection detection ---
+        injection_result = detect_prompt_injection(message)
+        if injection_result.should_block:
+            logger.warning(
+                f"Prompt injection blocked: score={injection_result.risk_score:.2f}, "
+                f"threats={injection_result.threats}"
+            )
+            return {
+                "status": "error",
+                "response": "I noticed something unusual in your message. Could you rephrase that? I'm here to help. 💙",
+                "error_code": "message_flagged",
+            }
+
+        # --- Security Layer 2: PII redaction before AI provider call ---
+        clean_message, pii_mapping = pii_redactor.redact(message)
 
         # Quota tracking for subscription system
         user_id: str | None = None
@@ -644,8 +679,9 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
         # Use KIAAN core service for consistent ecosystem-wide wisdom
         from backend.services.kiaan_core import kiaan_core
 
+        # Send PII-redacted message to AI provider (privacy layer)
         kiaan_result = await kiaan_core.get_kiaan_response(
-            message=message,
+            message=clean_message,
             user_id=user_id,
             db=db,
             context=chat.context or "general",
@@ -654,7 +690,11 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
         )
         
         response = kiaan_result["response"]
-        
+
+        # --- Security Layer 3: Restore PII in response (user sees original context) ---
+        if pii_mapping:
+            response = pii_redactor.restore(response, pii_mapping)
+
         # Log validation results
         if not kiaan_result["validation"]["valid"]:
             logger.warning(f"KIAAN response validation issues: {kiaan_result['validation']['errors']}")
@@ -744,12 +784,12 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             session_id = chat.session_id or str(uuid.uuid4())
             result["session_id"] = session_id
 
-            # Create chat message record
+            # Create chat message record (encrypt sensitive fields before storage)
             chat_message = KiaanChatMessage(
                 user_id=user_id,
                 session_id=session_id,
-                user_message=message,
-                kiaan_response=response,
+                user_message=encrypt_chat_field(message),
+                kiaan_response=encrypt_chat_field(response),
                 summary=summary_result.get("summary") if summary_result and summary_result.get("success") else None,
                 context=chat.context or "general",
                 mood_at_time=chat.mood,
@@ -909,8 +949,8 @@ async def get_chat_history(
                 {
                     "id": msg.id,
                     "session_id": msg.session_id,
-                    "user_message": msg.user_message,
-                    "kiaan_response": msg.kiaan_response,
+                    "user_message": decrypt_chat_field(msg.user_message),
+                    "kiaan_response": decrypt_chat_field(msg.kiaan_response),
                     "summary": msg.summary,
                     "context": msg.context,
                     "mood": msg.mood_at_time,
