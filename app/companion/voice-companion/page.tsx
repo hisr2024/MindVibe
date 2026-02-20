@@ -39,7 +39,7 @@ interface GitaChapter {
   englishName: string
   verseCount: number
   themes: string[]
-  mentalHealthFocus: string
+  spiritualFocus: string
   yogaType: string
 }
 
@@ -98,24 +98,24 @@ type PageMode = 'friend' | 'guide'
 // ─── Chapter Data (all 18 chapters - works offline) ────────────────────
 
 const CHAPTERS: GitaChapter[] = [
-  { number: 1, sanskritName: '\u0905\u0930\u094D\u091C\u0941\u0928\u0935\u093F\u0937\u093E\u0926\u092F\u094B\u0917', englishName: "Arjuna's Grief", verseCount: 47, themes: ['grief', 'moral dilemma', 'overwhelm'], mentalHealthFocus: 'Anxiety & Grief', yogaType: 'Vishada Yoga' },
-  { number: 2, sanskritName: '\u0938\u093E\u0902\u0916\u094D\u092F\u092F\u094B\u0917', englishName: 'The Yoga of Knowledge', verseCount: 72, themes: ['self-knowledge', 'equanimity', 'emotional regulation'], mentalHealthFocus: 'Self-Awareness', yogaType: 'Sankhya Yoga' },
-  { number: 3, sanskritName: '\u0915\u0930\u094D\u092E\u092F\u094B\u0917', englishName: 'The Yoga of Action', verseCount: 43, themes: ['purposeful action', 'duty', 'overcoming inertia'], mentalHealthFocus: 'Depression & Purpose', yogaType: 'Karma Yoga' },
-  { number: 4, sanskritName: '\u091C\u094D\u091E\u093E\u0928\u0915\u0930\u094D\u092E\u0938\u0902\u0928\u094D\u092F\u093E\u0938\u092F\u094B\u0917', englishName: 'Knowledge & Renunciation', verseCount: 42, themes: ['knowledge', 'trust', 'faith'], mentalHealthFocus: 'Self-Doubt & Trust', yogaType: 'Jnana Karma Sannyasa Yoga' },
-  { number: 5, sanskritName: '\u0915\u0930\u094D\u092E\u0938\u0902\u0928\u094D\u092F\u093E\u0938\u092F\u094B\u0917', englishName: 'Renunciation of Action', verseCount: 29, themes: ['inner peace', 'detachment', 'contentment'], mentalHealthFocus: 'Letting Go', yogaType: 'Karma Sannyasa Yoga' },
-  { number: 6, sanskritName: '\u0927\u094D\u092F\u093E\u0928\u092F\u094B\u0917', englishName: 'The Yoga of Meditation', verseCount: 47, themes: ['meditation', 'mindfulness', 'self-mastery'], mentalHealthFocus: 'Anxiety & Mindfulness', yogaType: 'Dhyana Yoga' },
-  { number: 7, sanskritName: '\u091C\u094D\u091E\u093E\u0928\u0935\u093F\u091C\u094D\u091E\u093E\u0928\u092F\u094B\u0917', englishName: 'Knowledge of the Divine', verseCount: 30, themes: ['divine connection', 'faith', 'wonder'], mentalHealthFocus: 'Existential Questions', yogaType: 'Jnana Vijnana Yoga' },
-  { number: 8, sanskritName: '\u0905\u0915\u094D\u0937\u0930\u092C\u094D\u0930\u0939\u094D\u092E\u092F\u094B\u0917', englishName: 'The Imperishable', verseCount: 28, themes: ['transcendence', 'the eternal', 'impermanence'], mentalHealthFocus: 'Death Anxiety', yogaType: 'Akshara Brahma Yoga' },
-  { number: 9, sanskritName: '\u0930\u093E\u091C\u0935\u093F\u0926\u094D\u092F\u093E\u0930\u093E\u091C\u0917\u0941\u0939\u094D\u092F\u092F\u094B\u0917', englishName: 'The Royal Knowledge', verseCount: 34, themes: ['devotion', 'unconditional love', 'acceptance'], mentalHealthFocus: 'Self-Worth & Acceptance', yogaType: 'Raja Vidya Raja Guhya Yoga' },
-  { number: 10, sanskritName: '\u0935\u093F\u092D\u0942\u0924\u093F\u092F\u094B\u0917', englishName: 'Divine Glories', verseCount: 42, themes: ['divine qualities', 'excellence', 'gratitude'], mentalHealthFocus: 'Low Self-Esteem', yogaType: 'Vibhuti Yoga' },
-  { number: 11, sanskritName: '\u0935\u093F\u0936\u094D\u0935\u0930\u0942\u092A\u0926\u0930\u094D\u0936\u0928\u092F\u094B\u0917', englishName: 'The Universal Vision', verseCount: 55, themes: ['cosmic perspective', 'awe', 'humility'], mentalHealthFocus: 'Perspective & Humility', yogaType: 'Vishvarupa Darshana Yoga' },
-  { number: 12, sanskritName: '\u092D\u0915\u094D\u0924\u093F\u092F\u094B\u0917', englishName: 'The Yoga of Devotion', verseCount: 20, themes: ['love', 'devotion', 'ideal qualities'], mentalHealthFocus: 'Relationship Healing', yogaType: 'Bhakti Yoga' },
-  { number: 13, sanskritName: '\u0915\u094D\u0937\u0947\u0924\u094D\u0930\u0915\u094D\u0937\u0947\u0924\u094D\u0930\u091C\u094D\u091E\u0935\u093F\u092D\u093E\u0917\u092F\u094B\u0917', englishName: 'The Field & Knower', verseCount: 35, themes: ['body-mind distinction', 'self-knowledge'], mentalHealthFocus: 'Identity & Mindfulness', yogaType: 'Kshetra Kshetrajna Vibhaga Yoga' },
-  { number: 14, sanskritName: '\u0917\u0941\u0923\u0924\u094D\u0930\u092F\u0935\u093F\u092D\u093E\u0917\u092F\u094B\u0917', englishName: 'Three Qualities of Nature', verseCount: 27, themes: ['behavioral patterns', 'habits', 'balance'], mentalHealthFocus: 'Habits & Mood', yogaType: 'Gunatraya Vibhaga Yoga' },
-  { number: 15, sanskritName: '\u092A\u0941\u0930\u0941\u0937\u094B\u0924\u094D\u0924\u092E\u092F\u094B\u0917', englishName: 'The Supreme Person', verseCount: 20, themes: ['life purpose', 'meaning', 'ultimate reality'], mentalHealthFocus: 'Life Purpose', yogaType: 'Purushottama Yoga' },
-  { number: 16, sanskritName: '\u0926\u0948\u0935\u093E\u0938\u0941\u0930\u0938\u092E\u094D\u092A\u0926\u094D\u0935\u093F\u092D\u093E\u0917\u092F\u094B\u0917', englishName: 'Divine & Demonic Qualities', verseCount: 24, themes: ['virtue', 'self-improvement', 'toxic traits'], mentalHealthFocus: 'Character Growth', yogaType: 'Daivasura Sampad Vibhaga Yoga' },
-  { number: 17, sanskritName: '\u0936\u094D\u0930\u0926\u094D\u0927\u093E\u0924\u094D\u0930\u092F\u0935\u093F\u092D\u093E\u0917\u092F\u094B\u0917', englishName: 'Three Types of Faith', verseCount: 28, themes: ['faith', 'discipline', 'motivation'], mentalHealthFocus: 'Motivation & Discipline', yogaType: 'Shraddhatraya Vibhaga Yoga' },
-  { number: 18, sanskritName: '\u092E\u094B\u0915\u094D\u0937\u0938\u0902\u0928\u094D\u092F\u093E\u0938\u092F\u094B\u0917', englishName: 'Liberation', verseCount: 78, themes: ['liberation', 'integration', 'surrender', 'dharma'], mentalHealthFocus: 'Integration & Freedom', yogaType: 'Moksha Sannyasa Yoga' },
+  { number: 1, sanskritName: '\u0905\u0930\u094D\u091C\u0941\u0928\u0935\u093F\u0937\u093E\u0926\u092F\u094B\u0917', englishName: "Arjuna's Grief", verseCount: 47, themes: ['grief', 'moral dilemma', 'overwhelm'], spiritualFocus: 'Anxiety & Grief', yogaType: 'Vishada Yoga' },
+  { number: 2, sanskritName: '\u0938\u093E\u0902\u0916\u094D\u092F\u092F\u094B\u0917', englishName: 'The Yoga of Knowledge', verseCount: 72, themes: ['self-knowledge', 'equanimity', 'emotional regulation'], spiritualFocus: 'Self-Awareness', yogaType: 'Sankhya Yoga' },
+  { number: 3, sanskritName: '\u0915\u0930\u094D\u092E\u092F\u094B\u0917', englishName: 'The Yoga of Action', verseCount: 43, themes: ['purposeful action', 'duty', 'overcoming inertia'], spiritualFocus: 'Depression & Purpose', yogaType: 'Karma Yoga' },
+  { number: 4, sanskritName: '\u091C\u094D\u091E\u093E\u0928\u0915\u0930\u094D\u092E\u0938\u0902\u0928\u094D\u092F\u093E\u0938\u092F\u094B\u0917', englishName: 'Knowledge & Renunciation', verseCount: 42, themes: ['knowledge', 'trust', 'faith'], spiritualFocus: 'Self-Doubt & Trust', yogaType: 'Jnana Karma Sannyasa Yoga' },
+  { number: 5, sanskritName: '\u0915\u0930\u094D\u092E\u0938\u0902\u0928\u094D\u092F\u093E\u0938\u092F\u094B\u0917', englishName: 'Renunciation of Action', verseCount: 29, themes: ['inner peace', 'detachment', 'contentment'], spiritualFocus: 'Letting Go', yogaType: 'Karma Sannyasa Yoga' },
+  { number: 6, sanskritName: '\u0927\u094D\u092F\u093E\u0928\u092F\u094B\u0917', englishName: 'The Yoga of Meditation', verseCount: 47, themes: ['meditation', 'mindfulness', 'self-mastery'], spiritualFocus: 'Anxiety & Mindfulness', yogaType: 'Dhyana Yoga' },
+  { number: 7, sanskritName: '\u091C\u094D\u091E\u093E\u0928\u0935\u093F\u091C\u094D\u091E\u093E\u0928\u092F\u094B\u0917', englishName: 'Knowledge of the Divine', verseCount: 30, themes: ['divine connection', 'faith', 'wonder'], spiritualFocus: 'Existential Questions', yogaType: 'Jnana Vijnana Yoga' },
+  { number: 8, sanskritName: '\u0905\u0915\u094D\u0937\u0930\u092C\u094D\u0930\u0939\u094D\u092E\u092F\u094B\u0917', englishName: 'The Imperishable', verseCount: 28, themes: ['transcendence', 'the eternal', 'impermanence'], spiritualFocus: 'Death Anxiety', yogaType: 'Akshara Brahma Yoga' },
+  { number: 9, sanskritName: '\u0930\u093E\u091C\u0935\u093F\u0926\u094D\u092F\u093E\u0930\u093E\u091C\u0917\u0941\u0939\u094D\u092F\u092F\u094B\u0917', englishName: 'The Royal Knowledge', verseCount: 34, themes: ['devotion', 'unconditional love', 'acceptance'], spiritualFocus: 'Self-Worth & Acceptance', yogaType: 'Raja Vidya Raja Guhya Yoga' },
+  { number: 10, sanskritName: '\u0935\u093F\u092D\u0942\u0924\u093F\u092F\u094B\u0917', englishName: 'Divine Glories', verseCount: 42, themes: ['divine qualities', 'excellence', 'gratitude'], spiritualFocus: 'Low Self-Esteem', yogaType: 'Vibhuti Yoga' },
+  { number: 11, sanskritName: '\u0935\u093F\u0936\u094D\u0935\u0930\u0942\u092A\u0926\u0930\u094D\u0936\u0928\u092F\u094B\u0917', englishName: 'The Universal Vision', verseCount: 55, themes: ['cosmic perspective', 'awe', 'humility'], spiritualFocus: 'Perspective & Humility', yogaType: 'Vishvarupa Darshana Yoga' },
+  { number: 12, sanskritName: '\u092D\u0915\u094D\u0924\u093F\u092F\u094B\u0917', englishName: 'The Yoga of Devotion', verseCount: 20, themes: ['love', 'devotion', 'ideal qualities'], spiritualFocus: 'Relationship Healing', yogaType: 'Bhakti Yoga' },
+  { number: 13, sanskritName: '\u0915\u094D\u0937\u0947\u0924\u094D\u0930\u0915\u094D\u0937\u0947\u0924\u094D\u0930\u091C\u094D\u091E\u0935\u093F\u092D\u093E\u0917\u092F\u094B\u0917', englishName: 'The Field & Knower', verseCount: 35, themes: ['body-mind distinction', 'self-knowledge'], spiritualFocus: 'Identity & Mindfulness', yogaType: 'Kshetra Kshetrajna Vibhaga Yoga' },
+  { number: 14, sanskritName: '\u0917\u0941\u0923\u0924\u094D\u0930\u092F\u0935\u093F\u092D\u093E\u0917\u092F\u094B\u0917', englishName: 'Three Qualities of Nature', verseCount: 27, themes: ['behavioral patterns', 'habits', 'balance'], spiritualFocus: 'Habits & Mood', yogaType: 'Gunatraya Vibhaga Yoga' },
+  { number: 15, sanskritName: '\u092A\u0941\u0930\u0941\u0937\u094B\u0924\u094D\u0924\u092E\u092F\u094B\u0917', englishName: 'The Supreme Person', verseCount: 20, themes: ['life purpose', 'meaning', 'ultimate reality'], spiritualFocus: 'Life Purpose', yogaType: 'Purushottama Yoga' },
+  { number: 16, sanskritName: '\u0926\u0948\u0935\u093E\u0938\u0941\u0930\u0938\u092E\u094D\u092A\u0926\u094D\u0935\u093F\u092D\u093E\u0917\u092F\u094B\u0917', englishName: 'Divine & Demonic Qualities', verseCount: 24, themes: ['virtue', 'self-improvement', 'toxic traits'], spiritualFocus: 'Character Growth', yogaType: 'Daivasura Sampad Vibhaga Yoga' },
+  { number: 17, sanskritName: '\u0936\u094D\u0930\u0926\u094D\u0927\u093E\u0924\u094D\u0930\u092F\u0935\u093F\u092D\u093E\u0917\u092F\u094B\u0917', englishName: 'Three Types of Faith', verseCount: 28, themes: ['faith', 'discipline', 'motivation'], spiritualFocus: 'Motivation & Discipline', yogaType: 'Shraddhatraya Vibhaga Yoga' },
+  { number: 18, sanskritName: '\u092E\u094B\u0915\u094D\u0937\u0938\u0902\u0928\u094D\u092F\u093E\u0938\u092F\u094B\u0917', englishName: 'Liberation', verseCount: 78, themes: ['liberation', 'integration', 'surrender', 'dharma'], spiritualFocus: 'Integration & Freedom', yogaType: 'Moksha Sannyasa Yoga' },
 ]
 
 // ─── Sample Verses (per chapter, loads full data from API) ─────────────
@@ -462,7 +462,7 @@ export default function VoiceCompanionPage() {
         ch.englishName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ch.sanskritName.includes(searchQuery) ||
         ch.themes.some(t => t.includes(searchQuery.toLowerCase())) ||
-        ch.mentalHealthFocus.toLowerCase().includes(searchQuery.toLowerCase())
+        ch.spiritualFocus.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : CHAPTERS
 
@@ -830,7 +830,7 @@ export default function VoiceCompanionPage() {
                           <span key={t} className="px-2 py-0.5 text-[10px] rounded-full bg-white/5 text-white/40">{t}</span>
                         ))}
                       </div>
-                      <p className="text-[10px] text-purple-300/50 mt-2">{ch.mentalHealthFocus}</p>
+                      <p className="text-[10px] text-purple-300/50 mt-2">{ch.spiritualFocus}</p>
                     </button>
                   ))}
                 </div>
@@ -857,7 +857,7 @@ export default function VoiceCompanionPage() {
                       </div>
                     </div>
                     <p className="text-xs text-white/40 mt-1">
-                      {selectedChapterData.verseCount} verses &middot; {selectedChapterData.yogaType} &middot; {selectedChapterData.mentalHealthFocus}
+                      {selectedChapterData.verseCount} verses &middot; {selectedChapterData.yogaType} &middot; {selectedChapterData.spiritualFocus}
                     </p>
                     <div className="flex flex-wrap gap-1 mt-2">
                       {selectedChapterData.themes.map(t => (

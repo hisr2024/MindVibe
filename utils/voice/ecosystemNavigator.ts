@@ -63,7 +63,7 @@ export const ECOSYSTEM_TOOLS: EcosystemTool[] = [
     ],
     triggerKeywords: ['overwhelmed', 'emotional', 'breaking down', 'falling apart', 'cannot cope', 'too much', 'emotional wreck', 'reset', 'calm down', 'cannot handle', 'losing it'],
     emotions: ['overwhelm', 'anxiety', 'sadness', 'anger', 'grief'],
-    situations: ['emotional_overload', 'panic_attack', 'mental_health'],
+    situations: ['emotional_overload', 'panic_attack', 'spiritual_wellness'],
     gitaVerse: { chapter: 2, verse: 14, essence: 'That which is temporary passes — endure it with patience.' },
     category: 'wellness',
     icon: '🌊',

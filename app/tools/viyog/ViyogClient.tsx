@@ -191,7 +191,7 @@ export default function ViyogClient() {
           <ToolActionCard
             icon="⏱️"
             title="60-Second Reset"
-            description="A quick mental reset when worry about outcomes feels overwhelming."
+            description="A quick inner reset when worry about outcomes feels overwhelming."
             ctaLabel="Start Reset"
             href="/tools/viyog#clarity-pause"
             gradient="from-cyan-500/10 to-blue-500/10"

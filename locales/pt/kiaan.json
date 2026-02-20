@@ -2,7 +2,7 @@
   "welcome": {
     "title": "Bem-vindo ao KIAAN",
     "subtitle": "Your calm, modern spiritual companion — always here, always supportive.",
-    "description": "Companheiro de saúde mental calmo e focado na privacidade com diário, chats guiados e painéis."
+    "description": "Companheiro espiritual calmo e focado na privacidade com diário, chats guiados e painéis."
   },
   "chat": {
     "title": "Fale com KIAAN",
@@ -25,7 +25,7 @@
     "share": "Compartilhar",
     "shareVia": "Compartilhar via",
     "privacyNotice": "Aviso de Privacidade",
-    "shareWarning": "Você está prestes a compartilhar informações de saúde mental. Certifique-se de que está confortável em compartilhar este conteúdo publicamente.",
+    "shareWarning": "Você está prestes a compartilhar reflexões espirituais. Certifique-se de que está confortável em compartilhar este conteúdo publicamente.",
     "anonymize": "Anonimizar conteúdo (remover identificadores pessoais)",
     "anonymized": "✓ Conteúdo anonimizado",
     "sharingOriginal": "Compartilhando conteúdo original"
@@ -41,7 +41,7 @@
     },
     "mindControl": {
       "title": "Controle da Mente",
-      "description": "Desenvolva clareza focada através de práticas estruturadas de atenção plena. Ideal para tomada de decisões, concentração e manutenção da disciplina mental.",
+      "description": "Desenvolva clareza focada através de práticas estruturadas de atenção plena. Ideal para tomada de decisões, concentração e manutenção da disciplina interior.",
       "note": "Passos firmes, um pensamento de cada vez"
     },
     "selfKindness": {

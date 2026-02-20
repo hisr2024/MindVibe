@@ -1,22 +1,22 @@
 {
   "hero": {
-    "title": "Tu Compañero de IA para el Bienestar Mental",
+    "title": "Tu Compañero de IA para el Bienestar Espiritual",
     "subtitle": "Chatea con KIAAN, impulsado por la Sabiduría Antigua",
-    "tagline": "Tu compañero de bienestar mental tranquilo y privado, impulsado por sabiduría antigua",
+    "tagline": "Tu compañero de bienestar espiritual tranquilo y privado, impulsado por sabiduría antigua",
     "ctaPrimary": "Hablar con KIAAN",
     "ctaSecondary": "Reflexiones Sagradas",
     "privacy": "Las conversaciones permanecen privadas • un refugio cálido y confidencial"
   },
   "ecosystem": {
     "title": "El Ecosistema MindVibe",
-    "subtitle": "Un enfoque holístico para el bienestar mental, arraigado en sabiduría antigua y prácticas modernas",
+    "subtitle": "Un enfoque holístico para el bienestar espiritual, arraigado en sabiduría antigua y prácticas modernas",
     "pillars": {
       "innerPeace": {
         "title": "Paz Interior",
         "description": "Encuentra quietud a través de ejercicios centrados en la respiración y técnicas suaves de conexión a tierra."
       },
       "mindControl": {
-        "title": "Control Mental",
+        "title": "Claridad Interior",
         "description": "Desarrolla claridad enfocada a través de prácticas estructuradas de mindfulness."
       },
       "selfKindness": {
@@ -24,11 +24,11 @@
         "description": "Cultiva compasión hacia ti mismo a través de ejercicios cálidos y de apoyo."
       }
     },
-    "footer": "Cada pilar trabaja junto para crear un enfoque equilibrado y sostenible del bienestar mental"
+    "footer": "Cada pilar trabaja junto para crear un enfoque equilibrado y sostenible del bienestar espiritual"
   },
   "features": {
     "title": "Características Clave",
-    "subtitle": "Herramientas que priorizan la privacidad diseñadas para tu viaje de bienestar mental",
+    "subtitle": "Herramientas que priorizan la privacidad diseñadas para tu viaje de bienestar espiritual",
     "voice": {
       "title": "Guía por Voz",
       "description": "Habla naturalmente con KIAAN usando entrada de voz para una experiencia más personal.",
@@ -70,7 +70,7 @@
     "kiaan": {
       "title": "Hablar con KIAAN",
       "subtitle": "Guía instantánea",
-      "description": "Entra en una conversación enfocada para apoyo en bienestar mental",
+      "description": "Entra en una conversación enfocada para apoyo en bienestar espiritual",
       "cta": "Abrir Chat"
     },
     "dashboard": {

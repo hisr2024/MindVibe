@@ -215,7 +215,7 @@ export const AUDIO_LECTURES: AudioLecture[] = [
     language: 'en',
     durationMinutes: 75,
     topics: ['meditation', 'mind control', 'balance', 'inner peace'],
-    applicableSituations: ['restless_mind', 'meditation', 'mental_health', 'insomnia'],
+    applicableSituations: ['restless_mind', 'meditation', 'spiritual_wellness', 'insomnia'],
     conversationalReference: 'There\'s a wonderful lecture by Swami Sarvapriyananda on Chapter 6 about taming the restless mind through meditation.',
   },
   {

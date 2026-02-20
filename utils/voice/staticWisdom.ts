@@ -172,7 +172,7 @@ export const LIFE_SITUATIONS: LifeSituation[] = [
     verse: { chapter: 2, verse: 20, key: 'indestructible_soul' },
   },
   {
-    id: 'mental_health',
+    id: 'spiritual_wellness',
     category: 'health',
     keywords: ['depressed', 'depression', 'therapy', 'medication', 'spiritual wellness', 'breakdown', 'suicidal', 'self harm', 'can\'t go on', 'end it all'],
     connectResponses: [

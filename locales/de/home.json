@@ -1,15 +1,15 @@
 {
   "hero": {
-    "title": "Dein KI-Begleiter für mentales Wohlbefinden",
+    "title": "Dein KI-Begleiter für spirituelles Wohlbefinden",
     "subtitle": "Chatte mit KIAAN, unterstützt durch alte Weisheit",
-    "tagline": "Dein ruhiger, datenschutzorientierter Begleiter für mentales Wohlbefinden, inspiriert von alter Weisheit",
+    "tagline": "Dein ruhiger, datenschutzorientierter Begleiter für spirituelles Wohlbefinden, inspiriert von alter Weisheit",
     "ctaPrimary": "Mit KIAAN sprechen",
     "ctaSecondary": "Heilige Reflexionen",
     "privacy": "Gespräche bleiben privat • ein warmer, vertraulicher Rückzugsort"
   },
   "ecosystem": {
     "title": "Das MindVibe-Ökosystem",
-    "subtitle": "Ein ganzheitlicher Ansatz für mentales Wohlbefinden, verwurzelt in alter Weisheit und modernen Praktiken",
+    "subtitle": "Ein ganzheitlicher Ansatz für spirituelles Wohlbefinden, verwurzelt in alter Weisheit und modernen Praktiken",
     "pillars": {
       "innerPeace": {
         "title": "Innerer Frieden",
@@ -24,11 +24,11 @@
         "description": "Kultiviere Mitgefühl für dich selbst durch warme, unterstützende Übungen."
       }
     },
-    "footer": "Jede Säule arbeitet zusammen, um einen ausgewogenen, nachhaltigen Ansatz für mentales Wohlbefinden zu schaffen"
+    "footer": "Jede Säule arbeitet zusammen, um einen ausgewogenen, nachhaltigen Ansatz für spirituelles Wohlbefinden zu schaffen"
   },
   "features": {
     "title": "Hauptfunktionen",
-    "subtitle": "Datenschutzorientierte Werkzeuge für deine Reise zum mentalen Wohlbefinden",
+    "subtitle": "Datenschutzorientierte Werkzeuge für deine Reise zum spirituellen Wohlbefinden",
     "voice": {
       "title": "Sprachführung",
       "description": "Sprich natürlich mit KIAAN per Spracheingabe für ein persönlicheres Erlebnis.",
@@ -73,7 +73,7 @@
     "kiaan": {
       "title": "Mit KIAAN sprechen",
       "subtitle": "Sofortige Führung",
-      "description": "Springe in ein fokussiertes Gespräch für Unterstützung beim mentalen Wohlbefinden",
+      "description": "Springe in ein fokussiertes Gespräch für Unterstützung beim spirituellen Wohlbefinden",
       "cta": "Chat öffnen"
     },
     "dashboard": {

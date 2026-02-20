@@ -125,7 +125,7 @@ const SITUATIONS: LifeSituation[] = [
   },
   // ═══ SPIRITUAL WELLNESS ═══
   {
-    id: 'anxiety-general', category: 'mental-health',
+    id: 'anxiety-general', category: 'spiritual-wellness',
     keywords: ['anxious', 'anxiety', 'panic', 'worried', 'scared', 'nervous', 'fear', 'dread'],
     description: 'General anxiety or worry',
     verses: [{
@@ -136,7 +136,7 @@ const SITUATIONS: LifeSituation[] = [
     }],
   },
   {
-    id: 'depression', category: 'mental-health',
+    id: 'depression', category: 'spiritual-wellness',
     keywords: ['depressed', 'depression', 'hopeless', 'empty', 'numb', 'no point', 'give up', 'worthless'],
     description: 'Feeling depressed or hopeless',
     verses: [{
@@ -147,7 +147,7 @@ const SITUATIONS: LifeSituation[] = [
     }],
   },
   {
-    id: 'overthinking', category: 'mental-health',
+    id: 'overthinking', category: 'spiritual-wellness',
     keywords: ['overthinking', 'can\'t stop thinking', 'racing thoughts', 'mind won\'t stop', 'ruminating', 'spiraling'],
     description: 'Caught in a cycle of overthinking',
     verses: [{
@@ -158,7 +158,7 @@ const SITUATIONS: LifeSituation[] = [
     }],
   },
   {
-    id: 'self-harm-thoughts', category: 'mental-health',
+    id: 'self-harm-thoughts', category: 'spiritual-wellness',
     keywords: ['hurt myself', 'self harm', 'don\'t want to live', 'suicidal', 'end it'],
     description: 'Having thoughts of self-harm',
     verses: [{
@@ -407,7 +407,7 @@ const SITUATIONS: LifeSituation[] = [
 
   // ═══ SPIRITUAL WELLNESS - EXPANDED ═══
   {
-    id: 'burnout', category: 'mental-health',
+    id: 'burnout', category: 'spiritual-wellness',
     keywords: ['burnt out', 'burnout', 'exhausted', 'drained', 'nothing left', 'empty tank', 'running on empty'],
     description: 'Professional or personal burnout',
     verses: [{
@@ -418,7 +418,7 @@ const SITUATIONS: LifeSituation[] = [
     }],
   },
   {
-    id: 'panic-attack', category: 'mental-health',
+    id: 'panic-attack', category: 'spiritual-wellness',
     keywords: ['panic attack', 'can\'t breathe', 'heart racing', 'going to die', 'losing control', 'shaking'],
     description: 'Experiencing panic or acute anxiety',
     verses: [{
@@ -429,7 +429,7 @@ const SITUATIONS: LifeSituation[] = [
     }],
   },
   {
-    id: 'imposter-syndrome', category: 'mental-health',
+    id: 'imposter-syndrome', category: 'spiritual-wellness',
     keywords: ['imposter', 'fraud', 'don\'t deserve', 'they\'ll find out', 'not qualified', 'luck'],
     description: 'Feeling like a fraud or imposter',
     verses: [{
@@ -440,7 +440,7 @@ const SITUATIONS: LifeSituation[] = [
     }],
   },
   {
-    id: 'addiction', category: 'mental-health',
+    id: 'addiction', category: 'spiritual-wellness',
     keywords: ['addicted', 'addiction', 'can\'t stop', 'substance', 'drinking', 'smoking', 'drugs', 'gambling'],
     description: 'Struggling with addiction',
     verses: [{
@@ -451,7 +451,7 @@ const SITUATIONS: LifeSituation[] = [
     }],
   },
   {
-    id: 'body-image', category: 'mental-health',
+    id: 'body-image', category: 'spiritual-wellness',
     keywords: ['ugly', 'fat', 'body image', 'hate my body', 'appearance', 'weight', 'not attractive'],
     description: 'Body image struggles',
     verses: [{
@@ -462,7 +462,7 @@ const SITUATIONS: LifeSituation[] = [
     }],
   },
   {
-    id: 'social-anxiety', category: 'mental-health',
+    id: 'social-anxiety', category: 'spiritual-wellness',
     keywords: ['social anxiety', 'afraid of people', 'shy', 'awkward', 'can\'t talk to people', 'fear of judgment'],
     description: 'Social anxiety or fear of judgment',
     verses: [{
