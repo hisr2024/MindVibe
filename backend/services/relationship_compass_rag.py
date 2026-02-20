@@ -417,9 +417,9 @@ def build_context_block(chunks: Iterable[GitaChunk], dynamic_wisdom: list[dict] 
         if "Principle:" in commentary:
             principle = commentary.split("Principle:")[-1].strip()
             lines.append(f"  Gita Principle: {principle}")
-        if "Mental Health:" in commentary:
-            mh = commentary.split("Mental Health:")[1].split("\n")[0].strip()
-            lines.append(f"  Mental Health Application: {mh}")
+        if "Spiritual Wellness:" in commentary:
+            mh = commentary.split("Spiritual Wellness:")[1].split("\n")[0].strip()
+            lines.append(f"  Spiritual Wellness Application: {mh}")
 
         if chunk.tags:
             lines.append(f"  Tags: {', '.join(chunk.tags)}")

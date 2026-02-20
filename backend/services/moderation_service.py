@@ -150,7 +150,7 @@ class ModerationService:
                 requires_review=True,
                 crisis_detected=True,
                 crisis_keywords=crisis_keywords_found,
-                suggestions=["Please reach out to a mental health professional or crisis hotline."],
+                suggestions=["Please reach out to a spiritual wellness professional or crisis hotline."],
                 analyzed_at=datetime.now()
             )
 

@@ -5,7 +5,7 @@
 
 ## Description
 
-This PR introduces two major enhancements to MindVibe's mental health platform:
+This PR introduces two major enhancements to MindVibe's spiritual wellness platform:
 1. **Enhancement #3**: Multilingual Voice Guidance (TTS in 17 Languages)
 2. **Enhancement #4**: Emotion-Driven UI Themes (5 Adaptive Theme States)
 
@@ -276,7 +276,7 @@ This PR builds upon previously merged work:
 - ✅ **Enhancement #1**: AI-Powered Wisdom Journeys (Merged)
 - ✅ **Enhancement #2**: Offline-First Toolkit (Merged)
 
-Together, these form the **Quantum Enhancement Initiative** bringing MindVibe's mental health platform to the next level.
+Together, these form the **Quantum Enhancement Initiative** bringing MindVibe's spiritual wellness platform to the next level.
 
 ---
 

@@ -28,7 +28,7 @@ vi.mock('@/hooks/useLanguage', () => ({
         'dashboard.categories.karma': 'Karma & Growth',
         'dashboard.categories.quick-access': 'Quick Access',
         'dashboard.tools.kiaan.title': 'KIAAN Chat',
-        'dashboard.tools.kiaan.description': 'AI mental health companion',
+        'dashboard.tools.kiaan.description': 'AI spiritual companion',
         'dashboard.tools.kiaan-voice.title': 'KIAAN Companion',
         'dashboard.tools.kiaan-voice.description': 'Your best friend who truly listens',
         'dashboard.tools.viyog.title': 'Viyoga',

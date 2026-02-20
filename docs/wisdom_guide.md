@@ -2,15 +2,15 @@
 
 ## Overview
 
-The AI Vibe Bot provides AI-powered mental health guidance based on timeless wisdom teachings from the Bhagavad Gita, presented in a universally applicable, non-religious way.
+The AI Vibe Bot provides AI-powered spiritual wellness guidance based on timeless wisdom teachings from the Bhagavad Gita, presented in a universally applicable, non-religious way.
 
 ## Features
 
 - **Universal Presentation**: All wisdom is sanitized to remove religious references and presented as timeless principles
 - **Multi-language Support**: Access wisdom in English, Hindi, or Sanskrit
-- **Semantic Search**: Find relevant verses for specific mental health concerns
+- **Semantic Search**: Find relevant verses for specific spiritual wellness concerns
 - **AI-Powered Responses**: Get personalized guidance using GPT-4 (when configured)
-- **Mental Health Applications**: Each verse is tagged with applicable mental health topics
+- **Spiritual Wellness Applications**: Each verse is tagged with applicable spiritual wellness topics
 
 ## API Endpoints
 
@@ -114,9 +114,9 @@ Verses are stored in `data/wisdom/verses.json` with the following structure:
 }
 ```
 
-## Mental Health Applications
+## Spiritual Wellness Applications
 
-The following mental health applications are supported:
+The following spiritual wellness applications are supported:
 
 - anxiety_management
 - stress_reduction

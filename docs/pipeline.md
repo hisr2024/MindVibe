@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Context Transformation Pipeline is a modern, extensible system for processing Bhagavad Gita verses into structured, searchable content suitable for universal mental health applications. It transforms raw verse data through multiple stages of validation, sanitization, and enrichment to create content that is:
+The Context Transformation Pipeline is a modern, extensible system for processing Bhagavad Gita verses into structured, searchable content suitable for universal spiritual wellness applications. It transforms raw verse data through multiple stages of validation, sanitization, and enrichment to create content that is:
 
 - **Universal**: Religious references replaced with neutral language
 - **Structured**: Consistent format for all verses
@@ -33,12 +33,12 @@ Transformed Verse Data
 - Checks for required fields (chapter, verse_number, theme, english)
 - Validates data types and formats
 - Ensures chapter numbers are between 1-18
-- Verifies mental health applications format
+- Verifies spiritual wellness applications format
 
 #### 2. Normalization
 - Creates standardized verse IDs (e.g., "2.47")
 - Converts themes to snake_case
-- Normalizes mental health applications format
+- Normalizes spiritual wellness applications format
 - Standardizes whitespace and punctuation
 
 #### 3. Sanitization
@@ -50,7 +50,7 @@ Transformed Verse Data
 #### 4. Enrichment
 - Extracts philosophical principles from content
 - Generates keywords for search optimization
-- Suggests additional mental health applications
+- Suggests additional spiritual wellness applications
 - Adds chapter-level context
 - Creates combined searchable text
 - Calculates metadata richness score
@@ -171,7 +171,7 @@ pipeline = ContextTransformationPipeline(
 }
 ```
 
-### Mental Health Applications Format
+### Spiritual Wellness Applications Format
 
 The pipeline accepts two formats:
 
@@ -204,7 +204,7 @@ The pipeline adds the following fields to each verse:
 ### Enrichment Fields (added by pipeline)
 - `principles`: List of philosophical principles
 - `keywords`: Important keywords for search
-- `suggested_applications`: Additional mental health applications
+- `suggested_applications`: Additional spiritual wellness applications
 - `searchable_text`: Combined text for search indexing
 - `chapter_theme`: Overall theme of the chapter
 - `metadata_score`: Richness score (0.0 to 1.0)
@@ -309,7 +309,7 @@ score = MetadataEnricher.calculate_metadata_score(verse_data)
 The goal is to make ancient wisdom universally accessible:
 - **Inclusivity**: People of all backgrounds can benefit
 - **Focus on Principles**: Emphasizes timeless wisdom over specific traditions
-- **Mental Health Context**: Easier to apply in therapeutic settings
+- **Spiritual Wellness Context**: Easier to apply in therapeutic settings
 - **Reduced Barriers**: Removes potential resistance to religious terminology
 
 ### Sanitization Mappings
@@ -336,7 +336,7 @@ The pipeline is designed for easy extension:
 
 1. **Custom Stages**: Add new transformation stages
 2. **Language Support**: Add new translation fields
-3. **New Applications**: Extend mental health categories
+3. **New Applications**: Extend spiritual wellness categories
 4. **Custom Principles**: Add domain-specific principles
 
 ```python

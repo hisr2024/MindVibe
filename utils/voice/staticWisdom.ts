@@ -174,7 +174,7 @@ export const LIFE_SITUATIONS: LifeSituation[] = [
   {
     id: 'mental_health',
     category: 'health',
-    keywords: ['depressed', 'depression', 'therapy', 'medication', 'mental health', 'breakdown', 'suicidal', 'self harm', 'can\'t go on', 'end it all'],
+    keywords: ['depressed', 'depression', 'therapy', 'medication', 'spiritual wellness', 'breakdown', 'suicidal', 'self harm', 'can\'t go on', 'end it all'],
     connectResponses: [
       "Friend, I hear you, and I want you to know: what you're feeling is real, it matters, and there is no shame in it. I'm right here. Can you tell me more about what you're going through?",
       "Dear one, thank you for trusting me with this. That takes real courage. Your pain is valid, and you deserve support. Are you safe right now?",

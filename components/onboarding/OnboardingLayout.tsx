@@ -92,7 +92,7 @@ export function OnboardingLayout({
 
         {/* Footer branding */}
         <p className="text-center text-xs text-orange-100/30 mt-6">
-          MindVibe — Your calm, privacy-first mental health companion
+          MindVibe — Your calm, privacy-first spiritual companion
         </p>
       </motion.div>
     </main>

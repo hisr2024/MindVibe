@@ -103,7 +103,7 @@ Stores metadata for each of the 18 chapters of the Bhagavad Gita.
 - `english_name`: English translation (e.g., "The Yoga of Arjuna's Dejection")
 - `verse_count`: Number of verses in the chapter
 - `themes`: Array of thematic elements
-- `mental_health_relevance`: Contemporary mental health applications
+- `mental_health_relevance`: Contemporary spiritual wellness applications
 
 #### GitaSource
 Tracks authentic sources for verse translations.
@@ -144,7 +144,7 @@ Contemporary applications and relevance of verses.
 - `application_area`: Modern context (e.g., "Work-Life Balance", "Stress Management")
 - `description`: Detailed explanation of application
 - `examples`: Array of practical examples
-- `mental_health_benefits`: Array of mental health benefits
+- `mental_health_benefits`: Array of spiritual wellness benefits
 
 #### GitaKeyword
 Keywords and themes for categorization and search.
@@ -155,7 +155,7 @@ Keywords and themes for categorization and search.
 - Practice (yoga, meditation)
 - Wisdom (knowledge, understanding)
 - Bhakti (devotion)
-- Mental Health (anxiety, stress, peace)
+- Spiritual Wellness (anxiety, stress, peace)
 
 #### GitaVerseKeyword
 Junction table for many-to-many relationship between verses and keywords.

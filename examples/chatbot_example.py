@@ -3,7 +3,7 @@
 Example usage of the AI Chatbot API
 
 This script demonstrates how to interact with the MindVibe AI Chatbot
-for mental health guidance based on Bhagavad Gita wisdom.
+for spiritual wellness guidance based on Bhagavad Gita wisdom.
 
 Usage:
     python examples/chatbot_example.py
@@ -169,8 +169,8 @@ def example_multilingual() -> None:
 
 
 def example_mental_health_scenarios() -> None:
-    """Example 4: Various mental health scenarios."""
-    print("\n🧠 EXAMPLE 4: Mental Health Scenarios\n")
+    """Example 4: Various spiritual wellness scenarios."""
+    print("\n🧠 EXAMPLE 4: Spiritual Wellness Scenarios\n")
 
     client = ChatbotClient()
 
@@ -223,7 +223,7 @@ def main() -> None:
 ║                                                                        ║
 ║          MindVibe AI Chatbot - Usage Examples                         ║
 ║                                                                        ║
-║  AI-powered mental health guidance based on Bhagavad Gita wisdom      ║
+║  AI-powered spiritual wellness guidance based on Bhagavad Gita wisdom      ║
 ║  Presented in a secular, universally applicable way                    ║
 ║                                                                        ║
 ╚════════════════════════════════════════════════════════════════════════╝

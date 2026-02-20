@@ -1221,7 +1221,7 @@ async def quick_voice_response(
         if client:
             name_ref = user_name or "friend"
             system_prompt = (
-                f"You are KIAAN, a divine friend and mental wellness companion. "
+                f"You are KIAAN, a divine friend and spiritual wellness companion. "
                 f"The user just activated you with a voice wake word. "
                 f"Respond warmly and briefly to their query. "
                 f"Address them as '{name_ref}'. "

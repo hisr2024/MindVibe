@@ -19,10 +19,10 @@ class WisdomKnowledgeBase:
     """Knowledge base for managing wisdom verses.
 
     Integrates with GitaService to provide access to 700+ Bhagavad Gita verses
-    while preserving text sanitization and mental health tagging functionality.
+    while preserving text sanitization and spiritual wellness tagging functionality.
     """
 
-    # Mental health tag boost for search scoring
+    # Spiritual wellness tag boost for search scoring
     TAG_BOOST = 0.2
 
     def __init__(self) -> None:
@@ -106,7 +106,7 @@ class WisdomKnowledgeBase:
         db: AsyncSession, application: str
     ) -> list[WisdomVerse]:
         """
-        Search verses by mental health application.
+        Search verses by spiritual wellness application.
 
         Args:
             db: Database session
@@ -185,7 +185,7 @@ class WisdomKnowledgeBase:
             - total_verses: Total number of verses
             - by_chapter: Count per chapter
             - by_theme: Count per theme
-            - tagged_verses: Verses with mental health tags
+            - tagged_verses: Verses with spiritual wellness tags
             - coverage: "complete" if 700 verses, else "partial"
         """
         from sqlalchemy import text
@@ -211,7 +211,7 @@ class WisdomKnowledgeBase:
         )
         by_theme = {row[0]: row[1] for row in result.fetchall()}
 
-        # Tagged verses (with mental health applications)
+        # Tagged verses (with spiritual wellness applications)
         result = await db.execute(
             text(
                 "SELECT COUNT(*) FROM gita_verses "
@@ -382,7 +382,7 @@ class WisdomKnowledgeBase:
             db: Database session
             query: Search query text
             theme: Optional theme to filter by
-            application: Optional mental health application to filter by
+            application: Optional spiritual wellness application to filter by
             limit: Maximum number of results (default 5)
 
         Returns:
@@ -445,7 +445,7 @@ class WisdomKnowledgeBase:
 
             base_score = max(english_score, context_score)
 
-            # Tag boost for mental health applications
+            # Tag boost for spiritual wellness applications
             tag_boost = 0.0
             mental_health_apps = verse.get("mental_health_applications", [])
             if mental_health_apps:
@@ -498,7 +498,7 @@ class WisdomKnowledgeBase:
             db: Database session
             query: Search query text
             theme: Optional theme to filter by
-            application: Optional mental health application to filter by
+            application: Optional spiritual wellness application to filter by
             limit: Optional maximum number of results (default 5)
 
         Returns:

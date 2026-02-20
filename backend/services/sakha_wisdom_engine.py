@@ -166,7 +166,7 @@ class SakhaWisdomEngine:
                     # Also index the full theme
                     self._theme_index.setdefault(theme, []).append(idx)
 
-                # Index by mental health applications
+                # Index by spiritual wellness applications
                 for app in verse.get("mental_health_applications", []):
                     app_key = app.lower().replace(" ", "_")
                     self._theme_index.setdefault(app_key, []).append(idx)

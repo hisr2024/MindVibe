@@ -1,7 +1,7 @@
 """Indian Gita Sources API Routes
 
 Provides RESTful endpoints for authentic Bhagavad Gita teachings, yoga paths,
-meditation techniques, and mental health applications rooted in Gita philosophy.
+meditation techniques, and spiritual wellness applications rooted in Gita philosophy.
 
 Endpoints:
 - GET /api/gita-sources/teachings - Search Gita teachings
@@ -111,7 +111,7 @@ class QuickWisdomResponse(BaseModel):
 class PracticeRequest(BaseModel):
     """Request model for practice recommendation."""
 
-    issue: str = Field(..., min_length=2, max_length=500, description="Mental health issue")
+    issue: str = Field(..., min_length=2, max_length=500, description="Spiritual wellness issue")
 
 
 class PracticeResponse(BaseModel):
@@ -149,15 +149,15 @@ class KiaanWisdomResponse(BaseModel):
 @router.get("/teachings", response_model=list[TeachingResponse])
 async def get_teachings(
     query: str = Query(default="", description="Search query"),
-    theme: str | None = Query(default=None, description="Mental health theme filter"),
+    theme: str | None = Query(default=None, description="Spiritual wellness theme filter"),
     yoga_path: str | None = Query(default=None, description="Yoga path filter"),
     limit: int = Query(default=5, ge=1, le=20, description="Maximum results"),
 ) -> list[dict[str, Any]]:
     """
-    Search Bhagavad Gita teachings for mental health.
+    Search Bhagavad Gita teachings for spiritual wellness.
 
     Returns teachings from authentic sources (Gita Press, Swami Sivananda, etc.)
-    with practical mental health applications.
+    with practical spiritual wellness applications.
     """
     # Parse theme enum if provided
     theme_enum = None
@@ -207,7 +207,7 @@ async def get_yoga_paths() -> list[dict[str, Any]]:
 
     Returns Karma Yoga (selfless action), Jnana Yoga (knowledge),
     Bhakti Yoga (devotion), and Dhyana Yoga (meditation) with
-    practical instructions and mental health benefits.
+    practical instructions and spiritual wellness benefits.
     """
     practices = indian_gita_sources._yoga_practices
 
@@ -260,7 +260,7 @@ async def get_sthitaprajna_qualities() -> list[dict[str, Any]]:
     Get the qualities of the Sthitaprajna (person of steady wisdom).
 
     Based on Bhagavad Gita 2.54-72, these verses form the Gita's
-    complete description of optimal mental health and emotional regulation.
+    complete description of optimal spiritual wellness and emotional regulation.
     """
     qualities = indian_gita_sources._sthitaprajna_qualities
 
@@ -322,7 +322,7 @@ async def get_quick_wisdom(mood: str) -> dict[str, Any]:
 @router.post("/practice", response_model=PracticeResponse)
 async def get_practice_recommendation(request: PracticeRequest) -> dict[str, Any]:
     """
-    Get Gita-based practice recommendation for a mental health issue.
+    Get Gita-based practice recommendation for a spiritual wellness issue.
 
     Analyzes the issue and returns a comprehensive recommendation including
     relevant teaching, meditation, yoga path, and immediate practice.
@@ -380,7 +380,7 @@ async def get_kiaan_wisdom(request: KiaanWisdomRequest) -> dict[str, Any]:
 @router.get("/themes")
 async def get_available_themes() -> dict[str, list[str]]:
     """
-    Get list of available mental health themes from Gita teachings.
+    Get list of available spiritual wellness themes from Gita teachings.
     """
     return {
         "themes": [theme.value for theme in GitaMentalHealthTheme],
@@ -394,7 +394,7 @@ async def get_verse_wisdom(chapter: int, verse: int) -> dict[str, Any]:
     Get wisdom teachings associated with a specific Gita verse.
 
     Returns any teachings that reference the specified verse with
-    mental health applications.
+    spiritual wellness applications.
     """
     verse_ref = f"{chapter}.{verse}"
 

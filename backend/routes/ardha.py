@@ -242,7 +242,7 @@ def _build_gita_context(verses: list[dict[str, Any]]) -> tuple[str, list[dict[st
     return "\n".join(lines), sources
 
 
-# Mental health keywords mapped to Gita themes and chapters
+# Spiritual wellness keywords mapped to Gita themes and chapters
 MENTAL_HEALTH_KEYWORDS = {
     # Anxiety and worry
     "anxiety": ["fear", "worry", "anxious", "nervous", "panic", "stress"],
@@ -294,7 +294,7 @@ CHAPTER_THEMES = {
 
 
 def _search_gita_json(query: str, limit: int = 8, depth: str = "quick") -> list[dict[str, Any]]:
-    """Search 701 Gita verses using keyword matching and mental health relevance.
+    """Search 701 Gita verses using keyword matching and spiritual wellness relevance.
 
     This provides a reliable search over all verses when RAG embeddings aren't available.
 
@@ -312,7 +312,7 @@ def _search_gita_json(query: str, limit: int = 8, depth: str = "quick") -> list[
     query_lower = query.lower()
     query_words = set(query_lower.split())
 
-    # Expand query with related mental health keywords
+    # Expand query with related spiritual wellness keywords
     expanded_keywords = set(query_words)
     for category, keywords in MENTAL_HEALTH_KEYWORDS.items():
         for keyword in keywords:
@@ -326,7 +326,7 @@ def _search_gita_json(query: str, limit: int = 8, depth: str = "quick") -> list[
     for verse in GITA_VERSES:
         score = 0.0
 
-        # Check mental health applications
+        # Check spiritual wellness applications
         mh_apps = verse.get("mental_health_applications", [])
         for app in mh_apps:
             if app.lower() in expanded_keywords or any(k in app.lower() for k in expanded_keywords):
@@ -349,7 +349,7 @@ def _search_gita_json(query: str, limit: int = 8, depth: str = "quick") -> list[
             if len(word) > 3 and word in principle:
                 score += 0.3
 
-        # Boost important chapters for mental health (2, 3, 6, 12, 18)
+        # Boost important chapters for spiritual wellness (2, 3, 6, 12, 18)
         chapter = verse.get("chapter", 0)
         if chapter in [2, 6, 12, 18]:
             score *= 1.3
@@ -403,7 +403,7 @@ def _build_json_verse_context(verses: list[dict[str, Any]]) -> tuple[str, list[d
         if principle:
             lines.append(f"  Principle: {principle}")
         if mh_apps:
-            lines.append(f"  Mental Health Applications: {', '.join(mh_apps[:5])}")
+            lines.append(f"  Spiritual Wellness Applications: {', '.join(mh_apps[:5])}")
         lines.append("")
 
         sources.append({"file": file_path, "reference": reference})

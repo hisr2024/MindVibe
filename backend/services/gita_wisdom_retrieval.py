@@ -1,7 +1,7 @@
 """Shared Gita Wisdom Retrieval Service for Viyoga and Relationship Compass.
 
 This service provides direct access to the 701 Bhagavad Gita verses stored in JSON,
-with keyword-based search optimized for mental health applications.
+with keyword-based search optimized for spiritual wellness applications.
 
 ENHANCED v2.0: Now includes AI-powered analysis integration via gita_ai_analyzer.
 Keyword matching serves as fallback when AI is unavailable.
@@ -82,7 +82,7 @@ RELATIONSHIP_KEYWORDS = {
     "workplace": ["colleague", "boss", "coworker", "work", "office", "professional"],
 }
 
-# Chapter focus areas for mental health
+# Chapter focus areas for spiritual wellness
 CHAPTER_MENTAL_HEALTH_FOCUS = {
     2: ["wisdom", "equanimity", "steady_mind", "grief", "confusion"],  # Sankhya Yoga
     3: ["action", "duty", "karma", "work", "selfless_service"],  # Karma Yoga
@@ -99,7 +99,7 @@ def search_gita_verses(
     limit: int = 8,
     depth: str = "standard"
 ) -> list[dict[str, Any]]:
-    """Search 701 Gita verses using keyword matching and mental health relevance.
+    """Search 701 Gita verses using keyword matching and spiritual wellness relevance.
 
     Args:
         query: User's input/concern
@@ -139,7 +139,7 @@ def search_gita_verses(
     for verse in GITA_VERSES:
         score = 0.0
 
-        # Check mental health applications (highest priority)
+        # Check spiritual wellness applications (highest priority)
         mh_apps = verse.get("mental_health_applications", [])
         for app in mh_apps:
             app_lower = app.lower()
@@ -184,7 +184,7 @@ def search_gita_verses(
             elif chapter in [2, 18]:
                 score *= 1.2
         else:
-            # General: boost mental health chapters
+            # General: boost spiritual wellness chapters
             if chapter in [2, 6, 12, 18]:
                 score *= 1.3
 
@@ -207,7 +207,7 @@ def build_gita_context(verses: list[dict[str, Any]], tool: str = "general") -> t
     """Build rich context string from verses for AI prompt with strict Gita adherence.
 
     Includes Sanskrit text, transliteration, word meanings, themes, principles,
-    and mental health applications for comprehensive Gita-grounded guidance.
+    and spiritual wellness applications for comprehensive Gita-grounded guidance.
 
     Args:
         verses: List of verse dictionaries from 701-verse repository
@@ -253,7 +253,7 @@ def build_gita_context(verses: list[dict[str, Any]], tool: str = "general") -> t
         if theme:
             lines.append(f"  Theme: {theme.replace('_', ' ').title()}")
         if mh_apps:
-            lines.append(f"  Mental Health Applications: {', '.join(mh_apps[:6])}")
+            lines.append(f"  Spiritual Wellness Applications: {', '.join(mh_apps[:6])}")
 
         # Include key word meanings for deeper understanding
         if word_meanings and isinstance(word_meanings, dict):

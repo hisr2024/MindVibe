@@ -18,7 +18,7 @@ mobile/
 MindVibe mobile apps provide native experiences for Android and iOS platforms while maintaining feature parity with the web application. The apps follow platform-specific design guidelines and best practices.
 
 ### Key Features
-- 🤖 **KIAAN Integration** - AI-powered mental health guidance
+- 🤖 **KIAAN Integration** - AI-powered spiritual wellness guidance
 - 📊 **Mood Tracking** - Native mobile mood tracking with analytics
 - 📝 **Encrypted Journal** - Secure journaling with end-to-end encryption
 - 🕉️ **Bhagavad Gita Ecosystem** - Access to all 700 verses with wisdom
@@ -258,4 +258,4 @@ This project is licensed under the MIT License - see the [LICENSE](../LICENSE) f
 
 ---
 
-**Built with ❤️ for mental health and well-being**
+**Built with ❤️ for spiritual wellness and well-being**

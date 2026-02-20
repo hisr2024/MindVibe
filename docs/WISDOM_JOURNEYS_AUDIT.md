@@ -34,10 +34,10 @@ if reflection_response:
     }
 ```
 
-**Issue:** User reflections containing sensitive mental health information are stored in plaintext JSON despite the field being named `reflection_encrypted`. This violates HIPAA-grade security requirements.
+**Issue:** User reflections containing sensitive spiritual wellness information are stored in plaintext JSON despite the field being named `reflection_encrypted`. This violates HIPAA-grade security requirements.
 
 **Impact:**
-- Data breach would expose highly sensitive mental health data
+- Data breach would expose highly sensitive spiritual wellness data
 - Potential regulatory compliance issues
 - User trust violation
 
@@ -152,7 +152,7 @@ function getAuthToken(): string | null {
 **Impact:**
 - Session hijacking via XSS
 - Account takeover
-- Unauthorized access to mental health data
+- Unauthorized access to spiritual wellness data
 
 **Remediation:**
 1. Use `httpOnly` cookies for token storage
@@ -602,7 +602,7 @@ The Wisdom Journeys feature has a well-designed architecture with proper separat
 - Good type safety (Pydantic, TypeScript)
 
 ### Critical Weaknesses
-1. **Security**: Unencrypted mental health data, XSS-vulnerable token storage, prompt injection risk
+1. **Security**: Unencrypted spiritual wellness data, XSS-vulnerable token storage, prompt injection risk
 2. **Data Integrity**: Race conditions, missing idempotency
 3. **Architecture**: Duplicate systems creating confusion
 4. **Testing**: Critical security paths untested

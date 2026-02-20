@@ -438,4 +438,4 @@ This PR successfully establishes a robust foundation for Android and iOS apps, e
 
 ---
 
-**Built with ❤️ for mental health and well-being on mobile platforms**
+**Built with ❤️ for spiritual wellness and well-being on mobile platforms**

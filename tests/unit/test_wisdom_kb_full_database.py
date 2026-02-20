@@ -150,7 +150,7 @@ class TestWisdomKnowledgeBaseFullDatabase:
 
     @pytest.mark.asyncio
     async def test_search_relevant_verses_full_db_uses_tag_boost(self, kb):
-        """Test that tag boost is applied when query matches mental health tags."""
+        """Test that tag boost is applied when query matches spiritual wellness tags."""
         mock_db = AsyncMock()
 
         # Create test verses with different tags
@@ -233,7 +233,7 @@ class TestWisdomKnowledgeBaseFullDatabase:
 
     @pytest.mark.asyncio
     async def test_search_relevant_verses_full_db_by_application(self, kb, mock_gita_verses):
-        """Test filtering by mental health application."""
+        """Test filtering by spiritual wellness application."""
         mock_db = AsyncMock()
 
         with patch.object(
@@ -398,7 +398,7 @@ class TestGitaServiceExtensions:
 
 
 class TestMentalHealthTagBoost:
-    """Test mental health tag boosting in search."""
+    """Test spiritual wellness tag boosting in search."""
 
     @pytest.fixture
     def kb(self):

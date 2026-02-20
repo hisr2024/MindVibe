@@ -14,10 +14,10 @@
    - **Example**: Provide coping strategies or mindfulness exercises suited to the user's situation.
 
 4. **Resource Recommendations**: Suggest additional resources such as articles, videos, or even professional help if necessary.
-   - **Example**: Link to external mental health resources or self-help materials.
+   - **Example**: Link to external spiritual wellness resources or self-help materials.
 
 5. **Follow-Up**: Implement a system to check in with the user periodically to reassess their mental state and adjust responses accordingly.
-   - **Example**: Schedule routine prompts for users to provide updates on their mental wellness.
+   - **Example**: Schedule routine prompts for users to provide updates on their spiritual wellness.
 
 6. **Feedback Loop**: Encourage users to provide feedback on the responses and resources they've used, which will help refine and improve the engine over time.
    - **Example**: Collect feedback through simple ratings or comments on effectiveness.

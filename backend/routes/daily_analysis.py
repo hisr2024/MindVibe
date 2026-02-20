@@ -1,7 +1,7 @@
 """
 KIAAN Daily Analysis API Routes
 
-Provides automated daily mental health assessment and insights
+Provides automated daily spiritual wellness assessment and insights
 based on user's emotional logs and Gita wisdom.
 """
 

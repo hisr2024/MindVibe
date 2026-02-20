@@ -1,15 +1,15 @@
 {
   "hero": {
-    "title": "Your AI Companion for Mental Wellness",
+    "title": "Your AI Companion for Spiritual Wellness",
     "subtitle": "Chat with KIAAN, powered by Ancient Wisdom",
-    "tagline": "Your calm, privacy-first mental wellness companion powered by ancient wisdom",
+    "tagline": "Your calm, privacy-first spiritual companion powered by ancient wisdom",
     "ctaPrimary": "Talk to KIAAN",
     "ctaSecondary": "Sacred Reflections",
     "privacy": "Conversations remain private • a warm, confidential refuge"
   },
   "ecosystem": {
     "title": "The MindVibe Ecosystem",
-    "subtitle": "A holistic approach to mental wellness, rooted in ancient wisdom and modern practices",
+    "subtitle": "A holistic approach to spiritual wellness, rooted in ancient wisdom and modern practices",
     "pillars": {
       "innerPeace": {
         "title": "Inner Peace",
@@ -24,11 +24,11 @@
         "description": "Cultivate compassion for yourself through warm, supportive exercises."
       }
     },
-    "footer": "Each pillar works together to create a balanced, sustainable approach to mental wellness"
+    "footer": "Each pillar works together to create a balanced, sustainable approach to spiritual wellness"
   },
   "features": {
     "title": "Key Features",
-    "subtitle": "Privacy-first tools designed for your mental wellness journey",
+    "subtitle": "Privacy-first tools designed for your spiritual wellness journey",
     "voice": {
       "title": "Voice Guidance",
       "description": "Talk naturally with KIAAN using voice input for a more personal experience.",
@@ -73,7 +73,7 @@
     "kiaan": {
       "title": "Talk to KIAAN",
       "subtitle": "Instant guidance",
-      "description": "Jump into a focused conversation for mental wellness support",
+      "description": "Jump into a focused conversation for spiritual wellness support",
       "cta": "Open Chat"
     },
     "dashboard": {

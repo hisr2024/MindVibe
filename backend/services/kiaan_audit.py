@@ -70,7 +70,7 @@ class AuditEventType(str, Enum):
     MODEL_SWITCH = "model_switch"
     MEMORY_CLEANUP = "memory_cleanup"
 
-    # Crisis Events (Mental Health Compliance)
+    # Crisis Events (Spiritual Wellness Compliance)
     CRISIS_DETECTED = "crisis_detected"
     CRISIS_RESPONSE_SENT = "crisis_response_sent"
 
@@ -498,7 +498,7 @@ class KIAANAuditLogger:
         """
         Log a crisis detection event for compliance and safety monitoring.
 
-        This is a critical compliance requirement for mental health applications.
+        This is a critical compliance requirement for spiritual wellness applications.
         All crisis events must be logged for:
         - Regulatory compliance (HIPAA, SOC2)
         - Safety monitoring and follow-up

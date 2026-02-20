@@ -51,9 +51,9 @@ async def example_filter_by_theme() -> None:
 
 
 async def example_filter_by_application() -> None:
-    """Example: Filter verses by mental health application."""
+    """Example: Filter verses by spiritual wellness application."""
     print("\n" + "=" * 60)
-    print("Example 3: Filter verses by mental health application")
+    print("Example 3: Filter verses by spiritual wellness application")
     print("=" * 60)
 
     async with httpx.AsyncClient() as client:
@@ -187,16 +187,16 @@ async def example_list_themes() -> None:
 
 
 async def example_list_applications() -> None:
-    """Example: List all mental health applications."""
+    """Example: List all spiritual wellness applications."""
     print("\n" + "=" * 60)
-    print("Example 9: List all mental health applications")
+    print("Example 9: List all spiritual wellness applications")
     print("=" * 60)
 
     async with httpx.AsyncClient() as client:
         response = await client.get(f"{BASE_URL}/api/wisdom/applications")
         data = response.json()
 
-        print(f"\nAvailable mental health applications ({data['total']}):")
+        print(f"\nAvailable spiritual wellness applications ({data['total']}):")
         for app in data["applications"]:
             print(f"  - {app}")
 

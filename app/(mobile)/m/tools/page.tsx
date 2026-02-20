@@ -3,7 +3,7 @@
 /**
  * Mobile Tools Page
  *
- * Hub for all MindVibe spiritual and mental wellness tools.
+ * Hub for all MindVibe spiritual and spiritual wellness tools.
  * Organized by category with quick access and descriptions.
  */
 

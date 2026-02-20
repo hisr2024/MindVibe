@@ -45,7 +45,7 @@ components/analytics/
 ├── WellnessScoreGauge.tsx      # Radial gauge visualization
 ├── MoodForecastChart.tsx       # Prediction chart with confidence bands
 ├── AIInsightsPanel.tsx         # AI-generated insights cards
-├── RiskAssessment.tsx          # Mental health risk scoring
+├── RiskAssessment.tsx          # Spiritual wellness risk scoring
 └── PatternAnalysis.tsx         # Weekly & tag pattern visualization
 ```
 
@@ -100,7 +100,7 @@ risk = ml_service.calculate_risk_score(mood_data)
   4. **Low Mood Frequency (10% weight)**: Count of scores ≤3
 
 - **Risk Levels**:
-  - **Low (0-30)**: Stable mental health
+  - **Low (0-30)**: Stable spiritual wellness
   - **Medium (31-60)**: Some patterns warrant attention
   - **High (61-100)**: Significant concerns, seek professional support
 
@@ -370,7 +370,7 @@ else:
 {
   "risk_score": 28.5,
   "risk_level": "low",
-  "description": "Your mental health patterns indicate stability",
+  "description": "Your spiritual wellness patterns indicate stability",
   "factors": {
     "mood_average": { "value": 7.5, "risk": 10.0 },
     "trend": { "direction": "improving", "risk": 5.0 },
@@ -379,7 +379,7 @@ else:
   },
   "recommendations": [
     "Maintain your current wellness practices",
-    "Your patterns indicate stable mental health"
+    "Your patterns indicate stable spiritual wellness"
   ]
 }
 ```
@@ -586,7 +586,7 @@ else:
 
 ### 4. RiskAssessment.tsx (240 lines)
 
-**Purpose**: Mental health risk score (0-100) with factor breakdown.
+**Purpose**: Spiritual wellness risk score (0-100) with factor breakdown.
 
 **Features**:
 - Radial gauge with risk level icon
@@ -608,7 +608,7 @@ else:
 │      ╲─────╱                │
 │                             │
 │   [Low Risk]                │
-│   Stable mental health      │
+│   Stable spiritual wellness      │
 │                             │
 │ Contributing Factors:       │
 │ ▓▓░░░░░░░░ Mood Avg (10pts)│
@@ -818,7 +818,7 @@ If not provided, falls back to template-based insights.
 | **Verse Analytics** | ❌ Not tracked | ✅ Read time, favorites, domains |
 | **Pattern Detection** | ⚠️ Basic tags | ✅ NLP-based theme extraction |
 | **Visualizations** | ⚠️ Simple charts | ✅ Advanced (heatmaps, gauges, radars) |
-| **Risk Scoring** | ❌ None | ✅ Mental health decline alerts |
+| **Risk Scoring** | ❌ None | ✅ Spiritual wellness decline alerts |
 | **Correlations** | ❌ None | ✅ Mood ↔ journal ↔ behaviors |
 | **Data Source** | ⚠️ Mock | ✅ Ready for real DB queries |
 
@@ -876,7 +876,7 @@ If not provided, falls back to template-based insights.
 - 7-14 day mood forecasts with confidence intervals
 - Comprehensive 0-100 wellness score from 4 factors
 - AI-generated personalized insights (GPT-4o-mini)
-- Mental health risk assessment with early warnings
+- Spiritual wellness risk assessment with early warnings
 - Behavioral pattern detection (weekly rhythms, tag correlations)
 - Advanced visualizations (gauges, charts, heatmaps)
 

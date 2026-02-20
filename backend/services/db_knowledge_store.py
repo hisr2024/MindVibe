@@ -102,7 +102,7 @@ class DatabaseKnowledgeStore:
             shad_ripu_tags: List of inner enemy tags (kama, krodha, etc.)
             keywords: List of searchable keywords
             quality_score: Quality score 0.0-1.0
-            primary_domain: Primary mental health domain
+            primary_domain: Primary spiritual wellness domain
             secondary_domains: Additional domains
             mental_health_applications: Specific applications
             metadata: Additional metadata dict
@@ -284,7 +284,7 @@ class DatabaseKnowledgeStore:
         limit: int = 50,
     ) -> list[LearnedWisdom]:
         """
-        Get wisdom by mental health domain (e.g., anxiety, stress, grief).
+        Get wisdom by spiritual wellness domain (e.g., anxiety, stress, grief).
         """
         query = select(LearnedWisdom).where(
             or_(

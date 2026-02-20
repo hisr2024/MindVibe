@@ -569,7 +569,7 @@ async def main(use_api: bool = False, use_chapters: bool = False) -> int:
             print("=" * 70)
             print("\n🎉 You now have the complete Bhagavad Gita in your database!")
             print("   All 700 verses across 18 chapters are ready for AI-powered")
-            print("   modern mental health applications.\n")
+            print("   modern spiritual wellness applications.\n")
             print("📋 Next steps:")
             print("   1. Run: python scripts/migrate_mental_health_tags.py")
             print("   2. Run: python scripts/verify_700_verses.py --database")

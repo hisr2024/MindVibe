@@ -88,7 +88,7 @@ class LearnedWisdom(SoftDeleteMixin, Base):
     shad_ripu_tags: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
     keywords: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
 
-    # Mental health mapping (similar to GitaVerse)
+    # Spiritual wellness mapping (similar to GitaVerse)
     primary_domain: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     secondary_domains: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     mental_health_applications: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)

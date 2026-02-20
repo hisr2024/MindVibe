@@ -71,7 +71,7 @@ You need to create these JSON files in your language directory:
 {
   "app": {
     "name": "MindVibe",
-    "tagline": "[Your translation of 'Mental Health App']"
+    "tagline": "[Your translation of 'Spiritual Wellness App']"
   },
   "buttons": {
     "submit": "[Submit]",
@@ -168,7 +168,7 @@ You need to create these JSON files in your language directory:
     "support": "[Support]",
     "explore": "[Explore]",
     "safety": "[Safety]",
-    "description": "[Designed for calm, privacy-first mental health support. Built with focus on WCAG accessibility, encryption, and gentle experience.]",
+    "description": "[Designed for calm, privacy-first spiritual wellness support. Built with focus on WCAG accessibility, encryption, and gentle experience.]",
     "emailUs": "[Email us]",
     "encryptedJournals": "[Encrypted journals]",
     "noTracking": "[No tracking ads]"
@@ -372,7 +372,7 @@ Keep a glossary of terms:
 
 ```json
 {
-  "mental health": "YOUR_TRANSLATION",
+  "spiritual wellness": "YOUR_TRANSLATION",
   "dashboard": "YOUR_TRANSLATION",
   "meditation": "YOUR_TRANSLATION"
 }

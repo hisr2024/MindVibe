@@ -123,7 +123,7 @@ const SITUATIONS: LifeSituation[] = [
       kiaanSays: 'I hear the pain in what you\'re sharing. Betrayal cuts deep because it attacks our ability to trust. The Gita doesn\'t say forget - it says release. When you\'re ready, not before. What do you need right now?',
     }],
   },
-  // ═══ MENTAL HEALTH ═══
+  // ═══ SPIRITUAL WELLNESS ═══
   {
     id: 'anxiety-general', category: 'mental-health',
     keywords: ['anxious', 'anxiety', 'panic', 'worried', 'scared', 'nervous', 'fear', 'dread'],
@@ -405,7 +405,7 @@ const SITUATIONS: LifeSituation[] = [
     }],
   },
 
-  // ═══ MENTAL HEALTH - EXPANDED ═══
+  // ═══ SPIRITUAL WELLNESS - EXPANDED ═══
   {
     id: 'burnout', category: 'mental-health',
     keywords: ['burnt out', 'burnout', 'exhausted', 'drained', 'nothing left', 'empty tank', 'running on empty'],

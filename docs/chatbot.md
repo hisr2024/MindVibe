@@ -1,8 +1,8 @@
-# AI Chatbot - Mental Health Guidance
+# AI Chatbot - Spiritual Wellness Guidance
 
 ## Overview
 
-The MindVibe AI Chatbot provides conversational mental health guidance based on timeless wisdom from the Bhagavad Gita, presented in a completely secular, universally applicable way. The chatbot maintains conversation context, remembers previous interactions, and provides empathetic, actionable guidance.
+The MindVibe AI Chatbot provides conversational spiritual wellness guidance based on timeless wisdom from the Bhagavad Gita, presented in a completely secular, universally applicable way. The chatbot maintains conversation context, remembers previous interactions, and provides empathetic, actionable guidance.
 
 ## Key Features
 
@@ -16,7 +16,7 @@ The MindVibe AI Chatbot provides conversational mental health guidance based on 
 - Draws from authentic Bhagavad Gita verses
 - All religious references automatically sanitized
 - Presents wisdom as universal principles
-- Focuses on practical mental health applications
+- Focuses on practical spiritual wellness applications
 
 ### 3. **Multi-Language Support**
 - **English**: Modern, accessible language
@@ -25,7 +25,7 @@ The MindVibe AI Chatbot provides conversational mental health guidance based on 
 
 ### 4. **Intelligent Search**
 - Semantic search finds relevant verses for queries
-- Theme-based matching for mental health concerns
+- Theme-based matching for spiritual wellness concerns
 - Context-aware verse selection
 
 ### 5. **Fallback Mechanisms**
@@ -295,9 +295,9 @@ for msg in history['messages']:
     print(f"{msg['role']}: {msg['content']}")
 ```
 
-## Mental Health Applications
+## Spiritual Wellness Applications
 
-The chatbot provides guidance for the following mental health concerns:
+The chatbot provides guidance for the following spiritual wellness concerns:
 
 ### Anxiety & Stress
 - anxiety_management
@@ -486,14 +486,14 @@ The chatbot follows strict guidelines to ensure universal applicability:
 - [ ] **Voice Interface**: Voice input/output for conversations
 - [ ] **Verse Recommendations**: Proactive verse suggestions
 - [ ] **Daily Wisdom**: Scheduled wisdom notifications
-- [ ] **Progress Tracking**: Track user's mental health journey
+- [ ] **Progress Tracking**: Track user's spiritual wellness journey
 - [ ] **Advanced Search**: Use sentence-transformers for embeddings
 - [ ] **Multi-Modal**: Support images, videos, audio recordings
 - [ ] **Crisis Detection**: Identify crisis situations and provide resources
 - [ ] **Therapist Integration**: Option to connect with human therapist
 
 ### Potential Integrations
-- Mental health assessment tools
+- Spiritual wellness assessment tools
 - Mood tracking visualization
 - Journaling features
 - Meditation timers
@@ -517,13 +517,13 @@ The chatbot follows strict guidelines to ensure universal applicability:
 
 ## Disclaimer
 
-**Important**: This chatbot provides guidance based on universal wisdom principles and is intended for **general mental health support only**. It is **not a substitute for professional mental health care**.
+**Important**: This chatbot provides guidance based on universal wisdom principles and is intended for **general spiritual wellness support only**. It is **not a substitute for professional spiritual wellness care**.
 
 ### When to Seek Professional Help
 - If you're experiencing severe depression or anxiety
 - If you're having thoughts of self-harm or suicide
-- If mental health issues interfere with daily functioning
-- If you need diagnosis or treatment for a mental health condition
+- If spiritual wellness issues interfere with daily functioning
+- If you need diagnosis or treatment for a spiritual wellness condition
 
 ### Crisis Resources
 - **National Suicide Prevention Lifeline**: 988 (US)
@@ -532,4 +532,4 @@ The chatbot follows strict guidelines to ensure universal applicability:
 
 ---
 
-**Remember**: This chatbot is here to support your mental wellness journey with timeless wisdom, but professional mental health care is irreplaceable when needed.
+**Remember**: This chatbot is here to support your spiritual wellness journey with timeless wisdom, but professional spiritual wellness care is irreplaceable when needed.

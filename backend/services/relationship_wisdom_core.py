@@ -192,7 +192,7 @@ _INDEX_BY_THEME: dict[str, list[int]] = {}  # theme -> verse indices
 _INDEX_BY_CHAPTER: dict[int, list[int]] = {}  # chapter -> verse indices
 _INDEX_BY_KEYWORD: dict[str, list[int]] = {}  # keyword -> verse indices
 
-# Relationship-relevant mental health applications (mapped to modes/emotions)
+# Relationship-relevant spiritual wellness applications (mapped to modes/emotions)
 _MH_APP_TO_MODE: dict[str, list[str]] = {
     "conflict_resolution": ["conflict", "repair"],
     "emotional_regulation": ["conflict", "pattern", "courage"],
@@ -288,7 +288,7 @@ def _load_and_index_corpus() -> None:
 
         # Build indices
         for idx, verse in enumerate(_GITA_CORPUS):
-            # Index by mental health applications
+            # Index by spiritual wellness applications
             for app in verse.get("mental_health_applications", []):
                 app_lower = app.lower().strip()
                 _INDEX_BY_MH_APP.setdefault(app_lower, []).append(idx)
@@ -587,7 +587,7 @@ class RelationshipWisdomCore:
     """
 
     # Scoring weights for corpus search
-    MH_APP_WEIGHT = 4.0    # Mental health application match
+    MH_APP_WEIGHT = 4.0    # Spiritual wellness application match
     THEME_WEIGHT = 3.0      # Theme match
     KEYWORD_WEIGHT = 1.5    # Keyword in English translation
     PRINCIPLE_WEIGHT = 2.0  # Principle text match
@@ -693,7 +693,7 @@ class RelationshipWisdomCore:
         # Collect candidate verse indices from indices (avoid scoring all 700+)
         candidate_indices: dict[int, float] = {}
 
-        # 1. Score by mental health application matches
+        # 1. Score by spiritual wellness application matches
         relevant_apps = self._get_relevant_mh_apps(mode, emotion, mechanism, situation_words)
         for app in relevant_apps:
             app_lower = app.lower()
@@ -808,7 +808,7 @@ class RelationshipWisdomCore:
                     score += self.PRINCIPLE_WEIGHT
                     break
 
-        # Mode-specific mental health app matching
+        # Mode-specific spiritual wellness app matching
         mh_apps = verse.get("mental_health_applications", [])
         mode_relevant_apps = set()
         for app, modes in _MH_APP_TO_MODE.items():
@@ -819,7 +819,7 @@ class RelationshipWisdomCore:
             if app.lower() in mode_relevant_apps:
                 score += 1.5
 
-        # Emotion-specific mental health app matching
+        # Emotion-specific spiritual wellness app matching
         emotion_relevant_apps = set()
         for app, emotions in _MH_APP_TO_EMOTION.items():
             if emotion in emotions:
@@ -855,7 +855,7 @@ class RelationshipWisdomCore:
             situation_words: Significant words from user's situation.
 
         Returns:
-            List of relevant mental health application keys.
+            List of relevant spiritual wellness application keys.
         """
         apps: set[str] = set()
 

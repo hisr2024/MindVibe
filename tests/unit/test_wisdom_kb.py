@@ -156,7 +156,7 @@ class TestWisdomKnowledgeBaseQueries:
 
     @pytest.mark.asyncio
     async def test_search_verses_by_application(self, test_db: AsyncSession):
-        """Test searching verses by mental health application."""
+        """Test searching verses by spiritual wellness application."""
         # Create test verses
         verse1 = WisdomVerse(
             verse_id="4.1",

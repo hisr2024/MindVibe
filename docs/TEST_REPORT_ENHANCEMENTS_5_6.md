@@ -167,7 +167,7 @@
 ```
 ✓ Risk score: 15.0/100 (lower is better)
 ✓ Risk level: LOW
-✓ Description: Your mental health patterns indicate stability
+✓ Description: Your spiritual wellness patterns indicate stability
 ✓ Factors:
   - Mood average: 7.5 (risk: 5.0)
   - Trend: improving (risk: 5.0)
@@ -469,7 +469,7 @@
 | 1 | `/api/analytics/wellness-score` | GET | Get wellness score | ✅ Structure |
 | 2 | `/api/analytics/mood-trends` | GET | Analyze mood trends | ✅ Structure |
 | 3 | `/api/analytics/mood-forecast` | GET | 7-day mood prediction | ✅ Structure |
-| 4 | `/api/analytics/risk-assessment` | GET | Mental health risk score | ✅ Structure |
+| 4 | `/api/analytics/risk-assessment` | GET | Spiritual wellness risk score | ✅ Structure |
 | 5 | `/api/analytics/patterns` | GET | Weekly & tag patterns | ✅ Structure |
 | 6 | `/api/analytics/insights` | GET | AI-generated insights | ✅ Structure |
 

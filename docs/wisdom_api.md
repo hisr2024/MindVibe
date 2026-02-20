@@ -1,6 +1,6 @@
 # Wisdom API Reference
 
-The Wisdom API provides access to universal wisdom verses from ancient teachings, presented in a secular, universally applicable way. The API supports semantic search, filtering by themes and mental health applications, and multi-language support (English, Hindi, Sanskrit).
+The Wisdom API provides access to universal wisdom verses from ancient teachings, presented in a secular, universally applicable way. The API supports semantic search, filtering by themes and spiritual wellness applications, and multi-language support (English, Hindi, Sanskrit).
 
 ## Base URL
 
@@ -21,7 +21,7 @@ Currently, the Wisdom API endpoints are public and do not require authentication
 - **POST /search** - Perform semantic search over wisdom content
 - **POST /query** - Get AI-powered guidance with relevant verses
 - **GET /themes** - List all available themes
-- **GET /applications** - List all mental health applications
+- **GET /applications** - List all spiritual wellness applications
 
 ---
 
@@ -41,7 +41,7 @@ List wisdom verses with optional filtering and pagination.
 |-----------|------|---------|-------------|
 | `language` | string | `english` | Preferred language: `english`, `hindi`, or `sanskrit` |
 | `theme` | string | none | Filter by specific theme (e.g., `action_without_attachment`) |
-| `application` | string | none | Filter by mental health application (e.g., `anxiety_management`) |
+| `application` | string | none | Filter by spiritual wellness application (e.g., `anxiety_management`) |
 | `include_sanskrit` | boolean | `false` | Include Sanskrit text in response |
 | `limit` | integer | `10` | Number of verses to return (1-100) |
 | `offset` | integer | `0` | Number of verses to skip for pagination |
@@ -171,7 +171,7 @@ Perform semantic search to find the most relevant verses for a query.
 |-----------|------|---------|-------------|
 | `language` | string | `english` | Preferred language for results |
 | `theme` | string | none | Filter results by specific theme |
-| `application` | string | none | Filter results by mental health application |
+| `application` | string | none | Filter results by spiritual wellness application |
 | `include_sanskrit` | boolean | `false` | Include Sanskrit text in results |
 | `limit` | integer | `5` | Number of results to return (1-20) |
 
@@ -347,13 +347,13 @@ curl http://localhost:8000/api/wisdom/themes
 
 ---
 
-### 6. List Mental Health Applications
+### 6. List Spiritual Wellness Applications
 
 ```http
 GET /api/wisdom/applications
 ```
 
-Get a list of all mental health applications covered by wisdom verses.
+Get a list of all spiritual wellness applications covered by wisdom verses.
 
 #### Response
 
@@ -396,9 +396,9 @@ The wisdom database includes verses on the following themes:
 - **self_knowledge** - Understanding oneself deeply
 - **inner_joy** - Accessing happiness independent of external circumstances
 
-## Mental Health Applications
+## Spiritual Wellness Applications
 
-Verses are tagged with mental health applications including:
+Verses are tagged with spiritual wellness applications including:
 
 - **anxiety_management** - Managing worry and anxious thoughts
 - **stress_reduction** - Reducing and coping with stress

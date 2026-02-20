@@ -227,7 +227,7 @@ class TestMetadataEnricher:
         assert any(word in keywords for word in ["peace", "meditation", "mindfulness"])
 
     def test_suggest_applications(self):
-        """Test mental health application suggestions."""
+        """Test spiritual wellness application suggestions."""
         verse = {
             "english": "Stay calm in times of stress and anxiety",
             "context": "About managing worry and fear",

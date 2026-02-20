@@ -723,7 +723,7 @@ Headers:
 
 ## 🙏 GRATITUDE
 
-This implementation honors the Bhagavad Gita's wisdom while making it accessible and actionable for modern mental health challenges. The journey system embodies:
+This implementation honors the Bhagavad Gita's wisdom while making it accessible and actionable for modern spiritual wellness challenges. The journey system embodies:
 
 - **Karma Yoga** (selfless action): Verses encourage action without attachment to outcomes
 - **Bhakti Yoga** (devotion): Templates foster compassion and loving-kindness

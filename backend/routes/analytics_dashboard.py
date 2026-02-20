@@ -591,7 +591,7 @@ async def get_ai_insights():
 @router.get("/advanced/risk-assessment")
 async def get_risk_assessment():
     """
-    Get mental health risk assessment score (0-100).
+    Get spiritual wellness risk assessment score (0-100).
     Lower is better.
 
     Quantum Enhancement #6: Advanced Analytics Dashboard
@@ -623,7 +623,7 @@ async def get_risk_assessment():
             "Explore meditation verses if anxiety increases"
         ] if risk_assessment["level"] == "medium" else [
             "Maintain your current wellness practices",
-            "Your patterns indicate stable mental health"
+            "Your patterns indicate stable spiritual wellness"
         ],
         "assessed_at": datetime.now().isoformat()
     }

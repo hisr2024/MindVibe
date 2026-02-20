@@ -85,7 +85,7 @@ export default function FeaturesPage() {
             <div className="space-y-3 text-center md:text-left">
               <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Features & Flows</p>
               <h1 className="text-3xl font-bold text-orange-50 md:text-4xl">Your Personal Wellness Companion</h1>
-              <p className="max-w-2xl text-orange-100/80 text-sm">Everything you need for your mental wellness journey—empathetic, mobile-ready, and built with care.</p>
+              <p className="max-w-2xl text-orange-100/80 text-sm">Everything you need for your spiritual wellness journey—empathetic, mobile-ready, and built with care.</p>
             </div>
             <div className="flex items-center justify-center gap-2 text-sm text-orange-100/80 md:justify-start">
               <span className="rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-100">PWA</span>

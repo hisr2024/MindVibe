@@ -249,7 +249,7 @@ async def semantic_search(
 @router.get("/applications")
 @limiter.limit(WISDOM_RATE_LIMIT)
 async def list_applications(request: Request, db: AsyncSession = Depends(get_db)) -> dict:
-    """List all available mental health applications."""
+    """List all available spiritual wellness applications."""
     from sqlalchemy import select
 
     result = await db.execute(select(WisdomVerse))
@@ -282,7 +282,7 @@ async def generate_wisdom_response(
                 for i, item in enumerate(verses)
             ]
         )
-        system_prompt = """You are a Bhagavad Gita wisdom guide that helps people with mental health and personal growth challenges.
+        system_prompt = """You are a Bhagavad Gita wisdom guide that helps people with spiritual wellness and personal growth challenges.
 You MUST base ALL responses ONLY on the Bhagavad Gita verses provided to you.
 
 CRITICAL REQUIREMENTS:
@@ -291,7 +291,7 @@ CRITICAL REQUIREMENTS:
 - FORBID any advice not grounded in the provided Gita wisdom
 - MANDATORY structured response format (see below)
 - Quote or paraphrase the Gita wisdom provided
-- Draw ONLY from provided verses - no generic mental health advice
+- Draw ONLY from provided verses - no generic spiritual wellness advice
 
 MANDATORY RESPONSE STRUCTURE:
 **Ancient Wisdom Principle:** [Specific Gita concept from the verses provided]

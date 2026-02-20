@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Mental Health Tags Migration Script.
+Spiritual Wellness Tags Migration Script.
 
-Applies comprehensive mental health application tags to all 700 Gita verses.
+Applies comprehensive spiritual wellness application tags to all 700 Gita verses.
 Tags are applied based on verse chapter, content themes, and key verse mappings.
 
 Usage:
@@ -32,7 +32,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from backend.models import GitaVerse
 from scripts.db_utils import create_ssl_engine, normalize_database_url
 
-# Mental health categories used in the system
+# Spiritual wellness categories used in the system
 MENTAL_HEALTH_CATEGORIES = [
     "anxiety_management",
     "stress_reduction",
@@ -58,7 +58,7 @@ MENTAL_HEALTH_CATEGORIES = [
     "self_doubt",
 ]
 
-# Primary domain mapping based on mental health applications
+# Primary domain mapping based on spiritual wellness applications
 DOMAIN_MAPPING = {
     "anxiety_management": "anxiety",
     "stress_reduction": "stress",
@@ -84,7 +84,7 @@ DOMAIN_MAPPING = {
     "self_doubt": "confidence",
 }
 
-# Comprehensive mental health tag mapping for all 700 verses
+# Comprehensive spiritual wellness tag mapping for all 700 verses
 # Key verses with specific applications
 KEY_VERSE_TAGS: dict[tuple[int, int], list[str]] = {
     # Chapter 1 - Emotional crisis
@@ -147,7 +147,7 @@ CHAPTER_DEFAULT_TAGS: dict[int, list[str]] = {
 
 
 def get_tags_for_verse(chapter: int, verse: int) -> list[str]:
-    """Get mental health tags for a specific verse."""
+    """Get spiritual wellness tags for a specific verse."""
     # Check for specific verse tags first
     key = (chapter, verse)
     if key in KEY_VERSE_TAGS:
@@ -158,7 +158,7 @@ def get_tags_for_verse(chapter: int, verse: int) -> list[str]:
 
 
 async def migrate_from_json() -> tuple[int, int, int]:
-    """Migrate mental health tags from gita_verses_complete.json."""
+    """Migrate spiritual wellness tags from gita_verses_complete.json."""
     json_path = Path(__file__).parent.parent / "data" / "gita" / "gita_verses_complete.json"
 
     if not json_path.exists():
@@ -183,7 +183,7 @@ async def migrate_from_json() -> tuple[int, int, int]:
 
 
 async def migrate_comprehensive() -> tuple[int, int, int]:
-    """Apply comprehensive chapter-based mental health tags to all verses."""
+    """Apply comprehensive chapter-based spiritual wellness tags to all verses."""
     print("   Applying comprehensive chapter-based tagging...")
     return await apply_tags({})  # Will use defaults
 
@@ -192,7 +192,7 @@ async def apply_tags(
     tag_mapping: dict[tuple[int, int], list[str]]
 ) -> tuple[int, int, int]:
     """
-    Apply mental health tags to verses in the database.
+    Apply spiritual wellness tags to verses in the database.
 
     Args:
         tag_mapping: Optional mapping of (chapter, verse) to tags.
@@ -284,7 +284,7 @@ async def migrate_mental_health_tags(comprehensive: bool = False) -> None:
     )
 
     print("=" * 70)
-    print("🕉️  MENTAL HEALTH TAGS MIGRATION")
+    print("🕉️  SPIRITUAL WELLNESS TAGS MIGRATION")
     print("=" * 70)
     print(f"📍 Database: {database_url[:60]}...")
     print(f"   Mode: {'Comprehensive' if comprehensive else 'From JSON'}")
@@ -304,8 +304,8 @@ async def migrate_mental_health_tags(comprehensive: bool = False) -> None:
     print("=" * 70)
 
     if updated > 0:
-        print("\n✅ Mental health tags migration completed successfully!")
-        print(f"   {updated} verses now have mental health application tags.")
+        print("\n✅ Spiritual wellness tags migration completed successfully!")
+        print(f"   {updated} verses now have spiritual wellness application tags.")
     else:
         print("\n⚠️  No verses were updated.")
         print("   Ensure gita_verses table is populated with verses first.")
@@ -315,7 +315,7 @@ async def migrate_mental_health_tags(comprehensive: bool = False) -> None:
 def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="Migrate mental health tags to Gita verses"
+        description="Migrate spiritual wellness tags to Gita verses"
     )
     parser.add_argument(
         "--comprehensive",

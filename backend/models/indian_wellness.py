@@ -112,7 +112,7 @@ class IndianWisdomContent(SoftDeleteMixin, Base):
 
 class YogaAsanaDB(SoftDeleteMixin, Base):
     """
-    Authentic yoga asanas with Sanskrit terminology and mental health benefits.
+    Authentic yoga asanas with Sanskrit terminology and spiritual wellness benefits.
 
     Based on teachings from The Yoga Institute, Ministry of AYUSH, and
     traditional yoga texts.

@@ -149,7 +149,7 @@ describe('TranslationService', () => {
   describe('Translation - All Languages', () => {
     const sampleTexts = {
       greeting: 'Hello, how can I help you?',
-      wellness: 'I support your mental wellness journey.',
+      wellness: 'I support your spiritual wellness journey.',
       meditation: 'Let us begin with mindful breathing.'
     };
 

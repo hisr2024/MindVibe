@@ -2,7 +2,7 @@
 
 ## Overview
 
-KIAAN (Knowledge-Infused AI for Authentic Navigation) is MindVibe's AI-powered mental health companion that provides support in 17 languages. This document details KIAAN's multilingual capabilities, technical implementation, and best practices.
+KIAAN (Knowledge-Infused AI for Authentic Navigation) is MindVibe's AI-powered spiritual companion that provides support in 17 languages. This document details KIAAN's multilingual capabilities, technical implementation, and best practices.
 
 ## Language Support
 

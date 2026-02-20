@@ -32,7 +32,7 @@ The ancient sages understood that our suffering comes not from action itself but
     @pytest.fixture
     def generic_response(self):
         """A generic response that should fail validation."""
-        return """According to recent studies, stress management is important for mental health. Research indicates that mindfulness and therapy can help reduce anxiety. Experts recommend practicing deep breathing and seeking professional help if needed.
+        return """According to recent studies, stress management is important for spiritual wellness. Research indicates that mindfulness and therapy can help reduce anxiety. Experts recommend practicing deep breathing and seeking professional help if needed.
 
 You should try to set boundaries at work and make time for self-care. Modern psychology shows that cognitive behavioral therapy is effective for managing work stress. Talk to a therapist about developing coping strategies.
 

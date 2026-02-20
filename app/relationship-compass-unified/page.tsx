@@ -678,7 +678,7 @@ export default function RelationshipCompassUnifiedPage() {
               <p className="text-xs text-slate-500 leading-relaxed">
                 <strong className="text-slate-400">Not therapy.</strong> This tool provides clarity, not clinical intervention.
                 It draws from philosophical principles about human nature and self-mastery.
-                If you&apos;re experiencing abuse or a mental health crisis, please reach out to a professional.
+                If you&apos;re experiencing abuse or a crisis, please reach out to a professional.
               </p>
             </div>
 

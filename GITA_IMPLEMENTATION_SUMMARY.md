@@ -12,7 +12,7 @@ Created 6 new SQLAlchemy ORM models:
   - Sanskrit and English names
   - Verse counts
   - Themes array
-  - Mental health relevance notes
+  - Spiritual wellness relevance notes
 
 - **GitaSource**: Tracks authentic sources
   - Gita Press Gorakhpur
@@ -38,11 +38,11 @@ Created 6 new SQLAlchemy ORM models:
   - Application areas (work-life balance, stress management, etc.)
   - Detailed descriptions
   - Practical examples
-  - Mental health benefits
+  - Spiritual wellness benefits
 
 - **GitaKeyword**: Keywords and themes
   - Keyword taxonomy
-  - Categories (Ethics, Action, Practice, Wisdom, Mental Health)
+  - Categories (Ethics, Action, Practice, Wisdom, Spiritual Wellness)
   - Descriptions
 
 - **GitaVerseKeyword**: Many-to-many relationships
@@ -247,7 +247,7 @@ contexts = await GitaService.get_modern_context(db, verse_id=123)
 - **Action**: karma
 - **Practice**: yoga, meditation, self-control, detachment, equanimity
 - **Wisdom**: knowledge, devotion
-- **Mental Health**: peace, anxiety, stress, courage, acceptance
+- **Spiritual Wellness**: peace, anxiety, stress, courage, acceptance
 
 ## Modern Applications Included
 
@@ -259,7 +259,7 @@ Sample modern contexts for key verses:
 Each with:
 - Detailed descriptions
 - Practical examples
-- Mental health benefits
+- Spiritual wellness benefits
 
 ## Testing Coverage
 
@@ -313,7 +313,7 @@ This implementation provides a **production-ready**, **well-tested**, **fully-do
 
 ✅ Store all 700 verses with authentic translations
 ✅ Track source attribution for credibility
-✅ Provide modern mental health applications
+✅ Provide modern spiritual wellness applications
 ✅ Enable flexible search and filtering
 ✅ Support multiple languages
 ✅ Maintain data integrity

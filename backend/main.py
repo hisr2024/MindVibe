@@ -156,7 +156,7 @@ from backend.deps import engine, SessionLocal
 app = FastAPI(
     title="MindVibe API",
     version="1.0.0",
-    description="AI Mental Wellness Coach Backend",
+    description="AI Spiritual Wellness Coach Backend",
 )
 
 # Add DDoS protection middleware (first line of defense)
@@ -515,7 +515,7 @@ try:
     from backend.routes.indian_gita_sources import router as indian_gita_sources_router
     app.include_router(indian_gita_sources_router)
     startup_logger.info("✅ [SUCCESS] Indian Gita Sources router loaded")
-    startup_logger.info("   • GET    /api/gita-sources/teachings - Gita teachings for mental health")
+    startup_logger.info("   • GET    /api/gita-sources/teachings - Gita teachings for spiritual wellness")
     startup_logger.info("   • GET    /api/gita-sources/yoga-paths - Four yoga paths from Gita")
     startup_logger.info("   • GET    /api/gita-sources/meditation - Chapter 6 meditation techniques")
     startup_logger.info("   • GET    /api/gita-sources/sthitaprajna - Qualities of steady wisdom (2.54-72)")

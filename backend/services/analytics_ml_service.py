@@ -180,10 +180,10 @@ class AnalyticsMLService:
         journal_data: Optional[List[Dict]] = None
     ) -> Dict:
         """
-        Calculate mental health risk score (0-100)
+        Calculate spiritual wellness risk score (0-100)
 
         Lower is better:
-        - 0-30: Low risk (stable mental health)
+        - 0-30: Low risk (stable spiritual wellness)
         - 31-60: Medium risk (some concerns)
         - 61-100: High risk (significant concerns)
 
@@ -246,7 +246,7 @@ class AnalyticsMLService:
         risk_score = round(risk_score, 1)
         if risk_score <= 30:
             level = "low"
-            description = "Your mental health patterns indicate stability"
+            description = "Your spiritual wellness patterns indicate stability"
         elif risk_score <= 60:
             level = "medium"
             description = "Some patterns warrant attention"

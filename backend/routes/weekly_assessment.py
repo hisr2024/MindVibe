@@ -1,7 +1,7 @@
 """
 KIAAN Weekly Assessment API Routes
 
-Provides structured weekly mental health evaluations with
+Provides structured weekly spiritual wellness evaluations with
 Gita-wisdom integration and personalized recommendations.
 """
 
@@ -28,7 +28,7 @@ router = APIRouter(
 kiaan_core = KIAANCore()
 
 
-# Assessment questions for mental health evaluation
+# Assessment questions for spiritual wellness evaluation
 ASSESSMENT_QUESTIONS = [
     {
         "id": "emotional_state",

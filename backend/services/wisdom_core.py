@@ -55,7 +55,7 @@ Usage:
         # Get wisdom for inner enemy (Shad Ripu)
         anger_wisdom = await wisdom.get_for_enemy(db, "krodha")
 
-        # Get wisdom by mental health domain
+        # Get wisdom by spiritual wellness domain
         anxiety_help = await wisdom.get_by_domain(db, "anxiety")
 """
 
@@ -130,7 +130,7 @@ class WisdomResult:
     themes: list[str] = field(default_factory=list)
     keywords: list[str] = field(default_factory=list)
 
-    # Mental health
+    # Spiritual wellness
     primary_domain: Optional[str] = None
     secondary_domains: list[str] = field(default_factory=list)
     mental_health_applications: list[str] = field(default_factory=list)
@@ -298,7 +298,7 @@ SHAD_RIPU_THEMES = {
     ],
 }
 
-# Mental health domains and their related themes
+# Spiritual wellness domains and their related themes
 DOMAIN_THEMES = {
     "anxiety": ["peace", "calm", "equanimity", "breath", "grounding", "trust", "surrender"],
     "depression": ["hope", "light", "purpose", "meaning", "joy", "renewal", "strength"],
@@ -547,7 +547,7 @@ class WisdomCore:
                     reasons.append(f"domain:{verse.primary_domain}")
                     break
 
-        # Mental health applications match
+        # Spiritual wellness applications match
         if verse.mental_health_applications:
             for app in verse.mental_health_applications:
                 app_lower = app.lower()
@@ -809,7 +809,7 @@ class WisdomCore:
         return results[:limit]
 
     # =========================================================================
-    # MENTAL HEALTH DOMAIN RETRIEVAL
+    # SPIRITUAL WELLNESS DOMAIN RETRIEVAL
     # =========================================================================
 
     async def get_by_domain(
@@ -820,7 +820,7 @@ class WisdomCore:
         include_learned: bool = True,
     ) -> list[WisdomResult]:
         """
-        Get wisdom by mental health domain.
+        Get wisdom by spiritual wellness domain.
 
         Args:
             db: Database session

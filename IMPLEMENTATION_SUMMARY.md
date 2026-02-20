@@ -7,10 +7,10 @@ Successfully implemented the AI Vibe Bot for MindVibe that presents Bhagavad Git
 
 ### 1. Data Structure
 - **Location**: `data/wisdom/verses.json`
-- **Content**: 10 carefully selected wisdom verses covering key mental health themes
+- **Content**: 10 carefully selected wisdom verses covering key spiritual wellness themes
 - **Languages**: English, Hindi, and Sanskrit translations
 - **Features**: 
-  - Each verse tagged with mental health applications
+  - Each verse tagged with spiritual wellness applications
   - Context explaining the practical application
   - Already sanitized English translations
 
@@ -35,7 +35,7 @@ Successfully implemented the AI Vibe Bot for MindVibe that presents Bhagavad Git
     - "Divine" → "universal"
   - **Semantic search**: Finds relevant verses based on query similarity
   - **Theme-based search**: Filter verses by theme
-  - **Application-based search**: Find verses by mental health application
+  - **Application-based search**: Find verses by spiritual wellness application
   - **Multi-language formatting**: Returns verses in requested language
 
 ### 4. API Endpoints
@@ -44,7 +44,7 @@ Successfully implemented the AI Vibe Bot for MindVibe that presents Bhagavad Git
 - **Endpoints**:
 
   1. **POST `/api/wisdom/query`**
-     - Query the wisdom guide with a mental health concern
+     - Query the wisdom guide with a spiritual wellness concern
      - Returns AI-generated guidance + relevant verses
      - Supports language preference (english/hindi/sanskrit)
      - Optional Sanskrit inclusion
@@ -86,7 +86,7 @@ Successfully implemented the AI Vibe Bot for MindVibe that presents Bhagavad Git
 - **Contents**:
   - API endpoint documentation with examples
   - Configuration guide
-  - Mental health applications list
+  - Spiritual wellness applications list
   - Usage examples
   - Future enhancement ideas
 
@@ -96,7 +96,7 @@ Successfully implemented the AI Vibe Bot for MindVibe that presents Bhagavad Git
 All wisdom is presented without any religious context:
 - No mention of Krishna, Arjuna, or Hindu deities
 - No religious terminology in responses
-- Focus on practical mental health applications
+- Focus on practical spiritual wellness applications
 - Timeless principles applicable to anyone
 
 ### 2. Multi-Language Support
@@ -105,7 +105,7 @@ All wisdom is presented without any religious context:
 - Sanskrit: Original Sanskrit verses
 - Users can choose their preferred language
 
-### 3. Mental Health Focus
+### 3. Spiritual Wellness Focus
 Each verse is tagged with specific applications:
 - anxiety_management
 - stress_reduction
@@ -227,7 +227,7 @@ response = requests.post(
 ✓ Supports English, Hindi, and Sanskrit
 ✓ Removes all religious terminology and references
 ✓ Presents wisdom as universal principles
-✓ Applies principles to modern mental health challenges
+✓ Applies principles to modern spiritual wellness challenges
 ✓ Provides practical guidance
 
 ✓ Knowledge base service with sanitization

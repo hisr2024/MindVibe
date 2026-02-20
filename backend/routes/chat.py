@@ -367,7 +367,7 @@ def build_gita_context_comprehensive(verse_results: list, limit: int = 5) -> str
     This function creates rich context for KIAAN responses by extracting:
     - Core teachings from verses
     - Principles and themes
-    - Mental health applications
+    - Spiritual wellness applications
     - Response guidelines
 
     Args:
@@ -407,7 +407,7 @@ Draw from these universal principles:
             principle = getattr(verse, 'principle', '') if hasattr(verse, 'principle') else verse.get('context', '')
             theme = getattr(verse, 'theme', '') if hasattr(verse, 'theme') else verse.get('theme', '')
 
-            # Extract mental health applications
+            # Extract spiritual wellness applications
             mh_apps = None
             if hasattr(verse, 'mental_health_applications'):
                 mh_apps = verse.mental_health_applications
@@ -828,7 +828,7 @@ async def about() -> dict[str, Any]:
         "version": "16.0",
         "model": "gpt-4o-mini",
         "status": "Operational" if openai_optimizer.ready else "Error",
-        "description": "AI guide rooted in Bhagavad Gita wisdom for modern mental wellness (Chat Persistence v16.0)",
+        "description": "AI guide rooted in Bhagavad Gita wisdom for modern spiritual wellness (Chat Persistence v16.0)",
         "gita_verses": "700+",
         "wisdom_style": "Universal principles, no citations",
         "enhancements": [

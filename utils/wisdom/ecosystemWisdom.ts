@@ -406,7 +406,7 @@ export function getRandomWisdomNugget(): string {
 }
 
 /**
- * Get wellness-specific wisdom based on a mental health context.
+ * Get wellness-specific wisdom based on a spiritual wellness context.
  * Maps wellness conditions to appropriate Gita verses.
  */
 export function getWellnessWisdom(

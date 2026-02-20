@@ -203,7 +203,7 @@ z-[40]    - Fixed header navigation
 
 ### Tools Categories:
 All tools organized by category and accessible via the overlay:
-- Mental Wellness Tools
+- Spiritual Wellness Tools
 - Guided Journeys
 - Mindfulness & Meditation
 - Expert Resources

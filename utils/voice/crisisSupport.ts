@@ -56,7 +56,7 @@ const CRISIS_RESOURCES: CrisisResource[] = [
   {
     name: 'Vandrevala Foundation (India)',
     contact: '1860-2662-345',
-    description: 'Mental health support',
+    description: 'Spiritual wellness support',
     available: '24/7',
   },
   {

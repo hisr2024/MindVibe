@@ -37,7 +37,7 @@ export function EcosystemIntro() {
           The MindVibe Ecosystem
         </h2>
         <p className="mx-auto max-w-2xl text-base text-orange-100/80 md:text-lg">
-          A holistic approach to mental wellness, rooted in ancient wisdom and modern practices
+          A holistic approach to spiritual wellness, rooted in ancient wisdom and modern practices
         </p>
       </div>
 
@@ -72,7 +72,7 @@ export function EcosystemIntro() {
       {/* Supporting text */}
       <div className="rounded-2xl border border-orange-500/20 bg-white/5 p-4 text-center">
         <p className="text-sm text-orange-100/75">
-          ✨ Each pillar works together to create a balanced, sustainable approach to mental wellness
+          ✨ Each pillar works together to create a balanced, sustainable approach to spiritual wellness
         </p>
       </div>
     </section>

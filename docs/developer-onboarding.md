@@ -1,6 +1,6 @@
 # Developer Onboarding Guide
 
-Welcome to MindVibe! This guide will help you get started with the project quickly. MindVibe is a mental health app that uses wisdom from the Bhagavad Gita to provide AI-powered guidance in a secular, universally applicable way.
+Welcome to MindVibe! This guide will help you get started with the project quickly. MindVibe is a spiritual wellness app that uses wisdom from the Bhagavad Gita to provide AI-powered guidance in a secular, universally applicable way.
 
 ## Project Overview
 

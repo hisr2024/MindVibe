@@ -72,7 +72,7 @@ const WISDOM_LIBRARY: DailyWisdomEntry[] = [
     modern_title: "Your Path Is Uniquely Yours",
     insight: "Stop comparing your chapter 3 to someone's chapter 20. Your imperfect path, walked authentically, beats someone else's path walked perfectly.",
     secular_theme: 'Authentic self-expression',
-    psychology: "Carl Rogers' concept of congruence: mental health improves when your outer behavior aligns with your inner values. Inauthenticity is exhausting.",
+    psychology: "Carl Rogers' concept of congruence: spiritual wellness improves when your outer behavior aligns with your inner values. Inauthenticity is exhausting.",
     daily_practice: "Identify one area where you're performing someone else's expectations. Ask: 'What would I choose if nobody was watching?'",
     applies_to: ['comparison', 'identity', 'career confusion', 'social pressure'],
   },

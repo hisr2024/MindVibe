@@ -2,7 +2,7 @@
 
 ## Purpose and Vision
 
-The Context Transformation Pipeline was designed to make ancient wisdom from the Bhagavad Gita universally accessible for modern mental health applications. The primary goals are:
+The Context Transformation Pipeline was designed to make ancient wisdom from the Bhagavad Gita universally accessible for modern spiritual wellness applications. The primary goals are:
 
 1. **Universal Accessibility**: Remove cultural and religious barriers
 2. **Clinical Applicability**: Make content suitable for therapeutic settings
@@ -115,7 +115,7 @@ pipeline = ContextTransformationPipeline(strict_mode=False)
 **Enrichment Process**:
 1. Extract philosophical principles from content
 2. Generate keywords for search indexing
-3. Suggest additional mental health applications
+3. Suggest additional spiritual wellness applications
 4. Add chapter-level context
 5. Calculate metadata richness score
 
@@ -253,4 +253,4 @@ pipeline.add_custom_stage('custom', custom_stage)
 
 The Context Transformation Pipeline successfully transforms Bhagavad Gita verses into universally accessible content while maintaining data quality and enabling rich search capabilities. The modular, extensible design ensures it can evolve with future needs while remaining simple to use and maintain.
 
-The key innovation is the sanitization of religious references, making ancient wisdom applicable to modern mental health applications across all cultures and belief systems. This, combined with robust validation and rich metadata enrichment, creates a solid foundation for the MindVibe mental health platform.
+The key innovation is the sanitization of religious references, making ancient wisdom applicable to modern spiritual wellness applications across all cultures and belief systems. This, combined with robust validation and rich metadata enrichment, creates a solid foundation for the MindVibe spiritual wellness platform.

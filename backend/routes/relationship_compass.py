@@ -23,7 +23,7 @@ GITA-GROUNDED PATTERN (v3.2):
 6. FALLBACK USES REAL VERSES - Strictly Gita-grounded, never generic text
 
 DUAL WISDOM SOURCES:
-- Static: 701-verse JSON with Sanskrit, translations, themes, principles, mental health tags
+- Static: 701-verse JSON with Sanskrit, translations, themes, principles, spiritual wellness tags
 - Dynamic: WisdomCore validated learned wisdom (LearnedWisdom table) with verse references
 
 NEW IN v3.2 - Strict Gita Adherence:
@@ -315,7 +315,7 @@ async def _fetch_dynamic_wisdom(
                     results.append(r)
                     seen_ids.add(r.id)
 
-        # Also search by mental health domain if relevant
+        # Also search by spiritual wellness domain if relevant
         if ai_analysis and ai_analysis.primary_emotion:
             # Map emotion to domain
             emotion_domain_map = {

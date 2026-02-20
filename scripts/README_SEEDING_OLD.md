@@ -175,7 +175,7 @@ Each verse includes:
 - `english`: English translation
 - `principle`: Core teaching/principle
 - `theme`: Thematic categorization
-- `mental_health_applications`: List of mental health tags
+- `mental_health_applications`: List of spiritual wellness tags
 - `primary_domain`: Primary emotional domain
 - `secondary_domains`: Secondary domains
 
@@ -238,7 +238,7 @@ Connecting to database...
 ...
 ✅ Chapter 18:  78/ 78 verses
 
-🏷️  Verses with mental health tags: 700
+🏷️  Verses with spiritual wellness tags: 700
 
 🎉 SUCCESS! All 700 verses in database!
 ```

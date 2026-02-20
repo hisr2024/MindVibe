@@ -196,7 +196,7 @@ class GitaValidator:
             A safe, Gita-based response
         """
         fallback_responses = [
-            """In times of uncertainty, remember the eternal wisdom: your duty lies in the action itself, not in worrying about the outcome. When we focus on doing our best in this present moment, we free ourselves from anxiety and discover true inner peace. This principle of karma yoga is the foundation of both spiritual growth and mental wellness.
+            """In times of uncertainty, remember the eternal wisdom: your duty lies in the action itself, not in worrying about the outcome. When we focus on doing our best in this present moment, we free ourselves from anxiety and discover true inner peace. This principle of karma yoga is the foundation of both spiritual growth and spiritual wellness.
 
 This path of karma yoga - acting without attachment to results - is the foundation of lasting calm. Each small step you take with full presence is a victory. Practice letting go of what you cannot control while embracing what you can: your effort, your attitude, your response to life's challenges. This shift in perspective creates immediate relief from stress.
 

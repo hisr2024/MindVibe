@@ -1,8 +1,8 @@
 {
   "welcome": {
     "title": "Welcome to KIAAN",
-    "subtitle": "Your calm, modern mental wellness companion — always here, always supportive.",
-    "description": "Calm, privacy-first mental health companion with journaling, guided chats, and dashboards."
+    "subtitle": "Your calm, modern spiritual companion — always here, always supportive.",
+    "description": "Calm, privacy-first spiritual companion with journaling, guided chats, and dashboards."
   },
   "chat": {
     "title": "Talk to KIAAN",
@@ -25,7 +25,7 @@
     "share": "Share",
     "shareVia": "Share via",
     "privacyNotice": "Privacy Notice",
-    "shareWarning": "You are about to share mental health information. Please ensure you're comfortable sharing this content publicly.",
+    "shareWarning": "You are about to share spiritual wellness information. Please ensure you're comfortable sharing this content publicly.",
     "anonymize": "Anonymize content (remove personal identifiers)",
     "anonymized": "✓ Anonymized content",
     "sharingOriginal": "Sharing original content"

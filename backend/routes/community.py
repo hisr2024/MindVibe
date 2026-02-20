@@ -641,7 +641,7 @@ async def get_crisis_resources():
             name="NAMI Helpline",
             phone="1-800-950-6264",
             url="https://www.nami.org",
-            description="Mental health support and resources",
+            description="Spiritual wellness support and resources",
             availability="Mon-Fri 10am-10pm ET"
         )
     ]
