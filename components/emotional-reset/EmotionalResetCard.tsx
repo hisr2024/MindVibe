@@ -18,7 +18,7 @@ export function EmotionalResetCard({
   if (variant === 'compact') {
     return (
       <Link
-        href="/emotional-reset"
+        href="/tools/emotional-reset"
         className={`group flex items-center justify-between rounded-2xl border border-orange-500/20 bg-black/40 px-4 py-3 text-sm font-semibold text-orange-50 transition hover:border-orange-400/50 ${className}`}
       >
         <div className="flex items-center gap-3">
@@ -46,7 +46,7 @@ export function EmotionalResetCard({
           Process emotions, find calm, and reset your mental state with ancient wisdom in a guided 7-step flow.
         </p>
         <Link
-          href="/emotional-reset"
+          href="/tools/emotional-reset"
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-400/80 via-[#ffb347]/80 to-orange-300/80 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/20 transition hover:scale-[1.02]"
         >
           <span>🧘</span>
@@ -59,7 +59,7 @@ export function EmotionalResetCard({
   // Default variant
   return (
     <Link
-      href="/emotional-reset"
+      href="/tools/emotional-reset"
       className={`block rounded-2xl border border-orange-500/20 bg-black/50 p-5 shadow-[0_12px_48px_rgba(255,115,39,0.12)] transition hover:border-orange-300/70 hover:scale-[1.02] ${className}`}
     >
       <div className="flex items-center gap-3 mb-3">

@@ -8,3 +8,11 @@ Disallow: /admin/
 Disallow: /account/
 Disallow: /profile/
 Disallow: /onboarding/
+
+# Old tool routes (redirected to /tools/*)
+Disallow: /ardha
+Disallow: /karmic-tree
+Disallow: /emotional-reset
+Disallow: /karma-footprint
+Disallow: /relationship-compass
+Disallow: /viyog

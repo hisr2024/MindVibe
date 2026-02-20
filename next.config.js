@@ -81,6 +81,37 @@ const nextConfig = {
         destination: '/introduction',
         permanent: false,
       },
+      // Redirect old tool routes to canonical /tools/* paths to eliminate duplicate content
+      {
+        source: '/ardha',
+        destination: '/tools/ardha',
+        permanent: true,
+      },
+      {
+        source: '/karmic-tree',
+        destination: '/tools/karmic-tree',
+        permanent: true,
+      },
+      {
+        source: '/emotional-reset',
+        destination: '/tools/emotional-reset',
+        permanent: true,
+      },
+      {
+        source: '/karma-footprint',
+        destination: '/tools/karma-footprint',
+        permanent: true,
+      },
+      {
+        source: '/relationship-compass',
+        destination: '/tools/relationship-compass',
+        permanent: true,
+      },
+      {
+        source: '/viyog',
+        destination: '/tools/viyog',
+        permanent: true,
+      },
     ];
   },
 };
