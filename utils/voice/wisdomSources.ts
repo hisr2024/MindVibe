@@ -116,7 +116,7 @@ export const VERIFIED_SOURCES: WisdomSource[] = [
     type: 'teacher',
     trustScore: 90,
     languages: ['en', 'hi'],
-    description: 'Contemporary spiritual teacher known for applying Gita wisdom to modern life problems - career, relationships, mental health. Extremely popular with young audiences for his direct, no-nonsense teaching style.',
+    description: 'Contemporary spiritual teacher known for applying Gita wisdom to modern life problems - career, relationships, spiritual wellness. Extremely popular with young audiences for his direct, no-nonsense teaching style.',
     tradition: 'Advaita Vedanta / Contemporary',
     isActive: true,
   },

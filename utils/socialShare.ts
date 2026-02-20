@@ -44,7 +44,7 @@ export function sanitizeShareContent(text: string, anonymize: boolean = false): 
 export function formatShareContent(text: string, anonymize: boolean = false): string {
   const sanitized = sanitizeShareContent(text, anonymize);
   const prefix = 'Shared from MindVibe - KIAAN AI:\n\n';
-  const suffix = '\n\n💙 Discover mental wellness with KIAAN at mindvibe.life';
+  const suffix = '\n\n💙 Discover spiritual wellness with KIAAN at mindvibe.life';
 
   return `${prefix}${sanitized}${suffix}`;
 }

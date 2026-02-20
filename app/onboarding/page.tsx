@@ -96,7 +96,7 @@ export default function OnboardingPage() {
     {
       id: 'welcome',
       title: 'Welcome to MindVibe',
-      description: 'Your calm, privacy-first mental health companion',
+      description: 'Your calm, privacy-first spiritual companion',
       content: <WelcomeScreen />,
     },
     {

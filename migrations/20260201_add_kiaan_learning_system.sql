@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS learned_wisdom (
     shad_ripu_tags JSONB NOT NULL DEFAULT '[]'::jsonb,  -- Inner enemies
     keywords JSONB NOT NULL DEFAULT '[]'::jsonb,
 
-    -- Mental health mapping
+    -- Spiritual wellness mapping
     primary_domain VARCHAR(64),
     secondary_domains JSONB,
     mental_health_applications JSONB,

@@ -95,7 +95,7 @@ class UserEmotionalLog(Base):
 
 
 class UserDailyAnalysis(Base):
-    """Automated daily mental health analysis and insights."""
+    """Automated daily spiritual wellness analysis and insights."""
 
     __tablename__ = "user_daily_analysis"
 
@@ -159,7 +159,7 @@ class UserWeeklyReflection(Base):
 
 
 class UserAssessment(Base):
-    """Structured weekly mental health assessments with Gita wisdom."""
+    """Structured weekly spiritual wellness assessments with Gita wisdom."""
 
     __tablename__ = "user_assessments"
 

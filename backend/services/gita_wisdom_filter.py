@@ -337,7 +337,7 @@ class GitaWisdomFilter:
         for verse in self._verses:
             score = 0.0
 
-            # Check mental health applications
+            # Check spiritual wellness applications
             mh_apps = verse.get("mental_health_applications", [])
             for app in mh_apps:
                 if any(k in app.lower() for k in expanded_keywords):

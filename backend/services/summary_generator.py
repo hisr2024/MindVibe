@@ -143,7 +143,7 @@ class SummaryGenerator:
             lang_name = language_map.get(language, language)
             language_instruction = f"\nGenerate the summary in {lang_name}."
 
-        return f"""You are a sacred wisdom summarizer for KIAAN, a mental wellness companion.
+        return f"""You are a sacred wisdom summarizer for KIAAN, a spiritual wellness companion.
 
 YOUR TASK: Create a concise, to-the-point summary (60-80 words) of an elaborate KIAAN response.{language_instruction}
 

@@ -2078,7 +2078,7 @@ class CompanionFriendEngine:
         """Generate AI response: behavioral science comprehension + Gita-only guidance.
 
         Wisdom source priority:
-        1. Guidance Engine DB verse (db_wisdom_verse) — richest data (mental health tags, modern contexts)
+        1. Guidance Engine DB verse (db_wisdom_verse) — richest data (spiritual wellness tags, modern contexts)
         2. SakhaWisdomEngine JSON corpus — 5-factor contextual scoring over 700 verses
         3. WISDOM_CORE static dict — hardcoded Gita principles per mood
         """

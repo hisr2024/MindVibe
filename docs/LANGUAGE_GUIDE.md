@@ -2,7 +2,7 @@
 
 ## Overview
 
-MindVibe supports 17 languages to ensure mental health support is accessible to users worldwide. This guide explains how to switch languages and what features are available in your preferred language.
+MindVibe supports 17 languages to ensure spiritual wellness support is accessible to users worldwide. This guide explains how to switch languages and what features are available in your preferred language.
 
 ## Supported Languages
 
@@ -74,7 +74,7 @@ MindVibe automatically detects your browser's language settings:
 
 ### KIAAN Multi-Language Support
 
-KIAAN, our AI mental health companion, provides multi-language support:
+KIAAN, our AI spiritual companion, provides multi-language support:
 
 - **Language Detection**: KIAAN automatically detects the language you're typing in
 - **Response Language**: KIAAN responds in the same language you use

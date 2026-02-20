@@ -42,7 +42,7 @@ class KarmaResetService:
         "self-forgive": ["self_compassion", "acceptance", "peace"],
     }
     
-    # Map repair types to mental health applications
+    # Map repair types to spiritual wellness applications
     REPAIR_TYPE_APPLICATIONS = {
         "apology": ["forgiveness", "compassion", "humility"],
         "clarification": ["clear_communication", "truth", "understanding"],
@@ -264,7 +264,7 @@ class KarmaResetService:
     
     def get_repair_applications(self, repair_type: str) -> list[str]:
         """
-        Get mental health application tags for a repair type.
+        Get spiritual wellness application tags for a repair type.
         
         Args:
             repair_type: Type of repair action

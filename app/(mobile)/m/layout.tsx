@@ -11,7 +11,7 @@ import { MobileErrorBoundary } from '@/components/mobile/MobileErrorBoundary'
 export const metadata: Metadata = {
   title: {
     template: '%s | MindVibe',
-    default: 'MindVibe - Your Mental Wellness Companion',
+    default: 'MindVibe - Your Spiritual Wellness Companion',
   },
   description: 'Find inner peace with AI-powered wisdom guidance, journaling, and transformational journeys.',
   appleWebApp: {

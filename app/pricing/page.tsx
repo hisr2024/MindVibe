@@ -631,7 +631,7 @@ export default function PricingPage() {
             <div>
               <h2 className="text-xl font-semibold text-orange-50 mb-2">The KIAAN Promise</h2>
               <p className="text-sm text-orange-100/70 mb-4">
-                Every user receives the same quality of guidance from KIAAN—the only difference is how many questions you can ask each month. We believe mental wellness should be accessible to everyone.
+                Every user receives the same quality of guidance from KIAAN—the only difference is how many questions you can ask each month. We believe spiritual wellness should be accessible to everyone.
               </p>
               <ul className="grid md:grid-cols-2 gap-2">
                 {[

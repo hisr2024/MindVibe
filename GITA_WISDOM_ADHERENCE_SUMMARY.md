@@ -43,7 +43,7 @@ Validates against 10+ Gita indicators:
 - "Chapter", "Verse"
 
 ### 4. Enhanced Template Responses
-**Coverage:** 10+ mental health themes
+**Coverage:** 10+ spiritual wellness themes
 
 Each template response now includes:
 - Specific Gita chapter and verse citations (e.g., "Chapter 2, Verse 47")
@@ -122,7 +122,7 @@ Self (Atman), which remains peaceful beyond all circumstances.
 ## Impact
 
 ### Before This Enhancement:
-❌ Generic mental health advice
+❌ Generic spiritual wellness advice
 ❌ No clear connection to Gita
 ❌ Indistinguishable from standard AI
 ❌ Loose structure
@@ -189,4 +189,4 @@ This implementation successfully strengthens Gita wisdom adherence by:
 4. **Preventing** generic advice without Gita foundation
 5. **Ensuring** every response is clearly differentiated from generic AI
 
-The chatbot now provides genuine Bhagavad Gita wisdom rather than generic mental health advice dressed in spiritual language.
+The chatbot now provides genuine Bhagavad Gita wisdom rather than generic spiritual wellness advice dressed in spiritual language.

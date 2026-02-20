@@ -133,7 +133,7 @@ class TestWisdomGuideGitaAdherence:
         wisdom_response = data.get("response") or data.get("guidance", "")
 
         # Response should not be generic - should have Gita foundation
-        # Check that it's not just generic mental health advice
+        # Check that it's not just generic spiritual wellness advice
         generic_only_phrases = [
             "just relax",
             "think positive",

@@ -8,7 +8,7 @@
 
 ## 📋 Summary
 
-This pull request introduces **four major enhancements** to MindVibe, adding advanced features for mental wellness support, community engagement, and personalized analytics.
+This pull request introduces **four major enhancements** to MindVibe, adding advanced features for spiritual wellness support, community engagement, and personalized analytics.
 
 **Total Changes**: 16,465+ lines across 47 files
 
@@ -100,7 +100,7 @@ This pull request introduces **four major enhancements** to MindVibe, adding adv
 **Features:**
 - ML-powered mood trend analysis (linear regression)
 - 7-day mood forecasting with confidence intervals
-- Mental health risk assessment scoring
+- Spiritual wellness risk assessment scoring
 - Weekly pattern detection
 - Anomaly detection using IQR algorithm
 - 4-component wellness scoring system
@@ -473,4 +473,4 @@ All code has been:
 
 **Ready for Review** ✅
 
-This PR represents a significant upgrade to MindVibe's capabilities, providing users with advanced tools for mental wellness support while maintaining the highest standards of code quality, security, and user safety.
+This PR represents a significant upgrade to MindVibe's capabilities, providing users with advanced tools for spiritual wellness support while maintaining the highest standards of code quality, security, and user safety.

@@ -1,7 +1,7 @@
 /**
  * Risk Assessment Component
  *
- * Displays mental health risk score with factor breakdown and recommendations.
+ * Displays spiritual wellness risk score with factor breakdown and recommendations.
  *
  * Quantum Enhancement #6: Advanced Analytics Dashboard
  */
@@ -41,7 +41,7 @@ const RISK_LEVEL_CONFIG = {
     bg: 'rgba(16, 185, 129, 0.1)',
     icon: CheckCircle,
     label: 'Low Risk',
-    description: 'Stable mental health patterns'
+    description: 'Stable spiritual wellness patterns'
   },
   medium: {
     color: '#F59E0B',
@@ -115,7 +115,7 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
           <Shield className="h-5 w-5 text-orange-400" />
           Risk Assessment
         </h3>
-        <p className="text-sm text-orange-100/60">Mental health stability indicators</p>
+        <p className="text-sm text-orange-100/60">Spiritual wellness stability indicators</p>
       </div>
 
       {/* Risk Score Gauge */}
@@ -274,7 +274,7 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
       <div className="mt-4 p-3 rounded-2xl border border-yellow-400/20 bg-yellow-950/10">
         <p className="text-xs text-yellow-100/70 leading-relaxed">
           ⚠️ <strong>Important:</strong> This assessment is for informational purposes only and is not a medical
-          diagnosis. If you&apos;re experiencing a mental health crisis, please contact a professional or call your local
+          diagnosis. If you&apos;re experiencing a crisis, please contact a professional or call your local
           crisis hotline.
         </p>
       </div>

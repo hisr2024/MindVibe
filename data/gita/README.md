@@ -1,12 +1,12 @@
 # Bhagavad Gita Data
 
-This directory contains all 700 verses of the Bhagavad Gita from authentic Indian sources, integrated into the MindVibe KIAAN ecosystem for mental health and wellness guidance.
+This directory contains all 700 verses of the Bhagavad Gita from authentic Indian sources, integrated into the MindVibe KIAAN ecosystem for spiritual wellness guidance.
 
 ## 📁 Files
 
 - **`gita_verses_complete.json`** - Complete database of all 700 authentic Gita verses (PRIMARY DATA SOURCE)
 - **`sample_verses_structure.json`** - Example structure showing 10 representative verses with all required fields
-- **`mental_health_tag_guide.md`** - Comprehensive methodology for tagging verses with mental health applications
+- **`mental_health_tag_guide.md`** - Comprehensive methodology for tagging verses with spiritual wellness applications
 - **`chapter_metadata.json`** - Metadata for all 18 chapters
 - **`gita_verses_starter.json`** - Initial sample verses (legacy)
 - **`chapters/`** - Individual chapter files (if applicable)
@@ -93,7 +93,7 @@ The Bhagavad Gita contains exactly **700 verses** across **18 chapters**:
 | 18 | 78 | मोक्ष संन्यास योग | Liberation & Surrender |
 | **TOTAL** | **700** | | |
 
-See [docs/BHAGAVAD_GITA_IMPLEMENTATION.md](../../docs/BHAGAVAD_GITA_IMPLEMENTATION.md) for complete breakdown with mental health applications.
+See [docs/BHAGAVAD_GITA_IMPLEMENTATION.md](../../docs/BHAGAVAD_GITA_IMPLEMENTATION.md) for complete breakdown with spiritual wellness applications.
 
 ## ✅ Validation
 
@@ -113,12 +113,12 @@ python scripts/validate_gita_authenticity.py data/gita/sample_verses_structure.j
 - ✅ Sanskrit is valid Devanagari (U+0900 to U+097F)
 - ✅ Transliteration uses IAST diacritics
 - ✅ All required fields present
-- ✅ Mental health tags are valid
+- ✅ Spiritual wellness tags are valid
 - ✅ No duplicate verses
 
-## 🏷️ Mental Health Tagging
+## 🏷️ Spiritual Wellness Tagging
 
-All verses are tagged with mental health applications following evidence-based methodology.
+All verses are tagged with spiritual wellness applications following evidence-based methodology.
 
 ### Primary Domains
 
@@ -134,7 +134,7 @@ Each verse has **one primary domain**:
 - `fear` - Courage, fearlessness
 - `grief` - Loss, impermanence
 
-### Mental Health Applications
+### Spiritual Wellness Applications
 
 Each verse can have **3-5 specific applications**:
 - `outcome_detachment` - Reducing anxiety by focusing on effort
@@ -168,7 +168,7 @@ All data in this directory must meet these standards:
 - All required fields filled
 - Word meanings included
 
-### ✅ Mental Health Tagging
+### ✅ Spiritual Wellness Tagging
 - Evidence-based applications
 - Aligned with modern psychology (CBT, DBT, ACT, CFT, MBSR)
 - Cultural sensitivity maintained
@@ -220,12 +220,12 @@ Start with `sample_verses_structure.json` as your template. Each verse must have
 2. Verify meaning aligns with Sanskrit
 3. Keep language accessible
 
-### Step 3: Tag with Mental Health Applications
+### Step 3: Tag with Spiritual Wellness Applications
 
 Follow the methodology in `mental_health_tag_guide.md`:
 
 1. Read and understand the verse
-2. Identify the primary mental health domain
+2. Identify the primary spiritual wellness domain
 3. List 3-5 specific applications
 4. Add 0-3 secondary domains
 5. Validate clinical relevance
@@ -264,29 +264,29 @@ For complete implementation details, see:
   - Data sources and requirements
   - Canonical verse distribution
   - JSON structure specification
-  - Mental health tagging methodology
+  - Spiritual wellness tagging methodology
   - Database schema
   - Seeding process
   - KIAAN integration guidelines
   - Testing and validation
   - Resources and references
 
-- **[mental_health_tag_guide.md](mental_health_tag_guide.md)** - Mental health tagging methodology
+- **[mental_health_tag_guide.md](mental_health_tag_guide.md)** - Spiritual wellness tagging methodology
   - Primary domains with definitions
-  - Mental health applications with evidence
+  - Spiritual wellness applications with evidence
   - Tagging principles
   - Key verse collections by need
   - Implementation workflow
 
 ## 🔐 Data Integrity
 
-This data represents sacred wisdom being applied to mental health. We maintain the highest standards:
+This data represents sacred wisdom being applied to spiritual wellness. We maintain the highest standards:
 
 - **No modifications** to authentic Sanskrit text
 - **No substitutions** with Western or non-traditional sources  
 - **Respectful integration** honoring the spiritual depth
 - **Cultural sensitivity** in all applications
-- **Evidence-based** mental health connections
+- **Evidence-based** spiritual wellness connections
 - **Quality validation** at every step
 
 ## 🤝 Contributing
@@ -306,7 +306,7 @@ When contributing verse data:
 For questions or issues:
 - See documentation in `docs/`
 - Check validation script output
-- Review mental health tagging guide
+- Review spiritual wellness tagging guide
 - Open GitHub issue if needed
 
 ---

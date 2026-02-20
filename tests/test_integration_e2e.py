@@ -262,7 +262,7 @@ def test_scenario_3_analytics_intelligence_flow():
         print(f"   ✓ 30-day average: {trend.moving_avg_30d:.2f}")
 
         # Step 3: Risk assessment
-        print("Step 3: Perform mental health risk assessment...")
+        print("Step 3: Perform spiritual wellness risk assessment...")
         risk = analytics_service.calculate_risk_score(mood_data)
         assert 'score' in risk, "Risk should have score"
         assert 'level' in risk, "Risk should have level"

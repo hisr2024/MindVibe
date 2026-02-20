@@ -59,7 +59,7 @@ export function MinimalFeatures() {
           {t('home.features.title', 'Key Features')}
         </h2>
         <p className="mt-2 text-sm text-orange-100/70">
-          {t('home.features.subtitle', 'Privacy-first tools designed for your mental wellness journey')}
+          {t('home.features.subtitle', 'Privacy-first tools designed for your spiritual wellness journey')}
         </p>
       </motion.div>
 

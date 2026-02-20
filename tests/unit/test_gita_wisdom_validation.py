@@ -201,11 +201,11 @@ class TestWisdomEngineGitaAdherence:
         assert "**Deeper Understanding:**" in response
 
     def test_no_generic_mental_health_advice(self):
-        """Test that responses don't use generic mental health language without Gita context"""
+        """Test that responses don't use generic spiritual wellness language without Gita context"""
         generic_phrases = [
             "cognitive behavioral therapy",
             "talk to a therapist",
-            "mental health professional",
+            "spiritual wellness professional",
             "psychology",
             "neuroscience"
         ]

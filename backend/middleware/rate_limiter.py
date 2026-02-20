@@ -13,7 +13,7 @@ shared global limit. This is intentional because:
 1. Different operations have different costs (auth is more sensitive than reads)
 2. Allows legitimate usage patterns (browsing wisdom while chatting)
 3. Prevents one endpoint's load from blocking another
-4. Aligns with mental health app UX (don't block someone in crisis)
+4. Aligns with spiritual wellness app UX (don't block someone in crisis)
 
 If a shared user-level limit is needed in the future, implement a Redis-backed
 counter that tracks total requests across all endpoints per user_id.

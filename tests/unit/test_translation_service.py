@@ -153,7 +153,7 @@ class TestTranslationService:
     @pytest.mark.asyncio
     async def test_translate_chat_response(self, service):
         """Test convenience method for chat responses"""
-        response = "I'm here to help you with your mental wellness journey."
+        response = "I'm here to help you with your spiritual wellness journey."
         expected_translation = "Estoy aquí para ayudarte con tu viaje de bienestar mental."
         
         # Mock the translator with async mock

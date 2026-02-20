@@ -7,18 +7,18 @@ data sources, specifically focused on Bhagavad Gita teachings and related dharmi
 The service extends KIAAN's existing 700+ Gita verse database with:
 1. Authentic commentaries from recognized scholars (Gita Press, Swami Sivananda, etc.)
 2. Yoga paths as taught in the Gita (Karma, Bhakti, Jnana, Dhyana)
-3. Mental health applications rooted in Gita philosophy
+3. Spiritual wellness applications rooted in Gita philosophy
 4. Government wellness resources aligned with Gita principles
 5. Traditional practices referenced in the Gita
 
 Data Sources:
 - Gita Press, Gorakhpur - Authentic Gita translations and commentaries
 - Ministry of AYUSH - Yoga as taught in ancient texts including Gita
-- National Health Portal - Mental wellness through traditional wisdom
+- National Health Portal - Spiritual wellness through traditional wisdom
 - ICMR - Research on meditation and yoga practices from Gita tradition
 
 All content maintains the sanctity of Gita teachings while providing
-practical mental health applications.
+practical spiritual wellness applications.
 """
 
 import hashlib
@@ -57,7 +57,7 @@ class GitaYogaPath(str, Enum):
 
 
 class GitaMentalHealthTheme(str, Enum):
-    """Mental health themes derived from Bhagavad Gita teachings."""
+    """Spiritual wellness themes derived from Bhagavad Gita teachings."""
 
     EQUANIMITY = "equanimity"  # Samatva - Chapter 2
     DETACHMENT = "detachment"  # Vairagya - Chapter 2, 6
@@ -125,7 +125,7 @@ class SthitaprajnaQuality:
     """
     Qualities of the Sthitaprajna (person of steady wisdom) from Gita 2.54-72.
 
-    These verses form the foundation of mental health in Gita philosophy.
+    These verses form the foundation of spiritual wellness in Gita philosophy.
     """
 
     id: str
@@ -144,7 +144,7 @@ class IndianGitaSourcesService:
     This service extends KIAAN's Gita verse database with:
     - Authentic commentaries from recognized scholars
     - Yoga paths as taught in the Gita
-    - Mental health applications rooted in Gita philosophy
+    - Spiritual wellness applications rooted in Gita philosophy
     - Practical exercises based on Gita teachings
     """
 
@@ -169,7 +169,7 @@ class IndianGitaSourcesService:
 
     def _load_gita_teachings(self) -> list[GitaTeaching]:
         """
-        Load core Bhagavad Gita teachings for mental health.
+        Load core Bhagavad Gita teachings for spiritual wellness.
 
         Based on authentic sources:
         - Gita Press translations
@@ -217,7 +217,7 @@ in success and failure. Equanimity is called yoga.
 This teaching addresses the emotional turbulence caused by life's inevitable
 ups and downs. When we develop equanimity, we remain stable whether praised
 or criticized, whether succeeding or failing. This is the essence of
-mental health - not the absence of challenges, but stability amidst them.""",
+spiritual wellness - not the absence of challenges, but stability amidst them.""",
                 sanskrit_verse="योगस्थः कुरु कर्माणि सङ्गं त्यक्त्वा धनञ्जय। सिद्ध्यसिद्ध्योः समो भूत्वा समत्वं योग उच्यते॥",
                 verse_reference="2.48",
                 hindi_translation="योग में स्थित होकर कर्म कर, आसक्ति त्यागकर और सिद्धि-असिद्धि में समान रहकर। यह समत्व ही योग कहलाता है।",
@@ -236,7 +236,7 @@ steady, who is absorbed in the Self? How does one of steady wisdom speak,
 sit, and walk?'
 
 Krishna's response (2.55-72) provides the most complete description of
-mental health in any ancient text. The Sthitaprajna:
+spiritual wellness in any ancient text. The Sthitaprajna:
 
 - Is satisfied in the Self alone (2.55)
 - Is unshaken by sorrows (2.56)
@@ -322,7 +322,7 @@ deeper peace → greater happiness.""",
 
 Fearlessness, purity of heart, steadfastness in knowledge and yoga...
 
-Fear is the root of many mental health challenges - anxiety, phobias,
+Fear is the root of many spiritual wellness challenges - anxiety, phobias,
 avoidance, paralysis. The Gita teaches that fearlessness comes from:
 
 1. Knowledge of the eternal nature of the Self (2.19-20)
@@ -621,7 +621,7 @@ compassion and freedom from hostility toward any creature.""",
     def _load_sthitaprajna_qualities(self) -> list[SthitaprajnaQuality]:
         """
         Load the qualities of the Sthitaprajna (person of steady wisdom)
-        from Bhagavad Gita 2.54-72 - the Gita's model of mental health.
+        from Bhagavad Gita 2.54-72 - the Gita's model of spiritual wellness.
         """
         return [
             SthitaprajnaQuality(
@@ -630,7 +630,7 @@ compassion and freedom from hostility toward any creature.""",
                 sanskrit_term="Atma Tushti",
                 verse_reference="2.55",
                 description="When one completely casts off all desires of the mind and is satisfied in the Self by the Self alone, then one is said to be of steady wisdom.",
-                mental_health_application="The ability to find contentment from within, not depending on external circumstances for happiness. This is the foundation of lasting mental wellness.",
+                mental_health_application="The ability to find contentment from within, not depending on external circumstances for happiness. This is the foundation of lasting spiritual wellness.",
                 practical_steps=[
                     "Notice moments of contentment that don't depend on external things",
                     "Cultivate gratitude for your own being, not just possessions",
@@ -773,7 +773,7 @@ compassion and freedom from hostility toward any creature.""",
 
         Args:
             query: Search query text
-            theme: Optional mental health theme filter
+            theme: Optional spiritual wellness theme filter
             yoga_path: Optional yoga path filter
             limit: Maximum results
 
@@ -806,7 +806,7 @@ compassion and freedom from hostility toward any creature.""",
             keyword_matches = sum(1 for kw in teaching.keywords if kw.lower() in query_lower)
             score += keyword_matches * 0.15
 
-            # Mental health benefit match
+            # Spiritual wellness benefit match
             if teaching.mental_health_benefit and query_lower in teaching.mental_health_benefit.lower():
                 score += 0.2
 
@@ -822,10 +822,10 @@ compassion and freedom from hostility toward any creature.""",
         issue: str,
     ) -> dict[str, Any]:
         """
-        Get recommended Gita-based practice for a mental health issue.
+        Get recommended Gita-based practice for a spiritual wellness issue.
 
         Args:
-            issue: The mental health issue (anxiety, stress, depression, etc.)
+            issue: The spiritual wellness issue (anxiety, stress, depression, etc.)
 
         Returns:
             Recommended practices from Gita teachings

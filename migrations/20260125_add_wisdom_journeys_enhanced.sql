@@ -170,7 +170,7 @@ CREATE INDEX IF NOT EXISTS idx_user_journey_step_state_delivered ON user_journey
 ALTER TABLE wisdom_verses ADD COLUMN IF NOT EXISTS enemy_tags JSONB DEFAULT '[]';
 ALTER TABLE wisdom_verses ADD COLUMN IF NOT EXISTS virtue_tags JSONB DEFAULT '[]';
 
--- Add mental health tags if not present
+-- Add spiritual wellness tags if not present
 ALTER TABLE gita_verses ADD COLUMN IF NOT EXISTS enemy_tags JSONB DEFAULT '[]';
 ALTER TABLE gita_verses ADD COLUMN IF NOT EXISTS virtue_tags JSONB DEFAULT '[]';
 ALTER TABLE gita_verses ADD COLUMN IF NOT EXISTS journey_relevance_score NUMERIC(3, 2) DEFAULT 0.5;

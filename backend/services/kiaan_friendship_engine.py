@@ -12,7 +12,7 @@ MODE 2 - GITA GUIDE (activated on request or detected need):
     When user explicitly asks for guidance, is in distress, or seeks meaning.
     KIAAN shifts to a wise, grounded guide who interprets Bhagavad Gita wisdom
     through a MODERN, SECULAR lens - making ancient verse applicable to today's
-    careers, relationships, mental health, and daily decisions.
+    careers, relationships, spiritual wellness, and daily decisions.
 
 Mode detection is automatic via intent analysis, but user can also toggle.
 
@@ -736,7 +736,7 @@ Psychology connection: {chapter_insight['psychology']}
 
 Generate:
 1. A modern interpretation (no religious jargon, pure psychology + practical wisdom)
-2. How this applies to daily life in 2025 (careers, relationships, mental health)
+2. How this applies to daily life in 2025 (careers, relationships, spiritual wellness)
 3. One specific, actionable practice for today
 4. The behavioral science behind why this works
 """

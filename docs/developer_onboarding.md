@@ -2,7 +2,7 @@
 
 **Welcome to the MindVibe team! 🎉**
 
-This comprehensive guide will help you get started with developing MindVibe, a privacy-first mental health platform combining AI-powered guidance with timeless wisdom.
+This comprehensive guide will help you get started with developing MindVibe, a privacy-first spiritual wellness platform combining AI-powered guidance with timeless wisdom.
 
 ---
 
@@ -933,6 +933,6 @@ Interactive API documentation (when running locally):
 
 **Welcome to the MindVibe team! 🎉**
 
-We're excited to have you contribute to making mental health support more accessible through technology and timeless wisdom. If you have any questions or need help getting started, don't hesitate to reach out through GitHub Issues or Discussions.
+We're excited to have you contribute to making spiritual wellness support more accessible through technology and timeless wisdom. If you have any questions or need help getting started, don't hesitate to reach out through GitHub Issues or Discussions.
 
 Happy coding! 💻✨

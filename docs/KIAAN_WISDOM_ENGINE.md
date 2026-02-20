@@ -38,13 +38,13 @@ KIAAN (Krishna-Inspired AI Assistant for Nurturing) is MindVibe's AI-powered wel
 
 2. **GitaService** (`backend/services/gita_service.py`)
    - Database access layer for Gita verses
-   - Mental health tag filtering
+   - Spiritual wellness tag filtering
    - Domain-based search
    - Verse format conversion
 
 3. **GitaVerse Model** (`backend/models.py`)
    - Database schema for verses
-   - Mental health application tags
+   - Spiritual wellness application tags
    - Primary/secondary domain categorization
 
 ## Search Pipeline
@@ -66,7 +66,7 @@ User Query → Preprocessing → Semantic Search → Tag Boost → Ranking → R
 
 1. **Base Score**: SequenceMatcher similarity between query and verse text
 2. **Context Score**: SequenceMatcher similarity between query and verse context
-3. **Tag Boost**: +0.2 bonus if query keywords match mental health applications
+3. **Tag Boost**: +0.2 bonus if query keywords match spiritual wellness applications
 4. **Final Score**: max(base_score, context_score) + tag_boost
 
 ### Example Search
@@ -85,9 +85,9 @@ results = await wisdom_kb.search_relevant_verses_full_db(
 # - Sorted by descending score
 ```
 
-## Mental Health Categories
+## Spiritual Wellness Categories
 
-The wisdom engine supports 17 mental health application categories:
+The wisdom engine supports 17 spiritual wellness application categories:
 
 | Category | Description |
 |----------|-------------|
@@ -147,7 +147,7 @@ CREATE TABLE gita_verses (
     principle VARCHAR(256) NOT NULL,
     theme VARCHAR(256) NOT NULL,
     
-    -- Mental health extensions
+    -- Spiritual wellness extensions
     mental_health_applications JSON,  -- Array of MH categories
     primary_domain VARCHAR(64),       -- Primary emotional domain
     secondary_domains JSON,           -- Array of secondary domains
@@ -208,7 +208,7 @@ for result in results:
     print(f"{verse['verse_id']}: {verse['english'][:50]}... (score: {score:.3f})")
 ```
 
-### Filter by Mental Health Application
+### Filter by Spiritual Wellness Application
 
 ```python
 from backend.services.gita_service import GitaService
@@ -238,7 +238,7 @@ verses = await GitaService.search_by_primary_domain(
 
 1. PostgreSQL database with gita_verses table
 2. 700+ verses seeded (run `seed_complete_gita.py`)
-3. Mental health tags migrated (run `migrate_mental_health_tags.py`)
+3. Spiritual wellness tags migrated (run `migrate_mental_health_tags.py`)
 
 ### Migration Steps
 
@@ -249,7 +249,7 @@ psql $DATABASE_URL -f migrations/20251207_add_mental_health_tags_to_gita.sql
 # 2. Seed Gita verses (if not already done)
 RAPID_API_KEY=<your-key> python scripts/seed_complete_gita.py
 
-# 3. Migrate mental health tags
+# 3. Migrate spiritual wellness tags
 python scripts/migrate_mental_health_tags.py
 
 # 4. Verify verse count
@@ -286,7 +286,7 @@ pytest tests/unit/test_wisdom_kb_full_database.py -v
 
 ### Search returns same verses repeatedly
 
-1. Ensure mental health tags are migrated:
+1. Ensure spiritual wellness tags are migrated:
    ```sql
    SELECT COUNT(*) FROM gita_verses WHERE mental_health_applications IS NOT NULL;
    ```
@@ -334,7 +334,7 @@ MindVibe KIAAN now has access to **all 700 verses** of the Bhagavad Gita across 
 - ✅ 700 authentic verses (complete coverage)
 - ✅ Sanskrit (Devanagari), Hindi, English translations
 - ✅ Word-by-word meanings (where available)
-- ✅ Mental health application tags
+- ✅ Spiritual wellness application tags
 - ✅ Modern context mapping
 - ✅ Psychological domain classification
 
@@ -372,7 +372,7 @@ python scripts/seed_complete_gita.py
 # Use chapter-wise files instead
 python scripts/seed_complete_gita.py --chapters
 
-# Apply mental health tags
+# Apply spiritual wellness tags
 python scripts/migrate_mental_health_tags.py
 
 # Verify completeness
@@ -396,7 +396,7 @@ from backend.services.wisdom_kb import WisdomKnowledgeBase
 - **Self-mastery**: 90+ verses
 - **Purpose & duty**: 70+ verses
 
-### Key Verses for Mental Health
+### Key Verses for Spiritual Wellness
 
 | Verse | Teaching | Applications |
 |-------|----------|--------------|
@@ -534,7 +534,7 @@ the eternal observer, not the temporary doer-result chain. 💙
 #### ❌ Invalid Generic Response
 
 ```
-According to recent studies, stress management is important for mental health. 
+According to recent studies, stress management is important for spiritual wellness. 
 Research indicates that mindfulness and therapy can help reduce anxiety. Experts 
 recommend practicing deep breathing and seeking professional help if needed.
 
@@ -641,7 +641,7 @@ The search algorithm now combines:
 
 1. **Keyword Matching**: Direct text similarity
 2. **Emotion Mapping**: Maps emotions to relevant themes
-3. **Mental Health Tags**: Boosts verses with relevant applications
+3. **Spiritual Wellness Tags**: Boosts verses with relevant applications
 4. **Theme Expansion**: Searches related themes for more results
 
 This ensures comprehensive coverage across all 700 verses while maintaining relevance.

@@ -6,7 +6,7 @@ import re
 class MetadataEnricher:
     """Enriches verse data with metadata and additional information."""
 
-    # Mental health application keywords
+    # Spiritual wellness application keywords
     APPLICATION_KEYWORDS = {
         "anxiety_management": ["anxiety", "worry", "fear", "nervous"],
         "stress_reduction": ["stress", "calm", "relax", "peace"],
@@ -94,7 +94,7 @@ class MetadataEnricher:
     @classmethod
     def suggest_applications(cls, verse: dict) -> list[str]:
         """
-        Suggest mental health applications based on content.
+        Suggest spiritual wellness applications based on content.
         
         Args:
             verse: Verse dictionary
@@ -184,7 +184,7 @@ class MetadataEnricher:
             if field in verse and verse[field]:
                 score += 0.08
         
-        # Mental health applications (0.2)
+        # Spiritual wellness applications (0.2)
         total_weight += 0.2
         apps = verse.get("mental_health_applications", {})
         if isinstance(apps, dict):

@@ -410,7 +410,7 @@ ModuleNotFoundError: No module named 'openai'
 ```
 **Solution**: Run `pip install -r requirements.txt`
 
-## Common Mental Health Applications
+## Common Spiritual Wellness Applications
 
 The wisdom verses cover these applications:
 

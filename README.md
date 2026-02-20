@@ -1,6 +1,6 @@
 # MindVibe 🧠✨
 
-**A privacy-first mental health platform combining AI-powered guidance with timeless wisdom for universal well-being.**
+**A privacy-first spiritual wellness platform combining AI-powered guidance with timeless wisdom for universal well-being.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -11,8 +11,8 @@
 
 ## 🌟 **Overview**
 
-MindVibe is a comprehensive mental health platform that provides:
-- 🤖 **AI-Powered Chatbot** - Compassionate mental health guidance
+MindVibe is a comprehensive spiritual wellness platform that provides:
+- 🤖 **AI-Powered Chatbot** - Compassionate spiritual wellness guidance
 - 📊 **Mood Tracking** - Track and analyze your emotional patterns
 - 📝 **Encrypted Journal** - Private, secure journaling
 - 🌍 **Universal Wisdom** - Ancient teachings without religious terminology
@@ -267,7 +267,7 @@ MindVibe backend includes **8 comprehensive API routers**:
 - `POST /api/wisdom/search` - Semantic search for verses
 - `POST /api/wisdom/query` - AI-powered guidance with verses
 - `GET /api/wisdom/themes` - List all themes
-- `GET /api/wisdom/applications` - List mental health applications
+- `GET /api/wisdom/applications` - List spiritual wellness applications
 
 #### **8. Gita Verses API** (`/api/gita`)
 - `GET /api/gita/verses` - List Bhagavad Gita verses
@@ -287,7 +287,7 @@ Visit `http://localhost:8000/docs` (Swagger UI) or `http://localhost:8000/redoc`
 
 ## 🕉️ **Bhagavad Gita Integration**
 
-MindVibe integrates all **700 authentic verses** of the Bhagavad Gita from authoritative Indian sources to provide timeless wisdom for mental health and well-being.
+MindVibe integrates all **700 authentic verses** of the Bhagavad Gita from authoritative Indian sources to provide timeless wisdom for spiritual wellness and well-being.
 
 ### **Authenticity Standards**
 
@@ -298,7 +298,7 @@ We maintain the highest standards of authenticity and quality:
 - **Hindi**: Gita Press translations (authentic Hindi rendering)
 - **English**: Swami Sivananda (Divine Life Society) / Swami Chinmayananda (Chinmaya Mission)
 - **Transliteration**: IAST (International Alphabet of Sanskrit Transliteration) standard only
-- **Mental Health Tags**: Evidence-based applications aligned with modern psychology
+- **Spiritual Wellness Tags**: Evidence-based applications aligned with modern psychology
 
 ### **Quality Requirements**
 
@@ -306,7 +306,7 @@ We maintain the highest standards of authenticity and quality:
 ✅ **IAST transliteration** with proper diacritics (ā ī ū ṛ ṃ ḥ etc.)  
 ✅ **Authentic translations** from recognized spiritual authorities  
 ✅ **All 700 verses** matching canonical chapter distribution  
-✅ **Evidence-based tagging** for mental health applications  
+✅ **Evidence-based tagging** for spiritual wellness applications  
 ❌ **NO Western substitutions** or non-traditional sources  
 ❌ **NO modifications** to original Sanskrit text  
 ❌ **NO non-standard** transliteration systems (ITRANS, Harvard-Kyoto)
@@ -315,7 +315,7 @@ We maintain the highest standards of authenticity and quality:
 
 The Gita contains exactly **700 verses** across **18 chapters**:
 
-| Chapter | Verses | English Name | Mental Health Focus |
+| Chapter | Verses | English Name | Spiritual Wellness Focus |
 |---------|--------|--------------|---------------------|
 | 1 | 47 | Arjuna's Grief | Depression, Despair |
 | 2 | 72 | Knowledge & Equanimity | Anxiety, Emotional Regulation |
@@ -328,9 +328,9 @@ The Gita contains exactly **700 verses** across **18 chapters**:
 
 See [docs/BHAGAVAD_GITA_IMPLEMENTATION.md](docs/BHAGAVAD_GITA_IMPLEMENTATION.md) for complete chapter breakdown.
 
-### **Mental Health Applications**
+### **Spiritual Wellness Applications**
 
-Each verse is tagged with mental health domains and applications:
+Each verse is tagged with spiritual wellness domains and applications:
 
 **Primary Domains:**
 - `anxiety` - Worry, fear of outcomes
@@ -360,16 +360,16 @@ See [data/gita/mental_health_tag_guide.md](data/gita/mental_health_tag_guide.md)
 - Data sources and requirements
 - Canonical verse distribution table
 - JSON structure specification
-- Mental health tagging methodology
+- Spiritual wellness tagging methodology
 - Database schema
 - Seeding process
 - KIAAN integration guidelines
 - Testing and validation
 - Resources and references
 
-📋 **[Mental Health Tagging Guide](data/gita/mental_health_tag_guide.md)**
+📋 **[Spiritual Wellness Tagging Guide](data/gita/mental_health_tag_guide.md)**
 - Primary domains with definitions
-- Mental health applications with evidence
+- Spiritual wellness applications with evidence
 - Tagging principles
 - Key verse collections by need
 
@@ -397,7 +397,7 @@ python scripts/validate_gita_authenticity.py data/gita/sample_verses_structure.j
 - ✅ Sanskrit is valid Devanagari (U+0900 to U+097F)
 - ✅ Transliteration uses IAST diacritics
 - ✅ All required fields present
-- ✅ Mental health tags are valid
+- ✅ Spiritual wellness tags are valid
 
 ### **Database Verification**
 
@@ -430,11 +430,11 @@ Builds response: "Focus on your preparation, not the outcome..."
 
 ### **Data Quality Commitment**
 
-This implementation represents **sacred wisdom** being applied to mental health. We maintain:
+This implementation represents **sacred wisdom** being applied to spiritual wellness. We maintain:
 
 - **Zero compromise** on authenticity
 - **Cultural sensitivity** in all applications  
-- **Evidence-based** mental health connections
+- **Evidence-based** spiritual wellness connections
 - **Respectful integration** honoring spiritual depth
 - **Quality validation** at every step
 
@@ -898,7 +898,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with ❤️ for mental health and well-being**
+**Made with ❤️ for spiritual wellness and well-being**
 
 ---
 

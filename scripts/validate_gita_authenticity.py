@@ -8,7 +8,7 @@ This script validates that Gita verse data meets all authenticity and quality st
 - Valid Devanagari Sanskrit (Unicode U+0900 to U+097F)
 - Valid IAST transliteration with required diacritics
 - Complete required fields
-- Valid mental health tags
+- Valid spiritual wellness tags
 
 Usage:
     python scripts/validate_gita_authenticity.py [path/to/verses.json]
@@ -49,13 +49,13 @@ TOTAL_VERSES = 700
 # IAST diacritics that should appear in transliterations
 IAST_DIACRITICS = set('āīūṛṝḷḹṃḥṅñṭḍṇśṣ')
 
-# Valid mental health domains
+# Valid spiritual wellness domains
 VALID_PRIMARY_DOMAINS = {
     'anxiety', 'depression', 'emotional_regulation', 'self_worth',
     'relationships', 'purpose', 'work_stress', 'anger', 'fear', 'grief'
 }
 
-# Valid mental health applications (partial list - extend as needed)
+# Valid spiritual wellness applications (partial list - extend as needed)
 VALID_APPLICATIONS = {
     'outcome_detachment', 'equanimity', 'self_mastery', 'compassion',
     'meditation_practice', 'duty_purpose', 'anxiety_reduction',
@@ -176,7 +176,7 @@ def validate_verse_structure(verse: Dict[str, Any], index: int) -> Tuple[bool, L
     if not is_valid_hindi:
         errors.append(f"Hindi validation failed: {hindi_error}")
     
-    # Validate mental health tags if present
+    # Validate spiritual wellness tags if present
     primary_domain = verse.get('primary_domain')
     if primary_domain:
         if primary_domain not in VALID_PRIMARY_DOMAINS:
@@ -192,7 +192,7 @@ def validate_verse_structure(verse: Dict[str, Any], index: int) -> Tuple[bool, L
                 if domain not in VALID_PRIMARY_DOMAINS:
                     errors.append(f"Invalid secondary domain: {domain}")
     
-    # Validate mental health applications
+    # Validate spiritual wellness applications
     applications = verse.get('mental_health_applications', [])
     if applications:
         if not isinstance(applications, list):
@@ -405,7 +405,7 @@ def main():
         print("   Transliteration: IAST ✅")
         print(f"   Verse count: {len(verses)}/{TOTAL_VERSES} ✅")
         print("   Chapter distribution: Canonical ✅")
-        print("   Mental health tags: Valid ✅")
+        print("   Spiritual wellness tags: Valid ✅")
         print()
         return 0
     else:

@@ -51,7 +51,7 @@ EXPECTED_COUNTS = {
 TOTAL_EXPECTED = 700
 
 # Quality thresholds for verification
-MIN_MENTAL_HEALTH_TAG_COVERAGE = 0.70  # 70% of verses should have mental health tags
+MIN_MENTAL_HEALTH_TAG_COVERAGE = 0.70  # 70% of verses should have spiritual wellness tags
 MIN_EMBEDDING_COVERAGE = 0.90  # 90% of verses should have embeddings
 
 # Key verses that must be present with proper content
@@ -151,16 +151,16 @@ def verify_json_file() -> tuple[bool, list[str]]:
             else:
                 print(f"   ✅ {chapter}.{verse_num} - Present")
 
-    # Check mental health tags
-    print("\n🏥 Checking mental health applications:")
+    # Check spiritual wellness tags
+    print("\n🏥 Checking spiritual wellness applications:")
     tagged_count = sum(
         1 for v in verses if v.get("mental_health_applications") and len(v.get("mental_health_applications", [])) > 0
     )
     tag_percentage = (tagged_count / total) * 100 if total > 0 else 0
     status = "✅" if tagged_count > 500 else "⚠️"
-    print(f"   {status} Verses with mental health tags: {tagged_count}/{total} ({tag_percentage:.1f}%)")
+    print(f"   {status} Verses with spiritual wellness tags: {tagged_count}/{total} ({tag_percentage:.1f}%)")
     if tagged_count < 500:
-        warnings.append(f"Only {tagged_count} verses have mental health tags (< 500)")
+        warnings.append(f"Only {tagged_count} verses have spiritual wellness tags (< 500)")
 
     # Summary
     print("\n" + "=" * 70)
@@ -263,8 +263,8 @@ async def verify_database() -> tuple[bool, list[str]]:
                 else:
                     print(f"   ✅ {chapter}.{verse_num} - Present")
 
-            # Check mental health tags
-            print("\nMental health tagging:")
+            # Check spiritual wellness tags
+            print("\nSpiritual wellness tagging:")
             result = await session.execute(
                 text("SELECT COUNT(*) FROM gita_verses WHERE mental_health_applications IS NOT NULL")
             )
@@ -273,7 +273,7 @@ async def verify_database() -> tuple[bool, list[str]]:
             status = "✅" if tagged_count >= total * MIN_MENTAL_HEALTH_TAG_COVERAGE else "⚠️"
             print(f"  {tagged_count}/{total} {status}")
             if tagged_count < total * MIN_MENTAL_HEALTH_TAG_COVERAGE:
-                warnings.append(f"Only {tagged_count} verses have mental health tags ({tag_percentage:.1f}%)")
+                warnings.append(f"Only {tagged_count} verses have spiritual wellness tags ({tag_percentage:.1f}%)")
 
             # Check embeddings
             print("\nEmbeddings generated:")

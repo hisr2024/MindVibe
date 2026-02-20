@@ -234,7 +234,7 @@ Keep it warm, personal, and encouraging. Use "you" and "your"."""
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are KIAAN, a compassionate mental health guide inspired by the Bhagavad Gita."
+                        "content": "You are KIAAN, a compassionate spiritual wellness guide inspired by the Bhagavad Gita."
                     },
                     {"role": "user", "content": prompt}
                 ],

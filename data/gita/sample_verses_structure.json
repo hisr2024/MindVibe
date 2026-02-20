@@ -24,9 +24,9 @@
     "word_meanings": "Object: Word-by-word Sanskrit to English meanings",
     "principle": "String: Core philosophical teaching of the verse",
     "theme": "String: Primary theme identifier (snake_case)",
-    "mental_health_applications": "Array of strings: Specific mental health applications",
-    "primary_domain": "String: Primary mental health domain (anxiety, depression, etc.)",
-    "secondary_domains": "Array of strings: Additional relevant mental health domains"
+    "mental_health_applications": "Array of strings: Specific spiritual wellness applications",
+    "primary_domain": "String: Primary spiritual wellness domain (anxiety, depression, etc.)",
+    "secondary_domains": "Array of strings: Additional relevant spiritual wellness domains"
   },
   "verses": [
     {
@@ -412,7 +412,7 @@
       "2. Follow the canonical chapter/verse distribution (see docs/BHAGAVAD_GITA_IMPLEMENTATION.md Section 3)",
       "3. Source Sanskrit from Gita Press or IIT Kanpur Gita Supersite",
       "4. Ensure IAST transliteration has proper diacritics",
-      "5. Tag with mental health applications following data/gita/mental_health_tag_guide.md",
+      "5. Tag with spiritual wellness applications following data/gita/mental_health_tag_guide.md",
       "6. Validate using scripts/validate_gita_authenticity.py"
     ],
     "validation_checklist": [
@@ -421,7 +421,7 @@
       "Sanskrit is valid Devanagari (U+0900 to U+097F)",
       "Transliteration uses IAST diacritics",
       "All required fields present",
-      "Mental health tags are valid",
+      "Spiritual wellness tags are valid",
       "No duplicate chapter/verse combinations"
     ]
   }

@@ -31,7 +31,7 @@ class TestAllLanguagesTranslation:
         """Sample texts for translation testing"""
         return {
             'greeting': 'Hello, how can I help you today?',
-            'wellness': 'I am here to support your mental wellness journey.',
+            'wellness': 'I am here to support your spiritual wellness journey.',
             'meditation': 'Let us begin with a mindful breathing exercise.',
             'gratitude': 'Practicing gratitude can bring inner peace.',
             'wisdom': 'Ancient wisdom teaches us to find balance in life.'
@@ -157,7 +157,7 @@ class TestAllLanguagesTranslation:
     async def test_long_text_translation(self, service):
         """Test translation of longer text passages"""
         long_text = """
-        Welcome to KIAAN, your compassionate mental wellness companion. 
+        Welcome to KIAAN, your compassionate spiritual wellness companion. 
         I am here to provide guidance rooted in ancient wisdom and modern psychology. 
         Together, we will explore practices like mindfulness, meditation, and self-reflection 
         to help you find inner peace and emotional balance. Your journey towards wellness 

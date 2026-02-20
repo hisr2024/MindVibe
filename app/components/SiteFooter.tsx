@@ -24,7 +24,7 @@ export default function SiteFooter() {
             <span className="text-orange-100/60">{t('common.app.taglineSuffix', 'Companion')}</span>
           </p>
           <p className="text-sm leading-relaxed text-white/50">
-            {t('navigation.footer.description', 'Designed for calm, privacy-first mental health support. Built with a focus on WCAG accessibility, encryption, and a gentle experience.')}
+            {t('navigation.footer.description', 'Designed for calm, privacy-first spiritual wellness support. Built with a focus on WCAG accessibility, encryption, and a gentle experience.')}
           </p>
         </div>
         <div className="grid grid-cols-2 gap-8 md:grid-cols-3">

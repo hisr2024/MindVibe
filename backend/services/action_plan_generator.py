@@ -9,7 +9,7 @@ from typing import Any
 
 
 class ActionPlanGenerator:
-    """Generates practical action plans for mental wellness support."""
+    """Generates practical action plans for spiritual wellness support."""
 
     def __init__(self) -> None:
         """Initialize the action plan generator."""

@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-MindVibe has a solid security foundation with multiple middleware layers (DDoS, threat detection, input sanitization, CSRF, RBAC), bcrypt password hashing, JWT authentication with refresh token rotation, 2FA support, and Pydantic input validation. However, several **critical and high-severity issues** exist that must be addressed before scaling to production users handling sensitive mental health data.
+MindVibe has a solid security foundation with multiple middleware layers (DDoS, threat detection, input sanitization, CSRF, RBAC), bcrypt password hashing, JWT authentication with refresh token rotation, 2FA support, and Pydantic input validation. However, several **critical and high-severity issues** exist that must be addressed before scaling to production users handling sensitive spiritual wellness data.
 
 **Critical findings:** 5 | **High severity:** 8 | **Medium severity:** 9 | **Low severity:** 6
 
@@ -35,7 +35,7 @@ if auth_uid and auth_uid not in {"undefined", "null"}:
 
 In `get_current_user_or_create`, a user is **automatically created** if the `X-Auth-UID` doesn't match an existing user. In `get_current_user_flexible`, it looks up by `User.id` directly, meaning any attacker who knows (or guesses) a UUID can access another user's account.
 
-**Impact:** Full account takeover. Any attacker can access any user's mental health data.
+**Impact:** Full account takeover. Any attacker can access any user's spiritual wellness data.
 
 **Remediation:**
 1. Remove `X-Auth-UID` as an authentication method entirely

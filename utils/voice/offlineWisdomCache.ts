@@ -323,7 +323,7 @@ export async function getResponseCount(): Promise<number> {
 }
 
 // ─── Pre-cached Essential Verses ─────────────────────────────────────────────
-// 108 most impactful verses for mental health and spiritual guidance
+// 108 most impactful verses for spiritual wellness and spiritual guidance
 
 const ESSENTIAL_VERSES: CachedVerse[] = [
   { id: '2.47', chapter: 2, verse: 47, sanskrit: 'Karmanye vadhikaraste Ma Phaleshu Kadachana', translation: 'You have the right to work, but never to the fruit of work.', explanation: 'Focus on action without attachment to outcomes. This frees you from anxiety about results.', emotions: ['anxiety', 'confusion'], keywords: ['action', 'detachment', 'karma', 'work'] },

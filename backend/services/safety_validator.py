@@ -205,7 +205,7 @@ These professionals are trained to help you work through these thoughts safely. 
 • **SAMHSA Helpline:** 1-800-662-4357
 
 You can also:
-• Contact a mental health professional
+• Contact a spiritual wellness professional
 • Reach out to a trusted friend or family member
 • Go to your nearest emergency room if you feel unsafe
 

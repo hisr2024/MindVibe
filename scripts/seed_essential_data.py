@@ -3,7 +3,7 @@ Seed Essential Database Tables for KIAAN
 
 This script seeds the critical tables needed for KIAAN chat to function:
 1. subscription_plans - Pricing tiers with quotas
-2. wisdom_verses - Curated Gita verses with mental health applications
+2. wisdom_verses - Curated Gita verses with spiritual wellness applications
 3. gita_chapters - Chapter metadata
 
 The script is idempotent and safe to run multiple times.
@@ -60,7 +60,7 @@ SUBSCRIPTION_PLANS = [
     {
         "tier": SubscriptionTier.FREE,
         "name": "Free",
-        "description": "Perfect for getting started with mental wellness",
+        "description": "Perfect for getting started with spiritual wellness",
         "price_monthly": Decimal("0.00"),
         "price_yearly": None,
         "stripe_price_id_monthly": None,
@@ -79,7 +79,7 @@ SUBSCRIPTION_PLANS = [
     {
         "tier": SubscriptionTier.BASIC,
         "name": "Basic",
-        "description": "Enhanced features for regular mental wellness practice",
+        "description": "Enhanced features for regular spiritual wellness practice",
         "price_monthly": Decimal("9.00"),
         "price_yearly": Decimal("90.00"),
         "stripe_price_id_monthly": None,
@@ -100,7 +100,7 @@ SUBSCRIPTION_PLANS = [
     {
         "tier": SubscriptionTier.PREMIUM,
         "name": "Premium",
-        "description": "Complete mental wellness toolkit with priority support",
+        "description": "Complete spiritual wellness toolkit with priority support",
         "price_monthly": Decimal("19.00"),
         "price_yearly": Decimal("190.00"),
         "stripe_price_id_monthly": None,
@@ -283,7 +283,7 @@ GITA_CHAPTERS = [
         "english_name": "Transcendental Knowledge",
         "verse_count": 72,
         "themes": ["self_knowledge", "equanimity", "karma_yoga", "wisdom", "duty"],
-        "mental_health_relevance": "Chapter 2 provides foundational teachings on managing emotions, developing equanimity, and understanding the impermanent nature of experiences - core principles for mental wellness.",
+        "mental_health_relevance": "Chapter 2 provides foundational teachings on managing emotions, developing equanimity, and understanding the impermanent nature of experiences - core principles for spiritual wellness.",
     },
     {
         "chapter_number": 6,

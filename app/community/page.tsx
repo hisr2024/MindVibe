@@ -36,7 +36,7 @@ interface Post {
 
 /**
  * Community Wisdom Circles Page
- * Anonymous peer support spaces for mental health community
+ * Anonymous peer support spaces for spiritual wellness community
  */
 export default function CommunityPage() {
   const { t } = useLanguage()

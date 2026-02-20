@@ -369,7 +369,7 @@ async def verify_database() -> dict:
                 status = "✅" if count == expected else "⚠️"
                 print(f"{status} Chapter {chapter_num:2d}: {count:3d}/{expected:3d} verses")
             
-            # Verses with mental health tags
+            # Verses with spiritual wellness tags
             result = await session.execute(
                 select(func.count()).select_from(GitaVerse).where(
                     GitaVerse.mental_health_applications.isnot(None)
@@ -377,7 +377,7 @@ async def verify_database() -> dict:
             )
             tagged_count = result.scalar()
             
-            print(f"\n🏷️  Verses with mental health tags: {tagged_count}")
+            print(f"\n🏷️  Verses with spiritual wellness tags: {tagged_count}")
             
             stats = {
                 "total_verses": total_count,

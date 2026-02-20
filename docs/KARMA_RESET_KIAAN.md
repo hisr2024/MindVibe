@@ -295,7 +295,7 @@ verses = await wisdom_kb.search_relevant_verses_full_db(
 # 4. Score includes:
 #    - Text similarity (0.0-1.0)
 #    - Theme match boost (+0.2)
-#    - Mental health tag boost (+0.2)
+#    - Spiritual wellness tag boost (+0.2)
 
 # 5. Return top N by score
 ```

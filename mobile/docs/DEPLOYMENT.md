@@ -84,7 +84,7 @@ Output: `app/build/outputs/bundle/release/app-release.aab`
 **Main Store Listing**:
 - App name: MindVibe
 - Short description (80 chars):
-  > AI-powered mental health companion with multi-language support
+  > AI-powered spiritual companion with multi-language support
 - Full description (4000 chars):
   > Include full app description, features, and benefits
 - App icon: 512x512 PNG
@@ -94,7 +94,7 @@ Output: `app/build/outputs/bundle/release/app-release.aab`
 **Categorization**:
 - Application type: Applications
 - Category: Health & Fitness
-- Tags: mental health, wellness, meditation
+- Tags: spiritual wellness, wellness, meditation
 
 #### Step 6: Content Rating
 
@@ -252,7 +252,7 @@ Increment build number for each submission.
 
 **App Information**:
 - Name: MindVibe
-- Subtitle: AI Mental Health Companion
+- Subtitle: AI Spiritual Companion
 - Category: Health & Fitness
 - Secondary Category: Lifestyle
 

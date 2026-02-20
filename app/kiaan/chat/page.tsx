@@ -227,7 +227,7 @@ function KiaanChatPageInner() {
               {t('kiaan.chat.title', 'Talk to KIAAN')}
             </h1>
             <p className="mt-1 sm:mt-2 text-sm text-orange-100/80 md:text-base">
-              {t('kiaan.chat.subtitle', 'Your calm, privacy-first mental wellness companion')}
+              {t('kiaan.chat.subtitle', 'Your calm, privacy-first spiritual companion')}
             </p>
             <p className="mt-1.5 text-[11px] tracking-wide text-orange-300/50" data-testid="mode-label">
               {t('dashboard.mode_label.prefix', 'You are in:')} {t('dashboard.mode_label.kiaan', 'Companion Mode')}

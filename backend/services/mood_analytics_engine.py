@@ -341,7 +341,7 @@ LIFE_DOMAIN_KEYWORDS: dict[str, list[str]] = {
     "health": [
         "health", "sick", "illness", "disease", "doctor", "hospital",
         "medication", "pain", "chronic", "diagnosis", "treatment",
-        "mental health", "physical", "body", "sleep", "insomnia",
+        "spiritual wellness", "physical", "body", "sleep", "insomnia",
     ],
     "finances": [
         "money", "financial", "debt", "bills", "savings", "income",

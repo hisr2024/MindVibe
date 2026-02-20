@@ -1,7 +1,7 @@
 # MindVibe & KIAAN — Brand Guidelines
 
 ## Brand Overview
-**MindVibe** is a premium, calming mental wellness ecosystem designed to feel universal, inclusive, and emotionally intelligent—on par with Calm, Headspace, and Insight Timer. The experience is modern, warm, and glow-kissed.
+**MindVibe** is a premium, calming spiritual wellness ecosystem designed to feel universal, inclusive, and emotionally intelligent—on par with Calm, Headspace, and Insight Timer. The experience is modern, warm, and glow-kissed.
 
 **KIAAN — MindVibe Companion** is the wise, gentle guide inside MindVibe. It delivers *crisp, calm guidance* with an elegant flute + peacock feather identity that is symbolic but not religious.
 

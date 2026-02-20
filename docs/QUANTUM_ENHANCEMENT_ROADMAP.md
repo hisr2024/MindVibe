@@ -5,7 +5,7 @@
 
 ## Executive Summary
 
-This roadmap outlines the implementation strategy for 10 quantum-level enhancements to MindVibe, transforming it into a world-class mental health platform with AI-powered personalization, offline capabilities, multilingual voice guidance, and ethical AI practices rooted in Gita principles.
+This roadmap outlines the implementation strategy for 10 quantum-level enhancements to MindVibe, transforming it into a world-class spiritual wellness platform with AI-powered personalization, offline capabilities, multilingual voice guidance, and ethical AI practices rooted in Gita principles.
 
 **Target Success Metrics:**
 - 100% Implementation Success Rate
@@ -167,9 +167,9 @@ DELETE /api/wisdom-journey/{id}              # Delete journey
 
 ---
 
-### 🎯 Enhancement #2: Offline-First Mental Health Toolkit
+### 🎯 Enhancement #2: Offline-First Spiritual Wellness Toolkit
 
-**Objective**: Enable full mental health functionality (mood tracking, journaling, verse reading, meditation) offline using Progressive Web App (PWA) architecture.
+**Objective**: Enable full spiritual wellness functionality (mood tracking, journaling, verse reading, meditation) offline using Progressive Web App (PWA) architecture.
 
 **Architecture**:
 ```
@@ -251,9 +251,9 @@ interface OfflineDatabase {
 **PWA Manifest**:
 ```json
 {
-  "name": "MindVibe - Mental Health Companion",
+  "name": "MindVibe - Spiritual Companion",
   "short_name": "MindVibe",
-  "description": "AI-powered mental health toolkit with Gita wisdom",
+  "description": "AI-powered spiritual wellness toolkit with Gita wisdom",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1a1a",
@@ -284,7 +284,7 @@ interface OfflineDatabase {
 
 ### 🎯 Enhancement #6: Advanced Analytics Dashboard
 
-**Objective**: Provide users with actionable insights through AI-powered mood trend analysis, verse engagement metrics, and predictive mental health indicators.
+**Objective**: Provide users with actionable insights through AI-powered mood trend analysis, verse engagement metrics, and predictive spiritual wellness indicators.
 
 **Architecture**:
 ```
@@ -317,7 +317,7 @@ Frontend:
 
 2. **Predictive Indicators**:
    - LSTM model for 7-day mood forecast
-   - Risk scoring for mental health decline (0-100)
+   - Risk scoring for spiritual wellness decline (0-100)
    - Early warning alerts for negative trend detection
 
 3. **Verse Engagement Metrics**:
@@ -332,7 +332,7 @@ Frontend:
 def generate_insight(user_data: dict) -> str:
     """Generate compassionate, actionable insights using GPT-4o-mini"""
     prompt = f"""
-    As KIAAN, a compassionate mental health guide, analyze this user's data:
+    As KIAAN, a compassionate spiritual wellness guide, analyze this user's data:
     - 7-day mood average: {user_data['mood_avg']}
     - Trend: {user_data['trend']}
     - Most engaged verses: {user_data['top_verses']}
@@ -1263,7 +1263,7 @@ ethics_fairness_score = Gauge(
 
 ### 🎯 Enhancement #5: Community Wisdom Circles
 
-**Objective**: Create safe, anonymous peer-sharing spaces where users can share mental health experiences, with AI-powered moderation to ensure compassionate, supportive interactions.
+**Objective**: Create safe, anonymous peer-sharing spaces where users can share spiritual wellness experiences, with AI-powered moderation to ensure compassionate, supportive interactions.
 
 **Architecture**:
 ```
@@ -1302,7 +1302,7 @@ class CircleType(str, Enum):
     OPEN = "open"              # Anyone can join
     INVITE_ONLY = "invite_only"  # Invitation required
     MODERATED = "moderated"    # Admin approval to join
-    TOPIC_BASED = "topic_based"  # Specific mental health topics
+    TOPIC_BASED = "topic_based"  # Specific spiritual wellness topics
 
 class Circle(BaseModel):
     id: UUID

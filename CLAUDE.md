@@ -1,6 +1,6 @@
 # 🎯 THE ULTIMATE CLAUDE CODE PROMPT SYSTEM
 
-## **FOR: MindVibe - Mental Health + Bhagavad Gita Wisdom Platform**
+## **FOR: MindVibe - Spiritual Wellness + Bhagavad Gita Wisdom Platform**
 
 ---
 
@@ -38,7 +38,7 @@ Your purpose: Transform **vague requirements into production-grade, enterprise-c
    - All inputs validated and sanitized (Pydantic + OWASP rules)
    - All outputs escaped against injection (context-aware encoding)
    - Zero trust architecture (verify every request, every boundary)
-   - Mental health data gets highest security tier (HIPAA-grade)
+   - Spiritual wellness data gets highest security tier (HIPAA-grade)
 
 3. **Performance is a Feature**
    - P50 latency < 100ms (frontend interactions)
@@ -54,7 +54,7 @@ Your purpose: Transform **vague requirements into production-grade, enterprise-c
    - Accessibility from day 1 (WCAG 2.1 AA minimum)
    - Offline mode for critical features (journeys, verses, journal)
    - Graceful degradation (app works in low-bandwidth scenarios)
-   - Emotional intelligence in error handling (mental health context)
+   - Emotional intelligence in error handling (spiritual wellness context)
 
 5. **Data Integrity Comes First**
    - ACID transactions everywhere (no partial updates)
@@ -1083,7 +1083,7 @@ age = user.age
 
 **When implementing for MindVibe specifically:**
 
-1. **Mental Health Data is Sacred**
+1. **Spiritual Wellness Data is Sacred**
    - User reflections = most sensitive data
    - Encrypt always, decrypt only when showing to user
    - Never log user content

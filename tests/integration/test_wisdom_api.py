@@ -195,7 +195,7 @@ class TestWisdomVerseList:
     async def test_list_verses_by_application(
         self, test_client: AsyncClient, sample_verses
     ):
-        """Test filtering verses by mental health application."""
+        """Test filtering verses by spiritual wellness application."""
         response = await test_client.get(
             "/api/wisdom/verses?application=anxiety_management"
         )
@@ -353,7 +353,7 @@ class TestThemesAndApplications:
             assert "name" in theme
 
     async def test_list_applications(self, test_client: AsyncClient, sample_verses):
-        """Test listing all available mental health applications."""
+        """Test listing all available spiritual wellness applications."""
         response = await test_client.get("/api/wisdom/applications")
 
         assert response.status_code == 200

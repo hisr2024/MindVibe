@@ -1,8 +1,8 @@
-# Mental Health Tagging Guide for Bhagavad Gita Verses
+# Spiritual Wellness Tagging Guide for Bhagavad Gita Verses
 
 ## Purpose
 
-This guide provides a comprehensive methodology for tagging all 700 Bhagavad Gita verses with mental health applications, ensuring:
+This guide provides a comprehensive methodology for tagging all 700 Bhagavad Gita verses with spiritual wellness applications, ensuring:
 - Evidence-based alignment with modern psychology
 - Cultural authenticity and respect for the original teachings
 - Clinical relevance for the KIAAN ecosystem
@@ -12,7 +12,7 @@ This guide provides a comprehensive methodology for tagging all 700 Bhagavad Git
 
 ## Primary Domains
 
-Each verse receives **one primary domain** representing its core mental health application.
+Each verse receives **one primary domain** representing its core spiritual wellness application.
 
 ### 1. anxiety - Worry, Fear of Outcomes
 
@@ -507,7 +507,7 @@ Application: Accepting the natural cycle reduces anticipatory grief.
 
 ---
 
-## Mental Health Applications
+## Spiritual Wellness Applications
 
 Applications are **specific interventions or therapeutic targets** that verses address. A verse can have multiple applications.
 
@@ -700,7 +700,7 @@ Tag based on what the verse explicitly teaches, not on commentary or extended in
 ### 2. Multiple Applications Allowed
 
 **Principle:**
-Many verses address multiple mental health concerns. Tag with 3-5 applications when appropriate.
+Many verses address multiple spiritual wellness concerns. Tag with 3-5 applications when appropriate.
 
 **Example - Verse 2.56:**
 ```
@@ -716,7 +716,7 @@ Applications:
 ### 3. Primary + Secondary Domains
 
 **Principle:**
-- **One primary domain**: The core mental health area
+- **One primary domain**: The core spiritual wellness area
 - **0-3 secondary domains**: Additional relevant areas
 
 **Example - Verse 6.5:**
@@ -730,7 +730,7 @@ Secondary domains: [depression, purpose]
 ### 4. Evidence-Based
 
 **Principle:**
-Applications should align with recognized mental health interventions and have research support.
+Applications should align with recognized spiritual wellness interventions and have research support.
 
 **Check:**
 - Does this align with CBT, DBT, ACT, CFT, or other evidence-based therapies?
@@ -942,7 +942,7 @@ Connect ancient wisdom to contemporary challenges while respecting the original 
 - Understand the core teaching
 
 ### Step 2: Identify Primary Domain
-Ask: "What is the **main** mental health concern this verse addresses?"
+Ask: "What is the **main** spiritual wellness concern this verse addresses?"
 - If about worry/outcomes → anxiety
 - If about despair/motivation → depression
 - If about emotional balance → emotional_regulation
@@ -950,7 +950,7 @@ Ask: "What is the **main** mental health concern this verse addresses?"
 - etc.
 
 ### Step 3: Identify Applications
-Ask: "What specific mental health interventions does this support?"
+Ask: "What specific spiritual wellness interventions does this support?"
 Examples:
 - Teaches outcome detachment? → `outcome_detachment`
 - Teaches emotional balance? → `equanimity`
@@ -958,7 +958,7 @@ Examples:
 - Teaches compassion? → `compassion`
 
 ### Step 4: Add Secondary Domains
-Ask: "What other mental health areas is this relevant to?"
+Ask: "What other spiritual wellness areas is this relevant to?"
 Usually 0-3 secondary domains.
 
 ### Step 5: Validate
@@ -974,7 +974,7 @@ Usually 0-3 secondary domains.
 Before finalizing tags for all 700 verses:
 
 - [ ] All 700 verses have a primary domain
-- [ ] Mental health applications are evidence-based
+- [ ] Spiritual wellness applications are evidence-based
 - [ ] Sanskrit terms are preserved where important
 - [ ] Tags align with modern psychology
 - [ ] Cultural sensitivity maintained
@@ -989,12 +989,12 @@ Before finalizing tags for all 700 verses:
 ## Conclusion
 
 This methodology ensures that all 700 Bhagavad Gita verses are tagged with:
-- ✅ Clinical relevance for modern mental health
+- ✅ Clinical relevance for modern spiritual wellness
 - ✅ Cultural authenticity and respect
 - ✅ Evidence-based alignment
 - ✅ Practical utility for KIAAN ecosystem
 - ✅ Consistency and quality
 
-**The result:** A powerful integration of ancient wisdom and modern psychology, providing authentic, effective mental health support through the Gita's timeless teachings.
+**The result:** A powerful integration of ancient wisdom and modern psychology, providing authentic, effective spiritual wellness support through the Gita's timeless teachings.
 
 🕉️ **For the benefit of all beings** 🕉️

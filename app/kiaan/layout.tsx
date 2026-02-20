@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 export const metadata = {
   title: 'KIAAN Chat',
-  description: 'Your calm, privacy-first mental wellness companion powered by ancient wisdom',
+  description: 'Your calm, privacy-first spiritual companion powered by ancient wisdom',
 }
 
 /**

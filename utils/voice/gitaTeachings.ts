@@ -277,7 +277,7 @@ export const GITA_CHAPTERS: ChapterTeaching[] = [
     sanskritTitle: 'Dhyana Yoga',
     coreTheme: 'The mind is your greatest friend or your worst enemy - train it',
     friendlySummary: 'Your mind is the most powerful tool you possess. It can lift you to the heights or drag you to the depths. Meditation isn\'t about emptying your mind - it\'s about BEFRIENDING it. Training it gently, like teaching a puppy to sit.',
-    lifeMoments: ['restless mind', 'insomnia', 'meditation practice', 'mental health', 'self-discipline', 'balance'],
+    lifeMoments: ['restless mind', 'insomnia', 'meditation practice', 'spiritual wellness', 'self-discipline', 'balance'],
     verses: [
       {
         chapter: 6, verse: 5,

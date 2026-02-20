@@ -507,7 +507,7 @@ class GitaService:
             application_area: Modern application area
             description: Description of the application
             examples: Optional list of examples
-            mental_health_benefits: Optional list of mental health benefits
+            mental_health_benefits: Optional list of spiritual wellness benefits
 
         Returns:
             Created GitaModernContext object
@@ -529,14 +529,14 @@ class GitaService:
         db: AsyncSession, limit: int | None = None
     ) -> list[GitaVerse]:
         """
-        Get all 700+ verses with mental health tags.
+        Get all 700+ verses with spiritual wellness tags.
 
         Args:
             db: Database session
             limit: Optional limit on number of verses returned
 
         Returns:
-            List of all GitaVerse objects with their mental health tags
+            List of all GitaVerse objects with their spiritual wellness tags
         """
         query = select(GitaVerse).order_by(GitaVerse.chapter, GitaVerse.verse)
 
@@ -551,11 +551,11 @@ class GitaService:
         db: AsyncSession, application: str, limit: int = 50
     ) -> list[GitaVerse]:
         """
-        Search verses by mental health application tag.
+        Search verses by spiritual wellness application tag.
 
         Args:
             db: Database session
-            application: Mental health application to search for (e.g., 'anxiety_management')
+            application: Spiritual wellness application to search for (e.g., 'anxiety_management')
             limit: Maximum number of results (default 50)
 
         Returns:
@@ -677,7 +677,7 @@ class GitaService:
         if include_word_meanings and verse.word_meanings:
             response["word_meanings"] = verse.word_meanings
 
-        # Add mental health tags if present
+        # Add spiritual wellness tags if present
         if verse.mental_health_applications:
             response["mental_health_applications"] = verse.mental_health_applications
         if verse.primary_domain:

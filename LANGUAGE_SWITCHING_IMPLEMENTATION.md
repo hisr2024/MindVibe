@@ -166,7 +166,7 @@ t('home.hero.title', 'Default Text')
 {
   "home": {
     "hero": {
-      "title": "Your AI Companion for Mental Wellness"
+      "title": "Your AI Companion for Spiritual Wellness"
     }
   }
 }

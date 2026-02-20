@@ -21,7 +21,7 @@ By accessing or using MindVibe ("the Service"), you agree to be bound by these T
 Use of this Service does not create a doctor-patient relationship between you and MindVibe, its creators, or any third parties.
 
 ### Emergency Situations
-**If you are experiencing a mental health crisis or emergency:**
+**If you are experiencing a crisis or emergency:**
 - **Call emergency services (911 in the US)**
 - **National Suicide Prevention Lifeline: 988 (US)**
 - **Crisis Text Line: Text HOME to 741741 (US)**

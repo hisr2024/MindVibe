@@ -1,7 +1,7 @@
 # KIAAN Core System Implementation Summary
 
 ## Overview
-This implementation creates a comprehensive KIAAN (Knowledge Integration and Awareness Network) Core system that integrates all 700+ Bhagavad Gita verses with modern secular interpretations for mental health support.
+This implementation creates a comprehensive KIAAN (Knowledge Integration and Awareness Network) Core system that integrates all 700+ Bhagavad Gita verses with modern secular interpretations for spiritual wellness support.
 
 ## ✅ Completed Components
 
@@ -12,7 +12,7 @@ This implementation creates a comprehensive KIAAN (Knowledge Integration and Awa
    - Stores user's emotional state, intensity (1-10), triggers, and notes
    - Links to Gita verses used for guidance
 
-2. **user_daily_analysis** - Automated daily mental health insights
+2. **user_daily_analysis** - Automated daily spiritual wellness insights
    - Emotional summary generated from emotional logs
    - AI-powered insights using KIAAN Core
    - Recommended Gita verses (2-5 per day)
@@ -24,7 +24,7 @@ This implementation creates a comprehensive KIAAN (Knowledge Integration and Awa
    - Verses explored during the week
    - Areas for growth and gratitude items
 
-4. **user_assessments** - Structured weekly mental health assessments
+4. **user_assessments** - Structured weekly spiritual wellness assessments
    - Multi-dimensional assessment (emotional, stress, sleep, social, purpose)
    - Calculated scores and overall wellbeing score
    - Personalized Gita verse recommendations based on responses
@@ -167,7 +167,7 @@ Uses existing Gita Service for:
   - Hindi translation
   - Theme classification
   - Principle/teaching
-  - Mental health applications
+  - Spiritual wellness applications
 
 ## 🔧 Technical Implementation Details
 

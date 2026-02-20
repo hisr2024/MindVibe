@@ -664,7 +664,7 @@ class ContentAcquisitionWorker:
                 async for db in get_async_session():
                     db_source_type = content_type_map.get(content_type, DBContentSourceType.WEB)
 
-                    # Determine mental health domain from themes
+                    # Determine spiritual wellness domain from themes
                     primary_domain = None
                     mental_health_apps = []
                     domain_mapping = {

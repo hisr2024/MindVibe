@@ -7,7 +7,7 @@ Premium prompts for Stable Diffusion / Midjourney to generate production-ready b
 
 ## 1. MindVibe Logo (MV Symbol)
 1. **Breath Halo Monogram**  
-   `Minimal MV monogram inside a circular badge, soft orange–gold gradient (#FF6B35→#FFD700), gentle inner glow, rounded geometry, floating on deep charcoal background, photographic lighting with subtle bloom, premium mental wellness app icon, vector clarity --ar 1:1`
+   `Minimal MV monogram inside a circular badge, soft orange–gold gradient (#FF6B35→#FFD700), gentle inner glow, rounded geometry, floating on deep charcoal background, photographic lighting with subtle bloom, premium spiritual wellness app icon, vector clarity --ar 1:1`
 2. **Abstract Balance Glyph**  
    `Abstract flowing curves forming an MV-like balance symbol, smooth chamfers, warm amber to gold gradient, soft radial light behind, zen minimalism, evokes inner calm, professional mobile app logo, high contrast on midnight navy background --ar 1:1 --stylize 750`
 3. **Glassmorphic Aura**  
@@ -29,7 +29,7 @@ Premium prompts for Stable Diffusion / Midjourney to generate production-ready b
 4. **Floating Letters**  
    `MindVibe letters slightly elevated with soft shadows, gradient from #FF6B35 to #F7931E, subtle reflection on glossy surface, cinematic lighting, premium splash screen look --ar 5:1`
 5. **Embossed Midnight**  
-   `Embossed MindVibe logotype pressed into charcoal leather texture, warm metallic fill, soft vignette, elegant and timeless mental wellness brand identity --ar 4:1`
+   `Embossed MindVibe logotype pressed into charcoal leather texture, warm metallic fill, soft vignette, elegant and timeless spiritual wellness brand identity --ar 4:1`
 
 ---
 

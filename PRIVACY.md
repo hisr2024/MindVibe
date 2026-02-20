@@ -4,13 +4,13 @@
 
 ## Introduction
 
-MindVibe ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. This privacy policy explains how we collect, use, and safeguard your information when you use our mental health and wellness application.
+MindVibe ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. This privacy policy explains how we collect, use, and safeguard your information when you use our spiritual wellness application.
 
 ## Important Disclaimer
 
 **MindVibe is NOT a substitute for professional medical advice, diagnosis, or treatment. This application is designed for general wellness and informational purposes only. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition. Never disregard professional medical advice or delay in seeking it because of something you have read in this application.**
 
-**If you are experiencing a mental health emergency, please contact emergency services immediately or call a crisis hotline:**
+**If you are experiencing a crisis or emergency, please contact emergency services immediately or call a crisis hotline:**
 - National Suicide Prevention Lifeline: 988 (US)
 - Crisis Text Line: Text HOME to 741741 (US)
 - International Association for Suicide Prevention: https://www.iasp.info/resources/Crisis_Centres/

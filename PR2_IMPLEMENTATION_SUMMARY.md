@@ -40,7 +40,7 @@ This PR successfully implements comprehensive seeding infrastructure and full KI
   - Verse teachings (truncated to 300 chars)
   - Core principles
   - Themes (formatted for readability)
-  - Mental health applications
+  - Spiritual wellness applications
 - ✅ Response guidelines (never cite sources)
 - ✅ Fallback to general wisdom if no matches
 - ✅ Synthesis guidelines for AI to combine wisdom
@@ -86,7 +86,7 @@ This PR successfully implements comprehensive seeding infrastructure and full KI
 - ✅ Multi-tier search strategy:
   1. Key karma yoga verses (10 verses)
   2. Theme-based search (selfless_action)
-  3. Mental health application search
+  3. Spiritual wellness application search
 - ✅ Constants for scoring (PRIORITY_VERSE_SCORE, KEY_VERSE_SCORE, THEME_VERSE_SCORE)
 
 **Integration:**
@@ -100,7 +100,7 @@ This PR successfully implements comprehensive seeding infrastructure and full KI
 **Verified Methods:**
 - ✅ `get_verse_by_reference(db, chapter, verse)` - Get specific verse
 - ✅ `get_verses_by_chapter(db, chapter)` - All verses from chapter
-- ✅ `search_by_mental_health_application(db, application, limit)` - By mental health tags
+- ✅ `search_by_mental_health_application(db, application, limit)` - By spiritual wellness tags
 - ✅ `search_by_primary_domain(db, domain, limit)` - By emotional domain
 - ✅ `convert_to_wisdom_verse_format(verse)` - Model to dict conversion
 - ✅ All required helper methods already present
@@ -113,7 +113,7 @@ This PR successfully implements comprehensive seeding infrastructure and full KI
 - ✅ Enhanced search across all 700 verses
 - ✅ Score verses by relevance
 - ✅ Apply theme/application filters
-- ✅ Mental health tag boosting (TAG_BOOST = 0.2)
+- ✅ Spiritual wellness tag boosting (TAG_BOOST = 0.2)
 
 ### 7. Documentation
 **Files:** 
@@ -167,9 +167,9 @@ This PR successfully implements comprehensive seeding infrastructure and full KI
 - ✅ Ardha provides sthitaprajna-based cognitive reframing (Chapter 2:54-72)
 - ✅ Viyoga coaches with karma yoga principles (verse 2.47 prioritized)
 - ✅ Production-ready seeding with validation
-- ✅ All mental wellness tools are Gita-rooted
+- ✅ All spiritual wellness tools are Gita-rooted
 - ✅ Zero Western substitutions or dilutions
-- ✅ MindVibe becomes the ONLY truly Gita-powered mental wellness platform
+- ✅ MindVibe becomes the ONLY truly Gita-powered spiritual wellness platform
 
 ## 🎯 Acceptance Criteria Met
 
@@ -264,9 +264,9 @@ When this PR is merged:
 2. ✅ KIAAN draws from complete authentic wisdom
 3. ✅ Ardha provides sthitaprajna-based reframing
 4. ✅ Viyoga coaches with karma yoga principles
-5. ✅ All mental wellness tools are Gita-rooted
+5. ✅ All spiritual wellness tools are Gita-rooted
 6. ✅ Zero Western substitutions or dilutions
-7. ✅ MindVibe becomes the ONLY truly Gita-powered mental wellness platform
+7. ✅ MindVibe becomes the ONLY truly Gita-powered spiritual wellness platform
 
 **Status:** ✅ ALL SUCCESS CRITERIA MET
 

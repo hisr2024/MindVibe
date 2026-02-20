@@ -3,7 +3,7 @@
 ## Section 1: Overview
 
 ### Purpose
-Integrate all 700 authentic verses of the Bhagavad Gita into the MindVibe KIAAN ecosystem to provide timeless wisdom for mental health and well-being.
+Integrate all 700 authentic verses of the Bhagavad Gita into the MindVibe KIAAN ecosystem to provide timeless wisdom for spiritual wellness and well-being.
 
 ### Authenticity Standards
 
@@ -132,7 +132,7 @@ The Bhagavad Gita contains exactly **700 verses** distributed across **18 chapte
 | 18 | 78 | मोक्ष संन्यास योग | Liberation & Surrender | Freedom, Final Teaching |
 | **TOTAL** | **700** | | | |
 
-### Chapter Breakdown for Mental Health Applications
+### Chapter Breakdown for Spiritual Wellness Applications
 
 **Anxiety & Stress (Chapters 2, 5, 6, 12, 18):**
 - Chapter 2: Equanimity, outcome detachment (verses 47-48, 56-72)
@@ -177,11 +177,11 @@ Each verse must contain the following fields:
   },
   "principle": "Core teaching",       // String: Main philosophical principle
   "theme": "theme_slug",              // String: Primary theme identifier
-  "mental_health_applications": [     // Array: Mental health applications
+  "mental_health_applications": [     // Array: Spiritual wellness applications
     "application_slug"
   ],
-  "primary_domain": "domain",         // String: Primary mental health domain
-  "secondary_domains": []             // Array: Secondary mental health domains
+  "primary_domain": "domain",         // String: Primary spiritual wellness domain
+  "secondary_domains": []             // Array: Secondary spiritual wellness domains
 }
 ```
 
@@ -271,11 +271,11 @@ Each verse must contain the following fields:
 
 ---
 
-## Section 5: Mental Health Tagging Methodology
+## Section 5: Spiritual Wellness Tagging Methodology
 
 ### Primary Domains
 
-Each verse is tagged with a primary mental health domain representing its core application:
+Each verse is tagged with a primary spiritual wellness domain representing its core application:
 
 #### 1. **anxiety** - Worry, Fear of Outcomes
 - **Definition:** Verses addressing excessive worry, future-oriented fear, outcome anxiety
@@ -337,7 +337,7 @@ Each verse is tagged with a primary mental health domain representing its core a
 - **Example Verses:** 2.11-30
 - **Psychological Basis:** Grief processing, acceptance, meaning reconstruction
 
-### Mental Health Applications
+### Spiritual Wellness Applications
 
 Specific applications that verses can address (multiple per verse):
 
@@ -378,7 +378,7 @@ Specific applications that verses can address (multiple per verse):
    - Avoid over-interpretation or projection
 
 2. **Multiple Applications Allowed**
-   - A verse can have 3-5 mental health applications
+   - A verse can have 3-5 spiritual wellness applications
    - Reflects the multi-layered wisdom of the Gita
 
 3. **Primary + Secondary Domains**
@@ -386,7 +386,7 @@ Specific applications that verses can address (multiple per verse):
    - 0-3 secondary domains
 
 4. **Evidence-Based**
-   - Applications should align with recognized mental health interventions
+   - Applications should align with recognized spiritual wellness interventions
    - Bridge traditional wisdom with modern psychology
 
 5. **Sanskrit Terms Preserved**
@@ -404,7 +404,7 @@ Specific applications that verses can address (multiple per verse):
 
 ### Key Verse Collections by Need
 
-Pre-curated verse sets for common mental health concerns:
+Pre-curated verse sets for common spiritual wellness concerns:
 
 **For Anxiety:**
 - 2.47 - Outcome detachment
@@ -487,7 +487,7 @@ class GitaVerse(Base):
     # Semantic search
     embedding: Mapped[list[float] | None] = mapped_column(Vector(384))
     
-    # Mental health tagging
+    # Spiritual wellness tagging
     mental_health_applications: Mapped[list[str] | None] = mapped_column(ARRAY(String))
     primary_domain: Mapped[str | None] = mapped_column(String(64), index=True)
     secondary_domains: Mapped[list[str] | None] = mapped_column(ARRAY(String))
@@ -555,7 +555,7 @@ python scripts/validate_gita_authenticity.py
 - ✅ Sanskrit is valid Devanagari (U+0900 to U+097F)
 - ✅ Transliteration uses IAST diacritics
 - ✅ Required fields present
-- ✅ Mental health tags are valid
+- ✅ Spiritual wellness tags are valid
 
 **Output:**
 ```
@@ -565,7 +565,7 @@ python scripts/validate_gita_authenticity.py
 ✅ Chapter distribution correct
 ✅ Devanagari validation passed
 ✅ IAST transliteration valid
-✅ Mental health tags complete
+✅ Spiritual wellness tags complete
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎉 VALIDATION PASSED - Ready for seeding
 ```
@@ -613,7 +613,7 @@ python scripts/verify_700_verses.py --database
 **Checks:**
 - Total verses in database = 700
 - Per-chapter counts match canonical
-- Mental health tags present
+- Spiritual wellness tags present
 - Embeddings generated
 - No duplicates
 
@@ -630,7 +630,7 @@ Chapter breakdown:
   ...
   Chapter 18: 78/78 ✅
 
-Mental health tagging: 700/700 ✅
+Spiritual wellness tagging: 700/700 ✅
 Embeddings: 700/700 ✅
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎉 SUCCESS! Database complete and verified
@@ -642,7 +642,7 @@ Embeddings: 700/700 ✅
 
 ### KIAAN (General Wellness AI)
 
-**Purpose:** Universal wisdom guidance for all mental health concerns
+**Purpose:** Universal wisdom guidance for all spiritual wellness concerns
 
 **Search Strategy:**
 1. User query → Embedding generation
@@ -784,7 +784,7 @@ async def test_semantic_search():
 - [ ] Verify 5 random verses against Gita Press source
 - [ ] Check IAST transliteration on 10 sample verses
 - [ ] Test semantic search with 20 queries
-- [ ] Verify mental health tags make sense for 50 verses
+- [ ] Verify spiritual wellness tags make sense for 50 verses
 - [ ] Check database indexes are created
 - [ ] Test KIAAN integration with 10 queries
 - [ ] Verify no duplicate verses in database
@@ -795,7 +795,7 @@ async def test_semantic_search():
 - Completeness: 700/700 verses present
 - Encoding: 100% valid UTF-8 Devanagari
 - Transliteration: 100% IAST standard
-- Mental Health Tags: 100% tagged
+- Spiritual Wellness Tags: 100% tagged
 
 ---
 
@@ -843,7 +843,7 @@ async def test_semantic_search():
 - Monier-Williams, M. (1899). *A Sanskrit-English Dictionary*. Oxford University Press.
 - Whitney, W. D. (1889). *Sanskrit Grammar*. Harvard University Press.
 
-### Mental Health Evidence Base
+### Spiritual Wellness Evidence Base
 
 **Mindfulness & Meditation:**
 - Kabat-Zinn, J. (1990). *Full Catastrophe Living: Using the Wisdom of Your Body and Mind to Face Stress, Pain, and Illness*.
@@ -861,8 +861,8 @@ async def test_semantic_search():
 - Frankl, V. E. (1946). *Man's Search for Meaning*.
 - Steger, M. F., & Frazier, P. (2005). "Meaning in life: One link in the chain from religiousness to well-being." *Journal of Counseling Psychology*, 52(4), 574.
 
-**Gita & Mental Health:**
-- Venkoba Rao, A. (2014). "Bhagavad Gita and mental health: An overview." *Indian Journal of Psychiatry*, 56(3), 227.
+**Gita & Spiritual Wellness:**
+- Venkoba Rao, A. (2014). "Bhagavad Gita and spiritual wellness: An overview." *Indian Journal of Psychiatry*, 56(3), 227.
 - Kumar, K. (2012). "Principles of the Bhagavad Gita in psychotherapy." *Indian Journal of Psychiatry*, 54(1), 17.
 
 ### Cultural & Philosophical Context
@@ -910,15 +910,15 @@ Use this checklist to track implementation progress:
 - [ ] Collect Hindi translations (Gita Press)
 - [ ] Collect English translations (Sivananda/Chinmayananda)
 - [ ] Create word meanings for all verses
-- [ ] Assign mental health tags (primary + secondary domains)
-- [ ] Assign mental health applications
+- [ ] Assign spiritual wellness tags (primary + secondary domains)
+- [ ] Assign spiritual wellness applications
 
 ### Phase 2: Validation
 - [ ] Create `gita_verses_complete.json` with all 700 verses
 - [ ] Run `validate_gita_authenticity.py`
 - [ ] Fix any validation errors
 - [ ] Verify random sample against sources
-- [ ] Peer review mental health tags
+- [ ] Peer review spiritual wellness tags
 
 ### Phase 3: Database Setup
 - [ ] Review database schema
@@ -929,7 +929,7 @@ Use this checklist to track implementation progress:
 ### Phase 4: Seeding
 - [ ] Run seeding script
 - [ ] Verify 700 verses loaded
-- [ ] Check mental health tags in database
+- [ ] Check spiritual wellness tags in database
 - [ ] Generate embeddings
 - [ ] Run verification script
 
@@ -950,7 +950,7 @@ Use this checklist to track implementation progress:
 
 ### Phase 7: Documentation
 - [ ] Complete this implementation guide ✅
-- [ ] Create mental health tagging guide
+- [ ] Create spiritual wellness tagging guide
 - [ ] Create sample data structure
 - [ ] Update README
 - [ ] Create data directory README
@@ -964,6 +964,6 @@ Use this checklist to track implementation progress:
 
 ---
 
-**This guide establishes the foundation for authentic Bhagavad Gita wisdom in MindVibe. Zero compromise on quality, maximum benefit for mental health.**
+**This guide establishes the foundation for authentic Bhagavad Gita wisdom in MindVibe. Zero compromise on quality, maximum benefit for spiritual wellness.**
 
 🕉️ **Om Shanti** 🕉️

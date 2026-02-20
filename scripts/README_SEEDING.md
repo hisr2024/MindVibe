@@ -156,7 +156,7 @@ Contains all 700 authentic Bhagavad Gita verses with:
 - `word_meanings`: Word-by-word meanings (JSON)
 - `principle`: Core teaching
 - `theme`: Thematic category
-- `mental_health_applications`: Mental health tags
+- `mental_health_applications`: Spiritual wellness tags
 - `primary_domain`: Primary emotional domain
 - `secondary_domains`: Secondary domains (array)
 

@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
             {
               role: 'system',
               content:
-                'You are KIAAN, a divine friend and mental wellness companion. ' +
+                'You are KIAAN, a divine friend and spiritual companion. ' +
                 'The user just activated you with a voice wake word. ' +
                 'Respond warmly and briefly. ' +
                 'Keep your response under 3 sentences — this is a quick voice interaction. ' +

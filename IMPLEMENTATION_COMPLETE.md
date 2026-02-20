@@ -2,7 +2,7 @@
 
 ## Overview
 
-Successfully implemented a complete AI-powered chatbot feature for MindVibe that provides mental health guidance based on Bhagavad Gita teachings, presented in a completely secular, universally applicable way.
+Successfully implemented a complete AI-powered chatbot feature for MindVibe that provides spiritual wellness guidance based on Bhagavad Gita teachings, presented in a completely secular, universally applicable way.
 
 ## Problem Statement Requirements - Compliance Check
 
@@ -32,7 +32,7 @@ Successfully implemented a complete AI-powered chatbot feature for MindVibe that
 
 **Code Location:** `WisdomKnowledgeBase.search_relevant_verses()` and `compute_text_similarity()`
 
-### ✅ 3. Provide actionable mental health guidance while maintaining cultural sensitivity
+### ✅ 3. Provide actionable spiritual wellness guidance while maintaining cultural sensitivity
 
 **Implementation:**
 - AI-powered responses with GPT-4 provide concrete, actionable steps
@@ -56,7 +56,7 @@ Successfully implemented a complete AI-powered chatbot feature for MindVibe that
 - Complete `WisdomKnowledgeBase` service in `services/wisdom_kb.py`
 - Manages verses with metadata:
   - Themes (action_without_attachment, equanimity_in_adversity, etc.)
-  - Mental health applications (anxiety_management, stress_reduction, etc.)
+  - Spiritual wellness applications (anxiety_management, stress_reduction, etc.)
   - Principles (karma yoga, inner peace, self-empowerment, etc.)
   - Context and practical applications
 - Methods for:
@@ -137,7 +137,7 @@ Successfully implemented a complete AI-powered chatbot feature for MindVibe that
      - Overview and key features
      - All API endpoints with examples
      - Usage examples in Python
-     - Mental health applications
+     - Spiritual wellness applications
      - How it works
      - Best practices
      - Troubleshooting
@@ -158,7 +158,7 @@ Successfully implemented a complete AI-powered chatbot feature for MindVibe that
      - Usage examples
      - Multi-turn conversations
      - Multi-language support
-     - Mental health scenarios
+     - Spiritual wellness scenarios
 
 **Code Location:** `docs/` directory and `examples/` directory
 
@@ -230,7 +230,7 @@ tests/
     └── test_chat_api.py          - API endpoint tests
 ```
 
-## Mental Health Applications Covered
+## Spiritual Wellness Applications Covered
 
 40+ applications across 10 verses:
 
@@ -375,7 +375,7 @@ While the current implementation is complete and production-ready, potential enh
 6. **More Verses**: Expand from 10 to 50+ verses covering more themes
 7. **Crisis Detection**: Identify crisis situations and provide appropriate resources
 8. **Multi-Modal**: Support images, videos, and audio recordings
-9. **Progress Tracking**: Track user's mental health journey over time
+9. **Progress Tracking**: Track user's spiritual wellness journey over time
 10. **Professional Integration**: Connect with licensed therapists when needed
 
 ## Conclusion
@@ -391,7 +391,7 @@ This implementation successfully delivers a complete, production-ready AI chatbo
 7. ✅ Follows modern best practices and patterns
 8. ✅ Is ready for production deployment
 
-The chatbot successfully combines ancient wisdom from the Bhagavad Gita with modern mental health practices, AI technology, and cultural sensitivity to create a unique tool for mental wellness that is accessible to everyone, regardless of their religious or cultural background.
+The chatbot successfully combines ancient wisdom from the Bhagavad Gita with modern spiritual wellness practices, AI technology, and cultural sensitivity to create a unique tool for spiritual wellness that is accessible to everyone, regardless of their religious or cultural background.
 
 ---
 
@@ -401,5 +401,5 @@ The chatbot successfully combines ancient wisdom from the Bhagavad Gita with mod
 - 40+ test cases
 - 6 API endpoints
 - Support for 3 languages
-- 40+ mental health applications
+- 40+ spiritual wellness applications
 - 100% requirement compliance

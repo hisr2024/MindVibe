@@ -56,7 +56,7 @@ CHAPTER_INFO = {
     18: {"name": "Moksha Sannyasa Yoga", "theme": "liberation_renunciation"},
 }
 
-# Mental health application mappings by theme
+# Spiritual wellness application mappings by theme
 MENTAL_HEALTH_APPLICATIONS = {
     "emotional_crisis_moral_conflict": ["emotional_regulation", "anxiety_management", "conflict_resolution", "self_awareness"],
     "wisdom_self_realization": ["self_discovery", "mindfulness", "inner_peace", "identity_clarity"],

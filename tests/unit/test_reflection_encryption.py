@@ -1,7 +1,7 @@
 """
 Tests for ReflectionEncryption class in journey_engine_enhanced.py
 
-This tests the encryption/decryption of mental health reflections,
+This tests the encryption/decryption of spiritual wellness reflections,
 which is critical for GDPR/HIPAA compliance.
 """
 

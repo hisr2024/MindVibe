@@ -1,6 +1,6 @@
 # AI Chatbot Setup Guide
 
-This guide will help you set up and use the MindVibe AI Chatbot for mental health guidance based on Bhagavad Gita wisdom.
+This guide will help you set up and use the MindVibe AI Chatbot for spiritual wellness guidance based on Bhagavad Gita wisdom.
 
 ## Prerequisites
 

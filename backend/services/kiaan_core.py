@@ -487,7 +487,7 @@ class KIAANCore:
         This method retrieves authentic Gita-based content including:
         - Core teachings with verse references
         - Recommended practices (Karma/Jnana/Bhakti/Dhyana Yoga)
-        - Sthitaprajna qualities for mental health
+        - Sthitaprajna qualities for spiritual wellness
         - Karma Yoga principles
 
         Args:
@@ -501,10 +501,10 @@ class KIAANCore:
 
     async def get_practice_recommendation(self, issue: str) -> dict[str, Any]:
         """
-        Get Gita-based practice recommendation for a mental health issue.
+        Get Gita-based practice recommendation for a spiritual wellness issue.
 
         Args:
-            issue: Mental health issue (anxiety, depression, stress, etc.)
+            issue: Spiritual wellness issue (anxiety, depression, stress, etc.)
 
         Returns:
             Recommended practice with key verse and immediate action
