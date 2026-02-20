@@ -366,7 +366,21 @@ async def startup():
             startup_logger.info(f"⚠️ Subscription plan seeding had issues: {seed_error}")
             # Don't fail startup - but log the warning
 
-        # Step 5: Initialize KIAAN 24/7 Learning Daemon (Autonomous Gita Wisdom)
+        # Step 5: Run data retention cleanup (purge expired soft-deleted chat data)
+        startup_logger.info("\n🔒 Running data retention cleanup...")
+        try:
+            from backend.services.data_retention import purge_expired_chat_messages
+            async with SessionLocal() as retention_db:
+                retention_result = await purge_expired_chat_messages(retention_db)
+                purged = retention_result.get("purged_messages", 0)
+                if purged:
+                    startup_logger.info(f"✅ Purged {purged} expired chat messages (retention={retention_result.get('retention_days')}d)")
+                else:
+                    startup_logger.info("ℹ️ No expired chat data to purge")
+        except Exception as retention_error:
+            startup_logger.info(f"⚠️ Data retention cleanup had issues: {retention_error}")
+
+        # Step 6: Initialize KIAAN 24/7 Learning Daemon (Autonomous Gita Wisdom)
         startup_logger.info("\n🕉️ Initializing KIAAN 24/7 Learning Daemon...")
         try:
             from backend.services.kiaan_learning_daemon import get_learning_daemon
