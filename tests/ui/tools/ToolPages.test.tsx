@@ -3,21 +3,33 @@
  *
  * Tests page rendering for:
  * - Karma Footprint page
- * - Tool redirect pages
+ * - Tool page existence checks
+ * - Tool page header rendering
  */
 
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
-// Test mocks for redirect pages
-vi.mock('next/navigation', async () => {
-  const actual = await vi.importActual('next/navigation')
-  return {
-    ...actual,
-    redirect: vi.fn(),
-  }
-})
+// Test mocks for Next.js navigation
+vi.mock('next/navigation', () => ({
+  redirect: vi.fn(),
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+  usePathname: () => '/tools/test',
+  useSearchParams: () => new URLSearchParams(),
+  useParams: () => ({}),
+  useSelectedLayoutSegment: () => null,
+  useSelectedLayoutSegments: () => [],
+  notFound: vi.fn(),
+  ReadonlyURLSearchParams: URLSearchParams,
+}))
 
 // Mock useFeatureAccess so SubscriptionGate renders children instead of loading spinner
 vi.mock('@/hooks/useFeatureAccess', () => ({
@@ -42,153 +54,157 @@ global.fetch = vi.fn(() =>
 
 describe('Karma Footprint Page', () => {
   it('renders the page title correctly', async () => {
-    // Dynamic import to avoid SSR issues
-    const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
+    const { default: KarmaFootprintPage } = await import('@/app/tools/karma-footprint/page')
     render(<KarmaFootprintPage />)
-    
+
     await waitFor(() => {
-      expect(screen.getByText('Karma Footprint')).toBeInTheDocument()
+      const titles = screen.getAllByText(/Karma Footprint Analyzer/i)
+      expect(titles.length).toBeGreaterThan(0)
     })
   })
 
   it('renders the subtitle correctly', async () => {
-    const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
+    const { default: KarmaFootprintPage } = await import('@/app/tools/karma-footprint/page')
     render(<KarmaFootprintPage />)
 
     await waitFor(() => {
-      expect(screen.getByText(/Track your daily actions/i)).toBeInTheDocument()
+      const subtitles = screen.getAllByText(/Reflect on your daily actions/i)
+      expect(subtitles.length).toBeGreaterThan(0)
     })
   })
 
-  it('renders the action input form', async () => {
-    const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
+  it('renders the day input form', async () => {
+    const { default: KarmaFootprintPage } = await import('@/app/tools/karma-footprint/page')
     render(<KarmaFootprintPage />)
-    
+
     await waitFor(() => {
-      expect(screen.getByLabelText(/what action do you want to reflect on/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/how did your day go/i)).toBeInTheDocument()
     })
   })
 
-  it('renders impact selection options', async () => {
-    const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
+  it('renders the analyze action card', async () => {
+    const { default: KarmaFootprintPage } = await import('@/app/tools/karma-footprint/page')
     render(<KarmaFootprintPage />)
-    
+
     await waitFor(() => {
-      expect(screen.getByText('Positive')).toBeInTheDocument()
-      expect(screen.getByText('Neutral')).toBeInTheDocument()
-      expect(screen.getByText('Growth')).toBeInTheDocument()
+      expect(screen.getByText('Analyze My Day')).toBeInTheDocument()
     })
   })
 
-  it('renders the analyze button', async () => {
-    const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
+  it('renders the start analysis button', async () => {
+    const { default: KarmaFootprintPage } = await import('@/app/tools/karma-footprint/page')
     render(<KarmaFootprintPage />)
-    
+
     await waitFor(() => {
-      expect(screen.getByText('Analyze Footprint')).toBeInTheDocument()
+      expect(screen.getByText('Start Analysis')).toBeInTheDocument()
     })
   })
 
-  it('renders KarmicTreeClient widget', async () => {
-    const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
+  it('renders Karmic Tree action card', async () => {
+    const { default: KarmaFootprintPage } = await import('@/app/tools/karma-footprint/page')
     render(<KarmaFootprintPage />)
 
-    // KarmicTreeClient shows loading state or tree content
     await waitFor(() => {
-      const treeElements = screen.getAllByText(/Karmic Tree/i)
-      expect(treeElements.length).toBeGreaterThan(0)
+      expect(screen.getByText(/View Karmic Tree/i)).toBeInTheDocument()
     })
   })
 
   it('renders related tools links via SpiritualToolsNav', async () => {
-    const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
+    const { default: KarmaFootprintPage } = await import('@/app/tools/karma-footprint/page')
     render(<KarmaFootprintPage />)
 
     await waitFor(() => {
-      // SpiritualToolsNav renders cross-feature navigation links
-      expect(screen.getByText('Emotional Reset')).toBeInTheDocument()
-      expect(screen.getByText('Karma Reset')).toBeInTheDocument()
+      expect(screen.getByText(/Emotional Reset/i)).toBeInTheDocument()
     })
   })
 
-  it('has accessible form elements', async () => {
-    const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
+  it('has accessible textarea element', async () => {
+    const { default: KarmaFootprintPage } = await import('@/app/tools/karma-footprint/page')
     render(<KarmaFootprintPage />)
-    
-    // Check radiogroup for impact selection
+
     await waitFor(() => {
-      expect(screen.getByRole('radiogroup', { name: /action impact type/i })).toBeInTheDocument()
+      expect(screen.getByRole('textbox')).toBeInTheDocument()
     })
   })
 
   it('renders back navigation link', async () => {
-    const { default: KarmaFootprintPage } = await import('@/app/karma-footprint/page')
+    const { default: KarmaFootprintPage } = await import('@/app/tools/karma-footprint/page')
     render(<KarmaFootprintPage />)
-    
+
     await waitFor(() => {
-      expect(screen.getByText('← Back to dashboard')).toBeInTheDocument()
+      expect(screen.getByText(/Back to home/i)).toBeInTheDocument()
     })
   })
 })
 
-describe('Tool Redirect Pages', () => {
-  it('viyog redirect page exists', async () => {
+describe('Tool Pages Exist', () => {
+  it('viyog tool page exists', async () => {
     const pageModule = await import('@/app/tools/viyog/page')
     expect(pageModule.default).toBeDefined()
   })
 
-  it('ardha redirect page exists', async () => {
+  it('ardha tool page exists', async () => {
     const pageModule = await import('@/app/tools/ardha/page')
     expect(pageModule.default).toBeDefined()
   })
 
-  it('relationship-compass redirect page exists', async () => {
+  it('relationship-compass tool page exists', async () => {
     const pageModule = await import('@/app/tools/relationship-compass/page')
     expect(pageModule.default).toBeDefined()
   })
 
-  it('emotional-reset redirect page exists', async () => {
+  it('emotional-reset tool page exists', async () => {
     const pageModule = await import('@/app/tools/emotional-reset/page')
     expect(pageModule.default).toBeDefined()
   })
 
-  it('karma-footprint redirect page exists', async () => {
+  it('karma-footprint tool page exists', async () => {
     const pageModule = await import('@/app/tools/karma-footprint/page')
     expect(pageModule.default).toBeDefined()
   })
 
-  it('karmic-tree redirect page exists', async () => {
+  it('karmic-tree tool page exists', async () => {
     const pageModule = await import('@/app/tools/karmic-tree/page')
     expect(pageModule.default).toBeDefined()
   })
 })
 
-describe('Existing Tool Pages Headers', () => {
+describe('Tool Pages Headers', () => {
   it('viyog page has correct heading', async () => {
-    const { default: ViyogPage } = await import('@/app/viyog/page')
+    const { default: ViyogPage } = await import('@/app/tools/viyog/page')
     render(<ViyogPage />)
 
-    expect(screen.getByText('Viyoga')).toBeInTheDocument()
+    await waitFor(() => {
+      const headings = screen.getAllByText(/Viyoga/i)
+      expect(headings.length).toBeGreaterThan(0)
+    })
   })
 
   it('ardha page has correct heading', async () => {
-    const { default: ArdhaPage } = await import('@/app/ardha/page')
+    const { default: ArdhaPage } = await import('@/app/tools/ardha/page')
     render(<ArdhaPage />)
-    
-    expect(screen.getByText(/Ardha – Cognitive Reframing/i)).toBeInTheDocument()
+
+    await waitFor(() => {
+      expect(screen.getByText(/Ardha.*Cognitive Reframing/i)).toBeInTheDocument()
+    })
   })
 
   it('relationship-compass page has correct heading', async () => {
-    const { default: RelationshipCompassPage } = await import('@/app/relationship-compass/page')
+    const { default: RelationshipCompassPage } = await import('@/app/tools/relationship-compass/page')
     render(<RelationshipCompassPage />)
 
-    expect(screen.getByText('Relationship Compass')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Relationship Compass')).toBeInTheDocument()
+    })
   })
 
-  // Note: emotional-reset page uses useRouter which requires special mocking
-  // The page exists and renders correctly in the actual app
-  it('emotional-reset page module exists', async () => {
-    const pageModule = await import('@/app/emotional-reset/page')
-    expect(pageModule.default).toBeDefined()
+  it('emotional-reset page has correct heading', async () => {
+    const { default: EmotionalResetPage } = await import('@/app/tools/emotional-reset/page')
+    render(<EmotionalResetPage />)
+
+    await waitFor(() => {
+      const headings = screen.getAllByText(/Emotional Reset/i)
+      expect(headings.length).toBeGreaterThan(0)
+    })
   })
 })
