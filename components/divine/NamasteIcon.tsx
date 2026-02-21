@@ -164,15 +164,16 @@ export function NamasteIcon({
         <motion.circle
           cx="60"
           cy="60"
-          r="8"
+          r={8}
           fill="url(#lotus-core)"
           filter="url(#lotus-glow)"
           animate={
             motionEnabled
-              ? { opacity: [0.8, 1, 0.8], r: [7.5, 8.5, 7.5] as unknown as number[] }
+              ? { opacity: [0.8, 1, 0.8], scale: [0.9375, 1.0625, 0.9375] }
               : undefined
           }
           transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ transformOrigin: '60px 60px' }}
         />
 
         {/* Inner light point */}

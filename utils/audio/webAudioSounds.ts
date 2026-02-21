@@ -10,9 +10,43 @@
  */
 
 let audioContext: AudioContext | null = null
+let userHasInteracted = false
+
+/**
+ * Track whether the user has interacted with the page.
+ * AudioContext can only be created/resumed after a user gesture.
+ */
+function setupUserInteractionTracking(): void {
+  if (typeof window === 'undefined' || userHasInteracted) return
+
+  const markInteracted = () => {
+    userHasInteracted = true
+    // Resume any suspended AudioContext now that we have a user gesture
+    if (audioContext && audioContext.state === 'suspended') {
+      audioContext.resume().catch(() => {})
+    }
+    window.removeEventListener('click', markInteracted, true)
+    window.removeEventListener('touchstart', markInteracted, true)
+    window.removeEventListener('keydown', markInteracted, true)
+    window.removeEventListener('pointerdown', markInteracted, true)
+  }
+
+  window.addEventListener('click', markInteracted, true)
+  window.addEventListener('touchstart', markInteracted, true)
+  window.addEventListener('keydown', markInteracted, true)
+  window.addEventListener('pointerdown', markInteracted, true)
+}
+
+// Initialize tracking as soon as this module loads
+if (typeof window !== 'undefined') {
+  setupUserInteractionTracking()
+}
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null
+
+  // Don't create AudioContext before user has interacted with the page
+  if (!userHasInteracted) return null
 
   if (!audioContext || audioContext.state === 'closed') {
     try {

@@ -213,7 +213,7 @@ export function TriangleOfEnergy({
           animate={
             isAnimated
               ? {
-                  r: selectedMode ? [8, 12, 8] : [8, 10, 8],
+                  scale: selectedMode ? [1, 1.5, 1] : [1, 1.25, 1],
                   opacity: selectedMode ? [0.4, 0.7, 0.4] : [0.2, 0.3, 0.2],
                 }
               : undefined
@@ -227,6 +227,7 @@ export function TriangleOfEnergy({
                 }
               : undefined
           }
+          style={{ transformOrigin: `${center}px ${center + radius * 0.1}px` }}
         />
 
         {/* Energy convergence when mode selected */}

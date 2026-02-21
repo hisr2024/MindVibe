@@ -312,9 +312,30 @@ export default function CompanionVoicePlayer({
     onEnd?.()
   }, [onStop, onEnd])
 
-  // Auto-play if requested (triggers on mount and when autoPlay/text change)
+  // Track whether user has interacted with the page (required for audio autoplay)
+  const userInteractedRef = useRef(false)
   useEffect(() => {
-    if (autoPlay && state === 'idle' && text) {
+    if (userInteractedRef.current) return
+    const markInteracted = () => {
+      userInteractedRef.current = true
+      window.removeEventListener('click', markInteracted, true)
+      window.removeEventListener('touchstart', markInteracted, true)
+      window.removeEventListener('keydown', markInteracted, true)
+    }
+    window.addEventListener('click', markInteracted, true)
+    window.addEventListener('touchstart', markInteracted, true)
+    window.addEventListener('keydown', markInteracted, true)
+    return () => {
+      window.removeEventListener('click', markInteracted, true)
+      window.removeEventListener('touchstart', markInteracted, true)
+      window.removeEventListener('keydown', markInteracted, true)
+    }
+  }, [])
+
+  // Auto-play if requested (triggers on mount and when autoPlay/text change)
+  // Only autoplay after user has interacted with the page to comply with browser policy
+  useEffect(() => {
+    if (autoPlay && state === 'idle' && text && userInteractedRef.current) {
       const timer = setTimeout(() => playAudio(), 300)
       return () => clearTimeout(timer)
     }

@@ -103,7 +103,26 @@ async def get_current_subscription(
     user_id = await get_current_user_id(request)
 
     # Auto-assign free tier if no subscription exists
-    subscription = await get_or_create_free_subscription(db, user_id)
+    try:
+        subscription = await get_or_create_free_subscription(db, user_id)
+    except ValueError as e:
+        logger.warning(f"User not found for subscription lookup: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "error": "user_not_found",
+                "message": "Your user account was not found. Please log out and sign in again.",
+            },
+        ) from None
+    except Exception as e:
+        logger.error(f"Failed to get/create subscription for user {user_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "error": "subscription_error",
+                "message": "Unable to load subscription. Please try again later.",
+            },
+        ) from None
 
     # Check if user is a developer — they get full premium access
     user_is_developer = await is_developer(db, user_id)
