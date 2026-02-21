@@ -25,7 +25,6 @@ import {
   Home,
   User,
   Sparkles,
-  Compass,
   PenLine,
   Bell,
   Wifi,

@@ -163,7 +163,7 @@ function HomeSkeleton() {
 
 export default function MobileHomePage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuth()
+  const { user } = useAuth()
   const { triggerHaptic } = useHapticFeedback()
 
   const [dashboardData, setDashboardData] = useState<DashboardData>({
