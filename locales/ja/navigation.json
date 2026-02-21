@@ -9,7 +9,8 @@
     "profile": "プロフィール",
     "settings": "設定",
     "account": "アカウントアクセス",
-    "theme": "テーマ"
+    "theme": "テーマ",
+    "introduction": "はじめに"
   },
   "features": {
     "kiaan": "KIAAN",
@@ -58,10 +59,18 @@
     "nav_label": "Healing pathway"
   },
   "next_step": {
-    "explore_ardha": "Explore in Ardha \u2192",
-    "continue_kiaan": "Continue with KIAAN \u2192",
-    "stabilize_viyoga": "Stabilize with Viyoga \u2192",
-    "enter_journey": "Enter a Journey \u2192",
+    "explore_ardha": "Explore in Ardha →",
+    "continue_kiaan": "Continue with KIAAN →",
+    "stabilize_viyoga": "Stabilize with Viyoga →",
+    "enter_journey": "Enter a Journey →",
     "helper": "Based on your conversation, you might find this helpful"
+  },
+  "tools": {
+    "releaseAttachment": "執着を解放",
+    "reframeThoughts": "思考をリフレーム",
+    "kiaanChat": "KIAANチャット",
+    "talkItThrough": "話して整理する",
+    "relationalClarity": "関係の明確さ",
+    "quickAccess": "クイックアクセス"
   }
 }

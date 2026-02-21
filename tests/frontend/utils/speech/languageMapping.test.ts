@@ -14,8 +14,8 @@ import {
 describe('speech language mapping', () => {
   describe('SPEECH_LANGUAGE_MAP', () => {
     it('should have mappings for all supported locales', () => {
-      const expectedLocales = ['en', 'es', 'fr', 'de', 'hi', 'ar', 'zh', 'ja', 'pt']
-      
+      const expectedLocales = ['en', 'hi', 'ta', 'te', 'bn', 'mr', 'gu', 'kn', 'ml', 'pa', 'sa', 'es', 'fr', 'de', 'pt', 'ja', 'zh-CN']
+
       expectedLocales.forEach(locale => {
         expect(SPEECH_LANGUAGE_MAP).toHaveProperty(locale)
         expect(typeof SPEECH_LANGUAGE_MAP[locale as keyof typeof SPEECH_LANGUAGE_MAP]).toBe('string')
@@ -24,12 +24,14 @@ describe('speech language mapping', () => {
 
     it('should map to correct BCP 47 language tags', () => {
       expect(SPEECH_LANGUAGE_MAP.en).toBe('en-US')
+      expect(SPEECH_LANGUAGE_MAP.hi).toBe('hi-IN')
+      expect(SPEECH_LANGUAGE_MAP.ta).toBe('ta-IN')
+      expect(SPEECH_LANGUAGE_MAP.te).toBe('te-IN')
+      expect(SPEECH_LANGUAGE_MAP.bn).toBe('bn-IN')
       expect(SPEECH_LANGUAGE_MAP.es).toBe('es-ES')
       expect(SPEECH_LANGUAGE_MAP.fr).toBe('fr-FR')
       expect(SPEECH_LANGUAGE_MAP.de).toBe('de-DE')
-      expect(SPEECH_LANGUAGE_MAP.hi).toBe('hi-IN')
-      expect(SPEECH_LANGUAGE_MAP.ar).toBe('ar-SA')
-      expect(SPEECH_LANGUAGE_MAP.zh).toBe('zh-CN')
+      expect(SPEECH_LANGUAGE_MAP['zh-CN']).toBe('zh-CN')
       expect(SPEECH_LANGUAGE_MAP.ja).toBe('ja-JP')
       expect(SPEECH_LANGUAGE_MAP.pt).toBe('pt-PT')
     })

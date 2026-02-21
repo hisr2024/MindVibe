@@ -17,8 +17,8 @@
       "title": "Como posso guiá-lo hoje?",
       "subtitle": "Compartilhe o que está em sua mente"
     },
-    "disclaimer": "KIAAN compartilha reflexões de apoio para o bem-estar geral. Essas conversas e exercícios não são aconselhamento médico. Se você estiver enfrentando preocupações sérias ou se sentir inseguro, entre em contato com os serviços médicos de emergência do seu país ou um profissional licenciado imediatamente.",
-    "saveToJournal": "Save to Journal",
+    "disclaimer": "KIAAN e seu companheiro espiritual, compartilhando reflexoes do Bhagavad Gita e sabedoria antiga.",
+    "saveToJournal": "Salvar no diario",
     "copy": "Copiar",
     "copied": "Copiado!",
     "copyFailed": "Falhou",
@@ -28,7 +28,11 @@
     "shareWarning": "Você está prestes a compartilhar reflexões espirituais. Certifique-se de que está confortável em compartilhar este conteúdo publicamente.",
     "anonymize": "Anonimizar conteúdo (remover identificadores pessoais)",
     "anonymized": "✓ Conteúdo anonimizado",
-    "sharingOriginal": "Compartilhando conteúdo original"
+    "sharingOriginal": "Compartilhando conteúdo original",
+    "defaultResponse": "Estou aqui. Conte-me o que esta acontecendo e resolveremos juntos.",
+    "summary": "Resumo",
+    "fullView": "Vista completa",
+    "divineFriend": "Seu Amigo Divino"
   },
   "guidanceModes": {
     "title": "Modos de orientação",
@@ -93,19 +97,19 @@
     "subtitle": "Prompts polidos que preenchem automaticamente o KIAAN para você",
     "scenarios": {
       "anxiety": {
-        "label": "Ansiedade para calma",
+        "label": "Ansiedade alta",
         "prompt": "Guie-me através de um exercício de ancoragem para estabilizar pensamentos ansiosos."
       },
       "heavy": {
-        "label": "Coração pesado",
+        "label": "Sentindo-se pesado",
         "prompt": "Preciso de palavras gentis para elevar meu humor e me lembrar de minhas forças."
       },
       "anger": {
-        "label": "Acalmando a raiva",
+        "label": "Gerenciando raiva",
         "prompt": "Ajude-me a esfriar minha raiva e responder com mais paciência."
       },
       "clarity": {
-        "label": "Verificação de clareza",
+        "label": "Preciso de clareza",
         "prompt": "Você pode me ajudar a ver os prós e contras antes de decidir algo importante?"
       },
       "work": {
@@ -113,16 +117,19 @@
         "prompt": "O trabalho parece avassalador—guie-me através de uma reinicialização rápida para recuperar o foco."
       },
       "relationships": {
-        "label": "Relacionamentos delicados",
+        "label": "Estresse relacional",
         "prompt": "Como posso lidar com uma conversa difícil com cuidado e honestidade?"
       },
       "purpose": {
-        "label": "Pulso de propósito",
+        "label": "Sentindo-se preso",
         "prompt": "Quero uma breve reflexão para me reconectar com meu propósito e direção."
       },
       "peace": {
-        "label": "Paz tranquila",
+        "label": "Preciso regular",
         "prompt": "Conduza-me em um momento consciente breve para que eu possa me sentir em paz novamente."
+      },
+      "balance": {
+        "label": "Sobrecarregado"
       }
     }
   }

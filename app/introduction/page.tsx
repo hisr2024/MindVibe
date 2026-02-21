@@ -17,6 +17,7 @@ import {
 } from '@/components/divine'
 import { DivineConsciousnessProvider } from '@/contexts/DivineConsciousnessContext'
 import { useUISound } from '@/hooks/useUISound'
+import { useLanguage } from '@/hooks/useLanguage'
 import Link from 'next/link'
 
 // Animation variants for consistent motion
@@ -100,6 +101,9 @@ export default function IntroductionPage() {
   const [showHeartJournal, setShowHeartJournal] = useState(false)
   const [hasSeenDarshan, setHasSeenDarshan] = useState(false)
   const [isPageReady, setIsPageReady] = useState(false)
+
+  // Language hook for translations
+  const { t } = useLanguage()
 
   // Audio hook for sound effects
   const { playSound, playOm, playSingingBowl, playChime, playBell } = useUISound()
@@ -222,12 +226,12 @@ export default function IntroductionPage() {
 
             {/* Title - Responsive typography */}
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2 sm:mb-3 px-2">
-              Welcome to Divine Presence
+              {t('home.introduction.heroTitle', 'Welcome to Divine Presence')}
             </h1>
 
             {/* Subtitle */}
             <p className="text-white/55 text-sm sm:text-base md:text-lg max-w-md sm:max-w-lg md:max-w-xl mx-auto px-4 leading-relaxed">
-              Experience the loving guidance of Krishna. You are never alone on this journey.
+              {t('home.introduction.heroSubtitle', 'Experience the loving guidance of Krishna. You are never alone on this journey.')}
             </p>
 
             {/* Morning Darshan Button - Mobile friendly */}
@@ -241,7 +245,7 @@ export default function IntroductionPage() {
                 style={{ transform: 'translateZ(0)' }}
               >
                 <span>🌅</span>
-                <span>Receive Krishna&apos;s Darshan</span>
+                <span>{t('home.introduction.receiveDarshan', "Receive Krishna's Darshan")}</span>
               </motion.button>
             )}
           </motion.section>
@@ -288,8 +292,8 @@ export default function IntroductionPage() {
                   <span className="text-xl sm:text-2xl font-bold text-slate-900">K</span>
                 </motion.div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-orange-100 font-semibold text-base sm:text-lg">Talk to KIAAN</h3>
-                  <p className="text-orange-200/60 text-xs sm:text-sm truncate">Divine wisdom & guidance</p>
+                  <h3 className="text-orange-100 font-semibold text-base sm:text-lg">{t('home.introduction.talkToKiaan', 'Talk to KIAAN')}</h3>
+                  <p className="text-orange-200/60 text-xs sm:text-sm truncate">{t('home.introduction.divineWisdom', 'Divine wisdom & guidance')}</p>
                 </div>
                 <div className="text-orange-300/50 group-hover:text-orange-300 transition-colors flex-shrink-0">
                   <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -322,8 +326,8 @@ export default function IntroductionPage() {
                   <span className="text-3xl sm:text-4xl">☸️</span>
                 </div>
                 <div className="w-full">
-                  <h3 className="text-amber-100 font-semibold text-sm sm:text-base md:text-lg">Divine Protection Shield</h3>
-                  <p className="text-amber-200/60 text-xs sm:text-sm mt-1">Activate Krishna&apos;s protection</p>
+                  <h3 className="text-amber-100 font-semibold text-sm sm:text-base md:text-lg">{t('home.introduction.protectionShield', 'Divine Protection Shield')}</h3>
+                  <p className="text-amber-200/60 text-xs sm:text-sm mt-1">{t('home.introduction.activateProtection', "Activate Krishna's protection")}</p>
                 </div>
               </motion.button>
 
@@ -342,8 +346,8 @@ export default function IntroductionPage() {
                   <span className="text-3xl sm:text-4xl">💙</span>
                 </div>
                 <div className="w-full">
-                  <h3 className="text-pink-100 font-semibold text-sm sm:text-base md:text-lg">Heart-to-Heart with Krishna</h3>
-                  <p className="text-pink-200/60 text-xs sm:text-sm mt-1">Write a letter to the Divine</p>
+                  <h3 className="text-pink-100 font-semibold text-sm sm:text-base md:text-lg">{t('home.introduction.heartToHeart', 'Heart-to-Heart with Krishna')}</h3>
+                  <p className="text-pink-200/60 text-xs sm:text-sm mt-1">{t('home.introduction.writeLetter', 'Write a letter to the Divine')}</p>
                 </div>
               </motion.button>
 
@@ -362,8 +366,8 @@ export default function IntroductionPage() {
               <div className="flex items-center justify-center gap-3 mb-4 sm:mb-5">
                 <span className="text-2xl sm:text-3xl">💙</span>
                 <div className="text-center">
-                  <h3 className="text-white/90 font-medium text-base sm:text-lg">How is your heart?</h3>
-                  <p className="text-white/50 text-xs sm:text-sm">Share your feelings with Krishna</p>
+                  <h3 className="text-white/90 font-medium text-base sm:text-lg">{t('home.introduction.howIsHeart', 'How is your heart?')}</h3>
+                  <p className="text-white/50 text-xs sm:text-sm">{t('home.introduction.shareFeelings', 'Share your feelings with Krishna')}</p>
                 </div>
               </div>
               <DivineMoodCheckIn compact={true} />
@@ -420,8 +424,8 @@ export default function IntroductionPage() {
                       <span className="text-2xl sm:text-3xl">🏠</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-indigo-100 font-semibold text-base sm:text-lg">Go to Dashboard</h3>
-                      <p className="text-indigo-200/60 text-xs sm:text-sm">Access all tools & features</p>
+                      <h3 className="text-indigo-100 font-semibold text-base sm:text-lg">{t('home.introduction.goToDashboard', 'Go to Dashboard')}</h3>
+                      <p className="text-indigo-200/60 text-xs sm:text-sm">{t('home.introduction.accessTools', 'Access all tools & features')}</p>
                     </div>
                     <div className="text-indigo-300/50 group-hover:text-indigo-300 transition-colors flex-shrink-0">
                       <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -438,35 +442,35 @@ export default function IntroductionPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.65 }}
                 >
-                  <h3 className="text-white/90 font-medium text-sm sm:text-base mb-3 sm:mb-4">Quick Divine Access</h3>
+                  <h3 className="text-white/90 font-medium text-sm sm:text-base mb-3 sm:mb-4">{t('home.introduction.quickAccess', 'Quick Divine Access')}</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                     <Link
                       href="/journeys"
                       className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[60px] sm:min-h-[72px]"
                     >
                       <span className="text-xl sm:text-2xl mb-1">🕉️</span>
-                      <span className="text-white/70 text-[10px] sm:text-xs text-center leading-tight">Journeys</span>
+                      <span className="text-white/70 text-[10px] sm:text-xs text-center leading-tight">{t('home.introduction.journeys', 'Journeys')}</span>
                     </Link>
                     <Link
                       href="/flows/journal"
                       className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[60px] sm:min-h-[72px]"
                     >
                       <span className="text-xl sm:text-2xl mb-1">📝</span>
-                      <span className="text-white/70 text-[10px] sm:text-xs text-center leading-tight">Journal</span>
+                      <span className="text-white/70 text-[10px] sm:text-xs text-center leading-tight">{t('home.introduction.journal', 'Journal')}</span>
                     </Link>
                     <Link
                       href="/tools/ardha"
                       className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[60px] sm:min-h-[72px]"
                     >
                       <span className="text-xl sm:text-2xl mb-1">🔄</span>
-                      <span className="text-white/70 text-[10px] sm:text-xs text-center leading-tight">Reframe</span>
+                      <span className="text-white/70 text-[10px] sm:text-xs text-center leading-tight">{t('home.introduction.reframe', 'Reframe')}</span>
                     </Link>
                     <Link
                       href="/tools/viyog"
                       className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[60px] sm:min-h-[72px]"
                     >
                       <span className="text-xl sm:text-2xl mb-1">🧘</span>
-                      <span className="text-white/70 text-[10px] sm:text-xs text-center leading-tight">Detach</span>
+                      <span className="text-white/70 text-[10px] sm:text-xs text-center leading-tight">{t('home.introduction.detach', 'Detach')}</span>
                     </Link>
                   </div>
                 </motion.div>
@@ -483,9 +487,9 @@ export default function IntroductionPage() {
             transition={{ delay: 0.8 }}
           >
             <p className="text-white/50 text-xs sm:text-sm italic font-sacred max-w-md mx-auto px-4 leading-relaxed">
-              &quot;I am the Self seated in the hearts of all beings. I am the beginning, the middle, and the end.&quot;
+              {t('home.introduction.footerVerse', '"I am the Self seated in the hearts of all beings. I am the beginning, the middle, and the end."')}
             </p>
-            <p className="text-amber-400/60 text-xs mt-2 font-medium">— Bhagavad Gita 10.20</p>
+            <p className="text-amber-400/60 text-xs mt-2 font-medium">{t('home.introduction.footerVerseRef', '— Bhagavad Gita 10.20')}</p>
           </motion.section>
 
           {/* ==================== FLOATING ELEMENTS ==================== */}

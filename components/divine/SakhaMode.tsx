@@ -14,6 +14,7 @@
 
 import React, { useState, useCallback, createContext, useContext, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '@/hooks/useLanguage';
 
 // Types
 interface SakhaModeContextType {
@@ -163,6 +164,7 @@ export function SakhaModeToggle({
   size = 'md',
 }: SakhaModeToggleProps) {
   const { isActive, toggleSakhaMode } = useSakhaMode();
+  const { t } = useLanguage();
 
   const sizes = {
     sm: { toggle: 'w-10 h-5', circle: 'w-4 h-4', translate: 'translate-x-5' },
@@ -194,10 +196,10 @@ export function SakhaModeToggle({
       {showLabel && (
         <div className="flex flex-col">
           <span className={`font-medium ${isActive ? 'text-amber-300' : 'text-white/70'}`}>
-            Sakha Mode
+            {t('divine.sacred.sakha.sakhaMode', 'Sakha Mode')}
           </span>
           <span className="text-xs text-white/50">
-            {isActive ? 'Krishna as Friend' : 'Standard KIAAN'}
+            {isActive ? t('divine.sacred.sakha.krishnaAsFriend', 'Krishna as Friend') : t('divine.sacred.sakha.standardKiaan', 'Standard KIAAN')}
           </span>
         </div>
       )}
@@ -207,7 +209,8 @@ export function SakhaModeToggle({
 
 // Sakha Mode Indicator (shows when active)
 export function SakhaModeIndicator({ className = '' }: { className?: string }) {
-  const { isActive, currentEndearment } = useSakhaMode();
+  const { isActive } = useSakhaMode();
+  const { t } = useLanguage();
 
   if (!isActive) return null;
 
@@ -225,7 +228,7 @@ export function SakhaModeIndicator({ className = '' }: { className?: string }) {
       >
         💙
       </motion.span>
-      <span className="text-amber-200 text-xs">Speaking as your Friend</span>
+      <span className="text-amber-200 text-xs">{t('divine.sacred.sakha.speakingAsFriend', 'Speaking as your Friend')}</span>
     </motion.div>
   );
 }
@@ -238,6 +241,7 @@ interface SakhaModeCardProps {
 
 export function SakhaModeCard({ className = '', onActivate }: SakhaModeCardProps) {
   const { isActive, toggleSakhaMode, getKrishnaResponse } = useSakhaMode();
+  const { t } = useLanguage();
   const [greeting, setGreeting] = useState('');
 
   const handleActivate = useCallback(() => {
@@ -264,8 +268,8 @@ export function SakhaModeCard({ className = '', onActivate }: SakhaModeCardProps
             <span className="text-2xl">🤝</span>
           </motion.div>
           <div>
-            <h3 className="text-amber-100 font-semibold">Sakha Mode</h3>
-            <p className="text-amber-200/60 text-xs">Talk to Krishna as your Friend</p>
+            <h3 className="text-amber-100 font-semibold">{t('divine.sacred.sakha.sakhaMode', 'Sakha Mode')}</h3>
+            <p className="text-amber-200/60 text-xs">{t('divine.sacred.sakha.talkToKrishna', 'Talk to Krishna as your Friend')}</p>
           </div>
         </div>
         <SakhaModeToggle size="sm" showLabel={false} />
@@ -286,8 +290,8 @@ export function SakhaModeCard({ className = '', onActivate }: SakhaModeCardProps
 
       <p className="text-amber-200/70 text-sm mb-4">
         {isActive
-          ? "Krishna speaks to you now as your eternal friend - with warmth, love, and deep understanding."
-          : "Enable Sakha Mode to experience KIAAN as Krishna, your divine friend who knows you completely and loves you unconditionally."
+          ? t('divine.sacred.sakha.activeDescription', "Krishna speaks to you now as your eternal friend - with warmth, love, and deep understanding.")
+          : t('divine.sacred.sakha.inactiveDescription', "Enable Sakha Mode to experience KIAAN as Krishna, your divine friend who knows you completely and loves you unconditionally.")
         }
       </p>
 
@@ -298,7 +302,7 @@ export function SakhaModeCard({ className = '', onActivate }: SakhaModeCardProps
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          Activate Friend Mode
+          {t('divine.sacred.sakha.activateFriendMode', 'Activate Friend Mode')}
         </motion.button>
       )}
 
@@ -309,7 +313,7 @@ export function SakhaModeCard({ className = '', onActivate }: SakhaModeCardProps
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <span>Talk to Your Friend</span>
+          <span>{t('divine.sacred.sakha.talkToYourFriend', 'Talk to Your Friend')}</span>
           <span>💙</span>
         </motion.a>
       )}

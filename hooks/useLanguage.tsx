@@ -154,7 +154,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
     try {
       // Load all translation files and merge them
-      const files = ['common', 'home', 'kiaan', 'navigation', 'dashboard', 'features', 'errors']
+      const files = ['common', 'home', 'kiaan', 'navigation', 'dashboard', 'features', 'errors', 'divine']
       const results = await Promise.allSettled(
         files.map(file => fetch(`/locales/${lang}/${file}.json`).then(r => {
           if (!r.ok) {

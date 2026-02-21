@@ -13,6 +13,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDivineConsciousness, BreathingPattern, SacredBreathingExercise } from '@/contexts/DivineConsciousnessContext';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface SacredBreathingProps {
   pattern?: BreathingPattern;
@@ -27,13 +28,13 @@ interface SacredBreathingProps {
 
 type BreathPhase = 'ready' | 'inhale' | 'hold' | 'exhale' | 'pause' | 'complete';
 
-const PHASE_LABELS: Record<BreathPhase, string> = {
-  ready: 'Prepare to breathe...',
-  inhale: 'Breathe in...',
-  hold: 'Hold gently...',
-  exhale: 'Release...',
-  pause: 'Rest...',
-  complete: 'Peace be with you',
+const PHASE_LABEL_KEYS: Record<BreathPhase, { key: string; fallback: string }> = {
+  ready: { key: 'divine.sacred.breathing.phases.ready', fallback: 'Prepare to breathe...' },
+  inhale: { key: 'divine.sacred.breathing.phases.inhale', fallback: 'Breathe in...' },
+  hold: { key: 'divine.sacred.breathing.phases.hold', fallback: 'Hold gently...' },
+  exhale: { key: 'divine.sacred.breathing.phases.exhale', fallback: 'Release...' },
+  pause: { key: 'divine.sacred.breathing.phases.pause', fallback: 'Rest...' },
+  complete: { key: 'divine.sacred.breathing.phases.complete', fallback: 'Peace be with you' },
 };
 
 const PHASE_COLORS: Record<BreathPhase, string> = {
@@ -56,6 +57,7 @@ export function SacredBreathing({
   className = '',
 }: SacredBreathingProps) {
   const { actions } = useDivineConsciousness();
+  const { t } = useLanguage();
 
   const [exercise, setExercise] = useState<SacredBreathingExercise | null>(null);
   const [phase, setPhase] = useState<BreathPhase>('ready');
@@ -239,7 +241,7 @@ export function SacredBreathing({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        Pattern: {exercise.pattern}
+        {t('divine.sacred.breathing.patternLabel', 'Pattern')}: {exercise.pattern}
       </motion.p>
 
       {/* Breathing Circle */}
@@ -280,7 +282,7 @@ export function SacredBreathing({
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
               >
-                {PHASE_LABELS[phase]}
+                {t(PHASE_LABEL_KEYS[phase].key, PHASE_LABEL_KEYS[phase].fallback)}
               </motion.span>
             </AnimatePresence>
 
@@ -331,7 +333,7 @@ export function SacredBreathing({
           >
             {isActive
               ? exercise.instructions[currentInstruction]
-              : 'Press start when you are ready to begin your sacred breathing journey.'}
+              : t('divine.sacred.breathing.pressStart', 'Press start when you are ready to begin your sacred breathing journey.')}
           </motion.p>
         </AnimatePresence>
       )}
@@ -364,7 +366,7 @@ export function SacredBreathing({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            Begin Sacred Breathing
+            {t('divine.sacred.breathing.beginSacredBreathing', 'Begin Sacred Breathing')}
           </motion.button>
         )}
 
@@ -375,7 +377,7 @@ export function SacredBreathing({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            Pause
+            {t('divine.sacred.breathing.pauseButton', 'Pause')}
           </motion.button>
         )}
 
@@ -388,7 +390,7 @@ export function SacredBreathing({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            Practice Again
+            {t('divine.sacred.breathing.practiceAgain', 'Practice Again')}
           </motion.button>
         )}
       </div>

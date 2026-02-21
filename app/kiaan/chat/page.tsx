@@ -66,7 +66,7 @@ function KiaanChatPageInner() {
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
         sender: 'assistant',
-        text: data.response || "I'm here. Tell me what's going on and we'll work through it together.",
+        text: data.response || t('kiaan.chat.defaultResponse', "I'm here. Tell me what's going on and we'll work through it together."),
         timestamp: new Date().toISOString(),
         summary: data.summary || undefined,
       };
@@ -79,9 +79,9 @@ function KiaanChatPageInner() {
       const upgradeUrl = getUpgradeUrl(error)
 
       if (isQuotaExceeded(error)) {
-        errorText = `${errorText}\n\nYour monthly quota has been reached. [Upgrade your plan](/pricing) to continue chatting.`
+        errorText = `${errorText}\n\n${t('kiaan.chat.quotaExceeded', 'Your monthly quota has been reached. [Upgrade your plan](/pricing) to continue chatting.')}`
       } else if (isFeatureLocked(error)) {
-        errorText = `${errorText}\n\nThis feature requires a higher plan. [View plans](${upgradeUrl || '/pricing'}) to unlock it.`
+        errorText = `${errorText}\n\n${t('kiaan.chat.featureLocked', `This feature requires a higher plan. [View plans](${upgradeUrl || '/pricing'}) to unlock it.`)}`
       }
 
       const errorMessage: Message = {
@@ -115,7 +115,7 @@ function KiaanChatPageInner() {
       const welcomeMessage: Message = {
         id: crypto.randomUUID(),
         sender: 'assistant',
-        text: `You're registering ${mood} right now. That's useful data. Tell me what's happening — I'm here to help you understand it and work with it.`,
+        text: t('kiaan.chat.moodWelcome', `You're registering ${mood} right now. That's useful data. Tell me what's happening — I'm here to help you understand it and work with it.`),
         timestamp: new Date().toISOString(),
       };
       setMessages([welcomeMessage]);
@@ -193,16 +193,16 @@ function KiaanChatPageInner() {
     });
   }, [messages, themeCounts]);
 
-  // Quick response prompts — grounded, practical language
+  // Quick response prompts — grounded, practical language (labels translated, prompts in English for AI)
   const quickResponses = [
-    { id: 'anxiety', text: 'Anxiety is high', emoji: '😰', prompt: 'My anxiety is elevated right now. Help me understand what\'s happening in my nervous system and what I can do about it.' },
-    { id: 'heavy', text: 'Feeling heavy', emoji: '💔', prompt: 'I\'m carrying a heaviness today. Help me identify what\'s driving it and how to process it.' },
-    { id: 'anger', text: 'Managing anger', emoji: '😤', prompt: 'I\'m angry right now. Help me regulate before I react and understand what\'s underneath it.' },
-    { id: 'clarity', text: 'Need clarity', emoji: '🧭', prompt: 'I\'m stuck on a decision and can\'t think clearly. Help me sort through the competing factors.' },
-    { id: 'balance', text: 'Overwhelmed', emoji: '⚖️', prompt: 'I\'m overwhelmed with competing demands. Help me prioritize and reduce cognitive load.' },
-    { id: 'relationships', text: 'Relationship stress', emoji: '💗', prompt: 'A relationship is causing me stress. Help me understand the attachment pattern and what I can do.' },
-    { id: 'purpose', text: 'Feeling stuck', emoji: '🌟', prompt: 'I feel disconnected from what matters to me. Help me reconnect with my values and find a concrete next step.' },
-    { id: 'peace', text: 'Need to regulate', emoji: '🕊️', prompt: 'My nervous system is activated and I need to downregulate. Walk me through a grounding exercise.' },
+    { id: 'anxiety', text: t('kiaan.quickPrompts.scenarios.anxiety.label', 'Anxiety is high'), emoji: '😰', prompt: 'My anxiety is elevated right now. Help me understand what\'s happening in my nervous system and what I can do about it.' },
+    { id: 'heavy', text: t('kiaan.quickPrompts.scenarios.heavy.label', 'Feeling heavy'), emoji: '💔', prompt: 'I\'m carrying a heaviness today. Help me identify what\'s driving it and how to process it.' },
+    { id: 'anger', text: t('kiaan.quickPrompts.scenarios.anger.label', 'Managing anger'), emoji: '😤', prompt: 'I\'m angry right now. Help me regulate before I react and understand what\'s underneath it.' },
+    { id: 'clarity', text: t('kiaan.quickPrompts.scenarios.clarity.label', 'Need clarity'), emoji: '🧭', prompt: 'I\'m stuck on a decision and can\'t think clearly. Help me sort through the competing factors.' },
+    { id: 'balance', text: t('kiaan.quickPrompts.scenarios.balance.label', 'Overwhelmed'), emoji: '⚖️', prompt: 'I\'m overwhelmed with competing demands. Help me prioritize and reduce cognitive load.' },
+    { id: 'relationships', text: t('kiaan.quickPrompts.scenarios.relationships.label', 'Relationship stress'), emoji: '💗', prompt: 'A relationship is causing me stress. Help me understand the attachment pattern and what I can do.' },
+    { id: 'purpose', text: t('kiaan.quickPrompts.scenarios.purpose.label', 'Feeling stuck'), emoji: '🌟', prompt: 'I feel disconnected from what matters to me. Help me reconnect with my values and find a concrete next step.' },
+    { id: 'peace', text: t('kiaan.quickPrompts.scenarios.peace.label', 'Need to regulate'), emoji: '🕊️', prompt: 'My nervous system is activated and I need to downregulate. Walk me through a grounding exercise.' },
   ];
 
   const handleClarityPause = () => {
@@ -283,7 +283,7 @@ function KiaanChatPageInner() {
               }`}
               title="Quick summary"
             >
-              Summary
+              {t('kiaan.chat.summary', 'Summary')}
             </button>
             <button
               onClick={() => setViewMode('detailed')}
@@ -292,9 +292,9 @@ function KiaanChatPageInner() {
                   ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg'
                   : 'text-orange-100/70 hover:text-orange-50'
               }`}
-              title="Full detailed response"
+              title={t('kiaan.chat.fullViewTitle', 'Full detailed response')}
             >
-              Full View
+              {t('kiaan.chat.fullView', 'Full View')}
             </button>
           </div>
 
@@ -305,21 +305,21 @@ function KiaanChatPageInner() {
               className="rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-sm font-semibold text-orange-100/80 transition-all hover:border-orange-400/50 hover:bg-white/10 hover:text-orange-50"
               title="Copy last response"
             >
-              📋 Copy
+              📋 {t('kiaan.chat.copy', 'Copy')}
             </button>
             <button
               onClick={() => handleShareResponse(messages[messages.length - 1].text)}
               className="rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-sm font-semibold text-orange-100/80 transition-all hover:border-orange-400/50 hover:bg-white/10 hover:text-orange-50"
-              title="Share response"
+              title={t('kiaan.chat.shareTitle', 'Share response')}
             >
-              📤 Share
+              📤 {t('kiaan.chat.share', 'Share')}
             </button>
             <button
               onClick={() => handleSaveToJournal(messages[messages.length - 1].text)}
               className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all hover:scale-105"
-              title="Save to Journal"
+              title={t('kiaan.chat.saveToJournalTitle', 'Save to Journal')}
             >
-              ✨ Save to Journal
+              ✨ {t('kiaan.chat.saveToJournal', 'Save to Journal')}
             </button>
           </div>
         </div>
@@ -373,9 +373,9 @@ function KiaanChatPageInner() {
 
       {/* A Note from KIAAN */}
       <div className="rounded-3xl border border-[#d4a44c]/15 bg-[#0b0b0f] p-5 shadow-[0_20px_80px_rgba(212,164,76,0.08)] md:p-6">
-        <h2 className="text-lg font-semibold text-[#d4a44c]/80">Your Divine Friend</h2>
+        <h2 className="text-lg font-semibold text-[#d4a44c]/80">{t('kiaan.chat.divineFriend', 'Your Divine Friend')}</h2>
         <p className="mt-3 text-sm leading-relaxed text-orange-100/70">
-          KIAAN is your spiritual companion, sharing reflections drawn from the Bhagavad Gita and ancient wisdom. This is a sacred space for inner peace and self-discovery. For matters beyond the spiritual path, always seek guidance from qualified professionals.
+          {t('kiaan.chat.disclaimer', 'KIAAN is your spiritual companion, sharing reflections drawn from the Bhagavad Gita and ancient wisdom. This is a sacred space for inner peace and self-discovery. For matters beyond the spiritual path, always seek guidance from qualified professionals.')}
         </p>
       </div>
     </main>
@@ -392,7 +392,7 @@ export default function KiaanChatPage() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center space-y-4">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-orange-500 border-t-transparent mx-auto" />
-          <p className="text-orange-100">Loading KIAAN Chat...</p>
+          <p className="text-orange-100">Loading...</p>
         </div>
       </div>
     }>

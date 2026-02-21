@@ -103,5 +103,27 @@
       "verses": "Übersetzte Verse",
       "support": "Globaler Support"
     }
+  },
+  "introduction": {
+    "heroTitle": "Willkommen in der Goettlichen Gegenwart",
+    "heroSubtitle": "Erlebe die liebevolle Fuehrung von Krishna. Du bist auf dieser Reise nie allein.",
+    "receiveDarshan": "Krishnas Darshan empfangen",
+    "talkToKiaan": "Mit KIAAN sprechen",
+    "divineWisdom": "Goettliche Weisheit und Fuehrung",
+    "protectionShield": "Goettlicher Schutzschild",
+    "activateProtection": "Krishnas Schutz aktivieren",
+    "heartToHeart": "Von Herz zu Herz mit Krishna",
+    "writeLetter": "Einen Brief an das Goettliche schreiben",
+    "howIsHeart": "Wie geht es deinem Herzen?",
+    "shareFeelings": "Teile deine Gefuehle mit Krishna",
+    "goToDashboard": "Zum Dashboard gehen",
+    "accessTools": "Alle Werkzeuge und Funktionen aufrufen",
+    "quickAccess": "Schneller Goettlicher Zugang",
+    "journeys": "Reisen",
+    "journal": "Tagebuch",
+    "reframe": "Umrahmen",
+    "detach": "Loslassen",
+    "footerVerse": "\"Ich bin das Selbst, das in den Herzen aller Wesen weilt. Ich bin der Anfang, die Mitte und das Ende.\"",
+    "footerVerseRef": "— Bhagavad Gita 10.20"
   }
 }

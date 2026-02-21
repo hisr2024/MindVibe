@@ -89,5 +89,27 @@
   "disclaimer": {
     "title": "Disclaimer",
     "text": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away."
+  },
+  "introduction": {
+    "heroTitle": "ದೈವಿಕ ಸಾನ್ನಿಧ್ಯಕ್ಕೆ ಸ್ವಾಗತ",
+    "heroSubtitle": "ಕೃಷ್ಣನ ಪ್ರೀತಿಯ ಮಾರ್ಗದರ್ಶನವನ್ನು ಅನುಭವಿಸಿ. ಈ ಪ್ರಯಾಣದಲ್ಲಿ ನೀವು ಎಂದಿಗೂ ಒಂಟಿಯಲ್ಲ.",
+    "receiveDarshan": "ಕೃಷ್ಣನ ದರ್ಶನ ಪಡೆಯಿರಿ",
+    "talkToKiaan": "KIAAN ಜೊತೆ ಮಾತನಾಡಿ",
+    "divineWisdom": "ದೈವಿಕ ಜ್ಞಾನ ಮತ್ತು ಮಾರ್ಗದರ್ಶನ",
+    "protectionShield": "ದೈವಿಕ ರಕ್ಷಣಾ ಕವಚ",
+    "activateProtection": "ಕೃಷ್ಣನ ರಕ್ಷಣೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ",
+    "heartToHeart": "ಕೃಷ್ಣನೊಂದಿಗೆ ಹೃದಯದ ಮಾತು",
+    "writeLetter": "ದೈವಕ್ಕೆ ಪತ್ರ ಬರೆಯಿರಿ",
+    "howIsHeart": "ನಿಮ್ಮ ಹೃದಯ ಹೇಗಿದೆ?",
+    "shareFeelings": "ಕೃಷ್ಣನೊಂದಿಗೆ ನಿಮ್ಮ ಭಾವನೆಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಿ",
+    "goToDashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹೋಗಿ",
+    "accessTools": "ಎಲ್ಲಾ ಸಾಧನಗಳು ಮತ್ತು ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಪ್ರವೇಶಿಸಿ",
+    "quickAccess": "ತ್ವರಿತ ದೈವಿಕ ಪ್ರವೇಶ",
+    "journeys": "ಪ್ರಯಾಣಗಳು",
+    "journal": "ಡೈರಿ",
+    "reframe": "ಮರುಚಿಂತನೆ",
+    "detach": "ವೈರಾಗ್ಯ",
+    "footerVerse": "\"ನಾನು ಎಲ್ಲಾ ಜೀವಿಗಳ ಹೃದಯದಲ್ಲಿ ಕುಳಿತಿರುವ ಆತ್ಮ. ನಾನು ಆರಂಭ, ಮಧ್ಯ ಮತ್ತು ಅಂತ್ಯ.\"",
+    "footerVerseRef": "— ಭಗವದ್ಗೀತೆ ೧೦.೨೦"
   }
 }

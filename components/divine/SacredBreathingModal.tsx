@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SacredBreathing } from './SacredBreathing';
 import { useDivineConsciousness, BreathingPattern } from '@/contexts/DivineConsciousnessContext';
 import { Portal } from '@/components/ui/Portal';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface SacredBreathingModalProps {
   pattern?: BreathingPattern;
@@ -32,6 +33,7 @@ export function SacredBreathingModal({
   cycles = 3,
 }: SacredBreathingModalProps) {
   const { actions } = useDivineConsciousness();
+  const { t } = useLanguage();
 
   const handleClose = useCallback(() => {
     actions.stopBreathing();
@@ -69,7 +71,7 @@ export function SacredBreathingModal({
             exit={{ opacity: 0 }}
             role="dialog"
             aria-modal="true"
-            aria-label="Sacred breathing exercise"
+            aria-label={t('divine.sacred.breathing.modalAriaLabel', 'Sacred breathing exercise')}
           >
             {/* Backdrop - click to close */}
             <motion.div
@@ -117,7 +119,7 @@ export function SacredBreathingModal({
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              aria-label="Close breathing exercise"
+              aria-label={t('divine.sacred.breathing.closeAriaLabel', 'Close breathing exercise')}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -151,7 +153,7 @@ export function SacredBreathingModal({
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
             >
-              Press Escape or tap outside to end the session
+              {t('divine.sacred.breathing.escapeHint', 'Press Escape or tap outside to end the session')}
             </motion.p>
           </motion.div>
         )}

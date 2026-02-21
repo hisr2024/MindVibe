@@ -9,7 +9,8 @@
     "profile": "प्रोफाइल",
     "settings": "सेटिंग्ज",
     "account": "खाते प्रवेश",
-    "theme": "थीम"
+    "theme": "थीम",
+    "introduction": "परिचय"
   },
   "features": {
     "kiaan": "KIAAN",
@@ -58,10 +59,18 @@
     "nav_label": "Healing pathway"
   },
   "next_step": {
-    "explore_ardha": "Explore in Ardha \u2192",
-    "continue_kiaan": "Continue with KIAAN \u2192",
-    "stabilize_viyoga": "Stabilize with Viyoga \u2192",
-    "enter_journey": "Enter a Journey \u2192",
+    "explore_ardha": "Explore in Ardha →",
+    "continue_kiaan": "Continue with KIAAN →",
+    "stabilize_viyoga": "Stabilize with Viyoga →",
+    "enter_journey": "Enter a Journey →",
     "helper": "Based on your conversation, you might find this helpful"
+  },
+  "tools": {
+    "releaseAttachment": "आसक्ती मुक्ती",
+    "reframeThoughts": "विचार पुनर्रचना",
+    "kiaanChat": "KIAAN चॅट",
+    "talkItThrough": "बोलून समजा",
+    "relationalClarity": "नातेसंबंध स्पष्टता",
+    "quickAccess": "जलद प्रवेश"
   }
 }

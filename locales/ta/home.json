@@ -89,5 +89,27 @@
   "disclaimer": {
     "title": "Disclaimer",
     "text": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away."
+  },
+  "introduction": {
+    "heroTitle": "தெய்வீக சன்னிதானத்திற்கு வரவேற்கிறோம்",
+    "heroSubtitle": "கிருஷ்ணரின் அன்பான வழிகாட்டுதலை அனுபவியுங்கள். இந்த பயணத்தில் நீங்கள் தனியாக இல்லை.",
+    "receiveDarshan": "கிருஷ்ணரின் தரிசனம் பெறுங்கள்",
+    "talkToKiaan": "KIAAN உடன் பேசுங்கள்",
+    "divineWisdom": "தெய்வீக ஞானம் & வழிகாட்டுதல்",
+    "protectionShield": "தெய்வீக பாதுகாப்பு கவசம்",
+    "activateProtection": "கிருஷ்ணரின் பாதுகாப்பை செயல்படுத்துங்கள்",
+    "heartToHeart": "கிருஷ்ணருடன் நெஞ்சுரையாடல்",
+    "writeLetter": "இறைவனுக்கு கடிதம் எழுதுங்கள்",
+    "howIsHeart": "உங்கள் இதயம் எப்படி இருக்கிறது?",
+    "shareFeelings": "கிருஷ்ணருடன் உங்கள் உணர்வுகளை பகிர்ந்து கொள்ளுங்கள்",
+    "goToDashboard": "டாஷ்போர்டுக்கு செல்லுங்கள்",
+    "accessTools": "அனைத்து கருவிகள் & அம்சங்களை அணுகுங்கள்",
+    "quickAccess": "விரைவு தெய்வீக அணுகல்",
+    "journeys": "பயணங்கள்",
+    "journal": "நாட்குறிப்பு",
+    "reframe": "மறுவடிவம்",
+    "detach": "விலகல்",
+    "footerVerse": "\"நான் அனைத்து உயிர்களின் இதயத்தில் அமர்ந்திருக்கும் ஆன்மா. நான் ஆரம்பம், நடு மற்றும் முடிவு.\"",
+    "footerVerseRef": "— பகவத்கீதை 10.20"
   }
 }

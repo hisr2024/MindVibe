@@ -89,5 +89,27 @@
   "disclaimer": {
     "title": "Disclaimer",
     "text": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away."
+  },
+  "introduction": {
+    "heroTitle": "ദിവ്യ സാന്നിധ്യത്തിലേക്ക് സ്വാഗതം",
+    "heroSubtitle": "കൃഷ്ണന്റെ സ്നേഹപൂര്‍ണ്ണ മാര്‍ഗദര്‍ശനം അനുഭവിക്കൂ. ഈ യാത്രയില്‍ നിങ്ങള്‍ ഒരിക്കലും ഒറ്റയ്ക്കല്ല.",
+    "receiveDarshan": "കൃഷ്ണന്റെ ദര്‍ശനം സ്വീകരിക്കൂ",
+    "talkToKiaan": "KIAAN-നോട് സംസാരിക്കൂ",
+    "divineWisdom": "ദിവ്യ ജ്ഞാനവും മാര്‍ഗദര്‍ശനവും",
+    "protectionShield": "ദിവ്യ സംരക്ഷണ കവചം",
+    "activateProtection": "കൃഷ്ണന്റെ സംരക്ഷണം സജീവമാക്കൂ",
+    "heartToHeart": "കൃഷ്ണനോട് ഹൃദയം തുറന്ന്",
+    "writeLetter": "ദൈവത്തിന് കത്ത് എഴുതൂ",
+    "howIsHeart": "നിങ്ങളുടെ ഹൃദയം എങ്ങനെ?",
+    "shareFeelings": "കൃഷ്ണനോട് നിങ്ങളുടെ വികാരങ്ങള്‍ പങ്കിടൂ",
+    "goToDashboard": "ഡാഷ്‌ബോര്‍ഡിലേക്ക് പോകൂ",
+    "accessTools": "എല്ലാ ഉപകരണങ്ങളും സവിശേഷതകളും ആക്സസ് ചെയ്യൂ",
+    "quickAccess": "ദ്രുത ദിവ്യ പ്രവേശം",
+    "journeys": "യാത്രകള്‍",
+    "journal": "ഡയറി",
+    "reframe": "പുനര്‍ചിന്തനം",
+    "detach": "വൈരാഗ്യം",
+    "footerVerse": "\"ഞാന്‍ എല്ലാ ജീവികളുടെയും ഹൃദയത്തില്‍ ഇരിക്കുന്ന ആത്മാവ്. ഞാന്‍ ആരംഭവും മധ്യവും അന്ത്യവും ആണ്.\"",
+    "footerVerseRef": "— ഭഗവദ്ഗീത 10.20"
   }
 }

@@ -1,11 +1,11 @@
 {
   "hero": {
-    "title": "মানসিক সুস্থতার জন্য আপনার এআই সঙ্গী",
-    "subtitle": "প্রাচীন জ্ঞান দ্বারা চালিত KIAAN এর সাথে চ্যাট করুন",
-    "tagline": "প্রাচীন জ্ঞান দ্বারা চালিত আপনার শান্ত, গোপনীয়তা-প্রথম মানসিক সুস্থতা সঙ্গী",
-    "ctaPrimary": "KIAAN এর সাথে কথা বলুন",
-    "ctaSecondary": "পবিত্র প্রতিফলন",
-    "privacy": "কথোপকথন ব্যক্তিগত থাকে • একটি উষ্ণ, গোপনীয় আশ্রয়"
+    "title": "Your AI Companion for Spiritual Wellness",
+    "subtitle": "Chat with KIAAN, powered by Ancient Wisdom",
+    "tagline": "Your calm, privacy-first spiritual companion powered by ancient wisdom",
+    "ctaPrimary": "Talk to KIAAN",
+    "ctaSecondary": "Sacred Reflections",
+    "privacy": "Conversations remain private • a warm, confidential refuge"
   },
   "ecosystem": {
     "title": "The MindVibe Ecosystem",
@@ -68,26 +68,48 @@
   },
   "quickAccess": {
     "kiaan": {
-      "title": "KIAAN এর সাথে কথা বলুন",
-      "subtitle": "তাত্ক্ষণিক নির্দেশনা",
-      "description": "মানসিক সুস্থতা সহায়তার জন্য একটি ফোকাসড কথোপকথনে ঝাঁপ দিন",
-      "cta": "চ্যাট খুলুন"
+      "title": "Talk to KIAAN",
+      "subtitle": "Instant guidance",
+      "description": "Jump into a focused conversation for spiritual wellness support",
+      "cta": "Open Chat"
     },
     "dashboard": {
-      "title": "অগ্রগতি ট্র্যাকিং",
-      "subtitle": "ড্যাশবোর্ড",
-      "description": "আপনার মেজাজ চেক-ইন এবং জার্নাল এন্ট্রি থেকে অন্তর্দৃষ্টি দেখুন",
-      "cta": "ড্যাশবোর্ড দেখুন"
+      "title": "Progress Tracking",
+      "subtitle": "Dashboard",
+      "description": "View insights from your mood check-ins and journal entries",
+      "cta": "View Dashboard"
     },
     "emotionalReset": {
-      "title": "দ্রুত রিসেট",
-      "subtitle": "আবেগিক রিসেট",
-      "description": "আপনার আবেগিক অবস্থা তাত্ক্ষণিকভাবে রিসেট করতে গাইডেড ব্যায়াম",
-      "cta": "রিসেট চেষ্টা করুন"
+      "title": "Quick Reset",
+      "subtitle": "Emotional Reset",
+      "description": "Guided exercises to reset your emotional state instantly",
+      "cta": "Try Reset"
     }
   },
   "disclaimer": {
-    "title": "দাবিত্যাগ",
-    "text": "KIAAN জ্ঞান ঐতিহ্য দ্বারা অনুপ্রাণিত সহায়ক প্রতিফলন শেয়ার করে। এই কথোপকথন এবং ব্যায়াম চিকিৎসা পরামর্শ নয়। আপনি যদি গুরুতর উদ্বেগের সম্মুখীন হন বা অনিরাপদ বোধ করেন, অনুগ্রহ করে অবিলম্বে আপনার দেশের জরুরি চিকিৎসা সেবা বা একজন লাইসেন্সপ্রাপ্ত পেশাদারের সাথে যোগাযোগ করুন।"
+    "title": "Disclaimer",
+    "text": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away."
+  },
+  "introduction": {
+    "heroTitle": "দিব্য উপস্থিতিতে স্বাগতম",
+    "heroSubtitle": "কৃষ্ণের প্রেমময় পথনির্দেশনা অনুভব করুন। এই যাত্রায় আপনি কখনই একা নন।",
+    "receiveDarshan": "কৃষ্ণের দর্শন গ্রহণ করুন",
+    "talkToKiaan": "KIAAN-এর সাথে কথা বলুন",
+    "divineWisdom": "দিব্য জ্ঞান ও পথনির্দেশনা",
+    "protectionShield": "দিব্য সুরক্ষা কবচ",
+    "activateProtection": "কৃষ্ণের সুরক্ষা সক্রিয় করুন",
+    "heartToHeart": "কৃষ্ণের সাথে হৃদয়ের কথা",
+    "writeLetter": "ঈশ্বরের কাছে চিঠি লিখুন",
+    "howIsHeart": "আপনার হৃদয় কেমন আছে?",
+    "shareFeelings": "কৃষ্ণের সাথে আপনার অনুভূতি শেয়ার করুন",
+    "goToDashboard": "ড্যাশবোর্ডে যান",
+    "accessTools": "সমস্ত সরঞ্জাম ও বৈশিষ্ট্য অ্যাক্সেস করুন",
+    "quickAccess": "দ্রুত দিব্য প্রবেশ",
+    "journeys": "যাত্রা",
+    "journal": "পত্রিকা",
+    "reframe": "পুনর্গঠন",
+    "detach": "বৈরাগ্য",
+    "footerVerse": "\"আমি সমস্ত প্রাণীর হৃদয়ে অবস্থিত আত্মা। আমি আরম্ভ, মধ্য এবং শেষ।\"",
+    "footerVerseRef": "— ভগবদ্গীতা ১০.২০"
   }
 }

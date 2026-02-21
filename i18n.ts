@@ -25,22 +25,26 @@ export const localeNames: Record<Locale, string> = {
 
 export async function getMessages(locale: Locale) {
   try {
-    const [common, kiaan, dashboard, features, navigation, errors] = await Promise.all([
+    const [common, home, kiaan, dashboard, features, navigation, errors, divine] = await Promise.all([
       import(`./locales/${locale}/common.json`),
+      import(`./locales/${locale}/home.json`),
       import(`./locales/${locale}/kiaan.json`),
       import(`./locales/${locale}/dashboard.json`),
       import(`./locales/${locale}/features.json`),
       import(`./locales/${locale}/navigation.json`),
       import(`./locales/${locale}/errors.json`),
+      import(`./locales/${locale}/divine.json`),
     ]);
 
     return {
       common: common.default,
+      home: home.default,
       kiaan: kiaan.default,
       dashboard: dashboard.default,
       features: features.default,
       navigation: navigation.default,
       errors: errors.default,
+      divine: divine.default,
     };
   } catch (error) {
     console.error(`Failed to load messages for locale: ${locale}`, error);

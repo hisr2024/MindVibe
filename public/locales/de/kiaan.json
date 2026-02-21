@@ -1,128 +1,135 @@
 {
   "welcome": {
-    "title": "Welcome to KIAAN",
+    "title": "Willkommen bei KIAAN",
     "subtitle": "Your calm, modern spiritual companion — always here, always supportive.",
-    "description": "Calm, privacy-first spiritual companion with journaling, guided chats, and dashboards."
+    "description": "Ruhiger, datenschutzorientierter Begleiter für psychische Gesundheit mit Tagebuch, geführten Gesprächen und Dashboards."
   },
   "chat": {
-    "title": "Talk to KIAAN",
-    "subtitle": "Gentle guidance with an ember glow",
-    "placeholder": "Type your message...",
-    "send": "Send",
-    "thinking": "KIAAN is reflecting...",
-    "connectionStatus": "Private, steady connection",
-    "connectionDesc": "Your questions animate into focus—answers remain unchanged.",
+    "title": "Mit KIAAN sprechen",
+    "subtitle": "Sanfte Führung mit warmem Glühen",
+    "placeholder": "Schreibe deine Nachricht...",
+    "send": "Senden",
+    "thinking": "KIAAN reflektiert...",
+    "connectionStatus": "Private, stabile Verbindung",
+    "connectionDesc": "Deine Fragen erscheinen animiert — Antworten bleiben unverändert.",
     "emptyState": {
       "emoji": "✨",
-      "title": "How can I guide you today?",
-      "subtitle": "Share what's on your mind"
+      "title": "Wie kann ich dich heute begleiten?",
+      "subtitle": "Teile, was dich beschäftigt"
     },
-    "disclaimer": "KIAAN shares supportive reflections for general wellness. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.",
-    "saveToJournal": "Save to Journal",
+    "disclaimer": "KIAAN ist Ihr spiritueller Begleiter und teilt Reflexionen aus der Bhagavad Gita und alter Weisheit.",
+    "saveToJournal": "Im Tagebuch speichern",
     "copy": "Kopieren",
     "copied": "Kopiert!",
     "copyFailed": "Fehlgeschlagen",
     "share": "Teilen",
     "shareVia": "Teilen über",
     "privacyNotice": "Datenschutzhinweis",
-    "shareWarning": "Sie sind dabei, Informationen zur psychischen Gesundheit zu teilen. Bitte stellen Sie sicher, dass Sie sich wohl fühlen, diesen Inhalt öffentlich zu teilen.",
+    "shareWarning": "Du bist dabei, Informationen zur psychischen Gesundheit zu teilen. Bitte stelle sicher, dass du dich wohl fühlst, diesen Inhalt öffentlich zu teilen.",
     "anonymize": "Inhalt anonymisieren (persönliche Kennungen entfernen)",
     "anonymized": "✓ Anonymisierter Inhalt",
-    "sharingOriginal": "Originalinhalt teilen"
+    "sharingOriginal": "Originalinhalt teilen",
+    "defaultResponse": "Ich bin hier. Erzaehlen Sie mir, was los ist, und wir werden es gemeinsam loesen.",
+    "summary": "Zusammenfassung",
+    "fullView": "Vollansicht",
+    "divineFriend": "Ihr Goettlicher Freund"
   },
   "guidanceModes": {
-    "title": "Guidance modes",
-    "subtitle": "Triangle of Flowing Energy",
-    "selectPrompt": "Tap a mode to explore how KIAAN guides your state.",
+    "title": "Führungsmodi",
+    "subtitle": "Dreieck der fließenden Energie",
+    "selectPrompt": "Tippe auf einen Modus, um zu erkunden, wie KIAAN deinen Zustand führt.",
     "innerPeace": {
-      "title": "Inner Peace",
-      "description": "Find stillness through breath-focused exercises and gentle grounding techniques. Perfect for moments when you need to calm your mind and reconnect with tranquility.",
-      "note": "Gentle breath and soft focus"
+      "title": "Innerer Frieden",
+      "description": "Finde Stille durch atemfokussierte Übungen und sanfte Erdungstechniken. Perfekt für Momente, wenn du deinen Geist beruhigen und dich mit Ruhe verbinden möchtest.",
+      "note": "Sanfter Atem und weicher Fokus"
     },
     "mindControl": {
-      "title": "Mind Control",
-      "description": "Develop focused clarity through structured mindfulness practices. Ideal for decision-making, concentration, and maintaining inner discipline.",
-      "note": "Steady steps, one thought at a time"
+      "title": "Gedankenkontrolle",
+      "description": "Entwickle fokussierte Klarheit durch strukturierte Achtsamkeitspraktiken. Ideal für Entscheidungsfindung, Konzentration und geistige Disziplin.",
+      "note": "Stetige Schritte, ein Gedanke nach dem anderen"
     },
     "selfKindness": {
-      "title": "Self Kindness",
-      "description": "Cultivate compassion for yourself through warm, supportive exercises. Essential for healing, self-acceptance, and nurturing your emotional well-being.",
-      "note": "You are welcome here"
+      "title": "Selbstfreundlichkeit",
+      "description": "Kultiviere Mitgefühl für dich selbst durch warme, unterstützende Übungen. Wesentlich für Heilung, Selbstakzeptanz und die Pflege deines emotionalen Wohlbefindens.",
+      "note": "Du bist hier willkommen"
     }
   },
   "clarityPause": {
-    "title": "Clarity Pause",
-    "subtitle": "Create space before you act.",
-    "description": "No advice. Just space to decide from clarity.",
-    "note": "KIAAN stays untouched—decline to pass through instantly.",
-    "closeOverlay": "Close overlay",
-    "sendNow": "Send now (bypass pause)",
-    "startPause": "Pause for 60 seconds",
-    "deliverToKiaan": "Deliver to KIAAN now",
-    "keepGrounding": "Keep 60s grounding",
-    "question": "Are you acting from clarity or from emotion right now?",
-    "countdown": "{seconds}s remaining",
-    "ready": "Ready when you are"
+    "title": "Klarheitspause",
+    "subtitle": "Schaffe Raum, bevor du handelst.",
+    "description": "Kein Rat. Nur Raum, um aus Klarheit zu entscheiden.",
+    "note": "KIAAN bleibt unberührt — lehne ab, um sofort durchzugehen.",
+    "closeOverlay": "Overlay schließen",
+    "sendNow": "Jetzt senden (Pause überspringen)",
+    "startPause": "60 Sekunden pausieren",
+    "deliverToKiaan": "Jetzt an KIAAN liefern",
+    "keepGrounding": "60s Erdung beibehalten",
+    "question": "Handelst du gerade aus Klarheit oder aus Emotion?",
+    "countdown": "{seconds}s verbleibend",
+    "ready": "Bereit, wenn du es bist"
   },
   "moodCheck": {
-    "title": "How are you feeling?",
-    "subtitle": "State check-in",
-    "logged": "Logged: {mood}",
+    "title": "Wie fühlst du dich?",
+    "subtitle": "Zustands-Check-in",
+    "logged": "Erfasst: {mood}",
     "responses": {
-      "peaceful": "I'm glad you're feeling calm — stay with that softness for a moment. 💙",
-      "happy": "It's beautiful to see you feeling bright. Let that warmth stay with you. ✨",
-      "neutral": "Steady is good. You're showing up, and that matters. 🌿",
-      "charged": "That energy is powerful — channel it wisely. ⚡",
-      "open": "Being open takes courage. I'm here to support you. 🌤️",
-      "grateful": "Gratitude is a gift to yourself. Hold onto this feeling. 🙏",
-      "reflective": "Reflection brings clarity. Take your time with what you're feeling. 🪞",
-      "determined": "That fire in you is strong. Move forward with purpose. 🔥",
-      "tender": "Tenderness is strength. Be gentle with yourself right now. 💙",
-      "tired": "Rest is not weakness. Your body is telling you something important. 😴",
-      "anxious": "That anxious feeling is tough — take a breath, I'm with you. 🌊",
-      "heavy": "I'm sorry you're feeling low… you're not alone. I'm right here with you. 🌧️",
-      "angry": "It's okay — anger means something important needs attention. I'm here beside you. 🔥",
-      "worried": "Worry can feel overwhelming. Let's take this one step at a time together. 💭",
-      "sad": "Sadness is heavy, but you're not alone right now. I'm here with you. 💙",
-      "lonely": "Loneliness is tough, but you're not alone right now. I'm here with you. 🤝",
-      "depressed": "This weight is real, and it's hard. Please reach out — you don't have to carry this alone. 💙"
+      "peaceful": "Ich freue mich, dass du dich ruhig fühlst — bleibe einen Moment bei dieser Sanftheit. 💙",
+      "happy": "Es ist wunderbar, dich strahlend zu sehen. Lass diese Wärme bei dir bleiben. ✨",
+      "neutral": "Stetig ist gut. Du zeigst dich, und das zählt. 🌿",
+      "charged": "Diese Energie ist kraftvoll — nutze sie weise. ⚡",
+      "open": "Offen zu sein erfordert Mut. Ich bin hier, um dich zu unterstützen. 🌤️",
+      "grateful": "Dankbarkeit ist ein Geschenk an dich selbst. Halte dieses Gefühl fest. 🙏",
+      "reflective": "Reflexion bringt Klarheit. Nimm dir Zeit mit dem, was du fühlst. 🪞",
+      "determined": "Das Feuer in dir ist stark. Gehe mit Entschlossenheit voran. 🔥",
+      "tender": "Zärtlichkeit ist Stärke. Sei jetzt sanft zu dir selbst. 💙",
+      "tired": "Ruhe ist keine Schwäche. Dein Körper sagt dir etwas Wichtiges. 😴",
+      "anxious": "Dieses ängstliche Gefühl ist schwer — atme tief, ich bin bei dir. 🌊",
+      "heavy": "Es tut mir leid, dass du dich niedergeschlagen fühlst... du bist nicht allein. Ich bin direkt hier bei dir. 🌧️",
+      "angry": "Es ist okay — Wut bedeutet, dass etwas Wichtiges Aufmerksamkeit braucht. Ich bin an deiner Seite. 🔥",
+      "worried": "Sorgen können überwältigend sein. Lass uns das Schritt für Schritt zusammen angehen. 💭",
+      "sad": "Traurigkeit ist schwer, aber du bist jetzt nicht allein. Ich bin hier bei dir. 💙",
+      "lonely": "Einsamkeit ist hart, aber du bist jetzt nicht allein. Ich bin hier bei dir. 🤝",
+      "depressed": "Diese Last ist real und schwer. Bitte wende dich an jemanden — du musst das nicht alleine tragen. 💙"
     }
   },
   "quickPrompts": {
-    "title": "Quick Responses",
-    "subtitle": "Polished prompts that auto-fill KIAAN for you",
+    "title": "Schnelle Antworten",
+    "subtitle": "Vorbereitete Eingaben, die KIAAN automatisch ausfüllen",
     "scenarios": {
       "anxiety": {
-        "label": "Anxiety to calm",
-        "prompt": "Guide me through a grounding exercise to steady anxious thoughts."
+        "label": "Hohe Angst",
+        "prompt": "Führe mich durch eine Erdungsübung, um ängstliche Gedanken zu beruhigen."
       },
       "heavy": {
-        "label": "Heart feels heavy",
-        "prompt": "I need gentle words to lift my mood and remind me of my strengths."
+        "label": "Schwere Gefuehle",
+        "prompt": "Ich brauche sanfte Worte, um meine Stimmung zu heben und mich an meine Stärken zu erinnern."
       },
       "anger": {
-        "label": "Cooling anger",
-        "prompt": "Help me cool down my anger and respond with more patience."
+        "label": "Wut bewaeltigen",
+        "prompt": "Hilf mir, meine Wut abzukühlen und mit mehr Geduld zu reagieren."
       },
       "clarity": {
-        "label": "Clarity check",
-        "prompt": "Can you help me see the pros and cons before I decide on something important?"
+        "label": "Klarheit noetig",
+        "prompt": "Kannst du mir helfen, die Vor- und Nachteile zu sehen, bevor ich eine wichtige Entscheidung treffe?"
       },
       "work": {
-        "label": "Work balance",
-        "prompt": "Work feels overwhelming—walk me through a quick reset to regain focus."
+        "label": "Work-Balance",
+        "prompt": "Arbeit fühlt sich überwältigend an — führe mich durch einen schnellen Reset, um wieder Fokus zu finden."
       },
       "relationships": {
-        "label": "Tender relationships",
-        "prompt": "How can I handle a tough conversation with care and honesty?"
+        "label": "Beziehungsstress",
+        "prompt": "Wie kann ich ein schwieriges Gespräch mit Fürsorge und Ehrlichkeit führen?"
       },
       "purpose": {
-        "label": "Purpose pulse",
-        "prompt": "I want a short reflection to reconnect with my purpose and direction."
+        "label": "Festgefahren",
+        "prompt": "Ich möchte eine kurze Reflexion, um mich wieder mit meinem Sinn und meiner Richtung zu verbinden."
       },
       "peace": {
-        "label": "Quiet peace",
-        "prompt": "Lead me in a brief mindful moment so I can feel peaceful again."
+        "label": "Regulierung noetig",
+        "prompt": "Führe mich in einem kurzen achtsamen Moment, damit ich mich wieder friedlich fühlen kann."
+      },
+      "balance": {
+        "label": "Ueberlastet"
       }
     }
   }

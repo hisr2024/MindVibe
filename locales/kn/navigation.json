@@ -9,7 +9,8 @@
     "profile": "ಪ್ರೊಫೈಲ್",
     "settings": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
     "account": "ಖಾತೆ ಪ್ರವೇಶ",
-    "theme": "ಥೀಮ್"
+    "theme": "ಥೀಮ್",
+    "introduction": "ಪರಿಚಯ"
   },
   "features": {
     "kiaan": "KIAAN",
@@ -58,10 +59,18 @@
     "nav_label": "Healing pathway"
   },
   "next_step": {
-    "explore_ardha": "Explore in Ardha \u2192",
-    "continue_kiaan": "Continue with KIAAN \u2192",
-    "stabilize_viyoga": "Stabilize with Viyoga \u2192",
-    "enter_journey": "Enter a Journey \u2192",
+    "explore_ardha": "Explore in Ardha →",
+    "continue_kiaan": "Continue with KIAAN →",
+    "stabilize_viyoga": "Stabilize with Viyoga →",
+    "enter_journey": "Enter a Journey →",
     "helper": "Based on your conversation, you might find this helpful"
+  },
+  "tools": {
+    "releaseAttachment": "ಆಸಕ್ತಿ ಮುಕ್ತಿ",
+    "reframeThoughts": "ಆಲೋಚನೆ ಮರುರಚನೆ",
+    "kiaanChat": "KIAAN ಚಾಟ್",
+    "talkItThrough": "ಮಾತನಾಡಿ ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ",
+    "relationalClarity": "ಸಂಬಂಧ ಸ್ಪಷ್ಟತೆ",
+    "quickAccess": "ತ್ವರಿತ ಪ್ರವೇಶ"
   }
 }

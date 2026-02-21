@@ -17,8 +17,8 @@
       "title": "How can I guide you today?",
       "subtitle": "Share what's on your mind"
     },
-    "disclaimer": "KIAAN shares supportive reflections for general wellness. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.",
-    "saveToJournal": "Save to Journal",
+    "disclaimer": "KIAANはあなたの精神的な伴侶であり、バガヴァッド・ギーターと古代の知恵からの考察を共有します。",
+    "saveToJournal": "日記に保存",
     "copy": "コピー",
     "copied": "コピーしました！",
     "copyFailed": "失敗",
@@ -28,7 +28,11 @@
     "shareWarning": "メンタルヘルス情報を共有しようとしています。このコンテンツを公開することに抵抗がないことを確認してください。",
     "anonymize": "コンテンツを匿名化（個人識別子を削除）",
     "anonymized": "✓ 匿名化されたコンテンツ",
-    "sharingOriginal": "元のコンテンツを共有"
+    "sharingOriginal": "元のコンテンツを共有",
+    "defaultResponse": "私はここにいます。何が起きているか話してください。一緒に解決しましょう。",
+    "summary": "要約",
+    "fullView": "全文表示",
+    "divineFriend": "あなたの神聖な友"
   },
   "guidanceModes": {
     "title": "Guidance modes",
@@ -93,19 +97,19 @@
     "subtitle": "Polished prompts that auto-fill KIAAN for you",
     "scenarios": {
       "anxiety": {
-        "label": "Anxiety to calm",
+        "label": "不安が高い",
         "prompt": "Guide me through a grounding exercise to steady anxious thoughts."
       },
       "heavy": {
-        "label": "Heart feels heavy",
+        "label": "重い気持ち",
         "prompt": "I need gentle words to lift my mood and remind me of my strengths."
       },
       "anger": {
-        "label": "Cooling anger",
+        "label": "怒りの管理",
         "prompt": "Help me cool down my anger and respond with more patience."
       },
       "clarity": {
-        "label": "Clarity check",
+        "label": "明晰さが必要",
         "prompt": "Can you help me see the pros and cons before I decide on something important?"
       },
       "work": {
@@ -113,16 +117,19 @@
         "prompt": "Work feels overwhelming—walk me through a quick reset to regain focus."
       },
       "relationships": {
-        "label": "Tender relationships",
+        "label": "関係のストレス",
         "prompt": "How can I handle a tough conversation with care and honesty?"
       },
       "purpose": {
-        "label": "Purpose pulse",
+        "label": "行き詰まり",
         "prompt": "I want a short reflection to reconnect with my purpose and direction."
       },
       "peace": {
-        "label": "Quiet peace",
+        "label": "調整が必要",
         "prompt": "Lead me in a brief mindful moment so I can feel peaceful again."
+      },
+      "balance": {
+        "label": "圧倒されている"
       }
     }
   }

@@ -10,6 +10,14 @@ import { generateLocalResponse } from '@/lib/kiaan-friend-engine'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
+// ─── Language Names (for multilingual Tier 2 responses) ─────────────────
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: 'English', hi: 'Hindi', ta: 'Tamil', te: 'Telugu', bn: 'Bengali',
+  mr: 'Marathi', gu: 'Gujarati', kn: 'Kannada', ml: 'Malayalam', pa: 'Punjabi',
+  sa: 'Sanskrit', es: 'Spanish', fr: 'French', de: 'German', pt: 'Portuguese',
+  ja: 'Japanese', 'zh-CN': 'Chinese (Simplified)',
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -61,18 +69,25 @@ export async function POST(request: NextRequest) {
         const OpenAI = (await import('openai')).default
         const client = new OpenAI({ apiKey })
 
+        const language = body.language || 'en'
+        const langName = LANGUAGE_NAMES[language] || 'English'
+        const langInstruction = language !== 'en' ? `\n\nLANGUAGE: You MUST respond entirely in ${langName}.` : ''
+
+        const systemPrompt =
+          'You are KIAAN, a divine friend and spiritual companion. ' +
+          'The user just activated you with a voice wake word. ' +
+          'Respond warmly and briefly. ' +
+          'Keep your response under 3 sentences — this is a quick voice interaction. ' +
+          'Be compassionate, wise, and concise. ' +
+          'Use contractions. Sound like a real friend, not a chatbot.' +
+          langInstruction
+
         const completion = await client.chat.completions.create({
           model: 'gpt-4o-mini',
           messages: [
             {
               role: 'system',
-              content:
-                'You are KIAAN, a divine friend and spiritual companion. ' +
-                'The user just activated you with a voice wake word. ' +
-                'Respond warmly and briefly. ' +
-                'Keep your response under 3 sentences — this is a quick voice interaction. ' +
-                'Be compassionate, wise, and concise. ' +
-                'Use contractions. Sound like a real friend, not a chatbot.',
+              content: systemPrompt,
             },
             { role: 'user', content: sanitizedQuery },
           ],

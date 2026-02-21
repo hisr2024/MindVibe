@@ -17,18 +17,22 @@
       "title": "How can I guide you today?",
       "subtitle": "Share what's on your mind"
     },
-    "disclaimer": "KIAAN shares supportive reflections for general wellness. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.",
-    "saveToJournal": "Save to Journal",
-    "copy": "Copy",
+    "disclaimer": "KIAAN உங்கள் ஆன்மீக துணையாகும், பகவத்கீதை மற்றும் பண்டைய ஞானத்திலிருந்து பிரதிபலிப்புகளை பகிர்கிறது. இது அக அமைதி மற்றும் சுய கண்டுபிடிப்பிற்கான புனித இடம்.",
+    "saveToJournal": "நாட்குறிப்பில் சேமி",
+    "copy": "நகலெடு",
     "copied": "Copied!",
     "copyFailed": "Failed",
-    "share": "Share",
+    "share": "பகிர்",
     "shareVia": "Share via",
     "privacyNotice": "Privacy Notice",
     "shareWarning": "You are about to share spiritual wellness information. Please ensure you're comfortable sharing this content publicly.",
     "anonymize": "Anonymize content (remove personal identifiers)",
     "anonymized": "✓ Anonymized content",
-    "sharingOriginal": "Sharing original content"
+    "sharingOriginal": "Sharing original content",
+    "defaultResponse": "நான் இங்கே இருக்கிறேன். என்ன நடக்கிறது என்று சொல்லுங்கள், நாம் இணைந்து தீர்ப்போம்.",
+    "summary": "சுருக்கம்",
+    "fullView": "முழு காட்சி",
+    "divineFriend": "உங்கள் தெய்வீக நண்பர்"
   },
   "guidanceModes": {
     "title": "Guidance modes",
@@ -93,19 +97,19 @@
     "subtitle": "Polished prompts that auto-fill KIAAN for you",
     "scenarios": {
       "anxiety": {
-        "label": "Anxiety to calm",
+        "label": "பதட்டம் அதிகம்",
         "prompt": "Guide me through a grounding exercise to steady anxious thoughts."
       },
       "heavy": {
-        "label": "Heart feels heavy",
+        "label": "மனம் கனமாக",
         "prompt": "I need gentle words to lift my mood and remind me of my strengths."
       },
       "anger": {
-        "label": "Cooling anger",
+        "label": "கோபம் நிர்வகிப்பு",
         "prompt": "Help me cool down my anger and respond with more patience."
       },
       "clarity": {
-        "label": "Clarity check",
+        "label": "தெளிவு தேவை",
         "prompt": "Can you help me see the pros and cons before I decide on something important?"
       },
       "work": {
@@ -113,16 +117,19 @@
         "prompt": "Work feels overwhelming—walk me through a quick reset to regain focus."
       },
       "relationships": {
-        "label": "Tender relationships",
+        "label": "உறவு அழுத்தம்",
         "prompt": "How can I handle a tough conversation with care and honesty?"
       },
       "purpose": {
-        "label": "Purpose pulse",
+        "label": "சிக்கியிருக்கிறேன்",
         "prompt": "I want a short reflection to reconnect with my purpose and direction."
       },
       "peace": {
-        "label": "Quiet peace",
+        "label": "அமைதி தேவை",
         "prompt": "Lead me in a brief mindful moment so I can feel peaceful again."
+      },
+      "balance": {
+        "label": "மூழ்கடிக்கப்பட்ட"
       }
     }
   }

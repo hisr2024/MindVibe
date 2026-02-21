@@ -7,9 +7,11 @@
 
 import Link from 'next/link'
 import { useOfflineMode } from '@/hooks/useOfflineMode'
+import { useLanguage } from '@/hooks/useLanguage'
 
 export function FeatureHighlights() {
   const { isOnline, queueCount } = useOfflineMode()
+  const { t } = useLanguage()
 
   return (
     <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Featured capabilities">
@@ -24,18 +26,18 @@ export function FeatureHighlights() {
               </svg>
             </div>
             <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-300">
-              New
+              {t('divine.sacred.system.features.new', 'New')}
             </span>
           </div>
-          <h3 className="mb-2 text-lg font-semibold text-blue-50">Voice Chat</h3>
+          <h3 className="mb-2 text-lg font-semibold text-blue-50">{t('divine.sacred.system.features.voiceChat', 'Voice Chat')}</h3>
           <p className="mb-4 text-sm text-blue-100/70">
-            Talk naturally with KIAAN using voice. Hands-free conversations in multiple languages.
+            {t('divine.sacred.system.features.voiceChatDesc', 'Talk naturally with KIAAN using voice. Hands-free conversations in multiple languages.')}
           </p>
           <div className="flex items-center gap-2 text-xs text-blue-300/80">
             <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span>Available in chat</span>
+            <span>{t('divine.sacred.system.features.availableInChat', 'Available in chat')}</span>
           </div>
         </div>
       </div>
@@ -52,15 +54,15 @@ export function FeatureHighlights() {
             </div>
             <div className={`h-2 w-2 rounded-full ${isOnline ? 'bg-emerald-400' : 'bg-amber-400'} animate-pulse`} />
           </div>
-          <h3 className="mb-2 text-lg font-semibold text-emerald-50">Offline Access</h3>
+          <h3 className="mb-2 text-lg font-semibold text-emerald-50">{t('divine.sacred.system.features.offlineAccess', 'Offline Access')}</h3>
           <p className="mb-4 text-sm text-emerald-100/70">
-            Access conversations and wisdom verses offline. Auto-syncs when you&apos;re back online.
+            {t('divine.sacred.system.features.offlineAccessDesc', "Access conversations and wisdom verses offline. Auto-syncs when you're back online.")}
           </p>
           <div className="flex items-center gap-2 text-xs text-emerald-300/80">
             <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span>{isOnline ? 'Connected' : 'Offline'} {queueCount > 0 ? `• ${queueCount} queued` : ''}</span>
+            <span>{isOnline ? t('divine.sacred.system.features.connected', 'Connected') : t('divine.sacred.system.features.offline', 'Offline')} {queueCount > 0 ? `• ${queueCount} ${t('divine.sacred.system.features.queued', 'queued')}` : ''}</span>
           </div>
         </div>
       </div>
@@ -76,15 +78,15 @@ export function FeatureHighlights() {
               </svg>
             </div>
           </div>
-          <h3 className="mb-2 text-lg font-semibold text-orange-50">Emotional Reset</h3>
+          <h3 className="mb-2 text-lg font-semibold text-orange-50">{t('divine.sacred.system.features.emotionalReset', 'Emotional Reset')}</h3>
           <p className="mb-4 text-sm text-orange-100/70">
-            7-step guided process to transform emotional overwhelm into calm clarity.
+            {t('divine.sacred.system.features.emotionalResetDesc', '7-step guided process to transform emotional overwhelm into calm clarity.')}
           </p>
           <Link
             href="/tools/emotional-reset"
             className="inline-flex items-center gap-1 text-xs font-medium text-orange-300 hover:text-orange-200"
           >
-            <span>Start Reset</span>
+            <span>{t('divine.sacred.system.features.startReset', 'Start Reset')}</span>
             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>

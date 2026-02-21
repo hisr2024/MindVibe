@@ -1,41 +1,76 @@
 {
   "mainNav": {
-    "home": "Home",
-    "dashboard": "Dashboard",
-    "features": "Features",
-    "about": "About",
-    "contact": "Contact",
-    "pricing": "Pricing",
-    "profile": "Profile",
-    "settings": "Settings"
+    "home": "ഹോം",
+    "dashboard": "ഡാഷ്‌ബോർഡ്",
+    "features": "സവിശേഷതകൾ",
+    "about": "കുറിച്ച്",
+    "contact": "ബന്ധപ്പെടുക",
+    "pricing": "സബ്‌സ്ക്രിപ്ഷനുകൾ",
+    "profile": "പ്രൊഫൈൽ",
+    "settings": "സെറ്റിംഗുകൾ",
+    "account": "അക്കൗണ്ട് ആക്‌സസ്",
+    "theme": "തീം",
+    "introduction": "ആമുഖം"
   },
   "features": {
     "kiaan": "KIAAN",
     "ardha": "Ardha",
     "viyog": "Viyoga",
-    "relationshipCompass": "Relationship Compass",
-    "sacredReflections": "Sacred Reflections",
-    "karmaFootprint": "Karma Footprint",
-    "karmicTree": "Karmic Tree",
-    "emotionalReset": "Emotional Reset",
-    "deepInsights": "Deep Insights",
-    "wisdomRooms": "Wisdom Rooms"
+    "relationshipCompass": "ബന്ധം കോമ്പസ്",
+    "sacredReflections": "പവിത്രമായ പ്രതിഫലനങ്ങൾ",
+    "karmaFootprint": "കർമ്മ കാൽപ്പാട്",
+    "karmicTree": "കാർമിക വൃക്ഷം",
+    "emotionalReset": "വൈകാരിക റീസെറ്റ്",
+    "deepInsights": "ആഴത്തിലുള്ള ഉൾക്കാഴ്ചകൾ",
+    "wisdomRooms": "ജ്ഞാന മുറികൾ"
   },
   "actions": {
-    "openChat": "Open Chat",
-    "startCheckin": "Start check-in",
-    "instantGuidance": "Instant guidance",
-    "spotYourState": "Spot your state"
+    "openChat": "ചാറ്റ് തുറക്കുക",
+    "startCheckin": "ചെക്ക്-ഇൻ ആരംഭിക്കുക",
+    "instantGuidance": "തൽക്ഷണ മാർഗ്ഗനിർദ്ദേശം",
+    "spotYourState": "നിങ്ങളുടെ അവസ്ഥ കണ്ടെത്തുക",
+    "menu": "മെനു",
+    "toggleMenu": "നാവിഗേഷൻ മെനു ടോഗിൾ ചെയ്യുക"
   },
   "mobileNav": {
-    "chat": "Chat",
-    "pause": "Pause",
-    "journal": "Sacred Reflections"
+    "chat": "ചാറ്റ്",
+    "pause": "താൽക്കാലികമായി നിർത്തുക",
+    "journal": "പവിത്രമായ പ്രതിഫലനങ്ങൾ"
   },
   "footer": {
-    "allRightsReserved": "All rights reserved",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "support": "Support"
+    "allRightsReserved": "എല്ലാ അവകാശങ്ങളും സംരക്ഷിതം",
+    "privacy": "സ്വകാര്യതാ നയം",
+    "terms": "സേവന നിബന്ധനകൾ",
+    "support": "പിന്തുണ",
+    "explore": "പര്യവേക്ഷണം ചെയ്യുക",
+    "safety": "സുരക്ഷ",
+    "description": "ശാന്തമായ, സ്വകാര്യത-ആദ്യ മാനസിക ആരോഗ്യ പിന്തുണയ്ക്കായി രൂപകൽപ്പന ചെയ്തത്. WCAG ആക്സസിബിലിറ്റി, എൻക്രിപ്ഷൻ, മൃദുവായ അനുഭവത്തിൽ ശ്രദ്ധ കേന്ദ്രീകരിച്ച് നിർമ്മിച്ചത്.",
+    "emailUs": "ഞങ്ങളെ ഇമെയിൽ ചെയ്യുക",
+    "encryptedJournals": "എൻക്രിപ്റ്റ് ചെയ്ത ജേണലുകൾ",
+    "noTracking": "ട്രാക്കിംഗ് പരസ്യങ്ങൾ ഇല്ല"
+  },
+  "pathway": {
+    "pause": "Pause",
+    "understand": "Understand",
+    "converse": "Converse",
+    "apply": "Apply",
+    "train": "Train",
+    "you_are_here": "You are here",
+    "nav_label": "Healing pathway"
+  },
+  "next_step": {
+    "explore_ardha": "Explore in Ardha →",
+    "continue_kiaan": "Continue with KIAAN →",
+    "stabilize_viyoga": "Stabilize with Viyoga →",
+    "enter_journey": "Enter a Journey →",
+    "helper": "Based on your conversation, you might find this helpful"
+  },
+  "tools": {
+    "releaseAttachment": "ആസക്തി വിമോചനം",
+    "reframeThoughts": "ചിന്തകള്‍ പുനരാവിഷ്കരണം",
+    "kiaanChat": "KIAAN ചാറ്റ്",
+    "talkItThrough": "സംസാരിച്ച് മനസ്സിലാക്കൂ",
+    "relationalClarity": "ബന്ധ വ്യക്തത",
+    "quickAccess": "ദ്രുത പ്രവേശം"
   }
 }

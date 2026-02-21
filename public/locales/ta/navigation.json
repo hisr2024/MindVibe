@@ -5,37 +5,72 @@
     "features": "அம்சங்கள்",
     "about": "பற்றி",
     "contact": "தொடர்பு",
-    "pricing": "விலை",
+    "pricing": "சந்தாக்கள்",
     "profile": "சுயவிவரம்",
-    "settings": "அமைப்புகள்"
+    "settings": "அமைப்புகள்",
+    "account": "கணக்கு அணுகல்",
+    "theme": "தீம்",
+    "introduction": "அறிமுகம்"
   },
   "features": {
-    "kiaan": "கியான்",
-    "ardha": "அர்த்",
-    "viyog": "வியோக",
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
     "relationshipCompass": "உறவு திசைகாட்டி",
-    "sacredReflections": "புனித பிரதிபலிப்புகள்",
-    "karmaFootprint": "கர்ம தடம்",
+    "sacredReflections": "புனித சிந்தனைகள்",
+    "karmaFootprint": "கர்மா பாதம்",
     "karmicTree": "கர்ம மரம்",
     "emotionalReset": "உணர்ச்சி மீட்டமைப்பு",
-    "deepInsights": "ஆழமான நுண்ணறிவுகள்",
+    "deepInsights": "ஆழ்ந்த நுண்ணறிவு",
     "wisdomRooms": "ஞான அறைகள்"
   },
   "actions": {
     "openChat": "அரட்டையைத் திற",
-    "startCheckin": "சரிபார்ப்பைத் தொடங்கவும்",
+    "startCheckin": "செக்-இன் தொடங்கு",
     "instantGuidance": "உடனடி வழிகாட்டுதல்",
-    "spotYourState": "உங்கள் நிலையைக் கண்டறியுங்கள்"
+    "spotYourState": "உங்கள் நிலையைக் கண்டறியவும்",
+    "menu": "மெனு",
+    "toggleMenu": "வழிசெலுத்தல் மெனுவை மாற்று"
   },
   "mobileNav": {
     "chat": "அரட்டை",
-    "pause": "இடைநிறுத்தம்",
-    "journal": "புனித பிரதிபலிப்புகள்"
+    "pause": "இடைநிறுத்து",
+    "journal": "புனித சிந்தனைகள்"
   },
   "footer": {
     "allRightsReserved": "அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை",
     "privacy": "தனியுரிமைக் கொள்கை",
     "terms": "சேவை விதிமுறைகள்",
-    "support": "ஆதரவு"
+    "support": "ஆதரவு",
+    "explore": "ஆராயவும்",
+    "safety": "பாதுகாப்பு",
+    "description": "அமைதி, தனியுரிமை-முதல் மன ஆரோக்கிய ஆதரவுக்காக வடிவமைக்கப்பட்டது. WCAG அணுகல், என்க்ரிப்ஷன் மற்றும் மென்மையான அனுபவம் மீது கவனம் செலுத்தி கட்டப்பட்டது.",
+    "emailUs": "எங்களுக்கு மின்னஞ்சல் அனுப்புங்கள்",
+    "encryptedJournals": "என்க்ரிப்ட் செய்யப்பட்ட பத்திரிகைகள்",
+    "noTracking": "கண்காணிப்பு விளம்பரங்கள் இல்லை"
+  },
+  "pathway": {
+    "pause": "Pause",
+    "understand": "Understand",
+    "converse": "Converse",
+    "apply": "Apply",
+    "train": "Train",
+    "you_are_here": "You are here",
+    "nav_label": "Healing pathway"
+  },
+  "next_step": {
+    "explore_ardha": "Explore in Ardha →",
+    "continue_kiaan": "Continue with KIAAN →",
+    "stabilize_viyoga": "Stabilize with Viyoga →",
+    "enter_journey": "Enter a Journey →",
+    "helper": "Based on your conversation, you might find this helpful"
+  },
+  "tools": {
+    "releaseAttachment": "பற்றை விடுவித்தல்",
+    "reframeThoughts": "எண்ணங்களை மறுவடிவம்",
+    "kiaanChat": "KIAAN அரட்டை",
+    "talkItThrough": "பேசி புரிந்துகொள்",
+    "relationalClarity": "உறவு தெளிவு",
+    "quickAccess": "விரைவு அணுகல்"
   }
 }

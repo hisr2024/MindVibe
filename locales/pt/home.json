@@ -19,5 +19,27 @@
   "features": {
     "title": "Tudo o que Você Precisa para Bem-estar Espiritual",
     "description": "Ferramentas abrangentes para sua jornada rumo à paz interior"
+  },
+  "introduction": {
+    "heroTitle": "Bem-vindo a Presenca Divina",
+    "heroSubtitle": "Experimente a orientacao amorosa de Krishna. Voce nunca esta sozinho nesta jornada.",
+    "receiveDarshan": "Receber o Darshan de Krishna",
+    "talkToKiaan": "Falar com KIAAN",
+    "divineWisdom": "Sabedoria e orientacao divina",
+    "protectionShield": "Escudo de Protecao Divina",
+    "activateProtection": "Ativar a protecao de Krishna",
+    "heartToHeart": "De Coracao para Coracao com Krishna",
+    "writeLetter": "Escreva uma carta ao Divino",
+    "howIsHeart": "Como esta seu coracao?",
+    "shareFeelings": "Compartilhe seus sentimentos com Krishna",
+    "goToDashboard": "Ir para o Painel",
+    "accessTools": "Acesse todas as ferramentas e recursos",
+    "quickAccess": "Acesso Divino Rapido",
+    "journeys": "Jornadas",
+    "journal": "Diario",
+    "reframe": "Repensar",
+    "detach": "Desapego",
+    "footerVerse": "\"Eu sou o Ser sentado nos coracoes de todos os seres. Eu sou o comeco, o meio e o fim.\"",
+    "footerVerseRef": "— Bhagavad Gita 10.20"
   }
 }

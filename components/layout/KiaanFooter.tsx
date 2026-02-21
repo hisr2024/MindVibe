@@ -15,13 +15,15 @@ import { useLanguage } from '@/hooks/useLanguage';
  * Relationship Compass. Tap outside or press Escape to dismiss.
  */
 
-// Tool links shown inside the popup
+// Tool links shown inside the popup - labels/descriptions resolved at render time via t()
 const TOOL_LINKS = [
   {
     id: 'viyoga',
     icon: '🎯',
-    label: 'Viyoga',
-    description: 'Release attachment',
+    labelKey: 'navigation.features.viyog',
+    labelFallback: 'Viyoga',
+    descKey: 'navigation.tools.releaseAttachment',
+    descFallback: 'Release attachment',
     href: '/tools/viyog',
     gradient: 'from-cyan-400/25 to-blue-500/25',
     border: 'border-cyan-500/20 hover:border-cyan-400/40',
@@ -29,8 +31,10 @@ const TOOL_LINKS = [
   {
     id: 'ardha',
     icon: '🔄',
-    label: 'Ardha',
-    description: 'Reframe thoughts',
+    labelKey: 'navigation.features.ardha',
+    labelFallback: 'Ardha',
+    descKey: 'navigation.tools.reframeThoughts',
+    descFallback: 'Reframe thoughts',
     href: '/ardha',
     gradient: 'from-amber-400/25 to-yellow-500/25',
     border: 'border-amber-500/20 hover:border-amber-400/40',
@@ -38,8 +42,10 @@ const TOOL_LINKS = [
   {
     id: 'kiaan-chat',
     icon: '💬',
-    label: 'KIAAN Chat',
-    description: 'Talk it through',
+    labelKey: 'navigation.tools.kiaanChat',
+    labelFallback: 'KIAAN Chat',
+    descKey: 'navigation.tools.talkItThrough',
+    descFallback: 'Talk it through',
     href: '/kiaan/chat',
     gradient: 'from-blue-400/25 to-purple-500/25',
     border: 'border-blue-500/20 hover:border-blue-400/40',
@@ -47,8 +53,10 @@ const TOOL_LINKS = [
   {
     id: 'relationship-compass',
     icon: '🧭',
-    label: 'Relationship Compass',
-    description: 'Relational clarity',
+    labelKey: 'navigation.features.relationshipCompass',
+    labelFallback: 'Relationship Compass',
+    descKey: 'navigation.tools.relationalClarity',
+    descFallback: 'Relational clarity',
     href: '/tools/relationship-compass',
     gradient: 'from-rose-400/25 to-orange-500/25',
     border: 'border-rose-500/20 hover:border-rose-400/40',
@@ -184,7 +192,7 @@ export function KiaanFooter() {
                 <h3 className="text-sm font-semibold text-orange-50">
                   {t('navigation.spiritual_tools.title', 'Spiritual Tools')}
                 </h3>
-                <p className="text-[10px] text-orange-100/50 mt-0.5">Quick access</p>
+                <p className="text-[10px] text-orange-100/50 mt-0.5">{t('navigation.tools.quickAccess', 'Quick access')}</p>
               </div>
               <motion.button
                 onClick={() => setIsOpen(false)}
@@ -217,10 +225,10 @@ export function KiaanFooter() {
                     </span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-orange-50 group-hover:text-white transition-colors truncate">
-                        {tool.label}
+                        {t(tool.labelKey, tool.labelFallback)}
                       </p>
                       <p className="text-[10px] text-orange-100/60 truncate">
-                        {tool.description}
+                        {t(tool.descKey, tool.descFallback)}
                       </p>
                     </div>
                     <svg

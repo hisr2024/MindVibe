@@ -89,5 +89,27 @@
   "disclaimer": {
     "title": "Disclaimer",
     "text": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away."
+  },
+  "introduction": {
+    "heroTitle": "ਦੈਵੀ ਮੌਜੂਦਗੀ ਵਿੱਚ ਜੀ ਆਇਆਂ ਨੂੰ",
+    "heroSubtitle": "ਕ੍ਰਿਸ਼ਨ ਦੀ ਪਿਆਰ ਭਰੀ ਅਗਵਾਈ ਦਾ ਅਨੁਭਵ ਕਰੋ। ਇਸ ਯਾਤਰਾ ਵਿੱਚ ਤੁਸੀਂ ਕਦੇ ਇਕੱਲੇ ਨਹੀਂ ਹੋ।",
+    "receiveDarshan": "ਕ੍ਰਿਸ਼ਨ ਦੇ ਦਰਸ਼ਨ ਪ੍ਰਾਪਤ ਕਰੋ",
+    "talkToKiaan": "KIAAN ਨਾਲ ਗੱਲ ਕਰੋ",
+    "divineWisdom": "ਦੈਵੀ ਗਿਆਨ ਅਤੇ ਮਾਰਗਦਰਸ਼ਨ",
+    "protectionShield": "ਦੈਵੀ ਸੁਰੱਖਿਆ ਕਵਚ",
+    "activateProtection": "ਕ੍ਰਿਸ਼ਨ ਦੀ ਸੁਰੱਖਿਆ ਸਰਗਰਮ ਕਰੋ",
+    "heartToHeart": "ਕ੍ਰਿਸ਼ਨ ਨਾਲ ਦਿਲ ਦੀ ਗੱਲ",
+    "writeLetter": "ਪ੍ਰਮਾਤਮਾ ਨੂੰ ਚਿੱਠੀ ਲਿਖੋ",
+    "howIsHeart": "ਤੁਹਾਡਾ ਦਿਲ ਕਿਵੇਂ ਹੈ?",
+    "shareFeelings": "ਕ੍ਰਿਸ਼ਨ ਨਾਲ ਆਪਣੀਆਂ ਭਾਵਨਾਵਾਂ ਸਾਂਝੀਆਂ ਕਰੋ",
+    "goToDashboard": "ਡੈਸ਼ਬੋਰਡ ਤੇ ਜਾਓ",
+    "accessTools": "ਸਾਰੇ ਔਜ਼ਾਰ ਅਤੇ ਸੁਵਿਧਾਵਾਂ ਤੱਕ ਪਹੁੰਚੋ",
+    "quickAccess": "ਤੇਜ਼ ਦੈਵੀ ਪਹੁੰਚ",
+    "journeys": "ਯਾਤਰਾਵਾਂ",
+    "journal": "ਡਾਇਰੀ",
+    "reframe": "ਮੁੜ-ਵਿਚਾਰ",
+    "detach": "ਵੈਰਾਗ",
+    "footerVerse": "\"ਮੈਂ ਸਾਰੇ ਜੀਵਾਂ ਦੇ ਦਿਲ ਵਿੱਚ ਬੈਠੀ ਆਤਮਾ ਹਾਂ। ਮੈਂ ਸ਼ੁਰੂਆਤ, ਮੱਧ ਅਤੇ ਅੰਤ ਹਾਂ।\"",
+    "footerVerseRef": "— ਭਗਵਦ ਗੀਤਾ 10.20"
   }
 }

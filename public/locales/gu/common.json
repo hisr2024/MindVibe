@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "માઇન્ડવાઇબ",
+    "name": "MindVibe",
     "tagline": "તમારો આધ્યાત્મિક સાથી અને દિવ્ય મિત્ર"
   },
   "buttons": {
@@ -13,25 +13,25 @@
     "next": "આગળ",
     "previous": "પાછળ",
     "confirm": "પુષ્ટિ કરો",
-    "back": "પાછળ",
+    "back": "પાછા",
     "continue": "ચાલુ રાખો",
     "learnMore": "વધુ જાણો",
-    "getStarted": "શરૂ કરો",
+    "getStarted": "પ્રારંભ કરો",
     "tryNow": "હમણાં પ્રયાસ કરો",
     "tools": "સાધનો"
   },
   "status": {
-    "loading": "લોડ થઈ રહ્યું છે...",
-    "saving": "સાચવી રહ્યા છીએ...",
+    "loading": "લોડ કરી રહ્યું છે...",
+    "saving": "સાચવી રહ્યું છે...",
     "saved": "સાચવ્યું",
     "error": "ભૂલ",
     "success": "સફળતા",
-    "processing": "પ્રક્રિયા કરી રહ્યા છીએ..."
+    "processing": "પ્રક્રિયા કરી રહ્યું છે..."
   },
   "common": {
     "hello": "નમસ્તે",
-    "welcome": "સ્વાગત",
-    "goodbye": "અલવિદા",
+    "welcome": "સ્વાગત છે",
+    "goodbye": "વિદાય",
     "thankyou": "આભાર",
     "yes": "હા",
     "no": "ના",
@@ -42,9 +42,9 @@
   },
   "privacy": {
     "encrypted": "એન્ક્રિપ્ટેડ",
-    "private": "ખાનગી",
+    "private": "ખાનગી ડિઝાઇન",
     "secure": "સુરક્ષિત",
     "localOnly": "માત્ર સ્થાનિક",
-    "offlineReady": "ઑફલાઇન-તૈયાર"
+    "offlineReady": "ઓફલાઇન-તૈયાર"
   }
 }

@@ -28,6 +28,7 @@ import MoodJourneyPanel from '@/components/companion/MoodJourneyPanel'
 import VoiceCompanionSelector from '@/components/voice/VoiceCompanionSelector'
 import { apiFetch } from '@/lib/api'
 import { KiaanFriendEngine } from '@/lib/kiaan-friend-engine'
+import { useLanguage } from '@/hooks/useLanguage'
 
 // ─── Voice Config Type ──────────────────────────────────────────────
 interface VoiceConfig {
@@ -118,6 +119,7 @@ export default function CompanionPage() {
   const searchParams = useSearchParams()
   const referralTool = searchParams.get('from')
   const referralMood = searchParams.get('mood')
+  const { language: globalLanguage } = useLanguage()
 
   const [messages, setMessages] = useState<Message[]>([])
   const [inputText, setInputText] = useState('')
@@ -140,13 +142,22 @@ export default function CompanionPage() {
   const [wisdomCorpusCount, setWisdomCorpusCount] = useState(0)
   const [aiStatus, setAiStatus] = useState<'unknown' | 'connected' | 'offline'>('unknown')
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig>({
-    language: 'en',
-    speakerId: 'en_sarvam-aura',
+    language: globalLanguage || 'en',
+    speakerId: `${globalLanguage || 'en'}_sarvam-aura`,
     emotion: 'neutral',
     speed: 0.95,
     pitch: 0.0,
     autoPlay: false,
   })
+
+  // Sync voice config language with global language preference
+  useEffect(() => {
+    setVoiceConfig(prev => ({
+      ...prev,
+      language: globalLanguage,
+      speakerId: `${globalLanguage}_${prev.speakerId.split('_').slice(1).join('_') || 'sarvam-aura'}`,
+    }))
+  }, [globalLanguage])
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)

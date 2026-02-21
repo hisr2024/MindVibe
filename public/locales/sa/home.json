@@ -89,5 +89,27 @@
   "disclaimer": {
     "title": "Disclaimer",
     "text": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away."
+  },
+  "introduction": {
+    "heroTitle": "दिव्यसन्निधौ स्वागतम्",
+    "heroSubtitle": "कृष्णस्य प्रेमपूर्णमार्गदर्शनम् अनुभवत। अस्मिन् यात्रायां भवान् कदापि एकाकी नास्ति।",
+    "receiveDarshan": "कृष्णदर्शनं प्राप्नुत",
+    "talkToKiaan": "KIAAN इत्यनेन सह संवदत",
+    "divineWisdom": "दिव्यज्ञानं मार्गदर्शनं च",
+    "protectionShield": "दिव्यरक्षाकवचम्",
+    "activateProtection": "कृष्णरक्षां सक्रियं कुरुत",
+    "heartToHeart": "कृष्णेन सह हृदयसंवादः",
+    "writeLetter": "दैवाय पत्रं लिखत",
+    "howIsHeart": "भवतः हृदयं कथम् अस्ति?",
+    "shareFeelings": "कृष्णेन सह स्वभावनाः विभजत",
+    "goToDashboard": "नियन्त्रणफलकं गच्छत",
+    "accessTools": "सर्वाणि उपकरणानि सुविधाश्च प्राप्नुत",
+    "quickAccess": "शीघ्रं दिव्यप्रवेशः",
+    "journeys": "यात्राः",
+    "journal": "दैनन्दिनी",
+    "reframe": "पुनर्विचारः",
+    "detach": "वैराग्यम्",
+    "footerVerse": "\"अहम् आत्मा सर्वभूतानां हृदये स्थितः। अहम् आदिश्च मध्यं च अन्तश्च।\"",
+    "footerVerseRef": "— भगवद्गीता १०.२०"
   }
 }

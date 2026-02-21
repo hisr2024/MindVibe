@@ -1,41 +1,76 @@
 {
   "mainNav": {
-    "home": "Home",
-    "dashboard": "Dashboard",
-    "features": "Features",
-    "about": "About",
-    "contact": "Contact",
-    "pricing": "Pricing",
-    "profile": "Profile",
-    "settings": "Settings"
+    "home": "ホーム",
+    "dashboard": "ダッシュボード",
+    "features": "機能",
+    "about": "概要",
+    "contact": "お問い合わせ",
+    "pricing": "サブスクリプション",
+    "profile": "プロフィール",
+    "settings": "設定",
+    "account": "アカウントアクセス",
+    "theme": "テーマ",
+    "introduction": "はじめに"
   },
   "features": {
     "kiaan": "KIAAN",
     "ardha": "Ardha",
     "viyog": "Viyoga",
-    "relationshipCompass": "Relationship Compass",
-    "sacredReflections": "Sacred Reflections",
-    "karmaFootprint": "Karma Footprint",
-    "karmicTree": "Karmic Tree",
-    "emotionalReset": "Emotional Reset",
-    "deepInsights": "Deep Insights",
-    "wisdomRooms": "Wisdom Rooms"
+    "relationshipCompass": "関係コンパス",
+    "sacredReflections": "聖なる反省",
+    "karmaFootprint": "カルマフットプリント",
+    "karmicTree": "カルマの木",
+    "emotionalReset": "感情的リセット",
+    "deepInsights": "深い洞察",
+    "wisdomRooms": "知恵の部屋"
   },
   "actions": {
-    "openChat": "Open Chat",
-    "startCheckin": "Start check-in",
-    "instantGuidance": "Instant guidance",
-    "spotYourState": "Spot your state"
+    "openChat": "チャットを開く",
+    "startCheckin": "チェックインを開始",
+    "instantGuidance": "即座のガイダンス",
+    "spotYourState": "あなたの状態を特定",
+    "menu": "メニュー",
+    "toggleMenu": "ナビゲーションメニューの切り替え"
   },
   "mobileNav": {
-    "chat": "Chat",
-    "pause": "Pause",
-    "journal": "Sacred Reflections"
+    "chat": "チャット",
+    "pause": "一時停止",
+    "journal": "聖なる反省"
   },
   "footer": {
-    "allRightsReserved": "All rights reserved",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "support": "Support"
+    "allRightsReserved": "全著作権所有",
+    "privacy": "プライバシーポリシー",
+    "terms": "利用規約",
+    "support": "サポート",
+    "explore": "探索",
+    "safety": "安全",
+    "description": "穏やかでプライバシー重視のメンタルヘルスサポートのために設計されました。WCAGアクセシビリティ、暗号化、そして穏やかな体験に焦点を当てて構築されています。",
+    "emailUs": "メールを送信",
+    "encryptedJournals": "暗号化されたジャーナル",
+    "noTracking": "トラッキング広告なし"
+  },
+  "pathway": {
+    "pause": "Pause",
+    "understand": "Understand",
+    "converse": "Converse",
+    "apply": "Apply",
+    "train": "Train",
+    "you_are_here": "You are here",
+    "nav_label": "Healing pathway"
+  },
+  "next_step": {
+    "explore_ardha": "Explore in Ardha →",
+    "continue_kiaan": "Continue with KIAAN →",
+    "stabilize_viyoga": "Stabilize with Viyoga →",
+    "enter_journey": "Enter a Journey →",
+    "helper": "Based on your conversation, you might find this helpful"
+  },
+  "tools": {
+    "releaseAttachment": "執着を解放",
+    "reframeThoughts": "思考をリフレーム",
+    "kiaanChat": "KIAANチャット",
+    "talkItThrough": "話して整理する",
+    "relationalClarity": "関係の明確さ",
+    "quickAccess": "クイックアクセス"
   }
 }

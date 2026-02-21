@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "マインドバイブ",
+    "name": "MindVibe",
     "tagline": "あなたのスピリチュアルな仲間と神聖な友"
   },
   "buttons": {
@@ -15,7 +15,7 @@
     "confirm": "確認",
     "back": "戻る",
     "continue": "続ける",
-    "learnMore": "詳細を見る",
+    "learnMore": "もっと詳しく",
     "getStarted": "始める",
     "tryNow": "今すぐ試す",
     "tools": "ツール"
@@ -23,7 +23,7 @@
   "status": {
     "loading": "読み込み中...",
     "saving": "保存中...",
-    "saved": "保存完了",
+    "saved": "保存しました",
     "error": "エラー",
     "success": "成功",
     "processing": "処理中..."
@@ -42,7 +42,7 @@
   },
   "privacy": {
     "encrypted": "暗号化",
-    "private": "プライベート",
+    "private": "プライベートデザイン",
     "secure": "安全",
     "localOnly": "ローカルのみ",
     "offlineReady": "オフライン対応"

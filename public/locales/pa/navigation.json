@@ -1,41 +1,76 @@
 {
   "mainNav": {
-    "home": "Home",
-    "dashboard": "Dashboard",
-    "features": "Features",
-    "about": "About",
-    "contact": "Contact",
-    "pricing": "Pricing",
-    "profile": "Profile",
-    "settings": "Settings"
+    "home": "ਘਰ",
+    "dashboard": "ਡੈਸ਼ਬੋਰਡ",
+    "features": "ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ",
+    "about": "ਬਾਰੇ",
+    "contact": "ਸੰਪਰਕ",
+    "pricing": "ਸਬਸਕ੍ਰਿਪਸ਼ਨ",
+    "profile": "ਪ੍ਰੋਫਾਈਲ",
+    "settings": "ਸੈਟਿੰਗਾਂ",
+    "account": "ਖਾਤਾ ਪਹੁੰਚ",
+    "theme": "ਥੀਮ",
+    "introduction": "ਜਾਣ-ਪਛਾਣ"
   },
   "features": {
     "kiaan": "KIAAN",
     "ardha": "Ardha",
     "viyog": "Viyoga",
-    "relationshipCompass": "Relationship Compass",
-    "sacredReflections": "Sacred Reflections",
-    "karmaFootprint": "Karma Footprint",
-    "karmicTree": "Karmic Tree",
-    "emotionalReset": "Emotional Reset",
-    "deepInsights": "Deep Insights",
-    "wisdomRooms": "Wisdom Rooms"
+    "relationshipCompass": "ਰਿਸ਼ਤਾ ਕੰਪਾਸ",
+    "sacredReflections": "ਪਵਿੱਤਰ ਪ੍ਰਤੀਬਿੰਬ",
+    "karmaFootprint": "ਕਰਮ ਪੈਰਾਂ ਦੇ ਨਿਸ਼ਾਨ",
+    "karmicTree": "ਕਾਰਮਿਕ ਰੁੱਖ",
+    "emotionalReset": "ਭਾਵਨਾਤਮਕ ਰੀਸੈੱਟ",
+    "deepInsights": "ਡੂੰਘੀਆਂ ਸਮਝਾਂ",
+    "wisdomRooms": "ਸਿਆਣਪ ਕਮਰੇ"
   },
   "actions": {
-    "openChat": "Open Chat",
-    "startCheckin": "Start check-in",
-    "instantGuidance": "Instant guidance",
-    "spotYourState": "Spot your state"
+    "openChat": "ਚੈਟ ਖੋਲ੍ਹੋ",
+    "startCheckin": "ਚੈੱਕ-ਇਨ ਸ਼ੁਰੂ ਕਰੋ",
+    "instantGuidance": "ਤੁਰੰਤ ਮਾਰਗਦਰਸ਼ਨ",
+    "spotYourState": "ਆਪਣੀ ਸਥਿਤੀ ਦਾ ਪਤਾ ਲਗਾਓ",
+    "menu": "ਮੀਨੂ",
+    "toggleMenu": "ਨੈਵੀਗੇਸ਼ਨ ਮੀਨੂ ਟੌਗਲ ਕਰੋ"
   },
   "mobileNav": {
-    "chat": "Chat",
-    "pause": "Pause",
-    "journal": "Sacred Reflections"
+    "chat": "ਚੈਟ",
+    "pause": "ਰੋਕੋ",
+    "journal": "ਪਵਿੱਤਰ ਪ੍ਰਤੀਬਿੰਬ"
   },
   "footer": {
-    "allRightsReserved": "All rights reserved",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "support": "Support"
+    "allRightsReserved": "ਸਾਰੇ ਅਧਿਕਾਰ ਰਾਖਵੇਂ",
+    "privacy": "ਗੋਪਨੀਯਤਾ ਨੀਤੀ",
+    "terms": "ਸੇਵਾ ਦੀਆਂ ਸ਼ਰਤਾਂ",
+    "support": "ਸਹਾਇਤਾ",
+    "explore": "ਖੋਜੋ",
+    "safety": "ਸੁਰੱਖਿਆ",
+    "description": "ਸ਼ਾਂਤ, ਗੋਪਨੀਯਤਾ-ਪਹਿਲ ਮਾਨਸਿਕ ਸਿਹਤ ਸਹਾਇਤਾ ਲਈ ਤਿਆਰ. WCAG ਪਹੁੰਚਯੋਗਤਾ, ਏਨਕ੍ਰਿਪਸ਼ਨ ਅਤੇ ਕੋਮਲ ਅਨੁਭਵ ਤੇ ਫੋਕਸ ਨਾਲ ਬਣਾਇਆ.",
+    "emailUs": "ਸਾਨੂੰ ਈਮੇਲ ਕਰੋ",
+    "encryptedJournals": "ਇਨਕ੍ਰਿਪਟਡ ਜਰਨਲ",
+    "noTracking": "ਕੋਈ ਟਰੈਕਿੰਗ ਇਸ਼ਤਿਹਾਰ ਨਹੀਂ"
+  },
+  "pathway": {
+    "pause": "Pause",
+    "understand": "Understand",
+    "converse": "Converse",
+    "apply": "Apply",
+    "train": "Train",
+    "you_are_here": "You are here",
+    "nav_label": "Healing pathway"
+  },
+  "next_step": {
+    "explore_ardha": "Explore in Ardha →",
+    "continue_kiaan": "Continue with KIAAN →",
+    "stabilize_viyoga": "Stabilize with Viyoga →",
+    "enter_journey": "Enter a Journey →",
+    "helper": "Based on your conversation, you might find this helpful"
+  },
+  "tools": {
+    "releaseAttachment": "ਮੋਹ ਮੁਕਤੀ",
+    "reframeThoughts": "ਵਿਚਾਰ ਮੁੜ-ਰਚਨਾ",
+    "kiaanChat": "KIAAN ਚੈਟ",
+    "talkItThrough": "ਗੱਲ ਕਰਕੇ ਸਮਝੋ",
+    "relationalClarity": "ਰਿਸ਼ਤਿਆਂ ਦੀ ਸਪੱਸ਼ਟਤਾ",
+    "quickAccess": "ਤੇਜ਼ ਪਹੁੰਚ"
   }
 }

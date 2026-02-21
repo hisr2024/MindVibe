@@ -20,6 +20,7 @@
 import React, { useState, useEffect, useMemo, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDivineConsciousness, EmotionalState } from '@/contexts/DivineConsciousnessContext';
+import { useLanguage } from '@/hooks/useLanguage';
 
 // Memoized decorative element to prevent re-renders
 const DecorativeFlute = memo(() => (
@@ -54,96 +55,17 @@ interface KrishnaMorningDarshanProps {
   onComplete?: () => void;
 }
 
-// Krishna's time-based greetings
-const TIME_DARSHANS = {
-  dawn: {
-    greeting: "Beloved child",
-    blessing: "As Surya rises, I illuminate your path. This new day is my gift to you.",
-    icon: "🌅",
-    atmosphere: "The golden light of dawn carries my love to you...",
-  },
-  morning: {
-    greeting: "Dear one",
-    blessing: "The morning dew holds my blessings for you. Walk with peace today.",
-    icon: "☀️",
-    atmosphere: "Feel my presence in the gentle warmth of morning...",
-  },
-  afternoon: {
-    greeting: "My beloved",
-    blessing: "In the fullness of day, remember - I am always with you, in every moment.",
-    icon: "🌤️",
-    atmosphere: "Even in the brightness of day, my cool shade protects you...",
-  },
-  evening: {
-    greeting: "Precious soul",
-    blessing: "As the day softens, release your burdens to me. I carry them gladly.",
-    icon: "🌆",
-    atmosphere: "The evening sky reflects my eternal embrace...",
-  },
-  night: {
-    greeting: "Beloved child",
-    blessing: "In the sacred silence of night, I watch over you. Sleep in my arms.",
-    icon: "🌙",
-    atmosphere: "The stars are my eyes, watching over you with love...",
-  },
+// Time-based icons (static, no translation needed)
+const TIME_ICONS: Record<string, string> = {
+  dawn: "🌅",
+  morning: "☀️",
+  afternoon: "🌤️",
+  evening: "🌆",
+  night: "🌙",
 };
 
-// Krishna's mood-based personal messages
-const MOOD_MESSAGES: Record<EmotionalState, { message: string; verse: string; reference: string }> = {
-  anxious: {
-    message: "I feel the flutter in your heart. But remember, dear one - why do you worry when I am here? Surrender your fears to me, and watch them dissolve like morning mist.",
-    verse: "Those who surrender all actions to Me, regarding Me as the supreme goal, worshipping Me... for them I am the swift deliverer from the ocean of death.",
-    reference: "Bhagavad Gita 12.6-7",
-  },
-  sad: {
-    message: "I see your tears, precious one. Each tear is sacred to me. Know that this sadness shall pass, but my love for you is eternal. Lean on me.",
-    verse: "The soul is never born nor does it ever die... It is unborn, eternal, permanent, and ancient. It is not slain when the body is slain.",
-    reference: "Bhagavad Gita 2.20",
-  },
-  angry: {
-    message: "I understand your fire, dear one. This energy within you is powerful. Let me help you transform it into strength and clarity.",
-    verse: "From anger arises delusion; from delusion, confusion of memory; from confusion of memory, loss of reason; and from loss of reason one is completely ruined.",
-    reference: "Bhagavad Gita 2.63",
-  },
-  lost: {
-    message: "You feel uncertain of the path, but beloved, I AM the path. When you cannot see the way, close your eyes and feel me. I am your compass.",
-    verse: "Whenever there is a decline in righteousness and rise of unrighteousness, I manifest myself. For the protection of the good and the destruction of the wicked, I am born age after age.",
-    reference: "Bhagavad Gita 4.7-8",
-  },
-  overwhelmed: {
-    message: "So much weighs upon you, dear one. But remember - you do not carry this alone. Give me your burdens. I am strong enough for both of us.",
-    verse: "You have the right to perform your prescribed duty, but you are not entitled to the fruits of action. Never consider yourself the cause of the results.",
-    reference: "Bhagavad Gita 2.47",
-  },
-  peaceful: {
-    message: "What beautiful stillness in your heart! This peace is your true nature, dear one. You are simply remembering who you truly are.",
-    verse: "The one whose mind is undisturbed in sorrow, free from desire in pleasure, without attachment, fear, or anger - that sage is called steady in wisdom.",
-    reference: "Bhagavad Gita 2.56",
-  },
-  grateful: {
-    message: "Your grateful heart delights me! Gratitude is the bridge between us. When you feel grateful, you feel my presence most strongly.",
-    verse: "Whatever you do, whatever you eat, whatever you offer in sacrifice, whatever you give away, and whatever austerity you practice - do it as an offering to Me.",
-    reference: "Bhagavad Gita 9.27",
-  },
-  happy: {
-    message: "Your joy makes the heavens rejoice! When you are happy, know that I am celebrating through you. Share this light with the world.",
-    verse: "The one who sees Me everywhere and sees everything in Me - I am never lost to them, and they are never lost to Me.",
-    reference: "Bhagavad Gita 6.30",
-  },
-  tired: {
-    message: "Rest, dear one. Even I rested after creation. Your weariness is sacred - it means you have given your all. Now, let me restore you.",
-    verse: "The one who has conquered the mind, for them the Supersoul is already reached, for they have attained tranquility. Such a person is situated in the Supreme.",
-    reference: "Bhagavad Gita 6.7",
-  },
-  confused: {
-    message: "The mind seeks clarity, but wisdom comes from stillness. Stop seeking answers - let them find you. I will show you the way when you are ready.",
-    verse: "When your intellect crosses beyond the mire of delusion, then you will attain indifference to what has been heard and what is yet to be heard.",
-    reference: "Bhagavad Gita 2.52",
-  },
-};
-
-// Default message when no mood detected
-const DEFAULT_MESSAGE = {
+// Fallback mood messages (used when translations not loaded)
+const DEFAULT_MOOD_FALLBACK = {
   message: "I am always with you, dear one. In every breath, in every heartbeat, in every moment of stillness - there I am. You are never alone.",
   verse: "I am the Self seated in the hearts of all beings. I am the beginning, the middle, and also the end of all beings.",
   reference: "Bhagavad Gita 10.20",
@@ -156,8 +78,9 @@ export function KrishnaMorningDarshan({
   onComplete,
 }: KrishnaMorningDarshanProps) {
   const { actions } = useDivineConsciousness();
+  const { t } = useLanguage();
   const [phase, setPhase] = useState<'entering' | 'greeting' | 'message' | 'verse' | 'closing'>('entering');
-  const [timeOfDay, setTimeOfDay] = useState<keyof typeof TIME_DARSHANS>('morning');
+  const [timeOfDay, setTimeOfDay] = useState<keyof typeof TIME_ICONS>('morning');
   const [isReady, setIsReady] = useState(false);
 
   // Determine time of day once on mount - memoized
@@ -189,9 +112,20 @@ export function KrishnaMorningDarshan({
     };
   }, [initialTimeOfDay]);
 
-  // Memoize darshan and moodData
-  const darshan = useMemo(() => TIME_DARSHANS[timeOfDay], [timeOfDay]);
-  const moodData = useMemo(() => lastMood ? MOOD_MESSAGES[lastMood] : DEFAULT_MESSAGE, [lastMood]);
+  // Memoize darshan and moodData using translations
+  const darshan = useMemo(() => ({
+    greeting: t(`divine.sacred.darshan.${timeOfDay}.greeting`, timeOfDay),
+    blessing: t(`divine.sacred.darshan.${timeOfDay}.blessing`, ''),
+    icon: TIME_ICONS[timeOfDay],
+    atmosphere: t(`divine.sacred.darshan.${timeOfDay}.atmosphere`, ''),
+  }), [timeOfDay, t]);
+
+  const moodKey = lastMood || 'default';
+  const moodData = useMemo(() => ({
+    message: t(`divine.sacred.darshan.moods.${moodKey}.message`, DEFAULT_MOOD_FALLBACK.message),
+    verse: t(`divine.sacred.darshan.moods.${moodKey}.verse`, DEFAULT_MOOD_FALLBACK.verse),
+    reference: t(`divine.sacred.darshan.moods.${moodKey}.reference`, DEFAULT_MOOD_FALLBACK.reference),
+  }), [moodKey, t]);
 
   // Show loading placeholder until ready
   if (!isReady) {
@@ -291,7 +225,7 @@ export function KrishnaMorningDarshan({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-amber-400/60 uppercase tracking-wider mb-2">
-                    Krishna speaks to you...
+                    {t('divine.sacred.darshan.krishnaSpeaks', 'Krishna speaks to you...')}
                   </p>
                   <p className="text-amber-100/90 text-base sm:text-lg leading-relaxed italic">
                     &quot;{moodData.message}&quot;
@@ -313,7 +247,7 @@ export function KrishnaMorningDarshan({
             >
               <div className="bg-amber-950/50 border border-amber-500/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
                 <p className="text-xs text-amber-400/60 uppercase tracking-wider mb-3">
-                  Divine Wisdom for You Today
+                  {t('divine.sacred.darshan.divineWisdomToday', 'Divine Wisdom for You Today')}
                 </p>
                 <p className="text-amber-100/80 italic mb-4 leading-relaxed text-sm sm:text-base">
                   &quot;{moodData.verse}&quot;
@@ -344,10 +278,10 @@ export function KrishnaMorningDarshan({
                 <span className="text-3xl sm:text-4xl">💙</span>
               </div>
               <p className="text-amber-100/90 text-base sm:text-lg mb-4 px-2">
-                Go in peace, beloved one.
+                {t('divine.sacred.darshan.goInPeace', 'Go in peace, beloved one.')}
               </p>
               <p className="text-amber-200/60 text-xs sm:text-sm italic max-w-sm mx-auto px-4">
-                &quot;I am always with you. In every thought, every breath, every heartbeat - there I am. You are never alone.&quot;
+                &quot;{t('divine.sacred.darshan.alwaysWithYou', 'I am always with you. In every thought, every breath, every heartbeat - there I am. You are never alone.')}&quot;
               </p>
 
               {onComplete && (
@@ -357,7 +291,7 @@ export function KrishnaMorningDarshan({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
                 >
-                  Begin My Day with Krishna
+                  {t('divine.sacred.darshan.beginMyDay', 'Begin My Day with Krishna')}
                 </motion.button>
               )}
             </motion.div>

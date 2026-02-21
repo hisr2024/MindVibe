@@ -17,18 +17,22 @@
       "title": "How can I guide you today?",
       "subtitle": "Share what's on your mind"
     },
-    "disclaimer": "KIAAN shares supportive reflections for general wellness. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.",
-    "saveToJournal": "Save to Journal",
-    "copy": "Copy",
+    "disclaimer": "KIAAN भवतः आध्यात्मिकसहचरः, भगवद्गीतातः प्राचीनज्ञानात् च चिन्तनानि विभजति।",
+    "saveToJournal": "दैनन्दिन्यां सञ्चयत",
+    "copy": "प्रतिलिपिः",
     "copied": "Copied!",
     "copyFailed": "Failed",
-    "share": "Share",
+    "share": "विभजत",
     "shareVia": "Share via",
     "privacyNotice": "Privacy Notice",
     "shareWarning": "You are about to share spiritual wellness information. Please ensure you're comfortable sharing this content publicly.",
     "anonymize": "Anonymize content (remove personal identifiers)",
     "anonymized": "✓ Anonymized content",
-    "sharingOriginal": "Sharing original content"
+    "sharingOriginal": "Sharing original content",
+    "defaultResponse": "अहम् अत्र अस्मि। किम् भवति तत् वदतु, वयं सहैव समाधानं कुर्मः।",
+    "summary": "सारांशः",
+    "fullView": "पूर्णदृश्यम्",
+    "divineFriend": "भवतः दिव्यमित्रम्"
   },
   "guidanceModes": {
     "title": "Guidance modes",
@@ -93,19 +97,19 @@
     "subtitle": "Polished prompts that auto-fill KIAAN for you",
     "scenarios": {
       "anxiety": {
-        "label": "Anxiety to calm",
+        "label": "चिन्ता अधिका",
         "prompt": "Guide me through a grounding exercise to steady anxious thoughts."
       },
       "heavy": {
-        "label": "Heart feels heavy",
+        "label": "मनः भारम्",
         "prompt": "I need gentle words to lift my mood and remind me of my strengths."
       },
       "anger": {
-        "label": "Cooling anger",
+        "label": "क्रोधप्रबन्धनम्",
         "prompt": "Help me cool down my anger and respond with more patience."
       },
       "clarity": {
-        "label": "Clarity check",
+        "label": "स्पष्टता आवश्यका",
         "prompt": "Can you help me see the pros and cons before I decide on something important?"
       },
       "work": {
@@ -113,16 +117,19 @@
         "prompt": "Work feels overwhelming—walk me through a quick reset to regain focus."
       },
       "relationships": {
-        "label": "Tender relationships",
+        "label": "सम्बन्धतनावः",
         "prompt": "How can I handle a tough conversation with care and honesty?"
       },
       "purpose": {
-        "label": "Purpose pulse",
+        "label": "स्तब्धः अस्मि",
         "prompt": "I want a short reflection to reconnect with my purpose and direction."
       },
       "peace": {
-        "label": "Quiet peace",
+        "label": "शान्तिः आवश्यका",
         "prompt": "Lead me in a brief mindful moment so I can feel peaceful again."
+      },
+      "balance": {
+        "label": "अत्यधिकभारः"
       }
     }
   }

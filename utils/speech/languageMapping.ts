@@ -2,29 +2,32 @@
  * Maps MindVibe locale codes to browser Speech API language codes
  */
 
-export type SupportedLocale = 'en' | 'es' | 'fr' | 'de' | 'hi' | 'ar' | 'zh' | 'ja' | 'pt'
+export type SupportedLocale = 'en' | 'hi' | 'ta' | 'te' | 'bn' | 'mr' | 'gu' | 'kn' | 'ml' | 'pa' | 'sa' | 'es' | 'fr' | 'de' | 'pt' | 'ja' | 'zh-CN'
 
 export const SPEECH_LANGUAGE_MAP: Record<SupportedLocale, string> = {
   en: 'en-US',
+  hi: 'hi-IN',
+  ta: 'ta-IN',
+  te: 'te-IN',
+  bn: 'bn-IN',
+  mr: 'mr-IN',
+  gu: 'gu-IN',
+  kn: 'kn-IN',
+  ml: 'ml-IN',
+  pa: 'pa-IN',
+  sa: 'hi-IN', // Sanskrit falls back to Hindi for speech
   es: 'es-ES',
   fr: 'fr-FR',
   de: 'de-DE',
-  hi: 'hi-IN',
-  ar: 'ar-SA',
-  zh: 'zh-CN',
-  ja: 'ja-JP',
   pt: 'pt-PT',
+  ja: 'ja-JP',
+  'zh-CN': 'zh-CN',
 }
 
 /**
  * Gets the Speech API language code for a given locale
  */
 export function getSpeechLanguage(locale: string): string {
-  // Handle zh-CN special case from useLanguage hook
-  if (locale === 'zh-CN') {
-    return SPEECH_LANGUAGE_MAP.zh
-  }
-  
   const localeKey = locale as SupportedLocale
   return SPEECH_LANGUAGE_MAP[localeKey] || SPEECH_LANGUAGE_MAP.en
 }
