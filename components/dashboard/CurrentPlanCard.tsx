@@ -35,9 +35,14 @@ export function CurrentPlanCard({ subscription, onManage, onUpgrade, className =
             <p className="text-xs uppercase tracking-wider text-orange-100/60 mb-1">Current Plan</p>
             <h3 className="text-2xl font-bold text-orange-50">{subscription.tierName}</h3>
           </div>
-          <Badge variant={statusBadge.variant} dot>
-            {statusBadge.label}
-          </Badge>
+          <div className="flex items-center gap-2">
+            {subscription.isDeveloper && (
+              <Badge variant="info" dot>Developer</Badge>
+            )}
+            <Badge variant={statusBadge.variant} dot>
+              {statusBadge.label}
+            </Badge>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">

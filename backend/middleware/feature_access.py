@@ -52,9 +52,8 @@ DEVELOPER_EMAILS = DEFAULT_DEVELOPER_EMAILS | _env_developer_emails
 async def is_developer(db: AsyncSession, user_id: str) -> bool:
     """Check if user is a developer with full access.
 
-    Developers are identified by:
-    1. Email in DEVELOPER_EMAILS environment variable
-    2. is_admin flag in user record
+    Developers are identified by email in DEVELOPER_EMAILS
+    (hardcoded defaults + environment variable).
 
     This function checks both User.id and User.auth_uid to handle
     different authentication sources (JWT uses id, X-Auth-UID might use auth_uid).
@@ -91,12 +90,7 @@ async def is_developer(db: AsyncSession, user_id: str) -> bool:
                 logger.info(f"Developer access granted for {user.email}")
                 return True
 
-        # Check if user is admin
-        if hasattr(user, "is_admin") and user.is_admin:
-            logger.info(f"Admin access granted for user {user_id}")
-            return True
-
-        logger.info(f"[is_developer] No developer/admin access for user {user_id}")
+        logger.info(f"[is_developer] No developer access for user {user_id}")
         return False
 
     except SQLAlchemyError as e:

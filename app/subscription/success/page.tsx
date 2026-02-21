@@ -33,7 +33,7 @@ function SuccessContent() {
           const data = await response.json()
           const subscription: Subscription = {
             id: String(data.id ?? `sub_${tier}`),
-            tierId: data.plan?.tier ?? tier,
+            tierId: data.effective_tier ?? data.plan?.tier ?? tier,
             tierName: data.plan?.name ?? tierNames[tier] ?? 'Basic',
             status: (data.status as Subscription['status']) ?? 'active',
             currentPeriodEnd: data.current_period_end
@@ -41,6 +41,7 @@ function SuccessContent() {
               : new Date(Date.now() + (yearly ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString(),
             cancelAtPeriodEnd: Boolean(data.cancel_at_period_end),
             isYearly: yearly,
+            isDeveloper: Boolean(data.is_developer),
           }
           updateSubscription(subscription)
         }

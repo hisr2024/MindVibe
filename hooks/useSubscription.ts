@@ -11,6 +11,7 @@ export interface Subscription {
   currentPeriodEnd: string
   cancelAtPeriodEnd: boolean
   isYearly: boolean
+  isDeveloper: boolean
 }
 
 interface UseSubscriptionResult {
@@ -38,6 +39,8 @@ interface ApiSubscription {
   status?: string
   current_period_end?: string | null
   cancel_at_period_end?: boolean
+  is_developer?: boolean
+  effective_tier?: string | null
 }
 
 function getDefaultSubscription(): Subscription {
@@ -49,6 +52,7 @@ function getDefaultSubscription(): Subscription {
     currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
     cancelAtPeriodEnd: false,
     isYearly: false,
+    isDeveloper: false,
   }
 }
 
@@ -101,14 +105,17 @@ async function fetchSubscriptionFromApi(): Promise<Subscription> {
     ? new Date(data.current_period_end).toISOString()
     : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 
+  const isDeveloper = Boolean(data.is_developer)
+
   const subscription: Subscription = {
     id: String(data.id ?? 'free-default'),
-    tierId: data.plan?.tier ?? 'free',
+    tierId: data.effective_tier ?? data.plan?.tier ?? 'free',
     tierName: data.plan?.name ?? 'Free',
     status: (data.status as Subscription['status']) ?? 'active',
     currentPeriodEnd,
     cancelAtPeriodEnd: Boolean(data.cancel_at_period_end),
     isYearly: Boolean(data.plan?.price_yearly && !data.plan?.price_monthly),
+    isDeveloper,
   }
 
   persistSubscription(subscription)

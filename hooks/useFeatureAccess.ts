@@ -83,6 +83,8 @@ export interface FeatureAccessResult {
   isKiaanUnlimited: boolean
   /** Max active Wisdom Journeys (-1 = unlimited) */
   journeyLimit: number
+  /** Whether the user has developer access (all features unlocked) */
+  isDeveloper: boolean
   /** Subscription loading state */
   loading: boolean
 }
@@ -97,11 +99,13 @@ export interface FeatureAccessResult {
 export function useFeatureAccess(): FeatureAccessResult {
   const { subscription, loading } = useSubscription()
 
+  const isDeveloper = subscription?.isDeveloper ?? false
   const tier = (subscription?.tierId ?? 'free') as TierId
   const tierRank = TIER_RANK[tier] ?? 0
 
   return useMemo(() => {
     const hasAccess = (feature: string): boolean => {
+      if (isDeveloper) return true
       const def = FEATURE_MAP[feature]
       if (!def) return true // unknown features are unrestricted
       return tierRank >= TIER_RANK[def.minTier]
@@ -120,14 +124,15 @@ export function useFeatureAccess(): FeatureAccessResult {
       hasAccess,
       requiredTier,
       featureLabel,
-      isPaid: tierRank >= TIER_RANK.basic,
-      isPremium: tierRank >= TIER_RANK.premium,
-      kiaanQuota: TIER_QUOTAS[tier] ?? 50,
-      isKiaanUnlimited: (TIER_QUOTAS[tier] ?? 50) === -1,
-      journeyLimit: JOURNEY_LIMITS[tier] ?? 1,
+      isPaid: isDeveloper || tierRank >= TIER_RANK.basic,
+      isPremium: isDeveloper || tierRank >= TIER_RANK.premium,
+      kiaanQuota: isDeveloper ? -1 : (TIER_QUOTAS[tier] ?? 50),
+      isKiaanUnlimited: isDeveloper || (TIER_QUOTAS[tier] ?? 50) === -1,
+      journeyLimit: isDeveloper ? -1 : (JOURNEY_LIMITS[tier] ?? 1),
+      isDeveloper,
       loading,
     }
-  }, [tier, tierRank, loading])
+  }, [tier, tierRank, isDeveloper, loading])
 }
 
 export default useFeatureAccess
