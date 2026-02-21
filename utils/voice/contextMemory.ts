@@ -156,7 +156,10 @@ async function decryptData(data: string): Promise<string> {
     const ciphertext = combined.slice(12)
     const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext)
     return new TextDecoder().decode(decrypted)
-  } catch { return '{}' }
+  } catch (error) {
+    console.warn('Failed to decrypt context memory data — returning empty state', error)
+    return '{}'
+  }
 }
 
 /**

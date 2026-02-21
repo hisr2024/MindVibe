@@ -35,6 +35,6 @@ def track_errors(func):
                     import sentry_sdk
                     sentry_sdk.capture_exception(e)
                 except ImportError:
-                    pass
+                    logger.debug("Optional monitoring dependency not available", exc_info=True)
             raise
     return wrapper

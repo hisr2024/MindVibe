@@ -993,7 +993,7 @@ async def send_voice_companion_message(
                     wisdom_text = verse.get("wisdom", "")
                     wisdom_verse_ref = verse.get("verse_ref", "")
         except Exception:
-            pass
+            logger.warning("Voice companion Sakha wisdom lookup failed", exc_info=True)
 
     # ══════════════════════════════════════════════════════════════════════
     # TIER 1: Direct OpenAI call via openai_optimizer
@@ -1204,6 +1204,7 @@ async def quick_voice_response(
     try:
         mood, mood_intensity = detect_mood(body.query)
     except Exception:
+        logger.warning("Voice companion mood detection failed, using defaults", exc_info=True)
         mood = "neutral"
         mood_intensity = 0.5
 
@@ -1441,7 +1442,7 @@ async def voice_companion_health():
         from backend.services.openai_optimizer import openai_optimizer
         tier1_ready = openai_optimizer.ready and openai_optimizer.client is not None
     except Exception:
-        pass
+        logger.warning("Voice companion health check: tier1 openai_optimizer check failed", exc_info=True)
 
     # Check CompanionFriendEngine (TIER 2)
     tier2_ready = False
@@ -1450,7 +1451,7 @@ async def voice_companion_health():
         engine = get_companion_engine()
         tier2_ready = engine._openai_available
     except Exception:
-        pass
+        logger.warning("Voice companion health check: tier2 engine check failed", exc_info=True)
 
     # Check wisdom corpus
     verse_count = 0
@@ -1459,7 +1460,7 @@ async def voice_companion_health():
         sakha = get_sakha_wisdom_engine()
         verse_count = sakha.get_verse_count()
     except Exception:
-        pass
+        logger.warning("Voice companion health check: wisdom corpus check failed", exc_info=True)
 
     voice_providers = ["browser_fallback"]
     if os.getenv("BHASHINI_API_KEY", "").strip():

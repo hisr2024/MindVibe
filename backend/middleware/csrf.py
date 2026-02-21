@@ -6,6 +6,7 @@ This middleware implements CSRF protection using the Synchronizer Token Pattern:
 - Exempt paths are strictly limited to webhooks and pre-authentication endpoints
 """
 
+import logging
 import secrets
 import hmac
 from typing import Awaitable, Callable, Set
@@ -13,6 +14,8 @@ from typing import Awaitable, Callable, Set
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response, JSONResponse
+
+logger = logging.getLogger(__name__)
 
 
 # Paths exempt from CSRF protection.
@@ -151,7 +154,7 @@ class CSRFMiddleware(BaseHTTPMiddleware):
                         form = await request.form()
                         header_token = form.get("csrf_token")
                     except Exception:
-                        pass
+                        logger.warning("CSRF token parsing failed", exc_info=True)
 
             # Validate token
             if not existing_token:

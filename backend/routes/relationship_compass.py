@@ -1404,7 +1404,7 @@ async def unified_health() -> dict[str, Any]:
         pm = get_provider_manager()
         provider_available = pm is not None
     except Exception:
-        pass
+        logger.warning("Relationship compass health check: provider manager check failed", exc_info=True)
 
     # Check WisdomCore
     wisdom_core_ready = False
@@ -1415,7 +1415,7 @@ async def unified_health() -> dict[str, Any]:
         wisdom_core_ready = len(test_principles) > 0
         corpus_stats = rwc.get_corpus_stats()
     except Exception:
-        pass
+        logger.warning("Relationship compass health check: wisdom core check failed", exc_info=True)
 
     return {
         "status": "ok",
