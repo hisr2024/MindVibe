@@ -112,7 +112,7 @@ export function MinimalLanguageSelector() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={springConfigs.smooth}
-            className="absolute right-0 top-full z-[60] mt-2 w-64 rounded-2xl border border-orange-500/30 bg-slate-950/98 p-2 shadow-2xl shadow-black/40 backdrop-blur-xl md:w-56"
+            className="absolute right-0 top-full z-[60] mt-2 w-64 rounded-2xl border border-orange-500/30 bg-slate-950 p-2 shadow-2xl shadow-black/40 backdrop-blur-xl md:w-56"
             role="menu"
             aria-orientation="vertical"
           >
