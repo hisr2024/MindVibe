@@ -30,14 +30,16 @@ import {
   Bell,
   Wifi,
   WifiOff,
+  Grid3X3,
 } from 'lucide-react'
 
 import { MobileTabBar, TabItem } from './MobileTabBar'
 import { MobileHeader, HeaderAction } from './MobileHeader'
+import { MobileToolsOverlay } from './MobileToolsOverlay'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 
-// Tab configuration for the app
+// Tab configuration for the app — center "Tools" tab opens overlay instead of navigating
 const DEFAULT_TABS: TabItem[] = [
   {
     id: 'home',
@@ -52,10 +54,10 @@ const DEFAULT_TABS: TabItem[] = [
     activeIcon: <Sparkles className="w-5 h-5 fill-current" />,
   },
   {
-    id: 'journeys',
-    label: 'Journeys',
-    icon: <Compass className="w-5 h-5" />,
-    activeIcon: <Compass className="w-5 h-5 fill-current" />,
+    id: 'tools',
+    label: 'Tools',
+    icon: <Grid3X3 className="w-5 h-5" />,
+    activeIcon: <Grid3X3 className="w-5 h-5 fill-current" />,
   },
   {
     id: 'journal',
@@ -71,11 +73,10 @@ const DEFAULT_TABS: TabItem[] = [
   },
 ]
 
-// Route mapping for navigation
+// Route mapping for navigation — "tools" tab is handled via overlay, not a route
 const TAB_ROUTES: Record<string, string> = {
   home: '/m',
   kiaan: '/m/kiaan',
-  journeys: '/m/journeys',
   journal: '/m/journal',
   profile: '/m/profile',
 }
@@ -84,9 +85,10 @@ const TAB_ROUTES: Record<string, string> = {
 const ROUTE_TO_TAB: Record<string, string> = {
   '/m': 'home',
   '/m/kiaan': 'kiaan',
-  '/m/journeys': 'journeys',
   '/m/journal': 'journal',
   '/m/profile': 'profile',
+  '/m/tools': 'home',
+  '/m/journeys': 'home',
 }
 
 export interface MobileAppShellProps {
@@ -135,6 +137,7 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
 
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [showOfflineBanner, setShowOfflineBanner] = useState(false)
+    const [isToolsOverlayOpen, setIsToolsOverlayOpen] = useState(false)
 
     // Determine active tab from current route
     const activeTab = useMemo(() => {
@@ -149,8 +152,13 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
       return 'home'
     }, [pathname])
 
-    // Handle tab change
+    // Handle tab change — "tools" tab opens overlay instead of navigating
     const handleTabChange = useCallback((tabId: string) => {
+      if (tabId === 'tools') {
+        triggerHaptic('selection')
+        setIsToolsOverlayOpen(true)
+        return
+      }
       const route = TAB_ROUTES[tabId]
       if (route && route !== pathname) {
         triggerHaptic('selection')
@@ -345,6 +353,12 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
             </motion.div>
           </div>
         )}
+
+        {/* Tools overlay — slides up from bottom with spiritual wellness tools */}
+        <MobileToolsOverlay
+          isOpen={isToolsOverlayOpen}
+          onClose={() => setIsToolsOverlayOpen(false)}
+        />
       </div>
     )
   }
