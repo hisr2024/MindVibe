@@ -1,32 +1,32 @@
 {
   "app": {
-    "name": "मैण्ड्वैब्",
+    "name": "MindVibe",
     "tagline": "तव आध्यात्मिकः सहचरः दिव्यश्च सखा"
   },
   "buttons": {
-    "submit": "प्रस्तुतीकरोतु",
-    "cancel": "रद्दीकरोतु",
+    "submit": "प्रेषयतु",
+    "cancel": "रद्द करोतु",
     "save": "रक्षतु",
-    "delete": "मार्जयतु",
+    "delete": "विलोपयतु",
     "edit": "सम्पादयतु",
-    "close": "बध्नातु",
-    "next": "अग्रे",
-    "previous": "पूर्वम्",
-    "confirm": "पुष्टीकरोतु",
-    "back": "पश्चात्",
-    "continue": "चालयतु",
+    "close": "बन्धयतु",
+    "next": "अग्रिमः",
+    "previous": "पूर्वः",
+    "confirm": "पुष्टयतु",
+    "back": "परावर्तनम्",
+    "continue": "अनुसरतु",
     "learnMore": "अधिकं जानातु",
-    "getStarted": "आरभताम्",
-    "tryNow": "इदानीं प्रयत्नं करोतु",
-    "tools": "साधनानि"
+    "getStarted": "आरभ्यताम्",
+    "tryNow": "इदानीं प्रयतताम्",
+    "tools": "उपकरणाणि"
   },
   "status": {
-    "loading": "लोड्यते...",
-    "saving": "रक्ष्यते...",
+    "loading": "आवरणम्...",
+    "saving": "रक्षणम्...",
     "saved": "रक्षितम्",
     "error": "दोषः",
-    "success": "सिद्धिः",
-    "processing": "प्रक्रियाकरणं भवति..."
+    "success": "सफलता",
+    "processing": "संस्करणम्..."
   },
   "common": {
     "hello": "नमस्ते",
@@ -37,14 +37,14 @@
     "no": "न",
     "or": "वा",
     "and": "च",
-    "optional": "वैकल्पिकम्",
+    "optional": "विकल्पः",
     "required": "आवश्यकम्"
   },
   "privacy": {
-    "encrypted": "कूटीकृतम्",
-    "private": "गोपनीयम्",
+    "encrypted": "कूटितम्",
+    "private": "निजी रचना",
     "secure": "सुरक्षितम्",
     "localOnly": "स्थानीयमेव",
-    "offlineReady": "अनलाइन-सिद्धम्"
+    "offlineReady": "ऑफलाइन-सिद्धम्"
   }
 }

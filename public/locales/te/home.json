@@ -89,5 +89,27 @@
   "disclaimer": {
     "title": "Disclaimer",
     "text": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away."
+  },
+  "introduction": {
+    "heroTitle": "దివ్య సన్నిధానానికి స్వాగతం",
+    "heroSubtitle": "కృష్ణుని ప్రేమపూర్వక మార్గదర్శకత్వాన్ని అనుభవించండి. ఈ ప్రయాణంలో మీరు ఒంటరి కాదు.",
+    "receiveDarshan": "కృష్ణుని దర్శనం పొందండి",
+    "talkToKiaan": "KIAAN తో మాట్లాడండి",
+    "divineWisdom": "దివ్య జ్ఞానం & మార్గదర్శకత్వం",
+    "protectionShield": "దివ్య రక్షణ కవచం",
+    "activateProtection": "కృష్ణుని రక్షణను సక్రియం చేయండి",
+    "heartToHeart": "కృష్ణునితో హృదయపూర్వక సంభాషణ",
+    "writeLetter": "దైవానికి లేఖ రాయండి",
+    "howIsHeart": "మీ హృదయం ఎలా ఉంది?",
+    "shareFeelings": "కృష్ణునితో మీ భావాలను పంచుకోండి",
+    "goToDashboard": "డాష్‌బోర్డ్‌కు వెళ్ళండి",
+    "accessTools": "అన్ని సాధనాలు & సౌకర్యాలను యాక్సెస్ చేయండి",
+    "quickAccess": "త్వరిత దివ్య ప్రాప్యత",
+    "journeys": "ప్రయాణాలు",
+    "journal": "పత్రిక",
+    "reframe": "పునరాలోచన",
+    "detach": "విరక్తి",
+    "footerVerse": "\"నేను అన్ని జీవుల హృదయాల్లో ఉన్న ఆత్మను. నేను ఆరంభం, మధ్య మరియు అంతం.\"",
+    "footerVerseRef": "— భగవద్గీత 10.20"
   }
 }

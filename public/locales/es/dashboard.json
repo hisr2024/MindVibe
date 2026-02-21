@@ -28,5 +28,20 @@
     "chatSessions": "Chat Sessions",
     "moodCheckins": "Mood Check-ins",
     "streakDays": "Day Streak"
+  },
+  "tool_desc": {
+    "viyog": "Calm the immediate reaction",
+    "ardha": "Reframe the perception",
+    "kiaan": "Talk it through",
+    "relationship-compass": "Navigate relational clarity",
+    "journey": "Train long-term inner steadiness"
+  },
+  "mode_label": {
+    "prefix": "Estás en:",
+    "viyog": "Modo Pausa",
+    "ardha": "Modo Claridad",
+    "kiaan": "Modo Compañero",
+    "relationship-compass": "Modo Relación",
+    "journey": "Modo Entrenamiento"
   }
 }

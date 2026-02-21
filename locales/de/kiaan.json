@@ -17,8 +17,8 @@
       "title": "Wie kann ich dich heute begleiten?",
       "subtitle": "Teile, was dich beschäftigt"
     },
-    "disclaimer": "KIAAN teilt unterstützende Reflexionen für allgemeines Wohlbefinden. Diese Gespräche und Übungen sind kein medizinischer Rat. Wenn du ernsthafte Bedenken hast oder dich unsicher fühlst, wende dich bitte an den Notdienst deines Landes oder einen zugelassenen Fachmann.",
-    "saveToJournal": "Save to Journal",
+    "disclaimer": "KIAAN ist Ihr spiritueller Begleiter und teilt Reflexionen aus der Bhagavad Gita und alter Weisheit.",
+    "saveToJournal": "Im Tagebuch speichern",
     "copy": "Kopieren",
     "copied": "Kopiert!",
     "copyFailed": "Fehlgeschlagen",
@@ -28,7 +28,11 @@
     "shareWarning": "Du bist dabei, Informationen zur psychischen Gesundheit zu teilen. Bitte stelle sicher, dass du dich wohl fühlst, diesen Inhalt öffentlich zu teilen.",
     "anonymize": "Inhalt anonymisieren (persönliche Kennungen entfernen)",
     "anonymized": "✓ Anonymisierter Inhalt",
-    "sharingOriginal": "Originalinhalt teilen"
+    "sharingOriginal": "Originalinhalt teilen",
+    "defaultResponse": "Ich bin hier. Erzaehlen Sie mir, was los ist, und wir werden es gemeinsam loesen.",
+    "summary": "Zusammenfassung",
+    "fullView": "Vollansicht",
+    "divineFriend": "Ihr Goettlicher Freund"
   },
   "guidanceModes": {
     "title": "Führungsmodi",
@@ -93,19 +97,19 @@
     "subtitle": "Vorbereitete Eingaben, die KIAAN automatisch ausfüllen",
     "scenarios": {
       "anxiety": {
-        "label": "Angst beruhigen",
+        "label": "Hohe Angst",
         "prompt": "Führe mich durch eine Erdungsübung, um ängstliche Gedanken zu beruhigen."
       },
       "heavy": {
-        "label": "Schweres Herz",
+        "label": "Schwere Gefuehle",
         "prompt": "Ich brauche sanfte Worte, um meine Stimmung zu heben und mich an meine Stärken zu erinnern."
       },
       "anger": {
-        "label": "Wut abkühlen",
+        "label": "Wut bewaeltigen",
         "prompt": "Hilf mir, meine Wut abzukühlen und mit mehr Geduld zu reagieren."
       },
       "clarity": {
-        "label": "Klarheits-Check",
+        "label": "Klarheit noetig",
         "prompt": "Kannst du mir helfen, die Vor- und Nachteile zu sehen, bevor ich eine wichtige Entscheidung treffe?"
       },
       "work": {
@@ -113,16 +117,19 @@
         "prompt": "Arbeit fühlt sich überwältigend an — führe mich durch einen schnellen Reset, um wieder Fokus zu finden."
       },
       "relationships": {
-        "label": "Beziehungen",
+        "label": "Beziehungsstress",
         "prompt": "Wie kann ich ein schwieriges Gespräch mit Fürsorge und Ehrlichkeit führen?"
       },
       "purpose": {
-        "label": "Sinn-Impuls",
+        "label": "Festgefahren",
         "prompt": "Ich möchte eine kurze Reflexion, um mich wieder mit meinem Sinn und meiner Richtung zu verbinden."
       },
       "peace": {
-        "label": "Stille Ruhe",
+        "label": "Regulierung noetig",
         "prompt": "Führe mich in einem kurzen achtsamen Moment, damit ich mich wieder friedlich fühlen kann."
+      },
+      "balance": {
+        "label": "Ueberlastet"
       }
     }
   }

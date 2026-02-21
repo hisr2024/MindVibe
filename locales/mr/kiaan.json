@@ -17,18 +17,22 @@
       "title": "How can I guide you today?",
       "subtitle": "Share what's on your mind"
     },
-    "disclaimer": "KIAAN shares supportive reflections for general wellness. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.",
-    "saveToJournal": "Save to Journal",
-    "copy": "Copy",
+    "disclaimer": "KIAAN तुमचा आध्यात्मिक साथी आहे, भगवद्गीता आणि प्राचीन ज्ञानातून चिंतन सामायिक करतो.",
+    "saveToJournal": "जर्नलमध्ये जतन करा",
+    "copy": "कॉपी",
     "copied": "Copied!",
     "copyFailed": "Failed",
-    "share": "Share",
+    "share": "शेअर",
     "shareVia": "Share via",
     "privacyNotice": "Privacy Notice",
     "shareWarning": "You are about to share spiritual wellness information. Please ensure you're comfortable sharing this content publicly.",
     "anonymize": "Anonymize content (remove personal identifiers)",
     "anonymized": "✓ Anonymized content",
-    "sharingOriginal": "Sharing original content"
+    "sharingOriginal": "Sharing original content",
+    "defaultResponse": "मी इथे आहे. काय होतंय ते सांगा, आपण एकत्र सोडवू.",
+    "summary": "सारांश",
+    "fullView": "पूर्ण दृश्य",
+    "divineFriend": "तुमचा दिव्य मित्र"
   },
   "guidanceModes": {
     "title": "Guidance modes",
@@ -93,19 +97,19 @@
     "subtitle": "Polished prompts that auto-fill KIAAN for you",
     "scenarios": {
       "anxiety": {
-        "label": "Anxiety to calm",
+        "label": "चिंता जास्त",
         "prompt": "Guide me through a grounding exercise to steady anxious thoughts."
       },
       "heavy": {
-        "label": "Heart feels heavy",
+        "label": "मन जड",
         "prompt": "I need gentle words to lift my mood and remind me of my strengths."
       },
       "anger": {
-        "label": "Cooling anger",
+        "label": "राग व्यवस्थापन",
         "prompt": "Help me cool down my anger and respond with more patience."
       },
       "clarity": {
-        "label": "Clarity check",
+        "label": "स्पष्टता हवी",
         "prompt": "Can you help me see the pros and cons before I decide on something important?"
       },
       "work": {
@@ -113,16 +117,19 @@
         "prompt": "Work feels overwhelming—walk me through a quick reset to regain focus."
       },
       "relationships": {
-        "label": "Tender relationships",
+        "label": "नातेसंबंध ताण",
         "prompt": "How can I handle a tough conversation with care and honesty?"
       },
       "purpose": {
-        "label": "Purpose pulse",
+        "label": "अडकलो",
         "prompt": "I want a short reflection to reconnect with my purpose and direction."
       },
       "peace": {
-        "label": "Quiet peace",
+        "label": "शांतता हवी",
         "prompt": "Lead me in a brief mindful moment so I can feel peaceful again."
+      },
+      "balance": {
+        "label": "दबून गेलो"
       }
     }
   }

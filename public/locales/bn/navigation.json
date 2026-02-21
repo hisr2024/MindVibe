@@ -2,22 +2,25 @@
   "mainNav": {
     "home": "হোম",
     "dashboard": "ড্যাশবোর্ড",
-    "features": "বৈশিষ্ট্যসমূহ",
+    "features": "বৈশিষ্ট্য",
     "about": "সম্পর্কে",
     "contact": "যোগাযোগ",
-    "pricing": "মূল্য",
+    "pricing": "সদস্যতা",
     "profile": "প্রোফাইল",
-    "settings": "সেটিংস"
+    "settings": "সেটিংস",
+    "account": "অ্যাকাউন্ট অ্যাক্সেস",
+    "theme": "থিম",
+    "introduction": "পরিচিতি"
   },
   "features": {
-    "kiaan": "কিয়ান",
-    "ardha": "অর্ধ",
-    "viyog": "বিয়োগ",
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
     "relationshipCompass": "সম্পর্ক কম্পাস",
     "sacredReflections": "পবিত্র প্রতিফলন",
     "karmaFootprint": "কর্ম পদচিহ্ন",
     "karmicTree": "কর্ম বৃক্ষ",
-    "emotionalReset": "আবেগিক রিসেট",
+    "emotionalReset": "আবেগজনিত রিসেট",
     "deepInsights": "গভীর অন্তর্দৃষ্টি",
     "wisdomRooms": "জ্ঞান কক্ষ"
   },
@@ -25,7 +28,9 @@
     "openChat": "চ্যাট খুলুন",
     "startCheckin": "চেক-ইন শুরু করুন",
     "instantGuidance": "তাত্ক্ষণিক নির্দেশনা",
-    "spotYourState": "আপনার অবস্থা চিহ্নিত করুন"
+    "spotYourState": "আপনার অবস্থা চিহ্নিত করুন",
+    "menu": "মেনু",
+    "toggleMenu": "নেভিগেশন মেনু টগল করুন"
   },
   "mobileNav": {
     "chat": "চ্যাট",
@@ -36,6 +41,36 @@
     "allRightsReserved": "সমস্ত অধিকার সংরক্ষিত",
     "privacy": "গোপনীয়তা নীতি",
     "terms": "সেবার শর্তাবলী",
-    "support": "সহায়তা"
+    "support": "সহায়তা",
+    "explore": "অন্বেষণ করুন",
+    "safety": "নিরাপত্তা",
+    "description": "শান্ত, গোপনীয়তা-প্রথম মানসিক স্বাস্থ্য সহায়তার জন্য ডিজাইন করা। WCAG অ্যাক্সেসিবিলিটি, এনক্রিপশন এবং মৃদু অভিজ্ঞতার উপর ফোকাস করে নির্মিত।",
+    "emailUs": "আমাদের ইমেল করুন",
+    "encryptedJournals": "এনক্রিপ্ট করা জার্নাল",
+    "noTracking": "কোনো ট্র্যাকিং বিজ্ঞাপন নেই"
+  },
+  "pathway": {
+    "pause": "Pause",
+    "understand": "Understand",
+    "converse": "Converse",
+    "apply": "Apply",
+    "train": "Train",
+    "you_are_here": "You are here",
+    "nav_label": "Healing pathway"
+  },
+  "next_step": {
+    "explore_ardha": "Explore in Ardha →",
+    "continue_kiaan": "Continue with KIAAN →",
+    "stabilize_viyoga": "Stabilize with Viyoga →",
+    "enter_journey": "Enter a Journey →",
+    "helper": "Based on your conversation, you might find this helpful"
+  },
+  "tools": {
+    "releaseAttachment": "আসক্তি মুক্তি",
+    "reframeThoughts": "চিন্তা পুনর্গঠন",
+    "kiaanChat": "KIAAN চ্যাট",
+    "talkItThrough": "কথা বলে বুঝুন",
+    "relationalClarity": "সম্পর্কের স্পষ্টতা",
+    "quickAccess": "দ্রুত প্রবেশ"
   }
 }

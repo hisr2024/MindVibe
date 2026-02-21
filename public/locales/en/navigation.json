@@ -5,9 +5,12 @@
     "features": "Features",
     "about": "About",
     "contact": "Contact",
-    "pricing": "Pricing",
+    "pricing": "Subscriptions",
     "profile": "Profile",
-    "settings": "Settings"
+    "settings": "Settings",
+    "account": "Account Access",
+    "theme": "Theme",
+    "introduction": "Introduction"
   },
   "features": {
     "kiaan": "KIAAN",
@@ -25,7 +28,9 @@
     "openChat": "Open Chat",
     "startCheckin": "Start check-in",
     "instantGuidance": "Instant guidance",
-    "spotYourState": "Spot your state"
+    "spotYourState": "Spot your state",
+    "menu": "Menu",
+    "toggleMenu": "Toggle navigation menu"
   },
   "mobileNav": {
     "chat": "Chat",
@@ -36,6 +41,36 @@
     "allRightsReserved": "All rights reserved",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
-    "support": "Support"
+    "support": "Support",
+    "explore": "Explore",
+    "safety": "Safety",
+    "description": "Designed for calm, privacy-first spiritual wellness support. Built with a focus on WCAG accessibility, encryption, and a gentle experience.",
+    "emailUs": "Email us",
+    "encryptedJournals": "Encrypted journals",
+    "noTracking": "No tracking ads"
+  },
+  "pathway": {
+    "pause": "Pause",
+    "understand": "Understand",
+    "converse": "Converse",
+    "apply": "Apply",
+    "train": "Train",
+    "you_are_here": "You are here",
+    "nav_label": "Healing pathway"
+  },
+  "next_step": {
+    "explore_ardha": "Explore in Ardha →",
+    "continue_kiaan": "Continue with KIAAN →",
+    "stabilize_viyoga": "Stabilize with Viyoga →",
+    "enter_journey": "Enter a Journey →",
+    "helper": "Based on your conversation, you might find this helpful"
+  },
+  "tools": {
+    "releaseAttachment": "Release attachment",
+    "reframeThoughts": "Reframe thoughts",
+    "kiaanChat": "KIAAN Chat",
+    "talkItThrough": "Talk it through",
+    "relationalClarity": "Relational clarity",
+    "quickAccess": "Quick access"
   }
 }

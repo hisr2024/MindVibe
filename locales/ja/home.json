@@ -19,5 +19,27 @@
   "features": {
     "title": "メンタルウェルネスに必要なすべて",
     "description": "内なる平和への旅のための包括的なツール"
+  },
+  "introduction": {
+    "heroTitle": "神聖なる存在へようこそ",
+    "heroSubtitle": "クリシュナの愛に満ちた導きを体験してください。この旅であなたは決して一人ではありません。",
+    "receiveDarshan": "クリシュナのダルシャンを受ける",
+    "talkToKiaan": "KIAANと話す",
+    "divineWisdom": "神聖な知恵と導き",
+    "protectionShield": "神聖な守護の盾",
+    "activateProtection": "クリシュナの守護を発動する",
+    "heartToHeart": "クリシュナとの心の対話",
+    "writeLetter": "神に手紙を書く",
+    "howIsHeart": "あなたの心はどうですか?",
+    "shareFeelings": "クリシュナとあなたの気持ちを分かち合う",
+    "goToDashboard": "ダッシュボードへ",
+    "accessTools": "すべてのツールと機能にアクセス",
+    "quickAccess": "クイック神聖アクセス",
+    "journeys": "旅",
+    "journal": "日記",
+    "reframe": "リフレーム",
+    "detach": "離執",
+    "footerVerse": "「私はすべての存在の心に座す自己である。私は始まりであり、中間であり、終わりである。」",
+    "footerVerseRef": "— バガヴァッド・ギーター 10.20"
   }
 }

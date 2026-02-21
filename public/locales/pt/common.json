@@ -17,7 +17,7 @@
     "continue": "Continuar",
     "learnMore": "Saiba mais",
     "getStarted": "Começar",
-    "tryNow": "Experimente agora",
+    "tryNow": "Tente agora",
     "tools": "Ferramentas"
   },
   "status": {
@@ -42,7 +42,7 @@
   },
   "privacy": {
     "encrypted": "Criptografado",
-    "private": "Privado",
+    "private": "Design privado",
     "secure": "Seguro",
     "localOnly": "Apenas local",
     "offlineReady": "Pronto offline"

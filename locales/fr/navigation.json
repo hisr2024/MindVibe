@@ -9,7 +9,8 @@
     "profile": "Profil",
     "settings": "Paramètres",
     "account": "Accès au compte",
-    "theme": "Thème"
+    "theme": "Thème",
+    "introduction": "Introduction"
   },
   "features": {
     "kiaan": "KIAAN",
@@ -58,10 +59,18 @@
     "nav_label": "Healing pathway"
   },
   "next_step": {
-    "explore_ardha": "Explore in Ardha \u2192",
-    "continue_kiaan": "Continue with KIAAN \u2192",
-    "stabilize_viyoga": "Stabilize with Viyoga \u2192",
-    "enter_journey": "Enter a Journey \u2192",
+    "explore_ardha": "Explore in Ardha →",
+    "continue_kiaan": "Continue with KIAAN →",
+    "stabilize_viyoga": "Stabilize with Viyoga →",
+    "enter_journey": "Enter a Journey →",
     "helper": "Based on your conversation, you might find this helpful"
+  },
+  "tools": {
+    "releaseAttachment": "Liberer l attachement",
+    "reframeThoughts": "Recadrer les pensees",
+    "kiaanChat": "Chat KIAAN",
+    "talkItThrough": "En parler",
+    "relationalClarity": "Clarte relationnelle",
+    "quickAccess": "Acces rapide"
   }
 }

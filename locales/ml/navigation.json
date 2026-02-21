@@ -9,7 +9,8 @@
     "profile": "പ്രൊഫൈൽ",
     "settings": "സെറ്റിംഗുകൾ",
     "account": "അക്കൗണ്ട് ആക്‌സസ്",
-    "theme": "തീം"
+    "theme": "തീം",
+    "introduction": "ആമുഖം"
   },
   "features": {
     "kiaan": "KIAAN",
@@ -58,10 +59,18 @@
     "nav_label": "Healing pathway"
   },
   "next_step": {
-    "explore_ardha": "Explore in Ardha \u2192",
-    "continue_kiaan": "Continue with KIAAN \u2192",
-    "stabilize_viyoga": "Stabilize with Viyoga \u2192",
-    "enter_journey": "Enter a Journey \u2192",
+    "explore_ardha": "Explore in Ardha →",
+    "continue_kiaan": "Continue with KIAAN →",
+    "stabilize_viyoga": "Stabilize with Viyoga →",
+    "enter_journey": "Enter a Journey →",
     "helper": "Based on your conversation, you might find this helpful"
+  },
+  "tools": {
+    "releaseAttachment": "ആസക്തി വിമോചനം",
+    "reframeThoughts": "ചിന്തകള്‍ പുനരാവിഷ്കരണം",
+    "kiaanChat": "KIAAN ചാറ്റ്",
+    "talkItThrough": "സംസാരിച്ച് മനസ്സിലാക്കൂ",
+    "relationalClarity": "ബന്ധ വ്യക്തത",
+    "quickAccess": "ദ്രുത പ്രവേശം"
   }
 }

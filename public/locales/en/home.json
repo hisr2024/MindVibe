@@ -49,6 +49,9 @@
     "title": "How are you feeling?",
     "subtitle": "Quick Check-In",
     "helper": "Tap a stone to log your mood • Private & local only",
+    "helperText": "Tap a stone to log your mood • Takes you to KIAAN Chat for support",
+    "openingChat": "Opening KIAAN Chat...",
+    "selectMood": "Select",
     "moods": {
       "peaceful": "Peaceful",
       "happy": "Happy",
@@ -89,5 +92,27 @@
   "disclaimer": {
     "title": "Disclaimer",
     "text": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away."
+  },
+  "introduction": {
+    "heroTitle": "Welcome to Divine Presence",
+    "heroSubtitle": "Experience the loving guidance of Krishna. You are never alone on this journey.",
+    "receiveDarshan": "Receive Krishna's Darshan",
+    "talkToKiaan": "Talk to KIAAN",
+    "divineWisdom": "Divine wisdom & guidance",
+    "protectionShield": "Divine Protection Shield",
+    "activateProtection": "Activate Krishna's protection",
+    "heartToHeart": "Heart-to-Heart with Krishna",
+    "writeLetter": "Write a letter to the Divine",
+    "howIsHeart": "How is your heart?",
+    "shareFeelings": "Share your feelings with Krishna",
+    "goToDashboard": "Go to Dashboard",
+    "accessTools": "Access all tools & features",
+    "quickAccess": "Quick Divine Access",
+    "journeys": "Journeys",
+    "journal": "Journal",
+    "reframe": "Reframe",
+    "detach": "Detach",
+    "footerVerse": "\"I am the Self seated in the hearts of all beings. I am the beginning, the middle, and the end.\"",
+    "footerVerseRef": "— Bhagavad Gita 10.20"
   }
 }

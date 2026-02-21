@@ -72,7 +72,7 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
       {/* Trigger Button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white/80 transition-all hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+        className="flex items-center gap-2 rounded-full border border-orange-500/40 bg-orange-500/15 px-3 py-2 text-sm font-medium text-orange-100 transition-all hover:bg-orange-500/25 hover:border-orange-500/60 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         aria-label={`Current language: ${config.name}. Click to change language.`}

@@ -17,8 +17,8 @@
       "title": "How can I guide you today?",
       "subtitle": "Share what's on your mind"
     },
-    "disclaimer": "KIAAN shares supportive reflections for general wellness. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.",
-    "saveToJournal": "Save to Journal",
+    "disclaimer": "KIAAN是你的精神伙伴，分享来自薄伽梵歌和古代智慧的思考。这是一个为内心平静和自我发现而设的神圣空间。",
+    "saveToJournal": "保存到日记",
     "copy": "复制",
     "copied": "已复制！",
     "copyFailed": "失败",
@@ -28,7 +28,11 @@
     "shareWarning": "您即将分享心理健康信息。请确保您愿意公开分享此内容。",
     "anonymize": "匿名内容（删除个人标识符）",
     "anonymized": "✓ 匿名内容",
-    "sharingOriginal": "分享原始内容"
+    "sharingOriginal": "分享原始内容",
+    "defaultResponse": "我在这里。告诉我发生了什么，我们一起解决。",
+    "summary": "摘要",
+    "fullView": "完整视图",
+    "divineFriend": "你的神圣朋友"
   },
   "guidanceModes": {
     "title": "Guidance modes",
@@ -93,19 +97,19 @@
     "subtitle": "Polished prompts that auto-fill KIAAN for you",
     "scenarios": {
       "anxiety": {
-        "label": "Anxiety to calm",
+        "label": "焦虑升高",
         "prompt": "Guide me through a grounding exercise to steady anxious thoughts."
       },
       "heavy": {
-        "label": "Heart feels heavy",
+        "label": "感觉沉重",
         "prompt": "I need gentle words to lift my mood and remind me of my strengths."
       },
       "anger": {
-        "label": "Cooling anger",
+        "label": "管理愤怒",
         "prompt": "Help me cool down my anger and respond with more patience."
       },
       "clarity": {
-        "label": "Clarity check",
+        "label": "需要清晰",
         "prompt": "Can you help me see the pros and cons before I decide on something important?"
       },
       "work": {
@@ -113,16 +117,19 @@
         "prompt": "Work feels overwhelming—walk me through a quick reset to regain focus."
       },
       "relationships": {
-        "label": "Tender relationships",
+        "label": "关系压力",
         "prompt": "How can I handle a tough conversation with care and honesty?"
       },
       "purpose": {
-        "label": "Purpose pulse",
+        "label": "感觉困顿",
         "prompt": "I want a short reflection to reconnect with my purpose and direction."
       },
       "peace": {
-        "label": "Quiet peace",
+        "label": "需要调节",
         "prompt": "Lead me in a brief mindful moment so I can feel peaceful again."
+      },
+      "balance": {
+        "label": "不堪重负"
       }
     }
   }

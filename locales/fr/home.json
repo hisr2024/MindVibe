@@ -19,5 +19,27 @@
   "features": {
     "title": "Tout ce dont Vous Avez Besoin pour le Bien-être Spirituel",
     "description": "Des outils complets pour votre voyage vers la paix intérieure"
+  },
+  "introduction": {
+    "heroTitle": "Bienvenue dans la Presence Divine",
+    "heroSubtitle": "Faites l experience du guide aimant de Krishna. Vous n etes jamais seul dans ce voyage.",
+    "receiveDarshan": "Recevoir le Darshan de Krishna",
+    "talkToKiaan": "Parler a KIAAN",
+    "divineWisdom": "Sagesse et guidance divine",
+    "protectionShield": "Bouclier de Protection Divine",
+    "activateProtection": "Activer la protection de Krishna",
+    "heartToHeart": "Coeur a Coeur avec Krishna",
+    "writeLetter": "Ecrire une lettre au Divin",
+    "howIsHeart": "Comment va votre coeur?",
+    "shareFeelings": "Partagez vos sentiments avec Krishna",
+    "goToDashboard": "Aller au Tableau de bord",
+    "accessTools": "Accedez a tous les outils et fonctionnalites",
+    "quickAccess": "Acces Divin Rapide",
+    "journeys": "Voyages",
+    "journal": "Journal",
+    "reframe": "Recadrer",
+    "detach": "Detachement",
+    "footerVerse": "\"Je suis le Soi assis dans les coeurs de tous les etres. Je suis le debut, le milieu et la fin.\"",
+    "footerVerseRef": "— Bhagavad Gita 10.20"
   }
 }

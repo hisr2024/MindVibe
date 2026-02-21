@@ -1,41 +1,76 @@
 {
   "mainNav": {
-    "home": "Home",
+    "home": "Startseite",
     "dashboard": "Dashboard",
-    "features": "Features",
-    "about": "About",
-    "contact": "Contact",
-    "pricing": "Pricing",
-    "profile": "Profile",
-    "settings": "Settings"
+    "features": "Funktionen",
+    "about": "Über uns",
+    "contact": "Kontakt",
+    "pricing": "Abonnements",
+    "profile": "Profil",
+    "settings": "Einstellungen",
+    "account": "Kontozugriff",
+    "theme": "Thema",
+    "introduction": "Einfuehrung"
   },
   "features": {
     "kiaan": "KIAAN",
     "ardha": "Ardha",
     "viyog": "Viyoga",
-    "relationshipCompass": "Relationship Compass",
-    "sacredReflections": "Sacred Reflections",
-    "karmaFootprint": "Karma Footprint",
-    "karmicTree": "Karmic Tree",
-    "emotionalReset": "Emotional Reset",
-    "deepInsights": "Deep Insights",
-    "wisdomRooms": "Wisdom Rooms"
+    "relationshipCompass": "Beziehungskompass",
+    "sacredReflections": "Heilige Reflexionen",
+    "karmaFootprint": "Karma-Fußabdruck",
+    "karmicTree": "Karmischer Baum",
+    "emotionalReset": "Emotionaler Reset",
+    "deepInsights": "Tiefe Einblicke",
+    "wisdomRooms": "Weisheitsräume"
   },
   "actions": {
-    "openChat": "Open Chat",
-    "startCheckin": "Start check-in",
-    "instantGuidance": "Instant guidance",
-    "spotYourState": "Spot your state"
+    "openChat": "Chat öffnen",
+    "startCheckin": "Check-in starten",
+    "instantGuidance": "Sofortige Anleitung",
+    "spotYourState": "Erkennen Sie Ihren Zustand",
+    "menu": "Menü",
+    "toggleMenu": "Navigationsmenü umschalten"
   },
   "mobileNav": {
     "chat": "Chat",
     "pause": "Pause",
-    "journal": "Sacred Reflections"
+    "journal": "Heilige Reflexionen"
   },
   "footer": {
-    "allRightsReserved": "All rights reserved",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "support": "Support"
+    "allRightsReserved": "Alle Rechte vorbehalten",
+    "privacy": "Datenschutzrichtlinie",
+    "terms": "Nutzungsbedingungen",
+    "support": "Support",
+    "explore": "Erkunden",
+    "safety": "Sicherheit",
+    "description": "Entwickelt für ruhige, datenschutzorientierte psychische Gesundheitsunterstützung. Gebaut mit Fokus auf WCAG-Zugänglichkeit, Verschlüsselung und sanfte Erfahrung.",
+    "emailUs": "Schreiben Sie uns",
+    "encryptedJournals": "Verschlüsselte Tagebücher",
+    "noTracking": "Keine Tracking-Anzeigen"
+  },
+  "pathway": {
+    "pause": "Pause",
+    "understand": "Understand",
+    "converse": "Converse",
+    "apply": "Apply",
+    "train": "Train",
+    "you_are_here": "You are here",
+    "nav_label": "Healing pathway"
+  },
+  "next_step": {
+    "explore_ardha": "Explore in Ardha →",
+    "continue_kiaan": "Continue with KIAAN →",
+    "stabilize_viyoga": "Stabilize with Viyoga →",
+    "enter_journey": "Enter a Journey →",
+    "helper": "Based on your conversation, you might find this helpful"
+  },
+  "tools": {
+    "releaseAttachment": "Anhaftung loesen",
+    "reframeThoughts": "Gedanken umrahmen",
+    "kiaanChat": "KIAAN Chat",
+    "talkItThrough": "Durchsprechen",
+    "relationalClarity": "Beziehungsklarheit",
+    "quickAccess": "Schnellzugriff"
   }
 }

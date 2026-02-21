@@ -17,8 +17,8 @@
       "title": "How can I guide you today?",
       "subtitle": "Share what's on your mind"
     },
-    "disclaimer": "KIAAN shares supportive reflections for general wellness. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.",
-    "saveToJournal": "Save to Journal",
+    "disclaimer": "KIAAN est votre compagnon spirituel, partageant des reflexions tirees du Bhagavad Gita et de la sagesse ancienne.",
+    "saveToJournal": "Sauvegarder dans le journal",
     "copy": "Copier",
     "copied": "Copié!",
     "copyFailed": "Échec",
@@ -28,7 +28,11 @@
     "shareWarning": "Vous êtes sur le point de partager des réflexions spirituelles. Assurez-vous d'être à l'aise de partager ce contenu publiquement.",
     "anonymize": "Anonymiser le contenu (supprimer les identifiants personnels)",
     "anonymized": "✓ Contenu anonymisé",
-    "sharingOriginal": "Partage du contenu original"
+    "sharingOriginal": "Partage du contenu original",
+    "defaultResponse": "Je suis la. Dites-moi ce qui se passe et nous trouverons une solution ensemble.",
+    "summary": "Resume",
+    "fullView": "Vue complete",
+    "divineFriend": "Votre Ami Divin"
   },
   "guidanceModes": {
     "title": "Guidance modes",
@@ -93,19 +97,19 @@
     "subtitle": "Polished prompts that auto-fill KIAAN for you",
     "scenarios": {
       "anxiety": {
-        "label": "Anxiety to calm",
+        "label": "Anxiete elevee",
         "prompt": "Guide me through a grounding exercise to steady anxious thoughts."
       },
       "heavy": {
-        "label": "Heart feels heavy",
+        "label": "Sentiment de lourdeur",
         "prompt": "I need gentle words to lift my mood and remind me of my strengths."
       },
       "anger": {
-        "label": "Cooling anger",
+        "label": "Gerer la colere",
         "prompt": "Help me cool down my anger and respond with more patience."
       },
       "clarity": {
-        "label": "Clarity check",
+        "label": "Besoin de clarte",
         "prompt": "Can you help me see the pros and cons before I decide on something important?"
       },
       "work": {
@@ -113,16 +117,19 @@
         "prompt": "Work feels overwhelming—walk me through a quick reset to regain focus."
       },
       "relationships": {
-        "label": "Tender relationships",
+        "label": "Stress relationnel",
         "prompt": "How can I handle a tough conversation with care and honesty?"
       },
       "purpose": {
-        "label": "Purpose pulse",
+        "label": "Sentiment de blocage",
         "prompt": "I want a short reflection to reconnect with my purpose and direction."
       },
       "peace": {
-        "label": "Quiet peace",
+        "label": "Besoin de regulation",
         "prompt": "Lead me in a brief mindful moment so I can feel peaceful again."
+      },
+      "balance": {
+        "label": "Submerge"
       }
     }
   }

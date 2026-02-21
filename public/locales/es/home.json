@@ -89,5 +89,27 @@
   "disclaimer": {
     "title": "Descargo de Responsabilidad",
     "text": "KIAAN comparte reflexiones de apoyo inspiradas en tradiciones de sabiduría. Estas conversaciones y ejercicios no son consejo médico. Si enfrentas preocupaciones serias o te sientes inseguro, por favor contacta los servicios médicos de emergencia de tu país o un profesional licenciado de inmediato."
+  },
+  "introduction": {
+    "heroTitle": "Bienvenido a la Presencia Divina",
+    "heroSubtitle": "Experimenta la guia amorosa de Krishna. Nunca estas solo en este viaje.",
+    "receiveDarshan": "Recibir el Darshan de Krishna",
+    "talkToKiaan": "Hablar con KIAAN",
+    "divineWisdom": "Sabiduria y guia divina",
+    "protectionShield": "Escudo de Proteccion Divina",
+    "activateProtection": "Activar la proteccion de Krishna",
+    "heartToHeart": "De Corazon a Corazon con Krishna",
+    "writeLetter": "Escribe una carta a lo Divino",
+    "howIsHeart": "Como esta tu corazon?",
+    "shareFeelings": "Comparte tus sentimientos con Krishna",
+    "goToDashboard": "Ir al Panel",
+    "accessTools": "Accede a todas las herramientas y funciones",
+    "quickAccess": "Acceso Rapido Divino",
+    "journeys": "Viajes",
+    "journal": "Diario",
+    "reframe": "Replantear",
+    "detach": "Desapego",
+    "footerVerse": "\"Soy el Ser sentado en los corazones de todos los seres. Soy el principio, el medio y el fin.\"",
+    "footerVerseRef": "— Bhagavad Gita 10.20"
   }
 }

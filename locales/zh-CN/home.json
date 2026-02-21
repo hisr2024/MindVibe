@@ -19,5 +19,27 @@
   "features": {
     "title": "心理健康所需的一切",
     "description": "通往内心平静之旅的综合工具"
+  },
+  "introduction": {
+    "heroTitle": "欢迎来到神圣的存在",
+    "heroSubtitle": "体验克里希那充满爱的引导。在这段旅程中，你永远不是孤独的。",
+    "receiveDarshan": "接受克里希那的达显",
+    "talkToKiaan": "与KIAAN交谈",
+    "divineWisdom": "神圣智慧与引导",
+    "protectionShield": "神圣保护盾",
+    "activateProtection": "激活克里希那的保护",
+    "heartToHeart": "与克里希那心灵对话",
+    "writeLetter": "给神写一封信",
+    "howIsHeart": "你的心感觉如何？",
+    "shareFeelings": "与克里希那分享你的感受",
+    "goToDashboard": "前往仪表板",
+    "accessTools": "访问所有工具和功能",
+    "quickAccess": "快速神圣访问",
+    "journeys": "旅程",
+    "journal": "日记",
+    "reframe": "重构",
+    "detach": "超脱",
+    "footerVerse": "\"我是坐在所有众生心中的自我。我是开始、中间和结束。\"",
+    "footerVerseRef": "— 薄伽梵歌 10.20"
   }
 }

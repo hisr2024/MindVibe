@@ -89,5 +89,27 @@
   "disclaimer": {
     "title": "Disclaimer",
     "text": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away."
+  },
+  "introduction": {
+    "heroTitle": "दिव्य उपस्थितीत स्वागत",
+    "heroSubtitle": "कृष्णाच्या प्रेमळ मार्गदर्शनाचा अनुभव घ्या. या प्रवासात तुम्ही कधीही एकटे नाही.",
+    "receiveDarshan": "कृष्णाचे दर्शन घ्या",
+    "talkToKiaan": "KIAAN शी बोला",
+    "divineWisdom": "दिव्य ज्ञान आणि मार्गदर्शन",
+    "protectionShield": "दिव्य संरक्षण कवच",
+    "activateProtection": "कृष्णाचे संरक्षण सक्रिय करा",
+    "heartToHeart": "कृष्णाशी मनमोकळी बात",
+    "writeLetter": "देवाला पत्र लिहा",
+    "howIsHeart": "तुमचे हृदय कसे आहे?",
+    "shareFeelings": "कृष्णासोबत तुमच्या भावना शेअर करा",
+    "goToDashboard": "डॅशबोर्डवर जा",
+    "accessTools": "सर्व साधने आणि वैशिष्ट्ये वापरा",
+    "quickAccess": "जलद दिव्य प्रवेश",
+    "journeys": "प्रवास",
+    "journal": "जर्नल",
+    "reframe": "पुनर्विचार",
+    "detach": "वैराग्य",
+    "footerVerse": "\"मी सर्व प्राण्यांच्या हृदयात बसलेला आत्मा आहे. मी आरंभ, मध्य आणि अंत आहे.\"",
+    "footerVerseRef": "— भगवद्गीता १०.२०"
   }
 }

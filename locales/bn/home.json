@@ -89,5 +89,27 @@
   "disclaimer": {
     "title": "Disclaimer",
     "text": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away."
+  },
+  "introduction": {
+    "heroTitle": "দিব্য উপস্থিতিতে স্বাগতম",
+    "heroSubtitle": "কৃষ্ণের প্রেমময় পথনির্দেশনা অনুভব করুন। এই যাত্রায় আপনি কখনই একা নন।",
+    "receiveDarshan": "কৃষ্ণের দর্শন গ্রহণ করুন",
+    "talkToKiaan": "KIAAN-এর সাথে কথা বলুন",
+    "divineWisdom": "দিব্য জ্ঞান ও পথনির্দেশনা",
+    "protectionShield": "দিব্য সুরক্ষা কবচ",
+    "activateProtection": "কৃষ্ণের সুরক্ষা সক্রিয় করুন",
+    "heartToHeart": "কৃষ্ণের সাথে হৃদয়ের কথা",
+    "writeLetter": "ঈশ্বরের কাছে চিঠি লিখুন",
+    "howIsHeart": "আপনার হৃদয় কেমন আছে?",
+    "shareFeelings": "কৃষ্ণের সাথে আপনার অনুভূতি শেয়ার করুন",
+    "goToDashboard": "ড্যাশবোর্ডে যান",
+    "accessTools": "সমস্ত সরঞ্জাম ও বৈশিষ্ট্য অ্যাক্সেস করুন",
+    "quickAccess": "দ্রুত দিব্য প্রবেশ",
+    "journeys": "যাত্রা",
+    "journal": "পত্রিকা",
+    "reframe": "পুনর্গঠন",
+    "detach": "বৈরাগ্য",
+    "footerVerse": "\"আমি সমস্ত প্রাণীর হৃদয়ে অবস্থিত আত্মা। আমি আরম্ভ, মধ্য এবং শেষ।\"",
+    "footerVerseRef": "— ভগবদ্গীতা ১০.২০"
   }
 }

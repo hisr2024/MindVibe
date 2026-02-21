@@ -1,41 +1,76 @@
 {
   "mainNav": {
-    "home": "Home",
-    "dashboard": "Dashboard",
-    "features": "Features",
-    "about": "About",
-    "contact": "Contact",
-    "pricing": "Pricing",
-    "profile": "Profile",
-    "settings": "Settings"
+    "home": "मुख्यपृष्ठ",
+    "dashboard": "डॅशबोर्ड",
+    "features": "वैशिष्ट्ये",
+    "about": "बद्दल",
+    "contact": "संपर्क",
+    "pricing": "सदस्यता",
+    "profile": "प्रोफाइल",
+    "settings": "सेटिंग्ज",
+    "account": "खाते प्रवेश",
+    "theme": "थीम",
+    "introduction": "परिचय"
   },
   "features": {
     "kiaan": "KIAAN",
     "ardha": "Ardha",
     "viyog": "Viyoga",
-    "relationshipCompass": "Relationship Compass",
-    "sacredReflections": "Sacred Reflections",
-    "karmaFootprint": "Karma Footprint",
-    "karmicTree": "Karmic Tree",
-    "emotionalReset": "Emotional Reset",
-    "deepInsights": "Deep Insights",
-    "wisdomRooms": "Wisdom Rooms"
+    "relationshipCompass": "नाते कंपास",
+    "sacredReflections": "पवित्र प्रतिबिंब",
+    "karmaFootprint": "कर्म पदचिन्ह",
+    "karmicTree": "कर्म वृक्ष",
+    "emotionalReset": "भावनिक रीसेट",
+    "deepInsights": "सखोल अंतर्दृष्टी",
+    "wisdomRooms": "ज्ञान खोल्या"
   },
   "actions": {
-    "openChat": "Open Chat",
-    "startCheckin": "Start check-in",
-    "instantGuidance": "Instant guidance",
-    "spotYourState": "Spot your state"
+    "openChat": "चॅट उघडा",
+    "startCheckin": "चेक-इन सुरू करा",
+    "instantGuidance": "त्वरित मार्गदर्शन",
+    "spotYourState": "तुमची स्थिती ओळखा",
+    "menu": "मेनू",
+    "toggleMenu": "नेव्हिगेशन मेनू टॉगल करा"
   },
   "mobileNav": {
-    "chat": "Chat",
-    "pause": "Pause",
-    "journal": "Sacred Reflections"
+    "chat": "चॅट",
+    "pause": "विराम",
+    "journal": "पवित्र प्रतिबिंब"
   },
   "footer": {
-    "allRightsReserved": "All rights reserved",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "support": "Support"
+    "allRightsReserved": "सर्व हक्क राखीव",
+    "privacy": "गोपनीयता धोरण",
+    "terms": "सेवा अटी",
+    "support": "समर्थन",
+    "explore": "एक्सप्लोर करा",
+    "safety": "सुरक्षा",
+    "description": "शांत, गोपनीयता-प्रथम मानसिक आरोग्य समर्थनासाठी डिझाइन केलेले. WCAG प्रवेशयोग्यता, एन्क्रिप्शन आणि सौम्य अनुभवावर लक्ष केंद्रित करून तयार केले.",
+    "emailUs": "आम्हाला ईमेल करा",
+    "encryptedJournals": "एन्क्रिप्टेड जर्नल्स",
+    "noTracking": "कोणतेही ट्रॅकिंग जाहिराती नाहीत"
+  },
+  "pathway": {
+    "pause": "Pause",
+    "understand": "Understand",
+    "converse": "Converse",
+    "apply": "Apply",
+    "train": "Train",
+    "you_are_here": "You are here",
+    "nav_label": "Healing pathway"
+  },
+  "next_step": {
+    "explore_ardha": "Explore in Ardha →",
+    "continue_kiaan": "Continue with KIAAN →",
+    "stabilize_viyoga": "Stabilize with Viyoga →",
+    "enter_journey": "Enter a Journey →",
+    "helper": "Based on your conversation, you might find this helpful"
+  },
+  "tools": {
+    "releaseAttachment": "आसक्ती मुक्ती",
+    "reframeThoughts": "विचार पुनर्रचना",
+    "kiaanChat": "KIAAN चॅट",
+    "talkItThrough": "बोलून समजा",
+    "relationalClarity": "नातेसंबंध स्पष्टता",
+    "quickAccess": "जलद प्रवेश"
   }
 }
