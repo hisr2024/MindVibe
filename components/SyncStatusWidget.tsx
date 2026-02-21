@@ -25,7 +25,7 @@ export function SyncStatusWidget() {
     if (hours > 0) return `${t('divine.sacred.system.sync.syncedHoursAgo', 'Synced {hours}h ago').replace('{hours}', String(hours))}`
     if (minutes > 0) return `${t('divine.sacred.system.sync.syncedMinutesAgo', 'Synced {minutes}m ago').replace('{minutes}', String(minutes))}`
     return t('divine.sacred.system.sync.justSynced', 'Just synced')
-  }, [lastSyncTime])
+  }, [lastSyncTime, t])
 
   const handleSyncNow = async () => {
     if (isOnline && !syncInProgress) {

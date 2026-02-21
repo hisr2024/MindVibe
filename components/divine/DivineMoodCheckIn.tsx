@@ -193,13 +193,24 @@ export function DivineMoodCheckIn({
     return () => clearTimeout(timer);
   }, []);
 
+  // Resolve translated mood response with fallback to hardcoded English
+  const getTranslatedMoodResponse = useCallback((score: number): SacredMoodResponse => {
+    const fallback = SACRED_MOOD_RESPONSES[score];
+    return {
+      response: t(`divine.sacred.moodCheckin.responses.${score}.response`, fallback.response),
+      divineMessage: t(`divine.sacred.moodCheckin.responses.${score}.divineMessage`, fallback.divineMessage),
+      practice: t(`divine.sacred.moodCheckin.responses.${score}.practice`, fallback.practice),
+      affirmation: t(`divine.sacred.moodCheckin.responses.${score}.affirmation`, fallback.affirmation),
+    };
+  }, [t]);
+
   // Memoized handlers to prevent recreation on every render
   const handleMoodSelect = useCallback((score: number) => {
     // Use requestAnimationFrame to prevent UI blocking
     requestAnimationFrame(() => {
       setMoodScore(score);
       if (compact) {
-        const sacredResponse = SACRED_MOOD_RESPONSES[score];
+        const sacredResponse = getTranslatedMoodResponse(score);
         setResponse(sacredResponse);
         setStep('response');
         onMoodSubmit?.({ score, emotion: null, response: sacredResponse });
@@ -207,12 +218,12 @@ export function DivineMoodCheckIn({
         setStep('emotion');
       }
     });
-  }, [compact, onMoodSubmit]);
+  }, [compact, onMoodSubmit, getTranslatedMoodResponse]);
 
   const handleEmotionSelect = useCallback((emotion: EmotionalState) => {
     requestAnimationFrame(() => {
       setSelectedEmotion(emotion);
-      const sacredResponse = SACRED_MOOD_RESPONSES[moodScore];
+      const sacredResponse = getTranslatedMoodResponse(moodScore);
       setResponse(sacredResponse);
       setStep('response');
       if (contextActions && !contextError) {
@@ -220,7 +231,7 @@ export function DivineMoodCheckIn({
       }
       onMoodSubmit?.({ score: moodScore, emotion, response: sacredResponse });
     });
-  }, [moodScore, contextActions, contextError, onMoodSubmit]);
+  }, [moodScore, contextActions, contextError, onMoodSubmit, getTranslatedMoodResponse]);
 
   const handleReset = useCallback(() => {
     setStep('mood');
@@ -240,7 +251,7 @@ export function DivineMoodCheckIn({
     if (hour >= 12 && hour < 17) return t('divine.sacred.moodCheckin.fallback.afternoon', "In the fullness of the day, find your center...");
     if (hour >= 17 && hour < 21) return t('divine.sacred.moodCheckin.fallback.evening', "As the day softens, let your heart soften too...");
     return t('divine.sacred.moodCheckin.fallback.night', "In the quiet of night, surrender to stillness...");
-  }, [contextActions, contextError]);
+  }, [contextActions, contextError, t]);
 
   // Memoize serenity moment
   const serenityMoment = useMemo(() => {
@@ -248,7 +259,7 @@ export function DivineMoodCheckIn({
       return contextActions.getSerenityMoment();
     }
     return `🕊️ *${t('divine.sacred.moodCheckin.fallback.serenity', 'Peace settles like soft snow...')}*`;
-  }, [contextActions, contextError]);
+  }, [contextActions, contextError, t]);
 
   // Show loading state until ready
   if (!isReady) {

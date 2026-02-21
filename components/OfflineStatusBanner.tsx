@@ -29,7 +29,7 @@ export function OfflineStatusBanner() {
     if (hours > 0) return `${hours}${t('divine.sacred.system.offline.hoursAgo', 'h ago')}`
     if (minutes > 0) return `${minutes}${t('divine.sacred.system.offline.minutesAgo', 'm ago')}`
     return t('divine.sacred.system.offline.justNow', 'Just now')
-  }, [lastSyncTime])
+  }, [lastSyncTime, t])
 
   // Don't show banner if online and no queued operations
   if (isOnline && queueCount === 0) {
