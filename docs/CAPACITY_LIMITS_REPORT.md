@@ -55,7 +55,20 @@
 
 ---
 
-### 2.2 Backend API (Render - FastAPI/Uvicorn)
+### 2.2 Next.js API Route Timeouts (Per-Route Analysis)
+
+| Route | Backend Timeout | Fallback | Notes |
+|-------|----------------|----------|-------|
+| `/api/chat/message` | 20s | Direct OpenAI (15s) -> Local engine | 3-tier fallback |
+| `/api/chat/message/stream` | Implicit (SSE) | Word-by-word simulation (30ms/chunk) | Holds open connection |
+| `/api/companion/message` | 15s | Direct OpenAI (15s) | Session-validated |
+| `/api/kiaan/friend/chat` | 8s | Direct OpenAI (15s) | Shortest timeout |
+| `/api/voice-companion/message` | 15s | Direct OpenAI (15s) | Voice-first |
+| `/api/viyoga/chat` | 60s | Expanded query retry | Deep analysis mode |
+| `/api/karma-reset/kiaan/generate` | 15s | 3 retries (500ms/1s/2s backoff) | Hardcoded fallback |
+| `/api/companion/voice/synthesize` | 15s | None (audio required) | Bandwidth-heavy |
+
+### 2.3 Backend API (Render - FastAPI/Uvicorn)
 
 | Metric | Current Limit | Notes |
 |--------|--------------|-------|
@@ -293,19 +306,31 @@ Voice/TTS                | ~50-100             | Bandwidth + API limits
    - **Impact:** Rate limits multiply by instance count (3x bypass possible)
    - **Fix:** Configure Redis-backed storage for slowapi
 
+4. **New OpenAI Client Per Request**
+   - **Files:** `app/api/chat/message/route.ts`, `app/api/companion/message/route.ts`, `app/api/kiaan/friend/chat/route.ts`, `app/api/voice-companion/message/route.ts`
+   - **Issue:** `new OpenAI({ apiKey })` instantiated per request instead of singleton
+   - **Impact:** Unnecessary connection overhead, 10-20% latency penalty
+   - **Fix:** Create singleton OpenAI client module, import across all routes
+
+5. **No SSE/Streaming Connection Limit**
+   - **File:** `app/api/chat/message/stream/route.ts`
+   - **Issue:** SSE streaming holds open HTTP connections with no max limit or timeout
+   - **Impact:** Each concurrent user = 1 persistent connection; at 1000+ users this exhausts Node.js file descriptors (~1024/process) and causes memory exhaustion
+   - **Fix:** Add explicit connection cap (500/instance) and 60s max stream timeout
+
 ### P1 (Fix Before Scale)
 
-4. **In-Memory DDoS Tracking Not Shared**
+6. **In-Memory DDoS Tracking Not Shared**
    - **File:** `backend/middleware/ddos_protection.py:91-103`
    - **Issue:** All DDoS tracking (request history, violations, blocked IPs) is in-memory
    - **Impact:** Attackers can bypass by hitting different instances
 
-5. **No OpenAI API Retry/Circuit Breaker**
-   - **Issue:** 11+ endpoints call OpenAI directly
-   - **Impact:** OpenAI outage cascades to all AI features simultaneously
-   - **Fix:** Add circuit breaker pattern, fallback responses
+7. **No OpenAI API Retry/Circuit Breaker on Frontend**
+   - **Issue:** Next.js API routes call OpenAI directly as Tier 2 fallback with no circuit breaker
+   - **Impact:** OpenAI outage cascades; backend circuit breaker exists but frontend bypasses it
+   - **Fix:** Add circuit breaker pattern to frontend OpenAI calls, honor backend circuit state
 
-6. **No Database Read Replicas**
+8. **No Database Read Replicas**
    - **Issue:** All reads and writes go to single PostgreSQL instance
    - **Impact:** Read-heavy queries (Gita verses, journey catalogs) compete with writes
 
