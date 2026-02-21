@@ -117,15 +117,29 @@ function buildSummaryFromResponse(response: string): string | null {
 
 // ─── Direct OpenAI Fallback ─────────────────────────────────────────────
 
+// Language name lookup for prompt instructions
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: 'English', hi: 'Hindi', ta: 'Tamil', te: 'Telugu', bn: 'Bengali',
+  mr: 'Marathi', gu: 'Gujarati', kn: 'Kannada', ml: 'Malayalam', pa: 'Punjabi',
+  sa: 'Sanskrit', es: 'Spanish', fr: 'French', de: 'German', pt: 'Portuguese',
+  ja: 'Japanese', 'zh-CN': 'Chinese (Simplified)',
+}
+
 async function tryDirectOpenAI(
   message: string,
   mood: string,
+  language: string = 'en',
 ): Promise<string | null> {
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey || apiKey === 'your-api-key-here') return null
 
   // Build verse context from the local 701-verse corpus
   const verseContext = buildVerseContext(mood, 'general', 3)
+
+  const langName = LANGUAGE_NAMES[language] || 'English'
+  const langInstruction = language !== 'en'
+    ? `\n\nLANGUAGE: You MUST respond entirely in ${langName}. Write naturally in ${langName} as a native speaker would.`
+    : ''
 
   const systemPrompt = `You are KIAAN, a warm spiritual companion rooted in the Bhagavad Gita.
 
@@ -143,7 +157,7 @@ ABSOLUTE REQUIREMENTS:
 - Never mention "Bhagavad Gita", "Gita", "Krishna", "Arjuna", verse numbers
 - Present wisdom as lived truth, not religious teaching
 - Use Sanskrit terms naturally (dharma, karma, equanimity, sattva) where they add depth
-- Speak as a trusted companion sitting with them in their experience`
+- Speak as a trusted companion sitting with them in their experience${langInstruction}`
 
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -306,7 +320,7 @@ export async function POST(request: NextRequest) {
 
     // ── Layer 2: Try direct OpenAI call ───────────────────────────────
     try {
-      const aiResponse = await tryDirectOpenAI(sanitizedMessage, mood)
+      const aiResponse = await tryDirectOpenAI(sanitizedMessage, mood, language)
       if (aiResponse) {
         console.warn('[Chat API] Layer 2 success: Direct OpenAI response')
 

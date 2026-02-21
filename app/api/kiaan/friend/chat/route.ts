@@ -15,6 +15,14 @@ import { buildVerseContext } from '@/lib/wisdom-core'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
+// ─── Language Names (for multilingual Tier 2 responses) ─────────────────
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: 'English', hi: 'Hindi', ta: 'Tamil', te: 'Telugu', bn: 'Bengali',
+  mr: 'Marathi', gu: 'Gujarati', kn: 'Kannada', ml: 'Malayalam', pa: 'Punjabi',
+  sa: 'Sanskrit', es: 'Spanish', fr: 'French', de: 'German', pt: 'Portuguese',
+  ja: 'Japanese', 'zh-CN': 'Chinese (Simplified)',
+}
+
 // ─── Mood Detection ──────────────────────────────────────────────────────
 const MOOD_KEYWORDS: Record<string, string[]> = {
   anxious: ['anxious', 'anxiety', 'worried', 'scared', 'panic', 'stress', 'nervous', 'afraid', 'fear', 'tense'],
@@ -54,7 +62,7 @@ function detectTopic(message: string): string {
   return 'general'
 }
 
-function buildSystemPrompt(mood: string, topic: string, forceMode: string | null): string {
+function buildSystemPrompt(mood: string, topic: string, forceMode: string | null, language: string = 'en'): string {
   // Build verse context from the full 701-verse Wisdom Core
   const verseContext = buildVerseContext(mood, topic, 3)
 
@@ -66,6 +74,9 @@ Give practical daily-life applications grounded in evidence.`
     : `You are in COMPANION mode. Be warm, calm, direct, and precise.
 Never say "as an AI" or use generic therapy phrases.
 Sound like a regulated, intelligent human — not a guru, not a poet.`
+
+  const langName = LANGUAGE_NAMES[language] || 'English'
+  const langInstruction = language !== 'en' ? `\n\nLANGUAGE: You MUST respond entirely in ${langName}.` : ''
 
   return `You are KIAAN — a modern, secular, psychologically grounded "Divine Friend."
 Your inspiration is the Bhagavad Gita, translated into contemporary neuroscience, psychology, and behavioral science.
@@ -105,7 +116,7 @@ TONE RULES:
 
 GOAL: User leaves feeling calmer, clearer, more self-aware, more capable, less dependent, slightly stronger. Not spiritually elevated. Not mystified. Not lectured.
 
-Current detected mood: ${mood}`
+Current detected mood: ${mood}${langInstruction}`
 }
 
 export async function POST(request: NextRequest) {
@@ -120,6 +131,7 @@ export async function POST(request: NextRequest) {
     const mood = detectMood(message)
     const topic = detectTopic(message)
     const forceMode = body.force_mode || null
+    const language = body.language || 'en'
     const conversationHistory = Array.isArray(body.conversation_history) ? body.conversation_history : []
 
     // ── Tier 1: Proxy to Python backend ──────────────────────────────
@@ -160,7 +172,7 @@ export async function POST(request: NextRequest) {
       try {
         const client = new OpenAI({ apiKey })
         const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
-          { role: 'system', content: buildSystemPrompt(mood, topic, forceMode) },
+          { role: 'system', content: buildSystemPrompt(mood, topic, forceMode, language) },
         ]
 
         // Include conversation history (last 6 messages)

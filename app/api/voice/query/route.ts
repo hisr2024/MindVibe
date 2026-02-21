@@ -5,8 +5,17 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import OpenAI from 'openai'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+// ─── Language Names (for multilingual Tier 2 responses) ─────────────────
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: 'English', hi: 'Hindi', ta: 'Tamil', te: 'Telugu', bn: 'Bengali',
+  mr: 'Marathi', gu: 'Gujarati', kn: 'Kannada', ml: 'Malayalam', pa: 'Punjabi',
+  sa: 'Sanskrit', es: 'Spanish', fr: 'French', de: 'German', pt: 'Portuguese',
+  ja: 'Japanese', 'zh-CN': 'Chinese (Simplified)',
+}
 
 // Fallback wisdom responses when backend is unavailable
 const FALLBACK_RESPONSES = [
@@ -103,10 +112,51 @@ export async function POST(request: NextRequest) {
         })
       }
     } catch (backendError) {
-      console.warn('[Voice Query] Backend failed, using fallback:', backendError)
+      console.warn('[Voice Query] Backend failed, trying OpenAI direct:', backendError)
     }
 
-    // Use fallback response
+    // ── Tier 2: Direct OpenAI from Next.js ───────────────────────────
+    try {
+      const apiKey = process.env.OPENAI_API_KEY
+      if (apiKey && apiKey !== 'your-api-key-here') {
+        const client = new OpenAI({ apiKey })
+
+        const langName = LANGUAGE_NAMES[language] || 'English'
+        const langInstruction = language !== 'en' ? `\n\nLANGUAGE: You MUST respond entirely in ${langName}.` : ''
+
+        const systemPrompt =
+          'You are KIAAN, a wise and compassionate voice companion rooted in Bhagavad Gita wisdom. ' +
+          'Respond to the user\'s voice query with warmth and insight. ' +
+          'Keep your response concise (2-4 sentences) since this is a voice interaction. ' +
+          'Weave in Gita principles using modern, secular language — never cite religious sources by name. ' +
+          'Use contractions. Sound like a real friend, not a chatbot.' +
+          langInstruction
+
+        const completion = await client.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: sanitizedQuery },
+          ],
+          max_tokens: 200,
+          temperature: 0.72,
+        })
+
+        const text = completion.choices[0]?.message?.content
+        if (text) {
+          return NextResponse.json({
+            success: true,
+            response: text,
+            gita_wisdom: true,
+            ai_tier: 'nextjs_openai',
+          })
+        }
+      }
+    } catch (openaiError) {
+      console.warn('[Voice Query] OpenAI direct failed, using fallback:', openaiError)
+    }
+
+    // ── Tier 3: Use fallback response ────────────────────────────────
     const fallback = FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)]
 
     return NextResponse.json({

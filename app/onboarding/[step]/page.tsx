@@ -210,6 +210,12 @@ export default function OnboardingStepPage() {
   // State update handlers
   const updateState = (updates: Partial<OnboardingState>) => {
     setState(prev => ({ ...prev, ...updates }))
+    // Sync language selection with global LanguageProvider
+    if (updates.language) {
+      localStorage.setItem('preferredLocale', updates.language)
+      document.documentElement.lang = updates.language
+      window.dispatchEvent(new CustomEvent('localeChanged', { detail: { locale: updates.language } }))
+    }
   }
 
   // Get current tier info for completion screen
@@ -271,8 +277,22 @@ export default function OnboardingStepPage() {
                   className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40"
                 >
                   <option value="en">English</option>
-                  <option value="hi">हिंदी (Hindi)</option>
-                  <option value="sa">संस्कृतम् (Sanskrit)</option>
+                  <option value="hi">हिन्दी (Hindi)</option>
+                  <option value="ta">தமிழ் (Tamil)</option>
+                  <option value="te">తెలుగు (Telugu)</option>
+                  <option value="bn">বাংলা (Bengali)</option>
+                  <option value="mr">मराठी (Marathi)</option>
+                  <option value="gu">ગુજરાતી (Gujarati)</option>
+                  <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                  <option value="ml">മലയാളം (Malayalam)</option>
+                  <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                  <option value="sa">संस्कृत (Sanskrit)</option>
+                  <option value="es">Español (Spanish)</option>
+                  <option value="fr">Français (French)</option>
+                  <option value="de">Deutsch (German)</option>
+                  <option value="pt">Português (Portuguese)</option>
+                  <option value="ja">日本語 (Japanese)</option>
+                  <option value="zh-CN">简体中文 (Chinese)</option>
                 </select>
               </div>
             </div>

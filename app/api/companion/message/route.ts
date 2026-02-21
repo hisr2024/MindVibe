@@ -13,6 +13,14 @@ import { generateLocalResponse } from '@/lib/kiaan-friend-engine'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
+// ─── Language Names (for multilingual Tier 2 responses) ─────────────────
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: 'English', hi: 'Hindi', ta: 'Tamil', te: 'Telugu', bn: 'Bengali',
+  mr: 'Marathi', gu: 'Gujarati', kn: 'Kannada', ml: 'Malayalam', pa: 'Punjabi',
+  sa: 'Sanskrit', es: 'Spanish', fr: 'French', de: 'German', pt: 'Portuguese',
+  ja: 'Japanese', 'zh-CN': 'Chinese (Simplified)',
+}
+
 // ─── Static Gita Wisdom (mirrors backend WISDOM_CORE) ────────────────────
 const GITA_WISDOM: Record<string, { principle: string; wisdom: string; verse_ref: string }[]> = {
   anxious: [
@@ -93,10 +101,13 @@ function detectMood(message: string): { mood: string; intensity: number } {
 }
 
 // ─── KIAAN System Prompt ─────────────────────────────────────────────────
-function buildKiaanPrompt(mood: string, intensity: number, wisdom: { principle: string; wisdom: string } | null): string {
+function buildKiaanPrompt(mood: string, intensity: number, wisdom: { principle: string; wisdom: string } | null, language: string = 'en'): string {
   const wisdomBlock = wisdom
     ? `\nWISDOM TO WEAVE IN (deliver as YOUR life experience, never cite source):\n"${wisdom.wisdom}"\nFrame as: "here's what I've learned..." or "something that changed how I see this..."`
     : ''
+
+  const langName = LANGUAGE_NAMES[language] || 'English'
+  const langInstruction = language !== 'en' ? `\n\nLANGUAGE: You MUST respond entirely in ${langName}.` : ''
 
   return `You are KIAAN — not a chatbot, not a therapist. You are the user's BEST FRIEND who carries deep life wisdom rooted in Bhagavad Gita principles (delivered in modern, secular language).
 
@@ -133,7 +144,7 @@ RULES:
 
 CONTEXT:
 - Mood: ${mood} (intensity: ${intensity.toFixed(1)}/1.0)
-${wisdomBlock}`
+${wisdomBlock}${langInstruction}`
 }
 
 // ─── Direct OpenAI Call ──────────────────────────────────────────────────
@@ -141,6 +152,7 @@ async function generateWithOpenAI(
   message: string,
   mood: string,
   intensity: number,
+  language: string = 'en',
 ): Promise<{ response: string; wisdom_used: { principle: string; verse_ref: string } | null } | null> {
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey || apiKey === 'your-api-key-here') {
@@ -149,7 +161,7 @@ async function generateWithOpenAI(
 
   const wisdomPool = GITA_WISDOM[mood] || GITA_WISDOM.neutral
   const wisdom = wisdomPool[Math.floor(Math.random() * wisdomPool.length)]
-  const systemPrompt = buildKiaanPrompt(mood, intensity, wisdom)
+  const systemPrompt = buildKiaanPrompt(mood, intensity, wisdom, language)
 
   try {
     const client = new OpenAI({ apiKey })
@@ -233,8 +245,9 @@ export async function POST(request: NextRequest) {
 
     // ── Tier 2: Direct OpenAI from Next.js (KIAAN + Gita wisdom) ─────
     const { mood, intensity } = detectMood(sanitizedMessage)
+    const language = body.language || 'en'
 
-    const aiResult = await generateWithOpenAI(sanitizedMessage, mood, intensity)
+    const aiResult = await generateWithOpenAI(sanitizedMessage, mood, intensity, language)
     if (aiResult) {
       return NextResponse.json({
         message_id: `msg_${Date.now()}`,

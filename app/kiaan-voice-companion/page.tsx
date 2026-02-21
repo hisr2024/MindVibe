@@ -30,6 +30,7 @@ import VoiceCompanionSelector from '@/components/voice/VoiceCompanionSelector'
 import type { VoiceCompanionConfig } from '@/components/voice/VoiceCompanionSelector'
 import { apiFetch } from '@/lib/api'
 import { KiaanFriendEngine } from '@/lib/kiaan-friend-engine'
+import { useLanguage } from '@/hooks/useLanguage'
 import { useGlobalWakeWord } from '@/contexts/WakeWordContext'
 import { stopAllAudio } from '@/utils/audio/universalAudioStop'
 import { detectVoiceCommand, isBlockingCommand } from '@/utils/speech/voiceCommands'
@@ -149,6 +150,8 @@ const DIVINE_SUGGESTIONS: Record<string, string[]> = {
 // ─── Component ──────────────────────────────────────────────────────────
 
 export default function KiaanVoiceCompanionPage() {
+  const { language: globalLanguage } = useLanguage()
+
   const [messages, setMessages] = useState<Message[]>([])
   const [inputText, setInputText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -169,14 +172,23 @@ export default function KiaanVoiceCompanionPage() {
   const [aiStatus, setAiStatus] = useState<'unknown' | 'connected' | 'offline'>('unknown')
   const [wisdomCorpusCount, setWisdomCorpusCount] = useState(0)
   const [voiceConfig, setVoiceConfig] = useState<VoiceConfig>({
-    language: 'en',
-    speakerId: 'en_sarvam-aura',
+    language: globalLanguage || 'en',
+    speakerId: `${globalLanguage || 'en'}_sarvam-aura`,
     voiceId: 'sarvam-aura',
     emotion: 'neutral',
     speed: 0.95,
     pitch: 0.0,
     autoPlay: true, // Voice auto-play ON by default for Voice Companion
   })
+
+  // Sync voice config language with global language preference
+  useEffect(() => {
+    setVoiceConfig(prev => ({
+      ...prev,
+      language: globalLanguage,
+      speakerId: `${globalLanguage}_${prev.voiceId || 'sarvam-aura'}`,
+    }))
+  }, [globalLanguage])
 
   // Bridge between VoiceCompanionConfig and page-level VoiceConfig
   const handleVoiceCompanionConfigChange = useCallback((cfg: VoiceCompanionConfig) => {
