@@ -95,6 +95,16 @@ async function fetchSubscriptionFromApi(): Promise<Subscription> {
     return getDefaultSubscription()
   }
 
+  // Handle 404 gracefully — user account not found, return default free subscription
+  if (response.status === 404) {
+    return getDefaultSubscription()
+  }
+
+  // Handle 500 gracefully — server error, fall back to cached or default subscription
+  if (response.status === 500) {
+    throw new Error('Failed to fetch subscription from API')
+  }
+
   if (!response.ok) {
     throw new Error('Failed to fetch subscription from API')
   }

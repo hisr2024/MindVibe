@@ -13,10 +13,11 @@
 
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGlobalWakeWord } from '@/contexts/WakeWordContext'
 import { WakeWordOverlay } from './WakeWordOverlay'
+import { playSynthSound } from '@/utils/audio/webAudioSounds'
 
 export function GlobalWakeWordListener() {
   const {
@@ -28,50 +29,12 @@ export function GlobalWakeWordListener() {
     error,
   } = useGlobalWakeWord()
 
-  // Play a subtle activation sound on wake word detection
-  const audioRef = useRef<AudioContext | null>(null)
-
-  // Clean up AudioContext on unmount to prevent resource leak
-  useEffect(() => {
-    return () => {
-      if (audioRef.current && audioRef.current.state !== 'closed') {
-        audioRef.current.close().catch(() => {})
-        audioRef.current = null
-      }
-    }
-  }, [])
-
+  // Play a subtle activation chime on wake word detection
+  // Uses the shared webAudioSounds utility which defers AudioContext
+  // creation until after a user gesture (avoids browser autoplay policy errors)
   useEffect(() => {
     if (!isActivated) return
-    if (typeof window === 'undefined' || typeof AudioContext === 'undefined') return
-
-    // Play a brief chime using Web Audio API
-    try {
-      if (!audioRef.current || audioRef.current.state === 'closed') {
-        audioRef.current = new AudioContext()
-      }
-      const ctx = audioRef.current
-      if (ctx.state === 'suspended') {
-        ctx.resume()
-      }
-
-      const oscillator = ctx.createOscillator()
-      const gainNode = ctx.createGain()
-      oscillator.connect(gainNode)
-      gainNode.connect(ctx.destination)
-
-      oscillator.type = 'sine'
-      oscillator.frequency.setValueAtTime(587.33, ctx.currentTime) // D5
-      oscillator.frequency.setValueAtTime(880, ctx.currentTime + 0.1) // A5
-
-      gainNode.gain.setValueAtTime(0.15, ctx.currentTime)
-      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3)
-
-      oscillator.start(ctx.currentTime)
-      oscillator.stop(ctx.currentTime + 0.3)
-    } catch {
-      // Audio playback not critical - silently continue
-    }
+    playSynthSound('chime', 0.15)
   }, [isActivated])
 
   // Don't render anything if not supported or not enabled
