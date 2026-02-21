@@ -76,7 +76,7 @@ export function LanguageSelector({
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 top-full mt-2 z-50 w-64 max-h-96 overflow-hidden rounded-xl border border-orange-500/30 bg-slate-900/95 backdrop-blur-sm shadow-xl shadow-orange-500/20">
+          <div className="absolute right-0 top-full mt-2 z-50 w-64 max-h-96 overflow-hidden rounded-xl border border-orange-500/30 bg-slate-950 backdrop-blur-sm shadow-xl shadow-orange-500/20">
             {/* Search input */}
             <div className="p-3 border-b border-orange-500/20">
               <input
@@ -150,7 +150,7 @@ export function LanguageSelector({
           </button>
 
           {isOpen && (
-            <div className="absolute left-0 top-full mt-2 z-50 w-full max-h-96 overflow-hidden rounded-xl border border-orange-500/30 bg-slate-900/95 backdrop-blur-sm shadow-xl shadow-orange-500/20">
+            <div className="absolute left-0 top-full mt-2 z-50 w-full max-h-96 overflow-hidden rounded-xl border border-orange-500/30 bg-slate-950 backdrop-blur-sm shadow-xl shadow-orange-500/20">
               {/* Search input */}
               <div className="p-3 border-b border-orange-500/20">
                 <input
