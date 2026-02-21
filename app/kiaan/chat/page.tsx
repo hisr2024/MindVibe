@@ -5,12 +5,21 @@ import { useSearchParams } from 'next/navigation';
 import { KiaanChat, type Message } from '@/components/chat/KiaanChat';
 import { apiCall, getErrorMessage, isQuotaExceeded, isFeatureLocked, getUpgradeUrl } from '@/lib/api-client';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useLanguage } from '@/hooks/useLanguage';
 import { LanguageSelector } from '@/components/chat/LanguageSelector';
-import { PathwayMap } from '@/components/navigation/PathwayMap';
 import { getNextStepSuggestion, extractThemes } from '@/lib/suggestions/nextStep';
-import { NextStepLink } from '@/components/suggestions/NextStepLink';
 import { useNextStepStore } from '@/lib/suggestions/store';
+
+// Dynamic imports for secondary UI components
+const PathwayMap = dynamic(
+  () => import('@/components/navigation/PathwayMap').then(mod => ({ default: mod.PathwayMap })),
+  { loading: () => <div className="h-32 animate-pulse rounded-xl bg-slate-800/30" /> }
+);
+const NextStepLink = dynamic(
+  () => import('@/components/suggestions/NextStepLink').then(mod => ({ default: mod.NextStepLink })),
+  { loading: () => <div className="h-10 animate-pulse rounded-lg bg-slate-800/30" /> }
+);
 
 /**
  * Dedicated KIAAN Chat Page - Inner Component

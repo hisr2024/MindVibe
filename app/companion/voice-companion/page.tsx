@@ -28,8 +28,14 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { apiFetch } from '@/lib/api'
-import VoiceCompanionSelector from '@/components/voice/VoiceCompanionSelector'
+
+// Dynamic import for voice selector - loaded on demand
+const VoiceCompanionSelector = dynamic(() => import('@/components/voice/VoiceCompanionSelector'), {
+  ssr: false,
+  loading: () => <div className="h-32 animate-pulse rounded-xl bg-slate-800/30" />,
+})
 
 // ─── Types ──────────────────────────────────────────────────────────────
 

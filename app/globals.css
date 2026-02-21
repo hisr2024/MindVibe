@@ -77,20 +77,14 @@
     font-size: var(--text-body);
     line-height: var(--line-relaxed);
     letter-spacing: -0.01em;
-    /* Prevent accidental zoom from double-tap or pinch gestures */
-    touch-action: pan-x pan-y;
-    /* Prevent pull-to-refresh which can cause visual zoom effect */
+    /* Allow natural touch interactions including pinch-to-zoom (WCAG 1.4.4) */
+    touch-action: manipulation;
+    /* Prevent pull-to-refresh which can cause unintended navigation */
     overscroll-behavior-y: none;
   }
 
-  /* Comprehensive zoom prevention for mobile */
-  /* This prevents double-tap zoom while still allowing touch interactions */
+  /* Prevent double-tap zoom on interactive elements while preserving pinch-to-zoom */
   @media (pointer: coarse) {
-    html, body {
-      touch-action: manipulation;
-    }
-
-    /* Prevent pinch zoom on all interactive elements */
     button, input, textarea, select, a, [role="button"] {
       touch-action: manipulation;
     }
@@ -959,24 +953,7 @@ body {
   scroll-behavior: smooth;
 }
 
-/* Note: fadeIn animation defined earlier in file - using that definition */
-
-/* Chat wobble animation */
-@keyframes chat-wobble {
-  0%, 100% {
-    transform: scale(1);
-  }
-  25% {
-    transform: scale(1.01) rotate(0.5deg);
-  }
-  75% {
-    transform: scale(1.01) rotate(-0.5deg);
-  }
-}
-
-.animate-chat-wobble {
-  animation: chat-wobble 0.6s ease-in-out;
-}
+/* Note: fadeIn animation and .animate-chat-wobble defined earlier in file */
 
 /* =====================================================
    DIVINE CELESTIAL EXPERIENCE
@@ -2331,7 +2308,7 @@ button:not(.no-highlight) {
   }
 }
 
-/* Performance: Reduce animations on low-end devices */
+/* Performance: Reduce animations on low-end devices and respect user motion preferences */
 @media (prefers-reduced-motion: reduce), (update: slow) {
   *,
   *::before,
@@ -2340,6 +2317,12 @@ button:not(.no-highlight) {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .animate-spin,
+  .animate-pulse,
+  .animate-bounce {
+    animation: none !important;
   }
 }
 
@@ -2591,25 +2574,7 @@ button:not(.no-highlight) {
   }
 }
 
-/* ─── Prefers Reduced Motion ─── */
-/* Respect user's motion preferences for accessibility */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-
-  /* Keep functional opacity transitions but instant */
-  .animate-spin,
-  .animate-pulse,
-  .animate-bounce {
-    animation: none !important;
-  }
-}
+/* Note: Reduced motion rules consolidated earlier in file (line ~2312) */
 
 /* ─── Enhanced Focus Styles ─── */
 /* Visible focus rings for keyboard navigation */

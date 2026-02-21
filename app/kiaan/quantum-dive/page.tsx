@@ -15,9 +15,19 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { SubscriptionGate } from '@/components/subscription'
 import { useLanguage } from '@/hooks/useLanguage'
-import { VoiceEnhancementsPanel, VoiceEnhancementsMobile } from '@/components/voice/enhancements'
+
+// Dynamic imports for voice enhancement panels - loaded when sidebar/mobile panel opens
+const VoiceEnhancementsPanel = dynamic(
+  () => import('@/components/voice/enhancements').then(mod => ({ default: mod.VoiceEnhancementsPanel })),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-xl bg-slate-800/30" /> }
+)
+const VoiceEnhancementsMobile = dynamic(
+  () => import('@/components/voice/enhancements').then(mod => ({ default: mod.VoiceEnhancementsMobile })),
+  { ssr: false }
+)
 
 // Types
 type QuantumDiveStage =
