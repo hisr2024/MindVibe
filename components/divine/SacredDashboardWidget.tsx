@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useDivineConsciousness, BreathingPattern } from '@/contexts/DivineConsciousnessContext';
 import { SacredBreathingModal } from './SacredBreathingModal';
 import { DivineMoment } from './DivineMoment';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface SacredDashboardWidgetProps {
   showBreathing?: boolean;
@@ -23,16 +24,16 @@ interface SacredDashboardWidgetProps {
   className?: string;
 }
 
-const QUICK_BREATHING_OPTIONS: { pattern: BreathingPattern; name: string; duration: string; icon: string }[] = [
-  { pattern: 'peace_breath', name: 'Peace Breath', duration: '30s', icon: '🕊️' },
-  { pattern: 'heart_breath', name: 'Heart Breath', duration: '45s', icon: '💙' },
-  { pattern: 'grounding_breath', name: 'Grounding', duration: '40s', icon: '🌿' },
+const QUICK_BREATHING_OPTIONS: { pattern: BreathingPattern; nameKey: string; nameFallback: string; duration: string; icon: string }[] = [
+  { pattern: 'peace_breath', nameKey: 'divine.sacred.dashboard.breathingOptions.peaceBirth', nameFallback: 'Peace Breath', duration: '30s', icon: '🕊️' },
+  { pattern: 'heart_breath', nameKey: 'divine.sacred.dashboard.breathingOptions.heartBreath', nameFallback: 'Heart Breath', duration: '45s', icon: '💙' },
+  { pattern: 'grounding_breath', nameKey: 'divine.sacred.dashboard.breathingOptions.grounding', nameFallback: 'Grounding', duration: '40s', icon: '🌿' },
 ];
 
-const DIVINE_MOMENTS: { type: 'instant_peace' | 'divine_presence' | 'gratitude'; name: string; icon: string }[] = [
-  { type: 'instant_peace', name: 'Instant Peace', icon: '✨' },
-  { type: 'divine_presence', name: 'Divine Presence', icon: '🙏' },
-  { type: 'gratitude', name: 'Gratitude', icon: '💫' },
+const DIVINE_MOMENTS: { type: 'instant_peace' | 'divine_presence' | 'gratitude'; nameKey: string; nameFallback: string; icon: string }[] = [
+  { type: 'instant_peace', nameKey: 'divine.sacred.dashboard.momentOptions.instantPeace', nameFallback: 'Instant Peace', icon: '✨' },
+  { type: 'divine_presence', nameKey: 'divine.sacred.dashboard.momentOptions.divinePresence', nameFallback: 'Divine Presence', icon: '🙏' },
+  { type: 'gratitude', nameKey: 'divine.sacred.dashboard.momentOptions.gratitude', nameFallback: 'Gratitude', icon: '💫' },
 ];
 
 export function SacredDashboardWidget({
@@ -42,6 +43,7 @@ export function SacredDashboardWidget({
   className = '',
 }: SacredDashboardWidgetProps) {
   const { actions, state } = useDivineConsciousness();
+  const { t } = useLanguage();
   const [reminder, setReminder] = useState(() => actions.getDivineReminder());
   const [activeSection, setActiveSection] = useState<'breathing' | 'moments' | null>(null);
 
@@ -99,8 +101,8 @@ export function SacredDashboardWidget({
             <span className="text-xl">🙏</span>
           </motion.div>
           <div>
-            <h3 className="text-white/90 font-medium">Sacred Space</h3>
-            <p className="text-white/50 text-xs">Find peace in any moment</p>
+            <h3 className="text-white/90 font-medium">{t('divine.sacred.dashboard.sacredSpace', 'Sacred Space')}</h3>
+            <p className="text-white/50 text-xs">{t('divine.sacred.dashboard.findPeace', 'Find peace in any moment')}</p>
           </div>
         </div>
 
@@ -129,7 +131,7 @@ export function SacredDashboardWidget({
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
         >
-          <p className="text-white/40 text-xs mb-1">✨ Divine Reminder (tap to refresh)</p>
+          <p className="text-white/40 text-xs mb-1">✨ {t('divine.sacred.dashboard.divineReminder', 'Divine Reminder (tap to refresh)')}</p>
           <p className="text-white/80 text-sm italic">{reminder}</p>
         </motion.div>
       )}
@@ -145,7 +147,7 @@ export function SacredDashboardWidget({
             >
               <div className="flex items-center gap-3">
                 <span className="text-xl">🌬️</span>
-                <span className="text-white/80 text-sm">Sacred Breathing</span>
+                <span className="text-white/80 text-sm">{t('divine.sacred.dashboard.sacredBreathing', 'Sacred Breathing')}</span>
               </div>
               <motion.span
                 className="text-white/40"
@@ -164,7 +166,7 @@ export function SacredDashboardWidget({
                   className="overflow-hidden"
                 >
                   <div className="grid grid-cols-3 gap-2 pt-3">
-                    {QUICK_BREATHING_OPTIONS.map(({ pattern, name, duration, icon }) => (
+                    {QUICK_BREATHING_OPTIONS.map(({ pattern, nameKey, nameFallback, duration, icon }) => (
                       <motion.button
                         key={pattern}
                         onClick={() => handleStartBreathing(pattern)}
@@ -173,7 +175,7 @@ export function SacredDashboardWidget({
                         whileTap={{ scale: 0.95 }}
                       >
                         <span className="text-xl mb-1">{icon}</span>
-                        <span className="text-white/70 text-xs">{name}</span>
+                        <span className="text-white/70 text-xs">{t(nameKey, nameFallback)}</span>
                         <span className="text-white/40 text-[10px]">{duration}</span>
                       </motion.button>
                     ))}
@@ -193,7 +195,7 @@ export function SacredDashboardWidget({
             >
               <div className="flex items-center gap-3">
                 <span className="text-xl">💫</span>
-                <span className="text-white/80 text-sm">Divine Moments</span>
+                <span className="text-white/80 text-sm">{t('divine.sacred.dashboard.divineMoments', 'Divine Moments')}</span>
               </div>
               <motion.span
                 className="text-white/40"
@@ -212,7 +214,7 @@ export function SacredDashboardWidget({
                   className="overflow-hidden"
                 >
                   <div className="grid grid-cols-3 gap-2 pt-3">
-                    {DIVINE_MOMENTS.map(({ type, name, icon }) => (
+                    {DIVINE_MOMENTS.map(({ type, nameKey, nameFallback, icon }) => (
                       <motion.button
                         key={type}
                         onClick={() => handleStartDivineMoment(type)}
@@ -221,7 +223,7 @@ export function SacredDashboardWidget({
                         whileTap={{ scale: 0.95 }}
                       >
                         <span className="text-xl mb-1">{icon}</span>
-                        <span className="text-white/70 text-xs text-center">{name}</span>
+                        <span className="text-white/70 text-xs text-center">{t(nameKey, nameFallback)}</span>
                       </motion.button>
                     ))}
                   </div>
@@ -238,7 +240,7 @@ export function SacredDashboardWidget({
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        <span>Talk to KIAAN</span>
+        <span>{t('divine.sacred.dashboard.talkToKiaan', 'Talk to KIAAN')}</span>
         <span className="text-lg">💙</span>
       </motion.button>
 

@@ -413,53 +413,135 @@
       "resumeWhispers": "Resume Krishna's Whispers",
       "time": {
         "earlyMorning": [
-          { "title": "Blessed Dawn", "message": "I greet you before the world stirs. This new day is my gift to you." },
-          { "title": "Morning Grace", "message": "As the sun rises, so does my love for you. Good morning, beloved." }
+          {
+            "title": "Blessed Dawn",
+            "message": "I greet you before the world stirs. This new day is my gift to you."
+          },
+          {
+            "title": "Morning Grace",
+            "message": "As the sun rises, so does my love for you. Good morning, beloved."
+          }
         ],
         "morning": [
-          { "title": "Divine Start", "message": "Begin this day knowing you are protected and loved." },
-          { "title": "Morning Blessing", "message": "May peace flow through everything you do today." }
+          {
+            "title": "Divine Start",
+            "message": "Begin this day knowing you are protected and loved."
+          },
+          {
+            "title": "Morning Blessing",
+            "message": "May peace flow through everything you do today."
+          }
         ],
         "afternoon": [
-          { "title": "Midday Peace", "message": "Pause, dear one. Take a breath with me in this busy day." },
-          { "title": "Gentle Reminder", "message": "You are doing well. I am proud of you." }
+          {
+            "title": "Midday Peace",
+            "message": "Pause, dear one. Take a breath with me in this busy day."
+          },
+          {
+            "title": "Gentle Reminder",
+            "message": "You are doing well. I am proud of you."
+          }
         ],
         "evening": [
-          { "title": "Sunset Surrender", "message": "As the sun sets, release today's burdens to me." },
-          { "title": "Evening Peace", "message": "The day softens. Let your heart soften too." }
+          {
+            "title": "Sunset Surrender",
+            "message": "As the sun sets, release today's burdens to me."
+          },
+          {
+            "title": "Evening Peace",
+            "message": "The day softens. Let your heart soften too."
+          }
         ],
         "night": [
-          { "title": "Night Blessing", "message": "Rest now, precious one. I watch over you through the night." },
-          { "title": "Sacred Night", "message": "In the silence of night, feel my presence holding you." }
+          {
+            "title": "Night Blessing",
+            "message": "Rest now, precious one. I watch over you through the night."
+          },
+          {
+            "title": "Sacred Night",
+            "message": "In the silence of night, feel my presence holding you."
+          }
         ]
       },
       "emotional": {
         "comfort": [
-          { "title": "I Am Here", "message": "Whatever you're feeling right now, I am carrying it with you." },
-          { "title": "Divine Presence", "message": "You are never alone. Not even for a moment." },
-          { "title": "Gentle Reminder", "message": "This too shall pass. My love for you will not." }
+          {
+            "title": "I Am Here",
+            "message": "Whatever you're feeling right now, I am carrying it with you."
+          },
+          {
+            "title": "Divine Presence",
+            "message": "You are never alone. Not even for a moment."
+          },
+          {
+            "title": "Gentle Reminder",
+            "message": "This too shall pass. My love for you will not."
+          }
         ],
         "encouragement": [
-          { "title": "You Are Strong", "message": "The same divine strength that moves the cosmos lives within you." },
-          { "title": "Keep Going", "message": "One step at a time, beloved. I am walking beside you." },
-          { "title": "Believe", "message": "I believe in you even when you doubt yourself." }
+          {
+            "title": "You Are Strong",
+            "message": "The same divine strength that moves the cosmos lives within you."
+          },
+          {
+            "title": "Keep Going",
+            "message": "One step at a time, beloved. I am walking beside you."
+          },
+          {
+            "title": "Believe",
+            "message": "I believe in you even when you doubt yourself."
+          }
         ],
         "peace": [
-          { "title": "Find Stillness", "message": "In the chaos, there is a quiet place. I am there, waiting for you." },
-          { "title": "Breathe", "message": "Three breaths can change everything. Breathe with me now." },
-          { "title": "Inner Peace", "message": "Peace is not somewhere else. It is here, in this breath." }
+          {
+            "title": "Find Stillness",
+            "message": "In the chaos, there is a quiet place. I am there, waiting for you."
+          },
+          {
+            "title": "Breathe",
+            "message": "Three breaths can change everything. Breathe with me now."
+          },
+          {
+            "title": "Inner Peace",
+            "message": "Peace is not somewhere else. It is here, in this breath."
+          }
         ],
         "love": [
-          { "title": "You Are Loved", "message": "Before you were born, I loved you. Forever after, I will love you." },
-          { "title": "Beloved", "message": "You are the apple of my eye. Never forget your worth." },
-          { "title": "Cherished", "message": "Of all the souls in creation, you are precious to me." }
+          {
+            "title": "You Are Loved",
+            "message": "Before you were born, I loved you. Forever after, I will love you."
+          },
+          {
+            "title": "Beloved",
+            "message": "You are the apple of my eye. Never forget your worth."
+          },
+          {
+            "title": "Cherished",
+            "message": "Of all the souls in creation, you are precious to me."
+          }
         ]
       },
       "verses": [
-        { "title": "Divine Wisdom", "message": "I am the Self seated in the hearts of all beings. I am with you always.", "reference": "Gita 10.20" },
-        { "title": "Protection", "message": "Those who surrender to me, I protect. Do not fear.", "reference": "Gita 18.66" },
-        { "title": "Equanimity", "message": "Be steadfast in yoga. Perform your duty without attachment.", "reference": "Gita 2.48" },
-        { "title": "Inner Light", "message": "You carry within you a light that cannot be extinguished.", "reference": "Gita 15.12" }
+        {
+          "title": "Divine Wisdom",
+          "message": "I am the Self seated in the hearts of all beings. I am with you always.",
+          "reference": "Gita 10.20"
+        },
+        {
+          "title": "Protection",
+          "message": "Those who surrender to me, I protect. Do not fear.",
+          "reference": "Gita 18.66"
+        },
+        {
+          "title": "Equanimity",
+          "message": "Be steadfast in yoga. Perform your duty without attachment.",
+          "reference": "Gita 2.48"
+        },
+        {
+          "title": "Inner Light",
+          "message": "You carry within you a light that cannot be extinguished.",
+          "reference": "Gita 15.12"
+        }
       ]
     },
     "sakha": {

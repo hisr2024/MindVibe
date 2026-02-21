@@ -12,6 +12,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useDivineConsciousness } from '@/contexts/DivineConsciousnessContext';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface DivineGreetingProps {
   userName?: string;
@@ -21,32 +22,12 @@ interface DivineGreetingProps {
   className?: string;
 }
 
-const TIME_GREETINGS = {
-  dawn: {
-    greeting: "Blessed dawn",
-    message: "As the world awakens gently, so too can you...",
-    icon: "🌅",
-  },
-  morning: {
-    greeting: "Peaceful morning",
-    message: "The morning holds space for you to begin again...",
-    icon: "☀️",
-  },
-  afternoon: {
-    greeting: "Serene afternoon",
-    message: "In the fullness of the day, find your center...",
-    icon: "🌤️",
-  },
-  evening: {
-    greeting: "Gentle evening",
-    message: "As the day softens, let your heart soften too...",
-    icon: "🌆",
-  },
-  night: {
-    greeting: "Sacred night",
-    message: "The quiet of night invites deep surrender...",
-    icon: "🌙",
-  },
+const TIME_ICONS = {
+  dawn: "🌅",
+  morning: "☀️",
+  afternoon: "🌤️",
+  evening: "🌆",
+  night: "🌙",
 };
 
 export function DivineGreeting({
@@ -57,7 +38,8 @@ export function DivineGreeting({
   className = '',
 }: DivineGreetingProps) {
   const { actions } = useDivineConsciousness();
-  const [timeOfDay, setTimeOfDay] = useState<keyof typeof TIME_GREETINGS>('morning');
+  const { t } = useLanguage();
+  const [timeOfDay, setTimeOfDay] = useState<keyof typeof TIME_ICONS>('morning');
   const [affirmation, setAffirmation] = useState('');
   const [reminder, setReminder] = useState('');
 
@@ -75,7 +57,9 @@ export function DivineGreeting({
     if (showReminder) setReminder(actions.getDivineReminder());
   }, [actions, showAffirmation, showReminder]);
 
-  const timeData = TIME_GREETINGS[timeOfDay];
+  const icon = TIME_ICONS[timeOfDay];
+  const greetingText = t(`divine.sacred.greetings.${timeOfDay}`, timeOfDay.charAt(0).toUpperCase() + timeOfDay.slice(1));
+  const messageText = t(`divine.sacred.greetings.${timeOfDay}Message`, '');
 
   if (compact) {
     return (
@@ -84,12 +68,12 @@ export function DivineGreeting({
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <span className="text-2xl">{timeData.icon}</span>
+        <span className="text-2xl">{icon}</span>
         <div>
           <p className="text-white/90 font-light">
-            {timeData.greeting}{userName ? `, ${userName}` : ''}
+            {greetingText}{userName ? `, ${userName}` : ''}
           </p>
-          <p className="text-white/50 text-sm">{timeData.message}</p>
+          <p className="text-white/50 text-sm">{messageText}</p>
         </div>
       </motion.div>
     );
@@ -111,7 +95,7 @@ export function DivineGreeting({
         }}
         transition={{ duration: 4, repeat: Infinity }}
       >
-        {timeData.icon}
+        {icon}
       </motion.span>
 
       {/* Greeting */}
@@ -121,7 +105,7 @@ export function DivineGreeting({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        {timeData.greeting}{userName ? `, ${userName}` : ''}
+        {greetingText}{userName ? `, ${userName}` : ''}
       </motion.h2>
 
       {/* Time message */}
@@ -131,7 +115,7 @@ export function DivineGreeting({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
       >
-        {timeData.message}
+        {messageText}
       </motion.p>
 
       {/* Affirmation */}
@@ -143,7 +127,7 @@ export function DivineGreeting({
           transition={{ delay: 0.6 }}
         >
           <p className="text-xs text-white/40 uppercase tracking-wider mb-2">
-            Today&apos;s Affirmation
+            {t('divine.sacred.moodCheckin.todaysAffirmation', "Today's Affirmation")}
           </p>
           <p className="text-white/80 italic">&quot;{affirmation}&quot;</p>
         </motion.div>

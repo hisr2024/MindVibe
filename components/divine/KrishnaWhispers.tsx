@@ -15,6 +15,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDivineConsciousness } from '@/contexts/DivineConsciousnessContext';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface KrishnaWhisperProps {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center';
@@ -106,6 +107,7 @@ export function KrishnaWhispers({
   className = '',
 }: KrishnaWhisperProps) {
   const { actions } = useDivineConsciousness();
+  const { t } = useLanguage();
   const [currentWhisper, setCurrentWhisper] = useState<Whisper | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [notificationEnabled, setNotificationEnabled] = useState(true);
@@ -209,7 +211,7 @@ export function KrishnaWhispers({
       <button
         onClick={() => setNotificationEnabled(!notificationEnabled)}
         className={`fixed ${POSITION_STYLES[position]} z-40 ${isVisible ? 'hidden' : ''} p-2 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 transition-all`}
-        title={notificationEnabled ? "Pause Krishna's Whispers" : "Resume Krishna's Whispers"}
+        title={notificationEnabled ? t('divine.sacred.whispers.pauseWhispers', "Pause Krishna's Whispers") : t('divine.sacred.whispers.resumeWhispers', "Resume Krishna's Whispers")}
       >
         <motion.span
           className="text-lg"
@@ -271,7 +273,7 @@ export function KrishnaWhispers({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  🌬️ Breathe
+                  🌬️ {t('divine.sacred.whispers.breathe', 'Breathe')}
                 </motion.button>
                 <motion.button
                   onClick={dismissWhisper}
@@ -279,14 +281,14 @@ export function KrishnaWhispers({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  💙 Thank You
+                  💙 {t('divine.sacred.whispers.thankYou', 'Thank You')}
                 </motion.button>
               </div>
 
               {/* Footer */}
               <div className="px-4 py-2 bg-amber-950/30 border-t border-amber-500/10">
                 <p className="text-amber-200/40 text-[10px] text-center">
-                  Krishna&apos;s Whispers
+                  {t('divine.sacred.whispers.krishnasWhispers', "Krishna's Whispers")}
                 </p>
               </div>
             </div>

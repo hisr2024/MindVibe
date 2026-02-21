@@ -20,6 +20,7 @@
 import React, { useState, useCallback, useMemo, memo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDivineConsciousness, EmotionalState } from '@/contexts/DivineConsciousnessContext';
+import { useLanguage } from '@/hooks/useLanguage';
 
 // Pre-calculate mood score colors and heights to prevent recalculation
 const MOOD_SCORE_CONFIG = [
@@ -144,19 +145,21 @@ const SACRED_MOOD_RESPONSES: Record<number, SacredMoodResponse> = {
   },
 };
 
-// Emotion options with icons
-const EMOTIONS: { value: EmotionalState; label: string; icon: string }[] = [
-  { value: 'peaceful', label: 'Peaceful', icon: '🕊️' },
-  { value: 'grateful', label: 'Grateful', icon: '🙏' },
-  { value: 'happy', label: 'Happy', icon: '☀️' },
-  { value: 'anxious', label: 'Anxious', icon: '🌊' },
-  { value: 'sad', label: 'Sad', icon: '🌧️' },
-  { value: 'tired', label: 'Tired', icon: '🌙' },
-  { value: 'overwhelmed', label: 'Overwhelmed', icon: '🌪️' },
-  { value: 'confused', label: 'Confused', icon: '🌫️' },
-  { value: 'angry', label: 'Frustrated', icon: '🔥' },
-  { value: 'lost', label: 'Lost', icon: '🧭' },
-];
+// Emotion icons by value
+const EMOTION_ICONS: Record<EmotionalState, string> = {
+  peaceful: '🕊️',
+  grateful: '🙏',
+  happy: '☀️',
+  anxious: '🌊',
+  sad: '🌧️',
+  tired: '🌙',
+  overwhelmed: '🌪️',
+  confused: '🌫️',
+  angry: '🔥',
+  lost: '🧭',
+};
+
+const EMOTION_VALUES: EmotionalState[] = ['peaceful', 'grateful', 'happy', 'anxious', 'sad', 'tired', 'overwhelmed', 'confused', 'angry', 'lost'];
 
 export function DivineMoodCheckIn({
   onMoodSubmit,
@@ -165,6 +168,8 @@ export function DivineMoodCheckIn({
   compact = false,
   className = '',
 }: DivineMoodCheckInProps) {
+  const { t } = useLanguage();
+
   // Safe context access with error handling
   let contextActions: ReturnType<typeof useDivineConsciousness>['actions'] | null = null;
   let contextError = false;
@@ -231,10 +236,10 @@ export function DivineMoodCheckIn({
     }
     // Fallback greeting based on time
     const hour = new Date().getHours();
-    if (hour >= 4 && hour < 12) return "As the morning unfolds, let your heart open...";
-    if (hour >= 12 && hour < 17) return "In the fullness of the day, find your center...";
-    if (hour >= 17 && hour < 21) return "As the day softens, let your heart soften too...";
-    return "In the quiet of night, surrender to stillness...";
+    if (hour >= 4 && hour < 12) return t('divine.sacred.moodCheckin.fallback.morning', "As the morning unfolds, let your heart open...");
+    if (hour >= 12 && hour < 17) return t('divine.sacred.moodCheckin.fallback.afternoon', "In the fullness of the day, find your center...");
+    if (hour >= 17 && hour < 21) return t('divine.sacred.moodCheckin.fallback.evening', "As the day softens, let your heart soften too...");
+    return t('divine.sacred.moodCheckin.fallback.night', "In the quiet of night, surrender to stillness...");
   }, [contextActions, contextError]);
 
   // Memoize serenity moment
@@ -242,7 +247,7 @@ export function DivineMoodCheckIn({
     if (contextActions && !contextError) {
       return contextActions.getSerenityMoment();
     }
-    return "🕊️ *Peace settles like soft snow...*";
+    return `🕊️ *${t('divine.sacred.moodCheckin.fallback.serenity', 'Peace settles like soft snow...')}*`;
   }, [contextActions, contextError]);
 
   // Show loading state until ready
@@ -250,7 +255,7 @@ export function DivineMoodCheckIn({
     return (
       <div className={`w-full max-w-lg mx-auto ${className}`}>
         <div className="text-center py-4">
-          <div className="text-white/40 text-sm">Preparing sacred space...</div>
+          <div className="text-white/40 text-sm">{t('divine.sacred.moodCheckin.preparingSacredSpace', 'Preparing sacred space...')}</div>
         </div>
       </div>
     );
@@ -275,7 +280,7 @@ export function DivineMoodCheckIn({
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              *Take a gentle breath...*
+              {t('divine.sacred.moodCheckin.takeBreath', '*Take a gentle breath...*')}
             </motion.p>
 
             <motion.p
@@ -288,7 +293,7 @@ export function DivineMoodCheckIn({
             </motion.p>
 
             <h3 className="text-xl font-light text-white/90 mb-6">
-              How does your heart feel right now?
+              {t('divine.sacred.moodCheckin.title', 'How does your heart feel right now?')}
             </h3>
 
             {/* Mood slider visualization - optimized with memoized bars */}
@@ -306,9 +311,9 @@ export function DivineMoodCheckIn({
 
               {/* Labels */}
               <div className="flex justify-between mt-3 w-full max-w-md mx-auto px-2">
-                <span className="text-[10px] sm:text-xs text-white/40">Struggling</span>
-                <span className="text-[10px] sm:text-xs text-white/40">Steady</span>
-                <span className="text-[10px] sm:text-xs text-white/40">Radiant</span>
+                <span className="text-[10px] sm:text-xs text-white/40">{t('divine.sacred.moodCheckin.levels.struggling', 'Struggling')}</span>
+                <span className="text-[10px] sm:text-xs text-white/40">{t('divine.sacred.moodCheckin.levels.steady', 'Steady')}</span>
+                <span className="text-[10px] sm:text-xs text-white/40">{t('divine.sacred.moodCheckin.levels.radiant', 'Radiant')}</span>
               </div>
             </div>
           </motion.div>
@@ -325,15 +330,19 @@ export function DivineMoodCheckIn({
             className="text-center"
           >
             <h3 className="text-lg sm:text-xl font-light text-white/90 mb-2">
-              What best describes this feeling?
+              {t('divine.sacred.moodCheckin.whatDescribes', 'What best describes this feeling?')}
             </h3>
             <p className="text-white/50 text-xs sm:text-sm mb-5 sm:mb-6">
-              Select the emotion closest to your experience
+              {t('divine.sacred.moodCheckin.selectEmotion', 'Select the emotion closest to your experience')}
             </p>
 
             {/* Responsive grid - 5 cols on desktop, 3 on mobile */}
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
-              {EMOTIONS.map(({ value, label, icon }) => (
+              {EMOTION_VALUES.map((value) => {
+                const icon = EMOTION_ICONS[value];
+                const labelKey = value === 'angry' ? 'frustrated' : value;
+                const label = t(`divine.sacred.moodCheckin.emotions.${labelKey}`, value);
+                return (
                 <button
                   key={value}
                   onClick={() => handleEmotionSelect(value)}
@@ -347,7 +356,8 @@ export function DivineMoodCheckIn({
                   <span className="text-xl sm:text-2xl mb-1">{icon}</span>
                   <span className="text-[10px] sm:text-xs text-white/70">{label}</span>
                 </button>
-              ))}
+              );
+              })}
             </div>
 
             <button
@@ -407,7 +417,7 @@ export function DivineMoodCheckIn({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}
               >
-                <p className="text-sm text-white/50 mb-2">🙏 Sacred Practice</p>
+                <p className="text-sm text-white/50 mb-2">🙏 {t('divine.sacred.moodCheckin.sacredPractice', 'Sacred Practice')}</p>
                 <p className="text-white/80 text-sm">{response.practice}</p>
               </motion.div>
             )}
@@ -420,7 +430,7 @@ export function DivineMoodCheckIn({
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1 }}
               >
-                <p className="text-sm text-white/50 mb-1">✨ Affirmation</p>
+                <p className="text-sm text-white/50 mb-1">✨ {t('divine.sacred.moodCheckin.affirmationLabel', 'Affirmation')}</p>
                 <p className="text-white/80 italic">&quot;{response.affirmation}&quot;</p>
               </motion.div>
             )}
@@ -436,7 +446,7 @@ export function DivineMoodCheckIn({
                 onClick={handleReset}
                 className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-white/80 text-sm transition-all"
               >
-                Check In Again
+                {t('divine.sacred.moodCheckin.checkInAgain', 'Check In Again')}
               </button>
             </motion.div>
           </motion.div>

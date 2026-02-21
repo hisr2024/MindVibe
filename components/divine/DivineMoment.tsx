@@ -13,6 +13,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDivineConsciousness } from '@/contexts/DivineConsciousnessContext';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface DivineMomentProps {
   type?: 'instant_peace' | 'divine_presence' | 'gratitude' | 'affirmation' | 'reminder';
@@ -23,66 +24,53 @@ interface DivineMomentProps {
   className?: string;
 }
 
-const MOMENT_CONTENT = {
-  instant_peace: {
-    icon: '🕊️',
-    title: 'Instant Peace',
-    guidance: [
-      'Close your eyes...',
-      'Take one deep breath...',
-      'Feel your body...',
-      'Notice where you hold tension...',
-      'And soften it...',
-      'Peace is not something to find...',
-      'It\'s something to remember...',
-      'In your heart, whisper: "I am peace."',
-      'Rest in this truth...',
-    ],
-    closing: 'Open your eyes when ready, carrying this peace.',
-  },
-  divine_presence: {
-    icon: '✨',
-    title: 'Divine Presence',
-    guidance: [
-      'Pause... become very still...',
-      'Something greater is here with you...',
-      'Can you feel it?',
-      'Just at the edge of awareness...',
-      'A presence... loving... patient... eternal...',
-      'It has always been here...',
-      'Watching over you. Holding you. Loving you.',
-      'Breathe... and let yourself be seen by the divine.',
-      'You are known. You are cherished. You are held.',
-    ],
-    closing: 'Rest in this embrace...',
-  },
-  gratitude: {
-    icon: '🙏',
-    title: 'Gratitude Breath',
-    guidance: [
-      'Place your hand on your heart...',
-      'Feel its sacred rhythm...',
-      'Inhale gratitude...',
-      'Exhale blessing...',
-      'Inhale "thank you"...',
-      'Exhale "I give thanks"...',
-      'The warmth you feel...',
-      'Is your connection to all that is...',
-    ],
-    closing: 'Carry this gratitude with you. 💙',
-  },
-  affirmation: {
-    icon: '💫',
-    title: 'Sacred Affirmation',
-    guidance: [], // Will be filled dynamically
-    closing: 'Let this truth settle into your being.',
-  },
-  reminder: {
-    icon: '🌟',
-    title: 'Divine Reminder',
-    guidance: [], // Will be filled dynamically
-    closing: 'You are never alone.',
-  },
+const MOMENT_ICONS: Record<string, string> = {
+  instant_peace: '🕊️',
+  divine_presence: '✨',
+  gratitude: '🙏',
+  affirmation: '💫',
+  reminder: '🌟',
+};
+
+const MOMENT_GUIDANCE_COUNTS: Record<string, number> = {
+  instant_peace: 9,
+  divine_presence: 9,
+  gratitude: 8,
+};
+
+const MOMENT_GUIDANCE_FALLBACKS: Record<string, string[]> = {
+  instant_peace: [
+    'Close your eyes...',
+    'Take one deep breath...',
+    'Feel your body...',
+    'Notice where you hold tension...',
+    'And soften it...',
+    'Peace is not something to find...',
+    'It\'s something to remember...',
+    'In your heart, whisper: "I am peace."',
+    'Rest in this truth...',
+  ],
+  divine_presence: [
+    'Pause... become very still...',
+    'Something greater is here with you...',
+    'Can you feel it?',
+    'Just at the edge of awareness...',
+    'A presence... loving... patient... eternal...',
+    'It has always been here...',
+    'Watching over you. Holding you. Loving you.',
+    'Breathe... and let yourself be seen by the divine.',
+    'You are known. You are cherished. You are held.',
+  ],
+  gratitude: [
+    'Place your hand on your heart...',
+    'Feel its sacred rhythm...',
+    'Inhale gratitude...',
+    'Exhale blessing...',
+    'Inhale "thank you"...',
+    'Exhale "I give thanks"...',
+    'The warmth you feel...',
+    'Is your connection to all that is...',
+  ],
 };
 
 export function DivineMoment({
@@ -94,43 +82,57 @@ export function DivineMoment({
   className = '',
 }: DivineMomentProps) {
   const { actions } = useDivineConsciousness();
+  const { t } = useLanguage();
 
   const [isVisible, setIsVisible] = useState(autoShow);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [content, setContent] = useState(MOMENT_CONTENT[type]);
+
+  const icon = MOMENT_ICONS[type] || '🕊️';
+  const title = t(`divine.sacred.moments.types.${type}.name`, type === 'instant_peace' ? 'Instant Peace' : type === 'divine_presence' ? 'Divine Presence' : type === 'gratitude' ? 'Gratitude Breath' : type === 'affirmation' ? 'Sacred Affirmation' : 'Divine Reminder');
+  const closing = t(`divine.sacred.moments.types.${type}.closing`, 'Peace be with you.');
+
+  const [content, setContent] = useState<{ icon: string; title: string; guidance: string[]; closing: string }>({ icon, title, guidance: [], closing });
 
   // Setup content (especially for dynamic types)
   useEffect(() => {
-    const baseContent = { ...MOMENT_CONTENT[type] };
+    const guidanceCount = MOMENT_GUIDANCE_COUNTS[type] || 0;
+    const fallbacks = MOMENT_GUIDANCE_FALLBACKS[type] || [];
+    let guidance: string[] = [];
+
+    if (type === 'instant_peace' || type === 'divine_presence' || type === 'gratitude') {
+      guidance = Array.from({ length: guidanceCount }, (_, i) =>
+        t(`divine.sacred.moments.types.${type}.guidance.${i}`, fallbacks[i] || '')
+      );
+    }
 
     if (type === 'affirmation') {
       const affirmation = actions.getDivineAffirmation();
-      baseContent.guidance = [
-        'Take a breath...',
-        'And receive this truth:',
+      guidance = [
+        t('divine.sacred.moments.types.affirmation.takeBreath', 'Take a breath...'),
+        t('divine.sacred.moments.types.affirmation.receiveThis', 'And receive this truth:'),
         `"${affirmation}"`,
-        'Feel these words...',
-        'Let them sink in...',
-        'This is true about you.',
+        t('divine.sacred.moments.types.affirmation.feelWords', 'Feel these words...'),
+        t('divine.sacred.moments.types.affirmation.letSinkIn', 'Let them sink in...'),
+        t('divine.sacred.moments.types.affirmation.trueAboutYou', 'This is true about you.'),
       ];
     }
 
     if (type === 'reminder') {
       const reminder = actions.getDivineReminder();
-      baseContent.guidance = [
-        'Pause for a moment...',
-        'And remember:',
+      guidance = [
+        t('divine.sacred.moments.types.reminder.pauseMoment', 'Pause for a moment...'),
+        t('divine.sacred.moments.types.reminder.andRemember', 'And remember:'),
         reminder,
-        'Let this settle...',
-        'You are held.',
+        t('divine.sacred.moments.types.reminder.letSettle', 'Let this settle...'),
+        t('divine.sacred.moments.types.reminder.youAreHeld', 'You are held.'),
       ];
     }
 
-    setContent(baseContent);
+    setContent({ icon, title, guidance, closing });
     setCurrentIndex(0);
     setProgress(0);
-  }, [type, actions, isVisible]);
+  }, [type, actions, isVisible, t, icon, title, closing]);
 
   // Progress through guidance
   useEffect(() => {

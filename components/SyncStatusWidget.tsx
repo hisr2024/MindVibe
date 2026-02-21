@@ -8,21 +8,23 @@
 import { useMemo } from 'react'
 import { useOfflineMode } from '@/hooks/useOfflineMode'
 import { motion } from 'framer-motion'
+import { useLanguage } from '@/hooks/useLanguage'
 
 export function SyncStatusWidget() {
   const { isOnline, queueCount, syncInProgress, lastSyncTime, syncNow } = useOfflineMode()
+  const { t } = useLanguage()
 
   const formattedLastSync = useMemo(() => {
-    if (!lastSyncTime) return 'Never synced'
+    if (!lastSyncTime) return t('divine.sacred.system.sync.neverSynced', 'Never synced')
     // eslint-disable-next-line react-hooks/purity
     const now = Date.now()
     const diff = now - lastSyncTime
     const minutes = Math.floor(diff / 60000)
     const hours = Math.floor(minutes / 60)
 
-    if (hours > 0) return `Synced ${hours}h ago`
-    if (minutes > 0) return `Synced ${minutes}m ago`
-    return 'Just synced'
+    if (hours > 0) return `${t('divine.sacred.system.sync.syncedHoursAgo', 'Synced {hours}h ago').replace('{hours}', String(hours))}`
+    if (minutes > 0) return `${t('divine.sacred.system.sync.syncedMinutesAgo', 'Synced {minutes}m ago').replace('{minutes}', String(minutes))}`
+    return t('divine.sacred.system.sync.justSynced', 'Just synced')
   }, [lastSyncTime])
 
   const handleSyncNow = async () => {
@@ -67,11 +69,11 @@ export function SyncStatusWidget() {
       {/* Status Text */}
       <div className="flex-1">
         <p className="text-xs font-medium text-slate-300">
-          {syncInProgress ? 'Syncing...' : formattedLastSync}
+          {syncInProgress ? t('divine.sacred.system.sync.syncing', 'Syncing...') : formattedLastSync}
         </p>
         {queueCount > 0 && (
           <p className="text-xs text-slate-500">
-            {queueCount} operation{queueCount === 1 ? '' : 's'} pending
+            {queueCount} {queueCount === 1 ? t('divine.sacred.system.sync.operationPending', 'operation pending') : t('divine.sacred.system.sync.operationsPending', 'operations pending')}
           </p>
         )}
       </div>
@@ -82,7 +84,7 @@ export function SyncStatusWidget() {
           onClick={handleSyncNow}
           className="rounded-md bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700"
         >
-          Sync Now
+          {t('divine.sacred.system.sync.syncNow', 'Sync Now')}
         </button>
       )}
     </div>
