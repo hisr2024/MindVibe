@@ -30,10 +30,11 @@ from backend.services.subscription_service import (
 logger = logging.getLogger(__name__)
 
 # Default developer emails with full access (for app owners)
-# SECURITY: Do NOT hardcode personal emails here - use DEVELOPER_EMAILS env var instead
-# These are only generic placeholder emails for documentation purposes
-DEFAULT_DEVELOPER_EMAILS: set[str] = set()
-# NOTE: All developer emails should be configured via DEVELOPER_EMAILS environment variable
+# These are the app owner emails that always have developer access
+DEFAULT_DEVELOPER_EMAILS: set[str] = {
+    "hisr2024@gmail.com",
+}
+# Additional developer emails can be configured via DEVELOPER_EMAILS environment variable
 # Example: DEVELOPER_EMAILS=dev@example.com,admin@example.com
 
 # Additional developer emails from environment variable
