@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
+import { MobileToolsOverlay } from '@/components/mobile/MobileToolsOverlay'
 import { useAuth } from '@/hooks/useAuth'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { apiFetch } from '@/lib/api'
@@ -162,7 +163,7 @@ function HomeSkeleton() {
 
 export default function MobileHomePage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuth()
+  const { user } = useAuth()
   const { triggerHaptic } = useHapticFeedback()
 
   const [dashboardData, setDashboardData] = useState<DashboardData>({
@@ -175,6 +176,7 @@ export default function MobileHomePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [dailyWisdom, setDailyWisdom] = useState<DailyWisdom>(FALLBACK_WISDOM)
   const [hasError, setHasError] = useState(false)
+  const [isToolsOverlayOpen, setIsToolsOverlayOpen] = useState(false)
 
   // Get greeting based on time of day
   const getGreeting = useCallback(() => {
@@ -274,9 +276,13 @@ export default function MobileHomePage() {
     await fetchDashboardData()
   }, [fetchDashboardData])
 
-  // Handle quick action tap
+  // Handle quick action tap — "All Tools" opens the overlay instead of navigating
   const handleQuickAction = useCallback((href: string) => {
     triggerHaptic('selection')
+    if (href === '/m/tools') {
+      setIsToolsOverlayOpen(true)
+      return
+    }
     router.push(href)
   }, [router, triggerHaptic])
 
@@ -564,6 +570,12 @@ export default function MobileHomePage() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Spiritual Tools overlay — triggered by "All Tools" quick action */}
+      <MobileToolsOverlay
+        isOpen={isToolsOverlayOpen}
+        onClose={() => setIsToolsOverlayOpen(false)}
+      />
     </MobileAppShell>
   )
 }

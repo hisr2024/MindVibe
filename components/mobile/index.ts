@@ -131,6 +131,12 @@ export {
   type MobilePageProps,
 } from './MobileAppShell'
 
+// Mobile Tools Overlay (slide-up spiritual tools)
+export {
+  MobileToolsOverlay,
+  type MobileToolsOverlayProps,
+} from './MobileToolsOverlay'
+
 // Mobile KIAAN Chat
 export {
   MobileKiaanChat,
