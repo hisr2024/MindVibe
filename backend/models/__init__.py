@@ -25,6 +25,7 @@ from backend.models.user import (
 from backend.models.auth import (
     Session,
     RefreshToken,
+    PasswordResetToken,
 )
 
 # Achievement & gamification models
@@ -177,6 +178,22 @@ from backend.models.chat import (
     ChatTranslation,
 )
 
+# Feedback models
+from backend.models.feedback import (
+    FeedbackRating,
+    FeedbackSummaryCache,
+)
+
+# Notification models
+from backend.models.notification import (
+    NotificationChannel,
+    NotificationStatus,
+    PushSubscription,
+    NotificationTemplate,
+    Notification,
+    NotificationPreference,
+)
+
 # Companion (KIAAN Best Friend) models
 from backend.models.companion import (
     CompanionMood,
@@ -250,6 +267,7 @@ __all__ = [
     "UserProfile",
     "Session",
     "RefreshToken",
+    "PasswordResetToken",
     # Achievement & Gamification models
     "Achievement",
     "UserAchievement",
@@ -360,6 +378,16 @@ __all__ = [
     "CompanionMessage",
     "CompanionMemory",
     "CompanionProfile",
+    # Feedback models
+    "FeedbackRating",
+    "FeedbackSummaryCache",
+    # Notification models
+    "NotificationChannel",
+    "NotificationStatus",
+    "PushSubscription",
+    "NotificationTemplate",
+    "Notification",
+    "NotificationPreference",
     # Team & collaboration models
     "TeamRole",
     "TeamPermission",

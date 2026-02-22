@@ -16,12 +16,12 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
-from openai import OpenAI
+from fastapi import APIRouter, Depends, HTTPException, Request
+from openai import AsyncOpenAI  # noqa: F401 - used at module level
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_db, get_current_user_flexible
+from backend.deps import get_db, get_current_user_optional
 from backend.services.karma_reset_service import KarmaResetService
 
 # Configure logging
@@ -130,9 +130,9 @@ openai_key = os.getenv("OPENAI_API_KEY")
 
 if openai_key and openai_key != "your-api-key-here":
     try:
-        client = OpenAI(api_key=openai_key)
+        client = AsyncOpenAI(api_key=openai_key, timeout=30.0)
         ready = True
-        logger.info("Karma Reset KIAAN: OpenAI client initialized")
+        logger.info("Karma Reset KIAAN: AsyncOpenAI client initialized")
     except Exception as e:
         logger.error(f"Karma Reset KIAAN: Failed to initialize OpenAI: {str(e)}")
         ready = False
@@ -149,8 +149,10 @@ karma_reset_service = KarmaResetService()
 
 @router.post("/generate", response_model=KarmaResetKiaanResponse)
 async def generate_kiaan_karma_reset(
-    request: KarmaResetKiaanRequest,
-    db: AsyncSession = Depends(get_db)
+    request: Request,
+    body: KarmaResetKiaanRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: str | None = Depends(get_current_user_optional)
 ) -> KarmaResetKiaanResponse:
     """
     Generate karma reset guidance with KIAAN ecosystem integration.
@@ -167,9 +169,9 @@ async def generate_kiaan_karma_reset(
     start_time = datetime.now()
     
     # Extract and normalize request data
-    situation = request.situation or "A brief misstep"
-    feeling = request.feeling or "Someone I care about"
-    repair_type = request.repair_type or "apology"
+    situation = body.situation or "A brief misstep"
+    feeling = body.feeling or "Someone I care about"
+    repair_type = body.repair_type or "apology"
     
     logger.info(
         f"[{request_id}] KIAAN Karma Reset request",
@@ -236,7 +238,7 @@ Example format:
 }}
 """
             
-            response = client.chat.completions.create(
+            response = await client.chat.completions.create(
                 model="gpt-4",
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -375,7 +377,7 @@ class JourneyResetResponse(BaseModel):
 async def reset_user_journey(
     request: JourneyResetRequest,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_flexible)
+    user_id: str = Depends(get_current_user_optional)
 ) -> JourneyResetResponse:
     """
     Reset user's KIAAN journey data with wisdom-based fresh start guidance.
@@ -518,7 +520,7 @@ Provide encouraging wisdom for their fresh start in JSON format with these keys:
 Tone: warm, encouraging, wisdom-based, non-judgmental.
 """
                 
-                response = client.chat.completions.create(
+                response = await client.chat.completions.create(
                     model="gpt-4",
                     messages=[
                         {"role": "system", "content": prompt},

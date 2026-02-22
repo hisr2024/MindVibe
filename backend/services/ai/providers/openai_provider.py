@@ -5,6 +5,7 @@ Wraps the existing OpenAI integration in the codebase.
 Uses GPT-4o-mini by default for cost optimization.
 """
 
+import asyncio
 import logging
 import os
 import time
@@ -65,6 +66,7 @@ class OpenAIProvider(AIProvider):
             self._client = AsyncOpenAI(
                 api_key=self._api_key,
                 base_url=self._base_url,
+                timeout=30.0,  # 30s timeout instead of default 10 minutes
             )
 
     @property
@@ -174,8 +176,8 @@ class OpenAIProvider(AIProvider):
                 status_code=e.status_code,
             )
 
-        except TimeoutError as e:
-            raise TimeoutError(str(e), self.name)
+        except asyncio.TimeoutError as e:
+            raise TimeoutError(f"OpenAI request timed out: {e}", self.name)
 
         except Exception as e:
             logger.error(f"OpenAI unexpected error: {type(e).__name__}: {e}")
@@ -196,11 +198,12 @@ class OpenAIProvider(AIProvider):
         start_time = time.time()
 
         try:
-            # Make a minimal request to check health
+            # Make a minimal request to check health (short timeout)
             response = await self._client.chat.completions.create(
                 model=self._model,
                 messages=[{"role": "user", "content": "Hi"}],
                 max_tokens=5,
+                timeout=10.0,  # Short timeout for health checks
             )
 
             latency_ms = int((time.time() - start_time) * 1000)

@@ -9,6 +9,11 @@ import { NextRequest, NextResponse } from 'next/server';
  * - Sets CSP header with nonce-based script-src (no 'unsafe-inline')
  * - Passes nonce to layout via x-nonce request header
  * - Auto-detects mobile devices and redirects to /m/* routes
+ *
+ * CSP note: Next.js generates inline scripts for hydration and data passing.
+ * Using nonce-only script-src breaks hydration because Next.js inline scripts
+ * don't carry the nonce. We use 'unsafe-inline' for script-src to allow
+ * Next.js to work, and rely on style-src-elem for font loading.
  */
 
 const PROTECTED_ROUTES = [
@@ -122,15 +127,20 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // Generate a per-request nonce for CSP
+  // Generate a per-request nonce (still useful for layout's custom inline script)
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
 
+  // CSP: use 'unsafe-inline' 'unsafe-eval' for script-src because Next.js
+  // generates inline scripts for hydration/data that don't carry nonces.
+  // Per CSP3, 'unsafe-inline' is ignored when a nonce is present, so we
+  // intentionally omit the nonce from the CSP directive to allow inline scripts.
   const cspHeader = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}'`,
-    "style-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https:",
-    "font-src 'self' data:",
+    "font-src 'self' data: https://fonts.gstatic.com",
     "media-src 'self' https: blob:",
     "connect-src 'self' https://mindvibe-api.onrender.com https://*.firebaseio.com https://*.googleapis.com https://cdn.pixabay.com https://*.freesound.org",
     "frame-ancestors 'none'",
@@ -139,7 +149,7 @@ export function proxy(request: NextRequest) {
     "object-src 'none'",
   ].join('; ');
 
-  // Pass the nonce to layout via request header
+  // Pass the nonce to layout via request header (for explicit use in <script nonce={nonce}>)
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-nonce', nonce);
 

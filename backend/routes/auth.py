@@ -1,3 +1,6 @@
+import logging
+import secrets
+import uuid
 from datetime import UTC, datetime, timedelta
 
 import pyotp
@@ -10,9 +13,11 @@ from backend.core.settings import settings
 from backend.deps import get_db
 from backend.middleware.rate_limiter import limiter, AUTH_RATE_LIMIT
 from backend.models import Session, User
+from backend.models.auth import PasswordResetToken
 from backend.security.jwt import create_access_token, decode_access_token
 from backend.security.password_hash import hash_password, verify_password
 from backend.security.password_policy import policy
+from backend.services.email_service import send_password_reset_email
 from backend.services.refresh_service import (
     create_refresh_token,
     get_refresh_token_by_raw,
@@ -29,6 +34,8 @@ from backend.services.session_service import (
     session_is_active,
     touch_session,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -715,4 +722,151 @@ async def refresh_tokens(
         expires_in=expires_in_seconds,
         session_id=str(session_row.id),
         refresh_token=new_raw if settings.REFRESH_TOKEN_ENABLE_BODY_RETURN else None,
+    )
+
+
+# ----------------------
+# Password Reset: Forgot + Reset
+# ----------------------
+
+RESET_TOKEN_EXPIRE_HOURS = 1
+
+
+class ForgotPasswordIn(BaseModel):
+    email: EmailStr
+
+
+class ForgotPasswordOut(BaseModel):
+    message: str
+
+
+class ResetPasswordIn(BaseModel):
+    token: str
+    new_password: str
+
+
+class ResetPasswordOut(BaseModel):
+    message: str
+
+
+@router.post("/forgot-password", response_model=ForgotPasswordOut)
+@limiter.limit("5/minute")
+async def forgot_password(
+    request: Request, payload: ForgotPasswordIn, db: AsyncSession = Depends(get_db)
+):
+    """Request a password reset email.
+
+    Always returns success to prevent account enumeration.
+    If the email exists, a reset link is sent. If not, nothing happens.
+    """
+    email_norm = payload.email.lower()
+
+    # Always return same response to prevent account enumeration
+    generic_response = ForgotPasswordOut(
+        message="If an account with that email exists, a password reset link has been sent."
+    )
+
+    stmt = select(User).where(User.email == email_norm, User.deleted_at.is_(None))
+    user = (await db.execute(stmt)).scalars().first()
+
+    if not user:
+        logger.info("Password reset requested for non-existent email: %s", email_norm)
+        return generic_response
+
+    # Invalidate any existing unused reset tokens for this user
+    await db.execute(
+        update(PasswordResetToken)
+        .where(
+            PasswordResetToken.user_id == user.id,
+            PasswordResetToken.used_at.is_(None),
+        )
+        .values(used_at=datetime.now(UTC))
+    )
+
+    # Generate cryptographically secure token
+    raw_token = secrets.token_urlsafe(32)
+    token_hash = hash_password(raw_token)
+
+    reset_row = PasswordResetToken(
+        id=str(uuid.uuid4()),
+        user_id=user.id,
+        token_hash=token_hash,
+        expires_at=datetime.now(UTC) + timedelta(hours=RESET_TOKEN_EXPIRE_HOURS),
+        ip_address=request.client.host if request.client else None,
+    )
+    db.add(reset_row)
+    await db.commit()
+
+    # Send email (non-blocking — failure logged but doesn't break the flow)
+    sent = await send_password_reset_email(user.email, raw_token)
+    if not sent:
+        logger.warning("Failed to send reset email to user %s", user.id)
+
+    logger.info("Password reset token created for user %s", user.id)
+    return generic_response
+
+
+@router.post("/reset-password", response_model=ResetPasswordOut)
+@limiter.limit("10/minute")
+async def reset_password(
+    request: Request, payload: ResetPasswordIn, db: AsyncSession = Depends(get_db)
+):
+    """Reset password using a valid reset token.
+
+    The token is single-use and expires after 1 hour.
+    On success, all existing sessions are revoked for security.
+    """
+    # Validate new password against policy
+    result = policy.validate(payload.new_password)
+    if not result.ok:
+        raise HTTPException(status_code=422, detail=result.errors)
+
+    # Find all non-expired, unused reset tokens
+    stmt = select(PasswordResetToken).where(
+        PasswordResetToken.used_at.is_(None),
+        PasswordResetToken.expires_at > datetime.now(UTC),
+    )
+    candidates = (await db.execute(stmt)).scalars().all()
+
+    # Verify token against hashed candidates (bcrypt compare)
+    matched_token = None
+    for candidate in candidates:
+        if verify_password(payload.token, candidate.token_hash):
+            matched_token = candidate
+            break
+
+    if not matched_token:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired reset token. Please request a new one.",
+        )
+
+    # Mark token as used
+    matched_token.used_at = datetime.now(UTC)
+
+    # Update user's password
+    new_hashed = hash_password(payload.new_password)
+    await db.execute(
+        update(User)
+        .where(User.id == matched_token.user_id)
+        .values(
+            hashed_password=new_hashed,
+            failed_login_attempts=0,
+            locked_until=None,
+        )
+    )
+
+    # Revoke all existing sessions for security
+    await db.execute(
+        update(Session)
+        .where(Session.user_id == matched_token.user_id, Session.revoked_at.is_(None))
+        .values(revoked_at=datetime.now(UTC))
+    )
+
+    await db.commit()
+
+    logger.info("Password reset completed for user %s", matched_token.user_id)
+
+    return ResetPasswordOut(
+        message="Password has been reset successfully. Please log in with your new password."
     )

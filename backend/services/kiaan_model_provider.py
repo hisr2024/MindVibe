@@ -405,7 +405,7 @@ class ConnectivityChecker:
     async def check_connectivity(self, force: bool = False) -> ConnectionStatus:
         """Check overall connectivity status."""
         now = datetime.now()
-        if not force and (now - self._last_check).seconds < self._check_interval:
+        if not force and (now - self._last_check).total_seconds() < self._check_interval:
             return self._status
 
         # Quick internet check
@@ -440,7 +440,7 @@ class ConnectivityChecker:
         """Quick check if internet is available."""
         try:
             # Try to resolve a common domain
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             await asyncio.wait_for(
                 loop.run_in_executor(None, socket.gethostbyname, "api.openai.com"),
                 timeout=2.0
@@ -498,8 +498,11 @@ class ConnectivityChecker:
         for provider, status in self._provider_status.items():
             if status:
                 available.append(provider)
-        # Local providers are always available if models exist
-        available.extend([ModelProvider.LOCAL, ModelProvider.OLLAMA, ModelProvider.LM_STUDIO])
+        # Only add local providers if they are actually available
+        if LLAMA_CPP_AVAILABLE and local_model_registry.has_any_model():
+            available.append(ModelProvider.LOCAL)
+        # Ollama and LM Studio availability is checked at runtime via their
+        # clients; don't unconditionally add them here
         return available
 
 
@@ -1094,7 +1097,8 @@ class LocalLLMClient(BaseModelClient):
     def __init__(self):
         self.model_path = os.getenv("LOCAL_MODEL_PATH", str(Path.home() / ".mindvibe" / "models"))
         self.loaded_model: Optional[Any] = None
-        self.loaded_model_name: Optional[str] = None
+        self.loaded_model_name: Optional[str] = None  # Stores file path of loaded model
+        self._loaded_logical_name: Optional[str] = None  # Stores logical name (e.g. "mistral-7b-local")
         self.context_size = int(os.getenv("LOCAL_MODEL_CONTEXT_SIZE", "4096"))
         self.n_threads = int(os.getenv("MAX_LOCAL_MODEL_THREADS", "4"))
         self._registry = local_model_registry
@@ -1127,13 +1131,20 @@ class LocalLLMClient(BaseModelClient):
 
     def _ensure_model_loaded(self, model: str) -> bool:
         """Ensure a model is loaded, loading if necessary."""
-        if self.loaded_model is not None and self.loaded_model_name == model:
+        # Check if the requested model (by logical name or file path) is already loaded
+        if self.loaded_model is not None and (
+            self.loaded_model_name == model or
+            self._loaded_logical_name == model
+        ):
             return True
 
         # Find model file
         model_info = self._registry.get_model_info(model)
         if model_info:
-            return self._load_model(model_info.path)
+            success = self._load_model(model_info.path)
+            if success:
+                self._loaded_logical_name = model
+            return success
 
         # Try to find by partial name match
         available = self._registry.get_available_models()
@@ -1141,14 +1152,20 @@ class LocalLLMClient(BaseModelClient):
             if model.lower() in name.lower():
                 info = self._registry.get_model_info(name)
                 if info:
-                    return self._load_model(info.path)
+                    success = self._load_model(info.path)
+                    if success:
+                        self._loaded_logical_name = model
+                    return success
 
         # Use best available model
         best = self._registry.get_best_available_model()
         if best:
             info = self._registry.get_model_info(best)
             if info:
-                return self._load_model(info.path)
+                success = self._load_model(info.path)
+                if success:
+                    self._loaded_logical_name = model
+                return success
 
         return False
 
@@ -1177,13 +1194,17 @@ class LocalLLMClient(BaseModelClient):
                 async for chunk in self._stream_completion(prompt, temperature, max_tokens):
                     yield chunk
             else:
-                # Full response
-                response = self.loaded_model(
-                    prompt,
-                    max_tokens=max_tokens or 512,
-                    temperature=temperature,
-                    stop=["</s>", "[/INST]", "User:", "Human:"],
-                    echo=False
+                # Full response - run in executor to avoid blocking event loop
+                loop = asyncio.get_running_loop()
+                response = await loop.run_in_executor(
+                    None,
+                    lambda: self.loaded_model(
+                        prompt,
+                        max_tokens=max_tokens or 512,
+                        temperature=temperature,
+                        stop=["</s>", "[/INST]", "User:", "Human:"],
+                        echo=False
+                    )
                 )
 
                 content = response["choices"][0]["text"].strip()
@@ -1212,21 +1233,46 @@ class LocalLLMClient(BaseModelClient):
         temperature: float,
         max_tokens: Optional[int]
     ) -> AsyncGenerator[str, None]:
-        """Stream completion tokens."""
-        try:
-            for output in self.loaded_model(
-                prompt,
-                max_tokens=max_tokens or 512,
-                temperature=temperature,
-                stop=["</s>", "[/INST]", "User:", "Human:"],
-                stream=True
-            ):
-                token = output["choices"][0]["text"]
-                if token:
-                    yield token
-        except Exception as e:
-            logger.error(f"Streaming error: {e}")
-            raise
+        """Stream completion tokens using a thread to avoid blocking the event loop."""
+        import queue
+
+        token_queue: queue.Queue = queue.Queue()
+        sentinel = object()
+
+        def _run_inference():
+            """Run blocking model inference in a thread."""
+            try:
+                for output in self.loaded_model(
+                    prompt,
+                    max_tokens=max_tokens or 512,
+                    temperature=temperature,
+                    stop=["</s>", "[/INST]", "User:", "Human:"],
+                    stream=True
+                ):
+                    token = output["choices"][0]["text"]
+                    if token:
+                        token_queue.put(token)
+                token_queue.put(sentinel)
+            except Exception as e:
+                token_queue.put(e)
+
+        loop = asyncio.get_running_loop()
+        loop.run_in_executor(None, _run_inference)
+
+        while True:
+            # Poll the queue without blocking the event loop
+            try:
+                item = token_queue.get_nowait()
+            except queue.Empty:
+                await asyncio.sleep(0.01)
+                continue
+
+            if item is sentinel:
+                break
+            if isinstance(item, Exception):
+                logger.error(f"Streaming error: {item}")
+                raise item
+            yield item
 
     def _format_messages(self, messages: list[Message]) -> str:
         """Format messages for local model."""
@@ -1426,10 +1472,12 @@ class KIAANModelProvider:
 
     def is_offline_capable(self) -> bool:
         """Check if offline operation is possible."""
-        return (
-            LLAMA_CPP_AVAILABLE and
-            self.local_registry.has_any_model()
-        ) or self.clients[ModelProvider.OLLAMA]
+        # Check if local GGUF models are available via llama.cpp
+        has_local = LLAMA_CPP_AVAILABLE and self.local_registry.has_any_model()
+        # Note: Ollama availability requires an async check, so we only
+        # report it as offline-capable if local models are confirmed.
+        # Ollama will still be tried at runtime via the fallback chain.
+        return has_local
 
     async def get_best_available_model(self, prefer_local: bool = False) -> str:
         """Get the best currently available model."""
@@ -1459,12 +1507,9 @@ class KIAANModelProvider:
         # Last resort - return whatever local model we have
         return self.offline_default_model
 
-    async def initialize(self) -> dict[str, bool]:
-        """Check availability of all providers."""
-        availability = {}
-        for provider, client in self.clients.items():
-            availability[provider.value] = await client.is_available()
-        return availability
+    # NOTE: initialize() is defined above (line ~1402) with full connectivity
+    # checks, local model scanning, and rich status reporting.
+    # A duplicate bare-bones definition was removed here to prevent silent override.
 
     def get_model_config(self, model_name: str) -> Optional[ModelConfig]:
         """Get configuration for a model."""
@@ -1649,19 +1694,20 @@ class KIAANModelProvider:
         temperature: float = 0.7,
         max_tokens: Optional[int] = None,
         stream: bool = False,
-    ) -> AsyncGenerator[str, None] | ModelResponse:
+    ) -> AsyncGenerator[str | ModelResponse, None]:
         """
         Force completion using only local/offline models.
         Useful for air-gapped environments or when minimizing API costs.
         """
-        return self.complete(
+        async for result in self.complete(
             messages=messages,
             model=model or self.offline_default_model,
             temperature=temperature,
             max_tokens=max_tokens,
             stream=stream,
             prefer_local=True
-        )
+        ):
+            yield result
 
     async def estimate_cost(
         self,

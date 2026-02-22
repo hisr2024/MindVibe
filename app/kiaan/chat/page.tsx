@@ -10,6 +10,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { LanguageSelector } from '@/components/chat/LanguageSelector';
 import { getNextStepSuggestion, extractThemes } from '@/lib/suggestions/nextStep';
 import { useNextStepStore } from '@/lib/suggestions/store';
+import { useKiaanQuota } from '@/hooks/useKiaanQuota';
 
 // Dynamic imports for secondary UI components
 const PathwayMap = dynamic(
@@ -34,6 +35,9 @@ function KiaanChatPageInner() {
 
   // Session tracking for conversation continuity
   const [sessionId] = useState(() => crypto.randomUUID());
+
+  // KIAAN quota tracking — shows remaining questions, warns before limit
+  const quota = useKiaanQuota('free');
 
   // Ref to always access the latest handleSendMessage without stale closures
   const handleSendMessageRef = useRef<(text: string) => Promise<void>>();
@@ -81,6 +85,9 @@ function KiaanChatPageInner() {
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+
+      // Increment local quota counter to keep UI in sync
+      quota.incrementUsage();
     } catch (error) {
       console.error('KIAAN chat error:', error);
 
@@ -276,6 +283,47 @@ function KiaanChatPageInner() {
           <span className="text-lg">🔒</span>
           <span>{t('home.hero.privacy', 'Conversations remain private • a warm, confidential refuge')}</span>
         </div>
+
+        {/* KIAAN Quota Indicator — shows remaining questions, warns at 80% */}
+        {!quota.loading && quota.limit !== -1 && (
+          <div className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-sm ${
+            quota.isExceeded
+              ? 'border-red-500/30 bg-red-500/10 text-red-200'
+              : quota.isWarning
+                ? 'border-amber-500/30 bg-amber-500/10 text-amber-200'
+                : 'border-orange-500/15 bg-white/5 text-orange-100/70'
+          }`}>
+            <div className="flex items-center gap-2">
+              <span className="text-base">{quota.isExceeded ? '⚠️' : '💬'}</span>
+              <span>
+                {quota.isExceeded
+                  ? t('kiaan.quota.exceeded', 'Monthly quota reached')
+                  : `${quota.remaining} ${t('kiaan.quota.remaining', 'questions remaining this month')}`
+                }
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              {/* Compact progress bar */}
+              <div className="hidden sm:block w-24 h-2 rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    quota.isExceeded ? 'bg-red-400' : quota.isWarning ? 'bg-amber-400' : 'bg-orange-400'
+                  }`}
+                  style={{ width: `${Math.min(100, quota.percentage)}%` }}
+                />
+              </div>
+              <span className="text-xs opacity-70">{quota.used}/{quota.limit}</span>
+              {quota.isExceeded && (
+                <Link
+                  href="/pricing"
+                  className="rounded-lg bg-gradient-to-r from-orange-400 to-amber-400 px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:scale-105"
+                >
+                  {t('kiaan.quota.upgrade', 'Upgrade')}
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Message Actions - Only show when there are KIAAN responses */}

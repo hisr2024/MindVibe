@@ -1140,17 +1140,30 @@ async def send_voice_companion_message(
     await db.commit()
 
     # Schedule AI-powered memory extraction in background (does not block response)
+    # IMPORTANT: Use a new DB session for the background task since the request-scoped
+    # session will be closed after the response is sent.
+    _bg_user_id = current_user.id
+    _bg_session_id = session.id
+    _bg_message = body.message
+    _bg_response = response_text
+    _bg_mood = mood
+
     async def _extract_memories_background():
         try:
-            engine = get_companion_engine()
-            ai_memories = await engine.extract_memories_with_ai(
-                user_message=body.message,
-                companion_response=response_text,
-                mood=mood,
-            )
-            if ai_memories:
-                await _save_memories(db, current_user.id, session.id, ai_memories)
-                await db.commit()
+            from backend.deps import SessionLocal
+            async with SessionLocal() as bg_db:
+                try:
+                    engine = get_companion_engine()
+                    ai_memories = await engine.extract_memories_with_ai(
+                        user_message=_bg_message,
+                        companion_response=_bg_response,
+                        mood=_bg_mood,
+                    )
+                    if ai_memories:
+                        await _save_memories(bg_db, _bg_user_id, _bg_session_id, ai_memories)
+                        await bg_db.commit()
+                finally:
+                    await bg_db.close()
         except Exception as e:
             logger.debug(f"VoiceCompanion: Background memory extraction skipped: {e}")
 

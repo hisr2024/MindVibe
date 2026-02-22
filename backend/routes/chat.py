@@ -700,11 +700,16 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             logger.warning(f"KIAAN response validation issues: {kiaan_result['validation']['errors']}")
 
         # Translate response if requested language is not English
+        # NOTE: Skip post-hoc translation when the AI was already instructed to respond
+        # in the target language (via the 'language' parameter passed to get_kiaan_response).
+        # Double-translating produces garbled output.
         translation_result = None
-        if language and language != 'en':
+        if language and language != 'en' and not kiaan_result.get("provider"):
+            # Only translate if the response came from a provider that doesn't support
+            # direct language generation (e.g., cached/fallback responses)
             try:
                 from backend.middleware.translation import translation_middleware
-                
+
                 translation_result = await translation_middleware.translate_response(
                     response=response,
                     target_lang=language,
@@ -712,7 +717,7 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
                     user_id=user_id,
                     session_id=request.headers.get('X-Session-ID')
                 )
-                
+
                 logger.info(f"Translation to {language}: {'success' if translation_result['success'] else 'failed'}")
             except Exception as translation_error:
                 logger.error(f"Translation error: {translation_error}")

@@ -209,8 +209,8 @@ async def divine_chat(
         raise
 
     except Exception as e:
-        logger.error(f"Divine chat error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Divine chat error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="An error occurred processing your request. Please try again.")
 
 
 # ============================================
@@ -352,7 +352,7 @@ async def synthesize_voice(
         raise
     except Exception as e:
         logger.error(f"Synthesis error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An error occurred processing your request. Please try again.")
 
 
 # ============================================
@@ -399,7 +399,7 @@ async def transcribe_voice(request: TranscribeRequest):
 
     except Exception as e:
         logger.error(f"Transcription error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An error occurred processing your request. Please try again.")
 
 
 # ============================================
@@ -489,7 +489,7 @@ async def get_soul_reading(
 
     except Exception as e:
         logger.error(f"Soul reading error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An error occurred processing your request. Please try again.")
 
 
 # ============================================
@@ -544,7 +544,7 @@ async def get_session_summary(
 
     except Exception as e:
         logger.error(f"Session summary error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An error occurred processing your request. Please try again.")
 
 
 @router.delete("/session/{session_id}")
@@ -566,7 +566,7 @@ async def end_session(
 
     except Exception as e:
         logger.error(f"End session error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An error occurred processing your request. Please try again.")
 
 
 # ============================================
