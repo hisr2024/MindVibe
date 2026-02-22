@@ -91,6 +91,7 @@ export function isEnvironmentSupported(): { supported: boolean; reason?: string 
  * Check current microphone permission status
  */
 export async function checkMicrophonePermission(): Promise<MicrophonePermissionState> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { platform, browser, isMobile, isIOS } = detectPlatform()
 
   // Check environment first
@@ -146,7 +147,7 @@ export async function checkMicrophonePermission(): Promise<MicrophonePermissionS
           browser
         }
       }
-    } catch (enumError) {
+    } catch {
       // Enumeration failed, assume we need to prompt
       return { status: 'prompt', canUse: false, platform, browser }
     }
@@ -252,7 +253,7 @@ export async function requestMicrophoneAccess(
 /**
  * Format error messages to be user-friendly and platform-specific
  */
-function formatMicrophoneError(error: unknown, platform: string, browser: string): string {
+function formatMicrophoneError(error: unknown, platform: string, _browser: string): string {
   const errorName = error instanceof Error ? error.name : ''
   const errorMsg = error instanceof Error ? error.message : ''
 

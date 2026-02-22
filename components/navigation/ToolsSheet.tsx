@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import { TOOLS_BY_CATEGORY, type ToolConfig } from '@/lib/constants/tools'

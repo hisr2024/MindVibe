@@ -94,7 +94,7 @@ const INITIAL_ERROR_STATE: AnalyticsErrorState = {
   achievements: null,
 }
 
-export function useAnalytics(userId?: string): UseAnalyticsResult {
+export function useAnalytics(_userId?: string): UseAnalyticsResult {
   // Data states
   const [overview, setOverview] = useState<OverviewMetrics | null>(null)
   const [moodTrends, setMoodTrends] = useState<MoodTrendData | null>(null)

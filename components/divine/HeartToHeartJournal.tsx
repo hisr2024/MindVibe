@@ -13,7 +13,7 @@
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useDivineConsciousness } from '@/contexts/DivineConsciousnessContext';
 import { VoiceInputButton, VoiceResponseButton } from '@/components/voice';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -96,7 +96,7 @@ export function HeartToHeartJournal({
   onClose,
   className = '',
 }: HeartToHeartJournalProps) {
-  const { actions } = useDivineConsciousness();
+  const { actions: _actions } = useDivineConsciousness();
   const [isActive, setIsActive] = useState(isOpen);
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [currentEntry, setCurrentEntry] = useState('');

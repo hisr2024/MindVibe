@@ -23,9 +23,6 @@ import {
   Sun,
   Heart,
   ChevronUp,
-  GripHorizontal,
-  Play,
-  Pause
 } from 'lucide-react'
 import { BinauraBeatsControl } from './BinauraBeatsControl'
 import { SpatialAudioControl } from './SpatialAudioControl'

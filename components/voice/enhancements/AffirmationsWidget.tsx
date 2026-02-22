@@ -18,14 +18,12 @@ import {
   Pause,
   SkipForward,
   Heart,
-  Volume2,
   RefreshCw,
   Star,
   Sun,
   Moon,
   Shield,
   Leaf,
-  Zap,
   BookOpen
 } from 'lucide-react'
 

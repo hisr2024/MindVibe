@@ -18,7 +18,7 @@ export async function copyToClipboard(
   text: string,
   options: CopyOptions = {}
 ): Promise<boolean> {
-  const { preserveFormatting = true, onSuccess, onError } = options;
+  const { preserveFormatting: _preserveFormatting = true, onSuccess, onError } = options;
 
   try {
     // Modern Clipboard API (preferred)

@@ -15,7 +15,9 @@ const mockRecognition = {
   stop: vi.fn(),
   abort: vi.fn(),
   onstart: null as (() => void) | null,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onresult: null as ((event: any) => void) | null,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onerror: null as ((event: any) => void) | null,
   onend: null as (() => void) | null,
 }

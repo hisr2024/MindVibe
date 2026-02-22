@@ -36,8 +36,6 @@ import {
   createBilingualVerseTrack,
   createDivinePlaylist,
   getCollectionMeta,
-  VOICE_STYLE_PARAMS,
-  DIVINE_VERSE_COLLECTIONS,
   type GitaVoiceStyle,
   type DivineCollectionKey,
 } from '@/lib/kiaan-vibe/gita-voice-tracks'
@@ -105,6 +103,7 @@ export function GitaVoicePlayer({
   currentLanguage,
   compact = false,
 }: GitaVoicePlayerProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { currentTrack, isPlaying, play, setQueue, addToQueue, pause, toggle } = usePlayerStore()
   const [selectedStyle, setSelectedStyle] = useState<GitaVoiceStyle>('divine')
   const [selectedLang, setSelectedLang] = useState(currentLanguage)
@@ -430,8 +429,8 @@ interface DivineCollectionPlayerProps {
 
 export function DivineCollectionPlayer({ collectionKey }: DivineCollectionPlayerProps) {
   const { play, setQueue } = usePlayerStore()
-  const [selectedLang, setSelectedLang] = useState('sa')
-  const [selectedStyle, setSelectedStyle] = useState<GitaVoiceStyle>('divine')
+  const [selectedLang, _setSelectedLang] = useState('sa')
+  const [selectedStyle, _setSelectedStyle] = useState<GitaVoiceStyle>('divine')
   const [isLoading, setIsLoading] = useState(false)
 
   const meta = getCollectionMeta(collectionKey)

@@ -5,7 +5,7 @@
  * To add a new language, simply drop a JSON file in data/gita/{languageCode}.json
  */
 
-import type { GitaChapter, GitaVerse, GitaData } from './types'
+import type { GitaChapter, GitaVerse } from './types'
 
 // ============ Types for JSON data ============
 
@@ -158,7 +158,7 @@ export async function loadGitaLanguage(languageCode: string): Promise<GitaLangua
     const parsed = data.default as GitaLanguageFile
     languageDataCache.set(languageCode, parsed)
     return parsed
-  } catch (error) {
+  } catch {
     console.warn(`[Gita] Language not available: ${languageCode}`)
     return null
   }

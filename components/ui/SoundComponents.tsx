@@ -21,7 +21,7 @@
  * - SoundToast: Toast notification with sound
  */
 
-import React, { forwardRef, useCallback, useState } from 'react'
+import React, { forwardRef, useState } from 'react'
 import Link from 'next/link'
 import { useUISound, type UISound } from '@/hooks/useUISound'
 
@@ -308,7 +308,7 @@ interface SoundInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const SoundInput = forwardRef<HTMLInputElement, SoundInputProps>(
-  ({ focusSound = 'click', typeSound = false, onFocus, onBlur, className, ...props }, ref) => {
+  ({ focusSound = 'click', typeSound: _typeSound = false, onFocus, onBlur, className, ...props }, ref) => {
     const { playSound } = useUISound()
 
     const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -495,7 +495,7 @@ export function SoundAccordion({
   title,
   children,
   defaultOpen = false,
-  sound = 'toggle',
+  sound: _sound = 'toggle',
   className = ''
 }: SoundAccordionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)

@@ -461,7 +461,7 @@ export class QuantumDiveEngine {
    * Perform a quantum dive analysis
    */
   async performQuantumDive(input: QuantumDiveInput): Promise<QuantumDiveAnalysis> {
-    const startTime = Date.now()
+    const _startTime = Date.now()
 
     try {
       this.config.onProgress(0, 'Initializing quantum field analysis')
@@ -992,7 +992,7 @@ export class QuantumDiveEngine {
   private generateInsights(
     layers: Record<ConsciousnessLayer, QuantumState>,
     patterns: TemporalPattern[],
-    input: QuantumDiveInput
+    _input: QuantumDiveInput
   ): QuantumInsight[] {
     const insights: QuantumInsight[] = []
 
@@ -1080,7 +1080,7 @@ export class QuantumDiveEngine {
     }
   }
 
-  private createGrowthInsight(layer: ConsciousnessLayer, state: QuantumState): QuantumInsight {
+  private createGrowthInsight(layer: ConsciousnessLayer, _state: QuantumState): QuantumInsight {
     return {
       id: `insight-${layer}-growth`,
       type: 'growth',
@@ -1137,7 +1137,7 @@ export class QuantumDiveEngine {
 
   private getWisdomRecommendations(
     layers: Record<ConsciousnessLayer, QuantumState>,
-    insights: QuantumInsight[]
+    _insights: QuantumInsight[]
   ): WisdomRecommendation[] {
     const recommendations: WisdomRecommendation[] = []
 
@@ -1173,7 +1173,7 @@ export class QuantumDiveEngine {
 
   private getPracticeRecommendations(
     layers: Record<ConsciousnessLayer, QuantumState>,
-    insights: QuantumInsight[]
+    _insights: QuantumInsight[]
   ): PracticeRecommendation[] {
     const recommendations: PracticeRecommendation[] = []
 
@@ -1238,10 +1238,10 @@ export class QuantumDiveEngine {
   ): string {
     // Create a unique identifier based on layer states
     const patterns = Object.values(layers).map(l => l.dominantPattern.charAt(0))
-    const signature = patterns.join('') + '-' + coherence
+    const _signature = patterns.join('') + '-' + coherence
 
     // Map to a meaningful archetype
-    const archetypes: Record<string, string> = {
+    const _archetypes: Record<string, string> = {
       'ascending': 'Rising Phoenix',
       'stable': 'Steady Mountain',
       'descending': 'Transforming Lotus',

@@ -35,6 +35,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   const [isSupported] = useState(() => isSpeechRecognitionSupported())
   
   const recognitionRef = useRef<SpeechRecognitionService | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { language = 'en', onTranscript, onError, autoSend = false } = options
 
   // Initialize recognition service

@@ -68,7 +68,7 @@ export async function getMicrophonePermissionStatus(): Promise<'granted' | 'deni
   try {
     const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
     return result.state as 'granted' | 'denied' | 'prompt';
-  } catch (error) {
+  } catch {
     // Permissions API might not be supported or microphone query might fail
     return 'unsupported';
   }

@@ -82,8 +82,8 @@ export function ChatFooter() {
   }, [globalMessages, isOpen])
 
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'connecting' | 'error'>('connected')
-  const [retryAttempt, setRetryAttempt] = useState(0)
-  const [backendHealthy, setBackendHealthy] = useState<boolean | null>(null)
+  const [_retryAttempt, setRetryAttempt] = useState(0)
+  const [_backendHealthy, setBackendHealthy] = useState<boolean | null>(null)
   const MAX_RETRIES = 2
 
   // Health check on mount

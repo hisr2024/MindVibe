@@ -54,9 +54,9 @@ export function FloatingPlayer() {
     shuffle,
     muted,
     audioError,
-    hasAudioIssues,
-    play,
-    pause,
+    hasAudioIssues, // eslint-disable-line @typescript-eslint/no-unused-vars
+    play, // eslint-disable-line @typescript-eslint/no-unused-vars
+    pause, // eslint-disable-line @typescript-eslint/no-unused-vars
     toggle,
     next,
     previous,

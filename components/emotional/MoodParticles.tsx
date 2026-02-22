@@ -15,7 +15,7 @@ interface MoodParticlesProps {
 }
 
 export function MoodParticles({ color, trigger, origin }: MoodParticlesProps) {
-  const [particleTrigger, setParticleTrigger] = useState(0);
+  const [_particleTrigger, setParticleTrigger] = useState(0);
 
   // Reset trigger to allow multiple bursts
   useEffect(() => {

@@ -48,7 +48,7 @@ describe('LanguageSelector Component', () => {
     // Clear localStorage before each test
     localStorage.clear();
     // Mock fetch for translation files
-    global.fetch = vi.fn((url) => {
+    global.fetch = vi.fn((_url) => {
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve({}),
