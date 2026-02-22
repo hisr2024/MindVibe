@@ -1139,6 +1139,46 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Feedback router: {e}")
 
+# Load Notifications router
+startup_logger.info("\n[Notifications] Attempting to import Notifications router...")
+try:
+    from backend.routes.notifications import router as notifications_router
+    app.include_router(notifications_router)
+    startup_logger.info("✅ [SUCCESS] Notifications router loaded")
+    startup_logger.info("   • POST   /api/notifications/subscribe - Register push subscription")
+    startup_logger.info("   • DELETE  /api/notifications/subscribe - Unregister push subscription")
+    startup_logger.info("   • GET    /api/notifications/inbox - Notification inbox")
+    startup_logger.info("   • POST   /api/notifications/{id}/read - Mark as read")
+    startup_logger.info("   • GET    /api/notifications/preferences - Get preferences")
+    startup_logger.info("   • PUT    /api/notifications/preferences - Update preferences")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Notifications router: {e}")
+
+# Load Beginner Curriculum router
+startup_logger.info("\n[Beginner] Attempting to import Beginner Curriculum router...")
+try:
+    from backend.routes.beginner_curriculum import router as beginner_curriculum_router
+    app.include_router(beginner_curriculum_router)
+    startup_logger.info("✅ [SUCCESS] Beginner Curriculum router loaded")
+    startup_logger.info("   • GET    /api/beginner/curriculum - Full 7-day curriculum")
+    startup_logger.info("   • GET    /api/beginner/curriculum/day/{n} - Single day")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Beginner Curriculum router: {e}")
+
+# Load Guided Meditation router
+startup_logger.info("\n[Meditation] Attempting to import Guided Meditation router...")
+try:
+    from backend.routes.meditation import router as meditation_router
+    app.include_router(meditation_router)
+    startup_logger.info("✅ [SUCCESS] Guided Meditation router loaded")
+    startup_logger.info("   • GET    /api/meditation/programs - List guided programs")
+    startup_logger.info("   • GET    /api/meditation/programs/{id} - Get program with phases")
+    startup_logger.info("   • GET    /api/meditation/practices - List DB practices")
+    startup_logger.info("   • POST   /api/meditation/sessions/start - Start session")
+    startup_logger.info("   • POST   /api/meditation/sessions/{id}/complete - Complete session")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Guided Meditation router: {e}")
+
 # Load Content router
 startup_logger.info("\n[Content] Attempting to import Content router...")
 try:
