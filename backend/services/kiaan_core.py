@@ -190,30 +190,32 @@ class OfflineWisdomCache:
             self._save_cache()
 
     def get_similar(self, message: str, context: str) -> Optional[dict]:
-        """Find a similar cached response using simple matching."""
-        message_lower = message.lower()
-        keywords = set(message_lower.split())
+        """Find a similar cached response using cache key proximity.
 
+        Since we no longer store original_query for privacy, similarity is
+        determined by matching the context and using the cache key hash proximity.
+        This is a best-effort match for offline degraded operation.
+        """
+        # Try exact key match first (most common case)
+        exact = self.get(message, context)
+        if exact:
+            return exact
+
+        # For offline similar matching, we can only match by context now
+        # since raw queries are no longer stored for privacy reasons.
+        # Return the most recently cached entry for the same context.
         best_match = None
-        best_score = 0
+        best_timestamp = ""
 
         for key, cached in self.memory_cache.items():
             if cached.get("context") != context:
                 continue
-
-            # Simple keyword overlap scoring
-            cached_keywords = set(cached.get("response", {}).get("original_query", "").lower().split())
-            overlap = len(keywords & cached_keywords)
-
-            if overlap > best_score:
-                best_score = overlap
+            cached_at = cached.get("cached_at", "")
+            if cached_at > best_timestamp:
+                best_timestamp = cached_at
                 best_match = cached
 
-        # Only return if we have reasonable overlap
-        if best_score >= 2:
-            return best_match
-
-        return None
+        return best_match
 
 
 # =============================================================================
@@ -1034,9 +1036,16 @@ The user is greeting you. Welcome them with warmth and presence. Gently invite t
                 return offline_response
             except Exception as offline_error:
                 logger.error(f"Offline fallback also failed: {offline_error}")
-                response_text = self.optimizer.get_fallback_response(context)
+                try:
+                    response_text = self.optimizer.get_fallback_response(context)
+                except Exception:
+                    response_text = self._get_emergency_fallback(context)
                 provider_used = "fallback"
                 model_used = "hardcoded"
+
+        # Guard against None response_text reaching validation (prevents AttributeError crash)
+        if response_text is None:
+            return self.graceful_degradation.get_degraded_response(context, "All providers failed")
 
         # Step 4: Validate response (lightweight check only - no retry for speed)
         validation = self._validate_kiaan_response_fast(response_text)
@@ -1053,12 +1062,15 @@ The user is greeting you. Welcome them with warmth and presence. Gently invite t
             logger.debug(f"✅ Cached KIAAN response for future use (context: {context})")
 
             # Also cache for offline use (v3.0)
+            # Note: Do NOT store raw user message (original_query) in cache files
+            # to protect spiritual wellness data privacy. Store keywords hash instead.
+            query_keywords = " ".join(sorted(set(message.lower().split())))
             self.offline_cache.set(message, context, {
                 "response": response_text,
                 "verses_used": [v.get("verse_id", "") for v in verses[:3]],
                 "validation": validation,
                 "context": context,
-                "original_query": message
+                "query_keywords": hashlib.sha256(query_keywords.encode()).hexdigest()[:16]
             })
 
         # Step 7: Learn from this query (v4.0 Learning Engine)
@@ -1070,7 +1082,7 @@ The user is greeting you. Welcome them with warmth and presence. Gently invite t
                     successful=validation.get("valid", False),
                     rating=None  # User rating can be added later via feedback endpoint
                 )
-                logger.debug(f"Learned from query: '{message[:50]}...'")
+                logger.debug(f"Learned from query in context: {context}")
         except Exception as learn_error:
             logger.warning(f"Learning from query failed (non-critical): {learn_error}")
 

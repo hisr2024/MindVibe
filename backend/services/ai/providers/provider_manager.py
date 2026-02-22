@@ -181,10 +181,19 @@ class ProviderManager:
             if health.status == ProviderStatus.HEALTHY:
                 return self._providers[name]
 
-        # If no healthy providers, try any configured one
+        # Try degraded providers before blind fallback
+        for name in self._fallback_order:
+            if name not in self._providers:
+                continue
+            health = await self.get_health_status(name)
+            if health.status in (ProviderStatus.DEGRADED, ProviderStatus.UNKNOWN):
+                logger.warning(f"No healthy providers, using degraded provider: {name}")
+                return self._providers[name]
+
+        # If no healthy or degraded providers, try any configured one
         for name in self._fallback_order:
             if name in self._providers:
-                logger.warning(f"No healthy providers, using {name}")
+                logger.warning(f"All providers unhealthy, using {name} as last resort")
                 return self._providers[name]
 
         logger.error("No AI providers available")
