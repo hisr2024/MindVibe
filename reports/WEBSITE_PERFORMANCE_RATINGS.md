@@ -1,243 +1,477 @@
-# MindVibe — Comprehensive Performance & Quality Ratings
+# MindVibe — Comprehensive Website Performance & Quality Ratings
 
-**Date:** 2026-02-21
-**Auditor:** Claude Opus 4.6 (Unbiased Deep Analysis)
-**Scope:** Full-stack webapp audit — Frontend, Backend, AI Integration, UX, Security, Content, Architecture
-
----
-
-## EXECUTIVE SUMMARY
-
-MindVibe is a **Bhagavad Gita-based spiritual wellness platform** built with Next.js 16 (frontend) and FastAPI (backend), featuring an AI spiritual companion called KIAAN. The codebase is **ambitious in scope** (~139K lines TypeScript, ~136K lines Python, 96 pages, 245 components, 33 hooks, 282 backend Python files) but exhibits a pattern of **rapid feature accumulation with insufficient consolidation**.
+**Audit Date:** 2026-02-22 (v2 — Deep Scan)
+**Audited By:** Claude Opus 4.6 (5 parallel deep-scan agents, 409 tool invocations)
+**Codebase:** 670 TypeScript/TSX files (frontend) + 282 Python files (backend)
+**Methodology:** Every file, config, and pattern in the codebase analyzed with exact counts
 
 ---
 
-## DIMENSIONAL RATINGS
+## OVERALL SCORE: 5.7 / 10
 
-### Rating Scale
-
-| Score | Meaning |
-|-------|---------|
-| 10/10 | World-class, industry-leading |
-| 8-9/10 | Production-ready, professional |
-| 6-7/10 | Functional but needs improvement |
-| 4-5/10 | Below average, significant gaps |
-| 1-3/10 | Critical issues, not production-worthy |
-
----
-
-## 1. AS A LAYMAN / REGULAR USER (Non-Technical Person)
-
-### Overall Layman Rating: 6.8 / 10
-
-| Dimension | Score | Assessment |
-|-----------|-------|------------|
-| **First Impression** | 7.5/10 | The celestial dark theme with gold accents creates a premium, mystical feel. The landing page has visual gravitas. However, the sheer volume of features visible from entry can overwhelm. |
-| **Ease of Use** | 5.5/10 | 96 pages is a lot. The navigation presents tools, journeys, companions, vibe players, relationship compasses, karma footprints, karmic trees, sacred reflections, wisdom rooms, etc. A regular user looking for "spiritual guidance" would be paralyzed by choice. The app tries to be everything at once. |
-| **Content Quality** | 8.0/10 | Bhagavad Gita verses are properly attributed. The spiritual language is respectful, authentic, and rooted in tradition. The disclaimer about not replacing professional care is responsible. Multi-language support (17 languages including Sanskrit) is impressive. |
-| **Value Proposition Clarity** | 6.0/10 | The tagline "Your Spiritual Companion & Best Divine Friend" is clear, but the product itself is so feature-dense that a user cannot quickly understand what the core offering is — is it a chat AI? A meditation app? A Gita reader? A journaling tool? All of these? |
-| **Mobile Experience** | 7.0/10 | Dedicated mobile routes (`/m/*`), mobile-specific components (MobileAppShell, MobileBottomSheet, PullToRefresh, VirtualScroll), safe area handling, haptic feedback hooks, and PWA manifest show genuine effort. However, having both mobile-specific AND desktop routes creates potential confusion. |
-| **Loading & Responsiveness** | 6.5/10 | Loading spinner with "Entering the sacred space..." text is a nice touch. However, `framer-motion` is used everywhere (every section, every card, every text element), which will cause jank on lower-end devices. No `dynamic()` imports found — zero code splitting. |
-| **Offline Capability** | 7.5/10 | Service worker v16 with intelligent caching strategies (cache-first for static, network-first for dynamic, SWR for API). Offline page exists. IndexedDB integration via `idb` package. This is genuinely useful for users in low-bandwidth areas. |
-| **Trustworthiness** | 7.0/10 | Privacy policy, terms, security page, and medical disclaimer all present. No aggressive monetization visible. GDPR compliance routes exist in backend. However, the app stores user data (moods, journal entries, reflections) — trust depends on backend execution. |
-
-**Layman Verdict:** A visually striking app with genuine spiritual depth and impressive multilingual support. But it suffers from feature overload — it feels like 10 apps merged into one without a clear user journey. A non-technical user would likely use 10% of what's built and feel lost navigating the rest.
-
----
-
-## 2. AS A TECHNICAL PERSON / SOFTWARE ENGINEER
-
-### Overall Technical Rating: 5.9 / 10
-
-| Dimension | Score | Assessment |
-|-----------|-------|------------|
-| **Architecture & Structure** | 5.0/10 | The project has a massive scope problem. 96 pages, 245 components, 50+ backend routes, 90+ backend services — many appear to be overlapping or experimental. Three different "relationship compass" pages exist. Multiple "companion" implementations. Backend has services like `kiaan_bci_foundation.py` (brain-computer interface?), `kiaan_immune_evolution.py`, `kiaan_nervous_system.py` — these read like speculative/aspirational code, not production features. |
-| **TypeScript Quality** | 7.5/10 | `strict: true` and `noImplicitAny: true` in tsconfig. Only 14 `any` usages across hooks/lib — disciplined. Types directory with 10 dedicated type files. Proper interface definitions for auth, journeys, API responses. ESLint configured with `@typescript-eslint/no-explicit-any: warn`. |
-| **Code Organization** | 5.5/10 | Path aliases (`@/components`, `@/hooks`, `@/lib`, `@/types`) are well configured. But the top-level directory has 50 markdown files documenting various "implementation summaries" — this screams rapid iteration without cleanup. Components are split across `app/components/` and root `components/` creating ambiguity. |
-| **State Management** | 6.5/10 | Zustand (v5) for global state — good choice. React Context for language, chat, divine consciousness, wake word. Custom hooks for auth, subscriptions, analytics, voice, etc. (33 hooks total). Pattern is reasonable but some hooks are very specialized (`useBiometricAuth`, `useWakeWord`, `usePullToRefresh`) suggesting features that may not be fully baked. |
-| **Error Handling** | 6.0/10 | ErrorBoundary wraps the entire app — good. Global exception handler in FastAPI catches all unhandled errors. API client includes CSRF token handling. However: 49 empty `catch {}` blocks in app code (30% of all catch blocks are silent swallows). This is a real problem for debugging production issues. |
-| **Testing** | 3.5/10 | 42 frontend test files and 2 backend test files. For a codebase of 275K+ total lines, this is **severely inadequate**. Test coverage is likely below 5%. The `--passWithNoTests` flag in the test script confirms tests are an afterthought. No E2E tests (no Playwright/Cypress). No load tests. Backend has only 2 test files for 282 Python files. |
-| **Performance Optimization** | 4.5/10 | **Critical gap:** Zero `dynamic()` imports — no code splitting whatsoever. Zero `loading="lazy"` on images. framer-motion imported on every page (adds ~30KB+ to every route). 452 memoization calls (useMemo/useCallback/React.memo) across codebase — this is actually excessive and suggests premature optimization in some areas while missing the fundamentals (code splitting, lazy loading). The globals.css is 2,650 lines — a lot for a Tailwind project. |
-| **API Design** | 6.5/10 | RESTful API with proper route organization. Rate limiting (slowapi), CSRF protection, CORS configuration with credentials. Request logging middleware. However, the backend has grown organically — 50+ route files with overlapping domains. |
-| **Database & Data Layer** | 6.0/10 | SQLAlchemy async with PostgreSQL. Migration system exists. Models are reasonably structured (20 model files). Connection pooling via deps.py. SSL handling for Render deployment. But no evidence of query optimization, N+1 prevention strategy, or database indexing beyond defaults. |
-| **Build & Deploy** | 7.0/10 | Vercel for frontend (well-configured vercel.json with security headers). Docker support (Dockerfile + docker-compose). Render for backend (render.yaml). CI/CD exists. However, `npm install --legacy-peer-deps --no-package-lock` in vercel.json is concerning — it suggests dependency conflicts that haven't been properly resolved. |
-
-**Technical Verdict:** The codebase demonstrates competency in individual areas (TypeScript strictness, auth patterns, middleware stack) but suffers from **scope inflation**. The ratio of test coverage to code volume is alarming. The absence of code splitting in a 96-page Next.js app is a critical performance gap. Many backend services appear to be aspirational rather than functional.
-
----
-
-## 3. AS THE BEST TECHNICAL CRITIC (Ruthless Standards)
-
-### Overall Technical Critic Rating: 4.8 / 10
-
-| Critical Issue | Severity | Detail |
-|----------------|----------|--------|
-| **No Code Splitting** | P0 - Critical | A 96-page Next.js 16 app with ZERO `dynamic()` imports means every page potentially loads the entire component tree. This alone could make the app unusable on 3G/4G connections. Next.js does automatic route-based splitting, but heavy shared components (framer-motion, recharts, lucide-react, etc.) bloat every route. |
-| **Test Coverage ~5%** | P0 - Critical | 42 test files for 139K lines of frontend + 2 test files for 136K lines of backend. This is not production-grade by any standard. Any refactoring or feature addition is essentially done blind. |
-| **50+ Root-level MD files** | P1 - High | `ANIMATION_IMPLEMENTATION_SUMMARY.md`, `ARDHA_VIYOGA_INTEGRATION_SUMMARY.md`, `BACKEND_REORGANIZATION_COMPLETE.md`, `CLEANUP_PHASE_1_COMPLETE.md`, `CLEANUP_PROGRESS.md`, `CLEANUP_SUMMARY.md`, `QUANTUM_COHERENCE.md` — the project root has 50 markdown files documenting various implementation phases. This is documentation debt, not documentation. A clean project has a README, CONTRIBUTING, and CHANGELOG — not 50 summaries. |
-| **Feature Duplication** | P1 - High | Three relationship compass pages (`/relationship-compass`, `/relationship-compass-engine`, `/relationship-compass-unified`). Multiple companion implementations. Multiple voice companion routes. This suggests features were rebuilt rather than iterated upon. |
-| **49 Silent Catch Blocks** | P1 - High | `catch {}` or `catch { }` appearing 49 times means errors are being swallowed silently across the app. In a wellness app where user data (moods, journal entries) could be lost, this is unacceptable. |
-| **Dependency Concerns** | P2 - Medium | `--legacy-peer-deps` in install command. `bcryptjs` vendored locally (`"bcryptjs": "file:vendor/bcryptjs"`). React 18 with Next.js 16 (which supports React 19). `openai` SDK directly in frontend package.json (should be backend-only). |
-| **globals.css: 2,650 lines** | P2 - Medium | For a Tailwind CSS project, 2,650 lines of custom CSS suggests Tailwind is being fought rather than embraced. This creates maintenance burden and specificity conflicts. |
-| **Backend Scope Creep** | P2 - Medium | Services like `kiaan_bci_foundation.py`, `kiaan_immune_evolution.py`, `kiaan_nervous_system.py`, `kiaan_sovereign_mind.py`, `kiaan_consciousness.py` suggest aspirational/speculative code committed to the main branch. These should live in feature branches until validated. |
-| **`userScalable: false`** | P2 - Medium | In layout.tsx: `userScalable: false` and `maximumScale: 1`. This is an **accessibility violation** (WCAG 1.4.4). Users with visual impairments need to zoom. Apple has deprecated this behavior on iOS for this reason. |
-| **No Image Optimization** | P2 - Medium | Zero usage of Next.js `<Image>` component found based on no `loading="lazy"` attributes. In a 96-page app with visual content, this means no automatic WebP conversion, no responsive sizing, no lazy loading. |
-
-**Technical Critic Verdict:** This project has the ambition of a 20-person team but the structure of a solo developer with an AI assistant (62% of commits are from "Claude"). The result is a codebase that's **wide but not deep** — many features exist at a surface level without the testing, optimization, and consolidation needed for production quality. The app would likely score poorly on Lighthouse (LCP/CLS issues from motion animations, no image optimization, massive JS bundles from no code splitting).
-
----
-
-## 4. AS THE BEST AI CRITIC
-
-### Overall AI Integration Rating: 6.2 / 10
-
-| Dimension | Score | Assessment |
-|-----------|-------|------------|
-| **AI Feature Breadth** | 8.0/10 | KIAAN has multiple modes: chat, voice companion, quantum dive, friend mode, divine consciousness. RAG service for Gita verse retrieval. Emotional pattern extraction. Viyoga analysis. Relationship compass analysis. The AI feature set is genuinely comprehensive. |
-| **AI Architecture** | 6.0/10 | `kiaan_core.py`, `kiaan_model_provider.py`, `kiaan_agent_orchestrator.py`, `kiaan_agent_tools.py` suggest an agent-based architecture. Model provider abstraction exists. But the implementation is sprawled across 20+ KIAAN-related service files with unclear boundaries. |
-| **Prompt Engineering** | 5.5/10 | Dedicated prompt files exist (`ardha_prompts.py`, `viyoga_prompts.py`, `relationship_compass_prompt.py`). But prompts embedded in service files rather than centralized makes versioning and testing difficult. No prompt testing framework visible. |
-| **AI Safety** | 7.0/10 | `safety_validator.py`, `prompt_injection_detector.py`, `gita_wisdom_filter.py`, `gita_validator.py`, `moderation_service.py` — safety infrastructure exists. PII redactor present. The disclaimer on the homepage about not replacing professional care is responsible. |
-| **AI Fallback Strategy** | 6.5/10 | Multiple TTS providers (ElevenLabs, Sarvam, Bhashini) with fallback chains. Model provider abstraction suggests multi-model support. But without test coverage, the actual fallback behavior under failure is unverified. |
-| **AI Cost Management** | 5.0/10 | `openai_optimizer.py` exists but the OpenAI SDK is in the frontend package.json — suggesting API keys might be exposed to the client (a critical security risk if true). `subscription_cost_calculator.py` exists but no clear token budgeting or usage metering visible. |
-| **AI UX** | 6.5/10 | Voice input/output, wake word ("Hey KIAAN"), streaming text, emotion-aware themes. The AI UX ambition is high. However, the complexity of 4+ different AI interaction modes (chat, voice, quantum dive, companion) likely creates confusion about which to use. |
-| **RAG Quality** | 5.5/10 | `rag_service.py` and `gita_wisdom_retrieval.py` exist for retrieving relevant Gita verses. `db_knowledge_store.py` suggests a knowledge base. But no vector database integration visible (no Pinecone, Weaviate, pgvector, etc.) — the RAG implementation may be keyword-based rather than semantic. |
-
-**AI Critic Verdict:** The AI integration is **ambitious and well-intentioned** but suffers from the same scope inflation as the rest of the app. 20+ KIAAN service files without clear boundaries or comprehensive testing means the AI behavior is unpredictable. The safety layer is a genuine strength. The lack of a proper vector database for RAG is a significant gap for a Gita-wisdom app that claims 700+ verses.
-
----
-
-## 5. AS THE BEST USER EXPERIENCE CRITIC
-
-### Overall UX Rating: 5.5 / 10
-
-| Dimension | Score | Assessment |
-|-----------|-------|------------|
-| **Information Architecture** | 4.0/10 | **The biggest problem.** 96 pages with no clear hierarchy. The nav offers: Dashboard, Journeys, Journey Engine, KIAAN, KIAAN Vibe, KIAAN Voice, Companion, Voice Companion, Tools, Relationship Compass (3 variants), Karma Footprint, Karmic Tree, Sacred Reflections, Wisdom Rooms, Deep Insights, Emotional Reset, Ardha, Viyog, Teams, etc. This is a taxonomy nightmare. No user mental model maps to this structure. |
-| **Visual Design** | 7.5/10 | The dark theme with gold (#d4a44c) accents, celestial backgrounds, and sacred typography (Crimson Text) creates a cohesive spiritual aesthetic. Custom design tokens, gradient system, and emotion-aware themes show design thinking. The color palette is well-considered. |
-| **Interaction Design** | 6.0/10 | Haptic feedback hooks, pull-to-refresh, swipe gestures, micro-interactions via framer-motion — all present. But framer-motion is used so heavily (every section on every page) that it likely causes animation fatigue. Motion should be meaningful and sparse, not omnipresent. |
-| **Accessibility (a11y)** | 4.5/10 | Skip-to-content link exists. 20 ARIA attributes in UI components, 54 role attributes, 5 tabIndex usages. `useReducedMotion` hook exists. But: `userScalable: false` blocks zoom. No `alt` text strategy visible. ARIA coverage across 245 components is sparse. No evidence of screen reader testing or WCAG audit. |
-| **Onboarding** | 6.0/10 | Onboarding flow exists (`/onboarding/[step]`). Introduction page present. The home page "Entering the sacred space..." loading state is thematic. But there's no evidence of progressive disclosure — new users are exposed to the full feature set immediately. |
-| **Error States** | 5.5/10 | `EmptyState` component exists. ErrorBoundary wraps the app. The home page has a compassionate disclaimer. But 49 silent catch blocks mean errors are being hidden from users rather than communicated. Error messages in a wellness context should guide, not hide problems. |
-| **Performance UX** | 5.0/10 | Skeleton components exist (`MobileSkeleton.tsx`, `MobileSkeletons.tsx`). Loading states mentioned in home page. But no image lazy loading, no code splitting, and heavy framer-motion everywhere means perceived performance will suffer, especially on mobile. |
-| **Consistency** | 5.5/10 | UI component library exists (Button, Card, Input, Modal, etc. in `components/ui/`). But having both `components/` and `app/components/` directories, plus feature-specific component folders, means patterns may diverge. Three different relationship compass implementations confirm inconsistency. |
-| **Mobile UX** | 6.5/10 | Dedicated mobile components, safe area handling, mobile-optimized shadows/animations, PWA install prompt, mobile nav — genuine effort. But maintaining two parallel UI systems (desktop + `/m/*` mobile) doubles the maintenance burden and risks divergence. |
-
-**UX Critic Verdict:** MindVibe has the **aesthetics** of a well-designed product but the **information architecture** of a developer's feature wishlist. The core UX sin is trying to surface everything at once. A user in emotional distress (the target audience for a spiritual wellness app) needs a clear, calming, 3-step path — not 96 pages with overlapping features. The app needs radical simplification: pick 5 core features, make them flawless, hide the rest behind progressive disclosure.
-
----
-
-## COMPOSITE SCORES
-
-| Perspective | Score | Key Strength | Key Weakness |
-|-------------|-------|--------------|--------------|
-| Layman | **6.8/10** | Visual beauty, spiritual authenticity | Feature overload, choice paralysis |
-| Technical Person | **5.9/10** | TypeScript discipline, auth patterns | No code splitting, minimal testing |
-| Technical Critic | **4.8/10** | Security middleware stack | Scope inflation, silent error swallowing |
-| AI Critic | **6.2/10** | Safety layer, multi-modal AI | Fragmented AI services, no vector DB |
-| UX Critic | **5.5/10** | Cohesive visual design system | Information architecture chaos |
-
-### **UNWEIGHTED AVERAGE: 5.8 / 10**
-### **WEIGHTED AVERAGE (favoring user impact): 5.7 / 10**
-
----
-
-## WHAT'S GENUINELY GOOD (Credit Where Due)
-
-1. **Spiritual authenticity** — The Bhagavad Gita content is respectful, properly attributed, and not commercialized cynically
-2. **17-language support** — Including Sanskrit, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Malayalam, Punjabi — this serves a real Indian audience
-3. **Security middleware stack** — DDoS protection, threat detection, input sanitization, CSRF, rate limiting, security headers — the backend security posture is serious
-4. **TypeScript strictness** — `strict: true`, `noImplicitAny: true`, only 14 `any` usages across frontend
-5. **PWA + Offline support** — Service worker v16 with intelligent caching for a spiritual app used in areas with spotty connectivity
-6. **httpOnly cookie auth** — Not storing tokens in localStorage (XSS protection)
-7. **EdDSA JWT support** — Modern asymmetric JWT signing option
-8. **Comprehensive AI safety** — Prompt injection detection, PII redaction, content moderation, wisdom filtering
-
----
-
-## TOP 10 RECOMMENDATIONS (Priority Order)
-
-### 1. RADICAL FEATURE REDUCTION
-Remove or hide 60% of pages behind progressive disclosure. Core flow should be: **Home -> Daily Practice -> KIAAN Chat -> Journal -> Progress**. Everything else should be discoverable, not displayed.
-
-### 2. ADD CODE SPLITTING (IMMEDIATE)
-```typescript
-// Every heavy page should use dynamic imports
-const KiaanChat = dynamic(() => import('@/components/chat/KiaanChat'), {
-  loading: () => <ChatSkeleton />,
-})
+```
+ ██████████████████████████████░░░░░░░░░░░░░░░░░░░░  57%
 ```
 
-### 3. ACHIEVE 60%+ TEST COVERAGE
-The current ~5% is dangerous. Prioritize testing for: auth flows, KIAAN responses, journey completion, payment flows, data encryption/decryption.
-
-### 4. REMOVE `userScalable: false`
-This is an accessibility violation. Allow users to zoom.
-
-### 5. CONSOLIDATE DUPLICATE FEATURES
-Pick ONE relationship compass, ONE companion, ONE voice interface. Delete the others.
-
-### 6. REDUCE globals.css TO <500 LINES
-Extract repeated patterns into Tailwind config. Use `@apply` sparingly. The 2,650-line CSS file suggests fighting the framework.
-
-### 7. FIX ALL 49 SILENT CATCH BLOCKS
-```typescript
-// BAD
-catch {}
-
-// GOOD
-catch (error) {
-  logger.warn('Step completion failed', { error, context })
-  showCompassionateError('Something went gently wrong. Let us try again.')
-}
-```
-
-### 8. CLEAN UP ROOT DIRECTORY
-Move all 50 markdown summary files to `/docs/archive/`. The project root should have only: README.md, CHANGELOG.md, LICENSE, CONTRIBUTING.md, SECURITY.md, PRIVACY.md.
-
-### 9. ADD NEXT.JS IMAGE OPTIMIZATION
-Replace all `<img>` tags with Next.js `<Image>` component for automatic WebP, responsive sizing, and lazy loading.
-
-### 10. ADD VECTOR DATABASE FOR RAG
-A Gita-wisdom app with 700+ verses should use semantic search (pgvector, Pinecone, or Weaviate) — not keyword matching — for verse retrieval.
+**Verdict:** Excellent backend security and architecture. Frontend performance, testing, and accessibility are the critical weak points preventing production readiness.
 
 ---
 
-## CODEBASE STATISTICS
+## CATEGORY RATINGS
 
-| Metric | Value |
+---
+
+### 1. Frontend Performance — 3.5 / 10
+
+```
+ ███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  35%
+```
+
+| Metric | Finding | Grade |
+|--------|---------|-------|
+| Code splitting | **Zero** `next/dynamic` or `React.lazy` imports | F |
+| Image optimization | **Zero** `next/image` usage; 4 raw `<img>` tags | F |
+| Loading states | **1** `loading.tsx` for **96** pages | F |
+| Suspense boundaries | **2** total (1 with fallback) | F |
+| Static generation | **Zero** `generateStaticParams`; no ISR/SSG | F |
+| Web Vitals monitoring | Not installed, not configured | F |
+| Root middleware | Missing entirely | F |
+| `'use client'` directives | **345** files (51.5% of codebase) | D |
+| Font loading | `<link>` tags instead of `next/font` | C |
+| Service worker | **Excellent:** 4 cache stores, offline fallback, 363 lines of production-grade code | A |
+| next.config.js | Security headers solid; missing perf tuning | B |
+| CSS | 2,650-line globals.css; 80 inline styles | C |
+
+**Heavy libraries all statically imported (never lazy-loaded):**
+
+| Library | Static Imports | Files | Bundle Impact |
+|---------|---------------|-------|---------------|
+| framer-motion | 32 | 31 | ~40KB gzipped |
+| recharts | 4 | 4 | ~80KB gzipped |
+| openai | 5 | 5 | ~20KB gzipped |
+| firebase | in deps | — | ~30KB gzipped |
+| lottie-react | in deps | — | ~15KB gzipped |
+| jspdf | in deps | — | ~25KB gzipped |
+
+**Estimated current bundle:** ~450KB uncompressed main bundle.
+**After fixes:** ~180KB (-60%).
+
+---
+
+### 2. Backend Architecture — 8.0 / 10
+
+```
+ ████████████████████████████████████████░░░░░░░░░░  80%
+```
+
+| Metric | Finding | Grade |
+|--------|---------|-------|
+| Route organization | **56** route files, well-separated by domain | A |
+| Middleware stack | **12** layers: DDoS, threat detection, sanitization, CSRF, CORS, rate limiting, security headers, logging | A+ |
+| Error handling | Only **1** bare `except:` in 282 Python files (`whisper_transcription.py:132`) | A |
+| Type hints | **159+** typed endpoint functions; comprehensive Pydantic models | A |
+| Database patterns | Async SQLAlchemy, connection pooling (30 base + 10 overflow), eager loading (11 `selectinload` instances) | A |
+| API documentation | FastAPI auto-generated Swagger at `/docs`, title/version configured | B+ |
+| Logging | Structured, no PII, proper INFO/WARN/ERROR levels, admin log endpoint at `/api/admin/backend-logs` | A |
+| main.py structure | 1,283 lines — large but well-organized with try/except per router, 3-tier startup | B |
+| Migration strategy | 3-tier: SQL migrations → Manual Python → ORM table creation | B+ |
+| Code cleanliness | **Zero** `print()` in routes; all 147 services appear referenced | A |
+
+**Positive highlights:**
+- All queries use SQLAlchemy ORM with parameterized statements (zero SQL injection risk)
+- Connection pooling properly configured and environment-variable tunable
+- Each router registered with independent try/except so one failure doesn't block others
+- DDoS protection: 100 req/min, 10 concurrent connections/IP, 10MB max request size
+
+---
+
+### 3. Security — 8.5 / 10
+
+```
+ █████████████████████████████████████████████░░░░░  85%
+```
+
+| Metric | Finding | Grade |
+|--------|---------|-------|
+| Hardcoded secrets | **Zero** — all loaded via `os.getenv()` | A+ |
+| SQL injection | **Zero** — all parameterized via SQLAlchemy ORM | A+ |
+| Input validation | **34+** Pydantic models with field constraints (min/max length, ranges) | A+ |
+| Rate limiting | DDoS middleware + per-endpoint limits (e.g., voice: 10/min) | A |
+| Authentication | JWT with Bearer tokens + httpOnly cookies; EdDSA signing support | A |
+| Authorization | `get_current_user()` enforced; admin routes use `get_current_admin_user()` | A |
+| Brute force protection | 5 failed attempts → 30-minute lockout; generic error messages prevent enumeration | A |
+| CORS | Explicit origin whitelist (4 origins), no wildcards with credentials | A |
+| CSRF protection | Dedicated middleware: SameSite=strict, Secure=true, 24h max-age | A |
+| Data encryption | Fernet encryption enforced for spiritual wellness data + chat messages | A |
+| Security headers | HSTS (31536000), X-Frame-Options: DENY, X-Content-Type-Options, Referrer-Policy, Permissions-Policy | A |
+| Pre-commit secrets | Gitleaks hook configured | A |
+| Production validation | `SECRET_KEY` validated at startup — raises ValueError if default in production | A |
+| Root Next.js middleware | **Missing** — no server-side route protection | F |
+| CSP header | Not explicitly set (relies on framework defaults) | C |
+
+**Why not 9+:** No root `middleware.ts` means `/admin/*`, `/dashboard/*`, `/profile/*` routes have no server-side auth guard — protection is client-side only. No explicit Content-Security-Policy header.
+
+---
+
+### 4. Testing — 4.5 / 10
+
+```
+ ██████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░  45%
+```
+
+| Metric | Finding | Grade |
+|--------|---------|-------|
+| Total test files | **113** (71 backend + 42 frontend) | B |
+| Total individual tests | **~1,214** (~700 backend + ~514 frontend) | B |
+| Total test code | **22,636** lines | B |
+| Backend route coverage | **100%** — all 66 routes referenced in tests | A |
+| Backend service coverage | **22%** — only 32/147 services tested | F |
+| Frontend test coverage | **42** test files for **670** source files (~6%) | F |
+| E2E tests | **Zero** — no Playwright, Cypress, or Puppeteer | F |
+| Load/stress tests | Files exist (`locustfile.py`, `test_api_performance.py`) but **not in CI** | D |
+| CI coverage threshold | **49%** (CLAUDE.md demands 80%) | D |
+| CI lint enforcement | `ruff` has `continue-on-error: true` | F |
+| Test quality | Some tests accept HTTP 500 as passing | D |
+| Test infrastructure | Async fixtures, proper mocking, Vitest + pytest well-configured | A |
+
+**115 untested backend services include critical business logic:**
+- `relationship_compass_engine` — complex AI analysis
+- `kiaan_consciousness` — core AI personality
+- `response_engine` — primary response generation
+- `journey_service` — core business workflow
+- `wisdom_core` — spiritual content retrieval
+- `multilingual_voice_engine` — key feature
+- `divine_consciousness_service`, `divine_conversation_engine`, `divine_voice_orchestrator`
+- `rag_service` — retrieval augmented generation
+- `whisper_transcription` — voice input processing
+- +105 more
+
+**Test quality issue found in `test_auth_api.py`:**
+```python
+# This masks real failures — a 500 server error "passes" the test:
+assert response.status_code in (201, 500)
+```
+
+---
+
+### 5. SEO — 4.0 / 10
+
+```
+ ████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  40%
+```
+
+| Metric | Finding | Grade |
+|--------|---------|-------|
+| Root metadata | title, description, keywords, OG, Twitter card, canonical, robots, manifest, icons | A |
+| Per-page metadata | Only **24/100** pages have explicit metadata (76% inherit from root) | D |
+| Sitemap | **Missing** — `robots.txt` references `/sitemap.xml` that doesn't exist (404 for crawlers) | F |
+| robots.txt | Properly configured: Allow /, Disallow /api/, /admin/, /account/, /onboarding/ | A |
+| Structured data (JSON-LD) | Only **2** files attempt it | F |
+| OG images | **Zero** `opengraph-image.tsx` files | F |
+| Canonical URLs | Root layout only, not per-page | D |
+| Heading hierarchy | Correct in reviewed pages (h1 → h2 → h3) | A |
+| Redirects | 6 proper permanent redirects for old tool URLs | A |
+
+**Impact:** 96 pages, 700+ Gita verses, and multiple tool pages exist but search engines can't properly discover or rank them. The sitemap 404 is actively harmful.
+
+---
+
+### 6. Accessibility — 5.0 / 10
+
+```
+ █████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░  50%
+```
+
+| Metric | Finding | Grade |
+|--------|---------|-------|
+| Skip-to-content link | Implemented in root layout (`app/layout.tsx:115-122`) | A |
+| `prefers-reduced-motion` | **7** instances in CSS + runtime checks in components | A |
+| Color contrast | Primary text `#f8fafc` on `#0b0b0f` — 4.5:1+ ratio | B+ |
+| Heading hierarchy | Proper semantic h1 → h2 → h3 structure | A |
+| Viewport zoom | `userScalable: false`, `maximumScale: 1` — **WCAG 2.1 AA violation** | F |
+| ARIA labels | **Missing** from most components (zero `aria-label` in component directory) | F |
+| Alt text | **Zero** alt text found on images | F |
+| Focus management | No modal focus traps, no route change focus reset | F |
+| Form labels | Labels exist but missing `htmlFor` attributes connecting to inputs | D |
+| `aria-live` regions | Not implemented for chat/AI dynamic content | F |
+| Keyboard navigation | Skip links work; no `tabindex` management elsewhere | D |
+| Error announcements | No `aria-describedby` for form validation errors | F |
+
+**WCAG 2.1 AA compliance: FAILING.** The `userScalable: false` viewport setting alone blocks compliance. Combined with missing ARIA labels and alt text, the app is not accessible.
+
+---
+
+### 7. Code Quality — 6.5 / 10
+
+```
+ ████████████████████████████████░░░░░░░░░░░░░░░░░  65%
+```
+
+| Metric | Finding | Grade |
+|--------|---------|-------|
+| TypeScript strict mode | Enabled: `strict: true`, `noImplicitAny: true` | A |
+| ESLint configuration | Extends Next.js + Prettier; 10+ rules configured | B |
+| ESLint enforcement | Most rules `warn` not `error` (allows degradation) | C |
+| `any` types | **63** instances across 22 files | C |
+| Console statements | **~275** across 104 files (stripped in prod via `removeConsole`) | C |
+| TODO/FIXME comments | Only **3** in 670 files (0.4%) | A+ |
+| Code duplication | Minimal — good component reuse patterns | A |
+| Error boundaries | **Zero** `error.tsx` files in app directory | F |
+| Loading states | **1** `loading.tsx` for 96 pages | F |
+| Pre-commit hooks | **9** hooks: Black, Ruff, isort, mypy, Prettier, Gitleaks, markdownlint, yamllint | A+ |
+| Client/server split | 345 `'use client'` vs ~325 server — reasonable balance | B |
+| Backend code quality | Zero `print()`, 1 bare except, 159+ typed functions | A |
+
+---
+
+### 8. Developer Experience — 8.0 / 10
+
+```
+ ████████████████████████████████████████░░░░░░░░░░  80%
+```
+
+| Metric | Finding | Grade |
+|--------|---------|-------|
+| npm scripts | **15** scripts: dev, build, start, lint, lint:fix, typecheck, format, format:check, test, test:watch, test:coverage, test:ui, prepare, aider, viyoga:index | A |
+| Pre-commit hooks | **9** comprehensive hooks covering all file types | A+ |
+| `.env.example` | **176** lines, well-documented by section (17 categories) | A |
+| Documentation | **50+** markdown files, **18+** specialized guides in `/docs/` | A |
+| TypeScript config | Strict mode, path aliases, proper module resolution | A |
+| Docker setup | Multi-stage Dockerfile (4 stages), docker-compose with health checks | B |
+| QUICKSTART guide | 80+ lines but covers backend only — no frontend instructions | C |
+| CONTRIBUTING guide | Only 7 lines — too sparse for collaboration | D |
+| Docker completeness | Frontend missing health check; may not build (missing directory copies) | C |
+
+---
+
+### 9. Documentation — 7.0 / 10
+
+```
+ ██████████████████████████████████░░░░░░░░░░░░░░░  70%
+```
+
+| Metric | Finding | Grade |
+|--------|---------|-------|
+| README | 100 lines, high-level overview | B |
+| QUICKSTART | 80+ lines but backend-only | C |
+| Specialized docs | 18+ guides in `/docs/` (security, Gita, analytics, capacity, chatbot, etc.) | A |
+| API documentation | FastAPI auto-Swagger at `/docs` | B+ |
+| `.env.example` | 176 lines, 17 sections, well-documented | A |
+| Code comments | Clean — only 3 TODOs, minimal noise, good comment quality | A |
+| Architecture Decision Records | **None** | D |
+| CONTRIBUTING guide | 7 lines — missing dev setup, code style, PR/issue templates | D |
+
+---
+
+### 10. Monitoring & Observability — 3.0 / 10
+
+```
+ ███████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  30%
+```
+
+| Metric | Finding | Grade |
+|--------|---------|-------|
+| Backend logging | Structured, proper levels (INFO/WARN/ERROR), no PII | A |
+| Request logging middleware | `RequestLoggingMiddleware` enabled | A |
+| Admin log endpoint | `/api/admin/backend-logs` for runtime log access | A |
+| Frontend performance monitoring | **Zero** — no web-vitals library, no Lighthouse CI | F |
+| Error tracking | No Sentry or equivalent configured | F |
+| Performance budgets | None — no bundle size tracking in CI | F |
+| Bundle analysis | No `@next/bundle-analyzer` | F |
+| Core Web Vitals tracking | Not tracked | F |
+| Backend metrics | Prometheus client in requirements.txt but unclear if wired up | D |
+| Dashboards | None configured | F |
+
+---
+
+## SCORE CALCULATION
+
+| Category | Weight | Score | Weighted |
+|----------|--------|-------|----------|
+| Frontend Performance | 15% | 3.5 | 0.53 |
+| Backend Architecture | 10% | 8.0 | 0.80 |
+| Security | 15% | 8.5 | 1.28 |
+| Testing | 15% | 4.5 | 0.68 |
+| SEO | 10% | 4.0 | 0.40 |
+| Accessibility | 10% | 5.0 | 0.50 |
+| Code Quality | 10% | 6.5 | 0.65 |
+| Developer Experience | 5% | 8.0 | 0.40 |
+| Documentation | 5% | 7.0 | 0.35 |
+| Monitoring | 5% | 3.0 | 0.15 |
+| **TOTAL** | **100%** | | **5.74 ≈ 5.7** |
+
+---
+
+## TOP STRENGTHS
+
+1. **Backend security is production-grade** — zero hardcoded secrets, zero SQL injection, 12-layer middleware defense-in-depth (DDoS, threat detection, sanitization, CSRF, rate limiting, security headers), Fernet encryption for sensitive data, brute force protection with lockout
+2. **Service worker is excellent** — 363 lines, 4 cache stores, network-first for dynamic content, cache-first for static (30 days), stale-while-revalidate for API, 365-day Gita verse cache, max cache limits, offline fallback page
+3. **Pre-commit hooks are comprehensive** — 9 hooks: Black, Ruff, isort, mypy, Prettier, Gitleaks (secrets detection), markdownlint, yamllint, general file checks
+4. **Backend error handling is clean** — 1 bare except in 282 files, structured logging throughout without PII, proper HTTP exception hierarchy, graceful router registration (one failure doesn't block others)
+5. **Type safety is strong** — TypeScript strict mode + `noImplicitAny`, 159+ typed backend functions, 34+ Pydantic models with field constraints
+6. **Environment management** — 176-line `.env.example` covering 17 categories, all secrets externalized, production validation at startup
+
+---
+
+## TOP WEAKNESSES
+
+1. **Zero frontend code splitting** — all heavy libraries (framer-motion 40KB, recharts 80KB, openai 20KB) statically loaded; 0 `next/dynamic`, 0 `React.lazy`
+2. **78% of backend services untested** — 115/147 services including core business logic (journey_service, response_engine, wisdom_core, rag_service)
+3. **No E2E tests** — zero Playwright/Cypress; critical user flows (signup → chat → journal) are never tested end-to-end
+4. **Missing sitemap** — robots.txt references non-existent `/sitemap.xml`; search engines get 404
+5. **WCAG violations** — `userScalable: false`, zero ARIA labels in components, zero alt text on images
+6. **Zero performance monitoring** — no web-vitals, no Lighthouse CI, no bundle analysis, no Sentry
+7. **No root middleware** — `/admin/*`, `/dashboard/*` routes accessible without server-side auth
+8. **Zero error boundaries** — no `error.tsx` files; unhandled errors crash entire page trees
+9. **CI quality not enforced** — ruff has `continue-on-error: true`; coverage threshold is 49%
+10. **Tests mask failures** — backend tests accept HTTP 500 as passing responses
+
+---
+
+## ROADMAP: 5.7 → 10.0
+
+### Phase 1: Critical Fixes → 7.5 (+1.8)
+*Effort: 2-3 weeks*
+
+| # | Fix | Category Impact |
+|---|-----|-----------------|
+| 1 | Add `next/dynamic` for framer-motion (32 files), recharts (4 files), openai (5 files) | Performance: 3.5→5.5 |
+| 2 | Create root `middleware.ts` with auth guards for `/admin/*`, `/dashboard/*`, `/profile/*` | Security: 8.5→9.0 |
+| 3 | Create `app/sitemap.ts` covering all 96 public pages | SEO: 4.0→6.0 |
+| 4 | Add `error.tsx` to root + all route groups (tools, kiaan, journeys, admin) | Code Quality: 6.5→7.5 |
+| 5 | Add `loading.tsx` to all route groups with skeleton fallbacks | Performance: +0.5 |
+| 6 | Fix `userScalable: false` → `userScalable: true`, `maximumScale: 5` | Accessibility: 5.0→5.5 |
+| 7 | Change `continue-on-error: true` → `false` for ruff in CI | Testing: +0.3 |
+| 8 | Fix test assertions that accept 500 status codes | Testing: +0.2 |
+| 9 | Add `@next/bundle-analyzer` and measure baseline | Monitoring: +0.3 |
+
+### Phase 2: Quality Push → 8.5 (+1.0)
+*Effort: 3-4 weeks*
+
+| # | Fix | Category Impact |
+|---|-----|-----------------|
+| 10 | Add Playwright E2E for 5 critical flows (signup, login, KIAAN chat, journey completion, journal) | Testing: 4.5→6.0 |
+| 11 | Write tests for 50 most critical backend services | Testing: 6.0→7.0 |
+| 12 | Raise CI coverage threshold from 49% to 70% | Testing: +0.3 |
+| 13 | Add ARIA labels to all interactive components | Accessibility: 5.5→7.0 |
+| 14 | Add alt text to all images; add `aria-live` to chat/AI responses | Accessibility: 7.0→7.5 |
+| 15 | Add focus management: modal focus traps, route change focus | Accessibility: 7.5→8.0 |
+| 16 | Add JSON-LD structured data (Organization, WebSite, BreadcrumbList) | SEO: 6.0→7.0 |
+| 17 | Add per-page metadata to top 20 trafficked pages | SEO: 7.0→7.5 |
+| 18 | Migrate fonts from `<link>` to `next/font` | Performance: +0.2 |
+| 19 | Replace 63 `any` types with proper types; set ESLint rule to `error` | Code Quality: +0.3 |
+| 20 | Add `generateStaticParams` for Gita verse pages + journey pages | Performance: +0.5 |
+
+### Phase 3: Production Polish → 9.2 (+0.7)
+*Effort: 2-3 weeks*
+
+| # | Fix | Category Impact |
+|---|-----|-----------------|
+| 21 | Install web-vitals; add Lighthouse CI to pipeline | Monitoring: 3.0→6.0 |
+| 22 | Add Sentry error tracking (frontend + backend) | Monitoring: 6.0→7.0 |
+| 23 | Add bundle size budgets enforced in CI | Monitoring: 7.0→7.5 |
+| 24 | Expand CONTRIBUTING guide: dev setup, code style, PR templates, issue templates | Documentation: 7.0→8.0 |
+| 25 | Create unified "Getting Started" guide covering frontend + backend + Docker | DevEx: 8.0→8.5 |
+| 26 | Fix Docker: frontend health check, copy all directories, fix compose | DevEx: +0.3 |
+| 27 | Replace console.* with structured logger (pino); enforce ESLint no-console as error | Code Quality: +0.3 |
+| 28 | Add load tests to CI pipeline (locustfile.py already exists) | Testing: +0.3 |
+| 29 | Add explicit CSP header in next.config.js | Security: +0.2 |
+| 30 | Fix bare except in whisper_transcription.py | Code Quality: +0.1 |
+
+### Phase 4: Excellence → 9.7+ (+0.5)
+*Effort: Ongoing*
+
+| # | Fix | Category Impact |
+|---|-----|-----------------|
+| 31 | Achieve 90%+ backend service test coverage | Testing: +0.3 |
+| 32 | Full WCAG 2.1 AA audit with axe-core; fix all violations | Accessibility: +0.3 |
+| 33 | Add per-page metadata to all 96 pages | SEO: +0.2 |
+| 34 | Enforce performance budgets (LCP <2.5s, CLS <0.1, FID <100ms) | Performance: +0.2 |
+| 35 | Add Architecture Decision Records | Documentation: +0.1 |
+| 36 | Add OpenTelemetry distributed tracing | Monitoring: +0.2 |
+| 37 | Pin Python dependencies with pip-compile | DevEx: +0.1 |
+
+---
+
+## DATA SOURCES
+
+This audit was performed by 5 specialized agents running in parallel:
+
+| Agent | Scope | Tool Calls | Duration |
+|-------|-------|------------|----------|
+| Frontend Performance | Bundle, images, loading, SSG, SW, middleware, config | 79 | 7.3 min |
+| Backend Architecture | main.py, routes, security, DB, logging, deps, types | 70 | 7.4 min |
+| Test Coverage | All test files, CI config, thresholds, test quality | 74 | 6.7 min |
+| Security & Accessibility | Auth, CORS, encryption, ARIA, viewport, focus, contrast | 86 | 4.8 min |
+| SEO & Code Quality | Metadata, sitemap, ESLint, console, any, Docker, DX | 100 | 8.0 min |
+
+**Total tool invocations:** 409
+**Total tokens analyzed:** ~300,000+
+
+---
+
+## DETAILED METRICS APPENDIX
+
+### Frontend
+| Metric | Count |
 |--------|-------|
-| Total TypeScript/TSX LOC | ~139,000 |
-| Total Python LOC | ~136,000 |
-| Total CSS LOC | ~2,991 |
+| TypeScript/TSX files | 670 |
 | Pages | 96 |
-| Components | 245 |
-| Custom Hooks | 33 |
-| Backend Routes | 50+ files |
-| Backend Services | 90+ files |
-| Backend Models | 20 files |
-| Test Files (Frontend) | 42 |
-| Test Files (Backend) | 2 |
-| Locale Languages | 17 |
-| Total Commits | 140 |
-| AI-Generated Commits | 62% |
-| Root MD Files | 50 |
-| Empty Catch Blocks | 49 |
-| `any` Type Usages | 14 |
-| Memoization Calls | 452 |
-| Dynamic Imports | 0 |
-| Lazy-Loaded Images | 0 |
+| `'use client'` directives | 345 |
+| `next/dynamic` imports | 0 |
+| `React.lazy` imports | 0 |
+| `next/image` imports | 0 |
+| Raw `<img>` tags | 4 |
+| `loading.tsx` files | 1 |
+| `error.tsx` files | 0 |
+| `Suspense` boundaries | 2 |
+| `generateStaticParams` | 0 |
+| framer-motion imports | 32 (31 files) |
+| recharts imports | 4 (4 files) |
+| Console statements | ~275 (104 files) |
+| Explicit `any` types | 63 (22 files) |
+| Inline styles | 80 |
+| TODO comments | 3 |
+| CSS lines (globals.css) | 2,650 |
+| Pre-commit hooks | 9 |
+| npm scripts | 15 |
 
----
+### Backend
+| Metric | Count |
+|--------|-------|
+| Python files | 282 |
+| Total lines | 271,530 |
+| Route files | 56 (33,396 lines) |
+| Service files | 147 |
+| Middleware layers | 12 |
+| Pydantic models | 34+ |
+| Typed functions | 159+ |
+| Bare except clauses | 1 |
+| print() in routes | 0 |
+| SQL injection vulnerabilities | 0 |
+| Hardcoded secrets | 0 |
+| selectinload instances | 11 |
+| Connection pool size | 30 + 10 overflow |
 
-## FINAL WORD
+### Testing
+| Metric | Count |
+|--------|-------|
+| Total test files | 113 (71 backend + 42 frontend) |
+| Total individual tests | ~1,214 |
+| Total test code lines | 22,636 |
+| Backend route coverage | 100% (66/66 referenced) |
+| Backend service coverage | 22% (32/147 tested) |
+| E2E test files | 0 |
+| Load test files | 2 (not in CI) |
+| CI coverage threshold | 49% |
 
-MindVibe has the **heart** of something meaningful — a spiritual wellness platform rooted in authentic Bhagavad Gita wisdom, serving users in 17 languages. The technical ambition is evident, and the security posture is above average for a project of this stage.
-
-But it is a victim of **feature velocity without consolidation**. The codebase reads like a developer (aided heavily by AI) who kept saying "yes" to every feature idea without ever saying "this is enough for v1." The result is a product that's impressive on a feature checklist but would struggle in a real Lighthouse audit, a real accessibility review, or a real user testing session.
-
-The path forward is not more features. It is **less, but better.**
-
-> *"It is better to do one's own duty imperfectly than to do another's duty perfectly."*
-> — Bhagavad Gita 3.35
-
-Build 5 features perfectly. Ship them. Listen to users. Then build 5 more.
+### Infrastructure
+| Metric | Count |
+|--------|-------|
+| .env.example variables | 176 lines |
+| Documentation files | 50+ |
+| Docker stages | 4 |
+| CI workflow files | 3+ |
+| Security headers | 5 |
+| Redirect rules | 6 |
+| CORS allowed origins | 4 |

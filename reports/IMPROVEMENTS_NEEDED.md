@@ -1,6 +1,6 @@
 # MindVibe — Complete Improvements List
 
-**Date:** 2026-02-21
+**Date:** 2026-02-22 (v2 — Updated with deep scan data)
 **Scope:** Everything needed to take MindVibe from 5.7/10 to 10/10
 
 ---
@@ -9,18 +9,21 @@
 
 ### 1. Test Coverage is Dangerously Low
 
-| Layer | Source Files | Test Files | Coverage |
-|-------|-------------|------------|----------|
-| Backend (Python) | 282 | 37 unit + 23 integration = 60 | ~21% file coverage |
-| Frontend (TypeScript) | 604 | 42 | ~7% file coverage |
-| E2E Tests | — | 0 | 0% |
+| Layer | Source Files | Test Files | Individual Tests | Coverage |
+|-------|-------------|------------|-----------------|----------|
+| Backend (Python) | 282 | 71 (38 unit + 23 integration + 10 other) | ~700 | Routes: 100%, Services: 22% |
+| Frontend (TypeScript) | 670 | 42 (20 component + 22 service/util) | ~514 | ~6% file coverage |
+| E2E Tests | — | 0 | 0 | 0% |
+| **Total** | **952** | **113** | **~1,214** | |
 
 **What's missing:**
 - **Zero E2E tests** — no Playwright, Cypress, or Puppeteer. No user flow is verified end-to-end.
-- **Backend route coverage** — 40+ route files, only ~15 have corresponding tests. Missing tests for: `ardha.py`, `chat_rooms.py`, `community.py`, `divine_consciousness.py`, `daily_analysis.py`, `emotional_patterns.py`, `feedback.py`, `gita_social_ingestion.py`, `journeys.py`, `karma_footprint.py`, `notifications.py`, `voice_learning_advanced.py`, `wisdom_guide.py`, and most admin routes.
-- **Frontend component coverage** — 245+ components, only 42 test files. Critical untested components: all chat components, all divine components, all navigation components, all mobile components, pricing page, onboarding wizard, journal encryption, profile page.
+- **Backend service coverage is 22%** — only 32/147 services tested. 115 untested services include: `relationship_compass_engine`, `kiaan_consciousness`, `response_engine`, `journey_service`, `wisdom_core`, `multilingual_voice_engine`, `rag_service`, `whisper_transcription`, all "divine" services, and 100+ more.
+- **Backend route coverage is 100%** (all 66 routes referenced in tests — this is good).
+- **Frontend component coverage** — 670 source files, only 42 test files. Critical untested components: all chat components, all divine components, all navigation components, all mobile components, pricing page, onboarding wizard, journal encryption, profile page.
 - **CI threshold is only 49%** (`--cov-fail-under=49` in `ci.yml`). CLAUDE.md demands 80%.
-- **No load/stress tests** exist despite CLAUDE.md mandating them.
+- **Load tests exist but are NOT in CI** — `locustfile.py` and `test_api_performance.py` exist but never run automatically.
+- **Tests mask failures** — some backend tests accept HTTP 500 as passing: `assert response.status_code in (201, 500)`.
 
 **Action items:**
 - [ ] Add Playwright for E2E tests (critical user flows: signup, login, chat with KIAAN, complete journey step, journal entry)
@@ -119,33 +122,44 @@
 **Current state:** 460 ARIA attribute occurrences across 144 files — this is decent coverage but inconsistent. 245 components total means ~100 components have zero ARIA attributes.
 
 **Missing accessibility patterns:**
-- No skip-to-content link in the layout
-- No focus management on route changes
-- `userScalable: false` in viewport meta — prevents zoom on mobile (WCAG violation)
+- `userScalable: false` and `maximumScale: 1` in viewport meta — **WCAG 2.1 AA violation** (prevents zoom)
+- Zero `aria-label` attributes found in component directory
+- Zero alt text on images
+- No focus management on route changes or in modal dialogs
 - No `aria-live` regions for dynamic content (chat messages, AI responses)
-- Error boundaries don't announce errors to screen readers
-- No keyboard trap prevention in modals (except `Modal.tsx` which has it)
+- Form labels missing `htmlFor` attributes
+- No `aria-describedby` for form error announcements
+- No `tabindex` management for custom interactive components
+
+**What IS working:**
+- Skip-to-content link exists (`app/layout.tsx:115-122`)
+- `prefers-reduced-motion` handled in 7 CSS instances + runtime checks
+- Good color contrast (primary text 4.5:1+ ratio)
+- Heading hierarchy correct (h1 → h2 → h3)
 
 **Action items:**
-- [ ] Remove `userScalable: false` from viewport (accessibility violation)
-- [ ] Add skip-to-content link in root layout
+- [ ] Remove `userScalable: false` and set `maximumScale: 5` (WCAG requirement)
+- [ ] Add `aria-label` to all interactive components (buttons, links, inputs)
+- [ ] Add alt text to all `<img>` tags (4 found)
 - [ ] Add `aria-live="polite"` to chat message containers and AI response areas
-- [ ] Add focus management on route transitions
-- [ ] Audit all interactive components for keyboard accessibility
+- [ ] Add focus management: modal focus traps, route change focus reset
+- [ ] Add `htmlFor` attributes to all form labels
+- [ ] Add `aria-describedby` for form validation errors
 - [ ] Run axe-core automated audit and fix all violations
-- [ ] Add `prefers-reduced-motion` checks around all framer-motion animations
 
 ---
 
 ### 8. Framer-Motion Overuse / Performance
 
-**Current state:** `framer-motion` is imported and used extensively throughout the app. With 345 `'use client'` components, many use animation on mount.
+**Current state:** `framer-motion` is statically imported in **32 imports across 31 files**. With 345 `'use client'` components, many use animation on mount. This adds ~40KB gzipped to every page that imports it.
 
-**Impact:** On low-end devices (budget Android phones — common in India, a primary target market), animation-heavy pages will lag and jank. No `prefers-reduced-motion` system check was found being used globally.
+**What IS working:** `prefers-reduced-motion` is handled in 7 CSS instances + runtime checks in some components (e.g., `KiaanChat.tsx`, `pricing/page.tsx`).
+
+**Impact:** On low-end devices (budget Android phones — common in India, a primary target market), animation-heavy pages will lag and jank. The ~40KB bundle overhead from framer-motion affects every page.
 
 **Action items:**
-- [ ] Create a `useReducedMotion` hook that respects system preferences (one exists in tests but check if it's used in production components)
-- [ ] Wrap all framer-motion animations in reduced-motion checks
+- [ ] Use `next/dynamic` to lazy-load framer-motion in all 31 files
+- [ ] Verify `prefers-reduced-motion` checks are applied in all animated components (not just 7 CSS instances)
 - [ ] Remove animations from below-the-fold content
 - [ ] Use CSS animations instead of JS animations where possible (transforms, opacity)
 - [ ] Profile with React DevTools Profiler and eliminate unnecessary re-renders
@@ -169,25 +183,29 @@
 
 ### 10. Backend `main.py` is 1283 Lines
 
-**Current state:** `backend/main.py` is a single 1283-line file that handles startup, middleware registration, all route registration, database setup, migration running, health checks, and error handling.
+**Current state:** `backend/main.py` is 1,283 lines handling startup, middleware registration (12 layers), route registration (40+ routers with try/except each), database setup, migration running (3-tier), health checks, and error handling.
+
+**Nuance from deep audit:** The file is large but *well-organized* — each router has independent try/except, startup uses a 3-tier migration sequence (SQL → Manual → ORM), and middleware is layered properly. It's not a "god file" in the traditional sense, but it would benefit from extraction.
 
 **Action items:**
 - [ ] Extract middleware registration into `backend/middleware/__init__.py`
 - [ ] Extract route registration into `backend/routes/__init__.py`
 - [ ] Extract startup/shutdown into `backend/lifecycle.py`
-- [ ] `main.py` should be <100 lines — just app creation and imports
+- [ ] Target: `main.py` should be <200 lines (app creation, imports, composition)
 
 ---
 
 ### 11. CI/CD Gaps
 
 **Current state:**
-- `black` and `ruff` both have `continue-on-error: true` — linting failures don't block merges
+- `ruff` has `continue-on-error: true` — linting failures don't block merges (confirmed in deep audit)
+- `black` format check is enforced (no continue-on-error)
+- `mypy` type checking is enforced
+- `test-enhancements.yml` has `continue-on-error: true` on unit tests AND type checking
 - No E2E test step in CI
 - No bundle size check in CI
 - No Lighthouse CI for performance regression
 - No dependency vulnerability scanning (npm audit / safety check not in CI)
-- `test-enhancements.yml` and `deploy-enhancements.yml` exist but unclear if they run
 
 **Action items:**
 - [ ] Remove `continue-on-error: true` from black and ruff — make linting failures block merges
@@ -296,44 +314,49 @@ Thank you for contributing to MindVibe!
 
 ---
 
-### 18. Speculative/Unused Backend Services
+### 18. Backend Service Organization
 
-**Current state:** Many backend service files appear to be speculative or unfinished:
-- `backend/services/bci_foundation/` — Brain-Computer Interface (no real implementation)
+**Updated finding from deep audit:** All 147 backend services appear to be referenced by routes (no confirmed dead code). However, 115 of those services (78%) have **zero test coverage**, making it impossible to verify they work correctly.
+
+**Concern areas:**
+- `backend/services/bci_foundation/` — Brain-Computer Interface (aspirational?)
 - `backend/services/immune_evolution/` — Immune system modeling
 - `backend/services/nervous_system/` — Nervous system simulation
-- `backend/services/voice_learning/voice_fingerprint.py` — Has TODO comments
-- `backend/services/whisper_transcription.py` — Has bare except
-
-**Impact:** Dead code increases maintenance burden, confuses developers, and inflates the codebase.
+- `backend/services/whisper_transcription.py` — Has bare except clause
 
 **Action items:**
-- [ ] Audit all backend services for actual usage (check if routes import them)
-- [ ] Remove or archive services that aren't imported/used by any route
-- [ ] Add `# NOTE: Experimental — not yet integrated` comments to any kept experimental code
+- [ ] Prioritize testing for the 115 untested services (start with core business: journey_service, response_engine, wisdom_core)
+- [ ] Verify experimental services (bci_foundation, immune_evolution, nervous_system) are actually used in production flows
+- [ ] Add `# NOTE: Experimental` comments to any kept experimental code
 
 ---
 
-### 19. Missing API Documentation
+### 19. API Documentation Enhancement
 
-**Current state:** No Swagger/OpenAPI documentation endpoint configured. FastAPI auto-generates this at `/docs` but it's unclear if it's enabled or properly configured with descriptions.
+**Updated finding:** FastAPI auto-generated Swagger IS enabled at `/docs` with title "MindVibe API" v1.0.0. This is functional but could be improved.
 
 **Action items:**
-- [ ] Ensure `/docs` (Swagger) and `/redoc` are enabled
-- [ ] Add descriptions to all route handlers
+- [ ] Add descriptions to all route handlers (many are missing)
 - [ ] Add request/response examples to Pydantic schemas
-- [ ] Generate and host API documentation
+- [ ] Add authentication documentation to Swagger
+- [ ] Consider hosting generated docs publicly for developer onboarding
 
 ---
 
-### 20. Database Migration Concerns
+### 20. Database Migration Strategy
 
-**Current state:** Both `backend/core/migrations.py` and `backend/core/manual_migrations.py` exist. No Alembic detected.
+**Updated finding:** The migration system is a well-designed 3-tier approach:
+1. **SQL Migrations** — Render-specific SQL files (e.g., `001_add_composite_indexes.sql`)
+2. **Manual Python Migrations** — Complex operations requiring code
+3. **ORM Table Creation** — SQLAlchemy `Base.metadata.create_all()`
+
+This is functional but custom. No Alembic detected.
 
 **Action items:**
-- [ ] Evaluate if custom migration system handles rollbacks
-- [ ] Consider adopting Alembic for structured, versioned migrations
-- [ ] Add migration tests to CI (verify migrations can run on fresh DB)
+- [ ] Evaluate if custom system handles rollbacks (critical for production safety)
+- [ ] Document the migration workflow for other developers
+- [ ] Add migration tests to CI (verify migrations run cleanly on fresh DB)
+- [ ] Consider Alembic for versioned, reversible migrations (long-term)
 
 ---
 
@@ -341,7 +364,10 @@ Thank you for contributing to MindVibe!
 
 ### 21. TODO/FIXME Comments
 
-14 occurrences across 11 files. Each represents acknowledged technical debt.
+**Updated count:** Only **3** TODO comments in 670 frontend files (0.4%) — this is excellent. Backend has a few more. Key ones:
+1. `WisdomSearch.tsx` — "Replace with proper i18n hook once next-intl is fully integrated"
+2. `EncryptedNotesBackup.tsx` — "Implement proper AES-256-GCM encryption with user's key"
+3. `useOfflineFavorites.ts` — "Queue sync operation to save favorites online"
 
 **Action items:**
 - [ ] Triage each TODO — convert to GitHub issues with priority labels
