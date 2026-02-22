@@ -427,7 +427,7 @@ export function VoiceEnhancementsPanel({
             </div>
 
             {/* Settings */}
-            <button className="p-2 rounded-lg bg-white/5 text-white/50 hover:bg-white/10">
+            <button className="p-2 rounded-lg bg-white/5 text-white/50 hover:bg-white/10" aria-label="Voice enhancement settings">
               <Settings2 className="w-4 h-4" />
             </button>
           </div>

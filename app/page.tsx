@@ -17,20 +17,21 @@
  */
 
 import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { useLanguage } from '@/hooks/useLanguage';
 import { springConfigs } from '@/lib/animations/spring-configs';
 
-// Divine experience components
-import { DivineCelestialBackground } from '@/components/divine/DivineCelestialBackground';
-import { DivineKrishnaPresence } from '@/components/divine/DivineKrishnaPresence';
-import { DivineAbhyaasVerse } from '@/components/divine/DivineAbhyaasVerse';
-import { DivineSacredActions } from '@/components/divine/DivineSacredActions';
-
-// Preserved KIAAN ecosystem components
-import { MinimalFeatures } from '@/components/home/MinimalFeatures';
-import { MinimalMoodCheckIn } from '@/components/home/MinimalMoodCheckIn';
-import { FlowingEnergyTriangle } from '@/components/home/FlowingEnergyTriangle';
+// Preserved non-animated component
 import { PathwayMap } from '@/components/navigation/PathwayMap';
+
+// Dynamic imports for framer-motion components to reduce initial bundle size
+const DivineCelestialBackground = dynamic(() => import('@/components/divine/DivineCelestialBackground').then(mod => mod.DivineCelestialBackground), { ssr: false });
+const DivineKrishnaPresence = dynamic(() => import('@/components/divine/DivineKrishnaPresence').then(mod => mod.DivineKrishnaPresence), { ssr: false });
+const DivineAbhyaasVerse = dynamic(() => import('@/components/divine/DivineAbhyaasVerse').then(mod => mod.DivineAbhyaasVerse), { ssr: false });
+const DivineSacredActions = dynamic(() => import('@/components/divine/DivineSacredActions').then(mod => mod.DivineSacredActions), { ssr: false });
+const MinimalFeatures = dynamic(() => import('@/components/home/MinimalFeatures').then(mod => mod.MinimalFeatures), { ssr: false });
+const MinimalMoodCheckIn = dynamic(() => import('@/components/home/MinimalMoodCheckIn').then(mod => mod.MinimalMoodCheckIn), { ssr: false });
+const FlowingEnergyTriangle = dynamic(() => import('@/components/home/FlowingEnergyTriangle').then(mod => mod.FlowingEnergyTriangle), { ssr: false });
 
 export default function Home() {
   const { t, isInitialized } = useLanguage();

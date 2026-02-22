@@ -119,7 +119,7 @@ export function GitaLearningMode({
   }, [])
 
   // Update settings
-  const updateSettings = useCallback((key: keyof GitaLearningSettings, value: any) => {
+  const updateSettings = useCallback((key: keyof GitaLearningSettings, value: GitaLearningSettings[keyof GitaLearningSettings]) => {
     setSettings(prev => ({ ...prev, [key]: value }))
   }, [])
 
@@ -206,6 +206,7 @@ export function GitaLearningMode({
           <button
             onClick={repeatVerse}
             className="p-2 rounded-full text-white/50 hover:text-white/70 transition-colors"
+            aria-label="Repeat verse"
           >
             <RotateCcw className="w-5 h-5" />
           </button>
@@ -215,6 +216,7 @@ export function GitaLearningMode({
             onClick={goToPrevVerse}
             disabled={currentVerse <= 1}
             className="p-3 rounded-full bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-colors disabled:opacity-30"
+            aria-label="Previous verse"
           >
             <SkipBack className="w-5 h-5" />
           </button>
@@ -229,6 +231,7 @@ export function GitaLearningMode({
                 : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
               }
             `}
+            aria-label={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? (
               <Pause className="w-7 h-7" />
@@ -242,6 +245,7 @@ export function GitaLearningMode({
             onClick={goToNextVerse}
             disabled={currentVerse >= totalVerses}
             className="p-3 rounded-full bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-colors disabled:opacity-30"
+            aria-label="Next verse"
           >
             <SkipForward className="w-5 h-5" />
           </button>
@@ -249,6 +253,7 @@ export function GitaLearningMode({
           {/* Volume */}
           <button
             className="p-2 rounded-full text-white/50 hover:text-white/70 transition-colors"
+            aria-label="Volume"
           >
             <Volume2 className="w-5 h-5" />
           </button>

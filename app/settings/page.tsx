@@ -2,10 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { SettingsSection, SettingsItem, SettingsDivider, ToggleSwitch } from '@/components/settings'
+import dynamic from 'next/dynamic'
+import { SettingsSection, SettingsItem, SettingsDivider } from '@/components/settings'
 import { ThemeToggle, Button, Card, CardContent } from '@/components/ui'
 import { OfflineModeToggle } from '@/components/OfflineModeToggle'
-import { SyncStatusWidget } from '@/components/SyncStatusWidget'
+
+// Dynamic imports for framer-motion components to reduce bundle size
+const ToggleSwitch = dynamic(() => import('@/components/settings/ToggleSwitch').then(mod => mod.ToggleSwitch), { ssr: false })
+const SyncStatusWidget = dynamic(() => import('@/components/SyncStatusWidget').then(mod => mod.SyncStatusWidget), { ssr: false })
 
 interface Settings {
   notifications: {

@@ -160,6 +160,7 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
                 <button
                   onClick={handleClose}
                   className="text-orange-100/60 hover:text-orange-50 transition"
+                  aria-label="Close export dialog"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

@@ -203,10 +203,11 @@ export default function DeleteAccountModal({
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-orange-100/70 mb-2">
+                  <label htmlFor="delete-reason" className="block text-sm font-medium text-orange-100/70 mb-2">
                     Reason for leaving (optional)
                   </label>
                   <textarea
+                    id="delete-reason"
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="Help us improve by sharing why you're leaving..."
@@ -216,10 +217,11 @@ export default function DeleteAccountModal({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-orange-100/70 mb-2">
+                  <label htmlFor="delete-confirm" className="block text-sm font-medium text-orange-100/70 mb-2">
                     Type <span className="text-red-400 font-mono">DELETE MY ACCOUNT</span> to confirm
                   </label>
                   <input
+                    id="delete-confirm"
                     type="text"
                     value={confirmText}
                     onChange={(e) => setConfirmText(e.target.value)}

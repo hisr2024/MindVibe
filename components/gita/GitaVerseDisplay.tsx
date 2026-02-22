@@ -111,6 +111,7 @@ export function GitaVerseDisplay({
               className={`p-2 rounded-lg transition-colors ${
                 isFavorite ? 'text-rose-400 bg-rose-500/10' : 'text-white/40 hover:text-white/60'
               }`}
+              aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             >
               <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
             </button>
@@ -119,18 +120,21 @@ export function GitaVerseDisplay({
               className={`p-2 rounded-lg transition-colors ${
                 isBookmarked ? 'text-amber-400 bg-amber-500/10' : 'text-white/40 hover:text-white/60'
               }`}
+              aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark verse'}
             >
               <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
             </button>
             <button
               onClick={onCopy}
               className="p-2 rounded-lg text-white/40 hover:text-white/60 transition-colors"
+              aria-label="Copy verse"
             >
               <Copy className="w-4 h-4" />
             </button>
             <button
               onClick={onShare}
               className="p-2 rounded-lg text-white/40 hover:text-white/60 transition-colors"
+              aria-label="Share verse"
             >
               <Share2 className="w-4 h-4" />
             </button>

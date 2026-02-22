@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const backendResponse = await fetch(`${API_URL}/api/gita/favorites`, {
+    const backendResponse = await fetch(`${BACKEND_URL}/api/gita/favorites`, {
       method: 'POST',
       headers: {
         'Cookie': cookieHeader,
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
   try {
     const cookieHeader = request.headers.get('cookie') || ''
 
-    const backendResponse = await fetch(`${API_URL}/api/gita/favorites`, {
+    const backendResponse = await fetch(`${BACKEND_URL}/api/gita/favorites`, {
       method: 'GET',
       headers: {
         'Cookie': cookieHeader,

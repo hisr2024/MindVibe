@@ -121,7 +121,7 @@ export default function MoodJourneyPanel({ onClose }: MoodJourneyPanelProps) {
               Milestones
             </button>
           </div>
-          <button onClick={onClose} className="p-1 text-white/30 hover:text-white/60 transition-colors">
+          <button onClick={onClose} className="p-1 text-white/30 hover:text-white/60 transition-colors" aria-label="Close mood journey panel">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>

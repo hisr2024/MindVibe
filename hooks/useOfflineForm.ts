@@ -20,8 +20,8 @@ import { apiFetch } from '@/lib/api'
 
 export type FormStatus = 'idle' | 'saving' | 'success' | 'error' | 'queued'
 
-export interface OfflineFormOptions {
-  onSuccess?: (data: any) => void
+export interface OfflineFormOptions<T = unknown> {
+  onSuccess?: (data: T) => void
   onError?: (error: Error) => void
   resetOnSuccess?: boolean
 }
@@ -29,12 +29,12 @@ export interface OfflineFormOptions {
 export interface OfflineFormSubmitOptions {
   endpoint: string
   method: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
-  data: any
+  data: Record<string, unknown>
   entityType: string
   entityId?: string
 }
 
-export function useOfflineForm<T = any>(options: OfflineFormOptions = {}) {
+export function useOfflineForm<T = unknown>(options: OfflineFormOptions<T> = {}) {
   const { onSuccess, onError, resetOnSuccess = true } = options
 
   const [status, setStatus] = useState<FormStatus>('idle')

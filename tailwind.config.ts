@@ -24,8 +24,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['var(--font-sans)', 'Inter', 'system-ui', 'sans-serif'],
-        heading: ['var(--font-sans)', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-inter)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
+        heading: ['var(--font-inter)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
         sacred: ['var(--font-sacred)', 'Crimson Text', 'Georgia', 'serif'],
       },
       backgroundImage: {

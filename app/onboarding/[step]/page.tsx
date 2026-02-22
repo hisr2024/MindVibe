@@ -247,10 +247,11 @@ export default function OnboardingStepPage() {
             {/* Timezone auto-detection */}
             <div className="max-w-md mx-auto space-y-4">
               <div className="space-y-1.5">
-                <label className="block text-sm font-semibold text-orange-50">
+                <label htmlFor="onboarding-timezone" className="block text-sm font-semibold text-orange-50">
                   Timezone
                 </label>
                 <select
+                  id="onboarding-timezone"
                   value={state.timezone}
                   onChange={(e) => updateState({ timezone: e.target.value })}
                   className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40"
@@ -268,10 +269,11 @@ export default function OnboardingStepPage() {
               
               {/* Language selector */}
               <div className="space-y-1.5">
-                <label className="block text-sm font-semibold text-orange-50">
+                <label htmlFor="onboarding-language" className="block text-sm font-semibold text-orange-50">
                   Language
                 </label>
                 <select
+                  id="onboarding-language"
                   value={state.language}
                   onChange={(e) => updateState({ language: e.target.value })}
                   className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40"
@@ -313,10 +315,11 @@ export default function OnboardingStepPage() {
             {/* Additional preferences */}
             <div className="max-w-md mx-auto space-y-4 mt-6 pt-6 border-t border-orange-500/10">
               <div className="space-y-1.5">
-                <label className="block text-sm font-semibold text-orange-50">
+                <label htmlFor="mood-frequency" className="block text-sm font-semibold text-orange-50">
                   Mood Tracking Frequency
                 </label>
                 <select
+                  id="mood-frequency"
                   value={state.moodFrequency}
                   onChange={(e) => updateState({ moodFrequency: e.target.value })}
                   className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40"

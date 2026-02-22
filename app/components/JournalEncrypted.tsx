@@ -161,12 +161,14 @@ export default function JournalEncrypted() {
           value={title}
           onChange={e => setTitle(e.target.value)}
           placeholder="Title (optional)"
+          aria-label="Reflection title"
           className="w-full rounded-2xl border border-orange-500/25 bg-slate-950/70 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-400/70"
         />
         <textarea
           value={body}
           onChange={e => setBody(e.target.value)}
           placeholder="Write privately. Data is encrypted on your device."
+          aria-label="Reflection content"
           className="h-40 w-full rounded-2xl border border-orange-500/25 bg-slate-950/70 p-3 text-sm outline-none focus:ring-2 focus:ring-orange-400/70"
         />
         <div className="mt-3 flex flex-wrap gap-2">

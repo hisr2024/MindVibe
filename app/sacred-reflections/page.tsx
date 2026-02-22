@@ -401,8 +401,9 @@ export default function SacredReflectionsPage() {
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-orange-100">Encryption passphrase</label>
+              <label htmlFor="encryption-passphrase" className="text-sm font-semibold text-orange-100">Encryption passphrase</label>
               <input
+                id="encryption-passphrase"
                 type="password"
                 autoComplete="off"
                 value={passphrase}
@@ -435,9 +436,10 @@ export default function SacredReflectionsPage() {
 
             {/* Title */}
             <div>
-              <label className="text-sm font-semibold text-orange-100">Title (optional)</label>
+              <label htmlFor="reflection-title" className="text-sm font-semibold text-orange-100">Title (optional)</label>
               <div className="mt-2 flex gap-2 items-center">
                 <input
+                  id="reflection-title"
                   value={title}
                   onChange={e => setTitle(e.target.value)}
                   placeholder="A word or phrase for this moment..."
@@ -453,13 +455,14 @@ export default function SacredReflectionsPage() {
             {/* Body */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-semibold text-orange-100">Write freely</label>
+                <label htmlFor="reflection-body" className="text-sm font-semibold text-orange-100">Write freely</label>
                 <VoiceInputButton
                   language={language}
                   onTranscript={(text) => setBody(prev => prev ? `${prev} ${text}` : text)}
                 />
               </div>
               <textarea
+                id="reflection-body"
                 value={body}
                 onChange={e => setBody(e.target.value)}
                 placeholder="Let your thoughts flow. Tap the microphone to speak your reflection."

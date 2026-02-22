@@ -11,7 +11,7 @@
 
 export type ConflictStrategy = 'last-write-wins' | 'merge' | 'user-prompt' | 'keep-both';
 
-export interface ConflictData<T = any> {
+export interface ConflictData<T = Record<string, unknown>> {
   localVersion: T;
   serverVersion: T;
   localTimestamp: Date;
@@ -20,7 +20,7 @@ export interface ConflictData<T = any> {
   entityId: string;
 }
 
-export interface ConflictResolution<T = any> {
+export interface ConflictResolution<T = Record<string, unknown>> {
   strategy: ConflictStrategy;
   resolvedData: T;
   requiresUserInput: boolean;
@@ -89,8 +89,10 @@ export class ConflictResolver {
     const { localVersion, serverVersion, localTimestamp, serverTimestamp } = conflict;
 
     // Check if content is substantially different
-    const localContent = (localVersion as any).encrypted_data || (localVersion as any).content || '';
-    const serverContent = (serverVersion as any).encrypted_data || (serverVersion as any).content || '';
+    const localRecord = localVersion as Record<string, unknown>;
+    const serverRecord = serverVersion as Record<string, unknown>;
+    const localContent = (localRecord.encrypted_data as string) || (localRecord.content as string) || '';
+    const serverContent = (serverRecord.encrypted_data as string) || (serverRecord.content as string) || '';
 
     // If content is identical, just update timestamp
     if (localContent === serverContent) {
@@ -122,23 +124,23 @@ export class ConflictResolver {
   private static resolveJourneyProgressConflict<T>(conflict: ConflictData<T>): ConflictResolution<T> {
     const { localVersion, serverVersion } = conflict;
 
-    const local = localVersion as any;
-    const server = serverVersion as any;
+    const local = localVersion as Record<string, unknown>;
+    const server = serverVersion as Record<string, unknown>;
 
     // Merge progress tracking fields
     const merged = {
       ...server,
       ...local,
-      current_step: Math.max(local.current_step || 0, server.current_step || 0),
-      progress_percentage: Math.max(local.progress_percentage || 0, server.progress_percentage || 0),
-      completed_steps: this.mergeArrays(local.completed_steps || [], server.completed_steps || []),
-      time_spent_seconds: (local.time_spent_seconds || 0) + (server.time_spent_seconds || 0),
-      updated_at: local.updated_at > server.updated_at ? local.updated_at : server.updated_at
+      current_step: Math.max((local.current_step as number) || 0, (server.current_step as number) || 0),
+      progress_percentage: Math.max((local.progress_percentage as number) || 0, (server.progress_percentage as number) || 0),
+      completed_steps: this.mergeArrays((local.completed_steps as unknown[]) || [], (server.completed_steps as unknown[]) || []),
+      time_spent_seconds: ((local.time_spent_seconds as number) || 0) + ((server.time_spent_seconds as number) || 0),
+      updated_at: (local.updated_at as string) > (server.updated_at as string) ? local.updated_at : server.updated_at
     };
 
     return {
       strategy: 'merge',
-      resolvedData: merged as T,
+      resolvedData: merged as unknown as T,
       requiresUserInput: false,
       metadata: {
         mergedFields: ['current_step', 'progress_percentage', 'completed_steps', 'time_spent_seconds'],
@@ -151,14 +153,14 @@ export class ConflictResolver {
    * User preferences conflicts: Last-write-wins with merge of nested objects
    */
   private static resolvePreferencesConflict<T>(conflict: ConflictData<T>): ConflictResolution<T> {
-    const { localVersion, serverVersion, localTimestamp, serverTimestamp } = conflict;
+    const { localVersion, serverVersion, localTimestamp: _localTimestamp, serverTimestamp: _serverTimestamp } = conflict;
 
     // Merge preferences, preferring local changes for conflicting keys
-    const merged = this.deepMerge(serverVersion as any, localVersion as any);
+    const merged = this.deepMerge(serverVersion as Record<string, unknown>, localVersion as Record<string, unknown>);
 
     return {
       strategy: 'merge',
-      resolvedData: merged as T,
+      resolvedData: merged as unknown as T,
       requiresUserInput: false,
       metadata: {
         reason: 'Preferences merged with local values taking precedence'
@@ -172,23 +174,23 @@ export class ConflictResolver {
   private static resolveVerseInteractionConflict<T>(conflict: ConflictData<T>): ConflictResolution<T> {
     const { localVersion, serverVersion } = conflict;
 
-    const local = localVersion as any;
-    const server = serverVersion as any;
+    const local = localVersion as Record<string, unknown>;
+    const server = serverVersion as Record<string, unknown>;
 
     // Merge interaction metrics
     const merged = {
       ...server,
       ...local,
-      view_count: (local.view_count || 0) + (server.view_count || 0),
+      view_count: ((local.view_count as number) || 0) + ((server.view_count as number) || 0),
       favorite: local.favorite || server.favorite,
       notes: local.notes || server.notes || null,
-      last_viewed_at: local.last_viewed_at > server.last_viewed_at ? local.last_viewed_at : server.last_viewed_at,
-      time_spent_seconds: (local.time_spent_seconds || 0) + (server.time_spent_seconds || 0)
+      last_viewed_at: (local.last_viewed_at as string) > (server.last_viewed_at as string) ? local.last_viewed_at : server.last_viewed_at,
+      time_spent_seconds: ((local.time_spent_seconds as number) || 0) + ((server.time_spent_seconds as number) || 0)
     };
 
     return {
       strategy: 'merge',
-      resolvedData: merged as T,
+      resolvedData: merged as unknown as T,
       requiresUserInput: false,
       metadata: {
         mergedFields: ['view_count', 'time_spent_seconds'],
@@ -228,8 +230,8 @@ export class ConflictResolver {
   /**
    * Helper: Deep merge two objects (local takes precedence)
    */
-  private static deepMerge(target: any, source: any): any {
-    const output = { ...target };
+  private static deepMerge(target: Record<string, unknown>, source: Record<string, unknown>): Record<string, unknown> {
+    const output: Record<string, unknown> = { ...target };
 
     if (this.isObject(target) && this.isObject(source)) {
       Object.keys(source).forEach(key => {
@@ -237,7 +239,7 @@ export class ConflictResolver {
           if (!(key in target)) {
             output[key] = source[key];
           } else {
-            output[key] = this.deepMerge(target[key], source[key]);
+            output[key] = this.deepMerge(target[key] as Record<string, unknown>, source[key] as Record<string, unknown>);
           }
         } else {
           output[key] = source[key];
@@ -251,8 +253,8 @@ export class ConflictResolver {
   /**
    * Helper: Check if value is a plain object
    */
-  private static isObject(item: any): boolean {
-    return item && typeof item === 'object' && !Array.isArray(item);
+  private static isObject(item: unknown): item is Record<string, unknown> {
+    return item !== null && typeof item === 'object' && !Array.isArray(item);
   }
 }
 
@@ -355,12 +357,12 @@ export function generateUserPrompt(conflict: ConflictData): UserConflictPrompt {
         question: 'You edited this journal entry offline, but it was also changed on another device. Which version would you like to keep?',
         localOption: {
           label: 'My offline changes',
-          preview: (localVersion as any).content?.substring(0, 100) + '...',
+          preview: ((localVersion as Record<string, unknown>).content as string)?.substring(0, 100) + '...',
           timestamp: localTimestamp
         },
         serverOption: {
           label: 'Changes from other device',
-          preview: (serverVersion as any).content?.substring(0, 100) + '...',
+          preview: ((serverVersion as Record<string, unknown>).content as string)?.substring(0, 100) + '...',
           timestamp: serverTimestamp
         },
         keepBothOption: {

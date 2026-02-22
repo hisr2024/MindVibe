@@ -12,12 +12,12 @@ const nextConfig = {
   },
 
   images: {
-    domains: [],
+    remotePatterns: [],
     formats: ['image/avif', 'image/webp'],
   },
 
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:8000'),
   },
 
   // Output configuration for production
@@ -50,6 +50,10 @@ const nextConfig = {
           {
             key: 'Permissions-Policy',
             value: 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(self), payment=(), usb=()',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://mindvibe-api.onrender.com https://fonts.googleapis.com; frame-ancestors 'none';",
           },
         ],
       },
@@ -114,6 +118,20 @@ const nextConfig = {
       },
     ];
   },
+};
+
+nextConfig.experimental = {
+  optimizePackageImports: [
+    'lucide-react',
+    'date-fns',
+    'recharts',
+    'framer-motion',
+    '@radix-ui/react-accordion',
+    '@radix-ui/react-dialog',
+    '@radix-ui/react-hover-card',
+    '@radix-ui/react-switch',
+    '@radix-ui/react-tooltip',
+  ],
 };
 
 module.exports = nextConfig;

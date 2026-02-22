@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   # PostgreSQL Database
   db:
@@ -21,6 +19,20 @@ services:
     networks:
       - mindvibe-network
 
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: mindvibe-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mindvibe-network
+
   # Backend API (FastAPI)
   api:
     build:
@@ -33,6 +45,8 @@ services:
       - PORT=8000
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     ports:
       - "8000:8000"
@@ -62,6 +76,11 @@ services:
       - api
     ports:
       - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - mindvibe-network
 

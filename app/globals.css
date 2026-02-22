@@ -10,8 +10,10 @@
   --color-background: #0b0b0f;
   --color-foreground: #f8fafc;
   --color-surface: #0f1624;
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-sacred: 'Crimson Text', Georgia, 'Times New Roman', serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* --font-sacred is set by next/font/google via the Crimson_Text variable class on <body>.
+     The fallback below applies only if the CSS variable is not injected (e.g. error pages). */
+  --font-sacred: Georgia, 'Times New Roman', serif;
   --text-h1: clamp(2rem, 3vw + 1rem, 2.6rem);
   --text-h2: clamp(1.6rem, 2vw + 1rem, 2.1rem);
   --text-h3: clamp(1.3rem, 1vw + 1rem, 1.6rem);
@@ -866,9 +868,11 @@ html.light .subscription-scroll::-webkit-scrollbar-thumb:hover {
   font-family: 'Noto Sans SC', 'Microsoft YaHei', 'SimHei', sans-serif;
 }
 
-/* System font stack for better compatibility */
+/* System font stack for better compatibility.
+   var(--font-inter) is injected by next/font on <body> and resolves to the
+   self-hosted Inter files, removing the need for an external Google Fonts link. */
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* Ancient India Background Animations */
