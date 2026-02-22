@@ -299,7 +299,7 @@ function formatMicrophoneError(error: unknown, platform: string, browser: string
 export function isSpeechRecognitionAvailable(): boolean {
   if (typeof window === 'undefined') return false
 
-  const win = window as Window & Record<string, unknown>
+  const win = window as unknown as Window & Record<string, unknown>
   return !!(
     win.SpeechRecognition ||
     win.webkitSpeechRecognition ||
@@ -314,7 +314,7 @@ export function isSpeechRecognitionAvailable(): boolean {
 export function getSpeechRecognitionConstructor(): (new () => SpeechRecognition) | null {
   if (typeof window === 'undefined') return null
 
-  const win = window as Window & Record<string, unknown>
+  const win = window as unknown as Window & Record<string, unknown>
   return (
     (win.SpeechRecognition as (new () => SpeechRecognition) | undefined) ||
     (win.webkitSpeechRecognition as (new () => SpeechRecognition) | undefined) ||

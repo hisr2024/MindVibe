@@ -51,9 +51,9 @@ export function OfflineJournalEntry({
     isQueued,
     isError,
     reset
-  } = useOfflineForm({
+  } = useOfflineForm<{ id?: string }>({
     onSuccess: (data) => {
-      if (onEntrySaved && data.id) {
+      if (onEntrySaved && data?.id) {
         onEntrySaved(data.id)
       }
       // Clear form after successful save

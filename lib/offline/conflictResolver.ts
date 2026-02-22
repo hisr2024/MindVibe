@@ -153,7 +153,7 @@ export class ConflictResolver {
    * User preferences conflicts: Last-write-wins with merge of nested objects
    */
   private static resolvePreferencesConflict<T>(conflict: ConflictData<T>): ConflictResolution<T> {
-    const { localVersion, serverVersion, localTimestamp, serverTimestamp } = conflict;
+    const { localVersion, serverVersion, localTimestamp: _localTimestamp, serverTimestamp: _serverTimestamp } = conflict;
 
     // Merge preferences, preferring local changes for conflicting keys
     const merged = this.deepMerge(serverVersion as Record<string, unknown>, localVersion as Record<string, unknown>);

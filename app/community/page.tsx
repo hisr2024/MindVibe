@@ -138,7 +138,7 @@ export default function CommunityPage() {
         // Rollback optimistic update on failure
         setPosts(previousPosts)
       }
-    } catch (err) {
+    } catch (_err) {
       // Rollback optimistic update on network error
       setPosts(previousPosts)
     }

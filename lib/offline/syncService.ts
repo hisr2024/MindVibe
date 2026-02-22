@@ -423,7 +423,7 @@ class OfflineSyncService {
       throw new Error('Conflict not found')
     }
 
-    const conflict = this.conflicts[conflictIndex]
+    const _conflict = this.conflicts[conflictIndex]
     const operation = this.syncQueue.find((op) => op.id === operationId)
 
     if (!operation) {

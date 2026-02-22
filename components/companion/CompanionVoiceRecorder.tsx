@@ -57,7 +57,7 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
     if (isDisabled || isProcessing) return
 
     // Use Web Speech API for transcription (browser-native, no backend needed)
-    const win = window as Window & Record<string, unknown>
+    const win = window as unknown as Window & Record<string, unknown>
     const SpeechRecognition =
       (win.SpeechRecognition as typeof globalThis.SpeechRecognition | undefined) || (win.webkitSpeechRecognition as typeof globalThis.SpeechRecognition | undefined)
 
