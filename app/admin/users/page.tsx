@@ -12,14 +12,6 @@ interface User {
   createdAt: string
 }
 
-interface UserListResponse {
-  users: User[]
-  total: number
-  page: number
-  pageSize: number
-  totalPages: number
-}
-
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)

@@ -9,7 +9,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { LineChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { LineChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { TrendingUp, AlertCircle } from 'lucide-react'
 
 interface MoodPrediction {

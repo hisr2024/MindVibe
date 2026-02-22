@@ -61,10 +61,10 @@ export default function MobileWisdomPage() {
   const { triggerHaptic } = useHapticFeedback()
 
   const [dailyVerse, setDailyVerse] = useState<DailyVerse>(FALLBACK_VERSE)
-  const [isLoading, setIsLoading] = useState(true)
+  const [_isLoading, setIsLoading] = useState(true)
   const [isFavorited, setIsFavorited] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [selectedTheme, setSelectedTheme] = useState<string | null>(null)
+  const [_selectedTheme, setSelectedTheme] = useState<string | null>(null)
 
   // Fetch daily wisdom
   useEffect(() => {

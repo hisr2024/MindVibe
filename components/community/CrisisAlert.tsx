@@ -10,7 +10,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { AlertCircle, Phone, MessageSquare, Globe, X } from 'lucide-react'
+import { Phone, MessageSquare, Globe, X } from 'lucide-react'
 import { useState } from 'react'
 
 interface CrisisResource {

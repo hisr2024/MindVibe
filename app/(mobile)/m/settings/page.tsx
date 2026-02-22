@@ -170,8 +170,8 @@ export default function MobileSettingsPage() {
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [notificationTopics, setNotificationTopics] = useState<NotificationTopic[]>([])
-  const [darkMode, setDarkMode] = useState(true)
-  const [language, setLanguage] = useState('en')
+  const [_darkMode, _setDarkMode] = useState(true)
+  const [language, _setLanguage] = useState('en')
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isExporting, setIsExporting] = useState(false)

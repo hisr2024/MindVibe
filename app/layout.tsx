@@ -14,6 +14,7 @@ import { ClientLayout } from './ClientLayout'
 import { OverlayRoot } from '@/components/ui/OverlayRoot'
 import { MobileRouteGuard, MobileContentWrapper } from '@/components/mobile/MobileRouteGuard'
 import { WebVitalsReporter } from '@/components/WebVitalsReporter'
+import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -179,6 +180,8 @@ export default async function RootLayout({
             </MobileRouteGuard>
             {/* Global wake word listener - "Hey KIAAN" from anywhere */}
             <GlobalWakeWordListener />
+            {/* BreadcrumbList structured data for SERP display */}
+            <BreadcrumbSchema />
             {/* Core Web Vitals monitoring */}
             <WebVitalsReporter />
           </Providers>

@@ -58,7 +58,6 @@ export default function UploadsPage() {
   // Load uploads on mount
   useEffect(() => {
     loadUploads()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {

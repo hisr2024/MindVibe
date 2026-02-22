@@ -7,7 +7,7 @@
 
 import { motion } from 'framer-motion'
 import { Skeleton } from '@/components/ui'
-import type { WeeklySummaryData, Achievement } from '@/types/analytics.types'
+import type { WeeklySummaryData } from '@/types/analytics.types'
 
 interface WeeklySummaryProps {
   summary: WeeklySummaryData | null

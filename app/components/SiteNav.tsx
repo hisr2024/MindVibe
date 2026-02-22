@@ -77,7 +77,7 @@ export default function SiteNav() {
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
           {links.map((link, index) => {
-            const active = pathname === link.href || pathname.startsWith(link.href + '/')
+            const active = link.href === '/' ? pathname === '/' : (pathname === link.href || pathname.startsWith(link.href + '/'))
             const isHighlight = 'highlight' in link && link.highlight
             const isDivine = 'divine' in link && link.divine
             return (

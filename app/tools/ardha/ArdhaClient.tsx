@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
 import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import CompanionCTA from '@/components/companion/CompanionCTA'

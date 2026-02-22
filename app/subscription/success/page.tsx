@@ -8,7 +8,7 @@ import { updateSubscription, type Subscription } from '@/hooks/useSubscription'
 
 function SuccessContent() {
   const searchParams = useSearchParams()
-  const router = useRouter()
+  const _router = useRouter()
   const tier = searchParams.get('tier') || 'basic'
   const yearly = searchParams.get('yearly') === 'true'
   const sessionId = searchParams.get('session_id')

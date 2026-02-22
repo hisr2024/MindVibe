@@ -235,7 +235,7 @@ export default function DashboardClient() {
   }, [triggerHaptic])
 
   return (
-    <main className="mx-auto max-w-6xl space-y-6 sm:space-y-8 px-4 sm:px-6 pb-28 sm:pb-20 md:pb-10 lg:px-8">
+    <div className="space-y-6 sm:space-y-8">
       <FadeIn>
         <motion.div
           variants={containerVariants}
@@ -588,6 +588,6 @@ export default function DashboardClient() {
 
         </motion.div>
       </FadeIn>
-    </main>
+    </div>
   )
 }

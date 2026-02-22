@@ -11,7 +11,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLanguage, type Language } from '@/hooks/useLanguage';
-import { SUPPORTED_LANGUAGES, getLanguagesByRegion } from '@/config/translation';
+import { getLanguagesByRegion } from '@/config/translation';
 
 interface LanguageSettingsProps {
   onClose?: () => void;

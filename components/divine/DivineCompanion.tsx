@@ -84,8 +84,8 @@ export function DivineCompanion({
   showByDefault = true,
   className = '',
 }: DivineCompanionProps) {
-  const { actions, state } = useDivineConsciousness();
-  const [isVisible, setIsVisible] = useState(showByDefault);
+  const { actions, state: _state } = useDivineConsciousness();
+  const [isVisible, _setIsVisible] = useState(showByDefault);
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentMood, setCurrentMood] = useState<KrishnaMood>('blessing');
   const [comfortMessage, setComfortMessage] = useState(INSTANT_COMFORT[0]);

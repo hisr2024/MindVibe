@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo, memo } from 'react'
+import { useState, useEffect, useCallback, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   DivineGreeting,
@@ -21,7 +21,7 @@ import { useLanguage } from '@/hooks/useLanguage'
 import Link from 'next/link'
 
 // Animation variants for consistent motion
-const fadeInUp = {
+const _fadeInUp = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.4, ease: "easeOut" }
@@ -100,7 +100,7 @@ export default function IntroductionPage() {
   const [showProtectionShield, setShowProtectionShield] = useState(false)
   const [showHeartJournal, setShowHeartJournal] = useState(false)
   const [hasSeenDarshan, setHasSeenDarshan] = useState(false)
-  const [isPageReady, setIsPageReady] = useState(false)
+  const [_isPageReady, setIsPageReady] = useState(false)
 
   // Language hook for translations
   const { t } = useLanguage()

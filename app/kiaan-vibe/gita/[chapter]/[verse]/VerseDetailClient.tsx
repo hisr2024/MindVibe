@@ -259,8 +259,8 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
       await navigator.clipboard.writeText(text)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy:', err)
+    } catch {
+      // copy failed
     }
   }
 
@@ -276,7 +276,7 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
     if (navigator.share) {
       try {
         await navigator.share(shareData)
-      } catch (err) {
+      } catch {
         // User cancelled or error
       }
     }

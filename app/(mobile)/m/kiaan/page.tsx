@@ -21,7 +21,7 @@ import { queueOfflineOperation } from '@/lib/offline/syncService'
 
 export default function MobileKiaanPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuth()
+  const { user: _user, isAuthenticated } = useAuth()
   const { triggerHaptic } = useHapticFeedback()
 
   const [messages, setMessages] = useState<ChatMessage[]>([])

@@ -15,7 +15,6 @@ import {
   SUPPORTED_LANGUAGES,
   detectBrowserLanguage,
   getAvailableLanguages,
-  type LanguageInfo,
 } from '@/lib/kiaan-vibe/gita'
 
 export default function GitaChaptersPage() {

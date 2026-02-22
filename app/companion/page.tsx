@@ -24,6 +24,7 @@ import CompanionMoodRing from '@/components/companion/CompanionMoodRing'
 import { apiFetch } from '@/lib/api'
 import { KiaanFriendEngine } from '@/lib/kiaan-friend-engine'
 import { useLanguage } from '@/hooks/useLanguage'
+import type { VoiceLanguage } from '@/utils/voice/voiceCatalog'
 
 // Dynamic imports for heavy components - loaded on demand to reduce initial bundle
 const CompanionVoiceRecorder = dynamic(() => import('@/components/companion/CompanionVoiceRecorder'), {
@@ -623,7 +624,7 @@ export default function CompanionPage() {
         <div className="relative z-20 max-w-xl mx-auto w-full px-4 pt-3">
           <VoiceCompanionSelector
             currentConfig={{
-              language: (voiceConfig.language || 'en') as any,
+              language: (voiceConfig.language || 'en') as VoiceLanguage,
               voiceId: voiceConfig.speakerId?.split('_').pop() || 'sarvam-aura',
               emotion: voiceConfig.emotion || 'neutral',
               speed: voiceConfig.speed || 0.95,

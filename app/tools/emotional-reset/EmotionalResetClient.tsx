@@ -1,7 +1,6 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { EmotionalResetWizard } from '@/components/emotional-reset'
 import { ToolHeader, ToolActionCard } from '@/components/tools'
 import { FadeIn } from '@/components/ui'

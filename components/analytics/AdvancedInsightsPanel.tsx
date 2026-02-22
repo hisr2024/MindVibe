@@ -15,12 +15,9 @@ import React, { useState } from 'react'
 import { EmotionCircumplex } from './EmotionCircumplex'
 import type {
   MoodAnalysis,
-  CognitiveDistortion,
   PsychologicalBridge,
   YogaPathGuidance,
   GunaTransformationPlan,
-  DISTORTION_LABELS,
-  YOGA_PATH_LABELS,
 } from '@/types/advanced-analytics.types'
 
 interface AdvancedInsightsPanelProps {
@@ -51,7 +48,7 @@ export function AdvancedInsightsPanel({
   analysis,
   distortionGuidance = [],
   yogaGuidance,
-  gunaTransformation,
+  gunaTransformation: _gunaTransformation,
   dailyIntention,
   className = '',
 }: AdvancedInsightsPanelProps) {
@@ -154,7 +151,7 @@ export function AdvancedInsightsPanel({
 
             {expandedSection === 'distortions' && (
               <div className="mt-4 space-y-3">
-                {analysis.distortions_detected.map((distortion, index) => {
+                {analysis.distortions_detected.map((distortion, _index) => {
                   const guidance = distortionGuidance.find(
                     g => g.psychological_concept.toLowerCase().includes(
                       distortion.replace(/_/g, ' ')

@@ -48,7 +48,7 @@ export default function JourneyDetailPage() {
         const stepData = await journeyEngineService.getCurrentStep(journeyId)
         setCurrentStep(stepData)
         setSelectedDay(stepData?.day_index || journeyData.current_day)
-      } catch (stepErr) {
+      } catch {
         // Step may not exist for completed journeys — not fatal
         setSelectedDay(journeyData.current_day)
       }

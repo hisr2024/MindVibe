@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -11,7 +11,6 @@ import {
   JourneyServiceError,
 } from '@/services/journeyService'
 import type {
-  Journey,
   JourneyStatus,
   JourneyFormState,
 } from '@/types/journey.types'
@@ -279,9 +278,11 @@ export default function JourneyFormClient({ mode, journeyId }: JourneyFormClient
                   ? 'border-red-500 bg-red-900/10 focus:border-red-500'
                   : 'border-white/10 bg-white/5 focus:border-amber-500/50'
               }`}
+              aria-invalid={!!fieldErrors.description}
+              aria-describedby={fieldErrors.description ? 'description-error' : undefined}
             />
             {fieldErrors.description && (
-              <p className="mt-1 text-sm text-red-400">{fieldErrors.description}</p>
+              <p id="description-error" className="mt-1 text-sm text-red-400">{fieldErrors.description}</p>
             )}
             <p className="mt-1 text-right text-xs text-white/40">
               {form.description.length}/5000
@@ -324,9 +325,11 @@ export default function JourneyFormClient({ mode, journeyId }: JourneyFormClient
                   ? 'border-red-500 bg-red-900/10 focus:border-red-500'
                   : 'border-white/10 bg-white/5 focus:border-amber-500/50'
               }`}
+              aria-invalid={!!fieldErrors.cover_image_url}
+              aria-describedby={fieldErrors.cover_image_url ? 'cover-image-error' : undefined}
             />
             {fieldErrors.cover_image_url && (
-              <p className="mt-1 text-sm text-red-400">{fieldErrors.cover_image_url}</p>
+              <p id="cover-image-error" className="mt-1 text-sm text-red-400">{fieldErrors.cover_image_url}</p>
             )}
           </div>
 
@@ -345,6 +348,8 @@ export default function JourneyFormClient({ mode, journeyId }: JourneyFormClient
                 placeholder="Add a tag and press Enter"
                 maxLength={50}
                 className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-amber-500/50 focus:outline-none"
+                aria-invalid={!!fieldErrors.tags}
+                aria-describedby={fieldErrors.tags ? 'tags-error' : undefined}
               />
               <button
                 type="button"
@@ -376,7 +381,7 @@ export default function JourneyFormClient({ mode, journeyId }: JourneyFormClient
               </div>
             )}
             {fieldErrors.tags && (
-              <p className="mt-1 text-sm text-red-400">{fieldErrors.tags}</p>
+              <p id="tags-error" className="mt-1 text-sm text-red-400">{fieldErrors.tags}</p>
             )}
             <p className="mt-2 text-xs text-white/40">
               {form.tags.length}/10 tags

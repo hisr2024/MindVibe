@@ -28,7 +28,7 @@ export default function ChapterVersesPage({ params }: PageProps) {
 
   const [chapter, setChapter] = useState<GitaChapter | null>(null)
   const [loading, setLoading] = useState(true)
-  const [copiedVerse, setCopiedVerse] = useState<number | null>(null)
+  const [_copiedVerse, setCopiedVerse] = useState<number | null>(null)
   const [isLoadingChapter, setIsLoadingChapter] = useState(false)
 
   const { play, setQueue, currentTrack, isPlaying: playerIsPlaying } = usePlayerStore()
@@ -69,7 +69,7 @@ export default function ChapterVersesPage({ params }: PageProps) {
     loadChapter()
   }, [chapterNumber, languageCode])
 
-  const handleCopy = async (verseNumber: number, text: string) => {
+  const _handleCopy = async (verseNumber: number, text: string) => {
     try {
       await navigator.clipboard.writeText(text)
       setCopiedVerse(verseNumber)

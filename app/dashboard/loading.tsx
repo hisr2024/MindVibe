@@ -6,7 +6,7 @@
  * so users perceive content forming rather than seeing a blank screen.
  */
 
-import { Skeleton, SkeletonText } from '@/components/ui/Skeleton'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 function QuickActionSkeleton() {
   return (
