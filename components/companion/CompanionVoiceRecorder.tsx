@@ -48,7 +48,7 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
       if (recognitionRef.current) {
-        try { recognitionRef.current.stop() } catch {}
+        try { recognitionRef.current.stop() } catch { /* recognition may already be stopped */ }
       }
     }
   }, [])
@@ -111,7 +111,7 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop()
-      } catch {}
+      } catch { /* recognition may already be stopped */ }
     }
     if (timerRef.current) {
       clearInterval(timerRef.current)

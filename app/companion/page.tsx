@@ -18,17 +18,34 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import CompanionChatBubble from '@/components/companion/CompanionChatBubble'
 import CompanionMoodRing from '@/components/companion/CompanionMoodRing'
-import CompanionVoiceRecorder from '@/components/companion/CompanionVoiceRecorder'
-import CompanionSuggestions from '@/components/companion/CompanionSuggestions'
-import CompanionVoicePlayer from '@/components/companion/CompanionVoicePlayer'
-import CompanionBreathingExercise from '@/components/companion/CompanionBreathingExercise'
-import MoodJourneyPanel from '@/components/companion/MoodJourneyPanel'
-import VoiceCompanionSelector from '@/components/voice/VoiceCompanionSelector'
 import { apiFetch } from '@/lib/api'
 import { KiaanFriendEngine } from '@/lib/kiaan-friend-engine'
 import { useLanguage } from '@/hooks/useLanguage'
+
+// Dynamic imports for heavy components - loaded on demand to reduce initial bundle
+const CompanionVoiceRecorder = dynamic(() => import('@/components/companion/CompanionVoiceRecorder'), {
+  ssr: false,
+  loading: () => <div className="h-12 w-12 animate-pulse rounded-full bg-slate-800/50" />,
+})
+const CompanionSuggestions = dynamic(() => import('@/components/companion/CompanionSuggestions'), {
+  loading: () => <div className="h-16 animate-pulse rounded-lg bg-slate-800/30" />,
+})
+const CompanionVoicePlayer = dynamic(() => import('@/components/companion/CompanionVoicePlayer'), {
+  ssr: false,
+})
+const CompanionBreathingExercise = dynamic(() => import('@/components/companion/CompanionBreathingExercise'), {
+  loading: () => <div className="h-48 animate-pulse rounded-xl bg-slate-800/30" />,
+})
+const MoodJourneyPanel = dynamic(() => import('@/components/companion/MoodJourneyPanel'), {
+  loading: () => <div className="h-64 animate-pulse rounded-xl bg-slate-800/30" />,
+})
+const VoiceCompanionSelector = dynamic(() => import('@/components/voice/VoiceCompanionSelector'), {
+  ssr: false,
+  loading: () => <div className="h-32 animate-pulse rounded-xl bg-slate-800/30" />,
+})
 
 // ─── Voice Config Type ──────────────────────────────────────────────
 interface VoiceConfig {
