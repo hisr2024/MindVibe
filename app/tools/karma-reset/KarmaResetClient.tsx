@@ -9,7 +9,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { EcosystemNav, KiaanBadge } from '@/components/kiaan-ecosystem'
+import { EcosystemNav } from '@/components/kiaan-ecosystem'
 import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import { ResetPlanCard } from '@/components/tools/ResetPlanCard'
 import { BreathingOrb } from '@/components/animations/BreathingOrb'
@@ -42,7 +42,7 @@ export default function KarmaResetClient() {
   const [repairType, setRepairType] = useState<'apology' | 'clarification' | 'calm_followup'>('apology')
   const [loading, setLoading] = useState(false)
   const [resetGuidance, setResetGuidance] = useState<ResetGuidance | null>(null)
-  const [kiaanMetadata, setKiaanMetadata] = useState<KiaanMetadata | null>(null)
+  const [_kiaanMetadata, setKiaanMetadata] = useState<KiaanMetadata | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
   const [backendHealthy, setBackendHealthy] = useState<boolean | null>(null)

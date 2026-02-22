@@ -10,7 +10,6 @@
 import React, { useMemo } from 'react'
 import type {
   RippleVisualizationData,
-  RippleCircle,
   Guna,
 } from '@/types/advanced-analytics.types'
 
@@ -46,7 +45,7 @@ export function KarmicRippleViz({
 
   // Calculate ring positions
   const rings = useMemo(() => {
-    return data.ripple_circles.map((ripple, index) => {
+    return data.ripple_circles.map((ripple, _index) => {
       const baseRadius = (ripple.radius / 5) * maxRadius
       return {
         ...ripple,

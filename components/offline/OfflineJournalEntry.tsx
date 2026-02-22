@@ -43,7 +43,7 @@ export function OfflineJournalEntry({
 
   const {
     submitForm,
-    status,
+    status, // eslint-disable-line @typescript-eslint/no-unused-vars
     error,
     isOnline,
     isSaving,

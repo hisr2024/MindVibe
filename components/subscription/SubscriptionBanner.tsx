@@ -26,7 +26,7 @@ export function SubscriptionBanner({
   ctaText = 'Upgrade',
   className = '',
 }: SubscriptionBannerProps) {
-  const { hasAccess, featureLabel, tier } = useFeatureAccess()
+  const { hasAccess, featureLabel, tier: _tier } = useFeatureAccess()
 
   // Don't show banner if user already has access
   if (hasAccess(feature)) return null

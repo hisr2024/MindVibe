@@ -356,7 +356,7 @@ export function useBiometricAuth(): UseBiometricAuthReturn {
         throw new Error('Server verification failed')
       }
 
-      const verifyData = await verifyResponse.json()
+      const _verifyData = await verifyResponse.json()
 
       return {
         success: true,

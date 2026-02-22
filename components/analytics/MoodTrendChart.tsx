@@ -10,7 +10,7 @@ import { motion } from 'framer-motion'
 import { Chart } from '@/components/common/Chart'
 import { Skeleton } from '@/components/ui'
 import type { MoodTrendData, AnalyticsPeriod } from '@/types/analytics.types'
-import { formatChartDate, getMoodColor, getMoodEmoji } from '@/utils/chartHelpers'
+import { formatChartDate, getMoodEmoji } from '@/utils/chartHelpers'
 
 interface MoodTrendChartProps {
   data: MoodTrendData | null

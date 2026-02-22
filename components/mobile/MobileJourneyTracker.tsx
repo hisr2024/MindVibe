@@ -32,18 +32,12 @@ import {
   ChevronRight,
   Check,
   Lock,
-  Star,
   Target,
   Sparkles,
-  Clock,
   BookOpen,
-  Play,
-  Pause,
-  Volume2,
 } from 'lucide-react'
 
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
-import { useSwipeGesture } from '@/hooks/useSwipeGesture'
 import { queueOfflineOperation } from '@/lib/offline/syncService'
 
 export interface JourneyStep {
@@ -98,7 +92,7 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
 
     const [currentDayIndex, setCurrentDayIndex] = useState(journey.currentDay)
     const [isCompleting, setIsCompleting] = useState(false)
-    const [showContent, setShowContent] = useState(false)
+    const [_showContent, _setShowContent] = useState(false)
 
     const containerRef = useRef<HTMLDivElement>(null)
 
@@ -184,7 +178,7 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
 
     // Progress dots
     const progressDots = useMemo(() => {
-      return journey.steps.slice(0, 7).map((step, index) => {
+      return journey.steps.slice(0, 7).map((step, _index) => {
         const isActive = step.dayIndex === currentDayIndex
         const isCompleted = step.isCompleted
         const isLocked = step.isLocked
@@ -257,6 +251,7 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
         <motion.div
           ref={containerRef}
           className="flex-1 overflow-hidden"
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onPanEnd={handlePanEnd as any}
         >
           <motion.div

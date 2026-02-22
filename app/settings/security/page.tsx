@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Card, CardContent } from '@/components/ui'
-import { SettingsSection, SettingsItem, SettingsDivider } from '@/components/settings'
+import { SettingsSection } from '@/components/settings'
 import { apiFetch } from '@/lib/api'
 import useAuth from '@/hooks/useAuth'
 
@@ -53,7 +53,7 @@ export default function SecuritySettingsPage() {
       } else {
         setError('Failed to load 2FA status')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again.')
     } finally {
       setLoading(false)
@@ -87,7 +87,7 @@ export default function SecuritySettingsPage() {
         const errorData = await res.json()
         setError(errorData.detail || 'Failed to start 2FA setup')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again.')
     }
   }
@@ -114,7 +114,7 @@ export default function SecuritySettingsPage() {
         const errorData = await res.json()
         setError(errorData.detail || 'Invalid code. Please try again.')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again.')
     } finally {
       setVerifying(false)
@@ -160,7 +160,7 @@ export default function SecuritySettingsPage() {
         const errorData = await res.json()
         setError(errorData.detail || 'Failed to disable 2FA')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again.')
     } finally {
       setDisabling(false)
@@ -193,7 +193,7 @@ export default function SecuritySettingsPage() {
         const errorData = await res.json()
         setError(errorData.detail || 'Failed to regenerate backup codes')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again.')
     } finally {
       setRegeneratingBackupCodes(false)

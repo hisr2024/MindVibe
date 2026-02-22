@@ -7,7 +7,6 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Card, CardContent, Skeleton } from '@/components/ui'
 import { AnalyticsOverview } from './AnalyticsOverview'
 import { MoodTrendChart } from './MoodTrendChart'
 import { JournalStatistics } from './JournalStatistics'

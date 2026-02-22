@@ -14,7 +14,6 @@ import {
   Heart,
   MessageCircle,
   Flag,
-  Award,
   Sparkles,
   MoreHorizontal,
   Pin

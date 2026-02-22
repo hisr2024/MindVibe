@@ -32,7 +32,7 @@ export interface UseMessageTranslationReturn {
  * Hook for handling message translation
  */
 export function useMessageTranslation(options: UseMessageTranslationOptions): UseMessageTranslationReturn {
-  const { messageId, originalText, sourceLang = 'en', autoTranslate = false } = options;
+  const { messageId: _messageId, originalText, sourceLang = 'en', autoTranslate = false } = options;
   const { language: targetLang } = useLanguage();
   
   const [translatedText, setTranslatedText] = useState<string | null>(null);

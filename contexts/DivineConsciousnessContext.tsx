@@ -13,7 +13,7 @@
  * "The divine is not somewhere far away - it rests in the stillness of your own heart."
  */
 
-import React, { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef, ReactNode } from 'react';
 
 // Types
 export type EmotionalState =

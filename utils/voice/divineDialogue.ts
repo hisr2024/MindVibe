@@ -638,7 +638,7 @@ function generateEmpowerResponse(emotion?: string): DialogueResponse {
 export function wrapWithConversationalWarmth(
   backendResponse: string,
   turnCount: number,
-  emotion?: string,
+  _emotion?: string,
 ): string {
   const phase = getConversationPhase(turnCount)
 

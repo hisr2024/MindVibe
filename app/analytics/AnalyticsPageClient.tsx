@@ -8,7 +8,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnalyticsDashboard } from '@/components/analytics'
-import { Card, CardContent } from '@/components/ui'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
 import { SubscriptionBanner } from '@/components/subscription'
 

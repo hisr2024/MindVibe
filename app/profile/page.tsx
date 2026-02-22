@@ -36,7 +36,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [_saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Fetch profile from backend or localStorage

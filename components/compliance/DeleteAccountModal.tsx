@@ -196,6 +196,7 @@ export default function DeleteAccountModal({
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
+                    id="delete-confirm-error"
                     className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-sm text-red-400"
                   >
                     {errorMessage}
@@ -227,6 +228,8 @@ export default function DeleteAccountModal({
                     onChange={(e) => setConfirmText(e.target.value)}
                     placeholder="DELETE MY ACCOUNT"
                     className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-orange-50 placeholder-orange-100/30 focus:outline-none focus:border-red-500 font-mono"
+                    aria-invalid={!!errorMessage}
+                    aria-describedby={errorMessage ? 'delete-confirm-error' : undefined}
                   />
                 </div>
 

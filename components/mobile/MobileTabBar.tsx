@@ -1,7 +1,7 @@
 'use client'
 
 import { forwardRef, ReactNode, useState, useCallback, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
 export interface TabItem {
@@ -172,7 +172,7 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
           )}
 
           {/* Tab items */}
-          {tabs.map((tab, index) => {
+          {tabs.map((tab, _index) => {
             const isActive = tab.id === activeTab
 
             return (

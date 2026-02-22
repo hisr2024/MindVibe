@@ -161,13 +161,13 @@ export default function QuantumDivePage() {
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [selectedLayer, setSelectedLayer] = useState<ConsciousnessLayer | null>(null)
   const [progress, setProgress] = useState(0)
-  const [isQuickDive, setIsQuickDive] = useState(false)
+  const [_isQuickDive, setIsQuickDive] = useState(false)
 
   // Refs
   const speechRef = useRef<SpeechSynthesisUtterance | null>(null)
 
   // Hooks
-  const { t, language } = useLanguage()
+  const { language } = useLanguage()
 
   // Initialize speech synthesis
   useEffect(() => {

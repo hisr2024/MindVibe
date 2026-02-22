@@ -1,6 +1,6 @@
 'use client'
 
-import { HelpIcon, FadeIn, AnimatedCard, Disclosure, DisclosureItem } from '@/components/ui'
+import { HelpIcon, FadeIn, AnimatedCard, DisclosureItem } from '@/components/ui'
 
 const values = [
   {

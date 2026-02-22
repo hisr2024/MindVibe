@@ -60,7 +60,7 @@ export async function getJournalHandler(
     }))
 
     return jsonResponse(200, decrypted)
-  } catch (error) {
+  } catch {
     return jsonResponse(500, { error: 'vault_processing_error' })
   }
 }

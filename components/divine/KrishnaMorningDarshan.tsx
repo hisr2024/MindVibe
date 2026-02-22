@@ -77,7 +77,7 @@ export function KrishnaMorningDarshan({
   className = '',
   onComplete,
 }: KrishnaMorningDarshanProps) {
-  const { actions } = useDivineConsciousness();
+  const { actions: _actions } = useDivineConsciousness();
   const { t } = useLanguage();
   const [phase, setPhase] = useState<'entering' | 'greeting' | 'message' | 'verse' | 'closing'>('entering');
   const [timeOfDay, setTimeOfDay] = useState<keyof typeof TIME_ICONS>('morning');

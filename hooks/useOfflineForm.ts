@@ -35,6 +35,7 @@ export interface OfflineFormSubmitOptions {
 }
 
 export function useOfflineForm<T = unknown>(options: OfflineFormOptions<T> = {}) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { onSuccess, onError, resetOnSuccess = true } = options
 
   const [status, setStatus] = useState<FormStatus>('idle')
@@ -48,6 +49,7 @@ export function useOfflineForm<T = unknown>(options: OfflineFormOptions<T> = {})
       setStatus('saving')
       setError(null)
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { endpoint, method, data: formData, entityType, entityId } = submitOptions
 
       try {

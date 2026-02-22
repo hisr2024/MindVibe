@@ -53,7 +53,6 @@ export default function PlaylistsPage() {
   // Load playlists on mount
   useEffect(() => {
     loadPlaylists()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleCreatePlaylist = async () => {

@@ -70,7 +70,7 @@ export default function AdminLogin() {
           {/* Error */}
           {error && (
             <div className="mb-6 rounded-lg bg-red-500/10 border border-red-500/30 px-4 py-3">
-              <p className="text-sm text-red-400">{error}</p>
+              <p id="login-error" className="text-sm text-red-400">{error}</p>
             </div>
           )}
 
@@ -94,6 +94,8 @@ export default function AdminLogin() {
                     required
                     className="w-full rounded-lg border border-slate-600 bg-slate-700/50 px-4 py-3 text-slate-100 placeholder-slate-400 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                     placeholder="admin@mindvibe.life"
+                    aria-invalid={!!error}
+                    aria-describedby={error ? 'login-error' : undefined}
                   />
                 </div>
                 <div>
@@ -113,6 +115,8 @@ export default function AdminLogin() {
                     minLength={8}
                     className="w-full rounded-lg border border-slate-600 bg-slate-700/50 px-4 py-3 text-slate-100 placeholder-slate-400 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                     placeholder="••••••••"
+                    aria-invalid={!!error}
+                    aria-describedby={error ? 'login-error' : undefined}
                   />
                 </div>
               </>

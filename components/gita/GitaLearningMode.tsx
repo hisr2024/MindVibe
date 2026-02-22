@@ -20,18 +20,13 @@ import {
   SkipBack,
   RotateCcw,
   Volume2,
-  BookOpen,
   GraduationCap,
   Target,
   Trophy,
-  ChevronLeft,
-  ChevronRight,
-  Settings2,
-  Clock
+  Settings2
 } from 'lucide-react'
 import { GitaVerseDisplay, type GitaVerse } from './GitaVerseDisplay'
 import {
-  type GitaChapter,
   type GitaLearningSettings,
   GITA_CHAPTERS,
   DEFAULT_LEARNING_SETTINGS
@@ -70,7 +65,7 @@ export function GitaLearningMode({
   const [showSettings, setShowSettings] = useState(false)
   const [repeatCount, setRepeatCount] = useState(0)
   const [completedVerses, setCompletedVerses] = useState<Set<number>>(new Set())
-  const [streak, setStreak] = useState(0)
+  const [streak, _setStreak] = useState(0)
 
   // Chapter info
   const chapterInfo = GITA_CHAPTERS.find(c => c.number === chapter)

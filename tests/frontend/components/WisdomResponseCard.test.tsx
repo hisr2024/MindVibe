@@ -151,7 +151,7 @@ describe('WisdomResponseCard — Accordion behavior', () => {
 
     await waitFor(() => {
       // All AccordionContent elements should be closed
-      const contentEls = document.querySelectorAll('[data-state="open"]')
+      const _contentEls = document.querySelectorAll('[data-state="open"]')
       // Only the Root element may have data-state; items should all be closed
       const openItems = document.querySelectorAll('[role="region"][data-state="open"]')
       expect(openItems.length).toBe(0)

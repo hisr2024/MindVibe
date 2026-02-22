@@ -5,7 +5,6 @@
 
 import type {
   ChartTheme,
-  DARK_CHART_THEME,
   MoodDataPoint,
   WritingTimeData,
 } from '@/types/analytics.types'

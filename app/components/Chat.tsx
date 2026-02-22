@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import SimpleBar from 'simplebar-react'
 import { MessageBubble } from '@/components/chat'
 import { apiCall, getErrorMessage } from '@/lib/api-client'

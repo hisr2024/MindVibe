@@ -53,7 +53,7 @@ const NOTIFICATION_BG: Record<string, string> = {
 
 export default function MobileNotificationsPage() {
   const router = useRouter()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated: _isAuthenticated } = useAuth()
   const { triggerHaptic } = useHapticFeedback()
 
   const [notifications, setNotifications] = useState<Notification[]>([])
@@ -131,7 +131,7 @@ export default function MobileNotificationsPage() {
   }, [triggerHaptic])
 
   // Remove notification
-  const removeNotification = useCallback((id: string) => {
+  const _removeNotification = useCallback((id: string) => {
     triggerHaptic('light')
     setNotifications(prev => {
       const updated = prev.filter(n => n.id !== id)

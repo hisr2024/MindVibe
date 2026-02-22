@@ -249,7 +249,7 @@ class PushNotificationService {
     try {
       // Try to get VAPID public key from server
       // If backend doesn't support push notifications, fall back to local-only notifications
-      let serverPushEnabled = false
+      let _serverPushEnabled = false
       try {
         const keyResponse = await apiFetch('/api/notifications/vapid-key')
         if (keyResponse.ok) {
@@ -274,7 +274,7 @@ class PushNotificationService {
               subscription: this.state.subscription,
             }),
           })
-          serverPushEnabled = true
+          _serverPushEnabled = true
         }
       } catch {
         // Server push not available, continue with local notifications only

@@ -28,9 +28,8 @@ import {
   useRef,
   useEffect,
   useCallback,
-  useMemo,
 } from 'react'
-import { motion, AnimatePresence, PanInfo } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Send,
   Mic,
@@ -40,7 +39,6 @@ import {
   Share2,
   BookOpen,
   ChevronDown,
-  MoreVertical,
   Volume2,
   Check,
   AlertCircle,
@@ -110,7 +108,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
       transcript,
       startListening,
       stopListening,
-      error: voiceError,
+      error: _voiceError,
     } = useVoiceInput({
       language,
       onTranscript: (text, isFinal) => {
@@ -293,7 +291,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
 
             {/* Chat messages */}
             <AnimatePresence mode="popLayout">
-              {messages.map((message, index) => (
+              {messages.map((message, _index) => (
                 <motion.div
                   key={message.id}
                   initial={{ opacity: 0, y: 20, scale: 0.95 }}

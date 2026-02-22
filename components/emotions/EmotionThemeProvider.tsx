@@ -39,7 +39,7 @@ interface EmotionThemeProviderProps {
 export function EmotionThemeProvider({
   children,
   showBackground = true,
-  showIndicator = false
+  showIndicator: _showIndicator = false
 }: EmotionThemeProviderProps) {
   const emotionTheme = useEmotionTheme()
 

@@ -69,6 +69,7 @@ describe('browserSupport utilities', () => {
   describe('isSpeechRecognitionSupported', () => {
     it('should return true when SpeechRecognition is available', () => {
       mockWindow({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         SpeechRecognition: {} as any,
       })
       expect(isSpeechRecognitionSupported()).toBe(true)
@@ -76,6 +77,7 @@ describe('browserSupport utilities', () => {
 
     it('should return true when webkitSpeechRecognition is available', () => {
       mockWindow({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         webkitSpeechRecognition: {} as any,
       })
       expect(isSpeechRecognitionSupported()).toBe(true)
@@ -90,6 +92,7 @@ describe('browserSupport utilities', () => {
   describe('isSpeechSynthesisSupported', () => {
     it('should return true when speechSynthesis is available', () => {
       mockWindow({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         speechSynthesis: {} as any,
       })
       expect(isSpeechSynthesisSupported()).toBe(true)
@@ -192,6 +195,7 @@ describe('browserSupport utilities', () => {
           protocol: 'https:',
           hostname: 'example.com',
         } as Location,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         webkitSpeechRecognition: {} as any,
       })
 
@@ -219,6 +223,7 @@ describe('browserSupport utilities', () => {
           protocol: 'http:',
           hostname: 'example.com',
         } as Location,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         webkitSpeechRecognition: {} as any,
       })
 
@@ -235,6 +240,7 @@ describe('browserSupport utilities', () => {
           protocol: 'https:',
           hostname: 'example.com',
         } as Location,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         webkitSpeechRecognition: {} as any,
       })
 
