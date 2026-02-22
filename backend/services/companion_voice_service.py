@@ -1052,7 +1052,7 @@ def get_elevenlabs_voice_status() -> dict[str, Any]:
         try:
             return get_elevenlabs_health_status()
         except Exception:
-            pass
+            logger.warning("Companion voice service: ElevenLabs health check failed", exc_info=True)
     return {"provider": "elevenlabs", "available": False}
 
 
@@ -1062,7 +1062,7 @@ def get_bhashini_voice_status() -> dict[str, Any]:
         try:
             return get_bhashini_health_status()
         except Exception:
-            pass
+            logger.warning("Companion voice service: Bhashini health check failed", exc_info=True)
     return {"provider": "bhashini_ai", "available": False}
 
 

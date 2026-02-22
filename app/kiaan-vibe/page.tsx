@@ -12,7 +12,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import dynamic from 'next/dynamic'
 import {
   BookOpen,
   Music2,
@@ -28,6 +28,22 @@ import {
   Brain,
   Volume2,
 } from 'lucide-react'
+
+// Dynamic import for framer-motion to reduce initial bundle size
+const MotionDiv = dynamic(
+  () => import('framer-motion').then(mod => {
+    const { motion } = mod
+    return { default: motion.div }
+  }),
+  { ssr: false }
+)
+const MotionButton = dynamic(
+  () => import('framer-motion').then(mod => {
+    const { motion } = mod
+    return { default: motion.button }
+  }),
+  { ssr: false }
+)
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
 import { getAllTracks, getTracksByCategory, formatDuration } from '@/lib/kiaan-vibe/meditation-library'
 import { MEDITATION_CATEGORIES, type MeditationCategory } from '@/lib/kiaan-vibe/types'
@@ -189,7 +205,7 @@ export default function KiaanVibePage() {
           {displayTracks.map((track, index) => {
             const isPlaying = currentTrack?.id === track.id
             return (
-              <motion.button
+              <MotionButton
                 key={track.id}
                 onClick={() => handlePlayTrack(index)}
                 className={`
@@ -240,7 +256,7 @@ export default function KiaanVibePage() {
                 {isPlaying && (
                   <div className="flex gap-0.5">
                     {[1, 2, 3].map((i) => (
-                      <motion.div
+                      <MotionDiv
                         key={i}
                         className="w-0.5 bg-orange-400 rounded-full"
                         animate={{ height: [4, 12, 4] }}
@@ -253,7 +269,7 @@ export default function KiaanVibePage() {
                     ))}
                   </div>
                 )}
-              </motion.button>
+              </MotionButton>
             )
           })}
         </div>

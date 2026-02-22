@@ -2,10 +2,20 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
+import dynamic from 'next/dynamic'
 import { apiFetch } from '@/lib/api'
 import { useLanguage } from '@/hooks/useLanguage'
 import { SubscriptionGate } from '@/components/subscription'
+
+// Dynamic imports for voice components - loaded on user interaction
+const VoiceInputButton = dynamic(
+  () => import('@/components/voice').then(mod => ({ default: mod.VoiceInputButton })),
+  { ssr: false, loading: () => <div className="h-10 w-10 animate-pulse rounded-full bg-slate-800/50" /> }
+)
+const VoiceResponseButton = dynamic(
+  () => import('@/components/voice').then(mod => ({ default: mod.VoiceResponseButton })),
+  { ssr: false }
+)
 
 type EncryptedPayload = {
   ciphertext: string

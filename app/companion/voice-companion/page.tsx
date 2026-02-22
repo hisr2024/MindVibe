@@ -28,9 +28,14 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { apiFetch } from '@/lib/api'
-import VoiceCompanionSelector from '@/components/voice/VoiceCompanionSelector'
-import type { VoiceLanguage } from '@/utils/voice/voiceCatalog'
+
+// Dynamic import for voice selector - loaded on demand
+const VoiceCompanionSelector = dynamic(() => import('@/components/voice/VoiceCompanionSelector'), {
+  ssr: false,
+  loading: () => <div className="h-32 animate-pulse rounded-xl bg-slate-800/30" />,
+})
 
 // ─── Types ──────────────────────────────────────────────────────────────
 
@@ -360,7 +365,9 @@ export default function VoiceCompanionPage() {
             })))
           }
         }
-      }).catch(() => {})
+      }).catch((err) => {
+        console.warn('Failed to load Gita verses for chapter', chapterNum, err)
+      })
 
     const guidePromise = apiFetch(`/api/kiaan/friend/gita-guide/${chapterNum}`)
       .then(async res => {
@@ -368,7 +375,9 @@ export default function VoiceCompanionPage() {
           const data = await res.json()
           if (data?.chapter_guide) setChapterGuide(data.chapter_guide)
         }
-      }).catch(() => {})
+      }).catch((err) => {
+        console.warn('Failed to load chapter guide for chapter', chapterNum, err)
+      })
 
     await Promise.all([versesPromise, guidePromise])
   }, [])

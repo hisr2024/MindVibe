@@ -229,7 +229,7 @@ def scan_request_body(body: bytes, content_type: str) -> Tuple[bool, List[str]]:
         text_body = body.decode('utf-8', errors='ignore')
         threats.extend(detect_threats_in_value(text_body))
     except Exception:
-        pass
+        logger.warning("Threat detection check failed during request body scan", exc_info=True)
 
     # Check entropy for potentially encrypted payloads
     if len(body) > 1000:
@@ -497,7 +497,7 @@ class FileUploadScanner:
             content_threats = detect_threats_in_value(text_content)
             threats.extend(content_threats)
         except Exception:
-            pass
+            logger.warning("Threat detection check failed during file upload scan", exc_info=True)
 
         return len(threats) == 0, threats
 
