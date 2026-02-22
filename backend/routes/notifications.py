@@ -1,14 +1,17 @@
 """Notification routes: push subscription management, notification inbox, preferences.
 
 Endpoints:
+- GET  /vapid-key    — Get the VAPID public key for Web Push
 - POST /subscribe    — Register a push subscription (FCM/Web Push)
-- DELETE /subscribe  — Unregister a push subscription
-- GET /inbox         — Get user's notifications (paginated)
+- POST /unsubscribe  — Unregister a push subscription (matches frontend)
+- DELETE /subscribe  — Unregister a push subscription (by query param)
+- GET  /inbox        — Get user's notifications (paginated)
 - POST /{id}/read    — Mark notification as read
-- GET /preferences   — Get notification preferences
-- PUT /preferences   — Update notification preferences
+- GET  /preferences  — Get notification preferences
+- PUT  /preferences  — Update notification preferences
 """
 
+import os
 import logging
 from datetime import UTC, datetime
 from typing import Optional
@@ -18,7 +21,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_current_user_id, get_db
+from backend.deps import get_current_user, get_db
 from backend.middleware.rate_limiter import limiter
 from backend.models.notification import (
     Notification,
@@ -31,17 +34,27 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/notifications", tags=["notifications"])
 
+# VAPID public key for Web Push (set via environment variable)
+VAPID_PUBLIC_KEY = os.getenv("VAPID_PUBLIC_KEY", "")
+
 
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
 
 class PushSubscriptionIn(BaseModel):
-    """Web Push subscription payload from the browser."""
+    """Web Push subscription payload from the browser.
 
-    endpoint: str = Field(..., max_length=2048)
+    Accepts both direct format and wrapped format from the frontend:
+    - Direct: { endpoint, keys, device_name }
+    - Wrapped: { subscription: { endpoint, keys } }
+    """
+
+    endpoint: str = Field(default="", max_length=2048)
     keys: dict | None = None
     device_name: str | None = Field(None, max_length=128)
+    # Frontend sends { subscription: { endpoint, keys, ... } }
+    subscription: dict | None = None
 
 
 class PushSubscriptionOut(BaseModel):
@@ -91,6 +104,25 @@ class PreferencesOut(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# GET /vapid-key — VAPID public key for Web Push
+# ---------------------------------------------------------------------------
+
+@router.get("/vapid-key")
+async def get_vapid_key(request: Request):
+    """Return the VAPID public key so the browser can subscribe to Web Push.
+
+    If VAPID_PUBLIC_KEY is not configured, returns 404 to signal the frontend
+    to fall back to local-only notifications.
+    """
+    if not VAPID_PUBLIC_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="VAPID key not configured. Push notifications are not available.",
+        )
+    return {"public_key": VAPID_PUBLIC_KEY}
+
+
+# ---------------------------------------------------------------------------
 # POST /subscribe — register push subscription
 # ---------------------------------------------------------------------------
 
@@ -100,23 +132,40 @@ async def subscribe_push(
     request: Request,
     payload: PushSubscriptionIn,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_id),
+    user_id: str = Depends(get_current_user),
 ) -> PushSubscriptionOut:
     """Register a push notification subscription for the current user.
+
+    Accepts both direct and wrapped formats:
+    - Direct: { endpoint: "...", keys: {...} }
+    - Wrapped: { subscription: { endpoint: "...", keys: {...} } }
 
     If the endpoint already exists for this user, reactivates it
     instead of creating a duplicate.
     """
+    # Handle wrapped subscription format from frontend
+    endpoint = payload.endpoint
+    keys = payload.keys
+    if payload.subscription and not endpoint:
+        endpoint = payload.subscription.get("endpoint", "")
+        keys = payload.subscription.get("keys", keys)
+
+    if not endpoint:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Push subscription endpoint is required",
+        )
+
     # Check for existing subscription with same endpoint
     stmt = select(PushSubscription).where(
         PushSubscription.user_id == user_id,
-        PushSubscription.endpoint == payload.endpoint,
+        PushSubscription.endpoint == endpoint,
     )
     existing = (await db.execute(stmt)).scalars().first()
 
     if existing:
         existing.is_active = True
-        existing.keys = payload.keys
+        existing.keys = keys
         existing.last_used_at = datetime.now(UTC)
         existing.user_agent = request.headers.get("User-Agent")
         await db.commit()
@@ -125,8 +174,8 @@ async def subscribe_push(
 
     sub = PushSubscription(
         user_id=user_id,
-        endpoint=payload.endpoint,
-        keys=payload.keys,
+        endpoint=endpoint,
+        keys=keys,
         device_name=payload.device_name,
         user_agent=request.headers.get("User-Agent"),
     )
@@ -139,7 +188,41 @@ async def subscribe_push(
 
 
 # ---------------------------------------------------------------------------
-# DELETE /subscribe — unregister push subscription
+# POST /unsubscribe — unregister push subscription (frontend format)
+# ---------------------------------------------------------------------------
+
+class UnsubscribeIn(BaseModel):
+    """Unsubscribe request from the frontend."""
+    endpoint: str = Field(..., max_length=2048)
+
+
+@router.post("/unsubscribe")
+@limiter.limit("10/minute")
+async def unsubscribe_push_post(
+    request: Request,
+    payload: UnsubscribeIn,
+    db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user),
+):
+    """Deactivate a push subscription by endpoint URL (POST body).
+
+    This endpoint matches the frontend pushService.ts which sends:
+    POST /api/notifications/unsubscribe { endpoint: "..." }
+    """
+    await db.execute(
+        update(PushSubscription)
+        .where(
+            PushSubscription.user_id == user_id,
+            PushSubscription.endpoint == payload.endpoint,
+        )
+        .values(is_active=False)
+    )
+    await db.commit()
+    return {"status": "unsubscribed"}
+
+
+# ---------------------------------------------------------------------------
+# DELETE /subscribe — unregister push subscription (query param)
 # ---------------------------------------------------------------------------
 
 @router.delete("/subscribe")
@@ -148,9 +231,9 @@ async def unsubscribe_push(
     request: Request,
     endpoint: str,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_id),
+    user_id: str = Depends(get_current_user),
 ):
-    """Deactivate a push subscription by endpoint URL."""
+    """Deactivate a push subscription by endpoint URL (query parameter)."""
     await db.execute(
         update(PushSubscription)
         .where(
@@ -173,7 +256,7 @@ async def get_inbox(
     limit: int = 20,
     offset: int = 0,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_id),
+    user_id: str = Depends(get_current_user),
 ) -> NotificationInboxOut:
     """Get the user's notification inbox (most recent first)."""
     limit = min(limit, 100)
@@ -232,7 +315,7 @@ async def mark_read(
     notification_id: str,
     request: Request,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_id),
+    user_id: str = Depends(get_current_user),
 ):
     """Mark a notification as read."""
     stmt = select(Notification).where(
@@ -259,7 +342,7 @@ async def mark_read(
 async def get_preferences(
     request: Request,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_id),
+    user_id: str = Depends(get_current_user),
 ) -> PreferencesOut:
     """Get the user's notification preferences."""
     stmt = select(NotificationPreference).where(
@@ -303,7 +386,7 @@ async def update_preferences(
     request: Request,
     payload: PreferencesIn,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_id),
+    user_id: str = Depends(get_current_user),
 ) -> PreferencesOut:
     """Update the user's notification preferences."""
     stmt = select(NotificationPreference).where(

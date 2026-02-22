@@ -52,13 +52,14 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         )
 
         # Content-Security-Policy: Restricts resource loading
-        # Uses nonce-based policy for scripts instead of 'unsafe-inline'
-        # This ensures only scripts with the correct nonce can execute
-        # Aligned with frontend proxy.ts CSP for consistency
+        # Uses 'unsafe-inline' for scripts to match frontend proxy.ts CSP.
+        # The backend primarily serves JSON APIs; this CSP protects any
+        # HTML responses (e.g., OpenAPI docs, error pages).
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
-            f"script-src 'self' 'nonce-{csp_nonce}'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "img-src 'self' data: https:; "
             "font-src 'self' data: https://fonts.gstatic.com; "
             "media-src 'self' https: blob:; "
