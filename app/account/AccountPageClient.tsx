@@ -22,12 +22,12 @@ function formatDate(dateString: string) {
 }
 
 export default function AccountPageClient() {
-  const { user, isAuthenticated, login, signup, logout, loading: authLoading, error: authError } = useAuth()
+  const { user, isAuthenticated, login, signup, logout, loading: _authLoading, error: authError } = useAuth()
 
   const [mode, setMode] = useState<'create' | 'login'>('create')
   const [legacyAccounts, setLegacyAccounts] = useState<LegacyAccount[]>([])
   const [status, setStatus] = useState<Status | null>(null)
-  const [hydrated, setHydrated] = useState(false)
+  const [_hydrated, setHydrated] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [createForm, setCreateForm] = useState({
@@ -176,14 +176,14 @@ export default function AccountPageClient() {
     try {
       await logout()
       setStatus({ type: 'info', message: 'Signed out. You can log back in anytime.' })
-    } catch (err) {
+    } catch {
       setStatus({ type: 'info', message: 'Signed out successfully.' })
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const accountCreatedAt = user ? new Date().toISOString() : null
+  const _accountCreatedAt = user ? new Date().toISOString() : null
 
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 pb-16">

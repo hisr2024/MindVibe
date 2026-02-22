@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Try the backend journal endpoint
-    const backendResponse = await fetch(`${API_URL}/api/journal/blob`, {
+    const backendResponse = await fetch(`${BACKEND_URL}/api/journal/blob`, {
       method: 'POST',
       headers: {
         'Cookie': cookieHeader,
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Try alternate journal endpoint
-    const altResponse = await fetch(`${API_URL}/api/journal/entries`, {
+    const altResponse = await fetch(`${BACKEND_URL}/api/journal/entries`, {
       method: 'POST',
       headers: {
         'Cookie': cookieHeader,

@@ -9,7 +9,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { EcosystemNav, KiaanBadge } from '@/components/kiaan-ecosystem'
+import { EcosystemNav } from '@/components/kiaan-ecosystem'
 import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import { ResetPlanCard } from '@/components/tools/ResetPlanCard'
 import { BreathingOrb } from '@/components/animations/BreathingOrb'
@@ -42,7 +42,7 @@ export default function KarmaResetClient() {
   const [repairType, setRepairType] = useState<'apology' | 'clarification' | 'calm_followup'>('apology')
   const [loading, setLoading] = useState(false)
   const [resetGuidance, setResetGuidance] = useState<ResetGuidance | null>(null)
-  const [kiaanMetadata, setKiaanMetadata] = useState<KiaanMetadata | null>(null)
+  const [_kiaanMetadata, setKiaanMetadata] = useState<KiaanMetadata | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
   const [backendHealthy, setBackendHealthy] = useState<boolean | null>(null)
@@ -314,7 +314,7 @@ export default function KarmaResetClient() {
                           name="repairType"
                           value="apology"
                           checked={repairType === 'apology'}
-                          onChange={(e) => setRepairType(e.target.value as any)}
+                          onChange={(e) => setRepairType(e.target.value as 'apology' | 'clarification' | 'calm_followup')}
                           className="mt-1 accent-orange-500"
                         />
                         <div>
@@ -329,7 +329,7 @@ export default function KarmaResetClient() {
                           name="repairType"
                           value="clarification"
                           checked={repairType === 'clarification'}
-                          onChange={(e) => setRepairType(e.target.value as any)}
+                          onChange={(e) => setRepairType(e.target.value as 'apology' | 'clarification' | 'calm_followup')}
                           className="mt-1 accent-orange-500"
                         />
                         <div>
@@ -344,7 +344,7 @@ export default function KarmaResetClient() {
                           name="repairType"
                           value="calm_followup"
                           checked={repairType === 'calm_followup'}
-                          onChange={(e) => setRepairType(e.target.value as any)}
+                          onChange={(e) => setRepairType(e.target.value as 'apology' | 'clarification' | 'calm_followup')}
                           className="mt-1 accent-orange-500"
                         />
                         <div>

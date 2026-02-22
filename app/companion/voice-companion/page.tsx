@@ -30,6 +30,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { apiFetch } from '@/lib/api'
+import type { VoiceLanguage } from '@/utils/voice/voiceCatalog'
 
 // Dynamic import for voice selector - loaded on demand
 const VoiceCompanionSelector = dynamic(() => import('@/components/voice/VoiceCompanionSelector'), {
@@ -355,7 +356,7 @@ export default function VoiceCompanionPage() {
         if (res.ok) {
           const data = await res.json()
           if (data?.verses?.length > 0) {
-            setVerses(data.verses.map((v: any) => ({
+            setVerses(data.verses.map((v: Record<string, string | number>) => ({
               chapter: v.chapter || chapterNum,
               verse: v.verse,
               sanskrit: v.sanskrit || '',
@@ -541,7 +542,7 @@ export default function VoiceCompanionPage() {
         <div className="max-w-6xl mx-auto px-4 pt-4">
           <VoiceCompanionSelector
             currentConfig={{
-              language: (voiceConfig.language || 'en') as any,
+              language: (voiceConfig.language || 'en') as VoiceLanguage,
               voiceId: selectedVoiceId,
               emotion: voiceConfig.emotion || 'neutral',
               speed: voiceConfig.speed || 0.95,

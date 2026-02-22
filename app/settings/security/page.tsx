@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Card, CardContent } from '@/components/ui'
-import { SettingsSection, SettingsItem, SettingsDivider } from '@/components/settings'
+import { SettingsSection } from '@/components/settings'
 import { apiFetch } from '@/lib/api'
 import useAuth from '@/hooks/useAuth'
 
@@ -53,7 +53,7 @@ export default function SecuritySettingsPage() {
       } else {
         setError('Failed to load 2FA status')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again.')
     } finally {
       setLoading(false)
@@ -87,7 +87,7 @@ export default function SecuritySettingsPage() {
         const errorData = await res.json()
         setError(errorData.detail || 'Failed to start 2FA setup')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again.')
     }
   }
@@ -114,7 +114,7 @@ export default function SecuritySettingsPage() {
         const errorData = await res.json()
         setError(errorData.detail || 'Invalid code. Please try again.')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again.')
     } finally {
       setVerifying(false)
@@ -160,7 +160,7 @@ export default function SecuritySettingsPage() {
         const errorData = await res.json()
         setError(errorData.detail || 'Failed to disable 2FA')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again.')
     } finally {
       setDisabling(false)
@@ -193,7 +193,7 @@ export default function SecuritySettingsPage() {
         const errorData = await res.json()
         setError(errorData.detail || 'Failed to regenerate backup codes')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again.')
     } finally {
       setRegeneratingBackupCodes(false)
@@ -302,10 +302,11 @@ export default function SecuritySettingsPage() {
                         Enter your current 2FA code to generate new backup codes. This will invalidate all existing backup codes.
                       </p>
                       <div>
-                        <label className="block text-sm font-medium text-orange-100 mb-1">
+                        <label htmlFor="regenerate-2fa-code" className="block text-sm font-medium text-orange-100 mb-1">
                           2FA Code
                         </label>
                         <input
+                          id="regenerate-2fa-code"
                           type="text"
                           inputMode="numeric"
                           pattern="[0-9]*"
@@ -410,10 +411,11 @@ export default function SecuritySettingsPage() {
                         This will make your account less secure. Are you sure?
                       </p>
                       <div>
-                        <label className="block text-sm font-medium text-orange-100 mb-1">
+                        <label htmlFor="disable-2fa-code" className="block text-sm font-medium text-orange-100 mb-1">
                           Current 2FA Code
                         </label>
                         <input
+                          id="disable-2fa-code"
                           type="text"
                           inputMode="numeric"
                           pattern="[0-9]*"
@@ -426,10 +428,11 @@ export default function SecuritySettingsPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-orange-100 mb-1">
+                        <label htmlFor="disable-2fa-password" className="block text-sm font-medium text-orange-100 mb-1">
                           Password
                         </label>
                         <input
+                          id="disable-2fa-password"
                           type="password"
                           autoComplete="current-password"
                           value={disablePassword}

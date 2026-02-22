@@ -84,6 +84,7 @@ export interface KiaanMetadata {
 /**
  * Standard KIAAN-enhanced API response structure
  */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface KiaanResponse<T = any> {
   /** Primary response data */
   data: T

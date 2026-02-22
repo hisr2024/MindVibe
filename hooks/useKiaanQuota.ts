@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 
-const KIAAN_QUOTA_STORAGE_KEY = 'mindvibe_kiaan_quota'
+const _KIAAN_QUOTA_STORAGE_KEY = 'mindvibe_kiaan_quota'
 const KIAAN_USAGE_STORAGE_KEY = 'mindvibe_kiaan_usage'
 
 interface QuotaData {

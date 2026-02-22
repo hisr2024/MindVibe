@@ -183,7 +183,7 @@ function generateTitle(
 
 function generateJourneyNarrative(
   timeline: Array<{ emotion: string; category: string; index: number }>,
-  totalEntries: number
+  _totalEntries: number
 ): string {
   if (timeline.length === 0) return 'A quiet, reflective conversation.'
 
@@ -250,7 +250,7 @@ function getInsightForEmotion(emotion: string): string {
 
 function generateClosingWisdom(
   trend: string,
-  emotions: Array<{ emotion: string; count: number }>
+  _emotions: Array<{ emotion: string; count: number }>
 ): string {
   if (trend === 'improved') {
     return 'Friend, I noticed something beautiful in our conversation: you came in one state and left in a better one. That doesn\'t happen by accident. YOUR willingness to explore, to feel, to be honest - that\'s what created the shift. Remember this feeling. It\'s yours.'

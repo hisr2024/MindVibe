@@ -13,7 +13,7 @@
  */
 
 import { useState, useCallback, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   Music,
   Play,
@@ -257,13 +257,13 @@ export function AmbientSoundscapeControl({
 }: AmbientSoundscapeControlProps) {
   // Connect to audio context (stubbed - feature to be reimplemented in new player)
   const { startAmbient, stopAmbient, state: audioState, playSound } = useAudioStub()
-  const setAmbientVolume = (_v: number) => {}
+  const _setAmbientVolume = (_v: number) => {}
 
   const [playing, setPlaying] = useState(isActive)
   const [activeSounds, setActiveSounds] = useState<ActiveSound[]>([])
   const [selectedCategory, setSelectedCategory] = useState<SoundCategory>('nature')
   const [masterVolume, setMasterVolume] = useState(0.7)
-  const [currentPreset, setCurrentPreset] = useState<string | null>(null)
+  const [currentPreset, _setCurrentPreset] = useState<string | null>(null)
 
   // Sync with audio state
   useEffect(() => {

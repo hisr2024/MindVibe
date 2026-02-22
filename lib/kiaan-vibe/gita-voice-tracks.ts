@@ -16,7 +16,7 @@
  */
 
 import type { Track } from './types'
-import { GITA_CHAPTERS_META, SUPPORTED_LANGUAGES, loadGitaLanguage, type LanguageInfo } from './gita'
+import { GITA_CHAPTERS_META, SUPPORTED_LANGUAGES, loadGitaLanguage } from './gita'
 
 // ============ Voice Configuration ============
 
@@ -164,7 +164,7 @@ export async function createChapterTracks(
   voiceStyle: GitaVoiceStyle = 'divine',
 ): Promise<Track[]> {
   const langData = await loadGitaLanguage(language === 'sa' ? 'en' : language)
-  const saData = language !== 'sa' ? await loadGitaLanguage('sa') : null
+  const _saData = language !== 'sa' ? await loadGitaLanguage('sa') : null
 
   // Always load Sanskrit data for the original text
   const sanskritData = await loadGitaLanguage('sa')

@@ -7,8 +7,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button, Input } from '@/components/ui'
-import { LoadingSpinner } from '@/components/common/LoadingSpinner'
+import { Button } from '@/components/ui'
 import type { ExportFormat, ExportDataType, DateRange, AnalyticsData } from '@/types/analytics.types'
 import { useDataExport } from '@/hooks/useDataExport'
 
@@ -160,6 +159,7 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
                 <button
                   onClick={handleClose}
                   className="text-orange-100/60 hover:text-orange-50 transition"
+                  aria-label="Close export dialog"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

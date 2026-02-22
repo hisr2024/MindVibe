@@ -44,7 +44,7 @@ export function OnboardingWizard({
     setCurrentStep((prev) => Math.max(0, prev - 1))
   }
 
-  const updateStepData = (key: string, value: unknown) => {
+  const _updateStepData = (key: string, value: unknown) => {
     setStepData((prev) => ({ ...prev, [key]: value }))
   }
 

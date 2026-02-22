@@ -12,7 +12,7 @@
 import { useState } from 'react'
 import { useEmotionThemeContext } from './EmotionThemeProvider'
 import { Emotion, getEmotionLabel, getEmotionDescription } from '@/lib/emotionClassifier'
-import { Settings, Eye, EyeOff, Zap, Clock, Palette, Check } from 'lucide-react'
+import { Settings, Eye, EyeOff, Clock, Palette, Check } from 'lucide-react'
 
 interface EmotionThemeSettingsProps {
   compact?: boolean

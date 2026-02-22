@@ -14,7 +14,7 @@
  *   const daily = getDailyVerse()
  */
 
-import { getVersesForEmotion, getChapterWisdom, GITA_CHAPTERS } from '@/utils/voice/gitaTeachings'
+import { GITA_CHAPTERS } from '@/utils/voice/gitaTeachings'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 

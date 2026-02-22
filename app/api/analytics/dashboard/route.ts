@@ -7,14 +7,14 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export async function GET(request: NextRequest) {
   try {
     // Forward cookies for authentication
     const cookieHeader = request.headers.get('cookie') || ''
 
-    const backendResponse = await fetch(`${API_URL}/api/analytics/dashboard`, {
+    const backendResponse = await fetch(`${BACKEND_URL}/api/analytics/dashboard`, {
       method: 'GET',
       headers: {
         'Cookie': cookieHeader,

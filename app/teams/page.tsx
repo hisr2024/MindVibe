@@ -319,10 +319,11 @@ export default function TeamsPage() {
               <h2 className="text-xl font-bold text-gray-900 mb-4">Create New Team</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="team-name" className="block text-sm font-medium text-gray-700 mb-1">
                     Team Name
                   </label>
                   <input
+                    id="team-name"
                     type="text"
                     value={createName}
                     onChange={(e) => setCreateName(e.target.value)}
@@ -331,10 +332,11 @@ export default function TeamsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="team-description" className="block text-sm font-medium text-gray-700 mb-1">
                     Description (optional)
                   </label>
                   <textarea
+                    id="team-description"
                     value={createDescription}
                     onChange={(e) => setCreateDescription(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
@@ -371,10 +373,11 @@ export default function TeamsPage() {
               </h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="invite-email" className="block text-sm font-medium text-gray-700 mb-1">
                     Email Address
                   </label>
                   <input
+                    id="invite-email"
                     type="email"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
@@ -383,8 +386,9 @@ export default function TeamsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                  <label htmlFor="invite-role" className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                   <select
+                    id="invite-role"
                     value={inviteRole}
                     onChange={(e) => setInviteRole(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
@@ -396,10 +400,11 @@ export default function TeamsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="invite-message" className="block text-sm font-medium text-gray-700 mb-1">
                     Message (optional)
                   </label>
                   <textarea
+                    id="invite-message"
                     value={inviteMessage}
                     onChange={(e) => setInviteMessage(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"

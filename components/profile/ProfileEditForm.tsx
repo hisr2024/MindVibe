@@ -73,10 +73,11 @@ export function ProfileEditForm({
           />
 
           <div className="space-y-1.5">
-            <label className="block text-sm font-semibold text-orange-50">
+            <label htmlFor="profile-bio" className="block text-sm font-semibold text-orange-50">
               Bio (optional)
             </label>
             <textarea
+              id="profile-bio"
               value={formData.bio ?? ''}
               onChange={handleChange('bio')}
               rows={3}

@@ -129,8 +129,8 @@ class WhisperService:
             import torch
             if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
                 return "mps"  # Apple Silicon
-        except:
-            pass
+        except (ImportError, AttributeError):
+            pass  # Apple Silicon detection fallback
 
         return "cpu"
 

@@ -36,7 +36,7 @@ interface PostComposerProps {
 }
 
 export function PostComposer({
-  circleId,
+  circleId: _circleId,
   circleName,
   onPost,
   onCancel,

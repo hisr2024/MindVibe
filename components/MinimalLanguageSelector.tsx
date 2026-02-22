@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { locales, localeNames, type Locale } from '@/i18n';
 import { springConfigs } from '@/lib/animations/spring-configs';
-import { useLanguage, LANGUAGES, type Language } from '@/hooks/useLanguage';
+import { useLanguage, type Language } from '@/hooks/useLanguage';
 
 const flagEmojis: Record<Locale, string> = {
   en: '🇬🇧',
@@ -28,7 +28,7 @@ const flagEmojis: Record<Locale, string> = {
 
 export function MinimalLanguageSelector() {
   // Use the global LanguageProvider context - single source of truth
-  const { language, setLanguage, config } = useLanguage();
+  const { language, setLanguage, config: _config } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 

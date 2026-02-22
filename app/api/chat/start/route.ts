@@ -7,14 +7,14 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export async function POST(request: NextRequest) {
   try {
     const cookieHeader = request.headers.get('cookie') || ''
 
     // Try backend session creation
-    const backendResponse = await fetch(`${API_URL}/api/chat/session/start`, {
+    const backendResponse = await fetch(`${BACKEND_URL}/api/chat/session/start`, {
       method: 'POST',
       headers: {
         'Cookie': cookieHeader,
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Try alternate endpoint
-    const altResponse = await fetch(`${API_URL}/api/kiaan/friend/chat`, {
+    const altResponse = await fetch(`${BACKEND_URL}/api/kiaan/friend/chat`, {
       method: 'POST',
       headers: {
         'Cookie': cookieHeader,

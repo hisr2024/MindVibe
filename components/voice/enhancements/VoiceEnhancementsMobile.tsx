@@ -23,9 +23,6 @@ import {
   Sun,
   Heart,
   ChevronUp,
-  GripHorizontal,
-  Play,
-  Pause
 } from 'lucide-react'
 import { BinauraBeatsControl } from './BinauraBeatsControl'
 import { SpatialAudioControl } from './SpatialAudioControl'
@@ -197,6 +194,7 @@ function EnhancementsBottomSheet({
               <button
                 onClick={onClose}
                 className="p-2 rounded-lg bg-white/5 text-white/50"
+                aria-label="Close voice enhancements"
               >
                 <X className="w-5 h-5" />
               </button>

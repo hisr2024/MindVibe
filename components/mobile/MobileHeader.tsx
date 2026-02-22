@@ -69,7 +69,7 @@ export const MobileHeader = forwardRef<HTMLElement, MobileHeaderProps>(
     const { triggerHaptic } = useHapticFeedback()
     const headerRef = useRef<HTMLElement>(null)
     const [isHidden, setIsHidden] = useState(false)
-    const [isScrolled, setIsScrolled] = useState(false)
+    const [_isScrolled, setIsScrolled] = useState(false)
     const lastScrollY = useRef(0)
 
     // Track scroll for hide on scroll behavior

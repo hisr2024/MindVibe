@@ -64,14 +64,6 @@ function isIOS(): boolean {
 }
 
 /**
- * Detect if we're on Android
- */
-function isAndroid(): boolean {
-  if (typeof window === 'undefined') return false
-  return /android/i.test(navigator.userAgent)
-}
-
-/**
  * Lock body scroll - prevents background scrolling when overlays are open.
  *
  * This handles:

@@ -70,7 +70,7 @@ export function BreathingAnimation({
   }, [isPaused])
 
   // Calculate total cycle duration
-  const cycleDuration = pattern.inhale + pattern.hold_in + pattern.exhale + pattern.hold_out
+  const _cycleDuration = pattern.inhale + pattern.hold_in + pattern.exhale + pattern.hold_out
 
   // Get current phase duration
   const getPhaseDuration = useCallback((phase: Phase) => {

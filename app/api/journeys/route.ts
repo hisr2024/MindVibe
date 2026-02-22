@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     // Try the journey-engine endpoint first (the main backend endpoint)
     const backendResponse = await fetch(
-      `${API_URL}/api/journey-engine/journeys${queryString}`,
+      `${BACKEND_URL}/api/journey-engine/journeys${queryString}`,
       {
         method: 'GET',
         headers: {
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     // Try alternate endpoint
     const altResponse = await fetch(
-      `${API_URL}/api/journeys${queryString}`,
+      `${BACKEND_URL}/api/journeys${queryString}`,
       {
         method: 'GET',
         headers: {

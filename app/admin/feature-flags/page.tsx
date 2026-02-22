@@ -168,24 +168,27 @@ export default function AdminFeatureFlagsPage() {
             <h2 className="text-lg font-semibold text-slate-100">Create Feature Flag</h2>
             <form className="mt-4 space-y-4">
               <div>
-                <label className="block text-sm text-slate-400">Key</label>
+                <label htmlFor="flag-key" className="block text-sm text-slate-400">Key</label>
                 <input
+                  id="flag-key"
                   type="text"
                   placeholder="feature_key"
                   className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-700 px-3 py-2 text-slate-100"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-400">Name</label>
+                <label htmlFor="flag-name" className="block text-sm text-slate-400">Name</label>
                 <input
+                  id="flag-name"
                   type="text"
                   placeholder="Feature Name"
                   className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-700 px-3 py-2 text-slate-100"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-400">Description</label>
+                <label htmlFor="flag-description" className="block text-sm text-slate-400">Description</label>
                 <textarea
+                  id="flag-description"
                   placeholder="What does this feature do?"
                   className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-700 px-3 py-2 text-slate-100"
                   rows={3}

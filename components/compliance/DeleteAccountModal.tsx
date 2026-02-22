@@ -196,6 +196,7 @@ export default function DeleteAccountModal({
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
+                    id="delete-confirm-error"
                     className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-sm text-red-400"
                   >
                     {errorMessage}
@@ -203,10 +204,11 @@ export default function DeleteAccountModal({
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-orange-100/70 mb-2">
+                  <label htmlFor="delete-reason" className="block text-sm font-medium text-orange-100/70 mb-2">
                     Reason for leaving (optional)
                   </label>
                   <textarea
+                    id="delete-reason"
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="Help us improve by sharing why you're leaving..."
@@ -216,15 +218,18 @@ export default function DeleteAccountModal({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-orange-100/70 mb-2">
+                  <label htmlFor="delete-confirm" className="block text-sm font-medium text-orange-100/70 mb-2">
                     Type <span className="text-red-400 font-mono">DELETE MY ACCOUNT</span> to confirm
                   </label>
                   <input
+                    id="delete-confirm"
                     type="text"
                     value={confirmText}
                     onChange={(e) => setConfirmText(e.target.value)}
                     placeholder="DELETE MY ACCOUNT"
                     className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-orange-50 placeholder-orange-100/30 focus:outline-none focus:border-red-500 font-mono"
+                    aria-invalid={!!errorMessage}
+                    aria-describedby={errorMessage ? 'delete-confirm-error' : undefined}
                   />
                 </div>
 

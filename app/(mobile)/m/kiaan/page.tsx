@@ -21,7 +21,7 @@ import { queueOfflineOperation } from '@/lib/offline/syncService'
 
 export default function MobileKiaanPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuth()
+  const { user: _user, isAuthenticated } = useAuth()
   const { triggerHaptic } = useHapticFeedback()
 
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -45,12 +45,12 @@ export default function MobileKiaanPage() {
 
           // Load existing messages if any
           if (data.messages && data.messages.length > 0) {
-            setMessages(data.messages.map((msg: any) => ({
+            setMessages(data.messages.map((msg: { id: string; role: string; content: string; created_at: string }) => ({
               id: msg.id,
-              sender: msg.role === 'user' ? 'user' : 'assistant',
+              sender: msg.role === 'user' ? 'user' as const : 'assistant' as const,
               text: msg.content,
               timestamp: msg.created_at,
-              status: 'sent',
+              status: 'sent' as const,
             })))
           }
         }

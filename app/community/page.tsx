@@ -2,13 +2,16 @@
 
 import { useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { CircleList } from '@/components/community/CircleList'
-import { PostFeed } from '@/components/community/PostFeed'
-import { PostComposer } from '@/components/community/PostComposer'
-import { CrisisAlert } from '@/components/community/CrisisAlert'
+import dynamic from 'next/dynamic'
 import { apiFetch } from '@/lib/api'
 import { useLanguage } from '@/hooks/useLanguage'
 import { ArrowLeft, Loader2 } from 'lucide-react'
+
+// Dynamic imports for framer-motion components to reduce bundle size
+const CircleList = dynamic(() => import('@/components/community/CircleList').then(mod => mod.CircleList), { ssr: false })
+const PostFeed = dynamic(() => import('@/components/community/PostFeed').then(mod => mod.PostFeed), { ssr: false })
+const PostComposer = dynamic(() => import('@/components/community/PostComposer').then(mod => mod.PostComposer), { ssr: false })
+const CrisisAlert = dynamic(() => import('@/components/community/CrisisAlert').then(mod => mod.CrisisAlert), { ssr: false })
 
 interface Circle {
   id: number
@@ -135,7 +138,7 @@ export default function CommunityPage() {
         // Rollback optimistic update on failure
         setPosts(previousPosts)
       }
-    } catch (err) {
+    } catch {
       // Rollback optimistic update on network error
       setPosts(previousPosts)
     }

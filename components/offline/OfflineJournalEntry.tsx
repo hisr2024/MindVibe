@@ -43,7 +43,7 @@ export function OfflineJournalEntry({
 
   const {
     submitForm,
-    status,
+    status, // eslint-disable-line @typescript-eslint/no-unused-vars
     error,
     isOnline,
     isSaving,
@@ -51,9 +51,9 @@ export function OfflineJournalEntry({
     isQueued,
     isError,
     reset
-  } = useOfflineForm({
+  } = useOfflineForm<{ id?: string }>({
     onSuccess: (data) => {
-      if (onEntrySaved && data.id) {
+      if (onEntrySaved && data?.id) {
         onEntrySaved(data.id)
       }
       // Clear form after successful save

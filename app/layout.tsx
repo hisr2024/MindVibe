@@ -13,6 +13,8 @@ import KiaanVoiceFAB from '@/components/voice/KiaanVoiceFAB'
 import { ClientLayout } from './ClientLayout'
 import { OverlayRoot } from '@/components/ui/OverlayRoot'
 import { MobileRouteGuard, MobileContentWrapper } from '@/components/mobile/MobileRouteGuard'
+import { WebVitalsReporter } from '@/components/WebVitalsReporter'
+import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -92,7 +94,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Load Crimson Text at runtime — no build-time network dependency */}
+        {/* Load Crimson Text at runtime */}
         <link
           rel="preconnect"
           href="https://fonts.googleapis.com"
@@ -105,6 +107,39 @@ export default async function RootLayout({
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap"
+        />
+        {/* JSON-LD structured data for search engine rich results */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@graph': [
+                {
+                  '@type': 'WebSite',
+                  '@id': 'https://mindvibe.life/#website',
+                  url: 'https://mindvibe.life',
+                  name: 'MindVibe',
+                  description:
+                    'Your Spiritual Companion & Best Divine Friend — powered by Bhagavad Gita Wisdom',
+                  publisher: {
+                    '@id': 'https://mindvibe.life/#organization',
+                  },
+                },
+                {
+                  '@type': 'Organization',
+                  '@id': 'https://mindvibe.life/#organization',
+                  name: 'MindVibe',
+                  url: 'https://mindvibe.life',
+                  logo: {
+                    '@type': 'ImageObject',
+                    url: 'https://mindvibe.life/icons/icon.svg',
+                  },
+                  sameAs: [],
+                },
+              ],
+            }),
+          }}
         />
         {/* Set language from localStorage before hydration to prevent flash */}
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: languageScript }} />
@@ -145,6 +180,10 @@ export default async function RootLayout({
             </MobileRouteGuard>
             {/* Global wake word listener - "Hey KIAAN" from anywhere */}
             <GlobalWakeWordListener />
+            {/* BreadcrumbList structured data for SERP display */}
+            <BreadcrumbSchema />
+            {/* Core Web Vitals monitoring */}
+            <WebVitalsReporter />
           </Providers>
         </ClientLayout>
       </body>

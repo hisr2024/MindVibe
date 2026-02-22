@@ -20,7 +20,6 @@ import {
   forwardRef,
   useState,
   useCallback,
-  useEffect,
   useMemo,
 } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -30,14 +29,11 @@ import {
   Meh,
   CloudRain,
   Frown,
-  Heart,
   TrendingUp,
   TrendingDown,
   Minus,
   Calendar,
   ChevronRight,
-  MessageCircle,
-  X,
   Check,
 } from 'lucide-react'
 
@@ -275,7 +271,7 @@ export const MobileMoodTracker = forwardRef<HTMLDivElement, MobileMoodTrackerPro
           <div className="flex justify-between gap-2">
             {MOODS.map((mood, index) => {
               const isSelected = selectedMood === mood.id
-              const MoodIcon = mood.icon
+              const _MoodIcon = mood.icon
 
               return (
                 <motion.button

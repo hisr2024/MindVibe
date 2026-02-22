@@ -36,7 +36,7 @@ export default function SessionsPage() {
       } else {
         setError('Failed to load sessions')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again.')
     } finally {
       setLoading(false)
@@ -69,7 +69,7 @@ export default function SessionsPage() {
         const errorData = await res.json()
         setError(errorData.detail || 'Failed to revoke session')
       }
-    } catch (err) {
+    } catch {
       setError('Network error. Please try again.')
     } finally {
       setRevokingId(null)

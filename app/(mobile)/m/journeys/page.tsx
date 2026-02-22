@@ -91,7 +91,7 @@ export default function MobileJourneysPage() {
         if (availableResponse.ok) {
           const data = await availableResponse.json()
           // Filter out active journeys from available list
-          const activeIds = new Set((data.items || data.journeys || []).filter((j: { status?: string }) => j.status === 'active').map((j: { id: string }) => j.id))
+          const _activeIds = new Set((data.items || data.journeys || []).filter((j: { status?: string }) => j.status === 'active').map((j: { id: string }) => j.id))
           setAvailableJourneys((data.items || data.journeys || []).filter((j: { id: string; status?: string }) => j.status !== 'active'))
         }
       } catch (error) {

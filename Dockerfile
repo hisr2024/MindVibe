@@ -50,8 +50,21 @@ COPY --from=frontend-deps /app/node_modules ./node_modules
 
 # Copy Next.js configuration and frontend files
 COPY package.json next.config.js tsconfig.json postcss.config.js tailwind.config.ts ./
+COPY middleware.ts ./
+COPY vendor/ ./vendor/
 COPY app/ ./app/
 COPY lib/ ./lib/
+COPY components/ ./components/
+COPY hooks/ ./hooks/
+COPY utils/ ./utils/
+COPY services/ ./services/
+COPY contexts/ ./contexts/
+COPY types/ ./types/
+COPY data/ ./data/
+COPY config/ ./config/
+COPY brand/ ./brand/
+COPY public/ ./public/
+COPY styles/ ./styles/
 
 # Disable Next.js telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -65,14 +78,14 @@ FROM node:20-alpine AS frontend-runner
 # Set the working directory
 WORKDIR /app
 
-# Copy built .next, package.json and node_modules from builder
-COPY --from=frontend-builder /app/.next ./.next
-COPY --from=frontend-builder /app/package.json ./package.json
-COPY --from=frontend-builder /app/node_modules ./node_modules
+# Copy standalone build output (includes node_modules and server.js)
+COPY --from=frontend-builder /app/public ./public
+COPY --from=frontend-builder /app/.next/standalone ./
+COPY --from=frontend-builder /app/.next/static ./.next/static
 
 # Expose port and add health check
 EXPOSE 3000
-HEALTHCHECK CMD curl --fail http://localhost:3000/health || exit 1
+HEALTHCHECK CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
-# Run the Next.js application
-CMD ["npm", "start"]
+# Run the Next.js standalone server
+CMD ["node", "server.js"]

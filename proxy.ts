@@ -4,8 +4,10 @@ import { NextRequest, NextResponse } from 'next/server';
  * Next.js Proxy (formerly Middleware)
  *
  * Handles request processing before pages are rendered:
- * - Sets Content Security Policy header that allows Next.js hydration
- * - Passes a per-request nonce to layout via x-nonce header
+ * - Protects routes that require authentication
+ * - Generates a per-request cryptographic nonce for Content Security Policy
+ * - Sets CSP header with nonce-based script-src (no 'unsafe-inline')
+ * - Passes nonce to layout via x-nonce request header
  * - Auto-detects mobile devices and redirects to /m/* routes
  *
  * CSP note: Next.js generates inline scripts for hydration and data passing.
@@ -13,6 +15,18 @@ import { NextRequest, NextResponse } from 'next/server';
  * don't carry the nonce. We use 'unsafe-inline' for script-src to allow
  * Next.js to work, and rely on style-src-elem for font loading.
  */
+
+const PROTECTED_ROUTES = [
+  '/dashboard',
+  '/profile',
+  '/account',
+  '/admin',
+  '/settings',
+  '/companion',
+  '/journal',
+];
+
+const ADMIN_ROUTES = ['/admin'];
 
 // Routes that should never be redirected to mobile
 const MOBILE_SKIP_PATTERNS = [
@@ -64,6 +78,28 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Authentication check for protected routes
+  const isProtected = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
+  if (isProtected) {
+    const token =
+      request.cookies.get('access_token')?.value ||
+      request.cookies.get('session_token')?.value;
+
+    if (!token) {
+      const loginUrl = new URL('/introduction', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    const isAdmin = ADMIN_ROUTES.some((route) => pathname.startsWith(route));
+    if (isAdmin) {
+      const adminToken = request.cookies.get('admin_token')?.value;
+      if (!adminToken && !token) {
+        return NextResponse.redirect(new URL('/introduction', request.url));
+      }
+    }
+  }
+
   // Mobile auto-detection and redirect
   const preferDesktop = request.cookies.get('prefer-desktop')?.value;
   if (preferDesktop !== 'true') {
@@ -100,7 +136,7 @@ export function proxy(request: NextRequest) {
   // intentionally omit the nonce from the CSP directive to allow inline scripts.
   const cspHeader = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    `script-src 'self' 'nonce-${nonce}'`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https:",

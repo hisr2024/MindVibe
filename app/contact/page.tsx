@@ -21,6 +21,7 @@ export default function ContactPage() {
                 name="name"
                 type="text"
                 required
+                aria-label="Name"
                 className="w-full rounded-2xl border border-orange-500/25 bg-slate-950/60 px-3 py-2 outline-none focus:ring-2 focus:ring-orange-400/70"
               />
             </label>
@@ -30,6 +31,7 @@ export default function ContactPage() {
                 name="email"
                 type="email"
                 required
+                aria-label="Email"
                 className="w-full rounded-2xl border border-orange-500/25 bg-slate-950/60 px-3 py-2 outline-none focus:ring-2 focus:ring-orange-400/70"
               />
             </label>
@@ -38,6 +40,7 @@ export default function ContactPage() {
             <span className="font-semibold text-orange-50">Topic</span>
             <select
               name="topic"
+              aria-label="Topic"
               className="w-full rounded-2xl border border-orange-500/25 bg-slate-950/60 px-3 py-2 outline-none focus:ring-2 focus:ring-orange-400/70"
             >
               <option>Accessibility</option>
@@ -51,6 +54,7 @@ export default function ContactPage() {
             <textarea
               name="message"
               required
+              aria-label="Message"
               className="min-h-[140px] w-full rounded-2xl border border-orange-500/25 bg-slate-950/60 px-3 py-2 outline-none focus:ring-2 focus:ring-orange-400/70"
               placeholder="Share what's on your heart — we're here to listen."
             />

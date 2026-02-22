@@ -36,11 +36,11 @@ const MOOD_ACCENT: Record<string, string> = {
 }
 
 export default function CompanionChatBubble({
-  id,
+  id: _id,
   role,
   content,
   mood,
-  phase,
+  phase: _phase,
   timestamp,
   isLatest,
   onSpeak,

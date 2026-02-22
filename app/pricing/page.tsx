@@ -442,6 +442,7 @@ export default function PricingPage() {
     }
   }, [prefersReducedMotion])
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleRazorpayCheckout = async (data: Record<string, any>, tierId: string) => {
     const loaded = await loadRazorpayScript()
     if (!loaded) {

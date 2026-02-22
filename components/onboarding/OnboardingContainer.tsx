@@ -5,7 +5,7 @@
 
 'use client'
 
-import { useState, type ReactNode, useEffect } from 'react'
+import { useState, type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui'
 
@@ -51,7 +51,7 @@ export function OnboardingContainer({
   onStepChange,
   onComplete,
   onSkip,
-  isLoading = false,
+  isLoading: _isLoading = false,
   isSaving = false,
   canProceed = true,
   className = '',

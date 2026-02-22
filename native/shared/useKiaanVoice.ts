@@ -26,7 +26,7 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { NativeModules, NativeEventEmitter, Platform } from 'react-native'
+import { NativeModules, NativeEventEmitter } from 'react-native'
 import type {
   KiaanVoiceState,
   KiaanVoiceConfig,
@@ -45,7 +45,7 @@ const { KiaanVoiceModule } = NativeModules as {
   KiaanVoiceModule: KiaanVoiceNativeModule
 }
 
-const eventEmitter = new NativeEventEmitter(KiaanVoiceModule as any)
+const eventEmitter = new NativeEventEmitter(KiaanVoiceModule as unknown as Parameters<typeof NativeEventEmitter>[0])
 
 // ============================================================================
 // Hook Options
@@ -246,10 +246,10 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
         ...config,
       }
       await KiaanVoiceModule.initialize(mergedConfig)
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError({
         type: 'unknown',
-        message: err.message || 'Failed to initialize',
+        message: err instanceof Error ? err.message : 'Failed to initialize',
         isRecoverable: false,
       })
     }
@@ -260,10 +260,10 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
       const granted = await KiaanVoiceModule.requestPermissions()
       setHasPermission(granted)
       return granted
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError({
         type: 'permission_denied',
-        message: err.message || 'Permission denied',
+        message: err instanceof Error ? err.message : 'Permission denied',
         isRecoverable: false,
       })
       return false

@@ -79,7 +79,7 @@ export async function getKiaanWeeklyGuidanceHandler(
     const guidanceText = await sendToKiaanWeeklyGuidanceEngine({ profile, evaluation })
 
     return jsonResponse(200, { guidance: guidanceText, evaluation })
-  } catch (error) {
+  } catch {
     return jsonResponse(500, { error: 'evaluation_unavailable' })
   }
 }

@@ -194,7 +194,7 @@ export class TranslationCache<T = unknown> {
    */
   prune(): number {
     let pruned = 0;
-    const now = Date.now();
+    const _now = Date.now();
 
     this.cache.forEach((entry, key) => {
       if (this.isExpired(entry)) {

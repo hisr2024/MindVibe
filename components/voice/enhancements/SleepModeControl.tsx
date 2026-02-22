@@ -264,7 +264,7 @@ export function SleepModeControl({
   }, [onWakeUpSet])
 
   const currentContent = SLEEP_CONTENT[selectedContent]
-  const ContentIcon = currentContent.icon
+  const _ContentIcon = currentContent.icon
 
   // Compact view
   if (compact) {

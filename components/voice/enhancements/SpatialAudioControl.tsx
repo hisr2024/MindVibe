@@ -240,7 +240,7 @@ export function SpatialAudioControl({
   }, [onMovementChange])
 
   const currentEnv = ENVIRONMENTS[environment]
-  const EnvIcon = currentEnv.icon
+  const _EnvIcon = currentEnv.icon
 
   // Compact view
   if (compact) {

@@ -18,6 +18,7 @@ function renderUseLanguage() {
 }
 
 // Mock fetch for translation files
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockTranslations: Record<string, Record<string, any>> = {
   'en/common.json': {
     app: { name: 'MindVibe', tagline: 'Your Spiritual Companion & Divine Friend' },
@@ -58,6 +59,7 @@ describe('useLanguage Hook', () => {
         status: 404,
         json: () => Promise.resolve({})
       } as Response);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }) as any;
   });
 
@@ -247,7 +249,7 @@ describe('useLanguage Hook', () => {
       await waitFor(() => {
         expect(result.current.isInitialized).toBe(true);
       });
-
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const initialCallCount = (global.fetch as any).mock.calls.length;
 
       // Switch to Hindi and back to English
@@ -268,6 +270,7 @@ describe('useLanguage Hook', () => {
       });
 
       // Should use cached translations, not make new fetch calls for English
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const finalCallCount = (global.fetch as any).mock.calls.length;
       // Should not make excessive new calls (allowing some for Hindi fetch)
       const maxExpectedCalls = initialCallCount + 10; // Reasonable buffer for Hindi translations
@@ -415,6 +418,7 @@ describe('useLanguage Hook', () => {
     it('should handle fetch errors gracefully', async () => {
       // Clear localStorage to ensure clean state
       localStorage.clear();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       global.fetch = vi.fn(() => Promise.reject(new Error('Network error'))) as any;
 
       const { result } = renderUseLanguage();

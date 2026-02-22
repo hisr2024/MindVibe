@@ -11,8 +11,10 @@ import { ChatProvider } from '@/lib/ChatContext'
 // Mock framer-motion to avoid animation issues in tests
 vi.mock('framer-motion', () => ({
   motion: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
     div: ({ children, className, ...props }: any) => <div className={className} {...props}>{children}</div>,
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   AnimatePresence: ({ children }: any) => <>{children}</>,
 }))
 

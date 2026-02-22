@@ -30,7 +30,7 @@ import { apiFetch } from '@/lib/api';
 // CONFIGURATION
 // =============================================================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const _API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 const JOURNEY_ENGINE_ENDPOINT = '/api/journey-engine';
 
 // Retry configuration

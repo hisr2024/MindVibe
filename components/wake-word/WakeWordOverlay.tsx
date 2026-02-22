@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Wake Word Activation Overlay
  *

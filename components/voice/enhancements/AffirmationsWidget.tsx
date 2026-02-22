@@ -18,14 +18,12 @@ import {
   Pause,
   SkipForward,
   Heart,
-  Volume2,
   RefreshCw,
   Star,
   Sun,
   Moon,
   Shield,
   Leaf,
-  Zap,
   BookOpen
 } from 'lucide-react'
 
@@ -314,6 +312,7 @@ export function AffirmationsWidget({
             onClick={handleRandom}
             className="p-2.5 rounded-xl bg-white/5 text-white/50 hover:bg-white/10 transition-colors"
             title="Random"
+            aria-label="Random affirmation"
           >
             <RefreshCw className="w-5 h-5" />
           </button>
@@ -326,6 +325,7 @@ export function AffirmationsWidget({
                 ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
                 : 'bg-white/10 text-white/70 hover:bg-white/15'
             }`}
+            aria-label={isPlaying ? 'Pause affirmation' : 'Play affirmation'}
           >
             {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
           </button>
@@ -335,6 +335,7 @@ export function AffirmationsWidget({
             onClick={handleNext}
             className="p-2.5 rounded-xl bg-white/5 text-white/50 hover:bg-white/10 transition-colors"
             title="Next"
+            aria-label="Next affirmation"
           >
             <SkipForward className="w-5 h-5" />
           </button>
@@ -348,6 +349,7 @@ export function AffirmationsWidget({
                 : 'bg-white/5 text-white/50 hover:bg-white/10'
             }`}
             title="Favorite"
+            aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
           >
             <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} />
           </button>

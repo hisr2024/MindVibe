@@ -8,7 +8,6 @@
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Chart } from '@/components/common/Chart'
-import { StatCard } from '@/components/common/StatCard'
 import { Skeleton } from '@/components/ui'
 import type { JournalStatistics as JournalStatsType } from '@/types/analytics.types'
 

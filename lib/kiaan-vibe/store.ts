@@ -7,7 +7,7 @@
 
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
-import type { Track, RepeatMode, PlayerStore, PersistedPlayerState } from './types'
+import type { Track, RepeatMode, PlayerStore } from './types'
 import { getPersistedState, persistState } from './persistence'
 import {
   markTrackUnavailable,
@@ -61,13 +61,13 @@ function cleanupBlobUrl(): void {
 }
 
 // Browser Speech Synthesis instance for TTS fallback
-let activeSpeechUtterance: SpeechSynthesisUtterance | null = null
+let _activeSpeechUtterance: SpeechSynthesisUtterance | null = null
 
 function cancelBrowserTTS(): void {
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     window.speechSynthesis.cancel()
   }
-  activeSpeechUtterance = null
+  _activeSpeechUtterance = null
 }
 
 /**
@@ -146,16 +146,16 @@ function playViaBrowserTTS(
   }
 
   utterance.onend = () => {
-    activeSpeechUtterance = null
+    _activeSpeechUtterance = null
     onEnd()
   }
 
   utterance.onerror = () => {
-    activeSpeechUtterance = null
+    _activeSpeechUtterance = null
     onEnd()
   }
 
-  activeSpeechUtterance = utterance
+  _activeSpeechUtterance = utterance
   window.speechSynthesis.speak(utterance)
   return true
 }

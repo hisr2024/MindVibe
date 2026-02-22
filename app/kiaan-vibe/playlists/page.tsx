@@ -53,7 +53,6 @@ export default function PlaylistsPage() {
   // Load playlists on mount
   useEffect(() => {
     loadPlaylists()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleCreatePlaylist = async () => {
@@ -287,6 +286,7 @@ export default function PlaylistsPage() {
                 <button
                   onClick={closeModal}
                   className="p-2 text-white/50 hover:text-white transition-colors"
+                  aria-label="Close playlist dialog"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -296,10 +296,11 @@ export default function PlaylistsPage() {
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {/* Name input */}
                 <div>
-                  <label className="block text-sm text-white/60 mb-2">
+                  <label htmlFor="playlist-name" className="block text-sm text-white/60 mb-2">
                     Playlist Name
                   </label>
                   <input
+                    id="playlist-name"
                     type="text"
                     value={newPlaylistName}
                     onChange={(e) => setNewPlaylistName(e.target.value)}

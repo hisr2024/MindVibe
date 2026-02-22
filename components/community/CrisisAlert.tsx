@@ -10,7 +10,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { AlertCircle, Phone, MessageSquare, Globe, X } from 'lucide-react'
+import { Phone, MessageSquare, Globe, X } from 'lucide-react'
 import { useState } from 'react'
 
 interface CrisisResource {
@@ -84,6 +84,7 @@ export function CrisisAlert({ resources = DEFAULT_RESOURCES, onClose, className 
         <button
           onClick={handleDismiss}
           className="float-right text-orange-100/60 hover:text-orange-100 transition"
+          aria-label="Dismiss crisis alert"
         >
           <X className="h-5 w-5" />
         </button>

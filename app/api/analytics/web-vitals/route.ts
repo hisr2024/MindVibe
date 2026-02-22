@@ -1,28 +1,33 @@
-/**
- * Web Vitals API Route
- *
- * Accepts Web Vitals performance metrics from the browser.
- * Returns 200 to prevent 405 console errors on the client.
- */
+import { NextResponse } from 'next/server'
 
-import { NextRequest, NextResponse } from 'next/server'
-
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    // Accept the payload silently — log in development only
-    if (process.env.NODE_ENV === 'development') {
-      const body = await request.json().catch(() => null)
-      if (body) {
-        console.log('[Web Vitals]', JSON.stringify(body).slice(0, 200))
-      }
+    const body = await request.json()
+
+    const { name, value, rating, page, timestamp } = body
+
+    if (!name || value === undefined) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    return NextResponse.json({ status: 'ok' })
-  } catch {
-    return NextResponse.json({ status: 'ok' })
-  }
-}
+    // Log metrics server-side for monitoring
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`[Web Vitals] ${name}: ${value} (${rating}) on ${page}`)
+    }
 
-export async function GET() {
-  return NextResponse.json({ status: 'ok' })
+    // In production, forward to external analytics if configured
+    if (process.env.ANALYTICS_ENDPOINT) {
+      fetch(process.env.ANALYTICS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, value, rating, page, timestamp }),
+      }).catch(() => {
+        // Fire-and-forget: don't block the response
+      })
+    }
+
+    return NextResponse.json({ success: true }, { status: 200 })
+  } catch {
+    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
+  }
 }

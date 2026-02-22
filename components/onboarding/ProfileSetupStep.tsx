@@ -26,10 +26,11 @@ export function ProfileSetupStep({
       
       {onBioChange && (
         <div className="space-y-1.5">
-          <label className="block text-sm font-semibold text-orange-50">
+          <label htmlFor="setup-bio" className="block text-sm font-semibold text-orange-50">
             A bit about yourself (optional)
           </label>
           <textarea
+            id="setup-bio"
             value={bio}
             onChange={(e) => onBioChange(e.target.value)}
             rows={3}
