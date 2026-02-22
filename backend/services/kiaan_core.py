@@ -111,7 +111,20 @@ class OfflineWisdomCache:
         if cache_file.exists():
             try:
                 with open(cache_file, "r") as f:
-                    self.memory_cache = json.load(f)
+                    loaded = json.load(f)
+                # Enforce max size on load - keep only the most recent entries
+                # Sort by cached_at timestamp if available, otherwise arbitrary order
+                entries = list(loaded.items())
+                entries.sort(
+                    key=lambda kv: kv[1].get("cached_at", ""),
+                    reverse=False  # Oldest first so newest are at end (most recently used)
+                )
+                # Trim to max size
+                if len(entries) > self._max_entries:
+                    entries = entries[-self._max_entries:]
+                self.memory_cache = dict(entries)
+                # Populate _access_order so LRU eviction works correctly
+                self._access_order = [k for k, _ in entries]
                 logger.info(f"Loaded {len(self.memory_cache)} cached wisdom responses")
             except Exception as e:
                 logger.warning(f"Failed to load wisdom cache: {e}")
@@ -402,16 +415,18 @@ class KIAANCore:
         # Learning Engine for autonomous knowledge acquisition (v4.0)
         # Enables KIAAN to learn from user queries and external sources
         self._learning_engine: KIAANLearningEngine | None = None
+        self._learning_engine_failed: bool = False  # Cache init failure to avoid repeated attempts
 
     @property
-    def learning_engine(self) -> KIAANLearningEngine:
+    def learning_engine(self) -> KIAANLearningEngine | None:
         """Lazy initialization of learning engine."""
-        if self._learning_engine is None:
+        if self._learning_engine is None and not self._learning_engine_failed:
             try:
                 self._learning_engine = get_kiaan_learning_engine()
                 logger.info("KIAAN Learning Engine initialized")
             except Exception as e:
                 logger.warning(f"Failed to initialize learning engine: {e}")
+                self._learning_engine_failed = True
         return self._learning_engine
 
     @property

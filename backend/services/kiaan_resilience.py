@@ -573,10 +573,14 @@ class RateLimiter:
     - Per-user or global limiting
     """
 
+    # Maximum number of user buckets to track (prevents unbounded memory growth)
+    MAX_BUCKETS = 10000
+
     def __init__(self, config: Optional[RateLimitConfig] = None):
         self.config = config or RateLimitConfig()
         self._buckets: dict[str, dict] = {}
         self._lock = asyncio.Lock()
+        self._last_cleanup = time.time()
 
     async def is_allowed(self, key: str = "global") -> bool:
         """
@@ -590,6 +594,19 @@ class RateLimiter:
         """
         async with self._lock:
             now = time.time()
+
+            # Periodic cleanup of stale buckets (every 5 minutes)
+            if now - self._last_cleanup > 300 or len(self._buckets) > self.MAX_BUCKETS:
+                stale_threshold = now - 3600  # Remove buckets inactive for 1 hour
+                stale_keys = [
+                    k for k, v in self._buckets.items()
+                    if v["last_update"] < stale_threshold
+                ]
+                for k in stale_keys:
+                    del self._buckets[k]
+                if stale_keys:
+                    logger.debug(f"Cleaned up {len(stale_keys)} stale rate limit buckets")
+                self._last_cleanup = now
 
             if key not in self._buckets:
                 self._buckets[key] = {
