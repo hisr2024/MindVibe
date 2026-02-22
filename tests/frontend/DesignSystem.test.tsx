@@ -66,7 +66,7 @@ describe('Design Tokens', () => {
 
   describe('Typography', () => {
     it('exports font families', () => {
-      expect(typography.fonts.sans).toContain('Inter')
+      expect(typography.fonts.sans).toContain('--font-inter')
       expect(typography.fonts.display).toContain('SF Pro Display')
     })
 

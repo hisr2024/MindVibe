@@ -1,25 +1,57 @@
 import './globals.css'
 import type { Viewport } from 'next'
 import { headers } from 'next/headers'
+import { Inter, Crimson_Text } from 'next/font/google'
+import dynamic from 'next/dynamic'
 import SiteFooter from './components/SiteFooter'
 import SiteNav from './components/SiteNav'
 import Providers from './providers'
-import { MobileNav } from '@/components/navigation'
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
-import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
-import { KiaanFooter } from '@/components/layout/KiaanFooter'
-import { GlobalWakeWordListener } from '@/components/wake-word/GlobalWakeWordListener'
-import KiaanVoiceFAB from '@/components/voice/KiaanVoiceFAB'
 import { ClientLayout } from './ClientLayout'
 import { OverlayRoot } from '@/components/ui/OverlayRoot'
 import { MobileRouteGuard, MobileContentWrapper } from '@/components/mobile/MobileRouteGuard'
+import { WebVitalsReporter } from '@/components/WebVitalsReporter'
+
+// Dynamic imports for framer-motion components to reduce initial bundle size
+const MobileNav = dynamic(() => import('@/components/navigation/MobileNav').then(mod => mod.MobileNav), { ssr: false })
+const OfflineStatusBanner = dynamic(() => import('@/components/OfflineStatusBanner').then(mod => mod.OfflineStatusBanner), { ssr: false })
+const KiaanFooter = dynamic(() => import('@/components/layout/KiaanFooter').then(mod => mod.KiaanFooter), { ssr: false })
+const GlobalWakeWordListener = dynamic(() => import('@/components/wake-word/GlobalWakeWordListener').then(mod => mod.GlobalWakeWordListener), { ssr: false })
+const KiaanVoiceFAB = dynamic(() => import('@/components/voice/KiaanVoiceFAB'), { ssr: false })
+
+/**
+ * Self-hosted Inter via next/font/google.
+ * Used as the primary UI font across the entire application.
+ * The CSS variable --font-inter is consumed by Tailwind's `font-sans` family
+ * and the global --font-sans custom property, so every element inherits it
+ * without an extra network request to Google Fonts.
+ */
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+})
+
+/**
+ * Self-hosted Crimson Text via next/font/google.
+ * Replaces the external Google Fonts <link> tag so the font files are served
+ * from the same origin, eliminating the render-blocking cross-origin request
+ * and improving LCP / CLS scores.
+ */
+const crimsonText = Crimson_Text({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+  variable: '--font-sacred',
+})
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   minimumScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: 'cover',
   themeColor: '#0b0b0f',
 }
@@ -92,20 +124,6 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Load Crimson Text at runtime — no build-time network dependency */}
-        <link
-          rel="preconnect"
-          href="https://fonts.googleapis.com"
-        />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap"
-        />
         {/* JSON-LD structured data for search engine rich results */}
         <script
           type="application/ld+json"
@@ -142,7 +160,7 @@ export default async function RootLayout({
         {/* Set language from localStorage before hydration to prevent flash */}
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: languageScript }} />
       </head>
-      <body className="min-h-screen bg-slate-950 text-slate-50 antialiased mobile-viewport-fix overscroll-none">
+      <body className={`${inter.variable} ${crimsonText.variable} font-sans min-h-screen bg-slate-950 text-slate-50 antialiased mobile-viewport-fix overscroll-none`}>
         <ClientLayout>
           <Providers>
             {/* Skip to content link for keyboard accessibility */}
@@ -178,6 +196,8 @@ export default async function RootLayout({
             </MobileRouteGuard>
             {/* Global wake word listener - "Hey KIAAN" from anywhere */}
             <GlobalWakeWordListener />
+            {/* Core Web Vitals monitoring */}
+            <WebVitalsReporter />
           </Providers>
         </ClientLayout>
       </body>

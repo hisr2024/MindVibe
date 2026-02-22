@@ -337,13 +337,14 @@ export default function RelationshipCompassUnifiedPage() {
 
             {/* Situation Input */}
             <div className="rounded-2xl border border-slate-700/30 bg-[#0d0d12]/85 p-5">
-              <label className="text-sm font-semibold text-slate-300 block mb-3">
+              <label htmlFor="rc-situation" className="text-sm font-semibold text-slate-300 block mb-3">
                 What&apos;s happening?
                 <span className="font-normal text-slate-500 ml-2">
                   Be specific. The more detail, the sharper the guidance.
                 </span>
               </label>
               <textarea
+                id="rc-situation"
                 value={message}
                 onChange={e => setMessage(e.target.value)}
                 placeholder={PLACEHOLDERS[relationshipType] || PLACEHOLDERS.romantic}

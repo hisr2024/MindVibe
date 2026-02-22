@@ -197,6 +197,7 @@ function EnhancementsBottomSheet({
               <button
                 onClick={onClose}
                 className="p-2 rounded-lg bg-white/5 text-white/50"
+                aria-label="Close voice enhancements"
               >
                 <X className="w-5 h-5" />
               </button>

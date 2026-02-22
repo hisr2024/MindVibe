@@ -13,7 +13,13 @@ htmlcov
 .env.*.local
 *.md
 !README.md
+!CONTRIBUTING.md
 reports/
 docs/
 tests/
 *.log
+.vscode/
+.idea/
+playwright-report/
+test-results/
+*.tgz

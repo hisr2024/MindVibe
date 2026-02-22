@@ -557,10 +557,11 @@ export default function VoiceCompanionSelector({
             {/* Speed */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-[11px] text-white/50 font-medium">Speaking Speed</label>
+                <label htmlFor="voice-speed" className="text-[11px] text-white/50 font-medium">Speaking Speed</label>
                 <span className="text-[11px] font-mono text-amber-300/70">{speed.toFixed(2)}x</span>
               </div>
               <input
+                id="voice-speed"
                 type="range"
                 min="0.5"
                 max="1.5"
@@ -583,10 +584,11 @@ export default function VoiceCompanionSelector({
             {/* Pitch */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-[11px] text-white/50 font-medium">Voice Pitch</label>
+                <label htmlFor="voice-pitch" className="text-[11px] text-white/50 font-medium">Voice Pitch</label>
                 <span className="text-[11px] font-mono text-amber-300/70">{pitch > 0 ? '+' : ''}{pitch.toFixed(1)}</span>
               </div>
               <input
+                id="voice-pitch"
                 type="range"
                 min="-5"
                 max="5"

@@ -138,7 +138,7 @@ export function SoundLink({ sound = 'transition', onClick, children, ...props }:
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     playSound(sound)
     if (onClick) {
-      onClick(e as any)
+      ;(onClick as React.MouseEventHandler<HTMLAnchorElement>)(e)
     }
   }
 

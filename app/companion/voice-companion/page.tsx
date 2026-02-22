@@ -30,6 +30,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { apiFetch } from '@/lib/api'
 import VoiceCompanionSelector from '@/components/voice/VoiceCompanionSelector'
+import type { VoiceLanguage } from '@/utils/voice/voiceCatalog'
 
 // ─── Types ──────────────────────────────────────────────────────────────
 

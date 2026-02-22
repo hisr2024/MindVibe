@@ -41,7 +41,7 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
   const [state, setState] = useState<RecordingState>('idle')
   const [duration, setDuration] = useState(0)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
-  const recognitionRef = useRef<any>(null)
+  const recognitionRef = useRef<SpeechRecognition | null>(null)
 
   // Cleanup on unmount
   useEffect(() => {
@@ -57,8 +57,9 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
     if (isDisabled || isProcessing) return
 
     // Use Web Speech API for transcription (browser-native, no backend needed)
+    const win = window as Window & Record<string, unknown>
     const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      (win.SpeechRecognition as typeof globalThis.SpeechRecognition | undefined) || (win.webkitSpeechRecognition as typeof globalThis.SpeechRecognition | undefined)
 
     if (SpeechRecognition) {
       try {
@@ -67,7 +68,7 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
         recognition.interimResults = false
         recognition.lang = LANGUAGE_BCP47[language] || 'en-US'
 
-        recognition.onresult = (event: any) => {
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
           if (event.results?.length > 0 && event.results[0]?.length > 0) {
             const transcript = event.results[0][0].transcript
             if (transcript?.trim()) {

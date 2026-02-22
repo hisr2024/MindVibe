@@ -10,9 +10,9 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body className="min-h-screen bg-slate-950 text-slate-50">
-        <div className="flex min-h-screen items-center justify-center p-6">
+        <div role="alert" className="flex min-h-screen items-center justify-center p-6">
           <div className="max-w-md text-center">
-            <div className="mb-6 text-6xl">&#x1F64F;</div>
+            <div className="mb-6 text-6xl" aria-hidden="true">&#x1F64F;</div>
             <h2 className="mb-3 text-xl font-semibold text-slate-100">
               Something unexpected happened
             </h2>

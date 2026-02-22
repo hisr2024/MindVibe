@@ -128,7 +128,7 @@ class OfflineSyncService {
     if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
       navigator.serviceWorker.ready.then((registration) => {
         // Register for background sync
-        (registration as any).sync?.register('mindvibe-sync').catch((error: Error) => {
+        (registration as ServiceWorkerRegistration & { sync?: { register: (tag: string) => Promise<void> } }).sync?.register('mindvibe-sync').catch((error: Error) => {
           console.warn('[SyncService] Background sync registration failed:', error)
         })
       })

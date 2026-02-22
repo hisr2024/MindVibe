@@ -302,10 +302,11 @@ export default function SecuritySettingsPage() {
                         Enter your current 2FA code to generate new backup codes. This will invalidate all existing backup codes.
                       </p>
                       <div>
-                        <label className="block text-sm font-medium text-orange-100 mb-1">
+                        <label htmlFor="regenerate-2fa-code" className="block text-sm font-medium text-orange-100 mb-1">
                           2FA Code
                         </label>
                         <input
+                          id="regenerate-2fa-code"
                           type="text"
                           inputMode="numeric"
                           pattern="[0-9]*"
@@ -410,10 +411,11 @@ export default function SecuritySettingsPage() {
                         This will make your account less secure. Are you sure?
                       </p>
                       <div>
-                        <label className="block text-sm font-medium text-orange-100 mb-1">
+                        <label htmlFor="disable-2fa-code" className="block text-sm font-medium text-orange-100 mb-1">
                           Current 2FA Code
                         </label>
                         <input
+                          id="disable-2fa-code"
                           type="text"
                           inputMode="numeric"
                           pattern="[0-9]*"
@@ -426,10 +428,11 @@ export default function SecuritySettingsPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-orange-100 mb-1">
+                        <label htmlFor="disable-2fa-password" className="block text-sm font-medium text-orange-100 mb-1">
                           Password
                         </label>
                         <input
+                          id="disable-2fa-password"
                           type="password"
                           autoComplete="current-password"
                           value={disablePassword}

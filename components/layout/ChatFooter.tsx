@@ -410,6 +410,7 @@ export function ChatFooter() {
                     className="flex-1 bg-slate-800/80 text-slate-100 placeholder-slate-500 rounded-xl px-3 py-2 text-sm border border-orange-500/20 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-transparent"
                     disabled={isLoading}
                     maxLength={2000}
+                    aria-label="Type a message to KIAAN"
                   />
                   <button
                     onClick={() => sendMessage()}

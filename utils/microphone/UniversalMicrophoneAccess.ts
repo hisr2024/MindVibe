@@ -150,11 +150,12 @@ export async function checkMicrophonePermission(): Promise<MicrophonePermissionS
       // Enumeration failed, assume we need to prompt
       return { status: 'prompt', canUse: false, platform, browser }
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error checking microphone permission'
     return {
       status: 'unsupported',
       canUse: false,
-      error: error.message || 'Unknown error checking microphone permission',
+      error: message,
       platform,
       browser
     }
@@ -198,7 +199,7 @@ export async function requestMicrophoneAccess(
     }
   }
 
-  let lastError: any = null
+  let lastError: unknown = null
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -218,16 +219,18 @@ export async function requestMicrophoneAccess(
 
       return { success: true, stream }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error
-      console.warn(`[Microphone] Attempt ${attempt + 1} failed:`, error.name, error.message)
+      const errName = error instanceof Error ? error.name : 'UnknownError'
+      const errMessage = error instanceof Error ? error.message : String(error)
+      console.warn(`[Microphone] Attempt ${attempt + 1} failed:`, errName, errMessage)
 
       // Don't retry on permanent errors
       if (
-        error.name === 'NotAllowedError' ||
-        error.name === 'PermissionDeniedError' ||
-        error.name === 'NotFoundError' ||
-        error.name === 'DevicesNotFoundError'
+        errName === 'NotAllowedError' ||
+        errName === 'PermissionDeniedError' ||
+        errName === 'NotFoundError' ||
+        errName === 'DevicesNotFoundError'
       ) {
         break  // These won't be fixed by retrying
       }
@@ -249,9 +252,9 @@ export async function requestMicrophoneAccess(
 /**
  * Format error messages to be user-friendly and platform-specific
  */
-function formatMicrophoneError(error: any, platform: string, browser: string): string {
-  const errorName = error?.name || ''
-  const errorMsg = error?.message || ''
+function formatMicrophoneError(error: unknown, platform: string, browser: string): string {
+  const errorName = error instanceof Error ? error.name : ''
+  const errorMsg = error instanceof Error ? error.message : ''
 
   if (errorName === 'NotAllowedError' || errorName === 'PermissionDeniedError') {
     if (platform === 'iOS') {
@@ -296,25 +299,27 @@ function formatMicrophoneError(error: any, platform: string, browser: string): s
 export function isSpeechRecognitionAvailable(): boolean {
   if (typeof window === 'undefined') return false
 
+  const win = window as Window & Record<string, unknown>
   return !!(
-    (window as any).SpeechRecognition ||
-    (window as any).webkitSpeechRecognition ||
-    (window as any).mozSpeechRecognition ||
-    (window as any).msSpeechRecognition
+    win.SpeechRecognition ||
+    win.webkitSpeechRecognition ||
+    win.mozSpeechRecognition ||
+    win.msSpeechRecognition
   )
 }
 
 /**
  * Get the Speech Recognition constructor
  */
-export function getSpeechRecognitionConstructor(): any {
+export function getSpeechRecognitionConstructor(): (new () => SpeechRecognition) | null {
   if (typeof window === 'undefined') return null
 
+  const win = window as Window & Record<string, unknown>
   return (
-    (window as any).SpeechRecognition ||
-    (window as any).webkitSpeechRecognition ||
-    (window as any).mozSpeechRecognition ||
-    (window as any).msSpeechRecognition ||
+    (win.SpeechRecognition as (new () => SpeechRecognition) | undefined) ||
+    (win.webkitSpeechRecognition as (new () => SpeechRecognition) | undefined) ||
+    (win.mozSpeechRecognition as (new () => SpeechRecognition) | undefined) ||
+    (win.msSpeechRecognition as (new () => SpeechRecognition) | undefined) ||
     null
   )
 }
@@ -349,15 +354,17 @@ export async function runMicrophoneDiagnostics(): Promise<{
     const permState = await checkMicrophonePermission()
     permissionStatus = permState.status
     if (permState.error) errors.push(permState.error)
-  } catch (error: any) {
-    errors.push(`Permission check failed: ${error.message}`)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    errors.push(`Permission check failed: ${message}`)
   }
 
   try {
     const devices = await navigator.mediaDevices.enumerateDevices()
     audioDevicesCount = devices.filter(d => d.kind === 'audioinput').length
-  } catch (error: any) {
-    errors.push(`Device enumeration failed: ${error.message}`)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    errors.push(`Device enumeration failed: ${message}`)
   }
 
   return {

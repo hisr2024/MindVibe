@@ -7,8 +7,8 @@
 
 export const typography = {
   fonts: {
-    sans: '"Inter", -apple-system, BlinkMacSystemFont, "SF Pro", system-ui, sans-serif',
-    display: '"SF Pro Display", "Inter", sans-serif',
+    sans: 'var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro", system-ui, sans-serif',
+    display: '"SF Pro Display", var(--font-inter), sans-serif',
   },
 
   pageHeadings: {

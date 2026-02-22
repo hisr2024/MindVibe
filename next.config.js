@@ -12,7 +12,7 @@ const nextConfig = {
   },
 
   images: {
-    domains: [],
+    remotePatterns: [],
     formats: ['image/avif', 'image/webp'],
   },
 
@@ -53,7 +53,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://mindvibe-api.onrender.com https://fonts.googleapis.com; frame-ancestors 'none';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://mindvibe-api.onrender.com; frame-ancestors 'none';",
           },
         ],
       },
@@ -121,7 +121,17 @@ const nextConfig = {
 };
 
 nextConfig.experimental = {
-  optimizePackageImports: ['lucide-react', 'date-fns', 'recharts'],
+  optimizePackageImports: [
+    'lucide-react',
+    'date-fns',
+    'recharts',
+    'framer-motion',
+    '@radix-ui/react-accordion',
+    '@radix-ui/react-dialog',
+    '@radix-ui/react-hover-card',
+    '@radix-ui/react-switch',
+    '@radix-ui/react-tooltip',
+  ],
 };
 
 module.exports = nextConfig;

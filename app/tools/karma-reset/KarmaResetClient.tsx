@@ -314,7 +314,7 @@ export default function KarmaResetClient() {
                           name="repairType"
                           value="apology"
                           checked={repairType === 'apology'}
-                          onChange={(e) => setRepairType(e.target.value as any)}
+                          onChange={(e) => setRepairType(e.target.value as 'apology' | 'clarification' | 'calm_followup')}
                           className="mt-1 accent-orange-500"
                         />
                         <div>
@@ -329,7 +329,7 @@ export default function KarmaResetClient() {
                           name="repairType"
                           value="clarification"
                           checked={repairType === 'clarification'}
-                          onChange={(e) => setRepairType(e.target.value as any)}
+                          onChange={(e) => setRepairType(e.target.value as 'apology' | 'clarification' | 'calm_followup')}
                           className="mt-1 accent-orange-500"
                         />
                         <div>
@@ -344,7 +344,7 @@ export default function KarmaResetClient() {
                           name="repairType"
                           value="calm_followup"
                           checked={repairType === 'calm_followup'}
-                          onChange={(e) => setRepairType(e.target.value as any)}
+                          onChange={(e) => setRepairType(e.target.value as 'apology' | 'clarification' | 'calm_followup')}
                           className="mt-1 accent-orange-500"
                         />
                         <div>

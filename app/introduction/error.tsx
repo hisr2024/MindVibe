@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 
-export default function Error({
+export default function IntroductionError({
   error,
   reset,
 }: {
@@ -10,7 +10,7 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error('Application error:', error)
+    console.error('Introduction error:', error)
   }, [error])
 
   return (
@@ -18,11 +18,10 @@ export default function Error({
       <div className="max-w-md text-center">
         <div className="mb-6 text-6xl" aria-hidden="true">&#x1F64F;</div>
         <h2 className="mb-3 text-xl font-semibold text-slate-100">
-          Something went gently wrong
+          A moment of pause
         </h2>
         <p className="mb-6 text-sm text-slate-400">
-          Even on the path to enlightenment, we sometimes stumble.
-          Take a breath, and let us try again.
+          Every journey has its detours. Let us find our way back to the beginning.
         </p>
         <button
           onClick={reset}

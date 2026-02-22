@@ -84,7 +84,7 @@ interface QuantumDiveAnalysis {
   consciousness_signature: string
   evolution_trend: 'ascending' | 'stable' | 'descending' | 'transforming'
   layers: Record<string, QuantumState>
-  temporal_patterns: any[]
+  temporal_patterns: unknown[]
   insights: QuantumInsight[]
   wisdom_recommendations: WisdomRecommendation[]
   practice_recommendations: PracticeRecommendation[]

@@ -10,7 +10,7 @@ export function reportWebVitals(metric: Metric): void {
   // Log to console in development
   if (process.env.NODE_ENV === 'development') {
     // eslint-disable-next-line no-console
-    console.log(`[Web Vitals] ${name}: ${Math.round(value)} (${rating})`)
+    console.info(`[Web Vitals] ${name}: ${Math.round(value)} (${rating})`)
   }
 
   // In production, send to analytics endpoint

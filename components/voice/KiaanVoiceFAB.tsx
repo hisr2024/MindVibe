@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * KiaanVoiceFAB - Global Floating Action Button for Voice Access
  *
