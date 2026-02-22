@@ -372,6 +372,14 @@ class ThreatDetectionMiddleware(BaseHTTPMiddleware):
         if not self.enabled:
             return await call_next(request)
 
+        # Allow legitimate search engine bots through without threat scanning.
+        # Bots like Googlebot, Bingbot, and social media crawlers must access
+        # the site freely for SEO indexing and link preview generation.
+        from backend.middleware.ddos_protection import is_legitimate_bot
+        user_agent = request.headers.get("User-Agent", "")
+        if is_legitimate_bot(user_agent):
+            return await call_next(request)
+
         client_ip = self._get_client_ip(request)
         all_threats: List[str] = []
 

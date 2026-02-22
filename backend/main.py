@@ -27,10 +27,14 @@ startup_logger.info("=" * 80)
 
 # Set API key explicitly for this module
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
-startup_logger.info(f"✅ OPENAI_API_KEY: {'configured' if OPENAI_API_KEY else 'missing'}")
-
-# Pass to OpenAI before import
-if OPENAI_API_KEY:
+if not OPENAI_API_KEY:
+    startup_logger.warning(
+        "⚠️  OPENAI_API_KEY is NOT configured. "
+        "KIAAN AI features will be unavailable. "
+        "Set OPENAI_API_KEY in your environment to enable AI capabilities."
+    )
+else:
+    startup_logger.info("✅ OPENAI_API_KEY: configured")
     os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
 from fastapi import FastAPI, HTTPException, Request, status
@@ -116,11 +120,14 @@ def _connect_args_for_ssl(db_url: str) -> Dict[str, Any]:
     # Auto-detect Render environment (Render sets RENDER=true)
     is_render = os.getenv("RENDER", "").lower() == "true"
 
-    # Default to 'require' for Render (self-signed certs) and general compatibility
+    # Default SSL mode based on environment
     if not ssl_pref:
-        ssl_pref = "require"
         if is_render:
+            ssl_pref = "require"
             logger.info("Render environment detected - using SSL without certificate verification")
+        else:
+            ssl_pref = "verify-full"
+            logger.info("Production environment - using SSL with full certificate verification")
 
     ssl_pref = ssl_pref.lower()
 

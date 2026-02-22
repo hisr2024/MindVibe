@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d4a44c" />
+      <stop offset="50%" stop-color="#f5c56a" />
+      <stop offset="100%" stop-color="#d4a44c" />
+    </linearGradient>
+    <radialGradient id="glowBg" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#1a1520" />
+      <stop offset="100%" stop-color="#0b0b0f" />
+    </radialGradient>
+    <radialGradient id="lotusGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(212,164,76,0.15)" />
+      <stop offset="100%" stop-color="rgba(212,164,76,0)" />
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#glowBg)" />
+
+  <!-- Subtle border -->
+  <rect x="20" y="20" width="1160" height="590" rx="16" fill="none" stroke="rgba(212,164,76,0.12)" stroke-width="1" />
+
+  <!-- Lotus glow -->
+  <circle cx="600" cy="240" r="180" fill="url(#lotusGlow)" />
+
+  <!-- Simplified Lotus Symbol -->
+  <g transform="translate(600, 220)" fill="none" stroke="url(#goldGrad)" stroke-width="2.5" opacity="0.85">
+    <!-- Center petal -->
+    <ellipse cx="0" cy="-35" rx="18" ry="45" />
+    <!-- Left petals -->
+    <ellipse cx="-30" cy="-20" rx="16" ry="40" transform="rotate(-25, -30, -20)" />
+    <ellipse cx="-55" cy="0" rx="14" ry="35" transform="rotate(-50, -55, 0)" />
+    <!-- Right petals -->
+    <ellipse cx="30" cy="-20" rx="16" ry="40" transform="rotate(25, 30, -20)" />
+    <ellipse cx="55" cy="0" rx="14" ry="35" transform="rotate(50, 55, 0)" />
+    <!-- Base arc -->
+    <path d="M-40,20 Q0,35 40,20" stroke-width="2" />
+  </g>
+
+  <!-- Om symbol below lotus -->
+  <text x="600" y="310" text-anchor="middle" font-family="serif" font-size="36" fill="rgba(212,164,76,0.4)">&#x0950;</text>
+
+  <!-- MindVibe title -->
+  <text x="600" y="410" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="bold" fill="url(#goldGrad)" letter-spacing="6">MindVibe</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="465" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="24" fill="rgba(255,255,255,0.75)" letter-spacing="3">Your Spiritual Companion | Bhagavad Gita Wisdom</text>
+
+  <!-- Decorative line -->
+  <line x1="400" y1="500" x2="800" y2="500" stroke="rgba(212,164,76,0.2)" stroke-width="1" />
+
+  <!-- Bottom tagline -->
+  <text x="600" y="540" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="16" fill="rgba(255,255,255,0.35)" letter-spacing="5">WALK WITH KRISHNA</text>
+</svg>

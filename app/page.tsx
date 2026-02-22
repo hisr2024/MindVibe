@@ -50,7 +50,7 @@ export default function Home() {
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           />
-          <p className="text-[#d4a44c]/60 text-sm tracking-wide">
+          <p className="text-[#d4a44c]/80 text-sm tracking-wide">
             {t('common.loading', 'Entering the sacred space...')}
           </p>
         </motion.div>
@@ -68,6 +68,36 @@ export default function Home() {
 
         {/* === DIVINE ENTRY: Krishna's Presence === */}
         <DivineKrishnaPresence />
+
+        {/* === VALUE PROPOSITION === */}
+        <motion.section
+          className="text-center space-y-6 py-8"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="text-2xl sm:text-3xl font-bold text-white">
+            {t('home.value.title', 'Your AI Spiritual Companion, Rooted in the Bhagavad Gita')}
+          </h2>
+          <p className="text-white/70 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            {t('home.value.description', 'KIAAN guides you through sacred wisdom, personalized journeys, and healing tools — powered by 700+ Gita verses in 17 languages. Free to start, deeply transformative.')}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center pt-2">
+            <a
+              href="/introduction"
+              className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-semibold rounded-full hover:from-orange-400 hover:to-amber-400 transition-all text-sm sm:text-base"
+            >
+              {t('home.value.cta', 'Begin Your Journey')}
+            </a>
+            <a
+              href="/pricing"
+              className="inline-flex items-center gap-2 px-6 py-3 border border-[#d4a44c]/30 text-[#d4a44c]/90 rounded-full hover:border-[#d4a44c]/60 transition-all text-sm"
+            >
+              {t('home.value.pricing', 'View Plans — Free to Start')}
+            </a>
+          </div>
+        </motion.section>
 
         {/* === PATHWAY MAP: Healing journey steps === */}
         <PathwayMap />
@@ -96,13 +126,13 @@ export default function Home() {
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="space-y-3 py-6">
-            <p className="font-sacred text-base italic text-[#d4a44c]/50 sm:text-lg">
+            <p className="font-sacred text-base italic text-[#d4a44c]/70 sm:text-lg">
               {t(
                 'home.closing.verse',
                 '"Whenever the mind wanders — restless and unsteady — bring it back, again and again, to rest in the Self."'
               )}
             </p>
-            <p className="text-xs text-[#d4a44c]/30">
+            <p className="text-xs text-[#d4a44c]/50">
               — {t('home.closing.ref', 'Bhagavad Gita 6.26')}
             </p>
           </div>
@@ -116,10 +146,10 @@ export default function Home() {
           viewport={{ once: true, margin: '-50px' }}
           transition={springConfigs.smooth}
         >
-          <h2 className="text-base font-semibold text-[#d4a44c]/60">
+          <h2 className="text-base font-semibold text-[#d4a44c]/80">
             {t('home.disclaimer.title', 'A Note from Your Divine Friend')}
           </h2>
-          <p className="text-sm leading-relaxed text-slate-400/60">
+          <p className="text-sm leading-relaxed text-slate-400/80">
             {t(
               'home.disclaimer.text',
               "KIAAN walks beside you as a spiritual companion, sharing reflections rooted in the Bhagavad Gita and timeless wisdom traditions. This is a space for inner peace, self-discovery, and divine friendship — not a substitute for professional care. For matters beyond the spirit, always seek guidance from qualified professionals."

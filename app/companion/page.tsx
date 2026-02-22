@@ -865,7 +865,11 @@ export default function CompanionPage() {
         </footer>
       )}
 
-      {/* Animation styles */}
+      {/* Animation styles
+        * SECURITY NOTE: This dangerouslySetInnerHTML is safe because the content is
+        * entirely hardcoded CSS keyframe definitions. No user input, props, or
+        * external data flows into this string. Only static animation rules are injected.
+        */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes typing-dot {
           0%, 100% { transform: translateY(0); opacity: 0.4; }

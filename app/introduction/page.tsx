@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, memo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   DivineGreeting,
@@ -19,71 +19,7 @@ import { DivineConsciousnessProvider } from '@/contexts/DivineConsciousnessConte
 import { useUISound } from '@/hooks/useUISound'
 import { useLanguage } from '@/hooks/useLanguage'
 import Link from 'next/link'
-
-// Animation variants for consistent motion
-const _fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.4, ease: "easeOut" }
-};
-
-// Memoized feature card to prevent re-renders
-const FeatureCard = memo(({
-  href,
-  icon,
-  iconAnimation,
-  title,
-  subtitle,
-  gradient,
-  borderColor,
-  textColor,
-  delay = 0,
-  onClick,
-}: {
-  href?: string;
-  icon: React.ReactNode;
-  iconAnimation?: Record<string, unknown>;
-  title: string;
-  subtitle: string;
-  gradient: string;
-  borderColor: string;
-  textColor: string;
-  delay?: number;
-  onClick?: () => void;
-}) => {
-  const content = (
-    <motion.div
-      className={`flex items-center gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 ${gradient} border ${borderColor} rounded-2xl hover:border-opacity-70 transition-all active:scale-[0.98] group w-full text-left`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4, ease: "easeOut" }}
-      style={{ transform: 'translateZ(0)' }}
-    >
-      <div
-        className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full ${gradient.replace('50', '30')} flex items-center justify-center flex-shrink-0`}
-        style={iconAnimation}
-      >
-        {icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <h3 className={`${textColor} font-semibold text-base sm:text-lg`}>{title}</h3>
-        <p className={`${textColor.replace('100', '200')}/60 text-xs sm:text-sm truncate`}>{subtitle}</p>
-      </div>
-      <div className={`${textColor.replace('100', '300')}/50 group-hover:${textColor.replace('100', '300')} transition-colors flex-shrink-0`}>
-        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </div>
-    </motion.div>
-  );
-
-  if (href) {
-    return <Link href={href}>{content}</Link>;
-  }
-
-  return <button onClick={onClick} className="w-full">{content}</button>;
-});
-FeatureCard.displayName = 'FeatureCard';
+import { Home, BookOpen, RefreshCw, Leaf, Shield, Heart, Sun, Compass } from 'lucide-react'
 
 /**
  * Introduction Page - Divine Krishna Features
@@ -100,49 +36,39 @@ export default function IntroductionPage() {
   const [showProtectionShield, setShowProtectionShield] = useState(false)
   const [showHeartJournal, setShowHeartJournal] = useState(false)
   const [hasSeenDarshan, setHasSeenDarshan] = useState(false)
-  const [_isPageReady, setIsPageReady] = useState(false)
-
   // Language hook for translations
   const { t } = useLanguage()
 
   // Audio hook for sound effects
-  const { playSound, playOm, playSingingBowl, playChime, playBell } = useUISound()
+  const { playSound } = useUISound()
 
   // Check if user has seen today's darshan
   useEffect(() => {
-    // Mark page as ready immediately - the 100ms delay was causing flicker
-    setIsPageReady(true)
-
-    const today = new Date().toDateString()
-    const lastDarshanDate = localStorage.getItem('lastDarshanDate')
-
-    if (lastDarshanDate !== today) {
-      // Use requestAnimationFrame for smoother animation scheduling
-      // This prevents blocking the main thread and reduces flicker
-      const timer = setTimeout(() => {
-        requestAnimationFrame(() => {
-          setShowMorningDarshan(true)
-          playOm()  // Play OM sound when darshan appears
-        })
-      }, 1500) // Reduced from 1800ms for better perceived performance
-      return () => clearTimeout(timer)
-    } else {
-      setHasSeenDarshan(true)
+    try {
+      const today = new Date().toDateString()
+      const lastDarshanDate = localStorage.getItem('lastDarshanDate')
+      if (lastDarshanDate === today) {
+        setHasSeenDarshan(true)
+      }
+    } catch {
+      // localStorage unavailable (SSR, incognito, or disabled)
     }
-  }, [playOm])
+  }, [])
 
   // Memoized handlers to prevent recreation
   const completeDarshan = useCallback(() => {
     setShowMorningDarshan(false)
     setHasSeenDarshan(true)
-    localStorage.setItem('lastDarshanDate', new Date().toDateString())
-    playChime()  // Chime on darshan complete
-  }, [playChime])
+    try {
+      localStorage.setItem('lastDarshanDate', new Date().toDateString())
+    } catch {
+      // localStorage unavailable
+    }
+  }, [])
 
   const openProtectionShield = useCallback(() => {
     setShowProtectionShield(true)
-    playSingingBowl()  // Singing bowl for protection
-  }, [playSingingBowl])
+  }, [])
   const closeProtectionShield = useCallback(() => {
     setShowProtectionShield(false)
     playSound('close')
@@ -157,8 +83,7 @@ export default function IntroductionPage() {
   }, [playSound])
   const openMorningDarshan = useCallback(() => {
     setShowMorningDarshan(true)
-    playBell()  // Bell for morning darshan
-  }, [playBell])
+  }, [])
 
   return (
     <DivineConsciousnessProvider>
@@ -230,7 +155,7 @@ export default function IntroductionPage() {
             </h1>
 
             {/* Subtitle */}
-            <p className="text-white/55 text-sm sm:text-base md:text-lg max-w-md sm:max-w-lg md:max-w-xl mx-auto px-4 leading-relaxed">
+            <p className="text-white/70 text-sm sm:text-base md:text-lg max-w-md sm:max-w-lg md:max-w-xl mx-auto px-4 leading-relaxed">
               {t('home.introduction.heroSubtitle', 'Experience the loving guidance of Krishna. You are never alone on this journey.')}
             </p>
 
@@ -244,7 +169,7 @@ export default function IntroductionPage() {
                 transition={{ delay: 0.4, duration: 0.4 }}
                 style={{ transform: 'translateZ(0)' }}
               >
-                <span>🌅</span>
+                <Sun className="w-4 h-4 text-amber-300" />
                 <span>{t('home.introduction.receiveDarshan', "Receive Krishna's Darshan")}</span>
               </motion.button>
             )}
@@ -293,9 +218,9 @@ export default function IntroductionPage() {
                 </motion.div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-orange-100 font-semibold text-base sm:text-lg">{t('home.introduction.talkToKiaan', 'Talk to KIAAN')}</h3>
-                  <p className="text-orange-200/60 text-xs sm:text-sm truncate">{t('home.introduction.divineWisdom', 'Divine wisdom & guidance')}</p>
+                  <p className="text-orange-200/80 text-xs sm:text-sm truncate">{t('home.introduction.divineWisdom', 'Divine wisdom & guidance')}</p>
                 </div>
-                <div className="text-orange-300/50 group-hover:text-orange-300 transition-colors flex-shrink-0">
+                <div className="text-orange-300/70 group-hover:text-orange-300 transition-colors flex-shrink-0">
                   <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
@@ -323,11 +248,11 @@ export default function IntroductionPage() {
                   className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-full bg-gradient-to-br from-amber-400/30 to-orange-500/30 flex items-center justify-center animate-spin-slow"
                   style={{ animationDuration: '12s' }}
                 >
-                  <span className="text-3xl sm:text-4xl">☸️</span>
+                  <Shield className="w-7 h-7 sm:w-8 sm:h-8 text-amber-300" />
                 </div>
                 <div className="w-full">
                   <h3 className="text-amber-100 font-semibold text-sm sm:text-base md:text-lg">{t('home.introduction.protectionShield', 'Divine Protection Shield')}</h3>
-                  <p className="text-amber-200/60 text-xs sm:text-sm mt-1">{t('home.introduction.activateProtection', "Activate Krishna's protection")}</p>
+                  <p className="text-amber-200/80 text-xs sm:text-sm mt-1">{t('home.introduction.activateProtection', "Activate Krishna's protection")}</p>
                 </div>
               </motion.button>
 
@@ -343,11 +268,11 @@ export default function IntroductionPage() {
                 <div
                   className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-full bg-gradient-to-br from-pink-400/30 to-rose-500/30 flex items-center justify-center divine-heartbeat"
                 >
-                  <span className="text-3xl sm:text-4xl">💙</span>
+                  <Heart className="w-7 h-7 sm:w-8 sm:h-8 text-pink-300" />
                 </div>
                 <div className="w-full">
                   <h3 className="text-pink-100 font-semibold text-sm sm:text-base md:text-lg">{t('home.introduction.heartToHeart', 'Heart-to-Heart with Krishna')}</h3>
-                  <p className="text-pink-200/60 text-xs sm:text-sm mt-1">{t('home.introduction.writeLetter', 'Write a letter to the Divine')}</p>
+                  <p className="text-pink-200/80 text-xs sm:text-sm mt-1">{t('home.introduction.writeLetter', 'Write a letter to the Divine')}</p>
                 </div>
               </motion.button>
 
@@ -364,10 +289,10 @@ export default function IntroductionPage() {
               transition={{ delay: 0.4 }}
             >
               <div className="flex items-center justify-center gap-3 mb-4 sm:mb-5">
-                <span className="text-2xl sm:text-3xl">💙</span>
+                <Heart className="w-6 h-6 sm:w-7 sm:h-7 text-blue-400" />
                 <div className="text-center">
                   <h3 className="text-white/90 font-medium text-base sm:text-lg">{t('home.introduction.howIsHeart', 'How is your heart?')}</h3>
-                  <p className="text-white/50 text-xs sm:text-sm">{t('home.introduction.shareFeelings', 'Share your feelings with Krishna')}</p>
+                  <p className="text-white/70 text-xs sm:text-sm">{t('home.introduction.shareFeelings', 'Share your feelings with Krishna')}</p>
                 </div>
               </div>
               <DivineMoodCheckIn compact={true} />
@@ -421,13 +346,13 @@ export default function IntroductionPage() {
                     className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-indigo-900/50 to-purple-900/50 border border-indigo-500/30 rounded-2xl hover:border-indigo-500/50 transition-all active:scale-[0.98] group"
                   >
                     <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-indigo-400/30 to-purple-500/30 flex items-center justify-center flex-shrink-0">
-                      <span className="text-2xl sm:text-3xl">🏠</span>
+                      <Home className="w-6 h-6 sm:w-7 sm:h-7 text-indigo-300" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-indigo-100 font-semibold text-base sm:text-lg">{t('home.introduction.goToDashboard', 'Go to Dashboard')}</h3>
-                      <p className="text-indigo-200/60 text-xs sm:text-sm">{t('home.introduction.accessTools', 'Access all tools & features')}</p>
+                      <p className="text-indigo-200/80 text-xs sm:text-sm">{t('home.introduction.accessTools', 'Access all tools & features')}</p>
                     </div>
-                    <div className="text-indigo-300/50 group-hover:text-indigo-300 transition-colors flex-shrink-0">
+                    <div className="text-indigo-300/70 group-hover:text-indigo-300 transition-colors flex-shrink-0">
                       <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
@@ -446,31 +371,31 @@ export default function IntroductionPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                     <Link
                       href="/journeys"
-                      className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[60px] sm:min-h-[72px]"
+                      className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[72px] sm:min-h-[80px]"
                     >
-                      <span className="text-xl sm:text-2xl mb-1">🕉️</span>
-                      <span className="text-white/70 text-[10px] sm:text-xs text-center leading-tight">{t('home.introduction.journeys', 'Journeys')}</span>
+                      <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-amber-300 mb-1" />
+                      <span className="text-white/80 text-xs text-center leading-tight">{t('home.introduction.journeys', 'Journeys')}</span>
                     </Link>
                     <Link
                       href="/flows/journal"
-                      className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[60px] sm:min-h-[72px]"
+                      className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[72px] sm:min-h-[80px]"
                     >
-                      <span className="text-xl sm:text-2xl mb-1">📝</span>
-                      <span className="text-white/70 text-[10px] sm:text-xs text-center leading-tight">{t('home.introduction.journal', 'Journal')}</span>
+                      <Leaf className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-300 mb-1" />
+                      <span className="text-white/80 text-xs text-center leading-tight">{t('home.introduction.journal', 'Journal')}</span>
                     </Link>
                     <Link
                       href="/tools/ardha"
-                      className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[60px] sm:min-h-[72px]"
+                      className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[72px] sm:min-h-[80px]"
                     >
-                      <span className="text-xl sm:text-2xl mb-1">🔄</span>
-                      <span className="text-white/70 text-[10px] sm:text-xs text-center leading-tight">{t('home.introduction.reframe', 'Reframe')}</span>
+                      <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6 text-blue-300 mb-1" />
+                      <span className="text-white/80 text-xs text-center leading-tight">{t('home.introduction.reframe', 'Reframe')}</span>
                     </Link>
                     <Link
                       href="/tools/viyog"
-                      className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[60px] sm:min-h-[72px]"
+                      className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[72px] sm:min-h-[80px]"
                     >
-                      <span className="text-xl sm:text-2xl mb-1">🧘</span>
-                      <span className="text-white/70 text-[10px] sm:text-xs text-center leading-tight">{t('home.introduction.detach', 'Detach')}</span>
+                      <Compass className="w-5 h-5 sm:w-6 sm:h-6 text-purple-300 mb-1" />
+                      <span className="text-white/80 text-xs text-center leading-tight">{t('home.introduction.detach', 'Detach')}</span>
                     </Link>
                   </div>
                 </motion.div>
@@ -486,10 +411,10 @@ export default function IntroductionPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8 }}
           >
-            <p className="text-white/50 text-xs sm:text-sm italic font-sacred max-w-md mx-auto px-4 leading-relaxed">
+            <p className="text-white/70 text-xs sm:text-sm italic font-sacred max-w-md mx-auto px-4 leading-relaxed">
               {t('home.introduction.footerVerse', '"I am the Self seated in the hearts of all beings. I am the beginning, the middle, and the end."')}
             </p>
-            <p className="text-amber-400/60 text-xs mt-2 font-medium">{t('home.introduction.footerVerseRef', '— Bhagavad Gita 10.20')}</p>
+            <p className="text-amber-400/80 text-xs mt-2 font-medium">{t('home.introduction.footerVerseRef', '— Bhagavad Gita 10.20')}</p>
           </motion.section>
 
           {/* ==================== FLOATING ELEMENTS ==================== */}
@@ -503,7 +428,7 @@ export default function IntroductionPage() {
           {/* Krishna's Whispers */}
           <KrishnaWhispers
             position="top-right"
-            autoShow={true}
+            autoShow={false}
             intervalMinutes={30}
           />
         </main>

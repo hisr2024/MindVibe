@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 
 export const metadata = {
-  title: 'KIAAN Chat',
-  description: 'Your calm, privacy-first spiritual companion powered by ancient wisdom',
+  title: 'KIAAN - Your AI Spiritual Guide | MindVibe',
+  description: 'Talk to KIAAN, your calm and compassionate AI spiritual companion. Receive personalized guidance rooted in Bhagavad Gita wisdom for inner peace and self-discovery.',
 }
 
 /**

@@ -8,8 +8,10 @@ This module provides comprehensive DDoS protection including:
 - Suspicious pattern detection
 - Exponential backoff for repeated violations
 - IP blocking/allowlisting
+- Search engine bot whitelisting (Googlebot, Bingbot, etc.)
 """
 
+import re
 import time
 import logging
 from collections import defaultdict, deque
@@ -22,6 +24,50 @@ from starlette.responses import Response, JSONResponse
 from starlette.status import HTTP_429_TOO_MANY_REQUESTS, HTTP_403_FORBIDDEN
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Search engine and legitimate bot User-Agent patterns
+# These bots MUST be allowed through for SEO indexing and discoverability.
+# ---------------------------------------------------------------------------
+LEGITIMATE_BOT_PATTERNS = re.compile(
+    r'(?i)(?:'
+    r'Googlebot|Google-InspectionTool|Storebot-Google|GoogleOther'
+    r'|bingbot|BingPreview|msnbot'
+    r'|Slurp|Yahoo'
+    r'|DuckDuckBot'
+    r'|Baiduspider'
+    r'|YandexBot|YandexImages'
+    r'|Sogou'
+    r'|Applebot'
+    r'|facebookexternalhit|Facebot'
+    r'|Twitterbot'
+    r'|LinkedInBot'
+    r'|WhatsApp'
+    r'|TelegramBot'
+    r'|Discordbot'
+    r'|PinterestBot'
+    r'|Slackbot'
+    r'|ia_archiver'
+    r'|archive\.org_bot'
+    r'|AhrefsBot|SemrushBot|MJ12bot'
+    r'|rogerbot|dotbot'
+    r'|PetalBot'
+    r'|GPTBot'
+    r'|anthropic-ai'
+    r'|Chrome-Lighthouse'
+    r'|Google-PageRenderer'
+    r'|APIs-Google'
+    r'|Mediapartners-Google'
+    r'|AdsBot-Google'
+    r')'
+)
+
+
+def is_legitimate_bot(user_agent: str) -> bool:
+    """Check if a User-Agent belongs to a known legitimate bot/crawler."""
+    if not user_agent:
+        return False
+    return bool(LEGITIMATE_BOT_PATTERNS.search(user_agent))
 
 # Configuration constants
 MAX_REQUESTS_PER_WINDOW = 100  # Maximum requests per time window
@@ -246,15 +292,24 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
         # Skip if disabled
         if not self.enabled:
             return await call_next(request)
-        
+
         # Periodic cleanup
         self._cleanup_old_data()
-        
+
         # Get client IP
         client_ip = self._get_client_ip(request)
-        
+
         # Check allowlist
         if client_ip in self.allowlist:
+            return await call_next(request)
+
+        # Allow legitimate search engine bots and social media crawlers
+        # through without rate limiting — critical for SEO indexing
+        user_agent = request.headers.get("User-Agent", "")
+        if is_legitimate_bot(user_agent):
+            logger.debug(
+                f"[DDoS Protection] Allowing legitimate bot: {user_agent[:80]} from {client_ip}"
+            )
             return await call_next(request)
         
         # Check blocklist
