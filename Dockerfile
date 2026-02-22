@@ -52,6 +52,17 @@ COPY --from=frontend-deps /app/node_modules ./node_modules
 COPY package.json next.config.js tsconfig.json postcss.config.js tailwind.config.ts ./
 COPY app/ ./app/
 COPY lib/ ./lib/
+COPY components/ ./components/
+COPY hooks/ ./hooks/
+COPY utils/ ./utils/
+COPY services/ ./services/
+COPY contexts/ ./contexts/
+COPY types/ ./types/
+COPY data/ ./data/
+COPY config/ ./config/
+COPY brand/ ./brand/
+COPY public/ ./public/
+COPY styles/ ./styles/
 
 # Disable Next.js telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -66,6 +77,9 @@ FROM node:20-alpine AS frontend-runner
 WORKDIR /app
 
 # Copy built .next, package.json and node_modules from builder
+COPY --from=frontend-builder /app/public ./public
+COPY --from=frontend-builder /app/.next/standalone ./
+COPY --from=frontend-builder /app/.next/static ./.next/static
 COPY --from=frontend-builder /app/.next ./.next
 COPY --from=frontend-builder /app/package.json ./package.json
 COPY --from=frontend-builder /app/node_modules ./node_modules

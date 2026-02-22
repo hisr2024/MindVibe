@@ -106,6 +106,39 @@ export default async function RootLayout({
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap"
         />
+        {/* JSON-LD structured data for search engine rich results */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@graph': [
+                {
+                  '@type': 'WebSite',
+                  '@id': 'https://mindvibe.life/#website',
+                  url: 'https://mindvibe.life',
+                  name: 'MindVibe',
+                  description:
+                    'Your Spiritual Companion & Best Divine Friend — powered by Bhagavad Gita Wisdom',
+                  publisher: {
+                    '@id': 'https://mindvibe.life/#organization',
+                  },
+                },
+                {
+                  '@type': 'Organization',
+                  '@id': 'https://mindvibe.life/#organization',
+                  name: 'MindVibe',
+                  url: 'https://mindvibe.life',
+                  logo: {
+                    '@type': 'ImageObject',
+                    url: 'https://mindvibe.life/icons/icon.svg',
+                  },
+                  sameAs: [],
+                },
+              ],
+            }),
+          }}
+        />
         {/* Set language from localStorage before hydration to prevent flash */}
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: languageScript }} />
       </head>
