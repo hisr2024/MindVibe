@@ -28,7 +28,7 @@ export const viewport: Viewport = {
 
 export const metadata = {
   title: 'MindVibe — Your Spiritual Companion & Best Divine Friend | Bhagavad Gita Wisdom',
-  description: 'MindVibe is the best spiritual companion and divine friend — powered by 700+ Bhagavad Gita verses, KIAAN AI guide, sacred wisdom journeys, and tools for inner peace, self-discovery, and spiritual growth. Walk with Krishna.',
+  description: 'Discover inner peace through Bhagavad Gita wisdom. KIAAN, your AI spiritual guide, offers sacred journeys, voice companionship, and tools for self-discovery in 17 languages.',
   metadataBase: new URL('https://mindvibe.life'),
   keywords: ['spiritual companion', 'divine friend', 'Bhagavad Gita', 'KIAAN', 'spiritual growth', 'inner peace', 'Krishna wisdom', 'sacred journeys', 'Gita verses', 'self-discovery', 'spiritual guide', 'MindVibe'],
   openGraph: {
@@ -38,14 +38,35 @@ export const metadata = {
     siteName: 'MindVibe',
     locale: 'en_US',
     type: 'website',
+    images: [{ url: '/og-image.svg', width: 1200, height: 630, alt: 'MindVibe - Your Spiritual Companion' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'MindVibe — Your Spiritual Companion & Divine Friend',
-    description: 'The best spiritual companion rooted in the Bhagavad Gita. KIAAN AI guide, sacred wisdom journeys, and tools for inner peace.',
+    description: 'Discover inner peace through Bhagavad Gita wisdom. KIAAN, your AI spiritual guide, offers sacred journeys, voice companionship, and tools for self-discovery.',
+    images: ['/og-image.svg'],
   },
   alternates: {
     canonical: 'https://mindvibe.life',
+    languages: {
+      'en': 'https://mindvibe.life',
+      'hi': 'https://mindvibe.life?lang=hi',
+      'ta': 'https://mindvibe.life?lang=ta',
+      'te': 'https://mindvibe.life?lang=te',
+      'bn': 'https://mindvibe.life?lang=bn',
+      'mr': 'https://mindvibe.life?lang=mr',
+      'gu': 'https://mindvibe.life?lang=gu',
+      'kn': 'https://mindvibe.life?lang=kn',
+      'ml': 'https://mindvibe.life?lang=ml',
+      'pa': 'https://mindvibe.life?lang=pa',
+      'sa': 'https://mindvibe.life?lang=sa',
+      'es': 'https://mindvibe.life?lang=es',
+      'fr': 'https://mindvibe.life?lang=fr',
+      'de': 'https://mindvibe.life?lang=de',
+      'pt': 'https://mindvibe.life?lang=pt',
+      'ja': 'https://mindvibe.life?lang=ja',
+      'zh-CN': 'https://mindvibe.life?lang=zh-CN',
+    },
   },
   robots: {
     index: true,
@@ -64,8 +85,9 @@ export const metadata = {
   icons: {
     icon: [
       { url: '/icons/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
     ],
-    shortcut: '/favicon.ico',
+    shortcut: '/favicon.svg',
     apple: '/icons/icon.svg'
   }
 }
@@ -135,7 +157,6 @@ export default async function RootLayout({
                     '@type': 'ImageObject',
                     url: 'https://mindvibe.life/icons/icon.svg',
                   },
-                  sameAs: [],
                 },
               ],
             }),
@@ -156,6 +177,14 @@ export default async function RootLayout({
             </a>
             {/* Overlay root for Portal-based modals/sheets - must be early in tree */}
             <OverlayRoot />
+            {/* Screen reader announcements for dynamic content */}
+            <div
+              id="sr-announcements"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              className="sr-only"
+            />
             <ServiceWorkerRegistration />
             <OfflineStatusBanner />
             {/* Desktop/standard navigation - hidden on /m/* mobile routes to avoid duplication */}
@@ -164,13 +193,13 @@ export default async function RootLayout({
             </MobileRouteGuard>
             {/* Content wrapper: full-width for /m/* routes, constrained <main> for desktop */}
             <MobileContentWrapper>
-              {children}
+              <div id="main-content">
+                {children}
+              </div>
             </MobileContentWrapper>
             {/* Footer, nav, FABs - hidden on /m/* routes where MobileAppShell handles these */}
             <MobileRouteGuard>
-              <div className="hidden md:block">
-                <SiteFooter />
-              </div>
+              <SiteFooter />
               {/* Mobile bottom navigation (for standard non /m/* routes) */}
               <MobileNav />
               {/* OM floating chat widget */}

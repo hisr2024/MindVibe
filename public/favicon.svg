@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="MindVibe favicon">
+  <defs>
+    <linearGradient id="fGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d4a44c" />
+      <stop offset="50%" stop-color="#f5c56a" />
+      <stop offset="100%" stop-color="#c89b3c" />
+    </linearGradient>
+    <radialGradient id="fGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#161218" />
+      <stop offset="100%" stop-color="#0b0b0f" />
+    </radialGradient>
+  </defs>
+
+  <!-- Dark circle background -->
+  <circle cx="16" cy="16" r="16" fill="url(#fGlow)" />
+  <circle cx="16" cy="16" r="15" fill="none" stroke="rgba(212,164,76,0.25)" stroke-width="0.5" />
+
+  <!-- Simplified lotus on dark circle -->
+  <g transform="translate(16, 14)" fill="none" stroke="url(#fGold)" stroke-width="1.2" opacity="0.9">
+    <!-- Center petal -->
+    <ellipse cx="0" cy="-4" rx="3" ry="7" />
+    <!-- Left petals -->
+    <ellipse cx="-5" cy="-2" rx="2.5" ry="6" transform="rotate(-25, -5, -2)" />
+    <ellipse cx="-8.5" cy="1" rx="2" ry="5" transform="rotate(-50, -8.5, 1)" />
+    <!-- Right petals -->
+    <ellipse cx="5" cy="-2" rx="2.5" ry="6" transform="rotate(25, 5, -2)" />
+    <ellipse cx="8.5" cy="1" rx="2" ry="5" transform="rotate(50, 8.5, 1)" />
+    <!-- Base arc -->
+    <path d="M-6,5 Q0,8 6,5" stroke-width="1" />
+  </g>
+
+  <!-- Om symbol below -->
+  <text x="16" y="27" text-anchor="middle" font-family="serif" font-size="6" fill="rgba(212,164,76,0.5)">&#x0950;</text>
+</svg>

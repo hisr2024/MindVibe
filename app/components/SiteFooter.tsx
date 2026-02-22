@@ -51,6 +51,9 @@ export default function SiteFooter() {
               <Link className="text-white/60 transition hover:text-orange-200" href="/privacy">
                 {t('navigation.footer.privacy', 'Privacy')}
               </Link>
+              <Link className="text-white/60 transition hover:text-orange-200" href="/terms">
+                {t('navigation.footer.terms', 'Terms of Service')}
+              </Link>
               <a className="text-white/60 transition hover:text-orange-200" href="mailto:care@mindvibe.life">
                 {t('navigation.footer.emailUs', 'Email us')}
               </a>

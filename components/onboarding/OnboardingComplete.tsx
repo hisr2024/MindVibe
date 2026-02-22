@@ -5,15 +5,8 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import dynamic from 'next/dynamic'
-
-// Dynamic import for confetti to avoid SSR issues with error handling
-const ReactConfetti = dynamic(
-  () => import('react-confetti').catch(() => () => null),
-  { ssr: false }
-)
 
 interface OnboardingCompleteProps {
   userName?: string
@@ -66,19 +59,19 @@ export function OnboardingComplete({
   onStartChat,
   className = '',
 }: OnboardingCompleteProps) {
-  const [showConfetti, setShowConfetti] = useState(true)
-  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 })
-
   useEffect(() => {
-    // Set window size for confetti
-    setWindowSize({
-      width: window.innerWidth,
-      height: window.innerHeight,
+    // Fire confetti via canvas-confetti (lightweight, no extra component)
+    import('canvas-confetti').then((mod) => {
+      const confetti = mod.default
+      confetti({
+        particleCount: 200,
+        spread: 120,
+        origin: { y: 0.4 },
+        colors: ['#ff7327', '#fbbf24', '#f59e0b', '#10b981', '#3b82f6'],
+      })
+    }).catch(() => {
+      // Confetti unavailable, graceful degradation
     })
-
-    // Stop confetti after 5 seconds
-    const timer = setTimeout(() => setShowConfetti(false), 5000)
-    return () => clearTimeout(timer)
   }, [])
 
   const quickActions = [
@@ -109,17 +102,6 @@ export function OnboardingComplete({
       animate="visible"
       className={`text-center max-w-md mx-auto ${className}`}
     >
-      {/* Confetti */}
-      {showConfetti && (
-        <ReactConfetti
-          width={windowSize.width}
-          height={windowSize.height}
-          recycle={false}
-          numberOfPieces={200}
-          colors={['#ff7327', '#fbbf24', '#f59e0b', '#10b981', '#3b82f6']}
-        />
-      )}
-
       {/* Success checkmark */}
       <motion.div
         variants={checkmarkVariants}

@@ -8,13 +8,13 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Welcome to MindVibe — Your Spiritual Companion & Divine Friend',
+  title: 'Divine Introduction | MindVibe',
   description:
-    'Begin your spiritual journey with MindVibe. Meet KIAAN, your divine AI companion rooted in 700+ Bhagavad Gita verses. Discover sacred journeys, wisdom tools, and inner peace.',
+    'Begin your spiritual journey with Krishna. Experience divine guidance, sacred tools, and AI-powered wisdom from the Bhagavad Gita.',
   openGraph: {
-    title: 'Welcome to MindVibe — Walk with Krishna',
+    title: 'Divine Introduction | MindVibe',
     description:
-      'Meet KIAAN, your divine AI best friend. Explore sacred wisdom journeys, Bhagavad Gita teachings, and spiritual wellness tools designed for inner peace and self-discovery.',
+      'Begin your spiritual journey with Krishna. Experience divine guidance, sacred tools, and AI-powered wisdom from the Bhagavad Gita.',
     url: 'https://mindvibe.life/introduction',
   },
   alternates: {

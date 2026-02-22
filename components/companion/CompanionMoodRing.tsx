@@ -268,7 +268,11 @@ export default function CompanionMoodRing({
         </div>
       )}
 
-      {/* Keyframe animations */}
+      {/* Keyframe animations
+        * SECURITY NOTE: This dangerouslySetInnerHTML is safe because the content is
+        * entirely hardcoded CSS keyframe definitions. No user input, props, or
+        * external data flows into this string. Only static animation rules are injected.
+        */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes orb-glow {
           0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
