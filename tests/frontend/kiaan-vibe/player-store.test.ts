@@ -6,25 +6,30 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
-// Mock Audio element
-class MockAudio {
-  src = ''
-  volume = 1
-  currentTime = 0
-  duration = 100
-  playbackRate = 1
-  paused = true
-  muted = false
-  preload = ''
-
-  play = vi.fn().mockResolvedValue(undefined)
-  pause = vi.fn()
-  addEventListener = vi.fn()
-  removeEventListener = vi.fn()
-}
-
-// Mock the Audio constructor
-vi.stubGlobal('Audio', MockAudio)
+// Mock persistence module to prevent IndexedDB errors in test environment.
+// vi.mock is hoisted, so this runs before the store module loads.
+vi.mock('@/lib/kiaan-vibe/persistence', () => ({
+  getPersistedState: vi.fn().mockResolvedValue(null),
+  persistState: vi.fn().mockResolvedValue(undefined),
+  getAllUploadedTracks: vi.fn().mockResolvedValue([]),
+  getTrackMeta: vi.fn().mockResolvedValue(null),
+  saveTrackMeta: vi.fn().mockResolvedValue(undefined),
+  deleteTrackMeta: vi.fn().mockResolvedValue(undefined),
+  saveAudioBlob: vi.fn().mockResolvedValue(undefined),
+  getAudioBlob: vi.fn().mockResolvedValue(null),
+  getAudioBlobUrl: vi.fn().mockResolvedValue(null),
+  deleteAudioBlob: vi.fn().mockResolvedValue(undefined),
+  getAllPlaylists: vi.fn().mockResolvedValue([]),
+  getPlaylist: vi.fn().mockResolvedValue(null),
+  savePlaylist: vi.fn().mockResolvedValue(undefined),
+  deletePlaylist: vi.fn().mockResolvedValue(undefined),
+  uploadTrack: vi.fn().mockResolvedValue(null),
+  deleteUploadedTrack: vi.fn().mockResolvedValue(undefined),
+  default: {
+    getPersistedState: vi.fn().mockResolvedValue(null),
+    persistState: vi.fn().mockResolvedValue(undefined),
+  },
+}))
 
 // Mock navigator.mediaSession
 vi.stubGlobal('navigator', {
@@ -76,6 +81,8 @@ describe('KIAAN Vibe Player Store', () => {
       shuffle: false,
       muted: false,
       playHistory: [],
+      audioError: null,
+      hasAudioIssues: false,
     })
 
     vi.clearAllMocks()
