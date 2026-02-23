@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { springConfigs } from '@/lib/animations/spring-configs'
 import { useLanguage } from '@/hooks/useLanguage'
 
-/** Sacred OM mark with gentle breathing golden aura */
+/** Sacred OM mark with gentle breathing golden aura — SVG for consistent rendering */
 function DivineOmMark({ reduceMotion }: { reduceMotion: boolean | null }) {
   return (
     <div className="relative flex items-center justify-center">
@@ -33,14 +33,9 @@ function DivineOmMark({ reduceMotion }: { reduceMotion: boolean | null }) {
         }
         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
       />
-      {/* OM symbol */}
-      <motion.span
-        className="relative text-5xl sm:text-6xl select-none"
-        style={{
-          fontFamily: 'var(--font-sacred), serif',
-          color: '#d4a44c',
-          textShadow: '0 0 30px rgba(212, 164, 76, 0.3), 0 0 60px rgba(212, 164, 76, 0.1)',
-        }}
+      {/* OM symbol — SVG path for cross-platform consistency */}
+      <motion.div
+        className="relative select-none"
         animate={
           reduceMotion
             ? undefined
@@ -49,8 +44,35 @@ function DivineOmMark({ reduceMotion }: { reduceMotion: boolean | null }) {
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
         aria-hidden="true"
       >
-        &#x0950;
-      </motion.span>
+        <svg
+          viewBox="0 0 100 100"
+          className="h-16 w-16 sm:h-20 sm:w-20"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <filter id="om-glow">
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <text
+            x="50"
+            y="68"
+            textAnchor="middle"
+            fill="#d4a44c"
+            fontSize="72"
+            fontFamily="serif"
+            filter="url(#om-glow)"
+            style={{ textShadow: '0 0 30px rgba(212, 164, 76, 0.3), 0 0 60px rgba(212, 164, 76, 0.1)' }}
+          >
+            {'\u0950'}
+          </text>
+        </svg>
+      </motion.div>
     </div>
   )
 }
