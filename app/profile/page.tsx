@@ -28,6 +28,13 @@ interface BackendProfile {
   updated_at: string | null
 }
 
+interface ProfileStats {
+  journeysCompleted: number
+  journalEntries: number
+  insightsReceived: number
+  dayStreak: number
+}
+
 const PROFILE_STORAGE_KEY = 'mindvibe_profile'
 
 export default function ProfilePage() {
@@ -38,6 +45,31 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [_saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [stats, setStats] = useState<ProfileStats>({
+    journeysCompleted: 0,
+    journalEntries: 0,
+    insightsReceived: 0,
+    dayStreak: 0,
+  })
+
+  // Fetch profile stats from analytics
+  const fetchStats = useCallback(async () => {
+    if (!isAuthenticated) return
+    try {
+      const response = await apiFetch('/api/analytics/dashboard')
+      if (response.ok) {
+        const data = await response.json()
+        setStats({
+          journeysCompleted: data.journeys_completed || 0,
+          journalEntries: data.journal_entries || 0,
+          insightsReceived: data.insights_count || 0,
+          dayStreak: data.streak || 0,
+        })
+      }
+    } catch {
+      // Stats are non-critical, fail silently
+    }
+  }, [isAuthenticated])
 
   // Fetch profile from backend or localStorage
   const fetchProfile = useCallback(async () => {
@@ -57,7 +89,7 @@ export default function ProfilePage() {
             const profileData: ProfileData = {
               name: backendProfile.full_name || user.name || user.email.split('@')[0],
               email: user.email,
-              bio: '', // Backend doesn't store bio yet
+              bio: '',
               baseExperience: backendProfile.base_experience,
               createdAt: backendProfile.created_at,
             }
@@ -75,11 +107,9 @@ export default function ProfilePage() {
             }
 
             setProfile(profileData)
-            // Cache profile locally
             localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileData))
             return
           } else if (response.status === 404) {
-            // Profile doesn't exist in backend, create it
             const createResponse = await apiFetch('/api/profile', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -104,26 +134,22 @@ export default function ProfilePage() {
             }
           }
 
-          // Backend fetch failed, fall back to localStorage
           throw new Error('Backend profile fetch failed')
         } catch (backendError) {
           console.warn('Backend profile fetch failed, using localStorage:', backendError)
-          // Fall through to localStorage fallback
         }
       }
 
-      // Fall back to localStorage (for unauthenticated users or backend failures)
+      // Fall back to localStorage
       const stored = localStorage.getItem(PROFILE_STORAGE_KEY)
       if (stored) {
         const parsed = JSON.parse(stored)
-        // If we have a user, update the profile with user info
         if (user) {
           parsed.email = user.email
           parsed.name = parsed.name || user.name || user.email.split('@')[0]
         }
         setProfile(parsed)
       } else {
-        // Default profile
         const defaultProfile: ProfileData = {
           name: user?.name || user?.email?.split('@')[0] || 'MindVibe User',
           email: user?.email || 'user@mindvibe.life',
@@ -137,7 +163,6 @@ export default function ProfilePage() {
       console.error('Error loading profile:', err)
       setError('Failed to load profile')
 
-      // Set a minimal profile
       const fallbackProfile: ProfileData = {
         name: user?.name || user?.email?.split('@')[0] || 'MindVibe User',
         email: user?.email || 'user@mindvibe.life',
@@ -154,18 +179,20 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!authLoading) {
       fetchProfile()
+      fetchStats()
     }
-  }, [authLoading, fetchProfile])
+  }, [authLoading, fetchProfile, fetchStats])
 
   // Sync with auth changes
   useEffect(() => {
     const handleAuthChange = () => {
       fetchProfile()
+      fetchStats()
     }
 
     window.addEventListener('auth-changed', handleAuthChange)
     return () => window.removeEventListener('auth-changed', handleAuthChange)
-  }, [fetchProfile])
+  }, [fetchProfile, fetchStats])
 
   const handleSaveProfile = async (data: { name: string; email: string; bio?: string }) => {
     if (!profile) return
@@ -174,7 +201,6 @@ export default function ProfilePage() {
     setError(null)
 
     try {
-      // If authenticated, sync to backend
       if (isAuthenticated) {
         try {
           const response = await apiFetch('/api/profile', {
@@ -192,11 +218,9 @@ export default function ProfilePage() {
           }
         } catch (backendError) {
           console.warn('Backend profile save failed:', backendError)
-          // Continue to save locally
         }
       }
 
-      // Update local state and localStorage
       const updated: ProfileData = {
         ...profile,
         ...data,
@@ -213,7 +237,6 @@ export default function ProfilePage() {
   }
 
   const handleAvatarUpload = async (file: File): Promise<string> => {
-    // Convert to base64 for local storage (avatar storage would need backend support)
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = () => {
@@ -255,9 +278,15 @@ export default function ProfilePage() {
         <Card variant="elevated" className="mb-8">
           <CardContent>
             <div className="text-center py-8">
-              <h2 className="text-xl font-semibold text-orange-50 mb-2">Sign in to access your profile</h2>
+              <div className="mx-auto mb-4 h-16 w-16 rounded-2xl bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-900">
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-semibold text-orange-50 mb-2">Sign in to view your profile</h2>
               <p className="text-sm text-orange-100/70 mb-6">
-                Create an account or sign in to save your profile and access all features.
+                Create an account or sign in to manage your profile, track your progress, and access all features.
               </p>
               <Link href="/account">
                 <Button variant="primary">Go to Account</Button>
@@ -269,8 +298,21 @@ export default function ProfilePage() {
     )
   }
 
+  const STAT_ITEMS = [
+    { label: 'Day Streak', value: stats.dayStreak, color: 'text-orange-400', bg: 'bg-orange-500/10', icon: '🔥' },
+    { label: 'Journeys', value: stats.journeysCompleted, color: 'text-cyan-400', bg: 'bg-cyan-500/10', icon: '🧭' },
+    { label: 'Reflections', value: stats.journalEntries, color: 'text-purple-400', bg: 'bg-purple-500/10', icon: '📝' },
+    { label: 'Insights', value: stats.insightsReceived, color: 'text-teal-400', bg: 'bg-teal-500/10', icon: '✨' },
+  ]
+
   return (
     <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
+      {/* Page Header */}
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-orange-50 mb-1">My Profile</h1>
+        <p className="text-sm text-orange-100/60">Your personal space on MindVibe</p>
+      </div>
+
       {error && (
         <div className="mb-6 rounded-2xl border border-orange-400/40 bg-orange-500/10 p-4 text-sm text-orange-50">
           {error}
@@ -278,7 +320,7 @@ export default function ProfilePage() {
       )}
 
       {/* Profile Header */}
-      <Card variant="elevated" className="mb-8">
+      <Card variant="elevated" className="mb-6">
         <CardContent>
           <ProfileHeader
             name={profile.name}
@@ -291,6 +333,19 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        {STAT_ITEMS.map((stat) => (
+          <Card key={stat.label} className="text-center">
+            <CardContent className="py-4">
+              <span className="text-xl mb-1 block">{stat.icon}</span>
+              <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+              <p className="text-xs text-orange-100/50 mt-1">{stat.label}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
       {isEditing ? (
         <ProfileEditForm
           initialData={{
@@ -300,12 +355,12 @@ export default function ProfilePage() {
           }}
           onSave={handleSaveProfile}
           onCancel={() => setIsEditing(false)}
-          className="mb-8"
+          className="mb-6"
         />
       ) : (
         <>
           {/* Avatar Upload Section */}
-          <Card className="mb-8">
+          <Card className="mb-6">
             <CardContent>
               <h2 className="text-lg font-semibold text-orange-50 mb-4">Profile Picture</h2>
               <AvatarUpload
@@ -317,7 +372,7 @@ export default function ProfilePage() {
           </Card>
 
           {/* Bio Section */}
-          <Card className="mb-8">
+          <Card className="mb-6">
             <CardContent>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-orange-50">About</h2>
@@ -336,7 +391,7 @@ export default function ProfilePage() {
           </Card>
 
           {/* Subscription Info */}
-          <Card className="mb-8">
+          <Card className="mb-6">
             <CardContent>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-orange-50">Subscription</h2>
@@ -366,25 +421,30 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          {/* Account Actions */}
+          {/* Quick Links */}
           <Card>
             <CardContent>
-              <h2 className="text-lg font-semibold text-orange-50 mb-4">Account</h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-2">
+              <h2 className="text-lg font-semibold text-orange-50 mb-4">Quick Links</h2>
+              <div className="space-y-3">
+                <Link href="/account" className="flex items-center justify-between py-2 group">
                   <div>
-                    <p className="text-sm font-medium text-orange-50">Export Data</p>
-                    <p className="text-xs text-orange-100/50">Download all your journal entries and data</p>
+                    <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Account Settings</p>
+                    <p className="text-xs text-orange-100/50">Security, sessions, and data management</p>
                   </div>
-                  <Button variant="outline" size="sm">Export</Button>
-                </div>
-                <div className="flex items-center justify-between py-2 border-t border-orange-500/10">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </Link>
+                <div className="border-t border-orange-500/10" />
+                <Link href="/settings" className="flex items-center justify-between py-2 group">
                   <div>
-                    <p className="text-sm font-medium text-red-400">Delete Account</p>
-                    <p className="text-xs text-orange-100/50">Permanently delete your account and all data</p>
+                    <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">App Settings</p>
+                    <p className="text-xs text-orange-100/50">Notifications, privacy, and accessibility</p>
                   </div>
-                  <Button variant="danger" size="sm">Delete</Button>
-                </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </Link>
               </div>
             </CardContent>
           </Card>

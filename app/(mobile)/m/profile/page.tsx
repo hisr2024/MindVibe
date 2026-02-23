@@ -39,7 +39,7 @@ interface ProfileStats {
 
 export default function MobileProfilePage() {
   const router = useRouter()
-  const { user, isAuthenticated, logout } = useAuth()
+  const { user, isAuthenticated, logout, loading: authLoading } = useAuth()
   const { triggerHaptic } = useHapticFeedback()
 
   const [stats, setStats] = useState<ProfileStats>({
@@ -80,7 +80,11 @@ export default function MobileProfilePage() {
 
   const handleLogout = useCallback(async () => {
     triggerHaptic('medium')
-    await logout()
+    try {
+      await logout()
+    } catch {
+      // Ensure redirect happens even if logout API fails
+    }
     router.push('/introduction')
   }, [logout, router, triggerHaptic])
 
@@ -100,11 +104,28 @@ export default function MobileProfilePage() {
   ]
 
   const MENU_ITEMS = [
-    { label: 'Settings', description: 'Account & preferences', icon: Settings, href: '/m/settings' },
-    { label: 'Security', description: 'Password & 2FA', icon: Shield, href: '/m/settings' },
+    { label: 'Account', description: 'Security, sessions & data', icon: Shield, href: '/account' },
+    { label: 'Settings', description: 'Preferences & notifications', icon: Settings, href: '/m/settings' },
     { label: 'My Journeys', description: 'View all journeys', icon: BookOpen, href: '/m/journeys' },
     { label: 'Journal History', description: 'Past reflections', icon: PenLine, href: '/m/journal' },
   ]
+
+  if (authLoading) {
+    return (
+      <MobileAppShell title="Profile" showHeader={false} showTabBar={true}>
+        <div className="px-4 pt-6 pb-8 space-y-6 animate-pulse">
+          <div className="flex flex-col items-center pt-4">
+            <div className="w-20 h-20 rounded-full bg-white/[0.06]" />
+            <div className="h-5 w-32 rounded bg-white/[0.06] mt-3" />
+            <div className="h-4 w-48 rounded bg-white/[0.04] mt-2" />
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {[1,2,3,4].map(i => <div key={i} className="h-20 rounded-xl bg-white/[0.03]" />)}
+          </div>
+        </div>
+      </MobileAppShell>
+    )
+  }
 
   return (
     <MobileAppShell

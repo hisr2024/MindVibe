@@ -41,6 +41,7 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
     { href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Sacred Reflections') },
     { href: '/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
     { href: '/profile', label: t('navigation.mainNav.profile', 'Profile') },
+    { href: '/account', label: t('navigation.mainNav.account', 'Account') },
   ], [t])
 
   // Get tools for mobile menu display
@@ -109,7 +110,9 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
           </Link>
           <Link
             href="/profile"
-            className="hidden items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/5 hover:text-white md:inline-flex focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+            className={`hidden items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition hover:bg-white/5 hover:text-white md:inline-flex focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+              pathname === '/profile' ? 'border-orange-500/40 text-white bg-white/5' : 'border-white/10 text-white/80'
+            }`}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -127,6 +130,29 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
               <circle cx="12" cy="7" r="4" />
             </svg>
             {t('navigation.mainNav.profile', 'Profile')}
+          </Link>
+          <Link
+            href="/account"
+            className={`hidden items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition hover:bg-white/5 hover:text-white md:inline-flex focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+              pathname === '/account' ? 'border-orange-500/40 text-white bg-white/5' : 'border-white/10 text-white/80'
+            }`}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+            {t('navigation.mainNav.account', 'Account')}
           </Link>
 
           {/* Mobile menu button */}
@@ -202,13 +228,22 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
               <span className="text-sm text-white/80">{t('navigation.mainNav.language', 'Language')}</span>
               <GlobalLanguageSelector />
             </div>
-            <Link
-              href="/profile"
-              onClick={() => setMobileMenuOpen(false)}
-              className="rounded-full bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-3 py-2 text-center text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
-            >
-              {t('navigation.mainNav.profile', 'Profile')}
-            </Link>
+            <div className="flex gap-2">
+              <Link
+                href="/profile"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex-1 rounded-full bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-3 py-2 text-center text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
+              >
+                {t('navigation.mainNav.profile', 'Profile')}
+              </Link>
+              <Link
+                href="/account"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex-1 rounded-full border border-orange-500/30 px-3 py-2 text-center text-sm font-semibold text-orange-50 hover:bg-orange-500/10 transition"
+              >
+                {t('navigation.mainNav.account', 'Account')}
+              </Link>
+            </div>
           </div>
         </div>
       )}
