@@ -325,6 +325,8 @@ export default function QuantumDivePage() {
     const layerState = analysis.layers[layer]
     const layerInfo = LAYER_INFO[layer]
 
+    if (!layerState) return
+
     const coherencePercent = Math.round(layerState.coherence * 100)
 
     speak(
@@ -365,28 +367,28 @@ export default function QuantumDivePage() {
         className={`
           relative p-4 rounded-xl border transition-all duration-300
           ${isSelected
-            ? 'border-white/30 bg-white/10 scale-105'
-            : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20'
+            ? 'border-[#d4a44c]/40 bg-[#d4a44c]/10 scale-105'
+            : 'border-[#d4a44c]/10 bg-[#d4a44c]/[0.03] hover:bg-[#d4a44c]/[0.08] hover:border-[#d4a44c]/25'
           }
         `}
       >
-        <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${info.color} opacity-20`} />
+        <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${info.color} opacity-10`} />
         <div className="relative">
-          <div className="text-xs text-white/60 mb-1">{info.sanskrit}</div>
-          <div className="font-medium text-white mb-2">{info.name}</div>
+          <div className="text-xs text-[#d4a44c]/50 mb-1">{info.sanskrit}</div>
+          <div className="font-medium text-[#e8dcc8] mb-2">{info.name}</div>
 
           {state && (
             <>
               {/* Coherence bar */}
-              <div className="h-2 bg-white/10 rounded-full overflow-hidden mb-2">
+              <div className="h-2 bg-[#d4a44c]/10 rounded-full overflow-hidden mb-2">
                 <div
                   className={`h-full bg-gradient-to-r ${info.color} transition-all duration-1000`}
                   style={{ width: `${coherence}%` }}
                 />
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-white/60">{coherence}%</span>
-                <span className="text-white/40">{state.dominant_pattern}</span>
+                <span className="text-[#d4a44c]/60">{coherence}%</span>
+                <span className="text-[#d4a44c]/40">{state.dominant_pattern}</span>
               </div>
             </>
           )}
@@ -397,27 +399,27 @@ export default function QuantumDivePage() {
 
   return (
     <SubscriptionGate feature="quantum_dive">
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900">
-      {/* Background effects */}
+    <div className="kiaan-cosmic-bg min-h-screen relative overflow-hidden">
+      {/* Background effects - cosmic golden nebula */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-3xl" />
+        <div className="kiaan-nebula absolute top-1/4 left-1/4 w-96 h-96 bg-[#d4a44c]/8 rounded-full blur-[100px]" />
+        <div className="kiaan-nebula absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#d4a44c]/6 rounded-full blur-[120px]" style={{ animationDelay: '-8s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#8b5cf6]/[0.03] rounded-full blur-[140px]" />
       </div>
 
       {/* Header */}
-      <header className="relative z-10 px-4 py-4 border-b border-white/10">
+      <header className="relative z-10 px-4 py-4 border-b border-[#d4a44c]/10">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Link
-            href="/app/kiaan"
-            className="text-white/60 hover:text-white transition-colors"
+            href="/kiaan"
+            className="text-[#d4a44c]/50 hover:text-[#d4a44c] transition-colors"
           >
             &larr; Back to KIAAN
           </Link>
-          <h1 className="text-lg font-semibold text-white">Quantum Dive</h1>
+          <h1 className="kiaan-text-golden text-lg font-semibold">Quantum Dive</h1>
           <Link
             href="/companion"
-            className="text-white/60 hover:text-white transition-colors"
+            className="text-[#d4a44c]/50 hover:text-[#d4a44c] transition-colors"
           >
             Voice &rarr;
           </Link>
@@ -431,13 +433,13 @@ export default function QuantumDivePage() {
           <main className="max-w-4xl mx-auto lg:mx-0">
         {/* Stage indicator */}
         <div className="text-center mb-8">
-          <div className="text-sm text-white/50 mb-2">{STAGE_TITLES[stage]}</div>
+          <div className="text-sm text-[#d4a44c]/50 mb-2">{STAGE_TITLES[stage]}</div>
 
           {/* Progress bar */}
           {stage !== 'ready' && stage !== 'complete' && (
-            <div className="h-1 bg-white/10 rounded-full overflow-hidden max-w-md mx-auto">
+            <div className="h-1 bg-[#d4a44c]/10 rounded-full overflow-hidden max-w-md mx-auto">
               <div
-                className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-500"
+                className="h-full bg-gradient-to-r from-[#c8943a] to-[#e8b54a] transition-all duration-500"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -447,21 +449,21 @@ export default function QuantumDivePage() {
         {/* Ready state */}
         {stage === 'ready' && (
           <div className="text-center space-y-8">
-            {/* Quantum symbol */}
+            {/* Quantum symbol - golden cosmic rings */}
             <div className="relative w-48 h-48 mx-auto">
-              <div className="absolute inset-0 rounded-full border-2 border-purple-500/30 animate-spin-slow" />
-              <div className="absolute inset-4 rounded-full border-2 border-indigo-500/40 animate-spin-slow-reverse" />
-              <div className="absolute inset-8 rounded-full border-2 border-blue-500/30 animate-spin-slow" />
+              <div className="absolute inset-0 rounded-full border-2 border-[#d4a44c]/25 animate-spin-slow" />
+              <div className="absolute inset-4 rounded-full border-2 border-[#e8b54a]/30 animate-spin-slow-reverse" />
+              <div className="absolute inset-8 rounded-full border-2 border-[#c8943a]/20 animate-spin-slow" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-4xl font-light text-white/80">Q</div>
+                <div className="kiaan-text-golden text-4xl font-light">Q</div>
               </div>
             </div>
 
             <div>
-              <h2 className="text-2xl font-semibold text-white mb-4">
+              <h2 className="kiaan-text-golden text-2xl font-semibold mb-4">
                 Quantum Dive
               </h2>
-              <p className="text-white/60 max-w-md mx-auto mb-8">
+              <p className="text-[#e8dcc8]/50 max-w-md mx-auto mb-8">
                 A multi-dimensional journey through your five layers of consciousness.
                 Discover insights, receive ancient wisdom, and find your path to greater coherence.
               </p>
@@ -477,19 +479,19 @@ export default function QuantumDivePage() {
               <button
                 onClick={() => startQuantumDive(false)}
                 disabled={isLoading}
-                className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium rounded-xl transition-all disabled:opacity-50"
+                className="kiaan-btn-golden px-8 py-4 font-medium rounded-xl transition-all disabled:opacity-50"
               >
                 Begin Full Quantum Dive
-                <span className="block text-xs text-white/60 mt-1">~15 minutes</span>
+                <span className="block text-xs text-[#0a0a0f]/60 mt-1">~15 minutes</span>
               </button>
 
               <button
                 onClick={() => startQuantumDive(true)}
                 disabled={isLoading}
-                className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-medium rounded-xl transition-all border border-white/20 disabled:opacity-50"
+                className="px-8 py-4 bg-[#d4a44c]/10 hover:bg-[#d4a44c]/20 text-[#e8dcc8] font-medium rounded-xl transition-all border border-[#d4a44c]/20 disabled:opacity-50"
               >
                 Quick Dive
-                <span className="block text-xs text-white/60 mt-1">~2 minutes</span>
+                <span className="block text-xs text-[#d4a44c]/50 mt-1">~2 minutes</span>
               </button>
             </div>
           </div>
@@ -525,19 +527,19 @@ export default function QuantumDivePage() {
                     />
                     <defs>
                       <linearGradient id="coherenceGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#8B5CF6" />
-                        <stop offset="100%" stopColor="#6366F1" />
+                        <stop offset="0%" stopColor="#c8943a" />
+                        <stop offset="100%" stopColor="#e8b54a" />
                       </linearGradient>
                     </defs>
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div className="text-4xl font-bold text-white">{analysis.overall_coherence}</div>
-                    <div className="text-xs text-white/50">Coherence</div>
+                    <div className="kiaan-text-golden text-4xl font-bold">{analysis.overall_coherence}</div>
+                    <div className="text-xs text-[#d4a44c]/50">Coherence</div>
                   </div>
                 </div>
 
-                <div className="text-white/80 font-medium">{analysis.consciousness_signature}</div>
-                <div className="text-white/50 text-sm flex items-center justify-center gap-2 mt-1">
+                <div className="text-[#e8dcc8] font-medium">{analysis.consciousness_signature}</div>
+                <div className="text-[#d4a44c]/50 text-sm flex items-center justify-center gap-2 mt-1">
                   <span>{getTrendIcon(analysis.evolution_trend)}</span>
                   <span>{getTrendDescription(analysis.evolution_trend)}</span>
                 </div>
@@ -546,14 +548,14 @@ export default function QuantumDivePage() {
 
             {/* Current narration */}
             {currentNarration && (
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6 max-w-2xl mx-auto">
+              <div className="kiaan-cosmic-card rounded-xl p-6 max-w-2xl mx-auto">
                 <div className="flex items-start gap-3">
                   {isSpeaking && (
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
-                      <div className="w-3 h-3 bg-purple-400 rounded-full animate-pulse" />
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#d4a44c]/15 flex items-center justify-center">
+                      <div className="w-3 h-3 bg-[#d4a44c] rounded-full animate-pulse" />
                     </div>
                   )}
-                  <p className="text-white/80 italic leading-relaxed">{currentNarration}</p>
+                  <p className="text-[#e8dcc8]/80 italic leading-relaxed">{currentNarration}</p>
                 </div>
               </div>
             )}
@@ -567,35 +569,35 @@ export default function QuantumDivePage() {
 
             {/* Selected layer details */}
             {selectedLayer && analysis && (
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+              <div className="kiaan-cosmic-card rounded-xl p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <div className="text-sm text-white/50">{LAYER_INFO[selectedLayer].sanskrit}</div>
-                    <h3 className="text-xl font-semibold text-white">{LAYER_INFO[selectedLayer].name}</h3>
+                    <div className="text-sm text-[#d4a44c]/50">{LAYER_INFO[selectedLayer].sanskrit}</div>
+                    <h3 className="text-xl font-semibold text-[#e8dcc8]">{LAYER_INFO[selectedLayer].name}</h3>
                   </div>
                   <button
                     onClick={() => setSelectedLayer(null)}
-                    className="text-white/40 hover:text-white"
+                    className="text-[#d4a44c]/40 hover:text-[#d4a44c]"
                   >
                     x
                   </button>
                 </div>
 
-                <p className="text-white/70 mb-4">{LAYER_INFO[selectedLayer].description}</p>
+                <p className="text-[#e8dcc8]/60 mb-4">{LAYER_INFO[selectedLayer].description}</p>
 
                 {analysis.layers[selectedLayer] && (
                   <div className="space-y-3">
                     <div>
-                      <div className="text-xs text-white/50 mb-1">Dominant Pattern</div>
-                      <div className="text-white">{analysis.layers[selectedLayer].dominant_pattern}</div>
+                      <div className="text-xs text-[#d4a44c]/50 mb-1">Dominant Pattern</div>
+                      <div className="text-[#e8dcc8]">{analysis.layers[selectedLayer].dominant_pattern}</div>
                     </div>
 
                     {analysis.layers[selectedLayer].blocked_by.length > 0 && (
                       <div>
-                        <div className="text-xs text-white/50 mb-1">Obstacles</div>
+                        <div className="text-xs text-[#d4a44c]/50 mb-1">Obstacles</div>
                         <div className="flex flex-wrap gap-2">
                           {analysis.layers[selectedLayer].blocked_by.map((item, i) => (
-                            <span key={i} className="px-2 py-1 bg-red-500/20 text-red-300 text-sm rounded">
+                            <span key={i} className="px-2 py-1 bg-red-500/15 text-red-300/80 text-sm rounded border border-red-500/15">
                               {item}
                             </span>
                           ))}
@@ -605,10 +607,10 @@ export default function QuantumDivePage() {
 
                     {analysis.layers[selectedLayer].supported_by.length > 0 && (
                       <div>
-                        <div className="text-xs text-white/50 mb-1">Supporters</div>
+                        <div className="text-xs text-[#d4a44c]/50 mb-1">Supporters</div>
                         <div className="flex flex-wrap gap-2">
                           {analysis.layers[selectedLayer].supported_by.map((item, i) => (
-                            <span key={i} className="px-2 py-1 bg-green-500/20 text-green-300 text-sm rounded">
+                            <span key={i} className="px-2 py-1 bg-[#d4a44c]/10 text-[#d4a44c]/80 text-sm rounded border border-[#d4a44c]/15">
                               {item}
                             </span>
                           ))}
@@ -623,17 +625,17 @@ export default function QuantumDivePage() {
             {/* Insights section */}
             {analysis && analysis.insights.length > 0 && stage !== 'grounding' && stage !== 'scanning' && (
               <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-white">Key Insights</h3>
+                <h3 className="kiaan-text-golden text-lg font-semibold">Key Insights</h3>
                 <div className="grid gap-3">
                   {analysis.insights.slice(0, 3).map((insight) => (
                     <div
                       key={insight.id}
                       className={`p-4 rounded-lg border ${
                         insight.type === 'warning'
-                          ? 'bg-amber-500/10 border-amber-500/30'
+                          ? 'bg-amber-500/10 border-amber-500/20'
                           : insight.type === 'encouragement'
-                          ? 'bg-green-500/10 border-green-500/30'
-                          : 'bg-blue-500/10 border-blue-500/30'
+                          ? 'bg-[#d4a44c]/10 border-[#d4a44c]/20'
+                          : 'bg-[#d4a44c]/[0.06] border-[#d4a44c]/15'
                       }`}
                     >
                       <div className="flex items-start gap-3">
@@ -641,8 +643,8 @@ export default function QuantumDivePage() {
                           {insight.type === 'warning' ? '!' : insight.type === 'encouragement' ? '*' : '#'}
                         </span>
                         <div>
-                          <div className="font-medium text-white">{insight.title}</div>
-                          <p className="text-white/70 text-sm mt-1">{insight.content}</p>
+                          <div className="font-medium text-[#e8dcc8]">{insight.title}</div>
+                          <p className="text-[#e8dcc8]/60 text-sm mt-1">{insight.content}</p>
                         </div>
                       </div>
                     </div>
@@ -654,18 +656,18 @@ export default function QuantumDivePage() {
             {/* Wisdom section */}
             {analysis && analysis.wisdom_recommendations.length > 0 && (stage === 'wisdom' || stage === 'integration' || stage === 'complete') && (
               <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-white">Gita Wisdom</h3>
+                <h3 className="kiaan-text-golden text-lg font-semibold">Gita Wisdom</h3>
                 <div className="grid gap-3">
                   {analysis.wisdom_recommendations.slice(0, 2).map((verse) => (
                     <div
                       key={verse.verse_id}
-                      className="p-4 rounded-lg bg-indigo-500/10 border border-indigo-500/30"
+                      className="kiaan-cosmic-card p-4 rounded-lg"
                     >
-                      <div className="text-xs text-indigo-300 mb-2">
+                      <div className="text-xs text-[#d4a44c]/60 mb-2">
                         Chapter {verse.chapter}, Verse {verse.verse}
                       </div>
-                      <p className="text-white/90 italic mb-3">&quot;{verse.translation}&quot;</p>
-                      <p className="text-white/60 text-sm">{verse.application_guide}</p>
+                      <p className="text-[#e8dcc8]/90 italic mb-3">&quot;{verse.translation}&quot;</p>
+                      <p className="text-[#e8dcc8]/50 text-sm">{verse.application_guide}</p>
                     </div>
                   ))}
                 </div>
@@ -675,16 +677,16 @@ export default function QuantumDivePage() {
             {/* Practice recommendations */}
             {analysis && analysis.practice_recommendations.length > 0 && (stage === 'integration' || stage === 'complete') && (
               <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-white">Recommended Practices</h3>
+                <h3 className="kiaan-text-golden text-lg font-semibold">Recommended Practices</h3>
                 <div className="grid sm:grid-cols-2 gap-3">
                   {analysis.practice_recommendations.slice(0, 2).map((practice) => (
                     <div
                       key={practice.id}
-                      className="p-4 rounded-lg bg-white/5 border border-white/10"
+                      className="p-4 rounded-lg bg-[#d4a44c]/[0.04] border border-[#d4a44c]/12"
                     >
-                      <div className="font-medium text-white mb-1">{practice.name}</div>
-                      <p className="text-white/60 text-sm mb-3">{practice.description}</p>
-                      <div className="flex gap-4 text-xs text-white/40">
+                      <div className="font-medium text-[#e8dcc8] mb-1">{practice.name}</div>
+                      <p className="text-[#e8dcc8]/50 text-sm mb-3">{practice.description}</p>
+                      <div className="flex gap-4 text-xs text-[#d4a44c]/40">
                         <span>{practice.duration}</span>
                         <span>{practice.frequency}</span>
                       </div>
@@ -699,7 +701,7 @@ export default function QuantumDivePage() {
               {isSpeaking && (
                 <button
                   onClick={stopSpeaking}
-                  className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all"
+                  className="px-6 py-2 bg-[#d4a44c]/10 hover:bg-[#d4a44c]/20 text-[#e8dcc8] rounded-lg transition-all border border-[#d4a44c]/20"
                 >
                   Stop Speaking
                 </button>
@@ -708,7 +710,7 @@ export default function QuantumDivePage() {
               {stage === 'complete' && (
                 <button
                   onClick={resetDive}
-                  className="px-6 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-lg transition-all"
+                  className="kiaan-btn-golden px-6 py-2 rounded-lg transition-all"
                 >
                   Start New Dive
                 </button>
@@ -717,7 +719,7 @@ export default function QuantumDivePage() {
               {stage !== 'complete' && (
                 <button
                   onClick={resetDive}
-                  className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white/60 hover:text-white rounded-lg transition-all"
+                  className="px-6 py-2 bg-[#d4a44c]/10 hover:bg-[#d4a44c]/20 text-[#d4a44c]/60 hover:text-[#d4a44c] rounded-lg transition-all border border-[#d4a44c]/15"
                 >
                   Cancel
                 </button>

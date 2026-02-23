@@ -17,7 +17,6 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 
 const PROTECTED_ROUTES = [
-  '/dashboard',
   '/profile',
   '/account',
   '/admin',
