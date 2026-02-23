@@ -127,12 +127,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
 
-    const message = body.message.replace(/[<>]/g, '').slice(0, 2000)
+    const message = body.message.slice(0, 2000).replace(/[<>]/g, '')
     const mood = detectMood(message)
     const topic = detectTopic(message)
     const forceMode = body.force_mode || null
     const language = body.language || 'en'
-    const conversationHistory = Array.isArray(body.conversation_history) ? body.conversation_history : []
+    const conversationHistory = Array.isArray(body.conversation_history)
+      ? body.conversation_history.slice(-100)
+      : []
 
     // ── Tier 1: Proxy to Python backend ──────────────────────────────
     try {

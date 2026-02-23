@@ -5,6 +5,7 @@
  * Proxies to backend chat service with session ID generation fallback.
  */
 
+import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
@@ -66,7 +67,5 @@ export async function POST(request: NextRequest) {
 }
 
 function generateSessionId(): string {
-  const timestamp = Date.now().toString(36)
-  const random = Math.random().toString(36).substring(2, 10)
-  return `local-${timestamp}-${random}`
+  return `local-${randomUUID()}`
 }

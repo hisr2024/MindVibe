@@ -137,10 +137,10 @@ export function proxy(request: NextRequest) {
   const cspHeader = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}'`,
-    "style-src 'self' 'unsafe-inline'",
-    "style-src-elem 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: https:",
-    "font-src 'self' data:",
+    "font-src 'self' data: https://fonts.gstatic.com",
     "media-src 'self' https: blob:",
     "connect-src 'self' https://mindvibe-api.onrender.com https://*.firebaseio.com https://*.googleapis.com https://cdn.pixabay.com https://*.freesound.org",
     "frame-ancestors 'none'",

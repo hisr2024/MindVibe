@@ -5,6 +5,7 @@
  * Proxies to backend with graceful fallback.
  */
 
+import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate a local download token for client-side data
-    const downloadToken = `local-${Date.now().toString(36)}`
+    const downloadToken = `local-${randomUUID()}`
     return NextResponse.json({
       download_token: downloadToken,
       message: 'Export queued. Server data will be available when backend is online.',

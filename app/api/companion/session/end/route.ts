@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers,
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(10000),
     })
 
     if (backendResponse.ok) {

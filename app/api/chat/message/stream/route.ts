@@ -37,11 +37,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Sanitize input
+    // Truncate first, then sanitize (avoids processing unbounded input)
     const sanitizedMessage = message
+      .slice(0, 2000)
       .replace(/[<>]/g, '')
       .replace(/\\/g, '')
-      .slice(0, 2000)
 
     // Try backend streaming endpoint first
     try {
@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
           message: sanitizedMessage,
           language,
         }),
+        signal: AbortSignal.timeout(15000),
       })
 
       if (response.ok && response.body) {
@@ -84,6 +85,7 @@ export async function POST(request: NextRequest) {
           message: sanitizedMessage,
           language,
         }),
+        signal: AbortSignal.timeout(10000),
       })
 
       if (response.ok) {
