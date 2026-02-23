@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { apiFetch } from '@/lib/api'
 import { WakeWordSettings } from '@/components/wake-word/WakeWordSettings'
@@ -21,8 +21,381 @@ function formatDate(dateString: string) {
   return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(dateString))
 }
 
-export default function AccountPageClient() {
-  const { user, isAuthenticated, login, signup, logout, loading: _authLoading, error: authError } = useAuth()
+/* ------------------------------------------------------------------ */
+/*  Authenticated Account Dashboard                                    */
+/* ------------------------------------------------------------------ */
+function AuthenticatedAccountView({
+  user,
+  onSignOut,
+  isSubmitting,
+}: {
+  user: { id: string; email: string; name?: string }
+  onSignOut: () => void
+  isSubmitting: boolean
+}) {
+  const [isExporting, setIsExporting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [actionStatus, setActionStatus] = useState<Status | null>(null)
+  const { logout } = useAuth()
+
+  const handleExportData = useCallback(async () => {
+    setIsExporting(true)
+    setActionStatus(null)
+    try {
+      const response = await apiFetch('/api/gdpr/data-export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ format: 'json' }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        const token = data.download_token || data.token
+        if (token) {
+          const downloadResponse = await apiFetch(`/api/gdpr/data-export/${token}`)
+          if (downloadResponse.ok) {
+            const exportData = await downloadResponse.json()
+            const blob = new Blob([JSON.stringify(exportData.data || exportData, null, 2)], { type: 'application/json' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `mindvibe-data-${new Date().toISOString().split('T')[0]}.json`
+            a.click()
+            URL.revokeObjectURL(url)
+          }
+        }
+        setActionStatus({ type: 'success', message: 'Data exported successfully.' })
+      } else {
+        throw new Error('Export request failed')
+      }
+    } catch {
+      setActionStatus({ type: 'error', message: 'Failed to export data. Please try again.' })
+    } finally {
+      setIsExporting(false)
+    }
+  }, [])
+
+  const handleDeleteAccount = useCallback(async () => {
+    setIsDeleting(true)
+    setActionStatus(null)
+    try {
+      const response = await apiFetch('/api/gdpr/delete-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirm: true }),
+      })
+      if (response.ok) {
+        await logout()
+        window.location.href = '/'
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.detail || 'Account deletion failed')
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to delete account.'
+      setActionStatus({ type: 'error', message })
+      setShowDeleteConfirm(false)
+    } finally {
+      setIsDeleting(false)
+    }
+  }, [logout])
+
+  const userName = user.name || user.email.split('@')[0]
+  const userInitial = userName.charAt(0).toUpperCase()
+
+  return (
+    <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
+      {/* Page Header */}
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-orange-50 mb-1">Account</h1>
+        <p className="text-sm text-orange-100/60">Manage your account settings, security, and data</p>
+      </div>
+
+      {actionStatus && (
+        <div
+          className={`mb-6 rounded-2xl border p-4 text-sm ${
+            actionStatus.type === 'success'
+              ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-50'
+              : 'border-orange-400/40 bg-orange-500/10 text-orange-50'
+          }`}
+        >
+          {actionStatus.message}
+        </div>
+      )}
+
+      {/* Account Overview Card */}
+      <div className="rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0f0a08] via-[#0b0b0f] to-[#0c0f19] p-6 mb-6 shadow-[0_24px_100px_rgba(255,115,39,0.12)]">
+        <div className="flex items-center gap-4">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 flex items-center justify-center text-xl font-bold text-slate-900 shrink-0">
+            {userInitial}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-lg font-semibold text-orange-50 truncate">{userName}</p>
+            <p className="text-sm text-orange-100/60 truncate">{user.email}</p>
+          </div>
+          <div className="flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 shrink-0">
+            <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-xs font-medium text-emerald-50">Active</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Security Section */}
+      <div className="rounded-3xl border border-orange-500/15 bg-black/40 p-5 sm:p-6 mb-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="h-9 w-9 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-semibold text-orange-50">Security</h2>
+        </div>
+        <div className="space-y-1">
+          <Link
+            href="/settings/security"
+            className="flex items-center justify-between py-3 px-1 group border-b border-orange-500/10"
+          >
+            <div>
+              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Two-Factor Authentication</p>
+              <p className="text-xs text-orange-100/50 mt-0.5">Add an extra layer of security to your account</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </Link>
+          <Link
+            href="/settings/security/sessions"
+            className="flex items-center justify-between py-3 px-1 group border-b border-orange-500/10"
+          >
+            <div>
+              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Active Sessions</p>
+              <p className="text-xs text-orange-100/50 mt-0.5">Manage devices logged into your account</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </Link>
+          <Link
+            href="/settings/security"
+            className="flex items-center justify-between py-3 px-1 group"
+          >
+            <div>
+              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Change Password</p>
+              <p className="text-xs text-orange-100/50 mt-0.5">Update your account password</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </Link>
+        </div>
+      </div>
+
+      {/* KIAAN Voice Settings */}
+      <div className="rounded-3xl border border-orange-500/15 bg-black/40 p-5 sm:p-6 mb-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="h-9 w-9 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" y1="19" x2="12" y2="23" />
+              <line x1="8" y1="23" x2="16" y2="23" />
+            </svg>
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-orange-50">KIAAN Voice</h2>
+            <p className="text-xs text-orange-100/50">Wake up KIAAN with your voice from anywhere</p>
+          </div>
+        </div>
+        <WakeWordSettings />
+      </div>
+
+      {/* Data Management Section */}
+      <div className="rounded-3xl border border-orange-500/15 bg-black/40 p-5 sm:p-6 mb-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="h-9 w-9 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-semibold text-orange-50">Data Management</h2>
+        </div>
+        <div className="space-y-1">
+          <button
+            onClick={handleExportData}
+            disabled={isExporting}
+            className="w-full flex items-center justify-between py-3 px-1 group border-b border-orange-500/10 disabled:opacity-50"
+          >
+            <div className="text-left">
+              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Export My Data</p>
+              <p className="text-xs text-orange-100/50 mt-0.5">Download all your journal entries, journeys, and settings</p>
+            </div>
+            {isExporting ? (
+              <div className="h-4 w-4 border-2 border-orange-400 border-t-transparent rounded-full animate-spin shrink-0" />
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+            )}
+          </button>
+          <Link
+            href="/settings"
+            className="flex items-center justify-between py-3 px-1 group"
+          >
+            <div>
+              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">App Settings</p>
+              <p className="text-xs text-orange-100/50 mt-0.5">Notifications, privacy, accessibility, and cache</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </Link>
+        </div>
+      </div>
+
+      {/* Quick Links */}
+      <div className="rounded-3xl border border-orange-500/15 bg-black/40 p-5 sm:p-6 mb-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="h-9 w-9 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-semibold text-orange-50">Quick Links</h2>
+        </div>
+        <div className="space-y-1">
+          <Link
+            href="/profile"
+            className="flex items-center justify-between py-3 px-1 group border-b border-orange-500/10"
+          >
+            <div>
+              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Edit Profile</p>
+              <p className="text-xs text-orange-100/50 mt-0.5">Update your name, bio, and avatar</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </Link>
+          <Link
+            href="/dashboard/subscription"
+            className="flex items-center justify-between py-3 px-1 group"
+          >
+            <div>
+              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Manage Subscription</p>
+              <p className="text-xs text-orange-100/50 mt-0.5">View or change your current plan</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </Link>
+        </div>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="rounded-3xl border border-red-500/15 bg-black/40 p-5 sm:p-6 mb-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="h-9 w-9 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-semibold text-red-400">Danger Zone</h2>
+        </div>
+        <div className="space-y-1">
+          <button
+            onClick={onSignOut}
+            disabled={isSubmitting}
+            className="w-full flex items-center justify-between py-3 px-1 group border-b border-red-500/10 disabled:opacity-50"
+          >
+            <div className="text-left">
+              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Sign Out</p>
+              <p className="text-xs text-orange-100/50 mt-0.5">Sign out of your current session</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="w-full flex items-center justify-between py-3 px-1 group"
+          >
+            <div className="text-left">
+              <p className="text-sm font-medium text-red-400 group-hover:text-red-300 transition">Delete Account</p>
+              <p className="text-xs text-orange-100/50 mt-0.5">Permanently delete your account and all data</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400/50 group-hover:text-red-300 transition shrink-0">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <>
+          <div
+            onClick={() => !isDeleting && setShowDeleteConfirm(false)}
+            className="fixed inset-0 bg-black/60 z-40"
+          />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-sm p-6 rounded-2xl bg-[#1a1a1f] border border-red-500/20">
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-white">Delete Account?</h3>
+              <p className="text-sm text-slate-400 mt-1">
+                This action cannot be undone. All your data, including journals, journey progress, and insights will be permanently deleted.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="flex-1 py-3 rounded-xl bg-white/[0.06] text-white font-medium disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={isDeleting}
+                className="flex-1 py-3 rounded-xl bg-red-500 text-white font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <span>Delete Forever</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </main>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Unauthenticated Account View (Login / Signup)                      */
+/* ------------------------------------------------------------------ */
+function UnauthenticatedAccountView() {
+  const { login, signup, error: authError } = useAuth()
 
   const [mode, setMode] = useState<'create' | 'login'>('create')
   const [legacyAccounts, setLegacyAccounts] = useState<LegacyAccount[]>([])
@@ -44,7 +417,6 @@ export default function AccountPageClient() {
 
   const [needsTwoFactor, setNeedsTwoFactor] = useState(false)
 
-  // Load legacy accounts for display purposes only
   useEffect(() => {
     if (typeof window === 'undefined') return
     const stored = window.localStorage.getItem(LEGACY_ACCOUNT_STORAGE_KEY)
@@ -52,7 +424,6 @@ export default function AccountPageClient() {
     setHydrated(true)
   }, [])
 
-  // Show auth errors
   useEffect(() => {
     if (authError) {
       setStatus({ type: 'error', message: authError })
@@ -102,21 +473,18 @@ export default function AccountPageClient() {
     setIsSubmitting(true)
 
     try {
-      // Call backend signup API via useAuth hook
       const authUser = await signup(createForm.email.trim(), createForm.password, createForm.name.trim())
 
-      // Create profile with name after signup
       try {
         await apiFetch('/api/profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             full_name: createForm.name.trim(),
-            base_experience: 'new_user', // Required field
+            base_experience: 'new_user',
           }),
         })
       } catch (profileError) {
-        // Profile creation is optional, don't fail the signup
         console.warn('Profile creation failed:', profileError)
       }
 
@@ -127,7 +495,6 @@ export default function AccountPageClient() {
       const message = err instanceof Error ? err.message : 'Failed to create account. Please try again.'
       setStatus({ type: 'error', message })
 
-      // If email already exists, suggest login
       if (message.toLowerCase().includes('already registered') || message.toLowerCase().includes('already exists')) {
         setMode('login')
         setLoginForm(prev => ({ ...prev, email: createForm.email.trim().toLowerCase() }))
@@ -157,12 +524,9 @@ export default function AccountPageClient() {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed. Please try again.'
 
-      // Check if 2FA is required
       if (message.toLowerCase().includes('two-factor') || message.toLowerCase().includes('2fa')) {
         setNeedsTwoFactor(true)
         setStatus({ type: 'info', message: 'Enter your two-factor authentication code.' })
-      } else if (message.toLowerCase().includes('locked')) {
-        setStatus({ type: 'error', message })
       } else {
         setStatus({ type: 'error', message })
       }
@@ -171,63 +535,22 @@ export default function AccountPageClient() {
     }
   }
 
-  const signOut = async () => {
-    setIsSubmitting(true)
-    try {
-      await logout()
-      setStatus({ type: 'info', message: 'Signed out. You can log back in anytime.' })
-    } catch {
-      setStatus({ type: 'info', message: 'Signed out successfully.' })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const _accountCreatedAt = user ? new Date().toISOString() : null
-
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 pb-16">
       <section className="rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0f0a08] via-[#0b0b0f] to-[#0c0f19] p-8 shadow-[0_24px_100px_rgba(255,115,39,0.18)]">
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.26em] text-orange-100/75">Account</p>
           <h1 className="text-3xl font-bold text-orange-50">Access your account</h1>
+          <p className="text-sm text-orange-100/60">Create an account or sign in to sync your progress across devices</p>
         </div>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
         <div className="space-y-4">
-          {isAuthenticated && user ? (
-            <div className="flex flex-col gap-3 rounded-3xl border border-emerald-400/30 bg-emerald-400/10 p-5 text-sm text-emerald-50 shadow-lg shadow-emerald-500/20">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.16em] text-emerald-50/80">Signed in</p>
-                  <p className="text-lg font-semibold text-emerald-50">{user.name || user.email.split('@')[0]}</p>
-                  <p className="text-emerald-50/80">{user.email}</p>
-                </div>
-                <button
-                  onClick={signOut}
-                  disabled={isSubmitting}
-                  className="rounded-xl border border-emerald-200/40 px-3 py-2 text-xs font-semibold text-emerald-50 transition hover:border-emerald-100 hover:bg-emerald-100/10 disabled:opacity-50"
-                >
-                  {isSubmitting ? 'Signing out...' : 'Sign out'}
-                </button>
-              </div>
-              <div className="flex items-center justify-between text-emerald-50/80">
-                <p>Session active</p>
-                <Link
-                  href="/dashboard"
-                  className="rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-300 px-3 py-2 text-xs font-semibold text-slate-900 shadow-md shadow-emerald-400/20 transition hover:scale-[1.01]"
-                >
-                  Continue to dashboard
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-3xl border border-orange-500/20 bg-black/40 p-5 text-sm text-orange-100/80">
-              <p className="font-semibold text-orange-50">No active session</p>
-              <p className="mt-1">Create an account or log in to unlock your personalized flows.</p>
-            </div>
-          )}
+          <div className="rounded-3xl border border-orange-500/20 bg-black/40 p-5 text-sm text-orange-100/80">
+            <p className="font-semibold text-orange-50">No active session</p>
+            <p className="mt-1">Create an account or log in to unlock your personalized flows.</p>
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -430,15 +753,49 @@ export default function AccountPageClient() {
           )}
         </div>
       </section>
-
-      {/* KIAAN Voice Settings */}
-      <section className="space-y-4">
-        <div className="space-y-1 px-1">
-          <h2 className="text-lg font-semibold text-orange-50">KIAAN Voice</h2>
-          <p className="text-xs text-orange-200/50">Wake up KIAAN with your voice from anywhere</p>
-        </div>
-        <WakeWordSettings />
-      </section>
     </main>
   )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main Account Page Client                                           */
+/* ------------------------------------------------------------------ */
+export default function AccountPageClient() {
+  const { user, isAuthenticated, logout, loading: authLoading } = useAuth()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const signOut = async () => {
+    setIsSubmitting(true)
+    try {
+      await logout()
+    } catch {
+      // Signed out regardless
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (authLoading) {
+    return (
+      <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
+        <div className="animate-pulse space-y-6">
+          <div className="h-24 rounded-3xl bg-orange-500/10" />
+          <div className="h-48 rounded-3xl bg-orange-500/10" />
+          <div className="h-48 rounded-3xl bg-orange-500/10" />
+        </div>
+      </main>
+    )
+  }
+
+  if (isAuthenticated && user) {
+    return (
+      <AuthenticatedAccountView
+        user={user}
+        onSignOut={signOut}
+        isSubmitting={isSubmitting}
+      />
+    )
+  }
+
+  return <UnauthenticatedAccountView />
 }
