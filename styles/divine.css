@@ -1,0 +1,202 @@
+/* =====================================================
+   DIVINE — Celestial experience, Krishna presence, sacred UI
+   ===================================================== */
+
+/* Star twinkle animation */
+@keyframes divineTwinkle {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.3); }
+}
+
+.divine-star-twinkle {
+  animation: divineTwinkle 4s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+/* Hero container - deep cosmic glass */
+.divine-hero-container {
+  background:
+    linear-gradient(
+      170deg,
+      rgba(10, 14, 30, 0.92) 0%,
+      rgba(15, 12, 25, 0.88) 40%,
+      rgba(18, 10, 12, 0.90) 100%
+    );
+  border: 1px solid rgba(212, 164, 76, 0.1);
+  box-shadow:
+    0 30px 100px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(212, 164, 76, 0.06),
+    inset 0 -1px 0 rgba(30, 58, 138, 0.04);
+  backdrop-filter: blur(30px) saturate(120%);
+  -webkit-backdrop-filter: blur(30px) saturate(120%);
+}
+
+/* Verse container - sacred parchment feel */
+.divine-verse-container {
+  background:
+    linear-gradient(
+      165deg,
+      rgba(12, 15, 28, 0.9) 0%,
+      rgba(10, 10, 18, 0.92) 50%,
+      rgba(15, 10, 8, 0.88) 100%
+    );
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(212, 164, 76, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Sacred action cards */
+.divine-action-card {
+  background-color: rgba(10, 12, 22, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.divine-action-card:active {
+  transform: scale(0.98);
+}
+
+/* Primary CTA - sacred gold */
+.divine-cta-primary {
+  background: linear-gradient(135deg, #c8943a 0%, #e8b54a 45%, #f0c96d 100%);
+  color: #0a0a14;
+  box-shadow:
+    0 8px 30px rgba(212, 164, 76, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.divine-cta-primary:active {
+  transform: scale(0.96);
+}
+
+/* Secondary CTA - divine outline */
+.divine-cta-secondary {
+  background: rgba(212, 164, 76, 0.06);
+  border: 1px solid rgba(212, 164, 76, 0.2);
+  color: #e8d8c0;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.divine-cta-secondary:active {
+  transform: scale(0.96);
+}
+
+/* Disclaimer section */
+.divine-disclaimer {
+  background: rgba(10, 12, 22, 0.7);
+  border: 1px solid rgba(212, 164, 76, 0.08);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Light mode overrides for divine components */
+html.light .divine-hero-container {
+  background: linear-gradient(170deg, rgba(255, 253, 248, 0.95) 0%, rgba(255, 248, 240, 0.92) 100%);
+  border-color: rgba(212, 164, 76, 0.2);
+  box-shadow: 0 20px 60px rgba(212, 164, 76, 0.1);
+}
+
+html.light .divine-verse-container {
+  background: linear-gradient(165deg, rgba(255, 253, 248, 0.95) 0%, rgba(255, 250, 245, 0.93) 100%);
+  box-shadow: 0 16px 50px rgba(212, 164, 76, 0.08);
+}
+
+html.light .divine-action-card {
+  background-color: rgba(255, 253, 250, 0.9);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+html.light .divine-cta-secondary {
+  color: #5a4520;
+}
+
+html.light .divine-disclaimer {
+  background: rgba(255, 253, 250, 0.9);
+  border-color: rgba(212, 164, 76, 0.15);
+}
+
+html.light .divine-star-twinkle {
+  display: none;
+}
+
+/* ─── Divine Presence Animations ─── */
+
+/* Subtle glow animation for Krishna avatar */
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(251, 191, 36, 0.45); }
+}
+
+/* Heartbeat animation for closing section */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1) translateZ(0); opacity: 0.85; }
+  50% { transform: scale(1.06) translateZ(0); opacity: 1; }
+}
+
+/* Dot pulse for phase indicators */
+@keyframes dotPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* Smooth pulse for background elements */
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.5; }
+}
+
+/* Divine mood bar animation */
+@keyframes moodBarGrow {
+  0% { transform: scaleY(0.95) translateZ(0); opacity: 0.7; }
+  100% { transform: scaleY(1) translateZ(0); opacity: 1; }
+}
+
+/* Serenity particle float */
+@keyframes serenityFloat {
+  0%, 100% { transform: translateY(0) translateZ(0); opacity: 0.6; }
+  50% { transform: translateY(-8px) translateZ(0); opacity: 0.9; }
+}
+
+/* Safe glow for SSR - uses CSS only */
+.divine-glow {
+  animation: glow 3s ease-in-out infinite;
+  will-change: box-shadow;
+}
+
+.divine-heartbeat {
+  animation: heartbeat 3s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.divine-pulse {
+  animation: pulse 4s ease-in-out infinite;
+  will-change: opacity;
+}
+
+.divine-float {
+  animation: serenityFloat 4s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* Reduced motion support for divine animations */
+@media (prefers-reduced-motion: reduce) {
+  .divine-star-twinkle {
+    animation: none !important;
+    opacity: 0.3;
+  }
+
+  .divine-glow,
+  .divine-heartbeat,
+  .divine-pulse,
+  .divine-float {
+    animation: none !important;
+  }
+}

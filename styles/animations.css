@@ -1,0 +1,240 @@
+/* =====================================================
+   ANIMATIONS — All keyframes and animation utility classes
+   ===================================================== */
+
+/* Accordion */
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
+.animate-accordion-down {
+  animation: accordion-down 0.2s ease-out;
+}
+
+.animate-accordion-up {
+  animation: accordion-up 0.2s ease-out;
+}
+
+/* Chat wobble */
+@keyframes chatWobbleLift {
+  0% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-4px) scale(1.01); }
+  60% { transform: translateY(-2px) scale(1.005); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.animate-chat-wobble {
+  animation: chatWobbleLift 0.6s ease-out;
+}
+
+/* Ember drift (aurora pane) */
+@keyframes emberDrift {
+  0% { transform: translate3d(-8%, 4%, 0) scale(1); }
+  50% { transform: translate3d(6%, -6%, 0) scale(1.02); }
+  100% { transform: translate3d(-8%, 4%, 0) scale(1); }
+}
+
+/* Calm breathing */
+@keyframes calmBreath {
+  0%, 100% { transform: scale(0.9); opacity: 0.9; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+/* Arrow pulse */
+@keyframes arrowPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(0.95); }
+  50% { transform: translate(-50%, -50%) scale(1.05); }
+}
+
+/* Scrollbar fade */
+@keyframes scrollbarFadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes scrollbarFadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Fade in for micro-responses */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Ancient India background animations */
+@keyframes chakraRotate {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+  50% { transform: rotate(180deg) scale(1.1); opacity: 0.5; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.3; }
+}
+
+@keyframes sunRays {
+  0% { transform: rotate(0deg); opacity: 0.2; }
+  50% { opacity: 0.4; }
+  100% { transform: rotate(180deg); opacity: 0.2; }
+}
+
+@keyframes moonGlow {
+  0%, 100% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.3); }
+  50% { box-shadow: 0 0 50px rgba(255, 255, 255, 0.5); }
+}
+
+.ancient-chakra {
+  animation: chakraRotate 20s ease-in-out infinite;
+}
+
+.ancient-sun {
+  animation: sunRays 30s linear infinite;
+}
+
+.ancient-moon {
+  animation: moonGlow 8s ease-in-out infinite;
+}
+
+/* Stagger animation for lists */
+@keyframes staggerFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stagger-item {
+  animation: staggerFadeIn 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0.05s; }
+.stagger-item:nth-child(2) { animation-delay: 0.1s; }
+.stagger-item:nth-child(3) { animation-delay: 0.15s; }
+.stagger-item:nth-child(4) { animation-delay: 0.2s; }
+.stagger-item:nth-child(5) { animation-delay: 0.25s; }
+.stagger-item:nth-child(6) { animation-delay: 0.3s; }
+.stagger-item:nth-child(7) { animation-delay: 0.35s; }
+.stagger-item:nth-child(8) { animation-delay: 0.4s; }
+
+/* Page transitions */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease-out, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.page-transition-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+/* Skeleton shimmer */
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Bottom sheet slide */
+@keyframes bottomSheetSlideUp {
+  from { transform: translateY(100%) translateZ(0); }
+  to { transform: translateY(0) translateZ(0); }
+}
+
+@keyframes bottomSheetSlideDown {
+  from { transform: translateY(0) translateZ(0); }
+  to { transform: translateY(100%) translateZ(0); }
+}
+
+.bottom-sheet-enter {
+  animation: bottomSheetSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.bottom-sheet-exit {
+  animation: bottomSheetSlideDown 0.2s ease-in forwards;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Mobile loading sweep */
+@keyframes mobile-loading-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Mobile spinner */
+@keyframes mobileSpinnerRotate {
+  to { transform: rotate(360deg); }
+}
+
+.mobile-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2.5px solid rgba(255, 145, 89, 0.2);
+  border-top-color: #ff9159;
+  border-radius: 50%;
+  animation: mobileSpinnerRotate 0.8s linear infinite;
+}
+
+/* Offline gradient */
+@keyframes offline-gradient {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* Tab indicator pulse */
+@keyframes tab-indicator-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(255, 145, 89, 0.4); }
+  50% { box-shadow: 0 0 16px rgba(255, 145, 89, 0.6); }
+}
+
+.tab-indicator-active {
+  animation: tab-indicator-pulse 2s ease-in-out infinite;
+}
+
+/* Consolidated reduced-motion for animations */
+@media (prefers-reduced-motion: reduce) {
+  .animate-chat-wobble,
+  .aurora-pane::after,
+  .breathing-orb,
+  .arrow-head,
+  .animate-accordion-down,
+  .animate-accordion-up,
+  .animate-fadeIn,
+  .ancient-chakra,
+  .ancient-sun,
+  .ancient-moon,
+  .stagger-item {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .pricing-card,
+  .subscription-scroll,
+  .chat-scrollbar,
+  .chat-scrollbar::-webkit-scrollbar-thumb,
+  .subscription-scroll::-webkit-scrollbar-thumb {
+    transition: none !important;
+  }
+}

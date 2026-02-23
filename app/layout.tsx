@@ -1,5 +1,6 @@
 import './globals.css'
 import type { Viewport } from 'next'
+import { Inter, Crimson_Text } from 'next/font/google'
 import { headers } from 'next/headers'
 import SiteFooter from './components/SiteFooter'
 import SiteNav from './components/SiteNav'
@@ -15,6 +16,20 @@ import { OverlayRoot } from '@/components/ui/OverlayRoot'
 import { MobileRouteGuard, MobileContentWrapper } from '@/components/mobile/MobileRouteGuard'
 import { WebVitalsReporter } from '@/components/WebVitalsReporter'
 import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema'
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
+
+const crimsonText = Crimson_Text({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-sacred',
+  display: 'swap',
+})
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -38,13 +53,13 @@ export const metadata = {
     siteName: 'MindVibe',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: '/og-image.svg', width: 1200, height: 630, alt: 'MindVibe - Your Spiritual Companion' }],
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'MindVibe - Your Spiritual Companion' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'MindVibe — Your Spiritual Companion & Divine Friend',
     description: 'Discover inner peace through Bhagavad Gita wisdom. KIAAN, your AI spiritual guide, offers sacred journeys, voice companionship, and tools for self-discovery.',
-    images: ['/og-image.svg'],
+    images: ['/og-image.png'],
   },
   alternates: {
     canonical: 'https://mindvibe.life',
@@ -116,20 +131,6 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Load Crimson Text at runtime */}
-        <link
-          rel="preconnect"
-          href="https://fonts.googleapis.com"
-        />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap"
-        />
         {/* JSON-LD structured data for search engine rich results */}
         <script
           type="application/ld+json"
@@ -165,7 +166,7 @@ export default async function RootLayout({
         {/* Set language from localStorage before hydration to prevent flash */}
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: languageScript }} />
       </head>
-      <body className="min-h-screen bg-slate-950 text-slate-50 antialiased mobile-viewport-fix overscroll-none">
+      <body className={`${inter.variable} ${crimsonText.variable} min-h-screen bg-slate-950 text-slate-50 antialiased mobile-viewport-fix overscroll-none`}>
         <ClientLayout>
           <Providers>
             {/* Skip to content link for keyboard accessibility */}

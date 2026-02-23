@@ -1,0 +1,152 @@
+/* =====================================================
+   COMPONENTS — MV panels, cards, chips, inputs, mood cards
+   ===================================================== */
+
+.mv-page {
+  background: var(--mv-background);
+  color: var(--mv-text-primary);
+}
+
+.mv-surface-panel {
+  background: var(--mv-panel-bg);
+  border: 1px solid var(--mv-panel-border);
+  color: var(--mv-panel-text-primary);
+  box-shadow: var(--mv-card-shadow, 0 16px 48px rgba(6, 10, 22, 0.18));
+}
+
+.mv-chip {
+  color: var(--mv-panel-text-secondary);
+  border-color: var(--mv-border);
+  background: var(--mv-surface-subtle);
+}
+
+.mv-panel-title {
+  color: var(--mv-panel-text-primary);
+}
+
+.mv-panel-subtle {
+  color: var(--mv-panel-text-secondary);
+}
+
+.mv-input {
+  background: var(--mv-input-bg);
+  border: 1px solid var(--mv-input-border);
+  color: var(--mv-text-primary);
+}
+
+.mv-input::placeholder {
+  color: var(--mv-input-placeholder);
+}
+
+.mv-token-card {
+  background: var(--mv-card-bg);
+  color: var(--mv-card-text);
+  box-shadow: var(--mv-card-shadow);
+  border: 1px solid var(--mv-border);
+}
+
+.mv-token-card .mv-token-text {
+  color: var(--mv-card-text);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.mood-card {
+  color: var(--mv-panel-text-primary);
+  background: var(--mv-surface-subtle);
+  border-color: var(--mv-border);
+  box-shadow: 0 18px 60px rgba(15, 23, 42, 0.14);
+}
+
+.mood-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  background: var(--mv-overlay-soft);
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+html.light .mood-card {
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
+}
+
+html.light .mood-card .mv-panel-subtle,
+html.light .mood-card .mv-panel-title {
+  color: var(--mv-panel-text-primary);
+}
+
+.clarity-card {
+  background: var(--mv-surface-subtle);
+  border-color: var(--mv-border);
+  color: var(--mv-panel-text-primary);
+  box-shadow: 0 14px 45px rgba(15, 23, 42, 0.12);
+}
+
+/* Arrow progress track */
+.arrow-track {
+  position: relative;
+  height: 12px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgba(255, 153, 51, 0.08), rgba(255, 153, 51, 0.2));
+  overflow: hidden;
+}
+
+.arrow-flight {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #ff7a1a, #ffb347, #ffe7c0);
+  box-shadow: 0 0 18px rgba(255, 133, 51, 0.45);
+  transition: width 0.8s ease;
+}
+
+.arrow-head {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 30% 30%, #fff7ec, #ff9d36);
+  border-radius: 9999px;
+  box-shadow:
+    0 0 16px rgba(255, 153, 51, 0.45),
+    0 0 32px rgba(255, 153, 51, 0.25);
+  transition: left 0.8s ease, transform 0.3s ease;
+  animation: arrowPulse 1.8s ease-in-out infinite;
+}
+
+/* Pricing card */
+.pricing-card {
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+  will-change: transform;
+}
+
+.pricing-card:focus-visible {
+  outline: 2px solid #fb923c;
+  outline-offset: 4px;
+}
+
+/* Aurora pane background effect */
+.aurora-pane {
+  position: relative;
+  overflow: hidden;
+}
+
+.aurora-pane::after {
+  content: '';
+  position: absolute;
+  inset: -35%;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 180, 120, 0.12), transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 228, 196, 0.08), transparent 45%),
+    radial-gradient(circle at 40% 70%, rgba(255, 115, 39, 0.1), transparent 52%);
+  opacity: 0.9;
+  pointer-events: none;
+  filter: blur(26px) saturate(110%);
+  animation: emberDrift 14s ease-in-out infinite;
+}
+
+.breathing-orb {
+  animation: calmBreath 10s ease-in-out infinite;
+}

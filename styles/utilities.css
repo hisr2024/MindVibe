@@ -1,0 +1,105 @@
+/* =====================================================
+   UTILITIES — Safe area, RTL, fluid typography, focus,
+               selection, snap scroll, containment
+   ===================================================== */
+
+/* ─── RTL Support ─── */
+[dir="rtl"] { direction: rtl; }
+[dir="rtl"] .rtl-mirror { transform: scaleX(-1); }
+[dir="rtl"] .text-left { text-align: right; }
+[dir="rtl"] .text-right { text-align: left; }
+
+[dir="rtl"] .ml-auto { margin-left: initial; margin-right: auto; }
+[dir="rtl"] .mr-auto { margin-right: initial; margin-left: auto; }
+[dir="rtl"] .flex-row { flex-direction: row-reverse; }
+
+[dir="rtl"] .rounded-l {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: var(--tw-rounded);
+  border-bottom-right-radius: var(--tw-rounded);
+}
+
+[dir="rtl"] .rounded-r {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: var(--tw-rounded);
+  border-bottom-left-radius: var(--tw-rounded);
+}
+
+[dir="rtl"] .chat-bubble-user { margin-left: auto; margin-right: 0; }
+[dir="rtl"] .chat-bubble-assistant { margin-right: auto; margin-left: 0; }
+
+[dir="rtl"] .icon-arrow,
+[dir="rtl"] .icon-chevron,
+[dir="rtl"] .icon-nav {
+  transform: scaleX(-1);
+}
+
+/* ─── Safe Area Padding ─── */
+.safe-area-top { padding-top: env(safe-area-inset-top, 0px); }
+.safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.safe-area-left { padding-left: env(safe-area-inset-left, 0px); }
+.safe-area-right { padding-right: env(safe-area-inset-right, 0px); }
+
+.safe-area-all {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* ─── Fluid Typography ─── */
+.fluid-text-sm { font-size: clamp(0.75rem, 2vw + 0.5rem, 0.875rem); }
+.fluid-text-base { font-size: clamp(0.875rem, 2vw + 0.5rem, 1rem); }
+.fluid-text-lg { font-size: clamp(1rem, 2.5vw + 0.5rem, 1.125rem); }
+.fluid-text-xl { font-size: clamp(1.125rem, 3vw + 0.5rem, 1.25rem); }
+.fluid-text-2xl { font-size: clamp(1.25rem, 4vw + 0.5rem, 1.5rem); }
+.fluid-text-3xl { font-size: clamp(1.5rem, 5vw + 0.5rem, 1.875rem); }
+
+/* ─── Scroll Snapping ─── */
+.snap-x { scroll-snap-type: x mandatory; scroll-padding: 16px; }
+.snap-x > * { scroll-snap-align: start; }
+.snap-y { scroll-snap-type: y mandatory; scroll-padding: 16px; }
+.snap-y > * { scroll-snap-align: start; }
+
+/* ─── Touch Scroll ─── */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+.momentum-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+.inertia-scroll {
+  scroll-snap-type: y proximity;
+  scroll-padding-top: 16px;
+  scroll-padding-bottom: 88px;
+}
+
+/* ─── Containment ─── */
+.contain-layout { contain: layout; }
+.contain-paint { contain: paint; }
+.contain-strict { contain: strict; }
+
+/* ─── Enhanced Focus ─── */
+*:focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.8);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ─── Selection Colors ─── */
+::selection {
+  background: rgba(251, 146, 60, 0.3);
+  color: #fff;
+}
