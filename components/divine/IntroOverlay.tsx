@@ -203,18 +203,33 @@ export function IntroOverlay() {
                 </p>
               </motion.div>
 
-              {/* Sacred verse */}
+              {/* Abhyaas Verse — The Teaching of Practice (BG 6.35) */}
               <motion.div
-                className="mb-8 sm:mb-10"
+                className="mb-8 sm:mb-10 space-y-3"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 1.3, duration: 0.8 }}
+                transition={{ delay: 1.2, duration: 0.8 }}
               >
-                <p className="font-sacred text-sm sm:text-base italic text-[#d4a44c]/50 leading-relaxed max-w-md mx-auto">
-                  &ldquo;Whenever the mind wanders — restless and unsteady — bring it back, again and again, to rest in the Self.&rdquo;
+                <p className="text-[#d4a44c]/45 text-[10px] sm:text-xs uppercase tracking-[0.2em]">
+                  Bhagavad Gita 6.35
                 </p>
-                <p className="mt-2 text-xs text-[#d4a44c]/35">
-                  — Bhagavad Gita 6.26
+                <p
+                  className="font-sacred text-base sm:text-lg leading-relaxed tracking-wide text-[#f0c96d]/80"
+                  lang="sa"
+                >
+                  {'\u0905\u092D\u094D\u092F\u093E\u0938\u0947\u0928 \u0924\u0941 \u0915\u094C\u0928\u094D\u0924\u0947\u092F'}
+                </p>
+                <p
+                  className="font-sacred text-base sm:text-lg leading-relaxed tracking-wide text-[#f0c96d]/80"
+                  lang="sa"
+                >
+                  {'\u0935\u0948\u0930\u093E\u0917\u094D\u092F\u0947\u0923 \u091A \u0917\u0943\u0939\u094D\u092F\u0924\u0947'}
+                </p>
+                <p className="font-sacred text-xs sm:text-sm italic text-[#d4a44c]/50 leading-relaxed max-w-md mx-auto">
+                  &ldquo;The mind is indeed restless and difficult to restrain, O son of Kunti. But through practice and detachment, it can be mastered.&rdquo;
+                </p>
+                <p className="text-xs text-[#d4a44c]/35">
+                  — Shri Krishna to Arjuna
                 </p>
               </motion.div>
 

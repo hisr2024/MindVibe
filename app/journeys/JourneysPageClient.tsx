@@ -788,6 +788,36 @@ export default function JourneysPageClient() {
           </div>
 
           {/* ============================================================= */}
+          {/* ABHYAAS VERSE - Sacred teaching of Practice (BG 6.35)          */}
+          {/* ============================================================= */}
+          <motion.div
+            className="relative mb-8 rounded-2xl border border-[#d4a44c]/12 bg-gradient-to-br from-[#d4a44c]/[0.04] to-transparent px-5 py-4 sm:px-6 sm:py-5 text-center overflow-hidden"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+          >
+            {/* Decorative corner flourishes */}
+            <div className="pointer-events-none absolute left-3 top-3 h-5 w-5 border-l border-t border-[#d4a44c]/15 rounded-tl-md" />
+            <div className="pointer-events-none absolute right-3 top-3 h-5 w-5 border-r border-t border-[#d4a44c]/15 rounded-tr-md" />
+
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[#d4a44c]/50 mb-2">
+              {t('journeys.abhyaas.chapter', 'Bhagavad Gita 6.35')}
+            </p>
+            <p className="font-sacred text-base sm:text-lg leading-relaxed tracking-wide text-[#f0c96d]/80" lang="sa">
+              {'\u0905\u092D\u094D\u092F\u093E\u0938\u0947\u0928 \u0924\u0941 \u0915\u094C\u0928\u094D\u0924\u0947\u092F \u0935\u0948\u0930\u093E\u0917\u094D\u092F\u0947\u0923 \u091A \u0917\u0943\u0939\u094D\u092F\u0924\u0947'}
+            </p>
+            <p className="mt-2 text-sm italic text-slate-300/60">
+              {t(
+                'journeys.abhyaas.translation',
+                '"Through practice and detachment, the restless mind can be mastered."'
+              )}
+            </p>
+            <p className="mt-1 text-xs text-[#d4a44c]/35">
+              — {t('journeys.abhyaas.speaker', 'Shri Krishna to Arjuna')}
+            </p>
+          </motion.div>
+
+          {/* ============================================================= */}
           {/* ERROR BANNER                                                   */}
           {/* ============================================================= */}
           <AnimatePresence>
