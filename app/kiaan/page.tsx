@@ -26,13 +26,13 @@ export default function KiaanHome() {
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="text-center space-y-4">
         <div className="relative mx-auto h-12 w-12">
-          <div className="absolute inset-0 animate-spin rounded-full border-4 border-orange-500/20 border-t-orange-500" />
+          <div className="absolute inset-0 animate-spin rounded-full border-4 border-[#d4a44c]/20 border-t-[#d4a44c]" />
         </div>
-        <p className="text-sm text-white/70">Opening KIAAN Chat...</p>
+        <p className="text-sm text-[#d4a44c]/60">Opening KIAAN Chat...</p>
         {showFallback && (
           <Link
             href="/kiaan/chat"
-            className="inline-block rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/20 transition hover:shadow-xl"
+            className="kiaan-btn-golden inline-block rounded-full px-6 py-2.5 text-sm font-semibold shadow-lg shadow-[#d4a44c]/15 transition hover:shadow-xl"
           >
             Go to KIAAN Chat
           </Link>

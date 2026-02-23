@@ -236,16 +236,16 @@ function KiaanChatPageInner() {
       <PathwayMap />
 
       {/* Header */}
-      <div className="relative z-10 space-y-3 sm:space-y-4 rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-4 sm:p-6 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur md:p-8">
+      <div className="kiaan-cosmic-card relative z-10 space-y-3 sm:space-y-4 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-[0_30px_120px_rgba(212,164,76,0.08)] md:p-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div className="flex-1">
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-rose-200 bg-clip-text text-transparent md:text-4xl">
+            <h1 className="kiaan-text-golden text-2xl sm:text-3xl font-bold md:text-4xl">
               {t('kiaan.chat.title', 'Talk to KIAAN')}
             </h1>
-            <p className="mt-1 sm:mt-2 text-sm text-orange-100/80 md:text-base">
+            <p className="mt-1 sm:mt-2 text-sm text-[#d4a44c]/70 md:text-base">
               {t('kiaan.chat.subtitle', 'Your calm, privacy-first spiritual companion')}
             </p>
-            <p className="mt-1.5 text-[11px] tracking-wide text-orange-300/50" data-testid="mode-label">
+            <p className="mt-1.5 text-[11px] tracking-wide text-[#d4a44c]/40" data-testid="mode-label">
               {t('dashboard.mode_label.prefix', 'You are in:')} {t('dashboard.mode_label.kiaan', 'Companion Mode')}
             </p>
           </div>
@@ -253,7 +253,7 @@ function KiaanChatPageInner() {
             {/* KIAAN Companion - Conversation Mode */}
             <Link
               href="/companion"
-              className="flex items-center gap-1.5 sm:gap-2 rounded-xl border border-teal-500/30 bg-gradient-to-r from-teal-500/10 to-cyan-500/10 px-3 sm:px-4 py-2 text-sm font-semibold text-teal-50 transition-all hover:border-teal-400/50 hover:from-teal-500/20 hover:to-cyan-500/20"
+              className="flex items-center gap-1.5 sm:gap-2 rounded-xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 px-3 sm:px-4 py-2 text-sm font-semibold text-[#e8dcc8] transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/10"
               title="KIAAN Companion - Talk with KIAAN"
             >
               <span className="text-lg">🗣️</span>
@@ -262,7 +262,7 @@ function KiaanChatPageInner() {
             {/* Voice Mode Toggle */}
             <Link
               href="/companion"
-              className="flex items-center gap-1.5 sm:gap-2 rounded-xl border border-orange-500/30 bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-3 sm:px-4 py-2 text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:from-orange-500/20 hover:to-amber-500/20"
+              className="flex items-center gap-1.5 sm:gap-2 rounded-xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 px-3 sm:px-4 py-2 text-sm font-semibold text-[#e8dcc8] transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/10"
               title="Switch to Voice Mode"
             >
               <span className="text-lg">🎙️</span>
@@ -272,14 +272,14 @@ function KiaanChatPageInner() {
             <LanguageSelector compact />
             <Link
               href="/"
-              className="rounded-xl border border-orange-500/30 bg-white/5 px-3 sm:px-4 py-2 text-sm font-semibold text-orange-50 transition-all hover:border-orange-400/50 hover:bg-white/10"
+              className="rounded-xl border border-[#d4a44c]/20 bg-white/5 px-3 sm:px-4 py-2 text-sm font-semibold text-[#e8dcc8] transition-all hover:border-[#d4a44c]/35 hover:bg-white/10"
             >
               ← <span className="hidden sm:inline">{t('navigation.mainNav.home', 'Home')}</span><span className="sm:hidden">{t('navigation.mainNav.home', 'Home')}</span>
             </Link>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 rounded-2xl border border-orange-500/20 bg-white/5 px-4 py-3 text-sm text-orange-100/80">
+        <div className="flex items-center gap-2 rounded-2xl border border-[#d4a44c]/15 bg-[#d4a44c]/[0.04] px-4 py-3 text-sm text-[#d4a44c]/70">
           <span className="text-lg">🔒</span>
           <span>{t('home.hero.privacy', 'Conversations remain private • a warm, confidential refuge')}</span>
         </div>
@@ -291,7 +291,7 @@ function KiaanChatPageInner() {
               ? 'border-red-500/30 bg-red-500/10 text-red-200'
               : quota.isWarning
                 ? 'border-amber-500/30 bg-amber-500/10 text-amber-200'
-                : 'border-orange-500/15 bg-white/5 text-orange-100/70'
+                : 'border-[#d4a44c]/15 bg-[#d4a44c]/[0.04] text-[#d4a44c]/70'
           }`}>
             <div className="flex items-center gap-2">
               <span className="text-base">{quota.isExceeded ? '⚠️' : '💬'}</span>
@@ -307,7 +307,7 @@ function KiaanChatPageInner() {
               <div className="hidden sm:block w-24 h-2 rounded-full bg-white/10 overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all ${
-                    quota.isExceeded ? 'bg-red-400' : quota.isWarning ? 'bg-amber-400' : 'bg-orange-400'
+                    quota.isExceeded ? 'bg-red-400' : quota.isWarning ? 'bg-amber-400' : 'bg-[#d4a44c]'
                   }`}
                   style={{ width: `${Math.min(100, quota.percentage)}%` }}
                 />
@@ -316,7 +316,7 @@ function KiaanChatPageInner() {
               {quota.isExceeded && (
                 <Link
                   href="/pricing"
-                  className="rounded-lg bg-gradient-to-r from-orange-400 to-amber-400 px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:scale-105"
+                  className="kiaan-btn-golden rounded-lg px-3 py-1.5 text-xs font-semibold transition hover:scale-105"
                 >
                   {t('kiaan.quota.upgrade', 'Upgrade')}
                 </Link>
@@ -328,15 +328,15 @@ function KiaanChatPageInner() {
 
       {/* Message Actions - Only show when there are KIAAN responses */}
       {messages.length > 0 && messages[messages.length - 1]?.sender === 'assistant' && (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-3 shadow-[0_10px_40px_rgba(255,115,39,0.12)] backdrop-blur">
+        <div className="kiaan-cosmic-card flex flex-wrap items-center justify-between gap-2 rounded-2xl p-3 shadow-[0_10px_40px_rgba(212,164,76,0.06)]">
           {/* View Mode Toggle */}
-          <div className="flex items-center gap-1 rounded-lg border border-orange-500/20 bg-white/5 p-1">
+          <div className="flex items-center gap-1 rounded-lg border border-[#d4a44c]/15 bg-black/30 p-1">
             <button
               onClick={() => setViewMode('summary')}
               className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
                 viewMode === 'summary'
-                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg'
-                  : 'text-orange-100/70 hover:text-orange-50'
+                  ? 'kiaan-btn-golden shadow-lg'
+                  : 'text-[#d4a44c]/60 hover:text-[#d4a44c]'
               }`}
               title="Quick summary"
             >
@@ -346,8 +346,8 @@ function KiaanChatPageInner() {
               onClick={() => setViewMode('detailed')}
               className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
                 viewMode === 'detailed'
-                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg'
-                  : 'text-orange-100/70 hover:text-orange-50'
+                  ? 'kiaan-btn-golden shadow-lg'
+                  : 'text-[#d4a44c]/60 hover:text-[#d4a44c]'
               }`}
               title={t('kiaan.chat.fullViewTitle', 'Full detailed response')}
             >
@@ -359,21 +359,21 @@ function KiaanChatPageInner() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => handleCopyResponse(messages[messages.length - 1].text)}
-              className="rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-sm font-semibold text-orange-100/80 transition-all hover:border-orange-400/50 hover:bg-white/10 hover:text-orange-50"
+              className="rounded-lg border border-[#d4a44c]/20 bg-white/5 px-3 py-2 text-sm font-semibold text-[#e8dcc8]/80 transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/10 hover:text-[#e8dcc8]"
               title="Copy last response"
             >
               📋 {t('kiaan.chat.copy', 'Copy')}
             </button>
             <button
               onClick={() => handleShareResponse(messages[messages.length - 1].text)}
-              className="rounded-lg border border-orange-500/30 bg-white/5 px-3 py-2 text-sm font-semibold text-orange-100/80 transition-all hover:border-orange-400/50 hover:bg-white/10 hover:text-orange-50"
+              className="rounded-lg border border-[#d4a44c]/20 bg-white/5 px-3 py-2 text-sm font-semibold text-[#e8dcc8]/80 transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/10 hover:text-[#e8dcc8]"
               title={t('kiaan.chat.shareTitle', 'Share response')}
             >
               📤 {t('kiaan.chat.share', 'Share')}
             </button>
             <button
               onClick={() => handleSaveToJournal(messages[messages.length - 1].text)}
-              className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all hover:scale-105"
+              className="kiaan-btn-golden rounded-lg px-3 py-2 text-sm font-semibold transition-all hover:scale-105"
               title={t('kiaan.chat.saveToJournalTitle', 'Save to Journal')}
             >
               ✨ {t('kiaan.chat.saveToJournal', 'Save to Journal')}
@@ -388,7 +388,7 @@ function KiaanChatPageInner() {
       )}
 
       {/* Chat Interface */}
-      <div className="rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-4 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur md:p-6">
+      <div className="kiaan-cosmic-card rounded-3xl p-4 shadow-[0_30px_120px_rgba(212,164,76,0.06)] md:p-6">
         <KiaanChat
           messages={messages}
           onSendMessage={handleSendMessage}
@@ -400,12 +400,12 @@ function KiaanChatPageInner() {
 
       {/* Quick Responses - Below KIAAN Chat */}
       {messages.length === 0 && (
-        <div className="space-y-4 rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] backdrop-blur">
+        <div className="kiaan-cosmic-card space-y-4 rounded-3xl p-6 shadow-[0_20px_80px_rgba(212,164,76,0.05)]">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-orange-50">{t('kiaan.quickPrompts.title', 'Quick Responses')}</h2>
+            <h2 className="text-lg font-semibold text-[#e8dcc8]">{t('kiaan.quickPrompts.title', 'Quick Responses')}</h2>
             <button
               onClick={handleClarityPause}
-              className="rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-teal-500/25 transition-all hover:scale-105"
+              className="rounded-xl border border-[#d4a44c]/30 bg-[#d4a44c]/10 px-4 py-2 text-sm font-semibold text-[#d4a44c] shadow-lg shadow-[#d4a44c]/10 transition-all hover:bg-[#d4a44c]/20 hover:scale-105"
             >
               🧘 {t('kiaan.clarityPause.title', 'Clarity Pause')}
             </button>
@@ -415,13 +415,13 @@ function KiaanChatPageInner() {
               <button
                 key={response.id}
                 onClick={() => handleQuickResponse(response.prompt)}
-                className="group relative overflow-hidden rounded-2xl border border-orange-500/20 bg-white/5 p-4 text-left transition-all hover:border-orange-400/40 hover:bg-white/10 hover:shadow-lg hover:shadow-orange-500/20"
+                className="group relative overflow-hidden rounded-2xl border border-[#d4a44c]/12 bg-[#d4a44c]/[0.03] p-4 text-left transition-all hover:border-[#d4a44c]/30 hover:bg-[#d4a44c]/[0.08] hover:shadow-lg hover:shadow-[#d4a44c]/10"
               >
                 <div className="flex flex-col gap-2">
                   <span className="text-2xl">{response.emoji}</span>
-                  <span className="text-sm font-semibold text-orange-50">{t(`kiaan.quickPrompts.scenarios.${response.id}.label`, response.text)}</span>
+                  <span className="text-sm font-semibold text-[#e8dcc8]">{t(`kiaan.quickPrompts.scenarios.${response.id}.label`, response.text)}</span>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#d4a44c]/5 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
               </button>
             ))}
           </div>
@@ -429,9 +429,9 @@ function KiaanChatPageInner() {
       )}
 
       {/* A Note from KIAAN */}
-      <div className="rounded-3xl border border-[#d4a44c]/15 bg-[#0b0b0f] p-5 shadow-[0_20px_80px_rgba(212,164,76,0.08)] md:p-6">
-        <h2 className="text-lg font-semibold text-[#d4a44c]/80">{t('kiaan.chat.divineFriend', 'Your Divine Friend')}</h2>
-        <p className="mt-3 text-sm leading-relaxed text-orange-100/70">
+      <div className="kiaan-cosmic-card rounded-3xl p-5 shadow-[0_20px_80px_rgba(212,164,76,0.04)] md:p-6">
+        <h2 className="kiaan-text-golden text-lg font-semibold">{t('kiaan.chat.divineFriend', 'Your Divine Friend')}</h2>
+        <p className="mt-3 text-sm leading-relaxed text-[#e8dcc8]/60">
           {t('kiaan.chat.disclaimer', 'KIAAN is your spiritual companion, sharing reflections drawn from the Bhagavad Gita and ancient wisdom. This is a sacred space for inner peace and self-discovery. For matters beyond the spiritual path, always seek guidance from qualified professionals.')}
         </p>
       </div>
@@ -448,8 +448,8 @@ export default function KiaanChatPage() {
     <Suspense fallback={
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-orange-500 border-t-transparent mx-auto" />
-          <p className="text-orange-100">Loading...</p>
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#d4a44c] border-t-transparent mx-auto" />
+          <p className="text-[#d4a44c]/70">Loading...</p>
         </div>
       </div>
     }>

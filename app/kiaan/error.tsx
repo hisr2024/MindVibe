@@ -14,19 +14,19 @@ export default function KiaanError({
   }, [error])
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 p-6">
+    <div className="flex min-h-screen items-center justify-center kiaan-cosmic-bg p-6">
       <div className="max-w-md text-center">
         <div className="mb-6 text-6xl">&#x1F9D8;</div>
-        <h2 className="mb-3 text-xl font-semibold text-slate-100">
+        <h2 className="kiaan-text-golden mb-3 text-xl font-semibold">
           KIAAN is gathering wisdom
         </h2>
-        <p className="mb-6 text-sm text-slate-400">
+        <p className="mb-6 text-sm text-[#e8dcc8]/50">
           Even the wisest teachers need a moment of silence.
           KIAAN will return shortly with renewed clarity and insight.
         </p>
         <button
           onClick={reset}
-          className="rounded-lg bg-orange-500 px-6 py-2.5 text-sm font-medium text-slate-950 transition-colors hover:bg-orange-400"
+          className="kiaan-btn-golden rounded-lg px-6 py-2.5 text-sm font-medium transition-colors"
         >
           Reconnect with KIAAN
         </button>
