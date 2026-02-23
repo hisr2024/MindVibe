@@ -149,13 +149,21 @@ export default function IntroductionPage() {
               <NamasteIcon size="xl" animated={true} showGlow={true} />
             </div>
 
-            {/* Title - Responsive typography */}
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2 sm:mb-3 px-2">
+            {/* Title - Responsive typography with gold gradient */}
+            <h1
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-2 sm:mb-3 px-2"
+              style={{
+                background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 40%, #f0c96d 70%, #d4a44c 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
               {t('home.introduction.heroTitle', 'Welcome to Divine Presence')}
             </h1>
 
             {/* Subtitle */}
-            <p className="text-white/70 text-sm sm:text-base md:text-lg max-w-md sm:max-w-lg md:max-w-xl mx-auto px-4 leading-relaxed">
+            <p className="text-white/60 text-sm sm:text-base md:text-lg max-w-md sm:max-w-lg md:max-w-xl mx-auto px-4 leading-relaxed">
               {t('home.introduction.heroSubtitle', 'Experience the loving guidance of Krishna. You are never alone on this journey.')}
             </p>
 
@@ -163,13 +171,13 @@ export default function IntroductionPage() {
             {hasSeenDarshan && (
               <motion.button
                 onClick={openMorningDarshan}
-                className="mt-5 sm:mt-6 inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 active:from-amber-500/40 active:to-orange-500/40 border border-amber-500/30 rounded-full text-amber-200 text-sm sm:text-base transition-all active:scale-95"
+                className="mt-5 sm:mt-6 inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-[#d4a44c]/10 hover:bg-[#d4a44c]/15 active:bg-[#d4a44c]/20 border border-[#d4a44c]/30 rounded-full text-[#e8b54a] text-sm sm:text-base transition-all active:scale-95"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.4 }}
                 style={{ transform: 'translateZ(0)' }}
               >
-                <Sun className="w-4 h-4 text-amber-300" />
+                <Sun className="w-4 h-4 text-[#d4a44c]" />
                 <span>{t('home.introduction.receiveDarshan', "Receive Krishna's Darshan")}</span>
               </motion.button>
             )}
@@ -201,26 +209,27 @@ export default function IntroductionPage() {
             >
               <Link
                 href="/kiaan"
-                className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-orange-900/50 to-amber-900/50 border border-orange-500/30 rounded-2xl hover:border-orange-500/50 transition-all active:scale-[0.98] group"
+                className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-[#1a1408] to-[#0f0c06] border border-[#d4a44c]/25 rounded-2xl hover:border-[#d4a44c]/45 transition-all active:scale-[0.98] group"
               >
                 <motion.div
-                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center shadow-lg shadow-orange-500/30 flex-shrink-0"
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-lg flex-shrink-0"
+                  style={{ background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 50%, #f0c96d 100%)' }}
                   animate={{
                     boxShadow: [
-                      '0 0 20px rgba(251, 146, 60, 0.3)',
-                      '0 0 35px rgba(251, 146, 60, 0.5)',
-                      '0 0 20px rgba(251, 146, 60, 0.3)',
+                      '0 0 20px rgba(212, 164, 76, 0.3)',
+                      '0 0 35px rgba(212, 164, 76, 0.5)',
+                      '0 0 20px rgba(212, 164, 76, 0.3)',
                     ],
                   }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <span className="text-xl sm:text-2xl font-bold text-slate-900">K</span>
+                  <span className="text-xl sm:text-2xl font-bold text-[#0a0a0f]">K</span>
                 </motion.div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-orange-100 font-semibold text-base sm:text-lg">{t('home.introduction.talkToKiaan', 'Talk to KIAAN')}</h3>
-                  <p className="text-orange-200/80 text-xs sm:text-sm truncate">{t('home.introduction.divineWisdom', 'Divine wisdom & guidance')}</p>
+                  <h3 className="text-[#f0c96d] font-semibold text-base sm:text-lg">{t('home.introduction.talkToKiaan', 'Talk to KIAAN')}</h3>
+                  <p className="text-[#d4a44c]/70 text-xs sm:text-sm truncate">{t('home.introduction.divineWisdom', 'Divine wisdom & guidance')}</p>
                 </div>
-                <div className="text-orange-300/70 group-hover:text-orange-300 transition-colors flex-shrink-0">
+                <div className="text-[#d4a44c]/50 group-hover:text-[#d4a44c]/80 transition-colors flex-shrink-0">
                   <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
@@ -238,41 +247,41 @@ export default function IntroductionPage() {
               {/* LEFT BRICK - Divine Protection Shield */}
               <motion.button
                 onClick={openProtectionShield}
-                className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-amber-900/50 to-orange-900/50 border border-amber-500/30 rounded-2xl hover:border-amber-500/50 transition-all active:scale-[0.98] group text-center"
+                className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-[#1a1408] to-[#0f0c06] border border-[#d4a44c]/20 rounded-2xl hover:border-[#d4a44c]/40 transition-all active:scale-[0.98] group text-center"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.35, duration: 0.4, ease: "easeOut" }}
                 style={{ transform: 'translateZ(0)' }}
               >
                 <div
-                  className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-full bg-gradient-to-br from-amber-400/30 to-orange-500/30 flex items-center justify-center animate-spin-slow"
+                  className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-full bg-[#d4a44c]/15 flex items-center justify-center animate-spin-slow"
                   style={{ animationDuration: '12s' }}
                 >
-                  <Shield className="w-7 h-7 sm:w-8 sm:h-8 text-amber-300" />
+                  <Shield className="w-7 h-7 sm:w-8 sm:h-8 text-[#d4a44c]" />
                 </div>
                 <div className="w-full">
-                  <h3 className="text-amber-100 font-semibold text-sm sm:text-base md:text-lg">{t('home.introduction.protectionShield', 'Divine Protection Shield')}</h3>
-                  <p className="text-amber-200/80 text-xs sm:text-sm mt-1">{t('home.introduction.activateProtection', "Activate Krishna's protection")}</p>
+                  <h3 className="text-[#f0c96d] font-semibold text-sm sm:text-base md:text-lg">{t('home.introduction.protectionShield', 'Divine Protection Shield')}</h3>
+                  <p className="text-[#d4a44c]/60 text-xs sm:text-sm mt-1">{t('home.introduction.activateProtection', "Activate Krishna's protection")}</p>
                 </div>
               </motion.button>
 
               {/* RIGHT BRICK - Heart-to-Heart with Krishna */}
               <motion.button
                 onClick={openHeartJournal}
-                className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-pink-900/50 to-rose-900/50 border border-pink-500/30 rounded-2xl hover:border-pink-500/50 transition-all active:scale-[0.98] group text-center"
+                className="flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-[#140a10] to-[#0f0608] border border-[#d4a44c]/15 rounded-2xl hover:border-[#d4a44c]/35 transition-all active:scale-[0.98] group text-center"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.35, duration: 0.4, ease: "easeOut" }}
                 style={{ transform: 'translateZ(0)' }}
               >
                 <div
-                  className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-full bg-gradient-to-br from-pink-400/30 to-rose-500/30 flex items-center justify-center divine-heartbeat"
+                  className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-full bg-rose-500/15 flex items-center justify-center divine-heartbeat"
                 >
-                  <Heart className="w-7 h-7 sm:w-8 sm:h-8 text-pink-300" />
+                  <Heart className="w-7 h-7 sm:w-8 sm:h-8 text-rose-300/80" />
                 </div>
                 <div className="w-full">
-                  <h3 className="text-pink-100 font-semibold text-sm sm:text-base md:text-lg">{t('home.introduction.heartToHeart', 'Heart-to-Heart with Krishna')}</h3>
-                  <p className="text-pink-200/80 text-xs sm:text-sm mt-1">{t('home.introduction.writeLetter', 'Write a letter to the Divine')}</p>
+                  <h3 className="text-rose-100/90 font-semibold text-sm sm:text-base md:text-lg">{t('home.introduction.heartToHeart', 'Heart-to-Heart with Krishna')}</h3>
+                  <p className="text-rose-200/50 text-xs sm:text-sm mt-1">{t('home.introduction.writeLetter', 'Write a letter to the Divine')}</p>
                 </div>
               </motion.button>
 
@@ -283,16 +292,16 @@ export default function IntroductionPage() {
 
           <section className="mb-6 sm:mb-8">
             <motion.div
-              className="bg-gradient-to-br from-slate-900/80 to-indigo-900/50 border border-indigo-500/20 rounded-2xl p-5 sm:p-6 md:p-8"
+              className="bg-gradient-to-br from-[#0c0a06] to-[#080808] border border-[#d4a44c]/12 rounded-2xl p-5 sm:p-6 md:p-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
             >
               <div className="flex items-center justify-center gap-3 mb-4 sm:mb-5">
-                <Heart className="w-6 h-6 sm:w-7 sm:h-7 text-blue-400" />
+                <Heart className="w-6 h-6 sm:w-7 sm:h-7 text-[#d4a44c]/70" />
                 <div className="text-center">
-                  <h3 className="text-white/90 font-medium text-base sm:text-lg">{t('home.introduction.howIsHeart', 'How is your heart?')}</h3>
-                  <p className="text-white/70 text-xs sm:text-sm">{t('home.introduction.shareFeelings', 'Share your feelings with Krishna')}</p>
+                  <h3 className="text-white/85 font-medium text-base sm:text-lg">{t('home.introduction.howIsHeart', 'How is your heart?')}</h3>
+                  <p className="text-white/50 text-xs sm:text-sm">{t('home.introduction.shareFeelings', 'Share your feelings with Krishna')}</p>
                 </div>
               </div>
               <DivineMoodCheckIn compact={true} />
@@ -343,16 +352,16 @@ export default function IntroductionPage() {
                 >
                   <Link
                     href="/dashboard"
-                    className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-indigo-900/50 to-purple-900/50 border border-indigo-500/30 rounded-2xl hover:border-indigo-500/50 transition-all active:scale-[0.98] group"
+                    className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 bg-gradient-to-br from-[#0c0a06] to-[#080808] border border-[#d4a44c]/15 rounded-2xl hover:border-[#d4a44c]/35 transition-all active:scale-[0.98] group"
                   >
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-indigo-400/30 to-purple-500/30 flex items-center justify-center flex-shrink-0">
-                      <Home className="w-6 h-6 sm:w-7 sm:h-7 text-indigo-300" />
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#d4a44c]/10 flex items-center justify-center flex-shrink-0">
+                      <Home className="w-6 h-6 sm:w-7 sm:h-7 text-[#d4a44c]/70" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-indigo-100 font-semibold text-base sm:text-lg">{t('home.introduction.goToDashboard', 'Go to Dashboard')}</h3>
-                      <p className="text-indigo-200/80 text-xs sm:text-sm">{t('home.introduction.accessTools', 'Access all tools & features')}</p>
+                      <h3 className="text-white/85 font-semibold text-base sm:text-lg">{t('home.introduction.goToDashboard', 'Go to Dashboard')}</h3>
+                      <p className="text-white/50 text-xs sm:text-sm">{t('home.introduction.accessTools', 'Access all tools & features')}</p>
                     </div>
-                    <div className="text-indigo-300/70 group-hover:text-indigo-300 transition-colors flex-shrink-0">
+                    <div className="text-[#d4a44c]/40 group-hover:text-[#d4a44c]/70 transition-colors flex-shrink-0">
                       <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
@@ -362,40 +371,40 @@ export default function IntroductionPage() {
 
                 {/* Quick Divine Access Grid */}
                 <motion.div
-                  className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 border border-white/10 rounded-2xl p-4 sm:p-5"
+                  className="bg-gradient-to-br from-[#0c0a06] to-[#080808] border border-[#d4a44c]/10 rounded-2xl p-4 sm:p-5"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.65 }}
                 >
-                  <h3 className="text-white/90 font-medium text-sm sm:text-base mb-3 sm:mb-4">{t('home.introduction.quickAccess', 'Quick Divine Access')}</h3>
+                  <h3 className="text-white/80 font-medium text-sm sm:text-base mb-3 sm:mb-4">{t('home.introduction.quickAccess', 'Quick Divine Access')}</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                     <Link
                       href="/journeys"
-                      className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[72px] sm:min-h-[80px]"
+                      className="flex flex-col items-center p-2 sm:p-3 bg-[#d4a44c]/5 hover:bg-[#d4a44c]/10 active:bg-[#d4a44c]/15 border border-[#d4a44c]/10 rounded-xl transition-all min-h-[72px] sm:min-h-[80px]"
                     >
-                      <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-amber-300 mb-1" />
-                      <span className="text-white/80 text-xs text-center leading-tight">{t('home.introduction.journeys', 'Journeys')}</span>
+                      <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-[#d4a44c]/70 mb-1" />
+                      <span className="text-white/70 text-xs text-center leading-tight">{t('home.introduction.journeys', 'Journeys')}</span>
                     </Link>
                     <Link
                       href="/flows/journal"
-                      className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[72px] sm:min-h-[80px]"
+                      className="flex flex-col items-center p-2 sm:p-3 bg-[#d4a44c]/5 hover:bg-[#d4a44c]/10 active:bg-[#d4a44c]/15 border border-[#d4a44c]/10 rounded-xl transition-all min-h-[72px] sm:min-h-[80px]"
                     >
-                      <Leaf className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-300 mb-1" />
-                      <span className="text-white/80 text-xs text-center leading-tight">{t('home.introduction.journal', 'Journal')}</span>
+                      <Leaf className="w-5 h-5 sm:w-6 sm:h-6 text-[#d4a44c]/70 mb-1" />
+                      <span className="text-white/70 text-xs text-center leading-tight">{t('home.introduction.journal', 'Journal')}</span>
                     </Link>
                     <Link
                       href="/tools/ardha"
-                      className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[72px] sm:min-h-[80px]"
+                      className="flex flex-col items-center p-2 sm:p-3 bg-[#d4a44c]/5 hover:bg-[#d4a44c]/10 active:bg-[#d4a44c]/15 border border-[#d4a44c]/10 rounded-xl transition-all min-h-[72px] sm:min-h-[80px]"
                     >
-                      <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6 text-blue-300 mb-1" />
-                      <span className="text-white/80 text-xs text-center leading-tight">{t('home.introduction.reframe', 'Reframe')}</span>
+                      <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6 text-[#d4a44c]/70 mb-1" />
+                      <span className="text-white/70 text-xs text-center leading-tight">{t('home.introduction.reframe', 'Reframe')}</span>
                     </Link>
                     <Link
                       href="/tools/viyog"
-                      className="flex flex-col items-center p-2 sm:p-3 bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-xl transition-all min-h-[72px] sm:min-h-[80px]"
+                      className="flex flex-col items-center p-2 sm:p-3 bg-[#d4a44c]/5 hover:bg-[#d4a44c]/10 active:bg-[#d4a44c]/15 border border-[#d4a44c]/10 rounded-xl transition-all min-h-[72px] sm:min-h-[80px]"
                     >
-                      <Compass className="w-5 h-5 sm:w-6 sm:h-6 text-purple-300 mb-1" />
-                      <span className="text-white/80 text-xs text-center leading-tight">{t('home.introduction.detach', 'Detach')}</span>
+                      <Compass className="w-5 h-5 sm:w-6 sm:h-6 text-[#d4a44c]/70 mb-1" />
+                      <span className="text-white/70 text-xs text-center leading-tight">{t('home.introduction.detach', 'Detach')}</span>
                     </Link>
                   </div>
                 </motion.div>
@@ -411,10 +420,10 @@ export default function IntroductionPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8 }}
           >
-            <p className="text-white/70 text-xs sm:text-sm italic font-sacred max-w-md mx-auto px-4 leading-relaxed">
+            <p className="text-white/50 text-xs sm:text-sm italic font-sacred max-w-md mx-auto px-4 leading-relaxed">
               {t('home.introduction.footerVerse', '"I am the Self seated in the hearts of all beings. I am the beginning, the middle, and the end."')}
             </p>
-            <p className="text-amber-400/80 text-xs mt-2 font-medium">{t('home.introduction.footerVerseRef', '— Bhagavad Gita 10.20')}</p>
+            <p className="text-[#d4a44c]/50 text-xs mt-2 font-medium">{t('home.introduction.footerVerseRef', '— Bhagavad Gita 10.20')}</p>
           </motion.section>
 
           {/* ==================== FLOATING ELEMENTS ==================== */}

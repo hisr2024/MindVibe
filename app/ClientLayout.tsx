@@ -1,6 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
+
+const IntroOverlay = dynamic(
+  () => import('@/components/divine/IntroOverlay').then(mod => mod.IntroOverlay),
+  { ssr: false }
+)
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
@@ -28,5 +34,11 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     )
   }
 
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      {/* Divine intro overlay — shown once to first-time visitors */}
+      <IntroOverlay />
+    </>
+  )
 }

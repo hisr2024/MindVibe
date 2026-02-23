@@ -86,8 +86,8 @@ function EnemyRadarChart({ data, size = 240 }: RadarChartProps) {
       <svg width={size} height={size} className="mx-auto">
         <defs>
           <linearGradient id="radarFill" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="rgba(139, 92, 246, 0.35)" />
-            <stop offset="100%" stopColor="rgba(236, 72, 153, 0.25)" />
+            <stop offset="0%" stopColor="rgba(212, 164, 76, 0.3)" />
+            <stop offset="100%" stopColor="rgba(200, 148, 58, 0.15)" />
           </linearGradient>
           <filter id="radarGlow">
             <feGaussianBlur stdDeviation="3" result="blur" />
@@ -136,7 +136,7 @@ function EnemyRadarChart({ data, size = 240 }: RadarChartProps) {
         <motion.path
           d={pathD}
           fill="url(#radarFill)"
-          stroke="rgba(168, 85, 247, 0.8)"
+          stroke="rgba(212, 164, 76, 0.7)"
           strokeWidth="2"
           filter="url(#radarGlow)"
           initial={{ opacity: 0, scale: 0.3 }}
@@ -209,7 +209,7 @@ function EnemyMasteryCard({
       className={`
         relative w-full p-3 rounded-xl border text-left transition-all duration-300
         ${isSelected
-          ? 'border-white/25 bg-white/10 shadow-lg shadow-purple-500/10'
+          ? 'border-[#d4a44c]/30 bg-[#d4a44c]/10 shadow-lg shadow-[#d4a44c]/10'
           : 'border-white/[0.07] bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/15'
         }
       `}
@@ -286,12 +286,12 @@ function ActiveJourneyCard({ journey }: { journey: JourneyResponse }) {
 
           <div className="flex items-center justify-between text-xs text-white/50">
             <span>Day {journey.current_day} of {journey.total_days}</span>
-            <span className="font-bold text-purple-300">{Math.round(journey.progress_percentage)}%</span>
+            <span className="font-bold text-[#e8b54a]">{Math.round(journey.progress_percentage)}%</span>
           </div>
 
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
             <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500"
+              className="h-full rounded-full bg-gradient-to-r from-[#c8943a] to-[#e8b54a]"
               style={{ backgroundColor: enemyInfo?.color }}
               initial={{ width: 0 }}
               animate={{ width: `${journey.progress_percentage}%` }}
@@ -391,7 +391,8 @@ function TemplateCard({
             onStart(template.id)
           }}
           disabled={isStarting || disabled}
-          className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 py-2 text-xs font-semibold text-white transition-all hover:from-purple-500 hover:to-indigo-500 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-purple-500/20"
+          className="w-full rounded-lg py-2 text-xs font-semibold text-[#0a0a0f] transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#d4a44c]/20 hover:shadow-[#d4a44c]/30"
+          style={{ background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 45%, #f0c96d 100%)' }}
         >
           {isStarting ? 'Starting...' : 'Start Journey'}
         </button>
@@ -419,9 +420,10 @@ function EnemyFilter({
         onClick={() => { triggerHaptic('light'); onSelect(null) }}
         className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
           selected === null
-            ? 'bg-purple-500/80 text-white shadow-lg shadow-purple-500/30'
+            ? 'text-[#0a0a0f] shadow-lg shadow-[#d4a44c]/25'
             : 'bg-white/[0.06] text-white/60 hover:bg-white/10'
         }`}
+        style={selected === null ? { background: 'linear-gradient(135deg, #c8943a, #e8b54a)' } : undefined}
       >
         All
       </button>
@@ -620,10 +622,10 @@ export default function JourneysPageClient() {
     return (
       <div className="min-h-screen relative">
         {/* Background */}
-        <div className="fixed inset-0 bg-gradient-to-br from-gray-950 via-purple-950/50 to-indigo-950 pointer-events-none" />
+        <div className="fixed inset-0 bg-[#050507] pointer-events-none" />
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-purple-600/8 rounded-full blur-[120px]" />
-          <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-indigo-600/8 rounded-full blur-[100px]" />
+          <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-[#d4a44c]/[0.04] rounded-full blur-[120px]" />
+          <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-[#d4a44c]/[0.03] rounded-full blur-[100px]" />
         </div>
 
         <main className="relative z-10 mx-auto max-w-6xl space-y-8 px-4 sm:px-6 lg:px-8 pb-28 sm:pb-20 md:pb-10 pt-6">
@@ -632,11 +634,11 @@ export default function JourneysPageClient() {
             <div className="text-center mb-2">
               <h1 className="text-3xl sm:text-4xl font-bold text-white">
                 The Six Enemies{' '}
-                <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                <span style={{ background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 50%, #f0c96d 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                   (Shadripu)
                 </span>
               </h1>
-              <p className="mt-3 text-white/55 max-w-xl mx-auto text-sm leading-relaxed">
+              <p className="mt-3 text-white/50 max-w-xl mx-auto text-sm leading-relaxed">
                 According to the Bhagavad Gita, these six inner enemies prevent us from attaining peace.
                 Master them through guided journeys of wisdom and practice.
               </p>
@@ -647,7 +649,7 @@ export default function JourneysPageClient() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="rounded-2xl border border-purple-500/20 bg-white/[0.03] backdrop-blur-sm p-8 text-center"
+              className="rounded-2xl border border-[#d4a44c]/20 bg-white/[0.03] backdrop-blur-sm p-8 text-center"
             >
               <div className="text-5xl mb-4">{'\uD83D\uDE4F'}</div>
               <h3 className="text-lg font-semibold text-white mb-2">Sign In to Begin Your Journey</h3>
@@ -657,7 +659,8 @@ export default function JourneysPageClient() {
               </p>
               <Link
                 href="/onboarding"
-                className="inline-block rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-3 font-medium text-white shadow-lg shadow-purple-500/25 hover:from-purple-500 hover:to-indigo-500 transition-all"
+                className="inline-block rounded-xl px-8 py-3 font-medium text-[#0a0a0f] shadow-lg shadow-[#d4a44c]/20 transition-all hover:shadow-xl"
+                style={{ background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 45%, #f0c96d 100%)' }}
               >
                 Sign In
               </Link>
@@ -720,7 +723,7 @@ export default function JourneysPageClient() {
   if (loading || authLoading) {
     return (
       <div className="min-h-screen relative">
-        <div className="fixed inset-0 bg-gradient-to-br from-gray-950 via-purple-950/50 to-indigo-950 pointer-events-none" />
+        <div className="fixed inset-0 bg-[#050507] pointer-events-none" />
         <main className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white">Strengthen Steadiness Within</h1>
@@ -728,8 +731,8 @@ export default function JourneysPageClient() {
           </div>
           <div className="flex items-center justify-center py-20">
             <div className="relative">
-              <div className="h-14 w-14 animate-spin rounded-full border-2 border-purple-500/30 border-t-purple-500" />
-              <div className="absolute inset-0 h-14 w-14 animate-ping rounded-full border border-purple-500/20" />
+              <div className="h-14 w-14 animate-spin rounded-full border-2 border-[#d4a44c]/30 border-t-[#d4a44c]" />
+              <div className="absolute inset-0 h-14 w-14 animate-ping rounded-full border border-[#d4a44c]/20" />
             </div>
           </div>
         </main>
@@ -742,14 +745,14 @@ export default function JourneysPageClient() {
   // =========================================================================
   return (
     <div className="min-h-screen relative">
-      {/* Deep gradient background */}
-      <div className="fixed inset-0 bg-gradient-to-br from-gray-950 via-purple-950/50 to-indigo-950 pointer-events-none" />
+      {/* Deep black background */}
+      <div className="fixed inset-0 bg-[#050507] pointer-events-none" />
 
-      {/* Ambient floating orbs */}
+      {/* Ambient floating golden orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[15%] left-[20%] w-[500px] h-[500px] bg-purple-600/[0.07] rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
-        <div className="absolute bottom-[20%] right-[15%] w-[400px] h-[400px] bg-indigo-600/[0.06] rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '12s' }} />
-        <div className="absolute top-[60%] left-[50%] w-[300px] h-[300px] bg-pink-600/[0.04] rounded-full blur-[80px] animate-pulse" style={{ animationDuration: '10s' }} />
+        <div className="absolute top-[15%] left-[20%] w-[500px] h-[500px] bg-[#d4a44c]/[0.04] rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-[20%] right-[15%] w-[400px] h-[400px] bg-[#d4a44c]/[0.03] rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '12s' }} />
+        <div className="absolute top-[60%] left-[50%] w-[300px] h-[300px] bg-[#d4a44c]/[0.02] rounded-full blur-[80px] animate-pulse" style={{ animationDuration: '10s' }} />
       </div>
 
       <main className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-28 sm:pb-20 md:pb-10 pt-4 sm:pt-6">
@@ -765,20 +768,20 @@ export default function JourneysPageClient() {
                 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white"
               >
                 The Six Enemies{' '}
-                <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
+                <span style={{ background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 50%, #f0c96d 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                   (Shadripu)
                 </span>
               </motion.h1>
               <p className="mt-1.5 text-white/50 text-sm max-w-lg">
                 Master the inner enemies through guided journeys of Gita wisdom and daily practice.
               </p>
-              <p className="mt-1 text-[11px] tracking-wide text-purple-400/40" data-testid="mode-label">
+              <p className="mt-1 text-[11px] tracking-wide text-[#d4a44c]/35" data-testid="mode-label">
                 {t('dashboard.mode_label.prefix', 'You are in:')} {t('dashboard.mode_label.journey', 'Training Mode')}
               </p>
             </div>
             <Link
               href="/journeys/new"
-              className="shrink-0 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-white/60 transition-all hover:bg-white/[0.08] hover:text-white/80"
+              className="shrink-0 rounded-xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 px-4 py-2.5 text-sm font-medium text-[#d4a44c]/70 transition-all hover:bg-[#d4a44c]/10 hover:text-[#e8b54a]"
             >
               + Custom Journey
             </Link>
@@ -805,7 +808,8 @@ export default function JourneysPageClient() {
                     <button
                       onClick={handleFixStuckJourneys}
                       disabled={isFixing}
-                      className="rounded-lg bg-purple-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-purple-500 disabled:opacity-50"
+                      className="rounded-lg px-4 py-1.5 text-xs font-medium text-[#0a0a0f] disabled:opacity-50"
+                      style={{ background: 'linear-gradient(135deg, #c8943a, #e8b54a)' }}
                     >
                       {isFixing ? 'Fixing...' : 'Fix Stuck Journeys'}
                     </button>
@@ -867,9 +871,9 @@ export default function JourneysPageClient() {
             <motion.section
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8 rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-500/[0.08] to-indigo-500/[0.05] p-5 backdrop-blur-sm"
+              className="mb-8 rounded-2xl border border-[#d4a44c]/15 bg-gradient-to-r from-[#d4a44c]/[0.06] to-[#d4a44c]/[0.02] p-5 backdrop-blur-sm"
             >
-              <h2 className="text-base font-semibold text-purple-300 mb-3">
+              <h2 className="text-base font-semibold text-[#e8b54a] mb-3">
                 Today&apos;s Practice ({dashboard.today_steps.length} {dashboard.today_steps.length === 1 ? 'step' : 'steps'})
               </h2>
               <div className="space-y-2">
@@ -886,7 +890,7 @@ export default function JourneysPageClient() {
                     {step.is_completed ? (
                       <span className="text-xs text-emerald-400 font-medium">{'\u2713'} Complete</span>
                     ) : (
-                      <span className="px-3 py-1 text-xs font-medium bg-purple-600/80 text-white rounded-lg">
+                      <span className="px-3 py-1 text-xs font-medium rounded-lg text-[#0a0a0f]" style={{ background: 'linear-gradient(135deg, #c8943a, #e8b54a)' }}>
                         Practice Now
                       </span>
                     )}
@@ -977,7 +981,7 @@ export default function JourneysPageClient() {
                   {selectedEnemy && (
                     <button
                       onClick={() => setSelectedEnemy(null)}
-                      className="text-xs text-purple-400 hover:text-purple-300"
+                      className="text-xs text-[#d4a44c] hover:text-[#e8b54a]"
                     >
                       Show All
                     </button>
@@ -1009,7 +1013,7 @@ export default function JourneysPageClient() {
                         onClick={() => setShowAllTemplates(true)}
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.99 }}
-                        className="mt-4 w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-3 text-sm font-medium text-purple-400/80 hover:bg-white/[0.06] hover:text-purple-300 transition-all"
+                        className="mt-4 w-full rounded-xl border border-[#d4a44c]/15 bg-[#d4a44c]/5 py-3 text-sm font-medium text-[#d4a44c]/70 hover:bg-[#d4a44c]/10 hover:text-[#e8b54a] transition-all"
                       >
                         View All Templates
                       </motion.button>

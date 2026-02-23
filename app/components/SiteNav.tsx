@@ -54,7 +54,7 @@ export default function SiteNav() {
 
   return (
     <motion.header
-      className="fixed inset-x-0 top-0 z-40 border-b border-white/5 bg-[var(--brand-surface)]/95 shadow-lg shadow-black/20 backdrop-blur-xl"
+      className="fixed inset-x-0 top-0 z-40 border-b border-[#d4a44c]/10 bg-[#050507]/95 shadow-lg shadow-black/30 backdrop-blur-xl"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={springConfigs.smooth}
@@ -89,18 +89,18 @@ export default function SiteNav() {
                 <Link
                   href={link.href}
                   aria-current={active ? 'page' : undefined}
-                  className={`block rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
+                  className={`block rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050507] ${
                     active
                       ? isDivine
-                        ? 'border-2 border-amber-400 text-amber-300 shadow-lg shadow-amber-500/20'
+                        ? 'border-2 border-[#d4a44c] text-[#e8b54a] shadow-lg shadow-[#d4a44c]/20'
                         : isHighlight
-                        ? 'border-2 border-orange-500 text-orange-400 shadow-lg shadow-orange-500/20'
-                        : 'bg-white/10 text-white shadow-glowSunrise'
+                        ? 'border-2 border-[#d4a44c] text-[#e8b54a] shadow-lg shadow-[#d4a44c]/20'
+                        : 'bg-[#d4a44c]/10 text-white shadow-[0_0_16px_rgba(212,164,76,0.15)]'
                       : isDivine
-                      ? 'border border-amber-500/50 text-amber-300 hover:border-amber-400 hover:text-amber-200'
+                      ? 'border border-[#d4a44c]/40 text-[#d4a44c]/80 hover:border-[#d4a44c]/60 hover:text-[#e8b54a]'
                       : isHighlight
-                      ? 'border border-orange-500/50 text-orange-400 hover:border-orange-400 hover:text-orange-300'
-                      : 'text-white/70 hover:bg-white/5 hover:text-white'
+                      ? 'border border-[#d4a44c]/40 text-[#d4a44c]/80 hover:border-[#d4a44c]/60 hover:text-[#e8b54a]'
+                      : 'text-white/60 hover:bg-white/5 hover:text-white/90'
                   }`}
                 >
                   <motion.span
@@ -122,7 +122,7 @@ export default function SiteNav() {
 
           <Link
             href="/dashboard/subscription"
-            className="hidden rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5 hover:text-white sm:inline-flex"
+            className="hidden rounded-full border border-[#d4a44c]/20 px-4 py-2 text-sm font-semibold text-white/70 transition hover:border-[#d4a44c]/40 hover:text-white sm:inline-flex"
           >
             <motion.span whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               {t('navigation.mainNav.pricing', 'Subscriptions')}
@@ -130,7 +130,8 @@ export default function SiteNav() {
           </Link>
           <Link
             href="/account"
-            className="hidden rounded-full bg-mvGradientSunrise px-4 py-2 text-sm font-semibold text-slate-950 shadow-glowSunrise md:inline-flex"
+            className="hidden rounded-full px-4 py-2 text-sm font-semibold text-[#0a0a0f] shadow-[0_4px_20px_rgba(212,164,76,0.3)] md:inline-flex"
+            style={{ background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 45%, #f0c96d 100%)' }}
           >
             <motion.span
               whileHover={{ scale: 1.05 }}
@@ -142,7 +143,7 @@ export default function SiteNav() {
           </Link>
           <motion.button
             onClick={() => setOpen(value => !value)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/80 md:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 text-white/70 md:hidden"
             aria-expanded={open}
             aria-label={t('navigation.actions.toggleMenu', 'Toggle navigation menu')}
             whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
@@ -191,7 +192,7 @@ export default function SiteNav() {
             />
             {/* Mobile menu */}
             <motion.div
-              className="fixed inset-x-0 top-[60px] z-40 max-h-[calc(100vh-60px)] overflow-y-auto border-t border-white/10 bg-slate-950 px-4 py-4 shadow-xl md:hidden"
+              className="fixed inset-x-0 top-[60px] z-40 max-h-[calc(100vh-60px)] overflow-y-auto border-t border-[#d4a44c]/10 bg-[#050507] px-4 py-4 shadow-xl md:hidden"
               aria-label="Mobile navigation"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -225,23 +226,23 @@ export default function SiteNav() {
                         href={link.href}
                         onClick={() => setOpen(false)}
                         aria-current={active ? 'page' : undefined}
-                        className={`flex min-h-[48px] items-center rounded-xl px-4 py-3 text-base font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
+                        className={`flex min-h-[48px] items-center rounded-xl px-4 py-3 text-base font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050507] ${
                           active
                             ? isDivine
-                              ? 'border-2 border-amber-400 text-amber-300 shadow-lg shadow-amber-500/20'
+                              ? 'border-2 border-[#d4a44c] text-[#e8b54a] shadow-lg shadow-[#d4a44c]/20'
                               : isHighlight
-                              ? 'border-2 border-orange-500 text-orange-400 shadow-lg shadow-orange-500/20'
-                              : 'bg-white/10 text-white'
+                              ? 'border-2 border-[#d4a44c] text-[#e8b54a] shadow-lg shadow-[#d4a44c]/20'
+                              : 'bg-[#d4a44c]/10 text-white'
                             : isDivine
-                            ? 'border border-amber-500/50 text-amber-300 hover:border-amber-400 hover:text-amber-200'
+                            ? 'border border-[#d4a44c]/40 text-[#d4a44c]/80 hover:border-[#d4a44c]/60 hover:text-[#e8b54a]'
                             : isHighlight
-                            ? 'border border-orange-500/50 text-orange-400 hover:border-orange-400 hover:text-orange-300'
-                            : 'text-white/80 hover:bg-white/5 hover:text-white'
+                            ? 'border border-[#d4a44c]/40 text-[#d4a44c]/80 hover:border-[#d4a44c]/60 hover:text-[#e8b54a]'
+                            : 'text-white/70 hover:bg-white/5 hover:text-white'
                         }`}
                       >
                         {link.label}
                         {isHighlight && !active && (
-                          <span className="ml-auto rounded-full bg-orange-500/20 px-2 py-0.5 text-xs text-orange-300">
+                          <span className="ml-auto rounded-full bg-[#d4a44c]/15 px-2 py-0.5 text-xs text-[#d4a44c]/80">
                             AI
                           </span>
                         )}
@@ -256,7 +257,7 @@ export default function SiteNav() {
                 />
 
                 <motion.div
-                  className="flex min-h-[48px] items-center justify-between rounded-xl bg-white/5 px-4 py-3"
+                  className="flex min-h-[48px] items-center justify-between rounded-xl bg-[#d4a44c]/5 px-4 py-3"
                   variants={animationVariants.slideUp}
                 >
                   <span className="text-base font-medium text-white/80">{t('navigation.mainNav.theme', 'Theme')}</span>
@@ -267,7 +268,8 @@ export default function SiteNav() {
                   <Link
                     href="/account"
                     onClick={() => setOpen(false)}
-                    className="flex min-h-[48px] items-center justify-center rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-3 text-base font-semibold text-slate-950 shadow-lg shadow-orange-500/20 transition-all hover:shadow-xl"
+                    className="flex min-h-[48px] items-center justify-center rounded-xl px-4 py-3 text-base font-semibold text-[#0a0a0f] shadow-lg shadow-[#d4a44c]/20 transition-all hover:shadow-xl"
+                    style={{ background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 45%, #f0c96d 100%)' }}
                   >
                     {t('navigation.mainNav.account', 'Account Access')}
                   </Link>
