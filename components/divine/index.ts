@@ -57,6 +57,11 @@ export { DivineKrishnaPresence } from './DivineKrishnaPresence';
 export { DivineSacredActions } from './DivineSacredActions';
 
 // ========================================
+// Intro Overlay - First-visit welcome
+// ========================================
+export { IntroOverlay } from './IntroOverlay';
+
+// ========================================
 // Types
 // ========================================
 export type { EmotionalState, AtmosphereType, BreathingPattern } from '@/contexts/DivineConsciousnessContext';

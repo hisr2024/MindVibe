@@ -54,7 +54,7 @@ export default function SiteNav() {
 
   return (
     <motion.header
-      className="fixed inset-x-0 top-0 z-40 border-b border-white/5 bg-[var(--brand-surface)]/95 shadow-lg shadow-black/20 backdrop-blur-xl"
+      className="fixed inset-x-0 top-0 z-40 border-b border-[#d4a44c]/10 bg-[#050507]/95 shadow-lg shadow-black/30 backdrop-blur-xl"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={springConfigs.smooth}

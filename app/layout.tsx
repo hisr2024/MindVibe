@@ -15,6 +15,9 @@ import { OverlayRoot } from '@/components/ui/OverlayRoot'
 import { MobileRouteGuard, MobileContentWrapper } from '@/components/mobile/MobileRouteGuard'
 import { WebVitalsReporter } from '@/components/WebVitalsReporter'
 import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema'
+import dynamic from 'next/dynamic'
+
+const IntroOverlay = dynamic(() => import('@/components/divine/IntroOverlay').then(mod => mod.IntroOverlay), { ssr: false })
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -216,6 +219,8 @@ export default async function RootLayout({
             <BreadcrumbSchema />
             {/* Core Web Vitals monitoring */}
             <WebVitalsReporter />
+            {/* Divine intro overlay — shown once to first-time visitors */}
+            <IntroOverlay />
           </Providers>
         </ClientLayout>
       </body>
