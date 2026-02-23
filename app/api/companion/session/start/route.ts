@@ -3,6 +3,7 @@
  * Proxies session start requests to the backend companion service.
  */
 
+import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      session_id: `local_${Date.now()}`,
+      session_id: `local_${randomUUID()}`,
       greeting,
       phase: 'connect',
       friendship_level: 'new',
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
   } catch {
     return NextResponse.json(
       {
-        session_id: `local_${Date.now()}`,
+        session_id: `local_${randomUUID()}`,
         greeting: "Hey! I'm KIAAN, your best friend. Whatever's on your mind, I'm here. Talk to me.",
         phase: 'connect',
         friendship_level: 'new',

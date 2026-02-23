@@ -1,0 +1,705 @@
+/* =====================================================
+   MOBILE — Touch interactions, glass morphism, FAB, bottom sheets
+   ===================================================== */
+
+/* ─── Z-INDEX LAYER SYSTEM ─── */
+/* z-[9999] - Crisis alerts, critical system modals
+   z-[100]  - Toasts, notifications
+   z-[80]   - Tooltips, popovers
+   z-[70]   - Modals, dialogs (via Portal)
+   z-[65]   - Bottom sheets, drawers (via Portal)
+   z-[60]   - Floating action buttons, chat widgets
+   z-[50]   - Mobile bottom navigation
+   z-[40]   - Fixed header navigation (SiteNav)
+   z-[30]   - Backdrop overlays
+   z-[10]   - Content overlays
+   IMPORTANT: All modals/sheets should use Portal component
+   to render into #overlay-root, escaping stacking contexts. */
+
+/* ─── Safe Area ─── */
+.mobile-safe-area {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
+}
+
+.mobile-safe-padding {
+  padding-top: max(env(safe-area-inset-top), 0px);
+  padding-left: max(env(safe-area-inset-left), 0px);
+  padding-right: max(env(safe-area-inset-right), 0px);
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+
+@supports not (padding: env(safe-area-inset-bottom)) {
+  .mobile-safe-area { padding-bottom: 12px; }
+  .mobile-safe-padding { padding: 0; }
+}
+
+/* ─── Touch Targets ─── */
+@media (max-width: 768px) {
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  button, a, [role="button"], nav {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .scroll-container {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
+
+/* ─── Focus States ─── */
+:focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.7);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ─── Touch Ripple Effect ─── */
+.touch-ripple {
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 145, 89, 0.35) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: width 0.4s ease-out, height 0.4s ease-out, opacity 0.4s ease-out;
+}
+
+.touch-ripple:active::after {
+  width: 200%;
+  height: 200%;
+  opacity: 1;
+  transition: width 0s, height 0s, opacity 0s;
+}
+
+/* ─── Glass Morphism ─── */
+.mobile-glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+html.light .mobile-glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* ─── Interactive Cards ─── */
+.mobile-card-interactive {
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.2s ease,
+              border-color 0.2s ease;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-card-interactive:active {
+  transform: scale(0.97);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+@media (hover: hover) {
+  .mobile-card-interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(255, 145, 89, 0.15);
+    border-color: rgba(255, 145, 89, 0.3);
+  }
+}
+
+/* ─── Buttons ─── */
+.mobile-btn-primary {
+  position: relative;
+  background: linear-gradient(135deg, #ff7a3c 0%, #ff9f52 50%, #ffd36f 100%);
+  background-size: 200% 200%;
+  color: #0b0b0f;
+  font-weight: 600;
+  border-radius: 16px;
+  padding: 14px 24px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 4px 20px rgba(255, 122, 60, 0.35), 0 0 0 0 rgba(255, 145, 89, 0);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-btn-primary:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 12px rgba(255, 122, 60, 0.25), 0 0 0 4px rgba(255, 145, 89, 0.2);
+  background-position: 100% 100%;
+}
+
+.mobile-btn-secondary {
+  position: relative;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 145, 89, 0.25);
+  color: #fff;
+  font-weight: 500;
+  border-radius: 16px;
+  padding: 14px 24px;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-btn-secondary:active {
+  transform: scale(0.96);
+  background: rgba(255, 145, 89, 0.12);
+  border-color: rgba(255, 145, 89, 0.4);
+}
+
+/* ─── Mobile Input ─── */
+.mobile-input {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1.5px solid rgba(255, 145, 89, 0.2);
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-size: 16px; /* Prevents iOS zoom */
+  color: var(--mv-text-primary);
+  transition: all 0.25s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.mobile-input:focus {
+  outline: none;
+  border-color: rgba(255, 145, 89, 0.5);
+  box-shadow: 0 0 0 4px rgba(255, 145, 89, 0.12), 0 4px 20px rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.mobile-input::placeholder {
+  color: var(--mv-text-muted);
+  opacity: 0.7;
+}
+
+html.light .mobile-input {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+html.light .mobile-input:focus {
+  background: #fff;
+  border-color: #ff9159;
+  box-shadow: 0 0 0 4px rgba(255, 145, 89, 0.15), 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Pull to Refresh ─── */
+.pull-to-refresh-indicator {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  z-index: 9999;
+  padding: 12px 24px;
+  border-radius: 0 0 20px 20px;
+  background: linear-gradient(135deg, rgba(255, 122, 60, 0.95), rgba(255, 159, 82, 0.95));
+  color: #0b0b0f;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 4px 20px rgba(255, 122, 60, 0.4);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pull-to-refresh-indicator.visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ─── Skeleton Loader ─── */
+.skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+html.light .skeleton {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.08) 50%, rgba(0, 0, 0, 0.04) 100%);
+  background-size: 200% 100%;
+}
+
+.skeleton-text { height: 1em; border-radius: 4px; }
+.skeleton-title { height: 1.5em; width: 60%; border-radius: 6px; }
+.skeleton-avatar { border-radius: 50%; }
+.skeleton-card { border-radius: 16px; min-height: 120px; }
+
+/* ─── Anti-flicker for Overlays ─── */
+[role="dialog"],
+[aria-modal="true"] {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  perspective: 1000px;
+}
+
+.overlay-backdrop {
+  will-change: opacity;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.no-flicker {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  perspective: 1000px;
+}
+
+/* ─── Tab Bar ─── */
+.mobile-tab-glow {
+  position: relative;
+}
+
+.mobile-tab-glow::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  width: 60px;
+  height: 20px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(255, 145, 89, 0.4) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.mobile-tab-glow.active::before {
+  opacity: 1;
+}
+
+/* ─── Carousel ─── */
+.mobile-carousel {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 16px;
+  padding: 8px 16px 16px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mobile-carousel::-webkit-scrollbar { display: none; }
+.mobile-carousel > * { scroll-snap-align: start; flex-shrink: 0; }
+
+/* ─── FAB ─── */
+.mobile-fab {
+  position: fixed;
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px) + 16px);
+  right: 16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff7a3c 0%, #ffb347 100%);
+  color: #0b0b0f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 24px rgba(255, 122, 60, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 45;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-fab:active {
+  transform: scale(0.92);
+  box-shadow: 0 3px 16px rgba(255, 122, 60, 0.3), 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* ─── Toast ─── */
+.mobile-toast {
+  position: fixed;
+  bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  padding: 14px 24px;
+  border-radius: 16px;
+  background: rgba(15, 22, 36, 0.95);
+  border: 1px solid rgba(255, 145, 89, 0.2);
+  color: #f8fafc;
+  font-weight: 500;
+  font-size: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  z-index: 9999;
+  opacity: 0;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mobile-toast.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+html.light .mobile-toast {
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* ─── Mobile Loading State ─── */
+.mobile-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+  animation: mobile-loading-sweep 1.5s ease-in-out infinite;
+}
+
+/* ─── Haptic Feedback Visual ─── */
+.haptic-feedback {
+  position: relative;
+}
+
+.haptic-feedback::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: radial-gradient(circle at center, rgba(255, 145, 89, 0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.haptic-feedback:active::after {
+  opacity: 1;
+}
+
+/* ─── Offline Indicator ─── */
+.offline-indicator {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ef4444, #f97316, #ef4444);
+  background-size: 200% 100%;
+  animation: offline-gradient 2s linear infinite;
+  z-index: 9999;
+}
+
+/* ─── Keyboard Handling ─── */
+.keyboard-visible .mobile-nav,
+.keyboard-visible .mobile-fab {
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* ─── Swipe Indicator ─── */
+.swipe-indicator {
+  width: 40px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  margin: 0 auto 12px;
+  transition: background-color 0.2s ease;
+}
+
+.swipe-indicator:active { background: rgba(255, 145, 89, 0.6); }
+
+html.light .swipe-indicator { background: rgba(0, 0, 0, 0.2); }
+html.light .swipe-indicator:active { background: rgba(255, 145, 89, 0.8); }
+
+/* ─── Card Depth ─── */
+.mobile-card-depth {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mobile-card-depth::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.mobile-card-depth:active {
+  transform: scale(0.98) translateZ(-10px);
+}
+
+/* ─── Touch Highlight ─── */
+* { -webkit-tap-highlight-color: transparent; }
+
+a:not(.no-highlight),
+button:not(.no-highlight) {
+  -webkit-tap-highlight-color: rgba(255, 145, 89, 0.1);
+}
+
+/* ─── Mobile-Optimized Images ─── */
+img { content-visibility: auto; }
+
+/* ─── GPU Acceleration ─── */
+.gpu-accelerated,
+.mobile-card-interactive,
+.mobile-btn-primary,
+.mobile-btn-secondary,
+.mobile-fab {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.gpu-accelerated:active,
+.mobile-card-interactive:active {
+  will-change: transform;
+}
+
+@media (hover: hover) {
+  .gpu-accelerated:hover,
+  .mobile-card-interactive:hover {
+    will-change: transform;
+  }
+}
+
+/* ─── Enhanced Mobile Responsiveness ─── */
+@media (max-width: 768px) {
+  .touch-target-lg { min-height: 48px; min-width: 48px; }
+
+  input[type="text"], input[type="email"], input[type="password"],
+  input[type="search"], input[type="number"], input[type="tel"],
+  textarea, select {
+    font-size: 16px !important;
+  }
+
+  button:active, a:active, [role="button"]:active { opacity: 0.85; }
+
+  .list-item-interactive { transition: background-color 0.15s ease; }
+  .list-item-interactive:active { background-color: rgba(255, 145, 89, 0.08); }
+
+  .mobile-content-area {
+    min-height: calc(100vh - 88px - env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+
+  nav[aria-label="Mobile navigation"] { z-index: 50; }
+  .overlay-backdrop { z-index: 64; }
+  .overlay-bottom-sheet { z-index: 65; }
+}
+
+/* ─── iOS Viewport Fixes ─── */
+@supports (-webkit-touch-callout: none) {
+  .mobile-viewport-fix { min-height: -webkit-fill-available; }
+}
+
+body.scroll-locked { overflow: hidden !important; }
+html:has(body.scroll-locked) { overflow: hidden !important; }
+
+.mobile-viewport-fix {
+  min-height: 100vh;
+  min-height: 100dvh;
+  touch-action: manipulation;
+}
+
+body[style*="position: fixed"] { width: 100% !important; }
+
+@supports (height: 100dvh) {
+  .mobile-viewport-fix { min-height: 100dvh; }
+}
+
+.scroll-container, .overflow-y-auto, .overflow-auto {
+  overscroll-behavior: contain;
+}
+
+/* ─── Text Selection ─── */
+.no-select, button, nav, [role="button"], .mobile-nav, .mobile-tab-bar {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.selectable, p, article, .prose {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* ─── Mobile Content Spacing ─── */
+.mobile-content {
+  padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+}
+
+.mobile-content-area {
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 1;
+}
+
+.mobile-app-root {
+  min-height: 100dvh;
+  width: 100%;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+}
+
+/* ─── Enhanced Navigation ─── */
+.shadow-mobile-nav {
+  box-shadow:
+    0 -8px 32px rgba(0, 0, 0, 0.5),
+    0 -2px 8px rgba(0, 0, 0, 0.3),
+    0 1px 0 rgba(255, 145, 89, 0.1) inset;
+}
+
+.mobile-nav-glow {
+  position: relative;
+}
+
+.mobile-nav-glow::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 80px;
+  height: 100%;
+  background: radial-gradient(ellipse 50% 80% at 50% 0%, rgba(255, 145, 89, 0.2) 0%, transparent 60%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-nav-glow.active::after { opacity: 1; }
+
+.kiaan-nav-button {
+  position: relative;
+  z-index: 10;
+}
+
+.kiaan-nav-button::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 70px;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 145, 89, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.tools-grid-card {
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tools-grid-card:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.scroll-indicator { position: relative; }
+
+.scroll-indicator::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  background: linear-gradient(90deg, transparent, rgba(11, 11, 15, 0.9));
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.scroll-indicator.scrolled-end::after { opacity: 0; }
+
+.language-selector-mobile { min-height: 44px; min-width: 44px; }
+
+.mobile-fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 60;
+}
+
+.mobile-sheet-handle {
+  width: 48px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  margin: 0 auto;
+  transition: all 0.2s ease;
+}
+
+.mobile-sheet-handle:active,
+.mobile-sheet-handle.dragging {
+  width: 60px;
+  background: rgba(255, 145, 89, 0.6);
+}
+
+/* ─── Extra Small Phones ─── */
+@media (max-width: 359px) {
+  .xs-text-sm { font-size: 0.875rem; }
+  .xs-p-2 { padding: 0.5rem; }
+  .xs-gap-2 { gap: 0.5rem; }
+}
+
+/* ─── Landscape Mobile ─── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .landscape-hide { display: none !important; }
+  .landscape-compact { padding-top: 8px; padding-bottom: 8px; }
+  .mobile-nav { height: 56px; }
+}
+
+/* ─── OLED Dark Mode ─── */
+@media (prefers-color-scheme: dark) {
+  .oled-black { background-color: #000000; }
+}
+
+/* ─── High Contrast ─── */
+@media (prefers-contrast: high) {
+  .mobile-card, .mobile-button { border-width: 2px; }
+  .text-slate-400, .text-slate-500 { color: #94a3b8 !important; }
+}
+
+/* ─── Print ─── */
+@media print {
+  .mobile-nav, .mobile-fab, .mobile-header { display: none !important; }
+  .mobile-content { padding-bottom: 0; }
+}
+
+/* ─── Low-End Device Performance ─── */
+@media (prefers-reduced-motion: reduce), (update: slow) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-spin, .animate-pulse, .animate-bounce {
+    animation: none !important;
+  }
+}

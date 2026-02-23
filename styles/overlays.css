@@ -1,0 +1,80 @@
+/* =====================================================
+   OVERLAYS — Portal system, modals, bottom sheets
+   ===================================================== */
+
+/* Overlay root container - renders at document.body level */
+#overlay-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  overflow: visible;
+  contain: none;
+}
+
+#overlay-root > * {
+  pointer-events: auto;
+}
+
+/* Overlay backdrop */
+.overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  touch-action: none;
+}
+
+/* Overlay content container */
+.overlay-content {
+  position: fixed;
+  pointer-events: auto;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Bottom sheet */
+.overlay-bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 95vh;
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  overflow: visible;
+}
+
+/* Modal */
+.overlay-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Touch gesture support */
+.overlay-draggable {
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.overlay-draggable:active {
+  cursor: grabbing;
+}
+
+/* iOS Safari PWA mode */
+@supports (-webkit-touch-callout: none) {
+  #overlay-root {
+    -webkit-overflow-scrolling: auto;
+  }
+
+  .overlay-bottom-sheet {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}

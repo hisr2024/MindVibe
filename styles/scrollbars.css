@@ -1,0 +1,293 @@
+/* =====================================================
+   SCROLLBARS — Chat, subscription, energy flow, global
+   ===================================================== */
+
+/* ─── Scroll Stability ─── */
+.scroll-stable {
+  scrollbar-gutter: stable both-edges;
+  overscroll-behavior: contain;
+  overflow-anchor: auto;
+}
+
+/* ─── Kiaan Chat Scrollbar ─── */
+.kiaan-chat-scroll-container,
+.chat-scrollbar {
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.45) transparent;
+  overscroll-behavior: contain;
+  overflow-anchor: auto;
+  scrollbar-gutter: stable both-edges;
+  padding-inline-end: max(env(safe-area-inset-right), 0px);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+}
+
+.kiaan-chat-scroll-container::-webkit-scrollbar,
+.chat-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kiaan-chat-scroll-container::-webkit-scrollbar-track,
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 40%, rgba(255, 255, 255, 0.05));
+  margin: 6px 0;
+  border-radius: 9999px;
+}
+
+.kiaan-chat-scroll-container::-webkit-scrollbar-thumb,
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ffb347, #ff8c4a);
+  border-radius: 9999px;
+  border: 2px solid rgba(12, 18, 30, 0.9);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.kiaan-chat-scroll-container::-webkit-scrollbar-thumb:hover,
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ffd36f, #ff9a5c);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.chat-scrollbar:focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.55);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .kiaan-chat-scroll-container,
+  .chat-scrollbar {
+    scrollbar-width: auto;
+  }
+
+  .kiaan-chat-scroll-container::-webkit-scrollbar,
+  .chat-scrollbar::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  .kiaan-chat-scroll-container::-webkit-scrollbar-thumb,
+  .chat-scrollbar::-webkit-scrollbar-thumb {
+    border-width: 3px;
+  }
+}
+
+html.light .kiaan-chat-scroll-container,
+html.light .chat-scrollbar {
+  scrollbar-color: rgba(30, 41, 59, 0.6) transparent;
+  background-image: linear-gradient(180deg, rgba(30, 41, 59, 0.05), rgba(30, 41, 59, 0));
+}
+
+html.light .kiaan-chat-scroll-container::-webkit-scrollbar-thumb,
+html.light .chat-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #f59e0b, #ea580c);
+  border-color: #f8fafc;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25), 0 4px 12px rgba(15, 23, 42, 0.25);
+}
+
+.smooth-touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+/* ─── Chat Messages Scrollbar ─── */
+.chat-messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: rgba(255, 145, 89, 0.05);
+  border-radius: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ff9159 0%, #ffd070 100%);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ff7a3c 0%, #ff9f52 100%);
+}
+
+.chat-messages {
+  scrollbar-width: thin;
+  scrollbar-color: #ff9159 rgba(255, 145, 89, 0.05);
+  scroll-behavior: smooth;
+}
+
+/* ─── Energy Flow Scrollbar (SimpleBar theme) ─── */
+.mv-energy-scrollbar {
+  position: relative;
+  isolation: isolate;
+  --mv-energy-thumb: linear-gradient(180deg, #ffd08a 0%, #ff9b45 52%, #ff7a2c 100%);
+  --mv-energy-track: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 153, 51, 0.08), rgba(255, 255, 255, 0.04));
+}
+
+.mv-energy-scrollbar .simplebar-mask,
+.mv-energy-scrollbar .simplebar-offset {
+  border-radius: inherit;
+}
+
+.mv-energy-scrollbar .simplebar-content-wrapper {
+  scrollbar-gutter: stable both-edges;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+.mv-energy-scrollbar .simplebar-track.simplebar-vertical {
+  width: 12px;
+  margin: 12px 2px;
+  border-radius: 9999px;
+  background: var(--mv-energy-track);
+  box-shadow: inset 0 0 0 1px rgba(255, 153, 51, 0.05), 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+.mv-energy-scrollbar .simplebar-track.simplebar-horizontal {
+  height: 10px;
+  margin: 4px 8px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(255, 153, 51, 0.08), rgba(255, 255, 255, 0.04));
+}
+
+.mv-energy-scrollbar .simplebar-scrollbar::before {
+  content: '';
+  position: absolute;
+  inset: 3px 2px;
+  border-radius: 9999px;
+  background: var(--mv-energy-thumb);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15), 0 10px 30px rgba(255, 146, 60, 0.45);
+  opacity: 0.9;
+  animation: mv-energy-flow 2.4s ease-in-out infinite alternate;
+  transition: box-shadow 150ms ease, filter 150ms ease, opacity 200ms ease;
+}
+
+.mv-energy-scrollbar .simplebar-scrollbar.simplebar-visible::before {
+  opacity: 1;
+}
+
+.mv-energy-scrollbar .simplebar-scrollbar:hover::before,
+.mv-energy-scrollbar .simplebar-scrollbar:focus-visible::before {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22), 0 12px 36px rgba(255, 146, 60, 0.62);
+  filter: brightness(1.05);
+}
+
+.mv-energy-scrollbar .simplebar-content-wrapper:focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.6);
+  outline-offset: 2px;
+}
+
+@keyframes mv-energy-flow {
+  0%, 100% { transform: translateY(-6%) scale(0.98); }
+  50% { transform: translateY(6%) scale(1.02); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-energy-scrollbar .simplebar-scrollbar::before {
+    animation: none;
+  }
+}
+
+html.light .mv-energy-scrollbar {
+  --mv-energy-thumb: linear-gradient(180deg, #ffb347 0%, #ff8c4a 60%, #ffde8f 100%);
+  --mv-energy-track: linear-gradient(180deg, rgba(30, 41, 59, 0.08), rgba(255, 186, 120, 0.12), rgba(30, 41, 59, 0.05));
+}
+
+/* ─── Subscription Scroll Container ─── */
+.subscription-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 1rem;
+  scroll-padding-right: 1rem;
+  touch-action: pan-y;
+  transition: scrollbar-color 0.3s ease, background 0.3s ease;
+}
+
+.subscription-scroll.scrolling,
+.subscription-scroll:focus-visible {
+  scrollbar-color: rgba(251, 146, 60, 0.5) rgba(0, 0, 0, 0.1);
+}
+
+.subscription-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.subscription-scroll::-webkit-scrollbar-track {
+  background: radial-gradient(circle at 0% 50%, rgba(255, 115, 39, 0.12), transparent),
+    radial-gradient(circle at 100% 50%, rgba(255, 200, 80, 0.12), transparent);
+  border-radius: 9999px;
+}
+
+.subscription-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #ff7a2c, #ffc14f);
+  border-radius: 9999px;
+  opacity: 0;
+  box-shadow: 0 0 0 rgba(255, 140, 74, 0.25);
+  transition: opacity 0.35s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.subscription-scroll.scrolling::-webkit-scrollbar-thumb,
+.subscription-scroll:focus-visible::-webkit-scrollbar-thumb {
+  opacity: 1;
+  box-shadow: 0 0 12px rgba(255, 140, 74, 0.35);
+}
+
+.subscription-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #ff8c4a, #ffd06f);
+  box-shadow: 0 0 14px rgba(255, 115, 39, 0.45);
+}
+
+html.light .subscription-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+html.light .subscription-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #ea580c, #f59e0b);
+}
+
+html.light .subscription-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #c2410c, #d97706);
+}
+
+/* ─── Global Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ─── Scrollbar Hide Utility ─── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .subscription-scroll {
+    scroll-behavior: auto !important;
+  }
+
+  .smooth-touch-scroll {
+    scroll-behavior: auto !important;
+  }
+}

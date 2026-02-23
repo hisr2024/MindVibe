@@ -38,13 +38,13 @@ export const metadata = {
     siteName: 'MindVibe',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: '/og-image.svg', width: 1200, height: 630, alt: 'MindVibe - Your Spiritual Companion' }],
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'MindVibe - Your Spiritual Companion' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'MindVibe — Your Spiritual Companion & Divine Friend',
     description: 'Discover inner peace through Bhagavad Gita wisdom. KIAAN, your AI spiritual guide, offers sacred journeys, voice companionship, and tools for self-discovery.',
-    images: ['/og-image.svg'],
+    images: ['/og-image.png'],
   },
   alternates: {
     canonical: 'https://mindvibe.life',
@@ -116,7 +116,10 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Load Crimson Text at runtime */}
+        {/* Crimson Text (sacred font) — loaded via preconnect + stylesheet for
+            broadest build compatibility. The Google Fonts stylesheet injects
+            @font-face rules that make 'Crimson Text' available globally.
+            Tailwind's font-sacred stack: var(--font-sacred) → 'Crimson Text' → Georgia → serif */}
         <link
           rel="preconnect"
           href="https://fonts.googleapis.com"
