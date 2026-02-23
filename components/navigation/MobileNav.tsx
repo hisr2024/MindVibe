@@ -123,11 +123,11 @@ const activeIndicatorVariants = {
 const iconGlowVariants = {
   inactive: {
     scale: 1,
-    boxShadow: '0 0 0 rgba(255, 145, 89, 0)',
+    boxShadow: '0 0 0 rgba(212, 164, 76, 0)',
   },
   active: {
     scale: 1.1,
-    boxShadow: '0 0 20px rgba(255, 145, 89, 0.4)',
+    boxShadow: '0 0 20px rgba(212, 164, 76, 0.35)',
     transition: {
       type: 'spring' as const,
       stiffness: 300,
@@ -209,7 +209,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         >
           {/* Subtle top glow line */}
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500/50 to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4a44c]/40 to-transparent" />
 
           <div className="flex items-stretch justify-evenly px-2">
             {tabs.map((tab) => {
@@ -226,9 +226,9 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                     initial="rest"
                     whileTap="pressed"
                     whileHover="hover"
-                    className={`relative flex min-h-[68px] min-w-[60px] flex-1 flex-col items-center justify-center gap-1.5 py-2 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400 ${
+                    className={`relative flex min-h-[68px] min-w-[60px] flex-1 flex-col items-center justify-center gap-1.5 py-2 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#d4a44c]/60 ${
                       toolsSheetOpen
-                        ? 'text-orange-400'
+                        ? 'text-[#d4a44c]'
                         : 'text-white/50'
                     }`}
                     aria-expanded={toolsSheetOpen}
@@ -236,7 +236,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                   >
                     <motion.span
                       className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-all duration-200 ${
-                        toolsSheetOpen ? 'bg-orange-500/25 text-orange-400' : 'bg-white/5'
+                        toolsSheetOpen ? 'bg-[#d4a44c]/20 text-[#d4a44c]' : 'bg-white/5'
                       }`}
                       variants={iconGlowVariants}
                       animate={toolsSheetOpen ? 'active' : 'inactive'}
@@ -245,7 +245,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                     </motion.span>
                     <span
                       className={`text-[11px] leading-tight ${
-                        toolsSheetOpen ? 'font-bold text-orange-400' : 'font-medium text-white/50'
+                        toolsSheetOpen ? 'font-bold text-[#d4a44c]' : 'font-medium text-white/50'
                       }`}
                     >
                       {getTabLabel(tab.id, tab.label)}
@@ -261,7 +261,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                     key={tab.id}
                     href={tab.href}
                     onClick={() => handleTabPress(isActive, tab.id)}
-                    className="relative flex min-h-[68px] min-w-[70px] flex-col items-center justify-center gap-1 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400 -mt-4"
+                    className="relative flex min-h-[68px] min-w-[70px] flex-col items-center justify-center gap-1 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#d4a44c]/60 -mt-4"
                     aria-current={isActive ? 'page' : undefined}
                   >
                     <motion.div
@@ -273,15 +273,16 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                     >
                       {/* Highlighted KIAAN button - Prominent floating design */}
                       <motion.span
-                        className="relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 via-orange-400 to-amber-500 text-white shadow-xl border-4 border-[#0a0a0e]"
+                        className="relative flex h-14 w-14 items-center justify-center rounded-full text-[#0a0a0f] shadow-xl border-4 border-[#0a0a0e]"
+                        style={{ background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 50%, #f0c96d 100%)' }}
                         animate={{
                           boxShadow: isActive
                             ? [
-                                '0 6px 24px rgba(255, 145, 89, 0.5)',
-                                '0 6px 32px rgba(255, 145, 89, 0.7)',
-                                '0 6px 24px rgba(255, 145, 89, 0.5)',
+                                '0 6px 24px rgba(212, 164, 76, 0.4)',
+                                '0 6px 32px rgba(212, 164, 76, 0.6)',
+                                '0 6px 24px rgba(212, 164, 76, 0.4)',
                               ]
-                            : '0 6px 20px rgba(255, 145, 89, 0.4)',
+                            : '0 6px 20px rgba(212, 164, 76, 0.35)',
                           scale: isActive ? 1.08 : 1,
                         }}
                         transition={{
@@ -310,7 +311,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                       </motion.span>
                       <span
                         className={`text-[11px] leading-tight font-bold ${
-                          isActive ? 'text-orange-400' : 'text-orange-300/90'
+                          isActive ? 'text-[#d4a44c]' : 'text-[#d4a44c]/80'
                         }`}
                       >
                         {getTabLabel(tab.id, tab.label)}
@@ -326,7 +327,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                   key={tab.id}
                   href={tab.href}
                   onClick={() => handleTabPress(isActive, tab.id)}
-                  className="relative flex min-h-[68px] min-w-[60px] flex-1 flex-col items-center justify-center gap-1.5 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400"
+                  className="relative flex min-h-[68px] min-w-[60px] flex-1 flex-col items-center justify-center gap-1.5 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#d4a44c]/60"
                   aria-current={isActive ? 'page' : undefined}
                 >
                   <motion.div
@@ -338,7 +339,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                   >
                     <motion.span
                       className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-all duration-200 ${
-                        isActive ? 'text-orange-400 bg-orange-500/20' : 'text-white/50 bg-white/5'
+                        isActive ? 'text-[#d4a44c] bg-[#d4a44c]/15' : 'text-white/50 bg-white/5'
                       }`}
                       variants={iconGlowVariants}
                       animate={isActive ? 'active' : 'inactive'}
@@ -347,7 +348,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                     </motion.span>
                     <span
                       className={`text-[11px] leading-tight ${
-                        isActive ? 'font-bold text-orange-400' : 'font-medium text-white/50'
+                        isActive ? 'font-bold text-[#d4a44c]' : 'font-medium text-white/50'
                       }`}
                     >
                       {getTabLabel(tab.id, tab.label)}
@@ -358,7 +359,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                   <AnimatePresence>
                     {isActive && (
                       <motion.span
-                        className="absolute bottom-1 left-1/2 h-1 w-8 -translate-x-1/2 rounded-full bg-gradient-to-r from-orange-400 to-amber-400 shadow-[0_0_12px_rgba(255,145,89,0.6)]"
+                        className="absolute bottom-1 left-1/2 h-1 w-8 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#c8943a] to-[#e8b54a] shadow-[0_0_12px_rgba(212,164,76,0.5)]"
                         variants={activeIndicatorVariants}
                         initial="initial"
                         animate="animate"

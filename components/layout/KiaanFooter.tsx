@@ -109,15 +109,15 @@ const itemVariants = {
 const fabVariants = {
   rest: {
     scale: 1,
-    boxShadow: '0 8px 30px rgba(255, 115, 39, 0.35)',
+    boxShadow: '0 8px 30px rgba(212, 164, 76, 0.3)',
   },
   hover: {
     scale: 1.08,
-    boxShadow: '0 12px 40px rgba(255, 115, 39, 0.5)',
+    boxShadow: '0 12px 40px rgba(212, 164, 76, 0.45)',
   },
   tap: {
     scale: 0.92,
-    boxShadow: '0 4px 20px rgba(255, 115, 39, 0.25)',
+    boxShadow: '0 4px 20px rgba(212, 164, 76, 0.2)',
   },
 };
 
@@ -181,10 +181,10 @@ export function KiaanFooter() {
             initial="hidden"
             animate="visible"
             exit="hidden"
-            className="mb-3 w-[260px] overflow-hidden rounded-[20px] border border-orange-500/25 bg-gradient-to-b from-slate-900/[0.98] via-slate-900/95 to-slate-950/[0.98] shadow-2xl shadow-black/40 backdrop-blur-xl md:mb-4 md:w-[280px] md:rounded-[24px]"
+            className="mb-3 w-[260px] overflow-hidden rounded-[20px] border border-[#d4a44c]/20 bg-gradient-to-b from-[#0c0a06]/[0.98] via-[#080808]/95 to-[#050507]/[0.98] shadow-2xl shadow-black/40 backdrop-blur-xl md:mb-4 md:w-[280px] md:rounded-[24px]"
           >
             {/* Top glow accent */}
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500/50 to-transparent" />
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4a44c]/40 to-transparent" />
 
             {/* Header */}
             <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
@@ -259,9 +259,9 @@ export function KiaanFooter() {
             ? 'rest'
             : {
                 boxShadow: [
-                  '0 8px 30px rgba(255, 115, 39, 0.35)',
-                  '0 12px 40px rgba(255, 115, 39, 0.5)',
-                  '0 8px 30px rgba(255, 115, 39, 0.35)',
+                  '0 8px 30px rgba(212, 164, 76, 0.3)',
+                  '0 12px 40px rgba(212, 164, 76, 0.45)',
+                  '0 8px 30px rgba(212, 164, 76, 0.3)',
                 ],
                 transition: {
                   boxShadow: {
@@ -272,7 +272,8 @@ export function KiaanFooter() {
                 },
               }
         }
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 via-orange-400 to-amber-500 shadow-lg transition-all md:h-16 md:w-16"
+        className="flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all md:h-16 md:w-16"
+        style={{ background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 50%, #f0c96d 100%)' }}
         aria-label={isOpen ? 'Close tools menu' : 'Open tools menu'}
         aria-expanded={isOpen}
       >

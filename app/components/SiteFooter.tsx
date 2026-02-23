@@ -8,7 +8,7 @@ export default function SiteFooter() {
   const { t } = useLanguage()
 
   return (
-    <footer className="border-t border-white/[0.06] bg-gradient-to-b from-slate-950 to-[#050507]">
+    <footer className="border-t border-[#d4a44c]/8 bg-gradient-to-b from-[#080706] to-[#050507]">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6 md:flex-row md:items-start md:justify-between lg:px-8">
         <div className="space-y-3 md:max-w-xs">
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-orange-100/80">{t('common.app.name', 'MindVibe')}</p>
@@ -31,13 +31,13 @@ export default function SiteFooter() {
           <nav className="space-y-3 text-sm" aria-label="Footer explore links">
             <p className="text-xs font-semibold uppercase tracking-widest text-white/40">{t('navigation.footer.explore', 'Explore')}</p>
             <div className="flex flex-col gap-2.5">
-              <Link className="text-white/60 transition hover:text-orange-200" href="/about">
+              <Link className="text-white/50 transition hover:text-[#e8b54a]" href="/about">
                 {t('navigation.mainNav.about', 'About')}
               </Link>
-              <Link className="text-white/60 transition hover:text-orange-200" href="/features">
+              <Link className="text-white/50 transition hover:text-[#e8b54a]" href="/features">
                 {t('navigation.mainNav.features', 'Features')}
               </Link>
-              <Link className="text-white/60 transition hover:text-orange-200" href="/dashboard">
+              <Link className="text-white/50 transition hover:text-[#e8b54a]" href="/dashboard">
                 {t('navigation.mainNav.dashboard', 'Dashboard')}
               </Link>
             </div>
@@ -45,16 +45,16 @@ export default function SiteFooter() {
           <nav className="space-y-3 text-sm" aria-label="Footer support links">
             <p className="text-xs font-semibold uppercase tracking-widest text-white/40">{t('navigation.footer.support', 'Support')}</p>
             <div className="flex flex-col gap-2.5">
-              <Link className="text-white/60 transition hover:text-orange-200" href="/contact">
+              <Link className="text-white/50 transition hover:text-[#e8b54a]" href="/contact">
                 {t('navigation.mainNav.contact', 'Contact')}
               </Link>
-              <Link className="text-white/60 transition hover:text-orange-200" href="/privacy">
+              <Link className="text-white/50 transition hover:text-[#e8b54a]" href="/privacy">
                 {t('navigation.footer.privacy', 'Privacy')}
               </Link>
-              <Link className="text-white/60 transition hover:text-orange-200" href="/terms">
+              <Link className="text-white/50 transition hover:text-[#e8b54a]" href="/terms">
                 {t('navigation.footer.terms', 'Terms of Service')}
               </Link>
-              <a className="text-white/60 transition hover:text-orange-200" href="mailto:care@mindvibe.life">
+              <a className="text-white/50 transition hover:text-[#e8b54a]" href="mailto:care@mindvibe.life">
                 {t('navigation.footer.emailUs', 'Email us')}
               </a>
             </div>
