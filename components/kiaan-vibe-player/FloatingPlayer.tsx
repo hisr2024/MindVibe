@@ -67,6 +67,7 @@ export function FloatingPlayer() {
     toggleShuffle,
     toggleMute,
     removeFromQueue,
+    clearQueue,
     clearAudioError,
     retryPlayback,
   } = usePlayerStore()
@@ -105,12 +106,15 @@ export function FloatingPlayer() {
         case 'm':
           toggleMute()
           break
+        case 'Escape':
+          clearQueue()
+          break
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [toggle, seek, position, duration, next, previous, toggleMute])
+  }, [toggle, seek, position, duration, next, previous, toggleMute, clearQueue])
 
   // Handle progress bar click/drag
   const handleProgressClick = useCallback(
@@ -248,6 +252,15 @@ export function FloatingPlayer() {
                   ) : (
                     <ChevronUp className="w-4 h-4" />
                   )}
+                </button>
+
+                <button
+                  onClick={() => clearQueue()}
+                  className="p-2 text-white/40 hover:text-red-400 transition-colors"
+                  aria-label="Close player"
+                  title="Close player"
+                >
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
