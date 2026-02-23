@@ -9,7 +9,7 @@
  * Flow:
  * 1. DivineKrishnaPresence — Krishna's welcome (OM + "Welcome, Dear Friend")
  * 2. Krishna's Eternal Presence — He is always around us, guiding
- * 3. DivineAbhyaasVerse — The teaching of Practice (Gita 6.35)
+ * 3. Divine Features Grid — Protection Shield, Heart-to-Heart, Sacred Space, Sakha Mode
  * 4. Sacred Actions — Quick access to KIAAN tools
  * 5. Pathway Map — Healing journey steps
  * 6. Closing verse + Disclaimer
@@ -17,6 +17,7 @@
 
 import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { useLanguage } from '@/hooks/useLanguage';
 import { springConfigs } from '@/lib/animations/spring-configs';
 
@@ -26,8 +27,63 @@ import { PathwayMap } from '@/components/navigation/PathwayMap';
 // Dynamic imports for framer-motion components to reduce initial bundle size
 const DivineCelestialBackground = dynamic(() => import('@/components/divine/DivineCelestialBackground').then(mod => mod.DivineCelestialBackground), { ssr: false });
 const DivineKrishnaPresence = dynamic(() => import('@/components/divine/DivineKrishnaPresence').then(mod => mod.DivineKrishnaPresence), { ssr: false });
-const DivineAbhyaasVerse = dynamic(() => import('@/components/divine/DivineAbhyaasVerse').then(mod => mod.DivineAbhyaasVerse), { ssr: false });
 const DivineSacredActions = dynamic(() => import('@/components/divine/DivineSacredActions').then(mod => mod.DivineSacredActions), { ssr: false });
+
+/** Divine features grid data — the sacred tools from Image 3 */
+const divineFeatures = [
+  {
+    titleKey: 'home.features.shield.title',
+    titleFallback: 'Divine Protection Shield',
+    descKey: 'home.features.shield.desc',
+    descFallback: 'Activate Krishna\'s Sudarshana Chakra when anxiety or fear arises. A grounding exercise wrapped in divine protection.',
+    href: '/tools/emotional-reset',
+    symbol: '\u2638', // Dharma wheel
+    gradient: 'from-amber-500/12 to-orange-500/8',
+    borderColor: 'border-amber-500/15',
+    hoverBorder: 'rgba(245, 158, 11, 0.4)',
+    hoverShadow: '0 20px 60px rgba(245, 158, 11, 0.15)',
+    accentColor: 'text-amber-400/80',
+  },
+  {
+    titleKey: 'home.features.heartToHeart.title',
+    titleFallback: 'Heart-to-Heart Journal',
+    descKey: 'home.features.heartToHeart.desc',
+    descFallback: 'Write letters to Krishna in an intimate prayer journal. Receive loving responses rooted in Gita wisdom.',
+    href: '/sacred-reflections',
+    symbol: '\u2764', // Heart
+    gradient: 'from-rose-500/10 to-pink-500/6',
+    borderColor: 'border-rose-500/15',
+    hoverBorder: 'rgba(244, 63, 94, 0.35)',
+    hoverShadow: '0 20px 60px rgba(244, 63, 94, 0.12)',
+    accentColor: 'text-rose-400/80',
+  },
+  {
+    titleKey: 'home.features.sacredSpace.title',
+    titleFallback: 'Sacred Breathing Space',
+    descKey: 'home.features.sacredSpace.desc',
+    descFallback: 'Guided divine breathing exercises — inhale peace, exhale suffering. Visual breath circle with sacred mantras.',
+    href: '/tools/emotional-reset',
+    symbol: '\u0950', // OM
+    gradient: 'from-[#1e3a8a]/10 to-[#6ad7ff]/6',
+    borderColor: 'border-[#6ad7ff]/12',
+    hoverBorder: 'rgba(106, 215, 255, 0.35)',
+    hoverShadow: '0 20px 60px rgba(106, 215, 255, 0.12)',
+    accentColor: 'text-[#6ad7ff]/80',
+  },
+  {
+    titleKey: 'home.features.sakha.title',
+    titleFallback: 'Sakha Mode',
+    descKey: 'home.features.sakha.desc',
+    descFallback: 'Transform KIAAN into Krishna\'s friend form — intimate, warm conversations as a beloved companion who celebrates your joy and shares your tears.',
+    href: '/kiaan/chat',
+    symbol: '\u2727', // Sparkle
+    gradient: 'from-[#5b2168]/10 to-[#c2a5ff]/6',
+    borderColor: 'border-[#c2a5ff]/12',
+    hoverBorder: 'rgba(194, 165, 255, 0.35)',
+    hoverShadow: '0 20px 60px rgba(194, 165, 255, 0.12)',
+    accentColor: 'text-[#c2a5ff]/80',
+  },
+];
 
 export default function Home() {
   const { t, isInitialized } = useLanguage();
@@ -62,7 +118,7 @@ export default function Home() {
       {/* Content layer — above the celestial backdrop */}
       <div className="relative z-10 mx-auto max-w-6xl space-y-8 sm:space-y-12 pb-36 md:pb-16 px-4 sm:px-6">
 
-        {/* === DIVINE ENTRY: Krishna's Presence (Image 4 — stays as is) === */}
+        {/* === DIVINE ENTRY: Krishna's Presence === */}
         <DivineKrishnaPresence />
 
         {/* === KRISHNA'S ETERNAL PRESENCE: He is always around us === */}
@@ -146,8 +202,91 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* === ABHYAAS TEACHING: The core Gita message on Practice (Image 1) === */}
-        <DivineAbhyaasVerse />
+        {/* === DIVINE FEATURES: Protection Shield, Heart-to-Heart, Sacred Space, Sakha Mode === */}
+        <motion.section
+          className="space-y-6"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.7 }}
+        >
+          <motion.div
+            className="text-center"
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-xl sm:text-2xl font-bold text-white">
+              {t('home.features.heading', 'Sacred Tools for Inner Peace')}
+            </h2>
+            <p className="mt-2 text-sm text-white/60 max-w-lg mx-auto">
+              {t('home.features.subheading', 'Divine instruments to guide you through every moment — protection, prayer, breath, and friendship.')}
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="grid gap-4 sm:grid-cols-2"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-60px' }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.1 },
+              },
+            }}
+          >
+            {divineFeatures.map((feature) => (
+              <motion.div
+                key={feature.titleKey}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0 },
+                }}
+              >
+                <Link href={feature.href}>
+                  <motion.div
+                    className={`group relative overflow-hidden rounded-2xl border ${feature.borderColor} bg-gradient-to-br ${feature.gradient} p-5 sm:p-6`}
+                    whileHover={{
+                      y: -4,
+                      borderColor: feature.hoverBorder,
+                      boxShadow: feature.hoverShadow,
+                      transition: springConfigs.snappy,
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {/* Background symbol */}
+                    <span
+                      className="pointer-events-none absolute -right-2 -top-2 text-6xl opacity-[0.04] select-none"
+                      aria-hidden
+                    >
+                      {feature.symbol}
+                    </span>
+
+                    <h3 className="text-base font-semibold text-slate-100/90 sm:text-lg">
+                      {t(feature.titleKey, feature.titleFallback)}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-300/60">
+                      {t(feature.descKey, feature.descFallback)}
+                    </p>
+                    <div className={`mt-4 inline-flex items-center gap-2 text-sm font-semibold ${feature.accentColor}`}>
+                      {t('home.features.explore', 'Explore')}
+                      <motion.span
+                        aria-hidden
+                        animate={{ x: [0, 4, 0] }}
+                        transition={{ repeat: Infinity, duration: 2 }}
+                      >
+                        &rarr;
+                      </motion.span>
+                    </div>
+                  </motion.div>
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.section>
 
         {/* === SACRED ACTIONS: Quick access to KIAAN tools === */}
         <DivineSacredActions />
