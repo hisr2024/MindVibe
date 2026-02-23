@@ -358,21 +358,21 @@ function KiaanChatPageInner() {
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => handleCopyResponse(messages[messages.length - 1].text)}
+              onClick={() => handleCopyResponse(messages[messages.length - 1]?.text ?? '')}
               className="rounded-lg border border-[#d4a44c]/20 bg-white/5 px-3 py-2 text-sm font-semibold text-[#e8dcc8]/80 transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/10 hover:text-[#e8dcc8]"
               title="Copy last response"
             >
               📋 {t('kiaan.chat.copy', 'Copy')}
             </button>
             <button
-              onClick={() => handleShareResponse(messages[messages.length - 1].text)}
+              onClick={() => handleShareResponse(messages[messages.length - 1]?.text ?? '')}
               className="rounded-lg border border-[#d4a44c]/20 bg-white/5 px-3 py-2 text-sm font-semibold text-[#e8dcc8]/80 transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/10 hover:text-[#e8dcc8]"
               title={t('kiaan.chat.shareTitle', 'Share response')}
             >
               📤 {t('kiaan.chat.share', 'Share')}
             </button>
             <button
-              onClick={() => handleSaveToJournal(messages[messages.length - 1].text)}
+              onClick={() => handleSaveToJournal(messages[messages.length - 1]?.text ?? '')}
               className="kiaan-btn-golden rounded-lg px-3 py-2 text-sm font-semibold transition-all hover:scale-105"
               title={t('kiaan.chat.saveToJournalTitle', 'Save to Journal')}
             >

@@ -325,6 +325,8 @@ export default function QuantumDivePage() {
     const layerState = analysis.layers[layer]
     const layerInfo = LAYER_INFO[layer]
 
+    if (!layerState) return
+
     const coherencePercent = Math.round(layerState.coherence * 100)
 
     speak(
@@ -409,7 +411,7 @@ export default function QuantumDivePage() {
       <header className="relative z-10 px-4 py-4 border-b border-[#d4a44c]/10">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Link
-            href="/app/kiaan"
+            href="/kiaan"
             className="text-[#d4a44c]/50 hover:text-[#d4a44c] transition-colors"
           >
             &larr; Back to KIAAN
