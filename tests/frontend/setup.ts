@@ -59,3 +59,12 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }))
+
+// Stub HTMLMediaElement methods not implemented in jsdom
+// This prevents "Not implemented: HTMLMediaElement.prototype.pause" console errors
+// when any code (e.g. player store) calls audio.pause() or audio.play()
+if (typeof HTMLMediaElement !== 'undefined') {
+  HTMLMediaElement.prototype.pause = vi.fn()
+  HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined)
+  HTMLMediaElement.prototype.load = vi.fn()
+}
