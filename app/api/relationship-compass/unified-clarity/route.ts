@@ -11,36 +11,36 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 const REQUEST_TIMEOUT = 60000
 
 /**
- * Wisdom-enhanced fallback response.
- * Uses principle-based insight instead of generic advice.
+ * Gita-grounded wisdom-enhanced fallback response.
+ * All wisdom derived from Bhagavad Gita, presented in modern feeling-rich language.
  */
 const FALLBACK_RESPONSE = {
   response: `Mode: Conflict
 
 ## Emotional Precision
-Something important has been crossed in this relationship. The intensity you're feeling — whether it's frustration, hurt, or something harder to name — is your system flagging that a core need isn't being met. That's not overreacting. That's information.
+Something important has been crossed in this relationship — and you can feel it in your body, in the tightness of your chest, in the way your mind keeps circling back to what happened. The intensity you're feeling — whether it's frustration, hurt, or something harder to name — isn't overreacting. It's your heart telling you that something you deeply value is at stake. A need for respect, for safety, for being truly seen. That feeling deserves to be honored, not dismissed.
 
 ## What's Really Going On
-There's likely a gap between what you expected from this person and what you're actually getting. That gap is where the pain lives. It could be an unmet expectation, an attachment response, or a pattern that keeps repeating. The surface-level conflict is rarely the actual issue — underneath is usually a need for respect, safety, or recognition that isn't being addressed.
+Beneath the surface of this conflict, there's likely a deeper current at work. Much of our relationship pain comes from attachment — from holding tightly to how we believe things should be, and suffering when reality doesn't match. You had an image of how they should show up, what they should understand, how they should respond — and the gap between that expectation and what actually happened is where the pain lives. This isn't about being weak or needy. It's about being human enough to care deeply.
 
 ## The Deeper Insight
-There's a principle worth considering: you control how you show up — you do not control their response. Investing energy in managing their reaction is energy stolen from your own clarity. And strong emotions signal what matters, not what to do. The pause between feeling and action is where your actual power lives.
+Here's a truth that has guided people through heartbreak for thousands of years: you have complete authority over your own actions — but you have no control over the outcome. Pouring your heart into doing what's right while releasing your grip on how they respond is one of the hardest things a person can do. But it's also where your real freedom lives. Your peace can't be at the mercy of someone else's choices. When you stop trying to manage their reaction and focus entirely on showing up with integrity, something shifts inside you — and often, in the relationship too.
 
 ## The Hard Truth
-You cannot solve this by thinking harder about it. At some point, clarity comes from action, not analysis. The question isn't "What's the perfect thing to say?" — it's "What would I do if I respected myself enough to be honest?"
+You cannot solve this by thinking harder about it or by replaying the conversation a hundred more times in your head. At some point, clarity comes from action, not analysis. The question isn't "What's the perfect thing to say?" — it's "What would I do if I trusted my own worth enough to be honest?" That question cuts through everything.
 
 ## What To Do
-Before your next interaction, take 90 seconds to let the cortisol surge pass. Then ask yourself one question: "What do I actually need here?" Lead with that need, not the complaint. Not "You always do X" — but "I need Y. Can we talk about that?"
+Before your next interaction, give yourself the gift of a pause. Let the emotional storm pass through you — even 90 seconds of conscious breathing changes your inner landscape. Then ask yourself one honest question: "What do I actually need here?" Lead with that need, not the complaint. Not "You always do X" — but "I need Y. Can we talk about that?" Speaking from your real need instead of your accumulated frustration changes the entire dynamic.
 
 ## Script
-"I want to talk about something that matters to me. When [specific event] happened, I felt [specific emotion]. What I actually need is [specific need]. I'm not trying to win an argument — I want us to understand each other."`,
+"I want to talk about something that's been weighing on my heart. When [specific event] happened, I felt [specific emotion]. What I really need underneath all of it is [specific need]. I'm not bringing this up to fight or to win — I'm bringing it up because this relationship matters to me, and I want us to truly understand each other."`,
   sections: {
-    'Emotional Precision': 'Something important has been crossed in this relationship. The intensity you\'re feeling — whether it\'s frustration, hurt, or something harder to name — is your system flagging that a core need isn\'t being met. That\'s not overreacting. That\'s information.',
-    "What's Really Going On": 'There\'s likely a gap between what you expected from this person and what you\'re actually getting. That gap is where the pain lives. It could be an unmet expectation, an attachment response, or a pattern that keeps repeating. The surface-level conflict is rarely the actual issue — underneath is usually a need for respect, safety, or recognition.',
-    'The Deeper Insight': 'There\'s a principle worth considering: you control how you show up — you do not control their response. Investing energy in managing their reaction is energy stolen from your own clarity. And strong emotions signal what matters, not what to do. The pause between feeling and action is where your actual power lives.',
-    'The Hard Truth': 'You cannot solve this by thinking harder about it. At some point, clarity comes from action, not analysis. The question isn\'t "What\'s the perfect thing to say?" — it\'s "What would I do if I respected myself enough to be honest?"',
-    'What To Do': 'Before your next interaction, take 90 seconds to let the cortisol surge pass. Then ask yourself one question: "What do I actually need here?" Lead with that need, not the complaint.',
-    'Script': '"I want to talk about something that matters to me. When [specific event] happened, I felt [specific emotion]. What I actually need is [specific need]. I\'m not trying to win an argument — I want us to understand each other."',
+    'Emotional Precision': 'Something important has been crossed in this relationship — and you can feel it in your body, in the tightness of your chest, in the way your mind keeps circling back. The intensity you\'re feeling isn\'t overreacting. It\'s your heart telling you that something you deeply value is at stake. That feeling deserves to be honored, not dismissed.',
+    "What's Really Going On": 'Beneath the surface, there\'s likely a deeper current at work. Much of our relationship pain comes from attachment — from holding tightly to how we believe things should be, and suffering when reality doesn\'t match. The gap between expectation and what actually happened is where the pain lives. This isn\'t about being weak. It\'s about being human enough to care deeply.',
+    'The Deeper Insight': 'You have complete authority over your own actions — but you have no control over the outcome. Pouring your heart into doing what\'s right while releasing your grip on how they respond is where your real freedom lives. Your peace can\'t be at the mercy of someone else\'s choices.',
+    'The Hard Truth': 'You cannot solve this by thinking harder about it. Clarity comes from action, not analysis. The question isn\'t "What\'s the perfect thing to say?" — it\'s "What would I do if I trusted my own worth enough to be honest?"',
+    'What To Do': 'Before your next interaction, give yourself the gift of a pause. Let the emotional storm pass. Then ask: "What do I actually need here?" Lead with that need, not the complaint.',
+    'Script': '"I want to talk about something that\'s been weighing on my heart. When [event] happened, I felt [emotion]. What I really need is [need]. I\'m not bringing this up to fight — I\'m bringing it up because this relationship matters to me."',
   },
   analysis: {
     mode: 'conflict',
@@ -48,7 +48,7 @@ Before your next interaction, take 90 seconds to let the cortisol surge pass. Th
     secondary_emotions: [],
     emotional_intensity: 'moderate',
     mechanism: 'unmet_expectation',
-    mechanism_detail: 'A gap exists between expectation and reality.',
+    mechanism_detail: 'Pain from the gap between heartfelt expectation and reality — attachment to outcome.',
     power_dynamic: 'unknown',
     boundary_needed: false,
     safety_concern: false,
@@ -59,7 +59,7 @@ Before your next interaction, take 90 seconds to let the cortisol surge pass. Th
     analysis_depth: 'fallback',
   },
   provider: 'fallback',
-  model: 'wisdom_enhanced_static',
+  model: 'gita_wisdom_static',
   latency_ms: 0,
   wisdom_metadata: {
     total_sources: 2,
@@ -73,13 +73,13 @@ Before your next interaction, take 90 seconds to let the cortisol surge pass. Th
     principles: [
       {
         id: 'P01',
-        principle: 'Focus on your actions, not their response',
-        explanation: 'You control how you show up. You do not control their reaction.',
+        principle: 'Pour your heart into right action, release attachment to outcome',
+        explanation: 'You have authority over your actions, but not over their results. Your peace lives in doing what is right — not in controlling how others respond. (BG 2.47)',
       },
       {
         id: 'P02',
-        principle: 'Strong emotions signal what matters, not what to do',
-        explanation: 'Anger, hurt, fear: these flag that something important is at stake. But acting from the emotion itself usually makes things worse.',
+        principle: 'Strong emotions reveal what matters — equanimity reveals what to do',
+        explanation: 'Anger, hurt, fear: these tell you what is at stake. But acting from the emotional storm leads to regret. The pause between feeling and action is where wisdom lives. (BG 2.56)',
       },
     ],
     top_verses: [],

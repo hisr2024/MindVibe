@@ -122,6 +122,14 @@ const SECTION_CONFIG = {
       'Gita Wisdom': { title: 'Gita Wisdom', icon: '🙏', order: 6 },
       'One Small Step': { title: 'One Small Step', icon: '👣', order: 7 },
       'Let Me Understand Better': { title: 'Let Me Understand Better', icon: '❓', order: 8 },
+      // Unified Clarity / Engine sections (modern emotional precision format)
+      'Emotional Precision': { title: 'Emotional Precision', icon: '💜', order: 1 },
+      "What's Really Going On": { title: "What's Really Going On", icon: '💡', order: 2 },
+      "What's Actually Happening": { title: "What's Actually Happening", icon: '💡', order: 2 },
+      'The Deeper Insight': { title: 'The Deeper Insight', icon: '🤝', order: 3 },
+      'The Hard Truth': { title: 'The Hard Truth', icon: '✨', order: 4 },
+      'What To Do': { title: 'What To Do', icon: '👣', order: 5 },
+      'Script': { title: 'Script', icon: '💬', order: 6 },
       // Legacy/Gita sections (for backwards compatibility)
       'Sacred Acknowledgement': { title: 'Sacred Acknowledgement', icon: '🙏', order: 1 },
       'Inner Conflict Mirror': { title: 'Inner Conflict Mirror', icon: '🪞', order: 2 },
