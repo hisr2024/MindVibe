@@ -390,7 +390,7 @@ class WhisperService:
 
     def _estimate_pitch(
         self,
-        audio: 'np.ndarray',
+        audio: Any,
         sample_rate: int
     ) -> Tuple[float, float]:
         """Estimate pitch using simple autocorrelation"""

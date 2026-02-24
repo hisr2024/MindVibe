@@ -196,9 +196,7 @@ export default async function RootLayout({
             </MobileRouteGuard>
             {/* Content wrapper: full-width for /m/* routes, constrained <main> for desktop */}
             <MobileContentWrapper>
-              <div id="main-content">
-                {children}
-              </div>
+              {children}
             </MobileContentWrapper>
             {/* Footer, nav, FABs - hidden on /m/* routes where MobileAppShell handles these */}
             <MobileRouteGuard>

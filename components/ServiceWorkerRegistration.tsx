@@ -21,13 +21,14 @@ export function ServiceWorkerRegistration() {
             })
           }, 60000) // Check every minute
 
-          // Listen for updates
+          // Listen for updates and auto-activate new service worker
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // New service worker available - could show notification to user
+                  // Activate the new service worker immediately to clear stale caches
+                  newWorker.postMessage({ type: 'SKIP_WAITING' })
                 }
               })
             }
@@ -36,6 +37,15 @@ export function ServiceWorkerRegistration() {
         .catch((error) => {
           console.error('Service Worker registration failed:', error)
         })
+
+      // Reload page when a new service worker takes control (clears stale caches)
+      let refreshing = false
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true
+          window.location.reload()
+        }
+      })
 
       // Listen for messages from service worker
       navigator.serviceWorker.addEventListener('message', (event) => {
