@@ -51,7 +51,6 @@ export default function SiteNav() {
     { href: '/tools/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
     { href: '/profile', label: t('navigation.mainNav.profile', 'Profile') },
     { href: '/account', label: t('navigation.mainNav.account', 'Account') },
-    { href: '/introduction', label: t('navigation.mainNav.divinePresence', 'Divine Presence'), divine: true },
   ], [t])
 
   return (
@@ -128,19 +127,6 @@ export default function SiteNav() {
           >
             <motion.span whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               {t('navigation.mainNav.pricing', 'Subscriptions')}
-            </motion.span>
-          </Link>
-          <Link
-            href="/introduction"
-            className="hidden rounded-full px-4 py-2 text-sm font-semibold text-[#0a0a0f] shadow-[0_4px_20px_rgba(212,164,76,0.3)] md:inline-flex"
-            style={{ background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 45%, #f0c96d 100%)' }}
-          >
-            <motion.span
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={springConfigs.snappy}
-            >
-              {t('navigation.mainNav.divinePresence', 'Divine Presence')}
             </motion.span>
           </Link>
           <motion.button
@@ -266,16 +252,6 @@ export default function SiteNav() {
                   <ThemeToggle />
                 </motion.div>
 
-                <motion.div variants={animationVariants.slideUp} className="mt-2">
-                  <Link
-                    href="/introduction"
-                    onClick={() => setOpen(false)}
-                    className="flex min-h-[48px] items-center justify-center rounded-xl px-4 py-3 text-base font-semibold text-[#0a0a0f] shadow-lg shadow-[#d4a44c]/20 transition-all hover:shadow-xl"
-                    style={{ background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 45%, #f0c96d 100%)' }}
-                  >
-                    {t('navigation.mainNav.divinePresence', 'Divine Presence')}
-                  </Link>
-                </motion.div>
               </motion.nav>
             </motion.div>
           </>
