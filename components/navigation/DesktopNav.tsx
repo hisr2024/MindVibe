@@ -40,6 +40,7 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
     { href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Sacred Reflections') },
     { href: '/tools/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
     { href: '/profile', label: t('navigation.mainNav.profile', 'Profile') },
+    { href: '/account', label: t('navigation.mainNav.account', 'Account') },
     { href: '/introduction', label: t('navigation.mainNav.divinePresence', 'Divine Presence'), divine: true },
   ], [t])
 
