@@ -39,7 +39,7 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
     { href: '/dashboard', label: t('navigation.mainNav.dashboard', 'Dashboard') },
     { href: '/journeys', label: t('navigation.features.wisdomJourneys', 'Journeys'), premium: true, purposeDescKey: 'journey' },
     { href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Sacred Reflections') },
-    { href: '/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
+    { href: '/tools/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
     { href: '/introduction', label: t('navigation.mainNav.divinePresence', 'Divine Presence'), divine: true },
   ], [t])
 

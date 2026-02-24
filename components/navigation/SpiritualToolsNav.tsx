@@ -36,14 +36,14 @@ const SPIRITUAL_TOOLS: ToolLink[] = [
     id: 'viyoga',
     icon: '🎯',
     label: 'Viyoga',
-    href: '/viyog',
+    href: '/tools/viyog',
     description: 'Release attachment to outcomes',
   },
   {
     id: 'ardha',
     icon: '🔄',
     label: 'Ardha',
-    href: '/ardha',
+    href: '/tools/ardha',
     description: 'Reframe distorted thoughts',
   },
   {
@@ -57,14 +57,14 @@ const SPIRITUAL_TOOLS: ToolLink[] = [
     id: 'relationship-compass',
     icon: '🧭',
     label: 'Relationship Compass',
-    href: '/relationship-compass',
+    href: '/tools/relationship-compass',
     description: 'Gita-grounded relationship guidance',
   },
   {
     id: 'emotional-reset',
     icon: '💫',
     label: 'Emotional Reset',
-    href: '/emotional-reset',
+    href: '/tools/emotional-reset',
     description: '7-step guided emotional processing',
   },
   {
