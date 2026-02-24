@@ -3,8 +3,11 @@
 import Link from 'next/link'
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
+import { useSubscription } from '@/hooks/useSubscription'
+import { useFeatureAccess } from '@/hooks/useFeatureAccess'
 import { apiFetch } from '@/lib/api'
 import { WakeWordSettings } from '@/components/wake-word/WakeWordSettings'
+import { getKiaanTools } from '@/lib/api/kiaan-ecosystem'
 
 type LegacyAccount = {
   name: string
@@ -19,6 +22,83 @@ const LEGACY_ACCOUNT_STORAGE_KEY = 'mindvibe_accounts_v2'
 
 function formatDate(dateString: string) {
   return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(dateString))
+}
+
+/* Reusable chevron icon */
+function ChevronRight({ className = '' }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-orange-100/30 group-hover:text-orange-300 transition shrink-0 ${className}`}>
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  )
+}
+
+/* Reusable section wrapper */
+function AccountSection({
+  icon,
+  title,
+  subtitle,
+  children,
+  borderColor = 'border-orange-500/15',
+}: {
+  icon: React.ReactNode
+  title: string
+  subtitle?: string
+  children: React.ReactNode
+  borderColor?: string
+}) {
+  return (
+    <div className={`rounded-3xl border ${borderColor} bg-black/40 p-5 sm:p-6 mb-6`}>
+      <div className="flex items-center gap-3 mb-5">
+        <div className="h-9 w-9 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+          {icon}
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-orange-50">{title}</h2>
+          {subtitle && <p className="text-xs text-orange-100/50">{subtitle}</p>}
+        </div>
+      </div>
+      {children}
+    </div>
+  )
+}
+
+/* Reusable nav row (link or button) */
+function NavRow({
+  href,
+  onClick,
+  label,
+  description,
+  disabled,
+  trailingIcon,
+  isLast,
+  labelClass = 'text-orange-50 group-hover:text-orange-300',
+}: {
+  href?: string
+  onClick?: () => void
+  label: string
+  description: string
+  disabled?: boolean
+  trailingIcon?: React.ReactNode
+  isLast?: boolean
+  labelClass?: string
+}) {
+  const inner = (
+    <>
+      <div className="text-left">
+        <p className={`text-sm font-medium transition ${labelClass}`}>{label}</p>
+        <p className="text-xs text-orange-100/50 mt-0.5">{description}</p>
+      </div>
+      {trailingIcon ?? <ChevronRight />}
+    </>
+  )
+
+  const cls = `w-full flex items-center justify-between py-3 px-1 group ${isLast ? '' : 'border-b border-orange-500/10'} disabled:opacity-50`
+
+  if (href) {
+    return <Link href={href} className={cls}>{inner}</Link>
+  }
+  return <button onClick={onClick} disabled={disabled} className={cls}>{inner}</button>
 }
 
 /* ------------------------------------------------------------------ */
@@ -38,6 +118,10 @@ function AuthenticatedAccountView({
   const [isDeleting, setIsDeleting] = useState(false)
   const [actionStatus, setActionStatus] = useState<Status | null>(null)
   const { logout } = useAuth()
+  const { subscription } = useSubscription()
+  const { tier, isPaid, kiaanQuota, isKiaanUnlimited, journeyLimit, isDeveloper } = useFeatureAccess()
+
+  const kiaanTools = useMemo(() => getKiaanTools(), [])
 
   const handleExportData = useCallback(async () => {
     setIsExporting(true)
@@ -104,6 +188,16 @@ function AuthenticatedAccountView({
   const userName = user.name || user.email.split('@')[0]
   const userInitial = userName.charAt(0).toUpperCase()
 
+  const tierDisplayName = subscription?.tierName ?? 'Free'
+  const tierColors: Record<string, string> = {
+    free: 'border-orange-400/30 bg-orange-400/10 text-orange-300',
+    basic: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-300',
+    premium: 'border-purple-400/30 bg-purple-400/10 text-purple-300',
+    enterprise: 'border-amber-400/30 bg-amber-400/10 text-amber-300',
+    premier: 'border-rose-400/30 bg-rose-400/10 text-rose-300',
+  }
+  const tierBadgeClass = tierColors[tier] || tierColors.free
+
   return (
     <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
       {/* Page Header */}
@@ -124,9 +218,9 @@ function AuthenticatedAccountView({
         </div>
       )}
 
-      {/* Account Overview Card */}
+      {/* Account Overview + Subscription Card */}
       <div className="rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0f0a08] via-[#0b0b0f] to-[#0c0f19] p-6 mb-6 shadow-[0_24px_100px_rgba(255,115,39,0.12)]">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 mb-5">
           <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 flex items-center justify-center text-xl font-bold text-slate-900 shrink-0">
             {userInitial}
           </div>
@@ -134,167 +228,172 @@ function AuthenticatedAccountView({
             <p className="text-lg font-semibold text-orange-50 truncate">{userName}</p>
             <p className="text-sm text-orange-100/60 truncate">{user.email}</p>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 shrink-0">
-            <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-xs font-medium text-emerald-50">Active</span>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${tierBadgeClass}`}>
+              {isDeveloper ? 'Developer' : tierDisplayName}
+            </span>
+            <div className="flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1">
+              <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-xs font-medium text-emerald-50">Active</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Subscription Summary */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-4 border-t border-orange-500/10">
+          <div className="rounded-xl bg-white/[0.03] p-3">
+            <p className="text-xs text-orange-100/50 mb-1">KIAAN Quota</p>
+            <p className="text-sm font-semibold text-orange-50">
+              {isKiaanUnlimited ? 'Unlimited' : `${kiaanQuota}/month`}
+            </p>
+          </div>
+          <div className="rounded-xl bg-white/[0.03] p-3">
+            <p className="text-xs text-orange-100/50 mb-1">Journey Limit</p>
+            <p className="text-sm font-semibold text-orange-50">
+              {journeyLimit === -1 ? 'Unlimited' : `${journeyLimit} active`}
+            </p>
+          </div>
+          <div className="rounded-xl bg-white/[0.03] p-3 col-span-2 sm:col-span-1">
+            <p className="text-xs text-orange-100/50 mb-1">Plan</p>
+            <Link href="/dashboard/subscription" className="text-sm font-semibold text-orange-300 hover:text-orange-200 transition">
+              {isPaid ? `${tierDisplayName} Plan` : 'Free Plan'} &rarr;
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Security Section */}
-      <div className="rounded-3xl border border-orange-500/15 bg-black/40 p-5 sm:p-6 mb-6">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="h-9 w-9 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
-          </div>
-          <h2 className="text-lg font-semibold text-orange-50">Security</h2>
+      {/* KIAAN AI Ecosystem */}
+      <AccountSection
+        icon={<span className="text-base font-black text-orange-400">K</span>}
+        title="KIAAN AI Ecosystem"
+        subtitle={`${kiaanTools.length} tools powered by Ancient Wisdom`}
+      >
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+          {kiaanTools.slice(0, 8).map(tool => (
+            <Link
+              key={tool.id}
+              href={tool.route}
+              className="group rounded-xl border border-orange-500/10 bg-white/[0.02] p-3 text-center hover:border-orange-400/30 hover:bg-orange-500/5 transition"
+            >
+              <span className="text-lg block mb-1">{tool.icon}</span>
+              <span className="text-xs font-medium text-orange-100/70 group-hover:text-orange-50 transition line-clamp-1">{tool.name}</span>
+            </Link>
+          ))}
         </div>
         <div className="space-y-1">
-          <Link
-            href="/settings/security"
-            className="flex items-center justify-between py-3 px-1 group border-b border-orange-500/10"
-          >
-            <div>
-              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Two-Factor Authentication</p>
-              <p className="text-xs text-orange-100/50 mt-0.5">Add an extra layer of security to your account</p>
-            </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </Link>
-          <Link
-            href="/settings/security/sessions"
-            className="flex items-center justify-between py-3 px-1 group border-b border-orange-500/10"
-          >
-            <div>
-              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Active Sessions</p>
-              <p className="text-xs text-orange-100/50 mt-0.5">Manage devices logged into your account</p>
-            </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </Link>
-          <Link
-            href="/settings/security"
-            className="flex items-center justify-between py-3 px-1 group"
-          >
-            <div>
-              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Change Password</p>
-              <p className="text-xs text-orange-100/50 mt-0.5">Update your account password</p>
-            </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </Link>
+          <NavRow href="/kiaan/chat" label="Open KIAAN Chat" description="Your AI wisdom companion" isLast />
         </div>
-      </div>
+      </AccountSection>
+
+      {/* Subscription Management */}
+      <AccountSection
+        icon={
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+            <path d="M2 12l10 5 10-5" />
+          </svg>
+        }
+        title="Subscription"
+        subtitle={isPaid ? `${tierDisplayName} plan active` : 'Free plan'}
+      >
+        <div className="space-y-1">
+          <NavRow
+            href="/dashboard/subscription"
+            label="Manage Subscription"
+            description={isPaid ? `Currently on ${tierDisplayName}. View billing, upgrade, or cancel.` : 'View plans and upgrade for more KIAAN questions and features'}
+          />
+          {!isPaid && (
+            <NavRow
+              href="/pricing"
+              label="Upgrade to Premium"
+              description="Unlock voice companion, soul reading, unlimited journeys, and more"
+              isLast
+            />
+          )}
+          {isPaid && subscription?.cancelAtPeriodEnd && (
+            <div className="mt-3 rounded-xl border border-amber-400/30 bg-amber-400/10 p-3 text-xs text-amber-100">
+              Your plan will end on {subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString() : 'the end of the billing period'}. Renew to keep your features.
+            </div>
+          )}
+        </div>
+      </AccountSection>
+
+      {/* Security */}
+      <AccountSection
+        icon={
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+        }
+        title="Security"
+      >
+        <div className="space-y-1">
+          <NavRow href="/settings/security" label="Two-Factor Authentication" description="Add an extra layer of security to your account" />
+          <NavRow href="/settings/security/sessions" label="Active Sessions" description="Manage devices logged into your account" />
+          <NavRow href="/settings/security" label="Change Password" description="Update your account password" isLast />
+        </div>
+      </AccountSection>
 
       {/* KIAAN Voice Settings */}
-      <div className="rounded-3xl border border-orange-500/15 bg-black/40 p-5 sm:p-6 mb-6">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="h-9 w-9 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-              <line x1="12" y1="19" x2="12" y2="23" />
-              <line x1="8" y1="23" x2="16" y2="23" />
-            </svg>
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-orange-50">KIAAN Voice</h2>
-            <p className="text-xs text-orange-100/50">Wake up KIAAN with your voice from anywhere</p>
-          </div>
-        </div>
+      <AccountSection
+        icon={
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+            <line x1="12" y1="19" x2="12" y2="23" />
+            <line x1="8" y1="23" x2="16" y2="23" />
+          </svg>
+        }
+        title="KIAAN Voice"
+        subtitle="Wake up KIAAN with your voice from anywhere"
+      >
         <WakeWordSettings />
-      </div>
+      </AccountSection>
 
-      {/* Data Management Section */}
-      <div className="rounded-3xl border border-orange-500/15 bg-black/40 p-5 sm:p-6 mb-6">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="h-9 w-9 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-          </div>
-          <h2 className="text-lg font-semibold text-orange-50">Data Management</h2>
-        </div>
+      {/* Data Management */}
+      <AccountSection
+        icon={
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+        }
+        title="Data Management"
+      >
         <div className="space-y-1">
-          <button
+          <NavRow
             onClick={handleExportData}
             disabled={isExporting}
-            className="w-full flex items-center justify-between py-3 px-1 group border-b border-orange-500/10 disabled:opacity-50"
-          >
-            <div className="text-left">
-              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Export My Data</p>
-              <p className="text-xs text-orange-100/50 mt-0.5">Download all your journal entries, journeys, and settings</p>
-            </div>
-            {isExporting ? (
-              <div className="h-4 w-4 border-2 border-orange-400 border-t-transparent rounded-full animate-spin shrink-0" />
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-            )}
-          </button>
-          <Link
-            href="/settings"
-            className="flex items-center justify-between py-3 px-1 group"
-          >
-            <div>
-              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">App Settings</p>
-              <p className="text-xs text-orange-100/50 mt-0.5">Notifications, privacy, accessibility, and cache</p>
-            </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </Link>
+            label="Export My Data"
+            description="Download all your journal entries, journeys, and settings"
+            trailingIcon={
+              isExporting
+                ? <div className="h-4 w-4 border-2 border-orange-400 border-t-transparent rounded-full animate-spin shrink-0" />
+                : <ChevronRight />
+            }
+          />
+          <NavRow href="/settings" label="App Settings" description="Notifications, privacy, accessibility, and cache" isLast />
         </div>
-      </div>
+      </AccountSection>
 
       {/* Quick Links */}
-      <div className="rounded-3xl border border-orange-500/15 bg-black/40 p-5 sm:p-6 mb-6">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="h-9 w-9 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
-              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          </div>
-          <h2 className="text-lg font-semibold text-orange-50">Quick Links</h2>
-        </div>
+      <AccountSection
+        icon={
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+          </svg>
+        }
+        title="Quick Links"
+      >
         <div className="space-y-1">
-          <Link
-            href="/profile"
-            className="flex items-center justify-between py-3 px-1 group border-b border-orange-500/10"
-          >
-            <div>
-              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Edit Profile</p>
-              <p className="text-xs text-orange-100/50 mt-0.5">Update your name, bio, and avatar</p>
-            </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </Link>
-          <Link
-            href="/dashboard/subscription"
-            className="flex items-center justify-between py-3 px-1 group"
-          >
-            <div>
-              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Manage Subscription</p>
-              <p className="text-xs text-orange-100/50 mt-0.5">View or change your current plan</p>
-            </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </Link>
+          <NavRow href="/profile" label="Edit Profile" description="Update your name, bio, and avatar" />
+          <NavRow href="/dashboard" label="Dashboard" description="View your journey progress and insights" />
+          <NavRow href="/journeys" label="Wisdom Journeys" description="Explore guided spiritual growth paths" isLast />
         </div>
-      </div>
+      </AccountSection>
 
       {/* Danger Zone */}
       <div className="rounded-3xl border border-red-500/15 bg-black/40 p-5 sm:p-6 mb-6">
@@ -400,7 +499,6 @@ function UnauthenticatedAccountView() {
   const [mode, setMode] = useState<'create' | 'login'>('create')
   const [legacyAccounts, setLegacyAccounts] = useState<LegacyAccount[]>([])
   const [status, setStatus] = useState<Status | null>(null)
-  const [_hydrated, setHydrated] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [createForm, setCreateForm] = useState({
@@ -420,8 +518,13 @@ function UnauthenticatedAccountView() {
   useEffect(() => {
     if (typeof window === 'undefined') return
     const stored = window.localStorage.getItem(LEGACY_ACCOUNT_STORAGE_KEY)
-    if (stored) setLegacyAccounts(JSON.parse(stored))
-    setHydrated(true)
+    if (stored) {
+      try {
+        setLegacyAccounts(JSON.parse(stored))
+      } catch {
+        // Corrupted data, ignore
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -535,24 +638,76 @@ function UnauthenticatedAccountView() {
     }
   }
 
+  const kiaanTools = useMemo(() => getKiaanTools(), [])
+
   return (
-    <main className="mx-auto max-w-6xl space-y-8 px-4 pb-16">
+    <main className="mx-auto max-w-6xl space-y-8 px-4 pb-16 pt-6 sm:pt-8 md:pt-12">
+      {/* Hero Section */}
       <section className="rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0f0a08] via-[#0b0b0f] to-[#0c0f19] p-8 shadow-[0_24px_100px_rgba(255,115,39,0.18)]">
         <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.26em] text-orange-100/75">Account</p>
-          <h1 className="text-3xl font-bold text-orange-50">Access your account</h1>
-          <p className="text-sm text-orange-100/60">Create an account or sign in to sync your progress across devices</p>
+          <p className="text-xs uppercase tracking-[0.26em] text-orange-100/75">Account Access</p>
+          <h1 className="text-3xl font-bold text-orange-50">Welcome to MindVibe</h1>
+          <p className="text-sm text-orange-100/60">Create an account or sign in to sync your spiritual journey across devices</p>
         </div>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
+        {/* Left Column - KIAAN Ecosystem Preview + Info */}
         <div className="space-y-4">
+          {/* Session Status */}
           <div className="rounded-3xl border border-orange-500/20 bg-black/40 p-5 text-sm text-orange-100/80">
             <p className="font-semibold text-orange-50">No active session</p>
-            <p className="mt-1">Create an account or log in to unlock your personalized flows.</p>
+            <p className="mt-1">Create an account or log in to unlock your personalized spiritual flows.</p>
           </div>
+
+          {/* KIAAN Ecosystem Preview */}
+          <div className="rounded-3xl border border-orange-500/15 bg-black/40 p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/10 text-base font-black text-orange-400">K</span>
+              <div>
+                <p className="text-sm font-semibold text-orange-50">KIAAN AI Ecosystem</p>
+                <p className="text-xs text-orange-100/50">{kiaanTools.length} wisdom-powered tools await you</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {kiaanTools.slice(0, 8).map(tool => (
+                <div
+                  key={tool.id}
+                  className="rounded-xl border border-orange-500/10 bg-white/[0.02] p-2 text-center opacity-60"
+                >
+                  <span className="text-lg block">{tool.icon}</span>
+                  <span className="text-[10px] text-orange-100/50 line-clamp-1">{tool.name}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-orange-100/40 mt-3 text-center">Sign in to access all tools</p>
+          </div>
+
+          {/* Legacy accounts */}
+          {legacyAccounts.length > 0 && (
+            <div className="rounded-3xl border border-orange-500/15 bg-black/50 p-5 text-sm text-orange-100/80">
+              <p className="text-xs uppercase tracking-[0.18em] text-orange-100/60">Previous local accounts</p>
+              <p className="mt-2 text-xs text-orange-100/50">These accounts were stored locally. Create a new account to sync your data securely.</p>
+              <ul className="mt-3 space-y-3">
+                {legacyAccounts
+                  .slice()
+                  .reverse()
+                  .slice(0, 3)
+                  .map(account => (
+                    <li key={account.email} className="rounded-2xl border border-orange-500/20 bg-slate-950/80 p-3">
+                      <div className="flex items-center justify-between text-orange-50">
+                        <span className="font-semibold">{account.name}</span>
+                        <span className="text-xs uppercase tracking-[0.14em] text-orange-100/70">{formatDate(account.createdAt)}</span>
+                      </div>
+                      <p className="text-xs text-orange-100/70">{account.email}</p>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
         </div>
 
+        {/* Right Column - Auth Forms */}
         <div className="space-y-4">
           <div className="rounded-3xl border border-orange-500/20 bg-black/60 p-6 shadow-[0_20px_70px_rgba(255,115,39,0.14)]">
             <div className="flex items-center justify-between">
@@ -562,7 +717,7 @@ function UnauthenticatedAccountView() {
               </div>
               <div className="flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-50">
                 <span className="inline-block h-2 w-2 rounded-full bg-emerald-300" />
-                Secure authentication
+                Secure auth
               </div>
             </div>
 
@@ -577,7 +732,7 @@ function UnauthenticatedAccountView() {
                 onClick={() => { setMode('login'); resetStatus(); }}
                 className={`flex-1 rounded-xl px-3 py-2 transition ${mode === 'login' ? 'bg-orange-500 text-slate-950 shadow-md shadow-orange-500/30' : 'hover:bg-orange-500/20'}`}
               >
-                Login with Password
+                Sign In
               </button>
             </div>
 
@@ -598,9 +753,7 @@ function UnauthenticatedAccountView() {
             {mode === 'create' ? (
               <form className="mt-6 space-y-4" onSubmit={handleCreate}>
                 <div className="space-y-1">
-                  <label className="text-sm font-semibold text-orange-50" htmlFor="name">
-                    Full name
-                  </label>
+                  <label className="text-sm font-semibold text-orange-50" htmlFor="name">Full name</label>
                   <input
                     id="name"
                     type="text"
@@ -613,9 +766,7 @@ function UnauthenticatedAccountView() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-semibold text-orange-50" htmlFor="email">
-                    Email
-                  </label>
+                  <label className="text-sm font-semibold text-orange-50" htmlFor="email">Email</label>
                   <input
                     id="email"
                     type="email"
@@ -628,9 +779,7 @@ function UnauthenticatedAccountView() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-orange-50" htmlFor="password">
-                    Password
-                  </label>
+                  <label className="text-sm font-semibold text-orange-50" htmlFor="password">Password</label>
                   <input
                     id="password"
                     type="password"
@@ -660,9 +809,7 @@ function UnauthenticatedAccountView() {
             ) : (
               <form className="mt-6 space-y-4" onSubmit={handleLogin}>
                 <div className="space-y-1">
-                  <label className="text-sm font-semibold text-orange-50" htmlFor="login-email">
-                    Email
-                  </label>
+                  <label className="text-sm font-semibold text-orange-50" htmlFor="login-email">Email</label>
                   <input
                     id="login-email"
                     type="email"
@@ -675,9 +822,7 @@ function UnauthenticatedAccountView() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-semibold text-orange-50" htmlFor="login-password">
-                    Password
-                  </label>
+                  <label className="text-sm font-semibold text-orange-50" htmlFor="login-password">Password</label>
                   <input
                     id="login-password"
                     type="password"
@@ -691,9 +836,7 @@ function UnauthenticatedAccountView() {
                 </div>
                 {needsTwoFactor && (
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-orange-50" htmlFor="two-factor">
-                      Two-Factor Code
-                    </label>
+                    <label className="text-sm font-semibold text-orange-50" htmlFor="two-factor">Two-Factor Code</label>
                     <input
                       id="two-factor"
                       type="text"
@@ -728,29 +871,6 @@ function UnauthenticatedAccountView() {
               </form>
             )}
           </div>
-
-          {/* Show legacy accounts if any exist */}
-          {legacyAccounts.length > 0 && (
-            <div className="rounded-3xl border border-orange-500/15 bg-black/50 p-5 text-sm text-orange-100/80">
-              <p className="text-xs uppercase tracking-[0.18em] text-orange-100/60">Previous local accounts</p>
-              <p className="mt-2 text-xs text-orange-100/50">These accounts were stored locally. Create a new account to sync your data securely.</p>
-              <ul className="mt-3 space-y-3">
-                {legacyAccounts
-                  .slice()
-                  .reverse()
-                  .slice(0, 3)
-                  .map(account => (
-                    <li key={account.email} className="rounded-2xl border border-orange-500/20 bg-slate-950/80 p-3">
-                      <div className="flex items-center justify-between text-orange-50">
-                        <span className="font-semibold">{account.name}</span>
-                        <span className="text-xs uppercase tracking-[0.14em] text-orange-100/70">{formatDate(account.createdAt)}</span>
-                      </div>
-                      <p className="text-xs text-orange-100/70">{account.email}</p>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          )}
         </div>
       </section>
     </main>
