@@ -39,9 +39,8 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
     { href: '/dashboard', label: t('navigation.mainNav.dashboard', 'Dashboard') },
     { href: '/journeys', label: t('navigation.features.wisdomJourneys', 'Journeys'), premium: true, purposeDescKey: 'journey' },
     { href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Sacred Reflections') },
-    { href: '/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
-    { href: '/profile', label: t('navigation.mainNav.profile', 'Profile') },
-    { href: '/account', label: t('navigation.mainNav.account', 'Account') },
+    { href: '/tools/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
+    { href: '/introduction', label: t('navigation.mainNav.divinePresence', 'Divine Presence'), divine: true },
   ], [t])
 
   // Get tools for mobile menu display
@@ -109,50 +108,13 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
             {t('navigation.mainNav.pricing', 'Subscriptions')}
           </Link>
           <Link
-            href="/profile"
+            href="/introduction"
             className={`hidden items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition hover:bg-white/5 hover:text-white md:inline-flex focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
-              pathname === '/profile' ? 'border-orange-500/40 text-white bg-white/5' : 'border-white/10 text-white/80'
+              pathname === '/introduction' ? 'border-amber-500/40 text-amber-200 bg-amber-500/10' : 'border-white/10 text-white/80'
             }`}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-            {t('navigation.mainNav.profile', 'Profile')}
-          </Link>
-          <Link
-            href="/account"
-            className={`hidden items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition hover:bg-white/5 hover:text-white md:inline-flex focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
-              pathname === '/account' ? 'border-orange-500/40 text-white bg-white/5' : 'border-white/10 text-white/80'
-            }`}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-            {t('navigation.mainNav.account', 'Account')}
+            <span className="text-base leading-none" aria-hidden="true">ॐ</span>
+            {t('navigation.mainNav.divinePresence', 'Divine Presence')}
           </Link>
 
           {/* Mobile menu button */}
@@ -230,18 +192,11 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
             </div>
             <div className="flex gap-2">
               <Link
-                href="/profile"
+                href="/introduction"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 rounded-full bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-3 py-2 text-center text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
+                className="flex-1 rounded-full bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-400 px-3 py-2 text-center text-sm font-semibold text-slate-950 shadow-lg shadow-amber-500/25"
               >
-                {t('navigation.mainNav.profile', 'Profile')}
-              </Link>
-              <Link
-                href="/account"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 rounded-full border border-orange-500/30 px-3 py-2 text-center text-sm font-semibold text-orange-50 hover:bg-orange-500/10 transition"
-              >
-                {t('navigation.mainNav.account', 'Account')}
+                ॐ {t('navigation.mainNav.divinePresence', 'Divine Presence')}
               </Link>
             </div>
           </div>

@@ -41,6 +41,10 @@ CSRF_EXEMPT_PATHS: Set[str] = {
     "/api/auth/reset-password",
     # Admin login - no session exists yet
     "/api/admin/auth/login",
+    # WebAuthn authentication - no session exists yet (biometric login)
+    # Rate limiting protects against brute force
+    "/api/auth/webauthn/authenticate/options",
+    "/api/auth/webauthn/authenticate/verify",
 }
 
 # Methods that require CSRF protection

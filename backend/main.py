@@ -560,6 +560,20 @@ except Exception as e:
 # The two_factor_auth.py module exists for reference but endpoints are in auth.py
 startup_logger.info("\n[2FA] 2FA endpoints included in Auth router")
 
+# Load WebAuthn (biometric authentication) router
+startup_logger.info("\n[WebAuthn] Attempting to import WebAuthn router...")
+try:
+    from backend.routes.webauthn import router as webauthn_router
+    app.include_router(webauthn_router)
+    startup_logger.info("✅ [SUCCESS] WebAuthn router loaded (Biometric Authentication)")
+    startup_logger.info("   • POST   /api/auth/webauthn/register/options - Get registration challenge")
+    startup_logger.info("   • POST   /api/auth/webauthn/register/verify - Verify registration")
+    startup_logger.info("   • POST   /api/auth/webauthn/authenticate/options - Get auth challenge")
+    startup_logger.info("   • POST   /api/auth/webauthn/authenticate/verify - Verify authentication")
+    startup_logger.info("   • POST   /api/auth/webauthn/unregister - Remove credential")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load WebAuthn router: {e}")
+
 # Load Profile router
 startup_logger.info("\n[Profile] Attempting to import Profile router...")
 try:

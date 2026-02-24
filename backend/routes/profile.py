@@ -30,13 +30,19 @@ class ProfileOut(BaseModel):
 async def _get_authenticated_user_and_session(
     request: Request, db: AsyncSession
 ) -> tuple[User, Session, int | None]:
+    # Accept Bearer token OR httpOnly cookie (same pattern as auth routes)
     auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.lower().startswith("bearer "):
+    token = None
+
+    if auth_header and auth_header.lower().startswith("bearer "):
+        token = auth_header.split(" ", 1)[1].strip()
+    else:
+        token = request.cookies.get("access_token")
+
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
         )
-
-    token = auth_header.split(" ", 1)[1].strip()
     try:
         payload = decode_access_token(token)
     except Exception as exc:  # pragma: no cover - explicit error path
