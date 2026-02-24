@@ -1,13 +1,15 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { ProfileHeader } from '@/components/profile/ProfileHeader'
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
 import { AvatarUpload } from '@/components/profile/AvatarUpload'
 import { Card, CardContent, Badge, Button } from '@/components/ui'
 import { useSubscription } from '@/hooks/useSubscription'
+import { useFeatureAccess } from '@/hooks/useFeatureAccess'
 import { useAuth } from '@/hooks/useAuth'
 import { apiFetch } from '@/lib/api'
+import { getKiaanTools } from '@/lib/api/kiaan-ecosystem'
 import Link from 'next/link'
 
 interface ProfileData {
@@ -39,11 +41,12 @@ const PROFILE_STORAGE_KEY = 'mindvibe_profile'
 
 export default function ProfilePage() {
   const { subscription } = useSubscription()
+  const { tier, isPaid, kiaanQuota, isKiaanUnlimited, journeyLimit, isDeveloper } = useFeatureAccess()
   const { user, isAuthenticated, loading: authLoading } = useAuth()
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [_saving, setSaving] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [stats, setStats] = useState<ProfileStats>({
     journeysCompleted: 0,
@@ -52,7 +55,8 @@ export default function ProfilePage() {
     dayStreak: 0,
   })
 
-  // Fetch profile stats from analytics
+  const kiaanTools = useMemo(() => getKiaanTools(), [])
+
   const fetchStats = useCallback(async () => {
     if (!isAuthenticated) return
     try {
@@ -67,22 +71,18 @@ export default function ProfilePage() {
         })
       }
     } catch {
-      // Stats are non-critical, fail silently
+      // Stats are non-critical
     }
   }, [isAuthenticated])
 
-  // Fetch profile from backend or localStorage
   const fetchProfile = useCallback(async () => {
     setLoading(true)
     setError(null)
 
     try {
-      // If authenticated, try to fetch from backend
       if (isAuthenticated && user) {
         try {
-          const response = await apiFetch('/api/profile', {
-            method: 'GET',
-          })
+          const response = await apiFetch('/api/profile', { method: 'GET' })
 
           if (response.ok) {
             const backendProfile: BackendProfile = await response.json()
@@ -94,7 +94,6 @@ export default function ProfilePage() {
               createdAt: backendProfile.created_at,
             }
 
-            // Try to get avatar and bio from localStorage cache
             const cached = localStorage.getItem(PROFILE_STORAGE_KEY)
             if (cached) {
               try {
@@ -175,7 +174,6 @@ export default function ProfilePage() {
     }
   }, [isAuthenticated, user])
 
-  // Initial load
   useEffect(() => {
     if (!authLoading) {
       fetchProfile()
@@ -183,13 +181,11 @@ export default function ProfilePage() {
     }
   }, [authLoading, fetchProfile, fetchStats])
 
-  // Sync with auth changes
   useEffect(() => {
     const handleAuthChange = () => {
       fetchProfile()
       fetchStats()
     }
-
     window.addEventListener('auth-changed', handleAuthChange)
     return () => window.removeEventListener('auth-changed', handleAuthChange)
   }, [fetchProfile, fetchStats])
@@ -221,10 +217,7 @@ export default function ProfilePage() {
         }
       }
 
-      const updated: ProfileData = {
-        ...profile,
-        ...data,
-      }
+      const updated: ProfileData = { ...profile, ...data }
       setProfile(updated)
       localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(updated))
       setIsEditing(false)
@@ -260,18 +253,20 @@ export default function ProfilePage() {
     localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(updated))
   }
 
+  // Loading state
   if (authLoading || loading || !profile) {
     return (
       <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
         <div className="animate-pulse space-y-6">
           <div className="h-32 rounded-3xl bg-orange-500/10" />
+          <div className="h-24 rounded-3xl bg-orange-500/10" />
           <div className="h-64 rounded-3xl bg-orange-500/10" />
         </div>
       </main>
     )
   }
 
-  // Show login prompt if not authenticated
+  // Unauthenticated view
   if (!isAuthenticated) {
     return (
       <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
@@ -298,11 +293,14 @@ export default function ProfilePage() {
     )
   }
 
+  // Authenticated view
+  const tierDisplayName = subscription?.tierName ?? 'Free'
+
   const STAT_ITEMS = [
-    { label: 'Day Streak', value: stats.dayStreak, color: 'text-orange-400', bg: 'bg-orange-500/10', icon: '🔥' },
-    { label: 'Journeys', value: stats.journeysCompleted, color: 'text-cyan-400', bg: 'bg-cyan-500/10', icon: '🧭' },
-    { label: 'Reflections', value: stats.journalEntries, color: 'text-purple-400', bg: 'bg-purple-500/10', icon: '📝' },
-    { label: 'Insights', value: stats.insightsReceived, color: 'text-teal-400', bg: 'bg-teal-500/10', icon: '✨' },
+    { label: 'Day Streak', value: stats.dayStreak, color: 'text-orange-400', icon: '🔥' },
+    { label: 'Journeys', value: stats.journeysCompleted, color: 'text-cyan-400', icon: '🧭' },
+    { label: 'Reflections', value: stats.journalEntries, color: 'text-purple-400', icon: '📝' },
+    { label: 'Insights', value: stats.insightsReceived, color: 'text-teal-400', icon: '✨' },
   ]
 
   return (
@@ -326,7 +324,7 @@ export default function ProfilePage() {
             name={profile.name}
             email={profile.email}
             avatarUrl={profile.avatarUrl}
-            tier={subscription?.tierName ?? 'Free'}
+            tier={isDeveloper ? 'Developer' : tierDisplayName}
             memberSince={new Date(profile.createdAt)}
             onEditProfile={() => setIsEditing(true)}
           />
@@ -359,7 +357,7 @@ export default function ProfilePage() {
         />
       ) : (
         <>
-          {/* Avatar Upload Section */}
+          {/* Avatar Upload */}
           <Card className="mb-6">
             <CardContent>
               <h2 className="text-lg font-semibold text-orange-50 mb-4">Profile Picture</h2>
@@ -371,7 +369,7 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          {/* Bio Section */}
+          {/* Bio */}
           <Card className="mb-6">
             <CardContent>
               <div className="flex items-center justify-between mb-4">
@@ -390,33 +388,88 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          {/* Subscription Info */}
+          {/* Subscription & KIAAN Quota */}
           <Card className="mb-6">
             <CardContent>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-orange-50">Subscription</h2>
-                <Badge variant={subscription?.tierId === 'free' ? 'default' : 'premium'}>
-                  {subscription?.tierName ?? 'Free'}
+                <Badge variant={tier === 'free' ? 'default' : 'premium'}>
+                  {isDeveloper ? 'Developer' : tierDisplayName}
                 </Badge>
               </div>
+
+              {/* Tier details */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                <div className="rounded-xl border border-orange-500/10 bg-white/[0.02] p-3">
+                  <p className="text-xs text-orange-100/50 mb-1">KIAAN Questions</p>
+                  <p className="text-sm font-semibold text-orange-50">
+                    {isKiaanUnlimited ? 'Unlimited' : `${kiaanQuota}/month`}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-orange-500/10 bg-white/[0.02] p-3">
+                  <p className="text-xs text-orange-100/50 mb-1">Active Journeys</p>
+                  <p className="text-sm font-semibold text-orange-50">
+                    {journeyLimit === -1 ? 'Unlimited' : `${journeyLimit} max`}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-orange-500/10 bg-white/[0.02] p-3 col-span-2 sm:col-span-1">
+                  <p className="text-xs text-orange-100/50 mb-1">Plan Status</p>
+                  <p className="text-sm font-semibold text-orange-50">
+                    {subscription?.status === 'active' ? 'Active' : subscription?.status ?? 'Active'}
+                  </p>
+                </div>
+              </div>
+
               <p className="text-sm text-orange-100/70 mb-4">
-                {subscription?.tierId === 'free'
-                  ? 'You are on the free plan with 20 KIAAN questions per month.'
-                  : `You are on the ${subscription?.tierName} plan.`}
+                {tier === 'free'
+                  ? `You are on the free plan with ${kiaanQuota} KIAAN questions per month.`
+                  : `You are on the ${tierDisplayName} plan with ${isKiaanUnlimited ? 'unlimited' : kiaanQuota} KIAAN questions.`}
               </p>
+
+              {subscription?.cancelAtPeriodEnd && (
+                <div className="mb-4 rounded-xl border border-amber-400/30 bg-amber-400/10 p-3 text-xs text-amber-100">
+                  Your plan will end on {subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString() : 'the end of the billing period'}.
+                </div>
+              )}
+
               <div className="flex gap-3">
                 <Link href="/dashboard/subscription">
                   <Button variant="secondary" size="sm">
                     Manage Subscription
                   </Button>
                 </Link>
-                {subscription?.tierId === 'free' && (
+                {!isPaid && (
                   <Link href="/pricing">
                     <Button variant="primary" size="sm">
                       Upgrade
                     </Button>
                   </Link>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* KIAAN Ecosystem Tools */}
+          <Card className="mb-6">
+            <CardContent>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/10 text-sm font-black text-orange-400">K</span>
+                <div>
+                  <h2 className="text-lg font-semibold text-orange-50">KIAAN AI Ecosystem</h2>
+                  <p className="text-xs text-orange-100/50">{kiaanTools.length} wisdom-powered tools</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {kiaanTools.map(tool => (
+                  <Link
+                    key={tool.id}
+                    href={tool.route}
+                    className="group rounded-xl border border-orange-500/10 bg-white/[0.02] p-3 text-center hover:border-orange-400/30 hover:bg-orange-500/5 transition"
+                  >
+                    <span className="text-lg block mb-1">{tool.icon}</span>
+                    <span className="text-xs font-medium text-orange-100/70 group-hover:text-orange-50 transition line-clamp-1">{tool.name}</span>
+                  </Link>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -430,6 +483,16 @@ export default function ProfilePage() {
                   <div>
                     <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Account Settings</p>
                     <p className="text-xs text-orange-100/50">Security, sessions, and data management</p>
+                  </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </Link>
+                <div className="border-t border-orange-500/10" />
+                <Link href="/kiaan/chat" className="flex items-center justify-between py-2 group">
+                  <div>
+                    <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">KIAAN Chat</p>
+                    <p className="text-xs text-orange-100/50">Your AI wisdom companion</p>
                   </div>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition">
                     <polyline points="9 18 15 12 9 6" />
@@ -450,6 +513,9 @@ export default function ProfilePage() {
           </Card>
         </>
       )}
+
+      {/* Suppress unused variable warning */}
+      {saving && null}
     </main>
   )
 }

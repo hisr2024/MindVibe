@@ -10,7 +10,7 @@
  * - Images: cache-first (30 days)
  */
 
-const CACHE_VERSION = 'mindvibe-v18.0-nav-fix';
+const CACHE_VERSION = 'mindvibe-v19.0-account-profile-rebuild';
 const CACHE_STATIC = `${CACHE_VERSION}-static`;
 const CACHE_DYNAMIC = `${CACHE_VERSION}-dynamic`;
 const CACHE_API = `${CACHE_VERSION}-api`;

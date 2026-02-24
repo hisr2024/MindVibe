@@ -16,9 +16,11 @@ import { NextRequest, NextResponse } from 'next/server';
  * Next.js to work, and rely on style-src-elem for font loading.
  */
 
+// Routes requiring authentication. /account and /profile handle their own
+// unauthenticated states (login form + sign-in prompt), so they must NOT
+// appear here or the proxy will redirect unauthenticated users in an
+// infinite loop (/account → redirect to /account → loop).
 const PROTECTED_ROUTES = [
-  '/profile',
-  '/account',
   '/admin',
   '/settings',
   '/companion',
