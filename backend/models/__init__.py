@@ -28,6 +28,11 @@ from backend.models.auth import (
     PasswordResetToken,
 )
 
+# WebAuthn (biometric) models
+from backend.models.webauthn import (
+    WebAuthnCredential,
+)
+
 # Achievement & gamification models
 from backend.models.achievements import (
     AchievementCategory,
@@ -268,6 +273,7 @@ __all__ = [
     "Session",
     "RefreshToken",
     "PasswordResetToken",
+    "WebAuthnCredential",
     # Achievement & Gamification models
     "Achievement",
     "UserAchievement",
