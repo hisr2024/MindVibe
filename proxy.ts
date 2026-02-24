@@ -85,7 +85,7 @@ export function proxy(request: NextRequest) {
       request.cookies.get('session_token')?.value;
 
     if (!token) {
-      const loginUrl = new URL('/introduction', request.url);
+      const loginUrl = new URL('/account', request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
@@ -94,7 +94,7 @@ export function proxy(request: NextRequest) {
     if (isAdmin) {
       const adminToken = request.cookies.get('admin_token')?.value;
       if (!adminToken && !token) {
-        return NextResponse.redirect(new URL('/introduction', request.url));
+        return NextResponse.redirect(new URL('/account', request.url));
       }
     }
   }

@@ -159,7 +159,7 @@ export default function IntroductionPage() {
                 backgroundClip: 'text',
               }}
             >
-              {t('home.introduction.heroTitle', 'Welcome to Divine Presence')}
+              {t('home.introduction.heroTitle', 'Welcome to MindVibe')}
             </h1>
 
             {/* Subtitle */}

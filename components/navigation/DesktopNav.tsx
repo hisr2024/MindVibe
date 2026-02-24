@@ -41,7 +41,6 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
     { href: '/tools/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
     { href: '/profile', label: t('navigation.mainNav.profile', 'Profile') },
     { href: '/account', label: t('navigation.mainNav.account', 'Account') },
-    { href: '/introduction', label: t('navigation.mainNav.divinePresence', 'Divine Presence'), divine: true },
   ], [t])
 
   // Get tools for mobile menu display
@@ -74,22 +73,16 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
         >
           {mainNavLinks.map((link) => {
             const active = pathname === link.href
-            const isDivine = 'divine' in link && link.divine
             return (
               <Link
                 key={link.href}
                 href={link.href}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900 flex items-center gap-1 ${
                   active
-                    ? isDivine
-                      ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-900 shadow-lg shadow-amber-500/20'
-                      : 'bg-white/10 text-white shadow-lg shadow-orange-500/20'
-                    : isDivine
-                    ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-200 hover:from-amber-500/30 hover:to-yellow-500/30 border border-amber-500/30'
+                    ? 'bg-white/10 text-white shadow-lg shadow-orange-500/20'
                     : 'text-white/70 hover:bg-white/5 hover:text-white'
                 }`}
               >
-                {isDivine && <span className="text-xs">🙏</span>}
                 {link.label}
               </Link>
             )
@@ -107,15 +100,6 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
             className="hidden items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/5 hover:text-white sm:inline-flex focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
           >
             {t('navigation.mainNav.pricing', 'Subscriptions')}
-          </Link>
-          <Link
-            href="/introduction"
-            className={`hidden items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition hover:bg-white/5 hover:text-white md:inline-flex focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
-              pathname === '/introduction' ? 'border-amber-500/40 text-amber-200 bg-amber-500/10' : 'border-white/10 text-white/80'
-            }`}
-          >
-            <span className="text-base leading-none" aria-hidden="true">ॐ</span>
-            {t('navigation.mainNav.divinePresence', 'Divine Presence')}
           </Link>
 
           {/* Mobile menu button */}
@@ -190,15 +174,6 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
             <div className="flex items-center justify-between rounded-xl px-3 py-2">
               <span className="text-sm text-white/80">{t('navigation.mainNav.language', 'Language')}</span>
               <GlobalLanguageSelector />
-            </div>
-            <div className="flex gap-2">
-              <Link
-                href="/introduction"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 rounded-full bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-400 px-3 py-2 text-center text-sm font-semibold text-slate-950 shadow-lg shadow-amber-500/25"
-              >
-                ॐ {t('navigation.mainNav.divinePresence', 'Divine Presence')}
-              </Link>
             </div>
           </div>
         </div>
