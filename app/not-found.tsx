@@ -13,7 +13,7 @@ export default function NotFound() {
           As the Gita teaches, every journey begins with a single step.
         </p>
         <Link
-          href="/introduction"
+          href="/"
           className="inline-block rounded-lg bg-orange-500 px-6 py-2.5 text-sm font-medium text-slate-950 transition-colors hover:bg-orange-400"
         >
           Return Home

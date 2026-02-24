@@ -85,7 +85,7 @@ export default function MobileProfilePage() {
     } catch {
       // Ensure redirect happens even if logout API fails
     }
-    router.push('/introduction')
+    router.push('/account')
   }, [logout, router, triggerHaptic])
 
   const handleNavigate = useCallback((href: string) => {
