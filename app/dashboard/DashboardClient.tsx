@@ -576,10 +576,10 @@ export default function DashboardClient() {
             <PathwayMap />
           </motion.div>
 
-          {/* ─── Divine Presence: My Profile Banner ─── */}
+          {/* ─── Divine Presence Banner ─── */}
           <motion.div variants={itemVariants}>
             <Link
-              href="/profile"
+              href="/introduction"
               onClick={handleFeatureTap}
               className="group block"
             >
@@ -664,30 +664,20 @@ export default function DashboardClient() {
                       }}
                       transition={{ duration: 2.5, repeat: Infinity }}
                     />
-                    <svg
-                      className="h-8 w-8 text-[#0a0a0f] drop-shadow-sm sm:h-9 sm:w-9 md:h-10 md:w-10"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
+                    <span className="text-3xl sm:text-4xl md:text-[42px] text-[#0a0a0f] drop-shadow-sm select-none" style={{ lineHeight: 1 }}>
+                      ॐ
+                    </span>
                   </motion.div>
 
                   <div className="flex-1 min-w-0">
                     <h2 className="flex flex-wrap items-center gap-2.5 text-lg font-semibold text-[#f5e6c8] sm:text-xl md:text-[22px]">
-                      My Profile
+                      Divine Presence
                       <span className="inline-flex rounded-full border border-[#d4a843]/30 bg-[#d4a843]/15 px-2.5 py-0.5 text-[10px] font-medium text-[#d4a843] tracking-wide uppercase">
-                        Account
+                        Sacred
                       </span>
                     </h2>
                     <p className="mt-1.5 text-sm text-[#d4a843]/70 line-clamp-2 sm:text-[15px]">
-                      Your sacred space — view profile, manage settings, and account access
+                      Enter the divine presence — experience Krishna&apos;s loving guidance and sacred wisdom
                     </p>
                   </div>
 
