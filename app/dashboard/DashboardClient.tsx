@@ -182,6 +182,15 @@ const PRAYER_STARS = Array.from({ length: 12 }, (_, i) => ({
   size: i % 3 === 0 ? 3 : 2,
 }))
 
+// Divine Presence particles for the My Profile banner
+const DIVINE_PARTICLES = Array.from({ length: 8 }, (_, i) => ({
+  id: i,
+  left: `${10 + (i * 11) % 80}%`,
+  delay: i * 0.5,
+  duration: 3 + (i % 2) * 1.5,
+  size: i % 2 === 0 ? 2.5 : 2,
+}))
+
 /**
  * Returns a time-of-day greeting for the sacred sanctuary dashboard.
  *
@@ -567,57 +576,135 @@ export default function DashboardClient() {
             <PathwayMap />
           </motion.div>
 
-          {/* ─── Profile & Account Access ─── */}
+          {/* ─── Divine Presence: My Profile Banner ─── */}
           <motion.div variants={itemVariants}>
             <Link
               href="/profile"
               onClick={handleFeatureTap}
-              className="block overflow-hidden rounded-[24px] bg-gradient-to-br from-amber-900/40 via-amber-900/30 to-orange-900/40 p-4 sm:p-5 shadow-mobile-glow transition-all duration-300 active:scale-[0.98] md:p-6"
+              className="group block"
             >
               <motion.div
-                className="flex items-center gap-4"
+                className="relative overflow-hidden rounded-[24px] p-5 sm:p-6 md:p-7 shadow-[0_8px_40px_rgba(212,168,67,0.15)] transition-all duration-300 active:scale-[0.98]"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(212, 168, 67, 0.12) 0%, rgba(184, 134, 11, 0.08) 50%, rgba(212, 168, 67, 0.06) 100%)',
+                  border: '1px solid rgba(212, 168, 67, 0.2)',
+                }}
                 variants={quickActionVariants}
                 initial="rest"
                 whileHover="hover"
                 whileTap="tap"
               >
+                {/* Divine Presence Glow Overlay */}
                 <motion.div
-                  className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400/30 to-orange-500/30 shadow-lg shadow-amber-500/20 md:h-16 md:w-16"
+                  className="absolute inset-0 pointer-events-none rounded-[24px]"
                   animate={{
-                    scale: [1, 1.05, 1],
                     boxShadow: [
-                      '0 0 20px rgba(251, 191, 36, 0.2)',
-                      '0 0 30px rgba(251, 191, 36, 0.35)',
-                      '0 0 20px rgba(251, 191, 36, 0.2)',
+                      'inset 0 0 30px rgba(212, 168, 67, 0.05)',
+                      'inset 0 0 50px rgba(212, 168, 67, 0.12)',
+                      'inset 0 0 30px rgba(212, 168, 67, 0.05)',
                     ],
                   }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                >
-                  <svg className="h-8 w-8 md:h-9 md:w-9 text-amber-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                </motion.div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="flex flex-wrap items-center gap-2 text-lg font-semibold text-amber-100 md:text-xl">
-                    My Profile
-                    <span className="inline-flex rounded-full bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-medium text-amber-300">
-                      Account
-                    </span>
-                  </h2>
-                  <p className="mt-1 text-sm text-amber-200/60 line-clamp-2">
-                    View your profile, manage settings, and access your account
-                  </p>
+                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                />
+
+                {/* Floating Divine Particles */}
+                {DIVINE_PARTICLES.map((particle) => (
+                  <motion.div
+                    key={particle.id}
+                    className="absolute rounded-full bg-[#d4a843]/70"
+                    style={{
+                      width: particle.size,
+                      height: particle.size,
+                      left: particle.left,
+                      bottom: 0,
+                    }}
+                    animate={{
+                      y: [0, -120],
+                      opacity: [0, 0.9, 0.7, 0],
+                      scale: [0.4, 1, 0.6, 0.2],
+                    }}
+                    transition={{
+                      duration: particle.duration,
+                      repeat: Infinity,
+                      delay: particle.delay,
+                      ease: 'easeOut',
+                    }}
+                  />
+                ))}
+
+                {/* Top radiance line */}
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4a843]/50 to-transparent" />
+
+                <div className="relative flex items-center gap-4 sm:gap-5">
+                  {/* Golden Avatar Circle with Pulsing Glow */}
+                  <motion.div
+                    className="relative flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full sm:h-18 sm:w-18 md:h-20 md:w-20"
+                    style={{
+                      background: 'linear-gradient(135deg, #d4a843 0%, #e8c56d 50%, #b8860b 100%)',
+                    }}
+                    animate={{
+                      scale: [1, 1.06, 1],
+                      boxShadow: [
+                        '0 0 25px rgba(212, 168, 67, 0.35), 0 0 50px rgba(212, 168, 67, 0.15)',
+                        '0 0 35px rgba(212, 168, 67, 0.5), 0 0 70px rgba(212, 168, 67, 0.25)',
+                        '0 0 25px rgba(212, 168, 67, 0.35), 0 0 50px rgba(212, 168, 67, 0.15)',
+                      ],
+                    }}
+                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    {/* Inner glow ring */}
+                    <motion.div
+                      className="absolute inset-0 rounded-full"
+                      animate={{
+                        boxShadow: [
+                          'inset 0 0 12px rgba(255, 255, 255, 0.3)',
+                          'inset 0 0 18px rgba(255, 255, 255, 0.45)',
+                          'inset 0 0 12px rgba(255, 255, 255, 0.3)',
+                        ],
+                      }}
+                      transition={{ duration: 2.5, repeat: Infinity }}
+                    />
+                    <svg
+                      className="h-8 w-8 text-[#0a0a0f] drop-shadow-sm sm:h-9 sm:w-9 md:h-10 md:w-10"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </motion.div>
+
+                  <div className="flex-1 min-w-0">
+                    <h2 className="flex flex-wrap items-center gap-2.5 text-lg font-semibold text-[#f5e6c8] sm:text-xl md:text-[22px]">
+                      My Profile
+                      <span className="inline-flex rounded-full border border-[#d4a843]/30 bg-[#d4a843]/15 px-2.5 py-0.5 text-[10px] font-medium text-[#d4a843] tracking-wide uppercase">
+                        Account
+                      </span>
+                    </h2>
+                    <p className="mt-1.5 text-sm text-[#d4a843]/70 line-clamp-2 sm:text-[15px]">
+                      Your sacred space — view profile, manage settings, and account access
+                    </p>
+                  </div>
+
+                  {/* Animated Arrow */}
+                  <motion.div
+                    className="flex-shrink-0 text-[#d4a843]/60 transition-colors duration-300 group-hover:text-[#d4a843]"
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    <svg className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </motion.div>
                 </div>
-                <motion.div
-                  className="flex-shrink-0 text-amber-300/40"
-                  animate={{ x: [0, 4, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  <svg className="h-6 w-6 md:h-8 md:w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </motion.div>
+
+                {/* Bottom radiance line */}
+                <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#d4a843]/30 to-transparent" />
               </motion.div>
             </Link>
           </motion.div>
