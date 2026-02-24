@@ -18,7 +18,7 @@ interface MobileRouteGuardProps {
 
 export function MobileRouteGuard({ children }: MobileRouteGuardProps) {
   const pathname = usePathname()
-  const isMobileRoute = pathname.startsWith('/m')
+  const isMobileRoute = pathname === '/m' || pathname.startsWith('/m/')
 
   if (isMobileRoute) {
     return null
@@ -40,7 +40,7 @@ interface MobileContentWrapperProps {
 
 export function MobileContentWrapper({ children }: MobileContentWrapperProps) {
   const pathname = usePathname()
-  const isMobileRoute = pathname.startsWith('/m')
+  const isMobileRoute = pathname === '/m' || pathname.startsWith('/m/')
 
   if (isMobileRoute) {
     return (

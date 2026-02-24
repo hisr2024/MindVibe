@@ -1,5 +1,5 @@
 /**
- * MindVibe Service Worker v16.0 - Silent Production Grade
+ * MindVibe Service Worker v18.0 - Silent Production Grade
  *
  * Zero console output. Robust offline support. Intelligent caching.
  *
@@ -10,7 +10,7 @@
  * - Images: cache-first (30 days)
  */
 
-const CACHE_VERSION = 'mindvibe-v16.0-silent';
+const CACHE_VERSION = 'mindvibe-v18.0-nav-fix';
 const CACHE_STATIC = `${CACHE_VERSION}-static`;
 const CACHE_DYNAMIC = `${CACHE_VERSION}-dynamic`;
 const CACHE_API = `${CACHE_VERSION}-api`;
@@ -85,16 +85,13 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
+  const currentCaches = new Set([CACHE_STATIC, CACHE_DYNAMIC, CACHE_API, CACHE_IMAGES]);
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames
-            .filter((cacheName) => {
-              return cacheName.startsWith('mindvibe-') && cacheName !== CACHE_STATIC &&
-                     cacheName !== CACHE_DYNAMIC && cacheName !== CACHE_API &&
-                     cacheName !== CACHE_IMAGES;
-            })
+            .filter((cacheName) => !currentCaches.has(cacheName))
             .map((cacheName) => caches.delete(cacheName))
         );
       })
