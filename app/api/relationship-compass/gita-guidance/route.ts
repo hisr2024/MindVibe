@@ -3,47 +3,44 @@ import { NextRequest, NextResponse } from 'next/server'
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 const REQUEST_TIMEOUT = 60000
 
-// Secular fallback response - modern, friendly, no religious references
+// Gita-grounded secular fallback - modern, feeling-rich, all wisdom from Gita
 const FALLBACK_RESPONSE = {
   response: `# I Hear You
-I can tell this is weighing on you. Relationship challenges can feel overwhelming, especially when you're right in the middle of them. The fact that you're taking time to reflect on this instead of just reacting shows a lot of self-awareness.
+I can feel the weight of what you're carrying right now. Relationship pain has a way of settling into your chest and coloring everything — your thoughts, your sleep, your sense of self. The fact that you're here, reaching out, trying to make sense of it instead of just reacting from the hurt — that tells me something important about who you are. You're choosing awareness over autopilot, and that takes real courage.
 
 # What Might Be Happening
-A few things that might be at play here:
-- **Unmet needs**: Conflicts often aren't about what they seem on the surface. What do you really need - respect? To be heard? Understanding?
-- **Different perspectives**: You and the other person might be seeing the same situation very differently. Neither view is necessarily "wrong."
-- **Communication patterns**: Sometimes how we communicate creates misunderstandings that snowball.
+When we look beneath the surface of relationship conflict, there's almost always something deeper at work:
+- **The grip of attachment**: Much of our pain comes from holding tightly to how we think things SHOULD be — how they should respond, what they should understand. The ache lives in the gap between expectation and reality.
+- **The ego's quiet voice**: Sometimes what feels like righteous hurt is actually our sense of self feeling threatened. Being dismissed, disrespected, or unseen strikes at something fundamental.
+- **The chain of reaction**: When we replay what hurt us, frustration spirals into anger, and anger clouds the very clarity we need. Recognizing that spiral is the first step to breaking free from it.
 
 # The Other Side
-Without excusing any hurtful behavior, it might help to consider: the other person is also navigating their own fears, insecurities, and past experiences. People often act from their own pain, not from a desire to hurt us.
-
-Some questions to consider:
-- What might they be feeling or fearing in this situation?
-- Is there any possibility they're unaware of how their actions are affecting you?
+Without excusing anything that's happened, there's a truth worth holding: the other person is also navigating their own fears, conditioning, and unresolved pain. People rarely act from a desire to hurt — they act from their own internal storms. Their behavior reflects their inner struggle, not your worth. Seeing that doesn't mean accepting poor treatment — it means you see the full picture, which gives you more power to choose wisely.
 
 # What You Could Try
-Here are a few approaches that might help:
+1. **Give yourself the gift of a pause**: Before the next conversation, let the emotional storm pass through you. When the mind is turbulent, wisdom can't reach you. Even 90 seconds of conscious breathing changes your entire internal landscape.
 
-1. **Take a breather first**: Before having a conversation, give yourself time to move from reactive to responsive. A calm conversation is 10x more productive than one driven by raw emotion.
+2. **Focus on what's truly yours to control**: You can't control how they behave, but you have complete authority over how you respond. Ask yourself: "What would the wisest version of me do here?" Then do that — regardless of their reaction.
 
-2. **Focus on what you can control**: You can't control how someone else behaves, but you can control how you respond. Ask yourself: "What would the version of me I'm proud of do here?"
-
-3. **Lead with curiosity, not accusations**: Instead of "You always..." try "Help me understand..." People get defensive when they feel attacked.
+3. **Lead with your real need, not the accusation**: Instead of "You always..." try "What I really need right now is..." When you speak from vulnerability instead of anger, something shifts — in you and in them.
 
 # A Way to Say It
-When you're ready, here's a template that tends to work well:
+*"Hey, can we talk about something that's been on my heart? When [specific situation], I felt [your emotion]. I think what I really need underneath all of it is [your need]. I'm not bringing this up to fight or to be right — I'm bringing it up because you matter to me and I want us to understand each other better."*
 
-*"Hey, can we talk about something that's been on my mind? When [specific situation], I felt [your emotion]. I think it's because [your underlying need]. I'm not looking to argue - I just want us to understand each other better. What was going on for you in that moment?"*
+# Gita Wisdom
+**BG 2.47** — "You have the right to your actions, but never to the fruits of your actions."
+In relationships, this means: pour your heart into showing up with honesty and kindness — but release your grip on how they respond. Your peace can't depend on their reaction. Do what's right because it's right, not because it guarantees a specific outcome.
 
 # One Small Step
-For today, try this: Before your next interaction, take a moment to set an intention. Not an outcome you're hoping for, but a way of being. Something like: "I'm going to stay curious" or "I'm going to listen more than I speak."`,
+For today: before your next interaction with this person, place one hand on your heart and take three slow, deep breaths. Then set a quiet intention — not an outcome you're hoping for, but a way of being. Something like: "I'm going to speak from my heart, not my hurt" or "I'm going to listen with the goal of understanding, not winning." That inner shift changes everything.`,
   sections: {
-    'I Hear You': 'I can tell this is weighing on you. Relationship challenges can feel overwhelming, especially when you\'re right in the middle of them. The fact that you\'re taking time to reflect on this instead of just reacting shows a lot of self-awareness.',
-    'What Might Be Happening': 'A few things that might be at play here:\n- **Unmet needs**: Conflicts often aren\'t about what they seem on the surface. What do you really need - respect? To be heard? Understanding?\n- **Different perspectives**: You and the other person might be seeing the same situation very differently.\n- **Communication patterns**: Sometimes how we communicate creates misunderstandings that snowball.',
-    'The Other Side': 'Without excusing any hurtful behavior, it might help to consider: the other person is also navigating their own fears, insecurities, and past experiences. People often act from their own pain, not from a desire to hurt us.',
-    'What You Could Try': '1. **Take a breather first**: Before having a conversation, give yourself time to move from reactive to responsive.\n\n2. **Focus on what you can control**: You can\'t control how someone else behaves, but you can control how you respond.\n\n3. **Lead with curiosity, not accusations**: Instead of "You always..." try "Help me understand..."',
-    'A Way to Say It': '*"Hey, can we talk about something? When [situation], I felt [emotion]. I think it\'s because [need]. I\'m not looking to argue - I just want us to understand each other better."*',
-    'One Small Step': 'For today: Before your next interaction, set an intention. Not an outcome you\'re hoping for, but a way of being. Something like: "I\'m going to stay curious" or "I\'m going to listen more than I speak."'
+    'I Hear You': 'I can feel the weight of what you\'re carrying right now. Relationship pain has a way of settling into your chest and coloring everything — your thoughts, your sleep, your sense of self. The fact that you\'re here, reaching out, trying to make sense of it instead of just reacting from the hurt — that tells me something important about who you are. You\'re choosing awareness over autopilot, and that takes real courage.',
+    'What Might Be Happening': 'When we look beneath the surface of relationship conflict, there\'s almost always something deeper at work:\n- **The grip of attachment**: Much of our pain comes from holding tightly to how we think things SHOULD be. The ache lives in the gap between expectation and reality.\n- **The ego\'s quiet voice**: Sometimes what feels like righteous hurt is actually our sense of self feeling threatened.\n- **The chain of reaction**: When we replay what hurt us, frustration spirals into anger, and anger clouds the very clarity we need.',
+    'The Other Side': 'The other person is also navigating their own fears, conditioning, and unresolved pain. People rarely act from a desire to hurt — they act from their own internal storms. Their behavior reflects their inner struggle, not your worth. Seeing that doesn\'t mean accepting poor treatment — it means you see the full picture.',
+    'What You Could Try': '1. **Give yourself the gift of a pause**: Let the emotional storm pass through you. Even 90 seconds of conscious breathing changes your entire internal landscape.\n\n2. **Focus on what\'s truly yours to control**: You have complete authority over how you respond. Ask yourself: "What would the wisest version of me do here?"\n\n3. **Lead with your real need, not the accusation**: Instead of "You always..." try "What I really need right now is..."',
+    'A Way to Say It': '*"Hey, can we talk about something that\'s been on my heart? When [situation], I felt [emotion]. What I really need is [need]. I\'m not bringing this up to fight — I\'m bringing it up because you matter to me and I want us to understand each other better."*',
+    'Gita Wisdom': '**BG 2.47** — "You have the right to your actions, but never to the fruits of your actions." In relationships, this means: pour your heart into showing up with honesty and kindness — but release your grip on how they respond. Your peace can\'t depend on their reaction.',
+    'One Small Step': 'Before your next interaction, place one hand on your heart and take three slow, deep breaths. Then set a quiet intention — not an outcome, but a way of being: "I\'m going to speak from my heart, not my hurt." That inner shift changes everything.'
   },
   citations: [],
   contextSufficient: true,

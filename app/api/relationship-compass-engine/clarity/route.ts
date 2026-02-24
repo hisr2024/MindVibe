@@ -4,32 +4,32 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 const REQUEST_TIMEOUT = 60000
 
 /**
- * Rule-based fallback response when the backend is unavailable.
- * Mirrors the backend's `build_fallback_response` for conflict mode.
+ * Gita-grounded fallback response when backend is unavailable.
+ * All wisdom derived from Bhagavad Gita, presented in modern feeling-rich language.
  */
 const FALLBACK_RESPONSE = {
   response: `Mode: Conflict
 
 ## Emotional Precision
-You're distressed. That's a real response to a real situation. Name it without judging yourself for it — the emotion is giving you information about what matters to you here.
+You're hurting — and that hurt runs deeper than the surface of what happened. There's a tightness in your chest, a weight that won't lift. That emotional intensity isn't a flaw or an overreaction. It's your heart telling you that something genuinely important is at stake here — a need for respect, for understanding, for being truly seen. Let yourself feel it. The emotion is information, and it deserves your attention.
 
 ## What's Actually Happening
-There's a gap between what you expected and what you got. You had an image of how this should go — how they should respond, what they should understand — and reality didn't match. The pain lives in that gap, not in the event itself.
+Beneath this conflict, there's a deeper current at work. Much of our relationship pain comes from attachment — from the gap between what our heart hoped for and what actually happened. You carried an expectation of how they should respond, what they should understand, and when reality fell short of that picture, the pain rushed in. This is one of the most universal human experiences: the suffering that comes from holding tightly to how things should be. The event itself may have been small. But the disappointment of unmet hope — that's enormous.
 
 ## The Hard Truth
-You cannot win an argument and deepen a relationship at the same time. If you're optimizing for being right, you're not optimizing for connection. The question isn't "Who's right?" — it's "What do I actually need here, and can I ask for it without needing to defeat them first?"
+Here's what's true, even though it's hard to hear: you cannot win an argument and deepen a relationship at the same time. Acting from the need to be right is acting from ego — and ego never leads to peace. The real question isn't "Who's right?" It's "What do I actually need here, and can I ask for it without needing to defeat them first?" That shift — from winning to understanding — is where healing begins.
 
 ## What To Do
-Before your next interaction, regulate your nervous system first. Take 90 seconds — that's how long it takes for a cortisol surge to pass through. Then ask yourself one question: "What do I actually need here?" Lead with that need, not with the complaint. Instead of "You never listen," try "I need to feel heard right now. Can you listen without fixing?"
+Before your next interaction, give yourself the gift of a pause. Let the emotional storm pass through you — even 90 seconds of conscious breathing changes your entire inner landscape. When the mind is turbulent, wisdom can't reach you. Then ask yourself one honest question: "What do I actually NEED here?" Lead with that need, not the complaint. Instead of "You never listen," try "I need to feel heard right now. Can you just listen, without trying to fix it?" That vulnerable honesty changes everything.
 
 ## Script
-"I want to talk about what happened, but I need us both to be calm for it to go well. Here's what I experienced: [specific event]. What I felt was [emotion]. What I actually need is [need]. I'm not looking to assign blame — I want us to figure this out together."`,
+"Hey, I want to talk about what happened — and I want us both to be in a good place for it. Here's what I experienced: [specific event]. What I felt in that moment was [emotion]. And what I really need underneath all of it is [need]. I'm not bringing this up to blame you or to win. I'm bringing it up because this relationship matters to me, and I want us to understand each other."`,
   sections: {
-    'Emotional Precision': "You're distressed. That's a real response to a real situation. Name it without judging yourself for it — the emotion is giving you information about what matters to you here.",
-    "What's Actually Happening": "There's a gap between what you expected and what you got. You had an image of how this should go — how they should respond, what they should understand — and reality didn't match. The pain lives in that gap, not in the event itself.",
-    'The Hard Truth': 'You cannot win an argument and deepen a relationship at the same time. If you\'re optimizing for being right, you\'re not optimizing for connection. The question isn\'t "Who\'s right?" — it\'s "What do I actually need here, and can I ask for it without needing to defeat them first?"',
-    'What To Do': 'Before your next interaction, regulate your nervous system first. Take 90 seconds — that\'s how long it takes for a cortisol surge to pass through. Then ask yourself one question: "What do I actually need here?" Lead with that need, not with the complaint.',
-    'Script': '"I want to talk about what happened, but I need us both to be calm for it to go well. Here\'s what I experienced: [specific event]. What I felt was [emotion]. What I actually need is [need]. I\'m not looking to assign blame — I want us to figure this out together."',
+    'Emotional Precision': "You're hurting — and that hurt runs deeper than the surface of what happened. That emotional intensity isn't a flaw. It's your heart telling you that something genuinely important is at stake — a need for respect, for understanding, for being truly seen. Let yourself feel it.",
+    "What's Actually Happening": "Beneath this conflict, there's a deeper current at work. Much of our relationship pain comes from attachment — from the gap between what our heart hoped for and what actually happened. The suffering comes from holding tightly to how things should be.",
+    'The Hard Truth': 'You cannot win an argument and deepen a relationship at the same time. Acting from the need to be right is acting from ego — and ego never leads to peace. The real question isn\'t "Who\'s right?" — it\'s "What do I actually need, and can I ask for it without defeating them first?"',
+    'What To Do': 'Give yourself the gift of a pause. Let the emotional storm pass through you. Then ask: "What do I actually NEED here?" Lead with that need, not the complaint. Instead of "You never listen," try "I need to feel heard right now."',
+    'Script': '"Hey, I want to talk about what happened. Here\'s what I experienced: [event]. What I felt was [emotion]. What I really need is [need]. I\'m not bringing this up to blame you — I\'m bringing it up because this relationship matters to me."',
   },
   analysis: {
     mode: 'conflict',
@@ -37,7 +37,7 @@ Before your next interaction, regulate your nervous system first. Take 90 second
     secondary_emotions: [],
     emotional_intensity: 'moderate',
     mechanism: 'unmet_expectation',
-    mechanism_detail: 'Gap between expected and actual outcome.',
+    mechanism_detail: 'Pain from the gap between heartfelt expectation and reality — attachment to outcome.',
     power_dynamic: 'unknown',
     boundary_needed: false,
     safety_concern: false,
@@ -48,7 +48,7 @@ Before your next interaction, regulate your nervous system first. Take 90 second
     analysis_depth: 'fallback',
   },
   provider: 'fallback',
-  model: 'static',
+  model: 'gita_wisdom_static',
 }
 
 export async function POST(request: NextRequest) {
