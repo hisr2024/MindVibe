@@ -11,7 +11,7 @@ from typing import Optional, List
 
 from fastapi import APIRouter, Depends, Query, Request
 from pydantic import BaseModel, Field
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func, and_, Integer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
@@ -369,7 +369,6 @@ async def get_user_preferences_summary(
         func.count().label("total_users"),
     )
 
-    from sqlalchemy import Integer
     enhancement_result = await db.execute(enhancement_stmt)
     enhancements = enhancement_result.first()
 

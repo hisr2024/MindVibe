@@ -107,7 +107,7 @@ class DivineSpeechIntegration:
 
     def __init__(self):
         """Initialize divine speech integration."""
-        self._orchestrator: Optional[SpeechOrchestrator] = None
+        self._orchestrator: Optional[SpeechModuleOrchestrator] = None
         self._initialized = False
 
         # Voice profile cache

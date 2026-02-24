@@ -3,6 +3,7 @@
 Provides endpoints for accessing universal wisdom and AI-powered guidance
 based on ancient teachings presented in a non-religious, universally applicable way."""
 
+import logging
 import os
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -13,6 +14,8 @@ from backend.deps import get_db
 from backend.middleware.rate_limiter import limiter, WISDOM_RATE_LIMIT
 from backend.models import WisdomVerse
 from backend.services.wisdom_kb import WisdomKnowledgeBase
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/wisdom", tags=["wisdom"])
 

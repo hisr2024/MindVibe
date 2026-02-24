@@ -8,8 +8,11 @@ Quantum Enhancement #6: Advanced Analytics Dashboard
 
 from typing import List, Dict, Optional
 from datetime import datetime
+import logging
 import statistics
 import os
+
+logger = logging.getLogger(__name__)
 
 
 class InsightGeneratorService:
