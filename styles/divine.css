@@ -420,6 +420,29 @@ html.light .kiaan-cosmic-card {
   box-shadow: 0 12px 40px rgba(212, 164, 76, 0.08);
 }
 
+/* ─── Divine CTA Buttons — Golden Black Theme ─── */
+
+.divine-cta-primary {
+  background: linear-gradient(135deg, #c8943a 0%, #e8b54a 45%, #f0c96d 100%);
+  color: #050507;
+  box-shadow: 0 8px 30px rgba(212, 164, 76, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.divine-cta-primary:hover {
+  box-shadow: 0 12px 40px rgba(212, 164, 76, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.divine-cta-primary:active {
+  transform: scale(0.97);
+}
+
+html.light .divine-cta-primary {
+  color: #1a1408;
+  box-shadow: 0 8px 30px rgba(212, 164, 76, 0.2);
+}
+
 /* Reduced motion support for KIAAN cosmic animations */
 @media (prefers-reduced-motion: reduce) {
   .kiaan-particle,

@@ -40,12 +40,12 @@ export function IntroOverlay() {
     } catch {
       // localStorage unavailable
     }
-    // Allow exit animation to complete
+    // Allow exit animation to complete — longer duration for cinematic feel
     setTimeout(() => {
       setIsVisible(false)
       setIsClosing(false)
       unlockBodyScroll()
-    }, 500)
+    }, 700)
   }, [])
 
   // Close on Escape key
@@ -69,8 +69,8 @@ export function IntroOverlay() {
             style={{ zIndex: 9999, pointerEvents: 'auto' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            exit={{ opacity: 0, scale: 1.02, filter: 'blur(8px)' }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             role="dialog"
             aria-modal="true"
             aria-label="Welcome to MindVibe"

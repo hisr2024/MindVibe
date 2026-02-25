@@ -202,7 +202,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
         }}
       >
         {/* Gradient fade overlay for content behind nav */}
-        <div className="absolute inset-x-0 -top-6 h-6 bg-gradient-to-t from-[#0b0b0f] to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 -top-6 h-6 bg-gradient-to-t from-[#050507] to-transparent pointer-events-none" />
 
         {/* Main nav container with glass effect - Enhanced mobile UX */}
         <div

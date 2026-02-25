@@ -38,14 +38,14 @@
 /* Voice glow effect */
 @keyframes voice-glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(251, 146, 60, 0.3),
-                0 0 40px rgba(251, 146, 60, 0.2),
-                0 0 60px rgba(251, 146, 60, 0.1);
+    box-shadow: 0 0 20px rgba(212, 164, 76, 0.3),
+                0 0 40px rgba(212, 164, 76, 0.2),
+                0 0 60px rgba(212, 164, 76, 0.1);
   }
   50% {
-    box-shadow: 0 0 30px rgba(251, 146, 60, 0.5),
-                0 0 60px rgba(251, 146, 60, 0.3),
-                0 0 90px rgba(251, 146, 60, 0.2);
+    box-shadow: 0 0 30px rgba(212, 164, 76, 0.5),
+                0 0 60px rgba(212, 164, 76, 0.3),
+                0 0 90px rgba(212, 164, 76, 0.2);
   }
 }
 

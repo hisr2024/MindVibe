@@ -62,6 +62,12 @@ export { DivineSacredActions } from './DivineSacredActions';
 export { IntroOverlay } from './IntroOverlay';
 
 // ========================================
+// Golden Black Theme - Global Components
+// ========================================
+export { GodParticles } from './GodParticles';
+export { PageTransitionWrapper } from './PageTransitionWrapper';
+
+// ========================================
 // Types
 // ========================================
 export type { EmotionalState, AtmosphereType, BreathingPattern } from '@/contexts/DivineConsciousnessContext';

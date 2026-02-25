@@ -23,7 +23,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: 'cover',
-  themeColor: '#0b0b0f',
+  themeColor: '#050507',
 }
 
 export const metadata = {
@@ -168,13 +168,13 @@ export default async function RootLayout({
         {/* Set language from localStorage before hydration to prevent flash */}
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: languageScript }} />
       </head>
-      <body className="min-h-screen bg-slate-950 text-slate-50 antialiased mobile-viewport-fix overscroll-none">
+      <body className="min-h-screen bg-[#050507] text-[#f5f0e8] antialiased mobile-viewport-fix overscroll-none">
         <ClientLayout>
           <Providers>
             {/* Skip to content link for keyboard accessibility */}
             <a
               href="#main-content"
-              className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-orange-500 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-950 focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-[#d4a44c] focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-[#050507] focus:outline-none focus:ring-2 focus:ring-[#e8b54a]"
             >
               Skip to content
             </a>

@@ -130,7 +130,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center pt-4">
               <a
                 href="/introduction"
-                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-semibold rounded-full hover:from-orange-400 hover:to-amber-400 transition-all text-sm sm:text-base shadow-lg shadow-orange-500/20"
+                className="divine-cta-primary inline-flex items-center gap-2 px-8 py-3 font-semibold rounded-full text-sm sm:text-base"
               >
                 {t('home.value.cta', 'Begin Your Journey')}
               </a>
