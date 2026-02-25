@@ -98,7 +98,7 @@ export default function AdminABTestsPage() {
             Create and manage experiments
           </p>
         </div>
-        <button className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-orange-400">
+        <button className="rounded-lg bg-[#d4a44c] px-4 py-2 text-sm font-medium text-slate-900 hover:bg-[#d4a44c]">
           + New Test
         </button>
       </div>
@@ -165,7 +165,7 @@ export default function AdminABTestsPage() {
                       <Tooltip
                         contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}
                       />
-                      <Bar dataKey="rate" fill="#f97316" name="Conversion Rate %" />
+                      <Bar dataKey="rate" fill="#d4a44c" name="Conversion Rate %" />
                     </BarChart>
                   </ResponsiveContainer>
                   <div className="mt-3 flex gap-4 text-xs text-slate-400">

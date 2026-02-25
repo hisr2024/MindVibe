@@ -242,12 +242,12 @@ export function ChatFooter() {
           >
             <button
               onClick={toggleOpen}
-              className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 via-orange-600 to-amber-500 shadow-lg shadow-black/30 transition-all hover:scale-110 hover:shadow-xl hover:shadow-black/40 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-slate-950 md:h-16 md:w-16"
+              className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#d4a44c] via-[#c8943a] to-[#d4a44c] shadow-lg shadow-black/30 transition-all hover:scale-110 hover:shadow-xl hover:shadow-black/40 focus:outline-none focus:ring-2 focus:ring-[#d4a44c] focus:ring-offset-2 focus:ring-offset-slate-950 md:h-16 md:w-16"
               aria-label="Open KIAAN chat"
               title="Chat with KIAAN"
             >
               {/* Pulsing background effect */}
-              <span className="absolute inset-0 animate-ping rounded-full bg-orange-400 opacity-30" />
+              <span className="absolute inset-0 animate-ping rounded-full bg-[#d4a44c] opacity-30" />
 
               {/* Notification badge for unread messages */}
               {unreadCount > 0 && (
@@ -274,7 +274,7 @@ export function ChatFooter() {
               </svg>
 
               {/* Hover label */}
-              <span className="absolute bottom-full right-0 mb-2 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-orange-50 opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus:opacity-100">
+              <span className="absolute bottom-full right-0 mb-2 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-[#f5f0e8] opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus:opacity-100">
                 Chat with KIAAN
                 <span className="absolute left-auto right-4 top-full -mt-1 h-2 w-2 rotate-45 bg-slate-900" />
               </span>
@@ -293,16 +293,16 @@ export function ChatFooter() {
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className="fixed bottom-8 right-8 z-[60] hidden w-[380px] md:block"
           >
-            <div className="flex flex-col h-[60vh] max-h-[500px] md:h-[600px] md:max-h-none rounded-2xl border border-orange-500/20 bg-slate-950/95 backdrop-blur-lg shadow-lg shadow-black/30 overflow-hidden">
+            <div className="flex flex-col h-[60vh] max-h-[500px] md:h-[600px] md:max-h-none rounded-2xl border border-[#d4a44c]/20 bg-slate-950/95 backdrop-blur-lg shadow-lg shadow-black/30 overflow-hidden">
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-orange-500/20 bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-4 py-3">
+              <div className="flex items-center justify-between border-b border-[#d4a44c]/20 bg-gradient-to-r from-[#d4a44c]/10 to-[#d4a44c]/10 px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center text-sm font-bold text-slate-900">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#d4a44c] to-[#e8b54a] flex items-center justify-center text-sm font-bold text-slate-900">
                     K
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-semibold text-orange-50">Chat with KIAAN</h3>
+                      <h3 className="text-sm font-semibold text-[#f5f0e8]">Chat with KIAAN</h3>
                       {connectionStatus === 'connected' && (
                         <span className="flex h-2 w-2">
                           <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span>
@@ -316,7 +316,7 @@ export function ChatFooter() {
                         <span className="h-2 w-2 rounded-full bg-red-500"></span>
                       )}
                     </div>
-                    <p className="text-[10px] text-orange-100/60">
+                    <p className="text-[10px] text-[#f5f0e8]/60">
                       {connectionStatus === 'connected' && 'Online'}
                       {connectionStatus === 'connecting' && 'Connecting...'}
                       {connectionStatus === 'error' && 'Connection issues'}
@@ -327,7 +327,7 @@ export function ChatFooter() {
                   {connectionStatus === 'error' && (
                     <a
                       href="/kiaan/chat"
-                      className="text-xs text-orange-300 hover:text-orange-100 underline"
+                      className="text-xs text-[#e8b54a] hover:text-orange-100 underline"
                       title="Open main chat page"
                     >
                       Full Chat
@@ -335,7 +335,7 @@ export function ChatFooter() {
                   )}
                   <button
                     onClick={toggleOpen}
-                    className="rounded-lg p-1.5 text-orange-100/60 hover:bg-orange-500/10 hover:text-orange-50 transition-colors"
+                    className="rounded-lg p-1.5 text-[#f5f0e8]/60 hover:bg-[#d4a44c]/10 hover:text-[#f5f0e8] transition-colors"
                     aria-label="Minimize chat"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -346,14 +346,14 @@ export function ChatFooter() {
               </div>
 
               {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-thin scrollbar-thumb-orange-500/20 scrollbar-track-transparent">
+              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-thin scrollbar-thumb-[#d4a44c]/20 scrollbar-track-transparent">
                 {globalMessages.length === 0 && (
                   <div className="text-center py-12">
-                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-orange-400/20 to-amber-300/20 flex items-center justify-center mx-auto mb-4">
+                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-[#d4a44c]/20 to-[#e8b54a]/20 flex items-center justify-center mx-auto mb-4">
                       <span className="text-3xl">💬</span>
                     </div>
-                    <h4 className="text-sm font-semibold text-orange-50 mb-2">Welcome to KIAAN</h4>
-                    <p className="text-xs text-orange-100/70 max-w-[260px] mx-auto">
+                    <h4 className="text-sm font-semibold text-[#f5f0e8] mb-2">Welcome to KIAAN</h4>
+                    <p className="text-xs text-[#f5f0e8]/70 max-w-[260px] mx-auto">
                       Share what&apos;s on your mind. I&apos;m here to listen, support, and offer thoughtful guidance.
                     </p>
                   </div>
@@ -364,10 +364,10 @@ export function ChatFooter() {
                     <div
                       className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
                         msg.sender === 'user'
-                          ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white'
+                          ? 'bg-gradient-to-br from-[#d4a44c] to-[#c8943a] text-white'
                           : msg.status === 'error'
                           ? 'bg-red-500/10 border border-red-500/30 text-red-200'
-                          : 'bg-slate-800/80 text-slate-100 border border-orange-500/10'
+                          : 'bg-slate-800/80 text-slate-100 border border-[#d4a44c]/10'
                       }`}
                     >
                       <p className="whitespace-pre-wrap break-words">{msg.text}</p>
@@ -381,12 +381,12 @@ export function ChatFooter() {
                 {/* Typing indicator */}
                 {isLoading && (
                   <div className="flex justify-start">
-                    <div className="bg-slate-800/80 rounded-2xl px-4 py-3 border border-orange-500/10">
+                    <div className="bg-slate-800/80 rounded-2xl px-4 py-3 border border-[#d4a44c]/10">
                       <div className="flex items-center gap-2 text-slate-400 text-sm">
                         <div className="flex gap-1">
-                          <div className="w-2 h-2 bg-orange-400/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <div className="w-2 h-2 bg-orange-400/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <div className="w-2 h-2 bg-orange-400/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                          <div className="w-2 h-2 bg-[#d4a44c]/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <div className="w-2 h-2 bg-[#d4a44c]/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <div className="w-2 h-2 bg-[#d4a44c]/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                         </div>
                         <span className="text-xs">KIAAN is thinking...</span>
                       </div>
@@ -398,7 +398,7 @@ export function ChatFooter() {
               </div>
 
               {/* Input Area */}
-              <div className="border-t border-orange-500/20 bg-slate-900/50 px-4 py-3">
+              <div className="border-t border-[#d4a44c]/20 bg-slate-900/50 px-4 py-3">
                 <div className="flex items-end gap-2">
                   <input
                     ref={inputRef}
@@ -407,7 +407,7 @@ export function ChatFooter() {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Share what's on your mind..."
-                    className="flex-1 bg-slate-800/80 text-slate-100 placeholder-slate-500 rounded-xl px-3 py-2 text-sm border border-orange-500/20 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-transparent"
+                    className="flex-1 bg-slate-800/80 text-slate-100 placeholder-slate-500 rounded-xl px-3 py-2 text-sm border border-[#d4a44c]/20 focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50 focus:border-transparent"
                     disabled={isLoading}
                     maxLength={2000}
                     aria-label="Type a message to KIAAN"
@@ -415,7 +415,7 @@ export function ChatFooter() {
                   <button
                     onClick={() => sendMessage()}
                     disabled={!input.trim() || isLoading}
-                    className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                    className="px-4 py-2 bg-gradient-to-r from-[#d4a44c] to-[#c8943a] hover:from-[#c8943a] hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50"
                     aria-label="Send message"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

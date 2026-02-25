@@ -33,7 +33,7 @@ import { apiFetch } from '@/lib/api'
 // Mood options with emojis and colors - score maps to backend (-2 to 2 scale)
 const MOOD_OPTIONS = [
   { id: 'great', label: 'Great', emoji: '😊', color: 'from-green-500 to-emerald-400', score: 2 },
-  { id: 'good', label: 'Good', emoji: '🙂', color: 'from-yellow-500 to-amber-400', score: 1 },
+  { id: 'good', label: 'Good', emoji: '🙂', color: 'from-yellow-500 to-[#d4a44c]', score: 1 },
   { id: 'okay', label: 'Okay', emoji: '😐', color: 'from-blue-500 to-cyan-400', score: 0 },
   { id: 'low', label: 'Low', emoji: '😔', color: 'from-purple-500 to-indigo-400', score: -1 },
   { id: 'struggling', label: 'Struggling', emoji: '😢', color: 'from-red-500 to-pink-400', score: -2 },
@@ -47,8 +47,8 @@ const QUICK_ACTIONS = [
     description: 'AI wisdom companion',
     icon: Sparkles,
     href: '/m/kiaan',
-    gradient: 'from-orange-500/20 to-amber-500/20',
-    iconColor: 'text-orange-400',
+    gradient: 'from-[#d4a44c]/20 to-[#d4a44c]/20',
+    iconColor: 'text-[#d4a44c]',
   },
   {
     id: 'journal',
@@ -405,10 +405,10 @@ export default function MobileHomePage() {
           transition={{ delay: 0.15 }}
           className="grid grid-cols-3 gap-3"
         >
-          <div className="p-3 rounded-xl text-center bg-gradient-to-br from-orange-500/10 to-amber-500/5 border border-orange-500/20">
+          <div className="p-3 rounded-xl text-center bg-gradient-to-br from-[#d4a44c]/10 to-[#d4a44c]/5 border border-[#d4a44c]/20">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <Zap className="w-4 h-4 text-orange-400" />
-              <span className="text-xl font-bold text-orange-400">
+              <Zap className="w-4 h-4 text-[#d4a44c]" />
+              <span className="text-xl font-bold text-[#d4a44c]">
                 {dashboardData.streak}
               </span>
             </div>
@@ -560,10 +560,10 @@ export default function MobileHomePage() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-orange-500/10 border border-orange-500/15"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#d4a44c]/10 border border-[#d4a44c]/15"
             >
-              <RefreshCw className="w-4 h-4 text-orange-400 flex-shrink-0" />
-              <p className="text-xs text-orange-300">
+              <RefreshCw className="w-4 h-4 text-[#d4a44c] flex-shrink-0" />
+              <p className="text-xs text-[#e8b54a]">
                 Some data may be outdated. Pull down to refresh.
               </p>
             </motion.div>

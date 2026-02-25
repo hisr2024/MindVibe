@@ -7,7 +7,7 @@ import CompanionCTA from '@/components/companion/CompanionCTA'
 
 export default function KarmicTreePageClient() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] text-white p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <FadeIn>
@@ -28,7 +28,7 @@ export default function KarmicTreePageClient() {
               description="Add a reflection to earn XP and grow your tree."
               ctaLabel="Write Now"
               href="/sacred-reflections"
-              gradient="from-orange-500/10 to-amber-500/10"
+              gradient="from-[#d4a44c]/10 to-amber-500/10"
             />
             <ToolActionCard
               icon="👣"
@@ -56,29 +56,29 @@ export default function KarmicTreePageClient() {
 
         {/* Footer Links */}
         <FadeIn delay={0.15}>
-          <div className="rounded-2xl border border-orange-500/15 bg-black/40 p-4">
+          <div className="rounded-2xl border border-[#d4a44c]/15 bg-black/40 p-4">
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Link
                 href="/tools/karmic-tree"
-                className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-3 py-1.5 border border-orange-500/20"
+                className="text-xs text-[#f5f0e8]/70 hover:text-[#e8b54a] transition rounded px-3 py-1.5 border border-[#d4a44c]/20"
               >
                 Karmic Tree
               </Link>
               <Link
                 href="/tools/karma-footprint"
-                className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-3 py-1.5 border border-orange-500/20"
+                className="text-xs text-[#f5f0e8]/70 hover:text-[#e8b54a] transition rounded px-3 py-1.5 border border-[#d4a44c]/20"
               >
                 Karma Footprint
               </Link>
               <Link
                 href="/tools/emotional-reset"
-                className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-3 py-1.5 border border-orange-500/20"
+                className="text-xs text-[#f5f0e8]/70 hover:text-[#e8b54a] transition rounded px-3 py-1.5 border border-[#d4a44c]/20"
               >
                 Emotional Reset
               </Link>
               <Link
                 href="/dashboard"
-                className="text-xs text-orange-100/70 hover:text-orange-200 transition rounded px-3 py-1.5 border border-orange-500/20"
+                className="text-xs text-[#f5f0e8]/70 hover:text-[#e8b54a] transition rounded px-3 py-1.5 border border-[#d4a44c]/20"
               >
                 Dashboard
               </Link>

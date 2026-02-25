@@ -38,7 +38,7 @@ interface Notification {
 const NOTIFICATION_ICONS: Record<string, React.ReactNode> = {
   wisdom: <BookOpen className="w-4 h-4 text-teal-400" />,
   journey: <Compass className="w-4 h-4 text-cyan-400" />,
-  insight: <Sparkles className="w-4 h-4 text-orange-400" />,
+  insight: <Sparkles className="w-4 h-4 text-[#d4a44c]" />,
   system: <Bell className="w-4 h-4 text-slate-400" />,
   reminder: <Heart className="w-4 h-4 text-pink-400" />,
 }
@@ -46,7 +46,7 @@ const NOTIFICATION_ICONS: Record<string, React.ReactNode> = {
 const NOTIFICATION_BG: Record<string, string> = {
   wisdom: 'bg-teal-500/15',
   journey: 'bg-cyan-500/15',
-  insight: 'bg-orange-500/15',
+  insight: 'bg-[#d4a44c]/15',
   system: 'bg-white/[0.06]',
   reminder: 'bg-pink-500/15',
 }
@@ -193,7 +193,7 @@ export default function MobileNotificationsPage() {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={markAllAsRead}
-            className="p-2 rounded-lg text-orange-400"
+            className="p-2 rounded-lg text-[#d4a44c]"
             aria-label="Mark all as read"
           >
             <CheckCheck className="w-5 h-5" />
@@ -223,10 +223,10 @@ export default function MobileNotificationsPage() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#d4a44c]/10 border border-[#d4a44c]/20"
               >
-                <Bell className="w-4 h-4 text-orange-400" />
-                <span className="text-sm text-orange-400 font-medium">
+                <Bell className="w-4 h-4 text-[#d4a44c]" />
+                <span className="text-sm text-[#d4a44c] font-medium">
                   {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
                 </span>
               </motion.div>
@@ -265,7 +265,7 @@ export default function MobileNotificationsPage() {
                                   {notification.title}
                                 </p>
                                 {!notification.read && (
-                                  <div className="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0" />
+                                  <div className="w-2 h-2 rounded-full bg-[#d4a44c] flex-shrink-0" />
                                 )}
                               </div>
                               <p className="text-xs text-slate-400 line-clamp-2">

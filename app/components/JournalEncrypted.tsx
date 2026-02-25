@@ -136,75 +136,75 @@ export default function JournalEncrypted() {
   }, [pass, cipherList])
 
   return (
-    <main className="space-y-4 text-orange-50">
-      <section className="rounded-3xl border border-orange-500/20 bg-slate-950/60 p-5">
+    <main className="space-y-4 text-[#f5f0e8]">
+      <section className="rounded-3xl border border-[#d4a44c]/20 bg-slate-950/60 p-5">
         <h2 className="text-lg font-semibold">Encrypted Sacred Reflections</h2>
-        <p className="text-sm text-orange-100/80">Protected with AES-GCM; your passphrase never leaves this device.</p>
+        <p className="text-sm text-[#f5f0e8]/80">Protected with AES-GCM; your passphrase never leaves this device.</p>
         <div className="mt-3 flex flex-wrap items-end gap-3">
-          <label className="text-sm text-orange-100/80">
-            <span className="font-semibold text-orange-50">Passphrase</span>
+          <label className="text-sm text-[#f5f0e8]/80">
+            <span className="font-semibold text-[#f5f0e8]">Passphrase</span>
             <input
               type="password"
               autoComplete="off"
               value={pass}
               onChange={e => setPass(e.target.value)}
-              className="mt-1 block w-64 rounded-2xl border border-orange-500/25 bg-slate-950/70 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-400/70"
+              className="mt-1 block w-64 rounded-2xl border border-[#d4a44c]/25 bg-slate-950/70 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#d4a44c]/70"
               aria-label="Sacred Reflections passphrase"
             />
           </label>
-          <div className="text-xs text-orange-100/70">Your passphrase is never stored.</div>
+          <div className="text-xs text-[#f5f0e8]/70">Your passphrase is never stored.</div>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-orange-500/20 bg-slate-950/60 p-5 space-y-3">
+      <section className="rounded-3xl border border-[#d4a44c]/20 bg-slate-950/60 p-5 space-y-3">
         <input
           value={title}
           onChange={e => setTitle(e.target.value)}
           placeholder="Title (optional)"
           aria-label="Reflection title"
-          className="w-full rounded-2xl border border-orange-500/25 bg-slate-950/70 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-400/70"
+          className="w-full rounded-2xl border border-[#d4a44c]/25 bg-slate-950/70 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#d4a44c]/70"
         />
         <textarea
           value={body}
           onChange={e => setBody(e.target.value)}
           placeholder="Write privately. Data is encrypted on your device."
           aria-label="Reflection content"
-          className="h-40 w-full rounded-2xl border border-orange-500/25 bg-slate-950/70 p-3 text-sm outline-none focus:ring-2 focus:ring-orange-400/70"
+          className="h-40 w-full rounded-2xl border border-[#d4a44c]/25 bg-slate-950/70 p-3 text-sm outline-none focus:ring-2 focus:ring-[#d4a44c]/70"
         />
         <div className="mt-3 flex flex-wrap gap-2">
           <button
             disabled={!pass || !body.trim()}
             onClick={addEntry}
-            className="rounded-2xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-5 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-2xl bg-gradient-to-r from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] px-5 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-[#d4a44c]/25 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
           >
             Add entry
           </button>
           <button
             onClick={exportFile}
-            className="rounded-2xl border border-orange-500/25 px-4 py-2 text-sm font-semibold text-orange-50 transition hover:bg-orange-500/10"
+            className="rounded-2xl border border-[#d4a44c]/25 px-4 py-2 text-sm font-semibold text-[#f5f0e8] transition hover:bg-[#d4a44c]/10"
           >
             Export
           </button>
-          <label className="cursor-pointer rounded-2xl border border-orange-500/25 px-4 py-2 text-sm font-semibold text-orange-50 transition hover:bg-orange-500/10">
+          <label className="cursor-pointer rounded-2xl border border-[#d4a44c]/25 px-4 py-2 text-sm font-semibold text-[#f5f0e8] transition hover:bg-[#d4a44c]/10">
             Import
             <input ref={fileRef} type="file" accept="application/json" className="hidden" onChange={importFile} />
           </label>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-orange-500/20 bg-slate-950/60 p-5">
+      <section className="rounded-3xl border border-[#d4a44c]/20 bg-slate-950/60 p-5">
         <h3 className="text-lg font-semibold">Entries</h3>
-        {!pass && <p className="text-sm text-orange-100/70">Enter your passphrase to view entries.</p>}
+        {!pass && <p className="text-sm text-[#f5f0e8]/70">Enter your passphrase to view entries.</p>}
         {pass && (
           <ul className="mt-3 space-y-3">
             {(entries || []).map((entry, idx) => (
-              <li key={idx} className="rounded-2xl border border-orange-500/25 bg-black/60 p-3">
-                <div className="text-xs text-orange-100/70">{new Date(entry.at).toLocaleString()}</div>
+              <li key={idx} className="rounded-2xl border border-[#d4a44c]/25 bg-black/60 p-3">
+                <div className="text-xs text-[#f5f0e8]/70">{new Date(entry.at).toLocaleString()}</div>
                 {entry.title && <div className="font-semibold">{entry.title}</div>}
-                <div className="whitespace-pre-wrap text-orange-50">{entry.body}</div>
+                <div className="whitespace-pre-wrap text-[#f5f0e8]">{entry.body}</div>
               </li>
             ))}
-            {pass && (entries?.length || 0) === 0 && <li className="text-sm text-orange-100/70">No entries yet.</li>}
+            {pass && (entries?.length || 0) === 0 && <li className="text-sm text-[#f5f0e8]/70">No entries yet.</li>}
           </ul>
         )}
       </section>

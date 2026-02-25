@@ -74,7 +74,7 @@ export function VoiceOutputButton({
       {/* Main speaker button */}
       <button
         onClick={handleSpeak}
-        className={`group flex items-center gap-1.5 rounded-lg border border-orange-500/25 bg-orange-500/10 px-2.5 py-1.5 text-xs font-medium text-orange-200 transition-all hover:border-orange-500/40 hover:bg-orange-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 ${className}`}
+        className={`group flex items-center gap-1.5 rounded-lg border border-[#d4a44c]/25 bg-[#d4a44c]/10 px-2.5 py-1.5 text-xs font-medium text-[#e8b54a] transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 ${className}`}
         aria-label={isSpeaking ? (isPaused ? 'Resume speaking' : 'Pause speaking') : 'Read aloud'}
         title={isSpeaking ? (isPaused ? 'Resume' : 'Pause') : 'Read this response aloud'}
       >
@@ -90,7 +90,7 @@ export function VoiceOutputButton({
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-orange-400"
+            className="text-[#d4a44c]"
           >
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
             <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
@@ -110,7 +110,7 @@ export function VoiceOutputButton({
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-orange-400 animate-pulse"
+            className="text-[#d4a44c] animate-pulse"
           >
             <rect x="6" y="4" width="4" height="16" />
             <rect x="14" y="4" width="4" height="16" />
@@ -129,7 +129,7 @@ export function VoiceOutputButton({
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-orange-400"
+            className="text-[#d4a44c]"
           >
             <polygon points="5 3 19 12 5 21 5 3" />
           </svg>
@@ -161,16 +161,16 @@ export function VoiceOutputButton({
           </button>
 
           {/* Speed controls */}
-          <div className="flex items-center gap-1 rounded-lg border border-orange-500/25 bg-orange-500/10 px-2 py-1">
-            <span className="text-[10px] text-orange-300 uppercase tracking-wider">Speed:</span>
+          <div className="flex items-center gap-1 rounded-lg border border-[#d4a44c]/25 bg-[#d4a44c]/10 px-2 py-1">
+            <span className="text-[10px] text-[#e8b54a] uppercase tracking-wider">Speed:</span>
             {[0.75, 1.0, 1.25, 1.5].map((rate) => (
               <button
                 key={rate}
                 onClick={() => handleRateChange(rate)}
                 className={`text-[10px] font-medium px-1.5 py-0.5 rounded transition-colors ${
                   playbackRate === rate
-                    ? 'bg-orange-500/30 text-orange-200'
-                    : 'text-orange-300/70 hover:text-orange-200'
+                    ? 'bg-[#d4a44c]/30 text-[#e8b54a]'
+                    : 'text-[#e8b54a]/70 hover:text-[#e8b54a]'
                 }`}
                 aria-label={`Playback speed ${rate}x`}
               >

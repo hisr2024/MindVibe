@@ -174,7 +174,7 @@ export default function ViyogClient() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] text-white p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <ToolHeader
@@ -201,7 +201,7 @@ export default function ViyogClient() {
             description="Share what's on your mind and get a fresh perspective."
             ctaLabel="Share What's Up"
             onClick={() => document.getElementById('concern-input')?.focus()}
-            gradient="from-orange-500/10 to-amber-500/10"
+            gradient="from-[#d4a44c]/10 to-amber-500/10"
           />
         </div>
 
@@ -209,9 +209,9 @@ export default function ViyogClient() {
         <div className="grid gap-6 lg:grid-cols-[1.5fr,1fr]">
           {/* Left: Input and Response */}
           <section className="space-y-4">
-            <div className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
+            <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
               <div className="flex items-center justify-between mb-3">
-                <label htmlFor="concern-input" className="text-sm font-semibold text-orange-100">
+                <label htmlFor="concern-input" className="text-sm font-semibold text-[#f5f0e8]">
                   What outcome are you worried about?
                 </label>
                 <VoiceInputButton
@@ -225,7 +225,7 @@ export default function ViyogClient() {
                 value={concern}
                 onChange={e => setConcern(e.target.value)}
                 placeholder="Tell me what's on your mind. Example: I'm worried my presentation won't go well and everyone will think I'm not good at my job."
-                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/60 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
+                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-[#d4a44c]/25 text-[#f5f0e8] placeholder:text-[#f5f0e8]/60 p-4 focus:ring-2 focus:ring-[#d4a44c]/50 outline-none"
                 aria-describedby="concern-hint"
               />
               <p id="concern-hint" className="sr-only">Describe what you&apos;re worried about</p>
@@ -234,7 +234,7 @@ export default function ViyogClient() {
                 <button
                   onClick={requestDetachment}
                   disabled={!concern.trim() || loading}
-                  className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400/50"
+                  className="px-5 py-3 rounded-2xl bg-gradient-to-r from-[#d4a44c] via-[#ffb347] to-[#e8b54a] text-slate-950 font-semibold shadow-lg shadow-[#d4a44c]/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50"
                   aria-label={loading ? 'Processing...' : 'Get Fresh Perspective'}
                 >
                   {loading ? <span>Thinking...</span> : <span>Get Fresh Perspective</span>}
@@ -242,7 +242,7 @@ export default function ViyogClient() {
               </div>
 
               {error && (
-                <p className="mt-3 text-sm text-orange-200" role="alert">
+                <p className="mt-3 text-sm text-[#e8b54a]" role="alert">
                   <span>{error}</span>
                 </p>
               )}
@@ -275,7 +275,7 @@ export default function ViyogClient() {
           <section className="space-y-4">
             {/* Concern Analysis Insight Card - shows when analysis is available */}
             {result && !loading && !showPause && result.concernAnalysis && result.concernAnalysis.analysis_depth === 'ai_enhanced' && (
-              <div className="rounded-2xl border border-amber-500/25 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-5 shadow-[0_15px_60px_rgba(255,180,50,0.08)]">
+              <div className="rounded-2xl border border-amber-500/25 bg-gradient-to-br from-amber-500/5 to-[#d4a44c]/5 p-5 shadow-[0_15px_60px_rgba(255,180,50,0.08)]">
                 <h3 className="text-sm font-semibold text-amber-100 mb-3 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
                   What I See in Your Situation
@@ -325,11 +325,11 @@ export default function ViyogClient() {
                   )}
                   {result.concernAnalysis.not_in_their_control && result.concernAnalysis.not_in_their_control.length > 0 && (
                     <div className="mt-1">
-                      <span className="text-orange-400/80 font-medium text-[11px] uppercase tracking-wider block mb-1.5">Not in your control</span>
+                      <span className="text-[#d4a44c]/80 font-medium text-[11px] uppercase tracking-wider block mb-1.5">Not in your control</span>
                       <ul className="space-y-1">
                         {result.concernAnalysis.not_in_their_control.slice(0, 3).map((item, i) => (
                           <li key={i} className="flex items-start gap-1.5">
-                            <span className="text-orange-400/60 mt-0.5 shrink-0">-</span>
+                            <span className="text-[#d4a44c]/60 mt-0.5 shrink-0">-</span>
                             <span>{item}</span>
                           </li>
                         ))}
@@ -340,12 +340,12 @@ export default function ViyogClient() {
               </div>
             )}
 
-            <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-              <h3 className="text-sm font-semibold text-orange-50 mb-4">The Flow</h3>
-              <ol className="space-y-3 text-sm text-orange-100/85">
+            <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
+              <h3 className="text-sm font-semibold text-[#f5f0e8] mb-4">The Flow</h3>
+              <ol className="space-y-3 text-sm text-[#f5f0e8]/85">
                 {flowSteps.map((step, idx) => (
                   <li key={idx} className="flex items-start gap-3">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-orange-400 to-[#ffb347] text-xs font-bold text-slate-950 shrink-0">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-[#d4a44c] to-[#ffb347] text-xs font-bold text-slate-950 shrink-0">
                       {idx + 1}
                     </span>
                     <span>{step}</span>
@@ -354,23 +354,23 @@ export default function ViyogClient() {
               </ol>
             </div>
 
-            <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-              <h3 className="text-sm font-semibold text-orange-50 mb-3">About Viyoga</h3>
-              <p className="text-xs text-orange-100/80 leading-relaxed mb-4">
+            <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
+              <h3 className="text-sm font-semibold text-[#f5f0e8] mb-3">About Viyoga</h3>
+              <p className="text-xs text-[#f5f0e8]/80 leading-relaxed mb-4">
                 Viyoga is like a wise friend who actually listens. It deeply analyzes YOUR specific situation - understanding what you&apos;re attached to, why it matters to you, and what&apos;s really driving the anxiety. Then it helps you find freedom through focused action, guided by timeless Bhagavad Gita wisdom on detachment.
               </p>
 
-              <div className="p-3 rounded-xl bg-black/40 border border-orange-500/15">
-                <h4 className="text-xs font-semibold text-orange-50 mb-2">How It Works</h4>
-                <p className="text-xs text-orange-100/70">
+              <div className="p-3 rounded-xl bg-black/40 border border-[#d4a44c]/15">
+                <h4 className="text-xs font-semibold text-[#f5f0e8] mb-2">How It Works</h4>
+                <p className="text-xs text-[#f5f0e8]/70">
                   Deep Understanding → Identify Attachment → See What You Control → Shift to Effort → One Action → Reflect
                 </p>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 to-transparent p-4">
-              <p className="text-xs text-orange-100/80">
-                <strong className="text-orange-50">The Path of Detachment:</strong> Viyoga draws from the Gita&apos;s timeless teaching — let go of attachment to outcomes and find peace in right action. As Krishna teaches: &quot;You have the right to perform your actions, but not to the fruits thereof.&quot;
+            <div className="rounded-2xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#d4a44c]/10 to-transparent p-4">
+              <p className="text-xs text-[#f5f0e8]/80">
+                <strong className="text-[#f5f0e8]">The Path of Detachment:</strong> Viyoga draws from the Gita&apos;s timeless teaching — let go of attachment to outcomes and find peace in right action. As Krishna teaches: &quot;You have the right to perform your actions, but not to the fruits thereof.&quot;
               </p>
             </div>
 

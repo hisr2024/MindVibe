@@ -27,7 +27,7 @@ function formatDate(dateString: string) {
 /* Reusable chevron icon */
 function ChevronRight({ className = '' }: { className?: string }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-orange-100/30 group-hover:text-orange-300 transition shrink-0 ${className}`}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-[#f5f0e8]/30 group-hover:text-[#e8b54a] transition shrink-0 ${className}`}>
       <polyline points="9 18 15 12 9 6" />
     </svg>
   )
@@ -39,7 +39,7 @@ function AccountSection({
   title,
   subtitle,
   children,
-  borderColor = 'border-orange-500/15',
+  borderColor = 'border-[#d4a44c]/15',
 }: {
   icon: React.ReactNode
   title: string
@@ -50,12 +50,12 @@ function AccountSection({
   return (
     <div className={`rounded-3xl border ${borderColor} bg-black/40 p-5 sm:p-6 mb-6`}>
       <div className="flex items-center gap-3 mb-5">
-        <div className="h-9 w-9 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+        <div className="h-9 w-9 rounded-xl bg-[#d4a44c]/10 flex items-center justify-center shrink-0">
           {icon}
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-orange-50">{title}</h2>
-          {subtitle && <p className="text-xs text-orange-100/50">{subtitle}</p>}
+          <h2 className="text-lg font-semibold text-[#f5f0e8]">{title}</h2>
+          {subtitle && <p className="text-xs text-[#f5f0e8]/50">{subtitle}</p>}
         </div>
       </div>
       {children}
@@ -72,7 +72,7 @@ function NavRow({
   disabled,
   trailingIcon,
   isLast,
-  labelClass = 'text-orange-50 group-hover:text-orange-300',
+  labelClass = 'text-[#f5f0e8] group-hover:text-[#e8b54a]',
 }: {
   href?: string
   onClick?: () => void
@@ -87,13 +87,13 @@ function NavRow({
     <>
       <div className="text-left">
         <p className={`text-sm font-medium transition ${labelClass}`}>{label}</p>
-        <p className="text-xs text-orange-100/50 mt-0.5">{description}</p>
+        <p className="text-xs text-[#f5f0e8]/50 mt-0.5">{description}</p>
       </div>
       {trailingIcon ?? <ChevronRight />}
     </>
   )
 
-  const cls = `w-full flex items-center justify-between py-3 px-1 group ${isLast ? '' : 'border-b border-orange-500/10'} disabled:opacity-50`
+  const cls = `w-full flex items-center justify-between py-3 px-1 group ${isLast ? '' : 'border-b border-[#d4a44c]/10'} disabled:opacity-50`
 
   if (href) {
     return <Link href={href} className={cls}>{inner}</Link>
@@ -190,10 +190,10 @@ function AuthenticatedAccountView({
 
   const tierDisplayName = subscription?.tierName ?? 'Free'
   const tierColors: Record<string, string> = {
-    free: 'border-orange-400/30 bg-orange-400/10 text-orange-300',
+    free: 'border-[#d4a44c]/30 bg-[#d4a44c]/10 text-[#e8b54a]',
     basic: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-300',
     premium: 'border-purple-400/30 bg-purple-400/10 text-purple-300',
-    enterprise: 'border-amber-400/30 bg-amber-400/10 text-amber-300',
+    enterprise: 'border-[#d4a44c]/30 bg-[#d4a44c]/10 text-[#e8b54a]',
     premier: 'border-rose-400/30 bg-rose-400/10 text-rose-300',
   }
   const tierBadgeClass = tierColors[tier] || tierColors.free
@@ -202,8 +202,8 @@ function AuthenticatedAccountView({
     <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
       {/* Page Header */}
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-orange-50 mb-1">Account</h1>
-        <p className="text-sm text-orange-100/60">Manage your account settings, security, and data</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#f5f0e8] mb-1">Account</h1>
+        <p className="text-sm text-[#f5f0e8]/60">Manage your account settings, security, and data</p>
       </div>
 
       {actionStatus && (
@@ -211,7 +211,7 @@ function AuthenticatedAccountView({
           className={`mb-6 rounded-2xl border p-4 text-sm ${
             actionStatus.type === 'success'
               ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-50'
-              : 'border-orange-400/40 bg-orange-500/10 text-orange-50'
+              : 'border-[#d4a44c]/40 bg-[#d4a44c]/10 text-[#f5f0e8]'
           }`}
         >
           {actionStatus.message}
@@ -219,14 +219,14 @@ function AuthenticatedAccountView({
       )}
 
       {/* Account Overview + Subscription Card */}
-      <div className="rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0f0a08] via-[#0b0b0f] to-[#0c0f19] p-6 mb-6 shadow-[0_24px_100px_rgba(255,115,39,0.12)]">
+      <div className="rounded-3xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#0f0a08] via-[#0b0b0f] to-[#0c0f19] p-6 mb-6 shadow-[0_24px_100px_rgba(255,115,39,0.12)]">
         <div className="flex items-center gap-4 mb-5">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 flex items-center justify-center text-xl font-bold text-slate-900 shrink-0">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] flex items-center justify-center text-xl font-bold text-slate-900 shrink-0">
             {userInitial}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-lg font-semibold text-orange-50 truncate">{userName}</p>
-            <p className="text-sm text-orange-100/60 truncate">{user.email}</p>
+            <p className="text-lg font-semibold text-[#f5f0e8] truncate">{userName}</p>
+            <p className="text-sm text-[#f5f0e8]/60 truncate">{user.email}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${tierBadgeClass}`}>
@@ -240,22 +240,22 @@ function AuthenticatedAccountView({
         </div>
 
         {/* Subscription Summary */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-4 border-t border-orange-500/10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-4 border-t border-[#d4a44c]/10">
           <div className="rounded-xl bg-white/[0.03] p-3">
-            <p className="text-xs text-orange-100/50 mb-1">KIAAN Quota</p>
-            <p className="text-sm font-semibold text-orange-50">
+            <p className="text-xs text-[#f5f0e8]/50 mb-1">KIAAN Quota</p>
+            <p className="text-sm font-semibold text-[#f5f0e8]">
               {isKiaanUnlimited ? 'Unlimited' : `${kiaanQuota}/month`}
             </p>
           </div>
           <div className="rounded-xl bg-white/[0.03] p-3">
-            <p className="text-xs text-orange-100/50 mb-1">Journey Limit</p>
-            <p className="text-sm font-semibold text-orange-50">
+            <p className="text-xs text-[#f5f0e8]/50 mb-1">Journey Limit</p>
+            <p className="text-sm font-semibold text-[#f5f0e8]">
               {journeyLimit === -1 ? 'Unlimited' : `${journeyLimit} active`}
             </p>
           </div>
           <div className="rounded-xl bg-white/[0.03] p-3 col-span-2 sm:col-span-1">
-            <p className="text-xs text-orange-100/50 mb-1">Plan</p>
-            <Link href="/dashboard/subscription" className="text-sm font-semibold text-orange-300 hover:text-orange-200 transition">
+            <p className="text-xs text-[#f5f0e8]/50 mb-1">Plan</p>
+            <Link href="/dashboard/subscription" className="text-sm font-semibold text-[#e8b54a] hover:text-[#e8b54a] transition">
               {isPaid ? `${tierDisplayName} Plan` : 'Free Plan'} &rarr;
             </Link>
           </div>
@@ -264,7 +264,7 @@ function AuthenticatedAccountView({
 
       {/* KIAAN AI Ecosystem */}
       <AccountSection
-        icon={<span className="text-base font-black text-orange-400">K</span>}
+        icon={<span className="text-base font-black text-[#d4a44c]">K</span>}
         title="KIAAN AI Ecosystem"
         subtitle={`${kiaanTools.length} tools powered by Ancient Wisdom`}
       >
@@ -273,10 +273,10 @@ function AuthenticatedAccountView({
             <Link
               key={tool.id}
               href={tool.route}
-              className="group rounded-xl border border-orange-500/10 bg-white/[0.02] p-3 text-center hover:border-orange-400/30 hover:bg-orange-500/5 transition"
+              className="group rounded-xl border border-[#d4a44c]/10 bg-white/[0.02] p-3 text-center hover:border-[#d4a44c]/30 hover:bg-[#d4a44c]/5 transition"
             >
               <span className="text-lg block mb-1">{tool.icon}</span>
-              <span className="text-xs font-medium text-orange-100/70 group-hover:text-orange-50 transition line-clamp-1">{tool.name}</span>
+              <span className="text-xs font-medium text-[#f5f0e8]/70 group-hover:text-[#f5f0e8] transition line-clamp-1">{tool.name}</span>
             </Link>
           ))}
         </div>
@@ -288,7 +288,7 @@ function AuthenticatedAccountView({
       {/* Subscription Management */}
       <AccountSection
         icon={
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c]">
             <path d="M12 2L2 7l10 5 10-5-10-5z" />
             <path d="M2 17l10 5 10-5" />
             <path d="M2 12l10 5 10-5" />
@@ -312,7 +312,7 @@ function AuthenticatedAccountView({
             />
           )}
           {isPaid && subscription?.cancelAtPeriodEnd && (
-            <div className="mt-3 rounded-xl border border-amber-400/30 bg-amber-400/10 p-3 text-xs text-amber-100">
+            <div className="mt-3 rounded-xl border border-[#d4a44c]/30 bg-[#d4a44c]/10 p-3 text-xs text-[#f5f0e8]">
               Your plan will end on {subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString() : 'the end of the billing period'}. Renew to keep your features.
             </div>
           )}
@@ -322,7 +322,7 @@ function AuthenticatedAccountView({
       {/* Security */}
       <AccountSection
         icon={
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c]">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
           </svg>
         }
@@ -338,7 +338,7 @@ function AuthenticatedAccountView({
       {/* KIAAN Voice Settings */}
       <AccountSection
         icon={
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c]">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
             <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
             <line x1="12" y1="19" x2="12" y2="23" />
@@ -354,7 +354,7 @@ function AuthenticatedAccountView({
       {/* Data Management */}
       <AccountSection
         icon={
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c]">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
@@ -370,7 +370,7 @@ function AuthenticatedAccountView({
             description="Download all your journal entries, journeys, and settings"
             trailingIcon={
               isExporting
-                ? <div className="h-4 w-4 border-2 border-orange-400 border-t-transparent rounded-full animate-spin shrink-0" />
+                ? <div className="h-4 w-4 border-2 border-[#d4a44c] border-t-transparent rounded-full animate-spin shrink-0" />
                 : <ChevronRight />
             }
           />
@@ -381,7 +381,7 @@ function AuthenticatedAccountView({
       {/* Quick Links */}
       <AccountSection
         icon={
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c]">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
           </svg>
@@ -414,10 +414,10 @@ function AuthenticatedAccountView({
             className="w-full flex items-center justify-between py-3 px-1 group border-b border-red-500/10 disabled:opacity-50"
           >
             <div className="text-left">
-              <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Sign Out</p>
-              <p className="text-xs text-orange-100/50 mt-0.5">Sign out of your current session</p>
+              <p className="text-sm font-medium text-[#f5f0e8] group-hover:text-[#e8b54a] transition">Sign Out</p>
+              <p className="text-xs text-[#f5f0e8]/50 mt-0.5">Sign out of your current session</p>
             </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#f5f0e8]/30 group-hover:text-[#e8b54a] transition shrink-0">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
               <polyline points="16 17 21 12 16 7" />
               <line x1="21" y1="12" x2="9" y2="12" />
@@ -429,7 +429,7 @@ function AuthenticatedAccountView({
           >
             <div className="text-left">
               <p className="text-sm font-medium text-red-400 group-hover:text-red-300 transition">Delete Account</p>
-              <p className="text-xs text-orange-100/50 mt-0.5">Permanently delete your account and all data</p>
+              <p className="text-xs text-[#f5f0e8]/50 mt-0.5">Permanently delete your account and all data</p>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400/50 group-hover:text-red-300 transition shrink-0">
               <polyline points="3 6 5 6 21 6" />
@@ -543,7 +543,7 @@ function UnauthenticatedAccountView() {
     ]
     const fulfilled = requirements.filter(rule => rule.test(createForm.password)).length
     const levels = ['Fragile', 'Getting there', 'Ready', 'Strong', 'Elite', 'Elite']
-    const colors = ['bg-orange-500/50', 'bg-orange-500/70', 'bg-amber-400/80', 'bg-emerald-400/80', 'bg-teal-300/80', 'bg-teal-200']
+    const colors = ['bg-[#d4a44c]/50', 'bg-[#d4a44c]/70', 'bg-[#d4a44c]/80', 'bg-emerald-400/80', 'bg-teal-300/80', 'bg-teal-200']
 
     return {
       label: levels[Math.min(fulfilled, levels.length - 1)],
@@ -643,11 +643,11 @@ function UnauthenticatedAccountView() {
   return (
     <main className="mx-auto max-w-6xl space-y-8 px-4 pb-16 pt-6 sm:pt-8 md:pt-12">
       {/* Hero Section */}
-      <section className="rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0f0a08] via-[#0b0b0f] to-[#0c0f19] p-8 shadow-[0_24px_100px_rgba(255,115,39,0.18)]">
+      <section className="rounded-3xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#0f0a08] via-[#0b0b0f] to-[#0c0f19] p-8 shadow-[0_24px_100px_rgba(255,115,39,0.18)]">
         <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.26em] text-orange-100/75">Account Access</p>
-          <h1 className="text-3xl font-bold text-orange-50">Welcome to MindVibe</h1>
-          <p className="text-sm text-orange-100/60">Create an account or sign in to sync your spiritual journey across devices</p>
+          <p className="text-xs uppercase tracking-[0.26em] text-[#f5f0e8]/75">Account Access</p>
+          <h1 className="text-3xl font-bold text-[#f5f0e8]">Welcome to MindVibe</h1>
+          <p className="text-sm text-[#f5f0e8]/60">Create an account or sign in to sync your spiritual journey across devices</p>
         </div>
       </section>
 
@@ -655,51 +655,51 @@ function UnauthenticatedAccountView() {
         {/* Left Column - KIAAN Ecosystem Preview + Info */}
         <div className="space-y-4">
           {/* Session Status */}
-          <div className="rounded-3xl border border-orange-500/20 bg-black/40 p-5 text-sm text-orange-100/80">
-            <p className="font-semibold text-orange-50">No active session</p>
+          <div className="rounded-3xl border border-[#d4a44c]/20 bg-black/40 p-5 text-sm text-[#f5f0e8]/80">
+            <p className="font-semibold text-[#f5f0e8]">No active session</p>
             <p className="mt-1">Create an account or log in to unlock your personalized spiritual flows.</p>
           </div>
 
           {/* KIAAN Ecosystem Preview */}
-          <div className="rounded-3xl border border-orange-500/15 bg-black/40 p-5">
+          <div className="rounded-3xl border border-[#d4a44c]/15 bg-black/40 p-5">
             <div className="flex items-center gap-3 mb-4">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/10 text-base font-black text-orange-400">K</span>
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#d4a44c]/10 text-base font-black text-[#d4a44c]">K</span>
               <div>
-                <p className="text-sm font-semibold text-orange-50">KIAAN AI Ecosystem</p>
-                <p className="text-xs text-orange-100/50">{kiaanTools.length} wisdom-powered tools await you</p>
+                <p className="text-sm font-semibold text-[#f5f0e8]">KIAAN AI Ecosystem</p>
+                <p className="text-xs text-[#f5f0e8]/50">{kiaanTools.length} wisdom-powered tools await you</p>
               </div>
             </div>
             <div className="grid grid-cols-4 gap-2">
               {kiaanTools.slice(0, 8).map(tool => (
                 <div
                   key={tool.id}
-                  className="rounded-xl border border-orange-500/10 bg-white/[0.02] p-2 text-center opacity-60"
+                  className="rounded-xl border border-[#d4a44c]/10 bg-white/[0.02] p-2 text-center opacity-60"
                 >
                   <span className="text-lg block">{tool.icon}</span>
-                  <span className="text-[10px] text-orange-100/50 line-clamp-1">{tool.name}</span>
+                  <span className="text-[10px] text-[#f5f0e8]/50 line-clamp-1">{tool.name}</span>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-orange-100/40 mt-3 text-center">Sign in to access all tools</p>
+            <p className="text-xs text-[#f5f0e8]/40 mt-3 text-center">Sign in to access all tools</p>
           </div>
 
           {/* Legacy accounts */}
           {legacyAccounts.length > 0 && (
-            <div className="rounded-3xl border border-orange-500/15 bg-black/50 p-5 text-sm text-orange-100/80">
-              <p className="text-xs uppercase tracking-[0.18em] text-orange-100/60">Previous local accounts</p>
-              <p className="mt-2 text-xs text-orange-100/50">These accounts were stored locally. Create a new account to sync your data securely.</p>
+            <div className="rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-5 text-sm text-[#f5f0e8]/80">
+              <p className="text-xs uppercase tracking-[0.18em] text-[#f5f0e8]/60">Previous local accounts</p>
+              <p className="mt-2 text-xs text-[#f5f0e8]/50">These accounts were stored locally. Create a new account to sync your data securely.</p>
               <ul className="mt-3 space-y-3">
                 {legacyAccounts
                   .slice()
                   .reverse()
                   .slice(0, 3)
                   .map(account => (
-                    <li key={account.email} className="rounded-2xl border border-orange-500/20 bg-slate-950/80 p-3">
-                      <div className="flex items-center justify-between text-orange-50">
+                    <li key={account.email} className="rounded-2xl border border-[#d4a44c]/20 bg-slate-950/80 p-3">
+                      <div className="flex items-center justify-between text-[#f5f0e8]">
                         <span className="font-semibold">{account.name}</span>
-                        <span className="text-xs uppercase tracking-[0.14em] text-orange-100/70">{formatDate(account.createdAt)}</span>
+                        <span className="text-xs uppercase tracking-[0.14em] text-[#f5f0e8]/70">{formatDate(account.createdAt)}</span>
                       </div>
-                      <p className="text-xs text-orange-100/70">{account.email}</p>
+                      <p className="text-xs text-[#f5f0e8]/70">{account.email}</p>
                     </li>
                   ))}
               </ul>
@@ -709,28 +709,28 @@ function UnauthenticatedAccountView() {
 
         {/* Right Column - Auth Forms */}
         <div className="space-y-4">
-          <div className="rounded-3xl border border-orange-500/20 bg-black/60 p-6 shadow-[0_20px_70px_rgba(255,115,39,0.14)]">
+          <div className="rounded-3xl border border-[#d4a44c]/20 bg-black/60 p-6 shadow-[0_20px_70px_rgba(255,115,39,0.14)]">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-50">
-                <span className="inline-block h-2 w-2 rounded-full bg-orange-300" />
+              <div className="flex items-center gap-2 rounded-full border border-[#d4a44c]/20 bg-[#d4a44c]/10 px-3 py-1 text-xs font-semibold text-[#f5f0e8]">
+                <span className="inline-block h-2 w-2 rounded-full bg-[#e8b54a]" />
                 Real-time validation
               </div>
-              <div className="flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-50">
+              <div className="flex items-center gap-2 rounded-full border border-[#d4a44c]/20 bg-[#d4a44c]/10 px-3 py-1 text-xs font-semibold text-[#f5f0e8]">
                 <span className="inline-block h-2 w-2 rounded-full bg-emerald-300" />
                 Secure auth
               </div>
             </div>
 
-            <div className="mt-6 flex items-center gap-2 rounded-2xl border border-orange-500/15 bg-orange-500/10 p-1 text-sm font-semibold text-orange-50">
+            <div className="mt-6 flex items-center gap-2 rounded-2xl border border-[#d4a44c]/15 bg-[#d4a44c]/10 p-1 text-sm font-semibold text-[#f5f0e8]">
               <button
                 onClick={() => { setMode('create'); setNeedsTwoFactor(false); resetStatus(); }}
-                className={`flex-1 rounded-xl px-3 py-2 transition ${mode === 'create' ? 'bg-orange-500 text-slate-950 shadow-md shadow-orange-500/30' : 'hover:bg-orange-500/20'}`}
+                className={`flex-1 rounded-xl px-3 py-2 transition ${mode === 'create' ? 'bg-[#d4a44c]text-slate-950 shadow-md shadow-[#d4a44c]/30' : 'hover:bg-[#d4a44c]/20'}`}
               >
                 Create Account
               </button>
               <button
                 onClick={() => { setMode('login'); resetStatus(); }}
-                className={`flex-1 rounded-xl px-3 py-2 transition ${mode === 'login' ? 'bg-orange-500 text-slate-950 shadow-md shadow-orange-500/30' : 'hover:bg-orange-500/20'}`}
+                className={`flex-1 rounded-xl px-3 py-2 transition ${mode === 'login' ? 'bg-[#d4a44c]text-slate-950 shadow-md shadow-[#d4a44c]/30' : 'hover:bg-[#d4a44c]/20'}`}
               >
                 Sign In
               </button>
@@ -743,7 +743,7 @@ function UnauthenticatedAccountView() {
                     ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-50'
                     : status.type === 'info'
                     ? 'border-cyan-400/40 bg-cyan-400/10 text-cyan-50'
-                    : 'border-orange-400/40 bg-orange-500/10 text-orange-50'
+                    : 'border-[#d4a44c]/40 bg-[#d4a44c]/10 text-[#f5f0e8]'
                 }`}
               >
                 {status.message}
@@ -753,7 +753,7 @@ function UnauthenticatedAccountView() {
             {mode === 'create' ? (
               <form className="mt-6 space-y-4" onSubmit={handleCreate}>
                 <div className="space-y-1">
-                  <label className="text-sm font-semibold text-orange-50" htmlFor="name">Full name</label>
+                  <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="name">Full name</label>
                   <input
                     id="name"
                     type="text"
@@ -761,12 +761,12 @@ function UnauthenticatedAccountView() {
                     value={createForm.name}
                     onChange={event => setCreateForm({ ...createForm, name: event.target.value })}
                     disabled={isSubmitting}
-                    className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40 disabled:opacity-50"
+                    className="w-full rounded-xl border border-[#d4a44c]/20 bg-slate-900/70 px-3 py-3 text-sm text-[#f5f0e8] outline-none transition focus:border-[#d4a44c] focus:ring-2 focus:ring-[#d4a44c]/40 disabled:opacity-50"
                     placeholder="Alex Parker"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-semibold text-orange-50" htmlFor="email">Email</label>
+                  <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="email">Email</label>
                   <input
                     id="email"
                     type="email"
@@ -774,12 +774,12 @@ function UnauthenticatedAccountView() {
                     value={createForm.email}
                     onChange={event => setCreateForm({ ...createForm, email: event.target.value })}
                     disabled={isSubmitting}
-                    className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40 disabled:opacity-50"
+                    className="w-full rounded-xl border border-[#d4a44c]/20 bg-slate-900/70 px-3 py-3 text-sm text-[#f5f0e8] outline-none transition focus:border-[#d4a44c] focus:ring-2 focus:ring-[#d4a44c]/40 disabled:opacity-50"
                     placeholder="you@mindvibe.life"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-orange-50" htmlFor="password">Password</label>
+                  <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="password">Password</label>
                   <input
                     id="password"
                     type="password"
@@ -787,29 +787,29 @@ function UnauthenticatedAccountView() {
                     value={createForm.password}
                     onChange={event => setCreateForm({ ...createForm, password: event.target.value })}
                     disabled={isSubmitting}
-                    className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40 disabled:opacity-50"
+                    className="w-full rounded-xl border border-[#d4a44c]/20 bg-slate-900/70 px-3 py-3 text-sm text-[#f5f0e8] outline-none transition focus:border-[#d4a44c] focus:ring-2 focus:ring-[#d4a44c]/40 disabled:opacity-50"
                     placeholder="At least 8 characters"
                   />
-                  <div className="flex items-center gap-3 text-xs text-orange-100/80">
-                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-orange-500/20">
+                  <div className="flex items-center gap-3 text-xs text-[#f5f0e8]/80">
+                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-[#d4a44c]/20">
                       <div className={`h-2 ${passwordStrength.bar}`} style={{ width: `${passwordStrength.percent}%` }} />
                     </div>
-                    <span className="min-w-[88px] text-right font-semibold text-orange-50">{passwordStrength.label}</span>
+                    <span className="min-w-[88px] text-right font-semibold text-[#f5f0e8]">{passwordStrength.label}</span>
                   </div>
                 </div>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full rounded-xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-4 py-3 text-sm font-semibold text-slate-900 shadow-lg shadow-orange-500/25 transition hover:scale-[1.01] disabled:opacity-50 disabled:hover:scale-100"
+                  className="w-full rounded-xl bg-gradient-to-r from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] px-4 py-3 text-sm font-semibold text-slate-900 shadow-lg shadow-[#d4a44c]/25 transition hover:scale-[1.01] disabled:opacity-50 disabled:hover:scale-100"
                 >
                   {isSubmitting ? 'Creating account...' : 'Create account'}
                 </button>
-                <p className="text-center text-xs text-orange-100/70">Your account is secured with bcrypt encryption.</p>
+                <p className="text-center text-xs text-[#f5f0e8]/70">Your account is secured with bcrypt encryption.</p>
               </form>
             ) : (
               <form className="mt-6 space-y-4" onSubmit={handleLogin}>
                 <div className="space-y-1">
-                  <label className="text-sm font-semibold text-orange-50" htmlFor="login-email">Email</label>
+                  <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="login-email">Email</label>
                   <input
                     id="login-email"
                     type="email"
@@ -817,12 +817,12 @@ function UnauthenticatedAccountView() {
                     value={loginForm.email}
                     onChange={event => setLoginForm({ ...loginForm, email: event.target.value.toLowerCase() })}
                     disabled={isSubmitting}
-                    className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40 disabled:opacity-50"
+                    className="w-full rounded-xl border border-[#d4a44c]/20 bg-slate-900/70 px-3 py-3 text-sm text-[#f5f0e8] outline-none transition focus:border-[#d4a44c] focus:ring-2 focus:ring-[#d4a44c]/40 disabled:opacity-50"
                     placeholder="you@mindvibe.life"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-semibold text-orange-50" htmlFor="login-password">Password</label>
+                  <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="login-password">Password</label>
                   <input
                     id="login-password"
                     type="password"
@@ -830,13 +830,13 @@ function UnauthenticatedAccountView() {
                     value={loginForm.password}
                     onChange={event => setLoginForm({ ...loginForm, password: event.target.value })}
                     disabled={isSubmitting}
-                    className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40 disabled:opacity-50"
+                    className="w-full rounded-xl border border-[#d4a44c]/20 bg-slate-900/70 px-3 py-3 text-sm text-[#f5f0e8] outline-none transition focus:border-[#d4a44c] focus:ring-2 focus:ring-[#d4a44c]/40 disabled:opacity-50"
                     placeholder="Enter your password"
                   />
                 </div>
                 {needsTwoFactor && (
                   <div className="space-y-1">
-                    <label className="text-sm font-semibold text-orange-50" htmlFor="two-factor">Two-Factor Code</label>
+                    <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="two-factor">Two-Factor Code</label>
                     <input
                       id="two-factor"
                       type="text"
@@ -845,17 +845,17 @@ function UnauthenticatedAccountView() {
                       value={loginForm.twoFactorCode}
                       onChange={event => setLoginForm({ ...loginForm, twoFactorCode: event.target.value.replace(/\D/g, '').slice(0, 6) })}
                       disabled={isSubmitting}
-                      className="w-full rounded-xl border border-cyan-500/30 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/40 disabled:opacity-50"
+                      className="w-full rounded-xl border border-cyan-500/30 bg-slate-900/70 px-3 py-3 text-sm text-[#f5f0e8] outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/40 disabled:opacity-50"
                       placeholder="6-digit code"
                       maxLength={6}
                     />
                   </div>
                 )}
-                <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-orange-100/75">
+                <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[#f5f0e8]/75">
                   <button
                     type="button"
                     onClick={() => setMode('create')}
-                    className="rounded-lg border border-orange-500/20 px-3 py-2 font-semibold text-orange-50 transition hover:border-orange-400 hover:bg-orange-500/10"
+                    className="rounded-lg border border-[#d4a44c]/20 px-3 py-2 font-semibold text-[#f5f0e8] transition hover:border-[#d4a44c] hover:bg-[#d4a44c]/10"
                   >
                     Need an account? Create one
                   </button>
@@ -867,7 +867,7 @@ function UnauthenticatedAccountView() {
                 >
                   {isSubmitting ? 'Signing in...' : 'Sign in securely'}
                 </button>
-                <p className="text-center text-xs text-orange-100/70">Secure authentication with session management.</p>
+                <p className="text-center text-xs text-[#f5f0e8]/70">Secure authentication with session management.</p>
               </form>
             )}
           </div>
@@ -899,9 +899,9 @@ export default function AccountPageClient() {
     return (
       <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
         <div className="animate-pulse space-y-6">
-          <div className="h-24 rounded-3xl bg-orange-500/10" />
-          <div className="h-48 rounded-3xl bg-orange-500/10" />
-          <div className="h-48 rounded-3xl bg-orange-500/10" />
+          <div className="h-24 rounded-3xl bg-[#d4a44c]/10" />
+          <div className="h-48 rounded-3xl bg-[#d4a44c]/10" />
+          <div className="h-48 rounded-3xl bg-[#d4a44c]/10" />
         </div>
       </main>
     )

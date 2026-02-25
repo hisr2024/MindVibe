@@ -155,17 +155,17 @@ export function ToolCard({
 
       {/* Title and description */}
       <div className="mt-3">
-        <h3 className="text-sm font-semibold text-orange-50 transition-colors duration-200 group-hover:text-white">
+        <h3 className="text-sm font-semibold text-[#f5f0e8] transition-colors duration-200 group-hover:text-white">
           {title}
         </h3>
-        <p className="mt-1 text-xs text-orange-100/60 line-clamp-2 leading-relaxed">
+        <p className="mt-1 text-xs text-[#f5f0e8]/60 line-clamp-2 leading-relaxed">
           {description}
         </p>
       </div>
 
       {/* Bottom accent line */}
       <motion.div
-        className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-orange-500/30 to-transparent"
+        className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-[#d4a44c]/30 to-transparent"
         initial={{ scaleX: 0, opacity: 0 }}
         whileHover={{ scaleX: 1, opacity: 1 }}
         transition={{ duration: 0.3 }}
@@ -200,7 +200,7 @@ export function ToolCard({
       <Link
         href={href}
         onClick={handleTap}
-        className={`group relative block overflow-hidden rounded-[18px] border border-orange-500/15 bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-4 shadow-mobile-card transition-all duration-200 hover:border-orange-500/30 hover:shadow-[0_8px_32px_rgba(255,115,39,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b0b0f] active:opacity-95 ${className}`}
+        className={`group relative block overflow-hidden rounded-[18px] border border-[#d4a44c]/15 bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-4 shadow-mobile-card transition-all duration-200 hover:border-[#d4a44c]/30 hover:shadow-[0_8px_32px_rgba(212,164,76,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050507] active:opacity-95 ${className}`}
       >
         {cardContent}
       </Link>

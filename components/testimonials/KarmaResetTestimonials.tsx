@@ -48,10 +48,10 @@ export function KarmaResetTestimonials() {
     >
       {/* Section header */}
       <div className="mb-6 text-center">
-        <h2 className="text-xl font-semibold text-orange-50/90">
+        <h2 className="text-xl font-semibold text-[#f5f0e8]/90">
           Voices from the journey
         </h2>
-        <p className="mt-1 text-sm text-orange-100/50">
+        <p className="mt-1 text-sm text-[#f5f0e8]/50">
           Real experiences from those who walked this path
         </p>
       </div>
@@ -74,7 +74,7 @@ export function KarmaResetTestimonials() {
         <div className="mt-6 text-center">
           <button
             onClick={() => setShowAll((prev) => !prev)}
-            className="rounded-xl border border-orange-500/20 bg-white/5 px-5 py-2.5 text-sm font-medium text-orange-100/70 transition-all duration-200 hover:border-orange-400/40 hover:bg-white/10 hover:text-orange-100/90"
+            className="rounded-xl border border-[#d4a44c]/20 bg-white/5 px-5 py-2.5 text-sm font-medium text-[#f5f0e8]/70 transition-all duration-200 hover:border-[#d4a44c]/40 hover:bg-white/10 hover:text-[#f5f0e8]/90"
           >
             {showAll
               ? 'Show fewer'

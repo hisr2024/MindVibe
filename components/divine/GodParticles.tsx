@@ -79,7 +79,7 @@ export function GodParticles({ count = 45 }: { count?: number }) {
             height: `${p.size}px`,
             opacity: p.opacity,
             animationDelay: `${p.delay}s`,
-            animationDuration: `${p.duration}s`,
+            ['--particle-duration' as string]: `${p.duration}s`,
             ['--particle-drift' as string]: `${p.drift}px`,
             background: PARTICLE_COLORS[p.variant],
             boxShadow:

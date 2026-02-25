@@ -53,21 +53,21 @@ export function OnboardingWizard({
       {/* Progress bar */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xs text-orange-100/60">
+          <p className="text-xs text-[#f5f0e8]/60">
             Step {currentStep + 1} of {steps.length}
           </p>
           {onSkip && (
             <button
               onClick={onSkip}
-              className="text-xs text-orange-100/50 hover:text-orange-100/80 transition"
+              className="text-xs text-[#f5f0e8]/50 hover:text-[#f5f0e8]/80 transition"
             >
               Skip onboarding
             </button>
           )}
         </div>
-        <div className="h-1.5 w-full rounded-full bg-orange-500/20 overflow-hidden">
+        <div className="h-1.5 w-full rounded-full bg-[#d4a44c]/20 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-orange-400 to-amber-300 transition-all duration-500"
+            className="h-full bg-gradient-to-r from-[#d4a44c] to-[#e8b54a] transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -82,10 +82,10 @@ export function OnboardingWizard({
             disabled={index > currentStep}
             className={`h-2 rounded-full transition-all ${
               index === currentStep
-                ? 'w-8 bg-orange-400'
+                ? 'w-8 bg-[#d4a44c]'
                 : index < currentStep
-                ? 'w-2 bg-orange-400/60 cursor-pointer hover:bg-orange-400/80'
-                : 'w-2 bg-orange-500/20'
+                ? 'w-2 bg-[#d4a44c]/60 cursor-pointer hover:bg-[#d4a44c]/80'
+                : 'w-2 bg-[#d4a44c]/20'
             }`}
             aria-label={`Go to step ${index + 1}: ${s.title}`}
           />
@@ -94,9 +94,9 @@ export function OnboardingWizard({
 
       {/* Step content */}
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-orange-50 mb-2">{step.title}</h2>
+        <h2 className="text-2xl font-bold text-[#f5f0e8] mb-2">{step.title}</h2>
         {step.description && (
-          <p className="text-sm text-orange-100/70">{step.description}</p>
+          <p className="text-sm text-[#f5f0e8]/70">{step.description}</p>
         )}
       </div>
 

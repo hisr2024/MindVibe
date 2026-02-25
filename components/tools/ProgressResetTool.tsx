@@ -128,7 +128,7 @@ export function ProgressResetTool() {
         <h3 className="text-xl font-semibold text-slate-100 flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-orange-500"
+            className="h-6 w-6 text-[#d4a44c]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -205,7 +205,7 @@ export function ProgressResetTool() {
       <button
         onClick={handleResetClick}
         disabled={isLoading || !!resetResponse}
-        className="w-full rounded-lg bg-gradient-to-r from-orange-600 to-red-600 px-6 py-3 text-sm font-medium text-white transition-all hover:from-orange-700 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-800"
+        className="w-full rounded-lg bg-gradient-to-r from-[#c8943a] to-red-600 px-6 py-3 text-sm font-medium text-white transition-all hover:from-[#c8943a] hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#d4a44c] focus:ring-offset-2 focus:ring-offset-slate-800"
       >
         {isLoading ? 'Loading...' : 'Reset My Progress'}
       </button>
@@ -230,7 +230,7 @@ export function ProgressResetTool() {
               <h3 className="text-xl font-bold text-slate-100 mb-4 flex items-center gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-amber-500"
+                  className="h-6 w-6 text-[#d4a44c]"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -273,13 +273,13 @@ export function ProgressResetTool() {
                     </ul>
                   </div>
 
-                  <p className="text-xs text-amber-300 font-medium">{preview.warning}</p>
+                  <p className="text-xs text-[#e8b54a] font-medium">{preview.warning}</p>
                 </div>
               )}
 
               <div className="mb-6">
                 <label htmlFor="confirmText" className="block text-sm font-medium text-slate-300 mb-2">
-                  Type <span className="font-mono text-orange-400">reset my progress</span> to confirm:
+                  Type <span className="font-mono text-[#d4a44c]">reset my progress</span> to confirm:
                 </label>
                 <input
                   id="confirmText"
@@ -287,7 +287,7 @@ export function ProgressResetTool() {
                   value={confirmText}
                   onChange={(e) => setConfirmText(e.target.value)}
                   placeholder="reset my progress"
-                  className="w-full rounded-lg bg-slate-900 border border-slate-600 px-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full rounded-lg bg-slate-900 border border-slate-600 px-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#d4a44c]"
                   disabled={isLoading}
                 />
               </div>

@@ -66,7 +66,7 @@ export function TranslateButton({ text, onTranslate, className = '' }: Translate
     <button
       onClick={handleTranslate}
       disabled={isTranslating}
-      className={`group relative flex items-center gap-1.5 rounded-lg border border-orange-500/25 bg-orange-500/10 px-2.5 py-1.5 text-xs font-medium text-orange-200 transition-all hover:border-orange-500/40 hover:bg-orange-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`group relative flex items-center gap-1.5 rounded-lg border border-[#d4a44c]/25 bg-[#d4a44c]/10 px-2.5 py-1.5 text-xs font-medium text-[#e8b54a] transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       aria-label={isTranslated ? `Show original (English)` : `Translate to ${config.name}`}
       title={isTranslated ? 'Show original' : `Translate to ${config.name}`}
     >
@@ -82,7 +82,7 @@ export function TranslateButton({ text, onTranslate, className = '' }: Translate
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`text-orange-400 ${isTranslating ? 'animate-spin' : ''}`}
+          className={`text-[#d4a44c] ${isTranslating ? 'animate-spin' : ''}`}
         >
           {isTranslated ? (
             // Globe with check (translated)
@@ -135,7 +135,7 @@ export function TranslateButton({ text, onTranslate, className = '' }: Translate
 
       {/* Tooltip showing target language */}
       {!isTranslating && !error && language !== 'en' && (
-        <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-orange-500/90 px-2 py-1 text-[10px] font-semibold text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+        <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[#d4a44c]/90 px-2 py-1 text-[10px] font-semibold text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
           {isTranslated ? 'Show English' : `Translate to ${config.nativeName}`}
         </div>
       )}

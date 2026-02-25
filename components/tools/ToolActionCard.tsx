@@ -53,7 +53,7 @@ export function ToolActionCard({
   className = '',
 }: ToolActionCardProps) {
   const variantGradients: Record<ToolActionCardVariant, string> = {
-    orange: 'from-orange-500/10 to-amber-500/10',
+    orange: 'from-[#d4a44c]/10 to-[#e8b54a]/10',
     purple: 'from-purple-500/10 to-indigo-500/10',
     green: 'from-green-500/10 to-emerald-500/10',
     blue: 'from-blue-500/10 to-cyan-500/10',
@@ -61,7 +61,7 @@ export function ToolActionCard({
   }
 
   const variantBadge: Record<ToolActionCardVariant, string> = {
-    orange: 'from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 shadow-orange-500/25',
+    orange: 'from-[#d4a44c] via-[#e8b54a] to-[#e8b54a] text-slate-950 shadow-[#d4a44c]/25',
     purple: 'from-indigo-400 via-purple-400 to-fuchsia-300 text-white shadow-purple-500/25',
     green: 'from-emerald-400 via-lime-400 to-green-200 text-slate-900 shadow-emerald-500/25',
     blue: 'from-sky-400 via-blue-400 to-cyan-200 text-slate-900 shadow-sky-500/25',
@@ -81,11 +81,11 @@ export function ToolActionCard({
             {icon}
           </span>
         )}
-        <h3 className="text-lg font-semibold text-orange-50">{title}</h3>
+        <h3 className="text-lg font-semibold text-[#f5f0e8]">{title}</h3>
       </div>
 
       {description && (
-        <p className="text-sm text-orange-100/80 mb-4 leading-relaxed">
+        <p className="text-sm text-[#f5f0e8]/80 mb-4 leading-relaxed">
           {description}
         </p>
       )}
@@ -117,9 +117,9 @@ export function ToolActionCard({
     </>
   )
 
-  const baseStyles = `group rounded-2xl border border-orange-500/20 bg-gradient-to-br ${resolvedGradient} p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)] transition ${
-    disabled ? 'opacity-60 cursor-not-allowed' : 'hover:border-orange-400/30'
-  } focus:outline-none focus:ring-2 focus:ring-orange-400/50 focus:ring-offset-2 focus:ring-offset-slate-900 ${className}`
+  const baseStyles = `group rounded-2xl border border-[#d4a44c]/20 bg-gradient-to-br ${resolvedGradient} p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)] transition ${
+    disabled ? 'opacity-60 cursor-not-allowed' : 'hover:border-[#d4a44c]/30'
+  } focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50 focus:ring-offset-2 focus:ring-offset-slate-900 ${className}`
 
   if (href && !disabled) {
     return (

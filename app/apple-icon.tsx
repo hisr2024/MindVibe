@@ -8,8 +8,8 @@ export default function AppleIcon() {
     (
       <div
         style={{
-          background: 'linear-gradient(135deg, #ffb56b 0%, #ff9248 45%, #ff7a36 65%, #241913 100%)',
-          color: '#0b0b0f',
+          background: 'linear-gradient(135deg, #f0c96d 0%, #d4a44c 45%, #c8943a 65%, #050507 100%)',
+          color: '#050507',
           width: '100%',
           height: '100%',
           display: 'flex',

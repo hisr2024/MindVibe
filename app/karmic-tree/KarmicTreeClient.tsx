@@ -76,8 +76,8 @@ const fallbackProgress: ProgressResponse = {
 }
 
 const rarityAccent: Record<string, string> = {
-  common: 'border-orange-500/30 text-orange-100',
-  rare: 'border-amber-400/60 text-amber-100',
+  common: 'border-[#d4a44c]/30 text-[#f5f0e8]',
+  rare: 'border-[#d4a44c]/60 text-[#f5f0e8]',
   epic: 'border-purple-400/60 text-purple-100',
   legendary: 'border-pink-400/70 text-pink-100'
 }
@@ -105,7 +105,7 @@ function ProgressBar({ percent }: { percent: number }) {
   return (
     <div className="h-3 w-full overflow-hidden rounded-full bg-slate-800">
       <div
-        className="h-full rounded-full bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 shadow-[0_0_25px_rgba(249,115,22,0.4)]"
+        className="h-full rounded-full bg-gradient-to-r from-[#d4a44c] via-[#e8b54a] to-[#d4a44c] shadow-[0_0_25px_rgba(249,115,22,0.4)]"
         style={{ width: `${Math.min(100, percent)}%` }}
       />
     </div>
@@ -114,35 +114,35 @@ function ProgressBar({ percent }: { percent: number }) {
 
 function AchievementBadge({ achievement }: { achievement: AchievementProgress }) {
   const percentage = Math.min(100, Math.round((achievement.progress / achievement.target_value) * 100))
-  const accent = rarityAccent[achievement.rarity] || 'border-orange-400/30 text-orange-100'
+  const accent = rarityAccent[achievement.rarity] || 'border-[#d4a44c]/30 text-[#f5f0e8]'
 
   return (
-    <div className={`flex flex-col gap-2 rounded-2xl border bg-slate-950/60 p-4 shadow-lg shadow-orange-500/5 ${accent}`}>
+    <div className={`flex flex-col gap-2 rounded-2xl border bg-slate-950/60 p-4 shadow-lg shadow-[#d4a44c]/5 ${accent}`}>
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10 text-xl">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#d4a44c]/10 text-xl">
             {achievement.badge_icon || '🌿'}
           </div>
           <div>
-            <p className="text-sm font-semibold text-orange-50">{achievement.name}</p>
-            <p className="text-xs text-orange-100/70">{achievement.description}</p>
+            <p className="text-sm font-semibold text-[#f5f0e8]">{achievement.name}</p>
+            <p className="text-xs text-[#f5f0e8]/70">{achievement.description}</p>
           </div>
         </div>
-        <span className="rounded-full bg-white/5 px-3 py-1 text-[11px] uppercase tracking-wide text-orange-100/80">
+        <span className="rounded-full bg-white/5 px-3 py-1 text-[11px] uppercase tracking-wide text-[#f5f0e8]/80">
           {achievement.rarity}
         </span>
       </div>
       <ProgressBar percent={percentage} />
-      <div className="flex items-center justify-between text-xs text-orange-100/70">
+      <div className="flex items-center justify-between text-xs text-[#f5f0e8]/70">
         <span>
           {achievement.progress} / {achievement.target_value}
         </span>
-        <span className={achievement.unlocked ? 'text-emerald-300' : 'text-orange-200'}>
+        <span className={achievement.unlocked ? 'text-emerald-300' : 'text-[#e8b54a]'}>
           {achievement.unlocked ? 'Unlocked' : 'In progress'}
         </span>
       </div>
       {achievement.reward_hint && (
-        <p className="text-[11px] text-orange-100/60">{achievement.reward_hint}</p>
+        <p className="text-[11px] text-[#f5f0e8]/60">{achievement.reward_hint}</p>
       )}
     </div>
   )
@@ -150,19 +150,19 @@ function AchievementBadge({ achievement }: { achievement: AchievementProgress })
 
 function UnlockableCard({ unlockable }: { unlockable: UnlockableOut }) {
   return (
-    <div className="flex flex-col gap-2 rounded-2xl border border-orange-500/20 bg-slate-950/70 p-4 shadow-lg shadow-orange-500/10">
+    <div className="flex flex-col gap-2 rounded-2xl border border-[#d4a44c]/20 bg-slate-950/70 p-4 shadow-lg shadow-[#d4a44c]/10">
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
-          <p className="text-sm font-semibold text-orange-50">{unlockable.name}</p>
-          <p className="text-xs text-orange-100/70">{unlockable.description}</p>
+          <p className="text-sm font-semibold text-[#f5f0e8]">{unlockable.name}</p>
+          <p className="text-xs text-[#f5f0e8]/70">{unlockable.description}</p>
         </div>
-        <span className="rounded-full bg-orange-500/15 px-3 py-1 text-[11px] uppercase tracking-wide text-orange-100">
+        <span className="rounded-full bg-[#d4a44c]/15 px-3 py-1 text-[11px] uppercase tracking-wide text-[#f5f0e8]">
           {unlockable.kind}
         </span>
       </div>
-      <div className="flex items-center justify-between text-xs text-orange-100/70">
-        <span className="uppercase tracking-wide text-[11px] text-orange-200">{unlockable.rarity}</span>
-        <span className={unlockable.unlocked ? 'text-emerald-300' : 'text-orange-200'}>
+      <div className="flex items-center justify-between text-xs text-[#f5f0e8]/70">
+        <span className="uppercase tracking-wide text-[11px] text-[#e8b54a]">{unlockable.rarity}</span>
+        <span className={unlockable.unlocked ? 'text-emerald-300' : 'text-[#e8b54a]'}>
           {unlockable.unlocked ? 'Unlocked' : 'Locked'}
         </span>
       </div>
@@ -176,15 +176,15 @@ function TreeVisualizer({ stage, percent }: { stage: string; percent: number }) 
   const pulse = stage === 'canopy' ? 'animate-pulse' : ''
 
   return (
-    <div className="relative h-80 w-full overflow-hidden rounded-3xl border border-orange-500/20 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <div className="relative h-80 w-full overflow-hidden rounded-3xl border border-[#d4a44c]/20 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       <div className="absolute inset-0 opacity-50" style={{ backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(249,115,22,0.12), transparent 30%)' }} />
-      <div className="absolute bottom-0 left-1/2 h-full w-[2px] -translate-x-1/2 bg-gradient-to-t from-orange-500 via-orange-400 to-amber-200" style={{ height: `${height}%` }} />
+      <div className="absolute bottom-0 left-1/2 h-full w-[2px] -translate-x-1/2 bg-gradient-to-t from-[#d4a44c] via-[#d4a44c] to-[#f0c96d]" style={{ height: `${height}%` }} />
       <div
-        className={`absolute bottom-[35%] left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-br from-orange-500/40 via-amber-200/30 to-orange-300/30 blur-3xl ${pulse}`}
+        className={`absolute bottom-[35%] left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-br from-[#d4a44c]/40 via-[#f0c96d]/30 to-[#e8b54a]/30 blur-3xl ${pulse}`}
         style={{ width: `${canopySize}px`, height: `${canopySize}px` }}
       />
-      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-orange-500/20 via-orange-500/5 to-transparent" />
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-orange-500/20 px-4 py-1 text-xs font-semibold text-orange-50">
+      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#d4a44c]/20 via-[#d4a44c]/5 to-transparent" />
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-[#d4a44c]/20 px-4 py-1 text-xs font-semibold text-[#f5f0e8]">
         {stageCopy[stage]?.title || 'Growing'}
       </div>
     </div>
@@ -237,9 +237,9 @@ export default function KarmicTreeClient() {
   const stageNarrative = useMemo(() => stageCopy[progress.tree_stage] ?? stageCopy.seedling, [progress.tree_stage])
 
   const activityPills = [
-    { label: 'Journals', value: progress.activity.journals, accent: 'bg-orange-500/15' },
-    { label: 'Mood logs', value: progress.activity.moods, accent: 'bg-amber-400/15' },
-    { label: 'Chats', value: progress.activity.chats, accent: 'bg-orange-300/15' }
+    { label: 'Journals', value: progress.activity.journals, accent: 'bg-[#d4a44c]/15' },
+    { label: 'Mood logs', value: progress.activity.moods, accent: 'bg-[#d4a44c]/15' },
+    { label: 'Chats', value: progress.activity.chats, accent: 'bg-[#e8b54a]/15' }
   ]
 
   const notifications = [...(progress.notifications || []), ...(error ? [{ message: error, tone: 'warning' as const }] : [])]
@@ -247,48 +247,48 @@ export default function KarmicTreeClient() {
   return (
     <main className="mx-auto max-w-6xl space-y-6 sm:space-y-8 md:space-y-10 px-3 sm:px-4 pb-28 sm:pb-16 pt-4 sm:pt-8 md:pt-12">
       <FadeIn>
-        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0f0a08] via-[#0c0c10] to-[#0a0a0f] p-4 sm:p-6 md:p-8 shadow-[0_25px_100px_rgba(255,115,39,0.14)]">
-          <div className="pointer-events-none absolute -left-10 -top-16 h-48 w-48 rounded-full bg-orange-500/20 blur-3xl" />
-          <div className="pointer-events-none absolute -right-16 bottom-0 h-56 w-56 rounded-full bg-amber-300/10 blur-3xl" />
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0f0a08] via-[#0c0c10] to-[#0a0a0f] p-4 sm:p-6 md:p-8 shadow-[0_25px_100px_rgba(255,115,39,0.14)]">
+          <div className="pointer-events-none absolute -left-10 -top-16 h-48 w-48 rounded-full bg-[#d4a44c]/20 blur-3xl" />
+          <div className="pointer-events-none absolute -right-16 bottom-0 h-56 w-56 rounded-full bg-[#e8b54a]/10 blur-3xl" />
 
           <div className="relative grid gap-4 sm:gap-6 md:gap-8 lg:grid-cols-[1.4fr,1fr] lg:items-start">
             <div className="space-y-5">
               <div className="flex items-center gap-3">
                 <MindVibeLockup theme="sunrise" className="h-10 w-auto drop-shadow-[0_10px_40px_rgba(255,147,89,0.28)]" />
-                <span className="rounded-full bg-orange-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-orange-50">
+                <span className="rounded-full bg-[#d4a44c]/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#f5f0e8]">
                   Karmic Tree
                 </span>
               </div>
               <div className="space-y-2">
-                <h1 className="text-2xl sm:text-3xl font-bold leading-tight text-orange-50 md:text-4xl">Grow with mindful actions</h1>
-                <p className="max-w-2xl text-orange-100/80">
+                <h1 className="text-2xl sm:text-3xl font-bold leading-tight text-[#f5f0e8] md:text-4xl">Grow with mindful actions</h1>
+                <p className="max-w-2xl text-[#f5f0e8]/80">
                   Earn achievements for journaling, mood tracking, and guided chats. Unlock calming themes and badges as your tree expands.
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
                 {activityPills.map(item => (
-                  <div key={item.label} className={`flex items-center justify-between rounded-2xl border border-orange-500/20 px-4 py-3 text-sm font-semibold text-orange-50 ${item.accent}`}>
+                  <div key={item.label} className={`flex items-center justify-between rounded-2xl border border-[#d4a44c]/20 px-4 py-3 text-sm font-semibold text-[#f5f0e8] ${item.accent}`}>
                     <span>{item.label}</span>
-                    <span className="text-orange-200">{item.value}</span>
+                    <span className="text-[#e8b54a]">{item.value}</span>
                   </div>
                 ))}
               </div>
-              <div className="space-y-2 rounded-2xl border border-orange-500/15 bg-black/50 p-4">
-                <div className="flex items-center justify-between text-sm font-semibold text-orange-50">
+              <div className="space-y-2 rounded-2xl border border-[#d4a44c]/15 bg-black/50 p-4">
+                <div className="flex items-center justify-between text-sm font-semibold text-[#f5f0e8]">
                   <span>Level {progress.level}</span>
                   <span>{progress.xp} xp</span>
                 </div>
                 <ProgressBar percent={progress.progress_percent} />
-                <div className="flex items-center justify-between text-xs text-orange-100/70">
+                <div className="flex items-center justify-between text-xs text-[#f5f0e8]/70">
                   <span>{stageNarrative.title}</span>
                   <span>Next level at {progress.next_level_xp} xp</span>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-3xl border border-orange-500/20 bg-black/50 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
+            <div className="rounded-3xl border border-[#d4a44c]/20 bg-black/50 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
               <TreeVisualizer stage={progress.tree_stage} percent={progress.progress_percent} />
-              <p className="mt-4 text-sm text-orange-100/75">{stageNarrative.body}</p>
+              <p className="mt-4 text-sm text-[#f5f0e8]/75">{stageNarrative.body}</p>
             </div>
           </div>
         </div>
@@ -303,8 +303,8 @@ export default function KarmicTreeClient() {
                 note.tone === 'success'
                   ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-100'
                   : note.tone === 'warning'
-                    ? 'border-amber-400/40 bg-amber-500/10 text-amber-50'
-                    : 'border-orange-500/25 bg-orange-500/5 text-orange-50'
+                    ? 'border-[#d4a44c]/40 bg-[#d4a44c]/10 text-[#f5f0e8]'
+                    : 'border-[#d4a44c]/25 bg-[#d4a44c]/5 text-[#f5f0e8]'
               }`}
             >
               <span>{note.message}</span>
@@ -319,10 +319,10 @@ export default function KarmicTreeClient() {
           <AnimatedCard className="space-y-4 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm uppercase tracking-wide text-orange-200/80">Achievements</p>
-                <h2 className="text-xl font-semibold text-orange-50">Unlock branches as you care for yourself</h2>
+                <p className="text-sm uppercase tracking-wide text-[#e8b54a]/80">Achievements</p>
+                <h2 className="text-xl font-semibold text-[#f5f0e8]">Unlock branches as you care for yourself</h2>
               </div>
-              <span className="rounded-full bg-orange-500/20 px-3 py-1 text-[11px] font-semibold text-orange-50">
+              <span className="rounded-full bg-[#d4a44c]/20 px-3 py-1 text-[11px] font-semibold text-[#f5f0e8]">
                 Privacy-safe counts only
               </span>
             </div>
@@ -337,8 +337,8 @@ export default function KarmicTreeClient() {
         <StaggerItem>
           <AnimatedCard className="space-y-4 p-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-orange-50">Unlockables</h3>
-              <span className="rounded-full bg-orange-500/15 px-3 py-1 text-[11px] uppercase tracking-wide text-orange-100">Rewards</span>
+              <h3 className="text-lg font-semibold text-[#f5f0e8]">Unlockables</h3>
+              <span className="rounded-full bg-[#d4a44c]/15 px-3 py-1 text-[11px] uppercase tracking-wide text-[#f5f0e8]">Rewards</span>
             </div>
             <div className="space-y-3">
               {progress.unlockables.map(unlockable => (
@@ -351,13 +351,13 @@ export default function KarmicTreeClient() {
 
       {/* ─── Analytics Section ─── */}
       <FadeIn>
-        <div className="rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0f0a08] via-[#0c0c10] to-[#0a0a0f] p-4 sm:p-6 md:p-8 shadow-[0_25px_100px_rgba(255,115,39,0.14)]">
+        <div className="rounded-2xl sm:rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0f0a08] via-[#0c0c10] to-[#0a0a0f] p-4 sm:p-6 md:p-8 shadow-[0_25px_100px_rgba(255,115,39,0.14)]">
           <div className="mb-4 sm:mb-6">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-2xl">{'\u{1F4CA}'}</span>
-              <h2 className="text-xl sm:text-2xl font-bold text-orange-50">Your Analytics</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#f5f0e8]">Your Analytics</h2>
             </div>
-            <p className="text-sm text-orange-100/60">
+            <p className="text-sm text-[#f5f0e8]/60">
               Real insights from your wellness journey — all data comes from your actual activity.
             </p>
           </div>

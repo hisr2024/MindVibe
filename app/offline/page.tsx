@@ -18,8 +18,8 @@ export default function OfflinePage() {
     <main className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
       {/* Background gradients */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-20 top-10 h-80 w-80 rounded-full bg-gradient-to-br from-orange-600/20 via-[#ff9933]/10 to-transparent blur-3xl" />
-        <div className="absolute bottom-10 right-0 h-96 w-96 rounded-full bg-gradient-to-tr from-[#ff9933]/15 via-orange-500/8 to-transparent blur-[120px]" />
+        <div className="absolute -left-20 top-10 h-80 w-80 rounded-full bg-gradient-to-br from-[#c8943a]/20 via-[#ff9933]/10 to-transparent blur-3xl" />
+        <div className="absolute bottom-10 right-0 h-96 w-96 rounded-full bg-gradient-to-tr from-[#ff9933]/15 via-[#d4a44c]/8 to-transparent blur-[120px]" />
       </div>
 
       <motion.div
@@ -30,13 +30,13 @@ export default function OfflinePage() {
       >
         {/* Offline Icon */}
         <motion.div
-          className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-orange-500/20 to-amber-500/10 border border-orange-500/30"
+          className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[#d4a44c]/20 to-[#d4a44c]/10 border border-[#d4a44c]/30"
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, duration: 0.4 }}
         >
           <svg
-            className="h-12 w-12 text-orange-400"
+            className="h-12 w-12 text-[#d4a44c]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -57,10 +57,10 @@ export default function OfflinePage() {
 
         {/* Message */}
         <div className="space-y-2">
-          <h1 className="text-2xl font-light text-orange-50 md:text-3xl">
+          <h1 className="text-2xl font-light text-[#f5f0e8] md:text-3xl">
             You&apos;re Offline
           </h1>
-          <p className="text-base text-orange-100/70">
+          <p className="text-base text-[#f5f0e8]/70">
             It looks like you&apos;ve lost your internet connection. Some features may not be available until you reconnect.
           </p>
         </div>
@@ -69,7 +69,7 @@ export default function OfflinePage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <motion.button
             onClick={handleRetry}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-300 px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#d4a44c] via-[#ff9933] to-[#e8b54a] px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-[#d4a44c]/25"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -91,7 +91,7 @@ export default function OfflinePage() {
 
           <Link href="/">
             <motion.div
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange-500/30 bg-white/5 px-5 py-3 text-sm font-semibold text-orange-50"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#d4a44c]/30 bg-white/5 px-5 py-3 text-sm font-semibold text-[#f5f0e8]"
               whileHover={{ scale: 1.05, borderColor: 'rgba(251, 146, 60, 0.5)' }}
               whileTap={{ scale: 0.95 }}
             >
@@ -102,13 +102,13 @@ export default function OfflinePage() {
 
         {/* Tip */}
         <motion.div
-          className="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-4 text-left"
+          className="rounded-2xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 p-4 text-left"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
         >
-          <p className="text-xs text-orange-100/70">
-            <span className="font-medium text-orange-200">Tip:</span> Previously viewed pages may still be available from cache. Try navigating to a page you&apos;ve visited before.
+          <p className="text-xs text-[#f5f0e8]/70">
+            <span className="font-medium text-[#e8b54a]">Tip:</span> Previously viewed pages may still be available from cache. Try navigating to a page you&apos;ve visited before.
           </p>
         </motion.div>
       </motion.div>

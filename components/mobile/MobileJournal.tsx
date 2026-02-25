@@ -259,7 +259,7 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
     return (
       <div
         ref={ref}
-        className={`flex flex-col h-full bg-[#0b0b0f] ${className}`}
+        className={`flex flex-col h-full bg-[#050507] ${className}`}
         style={{
           paddingBottom: isKeyboardVisible ? keyboardHeight : 0,
         }}
@@ -563,13 +563,13 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
                           flex flex-col items-center gap-1 py-4 rounded-xl
                           transition-all
                           ${isSelected
-                            ? 'bg-orange-500/20 border border-orange-500/40'
+                            ? 'bg-[#d4a44c]/20 border border-[#d4a44c]/40'
                             : 'bg-white/[0.04] border border-white/[0.08]'
                           }
                         `}
                       >
                         <span className="text-2xl">{option.emoji}</span>
-                        <span className={`text-xs ${isSelected ? 'text-orange-300' : 'text-slate-400'}`}>
+                        <span className={`text-xs ${isSelected ? 'text-[#e8b54a]' : 'text-slate-400'}`}>
                           {option.label}
                         </span>
                       </motion.button>
@@ -600,7 +600,7 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
         {/* Bottom toolbar */}
         <div className="
           px-4 py-3
-          bg-[#0b0b0f]/95 backdrop-blur-xl
+          bg-[#050507]/95 backdrop-blur-xl
           border-t border-white/[0.06]
         ">
           <div className="flex items-center justify-between">

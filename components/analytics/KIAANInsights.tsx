@@ -19,7 +19,7 @@ interface KIAANInsightsProps {
 
 function InsightsSkeleton() {
   return (
-    <div className="rounded-2xl border border-orange-500/20 bg-black/40 p-6">
+    <div className="rounded-2xl border border-[#d4a44c]/20 bg-black/40 p-6">
       <Skeleton height={24} width={150} className="mb-6" />
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[1, 2, 3].map((i) => (
@@ -40,16 +40,16 @@ const engagementStyles = {
     emoji: '🔥',
   },
   medium: {
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/30',
-    text: 'text-amber-400',
+    bg: 'bg-[#d4a44c]/10',
+    border: 'border-[#d4a44c]/30',
+    text: 'text-[#d4a44c]',
     label: 'Moderate',
     emoji: '👍',
   },
   low: {
-    bg: 'bg-orange-500/10',
-    border: 'border-orange-500/30',
-    text: 'text-orange-400',
+    bg: 'bg-[#d4a44c]/10',
+    border: 'border-[#d4a44c]/30',
+    text: 'text-[#d4a44c]',
     label: 'Getting Started',
     emoji: '🌱',
   },
@@ -86,11 +86,11 @@ export function KIAANInsights({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.3 }}
-      className={`rounded-2xl border border-orange-500/20 bg-black/40 p-6 ${className}`}
+      className={`rounded-2xl border border-[#d4a44c]/20 bg-black/40 p-6 ${className}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-orange-50">
+        <h3 className="text-lg font-semibold text-[#f5f0e8]">
           KIAAN Insights
         </h3>
         <div
@@ -127,7 +127,7 @@ export function KIAANInsights({
       <div className="grid md:grid-cols-2 gap-6">
         {/* Usage by Day */}
         <div>
-          <h4 className="text-sm font-medium text-orange-100/80 mb-4">
+          <h4 className="text-sm font-medium text-[#f5f0e8]/80 mb-4">
             Activity by Day
           </h4>
           {usageByDayData.length > 0 ? (
@@ -144,27 +144,27 @@ export function KIAANInsights({
             />
           ) : (
             <div className="h-[180px] flex items-center justify-center">
-              <p className="text-orange-100/50 text-sm">No activity data</p>
+              <p className="text-[#f5f0e8]/50 text-sm">No activity data</p>
             </div>
           )}
         </div>
 
         {/* Top Topics */}
         <div>
-          <h4 className="text-sm font-medium text-orange-100/80 mb-4">
+          <h4 className="text-sm font-medium text-[#f5f0e8]/80 mb-4">
             Topics Discussed
           </h4>
           {topTopicsData.length > 0 ? (
             <div className="space-y-3">
               {topTopicsData.map((topic, index) => (
                 <div key={topic.tag} className="flex items-center gap-3">
-                  <span className="text-sm text-orange-100/60 w-4">{index + 1}.</span>
+                  <span className="text-sm text-[#f5f0e8]/60 w-4">{index + 1}.</span>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm text-orange-50 capitalize">{topic.tag}</span>
-                      <span className="text-xs text-orange-100/50">{topic.count}</span>
+                      <span className="text-sm text-[#f5f0e8] capitalize">{topic.tag}</span>
+                      <span className="text-xs text-[#f5f0e8]/50">{topic.count}</span>
                     </div>
-                    <div className="h-1.5 w-full rounded-full bg-orange-500/10 overflow-hidden">
+                    <div className="h-1.5 w-full rounded-full bg-[#d4a44c]/10 overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-500"
                         style={{ width: `${topic.percentage}%` }}
@@ -176,15 +176,15 @@ export function KIAANInsights({
             </div>
           ) : (
             <div className="h-[180px] flex items-center justify-center">
-              <p className="text-orange-100/50 text-sm">Start chatting to see topics</p>
+              <p className="text-[#f5f0e8]/50 text-sm">Start chatting to see topics</p>
             </div>
           )}
         </div>
       </div>
 
       {/* Response Time */}
-      <div className="mt-6 pt-6 border-t border-orange-500/10">
-        <div className="flex items-center justify-center gap-2 text-sm text-orange-100/60">
+      <div className="mt-6 pt-6 border-t border-[#d4a44c]/10">
+        <div className="flex items-center justify-center gap-2 text-sm text-[#f5f0e8]/60">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"

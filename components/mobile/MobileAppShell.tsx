@@ -234,7 +234,7 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
     return (
       <div
         ref={ref}
-        className={`mobile-app-root bg-[#0b0b0f] text-white min-h-[100dvh] flex flex-col ${className}`.trim()}
+        className={`mobile-app-root bg-[#050507] text-white min-h-[100dvh] flex flex-col ${className}`.trim()}
       >
         {/* Offline Banner */}
         <AnimatePresence>
@@ -246,7 +246,7 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
               transition={{ duration: 0.2 }}
               className={`
                 fixed top-0 left-0 right-0 z-[100]
-                ${isOnline ? 'bg-green-500' : 'bg-orange-500'}
+                ${isOnline ? 'bg-green-500' : 'bg-[#d4a44c]'}
               `}
               style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
             >
@@ -302,7 +302,7 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
             >
               <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
                 <motion.div
-                  className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full"
+                  className="w-5 h-5 border-2 border-[#d4a44c] border-t-transparent rounded-full"
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                 />

@@ -111,14 +111,14 @@ function ToastContainer({ toasts, removeToast }: { toasts: Toast[]; removeToast:
         >
           <div className="shrink-0 mt-0.5">{typeStyles[toast.type].icon}</div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-orange-50">{toast.message}</p>
+            <p className="text-sm font-medium text-[#f5f0e8]">{toast.message}</p>
             {toast.description && (
-              <p className="mt-1 text-xs text-orange-100/70">{toast.description}</p>
+              <p className="mt-1 text-xs text-[#f5f0e8]/70">{toast.description}</p>
             )}
           </div>
           <button
             onClick={() => removeToast(toast.id)}
-            className="shrink-0 rounded-lg p-1 text-orange-100/50 hover:text-orange-50 hover:bg-white/10"
+            className="shrink-0 rounded-lg p-1 text-[#f5f0e8]/50 hover:text-[#f5f0e8] hover:bg-white/10"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />

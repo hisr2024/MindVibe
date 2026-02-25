@@ -63,14 +63,14 @@ function AccordionItem({ item }: { item: { id: string; title: string; preview?: 
   return (
     <AccordionPrimitive.Item
       value={item.id}
-      className="rounded-2xl border border-orange-500/15 bg-black/40 overflow-hidden"
+      className="rounded-2xl border border-[#d4a44c]/15 bg-black/40 overflow-hidden"
     >
       <AccordionPrimitive.Header>
-        <AccordionPrimitive.Trigger className="group flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-orange-500/5">
+        <AccordionPrimitive.Trigger className="group flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[#d4a44c]/5">
           <div className="flex-1">
-            <span className="text-sm font-semibold text-orange-50">{item.title}</span>
+            <span className="text-sm font-semibold text-[#f5f0e8]">{item.title}</span>
             {item.preview && (
-              <span className="ml-2 text-xs text-orange-100/60">{item.preview}</span>
+              <span className="ml-2 text-xs text-[#f5f0e8]/60">{item.preview}</span>
             )}
           </div>
           <svg
@@ -81,14 +81,14 @@ function AccordionItem({ item }: { item: { id: string; title: string; preview?: 
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="h-4 w-4 text-orange-400/70 transition-transform group-data-[state=open]:rotate-180"
+            className="h-4 w-4 text-[#d4a44c]/70 transition-transform group-data-[state=open]:rotate-180"
           >
             <polyline points="6 9 12 15 18 9" />
           </svg>
         </AccordionPrimitive.Trigger>
       </AccordionPrimitive.Header>
       <AccordionPrimitive.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-        <div className="px-4 pb-4 pt-1 text-sm text-orange-100/80">
+        <div className="px-4 pb-4 pt-1 text-sm text-[#f5f0e8]/80">
           {item.content}
         </div>
       </AccordionPrimitive.Content>
@@ -108,16 +108,16 @@ export function DisclosureItem({ title, preview, children, defaultOpen = false, 
   const [isOpen, setIsOpen] = React.useState(defaultOpen)
 
   return (
-    <div className={`rounded-2xl border border-orange-500/15 bg-black/40 overflow-hidden ${className}`}>
+    <div className={`rounded-2xl border border-[#d4a44c]/15 bg-black/40 overflow-hidden ${className}`}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-orange-500/5"
+        className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[#d4a44c]/5"
       >
         <div className="flex-1">
-          <span className="text-sm font-semibold text-orange-50">{title}</span>
+          <span className="text-sm font-semibold text-[#f5f0e8]">{title}</span>
           {preview && !isOpen && (
-            <span className="ml-2 text-xs text-orange-100/60">{preview}</span>
+            <span className="ml-2 text-xs text-[#f5f0e8]/60">{preview}</span>
           )}
         </div>
         <motion.svg
@@ -130,7 +130,7 @@ export function DisclosureItem({ title, preview, children, defaultOpen = false, 
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="h-4 w-4 text-orange-400/70"
+          className="h-4 w-4 text-[#d4a44c]/70"
         >
           <polyline points="6 9 12 15 18 9" />
         </motion.svg>
@@ -143,7 +143,7 @@ export function DisclosureItem({ title, preview, children, defaultOpen = false, 
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
           >
-            <div className="px-4 pb-4 pt-1 text-sm text-orange-100/80">
+            <div className="px-4 pb-4 pt-1 text-sm text-[#f5f0e8]/80">
               {children}
             </div>
           </motion.div>

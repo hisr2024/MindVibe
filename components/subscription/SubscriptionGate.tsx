@@ -25,7 +25,7 @@ export function SubscriptionGate({ feature, children, fallback }: SubscriptionGa
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-orange-400/30 border-t-orange-400" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#d4a44c]/30 border-t-[#d4a44c]" />
       </div>
     )
   }
@@ -47,25 +47,25 @@ export function SubscriptionGate({ feature, children, fallback }: SubscriptionGa
       <Card variant="elevated">
         <CardContent>
           <div className="text-center">
-            <div className="mx-auto mb-4 h-16 w-16 rounded-2xl bg-gradient-to-br from-amber-500/30 via-orange-500/30 to-rose-500/30 flex items-center justify-center">
+            <div className="mx-auto mb-4 h-16 w-16 rounded-2xl bg-gradient-to-br from-[#d4a44c]/30 via-[#d4a44c]/30 to-rose-500/30 flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
             </div>
 
-            <h2 className="text-xl font-semibold text-orange-50 mb-2">
+            <h2 className="text-xl font-semibold text-[#f5f0e8] mb-2">
               Unlock {label}
             </h2>
 
-            <p className="text-sm text-orange-100/70 mb-6">
+            <p className="text-sm text-[#f5f0e8]/70 mb-6">
               {label} is available on the {tierLabel} plan and above.
               Upgrade to continue your journey toward inner peace.
             </p>
 
-            <div className="rounded-xl bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/10 border border-orange-400/30 p-4 mb-6">
-              <p className="text-sm font-medium text-orange-50 mb-3">{tierLabel} plan includes:</p>
-              <ul className="text-sm text-orange-100/80 space-y-2 text-left">
+            <div className="rounded-xl bg-gradient-to-r from-[#d4a44c]/10 via-[#d4a44c]/10 to-[#d4a44c]/10 border border-[#d4a44c]/30 p-4 mb-6">
+              <p className="text-sm font-medium text-[#f5f0e8] mb-3">{tierLabel} plan includes:</p>
+              <ul className="text-sm text-[#f5f0e8]/80 space-y-2 text-left">
                 {tierLabel === 'Plus' ? (
                   <>
                     <FeatureItem text="150 KIAAN questions/month" />

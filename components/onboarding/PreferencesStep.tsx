@@ -30,7 +30,7 @@ export function PreferencesStep({
 
   return (
     <div className="max-w-md mx-auto">
-      <p className="text-sm text-orange-100/70 text-center mb-4">
+      <p className="text-sm text-[#f5f0e8]/70 text-center mb-4">
         Select all that apply. You can change these later.
       </p>
       <div className="grid grid-cols-2 gap-3">
@@ -42,12 +42,12 @@ export function PreferencesStep({
               onClick={() => toggleGoal(goal.id)}
               className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${
                 isSelected
-                  ? 'border-orange-400 bg-orange-500/10'
-                  : 'border-orange-500/20 bg-black/30 hover:border-orange-400/50'
+                  ? 'border-[#d4a44c] bg-[#d4a44c]/10'
+                  : 'border-[#d4a44c]/20 bg-black/30 hover:border-[#d4a44c]/50'
               }`}
             >
               <span className="text-2xl">{goal.icon}</span>
-              <span className={`text-sm font-medium ${isSelected ? 'text-orange-50' : 'text-orange-100/80'}`}>
+              <span className={`text-sm font-medium ${isSelected ? 'text-[#f5f0e8]' : 'text-[#f5f0e8]/80'}`}>
                 {goal.label}
               </span>
             </button>

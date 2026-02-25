@@ -24,10 +24,10 @@ export function ToggleSwitch({
       onCheckedChange={onToggle}
       disabled={disabled}
       aria-label={label}
-      className={`relative h-6 w-11 rounded-full border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 disabled:opacity-50 disabled:cursor-not-allowed ${
+      className={`relative h-6 w-11 rounded-full border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 disabled:opacity-50 disabled:cursor-not-allowed ${
         enabled
-          ? 'bg-orange-500 border-orange-400'
-          : 'bg-slate-800 border-orange-500/30'
+          ? 'bg-[#d4a44c] border-[#d4a44c]'
+          : 'bg-slate-800 border-[#d4a44c]/30'
       } ${className}`}
     >
       <Switch.Thumb asChild>

@@ -57,9 +57,9 @@ export class MobileErrorBoundary extends Component<Props, State> {
   render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-[#0b0b0f] flex flex-col items-center justify-center px-6 text-center">
+        <div className="min-h-screen bg-[#050507] flex flex-col items-center justify-center px-6 text-center">
           {/* Calming animation */}
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500/20 to-amber-500/10 flex items-center justify-center mb-6 animate-pulse">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#d4a44c]/20 to-amber-500/10 flex items-center justify-center mb-6 animate-pulse">
             <span className="text-4xl">🙏</span>
           </div>
 
@@ -74,7 +74,7 @@ export class MobileErrorBoundary extends Component<Props, State> {
           <div className="flex flex-col gap-3 w-full max-w-xs">
             <button
               onClick={this.handleRetry}
-              className="w-full py-3 rounded-xl bg-orange-500 text-white font-medium text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+              className="w-full py-3 rounded-xl bg-[#d4a44c] text-white font-medium text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
             >
               <RefreshCw className="w-4 h-4" />
               Try Again
@@ -112,7 +112,7 @@ export class MobileErrorBoundary extends Component<Props, State> {
  */
 export function MobilePageSkeleton() {
   return (
-    <div className="min-h-screen bg-[#0b0b0f] px-4 pt-16 pb-24 animate-pulse">
+    <div className="min-h-screen bg-[#050507] px-4 pt-16 pb-24 animate-pulse">
       {/* Header skeleton */}
       <div className="mb-6">
         <div className="h-4 w-24 bg-white/[0.06] rounded mb-2" />

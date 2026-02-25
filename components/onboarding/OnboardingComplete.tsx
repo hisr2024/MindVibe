@@ -122,11 +122,11 @@ export function OnboardingComplete({
       </motion.div>
 
       {/* Welcome message */}
-      <motion.h2 variants={itemVariants} className="text-2xl font-bold text-orange-50 mb-2">
+      <motion.h2 variants={itemVariants} className="text-2xl font-bold text-[#f5f0e8] mb-2">
         {userName ? `Welcome, ${userName}!` : 'You\'re All Set!'}
       </motion.h2>
 
-      <motion.p variants={itemVariants} className="text-sm text-orange-100/70 mb-6">
+      <motion.p variants={itemVariants} className="text-sm text-[#f5f0e8]/70 mb-6">
         Your profile is ready. Start a conversation with KIAAN, explore your
         journal, or try one of our guided exercises.
       </motion.p>
@@ -134,11 +134,11 @@ export function OnboardingComplete({
       {/* Selected plan card */}
       <motion.div
         variants={itemVariants}
-        className="rounded-xl bg-orange-500/10 border border-orange-500/20 p-4 mb-8"
+        className="rounded-xl bg-[#d4a44c]/10 border border-[#d4a44c]/20 p-4 mb-8"
       >
-        <p className="text-xs text-orange-100/60 mb-2">Your selected plan:</p>
-        <p className="text-lg font-semibold text-orange-50">{selectedPlan}</p>
-        <p className="text-xs text-orange-100/60 mt-1">
+        <p className="text-xs text-[#f5f0e8]/60 mb-2">Your selected plan:</p>
+        <p className="text-lg font-semibold text-[#f5f0e8]">{selectedPlan}</p>
+        <p className="text-xs text-[#f5f0e8]/60 mt-1">
           {kiaanQuota === 'unlimited'
             ? 'Unlimited KIAAN questions'
             : `${kiaanQuota} KIAAN questions per month`}
@@ -147,7 +147,7 @@ export function OnboardingComplete({
 
       {/* Quick actions */}
       <motion.div variants={itemVariants} className="space-y-3">
-        <p className="text-sm font-medium text-orange-100/80 mb-3">
+        <p className="text-sm font-medium text-[#f5f0e8]/80 mb-3">
           Start exploring:
         </p>
         {quickActions.map((action) => (
@@ -162,12 +162,12 @@ export function OnboardingComplete({
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="flex items-center gap-4 rounded-xl border border-orange-500/20 bg-black/30 p-4 hover:border-orange-400/50 transition cursor-pointer"
+            className="flex items-center gap-4 rounded-xl border border-[#d4a44c]/20 bg-black/30 p-4 hover:border-[#d4a44c]/50 transition cursor-pointer"
           >
             <span className="text-2xl">{action.icon}</span>
             <div className="text-left">
-              <p className="text-sm font-medium text-orange-50">{action.label}</p>
-              <p className="text-xs text-orange-100/50">{action.description}</p>
+              <p className="text-sm font-medium text-[#f5f0e8]">{action.label}</p>
+              <p className="text-xs text-[#f5f0e8]/50">{action.description}</p>
             </div>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -177,7 +177,7 @@ export function OnboardingComplete({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="w-5 h-5 text-orange-100/40 ml-auto"
+              className="w-5 h-5 text-[#f5f0e8]/40 ml-auto"
             >
               <polyline points="9 18 15 12 9 6" />
             </svg>
@@ -190,7 +190,7 @@ export function OnboardingComplete({
         <motion.button
           variants={itemVariants}
           onClick={onGoToDashboard}
-          className="mt-8 text-sm text-orange-100/60 hover:text-orange-50 transition underline underline-offset-4"
+          className="mt-8 text-sm text-[#f5f0e8]/60 hover:text-[#f5f0e8] transition underline underline-offset-4"
         >
           Or go to dashboard →
         </motion.button>

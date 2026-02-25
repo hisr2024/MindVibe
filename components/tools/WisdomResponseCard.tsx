@@ -233,10 +233,10 @@ function highlightSanskrit(text: string): React.ReactNode[] {
             key={key++}
             className="relative group cursor-help"
           >
-            <span className="text-amber-300 font-medium italic border-b border-amber-300/30 border-dotted">
+            <span className="text-[#e8b54a] font-medium italic border-b border-[#e8b54a]/30 border-dotted">
               {originalTerm}
             </span>
-            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-black/95 border border-amber-500/30 rounded-lg text-xs text-amber-100 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none shadow-lg shadow-amber-500/10">
+            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-black/95 border border-[#d4a44c]/30 rounded-lg text-xs text-[#f5f0e8] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none shadow-lg shadow-[#d4a44c]/10">
               {SANSKRIT_TERMS[term]}
             </span>
           </span>
@@ -281,13 +281,13 @@ export default function WisdomResponseCard({
   const config = SECTION_CONFIG[tool]
   const accentColorMap = {
     orange: {
-      border: 'border-orange-500/20',
-      bg: 'bg-orange-500/5',
-      text: 'text-orange-100',
-      accent: 'text-orange-300',
-      badge: 'from-orange-500/20 to-amber-400/20 border-orange-400/30 text-orange-300',
-      glow: 'shadow-orange-500/10',
-      button: 'from-orange-400 via-[#ffb347] to-orange-200',
+      border: 'border-[#d4a44c]/20',
+      bg: 'bg-[#d4a44c]/5',
+      text: 'text-[#f5f0e8]',
+      accent: 'text-[#e8b54a]',
+      badge: 'from-[#d4a44c]/20 to-[#d4a44c]/20 border-[#d4a44c]/30 text-[#e8b54a]',
+      glow: 'shadow-[#d4a44c]/10',
+      button: 'from-[#d4a44c] via-[#ffb347] to-[#e8b54a]',
     },
     purple: {
       border: 'border-purple-500/20',
@@ -430,7 +430,7 @@ export default function WisdomResponseCard({
             onClick={() => setShowFullText(!showFullText)}
             className={`text-[10px] px-2 py-1 rounded border transition ${
               showFullText
-                ? 'border-amber-500/50 text-amber-300'
+                ? 'border-[#d4a44c]/50 text-[#e8b54a]'
                 : 'border-gray-600/50 text-gray-400 hover:text-white hover:border-gray-500'
             }`}
           >
@@ -547,22 +547,22 @@ export function WisdomLoadingState({ tool, secularMode = true }: { tool: 'viyoga
     : 'Searching sacred verses for your situation...'
 
   return (
-    <div className="rounded-2xl bg-black/40 border border-amber-500/20 p-8 text-center">
+    <div className="rounded-2xl bg-black/40 border border-[#d4a44c]/20 p-8 text-center">
       {/* Symbol Animation */}
       <div className="relative w-20 h-20 mx-auto mb-6">
-        <div className="absolute inset-0 rounded-full border-2 border-amber-500/30 animate-ping" />
-        <div className="absolute inset-2 rounded-full border-2 border-amber-400/40 animate-pulse" />
-        <div className="absolute inset-4 rounded-full border border-amber-300/50 animate-spin" style={{ animationDuration: '3s' }} />
+        <div className="absolute inset-0 rounded-full border-2 border-[#d4a44c]/30 animate-ping" />
+        <div className="absolute inset-2 rounded-full border-2 border-[#d4a44c]/40 animate-pulse" />
+        <div className="absolute inset-4 rounded-full border border-[#e8b54a]/50 animate-spin" style={{ animationDuration: '3s' }} />
         <div className="absolute inset-0 flex items-center justify-center text-3xl">
           {symbol}
         </div>
       </div>
 
       {/* Loading Message */}
-      <p className="text-amber-200 font-medium animate-pulse">
+      <p className="text-[#f0c96d] font-medium animate-pulse">
         {messages[messageIndex]}
       </p>
-      <p className="text-xs text-amber-100/50 mt-2">
+      <p className="text-xs text-[#f5f0e8]/50 mt-2">
         {subtitleText}
       </p>
 
@@ -571,7 +571,7 @@ export function WisdomLoadingState({ tool, secularMode = true }: { tool: 'viyoga
         {[0, 1, 2].map(i => (
           <div
             key={i}
-            className="w-2 h-2 rounded-full bg-amber-400/60 animate-bounce"
+            className="w-2 h-2 rounded-full bg-[#d4a44c]/60 animate-bounce"
             style={{ animationDelay: `${i * 200}ms` }}
           />
         ))}

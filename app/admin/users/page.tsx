@@ -96,7 +96,7 @@ export default function AdminUsersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by email or ID..."
-            className="w-full rounded-lg border border-slate-600 bg-slate-800/50 px-4 py-2.5 text-slate-100 placeholder-slate-400 focus:border-orange-500 focus:outline-none"
+            className="w-full rounded-lg border border-slate-600 bg-slate-800/50 px-4 py-2.5 text-slate-100 placeholder-slate-400 focus:border-[#d4a44c] focus:outline-none"
           />
         </div>
         <button className="rounded-lg bg-slate-700 px-4 py-2.5 text-slate-200 hover:bg-slate-600">

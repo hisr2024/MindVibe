@@ -60,7 +60,7 @@ export function CopyButton({ text, className = '', onCopy }: CopyButtonProps) {
   return (
     <button
       onClick={handleCopy}
-      className={`group relative flex items-center gap-1.5 rounded-lg border border-orange-500/25 bg-orange-500/10 px-2.5 py-1.5 text-xs font-medium text-orange-200 transition-all hover:border-orange-500/40 hover:bg-orange-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`group relative flex items-center gap-1.5 rounded-lg border border-[#d4a44c]/25 bg-[#d4a44c]/10 px-2.5 py-1.5 text-xs font-medium text-[#e8b54a] transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       disabled={copied || error}
       aria-label={copied ? 'Copied!' : 'Copy to clipboard'}
     >
@@ -76,7 +76,7 @@ export function CopyButton({ text, className = '', onCopy }: CopyButtonProps) {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-orange-400"
+          className="text-[#d4a44c]"
         >
           <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
           <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>

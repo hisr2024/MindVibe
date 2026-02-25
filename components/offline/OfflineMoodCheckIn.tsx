@@ -181,11 +181,11 @@ export function OfflineMoodCheckIn({
   const commonTags = ['work', 'family', 'health', 'relationships', 'stress', 'gratitude']
 
   return (
-    <div className={`space-y-4 ${compact ? 'p-4' : 'p-6 md:p-8'} rounded-3xl border border-orange-500/15 bg-black/50 shadow-[0_20px_80px_rgba(255,115,39,0.12)]`}>
+    <div className={`space-y-4 ${compact ? 'p-4' : 'p-6 md:p-8'} rounded-3xl border border-[#d4a44c]/15 bg-black/50 shadow-[0_20px_80px_rgba(255,115,39,0.12)]`}>
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className={`${compact ? 'text-xl' : 'text-2xl'} font-semibold text-orange-50`}>
+          <h2 className={`${compact ? 'text-xl' : 'text-2xl'} font-semibold text-[#f5f0e8]`}>
             Mood Check-In
           </h2>
 
@@ -205,7 +205,7 @@ export function OfflineMoodCheckIn({
               )}
 
               {queueCount > 0 && (
-                <div className="flex items-center gap-1 rounded-full bg-orange-500/20 px-2 py-0.5 text-xs text-orange-300">
+                <div className="flex items-center gap-1 rounded-full bg-[#d4a44c]/20 px-2 py-0.5 text-xs text-orange-300">
                   <span>{queueCount} queued</span>
                 </div>
               )}
@@ -214,7 +214,7 @@ export function OfflineMoodCheckIn({
         </div>
 
         {!compact && (
-          <p className="text-sm text-orange-100/80">
+          <p className="text-sm text-[#f5f0e8]/80">
             {isOnline
               ? 'Your mood will be saved immediately'
               : 'Your mood will be saved locally and synced when you\'re back online'
@@ -225,7 +225,7 @@ export function OfflineMoodCheckIn({
 
       {/* Mood Selector */}
       <div className="space-y-3">
-        <h3 className="text-sm font-medium text-orange-50">How are you feeling?</h3>
+        <h3 className="text-sm font-medium text-[#f5f0e8]">How are you feeling?</h3>
         <div className="flex flex-wrap gap-2">
           {MOOD_STATES.map(mood => (
             <button
@@ -234,8 +234,8 @@ export function OfflineMoodCheckIn({
               disabled={saving}
               className={`rounded-2xl border px-4 py-2.5 text-sm font-semibold transition ${
                 selectedScore === mood.value
-                  ? 'border-orange-400 bg-orange-500/30 text-orange-50 ring-2 ring-orange-400/50'
-                  : 'border-orange-500/25 bg-orange-500/10 text-orange-50 hover:bg-orange-500/20 disabled:opacity-50'
+                  ? 'border-[#d4a44c] bg-[#d4a44c]/30 text-[#f5f0e8] ring-2 ring-[#d4a44c]/50'
+                  : 'border-[#d4a44c]/25 bg-[#d4a44c]/10 text-[#f5f0e8] hover:bg-[#d4a44c]/20 disabled:opacity-50'
               }`}
             >
               {mood.label}
@@ -251,7 +251,7 @@ export function OfflineMoodCheckIn({
             <div className="h-8 w-8 shrink-0 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center text-xs font-bold text-slate-900">
               K
             </div>
-            <p className="text-sm text-orange-50 leading-relaxed">
+            <p className="text-sm text-[#f5f0e8] leading-relaxed">
               {MOOD_RESPONSES[selectedScore]}
             </p>
           </div>
@@ -261,7 +261,7 @@ export function OfflineMoodCheckIn({
       {/* Tags */}
       {!compact && selectedScore !== null && (
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-orange-50">Add context (optional)</h3>
+          <h3 className="text-sm font-medium text-[#f5f0e8]">Add context (optional)</h3>
           <div className="flex flex-wrap gap-2">
             {commonTags.map(tag => (
               <button
@@ -271,7 +271,7 @@ export function OfflineMoodCheckIn({
                 className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                   tags.includes(tag)
                     ? 'border-purple-400 bg-purple-500/30 text-purple-50'
-                    : 'border-orange-500/25 bg-orange-500/5 text-orange-100/80 hover:bg-orange-500/10 disabled:opacity-50'
+                    : 'border-[#d4a44c]/25 bg-[#d4a44c]/5 text-[#f5f0e8]/80 hover:bg-[#d4a44c]/10 disabled:opacity-50'
                 }`}
               >
                 {tag}
@@ -284,7 +284,7 @@ export function OfflineMoodCheckIn({
       {/* Note */}
       {selectedScore !== null && (
         <div className="space-y-2">
-          <label htmlFor="mood-note" className="text-sm font-medium text-orange-50">
+          <label htmlFor="mood-note" className="text-sm font-medium text-[#f5f0e8]">
             Add a note (optional)
           </label>
           <textarea
@@ -293,7 +293,7 @@ export function OfflineMoodCheckIn({
             onChange={(e) => setNote(e.target.value)}
             placeholder="What's on your mind?"
             disabled={saving}
-            className="w-full rounded-2xl border border-orange-500/25 bg-slate-950/70 p-3 text-sm text-orange-50 placeholder:text-orange-100/40 outline-none focus:ring-2 focus:ring-orange-400/70 disabled:opacity-50"
+            className="w-full rounded-2xl border border-[#d4a44c]/25 bg-slate-950/70 p-3 text-sm text-[#f5f0e8] placeholder:text-[#f5f0e8]/40 outline-none focus:ring-2 focus:ring-orange-400/70 disabled:opacity-50"
             rows={compact ? 2 : 3}
           />
         </div>
@@ -344,7 +344,7 @@ export function OfflineMoodCheckIn({
         <button
           onClick={syncNow}
           disabled={syncInProgress}
-          className="w-full rounded-2xl border border-orange-500/30 bg-orange-500/10 px-4 py-2 text-sm font-medium text-orange-50 transition hover:bg-orange-500/20 disabled:opacity-50"
+          className="w-full rounded-2xl border border-[#d4a44c]/30 bg-[#d4a44c]/10 px-4 py-2 text-sm font-medium text-[#f5f0e8] transition hover:bg-[#d4a44c]/20 disabled:opacity-50"
         >
           {syncInProgress ? (
             <>

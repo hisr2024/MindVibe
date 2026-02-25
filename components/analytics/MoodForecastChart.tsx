@@ -64,9 +64,9 @@ export function MoodForecastChart({ forecastDays = 7, className = '' }: MoodFore
 
   if (loading) {
     return (
-      <div className={`rounded-3xl border border-orange-500/15 bg-black/50 p-6 ${className}`}>
+      <div className={`rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-6 ${className}`}>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-400" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#d4a44c]" />
         </div>
       </div>
     )
@@ -99,15 +99,15 @@ export function MoodForecastChart({ forecastDays = 7, className = '' }: MoodFore
   const trend = lastScore > firstScore ? 'improving' : lastScore < firstScore ? 'declining' : 'stable'
 
   return (
-    <div className={`rounded-3xl border border-orange-500/15 bg-black/50 p-6 ${className}`}>
+    <div className={`rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-6 ${className}`}>
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-orange-50 mb-1 flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-orange-400" />
+          <h3 className="text-lg font-semibold text-[#f5f0e8] mb-1 flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-[#d4a44c]" />
             Mood Forecast
           </h3>
-          <p className="text-sm text-orange-100/60">
+          <p className="text-sm text-[#f5f0e8]/60">
             {forecastDays}-day prediction with confidence intervals
           </p>
         </div>
@@ -128,18 +128,18 @@ export function MoodForecastChart({ forecastDays = 7, className = '' }: MoodFore
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-3">
-          <div className="text-xs text-orange-100/60 mb-1">Avg Predicted</div>
-          <div className="text-2xl font-bold text-orange-50">{avgPredicted.toFixed(1)}</div>
+        <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 p-3">
+          <div className="text-xs text-[#f5f0e8]/60 mb-1">Avg Predicted</div>
+          <div className="text-2xl font-bold text-[#f5f0e8]">{avgPredicted.toFixed(1)}</div>
         </div>
-        <div className="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-3">
-          <div className="text-xs text-orange-100/60 mb-1">Best Day</div>
+        <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 p-3">
+          <div className="text-xs text-[#f5f0e8]/60 mb-1">Best Day</div>
           <div className="text-2xl font-bold text-green-400">
             {(scores.length > 0 ? Math.max(...scores) : 0).toFixed(1)}
           </div>
         </div>
-        <div className="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-3">
-          <div className="text-xs text-orange-100/60 mb-1">Lowest Day</div>
+        <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 p-3">
+          <div className="text-xs text-[#f5f0e8]/60 mb-1">Lowest Day</div>
           <div className="text-2xl font-bold text-red-400">
             {(scores.length > 0 ? Math.min(...scores) : 0).toFixed(1)}
           </div>
@@ -150,21 +150,21 @@ export function MoodForecastChart({ forecastDays = 7, className = '' }: MoodFore
       <div className="h-64 mb-4">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 115, 39, 0.1)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(212, 164, 76, 0.1)" />
             <XAxis
               dataKey="date"
-              stroke="rgba(255, 115, 39, 0.6)"
-              tick={{ fill: 'rgba(255, 115, 39, 0.8)', fontSize: 11 }}
+              stroke="rgba(212, 164, 76, 0.6)"
+              tick={{ fill: 'rgba(212, 164, 76, 0.8)', fontSize: 11 }}
             />
             <YAxis
               domain={[0, 10]}
-              stroke="rgba(255, 115, 39, 0.6)"
-              tick={{ fill: 'rgba(255, 115, 39, 0.8)', fontSize: 11 }}
+              stroke="rgba(212, 164, 76, 0.6)"
+              tick={{ fill: 'rgba(212, 164, 76, 0.8)', fontSize: 11 }}
             />
             <Tooltip
               contentStyle={{
                 backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                border: '1px solid rgba(255, 115, 39, 0.3)',
+                border: '1px solid rgba(212, 164, 76, 0.3)',
                 borderRadius: '12px',
                 padding: '8px 12px'
               }}
@@ -212,7 +212,7 @@ export function MoodForecastChart({ forecastDays = 7, className = '' }: MoodFore
       </div>
 
       {/* Model Info */}
-      <div className="mt-3 text-xs text-center text-orange-100/40">
+      <div className="mt-3 text-xs text-center text-[#f5f0e8]/40">
         Model: {forecastData.model_info.type} • Updated{' '}
         {new Date(forecastData.model_info.last_updated).toLocaleString()}
       </div>

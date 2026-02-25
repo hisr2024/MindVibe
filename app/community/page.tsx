@@ -152,10 +152,10 @@ export default function CommunityPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center space-y-2"
       >
-        <h1 className="text-3xl font-bold text-orange-50 md:text-4xl">
+        <h1 className="text-3xl font-bold text-[#f5f0e8] md:text-4xl">
           {t('community.title', 'Community Wisdom Circles')}
         </h1>
-        <p className="text-orange-100/70 max-w-2xl mx-auto">
+        <p className="text-[#f5f0e8]/70 max-w-2xl mx-auto">
           {t('community.subtitle', 'Connect anonymously with others on similar journeys. Share experiences, give support, and grow together in a safe, judgment-free space.')}
         </p>
       </motion.div>
@@ -170,7 +170,7 @@ export default function CommunityPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="rounded-3xl border border-orange-500/20 bg-gradient-to-br from-slate-900/90 via-slate-900/80 to-slate-900/90 p-4 md:p-6 shadow-2xl shadow-orange-500/10 backdrop-blur-xl"
+        className="rounded-3xl border border-[#d4a44c]/20 bg-gradient-to-br from-slate-900/90 via-slate-900/80 to-slate-900/90 p-4 md:p-6 shadow-2xl shadow-[#d4a44c]/10 backdrop-blur-xl"
       >
         {selectedCircle === null ? (
           /* Circle List View */
@@ -186,14 +186,14 @@ export default function CommunityPage() {
             <div className="flex items-center gap-4">
               <button
                 onClick={handleBackToCircles}
-                className="flex items-center gap-2 text-sm text-orange-300 hover:text-orange-100 transition-colors"
+                className="flex items-center gap-2 text-sm text-[#e8b54a] hover:text-[#f5f0e8] transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 {t('community.backToCircles', 'Back to Circles')}
               </button>
               <div className="flex-1">
-                <h2 className="text-xl font-bold text-orange-50">{selectedCircle.name}</h2>
-                <p className="text-sm text-orange-100/60">{selectedCircle.description}</p>
+                <h2 className="text-xl font-bold text-[#f5f0e8]">{selectedCircle.name}</h2>
+                <p className="text-sm text-[#f5f0e8]/60">{selectedCircle.description}</p>
               </div>
             </div>
 
@@ -207,11 +207,11 @@ export default function CommunityPage() {
             {/* Post Feed */}
             {isLoadingPosts ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-orange-400" />
+                <Loader2 className="h-8 w-8 animate-spin text-[#d4a44c]" />
               </div>
             ) : posts.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-orange-100/60">No posts yet. Be the first to share!</p>
+                <p className="text-[#f5f0e8]/60">No posts yet. Be the first to share!</p>
               </div>
             ) : (
               <PostFeed
@@ -229,13 +229,13 @@ export default function CommunityPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="rounded-2xl border border-orange-500/10 bg-white/5 p-4 backdrop-blur"
+          className="rounded-2xl border border-[#d4a44c]/10 bg-white/5 p-4 backdrop-blur"
         >
           <div className="text-2xl mb-2">🔒</div>
-          <h3 className="font-semibold text-orange-50 mb-1">
+          <h3 className="font-semibold text-[#f5f0e8] mb-1">
             {t('community.features.anonymous.title', 'Anonymous & Safe')}
           </h3>
-          <p className="text-xs text-orange-100/60">
+          <p className="text-xs text-[#f5f0e8]/60">
             {t('community.features.anonymous.description', 'Your identity is protected with cryptographic anonymization. Share freely without fear.')}
           </p>
         </motion.div>
@@ -244,13 +244,13 @@ export default function CommunityPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="rounded-2xl border border-orange-500/10 bg-white/5 p-4 backdrop-blur"
+          className="rounded-2xl border border-[#d4a44c]/10 bg-white/5 p-4 backdrop-blur"
         >
           <div className="text-2xl mb-2">🛡️</div>
-          <h3 className="font-semibold text-orange-50 mb-1">
+          <h3 className="font-semibold text-[#f5f0e8] mb-1">
             {t('community.features.moderated.title', 'AI Moderated')}
           </h3>
-          <p className="text-xs text-orange-100/60">
+          <p className="text-xs text-[#f5f0e8]/60">
             {t('community.features.moderated.description', 'Every post is nurtured for compassion and respect. A sacred space where seekers support one another.')}
           </p>
         </motion.div>
@@ -259,13 +259,13 @@ export default function CommunityPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="rounded-2xl border border-orange-500/10 bg-white/5 p-4 backdrop-blur"
+          className="rounded-2xl border border-[#d4a44c]/10 bg-white/5 p-4 backdrop-blur"
         >
           <div className="text-2xl mb-2">💝</div>
-          <h3 className="font-semibold text-orange-50 mb-1">
+          <h3 className="font-semibold text-[#f5f0e8] mb-1">
             {t('community.features.compassion.title', 'Compassion First')}
           </h3>
-          <p className="text-xs text-orange-100/60">
+          <p className="text-xs text-[#f5f0e8]/60">
             {t('community.features.compassion.description', 'Earn badges for supportive messages. Build a community rooted in empathy and understanding.')}
           </p>
         </motion.div>

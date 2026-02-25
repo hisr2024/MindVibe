@@ -46,8 +46,8 @@ const CORE_TOOLS: Tool[] = [
     description: 'AI wisdom companion',
     icon: Sparkles,
     href: '/m/kiaan',
-    gradient: 'from-orange-500/15 to-amber-500/15',
-    iconColor: 'text-orange-400',
+    gradient: 'from-[#d4a44c]/15 to-[#d4a44c]/15',
+    iconColor: 'text-[#d4a44c]',
   },
   {
     id: 'journal',
@@ -85,7 +85,7 @@ const EMOTIONAL_TOOLS: Tool[] = [
     description: 'Transform anger & ego',
     icon: Flame,
     href: '/ardha',
-    gradient: 'from-red-500/15 to-orange-500/15',
+    gradient: 'from-red-500/15 to-[#d4a44c]/15',
     iconColor: 'text-red-400',
   },
   {
@@ -125,8 +125,8 @@ const GROWTH_TOOLS: Tool[] = [
     description: 'Track your impact',
     icon: Footprints,
     href: '/karma-footprint',
-    gradient: 'from-amber-500/15 to-yellow-500/15',
-    iconColor: 'text-amber-400',
+    gradient: 'from-[#d4a44c]/15 to-yellow-500/15',
+    iconColor: 'text-[#d4a44c]',
   },
   {
     id: 'karmic-tree',
@@ -183,7 +183,7 @@ function ToolsSection({ title, tools, onToolPress, baseDelay }: ToolsSectionProp
           >
             {tool.premium && (
               <div className="absolute top-2 right-2">
-                <Lock className="w-3 h-3 text-amber-400" />
+                <Lock className="w-3 h-3 text-[#d4a44c]" />
               </div>
             )}
             <tool.icon className={`w-6 h-6 ${tool.iconColor} mb-2`} />

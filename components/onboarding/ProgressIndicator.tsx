@@ -42,10 +42,10 @@ export function ProgressIndicator({
             disabled={!onStepClick || index > currentStep}
             className={`h-2 rounded-full transition-all duration-300 ${
               index === currentStep
-                ? 'w-8 bg-orange-400'
+                ? 'w-8 bg-[#d4a44c]'
                 : index < currentStep
-                ? 'w-2 bg-orange-400/60 cursor-pointer hover:bg-orange-400/80'
-                : 'w-2 bg-orange-500/20'
+                ? 'w-2 bg-[#d4a44c]/60 cursor-pointer hover:bg-[#d4a44c]/80'
+                : 'w-2 bg-[#d4a44c]/20'
             }`}
             aria-label={`Step ${index + 1}: ${step.title}`}
           />
@@ -59,16 +59,16 @@ export function ProgressIndicator({
     return (
       <div className={className}>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-orange-100/60">
+          <span className="text-xs text-[#f5f0e8]/60">
             Step {currentStep + 1} of {steps.length}
           </span>
-          <span className="text-xs text-orange-100/60">
+          <span className="text-xs text-[#f5f0e8]/60">
             {steps[currentStep]?.title}
           </span>
         </div>
-        <div className="h-1.5 w-full rounded-full bg-orange-500/20 overflow-hidden">
+        <div className="h-1.5 w-full rounded-full bg-[#d4a44c]/20 overflow-hidden">
           <motion.div
-            className="h-full bg-gradient-to-r from-orange-400 to-amber-300"
+            className="h-full bg-gradient-to-r from-[#d4a44c] to-[#e8b54a]"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -96,10 +96,10 @@ export function ProgressIndicator({
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                   index < currentStep
-                    ? 'bg-orange-400 border-orange-400 text-slate-900'
+                    ? 'bg-[#d4a44c] border-[#d4a44c] text-slate-900'
                     : index === currentStep
-                    ? 'border-orange-400 bg-orange-400/20 text-orange-50'
-                    : 'border-orange-500/30 bg-transparent text-orange-100/40'
+                    ? 'border-[#d4a44c] bg-[#d4a44c]/20 text-[#f5f0e8]'
+                    : 'border-[#d4a44c]/30 bg-transparent text-[#f5f0e8]/40'
                 }`}
               >
                 {index < currentStep ? (
@@ -122,8 +122,8 @@ export function ProgressIndicator({
               <span
                 className={`mt-2 text-xs font-medium whitespace-nowrap ${
                   index <= currentStep
-                    ? 'text-orange-100'
-                    : 'text-orange-100/40'
+                    ? 'text-[#f5f0e8]'
+                    : 'text-[#f5f0e8]/40'
                 }`}
               >
                 {step.title}
@@ -132,9 +132,9 @@ export function ProgressIndicator({
 
             {/* Connector line */}
             {index < steps.length - 1 && (
-              <div className="flex-1 mx-4 h-0.5 bg-orange-500/20">
+              <div className="flex-1 mx-4 h-0.5 bg-[#d4a44c]/20">
                 <motion.div
-                  className="h-full bg-orange-400"
+                  className="h-full bg-[#d4a44c]"
                   initial={{ width: 0 }}
                   animate={{
                     width: index < currentStep ? '100%' : '0%',
@@ -150,16 +150,16 @@ export function ProgressIndicator({
       {/* Mobile view - use compact variant */}
       <div className="md:hidden">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-orange-100/60">
+          <span className="text-xs text-[#f5f0e8]/60">
             Step {currentStep + 1} of {steps.length}
           </span>
-          <span className="text-xs text-orange-100/60">
+          <span className="text-xs text-[#f5f0e8]/60">
             {steps[currentStep]?.title}
           </span>
         </div>
-        <div className="h-1.5 w-full rounded-full bg-orange-500/20 overflow-hidden">
+        <div className="h-1.5 w-full rounded-full bg-[#d4a44c]/20 overflow-hidden">
           <motion.div
-            className="h-full bg-gradient-to-r from-orange-400 to-amber-300"
+            className="h-full bg-gradient-to-r from-[#d4a44c] to-[#e8b54a]"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -174,10 +174,10 @@ export function ProgressIndicator({
               disabled={!onStepClick || index > currentStep}
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 index === currentStep
-                  ? 'w-4 bg-orange-400'
+                  ? 'w-4 bg-[#d4a44c]'
                   : index < currentStep
-                  ? 'w-1.5 bg-orange-400/60'
-                  : 'w-1.5 bg-orange-500/20'
+                  ? 'w-1.5 bg-[#d4a44c]/60'
+                  : 'w-1.5 bg-[#d4a44c]/20'
               }`}
               aria-label={`Step ${index + 1}: ${step.title}`}
             />

@@ -235,8 +235,8 @@ export default function OnboardingStepPage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-orange-50 mb-2">Set Up Your Profile</h2>
-              <p className="text-sm text-orange-100/70">Let&apos;s personalize your experience</p>
+              <h2 className="text-2xl font-bold text-[#f5f0e8] mb-2">Set Up Your Profile</h2>
+              <p className="text-sm text-[#f5f0e8]/70">Let&apos;s personalize your experience</p>
             </div>
             <ProfileSetupStep
               name={state.name}
@@ -247,14 +247,14 @@ export default function OnboardingStepPage() {
             {/* Timezone auto-detection */}
             <div className="max-w-md mx-auto space-y-4">
               <div className="space-y-1.5">
-                <label htmlFor="onboarding-timezone" className="block text-sm font-semibold text-orange-50">
+                <label htmlFor="onboarding-timezone" className="block text-sm font-semibold text-[#f5f0e8]">
                   Timezone
                 </label>
                 <select
                   id="onboarding-timezone"
                   value={state.timezone}
                   onChange={(e) => updateState({ timezone: e.target.value })}
-                  className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40"
+                  className="w-full rounded-xl border border-[#d4a44c]/20 bg-slate-900/70 px-3 py-3 text-sm text-[#f5f0e8] outline-none transition focus:border-[#d4a44c] focus:ring-2 focus:ring-[#d4a44c]/40"
                 >
                   <option value={Intl.DateTimeFormat().resolvedOptions().timeZone}>
                     {Intl.DateTimeFormat().resolvedOptions().timeZone} (Auto-detected)
@@ -269,14 +269,14 @@ export default function OnboardingStepPage() {
               
               {/* Language selector */}
               <div className="space-y-1.5">
-                <label htmlFor="onboarding-language" className="block text-sm font-semibold text-orange-50">
+                <label htmlFor="onboarding-language" className="block text-sm font-semibold text-[#f5f0e8]">
                   Language
                 </label>
                 <select
                   id="onboarding-language"
                   value={state.language}
                   onChange={(e) => updateState({ language: e.target.value })}
-                  className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40"
+                  className="w-full rounded-xl border border-[#d4a44c]/20 bg-slate-900/70 px-3 py-3 text-sm text-[#f5f0e8] outline-none transition focus:border-[#d4a44c] focus:ring-2 focus:ring-[#d4a44c]/40"
                 >
                   <option value="en">English</option>
                   <option value="hi">हिन्दी (Hindi)</option>
@@ -305,24 +305,24 @@ export default function OnboardingStepPage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-orange-50 mb-2">What brings you here?</h2>
-              <p className="text-sm text-orange-100/70">Help us understand your wellness goals</p>
+              <h2 className="text-2xl font-bold text-[#f5f0e8] mb-2">What brings you here?</h2>
+              <p className="text-sm text-[#f5f0e8]/70">Help us understand your wellness goals</p>
             </div>
             <PreferencesStep
               selectedGoals={state.goals}
               onGoalsChange={(goals) => updateState({ goals })}
             />
             {/* Additional preferences */}
-            <div className="max-w-md mx-auto space-y-4 mt-6 pt-6 border-t border-orange-500/10">
+            <div className="max-w-md mx-auto space-y-4 mt-6 pt-6 border-t border-[#d4a44c]/10">
               <div className="space-y-1.5">
-                <label htmlFor="mood-frequency" className="block text-sm font-semibold text-orange-50">
+                <label htmlFor="mood-frequency" className="block text-sm font-semibold text-[#f5f0e8]">
                   Mood Tracking Frequency
                 </label>
                 <select
                   id="mood-frequency"
                   value={state.moodFrequency}
                   onChange={(e) => updateState({ moodFrequency: e.target.value })}
-                  className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40"
+                  className="w-full rounded-xl border border-[#d4a44c]/20 bg-slate-900/70 px-3 py-3 text-sm text-[#f5f0e8] outline-none transition focus:border-[#d4a44c] focus:ring-2 focus:ring-[#d4a44c]/40"
                 >
                   <option value="daily">Daily</option>
                   <option value="twice_daily">Twice Daily</option>
@@ -333,19 +333,19 @@ export default function OnboardingStepPage() {
               
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-orange-50">Daily Reminders</p>
-                  <p className="text-xs text-orange-100/50">Get gentle nudges for journaling</p>
+                  <p className="text-sm font-semibold text-[#f5f0e8]">Daily Reminders</p>
+                  <p className="text-xs text-[#f5f0e8]/50">Get gentle nudges for journaling</p>
                 </div>
                 <button
                   onClick={() => updateState({ notifications: !state.notifications })}
                   className={`relative w-12 h-6 rounded-full transition ${
                     state.notifications
-                      ? 'bg-orange-500/30 border border-orange-400'
-                      : 'bg-orange-500/10 border border-orange-500/20'
+                      ? 'bg-[#d4a44c]/30 border border-[#d4a44c]'
+                      : 'bg-[#d4a44c]/10 border border-[#d4a44c]/20'
                   }`}
                 >
                   <motion.div
-                    className="absolute top-0.5 w-5 h-5 rounded-full bg-gradient-to-r from-orange-400 to-amber-300"
+                    className="absolute top-0.5 w-5 h-5 rounded-full bg-gradient-to-r from-[#d4a44c] to-[#e8b54a]"
                     animate={{ left: state.notifications ? '1.5rem' : '0.125rem' }}
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                   />
@@ -359,8 +359,8 @@ export default function OnboardingStepPage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-orange-50 mb-2">Choose Your Plan</h2>
-              <p className="text-sm text-orange-100/70">Start free or unlock more features</p>
+              <h2 className="text-2xl font-bold text-[#f5f0e8] mb-2">Choose Your Plan</h2>
+              <p className="text-sm text-[#f5f0e8]/70">Start free or unlock more features</p>
             </div>
             <PlanSelectionStep
               tiers={pricingTiers}
@@ -374,8 +374,8 @@ export default function OnboardingStepPage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-4">
-              <h2 className="text-2xl font-bold text-orange-50 mb-2">You&apos;re All Set!</h2>
-              <p className="text-sm text-orange-100/70">Ready to begin your mindful journey</p>
+              <h2 className="text-2xl font-bold text-[#f5f0e8] mb-2">You&apos;re All Set!</h2>
+              <p className="text-sm text-[#f5f0e8]/70">Ready to begin your mindful journey</p>
             </div>
             <OnboardingComplete
               userName={state.name}
@@ -395,7 +395,7 @@ export default function OnboardingStepPage() {
   if (!isClient || !isValidStep) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-orange-100/50">Loading...</div>
+        <div className="animate-pulse text-[#f5f0e8]/50">Loading...</div>
       </div>
     )
   }

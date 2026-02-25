@@ -149,16 +149,16 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-orange-500/20 bg-[#0d0d10] p-6 shadow-2xl"
+              className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-[#d4a44c]/20 bg-[#0d0d10] p-6 shadow-2xl"
             >
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-orange-50">
+                <h2 className="text-lg font-semibold text-[#f5f0e8]">
                   Export Your Data
                 </h2>
                 <button
                   onClick={handleClose}
-                  className="text-orange-100/60 hover:text-orange-50 transition"
+                  className="text-[#f5f0e8]/60 hover:text-[#f5f0e8] transition"
                   aria-label="Close export dialog"
                 >
                   <svg
@@ -179,7 +179,7 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
 
               {/* Format Selection */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-orange-100/80 mb-3">
+                <label className="block text-sm font-medium text-[#f5f0e8]/80 mb-3">
                   Export Format
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -189,15 +189,15 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
                       onClick={() => setSelectedFormat(format.value)}
                       className={`flex flex-col items-center gap-1 p-3 rounded-xl border transition ${
                         selectedFormat === format.value
-                          ? 'border-orange-400 bg-orange-500/10'
-                          : 'border-orange-500/20 bg-black/30 hover:border-orange-400/50'
+                          ? 'border-[#d4a44c] bg-[#d4a44c]/10'
+                          : 'border-[#d4a44c]/20 bg-black/30 hover:border-[#d4a44c]/50'
                       }`}
                     >
                       <span className="text-xl">{format.icon}</span>
-                      <span className="text-sm font-medium text-orange-50">
+                      <span className="text-sm font-medium text-[#f5f0e8]">
                         {format.label}
                       </span>
-                      <span className="text-[10px] text-orange-100/50">
+                      <span className="text-[10px] text-[#f5f0e8]/50">
                         {format.description}
                       </span>
                     </button>
@@ -207,7 +207,7 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
 
               {/* Data Type Selection */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-orange-100/80 mb-3">
+                <label className="block text-sm font-medium text-[#f5f0e8]/80 mb-3">
                   Data to Export
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -217,12 +217,12 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
                       onClick={() => toggleDataType(type.value)}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition ${
                         selectedDataTypes.includes(type.value)
-                          ? 'border-orange-400 bg-orange-500/10'
-                          : 'border-orange-500/20 bg-black/30 hover:border-orange-400/50'
+                          ? 'border-[#d4a44c] bg-[#d4a44c]/10'
+                          : 'border-[#d4a44c]/20 bg-black/30 hover:border-[#d4a44c]/50'
                       }`}
                     >
                       <span>{type.icon}</span>
-                      <span className="text-sm text-orange-50">{type.label}</span>
+                      <span className="text-sm text-[#f5f0e8]">{type.label}</span>
                     </button>
                   ))}
                 </div>
@@ -230,12 +230,12 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
 
               {/* Date Range */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-orange-100/80 mb-3">
+                <label className="block text-sm font-medium text-[#f5f0e8]/80 mb-3">
                   Date Range
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-orange-100/50 mb-1">
+                    <label className="block text-xs text-[#f5f0e8]/50 mb-1">
                       From
                     </label>
                     <input
@@ -244,11 +244,11 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
                       onChange={(e) =>
                         setDateRange((prev) => ({ ...prev, start: e.target.value }))
                       }
-                      className="w-full rounded-lg border border-orange-500/20 bg-black/50 px-3 py-2 text-sm text-orange-50 outline-none focus:border-orange-400"
+                      className="w-full rounded-lg border border-[#d4a44c]/20 bg-black/50 px-3 py-2 text-sm text-[#f5f0e8] outline-none focus:border-[#d4a44c]"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-orange-100/50 mb-1">
+                    <label className="block text-xs text-[#f5f0e8]/50 mb-1">
                       To
                     </label>
                     <input
@@ -257,7 +257,7 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
                       onChange={(e) =>
                         setDateRange((prev) => ({ ...prev, end: e.target.value }))
                       }
-                      className="w-full rounded-lg border border-orange-500/20 bg-black/50 px-3 py-2 text-sm text-orange-50 outline-none focus:border-orange-400"
+                      className="w-full rounded-lg border border-[#d4a44c]/20 bg-black/50 px-3 py-2 text-sm text-[#f5f0e8] outline-none focus:border-[#d4a44c]"
                     />
                   </div>
                 </div>
@@ -273,15 +273,15 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
               {/* Progress */}
               {isExporting && progress && (
                 <div className="mb-4">
-                  <div className="flex items-center justify-between text-sm text-orange-100/60 mb-2">
+                  <div className="flex items-center justify-between text-sm text-[#f5f0e8]/60 mb-2">
                     <span>Exporting...</span>
                     <span>{progress.progress}%</span>
                   </div>
-                  <div className="h-2 w-full rounded-full bg-orange-500/20 overflow-hidden">
+                  <div className="h-2 w-full rounded-full bg-[#d4a44c]/20 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${progress.progress}%` }}
-                      className="h-full bg-gradient-to-r from-orange-400 to-amber-300"
+                      className="h-full bg-gradient-to-r from-[#d4a44c] to-[#e8b54a]"
                     />
                   </div>
                 </div>

@@ -24,7 +24,7 @@ interface BreathingRingProps {
 const PHASE_CONFIG = {
   inhale: { label: 'Breathe In', color: '#60a5fa', bgGlow: 'shadow-blue-500/20' },
   hold: { label: 'Hold', color: '#a78bfa', bgGlow: 'shadow-purple-500/20' },
-  exhale: { label: 'Release', color: '#fbbf24', bgGlow: 'shadow-amber-500/20' },
+  exhale: { label: 'Release', color: '#f0c96d', bgGlow: 'shadow-[#d4a44c]/20' },
   rest: { label: 'Rest', color: '#34d399', bgGlow: 'shadow-emerald-500/20' },
 }
 

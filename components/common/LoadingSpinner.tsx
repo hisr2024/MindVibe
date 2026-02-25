@@ -21,7 +21,7 @@ const sizeStyles = {
 }
 
 const colorStyles = {
-  orange: 'text-orange-400',
+  orange: 'text-[#d4a44c]',
   white: 'text-white',
   current: 'text-current',
 }

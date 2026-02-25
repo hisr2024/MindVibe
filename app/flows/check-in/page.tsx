@@ -30,8 +30,8 @@ const SOUL_STATES = [
     label: 'Radiant',
     score: 9,
     icon: '\u2728',
-    gradient: 'from-amber-400 to-yellow-300',
-    ring: 'ring-amber-400/50',
+    gradient: 'from-[#d4a44c] to-yellow-300',
+    ring: 'ring-[#d4a44c]/50',
     bgGlow: 'rgba(251, 191, 36, 0.12)',
     description: 'Light fills my being',
     moodKey: 'Excellent',
@@ -52,8 +52,8 @@ const SOUL_STATES = [
     label: 'Grateful',
     score: 7,
     icon: '\u{1F64F}',
-    gradient: 'from-orange-400 to-amber-300',
-    ring: 'ring-orange-400/50',
+    gradient: 'from-[#d4a44c] to-[#e8b54a]',
+    ring: 'ring-[#d4a44c]/50',
     bgGlow: 'rgba(251, 146, 60, 0.12)',
     description: 'My heart overflows',
     moodKey: 'Good',
@@ -684,7 +684,7 @@ export default function SacredCheckIn() {
                   <div
                     key={p}
                     className={`h-1.5 rounded-full ${
-                      p === phase ? 'w-8 bg-amber-400' : 'w-1.5 bg-violet-400/60'
+                      p === phase ? 'w-8 bg-[#d4a44c]' : 'w-1.5 bg-violet-400/60'
                     }`}
                     aria-hidden="true"
                   />
@@ -693,7 +693,7 @@ export default function SacredCheckIn() {
 
               {/* KIAAN divine friend response */}
               <motion.div
-                className="relative rounded-[24px] border border-amber-500/15 bg-gradient-to-b from-amber-950/30 via-orange-950/20 to-violet-950/20 p-6 sm:p-8 overflow-hidden"
+                className="relative rounded-[24px] border border-[#d4a44c]/15 bg-gradient-to-b from-amber-950/30 via-orange-950/20 to-violet-950/20 p-6 sm:p-8 overflow-hidden"
                 initial={{ opacity: 0, y: 20, scale: 0.97 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ delay: 0.3, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -714,7 +714,7 @@ export default function SacredCheckIn() {
                 {/* KIAAN avatar */}
                 <div className="relative flex items-start gap-4">
                   <motion.div
-                    className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-400 shadow-lg"
+                    className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#d4a44c] to-[#d4a44c] shadow-lg"
                     animate={{
                       boxShadow: [
                         '0 0 15px rgba(251, 191, 36, 0.3)',
@@ -729,15 +729,15 @@ export default function SacredCheckIn() {
 
                   <div className="flex-1 space-y-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-amber-200">KIAAN</span>
-                      <span className="text-[10px] text-amber-400/50 bg-amber-400/10 px-2 py-0.5 rounded-full">
+                      <span className="text-sm font-semibold text-[#f0c96d]">KIAAN</span>
+                      <span className="text-[10px] text-[#d4a44c]/50 bg-[#d4a44c]/10 px-2 py-0.5 rounded-full">
                         Your Divine Friend
                       </span>
                     </div>
 
                     {/* Blessing text */}
                     <motion.p
-                      className="font-sacred text-base sm:text-lg text-amber-100/85 leading-relaxed italic"
+                      className="font-sacred text-base sm:text-lg text-[#f5f0e8]/85 leading-relaxed italic"
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.8, duration: 0.6 }}
@@ -749,7 +749,7 @@ export default function SacredCheckIn() {
 
                     {/* Personalized acknowledgement */}
                     <motion.p
-                      className="text-sm text-amber-200/50 leading-relaxed"
+                      className="text-sm text-[#f0c96d]/50 leading-relaxed"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 1.4, duration: 0.6 }}

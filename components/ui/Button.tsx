@@ -15,10 +15,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 text-slate-900 shadow-lg shadow-orange-500/25 hover:scale-[1.02]',
-  secondary: 'bg-white/10 border border-orange-400/30 text-orange-50 hover:bg-orange-500/20 hover:border-orange-400',
-  outline: 'border border-orange-500/30 text-orange-50 hover:bg-orange-500/10',
-  ghost: 'text-orange-50 hover:bg-orange-500/10',
+  primary: 'bg-gradient-to-r from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] text-slate-900 shadow-lg shadow-[#d4a44c]/25 hover:scale-[1.02]',
+  secondary: 'bg-white/10 border border-[#d4a44c]/30 text-[#f5f0e8] hover:bg-[#d4a44c]/20 hover:border-[#d4a44c]',
+  outline: 'border border-[#d4a44c]/30 text-[#f5f0e8] hover:bg-[#d4a44c]/10',
+  ghost: 'text-[#f5f0e8] hover:bg-[#d4a44c]/10',
   danger: 'bg-red-500/80 text-white hover:bg-red-500 shadow-lg shadow-red-500/20',
 }
 
@@ -30,7 +30,7 @@ const sizeStyles: Record<ButtonSize, string> = {
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = 'primary', size = 'md', loading, leftIcon, rightIcon, children, className = '', disabled, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-400/50 disabled:opacity-50 disabled:cursor-not-allowed'
+    const baseStyles = 'inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50 disabled:opacity-50 disabled:cursor-not-allowed'
     
     return (
       <button

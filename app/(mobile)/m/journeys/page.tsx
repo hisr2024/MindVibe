@@ -189,7 +189,7 @@ export default function MobileJourneysPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search journeys..."
-                className="w-full px-4 py-3 mb-4 rounded-xl bg-white/[0.06] border border-white/[0.08] text-white text-sm placeholder:text-slate-500 outline-none focus:border-orange-500/40"
+                className="w-full px-4 py-3 mb-4 rounded-xl bg-white/[0.06] border border-white/[0.08] text-white text-sm placeholder:text-slate-500 outline-none focus:border-[#d4a44c]/40"
                 autoFocus
               />
             </motion.div>
@@ -208,7 +208,7 @@ export default function MobileJourneysPage() {
                   key={category.id}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleCategoryChange(category.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl whitespace-nowrap transition-all ${isSelected ? 'bg-orange-500/20 border border-orange-500/40 text-orange-300' : 'bg-white/[0.04] border border-white/[0.08] text-slate-400'}`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl whitespace-nowrap transition-all ${isSelected ? 'bg-[#d4a44c]/20 border border-[#d4a44c]/40 text-[#e8b54a]' : 'bg-white/[0.04] border border-white/[0.08] text-slate-400'}`}
                 >
                   <Icon className="w-4 h-4" />
                   <span className="text-sm font-medium">{category.label}</span>
@@ -228,11 +228,11 @@ export default function MobileJourneysPage() {
                   key={journey.id}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => handleJourneyPress(journey.id)}
-                  className="w-full p-4 rounded-2xl text-left bg-gradient-to-br from-orange-500/10 to-amber-500/5 border border-orange-500/20"
+                  className="w-full p-4 rounded-2xl text-left bg-gradient-to-br from-[#d4a44c]/10 to-[#d4a44c]/5 border border-[#d4a44c]/20"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0">
-                      <Compass className="w-6 h-6 text-orange-400" />
+                    <div className="w-12 h-12 rounded-xl bg-[#d4a44c]/20 flex items-center justify-center flex-shrink-0">
+                      <Compass className="w-6 h-6 text-[#d4a44c]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-base font-semibold text-white truncate">
@@ -249,10 +249,10 @@ export default function MobileJourneysPage() {
                             initial={{ width: 0 }}
                             animate={{ width: `${journey.progress}%` }}
                             transition={{ duration: 0.5 }}
-                            className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full"
+                            className="h-full bg-gradient-to-r from-[#d4a44c] to-[#d4a44c] rounded-full"
                           />
                         </div>
-                        <p className="text-[10px] text-orange-400 mt-1">{journey.progress}% complete</p>
+                        <p className="text-[10px] text-[#d4a44c] mt-1">{journey.progress}% complete</p>
                       </div>
                     </div>
                     <ChevronRight className="w-5 h-5 text-slate-500 flex-shrink-0" />
@@ -310,7 +310,7 @@ export default function MobileJourneysPage() {
                           {journey.title}
                         </h3>
                         {journey.is_premium && (
-                          <Sparkles className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                          <Sparkles className="w-4 h-4 text-[#d4a44c] flex-shrink-0" />
                         )}
                       </div>
                       <p className="text-xs text-slate-400 line-clamp-2">
@@ -324,7 +324,7 @@ export default function MobileJourneysPage() {
                           <span>{journey.duration_days} days</span>
                         </div>
                         <div className="flex items-center gap-1 text-xs text-slate-500">
-                          <Star className="w-3 h-3 text-amber-400" />
+                          <Star className="w-3 h-3 text-[#d4a44c]" />
                           <span>{(journey.rating ?? 0).toFixed(1)}</span>
                         </div>
                         <span className={`text-[10px] px-2 py-0.5 rounded-full border ${difficultyColors[journey.difficulty]}`}>

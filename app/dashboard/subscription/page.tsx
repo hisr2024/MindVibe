@@ -34,10 +34,10 @@ export default function SubscriptionDashboardPage() {
     return (
       <main className="mx-auto max-w-6xl px-4 py-12">
         <div className="animate-pulse space-y-6">
-          <div className="h-10 w-64 rounded-lg bg-orange-500/10" />
+          <div className="h-10 w-64 rounded-lg bg-[#d4a44c]/10" />
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="h-64 rounded-3xl bg-orange-500/10" />
-            <div className="h-64 rounded-3xl bg-orange-500/10" />
+            <div className="h-64 rounded-3xl bg-[#d4a44c]/10" />
+            <div className="h-64 rounded-3xl bg-[#d4a44c]/10" />
           </div>
         </div>
       </main>
@@ -49,8 +49,8 @@ export default function SubscriptionDashboardPage() {
       <main className="mx-auto max-w-6xl px-4 py-12">
         <Card>
           <CardContent className="text-center py-12">
-            <h1 className="text-xl font-semibold text-orange-50 mb-4">No Active Subscription</h1>
-            <p className="text-sm text-orange-100/70 mb-6">Get started with a plan to unlock KIAAN&apos;s full potential.</p>
+            <h1 className="text-xl font-semibold text-[#f5f0e8] mb-4">No Active Subscription</h1>
+            <p className="text-sm text-[#f5f0e8]/70 mb-6">Get started with a plan to unlock KIAAN&apos;s full potential.</p>
             <Button onClick={handleUpgrade}>View Plans</Button>
           </CardContent>
         </Card>
@@ -67,11 +67,11 @@ export default function SubscriptionDashboardPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-12">
       {/* Header */}
-      <div className="mb-8 rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0d0d10]/90 via-[#0b0b0f]/80 to-[#0f0a08]/90 p-6 shadow-[0_18px_70px_rgba(46,160,255,0.14)] flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-8 rounded-3xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#0d0d10]/90 via-[#050507]/80 to-[#0f0a08]/90 p-6 shadow-[0_18px_70px_rgba(46,160,255,0.14)] flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <KiaanLogo size="md" className="shrink-0" />
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-orange-50 mb-1">Subscription</h1>
-          <p className="text-orange-100/75 max-w-3xl">
+          <h1 className="text-3xl font-bold text-[#f5f0e8] mb-1">Subscription</h1>
+          <p className="text-[#f5f0e8]/75 max-w-3xl">
             Manage your plan and track your usage with the MindVibe Companion by your side. Everything you need to stay on top of your membership is organized below.
           </p>
         </div>
@@ -117,9 +117,9 @@ export default function SubscriptionDashboardPage() {
         {/* Billing History */}
         <Card>
           <CardContent>
-            <h3 className="font-semibold text-orange-50 mb-4">Billing History</h3>
+            <h3 className="font-semibold text-[#f5f0e8] mb-4">Billing History</h3>
             {subscription.tierId === 'free' ? (
-              <p className="text-sm text-orange-100/60">
+              <p className="text-sm text-[#f5f0e8]/60">
                 No billing history for free plan.
               </p>
             ) : (
@@ -127,15 +127,15 @@ export default function SubscriptionDashboardPage() {
                 {[
                   { date: new Date(), amount: subscription.isYearly ? ({ basic: 49.99, premium: 99.99, enterprise: 150.00, premier: 250.00 }[subscription.tierId] ?? 0) : ({ basic: 4.99, premium: 9.99, enterprise: 15.00, premier: 25.00 }[subscription.tierId] ?? 0), status: 'paid' },
                 ].map((invoice, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b border-orange-500/10 last:border-0">
+                  <div key={i} className="flex items-center justify-between py-2 border-b border-[#d4a44c]/10 last:border-0">
                     <div>
-                      <p className="text-sm font-medium text-orange-50">
+                      <p className="text-sm font-medium text-[#f5f0e8]">
                         {invoice.date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                       </p>
-                      <p className="text-xs text-orange-100/60">{subscription.tierName} Plan</p>
+                      <p className="text-xs text-[#f5f0e8]/60">{subscription.tierName} Plan</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-semibold text-orange-50">${invoice.amount}</span>
+                      <span className="text-sm font-semibold text-[#f5f0e8]">${invoice.amount}</span>
                       <Badge variant="success" size="sm">Paid</Badge>
                     </div>
                   </div>
@@ -149,7 +149,7 @@ export default function SubscriptionDashboardPage() {
       {/* Quick Actions */}
       <Card>
         <CardContent>
-          <h3 className="font-semibold text-orange-50 mb-4">Quick Actions</h3>
+          <h3 className="font-semibold text-[#f5f0e8] mb-4">Quick Actions</h3>
           <div className="flex flex-wrap gap-3">
             <Button onClick={handleUpgrade} variant="outline" size="sm">
               Change Plan

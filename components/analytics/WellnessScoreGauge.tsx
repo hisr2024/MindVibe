@@ -76,9 +76,9 @@ export function WellnessScoreGauge({ userId, className = '' }: WellnessScoreGaug
 
   if (loading) {
     return (
-      <div className={`rounded-3xl border border-orange-500/15 bg-black/50 p-6 ${className}`}>
+      <div className={`rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-6 ${className}`}>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-400" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#d4a44c]" />
         </div>
       </div>
     )
@@ -96,11 +96,11 @@ export function WellnessScoreGauge({ userId, className = '' }: WellnessScoreGaug
   const scorePercentage = wellnessData.total_score
 
   return (
-    <div className={`rounded-3xl border border-orange-500/15 bg-black/50 p-6 ${className}`}>
+    <div className={`rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-6 ${className}`}>
       {/* Header */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-orange-50 mb-1">Wellness Score</h3>
-        <p className="text-sm text-orange-100/60">Comprehensive health assessment</p>
+        <h3 className="text-lg font-semibold text-[#f5f0e8] mb-1">Wellness Score</h3>
+        <p className="text-sm text-[#f5f0e8]/60">Comprehensive health assessment</p>
       </div>
 
       {/* Radial Gauge */}
@@ -113,7 +113,7 @@ export function WellnessScoreGauge({ userId, className = '' }: WellnessScoreGaug
               cy="96"
               r="80"
               fill="none"
-              stroke="rgba(255, 115, 39, 0.1)"
+              stroke="rgba(212, 164, 76, 0.1)"
               strokeWidth="16"
             />
             {/* Progress circle */}
@@ -144,7 +144,7 @@ export function WellnessScoreGauge({ userId, className = '' }: WellnessScoreGaug
               <div className="text-4xl font-bold" style={{ color: levelConfig.primary }}>
                 {wellnessData.total_score}
               </div>
-              <div className="text-xs text-orange-100/60">out of 100</div>
+              <div className="text-xs text-[#f5f0e8]/60">out of 100</div>
             </motion.div>
           </div>
         </div>
@@ -164,7 +164,7 @@ export function WellnessScoreGauge({ userId, className = '' }: WellnessScoreGaug
       </div>
 
       {/* Description */}
-      <p className="text-sm text-center text-orange-100/80 mb-6">
+      <p className="text-sm text-center text-[#f5f0e8]/80 mb-6">
         {wellnessData.level_description}
       </p>
 
@@ -178,21 +178,21 @@ export function WellnessScoreGauge({ userId, className = '' }: WellnessScoreGaug
             <div key={key} className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Icon className="h-4 w-4 text-orange-400" />
-                  <span className="text-sm text-orange-50 capitalize">
+                  <Icon className="h-4 w-4 text-[#d4a44c]" />
+                  <span className="text-sm text-[#f5f0e8] capitalize">
                     {key.replace(/_/g, ' ')}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-orange-100/60">{component.weight}</span>
-                  <span className="text-sm font-semibold text-orange-50">
+                  <span className="text-xs text-[#f5f0e8]/60">{component.weight}</span>
+                  <span className="text-sm font-semibold text-[#f5f0e8]">
                     {componentScore.toFixed(1)}
                   </span>
                 </div>
               </div>
 
               {/* Progress bar */}
-              <div className="h-2 rounded-full bg-orange-500/10 overflow-hidden">
+              <div className="h-2 rounded-full bg-[#d4a44c]/10 overflow-hidden">
                 <motion.div
                   className="h-full rounded-full"
                   style={{
@@ -211,14 +211,14 @@ export function WellnessScoreGauge({ userId, className = '' }: WellnessScoreGaug
       {/* Recommendations */}
       {wellnessData.recommendations.length > 0 && (
         <div className="rounded-2xl border border-indigo-400/30 bg-indigo-950/20 p-4">
-          <h4 className="text-sm font-semibold text-orange-50 mb-2 flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-[#f5f0e8] mb-2 flex items-center gap-2">
             <span>💡</span>
             <span>Recommendations</span>
           </h4>
           <ul className="space-y-2">
             {wellnessData.recommendations.map((rec, idx) => (
-              <li key={idx} className="text-xs text-orange-100/80 flex items-start gap-2">
-                <span className="text-orange-400 mt-0.5">•</span>
+              <li key={idx} className="text-xs text-[#f5f0e8]/80 flex items-start gap-2">
+                <span className="text-[#d4a44c] mt-0.5">•</span>
                 <span>{rec}</span>
               </li>
             ))}
@@ -227,7 +227,7 @@ export function WellnessScoreGauge({ userId, className = '' }: WellnessScoreGaug
       )}
 
       {/* Last Updated */}
-      <div className="mt-4 text-xs text-center text-orange-100/40">
+      <div className="mt-4 text-xs text-center text-[#f5f0e8]/40">
         Updated {new Date(wellnessData.calculated_at).toLocaleString()}
       </div>
     </div>

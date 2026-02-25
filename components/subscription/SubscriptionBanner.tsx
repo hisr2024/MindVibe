@@ -36,16 +36,16 @@ export function SubscriptionBanner({
 
   return (
     <div
-      className={`rounded-2xl bg-gradient-to-r from-orange-500/15 via-amber-500/10 to-orange-500/15 border border-orange-400/25 p-3 sm:p-4 ${className}`}
+      className={`rounded-2xl bg-gradient-to-r from-[#d4a44c]/15 via-[#d4a44c]/10 to-[#d4a44c]/15 border border-[#d4a44c]/25 p-3 sm:p-4 ${className}`}
     >
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="h-8 w-8 shrink-0 rounded-lg bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 flex items-center justify-center">
+          <div className="h-8 w-8 shrink-0 rounded-lg bg-gradient-to-br from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-900">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
           </div>
-          <p className="text-sm text-orange-100/90 truncate">
+          <p className="text-sm text-[#f5f0e8]/90 truncate">
             {message || defaultMessage}
           </p>
         </div>

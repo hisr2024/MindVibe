@@ -17,9 +17,9 @@ const sizeStyles = {
 }
 
 const variantStyles = {
-  default: 'bg-gradient-to-r from-orange-400 via-[#ff9933] to-amber-300',
+  default: 'bg-gradient-to-r from-[#d4a44c] via-[#ff9933] to-[#e8b54a]',
   success: 'bg-gradient-to-r from-emerald-400 to-teal-300',
-  warning: 'bg-gradient-to-r from-amber-400 to-orange-400',
+  warning: 'bg-gradient-to-r from-[#d4a44c] to-[#d4a44c]',
   danger: 'bg-gradient-to-r from-red-400 to-rose-400',
 }
 
@@ -41,15 +41,15 @@ export function ProgressBar({
     <div className={`space-y-1.5 ${className}`}>
       {(label || showValue) && (
         <div className="flex items-center justify-between text-sm">
-          {label && <span className="font-medium text-orange-100">{label}</span>}
+          {label && <span className="font-medium text-[#f5f0e8]">{label}</span>}
           {showValue && (
-            <span className="text-orange-100/70">
+            <span className="text-[#f5f0e8]/70">
               {value} / {max}
             </span>
           )}
         </div>
       )}
-      <div className={`relative w-full overflow-hidden rounded-full bg-orange-500/20 ${sizeStyles[size]}`}>
+      <div className={`relative w-full overflow-hidden rounded-full bg-[#d4a44c]/20 ${sizeStyles[size]}`}>
         <div
           className={`h-full transition-all duration-500 ease-out ${variantStyles[autoVariant]} rounded-full`}
           style={{ width: `${percentage}%` }}

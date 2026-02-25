@@ -33,22 +33,22 @@ export function QuotaExceededModal({
       size="md"
     >
       <div className="text-center">
-        <div className="mx-auto mb-4 h-16 w-16 rounded-2xl bg-gradient-to-br from-orange-500/30 via-amber-500/30 to-orange-500/30 flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+        <div className="mx-auto mb-4 h-16 w-16 rounded-2xl bg-gradient-to-br from-[#d4a44c]/30 via-[#d4a44c]/30 to-[#d4a44c]/30 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c]">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
         </div>
 
-        <p className="text-sm text-orange-100/80 mb-4">
+        <p className="text-sm text-[#f5f0e8]/80 mb-4">
           You&apos;ve used all {quota} of your monthly KIAAN questions. Your quota will reset in{' '}
-          <span className="font-semibold text-orange-50">{daysUntilReset} days</span>.
+          <span className="font-semibold text-[#f5f0e8]">{daysUntilReset} days</span>.
         </p>
 
-        <div className="rounded-xl bg-orange-500/10 border border-orange-500/20 p-4 mb-6">
-          <p className="text-xs text-orange-100/70 mb-2">
+        <div className="rounded-xl bg-[#d4a44c]/10 border border-[#d4a44c]/20 p-4 mb-6">
+          <p className="text-xs text-[#f5f0e8]/70 mb-2">
             KIAAN is still here for you! You can:
           </p>
-          <ul className="text-sm text-orange-100/80 space-y-1 text-left">
+          <ul className="text-sm text-[#f5f0e8]/80 space-y-1 text-left">
             <li className="flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
                 <polyline points="20 6 9 17 4 12" />

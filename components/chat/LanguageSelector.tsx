@@ -60,11 +60,11 @@ export function LanguageSelector({
       <div className={`relative language-selector-dropdown ${className}`}>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 rounded-lg border border-orange-500/25 bg-orange-500/10 px-3 py-2 text-sm font-medium text-orange-200 transition-all hover:border-orange-500/40 hover:bg-orange-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50"
+          className="flex items-center gap-2 rounded-lg border border-[#d4a44c]/25 bg-[#d4a44c]/10 px-3 py-2 text-sm font-medium text-[#e8b54a] transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50"
           aria-label="Select language"
           title="Select language for responses"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c]">
             <circle cx="12" cy="12" r="10"></circle>
             <path d="M2 12h20"></path>
             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
@@ -76,15 +76,15 @@ export function LanguageSelector({
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 top-full mt-2 z-50 w-64 max-h-96 overflow-hidden rounded-xl border border-orange-500/30 bg-slate-950 backdrop-blur-sm shadow-xl shadow-orange-500/20">
+          <div className="absolute right-0 top-full mt-2 z-50 w-64 max-h-96 overflow-hidden rounded-xl border border-[#d4a44c]/30 bg-slate-950 backdrop-blur-sm shadow-xl shadow-[#d4a44c]/20">
             {/* Search input */}
-            <div className="p-3 border-b border-orange-500/20">
+            <div className="p-3 border-b border-[#d4a44c]/20">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search languages..."
-                className="w-full rounded-lg border border-orange-500/25 bg-slate-950/70 px-3 py-2 text-sm text-orange-50 outline-none focus:ring-2 focus:ring-orange-400/50 placeholder:text-orange-100/40"
+                className="w-full rounded-lg border border-[#d4a44c]/25 bg-slate-950/70 px-3 py-2 text-sm text-[#f5f0e8] outline-none focus:ring-2 focus:ring-[#d4a44c]/50 placeholder:text-[#f5f0e8]/40"
                 autoFocus
               />
             </div>
@@ -97,22 +97,22 @@ export function LanguageSelector({
                   onClick={() => handleLanguageSelect(code)}
                   className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
                     language === code
-                      ? 'bg-orange-500/20 text-orange-50 font-semibold'
-                      : 'text-orange-100/80 hover:bg-orange-500/10'
+                      ? 'bg-[#d4a44c]/20 text-[#f5f0e8] font-semibold'
+                      : 'text-[#f5f0e8]/80 hover:bg-[#d4a44c]/10'
                   }`}
                 >
                   <span className="flex items-center gap-3">
                     <span className="text-base">{name}</span>
                   </span>
                   {language === code && (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c]">
                       <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                   )}
                 </button>
               ))}
               {filteredLanguages.length === 0 && (
-                <div className="px-4 py-6 text-center text-orange-100/60 text-sm">
+                <div className="px-4 py-6 text-center text-[#f5f0e8]/60 text-sm">
                   No languages found
                 </div>
               )}
@@ -127,38 +127,38 @@ export function LanguageSelector({
   return (
     <div className={`language-selector-dropdown ${className}`}>
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-semibold text-orange-100/80">
+        <label className="text-sm font-semibold text-[#f5f0e8]/80">
           Response Language
         </label>
         <div className="relative">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="w-full flex items-center justify-between rounded-xl border border-orange-500/25 bg-orange-500/10 px-4 py-3 text-sm font-medium text-orange-50 transition-all hover:border-orange-500/40 hover:bg-orange-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50"
+            className="w-full flex items-center justify-between rounded-xl border border-[#d4a44c]/25 bg-[#d4a44c]/10 px-4 py-3 text-sm font-medium text-[#f5f0e8] transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50"
             aria-label="Select language"
           >
             <span className="flex items-center gap-3">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c]">
                 <circle cx="12" cy="12" r="10"></circle>
                 <path d="M2 12h20"></path>
                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
               </svg>
               <span>{config.name}</span>
             </span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-orange-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`text-[#d4a44c] transition-transform ${isOpen ? 'rotate-180' : ''}`}>
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
 
           {isOpen && (
-            <div className="absolute left-0 top-full mt-2 z-50 w-full max-h-96 overflow-hidden rounded-xl border border-orange-500/30 bg-slate-950 backdrop-blur-sm shadow-xl shadow-orange-500/20">
+            <div className="absolute left-0 top-full mt-2 z-50 w-full max-h-96 overflow-hidden rounded-xl border border-[#d4a44c]/30 bg-slate-950 backdrop-blur-sm shadow-xl shadow-[#d4a44c]/20">
               {/* Search input */}
-              <div className="p-3 border-b border-orange-500/20">
+              <div className="p-3 border-b border-[#d4a44c]/20">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search languages..."
-                  className="w-full rounded-lg border border-orange-500/25 bg-slate-950/70 px-3 py-2 text-sm text-orange-50 outline-none focus:ring-2 focus:ring-orange-400/50 placeholder:text-orange-100/40"
+                  className="w-full rounded-lg border border-[#d4a44c]/25 bg-slate-950/70 px-3 py-2 text-sm text-[#f5f0e8] outline-none focus:ring-2 focus:ring-[#d4a44c]/50 placeholder:text-[#f5f0e8]/40"
                   autoFocus
                 />
               </div>
@@ -171,20 +171,20 @@ export function LanguageSelector({
                     onClick={() => handleLanguageSelect(code)}
                     className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
                       language === code
-                        ? 'bg-orange-500/20 text-orange-50 font-semibold'
-                        : 'text-orange-100/80 hover:bg-orange-500/10'
+                        ? 'bg-[#d4a44c]/20 text-[#f5f0e8] font-semibold'
+                        : 'text-[#f5f0e8]/80 hover:bg-[#d4a44c]/10'
                     }`}
                   >
                     <span className="text-base">{name}</span>
                     {language === code && (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c]">
                         <polyline points="20 6 9 17 4 12"></polyline>
                       </svg>
                     )}
                   </button>
                 ))}
                 {filteredLanguages.length === 0 && (
-                  <div className="px-4 py-6 text-center text-orange-100/60 text-sm">
+                  <div className="px-4 py-6 text-center text-[#f5f0e8]/60 text-sm">
                     No languages found
                   </div>
                 )}
@@ -194,7 +194,7 @@ export function LanguageSelector({
         </div>
         
         {/* Helper text */}
-        <p className="text-xs text-orange-100/60">
+        <p className="text-xs text-[#f5f0e8]/60">
           KIAAN will respond in {config.name}. You can type in any language.
         </p>
       </div>

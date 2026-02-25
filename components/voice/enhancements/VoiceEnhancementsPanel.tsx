@@ -108,8 +108,8 @@ const ENHANCEMENTS: {
     nameHindi: 'परिवेशी ध्वनि',
     description: 'Layered nature & spiritual sounds',
     icon: Music,
-    color: 'text-orange-400',
-    gradient: 'from-orange-500/20 to-amber-500/20'
+    color: 'text-[#d4a44c]',
+    gradient: 'from-[#d4a44c]/20 to-[#d4a44c]/20'
   },
   {
     type: 'sleep_mode',
@@ -126,8 +126,8 @@ const ENHANCEMENTS: {
     nameHindi: 'दैनिक जांच',
     description: 'Mood & wellness tracking',
     icon: Sun,
-    color: 'text-amber-400',
-    gradient: 'from-amber-500/20 to-orange-500/20'
+    color: 'text-[#d4a44c]',
+    gradient: 'from-[#d4a44c]/20 to-[#d4a44c]/20'
   },
   {
     type: 'affirmations',
@@ -334,8 +334,8 @@ export function VoiceEnhancementsPanel({
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500/20 to-purple-500/20">
-                <Sparkles className="w-5 h-5 text-orange-400" />
+              <div className="p-2 rounded-xl bg-gradient-to-br from-[#d4a44c]/20 to-purple-500/20">
+                <Sparkles className="w-5 h-5 text-[#d4a44c]" />
               </div>
               <div>
                 <h3 className="font-semibold text-white">Voice Enhancements</h3>
@@ -393,8 +393,8 @@ export function VoiceEnhancementsPanel({
       <div className="p-4 border-b border-white/5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/20 to-purple-500/20">
-              <Sparkles className="w-6 h-6 text-orange-400" />
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#d4a44c]/20 to-purple-500/20">
+              <Sparkles className="w-6 h-6 text-[#d4a44c]" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-white">Voice Enhancements</h2>
@@ -422,7 +422,7 @@ export function VoiceEnhancementsPanel({
                 step="0.05"
                 value={masterMuted ? 0 : masterVolume}
                 onChange={(e) => handleMasterVolumeChange(parseFloat(e.target.value))}
-                className="w-24 h-1.5 rounded-full appearance-none cursor-pointer bg-white/10 accent-orange-500"
+                className="w-24 h-1.5 rounded-full appearance-none cursor-pointer bg-white/10 accent-[#d4a44c]"
               />
             </div>
 

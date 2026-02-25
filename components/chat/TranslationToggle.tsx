@@ -39,7 +39,7 @@ export function TranslationToggle({
           font-medium transition-all duration-200
           ${
             showOriginal
-              ? 'border-orange-500/40 bg-orange-500/10 text-orange-200 hover:border-orange-400/60'
+              ? 'border-[#d4a44c]/40 bg-[#d4a44c]/10 text-[#e8b54a] hover:border-[#d4a44c]/60'
               : 'border-blue-500/40 bg-blue-500/10 text-blue-200 hover:border-blue-400/60'
           }
         `}
@@ -70,7 +70,7 @@ export function TranslationToggle({
         <span
           className={`
             h-1.5 w-1.5 rounded-full transition-colors
-            ${showOriginal ? 'bg-orange-400' : 'bg-blue-400'}
+            ${showOriginal ? 'bg-[#d4a44c]' : 'bg-blue-400'}
           `}
           aria-hidden="true"
         />

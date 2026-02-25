@@ -62,7 +62,7 @@ export default function AdminAnnouncementsPage() {
             Create and manage system announcements
           </p>
         </div>
-        <button className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-orange-400">
+        <button className="rounded-lg bg-[#d4a44c] px-4 py-2 text-sm font-medium text-slate-900 hover:bg-[#d4a44c]">
           + New Announcement
         </button>
       </div>

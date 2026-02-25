@@ -60,11 +60,11 @@ interface VoiceConfig {
 
 // ─── Mood Emoji + Label Map ─────────────────────────────────────────
 const MOOD_DISPLAY: Record<string, { emoji: string; label: string; color: string }> = {
-  happy: { emoji: '\uD83D\uDE0A', label: 'Happy', color: 'text-amber-400' },
+  happy: { emoji: '\uD83D\uDE0A', label: 'Happy', color: 'text-[#d4a44c]' },
   sad: { emoji: '\uD83D\uDE22', label: 'Sad', color: 'text-blue-400' },
   anxious: { emoji: '\uD83D\uDE30', label: 'Anxious', color: 'text-purple-400' },
   angry: { emoji: '\uD83D\uDE24', label: 'Angry', color: 'text-red-400' },
-  confused: { emoji: '\uD83E\uDD14', label: 'Confused', color: 'text-orange-400' },
+  confused: { emoji: '\uD83E\uDD14', label: 'Confused', color: 'text-[#d4a44c]' },
   peaceful: { emoji: '\uD83E\uDDD8', label: 'Peaceful', color: 'text-emerald-400' },
   hopeful: { emoji: '\u2728', label: 'Hopeful', color: 'text-yellow-400' },
   lonely: { emoji: '\uD83D\uDC99', label: 'Lonely', color: 'text-indigo-400' },
@@ -76,7 +76,7 @@ const MOOD_DISPLAY: Record<string, { emoji: string; label: string; color: string
   jealous: { emoji: '\uD83D\uDE15', label: 'Jealous', color: 'text-lime-400' },
   guilty: { emoji: '\uD83D\uDE14', label: 'Guilty', color: 'text-stone-400' },
   fearful: { emoji: '\uD83D\uDE28', label: 'Fearful', color: 'text-cyan-400' },
-  frustrated: { emoji: '\uD83D\uDE23', label: 'Frustrated', color: 'text-orange-500' },
+  frustrated: { emoji: '\uD83D\uDE23', label: 'Frustrated', color: 'text-[#d4a44c]' },
   stressed: { emoji: '\uD83E\uDD2F', label: 'Stressed', color: 'text-red-300' },
 }
 
@@ -517,13 +517,13 @@ export default function CompanionPage() {
               aiStatus === 'connected'
                 ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10'
                 : aiStatus === 'offline'
-                ? 'border-amber-500/30 text-amber-400 bg-amber-500/10'
+                ? 'border-[#d4a44c]/30 text-[#d4a44c] bg-[#d4a44c]/10'
                 : 'border-white/10 text-white/40 bg-white/5'
             }`}
             title={aiStatus === 'connected' ? 'AI-powered responses active' : 'Using offline wisdom'}
           >
             <span className={`w-1.5 h-1.5 rounded-full ${
-              aiStatus === 'connected' ? 'bg-emerald-400' : aiStatus === 'offline' ? 'bg-amber-400' : 'bg-white/40'
+              aiStatus === 'connected' ? 'bg-emerald-400' : aiStatus === 'offline' ? 'bg-[#d4a44c]' : 'bg-white/40'
             }`} />
             {aiStatus === 'connected'
               ? `AI${wisdomCorpusCount ? ` \u00B7 ${wisdomCorpusCount}` : ''}`

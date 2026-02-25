@@ -175,8 +175,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Light mode text contrast fixes for legacy classes */
-html.light [class*="text-orange"] {
+/* Light mode text contrast fixes for legacy and gold theme classes */
+html.light [class*="text-orange"],
+html.light [class*="text-\\[\\#d4a44c"],
+html.light [class*="text-\\[\\#e8b54a"],
+html.light [class*="text-\\[\\#c8943a"] {
   color: #3d3218;
 }
 

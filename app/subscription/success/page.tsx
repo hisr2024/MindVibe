@@ -59,8 +59,8 @@ function SuccessContent() {
     return (
       <main className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center space-y-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-orange-500 border-t-transparent mx-auto" />
-          <p className="text-orange-100">Confirming your subscription...</p>
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#d4a44c] border-t-transparent mx-auto" />
+          <p className="text-[#f5f0e8]">Confirming your subscription...</p>
         </div>
       </main>
     )
@@ -76,16 +76,16 @@ function SuccessContent() {
             </svg>
           </div>
 
-          <h1 className="text-2xl font-bold text-orange-50 mb-2">
+          <h1 className="text-2xl font-bold text-[#f5f0e8] mb-2">
             Welcome to {tierNames[tier] || 'Basic'}!
           </h1>
-          <p className="text-sm text-orange-100/70 mb-6">
+          <p className="text-sm text-[#f5f0e8]/70 mb-6">
             Your subscription is now active. You have access to all {tierNames[tier] || 'Basic'} features.
           </p>
 
-          <div className="rounded-xl bg-orange-500/10 border border-orange-500/20 p-4 mb-6 text-left">
-            <h2 className="font-semibold text-orange-50 mb-2">What&apos;s next?</h2>
-            <ul className="space-y-2 text-sm text-orange-100/80">
+          <div className="rounded-xl bg-[#d4a44c]/10 border border-[#d4a44c]/20 p-4 mb-6 text-left">
+            <h2 className="font-semibold text-[#f5f0e8] mb-2">What&apos;s next?</h2>
+            <ul className="space-y-2 text-sm text-[#f5f0e8]/80">
               <li className="flex items-start gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400 mt-0.5 shrink-0">
                   <polyline points="20 6 9 17 4 12" />
@@ -129,7 +129,7 @@ export default function SubscriptionSuccessPage() {
   return (
     <Suspense fallback={
       <main className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-orange-100">Loading...</div>
+        <div className="text-[#f5f0e8]">Loading...</div>
       </main>
     }>
       <SuccessContent />

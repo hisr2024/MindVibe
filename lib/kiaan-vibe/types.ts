@@ -83,7 +83,7 @@ export const MEDITATION_CATEGORIES: Record<MeditationCategory, {
     name: 'Mantra',
     description: 'Sacred chants and mantras',
     icon: 'Om',
-    gradient: 'from-orange-500 to-red-600',
+    gradient: 'from-[#d4a44c] to-red-600',
   },
   ambient: {
     name: 'Ambient',

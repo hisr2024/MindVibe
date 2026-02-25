@@ -236,12 +236,12 @@ export function HeartToHeartJournal({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#d4a44c] to-[#d4a44c] flex items-center justify-center flex-shrink-0 shadow-lg">
                 <span className="text-xl">🙏</span>
               </div>
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[80%]">
-                <p className="text-xs text-amber-400/60 mb-1">Krishna</p>
-                <p className="text-amber-100/90 italic">
+              <div className="bg-[#d4a44c]/10 border border-[#d4a44c]/20 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[80%]">
+                <p className="text-xs text-[#d4a44c]/60 mb-1">Krishna</p>
+                <p className="text-[#f5f0e8]/90 italic">
                   Beloved child, this is our sacred space. Here, you can share anything with me - your joys, your fears, your questions, your tears. I am listening with all my heart. {currentPrompt}
                 </p>
               </div>
@@ -257,7 +257,7 @@ export function HeartToHeartJournal({
               animate={{ opacity: 1, y: 0 }}
             >
               {entry.type === 'krishna' ? (
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#d4a44c] to-[#d4a44c] flex items-center justify-center flex-shrink-0 shadow-lg">
                   <span className="text-xl">🙏</span>
                 </div>
               ) : (
@@ -269,12 +269,12 @@ export function HeartToHeartJournal({
               <div
                 className={`rounded-2xl px-4 py-3 max-w-[80%] ${
                   entry.type === 'krishna'
-                    ? 'bg-amber-500/10 border border-amber-500/20 rounded-tl-sm'
+                    ? 'bg-[#d4a44c]/10 border border-[#d4a44c]/20 rounded-tl-sm'
                     : 'bg-pink-500/10 border border-pink-500/20 rounded-tr-sm'
                 }`}
               >
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <p className={`text-xs ${entry.type === 'krishna' ? 'text-amber-400/60' : 'text-pink-400/60'}`}>
+                  <p className={`text-xs ${entry.type === 'krishna' ? 'text-[#d4a44c]/60' : 'text-pink-400/60'}`}>
                     {entry.type === 'krishna' ? 'Krishna' : 'You'}
                   </p>
                   {entry.type === 'krishna' && (
@@ -286,10 +286,10 @@ export function HeartToHeartJournal({
                     />
                   )}
                 </div>
-                <p className={`${entry.type === 'krishna' ? 'text-amber-100/90 italic' : 'text-pink-100/90'} whitespace-pre-wrap`}>
+                <p className={`${entry.type === 'krishna' ? 'text-[#f5f0e8]/90 italic' : 'text-pink-100/90'} whitespace-pre-wrap`}>
                   {entry.content}
                 </p>
-                <p className={`text-xs mt-2 ${entry.type === 'krishna' ? 'text-amber-400/40' : 'text-pink-400/40'}`}>
+                <p className={`text-xs mt-2 ${entry.type === 'krishna' ? 'text-[#d4a44c]/40' : 'text-pink-400/40'}`}>
                   {entry.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
@@ -303,24 +303,24 @@ export function HeartToHeartJournal({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#d4a44c] to-[#d4a44c] flex items-center justify-center flex-shrink-0 shadow-lg">
                 <span className="text-xl">🙏</span>
               </div>
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl rounded-tl-sm px-4 py-3">
-                <p className="text-xs text-amber-400/60 mb-1">Krishna</p>
+              <div className="bg-[#d4a44c]/10 border border-[#d4a44c]/20 rounded-2xl rounded-tl-sm px-4 py-3">
+                <p className="text-xs text-[#d4a44c]/60 mb-1">Krishna</p>
                 <div className="flex gap-1 py-2">
                   <motion.span
-                    className="w-2 h-2 rounded-full bg-amber-400"
+                    className="w-2 h-2 rounded-full bg-[#d4a44c]"
                     animate={{ opacity: [0.3, 1, 0.3] }}
                     transition={{ duration: 1, repeat: Infinity, delay: 0 }}
                   />
                   <motion.span
-                    className="w-2 h-2 rounded-full bg-amber-400"
+                    className="w-2 h-2 rounded-full bg-[#d4a44c]"
                     animate={{ opacity: [0.3, 1, 0.3] }}
                     transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
                   />
                   <motion.span
-                    className="w-2 h-2 rounded-full bg-amber-400"
+                    className="w-2 h-2 rounded-full bg-[#d4a44c]"
                     animate={{ opacity: [0.3, 1, 0.3] }}
                     transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
                   />

@@ -122,15 +122,15 @@ export function PostFeed({
 
   if (posts.length === 0) {
     return (
-      <div className={`rounded-3xl border border-orange-500/15 bg-black/50 p-12 text-center ${className}`}>
+      <div className={`rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-12 text-center ${className}`}>
         <div className="max-w-md mx-auto">
           <div className="mb-4 flex justify-center">
-            <div className="h-16 w-16 rounded-full bg-orange-500/10 flex items-center justify-center">
-              <MessageCircle className="h-8 w-8 text-orange-400" />
+            <div className="h-16 w-16 rounded-full bg-[#d4a44c]/10 flex items-center justify-center">
+              <MessageCircle className="h-8 w-8 text-[#d4a44c]" />
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-orange-50 mb-2">No posts yet</h3>
-          <p className="text-sm text-orange-100/60">
+          <h3 className="text-lg font-semibold text-[#f5f0e8] mb-2">No posts yet</h3>
+          <p className="text-sm text-[#f5f0e8]/60">
             Be the first to share and start a supportive conversation in this circle.
           </p>
         </div>
@@ -152,13 +152,13 @@ export function PostFeed({
             transition={{ delay: index * 0.05 }}
             className={`rounded-3xl border bg-black/50 p-6 ${
               post.is_pinned
-                ? 'border-orange-400/30 bg-orange-950/10'
-                : 'border-orange-500/15'
+                ? 'border-[#d4a44c]/30 bg-orange-950/10'
+                : 'border-[#d4a44c]/15'
             }`}
           >
             {/* Pinned Badge */}
             {post.is_pinned && (
-              <div className="mb-3 flex items-center gap-2 text-orange-400 text-xs font-medium">
+              <div className="mb-3 flex items-center gap-2 text-[#d4a44c] text-xs font-medium">
                 <Pin className="h-3.5 w-3.5" />
                 <span>Pinned Post</span>
               </div>
@@ -178,7 +178,7 @@ export function PostFeed({
                 {/* Author Info */}
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-orange-50">{post.author.display_name}</span>
+                    <span className="font-medium text-[#f5f0e8]">{post.author.display_name}</span>
                     {post.compassion_badges.length > 0 && (
                       <div className="flex items-center gap-1">
                         {post.compassion_badges.map((badge, i) => (
@@ -193,14 +193,14 @@ export function PostFeed({
                       </div>
                     )}
                   </div>
-                  <span className="text-xs text-orange-100/60">{formatTimestamp(post.created_at)}</span>
+                  <span className="text-xs text-[#f5f0e8]/60">{formatTimestamp(post.created_at)}</span>
                 </div>
               </div>
 
               {/* More Menu */}
               <button
                 onClick={() => onReport?.(post.id)}
-                className="text-orange-100/60 hover:text-orange-100 transition"
+                className="text-[#f5f0e8]/60 hover:text-[#f5f0e8] transition"
               >
                 <MoreHorizontal className="h-5 w-5" />
               </button>
@@ -209,7 +209,7 @@ export function PostFeed({
             {/* Content */}
             <div className="mb-4">
               <p
-                className={`text-sm text-orange-100/90 leading-relaxed ${
+                className={`text-sm text-[#f5f0e8]/90 leading-relaxed ${
                   !isExpanded && post.content.length > 300 ? 'line-clamp-4' : ''
                 }`}
               >
@@ -218,7 +218,7 @@ export function PostFeed({
               {post.content.length > 300 && (
                 <button
                   onClick={() => toggleExpanded(post.id)}
-                  className="mt-2 text-xs text-orange-400 hover:text-orange-300"
+                  className="mt-2 text-xs text-[#d4a44c] hover:text-[#e8b54a]"
                 >
                   {isExpanded ? 'Show less' : 'Read more'}
                 </button>
@@ -226,8 +226,8 @@ export function PostFeed({
             </div>
 
             {/* Reactions Bar */}
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-orange-500/10">
-              <div className="flex items-center gap-4 text-xs text-orange-100/60">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#d4a44c]/10">
+              <div className="flex items-center gap-4 text-xs text-[#f5f0e8]/60">
                 {totalReactions > 0 && (
                   <span>{totalReactions} {totalReactions === 1 ? 'reaction' : 'reactions'}</span>
                 )}
@@ -249,8 +249,8 @@ export function PostFeed({
                   }
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 ${
                     post.user_reaction
-                      ? 'bg-orange-500/20 text-orange-400 border border-orange-400/30'
-                      : 'border border-orange-500/20 text-orange-100/80 hover:border-orange-400/40 hover:text-orange-50'
+                      ? 'bg-[#d4a44c]/20 text-[#d4a44c] border border-[#d4a44c]/30'
+                      : 'border border-[#d4a44c]/20 text-[#f5f0e8]/80 hover:border-[#d4a44c]/40 hover:text-[#f5f0e8]'
                   }`}
                 >
                   <Heart className={`h-4 w-4 ${post.user_reaction ? 'fill-current' : ''}`} />
@@ -264,13 +264,13 @@ export function PostFeed({
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute bottom-full mb-2 left-0 rounded-2xl border border-orange-500/20 bg-black/95 p-2 flex gap-1 shadow-xl backdrop-blur-sm"
+                      className="absolute bottom-full mb-2 left-0 rounded-2xl border border-[#d4a44c]/20 bg-black/95 p-2 flex gap-1 shadow-xl backdrop-blur-sm"
                     >
                       {Object.entries(REACTION_ICONS).map(([type, icon]) => (
                         <button
                           key={type}
                           onClick={() => handleReact(post.id, type)}
-                          className="h-10 w-10 rounded-xl hover:bg-orange-500/10 transition text-xl flex items-center justify-center"
+                          className="h-10 w-10 rounded-xl hover:bg-[#d4a44c]/10 transition text-xl flex items-center justify-center"
                           title={type}
                         >
                           {icon}
@@ -284,7 +284,7 @@ export function PostFeed({
               {/* Reply Button */}
               <button
                 onClick={() => onReply?.(post.id)}
-                className="px-4 py-2 rounded-xl border border-orange-500/20 text-orange-100/80 text-sm font-medium hover:border-orange-400/40 hover:text-orange-50 transition flex items-center gap-2"
+                className="px-4 py-2 rounded-xl border border-[#d4a44c]/20 text-[#f5f0e8]/80 text-sm font-medium hover:border-[#d4a44c]/40 hover:text-[#f5f0e8] transition flex items-center gap-2"
               >
                 <MessageCircle className="h-4 w-4" />
                 <span>Reply</span>
@@ -296,7 +296,7 @@ export function PostFeed({
                   onClick={() =>
                     setShowBadgePicker(showBadgePicker === post.id ? null : post.id)
                   }
-                  className="px-4 py-2 rounded-xl border border-orange-500/20 text-orange-100/80 text-sm font-medium hover:border-orange-400/40 hover:text-orange-50 transition flex items-center gap-2"
+                  className="px-4 py-2 rounded-xl border border-[#d4a44c]/20 text-[#f5f0e8]/80 text-sm font-medium hover:border-[#d4a44c]/40 hover:text-[#f5f0e8] transition flex items-center gap-2"
                 >
                   <Sparkles className="h-4 w-4" />
                   <span>Award</span>
@@ -309,20 +309,20 @@ export function PostFeed({
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute bottom-full mb-2 right-0 rounded-2xl border border-orange-500/20 bg-black/95 p-3 shadow-xl backdrop-blur-sm w-56"
+                      className="absolute bottom-full mb-2 right-0 rounded-2xl border border-[#d4a44c]/20 bg-black/95 p-3 shadow-xl backdrop-blur-sm w-56"
                     >
-                      <p className="text-xs text-orange-100/80 mb-2 font-medium">Award Compassion Badge</p>
+                      <p className="text-xs text-[#f5f0e8]/80 mb-2 font-medium">Award Compassion Badge</p>
                       <div className="space-y-1">
                         {Object.entries(BADGE_ICONS).map(([type, icon]) => (
                           <button
                             key={type}
                             onClick={() => handleAwardBadge(post.id, type)}
-                            className="w-full text-left px-3 py-2 rounded-xl hover:bg-orange-500/10 transition flex items-center gap-2"
+                            className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#d4a44c]/10 transition flex items-center gap-2"
                           >
                             <span className="text-lg">{icon}</span>
                             <div className="flex-1">
-                              <div className="text-xs font-medium text-orange-50 capitalize">{type}</div>
-                              <div className="text-xs text-orange-100/60">
+                              <div className="text-xs font-medium text-[#f5f0e8] capitalize">{type}</div>
+                              <div className="text-xs text-[#f5f0e8]/60">
                                 {BADGE_DESCRIPTIONS[type as keyof typeof BADGE_DESCRIPTIONS]}
                               </div>
                             </div>
@@ -337,7 +337,7 @@ export function PostFeed({
               {/* Report Button */}
               <button
                 onClick={() => onReport?.(post.id)}
-                className="px-3 py-2 rounded-xl border border-orange-500/20 text-orange-100/60 text-sm hover:border-red-400/40 hover:text-red-400 transition"
+                className="px-3 py-2 rounded-xl border border-[#d4a44c]/20 text-[#f5f0e8]/60 text-sm hover:border-red-400/40 hover:text-red-400 transition"
                 title="Report post"
               >
                 <Flag className="h-4 w-4" />
@@ -346,15 +346,15 @@ export function PostFeed({
 
             {/* Reaction Summary */}
             {totalReactions > 0 && (
-              <div className="mt-3 pt-3 border-t border-orange-500/10 flex items-center gap-3">
+              <div className="mt-3 pt-3 border-t border-[#d4a44c]/10 flex items-center gap-3">
                 {Object.entries(post.reaction_counts).map(([type, count]) => (
                   count > 0 && (
                     <div
                       key={type}
-                      className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-orange-500/5"
+                      className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#d4a44c]/5"
                     >
                       <span className="text-sm">{REACTION_ICONS[type as keyof typeof REACTION_ICONS]}</span>
-                      <span className="text-xs text-orange-100/80 font-medium">{count}</span>
+                      <span className="text-xs text-[#f5f0e8]/80 font-medium">{count}</span>
                     </div>
                   )
                 ))}

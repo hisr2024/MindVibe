@@ -19,7 +19,7 @@ interface JournalStatisticsProps {
 
 function StatisticsSkeleton() {
   return (
-    <div className="rounded-2xl border border-orange-500/20 bg-black/40 p-6">
+    <div className="rounded-2xl border border-[#d4a44c]/20 bg-black/40 p-6">
       <Skeleton height={24} width={180} className="mb-6" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[1, 2, 3, 4].map((i) => (
@@ -77,22 +77,22 @@ export function JournalStatistics({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.2 }}
-      className={`rounded-2xl border border-orange-500/20 bg-black/40 p-6 ${className}`}
+      className={`rounded-2xl border border-[#d4a44c]/20 bg-black/40 p-6 ${className}`}
     >
       {/* Header */}
-      <h3 className="text-lg font-semibold text-orange-50 mb-6">
+      <h3 className="text-lg font-semibold text-[#f5f0e8] mb-6">
         Journal Statistics
       </h3>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="rounded-xl border border-orange-500/15 bg-orange-500/5 p-3 text-center">
-          <p className="text-2xl font-bold text-orange-50">{stats.totalEntries}</p>
-          <p className="text-xs text-orange-100/60">Total Entries</p>
+        <div className="rounded-xl border border-[#d4a44c]/15 bg-[#d4a44c]/5 p-3 text-center">
+          <p className="text-2xl font-bold text-[#f5f0e8]">{stats.totalEntries}</p>
+          <p className="text-xs text-[#f5f0e8]/60">Total Entries</p>
         </div>
-        <div className="rounded-xl border border-orange-500/15 bg-orange-500/5 p-3 text-center">
-          <p className="text-2xl font-bold text-orange-50">{stats.totalWords.toLocaleString()}</p>
-          <p className="text-xs text-orange-100/60">Words Written</p>
+        <div className="rounded-xl border border-[#d4a44c]/15 bg-[#d4a44c]/5 p-3 text-center">
+          <p className="text-2xl font-bold text-[#f5f0e8]">{stats.totalWords.toLocaleString()}</p>
+          <p className="text-xs text-[#f5f0e8]/60">Words Written</p>
         </div>
         <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/5 p-3 text-center">
           <p className="text-2xl font-bold text-emerald-50">{stats.currentStreak}</p>
@@ -108,7 +108,7 @@ export function JournalStatistics({
       <div className="grid md:grid-cols-2 gap-6">
         {/* Sentiment Distribution */}
         <div>
-          <h4 className="text-sm font-medium text-orange-100/80 mb-4">
+          <h4 className="text-sm font-medium text-[#f5f0e8]/80 mb-4">
             Sentiment Distribution
           </h4>
           {sentimentData.length > 0 ? (
@@ -124,7 +124,7 @@ export function JournalStatistics({
             />
           ) : (
             <div className="h-[200px] flex items-center justify-center">
-              <p className="text-orange-100/50 text-sm">No sentiment data</p>
+              <p className="text-[#f5f0e8]/50 text-sm">No sentiment data</p>
             </div>
           )}
           {/* Legend */}
@@ -135,7 +135,7 @@ export function JournalStatistics({
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: sentimentColors[index] }}
                 />
-                <span className="text-xs text-orange-100/70">
+                <span className="text-xs text-[#f5f0e8]/70">
                   {item.name} ({item.value}%)
                 </span>
               </div>
@@ -145,7 +145,7 @@ export function JournalStatistics({
 
         {/* Top Topics/Tags */}
         <div>
-          <h4 className="text-sm font-medium text-orange-100/80 mb-4">
+          <h4 className="text-sm font-medium text-[#f5f0e8]/80 mb-4">
             Common Topics
           </h4>
           {tagsData.length > 0 ? (
@@ -160,7 +160,7 @@ export function JournalStatistics({
             />
           ) : (
             <div className="h-[200px] flex items-center justify-center">
-              <p className="text-orange-100/50 text-sm">No topics detected yet</p>
+              <p className="text-[#f5f0e8]/50 text-sm">No topics detected yet</p>
             </div>
           )}
         </div>
@@ -169,7 +169,7 @@ export function JournalStatistics({
       {/* Entries by Month */}
       {entriesData.length > 0 && (
         <div className="mt-6">
-          <h4 className="text-sm font-medium text-orange-100/80 mb-4">
+          <h4 className="text-sm font-medium text-[#f5f0e8]/80 mb-4">
             Entries Over Time
           </h4>
           <Chart
@@ -186,15 +186,15 @@ export function JournalStatistics({
       )}
 
       {/* Additional Stats */}
-      <div className="mt-6 pt-6 border-t border-orange-500/10">
+      <div className="mt-6 pt-6 border-t border-[#d4a44c]/10">
         <div className="flex flex-wrap gap-6 justify-center text-center">
           <div>
-            <p className="text-xl font-bold text-orange-50">{stats.longestStreak}</p>
-            <p className="text-xs text-orange-100/50">Longest Streak</p>
+            <p className="text-xl font-bold text-[#f5f0e8]">{stats.longestStreak}</p>
+            <p className="text-xs text-[#f5f0e8]/50">Longest Streak</p>
           </div>
           <div>
-            <p className="text-xl font-bold text-orange-50">{stats.avgEntriesPerWeek.toFixed(1)}</p>
-            <p className="text-xs text-orange-100/50">Avg Entries/Week</p>
+            <p className="text-xl font-bold text-[#f5f0e8]">{stats.avgEntriesPerWeek.toFixed(1)}</p>
+            <p className="text-xs text-[#f5f0e8]/50">Avg Entries/Week</p>
           </div>
         </div>
       </div>

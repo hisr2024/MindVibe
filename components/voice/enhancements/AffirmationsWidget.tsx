@@ -60,14 +60,14 @@ const CATEGORIES: Record<AffirmationCategory, {
   calm: { name: 'Calm', nameHindi: 'शांति', icon: Leaf, color: 'text-emerald-400' },
   gratitude: { name: 'Gratitude', nameHindi: 'कृतज्ञता', icon: Heart, color: 'text-pink-400' },
   self_love: { name: 'Self Love', nameHindi: 'आत्म-प्रेम', icon: Heart, color: 'text-rose-400' },
-  strength: { name: 'Strength', nameHindi: 'शक्ति', icon: Shield, color: 'text-orange-400' },
+  strength: { name: 'Strength', nameHindi: 'शक्ति', icon: Shield, color: 'text-[#d4a44c]' },
   healing: { name: 'Healing', nameHindi: 'उपचार', icon: Sparkles, color: 'text-teal-400' },
-  abundance: { name: 'Abundance', nameHindi: 'प्रचुरता', icon: Star, color: 'text-amber-400' },
+  abundance: { name: 'Abundance', nameHindi: 'प्रचुरता', icon: Star, color: 'text-[#d4a44c]' },
   peace: { name: 'Peace', nameHindi: 'शांति', icon: Leaf, color: 'text-blue-400' },
   wisdom: { name: 'Wisdom', nameHindi: 'ज्ञान', icon: BookOpen, color: 'text-purple-400' },
-  morning: { name: 'Morning', nameHindi: 'सुबह', icon: Sun, color: 'text-amber-400' },
+  morning: { name: 'Morning', nameHindi: 'सुबह', icon: Sun, color: 'text-[#d4a44c]' },
   evening: { name: 'Evening', nameHindi: 'शाम', icon: Moon, color: 'text-indigo-400' },
-  gita_inspired: { name: 'Gita Wisdom', nameHindi: 'गीता', icon: BookOpen, color: 'text-orange-400' }
+  gita_inspired: { name: 'Gita Wisdom', nameHindi: 'गीता', icon: BookOpen, color: 'text-[#d4a44c]' }
 }
 
 // Sample affirmations (subset - full list in engine)

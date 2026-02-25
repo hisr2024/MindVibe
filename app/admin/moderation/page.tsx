@@ -77,7 +77,7 @@ export default function AdminModerationPage() {
             onClick={() => setFilter(status)}
             className={`rounded-lg px-4 py-2 text-sm capitalize ${
               filter === status
-                ? 'bg-orange-500/20 text-orange-400'
+                ? 'bg-[#d4a44c]/20 text-[#d4a44c]'
                 : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
             }`}
           >

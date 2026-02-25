@@ -17,7 +17,7 @@ export default function CompanionLoading() {
         <div className="mx-auto max-w-3xl space-y-6">
           {/* Welcome message */}
           <div className="flex gap-3">
-            <div className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-orange-500/20" />
+            <div className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-[#d4a44c]/20" />
             <div className="max-w-[80%] space-y-2 rounded-2xl rounded-tl-sm bg-slate-800/40 p-4">
               <div className="h-3 w-60 animate-pulse rounded bg-slate-700/60" />
               <div className="h-3 w-72 animate-pulse rounded bg-slate-700/60" />

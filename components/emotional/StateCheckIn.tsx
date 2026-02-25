@@ -104,7 +104,7 @@ export function StateCheckIn({ onStateSelect, className = '' }: StateCheckInProp
     <div className={`space-y-6 ${className}`}>
       {/* Category: Uplifted */}
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold text-orange-50 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-[#f5f0e8] flex items-center gap-2">
           <span className="text-xl">✨</span>
           Uplifted
         </h3>
@@ -124,7 +124,7 @@ export function StateCheckIn({ onStateSelect, className = '' }: StateCheckInProp
 
       {/* Category: Reflective */}
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold text-orange-50 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-[#f5f0e8] flex items-center gap-2">
           <span className="text-xl">🌙</span>
           Reflective
         </h3>
@@ -144,7 +144,7 @@ export function StateCheckIn({ onStateSelect, className = '' }: StateCheckInProp
 
       {/* Category: Heavy */}
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold text-orange-50 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-[#f5f0e8] flex items-center gap-2">
           <span className="text-xl">🌧️</span>
           Heavy
         </h3>
@@ -167,19 +167,19 @@ export function StateCheckIn({ onStateSelect, className = '' }: StateCheckInProp
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-orange-500/20 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)]"
+          className="rounded-2xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#0d0d0f]/90 via-[#050507]/80 to-[#120a07]/90 p-6 shadow-[0_20px_80px_rgba(212,164,76,0.12)]"
         >
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <span className="text-2xl">{selectedState.emoji}</span>
               <div>
-                <h4 className="text-lg font-semibold text-orange-50">{selectedState.label}</h4>
-                <p className="text-xs text-orange-100/70">Adjust the intensity</p>
+                <h4 className="text-lg font-semibold text-[#f5f0e8]">{selectedState.label}</h4>
+                <p className="text-xs text-[#f5f0e8]/70">Adjust the intensity</p>
               </div>
             </div>
             <button
               onClick={() => setSelectedState(null)}
-              className="rounded-lg p-2 text-orange-100/60 hover:bg-orange-500/10 hover:text-orange-50 transition-colors"
+              className="rounded-lg p-2 text-[#f5f0e8]/60 hover:bg-[#d4a44c]/10 hover:text-[#f5f0e8] transition-colors"
               aria-label="Clear selection"
             >
               ✕
@@ -231,7 +231,7 @@ function StateCircle({ state, isSelected, isHovered, onHover, onClick }: StateCi
       onMouseLeave={() => onHover(null)}
       whileHover={{ scale: 1.1, z: 20 }}
       whileTap={{ scale: 0.95 }}
-      className="relative flex flex-col items-center gap-2 p-3 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-orange-400/50"
+      className="relative flex flex-col items-center gap-2 p-3 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50"
       style={{
         backgroundColor: isSelected || isHovered ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
         perspective: '1000px',
@@ -278,7 +278,7 @@ function StateCircle({ state, isSelected, isHovered, onHover, onClick }: StateCi
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-orange-500 flex items-center justify-center text-[10px]"
+          className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#d4a44c] flex items-center justify-center text-[10px]"
         >
           ✓
         </motion.div>

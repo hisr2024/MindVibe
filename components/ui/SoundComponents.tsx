@@ -597,7 +597,7 @@ export function MeditationBellButton({ onBell, className }: MeditationBellButton
     <button
       onClick={handleClick}
       className={cn(
-        'w-16 h-16 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30',
+        'w-16 h-16 rounded-full bg-gradient-to-br from-[#d4a44c]/20 to-[#d4a44c]/20 border border-[#d4a44c]/30',
         'flex items-center justify-center text-2xl hover:scale-105 active:scale-95 transition-transform',
         className
       )}
@@ -681,7 +681,7 @@ export function GongButton({ onGong, className }: GongButtonProps) {
     <button
       onClick={handleClick}
       className={cn(
-        'w-16 h-16 rounded-full bg-gradient-to-br from-yellow-500/20 to-amber-600/20 border border-yellow-500/30',
+        'w-16 h-16 rounded-full bg-gradient-to-br from-yellow-500/20 to-[#c8943a]/20 border border-yellow-500/30',
         'flex items-center justify-center hover:scale-105 active:scale-95 transition-transform',
         className
       )}

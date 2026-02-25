@@ -153,10 +153,10 @@ export function OfflineVerseReader({
 
   if (loading) {
     return (
-      <div className={`flex items-center justify-center ${compact ? 'p-8' : 'p-12'} rounded-3xl border border-orange-500/15 bg-black/50`}>
+      <div className={`flex items-center justify-center ${compact ? 'p-8' : 'p-12'} rounded-3xl border border-[#d4a44c]/15 bg-black/50`}>
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-orange-400" />
-          <p className="text-sm text-orange-100/80">Loading verses...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-[#d4a44c]" />
+          <p className="text-sm text-[#f5f0e8]/80">Loading verses...</p>
         </div>
       </div>
     )
@@ -174,11 +174,11 @@ export function OfflineVerseReader({
   }
 
   return (
-    <div className={`space-y-4 ${compact ? 'p-4' : 'p-6 md:p-8'} rounded-3xl border border-orange-500/15 bg-black/50 shadow-[0_20px_80px_rgba(255,115,39,0.12)]`}>
+    <div className={`space-y-4 ${compact ? 'p-4' : 'p-6 md:p-8'} rounded-3xl border border-[#d4a44c]/15 bg-black/50 shadow-[0_20px_80px_rgba(212,164,76,0.12)]`}>
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className={`${compact ? 'text-xl' : 'text-2xl'} font-semibold text-orange-50 flex items-center gap-2`}>
+          <h2 className={`${compact ? 'text-xl' : 'text-2xl'} font-semibold text-[#f5f0e8] flex items-center gap-2`}>
             <BookOpen className="h-6 w-6" />
             Bhagavad Gita
           </h2>
@@ -196,7 +196,7 @@ export function OfflineVerseReader({
               </div>
             )}
 
-            <div className="flex items-center gap-1 rounded-full bg-orange-500/20 px-2.5 py-1 text-xs text-orange-300">
+            <div className="flex items-center gap-1 rounded-full bg-[#d4a44c]/20 px-2.5 py-1 text-xs text-[#e8b54a]">
               <Book className="h-3 w-3" />
               <span>{verses.length} verses cached</span>
             </div>
@@ -204,7 +204,7 @@ export function OfflineVerseReader({
         </div>
 
         {!compact && (
-          <p className="text-sm text-orange-100/80">
+          <p className="text-sm text-[#f5f0e8]/80">
             {isOnline
               ? 'Browse all 700+ verses of the Bhagavad Gita'
               : 'Reading from offline cache - all verses available'
@@ -217,7 +217,7 @@ export function OfflineVerseReader({
         <>
           {/* Chapter Selector */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-orange-50">Select Chapter</label>
+            <label className="text-sm font-medium text-[#f5f0e8]">Select Chapter</label>
             <div className="flex flex-wrap gap-2">
               {chapters.map(chapter => (
                 <button
@@ -225,8 +225,8 @@ export function OfflineVerseReader({
                   onClick={() => setSelectedChapter(chapter)}
                   className={`rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
                     selectedChapter === chapter
-                      ? 'border-orange-400 bg-orange-500/30 text-orange-50 ring-2 ring-orange-400/50'
-                      : 'border-orange-500/25 bg-orange-500/10 text-orange-50 hover:bg-orange-500/20'
+                      ? 'border-[#d4a44c] bg-[#d4a44c]/30 text-[#f5f0e8] ring-2 ring-[#d4a44c]/50'
+                      : 'border-[#d4a44c]/25 bg-[#d4a44c]/10 text-[#f5f0e8] hover:bg-[#d4a44c]/20'
                   }`}
                 >
                   {chapter}
@@ -238,13 +238,13 @@ export function OfflineVerseReader({
           {/* Search */}
           {showSearch && (
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-100/60" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#f5f0e8]/60" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search verses, translations, commentary..."
-                className="w-full rounded-2xl border border-orange-500/25 bg-slate-950/70 pl-10 pr-4 py-2.5 text-sm text-orange-50 placeholder:text-orange-100/40 outline-none focus:ring-2 focus:ring-orange-400/70"
+                className="w-full rounded-2xl border border-[#d4a44c]/25 bg-slate-950/70 pl-10 pr-4 py-2.5 text-sm text-[#f5f0e8] placeholder:text-[#f5f0e8]/40 outline-none focus:ring-2 focus:ring-[#d4a44c]/70"
               />
             </div>
           )}
@@ -252,7 +252,7 @@ export function OfflineVerseReader({
           {/* Verse List */}
           <div className="space-y-2 max-h-[600px] overflow-y-auto">
             {filteredVerses.length === 0 ? (
-              <div className="py-12 text-center text-orange-100/60">
+              <div className="py-12 text-center text-[#f5f0e8]/60">
                 {searchQuery ? 'No verses found matching your search' : 'No verses available'}
               </div>
             ) : (
@@ -260,18 +260,18 @@ export function OfflineVerseReader({
                 <button
                   key={verse.id}
                   onClick={() => handleVerseSelect(verse)}
-                  className="w-full text-left rounded-2xl border border-orange-500/20 bg-[#0d0d10]/80 p-4 transition hover:bg-orange-500/10 hover:border-orange-500/30"
+                  className="w-full text-left rounded-2xl border border-[#d4a44c]/20 bg-[#0d0d10]/80 p-4 transition hover:bg-[#d4a44c]/10 hover:border-[#d4a44c]/30"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-orange-400">
+                        <span className="text-xs font-medium text-[#d4a44c]">
                           Chapter {verse.chapter}, Verse {verse.verse}
                         </span>
                         {verse.tags && verse.tags.length > 0 && (
                           <div className="flex gap-1">
                             {verse.tags.slice(0, 2).map(tag => (
-                              <span key={tag} className="text-xs text-orange-100/50">
+                              <span key={tag} className="text-xs text-[#f5f0e8]/50">
                                 #{tag}
                               </span>
                             ))}
@@ -279,11 +279,11 @@ export function OfflineVerseReader({
                         )}
                       </div>
 
-                      <p className="text-sm font-medium text-orange-50 line-clamp-1">
+                      <p className="text-sm font-medium text-[#f5f0e8] line-clamp-1">
                         {verse.transliteration || verse.sanskrit}
                       </p>
 
-                      <p className="text-xs text-orange-100/70 line-clamp-2">
+                      <p className="text-xs text-[#f5f0e8]/70 line-clamp-2">
                         {verse.translation}
                       </p>
                     </div>
@@ -299,7 +299,7 @@ export function OfflineVerseReader({
                         className={`h-4 w-4 transition ${
                           favorites.has(verse.id)
                             ? 'fill-red-400 text-red-400'
-                            : 'text-orange-100/40 hover:text-orange-100/60'
+                            : 'text-[#f5f0e8]/40 hover:text-[#f5f0e8]/60'
                         }`}
                       />
                     </button>
@@ -315,16 +315,16 @@ export function OfflineVerseReader({
           <div className="space-y-4">
             <button
               onClick={handleBackToList}
-              className="text-sm text-orange-400 hover:text-orange-300 transition"
+              className="text-sm text-[#d4a44c] hover:text-[#e8b54a] transition"
             >
               ← Back to list
             </button>
 
-            <div className="space-y-4 rounded-2xl border border-orange-500/20 bg-[#0d0d10]/80 p-6">
+            <div className="space-y-4 rounded-2xl border border-[#d4a44c]/20 bg-[#0d0d10]/80 p-6">
               {/* Verse Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-orange-400">
+                  <span className="text-sm font-medium text-[#d4a44c]">
                     Chapter {selectedVerse.chapter}, Verse {selectedVerse.verse}
                   </span>
                 </div>
@@ -337,7 +337,7 @@ export function OfflineVerseReader({
                     className={`h-5 w-5 transition ${
                       favorites.has(selectedVerse.id)
                         ? 'fill-red-400 text-red-400'
-                        : 'text-orange-100/40 hover:text-orange-100/60'
+                        : 'text-[#f5f0e8]/40 hover:text-[#f5f0e8]/60'
                     }`}
                   />
                 </button>
@@ -346,10 +346,10 @@ export function OfflineVerseReader({
               {/* Sanskrit */}
               {selectedVerse.sanskrit && (
                 <div className="space-y-1">
-                  <h3 className="text-xs font-medium text-orange-100/70 uppercase tracking-wider">
+                  <h3 className="text-xs font-medium text-[#f5f0e8]/70 uppercase tracking-wider">
                     Sanskrit
                   </h3>
-                  <p className="text-lg font-serif text-orange-50">
+                  <p className="text-lg font-serif text-[#f5f0e8]">
                     {selectedVerse.sanskrit}
                   </p>
                 </div>
@@ -358,10 +358,10 @@ export function OfflineVerseReader({
               {/* Transliteration */}
               {selectedVerse.transliteration && (
                 <div className="space-y-1">
-                  <h3 className="text-xs font-medium text-orange-100/70 uppercase tracking-wider">
+                  <h3 className="text-xs font-medium text-[#f5f0e8]/70 uppercase tracking-wider">
                     Transliteration
                   </h3>
-                  <p className="text-base italic text-orange-100/90">
+                  <p className="text-base italic text-[#f5f0e8]/90">
                     {selectedVerse.transliteration}
                   </p>
                 </div>
@@ -369,10 +369,10 @@ export function OfflineVerseReader({
 
               {/* Translation */}
               <div className="space-y-1">
-                <h3 className="text-xs font-medium text-orange-100/70 uppercase tracking-wider">
+                <h3 className="text-xs font-medium text-[#f5f0e8]/70 uppercase tracking-wider">
                   Translation
                 </h3>
-                <p className="text-base text-orange-50 leading-relaxed">
+                <p className="text-base text-[#f5f0e8] leading-relaxed">
                   {selectedVerse.translation}
                 </p>
               </div>
@@ -380,10 +380,10 @@ export function OfflineVerseReader({
               {/* Commentary */}
               {selectedVerse.commentary && (
                 <div className="space-y-1">
-                  <h3 className="text-xs font-medium text-orange-100/70 uppercase tracking-wider">
+                  <h3 className="text-xs font-medium text-[#f5f0e8]/70 uppercase tracking-wider">
                     Commentary
                   </h3>
-                  <p className="text-sm text-orange-100/80 leading-relaxed">
+                  <p className="text-sm text-[#f5f0e8]/80 leading-relaxed">
                     {selectedVerse.commentary}
                   </p>
                 </div>
@@ -395,7 +395,7 @@ export function OfflineVerseReader({
                   {selectedVerse.tags.map(tag => (
                     <span
                       key={tag}
-                      className="rounded-full border border-orange-500/25 bg-orange-500/10 px-3 py-1 text-xs font-medium text-orange-100/80"
+                      className="rounded-full border border-[#d4a44c]/25 bg-[#d4a44c]/10 px-3 py-1 text-xs font-medium text-[#f5f0e8]/80"
                     >
                       #{tag}
                     </span>

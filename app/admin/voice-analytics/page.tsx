@@ -197,7 +197,7 @@ export default function AdminVoiceAnalyticsPage() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="text-center">
-          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent mx-auto" />
+          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-[#d4a44c] border-t-transparent mx-auto" />
           <p className="text-slate-400">Loading voice analytics...</p>
         </div>
       </div>
@@ -294,7 +294,7 @@ export default function AdminVoiceAnalyticsPage() {
         </div>
         <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-4">
           <p className="text-sm text-slate-400">TTS Cost (Month)</p>
-          <p className="mt-1 text-2xl font-bold text-orange-400">
+          <p className="mt-1 text-2xl font-bold text-[#d4a44c]">
             {formatCost(overview?.estimated_cost_usd || 0)}
           </p>
           <p className="mt-1 text-xs text-slate-500">
@@ -435,7 +435,7 @@ export default function AdminVoiceAnalyticsPage() {
               <div className="flex-1">
                 <div className="h-4 rounded-full bg-slate-700">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-orange-500 to-amber-400 transition-all"
+                    className="h-full rounded-full bg-gradient-to-r from-[#d4a44c] to-[#d4a44c] transition-all"
                     style={{ width: `${(item.count / (concernData[0]?.count || 1)) * 100}%` }}
                   />
                 </div>
@@ -504,7 +504,7 @@ export default function AdminVoiceAnalyticsPage() {
           {trends &&
             Object.entries(trends.voice_type_distribution).map(([type, count]) => (
               <div key={type} className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-500/20">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#d4a44c]/20">
                   <span className="text-xl">
                     {type === 'friendly' ? '😊' : type === 'calm' ? '🧘' : '📖'}
                   </span>

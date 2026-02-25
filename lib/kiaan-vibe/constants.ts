@@ -45,7 +45,7 @@ export const GITA_CHAPTERS: GitaChapter[] = [
     yogaType: 'Karma Yoga',
     verseCount: 43,
     duration: '18:00',
-    color: 'from-orange-500 to-red-600',
+    color: 'from-[#d4a44c] to-red-600',
     verses: [],
   },
   {

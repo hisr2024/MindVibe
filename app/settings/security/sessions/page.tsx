@@ -107,11 +107,11 @@ export default function SessionsPage() {
     return (
       <main className="mx-auto max-w-3xl px-4 py-12">
         <div className="animate-pulse">
-          <div className="h-8 bg-orange-500/20 rounded w-48 mb-4"></div>
-          <div className="h-4 bg-orange-500/10 rounded w-64 mb-8"></div>
+          <div className="h-8 bg-[#d4a44c]/20 rounded w-48 mb-4"></div>
+          <div className="h-4 bg-[#d4a44c]/10 rounded w-64 mb-8"></div>
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 bg-orange-500/10 rounded-xl"></div>
+              <div key={i} className="h-24 bg-[#d4a44c]/10 rounded-xl"></div>
             ))}
           </div>
         </div>
@@ -125,11 +125,11 @@ export default function SessionsPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
       <div className="mb-8">
-        <Link href="/settings/security" className="text-orange-400 hover:text-orange-300 text-sm mb-4 inline-block">
+        <Link href="/settings/security" className="text-[#d4a44c] hover:text-[#e8b54a] text-sm mb-4 inline-block">
           &larr; Back to Security
         </Link>
-        <h1 className="text-3xl font-bold text-orange-50 mb-2">Active Sessions</h1>
-        <p className="text-orange-100/70">
+        <h1 className="text-3xl font-bold text-[#f5f0e8] mb-2">Active Sessions</h1>
+        <p className="text-[#f5f0e8]/70">
           Manage devices and sessions logged into your account
         </p>
       </div>
@@ -155,7 +155,7 @@ export default function SessionsPage() {
 
       {/* Active Sessions */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold text-orange-50 mb-4">
+        <h2 className="text-lg font-semibold text-[#f5f0e8] mb-4">
           Active Sessions ({activeSessions.length})
         </h2>
         <div className="space-y-3">
@@ -172,10 +172,10 @@ export default function SessionsPage() {
                 <CardContent className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      session.current ? 'bg-emerald-500/20' : 'bg-orange-500/20'
+                      session.current ? 'bg-emerald-500/20' : 'bg-[#d4a44c]/20'
                     }`}>
                       <svg
-                        className={`w-5 h-5 ${session.current ? 'text-emerald-400' : 'text-orange-400'}`}
+                        className={`w-5 h-5 ${session.current ? 'text-emerald-400' : 'text-[#d4a44c]'}`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -190,7 +190,7 @@ export default function SessionsPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="font-medium text-orange-50">
+                        <p className="font-medium text-[#f5f0e8]">
                           {session.current ? 'This Device' : 'Session'}
                         </p>
                         {session.current && (
@@ -199,10 +199,10 @@ export default function SessionsPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-orange-100/50">
+                      <p className="text-xs text-[#f5f0e8]/50">
                         Last active: {getRelativeTime(session.last_used_at)}
                       </p>
-                      <p className="text-xs text-orange-100/30 mt-1">
+                      <p className="text-xs text-[#f5f0e8]/30 mt-1">
                         Created: {formatDate(session.created_at)}
                       </p>
                     </div>
@@ -223,7 +223,7 @@ export default function SessionsPage() {
           ))}
 
           {activeSessions.length === 0 && (
-            <div className="text-center py-8 text-orange-100/50">
+            <div className="text-center py-8 text-[#f5f0e8]/50">
               No active sessions found
             </div>
           )}
@@ -233,7 +233,7 @@ export default function SessionsPage() {
       {/* Inactive Sessions */}
       {inactiveSessions.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-orange-50/70 mb-4">
+          <h2 className="text-lg font-semibold text-[#f5f0e8]/70 mb-4">
             Inactive Sessions ({inactiveSessions.length})
           </h2>
           <div className="space-y-3 opacity-60">
@@ -256,8 +256,8 @@ export default function SessionsPage() {
                     </svg>
                   </div>
                   <div>
-                    <p className="font-medium text-orange-100/70">Expired Session</p>
-                    <p className="text-xs text-orange-100/40">
+                    <p className="font-medium text-[#f5f0e8]/70">Expired Session</p>
+                    <p className="text-xs text-[#f5f0e8]/40">
                       {session.revoked_at
                         ? `Revoked: ${formatDate(session.revoked_at)}`
                         : `Expired: ${formatDate(session.expires_at)}`}

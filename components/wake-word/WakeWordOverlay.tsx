@@ -342,13 +342,13 @@ export function WakeWordOverlay() {
       case 'greeting':
         return 'from-rose-400 via-pink-400 to-fuchsia-400'
       case 'listening':
-        return 'from-orange-400 via-amber-400 to-yellow-400'
+        return 'from-[#d4a44c] via-[#d4a44c] to-yellow-400'
       case 'processing':
         return 'from-purple-400 via-violet-400 to-indigo-400'
       case 'responding':
         return 'from-emerald-400 via-teal-400 to-cyan-400'
       default:
-        return 'from-orange-400 via-amber-400 to-orange-500'
+        return 'from-[#d4a44c] via-[#d4a44c] to-[#d4a44c]'
     }
   })()
 
@@ -456,7 +456,7 @@ export function WakeWordOverlay() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <h2 className="text-xl font-semibold text-orange-50">
+            <h2 className="text-xl font-semibold text-[#f5f0e8]">
               {phase === 'greeting' && 'KIAAN'}
               {phase === 'listening' && 'Listening...'}
               {phase === 'processing' && 'Understanding...'}
@@ -479,7 +479,7 @@ export function WakeWordOverlay() {
             {/* Interim transcript while listening */}
             {phase === 'listening' && (interimTranscript || transcript) && (
               <motion.p
-                className="text-sm text-orange-200/70 italic"
+                className="text-sm text-[#e8b54a]/70 italic"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               >
@@ -490,7 +490,7 @@ export function WakeWordOverlay() {
             {/* User query display */}
             {userQuery && phase !== 'listening' && phase !== 'greeting' && (
               <motion.p
-                className="text-sm text-orange-200/60"
+                className="text-sm text-[#e8b54a]/60"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               >
@@ -507,16 +507,16 @@ export function WakeWordOverlay() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                className="w-full rounded-2xl border border-orange-500/20 bg-white/[0.06] p-5 backdrop-blur-sm"
+                className="w-full rounded-2xl border border-[#d4a44c]/20 bg-white/[0.06] p-5 backdrop-blur-sm"
               >
-                <p className="text-sm leading-relaxed text-orange-50/90">
+                <p className="text-sm leading-relaxed text-[#f5f0e8]/90">
                   {kiaanResponse}
                 </p>
 
                 {/* Action to open full companion */}
                 <button
                   onClick={handleOpenFullCompanion}
-                  className="mt-4 w-full rounded-xl bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30 px-4 py-2.5 text-sm font-medium text-orange-200 transition-all hover:from-orange-500/30 hover:to-amber-500/30 active:scale-[0.98]"
+                  className="mt-4 w-full rounded-xl bg-gradient-to-r from-[#d4a44c]/20 to-[#d4a44c]/20 border border-[#d4a44c]/30 px-4 py-2.5 text-sm font-medium text-[#e8b54a] transition-all hover:from-[#d4a44c]/30 hover:to-[#d4a44c]/30 active:scale-[0.98]"
                 >
                   Continue conversation with KIAAN
                 </button>
@@ -534,7 +534,7 @@ export function WakeWordOverlay() {
               {[0, 1, 2].map((i) => (
                 <motion.div
                   key={i}
-                  className="h-2.5 w-2.5 rounded-full bg-orange-400"
+                  className="h-2.5 w-2.5 rounded-full bg-[#d4a44c]"
                   animate={{
                     y: [0, -10, 0],
                     opacity: [0.4, 1, 0.4],

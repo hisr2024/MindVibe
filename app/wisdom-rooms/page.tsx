@@ -179,28 +179,28 @@ export default function WisdomRoomsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] text-white p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
-        <header className="rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
+        <header className="rounded-3xl border border-[#d4a44c]/15 bg-[#0d0d10]/85 p-6 md:p-8 shadow-[0_20px_80px_rgba(212,164,76,0.12)]">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex items-start gap-4">
               <KiaanLogo size="md" className="shrink-0" />
               <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Community Space</p>
-                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-orange-100 bg-clip-text text-transparent">
+                <p className="text-xs uppercase tracking-[0.22em] text-[#f5f0e8]/70">Community Space</p>
+                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#e8b54a] via-[#ffb347] to-[#e8b54a] bg-clip-text text-transparent">
                   Wisdom Chat Rooms
                 </h1>
-                <p className="mt-2 text-sm text-orange-100/80 max-w-xl">
+                <p className="mt-2 text-sm text-[#f5f0e8]/80 max-w-xl">
                   Real-time rooms with server-side moderation. Messages are stored safely so you can rejoin without losing the thread.
                 </p>
               </div>
             </div>
             <div className="flex flex-col gap-2 items-start">
-              <span className="inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-orange-500/10 px-4 py-2 text-xs font-semibold text-orange-50">
-                <span className={`h-2 w-2 rounded-full ${status === 'connected' ? 'bg-green-400 animate-pulse' : 'bg-orange-300'}`} />
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#d4a44c]/30 bg-[#d4a44c]/10 px-4 py-2 text-xs font-semibold text-[#f5f0e8]">
+                <span className={`h-2 w-2 rounded-full ${status === 'connected' ? 'bg-green-400 animate-pulse' : 'bg-[#d4a44c]'}`} />
                 {status === 'connected' ? 'Live & moderated' : status === 'connecting' ? 'Connecting...' : 'Offline'}
               </span>
-              <Link href="/" className="text-xs text-orange-100/70 hover:text-orange-200 transition">
+              <Link href="/" className="text-xs text-[#f5f0e8]/70 hover:text-[#e8b54a] transition">
                 ← Back to home
               </Link>
             </div>
@@ -214,24 +214,24 @@ export default function WisdomRoomsPage() {
               onClick={() => { setActiveRoomId(room.id || room.slug); setAlert(null) }}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-full border text-sm font-semibold transition-all ${
                 (room.id || room.slug) === activeRoomId
-                  ? 'bg-gradient-to-r from-orange-400/80 via-[#ffb347]/80 to-orange-300/80 text-slate-950 border-transparent shadow-lg shadow-orange-500/25'
-                  : 'bg-white/5 border-orange-400/20 text-orange-50 hover:border-orange-300/50 hover:bg-white/10'
+                  ? 'bg-gradient-to-r from-[#d4a44c]/80 via-[#ffb347]/80 to-[#d4a44c]/80 text-slate-950 border-transparent shadow-lg shadow-[#d4a44c]/25'
+                  : 'bg-white/5 border-[#d4a44c]/20 text-[#f5f0e8] hover:border-[#d4a44c]/50 hover:bg-white/10'
               }`}
             >
-              <span className="h-2 w-2 rounded-full bg-orange-300" />
+              <span className="h-2 w-2 rounded-full bg-[#d4a44c]" />
               <span>{room.name}</span>
-              <span className="text-[11px] text-orange-100/80">{room.active_count ?? 0} active</span>
+              <span className="text-[11px] text-[#f5f0e8]/80">{room.active_count ?? 0} active</span>
             </button>
           ))}
         </div>
 
-        <section className="rounded-3xl border border-orange-500/15 bg-[#0c0c10]/85 shadow-[0_20px_80px_rgba(255,115,39,0.14)] overflow-hidden">
-          <div className="px-6 py-4 border-b border-orange-500/15 bg-gradient-to-r from-orange-500/10 via-transparent to-transparent">
+        <section className="rounded-3xl border border-[#d4a44c]/15 bg-[#0c0c10]/85 shadow-[0_20px_80px_rgba(212,164,76,0.14)] overflow-hidden">
+          <div className="px-6 py-4 border-b border-[#d4a44c]/15 bg-gradient-to-r from-[#d4a44c]/10 via-transparent to-transparent">
             <div className="flex items-center gap-3">
               <span className="text-2xl">🧘</span>
               <div>
-                <h2 className="text-lg font-semibold text-orange-50">{activeRoom?.name ?? 'Choose a room'}</h2>
-                <p className="text-xs text-orange-100/70">{activeRoom?.theme ?? 'Pick a room to start chatting'}</p>
+                <h2 className="text-lg font-semibold text-[#f5f0e8]">{activeRoom?.name ?? 'Choose a room'}</h2>
+                <p className="text-xs text-[#f5f0e8]/70">{activeRoom?.theme ?? 'Pick a room to start chatting'}</p>
               </div>
             </div>
           </div>
@@ -244,27 +244,27 @@ export default function WisdomRoomsPage() {
               style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch' }}
             >
               {activeMessages.length === 0 && (
-                <p className="text-orange-100/70 text-sm">No messages yet. Say hello to open the conversation.</p>
+                <p className="text-[#f5f0e8]/70 text-sm">No messages yet. Say hello to open the conversation.</p>
               )}
               {activeMessages.map(msg => (
                 <div key={msg.id} className={`flex ${msg.user_id === currentUserId ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[85%] md:max-w-[70%] px-4 py-3 rounded-2xl text-sm shadow-lg ${
                     msg.user_id === currentUserId
-                      ? 'bg-gradient-to-r from-orange-500/80 via-[#ff9933]/80 to-orange-400/80 text-white'
-                      : 'bg-white/5 border border-orange-200/10 text-orange-50 backdrop-blur'
+                      ? 'bg-gradient-to-r from-[#d4a44c]/80 via-[#ff9933]/80 to-[#d4a44c]/80 text-white'
+                      : 'bg-white/5 border border-[#e8b54a]/10 text-[#f5f0e8] backdrop-blur'
                   }`}>
                     <p className="font-semibold mb-1">{msg.user_id === currentUserId ? 'You' : 'Participant'}</p>
                     <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                    <p className="text-[11px] text-orange-100/70 mt-1">{new Date(msg.created_at).toLocaleTimeString()}</p>
+                    <p className="text-[11px] text-[#f5f0e8]/70 mt-1">{new Date(msg.created_at).toLocaleTimeString()}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             <aside className="p-4 md:p-6 bg-white/5">
-              <h3 className="text-sm font-semibold text-orange-50 mb-2">Active participants</h3>
-              <div className="space-y-2 text-sm text-orange-100/80">
-                {activeParticipants.length === 0 && <p className="text-orange-100/60">No one is here yet.</p>}
+              <h3 className="text-sm font-semibold text-[#f5f0e8] mb-2">Active participants</h3>
+              <div className="space-y-2 text-sm text-[#f5f0e8]/80">
+                {activeParticipants.length === 0 && <p className="text-[#f5f0e8]/60">No one is here yet.</p>}
                 {activeParticipants.map(person => (
                   <div key={person.id} className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-green-400" />
@@ -276,7 +276,7 @@ export default function WisdomRoomsPage() {
           </div>
         </section>
 
-        {alert && <p className="text-xs text-orange-200">{alert}</p>}
+        {alert && <p className="text-xs text-[#e8b54a]">{alert}</p>}
 
         <div className="flex gap-3 flex-col sm:flex-row">
           <input
@@ -286,12 +286,12 @@ export default function WisdomRoomsPage() {
             onKeyDown={e => e.key === 'Enter' && sendMessage()}
             placeholder={isAuthenticated ? 'Share something helpful for the room...' : 'Sign in to start sharing'}
             disabled={!isAuthenticated}
-            className="flex-1 w-full px-4 py-3 bg-black/60 border border-orange-500/40 rounded-xl focus:ring-2 focus:ring-orange-400/70 outline-none placeholder:text-orange-100/70 text-orange-50 disabled:opacity-70"
+            className="flex-1 w-full px-4 py-3 bg-black/60 border border-[#d4a44c]/40 rounded-xl focus:ring-2 focus:ring-[#d4a44c]/70 outline-none placeholder:text-[#f5f0e8]/70 text-[#f5f0e8] disabled:opacity-70"
           />
           <button
             onClick={sendMessage}
             disabled={!message.trim() || !isAuthenticated || status !== 'connected'}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 font-semibold disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 shadow-lg shadow-orange-500/20 w-full sm:w-auto"
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#d4a44c] via-[#ffb347] to-[#e8b54a] font-semibold disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 shadow-lg shadow-[#d4a44c]/20 w-full sm:w-auto"
           >
             {status === 'connected' ? 'Share warmly' : 'Connecting...'}
           </button>

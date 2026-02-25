@@ -13,7 +13,7 @@ export function BillingToggle({ isYearly, onToggle, yearlySavings = 20, classNam
       <button
         onClick={() => onToggle(false)}
         className={`text-sm font-semibold transition-colors min-w-[70px] text-right ${
-          !isYearly ? 'text-orange-50' : 'text-orange-100/60 hover:text-orange-100/80'
+          !isYearly ? 'text-[#f5f0e8]' : 'text-[#f5f0e8]/60 hover:text-[#f5f0e8]/80'
         }`}
       >
         Monthly
@@ -21,11 +21,11 @@ export function BillingToggle({ isYearly, onToggle, yearlySavings = 20, classNam
 
       <button
         onClick={() => onToggle(!isYearly)}
-        className="relative h-8 w-14 flex-shrink-0 rounded-full border border-orange-500/30 bg-black/40 transition-colors hover:border-orange-400"
+        className="relative h-8 w-14 flex-shrink-0 rounded-full border border-[#d4a44c]/30 bg-black/40 transition-colors hover:border-[#d4a44c]"
         aria-label={`Switch to ${isYearly ? 'monthly' : 'yearly'} billing`}
       >
         <span
-          className={`absolute left-1 top-1 h-6 w-6 rounded-full bg-gradient-to-r from-orange-400 to-amber-300 transition-transform ${
+          className={`absolute left-1 top-1 h-6 w-6 rounded-full bg-gradient-to-r from-[#d4a44c] to-[#e8b54a] transition-transform ${
             isYearly ? 'translate-x-6' : 'translate-x-0'
           }`}
         />
@@ -35,7 +35,7 @@ export function BillingToggle({ isYearly, onToggle, yearlySavings = 20, classNam
         <button
           onClick={() => onToggle(true)}
           className={`text-sm font-semibold transition-colors ${
-            isYearly ? 'text-orange-50' : 'text-orange-100/60 hover:text-orange-100/80'
+            isYearly ? 'text-[#f5f0e8]' : 'text-[#f5f0e8]/60 hover:text-[#f5f0e8]/80'
           }`}
         >
           Yearly

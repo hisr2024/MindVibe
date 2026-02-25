@@ -92,12 +92,12 @@ export default function AdminKiaanAnalyticsPage() {
       </div>
 
       {/* KIAAN Protection Banner */}
-      <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-4">
+      <div className="rounded-xl border border-[#d4a44c]/30 bg-[#d4a44c]/10 p-4">
         <div className="flex items-center gap-3">
           <span className="text-2xl">🛡️</span>
           <div>
-            <p className="font-medium text-orange-400">KIAAN Ecosystem Protected</p>
-            <p className="text-sm text-orange-300/80">
+            <p className="font-medium text-[#d4a44c]">KIAAN Ecosystem Protected</p>
+            <p className="text-sm text-[#e8b54a]/80">
               This dashboard provides read-only analytics. Admin cannot modify KIAAN logic, 
               access conversations, or bypass quota limits.
             </p>
@@ -169,7 +169,7 @@ export default function AdminKiaanAnalyticsPage() {
               <div className="flex-1">
                 <div className="h-4 rounded-full bg-slate-700">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-orange-500 to-amber-400"
+                    className="h-full rounded-full bg-gradient-to-r from-[#d4a44c] to-[#d4a44c]"
                     style={{ width: `${(item.count / topicData[0].count) * 100}%` }}
                   />
                 </div>

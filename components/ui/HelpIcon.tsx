@@ -25,7 +25,7 @@ export function HelpIcon({ content, side = 'top', size = 'md', className = '' }:
       <TooltipPrimitive.Trigger asChild>
         <button
           type="button"
-          className={`inline-flex items-center justify-center rounded-full text-orange-400/70 hover:text-orange-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 ${className}`}
+          className={`inline-flex items-center justify-center rounded-full text-[#d4a44c]/70 hover:text-[#d4a44c] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 ${className}`}
           aria-label="More information"
         >
           <svg
@@ -57,7 +57,7 @@ export function HelpIcon({ content, side = 'top', size = 'md', className = '' }:
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.96 }}
                 transition={{ duration: 0.12, ease: 'easeOut' }}
-                className="z-50 max-w-xs rounded-lg border border-orange-500/20 bg-slate-900 px-3 py-2 text-xs text-orange-100/90 shadow-lg shadow-orange-500/10"
+                className="z-50 max-w-xs rounded-lg border border-[#d4a44c]/20 bg-slate-900 px-3 py-2 text-xs text-[#f5f0e8]/90 shadow-lg shadow-[#d4a44c]/10"
               >
                 {content}
                 <TooltipPrimitive.Arrow className="fill-slate-900" />

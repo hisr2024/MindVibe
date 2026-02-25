@@ -72,7 +72,7 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
       {/* Trigger Button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-full border border-orange-500/40 bg-orange-500/15 px-3 py-2 text-sm font-medium text-orange-100 transition-all hover:bg-orange-500/25 hover:border-orange-500/60 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+        className="flex items-center gap-2 rounded-full border border-[#d4a44c]/40 bg-[#d4a44c]/15 px-3 py-2 text-sm font-medium text-[#f5f0e8] transition-all hover:bg-[#d4a44c]/25 hover:border-[#d4a44c]/60 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#d4a44c] focus:ring-offset-2 focus:ring-offset-slate-900"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         aria-label={`Current language: ${config.name}. Click to change language.`}
@@ -90,7 +90,7 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-orange-400"
+          className="text-[#d4a44c]"
         >
           <circle cx="12" cy="12" r="10"></circle>
           <path d="M2 12h20"></path>
@@ -130,7 +130,7 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
             aria-label="Select language"
           >
             {/* Header */}
-            <div className="border-b border-white/10 bg-gradient-to-r from-orange-500/10 to-purple-500/10 px-4 py-3">
+            <div className="border-b border-white/10 bg-gradient-to-r from-[#d4a44c]/10 to-purple-500/10 px-4 py-3">
               <h3 className="text-sm font-semibold text-white/90">Select Language</h3>
               <p className="text-xs text-white/50 mt-0.5">Choose your preferred language</p>
             </div>
@@ -158,7 +158,7 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search languages..."
-                  className="w-full rounded-lg border border-white/10 bg-white/5 pl-10 pr-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/30 transition-all"
+                  className="w-full rounded-lg border border-white/10 bg-white/5 pl-10 pr-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-[#d4a44c]/50 focus:ring-1 focus:ring-[#d4a44c]/30 transition-all"
                   autoFocus
                 />
               </div>
@@ -175,7 +175,7 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
                       onClick={() => handleLanguageSelect(code as Language)}
                       className={`w-full flex items-center justify-between px-4 py-3 text-left transition-all ${
                         isSelected
-                          ? 'bg-orange-500/20 text-orange-50'
+                          ? 'bg-[#d4a44c]/20 text-[#f5f0e8]'
                           : 'text-white/80 hover:bg-white/5'
                       }`}
                       role="option"
@@ -184,7 +184,7 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
                     >
                       <span className="flex flex-col">
                         <span className="font-medium">{langConfig.nativeName}</span>
-                        <span className={`text-xs ${isSelected ? 'text-orange-200/70' : 'text-white/40'}`}>
+                        <span className={`text-xs ${isSelected ? 'text-[#e8b54a]/70' : 'text-white/40'}`}>
                           {langConfig.name}
                         </span>
                       </span>
@@ -201,7 +201,7 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
                           strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          className="text-orange-400"
+                          className="text-[#d4a44c]"
                         >
                           <polyline points="20 6 9 17 4 12"></polyline>
                         </motion.svg>

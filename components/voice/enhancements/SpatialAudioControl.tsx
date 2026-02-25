@@ -55,7 +55,7 @@ const ENVIRONMENTS: Record<RoomEnvironment, {
     nameHindi: 'पवित्र मंदिर',
     description: 'Deep reverb, spiritual atmosphere',
     icon: Sparkles,
-    color: 'text-amber-400',
+    color: 'text-[#d4a44c]',
     reverbLevel: 0.8
   },
   cave: {
@@ -87,7 +87,7 @@ const ENVIRONMENTS: Record<RoomEnvironment, {
     nameHindi: 'ध्यान कक्ष',
     description: 'Intimate, focused space',
     icon: Circle,
-    color: 'text-orange-400',
+    color: 'text-[#d4a44c]',
     reverbLevel: 0.3
   }
 }

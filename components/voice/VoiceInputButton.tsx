@@ -104,12 +104,12 @@ export function VoiceInputButton({
         type="button"
         onClick={handleClick}
         disabled={disabled}
-        className={`relative flex h-10 w-10 items-center justify-center rounded-2xl border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 disabled:opacity-50 disabled:cursor-not-allowed ${
+        className={`relative flex h-10 w-10 items-center justify-center rounded-2xl border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 disabled:opacity-50 disabled:cursor-not-allowed ${
           isDenied
-            ? 'border-amber-500/40 bg-amber-500/10 text-amber-400'
+            ? 'border-[#d4a44c]/40 bg-[#d4a44c]/10 text-[#d4a44c]'
             : isListening
             ? 'border-red-500/60 bg-red-500/20 text-red-400 animate-pulse'
-            : 'border-orange-500/25 bg-slate-950/70 text-orange-400 hover:bg-slate-900/70 hover:border-orange-500/40'
+            : 'border-[#d4a44c]/25 bg-slate-950/70 text-[#d4a44c] hover:bg-slate-900/70 hover:border-[#d4a44c]/40'
         } ${className}`}
         aria-label={
           isDenied
@@ -147,7 +147,7 @@ export function VoiceInputButton({
         {/* Denied slash indicator */}
         {isDenied && (
           <span className="absolute inset-0 flex items-center justify-center">
-            <span className="h-[2px] w-6 rotate-45 bg-amber-400/70 rounded-full" />
+            <span className="h-[2px] w-6 rotate-45 bg-[#d4a44c]/70 rounded-full" />
           </span>
         )}
 
@@ -159,17 +159,17 @@ export function VoiceInputButton({
 
       {/* Live transcription display */}
       {isListening && interimTranscript && (
-        <div className="absolute left-0 top-full mt-2 z-20 min-w-[200px] max-w-[300px] rounded-lg bg-slate-900/95 px-3 py-2 text-xs text-orange-50 shadow-lg border border-orange-500/30 backdrop-blur-sm">
-          <div className="text-[10px] text-orange-300 mb-1 uppercase tracking-wider">Listening...</div>
-          <div className="text-sm italic text-orange-100/80">{interimTranscript}</div>
+        <div className="absolute left-0 top-full mt-2 z-20 min-w-[200px] max-w-[300px] rounded-lg bg-slate-900/95 px-3 py-2 text-xs text-[#f5f0e8] shadow-lg border border-[#d4a44c]/30 backdrop-blur-sm">
+          <div className="text-[10px] text-[#e8b54a] mb-1 uppercase tracking-wider">Listening...</div>
+          <div className="text-sm italic text-[#f5f0e8]/80">{interimTranscript}</div>
         </div>
       )}
 
       {/* Permission denied guidance */}
       {showPermissionHint && isDenied && !isListening && (
-        <div className="absolute right-0 top-full mt-2 z-30 w-[280px] rounded-xl bg-slate-900/98 px-4 py-3 shadow-xl border border-amber-500/30 backdrop-blur-md">
+        <div className="absolute right-0 top-full mt-2 z-30 w-[280px] rounded-xl bg-slate-900/98 px-4 py-3 shadow-xl border border-[#d4a44c]/30 backdrop-blur-md">
           <div className="flex items-start gap-2.5">
-            <span className="mt-0.5 text-amber-400 flex-shrink-0">
+            <span className="mt-0.5 text-[#d4a44c] flex-shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
@@ -177,17 +177,17 @@ export function VoiceInputButton({
               </svg>
             </span>
             <div className="flex-1 space-y-1.5">
-              <p className="text-xs font-medium text-amber-100">Microphone access needed</p>
-              <p className="text-[11px] text-amber-100/70 leading-relaxed">
+              <p className="text-xs font-medium text-[#f5f0e8]">Microphone access needed</p>
+              <p className="text-[11px] text-[#f5f0e8]/70 leading-relaxed">
                 To use voice input, allow microphone access in your browser settings. Look for the lock or camera icon in your address bar.
               </p>
-              <p className="text-[10px] text-amber-100/50">Your audio is processed locally — never stored.</p>
+              <p className="text-[10px] text-[#f5f0e8]/50">Your audio is processed locally — never stored.</p>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setShowPermissionHint(false)}
-            className="absolute top-2 right-2 text-amber-100/40 hover:text-amber-100/70 transition-colors"
+            className="absolute top-2 right-2 text-[#f5f0e8]/40 hover:text-[#f5f0e8]/70 transition-colors"
             aria-label="Dismiss"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -224,7 +224,7 @@ export function VoiceInputButton({
 
       {/* Permission hint on hover (when permission is prompt/unknown) */}
       {!isListening && !error && !isDenied && micPermission !== 'granted' && (
-        <div className="absolute right-0 top-full mt-2 z-20 min-w-[200px] max-w-[280px] rounded-lg bg-slate-900/95 px-3 py-2 text-xs text-orange-100/70 shadow-lg border border-orange-500/30 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+        <div className="absolute right-0 top-full mt-2 z-20 min-w-[200px] max-w-[280px] rounded-lg bg-slate-900/95 px-3 py-2 text-xs text-[#f5f0e8]/70 shadow-lg border border-[#d4a44c]/30 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
           Click to speak. Your browser will ask for microphone permission. Audio is processed locally.
         </div>
       )}

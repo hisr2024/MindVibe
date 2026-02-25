@@ -17,7 +17,7 @@ export function ThemeToggle({ className = '' }: ThemeToggleProps) {
 
   return (
     <div
-      className={`inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-black/40 px-3 py-1 text-xs font-medium text-orange-100 ${className}`}
+      className={`inline-flex items-center gap-2 rounded-full border border-[#d4a44c]/20 bg-black/40 px-3 py-1 text-xs font-medium text-[#f5f0e8] ${className}`}
       role="status"
       aria-label="Dark theme enabled"
     >
@@ -32,7 +32,7 @@ export function ThemeToggle({ className = '' }: ThemeToggleProps) {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-orange-100"
+          className="text-[#f5f0e8]"
         >
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
         </svg>

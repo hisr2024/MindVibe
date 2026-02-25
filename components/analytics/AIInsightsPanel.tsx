@@ -33,9 +33,9 @@ interface AIInsightsPanelProps {
 
 const PRIORITY_STYLES = {
   high: {
-    border: 'border-orange-400/30',
+    border: 'border-[#d4a44c]/30',
     bg: 'bg-gradient-to-br from-orange-950/40 to-amber-950/30',
-    badge: 'bg-orange-500/20 text-orange-400'
+    badge: 'bg-[#d4a44c]/20 text-[#d4a44c]'
   },
   medium: {
     border: 'border-blue-400/30',
@@ -85,9 +85,9 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
 
   if (loading && !refreshing) {
     return (
-      <div className={`rounded-3xl border border-orange-500/15 bg-black/50 p-6 ${className}`}>
+      <div className={`rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-6 ${className}`}>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-400" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#d4a44c]" />
         </div>
       </div>
     )
@@ -99,7 +99,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
         <p className="text-red-400 text-center">{error || 'No insights available'}</p>
         <button
           onClick={handleRefresh}
-          className="mt-4 mx-auto block px-4 py-2 rounded-xl bg-orange-500/20 text-orange-400 text-sm hover:bg-orange-500/30 transition"
+          className="mt-4 mx-auto block px-4 py-2 rounded-xl bg-[#d4a44c]/20 text-[#d4a44c] text-sm hover:bg-[#d4a44c]/30 transition"
         >
           Try Again
         </button>
@@ -108,15 +108,15 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
   }
 
   return (
-    <div className={`rounded-3xl border border-orange-500/15 bg-black/50 p-6 ${className}`}>
+    <div className={`rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-6 ${className}`}>
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-orange-50 mb-1 flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-orange-400" />
+          <h3 className="text-lg font-semibold text-[#f5f0e8] mb-1 flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-[#d4a44c]" />
             AI-Powered Insights
           </h3>
-          <p className="text-sm text-orange-100/60">
+          <p className="text-sm text-[#f5f0e8]/60">
             Personalized guidance based on your patterns
           </p>
         </div>
@@ -125,7 +125,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-orange-500/20 text-sm text-orange-100/80 hover:border-orange-400/50 hover:text-orange-50 transition disabled:opacity-50"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#d4a44c]/20 text-sm text-[#f5f0e8]/80 hover:border-[#d4a44c]/50 hover:text-[#f5f0e8] transition disabled:opacity-50"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
           <span>Refresh</span>
@@ -158,8 +158,8 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">{insight.icon}</span>
                   <div>
-                    <h4 className="text-sm font-semibold text-orange-50">{insight.title}</h4>
-                    <p className="text-xs text-orange-100/60 capitalize">{insight.type.replace(/_/g, ' ')}</p>
+                    <h4 className="text-sm font-semibold text-[#f5f0e8]">{insight.title}</h4>
+                    <p className="text-xs text-[#f5f0e8]/60 capitalize">{insight.type.replace(/_/g, ' ')}</p>
                   </div>
                 </div>
 
@@ -170,7 +170,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
               </div>
 
               {/* Content */}
-              <p className="text-sm text-orange-100/90 leading-relaxed">
+              <p className="text-sm text-[#f5f0e8]/90 leading-relaxed">
                 {insight.content}
               </p>
             </motion.div>
@@ -179,12 +179,12 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
       </div>
 
       {/* Footer */}
-      <div className="mt-6 pt-4 border-t border-orange-500/10">
+      <div className="mt-6 pt-4 border-t border-[#d4a44c]/10">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-orange-100/60">
+          <span className="text-[#f5f0e8]/60">
             Generated {new Date(insightsData.generated_at).toLocaleString()}
           </span>
-          <span className="text-orange-100/40">
+          <span className="text-[#f5f0e8]/40">
             {insightsData.insights.length} insights
           </span>
         </div>

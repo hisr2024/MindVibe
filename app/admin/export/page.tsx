@@ -75,7 +75,7 @@ export default function AdminExportPage() {
                       disabled={exporting !== null}
                       className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
                         exporting === `${option.id}-${format}`
-                          ? 'bg-orange-500/50 text-slate-900'
+                          ? 'bg-[#d4a44c]/50 text-slate-900'
                           : 'bg-slate-700 text-slate-200 hover:bg-slate-600'
                       }`}
                     >
@@ -100,12 +100,12 @@ export default function AdminExportPage() {
       </div>
 
       {/* Privacy Notice */}
-      <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-4">
+      <div className="rounded-xl border border-[#d4a44c]/30 bg-[#d4a44c]/10 p-4">
         <div className="flex items-start gap-3">
           <span className="text-xl">🔒</span>
           <div>
-            <h3 className="font-semibold text-orange-400">Privacy Notice</h3>
-            <ul className="mt-2 space-y-1 text-sm text-orange-300/80">
+            <h3 className="font-semibold text-[#d4a44c]">Privacy Notice</h3>
+            <ul className="mt-2 space-y-1 text-sm text-[#e8b54a]/80">
               <li>• Exported data is subject to your organization&apos;s data handling policies</li>
               <li>• Sensitive data like passwords are never included in exports</li>
               <li>• KIAAN conversation content is encrypted and NOT exportable</li>

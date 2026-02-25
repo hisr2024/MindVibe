@@ -82,10 +82,10 @@ const SOUNDS: Record<SoundType, {
   wind: { name: 'Soft Wind', nameHindi: 'हवा', category: 'nature', icon: Wind, color: 'text-gray-400' },
   birds: { name: 'Forest Birds', nameHindi: 'पक्षी', category: 'nature', icon: Bird, color: 'text-green-400' },
   crickets: { name: 'Night Crickets', nameHindi: 'झींगुर', category: 'nature', icon: Moon, color: 'text-indigo-400' },
-  fire: { name: 'Crackling Fire', nameHindi: 'अग्नि', category: 'nature', icon: Flame, color: 'text-orange-400' },
+  fire: { name: 'Crackling Fire', nameHindi: 'अग्नि', category: 'nature', icon: Flame, color: 'text-[#d4a44c]' },
 
   // Spiritual
-  temple_bells: { name: 'Temple Bells', nameHindi: 'मंदिर घंटी', category: 'spiritual', icon: Bell, color: 'text-amber-400' },
+  temple_bells: { name: 'Temple Bells', nameHindi: 'मंदिर घंटी', category: 'spiritual', icon: Bell, color: 'text-[#d4a44c]' },
   singing_bowl: { name: 'Singing Bowl', nameHindi: 'गायन कटोरा', category: 'spiritual', icon: Bell, color: 'text-purple-400' },
   om_chant: { name: 'Om Chant', nameHindi: 'ॐ जाप', category: 'spiritual', icon: Sparkles, color: 'text-violet-400' },
   tanpura: { name: 'Tanpura Drone', nameHindi: 'तानपुरा', category: 'spiritual', icon: Music, color: 'text-rose-400' },
@@ -94,7 +94,7 @@ const SOUNDS: Record<SoundType, {
   // Ambient
   white_noise: { name: 'White Noise', nameHindi: 'सफ़ेद शोर', category: 'ambient', icon: Waves, color: 'text-gray-300' },
   pink_noise: { name: 'Pink Noise', nameHindi: 'गुलाबी शोर', category: 'ambient', icon: Waves, color: 'text-pink-300' },
-  brown_noise: { name: 'Brown Noise', nameHindi: 'भूरा शोर', category: 'ambient', icon: Waves, color: 'text-amber-600' },
+  brown_noise: { name: 'Brown Noise', nameHindi: 'भूरा शोर', category: 'ambient', icon: Waves, color: 'text-[#c8943a]' },
 
   // Music
   soft_piano: { name: 'Soft Piano', nameHindi: 'मृदु पियानो', category: 'music', icon: Music, color: 'text-white' },
@@ -195,7 +195,7 @@ function SoundMixerItem({
   return (
     <div className={`p-3 rounded-xl border transition-all ${
       isActive
-        ? 'border-orange-500/30 bg-orange-500/10'
+        ? 'border-[#d4a44c]/30 bg-[#d4a44c]/10'
         : 'border-white/10 bg-white/5'
     }`}>
       <div className="flex items-center justify-between mb-2">
@@ -209,7 +209,7 @@ function SoundMixerItem({
           onClick={onToggle}
           className={`p-1.5 rounded-lg transition-colors ${
             isActive
-              ? 'bg-orange-500/30 text-orange-300'
+              ? 'bg-[#d4a44c]/30 text-[#e8b54a]'
               : 'bg-white/10 text-white/30 hover:bg-white/15'
           }`}
         >
@@ -227,7 +227,7 @@ function SoundMixerItem({
             step="0.05"
             value={volume}
             onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
-            className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer bg-white/10 accent-orange-500"
+            className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer bg-white/10 accent-[#d4a44c]"
           />
           <span className="text-[10px] text-white/40 w-7">{Math.round(volume * 100)}%</span>
         </div>
@@ -330,11 +330,11 @@ export function AmbientSoundscapeControl({
   // Compact view
   if (compact) {
     return (
-      <div className={`rounded-xl border border-orange-500/20 bg-black/30 p-3 ${className}`}>
+      <div className={`rounded-xl border border-[#d4a44c]/20 bg-black/30 p-3 ${className}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-gradient-to-br from-orange-500/20 to-amber-500/20">
-              <Music className="w-4 h-4 text-orange-400" />
+            <div className="p-1.5 rounded-lg bg-gradient-to-br from-[#d4a44c]/20 to-[#d4a44c]/20">
+              <Music className="w-4 h-4 text-[#d4a44c]" />
             </div>
             <div>
               <p className="text-xs font-medium text-white">Soundscapes</p>
@@ -345,7 +345,7 @@ export function AmbientSoundscapeControl({
             onClick={handleToggle}
             className={`p-2 rounded-lg transition-all ${
               playing
-                ? 'bg-orange-500/30 text-orange-300'
+                ? 'bg-[#d4a44c]/30 text-[#e8b54a]'
                 : 'bg-white/5 text-white/50 hover:bg-white/10'
             }`}
           >
@@ -361,14 +361,14 @@ export function AmbientSoundscapeControl({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-2xl border border-orange-500/20 bg-gradient-to-br from-orange-950/40 to-black/40 backdrop-blur-sm overflow-hidden ${className}`}
+      className={`rounded-2xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#1a1508]/40 to-black/40 backdrop-blur-sm overflow-hidden ${className}`}
     >
       {/* Header */}
       <div className="p-4 border-b border-white/5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/20">
-              <Music className="w-5 h-5 text-orange-400" />
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#d4a44c]/20 to-[#d4a44c]/20">
+              <Music className="w-5 h-5 text-[#d4a44c]" />
             </div>
             <div>
               <h3 className="font-semibold text-white">Ambient Soundscapes</h3>
@@ -380,7 +380,7 @@ export function AmbientSoundscapeControl({
             onClick={handleToggle}
             className={`p-2.5 rounded-xl transition-all ${
               playing
-                ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
+                ? 'bg-[#d4a44c] text-white shadow-lg shadow-[#d4a44c]/30'
                 : 'bg-white/10 text-white/70 hover:bg-white/15'
             }`}
           >
@@ -401,7 +401,7 @@ export function AmbientSoundscapeControl({
                 onClick={() => applyPreset(idx)}
                 className="flex-shrink-0 px-3 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
               >
-                <Icon className="w-4 h-4 mx-auto mb-1 text-orange-400" />
+                <Icon className="w-4 h-4 mx-auto mb-1 text-[#d4a44c]" />
                 <p className="text-xs text-white whitespace-nowrap">{preset.name}</p>
                 <p className="text-[10px] text-white/40">{preset.nameHindi}</p>
               </button>
@@ -419,7 +419,7 @@ export function AmbientSoundscapeControl({
               onClick={() => setSelectedCategory(cat)}
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium capitalize transition-colors ${
                 selectedCategory === cat
-                  ? 'bg-orange-500/30 text-orange-300'
+                  ? 'bg-[#d4a44c]/30 text-[#e8b54a]'
                   : 'text-white/50 hover:text-white/70'
               }`}
             >
@@ -449,7 +449,7 @@ export function AmbientSoundscapeControl({
       <div className="p-4 border-t border-white/5">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs text-white/50">
-            Active: <span className="text-orange-400">{activeSounds.length}</span> sounds
+            Active: <span className="text-[#d4a44c]">{activeSounds.length}</span> sounds
           </span>
           <span className="text-xs text-white/50">
             Master: <span className="text-white/70">{Math.round(masterVolume * 100)}%</span>
@@ -462,7 +462,7 @@ export function AmbientSoundscapeControl({
           step="0.05"
           value={masterVolume}
           onChange={(e) => setMasterVolume(parseFloat(e.target.value))}
-          className="w-full h-2 rounded-full appearance-none cursor-pointer bg-white/10 accent-orange-500"
+          className="w-full h-2 rounded-full appearance-none cursor-pointer bg-white/10 accent-[#d4a44c]"
         />
       </div>
     </motion.div>
