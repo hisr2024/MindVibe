@@ -77,9 +77,9 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900 flex items-center gap-1 ${
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#d4a44c] focus:ring-offset-2 focus:ring-offset-slate-900 flex items-center gap-1 ${
                   active
-                    ? 'bg-white/10 text-white shadow-lg shadow-orange-500/20'
+                    ? 'bg-white/10 text-white shadow-lg shadow-[#d4a44c]/20'
                     : 'text-white/70 hover:bg-white/5 hover:text-white'
                 }`}
               >
@@ -97,7 +97,7 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
 
           <Link
             href="/dashboard/subscription"
-            className="hidden items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/5 hover:text-white sm:inline-flex focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+            className="hidden items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/5 hover:text-white sm:inline-flex focus:outline-none focus:ring-2 focus:ring-[#d4a44c] focus:ring-offset-2 focus:ring-offset-slate-900"
           >
             {t('navigation.mainNav.pricing', 'Subscriptions')}
           </Link>
@@ -129,7 +129,7 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`rounded-xl px-3 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                  className={`rounded-xl px-3 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#d4a44c] focus:ring-offset-2 focus:ring-offset-slate-900 ${
                     active
                       ? 'bg-white/10 text-white'
                       : 'text-white/80 hover:bg-white/5'

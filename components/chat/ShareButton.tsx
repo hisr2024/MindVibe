@@ -84,7 +84,7 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
     <>
       <button
         onClick={() => setShowModal(true)}
-        className={`group relative flex items-center gap-1.5 rounded-lg border border-orange-500/25 bg-orange-500/10 px-2.5 py-1.5 text-xs font-medium text-orange-200 transition-all hover:border-orange-500/40 hover:bg-orange-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 ${className}`}
+        className={`group relative flex items-center gap-1.5 rounded-lg border border-[#d4a44c]/25 bg-[#d4a44c]/10 px-2.5 py-1.5 text-xs font-medium text-[#e8b54a] transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 ${className}`}
         aria-label="Share this response"
       >
         <svg
@@ -97,7 +97,7 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-orange-400"
+          className="text-[#d4a44c]"
         >
           <circle cx="18" cy="5" r="3"></circle>
           <circle cx="6" cy="12" r="3"></circle>
@@ -115,13 +115,13 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="relative max-w-lg w-full rounded-3xl border border-orange-500/20 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 p-6 shadow-2xl shadow-orange-500/20"
+            className="relative max-w-lg w-full rounded-3xl border border-[#d4a44c]/20 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 p-6 shadow-2xl shadow-[#d4a44c]/20"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <button
               onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 rounded-full p-2 text-orange-200 hover:bg-orange-500/20 transition-colors"
+              className="absolute top-4 right-4 rounded-full p-2 text-[#e8b54a] hover:bg-[#d4a44c]/20 transition-colors"
               aria-label="Close modal"
             >
               <svg
@@ -145,29 +145,29 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
                 {/* Privacy Warning */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full bg-orange-500/20 flex items-center justify-center text-2xl">
+                    <div className="h-12 w-12 rounded-full bg-[#d4a44c]/20 flex items-center justify-center text-2xl">
                       ⚠️
                     </div>
-                    <h2 className="text-xl font-bold text-orange-50">
+                    <h2 className="text-xl font-bold text-[#f5f0e8]">
                       Privacy Notice
                     </h2>
                   </div>
 
-                  <p className="text-sm text-orange-100/80 leading-relaxed">
+                  <p className="text-sm text-[#f5f0e8]/80 leading-relaxed">
                     You are about to share spiritual wellness information. Please ensure you&apos;re
                     comfortable sharing this content publicly.
                   </p>
 
-                  <div className="rounded-2xl border border-orange-500/20 bg-orange-500/10 p-4">
+                  <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#d4a44c]/10 p-4">
                     <div className="flex items-start gap-2">
                       <input
                         type="checkbox"
                         id="anonymize"
                         checked={anonymize}
                         onChange={(e) => setAnonymize(e.target.checked)}
-                        className="mt-0.5 h-4 w-4 rounded border-orange-500/30 bg-transparent text-orange-500 focus:ring-orange-400"
+                        className="mt-0.5 h-4 w-4 rounded border-[#d4a44c]/30 bg-transparent text-[#d4a44c] focus:ring-[#d4a44c]"
                       />
-                      <label htmlFor="anonymize" className="text-sm text-orange-100/90">
+                      <label htmlFor="anonymize" className="text-sm text-[#f5f0e8]/90">
                         Anonymize content (remove personal identifiers)
                       </label>
                     </div>
@@ -176,13 +176,13 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
                   <div className="flex gap-3">
                     <button
                       onClick={() => setShowModal(false)}
-                      className="flex-1 rounded-xl border border-orange-500/30 px-4 py-2.5 text-sm font-semibold text-orange-200 transition-colors hover:bg-orange-500/10"
+                      className="flex-1 rounded-xl border border-[#d4a44c]/30 px-4 py-2.5 text-sm font-semibold text-[#e8b54a] transition-colors hover:bg-[#d4a44c]/10"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={acknowledgeWarning}
-                      className="flex-1 rounded-xl bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-lg shadow-orange-500/30 transition-all hover:scale-[1.02]"
+                      className="flex-1 rounded-xl bg-gradient-to-r from-[#d4a44c] via-[#d4a44c] to-[#d4a44c] px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-lg shadow-[#d4a44c]/30 transition-all hover:scale-[1.02]"
                     >
                       Continue
                     </button>
@@ -193,9 +193,9 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
               <>
                 {/* Share Options */}
                 <div className="space-y-4">
-                  <h2 className="text-xl font-bold text-orange-50">Share via</h2>
+                  <h2 className="text-xl font-bold text-[#f5f0e8]">Share via</h2>
 
-                  <p className="text-xs text-orange-100/70">
+                  <p className="text-xs text-[#f5f0e8]/70">
                     {anonymize ? '✓ Anonymized content' : 'Sharing original content'}
                   </p>
 
@@ -205,7 +205,7 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
                         key={option.platform}
                         onClick={() => handleShare(option.platform)}
                         disabled={sharing}
-                        className={`group relative rounded-2xl border border-orange-500/20 bg-gradient-to-br ${option.color} p-4 text-left transition-all hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100`}
+                        className={`group relative rounded-2xl border border-[#d4a44c]/20 bg-gradient-to-br ${option.color} p-4 text-left transition-all hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100`}
                       >
                         <div className="flex items-center gap-3">
                           <div className="text-3xl">{option.icon}</div>
@@ -230,7 +230,7 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
 
                   <button
                     onClick={() => setShowWarning(true)}
-                    className="w-full text-xs text-orange-300/70 hover:text-orange-200 transition-colors"
+                    className="w-full text-xs text-[#e8b54a]/70 hover:text-[#e8b54a] transition-colors"
                   >
                     ← Back to privacy settings
                   </button>

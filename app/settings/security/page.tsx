@@ -210,9 +210,9 @@ export default function SecuritySettingsPage() {
     return (
       <main className="mx-auto max-w-3xl px-4 py-12">
         <div className="animate-pulse">
-          <div className="h-8 bg-orange-500/20 rounded w-48 mb-4"></div>
-          <div className="h-4 bg-orange-500/10 rounded w-64 mb-8"></div>
-          <div className="h-64 bg-orange-500/10 rounded-xl"></div>
+          <div className="h-8 bg-[#d4a44c]/20 rounded w-48 mb-4"></div>
+          <div className="h-4 bg-[#d4a44c]/10 rounded w-64 mb-8"></div>
+          <div className="h-64 bg-[#d4a44c]/10 rounded-xl"></div>
         </div>
       </main>
     )
@@ -221,11 +221,11 @@ export default function SecuritySettingsPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
       <div className="mb-8">
-        <Link href="/settings" className="text-orange-400 hover:text-orange-300 text-sm mb-4 inline-block">
+        <Link href="/settings" className="text-[#d4a44c] hover:text-[#e8b54a] text-sm mb-4 inline-block">
           &larr; Back to Settings
         </Link>
-        <h1 className="text-3xl font-bold text-orange-50 mb-2">Security Settings</h1>
-        <p className="text-orange-100/70">Protect your account with additional security measures</p>
+        <h1 className="text-3xl font-bold text-[#f5f0e8] mb-2">Security Settings</h1>
+        <p className="text-[#f5f0e8]/70">Protect your account with additional security measures</p>
       </div>
 
       <AnimatePresence mode="wait">
@@ -298,11 +298,11 @@ export default function SecuritySettingsPage() {
                 >
                   <Card variant="bordered" className="mt-4">
                     <CardContent className="space-y-4">
-                      <p className="text-sm text-orange-100/70">
+                      <p className="text-sm text-[#f5f0e8]/70">
                         Enter your current 2FA code to generate new backup codes. This will invalidate all existing backup codes.
                       </p>
                       <div>
-                        <label htmlFor="regenerate-2fa-code" className="block text-sm font-medium text-orange-100 mb-1">
+                        <label htmlFor="regenerate-2fa-code" className="block text-sm font-medium text-[#f5f0e8] mb-1">
                           2FA Code
                         </label>
                         <input
@@ -314,7 +314,7 @@ export default function SecuritySettingsPage() {
                           autoComplete="one-time-code"
                           value={regenerateCode}
                           onChange={(e) => setRegenerateCode(e.target.value.replace(/\D/g, ''))}
-                          className="w-full px-4 py-2 bg-black/20 border border-orange-500/30 rounded-lg text-orange-50 placeholder-orange-300/50 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                          className="w-full px-4 py-2 bg-black/20 border border-[#d4a44c]/30 rounded-lg text-[#f5f0e8] placeholder-orange-300/50 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                           placeholder="Enter 6-digit code"
                         />
                       </div>
@@ -360,12 +360,12 @@ export default function SecuritySettingsPage() {
                         </svg>
                         <span className="font-medium">Save These Backup Codes</span>
                       </div>
-                      <p className="text-sm text-orange-100/70">
+                      <p className="text-sm text-[#f5f0e8]/70">
                         These codes will only be shown once. Store them securely.
                       </p>
                       <div className="grid grid-cols-2 gap-2 p-4 bg-black/30 rounded-lg font-mono text-sm">
                         {newBackupCodes.map((code, i) => (
-                          <div key={i} className="text-orange-100">{code}</div>
+                          <div key={i} className="text-[#f5f0e8]">{code}</div>
                         ))}
                       </div>
                       <div className="flex gap-2">
@@ -407,11 +407,11 @@ export default function SecuritySettingsPage() {
                         </svg>
                         <span className="font-medium">Disable Two-Factor Authentication</span>
                       </div>
-                      <p className="text-sm text-orange-100/70">
+                      <p className="text-sm text-[#f5f0e8]/70">
                         This will make your account less secure. Are you sure?
                       </p>
                       <div>
-                        <label htmlFor="disable-2fa-code" className="block text-sm font-medium text-orange-100 mb-1">
+                        <label htmlFor="disable-2fa-code" className="block text-sm font-medium text-[#f5f0e8] mb-1">
                           Current 2FA Code
                         </label>
                         <input
@@ -423,12 +423,12 @@ export default function SecuritySettingsPage() {
                           autoComplete="one-time-code"
                           value={disableCode}
                           onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, ''))}
-                          className="w-full px-4 py-2 bg-black/20 border border-orange-500/30 rounded-lg text-orange-50 placeholder-orange-300/50 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                          className="w-full px-4 py-2 bg-black/20 border border-[#d4a44c]/30 rounded-lg text-[#f5f0e8] placeholder-orange-300/50 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                           placeholder="Enter 6-digit code"
                         />
                       </div>
                       <div>
-                        <label htmlFor="disable-2fa-password" className="block text-sm font-medium text-orange-100 mb-1">
+                        <label htmlFor="disable-2fa-password" className="block text-sm font-medium text-[#f5f0e8] mb-1">
                           Password
                         </label>
                         <input
@@ -437,7 +437,7 @@ export default function SecuritySettingsPage() {
                           autoComplete="current-password"
                           value={disablePassword}
                           onChange={(e) => setDisablePassword(e.target.value)}
-                          className="w-full px-4 py-2 bg-black/20 border border-orange-500/30 rounded-lg text-orange-50 placeholder-orange-300/50 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                          className="w-full px-4 py-2 bg-black/20 border border-[#d4a44c]/30 rounded-lg text-[#f5f0e8] placeholder-orange-300/50 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                           placeholder="Enter your password"
                         />
                       </div>
@@ -473,8 +473,8 @@ export default function SecuritySettingsPage() {
             <Card variant="bordered">
               <CardContent className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-orange-50">Enable 2FA</p>
-                  <p className="text-xs text-orange-100/50">
+                  <p className="font-medium text-[#f5f0e8]">Enable 2FA</p>
+                  <p className="text-xs text-[#f5f0e8]/50">
                     Use an authenticator app like Google Authenticator or Authy
                   </p>
                 </div>
@@ -504,10 +504,10 @@ export default function SecuritySettingsPage() {
             className="space-y-6"
           >
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-orange-50 mb-2">
+              <h3 className="text-lg font-semibold text-[#f5f0e8] mb-2">
                 Step 1: Scan QR Code
               </h3>
-              <p className="text-sm text-orange-100/70">
+              <p className="text-sm text-[#f5f0e8]/70">
                 Open your authenticator app and scan this QR code
               </p>
             </div>
@@ -525,10 +525,10 @@ export default function SecuritySettingsPage() {
             )}
 
             <div className="text-center">
-              <p className="text-xs text-orange-100/50 mb-2">
+              <p className="text-xs text-[#f5f0e8]/50 mb-2">
                 Or enter this code manually:
               </p>
-              <code className="px-4 py-2 bg-black/30 rounded-lg text-orange-300 font-mono text-sm">
+              <code className="px-4 py-2 bg-black/30 rounded-lg text-[#e8b54a] font-mono text-sm">
                 {setupData?.secret}
               </code>
             </div>
@@ -549,10 +549,10 @@ export default function SecuritySettingsPage() {
             className="space-y-6"
           >
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-orange-50 mb-2">
+              <h3 className="text-lg font-semibold text-[#f5f0e8] mb-2">
                 Step 2: Verify Code
               </h3>
-              <p className="text-sm text-orange-100/70">
+              <p className="text-sm text-[#f5f0e8]/70">
                 Enter the 6-digit code from your authenticator app
               </p>
             </div>
@@ -566,7 +566,7 @@ export default function SecuritySettingsPage() {
                 autoComplete="one-time-code"
                 value={verifyCode}
                 onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, ''))}
-                className="w-48 px-6 py-4 bg-black/20 border border-orange-500/30 rounded-xl text-center text-2xl font-mono text-orange-50 placeholder-orange-300/50 focus:outline-none focus:ring-2 focus:ring-orange-500/50 tracking-widest"
+                className="w-48 px-6 py-4 bg-black/20 border border-[#d4a44c]/30 rounded-xl text-center text-2xl font-mono text-[#f5f0e8] placeholder-orange-300/50 focus:outline-none focus:ring-2 focus:ring-orange-500/50 tracking-widest"
                 placeholder="000000"
                 autoFocus
               />
@@ -592,10 +592,10 @@ export default function SecuritySettingsPage() {
             className="space-y-6"
           >
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-orange-50 mb-2">
+              <h3 className="text-lg font-semibold text-[#f5f0e8] mb-2">
                 Step 3: Save Backup Codes
               </h3>
-              <p className="text-sm text-orange-100/70">
+              <p className="text-sm text-[#f5f0e8]/70">
                 These codes can be used to access your account if you lose your phone
               </p>
             </div>
@@ -614,7 +614,7 @@ export default function SecuritySettingsPage() {
 
             <div className="grid grid-cols-2 gap-2 p-4 bg-black/30 rounded-xl font-mono text-sm">
               {setupData?.backup_codes.map((code, i) => (
-                <div key={i} className="text-orange-100 p-2 bg-black/20 rounded">
+                <div key={i} className="text-[#f5f0e8] p-2 bg-black/20 rounded">
                   {code}
                 </div>
               ))}
@@ -662,8 +662,8 @@ export default function SecuritySettingsPage() {
         <Card variant="bordered">
           <CardContent className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-orange-50">View All Sessions</p>
-              <p className="text-xs text-orange-100/50">
+              <p className="font-medium text-[#f5f0e8]">View All Sessions</p>
+              <p className="text-xs text-[#f5f0e8]/50">
                 See and revoke access from other devices
               </p>
             </div>
@@ -689,8 +689,8 @@ export default function SecuritySettingsPage() {
                 </svg>
               </div>
               <div>
-                <p className="font-medium text-orange-50 text-sm">Use a strong, unique password</p>
-                <p className="text-xs text-orange-100/50 mt-1">
+                <p className="font-medium text-[#f5f0e8] text-sm">Use a strong, unique password</p>
+                <p className="text-xs text-[#f5f0e8]/50 mt-1">
                   Combine uppercase, lowercase, numbers, and symbols. Never reuse passwords.
                 </p>
               </div>
@@ -704,8 +704,8 @@ export default function SecuritySettingsPage() {
                 </svg>
               </div>
               <div>
-                <p className="font-medium text-orange-50 text-sm">Enable two-factor authentication</p>
-                <p className="text-xs text-orange-100/50 mt-1">
+                <p className="font-medium text-[#f5f0e8] text-sm">Enable two-factor authentication</p>
+                <p className="text-xs text-[#f5f0e8]/50 mt-1">
                   Adds an extra layer of protection even if your password is compromised.
                 </p>
               </div>
@@ -719,8 +719,8 @@ export default function SecuritySettingsPage() {
                 </svg>
               </div>
               <div>
-                <p className="font-medium text-orange-50 text-sm">Review active sessions regularly</p>
-                <p className="text-xs text-orange-100/50 mt-1">
+                <p className="font-medium text-[#f5f0e8] text-sm">Review active sessions regularly</p>
+                <p className="text-xs text-[#f5f0e8]/50 mt-1">
                   Revoke access from devices you don&apos;t recognize or no longer use.
                 </p>
               </div>
@@ -734,8 +734,8 @@ export default function SecuritySettingsPage() {
                 </svg>
               </div>
               <div>
-                <p className="font-medium text-orange-50 text-sm">Be cautious of phishing</p>
-                <p className="text-xs text-orange-100/50 mt-1">
+                <p className="font-medium text-[#f5f0e8] text-sm">Be cautious of phishing</p>
+                <p className="text-xs text-[#f5f0e8]/50 mt-1">
                   Never share your password or 2FA codes. We&apos;ll never ask for them via email.
                 </p>
               </div>

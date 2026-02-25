@@ -258,9 +258,9 @@ export default function ProfilePage() {
     return (
       <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
         <div className="animate-pulse space-y-6">
-          <div className="h-32 rounded-3xl bg-orange-500/10" />
-          <div className="h-24 rounded-3xl bg-orange-500/10" />
-          <div className="h-64 rounded-3xl bg-orange-500/10" />
+          <div className="h-32 rounded-3xl bg-[#d4a44c]/10" />
+          <div className="h-24 rounded-3xl bg-[#d4a44c]/10" />
+          <div className="h-64 rounded-3xl bg-[#d4a44c]/10" />
         </div>
       </main>
     )
@@ -273,14 +273,14 @@ export default function ProfilePage() {
         <Card variant="elevated" className="mb-8">
           <CardContent>
             <div className="text-center py-8">
-              <div className="mx-auto mb-4 h-16 w-16 rounded-2xl bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 flex items-center justify-center">
+              <div className="mx-auto mb-4 h-16 w-16 rounded-2xl bg-gradient-to-br from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-900">
                   <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
               </div>
-              <h2 className="text-xl font-semibold text-orange-50 mb-2">Sign in to view your profile</h2>
-              <p className="text-sm text-orange-100/70 mb-6">
+              <h2 className="text-xl font-semibold text-[#f5f0e8] mb-2">Sign in to view your profile</h2>
+              <p className="text-sm text-[#f5f0e8]/70 mb-6">
                 Create an account or sign in to manage your profile, track your progress, and access all features.
               </p>
               <Link href="/account">
@@ -297,7 +297,7 @@ export default function ProfilePage() {
   const tierDisplayName = subscription?.tierName ?? 'Free'
 
   const STAT_ITEMS = [
-    { label: 'Day Streak', value: stats.dayStreak, color: 'text-orange-400', icon: '🔥' },
+    { label: 'Day Streak', value: stats.dayStreak, color: 'text-[#d4a44c]', icon: '🔥' },
     { label: 'Journeys', value: stats.journeysCompleted, color: 'text-cyan-400', icon: '🧭' },
     { label: 'Reflections', value: stats.journalEntries, color: 'text-purple-400', icon: '📝' },
     { label: 'Insights', value: stats.insightsReceived, color: 'text-teal-400', icon: '✨' },
@@ -307,12 +307,12 @@ export default function ProfilePage() {
     <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
       {/* Page Header */}
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-orange-50 mb-1">My Profile</h1>
-        <p className="text-sm text-orange-100/60">Your personal space on MindVibe</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#f5f0e8] mb-1">My Profile</h1>
+        <p className="text-sm text-[#f5f0e8]/60">Your personal space on MindVibe</p>
       </div>
 
       {error && (
-        <div className="mb-6 rounded-2xl border border-orange-400/40 bg-orange-500/10 p-4 text-sm text-orange-50">
+        <div className="mb-6 rounded-2xl border border-[#d4a44c]/40 bg-[#d4a44c]/10 p-4 text-sm text-[#f5f0e8]">
           {error}
         </div>
       )}
@@ -338,7 +338,7 @@ export default function ProfilePage() {
             <CardContent className="py-4">
               <span className="text-xl mb-1 block">{stat.icon}</span>
               <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-              <p className="text-xs text-orange-100/50 mt-1">{stat.label}</p>
+              <p className="text-xs text-[#f5f0e8]/50 mt-1">{stat.label}</p>
             </CardContent>
           </Card>
         ))}
@@ -360,7 +360,7 @@ export default function ProfilePage() {
           {/* Avatar Upload */}
           <Card className="mb-6">
             <CardContent>
-              <h2 className="text-lg font-semibold text-orange-50 mb-4">Profile Picture</h2>
+              <h2 className="text-lg font-semibold text-[#f5f0e8] mb-4">Profile Picture</h2>
               <AvatarUpload
                 currentAvatar={profile.avatarUrl}
                 onUpload={handleAvatarUpload}
@@ -373,15 +373,15 @@ export default function ProfilePage() {
           <Card className="mb-6">
             <CardContent>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-orange-50">About</h2>
+                <h2 className="text-lg font-semibold text-[#f5f0e8]">About</h2>
                 <Button onClick={() => setIsEditing(true)} variant="ghost" size="sm">
                   Edit
                 </Button>
               </div>
               {profile.bio ? (
-                <p className="text-sm text-orange-100/80">{profile.bio}</p>
+                <p className="text-sm text-[#f5f0e8]/80">{profile.bio}</p>
               ) : (
-                <p className="text-sm text-orange-100/50 italic">
+                <p className="text-sm text-[#f5f0e8]/50 italic">
                   Add a bio to tell others about yourself...
                 </p>
               )}
@@ -392,7 +392,7 @@ export default function ProfilePage() {
           <Card className="mb-6">
             <CardContent>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-orange-50">Subscription</h2>
+                <h2 className="text-lg font-semibold text-[#f5f0e8]">Subscription</h2>
                 <Badge variant={tier === 'free' ? 'default' : 'premium'}>
                   {isDeveloper ? 'Developer' : tierDisplayName}
                 </Badge>
@@ -400,34 +400,34 @@ export default function ProfilePage() {
 
               {/* Tier details */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-                <div className="rounded-xl border border-orange-500/10 bg-white/[0.02] p-3">
-                  <p className="text-xs text-orange-100/50 mb-1">KIAAN Questions</p>
-                  <p className="text-sm font-semibold text-orange-50">
+                <div className="rounded-xl border border-[#d4a44c]/10 bg-white/[0.02] p-3">
+                  <p className="text-xs text-[#f5f0e8]/50 mb-1">KIAAN Questions</p>
+                  <p className="text-sm font-semibold text-[#f5f0e8]">
                     {isKiaanUnlimited ? 'Unlimited' : `${kiaanQuota}/month`}
                   </p>
                 </div>
-                <div className="rounded-xl border border-orange-500/10 bg-white/[0.02] p-3">
-                  <p className="text-xs text-orange-100/50 mb-1">Active Journeys</p>
-                  <p className="text-sm font-semibold text-orange-50">
+                <div className="rounded-xl border border-[#d4a44c]/10 bg-white/[0.02] p-3">
+                  <p className="text-xs text-[#f5f0e8]/50 mb-1">Active Journeys</p>
+                  <p className="text-sm font-semibold text-[#f5f0e8]">
                     {journeyLimit === -1 ? 'Unlimited' : `${journeyLimit} max`}
                   </p>
                 </div>
-                <div className="rounded-xl border border-orange-500/10 bg-white/[0.02] p-3 col-span-2 sm:col-span-1">
-                  <p className="text-xs text-orange-100/50 mb-1">Plan Status</p>
-                  <p className="text-sm font-semibold text-orange-50">
+                <div className="rounded-xl border border-[#d4a44c]/10 bg-white/[0.02] p-3 col-span-2 sm:col-span-1">
+                  <p className="text-xs text-[#f5f0e8]/50 mb-1">Plan Status</p>
+                  <p className="text-sm font-semibold text-[#f5f0e8]">
                     {subscription?.status === 'active' ? 'Active' : subscription?.status ?? 'Active'}
                   </p>
                 </div>
               </div>
 
-              <p className="text-sm text-orange-100/70 mb-4">
+              <p className="text-sm text-[#f5f0e8]/70 mb-4">
                 {tier === 'free'
                   ? `You are on the free plan with ${kiaanQuota} KIAAN questions per month.`
                   : `You are on the ${tierDisplayName} plan with ${isKiaanUnlimited ? 'unlimited' : kiaanQuota} KIAAN questions.`}
               </p>
 
               {subscription?.cancelAtPeriodEnd && (
-                <div className="mb-4 rounded-xl border border-amber-400/30 bg-amber-400/10 p-3 text-xs text-amber-100">
+                <div className="mb-4 rounded-xl border border-[#d4a44c]/30 bg-[#d4a44c]/10 p-3 text-xs text-[#f5f0e8]">
                   Your plan will end on {subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd).toLocaleDateString() : 'the end of the billing period'}.
                 </div>
               )}
@@ -453,10 +453,10 @@ export default function ProfilePage() {
           <Card className="mb-6">
             <CardContent>
               <div className="flex items-center gap-3 mb-4">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/10 text-sm font-black text-orange-400">K</span>
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#d4a44c]/10 text-sm font-black text-[#d4a44c]">K</span>
                 <div>
-                  <h2 className="text-lg font-semibold text-orange-50">KIAAN AI Ecosystem</h2>
-                  <p className="text-xs text-orange-100/50">{kiaanTools.length} wisdom-powered tools</p>
+                  <h2 className="text-lg font-semibold text-[#f5f0e8]">KIAAN AI Ecosystem</h2>
+                  <p className="text-xs text-[#f5f0e8]/50">{kiaanTools.length} wisdom-powered tools</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -464,10 +464,10 @@ export default function ProfilePage() {
                   <Link
                     key={tool.id}
                     href={tool.route}
-                    className="group rounded-xl border border-orange-500/10 bg-white/[0.02] p-3 text-center hover:border-orange-400/30 hover:bg-orange-500/5 transition"
+                    className="group rounded-xl border border-[#d4a44c]/10 bg-white/[0.02] p-3 text-center hover:border-[#d4a44c]/30 hover:bg-[#d4a44c]/5 transition"
                   >
                     <span className="text-lg block mb-1">{tool.icon}</span>
-                    <span className="text-xs font-medium text-orange-100/70 group-hover:text-orange-50 transition line-clamp-1">{tool.name}</span>
+                    <span className="text-xs font-medium text-[#f5f0e8]/70 group-hover:text-[#f5f0e8] transition line-clamp-1">{tool.name}</span>
                   </Link>
                 ))}
               </div>
@@ -477,34 +477,34 @@ export default function ProfilePage() {
           {/* Quick Links */}
           <Card>
             <CardContent>
-              <h2 className="text-lg font-semibold text-orange-50 mb-4">Quick Links</h2>
+              <h2 className="text-lg font-semibold text-[#f5f0e8] mb-4">Quick Links</h2>
               <div className="space-y-3">
                 <Link href="/account" className="flex items-center justify-between py-2 group">
                   <div>
-                    <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">Account Settings</p>
-                    <p className="text-xs text-orange-100/50">Security, sessions, and data management</p>
+                    <p className="text-sm font-medium text-[#f5f0e8] group-hover:text-[#e8b54a] transition">Account Settings</p>
+                    <p className="text-xs text-[#f5f0e8]/50">Security, sessions, and data management</p>
                   </div>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#f5f0e8]/30 group-hover:text-[#e8b54a] transition">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </Link>
-                <div className="border-t border-orange-500/10" />
+                <div className="border-t border-[#d4a44c]/10" />
                 <Link href="/kiaan/chat" className="flex items-center justify-between py-2 group">
                   <div>
-                    <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">KIAAN Chat</p>
-                    <p className="text-xs text-orange-100/50">Your AI wisdom companion</p>
+                    <p className="text-sm font-medium text-[#f5f0e8] group-hover:text-[#e8b54a] transition">KIAAN Chat</p>
+                    <p className="text-xs text-[#f5f0e8]/50">Your AI wisdom companion</p>
                   </div>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#f5f0e8]/30 group-hover:text-[#e8b54a] transition">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </Link>
-                <div className="border-t border-orange-500/10" />
+                <div className="border-t border-[#d4a44c]/10" />
                 <Link href="/settings" className="flex items-center justify-between py-2 group">
                   <div>
-                    <p className="text-sm font-medium text-orange-50 group-hover:text-orange-300 transition">App Settings</p>
-                    <p className="text-xs text-orange-100/50">Notifications, privacy, and accessibility</p>
+                    <p className="text-sm font-medium text-[#f5f0e8] group-hover:text-[#e8b54a] transition">App Settings</p>
+                    <p className="text-xs text-[#f5f0e8]/50">Notifications, privacy, and accessibility</p>
                   </div>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-100/30 group-hover:text-orange-300 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#f5f0e8]/30 group-hover:text-[#e8b54a] transition">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </Link>

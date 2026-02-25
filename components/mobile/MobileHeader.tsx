@@ -158,7 +158,7 @@ export const MobileHeader = forwardRef<HTMLElement, MobileHeaderProps>(
         >
           {/* Background */}
           <motion.div
-            className="absolute inset-0 bg-[#0b0b0f]/90"
+            className="absolute inset-0 bg-[#050507]/90"
             style={{ opacity: backgroundOpacity }}
           />
 
@@ -302,7 +302,7 @@ export function HeaderAction({
           absolute top-1 right-1
           min-w-4 h-4 px-1
           rounded-full
-          bg-orange-500 text-white text-[10px] font-bold
+          bg-[#d4a44c] text-white text-[10px] font-bold
           flex items-center justify-center
         ">
           {typeof badge === 'number' ? (badge > 9 ? '9+' : badge) : ''}
@@ -370,7 +370,7 @@ export function SearchHeader({
               bg-white/[0.06] border border-white/[0.08]
               text-white placeholder:text-slate-500
               text-base
-              focus:outline-none focus:border-orange-500/40
+              focus:outline-none focus:border-[#d4a44c]/40
               transition-colors
             "
             style={{ fontSize: '16px' }}

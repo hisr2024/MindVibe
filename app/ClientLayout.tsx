@@ -8,6 +8,16 @@ const IntroOverlay = dynamic(
   { ssr: false }
 )
 
+const GodParticles = dynamic(
+  () => import('@/components/divine/GodParticles').then(mod => mod.GodParticles),
+  { ssr: false }
+)
+
+const PageTransitionWrapper = dynamic(
+  () => import('@/components/divine/PageTransitionWrapper').then(mod => mod.PageTransitionWrapper),
+  { ssr: false }
+)
+
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
 
@@ -21,7 +31,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   if (!mounted) {
     return (
       <div
-        className="min-h-screen bg-slate-950"
+        className="min-h-screen bg-[#050507]"
         style={{
           opacity: 0,
           visibility: 'hidden',
@@ -36,7 +46,12 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {children}
+      {/* God Particles — divine golden motes floating across all pages */}
+      <GodParticles />
+      {/* Smooth page transition wrapper */}
+      <PageTransitionWrapper>
+        {children}
+      </PageTransitionWrapper>
       {/* Divine intro overlay — shown once to first-time visitors */}
       <IntroOverlay />
     </>

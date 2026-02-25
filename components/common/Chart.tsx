@@ -65,7 +65,7 @@ function CustomTooltip({
 
   return (
     <div
-      className="rounded-lg border border-orange-500/20 bg-[#0d0d10]/95 px-3 py-2 text-orange-50 shadow-lg"
+      className="rounded-lg border border-[#d4a44c]/20 bg-[#0d0d10]/95 px-3 py-2 text-[#f5f0e8] shadow-lg"
     >
       <p className="text-xs font-medium mb-1">
         {labelFormatter ? labelFormatter(label as string) : label}

@@ -100,19 +100,19 @@ export const MobileButton = forwardRef<HTMLButtonElement, MobileButtonProps>(
     // Variant styles
     const variantStyles: Record<string, string> = {
       primary: `
-        bg-gradient-to-r from-orange-500 to-amber-500
+        bg-gradient-to-r from-[#d4a44c] to-[#d4a44c]
         text-slate-950 font-semibold
         shadow-mobile-button
-        hover:shadow-lg hover:shadow-orange-500/30
+        hover:shadow-lg hover:shadow-[#d4a44c]/30
       `,
       secondary: `
-        bg-white/[0.06] border border-orange-500/20
-        text-orange-50 font-medium
-        hover:bg-white/[0.1] hover:border-orange-500/30
+        bg-white/[0.06] border border-[#d4a44c]/20
+        text-[#f5f0e8] font-medium
+        hover:bg-white/[0.1] hover:border-[#d4a44c]/30
       `,
       ghost: `
         bg-transparent
-        text-orange-50 font-medium
+        text-[#f5f0e8] font-medium
         hover:bg-white/[0.06]
       `,
       danger: `
@@ -246,9 +246,9 @@ export const MobileIconButton = forwardRef<HTMLButtonElement, MobileIconButtonPr
     const { triggerHaptic } = useHapticFeedback()
 
     const variantStyles: Record<string, string> = {
-      primary: 'bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 shadow-mobile-button',
-      secondary: 'bg-white/[0.06] border border-white/[0.08] text-orange-50 hover:bg-white/[0.1]',
-      ghost: 'bg-transparent text-orange-50 hover:bg-white/[0.06]',
+      primary: 'bg-gradient-to-r from-[#d4a44c] to-[#d4a44c] text-slate-950 shadow-mobile-button',
+      secondary: 'bg-white/[0.06] border border-white/[0.08] text-[#f5f0e8] hover:bg-white/[0.1]',
+      ghost: 'bg-transparent text-[#f5f0e8] hover:bg-white/[0.06]',
     }
 
     const sizeStyles: Record<string, string> = {

@@ -59,10 +59,10 @@ export function PathwayMap() {
                 className={`
                   relative rounded-lg px-3 py-1.5 text-sm font-medium
                   transition-colors duration-150
-                  focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]
                   focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950
                   ${isActive
-                    ? 'text-orange-50 after:absolute after:inset-x-2 after:bottom-0 after:h-[2px] after:rounded-full after:bg-orange-400'
+                    ? 'text-[#f5f0e8] after:absolute after:inset-x-2 after:bottom-0 after:h-[2px] after:rounded-full after:bg-[#d4a44c]'
                     : 'text-white/50 hover:text-white/80'
                   }
                 `}

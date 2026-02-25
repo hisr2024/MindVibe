@@ -97,11 +97,11 @@ export function AvatarUpload({
             <img
               src={preview || currentAvatar}
               alt="Avatar"
-              className="h-24 w-24 rounded-2xl object-cover border-2 border-orange-400/30"
+              className="h-24 w-24 rounded-2xl object-cover border-2 border-[#d4a44c]/30"
             />
           ) : (
-            <div className="h-24 w-24 rounded-2xl bg-gradient-to-br from-orange-500/30 via-amber-500/30 to-orange-500/30 border-2 border-dashed border-orange-400/30 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+            <div className="h-24 w-24 rounded-2xl bg-gradient-to-br from-[#d4a44c]/30 via-[#d4a44c]/30 to-[#d4a44c]/30 border-2 border-dashed border-[#d4a44c]/30 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c]">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
@@ -128,7 +128,7 @@ export function AvatarUpload({
               Remove
             </Button>
           )}
-          <p className="text-xs text-orange-100/50">JPG, PNG, GIF. Max 5MB.</p>
+          <p className="text-xs text-[#f5f0e8]/50">JPG, PNG, GIF. Max 5MB.</p>
         </div>
       </div>
 

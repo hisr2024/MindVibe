@@ -27,7 +27,7 @@ export default function DashboardLoading() {
       </div>
 
       {/* Divine Presence CTA skeleton */}
-      <div className="mb-6 rounded-[18px] sm:rounded-[20px] border border-amber-500/10 bg-amber-900/10 p-4 sm:p-5 md:p-6">
+      <div className="mb-6 rounded-[18px] sm:rounded-[20px] border border-[#d4a44c]/10 bg-amber-900/10 p-4 sm:p-5 md:p-6">
         <div className="flex items-center gap-4">
           <Skeleton width={56} height={56} rounded="full" />
           <div className="flex-1 space-y-2">
@@ -47,7 +47,7 @@ export default function DashboardLoading() {
       </div>
 
       {/* Companion CTA skeleton */}
-      <div className="mb-6 rounded-2xl border border-orange-500/10 bg-black/30 p-5">
+      <div className="mb-6 rounded-2xl border border-[#d4a44c]/10 bg-black/30 p-5">
         <div className="flex items-center gap-3">
           <Skeleton width={40} height={40} rounded="full" />
           <div className="flex-1 space-y-2">
@@ -65,7 +65,7 @@ export default function DashboardLoading() {
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="rounded-2xl border border-orange-500/10 bg-black/20 p-4 space-y-3">
+            <div key={i} className="rounded-2xl border border-[#d4a44c]/10 bg-black/20 p-4 space-y-3">
               <div className="flex items-center gap-3">
                 <Skeleton width={36} height={36} rounded="xl" />
                 <div className="flex-1 space-y-1.5">

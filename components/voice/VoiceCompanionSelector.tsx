@@ -74,11 +74,11 @@ const LANGUAGE_GROUPS = [
 
 const EMOTION_TONES = [
   { id: 'neutral', label: 'Natural', description: 'Warm, conversational default', gradient: 'from-violet-500 to-indigo-500' },
-  { id: 'warmth', label: 'Warmth', description: 'Extra caring and nurturing', gradient: 'from-amber-500 to-orange-500' },
+  { id: 'warmth', label: 'Warmth', description: 'Extra caring and nurturing', gradient: 'from-[#d4a44c] to-[#d4a44c]' },
   { id: 'calm', label: 'Calm', description: 'Peaceful and meditative', gradient: 'from-emerald-500 to-teal-500' },
   { id: 'wisdom', label: 'Wisdom', description: 'Measured and authoritative', gradient: 'from-indigo-500 to-purple-500' },
   { id: 'compassion', label: 'Compassion', description: 'Deep empathy and care', gradient: 'from-pink-500 to-rose-500' },
-  { id: 'encouragement', label: 'Uplift', description: 'Energizing and positive', gradient: 'from-yellow-500 to-amber-500' },
+  { id: 'encouragement', label: 'Uplift', description: 'Energizing and positive', gradient: 'from-yellow-500 to-[#d4a44c]' },
 ]
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -260,7 +260,7 @@ export default function VoiceCompanionSelector({
           {selectedVoice?.poweredBy && (
             <span className={`text-[9px] px-2 py-0.5 rounded-full border ${
               selectedVoice.poweredBy === 'elevenlabs'
-                ? 'border-amber-500/20 bg-amber-500/10 text-amber-400'
+                ? 'border-[#d4a44c]/20 bg-[#d4a44c]/10 text-[#d4a44c]'
                 : selectedVoice.poweredBy === 'sarvam'
                 ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
                 : selectedVoice.poweredBy === 'bhashini'
@@ -295,7 +295,7 @@ export default function VoiceCompanionSelector({
             onClick={() => setActiveSection(key)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-medium transition-all border-b-2 ${
               activeSection === key
-                ? 'border-amber-500/70 text-amber-300 bg-amber-500/5'
+                ? 'border-[#d4a44c]/70 text-[#e8b54a] bg-[#d4a44c]/5'
                 : 'border-transparent text-white/35 hover:text-white/55 hover:bg-white/[0.02]'
             }`}
           >
@@ -324,7 +324,7 @@ export default function VoiceCompanionSelector({
                   <span className={`text-[8px] px-1.5 py-0.5 rounded-full border ${
                     group.provider === 'sarvam'
                       ? 'border-emerald-500/20 text-emerald-400/60 bg-emerald-500/5'
-                      : 'border-amber-500/20 text-amber-400/60 bg-amber-500/5'
+                      : 'border-[#d4a44c]/20 text-[#d4a44c]/60 bg-[#d4a44c]/5'
                   }`}>
                     {group.provider === 'sarvam' ? 'Sarvam + Bhashini' : 'ElevenLabs'}
                   </span>
@@ -341,13 +341,13 @@ export default function VoiceCompanionSelector({
                         onClick={() => handleLanguageSelect(langCode)}
                         className={`flex flex-col items-center gap-1 p-2.5 rounded-xl transition-all ${
                           isSelected
-                            ? 'bg-amber-500/15 border border-amber-400/30 ring-1 ring-amber-400/15 shadow-sm shadow-amber-500/10'
+                            ? 'bg-[#d4a44c]/15 border border-[#d4a44c]/30 ring-1 ring-[#d4a44c]/15 shadow-sm shadow-[#d4a44c]/10'
                             : 'bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] hover:border-white/[0.1]'
                         }`}
                       >
                         <span className="text-lg leading-none">{lang.flag}</span>
                         <span className={`text-[10px] font-medium leading-tight text-center ${
-                          isSelected ? 'text-amber-300' : 'text-white/70'
+                          isSelected ? 'text-[#e8b54a]' : 'text-white/70'
                         }`}>
                           {lang.nativeName}
                         </span>
@@ -373,7 +373,7 @@ export default function VoiceCompanionSelector({
                   onClick={() => setFilterGender(g)}
                   className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${
                     filterGender === g
-                      ? 'bg-amber-500/15 text-amber-300 border border-amber-400/25'
+                      ? 'bg-[#d4a44c]/15 text-[#e8b54a] border border-[#d4a44c]/25'
                       : 'bg-white/[0.03] text-white/35 border border-white/[0.06] hover:bg-white/[0.06]'
                   }`}
                 >
@@ -393,7 +393,7 @@ export default function VoiceCompanionSelector({
                   <p className="text-sm text-white/30">No voices match your filters</p>
                   <button
                     onClick={() => setFilterGender('all')}
-                    className="mt-2 text-xs text-amber-400/70 hover:text-amber-400 transition-colors"
+                    className="mt-2 text-xs text-[#d4a44c]/70 hover:text-[#d4a44c] transition-colors"
                   >
                     Clear filters
                   </button>
@@ -410,7 +410,7 @@ export default function VoiceCompanionSelector({
                       onClick={() => handleVoiceSelect(voice)}
                       className={`relative rounded-xl border cursor-pointer transition-all group ${
                         isSelected
-                          ? 'bg-amber-500/[0.08] border-amber-400/25 shadow-sm shadow-amber-500/5'
+                          ? 'bg-[#d4a44c]/[0.08] border-[#d4a44c]/25 shadow-sm shadow-[#d4a44c]/5'
                           : 'bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.04] hover:border-white/[0.1]'
                       }`}
                     >
@@ -420,7 +420,7 @@ export default function VoiceCompanionSelector({
                           <div className="flex items-center gap-2.5 min-w-0">
                             <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-colors ${
                               isSelected
-                                ? 'bg-amber-500/20 text-amber-400 ring-1 ring-amber-400/30'
+                                ? 'bg-[#d4a44c]/20 text-[#d4a44c] ring-1 ring-[#d4a44c]/30'
                                 : voice.gender === 'female'
                                   ? 'bg-pink-500/10 text-pink-400/70'
                                   : 'bg-blue-500/10 text-blue-400/70'
@@ -431,12 +431,12 @@ export default function VoiceCompanionSelector({
                               <div className="flex items-center gap-1.5">
                                 <span className="text-sm font-semibold text-white/90">{voice.name}</span>
                                 {isSelected && (
-                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" className="text-amber-400 flex-shrink-0">
+                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" className="text-[#d4a44c] flex-shrink-0">
                                     <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                                   </svg>
                                 )}
                                 {voice.premium && (
-                                  <span className="px-1.5 py-0 rounded text-[7px] font-bold uppercase tracking-wider bg-gradient-to-r from-amber-500/15 to-orange-500/15 text-amber-400/70 border border-amber-500/15">
+                                  <span className="px-1.5 py-0 rounded text-[7px] font-bold uppercase tracking-wider bg-gradient-to-r from-[#d4a44c]/15 to-[#d4a44c]/15 text-[#d4a44c]/70 border border-[#d4a44c]/15">
                                     HD
                                   </span>
                                 )}
@@ -453,7 +453,7 @@ export default function VoiceCompanionSelector({
                             disabled={isPreviewPlaying}
                             className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
                               isPreviewing
-                                ? 'bg-amber-500/20 text-amber-400'
+                                ? 'bg-[#d4a44c]/20 text-[#d4a44c]'
                                 : 'bg-white/[0.04] text-white/35 hover:bg-white/[0.08] hover:text-white/55 group-hover:bg-white/[0.06]'
                             }`}
                             aria-label={isPreviewing ? 'Playing preview' : `Preview ${voice.name}`}
@@ -461,7 +461,7 @@ export default function VoiceCompanionSelector({
                             {isPreviewing ? (
                               <div className="flex items-center gap-[2px]">
                                 {[0, 1, 2].map(i => (
-                                  <div key={i} className="w-[3px] rounded-full bg-amber-400" style={{
+                                  <div key={i} className="w-[3px] rounded-full bg-[#d4a44c]" style={{
                                     height: `${8 + Math.random() * 8}px`,
                                     animation: `voiceBarPulse 0.6s ease-in-out ${i * 0.15}s infinite alternate`,
                                   }} />
@@ -482,7 +482,7 @@ export default function VoiceCompanionSelector({
                         <div className="flex items-center justify-between mt-2 ml-[46px]">
                           <span className={`text-[8px] px-1.5 py-0.5 rounded-full border ${
                             voice.poweredBy === 'elevenlabs'
-                              ? 'border-amber-500/15 text-amber-400/50 bg-amber-500/5'
+                              ? 'border-[#d4a44c]/15 text-[#d4a44c]/50 bg-[#d4a44c]/5'
                               : voice.poweredBy === 'sarvam'
                               ? 'border-emerald-500/15 text-emerald-400/50 bg-emerald-500/5'
                               : voice.poweredBy === 'bhashini'
@@ -496,7 +496,7 @@ export default function VoiceCompanionSelector({
                             <div className="flex items-center gap-1" title={`Warmth: ${Math.round(voice.warmth * 100)}%`}>
                               <span className="text-[7px] text-white/15">Warmth</span>
                               <div className="w-10 h-1 rounded-full bg-white/[0.06] overflow-hidden">
-                                <div className="h-full rounded-full bg-gradient-to-r from-amber-500/50 to-orange-500/50" style={{ width: `${voice.warmth * 100}%` }} />
+                                <div className="h-full rounded-full bg-gradient-to-r from-[#d4a44c]/50 to-[#d4a44c]/50" style={{ width: `${voice.warmth * 100}%` }} />
                               </div>
                             </div>
                             <div className="flex items-center gap-1" title={`Clarity: ${Math.round(voice.clarity * 100)}%`}>
@@ -531,7 +531,7 @@ export default function VoiceCompanionSelector({
                     onClick={() => handleEmotionSelect(tone.id)}
                     className={`flex flex-col items-start p-3 rounded-xl transition-all text-left ${
                       isSelected
-                        ? 'bg-white/[0.06] border border-amber-400/25 ring-1 ring-amber-400/10'
+                        ? 'bg-white/[0.06] border border-[#d4a44c]/25 ring-1 ring-[#d4a44c]/10'
                         : 'bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.04]'
                     }`}
                   >
@@ -539,7 +539,7 @@ export default function VoiceCompanionSelector({
                       <div className={`w-2.5 h-2.5 rounded-full bg-gradient-to-br ${tone.gradient} ${
                         isSelected ? 'ring-2 ring-white/20' : ''
                       }`} />
-                      <span className={`text-xs font-medium ${isSelected ? 'text-amber-300' : 'text-white/70'}`}>
+                      <span className={`text-xs font-medium ${isSelected ? 'text-[#e8b54a]' : 'text-white/70'}`}>
                         {tone.label}
                       </span>
                     </div>
@@ -558,7 +558,7 @@ export default function VoiceCompanionSelector({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label htmlFor="voice-speed" className="text-[11px] text-white/50 font-medium">Speaking Speed</label>
-                <span className="text-[11px] font-mono text-amber-300/70">{speed.toFixed(2)}x</span>
+                <span className="text-[11px] font-mono text-[#e8b54a]/70">{speed.toFixed(2)}x</span>
               </div>
               <input
                 id="voice-speed"
@@ -572,7 +572,7 @@ export default function VoiceCompanionSelector({
                   setSpeed(val)
                   emitConfig({ speed: val })
                 }}
-                className="w-full h-1.5 rounded-full appearance-none bg-white/[0.06] accent-amber-500"
+                className="w-full h-1.5 rounded-full appearance-none bg-white/[0.06] accent-[#d4a44c]"
               />
               <div className="flex justify-between text-[8px] text-white/20 mt-1">
                 <span>Slower</span>
@@ -585,7 +585,7 @@ export default function VoiceCompanionSelector({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label htmlFor="voice-pitch" className="text-[11px] text-white/50 font-medium">Voice Pitch</label>
-                <span className="text-[11px] font-mono text-amber-300/70">{pitch > 0 ? '+' : ''}{pitch.toFixed(1)}</span>
+                <span className="text-[11px] font-mono text-[#e8b54a]/70">{pitch > 0 ? '+' : ''}{pitch.toFixed(1)}</span>
               </div>
               <input
                 id="voice-pitch"
@@ -599,7 +599,7 @@ export default function VoiceCompanionSelector({
                   setPitch(val)
                   emitConfig({ pitch: val })
                 }}
-                className="w-full h-1.5 rounded-full appearance-none bg-white/[0.06] accent-amber-500"
+                className="w-full h-1.5 rounded-full appearance-none bg-white/[0.06] accent-[#d4a44c]"
               />
               <div className="flex justify-between text-[8px] text-white/20 mt-1">
                 <span>Deeper</span>
@@ -621,7 +621,7 @@ export default function VoiceCompanionSelector({
                   emitConfig({ autoPlay: next })
                 }}
                 className={`relative w-10 h-5.5 rounded-full transition-colors ${
-                  autoPlay ? 'bg-amber-500' : 'bg-white/15'
+                  autoPlay ? 'bg-[#d4a44c]' : 'bg-white/15'
                 }`}
                 role="switch"
                 aria-checked={autoPlay}
@@ -640,7 +640,7 @@ export default function VoiceCompanionSelector({
               <p className="text-[10px] text-white/25 mb-2 font-medium uppercase tracking-wider">Voice Providers</p>
               <div className="space-y-1.5">
                 {[
-                  { name: 'ElevenLabs', quality: '10/10', desc: 'Most natural human-like voices', color: 'text-amber-400' },
+                  { name: 'ElevenLabs', quality: '10/10', desc: 'Most natural human-like voices', color: 'text-[#d4a44c]' },
                   { name: 'Sarvam AI', quality: '9.5/10', desc: 'Best Indian language pronunciation', color: 'text-emerald-400' },
                   { name: 'Bhashini AI', quality: '9/10', desc: 'Government of India, 22 Indian languages', color: 'text-sky-400' },
                 ].map(p => (
@@ -668,7 +668,7 @@ export default function VoiceCompanionSelector({
           <div className="flex items-center gap-2.5">
             <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
               selectedVoice.poweredBy === 'elevenlabs'
-                ? 'bg-amber-500/20 text-amber-400'
+                ? 'bg-[#d4a44c]/20 text-[#d4a44c]'
                 : selectedVoice.poweredBy === 'sarvam'
                 ? 'bg-emerald-500/20 text-emerald-400'
                 : selectedVoice.poweredBy === 'bhashini'

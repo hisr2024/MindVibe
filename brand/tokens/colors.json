@@ -5,14 +5,14 @@
     "accessibility": "All primary on neutral surfaces meet WCAG AA for text at 16px+."
   },
   "core": {
-    "mvSunrise": { "value": "#ff9159", "description": "MindVibe Sunrise orange for optimism" },
-    "mvSunriseHighlight": { "value": "#ffd070", "description": "Sunrise highlight gold for glow" },
+    "mvSunrise": { "value": "#d4a44c", "description": "MindVibe divine gold for warmth and optimism" },
+    "mvSunriseHighlight": { "value": "#f0c96d", "description": "Sunrise highlight bright gold for glow" },
     "mvOcean": { "value": "#17b1a7", "description": "MindVibe Ocean teal for calm" },
     "mvOceanSky": { "value": "#6dd7f2", "description": "Sky accent for Ocean theme" },
     "mvAurora": { "value": "#ff8fb4", "description": "MindVibe Aurora rose for compassion" },
     "mvAuroraLilac": { "value": "#c2a5ff", "description": "Lilac lift for Aurora" },
     "kiaanDeep": { "value": "#0f172a", "description": "Anchor navy for KIAAN wordmark depth" },
-    "kiaanGlow": { "value": "#6ad7ff", "description": "Resonance halo for KIAAN" }
+    "kiaanGlow": { "value": "#e8b54a", "description": "Divine golden resonance halo for KIAAN" }
   },
   "modes": {
     "innerPeacePrimary": { "value": "#1fb8c0", "description": "Soft teal for Inner Peace vertex" },
@@ -20,7 +20,7 @@
     "selfKindnessPrimary": { "value": "#e57ac5", "description": "Rose-lilac glow for self-kindness" }
   },
   "neutrals": {
-    "ink": "#0b0b0f",
+    "ink": "#050507",
     "fog": "#0f1624",
     "cloud": "#e8edf5",
     "mist": "#f6f8fb",

@@ -83,7 +83,7 @@ export default function AdminFeatureFlagsPage() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-orange-400"
+          className="rounded-lg bg-[#d4a44c] px-4 py-2 text-sm font-medium text-slate-900 hover:bg-[#d4a44c]"
         >
           + Create Flag
         </button>
@@ -153,7 +153,7 @@ export default function AdminFeatureFlagsPage() {
                   max="100"
                   value={flag.rolloutPercentage}
                   onChange={(e) => handleRolloutChange(flag.id, parseInt(e.target.value))}
-                  className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-700 accent-orange-500"
+                  className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-700 accent-[#d4a44c]"
                 />
               </div>
             </div>
@@ -204,7 +204,7 @@ export default function AdminFeatureFlagsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-orange-500 px-4 py-2 text-slate-900 hover:bg-orange-400"
+                  className="rounded-lg bg-[#d4a44c] px-4 py-2 text-slate-900 hover:bg-[#d4a44c]"
                 >
                   Create
                 </button>

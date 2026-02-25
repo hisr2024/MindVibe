@@ -58,7 +58,7 @@ export const CORE_TOOLS: ToolConfig[] = [
     icon: '📝',
     title: 'Private Journal',
     description: 'Encrypted spiritual journaling',
-    gradient: 'from-amber-400/30 to-orange-400/30',
+    gradient: 'from-[#d4a44c]/30 to-[#d4a44c]/30',
     href: '/sacred-reflections', // Same page as Sacred Reflections - encrypted journaling feature
   },
   {
@@ -122,7 +122,7 @@ export const GUIDANCE_TOOLS: ToolConfig[] = [
     icon: '🔄',
     title: 'Ardha',
     description: 'Gita-aligned cognitive reframing',
-    gradient: 'from-amber-400/30 to-yellow-400/30',
+    gradient: 'from-[#d4a44c]/30 to-yellow-400/30',
     href: '/tools/ardha',
     purposeDescKey: 'ardha',
   },
@@ -131,7 +131,7 @@ export const GUIDANCE_TOOLS: ToolConfig[] = [
     icon: '🧭',
     title: 'Relationship Compass',
     description: 'Gita-grounded relationship guidance',
-    gradient: 'from-rose-400/30 to-orange-400/30',
+    gradient: 'from-rose-400/30 to-[#d4a44c]/30',
     href: '/tools/relationship-compass',
     purposeDescKey: 'relationship-compass',
   },
@@ -171,7 +171,7 @@ export const KARMA_TOOLS: ToolConfig[] = [
     icon: '💫',
     title: 'Emotional Reset',
     description: '7-step guided inner peace flow',
-    gradient: 'from-orange-400/30 to-amber-300/30',
+    gradient: 'from-[#d4a44c]/30 to-[#f0c96d]/30',
     href: '/tools/emotional-reset',
   },
 ]

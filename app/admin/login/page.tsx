@@ -56,7 +56,7 @@ export default function AdminLogin() {
         <div className="rounded-2xl border border-slate-700 bg-slate-800/50 p-8 backdrop-blur">
           {/* Header */}
           <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-300">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#d4a44c] to-[#e8b54a]">
               <span className="text-2xl font-bold text-slate-900">MV</span>
             </div>
             <h1 className="text-2xl font-bold text-slate-100">Admin Login</h1>
@@ -92,7 +92,7 @@ export default function AdminLogin() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full rounded-lg border border-slate-600 bg-slate-700/50 px-4 py-3 text-slate-100 placeholder-slate-400 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    className="w-full rounded-lg border border-slate-600 bg-slate-700/50 px-4 py-3 text-slate-100 placeholder-slate-400 focus:border-[#d4a44c] focus:outline-none focus:ring-1 focus:ring-[#d4a44c]"
                     placeholder="admin@mindvibe.life"
                     aria-invalid={!!error}
                     aria-describedby={error ? 'login-error' : undefined}
@@ -113,7 +113,7 @@ export default function AdminLogin() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={8}
-                    className="w-full rounded-lg border border-slate-600 bg-slate-700/50 px-4 py-3 text-slate-100 placeholder-slate-400 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    className="w-full rounded-lg border border-slate-600 bg-slate-700/50 px-4 py-3 text-slate-100 placeholder-slate-400 focus:border-[#d4a44c] focus:outline-none focus:ring-1 focus:ring-[#d4a44c]"
                     placeholder="••••••••"
                     aria-invalid={!!error}
                     aria-describedby={error ? 'login-error' : undefined}
@@ -137,7 +137,7 @@ export default function AdminLogin() {
                   required
                   minLength={6}
                   maxLength={8}
-                  className="w-full rounded-lg border border-slate-600 bg-slate-700/50 px-4 py-3 text-center text-2xl tracking-[0.5em] text-slate-100 placeholder-slate-400 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  className="w-full rounded-lg border border-slate-600 bg-slate-700/50 px-4 py-3 text-center text-2xl tracking-[0.5em] text-slate-100 placeholder-slate-400 focus:border-[#d4a44c] focus:outline-none focus:ring-1 focus:ring-[#d4a44c]"
                   placeholder="000000"
                   autoFocus
                 />
@@ -150,7 +150,7 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-gradient-to-r from-orange-500 to-amber-400 px-4 py-3 font-semibold text-slate-900 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-lg bg-gradient-to-r from-[#d4a44c] to-[#d4a44c] px-4 py-3 font-semibold text-slate-900 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? <span>Signing in...</span> : mfaRequired ? <span>Verify</span> : <span>Sign In</span>}
             </button>

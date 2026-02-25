@@ -82,9 +82,9 @@ export function PatternAnalysis({ className = '' }: PatternAnalysisProps) {
 
   if (loading) {
     return (
-      <div className={`rounded-3xl border border-orange-500/15 bg-black/50 p-6 ${className}`}>
+      <div className={`rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-6 ${className}`}>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-400" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#d4a44c]" />
         </div>
       </div>
     )
@@ -115,19 +115,19 @@ export function PatternAnalysis({ className = '' }: PatternAnalysisProps) {
   const worstDay = sortedDays[sortedDays.length - 1]
 
   return (
-    <div className={`rounded-3xl border border-orange-500/15 bg-black/50 p-6 ${className}`}>
+    <div className={`rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-6 ${className}`}>
       {/* Header */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-orange-50 mb-1 flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-orange-400" />
+        <h3 className="text-lg font-semibold text-[#f5f0e8] mb-1 flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-[#d4a44c]" />
           Pattern Analysis
         </h3>
-        <p className="text-sm text-orange-100/60">Discover your behavioral rhythms</p>
+        <p className="text-sm text-[#f5f0e8]/60">Discover your behavioral rhythms</p>
       </div>
 
       {/* Weekly Patterns Section */}
       <div className="mb-8">
-        <h4 className="text-sm font-semibold text-orange-50 mb-4">Weekly Mood Rhythm</h4>
+        <h4 className="text-sm font-semibold text-[#f5f0e8] mb-4">Weekly Mood Rhythm</h4>
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3 mb-4">
@@ -147,22 +147,22 @@ export function PatternAnalysis({ className = '' }: PatternAnalysisProps) {
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={weeklyChartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 115, 39, 0.1)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(212, 164, 76, 0.1)" />
               <XAxis
                 dataKey="day"
-                stroke="rgba(255, 115, 39, 0.6)"
-                tick={{ fill: 'rgba(255, 115, 39, 0.8)', fontSize: 10 }}
+                stroke="rgba(212, 164, 76, 0.6)"
+                tick={{ fill: 'rgba(212, 164, 76, 0.8)', fontSize: 10 }}
                 tickFormatter={(value) => value.substring(0, 3)}
               />
               <YAxis
                 domain={[0, 10]}
-                stroke="rgba(255, 115, 39, 0.6)"
-                tick={{ fill: 'rgba(255, 115, 39, 0.8)', fontSize: 10 }}
+                stroke="rgba(212, 164, 76, 0.6)"
+                tick={{ fill: 'rgba(212, 164, 76, 0.8)', fontSize: 10 }}
               />
               <Tooltip
                 contentStyle={{
                   backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                  border: '1px solid rgba(255, 115, 39, 0.3)',
+                  border: '1px solid rgba(212, 164, 76, 0.3)',
                   borderRadius: '12px'
                 }}
                 labelStyle={{ color: '#FFF5E6' }}
@@ -180,8 +180,8 @@ export function PatternAnalysis({ className = '' }: PatternAnalysisProps) {
 
       {/* Tag Correlations Section */}
       <div className="mb-6">
-        <h4 className="text-sm font-semibold text-orange-50 mb-4 flex items-center gap-2">
-          <Tag className="h-4 w-4 text-orange-400" />
+        <h4 className="text-sm font-semibold text-[#f5f0e8] mb-4 flex items-center gap-2">
+          <Tag className="h-4 w-4 text-[#d4a44c]" />
           Emotional Triggers
         </h4>
 
@@ -192,7 +192,7 @@ export function PatternAnalysis({ className = '' }: PatternAnalysisProps) {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="rounded-2xl border border-orange-500/15 bg-orange-500/5 p-3"
+              className="rounded-2xl border border-[#d4a44c]/15 bg-[#d4a44c]/5 p-3"
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
@@ -200,15 +200,15 @@ export function PatternAnalysis({ className = '' }: PatternAnalysisProps) {
                     className="h-3 w-3 rounded-full"
                     style={{ backgroundColor: IMPACT_COLORS[tag.impact] }}
                   />
-                  <span className="text-sm font-medium text-orange-50 capitalize">{tag.tag}</span>
+                  <span className="text-sm font-medium text-[#f5f0e8] capitalize">{tag.tag}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-orange-100/60">{tag.count} times</span>
-                  <span className="text-sm font-bold text-orange-50">{tag.average_mood.toFixed(1)}</span>
+                  <span className="text-xs text-[#f5f0e8]/60">{tag.count} times</span>
+                  <span className="text-sm font-bold text-[#f5f0e8]">{tag.average_mood.toFixed(1)}</span>
                 </div>
               </div>
 
-              <div className="h-1.5 rounded-full bg-orange-500/10 overflow-hidden">
+              <div className="h-1.5 rounded-full bg-[#d4a44c]/10 overflow-hidden">
                 <motion.div
                   className="h-full rounded-full"
                   style={{ backgroundColor: IMPACT_COLORS[tag.impact] }}
@@ -230,7 +230,7 @@ export function PatternAnalysis({ className = '' }: PatternAnalysisProps) {
               key={idx}
               className="rounded-2xl border border-blue-400/30 bg-blue-950/20 p-4"
             >
-              <h5 className="text-sm font-semibold text-orange-50 mb-1">{insight.title}</h5>
+              <h5 className="text-sm font-semibold text-[#f5f0e8] mb-1">{insight.title}</h5>
               <p className="text-xs text-blue-100/80 leading-relaxed">{insight.description}</p>
             </div>
           ))}
@@ -238,7 +238,7 @@ export function PatternAnalysis({ className = '' }: PatternAnalysisProps) {
       )}
 
       {/* Last Updated */}
-      <div className="mt-4 text-xs text-center text-orange-100/40">
+      <div className="mt-4 text-xs text-center text-[#f5f0e8]/40">
         Analyzed {new Date(patternData.analyzed_at).toLocaleString()}
       </div>
     </div>

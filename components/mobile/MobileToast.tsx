@@ -82,9 +82,9 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
     },
     warning: {
       icon: <AlertTriangle className="w-5 h-5" />,
-      bgClass: 'bg-amber-500/10 border-amber-500/30',
-      iconClass: 'text-amber-400',
-      textClass: 'text-amber-50',
+      bgClass: 'bg-[#d4a44c]/10 border-[#d4a44c]/30',
+      iconClass: 'text-[#d4a44c]',
+      textClass: 'text-[#f5f0e8]',
     },
     error: {
       icon: <AlertCircle className="w-5 h-5" />,
@@ -178,7 +178,7 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
             toast.action?.onClick()
             onDismiss(toast.id)
           }}
-          className="px-3 py-1 text-sm font-semibold text-orange-400 hover:text-orange-300"
+          className="px-3 py-1 text-sm font-semibold text-[#d4a44c] hover:text-[#e8b54a]"
         >
           {toast.action.label}
         </motion.button>

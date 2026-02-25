@@ -96,7 +96,7 @@ export default function KarmaFootprintClient() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] text-white p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <FadeIn>
@@ -136,8 +136,8 @@ export default function KarmaFootprintClient() {
           <section className="space-y-4">
             {!analysis ? (
               <FadeIn delay={0.1}>
-                <div className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-                  <label htmlFor="day-input" className="text-sm font-semibold text-orange-100 block mb-3">
+                <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
+                  <label htmlFor="day-input" className="text-sm font-semibold text-[#f5f0e8] block mb-3">
                     How did your day go?
                   </label>
                   <textarea
@@ -145,7 +145,7 @@ export default function KarmaFootprintClient() {
                     value={dayDescription}
                     onChange={e => setDayDescription(e.target.value)}
                     placeholder="Describe your interactions, choices, and moments from today. Include both positive moments and areas where you might have acted differently..."
-                    className="w-full min-h-[200px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/60 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none resize-none"
+                    className="w-full min-h-[200px] rounded-2xl bg-black/50 border border-[#d4a44c]/25 text-[#f5f0e8] placeholder:text-[#f5f0e8]/60 p-4 focus:ring-2 focus:ring-[#d4a44c]/50 outline-none resize-none"
                     aria-describedby="day-hint"
                   />
                   <p id="day-hint" className="sr-only">Describe your day for karma analysis</p>
@@ -154,7 +154,7 @@ export default function KarmaFootprintClient() {
                     <button
                       onClick={analyzeDay}
                       disabled={!dayDescription.trim() || loading}
-                      className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400/50"
+                      className="px-5 py-3 rounded-2xl bg-gradient-to-r from-[#d4a44c] via-[#ffb347] to-[#e8b54a] text-slate-950 font-semibold shadow-lg shadow-[#d4a44c]/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50"
                       aria-label={loading ? 'Analyzing...' : 'Analyze my day'}
                     >
                       {loading ? <span>Analyzing...</span> : <span>Analyze my day</span>}
@@ -162,7 +162,7 @@ export default function KarmaFootprintClient() {
                   </div>
 
                   {error && (
-                    <p className="mt-3 text-sm text-orange-200" role="alert">
+                    <p className="mt-3 text-sm text-[#e8b54a]" role="alert">
                       <span>{error}</span>
                     </p>
                   )}
@@ -172,10 +172,10 @@ export default function KarmaFootprintClient() {
               <FadeIn delay={0.1}>
                 <div className="space-y-4">
                   {/* Analysis Result Header */}
-                  <div className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
+                  <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-orange-50">Your Karma Footprint</h3>
-                      <span className="text-xs text-orange-100/70">
+                      <h3 className="text-lg font-semibold text-[#f5f0e8]">Your Karma Footprint</h3>
+                      <span className="text-xs text-[#f5f0e8]/70">
                         {new Date(analysis.analyzedAt).toLocaleString()}
                       </span>
                     </div>
@@ -183,7 +183,7 @@ export default function KarmaFootprintClient() {
                     <div className="flex items-center gap-6 mb-4">
                       <KarmaPlant state={analysis.state} size="md" />
                       <div className="flex-1">
-                        <p className="text-sm text-orange-100/90 leading-relaxed">
+                        <p className="text-sm text-[#f5f0e8]/90 leading-relaxed">
                           {analysis.summary}
                         </p>
                       </div>
@@ -223,16 +223,16 @@ export default function KarmaFootprintClient() {
                   </div>
 
                   {/* Recommendation */}
-                  <div className="rounded-2xl border border-orange-400/30 bg-orange-500/10 p-5">
-                    <h4 className="text-sm font-semibold text-orange-50 mb-2">Recommendation</h4>
-                    <p className="text-sm text-orange-100/80">{analysis.recommendation}</p>
+                  <div className="rounded-2xl border border-[#d4a44c]/30 bg-[#d4a44c]/10 p-5">
+                    <h4 className="text-sm font-semibold text-[#f5f0e8] mb-2">Recommendation</h4>
+                    <p className="text-sm text-[#f5f0e8]/80">{analysis.recommendation}</p>
                   </div>
 
                   {/* Action Buttons */}
                   <div className="flex flex-wrap gap-3">
                     <button
                       onClick={resetAnalysis}
-                      className="px-4 py-2 text-sm font-semibold rounded-lg border border-orange-400/25 text-orange-50 hover:bg-white/5 transition"
+                      className="px-4 py-2 text-sm font-semibold rounded-lg border border-[#d4a44c]/25 text-[#f5f0e8] hover:bg-white/5 transition"
                     >
                       🔄 Analyze Another Day
                     </button>
@@ -251,8 +251,8 @@ export default function KarmaFootprintClient() {
           {/* Right: Info Sidebar */}
           <section className="space-y-4">
             <FadeIn delay={0.15}>
-              <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-                <h3 className="text-sm font-semibold text-orange-50 mb-4">Karma Footprint States</h3>
+              <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
+                <h3 className="text-sm font-semibold text-[#f5f0e8] mb-4">Karma Footprint States</h3>
                 <div className="space-y-3">
                   {[
                     { state: 'strong_positive' as KarmaFootprintState, label: 'Flourishing', desc: 'Many mindful, positive actions' },
@@ -264,8 +264,8 @@ export default function KarmaFootprintClient() {
                     <div key={state} className="flex items-center gap-3 text-sm">
                       <KarmaPlant state={state} size="sm" />
                       <div>
-                        <span className="font-medium text-orange-50">{label}</span>
-                        <p className="text-xs text-orange-100/70">{desc}</p>
+                        <span className="font-medium text-[#f5f0e8]">{label}</span>
+                        <p className="text-xs text-[#f5f0e8]/70">{desc}</p>
                       </div>
                     </div>
                   ))}
@@ -274,15 +274,15 @@ export default function KarmaFootprintClient() {
             </FadeIn>
 
             <FadeIn delay={0.2}>
-              <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-                <h3 className="text-sm font-semibold text-orange-50 mb-3">About Karma Footprint</h3>
-                <p className="text-xs text-orange-100/80 leading-relaxed mb-4">
+              <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
+                <h3 className="text-sm font-semibold text-[#f5f0e8] mb-3">About Karma Footprint</h3>
+                <p className="text-xs text-[#f5f0e8]/80 leading-relaxed mb-4">
                   The Karma Footprint analyzer helps you reflect on your daily actions and their impact. It&apos;s not about judgment—it&apos;s about awareness and growth.
                 </p>
 
-                <div className="p-3 rounded-xl bg-black/40 border border-orange-500/15">
-                  <h4 className="text-xs font-semibold text-orange-50 mb-2">How it works</h4>
-                  <p className="text-xs text-orange-100/70">
+                <div className="p-3 rounded-xl bg-black/40 border border-[#d4a44c]/15">
+                  <h4 className="text-xs font-semibold text-[#f5f0e8] mb-2">How it works</h4>
+                  <p className="text-xs text-[#f5f0e8]/70">
                     Share your day → Get visual feedback → Identify patterns → Grow mindfully
                   </p>
                 </div>
@@ -290,9 +290,9 @@ export default function KarmaFootprintClient() {
             </FadeIn>
 
             <FadeIn delay={0.25}>
-              <div className="rounded-2xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 to-transparent p-4">
-                <p className="text-xs text-orange-100/80">
-                  <strong className="text-orange-50">Privacy:</strong> Your reflections are processed securely. We don&apos;t store personal details—only anonymized patterns for your growth tracking.
+              <div className="rounded-2xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#d4a44c]/10 to-transparent p-4">
+                <p className="text-xs text-[#f5f0e8]/80">
+                  <strong className="text-[#f5f0e8]">Privacy:</strong> Your reflections are processed securely. We don&apos;t store personal details—only anonymized patterns for your growth tracking.
                 </p>
               </div>
             </FadeIn>

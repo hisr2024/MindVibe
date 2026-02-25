@@ -348,19 +348,19 @@ export default function SacredReflectionsPage() {
     <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-3 sm:p-4 md:p-8 pb-28 sm:pb-8">
       <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <header className="rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-4 sm:p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
+        <header className="rounded-2xl sm:rounded-3xl border border-[#d4a44c]/15 bg-[#0d0d10]/85 p-4 sm:p-6 md:p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Private Sanctuary</p>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-orange-100 bg-clip-text text-transparent">
+              <p className="text-xs uppercase tracking-[0.22em] text-[#f5f0e8]/70">Private Sanctuary</p>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#f0c96d] via-[#e8b54a] to-[#f0c96d] bg-clip-text text-transparent">
                 Sacred Reflections
               </h1>
-              <p className="mt-2 text-sm text-orange-100/80 max-w-xl">
+              <p className="mt-2 text-sm text-[#f5f0e8]/80 max-w-xl">
                 Your encrypted private journal. Entries are sealed with AES-GCM in your browser and synced to the cloud only as ciphertext.
               </p>
             </div>
             <div className="flex flex-col gap-2">
-              <Link href="/" className="text-xs text-orange-100/70 hover:text-orange-200 transition">
+              <Link href="/" className="text-xs text-[#f5f0e8]/70 hover:text-[#e8b54a] transition">
                 ← Back to home
               </Link>
             </div>
@@ -371,37 +371,37 @@ export default function SacredReflectionsPage() {
             <span className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold ${
               encryptionReady
                 ? 'bg-emerald-500/15 border-emerald-400/40 text-emerald-50'
-                : 'bg-orange-500/15 border-orange-400/40 text-orange-50'
+                : 'bg-[#d4a44c]/15 border-[#d4a44c]/40 text-[#f5f0e8]'
             }`}>
-              <span className={`h-2 w-2 rounded-full animate-pulse ${encryptionReady ? 'bg-emerald-300' : 'bg-orange-300'}`} />
+              <span className={`h-2 w-2 rounded-full animate-pulse ${encryptionReady ? 'bg-emerald-300' : 'bg-[#e8b54a]'}`} />
               AES-GCM secured locally
             </span>
             <span className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold ${
               isOnline
                 ? 'bg-emerald-500/15 border-emerald-400/40 text-emerald-50'
-                : 'bg-orange-500/15 border-orange-400/40 text-orange-50'
+                : 'bg-[#d4a44c]/15 border-[#d4a44c]/40 text-[#f5f0e8]'
             }`}>
-              <span className={`h-2 w-2 rounded-full animate-pulse ${isOnline ? 'bg-emerald-300' : 'bg-orange-300'}`} />
+              <span className={`h-2 w-2 rounded-full animate-pulse ${isOnline ? 'bg-emerald-300' : 'bg-[#e8b54a]'}`} />
               Offline-ready saves on device
             </span>
           </div>
 
           {encryptionMessage && (
-            <p className="mt-3 text-xs text-orange-200">{encryptionMessage}</p>
+            <p className="mt-3 text-xs text-[#e8b54a]">{encryptionMessage}</p>
           )}
         </header>
 
         {/* Main Content Grid */}
         <div className="grid gap-4 sm:gap-6 md:grid-cols-[1.4fr,1fr]">
           {/* Left: Journal Entry Form */}
-          <form onSubmit={e => e.preventDefault()} className="rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-4 sm:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-4 sm:space-y-5">
+          <form onSubmit={e => e.preventDefault()} className="rounded-2xl sm:rounded-3xl border border-[#d4a44c]/15 bg-[#0d0d10]/85 p-4 sm:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-4 sm:space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-orange-50">New Reflection</h2>
-              <p className="text-xs text-orange-100/70 mt-1">KIAAN holds space for your thoughts with warmth and privacy.</p>
+              <h2 className="text-lg font-semibold text-[#f5f0e8]">New Reflection</h2>
+              <p className="text-xs text-[#f5f0e8]/70 mt-1">KIAAN holds space for your thoughts with warmth and privacy.</p>
             </div>
 
             <div>
-              <label htmlFor="encryption-passphrase" className="text-sm font-semibold text-orange-100">Encryption passphrase</label>
+              <label htmlFor="encryption-passphrase" className="text-sm font-semibold text-[#f5f0e8]">Encryption passphrase</label>
               <input
                 id="encryption-passphrase"
                 type="password"
@@ -409,14 +409,14 @@ export default function SacredReflectionsPage() {
                 value={passphrase}
                 onChange={e => setPassphrase(e.target.value)}
                 placeholder="Required for decryption and sync"
-                className="mt-2 w-full bg-black/50 border border-orange-800/60 rounded-2xl px-4 py-3 text-orange-50 placeholder:text-orange-100/50 focus:ring-2 focus:ring-orange-400/50 outline-none"
+                className="mt-2 w-full bg-black/50 border border-[#d4a44c]/60 rounded-2xl px-4 py-3 text-[#f5f0e8] placeholder:text-[#f5f0e8]/50 focus:ring-2 focus:ring-[#d4a44c]/50 outline-none"
               />
-              <p className="mt-1 text-xs text-orange-100/60">Stored only in your browser. MindVibe never sees it.</p>
+              <p className="mt-1 text-xs text-[#f5f0e8]/60">Stored only in your browser. MindVibe never sees it.</p>
             </div>
 
             {/* Mood Selection */}
             <div>
-              <label className="text-sm font-semibold text-orange-100">Select today&apos;s tone</label>
+              <label className="text-sm font-semibold text-[#f5f0e8]">Select today&apos;s tone</label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {moods.map(option => (
                   <button
@@ -424,8 +424,8 @@ export default function SacredReflectionsPage() {
                     onClick={() => setMood(option.label)}
                     className={`px-3 py-2.5 sm:py-2 rounded-2xl border text-sm transition-all ${
                       mood === option.label
-                        ? 'bg-gradient-to-r from-orange-500/70 via-[#ff9933]/70 to-orange-300/70 border-orange-300 text-black shadow-lg shadow-orange-500/25'
-                        : 'bg-black/50 border-orange-800/60 text-orange-100 hover:border-orange-500/60'
+                        ? 'bg-gradient-to-r from-[#d4a44c]/70 via-[#d4a44c]/70 to-[#e8b54a]/70 border-[#d4a44c] text-black shadow-lg shadow-[#d4a44c]/25'
+                        : 'bg-black/50 border-[#d4a44c]/60 text-[#f5f0e8] hover:border-[#d4a44c]/60'
                     }`}
                   >
                     <span className="mr-1">{option.emoji}</span>{option.label}
@@ -436,14 +436,14 @@ export default function SacredReflectionsPage() {
 
             {/* Title */}
             <div>
-              <label htmlFor="reflection-title" className="text-sm font-semibold text-orange-100">Title (optional)</label>
+              <label htmlFor="reflection-title" className="text-sm font-semibold text-[#f5f0e8]">Title (optional)</label>
               <div className="mt-2 flex gap-2 items-center">
                 <input
                   id="reflection-title"
                   value={title}
                   onChange={e => setTitle(e.target.value)}
                   placeholder="A word or phrase for this moment..."
-                  className="flex-1 bg-black/50 border border-orange-800/60 rounded-2xl px-4 py-3 text-orange-50 placeholder:text-orange-100/50 focus:ring-2 focus:ring-orange-400/50 outline-none"
+                  className="flex-1 bg-black/50 border border-[#d4a44c]/60 rounded-2xl px-4 py-3 text-[#f5f0e8] placeholder:text-[#f5f0e8]/50 focus:ring-2 focus:ring-[#d4a44c]/50 outline-none"
                 />
                 <VoiceInputButton
                   language={language}
@@ -455,7 +455,7 @@ export default function SacredReflectionsPage() {
             {/* Body */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label htmlFor="reflection-body" className="text-sm font-semibold text-orange-100">Write freely</label>
+                <label htmlFor="reflection-body" className="text-sm font-semibold text-[#f5f0e8]">Write freely</label>
                 <VoiceInputButton
                   language={language}
                   onTranscript={(text) => setBody(prev => prev ? `${prev} ${text}` : text)}
@@ -466,7 +466,7 @@ export default function SacredReflectionsPage() {
                 value={body}
                 onChange={e => setBody(e.target.value)}
                 placeholder="Let your thoughts flow. Tap the microphone to speak your reflection."
-                className="w-full h-40 bg-black/50 border border-orange-800/60 rounded-2xl p-4 text-orange-50 placeholder:text-orange-100/50 focus:ring-2 focus:ring-orange-400/50 outline-none"
+                className="w-full h-40 bg-black/50 border border-[#d4a44c]/60 rounded-2xl p-4 text-[#f5f0e8] placeholder:text-[#f5f0e8]/50 focus:ring-2 focus:ring-[#d4a44c]/50 outline-none"
               />
             </div>
 
@@ -474,43 +474,43 @@ export default function SacredReflectionsPage() {
               type="button"
               onClick={addEntry}
               disabled={!body.trim()}
-              className="w-full md:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition hover:scale-[1.02]"
+              className="w-full md:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-[#d4a44c] via-[#e8b54a] to-[#f0c96d] text-slate-950 font-semibold shadow-lg shadow-[#d4a44c]/25 disabled:opacity-50 disabled:cursor-not-allowed transition hover:scale-[1.02]"
             >
               Save Reflection
             </button>
           </form>
 
           {/* Right: Weekly Assessment */}
-          <section className="rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-4 sm:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-4 sm:space-y-5">
+          <section className="rounded-2xl sm:rounded-3xl border border-[#d4a44c]/15 bg-[#0d0d10]/85 p-4 sm:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-4 sm:space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-orange-50">Weekly Assessment</h2>
-              <span className="text-xs text-orange-100/60">Auto-updates</span>
+              <h2 className="text-lg font-semibold text-[#f5f0e8]">Weekly Assessment</h2>
+              <span className="text-xs text-[#f5f0e8]/60">Auto-updates</span>
             </div>
 
-            <div className="rounded-2xl bg-black/40 border border-orange-500/20 p-4 space-y-3">
-              <div className="text-sm text-orange-100/85">
-                Most present mood: <span className="font-semibold text-orange-50">{mostCommonMood}</span>
+            <div className="rounded-2xl bg-black/40 border border-[#d4a44c]/20 p-4 space-y-3">
+              <div className="text-sm text-[#f5f0e8]/85">
+                Most present mood: <span className="font-semibold text-[#f5f0e8]">{mostCommonMood}</span>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white/5 rounded-xl p-3 border border-orange-200/20">
-                  <div className="text-xs text-orange-200/80">Positive moments</div>
-                  <div className="text-2xl font-semibold text-orange-50">{positiveDays}</div>
+                <div className="bg-white/5 rounded-xl p-3 border border-[#d4a44c]/20">
+                  <div className="text-xs text-[#e8b54a]/80">Positive moments</div>
+                  <div className="text-2xl font-semibold text-[#f5f0e8]">{positiveDays}</div>
                 </div>
-                <div className="bg-white/5 rounded-xl p-3 border border-orange-200/20">
-                  <div className="text-xs text-orange-200/80">Tender days</div>
-                  <div className="text-2xl font-semibold text-orange-50">{challengingDays}</div>
+                <div className="bg-white/5 rounded-xl p-3 border border-[#d4a44c]/20">
+                  <div className="text-xs text-[#e8b54a]/80">Tender days</div>
+                  <div className="text-2xl font-semibold text-[#f5f0e8]">{challengingDays}</div>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-2xl bg-gradient-to-br from-orange-500/10 to-transparent border border-orange-400/20 p-4">
-              <h3 className="text-sm font-semibold text-orange-50 mb-2">KIAAN&apos;s gentle guidance</h3>
-              <p className="text-sm text-orange-100/80 leading-relaxed">{assessment.headline}</p>
-              <ul className="mt-3 space-y-2 text-xs text-orange-100/70">
+            <div className="rounded-2xl bg-gradient-to-br from-[#d4a44c]/10 to-transparent border border-[#d4a44c]/20 p-4">
+              <h3 className="text-sm font-semibold text-[#f5f0e8] mb-2">KIAAN&apos;s gentle guidance</h3>
+              <p className="text-sm text-[#f5f0e8]/80 leading-relaxed">{assessment.headline}</p>
+              <ul className="mt-3 space-y-2 text-xs text-[#f5f0e8]/70">
                 {assessment.guidance.map((tip, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <span className="text-orange-400">•</span>
+                    <span className="text-[#d4a44c]">•</span>
                     <span>{tip}</span>
                   </li>
                 ))}
@@ -518,47 +518,47 @@ export default function SacredReflectionsPage() {
             </div>
 
             <div className="text-center">
-              <span className="text-xs text-orange-100/50">Entries this week: {weeklyEntries.length}</span>
+              <span className="text-xs text-[#f5f0e8]/50">Entries this week: {weeklyEntries.length}</span>
             </div>
           </section>
         </div>
 
         {/* Recent Entries */}
-        <section className="rounded-2xl sm:rounded-3xl border border-orange-500/15 bg-[#0c0c10]/85 p-4 sm:p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
+        <section className="rounded-2xl sm:rounded-3xl border border-[#d4a44c]/15 bg-[#0c0c10]/85 p-4 sm:p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-orange-50">Recent Reflections</h2>
-            <span className="text-xs text-orange-100/60">Stored locally • Newest first</span>
+            <h2 className="text-lg font-semibold text-[#f5f0e8]">Recent Reflections</h2>
+            <span className="text-xs text-[#f5f0e8]/60">Stored locally • Newest first</span>
           </div>
 
           {entries.length === 0 ? (
-            <p className="text-sm text-orange-100/70 text-center py-8">
+            <p className="text-sm text-[#f5f0e8]/70 text-center py-8">
               Your reflections will appear here. Begin with a thought that needs space.
             </p>
           ) : (
             <ul className="space-y-4">
               {entries.slice(0, 10).map(entry => (
-                <li key={entry.id} className="rounded-2xl bg-black/50 border border-orange-800/40 p-3 sm:p-4">
-                  <div className="flex items-center justify-between text-xs text-orange-100/70 mb-2">
+                <li key={entry.id} className="rounded-2xl bg-black/50 border border-[#d4a44c]/40 p-3 sm:p-4">
+                  <div className="flex items-center justify-between text-xs text-[#f5f0e8]/70 mb-2">
                     <span>{new Date(entry.at).toLocaleString()}</span>
-                    <span className="px-2 py-1 rounded-lg bg-orange-900/50 text-orange-100 border border-orange-700">
+                    <span className="px-2 py-1 rounded-lg bg-[#d4a44c]/50 text-[#f5f0e8] border border-[#d4a44c]">
                       {entry.mood}
                     </span>
                   </div>
                   {entry.title && (
-                    <h3 className="font-semibold text-orange-50 mb-1">{entry.title}</h3>
+                    <h3 className="font-semibold text-[#f5f0e8] mb-1">{entry.title}</h3>
                   )}
-                  <p className="text-sm text-orange-100 whitespace-pre-wrap leading-relaxed">{entry.body}</p>
+                  <p className="text-sm text-[#f5f0e8] whitespace-pre-wrap leading-relaxed">{entry.body}</p>
 
                   <div className="mt-3 space-y-2">
                     <button
                       onClick={() => requestGuidance(entry)}
                       disabled={!!guidanceLoading[entry.id]}
-                      className="px-3 py-2 rounded-xl bg-gradient-to-r from-orange-500/80 to-[#ffb347]/80 text-sm font-semibold text-black disabled:opacity-60 shadow-lg shadow-orange-500/20 transition hover:scale-[1.02]"
+                      className="px-3 py-2 rounded-xl bg-gradient-to-r from-[#d4a44c]/80 to-[#e8b54a]/80 text-sm font-semibold text-black disabled:opacity-60 shadow-lg shadow-[#d4a44c]/20 transition hover:scale-[1.02]"
                     >
                       {guidanceLoading[entry.id] ? 'KIAAN is reflecting...' : "Get KIAAN's insight"}
                     </button>
                     {guidance[entry.id] && (
-                      <div className="text-sm text-orange-100/90 bg-black/40 border border-orange-700/50 rounded-xl p-3 whitespace-pre-wrap leading-relaxed">
+                      <div className="text-sm text-[#f5f0e8]/90 bg-black/40 border border-[#d4a44c]/50 rounded-xl p-3 whitespace-pre-wrap leading-relaxed">
                         <div className="flex items-start justify-between gap-2">
                           <span className="flex-1">{guidance[entry.id]}</span>
                           <VoiceResponseButton

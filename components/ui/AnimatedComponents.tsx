@@ -11,10 +11,10 @@ interface AnimatedButtonProps extends Omit<HTMLMotionProps<'button'>, 'ref'> {
 }
 
 const variants = {
-  primary: 'bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 text-slate-900 shadow-lg shadow-orange-500/25',
-  secondary: 'bg-orange-500/15 text-orange-50 border border-orange-500/30',
-  outline: 'bg-transparent text-orange-50 border border-orange-500/30 hover:bg-orange-500/10',
-  ghost: 'bg-transparent text-orange-100 hover:bg-orange-500/10',
+  primary: 'bg-gradient-to-r from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] text-slate-900 shadow-lg shadow-[#d4a44c]/25',
+  secondary: 'bg-[#d4a44c]/15 text-[#f5f0e8] border border-[#d4a44c]/30',
+  outline: 'bg-transparent text-[#f5f0e8] border border-[#d4a44c]/30 hover:bg-[#d4a44c]/10',
+  ghost: 'bg-transparent text-[#f5f0e8] hover:bg-[#d4a44c]/10',
 }
 
 const sizes = {
@@ -91,7 +91,7 @@ export function AnimatedCard({ children, className = '', hoverEffect = true, onC
       whileHover={hoverEffect ? { y: -4, scale: 1.01 } : undefined}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       onClick={onClick}
-      className={`rounded-2xl border border-orange-500/15 bg-black/40 p-4 shadow-[0_10px_40px_rgba(255,115,39,0.12)] ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      className={`rounded-2xl border border-[#d4a44c]/15 bg-black/40 p-4 shadow-[0_10px_40px_rgba(212,164,76,0.12)] ${onClick ? 'cursor-pointer' : ''} ${className}`}
     >
       {children}
     </Component>

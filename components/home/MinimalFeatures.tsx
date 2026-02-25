@@ -36,8 +36,8 @@ export function MinimalFeatures() {
       icon: '🔄',
       title: t('home.features.reset.title', 'Emotional Reset'),
       description: t('home.features.reset.description', 'Quick exercises to reset your emotional state and find instant calm.'),
-      gradient: 'from-orange-500/20 to-amber-500/20',
-      border: 'border-orange-400/30',
+      gradient: 'from-[#d4a44c]/20 to-[#d4a44c]/20',
+      border: 'border-[#d4a44c]/30',
       link: '/emotional-reset',
       linkText: t('home.features.reset.cta', 'Try Reset'),
     },
@@ -55,10 +55,10 @@ export function MinimalFeatures() {
         className="text-center"
         variants={animationVariants.slideUp}
       >
-        <h2 className="text-2xl font-bold text-orange-100 md:text-3xl">
+        <h2 className="text-2xl font-bold text-[#f5f0e8] md:text-3xl">
           {t('home.features.title', 'Key Features')}
         </h2>
-        <p className="mt-2 text-sm text-orange-100/70">
+        <p className="mt-2 text-sm text-[#f5f0e8]/70">
           {t('home.features.subtitle', 'Privacy-first tools designed for your spiritual wellness journey')}
         </p>
       </motion.div>
@@ -109,10 +109,10 @@ export function MinimalFeatures() {
 
               {/* Content */}
               <div className="space-y-2">
-                <h3 className="text-center text-lg font-semibold text-orange-50">
+                <h3 className="text-center text-lg font-semibold text-[#f5f0e8]">
                   {feature.title}
                 </h3>
-                <p className="text-center text-sm text-orange-100/80 leading-relaxed">
+                <p className="text-center text-sm text-[#f5f0e8]/80 leading-relaxed">
                   {feature.description}
                 </p>
               </div>
@@ -121,7 +121,7 @@ export function MinimalFeatures() {
               <div className="flex justify-center">
                 <Link href={feature.link}>
                   <motion.div
-                    className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-orange-50 "
+                    className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-[#f5f0e8] "
                     whileHover={{ 
                       scale: 1.05, 
                       backgroundColor: 'rgba(255, 255, 255, 0.2)',

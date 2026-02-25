@@ -64,7 +64,7 @@ function VoiceStyleButton({ style, selected, onSelect }: VoiceStyleButtonProps) 
       className={`
         flex-1 min-w-[80px] px-3 py-2 rounded-xl text-center transition-all
         ${selected
-          ? 'bg-orange-500/30 border border-orange-500/50 text-orange-300'
+          ? 'bg-[#d4a44c]/30 border border-[#d4a44c]/50 text-[#e8b54a]'
           : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white/80'
         }
       `}
@@ -210,8 +210,8 @@ export function GitaVoicePlayer({
           className={`
             flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
             ${isThisVersePlaying && isPlaying
-              ? 'bg-orange-500 text-white'
-              : 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30'
+              ? 'bg-[#d4a44c] text-white'
+              : 'bg-[#d4a44c]/20 text-[#d4a44c] hover:bg-[#d4a44c]/30'
             }
             ${isLoadingTrack ? 'opacity-70 cursor-wait' : ''}
           `}
@@ -245,12 +245,12 @@ export function GitaVoicePlayer({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-4 rounded-2xl bg-gradient-to-br from-orange-500/5 to-amber-500/5 border border-orange-500/20"
+      className="p-4 rounded-2xl bg-gradient-to-br from-[#d4a44c]/5 to-[#d4a44c]/5 border border-[#d4a44c]/20"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Volume2 className="w-4 h-4 text-orange-400" />
+          <Volume2 className="w-4 h-4 text-[#d4a44c]" />
           <span className="text-sm font-medium text-white">Divine Voice Player</span>
         </div>
         <span className="text-xs text-white/40">KIAAN Vibe</span>
@@ -294,7 +294,7 @@ export function GitaVoicePlayer({
           onClick={() => setShowLanguages(!showLanguages)}
           className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 transition-colors w-full"
         >
-          <Globe className="w-4 h-4 text-orange-400" />
+          <Globe className="w-4 h-4 text-[#d4a44c]" />
           <span className="text-lg">{langInfo?.flag || '🌐'}</span>
           <span className="text-sm flex-1 text-left">{langInfo?.nativeName || 'Select Language'}</span>
           <ChevronDown className={`w-4 h-4 text-white/40 transition-transform ${showLanguages ? 'rotate-180' : ''}`} />
@@ -318,12 +318,12 @@ export function GitaVoicePlayer({
                     }}
                     className={`
                       w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors
-                      ${code === selectedLang ? 'bg-orange-500/20 text-white' : 'text-white/70 hover:bg-white/5'}
+                      ${code === selectedLang ? 'bg-[#d4a44c]/20 text-white' : 'text-white/70 hover:bg-white/5'}
                     `}
                   >
                     <span>{info.flag}</span>
                     <span className="text-sm">{info.nativeName}</span>
-                    {code === selectedLang && <div className="ml-auto w-2 h-2 rounded-full bg-orange-500" />}
+                    {code === selectedLang && <div className="ml-auto w-2 h-2 rounded-full bg-[#d4a44c]" />}
                   </button>
                 ))}
               </div>
@@ -349,8 +349,8 @@ export function GitaVoicePlayer({
           className={`
             w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all
             ${isThisVersePlaying && isPlaying
-              ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
-              : 'bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-400 hover:to-amber-400'
+              ? 'bg-[#d4a44c] text-white shadow-lg shadow-[#d4a44c]/30'
+              : 'bg-gradient-to-r from-[#d4a44c] to-[#d4a44c] text-white hover:from-[#d4a44c] hover:to-[#d4a44c]'
             }
             ${isLoadingTrack ? 'opacity-80 cursor-wait' : ''}
           `}
@@ -382,7 +382,7 @@ export function GitaVoicePlayer({
               disabled={isLoadingTrack}
               className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-white/10 text-white/80 hover:bg-white/15 transition-colors text-sm font-medium"
             >
-              <Sparkles className="w-4 h-4 text-amber-400" />
+              <Sparkles className="w-4 h-4 text-[#d4a44c]" />
               Sanskrit + {langInfo?.name || 'Translation'}
             </button>
           )}

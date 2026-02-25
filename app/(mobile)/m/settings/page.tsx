@@ -143,7 +143,7 @@ function ToggleSwitch({ enabled, onChange, disabled = false }: ToggleSwitchProps
         }
       }}
       disabled={disabled}
-      className={`relative w-12 h-7 rounded-full transition-colors ${enabled ? 'bg-orange-500' : 'bg-white/[0.1]'} ${disabled ? 'opacity-50' : ''}`}
+      className={`relative w-12 h-7 rounded-full transition-colors ${enabled ? 'bg-[#d4a44c]' : 'bg-white/[0.1]'} ${disabled ? 'opacity-50' : ''}`}
     >
       <motion.div
         animate={{ x: enabled ? 22 : 2 }}
@@ -387,7 +387,7 @@ export default function MobileSettingsPage() {
               isOnline ? (
                 <Wifi className="w-4 h-4 text-green-400" />
               ) : (
-                <WifiOff className="w-4 h-4 text-orange-400" />
+                <WifiOff className="w-4 h-4 text-[#d4a44c]" />
               )
             }
           />
@@ -438,7 +438,7 @@ export default function MobileSettingsPage() {
         {/* Danger Zone */}
         <SettingSection title="Danger Zone">
           <SettingRow
-            icon={<LogOut className="w-4 h-4 text-orange-400" />}
+            icon={<LogOut className="w-4 h-4 text-[#d4a44c]" />}
             label="Log Out"
             onClick={() => setShowLogoutConfirm(true)}
           />
@@ -476,8 +476,8 @@ export default function MobileSettingsPage() {
               className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-sm p-6 rounded-2xl bg-[#1a1a1f] border border-white/[0.08]"
             >
               <div className="text-center mb-6">
-                <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto mb-3">
-                  <LogOut className="w-6 h-6 text-orange-400" />
+                <div className="w-12 h-12 rounded-full bg-[#d4a44c]/10 flex items-center justify-center mx-auto mb-3">
+                  <LogOut className="w-6 h-6 text-[#d4a44c]" />
                 </div>
                 <h3 className="text-lg font-semibold text-white">Log Out?</h3>
                 <p className="text-sm text-slate-400 mt-1">
@@ -495,7 +495,7 @@ export default function MobileSettingsPage() {
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={handleLogout}
-                  className="flex-1 py-3 rounded-xl bg-orange-500 text-white font-medium"
+                  className="flex-1 py-3 rounded-xl bg-[#d4a44c] text-white font-medium"
                 >
                   Log Out
                 </motion.button>

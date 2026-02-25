@@ -136,11 +136,11 @@ export function PostComposer({
   const canPost = content.length >= minLength && content.length <= charLimit
 
   return (
-    <div className={`rounded-3xl border border-orange-500/15 bg-black/50 p-6 ${className}`}>
+    <div className={`rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-6 ${className}`}>
       {/* Header */}
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-orange-50 mb-1">Share in {circleName}</h3>
-        <p className="text-sm text-orange-100/60">
+        <h3 className="text-lg font-semibold text-[#f5f0e8] mb-1">Share in {circleName}</h3>
+        <p className="text-sm text-[#f5f0e8]/60">
           Your identity is anonymous. Be authentic and compassionate.
         </p>
       </div>
@@ -181,7 +181,7 @@ export function PostComposer({
       {!showGuidelines && (
         <button
           onClick={() => setShowGuidelines(true)}
-          className="mb-4 text-xs text-orange-100/60 hover:text-orange-100"
+          className="mb-4 text-xs text-[#f5f0e8]/60 hover:text-[#f5f0e8]"
         >
           Show guidelines
         </button>
@@ -193,7 +193,7 @@ export function PostComposer({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Share your thoughts, feelings, or experiences..."
-          className="w-full h-40 px-4 py-3 rounded-2xl border border-orange-500/20 bg-orange-500/5 text-orange-50 text-sm placeholder:text-orange-100/40 focus:outline-none focus:border-orange-400/40 resize-none"
+          className="w-full h-40 px-4 py-3 rounded-2xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 text-[#f5f0e8] text-sm placeholder:text-[#f5f0e8]/40 focus:outline-none focus:border-[#d4a44c]/40 resize-none"
           maxLength={charLimit}
         />
 
@@ -202,10 +202,10 @@ export function PostComposer({
           <span
             className={
               charCount < minLength
-                ? 'text-orange-100/40'
+                ? 'text-[#f5f0e8]/40'
                 : charCount > charLimit * 0.9
                 ? 'text-red-400'
-                : 'text-orange-100/60'
+                : 'text-[#f5f0e8]/60'
             }
           >
             {charCount} / {charLimit} characters
@@ -230,10 +230,10 @@ export function PostComposer({
                   <AlertCircle className="h-5 w-5 text-[#d4a44c] flex-shrink-0 mt-0.5" />
                   <div>
                     <h5 className="text-sm font-semibold text-[#d4a44c] mb-1">You Are Not Alone</h5>
-                    <p className="text-xs text-orange-100/80 mb-2">
+                    <p className="text-xs text-[#f5f0e8]/80 mb-2">
                       Your feelings matter deeply. If you need support beyond the spiritual path, caring souls are ready to help:
                     </p>
-                    <div className="space-y-1 text-xs text-orange-100/90">
+                    <div className="space-y-1 text-xs text-[#f5f0e8]/90">
                       <p>📞 <strong>988</strong> - Support Line (US)</p>
                       <p>💬 <strong>Text HOME to 741741</strong> - Text Support</p>
                     </div>
@@ -259,12 +259,12 @@ export function PostComposer({
 
             {/* Toxicity Warning */}
             {moderationFeedback.flags.includes('toxicity') && (
-              <div className="mb-3 rounded-2xl border border-orange-400/30 bg-orange-950/20 p-4">
+              <div className="mb-3 rounded-2xl border border-[#d4a44c]/30 bg-orange-950/20 p-4">
                 <div className="flex items-start gap-2">
-                  <XCircle className="h-5 w-5 text-orange-400 flex-shrink-0 mt-0.5" />
+                  <XCircle className="h-5 w-5 text-[#d4a44c] flex-shrink-0 mt-0.5" />
                   <div>
-                    <h5 className="text-sm font-semibold text-orange-100 mb-1">Language Check</h5>
-                    <p className="text-xs text-orange-100/80">
+                    <h5 className="text-sm font-semibold text-[#f5f0e8] mb-1">Language Check</h5>
+                    <p className="text-xs text-[#f5f0e8]/80">
                       {moderationFeedback.suggestions.find((s) => s.includes('compassionate'))}
                     </p>
                   </div>
@@ -311,11 +311,11 @@ export function PostComposer({
         <button
           onClick={handlePost}
           disabled={!canPost || isPosting || moderationFeedback?.flags.includes('crisis')}
-          className="flex-1 px-4 py-3 rounded-xl bg-orange-500/20 text-orange-400 font-medium hover:bg-orange-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-3 rounded-xl bg-[#d4a44c]/20 text-[#d4a44c] font-medium hover:bg-[#d4a44c]/30 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isPosting ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-400" />
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#d4a44c]" />
               <span>Posting...</span>
             </>
           ) : (
@@ -330,7 +330,7 @@ export function PostComposer({
           <button
             onClick={onCancel}
             disabled={isPosting}
-            className="px-4 py-3 rounded-xl border border-orange-500/20 text-orange-100/80 hover:border-orange-400/40 hover:text-orange-50 transition disabled:opacity-50"
+            className="px-4 py-3 rounded-xl border border-[#d4a44c]/20 text-[#f5f0e8]/80 hover:border-[#d4a44c]/40 hover:text-[#f5f0e8] transition disabled:opacity-50"
           >
             Cancel
           </button>
@@ -339,7 +339,7 @@ export function PostComposer({
 
       {/* Community Guidelines */}
       <div className="mt-4 p-3 rounded-2xl border border-[#d4a44c]/10 bg-[#d4a44c]/5">
-        <p className="text-xs text-orange-100/60 leading-relaxed">
+        <p className="text-xs text-[#f5f0e8]/60 leading-relaxed">
           <strong>Sacred Space:</strong> All posts are reviewed to maintain a compassionate and respectful community. Your identity
           remains anonymous. This is a space of spiritual fellowship and mutual support.
         </p>

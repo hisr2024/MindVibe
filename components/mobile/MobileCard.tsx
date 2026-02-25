@@ -53,7 +53,7 @@ export const MobileCard = forwardRef<HTMLDivElement, MobileCardProps>(
       elevated:
         'bg-gradient-to-br from-slate-900/90 to-slate-950/90 border border-white/[0.08] shadow-mobile-card',
       outlined:
-        'bg-transparent border border-orange-500/20 hover:border-orange-500/30',
+        'bg-transparent border border-[#d4a44c]/20 hover:border-[#d4a44c]/30',
       glass:
         'mobile-glass',
     }

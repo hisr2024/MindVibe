@@ -195,7 +195,7 @@ function CurrencySwitcher({
     <div className="w-full max-w-xl" aria-label="Currency selector">
       <div
         ref={scrollerRef}
-        className="flex gap-3 overflow-x-auto no-scrollbar rounded-2xl bg-orange-500/10 p-2 shadow-inner"
+        className="flex gap-3 overflow-x-auto no-scrollbar rounded-2xl bg-[#d4a44c]/10 p-2 shadow-inner"
         role="tablist"
         tabIndex={0}
         onKeyDown={handleKeyDown}
@@ -209,10 +209,10 @@ function CurrencySwitcher({
             role="tab"
             aria-selected={currency === curr}
             onClick={() => onCurrencyChange(curr)}
-            className={`flex min-w-[110px] items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${
+            className={`flex min-w-[110px] items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${
               currency === curr
-                ? 'bg-gradient-to-r from-orange-400 via-amber-300 to-orange-200 text-slate-900 shadow-lg shadow-orange-500/30'
-                : 'bg-orange-500/10 text-orange-100/80 hover:bg-orange-500/20'
+                ? 'bg-gradient-to-r from-[#d4a44c] via-[#e8b54a] to-[#e8b54a] text-slate-900 shadow-lg shadow-[#d4a44c]/30'
+                : 'bg-[#d4a44c]/10 text-[#f5f0e8]/80 hover:bg-[#d4a44c]/20'
             }`}
           >
             <span className="text-base">{CURRENCIES[curr].symbol}</span>
@@ -220,7 +220,7 @@ function CurrencySwitcher({
           </button>
         ))}
       </div>
-      <p className="mt-2 text-center text-xs text-orange-100/70">Scroll or tap to choose your currency.</p>
+      <p className="mt-2 text-center text-xs text-[#f5f0e8]/70">Scroll or tap to choose your currency.</p>
     </div>
   )
 }
@@ -557,10 +557,10 @@ export default function PricingPage() {
     <main className="mx-auto max-w-6xl px-4 py-12">
       {/* Header */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-orange-50 mb-4">
+        <h1 className="text-4xl font-bold text-[#f5f0e8] mb-4">
           Choose Your Path to Inner Peace
         </h1>
-        <p className="text-lg text-orange-100/70 max-w-2xl mx-auto mb-8">
+        <p className="text-lg text-[#f5f0e8]/70 max-w-2xl mx-auto mb-8">
           Every plan includes the same quality KIAAN guidance. Choose based on how often you&apos;d like to connect.
         </p>
         
@@ -572,7 +572,7 @@ export default function PricingPage() {
               <BillingToggle isYearly={isYearly} onToggle={setIsYearly} />
             </div>
           </div>
-          <p className="text-sm text-orange-100/70">
+          <p className="text-sm text-[#f5f0e8]/70">
             INR pricing is always 25% less than USD/EUR. Save with yearly billing — get 2 months free.
           </p>
           <PaymentMethodSelector
@@ -591,7 +591,7 @@ export default function PricingPage() {
         tabIndex={0}
         role="region"
         aria-label="Pricing plans carousel"
-        className={`subscription-scroll grid gap-6 pb-6 mb-16 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-lg sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 ${
+        className={`subscription-scroll grid gap-6 pb-6 mb-16 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-lg sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 ${
           isScrolling ? 'scrolling' : ''
         }`}
         style={{
@@ -624,14 +624,14 @@ export default function PricingPage() {
       <Card variant="elevated" className="mb-16">
         <CardContent>
           <div className="flex items-start gap-6">
-            <div className="h-16 w-16 shrink-0 rounded-2xl bg-gradient-to-br from-orange-500/30 via-amber-500/30 to-orange-500/30 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+            <div className="h-16 w-16 shrink-0 rounded-2xl bg-gradient-to-br from-[#d4a44c]/30 via-[#d4a44c]/30 to-[#d4a44c]/30 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c]">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
               </svg>
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-orange-50 mb-2">The KIAAN Promise</h2>
-              <p className="text-sm text-orange-100/70 mb-4">
+              <h2 className="text-xl font-semibold text-[#f5f0e8] mb-2">The KIAAN Promise</h2>
+              <p className="text-sm text-[#f5f0e8]/70 mb-4">
                 Every user receives the same quality of guidance from KIAAN—the only difference is how many questions you can ask each month. We believe spiritual wellness should be accessible to everyone.
               </p>
               <ul className="grid md:grid-cols-2 gap-2">
@@ -641,7 +641,7 @@ export default function PricingPage() {
                   'Your data stays private',
                   'Cancel anytime',
                 ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-orange-100/80">
+                  <li key={i} className="flex items-center gap-2 text-sm text-[#f5f0e8]/80">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
@@ -656,7 +656,7 @@ export default function PricingPage() {
 
       {/* Feature Comparison */}
       <div className="mb-16">
-        <h2 className="text-2xl font-semibold text-orange-50 text-center mb-8">
+        <h2 className="text-2xl font-semibold text-[#f5f0e8] text-center mb-8">
           Compare Plans
         </h2>
         <Card>
@@ -668,7 +668,7 @@ export default function PricingPage() {
 
       {/* FAQ */}
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-2xl font-semibold text-orange-50 text-center mb-8">
+        <h2 className="text-2xl font-semibold text-[#f5f0e8] text-center mb-8">
           Frequently Asked Questions
         </h2>
         <div className="space-y-4">
@@ -692,8 +692,8 @@ export default function PricingPage() {
           ].map((faq, i) => (
             <Card key={i} variant="bordered">
               <CardContent>
-                <h3 className="font-semibold text-orange-50 mb-2">{faq.q}</h3>
-                <p className="text-sm text-orange-100/70">{faq.a}</p>
+                <h3 className="font-semibold text-[#f5f0e8] mb-2">{faq.q}</h3>
+                <p className="text-sm text-[#f5f0e8]/70">{faq.a}</p>
               </CardContent>
             </Card>
           ))}

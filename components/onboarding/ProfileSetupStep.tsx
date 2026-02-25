@@ -26,7 +26,7 @@ export function ProfileSetupStep({
       
       {onBioChange && (
         <div className="space-y-1.5">
-          <label htmlFor="setup-bio" className="block text-sm font-semibold text-orange-50">
+          <label htmlFor="setup-bio" className="block text-sm font-semibold text-[#f5f0e8]">
             A bit about yourself (optional)
           </label>
           <textarea
@@ -34,7 +34,7 @@ export function ProfileSetupStep({
             value={bio}
             onChange={(e) => onBioChange(e.target.value)}
             rows={3}
-            className="w-full rounded-xl border border-orange-500/20 bg-slate-900/70 px-3 py-3 text-sm text-orange-50 outline-none transition placeholder:text-orange-100/50 focus:border-orange-400 focus:ring-2 focus:ring-orange-500/40"
+            className="w-full rounded-xl border border-[#d4a44c]/20 bg-slate-900/70 px-3 py-3 text-sm text-[#f5f0e8] outline-none transition placeholder:text-[#f5f0e8]/50 focus:border-[#d4a44c] focus:ring-2 focus:ring-[#d4a44c]/40"
             placeholder="I'm on a journey to..."
           />
         </div>

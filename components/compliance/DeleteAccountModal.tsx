@@ -128,7 +128,7 @@ export default function DeleteAccountModal({
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-red-400">Delete Account</h2>
-                <p className="text-sm text-orange-100/50">This action cannot be undone</p>
+                <p className="text-sm text-[#f5f0e8]/50">This action cannot be undone</p>
               </div>
             </div>
           </div>
@@ -137,10 +137,10 @@ export default function DeleteAccountModal({
           <div className="p-6">
             {step === 'warning' && (
               <div className="space-y-4">
-                <p className="text-sm text-orange-100/70">
+                <p className="text-sm text-[#f5f0e8]/70">
                   Deleting your account will permanently remove:
                 </p>
-                <ul className="text-sm text-orange-100/70 space-y-2">
+                <ul className="text-sm text-[#f5f0e8]/70 space-y-2">
                   <li className="flex items-start gap-2">
                     <svg className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -167,8 +167,8 @@ export default function DeleteAccountModal({
                   </li>
                 </ul>
 
-                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
-                  <p className="text-sm text-amber-400">
+                <div className="p-3 rounded-lg bg-[#d4a44c]/10 border border-[#d4a44c]/30">
+                  <p className="text-sm text-[#d4a44c]">
                     💡 <strong>Grace Period:</strong> You will have 30 days to cancel the deletion before it becomes permanent.
                   </p>
                 </div>
@@ -176,7 +176,7 @@ export default function DeleteAccountModal({
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={handleClose}
-                    className="flex-1 px-4 py-2 text-sm font-medium rounded-lg bg-gray-800 text-orange-100 hover:bg-gray-700 transition-colors"
+                    className="flex-1 px-4 py-2 text-sm font-medium rounded-lg bg-gray-800 text-[#f5f0e8] hover:bg-gray-700 transition-colors"
                   >
                     Cancel
                   </button>
@@ -204,7 +204,7 @@ export default function DeleteAccountModal({
                 )}
 
                 <div>
-                  <label htmlFor="delete-reason" className="block text-sm font-medium text-orange-100/70 mb-2">
+                  <label htmlFor="delete-reason" className="block text-sm font-medium text-[#f5f0e8]/70 mb-2">
                     Reason for leaving (optional)
                   </label>
                   <textarea
@@ -212,13 +212,13 @@ export default function DeleteAccountModal({
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="Help us improve by sharing why you're leaving..."
-                    className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-orange-50 placeholder-orange-100/30 focus:outline-none focus:border-orange-500 resize-none"
+                    className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-[#f5f0e8] placeholder-[#f5f0e8]/30 focus:outline-none focus:border-[#d4a44c] resize-none"
                     rows={3}
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="delete-confirm" className="block text-sm font-medium text-orange-100/70 mb-2">
+                  <label htmlFor="delete-confirm" className="block text-sm font-medium text-[#f5f0e8]/70 mb-2">
                     Type <span className="text-red-400 font-mono">DELETE MY ACCOUNT</span> to confirm
                   </label>
                   <input
@@ -227,7 +227,7 @@ export default function DeleteAccountModal({
                     value={confirmText}
                     onChange={(e) => setConfirmText(e.target.value)}
                     placeholder="DELETE MY ACCOUNT"
-                    className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-orange-50 placeholder-orange-100/30 focus:outline-none focus:border-red-500 font-mono"
+                    className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-[#f5f0e8] placeholder-[#f5f0e8]/30 focus:outline-none focus:border-red-500 font-mono"
                     aria-invalid={!!errorMessage}
                     aria-describedby={errorMessage ? 'delete-confirm-error' : undefined}
                   />
@@ -236,7 +236,7 @@ export default function DeleteAccountModal({
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={() => setStep('warning')}
-                    className="flex-1 px-4 py-2 text-sm font-medium rounded-lg bg-gray-800 text-orange-100 hover:bg-gray-700 transition-colors"
+                    className="flex-1 px-4 py-2 text-sm font-medium rounded-lg bg-gray-800 text-[#f5f0e8] hover:bg-gray-700 transition-colors"
                   >
                     Back
                   </button>
@@ -253,17 +253,17 @@ export default function DeleteAccountModal({
 
             {step === 'submitted' && deletionInfo && (
               <div className="space-y-4 text-center">
-                <div className="p-4 rounded-full bg-amber-500/10 w-fit mx-auto">
-                  <svg className="w-12 h-12 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="p-4 rounded-full bg-[#d4a44c]/10 w-fit mx-auto">
+                  <svg className="w-12 h-12 text-[#d4a44c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-orange-50">Deletion Scheduled</h3>
-                  <p className="text-sm text-orange-100/70 mt-2">
+                  <h3 className="text-lg font-semibold text-[#f5f0e8]">Deletion Scheduled</h3>
+                  <p className="text-sm text-[#f5f0e8]/70 mt-2">
                     Your account is scheduled for deletion on{' '}
-                    <strong className="text-orange-400">{deletionInfo.graceEndsAt}</strong>.
+                    <strong className="text-[#d4a44c]">{deletionInfo.graceEndsAt}</strong>.
                   </p>
                 </div>
 
@@ -283,7 +283,7 @@ export default function DeleteAccountModal({
                   </button>
                   <button
                     onClick={handleClose}
-                    className="flex-1 px-4 py-2 text-sm font-medium rounded-lg bg-gray-800 text-orange-100 hover:bg-gray-700 transition-colors"
+                    className="flex-1 px-4 py-2 text-sm font-medium rounded-lg bg-gray-800 text-[#f5f0e8] hover:bg-gray-700 transition-colors"
                   >
                     Close
                   </button>
@@ -294,7 +294,7 @@ export default function DeleteAccountModal({
 
           {/* Footer */}
           <div className="px-6 py-4 bg-gray-800/50 border-t border-gray-700">
-            <p className="text-xs text-orange-100/40 text-center">
+            <p className="text-xs text-[#f5f0e8]/40 text-center">
               GDPR Article 17: You have the right to request erasure of your personal data.
             </p>
           </div>

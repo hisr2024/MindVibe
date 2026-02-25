@@ -213,7 +213,7 @@ export default function ArdhaClient() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] text-white p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <ToolHeader
@@ -240,7 +240,7 @@ export default function ArdhaClient() {
             description="Understand how Gita principles and CBT techniques work together."
             ctaLabel="Explore Wisdom"
             href="/wisdom-rooms"
-            gradient="from-amber-500/10 to-orange-500/10"
+            gradient="from-amber-500/10 to-[#d4a44c]/10"
           />
         </div>
 
@@ -248,9 +248,9 @@ export default function ArdhaClient() {
         <div className="grid gap-6 lg:grid-cols-[1.5fr,1fr]">
           {/* Left: Input and Response */}
           <section className="space-y-4">
-            <div className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
+            <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
               <div className="flex items-center justify-between mb-3">
-                <label htmlFor="thought-input" className="text-sm font-semibold text-orange-100">
+                <label htmlFor="thought-input" className="text-sm font-semibold text-[#f5f0e8]">
                   Share the thought to reframe
                 </label>
                 <VoiceInputButton
@@ -264,7 +264,7 @@ export default function ArdhaClient() {
                 value={thought}
                 onChange={e => setThought(e.target.value)}
                 placeholder="Speak or type your thought. Example: I keep messing up at work, maybe I'm just not cut out for this."
-                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/60 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
+                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-[#d4a44c]/25 text-[#f5f0e8] placeholder:text-[#f5f0e8]/60 p-4 focus:ring-2 focus:ring-[#d4a44c]/50 outline-none"
                 aria-describedby="thought-hint"
               />
               <p id="thought-hint" className="sr-only">Describe the negative thought you want to reframe</p>
@@ -273,7 +273,7 @@ export default function ArdhaClient() {
                 <button
                   onClick={requestReframe}
                   disabled={!thought.trim() || loading}
-                  className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400/50"
+                  className="px-5 py-3 rounded-2xl bg-gradient-to-r from-[#d4a44c] via-[#ffb347] to-[#e8b54a] text-slate-950 font-semibold shadow-lg shadow-[#d4a44c]/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50"
                   aria-label={loading ? 'Processing...' : 'Reframe with Ardha'}
                 >
                   {loading ? (
@@ -285,7 +285,7 @@ export default function ArdhaClient() {
               </div>
 
               {error && (
-                <p className="mt-3 text-sm text-orange-200" role="alert">
+                <p className="mt-3 text-sm text-[#e8b54a]" role="alert">
                   <span>{error}</span>
                 </p>
               )}
@@ -315,35 +315,35 @@ export default function ArdhaClient() {
 
           {/* Right: Pillars and Info */}
           <section className="space-y-4">
-            <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-              <h3 className="text-sm font-semibold text-orange-50 mb-4">Ardha&apos;s Pillars</h3>
-              <ul className="space-y-3 text-sm text-orange-100/85">
+            <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
+              <h3 className="text-sm font-semibold text-[#f5f0e8] mb-4">Ardha&apos;s Pillars</h3>
+              <ul className="space-y-3 text-sm text-[#f5f0e8]/85">
                 {pillars.map((pillar, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <span className="mt-1 h-2 w-2 rounded-full bg-gradient-to-r from-orange-400 to-[#ffb347] shrink-0" />
+                    <span className="mt-1 h-2 w-2 rounded-full bg-gradient-to-r from-[#d4a44c] to-[#ffb347] shrink-0" />
                     <span>{pillar}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-              <h3 className="text-sm font-semibold text-orange-50 mb-3">About Ardha</h3>
-              <p className="text-xs text-orange-100/80 leading-relaxed mb-4">
+            <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
+              <h3 className="text-sm font-semibold text-[#f5f0e8] mb-3">About Ardha</h3>
+              <p className="text-xs text-[#f5f0e8]/80 leading-relaxed mb-4">
                 Ardha detects cognitive distortions, names the emotion precisely, explains the psychological mechanism, and delivers a Gita-aligned truth with calibrated action. Clear, direct, grounded.
               </p>
 
-              <div className="p-3 rounded-xl bg-black/40 border border-orange-500/15">
-                <h4 className="text-xs font-semibold text-orange-50 mb-2">Output format</h4>
-                <p className="text-xs text-orange-100/70">
+              <div className="p-3 rounded-xl bg-black/40 border border-[#d4a44c]/15">
+                <h4 className="text-xs font-semibold text-[#f5f0e8] mb-2">Output format</h4>
+                <p className="text-xs text-[#f5f0e8]/70">
                   Distortion Detection → Emotional Precision → Mechanism Insight → Gita-Aligned Truth → Calibration → Disciplined Action → Reflective Question
                 </p>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 to-transparent p-4">
-              <p className="text-xs text-orange-100/80">
-                <strong className="text-orange-50">The Gift of Balance:</strong> Ardha draws from the Gita&apos;s wisdom on equanimity — transforming turbulent thoughts into balanced clarity. As Krishna teaches: &quot;The self-controlled soul attains peace.&quot;
+            <div className="rounded-2xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#d4a44c]/10 to-transparent p-4">
+              <p className="text-xs text-[#f5f0e8]/80">
+                <strong className="text-[#f5f0e8]">The Gift of Balance:</strong> Ardha draws from the Gita&apos;s wisdom on equanimity — transforming turbulent thoughts into balanced clarity. As Krishna teaches: &quot;The self-controlled soul attains peace.&quot;
               </p>
             </div>
 

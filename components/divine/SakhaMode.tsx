@@ -178,7 +178,7 @@ export function SakhaModeToggle({
         onClick={toggleSakhaMode}
         className={`relative ${sizes[size].toggle} rounded-full transition-colors duration-300 ${
           isActive
-            ? 'bg-gradient-to-r from-amber-500 to-orange-500'
+            ? 'bg-gradient-to-r from-[#d4a44c] to-[#d4a44c]'
             : 'bg-slate-700'
         }`}
         aria-pressed={isActive}
@@ -195,7 +195,7 @@ export function SakhaModeToggle({
 
       {showLabel && (
         <div className="flex flex-col">
-          <span className={`font-medium ${isActive ? 'text-amber-300' : 'text-white/70'}`}>
+          <span className={`font-medium ${isActive ? 'text-[#e8b54a]' : 'text-white/70'}`}>
             {t('divine.sacred.sakha.sakhaMode', 'Sakha Mode')}
           </span>
           <span className="text-xs text-white/50">
@@ -216,7 +216,7 @@ export function SakhaModeIndicator({ className = '' }: { className?: string }) {
 
   return (
     <motion.div
-      className={`flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-full ${className}`}
+      className={`flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-[#d4a44c]/20 to-[#d4a44c]/20 border border-[#d4a44c]/30 rounded-full ${className}`}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
@@ -228,7 +228,7 @@ export function SakhaModeIndicator({ className = '' }: { className?: string }) {
       >
         💙
       </motion.span>
-      <span className="text-amber-200 text-xs">{t('divine.sacred.sakha.speakingAsFriend', 'Speaking as your Friend')}</span>
+      <span className="text-[#f0c96d] text-xs">{t('divine.sacred.sakha.speakingAsFriend', 'Speaking as your Friend')}</span>
     </motion.div>
   );
 }
@@ -254,22 +254,22 @@ export function SakhaModeCard({ className = '', onActivate }: SakhaModeCardProps
 
   return (
     <motion.div
-      className={`bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/20 rounded-2xl p-6 ${className}`}
+      className={`bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-[#d4a44c]/20 rounded-2xl p-6 ${className}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <motion.div
-            className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400/30 to-orange-500/30 flex items-center justify-center"
+            className="w-12 h-12 rounded-full bg-gradient-to-br from-[#d4a44c]/30 to-[#d4a44c]/30 flex items-center justify-center"
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ duration: 3, repeat: Infinity }}
           >
             <span className="text-2xl">🤝</span>
           </motion.div>
           <div>
-            <h3 className="text-amber-100 font-semibold">{t('divine.sacred.sakha.sakhaMode', 'Sakha Mode')}</h3>
-            <p className="text-amber-200/60 text-xs">{t('divine.sacred.sakha.talkToKrishna', 'Talk to Krishna as your Friend')}</p>
+            <h3 className="text-[#f5f0e8] font-semibold">{t('divine.sacred.sakha.sakhaMode', 'Sakha Mode')}</h3>
+            <p className="text-[#f0c96d]/60 text-xs">{t('divine.sacred.sakha.talkToKrishna', 'Talk to Krishna as your Friend')}</p>
           </div>
         </div>
         <SakhaModeToggle size="sm" showLabel={false} />
@@ -278,17 +278,17 @@ export function SakhaModeCard({ className = '', onActivate }: SakhaModeCardProps
       <AnimatePresence>
         {isActive && greeting && (
           <motion.div
-            className="bg-amber-950/50 border border-amber-500/20 rounded-xl p-4 mb-4"
+            className="bg-amber-950/50 border border-[#d4a44c]/20 rounded-xl p-4 mb-4"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
           >
-            <p className="text-amber-200/80 text-sm italic">&quot;{greeting}&quot;</p>
+            <p className="text-[#f0c96d]/80 text-sm italic">&quot;{greeting}&quot;</p>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <p className="text-amber-200/70 text-sm mb-4">
+      <p className="text-[#f0c96d]/70 text-sm mb-4">
         {isActive
           ? t('divine.sacred.sakha.activeDescription', "Krishna speaks to you now as your eternal friend - with warmth, love, and deep understanding.")
           : t('divine.sacred.sakha.inactiveDescription', "Enable Sakha Mode to experience KIAAN as Krishna, your divine friend who knows you completely and loves you unconditionally.")
@@ -298,7 +298,7 @@ export function SakhaModeCard({ className = '', onActivate }: SakhaModeCardProps
       {!isActive && (
         <motion.button
           onClick={handleActivate}
-          className="w-full py-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/30 rounded-xl text-amber-100 transition-all"
+          className="w-full py-3 bg-gradient-to-r from-[#d4a44c]/20 to-[#d4a44c]/20 hover:from-[#d4a44c]/30 hover:to-[#d4a44c]/30 border border-[#d4a44c]/30 rounded-xl text-[#f5f0e8] transition-all"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
@@ -309,7 +309,7 @@ export function SakhaModeCard({ className = '', onActivate }: SakhaModeCardProps
       {isActive && (
         <motion.a
           href="/kiaan"
-          className="w-full py-3 bg-gradient-to-r from-amber-500/30 to-orange-500/30 hover:from-amber-500/40 hover:to-orange-500/40 border border-amber-500/30 rounded-xl text-amber-100 transition-all flex items-center justify-center gap-2"
+          className="w-full py-3 bg-gradient-to-r from-[#d4a44c]/30 to-[#d4a44c]/30 hover:from-[#d4a44c]/40 hover:to-[#d4a44c]/40 border border-[#d4a44c]/30 rounded-xl text-[#f5f0e8] transition-all flex items-center justify-center gap-2"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >

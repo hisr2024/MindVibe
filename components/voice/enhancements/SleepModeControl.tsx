@@ -394,14 +394,14 @@ export function SleepModeControl({
       <div className="p-4 border-t border-white/5">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Sun className="w-4 h-4 text-amber-400" />
+            <Sun className="w-4 h-4 text-[#d4a44c]" />
             <span className="text-xs font-medium text-white/50">Gentle Wake-Up</span>
           </div>
           <button
             onClick={() => setShowWakeUp(!showWakeUp)}
             className={`px-3 py-1 rounded-lg text-xs transition-colors ${
               wakeUpTime
-                ? 'bg-amber-500/20 text-amber-300'
+                ? 'bg-[#d4a44c]/20 text-[#e8b54a]'
                 : 'bg-white/5 text-white/40'
             }`}
           >
@@ -417,7 +417,7 @@ export function SleepModeControl({
               exit={{ height: 0, opacity: 0 }}
             >
               <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
-                <Bell className="w-4 h-4 text-amber-400" />
+                <Bell className="w-4 h-4 text-[#d4a44c]" />
                 <input
                   type="time"
                   value={wakeUpTime || ''}

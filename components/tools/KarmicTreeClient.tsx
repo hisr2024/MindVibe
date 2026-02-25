@@ -154,7 +154,7 @@ function ProgressBar({ percent }: { percent: number }) {
   return (
     <div className="h-3 w-full overflow-hidden rounded-full bg-slate-800">
       <div
-        className="h-full rounded-full bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 shadow-[0_0_25px_rgba(249,115,22,0.4)]"
+        className="h-full rounded-full bg-gradient-to-r from-[#d4a44c] via-[#e8b54a] to-[#d4a44c] shadow-[0_0_25px_rgba(212,164,76,0.4)]"
         style={{ width: `${Math.min(100, percent)}%` }}
         role="progressbar"
         aria-valuenow={percent}
@@ -172,18 +172,18 @@ function TreeVisualizer({ stage, percent }: { stage: string; percent: number }) 
 
   return (
     <div
-      className="relative h-80 w-full overflow-hidden rounded-3xl border border-orange-500/20 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950"
+      className="relative h-80 w-full overflow-hidden rounded-3xl border border-[#d4a44c]/20 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950"
       role="img"
       aria-label={`Karmic Tree at ${stageCopy[stage]?.title || 'Growing'} stage`}
     >
-      <div className="absolute inset-0 opacity-50" style={{ backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(249,115,22,0.12), transparent 30%)' }} />
-      <div className="absolute bottom-0 left-1/2 h-full w-[2px] -translate-x-1/2 bg-gradient-to-t from-orange-500 via-orange-400 to-amber-200" style={{ height: `${height}%` }} />
+      <div className="absolute inset-0 opacity-50" style={{ backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(212,164,76,0.12), transparent 30%)' }} />
+      <div className="absolute bottom-0 left-1/2 h-full w-[2px] -translate-x-1/2 bg-gradient-to-t from-[#d4a44c] via-[#d4a44c] to-[#e8b54a]" style={{ height: `${height}%` }} />
       <div
-        className={`absolute bottom-[35%] left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-br from-orange-500/40 via-amber-200/30 to-orange-300/30 blur-3xl ${pulse}`}
+        className={`absolute bottom-[35%] left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-br from-[#d4a44c]/40 via-[#e8b54a]/30 to-[#d4a44c]/30 blur-3xl ${pulse}`}
         style={{ width: `${canopySize}px`, height: `${canopySize}px` }}
       />
-      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-orange-500/20 via-orange-500/5 to-transparent" />
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-orange-500/20 px-4 py-1 text-xs font-semibold text-orange-50">
+      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#d4a44c]/20 via-[#d4a44c]/5 to-transparent" />
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-[#d4a44c]/20 px-4 py-1 text-xs font-semibold text-[#f5f0e8]">
         {stageCopy[stage]?.title || 'Growing'}
       </div>
     </div>
@@ -233,15 +233,15 @@ export function KarmicTreeClient({ className = '' }: KarmicTreeClientProps) {
   const stageNarrative = stageCopy[progress.tree_stage] ?? stageCopy.seedling
 
   const activityPills = [
-    { label: 'Journals', value: progress.activity.journals, accent: 'bg-orange-500/15' },
+    { label: 'Journals', value: progress.activity.journals, accent: 'bg-[#d4a44c]/15' },
     { label: 'Mood logs', value: progress.activity.moods, accent: 'bg-amber-400/15' },
-    { label: 'Chats', value: progress.activity.chats, accent: 'bg-orange-300/15' }
+    { label: 'Chats', value: progress.activity.chats, accent: 'bg-[#e8b54a]/15' }
   ]
 
   if (loading) {
     return (
       <div className={`flex items-center justify-center py-16 ${className}`}>
-        <div className="text-orange-100/70 animate-pulse">Loading Karmic Tree...</div>
+        <div className="text-[#f5f0e8]/70 animate-pulse">Loading Karmic Tree...</div>
       </div>
     )
   }
@@ -249,45 +249,45 @@ export function KarmicTreeClient({ className = '' }: KarmicTreeClientProps) {
   return (
     <div className={`space-y-8 ${className}`}>
       {/* Header Section */}
-      <div className="rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0f0a08] via-[#0c0c10] to-[#0a0a0f] p-8 shadow-[0_25px_100px_rgba(255,115,39,0.14)]">
+      <div className="rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0f0a08] via-[#0c0c10] to-[#0a0a0f] p-8 shadow-[0_25px_100px_rgba(212,164,76,0.14)]">
         <div className="grid gap-8 lg:grid-cols-[1.4fr,1fr] lg:items-start">
           <div className="space-y-5">
             <div className="flex items-center gap-3">
-              <MindVibeLockup theme="sunrise" className="h-10 w-auto drop-shadow-[0_10px_40px_rgba(255,147,89,0.28)]" />
-              <span className="rounded-full bg-orange-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-orange-50">
+              <MindVibeLockup theme="sunrise" className="h-10 w-auto drop-shadow-[0_10px_40px_rgba(212,164,76,0.28)]" />
+              <span className="rounded-full bg-[#d4a44c]/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#f5f0e8]">
                 Karmic Tree
               </span>
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-orange-50">Grow with mindful actions</h2>
-              <p className="max-w-2xl text-sm text-orange-100/80">
+              <h2 className="text-2xl font-bold text-[#f5f0e8]">Grow with mindful actions</h2>
+              <p className="max-w-2xl text-sm text-[#f5f0e8]/80">
                 Earn achievements for journaling, mood tracking, and guided chats. Unlock calming themes and badges as your tree expands.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               {activityPills.map(item => (
-                <div key={item.label} className={`flex items-center justify-between rounded-2xl border border-orange-500/20 px-4 py-3 text-sm font-semibold text-orange-50 ${item.accent}`}>
+                <div key={item.label} className={`flex items-center justify-between rounded-2xl border border-[#d4a44c]/20 px-4 py-3 text-sm font-semibold text-[#f5f0e8] ${item.accent}`}>
                   <span>{item.label}</span>
-                  <span className="text-orange-200">{item.value}</span>
+                  <span className="text-[#e8b54a]">{item.value}</span>
                 </div>
               ))}
             </div>
-            <div className="space-y-2 rounded-2xl border border-orange-500/15 bg-black/50 p-4">
-              <div className="flex items-center justify-between text-sm font-semibold text-orange-50">
+            <div className="space-y-2 rounded-2xl border border-[#d4a44c]/15 bg-black/50 p-4">
+              <div className="flex items-center justify-between text-sm font-semibold text-[#f5f0e8]">
                 <span>Level {progress.level}</span>
                 <span>{progress.xp} xp</span>
               </div>
               <ProgressBar percent={progress.progress_percent} />
-              <div className="flex items-center justify-between text-xs text-orange-100/70">
+              <div className="flex items-center justify-between text-xs text-[#f5f0e8]/70">
                 <span>{stageNarrative.title}</span>
                 <span>Next level at {progress.next_level_xp} xp</span>
               </div>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-orange-500/20 bg-black/50 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
+          <div className="rounded-3xl border border-[#d4a44c]/20 bg-black/50 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
             <TreeVisualizer stage={progress.tree_stage} percent={progress.progress_percent} />
-            <p className="mt-4 text-sm text-orange-100/75">{stageNarrative.body}</p>
+            <p className="mt-4 text-sm text-[#f5f0e8]/75">{stageNarrative.body}</p>
           </div>
         </div>
       </div>
@@ -309,7 +309,7 @@ export function KarmicTreeClient({ className = '' }: KarmicTreeClientProps) {
                   ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-100'
                   : note.tone === 'warning'
                     ? 'border-amber-400/40 bg-amber-500/10 text-amber-50'
-                    : 'border-orange-500/25 bg-orange-500/5 text-orange-50'
+                    : 'border-[#d4a44c]/25 bg-[#d4a44c]/5 text-[#f5f0e8]'
               }`}
             >
               <span>{note.message}</span>
@@ -322,25 +322,25 @@ export function KarmicTreeClient({ className = '' }: KarmicTreeClientProps) {
       {/* Stat Blocks */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Achievements */}
-        <div className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-          <h3 className="text-lg font-semibold text-orange-50 mb-4">Achievements</h3>
+        <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0d0d10]/85 p-6 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
+          <h3 className="text-lg font-semibold text-[#f5f0e8] mb-4">Achievements</h3>
           <div className="space-y-3">
             {progress.achievements?.map(achievement => (
               <div
                 key={achievement.key}
-                className="flex items-start gap-3 rounded-xl border border-orange-500/15 bg-black/30 p-3"
+                className="flex items-start gap-3 rounded-xl border border-[#d4a44c]/15 bg-black/30 p-3"
               >
-                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10 text-xl">
+                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#d4a44c]/10 text-xl">
                   {achievement.badge_icon || '🌿'}
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-semibold text-orange-50">{achievement.name}</span>
-                    <span className={`text-xs ${achievement.unlocked ? 'text-emerald-300' : 'text-orange-200'}`}>
+                    <span className="text-sm font-semibold text-[#f5f0e8]">{achievement.name}</span>
+                    <span className={`text-xs ${achievement.unlocked ? 'text-emerald-300' : 'text-[#e8b54a]'}`}>
                       {achievement.unlocked ? 'Unlocked' : `${achievement.progress}/${achievement.target_value}`}
                     </span>
                   </div>
-                  <p className="text-xs text-orange-100/70 mt-1">{achievement.description}</p>
+                  <p className="text-xs text-[#f5f0e8]/70 mt-1">{achievement.description}</p>
                 </div>
               </div>
             ))}
@@ -348,24 +348,24 @@ export function KarmicTreeClient({ className = '' }: KarmicTreeClientProps) {
         </div>
 
         {/* Unlockables */}
-        <div className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-          <h3 className="text-lg font-semibold text-orange-50 mb-4">Unlockables</h3>
+        <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0d0d10]/85 p-6 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
+          <h3 className="text-lg font-semibold text-[#f5f0e8] mb-4">Unlockables</h3>
           <div className="space-y-3">
             {progress.unlockables?.map(unlockable => (
               <div
                 key={unlockable.key}
-                className="rounded-xl border border-orange-500/15 bg-black/30 p-3"
+                className="rounded-xl border border-[#d4a44c]/15 bg-black/30 p-3"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-orange-50">{unlockable.name}</span>
-                  <span className="rounded-full bg-orange-500/15 px-2 py-0.5 text-[10px] uppercase tracking-wide text-orange-100">
+                  <span className="text-sm font-semibold text-[#f5f0e8]">{unlockable.name}</span>
+                  <span className="rounded-full bg-[#d4a44c]/15 px-2 py-0.5 text-[10px] uppercase tracking-wide text-[#f5f0e8]">
                     {unlockable.kind}
                   </span>
                 </div>
-                <p className="text-xs text-orange-100/70 mt-1">{unlockable.description}</p>
+                <p className="text-xs text-[#f5f0e8]/70 mt-1">{unlockable.description}</p>
                 <div className="flex items-center justify-between mt-2 text-xs">
-                  <span className="uppercase tracking-wide text-orange-200">{unlockable.rarity}</span>
-                  <span className={unlockable.unlocked ? 'text-emerald-300' : 'text-orange-200'}>
+                  <span className="uppercase tracking-wide text-[#e8b54a]">{unlockable.rarity}</span>
+                  <span className={unlockable.unlocked ? 'text-emerald-300' : 'text-[#e8b54a]'}>
                     {unlockable.unlocked ? 'Unlocked' : 'Locked'}
                   </span>
                 </div>

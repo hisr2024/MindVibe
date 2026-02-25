@@ -107,7 +107,7 @@ export default function Chat() {
           <button
             key={prompt}
             onClick={() => sendMessage(prompt)}
-            className="rounded-2xl border border-orange-500/25 bg-orange-500/10 px-3 py-2 text-xs font-semibold text-orange-50 transition hover:bg-orange-500/20"
+            className="rounded-2xl border border-[#d4a44c]/25 bg-[#d4a44c]/10 px-3 py-2 text-xs font-semibold text-[#f5f0e8] transition hover:bg-[#d4a44c]/20"
           >
             {prompt}
           </button>
@@ -124,11 +124,11 @@ export default function Chat() {
             tabIndex: 0,
             className: 'chat-scrollbar smooth-touch-scroll scroll-stable',
           }}
-          className="mv-energy-scrollbar h-[480px] max-h-[calc(100vh-320px)] min-h-[320px] rounded-2xl border border-orange-500/20 bg-slate-950/70 shadow-inner shadow-orange-500/10"
+          className="mv-energy-scrollbar h-[480px] max-h-[calc(100vh-320px)] min-h-[320px] rounded-2xl border border-[#d4a44c]/20 bg-slate-950/70 shadow-inner shadow-[#d4a44c]/10"
         >
           <div className="p-4 pr-3 sm:pr-4">
             {messages.length === 0 && (
-              <p className="text-sm text-orange-100/70">Start a gentle conversation. Your messages are sent securely.</p>
+              <p className="text-sm text-[#f5f0e8]/70">Start a gentle conversation. Your messages are sent securely.</p>
             )}
             <div className="space-y-3">
               {messages.map((message, idx) => (
@@ -150,12 +150,12 @@ export default function Chat() {
         </SimpleBar>
 
         <div className="pointer-events-none absolute inset-0 flex items-end justify-end p-3">
-          <div className="pointer-events-auto flex flex-col gap-2 text-xs font-semibold text-orange-50">
+          <div className="pointer-events-auto flex flex-col gap-2 text-xs font-semibold text-[#f5f0e8]">
             {hasNewMessage && (
               <button
                 type="button"
                 onClick={scrollToBottom}
-                className="rounded-xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-3 py-2 text-slate-950 shadow-lg shadow-orange-500/35 transition hover:scale-[1.02]"
+                className="rounded-xl bg-gradient-to-r from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] px-3 py-2 text-slate-950 shadow-lg shadow-[#d4a44c]/35 transition hover:scale-[1.02]"
               >
                 ↓ Jump to Latest
               </button>
@@ -168,18 +168,18 @@ export default function Chat() {
           value={input}
           onChange={e => setInput(e.target.value)}
           rows={3}
-          className="w-full rounded-2xl border border-orange-500/25 bg-slate-950/60 px-3 py-2 text-sm text-orange-50 outline-none focus:ring-2 focus:ring-orange-400/70"
+          className="w-full rounded-2xl border border-[#d4a44c]/25 bg-slate-950/60 px-3 py-2 text-sm text-[#f5f0e8] outline-none focus:ring-2 focus:ring-[#d4a44c]/70"
           placeholder="Share what you need support with. Avoid personal identifiers or emergencies."
         />
         <button
           onClick={() => sendMessage()}
           disabled={!input.trim() || loading}
-          className="rounded-2xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/25 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-2xl bg-gradient-to-r from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-[#d4a44c]/25 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? <span>Sending...</span> : <span>Send</span>}
         </button>
       </div>
-      <p className="text-xs text-orange-100/70">Your conversations are sacred and private. KIAAN walks beside you as a divine friend.</p>
+      <p className="text-xs text-[#f5f0e8]/70">Your conversations are sacred and private. KIAAN walks beside you as a divine friend.</p>
     </div>
   )
 }

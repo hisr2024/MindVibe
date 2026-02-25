@@ -110,7 +110,7 @@ export default function DataExportButton({
           <p className="text-sm text-emerald-400 mb-2">
             ✓ Your data export is ready!
           </p>
-          <p className="text-xs text-orange-100/50 mb-3">
+          <p className="text-xs text-[#f5f0e8]/50 mb-3">
             Click the button below to download your data. The link will expire in 7 days.
           </p>
           <button
@@ -127,7 +127,7 @@ export default function DataExportButton({
         <button
           onClick={requestExport}
           disabled={isLoading}
-          className="w-full px-4 py-2 text-sm font-medium rounded-lg bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full px-4 py-2 text-sm font-medium rounded-lg bg-[#d4a44c]/20 text-[#d4a44c] hover:bg-[#d4a44c]/30 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {isLoading ? (
             <>
@@ -160,7 +160,7 @@ export default function DataExportButton({
         </button>
       )}
 
-      <p className="mt-2 text-xs text-orange-100/40">
+      <p className="mt-2 text-xs text-[#f5f0e8]/40">
         GDPR Article 20: You have the right to receive your personal data in a portable format.
       </p>
     </div>

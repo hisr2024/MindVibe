@@ -23,10 +23,10 @@ interface StatCardProps {
 
 const colorStyles = {
   orange: {
-    bg: 'bg-orange-500/10',
-    border: 'border-orange-500/20',
-    icon: 'text-orange-400',
-    value: 'text-orange-50',
+    bg: 'bg-[#d4a44c]/10',
+    border: 'border-[#d4a44c]/20',
+    icon: 'text-[#d4a44c]',
+    value: 'text-[#f5f0e8]',
   },
   emerald: {
     bg: 'bg-emerald-500/10',
@@ -126,7 +126,7 @@ const trendIcons = {
 const trendColors = {
   up: 'text-emerald-400',
   down: 'text-red-400',
-  stable: 'text-orange-100/60',
+  stable: 'text-[#f5f0e8]/60',
 }
 
 export function StatCard({
@@ -159,14 +159,14 @@ export function StatCard({
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className={`font-medium text-orange-100/70 ${sizeStyle.title} mb-1`}>
+          <p className={`font-medium text-[#f5f0e8]/70 ${sizeStyle.title} mb-1`}>
             {title}
           </p>
           <p className={`font-bold ${colorStyle.value} ${sizeStyle.value}`}>
             {value}
           </p>
           {subtitle && (
-            <p className={`text-orange-100/50 ${sizeStyle.subtitle} mt-1`}>
+            <p className={`text-[#f5f0e8]/50 ${sizeStyle.subtitle} mt-1`}>
               {subtitle}
             </p>
           )}

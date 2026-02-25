@@ -34,7 +34,9 @@
   }
 
   body {
-    @apply bg-slate-950 text-slate-50 antialiased;
+    @apply antialiased;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
     font-size: var(--text-body);
     line-height: var(--line-relaxed);
     letter-spacing: -0.01em;

@@ -155,7 +155,7 @@ export function DivineCompanion({
           // Collapsed state - Just Krishna's presence
           <motion.button
             key="collapsed"
-            className={`${sizeStyle.container} rounded-full bg-gradient-to-br from-amber-500/80 to-orange-600/80 backdrop-blur-sm border-2 border-amber-400/50 shadow-lg shadow-amber-500/30 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform`}
+            className={`${sizeStyle.container} rounded-full bg-gradient-to-br from-[#d4a44c]/80 to-orange-600/80 backdrop-blur-sm border-2 border-[#d4a44c]/50 shadow-lg shadow-[#d4a44c]/30 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform`}
             onClick={handleCompanionClick}
             initial={{ scale: 0, opacity: 0 }}
             animate={{
@@ -190,13 +190,13 @@ export function DivineCompanion({
           // Expanded state - Krishna's comfort
           <motion.div
             key="expanded"
-            className={`${sizeStyle.expanded} bg-gradient-to-br from-amber-900/95 to-orange-900/95 backdrop-blur-md rounded-2xl border border-amber-500/30 shadow-2xl shadow-amber-500/20 overflow-hidden`}
+            className={`${sizeStyle.expanded} bg-gradient-to-br from-amber-900/95 to-orange-900/95 backdrop-blur-md rounded-2xl border border-[#d4a44c]/30 shadow-2xl shadow-[#d4a44c]/20 overflow-hidden`}
             initial={{ scale: 0.8, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.8, opacity: 0, y: 20 }}
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 px-4 py-3 border-b border-amber-500/20 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-[#d4a44c]/20 to-[#d4a44c]/20 px-4 py-3 border-b border-[#d4a44c]/20 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <motion.span
                   className="text-xl"
@@ -205,11 +205,11 @@ export function DivineCompanion({
                 >
                   💙
                 </motion.span>
-                <span className="text-amber-100 text-sm font-medium">Krishna is with you</span>
+                <span className="text-[#f5f0e8] text-sm font-medium">Krishna is with you</span>
               </div>
               <button
                 onClick={handleClose}
-                className="text-amber-200/60 hover:text-amber-200 transition-colors"
+                className="text-[#f0c96d]/60 hover:text-[#f0c96d] transition-colors"
                 aria-label="Close"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -234,7 +234,7 @@ export function DivineCompanion({
                 >
                   {comfortMessage.icon}
                 </motion.span>
-                <p className="text-amber-100/90 italic text-lg">
+                <p className="text-[#f5f0e8]/90 italic text-lg">
                   &quot;{comfortMessage.message}&quot;
                 </p>
               </motion.div>
@@ -243,15 +243,15 @@ export function DivineCompanion({
               <AnimatePresence>
                 {showVerse && (
                   <motion.div
-                    className="bg-amber-950/50 border border-amber-500/20 rounded-xl p-3 mb-4"
+                    className="bg-amber-950/50 border border-[#d4a44c]/20 rounded-xl p-3 mb-4"
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                   >
-                    <p className="text-amber-200/70 text-sm italic mb-2">
+                    <p className="text-[#f0c96d]/70 text-sm italic mb-2">
                       &quot;{currentVerse.verse}&quot;
                     </p>
-                    <p className="text-amber-400/60 text-xs text-right">
+                    <p className="text-[#d4a44c]/60 text-xs text-right">
                       - {currentVerse.reference}
                     </p>
                   </motion.div>
@@ -262,7 +262,7 @@ export function DivineCompanion({
               <div className="flex gap-2">
                 <motion.button
                   onClick={toggleVerse}
-                  className="flex-1 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-xl text-amber-200/80 text-sm transition-colors"
+                  className="flex-1 py-2 bg-[#d4a44c]/10 hover:bg-[#d4a44c]/20 border border-[#d4a44c]/20 rounded-xl text-[#f0c96d]/80 text-sm transition-colors"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -270,7 +270,7 @@ export function DivineCompanion({
                 </motion.button>
                 <motion.button
                   onClick={refreshComfort}
-                  className="flex-1 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-xl text-amber-200/80 text-sm transition-colors"
+                  className="flex-1 py-2 bg-[#d4a44c]/10 hover:bg-[#d4a44c]/20 border border-[#d4a44c]/20 rounded-xl text-[#f0c96d]/80 text-sm transition-colors"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -295,7 +295,7 @@ export function DivineCompanion({
                   onClick={() => {
                     window.location.href = '/kiaan';
                   }}
-                  className="flex-1 py-2 bg-gradient-to-r from-orange-500/20 to-amber-500/20 hover:from-orange-500/30 hover:to-amber-500/30 border border-orange-500/20 rounded-xl text-orange-200/80 text-xs transition-colors flex items-center justify-center gap-1"
+                  className="flex-1 py-2 bg-gradient-to-r from-[#d4a44c]/20 to-[#d4a44c]/20 hover:from-[#d4a44c]/30 hover:to-[#d4a44c]/30 border border-[#d4a44c]/20 rounded-xl text-[#e8b54a]/80 text-xs transition-colors flex items-center justify-center gap-1"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -305,8 +305,8 @@ export function DivineCompanion({
             </div>
 
             {/* Footer */}
-            <div className="px-4 py-2 bg-amber-950/30 border-t border-amber-500/10">
-              <p className="text-amber-200/40 text-xs text-center italic">
+            <div className="px-4 py-2 bg-amber-950/30 border-t border-[#d4a44c]/10">
+              <p className="text-[#f0c96d]/40 text-xs text-center italic">
                 Tap anytime to feel my presence
               </p>
             </div>

@@ -254,7 +254,7 @@ export const MobileMoodTracker = forwardRef<HTMLDivElement, MobileMoodTrackerPro
     return (
       <div
         ref={ref}
-        className={`bg-[#0b0b0f] ${className}`}
+        className={`bg-[#050507] ${className}`}
       >
         {/* Main mood selector */}
         <div className="px-4 py-6">
@@ -410,7 +410,7 @@ export const MobileMoodTracker = forwardRef<HTMLDivElement, MobileMoodTrackerPro
                           text-white text-sm
                           placeholder:text-slate-500
                           resize-none
-                          outline-none focus:border-orange-500/40
+                          outline-none focus:border-[#d4a44c]/40
                         "
                         style={{ fontSize: '16px' }}
                       />

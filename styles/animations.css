@@ -191,8 +191,8 @@
 .mobile-spinner {
   width: 24px;
   height: 24px;
-  border: 2.5px solid rgba(255, 145, 89, 0.2);
-  border-top-color: #ff9159;
+  border: 2.5px solid rgba(212, 164, 76, 0.2);
+  border-top-color: #d4a44c;
   border-radius: 50%;
   animation: mobileSpinnerRotate 0.8s linear infinite;
 }
@@ -205,8 +205,8 @@
 
 /* Tab indicator pulse */
 @keyframes tab-indicator-pulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(255, 145, 89, 0.4); }
-  50% { box-shadow: 0 0 16px rgba(255, 145, 89, 0.6); }
+  0%, 100% { box-shadow: 0 0 8px rgba(212, 164, 76, 0.4); }
+  50% { box-shadow: 0 0 16px rgba(212, 164, 76, 0.6); }
 }
 
 .tab-indicator-active {

@@ -40,7 +40,7 @@ export function Tooltip({ content, children, side = 'top', sideOffset = 6 }: Too
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.96 }}
                 transition={{ duration: 0.12, ease: 'easeOut' }}
-                className="z-50 max-w-xs rounded-lg border border-orange-500/20 bg-slate-900 px-3 py-2 text-xs text-orange-50 shadow-lg shadow-orange-500/10"
+                className="z-50 max-w-xs rounded-lg border border-[#d4a44c]/20 bg-slate-900 px-3 py-2 text-xs text-[#f5f0e8] shadow-lg shadow-[#d4a44c]/10"
               >
                 {content}
                 <TooltipPrimitive.Arrow className="fill-slate-900" />

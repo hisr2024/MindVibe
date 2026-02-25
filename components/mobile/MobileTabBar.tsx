@@ -104,7 +104,7 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
     // Variant styles
     const containerStyles = {
       default: `
-        bg-[#0b0b0f]/95 backdrop-blur-xl
+        bg-[#050507]/95 backdrop-blur-xl
         border-t border-white/[0.06]
       `,
       floating: `
@@ -155,7 +155,7 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
             <motion.div
               className="
                 absolute h-10 rounded-xl
-                bg-orange-500/10
+                bg-[#d4a44c]/10
                 pointer-events-none
               "
               layoutId="activeTabIndicator"
@@ -196,7 +196,7 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
                 <motion.span
                   animate={{
                     scale: isActive ? 1.1 : 1,
-                    color: isActive ? '#ff9159' : '#94a3b8',
+                    color: isActive ? '#d4a44c' : '#94a3b8',
                   }}
                   transition={{ type: 'spring', stiffness: 500 }}
                   className="relative"
@@ -229,7 +229,7 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
                 {showLabels && (
                   <motion.span
                     animate={{
-                      color: isActive ? '#ff9159' : '#64748b',
+                      color: isActive ? '#d4a44c' : '#64748b',
                       fontWeight: isActive ? 600 : 500,
                     }}
                     className="text-[10px] leading-tight"
@@ -245,7 +245,7 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
                     className="
                       absolute -bottom-0.5
                       w-1 h-1 rounded-full
-                      bg-orange-500
+                      bg-[#d4a44c]
                     "
                   />
                 )}
@@ -259,7 +259,7 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
           <div className="
             absolute -top-8 left-1/2 -translate-x-1/2
             w-1/2 h-8
-            bg-gradient-to-t from-orange-500/10 to-transparent
+            bg-gradient-to-t from-[#d4a44c]/10 to-transparent
             pointer-events-none rounded-t-full
           " />
         )}

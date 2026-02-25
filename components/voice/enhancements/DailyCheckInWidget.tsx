@@ -67,8 +67,8 @@ const CHECK_IN_TYPES: Record<CheckInTime, {
     nameHindi: 'सुबह की जांच',
     greeting: 'Good morning! How are you feeling today?',
     icon: Sun,
-    color: 'text-amber-400',
-    gradient: 'from-amber-500/20 to-orange-500/20'
+    color: 'text-[#d4a44c]',
+    gradient: 'from-[#d4a44c]/20 to-[#d4a44c]/20'
   },
   midday: {
     name: 'Midday Pause',
@@ -90,7 +90,7 @@ const CHECK_IN_TYPES: Record<CheckInTime, {
 
 const MOOD_OPTIONS: { level: MoodLevel; label: string; icon: typeof Smile; color: string }[] = [
   { level: 1, label: 'Struggling', icon: Frown, color: 'text-red-400' },
-  { level: 2, label: 'Low', icon: Frown, color: 'text-orange-400' },
+  { level: 2, label: 'Low', icon: Frown, color: 'text-[#d4a44c]' },
   { level: 3, label: 'Okay', icon: Meh, color: 'text-yellow-400' },
   { level: 4, label: 'Good', icon: Smile, color: 'text-green-400' },
   { level: 5, label: 'Great', icon: Smile, color: 'text-emerald-400' }
@@ -208,7 +208,7 @@ export function DailyCheckInWidget({
   // Compact view
   if (compact) {
     return (
-      <div className={`rounded-xl border border-amber-500/20 bg-black/30 p-3 ${className}`}>
+      <div className={`rounded-xl border border-[#d4a44c]/20 bg-black/30 p-3 ${className}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className={`p-1.5 rounded-lg bg-gradient-to-br ${checkInConfig.gradient}`}>
@@ -221,7 +221,7 @@ export function DailyCheckInWidget({
           </div>
           <button
             onClick={handleStartCheckIn}
-            className="px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-xs font-medium hover:bg-amber-500/30 transition-colors"
+            className="px-3 py-1.5 rounded-lg bg-[#d4a44c]/20 text-[#e8b54a] text-xs font-medium hover:bg-[#d4a44c]/30 transition-colors"
           >
             Start
           </button>
@@ -235,7 +235,7 @@ export function DailyCheckInWidget({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-950/40 to-black/40 backdrop-blur-sm overflow-hidden ${className}`}
+      className={`rounded-2xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#1a1508]/40 to-black/40 backdrop-blur-sm overflow-hidden ${className}`}
     >
       {/* Header */}
       <div className="p-4 border-b border-white/5">
@@ -253,7 +253,7 @@ export function DailyCheckInWidget({
           {!checkInActive && (
             <button
               onClick={handleStartCheckIn}
-              className="px-4 py-2 rounded-xl bg-amber-500/20 text-amber-300 text-sm font-medium hover:bg-amber-500/30 transition-colors"
+              className="px-4 py-2 rounded-xl bg-[#d4a44c]/20 text-[#e8b54a] text-sm font-medium hover:bg-[#d4a44c]/30 transition-colors"
             >
               Begin
             </button>
@@ -276,7 +276,7 @@ export function DailyCheckInWidget({
               {['mood', 'energy', 'gratitude', 'complete'].map((step, idx) => (
                 <div key={step} className="flex items-center gap-2 flex-1">
                   <div className={`w-2 h-2 rounded-full ${
-                    currentStep === step ? 'bg-amber-400' :
+                    currentStep === step ? 'bg-[#d4a44c]' :
                     ['mood', 'energy', 'gratitude', 'complete'].indexOf(currentStep) > idx
                       ? 'bg-emerald-400' : 'bg-white/20'
                   }`} />
@@ -301,7 +301,7 @@ export function DailyCheckInWidget({
                       onClick={() => handleMoodSelect(level)}
                       className={`p-3 rounded-xl border transition-all ${
                         selectedMood === level
-                          ? 'border-amber-500/50 bg-amber-500/20'
+                          ? 'border-[#d4a44c]/50 bg-[#d4a44c]/20'
                           : 'border-white/10 bg-white/5 hover:bg-white/10'
                       }`}
                     >
@@ -329,7 +329,7 @@ export function DailyCheckInWidget({
                       onClick={() => handleEnergySelect(level)}
                       className={`p-3 rounded-xl border transition-all ${
                         selectedEnergy === level
-                          ? 'border-amber-500/50 bg-amber-500/20'
+                          ? 'border-[#d4a44c]/50 bg-[#d4a44c]/20'
                           : 'border-white/10 bg-white/5 hover:bg-white/10'
                       }`}
                     >
@@ -365,7 +365,7 @@ export function DailyCheckInWidget({
                     value={gratitude}
                     onChange={(e) => setGratitude(e.target.value)}
                     placeholder="Share something you're grateful for..."
-                    className="w-full h-24 p-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-white/30 resize-none focus:outline-none focus:border-amber-500/50"
+                    className="w-full h-24 p-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-white/30 resize-none focus:outline-none focus:border-[#d4a44c]/50"
                   />
                   <button
                     onClick={() => setIsListening(!isListening)}
@@ -379,7 +379,7 @@ export function DailyCheckInWidget({
                 <div className="flex gap-2 mt-4">
                   <button
                     onClick={handleComplete}
-                    className="flex-1 py-2.5 rounded-xl bg-amber-500/20 text-amber-300 text-sm font-medium hover:bg-amber-500/30 transition-colors"
+                    className="flex-1 py-2.5 rounded-xl bg-[#d4a44c]/20 text-[#e8b54a] text-sm font-medium hover:bg-[#d4a44c]/30 transition-colors"
                   >
                     {gratitude ? 'Complete' : 'Skip & Complete'}
                   </button>

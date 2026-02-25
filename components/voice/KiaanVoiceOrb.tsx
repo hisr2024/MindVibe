@@ -60,13 +60,13 @@ interface KiaanVoiceOrbProps {
 
 // Emotion-to-gradient mapping for the orb's color soul
 const EMOTION_GRADIENTS: Record<OrbEmotion, { from: string; via: string; to: string }> = {
-  neutral:   { from: '#f97316', via: '#fb923c', to: '#0ea5e9' },   // sunrise-ocean (brand)
-  anxiety:   { from: '#f59e0b', via: '#fbbf24', to: '#d97706' },   // amber warmth
+  neutral:   { from: '#d4a44c', via: '#e8b54a', to: '#0ea5e9' },   // sunrise-ocean (brand)
+  anxiety:   { from: '#d4a44c', via: '#f0c96d', to: '#c8943a' },   // amber warmth
   sadness:   { from: '#3b82f6', via: '#60a5fa', to: '#6366f1' },   // calming blue-indigo
-  anger:     { from: '#ef4444', via: '#f87171', to: '#f97316' },   // red to cooling orange
+  anger:     { from: '#ef4444', via: '#f87171', to: '#d4a44c' },   // red to cooling orange
   confusion: { from: '#8b5cf6', via: '#a78bfa', to: '#6366f1' },   // clarifying violet
   peace:     { from: '#10b981', via: '#34d399', to: '#06b6d4' },   // serene emerald-cyan
-  hope:      { from: '#eab308', via: '#fde047', to: '#f97316' },   // radiant gold
+  hope:      { from: '#eab308', via: '#fde047', to: '#d4a44c' },   // radiant gold
   love:      { from: '#ec4899', via: '#f472b6', to: '#f43f5e' },   // divine rose
 }
 
@@ -99,7 +99,7 @@ const STATE_CONFIG: Record<OrbState, {
     baseScale: 1.05,
     pulseAnimation: 'none', // Volume-driven instead
     glowOpacity: 0.4,
-    ringColor: 'rgba(249,115,22,0.3)',
+    ringColor: 'rgba(212,164,76,0.3)',
     ringAnimation: 'orbPing 1.5s cubic-bezier(0, 0, 0.2, 1) infinite',
     particleSpeed: 8,
   },

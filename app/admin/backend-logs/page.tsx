@@ -55,7 +55,7 @@ function highlightMessage(msg: string): string {
   // Highlight warnings
   if (msg.includes('⚠️') || msg.includes('not installed') || msg.includes('not available') || msg.includes('not configured')) return 'text-yellow-400'
   // Highlight startup sections
-  if (msg.startsWith('===') || msg.startsWith('---')) return 'text-orange-400 font-bold'
+  if (msg.startsWith('===') || msg.startsWith('---')) return 'text-[#d4a44c] font-bold'
   // Request logs
   if (msg.startsWith('Request started:') || msg.startsWith('Request completed:')) return 'text-slate-400'
   if (msg.startsWith('INFO:')) return 'text-slate-500'
@@ -164,7 +164,7 @@ export default function BackendLogsPage() {
         </div>
         <button
           onClick={() => { fetchLogs(); fetchStats() }}
-          className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-500 transition"
+          className="rounded-lg bg-[#c8943a] px-4 py-2 text-sm font-medium text-white hover:bg-[#d4a44c] transition"
         >
           Refresh Now
         </button>

@@ -80,15 +80,15 @@ export default function FeaturesPage() {
     <main className="mx-auto max-w-6xl space-y-10 px-4 pb-16 mobile-safe-padding">
       {/* Hero Section */}
       <FadeIn>
-        <section className="rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#0b0b0f]/80 to-[#0f0a08]/90 p-8 shadow-[0_20px_80px_rgba(255,115,39,0.12)]">
+        <section className="rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#050507]/80 to-[#0f0a08]/90 p-8 shadow-[0_20px_80px_rgba(212,164,76,0.12)]">
           <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div className="space-y-3 text-center md:text-left">
-              <p className="text-xs uppercase tracking-[0.22em] text-orange-100/70">Features & Flows</p>
-              <h1 className="text-3xl font-bold text-orange-50 md:text-4xl">Your Personal Wellness Companion</h1>
-              <p className="max-w-2xl text-orange-100/80 text-sm">Everything you need for your spiritual wellness journey—empathetic, mobile-ready, and built with care.</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-[#f5f0e8]/70">Features & Flows</p>
+              <h1 className="text-3xl font-bold text-[#f5f0e8] md:text-4xl">Your Personal Wellness Companion</h1>
+              <p className="max-w-2xl text-[#f5f0e8]/80 text-sm">Everything you need for your spiritual wellness journey—empathetic, mobile-ready, and built with care.</p>
             </div>
-            <div className="flex items-center justify-center gap-2 text-sm text-orange-100/80 md:justify-start">
-              <span className="rounded-full bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-100">PWA</span>
+            <div className="flex items-center justify-center gap-2 text-sm text-[#f5f0e8]/80 md:justify-start">
+              <span className="rounded-full bg-[#d4a44c]/15 px-3 py-1 text-xs font-semibold text-[#f5f0e8]">PWA</span>
               <HelpIcon content="Install on your device for offline access" />
             </div>
           </div>
@@ -97,17 +97,17 @@ export default function FeaturesPage() {
 
       {/* How It Works - Simple 3-step flow */}
       <FadeIn delay={0.1}>
-        <section className="rounded-3xl border border-orange-500/15 bg-black/40 p-6">
-          <h2 className="text-lg font-semibold text-orange-50 mb-6 text-center">How It Works</h2>
+        <section className="rounded-3xl border border-[#d4a44c]/15 bg-black/40 p-6">
+          <h2 className="text-lg font-semibold text-[#f5f0e8] mb-6 text-center">How It Works</h2>
           <div className="grid gap-6 md:grid-cols-3">
             {howItWorks.map(({ step, title, description, icon }) => (
               <div key={step} className="text-center">
-                <div className="mx-auto mb-3 h-16 w-16 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center text-2xl font-bold text-slate-900 shadow-lg shadow-orange-500/25">
+                <div className="mx-auto mb-3 h-16 w-16 rounded-full bg-gradient-to-br from-[#d4a44c] to-amber-300 flex items-center justify-center text-2xl font-bold text-slate-900 shadow-lg shadow-[#d4a44c]/25">
                   {icon}
                 </div>
-                <div className="text-xs text-orange-100/60 mb-1">Step {step}</div>
-                <h3 className="text-base font-semibold text-orange-50 mb-1">{title}</h3>
-                <p className="text-sm text-orange-100/70">{description}</p>
+                <div className="text-xs text-[#f5f0e8]/60 mb-1">Step {step}</div>
+                <h3 className="text-base font-semibold text-[#f5f0e8] mb-1">{title}</h3>
+                <p className="text-sm text-[#f5f0e8]/70">{description}</p>
               </div>
             ))}
           </div>
@@ -117,7 +117,7 @@ export default function FeaturesPage() {
       {/* Feature Cards with Visual Demos (4 cards) */}
       <FadeIn delay={0.2}>
         <section>
-          <h2 className="text-lg font-semibold text-orange-50 mb-4 text-center">Core Features</h2>
+          <h2 className="text-lg font-semibold text-[#f5f0e8] mb-4 text-center">Core Features</h2>
           <StaggerContainer className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {featureCards.map(card => (
               <StaggerItem key={card.title}>
@@ -126,12 +126,12 @@ export default function FeaturesPage() {
                     <AnimatedCard className="h-full cursor-pointer">
                       <div className="flex flex-col items-center text-center">
                         {/* Visual demo placeholder */}
-                        <div className="mb-3 h-24 w-full rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/10 flex items-center justify-center text-4xl">
+                        <div className="mb-3 h-24 w-full rounded-xl bg-gradient-to-br from-[#d4a44c]/20 to-amber-500/10 flex items-center justify-center text-4xl">
                           {card.videoPlaceholder}
                         </div>
                         <span className="text-2xl mb-2">{card.icon}</span>
-                        <h2 className="text-lg font-semibold text-orange-50">{card.title}</h2>
-                        <p className="mt-1 text-sm text-orange-100/70">{card.summary}</p>
+                        <h2 className="text-lg font-semibold text-[#f5f0e8]">{card.title}</h2>
+                        <p className="mt-1 text-sm text-[#f5f0e8]/70">{card.summary}</p>
                       </div>
                     </AnimatedCard>
                   }
@@ -147,18 +147,18 @@ export default function FeaturesPage() {
 
       {/* Explore Flows - Quick Navigation */}
       <FadeIn delay={0.3}>
-        <section className="rounded-3xl border border-orange-500/15 bg-black/40 p-6">
-          <h3 className="text-lg font-semibold text-orange-50 mb-4">Explore Flows</h3>
-          <p className="text-sm text-orange-100/70 mb-4">Dive deeper into specific wellness experiences</p>
+        <section className="rounded-3xl border border-[#d4a44c]/15 bg-black/40 p-6">
+          <h3 className="text-lg font-semibold text-[#f5f0e8] mb-4">Explore Flows</h3>
+          <p className="text-sm text-[#f5f0e8]/70 mb-4">Dive deeper into specific wellness experiences</p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {flowPages.map(page => (
               <Link
                 key={page.href}
                 href={page.href}
-                className="rounded-2xl border border-orange-500/20 bg-black/50 p-4 shadow-sm transition hover:border-orange-300/70 hover:shadow-orange-500/10 hover:scale-[1.02]"
+                className="rounded-2xl border border-[#d4a44c]/20 bg-black/50 p-4 shadow-sm transition hover:border-[#d4a44c]/70 hover:shadow-[#d4a44c]/10 hover:scale-[1.02]"
               >
-                <h4 className="text-sm font-semibold text-orange-50">{page.title}</h4>
-                <p className="mt-1 text-xs text-orange-100/70">{page.detail}</p>
+                <h4 className="text-sm font-semibold text-[#f5f0e8]">{page.title}</h4>
+                <p className="mt-1 text-xs text-[#f5f0e8]/70">{page.detail}</p>
               </Link>
             ))}
           </div>
@@ -167,13 +167,13 @@ export default function FeaturesPage() {
 
       {/* Karmic Tree CTA */}
       <FadeIn delay={0.35}>
-        <section className="rounded-3xl border border-orange-500/15 bg-gradient-to-br from-emerald-950/30 to-orange-950/30 p-6">
+        <section className="rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-emerald-950/30 to-[#1a0f00]/30 p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h3 className="text-lg font-semibold text-orange-50 flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-[#f5f0e8] flex items-center gap-2">
                 <span>🌳</span> Watch Your Growth
               </h3>
-              <p className="text-sm text-orange-100/70 mt-1">
+              <p className="text-sm text-[#f5f0e8]/70 mt-1">
                 Your Karmic Tree reflects your wellness journey. See it bloom as you check in, journal, and grow.
               </p>
             </div>
@@ -189,17 +189,17 @@ export default function FeaturesPage() {
 
       {/* Performance & Mobile */}
       <FadeIn delay={0.4}>
-        <section className="rounded-3xl border border-orange-500/15 bg-black/40 p-6">
+        <section className="rounded-3xl border border-[#d4a44c]/15 bg-black/40 p-6">
           <div className="flex items-center gap-2 mb-3">
-            <h3 className="text-lg font-semibold text-orange-50">Built for performance</h3>
+            <h3 className="text-lg font-semibold text-[#f5f0e8]">Built for performance</h3>
             <HelpIcon content="Optimized imagery, lazy loading, and mobile-first design" />
           </div>
           <div className="flex flex-wrap gap-2">
-            <span className="rounded-xl bg-orange-500/15 px-3 py-1 text-xs text-orange-100">60fps animations</span>
-            <span className="rounded-xl bg-orange-500/15 px-3 py-1 text-xs text-orange-100">Lazy loading</span>
-            <span className="rounded-xl bg-orange-500/15 px-3 py-1 text-xs text-orange-100">Responsive</span>
-            <span className="rounded-xl bg-orange-500/15 px-3 py-1 text-xs text-orange-100">Dark mode</span>
-            <span className="rounded-xl bg-orange-500/15 px-3 py-1 text-xs text-orange-100">WCAG AA</span>
+            <span className="rounded-xl bg-[#d4a44c]/15 px-3 py-1 text-xs text-[#f5f0e8]">60fps animations</span>
+            <span className="rounded-xl bg-[#d4a44c]/15 px-3 py-1 text-xs text-[#f5f0e8]">Lazy loading</span>
+            <span className="rounded-xl bg-[#d4a44c]/15 px-3 py-1 text-xs text-[#f5f0e8]">Responsive</span>
+            <span className="rounded-xl bg-[#d4a44c]/15 px-3 py-1 text-xs text-[#f5f0e8]">Dark mode</span>
+            <span className="rounded-xl bg-[#d4a44c]/15 px-3 py-1 text-xs text-[#f5f0e8]">WCAG AA</span>
           </div>
         </section>
       </FadeIn>

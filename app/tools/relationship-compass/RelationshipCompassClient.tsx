@@ -156,7 +156,7 @@ export default function RelationshipCompassClient() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] text-white p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <ToolHeader
@@ -175,7 +175,7 @@ export default function RelationshipCompassClient() {
             description="Share your situation for balanced, thoughtful perspective."
             ctaLabel="Start Now"
             onClick={() => document.getElementById('conflict-input')?.focus()}
-            gradient="from-rose-500/10 to-orange-500/10"
+            gradient="from-rose-500/10 to-[#d4a44c]/10"
           />
           <ToolActionCard
             icon="🤝"
@@ -191,8 +191,8 @@ export default function RelationshipCompassClient() {
         <div className="grid gap-6 lg:grid-cols-[1.5fr,1fr]">
           {/* Left: Input and Response */}
           <section className="space-y-4">
-            <div className="rounded-2xl border border-orange-500/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-              <label htmlFor="conflict-input" className="text-sm font-semibold text-orange-100 block mb-3">
+            <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
+              <label htmlFor="conflict-input" className="text-sm font-semibold text-[#f5f0e8] block mb-3">
                 Describe the conflict
               </label>
               <textarea
@@ -200,7 +200,7 @@ export default function RelationshipCompassClient() {
                 value={conflict}
                 onChange={e => setConflict(e.target.value)}
                 placeholder="Example: My partner feels I don't listen, and I keep getting defensive when they bring it up."
-                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-orange-500/25 text-orange-50 placeholder:text-orange-100/60 p-4 focus:ring-2 focus:ring-orange-400/50 outline-none"
+                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-[#d4a44c]/25 text-[#f5f0e8] placeholder:text-[#f5f0e8]/60 p-4 focus:ring-2 focus:ring-[#d4a44c]/50 outline-none"
                 aria-describedby="conflict-hint"
               />
               <p id="conflict-hint" className="sr-only">Describe the relationship conflict you need guidance with</p>
@@ -209,21 +209,21 @@ export default function RelationshipCompassClient() {
                 <button
                   onClick={requestCompass}
                   disabled={!conflict.trim() || loading}
-                  className="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-400 via-[#ffb347] to-orange-200 text-slate-950 font-semibold shadow-lg shadow-orange-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-orange-400/50"
+                  className="px-5 py-3 rounded-2xl bg-gradient-to-r from-[#d4a44c] via-[#ffb347] to-[#e8b54a] text-slate-950 font-semibold shadow-lg shadow-[#d4a44c]/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50"
                   aria-label={loading ? 'Processing...' : 'Get Guidance'}
                 >
                   {loading ? <span>Thinking...</span> : <span>Get Guidance</span>}
                 </button>
                 <Link
                   href="/kiaan/chat"
-                  className="px-5 py-3 rounded-2xl bg-white/5 border border-orange-500/30 text-orange-50 text-sm font-semibold hover:border-orange-300/50 transition focus:outline-none focus:ring-2 focus:ring-orange-400/50"
+                  className="px-5 py-3 rounded-2xl bg-white/5 border border-[#d4a44c]/30 text-[#f5f0e8] text-sm font-semibold hover:border-[#d4a44c]/50 transition focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50"
                 >
                   Send context to KIAAN
                 </Link>
               </div>
 
               {error && (
-                <p className="mt-3 text-sm text-orange-200" role="alert">
+                <p className="mt-3 text-sm text-[#e8b54a]" role="alert">
                   <span>{error}</span>
                 </p>
               )}
@@ -251,34 +251,34 @@ export default function RelationshipCompassClient() {
 
           {/* Right: Trigger Patterns */}
           <section className="space-y-4">
-            <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
+            <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-orange-50">Good for</h3>
-                <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] text-orange-100/70">
+                <h3 className="text-sm font-semibold text-[#f5f0e8]">Good for</h3>
+                <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] text-[#f5f0e8]/70">
                   Use cases
                 </span>
               </div>
 
-              <ul className="space-y-3 text-sm text-orange-100/85">
+              <ul className="space-y-3 text-sm text-[#f5f0e8]/85">
                 {triggerPatterns.map((pattern, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <span className="mt-1 h-2 w-2 rounded-full bg-gradient-to-r from-orange-400 to-[#ffb347] shrink-0" />
+                    <span className="mt-1 h-2 w-2 rounded-full bg-gradient-to-r from-[#d4a44c] to-[#ffb347] shrink-0" />
                     <span>{pattern}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
-              <h4 className="text-xs font-semibold text-orange-50 mb-2">What you&apos;ll get</h4>
-              <p className="text-xs text-orange-100/70 leading-relaxed">
+            <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
+              <h4 className="text-xs font-semibold text-[#f5f0e8] mb-2">What you&apos;ll get</h4>
+              <p className="text-xs text-[#f5f0e8]/70 leading-relaxed">
                 Validation → Insight → Other perspective → Practical suggestions → Conversation script → One actionable step
               </p>
             </div>
 
-            <div className="rounded-2xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 to-transparent p-4">
-              <p className="text-xs text-orange-100/80">
-                <strong className="text-orange-50">Guided by Dharma:</strong> The Relationship Compass draws from the Gita&apos;s teachings on righteous conduct and compassion. It illuminates your path with clarity, never taking sides — always honoring truth.
+            <div className="rounded-2xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#d4a44c]/10 to-transparent p-4">
+              <p className="text-xs text-[#f5f0e8]/80">
+                <strong className="text-[#f5f0e8]">Guided by Dharma:</strong> The Relationship Compass draws from the Gita&apos;s teachings on righteous conduct and compassion. It illuminates your path with clarity, never taking sides — always honoring truth.
               </p>
             </div>
 

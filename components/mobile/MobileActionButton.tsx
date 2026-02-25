@@ -89,18 +89,18 @@ export const MobileActionButton = forwardRef<HTMLButtonElement, MobileActionButt
 
     const variantClasses = {
       primary: `
-        bg-gradient-to-br from-orange-500 via-amber-500 to-orange-400
+        bg-gradient-to-br from-[#d4a44c] via-[#d4a44c] to-[#d4a44c]
         text-slate-950
-        shadow-lg shadow-orange-500/30
+        shadow-lg shadow-[#d4a44c]/30
       `,
       secondary: `
-        bg-[#1a2133] border border-orange-500/20
-        text-orange-50
+        bg-[#1a2133] border border-[#d4a44c]/20
+        text-[#f5f0e8]
         shadow-lg shadow-black/20
       `,
       ghost: `
         bg-white/[0.08] backdrop-blur-lg
-        text-orange-50
+        text-[#f5f0e8]
         border border-white/[0.1]
       `,
     }
@@ -146,7 +146,7 @@ export const MobileActionButton = forwardRef<HTMLButtonElement, MobileActionButt
         {/* Animated background glow */}
         {variant === 'primary' && !disabled && (
           <motion.div
-            className="absolute inset-0 rounded-full bg-orange-500/30"
+            className="absolute inset-0 rounded-full bg-[#d4a44c]/30"
             animate={{
               scale: [1, 1.2, 1],
               opacity: [0.5, 0, 0.5],
@@ -309,7 +309,7 @@ export function ExpandableFAB({
                       ${
                         action.variant === 'danger'
                           ? 'bg-red-500 text-white shadow-red-500/30'
-                          : 'bg-white/[0.1] text-orange-50 border border-orange-500/20'
+                          : 'bg-white/[0.1] text-[#f5f0e8] border border-[#d4a44c]/20'
                       }
                     `}
                     aria-label={action.label}
@@ -330,11 +330,11 @@ export function ExpandableFAB({
           className={`
             w-14 h-14 rounded-full
             flex items-center justify-center
-            bg-gradient-to-br from-orange-500 via-amber-500 to-orange-400
+            bg-gradient-to-br from-[#d4a44c] via-[#d4a44c] to-[#d4a44c]
             text-slate-950
-            shadow-lg shadow-orange-500/30
+            shadow-lg shadow-[#d4a44c]/30
             transition-shadow duration-200
-            ${isExpanded ? 'shadow-orange-500/50' : ''}
+            ${isExpanded ? 'shadow-[#d4a44c]/50' : ''}
           `}
           aria-label={ariaLabel}
           aria-expanded={isExpanded}

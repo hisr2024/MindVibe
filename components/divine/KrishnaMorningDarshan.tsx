@@ -130,9 +130,9 @@ export function KrishnaMorningDarshan({
   // Show loading placeholder until ready
   if (!isReady) {
     return (
-      <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/40 via-orange-900/30 to-yellow-900/40 border border-amber-500/20 p-8 ${className}`}>
+      <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/40 via-orange-900/30 to-yellow-900/40 border border-[#d4a44c]/20 p-8 ${className}`}>
         <div className="flex items-center justify-center py-12">
-          <div className="w-8 h-8 rounded-full border-2 border-amber-400/30 border-t-amber-400 animate-spin" />
+          <div className="w-8 h-8 rounded-full border-2 border-[#d4a44c]/30 border-t-[#d4a44c] animate-spin" />
         </div>
       </div>
     );
@@ -140,7 +140,7 @@ export function KrishnaMorningDarshan({
 
   return (
     <motion.div
-      className={`relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/40 via-orange-900/30 to-yellow-900/40 border border-amber-500/20 p-6 sm:p-8 ${className}`}
+      className={`relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-900/40 via-orange-900/30 to-yellow-900/40 border border-[#d4a44c]/20 p-6 sm:p-8 ${className}`}
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
@@ -148,7 +148,7 @@ export function KrishnaMorningDarshan({
     >
       {/* Divine glow effect - reduced intensity to prevent flickering */}
       <div
-        className="absolute inset-0 bg-gradient-radial from-amber-400/8 via-transparent to-transparent pointer-events-none"
+        className="absolute inset-0 bg-gradient-radial from-[#d4a44c]/8 via-transparent to-transparent pointer-events-none"
         style={{ animation: 'pulse 6s ease-in-out infinite', opacity: 0.4 }}
       />
 
@@ -179,7 +179,7 @@ export function KrishnaMorningDarshan({
               >
                 {darshan.icon}
               </motion.span>
-              <p className="text-amber-200/70 italic text-sm sm:text-base px-4">{darshan.atmosphere}</p>
+              <p className="text-[#f0c96d]/70 italic text-sm sm:text-base px-4">{darshan.atmosphere}</p>
             </motion.div>
           )}
 
@@ -194,10 +194,10 @@ export function KrishnaMorningDarshan({
               transition={{ duration: 0.4, ease: "easeOut" }}
             >
               <span className="text-4xl sm:text-5xl block mb-4">{darshan.icon}</span>
-              <h2 className="text-xl sm:text-2xl font-light text-amber-100 mb-2 px-2">
+              <h2 className="text-xl sm:text-2xl font-light text-[#f5f0e8] mb-2 px-2">
                 {darshan.greeting}{userName ? `, ${userName}` : ''}
               </h2>
-              <p className="text-amber-200/80 max-w-md mx-auto text-sm sm:text-base px-4">
+              <p className="text-[#f0c96d]/80 max-w-md mx-auto text-sm sm:text-base px-4">
                 {darshan.blessing}
               </p>
             </motion.div>
@@ -215,7 +215,7 @@ export function KrishnaMorningDarshan({
             >
               <div className="flex items-start gap-3 sm:gap-4">
                 <div
-                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-lg"
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-[#d4a44c] to-[#d4a44c] flex items-center justify-center flex-shrink-0 shadow-lg"
                   style={{
                     boxShadow: '0 0 25px rgba(251, 191, 36, 0.35)',
                     animation: 'glow 3s ease-in-out infinite'
@@ -224,10 +224,10 @@ export function KrishnaMorningDarshan({
                   <span className="text-xl sm:text-2xl">🙏</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-amber-400/60 uppercase tracking-wider mb-2">
+                  <p className="text-xs text-[#d4a44c]/60 uppercase tracking-wider mb-2">
                     {t('divine.sacred.darshan.krishnaSpeaks', 'Krishna speaks to you...')}
                   </p>
-                  <p className="text-amber-100/90 text-base sm:text-lg leading-relaxed italic">
+                  <p className="text-[#f5f0e8]/90 text-base sm:text-lg leading-relaxed italic">
                     &quot;{moodData.message}&quot;
                   </p>
                 </div>
@@ -245,14 +245,14 @@ export function KrishnaMorningDarshan({
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
             >
-              <div className="bg-amber-950/50 border border-amber-500/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
-                <p className="text-xs text-amber-400/60 uppercase tracking-wider mb-3">
+              <div className="bg-amber-950/50 border border-[#d4a44c]/20 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+                <p className="text-xs text-[#d4a44c]/60 uppercase tracking-wider mb-3">
                   {t('divine.sacred.darshan.divineWisdomToday', 'Divine Wisdom for You Today')}
                 </p>
-                <p className="text-amber-100/80 italic mb-4 leading-relaxed text-sm sm:text-base">
+                <p className="text-[#f5f0e8]/80 italic mb-4 leading-relaxed text-sm sm:text-base">
                   &quot;{moodData.verse}&quot;
                 </p>
-                <p className="text-amber-400/70 text-xs sm:text-sm text-right">
+                <p className="text-[#d4a44c]/70 text-xs sm:text-sm text-right">
                   - {moodData.reference}
                 </p>
               </div>
@@ -269,7 +269,7 @@ export function KrishnaMorningDarshan({
               transition={{ duration: 0.4, ease: "easeOut" }}
             >
               <div
-                className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-amber-400/30 to-orange-500/30 flex items-center justify-center will-change-transform"
+                className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#d4a44c]/30 to-[#d4a44c]/30 flex items-center justify-center will-change-transform"
                 style={{
                   animation: 'heartbeat 3s ease-in-out infinite',
                   transform: 'translateZ(0)'
@@ -277,17 +277,17 @@ export function KrishnaMorningDarshan({
               >
                 <span className="text-3xl sm:text-4xl">💙</span>
               </div>
-              <p className="text-amber-100/90 text-base sm:text-lg mb-4 px-2">
+              <p className="text-[#f5f0e8]/90 text-base sm:text-lg mb-4 px-2">
                 {t('divine.sacred.darshan.goInPeace', 'Go in peace, beloved one.')}
               </p>
-              <p className="text-amber-200/60 text-xs sm:text-sm italic max-w-sm mx-auto px-4">
+              <p className="text-[#f0c96d]/60 text-xs sm:text-sm italic max-w-sm mx-auto px-4">
                 &quot;{t('divine.sacred.darshan.alwaysWithYou', 'I am always with you. In every thought, every breath, every heartbeat - there I am. You are never alone.')}&quot;
               </p>
 
               {onComplete && (
                 <motion.button
                   onClick={onComplete}
-                  className="mt-5 sm:mt-6 px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 active:from-amber-500/40 active:to-orange-500/40 border border-amber-500/30 rounded-xl text-amber-100 text-sm sm:text-base transition-all"
+                  className="mt-5 sm:mt-6 px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#d4a44c]/20 to-[#d4a44c]/20 hover:from-[#d4a44c]/30 hover:to-[#d4a44c]/30 active:from-[#d4a44c]/40 active:to-[#d4a44c]/40 border border-[#d4a44c]/30 rounded-xl text-[#f5f0e8] text-sm sm:text-base transition-all"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
                 >
@@ -306,8 +306,8 @@ export function KrishnaMorningDarshan({
             key={p}
             className={`w-2 h-2 rounded-full transition-all duration-500 ${
               phase === p
-                ? 'bg-amber-400 scale-125'
-                : 'bg-amber-400/25 scale-100'
+                ? 'bg-[#d4a44c] scale-125'
+                : 'bg-[#d4a44c]/25 scale-100'
             }`}
             style={{
               animation: phase === p ? 'dotPulse 2s ease-in-out infinite' : 'none'

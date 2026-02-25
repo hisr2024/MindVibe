@@ -213,13 +213,13 @@ export function EmotionalResetWizard({
 
     return (
       <div className="mb-6">
-        <div className="flex items-center justify-between text-sm text-orange-100/70 mb-2">
+        <div className="flex items-center justify-between text-sm text-[#f5f0e8]/70 mb-2">
           <span>{stepData?.step_title || 'Loading...'}</span>
           <span>{currentStep}/7</span>
         </div>
         <div className="h-2 bg-white/10 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-orange-400 to-amber-300 transition-all duration-500"
+            className="h-full bg-gradient-to-r from-[#d4a44c] to-[#e8b54a] transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -230,7 +230,7 @@ export function EmotionalResetWizard({
   const renderStep1 = () => (
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-orange-100/90 leading-relaxed flex-1">
+        <p className="text-[#f5f0e8]/90 leading-relaxed flex-1">
           {stepData?.guidance}
         </p>
         {stepData?.guidance && (
@@ -263,11 +263,11 @@ export function EmotionalResetWizard({
             }
           }}
           placeholder="Speak or type what's weighing on your heart..."
-          className="w-full h-32 px-4 py-3 bg-white/5 border border-orange-500/30 rounded-2xl text-orange-50 placeholder:text-orange-100/40 focus:outline-none focus:ring-2 focus:ring-orange-400/50 resize-none"
+          className="w-full h-32 px-4 py-3 bg-white/5 border border-[#d4a44c]/30 rounded-2xl text-[#f5f0e8] placeholder:text-[#f5f0e8]/40 focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50 resize-none"
           aria-label="Share your feelings"
           maxLength={200}
         />
-        <span className="absolute bottom-3 right-3 text-xs text-orange-100/50">
+        <span className="absolute bottom-3 right-3 text-xs text-[#f5f0e8]/50">
           {userInput.length}/200
         </span>
       </div>
@@ -276,13 +276,13 @@ export function EmotionalResetWizard({
 
   const renderStep2 = () => (
     <div className="space-y-4">
-      <p className="text-orange-100/90 leading-relaxed">
+      <p className="text-[#f5f0e8]/90 leading-relaxed">
         {stepData?.guidance}
       </p>
       {stepData?.assessment && (
-        <div className="bg-gradient-to-br from-orange-500/10 to-amber-300/10 border border-orange-400/30 rounded-2xl p-4">
+        <div className="bg-gradient-to-br from-[#d4a44c]/10 to-[#e8b54a]/10 border border-[#d4a44c]/30 rounded-2xl p-4">
           <div className="flex items-start justify-between gap-3">
-            <p className="text-orange-50 leading-relaxed whitespace-pre-wrap flex-1">
+            <p className="text-[#f5f0e8] leading-relaxed whitespace-pre-wrap flex-1">
               {stepData.assessment.assessment}
             </p>
             <VoiceResponseButton
@@ -299,7 +299,7 @@ export function EmotionalResetWizard({
 
   const renderStep3 = () => (
     <div className="space-y-4">
-      <p className="text-orange-100/90 leading-relaxed text-center">
+      <p className="text-[#f5f0e8]/90 leading-relaxed text-center">
         {stepData?.guidance}
       </p>
       {stepData?.breathing && (
@@ -311,7 +311,7 @@ export function EmotionalResetWizard({
         />
       )}
       {breathingComplete && (
-        <p className="text-center text-orange-100/80 animate-fadeIn">
+        <p className="text-center text-[#f5f0e8]/80 animate-fadeIn">
           {stepData?.breathing?.completion_message}
         </p>
       )}
@@ -320,13 +320,13 @@ export function EmotionalResetWizard({
 
   const renderStep4 = () => (
     <div className="space-y-4">
-      <p className="text-orange-100/90 leading-relaxed">
+      <p className="text-[#f5f0e8]/90 leading-relaxed">
         {stepData?.guidance}
       </p>
       {stepData?.visualization && (
         <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-400/20 rounded-2xl p-6">
           <div className="flex items-start justify-between gap-3">
-            <p className="text-orange-50 leading-relaxed italic whitespace-pre-wrap flex-1">
+            <p className="text-[#f5f0e8] leading-relaxed italic whitespace-pre-wrap flex-1">
               {stepData.visualization}
             </p>
             <VoiceResponseButton
@@ -343,13 +343,13 @@ export function EmotionalResetWizard({
 
   const renderStep5 = () => (
     <div className="space-y-4">
-      <p className="text-orange-100/90 leading-relaxed">
+      <p className="text-[#f5f0e8]/90 leading-relaxed">
         {stepData?.guidance}
       </p>
       {stepData?.wisdom?.map((item, index) => (
-        <div key={index} className="bg-gradient-to-br from-orange-500/10 to-amber-300/10 border border-orange-400/30 rounded-2xl p-4 space-y-3">
+        <div key={index} className="bg-gradient-to-br from-[#d4a44c]/10 to-[#e8b54a]/10 border border-[#d4a44c]/30 rounded-2xl p-4 space-y-3">
           <div className="flex items-start justify-between gap-3">
-            <p className="text-orange-50 leading-relaxed flex-1">
+            <p className="text-[#f5f0e8] leading-relaxed flex-1">
               &ldquo;{item.wisdom}&rdquo;
             </p>
             <VoiceResponseButton
@@ -359,7 +359,7 @@ export function EmotionalResetWizard({
               variant="accent"
             />
           </div>
-          <p className="text-sm text-orange-100/70 border-t border-orange-500/20 pt-3">
+          <p className="text-sm text-[#f5f0e8]/70 border-t border-[#d4a44c]/20 pt-3">
             {item.application}
           </p>
         </div>
@@ -369,17 +369,17 @@ export function EmotionalResetWizard({
 
   const renderStep6 = () => (
     <div className="space-y-4">
-      <p className="text-orange-100/90 leading-relaxed">
+      <p className="text-[#f5f0e8]/90 leading-relaxed">
         {stepData?.guidance}
       </p>
       <div className="space-y-3">
         {stepData?.affirmations?.map((affirmation, index) => (
           <div
             key={index}
-            className="bg-gradient-to-r from-orange-500/15 to-amber-300/15 border border-orange-400/25 rounded-xl p-4 flex items-start gap-3"
+            className="bg-gradient-to-r from-[#d4a44c]/15 to-[#e8b54a]/15 border border-[#d4a44c]/25 rounded-xl p-4 flex items-start gap-3"
           >
             <span className="text-lg">✨</span>
-            <p className="text-orange-50 leading-relaxed flex-1">
+            <p className="text-[#f5f0e8] leading-relaxed flex-1">
               {affirmation}
             </p>
             <VoiceResponseButton
@@ -400,50 +400,50 @@ export function EmotionalResetWizard({
         <>
           <div className="text-center space-y-2">
             <span className="text-4xl">🌟</span>
-            <h3 className="text-xl font-semibold text-orange-50">
+            <h3 className="text-xl font-semibold text-[#f5f0e8]">
               Session Complete
             </h3>
           </div>
 
-          <div className="bg-gradient-to-br from-orange-500/10 to-amber-300/10 border border-orange-400/30 rounded-2xl p-4 space-y-3">
-            <p className="text-orange-50 leading-relaxed">
+          <div className="bg-gradient-to-br from-[#d4a44c]/10 to-[#e8b54a]/10 border border-[#d4a44c]/30 rounded-2xl p-4 space-y-3">
+            <p className="text-[#f5f0e8] leading-relaxed">
               {stepData.summary.summary}
             </p>
           </div>
 
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-orange-100/80">
+            <h4 className="text-sm font-semibold text-[#f5f0e8]/80">
               Key Insight
             </h4>
-            <p className="text-orange-50 leading-relaxed">
+            <p className="text-[#f5f0e8] leading-relaxed">
               {stepData.summary.key_insight}
             </p>
           </div>
 
-          <div className="bg-gradient-to-r from-amber-500/15 to-orange-400/15 border border-amber-400/30 rounded-xl p-4">
-            <h4 className="text-sm font-semibold text-orange-100/80 mb-2">
+          <div className="bg-gradient-to-r from-[#d4a44c]/15 to-[#d4a44c]/15 border border-[#d4a44c]/30 rounded-xl p-4">
+            <h4 className="text-sm font-semibold text-[#f5f0e8]/80 mb-2">
               Affirmation to Remember
             </h4>
-            <p className="text-orange-50 font-medium">
+            <p className="text-[#f5f0e8] font-medium">
               &ldquo;{stepData.summary.affirmation_to_remember}&rdquo;
             </p>
           </div>
 
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-orange-100/80">
+            <h4 className="text-sm font-semibold text-[#f5f0e8]/80">
               Next Steps
             </h4>
             <ul className="space-y-2">
               {stepData.summary.next_steps.map((step, index) => (
-                <li key={index} className="flex items-start gap-2 text-orange-100/80">
-                  <span className="text-orange-400">•</span>
+                <li key={index} className="flex items-start gap-2 text-[#f5f0e8]/80">
+                  <span className="text-[#d4a44c]">•</span>
                   {step}
                 </li>
               ))}
             </ul>
           </div>
 
-          <p className="text-center text-orange-100/80 pt-4 border-t border-orange-500/20">
+          <p className="text-center text-[#f5f0e8]/80 pt-4 border-t border-[#d4a44c]/20">
             {stepData.summary.closing_message}
           </p>
         </>
@@ -481,7 +481,7 @@ export function EmotionalResetWizard({
             Krishna Cares for You
           </h3>
         </div>
-        <div className="text-orange-100/90 whitespace-pre-wrap leading-relaxed">
+        <div className="text-[#f5f0e8]/90 whitespace-pre-wrap leading-relaxed">
           {crisisResponse}
         </div>
         <div className="flex gap-3 pt-2">
@@ -490,7 +490,7 @@ export function EmotionalResetWizard({
               setCrisisDetected(false)
               setCrisisResponse(null)
             }}
-            className="flex-1 px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-orange-50 hover:bg-white/20 transition"
+            className="flex-1 px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-[#f5f0e8] hover:bg-white/20 transition"
           >
             I Understand
           </button>
@@ -508,9 +508,9 @@ export function EmotionalResetWizard({
   // Prevent hydration mismatch by waiting for client-side mount
   if (!isMounted) {
     return (
-      <div className={`bg-black/50 border border-orange-500/20 rounded-2xl p-6 ${className}`}>
+      <div className={`bg-black/50 border border-[#d4a44c]/20 rounded-2xl p-6 ${className}`}>
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin h-8 w-8 border-2 border-orange-400 border-t-transparent rounded-full" />
+          <div className="animate-spin h-8 w-8 border-2 border-[#d4a44c] border-t-transparent rounded-full" />
         </div>
       </div>
     )
@@ -518,18 +518,18 @@ export function EmotionalResetWizard({
 
   if (isCompleted) {
     return (
-      <div className={`bg-black/50 border border-orange-500/20 rounded-2xl p-6 ${className}`}>
+      <div className={`bg-black/50 border border-[#d4a44c]/20 rounded-2xl p-6 ${className}`}>
         <div className="text-center space-y-4">
           <span className="text-5xl">🌟</span>
-          <h2 className="text-2xl font-semibold text-orange-50">
+          <h2 className="text-2xl font-semibold text-[#f5f0e8]">
             Emotional Reset Complete
           </h2>
-          <p className="text-orange-100/80">
+          <p className="text-[#f5f0e8]/80">
             You&apos;ve taken a meaningful step toward emotional balance.
           </p>
           <button
             onClick={onClose}
-            className="px-6 py-3 bg-gradient-to-r from-orange-400 to-amber-300 rounded-xl font-semibold text-slate-900 hover:scale-105 transition"
+            className="px-6 py-3 bg-gradient-to-r from-[#d4a44c] to-[#e8b54a] rounded-xl font-semibold text-slate-900 hover:scale-105 transition"
           >
             Return to Dashboard
           </button>
@@ -539,18 +539,18 @@ export function EmotionalResetWizard({
   }
 
   return (
-    <div className={`bg-black/50 border border-orange-500/20 rounded-2xl ${className}`}>
+    <div className={`bg-black/50 border border-[#d4a44c]/20 rounded-2xl ${className}`}>
       {crisisDetected && renderCrisisModal()}
 
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-orange-500/20 px-6 py-4">
+      <div className="flex items-center justify-between border-b border-[#d4a44c]/20 px-6 py-4">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#d4a44c] to-[#e8b54a] flex items-center justify-center">
             <span className="text-lg">🧘</span>
           </div>
           <div>
-            <h2 className="font-semibold text-orange-50">Emotional Reset</h2>
-            <p className="text-xs text-orange-100/60">Guided Wellness Flow</p>
+            <h2 className="font-semibold text-[#f5f0e8]">Emotional Reset</h2>
+            <p className="text-xs text-[#f5f0e8]/60">Guided Wellness Flow</p>
           </div>
         </div>
         {onClose && (
@@ -559,7 +559,7 @@ export function EmotionalResetWizard({
             className="p-2 hover:bg-white/10 rounded-lg transition"
             aria-label="Close"
           >
-            <svg className="w-5 h-5 text-orange-100/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-[#f5f0e8]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -578,7 +578,7 @@ export function EmotionalResetWizard({
 
         {isLoading && !stepData ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin h-8 w-8 border-2 border-orange-400 border-t-transparent rounded-full" />
+            <div className="animate-spin h-8 w-8 border-2 border-[#d4a44c] border-t-transparent rounded-full" />
           </div>
         ) : (
           renderCurrentStep()
@@ -586,11 +586,11 @@ export function EmotionalResetWizard({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-orange-500/20 px-6 py-4">
+      <div className="border-t border-[#d4a44c]/20 px-6 py-4">
         <button
           onClick={handleNext}
           disabled={isLoading || (currentStep === 1 && !userInput.trim()) || (currentStep === 3 && !breathingComplete)}
-          className="w-full px-6 py-3 bg-gradient-to-r from-orange-400 to-amber-300 rounded-xl font-semibold text-slate-900 shadow-lg shadow-orange-500/25 transition hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="w-full px-6 py-3 bg-gradient-to-r from-[#d4a44c] to-[#e8b54a] rounded-xl font-semibold text-slate-900 shadow-lg shadow-[#d4a44c]/25 transition hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">

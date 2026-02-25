@@ -19,7 +19,7 @@ export default function EmotionalResetClient() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0b0b0f] to-[#120907] text-white p-4 md:p-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] text-white p-4 md:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <FadeIn>
@@ -40,7 +40,7 @@ export default function EmotionalResetClient() {
               description="Begin the guided 7-step emotional processing journey (~10 minutes)."
               ctaLabel="Begin Now"
               onClick={() => document.getElementById('reset-wizard')?.scrollIntoView({ behavior: 'smooth' })}
-              gradient="from-orange-500/10 to-amber-500/10"
+              gradient="from-[#d4a44c]/10 to-amber-500/10"
             />
             <ToolActionCard
               icon="⏱️"
@@ -59,21 +59,21 @@ export default function EmotionalResetClient() {
             <EmotionalResetWizard
               onComplete={handleComplete}
               onClose={handleClose}
-              className="shadow-[0_20px_80px_rgba(255,115,39,0.12)]"
+              className="shadow-[0_20px_80px_rgba(212,164,76,0.12)]"
             />
           </div>
         </FadeIn>
 
         {/* Footer info */}
         <FadeIn delay={0.2}>
-          <div className="rounded-2xl border border-orange-500/15 bg-black/40 p-4">
-            <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-orange-100/60">
+          <div className="rounded-2xl border border-[#d4a44c]/15 bg-black/40 p-4">
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-[#f5f0e8]/60">
               <span className="flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-400" aria-hidden="true"></span>
                 Max 10 sessions/day
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-orange-400" aria-hidden="true"></span>
+                <span className="h-1.5 w-1.5 rounded-full bg-[#d4a44c]" aria-hidden="true"></span>
                 Sessions expire after 30 min
               </span>
               <span className="flex items-center gap-1.5">

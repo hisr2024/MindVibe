@@ -54,7 +54,7 @@
 
 /* ─── Focus States ─── */
 :focus-visible {
-  outline: 2px solid rgba(251, 146, 60, 0.7);
+  outline: 2px solid rgba(212, 164, 76, 0.7);
   outline-offset: 2px;
 }
 
@@ -77,7 +77,7 @@
   width: 0;
   height: 0;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 145, 89, 0.35) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(212, 164, 76, 0.35) 0%, transparent 70%);
   transform: translate(-50%, -50%);
   pointer-events: none;
   opacity: 0;
@@ -123,37 +123,37 @@ html.light .mobile-glass {
 @media (hover: hover) {
   .mobile-card-interactive:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(255, 145, 89, 0.15);
-    border-color: rgba(255, 145, 89, 0.3);
+    box-shadow: 0 12px 40px rgba(212, 164, 76, 0.15);
+    border-color: rgba(212, 164, 76, 0.3);
   }
 }
 
 /* ─── Buttons ─── */
 .mobile-btn-primary {
   position: relative;
-  background: linear-gradient(135deg, #ff7a3c 0%, #ff9f52 50%, #ffd36f 100%);
+  background: linear-gradient(135deg, #c8943a 0%, #e8b54a 50%, #f0c96d 100%);
   background-size: 200% 200%;
-  color: #0b0b0f;
+  color: #050507;
   font-weight: 600;
   border-radius: 16px;
   padding: 14px 24px;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 4px 20px rgba(255, 122, 60, 0.35), 0 0 0 0 rgba(255, 145, 89, 0);
+  box-shadow: 0 4px 20px rgba(212, 164, 76, 0.3), 0 0 0 0 rgba(212, 164, 76, 0);
   -webkit-tap-highlight-color: transparent;
 }
 
 .mobile-btn-primary:active {
   transform: scale(0.96);
-  box-shadow: 0 2px 12px rgba(255, 122, 60, 0.25), 0 0 0 4px rgba(255, 145, 89, 0.2);
+  box-shadow: 0 2px 12px rgba(212, 164, 76, 0.25), 0 0 0 4px rgba(212, 164, 76, 0.2);
   background-position: 100% 100%;
 }
 
 .mobile-btn-secondary {
   position: relative;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 145, 89, 0.25);
-  color: #fff;
+  border: 1px solid rgba(212, 164, 76, 0.25);
+  color: #f5f0e8;
   font-weight: 500;
   border-radius: 16px;
   padding: 14px 24px;
@@ -163,14 +163,14 @@ html.light .mobile-glass {
 
 .mobile-btn-secondary:active {
   transform: scale(0.96);
-  background: rgba(255, 145, 89, 0.12);
-  border-color: rgba(255, 145, 89, 0.4);
+  background: rgba(212, 164, 76, 0.12);
+  border-color: rgba(212, 164, 76, 0.4);
 }
 
 /* ─── Mobile Input ─── */
 .mobile-input {
   background: rgba(0, 0, 0, 0.4);
-  border: 1.5px solid rgba(255, 145, 89, 0.2);
+  border: 1.5px solid rgba(212, 164, 76, 0.2);
   border-radius: 14px;
   padding: 14px 18px;
   font-size: 16px; /* Prevents iOS zoom */
@@ -182,8 +182,8 @@ html.light .mobile-glass {
 
 .mobile-input:focus {
   outline: none;
-  border-color: rgba(255, 145, 89, 0.5);
-  box-shadow: 0 0 0 4px rgba(255, 145, 89, 0.12), 0 4px 20px rgba(0, 0, 0, 0.25);
+  border-color: rgba(212, 164, 76, 0.5);
+  box-shadow: 0 0 0 4px rgba(212, 164, 76, 0.12), 0 4px 20px rgba(0, 0, 0, 0.25);
   background: rgba(0, 0, 0, 0.5);
 }
 
@@ -199,8 +199,8 @@ html.light .mobile-input {
 
 html.light .mobile-input:focus {
   background: #fff;
-  border-color: #ff9159;
-  box-shadow: 0 0 0 4px rgba(255, 145, 89, 0.15), 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-color: #d4a44c;
+  box-shadow: 0 0 0 4px rgba(212, 164, 76, 0.15), 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 /* ─── Pull to Refresh ─── */
@@ -212,11 +212,11 @@ html.light .mobile-input:focus {
   z-index: 9999;
   padding: 12px 24px;
   border-radius: 0 0 20px 20px;
-  background: linear-gradient(135deg, rgba(255, 122, 60, 0.95), rgba(255, 159, 82, 0.95));
-  color: #0b0b0f;
+  background: linear-gradient(135deg, rgba(200, 148, 58, 0.95), rgba(232, 181, 74, 0.95));
+  color: #050507;
   font-weight: 600;
   font-size: 14px;
-  box-shadow: 0 4px 20px rgba(255, 122, 60, 0.4);
+  box-shadow: 0 4px 20px rgba(212, 164, 76, 0.4);
   transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -277,7 +277,7 @@ html.light .skeleton {
   width: 60px;
   height: 20px;
   transform: translateX(-50%);
-  background: radial-gradient(ellipse at center, rgba(255, 145, 89, 0.4) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(212, 164, 76, 0.4) 0%, transparent 70%);
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -311,12 +311,12 @@ html.light .skeleton {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ff7a3c 0%, #ffb347 100%);
-  color: #0b0b0f;
+  background: linear-gradient(135deg, #c8943a 0%, #e8b54a 100%);
+  color: #050507;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 24px rgba(255, 122, 60, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 24px rgba(212, 164, 76, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   z-index: 45;
   -webkit-tap-highlight-color: transparent;
@@ -324,7 +324,7 @@ html.light .skeleton {
 
 .mobile-fab:active {
   transform: scale(0.92);
-  box-shadow: 0 3px 16px rgba(255, 122, 60, 0.3), 0 1px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 3px 16px rgba(212, 164, 76, 0.3), 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
 /* ─── Toast ─── */
@@ -336,8 +336,8 @@ html.light .skeleton {
   padding: 14px 24px;
   border-radius: 16px;
   background: rgba(15, 22, 36, 0.95);
-  border: 1px solid rgba(255, 145, 89, 0.2);
-  color: #f8fafc;
+  border: 1px solid rgba(212, 164, 76, 0.15);
+  color: #f5f0e8;
   font-weight: 500;
   font-size: 14px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -382,7 +382,7 @@ html.light .mobile-toast {
   position: absolute;
   inset: -4px;
   border-radius: inherit;
-  background: radial-gradient(circle at center, rgba(255, 145, 89, 0.3) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(212, 164, 76, 0.3) 0%, transparent 70%);
   opacity: 0;
   transition: opacity 0.15s ease;
   pointer-events: none;
@@ -399,7 +399,7 @@ html.light .mobile-toast {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #ef4444, #f97316, #ef4444);
+  background: linear-gradient(90deg, #ef4444, #d4a44c, #ef4444);
   background-size: 200% 100%;
   animation: offline-gradient 2s linear infinite;
   z-index: 9999;
@@ -423,10 +423,10 @@ html.light .mobile-toast {
   transition: background-color 0.2s ease;
 }
 
-.swipe-indicator:active { background: rgba(255, 145, 89, 0.6); }
+.swipe-indicator:active { background: rgba(212, 164, 76, 0.6); }
 
 html.light .swipe-indicator { background: rgba(0, 0, 0, 0.2); }
-html.light .swipe-indicator:active { background: rgba(255, 145, 89, 0.8); }
+html.light .swipe-indicator:active { background: rgba(212, 164, 76, 0.8); }
 
 /* ─── Card Depth ─── */
 .mobile-card-depth {
@@ -453,7 +453,7 @@ html.light .swipe-indicator:active { background: rgba(255, 145, 89, 0.8); }
 
 a:not(.no-highlight),
 button:not(.no-highlight) {
-  -webkit-tap-highlight-color: rgba(255, 145, 89, 0.1);
+  -webkit-tap-highlight-color: rgba(212, 164, 76, 0.1);
 }
 
 /* ─── Mobile-Optimized Images ─── */
@@ -494,7 +494,7 @@ img { content-visibility: auto; }
   button:active, a:active, [role="button"]:active { opacity: 0.85; }
 
   .list-item-interactive { transition: background-color 0.15s ease; }
-  .list-item-interactive:active { background-color: rgba(255, 145, 89, 0.08); }
+  .list-item-interactive:active { background-color: rgba(212, 164, 76, 0.08); }
 
   .mobile-content-area {
     min-height: calc(100vh - 88px - env(safe-area-inset-bottom, 0px));
@@ -565,7 +565,7 @@ body[style*="position: fixed"] { width: 100% !important; }
   box-shadow:
     0 -8px 32px rgba(0, 0, 0, 0.5),
     0 -2px 8px rgba(0, 0, 0, 0.3),
-    0 1px 0 rgba(255, 145, 89, 0.1) inset;
+    0 1px 0 rgba(212, 164, 76, 0.1) inset;
 }
 
 .mobile-nav-glow {
@@ -581,7 +581,7 @@ body[style*="position: fixed"] { width: 100% !important; }
   width: 100%;
   max-width: 80px;
   height: 100%;
-  background: radial-gradient(ellipse 50% 80% at 50% 0%, rgba(255, 145, 89, 0.2) 0%, transparent 60%);
+  background: radial-gradient(ellipse 50% 80% at 50% 0%, rgba(212, 164, 76, 0.2) 0%, transparent 60%);
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -602,7 +602,7 @@ body[style*="position: fixed"] { width: 100% !important; }
   transform: translateX(-50%);
   width: 70px;
   height: 70px;
-  background: radial-gradient(circle at 50% 50%, rgba(255, 145, 89, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle at 50% 50%, rgba(212, 164, 76, 0.15) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -625,7 +625,7 @@ body[style*="position: fixed"] { width: 100% !important; }
   top: 0;
   bottom: 0;
   width: 40px;
-  background: linear-gradient(90deg, transparent, rgba(11, 11, 15, 0.9));
+  background: linear-gradient(90deg, transparent, rgba(5, 5, 7, 0.9));
   pointer-events: none;
   opacity: 1;
   transition: opacity 0.3s ease;
@@ -656,7 +656,7 @@ body[style*="position: fixed"] { width: 100% !important; }
 .mobile-sheet-handle:active,
 .mobile-sheet-handle.dragging {
   width: 60px;
-  background: rgba(255, 145, 89, 0.6);
+  background: rgba(212, 164, 76, 0.6);
 }
 
 /* ─── Extra Small Phones ─── */

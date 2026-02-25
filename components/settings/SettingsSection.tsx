@@ -17,9 +17,9 @@ export function SettingsSection({
   className = '',
 }: SettingsSectionProps) {
   return (
-    <div className={`rounded-2xl border border-orange-500/15 bg-[#0d0d10]/85 p-6 ${className}`}>
+    <div className={`rounded-2xl border border-[#d4a44c]/15 bg-[#0d0d10]/85 p-6 ${className}`}>
       <div className="mb-4 flex items-center gap-2">
-        <h3 className="text-lg font-semibold text-orange-50">{title}</h3>
+        <h3 className="text-lg font-semibold text-[#f5f0e8]">{title}</h3>
         {description && <HelpIcon content={description} size="sm" />}
       </div>
       {children}
@@ -43,7 +43,7 @@ export function SettingsItem({
   return (
     <div className={`flex items-center justify-between py-3 ${className}`}>
       <div className="flex items-center gap-2">
-        <p className="text-sm font-medium text-orange-50">{label}</p>
+        <p className="text-sm font-medium text-[#f5f0e8]">{label}</p>
         {description && <HelpIcon content={description} size="sm" />}
       </div>
       <div>{children}</div>
@@ -56,7 +56,7 @@ interface SettingsDividerProps {
 }
 
 export function SettingsDivider({ className = '' }: SettingsDividerProps) {
-  return <hr className={`border-orange-500/10 ${className}`} />
+  return <hr className={`border-[#d4a44c]/10 ${className}`} />
 }
 
 export default SettingsSection

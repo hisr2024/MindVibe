@@ -275,7 +275,7 @@ export const MobileBottomSheet = forwardRef<HTMLDivElement, MobileBottomSheetPro
                       className={`
                         w-10 h-1.5 rounded-full
                         transition-colors duration-200
-                        ${isDragging ? 'bg-orange-400/80' : 'bg-white/30'}
+                        ${isDragging ? 'bg-[#d4a44c]/80' : 'bg-white/30'}
                       `}
                     />
                   </div>
@@ -392,7 +392,7 @@ export function ConfirmationSheet({
               ${
                 variant === 'danger'
                   ? 'bg-red-500 hover:bg-red-600 text-white'
-                  : 'bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950'
+                  : 'bg-gradient-to-r from-[#d4a44c] to-[#d4a44c] text-slate-950'
               }
             `}
           >

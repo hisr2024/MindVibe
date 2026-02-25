@@ -111,11 +111,11 @@ export function VoiceResponseButton({
 
     switch (variant) {
       case 'minimal':
-        return 'border-transparent bg-transparent text-orange-400 hover:bg-orange-500/10'
+        return 'border-transparent bg-transparent text-[#d4a44c] hover:bg-[#d4a44c]/10'
       case 'accent':
-        return 'border-orange-400/40 bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-300 hover:from-orange-500/30 hover:to-amber-500/30'
+        return 'border-[#d4a44c]/40 bg-gradient-to-r from-[#d4a44c]/20 to-[#d4a44c]/20 text-[#e8b54a] hover:from-[#d4a44c]/30 hover:to-[#d4a44c]/30'
       default:
-        return 'border-orange-500/25 bg-slate-950/70 text-orange-400 hover:bg-slate-900/70 hover:border-orange-500/40'
+        return 'border-[#d4a44c]/25 bg-slate-950/70 text-[#d4a44c] hover:bg-slate-900/70 hover:border-[#d4a44c]/40'
     }
   }
 
@@ -125,7 +125,7 @@ export function VoiceResponseButton({
       <motion.button
         type="button"
         onClick={handleClick}
-        className={`relative flex items-center justify-center rounded-xl border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 ${sizeClasses[size]} ${getVariantStyles()}`}
+        className={`relative flex items-center justify-center rounded-xl border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 ${sizeClasses[size]} ${getVariantStyles()}`}
         whileTap={{ scale: 0.95 }}
         aria-label={isLoading ? 'Loading' : isSpeaking ? (isPaused ? 'Resume' : 'Pause') : 'Listen'}
         title={isLoading ? 'Loading voice...' : isSpeaking ? (isPaused ? 'Resume speaking' : 'Pause speaking') : 'Listen to response'}

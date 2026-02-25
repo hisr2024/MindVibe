@@ -75,7 +75,7 @@ const PRESETS: Record<BrainwavePreset, {
     baseFrequency: 200,
     icon: Zap,
     color: 'text-yellow-400',
-    gradient: 'from-yellow-500/20 to-amber-500/20'
+    gradient: 'from-yellow-500/20 to-[#d4a44c]/20'
   },
   meditation: {
     name: 'Meditation',
@@ -124,8 +124,8 @@ const PRESETS: Record<BrainwavePreset, {
     frequency: 10,
     baseFrequency: 200,
     icon: Brain,
-    color: 'text-orange-400',
-    gradient: 'from-orange-500/20 to-amber-500/20'
+    color: 'text-[#d4a44c]',
+    gradient: 'from-[#d4a44c]/20 to-[#d4a44c]/20'
   }
 }
 

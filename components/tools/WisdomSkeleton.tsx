@@ -41,7 +41,7 @@ export function WisdomSkeleton({ variant = 'generic', className = '' }: WisdomSk
 
   return (
     <div
-      className={`rounded-2xl border border-orange-500/15 bg-[#0d0d10]/85 p-5 space-y-5 ${className}`}
+      className={`rounded-2xl border border-[#d4a44c]/15 bg-[#0d0d10]/85 p-5 space-y-5 ${className}`}
       role="status"
       aria-label="Loading wisdom response"
     >

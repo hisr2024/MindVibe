@@ -26,11 +26,11 @@ const stepConfig = [
     key: 'pauseAndBreathe',
     title: 'Pause & Breathe',
     icon: '🧘',
-    cardClass: 'border-orange-400/40 bg-gradient-to-br from-orange-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85',
-    numberClass: 'bg-orange-500/30 text-orange-50 border-orange-400',
-    textColor: 'text-orange-50',
-    contentTextColor: 'text-orange-100/90',
-    contentBorderClass: 'border-orange-500/15',
+    cardClass: 'border-[#d4a44c]/40 bg-gradient-to-br from-[#d4a44c]/10 via-[#0d0d10]/85 to-[#0d0d10]/85',
+    numberClass: 'bg-[#d4a44c]/30 text-[#f5f0e8] border-[#d4a44c]',
+    textColor: 'text-[#f5f0e8]',
+    contentTextColor: 'text-[#f5f0e8]/90',
+    contentBorderClass: 'border-[#d4a44c]/15',
     number: 1,
   },
   {
@@ -109,7 +109,7 @@ export function ResetPlanCard({
       {stepConfig.map((step, idx) => (
         <div
           key={step.key}
-          className={`rounded-2xl border ${step.cardClass} p-5 shadow-[0_15px_60px_rgba(255,115,39,0.08)] transition-opacity duration-500 ${
+          className={`rounded-2xl border ${step.cardClass} p-5 shadow-[0_15px_60px_rgba(212,164,76,0.08)] transition-opacity duration-500 ${
             revealedCards >= idx + 1 ? 'opacity-100' : 'opacity-0'
           }`}
           role="region"

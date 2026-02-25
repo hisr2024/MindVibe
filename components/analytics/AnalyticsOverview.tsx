@@ -89,7 +89,7 @@ function OverviewSkeleton() {
       {[1, 2, 3, 4].map((i) => (
         <div
           key={i}
-          className="rounded-2xl border border-orange-500/20 bg-orange-500/5 p-4"
+          className="rounded-2xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 p-4"
         >
           <Skeleton height={16} width="60%" className="mb-2" />
           <Skeleton height={32} width="40%" className="mb-2" />

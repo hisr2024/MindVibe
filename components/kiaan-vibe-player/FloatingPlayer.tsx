@@ -174,7 +174,7 @@ export function FloatingPlayer() {
               <div
                 className={`
                   flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden
-                  bg-gradient-to-br from-orange-500/20 to-amber-500/20
+                  bg-gradient-to-br from-[#d4a44c]/20 to-[#d4a44c]/20
                   flex items-center justify-center
                 `}
               >
@@ -185,7 +185,7 @@ export function FloatingPlayer() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <Music2 className="w-6 h-6 text-orange-400" />
+                  <Music2 className="w-6 h-6 text-[#d4a44c]" />
                 )}
               </div>
 
@@ -215,7 +215,7 @@ export function FloatingPlayer() {
                   className={`
                     p-2.5 rounded-full transition-all
                     ${isPlaying
-                      ? 'bg-orange-500 text-white'
+                      ? 'bg-[#d4a44c] text-white'
                       : 'bg-white/10 text-white hover:bg-white/20'
                     }
                   `}
@@ -271,7 +271,7 @@ export function FloatingPlayer() {
               onClick={handleProgressClick}
             >
               <div
-                className="h-full bg-orange-500 rounded-full relative"
+                className="h-full bg-[#d4a44c] rounded-full relative"
                 style={{ width: `${progress}%` }}
               >
                 <div
@@ -282,14 +282,14 @@ export function FloatingPlayer() {
 
             {/* Audio Error Display */}
             {audioError && (
-              <div className="mt-2 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+              <div className="mt-2 p-2 rounded-lg bg-[#d4a44c]/10 border border-[#d4a44c]/20">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                  <p className="text-xs text-amber-200 flex-1">{audioError}</p>
+                  <AlertTriangle className="w-4 h-4 text-[#d4a44c] flex-shrink-0" />
+                  <p className="text-xs text-[#f0c96d] flex-1">{audioError}</p>
                   <div className="flex gap-1">
                     <button
                       onClick={() => retryPlayback()}
-                      className="p-1.5 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 transition-colors"
+                      className="p-1.5 rounded-md bg-[#d4a44c]/20 hover:bg-[#d4a44c]/30 text-[#f0c96d] transition-colors"
                       aria-label="Retry playback"
                       title="Retry"
                     >
@@ -332,7 +332,7 @@ export function FloatingPlayer() {
                     <button
                       onClick={toggleShuffle}
                       className={`p-2 rounded-lg transition-colors ${
-                        shuffle ? 'text-orange-400 bg-orange-500/20' : 'text-white/50 hover:text-white'
+                        shuffle ? 'text-[#d4a44c] bg-[#d4a44c]/20' : 'text-white/50 hover:text-white'
                       }`}
                       aria-label="Shuffle"
                     >
@@ -343,7 +343,7 @@ export function FloatingPlayer() {
                     <button
                       onClick={cycleRepeatMode}
                       className={`p-2 rounded-lg transition-colors ${
-                        repeatMode !== 'off' ? 'text-orange-400 bg-orange-500/20' : 'text-white/50 hover:text-white'
+                        repeatMode !== 'off' ? 'text-[#d4a44c] bg-[#d4a44c]/20' : 'text-white/50 hover:text-white'
                       }`}
                       aria-label={`Repeat: ${repeatMode}`}
                     >
@@ -358,7 +358,7 @@ export function FloatingPlayer() {
                     <button
                       onClick={() => setShowQueue(!showQueue)}
                       className={`p-2 rounded-lg transition-colors ${
-                        showQueue ? 'text-orange-400 bg-orange-500/20' : 'text-white/50 hover:text-white'
+                        showQueue ? 'text-[#d4a44c] bg-[#d4a44c]/20' : 'text-white/50 hover:text-white'
                       }`}
                       aria-label="Queue"
                     >
@@ -385,7 +385,7 @@ export function FloatingPlayer() {
                         step="0.01"
                         value={muted ? 0 : volume}
                         onChange={handleVolumeChange}
-                        className="w-20 h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-orange-500"
+                        className="w-20 h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#d4a44c]"
                       />
                     </div>
                   </div>
@@ -400,7 +400,7 @@ export function FloatingPlayer() {
                           onClick={() => setPlaybackRate(rate)}
                           className={`px-2 py-1 text-xs rounded transition-colors ${
                             playbackRate === rate
-                              ? 'bg-orange-500 text-white'
+                              ? 'bg-[#d4a44c] text-white'
                               : 'bg-white/10 text-white/60 hover:bg-white/20'
                           }`}
                         >
@@ -429,7 +429,7 @@ export function FloatingPlayer() {
                               className={`
                                 flex items-center gap-2 p-2 rounded-lg
                                 ${index === queueIndex
-                                  ? 'bg-orange-500/20 border border-orange-500/30'
+                                  ? 'bg-[#d4a44c]/20 border border-[#d4a44c]/30'
                                   : 'hover:bg-white/5'
                                 }
                               `}

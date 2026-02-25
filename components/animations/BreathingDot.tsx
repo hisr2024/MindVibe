@@ -38,7 +38,7 @@ export function BreathingDot({
         >
           {/* The breathing dot */}
           <motion.span
-            className="block h-3 w-3 rounded-full bg-gradient-to-br from-orange-400 to-amber-300"
+            className="block h-3 w-3 rounded-full bg-gradient-to-br from-[#d4a44c] to-[#e8b54a]"
             animate={{
               scale: [1, 1.6, 1],
               opacity: [0.6, 1, 0.6],

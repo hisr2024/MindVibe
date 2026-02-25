@@ -82,15 +82,15 @@ export function WakeWordSettings({ className = '' }: WakeWordSettingsProps) {
   }
 
   return (
-    <div className={`rounded-2xl border border-orange-500/15 bg-slate-900/60 p-5 space-y-5 ${className}`}>
+    <div className={`rounded-2xl border border-[#d4a44c]/15 bg-slate-900/60 p-5 space-y-5 ${className}`}>
       {/* Header with toggle */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className={`flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${
-            enabled ? 'bg-orange-500/20' : 'bg-slate-800'
+            enabled ? 'bg-[#d4a44c]/20' : 'bg-slate-800'
           }`}>
             <svg
-              className={`h-5 w-5 transition-colors ${enabled ? 'text-orange-400' : 'text-slate-500'}`}
+              className={`h-5 w-5 transition-colors ${enabled ? 'text-[#d4a44c]' : 'text-slate-500'}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -99,10 +99,10 @@ export function WakeWordSettings({ className = '' }: WakeWordSettingsProps) {
             </svg>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-orange-50">
+            <h3 className="text-sm font-semibold text-[#f5f0e8]">
               &quot;Hey KIAAN&quot; Wake Word
             </h3>
-            <p className="text-xs text-orange-200/50">
+            <p className="text-xs text-[#e8b54a]/50">
               {enabled
                 ? isListening
                   ? isPaused ? 'Paused' : 'Listening...'
@@ -133,7 +133,7 @@ export function WakeWordSettings({ className = '' }: WakeWordSettingsProps) {
                 ? 'bg-red-400'
                 : isListening && !isPaused
                 ? 'bg-emerald-400'
-                : 'bg-orange-400/50'
+                : 'bg-[#d4a44c]/50'
             }`}
             animate={
               isListening && !isPaused && !error
@@ -161,7 +161,7 @@ export function WakeWordSettings({ className = '' }: WakeWordSettingsProps) {
           animate={{ opacity: 1, height: 'auto' }}
           className="space-y-3"
         >
-          <label className="text-xs font-medium text-orange-200/60 uppercase tracking-wider">
+          <label className="text-xs font-medium text-[#e8b54a]/60 uppercase tracking-wider">
             Sensitivity
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -171,12 +171,12 @@ export function WakeWordSettings({ className = '' }: WakeWordSettingsProps) {
                 onClick={() => setSensitivity(option.value)}
                 className={`rounded-xl border px-3 py-2.5 text-left transition-all ${
                   sensitivity === option.value
-                    ? 'border-orange-500/40 bg-orange-500/10 ring-1 ring-orange-500/20'
-                    : 'border-slate-700/50 bg-slate-800/30 hover:border-orange-500/20 hover:bg-slate-800/50'
+                    ? 'border-[#d4a44c]/40 bg-[#d4a44c]/10 ring-1 ring-[#d4a44c]/20'
+                    : 'border-slate-700/50 bg-slate-800/30 hover:border-[#d4a44c]/20 hover:bg-slate-800/50'
                 }`}
               >
                 <p className={`text-xs font-semibold ${
-                  sensitivity === option.value ? 'text-orange-300' : 'text-slate-300'
+                  sensitivity === option.value ? 'text-[#e8b54a]' : 'text-slate-300'
                 }`}>
                   {option.label}
                 </p>
@@ -194,10 +194,10 @@ export function WakeWordSettings({ className = '' }: WakeWordSettingsProps) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="rounded-xl bg-orange-500/5 border border-orange-500/10 px-4 py-3"
+          className="rounded-xl bg-[#d4a44c]/5 border border-[#d4a44c]/10 px-4 py-3"
         >
-          <p className="text-[11px] text-orange-200/50 leading-relaxed">
-            <span className="font-semibold text-orange-200/70">Supported phrases: </span>
+          <p className="text-[11px] text-[#e8b54a]/50 leading-relaxed">
+            <span className="font-semibold text-[#e8b54a]/70">Supported phrases: </span>
             &quot;Hey KIAAN&quot;, &quot;Hi KIAAN&quot;, &quot;Hello KIAAN&quot;,
             &quot;Namaste KIAAN&quot;, &quot;OK KIAAN&quot;, &quot;Hey MindVibe&quot;
           </p>

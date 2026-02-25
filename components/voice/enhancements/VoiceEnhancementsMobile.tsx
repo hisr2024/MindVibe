@@ -62,9 +62,9 @@ const ENHANCEMENTS: {
   { type: 'binaural_beats', name: 'Binaural', icon: Brain, color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
   { type: 'spatial_audio', name: '3D Audio', icon: Headphones, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
   { type: 'breathing', name: 'Breathe', icon: Wind, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' },
-  { type: 'soundscapes', name: 'Sounds', icon: Music, color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
+  { type: 'soundscapes', name: 'Sounds', icon: Music, color: 'text-[#d4a44c]', bgColor: 'bg-[#d4a44c]/20' },
   { type: 'sleep_mode', name: 'Sleep', icon: Moon, color: 'text-indigo-400', bgColor: 'bg-indigo-500/20' },
-  { type: 'check_in', name: 'Check-In', icon: Sun, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
+  { type: 'check_in', name: 'Check-In', icon: Sun, color: 'text-[#d4a44c]', bgColor: 'bg-[#d4a44c]/20' },
   { type: 'affirmations', name: 'Affirm', icon: Heart, color: 'text-pink-400', bgColor: 'bg-pink-500/20' }
 ]
 
@@ -87,10 +87,10 @@ function EnhancementsFAB({
     >
       <div className={`relative p-4 rounded-2xl shadow-lg ${
         isPlaying
-          ? 'bg-gradient-to-br from-orange-500 to-amber-500 shadow-orange-500/30'
+          ? 'bg-gradient-to-br from-[#d4a44c] to-[#d4a44c] shadow-[#d4a44c]/30'
           : 'bg-gradient-to-br from-slate-800 to-slate-900 shadow-black/50'
       }`}>
-        <Sparkles className={`w-6 h-6 ${isPlaying ? 'text-white' : 'text-orange-400'}`} />
+        <Sparkles className={`w-6 h-6 ${isPlaying ? 'text-white' : 'text-[#d4a44c]'}`} />
 
         {/* Active count badge */}
         {activeCount > 0 && (
@@ -106,7 +106,7 @@ function EnhancementsFAB({
         {/* Playing indicator */}
         {isPlaying && (
           <motion.div
-            className="absolute inset-0 rounded-2xl border-2 border-orange-300/50"
+            className="absolute inset-0 rounded-2xl border-2 border-[#d4a44c]/50"
             animate={{ scale: [1, 1.15, 1], opacity: [0.8, 0, 0.8] }}
             transition={{ duration: 2, repeat: Infinity }}
           />
@@ -183,8 +183,8 @@ function EnhancementsBottomSheet({
             {/* Header */}
             <div className="px-4 pb-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-orange-500/20 to-purple-500/20">
-                  <Sparkles className="w-5 h-5 text-orange-400" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-[#d4a44c]/20 to-purple-500/20">
+                  <Sparkles className="w-5 h-5 text-[#d4a44c]" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-white">Voice Enhancements</h3>

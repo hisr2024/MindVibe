@@ -76,7 +76,7 @@ export default function AdminDashboard() {
     { label: 'Pending Moderation', value: stats.pendingModeration, icon: '🛡️', color: 'from-yellow-500 to-yellow-600' },
     { label: 'Active Flags', value: stats.activeFeatureFlags, icon: '🚩', color: 'from-purple-500 to-purple-600' },
     { label: 'Running Tests', value: stats.runningTests, icon: '🧪', color: 'from-pink-500 to-pink-600' },
-    { label: 'Today Logins', value: stats.todayLogins, icon: '🔐', color: 'from-orange-500 to-orange-600' },
+    { label: 'Today Logins', value: stats.todayLogins, icon: '🔐', color: 'from-[#d4a44c] to-[#c8943a]' },
   ]
 
   if (loading) {
@@ -159,12 +159,12 @@ export default function AdminDashboard() {
       </div>
 
       {/* KIAAN Protection Notice */}
-      <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-4">
+      <div className="rounded-xl border border-[#d4a44c]/30 bg-[#d4a44c]/10 p-4">
         <div className="flex items-start gap-3">
           <span className="text-2xl">🕉️</span>
           <div>
-            <h3 className="font-semibold text-orange-400">KIAAN Protection Active</h3>
-            <p className="mt-1 text-sm text-orange-300/80">
+            <h3 className="font-semibold text-[#d4a44c]">KIAAN Protection Active</h3>
+            <p className="mt-1 text-sm text-[#e8b54a]/80">
               KIAAN ecosystem is protected. Admin access is read-only for analytics. 
               Chatbot logic, wisdom database, and encrypted conversations cannot be modified.
             </p>
@@ -176,7 +176,7 @@ export default function AdminDashboard() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <a
           href="/admin/users"
-          className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-800/50 p-4 transition hover:border-orange-500/50 hover:bg-slate-800"
+          className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-800/50 p-4 transition hover:border-[#d4a44c]/50 hover:bg-slate-800"
         >
           <span className="text-2xl">👥</span>
           <div>
@@ -186,7 +186,7 @@ export default function AdminDashboard() {
         </a>
         <a
           href="/admin/moderation"
-          className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-800/50 p-4 transition hover:border-orange-500/50 hover:bg-slate-800"
+          className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-800/50 p-4 transition hover:border-[#d4a44c]/50 hover:bg-slate-800"
         >
           <span className="text-2xl">🛡️</span>
           <div>
@@ -196,7 +196,7 @@ export default function AdminDashboard() {
         </a>
         <a
           href="/admin/feature-flags"
-          className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-800/50 p-4 transition hover:border-orange-500/50 hover:bg-slate-800"
+          className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-800/50 p-4 transition hover:border-[#d4a44c]/50 hover:bg-slate-800"
         >
           <span className="text-2xl">🚩</span>
           <div>
@@ -206,7 +206,7 @@ export default function AdminDashboard() {
         </a>
         <a
           href="/admin/export"
-          className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-800/50 p-4 transition hover:border-orange-500/50 hover:bg-slate-800"
+          className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-800/50 p-4 transition hover:border-[#d4a44c]/50 hover:bg-slate-800"
         >
           <span className="text-2xl">📤</span>
           <div>

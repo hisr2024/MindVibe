@@ -103,7 +103,7 @@ export function Modal({
         {/* Content */}
         <div
           ref={contentRef}
-          className={`relative w-full ${sizeStyles[size]} rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#0f0a08] via-[#0b0b0f] to-[#0c0f19] shadow-[0_24px_100px_rgba(255,115,39,0.2)] transition-transform duration-200 ${
+          className={`relative w-full ${sizeStyles[size]} rounded-3xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#0d0b08] via-[#0a0a12] to-[#080810] shadow-[0_24px_100px_rgba(212,164,76,0.12)] transition-transform duration-200 ${
             open ? 'scale-100' : 'scale-95'
           }`}
           style={{
@@ -115,7 +115,7 @@ export function Modal({
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 rounded-lg p-1.5 text-orange-100/70 transition hover:bg-orange-500/10 hover:text-orange-50"
+            className="absolute right-4 top-4 rounded-lg p-1.5 text-[#f5f0e8]/70 transition hover:bg-[#d4a44c]/10 hover:text-[#f5f0e8]"
             aria-label="Close modal"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

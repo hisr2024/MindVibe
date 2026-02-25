@@ -37,10 +37,10 @@ const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string
   depression: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-400/30' },
   stress: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-400/30' },
   relationships: { bg: 'bg-pink-500/10', text: 'text-pink-400', border: 'border-pink-400/30' },
-  work_life: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-400/30' },
+  work_life: { bg: 'bg-[#d4a44c]/10', text: 'text-[#d4a44c]', border: 'border-[#d4a44c]/30' },
   self_growth: { bg: 'bg-green-500/10', text: 'text-green-400', border: 'border-green-400/30' },
   grief: { bg: 'bg-indigo-500/10', text: 'text-indigo-400', border: 'border-indigo-400/30' },
-  general: { bg: 'bg-orange-500/10', text: 'text-orange-400', border: 'border-orange-400/30' }
+  general: { bg: 'bg-[#d4a44c]/10', text: 'text-[#d4a44c]', border: 'border-[#d4a44c]/30' }
 }
 
 const PRIVACY_ICONS = {
@@ -86,15 +86,15 @@ export function CircleCard({ circle, onJoin, onLeave, onView, className = '' }: 
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-3xl border border-orange-500/15 bg-black/50 p-6 hover:border-orange-400/30 transition cursor-pointer ${className}`}
+      className={`rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-6 hover:border-[#d4a44c]/30 transition cursor-pointer ${className}`}
       onClick={handleView}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-lg font-semibold text-orange-50">{circle.name}</h3>
-            {PrivacyIcon && <PrivacyIcon className="h-4 w-4 text-orange-100/60" />}
+            <h3 className="text-lg font-semibold text-[#f5f0e8]">{circle.name}</h3>
+            {PrivacyIcon && <PrivacyIcon className="h-4 w-4 text-[#f5f0e8]/60" />}
           </div>
 
           {/* Category Badge */}
@@ -114,10 +114,10 @@ export function CircleCard({ circle, onJoin, onLeave, onView, className = '' }: 
       </div>
 
       {/* Description */}
-      <p className="text-sm text-orange-100/80 mb-4 line-clamp-2">{circle.description}</p>
+      <p className="text-sm text-[#f5f0e8]/80 mb-4 line-clamp-2">{circle.description}</p>
 
       {/* Stats */}
-      <div className="flex items-center gap-4 mb-4 text-sm text-orange-100/60">
+      <div className="flex items-center gap-4 mb-4 text-sm text-[#f5f0e8]/60">
         <div className="flex items-center gap-1.5">
           <Users className="h-4 w-4" />
           <span>{circle.member_count} members</span>
@@ -156,7 +156,7 @@ export function CircleCard({ circle, onJoin, onLeave, onView, className = '' }: 
                 e.stopPropagation()
                 handleView()
               }}
-              className="flex-1 px-4 py-2 rounded-xl bg-orange-500/20 text-orange-400 text-sm font-medium hover:bg-orange-500/30 transition flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 rounded-xl bg-[#d4a44c]/20 text-[#d4a44c] text-sm font-medium hover:bg-[#d4a44c]/30 transition flex items-center justify-center gap-2"
             >
               <span>View Circle</span>
               <ChevronRight className="h-4 w-4" />
@@ -167,7 +167,7 @@ export function CircleCard({ circle, onJoin, onLeave, onView, className = '' }: 
                 handleLeave()
               }}
               disabled={isLeaving}
-              className="px-4 py-2 rounded-xl border border-orange-500/20 text-orange-100/80 text-sm hover:border-orange-400/40 hover:text-orange-50 transition disabled:opacity-50"
+              className="px-4 py-2 rounded-xl border border-[#d4a44c]/20 text-[#f5f0e8]/80 text-sm hover:border-[#d4a44c]/40 hover:text-[#f5f0e8] transition disabled:opacity-50"
             >
               {isLeaving ? 'Leaving...' : 'Leave'}
             </button>
@@ -179,7 +179,7 @@ export function CircleCard({ circle, onJoin, onLeave, onView, className = '' }: 
               handleJoin()
             }}
             disabled={isJoining || circle.privacy === 'invite_only'}
-            className="flex-1 px-4 py-2 rounded-xl bg-orange-500/20 text-orange-400 text-sm font-medium hover:bg-orange-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-4 py-2 rounded-xl bg-[#d4a44c]/20 text-[#d4a44c] text-sm font-medium hover:bg-[#d4a44c]/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isJoining
               ? 'Joining...'
@@ -193,8 +193,8 @@ export function CircleCard({ circle, onJoin, onLeave, onView, className = '' }: 
       </div>
 
       {/* Footer Info */}
-      <div className="mt-4 pt-4 border-t border-orange-500/10">
-        <p className="text-xs text-orange-100/40 flex items-center justify-between">
+      <div className="mt-4 pt-4 border-t border-[#d4a44c]/10">
+        <p className="text-xs text-[#f5f0e8]/40 flex items-center justify-between">
           <span>Anonymous participation • Compassionate moderation</span>
           <span>{circle.moderator_count} moderators</span>
         </p>

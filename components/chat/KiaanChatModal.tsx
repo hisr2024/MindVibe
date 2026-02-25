@@ -215,7 +215,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
             <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                 msg.sender === 'user' 
-                  ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white' 
+                  ? 'bg-gradient-to-br from-[#d4a44c] to-[#c8943a] text-white' 
                   : 'bg-slate-800 text-slate-100'
               }`}>
                 <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
@@ -270,7 +270,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
 
           {/* Voice not available warning */}
           {!voiceAvailability.available && (
-            <div className="mb-3 rounded-lg bg-amber-900/30 border border-amber-500/50 px-3 py-2 text-xs text-amber-200">
+            <div className="mb-3 rounded-lg bg-amber-900/30 border border-[#d4a44c]/50 px-3 py-2 text-xs text-[#f0c96d]">
               <div className="flex items-start gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -299,7 +299,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Share what's on your mind..."
-              className="flex-1 bg-slate-800 text-slate-100 placeholder-slate-500 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 min-h-[60px] max-h-[120px]"
+              className="flex-1 bg-slate-800 text-slate-100 placeholder-slate-500 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#d4a44c] min-h-[60px] max-h-[120px]"
               disabled={isLoading}
             />
 
@@ -316,7 +316,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
             <Button
               onClick={sendMessage}
               disabled={!input.trim() || isLoading}
-              className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 bg-gradient-to-r from-[#d4a44c] to-[#c8943a] hover:from-[#c8943a] hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Send
             </Button>

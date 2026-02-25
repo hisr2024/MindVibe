@@ -51,7 +51,7 @@ export function SubscriptionTierSelection({
       <div className="flex items-center justify-center gap-4 mb-8">
         <span
           className={`text-sm ${
-            billingCycle === 'monthly' ? 'text-orange-50' : 'text-orange-100/60'
+            billingCycle === 'monthly' ? 'text-[#f5f0e8]' : 'text-[#f5f0e8]/60'
           }`}
         >
           Monthly
@@ -60,17 +60,17 @@ export function SubscriptionTierSelection({
           onClick={() =>
             onBillingCycleChange(billingCycle === 'monthly' ? 'yearly' : 'monthly')
           }
-          className="relative w-14 h-7 rounded-full bg-orange-500/20 border border-orange-500/30 transition"
+          className="relative w-14 h-7 rounded-full bg-[#d4a44c]/20 border border-[#d4a44c]/30 transition"
         >
           <motion.div
-            className="absolute top-0.5 w-6 h-6 rounded-full bg-gradient-to-r from-orange-400 to-amber-300"
+            className="absolute top-0.5 w-6 h-6 rounded-full bg-gradient-to-r from-[#d4a44c] to-[#e8b54a]"
             animate={{ left: billingCycle === 'yearly' ? '1.75rem' : '0.125rem' }}
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
           />
         </button>
         <span
           className={`text-sm flex items-center gap-2 ${
-            billingCycle === 'yearly' ? 'text-orange-50' : 'text-orange-100/60'
+            billingCycle === 'yearly' ? 'text-[#f5f0e8]' : 'text-[#f5f0e8]/60'
           }`}
         >
           Yearly
@@ -96,36 +96,36 @@ export function SubscriptionTierSelection({
               whileTap={{ scale: 0.98 }}
               className={`relative flex flex-col rounded-2xl border p-5 text-left transition ${
                 isSelected
-                  ? 'border-orange-400 bg-orange-500/10 ring-2 ring-orange-400/50'
+                  ? 'border-[#d4a44c] bg-[#d4a44c]/10 ring-2 ring-[#d4a44c]/50'
                   : tier.isPopular
-                  ? 'border-orange-400/50 bg-[#1a0f08]/50'
-                  : 'border-orange-500/20 bg-black/30 hover:border-orange-400/50'
+                  ? 'border-[#d4a44c]/50 bg-[#1a0f08]/50'
+                  : 'border-[#d4a44c]/20 bg-black/30 hover:border-[#d4a44c]/50'
               }`}
             >
               {/* Badge */}
               {tier.badge && (
-                <span className="absolute -top-2 left-4 rounded-full bg-gradient-to-r from-orange-400 to-amber-300 px-2 py-0.5 text-[10px] font-bold text-slate-900">
+                <span className="absolute -top-2 left-4 rounded-full bg-gradient-to-r from-[#d4a44c] to-[#e8b54a] px-2 py-0.5 text-[10px] font-bold text-slate-900">
                   {tier.badge}
                 </span>
               )}
 
               {/* Header */}
-              <h3 className="text-lg font-semibold text-orange-50 mb-1">
+              <h3 className="text-lg font-semibold text-[#f5f0e8] mb-1">
                 {tier.name}
               </h3>
 
               {/* Price */}
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-2xl font-bold text-orange-50">
+                <span className="text-2xl font-bold text-[#f5f0e8]">
                   ${price === 0 ? '0' : price}
                 </span>
-                <span className="text-xs text-orange-100/60">
+                <span className="text-xs text-[#f5f0e8]/60">
                   /{billingCycle === 'yearly' ? 'year' : 'month'}
                 </span>
               </div>
 
               {billingCycle === 'yearly' && monthlyEquiv > 0 && (
-                <div className="text-[11px] text-orange-100/70 mb-1">
+                <div className="text-[11px] text-[#f5f0e8]/70 mb-1">
                   ~${monthlyEquiv}/month when billed yearly
                 </div>
               )}
@@ -138,10 +138,10 @@ export function SubscriptionTierSelection({
               )}
 
               {/* Description */}
-              <p className="text-xs text-orange-100/70 mb-3">{tier.description}</p>
+              <p className="text-xs text-[#f5f0e8]/70 mb-3">{tier.description}</p>
 
               {/* KIAAN quota */}
-              <div className="text-xs text-orange-100/60 mb-3 pb-3 border-b border-orange-500/10">
+              <div className="text-xs text-[#f5f0e8]/60 mb-3 pb-3 border-b border-[#d4a44c]/10">
                 KIAAN:{' '}
                 {tier.kiaanQuota === 'unlimited'
                   ? 'Unlimited'
@@ -154,7 +154,7 @@ export function SubscriptionTierSelection({
                   <li
                     key={i}
                     className={`flex items-start gap-2 text-xs ${
-                      feature.included ? 'text-orange-100/70' : 'text-orange-100/30'
+                      feature.included ? 'text-[#f5f0e8]/70' : 'text-[#f5f0e8]/30'
                     }`}
                   >
                     {feature.included ? (
@@ -179,7 +179,7 @@ export function SubscriptionTierSelection({
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="w-3 h-3 text-orange-100/30 mt-0.5 shrink-0"
+                        className="w-3 h-3 text-[#f5f0e8]/30 mt-0.5 shrink-0"
                       >
                         <line x1="18" y1="6" x2="6" y2="18" />
                         <line x1="6" y1="6" x2="18" y2="18" />
@@ -188,7 +188,7 @@ export function SubscriptionTierSelection({
                     <span>
                       {feature.name}
                       {feature.limit && (
-                        <span className="text-orange-100/40"> ({feature.limit})</span>
+                        <span className="text-[#f5f0e8]/40"> ({feature.limit})</span>
                       )}
                     </span>
                   </li>
@@ -199,7 +199,7 @@ export function SubscriptionTierSelection({
               {isSelected && (
                 <motion.div
                   layoutId="tier-selected"
-                  className="absolute inset-0 rounded-2xl ring-2 ring-orange-400 pointer-events-none"
+                  className="absolute inset-0 rounded-2xl ring-2 ring-[#d4a44c] pointer-events-none"
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               )}
@@ -209,7 +209,7 @@ export function SubscriptionTierSelection({
       </div>
 
       {/* Note */}
-      <p className="text-center text-xs text-orange-100/50 mt-6">
+      <p className="text-center text-xs text-[#f5f0e8]/50 mt-6">
         You can upgrade or change your plan anytime. All paid plans include a 15-day free trial.
       </p>
     </div>

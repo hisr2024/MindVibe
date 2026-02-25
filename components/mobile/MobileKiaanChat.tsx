@@ -231,7 +231,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
         ref={ref}
         className={`
           flex flex-col h-full
-          bg-[#0b0b0f]
+          bg-[#050507]
           ${className}
         `}
         style={{
@@ -252,8 +252,8 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col items-center justify-center py-12 text-center"
               >
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500/20 to-amber-400/20 flex items-center justify-center mb-4">
-                  <Sparkles className="w-10 h-10 text-orange-400" />
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#d4a44c]/20 to-amber-400/20 flex items-center justify-center mb-4">
+                  <Sparkles className="w-10 h-10 text-[#d4a44c]" />
                 </div>
                 <h2 className="text-xl font-semibold text-white mb-2">
                   Welcome to KIAAN
@@ -313,7 +313,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                     className={`
                       max-w-[85%] rounded-2xl px-4 py-3
                       ${message.sender === 'user'
-                        ? 'bg-orange-500/20 border border-orange-500/30 rounded-br-md'
+                        ? 'bg-[#d4a44c]/20 border border-[#d4a44c]/30 rounded-br-md'
                         : 'bg-white/[0.06] border border-white/[0.08] rounded-bl-md'
                       }
                       ${message.status === 'error' ? 'border-red-500/40 bg-red-500/10' : ''}
@@ -323,11 +323,11 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                     {/* Sender label for assistant */}
                     {message.sender === 'assistant' && (
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center">
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#d4a44c] to-amber-300 flex items-center justify-center">
                           <Sparkles className="w-3 h-3 text-slate-900" />
                         </div>
-                        <span className="text-xs font-medium text-orange-300">KIAAN</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                        <span className="text-xs font-medium text-[#e8b54a]">KIAAN</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#d4a44c]/20 text-[#e8b54a] border border-[#d4a44c]/30">
                           Ancient Wisdom
                         </span>
                       </div>
@@ -403,11 +403,11 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                           <motion.button
                             whileTap={{ scale: 0.9 }}
                             onClick={() => handleSaveToJournal(message.text)}
-                            className="px-3 h-8 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center gap-1.5 active:bg-orange-500/20"
+                            className="px-3 h-8 rounded-full bg-[#d4a44c]/10 border border-[#d4a44c]/30 flex items-center justify-center gap-1.5 active:bg-[#d4a44c]/20"
                             aria-label="Save to journal"
                           >
-                            <BookOpen className="w-4 h-4 text-orange-400" />
-                            <span className="text-xs text-orange-300">Journal</span>
+                            <BookOpen className="w-4 h-4 text-[#d4a44c]" />
+                            <span className="text-xs text-[#e8b54a]">Journal</span>
                           </motion.button>
                         )}
 
@@ -435,7 +435,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                 animate={{ opacity: 1 }}
                 className="flex items-center gap-3"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#d4a44c] to-amber-300 flex items-center justify-center">
                   <Sparkles className="w-4 h-4 text-slate-900" />
                 </div>
                 <div className="flex gap-1.5">
@@ -448,7 +448,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                         repeat: Infinity,
                         delay: i * 0.15,
                       }}
-                      className="w-2 h-2 rounded-full bg-orange-400/60"
+                      className="w-2 h-2 rounded-full bg-[#d4a44c]/60"
                     />
                   ))}
                 </div>
@@ -471,7 +471,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
               className="
                 absolute bottom-24 right-4
                 w-10 h-10 rounded-full
-                bg-orange-500 shadow-lg shadow-orange-500/30
+                bg-[#d4a44c] shadow-lg shadow-[#d4a44c]/30
                 flex items-center justify-center
                 active:scale-95
               "
@@ -492,7 +492,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
         )}
 
         {/* Input area */}
-        <div className="px-4 py-3 bg-[#0b0b0f]/95 backdrop-blur-xl border-t border-white/[0.06]">
+        <div className="px-4 py-3 bg-[#050507]/95 backdrop-blur-xl border-t border-white/[0.06]">
           {/* Voice input indicator */}
           <AnimatePresence>
             {isListening && (
@@ -527,7 +527,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                 placeholder={placeholder}
                 disabled={isLoading}
                 rows={1}
-                className="w-full px-4 py-3 pr-12 bg-white/[0.06] border border-white/[0.08] rounded-2xl text-white text-base placeholder:text-slate-500 resize-none focus:outline-none focus:border-orange-500/40 disabled:opacity-50"
+                className="w-full px-4 py-3 pr-12 bg-white/[0.06] border border-white/[0.08] rounded-2xl text-white text-base placeholder:text-slate-500 resize-none focus:outline-none focus:border-[#d4a44c]/40 disabled:opacity-50"
                 style={{
                   maxHeight: 120,
                   fontSize: '16px', // Prevent zoom on iOS
@@ -556,7 +556,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
               whileTap={{ scale: 0.9 }}
               onClick={handleSend}
               disabled={!inputText.trim() || isLoading}
-              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${inputText.trim() ? 'bg-gradient-to-r from-orange-500 to-amber-400 shadow-lg shadow-orange-500/30' : 'bg-white/[0.06] border border-white/[0.08]'} disabled:opacity-50`}
+              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${inputText.trim() ? 'bg-gradient-to-r from-[#d4a44c] to-amber-400 shadow-lg shadow-[#d4a44c]/30' : 'bg-white/[0.06] border border-white/[0.08]'} disabled:opacity-50`}
               aria-label="Send message"
             >
               <Send

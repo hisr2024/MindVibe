@@ -38,10 +38,10 @@ interface DailyVerse {
 // Curated wisdom themes
 const WISDOM_THEMES = [
   { id: 'peace', label: 'Inner Peace', emoji: '🕊️', gradient: 'from-teal-500/15 to-cyan-500/15', border: 'border-teal-500/20' },
-  { id: 'courage', label: 'Courage', emoji: '🦁', gradient: 'from-orange-500/15 to-red-500/15', border: 'border-orange-500/20' },
+  { id: 'courage', label: 'Courage', emoji: '🦁', gradient: 'from-[#d4a44c]/15 to-red-500/15', border: 'border-[#d4a44c]/20' },
   { id: 'wisdom', label: 'Wisdom', emoji: '🧘', gradient: 'from-purple-500/15 to-indigo-500/15', border: 'border-purple-500/20' },
   { id: 'devotion', label: 'Devotion', emoji: '🙏', gradient: 'from-pink-500/15 to-rose-500/15', border: 'border-pink-500/20' },
-  { id: 'action', label: 'Right Action', emoji: '⚡', gradient: 'from-amber-500/15 to-yellow-500/15', border: 'border-amber-500/20' },
+  { id: 'action', label: 'Right Action', emoji: '⚡', gradient: 'from-[#d4a44c]/15 to-yellow-500/15', border: 'border-[#d4a44c]/20' },
   { id: 'detachment', label: 'Letting Go', emoji: '🍃', gradient: 'from-green-500/15 to-emerald-500/15', border: 'border-green-500/20' },
 ]
 
@@ -178,12 +178,12 @@ export default function MobileWisdomPage() {
           animate={{ opacity: 1, y: 0 }}
           className="relative overflow-hidden"
         >
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-orange-500/10 via-amber-500/5 to-teal-500/10 border border-orange-500/15">
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-[#d4a44c]/10 via-[#d4a44c]/5 to-teal-500/10 border border-[#d4a44c]/15">
             {/* Daily label */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 text-amber-400" />
-                <span className="text-xs font-medium text-amber-400 uppercase tracking-wider">
+                <Star className="w-4 h-4 text-[#d4a44c]" />
+                <span className="text-xs font-medium text-[#d4a44c] uppercase tracking-wider">
                   Today&apos;s Wisdom
                 </span>
               </div>
@@ -194,7 +194,7 @@ export default function MobileWisdomPage() {
 
             {/* Sanskrit text */}
             {dailyVerse.sanskrit && (
-              <p className="text-base text-orange-300/80 font-serif italic mb-3 leading-relaxed">
+              <p className="text-base text-[#e8b54a]/80 font-serif italic mb-3 leading-relaxed">
                 {dailyVerse.sanskrit}
               </p>
             )}
@@ -257,7 +257,7 @@ export default function MobileWisdomPage() {
                   triggerHaptic('selection')
                   router.push(`/kiaan-vibe/gita/${dailyVerse.chapter}/${dailyVerse.verse}`)
                 }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-orange-500/15 text-orange-400 text-xs font-medium"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#d4a44c]/15 text-[#d4a44c] text-xs font-medium"
               >
                 <BookOpen className="w-3.5 h-3.5" />
                 Read More

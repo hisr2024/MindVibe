@@ -178,15 +178,15 @@ export default function KiaanVoiceFAB() {
   if (!isSupported) return null
 
   // Gradient colors based on state
-  const gradientFrom = fabState === 'listening' ? '#f97316' :
+  const gradientFrom = fabState === 'listening' ? '#d4a44c' :
     fabState === 'processing' ? '#8b5cf6' :
     fabState === 'responding' ? '#10b981' :
-    wakeWordListening ? '#10b981' : '#f97316'
+    wakeWordListening ? '#10b981' : '#c8943a'
 
-  const gradientTo = fabState === 'listening' ? '#fbbf24' :
+  const gradientTo = fabState === 'listening' ? '#f0c96d' :
     fabState === 'processing' ? '#6366f1' :
     fabState === 'responding' ? '#06b6d4' :
-    wakeWordListening ? '#34d399' : '#fb923c'
+    wakeWordListening ? '#34d399' : '#e8b54a'
 
   return (
     <>
@@ -200,15 +200,15 @@ export default function KiaanVoiceFAB() {
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className="fixed bottom-[calc(156px+env(safe-area-inset-bottom,0px))] md:bottom-24 right-4 z-[150] max-w-xs w-72"
           >
-            <div className="rounded-2xl border border-orange-500/20 bg-slate-900/95 p-4 backdrop-blur-xl shadow-2xl">
+            <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0a0a12]/95 p-4 backdrop-blur-xl shadow-2xl">
               {/* Transcript */}
               {transcript && (
-                <p className="text-xs text-orange-200/50 mb-2 italic truncate">
+                <p className="text-xs text-[#d4a44c]/50 mb-2 italic truncate">
                   &quot;{transcript}&quot;
                 </p>
               )}
               {/* Response */}
-              <p className="text-sm leading-relaxed text-orange-50/90 line-clamp-4">
+              <p className="text-sm leading-relaxed text-[#f5f0e8]/90 line-clamp-4">
                 {response}
               </p>
               {/* Open full companion */}
@@ -219,7 +219,7 @@ export default function KiaanVoiceFAB() {
                   setFabState('idle')
                   router.push('/kiaan-voice-companion')
                 }}
-                className="mt-3 w-full rounded-xl bg-gradient-to-r from-orange-500/15 to-amber-500/15 border border-orange-500/20 px-3 py-2 text-xs font-medium text-orange-200/80 transition-all hover:from-orange-500/25 hover:to-amber-500/25 active:scale-[0.98]"
+                className="mt-3 w-full rounded-xl bg-gradient-to-r from-[#d4a44c]/15 to-[#e8b54a]/15 border border-[#d4a44c]/20 px-3 py-2 text-xs font-medium text-[#e8b54a]/80 transition-all hover:from-[#d4a44c]/25 hover:to-[#e8b54a]/25 active:scale-[0.98]"
               >
                 Continue with KIAAN
               </button>
@@ -238,7 +238,7 @@ export default function KiaanVoiceFAB() {
             className="fixed bottom-[calc(156px+env(safe-area-inset-bottom,0px))] md:bottom-24 right-4 z-[150]"
           >
             <div className="rounded-xl bg-slate-900/90 px-3 py-2 backdrop-blur-md border border-white/10 max-w-xs">
-              <p className="text-xs text-orange-200/70 italic truncate">
+              <p className="text-xs text-[#d4a44c]/70 italic truncate">
                 {interimTranscript || transcript}
               </p>
             </div>
@@ -252,7 +252,7 @@ export default function KiaanVoiceFAB() {
         onPointerDown={handleLongPressStart}
         onPointerUp={handleLongPressEnd}
         onPointerCancel={handleLongPressEnd}
-        className="fixed bottom-[calc(88px+env(safe-area-inset-bottom,0px))] right-4 z-[140] md:bottom-8 flex items-center justify-center rounded-full shadow-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+        className="fixed bottom-[calc(88px+env(safe-area-inset-bottom,0px))] right-4 z-[140] md:bottom-8 flex items-center justify-center rounded-full shadow-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050507]"
         style={{ width: 56, height: 56 }}
         whileTap={{ scale: 0.92 }}
         aria-label={

@@ -17,7 +17,7 @@ interface WeeklySummaryProps {
 
 function SummarySkeleton() {
   return (
-    <div className="rounded-2xl border border-orange-500/20 bg-black/40 p-6">
+    <div className="rounded-2xl border border-[#d4a44c]/20 bg-black/40 p-6">
       <Skeleton height={24} width={180} className="mb-6" />
       <div className="space-y-4">
         <Skeleton height={80} className="rounded-xl" />
@@ -65,7 +65,7 @@ export function WeeklySummary({
   const getChangeColor = (change: number) => {
     if (change > 0) return 'text-emerald-400'
     if (change < 0) return 'text-red-400'
-    return 'text-orange-100/60'
+    return 'text-[#f5f0e8]/60'
   }
 
   const getChangePrefix = (change: number) => {
@@ -78,14 +78,14 @@ export function WeeklySummary({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.4 }}
-      className={`rounded-2xl border border-orange-500/20 bg-black/40 p-6 ${className}`}
+      className={`rounded-2xl border border-[#d4a44c]/20 bg-black/40 p-6 ${className}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-orange-50">
+        <h3 className="text-lg font-semibold text-[#f5f0e8]">
           Weekly Summary
         </h3>
-        <span className="text-sm text-orange-100/60">
+        <span className="text-sm text-[#f5f0e8]/60">
           {formatDateRange()}
         </span>
       </div>
@@ -112,15 +112,15 @@ export function WeeklySummary({
         </div>
 
         {/* Journal Summary */}
-        <div className="rounded-xl border border-orange-500/15 bg-orange-500/5 p-4">
+        <div className="rounded-xl border border-[#d4a44c]/15 bg-[#d4a44c]/5 p-4">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-lg">✍️</span>
-            <h4 className="text-sm font-medium text-orange-100">Journal</h4>
+            <h4 className="text-sm font-medium text-[#f5f0e8]">Journal</h4>
           </div>
-          <p className="text-2xl font-bold text-orange-50">
+          <p className="text-2xl font-bold text-[#f5f0e8]">
             {summary.journalSummary.entriesCount} entries
           </p>
-          <div className="mt-2 text-xs text-orange-100/60">
+          <div className="mt-2 text-xs text-[#f5f0e8]/60">
             <p>{summary.journalSummary.totalWords.toLocaleString()} words</p>
             {summary.journalSummary.topTopics.length > 0 && (
               <p className="mt-1">
@@ -151,27 +151,27 @@ export function WeeklySummary({
       </div>
 
       {/* Comparison to Previous Week */}
-      <div className="rounded-xl border border-orange-500/10 bg-orange-500/5 p-4 mb-6">
-        <h4 className="text-sm font-medium text-orange-100/80 mb-3">
+      <div className="rounded-xl border border-[#d4a44c]/10 bg-[#d4a44c]/5 p-4 mb-6">
+        <h4 className="text-sm font-medium text-[#f5f0e8]/80 mb-3">
           Compared to Last Week
         </h4>
         <div className="flex flex-wrap gap-6">
           <div>
-            <span className="text-xs text-orange-100/50">Mood</span>
+            <span className="text-xs text-[#f5f0e8]/50">Mood</span>
             <p className={`text-sm font-semibold ${getChangeColor(summary.comparisonToPreviousWeek.moodChange)}`}>
               {getChangePrefix(summary.comparisonToPreviousWeek.moodChange)}
               {summary.comparisonToPreviousWeek.moodChange}%
             </p>
           </div>
           <div>
-            <span className="text-xs text-orange-100/50">Entries</span>
+            <span className="text-xs text-[#f5f0e8]/50">Entries</span>
             <p className={`text-sm font-semibold ${getChangeColor(summary.comparisonToPreviousWeek.entriesChange)}`}>
               {getChangePrefix(summary.comparisonToPreviousWeek.entriesChange)}
               {summary.comparisonToPreviousWeek.entriesChange}%
             </p>
           </div>
           <div>
-            <span className="text-xs text-orange-100/50">KIAAN</span>
+            <span className="text-xs text-[#f5f0e8]/50">KIAAN</span>
             <p className={`text-sm font-semibold ${getChangeColor(summary.comparisonToPreviousWeek.kiaanChange)}`}>
               {getChangePrefix(summary.comparisonToPreviousWeek.kiaanChange)}
               {summary.comparisonToPreviousWeek.kiaanChange}%
@@ -183,7 +183,7 @@ export function WeeklySummary({
       {/* Insights */}
       {summary.insights.length > 0 && (
         <div className="mb-6">
-          <h4 className="text-sm font-medium text-orange-100/80 mb-3">
+          <h4 className="text-sm font-medium text-[#f5f0e8]/80 mb-3">
             Weekly Insights
           </h4>
           <div className="space-y-3">
@@ -193,16 +193,16 @@ export function WeeklySummary({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="flex items-start gap-3 rounded-lg border border-orange-500/10 bg-black/30 p-3"
+                className="flex items-start gap-3 rounded-lg border border-[#d4a44c]/10 bg-black/30 p-3"
               >
                 <span className="text-xl">
                   {insight.icon || insightIcons[insight.type] || '💡'}
                 </span>
                 <div>
-                  <p className="text-sm font-medium text-orange-50">
+                  <p className="text-sm font-medium text-[#f5f0e8]">
                     {insight.title}
                   </p>
-                  <p className="text-xs text-orange-100/60">
+                  <p className="text-xs text-[#f5f0e8]/60">
                     {insight.description}
                   </p>
                 </div>
@@ -214,8 +214,8 @@ export function WeeklySummary({
 
       {/* Highlight Quote */}
       {summary.highlightQuote && (
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-center">
-          <p className="text-sm text-amber-100/90 italic">
+        <div className="rounded-xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 p-4 text-center">
+          <p className="text-sm text-[#f5f0e8]/90 italic">
             &quot;{summary.highlightQuote}&quot;
           </p>
         </div>
@@ -223,18 +223,18 @@ export function WeeklySummary({
 
       {/* Achievements */}
       {summary.achievements.length > 0 && (
-        <div className="mt-6 pt-6 border-t border-orange-500/10">
-          <h4 className="text-sm font-medium text-orange-100/80 mb-3">
+        <div className="mt-6 pt-6 border-t border-[#d4a44c]/10">
+          <h4 className="text-sm font-medium text-[#f5f0e8]/80 mb-3">
             🏆 Achievements Earned
           </h4>
           <div className="flex flex-wrap gap-2">
             {summary.achievements.map((achievement) => (
               <div
                 key={achievement.id}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-amber-500/20 bg-amber-500/10"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#d4a44c]/20 bg-[#d4a44c]/10"
               >
                 <span>{achievement.icon}</span>
-                <span className="text-xs font-medium text-amber-100">
+                <span className="text-xs font-medium text-[#f5f0e8]">
                   {achievement.name}
                 </span>
               </div>

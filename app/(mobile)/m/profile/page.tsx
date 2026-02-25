@@ -97,7 +97,7 @@ export default function MobileProfilePage() {
   const userInitial = userName.charAt(0).toUpperCase()
 
   const STAT_ITEMS = [
-    { label: 'Streak', value: stats.dayStreak, icon: Zap, color: 'text-orange-400' },
+    { label: 'Streak', value: stats.dayStreak, icon: Zap, color: 'text-[#d4a44c]' },
     { label: 'Journeys', value: stats.journeysCompleted, icon: TrendingUp, color: 'text-cyan-400' },
     { label: 'Reflections', value: stats.journalEntries, icon: PenLine, color: 'text-purple-400' },
     { label: 'Insights', value: stats.insightsReceived, icon: Sparkles, color: 'text-teal-400' },
@@ -140,7 +140,7 @@ export default function MobileProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col items-center pt-safe-top pt-4"
         >
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-amber-400 flex items-center justify-center mb-3 shadow-lg shadow-orange-500/20">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#d4a44c] to-[#d4a44c] flex items-center justify-center mb-3 shadow-lg shadow-[#d4a44c]/20">
             <span className="text-3xl font-bold text-white">{userInitial}</span>
           </div>
           <h1 className="text-xl font-bold text-white">{userName}</h1>
@@ -185,11 +185,11 @@ export default function MobileProfilePage() {
           <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={() => handleNavigate('/pricing')}
-            className="w-full p-4 rounded-2xl text-left bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-pink-500/15 border border-amber-500/20"
+            className="w-full p-4 rounded-2xl text-left bg-gradient-to-r from-[#d4a44c]/15 via-[#d4a44c]/15 to-pink-500/15 border border-[#d4a44c]/20"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                <Crown className="w-5 h-5 text-amber-400" />
+              <div className="w-10 h-10 rounded-xl bg-[#d4a44c]/20 flex items-center justify-center">
+                <Crown className="w-5 h-5 text-[#d4a44c]" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-white">Upgrade to Premium</p>
@@ -240,7 +240,7 @@ export default function MobileProfilePage() {
               triggerHaptic('medium')
               setShowLogoutConfirm(true)
             }}
-            className="w-full py-3 rounded-xl bg-white/[0.04] border border-white/[0.06] text-orange-400 font-medium text-sm flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-xl bg-white/[0.04] border border-white/[0.06] text-[#d4a44c] font-medium text-sm flex items-center justify-center gap-2"
           >
             <LogOut className="w-4 h-4" />
             Log Out
@@ -270,8 +270,8 @@ export default function MobileProfilePage() {
             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-sm p-6 rounded-2xl bg-[#1a1a1f] border border-white/[0.08]"
           >
             <div className="text-center mb-6">
-              <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto mb-3">
-                <LogOut className="w-6 h-6 text-orange-400" />
+              <div className="w-12 h-12 rounded-full bg-[#d4a44c]/10 flex items-center justify-center mx-auto mb-3">
+                <LogOut className="w-6 h-6 text-[#d4a44c]" />
               </div>
               <h3 className="text-lg font-semibold text-white">Log Out?</h3>
               <p className="text-sm text-slate-400 mt-1">
@@ -289,7 +289,7 @@ export default function MobileProfilePage() {
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={handleLogout}
-                className="flex-1 py-3 rounded-xl bg-orange-500 text-white font-medium"
+                className="flex-1 py-3 rounded-xl bg-[#d4a44c] text-white font-medium"
               >
                 Log Out
               </motion.button>

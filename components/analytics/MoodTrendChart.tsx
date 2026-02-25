@@ -28,7 +28,7 @@ const periodOptions: { value: AnalyticsPeriod; label: string }[] = [
 
 function ChartSkeleton() {
   return (
-    <div className="rounded-2xl border border-orange-500/20 bg-black/40 p-6">
+    <div className="rounded-2xl border border-[#d4a44c]/20 bg-black/40 p-6">
       <div className="flex items-center justify-between mb-6">
         <Skeleton height={24} width={150} />
         <Skeleton height={32} width={200} />
@@ -77,18 +77,18 @@ export function MoodTrendChart({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1 }}
-      className={`rounded-2xl border border-orange-500/20 bg-black/40 p-6 ${className}`}
+      className={`rounded-2xl border border-[#d4a44c]/20 bg-black/40 p-6 ${className}`}
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-orange-50 flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-[#f5f0e8] flex items-center gap-2">
             Mood Trends
-            <span className="text-sm font-normal text-orange-100/60">
+            <span className="text-sm font-normal text-[#f5f0e8]/60">
               {trendInfo.emoji} {trendInfo.text} ({trendInfo.change})
             </span>
           </h3>
-          <p className="text-sm text-orange-100/50 mt-1">
+          <p className="text-sm text-[#f5f0e8]/50 mt-1">
             Avg: {data.averageScore.toFixed(1)} • High: {data.highestScore.toFixed(1)} • Low: {data.lowestScore.toFixed(1)}
           </p>
         </div>
@@ -96,15 +96,15 @@ export function MoodTrendChart({
         <div className="flex items-center gap-2">
           {/* Period selector */}
           {onPeriodChange && (
-            <div className="flex rounded-lg border border-orange-500/20 overflow-hidden">
+            <div className="flex rounded-lg border border-[#d4a44c]/20 overflow-hidden">
               {periodOptions.map((opt) => (
                 <button
                   key={opt.value}
                   onClick={() => onPeriodChange(opt.value)}
                   className={`px-3 py-1.5 text-xs font-medium transition ${
                     period === opt.value
-                      ? 'bg-orange-500/20 text-orange-50'
-                      : 'text-orange-100/60 hover:bg-orange-500/10'
+                      ? 'bg-[#d4a44c]/20 text-[#f5f0e8]'
+                      : 'text-[#f5f0e8]/60 hover:bg-[#d4a44c]/10'
                   }`}
                 >
                   {opt.label}
@@ -114,13 +114,13 @@ export function MoodTrendChart({
           )}
 
           {/* Chart type toggle */}
-          <div className="flex rounded-lg border border-orange-500/20 overflow-hidden">
+          <div className="flex rounded-lg border border-[#d4a44c]/20 overflow-hidden">
             <button
               onClick={() => setChartType('area')}
               className={`px-3 py-1.5 text-xs transition ${
                 chartType === 'area'
-                  ? 'bg-orange-500/20 text-orange-50'
-                  : 'text-orange-100/60 hover:bg-orange-500/10'
+                  ? 'bg-[#d4a44c]/20 text-[#f5f0e8]'
+                  : 'text-[#f5f0e8]/60 hover:bg-[#d4a44c]/10'
               }`}
               title="Area Chart"
             >
@@ -133,8 +133,8 @@ export function MoodTrendChart({
               onClick={() => setChartType('line')}
               className={`px-3 py-1.5 text-xs transition ${
                 chartType === 'line'
-                  ? 'bg-orange-500/20 text-orange-50'
-                  : 'text-orange-100/60 hover:bg-orange-500/10'
+                  ? 'bg-[#d4a44c]/20 text-[#f5f0e8]'
+                  : 'text-[#f5f0e8]/60 hover:bg-[#d4a44c]/10'
               }`}
               title="Line Chart"
             >
@@ -161,7 +161,7 @@ export function MoodTrendChart({
         />
       ) : (
         <div className="h-[250px] flex items-center justify-center">
-          <p className="text-orange-100/50 text-sm">No mood data available</p>
+          <p className="text-[#f5f0e8]/50 text-sm">No mood data available</p>
         </div>
       )}
     </motion.div>

@@ -39,7 +39,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 1: Acceptance */}
         <section className="mt-10">
-          <h2 className="text-xl font-semibold text-orange-200">
+          <h2 className="text-xl font-semibold text-[#e8b54a]">
             1. Acceptance of Terms
           </h2>
           <p className="text-white/70 leading-relaxed">
@@ -59,7 +59,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 2: Accounts */}
         <section className="mt-10">
-          <h2 className="text-xl font-semibold text-orange-200">
+          <h2 className="text-xl font-semibold text-[#e8b54a]">
             2. Your Account
           </h2>
           <p className="text-white/70 leading-relaxed">
@@ -74,7 +74,7 @@ export default function TermsOfServicePage() {
             to your account, please contact us immediately at{' '}
             <a
               href="mailto:care@mindvibe.life"
-              className="text-orange-300 hover:text-orange-200 transition"
+              className="text-[#e8b54a] hover:text-[#e8b54a] transition"
             >
               care@mindvibe.life
             </a>
@@ -84,7 +84,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 3: Privacy */}
         <section className="mt-10">
-          <h2 className="text-xl font-semibold text-orange-200">
+          <h2 className="text-xl font-semibold text-[#e8b54a]">
             3. Privacy and Data Protection
           </h2>
           <p className="text-white/70 leading-relaxed">
@@ -94,7 +94,7 @@ export default function TermsOfServicePage() {
             personal information is governed by our{' '}
             <a
               href="/privacy"
-              className="text-orange-300 hover:text-orange-200 transition"
+              className="text-[#e8b54a] hover:text-[#e8b54a] transition"
             >
               Privacy Policy
             </a>
@@ -109,7 +109,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 4: Payments */}
         <section className="mt-10">
-          <h2 className="text-xl font-semibold text-orange-200">
+          <h2 className="text-xl font-semibold text-[#e8b54a]">
             4. Payments and Subscriptions
           </h2>
           <p className="text-white/70 leading-relaxed">
@@ -128,7 +128,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 5: Content */}
         <section className="mt-10">
-          <h2 className="text-xl font-semibold text-orange-200">
+          <h2 className="text-xl font-semibold text-[#e8b54a]">
             5. Content and Intellectual Property
           </h2>
           <p className="text-white/70 leading-relaxed">
@@ -154,7 +154,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 6: Acceptable Use */}
         <section className="mt-10">
-          <h2 className="text-xl font-semibold text-orange-200">
+          <h2 className="text-xl font-semibold text-[#e8b54a]">
             6. Acceptable Use
           </h2>
           <p className="text-white/70 leading-relaxed">
@@ -186,7 +186,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 7: Disclaimers */}
         <section className="mt-10">
-          <h2 className="text-xl font-semibold text-orange-200">
+          <h2 className="text-xl font-semibold text-[#e8b54a]">
             7. Disclaimers
           </h2>
           <p className="text-white/70 leading-relaxed">
@@ -215,7 +215,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 8: Limitation of Liability */}
         <section className="mt-10">
-          <h2 className="text-xl font-semibold text-orange-200">
+          <h2 className="text-xl font-semibold text-[#e8b54a]">
             8. Limitation of Liability
           </h2>
           <p className="text-white/70 leading-relaxed">
@@ -230,14 +230,14 @@ export default function TermsOfServicePage() {
 
         {/* Section 9: Termination */}
         <section className="mt-10">
-          <h2 className="text-xl font-semibold text-orange-200">
+          <h2 className="text-xl font-semibold text-[#e8b54a]">
             9. Termination
           </h2>
           <p className="text-white/70 leading-relaxed">
             You may close your account at any time by contacting us at{' '}
             <a
               href="mailto:care@mindvibe.life"
-              className="text-orange-300 hover:text-orange-200 transition"
+              className="text-[#e8b54a] hover:text-[#e8b54a] transition"
             >
               care@mindvibe.life
             </a>
@@ -254,7 +254,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 10: Governing Law */}
         <section className="mt-10">
-          <h2 className="text-xl font-semibold text-orange-200">
+          <h2 className="text-xl font-semibold text-[#e8b54a]">
             10. Governing Law
           </h2>
           <p className="text-white/70 leading-relaxed">
@@ -268,7 +268,7 @@ export default function TermsOfServicePage() {
 
         {/* Section 11: Contact */}
         <section className="mt-10">
-          <h2 className="text-xl font-semibold text-orange-200">
+          <h2 className="text-xl font-semibold text-[#e8b54a]">
             11. Contact Us
           </h2>
           <p className="text-white/70 leading-relaxed">
@@ -279,7 +279,7 @@ export default function TermsOfServicePage() {
             Email:{' '}
             <a
               href="mailto:care@mindvibe.life"
-              className="text-orange-300 hover:text-orange-200 transition"
+              className="text-[#e8b54a] hover:text-[#e8b54a] transition"
             >
               care@mindvibe.life
             </a>
@@ -291,7 +291,7 @@ export default function TermsOfServicePage() {
           <p className="text-center text-sm text-white/40 italic">
             &quot;Set thy heart upon thy work, but never on its reward.&quot;
             <br />
-            <span className="text-orange-400/50">
+            <span className="text-[#d4a44c]/50">
               &mdash; Bhagavad Gita 2.47
             </span>
           </p>

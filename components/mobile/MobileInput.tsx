@@ -83,12 +83,12 @@ export const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
 
       switch (variant) {
         case 'filled':
-          return `${base} bg-white/[0.06] border-2 border-transparent focus:bg-white/[0.08] focus:border-orange-500/40 focus:ring-2 focus:ring-orange-400/15`
+          return `${base} bg-white/[0.06] border-2 border-transparent focus:bg-white/[0.08] focus:border-[#d4a44c]/40 focus:ring-2 focus:ring-[#d4a44c]/15`
         case 'outlined':
-          return `${base} bg-transparent border-2 border-white/[0.12] focus:border-orange-500/50 focus:ring-2 focus:ring-orange-400/15`
+          return `${base} bg-transparent border-2 border-white/[0.12] focus:border-[#d4a44c]/50 focus:ring-2 focus:ring-[#d4a44c]/15`
         case 'default':
         default:
-          return `${base} bg-white/[0.04] border border-orange-500/20 focus:border-orange-400/40 focus:ring-2 focus:ring-orange-400/15 focus:bg-white/[0.06]`
+          return `${base} bg-white/[0.04] border border-[#d4a44c]/20 focus:border-[#d4a44c]/40 focus:ring-2 focus:ring-[#d4a44c]/15 focus:bg-white/[0.06]`
       }
     }
 
@@ -108,7 +108,7 @@ export const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
         {label && (
           <motion.label
             className={`block text-sm font-medium ${
-              error ? 'text-red-400' : isFocused ? 'text-orange-400' : 'text-orange-100/70'
+              error ? 'text-red-400' : isFocused ? 'text-[#d4a44c]' : 'text-[#f5f0e8]/70'
             } transition-colors duration-200`}
             initial={false}
             animate={{ y: 0, opacity: 1 }}
@@ -131,7 +131,7 @@ export const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
             ref={ref}
             className={`
               w-full outline-none
-              text-orange-50 placeholder:text-orange-100/35
+              text-[#f5f0e8] placeholder:text-[#f5f0e8]/35
               disabled:opacity-50 disabled:cursor-not-allowed
               ${getVariantStyles()}
               ${sizeStyles[size].input}
@@ -192,7 +192,7 @@ export const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
           {!error && helperText && (
             <motion.p
               key="helper"
-              className="text-xs text-orange-100/50"
+              className="text-xs text-[#f5f0e8]/50"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -261,7 +261,7 @@ export const MobileTextarea = forwardRef<HTMLTextAreaElement, MobileTextareaProp
       if (error) {
         return `${base} bg-red-500/10 border-2 border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20`
       }
-      return `${base} bg-white/[0.04] border border-orange-500/20 focus:border-orange-400/40 focus:ring-2 focus:ring-orange-400/15 focus:bg-white/[0.06]`
+      return `${base} bg-white/[0.04] border border-[#d4a44c]/20 focus:border-[#d4a44c]/40 focus:ring-2 focus:ring-[#d4a44c]/15 focus:bg-white/[0.06]`
     }
 
     return (
@@ -269,7 +269,7 @@ export const MobileTextarea = forwardRef<HTMLTextAreaElement, MobileTextareaProp
         {label && (
           <label
             className={`block text-sm font-medium ${
-              error ? 'text-red-400' : isFocused ? 'text-orange-400' : 'text-orange-100/70'
+              error ? 'text-red-400' : isFocused ? 'text-[#d4a44c]' : 'text-[#f5f0e8]/70'
             } transition-colors duration-200`}
           >
             {label}
@@ -281,7 +281,7 @@ export const MobileTextarea = forwardRef<HTMLTextAreaElement, MobileTextareaProp
           rows={minRows}
           className={`
             w-full px-4 py-3 outline-none resize-none
-            text-[16px] text-orange-50 placeholder:text-orange-100/35
+            text-[16px] text-[#f5f0e8] placeholder:text-[#f5f0e8]/35
             disabled:opacity-50 disabled:cursor-not-allowed
             ${getStyles()}
             ${className}
@@ -314,7 +314,7 @@ export const MobileTextarea = forwardRef<HTMLTextAreaElement, MobileTextareaProp
           {!error && helperText && (
             <motion.p
               key="helper"
-              className="text-xs text-orange-100/50"
+              className="text-xs text-[#f5f0e8]/50"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

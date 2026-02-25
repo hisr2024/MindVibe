@@ -83,7 +83,7 @@ export function CrisisAlert({ resources = DEFAULT_RESOURCES, onClose, className 
       {onClose && (
         <button
           onClick={handleDismiss}
-          className="float-right text-orange-100/60 hover:text-orange-100 transition"
+          className="float-right text-[#f5f0e8]/60 hover:text-[#f5f0e8] transition"
           aria-label="Dismiss crisis alert"
         >
           <X className="h-5 w-5" />
@@ -98,12 +98,12 @@ export function CrisisAlert({ resources = DEFAULT_RESOURCES, onClose, className 
           </div>
           <div>
             <h3 className="text-xl font-bold text-[#d4a44c]">You Are Not Alone</h3>
-            <p className="text-sm text-orange-100/80">Krishna walks beside you. Caring souls are here to help.</p>
+            <p className="text-sm text-[#f5f0e8]/80">Krishna walks beside you. Caring souls are here to help.</p>
           </div>
         </div>
 
         <div className="p-4 rounded-2xl border border-[#d4a44c]/20 bg-[#d4a44c]/5">
-          <p className="text-sm text-orange-100/90 leading-relaxed">
+          <p className="text-sm text-[#f5f0e8]/90 leading-relaxed">
             Your feelings matter deeply. Sometimes the path requires support beyond what a spiritual companion can offer.
             These resources are available right now — caring, trained people ready to listen.
           </p>
@@ -122,13 +122,13 @@ export function CrisisAlert({ resources = DEFAULT_RESOURCES, onClose, className 
           >
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1">
-                <h4 className="font-semibold text-orange-50 mb-1 flex items-center gap-2">
+                <h4 className="font-semibold text-[#f5f0e8] mb-1 flex items-center gap-2">
                   {resource.name}
                   <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-medium">
                     {resource.availability}
                   </span>
                 </h4>
-                <p className="text-xs text-orange-100/70 mb-3">{resource.description}</p>
+                <p className="text-xs text-[#f5f0e8]/70 mb-3">{resource.description}</p>
               </div>
             </div>
 
@@ -137,7 +137,7 @@ export function CrisisAlert({ resources = DEFAULT_RESOURCES, onClose, className 
               {resource.phone !== 'Varies by country' && (
                 <a
                   href={`tel:${resource.phone.replace(/[^0-9]/g, '')}`}
-                  className="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl bg-[#d4a44c]/20 text-orange-50 font-medium hover:bg-[#d4a44c]/30 transition flex items-center justify-center gap-2"
+                  className="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl bg-[#d4a44c]/20 text-[#f5f0e8] font-medium hover:bg-[#d4a44c]/30 transition flex items-center justify-center gap-2"
                 >
                   <Phone className="h-4 w-4" />
                   <span>{resource.phone}</span>
@@ -149,7 +149,7 @@ export function CrisisAlert({ resources = DEFAULT_RESOURCES, onClose, className 
                 href={resource.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2.5 rounded-xl border border-[#d4a44c]/30 text-orange-100 hover:border-[#d4a44c]/50 hover:bg-[#d4a44c]/10 transition flex items-center gap-2 text-sm"
+                className="px-4 py-2.5 rounded-xl border border-[#d4a44c]/30 text-[#f5f0e8] hover:border-[#d4a44c]/50 hover:bg-[#d4a44c]/10 transition flex items-center gap-2 text-sm"
               >
                 <Globe className="h-4 w-4" />
                 <span>Learn More</span>
@@ -161,11 +161,11 @@ export function CrisisAlert({ resources = DEFAULT_RESOURCES, onClose, className 
 
       {/* Gentle Guidance */}
       <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 p-4">
-        <h5 className="text-sm font-semibold text-orange-50 mb-2 flex items-center gap-2">
+        <h5 className="text-sm font-semibold text-[#f5f0e8] mb-2 flex items-center gap-2">
           <MessageSquare className="h-4 w-4 text-[#d4a44c]" />
           <span>A Gentle Reminder</span>
         </h5>
-        <ul className="space-y-1.5 text-xs text-orange-100/80">
+        <ul className="space-y-1.5 text-xs text-[#f5f0e8]/80">
           <li>• Stay close to someone you trust — a friend, family member, or loved one</li>
           <li>• Difficult feelings are like passing clouds — they come and they go</li>
           <li>• You are deeply valued, and kind hearts are ready to listen</li>
@@ -174,12 +174,12 @@ export function CrisisAlert({ resources = DEFAULT_RESOURCES, onClose, className 
       </div>
 
       {/* Gita Wisdom */}
-      <div className="mt-4 rounded-2xl border border-orange-400/20 bg-orange-950/20 p-4">
-        <p className="text-sm text-orange-100/90 italic leading-relaxed mb-2">
+      <div className="mt-4 rounded-2xl border border-[#d4a44c]/20 bg-orange-950/20 p-4">
+        <p className="text-sm text-[#f5f0e8]/90 italic leading-relaxed mb-2">
           &quot;For one who has conquered the mind, the mind is the best of friends;
           but for one who has failed to do so, their mind will remain the greatest enemy.&quot;
         </p>
-        <p className="text-xs text-orange-100/60">— Bhagavad Gita 6.6</p>
+        <p className="text-xs text-[#f5f0e8]/60">— Bhagavad Gita 6.6</p>
       </div>
     </motion.div>
   )

@@ -121,7 +121,7 @@ const PATTERNS: Record<BreathingPattern, {
     nameHindi: 'प्राणायाम',
     description: 'Traditional yogic breathing',
     icon: Leaf,
-    color: 'text-orange-400',
+    color: 'text-[#d4a44c]',
     phases: [
       { phase: 'inhale', duration: 4 },
       { phase: 'hold_in', duration: 4 },

@@ -59,7 +59,7 @@ const OVERLAY_TOOLS: OverlayTool[] = [
     description: 'Cognitive reframing with Gita wisdom',
     icon: Flame,
     href: '/tools/ardha',
-    gradient: 'from-red-500/15 to-orange-500/10',
+    gradient: 'from-red-500/15 to-[#d4a44c]/10',
     iconColor: 'text-red-400',
     accentBorder: 'border-red-500/20',
   },
@@ -89,9 +89,9 @@ const OVERLAY_TOOLS: OverlayTool[] = [
     description: 'Heal relational harm with compassion',
     icon: Sparkles,
     href: '/tools/karma-reset',
-    gradient: 'from-amber-500/15 to-yellow-500/10',
-    iconColor: 'text-amber-400',
-    accentBorder: 'border-amber-500/20',
+    gradient: 'from-[#d4a44c]/15 to-yellow-500/10',
+    iconColor: 'text-[#d4a44c]',
+    accentBorder: 'border-[#d4a44c]/20',
   },
 ]
 

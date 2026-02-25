@@ -487,12 +487,12 @@ export default function DashboardClient() {
               >
                 <div className="flex items-center gap-4">
                   <motion.div
-                    className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-amber-300 shadow-lg shadow-orange-500/20"
+                    className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#d4a44c] to-[#e8b54a] shadow-lg shadow-[#d4a44c]/20"
                     animate={{
                       boxShadow: [
-                        '0 0 15px rgba(251, 146, 60, 0.2)',
-                        '0 0 25px rgba(251, 146, 60, 0.35)',
-                        '0 0 15px rgba(251, 146, 60, 0.2)',
+                        '0 0 15px rgba(212, 164, 76, 0.2)',
+                        '0 0 25px rgba(212, 164, 76, 0.35)',
+                        '0 0 15px rgba(212, 164, 76, 0.2)',
                       ],
                     }}
                     transition={{ duration: 3, repeat: Infinity }}
@@ -503,12 +503,12 @@ export default function DashboardClient() {
                     <h3 className="text-base font-semibold text-white/80">
                       Your Divine Friend is here
                     </h3>
-                    <p className="mt-0.5 text-xs text-orange-300/60">
+                    <p className="mt-0.5 text-xs text-[#e8b54a]/60">
                       Talk to KIAAN — voice or text
                     </p>
                   </div>
                   <motion.div
-                    className="flex-shrink-0 text-orange-300/30"
+                    className="flex-shrink-0 text-[#e8b54a]/30"
                     animate={{ x: [0, 4, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
                   >

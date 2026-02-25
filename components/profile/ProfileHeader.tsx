@@ -35,17 +35,17 @@ export function ProfileHeader({
           <img
             src={avatarUrl}
             alt={name}
-            className="h-20 w-20 rounded-2xl object-cover border-2 border-orange-400/30"
+            className="h-20 w-20 rounded-2xl object-cover border-2 border-[#d4a44c]/30"
           />
         ) : (
-          <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 flex items-center justify-center text-2xl font-bold text-slate-900 border-2 border-orange-400/30">
+          <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] flex items-center justify-center text-2xl font-bold text-slate-900 border-2 border-[#d4a44c]/30">
             {initials}
           </div>
         )}
         {onEditProfile && (
           <button
             onClick={onEditProfile}
-            className="absolute -bottom-2 -right-2 h-8 w-8 rounded-lg bg-slate-900 border border-orange-400/30 flex items-center justify-center text-orange-100 hover:bg-orange-500/20 transition"
+            className="absolute -bottom-2 -right-2 h-8 w-8 rounded-lg bg-slate-900 border border-[#d4a44c]/30 flex items-center justify-center text-[#f5f0e8] hover:bg-[#d4a44c]/20 transition"
             aria-label="Edit profile picture"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -58,12 +58,12 @@ export function ProfileHeader({
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3 mb-1">
-          <h1 className="text-2xl font-bold text-orange-50 truncate">{name}</h1>
+          <h1 className="text-2xl font-bold text-[#f5f0e8] truncate">{name}</h1>
           <Badge variant="premium">{tier}</Badge>
         </div>
-        <p className="text-sm text-orange-100/70 truncate mb-2">{email}</p>
+        <p className="text-sm text-[#f5f0e8]/70 truncate mb-2">{email}</p>
         {memberSince && (
-          <p className="text-xs text-orange-100/50">
+          <p className="text-xs text-[#f5f0e8]/50">
             Member since {memberSince.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           </p>
         )}

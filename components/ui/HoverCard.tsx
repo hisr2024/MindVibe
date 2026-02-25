@@ -48,7 +48,7 @@ export function HoverCard({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.96, y: side === 'bottom' ? -4 : 4 }}
                 transition={{ duration: 0.15, ease: 'easeOut' }}
-                className="z-50 w-72 rounded-xl border border-orange-500/20 bg-slate-900/95 p-4 shadow-xl shadow-orange-500/10 backdrop-blur-sm"
+                className="z-50 w-72 rounded-xl border border-[#d4a44c]/20 bg-slate-900/95 p-4 shadow-xl shadow-[#d4a44c]/10 backdrop-blur-sm"
               >
                 {children}
                 <HoverCardPrimitive.Arrow className="fill-slate-900/95" />
@@ -68,7 +68,7 @@ interface HoverCardTitleProps {
 
 export function HoverCardTitle({ children, className = '' }: HoverCardTitleProps) {
   return (
-    <h4 className={`text-sm font-semibold text-orange-50 ${className}`}>
+    <h4 className={`text-sm font-semibold text-[#f5f0e8] ${className}`}>
       {children}
     </h4>
   )
@@ -81,7 +81,7 @@ interface HoverCardDescriptionProps {
 
 export function HoverCardDescription({ children, className = '' }: HoverCardDescriptionProps) {
   return (
-    <p className={`mt-1 text-xs text-orange-100/70 leading-relaxed ${className}`}>
+    <p className={`mt-1 text-xs text-[#f5f0e8]/70 leading-relaxed ${className}`}>
       {children}
     </p>
   )

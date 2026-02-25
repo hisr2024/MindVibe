@@ -34,7 +34,7 @@ export function Skeleton({
 
   return (
     <div
-      className={`bg-orange-500/10 ${roundedStyles[rounded]} ${animate ? 'animate-pulse' : ''} ${className}`}
+      className={`bg-[#d4a44c]/10 ${roundedStyles[rounded]} ${animate ? 'animate-pulse' : ''} ${className}`}
       style={style}
       aria-hidden="true"
     />
@@ -58,7 +58,7 @@ export function SkeletonText({ lines = 3, className = '' }: { lines?: number; cl
 
 export function SkeletonCard({ className = '' }: { className?: string }) {
   return (
-    <div className={`rounded-3xl border border-orange-500/15 bg-[#0d0d10]/85 p-6 space-y-4 ${className}`}>
+    <div className={`rounded-3xl border border-[#d4a44c]/15 bg-[#0d0d10]/85 p-6 space-y-4 ${className}`}>
       <div className="flex items-center gap-4">
         <Skeleton width={48} height={48} rounded="xl" />
         <div className="flex-1 space-y-2">

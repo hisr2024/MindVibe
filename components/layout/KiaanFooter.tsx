@@ -36,8 +36,8 @@ const TOOL_LINKS = [
     descKey: 'navigation.tools.reframeThoughts',
     descFallback: 'Reframe thoughts',
     href: '/ardha',
-    gradient: 'from-amber-400/25 to-yellow-500/25',
-    border: 'border-amber-500/20 hover:border-amber-400/40',
+    gradient: 'from-[#d4a44c]/25 to-yellow-500/25',
+    border: 'border-[#d4a44c]/20 hover:border-[#d4a44c]/40',
   },
   {
     id: 'kiaan-chat',
@@ -58,7 +58,7 @@ const TOOL_LINKS = [
     descKey: 'navigation.tools.relationalClarity',
     descFallback: 'Relational clarity',
     href: '/tools/relationship-compass',
-    gradient: 'from-rose-400/25 to-orange-500/25',
+    gradient: 'from-rose-400/25 to-[#d4a44c]/25',
     border: 'border-rose-500/20 hover:border-rose-400/40',
   },
 ] as const;
@@ -189,14 +189,14 @@ export function KiaanFooter() {
             {/* Header */}
             <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
               <div>
-                <h3 className="text-sm font-semibold text-orange-50">
+                <h3 className="text-sm font-semibold text-[#f5f0e8]">
                   {t('navigation.spiritual_tools.title', 'Spiritual Tools')}
                 </h3>
-                <p className="text-[10px] text-orange-100/50 mt-0.5">{t('navigation.tools.quickAccess', 'Quick access')}</p>
+                <p className="text-[10px] text-[#f5f0e8]/50 mt-0.5">{t('navigation.tools.quickAccess', 'Quick access')}</p>
               </div>
               <motion.button
                 onClick={() => setIsOpen(false)}
-                className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-orange-100/60 hover:bg-white/10 hover:text-orange-50 transition-colors"
+                className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-[#f5f0e8]/60 hover:bg-white/10 hover:text-[#f5f0e8] transition-colors"
                 aria-label="Close"
                 whileTap={{ scale: 0.9 }}
               >
@@ -224,15 +224,15 @@ export function KiaanFooter() {
                       {tool.icon}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-orange-50 group-hover:text-white transition-colors truncate">
+                      <p className="text-sm font-semibold text-[#f5f0e8] group-hover:text-white transition-colors truncate">
                         {t(tool.labelKey, tool.labelFallback)}
                       </p>
-                      <p className="text-[10px] text-orange-100/60 truncate">
+                      <p className="text-[10px] text-[#f5f0e8]/60 truncate">
                         {t(tool.descKey, tool.descFallback)}
                       </p>
                     </div>
                     <svg
-                      className="w-4 h-4 text-orange-400/30 group-hover:text-orange-400/70 group-hover:translate-x-0.5 transition-all flex-shrink-0"
+                      className="w-4 h-4 text-[#d4a44c]/30 group-hover:text-[#d4a44c]/70 group-hover:translate-x-0.5 transition-all flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"

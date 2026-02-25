@@ -110,10 +110,10 @@ export function KiaanChat({
 
   return (
     <div
-      className={`relative flex flex-col rounded-3xl border border-orange-500/15 bg-black/50 h-[calc(100vh-280px)] max-h-[800px] min-h-[480px] ${className}`}
+      className={`relative flex flex-col rounded-3xl border border-[#d4a44c]/15 bg-black/50 h-[calc(100vh-280px)] max-h-[800px] min-h-[480px] ${className}`}
     >
       {/* Chat Header */}
-      <div className="flex items-center gap-3 border-b border-orange-500/15 px-4 py-3">
+      <div className="flex items-center gap-3 border-b border-[#d4a44c]/15 px-4 py-3">
         <KiaanLogo size="sm" showTagline={false} animated={true} />
 
         <div className="ml-auto flex items-center gap-2">
@@ -121,14 +121,14 @@ export function KiaanChat({
             <button
               type="button"
               onClick={() => setConfirmingClear(true)}
-              className="rounded-full border border-orange-500/25 bg-white/5 px-3 py-1.5 text-[11px] font-semibold text-orange-100/80 transition hover:border-orange-400/60 hover:text-orange-50"
+              className="rounded-full border border-[#d4a44c]/25 bg-white/5 px-3 py-1.5 text-[11px] font-semibold text-[#f5f0e8]/80 transition hover:border-[#d4a44c]/60 hover:text-[#f5f0e8]"
             >
               Clear old messages
             </button>
           )}
 
           {confirmingClear && (
-            <div className="flex items-center gap-2 rounded-full border border-orange-500/30 bg-black/70 px-3 py-1.5 text-[11px] text-orange-50 shadow-lg shadow-orange-500/20">
+            <div className="flex items-center gap-2 rounded-full border border-[#d4a44c]/30 bg-black/70 px-3 py-1.5 text-[11px] text-[#f5f0e8] shadow-lg shadow-[#d4a44c]/20">
               <span>Clear history?</span>
               <button
                 type="button"
@@ -137,14 +137,14 @@ export function KiaanChat({
                   setConfirmingClear(false)
                   scrollToBottom()
                 }}
-                className="rounded-full bg-gradient-to-r from-orange-400 via-[#ff9933] to-orange-200 px-2.5 py-1 text-[11px] font-semibold text-slate-950 shadow-md shadow-orange-500/30"
+                className="rounded-full bg-gradient-to-r from-[#d4a44c] via-[#ff9933] to-[#e8b54a] px-2.5 py-1 text-[11px] font-semibold text-slate-950 shadow-md shadow-[#d4a44c]/30"
               >
                 Yes
               </button>
               <button
                 type="button"
                 onClick={() => setConfirmingClear(false)}
-                className="rounded-full border border-orange-500/30 px-2.5 py-1 text-[11px] font-semibold text-orange-100/80"
+                className="rounded-full border border-[#d4a44c]/30 px-2.5 py-1 text-[11px] font-semibold text-[#f5f0e8]/80"
               >
                 Cancel
               </button>
@@ -163,7 +163,7 @@ export function KiaanChat({
             role: 'log',
             'aria-label': 'Chat messages',
             'aria-live': 'polite',
-            className: 'kiaan-chat-scroll-container smooth-touch-scroll scroll-stable focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 focus-visible:ring-inset',
+            className: 'kiaan-chat-scroll-container smooth-touch-scroll scroll-stable focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 focus-visible:ring-inset',
             style: {
               height: '100%',
               maxHeight: '100%',
@@ -176,11 +176,11 @@ export function KiaanChat({
           <div className="px-4 pr-6 md:pr-10 py-4 space-y-4">
             {visibleMessages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-12">
-                <div className="h-16 w-16 rounded-full bg-gradient-to-br from-orange-400/20 to-amber-300/20 flex items-center justify-center mb-4">
+                <div className="h-16 w-16 rounded-full bg-gradient-to-br from-[#d4a44c]/20 to-[#e8b54a]/20 flex items-center justify-center mb-4">
                   <span className="text-3xl">💬</span>
                 </div>
-                <h3 className="text-lg font-semibold text-orange-50 mb-2">KIAAN</h3>
-                <p className="text-sm text-orange-100/70 max-w-sm">
+                <h3 className="text-lg font-semibold text-[#f5f0e8] mb-2">KIAAN</h3>
+                <p className="text-sm text-[#f5f0e8]/70 max-w-sm">
                   Tell me what&apos;s happening. I&apos;ll help you understand the pattern, regulate the response, and find a concrete next step.
                 </p>
               </div>
@@ -202,13 +202,13 @@ export function KiaanChat({
             {/* Loading indicator */}
             {isLoading && (
               <div className="flex items-center gap-3 animate-pulse" role="status" aria-label="KIAAN is typing">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-400 to-amber-300 flex items-center justify-center text-xs font-bold text-slate-900">
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#d4a44c] to-[#e8b54a] flex items-center justify-center text-xs font-bold text-slate-900">
                   K
                 </div>
                 <div className="flex gap-1">
-                  <span className="h-2 w-2 rounded-full bg-orange-400/60 animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="h-2 w-2 rounded-full bg-orange-400/60 animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="h-2 w-2 rounded-full bg-orange-400/60 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <span className="h-2 w-2 rounded-full bg-[#d4a44c]/60 animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="h-2 w-2 rounded-full bg-[#d4a44c]/60 animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="h-2 w-2 rounded-full bg-[#d4a44c]/60 animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
                 <span className="sr-only">KIAAN is typing...</span>
               </div>
@@ -232,7 +232,7 @@ export function KiaanChat({
             onTouchStart={() => startScroll('up')}
             onTouchEnd={stopScroll}
             onTouchCancel={stopScroll}
-            className="pointer-events-auto h-10 w-10 rounded-xl bg-white/10 text-orange-50 shadow-md shadow-orange-500/20 backdrop-blur-sm border border-orange-500/30 hover:bg-white/15 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-400 transition-all text-sm font-semibold"
+            className="pointer-events-auto h-10 w-10 rounded-xl bg-white/10 text-[#f5f0e8] shadow-md shadow-[#d4a44c]/20 backdrop-blur-sm border border-[#d4a44c]/30 hover:bg-white/15 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#d4a44c] transition-all text-sm font-semibold"
             aria-label="Scroll up"
           >
             ↑
@@ -245,7 +245,7 @@ export function KiaanChat({
             onTouchStart={() => startScroll('down')}
             onTouchEnd={stopScroll}
             onTouchCancel={stopScroll}
-            className="pointer-events-auto h-10 w-10 rounded-xl bg-white/10 text-orange-50 shadow-md shadow-orange-500/20 backdrop-blur-sm border border-orange-500/30 hover:bg-white/15 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-400 transition-all text-sm font-semibold"
+            className="pointer-events-auto h-10 w-10 rounded-xl bg-white/10 text-[#f5f0e8] shadow-md shadow-[#d4a44c]/20 backdrop-blur-sm border border-[#d4a44c]/30 hover:bg-white/15 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#d4a44c] transition-all text-sm font-semibold"
             aria-label="Scroll down"
           >
             ↓
@@ -257,7 +257,7 @@ export function KiaanChat({
       {hasNewMessage && visibleMessages.length > 0 && (
         <button
           onClick={scrollToBottom}
-          className="absolute bottom-[116px] right-5 z-10 rounded-full bg-gradient-to-r from-orange-500 via-[#ff9933] to-orange-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-orange-500/40 transition-all hover:scale-105"
+          className="absolute bottom-[116px] right-5 z-10 rounded-full bg-gradient-to-r from-[#d4a44c] via-[#ff9933] to-[#d4a44c] px-4 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-[#d4a44c]/40 transition-all hover:scale-105"
           aria-label="Jump to latest message"
         >
           ↓ Jump to Latest
@@ -265,14 +265,14 @@ export function KiaanChat({
       )}
 
       {/* Input Form */}
-      <form onSubmit={handleSubmit} className="border-t border-orange-500/15 px-4 py-3">
+      <form onSubmit={handleSubmit} className="border-t border-[#d4a44c]/15 px-4 py-3">
         <div className="flex gap-3">
           <input
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Share what's on your mind..."
-            className="flex-1 rounded-2xl border border-orange-500/25 bg-slate-950/70 px-4 py-2.5 text-sm text-orange-50 outline-none focus:ring-2 focus:ring-orange-400/50 placeholder:text-orange-100/40"
+            className="flex-1 rounded-2xl border border-[#d4a44c]/25 bg-slate-950/70 px-4 py-2.5 text-sm text-[#f5f0e8] outline-none focus:ring-2 focus:ring-[#d4a44c]/50 placeholder:text-[#f5f0e8]/40"
             disabled={isLoading}
             aria-label="Type your message"
           />
@@ -284,7 +284,7 @@ export function KiaanChat({
           <button
             type="submit"
             disabled={!inputText.trim() || isLoading}
-            className="rounded-2xl bg-gradient-to-r from-orange-400 via-orange-500 to-amber-300 px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-lg shadow-orange-500/25 transition hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="rounded-2xl bg-gradient-to-r from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-lg shadow-[#d4a44c]/25 transition hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             aria-label="Send message"
           >
             Send

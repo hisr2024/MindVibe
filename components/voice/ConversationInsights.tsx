@@ -32,7 +32,7 @@ interface ConversationInsightsProps {
 }
 
 const EMOTION_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
-  anxiety:   { label: 'Anxious',   color: '#f59e0b', icon: '~' },
+  anxiety:   { label: 'Anxious',   color: '#d4a44c', icon: '~' },
   sadness:   { label: 'Sad',       color: '#3b82f6', icon: '⌢' },
   anger:     { label: 'Angry',     color: '#ef4444', icon: '!' },
   confusion: { label: 'Confused',  color: '#8b5cf6', icon: '?' },
@@ -188,7 +188,7 @@ export default function ConversationInsights({
                 stats.moodShift === 'improved'
                   ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
                   : stats.moodShift === 'needs-care'
-                  ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+                  ? 'bg-[#d4a44c]/10 border-[#d4a44c]/20 text-[#d4a44c]'
                   : 'bg-white/5 border-white/10 text-white/50'
               }`}>
                 <span className="text-sm">

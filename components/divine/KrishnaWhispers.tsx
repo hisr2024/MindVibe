@@ -210,7 +210,7 @@ export function KrishnaWhispers({
       {/* Settings Button (always visible) */}
       <button
         onClick={() => setNotificationEnabled(!notificationEnabled)}
-        className={`fixed ${POSITION_STYLES[position]} z-40 ${isVisible ? 'hidden' : ''} p-2 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 transition-all`}
+        className={`fixed ${POSITION_STYLES[position]} z-40 ${isVisible ? 'hidden' : ''} p-2 rounded-full bg-[#d4a44c]/10 hover:bg-[#d4a44c]/20 border border-[#d4a44c]/20 transition-all`}
         title={notificationEnabled ? t('divine.sacred.whispers.pauseWhispers', "Pause Krishna's Whispers") : t('divine.sacred.whispers.resumeWhispers', "Resume Krishna's Whispers")}
       >
         <motion.span
@@ -232,9 +232,9 @@ export function KrishnaWhispers({
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
           >
-            <div className="bg-gradient-to-br from-amber-900/95 to-orange-900/95 backdrop-blur-xl rounded-2xl border border-amber-500/30 shadow-2xl shadow-amber-500/20 overflow-hidden">
+            <div className="bg-gradient-to-br from-amber-900/95 to-orange-900/95 backdrop-blur-xl rounded-2xl border border-[#d4a44c]/30 shadow-2xl shadow-[#d4a44c]/20 overflow-hidden">
               {/* Header */}
-              <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 px-4 py-2 flex items-center justify-between">
+              <div className="bg-gradient-to-r from-[#d4a44c]/20 to-[#d4a44c]/20 px-4 py-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <motion.span
                     className="text-lg"
@@ -243,11 +243,11 @@ export function KrishnaWhispers({
                   >
                     {currentWhisper.icon}
                   </motion.span>
-                  <span className="text-amber-100 text-sm font-medium">{currentWhisper.title}</span>
+                  <span className="text-[#f5f0e8] text-sm font-medium">{currentWhisper.title}</span>
                 </div>
                 <button
                   onClick={dismissWhisper}
-                  className="text-amber-200/60 hover:text-amber-200 transition-colors"
+                  className="text-[#f0c96d]/60 hover:text-[#f0c96d] transition-colors"
                   aria-label="Dismiss whisper"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -258,7 +258,7 @@ export function KrishnaWhispers({
 
               {/* Content */}
               <div className="px-4 py-3">
-                <p className="text-amber-100/90 text-sm italic leading-relaxed">
+                <p className="text-[#f5f0e8]/90 text-sm italic leading-relaxed">
                   &quot;{currentWhisper.message}&quot;
                 </p>
               </div>
@@ -270,7 +270,7 @@ export function KrishnaWhispers({
                     actions.startBreathing('peace_breath');
                     dismissWhisper();
                   }}
-                  className="flex-1 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-lg text-amber-200/80 text-xs transition-colors"
+                  className="flex-1 py-1.5 bg-[#d4a44c]/10 hover:bg-[#d4a44c]/20 border border-[#d4a44c]/20 rounded-lg text-[#f0c96d]/80 text-xs transition-colors"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -278,7 +278,7 @@ export function KrishnaWhispers({
                 </motion.button>
                 <motion.button
                   onClick={dismissWhisper}
-                  className="flex-1 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-lg text-amber-200/80 text-xs transition-colors"
+                  className="flex-1 py-1.5 bg-[#d4a44c]/10 hover:bg-[#d4a44c]/20 border border-[#d4a44c]/20 rounded-lg text-[#f0c96d]/80 text-xs transition-colors"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -287,8 +287,8 @@ export function KrishnaWhispers({
               </div>
 
               {/* Footer */}
-              <div className="px-4 py-2 bg-amber-950/30 border-t border-amber-500/10">
-                <p className="text-amber-200/40 text-[10px] text-center">
+              <div className="px-4 py-2 bg-amber-950/30 border-t border-[#d4a44c]/10">
+                <p className="text-[#f0c96d]/40 text-[10px] text-center">
                   {t('divine.sacred.whispers.krishnasWhispers', "Krishna's Whispers")}
                 </p>
               </div>

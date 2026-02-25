@@ -207,7 +207,7 @@ export function PWAInstallPrompt({
             <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-6" />
 
             <div className="text-center mb-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#d4a44c] to-[#d4a44c] flex items-center justify-center">
                 <Smartphone className="w-8 h-8 text-slate-950" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">
@@ -230,8 +230,8 @@ export function PWAInstallPrompt({
               </div>
 
               <div className="flex items-center gap-4 p-3 rounded-xl bg-white/[0.04]">
-                <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center">
-                  <PlusSquare className="w-5 h-5 text-orange-400" />
+                <div className="w-10 h-10 rounded-full bg-[#d4a44c]/20 flex items-center justify-center">
+                  <PlusSquare className="w-5 h-5 text-[#d4a44c]" />
                 </div>
                 <div>
                   <p className="text-white font-medium">2. Add to Home Screen</p>
@@ -283,9 +283,9 @@ export function PWAInstallPrompt({
               fixed top-[calc(env(safe-area-inset-top,0px)+16px)]
               right-4
               px-4 py-2 rounded-full
-              bg-gradient-to-r from-orange-500 to-amber-500
+              bg-gradient-to-r from-[#d4a44c] to-[#d4a44c]
               text-slate-950 font-semibold text-sm
-              shadow-lg shadow-orange-500/30
+              shadow-lg shadow-[#d4a44c]/30
               flex items-center gap-2
               z-50
             "
@@ -311,7 +311,7 @@ export function PWAInstallPrompt({
             fixed bottom-[calc(88px+env(safe-area-inset-bottom,0px)+16px)]
             left-4 right-4
             p-4 rounded-2xl
-            bg-[#1a2133]/95 border border-orange-500/20
+            bg-[#1a2133]/95 border border-[#d4a44c]/20
             backdrop-blur-xl
             shadow-xl shadow-black/30
             z-50
@@ -337,9 +337,9 @@ export function PWAInstallPrompt({
             {/* App Icon */}
             <div className="
               w-14 h-14 rounded-xl flex-shrink-0
-              bg-gradient-to-br from-orange-500 to-amber-500
+              bg-gradient-to-br from-[#d4a44c] to-[#d4a44c]
               flex items-center justify-center
-              shadow-lg shadow-orange-500/30
+              shadow-lg shadow-[#d4a44c]/30
             ">
               <Sparkles className="w-7 h-7 text-slate-950" />
             </div>
@@ -361,9 +361,9 @@ export function PWAInstallPrompt({
             onClick={handleInstall}
             className="
               w-full mt-4 py-3 rounded-xl
-              bg-gradient-to-r from-orange-500 to-amber-500
+              bg-gradient-to-r from-[#d4a44c] to-[#d4a44c]
               text-slate-950 font-semibold
-              shadow-lg shadow-orange-500/25
+              shadow-lg shadow-[#d4a44c]/25
               flex items-center justify-center gap-2
             "
           >

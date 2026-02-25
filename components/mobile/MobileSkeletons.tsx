@@ -217,7 +217,7 @@ export function MessageSkeleton({ isUser = false, className = '' }: MessageSkele
       <div
         className={`
           max-w-[75%] p-3 rounded-2xl
-          ${isUser ? 'bg-orange-500/10' : 'bg-white/[0.04]'}
+          ${isUser ? 'bg-[#d4a44c]/10' : 'bg-white/[0.04]'}
         `}
       >
         <TextSkeleton

@@ -63,7 +63,7 @@ export function CancelSubscriptionModal({
     >
       {step === 'reason' && (
         <div>
-          <p className="text-sm text-orange-100/70 mb-4">
+          <p className="text-sm text-[#f5f0e8]/70 mb-4">
             We&apos;re sorry to see you go! Before you cancel, please let us know why:
           </p>
 
@@ -74,8 +74,8 @@ export function CancelSubscriptionModal({
                 onClick={() => setReason(r)}
                 className={`w-full text-left rounded-xl border p-3 text-sm transition ${
                   reason === r
-                    ? 'border-orange-400 bg-orange-500/10 text-orange-50'
-                    : 'border-orange-500/20 bg-black/30 text-orange-100/80 hover:border-orange-400/50'
+                    ? 'border-[#d4a44c] bg-[#d4a44c]/10 text-[#f5f0e8]'
+                    : 'border-[#d4a44c]/20 bg-black/30 text-[#f5f0e8]/80 hover:border-[#d4a44c]/50'
                 }`}
               >
                 {r}
@@ -110,18 +110,18 @@ export function CancelSubscriptionModal({
 
       {step === 'confirm' && (
         <div>
-          <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-4 mb-4">
-            <p className="text-sm text-amber-50 font-medium mb-2">Are you sure?</p>
-            <p className="text-sm text-amber-100/80">
+          <div className="rounded-xl bg-[#d4a44c]/10 border border-[#d4a44c]/30 p-4 mb-4">
+            <p className="text-sm text-[#f5f0e8] font-medium mb-2">Are you sure?</p>
+            <p className="text-sm text-[#f5f0e8]/80">
               Your {planName} subscription will remain active until{' '}
               <span className="font-semibold">{endDate.toLocaleDateString()}</span>.
               After that, you&apos;ll be moved to the Free plan.
             </p>
           </div>
 
-          <ul className="text-sm text-orange-100/70 space-y-2 mb-6">
+          <ul className="text-sm text-[#f5f0e8]/70 space-y-2 mb-6">
             <li className="flex items-start gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400 shrink-0 mt-0.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c] shrink-0 mt-0.5">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                 <line x1="12" y1="9" x2="12" y2="13" />
                 <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -129,7 +129,7 @@ export function CancelSubscriptionModal({
               Your KIAAN question quota will drop to 15/month
             </li>
             <li className="flex items-start gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400 shrink-0 mt-0.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c] shrink-0 mt-0.5">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                 <line x1="12" y1="9" x2="12" y2="13" />
                 <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -172,12 +172,12 @@ export function CancelSubscriptionModal({
             </svg>
           </div>
 
-          <p className="text-sm text-orange-100/70 mb-4">
+          <p className="text-sm text-[#f5f0e8]/70 mb-4">
             Your subscription has been canceled. You&apos;ll continue to have access to {planName} features
             until {endDate.toLocaleDateString()}.
           </p>
 
-          <p className="text-sm text-orange-100/50 mb-6">
+          <p className="text-sm text-[#f5f0e8]/50 mb-6">
             Changed your mind? You can resubscribe anytime from the pricing page.
           </p>
 

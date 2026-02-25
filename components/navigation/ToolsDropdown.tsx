@@ -95,7 +95,7 @@ export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps
         ref={buttonRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white/70 transition hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+        className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white/70 transition hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#d4a44c] focus:ring-offset-2 focus:ring-offset-slate-900"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
@@ -119,7 +119,7 @@ export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps
 
       {isOpen && (
         <div
-          className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border border-orange-500/20 bg-[#0f0f14] shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+          className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border border-[#d4a44c]/20 bg-[#0f0f14] shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
           role="menu"
           aria-orientation="vertical"
         >
@@ -130,7 +130,7 @@ export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps
                   <div className="my-2 border-t border-white/5" />
                 )}
                 <div className="px-3 py-2">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-orange-100/50">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#f5f0e8]/50">
                     {category.name}
                   </span>
                 </div>
@@ -143,18 +143,18 @@ export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps
                       className="flex items-start gap-3 rounded-lg px-3 py-2 transition hover:bg-white/5 focus:bg-white/5 focus:outline-none"
                       role="menuitem"
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500/20 to-amber-500/20">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#d4a44c]/20 to-[#d4a44c]/20">
                         {item.icon}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium text-orange-50">
+                        <div className="text-sm font-medium text-[#f5f0e8]">
                           {item.name}
                         </div>
-                        <div className="text-xs text-orange-100/60">
+                        <div className="text-xs text-[#f5f0e8]/60">
                           {item.description}
                         </div>
                         {item.purposeDescKey && (
-                          <div className="text-[10px] text-orange-200/40 truncate">
+                          <div className="text-[10px] text-[#e8b54a]/40 truncate">
                             {t(`dashboard.tool_desc.${item.purposeDescKey}`, '')}
                           </div>
                         )}
@@ -170,7 +170,7 @@ export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps
               <Link
                 href="/dashboard"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-orange-100/70 transition hover:bg-white/5 hover:text-orange-50"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#f5f0e8]/70 transition hover:bg-white/5 hover:text-[#f5f0e8]"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

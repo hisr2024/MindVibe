@@ -38,7 +38,7 @@ export default function AdminLayout({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <span className="text-lg font-semibold text-orange-400">MindVibe Admin</span>
+        <span className="text-lg font-semibold text-[#d4a44c]">MindVibe Admin</span>
       </div>
 
       {/* Sidebar */}
@@ -49,11 +49,11 @@ export default function AdminLayout({
       >
         <div className="flex h-16 items-center border-b border-slate-700 px-6">
           <Link href="/admin" className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-300 text-slate-900 font-bold">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#d4a44c] to-[#e8b54a] text-slate-900 font-bold">
               MV
             </span>
             <div>
-              <p className="text-sm font-semibold text-orange-400">MindVibe</p>
+              <p className="text-sm font-semibold text-[#d4a44c]">MindVibe</p>
               <p className="text-xs text-slate-400">Admin Panel</p>
             </div>
           </Link>
@@ -69,7 +69,7 @@ export default function AdminLayout({
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
                   isActive
-                    ? 'bg-orange-500/20 text-orange-400'
+                    ? 'bg-[#d4a44c]/20 text-[#d4a44c]'
                     : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
                 }`}
               >

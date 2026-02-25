@@ -118,17 +118,17 @@ export function LanguageShowcase() {
   return (
     <section className="py-16 px-4 relative">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute left-1/4 top-0 h-64 w-64 rounded-full bg-gradient-to-br from-orange-500/15 via-[#ff9933]/10 to-transparent blur-3xl" />
-        <div className="absolute right-1/4 bottom-0 h-72 w-72 rounded-full bg-gradient-to-tr from-[#ff9933]/12 via-orange-400/8 to-transparent blur-3xl" />
+        <div className="absolute left-1/4 top-0 h-64 w-64 rounded-full bg-gradient-to-br from-[#d4a44c]/15 via-[#ff9933]/10 to-transparent blur-3xl" />
+        <div className="absolute right-1/4 bottom-0 h-72 w-72 rounded-full bg-gradient-to-tr from-[#ff9933]/12 via-[#d4a44c]/8 to-transparent blur-3xl" />
       </div>
 
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-orange-100 bg-clip-text text-transparent mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#e8b54a] via-[#ffb347] to-[#f5f0e8] bg-clip-text text-transparent mb-4">
             {currentTranslation.title}
           </h2>
-          <p className="text-orange-100/70 text-base md:text-lg max-w-2xl mx-auto">
+          <p className="text-[#f5f0e8]/70 text-base md:text-lg max-w-2xl mx-auto">
             {currentTranslation.subtitle}
           </p>
         </div>
@@ -141,30 +141,30 @@ export function LanguageShowcase() {
               onClick={() => handleLanguageSelect(lang.code)}
               className={`group relative overflow-hidden p-5 md:p-6 rounded-2xl border text-center cursor-pointer transition-all duration-300 hover:-translate-y-1 ${
                 selectedLang === lang.code
-                  ? 'border-orange-400 bg-orange-500/10 shadow-lg shadow-orange-500/25'
-                  : 'border-orange-500/20 bg-white/5 hover:bg-white/10 hover:border-orange-500/40'
+                  ? 'border-[#d4a44c] bg-[#d4a44c]/10 shadow-lg shadow-[#d4a44c]/25'
+                  : 'border-[#d4a44c]/20 bg-white/5 hover:bg-white/10 hover:border-[#d4a44c]/40'
               }`}
               aria-label={`Switch to ${lang.name}`}
             >
               {/* Gradient overlay on hover */}
-              <div className={`absolute inset-0 bg-gradient-to-br from-orange-500/20 via-[#ff9933]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity ${selectedLang === lang.code ? 'opacity-100' : ''}`} />
+              <div className={`absolute inset-0 bg-gradient-to-br from-[#d4a44c]/20 via-[#ff9933]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity ${selectedLang === lang.code ? 'opacity-100' : ''}`} />
               
               {/* Content */}
               <div className="relative z-10">
                 <div className="text-4xl md:text-5xl mb-3 group-hover:scale-110 transition-transform">
                   {lang.flag}
                 </div>
-                <div className="font-semibold text-orange-50 text-sm md:text-base mb-1">
+                <div className="font-semibold text-[#f5f0e8] text-sm md:text-base mb-1">
                   {lang.nativeName}
                 </div>
-                <div className="text-xs text-orange-100/60">
+                <div className="text-xs text-[#f5f0e8]/60">
                   {lang.name}
                 </div>
               </div>
 
               {/* Selected indicator */}
               {selectedLang === lang.code && (
-                <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-orange-400 animate-pulse" />
+                <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-[#d4a44c] animate-pulse" />
               )}
             </button>
           ))}
@@ -172,27 +172,27 @@ export function LanguageShowcase() {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 md:gap-6 max-w-3xl mx-auto">
-          <div className="text-center p-4 rounded-2xl bg-white/5 border border-orange-500/20 backdrop-blur">
-            <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-orange-400 to-[#ffb347] bg-clip-text text-transparent">
+          <div className="text-center p-4 rounded-2xl bg-white/5 border border-[#d4a44c]/20 backdrop-blur">
+            <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#d4a44c] to-[#ffb347] bg-clip-text text-transparent">
               8+
             </div>
-            <div className="text-xs md:text-sm text-orange-100/60 mt-1">
+            <div className="text-xs md:text-sm text-[#f5f0e8]/60 mt-1">
               {getStatLabel('languages')}
             </div>
           </div>
-          <div className="text-center p-4 rounded-2xl bg-white/5 border border-orange-500/20 backdrop-blur">
-            <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-orange-400 to-[#ffb347] bg-clip-text text-transparent">
+          <div className="text-center p-4 rounded-2xl bg-white/5 border border-[#d4a44c]/20 backdrop-blur">
+            <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#d4a44c] to-[#ffb347] bg-clip-text text-transparent">
               700+
             </div>
-            <div className="text-xs md:text-sm text-orange-100/60 mt-1">
+            <div className="text-xs md:text-sm text-[#f5f0e8]/60 mt-1">
               {getStatLabel('verses')}
             </div>
           </div>
-          <div className="text-center p-4 rounded-2xl bg-white/5 border border-orange-500/20 backdrop-blur">
-            <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-orange-400 to-[#ffb347] bg-clip-text text-transparent">
+          <div className="text-center p-4 rounded-2xl bg-white/5 border border-[#d4a44c]/20 backdrop-blur">
+            <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#d4a44c] to-[#ffb347] bg-clip-text text-transparent">
               24/7
             </div>
-            <div className="text-xs md:text-sm text-orange-100/60 mt-1">
+            <div className="text-xs md:text-sm text-[#f5f0e8]/60 mt-1">
               {getStatLabel('support')}
             </div>
           </div>
@@ -200,7 +200,7 @@ export function LanguageShowcase() {
 
         {/* Informational note */}
         <div className="mt-8 text-center">
-          <p className="text-xs text-orange-100/50 max-w-2xl mx-auto">
+          <p className="text-xs text-[#f5f0e8]/50 max-w-2xl mx-auto">
             {getInfoText()}
           </p>
         </div>

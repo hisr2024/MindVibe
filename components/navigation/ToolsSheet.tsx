@@ -162,7 +162,7 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
             {/* Sheet - z-[65] to be above backdrop - Full height mobile optimized */}
             <motion.div
               ref={sheetRef}
-              className={`overlay-bottom-sheet fixed inset-x-0 bottom-0 flex flex-col overflow-hidden rounded-t-[28px] border-t border-orange-500/25 bg-gradient-to-b from-[#111118] to-[#0b0b0f] shadow-[0_-20px_60px_rgba(0,0,0,0.6)] will-change-transform ${className}`}
+              className={`overlay-bottom-sheet fixed inset-x-0 bottom-0 flex flex-col overflow-hidden rounded-t-[28px] border-t border-[#d4a44c]/25 bg-gradient-to-b from-[#111118] to-[#050507] shadow-[0_-20px_60px_rgba(0,0,0,0.6)] will-change-transform ${className}`}
               style={{
                 zIndex: 65,
                 WebkitBackfaceVisibility: 'hidden',
@@ -185,7 +185,7 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
               onDragEnd={handleDragEnd}
             >
               {/* Decorative top glow */}
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500/50 to-transparent" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4a44c]/50 to-transparent" />
 
               {/* Handle bar - draggable indicator */}
               <div
@@ -205,7 +205,7 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
               {/* Header - Sticky */}
               <div className="flex items-center justify-between border-b border-white/10 px-4 pb-3 bg-gradient-to-b from-[#111118] to-transparent sticky top-0">
                 <div>
-                  <h2 className="text-xl font-bold text-orange-50">All Tools</h2>
+                  <h2 className="text-xl font-bold text-[#f5f0e8]">All Tools</h2>
                   <p className="text-xs text-white/50 mt-0.5">Tap to explore your wellness toolkit</p>
                 </div>
                 <motion.button
@@ -250,10 +250,10 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                     className={categoryIndex > 0 ? 'mt-6' : ''}
                     variants={itemVariants}
                   >
-                    <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-300/70">
-                      <span className="h-px flex-1 bg-gradient-to-r from-orange-500/30 to-transparent" />
+                    <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#e8b54a]/70">
+                      <span className="h-px flex-1 bg-gradient-to-r from-[#d4a44c]/30 to-transparent" />
                       {category.name}
-                      <span className="h-px flex-1 bg-gradient-to-l from-orange-500/30 to-transparent" />
+                      <span className="h-px flex-1 bg-gradient-to-l from-[#d4a44c]/30 to-transparent" />
                     </h3>
                     <div className="grid grid-cols-2 gap-2.5">
                       {category.tools.map((tool: ToolConfig, toolIndex: number) => (
@@ -265,7 +265,7 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                           <Link
                             href={tool.href}
                             onClick={handleToolClick}
-                            className="group relative flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-4 transition-all duration-200 hover:border-orange-400/40 hover:from-white/[0.1] hover:to-white/[0.04] active:scale-[0.96] min-h-[100px]"
+                            className="group relative flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-4 transition-all duration-200 hover:border-[#d4a44c]/40 hover:from-white/[0.1] hover:to-white/[0.04] active:scale-[0.96] min-h-[100px]"
                           >
                             {/* Badge - positioned absolute */}
                             {tool.badge && (
@@ -274,20 +274,20 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                               </span>
                             )}
                             <motion.span
-                              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500/25 to-amber-500/20 text-2xl shadow-lg"
+                              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#d4a44c]/25 to-amber-500/20 text-2xl shadow-lg"
                               whileTap={{ scale: 0.9 }}
                             >
                               {tool.icon}
                             </motion.span>
                             <div className="text-center min-w-0 w-full">
-                              <p className="text-sm font-semibold text-orange-50 group-hover:text-white truncate">
+                              <p className="text-sm font-semibold text-[#f5f0e8] group-hover:text-white truncate">
                                 {tool.title}
                               </p>
                               <p className="text-[10px] text-white/40 mt-0.5 truncate">
                                 {tool.description}
                               </p>
                               {tool.purposeDescKey && (
-                                <p className="text-[9px] text-orange-200/40 mt-0.5 truncate">
+                                <p className="text-[9px] text-[#e8b54a]/40 mt-0.5 truncate">
                                   {t(`dashboard.tool_desc.${tool.purposeDescKey}`, '')}
                                 </p>
                               )}

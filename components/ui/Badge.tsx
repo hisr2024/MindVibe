@@ -14,21 +14,21 @@ interface BadgeProps {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  default: 'bg-orange-500/10 border-orange-500/30 text-orange-50',
+  default: 'bg-[#d4a44c]/10 border-[#d4a44c]/30 text-[#f5f0e8]',
   success: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-50',
-  warning: 'bg-amber-500/10 border-amber-500/30 text-amber-50',
+  warning: 'bg-[#d4a44c]/10 border-[#d4a44c]/30 text-[#f5f0e8]',
   danger: 'bg-red-500/10 border-red-500/30 text-red-50',
   info: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-50',
-  premium: 'bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-orange-500/20 border-orange-400/40 text-orange-50',
+  premium: 'bg-gradient-to-r from-[#d4a44c]/20 via-[#d4a44c]/20 to-[#d4a44c]/20 border-[#d4a44c]/40 text-[#f5f0e8]',
 }
 
 const dotStyles: Record<BadgeVariant, string> = {
-  default: 'bg-orange-400',
+  default: 'bg-[#d4a44c]',
   success: 'bg-emerald-400',
-  warning: 'bg-amber-400',
+  warning: 'bg-[#d4a44c]',
   danger: 'bg-red-400',
   info: 'bg-cyan-400',
-  premium: 'bg-gradient-to-r from-orange-400 to-amber-400',
+  premium: 'bg-gradient-to-r from-[#d4a44c] to-[#d4a44c]',
 }
 
 const sizeStyles: Record<BadgeSize, string> = {

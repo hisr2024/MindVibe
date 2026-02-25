@@ -30,13 +30,13 @@ export function EcosystemIntro() {
   ];
 
   return (
-    <section className="space-y-6 rounded-3xl border border-orange-500/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#0b0b0f]/80 to-[#120a07]/90 p-6 shadow-[0_30px_120px_rgba(255,115,39,0.18)] backdrop-blur md:p-8">
+    <section className="space-y-6 rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#050507]/80 to-[#120a07]/90 p-6 shadow-[0_30px_120px_rgba(212,164,76,0.18)] backdrop-blur md:p-8">
       {/* Header */}
       <div className="space-y-3 text-center">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-200 via-[#ffb347] to-rose-200 bg-clip-text text-transparent md:text-4xl">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-[#e8b54a] via-[#ffb347] to-rose-200 bg-clip-text text-transparent md:text-4xl">
           The MindVibe Ecosystem
         </h2>
-        <p className="mx-auto max-w-2xl text-base text-orange-100/80 md:text-lg">
+        <p className="mx-auto max-w-2xl text-base text-[#f5f0e8]/80 md:text-lg">
           A holistic approach to spiritual wellness, rooted in ancient wisdom and modern practices
         </p>
       </div>
@@ -58,10 +58,10 @@ export function EcosystemIntro() {
                   {pillar.icon}
                 </span>
               </div>
-              <h3 className="text-center text-xl font-semibold text-orange-50">
+              <h3 className="text-center text-xl font-semibold text-[#f5f0e8]">
                 {pillar.title}
               </h3>
-              <p className="text-center text-sm text-orange-100/80 leading-relaxed">
+              <p className="text-center text-sm text-[#f5f0e8]/80 leading-relaxed">
                 {pillar.description}
               </p>
             </div>
@@ -70,8 +70,8 @@ export function EcosystemIntro() {
       </div>
 
       {/* Supporting text */}
-      <div className="rounded-2xl border border-orange-500/20 bg-white/5 p-4 text-center">
-        <p className="text-sm text-orange-100/75">
+      <div className="rounded-2xl border border-[#d4a44c]/20 bg-white/5 p-4 text-center">
+        <p className="text-sm text-[#f5f0e8]/75">
           ✨ Each pillar works together to create a balanced, sustainable approach to spiritual wellness
         </p>
       </div>

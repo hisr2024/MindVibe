@@ -88,9 +88,9 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
 
   if (loading) {
     return (
-      <div className={`rounded-3xl border border-orange-500/15 bg-black/50 p-6 ${className}`}>
+      <div className={`rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-6 ${className}`}>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-400" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#d4a44c]" />
         </div>
       </div>
     )
@@ -108,14 +108,14 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
   const Icon = config.icon
 
   return (
-    <div className={`rounded-3xl border border-orange-500/15 bg-black/50 p-6 ${className}`}>
+    <div className={`rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-6 ${className}`}>
       {/* Header */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-orange-50 mb-1 flex items-center gap-2">
-          <Shield className="h-5 w-5 text-orange-400" />
+        <h3 className="text-lg font-semibold text-[#f5f0e8] mb-1 flex items-center gap-2">
+          <Shield className="h-5 w-5 text-[#d4a44c]" />
           Risk Assessment
         </h3>
-        <p className="text-sm text-orange-100/60">Spiritual wellness stability indicators</p>
+        <p className="text-sm text-[#f5f0e8]/60">Spiritual wellness stability indicators</p>
       </div>
 
       {/* Risk Score Gauge */}
@@ -128,7 +128,7 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
               cy="80"
               r="64"
               fill="none"
-              stroke="rgba(255, 115, 39, 0.1)"
+              stroke="rgba(212, 164, 76, 0.1)"
               strokeWidth="12"
             />
             {/* Risk score circle */}
@@ -154,7 +154,7 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
             <div className="text-3xl font-bold" style={{ color: config.color }}>
               {riskData.risk_score}
             </div>
-            <div className="text-xs text-orange-100/60">Risk Score</div>
+            <div className="text-xs text-[#f5f0e8]/60">Risk Score</div>
           </div>
         </div>
       </div>
@@ -173,32 +173,32 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
       </div>
 
       {/* Description */}
-      <p className="text-sm text-center text-orange-100/80 mb-6">{riskData.description}</p>
+      <p className="text-sm text-center text-[#f5f0e8]/80 mb-6">{riskData.description}</p>
 
       {/* Risk Factors */}
       <div className="space-y-4 mb-6">
-        <h4 className="text-sm font-semibold text-orange-50">Contributing Factors</h4>
+        <h4 className="text-sm font-semibold text-[#f5f0e8]">Contributing Factors</h4>
 
         {/* Mood Average */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Activity className="h-4 w-4 text-orange-400" />
-              <span className="text-sm text-orange-50">Mood Average</span>
+              <Activity className="h-4 w-4 text-[#d4a44c]" />
+              <span className="text-sm text-[#f5f0e8]">Mood Average</span>
             </div>
-            <span className="text-sm font-semibold text-orange-50">
+            <span className="text-sm font-semibold text-[#f5f0e8]">
               {riskData.factors.mood_average.value.toFixed(1)}/10
             </span>
           </div>
-          <div className="h-2 rounded-full bg-orange-500/10 overflow-hidden">
+          <div className="h-2 rounded-full bg-[#d4a44c]/10 overflow-hidden">
             <motion.div
-              className="h-full rounded-full bg-orange-400"
+              className="h-full rounded-full bg-[#d4a44c]"
               initial={{ width: 0 }}
               animate={{ width: `${(riskData.factors.mood_average.risk / 40) * 100}%` }}
               transition={{ duration: 1, delay: 0.2 }}
             />
           </div>
-          <p className="text-xs text-orange-100/60">
+          <p className="text-xs text-[#f5f0e8]/60">
             Contributes {riskData.factors.mood_average.risk.toFixed(1)} points to risk score
           </p>
         </div>
@@ -207,14 +207,14 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <TrendingDown className="h-4 w-4 text-orange-400" />
-              <span className="text-sm text-orange-50">Mood Trend</span>
+              <TrendingDown className="h-4 w-4 text-[#d4a44c]" />
+              <span className="text-sm text-[#f5f0e8]">Mood Trend</span>
             </div>
-            <span className="text-sm font-semibold text-orange-50 capitalize">
+            <span className="text-sm font-semibold text-[#f5f0e8] capitalize">
               {riskData.factors.trend.direction}
             </span>
           </div>
-          <div className="h-2 rounded-full bg-orange-500/10 overflow-hidden">
+          <div className="h-2 rounded-full bg-[#d4a44c]/10 overflow-hidden">
             <motion.div
               className="h-full rounded-full bg-blue-400"
               initial={{ width: 0 }}
@@ -222,7 +222,7 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
               transition={{ duration: 1, delay: 0.3 }}
             />
           </div>
-          <p className="text-xs text-orange-100/60">
+          <p className="text-xs text-[#f5f0e8]/60">
             Contributes {riskData.factors.trend.risk.toFixed(1)} points to risk score
           </p>
         </div>
@@ -231,14 +231,14 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-orange-400" />
-              <span className="text-sm text-orange-50">Volatility</span>
+              <AlertTriangle className="h-4 w-4 text-[#d4a44c]" />
+              <span className="text-sm text-[#f5f0e8]">Volatility</span>
             </div>
-            <span className="text-sm font-semibold text-orange-50">
+            <span className="text-sm font-semibold text-[#f5f0e8]">
               {riskData.factors.volatility.value.toFixed(2)}
             </span>
           </div>
-          <div className="h-2 rounded-full bg-orange-500/10 overflow-hidden">
+          <div className="h-2 rounded-full bg-[#d4a44c]/10 overflow-hidden">
             <motion.div
               className="h-full rounded-full bg-purple-400"
               initial={{ width: 0 }}
@@ -246,7 +246,7 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
               transition={{ duration: 1, delay: 0.4 }}
             />
           </div>
-          <p className="text-xs text-orange-100/60">
+          <p className="text-xs text-[#f5f0e8]/60">
             Contributes {riskData.factors.volatility.risk.toFixed(1)} points to risk score
           </p>
         </div>
@@ -255,14 +255,14 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
       {/* Recommendations */}
       {riskData.recommendations.length > 0 && (
         <div className="rounded-2xl border border-indigo-400/30 bg-indigo-950/20 p-4">
-          <h4 className="text-sm font-semibold text-orange-50 mb-2 flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-[#f5f0e8] mb-2 flex items-center gap-2">
             <span>💡</span>
             <span>Recommendations</span>
           </h4>
           <ul className="space-y-2">
             {riskData.recommendations.map((rec, idx) => (
-              <li key={idx} className="text-xs text-orange-100/80 flex items-start gap-2">
-                <span className="text-orange-400 mt-0.5">•</span>
+              <li key={idx} className="text-xs text-[#f5f0e8]/80 flex items-start gap-2">
+                <span className="text-[#d4a44c] mt-0.5">•</span>
                 <span>{rec}</span>
               </li>
             ))}
@@ -278,7 +278,7 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
       </div>
 
       {/* Last Updated */}
-      <div className="mt-4 text-xs text-center text-orange-100/40">
+      <div className="mt-4 text-xs text-center text-[#f5f0e8]/40">
         Assessed {new Date(riskData.assessed_at).toLocaleString()}
       </div>
     </div>

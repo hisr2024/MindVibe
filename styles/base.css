@@ -4,9 +4,13 @@
 
 :root {
   color-scheme: dark;
-  --color-background: #0b0b0f;
-  --color-foreground: #f8fafc;
-  --color-surface: #0f1624;
+
+  /* ─── Golden Black Theme: Core palette ─── */
+  --color-background: #050507;
+  --color-foreground: #f5f0e8;
+  --color-surface: #0a0a12;
+
+  /* ─── Typography ─── */
   --font-sans: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   /* --font-sacred is set by next/font/google via the Crimson_Text variable class on <body>.
      The fallback below applies only if the CSS variable is not injected (e.g. error pages). */
@@ -18,49 +22,80 @@
   --text-caption: 0.875rem;
   --line-snug: 1.35;
   --line-relaxed: 1.6;
-  --mv-sunrise: #ff9159;
-  --mv-sunrise-highlight: #ffd070;
+
+  /* ─── Golden Black: Brand accent colors ─── */
+  --mv-gold: #d4a44c;
+  --mv-gold-light: #e8b54a;
+  --mv-gold-bright: #f0c96d;
+  --mv-gold-deep: #c8943a;
+  --mv-gold-pale: #f5e6c8;
+
+  /* Original color tokens remapped to golden-black palette */
+  --mv-sunrise: #d4a44c;
+  --mv-sunrise-highlight: #f0c96d;
   --mv-ocean: #17b1a7;
   --mv-ocean-sky: #6dd7f2;
   --mv-aurora: #ff8fb4;
   --mv-aurora-lilac: #c2a5ff;
-  --kiaan-deep: #0f172a;
-  --kiaan-glow: #6ad7ff;
-  --brand-surface: linear-gradient(145deg, rgba(15, 22, 36, 0.9), rgba(8, 12, 20, 0.9));
-  --mv-gradient-sunrise: linear-gradient(135deg, #ff7a3c 0%, #ff9f52 50%, #ffd36f 100%);
+  --kiaan-deep: #0a0a12;
+  --kiaan-glow: #e8b54a;
+
+  /* ─── Golden Black: Gradients ─── */
+  --brand-surface: linear-gradient(145deg, rgba(10, 10, 18, 0.95), rgba(5, 5, 7, 0.95));
+  --mv-gradient-sunrise: linear-gradient(135deg, #c8943a 0%, #e8b54a 50%, #f0c96d 100%);
   --mv-gradient-ocean: linear-gradient(130deg, #0fa9a2 0%, #2ac8d4 55%, #9ae8ff 100%);
   --mv-gradient-aurora: linear-gradient(140deg, #ff7fa8 0%, #c987ff 52%, #e8d3ff 100%);
-  --kiaan-resonance: linear-gradient(120deg, #1e3a8a 0%, #2563eb 42%, #6ad7ff 100%);
-  --shadow-soft: 0 18px 48px rgba(6, 10, 22, 0.28);
-  --shadow-glow-sunrise: 0 0 32px rgba(255, 147, 89, 0.45);
+  --kiaan-resonance: linear-gradient(120deg, #c8943a 0%, #d4a44c 42%, #e8b54a 100%);
+
+  /* ─── Golden Black: Shadows ─── */
+  --shadow-soft: 0 18px 48px rgba(0, 0, 0, 0.4);
+  --shadow-glow-sunrise: 0 0 32px rgba(212, 164, 76, 0.35);
   --shadow-glow-ocean: 0 0 32px rgba(23, 177, 167, 0.35);
   --shadow-glow-aurora: 0 0 32px rgba(255, 143, 180, 0.4);
-  --mv-background: radial-gradient(circle at 15% 20%, rgba(255, 153, 51, 0.08), transparent 32%),
-    radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.05), transparent 40%),
-    linear-gradient(135deg, #050505 0%, #0b0b0f 45%, #120907 100%);
-  --mv-surface: #0f1624;
-  --mv-surface-subtle: #0b0b10;
-  --mv-surface-elevated: rgba(13, 13, 16, 0.9);
-  --mv-text-primary: #f8fafc;
-  --mv-text-secondary: #e2e8f0;
-  --mv-text-muted: #cbd5e1;
-  --mv-border: rgba(226, 232, 240, 0.16);
-  --mv-border-strong: rgba(255, 153, 51, 0.22);
+
+  /* ─── Golden Black: Cosmic background ─── */
+  --mv-background:
+    radial-gradient(ellipse at 15% 20%, rgba(212, 164, 76, 0.06) 0%, transparent 40%),
+    radial-gradient(ellipse at 85% 10%, rgba(212, 164, 76, 0.04) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 80%, rgba(139, 92, 246, 0.02) 0%, transparent 50%),
+    linear-gradient(170deg, #030305 0%, #050507 40%, #080608 70%, #050305 100%);
+
+  /* ─── Golden Black: Surfaces ─── */
+  --mv-surface: #0a0a12;
+  --mv-surface-subtle: #080810;
+  --mv-surface-elevated: rgba(10, 10, 16, 0.95);
+
+  /* ─── Golden Black: Text hierarchy — warm cream tones ─── */
+  --mv-text-primary: #f5f0e8;
+  --mv-text-secondary: #e0d8cc;
+  --mv-text-muted: #a89e8e;
+
+  /* ─── Golden Black: Borders ─── */
+  --mv-border: rgba(212, 164, 76, 0.12);
+  --mv-border-strong: rgba(212, 164, 76, 0.25);
+
+  /* ─── Golden Black: Cards ─── */
   --mv-card-teal-bg: linear-gradient(140deg, rgba(18, 92, 92, 0.85), rgba(60, 152, 142, 0.7), rgba(98, 204, 190, 0.6));
   --mv-card-teal-text: #e7fffb;
   --mv-card-blue-bg: linear-gradient(145deg, rgba(24, 42, 74, 0.86), rgba(58, 93, 132, 0.75), rgba(124, 173, 226, 0.68));
   --mv-card-blue-text: #eaf2ff;
   --mv-card-lilac-bg: linear-gradient(145deg, rgba(72, 46, 78, 0.85), rgba(122, 76, 124, 0.7), rgba(196, 158, 214, 0.64));
   --mv-card-lilac-text: #f9f0ff;
-  --mv-card-shadow: 0 16px 48px rgba(6, 10, 22, 0.32);
-  --mv-panel-bg: rgba(13, 13, 16, 0.9);
-  --mv-panel-border: rgba(255, 153, 51, 0.22);
-  --mv-panel-text-primary: #f8fafc;
-  --mv-panel-text-secondary: #e2e8f0;
-  --mv-input-bg: rgba(0, 0, 0, 0.55);
-  --mv-input-border: rgba(255, 153, 51, 0.28);
-  --mv-input-placeholder: rgba(248, 250, 252, 0.72);
-  --mv-overlay-soft: linear-gradient(180deg, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.4));
+  --mv-card-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+
+  /* ─── Golden Black: Panels ─── */
+  --mv-panel-bg: rgba(8, 8, 14, 0.95);
+  --mv-panel-border: rgba(212, 164, 76, 0.15);
+  --mv-panel-text-primary: #f5f0e8;
+  --mv-panel-text-secondary: #e0d8cc;
+
+  /* ─── Golden Black: Inputs ─── */
+  --mv-input-bg: rgba(5, 5, 7, 0.7);
+  --mv-input-border: rgba(212, 164, 76, 0.2);
+  --mv-input-placeholder: rgba(212, 164, 76, 0.4);
+
+  /* ─── Golden Black: Overlay ─── */
+  --mv-overlay-soft: linear-gradient(180deg, rgba(5, 5, 7, 0.3), rgba(5, 5, 7, 0.5));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -78,45 +113,46 @@
 /* Light mode styles using CSS custom properties */
 html.light {
   color-scheme: light;
-  --color-background: #ffffff;
-  --color-foreground: #0b1220;
-  --color-surface: #ffffff;
-  --brand-surface: linear-gradient(165deg, #ffffff, #f6f8fb);
-  --text-primary: #0b1220;
-  --text-secondary: #1f2937;
-  --text-tertiary: #334155;
-  --border-color: #cbd5e1;
-  --mv-background: linear-gradient(135deg, #ffffff 0%, #f6f8fb 45%, #eef2f7 100%),
-    radial-gradient(circle at 18% 22%, rgba(255, 188, 120, 0.16), transparent 32%),
-    radial-gradient(circle at 82% 18%, rgba(149, 213, 255, 0.16), transparent 38%);
-  --mv-surface: #ffffff;
-  --mv-surface-subtle: #f3f4f6;
-  --mv-surface-elevated: #f8fafc;
-  --mv-text-primary: #0b1220;
-  --mv-text-secondary: #1f2937;
-  --mv-text-muted: #334155;
-  --mv-border: #cbd5e1;
-  --mv-border-strong: #0f172a;
+  --color-background: #fffcf7;
+  --color-foreground: #1a1408;
+  --color-surface: #fffdf9;
+  --brand-surface: linear-gradient(165deg, #fffcf7, #fff8ef);
+  --text-primary: #1a1408;
+  --text-secondary: #3d3218;
+  --text-tertiary: #5a4d32;
+  --border-color: rgba(212, 164, 76, 0.25);
+  --mv-background:
+    linear-gradient(135deg, #fffcf7 0%, #fff8ef 45%, #fff5e8 100%),
+    radial-gradient(circle at 18% 22%, rgba(212, 164, 76, 0.12) 0%, transparent 38%),
+    radial-gradient(circle at 82% 18%, rgba(212, 164, 76, 0.08) 0%, transparent 42%);
+  --mv-surface: #fffdf9;
+  --mv-surface-subtle: #faf5ec;
+  --mv-surface-elevated: #fffcf7;
+  --mv-text-primary: #1a1408;
+  --mv-text-secondary: #3d3218;
+  --mv-text-muted: #5a4d32;
+  --mv-border: rgba(212, 164, 76, 0.2);
+  --mv-border-strong: rgba(212, 164, 76, 0.4);
   --mv-card-teal-bg: linear-gradient(135deg, #bff0e8, #9ee0d2, #7acdbf);
   --mv-card-teal-text: #0b1220;
   --mv-card-blue-bg: linear-gradient(135deg, #d7e6ff, #b8d0f3, #94b8e6);
   --mv-card-blue-text: #0b1a2b;
   --mv-card-lilac-bg: linear-gradient(135deg, #ece4f9, #d6c9ef, #c0addf);
   --mv-card-lilac-text: #221534;
-  --mv-card-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
-  --mv-panel-bg: #ffffff;
-  --mv-panel-border: #cbd5e1;
-  --mv-panel-text-primary: #0b1220;
-  --mv-panel-text-secondary: #1f2937;
-  --mv-input-bg: #ffffff;
-  --mv-input-border: #94a3b8;
-  --mv-input-placeholder: #475569;
-  --mv-overlay-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(243, 244, 246, 0.95));
+  --mv-card-shadow: 0 16px 40px rgba(100, 80, 40, 0.08);
+  --mv-panel-bg: #fffdf9;
+  --mv-panel-border: rgba(212, 164, 76, 0.2);
+  --mv-panel-text-primary: #1a1408;
+  --mv-panel-text-secondary: #3d3218;
+  --mv-input-bg: #fffdf9;
+  --mv-input-border: rgba(212, 164, 76, 0.3);
+  --mv-input-placeholder: #8a7a5e;
+  --mv-overlay-soft: linear-gradient(180deg, rgba(255, 252, 247, 0.92), rgba(250, 245, 236, 0.95));
 }
 
 html.light body {
-  background-color: #ffffff;
-  color: #0f172a;
+  background-color: #fffcf7;
+  color: #1a1408;
 }
 
 /* System font stack for Inter.
@@ -139,21 +175,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Light mode text contrast fixes for orange legacy classes */
-html.light [class*="text-orange"] {
-  color: #1e293b;
+/* Light mode text contrast fixes for legacy and gold theme classes */
+html.light [class*="text-orange"],
+html.light [class*="text-\\[\\#d4a44c"],
+html.light [class*="text-\\[\\#e8b54a"],
+html.light [class*="text-\\[\\#c8943a"] {
+  color: #3d3218;
 }
 
 html.light .text-white,
 html.light [class*="text-slate-50"],
-html.light [class*="text-slate-100"],
-html.light [class*="text-orange-50"],
-html.light [class*="text-orange-100"] {
-  color: #0f172a !important;
+html.light [class*="text-slate-100"] {
+  color: #1a1408 !important;
 }
 
 html.light [class*="bg-black"],
-html.light [class*="bg-slate-950"] {
+html.light [class*="bg-slate-950"],
+html.light [class*="bg-\\[\\#050507\\]"] {
   background-color: var(--color-surface) !important;
 }
 

@@ -136,15 +136,15 @@ export default function CookieBanner({
         exit={{ y: 100, opacity: 0 }}
         className="fixed bottom-0 left-0 right-0 z-50 p-4"
       >
-        <div className="mx-auto max-w-4xl rounded-2xl bg-gray-900/95 backdrop-blur-lg border border-orange-500/20 shadow-2xl">
+        <div className="mx-auto max-w-4xl rounded-2xl bg-gray-900/95 backdrop-blur-lg border border-[#d4a44c]/20 shadow-2xl">
           <div className="p-6">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 text-2xl">🍪</div>
               <div className="flex-grow">
-                <h3 className="text-lg font-semibold text-orange-50 mb-2">
+                <h3 className="text-lg font-semibold text-[#f5f0e8] mb-2">
                   Cookie Preferences
                 </h3>
-                <p className="text-sm text-orange-100/70 mb-4">
+                <p className="text-sm text-[#f5f0e8]/70 mb-4">
                   We use cookies to enhance your experience, analyze site traffic, and personalize content. 
                   You can customize your preferences below or accept all cookies.
                 </p>
@@ -161,10 +161,10 @@ export default function CookieBanner({
                         {/* Necessary Cookies */}
                         <div className="flex items-center justify-between p-3 rounded-lg bg-gray-800/50">
                           <div>
-                            <span className="text-sm font-medium text-orange-50">
+                            <span className="text-sm font-medium text-[#f5f0e8]">
                               Necessary Cookies
                             </span>
-                            <p className="text-xs text-orange-100/50">
+                            <p className="text-xs text-[#f5f0e8]/50">
                               Required for the website to function properly. Cannot be disabled.
                             </p>
                           </div>
@@ -176,10 +176,10 @@ export default function CookieBanner({
                         {/* Analytics Cookies */}
                         <div className="flex items-center justify-between p-3 rounded-lg bg-gray-800/50">
                           <div>
-                            <span className="text-sm font-medium text-orange-50">
+                            <span className="text-sm font-medium text-[#f5f0e8]">
                               Analytics Cookies
                             </span>
-                            <p className="text-xs text-orange-100/50">
+                            <p className="text-xs text-[#f5f0e8]/50">
                               Help us understand how visitors interact with our website.
                             </p>
                           </div>
@@ -204,10 +204,10 @@ export default function CookieBanner({
                         {/* Marketing Cookies */}
                         <div className="flex items-center justify-between p-3 rounded-lg bg-gray-800/50">
                           <div>
-                            <span className="text-sm font-medium text-orange-50">
+                            <span className="text-sm font-medium text-[#f5f0e8]">
                               Marketing Cookies
                             </span>
-                            <p className="text-xs text-orange-100/50">
+                            <p className="text-xs text-[#f5f0e8]/50">
                               Used to track visitors across websites for advertising purposes.
                             </p>
                           </div>
@@ -232,10 +232,10 @@ export default function CookieBanner({
                         {/* Functional Cookies */}
                         <div className="flex items-center justify-between p-3 rounded-lg bg-gray-800/50">
                           <div>
-                            <span className="text-sm font-medium text-orange-50">
+                            <span className="text-sm font-medium text-[#f5f0e8]">
                               Functional Cookies
                             </span>
-                            <p className="text-xs text-orange-100/50">
+                            <p className="text-xs text-[#f5f0e8]/50">
                               Enable enhanced functionality and personalization.
                             </p>
                           </div>
@@ -265,7 +265,7 @@ export default function CookieBanner({
                 <div className="flex flex-wrap items-center gap-3">
                   <button
                     onClick={() => setShowDetails(!showDetails)}
-                    className="text-sm text-orange-400 hover:text-orange-300 transition-colors"
+                    className="text-sm text-[#d4a44c] hover:text-[#e8b54a] transition-colors"
                   >
                     {showDetails ? 'Hide Details' : 'Customize'}
                   </button>
@@ -274,7 +274,7 @@ export default function CookieBanner({
                   
                   <button
                     onClick={handleRejectAll}
-                    className="px-4 py-2 text-sm font-medium text-orange-100/70 hover:text-orange-50 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-[#f5f0e8]/70 hover:text-[#f5f0e8] transition-colors"
                   >
                     Reject All
                   </button>
@@ -282,7 +282,7 @@ export default function CookieBanner({
                   {showDetails ? (
                     <button
                       onClick={handleSavePreferences}
-                      className="px-4 py-2 text-sm font-medium rounded-lg bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 transition-colors"
+                      className="px-4 py-2 text-sm font-medium rounded-lg bg-[#d4a44c]/20 text-[#d4a44c] hover:bg-[#d4a44c]/30 transition-colors"
                     >
                       Save Preferences
                     </button>
@@ -290,7 +290,7 @@ export default function CookieBanner({
                   
                   <button
                     onClick={handleAcceptAll}
-                    className="px-4 py-2 text-sm font-medium rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                    className="px-4 py-2 text-sm font-medium rounded-lg bg-[#d4a44c] text-white hover:bg-[#c8943a] transition-colors"
                   >
                     Accept All
                   </button>

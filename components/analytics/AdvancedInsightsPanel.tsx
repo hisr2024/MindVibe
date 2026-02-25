@@ -111,7 +111,7 @@ export function AdvancedInsightsPanel({
               <div>
                 <div className="text-xs text-gray-500 uppercase">Arousal</div>
                 <div className={`text-lg font-medium ${
-                  analysis.emotion_vector.arousal > 0.3 ? 'text-orange-600' : 'text-blue-600'
+                  analysis.emotion_vector.arousal > 0.3 ? 'text-[#c8943a]' : 'text-blue-600'
                 }`}>
                   {analysis.emotion_vector.arousal > 0 ? 'High' : 'Low'}
                 </div>
@@ -130,13 +130,13 @@ export function AdvancedInsightsPanel({
 
         {/* Row 2: Cognitive Distortions */}
         {analysis.distortions_detected.length > 0 && (
-          <div className="bg-amber-50 rounded-lg p-4">
+          <div className="bg-[#f5f0e8] rounded-lg p-4">
             <div
               className="flex items-center justify-between cursor-pointer"
               onClick={() => toggleSection('distortions')}
             >
               <div className="flex items-center gap-2">
-                <span className="text-amber-600">⚠️</span>
+                <span className="text-[#c8943a]">⚠️</span>
                 <span className="font-medium text-amber-800">
                   Thinking Patterns Detected
                 </span>
@@ -144,7 +144,7 @@ export function AdvancedInsightsPanel({
                   ({(analysis.distortion_severity * 100).toFixed(0)}% severity)
                 </span>
               </div>
-              <span className="text-amber-600">
+              <span className="text-[#c8943a]">
                 {expandedSection === 'distortions' ? '−' : '+'}
               </span>
             </div>
@@ -161,7 +161,7 @@ export function AdvancedInsightsPanel({
                   return (
                     <div
                       key={distortion}
-                      className="bg-white rounded-lg p-3 border border-amber-200"
+                      className="bg-white rounded-lg p-3 border border-[#f0c96d]"
                     >
                       <div className="font-medium text-gray-900 capitalize">
                         {distortion.replace(/_/g, ' ')}
@@ -207,7 +207,7 @@ export function AdvancedInsightsPanel({
               <div className="w-20 text-sm text-gray-600">Rajas</div>
               <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-orange-500 rounded-full transition-all"
+                  className="h-full bg-[#d4a44c] rounded-full transition-all"
                   style={{ width: `${analysis.guna_balance.rajas * 100}%` }}
                 />
               </div>
@@ -339,7 +339,7 @@ export function AdvancedInsightsCompact({
 
       {/* Distortion alert */}
       {analysis.distortions_detected.length > 0 && (
-        <div className="text-amber-600 text-sm">
+        <div className="text-[#c8943a] text-sm">
           ⚠️ {analysis.distortions_detected.length} pattern{analysis.distortions_detected.length > 1 ? 's' : ''}
         </div>
       )}

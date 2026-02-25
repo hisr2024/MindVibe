@@ -197,7 +197,7 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
             className={`
               w-3 h-3 rounded-full transition-all
               ${isActive
-                ? 'bg-orange-500 scale-125'
+                ? 'bg-[#d4a44c] scale-125'
                 : isCompleted
                   ? 'bg-green-500'
                   : isLocked
@@ -213,17 +213,17 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
     return (
       <div
         ref={ref}
-        className={`flex flex-col h-full bg-[#0b0b0f] ${className}`}
+        className={`flex flex-col h-full bg-[#050507] ${className}`}
       >
         {/* Header with progress */}
         <div className="px-4 pt-4 pb-2">
           <div className="flex items-center justify-between mb-2">
             <div>
-              <p className="text-xs text-orange-400 font-medium">{journey.category}</p>
+              <p className="text-xs text-[#d4a44c] font-medium">{journey.category}</p>
               <h1 className="text-lg font-semibold text-white">{journey.title}</h1>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-orange-400">{journey.progress}%</p>
+              <p className="text-2xl font-bold text-[#d4a44c]">{journey.progress}%</p>
               <p className="text-[10px] text-slate-500">Complete</p>
             </div>
           </div>
@@ -234,7 +234,7 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
               initial={{ width: 0 }}
               animate={{ width: `${journey.progress}%` }}
               transition={{ duration: 0.5, ease: 'easeOut' }}
-              className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full"
+              className="h-full bg-gradient-to-r from-[#d4a44c] to-amber-400 rounded-full"
             />
           </div>
 
@@ -342,16 +342,16 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
                         onClick={() => onVersePress?.(currentStep.verseReference!)}
                         className="
                           w-full p-4 rounded-2xl text-left
-                          bg-gradient-to-br from-orange-500/10 to-amber-500/5
-                          border border-orange-500/20
+                          bg-gradient-to-br from-[#d4a44c]/10 to-amber-500/5
+                          border border-[#d4a44c]/20
                         "
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
-                            <BookOpen className="w-5 h-5 text-orange-400" />
+                          <div className="w-10 h-10 rounded-xl bg-[#d4a44c]/20 flex items-center justify-center">
+                            <BookOpen className="w-5 h-5 text-[#d4a44c]" />
                           </div>
                           <div>
-                            <p className="text-xs text-orange-400">Today&apos;s Wisdom</p>
+                            <p className="text-xs text-[#d4a44c]">Today&apos;s Wisdom</p>
                             <p className="text-sm text-white font-medium">
                               {currentStep.verseReference}
                             </p>
@@ -406,9 +406,9 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
                   disabled={isCompleting}
                   className="
                     mt-4 w-full py-4 rounded-2xl
-                    bg-gradient-to-r from-orange-500 to-amber-400
+                    bg-gradient-to-r from-[#d4a44c] to-amber-400
                     text-white font-semibold text-base
-                    shadow-lg shadow-orange-500/30
+                    shadow-lg shadow-[#d4a44c]/30
                     disabled:opacity-50
                     flex items-center justify-center gap-2
                   "

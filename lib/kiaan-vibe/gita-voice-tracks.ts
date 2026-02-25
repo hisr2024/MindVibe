@@ -357,7 +357,7 @@ export function getCollectionMeta(key: DivineCollectionKey): {
     essential: {
       name: 'Essential Verses',
       description: 'The most powerful and transformative verses from the Bhagavad Gita',
-      gradient: 'from-orange-500 to-amber-600',
+      gradient: 'from-[#d4a44c] to-[#c8943a]',
       icon: 'Sparkles',
     },
     anxietyRelief: {
@@ -369,7 +369,7 @@ export function getCollectionMeta(key: DivineCollectionKey): {
     morningMeditation: {
       name: 'Morning Meditation',
       description: 'Begin your day with divine wisdom and sacred purpose',
-      gradient: 'from-amber-400 to-orange-500',
+      gradient: 'from-[#d4a44c] to-[#c8943a]',
       icon: 'Sun',
     },
     eveningReflection: {
