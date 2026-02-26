@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react'
 import SimpleBar from 'simplebar-react'
 import { MessageBubble } from './MessageBubble'
-import { KiaanLogo } from '@/components/branding'
 import { useSmartScroll } from '@/hooks/useSmartScroll'
 import { VoiceInputButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -110,25 +109,36 @@ export function KiaanChat({
 
   return (
     <div
-      className={`relative flex flex-col rounded-3xl border border-[#d4a44c]/15 bg-black/50 h-[calc(100vh-280px)] max-h-[800px] min-h-[480px] ${className}`}
+      className={`relative flex flex-col rounded-3xl divine-reset-container h-[calc(100vh-280px)] max-h-[800px] min-h-[480px] ${className}`}
     >
-      {/* Chat Header */}
-      <div className="flex items-center gap-3 border-b border-[#d4a44c]/15 px-4 py-3">
-        <KiaanLogo size="sm" showTagline={false} animated={true} />
+      {/* Chat Header — Sacred Companion */}
+      <div className="flex items-center gap-3 border-b border-[#d4a44c]/12 px-4 py-3">
+        <div className="flex items-center gap-3">
+          <div className="divine-companion-avatar h-9 w-9 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center">
+            <span className="text-sm font-bold text-[#0a0a12]">K</span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-[#f5f0e8]">KIAAN</span>
+              <span className="divine-diya h-1.5 w-1.5 rounded-full bg-[#e8b54a]" />
+            </div>
+            <p className="text-[10px] text-[#d4a44c]/60 tracking-wide">Your Divine Companion</p>
+          </div>
+        </div>
 
         <div className="ml-auto flex items-center gap-2">
           {!confirmingClear && (
             <button
               type="button"
               onClick={() => setConfirmingClear(true)}
-              className="rounded-full border border-[#d4a44c]/25 bg-white/5 px-3 py-1.5 text-[11px] font-semibold text-[#f5f0e8]/80 transition hover:border-[#d4a44c]/60 hover:text-[#f5f0e8]"
+              className="rounded-full border border-[#d4a44c]/20 bg-white/[0.03] px-3 py-1.5 text-[11px] font-semibold text-[#f5f0e8]/70 transition hover:border-[#d4a44c]/50 hover:text-[#f5f0e8] hover:bg-white/[0.06]"
             >
               Clear old messages
             </button>
           )}
 
           {confirmingClear && (
-            <div className="flex items-center gap-2 rounded-full border border-[#d4a44c]/30 bg-black/70 px-3 py-1.5 text-[11px] text-[#f5f0e8] shadow-lg shadow-[#d4a44c]/20">
+            <div className="flex items-center gap-2 rounded-full border border-[#d4a44c]/25 bg-[#0a0a12]/90 px-3 py-1.5 text-[11px] text-[#f5f0e8] shadow-lg shadow-black/40">
               <span>Clear history?</span>
               <button
                 type="button"
@@ -137,14 +147,14 @@ export function KiaanChat({
                   setConfirmingClear(false)
                   scrollToBottom()
                 }}
-                className="rounded-full bg-gradient-to-r from-[#d4a44c] via-[#ff9933] to-[#e8b54a] px-2.5 py-1 text-[11px] font-semibold text-slate-950 shadow-md shadow-[#d4a44c]/30"
+                className="kiaan-btn-golden rounded-full px-2.5 py-1 text-[11px] font-semibold"
               >
                 Yes
               </button>
               <button
                 type="button"
                 onClick={() => setConfirmingClear(false)}
-                className="rounded-full border border-[#d4a44c]/30 px-2.5 py-1 text-[11px] font-semibold text-[#f5f0e8]/80"
+                className="rounded-full border border-[#d4a44c]/25 px-2.5 py-1 text-[11px] font-semibold text-[#f5f0e8]/70 hover:text-[#f5f0e8]"
               >
                 Cancel
               </button>
@@ -175,13 +185,15 @@ export function KiaanChat({
         >
           <div className="px-4 pr-6 md:pr-10 py-4 space-y-4">
             {visibleMessages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center py-12">
-                <div className="h-16 w-16 rounded-full bg-gradient-to-br from-[#d4a44c]/20 to-[#e8b54a]/20 flex items-center justify-center mb-4">
-                  <span className="text-3xl">💬</span>
+              <div className="divine-companion-welcome flex flex-col items-center justify-center h-full text-center py-12 px-4">
+                <div className="divine-companion-avatar h-20 w-20 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center mb-5">
+                  <span className="text-3xl font-bold text-[#0a0a12]">K</span>
                 </div>
-                <h3 className="text-lg font-semibold text-[#f5f0e8] mb-2">KIAAN</h3>
-                <p className="text-sm text-[#f5f0e8]/70 max-w-sm">
-                  Tell me what&apos;s happening. I&apos;ll help you understand the pattern, regulate the response, and find a concrete next step.
+                <h3 className="text-xl font-semibold text-[#f5f0e8] mb-1.5">KIAAN</h3>
+                <p className="text-[11px] text-[#d4a44c]/60 tracking-[0.12em] uppercase mb-4">Your Divine Friend &amp; Spiritual Companion</p>
+                <div className="divine-sacred-thread w-24 mb-4" />
+                <p className="text-sm text-[#f5f0e8]/65 max-w-sm leading-relaxed font-sacred">
+                  I am here, always. Share what weighs on your heart — together we shall find understanding, peace, and a path forward.
                 </p>
               </div>
             ) : (
@@ -199,18 +211,21 @@ export function KiaanChat({
               ))
             )}
 
-            {/* Loading indicator */}
+            {/* Loading indicator — Divine presence typing */}
             {isLoading && (
-              <div className="flex items-center gap-3 animate-pulse" role="status" aria-label="KIAAN is typing">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#d4a44c] to-[#e8b54a] flex items-center justify-center text-xs font-bold text-slate-900">
+              <div className="flex items-center gap-3" role="status" aria-label="KIAAN is composing wisdom">
+                <div className="divine-companion-avatar h-8 w-8 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center text-xs font-bold text-[#0a0a12]">
                   K
                 </div>
-                <div className="flex gap-1">
-                  <span className="h-2 w-2 rounded-full bg-[#d4a44c]/60 animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="h-2 w-2 rounded-full bg-[#d4a44c]/60 animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="h-2 w-2 rounded-full bg-[#d4a44c]/60 animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div className="flex items-center gap-2 rounded-2xl divine-wisdom-bubble px-4 py-2.5">
+                  <div className="flex gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#e8b54a]/70 animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#d4a44c]/60 animate-bounce" style={{ animationDelay: '200ms' }} />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#c8943a]/50 animate-bounce" style={{ animationDelay: '400ms' }} />
+                  </div>
+                  <span className="text-[11px] text-[#d4a44c]/50 ml-1">KIAAN is reflecting...</span>
                 </div>
-                <span className="sr-only">KIAAN is typing...</span>
+                <span className="sr-only">KIAAN is composing wisdom...</span>
               </div>
             )}
 
@@ -264,17 +279,17 @@ export function KiaanChat({
         </button>
       )}
 
-      {/* Input Form */}
-      <form onSubmit={handleSubmit} className="border-t border-[#d4a44c]/15 px-4 py-3">
-        <div className="flex gap-3">
+      {/* Input Form — Sacred Space */}
+      <form onSubmit={handleSubmit} className="border-t border-[#d4a44c]/10 px-4 py-3">
+        <div className="flex gap-2.5">
           <input
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="Share what's on your mind..."
-            className="flex-1 rounded-2xl border border-[#d4a44c]/25 bg-slate-950/70 px-4 py-2.5 text-sm text-[#f5f0e8] outline-none focus:ring-2 focus:ring-[#d4a44c]/50 placeholder:text-[#f5f0e8]/40"
+            placeholder="Speak from your heart..."
+            className="flex-1 rounded-2xl border border-[#d4a44c]/20 bg-[#0a0a12]/80 px-4 py-2.5 text-sm text-[#f5f0e8] outline-none focus:ring-2 focus:ring-[#d4a44c]/40 focus:border-[#d4a44c]/30 placeholder:text-[#f5f0e8]/35 transition-all"
             disabled={isLoading}
-            aria-label="Type your message"
+            aria-label="Share what is on your heart"
           />
           <VoiceInputButton
             language={language}
@@ -284,7 +299,7 @@ export function KiaanChat({
           <button
             type="submit"
             disabled={!inputText.trim() || isLoading}
-            className="rounded-2xl bg-gradient-to-r from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-lg shadow-[#d4a44c]/25 transition hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="kiaan-btn-golden rounded-2xl px-5 py-2.5 text-sm font-semibold transition hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
             aria-label="Send message"
           >
             Send

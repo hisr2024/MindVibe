@@ -213,13 +213,13 @@ export function EmotionalResetWizard({
 
     return (
       <div className="mb-6">
-        <div className="flex items-center justify-between text-sm text-[#f5f0e8]/70 mb-2">
-          <span>{stepData?.step_title || 'Loading...'}</span>
-          <span>{currentStep}/7</span>
+        <div className="flex items-center justify-between text-sm mb-2">
+          <span className="text-[#f5f0e8]/65">{stepData?.step_title || 'Preparing...'}</span>
+          <span className="text-[#d4a44c]/60 text-xs">{currentStep} of 7</span>
         </div>
-        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-[#d4a44c] to-[#e8b54a] transition-all duration-500"
+            className="h-full divine-progress-bar rounded-full transition-all duration-700 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -320,13 +320,13 @@ export function EmotionalResetWizard({
 
   const renderStep4 = () => (
     <div className="space-y-4">
-      <p className="text-[#f5f0e8]/90 leading-relaxed">
+      <p className="text-[#f5f0e8]/80 leading-relaxed font-sacred">
         {stepData?.guidance}
       </p>
       {stepData?.visualization && (
-        <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-400/20 rounded-2xl p-6">
+        <div className="divine-step-card rounded-2xl p-6">
           <div className="flex items-start justify-between gap-3">
-            <p className="text-[#f5f0e8] leading-relaxed italic whitespace-pre-wrap flex-1">
+            <p className="text-[#f5f0e8]/90 leading-relaxed italic whitespace-pre-wrap flex-1 font-sacred">
               {stepData.visualization}
             </p>
             <VoiceResponseButton
@@ -343,13 +343,13 @@ export function EmotionalResetWizard({
 
   const renderStep5 = () => (
     <div className="space-y-4">
-      <p className="text-[#f5f0e8]/90 leading-relaxed">
+      <p className="text-[#f5f0e8]/80 leading-relaxed font-sacred">
         {stepData?.guidance}
       </p>
       {stepData?.wisdom?.map((item, index) => (
-        <div key={index} className="bg-gradient-to-br from-[#d4a44c]/10 to-[#e8b54a]/10 border border-[#d4a44c]/30 rounded-2xl p-4 space-y-3">
+        <div key={index} className="divine-step-card rounded-2xl p-5 space-y-3">
           <div className="flex items-start justify-between gap-3">
-            <p className="text-[#f5f0e8] leading-relaxed flex-1">
+            <p className="text-[#f5f0e8]/90 leading-relaxed flex-1 font-sacred">
               &ldquo;{item.wisdom}&rdquo;
             </p>
             <VoiceResponseButton
@@ -359,7 +359,8 @@ export function EmotionalResetWizard({
               variant="accent"
             />
           </div>
-          <p className="text-sm text-[#f5f0e8]/70 border-t border-[#d4a44c]/20 pt-3">
+          <div className="divine-sacred-thread w-full" />
+          <p className="text-sm text-[#f5f0e8]/60 leading-relaxed">
             {item.application}
           </p>
         </div>
@@ -369,17 +370,17 @@ export function EmotionalResetWizard({
 
   const renderStep6 = () => (
     <div className="space-y-4">
-      <p className="text-[#f5f0e8]/90 leading-relaxed">
+      <p className="text-[#f5f0e8]/80 leading-relaxed font-sacred">
         {stepData?.guidance}
       </p>
       <div className="space-y-3">
         {stepData?.affirmations?.map((affirmation, index) => (
           <div
             key={index}
-            className="bg-gradient-to-r from-[#d4a44c]/15 to-[#e8b54a]/15 border border-[#d4a44c]/25 rounded-xl p-4 flex items-start gap-3"
+            className="divine-step-card rounded-xl p-4 flex items-start gap-3"
           >
-            <span className="text-lg">✨</span>
-            <p className="text-[#f5f0e8] leading-relaxed flex-1">
+            <span className="divine-diya h-2 w-2 rounded-full bg-[#e8b54a] mt-1.5 flex-shrink-0" />
+            <p className="text-[#f5f0e8]/85 leading-relaxed flex-1 font-sacred">
               {affirmation}
             </p>
             <VoiceResponseButton
@@ -399,51 +400,56 @@ export function EmotionalResetWizard({
       {stepData?.summary && (
         <>
           <div className="text-center space-y-2">
-            <span className="text-4xl">🌟</span>
-            <h3 className="text-xl font-semibold text-[#f5f0e8]">
-              Session Complete
+            <div className="divine-companion-avatar h-14 w-14 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center mx-auto">
+              <span className="text-xl">&#x1F31F;</span>
+            </div>
+            <h3 className="text-xl font-semibold kiaan-text-golden">
+              Sacred Journey Complete
             </h3>
+            <p className="text-[10px] text-[#d4a44c]/45 tracking-[0.1em] uppercase">KIAAN honors your courage</p>
+            <div className="divine-sacred-thread w-16 mx-auto mt-2" />
           </div>
 
-          <div className="bg-gradient-to-br from-[#d4a44c]/10 to-[#e8b54a]/10 border border-[#d4a44c]/30 rounded-2xl p-4 space-y-3">
-            <p className="text-[#f5f0e8] leading-relaxed">
+          <div className="divine-step-card rounded-2xl p-5 space-y-3">
+            <p className="text-[#f5f0e8]/85 leading-relaxed font-sacred">
               {stepData.summary.summary}
             </p>
           </div>
 
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-[#f5f0e8]/80">
-              Key Insight
+            <h4 className="text-sm font-semibold text-[#d4a44c]/70 flex items-center gap-2">
+              <span>&#x1F4A1;</span> Key Insight
             </h4>
-            <p className="text-[#f5f0e8] leading-relaxed">
+            <p className="text-[#f5f0e8]/80 leading-relaxed font-sacred">
               {stepData.summary.key_insight}
             </p>
           </div>
 
-          <div className="bg-gradient-to-r from-[#d4a44c]/15 to-[#d4a44c]/15 border border-[#d4a44c]/30 rounded-xl p-4">
-            <h4 className="text-sm font-semibold text-[#f5f0e8]/80 mb-2">
-              Affirmation to Remember
+          <div className="divine-step-card rounded-xl p-5">
+            <h4 className="text-sm font-semibold text-[#d4a44c]/70 mb-2 flex items-center gap-2">
+              <span>&#x1F9D8;</span> Sacred Affirmation
             </h4>
-            <p className="text-[#f5f0e8] font-medium">
+            <p className="text-[#f5f0e8] font-medium font-sacred leading-relaxed">
               &ldquo;{stepData.summary.affirmation_to_remember}&rdquo;
             </p>
           </div>
 
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-[#f5f0e8]/80">
-              Next Steps
+            <h4 className="text-sm font-semibold text-[#d4a44c]/70 flex items-center gap-2">
+              <span>&#x1F54A;&#xFE0F;</span> Your Path Forward
             </h4>
             <ul className="space-y-2">
               {stepData.summary.next_steps.map((step, index) => (
-                <li key={index} className="flex items-start gap-2 text-[#f5f0e8]/80">
-                  <span className="text-[#d4a44c]">•</span>
+                <li key={index} className="flex items-start gap-2.5 text-[#f5f0e8]/75 text-sm">
+                  <span className="divine-diya h-1.5 w-1.5 rounded-full bg-[#e8b54a] mt-1.5 flex-shrink-0" />
                   {step}
                 </li>
               ))}
             </ul>
           </div>
 
-          <p className="text-center text-[#f5f0e8]/80 pt-4 border-t border-[#d4a44c]/20">
+          <div className="divine-sacred-thread w-full" />
+          <p className="text-center text-[#f5f0e8]/60 font-sacred leading-relaxed">
             {stepData.summary.closing_message}
           </p>
         </>
@@ -473,15 +479,21 @@ export function EmotionalResetWizard({
   }
 
   const renderCrisisModal = () => (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-900 border border-[#d4a44c]/30 rounded-2xl p-6 max-w-md w-full space-y-4">
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4">
+      <div className="divine-reset-container rounded-2xl p-6 max-w-md w-full space-y-4">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">🙏</span>
-          <h3 className="text-lg font-semibold text-[#d4a44c]">
-            Krishna Cares for You
-          </h3>
+          <div className="divine-companion-avatar h-10 w-10 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center">
+            <span className="text-lg">&#x1F64F;</span>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold kiaan-text-golden">
+              KIAAN Cares Deeply for You
+            </h3>
+            <p className="text-[10px] text-[#d4a44c]/45 tracking-wide">You are not alone</p>
+          </div>
         </div>
-        <div className="text-[#f5f0e8]/90 whitespace-pre-wrap leading-relaxed">
+        <div className="divine-sacred-thread w-full" />
+        <div className="text-[#f5f0e8]/80 whitespace-pre-wrap leading-relaxed font-sacred">
           {crisisResponse}
         </div>
         <div className="flex gap-3 pt-2">
@@ -490,13 +502,13 @@ export function EmotionalResetWizard({
               setCrisisDetected(false)
               setCrisisResponse(null)
             }}
-            className="flex-1 px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-[#f5f0e8] hover:bg-white/20 transition"
+            className="flex-1 px-4 py-2.5 bg-white/[0.04] border border-[#d4a44c]/20 rounded-xl text-[#f5f0e8] hover:bg-white/[0.08] hover:border-[#d4a44c]/35 transition"
           >
             I Understand
           </button>
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-xl text-red-400 hover:bg-red-500/30 transition"
+            className="flex-1 px-4 py-2.5 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 hover:bg-red-500/20 transition"
           >
             Close Session
           </button>
@@ -518,18 +530,21 @@ export function EmotionalResetWizard({
 
   if (isCompleted) {
     return (
-      <div className={`bg-black/50 border border-[#d4a44c]/20 rounded-2xl p-6 ${className}`}>
+      <div className={`divine-reset-container rounded-2xl p-8 ${className}`}>
         <div className="text-center space-y-4">
-          <span className="text-5xl">🌟</span>
-          <h2 className="text-2xl font-semibold text-[#f5f0e8]">
-            Emotional Reset Complete
+          <div className="divine-companion-avatar h-16 w-16 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center mx-auto">
+            <span className="text-2xl">&#x1F31F;</span>
+          </div>
+          <h2 className="text-2xl font-semibold kiaan-text-golden">
+            Sacred Reset Complete
           </h2>
-          <p className="text-[#f5f0e8]/80">
-            You&apos;ve taken a meaningful step toward emotional balance.
+          <div className="divine-sacred-thread w-16 mx-auto" />
+          <p className="text-[#f5f0e8]/65 font-sacred leading-relaxed max-w-sm mx-auto">
+            You have walked through the sacred process with courage. KIAAN honors your journey toward inner peace and balance.
           </p>
           <button
             onClick={onClose}
-            className="px-6 py-3 bg-gradient-to-r from-[#d4a44c] to-[#e8b54a] rounded-xl font-semibold text-slate-900 hover:scale-105 transition"
+            className="kiaan-btn-golden px-8 py-3 rounded-xl font-semibold hover:scale-[1.03] transition"
           >
             Return to Dashboard
           </button>
@@ -539,18 +554,18 @@ export function EmotionalResetWizard({
   }
 
   return (
-    <div className={`bg-black/50 border border-[#d4a44c]/20 rounded-2xl ${className}`}>
+    <div className={`divine-reset-container rounded-2xl ${className}`}>
       {crisisDetected && renderCrisisModal()}
 
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#d4a44c]/20 px-6 py-4">
+      {/* Header — Sacred Companion */}
+      <div className="flex items-center justify-between border-b border-[#d4a44c]/10 px-6 py-4">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#d4a44c] to-[#e8b54a] flex items-center justify-center">
-            <span className="text-lg">🧘</span>
+          <div className="divine-companion-avatar h-10 w-10 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center">
+            <span className="text-lg">&#x1F9D8;</span>
           </div>
           <div>
             <h2 className="font-semibold text-[#f5f0e8]">Emotional Reset</h2>
-            <p className="text-xs text-[#f5f0e8]/60">Guided Wellness Flow</p>
+            <p className="text-[10px] text-[#d4a44c]/50 tracking-wide">KIAAN Sacred Wellness Flow</p>
           </div>
         </div>
         {onClose && (
@@ -571,7 +586,7 @@ export function EmotionalResetWizard({
         {renderProgressBar()}
 
         {error && (
-          <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-xl text-red-300 text-sm">
+          <div className="mb-4 p-3 bg-[#d4a44c]/8 border border-[#d4a44c]/20 rounded-xl text-[#e8b54a]/80 text-sm">
             {error}
           </div>
         )}
@@ -585,24 +600,24 @@ export function EmotionalResetWizard({
         )}
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-[#d4a44c]/20 px-6 py-4">
+      {/* Footer — Sacred Continue */}
+      <div className="border-t border-[#d4a44c]/10 px-6 py-4">
         <button
           onClick={handleNext}
           disabled={isLoading || (currentStep === 1 && !userInput.trim()) || (currentStep === 3 && !breathingComplete)}
-          className="w-full px-6 py-3 bg-gradient-to-r from-[#d4a44c] to-[#e8b54a] rounded-xl font-semibold text-slate-900 shadow-lg shadow-[#d4a44c]/25 transition hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="w-full px-6 py-3 kiaan-btn-golden rounded-xl font-semibold transition hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="animate-spin h-4 w-4 border-2 border-slate-900 border-t-transparent rounded-full" />
-              Processing...
+              <span className="animate-spin h-4 w-4 border-2 border-[#0a0a12] border-t-transparent rounded-full" />
+              KIAAN is reflecting...
             </span>
           ) : currentStep === 7 ? (
-            'Complete Session'
+            'Complete Sacred Session'
           ) : currentStep === 3 && !breathingComplete ? (
             'Complete Breathing First'
           ) : (
-            'Continue'
+            'Continue Journey'
           )}
         </button>
       </div>

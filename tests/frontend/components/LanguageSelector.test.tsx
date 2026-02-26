@@ -189,7 +189,7 @@ describe('LanguageSelector Component', () => {
       
       await waitFor(() => {
         const englishButton = screen.getByText('English').closest('button');
-        expect(englishButton).toHaveClass('bg-orange-500/20');
+        expect(englishButton).toHaveClass('bg-[#d4a44c]/20');
       });
     });
   });

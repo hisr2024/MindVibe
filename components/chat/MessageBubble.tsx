@@ -127,55 +127,60 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 4 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: 'easeOut' }}
-      className="space-y-3 group"
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className="space-y-2.5 group divine-companion-message"
     >
-      <div className="flex items-center gap-2 text-xs text-orange-100/60">
-        <span className="font-semibold text-orange-50">{sender === 'user' ? 'You' : 'KIAAN'}</span>
-        <span suppressHydrationWarning>
+      <div className="flex items-center gap-2 text-xs text-[#f5f0e8]/50">
+        {sender === 'assistant' && (
+          <div className="divine-companion-avatar h-6 w-6 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center mr-0.5">
+            <span className="text-[9px] font-bold text-[#0a0a12]">K</span>
+          </div>
+        )}
+        <span className="font-semibold text-[#f5f0e8]/80">{sender === 'user' ? 'You' : 'KIAAN'}</span>
+        <span suppressHydrationWarning className="text-[#f5f0e8]/35">
           {timestamp ? new Date(timestamp).toLocaleTimeString() : ''}
         </span>
-        
-        {/* AI-Powered Badge for assistant messages */}
+
+        {/* Divine Wisdom Badge for assistant messages */}
         {sender === 'assistant' && aiPowered && !status && (
           <div className="relative">
             <div
-              className="flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-400/20 px-2 py-0.5 text-[10px] font-semibold text-orange-300 border border-orange-400/30 cursor-help"
+              className="flex items-center gap-1 rounded-full bg-[#d4a44c]/10 px-2 py-0.5 text-[10px] font-semibold text-[#d4a44c]/80 border border-[#d4a44c]/20 cursor-help"
               onMouseEnter={() => setShowVerseHover(true)}
               onMouseLeave={() => setShowVerseHover(false)}
               role="tooltip"
-              aria-label="AI-powered wellness guidance"
+              aria-label="Divine wisdom-guided response"
             >
-              <span className="text-xs">✨</span>
-              <span>AI Guided</span>
+              <span className="text-[10px]">&#x1F9E0;</span>
+              <span>Divine Wisdom</span>
             </div>
 
             {/* Hover tooltip */}
             {showVerseHover && (
-              <div className="absolute left-0 top-full mt-1 z-10 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-[11px] text-orange-50 shadow-lg border border-orange-500/30">
-                <div className="font-semibold text-orange-300 mb-0.5">AI-Powered Wellness Guidance</div>
-                <div className="text-orange-100/70">
-                  Thoughtful, personalized support
+              <div className="absolute left-0 top-full mt-1 z-10 whitespace-nowrap rounded-xl divine-wisdom-bubble px-3 py-2.5 text-[11px] text-[#f5f0e8]">
+                <div className="font-semibold text-[#e8b54a] mb-0.5">Sacred Guidance from KIAAN</div>
+                <div className="text-[#f5f0e8]/65">
+                  Rooted in Bhagavad Gita wisdom
                 </div>
-                <div className="mt-1 pt-1 border-t border-orange-500/20 text-orange-200/60 text-[10px]">
-                  Every KIAAN response is crafted with care
+                <div className="mt-1.5 pt-1.5 border-t border-[#d4a44c]/15 text-[#d4a44c]/50 text-[10px]">
+                  Your divine friend responds with care and ancient insight
                 </div>
               </div>
             )}
           </div>
         )}
       </div>
-      
+
       <div
         className={`whitespace-pre-wrap rounded-2xl px-4 py-3.5 text-sm leading-[1.85] ${
           sender === 'user'
-            ? 'bg-orange-500/10 text-orange-50'
+            ? 'divine-devotee-bubble text-[#f5f0e8]'
             : status === 'error'
-              ? 'border border-red-500/40 bg-red-500/10 text-red-50'
-              : 'bg-white/5 text-orange-50 border border-orange-500/15'
-        } ${isTranslated ? 'border-l-2 border-l-blue-400/50' : ''}`}
+              ? 'border border-red-500/30 bg-red-500/8 text-red-100'
+              : 'divine-wisdom-bubble text-[#f5f0e8]/95'
+        } ${isTranslated ? 'border-l-2 border-l-[#d4a44c]/40' : ''}`}
       >
         <div className={sender === 'assistant' ? 'max-w-[65ch] font-sacred' : ''}>
           {displayText || ''}
@@ -206,45 +211,45 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
       </div>
 
       {showSummaryToggle && (
-        <div className={`rounded-2xl border ${isAISummary ? 'border-teal-500/30 bg-gradient-to-br from-teal-950/40 to-black/40' : 'border-orange-500/20 bg-black/40'} p-3 space-y-2 text-[13px] text-orange-50/85`}>
+        <div className={`rounded-2xl border ${isAISummary ? 'border-[#d4a44c]/20 bg-gradient-to-br from-[#0a0a12]/80 to-black/60' : 'border-[#d4a44c]/12 bg-black/40'} p-3 space-y-2 text-[13px] text-[#f5f0e8]/85`}>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               {isAISummary && (
-                <span className="flex items-center gap-1 rounded-full bg-teal-500/20 px-2 py-0.5 text-[10px] font-semibold text-teal-300 border border-teal-400/30">
+                <span className="flex items-center gap-1 rounded-full bg-[#d4a44c]/12 px-2 py-0.5 text-[10px] font-semibold text-[#d4a44c]/80 border border-[#d4a44c]/20">
                   <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                     <path d="M2 17l10 5 10-5"/>
                     <path d="M2 12l10 5 10-5"/>
                   </svg>
-                  AI Summary
+                  Sacred Essence
                 </span>
               )}
-              <div className="text-[11px] uppercase tracking-[0.14em] text-orange-100/70">
+              <div className="text-[11px] uppercase tracking-[0.14em] text-[#f5f0e8]/50">
                 {viewMode === 'summary'
                   ? (isAISummary ? 'Key Insights' : 'Quick Summary')
-                  : 'Full View - In Depth Response'
+                  : 'Full Wisdom Response'
                 }
               </div>
             </div>
             <button
               type="button"
               onClick={() => setShowSummary(!showSummary)}
-              className={`rounded-full border ${isAISummary ? 'border-teal-500/40 hover:border-teal-400/60' : 'border-orange-500/30 hover:border-orange-300/60'} px-3 py-1 text-[11px] font-semibold text-orange-50 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-400`}
+              className="rounded-full border border-[#d4a44c]/25 hover:border-[#d4a44c]/45 px-3 py-1 text-[11px] font-semibold text-[#f5f0e8]/80 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#d4a44c]"
             >
               {showSummary ? 'Hide' : 'Show'}
             </button>
           </div>
           {showSummary && (
-            <div className={`rounded-xl ${isAISummary ? 'bg-teal-900/20 border border-teal-500/10' : 'bg-white/5'} p-3 text-sm leading-relaxed text-orange-50/90`}>
+            <div className={`rounded-xl ${isAISummary ? 'bg-[#d4a44c]/[0.04] border border-[#d4a44c]/10' : 'bg-white/[0.03]'} p-3 text-sm leading-relaxed text-[#f5f0e8]/85`}>
               {condensedSummary}
               {isAISummary && (
-                <div className="mt-2 pt-2 border-t border-teal-500/10 text-[10px] text-teal-300/60 flex items-center gap-1">
+                <div className="mt-2 pt-2 border-t border-[#d4a44c]/10 text-[10px] text-[#d4a44c]/45 flex items-center gap-1">
                   <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                   </svg>
                   {viewMode === 'summary'
-                    ? 'Intelligently summarized for quick reading'
-                    : 'Full in-depth response'
+                    ? 'Distilled with divine intelligence'
+                    : 'Full sacred response'
                   }
                 </div>
               )}
@@ -253,9 +258,9 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
         </div>
       )}
 
-      {/* Action buttons row - Copy, Share, Translate, Voice Output, and Save to Journal */}
+      {/* Action buttons — Sacred tools */}
       {sender === 'assistant' && !status && (
-        <div className="flex items-center gap-2 mt-2 flex-wrap">
+        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
           {/* Copy Button */}
           <CopyButton text={text} />
 
@@ -269,14 +274,14 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
           {onSaveToJournal && (
             <button
               onClick={handleSaveToJournal}
-              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-orange-200 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/25 hover:border-orange-500/40 rounded-xl animate-fadeIn focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/50 ${
+              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-[#e8b54a] bg-[#d4a44c]/8 hover:bg-[#d4a44c]/15 border border-[#d4a44c]/20 hover:border-[#d4a44c]/35 rounded-xl animate-fadeIn focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/40 ${
                 prefersReducedMotion
                   ? ''
-                  : 'transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_12px_rgba(255,115,39,0.2)]'
+                  : 'transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_12px_rgba(212,164,76,0.15)]'
               }`}
-              aria-label="Save this response to Journal"
+              aria-label="Save this sacred insight to Journal"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c]">
                 <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
                 <polyline points="17 21 17 13 7 13 7 21" />
                 <polyline points="7 3 7 8 15 8" />

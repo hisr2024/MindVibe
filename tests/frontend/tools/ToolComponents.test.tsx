@@ -192,10 +192,10 @@ describe('ResetPlanCard', () => {
 
   it('renders all four plan steps', () => {
     render(<ResetPlanCard plan={mockPlan} animated={false} />)
-    expect(screen.getByText('Pause & Breathe')).toBeInTheDocument()
-    expect(screen.getByText('Name the Ripple')).toBeInTheDocument()
-    expect(screen.getByText('Choose the Repair')).toBeInTheDocument()
-    expect(screen.getByText('Move with Intention')).toBeInTheDocument()
+    expect(screen.getByText('Sacred Pause')).toBeInTheDocument()
+    expect(screen.getByText('Acknowledge the Ripple')).toBeInTheDocument()
+    expect(screen.getByText('The Sacred Repair')).toBeInTheDocument()
+    expect(screen.getByText('Walk Forward with Grace')).toBeInTheDocument()
   })
 
   it('renders plan content correctly', () => {
@@ -208,10 +208,10 @@ describe('ResetPlanCard', () => {
 
   it('has proper accessibility attributes', () => {
     render(<ResetPlanCard plan={mockPlan} animated={false} />)
-    expect(screen.getByRole('region', { name: 'Reset Plan Steps' })).toBeInTheDocument()
-    expect(screen.getByRole('region', { name: 'Pause & Breathe' })).toBeInTheDocument()
-    expect(screen.getByRole('region', { name: 'Name the Ripple' })).toBeInTheDocument()
-    expect(screen.getByRole('region', { name: 'Choose the Repair' })).toBeInTheDocument()
-    expect(screen.getByRole('region', { name: 'Move with Intention' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Sacred Reset Plan' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Sacred Pause' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Acknowledge the Ripple' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'The Sacred Repair' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Walk Forward with Grace' })).toBeInTheDocument()
   })
 })

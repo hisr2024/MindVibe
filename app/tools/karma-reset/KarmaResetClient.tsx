@@ -203,64 +203,60 @@ export default function KarmaResetClient() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main content area */}
           <div className="lg:col-span-3">
-            {/* Header */}
+            {/* Header — Sacred Karma Reset */}
             <div className="mb-8">
-              <div className="flex items-center gap-3 mb-3">
-                <motion.h1 
-                  className="text-4xl font-bold bg-gradient-to-r from-[#e8b54a] via-[#ffb347] to-[#e8b54a] bg-clip-text text-transparent flex items-center gap-2"
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
+              <div className="flex items-center gap-4 mb-4">
+                <motion.div
+                  className="divine-companion-avatar h-14 w-14 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center flex-shrink-0"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   transition={springConfigs.smooth}
                 >
-                  <motion.span
-                    animate={{
-                      scale: [1, 1.08, 1],
-                      rotate: [0, 3, -3, 0],
-                    }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
+                  <span className="text-2xl">&#x1F49A;</span>
+                </motion.div>
+                <div>
+                  <motion.h1
+                    className="text-3xl sm:text-4xl font-bold kiaan-text-golden"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={springConfigs.smooth}
                   >
-                    💚
-                  </motion.span>
-                  Karma Reset
-                </motion.h1>
+                    Karma Reset
+                  </motion.h1>
+                  <p className="text-[11px] text-[#d4a44c]/50 tracking-[0.12em] uppercase mt-0.5">Guided by KIAAN, your divine companion</p>
+                </div>
                 {/* Connection status indicator */}
                 {backendHealthy !== null && (
-                  <span className="flex items-center gap-2 text-xs">
+                  <span className="flex items-center gap-2 text-xs ml-auto">
                     {backendHealthy ? (
                       <>
-                        <span className="flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                        </span>
-                        <span className="text-green-400">Connected</span>
+                        <span className="divine-diya h-2 w-2 rounded-full bg-[#e8b54a]" />
+                        <span className="text-[#d4a44c]/70">Connected</span>
                       </>
                     ) : (
                       <>
-                        <span className="h-2 w-2 rounded-full bg-yellow-500"></span>
-                        <span className="text-yellow-400">Offline (using fallback)</span>
+                        <span className="h-2 w-2 rounded-full bg-amber-500/60" />
+                        <span className="text-amber-400/70">Offline (guided fallback)</span>
                       </>
                     )}
                   </span>
                 )}
               </div>
-              <p className="text-lg text-[#f5f0e8]/80 mb-4">
-                A gentle process to acknowledge impact, repair connections, and move forward with clarity.
+              <div className="divine-sacred-thread w-full mb-4" />
+              <p className="text-base text-[#f5f0e8]/65 font-sacred leading-relaxed">
+                A sacred, gentle process to acknowledge the ripple you&apos;ve caused, repair the connection with grace, and move forward with clarity and intention.
               </p>
             </div>
 
-            {/* Input Form */}
+            {/* Input Form — Sacred Reflection Space */}
             {currentStep === 'input' && (
-              <div className="rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#050507]/80 to-[#120a07]/90 p-8 shadow-[0_30px_120px_rgba(212,164,76,0.18)] backdrop-blur">
+              <div className="divine-reset-container rounded-3xl p-6 sm:p-8">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Situation */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label htmlFor="situation" className="text-sm font-medium text-[#f5f0e8]">
-                        What happened?
+                        What happened, dear friend?
                       </label>
                       <VoiceInputButton
                         language={language}
@@ -302,13 +298,13 @@ export default function KarmaResetClient() {
                     </div>
                   </div>
 
-                  {/* Repair type */}
+                  {/* Repair type — Sacred paths */}
                   <div>
                     <label className="block text-sm font-medium text-[#f5f0e8] mb-3">
-                      How would you like to repair?
+                      How would you like to restore harmony?
                     </label>
                     <div className="space-y-3">
-                      <label className="flex items-start gap-3 p-4 rounded-lg border border-[#d4a44c]/20 bg-white/5 cursor-pointer hover:border-[#d4a44c]/40 hover:bg-white/10 transition-all">
+                      <label className="flex items-start gap-3 p-4 rounded-xl divine-step-card cursor-pointer transition-all">
                         <input
                           type="radio"
                           name="repairType"
@@ -318,12 +314,12 @@ export default function KarmaResetClient() {
                           className="mt-1 accent-[#d4a44c]"
                         />
                         <div>
-                          <div className="font-medium text-[#f5f0e8]">💚 Apology</div>
-                          <div className="text-sm text-[#f5f0e8]/70">Offer a sincere apology that stays brief and grounded</div>
+                          <div className="font-medium text-[#f5f0e8]">&#x1F49A; Sincere Apology</div>
+                          <div className="text-sm text-[#f5f0e8]/60 mt-0.5">Offer heartfelt words that acknowledge and heal</div>
                         </div>
                       </label>
-                      
-                      <label className="flex items-start gap-3 p-4 rounded-lg border border-[#d4a44c]/20 bg-white/5 cursor-pointer hover:border-[#d4a44c]/40 hover:bg-white/10 transition-all">
+
+                      <label className="flex items-start gap-3 p-4 rounded-xl divine-step-card cursor-pointer transition-all">
                         <input
                           type="radio"
                           name="repairType"
@@ -333,12 +329,12 @@ export default function KarmaResetClient() {
                           className="mt-1 accent-[#d4a44c]"
                         />
                         <div>
-                          <div className="font-medium text-[#f5f0e8]">💬 Clarification</div>
-                          <div className="text-sm text-[#f5f0e8]/70">Gently clarify what you meant and invite understanding</div>
+                          <div className="font-medium text-[#f5f0e8]">&#x1F54A;&#xFE0F; Gentle Clarification</div>
+                          <div className="text-sm text-[#f5f0e8]/60 mt-0.5">Illuminate your true intention with grace and compassion</div>
                         </div>
                       </label>
-                      
-                      <label className="flex items-start gap-3 p-4 rounded-lg border border-[#d4a44c]/20 bg-white/5 cursor-pointer hover:border-[#d4a44c]/40 hover:bg-white/10 transition-all">
+
+                      <label className="flex items-start gap-3 p-4 rounded-xl divine-step-card cursor-pointer transition-all">
                         <input
                           type="radio"
                           name="repairType"
@@ -348,24 +344,24 @@ export default function KarmaResetClient() {
                           className="mt-1 accent-[#d4a44c]"
                         />
                         <div>
-                          <div className="font-medium text-[#f5f0e8]">🕊️ Calm Follow-up</div>
-                          <div className="text-sm text-[#f5f0e8]/70">Return with a warm note that re-centers the conversation</div>
+                          <div className="font-medium text-[#f5f0e8]">&#x1F338; Warm Re-connection</div>
+                          <div className="text-sm text-[#f5f0e8]/60 mt-0.5">Return with warmth that restores the sacred bond</div>
                         </div>
                       </label>
                     </div>
                   </div>
 
-                  {/* Error message */}
+                  {/* Error message — compassionate */}
                   {error && (
-                    <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
+                    <div className="p-4 rounded-xl divine-step-card border-amber-500/20">
                       <div className="flex items-start gap-3">
-                        <span className="text-red-400 text-xl">⚠️</span>
+                        <span className="text-[#e8b54a] text-lg">&#x1F9D8;</span>
                         <div className="flex-1">
-                          <h4 className="font-semibold text-red-300 mb-1">Connection Issue</h4>
-                          <p className="text-sm text-red-200/80">{error}</p>
+                          <h4 className="font-semibold text-[#e8b54a]/90 mb-1">A moment of patience</h4>
+                          <p className="text-sm text-[#f5f0e8]/65">{error}</p>
                           {retryCount >= MAX_RETRIES && (
-                            <p className="text-sm text-red-200/70 mt-2">
-                              💙 Don&apos;t worry - we&apos;ve prepared fallback guidance for you below.
+                            <p className="text-sm text-[#f5f0e8]/55 mt-2">
+                              Do not worry, dear friend &#8212; KIAAN has prepared gentle guidance for you below.
                             </p>
                           )}
                         </div>
@@ -373,31 +369,38 @@ export default function KarmaResetClient() {
                     </div>
                   )}
 
-                  {/* Submit button */}
+                  {/* Submit button — Sacred action */}
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-[#d4a44c] via-[#ff9933] to-[#d4a44c] hover:from-[#d4a44c] hover:via-[#d4a44c] hover:to-[#d4a44c] disabled:from-gray-500 disabled:via-gray-600 disabled:to-gray-500 text-slate-950 font-semibold text-lg transition-all duration-200 shadow-lg shadow-[#d4a44c]/25 hover:shadow-xl hover:shadow-[#d4a44c]/40 hover:scale-[1.02]"
+                    className="w-full py-4 px-6 rounded-xl kiaan-btn-golden text-lg font-semibold transition-all duration-200 hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
-                    {loading ? 'Creating your reset...' : 'Get Reset Guidance'}
+                    {loading ? 'KIAAN is preparing your sacred guidance...' : 'Begin Sacred Reset'}
                   </button>
                 </form>
               </div>
             )}
 
-            {/* Breathing Step */}
+            {/* Breathing Step — Sacred Pause */}
             {currentStep === 'breathing' && resetGuidance && (
               <motion.div
-                className="rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#050507]/80 to-[#120a07]/90 p-8 shadow-[0_30px_120px_rgba(212,164,76,0.18)] backdrop-blur"
-                initial={{ opacity: 0, scale: 0.9 }}
+                className="divine-reset-container rounded-3xl p-8"
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={springConfigs.smooth}
               >
-                <h2 className="text-2xl font-bold text-[#f5f0e8] mb-6 text-center">
-                  Pause & Breathe
-                </h2>
+                <div className="text-center mb-2">
+                  <div className="divine-companion-avatar h-12 w-12 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center mx-auto mb-3">
+                    <span className="text-lg">&#x1F9D8;</span>
+                  </div>
+                  <h2 className="text-2xl font-bold kiaan-text-golden mb-1">
+                    Sacred Pause
+                  </h2>
+                  <p className="text-[10px] text-[#d4a44c]/45 tracking-[0.12em] uppercase">Breathe with KIAAN</p>
+                </div>
+                <div className="divine-sacred-thread w-16 mx-auto my-4" />
                 <div className="flex items-center justify-center gap-3 mb-8">
-                  <p className="text-lg text-[#f5f0e8]/80 text-center">
+                  <p className="text-lg text-[#f5f0e8]/75 text-center font-sacred leading-relaxed">
                     {resetGuidance.breathingLine}
                   </p>
                   <VoiceResponseButton
@@ -410,7 +413,7 @@ export default function KarmaResetClient() {
 
                 <BreathingOrb
                   size={250}
-                  color="#ff9933"
+                  color="#e8b54a"
                   pattern="4-7-8"
                   className="my-8"
                 />
@@ -418,22 +421,28 @@ export default function KarmaResetClient() {
                 <div className="text-center mt-8">
                   <button
                     onClick={() => setCurrentStep('plan')}
-                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#d4a44c] via-[#ff9933] to-[#d4a44c] hover:from-[#d4a44c] hover:via-[#d4a44c] hover:to-[#d4a44c] text-slate-950 font-semibold transition-all duration-200 shadow-lg shadow-[#d4a44c]/25 hover:shadow-xl hover:shadow-[#d4a44c]/40 hover:scale-[1.02]"
+                    className="kiaan-btn-golden px-8 py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-[1.02]"
                   >
-                    Continue to Plan
+                    Continue to Sacred Plan
                   </button>
                 </div>
               </motion.div>
             )}
 
-            {/* Plan Step */}
+            {/* Plan Step — Your Sacred Path Forward */}
             {currentStep === 'plan' && resetGuidance && (
-              <motion.div 
+              <motion.div
                 className="space-y-6"
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={springConfigs.smooth}
               >
+                <div className="text-center mb-2">
+                  <h2 className="text-xl font-semibold kiaan-text-golden">Your Sacred Path Forward</h2>
+                  <p className="text-[11px] text-[#d4a44c]/45 mt-1">KIAAN has crafted this guidance for you with care</p>
+                  <div className="divine-sacred-thread w-20 mx-auto mt-3" />
+                </div>
+
                 <ResetPlanCard
                   plan={{
                     pauseAndBreathe: resetGuidance.breathingLine,
@@ -443,25 +452,25 @@ export default function KarmaResetClient() {
                   }}
                   animated={true}
                 />
-                
+
                 {/* Confetti Effect */}
                 <ConfettiEffect trigger={showConfetti} />
-                
-                {/* Actions */}
+
+                {/* Actions — Sacred completion */}
                 <div className="flex gap-4 justify-center flex-wrap">
                   <motion.button
                     onClick={handleComplete}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#d4a44c] via-[#ff9933] to-[#d4a44c] hover:from-[#d4a44c] hover:via-[#d4a44c] hover:to-[#d4a44c] text-slate-950 font-semibold transition-all duration-200 shadow-lg shadow-[#d4a44c]/25 hover:shadow-xl hover:shadow-[#d4a44c]/40"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="kiaan-btn-golden px-8 py-3 rounded-xl font-semibold transition-all duration-200"
                   >
-                    ✨ Complete Reset
+                    Complete Sacred Reset
                   </motion.button>
                   <button
                     onClick={resetForm}
-                    className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-[#d4a44c]/30 hover:border-[#d4a44c]/50 text-[#f5f0e8] font-semibold transition-all duration-200"
+                    className="px-6 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-[#d4a44c]/20 hover:border-[#d4a44c]/35 text-[#f5f0e8]/80 font-semibold transition-all duration-200"
                   >
-                    Start New Reset
+                    Begin New Journey
                   </button>
                 </div>
               </motion.div>
