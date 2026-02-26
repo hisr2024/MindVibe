@@ -38,7 +38,7 @@ describe('ToolHeader - mode label', () => {
     expect(modeLabel.tagName).toBe('P')
     expect(modeLabel.className).toContain('text-[11px]')
     expect(modeLabel.className).toContain('tracking-wide')
-    expect(modeLabel.className).toContain('text-orange-300/50')
+    expect(modeLabel.className).toContain('text-[#e8b54a]/50')
   })
 
   it('does not render mode label when prop is not provided', () => {

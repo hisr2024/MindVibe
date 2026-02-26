@@ -240,10 +240,10 @@ describe('ResetPlanCard', () => {
 
   it('renders all four steps', () => {
     render(<ResetPlanCard plan={defaultPlan} animated={false} />)
-    expect(screen.getByText('Pause & Breathe')).toBeInTheDocument()
-    expect(screen.getByText('Name the Ripple')).toBeInTheDocument()
-    expect(screen.getByText('Choose the Repair')).toBeInTheDocument()
-    expect(screen.getByText('Move with Intention')).toBeInTheDocument()
+    expect(screen.getByText('Sacred Pause')).toBeInTheDocument()
+    expect(screen.getByText('Acknowledge the Ripple')).toBeInTheDocument()
+    expect(screen.getByText('The Sacred Repair')).toBeInTheDocument()
+    expect(screen.getByText('Walk Forward with Grace')).toBeInTheDocument()
   })
 
   it('renders step content correctly', () => {
@@ -272,7 +272,7 @@ describe('ResetPlanCard', () => {
     render(<ResetPlanCard plan={defaultPlan} animated={true} />)
     // Initially some cards may be hidden
     await waitFor(() => {
-      expect(screen.getByText('Pause & Breathe')).toBeInTheDocument()
+      expect(screen.getByText('Sacred Pause')).toBeInTheDocument()
     }, { timeout: 2000 })
   })
 })
