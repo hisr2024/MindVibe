@@ -24,46 +24,46 @@ export interface ResetPlanCardProps {
 const stepConfig = [
   {
     key: 'pauseAndBreathe',
-    title: 'Pause & Breathe',
-    icon: '🧘',
-    cardClass: 'border-[#d4a44c]/40 bg-gradient-to-br from-[#d4a44c]/10 via-[#0d0d10]/85 to-[#0d0d10]/85',
-    numberClass: 'bg-[#d4a44c]/30 text-[#f5f0e8] border-[#d4a44c]',
+    title: 'Sacred Pause',
+    icon: '\u{1F9D8}',
+    cardClass: 'divine-step-card border-[#d4a44c]/25',
+    numberClass: 'bg-gradient-to-br from-[#c8943a] to-[#e8b54a] text-[#0a0a12] border-transparent',
     textColor: 'text-[#f5f0e8]',
-    contentTextColor: 'text-[#f5f0e8]/90',
-    contentBorderClass: 'border-[#d4a44c]/15',
+    contentTextColor: 'text-[#f5f0e8]/80',
+    contentBorderClass: 'border-[#d4a44c]/10',
     number: 1,
   },
   {
     key: 'nameTheRipple',
-    title: 'Name the Ripple',
-    icon: '💧',
-    cardClass: 'border-purple-400/40 bg-gradient-to-br from-purple-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85',
-    numberClass: 'bg-purple-500/30 text-purple-50 border-purple-400',
-    textColor: 'text-purple-50',
-    contentTextColor: 'text-purple-100/90',
-    contentBorderClass: 'border-purple-500/15',
+    title: 'Acknowledge the Ripple',
+    icon: '\u{1F4A7}',
+    cardClass: 'divine-step-card border-[#d4a44c]/18',
+    numberClass: 'bg-gradient-to-br from-[#c8943a]/80 to-[#d4a44c]/80 text-[#0a0a12] border-transparent',
+    textColor: 'text-[#f5f0e8]',
+    contentTextColor: 'text-[#f5f0e8]/80',
+    contentBorderClass: 'border-[#d4a44c]/10',
     number: 2,
   },
   {
     key: 'repair',
-    title: 'Choose the Repair',
-    icon: '🔧',
-    cardClass: 'border-green-400/40 bg-gradient-to-br from-green-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85',
-    numberClass: 'bg-green-500/30 text-green-50 border-green-400',
-    textColor: 'text-green-50',
-    contentTextColor: 'text-green-100/90',
-    contentBorderClass: 'border-green-500/15',
+    title: 'The Sacred Repair',
+    icon: '\u{1F49A}',
+    cardClass: 'divine-step-card border-[#d4a44c]/18',
+    numberClass: 'bg-gradient-to-br from-[#c8943a]/70 to-[#d4a44c]/70 text-[#0a0a12] border-transparent',
+    textColor: 'text-[#f5f0e8]',
+    contentTextColor: 'text-[#f5f0e8]/80',
+    contentBorderClass: 'border-[#d4a44c]/10',
     number: 3,
   },
   {
     key: 'moveWithIntention',
-    title: 'Move with Intention',
-    icon: '🎯',
-    cardClass: 'border-blue-400/40 bg-gradient-to-br from-blue-500/10 via-[#0d0d10]/85 to-[#0d0d10]/85',
-    numberClass: 'bg-blue-500/30 text-blue-50 border-blue-400',
-    textColor: 'text-blue-50',
-    contentTextColor: 'text-blue-100/90',
-    contentBorderClass: 'border-blue-500/15',
+    title: 'Walk Forward with Grace',
+    icon: '\u{1F54A}\uFE0F',
+    cardClass: 'divine-step-card border-[#d4a44c]/18',
+    numberClass: 'bg-gradient-to-br from-[#c8943a]/60 to-[#d4a44c]/60 text-[#0a0a12] border-transparent',
+    textColor: 'text-[#f5f0e8]',
+    contentTextColor: 'text-[#f5f0e8]/80',
+    contentBorderClass: 'border-[#d4a44c]/10',
     number: 4,
   },
 ] as const
@@ -102,32 +102,35 @@ export function ResetPlanCard({
 
   return (
     <div
-      className={`space-y-4 ${className}`}
+      className={`space-y-3 ${className}`}
       role="region"
-      aria-label="Reset Plan Steps"
+      aria-label="Sacred Reset Plan"
     >
       {stepConfig.map((step, idx) => (
         <div
           key={step.key}
-          className={`rounded-2xl border ${step.cardClass} p-5 shadow-[0_15px_60px_rgba(212,164,76,0.08)] transition-opacity duration-500 ${
-            revealedCards >= idx + 1 ? 'opacity-100' : 'opacity-0'
+          className={`rounded-2xl ${step.cardClass} p-5 transition-all duration-500 ${
+            revealedCards >= idx + 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
           }`}
           role="region"
           aria-label={step.title}
         >
           <div className="flex items-center gap-3 mb-3">
             <span
-              className={`h-8 w-8 rounded-full ${step.numberClass} flex items-center justify-center text-sm font-bold`}
+              className={`h-8 w-8 rounded-full ${step.numberClass} flex items-center justify-center text-sm font-bold shadow-lg`}
               aria-hidden="true"
             >
               {step.number}
             </span>
-            <h3 className={`text-lg font-semibold ${step.textColor}`}>
-              {step.title}
-            </h3>
+            <div className="flex items-center gap-2">
+              <span className="text-base" aria-hidden="true">{step.icon}</span>
+              <h3 className={`text-base font-semibold ${step.textColor}`}>
+                {step.title}
+              </h3>
+            </div>
           </div>
           <div
-            className={`text-sm ${step.contentTextColor} bg-black/30 rounded-lg p-3 border ${step.contentBorderClass}`}
+            className={`text-sm leading-relaxed ${step.contentTextColor} bg-black/20 rounded-xl p-3.5 border ${step.contentBorderClass} font-sacred`}
           >
             {planValues[step.key]}
           </div>

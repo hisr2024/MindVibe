@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { EmotionalResetWizard } from '@/components/emotional-reset'
-import { ToolHeader, ToolActionCard } from '@/components/tools'
+import { ToolActionCard } from '@/components/tools'
 import { FadeIn } from '@/components/ui'
 import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import CompanionCTA from '@/components/companion/CompanionCTA'
@@ -20,35 +20,51 @@ export default function EmotionalResetClient() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] text-white p-4 md:p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
+      {/* Subtle sacred background gradients */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute -left-20 top-20 h-72 w-72 rounded-full bg-gradient-to-br from-[#d4a44c]/15 via-[#e8b54a]/8 to-transparent blur-[100px]" />
+        <div className="absolute bottom-20 right-0 h-80 w-80 rounded-full bg-gradient-to-tr from-[#d4a44c]/10 via-[#c8943a]/5 to-transparent blur-[120px]" />
+      </div>
+
+      <div className="max-w-4xl mx-auto space-y-6 relative">
+        {/* Header — Divine Emotional Companion */}
         <FadeIn>
-          <ToolHeader
-            icon="💫"
-            title="Emotional Reset"
-            subtitle="A calming 7-step flow to process emotions, find inner peace, and restore your spirit with gentle guidance."
-            backLink={{ label: 'Back to dashboard', href: '/dashboard' }}
-          />
+          <div className="flex items-center gap-4 mb-2">
+            <div className="divine-companion-avatar h-14 w-14 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center flex-shrink-0">
+              <span className="text-2xl">&#x1F4AB;</span>
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold kiaan-text-golden">Emotional Reset</h1>
+              <p className="text-[11px] text-[#d4a44c]/50 tracking-[0.12em] uppercase mt-0.5">A sacred space, guided by KIAAN</p>
+            </div>
+          </div>
+          <div className="divine-sacred-thread w-full my-4" />
+          <p className="text-sm text-[#f5f0e8]/60 font-sacred leading-relaxed mb-2">
+            A calming 7-step sacred flow to process emotions, find inner peace, and restore your spirit with gentle, divine guidance.
+          </p>
+          <a href="/dashboard" className="text-xs text-[#d4a44c]/50 hover:text-[#d4a44c]/70 transition">
+            &larr; Back to dashboard
+          </a>
         </FadeIn>
 
-        {/* Quick Actions */}
+        {/* Quick Actions — Sacred Paths */}
         <FadeIn delay={0.05}>
           <div className="grid gap-4 md:grid-cols-2">
             <ToolActionCard
-              icon="🧘"
-              title="Start Full Reset Flow"
-              description="Begin the guided 7-step emotional processing journey (~10 minutes)."
+              icon="\u{1F9D8}"
+              title="Begin Sacred Reset Flow"
+              description="A guided 7-step journey to process and release emotions (~10 minutes)."
               ctaLabel="Begin Now"
               onClick={() => document.getElementById('reset-wizard')?.scrollIntoView({ behavior: 'smooth' })}
               gradient="from-[#d4a44c]/10 to-amber-500/10"
             />
             <ToolActionCard
-              icon="⏱️"
-              title="Quick Breathing Exercise"
-              description="A 60-second breathing reset for immediate calm."
+              icon="\u{1F54A}\uFE0F"
+              title="Quick Sacred Breathing"
+              description="A 60-second breathing reset for immediate calm and peace."
               ctaLabel="Start Breathing"
               href="/tools/emotional-reset#reset-wizard"
-              gradient="from-blue-500/10 to-cyan-500/10"
+              gradient="from-[#d4a44c]/8 to-[#e8b54a]/8"
             />
           </div>
         </FadeIn>
@@ -64,21 +80,21 @@ export default function EmotionalResetClient() {
           </div>
         </FadeIn>
 
-        {/* Footer info */}
+        {/* Footer info — gentle sacred notes */}
         <FadeIn delay={0.2}>
-          <div className="rounded-2xl border border-[#d4a44c]/15 bg-black/40 p-4">
-            <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-[#f5f0e8]/60">
+          <div className="divine-step-card rounded-2xl p-4">
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-[#f5f0e8]/50">
               <span className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-400" aria-hidden="true"></span>
-                Max 10 sessions/day
+                <span className="divine-diya h-1.5 w-1.5 rounded-full bg-[#e8b54a]" aria-hidden="true"></span>
+                Max 10 sacred sessions/day
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#d4a44c]" aria-hidden="true"></span>
-                Sessions expire after 30 min
+                <span className="h-1.5 w-1.5 rounded-full bg-[#d4a44c]/60" aria-hidden="true"></span>
+                Sessions held for 30 minutes
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-400" aria-hidden="true"></span>
-                Progress saved automatically
+                <span className="h-1.5 w-1.5 rounded-full bg-[#c8943a]/60" aria-hidden="true"></span>
+                Progress preserved with care
               </span>
             </div>
           </div>

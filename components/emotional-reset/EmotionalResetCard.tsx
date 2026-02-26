@@ -19,38 +19,37 @@ export function EmotionalResetCard({
     return (
       <Link
         href="/tools/emotional-reset"
-        className={`group flex items-center justify-between rounded-2xl border border-orange-500/20 bg-black/40 px-4 py-3 text-sm font-semibold text-orange-50 transition hover:border-orange-400/50 ${className}`}
+        className={`group flex items-center justify-between rounded-2xl border border-[#d4a44c]/15 bg-black/40 px-4 py-3 text-sm font-semibold text-[#f5f0e8] transition hover:border-[#d4a44c]/30 ${className}`}
       >
         <div className="flex items-center gap-3">
-          <span className="text-lg">🕉️</span>
+          <span className="text-lg">&#x1F9D8;</span>
           <span>Emotional Reset</span>
         </div>
-        <span className="text-orange-200/90 transition group-hover:translate-x-0.5">→</span>
+        <span className="text-[#d4a44c]/60 transition group-hover:translate-x-0.5">&rarr;</span>
       </Link>
     )
   }
 
   if (variant === 'featured') {
     return (
-      <div className={`rounded-2xl border border-orange-500/20 bg-gradient-to-br from-[#0d0d10] to-[#0c0f14] p-5 shadow-[0_10px_40px_rgba(255,115,39,0.1)] hover:border-orange-400/40 transition ${className}`}>
+      <div className={`divine-step-card rounded-2xl p-5 transition ${className}`}>
         <div className="flex items-start gap-3 mb-4">
-          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-orange-400/30 to-amber-300/30 flex items-center justify-center text-2xl shadow-lg shadow-orange-500/10">
-            🕉️
+          <div className="divine-companion-avatar h-12 w-12 rounded-xl bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center text-2xl">
+            &#x1F9D8;
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-orange-50">KIAAN Emotional Reset</h3>
-            <p className="text-xs text-orange-100/70 mt-0.5">7-Step Guided Flow</p>
+            <h3 className="font-semibold text-[#f5f0e8]">KIAAN Emotional Reset</h3>
+            <p className="text-[10px] text-[#d4a44c]/50 tracking-wide mt-0.5">7-Step Sacred Flow</p>
           </div>
         </div>
-        <p className="text-sm text-orange-100/80 mb-4">
-          Process emotions, find calm, and reset your mental state with ancient wisdom in a guided 7-step flow.
+        <p className="text-sm text-[#f5f0e8]/60 mb-4 font-sacred leading-relaxed">
+          Process emotions, find calm, and restore your inner peace with a sacred 7-step guided flow.
         </p>
         <Link
           href="/tools/emotional-reset"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-400/80 via-[#ffb347]/80 to-orange-300/80 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-orange-500/20 transition hover:scale-[1.02]"
+          className="kiaan-btn-golden inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition hover:scale-[1.02]"
         >
-          <span>🧘</span>
-          Start Emotional Reset
+          Begin Sacred Reset
         </Link>
       </div>
     )
@@ -60,19 +59,19 @@ export function EmotionalResetCard({
   return (
     <Link
       href="/tools/emotional-reset"
-      className={`block rounded-2xl border border-orange-500/20 bg-black/50 p-5 shadow-[0_12px_48px_rgba(255,115,39,0.12)] transition hover:border-orange-300/70 hover:scale-[1.02] ${className}`}
+      className={`block divine-step-card rounded-2xl p-5 transition hover:scale-[1.02] ${className}`}
     >
       <div className="flex items-center gap-3 mb-3">
-        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-orange-400/30 to-amber-300/30 flex items-center justify-center text-xl">
-          🕉️
+        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#c8943a]/30 to-[#e8b54a]/30 flex items-center justify-center text-xl">
+          &#x1F9D8;
         </div>
         <div>
-          <h4 className="text-sm font-semibold text-orange-50">KIAAN Emotional Reset</h4>
-          <p className="text-xs text-orange-100/70">7-step guided flow</p>
+          <h4 className="text-sm font-semibold text-[#f5f0e8]">KIAAN Emotional Reset</h4>
+          <p className="text-[10px] text-[#d4a44c]/50 tracking-wide">7-step sacred flow</p>
         </div>
       </div>
-      <p className="text-xs text-orange-100/80">
-        Process emotions, find calm, and reset your mental state with ancient wisdom.
+      <p className="text-xs text-[#f5f0e8]/55">
+        Process emotions, find calm, and restore your inner peace with sacred ancient wisdom.
       </p>
     </Link>
   )

@@ -428,10 +428,19 @@ function KiaanChatPageInner() {
         </div>
       )}
 
-      {/* A Note from KIAAN */}
-      <div className="kiaan-cosmic-card rounded-3xl p-5 shadow-[0_20px_80px_rgba(212,164,76,0.04)] md:p-6">
-        <h2 className="kiaan-text-golden text-lg font-semibold">{t('kiaan.chat.divineFriend', 'Your Divine Friend')}</h2>
-        <p className="mt-3 text-sm leading-relaxed text-[#e8dcc8]/60">
+      {/* A Sacred Note from KIAAN */}
+      <div className="divine-reset-container rounded-3xl p-5 md:p-6">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="divine-companion-avatar h-10 w-10 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center">
+            <span className="text-sm font-bold text-[#0a0a12]">K</span>
+          </div>
+          <div>
+            <h2 className="kiaan-text-golden text-lg font-semibold">{t('kiaan.chat.divineFriend', 'Your Divine Friend')}</h2>
+            <p className="text-[10px] text-[#d4a44c]/45 tracking-[0.1em] uppercase">Always by your side</p>
+          </div>
+        </div>
+        <div className="divine-sacred-thread w-full mb-3" />
+        <p className="mt-1 text-sm leading-relaxed text-[#e8dcc8]/55 font-sacred">
           {t('kiaan.chat.disclaimer', 'KIAAN is your spiritual companion, sharing reflections drawn from the Bhagavad Gita and ancient wisdom. This is a sacred space for inner peace and self-discovery. For matters beyond the spiritual path, always seek guidance from qualified professionals.')}
         </p>
       </div>

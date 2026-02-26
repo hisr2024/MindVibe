@@ -443,6 +443,212 @@ html.light .divine-cta-primary {
   box-shadow: 0 8px 30px rgba(212, 164, 76, 0.2);
 }
 
+/* =====================================================
+   DIVINE COMPANION — Sakha (Friend) Mode UI Elements
+   Sacred chat, Karmic Reset, Emotional Reset divine feel
+   ===================================================== */
+
+/* Sacred lotus unfurl animation for message entry */
+@keyframes divineLotusUnfurl {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+    filter: blur(2px);
+  }
+  40% {
+    opacity: 0.7;
+    filter: blur(0.5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+/* Gentle aura pulse for KIAAN avatar */
+@keyframes divineAuraPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 12px rgba(212, 164, 76, 0.25),
+      0 0 30px rgba(212, 164, 76, 0.08);
+  }
+  50% {
+    box-shadow:
+      0 0 18px rgba(212, 164, 76, 0.4),
+      0 0 45px rgba(212, 164, 76, 0.12);
+  }
+}
+
+/* Sacred thread shimmer for dividers */
+@keyframes divineSacredThread {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Gentle incense drift for wisdom text */
+@keyframes divineIncenseDrift {
+  0%, 100% {
+    opacity: 0.7;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+/* Diya (lamp) flicker for status indicators */
+@keyframes divineDiyaFlicker {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  25% { opacity: 1; transform: scale(1.05); }
+  50% { opacity: 0.9; transform: scale(0.98); }
+  75% { opacity: 1; transform: scale(1.03); }
+}
+
+/* KIAAN Divine Friend — Chat message container */
+.divine-companion-message {
+  animation: divineLotusUnfurl 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* KIAAN Avatar — sacred aura glow */
+.divine-companion-avatar {
+  animation: divineAuraPulse 4s ease-in-out infinite;
+  will-change: box-shadow;
+}
+
+/* Sacred thread horizontal rule */
+.divine-sacred-thread {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 164, 76, 0.06) 15%,
+    rgba(212, 164, 76, 0.35) 50%,
+    rgba(212, 164, 76, 0.06) 85%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: divineSacredThread 4s linear infinite;
+}
+
+/* Diya indicator */
+.divine-diya {
+  animation: divineDiyaFlicker 3s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+/* KIAAN message bubble — wisdom panel */
+.divine-wisdom-bubble {
+  background: linear-gradient(
+    165deg,
+    rgba(12, 10, 8, 0.95) 0%,
+    rgba(10, 10, 14, 0.92) 50%,
+    rgba(8, 8, 12, 0.90) 100%
+  );
+  border: 1px solid rgba(212, 164, 76, 0.18);
+  box-shadow:
+    0 0 1px rgba(212, 164, 76, 0.12),
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(212, 164, 76, 0.06);
+}
+
+/* User message bubble — devotee panel */
+.divine-devotee-bubble {
+  background: linear-gradient(
+    135deg,
+    rgba(212, 164, 76, 0.12) 0%,
+    rgba(200, 148, 58, 0.08) 100%
+  );
+  border: 1px solid rgba(212, 164, 76, 0.22);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(212, 164, 76, 0.05);
+}
+
+/* Divine companion empty state */
+.divine-companion-welcome {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(212, 164, 76, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 30% 70%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
+}
+
+/* Reset sacred container */
+.divine-reset-container {
+  background: linear-gradient(
+    170deg,
+    rgba(10, 10, 16, 0.94) 0%,
+    rgba(8, 8, 12, 0.96) 40%,
+    rgba(12, 10, 8, 0.92) 100%
+  );
+  border: 1px solid rgba(212, 164, 76, 0.15);
+  box-shadow:
+    0 0 1px rgba(212, 164, 76, 0.1),
+    0 24px 80px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(212, 164, 76, 0.05);
+  backdrop-filter: blur(24px) saturate(120%);
+  -webkit-backdrop-filter: blur(24px) saturate(120%);
+}
+
+/* Sacred progress bar */
+.divine-progress-bar {
+  background: linear-gradient(
+    90deg,
+    #c8943a 0%,
+    #e8b54a 40%,
+    #f0c96d 60%,
+    #e8b54a 80%,
+    #c8943a 100%
+  );
+  background-size: 200% 100%;
+  animation: divineSacredThread 3s linear infinite;
+}
+
+/* Divine step card */
+.divine-step-card {
+  background: linear-gradient(
+    165deg,
+    rgba(12, 10, 8, 0.9) 0%,
+    rgba(10, 10, 14, 0.92) 100%
+  );
+  border: 1px solid rgba(212, 164, 76, 0.12);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(212, 164, 76, 0.04);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.divine-step-card:hover {
+  border-color: rgba(212, 164, 76, 0.25);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.3),
+    0 0 1px rgba(212, 164, 76, 0.15),
+    inset 0 1px 0 rgba(212, 164, 76, 0.06);
+}
+
+/* Light mode overrides for divine companion */
+html.light .divine-wisdom-bubble {
+  background: linear-gradient(165deg, rgba(255, 253, 248, 0.97) 0%, rgba(255, 250, 242, 0.95) 100%);
+  border-color: rgba(212, 164, 76, 0.18);
+  box-shadow: 0 4px 16px rgba(212, 164, 76, 0.08);
+}
+
+html.light .divine-devotee-bubble {
+  background: linear-gradient(135deg, rgba(212, 164, 76, 0.08) 0%, rgba(200, 148, 58, 0.04) 100%);
+  border-color: rgba(212, 164, 76, 0.2);
+}
+
+html.light .divine-reset-container {
+  background: rgba(255, 253, 248, 0.96);
+  border-color: rgba(212, 164, 76, 0.16);
+  box-shadow: 0 16px 60px rgba(212, 164, 76, 0.08);
+}
+
+html.light .divine-step-card {
+  background: rgba(255, 253, 248, 0.95);
+  border-color: rgba(212, 164, 76, 0.15);
+}
+
 /* Reduced motion support for KIAAN cosmic animations */
 @media (prefers-reduced-motion: reduce) {
   .kiaan-particle,
@@ -457,5 +663,17 @@ html.light .divine-cta-primary {
 
   .kiaan-krishna-silhouette {
     opacity: 0.03;
+  }
+
+  .divine-companion-message {
+    animation: none !important;
+    opacity: 1;
+  }
+
+  .divine-companion-avatar,
+  .divine-diya,
+  .divine-sacred-thread,
+  .divine-progress-bar {
+    animation: none !important;
   }
 }

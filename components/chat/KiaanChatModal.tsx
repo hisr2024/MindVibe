@@ -200,49 +200,54 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
   }
 
   return (
-    <Modal open={isOpen} onClose={onClose} size="2xl" title="KIAAN Chat">
+    <Modal open={isOpen} onClose={onClose} size="2xl" title="KIAAN — Your Divine Companion">
       <div className="flex flex-col h-[min(600px,70vh)]">
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
           {globalMessages.length === 0 && (
-            <div className="text-center text-slate-400 py-12">
-              <h3 className="text-lg font-semibold text-slate-200 mb-2">Welcome to KIAAN</h3>
-              <p className="text-sm">Share what&apos;s on your mind. I&apos;m here to listen, support, and offer thoughtful guidance.</p>
+            <div className="divine-companion-welcome text-center py-12 px-4">
+              <div className="divine-companion-avatar h-16 w-16 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center mx-auto mb-4">
+                <span className="text-xl font-bold text-[#0a0a12]">K</span>
+              </div>
+              <h3 className="text-lg font-semibold text-[#f5f0e8] mb-1">KIAAN</h3>
+              <p className="text-[10px] text-[#d4a44c]/55 tracking-[0.12em] uppercase mb-3">Your Divine Friend</p>
+              <div className="divine-sacred-thread w-16 mx-auto mb-3" />
+              <p className="text-sm text-[#f5f0e8]/60 max-w-xs mx-auto font-sacred leading-relaxed">Share what&apos;s on your heart. I am here to listen, support, and walk beside you with wisdom.</p>
             </div>
           )}
-          
+
           {globalMessages.map((msg) => (
-            <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} divine-companion-message`}>
               <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                msg.sender === 'user' 
-                  ? 'bg-gradient-to-br from-[#d4a44c] to-[#c8943a] text-white' 
-                  : 'bg-slate-800 text-slate-100'
+                msg.sender === 'user'
+                  ? 'divine-devotee-bubble text-[#f5f0e8]'
+                  : 'divine-wisdom-bubble text-[#f5f0e8]/95'
               }`}>
-                <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
+                <p className={`text-sm whitespace-pre-wrap leading-relaxed ${msg.sender === 'assistant' ? 'font-sacred' : ''}`}>{msg.text}</p>
               </div>
             </div>
           ))}
-          
+
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-slate-800 rounded-2xl px-4 py-3">
-                <div className="flex items-center gap-2 text-slate-400 text-sm">
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="divine-wisdom-bubble rounded-2xl px-4 py-3">
+                <div className="flex items-center gap-2 text-[#d4a44c]/60 text-sm">
+                  <div className="flex gap-1.5">
+                    <div className="w-1.5 h-1.5 bg-[#e8b54a]/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-1.5 h-1.5 bg-[#d4a44c]/50 rounded-full animate-bounce" style={{ animationDelay: '200ms' }} />
+                    <div className="w-1.5 h-1.5 bg-[#c8943a]/40 rounded-full animate-bounce" style={{ animationDelay: '400ms' }} />
                   </div>
-                  <span>KIAAN is thinking...</span>
+                  <span className="text-[11px]">KIAAN is reflecting...</span>
                 </div>
               </div>
             </div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
-        <div className="border-t border-slate-700 px-4 py-4">
+        {/* Input Area — Sacred Space */}
+        <div className="border-t border-[#d4a44c]/12 px-4 py-4">
           {/* Voice error notification */}
           {voiceError && (
             <div className="mb-3 rounded-lg bg-red-900/30 border border-red-500/50 px-3 py-2 text-xs text-red-200">
@@ -298,8 +303,8 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Share what's on your mind..."
-              className="flex-1 bg-slate-800 text-slate-100 placeholder-slate-500 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#d4a44c] min-h-[60px] max-h-[120px]"
+              placeholder="Speak from your heart..."
+              className="flex-1 bg-[#0a0a12]/80 text-[#f5f0e8] placeholder-[#f5f0e8]/30 border border-[#d4a44c]/15 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/40 focus:border-[#d4a44c]/25 min-h-[60px] max-h-[120px] transition-all"
               disabled={isLoading}
             />
 
@@ -316,14 +321,14 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
             <Button
               onClick={sendMessage}
               disabled={!input.trim() || isLoading}
-              className="px-6 py-3 bg-gradient-to-r from-[#d4a44c] to-[#c8943a] hover:from-[#c8943a] hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="kiaan-btn-golden px-6 py-3 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Send
             </Button>
           </div>
-          <p className="text-xs text-slate-500 mt-2">
+          <p className="text-xs text-[#f5f0e8]/35 mt-2">
             Press Enter to send, Shift+Enter for new line
-            {voiceAvailability.available && ' • Click mic to speak'}
+            {voiceAvailability.available && ' \u2022 Click mic to speak'}
           </p>
         </div>
       </div>
