@@ -185,20 +185,30 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
 
     // Copy message to clipboard
     const handleCopy = useCallback(async (messageId: string, text: string) => {
+      if (typeof window === 'undefined') return
       triggerHaptic('success')
-      await navigator.clipboard.writeText(text)
+      try {
+        await navigator.clipboard.writeText(text)
+      } catch {
+        // Clipboard API not available in this context
+      }
       setCopiedId(messageId)
       setTimeout(() => setCopiedId(null), 2000)
     }, [triggerHaptic])
 
     // Share message
     const handleShare = useCallback(async (text: string) => {
+      if (typeof window === 'undefined') return
       triggerHaptic('selection')
-      if (navigator.share) {
-        await navigator.share({
-          title: 'Wisdom from KIAAN',
-          text: text,
-        })
+      try {
+        if (navigator.share) {
+          await navigator.share({
+            title: 'Wisdom from KIAAN',
+            text: text,
+          })
+        }
+      } catch {
+        // Share cancelled or not supported
       }
     }, [triggerHaptic])
 
@@ -231,58 +241,103 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
         ref={ref}
         className={`
           flex flex-col h-full
-          bg-[#050507]
+          bg-[#050507] relative
           ${className}
         `}
         style={{
           paddingBottom: isKeyboardVisible ? keyboardHeight : 0,
         }}
       >
+        {/* Divine ambient background */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(212,164,76,0.04)_0%,transparent_70%)]" />
+          <div className="absolute bottom-1/3 right-0 w-[300px] h-[300px] bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.03)_0%,transparent_70%)]" />
+        </div>
+
+        {/* Divine KIAAN header */}
+        <div className="relative z-10 px-4 py-3 bg-gradient-to-b from-[#0a0a10] to-transparent">
+          <div className="flex items-center justify-center gap-3">
+            <div className="relative">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                className="absolute inset-0 w-10 h-10 rounded-full border border-[#d4a44c]/20"
+                style={{ borderStyle: 'dashed' }}
+              />
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#d4a44c] via-amber-400 to-[#d4a44c] flex items-center justify-center shadow-lg shadow-[#d4a44c]/20">
+                <span className="text-lg font-bold text-[#0a0a10]" aria-hidden="true">&#x0950;</span>
+              </div>
+            </div>
+            <div className="text-center">
+              <h1 className="text-base font-bold text-white tracking-wide">KIAAN</h1>
+              <p className="text-[10px] text-[#d4a44c]/70 tracking-[0.2em] uppercase">Divine Wisdom Guide</p>
+            </div>
+          </div>
+        </div>
+
         {/* Messages Container */}
         <div
           ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto overscroll-contain"
+          className="flex-1 overflow-y-auto overscroll-contain relative z-10"
           onScroll={handleScroll}
         >
           <div className="px-4 py-4 space-y-4">
-            {/* Welcome message when empty */}
+            {/* Divine welcome when empty */}
             {messages.length === 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col items-center justify-center py-12 text-center"
+                className="flex flex-col items-center justify-center py-8 text-center"
               >
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#d4a44c]/20 to-amber-400/20 flex items-center justify-center mb-4">
-                  <Sparkles className="w-10 h-10 text-[#d4a44c]" />
+                {/* Sacred lotus orb */}
+                <div className="relative mb-6">
+                  <motion.div
+                    animate={{ scale: [1, 1.08, 1], opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                    className="absolute inset-0 w-24 h-24 rounded-full bg-[#d4a44c]/10 blur-xl"
+                  />
+                  <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-[#d4a44c]/20 via-amber-500/10 to-purple-500/10 border border-[#d4a44c]/20 flex items-center justify-center">
+                    <Sparkles className="w-10 h-10 text-[#d4a44c]" />
+                  </div>
                 </div>
-                <h2 className="text-xl font-semibold text-white mb-2">
-                  Welcome to KIAAN
+
+                <p className="text-[#d4a44c]/60 text-xs tracking-[0.3em] uppercase mb-2">Namaste</p>
+                <h2 className="text-xl font-bold text-white mb-2">
+                  Welcome, Seeker
                 </h2>
-                <p className="text-sm text-slate-400 max-w-xs">
-                  I&apos;m here to offer warm, grounded guidance rooted in timeless wisdom.
-                  Share what&apos;s on your mind.
+                <p className="text-sm text-white/50 max-w-[280px] leading-relaxed">
+                  I am KIAAN, your wisdom companion rooted in the eternal teachings of the Bhagavad Gita.
+                  Share what weighs on your heart.
                 </p>
 
+                {/* Divine separator */}
+                <div className="flex items-center gap-3 my-5 w-full max-w-xs">
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent to-[#d4a44c]/20" />
+                  <span className="text-[#d4a44c]/40 text-xs">&#x2022; &#x0950; &#x2022;</span>
+                  <div className="flex-1 h-px bg-gradient-to-l from-transparent to-[#d4a44c]/20" />
+                </div>
+
                 {/* Suggested prompts */}
-                <div className="mt-6 space-y-2 w-full max-w-xs">
+                <div className="space-y-2.5 w-full max-w-xs">
                   {[
-                    "I'm feeling anxious about...",
-                    "Help me find peace with...",
-                    "I need guidance on...",
+                    { text: "I'm feeling anxious about...", icon: "&#x1F9D8;" },
+                    { text: "Help me find inner peace...", icon: "&#x1F54A;" },
+                    { text: "Guide me with Gita wisdom...", icon: "&#x1F4D6;" },
                   ].map((prompt, index) => (
                     <motion.button
-                      key={index}
+                      key={`prompt-${index}`}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 * index }}
+                      transition={{ delay: 0.3 + 0.1 * index }}
                       onClick={() => {
                         triggerHaptic('selection')
-                        setInputText(prompt)
+                        setInputText(prompt.text)
                         inputRef.current?.focus()
                       }}
-                      className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-left text-sm text-slate-300 active:scale-[0.98] transition-transform"
+                      className="w-full px-4 py-3.5 bg-gradient-to-r from-white/[0.03] to-[#d4a44c]/[0.03] border border-[#d4a44c]/10 rounded-2xl text-left text-sm text-white/70 active:scale-[0.98] transition-transform hover:border-[#d4a44c]/25"
                     >
-                      {prompt}
+                      <span dangerouslySetInnerHTML={{ __html: prompt.icon }} className="mr-2" />
+                      {prompt.text}
                     </motion.button>
                   ))}
                 </div>
@@ -291,19 +346,16 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
 
             {/* Chat messages */}
             <AnimatePresence mode="popLayout">
-              {messages.map((message, _index) => (
+              {messages.map((message) => (
                 <motion.div
                   key={message.id}
                   initial={{ opacity: 0, y: 20, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  className={`
-                    flex flex-col
-                    ${message.sender === 'user' ? 'items-end' : 'items-start'}
-                  `}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  className={`flex flex-col ${message.sender === 'user' ? 'items-end' : 'items-start'}`}
                 >
-                  {/* Message bubble */}
+                  {/* Divine message bubble */}
                   <motion.div
                     onTouchStart={() => {
                       const timer = setTimeout(() => handleLongPress(message.id), 500)
@@ -311,114 +363,110 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                     }}
                     whileTap={{ scale: 0.98 }}
                     className={`
-                      max-w-[85%] rounded-2xl px-4 py-3
+                      max-w-[85%] rounded-2xl px-4 py-3 relative overflow-hidden
                       ${message.sender === 'user'
-                        ? 'bg-[#d4a44c]/20 border border-[#d4a44c]/30 rounded-br-md'
-                        : 'bg-white/[0.06] border border-white/[0.08] rounded-bl-md'
+                        ? 'bg-gradient-to-br from-[#d4a44c]/20 to-amber-600/10 border border-[#d4a44c]/25 rounded-br-md shadow-sm shadow-[#d4a44c]/10'
+                        : 'bg-gradient-to-br from-white/[0.05] to-purple-500/[0.03] border border-white/[0.08] rounded-bl-md shadow-sm shadow-purple-500/5'
                       }
-                      ${message.status === 'error' ? 'border-red-500/40 bg-red-500/10' : ''}
+                      ${message.status === 'error' ? 'border-red-500/40 bg-gradient-to-br from-red-500/10 to-red-900/5' : ''}
                       ${message.status === 'queued' ? 'opacity-60' : ''}
                     `}
                   >
-                    {/* Sender label for assistant */}
+                    {/* Subtle glow for assistant messages */}
                     {message.sender === 'assistant' && (
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#d4a44c] to-amber-300 flex items-center justify-center">
-                          <Sparkles className="w-3 h-3 text-slate-900" />
+                      <div className="absolute top-0 left-0 w-20 h-20 bg-[radial-gradient(ellipse_at_top_left,rgba(212,164,76,0.06)_0%,transparent_70%)] pointer-events-none" />
+                    )}
+
+                    {/* Sacred sender label for KIAAN */}
+                    {message.sender === 'assistant' && (
+                      <div className="flex items-center gap-2 mb-2 relative">
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#d4a44c] via-amber-400 to-[#d4a44c] flex items-center justify-center shadow-sm shadow-[#d4a44c]/30">
+                          <span className="text-[9px] font-bold text-[#0a0a10]" aria-hidden="true">&#x0950;</span>
                         </div>
-                        <span className="text-xs font-medium text-[#e8b54a]">KIAAN</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#d4a44c]/20 text-[#e8b54a] border border-[#d4a44c]/30">
-                          Ancient Wisdom
+                        <span className="text-xs font-semibold text-[#e8b54a] tracking-wide">KIAAN</span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-[#d4a44c]/15 to-purple-500/10 text-[#e8b54a]/80 border border-[#d4a44c]/20">
+                          &#x2728; Divine Wisdom
                         </span>
                       </div>
                     )}
 
                     {/* Message text */}
-                    <p className="text-sm text-white leading-relaxed whitespace-pre-wrap">
+                    <p className={`text-sm leading-relaxed whitespace-pre-wrap relative ${
+                      message.sender === 'assistant' ? 'text-white/90' : 'text-white'
+                    }`}>
                       {message.text}
                     </p>
 
                     {/* Message metadata */}
-                    <div className="flex items-center justify-end gap-2 mt-2">
-                      <span className="text-[10px] text-slate-500">
+                    <div className="flex items-center justify-end gap-2 mt-2 relative">
+                      <span className={`text-[10px] ${message.sender === 'assistant' ? 'text-[#d4a44c]/40' : 'text-white/30'}`}>
                         {formatTime(message.timestamp)}
                       </span>
-
-                      {/* Status indicator */}
                       {message.status === 'sending' && (
-                        <Loader2 className="w-3 h-3 text-slate-500 animate-spin" />
+                        <Loader2 className="w-3 h-3 text-[#d4a44c]/50 animate-spin" />
                       )}
                       {message.status === 'sent' && (
-                        <Check className="w-3 h-3 text-green-500" />
+                        <Check className="w-3 h-3 text-emerald-400/70" />
                       )}
                       {message.status === 'error' && (
-                        <AlertCircle className="w-3 h-3 text-red-500" />
+                        <AlertCircle className="w-3 h-3 text-red-400" />
                       )}
                       {message.status === 'queued' && (
-                        <span className="text-[9px] text-slate-500">Queued</span>
+                        <span className="text-[9px] text-[#d4a44c]/40">Queued</span>
                       )}
                     </div>
                   </motion.div>
 
-                  {/* Action buttons (shown when message is selected or for assistant messages) */}
+                  {/* Sacred action buttons */}
                   <AnimatePresence>
                     {(selectedMessageId === message.id || message.sender === 'assistant') && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className={`
-                          flex items-center gap-2 mt-2
-                          ${message.sender === 'user' ? 'mr-2' : 'ml-2'}
-                        `}
+                        className={`flex items-center gap-1.5 mt-1.5 ${message.sender === 'user' ? 'mr-2' : 'ml-2'}`}
                       >
-                        {/* Copy button */}
                         <motion.button
                           whileTap={{ scale: 0.9 }}
                           onClick={() => handleCopy(message.id, message.text)}
-                          className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/[0.08] flex items-center justify-center active:bg-white/[0.1]"
+                          className="w-7 h-7 rounded-full bg-white/[0.04] border border-white/[0.06] flex items-center justify-center active:bg-white/[0.08]"
                           aria-label="Copy message"
                         >
                           {copiedId === message.id ? (
-                            <Check className="w-4 h-4 text-green-400" />
+                            <Check className="w-3.5 h-3.5 text-emerald-400" />
                           ) : (
-                            <Copy className="w-4 h-4 text-slate-400" />
+                            <Copy className="w-3.5 h-3.5 text-white/30" />
                           )}
                         </motion.button>
 
-                        {/* Share button */}
-                        {typeof navigator !== 'undefined' && 'share' in navigator && (
-                          <motion.button
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => handleShare(message.text)}
-                            className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/[0.08] flex items-center justify-center active:bg-white/[0.1]"
-                            aria-label="Share message"
-                          >
-                            <Share2 className="w-4 h-4 text-slate-400" />
-                          </motion.button>
-                        )}
+                        <motion.button
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleShare(message.text)}
+                          className="w-7 h-7 rounded-full bg-white/[0.04] border border-white/[0.06] flex items-center justify-center active:bg-white/[0.08]"
+                          aria-label="Share message"
+                        >
+                          <Share2 className="w-3.5 h-3.5 text-white/30" />
+                        </motion.button>
 
-                        {/* Save to journal (assistant only) */}
                         {message.sender === 'assistant' && onSaveToJournal && (
                           <motion.button
                             whileTap={{ scale: 0.9 }}
                             onClick={() => handleSaveToJournal(message.text)}
-                            className="px-3 h-8 rounded-full bg-[#d4a44c]/10 border border-[#d4a44c]/30 flex items-center justify-center gap-1.5 active:bg-[#d4a44c]/20"
+                            className="px-2.5 h-7 rounded-full bg-[#d4a44c]/8 border border-[#d4a44c]/15 flex items-center justify-center gap-1 active:bg-[#d4a44c]/15"
                             aria-label="Save to journal"
                           >
-                            <BookOpen className="w-4 h-4 text-[#d4a44c]" />
-                            <span className="text-xs text-[#e8b54a]">Journal</span>
+                            <BookOpen className="w-3.5 h-3.5 text-[#d4a44c]/70" />
+                            <span className="text-[10px] text-[#e8b54a]/70">Journal</span>
                           </motion.button>
                         )}
 
-                        {/* Voice output (assistant only) */}
                         {message.sender === 'assistant' && (
                           <motion.button
                             whileTap={{ scale: 0.9 }}
-                            className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/[0.08] flex items-center justify-center active:bg-white/[0.1]"
+                            className="w-7 h-7 rounded-full bg-white/[0.04] border border-white/[0.06] flex items-center justify-center active:bg-white/[0.08]"
                             aria-label="Listen to message"
                           >
-                            <Volume2 className="w-4 h-4 text-slate-400" />
+                            <Volume2 className="w-3.5 h-3.5 text-white/30" />
                           </motion.button>
                         )}
                       </motion.div>
@@ -428,29 +476,35 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
               ))}
             </AnimatePresence>
 
-            {/* Loading indicator */}
+            {/* Divine loading indicator */}
             {isLoading && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center gap-3"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-start gap-3"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#d4a44c] to-amber-300 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-slate-900" />
+                <div className="relative">
+                  <motion.div
+                    animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute inset-0 w-8 h-8 rounded-full bg-[#d4a44c]/20 blur-md"
+                  />
+                  <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-[#d4a44c] via-amber-400 to-[#d4a44c] flex items-center justify-center shadow-md shadow-[#d4a44c]/20">
+                    <span className="text-[10px] font-bold text-[#0a0a10]" aria-hidden="true">&#x0950;</span>
+                  </div>
                 </div>
-                <div className="flex gap-1.5">
-                  {[0, 1, 2].map((i) => (
-                    <motion.span
-                      key={i}
-                      animate={{ y: [0, -6, 0] }}
-                      transition={{
-                        duration: 0.6,
-                        repeat: Infinity,
-                        delay: i * 0.15,
-                      }}
-                      className="w-2 h-2 rounded-full bg-[#d4a44c]/60"
-                    />
-                  ))}
+                <div className="pt-2 flex items-center gap-2">
+                  <div className="flex gap-1">
+                    {[0, 1, 2].map((i) => (
+                      <motion.span
+                        key={i}
+                        animate={{ y: [0, -5, 0], opacity: [0.4, 1, 0.4] }}
+                        transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.2, ease: 'easeInOut' }}
+                        className="w-1.5 h-1.5 rounded-full bg-[#d4a44c]"
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[10px] text-[#d4a44c]/40 italic ml-1">contemplating...</span>
                 </div>
               </motion.div>
             )}
@@ -460,21 +514,15 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
           </div>
         </div>
 
-        {/* Scroll to bottom button */}
+        {/* Sacred scroll-to-bottom button */}
         <AnimatePresence>
           {showScrollButton && (
             <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
               onClick={scrollToBottom}
-              className="
-                absolute bottom-24 right-4
-                w-10 h-10 rounded-full
-                bg-[#d4a44c] shadow-lg shadow-[#d4a44c]/30
-                flex items-center justify-center
-                active:scale-95
-              "
+              className="absolute bottom-24 right-4 z-20 w-10 h-10 rounded-full bg-gradient-to-br from-[#d4a44c] to-amber-500 shadow-lg shadow-[#d4a44c]/30 flex items-center justify-center active:scale-95 border border-[#d4a44c]/40"
               aria-label="Scroll to bottom"
             >
               <ChevronDown className="w-5 h-5 text-white" />
@@ -482,17 +530,17 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
           )}
         </AnimatePresence>
 
-        {/* Offline indicator */}
+        {/* Offline indicator with divine styling */}
         {!isOnline && (
-          <div className="px-4 py-2 bg-yellow-500/10 border-t border-yellow-500/20">
-            <p className="text-xs text-yellow-300 text-center">
-              You&apos;re offline - Messages will be sent when you&apos;re back online
+          <div className="px-4 py-2 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-t border-[#d4a44c]/15 relative z-10">
+            <p className="text-xs text-[#d4a44c]/80 text-center">
+              &#x1F54A; You&apos;re offline &mdash; Messages will be queued and sent when reconnected
             </p>
           </div>
         )}
 
-        {/* Input area */}
-        <div className="px-4 py-3 bg-[#050507]/95 backdrop-blur-xl border-t border-white/[0.06]">
+        {/* Divine Input area */}
+        <div className="relative z-10 px-4 py-3 bg-gradient-to-t from-[#050507] via-[#050507]/98 to-[#050507]/90 backdrop-blur-xl border-t border-[#d4a44c]/8">
           {/* Voice input indicator */}
           <AnimatePresence>
             {isListening && (
@@ -500,24 +548,24 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mb-3 flex items-center justify-center gap-2"
+                className="mb-3 flex items-center justify-center gap-3"
               >
                 <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 1, repeat: Infinity }}
-                  className="w-3 h-3 rounded-full bg-red-500"
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }}
+                  transition={{ duration: 1.2, repeat: Infinity }}
+                  className="w-2.5 h-2.5 rounded-full bg-[#d4a44c]"
                 />
-                <span className="text-sm text-slate-300">Listening...</span>
+                <span className="text-xs text-[#d4a44c]/70 tracking-wider uppercase">Listening...</span>
                 {transcript && (
-                  <span className="text-sm text-white">{transcript}</span>
+                  <span className="text-sm text-white/80 italic">{transcript}</span>
                 )}
               </motion.div>
             )}
           </AnimatePresence>
 
           {/* Input row */}
-          <div className="flex items-end gap-2">
-            {/* Text input */}
+          <div className="flex items-end gap-2.5">
+            {/* Text input with sacred border */}
             <div className="flex-1 relative">
               <textarea
                 ref={inputRef}
@@ -527,19 +575,23 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                 placeholder={placeholder}
                 disabled={isLoading}
                 rows={1}
-                className="w-full px-4 py-3 pr-12 bg-white/[0.06] border border-white/[0.08] rounded-2xl text-white text-base placeholder:text-slate-500 resize-none focus:outline-none focus:border-[#d4a44c]/40 disabled:opacity-50"
+                className="w-full px-4 py-3 pr-12 bg-white/[0.04] border border-[#d4a44c]/10 rounded-2xl text-white text-base placeholder:text-white/25 resize-none focus:outline-none focus:border-[#d4a44c]/30 focus:bg-white/[0.06] focus:shadow-sm focus:shadow-[#d4a44c]/5 disabled:opacity-50 transition-all duration-200"
                 style={{
                   maxHeight: 120,
-                  fontSize: '16px', // Prevent zoom on iOS
+                  fontSize: '16px',
                 }}
               />
 
-              {/* Voice input button (inside input) */}
+              {/* Voice input button */}
               {voiceSupported && (
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={handleVoiceToggle}
-                  className={`absolute right-2 bottom-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isListening ? 'bg-red-500 text-white' : 'bg-white/[0.08] text-slate-400'}`}
+                  className={`absolute right-2 bottom-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
+                    isListening
+                      ? 'bg-[#d4a44c] text-[#0a0a10] shadow-md shadow-[#d4a44c]/30'
+                      : 'bg-white/[0.06] text-white/30 hover:text-white/50'
+                  }`}
                   aria-label={isListening ? 'Stop listening' : 'Start voice input'}
                 >
                   {isListening ? (
@@ -551,16 +603,20 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
               )}
             </div>
 
-            {/* Send button */}
+            {/* Divine send button */}
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={handleSend}
               disabled={!inputText.trim() || isLoading}
-              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${inputText.trim() ? 'bg-gradient-to-r from-[#d4a44c] to-amber-400 shadow-lg shadow-[#d4a44c]/30' : 'bg-white/[0.06] border border-white/[0.08]'} disabled:opacity-50`}
+              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${
+                inputText.trim()
+                  ? 'bg-gradient-to-br from-[#d4a44c] via-amber-400 to-[#d4a44c] shadow-lg shadow-[#d4a44c]/30 border border-[#d4a44c]/40'
+                  : 'bg-white/[0.04] border border-white/[0.06]'
+              } disabled:opacity-40`}
               aria-label="Send message"
             >
               <Send
-                className={`w-5 h-5 ${inputText.trim() ? 'text-white' : 'text-slate-500'}`}
+                className={`w-5 h-5 ${inputText.trim() ? 'text-[#0a0a10]' : 'text-white/20'}`}
               />
             </motion.button>
           </div>

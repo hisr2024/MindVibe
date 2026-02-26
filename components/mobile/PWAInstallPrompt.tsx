@@ -129,12 +129,16 @@ export function PWAInstallPrompt({
     if (!installPrompt) return
 
     triggerHaptic('medium')
-    await installPrompt.prompt()
-    const { outcome } = await installPrompt.userChoice
+    try {
+      await installPrompt.prompt()
+      const { outcome } = await installPrompt.userChoice
 
-    if (outcome === 'accepted') {
-      setIsInstalled(true)
-      triggerHaptic('success')
+      if (outcome === 'accepted') {
+        setIsInstalled(true)
+        triggerHaptic('success')
+      }
+    } catch {
+      // Install prompt was dismissed or failed
     }
 
     setInstallPrompt(null)
