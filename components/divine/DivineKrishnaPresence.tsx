@@ -84,9 +84,9 @@ export function DivineKrishnaPresence() {
   return (
     <motion.header
       className="relative overflow-hidden rounded-3xl"
-      initial={reduceMotion ? undefined : { opacity: 0, y: 30 }}
+      initial={reduceMotion ? undefined : { opacity: 0, y: 15 }}
       animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
       {/* Atmospheric container */}
       <div className="divine-hero-container relative px-6 py-10 sm:px-8 sm:py-14 md:px-12 md:py-20">
@@ -113,7 +113,7 @@ export function DivineKrishnaPresence() {
           <motion.div
             initial={reduceMotion ? undefined : { opacity: 0, scale: 0.85 }}
             animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, ...springConfigs.smooth }}
+            transition={{ delay: 0.05, ...springConfigs.smooth }}
           >
             <DivineOmMark reduceMotion={reduceMotion} />
           </motion.div>
@@ -122,7 +122,7 @@ export function DivineKrishnaPresence() {
           <motion.div
             initial={reduceMotion ? undefined : { opacity: 0, y: 10 }}
             animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
             <h2
               className="text-3xl font-black tracking-[0.22em] sm:text-4xl md:text-5xl"
@@ -146,7 +146,7 @@ export function DivineKrishnaPresence() {
             className="space-y-3"
             initial={reduceMotion ? undefined : { opacity: 0, y: 20 }}
             animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ delay: 0.15, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
             <h1 className="font-sacred text-2xl font-light tracking-wide text-slate-100/95 sm:text-3xl md:text-4xl">
               {t('home.divine.welcome', 'Welcome, Dear Friend')}
@@ -164,7 +164,7 @@ export function DivineKrishnaPresence() {
             className="mx-auto max-w-md"
             initial={reduceMotion ? undefined : { opacity: 0 }}
             animate={reduceMotion ? undefined : { opacity: 1 }}
-            transition={{ delay: 0.9, duration: 0.8 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
           >
             <p className="font-sacred text-sm italic leading-relaxed text-[#d4a44c]/60 sm:text-base">
               {t(
@@ -182,7 +182,7 @@ export function DivineKrishnaPresence() {
             className="flex flex-wrap items-center justify-center gap-3 pt-2"
             initial={reduceMotion ? undefined : { opacity: 0, y: 15 }}
             animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            transition={{ delay: 1.1, ...springConfigs.smooth }}
+            transition={{ delay: 0.25, ...springConfigs.smooth }}
           >
             <Link href="/kiaan/chat">
               <motion.div
@@ -223,7 +223,7 @@ export function DivineKrishnaPresence() {
             className="pt-2 text-xs text-slate-400/50"
             initial={reduceMotion ? undefined : { opacity: 0 }}
             animate={reduceMotion ? undefined : { opacity: 1 }}
-            transition={{ delay: 1.4, duration: 0.5 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
           >
             {t('home.divine.privacy', 'Your words remain sacred and private. A confidential refuge.')}
           </motion.p>

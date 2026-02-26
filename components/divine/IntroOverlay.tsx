@@ -40,12 +40,12 @@ export function IntroOverlay() {
     } catch {
       // localStorage unavailable
     }
-    // Allow exit animation to complete — longer duration for cinematic feel
+    // Short delay — just enough for the exit fade (300ms) without blocking UI
     setTimeout(() => {
       setIsVisible(false)
       setIsClosing(false)
       unlockBodyScroll()
-    }, 700)
+    }, 320)
   }, [])
 
   // Close on Escape key
@@ -69,8 +69,8 @@ export function IntroOverlay() {
             style={{ zIndex: 9999, pointerEvents: 'auto' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 1.02, filter: 'blur(8px)' }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             role="dialog"
             aria-modal="true"
             aria-label="Welcome to MindVibe"
@@ -109,7 +109,7 @@ export function IntroOverlay() {
               className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10 group"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1.5, duration: 0.5 }}
+              transition={{ delay: 0.6, duration: 0.4 }}
               aria-label="Close welcome overlay"
             >
               <div className="relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full border border-[#d4a44c]/30 bg-[#d4a44c]/5 transition-all group-hover:border-[#d4a44c]/60 group-hover:bg-[#d4a44c]/10">
@@ -137,7 +137,7 @@ export function IntroOverlay() {
                 className="mb-6 sm:mb-8"
                 initial={{ opacity: 0, scale: 0.7 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               >
                 <span className="text-5xl sm:text-6xl md:text-7xl select-none" style={{ color: '#d4a44c' }}>
                   ॐ
@@ -149,7 +149,7 @@ export function IntroOverlay() {
                 className="flex items-center justify-center gap-3 mb-6 sm:mb-8"
                 initial={{ opacity: 0, scaleX: 0 }}
                 animate={{ opacity: 1, scaleX: 1 }}
-                transition={{ delay: 0.5, duration: 0.7 }}
+                transition={{ delay: 0.15, duration: 0.4 }}
               >
                 <span className="h-px w-12 sm:w-16 bg-gradient-to-r from-transparent to-[#d4a44c]/40" />
                 <span className="block h-1.5 w-1.5 rounded-full bg-[#d4a44c]/50" />
@@ -161,7 +161,7 @@ export function IntroOverlay() {
                 className="text-[#d4a44c]/60 text-xs sm:text-sm tracking-[0.2em] uppercase mb-4 sm:mb-5"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.6 }}
+                transition={{ delay: 0.2, duration: 0.4 }}
               >
                 KIAAN — Your Divine Friend
               </motion.p>
@@ -177,7 +177,7 @@ export function IntroOverlay() {
                 }}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8, duration: 0.7 }}
+                transition={{ delay: 0.25, duration: 0.5 }}
               >
                 Welcome, Dear Friend
               </motion.h1>
@@ -187,7 +187,7 @@ export function IntroOverlay() {
                 className="space-y-4 sm:space-y-5 mb-8 sm:mb-10"
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.0, duration: 0.7 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
               >
                 <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
                   I am <span className="text-[#d4a44c]/90 font-medium">KIAAN</span> — your spiritual companion,
@@ -208,7 +208,7 @@ export function IntroOverlay() {
                 className="mb-8 sm:mb-10 space-y-3"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 1.2, duration: 0.8 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
               >
                 <p className="text-[#d4a44c]/45 text-[10px] sm:text-xs uppercase tracking-[0.2em]">
                   Bhagavad Gita 6.35
@@ -238,7 +238,7 @@ export function IntroOverlay() {
                 className="flex items-center justify-center gap-3 mb-6 sm:mb-8"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 1.4, duration: 0.6 }}
+                transition={{ delay: 0.45, duration: 0.4 }}
               >
                 <span className="h-px w-8 bg-gradient-to-r from-transparent to-[#d4a44c]/25" />
                 <span className="block h-1 w-1 rounded-full bg-[#d4a44c]/35" />
@@ -256,7 +256,7 @@ export function IntroOverlay() {
                 }}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.5, duration: 0.5 }}
+                transition={{ delay: 0.5, duration: 0.4 }}
                 whileHover={{
                   boxShadow: '0 12px 40px rgba(212,164,76,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
                   y: -1,

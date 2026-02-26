@@ -55,8 +55,8 @@ function generateParticles(count: number): Array<{ x: number; yStart: number; si
 
 export function DivineCelestialBackground() {
   const reduceMotion = useReducedMotion()
-  const stars = useMemo(() => generateStars(80), [])
-  const particles = useMemo(() => generateParticles(16), [])
+  const stars = useMemo(() => generateStars(35), [])
+  const particles = useMemo(() => generateParticles(6), [])
 
   return (
     <div className="divine-celestial-bg pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
@@ -96,8 +96,8 @@ export function DivineCelestialBackground() {
         ))}
       </svg>
 
-      {/* Sacred divine light emanation from top-center */}
-      <motion.div
+      {/* Sacred divine light emanation from top-center (CSS animation for zero JS overhead) */}
+      <div
         className="absolute left-1/2 top-0 -translate-x-1/2"
         style={{
           width: '120vw',
@@ -108,34 +108,17 @@ export function DivineCelestialBackground() {
               rgba(212, 164, 76, 0.05) 30%,
               transparent 70%)
           `,
-        }}
-        animate={
-          reduceMotion
-            ? undefined
-            : {
-                opacity: [0.6, 1, 0.6],
-                scale: [1, 1.03, 1],
-              }
-        }
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: 'easeInOut',
+          ...(reduceMotion ? {} : {
+            animation: 'calmBreath 8s ease-in-out infinite',
+          }),
         }}
       />
 
-      {/* Sudarshana Chakra - subtle sacred geometry at top */}
-      <motion.div
+      {/* Sudarshana Chakra - subtle sacred geometry at top (pure CSS rotation for zero JS overhead) */}
+      <div
         className="absolute left-1/2 top-[-5%] -translate-x-1/2"
-        animate={
-          reduceMotion
-            ? undefined
-            : { rotate: 360 }
-        }
-        transition={{
-          duration: 120,
-          repeat: Infinity,
-          ease: 'linear',
+        style={reduceMotion ? undefined : {
+          animation: 'spin 120s linear infinite',
         }}
       >
         <svg
@@ -181,7 +164,7 @@ export function DivineCelestialBackground() {
             )
           })}
         </svg>
-      </motion.div>
+      </div>
 
       {/* Floating golden particles - ascending like sacred offerings */}
       {!reduceMotion &&

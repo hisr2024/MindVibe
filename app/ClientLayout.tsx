@@ -19,41 +19,35 @@ const PageTransitionWrapper = dynamic(
 )
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false)
+  const [showDecorations, setShowDecorations] = useState(false)
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Standard mount detection for hydration safety
-    setMounted(true)
-  }, [])
+    // Defer decorative elements until after first paint to avoid blocking
+    // navigation and content rendering. requestIdleCallback ensures particles
+    // and overlay load only when the browser is idle.
+    const id = typeof requestIdleCallback !== 'undefined'
+      ? requestIdleCallback(() => setShowDecorations(true))
+      : setTimeout(() => setShowDecorations(true), 50) as unknown as number
 
-  // Show a minimal loading state to prevent flicker during hydration
-  // Use opacity: 0 to fully hide content until hydration completes
-  if (!mounted) {
-    return (
-      <div
-        className="min-h-screen bg-[#050507]"
-        style={{
-          opacity: 0,
-          visibility: 'hidden',
-        }}
-        aria-hidden="true"
-      >
-        {/* Invisible placeholder to prevent layout shift */}
-        <div className="sr-only">Loading...</div>
-      </div>
-    )
-  }
+    return () => {
+      if (typeof cancelIdleCallback !== 'undefined') {
+        cancelIdleCallback(id)
+      } else {
+        clearTimeout(id)
+      }
+    }
+  }, [])
 
   return (
     <>
-      {/* God Particles — divine golden motes floating across all pages */}
-      <GodParticles />
-      {/* Smooth page transition wrapper */}
+      {/* Decorative particles — deferred to avoid blocking navigation */}
+      {showDecorations && <GodParticles count={20} />}
+      {/* Page transition wrapper — animates content entrance without remounting */}
       <PageTransitionWrapper>
         {children}
       </PageTransitionWrapper>
       {/* Divine intro overlay — shown once to first-time visitors */}
-      <IntroOverlay />
+      {showDecorations && <IntroOverlay />}
     </>
   )
 }
