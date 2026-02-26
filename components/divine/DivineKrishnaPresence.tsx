@@ -191,7 +191,7 @@ export function DivineKrishnaPresence() {
                 whileTap={{ scale: 0.96 }}
                 transition={springConfigs.snappy}
               >
-                {t('home.divine.ctaPrimary', 'Speak with Krishna')}
+                {t('home.divine.ctaPrimary', 'Speak with KIAAN')}
                 <motion.span
                   aria-hidden
                   animate={reduceMotion ? undefined : { x: [0, 4, 0] }}
