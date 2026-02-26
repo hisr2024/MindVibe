@@ -23,9 +23,8 @@ from __future__ import annotations
 import json
 import logging
 import os
-import re
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -33,7 +32,7 @@ logger = logging.getLogger(__name__)
 ANALYSIS_MODEL = os.getenv("RELATIONSHIP_ENGINE_ANALYSIS_MODEL", "gpt-4o-mini")
 
 
-class RelationshipMode(str, Enum):
+class RelationshipMode(StrEnum):
     """The six modes the engine can detect from user input."""
     CONFLICT = "conflict"
     BOUNDARY = "boundary"
@@ -43,7 +42,7 @@ class RelationshipMode(str, Enum):
     COURAGE = "courage"
 
 
-class Mechanism(str, Enum):
+class Mechanism(StrEnum):
     """Psychological mechanisms the engine can identify."""
     ATTACHMENT_ACTIVATION = "attachment_activation"
     UNMET_EXPECTATION = "unmet_expectation"
@@ -327,7 +326,7 @@ def detect_boundary_needed(text: str) -> bool:
 
 def rule_based_analysis(
     text: str,
-    relationship_type: str = "romantic",
+    relationship_type: str = "romantic",  # noqa: ARG001 — kept for API contract
 ) -> EngineAnalysis:
     """Perform rule-based analysis when AI is unavailable.
 
@@ -519,8 +518,8 @@ def _parse_analysis_response(
 
 def build_fallback_response(
     analysis: EngineAnalysis,
-    text: str,
-    relationship_type: str,
+    text: str,  # noqa: ARG001 — kept for API contract
+    relationship_type: str,  # noqa: ARG001 — kept for API contract
 ) -> dict[str, str]:
     """Build a rule-based fallback response when AI is unavailable.
 
@@ -661,7 +660,7 @@ def gather_wisdom_context(
         Dict with wisdom context including verses, principles, and formatted block.
     """
     try:
-        from backend.services.relationship_wisdom_core import get_relationship_wisdom_core
+        from backend.services.relationship_wisdom_core import get_relationship_wisdom_core  # noqa: I001
 
         rwc = get_relationship_wisdom_core()
 
