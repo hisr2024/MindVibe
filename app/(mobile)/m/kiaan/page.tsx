@@ -8,6 +8,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { Mic } from 'lucide-react'
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { MobileKiaanChat, ChatMessage } from '@/components/mobile/MobileKiaanChat'
@@ -152,6 +153,16 @@ export default function MobileKiaanPage() {
       showHeader={false}
       showTabBar={true}
     >
+      {/* Voice companion shortcut */}
+      <div className="flex justify-end px-4 pt-2 pb-1">
+        <button
+          onClick={() => { triggerHaptic('selection'); router.push('/m/companion') }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#d4a44c]/10 border border-[#d4a44c]/20 text-xs text-[#d4a44c] font-medium"
+        >
+          <Mic className="w-3.5 h-3.5" />
+          Voice Mode
+        </button>
+      </div>
       <MobileKiaanChat
         messages={messages}
         onSendMessage={handleSendMessage}

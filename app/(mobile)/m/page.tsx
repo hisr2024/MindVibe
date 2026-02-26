@@ -22,6 +22,8 @@ import {
   Star,
   Grid3X3,
   RefreshCw,
+  Mic,
+  Users,
 } from 'lucide-react'
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
@@ -76,6 +78,24 @@ const QUICK_ACTIONS = [
     href: '/m/wisdom',
     gradient: 'from-teal-500/20 to-green-500/20',
     iconColor: 'text-teal-400',
+  },
+  {
+    id: 'voice',
+    label: 'Voice Companion',
+    description: 'Talk with KIAAN',
+    icon: Mic,
+    href: '/m/companion',
+    gradient: 'from-orange-500/20 to-red-500/20',
+    iconColor: 'text-orange-400',
+  },
+  {
+    id: 'rooms',
+    label: 'Wisdom Rooms',
+    description: 'Community chat',
+    icon: Users,
+    href: '/m/wisdom-rooms',
+    gradient: 'from-[#d4a44c]/15 to-yellow-500/15',
+    iconColor: 'text-[#d4a44c]',
   },
   {
     id: 'tools',

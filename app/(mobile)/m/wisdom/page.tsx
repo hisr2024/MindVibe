@@ -19,6 +19,7 @@ import {
   Sparkles,
   Copy,
   Check,
+  Users,
 } from 'lucide-react'
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
@@ -318,6 +319,33 @@ export default function MobileWisdomPage() {
               <div className="flex-1">
                 <p className="text-sm font-semibold text-white">Ask KIAAN</p>
                 <p className="text-xs text-slate-400 mt-0.5">Get personalized wisdom for your situation</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-slate-500" />
+            </div>
+          </motion.button>
+        </motion.section>
+
+        {/* Wisdom Chat Rooms */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.225 }}
+        >
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              triggerHaptic('selection')
+              router.push('/m/wisdom-rooms')
+            }}
+            className="w-full p-4 rounded-2xl text-left bg-gradient-to-br from-[#d4a44c]/10 to-orange-500/10 border border-[#d4a44c]/20"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#d4a44c]/20 flex items-center justify-center">
+                <Users className="w-5 h-5 text-[#d4a44c]" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-white">Wisdom Chat Rooms</p>
+                <p className="text-xs text-slate-400 mt-0.5">Join live community conversations</p>
               </div>
               <ChevronRight className="w-5 h-5 text-slate-500" />
             </div>

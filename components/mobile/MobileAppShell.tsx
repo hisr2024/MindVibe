@@ -35,6 +35,7 @@ import {
 import { MobileTabBar, TabItem } from './MobileTabBar'
 import { MobileHeader, HeaderAction } from './MobileHeader'
 import { MobileToolsOverlay } from './MobileToolsOverlay'
+import { MobileVibePlayer } from './MobileVibePlayer'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 
@@ -84,10 +85,13 @@ const TAB_ROUTES: Record<string, string> = {
 const ROUTE_TO_TAB: Record<string, string> = {
   '/m': 'home',
   '/m/kiaan': 'kiaan',
+  '/m/companion': 'kiaan',
   '/m/journal': 'journal',
   '/m/profile': 'profile',
   '/m/tools': 'home',
   '/m/journeys': 'home',
+  '/m/wisdom': 'home',
+  '/m/wisdom-rooms': 'home',
 }
 
 export interface MobileAppShellProps {
@@ -382,6 +386,9 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
             </motion.div>
           </div>
         )}
+
+        {/* KIAAN Vibe floating player — visible across all mobile pages */}
+        {showTabBar && <MobileVibePlayer />}
 
         {/* Tools overlay — slides up from bottom with spiritual wellness tools */}
         <MobileToolsOverlay
