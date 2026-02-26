@@ -1,17 +1,23 @@
 'use client'
 
 /**
- * IntroOverlay — Divine Welcome Overlay
+ * IntroOverlay — Divine Welcome Overlay (Performance-Optimized)
  *
  * A full-screen overlay that greets first-time visitors with Krishna's message
  * from the Bhagavad Gita. Uses localStorage to show only once per visitor.
- * Can be dismissed anytime via the close (X) button.
+ *
+ * Performance approach:
+ * - CSS-first animations via @keyframes (runs on GPU compositor thread)
+ * - Zero Framer Motion instances — pure CSS stagger with animation-delay
+ * - No filter:blur() — pre-softened radial gradients eliminate GPU blur cost
+ * - GPU layer promotion via will-change + translateZ(0) + contain
+ * - Exit animation uses onTransitionEnd (no setTimeout race condition)
+ * - Respects prefers-reduced-motion for accessibility
  *
  * Color scheme: Gold (#d4a44c) on Black (#050507) — rich and divine.
  */
 
-import { useState, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Portal } from '@/components/ui/Portal'
 import { lockBodyScroll, unlockBodyScroll } from '@/lib/mobile/bodyScrollLock'
 
@@ -19,12 +25,14 @@ const STORAGE_KEY = 'mindvibe_intro_seen'
 
 export function IntroOverlay() {
   const [isVisible, setIsVisible] = useState(false)
-  const [isClosing, setIsClosing] = useState(false)
+  const [isExiting, setIsExiting] = useState(false)
+  const hasCleanedUp = useRef(false)
 
   useEffect(() => {
     try {
       const hasSeen = localStorage.getItem(STORAGE_KEY)
       if (!hasSeen) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- Standard mount detection for hydration safety; localStorage is only available client-side
         setIsVisible(true)
         lockBodyScroll()
       }
@@ -33,242 +41,199 @@ export function IntroOverlay() {
     }
   }, [])
 
+  const cleanup = useCallback(() => {
+    if (hasCleanedUp.current) return
+    hasCleanedUp.current = true
+    setIsVisible(false)
+    setIsExiting(false)
+    unlockBodyScroll()
+  }, [])
+
   const handleClose = useCallback(() => {
-    setIsClosing(true)
+    if (isExiting) return
+    setIsExiting(true)
+    hasCleanedUp.current = false
     try {
       localStorage.setItem(STORAGE_KEY, 'true')
     } catch {
       // localStorage unavailable
     }
-    // Short delay — just enough for the exit fade (300ms) without blocking UI
-    setTimeout(() => {
-      setIsVisible(false)
-      setIsClosing(false)
-      unlockBodyScroll()
-    }, 320)
-  }, [])
+  }, [isExiting])
+
+  // Clean up after exit transition completes — no setTimeout race condition
+  const handleTransitionEnd = useCallback((e: React.TransitionEvent) => {
+    if (e.propertyName === 'opacity' && isExiting) {
+      cleanup()
+    }
+  }, [isExiting, cleanup])
 
   // Close on Escape key
   useEffect(() => {
     if (!isVisible) return
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') handleClose()
     }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
   }, [isVisible, handleClose])
+
+  // Safety net: if transitionend doesn't fire (e.g., reduced motion skips transitions)
+  useEffect(() => {
+    if (!isExiting) return
+    const fallbackTimer = setTimeout(() => {
+      cleanup()
+    }, 500)
+    return () => clearTimeout(fallbackTimer)
+  }, [isExiting, cleanup])
 
   if (!isVisible) return null
 
   return (
     <Portal>
-      <AnimatePresence>
-        {!isClosing && (
-          <motion.div
-            className="fixed inset-0 flex items-center justify-center"
-            style={{ zIndex: 9999, pointerEvents: 'auto' }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Welcome to MindVibe"
-          >
-            {/* Background — deep black with golden cosmic haze */}
-            <div className="absolute inset-0 bg-[#050507]">
-              {/* Top-left golden nebula */}
-              <div
-                className="absolute top-[10%] left-[15%] w-[400px] h-[400px] rounded-full opacity-[0.08]"
-                style={{
-                  background: 'radial-gradient(circle, rgba(212,164,76,0.5) 0%, transparent 70%)',
-                  filter: 'blur(60px)',
-                }}
-              />
-              {/* Bottom-right subtle gold */}
-              <div
-                className="absolute bottom-[15%] right-[10%] w-[350px] h-[350px] rounded-full opacity-[0.06]"
-                style={{
-                  background: 'radial-gradient(circle, rgba(212,164,76,0.4) 0%, transparent 70%)',
-                  filter: 'blur(50px)',
-                }}
-              />
-              {/* Center divine glow */}
-              <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-[0.04]"
-                style={{
-                  background: 'radial-gradient(circle, rgba(240,201,109,0.6) 0%, transparent 60%)',
-                  filter: 'blur(80px)',
-                }}
-              />
-            </div>
+      <div
+        className={`intro-overlay${isExiting ? ' intro-overlay--exiting' : ''}`}
+        onTransitionEnd={handleTransitionEnd}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Welcome to MindVibe"
+      >
+        {/* Background — deep black with pre-softened golden cosmic hazes */}
+        {/* No filter:blur() — wider radial-gradient spread handles softness natively */}
+        <div className="intro-overlay__bg" aria-hidden="true">
+          <div className="intro-overlay__glow intro-overlay__glow--top" />
+          <div className="intro-overlay__glow intro-overlay__glow--bottom" />
+          <div className="intro-overlay__glow intro-overlay__glow--center" />
+        </div>
 
-            {/* Close button */}
-            <motion.button
-              onClick={handleClose}
-              className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10 group"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6, duration: 0.4 }}
-              aria-label="Close welcome overlay"
+        {/* Close button */}
+        <button
+          onClick={handleClose}
+          className="intro-overlay__close intro-overlay__stagger"
+          style={{ '--stagger-index': 7 } as React.CSSProperties}
+          aria-label="Close welcome overlay"
+        >
+          <div className="intro-overlay__close-icon">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <div className="relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full border border-[#d4a44c]/30 bg-[#d4a44c]/5 transition-all group-hover:border-[#d4a44c]/60 group-hover:bg-[#d4a44c]/10">
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-[#d4a44c]/70 group-hover:text-[#d4a44c] transition-colors"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </div>
-            </motion.button>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </div>
+        </button>
 
-            {/* Content */}
-            <div className="relative z-10 max-w-2xl w-full mx-4 sm:mx-6 text-center px-6 sm:px-10">
-              {/* OM Symbol */}
-              <motion.div
-                className="mb-6 sm:mb-8"
-                initial={{ opacity: 0, scale: 0.7 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <span className="text-5xl sm:text-6xl md:text-7xl select-none" style={{ color: '#d4a44c' }}>
-                  ॐ
-                </span>
-              </motion.div>
+        {/* Content — all children use CSS stagger via --stagger-index */}
+        <div className="intro-overlay__content">
+          {/* OM Symbol */}
+          <div
+            className="intro-overlay__stagger intro-overlay__om"
+            style={{ '--stagger-index': 0 } as React.CSSProperties}
+          >
+            <span className="text-5xl sm:text-6xl md:text-7xl select-none" style={{ color: '#d4a44c' }}>
+              ॐ
+            </span>
+          </div>
 
-              {/* Top ornamental line */}
-              <motion.div
-                className="flex items-center justify-center gap-3 mb-6 sm:mb-8"
-                initial={{ opacity: 0, scaleX: 0 }}
-                animate={{ opacity: 1, scaleX: 1 }}
-                transition={{ delay: 0.15, duration: 0.4 }}
-              >
-                <span className="h-px w-12 sm:w-16 bg-gradient-to-r from-transparent to-[#d4a44c]/40" />
-                <span className="block h-1.5 w-1.5 rounded-full bg-[#d4a44c]/50" />
-                <span className="h-px w-12 sm:w-16 bg-gradient-to-l from-transparent to-[#d4a44c]/40" />
-              </motion.div>
+          {/* Top ornamental line */}
+          <div
+            className="intro-overlay__stagger intro-overlay__ornament"
+            style={{ '--stagger-index': 1 } as React.CSSProperties}
+          >
+            <span className="h-px w-12 sm:w-16 bg-gradient-to-r from-transparent to-[#d4a44c]/40" />
+            <span className="block h-1.5 w-1.5 rounded-full bg-[#d4a44c]/50" />
+            <span className="h-px w-12 sm:w-16 bg-gradient-to-l from-transparent to-[#d4a44c]/40" />
+          </div>
 
-              {/* KIAAN greeting */}
-              <motion.p
-                className="text-[#d4a44c]/60 text-xs sm:text-sm tracking-[0.2em] uppercase mb-4 sm:mb-5"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.4 }}
-              >
-                KIAAN — Your Divine Friend
-              </motion.p>
+          {/* KIAAN greeting */}
+          <p
+            className="intro-overlay__stagger text-[#d4a44c]/60 text-xs sm:text-sm tracking-[0.2em] uppercase mb-4 sm:mb-5"
+            style={{ '--stagger-index': 2 } as React.CSSProperties}
+          >
+            KIAAN — Your Divine Friend
+          </p>
 
-              {/* Main message */}
-              <motion.h1
-                className="text-xl sm:text-2xl md:text-3xl font-bold leading-relaxed mb-5 sm:mb-6"
-                style={{
-                  background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 40%, #f0c96d 70%, #d4a44c 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25, duration: 0.5 }}
-              >
-                Welcome, Dear Friend
-              </motion.h1>
+          {/* Main message */}
+          <h1
+            className="intro-overlay__stagger intro-overlay__heading"
+            style={{ '--stagger-index': 3 } as React.CSSProperties}
+          >
+            Welcome, Dear Friend
+          </h1>
 
-              {/* Krishna's message - the divine words */}
-              <motion.div
-                className="space-y-4 sm:space-y-5 mb-8 sm:mb-10"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-              >
-                <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
-                  I am <span className="text-[#d4a44c]/90 font-medium">KIAAN</span> — your spiritual companion,
-                  walking beside you on the path to inner peace. Whatever you carry in your heart —
-                  the weight of confusion, the ache of loss, or the restlessness of the mind —
-                  <span className="text-[#e8b54a]/80 font-medium"> know that you are not alone</span>.
-                </p>
+          {/* Krishna's message */}
+          <div
+            className="intro-overlay__stagger space-y-4 sm:space-y-5 mb-8 sm:mb-10"
+            style={{ '--stagger-index': 4 } as React.CSSProperties}
+          >
+            <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
+              I am <span className="text-[#d4a44c]/90 font-medium">KIAAN</span> — your spiritual companion,
+              walking beside you on the path to inner peace. Whatever you carry in your heart —
+              the weight of confusion, the ache of loss, or the restlessness of the mind —
+              <span className="text-[#e8b54a]/80 font-medium"> know that you are not alone</span>.
+            </p>
 
-                <p className="text-white/60 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
-                  Through the eternal wisdom of the <span className="font-sacred italic text-[#d4a44c]/70">Bhagavad Gita</span>,
-                  I am here to listen, guide, and walk with you — as Krishna walked with Arjuna.
-                  Not as a master, but as your closest friend.
-                </p>
-              </motion.div>
+            <p className="text-white/60 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
+              Through the eternal wisdom of the <span className="font-sacred italic text-[#d4a44c]/70">Bhagavad Gita</span>,
+              I am here to listen, guide, and walk with you — as Krishna walked with Arjuna.
+              Not as a master, but as your closest friend.
+            </p>
+          </div>
 
-              {/* Abhyaas Verse — The Teaching of Practice (BG 6.35) */}
-              <motion.div
-                className="mb-8 sm:mb-10 space-y-3"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-              >
-                <p className="text-[#d4a44c]/45 text-[10px] sm:text-xs uppercase tracking-[0.2em]">
-                  Bhagavad Gita 6.35
-                </p>
-                <p
-                  className="font-sacred text-base sm:text-lg leading-relaxed tracking-wide text-[#f0c96d]/80"
-                  lang="sa"
-                >
-                  {'\u0905\u092D\u094D\u092F\u093E\u0938\u0947\u0928 \u0924\u0941 \u0915\u094C\u0928\u094D\u0924\u0947\u092F'}
-                </p>
-                <p
-                  className="font-sacred text-base sm:text-lg leading-relaxed tracking-wide text-[#f0c96d]/80"
-                  lang="sa"
-                >
-                  {'\u0935\u0948\u0930\u093E\u0917\u094D\u092F\u0947\u0923 \u091A \u0917\u0943\u0939\u094D\u092F\u0924\u0947'}
-                </p>
-                <p className="font-sacred text-xs sm:text-sm italic text-[#d4a44c]/50 leading-relaxed max-w-md mx-auto">
-                  &ldquo;The mind is indeed restless and difficult to restrain, O son of Kunti. But through practice and detachment, it can be mastered.&rdquo;
-                </p>
-                <p className="text-xs text-[#d4a44c]/35">
-                  — Shri Krishna to Arjuna
-                </p>
-              </motion.div>
+          {/* Abhyaas Verse — BG 6.35 */}
+          <div
+            className="intro-overlay__stagger mb-8 sm:mb-10 space-y-3"
+            style={{ '--stagger-index': 5 } as React.CSSProperties}
+          >
+            <p className="text-[#d4a44c]/45 text-[10px] sm:text-xs uppercase tracking-[0.2em]">
+              Bhagavad Gita 6.35
+            </p>
+            <p
+              className="font-sacred text-base sm:text-lg leading-relaxed tracking-wide text-[#f0c96d]/80"
+              lang="sa"
+            >
+              {'\u0905\u092D\u094D\u092F\u093E\u0938\u0947\u0928 \u0924\u0941 \u0915\u094C\u0928\u094D\u0924\u0947\u092F'}
+            </p>
+            <p
+              className="font-sacred text-base sm:text-lg leading-relaxed tracking-wide text-[#f0c96d]/80"
+              lang="sa"
+            >
+              {'\u0935\u0948\u0930\u093E\u0917\u094D\u092F\u0947\u0923 \u091A \u0917\u0943\u0939\u094D\u092F\u0924\u0947'}
+            </p>
+            <p className="font-sacred text-xs sm:text-sm italic text-[#d4a44c]/50 leading-relaxed max-w-md mx-auto">
+              &ldquo;The mind is indeed restless and difficult to restrain, O son of Kunti. But through practice and detachment, it can be mastered.&rdquo;
+            </p>
+            <p className="text-xs text-[#d4a44c]/35">
+              — Shri Krishna to Arjuna
+            </p>
+          </div>
 
-              {/* Bottom ornament */}
-              <motion.div
-                className="flex items-center justify-center gap-3 mb-6 sm:mb-8"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.45, duration: 0.4 }}
-              >
-                <span className="h-px w-8 bg-gradient-to-r from-transparent to-[#d4a44c]/25" />
-                <span className="block h-1 w-1 rounded-full bg-[#d4a44c]/35" />
-                <span className="h-px w-8 bg-gradient-to-l from-transparent to-[#d4a44c]/25" />
-              </motion.div>
+          {/* Bottom ornament */}
+          <div
+            className="intro-overlay__stagger intro-overlay__ornament"
+            style={{ '--stagger-index': 6 } as React.CSSProperties}
+          >
+            <span className="h-px w-8 bg-gradient-to-r from-transparent to-[#d4a44c]/25" />
+            <span className="block h-1 w-1 rounded-full bg-[#d4a44c]/35" />
+            <span className="h-px w-8 bg-gradient-to-l from-transparent to-[#d4a44c]/25" />
+          </div>
 
-              {/* Enter button */}
-              <motion.button
-                onClick={handleClose}
-                className="inline-flex items-center gap-2 px-8 sm:px-10 py-3 sm:py-3.5 rounded-full font-semibold text-sm sm:text-base transition-all"
-                style={{
-                  background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 45%, #f0c96d 100%)',
-                  color: '#0a0a0f',
-                  boxShadow: '0 8px 30px rgba(212,164,76,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
-                }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.4 }}
-                whileHover={{
-                  boxShadow: '0 12px 40px rgba(212,164,76,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
-                  y: -1,
-                }}
-                whileTap={{ scale: 0.97 }}
-              >
-                Enter the Sacred Space
-              </motion.button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          {/* Enter button */}
+          <button
+            onClick={handleClose}
+            className="intro-overlay__stagger intro-overlay__cta"
+            style={{ '--stagger-index': 7 } as React.CSSProperties}
+          >
+            Enter the Sacred Space
+          </button>
+        </div>
+      </div>
     </Portal>
   )
 }
