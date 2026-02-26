@@ -32,6 +32,7 @@ export function IntroOverlay() {
     try {
       const hasSeen = localStorage.getItem(STORAGE_KEY)
       if (!hasSeen) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- Standard mount detection for hydration safety; localStorage is only available client-side
         setIsVisible(true)
         lockBodyScroll()
       }
