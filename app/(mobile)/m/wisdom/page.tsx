@@ -96,6 +96,7 @@ export default function MobileWisdomPage() {
 
   // Copy verse to clipboard
   const handleCopy = useCallback(async () => {
+    if (typeof window === 'undefined') return
     triggerHaptic('success')
     const text = `"${dailyVerse.translation}"\n\n— Bhagavad Gita ${dailyVerse.chapter}.${dailyVerse.verse}`
     try {
@@ -235,20 +236,22 @@ export default function MobileWisdomPage() {
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={async () => {
+                  if (typeof window === 'undefined') return
                   triggerHaptic('selection')
                   const shareText = `"${dailyVerse.translation}"\n\n— Bhagavad Gita ${dailyVerse.chapter}.${dailyVerse.verse}`
-                  if (navigator.share) {
-                    navigator.share({
-                      title: 'MindVibe Wisdom',
-                      text: shareText,
-                    }).catch(() => {})
-                  } else {
-                    // Fallback: copy to clipboard
-                    try {
+                  try {
+                    if (navigator.share) {
+                      await navigator.share({
+                        title: 'MindVibe Wisdom',
+                        text: shareText,
+                      })
+                    } else {
                       await navigator.clipboard.writeText(shareText)
                       setCopied(true)
                       setTimeout(() => setCopied(false), 2000)
-                    } catch { /* Clipboard unavailable */ }
+                    }
+                  } catch {
+                    // Share cancelled or clipboard unavailable
                   }
                 }}
                 className="p-2.5 rounded-xl bg-white/[0.06] text-slate-400"
