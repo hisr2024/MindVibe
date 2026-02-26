@@ -123,7 +123,7 @@ export function getCurrentQuestion(session: QuizSession): QuizQuestion | null {
  * Get quiz result message from KIAAN.
  */
 export function getQuizResultMessage(session: QuizSession): string {
-  const percent = Math.round((session.score / session.questions.length) * 100)
+  const percent = session.questions.length > 0 ? Math.round((session.score / session.questions.length) * 100) : 0
 
   if (percent === 100) return `Perfect score, friend! You truly know the Gita! ${session.bestStreak} questions in a row - you are a wisdom warrior!`
   if (percent >= 80) return `Wonderful! ${session.score}/${session.questions.length} correct! Your knowledge of the Gita runs deep, dear one.`

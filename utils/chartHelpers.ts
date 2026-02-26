@@ -230,7 +230,7 @@ export function calculateMovingAverage(
     const start = Math.max(0, index - Math.floor(window / 2))
     const end = Math.min(data.length, index + Math.ceil(window / 2))
     const slice = data.slice(start, end)
-    return slice.reduce((sum, val) => sum + val, 0) / slice.length
+    return slice.length > 0 ? slice.reduce((sum, val) => sum + val, 0) / slice.length : 0
   })
 }
 

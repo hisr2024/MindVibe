@@ -195,6 +195,8 @@ export function sendAffirmation(): void {
  * Schedule divine reminders throughout the day
  */
 export function scheduleDivineReminders(intervalMinutes: number = 120): number {
+  if (typeof window === 'undefined') return 0
+
   // Send a reminder at the specified interval
   const intervalId = window.setInterval(() => {
     const hour = new Date().getHours();
@@ -218,6 +220,7 @@ export function scheduleDivineReminders(intervalMinutes: number = 120): number {
  * Cancel scheduled divine reminders
  */
 export function cancelDivineReminders(intervalId: number): void {
+  if (typeof window === 'undefined') return
   window.clearInterval(intervalId);
 }
 

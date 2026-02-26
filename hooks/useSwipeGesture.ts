@@ -125,8 +125,7 @@ export function useSwipeGesture(config: SwipeConfig = {}): UseSwipeGestureReturn
       : Math.abs(deltaY)
 
     const elapsed = Date.now() - startTime
-    const velocity = distance / elapsed
-
+    const velocity = elapsed > 0 ? distance / elapsed : 0
     const progress = Math.min(distance / mergedConfig.threshold, 1)
 
     setState({
@@ -154,7 +153,7 @@ export function useSwipeGesture(config: SwipeConfig = {}): UseSwipeGestureReturn
         : Math.abs(deltaY)
 
       const elapsed = Date.now() - startTime
-      const velocity = distance / elapsed
+      const velocity = elapsed > 0 ? distance / elapsed : 0
 
       // Check if swipe meets threshold
       if (distance >= mergedConfig.threshold || velocity >= mergedConfig.velocityThreshold) {

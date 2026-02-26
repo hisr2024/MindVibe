@@ -9,9 +9,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-// Generate UUID using crypto API (browser-native)
-const generateId = () => crypto.randomUUID()
-
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { MobileKiaanChat, ChatMessage } from '@/components/mobile/MobileKiaanChat'
 import { useAuth } from '@/hooks/useAuth'
@@ -21,12 +18,13 @@ import { queueOfflineOperation } from '@/lib/offline/syncService'
 
 export default function MobileKiaanPage() {
   const router = useRouter()
-  const { user: _user, isAuthenticated } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { triggerHaptic } = useHapticFeedback()
 
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [sessionId, setSessionId] = useState<string | null>(null)
+  const [connectionError, setConnectionError] = useState(false)
 
   // Initialize chat session
   useEffect(() => {
@@ -56,6 +54,7 @@ export default function MobileKiaanPage() {
         }
       } catch (error) {
         console.error('Failed to initialize chat session:', error)
+        setConnectionError(true)
       }
     }
 
@@ -64,7 +63,7 @@ export default function MobileKiaanPage() {
 
   // Send message to KIAAN
   const handleSendMessage = useCallback(async (text: string) => {
-    const messageId = generateId()
+    const messageId = crypto.randomUUID()
     const timestamp = new Date().toISOString()
 
     // Optimistically add user message
@@ -108,9 +107,9 @@ export default function MobileKiaanPage() {
 
         // Add assistant response
         const assistantMessage: ChatMessage = {
-          id: data.message_id || generateId(),
+          id: data.message_id || crypto.randomUUID(),
           sender: 'assistant',
-          text: data.response,
+          text: data.response || 'I am here with you. Could you share more about what you are feeling?',
           timestamp: new Date().toISOString(),
           status: 'sent',
           summary: data.summary,
@@ -158,7 +157,7 @@ export default function MobileKiaanPage() {
         onSendMessage={handleSendMessage}
         onSaveToJournal={handleSaveToJournal}
         isLoading={isLoading}
-        placeholder="Share what's on your mind..."
+        placeholder={connectionError ? 'Reconnecting to KIAAN...' : "Share what's on your mind..."}
         className="flex-1 min-h-0"
       />
     </MobileAppShell>

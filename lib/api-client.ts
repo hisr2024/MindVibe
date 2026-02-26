@@ -26,7 +26,7 @@ export interface APICallOptions extends RequestInit {
  */
 export function getCurrentLocale(): string {
   if (typeof window === 'undefined') return 'en';
-  return localStorage.getItem('preferredLocale') || 'en';
+  try { return localStorage.getItem('preferredLocale') || 'en'; } catch { return 'en'; }
 }
 
 /**
