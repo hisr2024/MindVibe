@@ -3,6 +3,14 @@
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 
+/**
+ * IntroOverlay is loaded eagerly (not behind requestIdleCallback) because:
+ * - It's the first thing a new visitor sees — deferring it causes a visible
+ *   content flash where page content appears then gets covered by the overlay
+ * - The component is now CSS-first (no Framer Motion), so its JS payload is small
+ * - It checks localStorage synchronously and bails early for returning visitors,
+ *   so the cost for repeat visits is near zero
+ */
 const IntroOverlay = dynamic(
   () => import('@/components/divine/IntroOverlay').then(mod => mod.IntroOverlay),
   { ssr: false }
@@ -22,9 +30,10 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   const [showDecorations, setShowDecorations] = useState(false)
 
   useEffect(() => {
-    // Defer decorative elements until after first paint to avoid blocking
-    // navigation and content rendering. requestIdleCallback ensures particles
-    // and overlay load only when the browser is idle.
+    // Defer decorative particles until after first paint to avoid blocking
+    // navigation and content rendering. The IntroOverlay is NOT deferred —
+    // it must appear immediately for first-time visitors to prevent the
+    // flash of content-then-overlay.
     const id = typeof requestIdleCallback !== 'undefined'
       ? requestIdleCallback(() => setShowDecorations(true))
       : setTimeout(() => setShowDecorations(true), 50) as unknown as number
@@ -46,8 +55,9 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
       <PageTransitionWrapper>
         {children}
       </PageTransitionWrapper>
-      {/* Divine intro overlay — shown once to first-time visitors */}
-      {showDecorations && <IntroOverlay />}
+      {/* Divine intro overlay — shown once to first-time visitors.
+          Loaded eagerly (not deferred) to prevent content flash. */}
+      <IntroOverlay />
     </>
   )
 }

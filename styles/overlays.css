@@ -78,3 +78,347 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
+
+/* =====================================================
+   INTRO OVERLAY — CSS-first divine welcome experience
+   ─────────────────────────────────────────────────────
+   Performance strategy:
+   • All animations run via CSS @keyframes on the GPU compositor thread
+   • Zero JS animation libraries — no Framer Motion runtime overhead
+   • Stagger effect via --stagger-index CSS custom property × 80ms
+   • Exit fade uses CSS transition + onTransitionEnd (no setTimeout race)
+   • No filter:blur() — radial-gradient spread handles softness natively
+   • GPU layer promotion: will-change + translateZ(0) + contain
+   ===================================================== */
+
+/* ── Entrance keyframe: fade + subtle slide up ── */
+@keyframes introFadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+  }
+}
+
+/* ── OM symbol entrance: scale + fade ── */
+@keyframes introScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.7) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+  }
+}
+
+/* ── Ornament line entrance: scaleX from center ── */
+@keyframes introOrnamentReveal {
+  from {
+    opacity: 0;
+    transform: scaleX(0) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1) translateZ(0);
+  }
+}
+
+/* ── Background glow subtle pulse (runs after entrance) ── */
+@keyframes introGlowPulse {
+  0%, 100% { opacity: var(--glow-opacity); }
+  50% { opacity: calc(var(--glow-opacity) * 1.4); }
+}
+
+/* ── Main overlay container ── */
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+
+  /* GPU layer promotion + containment */
+  transform: translateZ(0);
+  will-change: opacity;
+  contain: layout style;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  /* Entrance: fade in the entire overlay */
+  opacity: 1;
+  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Exit state: fade out */
+.intro-overlay--exiting {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Background layer ── */
+.intro-overlay__bg {
+  position: absolute;
+  inset: 0;
+  background-color: #050507;
+  /* Prevent bg from triggering repaints on content animation */
+  contain: strict;
+}
+
+/* ── Golden glow elements — NO filter:blur() ──
+   The softness comes from wide radial-gradient spread (0% → 70%/80%)
+   combined with larger element sizes. This avoids the expensive GPU
+   blur compositing pass that filter:blur() requires. */
+.intro-overlay__glow {
+  position: absolute;
+  border-radius: 50%;
+  /* Promote each glow to its own layer to avoid repaints */
+  transform: translateZ(0);
+  will-change: opacity;
+  animation: introGlowPulse 6s ease-in-out infinite;
+  animation-delay: 1s; /* Start after entrance completes */
+}
+
+.intro-overlay__glow--top {
+  top: 5%;
+  left: 10%;
+  width: 500px;
+  height: 500px;
+  --glow-opacity: 0.07;
+  opacity: var(--glow-opacity);
+  background: radial-gradient(circle, rgba(212, 164, 76, 0.35) 0%, transparent 75%);
+}
+
+.intro-overlay__glow--bottom {
+  bottom: 10%;
+  right: 5%;
+  width: 450px;
+  height: 450px;
+  --glow-opacity: 0.05;
+  opacity: var(--glow-opacity);
+  background: radial-gradient(circle, rgba(212, 164, 76, 0.3) 0%, transparent 75%);
+  animation-delay: 1.5s;
+}
+
+.intro-overlay__glow--center {
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 600px;
+  margin-top: -300px;
+  margin-left: -300px;
+  --glow-opacity: 0.04;
+  opacity: var(--glow-opacity);
+  background: radial-gradient(circle, rgba(240, 201, 109, 0.4) 0%, transparent 65%);
+  animation-delay: 2s;
+}
+
+/* ── Content container ── */
+.intro-overlay__content {
+  position: relative;
+  z-index: 10;
+  max-width: 42rem;
+  width: 100%;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  text-align: center;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  /* Prevent content layout from affecting overlay layout */
+  contain: layout style;
+  /* Allow vertical scrolling on small screens */
+  max-height: 90vh;
+  overflow-y: auto;
+  /* Hide scrollbar for cleaner look */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.intro-overlay__content::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .intro-overlay__content {
+    margin-left: 1.5rem;
+    margin-right: 1.5rem;
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+
+/* ── Staggered entrance animation ──
+   Each child with .intro-overlay__stagger gets a CSS animation
+   delayed by --stagger-index × 80ms. This runs entirely on the
+   compositor thread — zero JS overhead, zero React re-renders. */
+.intro-overlay__stagger {
+  opacity: 0;
+  animation: introFadeSlideUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(var(--stagger-index, 0) * 80ms + 100ms);
+  /* GPU acceleration for the transform */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* OM gets a scale entrance instead of slide */
+.intro-overlay__om {
+  margin-bottom: 1.5rem;
+  animation-name: introScaleIn;
+  animation-duration: 0.5s;
+}
+
+@media (min-width: 640px) {
+  .intro-overlay__om {
+    margin-bottom: 2rem;
+  }
+}
+
+/* Ornaments get a scaleX reveal */
+.intro-overlay__ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  animation-name: introOrnamentReveal;
+  animation-duration: 0.4s;
+}
+
+@media (min-width: 640px) {
+  .intro-overlay__ornament:first-of-type {
+    margin-bottom: 2rem;
+  }
+}
+
+/* ── Heading with gold gradient text ── */
+.intro-overlay__heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.625;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(135deg, #c8943a 0%, #e8b54a 40%, #f0c96d 70%, #d4a44c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@media (min-width: 640px) {
+  .intro-overlay__heading {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .intro-overlay__heading {
+    font-size: 1.875rem;
+  }
+}
+
+/* ── Close button ── */
+.intro-overlay__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 20;
+  /* Override stagger slide — close button just fades in */
+  animation-name: introFadeSlideUp !important;
+}
+
+@media (min-width: 640px) {
+  .intro-overlay__close {
+    top: 1.5rem;
+    right: 1.5rem;
+  }
+}
+
+.intro-overlay__close-icon {
+  position: relative;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(212, 164, 76, 0.3);
+  background: rgba(212, 164, 76, 0.05);
+  color: rgba(212, 164, 76, 0.7);
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+}
+
+@media (min-width: 640px) {
+  .intro-overlay__close-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+.intro-overlay__close:hover .intro-overlay__close-icon,
+.intro-overlay__close:focus-visible .intro-overlay__close-icon {
+  border-color: rgba(212, 164, 76, 0.6);
+  background: rgba(212, 164, 76, 0.1);
+  color: #d4a44c;
+}
+
+/* ── CTA button ── */
+.intro-overlay__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #0a0a0f;
+  background: linear-gradient(135deg, #c8943a 0%, #e8b54a 45%, #f0c96d 100%);
+  box-shadow: 0 8px 30px rgba(212, 164, 76, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border: none;
+  cursor: pointer;
+  /* Smooth hover transition — CSS only, no JS state tracking */
+  transition: box-shadow 0.25s ease, transform 0.2s ease;
+}
+
+@media (min-width: 640px) {
+  .intro-overlay__cta {
+    padding: 0.875rem 2.5rem;
+    font-size: 1rem;
+  }
+}
+
+.intro-overlay__cta:hover {
+  box-shadow: 0 12px 40px rgba(212, 164, 76, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px) translateZ(0);
+}
+
+.intro-overlay__cta:active {
+  transform: scale(0.97) translateZ(0);
+}
+
+/* ── Prefers reduced motion ──
+   Skip all stagger animations, show content immediately.
+   Keep the exit fade since it's functional (not decorative). */
+@media (prefers-reduced-motion: reduce) {
+  .intro-overlay__stagger {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .intro-overlay__glow {
+    animation: none;
+  }
+
+  .intro-overlay__cta:hover {
+    transform: none;
+  }
+
+  .intro-overlay__cta:active {
+    transform: none;
+  }
+}
