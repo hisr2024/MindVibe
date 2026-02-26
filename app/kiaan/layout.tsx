@@ -28,8 +28,8 @@ export default function KiaanLayout({ children }: { children: ReactNode }) {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_20%,rgba(212,164,76,0.04),transparent_60%),radial-gradient(ellipse_at_20%_80%,rgba(212,164,76,0.02),transparent_50%)]" />
       </div>
 
-      {/* Cosmic golden particles */}
-      <CosmicParticles count={55} />
+      {/* Cosmic golden particles — reduced count for smooth navigation */}
+      <CosmicParticles count={20} />
 
       {/* Subtle Krishna silhouette - divine ambient presence */}
       <KrishnaSilhouette position="right" opacity={0.03} />
