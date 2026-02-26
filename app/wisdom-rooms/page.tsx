@@ -136,6 +136,11 @@ export default function WisdomRoomsPage() {
       }
     }
 
+    ws.onerror = () => {
+      setStatus('disconnected')
+      setAlert('Connection error — trying to reconnect...')
+    }
+
     ws.onclose = () => {
       setStatus('disconnected')
     }
