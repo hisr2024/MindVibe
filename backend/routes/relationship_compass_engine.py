@@ -30,7 +30,8 @@ from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
 from backend.services.relationship_compass_engine import (
     EngineAnalysis,
     RelationshipMode,
@@ -354,7 +355,7 @@ async def engine_health() -> dict[str, Any]:
     # Check wisdom core availability
     wisdom_stats: dict[str, Any] = {}
     try:
-        from backend.services.relationship_wisdom_core import get_relationship_wisdom_core
+        from backend.services.relationship_wisdom_core import get_relationship_wisdom_core  # noqa: I001
         rwc = get_relationship_wisdom_core()
         wisdom_stats = rwc.get_corpus_stats()
     except Exception:
@@ -491,7 +492,7 @@ async def _generate_ai_response(
 
     # Fallback: direct OpenAI
     try:
-        import os
+        import os  # noqa: I001
         from openai import OpenAI
 
         api_key = os.getenv("OPENAI_API_KEY", "").strip()
