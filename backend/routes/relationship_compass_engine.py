@@ -1,17 +1,20 @@
-"""Relationship Compass Engine - Modern, Secular Relationship Clarity API.
+"""Relationship Compass Engine - Deep Gita-Grounded Relationship Clarity API.
 
-This router provides relationship guidance that translates Bhagavad Gita
-principles into modern psychology and behavioral clarity. Unlike the
-original Relationship Compass (which uses Sanskrit terminology and verse
-citations), this engine delivers calm, direct, actionable guidance in
-plain modern language.
+This router provides relationship guidance deeply grounded in Bhagavad Gita
+wisdom from the full 700+ verse corpus. It translates Gita principles into
+modern psychology and behavioral clarity, delivering calm, direct, actionable
+guidance in plain modern language while ensuring every response traces back
+to authentic Gita teachings.
 
 Core features:
 - Mode detection: Conflict, Boundary, Repair, Decision, Pattern, Courage
 - Mechanism identification: Attachment activation, ego injury, etc.
+- Deep Gita wisdom integration: 700+ verse corpus + 20 curated principles
+- Gita Wisdom Filter: All AI responses validated for Gita grounding
 - Structured responses: Emotional Precision, Mechanism Insight, Hard Truth, Action, Script
 - Safety detection for abuse/crisis situations
 - Session history for multi-turn conversations
+- Multi-provider AI: OpenAI + Sarvam AI with automatic fallback
 
 Endpoints:
     POST /api/relationship-compass-engine/clarity  - Get relationship clarity
@@ -34,6 +37,7 @@ from backend.services.relationship_compass_engine import (
     ai_analysis,
     build_fallback_response,
     extract_response_sections,
+    gather_wisdom_context,
 )
 from backend.services.relationship_compass_engine_prompt import (
     RELATIONSHIP_ENGINE_SYSTEM_PROMPT,
@@ -148,22 +152,38 @@ async def get_clarity(
         f"confidence={analysis.confidence:.2f}"
     )
 
-    # Step 2: Generate response
+    # Step 2: Gather Gita wisdom context from 700+ verse corpus + curated principles
+    wisdom = gather_wisdom_context(
+        situation=message,
+        analysis=analysis,
+        relationship_type=relationship_type,
+    )
+
+    logger.info(
+        f"Wisdom context: {wisdom.get('verses_count', 0)} verses, "
+        f"{wisdom.get('principles_count', 0)} principles from "
+        f"{wisdom.get('corpus_size', 0)}-verse corpus"
+    )
+
+    # Step 3: Generate response with wisdom context
     response_text = None
     sections: dict[str, str] = {}
     provider_used = "fallback"
     model_used = "rule_based"
 
-    # Try AI-powered response generation
+    # Try AI-powered response generation with wisdom context
     try:
         response_text, provider_used, model_used = await _generate_ai_response(
             message=message,
             analysis=analysis,
             relationship_type=relationship_type,
             history=history,
+            wisdom_block=wisdom.get("wisdom_block", ""),
         )
 
         if response_text:
+            # Step 4: Apply Gita Wisdom Filter to validate grounding
+            response_text = await _apply_wisdom_filter(response_text, message)
             sections = extract_response_sections(response_text)
 
     except Exception as e:
@@ -212,6 +232,14 @@ async def get_clarity(
             "core_need": analysis.core_need,
             "confidence": analysis.confidence,
             "analysis_depth": analysis.analysis_depth,
+        },
+        "wisdom": {
+            "verse_citations": wisdom.get("verse_citations", []),
+            "principle_citations": wisdom.get("principle_citations", []),
+            "verses_used": wisdom.get("verses_count", 0),
+            "principles_used": wisdom.get("principles_count", 0),
+            "corpus_size": wisdom.get("corpus_size", 0),
+            "gita_grounded": wisdom.get("verses_count", 0) > 0,
         },
         "provider": provider_used,
         "model": model_used,
@@ -310,7 +338,7 @@ async def list_modes() -> dict[str, Any]:
 
 @router.get("/health")
 async def engine_health() -> dict[str, Any]:
-    """Health check for the Relationship Compass Engine."""
+    """Health check for the Relationship Compass Engine with wisdom integration."""
     import os
     openai_key = bool(os.getenv("OPENAI_API_KEY", "").strip())
 
@@ -323,14 +351,40 @@ async def engine_health() -> dict[str, Any]:
     except Exception:
         pass
 
+    # Check wisdom core availability
+    wisdom_stats: dict[str, Any] = {}
+    try:
+        from backend.services.relationship_wisdom_core import get_relationship_wisdom_core
+        rwc = get_relationship_wisdom_core()
+        wisdom_stats = rwc.get_corpus_stats()
+    except Exception:
+        pass
+
+    # Check Gita wisdom filter
+    wisdom_filter_ready = False
+    try:
+        from backend.services.gita_wisdom_filter import get_gita_wisdom_filter
+        wf = get_gita_wisdom_filter()
+        wisdom_filter_ready = wf is not None
+    except Exception:
+        pass
+
     return {
         "status": "ok",
         "service": "relationship-compass-engine",
-        "version": "1.0",
+        "version": "2.0",
         "ai_available": openai_key or provider_available,
         "provider_manager": provider_available,
         "fallback": "rule_based",
         "modes": [m.value for m in RelationshipMode],
+        "wisdom_integration": {
+            "corpus_loaded": wisdom_stats.get("corpus_loaded", False),
+            "total_verses": wisdom_stats.get("total_verses", 0),
+            "curated_principles": wisdom_stats.get("curated_principles", 0),
+            "themes_indexed": wisdom_stats.get("themes_indexed", 0),
+            "keywords_indexed": wisdom_stats.get("keywords_indexed", 0),
+            "wisdom_filter_ready": wisdom_filter_ready,
+        },
         "capabilities": [
             "mode_detection",
             "emotion_precision",
@@ -338,6 +392,10 @@ async def engine_health() -> dict[str, Any]:
             "safety_detection",
             "structured_guidance",
             "conversation_history",
+            "gita_wisdom_700_verses",
+            "curated_relationship_principles",
+            "gita_wisdom_filter",
+            "multi_provider_ai",
         ],
     }
 
@@ -351,22 +409,25 @@ async def _generate_ai_response(
     analysis: EngineAnalysis,
     relationship_type: str,
     history: list[dict],
+    wisdom_block: str = "",
 ) -> tuple[str | None, str, str]:
-    """Generate AI-powered response using the engine system prompt.
+    """Generate AI-powered response using the engine system prompt with Gita wisdom.
 
-    Tries multi-provider manager first, then direct OpenAI, and returns
-    the response text along with provider and model info.
+    Injects the wisdom context from the 700+ verse corpus into the prompt,
+    tries multi-provider manager first (supporting OpenAI + Sarvam AI fallback),
+    then direct OpenAI, and returns the response text along with provider info.
 
     Args:
         message: User's input.
         analysis: Pre-computed analysis of the situation.
         relationship_type: Type of relationship.
         history: Recent conversation history.
+        wisdom_block: Formatted Gita wisdom context block from RelationshipWisdomCore.
 
     Returns:
         Tuple of (response_text, provider_name, model_name).
     """
-    # Build the user prompt with analysis context
+    # Build the user prompt with analysis context and wisdom
     analysis_context = (
         f"[ANALYSIS CONTEXT - use this to inform your response, do not expose to user]\n"
         f"Detected mode: {analysis.mode}\n"
@@ -384,8 +445,14 @@ async def _generate_ai_response(
         analysis_context += f"Core unmet need: {analysis.core_need}\n"
     analysis_context += "[/ANALYSIS CONTEXT]\n\n"
 
+    # Inject Gita wisdom context from the 700+ verse corpus
+    wisdom_section = ""
+    if wisdom_block:
+        wisdom_section = f"{wisdom_block}\n\n"
+
     user_prompt = (
         f"{analysis_context}"
+        f"{wisdom_section}"
         f"Relationship type: {relationship_type}\n\n"
         f"User's situation:\n{message}"
     )
@@ -402,7 +469,7 @@ async def _generate_ai_response(
         {"role": "user", "content": user_prompt},
     ]
 
-    # Try multi-provider manager
+    # Try multi-provider manager (supports OpenAI + Sarvam AI with automatic fallback)
     try:
         from backend.services.ai.providers.provider_manager import get_provider_manager
         provider_manager = get_provider_manager()
@@ -411,7 +478,10 @@ async def _generate_ai_response(
             response = await provider_manager.chat(
                 messages=messages,
                 temperature=0.3,
-                max_tokens=1200,
+                max_tokens=1500,
+                apply_gita_filter=True,
+                tool_type="relationship_compass",
+                user_context=message,
             )
             if response and response.content and len(response.content.strip()) > 100:
                 logger.info(f"Engine response from {response.provider}/{response.model}")
@@ -432,7 +502,7 @@ async def _generate_ai_response(
                 model=model,
                 messages=messages,
                 temperature=0.3,
-                max_tokens=1200,
+                max_tokens=1500,
                 timeout=30.0,
             )
             content = response.choices[0].message.content if response.choices else None
@@ -443,6 +513,46 @@ async def _generate_ai_response(
         logger.warning(f"Direct OpenAI failed for engine response: {e}")
 
     return None, "fallback", "rule_based"
+
+
+async def _apply_wisdom_filter(response_text: str, user_context: str) -> str:
+    """Apply Gita Wisdom Filter to validate and enhance response grounding.
+
+    Passes the AI response through the central GitaWisdomFilter to ensure
+    it meets minimum Gita grounding requirements. Logs the wisdom score
+    for monitoring.
+
+    Args:
+        response_text: The AI-generated response.
+        user_context: The original user input for contextual enhancement.
+
+    Returns:
+        Filtered response text (may be enhanced if wisdom score was low).
+    """
+    try:
+        from backend.services.gita_wisdom_filter import get_gita_wisdom_filter
+
+        wisdom_filter = get_gita_wisdom_filter()
+        result = await wisdom_filter.filter_response(
+            content=response_text,
+            tool_type="relationship_compass",
+            user_context=user_context,
+            enhance_if_needed=True,
+        )
+
+        logger.info(
+            f"Wisdom filter: score={result.wisdom_score:.2f}, "
+            f"grounded={result.is_gita_grounded}, "
+            f"verses={len(result.verses_referenced)}, "
+            f"concepts={len(result.gita_concepts_found)}, "
+            f"enhanced={result.enhancement_applied}"
+        )
+
+        return result.content
+
+    except Exception as e:
+        logger.warning(f"Wisdom filter failed (non-critical, using original): {e}")
+        return response_text
 
 
 def _sections_to_text(mode: str, sections: dict[str, str]) -> str:

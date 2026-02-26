@@ -1,12 +1,18 @@
-"""Relationship Compass Engine - modern, secular relationship clarity service.
+"""Relationship Compass Engine - Deep Gita-grounded relationship clarity service.
 
 This module provides the core engine for the Relationship Compass, translating
 Bhagavad Gita principles into modern psychology and behavioral clarity. It handles
 mode detection, mechanism analysis, and structured response generation.
 
+The engine now integrates deeply with the full 700+ verse Gita corpus and curated
+relationship principles through RelationshipWisdomCore, ensuring every response is
+grounded in authentic Bhagavad Gita wisdom while expressed in modern, secular language.
+
 Key capabilities:
 - Mode detection: Conflict, Boundary, Repair, Decision, Pattern, Courage
 - Mechanism identification: Attachment activation, ego injury, control attempt, etc.
+- Deep Gita wisdom integration: 700+ verse corpus search + 20 curated principles
+- Gita Wisdom Filter: All AI responses validated for Gita grounding
 - Structured responses: Emotional Precision, Mechanism Insight, Hard Truth, Action, Script
 - Rule-based fallback when AI is unavailable
 - Safety detection for abuse/crisis situations
@@ -632,6 +638,134 @@ def build_fallback_response(
         "what_to_do": what_to_do,
         "script": script,
     }
+
+
+def gather_wisdom_context(
+    situation: str,
+    analysis: EngineAnalysis,
+    relationship_type: str = "romantic",
+) -> dict[str, Any]:
+    """Gather Gita wisdom context from the 700+ verse corpus and curated principles.
+
+    Searches the full static corpus and retrieves curated relationship principles
+    that are most relevant to the user's situation, mode, emotion, and mechanism.
+    This context is injected into the AI prompt so responses are deeply grounded
+    in authentic Bhagavad Gita wisdom.
+
+    Args:
+        situation: The user's relationship situation text.
+        analysis: Pre-computed EngineAnalysis of the situation.
+        relationship_type: Type of relationship.
+
+    Returns:
+        Dict with wisdom context including verses, principles, and formatted block.
+    """
+    try:
+        from backend.services.relationship_wisdom_core import get_relationship_wisdom_core
+
+        rwc = get_relationship_wisdom_core()
+
+        # Retrieve curated principles matched to mode/emotion/type
+        principles = rwc.get_principles(
+            mode=analysis.mode,
+            emotion=analysis.primary_emotion,
+            relationship_type=relationship_type,
+            limit=5,
+        )
+
+        # Search the full 700+ verse corpus for relationship-relevant wisdom
+        static_verses = rwc.search_corpus(
+            situation=situation,
+            mode=analysis.mode,
+            emotion=analysis.primary_emotion,
+            mechanism=analysis.mechanism,
+            relationship_type=relationship_type,
+            limit=6,
+        )
+
+        # Build a formatted wisdom context block for the AI synthesizer
+        lines = []
+        lines.append("[GITA_WISDOM_CONTEXT — use this to deeply ground your response]")
+        lines.append(f"Corpus: {rwc.get_corpus_stats().get('total_verses', 700)}+ verses across 18 chapters")
+        lines.append("")
+
+        if principles:
+            lines.append("--- RELATIONSHIP PRINCIPLES (Gita-derived, secular) ---")
+            for p in principles:
+                lines.append(f"• [{p.id}] {p.principle}")
+                lines.append(f"  Why: {p.explanation}")
+                lines.append(f"  Gita source: {p.gita_essence} ({p.gita_source})")
+                lines.append("")
+
+        if static_verses:
+            lines.append("--- RELEVANT GITA VERSES (ranked by relevance to this situation) ---")
+            for v in static_verses:
+                ref = v.get("verse_ref", "")
+                english = v.get("english", "")[:300]
+                principle_text = v.get("principle", "")
+                theme = v.get("theme", "")
+                mh_apps = v.get("mental_health_applications", [])
+                lines.append(f"• {ref}: {english}")
+                if principle_text:
+                    lines.append(f"  Teaching: {principle_text}")
+                if theme:
+                    lines.append(f"  Theme: {theme.replace('_', ' ').title()}")
+                if mh_apps:
+                    lines.append(f"  Applications: {', '.join(mh_apps[:4])}")
+                lines.append("")
+
+        lines.append("--- INSTRUCTIONS FOR USING WISDOM CONTEXT ---")
+        lines.append("1. DEEPLY ABSORB the verses and principles above before responding")
+        lines.append("2. TRANSLATE Gita wisdom into modern emotional language (never quote Sanskrit)")
+        lines.append("3. WEAVE the verse teachings naturally into your emotional precision and hard truth")
+        lines.append("4. Let the principles SHAPE your action step — make it feel like ancient wisdom in modern clothes")
+        lines.append("5. Go to the ROOT of the issue — surface-level advice is not enough")
+        lines.append("6. Feel the user's pain FIRST, then guide with the steadiness of Gita wisdom")
+        lines.append("[/GITA_WISDOM_CONTEXT]")
+
+        wisdom_block = "\n".join(lines)
+
+        # Build verse citations list for response metadata
+        verse_citations = []
+        for v in static_verses:
+            verse_citations.append({
+                "ref": v.get("verse_ref", ""),
+                "teaching": v.get("principle", v.get("english", "")[:150]),
+            })
+
+        principle_citations = []
+        for p in principles:
+            principle_citations.append({
+                "id": p.id,
+                "principle": p.principle,
+                "gita_source": p.gita_source,
+            })
+
+        logger.info(
+            f"Compass wisdom gathered: {len(principles)} principles, "
+            f"{len(static_verses)} verses for mode={analysis.mode}, "
+            f"emotion={analysis.primary_emotion}"
+        )
+
+        return {
+            "wisdom_block": wisdom_block,
+            "verse_citations": verse_citations,
+            "principle_citations": principle_citations,
+            "verses_count": len(static_verses),
+            "principles_count": len(principles),
+            "corpus_size": rwc.get_corpus_stats().get("total_verses", 0),
+        }
+
+    except Exception as e:
+        logger.warning(f"Wisdom context gathering failed (non-critical): {e}")
+        return {
+            "wisdom_block": "",
+            "verse_citations": [],
+            "principle_citations": [],
+            "verses_count": 0,
+            "principles_count": 0,
+            "corpus_size": 0,
+        }
 
 
 def extract_response_sections(text: str) -> dict[str, str]:
