@@ -192,7 +192,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // Initialize on mount - sync document attributes and load translations
   useEffect(() => {
     // Ensure localStorage is synced with the initial language
-    localStorage.setItem(STORAGE_KEY, language)
+    try { localStorage.setItem(STORAGE_KEY, language) } catch { /* Private browsing */ }
 
     // Apply RTL direction if needed
     const dir = LANGUAGES[language].dir
@@ -207,7 +207,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const setLanguage = useCallback(async (newLang: Language) => {
     setLanguageState(newLang)
-    localStorage.setItem(STORAGE_KEY, newLang)
+    try { localStorage.setItem(STORAGE_KEY, newLang) } catch { /* Private browsing */ }
     
     // Apply RTL direction
     const dir = LANGUAGES[newLang].dir

@@ -58,13 +58,14 @@ function getDefaultSubscription(): Subscription {
 
 function persistSubscription(subscription: Subscription) {
   if (typeof window === 'undefined') return
-  localStorage.setItem(SUBSCRIPTION_STORAGE_KEY, JSON.stringify(subscription))
+  try { localStorage.setItem(SUBSCRIPTION_STORAGE_KEY, JSON.stringify(subscription)) } catch { /* Private browsing */ }
 }
 
 function getCachedSubscription(): Subscription {
   if (typeof window === 'undefined') return getDefaultSubscription()
 
-  const stored = localStorage.getItem(SUBSCRIPTION_STORAGE_KEY)
+  let stored: string | null = null
+  try { stored = localStorage.getItem(SUBSCRIPTION_STORAGE_KEY) } catch { /* Private browsing */ }
   if (!stored) return getDefaultSubscription()
 
   try {

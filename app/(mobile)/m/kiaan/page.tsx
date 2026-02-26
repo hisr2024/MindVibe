@@ -109,7 +109,7 @@ export default function MobileKiaanPage() {
         const assistantMessage: ChatMessage = {
           id: data.message_id || crypto.randomUUID(),
           sender: 'assistant',
-          text: data.response,
+          text: data.response || 'I am here with you. Could you share more about what you are feeling?',
           timestamp: new Date().toISOString(),
           status: 'sent',
           summary: data.summary,
