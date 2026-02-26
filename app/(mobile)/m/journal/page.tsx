@@ -22,7 +22,7 @@ export default function MobileJournalPage() {
   const { triggerHaptic } = useHapticFeedback()
 
   const [prefillContent, setPrefillContent] = useState<string | undefined>()
-  const [_isSaving, setIsSaving] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   // Check for prefill content from KIAAN or other sources
   useEffect(() => {

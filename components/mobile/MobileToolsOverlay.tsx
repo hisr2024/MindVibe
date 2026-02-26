@@ -48,7 +48,7 @@ const OVERLAY_TOOLS: OverlayTool[] = [
     label: 'Viyoga',
     description: 'Practice sacred detachment from outcomes',
     icon: Leaf,
-    href: '/tools/viyog',
+    href: '/tools/viyoga',
     gradient: 'from-green-500/15 to-emerald-500/10',
     iconColor: 'text-green-400',
     accentBorder: 'border-green-500/20',

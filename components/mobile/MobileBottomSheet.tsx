@@ -173,14 +173,67 @@ export const MobileBottomSheet = forwardRef<HTMLDivElement, MobileBottomSheetPro
       triggerHaptic('selection')
     }, [triggerHaptic])
 
-    // Lock body scroll when open using centralized utility
+    // Store previously focused element for focus restoration
+    const previousFocusRef = useRef<HTMLElement | null>(null)
+
+    // Lock body scroll and manage focus when open
     useEffect(() => {
       if (isOpen) {
+        // Save the currently focused element
+        previousFocusRef.current = document.activeElement as HTMLElement | null
+
         lockBodyScroll()
+
+        // Focus the sheet after animation settles
+        const focusTimer = setTimeout(() => {
+          const focusTarget = sheetRef.current?.querySelector<HTMLElement>(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          )
+          if (focusTarget) {
+            focusTarget.focus()
+          } else {
+            sheetRef.current?.focus()
+          }
+        }, 100)
+
         return () => {
+          clearTimeout(focusTimer)
           unlockBodyScroll()
+
+          // Restore focus to the previously focused element
+          if (previousFocusRef.current && document.contains(previousFocusRef.current)) {
+            previousFocusRef.current.focus()
+          }
         }
       }
+    }, [isOpen])
+
+    // Focus trap: keep focus within the sheet
+    useEffect(() => {
+      if (!isOpen) return
+
+      const handleTabKey = (e: KeyboardEvent) => {
+        if (e.key !== 'Tab' || !sheetRef.current) return
+
+        const focusableElements = sheetRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+        if (focusableElements.length === 0) return
+
+        const firstElement = focusableElements[0]
+        const lastElement = focusableElements[focusableElements.length - 1]
+
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault()
+          lastElement.focus()
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault()
+          firstElement.focus()
+        }
+      }
+
+      window.addEventListener('keydown', handleTabKey)
+      return () => window.removeEventListener('keydown', handleTabKey)
     }, [isOpen])
 
     // Reset state when closed
@@ -191,7 +244,7 @@ export const MobileBottomSheet = forwardRef<HTMLDivElement, MobileBottomSheetPro
       }
     }, [isOpen])
 
-    // Handle escape key
+    // Handle escape key (always allow escape, not just when dismissible)
     useEffect(() => {
       const handleEscape = (e: KeyboardEvent) => {
         if (e.key === 'Escape' && isOpen && dismissible) {

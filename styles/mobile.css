@@ -690,6 +690,74 @@ body[style*="position: fixed"] { width: 100% !important; }
   .mobile-content { padding-bottom: 0; }
 }
 
+/* ─── Page Transition ─── */
+.mobile-page-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.mobile-page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+/* ─── Enhanced Mood Selector ─── */
+.mood-btn-active {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* ─── Streak Celebration ─── */
+@keyframes streak-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 164, 76, 0); }
+  50% { box-shadow: 0 0 12px 4px rgba(212, 164, 76, 0.15); }
+}
+
+.streak-celebration {
+  animation: streak-glow 2s ease-in-out infinite;
+}
+
+/* ─── Pull-to-refresh Progress ─── */
+.pull-refresh-circle {
+  transition: stroke-dasharray 0.1s ease-out;
+}
+
+/* ─── Enhanced Card Hover States ─── */
+@media (hover: hover) {
+  .mobile-quick-action:hover {
+    border-color: rgba(212, 164, 76, 0.2);
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* ─── Journey Progress Bar ─── */
+.journey-progress-bar {
+  background: linear-gradient(90deg, #d4a44c 0%, #e8b54a 100%);
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ─── Connection Error Banner ─── */
+.connection-error-banner {
+  background: linear-gradient(135deg, rgba(212, 164, 76, 0.1) 0%, rgba(212, 164, 76, 0.05) 100%);
+  border: 1px solid rgba(212, 164, 76, 0.15);
+}
+
+/* ─── Notification Swipe Hint ─── */
+.notification-swipe-hint {
+  background: linear-gradient(90deg, transparent 0%, rgba(239, 68, 68, 0.1) 100%);
+}
+
+/* ─── Bottom Sheet Focus Ring ─── */
+[role="dialog"]:focus-visible {
+  outline: none;
+}
+
+[role="dialog"] :focus-visible {
+  outline: 2px solid rgba(212, 164, 76, 0.5);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
 /* ─── Low-End Device Performance ─── */
 @media (prefers-reduced-motion: reduce), (update: slow) {
   *, *::before, *::after {
@@ -702,4 +770,25 @@ body[style*="position: fixed"] { width: 100% !important; }
   .animate-spin, .animate-pulse, .animate-bounce {
     animation: none !important;
   }
+
+  /* Disable framer-motion style animations for reduced motion */
+  [style*="transform"] {
+    transition: none !important;
+  }
+}
+
+/* ─── Animations Keyframes ─── */
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes mobile-loading-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes offline-gradient {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
 }

@@ -61,10 +61,9 @@ export default function MobileWisdomPage() {
   const { triggerHaptic } = useHapticFeedback()
 
   const [dailyVerse, setDailyVerse] = useState<DailyVerse>(FALLBACK_VERSE)
-  const [_isLoading, setIsLoading] = useState(true)
+  const [isPageLoading, setIsPageLoading] = useState(true)
   const [isFavorited, setIsFavorited] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [_selectedTheme, setSelectedTheme] = useState<string | null>(null)
 
   // Fetch daily wisdom
   useEffect(() => {
@@ -87,7 +86,7 @@ export default function MobileWisdomPage() {
       } catch (error) {
         console.error('Failed to fetch daily wisdom:', error)
       } finally {
-        setIsLoading(false)
+        setIsPageLoading(false)
       }
     }
 
@@ -129,7 +128,6 @@ export default function MobileWisdomPage() {
   // Navigate to theme exploration
   const handleThemeSelect = useCallback((themeId: string) => {
     triggerHaptic('selection')
-    setSelectedTheme(themeId)
     router.push(`/kiaan-vibe/gita?theme=${themeId}`)
   }, [router, triggerHaptic])
 
@@ -141,7 +139,7 @@ export default function MobileWisdomPage() {
 
   // Handle refresh
   const handleRefresh = useCallback(async () => {
-    setIsLoading(true)
+    setIsPageLoading(true)
     try {
       const response = await apiFetch('/api/kiaan/friend/daily-wisdom')
       if (response.ok) {
@@ -160,7 +158,7 @@ export default function MobileWisdomPage() {
     } catch (error) {
       console.error('Failed to refresh wisdom:', error)
     } finally {
-      setIsLoading(false)
+      setIsPageLoading(false)
     }
   }, [])
 
@@ -235,13 +233,21 @@ export default function MobileWisdomPage() {
 
               <motion.button
                 whileTap={{ scale: 0.9 }}
-                onClick={() => {
+                onClick={async () => {
                   triggerHaptic('selection')
+                  const shareText = `"${dailyVerse.translation}"\n\n— Bhagavad Gita ${dailyVerse.chapter}.${dailyVerse.verse}`
                   if (navigator.share) {
                     navigator.share({
                       title: 'MindVibe Wisdom',
-                      text: `"${dailyVerse.translation}"\n\n— Bhagavad Gita ${dailyVerse.chapter}.${dailyVerse.verse}`,
+                      text: shareText,
                     }).catch(() => {})
+                  } else {
+                    // Fallback: copy to clipboard
+                    try {
+                      await navigator.clipboard.writeText(shareText)
+                      setCopied(true)
+                      setTimeout(() => setCopied(false), 2000)
+                    } catch { /* Clipboard unavailable */ }
                   }
                 }}
                 className="p-2.5 rounded-xl bg-white/[0.06] text-slate-400"

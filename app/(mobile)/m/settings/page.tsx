@@ -170,8 +170,7 @@ export default function MobileSettingsPage() {
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [notificationTopics, setNotificationTopics] = useState<NotificationTopic[]>([])
-  const [_darkMode, _setDarkMode] = useState(true)
-  const [language, _setLanguage] = useState('en')
+  const [language, setLanguage] = useState('en')
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
@@ -306,17 +305,17 @@ export default function MobileSettingsPage() {
             icon={<User className="w-4 h-4 text-slate-400" />}
             label={user?.name || user?.email?.split('@')[0] || 'User'}
             description={user?.email}
-            onClick={() => router.push('/m/settings/profile')}
+            onClick={() => router.push('/account')}
           />
           <SettingRow
             icon={<Mail className="w-4 h-4 text-slate-400" />}
             label="Email Preferences"
-            onClick={() => router.push('/m/settings/email')}
+            onClick={() => router.push('/account')}
           />
           <SettingRow
             icon={<Key className="w-4 h-4 text-slate-400" />}
             label="Change Password"
-            onClick={() => router.push('/m/settings/password')}
+            onClick={() => router.push('/account')}
           />
         </SettingSection>
 
@@ -339,12 +338,12 @@ export default function MobileSettingsPage() {
             icon={<Shield className="w-4 h-4 text-slate-400" />}
             label="Two-Factor Authentication"
             description="Add extra security to your account"
-            onClick={() => router.push('/m/settings/2fa')}
+            onClick={() => router.push('/account')}
           />
           <SettingRow
             icon={<Lock className="w-4 h-4 text-slate-400" />}
             label="Privacy Settings"
-            onClick={() => router.push('/m/settings/privacy')}
+            onClick={() => router.push('/privacy')}
           />
         </SettingSection>
 
@@ -366,7 +365,7 @@ export default function MobileSettingsPage() {
               icon={<RefreshCw className="w-4 h-4 text-slate-400" />}
               label="Notification Types"
               value={`${notificationTopics.length} active`}
-              onClick={() => router.push('/m/settings/notifications')}
+              onClick={() => router.push('/m/notifications')}
             />
           )}
         </SettingSection>
@@ -377,7 +376,16 @@ export default function MobileSettingsPage() {
             icon={<Globe className="w-4 h-4 text-slate-400" />}
             label="Language"
             value={language === 'en' ? 'English' : language}
-            onClick={() => router.push('/m/settings/language')}
+            onClick={() => {
+              // Cycle through available languages
+              const langs = ['en', 'hi', 'ta', 'te']
+              const idx = langs.indexOf(language)
+              const next = langs[(idx + 1) % langs.length]
+              setLanguage(next)
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('mindvibe_language', next)
+              }
+            }}
           />
           <SettingRow
             icon={<Smartphone className="w-4 h-4 text-slate-400" />}
@@ -396,7 +404,9 @@ export default function MobileSettingsPage() {
             label="Switch to Desktop"
             description="Use the full desktop experience"
             onClick={() => {
-              document.cookie = 'prefer-desktop=true;path=/;max-age=31536000'
+              try {
+                document.cookie = 'prefer-desktop=true; path=/; max-age=31536000; SameSite=Lax'
+              } catch { /* Cookie API unavailable */ }
               router.push('/dashboard')
             }}
           />

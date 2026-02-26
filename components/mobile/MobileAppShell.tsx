@@ -185,12 +185,16 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
       }
     }, [isOnline])
 
+    // Pull progress for visual indicator
+    const [pullProgress, setPullProgress] = useState(0)
+
     // Pull-to-refresh via native touch events (NOT Framer onPan which kills scroll)
     useEffect(() => {
       if (!enablePullToRefresh || !onRefresh) return
 
       let startY = 0
       let pulling = false
+      const PULL_THRESHOLD = 80
 
       const onTouchStart = (e: TouchEvent) => {
         if (window.scrollY <= 0) {
@@ -199,14 +203,23 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
       }
 
       const onTouchMove = (e: TouchEvent) => {
-        if (window.scrollY > 0) return
+        if (window.scrollY > 0) {
+          setPullProgress(0)
+          return
+        }
         const diff = e.touches[0].clientY - startY
-        if (diff > 80 && !pulling && !isRefreshing) {
-          pulling = true
+        if (diff > 0 && !isRefreshing) {
+          const progress = Math.min(diff / PULL_THRESHOLD, 1)
+          setPullProgress(progress)
+          if (diff > PULL_THRESHOLD && !pulling) {
+            pulling = true
+            triggerHaptic('selection')
+          }
         }
       }
 
       const onTouchEnd = async () => {
+        setPullProgress(0)
         if (pulling && !isRefreshing) {
           pulling = false
           setIsRefreshing(true)
@@ -292,7 +305,7 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
 
         {/* Pull-to-refresh indicator */}
         <AnimatePresence>
-          {isRefreshing && (
+          {(isRefreshing || pullProgress > 0) && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -300,12 +313,29 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
               className="fixed left-1/2 -translate-x-1/2 z-30 pointer-events-none"
               style={{ top: showHeader ? (largeTitle ? 108 : 64) : 8 }}
             >
-              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                <motion.div
-                  className="w-5 h-5 border-2 border-[#d4a44c] border-t-transparent rounded-full"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                />
+              <div className="w-9 h-9 rounded-full bg-[#0f1624]/90 border border-[#d4a44c]/20 flex items-center justify-center shadow-lg shadow-black/20">
+                {isRefreshing ? (
+                  <motion.div
+                    className="w-5 h-5 border-2 border-[#d4a44c] border-t-transparent rounded-full"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                  />
+                ) : (
+                  <svg width="20" height="20" viewBox="0 0 20 20" className="text-[#d4a44c]">
+                    <circle
+                      cx="10"
+                      cy="10"
+                      r="7"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeDasharray={`${pullProgress * 44} 44`}
+                      transform="rotate(-90 10 10)"
+                      opacity={pullProgress}
+                    />
+                  </svg>
+                )}
               </div>
             </motion.div>
           )}

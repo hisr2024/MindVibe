@@ -53,7 +53,7 @@ const NOTIFICATION_BG: Record<string, string> = {
 
 export default function MobileNotificationsPage() {
   const router = useRouter()
-  const { isAuthenticated: _isAuthenticated } = useAuth()
+  useAuth() // Ensure auth context is loaded
   const { triggerHaptic } = useHapticFeedback()
 
   const [notifications, setNotifications] = useState<Notification[]>([])
@@ -130,8 +130,8 @@ export default function MobileNotificationsPage() {
     })
   }, [triggerHaptic])
 
-  // Remove notification
-  const _removeNotification = useCallback((id: string) => {
+  // Remove notification (used by swipe-to-dismiss)
+  const removeNotification = useCallback((id: string) => {
     triggerHaptic('light')
     setNotifications(prev => {
       const updated = prev.filter(n => n.id !== id)
@@ -247,6 +247,14 @@ export default function MobileNotificationsPage() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 100, height: 0 }}
                         transition={{ delay: index * 0.03 }}
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={0.3}
+                        onDragEnd={(_e, info) => {
+                          if (info.offset.x > 120 || info.velocity.x > 500) {
+                            removeNotification(notification.id)
+                          }
+                        }}
                       >
                         <motion.button
                           whileTap={{ scale: 0.98 }}

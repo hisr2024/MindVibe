@@ -21,6 +21,7 @@ import {
   Leaf,
   Sun,
   Search,
+  RefreshCw,
 } from 'lucide-react'
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
@@ -66,6 +67,7 @@ export default function MobileJourneysPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [hasError, setHasError] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
 
   // Fetch journeys
@@ -90,12 +92,11 @@ export default function MobileJourneysPage() {
 
         if (availableResponse.ok) {
           const data = await availableResponse.json()
-          // Filter out active journeys from available list
-          const _activeIds = new Set((data.items || data.journeys || []).filter((j: { status?: string }) => j.status === 'active').map((j: { id: string }) => j.id))
-          setAvailableJourneys((data.items || data.journeys || []).filter((j: { id: string; status?: string }) => j.status !== 'active'))
+          setAvailableJourneys((data.items || data.journeys || []).filter((j: { status?: string }) => j.status !== 'active'))
         }
       } catch (error) {
         console.error('Failed to fetch journeys:', error)
+        setHasError(true)
       } finally {
         setIsLoading(false)
       }
@@ -146,6 +147,7 @@ export default function MobileJourneysPage() {
       }
     } catch (error) {
       console.error('Failed to refresh journeys:', error)
+      setHasError(true)
     } finally {
       setIsLoading(false)
     }
@@ -339,6 +341,23 @@ export default function MobileJourneysPage() {
             </div>
           )}
         </div>
+
+        {/* Error hint */}
+        <AnimatePresence>
+          {hasError && !isLoading && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mx-4 mb-4 flex items-center gap-2 px-3 py-2 rounded-xl bg-[#d4a44c]/10 border border-[#d4a44c]/15"
+            >
+              <RefreshCw className="w-4 h-4 text-[#d4a44c] flex-shrink-0" />
+              <p className="text-xs text-[#e8b54a]">
+                Could not load journeys. Pull down to refresh.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </MobileAppShell>
   )

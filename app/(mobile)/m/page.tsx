@@ -405,7 +405,13 @@ export default function MobileHomePage() {
           transition={{ delay: 0.15 }}
           className="grid grid-cols-3 gap-3"
         >
-          <div className="p-3 rounded-xl text-center bg-gradient-to-br from-[#d4a44c]/10 to-[#d4a44c]/5 border border-[#d4a44c]/20">
+          <motion.div
+            whileTap={{ scale: 0.95 }}
+            className="p-3 rounded-xl text-center bg-gradient-to-br from-[#d4a44c]/10 to-[#d4a44c]/5 border border-[#d4a44c]/20 relative overflow-hidden"
+          >
+            {dashboardData.streak >= 7 && (
+              <div className="absolute inset-0 bg-gradient-to-t from-[#d4a44c]/5 to-transparent pointer-events-none" />
+            )}
             <div className="flex items-center justify-center gap-1 mb-1">
               <Zap className="w-4 h-4 text-[#d4a44c]" />
               <span className="text-xl font-bold text-[#d4a44c]">
@@ -413,9 +419,12 @@ export default function MobileHomePage() {
               </span>
             </div>
             <p className="text-[10px] text-slate-400">Day Streak</p>
-          </div>
+          </motion.div>
 
-          <div className="p-3 rounded-xl text-center bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20">
+          <motion.div
+            whileTap={{ scale: 0.95 }}
+            className="p-3 rounded-xl text-center bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20"
+          >
             <div className="flex items-center justify-center gap-1 mb-1">
               <PenLine className="w-4 h-4 text-purple-400" />
               <span className="text-xl font-bold text-purple-400">
@@ -423,9 +432,12 @@ export default function MobileHomePage() {
               </span>
             </div>
             <p className="text-[10px] text-slate-400">Reflections</p>
-          </div>
+          </motion.div>
 
-          <div className="p-3 rounded-xl text-center bg-gradient-to-br from-cyan-500/10 to-blue-500/5 border border-cyan-500/20">
+          <motion.div
+            whileTap={{ scale: 0.95 }}
+            className="p-3 rounded-xl text-center bg-gradient-to-br from-cyan-500/10 to-blue-500/5 border border-cyan-500/20"
+          >
             <div className="flex items-center justify-center gap-1 mb-1">
               <Sparkles className="w-4 h-4 text-cyan-400" />
               <span className="text-xl font-bold text-cyan-400">
@@ -433,7 +445,7 @@ export default function MobileHomePage() {
               </span>
             </div>
             <p className="text-[10px] text-slate-400">Insights</p>
-          </div>
+          </motion.div>
         </motion.section>
 
         {/* Active Journey Card */}
