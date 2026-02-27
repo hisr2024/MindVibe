@@ -436,6 +436,9 @@ def _get_secular_fallback(
 **Something to Consider**
 {sections['something_to_consider']}"""
 
+    # Get Gita teaching for this attachment type (used for karma_yoga_insight)
+    gita_teaching = ATTACHMENT_TO_GITA.get(attachment_type, ATTACHMENT_TO_GITA["outcome_anxiety"])
+
     return {
         "status": "success",
         "detachment_guidance": sections,
@@ -445,6 +448,12 @@ def _get_secular_fallback(
         "provider": "mindvibe",
         "analysis_mode": analysis_mode.value,
         "attachment_analysis": attachment_analysis,
+        "karma_yoga_insight": {
+            "teaching": gita_teaching.get("teaching", ""),
+            "verse": gita_teaching.get("verse", "BG 2.47"),
+            "remedy": gita_teaching.get("remedy", ""),
+            "pillars": gita_teaching.get("pillars", []),
+        },
         "fallback": True,
         "secularMode": True,
         "cached": False,
