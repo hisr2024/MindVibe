@@ -7,47 +7,36 @@
 
 import { randomUUID } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieHeader = request.headers.get('cookie') || ''
-
     // Try backend session creation
     const backendResponse = await fetch(`${BACKEND_URL}/api/chat/session/start`, {
       method: 'POST',
-      headers: {
-        'Cookie': cookieHeader,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers: proxyHeaders(request),
       signal: AbortSignal.timeout(5000),
     })
 
     if (backendResponse.ok) {
       const data = await backendResponse.json()
-      return NextResponse.json(data)
+      return forwardCookies(backendResponse, NextResponse.json(data))
     }
 
     // Try alternate endpoint
     const altResponse = await fetch(`${BACKEND_URL}/api/kiaan/friend/chat`, {
       method: 'POST',
-      headers: {
-        'Cookie': cookieHeader,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers: proxyHeaders(request),
       body: JSON.stringify({ action: 'start_session' }),
       signal: AbortSignal.timeout(5000),
     }).catch(() => null)
 
     if (altResponse?.ok) {
       const data = await altResponse.json()
-      return NextResponse.json({
+      return forwardCookies(altResponse, NextResponse.json({
         session_id: data.session_id || generateSessionId(),
         messages: data.messages || [],
-      })
+      }))
     }
 
     // Generate local session ID as fallback

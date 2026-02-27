@@ -6,13 +6,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const cookieHeader = request.headers.get('cookie') || ''
 
     // Validate blob_json is provided
     if (!body.blob_json) {
@@ -25,35 +23,27 @@ export async function POST(request: NextRequest) {
     // Try the backend journal endpoint
     const backendResponse = await fetch(`${BACKEND_URL}/api/journal/blob`, {
       method: 'POST',
-      headers: {
-        'Cookie': cookieHeader,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers: proxyHeaders(request),
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(8000),
     })
 
     if (backendResponse.ok) {
       const data = await backendResponse.json()
-      return NextResponse.json(data)
+      return forwardCookies(backendResponse, NextResponse.json(data))
     }
 
     // Try alternate journal endpoint
     const altResponse = await fetch(`${BACKEND_URL}/api/journal/entries`, {
       method: 'POST',
-      headers: {
-        'Cookie': cookieHeader,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers: proxyHeaders(request),
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(8000),
     }).catch(() => null)
 
     if (altResponse?.ok) {
       const data = await altResponse.json()
-      return NextResponse.json(data)
+      return forwardCookies(altResponse, NextResponse.json(data))
     }
 
     if (backendResponse.status === 401) {

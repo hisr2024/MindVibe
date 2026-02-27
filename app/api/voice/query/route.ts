@@ -6,8 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 // ─── Language Names (for multilingual Tier 2 responses) ─────────────────
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -63,11 +62,7 @@ export async function POST(request: NextRequest) {
       // Try voice query endpoint
       const response = await fetch(`${BACKEND_URL}/api/voice/query`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': request.headers.get('authorization') || '',
-          'Cookie': request.headers.get('cookie') || '',
-        },
+        headers: proxyHeaders(request),
         body: JSON.stringify({
           query: sanitizedQuery,
           language,
@@ -78,24 +73,20 @@ export async function POST(request: NextRequest) {
 
       if (response.ok) {
         const data = await response.json()
-        return NextResponse.json({
+        return forwardCookies(response, NextResponse.json({
           success: true,
           response: data.response || data.text,
           verse: data.verse,
           emotion: data.detected_emotion,
           audio_url: data.audio_url,
           gita_wisdom: true,
-        })
+        }))
       }
 
       // Try regular chat endpoint as fallback
       const chatResponse = await fetch(`${BACKEND_URL}/api/chat/message`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': request.headers.get('authorization') || '',
-          'Cookie': request.headers.get('cookie') || '',
-        },
+        headers: proxyHeaders(request),
         body: JSON.stringify({
           message: sanitizedQuery,
           language,
@@ -105,11 +96,11 @@ export async function POST(request: NextRequest) {
 
       if (chatResponse.ok) {
         const chatData = await chatResponse.json()
-        return NextResponse.json({
+        return forwardCookies(chatResponse, NextResponse.json({
           success: true,
           response: chatData.response || chatData.message,
           gita_wisdom: true,
-        })
+        }))
       }
     } catch (backendError) {
       console.warn('[Voice Query] Backend failed, trying OpenAI direct:', backendError)

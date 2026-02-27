@@ -1,33 +1,16 @@
 /**
  * Journey Engine Fix Stuck Journeys API Proxy
- * Proxies to backend fix-stuck-journeys endpoint.
- * Requires authentication.
- *
- * Forwards Set-Cookie headers from backend so CSRF tokens reach the browser.
+ * Proxies to backend fix-stuck-journeys endpoint. Requires authentication.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-
-function forwardCookies(backendRes: Response, clientRes: NextResponse): NextResponse {
-  const cookies = backendRes.headers.getSetCookie?.() ?? []
-  for (const cookie of cookies) {
-    clientRes.headers.append('Set-Cookie', cookie)
-  }
-  return clientRes
-}
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 export async function POST(request: NextRequest) {
   try {
     const response = await fetch(`${BACKEND_URL}/api/journey-engine/fix-stuck-journeys`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        cookie: request.headers.get('cookie') || '',
-        ...(request.headers.get('X-CSRF-Token') ? { 'X-CSRF-Token': request.headers.get('X-CSRF-Token')! } : {}),
-      },
+      headers: proxyHeaders(request),
     })
 
     if (response.ok) {

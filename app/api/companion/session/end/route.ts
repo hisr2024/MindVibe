@@ -4,31 +4,22 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    }
-    const cookie = request.headers.get('cookie')
-    if (cookie) headers.cookie = cookie
-    const authorization = request.headers.get('authorization')
-    if (authorization) headers.authorization = authorization
-
     const backendResponse = await fetch(`${BACKEND_URL}/api/companion/session/end`, {
       method: 'POST',
-      headers,
+      headers: proxyHeaders(request),
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(10000),
     })
 
     if (backendResponse.ok) {
       const data = await backendResponse.json()
-      return NextResponse.json(data)
+      return forwardCookies(backendResponse, NextResponse.json(data))
     }
 
     // Fallback farewell

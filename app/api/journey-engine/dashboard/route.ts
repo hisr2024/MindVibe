@@ -1,14 +1,10 @@
 /**
  * Journey Engine Dashboard API Proxy
- * Proxies to backend journey-engine service with graceful fallback
- * when the backend is unavailable or user is not authenticated.
- *
- * Forwards Set-Cookie headers from backend so CSRF tokens reach the browser.
+ * Proxies to backend journey-engine service with graceful fallback.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 const FALLBACK_DASHBOARD = {
   active_journeys: [],
@@ -21,23 +17,11 @@ const FALLBACK_DASHBOARD = {
   _fallback: true,
 }
 
-function forwardCookies(backendRes: Response, clientRes: NextResponse): NextResponse {
-  const cookies = backendRes.headers.getSetCookie?.() ?? []
-  for (const cookie of cookies) {
-    clientRes.headers.append('Set-Cookie', cookie)
-  }
-  return clientRes
-}
-
 export async function GET(request: NextRequest) {
   try {
     const response = await fetch(`${BACKEND_URL}/api/journey-engine/dashboard`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        cookie: request.headers.get('cookie') || '',
-      },
+      headers: proxyHeaders(request),
     })
 
     if (response.ok) {

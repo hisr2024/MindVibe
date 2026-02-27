@@ -3,9 +3,8 @@
  * Provides Server-Sent Events (SSE) streaming for real-time responses
  */
 
-import { NextRequest } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { NextRequest, NextResponse } from 'next/server'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 // Fallback wisdom responses when backend is unavailable
 const FALLBACK_RESPONSES = [
@@ -47,11 +46,7 @@ export async function POST(request: NextRequest) {
     try {
       const response = await fetch(`${BACKEND_URL}/api/chat/message/stream`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'text/event-stream',
-          cookie: request.headers.get('cookie') || '',
-        },
+        headers: proxyHeaders(request, { 'Accept': 'text/event-stream' }),
         body: JSON.stringify({
           message: sanitizedMessage,
           language,
@@ -60,14 +55,15 @@ export async function POST(request: NextRequest) {
       })
 
       if (response.ok && response.body) {
-        // Proxy the stream from backend
-        return new Response(response.body, {
+        // Proxy the stream from backend, forwarding Set-Cookie headers
+        const streamResponse = new NextResponse(response.body, {
           headers: {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive',
           },
         })
+        return forwardCookies(response, streamResponse)
       }
     } catch (backendError) {
       console.warn('[Chat Stream] Backend streaming failed:', backendError)
@@ -77,10 +73,7 @@ export async function POST(request: NextRequest) {
     try {
       const response = await fetch(`${BACKEND_URL}/api/chat/message`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          cookie: request.headers.get('cookie') || '',
-        },
+        headers: proxyHeaders(request),
         body: JSON.stringify({
           message: sanitizedMessage,
           language,
@@ -110,13 +103,14 @@ export async function POST(request: NextRequest) {
           },
         })
 
-        return new Response(stream, {
+        const streamResponse = new NextResponse(stream, {
           headers: {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive',
           },
         })
+        return forwardCookies(response, streamResponse)
       }
     } catch (nonStreamError) {
       console.warn('[Chat Stream] Non-streaming backend failed:', nonStreamError)

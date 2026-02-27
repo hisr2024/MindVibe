@@ -5,9 +5,8 @@
  * Rotates daily based on day-of-year so every user sees the same wisdom each day.
  */
 
-import { NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { NextRequest, NextResponse } from 'next/server'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 interface DailyWisdomEntry {
   chapter: number
@@ -87,15 +86,16 @@ const WISDOM_LIBRARY: DailyWisdomEntry[] = [
   },
 ]
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   // Try backend first
   try {
     const res = await fetch(`${BACKEND_URL}/api/kiaan/friend/daily-wisdom`, {
+      headers: proxyHeaders(request),
       signal: AbortSignal.timeout(3000),
     })
     if (res.ok) {
       const data = await res.json()
-      if (data?.wisdom) return NextResponse.json(data)
+      if (data?.wisdom) return forwardCookies(res, NextResponse.json(data))
     }
   } catch {
     // Backend unavailable

@@ -7,8 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 // Track processed idempotency keys to prevent duplicate deletions (TTL: 1 hour)
 const processedKeys = new Map<string, { status: number; body: Record<string, unknown>; expiresAt: number }>()
@@ -23,7 +22,6 @@ function cleanExpiredKeys() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const cookieHeader = request.headers.get('cookie') || ''
 
     if (!body.confirm) {
       return NextResponse.json(
@@ -44,11 +42,7 @@ export async function POST(request: NextRequest) {
 
     const backendResponse = await fetch(`${BACKEND_URL}/api/gdpr/delete-account`, {
       method: 'POST',
-      headers: {
-        'Cookie': cookieHeader,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers: proxyHeaders(request),
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(30000),
     })
@@ -58,7 +52,7 @@ export async function POST(request: NextRequest) {
       if (idempotencyKey) {
         processedKeys.set(idempotencyKey, { status: 200, body: data, expiresAt: Date.now() + 3600_000 })
       }
-      return NextResponse.json(data)
+      return forwardCookies(backendResponse, NextResponse.json(data))
     }
 
     if (backendResponse.status === 401) {

@@ -16,11 +16,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 import { VIYOGA_SECULAR_PROMPT, VIYOGA_SYSTEM_PROMPT, VIYOGA_HEADINGS_SECULAR, VIYOGA_HEADINGS_GITA } from '@/lib/viyoga/systemPrompt'
 import { retrieveGitaChunks, getExpandedQuery } from '@/lib/viyoga/retrieval'
 import { appendMessage, ensureSession, getRecentMessages } from '@/lib/viyoga/storage'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:8000'
 const BACKEND_TIMEOUT = 60000 // 60 seconds for AI analysis + response generation
 const OPENAI_TIMEOUT_MS = 30000
 const OPENAI_MODEL = process.env.VIYOGA_CHAT_MODEL || 'gpt-4o-mini'
@@ -112,11 +111,7 @@ export async function POST(request: NextRequest) {
 
     const backendResponse = await fetch(`${BACKEND_URL}/api/viyoga/chat`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        cookie: request.headers.get('cookie') || '',
-      },
+      headers: proxyHeaders(request),
       body: JSON.stringify({
         message: sanitizedMessage,
         sessionId,
@@ -142,7 +137,7 @@ export async function POST(request: NextRequest) {
         })
       } catch { /* continue */ }
 
-      return NextResponse.json({
+      return forwardCookies(backendResponse, NextResponse.json({
         assistant: data.assistant,
         sections: data.sections || {},
         citations: data.citations || [],
@@ -157,7 +152,7 @@ export async function POST(request: NextRequest) {
           strategy: data.provider || 'backend_v4',
           confidence: data.concern_analysis?.confidence || 0,
         },
-      })
+      }))
     }
 
     // Handle specific error codes

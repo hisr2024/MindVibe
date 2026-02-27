@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 const REQUEST_TIMEOUT = 60000
 
 /**
@@ -68,11 +67,7 @@ export async function POST(request: NextRequest) {
     try {
       const response = await fetch(`${BACKEND_URL}/api/relationship-compass-engine/clarity`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          cookie: request.headers.get('cookie') || '',
-        },
+        headers: proxyHeaders(request),
         body: JSON.stringify({
           message,
           sessionId,
@@ -86,11 +81,11 @@ export async function POST(request: NextRequest) {
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'Unknown error')
         console.error(`[Compass Engine] Backend returned ${response.status}: ${errorText}`)
-        return NextResponse.json(FALLBACK_RESPONSE)
+        return forwardCookies(response, NextResponse.json(FALLBACK_RESPONSE))
       }
 
       const data = await response.json()
-      return NextResponse.json(data)
+      return forwardCookies(response, NextResponse.json(data))
     } catch (backendError) {
       clearTimeout(timeoutId)
       if (backendError instanceof Error && backendError.name === 'AbortError') {

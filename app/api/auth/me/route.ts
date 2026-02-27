@@ -1,35 +1,17 @@
 /**
  * Auth Me API Route
- *
  * Returns the current authenticated user's identity.
  * Proxies to backend /api/auth/me with cookie-based auth.
- *
- * Forwards Set-Cookie headers from backend so CSRF tokens reach the browser.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-
-function forwardCookies(backendRes: Response, clientRes: NextResponse): NextResponse {
-  const cookies = backendRes.headers.getSetCookie?.() ?? []
-  for (const cookie of cookies) {
-    clientRes.headers.append('Set-Cookie', cookie)
-  }
-  return clientRes
-}
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 export async function GET(request: NextRequest) {
   try {
-    const cookieHeader = request.headers.get('cookie') || ''
-
     const backendResponse = await fetch(`${BACKEND_URL}/api/auth/me`, {
       method: 'GET',
-      headers: {
-        'Cookie': cookieHeader,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers: proxyHeaders(request),
       signal: AbortSignal.timeout(5000),
     })
 

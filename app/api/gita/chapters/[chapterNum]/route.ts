@@ -6,8 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 interface StaticVerse {
   chapter: number
@@ -51,7 +50,7 @@ const CHAPTER_VERSES: Record<number, StaticVerse[]> = {
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ chapterNum: string }> },
 ) {
   const { chapterNum: raw } = await params
@@ -64,11 +63,12 @@ export async function GET(
   // Try backend first
   try {
     const res = await fetch(`${BACKEND_URL}/api/gita/chapters/${chapterNum}/verses`, {
+      headers: proxyHeaders(request),
       signal: AbortSignal.timeout(4000),
     })
     if (res.ok) {
       const data = await res.json()
-      if (data?.verses?.length > 0) return NextResponse.json(data)
+      if (data?.verses?.length > 0) return forwardCookies(res, NextResponse.json(data))
     }
   } catch {
     // Backend unavailable

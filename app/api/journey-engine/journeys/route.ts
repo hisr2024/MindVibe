@@ -2,33 +2,15 @@
  * Journey Engine Journeys API Proxy
  * Proxies to backend journey-engine service with graceful fallback
  * when the backend is unavailable or user is not authenticated.
- *
- * IMPORTANT: All responses forward Set-Cookie headers from the backend
- * so that CSRF tokens and session cookies reach the browser through
- * the proxy layer. Without this, the backend CSRF middleware rejects
- * POST requests with 403 because the csrf_token cookie is never set.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 const FALLBACK_JOURNEYS = {
   journeys: [],
   total: 0,
   _fallback: true,
-}
-
-/**
- * Forward Set-Cookie headers from the backend response to the client.
- * This ensures CSRF tokens and auth cookies pass through the proxy.
- */
-function forwardCookies(backendRes: Response, clientRes: NextResponse): NextResponse {
-  const cookies = backendRes.headers.getSetCookie?.() ?? []
-  for (const cookie of cookies) {
-    clientRes.headers.append('Set-Cookie', cookie)
-  }
-  return clientRes
 }
 
 export async function GET(request: NextRequest) {
@@ -38,11 +20,7 @@ export async function GET(request: NextRequest) {
 
     const response = await fetch(`${BACKEND_URL}/api/journey-engine/journeys${queryString}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        cookie: request.headers.get('cookie') || '',
-      },
+      headers: proxyHeaders(request),
     })
 
     if (response.ok) {
@@ -62,12 +40,7 @@ export async function POST(request: NextRequest) {
 
     const response = await fetch(`${BACKEND_URL}/api/journey-engine/journeys`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        cookie: request.headers.get('cookie') || '',
-        ...(request.headers.get('X-CSRF-Token') ? { 'X-CSRF-Token': request.headers.get('X-CSRF-Token')! } : {}),
-      },
+      headers: proxyHeaders(request),
       body: JSON.stringify(body),
     })
 

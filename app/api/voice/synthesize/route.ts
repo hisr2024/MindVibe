@@ -4,8 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,11 +25,7 @@ export async function POST(request: NextRequest) {
       // Try backend TTS first
       const response = await fetch(`${BACKEND_URL}/api/voice/synthesize`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': request.headers.get('authorization') || '',
-          'Cookie': request.headers.get('cookie') || '',
-        },
+        headers: proxyHeaders(request),
         body: JSON.stringify({
           text: sanitizedText,
           language,
@@ -43,13 +38,14 @@ export async function POST(request: NextRequest) {
         const contentType = response.headers.get('content-type') || ''
         if (contentType.includes('audio/')) {
           const audioBlob = await response.blob()
-          return new NextResponse(audioBlob, {
+          const audioRes = new NextResponse(audioBlob, {
             status: 200,
             headers: {
               'Content-Type': 'audio/mpeg',
               'Cache-Control': 'public, max-age=3600',
             },
           })
+          return forwardCookies(response, audioRes)
         }
       }
     } catch (backendError) {
