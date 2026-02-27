@@ -84,10 +84,12 @@ EMOTION_KEYWORDS: dict[str, list[str]] = {
     "fear_of_failure": [
         "afraid to fail", "fear of failure", "what if i fail",
         "can't afford to fail", "too risky", "might not work",
+        "terrified", "failing", "fail",
     ],
     "overwhelm": [
         "overwhelmed", "too much", "can't handle", "drowning",
         "everything at once", "no time", "impossible",
+        "cant handle", "pressure", "handle",
     ],
     "perfectionism": [
         "perfect", "not enough", "never satisfied", "high standards",
@@ -104,6 +106,7 @@ EMOTION_KEYWORDS: dict[str, list[str]] = {
     "comparison": [
         "they're better", "everyone else", "behind", "ahead",
         "compared to", "worse than", "less than",
+        "except me", "succeed", "why does everyone",
     ],
     "rejection": [
         "rejected", "left out", "not wanted", "abandoned",
