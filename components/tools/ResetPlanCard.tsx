@@ -1,6 +1,129 @@
+/**
+ * ResetPlanCard - Displays karma reset plan with both legacy 4-step
+ * and new 7-phase deep Gita journey formats.
+ *
+ * Features:
+ * - DeepResetPlanCard: 7-phase overview with clickable navigation
+ * - ResetPlanCard: Legacy 4-step plan (backward compatible)
+ * - Animated reveal with staggered transitions
+ * - Accessible with proper ARIA labels
+ * - Responsive layout
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'
+import { PHASE_ICONS } from '@/types/karma-reset.types'
+import type { PhaseGuidance } from '@/types/karma-reset.types'
+
+// ==================== DEEP 7-PHASE PLAN CARD ====================
+
+export interface DeepResetPlanCardProps {
+  /** The 7-phase guidance from deep karma reset */
+  phases: PhaseGuidance[]
+  /** Currently active phase index */
+  currentPhase: number
+  /** Callback when a phase is clicked */
+  onPhaseClick: (index: number) => void
+  /** Additional className */
+  className?: string
+}
+
+/**
+ * DeepResetPlanCard - Displays the 7-phase karma reset journey overview.
+ *
+ * Shows all phases as a compact timeline with icons, names, and completion state.
+ * Clicking a phase navigates to it in the main view.
+ */
+export function DeepResetPlanCard({
+  phases,
+  currentPhase,
+  onPhaseClick,
+  className = '',
+}: DeepResetPlanCardProps) {
+  return (
+    <div
+      className={`divine-reset-container rounded-3xl p-5 ${className}`}
+      role="navigation"
+      aria-label="Karma Reset Journey Phases"
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <span className="text-base">{'\u{1F4FF}'}</span>
+        <h3 className="text-sm font-semibold text-[#f5f0e8]/80">
+          Your Sacred Journey &mdash; 7 Phases
+        </h3>
+      </div>
+
+      <div className="space-y-1.5">
+        {phases.map((phase, idx) => {
+          const isActive = idx === currentPhase
+          const isCompleted = idx < currentPhase
+          const icon = PHASE_ICONS[phase.icon] || '\u2728'
+
+          return (
+            <button
+              key={phase.phase}
+              onClick={() => onPhaseClick(idx)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-300 ${
+                isActive
+                  ? 'bg-[#d4a44c]/10 border border-[#d4a44c]/30'
+                  : isCompleted
+                  ? 'bg-[#d4a44c]/5 border border-transparent hover:border-[#d4a44c]/15'
+                  : 'bg-transparent border border-transparent hover:bg-white/[0.02]'
+              }`}
+              aria-label={`Phase ${phase.phase}: ${phase.english_name}${isActive ? ' (current)' : ''}${isCompleted ? ' (completed)' : ''}`}
+              aria-current={isActive ? 'step' : undefined}
+            >
+              {/* Phase number */}
+              <span
+                className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-all ${
+                  isActive
+                    ? 'bg-gradient-to-br from-[#c8943a] to-[#e8b54a] text-[#0a0a12] shadow-lg'
+                    : isCompleted
+                    ? 'bg-[#d4a44c]/30 text-[#e8b54a]'
+                    : 'bg-[#d4a44c]/10 text-[#d4a44c]/40'
+                }`}
+              >
+                {isCompleted ? '\u2713' : phase.phase}
+              </span>
+
+              {/* Phase icon + name */}
+              <span className={`text-sm ${isActive ? '' : 'opacity-70'}`}>{icon}</span>
+              <div className="min-w-0 flex-1">
+                <span
+                  className={`text-sm font-medium block truncate ${
+                    isActive
+                      ? 'text-[#f5f0e8]'
+                      : isCompleted
+                      ? 'text-[#f5f0e8]/60'
+                      : 'text-[#f5f0e8]/40'
+                  }`}
+                >
+                  {phase.name}
+                </span>
+                <span
+                  className={`text-[10px] block truncate ${
+                    isActive ? 'text-[#d4a44c]/60' : 'text-[#d4a44c]/30'
+                  }`}
+                >
+                  {phase.english_name}
+                </span>
+              </div>
+
+              {/* Active indicator */}
+              {isActive && (
+                <span className="h-1.5 w-1.5 rounded-full bg-[#e8b54a] flex-shrink-0 animate-pulse" />
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+
+// ==================== LEGACY 4-STEP PLAN CARD ====================
 
 export interface ResetPlanStep {
   title: string
@@ -69,13 +192,9 @@ const stepConfig = [
 ] as const
 
 /**
- * ResetPlanCard component - displays a 4-element karma reset plan.
- * 
- * Features:
- * - Four distinct steps with icons and colors
- * - Optional staggered animation
- * - Accessible with proper headings
- * - Responsive layout
+ * ResetPlanCard component - Legacy 4-element karma reset plan display.
+ *
+ * Maintained for backward compatibility with the original API response format.
  */
 export function ResetPlanCard({
   plan,
