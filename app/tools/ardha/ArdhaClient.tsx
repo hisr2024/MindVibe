@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import Link from 'next/link'
 import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import CompanionCTA from '@/components/companion/CompanionCTA'
 import { apiFetch } from '@/lib/api'
@@ -11,6 +10,7 @@ import { useLanguage } from '@/hooks/useLanguage'
 import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/WisdomResponseCard'
 import { useMicroPause } from '@/hooks/useMicroPause'
 import { BreathingDot } from '@/components/animations/BreathingDot'
+import { SacredPageShell } from '@/components/tools/SacredPageShell'
 import {
   ARDHA_PILLARS,
   ARDHA_COMPLIANCE_TESTS,
@@ -77,8 +77,8 @@ function ComplianceIndicator({ compliance }: { compliance: ArdhaCompliance | und
   if (!compliance) return null
 
   return (
-    <div className="rounded-[18px] border border-violet-500/10 bg-[#0a0812]/80 p-4">
-      <h4 className="text-xs font-semibold text-violet-200/70 mb-3">
+    <div className="rounded-[18px] border border-[#d4a44c]/10 bg-[#0d0a06]/80 p-4">
+      <h4 className="text-xs font-semibold text-[#f5e6c8]/70 mb-3">
         Gita Compliance ({compliance.score}/{compliance.max_score})
       </h4>
       <div className="space-y-2">
@@ -89,7 +89,7 @@ function ComplianceIndicator({ compliance }: { compliance: ArdhaCompliance | und
                 test.passed ? 'bg-emerald-400/80' : 'bg-red-400/40'
               }`}
             />
-            <span className={test.passed ? 'text-violet-100/70' : 'text-violet-100/35'}>
+            <span className={test.passed ? 'text-[#f5e6c8]/70' : 'text-[#f5e6c8]/35'}>
               {test.test}
             </span>
           </div>
@@ -103,20 +103,20 @@ function PillarAnalysis({ analysis }: { analysis: ArdhaAnalysis | undefined }) {
   if (!analysis || analysis.crisis_detected) return null
 
   return (
-    <div className="rounded-[18px] border border-violet-500/10 bg-[#0a0812]/80 p-4">
-      <h4 className="text-xs font-semibold text-violet-200/70 mb-2">ARDHA Analysis</h4>
-      <p className="text-xs text-violet-100/50 mb-3">
-        Detected: <span className="text-violet-300/80">{analysis.primary_emotion?.replace(/_/g, ' ')}</span>
+    <div className="rounded-[18px] border border-[#d4a44c]/10 bg-[#0d0a06]/80 p-4">
+      <h4 className="text-xs font-semibold text-[#f5e6c8]/70 mb-2">ARDHA Analysis</h4>
+      <p className="text-xs text-[#f5e6c8]/50 mb-3">
+        Detected: <span className="text-[#e8b54a]/80">{analysis.primary_emotion?.replace(/_/g, ' ')}</span>
       </p>
       <div className="space-y-2">
         {analysis.pillars?.map((pillar, idx) => (
           <div key={idx} className="flex items-start gap-2 text-xs">
-            <span className="mt-0.5 h-4 w-4 rounded-md bg-gradient-to-r from-violet-500/20 to-purple-500/20 border border-violet-500/15 flex items-center justify-center text-[8px] font-bold text-violet-300 shrink-0">
+            <span className="mt-0.5 h-4 w-4 rounded-md bg-gradient-to-r from-[#d4a44c]/20 to-[#e8b54a]/20 border border-[#d4a44c]/15 flex items-center justify-center text-[8px] font-bold text-[#e8b54a] shrink-0">
               {pillar.code}
             </span>
             <div>
-              <span className="text-violet-100/70">{pillar.name}</span>
-              <p className="text-violet-100/35 text-[10px]">{pillar.compliance_test}</p>
+              <span className="text-[#f5e6c8]/70">{pillar.name}</span>
+              <p className="text-[#f5e6c8]/35 text-[10px]">{pillar.compliance_test}</p>
             </div>
           </div>
         ))}
@@ -131,32 +131,32 @@ function PillarCard({ pillar, isExpanded, onToggle }: {
   onToggle: () => void
 }) {
   return (
-    <div className="rounded-xl border border-violet-500/8 bg-black/20 p-3">
+    <div className="rounded-xl border border-[#d4a44c]/8 bg-black/20 p-3">
       <button
         onClick={onToggle}
         className="w-full flex items-start gap-2 text-left"
         aria-expanded={isExpanded}
       >
-        <span className="mt-0.5 h-5 w-5 rounded-md bg-gradient-to-r from-violet-500/15 to-purple-500/15 border border-violet-500/10 flex items-center justify-center text-[10px] font-bold text-violet-300 shrink-0">
+        <span className="mt-0.5 h-5 w-5 rounded-md bg-gradient-to-r from-[#d4a44c]/15 to-[#e8b54a]/15 border border-[#d4a44c]/10 flex items-center justify-center text-[10px] font-bold text-[#e8b54a] shrink-0">
           {pillar.icon}
         </span>
         <div className="flex-1">
-          <span className="text-xs font-semibold text-violet-100/80">{pillar.name}</span>
-          <span className="text-[10px] text-violet-100/30 ml-1">({pillar.sanskritName})</span>
+          <span className="text-xs font-semibold text-[#f5e6c8]/80">{pillar.name}</span>
+          <span className="text-[10px] text-[#d4a44c]/30 ml-1">({pillar.sanskritName})</span>
         </div>
-        <span className="text-violet-100/25 text-xs">{isExpanded ? '\u25B2' : '\u25BC'}</span>
+        <span className="text-[#d4a44c]/25 text-xs">{isExpanded ? '\u25B2' : '\u25BC'}</span>
       </button>
       {isExpanded && (
         <div className="mt-2 pl-7 space-y-2">
-          <p className="text-[10px] text-violet-100/50 leading-relaxed">{pillar.coreTeaching}</p>
-          <div className="text-[10px] text-violet-100/35">
-            <span className="font-semibold text-violet-300/50">Test: </span>
+          <p className="text-[10px] text-[#f5e6c8]/50 leading-relaxed">{pillar.coreTeaching}</p>
+          <div className="text-[10px] text-[#f5e6c8]/35">
+            <span className="font-semibold text-[#e8b54a]/50">Test: </span>
             {pillar.complianceTest}
           </div>
           {pillar.keyVerses[0] && (
-            <div className="p-2 rounded-lg bg-violet-950/20 border border-violet-500/8">
-              <p className="text-[10px] text-violet-300/60 font-semibold">{pillar.keyVerses[0].reference}</p>
-              <p className="text-[10px] text-violet-100/40 italic mt-0.5">{pillar.keyVerses[0].english}</p>
+            <div className="p-2 rounded-lg bg-[#d4a44c]/[0.04] border border-[#d4a44c]/8">
+              <p className="text-[10px] text-[#e8b54a]/60 font-semibold">{pillar.keyVerses[0].reference}</p>
+              <p className="text-[10px] text-[#f5e6c8]/40 italic mt-0.5">{pillar.keyVerses[0].english}</p>
             </div>
           )}
         </div>
@@ -164,18 +164,6 @@ function PillarCard({ pillar, isExpanded, onToggle }: {
     </div>
   )
 }
-
-const ANCHOR_VERSE = {
-  english: 'The unreal has no existence, and the real never ceases to be.',
-  reference: 'Bhagavad Gita 2.16',
-}
-
-const SACRED_PARTICLES = Array.from({ length: 6 }, (_, i) => ({
-  id: i,
-  left: `${10 + (i * 15) % 80}%`,
-  delay: i * 0.7,
-  duration: 4.5 + (i % 3),
-}))
 
 export default function ArdhaClient() {
   const [thought, setThought] = useState('')
@@ -258,216 +246,152 @@ export default function ArdhaClient() {
     }
   }
 
-  return (
-    <main className="min-h-screen bg-gradient-to-b from-[#050308] via-[#080510] to-[#0a0815] text-white">
-      <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-8">
+  const leftContent = (
+    <>
+      {/* Input Card */}
+      <div
+        className="rounded-[22px] border border-[#d4a44c]/10 bg-[#0d0a06]/90 p-5 sm:p-6"
+        style={{ boxShadow: '0 8px 40px rgba(212, 164, 76, 0.04)' }}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <label htmlFor="thought-input" className="text-sm font-medium text-[#f5e6c8]/80">
+            Share the thought to reframe
+          </label>
+          <VoiceInputButton
+            language={language}
+            onTranscript={(text) => setThought((prev) => (prev ? `${prev} ${text}` : text))}
+            disabled={loading}
+          />
+        </div>
+        <textarea
+          id="thought-input"
+          value={thought}
+          onChange={(e) => setThought(e.target.value)}
+          placeholder="Speak or type a thought that troubles you... ARDHA will see through the distortion to the truth beneath."
+          className="w-full min-h-[140px] rounded-xl bg-black/40 border border-[#d4a44c]/10 text-[#f5f0e8]/90 placeholder:text-[#d4a44c]/20 p-4 text-sm leading-relaxed focus:ring-1 focus:ring-[#d4a44c]/30 focus:border-[#d4a44c]/20 outline-none transition-all resize-none"
+          aria-describedby="thought-hint"
+        />
+        <p id="thought-hint" className="sr-only">
+          Describe the negative thought you want to reframe through ARDHA
+        </p>
 
-        {/* Sacred Header */}
-        <motion.header
-          className="relative overflow-hidden rounded-[28px] border border-violet-500/10 bg-gradient-to-br from-violet-950/30 via-[#08061a] to-purple-950/20 p-6 sm:p-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          style={{
-            boxShadow: '0 16px 64px rgba(139, 92, 246, 0.08), inset 0 1px 0 rgba(139, 92, 246, 0.1)',
-          }}
-        >
-          {SACRED_PARTICLES.map((p) => (
-            <motion.div
-              key={p.id}
-              className="absolute w-1 h-1 rounded-full bg-violet-400/40"
-              style={{ left: p.left, bottom: 0 }}
-              animate={{ y: [0, -180], opacity: [0, 0.5, 0] }}
-              transition={{ duration: p.duration, repeat: Infinity, delay: p.delay, ease: 'easeOut' }}
+        <div className="flex items-center gap-3 mt-4">
+          <button
+            onClick={requestReframe}
+            disabled={!thought.trim() || loading}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#c8943a] via-[#d4a44c] to-[#e8b54a] text-[#0a0a0f] text-sm font-semibold shadow-lg shadow-[#d4a44c]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:shadow-[#d4a44c]/30 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/40"
+            aria-label={loading ? 'Processing...' : 'Reframe with ARDHA'}
+          >
+            {loading ? 'ARDHA is reflecting...' : 'Reframe with ARDHA'}
+          </button>
+        </div>
+
+        {error && (
+          <p className="mt-3 text-sm text-[#e8b54a]/70" role="alert">{error}</p>
+        )}
+      </div>
+
+      {loading && <WisdomLoadingState tool="ardha" />}
+      <BreathingDot visible={showPause} />
+
+      {result && !loading && !showPause && (
+        <>
+          <WisdomResponseCard
+            tool="ardha"
+            sections={result.sections}
+            fullResponse={result.response}
+            timestamp={result.requestedAt}
+            language={language}
+            analysisMode={result.depth || analysisMode}
+            sources={result.sources}
+          />
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <PillarAnalysis analysis={result.ardha_analysis} />
+            <ComplianceIndicator compliance={result.compliance} />
+          </div>
+        </>
+      )}
+    </>
+  )
+
+  const rightContent = (
+    <>
+      {/* 5 ARDHA Pillars */}
+      <div
+        className="rounded-[20px] border border-[#d4a44c]/8 bg-[#0d0a06]/80 p-5"
+        style={{ boxShadow: '0 4px 24px rgba(212, 164, 76, 0.03)' }}
+      >
+        <h3 className="text-xs font-semibold text-[#f5e6c8]/70 mb-4 flex items-center gap-2">
+          <motion.span
+            className="w-1.5 h-1.5 rounded-full bg-[#d4a44c]"
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+          ARDHA&apos;s 5 Pillars
+        </h3>
+        <div className="space-y-2">
+          {ARDHA_PILLARS.map((pillar, idx) => (
+            <PillarCard
+              key={pillar.code}
+              pillar={pillar}
+              isExpanded={expandedPillar === idx}
+              onToggle={() => setExpandedPillar(expandedPillar === idx ? null : idx)}
             />
           ))}
-
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-1.5 text-[11px] text-violet-400/50 hover:text-violet-300/70 transition-colors mb-5"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-            </svg>
-            Return to sanctuary
-          </Link>
-
-          <div className="flex items-start gap-4 sm:gap-5">
-            <motion.div
-              className="flex h-14 w-14 sm:h-16 sm:w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-400/15 to-purple-500/10 border border-violet-500/10"
-              animate={{
-                boxShadow: [
-                  '0 0 20px rgba(139, 92, 246, 0.1)',
-                  '0 0 35px rgba(139, 92, 246, 0.2)',
-                  '0 0 20px rgba(139, 92, 246, 0.1)',
-                ],
-              }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <span className="text-xl sm:text-2xl font-sacred text-violet-200/90 select-none">
-                {'\u0905\u0930\u094D\u0927'}
-              </span>
-            </motion.div>
-
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold text-violet-100">Ardha</h1>
-              <p className="text-sm text-violet-300/50 font-sacred italic mt-1">
-                Atma-Reframing through Dharma &amp; Higher Awareness
-              </p>
-              <p className="mt-1.5 text-[11px] tracking-wide text-violet-400/30">
-                {t('dashboard.mode_label.prefix', 'You are in:')} {t('dashboard.mode_label.ardha', 'ARDHA Mode')}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5 p-4 rounded-xl bg-violet-950/20 border border-violet-500/8">
-            <p className="font-sacred text-sm text-violet-200/60 italic leading-relaxed">
-              &ldquo;{ANCHOR_VERSE.english}&rdquo;
-            </p>
-            <p className="text-[10px] text-violet-400/30 mt-2 tracking-wide">
-              {ANCHOR_VERSE.reference}
-            </p>
-          </div>
-        </motion.header>
-
-        {/* Main Content */}
-        <div className="grid gap-6 lg:grid-cols-[1.4fr,1fr]">
-
-          {/* Left: Input + Response */}
-          <motion.section
-            className="space-y-5"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-          >
-            <div
-              className="rounded-[22px] border border-violet-500/10 bg-[#0a0812]/90 p-5 sm:p-6"
-              style={{ boxShadow: '0 8px 40px rgba(139, 92, 246, 0.06)' }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <label htmlFor="thought-input" className="text-sm font-medium text-violet-100/80">
-                  Share the thought to reframe
-                </label>
-                <VoiceInputButton
-                  language={language}
-                  onTranscript={(text) => setThought((prev) => (prev ? `${prev} ${text}` : text))}
-                  disabled={loading}
-                />
-              </div>
-              <textarea
-                id="thought-input"
-                value={thought}
-                onChange={(e) => setThought(e.target.value)}
-                placeholder="Speak or type a thought that troubles you... ARDHA will see through the distortion to the truth beneath."
-                className="w-full min-h-[140px] rounded-xl bg-black/40 border border-violet-500/10 text-white/90 placeholder:text-white/25 p-4 text-sm leading-relaxed focus:ring-1 focus:ring-violet-500/30 focus:border-violet-500/20 outline-none transition-all resize-none"
-                aria-describedby="thought-hint"
-              />
-              <p id="thought-hint" className="sr-only">
-                Describe the negative thought you want to reframe through ARDHA
-              </p>
-
-              <div className="flex items-center gap-3 mt-4">
-                <button
-                  onClick={requestReframe}
-                  disabled={!thought.trim() || loading}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white text-sm font-semibold shadow-lg shadow-violet-600/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:shadow-violet-500/30 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-violet-500/40"
-                  aria-label={loading ? 'Processing...' : 'Reframe with ARDHA'}
-                >
-                  {loading ? 'ARDHA is reflecting...' : 'Reframe with ARDHA'}
-                </button>
-              </div>
-
-              {error && (
-                <p className="mt-3 text-sm text-amber-300/80" role="alert">{error}</p>
-              )}
-            </div>
-
-            {loading && <WisdomLoadingState tool="ardha" />}
-            <BreathingDot visible={showPause} />
-
-            {result && !loading && !showPause && (
-              <>
-                <WisdomResponseCard
-                  tool="ardha"
-                  sections={result.sections}
-                  fullResponse={result.response}
-                  timestamp={result.requestedAt}
-                  language={language}
-                  analysisMode={result.depth || analysisMode}
-                  sources={result.sources}
-                />
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <PillarAnalysis analysis={result.ardha_analysis} />
-                  <ComplianceIndicator compliance={result.compliance} />
-                </div>
-              </>
-            )}
-          </motion.section>
-
-          {/* Right: Pillars + Info */}
-          <motion.section
-            className="space-y-4"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.25 }}
-          >
-            {/* 5 ARDHA Pillars */}
-            <div
-              className="rounded-[20px] border border-violet-500/8 bg-[#0a0812]/80 p-5"
-              style={{ boxShadow: '0 4px 24px rgba(139, 92, 246, 0.04)' }}
-            >
-              <h3 className="text-xs font-semibold text-violet-200/70 mb-4">ARDHA&apos;s 5 Pillars</h3>
-              <div className="space-y-2">
-                {ARDHA_PILLARS.map((pillar, idx) => (
-                  <PillarCard
-                    key={pillar.code}
-                    pillar={pillar}
-                    isExpanded={expandedPillar === idx}
-                    onToggle={() => setExpandedPillar(expandedPillar === idx ? null : idx)}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* ARDHA vs CBT */}
-            <div
-              className="rounded-[20px] border border-violet-500/8 bg-[#0a0812]/80 p-5"
-              style={{ boxShadow: '0 4px 24px rgba(139, 92, 246, 0.04)' }}
-            >
-              <h3 className="text-xs font-semibold text-violet-200/70 mb-3">ARDHA vs CBT</h3>
-              <p className="text-xs text-white/45 leading-relaxed">
-                CBT corrects <em>distorted thinking</em>. ARDHA corrects <em>mistaken identity</em>.
-                Where CBT strengthens the functional ego, ARDHA loosens ego-identification
-                toward inner freedom through right action.
-              </p>
-              <div className="mt-3 p-3 rounded-xl bg-violet-950/15 border border-violet-500/8">
-                <p className="text-[10px] text-violet-300/40 leading-relaxed">
-                  Atma Distinction {'\u2192'} Raga-Dvesha Scan {'\u2192'} Dharma Alignment {'\u2192'} Hrdaya Samatvam {'\u2192'} Arpana
-                </p>
-              </div>
-            </div>
-
-            {/* 5 Compliance Tests */}
-            <div className="rounded-[18px] border border-violet-500/8 bg-[#0a0812]/80 p-4">
-              <h4 className="text-xs font-semibold text-violet-200/60 mb-3">5 Tests of Gita Compliance</h4>
-              <ul className="space-y-2">
-                {ARDHA_COMPLIANCE_TESTS.map((test, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-[10px] text-violet-100/50">
-                    <span className="mt-0.5 h-3 w-3 rounded-full bg-gradient-to-r from-violet-500/15 to-purple-500/15 border border-violet-500/10 flex items-center justify-center text-[7px] font-bold text-violet-300 shrink-0">
-                      {idx + 1}
-                    </span>
-                    <span>{test.test}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <SpiritualToolsNav currentTool="ardha" />
-            <CompanionCTA fromTool="ardha" />
-          </motion.section>
         </div>
       </div>
-    </main>
+
+      {/* ARDHA vs CBT */}
+      <div
+        className="rounded-[20px] border border-[#d4a44c]/8 bg-[#0d0a06]/80 p-5"
+        style={{ boxShadow: '0 4px 24px rgba(212, 164, 76, 0.03)' }}
+      >
+        <h3 className="text-xs font-semibold text-[#f5e6c8]/60 mb-3">ARDHA vs CBT</h3>
+        <p className="text-xs text-[#f5f0e8]/40 leading-relaxed">
+          CBT corrects <em>distorted thinking</em>. ARDHA corrects <em>mistaken identity</em>.
+          Where CBT strengthens the functional ego, ARDHA loosens ego-identification
+          toward inner freedom through right action.
+        </p>
+        <div className="mt-3 p-3 rounded-xl bg-[#d4a44c]/[0.03] border border-[#d4a44c]/8">
+          <p className="text-[10px] text-[#d4a44c]/30 leading-relaxed">
+            Atma Distinction {'\u2192'} Raga-Dvesha Scan {'\u2192'} Dharma Alignment {'\u2192'} Hrdaya Samatvam {'\u2192'} Arpana
+          </p>
+        </div>
+      </div>
+
+      {/* 5 Compliance Tests */}
+      <div className="rounded-[18px] border border-[#d4a44c]/8 bg-[#0d0a06]/80 p-4">
+        <h4 className="text-xs font-semibold text-[#f5e6c8]/60 mb-3">5 Tests of Gita Compliance</h4>
+        <ul className="space-y-2">
+          {ARDHA_COMPLIANCE_TESTS.map((test, idx) => (
+            <li key={idx} className="flex items-start gap-2 text-[10px] text-[#f5e6c8]/50">
+              <span className="mt-0.5 h-3 w-3 rounded-full bg-gradient-to-r from-[#d4a44c]/15 to-[#e8b54a]/15 border border-[#d4a44c]/10 flex items-center justify-center text-[7px] font-bold text-[#e8b54a] shrink-0">
+                {idx + 1}
+              </span>
+              <span>{test.test}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <SpiritualToolsNav currentTool="ardha" />
+      <CompanionCTA fromTool="ardha" />
+    </>
+  )
+
+  return (
+    <SacredPageShell
+      title="Ardha"
+      sanskrit={'\u0905\u0930\u094D\u0927'}
+      subtitle="Atma-Reframing through Dharma & Higher Awareness"
+      modeLabel={`${t('dashboard.mode_label.prefix', 'You are in:')} ${t('dashboard.mode_label.ardha', 'ARDHA Mode')}`}
+      verse={{
+        english: 'The unreal has no existence, and the real never ceases to be.',
+        reference: 'Bhagavad Gita 2.16',
+      }}
+      leftContent={leftContent}
+      rightContent={rightContent}
+    />
   )
 }
