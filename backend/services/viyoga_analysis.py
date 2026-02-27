@@ -452,17 +452,17 @@ def _rule_based_analysis(concern: str) -> ConcernAnalysis:
                     secondary_emotions.append(emotion)
                 break
 
-    # Detect attachment type
+    # Detect attachment type (keys must match ATTACHMENT_TO_GITA / ATTACHMENT_TO_SECULAR)
     attachment_map = {
         "control": ["control", "manage", "guarantee", "make sure", "ensure", "force"],
-        "future_anxiety": ["what if", "might happen", "could go wrong", "will be", "going to", "future"],
-        "identity": ["not good enough", "failure", "worthless", "prove myself", "who I am"],
-        "approval": ["think of me", "judge", "opinion", "approve", "impress", "disappoint"],
+        "future_worry": ["what if", "might happen", "could go wrong", "will be", "going to", "future"],
+        "outcome_dependency": ["not good enough", "failure", "worthless", "prove myself", "who I am"],
+        "approval_seeking": ["think of me", "judge", "opinion", "approve", "impress", "disappoint"],
         "perfectionism": ["perfect", "flawless", "no mistakes", "exactly right", "100%"],
-        "loss_anxiety": ["lose", "losing", "lost", "gone", "taken away", "slip away"],
+        "outcome_anxiety": ["lose", "losing", "lost", "gone", "taken away", "slip away"],
     }
 
-    attachment_type = "outcome"
+    attachment_type = "outcome_anxiety"
     attachment_indicators = []
     for atype, keywords in attachment_map.items():
         for kw in keywords:
@@ -470,18 +470,17 @@ def _rule_based_analysis(concern: str) -> ConcernAnalysis:
                 attachment_type = atype
                 attachment_indicators.append(kw)
 
-    # Map to Gita concepts and Five Pillar mapping
+    # Map to Gita concepts and Five Pillar mapping (keys match ATTACHMENT_TO_GITA)
     gita_mapping = {
-        "outcome": (["phala-sakti", "nishkama-karma", "sakshi-bhava"], ["BG 2.47", "BG 2.16", "BG 3.19"], ["atman_prakriti", "phala_tyaga"]),
+        "outcome_anxiety": (["phala-sakti", "nishkama-karma", "sakshi-bhava"], ["BG 2.47", "BG 2.16", "BG 3.19"], ["atman_prakriti", "phala_tyaga"]),
         "control": (["niyantrtva-raga", "ishvara-pranidhana", "ahamkara"], ["BG 3.27", "BG 18.66"], ["ahamkara", "ishvara_arpana"]),
-        "future_anxiety": (["bhavishya-bhaya", "sakshi-bhava", "vairagya"], ["BG 13.2", "BG 2.16"], ["atman_prakriti", "ishvara_arpana"]),
-        "identity": (["ahamkara-bandha", "atma-jnana", "sakshi-bhava"], ["BG 2.20", "BG 13.2"], ["atman_prakriti", "ahamkara"]),
-        "approval": (["prashansa-raga", "sthitaprajna", "samatva"], ["BG 12.18-19", "BG 2.57"], ["samatvam", "atman_prakriti"]),
+        "future_worry": (["bhavishya-bhaya", "sakshi-bhava", "vairagya"], ["BG 13.2", "BG 2.16"], ["atman_prakriti", "ishvara_arpana"]),
+        "outcome_dependency": (["ahamkara-bandha", "atma-jnana", "sakshi-bhava"], ["BG 2.20", "BG 13.2"], ["atman_prakriti", "ahamkara"]),
+        "approval_seeking": (["prashansa-raga", "sthitaprajna", "samatva"], ["BG 12.18-19", "BG 2.57"], ["samatvam", "atman_prakriti"]),
         "perfectionism": (["siddhi-raga", "samatva", "ahamkara"], ["BG 2.48", "BG 3.27"], ["ahamkara", "samatvam"]),
-        "loss_anxiety": (["nashta-bhaya", "sakshi-bhava", "vairagya"], ["BG 2.16", "BG 2.20"], ["atman_prakriti", "phala_tyaga"]),
     }
 
-    concepts, teachings, pillars = gita_mapping.get(attachment_type, gita_mapping["outcome"])
+    concepts, teachings, pillars = gita_mapping.get(attachment_type, gita_mapping["outcome_anxiety"])
 
     # Determine intensity
     intensity = "moderate"
@@ -627,13 +626,16 @@ def analysis_to_dict(analysis: ConcernAnalysis) -> dict[str, Any]:
         "specific_worry": analysis.specific_worry,
         "why_it_matters": analysis.why_it_matters,
         "what_they_fear": analysis.what_they_fear,
+        "what_they_want": analysis.what_they_want,
         "primary_emotion": analysis.primary_emotion,
         "secondary_emotions": analysis.secondary_emotions,
         "emotional_intensity": analysis.emotional_intensity,
         "attachment_type": analysis.attachment_type,
         "attachment_object": analysis.attachment_object,
+        "attachment_indicators": analysis.attachment_indicators,
         "root_cause": analysis.root_cause,
         "gita_concepts": analysis.gita_concepts,
+        "recommended_teachings": analysis.recommended_teachings,
         "detachment_approach": analysis.detachment_approach,
         "effort_redirect": analysis.effort_redirect,
         "in_their_control": analysis.in_their_control,

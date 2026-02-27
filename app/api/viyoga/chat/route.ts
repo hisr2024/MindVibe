@@ -151,6 +151,8 @@ export async function POST(request: NextRequest) {
         concern_analysis: data.concern_analysis || null,
         attachment_analysis: data.attachment_analysis || null,
         karma_yoga_insight: data.karma_yoga_insight || null,
+        // v5.0 Five Pillar compliance scoring
+        five_pillar_compliance: data.five_pillar_compliance || null,
         retrieval: {
           strategy: data.provider || 'backend_v4',
           confidence: data.concern_analysis?.confidence || 0,
