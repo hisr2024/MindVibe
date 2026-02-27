@@ -72,13 +72,38 @@ const FALLBACK_RESPONSES: Record<string, {
       model: 'static',
       fallback: true
     }
+  },
+  // Generic fallback for all 10 karmic paths when backend is unavailable
+  _default: {
+    reset_guidance: {
+      breathingLine: "Take seven slow breaths. The Gita teaches that pranayama purifies the mind and creates space for wisdom. Let each breath bring you closer to your true self.",
+      rippleSummary: "A karmic ripple has touched your life. The Bhagavad Gita reminds us that every action creates consequence, and every consequence is an opportunity for growth and transformation.",
+      repairAction: "Reflect deeply on the situation with honesty and compassion. As Lord Krishna teaches in BG 6.5: 'Elevate yourself through the power of your mind, and do not degrade yourself, for the mind can be the friend and also the enemy of the self.'",
+      forwardIntention: "Walk forward with sacred intention. Practice your daily sadhana, return to the Gita's teachings when doubt arises, and remember: transformation is not a single act but a sustained commitment to dharmic living."
+    },
+    kiaan_metadata: {
+      provider: 'fallback',
+      model: 'static',
+      fallback: true
+    }
   }
 }
+
+// All valid repair/path types: 10 new karmic paths + 3 legacy types
+const ALL_VALID_PATH_KEYS = [
+  // 10 Gita-grounded karmic paths
+  'kshama', 'satya', 'shanti', 'atma_kshama', 'seva',
+  'ahimsa', 'daya', 'tyaga', 'tapas', 'shraddha',
+  // 3 legacy repair types (backward compatibility)
+  'apology', 'clarification', 'calm_followup',
+  // Legacy variation
+  'self-forgive',
+]
 
 interface KarmaResetRequest {
   situation: string
   feeling: string
-  repair_type: 'apology' | 'clarification' | 'calm_followup'
+  repair_type: string
 }
 
 export async function POST(request: NextRequest) {
@@ -94,24 +119,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!feeling || typeof feeling !== 'string') {
-      return NextResponse.json(
-        { error: 'feeling is required', detail: 'Please describe how the other person felt' },
-        { status: 400 }
-      )
-    }
+    // feeling is optional - default to empty string if not provided
+    const feelingValue = (feeling && typeof feeling === 'string') ? feeling : ''
 
-    const validRepairTypes = ['apology', 'clarification', 'calm_followup']
-    if (!repair_type || !validRepairTypes.includes(repair_type)) {
+    if (!repair_type || !ALL_VALID_PATH_KEYS.includes(repair_type)) {
       return NextResponse.json(
-        { error: 'invalid repair_type', detail: 'repair_type must be apology, clarification, or calm_followup' },
+        { error: 'invalid repair_type', detail: `repair_type must be one of: ${ALL_VALID_PATH_KEYS.join(', ')}` },
         { status: 400 }
       )
     }
 
     // Sanitize inputs
     const sanitizedSituation = situation.replace(/[<>]/g, '').replace(/\\/g, '').slice(0, 2000)
-    const sanitizedFeeling = feeling.replace(/[<>]/g, '').replace(/\\/g, '').slice(0, 500)
+    const sanitizedFeeling = feelingValue.replace(/[<>]/g, '').replace(/\\/g, '').slice(0, 500)
 
     // Build headers
     const headers = new Headers({
@@ -215,7 +235,7 @@ export async function POST(request: NextRequest) {
 
     // All retries failed - use fallback response
     console.warn('[karma-reset/generate] All retries exhausted, using fallback response')
-    const fallback = FALLBACK_RESPONSES[repair_type] || FALLBACK_RESPONSES.apology
+    const fallback = FALLBACK_RESPONSES[repair_type] || FALLBACK_RESPONSES._default
     return NextResponse.json({
       ...fallback,
       _offline: true,
@@ -226,7 +246,7 @@ export async function POST(request: NextRequest) {
 
     // Return a fallback response
     return NextResponse.json({
-      ...FALLBACK_RESPONSES.apology,
+      ...FALLBACK_RESPONSES._default,
       _offline: true,
       _error: 'An unexpected error occurred'
     })
