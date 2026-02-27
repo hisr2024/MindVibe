@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useCallback, useState, useEffect } from 'react'
-import { PathwayMap } from '@/components/navigation/PathwayMap'
 import { SubscriptionBanner } from '@/components/subscription'
 
 // Animation variants for staggered entrance
@@ -55,34 +54,6 @@ const quickActionVariants = {
     },
   },
 }
-
-// Quick access links for the dashboard
-const QUICK_ACCESS = [
-  {
-    id: 'profile',
-    icon: '\u{2699}\uFE0F',
-    title: 'Profile & Settings',
-    href: '/profile',
-  },
-  {
-    id: 'subscription',
-    icon: '\u{1F4B3}',
-    title: 'Subscription',
-    href: '/subscription/success',
-  },
-  {
-    id: 'about',
-    icon: '\u{2139}\uFE0F',
-    title: 'About MindVibe',
-    href: '/about',
-  },
-  {
-    id: 'sacred-reflections',
-    icon: '\u{1F64F}',
-    title: 'Sacred Reflections',
-    href: '/sacred-reflections#spiritual',
-  },
-] as const
 
 // Featured Sacred Tools — the three divine instruments (Gold-Black theme)
 const SACRED_TOOLS = [
@@ -599,34 +570,6 @@ export default function DashboardClient() {
               {/* Bottom golden radiance line */}
               <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#d4a44c]/20 to-transparent" />
             </div>
-          </motion.div>
-
-          {/* ─── Quick Access ─── */}
-          <motion.div variants={itemVariants}>
-            <div className="mb-3 flex items-center gap-3">
-              <span className="text-lg">{'\u{26A1}'}</span>
-              <h2 className="text-base font-semibold text-white/80">
-                Quick Access
-              </h2>
-            </div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
-              {QUICK_ACCESS.map((item) => (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  onClick={handleCardTap}
-                  className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-br from-white/[0.04] to-white/[0.01] px-3 py-3 shadow-mobile-glow transition-all duration-300 active:scale-[0.96] hover:from-white/[0.07]"
-                >
-                  <span className="text-lg">{item.icon}</span>
-                  <span className="text-xs font-medium text-white/70 truncate">{item.title}</span>
-                </Link>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* ─── Pathway Map ─── */}
-          <motion.div variants={itemVariants}>
-            <PathwayMap />
           </motion.div>
 
           {/* ─── Divine Presence Banner ─── */}
