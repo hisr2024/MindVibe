@@ -88,7 +88,7 @@ export default function RelationshipCompassClient() {
     setError(null)
 
     try {
-      const response = await apiFetch('/api/relationship-compass/gita-guidance', {
+      const response = await apiFetch('/api/relationship-compass/guide', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -272,7 +272,7 @@ export default function RelationshipCompassClient() {
             <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
               <h4 className="text-xs font-semibold text-[#f5f0e8] mb-2">What you&apos;ll get</h4>
               <p className="text-xs text-[#f5f0e8]/70 leading-relaxed">
-                Validation → Insight → Other perspective → Practical suggestions → Conversation script → One actionable step
+                Pause → Identify Attachment → Regulate → Speak Without Demanding → See Their Humanity → Real Message → The Real Test
               </p>
             </div>
 

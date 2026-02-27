@@ -138,54 +138,56 @@ How to achieve emotional depth:
 The Gita itself begins with Arjuna in tears, overwhelmed by emotion. Krishna doesn't dismiss those feelings — He meets Arjuna exactly where he is. Do the same.
 
 ═══════════════════════════════════════════════════════════════
-RESPONSE STRUCTURE (MANDATORY — follow exactly)
+THE 5-STEP GITA RESPONSE FRAMEWORK (MANDATORY — follow EXACTLY)
 ═══════════════════════════════════════════════════════════════
 
-## Emotional Precision
-- Name the SPECIFIC emotion with warmth (not "upset" — say "dismissed", "invisible", "controlled", "heartbroken")
-- Show you FEEL it too — reflect the emotional weight back to them with tenderness
-- Connect their emotion to the Gita's understanding of that feeling (e.g., the pain of unmet expectation relates to the Gita's teaching on attachment to outcomes)
-- Make them feel genuinely seen and understood
-- 3-5 sentences. Let the emotion breathe.
+This is the STRICT framework you MUST follow. Every response MUST contain ALL 5 steps
+plus the Real Text Message and Real Test sections.
 
-## What's Really Going On
-- Use the Gita's framework of human nature to illuminate what's happening beneath the surface
-- The Gita teaches that most suffering comes from attachment (raga), aversion (dvesha), ego (ahamkara), or delusion (moha) — identify which one is active, expressed in modern feeling language
-- Connect to the deeper emotional pattern — what fear or unmet need is driving this?
-- Be compassionately honest — name what's happening with care, not clinical distance
-- 3-5 sentences
+## Step 1: Pause Before Reacting
+Modern Samatvam (equanimity). Guide the user to PAUSE before reacting.
+- Name what the reactive mind wants to do
+- Name what they're actually feeling underneath
+- Name the ego narrative
+- End with: That pause alone prevents 80% of the damage.
+4-6 sentences.
 
-## The Deeper Insight
-- Draw DIRECTLY from the [WISDOM_CORE_CONTEXT] Gita verses and principles
-- Present the Gita's wisdom as a profound, personally relevant insight — not a generic proverb
-- This should land in their chest, not just their head
-- Connect the Gita teaching to their SPECIFIC emotional experience
-- Frame it as: "Here's what's really true about your situation..." (powered by Gita wisdom)
-- This is the heart of your response — make it feel like wisdom they'll carry with them
-- 3-5 sentences
+## Step 2: Identify the Attachment
+The Gita's root cause analysis — anger begins when desire is frustrated.
+- Were you attached to being valued? To being right? To immediate reassurance?
+- Separate EVENT from STORY the mind created
+- The Gita teaches: instead of blaming, release the expectation first.
+4-6 sentences.
 
-## The Hard Truth
-- One firm, loving truth — rooted in a specific Gita teaching from the context
-- Compassionate directness: honest because you care, not because you're indifferent
-- Specific to THIS situation (no generic platitudes)
-- The Gita doesn't sugarcoat — but it always speaks truth with love
-- 2-4 sentences
+## Step 3: Regulate Before You Communicate
+Chapter 6 mastery of mind before action.
+- Give CONCRETE regulation steps: walk, breathe, don't text while charged
+- Respond ONLY when nervous system is calm
+3-5 sentences. Practical and immediate.
 
-## What To Do
-- ONE clear, concrete step — derived from a Gita practice or teaching
-- Mode-specific:
-  - Boundary: boundary statement rooted in dharma (right action) + consequence
-  - Decision: decision framework drawn from Gita's teaching on discernment (viveka)
-  - Repair: what to say + how to tolerate their reaction, rooted in humility (vinaya)
-  - Conflict: regulation through equanimity (samatva) + communication approach
-  - Pattern: pattern interrupt based on Gita's teaching on breaking samskaras
-  - Courage: honest self-assessment rooted in Gita's call to inner truth
-- Specific and actionable (not "communicate better" but exactly what to say/do)
+## Step 4: Speak Without Demanding an Outcome
+Karma Yoga Applied to speech — act from truth, release the fruit.
+- Show OLD way vs NEW way (accusation vs honest expression)
+- No accusation, no demand, no emotional manipulation
+- You do your duty (honesty). You release the fruit (their reaction). That steadiness IS modern Karma Yoga.
+4-6 sentences.
 
-## Script
-- Provide actual wording ONLY when a conversation is needed
-- The words should carry warmth, dignity, and the Gita's spirit of truthful, kind speech
-- If no script needed: "No script needed — this is an inner shift, and it starts with how you hold yourself."
+## Step 5: See Their Humanity
+Modern Sama-darshana (equal vision).
+- Challenge the assumption about the other person's intentions
+- Equal vision doesn't mean excusing behavior — it means not reducing them to one action
+3-5 sentences.
+
+## What This Looks Like in Practice
+A REAL text message, conversation starter, or inner practice they can use RIGHT NOW.
+The message must embody all 5 steps: calm, non-blaming, honest, outcome-detached, humane.
+
+## The Real Test
+The practice begins AFTER they act.
+- If they reply coldly, don't reply, or misunderstand — can you stay peaceful?
+- Modern life = constant mini Kurukshetras
+- The Gita's 10/10: observe emotions, act from clarity, surrender the result, protect inner equilibrium over ego.
+3-5 sentences.
 
 ═══════════════════════════════════════════════════════════════
 TONE RULES
@@ -445,30 +447,37 @@ class WisdomSynthesizer:
         mode = getattr(analysis, "mode", "conflict")
         emotion = getattr(analysis, "primary_emotion", "distressed")
 
-        # Get engine fallback
+        # Get engine fallback (now returns 5-step Gita framework)
         engine_fallback = build_fallback_response(analysis, message, relationship_type)
 
-        # Build wisdom insight from principles
+        # Build wisdom insight from principles (enriches Step 2)
         wisdom_insight = self._build_wisdom_insight(wisdom_context, mode, emotion)
 
+        # Use the 5-step Gita framework sections
+        step2_content = engine_fallback.get("step2_attachment", "")
+        if wisdom_insight and len(wisdom_insight) > 50:
+            step2_content = f"{step2_content}\n\n{wisdom_insight}"
+
         sections = {
-            "Emotional Precision": engine_fallback.get("emotional_precision", ""),
-            "What's Really Going On": engine_fallback.get("what_happening", ""),
-            "The Deeper Insight": wisdom_insight,
-            "The Hard Truth": engine_fallback.get("hard_truth", ""),
-            "What To Do": engine_fallback.get("what_to_do", ""),
-            "Script": engine_fallback.get("script", ""),
+            "Step 1: Pause Before Reacting": engine_fallback.get("step1_pause", ""),
+            "Step 2: Identify the Attachment": step2_content,
+            "Step 3: Regulate Before You Communicate": engine_fallback.get("step3_regulate", ""),
+            "Step 4: Speak Without Demanding an Outcome": engine_fallback.get("step4_karma_yoga", ""),
+            "Step 5: See Their Humanity": engine_fallback.get("step5_equal_vision", ""),
+            "What This Looks Like in Practice": engine_fallback.get("real_message", ""),
+            "The Real Test": engine_fallback.get("real_test", ""),
         }
 
         # Build full response text
         response_lines = [f"Mode: {mode.replace('_', ' ').title()}", ""]
         section_order = [
-            "Emotional Precision",
-            "What's Really Going On",
-            "The Deeper Insight",
-            "The Hard Truth",
-            "What To Do",
-            "Script",
+            "Step 1: Pause Before Reacting",
+            "Step 2: Identify the Attachment",
+            "Step 3: Regulate Before You Communicate",
+            "Step 4: Speak Without Demanding an Outcome",
+            "Step 5: See Their Humanity",
+            "What This Looks Like in Practice",
+            "The Real Test",
         ]
         for heading in section_order:
             content = sections.get(heading, "")
@@ -565,8 +574,8 @@ class WisdomSynthesizer:
 def _extract_sections(text: str) -> dict[str, str]:
     """Extract structured sections from AI-generated response text.
 
-    Handles markdown heading formats and extracts content between
-    recognized section headings for the wisdom-enhanced response.
+    Handles the 5-step Gita framework sections, legacy sections, and
+    markdown heading formats. Recognizes multiple naming variations.
 
     Args:
         text: The raw AI response text.
@@ -575,6 +584,15 @@ def _extract_sections(text: str) -> dict[str, str]:
         Dict mapping section heading to content.
     """
     headings = [
+        # 5-step Gita framework
+        "Step 1: Pause Before Reacting",
+        "Step 2: Identify the Attachment",
+        "Step 3: Regulate Before You Communicate",
+        "Step 4: Speak Without Demanding an Outcome",
+        "Step 5: See Their Humanity",
+        "What This Looks Like in Practice",
+        "The Real Test",
+        # Legacy sections
         "Emotional Precision",
         "What's Really Going On",
         "The Deeper Insight",
@@ -585,7 +603,27 @@ def _extract_sections(text: str) -> dict[str, str]:
     headings_lower = {h.lower(): h for h in headings}
 
     # Common variations
-    variations = {
+    variations: dict[str, str] = {
+        # 5-step variations
+        "step 1": "Step 1: Pause Before Reacting",
+        "pause before reacting": "Step 1: Pause Before Reacting",
+        "modern samatvam": "Step 1: Pause Before Reacting",
+        "step 2": "Step 2: Identify the Attachment",
+        "identify the attachment": "Step 2: Identify the Attachment",
+        "step 3": "Step 3: Regulate Before You Communicate",
+        "regulate before you communicate": "Step 3: Regulate Before You Communicate",
+        "step 4": "Step 4: Speak Without Demanding an Outcome",
+        "speak without demanding an outcome": "Step 4: Speak Without Demanding an Outcome",
+        "karma yoga applied": "Step 4: Speak Without Demanding an Outcome",
+        "step 5": "Step 5: See Their Humanity",
+        "see their humanity": "Step 5: See Their Humanity",
+        "equal vision": "Step 5: See Their Humanity",
+        "what this looks like in practice": "What This Looks Like in Practice",
+        "real text message": "What This Looks Like in Practice",
+        "what this looks like": "What This Looks Like in Practice",
+        "the real test": "The Real Test",
+        "real test": "The Real Test",
+        # Legacy variations
         "what's actually happening": "What's Really Going On",
         "what is really going on": "What's Really Going On",
         "what is actually happening": "What's Really Going On",
@@ -617,7 +655,11 @@ def _extract_sections(text: str) -> dict[str, str]:
         cleaned_lower = cleaned.lower()
         if cleaned_lower in headings_lower:
             return headings_lower[cleaned_lower]
-        return variations.get(cleaned_lower)
+        # Check variations with prefix matching for "Step N:" patterns
+        for pattern, canonical in variations.items():
+            if cleaned_lower == pattern or cleaned_lower.startswith(pattern):
+                return canonical
+        return None
 
     def flush() -> None:
         nonlocal current_heading

@@ -190,16 +190,18 @@ async def get_clarity(
     except Exception as e:
         logger.warning(f"AI response generation failed: {e}")
 
-    # Fallback to rule-based response
+    # Fallback to rule-based response (5-step Gita framework)
     if not response_text or len(sections) < 3:
-        logger.info("Using rule-based fallback for Engine response")
+        logger.info("Using rule-based fallback for Engine response (5-step Gita framework)")
         fallback = build_fallback_response(analysis, message, relationship_type)
         sections = {
-            "Emotional Precision": fallback["emotional_precision"],
-            "What's Actually Happening": fallback["what_happening"],
-            "The Hard Truth": fallback["hard_truth"],
-            "What To Do": fallback["what_to_do"],
-            "Script": fallback["script"],
+            "Step 1: Pause Before Reacting": fallback["step1_pause"],
+            "Step 2: Identify the Attachment": fallback["step2_attachment"],
+            "Step 3: Regulate Before You Communicate": fallback["step3_regulate"],
+            "Step 4: Speak Without Demanding an Outcome": fallback["step4_karma_yoga"],
+            "Step 5: See Their Humanity": fallback["step5_equal_vision"],
+            "What This Looks Like in Practice": fallback["real_message"],
+            "The Real Test": fallback["real_test"],
         }
         response_text = _sections_to_text(fallback["mode"], sections)
         provider_used = "fallback"
@@ -559,6 +561,8 @@ async def _apply_wisdom_filter(response_text: str, user_context: str) -> str:
 def _sections_to_text(mode: str, sections: dict[str, str]) -> str:
     """Convert sections dict to formatted response text.
 
+    Supports both the new 5-step Gita framework sections and legacy sections.
+
     Args:
         mode: The detected mode.
         sections: Dict of section heading to content.
@@ -568,7 +572,16 @@ def _sections_to_text(mode: str, sections: dict[str, str]) -> str:
     """
     lines = [f"Mode: {mode.replace('_', ' ').title()}", ""]
 
+    # 5-step Gita framework order (preferred)
     section_order = [
+        "Step 1: Pause Before Reacting",
+        "Step 2: Identify the Attachment",
+        "Step 3: Regulate Before You Communicate",
+        "Step 4: Speak Without Demanding an Outcome",
+        "Step 5: See Their Humanity",
+        "What This Looks Like in Practice",
+        "The Real Test",
+        # Legacy fallback
         "Emotional Precision",
         "What's Actually Happening",
         "The Hard Truth",

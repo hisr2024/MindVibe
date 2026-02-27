@@ -521,10 +521,20 @@ def build_fallback_response(
     text: str,  # noqa: ARG001 — kept for API contract
     relationship_type: str,  # noqa: ARG001 — kept for API contract
 ) -> dict[str, str]:
-    """Build a rule-based fallback response when AI is unavailable.
+    """Build a rule-based fallback response using the strict 5-step Gita framework.
 
-    Generates structured sections based on the analysis results using
-    pre-written templates informed by Gita-translated principles.
+    Generates the 5-step Gita framework sections plus Real Text Message and
+    Real Test sections. Uses pre-written templates informed by Gita-translated
+    principles, matching each step to a specific Gita teaching.
+
+    Steps:
+    1. Pause Before Reacting (Modern Samatvam)
+    2. Identify the Attachment (Root cause analysis)
+    3. Regulate Before You Communicate (Chapter 6 mastery)
+    4. Speak Without Demanding an Outcome (Karma Yoga Applied)
+    5. See Their Humanity (Sama-darshana / Equal Vision)
+    + What This Looks Like in Practice (Real Text Message)
+    + The Real Test (Aftermath guidance)
 
     Args:
         analysis: The EngineAnalysis result.
@@ -538,104 +548,168 @@ def build_fallback_response(
     emotion = analysis.primary_emotion or "distressed"
     mechanism = analysis.mechanism or "unmet_expectation"
 
-    # Build Emotional Precision - Gita-grounded, feeling-rich
-    # Each emotion is understood through the Gita's framework: attachment (raga), aversion (dvesha),
-    # ego (ahamkara), desire (kama), anger (krodha), fear (bhaya), delusion (moha)
-    emotion_explanations = {
-        "angry": "You're angry — and not the mild, manageable kind. This is the kind of anger that burns in your chest and makes your hands shake. That fire is real, and it makes sense. Something that matters deeply to you was violated. The Gita teaches that anger arises when desire is frustrated — and underneath your anger is a desire that was real and valid: to be treated with fairness, to be respected, to matter. Feel it. But know that acting FROM the anger will cloud the very clarity you need right now.",
-        "hurt": "You're hurt — and it goes deep. This isn't surface-level disappointment. This is the kind of pain that only happens when someone you genuinely care about acts in a way that contradicts what your heart needs from them. There's an ache here that speaks to how much this relationship means to you. That capacity to feel this deeply isn't your weakness — it's your humanity. And it deserves to be honored, not dismissed.",
-        "betrayed": "You feel betrayed — and the ground beneath you has shifted. What you trusted turned out to be something else entirely, and now everything feels uncertain. That disorientation is your whole being trying to make sense of a world where the rules changed without warning. This isn't weakness — this is what happens when someone breaks the unspoken agreement that held your trust together. You're not falling apart. You're recalibrating.",
-        "anxious": "You're anxious — that tight, restless feeling where your mind won't stop running worst-case scenarios. Every silence feels loaded, every delay feels like a message. Your whole being is scanning for threat because something in this relationship doesn't feel safe right now. That anxiety isn't irrational — it's your heart trying to protect something it values. But the spiraling thoughts are stealing your peace, and you deserve that peace back.",
-        "dismissed": "You feel dismissed — like your experience, your feelings, your very presence doesn't register to the person who should see you most. That specific pain — being invisible to someone who matters — cuts deeper than most people realize. It makes you question whether your feelings are valid, whether you're asking too much, whether you even have the right to be hurt. You do. You absolutely do.",
-        "humiliated": "You feel humiliated — and there's a heaviness to it that goes beyond embarrassment. Being wrong is one thing. Being made to feel small is something else entirely. What happened didn't just challenge your position — it struck at your dignity, your sense of self. That sting lingers because it touched something fundamental: your right to be treated with basic respect. That right is non-negotiable.",
-        "guilty": "You feel guilty — and the weight of it sits heavy on your chest. You're carrying something you did or didn't do, and it's playing on repeat in your mind. Here's what matters: the fact that you feel guilt means your values are alive and well. You KNOW something wasn't right. But guilt is meant to be a signal, not a sentence. It's showing you where to grow — not condemning you to endless self-punishment.",
-        "powerless": "You feel powerless — like the situation has more control over you than you have over yourself. That helplessness is one of the most painful feelings there is, because it strikes at your sense of agency. But here's what the deepest wisdom teaches: you always have more power than you think. Not power over THEM — that was never yours to have. But power over how you respond, what you accept, and who you choose to be in this moment.",
-        "confused": "You're confused — and it's not because you're not smart enough to figure this out. It's because the signals you're getting are genuinely contradictory. They say one thing and do another. Their words don't match their actions. Mixed messages produce mixed feelings — that confusion isn't your flaw, it's a natural response to inconsistency. Your mind is trying to make a coherent picture from puzzle pieces that don't fit. Give yourself grace here.",
-        "exhausted": "You're exhausted — not just tired, but deeply, emotionally drained. The kind of exhaustion that comes from pouring yourself into something that takes and takes without giving back proportionally. That depletion is your being telling you something important: this imbalance isn't sustainable. You've been strong for so long. You've been patient, understanding, accommodating. And it's cost you. That exhaustion deserves to be listened to, not pushed through.",
-        "lonely": "You feel lonely — and not the kind that comes from being alone. This is the deeper loneliness of being WITH someone and still feeling completely unseen. Of sharing a life, a space, a bed — and still feeling like your inner world is invisible to them. That loneliness is harder than actual solitude, because it carries the ache of proximity without connection. You're not asking for too much by wanting to be truly known.",
-        "resentful": "You're resentful — and that resentment didn't appear overnight. It built up slowly, layer by layer, every time you gave what wasn't reciprocated, tolerated what should have been addressed, or swallowed words that needed to be said. Resentment is accumulated unspoken truth. It's the tax you pay for peace-keeping at the expense of your own needs. Acknowledging it isn't bitterness — it's honesty.",
-        "jealous": "You're feeling jealous — and underneath that jealousy, there's usually something more tender: a fear of being replaced, of not being enough, of losing something that matters deeply to you. The jealousy is what shows on the surface. But the engine driving it is fear and a longing to feel secure in your place in someone's heart. That longing is profoundly human.",
-        "inadequate": "You feel inadequate — like you're failing at something you should be getting right. That 'not enough' feeling is one of the most painful human experiences because it makes you question your fundamental worth. But consider this: whose measuring stick are you using? Often, our sense of inadequacy says more about the impossible standards we've absorbed than about our actual value. You are already complete — even in this moment of doubt.",
-        "suffocated": "You feel suffocated — the closeness that should feel safe has started to feel like it's compressing you. You need room to breathe, to think, to simply BE without someone else's needs filling every inch of space. That need for space isn't selfish — it's essential. Even the deepest love requires room for two whole people, not two halves trying to merge into one.",
-        "abandoned": "You feel abandoned — whether they physically left or emotionally checked out, the result lands the same way: you're standing alone in the space where connection used to live. That emptiness aches. And it's made worse by the questions that follow: Was I not enough? Did I do something wrong? Could I have held on tighter? The truth is, their leaving says something about their capacity, not your worth.",
-        "disappointed": "You're disappointed — and there's a specific ache to it that goes beyond what happened. The pain isn't just about this moment. It's about the picture you had in your heart of who they were, of what this relationship could be — and watching that picture crack. Disappointment is grief for the version of reality you believed in. Let yourself feel that grief. It's real.",
+    # Step 1: Pause Before Reacting (Modern Samatvam)
+    reactive_urges = {
+        "conflict": "send a long message defending yourself, point out everything they did wrong, or call someone to vent",
+        "boundary": "snap back, give an ultimatum in the heat of the moment, or shut down completely",
+        "repair": "rush to apologize just to make the discomfort stop, or over-explain yourself",
+        "decision": "ask ten people for their opinion, or make a hasty choice just to end the uncertainty",
+        "pattern": "react the same way you always do — because the script is so familiar it runs on autopilot",
+        "courage": "get defensive, or deflect by pointing out what THEY'VE done wrong",
     }
 
-    emotional_precision = emotion_explanations.get(
-        emotion,
-        f"You're {emotion}. That's a real response to a real situation. Name it without judging yourself for it — the emotion is giving you information about what matters to you here."
+    step1_urge = reactive_urges.get(mode, reactive_urges["conflict"])
+
+    step1 = (
+        f"Right now, part of you wants to {step1_urge}. "
+        f"Pause. You feel {emotion} — and that feeling is real and valid. Name it. Sit with it for a moment. "
+        f"Your mind is telling you a story about what this means — about your worth, about their intentions, about what you deserve. "
+        f"Notice that story. The disturbance is inside you, and recognizing that isn't weakness — it IS the practice. "
+        f"That pause alone prevents 80% of the damage."
     )
 
-    # Build mechanism insight - Gita-grounded (attachment/raga, aversion/dvesha, ego/ahamkara, desire/kama)
-    mechanism_insights = {
-        "attachment_activation": "Your heart is gripping tightly — because part of you senses that something precious might slip away. That monitoring — \"Am I safe? Do they still love me? Are they pulling away?\" — is your deepest attachment at work. The Gita teaches that attachment to outcomes is the root of suffering, and right now you're attached to a particular version of how this person should show up for you. That attachment isn't wrong — it shows how much this matters. But it's also the source of the panic. Your peace can't live in someone else's hands.",
-        "unmet_expectation": "There's a gap between what your heart hoped for and what actually happened — and the pain lives right in that gap. You carried an image of how they should respond, what they should understand, how they should show up — and reality didn't match. The Gita teaches that attachment to how things SHOULD be is one of the deepest sources of human suffering. The event itself may have been small. But the disappointment of unmet hope? That's enormous.",
-        "ego_injury": "Something about this struck at your sense of who you are — your worth, your dignity, your place. This isn't about vanity. This is about the fundamental human need to be respected and seen as someone who matters. When that gets challenged — especially by someone whose opinion carries weight — it doesn't just sting on the surface. It reverberates through your entire sense of self. The Gita teaches that our deepest pain often comes from confusing who we truly are with how others treat us.",
-        "emotional_flooding": "You're flooded right now — your emotions have overwhelmed the part of you that thinks clearly, plans wisely, and chooses words carefully. When we're flooded, we operate from our most reactive, fearful self — not our wisest self. The Gita describes this clearly: when the mind is agitated by strong emotions, wisdom becomes inaccessible. This isn't a character flaw — it's what happens to every human being under emotional overload. The first step isn't figuring out what to do. It's finding solid ground to stand on.",
-        "control_attempt": "You're trying to manage something that was never yours to control — another person's behavior, feelings, or choices. And the frustration you feel isn't just about what they're doing. It's about the helplessness of pouring effort into something that refuses to respond the way you need. The Gita's deepest teaching applies here: you have full authority over your own actions, but absolutely none over the results. Especially when those results depend on another person's free will.",
-        "pattern_repetition": "This feels familiar because it IS familiar. Your whole being recognizes this dynamic — maybe from this relationship, maybe from earlier chapters of your life. The familiarity is what makes it so emotionally charged. You're not just reacting to what happened today. You're carrying the accumulated weight of every time this pattern has played out before. The Gita teaches that deeply ingrained patterns (samskaras) shape our responses until we become conscious enough to choose differently. This is that moment.",
-        "avoidance": "You're avoiding something that needs to be faced — and the avoidance itself has become its own source of suffering. The hard conversation, the difficult truth, the decision you've been putting off — it sits in the background, quietly growing heavier. The Gita is clear on this: avoidance is not protection. It's borrowed time with interest. The discomfort of facing it is temporary. The cost of avoiding it compounds. Your heart already knows what needs to happen.",
-        "approval_seeking": "You've been filtering your words, your decisions, even your feelings through one question: \"Will they be okay with this?\" Your sense of who you are has become dependent on their opinion of you. That's not love — that's outsourcing your self-worth. The Gita teaches that true inner peace comes from being rooted in your own completeness, not from external validation. Right now, the most loving thing you can do — for yourself AND the relationship — is to start making choices based on your own values, not their approval.",
-        "projection": "You may be reading their intentions through the lens of your own deepest fears. What you're certain they're thinking or feeling — that certainty might actually be your own worry wearing their face. The Gita teaches that delusion (moha) clouds our ability to see clearly, and projection is one of its most common forms. Before you respond to what you THINK they meant, pause and ask: is this based on what they actually said and did, or on what I'm afraid might be true?",
-        "enmeshment": "The boundary between your emotional world and theirs has dissolved. Their mood becomes your mood. Their pain becomes your emergency. You can't feel settled until they're settled. This isn't empathy — it's losing yourself inside someone else's emotional experience. The Gita teaches that each person has their own path, their own struggles, their own growth to do. Carrying their emotional weight as your own doesn't help them — and it's slowly erasing you.",
+    # Step 2: Identify the Attachment
+    attachment_maps = {
+        "attachment_activation": "You were attached to feeling secure — to knowing your place in their heart was stable. The fear of losing that safety is what's driving the intensity right now.",
+        "unmet_expectation": "You were attached to a specific outcome — to how they SHOULD have responded, to what they SHOULD have understood. The pain lives in the gap between what you hoped for and what you got.",
+        "ego_injury": "You were attached to being respected, to being valued, to being seen as someone who matters. When that was challenged, it struck at something deeper than the event itself.",
+        "emotional_flooding": "You were attached to staying in control — and the intensity of what you're feeling has overwhelmed that. Your nervous system has taken over, and the thinking part of you has gone offline.",
+        "control_attempt": "You were attached to managing their behavior — to getting them to see, understand, or change. That's an outcome you were never going to be able to guarantee.",
+        "pattern_repetition": "You were attached to the hope that THIS time would be different. That hope kept you in the same cycle. The attachment isn't to them — it's to the version of them that matches what you need.",
+        "avoidance": "You were attached to comfort — to not having to face the hard conversation or the painful truth. The avoidance feels like protection, but it's actually letting the problem grow.",
+        "approval_seeking": "You were attached to their approval — filtering your words, your choices, even your feelings through 'Will they be okay with this?' That's not love. That's outsourcing your self-worth.",
+        "projection": "You were attached to a narrative about their intentions — one that might say more about your fears than about their reality. Before you respond to what you THINK they meant, check: is this fact or fear?",
+        "enmeshment": "You were attached to their emotional state as if it were your own. Their mood became your mood. Their peace became your peace. That's not empathy — it's losing yourself.",
     }
 
-    what_happening = mechanism_insights.get(
+    step2 = attachment_maps.get(
         mechanism,
-        "A core relational dynamic is at play. Something about this situation is triggering a deeper response than the surface event warrants — and that deeper layer is where the real work lives."
+        "Ask yourself honestly: Were you attached to being valued? To being right? To immediate reassurance? "
+        "The EVENT was what happened. The STORY your mind created is the interpretation, the fear, the meaning-making. "
+        "Separate the two. The Gita teaches that anger begins when desire is frustrated — so instead of blaming, "
+        "release the expectation first."
     )
 
-    # Build hard truth based on mode - Gita-grounded with emotional warmth
-    hard_truths = {
-        "conflict": "Here's what's true, even though it's hard to hear: you cannot win an argument and deepen a relationship at the same time. The Gita teaches that acting from the need to be right is acting from ego — and ego never leads to peace. The real question isn't \"Who's right?\" It's \"What do I actually need here, and can I ask for it without needing to defeat them first?\" That shift — from winning to understanding — is where healing begins.",
-        "boundary": "A boundary you don't enforce is just a wish. If you've stated your limit and they've crossed it without consequence, the unspoken message is that your limits are negotiable. The Gita teaches that protecting your own dharma — your right path, your integrity — is not selfish. It's necessary. Boundaries aren't about changing them. They're about what YOU do when they refuse to change.",
-        "repair": "Apology without changed behavior isn't repair — it's repetition. If you want to truly mend this, your words matter less than what you do differently starting now. The Gita teaches that action reveals truth far more than speech. And you need to be willing to sit with the discomfort of their timeline — repair doesn't mean things instantly go back to how they were. Sometimes love means waiting with patience and humility.",
-        "decision": "Waiting for perfect clarity before acting is itself a choice — a choice to stay exactly where you are by default. The Gita teaches that right action sometimes means moving forward without complete certainty. Make the decision based on which choice you can respect yourself for in a year — not which avoids the most discomfort right now. Your future self will thank you for choosing courage over comfort.",
-        "pattern": "You recognize this pattern. You've been here before — the same dynamic, the same hurt, the same hope that this time it'll be different. But the Gita teaches that deeply ingrained patterns only break when WE change, not when others do. The part of you hoping they'll finally get it is the part keeping you stuck. The pattern breaks when you do something different — even one small thing — that interrupts the familiar script.",
-        "courage": "The fact that you're asking whether you're the problem tells me something important: you have the kind of honesty that most people avoid. The Gita teaches that self-inquiry — really looking at yourself with clarity — is one of the bravest acts a person can do. You don't need to be perfect. Nobody is. The question is whether you're willing to see your part with clear eyes and change what needs changing. That willingness IS the growth.",
+    # Step 3: Regulate Before You Communicate
+    regulation_steps = {
+        "conflict": "Write what you want to say. Don't send it. Wait 2 hours. Reread it. Rewrite from a place of calm. Go for a short walk. Breathe slowly. Do NOT text while your chest is still tight. Respond only when your nervous system is settled — not when you've rehearsed the perfect comeback.",
+        "boundary": "Feel the anger fully. Let it burn through you without acting on it. Then — and only then — state your limit from a place of clarity, not rage. A boundary spoken from anger sounds like a threat. A boundary spoken from calm sounds like truth. Take 10 minutes. Sit. Breathe. Let the reactive fire settle before you speak.",
+        "repair": "Sit with the guilt. Don't rush to apologize just to escape the discomfort — that's an apology for YOUR relief, not their healing. Let the weight of what happened actually land. Breathe through it. When you feel the difference between urgency and genuine understanding, THEN you're ready to speak.",
+        "decision": "Stop asking others what to do. Get quiet. Put the phone down for 30 minutes. Sit somewhere alone. Your inner knowing has been speaking this whole time — you've just been too noisy to hear it. The clarity won't come from more information. It'll come from stillness.",
+        "pattern": "Notice the exact moment the familiar script starts playing — that's your intervention point. The old pattern has a trigger, a reaction, and a predictable outcome. Your job is to catch yourself at the REACTION stage and choose something different. Even pausing 30 seconds before responding breaks the automatic cycle.",
+        "courage": "Before you ask for honest feedback from them, get honest with yourself first. Sit down. Write out what YOU already know about your part in this. Don't edit it. Don't soften it. What do you see? Start there. The courage to look inward is the hardest and most important kind.",
     }
 
-    hard_truth = hard_truths.get(mode, hard_truths["conflict"])
+    step3 = regulation_steps.get(mode, regulation_steps["conflict"])
 
-    # Build action step based on mode - Gita-grounded practical wisdom
-    action_steps = {
-        "conflict": "Before your next interaction, give yourself the gift of a pause. The Gita teaches that wisdom is only accessible when the mind is steady — and right now, yours is turbulent. Take 90 seconds. Breathe. Let the emotional surge pass through you without acting on it. Then ask yourself one honest question: \"What do I actually NEED here?\" Lead with that need — not the accusation. Instead of \"You never listen,\" try \"I need to feel heard right now. Can you just listen, without trying to fix it?\" That shift from complaint to vulnerable need changes everything.",
-        "boundary": "State your boundary once, clearly, with warmth and firmness: \"I'm not willing to accept [specific behavior]. If it continues, I will [specific consequence].\" If they push back, repeat it calmly — same words, same tone. The Gita teaches that right action sometimes requires courage that's uncomfortable. If they violate the boundary, follow through. Their reaction to your boundary is their responsibility. Your job is to honor what you need.",
-        "repair": "Go to them and name what you did wrong — specifically, not vaguely. Don't explain why you did it (that sounds like justifying). Don't ask for forgiveness yet (that puts pressure on them). The Gita teaches that right action is its own reward — apologize because it's RIGHT, not because you need a particular response. Name what happened, name the impact, then ask: \"What do you need from me?\" Accept whatever they say — even if it's \"space\" or \"time.\" Repair is an offering, not a transaction.",
-        "decision": "Write down your options. Under each, write: \"If I choose this, what am I accepting? What am I losing? What am I gaining?\" Then ask the question that cuts through everything: \"Which choice can I respect myself for making in a year?\" Not which is easiest. Not which avoids the most pain. The Gita teaches that discernment (viveka) means choosing what's ultimately right over what's immediately comfortable. Trust your inner knowing — it's been speaking to you this whole time.",
-        "pattern": "Name the pattern out loud — to yourself or to them: \"I notice that when [trigger happens], I [your response], and then you [their response], and we end up in [outcome].\" Then do ONE thing differently. Not everything — just one link in the chain. The Gita teaches that lasting change comes not from grand overhauls but from conscious choice in the present moment. Break one link and the whole pattern starts to shift. Your power lives in choosing differently THIS time.",
-        "courage": "Sit with this honestly: What are YOU doing that makes the situation worse? Not what they're doing — what's your part? Write it down. The Gita teaches that self-inquiry is the beginning of all wisdom — and it takes genuine courage. Then decide: Are you willing to change that specific behavior? If yes, start today. Not after they change first. Not when it's convenient. Now. Your willingness to go first is not weakness — it's the kind of strength most people never find.",
+    # Step 4: Speak Without Demanding an Outcome (Karma Yoga Applied)
+    karma_yoga_speech = {
+        "conflict": (
+            "Instead of: \"You always do this. You don't care.\"\n\n"
+            "Try: \"When [specific thing] happened, I felt [specific emotion]. I value this relationship, so I wanted to share that honestly. "
+            "I'm not looking for you to fix it or defend yourself — I just need you to know where I'm at.\"\n\n"
+            "Notice the difference: No accusation. No demand. No emotional manipulation. No 'you must fix this.' "
+            "You are doing your duty — honesty. You release the fruit — their reaction. "
+            "If they respond defensively, you remain steady. If they apologize, you remain steady. That steadiness is the practice."
+        ),
+        "boundary": (
+            "Instead of: \"If you do that again, we're done.\"\n\n"
+            "Try: \"I care about us, which is why I need to be clear: when [behavior] happens, it's not something I can keep accepting. "
+            "If it continues, I will [specific consequence]. This isn't a threat — it's me taking care of what I need so I can still show up with my heart intact.\"\n\n"
+            "A boundary isn't a request. It's a statement of what YOU will do. Their reaction to your boundary is their responsibility. Yours is to follow through."
+        ),
+        "repair": (
+            "Instead of: \"I'm sorry, but you also...\"\n\n"
+            "Try: \"I did [specific action], and I can see it [specific impact on them]. I'm not going to explain why — what matters is that I hurt you. "
+            "I'm genuinely sorry. What do you need from me right now?\"\n\n"
+            "No justification. No deflection. No asking for forgiveness yet — that puts pressure on them. "
+            "Apologize because it's RIGHT, not because you need a particular response. Repair is an offering, not a transaction."
+        ),
+        "decision": (
+            "This step isn't about speaking to someone — it's about discerning.\n\n"
+            "Write your options down. Under each, write: \"If I choose this, what am I accepting? What am I losing? What am I gaining?\"\n\n"
+            "Then ask the one question that cuts through everything: \"Which choice can I respect myself for in a year?\" "
+            "Not which is easiest. Not which avoids the most pain. Trust that inner knowing — it's been speaking to you all along."
+        ),
+        "pattern": (
+            "Instead of playing out the familiar script:\n\n"
+            "Try: \"I've been noticing something between us. When [trigger] happens, I tend to [your pattern], "
+            "and then you [their pattern], and we end up right back where we started. I don't want to keep doing this dance. "
+            "I'm willing to start by changing how I [your part]. Can we figure this out together?\"\n\n"
+            "Do ONE thing differently. Not everything — just one link in the chain. Break one link and the whole pattern starts to shift."
+        ),
+        "courage": (
+            "The honest reckoning starts with you.\n\n"
+            "Ask yourself: What am I doing that makes this situation worse? Not what they're doing — what's YOUR part? "
+            "Write it down. Don't soften it. The Gita teaches that self-inquiry is the beginning of all wisdom.\n\n"
+            "Then decide: Are you willing to change that specific behavior? If yes, start today. Not after they change first. Now. "
+            "Your willingness to go first is not weakness — it's the kind of strength most people never find."
+        ),
     }
 
-    what_to_do = action_steps.get(mode, action_steps["conflict"])
+    step4 = karma_yoga_speech.get(mode, karma_yoga_speech["conflict"])
 
-    # Build script based on mode - warm, dignified, Gita-aligned truthful speech
-    scripts = {
-        "conflict": "\"Hey, I want to talk about what happened — and I want us both to be in a good place for it. Can we do that? Here's what I experienced: [specific event]. What I felt in that moment was [emotion]. And I think underneath it, what I really need is [need]. I'm not bringing this up to fight or to blame you. I'm bringing it up because this relationship matters to me, and I want us to understand each other better.\"",
-        "boundary": "\"I need to share something important with you — and I'm saying this because I care about us. When [specific behavior happens], it hurts me and it's not something I can keep accepting. Going forward, if it happens again, I'm going to [specific consequence]. This isn't about punishing you. It's about taking care of myself so I can show up for this relationship with my heart intact.\"",
-        "repair": "\"I need to tell you something, and I want you to know I mean it. I [specific action], and I can see that it [specific impact on them]. I'm not going to explain why I did it — that doesn't matter right now. What matters is that I hurt you, and I'm genuinely sorry. I want to do better. What do you need from me right now?\"",
-        "decision": "No script needed — this is an inner shift. The decision lives inside you. Give yourself the quiet space to listen to what your heart already knows, without the noise of other people's opinions.",
-        "pattern": "\"I've been noticing something between us, and I want to talk about it — not to blame, but because I want things to be different. When [trigger happens], I tend to [your pattern], and then you [their pattern], and we end up right back where we started. I don't want to keep doing this dance. Can we figure out together how to break the cycle? I'm willing to start by changing how I [your part].\"",
-        "courage": "No script needed — this is an inner shift, and it starts with you. The honest reckoning happens with yourself first. Sit with what you've seen about your own part. Let it land. Then, when you're ready, you'll know whether and how to share it with them.",
+    # Step 5: See Their Humanity (Equal Vision / Sama-darshana)
+    equal_vision = {
+        "conflict": "Instead of assuming they were trying to hurt you, consider: Maybe they're stressed. Maybe they're carrying something you can't see. Maybe they communicated badly because they were overwhelmed, not because they don't care. Equal vision doesn't mean excusing the behavior — it means you don't reduce a whole person to one moment. Hold space for their complexity while protecting your own peace.",
+        "boundary": "The person crossing your boundary may not realize the weight of what they're doing. That doesn't make it acceptable — but it means your firmness can coexist with compassion. You can hold a boundary AND see their struggle. These aren't contradictory. In fact, the strongest boundaries come from people who understand both sides clearly.",
+        "repair": "The person you hurt is dealing with their own pain right now. They may not be ready to hear your apology. They may be questioning things you don't know about. See THEIR experience — not just your guilt. Real repair requires seeing their world through their eyes, not just managing your own discomfort.",
+        "decision": "Every option involves real people with real feelings — including you. There's no choice that avoids all pain. But there might be a choice that honors the most truth. See yourself and everyone involved as whole humans navigating something difficult — not as problems to be solved.",
+        "pattern": "The other person in this pattern has their own history, their own triggers, their own fears that drive their side of the cycle. You don't need to fix their part — but seeing it clearly helps you stop taking it personally. Their pattern isn't about you. Yours isn't about them. You're both doing familiar dances learned long ago.",
+        "courage": "If you've been contributing to the problem, that doesn't make you a bad person. It makes you human. And if they've been contributing too, that doesn't make them a villain. See both of you clearly — flawed, trying, sometimes missing the mark. That honest seeing is the foundation of real change.",
     }
 
-    script = scripts.get(mode, scripts["conflict"])
+    step5 = equal_vision.get(mode, equal_vision["conflict"])
+
+    # Real Text Message / Practice
+    real_messages = {
+        "conflict": "\"Hey, I realized I reacted internally because I had expectations. I value our relationship, so I wanted to say I felt [emotion] when [event]. No blame — I just wanted to be open. I'm good, and I hope we can stay steady with each other.\"",
+        "boundary": "\"I care about us, which is why I need to be honest: [specific behavior] isn't something I can keep accepting. Going forward, if it happens again, I'll [consequence]. This isn't an ultimatum — it's me being clear about what I need to stay in this with my heart intact.\"",
+        "repair": "\"I owe you an honest apology. I [specific action], and I know it [impact]. I'm not going to explain why — that doesn't matter right now. What matters is I hurt you, and I'm sorry. Tell me what you need from me. I'll listen.\"",
+        "decision": "Journal prompt: \"If I trusted myself completely, I would choose ____. The reason I'm hesitating is ____. The choice I can respect myself for in a year is ____.\" Sit with your answers. Don't rush. Let clarity find you.",
+        "pattern": "\"I've noticed something between us, and I want to try something different. Usually when [trigger] happens, I [your pattern]. This time, I'm going to [new choice]. I'm not asking you to change first — I'm starting with me.\"",
+        "courage": "Inner practice: Write down your honest answer to: \"What am I doing that makes this worse?\" Don't share it yet. Just sit with it. Let it land. When you feel ready — not defensive, not guilty, just clear — decide what you'll do differently. Start tomorrow.",
+    }
+
+    real_message = real_messages.get(mode, real_messages["conflict"])
+
+    # The Real Test
+    real_test = (
+        "The real practice begins after you act. "
+        "If they reply coldly — can you stay peaceful? If they don't reply at all — can you stay steady? "
+        "If they misunderstand — can you resist the urge to over-explain? "
+        "THAT is the real test. Modern life is constant mini Kurukshetras — group chats, work misunderstandings, "
+        "social media triggers, relationship expectations. The battlefield has changed. The mind has not.\n\n"
+        "The Gita's 10/10 standard: You don't suppress emotions. You don't explode emotions. You observe them. "
+        "You act from clarity. You surrender the result. "
+        "And most importantly — you protect your inner equilibrium more than your ego."
+    )
 
     # Safety override
     if analysis.safety_concern:
-        emotional_precision = "What you're describing sounds like it may involve safety concerns. Your physical and emotional safety comes first — above the relationship, above keeping peace, above everything."
-        what_happening = "This situation has moved beyond relationship dynamics into territory that requires professional support. A relationship clarity tool is not the right resource for this."
-        hard_truth = "If you are in danger, no amount of communication strategy or self-reflection fixes that. Safety is the priority. Not the relationship. Not their feelings. Your safety."
-        what_to_do = "Contact a professional resource. If you're in the US, call the National Domestic Violence Hotline: 1-800-799-7233. If you're experiencing thoughts of self-harm, call 988 (Suicide & Crisis Lifeline). Reach out to someone you trust. You don't have to figure this out alone."
-        script = "No script needed. Focus on getting safe. Tell someone you trust what is happening."
+        step1 = "What you're describing sounds like it may involve safety concerns. Your physical and emotional safety comes first — above the relationship, above keeping peace, above everything."
+        step2 = "This situation has moved beyond relationship dynamics into territory that requires professional support. A relationship clarity tool is not the right resource for this."
+        step3 = "If you are in danger, prioritize getting safe. Don't worry about processing emotions right now — that comes after safety is secured."
+        step4 = "If you are in danger, no amount of communication strategy or self-reflection fixes that. Safety is the priority. Not the relationship. Not their feelings. Your safety."
+        step5 = "This is not a situation where seeing their humanity applies. Your wellbeing is the priority."
+        real_message = "Contact a professional resource. US: National Domestic Violence Hotline 1-800-799-7233. Suicide & Crisis Lifeline: 988. Tell someone you trust what is happening."
+        real_test = "The only test that matters right now is: Are you safe? If not, reach out for help. You don't have to figure this out alone."
 
     return {
         "mode": mode,
-        "emotional_precision": emotional_precision,
-        "what_happening": what_happening,
-        "hard_truth": hard_truth,
-        "what_to_do": what_to_do,
-        "script": script,
+        "step1_pause": step1,
+        "step2_attachment": step2,
+        "step3_regulate": step3,
+        "step4_karma_yoga": step4,
+        "step5_equal_vision": step5,
+        "real_message": real_message,
+        "real_test": real_test,
+        # Legacy keys for backward compat (map to closest 5-step equivalent)
+        "emotional_precision": step1,
+        "what_happening": step2,
+        "hard_truth": step4,
+        "what_to_do": step3,
+        "script": real_message,
     }
 
 
@@ -770,8 +844,17 @@ def gather_wisdom_context(
 def extract_response_sections(text: str) -> dict[str, str]:
     """Extract structured sections from AI-generated response text.
 
-    Handles markdown heading formats (## Heading) and extracts content
-    between recognized section headings.
+    Handles both the new 5-step Gita framework sections and legacy section
+    formats. Supports markdown heading formats (## Heading).
+
+    The 5-step framework sections:
+    - Step 1: Pause Before Reacting
+    - Step 2: Identify the Attachment
+    - Step 3: Regulate Before You Communicate
+    - Step 4: Speak Without Demanding an Outcome
+    - Step 5: See Their Humanity
+    - What This Looks Like in Practice (Real Text Message)
+    - The Real Test
 
     Args:
         text: The raw AI response text.
@@ -779,7 +862,16 @@ def extract_response_sections(text: str) -> dict[str, str]:
     Returns:
         Dict mapping section heading to content.
     """
+    # Canonical section names for the 5-step Gita framework
     headings = [
+        "Step 1: Pause Before Reacting",
+        "Step 2: Identify the Attachment",
+        "Step 3: Regulate Before You Communicate",
+        "Step 4: Speak Without Demanding an Outcome",
+        "Step 5: See Their Humanity",
+        "What This Looks Like in Practice",
+        "The Real Test",
+        # Legacy sections (still recognized for backward compatibility)
         "Emotional Precision",
         "What's Actually Happening",
         "The Hard Truth",
@@ -788,33 +880,82 @@ def extract_response_sections(text: str) -> dict[str, str]:
     ]
     headings_lower = {h.lower(): h for h in headings}
 
+    # Variations that map to canonical names
+    variations: dict[str, str] = {
+        # Step 1 variations
+        "step 1": "Step 1: Pause Before Reacting",
+        "pause before reacting": "Step 1: Pause Before Reacting",
+        "modern samatvam": "Step 1: Pause Before Reacting",
+        "step 1: pause": "Step 1: Pause Before Reacting",
+        "step 1 — pause before reacting": "Step 1: Pause Before Reacting",
+        "step 1 - pause before reacting": "Step 1: Pause Before Reacting",
+        # Step 2 variations
+        "step 2": "Step 2: Identify the Attachment",
+        "identify the attachment": "Step 2: Identify the Attachment",
+        "step 2: identify": "Step 2: Identify the Attachment",
+        "step 2 — identify the attachment": "Step 2: Identify the Attachment",
+        "step 2 - identify the attachment": "Step 2: Identify the Attachment",
+        # Step 3 variations
+        "step 3": "Step 3: Regulate Before You Communicate",
+        "regulate before you communicate": "Step 3: Regulate Before You Communicate",
+        "step 3: regulate": "Step 3: Regulate Before You Communicate",
+        "step 3 — regulate before you communicate": "Step 3: Regulate Before You Communicate",
+        "step 3 - regulate before you communicate": "Step 3: Regulate Before You Communicate",
+        # Step 4 variations
+        "step 4": "Step 4: Speak Without Demanding an Outcome",
+        "speak without demanding an outcome": "Step 4: Speak Without Demanding an Outcome",
+        "karma yoga applied": "Step 4: Speak Without Demanding an Outcome",
+        "step 4: speak": "Step 4: Speak Without Demanding an Outcome",
+        "step 4 — speak without demanding an outcome": "Step 4: Speak Without Demanding an Outcome",
+        "step 4 - speak without demanding an outcome": "Step 4: Speak Without Demanding an Outcome",
+        # Step 5 variations
+        "step 5": "Step 5: See Their Humanity",
+        "see their humanity": "Step 5: See Their Humanity",
+        "equal vision": "Step 5: See Their Humanity",
+        "step 5: see": "Step 5: See Their Humanity",
+        "step 5 — see their humanity": "Step 5: See Their Humanity",
+        "step 5 - see their humanity": "Step 5: See Their Humanity",
+        # Real Text Message variations
+        "what this looks like in practice": "What This Looks Like in Practice",
+        "real text message": "What This Looks Like in Practice",
+        "what this looks like": "What This Looks Like in Practice",
+        "in practice": "What This Looks Like in Practice",
+        "what to say": "What This Looks Like in Practice",
+        # Real Test variations
+        "the real test": "The Real Test",
+        "real test": "The Real Test",
+        "the test": "The Real Test",
+        "aftermath": "The Real Test",
+        # Legacy variations
+        "what's happening": "What's Actually Happening",
+        "what is actually happening": "What's Actually Happening",
+        "what is happening": "What's Actually Happening",
+        "whats actually happening": "What's Actually Happening",
+        "hard truth": "The Hard Truth",
+        "the truth": "The Hard Truth",
+        "what to do": "What To Do",
+        "action": "What To Do",
+        "practical action": "What To Do",
+        "next step": "What To Do",
+        "script (if relevant)": "Script",
+        "script": "Script",
+        "suggested script": "Script",
+    }
+
     section_map: dict[str, str] = {}
     current_heading: str | None = None
     buffer: list[str] = []
 
     def normalize(line: str) -> str | None:
         cleaned = line.strip().lstrip("#").strip().strip("*").strip().rstrip(":").strip()
-        # Handle variations
         cleaned_lower = cleaned.lower()
         if cleaned_lower in headings_lower:
             return headings_lower[cleaned_lower]
-        # Handle common variations
-        variations = {
-            "what's happening": "What's Actually Happening",
-            "what is actually happening": "What's Actually Happening",
-            "what is happening": "What's Actually Happening",
-            "whats actually happening": "What's Actually Happening",
-            "hard truth": "The Hard Truth",
-            "the truth": "The Hard Truth",
-            "what to do": "What To Do",
-            "action": "What To Do",
-            "practical action": "What To Do",
-            "next step": "What To Do",
-            "script (if relevant)": "Script",
-            "script": "Script",
-            "suggested script": "Script",
-        }
-        return variations.get(cleaned_lower)
+        # Check variations
+        for pattern, canonical in variations.items():
+            if cleaned_lower == pattern or cleaned_lower.startswith(pattern):
+                return canonical
+        return None
 
     def flush() -> None:
         if current_heading is not None:
