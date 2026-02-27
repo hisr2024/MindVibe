@@ -538,7 +538,9 @@ def get_karmic_path_by_legacy_type(repair_type: str) -> dict[str, Any] | None:
     normalized = repair_type.lower().strip().replace(" ", "_").replace("-", "_")
 
     for path_key, path_data in KARMIC_PATHS.items():
-        if path_data.get("repair_type_legacy") == normalized:
+        legacy = path_data.get("repair_type_legacy", "")
+        legacy_normalized = legacy.lower().replace(" ", "_").replace("-", "_")
+        if legacy_normalized == normalized:
             return path_data
         if path_key == normalized:
             return path_data

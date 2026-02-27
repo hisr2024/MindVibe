@@ -138,10 +138,10 @@ END $$;
 
 INSERT INTO achievements (key, name, description, category, target_value, rarity, badge_icon, reward_hint)
 VALUES
-    ('karma_first_reset', 'Karmic Awakening', 'Complete your first deep karma reset to begin your karmic transformation.', 'wellness', 1, 'common', '🕉️', 'A golden lotus badge for your first step on the karmic path'),
-    ('karma_5_resets', 'Dharma Seeker', 'Complete 5 karma resets and walk the path of dharmic repair.', 'wellness', 5, 'rare', '🪷', 'Unlock the Lotus Garden theme'),
-    ('karma_all_paths', 'Gita Scholar', 'Experience all 10 karmic paths at least once.', 'wellness', 10, 'epic', '📿', 'Unlock the Sacred Mala badge'),
-    ('karma_reflection', 'Inner Mirror', 'Write your first karma reset reflection.', 'wellness', 1, 'common', '🪞', 'A reflection badge for self-awareness')
+    ('karma_first_reset', 'Karmic Awakening', 'Complete your first deep karma reset to begin your karmic transformation.', 'WELLNESS', 1, 'COMMON', '🕉️', 'A golden lotus badge for your first step on the karmic path'),
+    ('karma_5_resets', 'Dharma Seeker', 'Complete 5 karma resets and walk the path of dharmic repair.', 'WELLNESS', 5, 'RARE', '🪷', 'Unlock the Lotus Garden theme'),
+    ('karma_all_paths', 'Gita Scholar', 'Experience all 10 karmic paths at least once.', 'WELLNESS', 10, 'EPIC', '📿', 'Unlock the Sacred Mala badge'),
+    ('karma_reflection', 'Inner Mirror', 'Write your first karma reset reflection.', 'WELLNESS', 1, 'COMMON', '🪞', 'A reflection badge for self-awareness')
 ON CONFLICT (key) DO NOTHING;
 
 -- ============================================================================
@@ -153,8 +153,8 @@ SELECT
     'karmic_lotus_badge',
     'Karmic Lotus Badge',
     'A golden lotus symbolizing your first step on the path of karmic repair.',
-    'badge',
-    'common',
+    'BADGE',
+    'COMMON',
     a.id,
     '{"icon": "🕉️", "gradient": "from-amber-400 via-yellow-300 to-amber-500"}'::jsonb
 FROM achievements a WHERE a.key = 'karma_first_reset'
@@ -165,8 +165,8 @@ SELECT
     'lotus_garden_theme',
     'Lotus Garden Theme',
     'A serene theme inspired by the lotus that blooms unstained from muddy waters.',
-    'theme',
-    'rare',
+    'THEME',
+    'RARE',
     a.id,
     '{"gradient": "from-pink-300 via-rose-200 to-amber-200", "accent": "#d4a44c"}'::jsonb
 FROM achievements a WHERE a.key = 'karma_5_resets'
@@ -177,8 +177,8 @@ SELECT
     'sacred_mala_badge',
     'Sacred Mala Badge',
     'A sacred mala representing mastery of all karmic paths — the mark of a true Gita scholar.',
-    'badge',
-    'epic',
+    'BADGE',
+    'EPIC',
     a.id,
     '{"icon": "📿", "gradient": "from-purple-400 via-indigo-300 to-blue-400"}'::jsonb
 FROM achievements a WHERE a.key = 'karma_all_paths'
