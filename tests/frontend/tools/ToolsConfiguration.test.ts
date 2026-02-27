@@ -90,11 +90,13 @@ describe('Tool Configuration', () => {
       expect(quickAccessCategory?.name).toBe('Quick Access')
     })
 
-    it('should not include Karma & Growth or Guidance Engines categories on dashboard', () => {
+    it('should include Sacred Instruments and Karma & Growth categories', () => {
       const karmaCategory = TOOLS_BY_CATEGORY.find(cat => cat.id === 'karma')
       const guidanceCategory = TOOLS_BY_CATEGORY.find(cat => cat.id === 'guidance')
-      expect(karmaCategory).toBeUndefined()
-      expect(guidanceCategory).toBeUndefined()
+      expect(karmaCategory).toBeDefined()
+      expect(karmaCategory?.name).toBe('Karma & Growth')
+      expect(guidanceCategory).toBeDefined()
+      expect(guidanceCategory?.name).toBe('Sacred Instruments')
     })
   })
 })

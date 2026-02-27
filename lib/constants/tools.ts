@@ -233,6 +233,16 @@ export const TOOLS_BY_CATEGORY: ToolCategory[] = [
     tools: CORE_TOOLS,
   },
   {
+    id: 'guidance',
+    name: 'Sacred Instruments',
+    tools: GUIDANCE_TOOLS,
+  },
+  {
+    id: 'karma',
+    name: 'Karma & Growth',
+    tools: KARMA_TOOLS,
+  },
+  {
     id: 'community',
     name: 'Community & Insights',
     tools: COMMUNITY_TOOLS,
