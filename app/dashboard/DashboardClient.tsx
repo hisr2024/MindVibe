@@ -439,38 +439,6 @@ export default function DashboardClient() {
             </Link>
           </motion.div>
 
-          {/* ─── Functional Flows — Dedicated feeling & wellness flows ─── */}
-          <motion.div variants={itemVariants}>
-            <div className="mb-3 flex items-center gap-3">
-              <span className="text-lg">{'\u{1F9D8}'}</span>
-              <h2 className="text-base font-semibold text-white/80">
-                Dedicated Flows
-              </h2>
-            </div>
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
-              {([
-                { icon: '\u{1F9D8}', title: 'Check-in', subtitle: 'State of mind', href: '/flows/check-in' },
-                { icon: '\u{1F504}', title: 'Ardha', subtitle: 'Reframe thoughts', href: '/flows/ardha' },
-                { icon: '\u{1F3AF}', title: 'Viyoga', subtitle: 'Let go', href: '/flows/viyog' },
-                { icon: '\u{2728}', title: 'Wisdom', subtitle: "Today's verse", href: '/flows/wisdom' },
-                { icon: '\u{1F4DD}', title: 'Journal', subtitle: 'Private space', href: '/flows/journal' },
-                { icon: '\u{1F3B5}', title: 'Companion', subtitle: 'Voice guide', href: '/companion' },
-              ] as const).map((flow) => (
-                <motion.div key={flow.href} variants={quickActionVariants} initial="rest" whileHover="hover" whileTap="tap">
-                  <Link
-                    href={flow.href}
-                    onClick={handleCardTap}
-                    className="flex flex-col items-center justify-center rounded-[20px] bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-3 sm:p-4 shadow-mobile-glow transition-all duration-300 active:opacity-90"
-                  >
-                    <span className="text-xl sm:text-2xl mb-1.5">{flow.icon}</span>
-                    <span className="text-xs sm:text-sm font-medium text-white/80 text-center leading-tight">{flow.title}</span>
-                    <span className="mt-0.5 text-[9px] sm:text-[10px] text-white/50 text-center leading-tight">{flow.subtitle}</span>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
           {/* ─── Speak to KIAAN (SECONDARY) ─── */}
           <motion.div variants={itemVariants}>
             <Link
