@@ -2,6 +2,11 @@
  * Journey Engine Journeys API Proxy
  * Proxies to backend journey-engine service with graceful fallback
  * when the backend is unavailable or user is not authenticated.
+ *
+ * IMPORTANT: All responses forward Set-Cookie headers from the backend
+ * so that CSRF tokens and session cookies reach the browser through
+ * the proxy layer. Without this, the backend CSRF middleware rejects
+ * POST requests with 403 because the csrf_token cookie is never set.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -12,6 +17,18 @@ const FALLBACK_JOURNEYS = {
   journeys: [],
   total: 0,
   _fallback: true,
+}
+
+/**
+ * Forward Set-Cookie headers from the backend response to the client.
+ * This ensures CSRF tokens and auth cookies pass through the proxy.
+ */
+function forwardCookies(backendRes: Response, clientRes: NextResponse): NextResponse {
+  const cookies = backendRes.headers.getSetCookie?.() ?? []
+  for (const cookie of cookies) {
+    clientRes.headers.append('Set-Cookie', cookie)
+  }
+  return clientRes
 }
 
 export async function GET(request: NextRequest) {
@@ -30,13 +47,11 @@ export async function GET(request: NextRequest) {
 
     if (response.ok) {
       const data = await response.json()
-      return NextResponse.json(data)
+      return forwardCookies(response, NextResponse.json(data))
     }
 
-    // Return fallback for auth failures or other errors
-    return NextResponse.json(FALLBACK_JOURNEYS)
+    return forwardCookies(response, NextResponse.json(FALLBACK_JOURNEYS))
   } catch {
-    // Backend unavailable - return fallback
     return NextResponse.json(FALLBACK_JOURNEYS)
   }
 }
@@ -58,21 +73,27 @@ export async function POST(request: NextRequest) {
 
     if (response.ok) {
       const data = await response.json()
-      return NextResponse.json(data)
+      return forwardCookies(response, NextResponse.json(data))
     }
 
     const status = response.status
     if (status === 401) {
-      return NextResponse.json(
-        { error: 'Authentication required to start a journey. Please sign in.' },
-        { status: 401 }
+      return forwardCookies(
+        response,
+        NextResponse.json(
+          { error: 'Authentication required to start a journey. Please sign in.' },
+          { status: 401 }
+        )
       )
     }
 
     const errorText = await response.text().catch(() => 'Unknown error')
-    return NextResponse.json(
-      { error: errorText || 'Failed to create journey' },
-      { status }
+    return forwardCookies(
+      response,
+      NextResponse.json(
+        { error: errorText || 'Failed to create journey' },
+        { status }
+      )
     )
   } catch {
     return NextResponse.json(

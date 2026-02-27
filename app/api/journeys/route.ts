@@ -3,11 +3,21 @@
  *
  * Provides journey listing for the mobile journeys page.
  * Proxies to backend journey service with catalog fallback.
+ *
+ * Forwards Set-Cookie headers from backend so CSRF tokens reach the browser.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+function forwardCookies(backendRes: Response, clientRes: NextResponse): NextResponse {
+  const cookies = backendRes.headers.getSetCookie?.() ?? []
+  for (const cookie of cookies) {
+    clientRes.headers.append('Set-Cookie', cookie)
+  }
+  return clientRes
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -33,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     if (backendResponse.ok) {
       const data = await backendResponse.json()
-      return NextResponse.json(data)
+      return forwardCookies(backendResponse, NextResponse.json(data))
     }
 
     // Try alternate endpoint
@@ -52,7 +62,7 @@ export async function GET(request: NextRequest) {
 
     if (altResponse?.ok) {
       const data = await altResponse.json()
-      return NextResponse.json(data)
+      return forwardCookies(altResponse, NextResponse.json(data))
     }
 
     // If requesting active journeys and backend is down, return empty

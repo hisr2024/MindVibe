@@ -2,6 +2,8 @@
  * Journey Engine Templates API Proxy
  * Proxies to backend journey-engine service with graceful fallback.
  * Templates are public (no auth required) so fallback returns empty list.
+ *
+ * Forwards Set-Cookie headers from backend so CSRF tokens reach the browser.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -14,6 +16,14 @@ const FALLBACK_TEMPLATES = {
   limit: 20,
   offset: 0,
   _fallback: true,
+}
+
+function forwardCookies(backendRes: Response, clientRes: NextResponse): NextResponse {
+  const cookies = backendRes.headers.getSetCookie?.() ?? []
+  for (const cookie of cookies) {
+    clientRes.headers.append('Set-Cookie', cookie)
+  }
+  return clientRes
 }
 
 export async function GET(request: NextRequest) {
@@ -32,10 +42,10 @@ export async function GET(request: NextRequest) {
 
     if (response.ok) {
       const data = await response.json()
-      return NextResponse.json(data)
+      return forwardCookies(response, NextResponse.json(data))
     }
 
-    return NextResponse.json(FALLBACK_TEMPLATES)
+    return forwardCookies(response, NextResponse.json(FALLBACK_TEMPLATES))
   } catch {
     return NextResponse.json(FALLBACK_TEMPLATES)
   }
