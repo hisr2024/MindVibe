@@ -270,6 +270,7 @@ async def detach_from_outcome(
                 "teaching": gita_teaching.get("teaching", ""),
                 "verse": gita_teaching.get("verse", "BG 2.47"),
                 "remedy": gita_teaching.get("remedy", ""),
+                "pillars": gita_teaching.get("pillars", []),
             },
             "cached": result.cached,
             "latency_ms": result.latency_ms,
@@ -388,6 +389,7 @@ def _get_gita_grounded_fallback(
             "teaching": gita_teaching.get("teaching", ""),
             "verse": gita_teaching.get("verse", "BG 2.47"),
             "remedy": gita_teaching.get("remedy", ""),
+            "pillars": gita_teaching.get("pillars", []),
         },
         "fallback": True,
         "secularMode": False,
@@ -405,14 +407,14 @@ def _get_secular_fallback(
     attachment_type = attachment_analysis.get("type", "outcome_anxiety")
     secular_info = ATTACHMENT_TO_SECULAR.get(attachment_type, ATTACHMENT_TO_SECULAR["outcome_anxiety"])
 
-    # Build secular response sections
+    # Build secular response sections (v5.0 - deeper identity-level insight)
     sections = {
-        "i_get_it": f"I can hear the weight in what you're sharing. It makes total sense that you're feeling anxious about this - when something matters to us, of course we want it to work out. That's completely human.",
-        "whats_really_going_on": secular_info["insight"],
-        "a_different_way_to_see_this": secular_info["shift"] + " What if you shifted focus from \"will this work out?\" to \"what's the best I can do right now?\" You can't guarantee outcomes, but you CAN show up with intention and effort.",
-        "try_this_right_now": "Take 3 slow breaths. Then ask yourself: \"What's ONE small thing I can do in the next 10 minutes that's completely within my control?\" Don't think about whether it will \"work\" - just identify one action you can take.",
-        "one_thing_you_can_do": "Pick that one small action and do it today. Not because it guarantees success, but because it's what you can offer right now. Focus on doing it well, not on what happens after.",
-        "something_to_consider": "What would change if you measured success by the quality of your effort, rather than the outcome?",
+        "i_get_it": f"I can hear the weight in what you're sharing. This matters to you — and the anxiety makes sense because some part of you feels that YOU are at stake here, not just the outcome. That's worth looking at.",
+        "whats_really_going_on": secular_info["insight"] + " But here's the deeper pattern: the worry isn't really about the outcome itself. It's about what you think the outcome says about YOU — your worth, your competence, your identity. The outcome and the person watching the outcome are two entirely different things.",
+        "a_different_way_to_see_this": secular_info["shift"] + " Consider this: the person who did the work, who showed up, who gave their best — that person doesn't change regardless of the result. The outcome belongs to circumstances, timing, and factors you don't control. But the person observing all of this? That person remains the same whether it goes perfectly or falls apart.",
+        "try_this_right_now": "Pause for 30 seconds. Notice the worry as something you are WATCHING — not something you ARE. You are the one aware of the anxiety; you are not the anxiety itself. Now imagine both outcomes: success and failure. Can you sit with both equally? The person who remains steady in either case — that is who you actually are.",
+        "one_thing_you_can_do": "Pick one small action within your control and do it today. Not as a strategy for winning — but as a contribution. The action is complete in itself, regardless of what follows. You've done your part. Now let the situation unfold.",
+        "something_to_consider": "If this goes exactly the way you fear — who are you then? The same person? Then what exactly are you afraid of losing?",
     }
 
     # Build full response text
@@ -434,6 +436,9 @@ def _get_secular_fallback(
 **Something to Consider**
 {sections['something_to_consider']}"""
 
+    # Get Gita teaching for this attachment type (used for karma_yoga_insight)
+    gita_teaching = ATTACHMENT_TO_GITA.get(attachment_type, ATTACHMENT_TO_GITA["outcome_anxiety"])
+
     return {
         "status": "success",
         "detachment_guidance": sections,
@@ -443,6 +448,12 @@ def _get_secular_fallback(
         "provider": "mindvibe",
         "analysis_mode": analysis_mode.value,
         "attachment_analysis": attachment_analysis,
+        "karma_yoga_insight": {
+            "teaching": gita_teaching.get("teaching", ""),
+            "verse": gita_teaching.get("verse", "BG 2.47"),
+            "remedy": gita_teaching.get("remedy", ""),
+            "pillars": gita_teaching.get("pillars", []),
+        },
         "fallback": True,
         "secularMode": True,
         "cached": False,
@@ -711,12 +722,16 @@ async def viyoga_chat(
         ATTACHMENT_TO_GITA["outcome_anxiety"]
     )
 
+    # Five Pillar compliance scoring (v5.0)
+    pillar_compliance = _score_five_pillar_compliance(response_text, secular_mode)
+
     latency_ms = (time.time() - start_time) * 1000
 
     logger.info(
-        f"Viyoga v4.0 chat: session={session_id[:8] if session_id else 'none'}..., "
+        f"Viyoga v5.0 chat: session={session_id[:8] if session_id else 'none'}..., "
         f"attachment={attachment_analysis.get('type', 'unknown')}, "
         f"emotion={concern_analysis.primary_emotion}, "
+        f"pillars={pillar_compliance.get('compliance_level', 'N/A')}, "
         f"verses={len(gita_verses)}, "
         f"provider={provider_used}, "
         f"secular={secular_mode}, "
@@ -734,7 +749,9 @@ async def viyoga_chat(
             "teaching": gita_teaching.get("teaching", ""),
             "verse": gita_teaching.get("verse", "BG 2.47"),
             "remedy": gita_teaching.get("remedy", ""),
+            "pillars": gita_teaching.get("pillars", []),
         },
+        "five_pillar_compliance": pillar_compliance,
         "model": model_used,
         "provider": provider_used,
         "gita_verses_used": len(gita_verses),
@@ -743,8 +760,41 @@ async def viyoga_chat(
 
 
 # =============================================================================
-# HELPER FUNCTIONS for v4.0 Enhanced Pipeline
+# HELPER FUNCTIONS for v5.0 Enhanced Pipeline with Five Pillar Compliance
 # =============================================================================
+
+# Lazy-initialized Gita validator for Five Pillar scoring
+_gita_validator = None
+
+
+def _get_gita_validator():
+    """Lazy import of Gita validator."""
+    global _gita_validator
+    if _gita_validator is None:
+        try:
+            from backend.services.gita_validator import GitaValidator
+            _gita_validator = GitaValidator()
+            logger.info("Viyoga v5.0: GitaValidator with Five Pillar scoring integrated")
+        except Exception as e:
+            logger.warning(f"Viyoga: GitaValidator unavailable: {e}")
+            _gita_validator = False
+    return _gita_validator if _gita_validator else None
+
+
+def _score_five_pillar_compliance(
+    response_text: str, secular_mode: bool = True
+) -> dict:
+    """Score response against the Five Pillars of deep Gita compliance."""
+    validator = _get_gita_validator()
+    if validator and response_text:
+        try:
+            return validator.score_five_pillar_compliance(
+                response_text, secular_mode=secular_mode
+            )
+        except Exception as e:
+            logger.warning(f"Five Pillar scoring error (continuing): {e}")
+    return {"overall_score": 0.0, "compliance_level": "N/A", "error": "scoring_unavailable"}
+
 
 async def _apply_gita_filter(content: str, user_context: str = "") -> str:
     """Apply Gita wisdom filter to AI-generated content."""

@@ -25,32 +25,32 @@ const BACKEND_TIMEOUT = 60000 // 60 seconds for AI analysis + response generatio
 const OPENAI_TIMEOUT_MS = 30000
 const OPENAI_MODEL = process.env.VIYOGA_CHAT_MODEL || 'gpt-4o-mini'
 
-// Secular fallback response - grounded and direct
+// Secular fallback response - deep identity-level insight, modern and grounded
 const FALLBACK_RESPONSE = {
   assistant: `**I Get It**
-You are anxious about an outcome you cannot fully control. That anxiety is real, and it makes sense - this matters to you. But the anxiety itself is not helping you.
+You are anxious about an outcome you cannot fully control. That anxiety is real — and it makes sense because some part of you feels that YOU are at stake here, not just the result. That is worth looking at.
 
 **What's Really Going On**
-You are spending energy trying to control something that is not entirely in your hands. The result depends on factors beyond your influence. What you are doing right now is rehearsing uncertainty, not solving it.
+You are spending energy trying to control something that is not entirely in your hands. But the deeper pattern: the worry is not really about the outcome itself. It is about what you think the outcome says about YOU — your worth, your competence, your identity. The outcome and the person watching the outcome are two different things.
 
 **A Different Way to See This**
-The outcome is not yours to guarantee. Your effort was. Shift the question from "will this work out?" to "have I done what I can?" If yes, the rest is not your responsibility. If no, do it now.
+Consider this: the person who did the work, who showed up, who gave their best — that person does not change regardless of the result. The outcome belongs to circumstances, timing, and factors you do not control. But the person observing all of this? That person remains the same whether it goes perfectly or falls apart. You are not at stake here.
 
 **Try This Right Now**
-Pause. Ask yourself: "What is ONE small thing within my control that I can do in the next 10 minutes?" Do not evaluate whether it will change the outcome. Just identify one action and take it.
+Pause for 30 seconds. Notice the worry as something you are WATCHING — not something you ARE. You are the one aware of the anxiety; you are not the anxiety itself. Now imagine both outcomes: success and failure. Can you sit with both equally? The person who remains steady in either case — that is who you actually are.
 
 **One Thing You Can Do**
-Pick that one action and do it today. Not because it guarantees anything, but because it is what you can contribute right now. Measure yourself by the quality of your effort, not by the result.
+Pick one small action within your control and do it today. Not as a strategy for winning — but as a contribution. The action is complete in itself, regardless of what follows. You have done your part. Now let the situation unfold.
 
 **Something to Consider**
-If you knew the outcome was already decided and could not be changed, what would you do with the energy you are spending on worry right now?`,
+If this goes exactly the way you fear — who are you then? The same person? Then what exactly are you afraid of losing?`,
   sections: {
-    i_get_it: 'You are anxious about an outcome you cannot fully control. That anxiety is real.',
-    whats_really_going_on: 'You are spending energy trying to control something not entirely in your hands.',
-    a_different_way_to_see_this: 'The outcome is not yours to guarantee. Your effort was.',
-    try_this_right_now: 'What is ONE small thing within my control that I can do in the next 10 minutes?',
-    one_thing_you_can_do: 'Pick one action and do it today. Measure by quality of effort, not result.',
-    something_to_consider: 'If the outcome was already decided, what would you do with your worry energy?',
+    i_get_it: 'You are anxious about an outcome you cannot fully control. Some part of you feels YOU are at stake.',
+    whats_really_going_on: 'The worry is not about the outcome — it is about what you think the outcome says about YOU.',
+    a_different_way_to_see_this: 'The person observing all of this does not change regardless of the result. You are not at stake.',
+    try_this_right_now: 'Notice the worry as something you are WATCHING, not something you ARE. Sit with both outcomes equally.',
+    one_thing_you_can_do: 'Pick one action as a contribution, not a strategy for winning. The action is complete in itself.',
+    something_to_consider: 'If this goes exactly the way you fear — who are you then? The same person?',
   },
   citations: [],
   secularMode: true,
@@ -151,6 +151,8 @@ export async function POST(request: NextRequest) {
         concern_analysis: data.concern_analysis || null,
         attachment_analysis: data.attachment_analysis || null,
         karma_yoga_insight: data.karma_yoga_insight || null,
+        // v5.0 Five Pillar compliance scoring
+        five_pillar_compliance: data.five_pillar_compliance || null,
         retrieval: {
           strategy: data.provider || 'backend_v4',
           confidence: data.concern_analysis?.confidence || 0,

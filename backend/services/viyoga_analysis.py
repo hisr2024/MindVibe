@@ -51,6 +51,14 @@ class ConcernAnalysis:
     attachment_indicators: list[str] = field(default_factory=list)
     root_cause: str = ""
 
+    # Five Pillar Analysis (v5.0 deep Gita compliance)
+    identity_confusion: str = ""  # Pillar 1: Where Self is confused with mind/outcome
+    fruit_attachment: str = ""  # Pillar 2: What outcome they claim, subtle bargaining
+    equanimity_test: str = ""  # Pillar 3: Can they be steady in both outcomes
+    ego_at_stake: str = ""  # Pillar 4: What "my..." is threatened
+    surrender_needed: str = ""  # Pillar 5: Is true release needed beyond technique
+    primary_pillars: list[str] = field(default_factory=list)  # Most relevant pillars
+
     # Detachment path
     gita_concepts: list[str] = field(default_factory=list)
     recommended_teachings: list[str] = field(default_factory=list)
@@ -69,53 +77,84 @@ class ConcernAnalysis:
 
 GITA_DETACHMENT_FRAMEWORK = """
 GITA DETACHMENT WISDOM FRAMEWORK (from MindVibe's 701-verse repository):
+FIVE PILLARS OF DEEP GITA COMPLIANCE:
 
-ATTACHMENT TYPES -> GITA CONCEPTS:
-- Outcome Attachment (phala-sakti): Clinging to specific results; BG 2.47 "Your right is to action alone"
-- Control Attachment (niyantrtva-raga): Need to control what can't be controlled; BG 18.14 on five factors of action
-- Identity Attachment (ahamkara-bandha): Worth tied to results; BG 2.14 "Contacts give rise to cold/heat, pleasure/pain"
-- Approval Attachment (prashansa-raga): Need for others' validation; BG 2.57 "Sthitaprajna unmoved by praise or blame"
-- Perfectionism (siddhi-raga): Need for flawless outcomes; BG 2.48 "Balanced in success and failure"
-- Future Anxiety (bhavishya-bhaya): Fear about what hasn't happened; BG 6.35 "Mind controlled by practice and detachment"
-- Loss Anxiety (nashta-bhaya): Fear of losing what one has; BG 2.11 "Wise grieve neither for living nor dead"
+=== PILLAR 1: ATMAN-PRAKRITI VIVEKA (Self vs Mind) ===
+The person is NOT the body, mind, anxiety, success, or failure. They are the witnessing consciousness.
+- BG 2.16: "The unreal has no existence; the real never ceases to be"
+- BG 2.20: "The soul is never born nor dies. It cannot be diminished"
+- BG 13.2: "I am the Knower of the Field in all fields" (Self vs body-mind)
+Key shift: From "I am anxious" to "Anxiety arises in the mind; I am the observer"
 
-ROOT CAUSES -> GITA PSYCHOLOGY:
+=== PILLAR 2: PHALA-TYAGA (Complete Fruit Renunciation) ===
+Not just "focus on effort." Renounce ALL claim. No inner bargaining. No subtle hope.
+- BG 2.47: "Your right is to action alone, never to its fruits"
+- BG 3.19: "Without attachment to results, act as a matter of duty"
+- BG 18.6: "Perform without attachment or expectation of result"
+- BG 18.11: "One who renounces the fruits is truly a renunciant"
+Key shift: Even silent craving for a good outcome breaks compliance
+
+=== PILLAR 3: SAMATVAM (Equanimity in All Dualities) ===
+Praise AND blame, success AND failure, gain AND loss — met with equal mind.
+- BG 2.38: "Treating happiness and distress, victory and defeat alike"
+- BG 2.48: "Balanced in success and failure — equanimity is yoga"
+- BG 12.18-19: "Same in honor and disgrace, cold and heat, pleasure and pain"
+- BG 2.57: "Without attachment, neither rejoices nor hates — steady wisdom"
+Key test: "If this fails publicly, can you remain inwardly undisturbed?"
+
+=== PILLAR 4: AHAMKARA DISSOLUTION (Ego Transcendence) ===
+The doer-identity is part of nature, not Self. "I do nothing at all."
+- BG 3.27: "All actions performed by gunas of Prakriti; ego thinks 'I am the doer'"
+- BG 5.8-9: "In divine consciousness, one knows 'I actually do nothing at all'"
+- BG 18.17: "Free from ego-notion — neither slays nor is bound"
+Key shift: "My performance," "my reputation" belong to Prakriti, not Atman
+
+=== PILLAR 5: ISHVARA-ARPANA (Surrender to the Divine) ===
+Offering the action to the Divine completes the cycle.
+- BG 18.66: "Abandon all dharmas and surrender unto Me alone. Do not fear"
+- BG 5.10: "Like lotus untouched by water — because the result was offered"
+- BG 12.6-7: "For those who give up all activities unto Me — I am the swift deliverer"
+- BG 9.27: "Whatever you do — do that as an offering unto Me"
+Key framing: "This action is my offering. The result belongs to a larger order."
+
+ATTACHMENT TYPES -> FIVE PILLAR MAPPING:
+- Outcome Attachment (phala-sakti): Pillar 2 (Phala-tyaga) + Pillar 1 (Atman-Prakriti)
+- Control Attachment (niyantrtva-raga): Pillar 4 (Ahamkara) + Pillar 5 (Ishvara-arpana)
+- Identity Attachment (ahamkara-bandha): Pillar 1 (Atman-Prakriti) + Pillar 4 (Ahamkara)
+- Approval Attachment (prashansa-raga): Pillar 3 (Samatvam) + Pillar 1 (Atman-Prakriti)
+- Perfectionism (siddhi-raga): Pillar 4 (Ahamkara) + Pillar 3 (Samatvam)
+- Future Anxiety (bhavishya-bhaya): Pillar 1 (Atman-Prakriti) + Pillar 5 (Ishvara-arpana)
+- Loss Anxiety (nashta-bhaya): Pillar 1 (Atman-Prakriti) + Pillar 2 (Phala-tyaga)
+
+ROOT CAUSES -> GITA ONTOLOGY:
 - Fear of inadequacy -> Forgetting Atman's inherent completeness (BG 2.20)
 - Need for certainty -> Resistance to the nature of change (BG 2.14, impermanence)
 - Desire for validation -> Seeking outside what exists within (BG 6.20-23, Atma-tripti)
 - Fear of judgment -> Giving others power over inner peace (BG 2.57, sthitaprajna)
-- Catastrophizing -> Mind's tendency toward moha (delusion) (BG 2.62-63)
-- Perfectionism -> Ego disguised as excellence (BG 3.35, svadharma)
+- Catastrophizing -> Mind's moha (delusion) mistaken for reality (BG 2.62-63)
+- Perfectionism -> Ego (ahamkara) disguised as excellence (BG 3.27, 3.35)
+- Identity crisis -> Confusing Self (Atman) with body-mind (Prakriti) (BG 13.2, 2.16)
 
-DETACHMENT APPROACHES:
-- Karma Yoga: Redirect energy from results to quality of effort (BG 2.47, 3.19, 18.6)
-- Sakshi Bhava: Witness the anxiety without becoming it (BG 6.19, 13.22)
-- Samatva: Practice equanimity regardless of outcome (BG 2.48, 5.18-20)
-- Nishkama Karma: Act from dharma, not desire (BG 2.47, 3.19)
-- Ishvara Pranidhana: Surrender outcomes to a larger order (BG 18.66, 12.6-7)
-- Svadharma: Focus on YOUR path, YOUR duty, YOUR effort (BG 3.35, 18.47)
-
-KEY GITA VERSES FOR DETACHMENT:
-- BG 2.47: "Your right is to action alone, never to its fruits"
-- BG 2.48: "Perform action, being steadfast in yoga, abandoning attachment, balanced in success and failure"
-- BG 2.14: "Sense contacts give rise to pleasure and pain; they come and go, endure them"
-- BG 2.57: "One without attachment, who neither rejoices nor hates, is of steady wisdom"
-- BG 3.19: "Without attachment to results, one should act as a matter of duty"
-- BG 5.10: "Like lotus leaf untouched by water, one who acts without attachment is unaffected"
-- BG 6.5: "One must elevate, not degrade, oneself by one's own mind"
-- BG 6.35: "The mind is restless, but controlled by practice and detachment"
-- BG 18.6: "All activities should be performed without attachment or expectation of result"
-- BG 18.66: "Abandon all dharmas and surrender unto Me alone. Do not fear."
+DETACHMENT APPROACHES (mapped to pillars):
+- Sakshi Bhava [P1]: Witness the anxiety without becoming it (BG 6.19, 13.22)
+- Karma Yoga [P2]: Redirect energy from results to quality of effort (BG 2.47, 3.19)
+- Samatva [P3]: Practice equanimity regardless of outcome (BG 2.48, 5.18-20)
+- Ahamkara Viveka [P4]: See through ego's claim of doership (BG 3.27, 5.8-9)
+- Ishvara Pranidhana [P5]: Surrender outcomes to a larger order (BG 18.66, 12.6-7)
+- Nishkama Karma [P2]: Act from dharma, not desire (BG 2.47, 3.19)
+- Svadharma [P2+5]: Focus on YOUR path, YOUR offering (BG 3.35, 18.47)
 """
 
-CONCERN_ANALYSIS_PROMPT = f"""You are a deeply empathetic wisdom guide who specializes in understanding
-why people get anxious about outcomes. You use the Bhagavad Gita's psychology of attachment
-and detachment to understand the SPECIFIC dynamics of each person's unique situation.
+CONCERN_ANALYSIS_PROMPT = f"""You are a deeply perceptive wisdom guide who specializes in understanding
+why people get anxious about outcomes. You use the Bhagavad Gita's ontology of Self (Atman)
+vs mind (Prakriti) and the Five Pillars of detachment to understand the SPECIFIC dynamics
+of each person's unique situation at the deepest level.
 
 {GITA_DETACHMENT_FRAMEWORK}
 
-Analyze the user's concern with DEEP SITUATIONAL UNDERSTANDING. Don't just categorize it -
-truly understand what they're going through and WHY this specific outcome matters so much to them.
+Analyze the user's concern with DEEP SITUATIONAL AND ONTOLOGICAL UNDERSTANDING.
+Don't just categorize it — truly understand what they're going through, WHY this specific
+outcome matters so much, and critically: WHERE THEY HAVE CONFUSED THEIR IDENTITY WITH THE OUTCOME.
 
 Your analysis must include:
 
@@ -130,29 +169,38 @@ Your analysis must include:
    - secondary_emotions: Other emotions present
    - emotional_intensity: low | moderate | high | overwhelming
 
-3. ATTACHMENT PATTERN (use Gita framework)
+3. ATTACHMENT PATTERN (use Five Pillar framework)
    - attachment_type: The type from the framework above (outcome, control, identity, approval, perfectionism, future_anxiety, loss_anxiety)
-   - attachment_object: What SPECIFIC thing are they attached to (e.g., "getting the job", "their partner's response", "exam results")
+   - attachment_object: What SPECIFIC thing are they attached to
    - attachment_indicators: Specific phrases that reveal the attachment
-   - root_cause: The deeper root cause from the Gita psychology framework above
+   - root_cause: The deeper root cause from the Gita ontology framework
 
-4. DETACHMENT PATH
-   - gita_concepts: Relevant Gita concepts (phala-sakti, nishkama karma, samatva, etc.)
+4. FIVE PILLAR ANALYSIS (NEW - critical for deep compliance)
+   - identity_confusion: WHERE have they confused Self with mind/outcome? What "I am..." statement is false? (Pillar 1: Atman-Prakriti)
+   - fruit_attachment: What SPECIFIC outcome are they claiming? Is there subtle bargaining or silent hope? (Pillar 2: Phala-tyaga)
+   - equanimity_test: Can they remain steady if this FAILS publicly? If this SUCCEEDS wildly? (Pillar 3: Samatvam)
+   - ego_at_stake: What "my..." is threatened? My reputation? My image? My worth? (Pillar 4: Ahamkara)
+   - surrender_needed: Is this a situation where technique alone won't help and true release is needed? (Pillar 5: Ishvara-arpana)
+   - primary_pillars: Which 2-3 pillars are most relevant to THIS person's situation?
+
+5. DETACHMENT PATH
+   - gita_concepts: Relevant Gita concepts (phala-sakti, nishkama karma, samatva, sakshi bhava, etc.)
    - recommended_teachings: Specific verses that apply (BG chapter:verse format)
    - detachment_approach: Which approach from the framework fits best
    - effort_redirect: What should they redirect their energy TOWARD instead
 
-5. CONTROL ANALYSIS (critical for helping them)
+6. CONTROL ANALYSIS
    - in_their_control: Things that ARE in their control right now (be specific to their situation)
    - not_in_their_control: Things that are NOT in their control (be specific)
 
-6. CONFIDENCE
+7. CONFIDENCE
    - confidence: 0.0-1.0
-   - analysis_notes: Key insight about their specific situation
+   - analysis_notes: Key insight about their specific situation, including the identity-level insight
 
 IMPORTANT:
 - Be SPECIFIC to their exact situation - don't give generic analysis
 - The situational understanding section is THE MOST IMPORTANT - get this right
+- The FIVE PILLAR ANALYSIS is critical for deep Gita compliance - identify the ontological confusion
 - in_their_control and not_in_their_control should be SPECIFIC to their situation
 - Connect Gita concepts naturally to their modern concern
 
@@ -254,6 +302,13 @@ def analyze_concern_with_ai(
             attachment_object=data.get("attachment_object", ""),
             attachment_indicators=data.get("attachment_indicators", []),
             root_cause=data.get("root_cause", ""),
+            # Five Pillar fields (v5.0)
+            identity_confusion=data.get("identity_confusion", ""),
+            fruit_attachment=data.get("fruit_attachment", ""),
+            equanimity_test=data.get("equanimity_test", ""),
+            ego_at_stake=data.get("ego_at_stake", ""),
+            surrender_needed=data.get("surrender_needed", ""),
+            primary_pillars=data.get("primary_pillars", []),
             gita_concepts=data.get("gita_concepts", []),
             recommended_teachings=data.get("recommended_teachings", []),
             detachment_approach=data.get("detachment_approach", ""),
@@ -270,6 +325,7 @@ def analyze_concern_with_ai(
             f"worry='{analysis.specific_worry[:50]}...', "
             f"attachment={analysis.attachment_type}, "
             f"emotion={analysis.primary_emotion}, "
+            f"pillars={analysis.primary_pillars}, "
             f"confidence={analysis.confidence:.2f}"
         )
 
@@ -330,6 +386,13 @@ async def analyze_concern_with_ai_async(
                         attachment_object=data.get("attachment_object", ""),
                         attachment_indicators=data.get("attachment_indicators", []),
                         root_cause=data.get("root_cause", ""),
+                        # Five Pillar fields (v5.0)
+                        identity_confusion=data.get("identity_confusion", ""),
+                        fruit_attachment=data.get("fruit_attachment", ""),
+                        equanimity_test=data.get("equanimity_test", ""),
+                        ego_at_stake=data.get("ego_at_stake", ""),
+                        surrender_needed=data.get("surrender_needed", ""),
+                        primary_pillars=data.get("primary_pillars", []),
                         gita_concepts=data.get("gita_concepts", []),
                         recommended_teachings=data.get("recommended_teachings", []),
                         detachment_approach=data.get("detachment_approach", ""),
@@ -389,17 +452,17 @@ def _rule_based_analysis(concern: str) -> ConcernAnalysis:
                     secondary_emotions.append(emotion)
                 break
 
-    # Detect attachment type
+    # Detect attachment type (keys must match ATTACHMENT_TO_GITA / ATTACHMENT_TO_SECULAR)
     attachment_map = {
         "control": ["control", "manage", "guarantee", "make sure", "ensure", "force"],
-        "future_anxiety": ["what if", "might happen", "could go wrong", "will be", "going to", "future"],
-        "identity": ["not good enough", "failure", "worthless", "prove myself", "who I am"],
-        "approval": ["think of me", "judge", "opinion", "approve", "impress", "disappoint"],
+        "future_worry": ["what if", "might happen", "could go wrong", "will be", "going to", "future"],
+        "outcome_dependency": ["not good enough", "failure", "worthless", "prove myself", "who I am"],
+        "approval_seeking": ["think of me", "judge", "opinion", "approve", "impress", "disappoint"],
         "perfectionism": ["perfect", "flawless", "no mistakes", "exactly right", "100%"],
-        "loss_anxiety": ["lose", "losing", "lost", "gone", "taken away", "slip away"],
+        "outcome_anxiety": ["lose", "losing", "lost", "gone", "taken away", "slip away"],
     }
 
-    attachment_type = "outcome"
+    attachment_type = "outcome_anxiety"
     attachment_indicators = []
     for atype, keywords in attachment_map.items():
         for kw in keywords:
@@ -407,18 +470,17 @@ def _rule_based_analysis(concern: str) -> ConcernAnalysis:
                 attachment_type = atype
                 attachment_indicators.append(kw)
 
-    # Map to Gita concepts
+    # Map to Gita concepts and Five Pillar mapping (keys match ATTACHMENT_TO_GITA)
     gita_mapping = {
-        "outcome": (["phala-sakti", "nishkama-karma"], ["BG 2.47", "BG 3.19"]),
-        "control": (["niyantrtva-raga", "ishvara-pranidhana"], ["BG 18.14", "BG 18.66"]),
-        "future_anxiety": (["bhavishya-bhaya", "vairagya"], ["BG 6.35", "BG 2.14"]),
-        "identity": (["ahamkara-bandha", "atma-jnana"], ["BG 2.20", "BG 6.5"]),
-        "approval": (["prashansa-raga", "sthitaprajna"], ["BG 2.57", "BG 14.22-25"]),
-        "perfectionism": (["siddhi-raga", "samatva"], ["BG 2.48", "BG 3.35"]),
-        "loss_anxiety": (["nashta-bhaya", "vairagya"], ["BG 2.11", "BG 2.14"]),
+        "outcome_anxiety": (["phala-sakti", "nishkama-karma", "sakshi-bhava"], ["BG 2.47", "BG 2.16", "BG 3.19"], ["atman_prakriti", "phala_tyaga"]),
+        "control": (["niyantrtva-raga", "ishvara-pranidhana", "ahamkara"], ["BG 3.27", "BG 18.66"], ["ahamkara", "ishvara_arpana"]),
+        "future_worry": (["bhavishya-bhaya", "sakshi-bhava", "vairagya"], ["BG 13.2", "BG 2.16"], ["atman_prakriti", "ishvara_arpana"]),
+        "outcome_dependency": (["ahamkara-bandha", "atma-jnana", "sakshi-bhava"], ["BG 2.20", "BG 13.2"], ["atman_prakriti", "ahamkara"]),
+        "approval_seeking": (["prashansa-raga", "sthitaprajna", "samatva"], ["BG 12.18-19", "BG 2.57"], ["samatvam", "atman_prakriti"]),
+        "perfectionism": (["siddhi-raga", "samatva", "ahamkara"], ["BG 2.48", "BG 3.27"], ["ahamkara", "samatvam"]),
     }
 
-    concepts, teachings = gita_mapping.get(attachment_type, gita_mapping["outcome"])
+    concepts, teachings, pillars = gita_mapping.get(attachment_type, gita_mapping["outcome_anxiety"])
 
     # Determine intensity
     intensity = "moderate"
@@ -441,6 +503,13 @@ def _rule_based_analysis(concern: str) -> ConcernAnalysis:
         attachment_object="",
         attachment_indicators=attachment_indicators[:3],
         root_cause="",
+        # Five Pillar fields (v5.0 rule-based defaults)
+        identity_confusion="",
+        fruit_attachment="",
+        equanimity_test="",
+        ego_at_stake="",
+        surrender_needed="",
+        primary_pillars=pillars,
         gita_concepts=concepts,
         recommended_teachings=teachings,
         detachment_approach="karma_yoga",
@@ -523,6 +592,20 @@ def build_analysis_context_for_prompt(analysis: ConcernAnalysis) -> str:
     if analysis.root_cause:
         lines.append(f"Root cause: {analysis.root_cause}")
 
+    # Five Pillar Analysis (v5.0 deep Gita compliance)
+    if analysis.identity_confusion:
+        lines.append(f"Identity confusion (Atman-Prakriti): {analysis.identity_confusion}")
+    if analysis.fruit_attachment:
+        lines.append(f"Fruit attachment (Phala-tyaga): {analysis.fruit_attachment}")
+    if analysis.equanimity_test:
+        lines.append(f"Equanimity test (Samatvam): {analysis.equanimity_test}")
+    if analysis.ego_at_stake:
+        lines.append(f"Ego at stake (Ahamkara): {analysis.ego_at_stake}")
+    if analysis.surrender_needed:
+        lines.append(f"Surrender needed (Ishvara-arpana): {analysis.surrender_needed}")
+    if analysis.primary_pillars:
+        lines.append(f"Primary pillars: {', '.join(analysis.primary_pillars[:3])}")
+
     if analysis.in_their_control:
         lines.append(f"In their control: {', '.join(analysis.in_their_control[:4])}")
     if analysis.not_in_their_control:
@@ -543,17 +626,27 @@ def analysis_to_dict(analysis: ConcernAnalysis) -> dict[str, Any]:
         "specific_worry": analysis.specific_worry,
         "why_it_matters": analysis.why_it_matters,
         "what_they_fear": analysis.what_they_fear,
+        "what_they_want": analysis.what_they_want,
         "primary_emotion": analysis.primary_emotion,
         "secondary_emotions": analysis.secondary_emotions,
         "emotional_intensity": analysis.emotional_intensity,
         "attachment_type": analysis.attachment_type,
         "attachment_object": analysis.attachment_object,
+        "attachment_indicators": analysis.attachment_indicators,
         "root_cause": analysis.root_cause,
         "gita_concepts": analysis.gita_concepts,
+        "recommended_teachings": analysis.recommended_teachings,
         "detachment_approach": analysis.detachment_approach,
         "effort_redirect": analysis.effort_redirect,
         "in_their_control": analysis.in_their_control,
         "not_in_their_control": analysis.not_in_their_control,
         "confidence": analysis.confidence,
         "analysis_depth": analysis.analysis_depth,
+        # Five Pillar Analysis (v5.0)
+        "identity_confusion": analysis.identity_confusion,
+        "fruit_attachment": analysis.fruit_attachment,
+        "equanimity_test": analysis.equanimity_test,
+        "ego_at_stake": analysis.ego_at_stake,
+        "surrender_needed": analysis.surrender_needed,
+        "primary_pillars": analysis.primary_pillars,
     }

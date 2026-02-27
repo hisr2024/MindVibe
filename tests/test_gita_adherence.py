@@ -153,11 +153,16 @@ Remember to take breaks and prioritize your wellbeing. 💙"""
     def test_fallback_response_generation(self, validator):
         """Test that fallback responses are properly generated."""
         fallback = validator.get_fallback_response("I'm feeling anxious")
-        
+
         assert fallback is not None
         assert len(fallback) > 0
-        assert "💙" in fallback
-        
+        # Fallback should contain Gita wisdom concepts (Five Pillar compliant)
+        fallback_lower = fallback.lower()
+        assert any(
+            term in fallback_lower
+            for term in ["witness", "atman", "equanimity", "offering", "karma yoga", "prakriti"]
+        ), "Fallback should contain Gita wisdom terms"
+
         # Validate that fallback itself would pass validation
         is_valid, details = validator.validate_response(
             fallback, [{"verse": {"verse_id": "2.47"}}]
@@ -198,6 +203,79 @@ Remember to take breaks and prioritize your wellbeing. 💙"""
         )
         assert not details["appropriate_length"]
         assert details["word_count"] > validator.MAX_WORDS
+
+
+class TestFivePillarCompliance:
+    """Test suite for Five Pillar Gita compliance scoring (v5.0)."""
+
+    @pytest.fixture
+    def validator(self):
+        """Create a GitaValidator instance."""
+        return GitaValidator()
+
+    def test_five_pillar_scoring_all_pillars(self, validator):
+        """Test that a response touching all five pillars scores high."""
+        response = (
+            "You are not your anxiety — you are the person aware of it, "
+            "watching it come and go. Release all claim over this outcome. "
+            "Even hoping quietly for success is still attachment. Whether this "
+            "succeeds or fails, can you remain equally steady? Both outcomes "
+            "test your composure. Most of this anxiety is about your reputation, "
+            "your image — the ego. You are more than any single performance. "
+            "Separate the person from the performer. You have done your part. "
+            "Now let the situation unfold as it will. Many factors are beyond "
+            "your control. Release to something larger."
+        )
+        result = validator.score_five_pillar_compliance(response, secular_mode=True)
+
+        assert result["overall_score"] >= 0.7
+        assert result["pillars_met"] >= 4
+        assert result["compliance_level"] in ("10/10", "8/10")
+
+    def test_five_pillar_scoring_gita_mode(self, validator):
+        """Test pillar scoring in Gita mode with Sanskrit terms."""
+        response = (
+            "You are the Atman, the unchanging witness. The anxiety belongs "
+            "to Prakriti, not to you. Renounce all fruits — nishkama karma "
+            "means desireless action without attachment or expectation. "
+            "Practice samatva: balanced in success and failure, unmoved by "
+            "praise and blame, the sthitaprajna remains steady. All actions "
+            "are performed by the gunas — the ego (ahamkara) thinks 'I am "
+            "the doer' but the Self does nothing. Surrender this offering "
+            "to Ishvara. The result belongs to the Lord."
+        )
+        result = validator.score_five_pillar_compliance(response, secular_mode=False)
+
+        assert result["overall_score"] >= 0.7
+        assert result["pillars_met"] >= 4
+
+    def test_five_pillar_scoring_missing_pillars(self, validator):
+        """Test that a response missing pillars scores lower."""
+        response = (
+            "Try to focus on your effort today. Take a deep breath. "
+            "Make a list of what you can control. Do your best and "
+            "see what happens."
+        )
+        result = validator.score_five_pillar_compliance(response, secular_mode=True)
+
+        assert result["overall_score"] < 0.5
+        assert len(result["missing_pillars"]) >= 3
+
+    def test_five_pillar_result_structure(self, validator):
+        """Test that the scoring result has all expected fields."""
+        result = validator.score_five_pillar_compliance("test response", secular_mode=True)
+
+        assert "overall_score" in result
+        assert "compliance_level" in result
+        assert "pillar_scores" in result
+        assert "missing_pillars" in result
+        assert "strong_pillars" in result
+        assert "pillars_met" in result
+        assert "total_pillars" in result
+        assert result["total_pillars"] == 5
+
+        expected_pillars = {"atman_prakriti", "phala_tyaga", "samatvam", "ahamkara", "ishvara_arpana"}
+        assert set(result["pillar_scores"].keys()) == expected_pillars
 
 
 class TestGitaAnalytics:
