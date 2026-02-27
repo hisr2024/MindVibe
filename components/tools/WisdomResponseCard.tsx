@@ -113,7 +113,23 @@ const SECTION_CONFIG = {
     icon: '🧭',
     name: 'Relationship Compass',
     sectionMeta: {
-      // Wisdom-infused sections (default mode - includes Gita wisdom in accessible way)
+      // ═══ 5-Step Gita Framework (PRIMARY — strict adherence) ═══
+      'Step 1: Pause Before Reacting': { title: 'Step 1: Pause Before Reacting', icon: '🌿', order: 1 },
+      'Step 2: Identify the Attachment': { title: 'Step 2: Identify the Attachment', icon: '🔥', order: 2 },
+      'Step 3: Regulate Before You Communicate': { title: 'Step 3: Regulate', icon: '🧘', order: 3 },
+      'Step 4: Speak Without Demanding an Outcome': { title: 'Step 4: Speak (Karma Yoga)', icon: '🕊️', order: 4 },
+      'Step 5: See Their Humanity': { title: 'Step 5: See Their Humanity', icon: '👁️', order: 5 },
+      'What This Looks Like in Practice': { title: 'What This Looks Like', icon: '📱', order: 6 },
+      'The Real Test': { title: 'The Real Test', icon: '💎', order: 7 },
+      // ═══ Unified Clarity / Engine sections (legacy emotional precision format) ═══
+      'Emotional Precision': { title: 'Emotional Precision', icon: '💜', order: 1 },
+      "What's Really Going On": { title: "What's Really Going On", icon: '💡', order: 2 },
+      "What's Actually Happening": { title: "What's Actually Happening", icon: '💡', order: 2 },
+      'The Deeper Insight': { title: 'The Deeper Insight', icon: '🤝', order: 3 },
+      'The Hard Truth': { title: 'The Hard Truth', icon: '✨', order: 4 },
+      'What To Do': { title: 'What To Do', icon: '👣', order: 5 },
+      'Script': { title: 'Script', icon: '💬', order: 6 },
+      // ═══ Wisdom-infused sections (legacy) ═══
       'I Hear You': { title: 'I Hear You', icon: '💜', order: 1 },
       'What Might Be Happening': { title: 'What Might Be Happening', icon: '💡', order: 2 },
       'The Other Side': { title: 'The Other Side', icon: '🤝', order: 3 },
@@ -122,15 +138,7 @@ const SECTION_CONFIG = {
       'Gita Wisdom': { title: 'Gita Wisdom', icon: '🙏', order: 6 },
       'One Small Step': { title: 'One Small Step', icon: '👣', order: 7 },
       'Let Me Understand Better': { title: 'Let Me Understand Better', icon: '❓', order: 8 },
-      // Unified Clarity / Engine sections (modern emotional precision format)
-      'Emotional Precision': { title: 'Emotional Precision', icon: '💜', order: 1 },
-      "What's Really Going On": { title: "What's Really Going On", icon: '💡', order: 2 },
-      "What's Actually Happening": { title: "What's Actually Happening", icon: '💡', order: 2 },
-      'The Deeper Insight': { title: 'The Deeper Insight', icon: '🤝', order: 3 },
-      'The Hard Truth': { title: 'The Hard Truth', icon: '✨', order: 4 },
-      'What To Do': { title: 'What To Do', icon: '👣', order: 5 },
-      'Script': { title: 'Script', icon: '💬', order: 6 },
-      // Legacy/Gita sections (for backwards compatibility)
+      // ═══ Legacy/Gita sections (backward compatibility) ═══
       'Sacred Acknowledgement': { title: 'Sacred Acknowledgement', icon: '🙏', order: 1 },
       'Inner Conflict Mirror': { title: 'Inner Conflict Mirror', icon: '🪞', order: 2 },
       'Gita Teachings Used': { title: 'Gita Teachings Used', icon: '📜', order: 3 },
@@ -521,10 +529,10 @@ export function WisdomLoadingState({ tool, secularMode = true }: { tool: 'viyoga
       'Preparing reframe...',
     ],
     relationship_compass: [
-      'Understanding your situation...',
-      'Considering different perspectives...',
-      'Finding practical solutions...',
-      'Preparing thoughtful guidance...',
+      'Understanding your situation through Gita wisdom...',
+      'Analyzing the root attachment...',
+      'Crafting your 5-step Gita guidance...',
+      'Preparing your real-world practice...',
     ],
   }
 
