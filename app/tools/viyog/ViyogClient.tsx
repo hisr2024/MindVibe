@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ToolHeader, ToolActionCard } from '@/components/tools'
+import { motion } from 'framer-motion'
+import Link from 'next/link'
 import { apiFetch } from '@/lib/api'
 import { VoiceInputButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -11,12 +12,11 @@ import CompanionCTA from '@/components/companion/CompanionCTA'
 import { useMicroPause } from '@/hooks/useMicroPause'
 import { BreathingDot } from '@/components/animations/BreathingDot'
 
-// Sanitize user input to prevent prompt injection
 function sanitizeInput(input: string): string {
   return input
-    .replace(/[<>]/g, '') // Remove potential HTML tags
-    .replace(/\\/g, '') // Remove backslashes
-    .slice(0, 2000) // Limit length
+    .replace(/[<>]/g, '')
+    .replace(/\\/g, '')
+    .slice(0, 2000)
 }
 
 function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
@@ -68,11 +68,17 @@ type ViyogResult = {
   provider?: string
 }
 
-const flowSteps = [
-  'Share what\'s weighing on you - name the worry you\'re carrying.',
-  'Get a fresh perspective on what you can and can\'t control.',
-  'Walk away with one concrete thing you can do today.',
-]
+const ANCHOR_VERSE = {
+  english: 'You have the right to perform your actions, but you are not entitled to the fruits of your actions.',
+  reference: 'Bhagavad Gita 2.47',
+}
+
+const SACRED_PARTICLES = Array.from({ length: 6 }, (_, i) => ({
+  id: i,
+  left: `${12 + (i * 14) % 76}%`,
+  delay: i * 0.8,
+  duration: 5 + (i % 3),
+}))
 
 export default function ViyogClient() {
   const [concern, setConcern] = useState('')
@@ -81,10 +87,8 @@ export default function ViyogClient() {
   const [result, setResult] = useLocalState<ViyogResult | null>('viyog_detachment', null)
   const [sessionId, setSessionId] = useLocalState<string>('viyog_session', '')
 
-  // Voice integration
   const { language, t } = useLanguage()
 
-  // Micro-pause before revealing response
   const { showPause } = useMicroPause({
     loading,
     hasResult: !!result,
@@ -132,13 +136,12 @@ export default function ViyogClient() {
       })
 
       if (!response.ok) {
-        // Handle specific HTTP error codes
         if (response.status === 401 || response.status === 403) {
           setError('Session expired. Please refresh the page and try again.')
         } else if (response.status === 429) {
-          setError('Too many requests. Please wait a moment before trying again.')
+          setError('Take a breath. Too many requests \u2014 please wait a moment.')
         } else if (response.status === 503) {
-          setError('Viyoga is temporarily unavailable. Please try again in a few minutes.')
+          setError('Viyoga is gathering wisdom. Please try again in a few minutes.')
         } else if (response.status >= 500) {
           setError('Viyoga encountered an issue. Please try again.')
         } else {
@@ -174,45 +177,94 @@ export default function ViyogClient() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] text-white p-4 md:p-8">
-      <div className="max-w-5xl mx-auto space-y-6">
-        {/* Header */}
-        <ToolHeader
-          icon="🎯"
-          title="Viyoga - Outcome Anxiety Support"
-          subtitle="Shift from worrying about results to focused action. Get practical help when you're stuck overthinking outcomes."
-          backLink={{ label: 'Back to home', href: '/' }}
-          modeLabel={`${t('dashboard.mode_label.prefix', 'You are in:')} ${t('dashboard.mode_label.viyog', 'Pause Mode')}`}
-        />
+    <main className="min-h-screen bg-gradient-to-b from-[#030508] via-[#050510] to-[#080510] text-white">
+      <div className="max-w-4xl mx-auto px-4 py-6 md:py-10 space-y-8">
 
-        {/* Quick Actions */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <ToolActionCard
-            icon="⏱️"
-            title="60-Second Reset"
-            description="A quick inner reset when worry about outcomes feels overwhelming."
-            ctaLabel="Start Reset"
-            href="/tools/viyog#clarity-pause"
-            gradient="from-cyan-500/10 to-blue-500/10"
-          />
-          <ToolActionCard
-            icon="🔄"
-            title="Talk It Through"
-            description="Share what's on your mind and get a fresh perspective."
-            ctaLabel="Share What's Up"
-            onClick={() => document.getElementById('concern-input')?.focus()}
-            gradient="from-[#d4a44c]/10 to-amber-500/10"
-          />
-        </div>
+        {/* Sacred Header */}
+        <motion.header
+          className="relative overflow-hidden rounded-[28px] border border-cyan-500/10 bg-gradient-to-br from-cyan-950/30 via-[#060810] to-blue-950/20 p-6 sm:p-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          style={{
+            boxShadow: '0 16px 64px rgba(6, 182, 212, 0.08), inset 0 1px 0 rgba(6, 182, 212, 0.1)',
+          }}
+        >
+          {SACRED_PARTICLES.map((p) => (
+            <motion.div
+              key={p.id}
+              className="absolute w-1 h-1 rounded-full bg-cyan-400/40"
+              style={{ left: p.left, bottom: 0 }}
+              animate={{ y: [0, -200], opacity: [0, 0.6, 0] }}
+              transition={{ duration: p.duration, repeat: Infinity, delay: p.delay, ease: 'easeOut' }}
+            />
+          ))}
+
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 text-[11px] text-cyan-400/50 hover:text-cyan-300/70 transition-colors mb-5"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+            </svg>
+            Return to sanctuary
+          </Link>
+
+          <div className="flex items-start gap-4 sm:gap-5">
+            <motion.div
+              className="flex h-14 w-14 sm:h-16 sm:w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400/15 to-blue-500/10 border border-cyan-500/10"
+              animate={{
+                boxShadow: [
+                  '0 0 20px rgba(6, 182, 212, 0.1)',
+                  '0 0 35px rgba(6, 182, 212, 0.2)',
+                  '0 0 20px rgba(6, 182, 212, 0.1)',
+                ],
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <span className="text-xl sm:text-2xl font-sacred text-cyan-200/90 select-none">
+                {'\u0935\u093F\u092F\u094B\u0917'}
+              </span>
+            </motion.div>
+
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold text-cyan-100">Viyoga</h1>
+              <p className="text-sm text-cyan-300/50 font-sacred italic mt-1">
+                The Sacred Art of Detachment
+              </p>
+              <p className="mt-1.5 text-[11px] tracking-wide text-cyan-400/30">
+                {t('dashboard.mode_label.prefix', 'You are in:')} {t('dashboard.mode_label.viyog', 'Pause Mode')}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 p-4 rounded-xl bg-cyan-950/20 border border-cyan-500/8">
+            <p className="font-sacred text-sm text-cyan-200/60 italic leading-relaxed">
+              &ldquo;{ANCHOR_VERSE.english}&rdquo;
+            </p>
+            <p className="text-[10px] text-cyan-400/30 mt-2 tracking-wide">
+              {ANCHOR_VERSE.reference}
+            </p>
+          </div>
+        </motion.header>
 
         {/* Main Content */}
-        <div className="grid gap-6 lg:grid-cols-[1.5fr,1fr]">
-          {/* Left: Input and Response */}
-          <section className="space-y-4">
-            <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0d0d10]/85 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
+        <div className="grid gap-6 lg:grid-cols-[1.4fr,1fr]">
+
+          {/* Left: Input + Response */}
+          <motion.section
+            className="space-y-5"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+          >
+            <div
+              className="rounded-[22px] border border-cyan-500/10 bg-[#080a12]/90 p-5 sm:p-6"
+              style={{ boxShadow: '0 8px 40px rgba(6, 182, 212, 0.06)' }}
+            >
               <div className="flex items-center justify-between mb-3">
-                <label htmlFor="concern-input" className="text-sm font-semibold text-[#f5f0e8]">
-                  What outcome are you worried about?
+                <label htmlFor="concern-input" className="text-sm font-medium text-cyan-100/80">
+                  What is weighing on your heart?
                 </label>
                 <VoiceInputButton
                   language={language}
@@ -224,39 +276,31 @@ export default function ViyogClient() {
                 id="concern-input"
                 value={concern}
                 onChange={e => setConcern(e.target.value)}
-                placeholder="Tell me what's on your mind. Example: I'm worried my presentation won't go well and everyone will think I'm not good at my job."
-                className="w-full min-h-[160px] rounded-2xl bg-black/50 border border-[#d4a44c]/25 text-[#f5f0e8] placeholder:text-[#f5f0e8]/60 p-4 focus:ring-2 focus:ring-[#d4a44c]/50 outline-none"
+                placeholder="Share what outcome you are attached to... what worry you carry..."
+                className="w-full min-h-[140px] rounded-xl bg-black/40 border border-cyan-500/10 text-white/90 placeholder:text-white/25 p-4 text-sm leading-relaxed focus:ring-1 focus:ring-cyan-500/30 focus:border-cyan-500/20 outline-none transition-all resize-none"
                 aria-describedby="concern-hint"
               />
-              <p id="concern-hint" className="sr-only">Describe what you&apos;re worried about</p>
+              <p id="concern-hint" className="sr-only">Describe what you are worried about</p>
 
-              <div className="flex flex-wrap gap-3 mt-4">
+              <div className="flex items-center gap-3 mt-4">
                 <button
                   onClick={requestDetachment}
                   disabled={!concern.trim() || loading}
-                  className="px-5 py-3 rounded-2xl bg-gradient-to-r from-[#d4a44c] via-[#ffb347] to-[#e8b54a] text-slate-950 font-semibold shadow-lg shadow-[#d4a44c]/25 disabled:opacity-60 disabled:cursor-not-allowed transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50"
-                  aria-label={loading ? 'Processing...' : 'Get Fresh Perspective'}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-sm font-semibold shadow-lg shadow-cyan-600/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:shadow-cyan-500/30 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
+                  aria-label={loading ? 'Processing...' : 'Release & Receive Wisdom'}
                 >
-                  {loading ? <span>Thinking...</span> : <span>Get Fresh Perspective</span>}
+                  {loading ? 'Receiving wisdom...' : 'Release & Receive Wisdom'}
                 </button>
               </div>
 
               {error && (
-                <p className="mt-3 text-sm text-[#e8b54a]" role="alert">
-                  <span>{error}</span>
-                </p>
+                <p className="mt-3 text-sm text-amber-300/80" role="alert">{error}</p>
               )}
             </div>
 
-            {/* Loading State */}
-            {loading && (
-              <WisdomLoadingState tool="viyoga" secularMode={true} />
-            )}
-
-            {/* Micro-pause breathing dot */}
+            {loading && <WisdomLoadingState tool="viyoga" secularMode={true} />}
             <BreathingDot visible={showPause} />
 
-            {/* Response Card */}
             {result && !loading && !showPause && (
               <WisdomResponseCard
                 tool="viyoga"
@@ -269,54 +313,61 @@ export default function ViyogClient() {
                 secularMode={true}
               />
             )}
-          </section>
+          </motion.section>
 
-          {/* Right: Insight Card, Flow Steps and Info */}
-          <section className="space-y-4">
-            {/* Concern Analysis Insight Card - shows when analysis is available */}
+          {/* Right: Insight + Guidance */}
+          <motion.section
+            className="space-y-4"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+          >
+            {/* Concern Analysis Insight Card */}
             {result && !loading && !showPause && result.concernAnalysis && result.concernAnalysis.analysis_depth === 'ai_enhanced' && (
-              <div className="rounded-2xl border border-amber-500/25 bg-gradient-to-br from-amber-500/5 to-[#d4a44c]/5 p-5 shadow-[0_15px_60px_rgba(255,180,50,0.08)]">
-                <h3 className="text-sm font-semibold text-amber-100 mb-3 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                  What I See in Your Situation
+              <div
+                className="rounded-[20px] border border-cyan-500/15 bg-gradient-to-br from-cyan-950/20 to-transparent p-5"
+                style={{ boxShadow: '0 8px 32px rgba(6, 182, 212, 0.06)' }}
+              >
+                <h3 className="text-xs font-semibold text-cyan-200/80 mb-3 flex items-center gap-2">
+                  <motion.span
+                    className="w-1.5 h-1.5 rounded-full bg-cyan-400"
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                  What Krishna Sees
                 </h3>
-                <div className="space-y-3 text-xs text-amber-100/80 leading-relaxed">
+                <div className="space-y-2.5 text-xs text-cyan-100/70 leading-relaxed">
                   {result.concernAnalysis.primary_emotion && (
                     <div className="flex items-start gap-2">
-                      <span className="text-amber-400/70 font-medium shrink-0 w-20">Feeling:</span>
-                      <span className="capitalize">
-                        {result.concernAnalysis.primary_emotion}
-                        {result.concernAnalysis.emotional_intensity && result.concernAnalysis.emotional_intensity !== 'moderate'
-                          ? ` (${result.concernAnalysis.emotional_intensity})`
-                          : ''}
-                      </span>
+                      <span className="text-cyan-400/50 font-medium shrink-0 w-16">Feeling:</span>
+                      <span className="capitalize">{result.concernAnalysis.primary_emotion}</span>
                     </div>
                   )}
                   {result.concernAnalysis.attachment_object && (
                     <div className="flex items-start gap-2">
-                      <span className="text-amber-400/70 font-medium shrink-0 w-20">Attached to:</span>
+                      <span className="text-cyan-400/50 font-medium shrink-0 w-16">Attached:</span>
                       <span>{result.concernAnalysis.attachment_object}</span>
                     </div>
                   )}
                   {result.concernAnalysis.root_cause && (
                     <div className="flex items-start gap-2">
-                      <span className="text-amber-400/70 font-medium shrink-0 w-20">Root:</span>
+                      <span className="text-cyan-400/50 font-medium shrink-0 w-16">Root:</span>
                       <span>{result.concernAnalysis.root_cause}</span>
                     </div>
                   )}
                   {result.concernAnalysis.effort_redirect && (
-                    <div className="p-2.5 rounded-xl bg-black/30 border border-amber-500/15 mt-2">
-                      <span className="text-amber-300/90 font-medium text-[11px] uppercase tracking-wider block mb-1">Redirect energy toward</span>
-                      <span className="text-amber-100/90">{result.concernAnalysis.effort_redirect}</span>
+                    <div className="p-3 rounded-xl bg-black/30 border border-cyan-500/10 mt-2">
+                      <span className="text-cyan-300/60 font-medium text-[10px] uppercase tracking-wider block mb-1">Redirect energy toward</span>
+                      <span className="text-cyan-100/80">{result.concernAnalysis.effort_redirect}</span>
                     </div>
                   )}
                   {result.concernAnalysis.in_their_control && result.concernAnalysis.in_their_control.length > 0 && (
                     <div className="mt-2">
-                      <span className="text-emerald-400/80 font-medium text-[11px] uppercase tracking-wider block mb-1.5">In your control</span>
+                      <span className="text-emerald-400/60 font-medium text-[10px] uppercase tracking-wider block mb-1.5">In your control</span>
                       <ul className="space-y-1">
                         {result.concernAnalysis.in_their_control.slice(0, 3).map((item, i) => (
                           <li key={i} className="flex items-start gap-1.5">
-                            <span className="text-emerald-400/60 mt-0.5 shrink-0">+</span>
+                            <span className="text-emerald-400/40 mt-0.5 shrink-0">+</span>
                             <span>{item}</span>
                           </li>
                         ))}
@@ -325,11 +376,11 @@ export default function ViyogClient() {
                   )}
                   {result.concernAnalysis.not_in_their_control && result.concernAnalysis.not_in_their_control.length > 0 && (
                     <div className="mt-1">
-                      <span className="text-[#d4a44c]/80 font-medium text-[11px] uppercase tracking-wider block mb-1.5">Not in your control</span>
+                      <span className="text-amber-400/50 font-medium text-[10px] uppercase tracking-wider block mb-1.5">Not in your control</span>
                       <ul className="space-y-1">
                         {result.concernAnalysis.not_in_their_control.slice(0, 3).map((item, i) => (
                           <li key={i} className="flex items-start gap-1.5">
-                            <span className="text-[#d4a44c]/60 mt-0.5 shrink-0">-</span>
+                            <span className="text-amber-400/40 mt-0.5 shrink-0">&ndash;</span>
                             <span>{item}</span>
                           </li>
                         ))}
@@ -340,45 +391,28 @@ export default function ViyogClient() {
               </div>
             )}
 
-            <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
-              <h3 className="text-sm font-semibold text-[#f5f0e8] mb-4">The Flow</h3>
-              <ol className="space-y-3 text-sm text-[#f5f0e8]/85">
-                {flowSteps.map((step, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-[#d4a44c] to-[#ffb347] text-xs font-bold text-slate-950 shrink-0">
-                      {idx + 1}
-                    </span>
-                    <span>{step}</span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-
-            <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(212,164,76,0.12)]">
-              <h3 className="text-sm font-semibold text-[#f5f0e8] mb-3">About Viyoga</h3>
-              <p className="text-xs text-[#f5f0e8]/80 leading-relaxed mb-4">
-                Viyoga is like a wise friend who actually listens. It deeply analyzes YOUR specific situation - understanding what you&apos;re attached to, why it matters to you, and what&apos;s really driving the anxiety. Then it helps you find freedom through focused action, guided by timeless Bhagavad Gita wisdom on detachment.
+            {/* Sacred Teaching */}
+            <div
+              className="rounded-[20px] border border-cyan-500/8 bg-[#080a12]/80 p-5"
+              style={{ boxShadow: '0 4px 24px rgba(6, 182, 212, 0.04)' }}
+            >
+              <h3 className="text-xs font-semibold text-cyan-200/70 mb-3">The Path of Viyoga</h3>
+              <p className="text-xs text-white/50 leading-relaxed">
+                Viyoga is the Gita&apos;s teaching of releasing attachment to outcomes.
+                Not suppression, but freedom. You act with full effort, then release
+                the result to the Divine. This is the path Krishna teaches Arjuna.
               </p>
-
-              <div className="p-3 rounded-xl bg-black/40 border border-[#d4a44c]/15">
-                <h4 className="text-xs font-semibold text-[#f5f0e8] mb-2">How It Works</h4>
-                <p className="text-xs text-[#f5f0e8]/70">
-                  Deep Understanding → Identify Attachment → See What You Control → Shift to Effort → One Action → Reflect
+              <div className="mt-3 p-3 rounded-xl bg-cyan-950/15 border border-cyan-500/8">
+                <p className="text-[10px] text-cyan-300/40 leading-relaxed">
+                  Share &rarr; Understand &rarr; See what you control &rarr; Shift to effort &rarr; Release
                 </p>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#d4a44c]/10 to-transparent p-4">
-              <p className="text-xs text-[#f5f0e8]/80">
-                <strong className="text-[#f5f0e8]">The Path of Detachment:</strong> Viyoga draws from the Gita&apos;s timeless teaching — let go of attachment to outcomes and find peace in right action. As Krishna teaches: &quot;You have the right to perform your actions, but not to the fruits thereof.&quot;
-              </p>
-            </div>
-
             <SpiritualToolsNav currentTool="viyoga" />
-          </section>
+            <CompanionCTA fromTool="viyog" />
+          </motion.section>
         </div>
-
-        <CompanionCTA fromTool="viyog" />
       </div>
     </main>
   )

@@ -84,43 +84,51 @@ const QUICK_ACCESS = [
   },
 ] as const
 
-// Spiritual Toolkit tools — card grid on the dashboard
-const SPIRITUAL_TOOLKIT = [
+// Featured Sacred Tools — the three divine instruments on the dashboard
+const SACRED_TOOLS = [
   {
     id: 'viyoga',
-    icon: '\u{1F3AF}',
     title: 'Viyoga',
-    subtitle: 'Release attachments',
-    href: '/viyog',
+    sanskrit: '\u0935\u093F\u092F\u094B\u0917',
+    subtitle: 'The Detachment Tool',
+    verse: 'BG 2.47',
+    href: '/tools/viyog',
+    gradient: 'from-cyan-900/40 via-blue-950/30 to-indigo-950/40',
+    glowColor: 'rgba(6, 182, 212, 0.2)',
+    accentColor: 'text-cyan-300',
+    borderColor: 'border-cyan-500/20',
+    iconBg: 'from-cyan-400/20 to-blue-500/20',
   },
   {
     id: 'ardha',
-    icon: '\u{1F504}',
     title: 'Ardha',
-    subtitle: 'Reframe thoughts',
-    href: '/ardha',
-  },
-  {
-    id: 'kiaan-companion',
-    icon: '\u{1F9E1}',
-    title: 'KIAAN Companion',
-    subtitle: 'Divine friend',
-    href: '/companion',
-  },
-  {
-    id: 'kiaan-chat',
-    icon: '\u{1F4AC}',
-    title: 'KIAAN Chat',
-    subtitle: 'Your companion',
-    href: '/kiaan/chat',
+    sanskrit: '\u0905\u0930\u094D\u0927',
+    subtitle: 'The Reframing Tool',
+    verse: 'BG 2.16',
+    href: '/tools/ardha',
+    gradient: 'from-violet-900/40 via-purple-950/30 to-indigo-950/40',
+    glowColor: 'rgba(139, 92, 246, 0.2)',
+    accentColor: 'text-violet-300',
+    borderColor: 'border-violet-500/20',
+    iconBg: 'from-violet-400/20 to-purple-500/20',
   },
   {
     id: 'relationship-compass',
-    icon: '\u{1F9ED}',
     title: 'Compass',
-    subtitle: 'Relationships',
-    href: '/relationship-compass',
+    sanskrit: '\u0938\u0902\u092C\u0928\u094D\u0927',
+    subtitle: 'The Relationship Guide',
+    verse: 'BG 6.32',
+    href: '/tools/relationship-compass',
+    gradient: 'from-rose-900/40 via-pink-950/30 to-amber-950/40',
+    glowColor: 'rgba(244, 63, 94, 0.15)',
+    accentColor: 'text-rose-300',
+    borderColor: 'border-rose-500/20',
+    iconBg: 'from-rose-400/20 to-amber-500/20',
   },
+] as const
+
+// Other tools — compact grid below the featured tools
+const OTHER_TOOLS = [
   {
     id: 'emotional-reset',
     icon: '\u{1F4AB}',
@@ -489,27 +497,111 @@ export default function DashboardClient() {
             </Link>
           </motion.div>
 
-          {/* ─── Spiritual Toolkit ─── */}
+          {/* ─── Sacred Spiritual Toolkit ─── */}
           <motion.div variants={itemVariants}>
-            <div className="mb-3 flex items-center gap-3">
-              <span className="text-lg">{'\u{1F549}\uFE0F'}</span>
-              <h2 className="text-base font-semibold text-white/80">
-                Your Spiritual Toolkit
-              </h2>
+            <div className="mb-4 flex items-center gap-3">
+              <motion.span
+                className="text-lg"
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                {'\u{1F549}\uFE0F'}
+              </motion.span>
+              <div>
+                <h2 className="text-base font-semibold text-white/80">
+                  Your Sacred Instruments
+                </h2>
+                <p className="text-[10px] text-white/40 font-sacred italic">
+                  Guided by the eternal wisdom of the Gita
+                </p>
+              </div>
             </div>
-            <div className="grid grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-              {SPIRITUAL_TOOLKIT.map((tool) => (
+
+            {/* Featured Sacred Tools — Viyoga, Ardha, Relationship Compass */}
+            <div className="space-y-3">
+              {SACRED_TOOLS.map((tool) => (
+                <motion.div
+                  key={tool.id}
+                  variants={quickActionVariants}
+                  initial="rest"
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  <Link
+                    href={tool.href}
+                    onClick={handleFeatureTap}
+                    className="group block"
+                  >
+                    <div
+                      className={`relative overflow-hidden rounded-[20px] bg-gradient-to-br ${tool.gradient} ${tool.borderColor} border p-4 sm:p-5 transition-all duration-300`}
+                      style={{
+                        boxShadow: `0 8px 32px ${tool.glowColor}`,
+                      }}
+                    >
+                      {/* Subtle sacred glow overlay */}
+                      <div
+                        className="absolute inset-0 pointer-events-none rounded-[20px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                        style={{
+                          boxShadow: `inset 0 0 40px ${tool.glowColor}`,
+                        }}
+                      />
+
+                      <div className="relative flex items-center gap-4">
+                        {/* Sacred Sanskrit Symbol */}
+                        <div className={`flex h-12 w-12 sm:h-14 sm:w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${tool.iconBg}`}>
+                          <span className="text-lg sm:text-xl font-sacred text-white/90 select-none">
+                            {tool.sanskrit}
+                          </span>
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h3 className={`text-base sm:text-lg font-semibold ${tool.accentColor}`}>
+                              {tool.title}
+                            </h3>
+                            <span className="text-[9px] text-white/30 font-mono tracking-wider">
+                              {tool.verse}
+                            </span>
+                          </div>
+                          <p className="text-xs text-white/60 mt-0.5 font-sacred italic">
+                            {tool.subtitle}
+                          </p>
+                        </div>
+
+                        {/* Arrow */}
+                        <motion.div
+                          className="flex-shrink-0 text-white/20 group-hover:text-white/50 transition-colors"
+                          animate={{ x: [0, 3, 0] }}
+                          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                        >
+                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </motion.div>
+                      </div>
+
+                      {/* Bottom glow line */}
+                      <div className={`absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent ${tool.accentColor.replace('text-', 'via-')}/20 to-transparent`} />
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Other Tools — Compact Grid */}
+            <div className="mt-4 grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {OTHER_TOOLS.map((tool) => (
                 <motion.div key={tool.id} variants={quickActionVariants} initial="rest" whileHover="hover" whileTap="tap">
                   <Link
                     href={tool.href}
                     onClick={handleCardTap}
-                    className="flex flex-col items-center justify-center rounded-[24px] bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-3 sm:p-4 shadow-mobile-glow transition-all duration-300 active:opacity-90 md:p-5"
+                    className="flex flex-col items-center justify-center rounded-[16px] bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-2.5 sm:p-3 shadow-mobile-glow transition-all duration-300 active:opacity-90"
                   >
-                    <div className="mb-2 sm:mb-3 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-white/[0.06] shadow-inner md:h-14 md:w-14">
-                      <span className="text-xl sm:text-2xl md:text-3xl">{tool.icon}</span>
+                    <div className="mb-1.5 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white/[0.05]">
+                      <span className="text-lg sm:text-xl">{tool.icon}</span>
                     </div>
-                    <span className="text-xs sm:text-sm font-medium text-white/80 text-center leading-tight">{tool.title}</span>
-                    <span className="mt-0.5 text-[9px] sm:text-[10px] text-white/50 text-center leading-tight">{tool.subtitle}</span>
+                    <span className="text-[10px] sm:text-xs font-medium text-white/70 text-center leading-tight">{tool.title}</span>
+                    <span className="mt-0.5 text-[8px] sm:text-[9px] text-white/40 text-center leading-tight">{tool.subtitle}</span>
                   </Link>
                 </motion.div>
               ))}
