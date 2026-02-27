@@ -117,6 +117,17 @@ GITA_CORE_CONCEPTS = {
     "sattva": "purity",
     "rajas": "activity",
     "tamas": "inertia",
+
+    # Five Pillar concepts (v5.0 deep compliance)
+    "sakshi bhava": "witness consciousness",
+    "ahamkara": "ego/doer-identity",
+    "phala tyaga": "renunciation of fruits",
+    "samatvam": "equanimity in all dualities",
+    "ishvara arpana": "offering action to the divine",
+    "sthitaprajna": "one of steady wisdom",
+    "purusha": "the conscious self",
+    "kshetra": "the field (body-mind)",
+    "kshetrajna": "the knower of the field",
 }
 
 # Verse reference patterns
@@ -138,8 +149,16 @@ TOOL_CORE_TEACHINGS = {
     WisdomTool.VIYOGA: {
         "primary_verse": "BG 2.47",
         "teaching": "You have the right to perform your prescribed duty, but you are not entitled to the fruits of action.",
-        "concepts": ["karma", "nishkama", "phala", "samatva", "vairagya", "karma yoga"],
-        "keywords": ["detach", "outcome", "action", "effort", "release", "fruit", "result"],
+        "concepts": [
+            "karma", "nishkama", "phala", "samatva", "vairagya", "karma yoga",
+            "atman", "prakriti", "sakshi bhava", "ahamkara", "phala tyaga",
+            "samatvam", "ishvara arpana", "sthitaprajna",
+        ],
+        "keywords": [
+            "detach", "outcome", "action", "effort", "release", "fruit", "result",
+            "witness", "observer", "ego", "doer", "surrender", "offering",
+            "equanimity", "steady", "identity", "unchanging", "awareness",
+        ],
     },
     WisdomTool.RELATIONSHIP_COMPASS: {
         "primary_verse": "BG 6.32",

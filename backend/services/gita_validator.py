@@ -13,7 +13,15 @@ logger = logging.getLogger(__name__)
 
 
 class GitaValidator:
-    """Validator for ensuring responses are rooted in Gita wisdom."""
+    """Validator for ensuring responses are rooted in Gita wisdom.
+
+    v5.0: Enhanced with Five Pillar compliance scoring for deep Gita adherence:
+    1. Atman-Prakriti Viveka (Self vs Mind distinction)
+    2. Phala-tyaga (Complete fruit renunciation)
+    3. Samatvam (Equanimity in all dualities)
+    4. Ahamkara Dissolution (Ego transcendence)
+    5. Ishvara-arpana (Surrender to the Divine)
+    """
 
     # Required Sanskrit/Gita terminology that should appear in responses
     GITA_TERMS = [
@@ -23,7 +31,8 @@ class GitaValidator:
         "dhyana", "samadhi", "nishkama", "vairagya", "viveka", "shraddha",
         "devotion", "detachment", "equanimity", "duty", "action", "knowledge",
         "wisdom", "peace", "balance", "surrender", "awareness", "consciousness",
-        "inner self", "higher self", "essence", "purpose", "discipline"
+        "inner self", "higher self", "essence", "purpose", "discipline",
+        "witness", "observer", "sakshi", "ahamkara", "offering",
     ]
 
     # Forbidden generic/non-Gita terms that indicate generic advice
@@ -42,6 +51,76 @@ class GitaValidator:
         "cultivate", "embrace", "release", "let go", "transcend",
         "inner peace", "self-mastery", "spiritual growth"
     ]
+
+    # Five Pillar compliance markers (v5.0)
+    # Each pillar has both Gita-mode and secular-mode indicators
+    PILLAR_MARKERS = {
+        "atman_prakriti": {
+            "gita": [
+                "atman", "prakriti", "witness", "witnessing", "observer",
+                "sakshi", "knower of the field", "not the body", "not the mind",
+                "unchanging", "consciousness", "self",
+            ],
+            "secular": [
+                "not your anxiety", "not your performance", "aware of",
+                "watching", "observing", "notice the worry", "underneath",
+                "the person observing", "awareness", "still here",
+                "doesn't change", "who you are beyond", "core self",
+            ],
+        },
+        "phala_tyaga": {
+            "gita": [
+                "renounce", "fruits", "phala", "tyaga", "release the claim",
+                "nishkama", "desireless", "offering", "no claim",
+                "without attachment", "without expectation",
+            ],
+            "secular": [
+                "release", "let go of the result", "not yours to hold",
+                "contribution", "not a strategy for winning", "action is complete",
+                "no bargaining", "silent hope", "subtle craving",
+                "done your part", "not entitled",
+            ],
+        },
+        "samatvam": {
+            "gita": [
+                "equanimity", "samatva", "equal mind", "steady",
+                "balanced in success and failure", "praise and blame",
+                "honor and disgrace", "sthitaprajna", "unmoved",
+            ],
+            "secular": [
+                "both outcomes", "success and failure", "either way",
+                "remain steady", "equally", "whether it works or not",
+                "praise or blame", "positive or negative",
+                "undisturbed", "composure",
+            ],
+        },
+        "ahamkara": {
+            "gita": [
+                "ahamkara", "ego", "doer", "gunas of prakriti",
+                "i do nothing", "doership", "nature performs",
+                "deluded", "not the doer",
+            ],
+            "secular": [
+                "my reputation", "my image", "my worth",
+                "ego", "identity at stake", "about you",
+                "says about you", "performer", "person from the performance",
+                "not about your competence", "separate",
+            ],
+        },
+        "ishvara_arpana": {
+            "gita": [
+                "surrender", "offering", "prasad", "ishvara",
+                "larger order", "divine", "offer the action",
+                "belongs to the lord", "sacred offering",
+            ],
+            "secular": [
+                "let the situation unfold", "beyond your control",
+                "release to something larger", "done your part",
+                "let it go", "unfold as it will", "trust the process",
+                "many factors", "not one person's to control",
+            ],
+        },
+    }
 
     # Minimum and maximum word counts
     MIN_WORDS = 200
@@ -196,29 +275,29 @@ class GitaValidator:
             A safe, Gita-based response
         """
         fallback_responses = [
-            """In times of uncertainty, remember the eternal wisdom: your duty lies in the action itself, not in worrying about the outcome. When we focus on doing our best in this present moment, we free ourselves from anxiety and discover true inner peace. This principle of karma yoga is the foundation of both spiritual growth and spiritual wellness.
+            """In times of uncertainty, the ancient wisdom offers a fundamental truth: you are not the anxiety, not the outcome, not the situation — you are the witness of it all. The atman within you remains untouched by temporary results. This is not philosophy but practical reality: the awareness watching your worry right now does not change based on what happens next.
 
-This path of karma yoga - acting without attachment to results - is the foundation of lasting calm. Each small step you take with full presence is a victory. Practice letting go of what you cannot control while embracing what you can: your effort, your attitude, your response to life's challenges. This shift in perspective creates immediate relief from stress.
+The path of karma yoga teaches complete release — not merely focusing on effort, but renouncing all claim over the outcome. Your right was to the action alone. You performed it. The result belongs to a larger order. Even subtle hope for a positive outcome is still attachment. Release it. Act fully, offer the action, and let the result unfold as it will.
 
-The ancient teachings remind us that we are not our circumstances but the eternal awareness witnessing them. Your true nature - the atman within - remains untouched by temporary difficulties. When you connect with this deeper reality through meditation and mindful action, you discover unshakeable strength that sustains you through any challenge.
+The Gita's standard of equanimity is high: can you remain inwardly steady whether this succeeds or fails? Whether praise comes or blame? The one of steady wisdom — the sthitaprajna — treats honor and disgrace with equal mind. This steadiness is not indifference; it is strength rooted in knowing who you truly are beyond any result.
 
-Start today with one simple practice: before any task, take a breath and remind yourself, "I'll do my best and release the rest." This discipline of detachment transforms ordinary actions into a journey of spiritual growth and brings profound peace to daily life. Trust the process, honor your dharma, and watch as equanimity becomes your natural state. 💙""",
+Start today with one practice: before any task, pause and recognize — "I am the awareness watching this situation. The outcome belongs to prakriti, to circumstance. I offer this action as my contribution and release the rest." This discipline of surrender transforms ordinary actions into sacred offerings and brings unshakeable equanimity to daily life.""",
 
-            """The ancient wisdom teaches us about the three gunas - the qualities that shape our inner state. When we're pulled by rajas (restlessness) or tamas (lethargy), we suffer. But we can cultivate sattva - clarity, harmony, and balance - through conscious choices and dedicated practice.
+            """The ancient teachings reveal something profound: all actions are performed by the gunas of prakriti — nature acts through you. The self, deluded by ahamkara (ego), mistakenly thinks "I am the doer." When you see this clearly — that "my performance" and "my reputation" belong to the body-mind instrument, not to the eternal witness within — anxiety loses its grip.
 
-Begin by bringing awareness to your thoughts and emotions without judgment. Notice them like clouds passing through the sky of your consciousness. This practice of self-observation, combined with regular meditation and mindful action, gradually brings equanimity even amid life's storms. The key is consistency - even a few minutes daily creates transformation over time.
+Begin by bringing awareness to WHO is anxious. Is it you — the unchanging consciousness — or is it the mind? Notice the worry as something arising in the field of experience while you, the knower of the field, remain untouched. This practice of sakshi bhava (witness consciousness) is the foundation of lasting peace.
 
-The path of wisdom shows that lasting peace comes not from controlling external circumstances, but from mastering our inner response to them. When you understand that you are the eternal witness - the unchanging awareness beyond temporary thoughts and feelings - you discover freedom from suffering. This recognition alone begins to dissolve the grip of anxiety and stress.
+The path of wisdom demands that we prepare for both outcomes with equal mind. If this succeeds, remain steady. If this fails, remain steady. The Gita teaches: balanced in success and failure, that equanimity is called yoga. Not because outcomes don't matter, but because your deepest identity does not depend on them.
 
-The path forward is simple but profound: engage fully with your duties, maintain balance in success and failure, practice compassion toward yourself and others, and trust in the journey of self-mastery. Each day is an opportunity to align with your higher purpose. Let go of perfectionism and embrace progress. Your buddhi (discriminating wisdom) will guide you when you quiet the restless mind through practice and patience. 💙""",
+The path forward is surrender: "This duty is my offering. I prepare with full sincerity. The result belongs to the Lord. Praise and criticism are His prasad. I remain steady." When you offer the action completely, there is nothing left to worry about. The offering was your dharma. The fruit was never yours.""",
 
-            """True peace comes from understanding the nature of the eternal self within you - the atman that remains unchanged despite life's turbulence. When you identify with this deeper essence rather than temporary circumstances, you discover unshakeable inner strength that no external situation can diminish.
+            """True peace comes from recognizing your identity as the eternal witness — the atman that watches all experiences without being changed by them. You are not your thoughts, not your achievements, not your failures. You are the aware presence that observes them all.
 
-This journey of self-knowledge begins with daily practice. Carve out time for quiet reflection, even if just for a few minutes. In this stillness, you connect with your inner wisdom and remember your true nature beyond fear and worry. The practice of dhyana (meditation) is not about stopping thoughts, but witnessing them without attachment. Start small and build gradually.
+This recognition begins with a simple shift: when anxiety arises, notice it as something happening IN you, not AS you. The worry about outcomes belongs to the mind — to prakriti. But you, the witness, remain unchanged regardless of what unfolds. This is the Gita's deepest teaching: the unreal has no existence, and the real never ceases to be.
 
-The timeless teachings emphasize that we suffer when we identify with the temporary - our roles, possessions, achievements. But our essence is eternal, pure consciousness itself. When you anchor yourself in this truth, external changes lose their power to disturb your peace. This understanding transforms everything.
+The timeless path requires complete fruit-renunciation — not just effort-focus but true release of all claim. Your action was your offering. Once offered, it is no longer yours to worry about. Even hoping quietly for a good result is attachment that binds. The wise know: "I do nothing at all" — action flows through the body-mind while the Self witnesses.
 
-Remember: you are not your thoughts, not your circumstances, but the aware presence behind them. Cultivate this awareness through meditation, mindful breathing, and bringing full presence to each moment. This is the path of jnana yoga - wisdom that liberates. Start where you are, practice with dedication, let go of attachment to immediate results, and trust that consistent effort leads to transformation. This is the way to freedom and lasting joy. 💙"""
+Remember: you are the knower of the field, not the field itself. Cultivate this witness awareness. When someone praises you, remain steady. When someone criticizes you, remain steady. Offer every action as a sacred offering and release the result to a larger order. This surrender is not weakness — it is the highest strength, rooted in knowledge of who you truly are."""
         ]
 
         # Simple hash to pick a consistent response based on message
@@ -232,6 +311,95 @@ Remember: you are not your thoughts, not your circumstances, but the aware prese
 
         return fallback_responses[index]
 
+    def score_five_pillar_compliance(
+        self,
+        response: str,
+        secular_mode: bool = True,
+    ) -> dict[str, Any]:
+        """Score response against the Five Pillars of deep Gita compliance.
+
+        Each pillar is scored 0.0-1.0 based on presence of relevant markers.
+        Overall compliance score is the average across all five pillars.
+
+        Args:
+            response: The response to evaluate
+            secular_mode: If True, use secular markers; if False, use Gita markers
+
+        Returns:
+            Dict with per-pillar scores, overall score, and details
+        """
+        response_lower = response.lower()
+        mode_key = "secular" if secular_mode else "gita"
+
+        pillar_scores: dict[str, float] = {}
+        pillar_details: dict[str, list[str]] = {}
+
+        for pillar_name, markers_by_mode in self.PILLAR_MARKERS.items():
+            markers = markers_by_mode.get(mode_key, [])
+            found = []
+            for marker in markers:
+                if marker.lower() in response_lower:
+                    found.append(marker)
+
+            # Score: 0.0 if none found, up to 1.0 based on how many markers hit
+            if not markers:
+                score = 0.0
+            elif len(found) >= 3:
+                score = 1.0
+            elif len(found) == 2:
+                score = 0.7
+            elif len(found) == 1:
+                score = 0.4
+            else:
+                score = 0.0
+
+            pillar_scores[pillar_name] = score
+            pillar_details[pillar_name] = found
+
+        # Overall compliance score (average of all five pillars)
+        overall_score = sum(pillar_scores.values()) / len(pillar_scores) if pillar_scores else 0.0
+
+        # Determine compliance level
+        if overall_score >= 0.8:
+            compliance_level = "10/10"
+        elif overall_score >= 0.6:
+            compliance_level = "8/10"
+        elif overall_score >= 0.4:
+            compliance_level = "6/10"
+        elif overall_score >= 0.2:
+            compliance_level = "4/10"
+        else:
+            compliance_level = "2/10"
+
+        # Identify missing pillars (score < 0.4)
+        missing_pillars = [
+            name for name, score in pillar_scores.items() if score < 0.4
+        ]
+
+        # Identify strong pillars (score >= 0.7)
+        strong_pillars = [
+            name for name, score in pillar_scores.items() if score >= 0.7
+        ]
+
+        result = {
+            "overall_score": round(overall_score, 2),
+            "compliance_level": compliance_level,
+            "pillar_scores": {k: round(v, 2) for k, v in pillar_scores.items()},
+            "pillar_details": pillar_details,
+            "missing_pillars": missing_pillars,
+            "strong_pillars": strong_pillars,
+            "pillars_met": len([s for s in pillar_scores.values() if s >= 0.4]),
+            "total_pillars": 5,
+        }
+
+        self.logger.info(
+            f"Five Pillar compliance: {compliance_level} "
+            f"(score={overall_score:.2f}, met={result['pillars_met']}/5, "
+            f"missing={missing_pillars})"
+        )
+
+        return result
+
     def check_four_part_structure(self, response: str) -> dict[str, bool]:
         """
         Check if response follows the 4-part structure:
@@ -239,10 +407,10 @@ Remember: you are not your thoughts, not your circumstances, but the aware prese
         2. Modern Application
         3. Practical Steps
         4. Deeper Understanding
-        
+
         Args:
             response: The response to check
-            
+
         Returns:
             Dict indicating which parts are present
         """
