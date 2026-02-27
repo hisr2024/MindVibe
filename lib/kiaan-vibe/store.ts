@@ -53,10 +53,48 @@ function getAudioElement(): HTMLAudioElement {
 // Track active blob URLs for cleanup to prevent memory leaks
 let activeBlobUrl: string | null = null
 
+// Track the pending play promise to prevent AbortError race conditions
+let pendingPlayPromise: Promise<void> | null = null
+
 function cleanupBlobUrl(): void {
   if (activeBlobUrl) {
     URL.revokeObjectURL(activeBlobUrl)
     activeBlobUrl = null
+  }
+}
+
+/**
+ * Safely pause audio and wait for any pending play() promise to settle.
+ * This prevents the "AbortError: The play() request was interrupted
+ * by a new load request" browser error.
+ */
+async function safelyStopAudio(audio: HTMLAudioElement): Promise<void> {
+  audio.pause()
+  if (pendingPlayPromise) {
+    try {
+      await pendingPlayPromise
+    } catch {
+      // Expected: pending play may reject with AbortError after pause
+    }
+    pendingPlayPromise = null
+  }
+}
+
+/**
+ * Wrapper around audio.play() that tracks the pending promise
+ * and gracefully handles AbortError (which is a benign race condition,
+ * not a real playback failure).
+ */
+async function safePlay(audio: HTMLAudioElement): Promise<void> {
+  const playPromise = audio.play()
+  pendingPlayPromise = playPromise
+  try {
+    await playPromise
+  } finally {
+    // Clear if this is still the active promise
+    if (pendingPlayPromise === playPromise) {
+      pendingPlayPromise = null
+    }
   }
 }
 
@@ -216,16 +254,21 @@ export const usePlayerStore = create<PlayerStore>()(
       const isResuming = !isNewTrack && state.currentTrack?.id === targetTrack.id
       if (isResuming) {
         try {
-          await audio.play()
+          await safePlay(audio)
           set({ isPlaying: true, isLoading: false })
           updateMediaSession(targetTrack)
-        } catch {
+        } catch (error) {
+          // AbortError is benign (source changed by another play call)
+          if (error instanceof DOMException && error.name === 'AbortError') return
           // Resume failed - will fall through to full play logic below
         }
         return
       }
 
       set({ currentTrack: targetTrack, isLoading: true, audioError: null })
+
+      // Stop any pending playback before changing source to prevent AbortError
+      await safelyStopAudio(audio)
 
       // Cleanup previous blob URL before creating a new one
       cleanupBlobUrl()
@@ -240,11 +283,13 @@ export const usePlayerStore = create<PlayerStore>()(
           audio.src = blobUrl
 
           try {
-            await audio.play()
+            await safePlay(audio)
             set({ isPlaying: true, isLoading: false })
             markTrackAvailable(targetTrack.id)
             updateMediaSession(targetTrack)
           } catch (error) {
+            // AbortError is benign - another play() call interrupted this one
+            if (error instanceof DOMException && error.name === 'AbortError') return
             console.error('[PlayerStore] Play error:', error)
             // If audio blob play fails, try browser TTS
             cleanupBlobUrl()
@@ -294,10 +339,12 @@ export const usePlayerStore = create<PlayerStore>()(
       audio.src = targetTrack.src
 
       try {
-        await audio.play()
+        await safePlay(audio)
         set({ isPlaying: true, isLoading: false })
         updateMediaSession(targetTrack)
       } catch (error) {
+        // AbortError is benign - another play() call interrupted this one
+        if (error instanceof DOMException && error.name === 'AbortError') return
         console.error('[PlayerStore] Play error:', error)
         set({ isPlaying: false, isLoading: false })
       }
