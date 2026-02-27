@@ -604,7 +604,7 @@ def get_guna_analysis(guna_type: str) -> dict[str, Any] | None:
 
 
 def build_deep_wisdom_context(
-    karmic_path: dict[str, Any],
+    karmic_path: dict[str, Any] | str,
     situation: str = "",
 ) -> str:
     """
@@ -615,12 +615,22 @@ def build_deep_wisdom_context(
     sadhana, guna analysis, and relevant core verses.
 
     Args:
-        karmic_path: Full karmic path data from KARMIC_PATHS
+        karmic_path: Full karmic path data dict, or a path key string
+            (e.g., 'kshama') which will be resolved automatically
         situation: User's description of the situation
 
     Returns:
         Rich wisdom context string for AI prompt injection
     """
+    # Accept both dict and string key for robustness
+    if isinstance(karmic_path, str):
+        resolved = get_karmic_path(karmic_path)
+        if resolved is None:
+            resolved = get_karmic_path_by_legacy_type(karmic_path)
+        if resolved is None:
+            resolved = KARMIC_PATHS.get("kshama", {})
+        karmic_path = resolved
+
     parts = []
 
     # Core identity and teaching
