@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -9,6 +9,7 @@ import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/Wisdo
 import { SpiritualToolsNav } from '@/components/navigation/SpiritualToolsNav'
 import CompanionCTA from '@/components/companion/CompanionCTA'
 import { SacredPageShell } from '@/components/tools/SacredPageShell'
+import { VoiceInputButton } from '@/components/voice/VoiceInputButton'
 
 function sanitizeInput(input: string): string {
   return input
@@ -79,6 +80,15 @@ export default function RelationshipCompassClient() {
       setSessionId(crypto.randomUUID())
     }
   }, [sessionId, setSessionId])
+
+  // Handle voice transcript — append spoken text to the conflict textarea
+  const handleVoiceTranscript = useCallback((text: string) => {
+    if (!text.trim()) return
+    setConflict(prev => {
+      const separator = prev.trim() ? ' ' : ''
+      return prev + separator + text.trim()
+    })
+  }, [])
 
   async function requestCompass() {
     const trimmedConflict = sanitizeInput(conflict.trim())
@@ -161,17 +171,27 @@ export default function RelationshipCompassClient() {
         <label htmlFor="conflict-input" className="text-sm font-medium text-[#f5e6c8]/80 block mb-3">
           Describe the relationship challenge
         </label>
-        <textarea
-          id="conflict-input"
-          value={conflict}
-          onChange={e => setConflict(e.target.value)}
-          placeholder="Share what is happening in this relationship... the Compass will illuminate both perspectives with Gita wisdom."
-          className="w-full min-h-[140px] rounded-xl bg-black/40 border border-[#d4a44c]/10 text-[#f5f0e8]/90 placeholder:text-[#d4a44c]/20 p-4 text-sm leading-relaxed focus:ring-1 focus:ring-[#d4a44c]/30 focus:border-[#d4a44c]/20 outline-none transition-all resize-none"
-          aria-describedby="conflict-hint"
-        />
-        <p id="conflict-hint" className="sr-only">Describe the relationship conflict you need guidance with</p>
+        {/* Textarea with voice input */}
+        <div className="relative">
+          <textarea
+            id="conflict-input"
+            value={conflict}
+            onChange={e => setConflict(e.target.value)}
+            placeholder="Share what is happening in this relationship... the Compass will illuminate both perspectives with Gita wisdom. You can also tap the mic to speak."
+            className="w-full min-h-[140px] rounded-xl bg-black/40 border border-[#d4a44c]/10 text-[#f5f0e8]/90 placeholder:text-[#d4a44c]/20 p-4 pr-14 text-sm leading-relaxed focus:ring-1 focus:ring-[#d4a44c]/30 focus:border-[#d4a44c]/20 outline-none transition-all resize-none"
+            aria-describedby="conflict-hint"
+          />
+          {/* Voice input — positioned inside the textarea for easy access */}
+          <div className="absolute bottom-3 right-3">
+            <VoiceInputButton
+              onTranscript={handleVoiceTranscript}
+              disabled={loading}
+            />
+          </div>
+        </div>
+        <p id="conflict-hint" className="sr-only">Describe the relationship conflict you need guidance with. You can type or use the microphone button to speak.</p>
 
-        <div className="flex flex-wrap gap-3 mt-4">
+        <div className="flex flex-wrap items-center gap-3 mt-4">
           <button
             onClick={requestCompass}
             disabled={!conflict.trim() || loading}
@@ -186,6 +206,9 @@ export default function RelationshipCompassClient() {
           >
             Talk to KIAAN
           </Link>
+          <span className="text-[10px] text-[#d4a44c]/30 hidden sm:inline">
+            Tap the mic to speak your concern
+          </span>
         </div>
 
         {error && (

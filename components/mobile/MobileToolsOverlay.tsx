@@ -23,6 +23,7 @@ import {
   Users,
   RefreshCw,
   Sparkles,
+  Volume2,
   ChevronRight,
 } from 'lucide-react'
 
@@ -41,7 +42,7 @@ interface OverlayTool {
   accentBorder: string
 }
 
-/** The five spiritual wellness tools shown in the overlay */
+/** Spiritual wellness tools shown in the overlay */
 const OVERLAY_TOOLS: OverlayTool[] = [
   {
     id: 'viyoga',
@@ -92,6 +93,16 @@ const OVERLAY_TOOLS: OverlayTool[] = [
     gradient: 'from-[#d4a44c]/15 to-yellow-500/10',
     iconColor: 'text-[#d4a44c]',
     accentBorder: 'border-[#d4a44c]/20',
+  },
+  {
+    id: 'voice-companion',
+    label: 'Voice Companion',
+    description: 'Speak with KIAAN — your spiritual guide',
+    icon: Volume2,
+    href: '/companion/voice-companion',
+    gradient: 'from-sky-500/15 to-cyan-500/10',
+    iconColor: 'text-sky-400',
+    accentBorder: 'border-sky-500/20',
   },
 ]
 

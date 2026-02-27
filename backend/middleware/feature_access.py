@@ -35,7 +35,17 @@ DEFAULT_DEVELOPER_EMAILS: set[str] = {
     "hisr2024@gmail.com",
 }
 # Additional developer emails can be configured via DEVELOPER_EMAILS environment variable
-# Example: DEVELOPER_EMAILS=dev@example.com,admin@example.com
+# on the Render backend environment (Settings → Environment → DEVELOPER_EMAILS).
+# Format: comma-separated list of emails
+# Example: DEVELOPER_EMAILS=dev1@example.com,dev2@example.com,tester@example.com
+#
+# Any email listed here gets FULL developer access to ALL premium features:
+#   - Unlimited KIAAN questions (no quota)
+#   - Full journal access (encrypted journal)
+#   - Unlimited Wisdom Journeys
+#   - All premium features (Voice Companion, Relationship Compass, Ardha, Viyoga, etc.)
+#   - No subscription required
+#   - Effective tier shown as PREMIER (highest tier)
 
 # Additional developer emails from environment variable
 # Format: comma-separated list of emails (e.g., DEVELOPER_EMAILS=dev1@example.com,dev2@example.com)
@@ -47,6 +57,13 @@ _env_developer_emails = {
 
 # Combined developer emails (hardcoded + environment variable)
 DEVELOPER_EMAILS = DEFAULT_DEVELOPER_EMAILS | _env_developer_emails
+
+# Log configured developer emails at module load (startup) for verification
+if DEVELOPER_EMAILS:
+    logger.info(
+        f"[Developer Access] Configured developer emails ({len(DEVELOPER_EMAILS)}): "
+        f"{', '.join(sorted(DEVELOPER_EMAILS))}"
+    )
 
 
 async def is_developer(db: AsyncSession, user_id: str) -> bool:
