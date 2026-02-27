@@ -32,12 +32,28 @@ import {
   Grid3X3,
 } from 'lucide-react'
 
+import dynamic from 'next/dynamic'
 import { MobileTabBar, TabItem } from './MobileTabBar'
 import { MobileHeader, HeaderAction } from './MobileHeader'
 import { MobileToolsOverlay } from './MobileToolsOverlay'
 import { MobileVibePlayer } from './MobileVibePlayer'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
+
+/**
+ * KiaanFooter (OM button) and KiaanVoiceFAB (Mic button) are loaded dynamically
+ * because they are client-only interactive widgets that depend on browser APIs
+ * (haptics, speech recognition). Lazy-loading prevents SSR issues and keeps
+ * initial mobile JS bundle small.
+ */
+const KiaanFooter = dynamic(
+  () => import('@/components/layout/KiaanFooter').then(mod => mod.KiaanFooter),
+  { ssr: false }
+)
+const KiaanVoiceFAB = dynamic(
+  () => import('@/components/voice/KiaanVoiceFAB'),
+  { ssr: false }
+)
 
 // Tab configuration for the app — center "Tools" tab opens overlay instead of navigating
 const DEFAULT_TABS: TabItem[] = [
@@ -389,6 +405,14 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
 
         {/* KIAAN Vibe floating player — visible across all mobile pages */}
         {showTabBar && <MobileVibePlayer />}
+
+        {/* OM floating action button (golden theme) — quick access to Viyoga, Ardha,
+            KIAAN Chat, and Relationship Compass tools from any mobile page */}
+        <KiaanFooter />
+
+        {/* Voice Companion Mic FAB (golden theme) — tap to talk to KIAAN
+            from any mobile page, with speech recognition and voice response */}
+        <KiaanVoiceFAB />
 
         {/* Tools overlay — slides up from bottom with spiritual wellness tools */}
         <MobileToolsOverlay

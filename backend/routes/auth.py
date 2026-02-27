@@ -870,3 +870,63 @@ async def reset_password(
     return ResetPasswordOut(
         message="Password has been reset successfully. Please log in with your new password."
     )
+
+
+# ----------------------
+# Developer Status Check
+# ----------------------
+class DeveloperStatusOut(BaseModel):
+    is_developer: bool
+    email: str | None = None
+    effective_tier: str = "free"
+    features_unlocked: bool = False
+
+
+@router.get("/developer-status", response_model=DeveloperStatusOut)
+async def developer_status(
+    request: Request, db: AsyncSession = Depends(get_db)
+):
+    """Check if the authenticated user has developer access.
+
+    Developer access grants full premium features without a subscription.
+    Developers are identified by their email address configured in the
+    DEVELOPER_EMAILS environment variable on the backend (Render).
+
+    Returns:
+        DeveloperStatusOut: Developer status with effective tier info.
+    """
+    from backend.middleware.feature_access import get_current_user_id, is_developer
+
+    try:
+        user_id = await get_current_user_id(request)
+    except HTTPException:
+        return DeveloperStatusOut(
+            is_developer=False,
+            email=None,
+            effective_tier="free",
+            features_unlocked=False,
+        )
+
+    # Look up the user to get their email
+    from sqlalchemy import or_
+    result = await db.execute(
+        select(User).where(or_(User.id == user_id, User.auth_uid == user_id))
+    )
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return DeveloperStatusOut(
+            is_developer=False,
+            email=None,
+            effective_tier="free",
+            features_unlocked=False,
+        )
+
+    is_dev = await is_developer(db, user_id)
+
+    return DeveloperStatusOut(
+        is_developer=is_dev,
+        email=user.email,
+        effective_tier="premier" if is_dev else "free",
+        features_unlocked=is_dev,
+    )
