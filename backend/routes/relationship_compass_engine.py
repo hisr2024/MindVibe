@@ -29,9 +29,11 @@ import logging
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.deps import get_db
 from backend.services.relationship_compass_engine import (
     EngineAnalysis,
     RelationshipMode,
@@ -104,6 +106,7 @@ class AnalyzeRequest(BaseModel):
 @router.post("/clarity")
 async def get_clarity(
     payload: ClarityRequest,
+    db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Generate relationship clarity guidance.
 
@@ -153,11 +156,12 @@ async def get_clarity(
         f"confidence={analysis.confidence:.2f}"
     )
 
-    # Step 2: Gather Gita wisdom context from 700+ verse corpus + curated principles
-    wisdom = gather_wisdom_context(
+    # Step 2: Gather Gita wisdom context from 700+ verse corpus + curated principles + dynamic wisdom
+    wisdom = await gather_wisdom_context(
         situation=message,
         analysis=analysis,
         relationship_type=relationship_type,
+        db=db,
     )
 
     logger.info(
@@ -242,6 +246,10 @@ async def get_clarity(
             "verses_used": wisdom.get("verses_count", 0),
             "principles_used": wisdom.get("principles_count", 0),
             "corpus_size": wisdom.get("corpus_size", 0),
+            "dynamic_verses": wisdom.get("dynamic_verses_count", 0),
+            "learned_wisdom": wisdom.get("learned_wisdom_count", 0),
+            "total_sources": wisdom.get("total_sources", 0),
+            "confidence": wisdom.get("confidence", 0.0),
             "gita_grounded": wisdom.get("verses_count", 0) > 0,
         },
         "provider": provider_used,

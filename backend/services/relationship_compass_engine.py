@@ -713,22 +713,28 @@ def build_fallback_response(
     }
 
 
-def gather_wisdom_context(
+async def gather_wisdom_context(
     situation: str,
     analysis: EngineAnalysis,
     relationship_type: str = "romantic",
+    db: Any = None,
 ) -> dict[str, Any]:
-    """Gather Gita wisdom context from the 700+ verse corpus and curated principles.
+    """Gather Gita wisdom from ALL sources: static corpus + principles + dynamic DB + learned.
 
-    Searches the full static corpus and retrieves curated relationship principles
-    that are most relevant to the user's situation, mode, emotion, and mechanism.
-    This context is injected into the AI prompt so responses are deeply grounded
-    in authentic Bhagavad Gita wisdom.
+    Uses the full RelationshipWisdomCore.gather_wisdom() pipeline which integrates:
+    1. 20 curated relationship principles (static, always available)
+    2. 700+ verse Gita static corpus (in-memory, always available)
+    3. Dynamic DB Gita verses (if database session provided)
+    4. Learned/validated wisdom from the 24/7 daemon (if database session provided)
+
+    The gathered wisdom is formatted into a rich context block using
+    WisdomContext.to_context_block() which structures all sources for the AI prompt.
 
     Args:
         situation: The user's relationship situation text.
         analysis: Pre-computed EngineAnalysis of the situation.
         relationship_type: Type of relationship.
+        db: Optional database session for dynamic wisdom retrieval.
 
     Returns:
         Dict with wisdom context including verses, principles, and formatted block.
@@ -738,16 +744,9 @@ def gather_wisdom_context(
 
         rwc = get_relationship_wisdom_core()
 
-        # Retrieve curated principles matched to mode/emotion/type
-        principles = rwc.get_principles(
-            mode=analysis.mode,
-            emotion=analysis.primary_emotion,
-            relationship_type=relationship_type,
-            limit=5,
-        )
-
-        # Search the full 700+ verse corpus for relationship-relevant wisdom
-        static_verses = rwc.search_corpus(
+        # Use the full gather_wisdom() method for ALL sources (static + dynamic + learned)
+        wisdom_context = await rwc.gather_wisdom(
+            db=db,
             situation=situation,
             mode=analysis.mode,
             emotion=analysis.primary_emotion,
@@ -756,77 +755,68 @@ def gather_wisdom_context(
             limit=6,
         )
 
-        # Build a formatted wisdom context block for the AI synthesizer
-        lines = []
-        lines.append("[GITA_WISDOM_CONTEXT — use this to deeply ground your response]")
-        lines.append(f"Corpus: {rwc.get_corpus_stats().get('total_verses', 700)}+ verses across 18 chapters")
-        lines.append("")
+        # Use the rich WisdomContext.to_context_block() for full formatting
+        # This includes: principles, static corpus, dynamic DB verses, learned wisdom
+        wisdom_block = wisdom_context.to_context_block()
 
-        if principles:
-            lines.append("--- RELATIONSHIP PRINCIPLES (Gita-derived, secular) ---")
-            for p in principles:
-                lines.append(f"• [{p.id}] {p.principle}")
-                lines.append(f"  Why: {p.explanation}")
-                lines.append(f"  Gita source: {p.gita_essence} ({p.gita_source})")
-                lines.append("")
+        # Append usage instructions to the context block
+        instructions = (
+            "\n--- INSTRUCTIONS FOR USING WISDOM CONTEXT ---\n"
+            "1. DEEPLY ABSORB the verses and principles above before responding\n"
+            "2. TRANSLATE Gita wisdom into modern emotional language (never quote Sanskrit)\n"
+            "3. WEAVE the verse teachings naturally into ALL 5 steps of the Gita framework\n"
+            "4. Let the principles SHAPE each step — make it feel like ancient wisdom in modern clothes\n"
+            "5. Go to the ROOT of the issue — surface-level advice is not enough\n"
+            "6. Feel the user's pain FIRST, then guide with the steadiness of Gita wisdom\n"
+            "7. Use DYNAMIC WISDOM and EXTENDED INSIGHTS if provided — they are validated and verified\n"
+        )
+        wisdom_block = wisdom_block.replace("[/WISDOM_CORE_CONTEXT]", f"{instructions}[/WISDOM_CORE_CONTEXT]")
 
-        if static_verses:
-            lines.append("--- RELEVANT GITA VERSES (ranked by relevance to this situation) ---")
-            for v in static_verses:
-                ref = v.get("verse_ref", "")
-                english = v.get("english", "")[:300]
-                principle_text = v.get("principle", "")
-                theme = v.get("theme", "")
-                mh_apps = v.get("mental_health_applications", [])
-                lines.append(f"• {ref}: {english}")
-                if principle_text:
-                    lines.append(f"  Teaching: {principle_text}")
-                if theme:
-                    lines.append(f"  Theme: {theme.replace('_', ' ').title()}")
-                if mh_apps:
-                    lines.append(f"  Applications: {', '.join(mh_apps[:4])}")
-                lines.append("")
-
-        lines.append("--- INSTRUCTIONS FOR USING WISDOM CONTEXT ---")
-        lines.append("1. DEEPLY ABSORB the verses and principles above before responding")
-        lines.append("2. TRANSLATE Gita wisdom into modern emotional language (never quote Sanskrit)")
-        lines.append("3. WEAVE the verse teachings naturally into your emotional precision and hard truth")
-        lines.append("4. Let the principles SHAPE your action step — make it feel like ancient wisdom in modern clothes")
-        lines.append("5. Go to the ROOT of the issue — surface-level advice is not enough")
-        lines.append("6. Feel the user's pain FIRST, then guide with the steadiness of Gita wisdom")
-        lines.append("[/GITA_WISDOM_CONTEXT]")
-
-        wisdom_block = "\n".join(lines)
-
-        # Build verse citations list for response metadata
+        # Build verse citations from all sources (static + dynamic)
         verse_citations = []
-        for v in static_verses:
+        for v in wisdom_context.static_verses:
             verse_citations.append({
                 "ref": v.get("verse_ref", ""),
                 "teaching": v.get("principle", v.get("english", "")[:150]),
             })
+        for v in wisdom_context.gita_verses:
+            verse_citations.append({
+                "ref": v.get("verse_ref", v.get("ref", "")),
+                "teaching": v.get("principle", v.get("content", "")[:150]),
+                "source": "dynamic",
+            })
 
         principle_citations = []
-        for p in principles:
+        for p in wisdom_context.principles:
             principle_citations.append({
                 "id": p.id,
                 "principle": p.principle,
                 "gita_source": p.gita_source,
             })
 
+        corpus_stats = rwc.get_corpus_stats()
+
         logger.info(
-            f"Compass wisdom gathered: {len(principles)} principles, "
-            f"{len(static_verses)} verses for mode={analysis.mode}, "
-            f"emotion={analysis.primary_emotion}"
+            f"Compass wisdom gathered (full pipeline): "
+            f"{len(wisdom_context.principles)} principles, "
+            f"{len(wisdom_context.static_verses)} static verses, "
+            f"{len(wisdom_context.gita_verses)} dynamic verses, "
+            f"{len(wisdom_context.learned_wisdom)} learned wisdom, "
+            f"confidence={wisdom_context.confidence:.2f}, "
+            f"mode={analysis.mode}, emotion={analysis.primary_emotion}"
         )
 
         return {
             "wisdom_block": wisdom_block,
             "verse_citations": verse_citations,
             "principle_citations": principle_citations,
-            "verses_count": len(static_verses),
-            "principles_count": len(principles),
-            "corpus_size": rwc.get_corpus_stats().get("total_verses", 0),
+            "verses_count": len(wisdom_context.static_verses) + len(wisdom_context.gita_verses),
+            "principles_count": len(wisdom_context.principles),
+            "corpus_size": corpus_stats.get("total_verses", 0),
+            "dynamic_verses_count": len(wisdom_context.gita_verses),
+            "learned_wisdom_count": len(wisdom_context.learned_wisdom),
+            "total_sources": wisdom_context.total_sources,
+            "confidence": wisdom_context.confidence,
         }
 
     except Exception as e:
@@ -838,6 +828,10 @@ def gather_wisdom_context(
             "verses_count": 0,
             "principles_count": 0,
             "corpus_size": 0,
+            "dynamic_verses_count": 0,
+            "learned_wisdom_count": 0,
+            "total_sources": 0,
+            "confidence": 0.0,
         }
 
 
