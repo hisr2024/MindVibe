@@ -48,12 +48,16 @@ describe('LanguageSelector Component', () => {
     // Clear localStorage before each test
     localStorage.clear();
     // Mock fetch for translation files
-    global.fetch = vi.fn((_url) => {
+    vi.spyOn(global, 'fetch').mockImplementation((_url) => {
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve({}),
       } as Response);
     });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('Rendering - Compact Mode', () => {
@@ -481,18 +485,16 @@ describe('LanguageSelector Component', () => {
 
     it('should not break with undefined onLanguageChange', async () => {
       renderWithProvider(<LanguageSelector compact={true} />);
-      
+
       const button = screen.getByRole('button', { name: /select language/i });
       await userEvent.click(button);
-      
+
       await waitFor(() => {
         expect(screen.getByText('Português')).toBeInTheDocument();
       });
-      
-      // Should not throw error
-      expect(() => {
-        userEvent.click(screen.getByText('Português'));
-      }).not.toThrow();
+
+      // Should not throw error — await the click so events settle before teardown
+      await userEvent.click(screen.getByText('Português'));
     });
   });
 });

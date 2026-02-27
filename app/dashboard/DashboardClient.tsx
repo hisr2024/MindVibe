@@ -84,7 +84,7 @@ const QUICK_ACCESS = [
   },
 ] as const
 
-// Featured Sacred Tools — the three divine instruments on the dashboard
+// Featured Sacred Tools — the three divine instruments (Gold-Black theme)
 const SACRED_TOOLS = [
   {
     id: 'viyoga',
@@ -93,11 +93,7 @@ const SACRED_TOOLS = [
     subtitle: 'The Detachment Tool',
     verse: 'BG 2.47',
     href: '/tools/viyog',
-    gradient: 'from-cyan-900/40 via-blue-950/30 to-indigo-950/40',
-    glowColor: 'rgba(6, 182, 212, 0.2)',
-    accentColor: 'text-cyan-300',
-    borderColor: 'border-cyan-500/20',
-    iconBg: 'from-cyan-400/20 to-blue-500/20',
+    symbol: '\u{1F549}\uFE0F',
   },
   {
     id: 'ardha',
@@ -106,74 +102,30 @@ const SACRED_TOOLS = [
     subtitle: 'The Reframing Tool',
     verse: 'BG 2.16',
     href: '/tools/ardha',
-    gradient: 'from-violet-900/40 via-purple-950/30 to-indigo-950/40',
-    glowColor: 'rgba(139, 92, 246, 0.2)',
-    accentColor: 'text-violet-300',
-    borderColor: 'border-violet-500/20',
-    iconBg: 'from-violet-400/20 to-purple-500/20',
+    symbol: '\u{1F4FF}',
   },
   {
     id: 'relationship-compass',
-    title: 'Compass',
+    title: 'Relationship Compass',
     sanskrit: '\u0938\u0902\u092C\u0928\u094D\u0927',
-    subtitle: 'The Relationship Guide',
-    verse: 'BG 6.32',
+    subtitle: 'Dharma-Guided Clarity',
+    verse: 'BG 6.29',
     href: '/tools/relationship-compass',
-    gradient: 'from-rose-900/40 via-pink-950/30 to-amber-950/40',
-    glowColor: 'rgba(244, 63, 94, 0.15)',
-    accentColor: 'text-rose-300',
-    borderColor: 'border-rose-500/20',
-    iconBg: 'from-rose-400/20 to-amber-500/20',
+    symbol: '\u{1F54A}\uFE0F',
   },
 ] as const
 
-// Other tools — compact grid below the featured tools
+// Other tools — compact sacred grid
 const OTHER_TOOLS = [
-  {
-    id: 'emotional-reset',
-    icon: '\u{1F4AB}',
-    title: 'Emotional Reset',
-    subtitle: 'Guided healing',
-    href: '/emotional-reset',
-  },
-  {
-    id: 'karma-reset',
-    icon: '\u{1F49A}',
-    title: 'Karma Reset',
-    subtitle: 'Heal with grace',
-    href: '/tools/karma-reset',
-  },
-  {
-    id: 'sacred-reflections',
-    icon: '\u{1F4DD}',
-    title: 'Sacred Reflections',
-    subtitle: 'Private journal',
-    href: '/flows/journal',
-  },
-  {
-    id: 'karmic-tree',
-    icon: '\u{1F331}',
-    title: 'Karmic Tree',
-    subtitle: 'Your growth',
-    href: '/karmic-tree',
-  },
-  {
-    id: 'kiaan-vibe',
-    icon: '\u{1F3B5}',
-    title: 'Vibe Player',
-    subtitle: 'Sacred sounds',
-    href: '/kiaan-vibe',
-  },
-  {
-    id: 'wisdom-rooms',
-    icon: '\u{1F30D}',
-    title: 'Wisdom Rooms',
-    subtitle: 'Community chats',
-    href: '/wisdom-rooms',
-  },
+  { id: 'emotional-reset', symbol: '\u{1F4AB}', title: 'Emotional Reset', subtitle: 'Guided healing', href: '/emotional-reset' },
+  { id: 'karma-reset', symbol: '\u{1F49A}', title: 'Karma Reset', subtitle: 'Heal with grace', href: '/tools/karma-reset' },
+  { id: 'sacred-reflections', symbol: '\u{1F4DD}', title: 'Sacred Reflections', subtitle: 'Private journal', href: '/flows/journal' },
+  { id: 'karmic-tree', symbol: '\u{1F331}', title: 'Karmic Tree', subtitle: 'Your growth', href: '/karmic-tree' },
+  { id: 'kiaan-vibe', symbol: '\u{1F3B5}', title: 'Vibe Player', subtitle: 'Sacred sounds', href: '/kiaan-vibe' },
+  { id: 'wisdom-rooms', symbol: '\u{1F30D}', title: 'Wisdom Rooms', subtitle: 'Community chats', href: '/wisdom-rooms' },
 ] as const
 
-// Sacred questions that cycle gently in the Chakra Heartbeat hero — dedicated to feelings
+// Sacred questions that cycle gently in the Chakra Heartbeat hero
 const SACRED_QUESTIONS = [
   'How does your heart feel right now?',
   'What emotions are alive in you today?',
@@ -190,7 +142,7 @@ const PRAYER_STARS = Array.from({ length: 12 }, (_, i) => ({
   size: i % 3 === 0 ? 3 : 2,
 }))
 
-// Divine Presence particles for the My Profile banner
+// Divine Presence particles for the banner
 const DIVINE_PARTICLES = Array.from({ length: 8 }, (_, i) => ({
   id: i,
   left: `${10 + (i * 11) % 80}%`,
@@ -199,14 +151,15 @@ const DIVINE_PARTICLES = Array.from({ length: 8 }, (_, i) => ({
   size: i % 2 === 0 ? 2.5 : 2,
 }))
 
-/**
- * Returns a time-of-day greeting for the sacred sanctuary dashboard.
- *
- * Morning (5-12): gentle awakening
- * Afternoon (12-17): warm presence
- * Evening (17-21): settling in
- * Night (21-5): quiet companionship
- */
+// Golden god particles for the sacred toolkit
+const TOOLKIT_PARTICLES = Array.from({ length: 10 }, (_, i) => ({
+  id: i,
+  left: `${6 + (i * 9) % 88}%`,
+  delay: i * 0.6,
+  duration: 4.5 + (i % 3) * 1.2,
+  size: i % 3 === 0 ? 2.5 : 1.5,
+}))
+
 function getGreeting(): string {
   const hour = new Date().getHours()
   if (hour >= 5 && hour < 12) return 'Good morning, beautiful soul.'
@@ -215,26 +168,9 @@ function getGreeting(): string {
   return 'The world is quiet. I\u2019m here with you.'
 }
 
-/**
- * DashboardClient component - Sacred Sanctuary Dashboard
- *
- * A calm, focused dashboard that feels like a divine friend greeting you.
- * All main features are prominently visible — KIAAN Chat, Journeys,
- * Viyoga, Relationship Compass, Karma Reset, and Emotional Reset
- * are front and center as feature highlights.
- *
- * Design philosophy:
- * - Sacred sanctuary with all highlights visible
- * - Soul Check-In as primary CTA, KIAAN as secondary
- * - Feature highlights grid for main spiritual tools
- * - Generous spacing, rounded-[24px] cards, shadow-mobile-glow
- * - font-sacred serif for greetings and blessings
- * - Haptic feedback preserved on all interactions
- */
 export default function DashboardClient() {
   const { triggerHaptic } = useHapticFeedback()
 
-  // Cycle through sacred questions every 5 seconds
   const [questionIndex, setQuestionIndex] = useState(0)
   useEffect(() => {
     const timer = setInterval(() => {
@@ -408,7 +344,7 @@ export default function DashboardClient() {
                           }}
                         />
                       ))}
-                      {/* Center Om symbol — larger, properly centered */}
+                      {/* Center Om symbol */}
                       <text
                         x="40"
                         y="46"
@@ -497,114 +433,171 @@ export default function DashboardClient() {
             </Link>
           </motion.div>
 
-          {/* ─── Sacred Spiritual Toolkit ─── */}
+          {/* ─── Sacred Spiritual Toolkit (Gold-Black Divine Theme) ─── */}
           <motion.div variants={itemVariants}>
-            <div className="mb-4 flex items-center gap-3">
-              <motion.span
-                className="text-lg"
-                animate={{ opacity: [0.7, 1, 0.7] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                {'\u{1F549}\uFE0F'}
-              </motion.span>
-              <div>
-                <h2 className="text-base font-semibold text-white/80">
-                  Your Sacred Instruments
-                </h2>
-                <p className="text-[10px] text-white/40 font-sacred italic">
-                  Guided by the eternal wisdom of the Gita
-                </p>
-              </div>
-            </div>
+            <div className="relative overflow-hidden rounded-[28px] border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0a06]/90 via-[#080706]/95 to-[#0a0806]/90 p-5 sm:p-6"
+              style={{ boxShadow: '0 12px 48px rgba(212, 164, 76, 0.08), inset 0 1px 0 rgba(212, 164, 76, 0.08)' }}
+            >
+              {/* Top golden radiance line */}
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4a44c]/40 to-transparent" />
 
-            {/* Featured Sacred Tools — Viyoga, Ardha, Relationship Compass */}
-            <div className="space-y-3">
-              {SACRED_TOOLS.map((tool) => (
+              {/* Floating golden god particles */}
+              {TOOLKIT_PARTICLES.map((p) => (
                 <motion.div
-                  key={tool.id}
-                  variants={quickActionVariants}
-                  initial="rest"
-                  whileHover="hover"
-                  whileTap="tap"
+                  key={p.id}
+                  className="absolute rounded-full"
+                  style={{
+                    width: p.size,
+                    height: p.size,
+                    left: p.left,
+                    bottom: 0,
+                    background: 'radial-gradient(circle, rgba(212,164,76,0.8) 0%, rgba(212,164,76,0) 70%)',
+                  }}
+                  animate={{
+                    y: [0, -180],
+                    opacity: [0, 0.7, 0.5, 0],
+                    scale: [0.4, 1, 0.7, 0.2],
+                  }}
+                  transition={{
+                    duration: p.duration,
+                    repeat: Infinity,
+                    delay: p.delay,
+                    ease: 'easeOut',
+                  }}
+                />
+              ))}
+
+              {/* Section header */}
+              <div className="relative mb-5 flex items-center gap-3">
+                <motion.div
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#d4a44c]/15 to-[#e8b54a]/10 border border-[#d4a44c]/15"
+                  animate={{
+                    boxShadow: [
+                      '0 0 12px rgba(212, 164, 76, 0.15)',
+                      '0 0 20px rgba(212, 164, 76, 0.3)',
+                      '0 0 12px rgba(212, 164, 76, 0.15)',
+                    ],
+                  }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                 >
-                  <Link
-                    href={tool.href}
-                    onClick={handleFeatureTap}
-                    className="group block"
+                  <span className="text-base select-none">{'\u{1F549}\uFE0F'}</span>
+                </motion.div>
+                <div>
+                  <h2 className="text-base font-semibold text-[#f5e6c8]">
+                    Your Sacred Instruments
+                  </h2>
+                  <p className="text-[10px] text-[#d4a44c]/40 font-sacred italic">
+                    Guided by the eternal wisdom of the Bhagavad Gita
+                  </p>
+                </div>
+              </div>
+
+              {/* Featured Sacred Tools — Viyoga, Ardha, Relationship Compass */}
+              <div className="relative space-y-2.5">
+                {SACRED_TOOLS.map((tool, idx) => (
+                  <motion.div
+                    key={tool.id}
+                    variants={quickActionVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    whileTap="tap"
                   >
-                    <div
-                      className={`relative overflow-hidden rounded-[20px] bg-gradient-to-br ${tool.gradient} ${tool.borderColor} border p-4 sm:p-5 transition-all duration-300`}
-                      style={{
-                        boxShadow: `0 8px 32px ${tool.glowColor}`,
-                      }}
+                    <Link
+                      href={tool.href}
+                      onClick={handleFeatureTap}
+                      className="group block"
                     >
-                      {/* Subtle sacred glow overlay */}
                       <div
-                        className="absolute inset-0 pointer-events-none rounded-[20px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                        className="relative overflow-hidden rounded-[18px] border border-[#d4a44c]/12 bg-gradient-to-r from-[#d4a44c]/[0.06] via-transparent to-[#d4a44c]/[0.03] p-4 sm:p-4.5 transition-all duration-300 hover:border-[#d4a44c]/25 hover:from-[#d4a44c]/[0.1]"
                         style={{
-                          boxShadow: `inset 0 0 40px ${tool.glowColor}`,
+                          boxShadow: '0 4px 20px rgba(212, 164, 76, 0.04)',
                         }}
-                      />
+                      >
+                        {/* Hover glow overlay */}
+                        <div
+                          className="absolute inset-0 pointer-events-none rounded-[18px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                          style={{
+                            boxShadow: 'inset 0 0 30px rgba(212, 164, 76, 0.08)',
+                          }}
+                        />
 
-                      <div className="relative flex items-center gap-4">
-                        {/* Sacred Sanskrit Symbol */}
-                        <div className={`flex h-12 w-12 sm:h-14 sm:w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${tool.iconBg}`}>
-                          <span className="text-lg sm:text-xl font-sacred text-white/90 select-none">
-                            {tool.sanskrit}
-                          </span>
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h3 className={`text-base sm:text-lg font-semibold ${tool.accentColor}`}>
-                              {tool.title}
-                            </h3>
-                            <span className="text-[9px] text-white/30 font-mono tracking-wider">
-                              {tool.verse}
+                        <div className="relative flex items-center gap-3.5">
+                          {/* Sacred Sanskrit Symbol in golden circle */}
+                          <motion.div
+                            className="flex h-12 w-12 sm:h-13 sm:w-13 flex-shrink-0 items-center justify-center rounded-2xl border border-[#d4a44c]/15"
+                            style={{
+                              background: 'linear-gradient(135deg, rgba(212, 164, 76, 0.12) 0%, rgba(232, 181, 74, 0.06) 100%)',
+                            }}
+                            animate={idx === 0 ? {
+                              boxShadow: [
+                                '0 0 10px rgba(212, 164, 76, 0.1)',
+                                '0 0 18px rgba(212, 164, 76, 0.2)',
+                                '0 0 10px rgba(212, 164, 76, 0.1)',
+                              ],
+                            } : undefined}
+                            transition={idx === 0 ? { duration: 3.5, repeat: Infinity, ease: 'easeInOut' } : undefined}
+                          >
+                            <span className="text-sm sm:text-base font-sacred text-[#e8b54a]/80 select-none">
+                              {tool.sanskrit}
                             </span>
+                          </motion.div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">{tool.symbol}</span>
+                              <h3 className="text-sm sm:text-[15px] font-semibold text-[#f5e6c8] group-hover:text-white transition-colors">
+                                {tool.title}
+                              </h3>
+                              <span className="text-[8px] text-[#d4a44c]/30 font-mono tracking-widest uppercase">
+                                {tool.verse}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-[#d4a44c]/45 mt-0.5 font-sacred italic">
+                              {tool.subtitle}
+                            </p>
                           </div>
-                          <p className="text-xs text-white/60 mt-0.5 font-sacred italic">
-                            {tool.subtitle}
-                          </p>
+
+                          {/* Arrow */}
+                          <motion.div
+                            className="flex-shrink-0 text-[#d4a44c]/20 group-hover:text-[#d4a44c]/50 transition-colors"
+                            animate={{ x: [0, 3, 0] }}
+                            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                          >
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </motion.div>
                         </div>
 
-                        {/* Arrow */}
-                        <motion.div
-                          className="flex-shrink-0 text-white/20 group-hover:text-white/50 transition-colors"
-                          animate={{ x: [0, 3, 0] }}
-                          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                        >
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </motion.div>
+                        {/* Bottom golden thread */}
+                        <div className="absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-transparent via-[#d4a44c]/10 to-transparent" />
                       </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
 
-                      {/* Bottom glow line */}
-                      <div className={`absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent ${tool.accentColor.replace('text-', 'via-')}/20 to-transparent`} />
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
+              {/* Other Tools — Compact Grid */}
+              <div className="relative mt-4 grid grid-cols-3 sm:grid-cols-6 gap-2">
+                {OTHER_TOOLS.map((tool) => (
+                  <motion.div key={tool.id} variants={quickActionVariants} initial="rest" whileHover="hover" whileTap="tap">
+                    <Link
+                      href={tool.href}
+                      onClick={handleCardTap}
+                      className="flex flex-col items-center justify-center rounded-[14px] border border-[#d4a44c]/[0.06] bg-gradient-to-br from-[#d4a44c]/[0.03] to-transparent p-2.5 sm:p-3 transition-all duration-300 hover:border-[#d4a44c]/15 active:opacity-90"
+                    >
+                      <div className="mb-1.5 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#d4a44c]/[0.06]">
+                        <span className="text-lg sm:text-xl">{tool.symbol}</span>
+                      </div>
+                      <span className="text-[10px] sm:text-xs font-medium text-[#f5e6c8]/70 text-center leading-tight">{tool.title}</span>
+                      <span className="mt-0.5 text-[8px] sm:text-[9px] text-[#d4a44c]/30 text-center leading-tight">{tool.subtitle}</span>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
 
-            {/* Other Tools — Compact Grid */}
-            <div className="mt-4 grid grid-cols-3 sm:grid-cols-6 gap-2">
-              {OTHER_TOOLS.map((tool) => (
-                <motion.div key={tool.id} variants={quickActionVariants} initial="rest" whileHover="hover" whileTap="tap">
-                  <Link
-                    href={tool.href}
-                    onClick={handleCardTap}
-                    className="flex flex-col items-center justify-center rounded-[16px] bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-2.5 sm:p-3 shadow-mobile-glow transition-all duration-300 active:opacity-90"
-                  >
-                    <div className="mb-1.5 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white/[0.05]">
-                      <span className="text-lg sm:text-xl">{tool.icon}</span>
-                    </div>
-                    <span className="text-[10px] sm:text-xs font-medium text-white/70 text-center leading-tight">{tool.title}</span>
-                    <span className="mt-0.5 text-[8px] sm:text-[9px] text-white/40 text-center leading-tight">{tool.subtitle}</span>
-                  </Link>
-                </motion.div>
-              ))}
+              {/* Bottom golden radiance line */}
+              <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#d4a44c]/20 to-transparent" />
             </div>
           </motion.div>
 
@@ -725,7 +718,7 @@ export default function DashboardClient() {
                       transition={{ duration: 2.5, repeat: Infinity }}
                     />
                     <span className="text-3xl sm:text-4xl md:text-[42px] text-[#0a0a0f] drop-shadow-sm select-none" style={{ lineHeight: 1 }}>
-                      ॐ
+                      {'\u0950'}
                     </span>
                   </motion.div>
 
