@@ -60,6 +60,7 @@ CREATE INDEX IF NOT EXISTS idx_wisdom_atoms_effectiveness ON wisdom_atoms(effect
 CREATE INDEX IF NOT EXISTS idx_wisdom_atoms_deleted_at ON wisdom_atoms(deleted_at);
 CREATE INDEX IF NOT EXISTS idx_wisdom_atoms_mood_tags ON wisdom_atoms USING GIN(mood_tags);
 CREATE INDEX IF NOT EXISTS idx_wisdom_atoms_topic_tags ON wisdom_atoms USING GIN(topic_tags);
+CREATE INDEX IF NOT EXISTS idx_wisdom_atoms_intent_tags ON wisdom_atoms USING GIN(intent_tags);
 CREATE INDEX IF NOT EXISTS idx_wisdom_atoms_phase_tags ON wisdom_atoms USING GIN(phase_tags);
 
 
