@@ -6,13 +6,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const cookieHeader = request.headers.get('cookie') || ''
 
     // Validate score is in range
     const score = body.score
@@ -25,11 +23,7 @@ export async function POST(request: NextRequest) {
 
     const backendResponse = await fetch(`${BACKEND_URL}/api/moods`, {
       method: 'POST',
-      headers: {
-        'Cookie': cookieHeader,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers: proxyHeaders(request),
       body: JSON.stringify({
         score,
         timestamp: body.timestamp || new Date().toISOString(),
@@ -39,14 +33,14 @@ export async function POST(request: NextRequest) {
 
     if (backendResponse.ok) {
       const data = await backendResponse.json()
-      return NextResponse.json(data)
+      return forwardCookies(backendResponse, NextResponse.json(data))
     }
 
     if (backendResponse.status === 401) {
-      return NextResponse.json(
+      return forwardCookies(backendResponse, NextResponse.json(
         { detail: 'Not authenticated' },
         { status: 401 }
-      )
+      ))
     }
 
     // If backend is unavailable, acknowledge the mood anyway
@@ -70,26 +64,21 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const cookieHeader = request.headers.get('cookie') || ''
     const { searchParams } = new URL(request.url)
     const period = searchParams.get('period') || '7d'
 
     const backendResponse = await fetch(`${BACKEND_URL}/api/moods?period=${period}`, {
       method: 'GET',
-      headers: {
-        'Cookie': cookieHeader,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers: proxyHeaders(request),
       signal: AbortSignal.timeout(5000),
     })
 
     if (backendResponse.ok) {
       const data = await backendResponse.json()
-      return NextResponse.json(data)
+      return forwardCookies(backendResponse, NextResponse.json(data))
     }
 
-    return NextResponse.json({ moods: [], trend: 'stable' })
+    return forwardCookies(backendResponse, NextResponse.json({ moods: [], trend: 'stable' }))
   } catch (error) {
     console.error('[Moods] Failed to fetch:', error instanceof Error ? error.message : 'Unknown error')
     return NextResponse.json({ moods: [], trend: 'stable' })

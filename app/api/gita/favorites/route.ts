@@ -6,13 +6,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const cookieHeader = request.headers.get('cookie') || ''
 
     // Validate verse reference
     if (!body.chapter || !body.verse) {
@@ -24,11 +22,7 @@ export async function POST(request: NextRequest) {
 
     const backendResponse = await fetch(`${BACKEND_URL}/api/gita/favorites`, {
       method: 'POST',
-      headers: {
-        'Cookie': cookieHeader,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers: proxyHeaders(request),
       body: JSON.stringify({
         chapter: body.chapter,
         verse: body.verse,
@@ -38,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     if (backendResponse.ok) {
       const data = await backendResponse.json()
-      return NextResponse.json(data)
+      return forwardCookies(backendResponse, NextResponse.json(data))
     }
 
     // Silently acknowledge - favorite will be stored locally
@@ -58,21 +52,15 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const cookieHeader = request.headers.get('cookie') || ''
-
     const backendResponse = await fetch(`${BACKEND_URL}/api/gita/favorites`, {
       method: 'GET',
-      headers: {
-        'Cookie': cookieHeader,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers: proxyHeaders(request),
       signal: AbortSignal.timeout(5000),
     })
 
     if (backendResponse.ok) {
       const data = await backendResponse.json()
-      return NextResponse.json(data)
+      return forwardCookies(backendResponse, NextResponse.json(data))
     }
 
     return NextResponse.json({ favorites: [] })

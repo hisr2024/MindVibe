@@ -5,8 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 /**
  * Generate personalized fallback response with ultra-deep sections
@@ -53,11 +52,7 @@ export async function POST(request: NextRequest) {
       // Call the backend Viyoga endpoint
       const response = await fetch(`${BACKEND_URL}/api/viyoga/detach`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          cookie: request.headers.get('cookie') || '',
-        },
+        headers: proxyHeaders(request),
         body: JSON.stringify({
           outcome_worry: sanitizedWorry,
         }),
@@ -65,14 +60,14 @@ export async function POST(request: NextRequest) {
 
       if (response.ok) {
         const data = await response.json()
-        return NextResponse.json({
+        return forwardCookies(response, NextResponse.json({
           status: data.status || 'success',
           detachment_guidance: data.detachment_guidance,
           gita_verses_used: data.gita_verses_used || 0,
           raw_text: data.raw_text,
           model: data.model,
           provider: data.provider || 'viyoga',
-        })
+        }))
       }
 
       // Log the error for debugging

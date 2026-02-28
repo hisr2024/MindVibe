@@ -7,8 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { generateLocalResponse } from '@/lib/kiaan-friend-engine'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 // ─── Language Names (for multilingual Tier 2 responses) ─────────────────
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -33,17 +32,9 @@ export async function POST(request: NextRequest) {
 
     // ── Tier 1: Proxy to Python backend ──────────────────────────────
     try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      }
-      const cookie = request.headers.get('cookie')
-      if (cookie) headers.cookie = cookie
-      const authorization = request.headers.get('authorization')
-      if (authorization) headers.authorization = authorization
-
       const backendResponse = await fetch(`${BACKEND_URL}/api/voice-companion/quick-response`, {
         method: 'POST',
-        headers,
+        headers: proxyHeaders(request),
         body: JSON.stringify({
           query: sanitizedQuery,
           language: body.language || 'en',
@@ -55,7 +46,7 @@ export async function POST(request: NextRequest) {
       if (backendResponse.ok) {
         const data = await backendResponse.json()
         if (data && typeof data.response === 'string') {
-          return NextResponse.json({ ...data, ai_tier: data.ai_tier || 'backend' })
+          return forwardCookies(backendResponse, NextResponse.json({ ...data, ai_tier: data.ai_tier || 'backend' }))
         }
       }
     } catch (err) {

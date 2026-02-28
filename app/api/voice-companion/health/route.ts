@@ -4,8 +4,7 @@
  */
 
 import { NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { BACKEND_URL } from '@/lib/proxy-utils'
 
 export async function GET() {
   let backendAvailable = false

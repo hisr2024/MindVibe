@@ -1,12 +1,10 @@
 /**
  * Journey Engine Templates API Proxy
  * Proxies to backend journey-engine service with graceful fallback.
- * Templates are public (no auth required) so fallback returns empty list.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 const FALLBACK_TEMPLATES = {
   templates: [],
@@ -23,19 +21,16 @@ export async function GET(request: NextRequest) {
 
     const response = await fetch(`${BACKEND_URL}/api/journey-engine/templates${queryString}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        cookie: request.headers.get('cookie') || '',
-      },
+      headers: proxyHeaders(request),
+      signal: AbortSignal.timeout(8000),
     })
 
     if (response.ok) {
       const data = await response.json()
-      return NextResponse.json(data)
+      return forwardCookies(response, NextResponse.json(data))
     }
 
-    return NextResponse.json(FALLBACK_TEMPLATES)
+    return forwardCookies(response, NextResponse.json(FALLBACK_TEMPLATES))
   } catch {
     return NextResponse.json(FALLBACK_TEMPLATES)
   }

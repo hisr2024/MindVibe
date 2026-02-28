@@ -70,40 +70,73 @@ export default function MobileJourneysPage() {
   const [hasError, setHasError] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
 
-  // Fetch journeys
+  // Fetch journeys on mount and when auth state changes
   useEffect(() => {
+    if (!isAuthenticated) return
+
     const fetchJourneys = async () => {
-      if (!isAuthenticated) return
-
       setIsLoading(true)
+      setHasError(false)
 
-      try {
-        // Fetch active journeys (user's in-progress journeys)
-        // Fetch all journeys for catalog (available to start)
-        const [activeResponse, availableResponse] = await Promise.all([
-          apiFetch('/api/journeys?status=active'),
-          apiFetch('/api/journeys'),
-        ])
+      // Fetch active and available journeys independently so one failure
+      // doesn't block the other from loading.
+      const [activeResult, availableResult] = await Promise.allSettled([
+        apiFetch('/api/journeys?status=active'),
+        apiFetch('/api/journeys'),
+      ])
 
-        if (activeResponse.ok) {
-          const data = await activeResponse.json()
-          setActiveJourneys(data.items || data.journeys || [])
-        }
+      let hadError = false
 
-        if (availableResponse.ok) {
-          const data = await availableResponse.json()
-          setAvailableJourneys((data.items || data.journeys || []).filter((j: { status?: string }) => j.status !== 'active'))
-        }
-      } catch (error) {
-        console.error('Failed to fetch journeys:', error)
-        setHasError(true)
-      } finally {
-        setIsLoading(false)
+      if (activeResult.status === 'fulfilled' && activeResult.value.ok) {
+        const data = await activeResult.value.json()
+        setActiveJourneys(data.items || data.journeys || [])
+      } else {
+        hadError = true
       }
+
+      if (availableResult.status === 'fulfilled' && availableResult.value.ok) {
+        const data = await availableResult.value.json()
+        setAvailableJourneys((data.items || data.journeys || []).filter((j: { status?: string }) => j.status !== 'active'))
+      } else {
+        hadError = true
+      }
+
+      if (hadError) setHasError(true)
+      setIsLoading(false)
     }
 
     fetchJourneys()
   }, [isAuthenticated])
+
+  // Pull-to-refresh handler reuses the same fetch logic
+  const handleRefresh = useCallback(async () => {
+    setIsLoading(true)
+    setHasError(false)
+
+    const [activeResult, availableResult] = await Promise.allSettled([
+      apiFetch('/api/journeys?status=active'),
+      apiFetch('/api/journeys'),
+    ])
+
+    let hadError = false
+
+    if (activeResult.status === 'fulfilled' && activeResult.value.ok) {
+      const data = await activeResult.value.json()
+      setActiveJourneys(data.items || data.journeys || [])
+    } else {
+      hadError = true
+    }
+
+    if (availableResult.status === 'fulfilled' && availableResult.value.ok) {
+      const data = await availableResult.value.json()
+      setAvailableJourneys((data.items || data.journeys || []).filter((j: { status?: string }) => j.status !== 'active'))
+    } else {
+      hadError = true
+    }
+
+    if (hadError) setHasError(true)
+    setIsLoading(false)
+  }, [])
 
   // Filter journeys
   const filteredJourneys = availableJourneys.filter((journey) => {
@@ -125,33 +158,6 @@ export default function MobileJourneysPage() {
     triggerHaptic('selection')
     setSelectedCategory(categoryId)
   }, [triggerHaptic])
-
-  // Handle refresh
-  const handleRefresh = useCallback(async () => {
-    setIsLoading(true)
-    // Re-fetch journeys
-    try {
-      const [activeResponse, availableResponse] = await Promise.all([
-        apiFetch('/api/journeys?status=active'),
-        apiFetch('/api/journeys'),
-      ])
-
-      if (activeResponse.ok) {
-        const data = await activeResponse.json()
-        setActiveJourneys(data.items || data.journeys || [])
-      }
-
-      if (availableResponse.ok) {
-        const data = await availableResponse.json()
-        setAvailableJourneys((data.items || data.journeys || []).filter((j: { status?: string }) => j.status !== 'active'))
-      }
-    } catch (error) {
-      console.error('Failed to refresh journeys:', error)
-      setHasError(true)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
 
   // Difficulty badge colors
   const difficultyColors = {

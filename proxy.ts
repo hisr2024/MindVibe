@@ -131,10 +131,9 @@ export function proxy(request: NextRequest) {
   // Generate a per-request nonce (still useful for layout's custom inline script)
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
 
-  // CSP: use 'unsafe-inline' 'unsafe-eval' for script-src because Next.js
-  // generates inline scripts for hydration/data that don't carry nonces.
-  // Per CSP3, 'unsafe-inline' is ignored when a nonce is present, so we
-  // intentionally omit the nonce from the CSP directive to allow inline scripts.
+  // CSP: use nonce-based script-src for security. Next.js 13+ App Router
+  // automatically adds the nonce to its inline scripts when the nonce is
+  // passed via the x-nonce request header.
   const cspHeader = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}'`,
@@ -143,6 +142,7 @@ export function proxy(request: NextRequest) {
     "img-src 'self' data: https:",
     "font-src 'self' data: https://fonts.gstatic.com",
     "media-src 'self' https: blob:",
+    "worker-src 'self' blob:",
     "connect-src 'self' https://mindvibe-api.onrender.com https://*.firebaseio.com https://*.googleapis.com https://cdn.pixabay.com https://*.freesound.org",
     "frame-ancestors 'none'",
     "base-uri 'self'",

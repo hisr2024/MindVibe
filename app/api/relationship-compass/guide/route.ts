@@ -8,8 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 const REQUEST_TIMEOUT = 60000
 
 const FALLBACK_RESPONSE = {
@@ -76,11 +75,7 @@ export async function POST(request: NextRequest) {
       let targetUrl = engineUrl
       const response = await fetch(targetUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          cookie: request.headers.get('cookie') || '',
-        },
+        headers: proxyHeaders(request),
         body: JSON.stringify({
           message,
           sessionId,
@@ -93,11 +88,7 @@ export async function POST(request: NextRequest) {
         targetUrl = legacyUrl
         return fetch(legacyUrl, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            cookie: request.headers.get('cookie') || '',
-          },
+          headers: proxyHeaders(request),
           body: JSON.stringify({
             message,
             sessionId,
@@ -113,7 +104,7 @@ export async function POST(request: NextRequest) {
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'Unknown error')
         console.error(`[Relationship Compass Guide] Backend (${targetUrl}) returned ${response.status}: ${errorText}`)
-        return NextResponse.json(FALLBACK_RESPONSE)
+        return forwardCookies(response, NextResponse.json(FALLBACK_RESPONSE))
       }
 
       const data = await response.json()
@@ -130,7 +121,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      return NextResponse.json(data)
+      return forwardCookies(response, NextResponse.json(data))
     } catch (backendError) {
       clearTimeout(timeoutId)
       if (backendError instanceof Error && backendError.name === 'AbortError') {

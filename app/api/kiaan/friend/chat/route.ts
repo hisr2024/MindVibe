@@ -12,8 +12,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { generateLocalResponse } from '@/lib/kiaan-friend-engine'
 import { buildVerseContext } from '@/lib/wisdom-core'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 // ─── Language Names (for multilingual Tier 2 responses) ─────────────────
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -140,10 +139,7 @@ export async function POST(request: NextRequest) {
     try {
       const backendRes = await fetch(`${BACKEND_URL}/api/companion/message`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          cookie: request.headers.get('cookie') || '',
-        },
+        headers: proxyHeaders(request),
         body: JSON.stringify({
           session_id: body.session_id || 'voice_companion',
           message,
@@ -155,14 +151,14 @@ export async function POST(request: NextRequest) {
 
       if (backendRes.ok) {
         const data = await backendRes.json()
-        return NextResponse.json({
+        return forwardCookies(backendRes, NextResponse.json({
           response: data.response ?? '',
           mood: data.mood ?? mood,
           mode: forceMode || 'companion',
           suggested_chapter: null,
           gita_insight: null,
           ai_tier: 'backend',
-        })
+        }))
       }
     } catch {
       // Backend unavailable

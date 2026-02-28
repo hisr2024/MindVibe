@@ -5,8 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 // Retry configuration
 const MAX_RETRIES = 3
@@ -282,23 +281,6 @@ export async function POST(request: NextRequest) {
     const sanitizedSituation = situation.replace(/[<>]/g, '').replace(/\\/g, '').slice(0, 2000)
     const sanitizedFeeling = feelingValue.replace(/[<>]/g, '').replace(/\\/g, '').slice(0, 500)
 
-    // Build headers
-    const headers = new Headers({
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    })
-
-    // Forward auth headers
-    const authHeader = request.headers.get('Authorization')
-    if (authHeader) {
-      headers.set('Authorization', authHeader)
-    }
-
-    const cookieHeader = request.headers.get('Cookie')
-    if (cookieHeader) {
-      headers.set('Cookie', cookieHeader)
-    }
-
     // Retry loop with exponential backoff
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       if (attempt > 0) {
@@ -312,7 +294,7 @@ export async function POST(request: NextRequest) {
 
         const response = await fetch(`${BACKEND_URL}/api/karma-reset/kiaan/generate`, {
           method: 'POST',
-          headers,
+          headers: proxyHeaders(request),
           body: JSON.stringify({
             situation: sanitizedSituation,
             feeling: sanitizedFeeling,
@@ -326,7 +308,7 @@ export async function POST(request: NextRequest) {
 
         if (response.ok) {
           const data = await response.json()
-          return NextResponse.json({
+          return forwardCookies(response, NextResponse.json({
             karmic_path: data.karmic_path,
             deep_guidance: data.deep_guidance,
             reset_guidance: data.reset_guidance,
@@ -336,7 +318,7 @@ export async function POST(request: NextRequest) {
               fallback: false
             },
             meta: data.meta,
-          })
+          }))
         }
 
         // Check for retryable errors

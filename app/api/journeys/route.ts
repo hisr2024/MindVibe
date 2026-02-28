@@ -3,15 +3,15 @@
  *
  * Provides journey listing for the mobile journeys page.
  * Proxies to backend journey service with catalog fallback.
+ *
+ * Forwards Set-Cookie headers from backend so CSRF tokens reach the browser.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 export async function GET(request: NextRequest) {
   try {
-    const cookieHeader = request.headers.get('cookie') || ''
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
 
@@ -22,18 +22,14 @@ export async function GET(request: NextRequest) {
       `${BACKEND_URL}/api/journey-engine/journeys${queryString}`,
       {
         method: 'GET',
-        headers: {
-          'Cookie': cookieHeader,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers: proxyHeaders(request),
         signal: AbortSignal.timeout(5000),
       }
     )
 
     if (backendResponse.ok) {
       const data = await backendResponse.json()
-      return NextResponse.json(data)
+      return forwardCookies(backendResponse, NextResponse.json(data))
     }
 
     // Try alternate endpoint
@@ -41,18 +37,14 @@ export async function GET(request: NextRequest) {
       `${BACKEND_URL}/api/journeys${queryString}`,
       {
         method: 'GET',
-        headers: {
-          'Cookie': cookieHeader,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers: proxyHeaders(request),
         signal: AbortSignal.timeout(5000),
       }
     ).catch(() => null)
 
     if (altResponse?.ok) {
       const data = await altResponse.json()
-      return NextResponse.json(data)
+      return forwardCookies(altResponse, NextResponse.json(data))
     }
 
     // If requesting active journeys and backend is down, return empty

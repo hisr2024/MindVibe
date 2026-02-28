@@ -10,8 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { generateLocalResponse } from '@/lib/kiaan-friend-engine'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 // ─── Language Names (for multilingual Tier 2 responses) ─────────────────
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -210,17 +209,9 @@ export async function POST(request: NextRequest) {
     // ── Tier 1: Proxy to Python backend (full pipeline) ──────────────
     if (!isLocalSession) {
       try {
-        const proxyHeaders: Record<string, string> = {
-          'Content-Type': 'application/json',
-        }
-        const proxyCookie = request.headers.get('cookie')
-        if (proxyCookie) proxyHeaders.cookie = proxyCookie
-        const proxyAuth = request.headers.get('authorization')
-        if (proxyAuth) proxyHeaders.authorization = proxyAuth
-
         const companionResponse = await fetch(`${BACKEND_URL}/api/companion/message`, {
           method: 'POST',
-          headers: proxyHeaders,
+          headers: proxyHeaders(request),
           body: JSON.stringify({
             session_id: body.session_id,
             message: sanitizedMessage,
@@ -235,7 +226,7 @@ export async function POST(request: NextRequest) {
           const data = await companionResponse.json()
           // Validate required fields from backend before forwarding
           if (data && typeof data.response === 'string' && data.mood && data.phase) {
-            return NextResponse.json({ ...data, ai_tier: 'backend' })
+            return forwardCookies(companionResponse, NextResponse.json({ ...data, ai_tier: 'backend' }))
           }
         }
       } catch (backendErr) {

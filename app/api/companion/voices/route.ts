@@ -4,21 +4,18 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 export async function GET(request: NextRequest) {
   try {
     const backendResponse = await fetch(`${BACKEND_URL}/api/companion/voices`, {
       method: 'GET',
-      headers: {
-        cookie: request.headers.get('cookie') || '',
-      },
+      headers: proxyHeaders(request),
     })
 
     if (backendResponse.ok) {
       const data = await backendResponse.json()
-      return NextResponse.json(data)
+      return forwardCookies(backendResponse, NextResponse.json(data))
     }
 
     // Fallback voice catalog

@@ -5,8 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 const FALLBACK_PROGRESS = {
   total_karma_points: 42,
@@ -29,16 +28,12 @@ export async function GET(request: NextRequest) {
   try {
     const response = await fetch(`${BACKEND_URL}/api/karmic-tree/progress`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        cookie: request.headers.get('cookie') || '',
-      },
+      headers: proxyHeaders(request),
     })
 
     if (response.ok) {
       const data = await response.json()
-      return NextResponse.json(data)
+      return forwardCookies(response, NextResponse.json(data))
     }
 
     // Return fallback for auth failures or other errors

@@ -117,13 +117,17 @@ export default function MobileJourneyDetailPage() {
 
   const handleCompleteStep = async () => {
     if (!step || !journey || step.is_completed || isCompletingRef.current) return
+
+    // Set completing flag immediately to prevent double-tap race condition.
+    isCompletingRef.current = true
+    setIsCompleting(true)
+
     if (journey.status !== 'active' || step.day_index !== journey.current_day) {
+      isCompletingRef.current = false
+      setIsCompleting(false)
       await loadJourney()
       return
     }
-
-    isCompletingRef.current = true
-    setIsCompleting(true)
 
     try {
       const result = await journeyEngineService.completeStep(

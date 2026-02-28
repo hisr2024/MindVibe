@@ -18,8 +18,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 /** Timeout for backend TTS calls (8s to keep UX responsive) */
 const BACKEND_TIMEOUT_MS = 8000
@@ -146,11 +145,7 @@ export async function POST(request: NextRequest) {
     try {
       const response = await fetch(`${BACKEND_URL}/api/voice/divine/shloka`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': request.headers.get('authorization') || '',
-          'Cookie': request.headers.get('cookie') || '',
-        },
+        headers: proxyHeaders(request),
         body: JSON.stringify({
           shloka: sanitizedShloka,
           chandas,
@@ -164,13 +159,14 @@ export async function POST(request: NextRequest) {
         const contentType = response.headers.get('content-type') || ''
         if (contentType.includes('audio/')) {
           const audioBlob = await response.blob()
-          return new NextResponse(audioBlob, {
+          const audioRes = new NextResponse(audioBlob, {
             status: 200,
             headers: {
               'Content-Type': contentType,
               'Cache-Control': 'public, max-age=2592000',
             },
           })
+          return forwardCookies(response, audioRes)
         }
       }
     } catch (shlokaError) {
@@ -204,11 +200,7 @@ async function tryShlokaSynthesis(
   try {
     const response = await fetch(`${BACKEND_URL}/api/voice/divine/shloka`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': request.headers.get('authorization') || '',
-        'Cookie': request.headers.get('cookie') || '',
-      },
+      headers: proxyHeaders(request),
       body: JSON.stringify({
         shloka: text,
         chandas: 'anushtubh',
@@ -221,7 +213,7 @@ async function tryShlokaSynthesis(
       const contentType = response.headers.get('content-type') || ''
       if (contentType.includes('audio/')) {
         const audioBlob = await response.blob()
-        return new NextResponse(audioBlob, {
+        const audioRes = new NextResponse(audioBlob, {
           status: 200,
           headers: {
             'Content-Type': contentType,
@@ -230,6 +222,7 @@ async function tryShlokaSynthesis(
             'X-Quality-Score': response.headers.get('X-Quality-Score') || '9.5',
           },
         })
+        return forwardCookies(response, audioRes)
       }
     }
   } catch {
@@ -252,11 +245,7 @@ async function synthesizeViaBackend(
   try {
     const response = await fetch(`${BACKEND_URL}/api/voice/synthesize`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': request.headers.get('authorization') || '',
-        'Cookie': request.headers.get('cookie') || '',
-      },
+      headers: proxyHeaders(request),
       body: JSON.stringify({
         text,
         language,
@@ -270,13 +259,14 @@ async function synthesizeViaBackend(
       const contentType = response.headers.get('content-type') || ''
       if (contentType.includes('audio/')) {
         const audioBlob = await response.blob()
-        return new NextResponse(audioBlob, {
+        const audioRes = new NextResponse(audioBlob, {
           status: 200,
           headers: {
             'Content-Type': 'audio/mpeg',
             'Cache-Control': 'public, max-age=604800',
           },
         })
+        return forwardCookies(response, audioRes)
       }
     }
   } catch (error) {
