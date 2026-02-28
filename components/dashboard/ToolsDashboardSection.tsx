@@ -19,7 +19,7 @@ export function ToolsDashboardSection() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#e8b54a]">{t('dashboard.title', 'Dashboard')}</p>
           <h2 className="text-xl sm:text-2xl font-bold text-[#f5f0e8]">{t('dashboard.allTools', 'All tools in one place')}</h2>
-          <p className="mt-1 text-sm text-[#f5f0e8]/80">{t('dashboard.subtitle', 'MindVibe tools')}</p>
+          <p className="mt-1 text-sm text-[#f5f0e8]/80">{t('dashboard.subtitle', 'Sakha tools')}</p>
         </div>
         <Link
           href="/dashboard"

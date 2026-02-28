@@ -80,7 +80,7 @@ export default function SettingsPage() {
     <main className="mx-auto max-w-3xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
       <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-orange-50 mb-2">Settings</h1>
-        <p className="text-orange-100/70">Customize your MindVibe experience</p>
+        <p className="text-orange-100/70">Customize your Sakha experience</p>
       </div>
 
       {saved && (
@@ -126,7 +126,7 @@ export default function SettingsPage() {
       </SettingsSection>
 
       {/* Appearance */}
-      <SettingsSection title="Appearance" description="Customize how MindVibe looks" className="mb-6">
+      <SettingsSection title="Appearance" description="Customize how Sakha looks" className="mb-6">
         <SettingsItem label="Theme" description="Switch between light and dark mode">
           <ThemeToggle />
         </SettingsItem>
@@ -165,7 +165,7 @@ export default function SettingsPage() {
 
       {/* Privacy */}
       <SettingsSection title="Privacy" description="Control your data and privacy" className="mb-6">
-        <SettingsItem label="Analytics" description="Help improve MindVibe with anonymous usage data">
+        <SettingsItem label="Analytics" description="Help improve Sakha with anonymous usage data">
           <ToggleSwitch
             enabled={settings.privacy.shareAnalytics}
             onToggle={(v) => updateSetting('privacy', 'shareAnalytics', v)}

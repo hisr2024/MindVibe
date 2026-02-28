@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * MindVibe Divine Home Page
+ * Sakha Divine Home Page
  *
  * An immersive divine experience — entering the world of Krishna,
  * the Divine Friend and Spiritual Companion.

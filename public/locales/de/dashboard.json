@@ -1,7 +1,7 @@
 {
   "title": "Dashboard",
   "allTools": "Alle Werkzeuge an einem Ort",
-  "subtitle": "MindVibe Werkzeuge",
+  "subtitle": "Sakha Werkzeuge",
   "returnHome": "Zur Startseite",
   "toolsCount": "Werkzeuge",
   "welcome": "Willkommen zurück",
@@ -61,7 +61,7 @@
       "description": "Deinen Plan verwalten"
     },
     "about": {
-      "title": "Über MindVibe",
+      "title": "Über Sakha",
       "description": "Plattform-Informationen"
     },
     "analytics": {

@@ -94,7 +94,7 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-2xl font-bold text-slate-100">Admin Dashboard</h1>
           <p className="text-sm text-slate-400">
-            Welcome to MindVibe Enterprise Admin
+            Welcome to Sakha Enterprise Admin
           </p>
         </div>
         <div className="text-right text-sm text-slate-400">

@@ -287,7 +287,7 @@ export function EmotionThemeSettings({
           {/* Info Box */}
           <div className="rounded-2xl border border-blue-400/30 bg-blue-950/20 p-4">
             <p className="text-xs leading-relaxed text-blue-100/80">
-              💡 <strong>How it works:</strong> When you log your mood, MindVibe
+              💡 <strong>How it works:</strong> When you log your mood, Sakha
               analyzes your mood score and tags to determine your emotional state,
               then adapts the entire interface with colors, animations, and ambiance
               designed to support that emotion.

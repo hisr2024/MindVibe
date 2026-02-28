@@ -64,7 +64,7 @@ export default function SiteNav() {
         <Link
           href="/"
           className="flex items-center gap-3 text-slate-100 transition hover:text-white"
-          aria-label="MindVibe home"
+          aria-label="Sakha home"
         >
           <motion.div
             whileHover={{ scale: 1.05 }}

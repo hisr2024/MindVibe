@@ -40,8 +40,8 @@ export interface PWAInstallPromptProps {
 export function PWAInstallPrompt({
   delay = 3000,
   dismissForDays = 7,
-  appName = 'MindVibe',
-  description = 'Install MindVibe for a better experience with offline access and faster loading.',
+  appName = 'Sakha',
+  description = 'Install Sakha for a better experience with offline access and faster loading.',
   variant = 'banner',
 }: PWAInstallPromptProps) {
   const { triggerHaptic } = useHapticFeedback()

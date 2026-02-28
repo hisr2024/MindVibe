@@ -310,7 +310,7 @@ export default function MobileHomePage() {
 
   if (isLoading) {
     return (
-      <MobileAppShell title="MindVibe" showHeader={false}>
+      <MobileAppShell title="Sakha" showHeader={false}>
         <HomeSkeleton />
       </MobileAppShell>
     )
@@ -318,7 +318,7 @@ export default function MobileHomePage() {
 
   return (
     <MobileAppShell
-      title="MindVibe"
+      title="Sakha"
       showHeader={false}
       enablePullToRefresh
       onRefresh={handleRefresh}

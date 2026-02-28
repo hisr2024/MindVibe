@@ -2,7 +2,7 @@
  * Dynamic Sitemap Generator
  *
  * Generates a comprehensive sitemap for search engines covering all public-facing
- * pages on MindVibe. Uses the Next.js Metadata API (app/sitemap.ts convention).
+ * pages on Sakha. Uses the Next.js Metadata API (app/sitemap.ts convention).
  *
  * Private/authenticated routes (dashboard, account, admin, settings, profile,
  * onboarding, subscription) are intentionally excluded because they require

@@ -34,7 +34,7 @@ export function EcosystemIntro() {
       {/* Header */}
       <div className="space-y-3 text-center">
         <h2 className="text-3xl font-bold bg-gradient-to-r from-[#e8b54a] via-[#ffb347] to-rose-200 bg-clip-text text-transparent md:text-4xl">
-          The MindVibe Ecosystem
+          The Sakha Ecosystem
         </h2>
         <p className="mx-auto max-w-2xl text-base text-[#f5f0e8]/80 md:text-lg">
           A holistic approach to spiritual wellness, rooted in ancient wisdom and modern practices

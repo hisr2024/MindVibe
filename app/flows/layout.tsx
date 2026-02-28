@@ -12,7 +12,7 @@ const flowLinks = [
 ]
 
 export const metadata = {
-  title: 'Guided Flows | MindVibe',
+  title: 'Guided Flows | Sakha',
   description: 'Dedicated pages that keep each guided flow focused and functional.',
 }
 

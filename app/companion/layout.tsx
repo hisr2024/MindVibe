@@ -8,7 +8,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'KIAAN Companion — Your Divine Best Friend | MindVibe',
+  title: 'KIAAN Companion — Your Divine Best Friend | Sakha',
   description:
     'Meet KIAAN, your divine best friend and voice-first spiritual companion. An immersive orb interface with mood-reactive responses, Gita wisdom, and every wellness tool at your fingertips.',
   openGraph: {

@@ -249,7 +249,7 @@ export default function MobileProfilePage() {
 
         {/* App version */}
         <div className="text-center pt-2">
-          <p className="text-xs text-slate-600">MindVibe v2.0.0</p>
+          <p className="text-xs text-slate-600">Sakha v2.0.0</p>
         </div>
       </div>
 

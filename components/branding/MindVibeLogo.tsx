@@ -15,7 +15,7 @@ export interface MindVibeLogoProps {
 }
 
 /**
- * Premium MindVibe logo wrapper.
+ * Premium Sakha logo wrapper.
  * - lockup=true renders icon + wordmark
  * - lockup=false renders icon only (legacy usage)
  */

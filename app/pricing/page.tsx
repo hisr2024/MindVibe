@@ -455,7 +455,7 @@ export default function PricingPage() {
       key: data.razorpay_key_id,
       amount: data.amount,
       currency: data.currency || 'INR',
-      name: data.name || 'MindVibe',
+      name: data.name || 'Sakha',
       description: data.description || 'Subscription',
       order_id: data.order_id,
       prefill: {

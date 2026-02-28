@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * MindVibeIcon - Refined sacred mark
+ * SakhaIcon - Refined sacred mark
  *
  * A clean, elegant golden lotus on a dark ground.
  * No ripple gimmicks, no flashy shimmer — just a sacred symbol
@@ -35,7 +35,7 @@ export function MindVibeIcon({
       initial={isAnimated ? { opacity: 0.85, scale: 0.96 } : undefined}
       animate={isAnimated ? { opacity: 1, scale: 1 } : undefined}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-      aria-label="MindVibe"
+      aria-label="Sakha"
       role="img"
     >
       {/* Subtle outer glow — no ripples, just warmth */}

@@ -57,7 +57,7 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
         <Link
           href="/"
           className="flex items-center gap-3 text-slate-100 transition hover:text-white"
-          aria-label="MindVibe home"
+          aria-label="Sakha home"
         >
           <MindVibeLockup
             theme="sunrise"

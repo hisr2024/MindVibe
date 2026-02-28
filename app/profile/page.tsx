@@ -150,7 +150,7 @@ export default function ProfilePage() {
         setProfile(parsed)
       } else {
         const defaultProfile: ProfileData = {
-          name: user?.name || user?.email?.split('@')[0] || 'MindVibe User',
+          name: user?.name || user?.email?.split('@')[0] || 'Sakha User',
           email: user?.email || 'user@mindvibe.life',
           bio: '',
           createdAt: new Date().toISOString(),
@@ -163,7 +163,7 @@ export default function ProfilePage() {
       setError('Failed to load profile')
 
       const fallbackProfile: ProfileData = {
-        name: user?.name || user?.email?.split('@')[0] || 'MindVibe User',
+        name: user?.name || user?.email?.split('@')[0] || 'Sakha User',
         email: user?.email || 'user@mindvibe.life',
         bio: '',
         createdAt: new Date().toISOString(),
@@ -308,7 +308,7 @@ export default function ProfilePage() {
       {/* Page Header */}
       <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-[#f5f0e8] mb-1">My Profile</h1>
-        <p className="text-sm text-[#f5f0e8]/60">Your personal space on MindVibe</p>
+        <p className="text-sm text-[#f5f0e8]/60">Your personal space on Sakha</p>
       </div>
 
       {error && (

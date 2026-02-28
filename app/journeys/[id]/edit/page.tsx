@@ -1,7 +1,7 @@
 import JourneyFormClient from '../../JourneyFormClient'
 
 export const metadata = {
-  title: 'Edit Journey | MindVibe',
+  title: 'Edit Journey | Sakha',
   description: 'Update your journey details.',
 }
 

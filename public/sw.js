@@ -1,5 +1,5 @@
 /**
- * MindVibe Service Worker v18.0 - Silent Production Grade
+ * Sakha Service Worker v18.0 - Silent Production Grade
  *
  * Zero console output. Robust offline support. Intelligent caching.
  *
@@ -207,13 +207,13 @@ async function handleAPIRequest(request) {
       if (request.url.includes('/catalog')) {
         return new Response(JSON.stringify([]), {
           status: 200,
-          headers: { 'Content-Type': 'application/json', 'X-MindVibe-Offline': 'true' },
+          headers: { 'Content-Type': 'application/json', 'X-Sakha-Offline': 'true' },
         })
       }
       if (request.url.includes('/active') || request.url.includes('/today')) {
         return new Response(
           JSON.stringify(request.url.includes('/today') ? { steps: [], priority_step: null, _offline: true } : []),
-          { status: 200, headers: { 'Content-Type': 'application/json', 'X-MindVibe-Offline': 'true' } }
+          { status: 200, headers: { 'Content-Type': 'application/json', 'X-Sakha-Offline': 'true' } }
         )
       }
       return new Response(

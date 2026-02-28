@@ -18,16 +18,16 @@
     </filter>
   </defs>
 
-  <!-- MindVibe Wordmark -->
+  <!-- Sakha Wordmark -->
   <text x="200" y="58"
         font-family="Manrope, system-ui, sans-serif"
         font-size="48"
         font-weight="700"
         fill="url(#textGradient)"
         text-anchor="middle"
-        letter-spacing="0.02em"
+        letter-spacing="0.04em"
         filter="url(#textGlow)">
-    MindVibe
+    Sakha
   </text>
 
   <!-- Tagline -->
@@ -38,7 +38,7 @@
         fill="#A8A8B3"
         text-anchor="middle"
         letter-spacing="0.08em">
-    Your Guide to Inner Peace
+    The Spiritual Companion
   </text>
 
   <!-- Decorative lotus accent under the text -->

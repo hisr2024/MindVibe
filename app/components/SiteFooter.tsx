@@ -11,9 +11,9 @@ export default function SiteFooter() {
     <footer className="border-t border-[#d4a44c]/8 bg-gradient-to-b from-[#080706] to-[#050507]">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6 md:flex-row md:items-start md:justify-between lg:px-8">
         <div className="space-y-3 md:max-w-xs">
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-orange-100/80">{t('common.app.name', 'MindVibe')}</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-orange-100/80">{t('common.app.name', 'Sakha')}</p>
           <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em]">
-            <span className="text-orange-100/60">{t('common.app.taglinePrefix', 'Your')}</span>
+            <span className="text-orange-100/60">{t('common.app.taglinePrefix', 'The')}</span>
             <KrishnaSymbol size={12} animated={false} glow={false} />
             <span
               className="bg-clip-text text-transparent font-bold"
@@ -81,7 +81,7 @@ export default function SiteFooter() {
       {/* Copyright bar */}
       <div className="border-t border-white/[0.04] py-4">
         <p className="text-center text-xs text-white/30">
-          {new Date().getFullYear()} MindVibe. Crafted with reverence for inner peace.
+          {new Date().getFullYear()} Sakha. Crafted with reverence for inner peace.
         </p>
       </div>
     </footer>

@@ -169,7 +169,7 @@ export default function OnboardingStepPage() {
   const handleComplete = () => {
     // Save profile
     const profile = {
-      displayName: state.name || 'MindVibe User',
+      displayName: state.name || 'Sakha User',
       email: 'user@mindvibe.life',
       bio: state.bio,
       timezone: state.timezone,

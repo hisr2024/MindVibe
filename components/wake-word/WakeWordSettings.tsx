@@ -199,7 +199,7 @@ export function WakeWordSettings({ className = '' }: WakeWordSettingsProps) {
           <p className="text-[11px] text-[#e8b54a]/50 leading-relaxed">
             <span className="font-semibold text-[#e8b54a]/70">Supported phrases: </span>
             &quot;Hey KIAAN&quot;, &quot;Hi KIAAN&quot;, &quot;Hello KIAAN&quot;,
-            &quot;Namaste KIAAN&quot;, &quot;OK KIAAN&quot;, &quot;Hey MindVibe&quot;
+            &quot;Namaste KIAAN&quot;, &quot;OK KIAAN&quot;, &quot;Hey Sakha&quot;
           </p>
         </motion.div>
       )}

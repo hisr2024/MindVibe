@@ -1,7 +1,7 @@
 import JourneyDetailClient from './JourneyDetailClient'
 
 export const metadata = {
-  title: 'Journey Details | MindVibe',
+  title: 'Journey Details | Sakha',
   description: 'View your journey details and track your progress.',
 }
 

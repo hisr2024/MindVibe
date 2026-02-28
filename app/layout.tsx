@@ -35,22 +35,22 @@ export const viewport: Viewport = {
 }
 
 export const metadata = {
-  title: 'MindVibe — Your Spiritual Companion & Best Divine Friend | Bhagavad Gita Wisdom',
+  title: 'Sakha — The Spiritual Companion & Your Divine Friend | Bhagavad Gita Wisdom',
   description: 'Discover inner peace through Bhagavad Gita wisdom. KIAAN, your AI spiritual guide, offers sacred journeys, voice companionship, and tools for self-discovery in 17 languages.',
   metadataBase: new URL('https://mindvibe.life'),
-  keywords: ['spiritual companion', 'divine friend', 'Bhagavad Gita', 'KIAAN', 'spiritual growth', 'inner peace', 'Krishna wisdom', 'sacred journeys', 'Gita verses', 'self-discovery', 'spiritual guide', 'MindVibe'],
+  keywords: ['spiritual companion', 'divine friend', 'Bhagavad Gita', 'KIAAN', 'spiritual growth', 'inner peace', 'Krishna wisdom', 'sacred journeys', 'Gita verses', 'self-discovery', 'spiritual guide', 'Sakha'],
   openGraph: {
-    title: 'MindVibe — Your Spiritual Companion & Best Divine Friend',
+    title: 'Sakha — The Spiritual Companion & Your Divine Friend',
     description: 'Walk with Krishna. 700+ Bhagavad Gita verses, KIAAN AI spiritual guide, sacred wisdom journeys, and divine tools for inner peace and self-discovery.',
     url: 'https://mindvibe.life',
-    siteName: 'MindVibe',
+    siteName: 'Sakha',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'MindVibe - Your Spiritual Companion' }],
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Sakha - The Spiritual Companion' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MindVibe — Your Spiritual Companion & Divine Friend',
+    title: 'Sakha — The Spiritual Companion & Your Divine Friend',
     description: 'Discover inner peace through Bhagavad Gita wisdom. KIAAN, your AI spiritual guide, offers sacred journeys, voice companionship, and tools for self-discovery.',
     images: ['/og-image.png'],
   },
@@ -88,7 +88,7 @@ export const metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'MindVibe',
+    title: 'Sakha',
   },
   icons: {
     icon: [
@@ -135,9 +135,9 @@ export default async function RootLayout({
                   '@type': 'WebSite',
                   '@id': 'https://mindvibe.life/#website',
                   url: 'https://mindvibe.life',
-                  name: 'MindVibe',
+                  name: 'Sakha',
                   description:
-                    'Your Spiritual Companion & Best Divine Friend — powered by Bhagavad Gita Wisdom',
+                    'The Spiritual Companion & Your Divine Friend — powered by Bhagavad Gita Wisdom',
                   publisher: {
                     '@id': 'https://mindvibe.life/#organization',
                   },
@@ -145,7 +145,7 @@ export default async function RootLayout({
                 {
                   '@type': 'Organization',
                   '@id': 'https://mindvibe.life/#organization',
-                  name: 'MindVibe',
+                  name: 'Sakha',
                   url: 'https://mindvibe.life',
                   logo: {
                     '@type': 'ImageObject',
