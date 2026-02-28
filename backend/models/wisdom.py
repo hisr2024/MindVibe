@@ -141,6 +141,93 @@ class GitaModernContext(Base):
     )
 
 
+class GitaPracticalWisdom(Base):
+    """
+    Practical modern-day applications of Bhagavad Gita principles.
+
+    Each entry maps a specific verse to a real-life domain with actionable
+    micro-practices, reflection prompts, and modern scenarios. This table
+    is auto-enriched by the Gita Wisdom Auto-Enricher service, which pulls
+    from authenticated open-source Gita repositories and validates strictly
+    against the 18-chapter, 700-verse ambit of the Bhagavad Gita.
+
+    Example:
+        verse_ref: "2.47"
+        life_domain: "workplace"
+        principle_in_action: "Perform your tasks with full dedication..."
+        micro_practice: "Before starting work, set intention: ..."
+        action_steps: ["Write down today's 3 priorities...", ...]
+        reflection_prompt: "Did I attach my identity to outcomes today?"
+        modern_scenario: "A software engineer anxious about code review..."
+        counter_pattern: "Obsessing over manager's reaction..."
+        source_attribution: "Swami Chinmayananda, Gita Chapter 2 commentary"
+    """
+
+    __tablename__ = "gita_practical_wisdom"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    # Verse reference (chapter.verse format, e.g. "2.47")
+    verse_ref: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    chapter: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    verse_number: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # Modern-life domain this wisdom applies to
+    life_domain: Mapped[str] = mapped_column(
+        String(64), nullable=False, index=True
+    )  # workplace, relationships, family, finance, health, education, social_media, daily_life, personal_growth, parenting
+
+    # The Gita principle distilled into actionable language
+    principle_in_action: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # 5-10 minute practical exercise grounded in the verse
+    micro_practice: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # 1-3 concrete behavioral steps
+    action_steps: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+
+    # Journaling/self-inquiry question rooted in the verse
+    reflection_prompt: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # Real-life scenario showing the principle applied
+    modern_scenario: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # What NOT to do — the pattern the verse warns against
+    counter_pattern: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # Shad Ripu (six inner enemies) this wisdom addresses
+    shad_ripu_tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+
+    # Mental health domains this addresses
+    wellness_domains: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+
+    # Attribution to authentic Gita commentator/source
+    source_attribution: Mapped[str | None] = mapped_column(String(512), nullable=True)
+
+    # Quality and usage tracking
+    effectiveness_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.5)
+    times_served: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    positive_feedback: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    negative_feedback: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    # Source of this entry: "seed", "auto_enriched", "community", "ai_generated"
+    enrichment_source: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="seed"
+    )
+
+    # Whether this has been validated by the Gita authenticity checker
+    is_validated: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True
+    )
+
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
+
+
 class GitaKeyword(Base):
     __tablename__ = "gita_keywords"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
