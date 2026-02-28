@@ -28,7 +28,6 @@ from __future__ import annotations
 import logging
 import math
 from datetime import datetime, timedelta
-from typing import Optional
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -415,7 +414,7 @@ class VerseApplicationGraph:
     def _calculate_confidence(
         positive: int,
         negative: int,
-        times_shown: int,
+        times_shown: int,  # noqa: ARG004 (reserved for exposure-weighted confidence)
     ) -> float:
         """
         Calculate Bayesian confidence score.
@@ -442,7 +441,7 @@ class VerseApplicationGraph:
 
 
 # Singleton
-_graph: Optional[VerseApplicationGraph] = None
+_graph: VerseApplicationGraph | None = None
 
 
 def get_verse_application_graph() -> VerseApplicationGraph:

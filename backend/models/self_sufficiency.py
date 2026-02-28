@@ -28,7 +28,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.models.base import Base, SoftDeleteMixin
 
-
 # =============================================================================
 # MODULE 1: Wisdom Atoms — Distilled from LLM responses
 # =============================================================================

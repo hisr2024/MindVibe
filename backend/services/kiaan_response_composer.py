@@ -21,11 +21,9 @@ Falls back to LLM only when:
 
 from __future__ import annotations
 
-import hashlib
 import logging
 import random
 from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -68,8 +66,8 @@ class ComposedResponse:
         phase: str,
         intent: str,
         atom_ids_used: list[str],
-        template_id: Optional[str] = None,
-        verse_ref: Optional[str] = None,
+        template_id: str | None = None,
+        verse_ref: str | None = None,
         is_self_sufficient: bool = True,
         confidence: float = 0.5,
     ):
@@ -119,7 +117,7 @@ class ResponseCompositionEngine:
         entities: list[str] | None = None,
         recent_atom_ids: list[str] | None = None,
         recent_verse_refs: list[str] | None = None,
-    ) -> Optional[ComposedResponse]:
+    ) -> ComposedResponse | None:
         """
         Attempt to compose a complete response without LLM.
 
@@ -166,7 +164,7 @@ class ResponseCompositionEngine:
         topic: str,
         phase: str,
         intent: str,
-    ) -> Optional[ComposedResponse]:
+    ) -> ComposedResponse | None:
         """Find a proven template matching this exact context."""
         query = (
             select(CompositionTemplate)
@@ -174,7 +172,7 @@ class ResponseCompositionEngine:
                 CompositionTemplate.mood == mood,
                 CompositionTemplate.topic == topic,
                 CompositionTemplate.phase == phase,
-                CompositionTemplate.is_active == True,
+                CompositionTemplate.is_active.is_(True),
                 CompositionTemplate.deleted_at.is_(None),
                 CompositionTemplate.effectiveness_score >= MIN_QUALITY_THRESHOLD,
             )
@@ -245,7 +243,7 @@ class ResponseCompositionEngine:
 
     async def _assemble_from_template(
         self, db: AsyncSession, template: CompositionTemplate
-    ) -> Optional[str]:
+    ) -> str | None:
         """Assemble response text from a template's atom references."""
         parts = []
 
@@ -283,17 +281,17 @@ class ResponseCompositionEngine:
         topic: str,
         phase: str,
         intent: str,
-        entities: list[str] | None,
+        entities: list[str] | None,  # noqa: ARG002 (reserved for entity-aware atom selection)
         recent_atom_ids: list[str],
-        recent_verse_refs: list[str],
-    ) -> Optional[ComposedResponse]:
+        recent_verse_refs: list[str],  # noqa: ARG002 (reserved for verse novelty filtering)
+    ) -> ComposedResponse | None:
         """Dynamically select best atoms per slot and assemble."""
         # Define which atom categories to use based on phase
         slot_categories = self._get_slot_categories(phase)
 
         assembled_parts: list[str] = []
         used_atom_ids: list[str] = []
-        verse_ref: Optional[str] = None
+        verse_ref: str | None = None
 
         for category in slot_categories:
             atom = await self._select_best_atom(
@@ -367,7 +365,7 @@ class ResponseCompositionEngine:
         phase: str,
         intent: str,
         exclude_ids: list[str],
-    ) -> Optional[WisdomAtom]:
+    ) -> WisdomAtom | None:
         """
         Select the best atom for a given slot.
 
@@ -457,7 +455,7 @@ class ResponseCompositionEngine:
         self,
         db: AsyncSession,
         atom_ids: list[str],
-        template_id: Optional[str],
+        template_id: str | None,
         positive: bool,
     ) -> None:
         """
@@ -567,7 +565,7 @@ def _wilson_score(positive: int, total: int, z: float = 1.96) -> float:
 
 
 # Singleton
-_composer: Optional[ResponseCompositionEngine] = None
+_composer: ResponseCompositionEngine | None = None
 
 
 def get_response_composer() -> ResponseCompositionEngine:
