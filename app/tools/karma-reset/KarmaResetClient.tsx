@@ -31,7 +31,6 @@ import {
   type KarmicPathKey,
   type DeepKarmaResetApiResponse,
   type PhaseGuidance,
-  type GitaVerse,
 } from '@/types/karma-reset.types'
 
 type ResetStep = 'input' | 'path_selection' | 'breathing' | 'deep_journey' | 'complete'
@@ -53,7 +52,7 @@ export default function KarmaResetClient() {
   // UI state
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [retryCount, setRetryCount] = useState(0)
+  const [_retryCount, setRetryCount] = useState(0)
   const [backendHealthy, setBackendHealthy] = useState<boolean | null>(null)
   const [showConfetti, setShowConfetti] = useState(false)
   const [showVerseDetail, setShowVerseDetail] = useState(false)

@@ -3,10 +3,12 @@
 /**
  * Mobile Journeys Page
  *
- * Browse and track transformational journeys.
+ * Browse templates and track active transformational journeys.
+ * Fetches user's active journeys from journey-engine and available
+ * templates from the templates endpoint.
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import {
@@ -22,12 +24,31 @@ import {
   Sun,
   Search,
   RefreshCw,
+  Loader2,
 } from 'lucide-react'
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { useAuth } from '@/hooks/useAuth'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
-import { apiFetch } from '@/lib/api'
+import {
+  journeyEngineService,
+  JourneyEngineError,
+} from '@/services/journeyEngineService'
+import type {
+  JourneyResponse,
+  JourneyTemplate,
+} from '@/types/journeyEngine.types'
+
+// Map enemy types to UI categories
+const ENEMY_TO_CATEGORY: Record<string, string> = {
+  krodha: 'anger',
+  kama: 'growth',
+  lobha: 'growth',
+  moha: 'peace',
+  mada: 'growth',
+  matsarya: 'growth',
+  bhaya: 'anxiety',
+}
 
 // Journey categories with icons
 const CATEGORIES = [
@@ -38,23 +59,75 @@ const CATEGORIES = [
   { id: 'growth', label: 'Growth', icon: Sun },
 ]
 
-interface Journey {
+// Difficulty number to label
+function difficultyLabel(level: number): 'beginner' | 'intermediate' | 'advanced' {
+  if (level <= 1) return 'beginner'
+  if (level <= 2) return 'intermediate'
+  return 'advanced'
+}
+
+// Static fallback catalog shown when backend and templates endpoint are unavailable
+const STATIC_CATALOG: DisplayTemplate[] = [
+  {
+    id: 'transform-anger-krodha',
+    title: 'Transform Anger (Krodha)',
+    description: 'A 14-day journey to understand and transform anger through Gita wisdom and modern psychology.',
+    category: 'anger',
+    duration_days: 14,
+    difficulty: 'beginner',
+    is_premium: false,
+    rating: 4.8,
+  },
+  {
+    id: 'overcome-anxiety-bhaya',
+    title: 'Overcome Anxiety (Bhaya)',
+    description: 'Release fear and anxiety with ancient breathing techniques and wisdom from Chapter 2 of the Gita.',
+    category: 'anxiety',
+    duration_days: 14,
+    difficulty: 'beginner',
+    is_premium: false,
+    rating: 4.9,
+  },
+  {
+    id: 'find-inner-peace-shanti',
+    title: 'Find Inner Peace (Shanti)',
+    description: 'Discover lasting inner peace through meditation, self-reflection, and the teachings of Lord Krishna.',
+    category: 'peace',
+    duration_days: 21,
+    difficulty: 'intermediate',
+    is_premium: false,
+    rating: 4.9,
+  },
+  {
+    id: 'personal-growth-vikas',
+    title: 'Personal Growth (Vikas)',
+    description: "Unlock your potential with daily practices rooted in the Gita's teachings on self-mastery.",
+    category: 'growth',
+    duration_days: 14,
+    difficulty: 'intermediate',
+    is_premium: false,
+    rating: 4.7,
+  },
+]
+
+interface DisplayActiveJourney {
+  id: string
+  title: string
+  progress: number
+  current_day: number
+  duration_days: number
+  started_at: string | null
+}
+
+interface DisplayTemplate {
   id: string
   title: string
   description: string
   category: string
   duration_days: number
   difficulty: 'beginner' | 'intermediate' | 'advanced'
-  image_url?: string
   is_premium: boolean
-  enrolled_count: number
   rating: number
-}
-
-interface ActiveJourney extends Journey {
-  progress: number
-  current_day: number
-  started_at: string
 }
 
 export default function MobileJourneysPage() {
@@ -62,75 +135,66 @@ export default function MobileJourneysPage() {
   const { isAuthenticated } = useAuth()
   const { triggerHaptic } = useHapticFeedback()
 
-  const [activeJourneys, setActiveJourneys] = useState<ActiveJourney[]>([])
-  const [availableJourneys, setAvailableJourneys] = useState<Journey[]>([])
+  const [activeJourneys, setActiveJourneys] = useState<DisplayActiveJourney[]>([])
+  const [availableTemplates, setAvailableTemplates] = useState<DisplayTemplate[]>([])
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
+  const [startingTemplateId, setStartingTemplateId] = useState<string | null>(null)
+  const isStartingRef = useRef(false)
 
-  // Fetch journeys on mount and when auth state changes
-  useEffect(() => {
-    if (!isAuthenticated) return
+  // Map backend JourneyResponse to display format
+  const mapJourney = (j: JourneyResponse): DisplayActiveJourney => ({
+    id: j.journey_id,
+    title: j.title,
+    progress: Math.round(j.progress_percentage),
+    current_day: j.current_day,
+    duration_days: j.total_days,
+    started_at: j.started_at,
+  })
 
-    const fetchJourneys = async () => {
-      setIsLoading(true)
-      setHasError(false)
+  // Map backend JourneyTemplate to display format
+  const mapTemplate = (t: JourneyTemplate): DisplayTemplate => ({
+    id: t.slug || t.id,
+    title: t.title,
+    description: t.description || '',
+    category: t.primary_enemy_tags?.[0]
+      ? (ENEMY_TO_CATEGORY[t.primary_enemy_tags[0]] || 'growth')
+      : 'growth',
+    duration_days: t.duration_days,
+    difficulty: difficultyLabel(t.difficulty),
+    is_premium: !t.is_free,
+    rating: 4.8,
+  })
 
-      // Fetch active and available journeys independently so one failure
-      // doesn't block the other from loading.
-      const [activeResult, availableResult] = await Promise.allSettled([
-        apiFetch('/api/journeys?status=active'),
-        apiFetch('/api/journeys'),
-      ])
-
-      let hadError = false
-
-      if (activeResult.status === 'fulfilled' && activeResult.value.ok) {
-        const data = await activeResult.value.json()
-        setActiveJourneys(data.items || data.journeys || [])
-      } else {
-        hadError = true
-      }
-
-      if (availableResult.status === 'fulfilled' && availableResult.value.ok) {
-        const data = await availableResult.value.json()
-        setAvailableJourneys((data.items || data.journeys || []).filter((j: { status?: string }) => j.status !== 'active'))
-      } else {
-        hadError = true
-      }
-
-      if (hadError) setHasError(true)
-      setIsLoading(false)
-    }
-
-    fetchJourneys()
-  }, [isAuthenticated])
-
-  // Pull-to-refresh handler reuses the same fetch logic
-  const handleRefresh = useCallback(async () => {
+  // Fetch active journeys and available templates
+  const fetchData = useCallback(async () => {
     setIsLoading(true)
     setHasError(false)
 
-    const [activeResult, availableResult] = await Promise.allSettled([
-      apiFetch('/api/journeys?status=active'),
-      apiFetch('/api/journeys'),
+    const [activeResult, templatesResult] = await Promise.allSettled([
+      journeyEngineService.listJourneys({ status_filter: 'active' }).catch(() => null),
+      journeyEngineService.listTemplates({ limit: 20 }).catch(() => null),
     ])
 
     let hadError = false
 
-    if (activeResult.status === 'fulfilled' && activeResult.value.ok) {
-      const data = await activeResult.value.json()
-      setActiveJourneys(data.items || data.journeys || [])
+    // Process active journeys
+    if (activeResult.status === 'fulfilled' && activeResult.value) {
+      setActiveJourneys(activeResult.value.journeys.map(mapJourney))
     } else {
+      setActiveJourneys([])
       hadError = true
     }
 
-    if (availableResult.status === 'fulfilled' && availableResult.value.ok) {
-      const data = await availableResult.value.json()
-      setAvailableJourneys((data.items || data.journeys || []).filter((j: { status?: string }) => j.status !== 'active'))
+    // Process available templates
+    if (templatesResult.status === 'fulfilled' && templatesResult.value) {
+      setAvailableTemplates(templatesResult.value.templates.map(mapTemplate))
     } else {
+      // Use static catalog as fallback
+      setAvailableTemplates(STATIC_CATALOG)
       hadError = true
     }
 
@@ -138,19 +202,57 @@ export default function MobileJourneysPage() {
     setIsLoading(false)
   }, [])
 
-  // Filter journeys
-  const filteredJourneys = availableJourneys.filter((journey) => {
-    const matchesCategory = selectedCategory === 'all' || journey.category === selectedCategory
+  // Fetch on mount and when auth state changes
+  useEffect(() => {
+    if (!isAuthenticated) return
+    fetchData()
+  }, [isAuthenticated, fetchData])
+
+  // Filter templates
+  const filteredTemplates = availableTemplates.filter((template) => {
+    const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory
     const matchesSearch = !searchQuery ||
-      journey.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      journey.description.toLowerCase().includes(searchQuery.toLowerCase())
+      template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      template.description.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesCategory && matchesSearch
   })
 
-  // Handle journey press
-  const handleJourneyPress = useCallback((journeyId: string) => {
+  // Handle active journey press → navigate to detail page
+  const handleActiveJourneyPress = useCallback((journeyId: string) => {
     triggerHaptic('selection')
     router.push(`/m/journeys/${journeyId}`)
+  }, [router, triggerHaptic])
+
+  // Handle template press → start journey then navigate
+  const handleTemplatePress = useCallback(async (templateId: string) => {
+    if (isStartingRef.current) return
+    isStartingRef.current = true
+    setStartingTemplateId(templateId)
+    triggerHaptic('selection')
+
+    try {
+      const journey = await journeyEngineService.startJourney({
+        template_id: templateId,
+      })
+      triggerHaptic('success')
+      router.push(`/m/journeys/${journey.journey_id}`)
+    } catch (err) {
+      if (err instanceof JourneyEngineError) {
+        if (err.isAuthError()) {
+          router.push('/onboarding')
+          return
+        }
+        if (err.isMaxJourneysError()) {
+          setHasError(true)
+          return
+        }
+      }
+      triggerHaptic('error')
+      setHasError(true)
+    } finally {
+      isStartingRef.current = false
+      setStartingTemplateId(null)
+    }
   }, [router, triggerHaptic])
 
   // Handle category change
@@ -171,7 +273,7 @@ export default function MobileJourneysPage() {
       title="Journeys"
       largeTitle
       enablePullToRefresh
-      onRefresh={handleRefresh}
+      onRefresh={fetchData}
       rightActions={
         <motion.button
           whileTap={{ scale: 0.9 }}
@@ -235,7 +337,7 @@ export default function MobileJourneysPage() {
                 <motion.button
                   key={journey.id}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => handleJourneyPress(journey.id)}
+                  onClick={() => handleActiveJourneyPress(journey.id)}
                   className="w-full p-4 rounded-2xl text-left bg-gradient-to-br from-[#d4a44c]/10 to-[#d4a44c]/5 border border-[#d4a44c]/20"
                 >
                   <div className="flex items-start gap-3">
@@ -271,7 +373,7 @@ export default function MobileJourneysPage() {
           </div>
         )}
 
-        {/* Available Journeys */}
+        {/* Available Templates */}
         <div className="px-4">
           <h2 className="text-sm font-medium text-slate-400 mb-3">
             {selectedCategory === 'all' ? 'Explore Journeys' : `${CATEGORIES.find(c => c.id === selectedCategory)?.label} Journeys`}
@@ -286,7 +388,7 @@ export default function MobileJourneysPage() {
                 />
               ))}
             </div>
-          ) : filteredJourneys.length === 0 ? (
+          ) : filteredTemplates.length === 0 ? (
             <div className="text-center py-12">
               <Compass className="w-12 h-12 text-slate-600 mx-auto mb-3" />
               <p className="text-slate-400">No journeys found</p>
@@ -298,45 +400,50 @@ export default function MobileJourneysPage() {
             </div>
           ) : (
             <div className="space-y-3 pb-4">
-              {filteredJourneys.map((journey, index) => (
+              {filteredTemplates.map((template, index) => (
                 <motion.button
-                  key={journey.id}
+                  key={template.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => handleJourneyPress(journey.id)}
-                  className="w-full p-4 rounded-2xl text-left bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04]"
+                  onClick={() => handleTemplatePress(template.id)}
+                  disabled={startingTemplateId !== null}
+                  className="w-full p-4 rounded-2xl text-left bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] disabled:opacity-60"
                 >
                   <div className="flex items-start gap-3">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center flex-shrink-0">
-                      <Target className="w-6 h-6 text-cyan-400" />
+                      {startingTemplateId === template.id ? (
+                        <Loader2 className="w-6 h-6 text-cyan-400 animate-spin" />
+                      ) : (
+                        <Target className="w-6 h-6 text-cyan-400" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="text-base font-semibold text-white truncate">
-                          {journey.title}
+                          {template.title}
                         </h3>
-                        {journey.is_premium && (
+                        {template.is_premium && (
                           <Sparkles className="w-4 h-4 text-[#d4a44c] flex-shrink-0" />
                         )}
                       </div>
                       <p className="text-xs text-slate-400 line-clamp-2">
-                        {journey.description}
+                        {template.description}
                       </p>
 
                       {/* Meta info */}
                       <div className="flex items-center gap-3 mt-2">
                         <div className="flex items-center gap-1 text-xs text-slate-500">
                           <Clock className="w-3 h-3" />
-                          <span>{journey.duration_days} days</span>
+                          <span>{template.duration_days} days</span>
                         </div>
                         <div className="flex items-center gap-1 text-xs text-slate-500">
                           <Star className="w-3 h-3 text-[#d4a44c]" />
-                          <span>{(journey.rating ?? 0).toFixed(1)}</span>
+                          <span>{(template.rating ?? 0).toFixed(1)}</span>
                         </div>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full border ${difficultyColors[journey.difficulty]}`}>
-                          {journey.difficulty}
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full border ${difficultyColors[template.difficulty]}`}>
+                          {template.difficulty}
                         </span>
                       </div>
                     </div>
@@ -359,7 +466,7 @@ export default function MobileJourneysPage() {
             >
               <RefreshCw className="w-4 h-4 text-[#d4a44c] flex-shrink-0" />
               <p className="text-xs text-[#e8b54a]">
-                Could not load journeys. Pull down to refresh.
+                Could not load some data. Pull down to refresh.
               </p>
             </motion.div>
           )}

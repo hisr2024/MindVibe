@@ -18,8 +18,6 @@ import {
   ChevronLeft,
   Send,
   Users,
-  Wifi,
-  WifiOff,
   MessageCircle,
 } from 'lucide-react'
 
