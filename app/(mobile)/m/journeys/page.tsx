@@ -70,13 +70,49 @@ export default function MobileJourneysPage() {
   const [hasError, setHasError] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
 
-  // Shared fetch logic for initial load and refresh
-  const loadJourneys = useCallback(async () => {
+  // Fetch journeys on mount and when auth state changes
+  useEffect(() => {
+    if (!isAuthenticated) return
+
+    const fetchJourneys = async () => {
+      setIsLoading(true)
+      setHasError(false)
+
+      // Fetch active and available journeys independently so one failure
+      // doesn't block the other from loading.
+      const [activeResult, availableResult] = await Promise.allSettled([
+        apiFetch('/api/journeys?status=active'),
+        apiFetch('/api/journeys'),
+      ])
+
+      let hadError = false
+
+      if (activeResult.status === 'fulfilled' && activeResult.value.ok) {
+        const data = await activeResult.value.json()
+        setActiveJourneys(data.items || data.journeys || [])
+      } else {
+        hadError = true
+      }
+
+      if (availableResult.status === 'fulfilled' && availableResult.value.ok) {
+        const data = await availableResult.value.json()
+        setAvailableJourneys((data.items || data.journeys || []).filter((j: { status?: string }) => j.status !== 'active'))
+      } else {
+        hadError = true
+      }
+
+      if (hadError) setHasError(true)
+      setIsLoading(false)
+    }
+
+    fetchJourneys()
+  }, [isAuthenticated])
+
+  // Pull-to-refresh handler reuses the same fetch logic
+  const handleRefresh = useCallback(async () => {
     setIsLoading(true)
     setHasError(false)
 
-    // Fetch active and available journeys independently so one failure
-    // doesn't block the other from loading.
     const [activeResult, availableResult] = await Promise.allSettled([
       apiFetch('/api/journeys?status=active'),
       apiFetch('/api/journeys'),
@@ -101,11 +137,6 @@ export default function MobileJourneysPage() {
     if (hadError) setHasError(true)
     setIsLoading(false)
   }, [])
-
-  // Fetch journeys on mount
-  useEffect(() => {
-    if (isAuthenticated) loadJourneys()
-  }, [isAuthenticated, loadJourneys])
 
   // Filter journeys
   const filteredJourneys = availableJourneys.filter((journey) => {
@@ -140,7 +171,7 @@ export default function MobileJourneysPage() {
       title="Journeys"
       largeTitle
       enablePullToRefresh
-      onRefresh={loadJourneys}
+      onRefresh={handleRefresh}
       rightActions={
         <motion.button
           whileTap={{ scale: 0.9 }}
