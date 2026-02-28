@@ -34,7 +34,7 @@ const TOOL_FRIENDLY_NAMES: Record<string, string> = {
   'karma-reset': 'Karma Reset',
   'karma-footprint': 'Karma Footprint',
   'karmic-tree': 'Karmic Tree',
-  'sacred-reflections': 'Sacred Reflections',
+  'sacred-reflections': 'Personal Reflections',
   'kiaan-vibe': 'KIAAN Vibe',
   'wisdom-rooms': 'Wisdom Rooms',
   'community': 'Community Circles',

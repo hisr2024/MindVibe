@@ -51,7 +51,7 @@ const CORE_TOOLS: Tool[] = [
   },
   {
     id: 'journal',
-    label: 'Sacred Reflections',
+    label: 'Personal Reflections',
     description: 'Write in your journal',
     icon: BookOpen,
     href: '/m/journal',

@@ -22,7 +22,7 @@ export default function PrivacyPage() {
         </div>
         <div>
           <h2 className="text-lg font-semibold text-[#f5f0e8]">Your control</h2>
-          <p className="text-sm text-[#f5f0e8]/80">Export or delete your sacred reflections at any time. Your spiritual journey remains fully in your hands.</p>
+          <p className="text-sm text-[#f5f0e8]/80">Export or delete your personal reflections at any time. Your spiritual journey remains fully in your hands.</p>
         </div>
         <div>
           <h2 className="text-lg font-semibold text-[#f5f0e8]">Built with reverence</h2>

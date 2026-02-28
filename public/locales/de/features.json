@@ -41,13 +41,13 @@
     "outputFormat": "Ausgabeformat: Anerkennen, Ego trennen, Werte benennen, richtiges Handeln, ablösen, Mitgefühl hinzufügen, Formulierung vorschlagen, dann einen nächsten Schritt."
   },
   "sacredReflections": {
-    "title": "Heilige Reflexionen",
+    "title": "Persönliche Reflexionen",
     "subtitle": "Tagebuch",
     "description": "Einträge bleiben auf deinem Gerät und aktualisieren die wöchentliche Anleitung automatisch.",
     "openJournal": "Tagebuch öffnen",
     "goToJournal": "Zum Tagebuch",
     "keepInOnePlace": "Halte Reflexionen an einem ruhigen Ort",
-    "openSacredReflections": "Öffne Heilige Reflexionen zum Schreiben, Wiederlesen oder Fortsetzen deiner Praxis.",
+    "openSacredReflections": "Öffne Persönliche Reflexionen zum Schreiben, Wiederlesen oder Fortsetzen deiner Praxis.",
     "writePrompt": "Schreibe frei. Nur du kannst das sehen.",
     "titlePlaceholder": "Titel (optional)",
     "addReflection": "Reflexion hinzufügen",

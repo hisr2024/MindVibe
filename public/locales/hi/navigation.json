@@ -17,7 +17,7 @@
     "ardha": "Ardha",
     "viyog": "Viyoga",
     "relationshipCompass": "संबंध दिशा-सूचक",
-    "sacredReflections": "पवित्र चिंतन",
+    "sacredReflections": "व्यक्तिगत चिंतन",
     "karmaFootprint": "कर्म पदचिह्न",
     "karmicTree": "कर्म वृक्ष",
     "emotionalReset": "भावनात्मक रीसेट",
@@ -35,7 +35,7 @@
   "mobileNav": {
     "chat": "चैट",
     "pause": "विराम",
-    "journal": "पवित्र चिंतन"
+    "journal": "व्यक्तिगत चिंतन"
   },
   "footer": {
     "allRightsReserved": "सर्वाधिकार सुरक्षित",

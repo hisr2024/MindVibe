@@ -251,7 +251,7 @@ export function DivineKrishnaPresence() {
                 whileTap={{ scale: 0.96 }}
                 transition={springConfigs.snappy}
               >
-                {t('home.divine.ctaSecondary', 'Sacred Reflections')}
+                {t('home.divine.ctaSecondary', 'Personal Reflections')}
               </motion.div>
             </Link>
           </motion.div>

@@ -17,7 +17,7 @@
     "ardha": "Ardha",
     "viyog": "Viyoga",
     "relationshipCompass": "Boussole relationnelle",
-    "sacredReflections": "Réflexions sacrées",
+    "sacredReflections": "Réflexions personnelles",
     "karmaFootprint": "Empreinte karmique",
     "karmicTree": "Arbre karmique",
     "emotionalReset": "Réinitialisation émotionnelle",
@@ -35,7 +35,7 @@
   "mobileNav": {
     "chat": "Chat",
     "pause": "Pause",
-    "journal": "Réflexions sacrées"
+    "journal": "Réflexions personnelles"
   },
   "footer": {
     "allRightsReserved": "Tous droits réservés",

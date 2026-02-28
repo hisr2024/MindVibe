@@ -68,7 +68,7 @@ async def get_current_week_reflection(
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required for sacred reflections",
+            detail="Authentication required for personal reflections",
         )
 
     # Get current week start (Monday)

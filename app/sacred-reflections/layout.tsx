@@ -8,11 +8,11 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Sacred Reflections — Private Journal | Sakha',
+  title: 'Personal Reflections — Private Journal | Sakha',
   description:
     'Your encrypted private journal for spiritual growth. Capture reflections, KIAAN insights, and sacred moments with AES-GCM encryption -- your words remain yours.',
   openGraph: {
-    title: 'Sacred Reflections — Encrypted Spiritual Journal',
+    title: 'Personal Reflections — Encrypted Spiritual Journal',
     description:
       'Capture your spiritual journey in an encrypted private journal. Save KIAAN insights, reflections, and sacred moments securely.',
     url: 'https://mindvibe.life/sacred-reflections',

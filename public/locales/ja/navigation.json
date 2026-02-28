@@ -17,7 +17,7 @@
     "ardha": "Ardha",
     "viyog": "Viyoga",
     "relationshipCompass": "関係コンパス",
-    "sacredReflections": "聖なる反省",
+    "sacredReflections": "個人的な振り返り",
     "karmaFootprint": "カルマフットプリント",
     "karmicTree": "カルマの木",
     "emotionalReset": "感情的リセット",
@@ -35,7 +35,7 @@
   "mobileNav": {
     "chat": "チャット",
     "pause": "一時停止",
-    "journal": "聖なる反省"
+    "journal": "個人的な振り返り"
   },
   "footer": {
     "allRightsReserved": "全著作権所有",

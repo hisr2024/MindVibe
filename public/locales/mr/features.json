@@ -41,13 +41,13 @@
     "outputFormat": "Output format: acknowledge, separate ego, name values, right action, detach, add compassion, suggest phrasing, then one next step."
   },
   "sacredReflections": {
-    "title": "Sacred Reflections",
+    "title": "Personal Reflections",
     "subtitle": "Journal",
     "description": "Entries stay on your device and refresh the weekly guidance automatically.",
     "openJournal": "Open Journal",
     "goToJournal": "Go to Journal",
     "keepInOnePlace": "Keep reflections in one calm place",
-    "openSacredReflections": "Open Sacred Reflections to write, revisit, or continue your practice.",
+    "openSacredReflections": "Open Personal Reflections to write, revisit, or continue your practice.",
     "writePrompt": "Write freely. Only you can see this.",
     "titlePlaceholder": "Title (optional)",
     "addReflection": "Add Reflection",

@@ -47,7 +47,7 @@ export default function SiteNav() {
     { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN'), highlight: true },
     { href: '/dashboard', label: t('navigation.mainNav.dashboard', 'Dashboard') },
     { href: '/journeys', label: t('navigation.features.wisdomJourneys', 'Journeys'), premium: true },
-    { href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Sacred Reflections') },
+    { href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Personal Reflections') },
     { href: '/tools/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
     { href: '/profile', label: t('navigation.mainNav.profile', 'Profile') },
     { href: '/account', label: t('navigation.mainNav.account', 'Account') },

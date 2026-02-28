@@ -17,7 +17,7 @@
     "ardha": "Ardha",
     "viyog": "Viyoga",
     "relationshipCompass": "ਰਿਸ਼ਤਾ ਕੰਪਾਸ",
-    "sacredReflections": "ਪਵਿੱਤਰ ਪ੍ਰਤੀਬਿੰਬ",
+    "sacredReflections": "ਨਿੱਜੀ ਪ੍ਰਤੀਬਿੰਬ",
     "karmaFootprint": "ਕਰਮ ਪੈਰਾਂ ਦੇ ਨਿਸ਼ਾਨ",
     "karmicTree": "ਕਾਰਮਿਕ ਰੁੱਖ",
     "emotionalReset": "ਭਾਵਨਾਤਮਕ ਰੀਸੈੱਟ",
@@ -35,7 +35,7 @@
   "mobileNav": {
     "chat": "ਚੈਟ",
     "pause": "ਰੋਕੋ",
-    "journal": "ਪਵਿੱਤਰ ਪ੍ਰਤੀਬਿੰਬ"
+    "journal": "ਨਿੱਜੀ ਪ੍ਰਤੀਬਿੰਬ"
   },
   "footer": {
     "allRightsReserved": "ਸਾਰੇ ਅਧਿਕਾਰ ਰਾਖਵੇਂ",

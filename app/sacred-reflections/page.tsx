@@ -353,7 +353,7 @@ export default function SacredReflectionsPage() {
             <div>
               <p className="text-xs uppercase tracking-[0.22em] text-[#f5f0e8]/70">Private Sanctuary</p>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#f0c96d] via-[#e8b54a] to-[#f0c96d] bg-clip-text text-transparent">
-                Sacred Reflections
+                Personal Reflections
               </h1>
               <p className="mt-2 text-sm text-[#f5f0e8]/80 max-w-xl">
                 Your encrypted private journal. Entries are sealed with AES-GCM in your browser and synced to the cloud only as ciphertext.

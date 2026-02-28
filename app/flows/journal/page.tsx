@@ -11,7 +11,7 @@ export default function JournalFlow() {
       <header className="space-y-2">
         <p className="text-xs uppercase tracking-[0.22em] text-[#f5f0e8]/70">Page 8</p>
         <h2 className="text-2xl font-semibold text-[#f5f0e8]">Private Journal</h2>
-        <p className="text-sm text-[#f5f0e8]/80">Sacred Reflections with sealed local storage.</p>
+        <p className="text-sm text-[#f5f0e8]/80">Personal Reflections with sealed local storage.</p>
       </header>
 
       <div className="grid gap-4 md:grid-cols-2">

@@ -168,12 +168,12 @@ export const ECOSYSTEM_TOOLS: EcosystemTool[] = [
   },
   {
     id: 'sacred-reflections',
-    name: 'Sacred Reflections Journal',
+    name: 'Personal Reflections Journal',
     route: '/sacred-reflections',
-    friendDescription: 'Your private, encrypted journal for thoughts, feelings, and sacred reflections.',
+    friendDescription: 'Your private, encrypted journal for thoughts, feelings, and personal reflections.',
     suggestions: [
-      'Friend, sometimes the wisest thing you can do is write. Our Sacred Reflections journal is completely private — encrypted so only you can read it. Pour out whatever is in your heart. The Gita says self-knowledge is the highest knowledge. Want to write?',
-      'You know what might really help right now? Writing it down. Our Sacred Reflections journal is end-to-end encrypted — not even I can read what you write. It is your safe space. Sometimes seeing your thoughts on paper is the first step to understanding them.',
+      'Friend, sometimes the wisest thing you can do is write. Our Personal Reflections journal is completely private — encrypted so only you can read it. Pour out whatever is in your heart. The Gita says self-knowledge is the highest knowledge. Want to write?',
+      'You know what might really help right now? Writing it down. Our Personal Reflections journal is end-to-end encrypted — not even I can read what you write. It is your safe space. Sometimes seeing your thoughts on paper is the first step to understanding them.',
       'Dear one, there is power in putting pen to paper. Our journal is your sacred space — private, encrypted, and always waiting for you. No judgment, no eyes but yours. Shall I take you there?',
     ],
     triggerKeywords: ['journal', 'write', 'diary', 'write down', 'express', 'vent', 'pour out', 'thoughts on paper', 'private', 'reflect'],

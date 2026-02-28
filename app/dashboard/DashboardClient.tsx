@@ -90,7 +90,7 @@ const SACRED_TOOLS = [
 const OTHER_TOOLS = [
   { id: 'emotional-reset', symbol: '\u{1F4AB}', title: 'Emotional Reset', subtitle: 'Guided healing', href: '/emotional-reset' },
   { id: 'karma-reset', symbol: '\u{1F49A}', title: 'Karma Reset', subtitle: 'Heal with grace', href: '/tools/karma-reset' },
-  { id: 'sacred-reflections', symbol: '\u{1F4DD}', title: 'Sacred Reflections', subtitle: 'Private journal', href: '/flows/journal' },
+  { id: 'sacred-reflections', symbol: '\u{1F4DD}', title: 'Personal Reflections', subtitle: 'Private journal', href: '/flows/journal' },
   { id: 'karmic-tree', symbol: '\u{1F331}', title: 'Karmic Tree', subtitle: 'Your growth', href: '/karmic-tree' },
   { id: 'kiaan-vibe', symbol: '\u{1F3B5}', title: 'Vibe Player', subtitle: 'Sacred sounds', href: '/kiaan-vibe' },
   { id: 'wisdom-rooms', symbol: '\u{1F30D}', title: 'Wisdom Rooms', subtitle: 'Community chats', href: '/wisdom-rooms' },

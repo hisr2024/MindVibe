@@ -558,7 +558,7 @@ class MultiModalEmotionService:
 
         elif emotion == EmotionCategory.SADNESS:
             recommendations.append("Remember: 'The soul is neither born nor does it die' - Gita 2.20")
-            recommendations.append("Consider journaling your feelings in Sacred Reflections")
+            recommendations.append("Consider journaling your feelings in Personal Reflections")
 
         elif emotion == EmotionCategory.ANGER:
             recommendations.append("Pause before reacting - practice the 5-second rule")

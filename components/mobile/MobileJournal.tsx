@@ -268,7 +268,7 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
           <div className="flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-purple-400" />
-            <span className="font-medium text-white">Sacred Reflection</span>
+            <span className="font-medium text-white">Personal Reflection</span>
           </div>
 
           <div className="flex items-center gap-2">

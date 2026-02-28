@@ -55,7 +55,7 @@ const QUICK_ACTIONS = [
   {
     id: 'journal',
     label: 'Write in Journal',
-    description: 'Sacred reflections',
+    description: 'Personal reflections',
     icon: PenLine,
     href: '/m/journal',
     gradient: 'from-purple-500/20 to-pink-500/20',

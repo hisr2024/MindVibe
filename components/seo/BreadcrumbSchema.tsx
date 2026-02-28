@@ -15,7 +15,7 @@ const ROUTE_LABELS: Record<string, string> = {
   journeys: 'Journeys',
   community: 'Community',
   'deep-insights': 'Deep Insights',
-  'sacred-reflections': 'Sacred Reflections',
+  'sacred-reflections': 'Personal Reflections',
   'wisdom-rooms': 'Wisdom Rooms',
   tools: 'Tools',
   flows: 'Guided Flows',

@@ -17,7 +17,7 @@
     "ardha": "Ardha",
     "viyog": "Viyoga",
     "relationshipCompass": "సంబంధ దిక్సూచి",
-    "sacredReflections": "పవిత్ర ప్రతిబింబాలు",
+    "sacredReflections": "వ్యక్తిగత ప్రతిబింబాలు",
     "karmaFootprint": "కర్మ పాదముద్ర",
     "karmicTree": "కర్మ వృక్షం",
     "emotionalReset": "భావోద్వేగ రీసెట్",
@@ -35,7 +35,7 @@
   "mobileNav": {
     "chat": "చాట్",
     "pause": "పాజ్",
-    "journal": "పవిత్ర ప్రతిబింబాలు"
+    "journal": "వ్యక్తిగత ప్రతిబింబాలు"
   },
   "footer": {
     "allRightsReserved": "అన్ని హక్కులు రిజర్వు చేయబడ్డాయి",

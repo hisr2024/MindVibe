@@ -618,7 +618,7 @@ export default function SacredCheckIn() {
                   value={reflection}
                   onChange={(e) => setReflection(e.target.value)}
                   placeholder="What weighs on your heart today? What would you share with a trusted divine friend?..."
-                  aria-label="Your sacred reflection"
+                  aria-label="Your personal reflection"
                   className="relative w-full rounded-[18px] bg-transparent px-5 py-5 text-sm text-violet-100/80 placeholder:text-violet-400/30 outline-none resize-none font-sacred leading-relaxed"
                   rows={6}
                 />
@@ -828,7 +828,7 @@ export default function SacredCheckIn() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <span className="text-sm font-medium text-white/70 group-hover:text-white/90 transition-colors">
-                      Write in Sacred Reflections
+                      Write in Personal Reflections
                     </span>
                     <p className="text-[11px] text-white/35 mt-0.5">
                       Deepen your reflection in your journal

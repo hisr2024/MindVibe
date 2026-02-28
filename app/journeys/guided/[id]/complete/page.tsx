@@ -298,7 +298,7 @@ export default function JourneyCompletePage() {
               href="/sacred-reflections"
               className="flex-1 rounded-lg border border-white/10 bg-white/5 py-3 text-center text-sm text-white/70 hover:bg-white/10"
             >
-              Sacred Reflections
+              Personal Reflections
             </Link>
           </div>
         </motion.div>

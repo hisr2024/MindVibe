@@ -216,7 +216,7 @@ export const QUICK_ACCESS_TOOLS: ToolConfig[] = [
   {
     id: 'sacred-reflections',
     icon: '🙏',
-    title: 'Sacred Reflections',
+    title: 'Personal Reflections',
     description: 'Spiritual journaling',
     gradient: 'from-purple-400/30 to-indigo-400/30',
     href: '/sacred-reflections#spiritual', // Distinct href for spiritual journaling view
