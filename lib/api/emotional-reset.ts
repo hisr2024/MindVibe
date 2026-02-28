@@ -120,9 +120,6 @@ export async function getSession(
     `${getApiUrl()}/api/emotional-reset/session/${sessionId}`,
     {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       credentials: 'include',
     }
   )
@@ -173,9 +170,6 @@ export async function checkHealth(): Promise<HealthCheckResponse> {
     `${getApiUrl()}/api/emotional-reset/health`,
     {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       credentials: 'include',
     },
     5000 // Shorter timeout for health checks

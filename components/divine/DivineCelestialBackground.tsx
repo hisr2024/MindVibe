@@ -53,10 +53,33 @@ function generateParticles(count: number): Array<{ x: number; yStart: number; si
   return particles
 }
 
+/** God Particles - tiny luminous golden specks drifting across screen */
+function generateGodParticles(count: number): Array<{ x: number; y: number; size: number; delay: number; duration: number; drift: number }> {
+  const particles: Array<{ x: number; y: number; size: number; delay: number; duration: number; drift: number }> = []
+  let s = 293
+  for (let i = 0; i < count; i++) {
+    s = (s * 16807 + 0) % 2147483647
+    const x = (s % 10000) / 100
+    s = (s * 16807 + 0) % 2147483647
+    const y = (s % 10000) / 100
+    s = (s * 16807 + 0) % 2147483647
+    const size = 1 + ((s % 100) / 100) * 3
+    s = (s * 16807 + 0) % 2147483647
+    const delay = ((s % 100) / 100) * 20
+    s = (s * 16807 + 0) % 2147483647
+    const duration = 6 + ((s % 100) / 100) * 12
+    s = (s * 16807 + 0) % 2147483647
+    const drift = -20 + ((s % 100) / 100) * 40
+    particles.push({ x, y, size, delay, duration, drift })
+  }
+  return particles
+}
+
 export function DivineCelestialBackground() {
   const reduceMotion = useReducedMotion()
   const stars = useMemo(() => generateStars(35), [])
   const particles = useMemo(() => generateParticles(6), [])
+  const godParticles = useMemo(() => generateGodParticles(18), [])
 
   return (
     <div className="divine-celestial-bg pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
@@ -195,6 +218,78 @@ export function DivineCelestialBackground() {
             }}
           />
         ))}
+
+      {/* God Particles — luminous golden specks floating across the sacred space */}
+      {!reduceMotion &&
+        godParticles.map((p, i) => (
+          <motion.div
+            key={`god-${i}`}
+            className="absolute rounded-full"
+            style={{
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              width: p.size,
+              height: p.size,
+              background: 'radial-gradient(circle, rgba(240, 201, 109, 0.9), rgba(212, 164, 76, 0) 70%)',
+              boxShadow: `0 0 ${p.size * 2}px rgba(240, 201, 109, 0.4)`,
+            }}
+            animate={{
+              y: [0, -30 - p.drift, 0],
+              x: [0, p.drift, 0],
+              opacity: [0, 0.7, 0.5, 0],
+              scale: [0.5, 1, 0.8, 0.3],
+            }}
+            transition={{
+              duration: p.duration,
+              delay: p.delay,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+        ))}
+
+      {/* Krishna Shadow — subtle divine silhouette presence */}
+      <div
+        className="absolute bottom-0 right-[8%] opacity-[0.025]"
+        style={{
+          filter: 'blur(1.5px)',
+          ...(reduceMotion ? {} : {
+            animation: 'kiaanDivineBreath 15s ease-in-out infinite',
+          }),
+        }}
+      >
+        <svg
+          viewBox="0 0 400 700"
+          className="h-[55vh] w-auto max-w-[300px]"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g fill="#d4a44c">
+            {/* Head with crown */}
+            <ellipse cx="200" cy="115" rx="32" ry="38" />
+            <path d="M175 90 L185 55 L195 80 L200 45 L205 80 L215 55 L225 90" />
+            <ellipse cx="200" cy="90" rx="28" ry="6" />
+            {/* Peacock feather */}
+            <path d="M210 60 Q225 25 215 10 Q230 30 228 55" />
+            <ellipse cx="220" cy="22" rx="6" ry="10" opacity="0.7" />
+            {/* Neck */}
+            <rect x="190" y="148" width="20" height="18" rx="8" />
+            {/* Shoulders and torso — tribhanga pose */}
+            <path d="M160 170 Q180 160 200 166 Q220 160 240 170 L245 190 Q230 185 200 192 Q170 185 155 190 Z" />
+            <path d="M162 190 Q170 250 180 310 Q190 320 200 318 Q210 320 220 310 Q230 250 238 190 Z" opacity="0.9" />
+            {/* Dhoti */}
+            <path d="M175 310 Q165 400 155 500 Q150 550 160 600 Q170 650 185 680 L200 685 L215 680 Q230 650 240 600 Q250 550 245 500 Q235 400 225 310 Z" opacity="0.85" />
+            {/* Arms with flute */}
+            <path d="M162 190 Q140 210 125 225 Q115 235 110 240 Q108 245 112 248 L140 235 Q150 225 158 210" opacity="0.85" />
+            <path d="M238 190 Q255 215 265 240 Q270 250 268 255 L248 248 Q242 230 235 210" opacity="0.85" />
+            {/* Flute */}
+            <rect x="100" y="238" width="170" height="5" rx="2.5" transform="rotate(-8 100 240)" opacity="0.7" />
+            {/* Feet */}
+            <ellipse cx="185" cy="685" rx="16" ry="6" opacity="0.7" />
+            <ellipse cx="215" cy="685" rx="16" ry="6" opacity="0.7" />
+          </g>
+        </svg>
+      </div>
 
       {/* Soft vignette for depth */}
       <div

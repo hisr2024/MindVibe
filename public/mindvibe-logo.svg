@@ -1,39 +1,39 @@
 <svg width="512" height="512" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Divine Sunrise Gradient -->
+    <!-- Divine Gold Gradient -->
     <linearGradient id="divineGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#FF6B35"/>
-      <stop offset="35%" stop-color="#F7931E"/>
-      <stop offset="70%" stop-color="#FFB347"/>
-      <stop offset="100%" stop-color="#FFD700"/>
+      <stop offset="0%" stop-color="#c8943a"/>
+      <stop offset="35%" stop-color="#d4a44c"/>
+      <stop offset="70%" stop-color="#e8b54a"/>
+      <stop offset="100%" stop-color="#f0c96d"/>
     </linearGradient>
 
     <!-- Inner Light Radial Glow -->
     <radialGradient id="innerLight" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#FFFEF0"/>
-      <stop offset="40%" stop-color="#FFE4B5"/>
-      <stop offset="100%" stop-color="#FFD700"/>
+      <stop offset="40%" stop-color="#f5e6c8"/>
+      <stop offset="100%" stop-color="#f0c96d"/>
     </radialGradient>
 
     <!-- Divine Halo Glow -->
     <radialGradient id="divineHalo" cx="50%" cy="50%" r="60%">
-      <stop offset="0%" stop-color="rgba(255, 215, 0, 0.5)"/>
-      <stop offset="50%" stop-color="rgba(255, 183, 71, 0.25)"/>
-      <stop offset="100%" stop-color="rgba(255, 147, 89, 0)"/>
+      <stop offset="0%" stop-color="rgba(240, 201, 109, 0.5)"/>
+      <stop offset="50%" stop-color="rgba(212, 164, 76, 0.25)"/>
+      <stop offset="100%" stop-color="rgba(200, 148, 58, 0)"/>
     </radialGradient>
 
     <!-- Outer Aura -->
     <radialGradient id="outerAura" cx="50%" cy="50%" r="70%">
-      <stop offset="0%" stop-color="rgba(255, 211, 111, 0.2)"/>
-      <stop offset="60%" stop-color="rgba(255, 147, 89, 0.08)"/>
+      <stop offset="0%" stop-color="rgba(240, 201, 109, 0.2)"/>
+      <stop offset="60%" stop-color="rgba(212, 164, 76, 0.08)"/>
       <stop offset="100%" stop-color="rgba(11, 11, 15, 0)"/>
     </radialGradient>
 
     <!-- Petal Gradient -->
     <linearGradient id="petalGold" x1="50%" y1="100%" x2="50%" y2="0%">
-      <stop offset="0%" stop-color="#F7931E"/>
-      <stop offset="50%" stop-color="#FFB347"/>
-      <stop offset="100%" stop-color="#FFD700"/>
+      <stop offset="0%" stop-color="#c8943a"/>
+      <stop offset="50%" stop-color="#e8b54a"/>
+      <stop offset="100%" stop-color="#f0c96d"/>
     </linearGradient>
 
     <!-- Filter for soft glow -->
@@ -124,7 +124,7 @@
   <ellipse cx="128" cy="116" rx="6" ry="8" fill="#FFFEF5" opacity="0.9"/>
 
   <!-- Light Rays Emanating (Divine Energy) -->
-  <g opacity="0.4" stroke="#FFD700" stroke-width="1" stroke-linecap="round">
+  <g opacity="0.4" stroke="#f0c96d" stroke-width="1" stroke-linecap="round">
     <line x1="128" y1="75" x2="128" y2="65"/>
     <line x1="150" y1="82" x2="158" y2="74"/>
     <line x1="106" y1="82" x2="98" y2="74"/>
@@ -133,8 +133,8 @@
   </g>
 
   <!-- Subtle sparkles -->
-  <circle cx="155" cy="90" r="1.5" fill="#FFE4B5" opacity="0.8"/>
-  <circle cx="101" cy="90" r="1.5" fill="#FFE4B5" opacity="0.8"/>
+  <circle cx="155" cy="90" r="1.5" fill="#f5e6c8" opacity="0.8"/>
+  <circle cx="101" cy="90" r="1.5" fill="#f5e6c8" opacity="0.8"/>
   <circle cx="128" cy="68" r="2" fill="#FFFEF5" opacity="0.9"/>
 
   <!-- Bottom accent (like lotus seat/base) -->

@@ -882,7 +882,7 @@ export default function JourneysPageClient() {
               <StatCard
                 label="Day Streak"
                 value={dashboard.current_streak}
-                gradient="from-amber-500 to-orange-500"
+                gradient="from-[#e8b54a] to-[#c8943a]"
                 delay={0.1}
               />
               <StatCard

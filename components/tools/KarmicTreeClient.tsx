@@ -211,7 +211,6 @@ export function KarmicTreeClient({ className = '' }: KarmicTreeClientProps) {
         const response = await apiFetch('/api/analytics/karmic_tree', {
           method: 'GET',
           signal: controller.signal,
-          headers: { 'Content-Type': 'application/json' }
         })
         if (!response.ok) throw new Error('Request failed')
         const payload = (await response.json()) as ProgressResponse

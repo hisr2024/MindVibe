@@ -210,14 +210,21 @@ async function apiRequest<T>(
   options?: { journeyId?: string }
 ): Promise<T> {
   let lastError: JourneyServiceError | null = null;
+  const upperMethod = method.toUpperCase();
+  const hasBody = ['POST', 'PUT', 'PATCH'].includes(upperMethod);
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const headers: Record<string, string> = {};
+    if (hasBody) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     const requestOptions: RequestInit = {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers,
     };
 
-    if (body !== undefined) {
+    if (hasBody && body !== undefined) {
       requestOptions.body = JSON.stringify(body);
     }
 
