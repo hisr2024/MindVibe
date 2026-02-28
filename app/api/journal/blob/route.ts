@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     // Try the backend journal endpoint
     const backendResponse = await fetch(`${BACKEND_URL}/api/journal/blob`, {
       method: 'POST',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'POST'),
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(8000),
     })
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     // Try alternate journal endpoint
     const altResponse = await fetch(`${BACKEND_URL}/api/journal/entries`, {
       method: 'POST',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'POST'),
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(8000),
     }).catch(() => null)

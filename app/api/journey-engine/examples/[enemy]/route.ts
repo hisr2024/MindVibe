@@ -15,7 +15,7 @@ export async function GET(
   try {
     const response = await fetch(
       `${BACKEND_URL}/api/journey-engine/examples/${encodeURIComponent(enemy)}`,
-      { method: 'GET', headers: proxyHeaders(request), signal: AbortSignal.timeout(10000) }
+      { method: 'GET', headers: proxyHeaders(request, 'GET'), signal: AbortSignal.timeout(10000) }
     )
     const data = await response.json().catch(() => ({}))
     return forwardCookies(response, NextResponse.json(data, { status: response.status }))

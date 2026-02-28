@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     const backendResponse = await fetch(`${BACKEND_URL}/api/moods`, {
       method: 'POST',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'POST'),
       body: JSON.stringify({
         score,
         timestamp: body.timestamp || new Date().toISOString(),
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
 
     const backendResponse = await fetch(`${BACKEND_URL}/api/moods?period=${period}`, {
       method: 'GET',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'GET'),
       signal: AbortSignal.timeout(5000),
     })
 

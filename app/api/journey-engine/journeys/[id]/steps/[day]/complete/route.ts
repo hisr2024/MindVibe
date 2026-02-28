@@ -19,7 +19,7 @@ export async function POST(
       `${BACKEND_URL}/api/journey-engine/journeys/${encodeURIComponent(id)}/steps/${encodeURIComponent(day)}/complete`,
       {
         method: 'POST',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'POST'),
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(10000),
       }

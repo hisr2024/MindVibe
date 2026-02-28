@@ -18,7 +18,7 @@ export async function GET(
       `${BACKEND_URL}/api/community/circles/${encodeURIComponent(circleId)}${url.search}`,
       {
         method: 'GET',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'GET'),
         signal: AbortSignal.timeout(10000),
       }
     )

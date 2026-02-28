@@ -6,32 +6,31 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 export async function GET(request: NextRequest) {
   try {
     const backendRes = await fetch(`${BACKEND_URL}/api/kiaan/quantum-dive/quick`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        cookie: request.headers.get('cookie') || '',
-      },
+      headers: proxyHeaders(request, 'GET'),
       signal: AbortSignal.timeout(10000),
     })
 
     if (!backendRes.ok) {
       const errorData = await backendRes.json().catch(() => null)
-      return NextResponse.json(
-        errorData || { error: 'Quick quantum dive failed' },
-        { status: backendRes.status }
+      return forwardCookies(
+        backendRes,
+        NextResponse.json(
+          errorData || { error: 'Quick quantum dive failed' },
+          { status: backendRes.status }
+        )
       )
     }
 
     const data = await backendRes.json()
-    return NextResponse.json(data)
+    return forwardCookies(backendRes, NextResponse.json(data))
   } catch (error) {
-    console.error('[Quantum Dive] Quick scan error:', error)
+    console.error('[Quantum Dive] Quick scan error:', error instanceof Error ? error.message : error)
     return NextResponse.json(
       { error: 'Failed to perform quick quantum dive' },
       { status: 502 }

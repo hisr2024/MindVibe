@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       // Try backend TTS first
       const response = await fetch(`${BACKEND_URL}/api/voice/synthesize`, {
         method: 'POST',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'POST'),
         body: JSON.stringify({
           text: sanitizedText,
           language,

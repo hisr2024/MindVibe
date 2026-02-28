@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     try {
       const backendResponse = await fetch(`${BACKEND_URL}/api/voice-companion/quick-response`, {
         method: 'POST',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'POST'),
         body: JSON.stringify({
           query: sanitizedQuery,
           language: body.language || 'en',

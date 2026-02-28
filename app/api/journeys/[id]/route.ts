@@ -20,7 +20,7 @@ export async function GET(
   try {
     const response = await fetch(
       `${BACKEND_URL}/api/journeys/${encodeURIComponent(id)}`,
-      { method: 'GET', headers: proxyHeaders(request), signal: AbortSignal.timeout(10000) }
+      { method: 'GET', headers: proxyHeaders(request, 'GET'), signal: AbortSignal.timeout(10000) }
     )
     const data = await response.json().catch(() => ({}))
     return forwardCookies(response, NextResponse.json(data, { status: response.status }))
@@ -38,7 +38,7 @@ export async function PUT(
     const body = await request.text()
     const response = await fetch(
       `${BACKEND_URL}/api/journeys/${encodeURIComponent(id)}`,
-      { method: 'PUT', headers: proxyHeaders(request), body: body || undefined, signal: AbortSignal.timeout(10000) }
+      { method: 'PUT', headers: proxyHeaders(request, 'PUT'), body: body || undefined, signal: AbortSignal.timeout(10000) }
     )
     if (response.status === 204) {
       return forwardCookies(response, new NextResponse(null, { status: 204 }))
@@ -58,7 +58,7 @@ export async function DELETE(
   try {
     const response = await fetch(
       `${BACKEND_URL}/api/journeys/${encodeURIComponent(id)}`,
-      { method: 'DELETE', headers: proxyHeaders(request), signal: AbortSignal.timeout(10000) }
+      { method: 'DELETE', headers: proxyHeaders(request, 'DELETE'), signal: AbortSignal.timeout(10000) }
     )
     if (response.status === 204) {
       return forwardCookies(response, new NextResponse(null, { status: 204 }))

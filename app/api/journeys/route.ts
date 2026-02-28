@@ -1,10 +1,11 @@
 /**
  * Journeys API Route
  *
- * Provides journey listing for the mobile journeys page.
- * Proxies to backend journey service with catalog fallback.
+ * GET /api/journeys → List journeys (proxies to journey-engine with fallback catalog)
  *
- * Forwards Set-Cookie headers from backend so CSRF tokens reach the browser.
+ * This route serves the desktop journeys list page. It tries the
+ * journey-engine backend first, falls back to a static catalog
+ * so the page always renders something useful.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -14,15 +15,13 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
-
     const queryString = status ? `?status=${status}` : ''
 
-    // Try the journey-engine endpoint first (the main backend endpoint)
     const backendResponse = await fetch(
       `${BACKEND_URL}/api/journey-engine/journeys${queryString}`,
       {
         method: 'GET',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'GET'),
         signal: AbortSignal.timeout(5000),
       }
     )
@@ -32,22 +31,19 @@ export async function GET(request: NextRequest) {
       return forwardCookies(backendResponse, NextResponse.json(data))
     }
 
-    // Try alternate endpoint
-    const altResponse = await fetch(
-      `${BACKEND_URL}/api/journeys${queryString}`,
-      {
-        method: 'GET',
-        headers: proxyHeaders(request),
-        signal: AbortSignal.timeout(5000),
-      }
-    ).catch(() => null)
-
-    if (altResponse?.ok) {
-      const data = await altResponse.json()
-      return forwardCookies(altResponse, NextResponse.json(data))
+    // Forward auth errors
+    if (backendResponse.status === 401 || backendResponse.status === 403) {
+      const data = await backendResponse.json().catch(() => ({}))
+      return forwardCookies(
+        backendResponse,
+        NextResponse.json(
+          { ...data, items: [], journeys: [] },
+          { status: backendResponse.status }
+        )
+      )
     }
 
-    // If requesting active journeys and backend is down, return empty
+    // If requesting active journeys and backend errored, return empty
     if (status === 'active') {
       return NextResponse.json({ items: [], journeys: [] })
     }
@@ -57,8 +53,7 @@ export async function GET(request: NextRequest) {
       items: getStaticJourneyCatalog(),
       journeys: getStaticJourneyCatalog(),
     })
-  } catch (error) {
-    console.error('[Journeys] Backend unavailable:', error instanceof Error ? error.message : 'Unknown error')
+  } catch {
     return NextResponse.json({
       items: getStaticJourneyCatalog(),
       journeys: getStaticJourneyCatalog(),
@@ -104,7 +99,7 @@ function getStaticJourneyCatalog() {
     {
       id: 'personal-growth-vikas',
       title: 'Personal Growth (Vikas)',
-      description: 'Unlock your potential with daily practices rooted in the Gita\'s teachings on self-mastery.',
+      description: "Unlock your potential with daily practices rooted in the Gita's teachings on self-mastery.",
       category: 'growth',
       duration_days: 14,
       difficulty: 'intermediate',
@@ -126,7 +121,7 @@ function getStaticJourneyCatalog() {
     {
       id: 'emotional-resilience-dhairya',
       title: 'Emotional Resilience (Dhairya)',
-      description: 'Build unshakeable inner strength through the warrior wisdom of Arjuna\'s transformation.',
+      description: "Build unshakeable inner strength through the warrior wisdom of Arjuna's transformation.",
       category: 'growth',
       duration_days: 14,
       difficulty: 'intermediate',

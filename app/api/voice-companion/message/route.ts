@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
       try {
         const companionResponse = await fetch(`${BACKEND_URL}/api/voice-companion/message`, {
           method: 'POST',
-          headers: proxyHeaders(request),
+          headers: proxyHeaders(request, 'POST'),
           body: JSON.stringify({
             session_id: body.session_id,
             message: sanitizedMessage,

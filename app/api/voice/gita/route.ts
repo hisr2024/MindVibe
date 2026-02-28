@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
     try {
       const response = await fetch(`${BACKEND_URL}/api/voice/divine/shloka`, {
         method: 'POST',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'POST'),
         body: JSON.stringify({
           shloka: sanitizedShloka,
           chandas,
@@ -200,7 +200,7 @@ async function tryShlokaSynthesis(
   try {
     const response = await fetch(`${BACKEND_URL}/api/voice/divine/shloka`, {
       method: 'POST',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'POST'),
       body: JSON.stringify({
         shloka: text,
         chandas: 'anushtubh',
@@ -245,7 +245,7 @@ async function synthesizeViaBackend(
   try {
     const response = await fetch(`${BACKEND_URL}/api/voice/synthesize`, {
       method: 'POST',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'POST'),
       body: JSON.stringify({
         text,
         language,

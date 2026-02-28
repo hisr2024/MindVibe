@@ -294,7 +294,7 @@ export async function POST(request: NextRequest) {
 
         const response = await fetch(`${BACKEND_URL}/api/karma-reset/kiaan/generate`, {
           method: 'POST',
-          headers: proxyHeaders(request),
+          headers: proxyHeaders(request, 'POST'),
           body: JSON.stringify({
             situation: sanitizedSituation,
             feeling: sanitizedFeeling,

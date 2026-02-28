@@ -7,35 +7,34 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await request.text().catch(() => '{}')
 
     const backendRes = await fetch(`${BACKEND_URL}/api/kiaan/quantum-dive/analyze`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        cookie: request.headers.get('cookie') || '',
-      },
-      body: JSON.stringify(body),
+      headers: proxyHeaders(request, 'POST'),
+      body: body || '{}',
       signal: AbortSignal.timeout(15000),
     })
 
     if (!backendRes.ok) {
       const errorData = await backendRes.json().catch(() => null)
-      return NextResponse.json(
-        errorData || { error: 'Quantum dive analysis failed' },
-        { status: backendRes.status }
+      return forwardCookies(
+        backendRes,
+        NextResponse.json(
+          errorData || { error: 'Quantum dive analysis failed' },
+          { status: backendRes.status }
+        )
       )
     }
 
     const data = await backendRes.json()
-    return NextResponse.json(data)
+    return forwardCookies(backendRes, NextResponse.json(data))
   } catch (error) {
-    console.error('[Quantum Dive] Analyze error:', error)
+    console.error('[Quantum Dive] Analyze error:', error instanceof Error ? error.message : error)
     return NextResponse.json(
       { error: 'Failed to perform quantum dive analysis' },
       { status: 502 }

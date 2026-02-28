@@ -17,7 +17,7 @@ export async function POST(
       `${BACKEND_URL}/api/journey-engine/journeys/${encodeURIComponent(id)}/pause`,
       {
         method: 'POST',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'POST'),
         signal: AbortSignal.timeout(10000),
       }
     )

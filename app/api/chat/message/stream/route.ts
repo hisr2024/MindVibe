@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     try {
       const response = await fetch(`${BACKEND_URL}/api/chat/message/stream`, {
         method: 'POST',
-        headers: proxyHeaders(request, { 'Accept': 'text/event-stream' }),
+        headers: proxyHeaders(request, 'POST', { 'Accept': 'text/event-stream' }),
         body: JSON.stringify({
           message: sanitizedMessage,
           language,
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     try {
       const response = await fetch(`${BACKEND_URL}/api/chat/message`, {
         method: 'POST',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'POST'),
         body: JSON.stringify({
           message: sanitizedMessage,
           language,

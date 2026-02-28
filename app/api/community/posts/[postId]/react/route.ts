@@ -18,7 +18,7 @@ export async function POST(
       `${BACKEND_URL}/api/community/posts/${encodeURIComponent(postId)}/react`,
       {
         method: 'POST',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'POST'),
         body: body || undefined,
         signal: AbortSignal.timeout(10000),
       }

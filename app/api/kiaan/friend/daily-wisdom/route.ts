@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
   // Try backend first
   try {
     const res = await fetch(`${BACKEND_URL}/api/kiaan/friend/daily-wisdom`, {
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'GET'),
       signal: AbortSignal.timeout(3000),
     })
     if (res.ok) {

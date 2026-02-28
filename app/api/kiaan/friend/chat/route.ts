@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
     try {
       const backendRes = await fetch(`${BACKEND_URL}/api/companion/message`, {
         method: 'POST',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'POST'),
         body: JSON.stringify({
           session_id: body.session_id || 'voice_companion',
           message,

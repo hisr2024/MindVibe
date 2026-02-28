@@ -1,7 +1,11 @@
 /**
  * Journey Engine Journeys API Proxy
- * Proxies to backend journey-engine service with graceful fallback
- * when the backend is unavailable or user is not authenticated.
+ *
+ * GET  /api/journey-engine/journeys → List user journeys (with fallback)
+ * POST /api/journey-engine/journeys → Start a new journey from a template
+ *
+ * Proxies to the backend journey-engine service. Returns an empty
+ * fallback on GET if the backend is unreachable so the UI still renders.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -16,11 +20,10 @@ const FALLBACK_JOURNEYS = {
 export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url)
-    const queryString = url.search
 
-    const response = await fetch(`${BACKEND_URL}/api/journey-engine/journeys${queryString}`, {
+    const response = await fetch(`${BACKEND_URL}/api/journey-engine/journeys${url.search}`, {
       method: 'GET',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'GET'),
       signal: AbortSignal.timeout(8000),
     })
 
@@ -29,7 +32,7 @@ export async function GET(request: NextRequest) {
       return forwardCookies(response, NextResponse.json(data))
     }
 
-    // Forward 401/403 as-is so the frontend can redirect to login
+    // Forward auth errors so the frontend can redirect to login
     if (response.status === 401 || response.status === 403) {
       return forwardCookies(
         response,
@@ -40,7 +43,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // For other errors, return fallback with 200 so the UI still renders
+    // For other errors return fallback with 200 so the UI still renders
     return forwardCookies(response, NextResponse.json(FALLBACK_JOURNEYS))
   } catch {
     return NextResponse.json(FALLBACK_JOURNEYS)
@@ -49,12 +52,14 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    // Safely read body — may be empty if template_id is in query
+    const rawBody = await request.text().catch(() => '')
+    const body = rawBody && rawBody.length > 0 ? rawBody : '{}'
 
     const response = await fetch(`${BACKEND_URL}/api/journey-engine/journeys`, {
       method: 'POST',
-      headers: proxyHeaders(request),
-      body: JSON.stringify(body),
+      headers: proxyHeaders(request, 'POST'),
+      body,
       signal: AbortSignal.timeout(10000),
     })
 
@@ -63,24 +68,13 @@ export async function POST(request: NextRequest) {
       return forwardCookies(response, NextResponse.json(data))
     }
 
-    const status = response.status
-    if (status === 401) {
-      return forwardCookies(
-        response,
-        NextResponse.json(
-          { error: 'Authentication required to start a journey. Please sign in.' },
-          { status: 401 }
-        )
-      )
-    }
+    // Forward the backend's error status and message
+    const data = await response.json().catch(() => ({}))
+    const detail = typeof data?.detail === 'string' ? data.detail : 'Failed to create journey'
 
-    const errorText = await response.text().catch(() => 'Unknown error')
     return forwardCookies(
       response,
-      NextResponse.json(
-        { error: errorText || 'Failed to create journey' },
-        { status }
-      )
+      NextResponse.json({ error: detail, detail }, { status: response.status })
     )
   } catch {
     return NextResponse.json(

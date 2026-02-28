@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
 
     const backendResponse = await fetch(`${BACKEND_URL}/api/companion/insights/mood-trends${queryString}`, {
       method: 'GET',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'GET'),
       signal: AbortSignal.timeout(8000),
     })
 

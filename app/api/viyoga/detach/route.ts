@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       // Call the backend Viyoga endpoint
       const response = await fetch(`${BACKEND_URL}/api/viyoga/detach`, {
         method: 'POST',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'POST'),
         body: JSON.stringify({
           outcome_worry: sanitizedWorry,
         }),

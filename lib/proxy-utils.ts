@@ -30,17 +30,28 @@ export function forwardCookies(backendRes: Response, clientRes: NextResponse): N
  * Build headers for a proxied request to the backend.
  * Automatically forwards cookies and CSRF token from the original request.
  *
+ * Content-Type is only set for methods that carry a body (POST, PUT, PATCH).
+ * Sending Content-Type on bodyless requests (GET, DELETE, HEAD) causes some
+ * backends (e.g. FastAPI) to reject the request with 400 Bad Request.
+ *
  * @param request - The incoming Next.js request
- * @param extra - Additional headers to merge (e.g. Content-Type)
+ * @param method  - HTTP method (used to decide Content-Type)
+ * @param extra   - Additional headers to merge
  */
 export function proxyHeaders(
   request: NextRequest,
+  method?: string,
   extra: Record<string, string> = {}
 ): Record<string, string> {
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     'Accept': 'application/json',
     ...extra,
+  }
+
+  // Only set Content-Type for methods that carry a request body
+  const upperMethod = (method || request.method).toUpperCase()
+  if (['POST', 'PUT', 'PATCH'].includes(upperMethod)) {
+    headers['Content-Type'] = 'application/json'
   }
 
   // Forward cookies for session-based auth
@@ -85,13 +96,15 @@ export function createProxyHandler(
 ) {
   return async function handler(request: NextRequest) {
     try {
-      const hasBody = ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())
-      const body = hasBody ? await request.text() : undefined
+      const upperMethod = method.toUpperCase()
+      const hasBody = ['POST', 'PUT', 'PATCH'].includes(upperMethod)
+      const rawBody = hasBody ? await request.text() : undefined
+      const body = rawBody && rawBody.length > 0 ? rawBody : undefined
 
       const backendResponse = await fetch(`${BACKEND_URL}${backendPath}`, {
-        method: method.toUpperCase(),
-        headers: proxyHeaders(request),
-        body: body || undefined,
+        method: upperMethod,
+        headers: proxyHeaders(request, upperMethod),
+        body,
         signal: AbortSignal.timeout(timeoutMs),
       })
 
