@@ -72,7 +72,7 @@ export default function SubscriptionDashboardPage() {
         <div className="space-y-1">
           <h1 className="text-3xl font-bold text-[#f5f0e8] mb-1">Subscription</h1>
           <p className="text-[#f5f0e8]/75 max-w-3xl">
-            Manage your plan and track your usage with the MindVibe Companion by your side. Everything you need to stay on top of your membership is organized below.
+            Manage your plan and track your usage with the Sakha by your side. Everything you need to stay on top of your membership is organized below.
           </p>
         </div>
       </div>

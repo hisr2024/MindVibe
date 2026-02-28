@@ -1,6 +1,6 @@
 export const metadata = {
-  title: 'Features | MindVibe',
-  description: 'Discover MindVibe&apos;s sacred tools — KIAAN divine companion, wisdom journeys, sacred reflections, and spiritual growth features rooted in the Bhagavad Gita.'
+  title: 'Features | Sakha',
+  description: 'Discover Sakha&apos;s sacred tools — KIAAN divine companion, wisdom journeys, sacred reflections, and spiritual growth features rooted in the Bhagavad Gita.'
 }
 
 export default function FeaturesLayout({

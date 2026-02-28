@@ -2,17 +2,17 @@
  * Dashboard Layout
  *
  * Server component wrapper that provides SEO metadata for the
- * user's sacred dashboard in MindVibe.
+ * user's sacred dashboard in Sakha.
  */
 
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Your Sacred Dashboard | MindVibe',
+  title: 'Your Sacred Dashboard | Sakha',
   description:
-    'Your personal spiritual dashboard. Track journey progress, access wisdom tools, review reflections, and continue your path to inner peace with MindVibe.',
+    'Your personal spiritual dashboard. Track journey progress, access wisdom tools, review reflections, and continue your path to inner peace with Sakha.',
   openGraph: {
-    title: 'Your Sacred Dashboard | MindVibe',
+    title: 'Your Sacred Dashboard | Sakha',
     description:
       'Your personal spiritual dashboard. Track journey progress, access wisdom tools, review reflections, and continue your path to inner peace.',
     url: 'https://mindvibe.life/dashboard',

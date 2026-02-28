@@ -1,7 +1,7 @@
 /**
  * Terms of Service Page
  *
- * Server component that renders MindVibe's Terms of Service.
+ * Server component that renders Sakha's Terms of Service.
  * Covers acceptance, accounts, privacy, payments, content,
  * disclaimers, and termination in spiritually-themed but
  * legally adequate language.
@@ -10,9 +10,9 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | MindVibe',
+  title: 'Terms of Service | Sakha',
   description:
-    'Terms of Service for MindVibe, your spiritual companion rooted in Bhagavad Gita wisdom. Read about usage, privacy, content, and your sacred responsibilities.',
+    'Terms of Service for Sakha, your spiritual companion rooted in Bhagavad Gita wisdom. Read about usage, privacy, content, and your sacred responsibilities.',
   alternates: {
     canonical: 'https://mindvibe.life/terms',
   },
@@ -30,9 +30,9 @@ export default function TermsOfServicePage() {
         </p>
 
         <p className="text-white/70 leading-relaxed">
-          Welcome to MindVibe. These Terms of Service govern your use of the
-          MindVibe platform, including our website, mobile application, KIAAN AI
-          companion, and all related services. By accessing or using MindVibe,
+          Welcome to Sakha. These Terms of Service govern your use of the
+          Sakha platform, including our website, mobile application, KIAAN AI
+          companion, and all related services. By accessing or using Sakha,
           you agree to be bound by these terms. If you do not agree, please
           refrain from using our services.
         </p>
@@ -43,7 +43,7 @@ export default function TermsOfServicePage() {
             1. Acceptance of Terms
           </h2>
           <p className="text-white/70 leading-relaxed">
-            By creating an account, accessing, or using any part of MindVibe,
+            By creating an account, accessing, or using any part of Sakha,
             you acknowledge that you have read, understood, and agree to be
             bound by these Terms of Service, our Privacy Policy, and any
             additional guidelines or rules posted on the platform. We may update
@@ -51,7 +51,7 @@ export default function TermsOfServicePage() {
             constitutes acceptance of the revised terms.
           </p>
           <p className="text-white/70 leading-relaxed">
-            You must be at least 13 years of age to use MindVibe. If you are
+            You must be at least 13 years of age to use Sakha. If you are
             under 18, you represent that you have obtained parental or guardian
             consent before using the platform.
           </p>
@@ -63,7 +63,7 @@ export default function TermsOfServicePage() {
             2. Your Account
           </h2>
           <p className="text-white/70 leading-relaxed">
-            When you create a MindVibe account, you are responsible for
+            When you create a Sakha account, you are responsible for
             maintaining the confidentiality of your login credentials and for
             all activities that occur under your account. You agree to provide
             accurate information and to promptly update it if it changes.
@@ -113,7 +113,7 @@ export default function TermsOfServicePage() {
             4. Payments and Subscriptions
           </h2>
           <p className="text-white/70 leading-relaxed">
-            MindVibe may offer free and paid tiers of service. If you subscribe
+            Sakha may offer free and paid tiers of service. If you subscribe
             to a paid plan, you agree to pay the applicable fees as described at
             the time of purchase. Subscriptions may renew automatically unless
             you cancel before the renewal date.
@@ -134,20 +134,20 @@ export default function TermsOfServicePage() {
           <p className="text-white/70 leading-relaxed">
             The Bhagavad Gita verses, translations, commentary, KIAAN AI
             responses, journey content, and all other materials provided through
-            MindVibe are protected by copyright and intellectual property laws.
+            Sakha are protected by copyright and intellectual property laws.
             You may use this content for personal, non-commercial spiritual
             growth purposes only.
           </p>
           <p className="text-white/70 leading-relaxed">
-            Content you create on MindVibe, such as journal entries,
+            Content you create on Sakha, such as journal entries,
             reflections, and notes, remains your intellectual property. By
-            submitting content, you grant MindVibe a limited, non-exclusive
+            submitting content, you grant Sakha a limited, non-exclusive
             license to store, process, and display your content back to you as
             part of the service.
           </p>
           <p className="text-white/70 leading-relaxed">
             You agree not to reproduce, distribute, modify, or create
-            derivative works from MindVibe&apos;s proprietary content without
+            derivative works from Sakha&apos;s proprietary content without
             our written permission.
           </p>
         </section>
@@ -158,7 +158,7 @@ export default function TermsOfServicePage() {
             6. Acceptable Use
           </h2>
           <p className="text-white/70 leading-relaxed">
-            MindVibe is a platform for spiritual growth and inner peace. You
+            Sakha is a platform for spiritual growth and inner peace. You
             agree not to use the platform to:
           </p>
           <ul className="list-disc pl-6 text-white/70 space-y-2">
@@ -178,7 +178,7 @@ export default function TermsOfServicePage() {
               platform
             </li>
             <li>
-              Scrape, mine, or extract data from MindVibe through automated
+              Scrape, mine, or extract data from Sakha through automated
               means without permission
             </li>
           </ul>
@@ -190,7 +190,7 @@ export default function TermsOfServicePage() {
             7. Disclaimers
           </h2>
           <p className="text-white/70 leading-relaxed">
-            MindVibe provides spiritual guidance and wisdom resources for
+            Sakha provides spiritual guidance and wisdom resources for
             personal growth and self-reflection. Our platform, including KIAAN
             AI, is <strong className="text-white/90">not a substitute</strong>{' '}
             for professional medical advice, mental health treatment, or
@@ -219,7 +219,7 @@ export default function TermsOfServicePage() {
             8. Limitation of Liability
           </h2>
           <p className="text-white/70 leading-relaxed">
-            To the fullest extent permitted by applicable law, MindVibe and its
+            To the fullest extent permitted by applicable law, Sakha and its
             creators, officers, employees, and agents shall not be liable for
             any indirect, incidental, special, consequential, or punitive
             damages, including but not limited to loss of data, loss of

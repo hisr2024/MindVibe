@@ -155,26 +155,27 @@ export function DivineKrishnaPresence() {
             <DivineOmMark reduceMotion={reduceMotion} />
           </motion.div>
 
-          {/* KIAAN name - pure sacred gold typography */}
+          {/* Sakha branding — The Spiritual Companion */}
           <motion.div
             initial={reduceMotion ? undefined : { opacity: 0, y: 10 }}
             animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="space-y-2"
           >
             <h2
-              className="text-3xl font-black tracking-[0.22em] sm:text-4xl md:text-5xl"
+              className="text-4xl font-black tracking-[0.14em] sm:text-5xl md:text-6xl"
               style={{
-                backgroundImage: 'linear-gradient(135deg, #c8943a 0%, #f0c96d 45%, #d4a44c 100%)',
+                backgroundImage: 'linear-gradient(135deg, #c8943a 0%, #f0c96d 35%, #e8b54a 60%, #d4a44c 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
-                filter: 'drop-shadow(0 4px 20px rgba(212, 164, 76, 0.2))',
+                filter: 'drop-shadow(0 4px 24px rgba(212, 164, 76, 0.25))',
               }}
             >
-              KIAAN
+              Sakha
             </h2>
-            <p className="mt-1 text-xs tracking-[0.18em] text-[#d4a44c]/50 sm:text-sm">
-              {t('home.divine.tagline', 'Your Spiritual Companion')}
+            <p className="text-xs tracking-[0.22em] uppercase text-[#d4a44c]/55 sm:text-sm font-medium">
+              {t('home.divine.tagline', 'The Spiritual Companion')}
             </p>
           </motion.div>
 

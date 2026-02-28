@@ -9,7 +9,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Wisdom Rooms — Sacred Spaces | MindVibe',
+  title: 'Wisdom Rooms — Sacred Spaces | Sakha',
   description:
     'Enter themed sacred spaces for calm grounding, gratitude, courage, clarity, and compassion. Real-time rooms guided by KIAAN and Bhagavad Gita wisdom.',
   openGraph: {

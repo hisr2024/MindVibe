@@ -1,6 +1,6 @@
 export const metadata = {
-  title: 'Privacy | MindVibe',
-  description: 'Your sacred space is protected. Learn how MindVibe keeps your spiritual journey private and confidential.'
+  title: 'Privacy | Sakha',
+  description: 'Your sacred space is protected. Learn how Sakha keeps your spiritual journey private and confidential.'
 }
 
 export default function PrivacyPage() {
@@ -27,7 +27,7 @@ export default function PrivacyPage() {
         <div>
           <h2 className="text-lg font-semibold text-[#f5f0e8]">Built with reverence</h2>
           <p className="text-sm text-[#f5f0e8]/80">
-            Your trust is sacred. MindVibe is built with the highest standards of data protection — encrypted storage, consent-first design, and complete transparency. A spiritual companion you can rely on.
+            Your trust is sacred. Sakha is built with the highest standards of data protection — encrypted storage, consent-first design, and complete transparency. A spiritual companion you can rely on.
           </p>
         </div>
       </section>

@@ -30,18 +30,18 @@ export function MindVibeWordmark({
   return (
     <motion.div
       className={`flex flex-col leading-tight ${className}`}
-      animate={isAnimated ? { filter: 'drop-shadow(0 8px 26px rgba(255, 147, 89, 0.32))' } : undefined}
+      animate={isAnimated ? { filter: 'drop-shadow(0 8px 26px rgba(212, 164, 76, 0.28))' } : undefined}
       transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-      aria-label="MindVibe wordmark"
+      aria-label="Sakha wordmark"
     >
       <motion.span
-        className={`font-extrabold tracking-[0.06em] ${text} bg-clip-text text-transparent`}
-        style={{ backgroundImage: gradientCss.mvGradientSunrise }}
+        className={`font-extrabold tracking-[0.08em] ${text} bg-clip-text text-transparent`}
+        style={{ backgroundImage: 'linear-gradient(135deg, #c8943a 0%, #f0c96d 45%, #e8b54a 70%, #d4a44c 100%)' }}
         initial={isAnimated ? { opacity: 0.8, y: 2 } : undefined}
         animate={isAnimated ? { opacity: 1, y: 0 } : undefined}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
       >
-        MindVibe
+        Sakha
       </motion.span>
       {showTagline && (
         <motion.span
@@ -50,7 +50,7 @@ export function MindVibeWordmark({
           animate={isAnimated ? { opacity: 1 } : undefined}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          Your{' '}
+          The{' '}
           <span className="relative inline-flex items-center">
             <KrishnaSymbol size={krishnaSize} animated={animated} glow />
             <motion.span

@@ -14,7 +14,7 @@ export default function KarmicTreePageClient() {
           <ToolHeader
             icon="🌱"
             title="Karmic Tree"
-            subtitle="Track achievements, unlock mindful rewards, and visualize your growth journey with MindVibe."
+            subtitle="Track achievements, unlock mindful rewards, and visualize your growth journey with Sakha."
             backLink={{ label: 'Back to home', href: '/' }}
           />
         </FadeIn>

@@ -56,7 +56,7 @@ export default function OnboardingPage() {
   const handleComplete = () => {
     // Save profile
     const profile = {
-      displayName: name || 'MindVibe User',
+      displayName: name || 'Sakha User',
       email: 'user@mindvibe.life',
       bio,
       goals,
@@ -95,7 +95,7 @@ export default function OnboardingPage() {
   const steps = [
     {
       id: 'welcome',
-      title: 'Welcome to MindVibe',
+      title: 'Welcome to Sakha',
       description: 'Your calm, privacy-first spiritual companion',
       content: <WelcomeScreen />,
     },

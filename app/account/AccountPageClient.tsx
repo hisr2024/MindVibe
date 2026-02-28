@@ -646,7 +646,7 @@ function UnauthenticatedAccountView() {
       <section className="rounded-3xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#0f0a08] via-[#0b0b0f] to-[#0c0f19] p-8 shadow-[0_24px_100px_rgba(255,115,39,0.18)]">
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.26em] text-[#f5f0e8]/75">Account Access</p>
-          <h1 className="text-3xl font-bold text-[#f5f0e8]">Welcome to MindVibe</h1>
+          <h1 className="text-3xl font-bold text-[#f5f0e8]">Welcome to Sakha</h1>
           <p className="text-sm text-[#f5f0e8]/60">Create an account or sign in to sync your spiritual journey across devices</p>
         </div>
       </section>

@@ -1,6 +1,6 @@
 export const metadata = {
-  title: 'Contact | MindVibe',
-  description: 'Reach the MindVibe team — your spiritual companion. Share feedback, seek guidance, or connect with us.'
+  title: 'Contact | Sakha',
+  description: 'Reach the Sakha team — your spiritual companion. Share feedback, seek guidance, or connect with us.'
 }
 
 export default function ContactPage() {

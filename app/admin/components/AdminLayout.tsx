@@ -38,7 +38,7 @@ export default function AdminLayout({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <span className="text-lg font-semibold text-[#d4a44c]">MindVibe Admin</span>
+        <span className="text-lg font-semibold text-[#d4a44c]">Sakha Admin</span>
       </div>
 
       {/* Sidebar */}
@@ -53,7 +53,7 @@ export default function AdminLayout({
               MV
             </span>
             <div>
-              <p className="text-sm font-semibold text-[#d4a44c]">MindVibe</p>
+              <p className="text-sm font-semibold text-[#d4a44c]">Sakha</p>
               <p className="text-xs text-slate-400">Admin Panel</p>
             </div>
           </Link>

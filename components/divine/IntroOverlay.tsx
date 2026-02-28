@@ -95,7 +95,7 @@ export function IntroOverlay() {
         onTransitionEnd={handleTransitionEnd}
         role="dialog"
         aria-modal="true"
-        aria-label="Welcome to MindVibe"
+        aria-label="Welcome to Sakha"
       >
         {/* Background — deep black with pre-softened golden cosmic hazes */}
         {/* No filter:blur() — wider radial-gradient spread handles softness natively */}

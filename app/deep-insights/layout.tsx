@@ -8,11 +8,11 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Deep Insights — Spiritual Analysis | MindVibe',
+  title: 'Deep Insights — Spiritual Analysis | Sakha',
   description:
     'Unlock deeper self-understanding with AI-powered spiritual analysis. Explore your inner patterns, emotional tendencies, and growth path through the lens of Bhagavad Gita wisdom.',
   openGraph: {
-    title: 'Deep Insights — MindVibe Spiritual Analysis',
+    title: 'Deep Insights — Sakha Spiritual Analysis',
     description:
       'AI-powered spiritual analysis tools. Discover your inner patterns and growth path through Bhagavad Gita wisdom.',
     url: 'https://mindvibe.life/deep-insights',

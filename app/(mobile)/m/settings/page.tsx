@@ -463,7 +463,7 @@ export default function MobileSettingsPage() {
 
         {/* App Version */}
         <div className="text-center py-4">
-          <p className="text-xs text-slate-600">MindVibe v2.0.0</p>
+          <p className="text-xs text-slate-600">Sakha v2.0.0</p>
           <p className="text-xs text-slate-700">Made with love for your wellbeing</p>
         </div>
       </div>

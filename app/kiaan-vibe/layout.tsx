@@ -9,7 +9,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'KIAAN Vibe — Sacred Music & Meditation | MindVibe',
+  title: 'KIAAN Vibe — Sacred Music & Meditation | Sakha',
   description:
     'Listen to sacred meditation tracks, Bhagavad Gita chanting, and calming soundscapes. KIAAN Vibe is your divine audio companion for focus, sleep, breath work, and mantra practice.',
   openGraph: {

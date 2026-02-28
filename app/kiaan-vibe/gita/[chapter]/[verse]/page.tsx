@@ -40,7 +40,7 @@ export function generateStaticParams() {
 }
 
 export const metadata = {
-  title: 'Bhagavad Gita Verse | MindVibe',
+  title: 'Bhagavad Gita Verse | Sakha',
   description: 'Read and listen to a sacred verse of the Bhagavad Gita with Sanskrit, transliteration, translations, and divine voice narration.',
 }
 

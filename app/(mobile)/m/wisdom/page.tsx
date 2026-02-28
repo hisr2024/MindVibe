@@ -244,7 +244,7 @@ export default function MobileWisdomPage() {
                   try {
                     if (navigator.share) {
                       await navigator.share({
-                        title: 'MindVibe Wisdom',
+                        title: 'Sakha Wisdom',
                         text: shareText,
                       })
                     } else {

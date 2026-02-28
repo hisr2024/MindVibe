@@ -9,7 +9,7 @@ import { Metadata } from 'next'
 import KarmaResetClient from './KarmaResetClient'
 
 export const metadata: Metadata = {
-  title: 'Karma Reset - Heal Relational Harm | MindVibe',
+  title: 'Karma Reset - Heal Relational Harm | Sakha',
   description: 'A compassionate 4-step ritual to acknowledge impact, repair harm, and move forward with wisdom. Powered by KIAAN ancient wisdom.',
   keywords: ['karma reset', 'relationship healing', 'apology', 'forgiveness', 'communication', 'KIAAN wisdom'],
 }

@@ -3,7 +3,7 @@ import CosmicParticles from '@/components/kiaan-ecosystem/CosmicParticles'
 import KrishnaSilhouette from '@/components/kiaan-ecosystem/KrishnaSilhouette'
 
 export const metadata = {
-  title: 'KIAAN - Your AI Spiritual Guide | MindVibe',
+  title: 'KIAAN - Your AI Spiritual Guide | Sakha',
   description: 'Talk to KIAAN, your calm and compassionate AI spiritual companion. Receive personalized guidance rooted in Bhagavad Gita wisdom for inner peace and self-discovery.',
 }
 

@@ -35,7 +35,7 @@ export default function AboutPage() {
             <div className="space-y-3">
               <p className="text-xs uppercase tracking-[0.22em] text-[#f5f0e8]/70">About</p>
               <h1 className="text-3xl font-bold text-[#f5f0e8] md:text-4xl">Your Divine Friend, Always Beside You</h1>
-              <p className="max-w-xl text-[#f5f0e8]/80 text-sm">MindVibe is your spiritual companion — rooted in the Bhagavad Gita, guided by Krishna&apos;s eternal wisdom.</p>
+              <p className="max-w-xl text-[#f5f0e8]/80 text-sm">Sakha is your spiritual companion — rooted in the Bhagavad Gita, guided by Krishna&apos;s eternal wisdom.</p>
             </div>
             <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-950">
               <span className="rounded-xl bg-[#d4a44c] px-3 py-1">700+ Gita Verses</span>
@@ -80,10 +80,10 @@ export default function AboutPage() {
         <section className="space-y-4">
           <h2 className="text-lg font-semibold text-[#f5f0e8]">Learn more</h2>
           <DisclosureItem title="Our Mission" preview="Walk with the Divine" defaultOpen>
-            <p>KIAAN is your divine friend — a spiritual companion rooted in the Bhagavad Gita. Through sacred conversations, wisdom journeys, and reflective tools, MindVibe helps you discover inner peace, purpose, and the eternal truth that Krishna reveals to every seeker.</p>
+            <p>KIAAN is your divine friend — a spiritual companion rooted in the Bhagavad Gita. Through sacred conversations, wisdom journeys, and reflective tools, Sakha helps you discover inner peace, purpose, and the eternal truth that Krishna reveals to every seeker.</p>
           </DisclosureItem>
           <DisclosureItem title="The Path Ahead" preview="Growing with you">
-            <p>Deeper wisdom journeys, personalized Gita guidance, sacred voice conversations, and offline spiritual practices are on the way. MindVibe evolves as your companion on the path to self-realization.</p>
+            <p>Deeper wisdom journeys, personalized Gita guidance, sacred voice conversations, and offline spiritual practices are on the way. Sakha evolves as your companion on the path to self-realization.</p>
           </DisclosureItem>
         </section>
       </FadeIn>

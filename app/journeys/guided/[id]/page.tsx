@@ -5,7 +5,7 @@ interface PageProps {
 }
 
 export const metadata = {
-  title: 'Journey | MindVibe',
+  title: 'Journey | Sakha',
   description: 'Continue your guided journey of transformation through Bhagavad Gita wisdom.',
 }
 

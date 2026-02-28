@@ -9,11 +9,11 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Pricing | MindVibe',
+  title: 'Pricing | Sakha',
   description:
-    'Choose the perfect MindVibe plan for your spiritual journey. Free, Plus, Pro, and Elite tiers with KIAAN AI guidance, sacred wisdom journeys, and divine tools.',
+    'Choose the perfect Sakha plan for your spiritual journey. Free, Plus, Pro, and Elite tiers with KIAAN AI guidance, sacred wisdom journeys, and divine tools.',
   openGraph: {
-    title: 'Pricing — MindVibe Spiritual Companion Plans',
+    title: 'Pricing — Sakha Spiritual Companion Plans',
     description:
       'Start free with 15 KIAAN questions/month. Upgrade for unlimited divine guidance, wisdom journeys, and sacred tools rooted in the Bhagavad Gita.',
     url: 'https://mindvibe.life/pricing',

@@ -411,7 +411,7 @@ export default function SacredReflectionsPage() {
                 placeholder="Required for decryption and sync"
                 className="mt-2 w-full bg-black/50 border border-[#d4a44c]/60 rounded-2xl px-4 py-3 text-[#f5f0e8] placeholder:text-[#f5f0e8]/50 focus:ring-2 focus:ring-[#d4a44c]/50 outline-none"
               />
-              <p className="mt-1 text-xs text-[#f5f0e8]/60">Stored only in your browser. MindVibe never sees it.</p>
+              <p className="mt-1 text-xs text-[#f5f0e8]/60">Stored only in your browser. Sakha never sees it.</p>
             </div>
 
             {/* Mood Selection */}

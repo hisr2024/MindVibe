@@ -20,7 +20,7 @@ export function generateStaticParams() {
 }
 
 export const metadata = {
-  title: 'Bhagavad Gita Chapter | MindVibe',
+  title: 'Bhagavad Gita Chapter | Sakha',
   description: 'Explore the sacred verses of the Bhagavad Gita with translations, transliterations, and divine voice narration.',
 }
 

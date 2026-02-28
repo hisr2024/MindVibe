@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
 
-export const alt = 'MindVibe — Your Spiritual Companion & Best Divine Friend'
+export const alt = 'Sakha — The Spiritual Companion & Your Divine Friend'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -59,7 +59,7 @@ export default async function TwitterImage() {
             display: 'flex',
           }}
         >
-          MindVibe
+          Sakha
         </div>
 
         {/* Subtitle */}
@@ -72,7 +72,7 @@ export default async function TwitterImage() {
             display: 'flex',
           }}
         >
-          Your Spiritual Companion & Best Divine Friend
+          The Spiritual Companion & Your Divine Friend
         </div>
 
         {/* Tagline */}

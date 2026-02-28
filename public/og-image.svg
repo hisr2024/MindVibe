@@ -41,11 +41,11 @@
   <!-- Om symbol below lotus -->
   <text x="600" y="310" text-anchor="middle" font-family="serif" font-size="36" fill="rgba(212,164,76,0.4)">&#x0950;</text>
 
-  <!-- MindVibe title -->
-  <text x="600" y="410" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="bold" fill="url(#goldGrad)" letter-spacing="6">MindVibe</text>
+  <!-- Sakha title -->
+  <text x="600" y="410" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="bold" fill="url(#goldGrad)" letter-spacing="8">Sakha</text>
 
   <!-- Subtitle -->
-  <text x="600" y="465" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="24" fill="rgba(255,255,255,0.75)" letter-spacing="3">Your Spiritual Companion | Bhagavad Gita Wisdom</text>
+  <text x="600" y="465" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="24" fill="rgba(255,255,255,0.75)" letter-spacing="3">The Spiritual Companion | Bhagavad Gita Wisdom</text>
 
   <!-- Decorative line -->
   <line x1="400" y1="500" x2="800" y2="500" stroke="rgba(212,164,76,0.2)" stroke-width="1" />

@@ -63,7 +63,7 @@ export default function AdminLogin() {
             <p className="mt-2 text-sm text-slate-400">
               {mfaRequired
                 ? 'Enter your MFA code to continue'
-                : 'Sign in to MindVibe Admin Panel'}
+                : 'Sign in to Sakha Admin Panel'}
             </p>
           </div>
 
