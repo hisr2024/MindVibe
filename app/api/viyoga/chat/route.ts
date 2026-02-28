@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
 
     const backendResponse = await fetch(`${BACKEND_URL}/api/viyoga/chat`, {
       method: 'POST',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'POST'),
       body: JSON.stringify({
         message: sanitizedMessage,
         sessionId,

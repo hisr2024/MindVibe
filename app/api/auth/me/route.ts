@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   try {
     const backendResponse = await fetch(`${BACKEND_URL}/api/auth/me`, {
       method: 'GET',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'GET'),
       signal: AbortSignal.timeout(5000),
     })
 

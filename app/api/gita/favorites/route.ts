@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     const backendResponse = await fetch(`${BACKEND_URL}/api/gita/favorites`, {
       method: 'POST',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'POST'),
       body: JSON.stringify({
         chapter: body.chapter,
         verse: body.verse,
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
   try {
     const backendResponse = await fetch(`${BACKEND_URL}/api/gita/favorites`, {
       method: 'GET',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'GET'),
       signal: AbortSignal.timeout(5000),
     })
 

@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       let targetUrl = engineUrl
       const response = await fetch(targetUrl, {
         method: 'POST',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'POST'),
         body: JSON.stringify({
           message,
           sessionId,
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
         targetUrl = legacyUrl
         return fetch(legacyUrl, {
           method: 'POST',
-          headers: proxyHeaders(request),
+          headers: proxyHeaders(request, 'POST'),
           body: JSON.stringify({
             message,
             sessionId,

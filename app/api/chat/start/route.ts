@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     // Try backend session creation
     const backendResponse = await fetch(`${BACKEND_URL}/api/chat/session/start`, {
       method: 'POST',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'POST'),
       signal: AbortSignal.timeout(5000),
     })
 
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     // Try alternate endpoint
     const altResponse = await fetch(`${BACKEND_URL}/api/kiaan/friend/chat`, {
       method: 'POST',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'POST'),
       body: JSON.stringify({ action: 'start_session' }),
       signal: AbortSignal.timeout(5000),
     }).catch(() => null)

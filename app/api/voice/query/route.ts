@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       // Try voice query endpoint
       const response = await fetch(`${BACKEND_URL}/api/voice/query`, {
         method: 'POST',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'POST'),
         body: JSON.stringify({
           query: sanitizedQuery,
           language,
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       // Try regular chat endpoint as fallback
       const chatResponse = await fetch(`${BACKEND_URL}/api/chat/message`, {
         method: 'POST',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'POST'),
         body: JSON.stringify({
           message: sanitizedQuery,
           language,

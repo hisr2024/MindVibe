@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   try {
     const backendResponse = await fetch(`${BACKEND_URL}/api/companion/voices`, {
       method: 'GET',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'GET'),
     })
 
     if (backendResponse.ok) {

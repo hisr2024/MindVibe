@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
   try {
     const response = await fetch(`${BACKEND_URL}/api/karmic-tree/progress`, {
       method: 'GET',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'GET'),
     })
 
     if (response.ok) {

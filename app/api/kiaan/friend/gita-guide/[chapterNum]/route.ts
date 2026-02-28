@@ -7,8 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { BACKEND_URL } from '@/lib/proxy-utils'
 
 interface ChapterGuide {
   chapter: number

@@ -18,7 +18,7 @@ export async function POST(
       `${BACKEND_URL}/api/auth/sessions/${encodeURIComponent(sessionId)}/revoke`,
       {
         method: 'POST',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'POST'),
         body: body || undefined,
         signal: AbortSignal.timeout(10000),
       }

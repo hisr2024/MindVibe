@@ -63,7 +63,7 @@ export async function GET(
   // Try backend first
   try {
     const res = await fetch(`${BACKEND_URL}/api/gita/chapters/${chapterNum}/verses`, {
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'GET'),
       signal: AbortSignal.timeout(4000),
     })
     if (res.ok) {

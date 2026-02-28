@@ -238,11 +238,18 @@ export default function CompanionPage() {
 
       if (response.ok) {
         const data = await response.json()
+
+        // Guard against malformed session data
+        if (!data?.session_id || !data?.greeting) {
+          createLocalSession()
+          return
+        }
+
         setSession({
           sessionId: data.session_id,
-          phase: data.phase,
-          friendshipLevel: data.friendship_level,
-          userName: data.user_name,
+          phase: data.phase || 'connect',
+          friendshipLevel: data.friendship_level || 'new',
+          userName: data.user_name || null,
           isActive: true,
         })
 
@@ -343,12 +350,18 @@ export default function CompanionPage() {
       if (response.ok) {
         const data = await response.json()
 
+        // Guard against malformed backend responses
+        if (!data?.response) {
+          addLocalFallbackResponse(text.trim())
+          return
+        }
+
         const companionMessage: Message = {
           id: data.message_id || `companion-${Date.now()}`,
           role: 'companion',
           content: data.response,
-          mood: data.mood,
-          phase: data.phase,
+          mood: data.mood || 'neutral',
+          phase: data.phase || 'connect',
           timestamp: new Date(),
         }
 

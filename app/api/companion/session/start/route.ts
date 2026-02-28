@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
     const backendResponse = await fetch(`${BACKEND_URL}/api/companion/session/start`, {
       method: 'POST',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'POST'),
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(10000),
     })

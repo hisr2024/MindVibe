@@ -18,7 +18,7 @@ export async function GET(
       `${BACKEND_URL}/api/journey-engine/journeys/${encodeURIComponent(id)}`,
       {
         method: 'GET',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'GET'),
         signal: AbortSignal.timeout(8000),
       }
     )
@@ -46,7 +46,7 @@ export async function DELETE(
       `${BACKEND_URL}/api/journey-engine/journeys/${encodeURIComponent(id)}`,
       {
         method: 'DELETE',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'DELETE'),
         signal: AbortSignal.timeout(10000),
       }
     )

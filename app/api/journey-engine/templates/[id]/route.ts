@@ -17,7 +17,7 @@ export async function GET(
       `${BACKEND_URL}/api/journey-engine/templates/${encodeURIComponent(id)}`,
       {
         method: 'GET',
-        headers: proxyHeaders(request),
+        headers: proxyHeaders(request, 'GET'),
         signal: AbortSignal.timeout(8000),
       }
     )

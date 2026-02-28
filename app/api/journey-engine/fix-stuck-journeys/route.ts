@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     const response = await fetch(`${BACKEND_URL}/api/journey-engine/fix-stuck-journeys`, {
       method: 'POST',
-      headers: proxyHeaders(request),
+      headers: proxyHeaders(request, 'POST'),
       signal: AbortSignal.timeout(15000),
     })
 
