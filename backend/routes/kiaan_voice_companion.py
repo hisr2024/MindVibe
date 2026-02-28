@@ -950,9 +950,28 @@ async def send_voice_companion_message(
     )
     logger.info(f"VoiceCompanion: response_mode={body.response_mode}, length_hint={length_hint}, max_tokens={adaptive_max_tokens}")
 
+    # ── Record outcome from previous wisdom delivery (Dynamic Corpus learning) ──
+    # This runs on EVERY message to capture how the user responded to the last
+    # wisdom delivery (mood change, engagement signals). Must run before the new
+    # wisdom lookup so the feedback loop stays current.
+    try:
+        from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
+        dynamic_corpus = get_dynamic_wisdom_corpus()
+        await dynamic_corpus.record_wisdom_outcome(
+            db=db,
+            user_id=current_user.id,
+            session_id=session.id,
+            mood_after=mood,
+            user_response=body.message,
+            session_continued=True,
+        )
+    except Exception:
+        pass  # Non-critical — learning loop is best-effort
+
     # ── Wisdom lookup ──
     wisdom_text = None
     wisdom_verse_ref = None
+    wisdom_theme = None
     try:
         from backend.services.wisdom_kb import WisdomKnowledgeBase
         kb = WisdomKnowledgeBase()
@@ -973,6 +992,7 @@ async def send_voice_companion_message(
             v = top["verse"]
             wisdom_text = top.get("sanitized_text") or v.get("english", "")
             wisdom_verse_ref = v.get("verse_id", "")
+            wisdom_theme = v.get("theme") or theme_hint
             logger.info(
                 f"VoiceCompanion: Wisdom verse {wisdom_verse_ref} "
                 f"(score={top['score']:.2f}) for mood={mood}"
@@ -981,23 +1001,10 @@ async def send_voice_companion_message(
         logger.debug(f"VoiceCompanion: Wisdom lookup skipped: {e}")
 
     # If no DB wisdom, try Dynamic Wisdom Corpus (effectiveness-learned selection)
-    wisdom_theme = None
     if not wisdom_text:
         try:
             from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
             dynamic_corpus = get_dynamic_wisdom_corpus()
-
-            # Record outcome from previous wisdom delivery (if any)
-            await dynamic_corpus.record_wisdom_outcome(
-                db=db,
-                user_id=current_user.id,
-                session_id=session.id,
-                mood_after=mood,
-                user_response=body.message,
-                session_continued=True,
-            )
-
-            # Try effectiveness-weighted verse selection
             dynamic_verse = await dynamic_corpus.get_effectiveness_weighted_verse(
                 db=db,
                 mood=mood,
@@ -1077,7 +1084,6 @@ async def send_voice_companion_message(
         logger.info("VoiceCompanion: TIER 1 failed, trying TIER 2 (engine AI)")
         try:
             engine = get_companion_engine()
-            engine.set_dynamic_wisdom_context(db, current_user.id)
             if engine._openai_available:
                 db_wisdom_verse = None
                 if wisdom_text and wisdom_verse_ref:
@@ -1097,6 +1103,8 @@ async def send_voice_companion_message(
                     profile_data=profile_context,
                     session_summaries=session_summaries,
                     db_wisdom_verse=db_wisdom_verse,
+                    db_session=db,
+                    user_id=current_user.id,
                 )
                 response_text = engine_result.get("response", "")
                 phase = engine_result.get("phase", phase)

@@ -1950,19 +1950,7 @@ class CompanionFriendEngine:
         self._openai_client = None
         self._openai_available = False
         self._verse_history: list[str] = []
-        # Dynamic Wisdom Corpus context (set by caller for DB-backed learning)
-        self._db_session = None
-        self._current_user_id: str | None = None
         self._init_openai()
-
-    def set_dynamic_wisdom_context(self, db_session, user_id: str) -> None:
-        """Set the DB session and user ID for Dynamic Wisdom Corpus lookups.
-
-        Called by route handlers that have a DB session available, enabling
-        the engine to use effectiveness-learned wisdom selection.
-        """
-        self._db_session = db_session
-        self._current_user_id = user_id
 
     def _init_openai(self):
         """Initialize OpenAI client for enhanced responses.
@@ -2011,12 +1999,17 @@ class CompanionFriendEngine:
         profile_data: dict | None = None,
         session_summaries: list[dict] | None = None,
         db_wisdom_verse: dict | None = None,
+        db_session=None,
+        user_id: str | None = None,
     ) -> dict[str, Any]:
         """Generate best-friend response with AI enhancement when available.
 
         Now accepts profile_data for personalization:
         - preferred_tone, prefers_tough_love, humor_level
         - total_sessions, streak_days, address_style
+
+        Optional db_session and user_id enable Dynamic Wisdom Corpus lookups
+        (effectiveness-learned verse selection). Pass these from route handlers.
         """
         # Self-healing: retry OpenAI init if it wasn't available at startup
         if not self._openai_available:
@@ -2055,6 +2048,8 @@ class CompanionFriendEngine:
                     profile_data=profile_data,
                     session_summaries=session_summaries,
                     db_wisdom_verse=db_wisdom_verse,
+                    db_session=db_session,
+                    user_id=user_id,
                 )
                 if ai_response:
                     return ai_response
@@ -2086,13 +2081,16 @@ class CompanionFriendEngine:
         profile_data: dict | None = None,
         session_summaries: list[dict] | None = None,
         db_wisdom_verse: dict | None = None,
+        db_session=None,
+        user_id: str | None = None,
     ) -> dict[str, Any] | None:
         """Generate AI response: behavioral science comprehension + Gita-only guidance.
 
         Wisdom source priority:
         1. Guidance Engine DB verse (db_wisdom_verse) — richest data (spiritual wellness tags, modern contexts)
-        2. SakhaWisdomEngine JSON corpus — 5-factor contextual scoring over 700 verses
-        3. WISDOM_CORE static dict — hardcoded Gita principles per mood
+        2. DynamicWisdomCorpus — effectiveness-learned verse selection (requires db_session)
+        3. SakhaWisdomEngine JSON corpus — 5-factor contextual scoring over 700 verses
+        4. WISDOM_CORE static dict — hardcoded Gita principles per mood
         """
         if not self._openai_client:
             return None
@@ -2113,28 +2111,28 @@ class CompanionFriendEngine:
             )
 
         # Wisdom Source 2: DynamicWisdomCorpus (effectiveness-learned selection)
-        if not wisdom_context:
+        # Only available when caller provides a DB session (route handlers do)
+        if not wisdom_context and db_session:
             try:
                 from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
                 dynamic_corpus = get_dynamic_wisdom_corpus()
-                if hasattr(self, "_db_session") and self._db_session:
-                    dynamic_verse = await dynamic_corpus.get_effectiveness_weighted_verse(
-                        db=self._db_session,
-                        mood=mood,
-                        user_message=user_message,
-                        phase=phase,
-                        user_id=getattr(self, "_current_user_id", "anonymous"),
-                        verse_history=self._verse_history,
-                        mood_intensity=mood_intensity,
+                dynamic_verse = await dynamic_corpus.get_effectiveness_weighted_verse(
+                    db=db_session,
+                    mood=mood,
+                    user_message=user_message,
+                    phase=phase,
+                    user_id=user_id or "anonymous",
+                    verse_history=self._verse_history,
+                    mood_intensity=mood_intensity,
+                )
+                if dynamic_verse and dynamic_verse.get("wisdom"):
+                    wisdom_context = dynamic_verse
+                    self._verse_history.append(dynamic_verse["verse_ref"])
+                    logger.info(
+                        f"Wisdom[Dynamic]: Selected verse {dynamic_verse['verse_ref']} "
+                        f"(effectiveness={dynamic_verse.get('effectiveness_score', 0):.2f}) "
+                        f"for mood={mood}"
                     )
-                    if dynamic_verse and dynamic_verse.get("wisdom"):
-                        wisdom_context = dynamic_verse
-                        self._verse_history.append(dynamic_verse["verse_ref"])
-                        logger.info(
-                            f"Wisdom[Dynamic]: Selected verse {dynamic_verse['verse_ref']} "
-                            f"(effectiveness={dynamic_verse.get('effectiveness_score', 0):.2f}) "
-                            f"for mood={mood}"
-                        )
             except Exception as e:
                 logger.debug(f"Dynamic wisdom corpus lookup skipped: {e}")
 

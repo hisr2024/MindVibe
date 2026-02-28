@@ -340,16 +340,18 @@ class TestCacheInvalidation:
     """Tests for cache behavior in DynamicWisdomCorpus."""
 
     def test_cache_invalidates_on_zero_timestamp(self):
-        """Setting cache_timestamp to 0 should force a refresh."""
-        from backend.services.dynamic_wisdom_corpus import DynamicWisdomCorpus
+        """Setting cache_timestamp to 0 should force a refresh on next query."""
+        from backend.services.dynamic_wisdom_corpus import DynamicWisdomCorpus, _EFFECTIVENESS_CACHE_TTL
+        import time
 
         corpus = DynamicWisdomCorpus()
         corpus._effectiveness_cache["anxious"] = [("2.47", 0.8)]
-        corpus._cache_timestamp = 0
+        # Set timestamp far in the past so (now - timestamp) > TTL
+        corpus._cache_timestamp = time.monotonic() - _EFFECTIVENESS_CACHE_TTL - 10
 
-        # With timestamp=0, cache should be considered stale
-        import time
-        assert (time.monotonic() - corpus._cache_timestamp) > 300  # Greater than TTL
+        # Cache should be considered stale
+        elapsed = time.monotonic() - corpus._cache_timestamp
+        assert elapsed > _EFFECTIVENESS_CACHE_TTL
 
     def test_fresh_cache_is_used(self):
         """Fresh cache should be returned without DB query."""
