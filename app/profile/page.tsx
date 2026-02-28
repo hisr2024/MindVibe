@@ -151,7 +151,7 @@ export default function ProfilePage() {
       } else {
         const defaultProfile: ProfileData = {
           name: user?.name || user?.email?.split('@')[0] || 'Sakha User',
-          email: user?.email || 'user@mindvibe.life',
+          email: user?.email || 'user@kiaanverse.com',
           bio: '',
           createdAt: new Date().toISOString(),
         }
@@ -164,7 +164,7 @@ export default function ProfilePage() {
 
       const fallbackProfile: ProfileData = {
         name: user?.name || user?.email?.split('@')[0] || 'Sakha User',
-        email: user?.email || 'user@mindvibe.life',
+        email: user?.email || 'user@kiaanverse.com',
         bio: '',
         createdAt: new Date().toISOString(),
       }

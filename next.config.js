@@ -59,7 +59,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: https://mindvibe.life https://*.mindvibe.life",
+              "img-src 'self' data: https://kiaanverse.com https://*.kiaanverse.com",
               `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'} https://fonts.googleapis.com https://fonts.gstatic.com`,
               "media-src 'self' blob: data:",
               "worker-src 'self' blob:",

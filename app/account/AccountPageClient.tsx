@@ -775,7 +775,7 @@ function UnauthenticatedAccountView() {
                     onChange={event => setCreateForm({ ...createForm, email: event.target.value })}
                     disabled={isSubmitting}
                     className="w-full rounded-xl border border-[#d4a44c]/20 bg-slate-900/70 px-3 py-3 text-sm text-[#f5f0e8] outline-none transition focus:border-[#d4a44c] focus:ring-2 focus:ring-[#d4a44c]/40 disabled:opacity-50"
-                    placeholder="you@mindvibe.life"
+                    placeholder="you@kiaanverse.com"
                   />
                 </div>
                 <div className="space-y-2">
@@ -818,7 +818,7 @@ function UnauthenticatedAccountView() {
                     onChange={event => setLoginForm({ ...loginForm, email: event.target.value.toLowerCase() })}
                     disabled={isSubmitting}
                     className="w-full rounded-xl border border-[#d4a44c]/20 bg-slate-900/70 px-3 py-3 text-sm text-[#f5f0e8] outline-none transition focus:border-[#d4a44c] focus:ring-2 focus:ring-[#d4a44c]/40 disabled:opacity-50"
-                    placeholder="you@mindvibe.life"
+                    placeholder="you@kiaanverse.com"
                   />
                 </div>
                 <div className="space-y-1">

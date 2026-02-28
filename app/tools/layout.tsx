@@ -15,10 +15,10 @@ export const metadata: Metadata = {
     title: 'Spiritual Wellness Tools | Sakha',
     description:
       'Discover powerful spiritual wellness tools: Ardha cognitive reframing, Karmic Tree visualization, Emotional Reset, Karma Footprint tracking, and more.',
-    url: 'https://mindvibe.life/tools',
+    url: 'https://kiaanverse.com/tools',
   },
   alternates: {
-    canonical: 'https://mindvibe.life/tools',
+    canonical: 'https://kiaanverse.com/tools',
   },
 }
 

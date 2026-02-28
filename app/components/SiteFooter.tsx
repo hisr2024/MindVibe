@@ -54,7 +54,7 @@ export default function SiteFooter() {
               <Link className="text-white/50 transition hover:text-[#e8b54a]" href="/terms">
                 {t('navigation.footer.terms', 'Terms of Service')}
               </Link>
-              <a className="text-white/50 transition hover:text-[#e8b54a]" href="mailto:care@mindvibe.life">
+              <a className="text-white/50 transition hover:text-[#e8b54a]" href="mailto:care@kiaanverse.com">
                 {t('navigation.footer.emailUs', 'Email us')}
               </a>
             </div>

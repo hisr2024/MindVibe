@@ -16,10 +16,10 @@ export const metadata: Metadata = {
     title: 'KIAAN Vibe — Sacred Music & Meditation',
     description:
       'Sacred audio for your spiritual practice. Gita chanting, meditation tracks, and calming soundscapes curated by KIAAN.',
-    url: 'https://mindvibe.life/kiaan-vibe',
+    url: 'https://kiaanverse.com/kiaan-vibe',
   },
   alternates: {
-    canonical: 'https://mindvibe.life/kiaan-vibe',
+    canonical: 'https://kiaanverse.com/kiaan-vibe',
   },
 }
 

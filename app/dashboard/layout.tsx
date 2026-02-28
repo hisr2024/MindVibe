@@ -15,10 +15,10 @@ export const metadata: Metadata = {
     title: 'Your Sacred Dashboard | Sakha',
     description:
       'Your personal spiritual dashboard. Track journey progress, access wisdom tools, review reflections, and continue your path to inner peace.',
-    url: 'https://mindvibe.life/dashboard',
+    url: 'https://kiaanverse.com/dashboard',
   },
   alternates: {
-    canonical: 'https://mindvibe.life/dashboard',
+    canonical: 'https://kiaanverse.com/dashboard',
   },
 }
 

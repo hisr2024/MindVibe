@@ -61,7 +61,7 @@ ALLOWED_ORIGINS = [
     origin.strip()
     for origin in os.getenv(
         "CORS_ALLOWED_ORIGINS",
-        "https://mind-vibe-universal.vercel.app,https://www.mindvibe.life,https://mindvibe.life,http://localhost:3000,http://localhost:3001"
+        "https://mind-vibe-universal.vercel.app,https://www.kiaanverse.com,https://kiaanverse.com,http://localhost:3000,http://localhost:3001"
     ).split(",")
 ]
 

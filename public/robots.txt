@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mindvibe.life/sitemap.xml
+Sitemap: https://kiaanverse.com/sitemap.xml
 
 Disallow: /api/
 Disallow: /admin/

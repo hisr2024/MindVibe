@@ -15,10 +15,10 @@ export const metadata: Metadata = {
     title: 'Deep Insights — Sakha Spiritual Analysis',
     description:
       'AI-powered spiritual analysis tools. Discover your inner patterns and growth path through Bhagavad Gita wisdom.',
-    url: 'https://mindvibe.life/deep-insights',
+    url: 'https://kiaanverse.com/deep-insights',
   },
   alternates: {
-    canonical: 'https://mindvibe.life/deep-insights',
+    canonical: 'https://kiaanverse.com/deep-insights',
   },
 }
 

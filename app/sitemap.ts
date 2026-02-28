@@ -12,7 +12,7 @@
 import type { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://mindvibe.life'
+  const baseUrl = 'https://kiaanverse.com'
   const now = new Date()
 
   // ── Core marketing & informational pages ─────────────────────────────

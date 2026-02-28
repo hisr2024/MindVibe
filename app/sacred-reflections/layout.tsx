@@ -15,10 +15,10 @@ export const metadata: Metadata = {
     title: 'Sacred Reflections — Encrypted Spiritual Journal',
     description:
       'Capture your spiritual journey in an encrypted private journal. Save KIAAN insights, reflections, and sacred moments securely.',
-    url: 'https://mindvibe.life/sacred-reflections',
+    url: 'https://kiaanverse.com/sacred-reflections',
   },
   alternates: {
-    canonical: 'https://mindvibe.life/sacred-reflections',
+    canonical: 'https://kiaanverse.com/sacred-reflections',
   },
 }
 
