@@ -85,6 +85,14 @@ from backend.models.ai import (
     AIProviderConfig,
 )
 
+# KIAAN Self-Sufficiency models
+from backend.models.self_sufficiency import (
+    WisdomAtom,
+    VerseApplicationEdge,
+    ConversationFlowSnapshot,
+    CompositionTemplate,
+)
+
 # Journey models
 from backend.models.journeys import (
     JourneyStatus,
@@ -375,6 +383,11 @@ __all__ = [
     # KIAAN Chat models
     "KiaanChatMessage",
     "KiaanChatSession",
+    # KIAAN Self-Sufficiency models
+    "WisdomAtom",
+    "VerseApplicationEdge",
+    "ConversationFlowSnapshot",
+    "CompositionTemplate",
     # Personal Journey
     "PersonalJourney",
     # Companion (KIAAN Best Friend) models
