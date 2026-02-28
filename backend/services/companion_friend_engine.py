@@ -1950,7 +1950,19 @@ class CompanionFriendEngine:
         self._openai_client = None
         self._openai_available = False
         self._verse_history: list[str] = []
+        # Dynamic Wisdom Corpus context (set by caller for DB-backed learning)
+        self._db_session = None
+        self._current_user_id: str | None = None
         self._init_openai()
+
+    def set_dynamic_wisdom_context(self, db_session, user_id: str) -> None:
+        """Set the DB session and user ID for Dynamic Wisdom Corpus lookups.
+
+        Called by route handlers that have a DB session available, enabling
+        the engine to use effectiveness-learned wisdom selection.
+        """
+        self._db_session = db_session
+        self._current_user_id = user_id
 
     def _init_openai(self):
         """Initialize OpenAI client for enhanced responses.
@@ -2100,7 +2112,33 @@ class CompanionFriendEngine:
                 f"(domain={db_wisdom_verse.get('primary_domain', '?')})"
             )
 
-        # Wisdom Source 2: SakhaWisdomEngine JSON corpus (contextual scoring)
+        # Wisdom Source 2: DynamicWisdomCorpus (effectiveness-learned selection)
+        if not wisdom_context:
+            try:
+                from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
+                dynamic_corpus = get_dynamic_wisdom_corpus()
+                if hasattr(self, "_db_session") and self._db_session:
+                    dynamic_verse = await dynamic_corpus.get_effectiveness_weighted_verse(
+                        db=self._db_session,
+                        mood=mood,
+                        user_message=user_message,
+                        phase=phase,
+                        user_id=getattr(self, "_current_user_id", "anonymous"),
+                        verse_history=self._verse_history,
+                        mood_intensity=mood_intensity,
+                    )
+                    if dynamic_verse and dynamic_verse.get("wisdom"):
+                        wisdom_context = dynamic_verse
+                        self._verse_history.append(dynamic_verse["verse_ref"])
+                        logger.info(
+                            f"Wisdom[Dynamic]: Selected verse {dynamic_verse['verse_ref']} "
+                            f"(effectiveness={dynamic_verse.get('effectiveness_score', 0):.2f}) "
+                            f"for mood={mood}"
+                        )
+            except Exception as e:
+                logger.debug(f"Dynamic wisdom corpus lookup skipped: {e}")
+
+        # Wisdom Source 3: SakhaWisdomEngine JSON corpus (contextual scoring)
         if not wisdom_context:
             try:
                 sakha = _get_sakha_engine()
@@ -2121,7 +2159,7 @@ class CompanionFriendEngine:
             except Exception as e:
                 logger.warning(f"Sakha wisdom engine failed: {e}")
 
-        # Wisdom Source 3: WISDOM_CORE static fallback
+        # Wisdom Source 4: WISDOM_CORE static fallback
         if not wisdom_context:
             wisdom_pool = WISDOM_CORE.get(mood, WISDOM_CORE["general"])
             wisdom_context = random.choice(wisdom_pool) if wisdom_pool else None
