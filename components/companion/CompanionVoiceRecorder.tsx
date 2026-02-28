@@ -40,8 +40,14 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
 }, ref) {
   const [state, setState] = useState<RecordingState>('idle')
   const [duration, setDuration] = useState(0)
+  const [unsupported, setUnsupported] = useState(false)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
+  // Track recording state via ref so event handlers avoid stale closures.
+  // The React state 'state' is captured at useCallback creation time, but
+  // recognition.onend fires asynchronously and needs the CURRENT value.
+  const stateRef = useRef<RecordingState>(state)
+  useEffect(() => { stateRef.current = state }, [state])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -61,52 +67,59 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
     const SpeechRecognition =
       (win.SpeechRecognition as typeof globalThis.SpeechRecognition | undefined) || (win.webkitSpeechRecognition as typeof globalThis.SpeechRecognition | undefined)
 
-    if (SpeechRecognition) {
-      try {
-        const recognition = new SpeechRecognition()
-        recognition.continuous = false
-        recognition.interimResults = false
-        recognition.lang = LANGUAGE_BCP47[language] || 'en-US'
-
-        recognition.onresult = (event: SpeechRecognitionEvent) => {
-          if (event.results?.length > 0 && event.results[0]?.length > 0) {
-            const transcript = event.results[0][0].transcript
-            if (transcript?.trim()) {
-              onTranscription(transcript.trim())
-            }
-          }
-          setState('idle')
-          setDuration(0)
-        }
-
-        recognition.onerror = () => {
-          setState('idle')
-          setDuration(0)
-        }
-
-        recognition.onend = () => {
-          if (state === 'recording') {
-            setState('idle')
-            setDuration(0)
-          }
-        }
-
-        recognitionRef.current = recognition
-        recognition.start()
-        setState('recording')
-
-        // Duration timer
-        const startTime = Date.now()
-        timerRef.current = setInterval(() => {
-          setDuration(Math.floor((Date.now() - startTime) / 1000))
-        }, 1000)
-
-      } catch {
-        // Fallback: prompt user to type instead
-        setState('idle')
-      }
+    if (!SpeechRecognition) {
+      // Browser does not support speech recognition — show user-friendly hint
+      setUnsupported(true)
+      return
     }
-  }, [isDisabled, isProcessing, onTranscription, state, language])
+
+    try {
+      const recognition = new SpeechRecognition()
+      recognition.continuous = false
+      recognition.interimResults = false
+      recognition.lang = LANGUAGE_BCP47[language] || 'en-US'
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        if (event.results?.length > 0 && event.results[0]?.length > 0) {
+          const transcript = event.results[0][0].transcript
+          if (transcript?.trim()) {
+            onTranscription(transcript.trim())
+          }
+        }
+        setState('idle')
+        setDuration(0)
+      }
+
+      recognition.onerror = () => {
+        setState('idle')
+        setDuration(0)
+      }
+
+      // Use stateRef (not state) to read the CURRENT recording state.
+      // Without this, the closure captures state='idle' from when
+      // startRecording was called, so the guard never fires.
+      recognition.onend = () => {
+        if (stateRef.current === 'recording') {
+          setState('idle')
+          setDuration(0)
+        }
+      }
+
+      recognitionRef.current = recognition
+      recognition.start()
+      setState('recording')
+
+      // Duration timer
+      const startTime = Date.now()
+      timerRef.current = setInterval(() => {
+        setDuration(Math.floor((Date.now() - startTime) / 1000))
+      }, 1000)
+
+    } catch {
+      // Fallback: prompt user to type instead
+      setState('idle')
+    }
+  }, [isDisabled, isProcessing, onTranscription, language])
 
   const stopRecording = useCallback(() => {
     if (recognitionRef.current) {
@@ -190,6 +203,13 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
           Listening...
+        </span>
+      )}
+
+      {/* Browser does not support speech recognition */}
+      {unsupported && (
+        <span className="text-xs text-amber-500">
+          Voice input not supported in this browser. Please type your message.
         </span>
       )}
     </div>

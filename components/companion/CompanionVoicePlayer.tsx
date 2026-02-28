@@ -225,8 +225,10 @@ export default function CompanionVoicePlayer({
 
     setState('loading')
 
-    // Try backend premium voice first
+    // Try backend premium voice first (15s timeout to prevent indefinite loading state)
     try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 15000)
       const response = await apiFetch('/api/companion/voice/synthesize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -236,7 +238,9 @@ export default function CompanionVoicePlayer({
           voice_id: effectiveVoiceId,
           language,
         }),
+        signal: controller.signal,
       })
+      clearTimeout(timeoutId)
 
       if (response.ok) {
         const contentType = response.headers.get('content-type')
@@ -280,7 +284,14 @@ export default function CompanionVoicePlayer({
             fallbackToBrowserTTS()
           }
 
-          await audio.play()
+          try {
+            await audio.play()
+          } catch {
+            // Browser blocked autoplay (NotAllowedError) — fall back to
+            // browser TTS which is more permissive about autoplay policies
+            setState('idle')
+            fallbackToBrowserTTS()
+          }
           return
         }
 

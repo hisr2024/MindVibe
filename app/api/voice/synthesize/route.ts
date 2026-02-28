@@ -9,7 +9,7 @@ import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { text, language = 'en', voice_type = 'friendly', speed = 1.0 } = body
+    const { text, language = 'en', voice_type = 'friendly', speed = 1.0, voice_id } = body
 
     if (!text || typeof text !== 'string') {
       return NextResponse.json(
@@ -31,7 +31,10 @@ export async function POST(request: NextRequest) {
           language,
           voice_type,
           speed,
+          // Forward voice_id so the backend can route to the correct TTS provider
+          ...(voice_id ? { voice_id } : {}),
         }),
+        signal: AbortSignal.timeout(15000),
       })
 
       if (response.ok) {

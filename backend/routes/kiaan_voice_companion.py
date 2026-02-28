@@ -887,22 +887,23 @@ async def send_voice_companion_message(
             detail="No active voice companion session found. Start a new session first.",
         )
 
-    # Get conversation history + user context in parallel
-    # Running these concurrently saves ~50-150ms vs sequential execution
-    history_result, profile, memories, session_summaries = await asyncio.gather(
-        db.execute(
-            select(CompanionMessage)
-            .where(
-                CompanionMessage.session_id == session.id,
-                CompanionMessage.deleted_at.is_(None),
-            )
-            .order_by(CompanionMessage.created_at)
-            .limit(20)
-        ),
-        _get_or_create_profile(db, current_user.id),
-        _get_user_memories(db, current_user.id),
-        _get_recent_session_summaries(db, current_user.id),
+    # Get conversation history + user context sequentially.
+    # SQLAlchemy AsyncSession is NOT safe for concurrent coroutine access;
+    # using asyncio.gather on the same session can cause
+    # "greenlet_spawn has not been called" errors or silent data corruption.
+    history_result = await db.execute(
+        select(CompanionMessage)
+        .where(
+            CompanionMessage.session_id == session.id,
+            CompanionMessage.deleted_at.is_(None),
+        )
+        .order_by(CompanionMessage.created_at)
+        .limit(20)
     )
+    profile = await _get_or_create_profile(db, current_user.id)
+    memories = await _get_user_memories(db, current_user.id)
+    session_summaries = await _get_recent_session_summaries(db, current_user.id)
+
     history_messages = history_result.scalars().all()
     conversation_history = [
         {"role": msg.role, "content": msg.content}
