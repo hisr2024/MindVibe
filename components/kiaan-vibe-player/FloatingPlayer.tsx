@@ -11,6 +11,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Play,
@@ -179,10 +180,13 @@ export function FloatingPlayer() {
                 `}
               >
                 {currentTrack.albumArt ? (
-                  <img
+                  <Image
                     src={currentTrack.albumArt}
                     alt={currentTrack.title}
+                    width={48}
+                    height={48}
                     className="w-full h-full object-cover"
+                    unoptimized
                   />
                 ) : (
                   <Music2 className="w-6 h-6 text-[#d4a44c]" />

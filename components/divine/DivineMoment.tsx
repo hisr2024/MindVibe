@@ -10,7 +10,7 @@
  * - Quick grounding moments
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDivineConsciousness } from '@/contexts/DivineConsciousnessContext';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -92,10 +92,7 @@ export function DivineMoment({
   const title = t(`divine.sacred.moments.types.${type}.name`, type === 'instant_peace' ? 'Instant Peace' : type === 'divine_presence' ? 'Divine Presence' : type === 'gratitude' ? 'Gratitude Breath' : type === 'affirmation' ? 'Sacred Affirmation' : 'Divine Reminder');
   const closing = t(`divine.sacred.moments.types.${type}.closing`, 'Peace be with you.');
 
-  const [content, setContent] = useState<{ icon: string; title: string; guidance: string[]; closing: string }>({ icon, title, guidance: [], closing });
-
-  // Setup content (especially for dynamic types)
-  useEffect(() => {
+  const content = useMemo(() => {
     const guidanceCount = MOMENT_GUIDANCE_COUNTS[type] || 0;
     const fallbacks = MOMENT_GUIDANCE_FALLBACKS[type] || [];
     let guidance: string[] = [];
@@ -129,10 +126,16 @@ export function DivineMoment({
       ];
     }
 
-    setContent({ icon, title, guidance, closing });
-    setCurrentIndex(0);
-    setProgress(0);
-  }, [type, actions, isVisible, t, icon, title, closing]);
+    return { icon, title, guidance, closing };
+  }, [type, actions, t, icon, title, closing]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentIndex(0);
+      setProgress(0);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [content]);
 
   // Progress through guidance
   useEffect(() => {
@@ -165,7 +168,7 @@ export function DivineMoment({
       clearInterval(guidanceInterval);
       clearInterval(progressInterval);
     };
-  }, [isVisible, content, duration, onComplete, autoShow]);
+  }, [isVisible, content, duration, onComplete, autoShow, onClose]);
 
   const handleOpen = () => {
     setIsVisible(true);

@@ -219,10 +219,11 @@ export function useBodyScrollLock(locked: boolean): void {
   }
 }
 
-export default {
+const bodyScrollLock = {
   lock: lockBodyScroll,
   unlock: unlockBodyScroll,
   forceUnlock: forceUnlockBodyScroll,
   isLocked: isBodyScrollLocked,
   getLockCount: getScrollLockCount,
 }
+export default bodyScrollLock

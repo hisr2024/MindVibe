@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Badge, Button } from '@/components/ui'
 
 interface ProfileHeaderProps {
@@ -32,10 +33,13 @@ export function ProfileHeader({
     <div className={`flex items-start gap-6 ${className}`}>
       <div className="relative">
         {avatarUrl ? (
-          <img
+          <Image
             src={avatarUrl}
             alt={name}
+            width={80}
+            height={80}
             className="h-20 w-20 rounded-2xl object-cover border-2 border-[#d4a44c]/30"
+            unoptimized
           />
         ) : (
           <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] flex items-center justify-center text-2xl font-bold text-slate-900 border-2 border-[#d4a44c]/30">

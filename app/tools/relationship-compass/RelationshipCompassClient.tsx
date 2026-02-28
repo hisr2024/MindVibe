@@ -19,29 +19,24 @@ function sanitizeInput(input: string): string {
 }
 
 function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
-  const [state, setState] = useState<T>(initial)
-  const [isHydrated, setIsHydrated] = useState(false)
-
-  useEffect(() => {
+  const [state, setState] = useState<T>(() => {
+    if (typeof window === 'undefined') return initial
     try {
       const item = window.localStorage.getItem(key)
-      if (item) {
-        setState(JSON.parse(item))
-      }
+      if (item) return JSON.parse(item)
     } catch {
       // Silent fail for localStorage
     }
-    setIsHydrated(true)
-  }, [key])
+    return initial
+  })
 
   useEffect(() => {
-    if (!isHydrated) return
     try {
       window.localStorage.setItem(key, JSON.stringify(state))
     } catch {
       // Silent fail for localStorage
     }
-  }, [key, state, isHydrated])
+  }, [key, state])
 
   return [state, setState]
 }

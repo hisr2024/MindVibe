@@ -428,7 +428,7 @@ export async function deleteUploadedTrack(id: string): Promise<void> {
   await deleteAudioBlob(id)
 }
 
-export default {
+const persistence = {
   getPersistedState,
   persistState,
   getAllUploadedTracks,
@@ -446,3 +446,4 @@ export default {
   uploadTrack,
   deleteUploadedTrack,
 }
+export default persistence

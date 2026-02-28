@@ -8,7 +8,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Search, Filter, Plus, Loader2 } from 'lucide-react'
 import { CircleCard } from './CircleCard'
@@ -59,11 +59,7 @@ export function CircleList({
   const [selectedCategory, setSelectedCategory] = useState('')
   const [showMyCircles, setShowMyCircles] = useState(false)
 
-  useEffect(() => {
-    fetchCircles()
-  }, [selectedCategory])
-
-  const fetchCircles = async () => {
+  const fetchCircles = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
@@ -91,7 +87,11 @@ export function CircleList({
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedCategory])
+
+  useEffect(() => {
+    fetchCircles()
+  }, [fetchCircles])
 
   const filteredCircles = circles.filter((circle) => {
     // Search filter

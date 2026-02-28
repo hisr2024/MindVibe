@@ -321,7 +321,7 @@ export function SakhaModeCard({ className = '', onActivate }: SakhaModeCardProps
   );
 }
 
-export default {
+const SakhaMode = {
   SakhaModeProvider,
   useSakhaMode,
   SakhaModeToggle,
@@ -329,3 +329,4 @@ export default {
   SakhaModeCard,
   SAKHA_PROMPT_ENHANCEMENT,
 };
+export default SakhaMode;

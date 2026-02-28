@@ -292,7 +292,7 @@ export function detectBrowserLanguage(): string {
   return 'en' // Fallback to English
 }
 
-export default {
+const gita = {
   loadGitaLanguage,
   getAvailableLanguages,
   getChapter,
@@ -303,3 +303,4 @@ export default {
   SUPPORTED_LANGUAGES,
   GITA_CHAPTERS_META,
 }
+export default gita

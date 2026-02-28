@@ -88,9 +88,10 @@ export function useEmotionTheme(): UseEmotionThemeReturn {
   })
 
   // Current emotion state
-  const [currentEmotion, setCurrentEmotion] = useState<Emotion>('balanced')
+  const initialEmotion = settings.manualOverride || 'balanced'
+  const [currentEmotion, setCurrentEmotion] = useState<Emotion>(initialEmotion)
   const [currentTheme, setCurrentTheme] = useState<EmotionTheme>(
-    getEmotionTheme('balanced')
+    () => getEmotionTheme(initialEmotion)
   )
 
   /**
@@ -116,32 +117,36 @@ export function useEmotionTheme(): UseEmotionThemeReturn {
   }, [persistSettings])
 
   /**
-   * Apply theme to DOM
+   * Resolve and apply theme to DOM, returning the resolved theme
    */
-  const applyTheme = useCallback((emotion: Emotion) => {
+  const resolveAndApplyToDOM = useCallback((emotion: Emotion): EmotionTheme => {
     let theme = getEmotionTheme(emotion)
 
-    // Apply high-contrast if enabled
     if (settings.highContrast) {
       theme = getHighContrastTheme(theme)
     }
 
-    // Check for reduced motion preference
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const shouldAnimate = !prefersReducedMotion || !settings.respectReducedMotion
 
-    // Apply theme with or without transition
     if (shouldAnimate) {
       applyThemeTransition(theme, settings.transitionDuration)
     } else {
-      applyThemeTransition(theme, 0)  // Instant
+      applyThemeTransition(theme, 0)
     }
 
-    // Set data attribute for emotion-specific styling
     document.documentElement.setAttribute('data-emotion', emotion)
 
-    setCurrentTheme(theme)
+    return theme
   }, [settings.highContrast, settings.respectReducedMotion, settings.transitionDuration])
+
+  /**
+   * Apply theme to DOM and update state
+   */
+  const applyTheme = useCallback((emotion: Emotion) => {
+    const theme = resolveAndApplyToDOM(emotion)
+    setCurrentTheme(theme)
+  }, [resolveAndApplyToDOM])
 
   /**
    * Update emotion and apply theme
@@ -179,9 +184,8 @@ export function useEmotionTheme(): UseEmotionThemeReturn {
    * Initialize theme on mount
    */
   useEffect(() => {
-    // Apply initial theme
-    const initialEmotion = settings.manualOverride || 'balanced'
-    setEmotionAndApply(initialEmotion)
+    // Apply initial theme to DOM
+    resolveAndApplyToDOM(settings.manualOverride || 'balanced')
 
     // Listen for system theme preference changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
@@ -192,16 +196,16 @@ export function useEmotionTheme(): UseEmotionThemeReturn {
 
     mediaQuery.addEventListener('change', handleChange)
     return () => mediaQuery.removeEventListener('change', handleChange)
-  }, []) // Only run on mount
+  }, [resolveAndApplyToDOM, settings.manualOverride, applyTheme, currentEmotion])
 
   /**
    * Update theme when settings change
    */
   useEffect(() => {
     if (settings.enabled) {
-      applyTheme(currentEmotion)
+      resolveAndApplyToDOM(currentEmotion)
     }
-  }, [settings.highContrast, settings.respectReducedMotion, currentEmotion, applyTheme])
+  }, [settings.highContrast, settings.respectReducedMotion, settings.enabled, currentEmotion, resolveAndApplyToDOM])
 
   return {
     currentEmotion,
@@ -224,8 +228,16 @@ export function useCurrentEmotionTheme(): {
   emotion: Emotion
   theme: EmotionTheme
 } {
-  const [emotion, setEmotion] = useState<Emotion>('balanced')
-  const [theme, setTheme] = useState<EmotionTheme>(getEmotionTheme('balanced'))
+  const [emotion, setEmotion] = useState<Emotion>(() => {
+    if (typeof document === 'undefined') return 'balanced'
+    const attr = document.documentElement.getAttribute('data-emotion') as Emotion
+    return attr || 'balanced'
+  })
+  const [theme, setTheme] = useState<EmotionTheme>(() => {
+    if (typeof document === 'undefined') return getEmotionTheme('balanced')
+    const attr = document.documentElement.getAttribute('data-emotion') as Emotion
+    return getEmotionTheme(attr || 'balanced')
+  })
   // Use ref to track current emotion without causing effect re-runs
   const emotionRef = useRef<Emotion>(emotion)
 
@@ -235,13 +247,6 @@ export function useCurrentEmotionTheme(): {
   }, [emotion])
 
   useEffect(() => {
-    // Read from data attribute
-    const currentEmotion = document.documentElement.getAttribute('data-emotion') as Emotion
-    if (currentEmotion) {
-      setEmotion(currentEmotion)
-      setTheme(getEmotionTheme(currentEmotion))
-    }
-
     // Watch for changes
     const observer = new MutationObserver(() => {
       const newEmotion = document.documentElement.getAttribute('data-emotion') as Emotion

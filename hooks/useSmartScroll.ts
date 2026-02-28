@@ -65,7 +65,7 @@ export function useSmartScroll(messageCount: number) {
           scrollToBottom(true)
         })
       } else {
-        setHasNewMessage(true)
+        queueMicrotask(() => setHasNewMessage(true))
       }
     }
     previousMessageCount.current = messageCount

@@ -80,25 +80,19 @@ export function KrishnaMorningDarshan({
   const { actions: _actions } = useDivineConsciousness();
   const { t } = useLanguage();
   const [phase, setPhase] = useState<'entering' | 'greeting' | 'message' | 'verse' | 'closing'>('entering');
-  const [timeOfDay, setTimeOfDay] = useState<keyof typeof TIME_ICONS>('morning');
-  const [isReady, setIsReady] = useState(false);
-
-  // Determine time of day once on mount - memoized
-  const initialTimeOfDay = useMemo(() => {
+  const [timeOfDay] = useState<keyof typeof TIME_ICONS>(() => {
     const hour = new Date().getHours();
     if (hour >= 4 && hour < 7) return 'dawn';
     if (hour >= 7 && hour < 12) return 'morning';
     if (hour >= 12 && hour < 17) return 'afternoon';
     if (hour >= 17 && hour < 21) return 'evening';
     return 'night';
-  }, []);
+  });
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    setTimeOfDay(initialTimeOfDay);
-    // Small delay to ensure smooth initial render
     const readyTimer = setTimeout(() => setIsReady(true), 100);
 
-    // Auto-progress through phases with slightly longer delays for smoother transitions
     const timers = [
       setTimeout(() => setPhase('greeting'), 1800),
       setTimeout(() => setPhase('message'), 4500),
@@ -110,7 +104,7 @@ export function KrishnaMorningDarshan({
       clearTimeout(readyTimer);
       timers.forEach(clearTimeout);
     };
-  }, [initialTimeOfDay]);
+  }, []);
 
   // Memoize darshan and moodData using translations
   const darshan = useMemo(() => ({

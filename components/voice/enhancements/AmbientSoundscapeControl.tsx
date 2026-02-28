@@ -12,7 +12,7 @@
  * NOW CONNECTED TO ACTUAL AUDIO ENGINE!
  */
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import {
   Music,
@@ -265,10 +265,10 @@ export function AmbientSoundscapeControl({
   const [masterVolume, setMasterVolume] = useState(0.7)
   const [currentPreset, _setCurrentPreset] = useState<string | null>(null)
 
-  // Sync with audio state
-  useEffect(() => {
+  // Sync with audio state during render
+  if (playing !== audioState.ambientActive) {
     setPlaying(audioState.ambientActive)
-  }, [audioState.ambientActive])
+  }
 
   const handleToggle = useCallback(async () => {
     const newState = !playing

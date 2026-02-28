@@ -11,6 +11,7 @@
  */
 
 import { useState, useCallback, useRef } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import {
   Play,
@@ -136,7 +137,7 @@ export function MobileVibePlayer() {
                 }`}
               >
                 {currentTrack.albumArt ? (
-                  <img src={currentTrack.albumArt} alt={currentTrack.title} className="w-full h-full object-cover" />
+                  <Image src={currentTrack.albumArt} alt={currentTrack.title} width={64} height={64} className="w-full h-full object-cover" unoptimized />
                 ) : (
                   <Music2 className={`text-[#d4a44c] ${isExpanded ? 'w-8 h-8' : 'w-5 h-5'}`} />
                 )}

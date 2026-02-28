@@ -38,21 +38,19 @@ export default function PlaylistsPage() {
 
   const allTracks = getAllTracks()
 
-  const loadPlaylists = async () => {
-    setLoading(true)
-    try {
-      const data = await getAllPlaylists()
-      data.sort((a, b) => b.updatedAt - a.updatedAt)
-      setPlaylists(data)
-    } catch (err) {
-      console.error('Failed to load playlists:', err)
-    }
-    setLoading(false)
-  }
-
   // Load playlists on mount
   useEffect(() => {
-    loadPlaylists()
+    getAllPlaylists()
+      .then((data) => {
+        data.sort((a, b) => b.updatedAt - a.updatedAt)
+        setPlaylists(data)
+      })
+      .catch((err) => {
+        console.error('Failed to load playlists:', err)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [])
 
   const handleCreatePlaylist = async () => {

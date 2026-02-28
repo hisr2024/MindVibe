@@ -6,6 +6,13 @@ import Link from 'next/link'
 import { Button, Card, CardContent } from '@/components/ui'
 import { updateSubscription, type Subscription } from '@/hooks/useSubscription'
 
+const tierNames: Record<string, string> = {
+  free: 'Free',
+  basic: 'Basic',
+  premium: 'Premium',
+  enterprise: 'Enterprise',
+}
+
 function SuccessContent() {
   const searchParams = useSearchParams()
   const _router = useRouter()
@@ -13,13 +20,6 @@ function SuccessContent() {
   const yearly = searchParams.get('yearly') === 'true'
   const sessionId = searchParams.get('session_id')
   const [validating, setValidating] = useState(true)
-
-  const tierNames: Record<string, string> = {
-    free: 'Free',
-    basic: 'Basic',
-    premium: 'Premium',
-    enterprise: 'Enterprise',
-  }
 
   useEffect(() => {
     async function validateSubscription() {

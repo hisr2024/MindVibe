@@ -11,7 +11,7 @@
  * - Friendship milestones and streaks
  */
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { apiFetch } from '@/lib/api'
 
 interface MoodTrendsData {
@@ -74,25 +74,25 @@ export default function MoodJourneyPanel({ onClose }: MoodJourneyPanelProps) {
   const [milestones, setMilestones] = useState<MilestoneData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const fetchData = useCallback(async () => {
-    setLoading(true)
-    try {
-      const [trendsRes, milestonesRes] = await Promise.all([
-        apiFetch('/api/companion/insights/mood-trends?days=30'),
-        apiFetch('/api/companion/insights/milestones'),
-      ])
-
-      if (trendsRes.ok) setTrends(await trendsRes.json())
-      if (milestonesRes.ok) setMilestones(await milestonesRes.json())
-    } catch {
-      // Silently fail — panel shows "no data yet"
-    }
-    setLoading(false)
-  }, [])
-
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    let cancelled = false
+    ;(async () => {
+      try {
+        const [trendsRes, milestonesRes] = await Promise.all([
+          apiFetch('/api/companion/insights/mood-trends?days=30'),
+          apiFetch('/api/companion/insights/milestones'),
+        ])
+
+        if (cancelled) return
+        if (trendsRes.ok) setTrends(await trendsRes.json())
+        if (milestonesRes.ok) setMilestones(await milestonesRes.json())
+      } catch {
+        // Silently fail — panel shows "no data yet"
+      }
+      if (!cancelled) setLoading(false)
+    })()
+    return () => { cancelled = true }
+  }, [])
 
   const trendConfig = TREND_CONFIG[trends?.trend || 'stable']
 

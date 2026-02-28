@@ -112,7 +112,7 @@ function KiaanChatPageInner() {
     } finally {
       setIsLoading(false);
     }
-  }, [language, sessionId, messages]);
+  }, [language, sessionId, messages, quota, t]);
 
   // Keep ref in sync so useEffect always calls the latest version
   useEffect(() => {
@@ -141,7 +141,7 @@ function KiaanChatPageInner() {
         handleSendMessageRef.current?.(decodeURIComponent(message));
       }, 1000);
     }
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const handleSaveToJournal = useCallback(async (text: string) => {
     if (typeof window === 'undefined') return;

@@ -240,7 +240,7 @@ export function getDivineNotificationContent(type: 'reminder' | 'breathing' | 'c
   }
 }
 
-export default {
+const divineNotifications = {
   requestDivineNotificationPermission,
   sendDivineReminder,
   sendBreathingInvitation,
@@ -250,3 +250,4 @@ export default {
   cancelDivineReminders,
   getDivineNotificationContent,
 };
+export default divineNotifications;

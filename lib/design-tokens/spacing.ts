@@ -26,4 +26,5 @@ export const borderRadius = {
 export type SpacingScale = typeof spacing
 export type BorderRadiusScale = typeof borderRadius
 
-export default { spacing, borderRadius }
+const spacingTokens = { spacing, borderRadius }
+export default spacingTokens

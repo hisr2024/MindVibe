@@ -780,7 +780,7 @@ export function getAllChapters(): ChapterInfo[] {
 }
 
 // Export default object for convenience
-export default {
+const gitaVerses = {
   CHAPTERS,
   KEY_VERSES,
   getTotalVerses,
@@ -793,3 +793,4 @@ export default {
   getChapterInfo,
   getAllChapters,
 }
+export default gitaVerses

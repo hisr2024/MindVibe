@@ -333,8 +333,9 @@ export const GITA_SOUNDSCAPES: GitaSoundscape[] = [
   },
 ]
 
-export default {
+const kiaanVibeConstants = {
   GITA_CHAPTERS,
   DEFAULT_LEARNING_SETTINGS,
   GITA_SOUNDSCAPES,
 }
+export default kiaanVibeConstants

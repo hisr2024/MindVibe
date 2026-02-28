@@ -161,8 +161,8 @@ export function BinauraBeatsControl({
 }: BinauraBeatsControlProps) {
   // Connect to audio context (stubbed - feature to be reimplemented in new player)
   const { startBinaural, stopBinaural, state: audioState } = useAudioStub()
-  const setBinauralVolume = (_v: number) => {}
-  const playSound = (_s: string) => {}
+  const setBinauralVolume = useCallback((_v: number) => {}, [])
+  const playSound = useCallback((_s: string) => {}, [])
 
   const [playing, setPlaying] = useState(isActive)
   const [selectedPreset, setSelectedPreset] = useState<BrainwavePreset>(

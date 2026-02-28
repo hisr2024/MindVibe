@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 export type Currency = 'USD' | 'EUR' | 'INR'
 
@@ -74,22 +74,18 @@ const roundForCurrency = (currency: Currency, amount: number) => {
 }
 
 export function useCurrency() {
-  const [currency, setCurrencyState] = useState<Currency>('USD')
-  const [isInitialized, setIsInitialized] = useState(false)
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
+  const [currency, setCurrencyState] = useState<Currency>(() => {
+    if (typeof window === 'undefined') return 'USD'
 
     const stored = localStorage.getItem(STORAGE_KEY) as Currency | null
     if (stored && CURRENCIES[stored]) {
-      setCurrencyState(stored)
-    } else {
-      const detected = detectCurrencyFromLocale()
-      setCurrencyState(detected)
-      localStorage.setItem(STORAGE_KEY, detected)
+      return stored
     }
-    setIsInitialized(true)
-  }, [])
+    const detected = detectCurrencyFromLocale()
+    localStorage.setItem(STORAGE_KEY, detected)
+    return detected
+  })
+  const [isInitialized] = useState(() => typeof window !== 'undefined')
 
   const setCurrency = useCallback((newCurrency: Currency) => {
     setCurrencyState(newCurrency)

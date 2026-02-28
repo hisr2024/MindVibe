@@ -11,6 +11,7 @@
  */
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import {
@@ -226,10 +227,13 @@ export default function KiaanVibePage() {
                   `}
                 >
                   {track.albumArt ? (
-                    <img
+                    <Image
                       src={track.albumArt}
                       alt={track.title}
+                      width={48}
+                      height={48}
                       className="w-full h-full object-cover"
+                      unoptimized
                     />
                   ) : (
                     <Music2 className="w-6 h-6 text-white/80" />

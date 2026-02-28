@@ -41,23 +41,20 @@ export default function UploadsPage() {
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const loadUploads = async () => {
-    setLoading(true)
-    try {
-      const tracks = await getAllUploadedTracks()
-      // Sort by most recent first
-      tracks.sort((a, b) => b.createdAt - a.createdAt)
-      setUploads(tracks)
-    } catch (err) {
-      console.error('Failed to load uploads:', err)
-      setError('Failed to load uploads')
-    }
-    setLoading(false)
-  }
-
   // Load uploads on mount
   useEffect(() => {
-    loadUploads()
+    getAllUploadedTracks()
+      .then((tracks) => {
+        tracks.sort((a, b) => b.createdAt - a.createdAt)
+        setUploads(tracks)
+      })
+      .catch((err) => {
+        console.error('Failed to load uploads:', err)
+        setError('Failed to load uploads')
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [])
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {

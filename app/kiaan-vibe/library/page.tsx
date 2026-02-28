@@ -7,6 +7,7 @@
  */
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
@@ -173,10 +174,13 @@ export default function LibraryPage() {
                   `}
                 >
                   {track.albumArt ? (
-                    <img
+                    <Image
                       src={track.albumArt}
                       alt={track.title}
+                      width={48}
+                      height={48}
                       className="w-full h-full object-cover rounded-xl"
+                      unoptimized
                     />
                   ) : (
                     <Icon className="w-6 h-6 text-white/80" />

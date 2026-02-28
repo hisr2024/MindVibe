@@ -10,9 +10,9 @@
  * - Sacred sound integration ready
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useDivineConsciousness, BreathingPattern, SacredBreathingExercise } from '@/contexts/DivineConsciousnessContext';
+import { useDivineConsciousness, BreathingPattern } from '@/contexts/DivineConsciousnessContext';
 import { useLanguage } from '@/hooks/useLanguage';
 
 interface SacredBreathingProps {
@@ -59,7 +59,7 @@ export function SacredBreathing({
   const { actions } = useDivineConsciousness();
   const { t } = useLanguage();
 
-  const [exercise, setExercise] = useState<SacredBreathingExercise | null>(null);
+  const exercise = useMemo(() => actions.getBreathingExercise(pattern), [pattern, actions]);
   const [phase, setPhase] = useState<BreathPhase>('ready');
   const [isActive, setIsActive] = useState(autoStart);
   const [currentCycle, setCurrentCycle] = useState(0);
@@ -72,16 +72,16 @@ export function SacredBreathing({
   // Track if autoStart has been triggered to prevent re-runs
   const autoStartTriggeredRef = useRef(false);
 
-  // Load exercise on mount or pattern change
+  // Reset state when exercise changes
   useEffect(() => {
-    const ex = actions.getBreathingExercise(pattern);
-    setExercise(ex);
-    setPhase('ready');
-    setCurrentCycle(0);
-    setCurrentInstruction(0);
-    // Reset autoStart trigger when pattern changes
-    autoStartTriggeredRef.current = false;
-  }, [pattern, actions]);
+    const timer = setTimeout(() => {
+      setPhase('ready');
+      setCurrentCycle(0);
+      setCurrentInstruction(0);
+      autoStartTriggeredRef.current = false;
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [exercise]);
 
   // Auto-start the breathing exercise when autoStart is true and exercise is loaded
   useEffect(() => {

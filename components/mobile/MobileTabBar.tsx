@@ -1,6 +1,6 @@
 'use client'
 
-import { forwardRef, ReactNode, useState, useCallback, useEffect } from 'react'
+import { forwardRef, ReactNode, useState, useCallback, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
@@ -54,7 +54,7 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
   ) {
     const { triggerHaptic } = useHapticFeedback()
     const [isHidden, setIsHidden] = useState(false)
-    const lastScrollY = { current: 0 }
+    const lastScrollY = useRef(0)
 
     // Hide on scroll behavior
     useEffect(() => {

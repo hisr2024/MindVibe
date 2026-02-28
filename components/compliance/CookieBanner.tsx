@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface CookiePreferences {
@@ -24,34 +24,34 @@ export default function CookieBanner({
   onRejectAll, 
   onSavePreferences 
 }: CookieBannerProps) {
-  const [isVisible, setIsVisible] = useState(false)
-  const [showDetails, setShowDetails] = useState(false)
-  const [preferences, setPreferences] = useState<CookiePreferences>({
-    necessary: true, // Always true, cannot be changed
-    analytics: false,
-    marketing: false,
-    functional: false,
-  })
-
-  useEffect(() => {
-    // Check if consent has been given
+  const [isVisible, setIsVisible] = useState(() => {
+    if (typeof window === 'undefined') return false
     const consent = localStorage.getItem(COOKIE_CONSENT_KEY)
-    if (!consent) {
-      setIsVisible(true)
-    } else {
+    if (!consent) return true
+    try {
+      const parsed = JSON.parse(consent)
+      if (parsed.version !== COOKIE_CONSENT_VERSION) return true
+      return false
+    } catch {
+      return true
+    }
+  })
+  const [showDetails, setShowDetails] = useState(false)
+  const [preferences, setPreferences] = useState<CookiePreferences>(() => {
+    if (typeof window === 'undefined') return { necessary: true, analytics: false, marketing: false, functional: false }
+    const consent = localStorage.getItem(COOKIE_CONSENT_KEY)
+    if (consent) {
       try {
         const parsed = JSON.parse(consent)
-        if (parsed.version !== COOKIE_CONSENT_VERSION) {
-          // Version changed, show banner again
-          setIsVisible(true)
-        } else {
-          setPreferences(parsed.preferences)
+        if (parsed.version === COOKIE_CONSENT_VERSION && parsed.preferences) {
+          return parsed.preferences
         }
       } catch {
-        setIsVisible(true)
+        // ignore
       }
     }
-  }, [])
+    return { necessary: true, analytics: false, marketing: false, functional: false }
+  })
 
   const saveConsent = async (prefs: CookiePreferences) => {
     const consentData = {

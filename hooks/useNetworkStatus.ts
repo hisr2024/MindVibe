@@ -189,12 +189,14 @@ export function useShouldReduceAnimations(): boolean {
   const { quality, saveData } = useNetworkStatus()
 
   // Also check prefers-reduced-motion
-  const [prefersReduced, setPrefersReduced] = useState(false)
+  const [prefersReduced, setPrefersReduced] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  })
 
   useEffect(() => {
     if (typeof window === 'undefined') return
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setPrefersReduced(query.matches)
 
     const handler = (e: MediaQueryListEvent) => setPrefersReduced(e.matches)
     query.addEventListener('change', handler)

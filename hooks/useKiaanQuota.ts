@@ -136,8 +136,8 @@ export function useKiaanQuota(tier: string = 'free'): UseKiaanQuotaResult {
   const resetDate = new Date(quotaData.resetDate)
   const daysUntilReset = useMemo(
     // eslint-disable-next-line react-hooks/purity
-    () => Math.max(0, Math.ceil((resetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
-    [resetDate]
+    () => Math.max(0, Math.ceil((new Date(quotaData.resetDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
+    [quotaData.resetDate]
   )
 
   return {

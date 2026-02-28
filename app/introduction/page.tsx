@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   DivineGreeting,
@@ -35,25 +35,21 @@ export default function IntroductionPage() {
   const [showMorningDarshan, setShowMorningDarshan] = useState(false)
   const [showProtectionShield, setShowProtectionShield] = useState(false)
   const [showHeartJournal, setShowHeartJournal] = useState(false)
-  const [hasSeenDarshan, setHasSeenDarshan] = useState(false)
+  const [hasSeenDarshan, setHasSeenDarshan] = useState(() => {
+    if (typeof window === 'undefined') return false
+    try {
+      const today = new Date().toDateString()
+      const lastDarshanDate = localStorage.getItem('lastDarshanDate')
+      return lastDarshanDate === today
+    } catch {
+      return false
+    }
+  })
   // Language hook for translations
   const { t } = useLanguage()
 
   // Audio hook for sound effects
   const { playSound } = useUISound()
-
-  // Check if user has seen today's darshan
-  useEffect(() => {
-    try {
-      const today = new Date().toDateString()
-      const lastDarshanDate = localStorage.getItem('lastDarshanDate')
-      if (lastDarshanDate === today) {
-        setHasSeenDarshan(true)
-      }
-    } catch {
-      // localStorage unavailable (SSR, incognito, or disabled)
-    }
-  }, [])
 
   // Memoized handlers to prevent recreation
   const completeDarshan = useCallback(() => {

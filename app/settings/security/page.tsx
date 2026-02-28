@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Card, CardContent } from '@/components/ui'
@@ -515,10 +516,13 @@ export default function SecuritySettingsPage() {
             {setupData?.qr_code && (
               <div className="flex justify-center">
                 <div className="p-4 bg-white rounded-xl">
-                  <img
+                  <Image
                     src={`data:image/png;base64,${setupData.qr_code}`}
                     alt="2FA QR Code"
+                    width={192}
+                    height={192}
                     className="w-48 h-48"
+                    unoptimized
                   />
                 </div>
               </div>

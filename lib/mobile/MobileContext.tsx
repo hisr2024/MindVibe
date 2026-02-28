@@ -178,7 +178,7 @@ interface MobileProviderProps {
 }
 
 export function MobileOptimizationProvider({ children }: MobileProviderProps) {
-  const [device, setDevice] = useState<MobileDeviceInfo>(defaultDeviceInfo)
+  const [device, setDevice] = useState<MobileDeviceInfo>(detectDevice)
   const [settings, setSettings] = useState<MobileSettings>(() => {
     if (typeof window === 'undefined') return defaultSettings
     const saved = localStorage.getItem('mv-mobile-settings')
@@ -198,8 +198,6 @@ export function MobileOptimizationProvider({ children }: MobileProviderProps) {
 
   // Initialize device detection
   useEffect(() => {
-    setDevice(detectDevice())
-
     // Update safe area insets
     const updateSafeArea = () => {
       const style = getComputedStyle(document.documentElement)
