@@ -7,6 +7,8 @@ import datetime
 from sqlalchemy import (
     JSON,
     TIMESTAMP,
+    Boolean,
+    Float,
     ForeignKey,
     Integer,
     String,
@@ -178,3 +180,50 @@ class GitaVerseUsage(Base):
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), index=True
     )
     effectiveness_rating: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+
+class WisdomEffectiveness(Base):
+    """Track wisdom verse effectiveness per user/mood to power the Dynamic Wisdom Corpus.
+
+    Records whether a particular verse delivered in a specific mood context led to
+    mood improvement, continued engagement, or session continuation. This data feeds
+    the DynamicWisdomCorpus scoring algorithm so future verse selection learns from
+    what actually helped users heal.
+    """
+
+    __tablename__ = "wisdom_effectiveness"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[str] = mapped_column(
+        String(255), nullable=False, index=True
+    )
+    session_id: Mapped[str] = mapped_column(
+        String(64), nullable=False, index=True
+    )
+    verse_ref: Mapped[str] = mapped_column(
+        String(16), nullable=False, index=True
+    )
+    principle: Mapped[str | None] = mapped_column(String(256), nullable=True)
+
+    # Context when wisdom was delivered
+    mood_at_delivery: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    mood_intensity_at_delivery: Mapped[float | None] = mapped_column(Float, nullable=True)
+    phase_at_delivery: Mapped[str] = mapped_column(String(32), nullable=False)
+    theme_used: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+    # Outcome signals (populated when session ends or next message arrives)
+    mood_after: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    mood_improved: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    user_continued_session: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    user_response_length: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    engagement_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+    # Computed effectiveness (0.0 to 1.0, updated by feedback loop)
+    effectiveness: Mapped[float | None] = mapped_column(Float, nullable=True, default=None)
+
+    delivered_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now(), index=True
+    )
+    outcome_recorded_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )

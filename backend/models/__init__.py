@@ -70,6 +70,7 @@ from backend.models.wisdom import (
     GitaKeyword,
     GitaVerseKeyword,
     GitaVerseUsage,
+    WisdomEffectiveness,
 )
 
 # AI / KIAAN models
@@ -310,6 +311,7 @@ __all__ = [
     "GitaKeyword",
     "GitaVerseKeyword",
     "GitaVerseUsage",
+    "WisdomEffectiveness",
     # KIAAN Learning System models
     "ContentSourceType",
     "ValidationStatus",

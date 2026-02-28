@@ -135,9 +135,12 @@ MINDVIBE_TO_SARVAM_LANG: dict[str, str] = {
     "sa": "hi-IN",  # Sanskrit → Hindi voice (closest match)
 }
 
-# Languages where Sarvam AI produces superior quality vs other providers
+# Languages where Sarvam AI produces superior quality vs other providers.
+# Includes "en" because the frontend normalizes "en-IN" to "en" via
+# getBackendLanguageCode(). MINDVIBE_TO_SARVAM_LANG maps "en" → "en-IN"
+# so Sarvam still receives the correct language code.
 SARVAM_PRIORITY_LANGUAGES = {
-    "hi", "ta", "te", "bn", "kn", "ml", "mr", "gu", "pa", "od", "sa", "en-IN",
+    "hi", "ta", "te", "bn", "kn", "ml", "mr", "gu", "pa", "od", "sa", "en-IN", "en",
 }
 
 

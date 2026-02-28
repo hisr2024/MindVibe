@@ -950,9 +950,28 @@ async def send_voice_companion_message(
     )
     logger.info(f"VoiceCompanion: response_mode={body.response_mode}, length_hint={length_hint}, max_tokens={adaptive_max_tokens}")
 
+    # ── Record outcome from previous wisdom delivery (Dynamic Corpus learning) ──
+    # This runs on EVERY message to capture how the user responded to the last
+    # wisdom delivery (mood change, engagement signals). Must run before the new
+    # wisdom lookup so the feedback loop stays current.
+    try:
+        from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
+        dynamic_corpus = get_dynamic_wisdom_corpus()
+        await dynamic_corpus.record_wisdom_outcome(
+            db=db,
+            user_id=current_user.id,
+            session_id=session.id,
+            mood_after=mood,
+            user_response=body.message,
+            session_continued=True,
+        )
+    except Exception:
+        pass  # Non-critical — learning loop is best-effort
+
     # ── Wisdom lookup ──
     wisdom_text = None
     wisdom_verse_ref = None
+    wisdom_theme = None
     try:
         from backend.services.wisdom_kb import WisdomKnowledgeBase
         kb = WisdomKnowledgeBase()
@@ -973,6 +992,7 @@ async def send_voice_companion_message(
             v = top["verse"]
             wisdom_text = top.get("sanitized_text") or v.get("english", "")
             wisdom_verse_ref = v.get("verse_id", "")
+            wisdom_theme = v.get("theme") or theme_hint
             logger.info(
                 f"VoiceCompanion: Wisdom verse {wisdom_verse_ref} "
                 f"(score={top['score']:.2f}) for mood={mood}"
@@ -980,7 +1000,32 @@ async def send_voice_companion_message(
     except Exception as e:
         logger.debug(f"VoiceCompanion: Wisdom lookup skipped: {e}")
 
-    # If no DB wisdom, try Sakha engine
+    # If no DB wisdom, try Dynamic Wisdom Corpus (effectiveness-learned selection)
+    if not wisdom_text:
+        try:
+            from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
+            dynamic_corpus = get_dynamic_wisdom_corpus()
+            dynamic_verse = await dynamic_corpus.get_effectiveness_weighted_verse(
+                db=db,
+                mood=mood,
+                user_message=body.message,
+                phase=phase,
+                user_id=current_user.id,
+                mood_intensity=mood_intensity,
+            )
+            if dynamic_verse:
+                wisdom_text = dynamic_verse.get("wisdom", "")
+                wisdom_verse_ref = dynamic_verse.get("verse_ref", "")
+                wisdom_theme = dynamic_verse.get("theme")
+                logger.info(
+                    f"VoiceCompanion: Dynamic wisdom verse {wisdom_verse_ref} "
+                    f"(effectiveness={dynamic_verse.get('effectiveness_score', 0):.2f}) "
+                    f"for mood={mood}"
+                )
+        except Exception as e:
+            logger.debug(f"VoiceCompanion: Dynamic wisdom lookup skipped: {e}")
+
+    # If no dynamic wisdom, try Sakha engine (static 5-factor scoring)
     if not wisdom_text:
         try:
             from backend.services.sakha_wisdom_engine import get_sakha_wisdom_engine
@@ -993,6 +1038,7 @@ async def send_voice_companion_message(
                 if verse:
                     wisdom_text = verse.get("wisdom", "")
                     wisdom_verse_ref = verse.get("verse_ref", "")
+                    wisdom_theme = verse.get("theme")
         except Exception:
             logger.warning("Voice companion Sakha wisdom lookup failed", exc_info=True)
 
@@ -1057,6 +1103,8 @@ async def send_voice_companion_message(
                     profile_data=profile_context,
                     session_summaries=session_summaries,
                     db_wisdom_verse=db_wisdom_verse,
+                    db_session=db,
+                    user_id=current_user.id,
                 )
                 response_text = engine_result.get("response", "")
                 phase = engine_result.get("phase", phase)
@@ -1111,6 +1159,25 @@ async def send_voice_companion_message(
         phase=phase,
     )
     db.add(companion_msg)
+
+    # Record wisdom delivery for Dynamic Wisdom Corpus learning loop
+    if wisdom_used and wisdom_used.get("verse_ref"):
+        try:
+            from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
+            dynamic_corpus = get_dynamic_wisdom_corpus()
+            await dynamic_corpus.record_wisdom_delivery(
+                db=db,
+                user_id=current_user.id,
+                session_id=session.id,
+                verse_ref=wisdom_used["verse_ref"],
+                principle=wisdom_used.get("principle"),
+                mood=mood,
+                mood_intensity=mood_intensity,
+                phase=phase,
+                theme=wisdom_theme,
+            )
+        except Exception as e:
+            logger.debug(f"VoiceCompanion: Wisdom delivery recording skipped: {e}")
 
     # Update session
     session.message_count += 2
@@ -1389,6 +1456,22 @@ async def end_voice_companion_session(
     )
     db.add(farewell_msg)
 
+    # Record final wisdom outcome for Dynamic Wisdom Corpus learning
+    if session.final_mood:
+        try:
+            from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
+            dynamic_corpus = get_dynamic_wisdom_corpus()
+            await dynamic_corpus.record_wisdom_outcome(
+                db=db,
+                user_id=current_user.id,
+                session_id=session.id,
+                mood_after=session.final_mood,
+                user_response=None,
+                session_continued=False,
+            )
+        except Exception as e:
+            logger.debug(f"VoiceCompanion: Final wisdom outcome recording skipped: {e}")
+
     await db.commit()
 
     return VoiceCompanionEndResponse(
@@ -1484,6 +1567,23 @@ async def voice_companion_health():
     if os.getenv("ELEVENLABS_API_KEY", "").strip():
         voice_providers.insert(0, "elevenlabs")
 
+    # Include circuit breaker status for TTS providers
+    provider_health = {}
+    try:
+        from backend.services.companion_voice_service import get_provider_health_status
+        provider_health = get_provider_health_status()
+    except Exception:
+        logger.debug("Voice companion health check: provider health unavailable")
+
+    # Check Dynamic Wisdom Corpus cache status
+    dynamic_wisdom_cache_entries = 0
+    try:
+        from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
+        dynamic_corpus = get_dynamic_wisdom_corpus()
+        dynamic_wisdom_cache_entries = len(dynamic_corpus._effectiveness_cache)
+    except Exception:
+        pass
+
     return {
         "status": "healthy",
         "service": "kiaan-voice-companion",
@@ -1495,7 +1595,11 @@ async def voice_companion_health():
         },
         "ai_enhanced": tier1_ready or tier2_ready,
         "voice_providers": voice_providers,
-        "wisdom_corpus": verse_count,
+        "voice_provider_health": provider_health,
+        "wisdom_corpus": {
+            "sakha_verses": verse_count,
+            "dynamic_corpus_cached_moods": dynamic_wisdom_cache_entries,
+        },
         "voice_first": True,
     }
 

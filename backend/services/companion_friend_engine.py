@@ -1999,12 +1999,17 @@ class CompanionFriendEngine:
         profile_data: dict | None = None,
         session_summaries: list[dict] | None = None,
         db_wisdom_verse: dict | None = None,
+        db_session=None,
+        user_id: str | None = None,
     ) -> dict[str, Any]:
         """Generate best-friend response with AI enhancement when available.
 
         Now accepts profile_data for personalization:
         - preferred_tone, prefers_tough_love, humor_level
         - total_sessions, streak_days, address_style
+
+        Optional db_session and user_id enable Dynamic Wisdom Corpus lookups
+        (effectiveness-learned verse selection). Pass these from route handlers.
         """
         # Self-healing: retry OpenAI init if it wasn't available at startup
         if not self._openai_available:
@@ -2043,6 +2048,8 @@ class CompanionFriendEngine:
                     profile_data=profile_data,
                     session_summaries=session_summaries,
                     db_wisdom_verse=db_wisdom_verse,
+                    db_session=db_session,
+                    user_id=user_id,
                 )
                 if ai_response:
                     return ai_response
@@ -2074,13 +2081,16 @@ class CompanionFriendEngine:
         profile_data: dict | None = None,
         session_summaries: list[dict] | None = None,
         db_wisdom_verse: dict | None = None,
+        db_session=None,
+        user_id: str | None = None,
     ) -> dict[str, Any] | None:
         """Generate AI response: behavioral science comprehension + Gita-only guidance.
 
         Wisdom source priority:
         1. Guidance Engine DB verse (db_wisdom_verse) — richest data (spiritual wellness tags, modern contexts)
-        2. SakhaWisdomEngine JSON corpus — 5-factor contextual scoring over 700 verses
-        3. WISDOM_CORE static dict — hardcoded Gita principles per mood
+        2. DynamicWisdomCorpus — effectiveness-learned verse selection (requires db_session)
+        3. SakhaWisdomEngine JSON corpus — 5-factor contextual scoring over 700 verses
+        4. WISDOM_CORE static dict — hardcoded Gita principles per mood
         """
         if not self._openai_client:
             return None
@@ -2100,7 +2110,33 @@ class CompanionFriendEngine:
                 f"(domain={db_wisdom_verse.get('primary_domain', '?')})"
             )
 
-        # Wisdom Source 2: SakhaWisdomEngine JSON corpus (contextual scoring)
+        # Wisdom Source 2: DynamicWisdomCorpus (effectiveness-learned selection)
+        # Only available when caller provides a DB session (route handlers do)
+        if not wisdom_context and db_session:
+            try:
+                from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
+                dynamic_corpus = get_dynamic_wisdom_corpus()
+                dynamic_verse = await dynamic_corpus.get_effectiveness_weighted_verse(
+                    db=db_session,
+                    mood=mood,
+                    user_message=user_message,
+                    phase=phase,
+                    user_id=user_id or "anonymous",
+                    verse_history=self._verse_history,
+                    mood_intensity=mood_intensity,
+                )
+                if dynamic_verse and dynamic_verse.get("wisdom"):
+                    wisdom_context = dynamic_verse
+                    self._verse_history.append(dynamic_verse["verse_ref"])
+                    logger.info(
+                        f"Wisdom[Dynamic]: Selected verse {dynamic_verse['verse_ref']} "
+                        f"(effectiveness={dynamic_verse.get('effectiveness_score', 0):.2f}) "
+                        f"for mood={mood}"
+                    )
+            except Exception as e:
+                logger.debug(f"Dynamic wisdom corpus lookup skipped: {e}")
+
+        # Wisdom Source 3: SakhaWisdomEngine JSON corpus (contextual scoring)
         if not wisdom_context:
             try:
                 sakha = _get_sakha_engine()
@@ -2121,7 +2157,7 @@ class CompanionFriendEngine:
             except Exception as e:
                 logger.warning(f"Sakha wisdom engine failed: {e}")
 
-        # Wisdom Source 3: WISDOM_CORE static fallback
+        # Wisdom Source 4: WISDOM_CORE static fallback
         if not wisdom_context:
             wisdom_pool = WISDOM_CORE.get(mood, WISDOM_CORE["general"])
             wisdom_context = random.choice(wisdom_pool) if wisdom_pool else None

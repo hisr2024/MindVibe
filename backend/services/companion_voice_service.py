@@ -34,9 +34,68 @@ Voice Provider Chain (highest quality first):
 import logging
 import os
 import re
+import time
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+
+# ─── Provider Circuit Breaker ──────────────────────────────────────────────
+# Tracks recent failures per TTS provider and temporarily disables a provider
+# after consecutive failures to avoid wasting latency on a known-down service.
+# Resets automatically after a cooldown period.
+
+_PROVIDER_FAILURE_COUNTS: dict[str, int] = {}
+_PROVIDER_DISABLED_UNTIL: dict[str, float] = {}
+_PROVIDER_FAILURE_THRESHOLD = 3          # failures before tripping the breaker
+_PROVIDER_COOLDOWN_SECONDS = 120         # 2 minutes before retrying a tripped provider
+_PROVIDER_LAST_SUCCESS: dict[str, float] = {}
+
+
+def _provider_is_healthy(provider: str) -> bool:
+    """Check if a TTS provider circuit breaker allows requests."""
+    disabled_until = _PROVIDER_DISABLED_UNTIL.get(provider, 0)
+    if time.monotonic() >= disabled_until:
+        # Cooldown expired — reset and allow
+        if provider in _PROVIDER_FAILURE_COUNTS:
+            _PROVIDER_FAILURE_COUNTS[provider] = 0
+        return True
+    return False
+
+
+def _record_provider_success(provider: str) -> None:
+    """Record a successful TTS call — resets the failure counter."""
+    _PROVIDER_FAILURE_COUNTS[provider] = 0
+    _PROVIDER_LAST_SUCCESS[provider] = time.monotonic()
+
+
+def _record_provider_failure(provider: str) -> None:
+    """Record a failed TTS call — trips the breaker after threshold."""
+    count = _PROVIDER_FAILURE_COUNTS.get(provider, 0) + 1
+    _PROVIDER_FAILURE_COUNTS[provider] = count
+    if count >= _PROVIDER_FAILURE_THRESHOLD:
+        _PROVIDER_DISABLED_UNTIL[provider] = time.monotonic() + _PROVIDER_COOLDOWN_SECONDS
+        logger.warning(
+            f"TTS circuit breaker OPEN for {provider}: "
+            f"{count} consecutive failures, disabled for {_PROVIDER_COOLDOWN_SECONDS}s"
+        )
+
+
+def get_provider_health_status() -> dict[str, Any]:
+    """Return health status of all TTS providers for monitoring/dashboards."""
+    now = time.monotonic()
+    providers = {}
+    for name in ("elevenlabs", "sarvam", "bhashini"):
+        disabled_until = _PROVIDER_DISABLED_UNTIL.get(name, 0)
+        failures = _PROVIDER_FAILURE_COUNTS.get(name, 0)
+        last_success = _PROVIDER_LAST_SUCCESS.get(name)
+        providers[name] = {
+            "healthy": now >= disabled_until,
+            "consecutive_failures": failures,
+            "disabled_remaining_seconds": max(0, int(disabled_until - now)),
+            "last_success_seconds_ago": int(now - last_success) if last_success else None,
+        }
+    return providers
 
 # Import pronunciation engine for correct Sanskrit/spiritual term handling
 try:
@@ -709,7 +768,7 @@ async def synthesize_companion_voice(
             pronunciation_corrected_text = plain_text
 
     # 1. Try ElevenLabs via dedicated service (most natural, most human-like)
-    if ELEVENLABS_SERVICE_AVAILABLE and _el_available():
+    if ELEVENLABS_SERVICE_AVAILABLE and _el_available() and _provider_is_healthy("elevenlabs"):
         try:
             el_pronunciation_text = plain_text
             if PRONUNCIATION_ENGINE_AVAILABLE:
@@ -726,6 +785,7 @@ async def synthesize_companion_voice(
                 pronunciation_text=el_pronunciation_text,
             )
             if audio:
+                _record_provider_success("elevenlabs")
                 return {
                     "audio": audio,
                     "content_type": "audio/mpeg",
@@ -735,47 +795,57 @@ async def synthesize_companion_voice(
                     "quality_score": 10.0,
                     "fallback_to_browser": False,
                 }
+            _record_provider_failure("elevenlabs")
         except Exception as e:
+            _record_provider_failure("elevenlabs")
             logger.warning(f"ElevenLabs dedicated service failed: {e}")
 
     # 1b. Fallback: Try ElevenLabs via inline implementation
-    audio = await _try_elevenlabs_tts(pronunciation_corrected_text, ssml_data)
-    if audio:
-        return {
-            "audio": audio,
-            "content_type": "audio/mpeg",
-            "ssml": ssml_data["ssml"],
-            "provider": "elevenlabs",
-            "voice_persona": ssml_data["voice_persona"],
-            "quality_score": 10.0,
-            "fallback_to_browser": False,
-        }
+    if _provider_is_healthy("elevenlabs"):
+        audio = await _try_elevenlabs_tts(pronunciation_corrected_text, ssml_data)
+        if audio:
+            _record_provider_success("elevenlabs")
+            return {
+                "audio": audio,
+                "content_type": "audio/mpeg",
+                "ssml": ssml_data["ssml"],
+                "provider": "elevenlabs",
+                "voice_persona": ssml_data["voice_persona"],
+                "quality_score": 10.0,
+                "fallback_to_browser": False,
+            }
 
     # 2. Try Sarvam AI Bulbul (best Indian language voices)
-    audio = await _try_sarvam_tts(plain_text, ssml_data, mood, voice_id)
-    if audio:
-        return {
-            "audio": audio,
-            "content_type": "audio/wav",
-            "ssml": ssml_data["ssml"],
-            "provider": "sarvam_ai_bulbul",
-            "voice_persona": ssml_data["voice_persona"],
-            "quality_score": 9.5,
-            "fallback_to_browser": False,
-        }
+    if _provider_is_healthy("sarvam"):
+        audio = await _try_sarvam_tts(plain_text, ssml_data, mood, voice_id)
+        if audio:
+            _record_provider_success("sarvam")
+            return {
+                "audio": audio,
+                "content_type": "audio/wav",
+                "ssml": ssml_data["ssml"],
+                "provider": "sarvam_ai_bulbul",
+                "voice_persona": ssml_data["voice_persona"],
+                "quality_score": 9.5,
+                "fallback_to_browser": False,
+            }
+        _record_provider_failure("sarvam")
 
     # 3. Try Bhashini AI (Government of India, 22 Indian languages)
-    audio = await _try_bhashini_tts(plain_text, ssml_data, mood, voice_id)
-    if audio:
-        return {
-            "audio": audio,
-            "content_type": "audio/wav",
-            "ssml": ssml_data["ssml"],
-            "provider": "bhashini_ai",
-            "voice_persona": ssml_data["voice_persona"],
-            "quality_score": 9.0,
-            "fallback_to_browser": False,
-        }
+    if _provider_is_healthy("bhashini"):
+        audio = await _try_bhashini_tts(plain_text, ssml_data, mood, voice_id)
+        if audio:
+            _record_provider_success("bhashini")
+            return {
+                "audio": audio,
+                "content_type": "audio/wav",
+                "ssml": ssml_data["ssml"],
+                "provider": "bhashini_ai",
+                "voice_persona": ssml_data["voice_persona"],
+                "quality_score": 9.0,
+                "fallback_to_browser": False,
+            }
+        _record_provider_failure("bhashini")
 
     # 4. Return config for browser-side synthesis
     return {
