@@ -28,7 +28,6 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -107,7 +106,7 @@ class ConversationFlowEngine:
         self,
         db: AsyncSession,
         session_id: str,
-        user_id: Optional[str] = None,
+        user_id: str | None = None,
     ) -> ConversationFlowSnapshot:
         """Get existing conversation state or create a new one."""
         result = await db.execute(
@@ -148,7 +147,7 @@ class ConversationFlowEngine:
         topic: str,
         intent: str,
         entities: list[str] | None = None,
-        verse_ref_used: Optional[str] = None,
+        verse_ref_used: str | None = None,
         atom_ids_used: list[str] | None = None,
         used_llm: bool = False,
     ) -> ConversationFlowSnapshot:
@@ -255,7 +254,7 @@ class ConversationFlowEngine:
         self,
         db: AsyncSession,
         session_id: str,
-    ) -> Optional[dict]:
+    ) -> dict | None:
         """
         Close a conversation session and return summary stats.
 
@@ -341,8 +340,9 @@ class ConversationFlowEngine:
                 return "connect"  # Acknowledge first
             return "guide"
 
-        # Rule 3: Seeking advice → accelerate to GUIDE
-        if is_seeking_advice and turn_count >= 2:
+        # Rule 3: Seeking advice → accelerate to GUIDE (only from understand+)
+        # We don't skip listen — the user needs to be heard before being guided.
+        if is_seeking_advice and current_phase in ("understand", "guide") and turn_count >= 2:
             return "guide"
 
         # Rule 4: Phase-specific progression
@@ -404,10 +404,7 @@ class ConversationFlowEngine:
             return True
 
         # Neutral → High intensity negative = significant shift
-        if previous_mood == "neutral" and current_mood in HIGH_INTENSITY_MOODS:
-            return True
-
-        return False
+        return previous_mood == "neutral" and current_mood in HIGH_INTENSITY_MOODS
 
     def _describe_trigger(
         self,
@@ -427,7 +424,7 @@ class ConversationFlowEngine:
         return f"turn_progression:turn_{turn}"
 
     @staticmethod
-    def _get_dominant(history: list[str]) -> Optional[str]:
+    def _get_dominant(history: list[str]) -> str | None:
         """Get the most frequent item in a history list."""
         if not history:
             return None
@@ -448,7 +445,7 @@ class ConversationFlowEngine:
 
     async def get_session_analytics(
         self, db: AsyncSession, session_id: str
-    ) -> Optional[dict]:
+    ) -> dict | None:
         """Get analytics for a specific session."""
         result = await db.execute(
             select(ConversationFlowSnapshot).where(
@@ -479,7 +476,7 @@ class ConversationFlowEngine:
 
 
 # Singleton
-_flow_engine: Optional[ConversationFlowEngine] = None
+_flow_engine: ConversationFlowEngine | None = None
 
 
 def get_conversation_flow_engine() -> ConversationFlowEngine:

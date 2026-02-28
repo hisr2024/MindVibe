@@ -28,8 +28,6 @@ from __future__ import annotations
 import hashlib
 import logging
 import re
-from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -134,12 +132,12 @@ class DistillationPipeline:
         self,
         db: AsyncSession,
         llm_response: str,
-        user_message: str,
+        user_message: str,  # noqa: ARG002 (reserved for future context-aware distillation)
         detected_mood: str,
         detected_topic: str,
         detected_intent: str,
         detected_phase: str,
-        source_message_id: Optional[str] = None,
+        source_message_id: str | None = None,
     ) -> list[WisdomAtom]:
         """
         Extract and store wisdom atoms from an LLM response.
@@ -343,7 +341,7 @@ class DistillationPipeline:
 
         return list(tags)
 
-    def _extract_verse_ref(self, text: str) -> Optional[str]:
+    def _extract_verse_ref(self, text: str) -> str | None:
         """Extract Gita verse reference from text (e.g., '2.47', 'BG 6.5')."""
         match = VERSE_REF_PATTERN.search(text)
         if match:
@@ -353,7 +351,7 @@ class DistillationPipeline:
                 return f"{chapter}.{verse}"
         return None
 
-    def _detect_psychology_frame(self, text: str) -> Optional[str]:
+    def _detect_psychology_frame(self, text: str) -> str | None:
         """Detect which psychology framework this atom references."""
         text_lower = text.lower()
 
@@ -399,7 +397,7 @@ class DistillationPipeline:
 
 
 # Singleton
-_pipeline: Optional[DistillationPipeline] = None
+_pipeline: DistillationPipeline | None = None
 
 
 def get_distillation_pipeline() -> DistillationPipeline:

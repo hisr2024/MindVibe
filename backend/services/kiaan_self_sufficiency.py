@@ -32,7 +32,6 @@ Growth model:
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -45,7 +44,6 @@ from backend.services.kiaan_distillation_pipeline import (
     get_distillation_pipeline,
 )
 from backend.services.kiaan_response_composer import (
-    ComposedResponse,
     ResponseCompositionEngine,
     get_response_composer,
 )
@@ -62,7 +60,7 @@ class SelfSufficiencyResult:
 
     def __init__(
         self,
-        response: Optional[str],
+        response: str | None,
         is_self_sufficient: bool,
         phase: str,
         mood: str,
@@ -71,8 +69,8 @@ class SelfSufficiencyResult:
         session_id: str,
         confidence: float = 0.0,
         atom_ids_used: list[str] | None = None,
-        template_id: Optional[str] = None,
-        verse_ref: Optional[str] = None,
+        template_id: str | None = None,
+        verse_ref: str | None = None,
         turn_count: int = 0,
     ):
         self.response = response
@@ -157,8 +155,8 @@ class KiaanSelfSufficiencyOrchestrator:
         self,
         db: AsyncSession,
         session_id: str,
-        user_id: Optional[str],
-        user_message: str,
+        user_id: str | None,
+        user_message: str,  # noqa: ARG002 (reserved for future message analysis)
         mood: str,
         topic: str,
         intent: str,
@@ -175,21 +173,20 @@ class KiaanSelfSufficiencyOrchestrator:
         """
         entities = entities or []
 
-        # Step 1: Advance conversation flow
-        state = await self.flow_engine.advance(
+        # Step 1: Get current conversation state (read-only, no turn increment)
+        state = await self.flow_engine.get_or_create_state(
             db=db,
             session_id=session_id,
-            mood=mood,
-            topic=topic,
-            intent=intent,
-            entities=entities,
+            user_id=user_id,
         )
 
+        # Calculate the phase that advance() would produce, without mutating state.
+        # We use the current state context for composition, then call advance() once
+        # after we know the outcome (self-sufficient or LLM needed).
         phase = state.current_phase
-        turn_count = state.turn_count
 
-        # Step 2: Check verse graph for recommendations
-        verse_recommendations = await self.verse_graph.recommend(
+        # Step 2: Pre-warm verse graph for this situation (improves future recommendations)
+        await self.verse_graph.recommend(
             db=db,
             mood=mood,
             topic=topic,
@@ -216,8 +213,8 @@ class KiaanSelfSufficiencyOrchestrator:
                     db, composed.verse_ref, mood, topic
                 )
 
-            # Update flow state with atoms and verse used
-            await self.flow_engine.advance(
+            # Advance flow state ONCE with full context (self-sufficient turn)
+            state = await self.flow_engine.advance(
                 db=db,
                 session_id=session_id,
                 mood=mood,
@@ -237,7 +234,7 @@ class KiaanSelfSufficiencyOrchestrator:
             return SelfSufficiencyResult(
                 response=composed.response,
                 is_self_sufficient=True,
-                phase=phase,
+                phase=state.current_phase,
                 mood=mood,
                 topic=topic,
                 intent=intent,
@@ -246,23 +243,32 @@ class KiaanSelfSufficiencyOrchestrator:
                 atom_ids_used=composed.atom_ids_used,
                 template_id=composed.template_id,
                 verse_ref=composed.verse_ref,
-                turn_count=turn_count,
+                turn_count=state.turn_count,
             )
 
-        # Composition failed — signal LLM needed
+        # Composition failed — advance flow state ONCE (LLM will be used)
+        state = await self.flow_engine.advance(
+            db=db,
+            session_id=session_id,
+            mood=mood,
+            topic=topic,
+            intent=intent,
+            entities=entities,
+        )
+
         logger.info(
-            f"[SelfSufficiency] LLM needed for {mood}/{topic}/{phase}"
+            f"[SelfSufficiency] LLM needed for {mood}/{topic}/{state.current_phase}"
         )
 
         return SelfSufficiencyResult(
             response=None,
             is_self_sufficient=False,
-            phase=phase,
+            phase=state.current_phase,
             mood=mood,
             topic=topic,
             intent=intent,
             session_id=session_id,
-            turn_count=turn_count,
+            turn_count=state.turn_count,
         )
 
     async def learn_from_llm(
@@ -275,7 +281,7 @@ class KiaanSelfSufficiencyOrchestrator:
         topic: str,
         intent: str,
         phase: str,
-        source_message_id: Optional[str] = None,
+        source_message_id: str | None = None,
     ) -> dict:
         """
         Feed an LLM response back into the system to grow self-sufficiency.
@@ -283,7 +289,7 @@ class KiaanSelfSufficiencyOrchestrator:
         Should be called after every LLM response. Runs the distillation
         pipeline to extract reusable atoms.
         """
-        # Run distillation pipeline
+        # Run distillation pipeline to extract reusable atoms
         new_atoms = await self.pipeline.distill(
             db=db,
             llm_response=llm_response,
@@ -295,16 +301,34 @@ class KiaanSelfSufficiencyOrchestrator:
             source_message_id=source_message_id,
         )
 
-        # Update flow state to note LLM was used
-        await self.flow_engine.advance(
-            db=db,
-            session_id=session_id,
-            mood=mood,
-            topic=topic,
-            intent=intent,
-            used_llm=True,
-            atom_ids_used=[a.id for a in new_atoms],
+        # Note: We do NOT call flow_engine.advance() here because
+        # try_respond() already advanced the state for this turn.
+        # We only need to update the snapshot with the newly created atom IDs.
+        from sqlalchemy import select as sa_select
+        from sqlalchemy import update as sa_update
+
+        from backend.models.self_sufficiency import ConversationFlowSnapshot
+
+        result = await db.execute(
+            sa_select(ConversationFlowSnapshot).where(
+                ConversationFlowSnapshot.session_id == session_id,
+                ConversationFlowSnapshot.deleted_at.is_(None),
+            )
         )
+        snapshot = result.scalar_one_or_none()
+        if snapshot and new_atoms:
+            updated_atom_ids = list(snapshot.atom_ids_used or []) + [
+                a.id for a in new_atoms
+            ]
+            await db.execute(
+                sa_update(ConversationFlowSnapshot)
+                .where(ConversationFlowSnapshot.id == snapshot.id)
+                .values(
+                    atom_ids_used=updated_atom_ids,
+                    used_llm=True,
+                )
+            )
+            await db.commit()
 
         return {
             "atoms_created": len(new_atoms),
@@ -314,12 +338,12 @@ class KiaanSelfSufficiencyOrchestrator:
     async def record_feedback(
         self,
         db: AsyncSession,
-        session_id: str,
-        verse_ref: Optional[str],
+        session_id: str,  # noqa: ARG002 (reserved for session-level feedback tracking)
+        verse_ref: str | None,
         mood: str,
         topic: str,
         atom_ids: list[str] | None,
-        template_id: Optional[str],
+        template_id: str | None,
         positive: bool,
     ) -> None:
         """
@@ -348,12 +372,12 @@ class KiaanSelfSufficiencyOrchestrator:
 
     async def get_system_stats(self, db: AsyncSession) -> dict:
         """Get comprehensive self-sufficiency system statistics."""
-        from sqlalchemy import func, select as sa_select
+        from sqlalchemy import func
+        from sqlalchemy import select as sa_select
 
         from backend.models.self_sufficiency import (
             CompositionTemplate,
             ConversationFlowSnapshot,
-            VerseApplicationEdge,
             WisdomAtom,
         )
 
@@ -380,7 +404,7 @@ class KiaanSelfSufficiencyOrchestrator:
         total_templates = await db.execute(
             sa_select(func.count(CompositionTemplate.id)).where(
                 CompositionTemplate.deleted_at.is_(None),
-                CompositionTemplate.is_active == True,
+                CompositionTemplate.is_active.is_(True),
             )
         )
 
@@ -426,7 +450,7 @@ class KiaanSelfSufficiencyOrchestrator:
 
 
 # Singleton
-_orchestrator: Optional[KiaanSelfSufficiencyOrchestrator] = None
+_orchestrator: KiaanSelfSufficiencyOrchestrator | None = None
 
 
 def get_self_sufficiency_orchestrator() -> KiaanSelfSufficiencyOrchestrator:
