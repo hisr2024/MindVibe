@@ -18,7 +18,6 @@ import { useRouter } from 'next/navigation'
 import {
   Mic,
   MicOff,
-  X,
   MessageSquare,
   Volume2,
   VolumeX,
