@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
     const response = await fetch(`${BACKEND_URL}/api/journey-engine/fix-stuck-journeys`, {
       method: 'POST',
       headers: proxyHeaders(request),
+      signal: AbortSignal.timeout(15000),
     })
 
     if (response.ok) {

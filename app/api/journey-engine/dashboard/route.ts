@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
     const response = await fetch(`${BACKEND_URL}/api/journey-engine/dashboard`, {
       method: 'GET',
       headers: proxyHeaders(request),
+      signal: AbortSignal.timeout(8000),
     })
 
     if (response.ok) {

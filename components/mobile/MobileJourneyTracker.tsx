@@ -92,6 +92,7 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
 
     const [currentDayIndex, setCurrentDayIndex] = useState(journey.currentDay)
     const [isCompleting, setIsCompleting] = useState(false)
+    const isCompletingRef = useRef(false)
     const [_showContent, _setShowContent] = useState(false)
 
     const containerRef = useRef<HTMLDivElement>(null)
@@ -146,10 +147,12 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
 
     // Complete current step
     const handleComplete = useCallback(async () => {
-      if (currentStep.isCompleted || currentStep.isLocked || isCompleting) {
+      if (currentStep.isCompleted || currentStep.isLocked || isCompletingRef.current) {
         return
       }
 
+      // Set ref immediately to prevent double-tap race condition
+      isCompletingRef.current = true
       setIsCompleting(true)
       triggerHaptic('success')
 
@@ -172,9 +175,10 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
         console.error('Failed to complete step:', error)
         triggerHaptic('error')
       } finally {
+        isCompletingRef.current = false
         setIsCompleting(false)
       }
-    }, [currentStep, isCompleting, triggerHaptic, journey.id, journey.totalDays, currentDayIndex, onStepComplete])
+    }, [currentStep, triggerHaptic, journey.id, journey.totalDays, currentDayIndex, onStepComplete])
 
     // Progress dots
     const progressDots = useMemo(() => {

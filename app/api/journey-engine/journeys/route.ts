@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
     const response = await fetch(`${BACKEND_URL}/api/journey-engine/journeys${queryString}`, {
       method: 'GET',
       headers: proxyHeaders(request),
+      signal: AbortSignal.timeout(8000),
     })
 
     if (response.ok) {
@@ -42,6 +43,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: proxyHeaders(request),
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(10000),
     })
 
     if (response.ok) {

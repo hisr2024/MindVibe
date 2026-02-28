@@ -523,20 +523,26 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
   const handleCompleteStep = async (reflection?: string) => {
     if (!step || !journey || step.is_completed || isCompletingRef.current) return
 
+    // Set completing flag immediately to prevent double-tap race condition.
+    // Must happen before any async work (including pre-flight validation).
+    isCompletingRef.current = true
+    setIsCompleting(true)
+
     // Pre-flight: verify state matches what backend expects.
     // If stale (step completed in another tab, journey advanced, etc.),
     // silently refresh instead of sending a doomed request.
     if (journey.status !== 'active') {
+      isCompletingRef.current = false
+      setIsCompleting(false)
       await loadJourney()
       return
     }
     if (step.day_index !== journey.current_day) {
+      isCompletingRef.current = false
+      setIsCompleting(false)
       await loadJourney()
       return
     }
-
-    isCompletingRef.current = true
-    setIsCompleting(true)
 
     try {
       const result = await journeyEngineService.completeStep(
