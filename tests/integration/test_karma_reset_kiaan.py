@@ -137,7 +137,8 @@ class TestKarmaResetKiaanIntegration:
             assert "verse_id" in verse_info
             assert "score" in verse_info
             assert "theme" in verse_info
-            assert "sanitized_text" in verse_info
+            # Verse data uses individual fields (sanskrit, english, hindi)
+            assert "english" in verse_info or "sanskrit" in verse_info
 
     @pytest.mark.asyncio
     async def test_kiaan_karma_reset_clarification_verses(

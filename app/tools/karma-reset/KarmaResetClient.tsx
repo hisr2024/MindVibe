@@ -146,7 +146,7 @@ export default function KarmaResetClient() {
   }
 
   const advancePhase = () => {
-    if (!deepResponse) return
+    if (!deepResponse?.deep_guidance?.phases) return
     const totalPhases = deepResponse.deep_guidance.phases.length
     if (currentPhase < totalPhases - 1) {
       setCurrentPhase(prev => prev + 1)
@@ -412,7 +412,7 @@ export default function KarmaResetClient() {
                       {'\u{1F32C}\uFE0F'} Pranayama Shuddhi
                     </h2>
                     <p className="text-xs text-[#d4a44c]/50 mb-1">
-                      {deepResponse.karmic_path.sanskrit_name} &middot; {deepResponse.karmic_path.name}
+                      {deepResponse.karmic_path?.sanskrit_name ?? ''} &middot; {deepResponse.karmic_path?.name ?? 'Karma Reset'}
                     </p>
                     <p className="text-[10px] text-[#d4a44c]/40 tracking-[0.12em] uppercase">
                       Sacred Breath Purification
@@ -422,11 +422,11 @@ export default function KarmaResetClient() {
 
                   <div className="flex items-center justify-center gap-3 mb-8">
                     <p className="text-lg text-[#f5f0e8]/75 text-center font-sacred leading-relaxed max-w-lg">
-                      {deepResponse.reset_guidance?.breathingLine ||
+                      {deepResponse.reset_guidance?.breathingLine ??
                         'Take seven deep breaths. With each exhale, release the agitated energy. The Gita teaches that pranayama calms the storm within and creates clarity for genuine repair.'}
                     </p>
                     <VoiceResponseButton
-                      text={deepResponse.reset_guidance?.breathingLine || ''}
+                      text={deepResponse.reset_guidance?.breathingLine ?? 'Take seven deep breaths and release the agitated energy.'}
                       language={language}
                       size="md"
                       variant="accent"
@@ -452,7 +452,7 @@ export default function KarmaResetClient() {
               )}
 
               {/* ==================== STEP 4: DEEP JOURNEY (7 PHASES) ==================== */}
-              {currentStep === 'deep_journey' && deepResponse && (
+              {currentStep === 'deep_journey' && deepResponse && deepResponse.deep_guidance?.phases && (
                 <motion.div
                   key="deep_journey"
                   className="space-y-6"
@@ -464,15 +464,15 @@ export default function KarmaResetClient() {
                   {/* Journey header with progress */}
                   <div className="text-center mb-2">
                     <h2 className="text-xl font-semibold kiaan-text-golden">
-                      {deepResponse.karmic_path.name}
+                      {deepResponse.karmic_path?.name ?? 'Deep Karma Reset'}
                     </h2>
                     <p className="text-xs text-[#d4a44c]/50 mt-1">
-                      {deepResponse.karmic_path.sanskrit_name}
+                      {deepResponse.karmic_path?.sanskrit_name ?? ''}
                     </p>
 
                     {/* Phase progress bar */}
                     <div className="flex items-center justify-center gap-1.5 mt-4 mb-2">
-                      {deepResponse.deep_guidance.phases.map((phase, idx) => (
+                      {(deepResponse.deep_guidance?.phases ?? []).map((phase, idx) => (
                         <button
                           key={phase.phase}
                           onClick={() => setCurrentPhase(idx)}
@@ -544,7 +544,7 @@ export default function KarmaResetClient() {
                         </div>
 
                         {/* Show core verse on the wisdom integration phase */}
-                        {currentPhaseData.phase === 7 && deepResponse.deep_guidance.core_verse && (
+                        {currentPhaseData.phase === 7 && deepResponse.deep_guidance?.core_verse && (
                           <div className="mt-4 p-4 rounded-xl bg-[#d4a44c]/5 border border-[#d4a44c]/20">
                             <p className="text-xs text-[#d4a44c]/60 uppercase tracking-wider mb-2">
                               Core Verse &middot; BG {deepResponse.deep_guidance.core_verse.chapter}.{deepResponse.deep_guidance.core_verse.verse}
@@ -606,7 +606,7 @@ export default function KarmaResetClient() {
                   </div>
 
                   {/* Sadhana section (visible after phase 5) */}
-                  {currentPhase >= 5 && deepResponse.deep_guidance.sadhana?.length > 0 && (
+                  {currentPhase >= 5 && (deepResponse.deep_guidance?.sadhana?.length ?? 0) > 0 && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -619,7 +619,7 @@ export default function KarmaResetClient() {
                         </h3>
                       </div>
                       <div className="space-y-3">
-                        {deepResponse.deep_guidance.sadhana.map((practice, idx) => (
+                        {(deepResponse.deep_guidance?.sadhana ?? []).map((practice, idx) => (
                           <div
                             key={idx}
                             className="flex items-start gap-3 p-3 rounded-xl bg-black/20 border border-[#d4a44c]/10"
@@ -652,7 +652,7 @@ export default function KarmaResetClient() {
                           </h3>
                         </div>
                         <p className="text-sm text-[#f5f0e8]/70 leading-relaxed font-sacred">
-                          {deepResponse.karmic_path.karmic_teaching}
+                          {deepResponse.karmic_path?.karmic_teaching ?? 'The Gita teaches that every action creates consequence, and every consequence is an opportunity for growth.'}
                         </p>
                       </div>
 
@@ -665,12 +665,12 @@ export default function KarmaResetClient() {
                           </h3>
                         </div>
                         <p className="text-sm text-[#f5f0e8]/70 leading-relaxed font-sacred">
-                          {deepResponse.karmic_path.guna_analysis}
+                          {deepResponse.karmic_path?.guna_analysis ?? 'Through awareness and practice, we transform the gunas that drive our actions.'}
                         </p>
                       </div>
 
                       {/* Supporting verses */}
-                      {deepResponse.deep_guidance.supporting_verses?.length > 0 && (
+                      {(deepResponse.deep_guidance?.supporting_verses?.length ?? 0) > 0 && (
                         <div className="divine-reset-container rounded-3xl p-6">
                           <div className="flex items-center gap-2 mb-3">
                             <span className="text-lg">{'\u{1F4DC}'}</span>
@@ -679,7 +679,7 @@ export default function KarmaResetClient() {
                             </h3>
                           </div>
                           <div className="space-y-3">
-                            {deepResponse.deep_guidance.supporting_verses.map((sv, idx) => (
+                            {(deepResponse.deep_guidance?.supporting_verses ?? []).map((sv, idx) => (
                               <div
                                 key={idx}
                                 className="p-3 rounded-xl bg-black/20 border border-[#d4a44c]/10"
@@ -752,7 +752,7 @@ export default function KarmaResetClient() {
                   {/* All 7 phases overview card */}
                   {!showVerseDetail && (
                     <DeepResetPlanCard
-                      phases={deepResponse.deep_guidance.phases}
+                      phases={deepResponse.deep_guidance?.phases ?? []}
                       currentPhase={currentPhase}
                       onPhaseClick={setCurrentPhase}
                     />
