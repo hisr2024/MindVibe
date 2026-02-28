@@ -68,3 +68,53 @@ export function proxyHeaders(
  * The backend URL from environment, used by all proxy routes.
  */
 export const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+/**
+ * Create a proxy handler that forwards a request to the backend and returns
+ * the response with Set-Cookie headers preserved.
+ *
+ * Usage in a route.ts file:
+ *   import { createProxyHandler } from '@/lib/proxy-utils'
+ *   export const POST = createProxyHandler('/api/auth/login', 'POST')
+ *   export const GET  = createProxyHandler('/api/auth/sessions', 'GET')
+ */
+export function createProxyHandler(
+  backendPath: string,
+  method: string,
+  timeoutMs: number = 10000
+) {
+  return async function handler(request: NextRequest) {
+    try {
+      const hasBody = ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())
+      const body = hasBody ? await request.text() : undefined
+
+      const backendResponse = await fetch(`${BACKEND_URL}${backendPath}`, {
+        method: method.toUpperCase(),
+        headers: proxyHeaders(request),
+        body: body || undefined,
+        signal: AbortSignal.timeout(timeoutMs),
+      })
+
+      if (backendResponse.status === 204) {
+        return forwardCookies(
+          backendResponse,
+          new NextResponse(null, { status: 204 })
+        )
+      }
+
+      const data = await backendResponse.json().catch(() => ({}))
+
+      return forwardCookies(
+        backendResponse,
+        NextResponse.json(data, { status: backendResponse.status })
+      )
+    } catch (error) {
+      const label = `[Proxy ${method} ${backendPath}]`
+      console.error(`${label} Backend unavailable:`, error instanceof Error ? error.message : 'Unknown error')
+      return NextResponse.json(
+        { detail: 'Service temporarily unavailable' },
+        { status: 503 }
+      )
+    }
+  }
+}
