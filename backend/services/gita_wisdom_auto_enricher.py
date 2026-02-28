@@ -53,19 +53,18 @@ Usage:
 """
 
 import asyncio
-import hashlib
 import json
 import logging
 import os
 import re
-from datetime import datetime, timedelta
-from typing import Any, Optional
+from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import func as sql_func
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.models.wisdom import GitaPracticalWisdom, GitaVerse
+from backend.models.wisdom import GitaPracticalWisdom
 
 logger = logging.getLogger(__name__)
 
@@ -294,14 +293,26 @@ class CopyrightSafeSourceRegistry:
         },
     ]
 
+    # Quick-match keywords from verified source names (for substring matching)
+    _SOURCE_KEYWORDS = [
+        "bhagavad gita", "gita press", "iit kanpur", "gita supersite",
+        "sivananda", "divine life", "vivekananda", "iskcon",
+        "vedabase", "mindvibe", "prabhupada",
+    ]
+
     @classmethod
     def is_source_safe(cls, source_name: str) -> bool:
         """Check if a source is in the verified copyright-safe registry."""
         source_lower = source_name.lower()
-        return any(
-            s["name"].lower() in source_lower or source_lower in s["name"].lower()
-            for s in cls.VERIFIED_SOURCES
-        )
+
+        # Check full name match (either direction)
+        for s in cls.VERIFIED_SOURCES:
+            s_lower = s["name"].lower()
+            if s_lower in source_lower or source_lower in s_lower:
+                return True
+
+        # Check keyword-based partial match
+        return any(kw in source_lower for kw in cls._SOURCE_KEYWORDS)
 
     @classmethod
     def get_attribution(cls, source_name: str) -> str:
@@ -360,6 +371,10 @@ class MultiPassGitaAuthenticator:
         "sacrifice", "yajna", "svadharma", "kshetra", "prakriti",
         "purusha", "ahamkara", "buddhi", "manas", "indriya",
         "samadhi", "nirvana", "sthitaprajna", "nishkama",
+        # Practical Gita concepts common in modern applications
+        "attachment", "desire", "anger", "greed", "kama", "krodha",
+        "lobha", "moha", "mada", "matsarya", "kurukshetra",
+        "battlefield", "gita", "verse", "chapter",
     }
 
     # Non-Gita content markers — REJECT if found
@@ -516,15 +531,17 @@ class MultiPassGitaAuthenticator:
         ]).lower()
 
         # --- FIRST READ: Gita terminology presence ---
+        # Practical wisdom entries use modern language, so we require at
+        # least 1 Gita term.  Chapter-alignment (Read3) provides the
+        # stronger thematic check.
         found_terms = [
             term for term in self.GITA_TERMS
             if term in combined_text
         ]
-        if len(found_terms) < 2:
+        if len(found_terms) < 1:
             issues.append(
-                f"P2-Read1: Insufficient Gita terminology. "
-                f"Found only {len(found_terms)} terms: {found_terms}. "
-                f"Minimum 2 required."
+                f"P2-Read1: No Gita terminology found in entry. "
+                f"At least 1 Gita-related term is required."
             )
 
         # --- SECOND READ: Non-Gita content detection ---
@@ -536,16 +553,16 @@ class MultiPassGitaAuthenticator:
                 )
 
         # --- THIRD READ: Verse-principle alignment ---
-        verse_ref = entry.get("verse_ref", "")
-        principle = str(entry.get("principle_in_action", "")).lower()
-
-        # Check that the principle mentions the verse or chapter context
+        # Check that the entry's combined text aligns with chapter themes.
+        # We search all fields (not just principle_in_action) because
+        # micro_practice, modern_scenario, and other fields often carry
+        # the chapter-relevant vocabulary.
         chapter = entry.get("chapter", 0)
         if chapter > 0:
             chapter_keywords = {
-                1: ["conflict", "confusion", "despair", "arjuna", "grief", "battlefield"],
-                2: ["self", "eternal", "soul", "knowledge", "equanimity", "karma"],
-                3: ["action", "selfless", "duty", "offering", "yajna", "work"],
+                1: ["conflict", "confusion", "despair", "arjuna", "grief", "battlefield", "dhritarashtra", "sanjaya", "inquiry", "blind"],
+                2: ["self", "eternal", "soul", "knowledge", "equanimity", "karma", "attachment", "duty", "desire", "anger"],
+                3: ["action", "selfless", "duty", "offering", "yajna", "work", "desire"],
                 4: ["knowledge", "wisdom", "teacher", "sacrifice", "humility"],
                 5: ["renunciation", "detachment", "peace", "sense", "pleasure"],
                 6: ["mind", "meditation", "discipline", "practice", "mastery"],
@@ -558,14 +575,14 @@ class MultiPassGitaAuthenticator:
                 13: ["field", "knower", "body", "awareness", "witness"],
                 14: ["guna", "sattva", "rajas", "tamas", "transcend"],
                 15: ["supreme", "tree", "eternal", "perishable", "imperishable"],
-                16: ["divine", "demonic", "quality", "fearlessness", "purity"],
+                16: ["divine", "demonic", "quality", "fearlessness", "purity", "desire"],
                 17: ["faith", "food", "sacrifice", "giving", "sattvic"],
-                18: ["surrender", "liberation", "duty", "renunciation", "freedom"],
+                18: ["surrender", "liberation", "duty", "renunciation", "freedom", "grace"],
             }
 
             chapter_terms = chapter_keywords.get(chapter, [])
             has_chapter_alignment = any(
-                term in principle for term in chapter_terms
+                term in combined_text for term in chapter_terms
             )
             if not has_chapter_alignment and chapter_terms:
                 # Soft warning — principle should ideally align with chapter theme

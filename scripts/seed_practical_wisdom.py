@@ -429,7 +429,7 @@ async def seed_practical_wisdom(session):
             "wellness_domains": entry_data.get("wellness_domains", []),
             "source_attribution": sanitize_text(entry_data.get("source_attribution", "")),
             "enrichment_source": "seed",
-            "is_validated": 1,
+            "is_validated": True,
         }
 
         # Check if entry already exists (deduplication)

@@ -7,6 +7,7 @@ import datetime
 from sqlalchemy import (
     JSON,
     TIMESTAMP,
+    Boolean,
     Float,
     ForeignKey,
     Integer,
@@ -216,8 +217,8 @@ class GitaPracticalWisdom(Base):
 
     # Whether this has been validated by the Gita authenticity checker
     is_validated: Mapped[bool] = mapped_column(
-        Integer, nullable=False, default=1
-    )  # 1 = validated, 0 = pending
+        Boolean, nullable=False, default=True
+    )
 
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()

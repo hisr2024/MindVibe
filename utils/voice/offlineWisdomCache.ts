@@ -111,8 +111,8 @@ function warmServiceWorkerCache(): void {
     navigator.serviceWorker.controller.postMessage({
       type: 'CACHE_URLS',
       urls: [
-        '/api/gita/verses',
-        '/api/wisdom',
+        '/api/wisdom/verses',
+        '/api/kiaan/friend/daily-wisdom',
       ],
     })
   } catch {

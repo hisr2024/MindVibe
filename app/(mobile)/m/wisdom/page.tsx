@@ -73,14 +73,16 @@ export default function MobileWisdomPage() {
         const response = await apiFetch('/api/kiaan/friend/daily-wisdom')
         if (response.ok) {
           const data = await response.json()
-          if (data.verse || data.translation) {
+          // API returns { wisdom: DailyWisdomEntry } — unwrap the nested object
+          const w = data.wisdom || data
+          if (w.verse || w.verse_id || w.translation || w.insight) {
             setDailyVerse({
-              chapter: data.chapter || data.verse_ref?.chapter || 2,
-              verse: data.verse_number || data.verse_ref?.verse || 47,
-              sanskrit: data.sanskrit || data.original || FALLBACK_VERSE.sanskrit,
-              translation: data.translation || data.meaning || FALLBACK_VERSE.translation,
-              commentary: data.commentary || data.insight || FALLBACK_VERSE.commentary,
-              theme: data.theme || 'wisdom',
+              chapter: w.chapter || w.verse_ref?.chapter || 2,
+              verse: w.verse || w.verse_number || w.verse_ref?.verse || 47,
+              sanskrit: w.sanskrit || w.original || FALLBACK_VERSE.sanskrit,
+              translation: w.translation || w.meaning || w.insight || FALLBACK_VERSE.translation,
+              commentary: w.commentary || w.insight || w.daily_practice || FALLBACK_VERSE.commentary,
+              theme: w.theme || w.secular_theme || 'wisdom',
             })
           }
         }
