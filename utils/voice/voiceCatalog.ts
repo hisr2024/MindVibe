@@ -440,10 +440,14 @@ export function saveLanguagePreference(lang: VoiceLanguage): void {
   localStorage.setItem(LANGUAGE_KEY, lang)
 }
 
-/** Map a voice to the backend language code for TTS */
+/** Map a voice to the backend language code for TTS.
+ *
+ * Preserves 'en-IN' so the backend Sarvam AI priority check can
+ * distinguish Indian English from international English. Sanskrit
+ * maps to 'hi' because Sarvam AI synthesizes Sanskrit via Hindi voice.
+ */
 export function getBackendLanguageCode(lang: VoiceLanguage): string {
   switch (lang) {
-    case 'en-IN': return 'en'
     case 'sa': return 'hi'  // Sanskrit uses Hindi TTS (Sarvam AI)
     default: return lang
   }

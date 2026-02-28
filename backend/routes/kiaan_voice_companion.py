@@ -1484,6 +1484,14 @@ async def voice_companion_health():
     if os.getenv("ELEVENLABS_API_KEY", "").strip():
         voice_providers.insert(0, "elevenlabs")
 
+    # Include circuit breaker status for TTS providers
+    provider_health = {}
+    try:
+        from backend.services.companion_voice_service import get_provider_health_status
+        provider_health = get_provider_health_status()
+    except Exception:
+        logger.debug("Voice companion health check: provider health unavailable")
+
     return {
         "status": "healthy",
         "service": "kiaan-voice-companion",
@@ -1495,6 +1503,7 @@ async def voice_companion_health():
         },
         "ai_enhanced": tier1_ready or tier2_ready,
         "voice_providers": voice_providers,
+        "voice_provider_health": provider_health,
         "wisdom_corpus": verse_count,
         "voice_first": True,
     }
