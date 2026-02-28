@@ -419,6 +419,26 @@ async def startup():
                 startup_logger.info(f"⚠️ KIAAN Learning System fallback failed: {fallback_error}")
             # Don't fail startup - learning is supplementary
 
+        # Step 7: Initialize Gita Practical Wisdom Auto-Enricher
+        startup_logger.info("\n📜 Initializing Gita Practical Wisdom Auto-Enricher...")
+        try:
+            from backend.services.gita_wisdom_auto_enricher import get_auto_enricher
+
+            enricher = get_auto_enricher()
+            asyncio.create_task(enricher.start(SessionLocal))
+
+            startup_logger.info("✅ Gita Practical Wisdom Auto-Enricher starting")
+            startup_logger.info("   • Mode: CONTINUOUS (auto-enrichment)")
+            startup_logger.info("   • Enrichment interval: 4 hours")
+            startup_logger.info("   • Target: 3+ practical entries per verse")
+            startup_logger.info("   • Validation: THREE-PASS (structural + authenticity + security)")
+            startup_logger.info("   • Security: TEXT-ONLY, no binaries/URLs/code execution")
+            startup_logger.info("   • Copyright: Public domain + open-license sources only")
+            startup_logger.info("   • Compliance: Strict Bhagavad Gita ambit (18 chapters, 700 verses)")
+        except Exception as enricher_error:
+            startup_logger.info(f"⚠️ Gita Wisdom Auto-Enricher initialization had issues: {enricher_error}")
+            # Don't fail startup - enrichment is supplementary
+
     except Exception as exc:
         failed_meta = migrations_module.LATEST_MIGRATION_RESULT
         if failed_meta and failed_meta.failed_file:
@@ -443,6 +463,15 @@ async def shutdown():
         startup_logger.info("✅ KIAAN 24/7 Learning Daemon stopped")
     except Exception as e:
         startup_logger.info(f"⚠️ Error stopping KIAAN daemon: {e}")
+
+    # Stop Gita Practical Wisdom Auto-Enricher
+    try:
+        from backend.services.gita_wisdom_auto_enricher import get_auto_enricher
+        enricher = get_auto_enricher()
+        await enricher.stop()
+        startup_logger.info("✅ Gita Practical Wisdom Auto-Enricher stopped")
+    except Exception as e:
+        startup_logger.info(f"⚠️ Error stopping Gita Auto-Enricher: {e}")
 
     # Stop legacy scheduler if running
     try:
