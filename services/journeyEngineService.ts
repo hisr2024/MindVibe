@@ -79,14 +79,22 @@ async function apiRequest<T>(
   endpoint: string,
   body?: unknown
 ): Promise<T> {
+  const upperMethod = method.toUpperCase();
+  const hasBody = ['POST', 'PUT', 'PATCH'].includes(upperMethod);
+
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
       // Use apiFetch for proper auth (httpOnly cookies, CSRF) and
       // Vercel proxy routing (relative paths in production, absolute in dev)
+      const headers: Record<string, string> = {};
+      if (hasBody) {
+        headers['Content-Type'] = 'application/json';
+      }
+
       const response = await apiFetch(endpoint, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: body ? JSON.stringify(body) : undefined,
+        headers,
+        body: hasBody && body ? JSON.stringify(body) : undefined,
       });
 
       if (response.status === 204) {

@@ -56,9 +56,6 @@ export default function DataExportButton({
     try {
       const response = await apiFetch(`/api/gdpr/data-export/${downloadToken}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       })
 
       if (!response.ok) {

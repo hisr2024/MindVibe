@@ -14,60 +14,97 @@ import Link from 'next/link'
 import { springConfigs } from '@/lib/animations/spring-configs'
 import { useLanguage } from '@/hooks/useLanguage'
 
-/** Sacred OM mark with gentle breathing golden aura — SVG for consistent rendering */
+/** Sacred OM mark with radiant golden aura and divine light rays */
 function DivineOmMark({ reduceMotion }: { reduceMotion: boolean | null }) {
   return (
     <div className="relative flex items-center justify-center">
-      {/* Breathing golden aura */}
+      {/* Outermost halo — soft expansive glow */}
       <motion.div
         className="absolute rounded-full"
         style={{
-          width: 120,
-          height: 120,
-          background: 'radial-gradient(circle, rgba(212, 164, 76, 0.12) 0%, rgba(212, 164, 76, 0) 70%)',
+          width: 200,
+          height: 200,
+          background: 'radial-gradient(circle, rgba(240, 201, 109, 0.08) 0%, rgba(212, 164, 76, 0.03) 50%, transparent 70%)',
         }}
         animate={
           reduceMotion
             ? undefined
-            : { scale: [0.9, 1.1, 0.9], opacity: [0.5, 0.8, 0.5] }
+            : { scale: [0.85, 1.15, 0.85], opacity: [0.3, 0.6, 0.3] }
         }
-        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
       />
-      {/* OM symbol — SVG path for cross-platform consistency */}
+      {/* Inner breathing golden aura — more intense */}
+      <motion.div
+        className="absolute rounded-full"
+        style={{
+          width: 140,
+          height: 140,
+          background: 'radial-gradient(circle, rgba(240, 201, 109, 0.2) 0%, rgba(212, 164, 76, 0.08) 50%, transparent 70%)',
+        }}
+        animate={
+          reduceMotion
+            ? undefined
+            : { scale: [0.9, 1.12, 0.9], opacity: [0.5, 0.9, 0.5] }
+        }
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      {/* Core radiance — bright golden center */}
+      <motion.div
+        className="absolute rounded-full"
+        style={{
+          width: 80,
+          height: 80,
+          background: 'radial-gradient(circle, rgba(245, 230, 200, 0.25) 0%, rgba(240, 201, 109, 0.12) 40%, transparent 70%)',
+        }}
+        animate={
+          reduceMotion
+            ? undefined
+            : { scale: [0.95, 1.08, 0.95], opacity: [0.6, 1, 0.6] }
+        }
+        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      {/* OM symbol — SVG with enhanced golden radiance */}
       <motion.div
         className="relative select-none"
         animate={
           reduceMotion
             ? undefined
-            : { opacity: [0.75, 1, 0.75] }
+            : { opacity: [0.85, 1, 0.85] }
         }
-        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
         aria-hidden="true"
       >
         <svg
           viewBox="0 0 100 100"
-          className="h-16 w-16 sm:h-20 sm:w-20"
+          className="h-20 w-20 sm:h-24 sm:w-24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
             <filter id="om-glow">
-              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feGaussianBlur stdDeviation="3" result="blur" />
               <feMerge>
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+            <linearGradient id="om-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#f0c96d" />
+              <stop offset="50%" stopColor="#e8b54a" />
+              <stop offset="100%" stopColor="#d4a44c" />
+            </linearGradient>
           </defs>
           <text
             x="50"
             y="68"
             textAnchor="middle"
-            fill="#d4a44c"
+            fill="url(#om-gold)"
             fontSize="72"
             fontFamily="serif"
             filter="url(#om-glow)"
-            style={{ textShadow: '0 0 30px rgba(212, 164, 76, 0.3), 0 0 60px rgba(212, 164, 76, 0.1)' }}
+            style={{
+              textShadow: '0 0 20px rgba(240, 201, 109, 0.6), 0 0 40px rgba(232, 181, 74, 0.35), 0 0 80px rgba(212, 164, 76, 0.15)',
+            }}
           >
             {'\u0950'}
           </text>
