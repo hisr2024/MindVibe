@@ -396,7 +396,7 @@ export function stopMediaStream(stream: MediaStream | null | undefined): void {
   }
 }
 
-export default {
+const UniversalMicrophoneAccess = {
   detectPlatform,
   isEnvironmentSupported,
   checkMicrophonePermission,
@@ -406,3 +406,4 @@ export default {
   runMicrophoneDiagnostics,
   stopMediaStream
 }
+export default UniversalMicrophoneAccess

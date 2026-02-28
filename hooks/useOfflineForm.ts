@@ -44,6 +44,17 @@ export function useOfflineForm<T = unknown>(options: OfflineFormOptions<T> = {})
 
   const { isOnline, queueOperation } = useOfflineMode()
 
+  const queueForOffline = useCallback(async (submitOptions: OfflineFormSubmitOptions) => {
+    const { endpoint, method, data: formData } = submitOptions
+
+    // Convert PATCH to PUT for offline queue
+    const queueMethod = method === 'PATCH' ? 'PUT' : method
+
+    await queueOperation(queueMethod as 'POST' | 'PUT' | 'DELETE', endpoint, formData)
+
+    setStatus('queued')
+  }, [queueOperation])
+
   const submitForm = useCallback(
     async (submitOptions: OfflineFormSubmitOptions) => {
       setStatus('saving')
@@ -101,19 +112,8 @@ export function useOfflineForm<T = unknown>(options: OfflineFormOptions<T> = {})
         return { success: false, error: errorObj }
       }
     },
-    [isOnline, onSuccess, onError]
+    [isOnline, onSuccess, onError, queueForOffline]
   )
-
-  const queueForOffline = async (submitOptions: OfflineFormSubmitOptions) => {
-    const { endpoint, method, data: formData } = submitOptions
-
-    // Convert PATCH to PUT for offline queue
-    const queueMethod = method === 'PATCH' ? 'PUT' : method
-
-    await queueOperation(queueMethod as 'POST' | 'PUT' | 'DELETE', endpoint, formData)
-
-    setStatus('queued')
-  }
 
   const reset = useCallback(() => {
     setStatus('idle')

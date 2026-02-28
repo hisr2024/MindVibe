@@ -15,9 +15,9 @@ export default function SiteNav() {
   const [open, setOpen] = useState(false)
   const { t } = useLanguage()
 
-  // Close menu when route changes
   useEffect(() => {
-    setOpen(false)
+    if (open) setOpen(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])
 
   // Prevent body scroll when menu is open

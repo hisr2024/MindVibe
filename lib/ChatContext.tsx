@@ -14,14 +14,8 @@ interface ChatContextValue {
 const ChatContext = createContext<ChatContextValue | undefined>(undefined)
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [messages, setMessages] = useState<ChatMessage[]>(() => loadChatMessages())
   const [isOpen, setIsOpen] = useState(false)
-
-  // Load messages from localStorage on mount
-  useEffect(() => {
-    const stored = loadChatMessages()
-    setMessages(stored)
-  }, [])
 
   // Save messages to localStorage whenever they change
   useEffect(() => {

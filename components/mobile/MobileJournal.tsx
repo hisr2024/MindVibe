@@ -139,25 +139,6 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
       },
     })
 
-    // Auto-save debounced
-    useEffect(() => {
-      if (body.length > 10 && !isSaving) {
-        if (autoSaveTimerRef.current) {
-          clearTimeout(autoSaveTimerRef.current)
-        }
-
-        autoSaveTimerRef.current = setTimeout(() => {
-          handleAutoSave()
-        }, 3000)
-      }
-
-      return () => {
-        if (autoSaveTimerRef.current) {
-          clearTimeout(autoSaveTimerRef.current)
-        }
-      }
-    }, [body, title, tags, mood])
-
     // Auto-save to offline storage
     const handleAutoSave = useCallback(async () => {
       if (!body.trim()) return
@@ -183,6 +164,25 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
       setSaveStatus('saved')
       setTimeout(() => setSaveStatus('idle'), 2000)
     }, [body, title, tags, mood, initialEntry])
+
+    // Auto-save debounced
+    useEffect(() => {
+      if (body.length > 10 && !isSaving) {
+        if (autoSaveTimerRef.current) {
+          clearTimeout(autoSaveTimerRef.current)
+        }
+
+        autoSaveTimerRef.current = setTimeout(() => {
+          handleAutoSave()
+        }, 3000)
+      }
+
+      return () => {
+        if (autoSaveTimerRef.current) {
+          clearTimeout(autoSaveTimerRef.current)
+        }
+      }
+    }, [body, title, tags, mood, handleAutoSave, isSaving])
 
     // Save entry
     const handleSave = useCallback(async () => {

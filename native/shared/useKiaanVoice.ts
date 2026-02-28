@@ -312,7 +312,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
 
   useEffect(() => {
     if (autoInitialize) {
-      initialize()
+      queueMicrotask(() => void initialize())
     }
 
     return () => {

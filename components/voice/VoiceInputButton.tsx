@@ -48,7 +48,6 @@ export function VoiceInputButton({
   // Check microphone permission status on mount
   useEffect(() => {
     if (typeof navigator === 'undefined' || !navigator.permissions) {
-      setMicPermission('unknown')
       return
     }
 
@@ -59,7 +58,7 @@ export function VoiceInputButton({
         if (status.state === 'granted') setShowPermissionHint(false)
       }
     }).catch(() => {
-      setMicPermission('unknown')
+      // keep default 'unknown'
     })
   }, [])
 
@@ -74,8 +73,11 @@ export function VoiceInputButton({
   // Detect denial from error message
   useEffect(() => {
     if (error && (error.toLowerCase().includes('denied') || error.toLowerCase().includes('permission') || error.toLowerCase().includes('not-allowed'))) {
-      setMicPermission('denied')
-      setShowPermissionHint(true)
+      const timer = setTimeout(() => {
+        setMicPermission('denied')
+        setShowPermissionHint(true)
+      }, 0)
+      return () => clearTimeout(timer)
     }
   }, [error])
 

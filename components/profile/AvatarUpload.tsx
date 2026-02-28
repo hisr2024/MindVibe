@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import Image from 'next/image'
 import { Button, Modal } from '@/components/ui'
 
 interface AvatarUploadProps {
@@ -94,10 +95,13 @@ export function AvatarUpload({
       <div className="flex items-center gap-4">
         <div className="relative">
           {currentAvatar || preview ? (
-            <img
-              src={preview || currentAvatar}
+            <Image
+              src={(preview || currentAvatar)!}
               alt="Avatar"
+              width={96}
+              height={96}
               className="h-24 w-24 rounded-2xl object-cover border-2 border-[#d4a44c]/30"
+              unoptimized
             />
           ) : (
             <div className="h-24 w-24 rounded-2xl bg-gradient-to-br from-[#d4a44c]/30 via-[#d4a44c]/30 to-[#d4a44c]/30 border-2 border-dashed border-[#d4a44c]/30 flex items-center justify-center">
@@ -147,10 +151,13 @@ export function AvatarUpload({
       >
         <div className="text-center">
           {preview && (
-            <img
+            <Image
               src={preview}
               alt="Preview"
+              width={192}
+              height={192}
               className="mx-auto h-48 w-48 rounded-2xl object-cover mb-4"
+              unoptimized
             />
           )}
           <div className="flex gap-3">

@@ -181,7 +181,47 @@ export default function CompanionPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const friendEngineRef = useRef(new KiaanFriendEngine())
 
-  // ─── Session Management ─────────────────────────────────────────────
+  // ─── Local Session Fallback ──────────────────────────────────────────
+
+  const createLocalSession = useCallback(() => {
+    const localId = `local_${Date.now()}`
+    setSession({
+      sessionId: localId,
+      phase: 'connect',
+      friendshipLevel: 'new',
+      userName: null,
+      isActive: true,
+    })
+
+    let greeting: string
+    if (referralTool && REFERRAL_GREETINGS[referralTool]) {
+      greeting = REFERRAL_GREETINGS[referralTool]
+    } else {
+      const hour = new Date().getHours()
+      if (hour >= 5 && hour < 12) {
+        greeting = "Good morning, friend! I'm KIAAN. Think of me as that friend who's always here - no judgment, no agenda. What's on your mind today?"
+      } else if (hour >= 12 && hour < 17) {
+        greeting = "Hey there! I'm KIAAN, your personal friend who never gets tired of listening. How's your day going?"
+      } else if (hour >= 17 && hour < 21) {
+        greeting = "Good evening! I'm KIAAN. The day's winding down - perfect time for a real conversation. How are you feeling?"
+      } else {
+        greeting = "Hey night owl! I'm KIAAN. Can't sleep, or just need someone to talk to? Either way, I'm right here."
+      }
+    }
+
+    setMessages([
+      {
+        id: `greeting-${Date.now()}`,
+        role: 'companion',
+        content: greeting,
+        mood: 'neutral',
+        phase: 'connect',
+        timestamp: new Date(),
+      },
+    ])
+    setShowSuggestions(true)
+    setIsInitializing(false)
+  }, [referralTool])
 
   const startSession = useCallback(async () => {
     try {
@@ -225,47 +265,7 @@ export default function CompanionPage() {
     } finally {
       setIsInitializing(false)
     }
-  }, [voiceConfig.language, referralTool, referralMood])
-
-  const createLocalSession = useCallback(() => {
-    const localId = `local_${Date.now()}`
-    setSession({
-      sessionId: localId,
-      phase: 'connect',
-      friendshipLevel: 'new',
-      userName: null,
-      isActive: true,
-    })
-
-    let greeting: string
-    if (referralTool && REFERRAL_GREETINGS[referralTool]) {
-      greeting = REFERRAL_GREETINGS[referralTool]
-    } else {
-      const hour = new Date().getHours()
-      if (hour >= 5 && hour < 12) {
-        greeting = "Good morning, friend! I'm KIAAN. Think of me as that friend who's always here - no judgment, no agenda. What's on your mind today?"
-      } else if (hour >= 12 && hour < 17) {
-        greeting = "Hey there! I'm KIAAN, your personal friend who never gets tired of listening. How's your day going?"
-      } else if (hour >= 17 && hour < 21) {
-        greeting = "Good evening! I'm KIAAN. The day's winding down - perfect time for a real conversation. How are you feeling?"
-      } else {
-        greeting = "Hey night owl! I'm KIAAN. Can't sleep, or just need someone to talk to? Either way, I'm right here."
-      }
-    }
-
-    setMessages([
-      {
-        id: `greeting-${Date.now()}`,
-        role: 'companion',
-        content: greeting,
-        mood: 'neutral',
-        phase: 'connect',
-        timestamp: new Date(),
-      },
-    ])
-    setShowSuggestions(true)
-    setIsInitializing(false)
-  }, [referralTool])
+  }, [voiceConfig.language, referralTool, referralMood, createLocalSession])
 
   useEffect(() => {
     startSession()
@@ -291,6 +291,24 @@ export default function CompanionPage() {
   }, [])
 
   // ─── Message Sending ────────────────────────────────────────────────
+
+  const addLocalFallbackResponse = useCallback((userText: string) => {
+    const result = friendEngineRef.current.processMessage(userText)
+
+    setCurrentMood(result.mood)
+    setSession(prev => ({ ...prev, phase: result.phase }))
+    setMessages(prev => [
+      ...prev,
+      {
+        id: `companion-${Date.now()}`,
+        role: 'companion',
+        content: result.response,
+        mood: result.mood,
+        phase: result.phase,
+        timestamp: new Date(),
+      },
+    ])
+  }, [])
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading || !session.sessionId) return
@@ -359,25 +377,7 @@ export default function CompanionPage() {
       setIsLoading(false)
       setShowSuggestions(true)
     }
-  }, [isLoading, session.sessionId, voiceConfig.language])
-
-  const addLocalFallbackResponse = useCallback((userText: string) => {
-    const result = friendEngineRef.current.processMessage(userText)
-
-    setCurrentMood(result.mood)
-    setSession(prev => ({ ...prev, phase: result.phase }))
-    setMessages(prev => [
-      ...prev,
-      {
-        id: `companion-${Date.now()}`,
-        role: 'companion',
-        content: result.response,
-        mood: result.mood,
-        phase: result.phase,
-        timestamp: new Date(),
-      },
-    ])
-  }, [])
+  }, [isLoading, session.sessionId, voiceConfig.language, addLocalFallbackResponse, voiceConfig.speakerId])
 
   // ─── End Session ────────────────────────────────────────────────────
 

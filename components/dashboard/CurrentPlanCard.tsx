@@ -15,8 +15,8 @@ export function CurrentPlanCard({ subscription, onManage, onUpgrade, className =
   const periodEnd = new Date(subscription.currentPeriodEnd)
   const daysRemaining = useMemo(
     // eslint-disable-next-line react-hooks/purity
-    () => Math.max(0, Math.ceil((periodEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
-    [periodEnd]
+    () => Math.max(0, Math.ceil((new Date(subscription.currentPeriodEnd).getTime() - Date.now()) / (1000 * 60 * 60 * 24))),
+    [subscription.currentPeriodEnd]
   )
 
   const statusBadge = {

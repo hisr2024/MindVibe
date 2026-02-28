@@ -29,6 +29,18 @@ export async function GET(request: NextRequest) {
       return forwardCookies(response, NextResponse.json(data))
     }
 
+    // Forward 401/403 as-is so the frontend can redirect to login
+    if (response.status === 401 || response.status === 403) {
+      return forwardCookies(
+        response,
+        NextResponse.json(
+          { detail: 'Authentication required', journeys: [], total: 0 },
+          { status: response.status }
+        )
+      )
+    }
+
+    // For other errors, return fallback with 200 so the UI still renders
     return forwardCookies(response, NextResponse.json(FALLBACK_JOURNEYS))
   } catch {
     return NextResponse.json(FALLBACK_JOURNEYS)

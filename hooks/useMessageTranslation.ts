@@ -115,7 +115,7 @@ export function useMessageTranslation(options: UseMessageTranslationOptions): Us
     if (autoTranslate && targetLang !== sourceLang && originalText) {
       translate();
     }
-  }, [autoTranslate, targetLang, sourceLang, originalText]); // Only run when these change
+  }, [autoTranslate, targetLang, sourceLang, originalText, translate]);
 
   // Return the display text based on showTranslation state
   const displayText = showTranslation && translatedText ? translatedText : null;

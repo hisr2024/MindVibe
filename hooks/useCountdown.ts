@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 
 interface UseCountdownResult {
   days: number
@@ -12,7 +12,10 @@ interface UseCountdownResult {
 }
 
 export function useCountdown(targetDate: Date | string): UseCountdownResult {
-  const target = typeof targetDate === 'string' ? new Date(targetDate) : targetDate
+  const target = useMemo(
+    () => typeof targetDate === 'string' ? new Date(targetDate) : targetDate,
+    [targetDate]
+  )
   const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft(target))
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -26,7 +29,6 @@ export function useCountdown(targetDate: Date | string): UseCountdownResult {
   }, [target])
 
   useEffect(() => {
-    tick()
     intervalRef.current = setInterval(tick, 1000)
 
     return () => {

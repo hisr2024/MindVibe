@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { SettingsSection, SettingsItem, SettingsDivider } from '@/components/settings'
@@ -48,15 +48,15 @@ const defaultSettings: Settings = {
 }
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState<Settings>(defaultSettings)
+  const [settings, setSettings] = useState<Settings>(() => {
+    if (typeof window === 'undefined') return defaultSettings
+    try {
+      const stored = localStorage.getItem(SETTINGS_STORAGE_KEY)
+      if (stored) return JSON.parse(stored)
+    } catch { /* ignore */ }
+    return defaultSettings
+  })
   const [saved, setSaved] = useState(false)
-
-  useEffect(() => {
-    const stored = localStorage.getItem(SETTINGS_STORAGE_KEY)
-    if (stored) {
-      setSettings(JSON.parse(stored))
-    }
-  }, [])
 
   const updateSetting = <K extends keyof Settings>(
     category: K,

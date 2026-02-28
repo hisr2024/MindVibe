@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { apiFetch } from '@/lib/api'
@@ -202,7 +202,7 @@ export default function SacredReflectionsPage() {
     })()
   }, [entries, encryptionReady, passphrase])
 
-  async function syncFromServer() {
+  const syncFromServer = useCallback(async () => {
     if (!passphrase) return
     try {
       const response = await apiFetch('/api/journal/entries')
@@ -226,12 +226,12 @@ export default function SacredReflectionsPage() {
     } catch {
       // ignore sync failures in offline mode
     }
-  }
+  }, [passphrase])
 
   useEffect(() => {
     if (!passphrase) return
     syncFromServer()
-  }, [passphrase])
+  }, [passphrase, syncFromServer])
 
   async function addEntry() {
     if (!body.trim()) return

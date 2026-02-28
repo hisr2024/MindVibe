@@ -239,8 +239,11 @@ export const MobileBottomSheet = forwardRef<HTMLDivElement, MobileBottomSheetPro
     // Reset state when closed
     useEffect(() => {
       if (!isOpen) {
-        setIsExpanded(false)
-        setIsDragging(false)
+        const timer = setTimeout(() => {
+          setIsExpanded(false)
+          setIsDragging(false)
+        }, 0)
+        return () => clearTimeout(timer)
       }
     }, [isOpen])
 

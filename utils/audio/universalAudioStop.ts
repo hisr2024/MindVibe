@@ -81,7 +81,7 @@ export function getActiveAudioCount(): number {
   return audioRegistry.size
 }
 
-export default {
+const universalAudioStop = {
   initUniversalAudioStop,
   registerAudioElement,
   unregisterAudioElement,
@@ -89,3 +89,4 @@ export default {
   pauseAllAudio,
   getActiveAudioCount,
 }
+export default universalAudioStop

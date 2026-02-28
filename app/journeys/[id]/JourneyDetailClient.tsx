@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FadeIn } from '@/components/ui'
@@ -54,7 +55,7 @@ export default function JourneyDetailClient({ journeyId }: JourneyDetailClientPr
     } finally {
       setLoading(false)
     }
-  }, [journeyId])
+  }, [journeyId, router])
 
   useEffect(() => {
     loadJourney()
@@ -180,13 +181,16 @@ export default function JourneyDetailClient({ journeyId }: JourneyDetailClientPr
           {/* Cover image */}
           {journey.cover_image_url && (
             <div className="mb-6 overflow-hidden rounded-2xl">
-              <img
+              <Image
                 src={journey.cover_image_url}
                 alt={journey.title}
+                width={800}
+                height={450}
                 className="aspect-video w-full object-cover"
+                unoptimized
                 onError={(e) => {
                   // Hide broken images
-                  e.currentTarget.style.display = 'none'
+                  (e.target as HTMLImageElement).style.display = 'none'
                 }}
               />
             </div>

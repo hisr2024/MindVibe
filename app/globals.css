@@ -27,6 +27,10 @@
 
 /* Base element styles — must be co-located with @tailwind base */
 @layer base {
+  :root {
+    --font-sacred: Georgia, 'Crimson Text', 'Times New Roman', serif;
+  }
+
   html {
     font-family: var(--font-sans);
     -webkit-text-size-adjust: 100%;

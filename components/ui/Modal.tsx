@@ -36,12 +36,11 @@ export function Modal({
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(open)
 
   // Handle visibility and body scroll lock
   useEffect(() => {
     if (open) {
-      setIsVisible(true)
       lockBodyScroll()
     } else {
       const timer = setTimeout(() => setIsVisible(false), 200)
@@ -52,6 +51,11 @@ export function Modal({
       unlockBodyScroll()
     }
   }, [open])
+
+  // Sync open -> isVisible during render (React recommended pattern for prop-to-state)
+  if (open && !isVisible) {
+    setIsVisible(true)
+  }
 
   // Handle escape key
   const handleKeyDown = useCallback((event: KeyboardEvent) => {

@@ -12,7 +12,7 @@
  * "No harm can touch you while I am here. I protect those who surrender to me."
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDivineConsciousness } from '@/contexts/DivineConsciousnessContext';
 
@@ -117,23 +117,29 @@ export function DivineProtectionShield({
     setIsActive(true);
     setPhase('activating');
     setGroundingStep(0);
-
-    // Random message and verse
     setCurrentMessage(PROTECTION_MESSAGES[Math.floor(Math.random() * PROTECTION_MESSAGES.length)]);
     setCurrentVerse(PROTECTION_VERSES[Math.floor(Math.random() * PROTECTION_VERSES.length)]);
-
     actions.activateDivinePresence();
-
-    // Progress to protection phase
-    setTimeout(() => setPhase('protection'), 3000);
   }, [actions]);
 
   // Sync with isOpen prop
+  const prevIsOpenRef = useRef(isOpen);
   useEffect(() => {
-    if (isOpen && !isActive) {
-      activateShield();
+    if (isOpen && !prevIsOpenRef.current) {
+      const timer = setTimeout(() => activateShield(), 0);
+      prevIsOpenRef.current = isOpen;
+      return () => clearTimeout(timer);
     }
-  }, [isOpen, isActive, activateShield]);
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen, activateShield]);
+
+  // Progress to protection phase after activation
+  useEffect(() => {
+    if (isActive && phase === 'activating') {
+      const timer = setTimeout(() => setPhase('protection'), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isActive, phase]);
 
   // Handle grounding phase
   useEffect(() => {

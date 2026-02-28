@@ -13,27 +13,27 @@ import { SubscriptionBanner } from '@/components/subscription'
 
 export default function AnalyticsPageClient() {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(true)
-  const [userId, setUserId] = useState<string | undefined>()
+  const [userId] = useState<string | undefined>(() => {
+    if (typeof window === 'undefined') return undefined
+    const onboardingComplete = localStorage.getItem('mindvibe_onboarding_complete')
+    if (onboardingComplete !== 'true') return undefined
+    const profile = localStorage.getItem('mindvibe_profile')
+    if (profile) {
+      try { return JSON.parse(profile).email || 'local-user' } catch { return 'local-user' }
+    }
+    return 'local-user'
+  })
+  const [isLoading] = useState(() => {
+    if (typeof window === 'undefined') return true
+    const onboardingComplete = localStorage.getItem('mindvibe_onboarding_complete')
+    return onboardingComplete !== 'true'
+  })
 
   useEffect(() => {
-    // Check if user has completed onboarding
     const onboardingComplete = localStorage.getItem('mindvibe_onboarding_complete')
     if (onboardingComplete !== 'true') {
       router.push('/onboarding')
-      return
     }
-
-    // Get user ID (from localStorage or auth)
-    const profile = localStorage.getItem('mindvibe_profile')
-    if (profile) {
-      const parsed = JSON.parse(profile)
-      setUserId(parsed.email || 'local-user')
-    } else {
-      setUserId('local-user')
-    }
-
-    setIsLoading(false)
   }, [router])
 
   if (isLoading) {

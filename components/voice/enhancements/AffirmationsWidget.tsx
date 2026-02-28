@@ -10,7 +10,7 @@
  * - Favorites & custom affirmations
  */
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Sparkles,
@@ -98,20 +98,14 @@ export function AffirmationsWidget({
   className = ''
 }: AffirmationsWidgetProps) {
   const [selectedCategory, setSelectedCategory] = useState<AffirmationCategory>('confidence')
-  const [currentAffirmation, setCurrentAffirmation] = useState<Affirmation | null>(null)
+  const categoryAffirmations = SAMPLE_AFFIRMATIONS.filter(a => a.category === selectedCategory)
+
+  const [currentAffirmation, setCurrentAffirmation] = useState<Affirmation | null>(
+    () => categoryAffirmations.length > 0 ? categoryAffirmations[0] : null
+  )
   const [isPlaying, setIsPlaying] = useState(false)
   const [showHindi, setShowHindi] = useState(true)
   const [autoPlay, setAutoPlay] = useState(false)
-
-  // Get affirmations for selected category
-  const categoryAffirmations = SAMPLE_AFFIRMATIONS.filter(a => a.category === selectedCategory)
-
-  // Set initial affirmation
-  useEffect(() => {
-    if (categoryAffirmations.length > 0 && !currentAffirmation) {
-      setCurrentAffirmation(categoryAffirmations[0])
-    }
-  }, [categoryAffirmations, currentAffirmation])
 
   const handleNext = useCallback(() => {
     const currentIndex = categoryAffirmations.findIndex(a => a.id === currentAffirmation?.id)

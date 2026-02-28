@@ -16,6 +16,14 @@ import { MobileRouteGuard, MobileContentWrapper } from '@/components/mobile/Mobi
 import { WebVitalsReporter } from '@/components/WebVitalsReporter'
 import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema'
 
+/**
+ * The CSS variable --font-sacred is set on <body> via globals.css and
+ * consumed by Tailwind's `font-sacred` utility (see tailwind.config.ts).
+ * Uses a system serif fallback stack (Georgia, Times New Roman) so the
+ * build doesn't require fetching from Google Fonts at build time.
+ * In production, Crimson Text can be loaded via CDN at runtime.
+ */
+
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -116,23 +124,6 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Crimson Text (sacred font) — loaded via preconnect + stylesheet for
-            broadest build compatibility. The Google Fonts stylesheet injects
-            @font-face rules that make 'Crimson Text' available globally.
-            Tailwind's font-sacred stack: var(--font-sacred) → 'Crimson Text' → Georgia → serif */}
-        <link
-          rel="preconnect"
-          href="https://fonts.googleapis.com"
-        />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap"
-        />
         {/* JSON-LD structured data for search engine rich results */}
         <script
           type="application/ld+json"

@@ -47,25 +47,22 @@ export function PWAInstallPrompt({
   const { triggerHaptic } = useHapticFeedback()
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isVisible, setIsVisible] = useState(false)
-  const [isIOS, setIsIOS] = useState(false)
-  const [isPWA, setIsPWA] = useState(false)
+  const [isIOS] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  })
+  const [isPWA] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as { standalone?: boolean }).standalone === true
+  })
   const [showIOSInstructions, setShowIOSInstructions] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
 
   // Check if already installed or dismissed
   useEffect(() => {
     if (typeof window === 'undefined') return
-
-    // Check if running as PWA
-    const isStandalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as { standalone?: boolean }).standalone === true
-    setIsPWA(isStandalone)
-
-    // Check if iOS
-    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-    setIsIOS(iOS)
 
     // Check dismiss timestamp
     const dismissedAt = localStorage.getItem('pwa-prompt-dismissed')
@@ -105,7 +102,7 @@ export function PWAInstallPrompt({
     window.addEventListener('appinstalled', handleAppInstalled)
 
     // Show iOS prompt after delay if on iOS and not PWA
-    if (iOS && !isStandalone) {
+    if (isIOS && !isPWA) {
       setTimeout(() => {
         setIsVisible(true)
         triggerHaptic('light')
@@ -116,7 +113,7 @@ export function PWAInstallPrompt({
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall)
       window.removeEventListener('appinstalled', handleAppInstalled)
     }
-  }, [delay, dismissForDays, triggerHaptic])
+  }, [delay, dismissForDays, triggerHaptic, isIOS, isPWA])
 
   // Handle install
   const handleInstall = useCallback(async () => {

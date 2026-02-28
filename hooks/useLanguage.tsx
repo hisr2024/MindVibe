@@ -200,10 +200,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     document.documentElement.lang = language
     document.documentElement.dataset[LANGUAGE_SOURCE_ATTR] = CLIENT_LANGUAGE_SOURCE
 
-    loadTranslations(language).then(() => {
+    void (async () => {
+      await loadTranslations(language)
       setIsInitialized(true)
-    })
-  }, []) // Only run once on mount - language is already set correctly
+    })()
+  }, [language, loadTranslations])
 
   const setLanguage = useCallback(async (newLang: Language) => {
     setLanguageState(newLang)

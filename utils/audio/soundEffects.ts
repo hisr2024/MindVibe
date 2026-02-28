@@ -87,9 +87,10 @@ export function cleanupAudio(): void {
   cleanupSynthAudio()
 }
 
-export default {
+const soundEffects = {
   playSound,
   playSoundWithHaptic,
   playOmChime,
   cleanupAudio,
 }
+export default soundEffects

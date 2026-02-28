@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 interface TeamMember {
   id: number
@@ -63,7 +63,7 @@ export default function AdminTeamsPage() {
     }
   }
 
-  const fetchTeams = async () => {
+  const fetchTeams = useCallback(async () => {
     setLoading(true)
     try {
       const res = await fetch(
@@ -80,7 +80,7 @@ export default function AdminTeamsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [apiUrl, page])
 
   const fetchTeamDetail = async (teamId: string) => {
     setDetailLoading(true)
@@ -168,7 +168,7 @@ export default function AdminTeamsPage() {
 
   useEffect(() => {
     fetchTeams()
-  }, [page])
+  }, [fetchTeams])
 
   const roleColors: Record<string, string> = {
     owner: 'bg-purple-100 text-purple-800',

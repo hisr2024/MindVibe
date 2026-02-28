@@ -15,7 +15,7 @@
  * (both local and synced) until observation (user verification)
  */
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useOfflineForm } from '@/hooks/useOfflineForm'
 import { AlertCircle, CheckCircle2, Cloud, CloudOff, Loader2, Lock, Save } from 'lucide-react'
 
@@ -32,9 +32,19 @@ export function OfflineJournalEntry({
   autoSaveDrafts = true,
   placeholder = 'What\'s on your mind? Your thoughts are encrypted and private...'
 }: OfflineJournalEntryProps) {
-  const [content, setContent] = useState('')
-  const [title, setTitle] = useState('')
-  const [tags, setTags] = useState<string[]>([])
+  const [initialDraft] = useState(() => {
+    if (typeof window === 'undefined') return null
+    try {
+      const draftJson = localStorage.getItem('journal_draft')
+      if (draftJson) return JSON.parse(draftJson)
+    } catch {
+      // ignore
+    }
+    return null
+  })
+  const [content, setContent] = useState(initialDraft?.content || '')
+  const [title, setTitle] = useState(initialDraft?.title || '')
+  const [tags, setTags] = useState<string[]>(initialDraft?.tags || [])
   const [customTag, setCustomTag] = useState('')
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
 
@@ -62,7 +72,7 @@ export function OfflineJournalEntry({
     resetOnSuccess: false
   })
 
-  const saveDraftLocally = () => {
+  const saveDraftLocally = useCallback(() => {
     setAutoSaveStatus('saving')
 
     try {
@@ -82,21 +92,7 @@ export function OfflineJournalEntry({
       console.error('Failed to save draft:', err)
       setAutoSaveStatus('idle')
     }
-  }
-
-  const loadDraftFromLocal = () => {
-    try {
-      const draftJson = localStorage.getItem('journal_draft')
-      if (draftJson) {
-        const draft = JSON.parse(draftJson)
-        setContent(draft.content || '')
-        setTitle(draft.title || '')
-        setTags(draft.tags || [])
-      }
-    } catch (err) {
-      console.error('Failed to load draft:', err)
-    }
-  }
+  }, [content, title, tags])
 
   // Auto-save draft to localStorage
   useEffect(() => {
@@ -117,12 +113,8 @@ export function OfflineJournalEntry({
         clearTimeout(autoSaveTimerRef.current)
       }
     }
-  }, [content, title, tags, autoSaveDrafts])
+  }, [content, title, tags, autoSaveDrafts, saveDraftLocally])
 
-  // Load draft from localStorage on mount
-  useEffect(() => {
-    loadDraftFromLocal()
-  }, [])
 
   const clearDraftFromLocal = () => {
     try {

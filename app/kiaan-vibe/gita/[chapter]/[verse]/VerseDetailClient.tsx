@@ -93,6 +93,43 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
   }, [chapterNumber, verseNumber])
 
   /**
+   * Browser TTS fallback when API is unavailable
+   */
+  const playBrowserTTS = useCallback((text: string, section: 'sanskrit' | 'translation', lang: string) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      console.warn('[GitaVerse] Speech synthesis not supported')
+      setIsLoadingAudio(false)
+      setPlayingSection(null)
+      return
+    }
+
+    const synth = window.speechSynthesis
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = TTS_LANGUAGE_MAP[lang] || 'en-US'
+    utterance.rate = 0.9
+    utterance.pitch = 1.0
+    utterance.volume = 1.0
+
+    utterance.onstart = () => {
+      setIsPlaying(true)
+      setIsLoadingAudio(false)
+    }
+
+    utterance.onend = () => {
+      setIsPlaying(false)
+      setPlayingSection(null)
+    }
+
+    utterance.onerror = () => {
+      setIsPlaying(false)
+      setPlayingSection(null)
+      setIsLoadingAudio(false)
+    }
+
+    synth.speak(utterance)
+  }, [])
+
+  /**
    * Play verse using natural divine voice from backend TTS API.
    * Falls back to browser TTS if API fails.
    */
@@ -180,44 +217,7 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
       console.warn('[GitaVerse] API TTS failed, using browser fallback:', error)
       playBrowserTTS(text, section, lang)
     }
-  }, [isPlaying, playingSection])
-
-  /**
-   * Browser TTS fallback when API is unavailable
-   */
-  const playBrowserTTS = useCallback((text: string, section: 'sanskrit' | 'translation', lang: string) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      console.warn('[GitaVerse] Speech synthesis not supported')
-      setIsLoadingAudio(false)
-      setPlayingSection(null)
-      return
-    }
-
-    const synth = window.speechSynthesis
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.lang = TTS_LANGUAGE_MAP[lang] || 'en-US'
-    utterance.rate = 0.9
-    utterance.pitch = 1.0
-    utterance.volume = 1.0
-
-    utterance.onstart = () => {
-      setIsPlaying(true)
-      setIsLoadingAudio(false)
-    }
-
-    utterance.onend = () => {
-      setIsPlaying(false)
-      setPlayingSection(null)
-    }
-
-    utterance.onerror = () => {
-      setIsPlaying(false)
-      setPlayingSection(null)
-      setIsLoadingAudio(false)
-    }
-
-    synth.speak(utterance)
-  }, [])
+  }, [isPlaying, playingSection, playBrowserTTS])
 
   useEffect(() => {
     const loadVerse = async () => {

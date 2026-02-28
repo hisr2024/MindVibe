@@ -9,7 +9,7 @@
  * - Divine presence awareness
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useDivineConsciousness } from '@/contexts/DivineConsciousnessContext';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -39,23 +39,22 @@ export function DivineGreeting({
 }: DivineGreetingProps) {
   const { actions } = useDivineConsciousness();
   const { t } = useLanguage();
-  const [timeOfDay, setTimeOfDay] = useState<keyof typeof TIME_ICONS>('morning');
-  const [affirmation, setAffirmation] = useState('');
-  const [reminder, setReminder] = useState('');
-
-  useEffect(() => {
-    // Determine time of day
+  const [timeOfDay] = useState<keyof typeof TIME_ICONS>(() => {
     const hour = new Date().getHours();
-    if (hour >= 4 && hour < 7) setTimeOfDay('dawn');
-    else if (hour >= 7 && hour < 12) setTimeOfDay('morning');
-    else if (hour >= 12 && hour < 17) setTimeOfDay('afternoon');
-    else if (hour >= 17 && hour < 21) setTimeOfDay('evening');
-    else setTimeOfDay('night');
-
-    // Get affirmation and reminder
-    if (showAffirmation) setAffirmation(actions.getDivineAffirmation());
-    if (showReminder) setReminder(actions.getDivineReminder());
-  }, [actions, showAffirmation, showReminder]);
+    if (hour >= 4 && hour < 7) return 'dawn';
+    if (hour >= 7 && hour < 12) return 'morning';
+    if (hour >= 12 && hour < 17) return 'afternoon';
+    if (hour >= 17 && hour < 21) return 'evening';
+    return 'night';
+  });
+  const affirmation = useMemo(
+    () => showAffirmation ? actions.getDivineAffirmation() : '',
+    [showAffirmation, actions]
+  );
+  const reminder = useMemo(
+    () => showReminder ? actions.getDivineReminder() : '',
+    [showReminder, actions]
+  );
 
   const icon = TIME_ICONS[timeOfDay];
   const greetingText = t(`divine.sacred.greetings.${timeOfDay}`, timeOfDay.charAt(0).toUpperCase() + timeOfDay.slice(1));

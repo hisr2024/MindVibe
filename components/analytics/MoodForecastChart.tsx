@@ -8,7 +8,7 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { LineChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { TrendingUp, AlertCircle } from 'lucide-react'
 
@@ -40,11 +40,7 @@ export function MoodForecastChart({ forecastDays = 7, className = '' }: MoodFore
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchForecast()
-  }, [forecastDays])
-
-  const fetchForecast = async () => {
+  const fetchForecast = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch(`/api/analytics/advanced/mood-predictions?forecast_days=${forecastDays}`, { credentials: 'include' })
@@ -60,7 +56,11 @@ export function MoodForecastChart({ forecastDays = 7, className = '' }: MoodFore
     } finally {
       setLoading(false)
     }
-  }
+  }, [forecastDays])
+
+  useEffect(() => {
+    fetchForecast()
+  }, [fetchForecast])
 
   if (loading) {
     return (

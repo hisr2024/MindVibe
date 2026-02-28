@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -35,14 +35,7 @@ export default function JourneyFormClient({ mode, journeyId }: JourneyFormClient
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
-  // Load journey data for edit mode
-  useEffect(() => {
-    if (mode === 'edit' && journeyId) {
-      loadJourney()
-    }
-  }, [mode, journeyId])
-
-  const loadJourney = async () => {
+  const loadJourney = useCallback(async () => {
     if (!journeyId) return
 
     try {
@@ -65,7 +58,14 @@ export default function JourneyFormClient({ mode, journeyId }: JourneyFormClient
     } finally {
       setLoading(false)
     }
-  }
+  }, [journeyId])
+
+  // Load journey data for edit mode
+  useEffect(() => {
+    if (mode === 'edit' && journeyId) {
+      loadJourney()
+    }
+  }, [mode, journeyId, loadJourney])
 
   // Form validation
   const validate = (): boolean => {

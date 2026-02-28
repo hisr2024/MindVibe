@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useEffect, useState } from 'react'
+import { useCallback, useRef, useEffect, useState, useMemo } from 'react'
 
 export type SwipeDirection = 'left' | 'right' | 'up' | 'down'
 
@@ -60,7 +60,38 @@ const defaultConfig: Required<SwipeConfig> = {
 }
 
 export function useSwipeGesture(config: SwipeConfig = {}): UseSwipeGestureReturn {
-  const mergedConfig = { ...defaultConfig, ...config }
+  const {
+    threshold,
+    velocityThreshold,
+    horizontal,
+    vertical,
+    preventDefault,
+    onSwipeStart,
+    onSwipeMove,
+    onSwipeEnd,
+    onSwipeCancel,
+  } = config
+  const mergedConfig = useMemo(() => ({
+    threshold: threshold ?? defaultConfig.threshold,
+    velocityThreshold: velocityThreshold ?? defaultConfig.velocityThreshold,
+    horizontal: horizontal ?? defaultConfig.horizontal,
+    vertical: vertical ?? defaultConfig.vertical,
+    preventDefault: preventDefault ?? defaultConfig.preventDefault,
+    onSwipeStart: onSwipeStart ?? defaultConfig.onSwipeStart,
+    onSwipeMove: onSwipeMove ?? defaultConfig.onSwipeMove,
+    onSwipeEnd: onSwipeEnd ?? defaultConfig.onSwipeEnd,
+    onSwipeCancel: onSwipeCancel ?? defaultConfig.onSwipeCancel,
+  }), [
+    threshold,
+    velocityThreshold,
+    horizontal,
+    vertical,
+    preventDefault,
+    onSwipeStart,
+    onSwipeMove,
+    onSwipeEnd,
+    onSwipeCancel,
+  ])
   const ref = useRef<HTMLElement | null>(null)
 
   const [state, setState] = useState<SwipeState>({

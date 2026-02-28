@@ -46,7 +46,6 @@ export function AnimatedParticles({
   // Pre-compute stable random seeds for particle generation
   const particleSeeds = useMemo(
     () => Array.from({ length: 6 }, () => ({ duration: 4 + Math.random() * 3, size: 2 + Math.random() * 2 })),
-    // eslint-disable-next-line react-hooks/purity
     []
   )
 
@@ -92,7 +91,6 @@ export function AnimatedParticles({
   // Pre-compute stable random radii for ambient particles
   const ambientRadii = useMemo(
     () => Array.from({ length: 4 }, () => 15 + Math.random() * 10),
-    // eslint-disable-next-line react-hooks/purity
     []
   )
 

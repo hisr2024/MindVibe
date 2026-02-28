@@ -50,9 +50,12 @@ export default function BreathingRing({ steps, onComplete }: BreathingRingProps)
     onComplete()
   }, [onComplete])
 
+  if (stepIndex >= totalSteps && isActive) {
+    setIsActive(false)
+  }
+
   useEffect(() => {
     if (!isActive || stepIndex >= totalSteps) {
-      if (stepIndex >= totalSteps) handleComplete()
       return
     }
 

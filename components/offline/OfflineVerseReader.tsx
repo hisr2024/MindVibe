@@ -15,7 +15,7 @@
  * temporal network connections collapse
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useOfflineMode } from '@/hooks/useOfflineMode'
 import { indexedDBManager, STORES } from '@/lib/offline/indexedDB'
 import { AlertCircle, Book, BookOpen, Cloud, CloudOff, Heart, Loader2, Search } from 'lucide-react'
@@ -56,32 +56,7 @@ export function OfflineVerseReader({
 
   const { isOnline, queueCount } = useOfflineMode()
 
-  // Load verses from IndexedDB on mount
-  useEffect(() => {
-    loadVersesFromCache()
-    loadFavorites()
-  }, [selectedChapter])
-
-  // Filter verses based on search query
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredVerses(verses)
-      return
-    }
-
-    const query = searchQuery.toLowerCase()
-    const filtered = verses.filter(verse =>
-      verse.sanskrit?.toLowerCase().includes(query) ||
-      verse.transliteration?.toLowerCase().includes(query) ||
-      verse.translation?.toLowerCase().includes(query) ||
-      verse.commentary?.toLowerCase().includes(query) ||
-      verse.tags?.some(tag => tag.toLowerCase().includes(query))
-    )
-
-    setFilteredVerses(filtered)
-  }, [searchQuery, verses])
-
-  const loadVersesFromCache = async () => {
+  const loadVersesFromCache = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -105,9 +80,9 @@ export function OfflineVerseReader({
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedChapter])
 
-  const loadFavorites = () => {
+  const loadFavorites = useCallback(() => {
     try {
       const favoritesJson = localStorage.getItem(`favorites_${userId}`)
       if (favoritesJson) {
@@ -116,7 +91,32 @@ export function OfflineVerseReader({
     } catch (err) {
       console.error('Failed to load favorites:', err)
     }
-  }
+  }, [userId])
+
+  // Load verses from IndexedDB on mount
+  useEffect(() => {
+    loadVersesFromCache()
+    loadFavorites()
+  }, [selectedChapter, loadVersesFromCache, loadFavorites])
+
+  // Filter verses based on search query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredVerses(verses)
+      return
+    }
+
+    const query = searchQuery.toLowerCase()
+    const filtered = verses.filter(verse =>
+      verse.sanskrit?.toLowerCase().includes(query) ||
+      verse.transliteration?.toLowerCase().includes(query) ||
+      verse.translation?.toLowerCase().includes(query) ||
+      verse.commentary?.toLowerCase().includes(query) ||
+      verse.tags?.some(tag => tag.toLowerCase().includes(query))
+    )
+
+    setFilteredVerses(filtered)
+  }, [searchQuery, verses])
 
   const toggleFavorite = (verseId: string) => {
     const newFavorites = new Set(favorites)

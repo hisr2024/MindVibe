@@ -432,7 +432,7 @@ export function formatDuration(seconds: number): string {
   return `${minutes}:${secs.toString().padStart(2, '0')}`
 }
 
-export default {
+const meditationLibrary = {
   getAllTracks,
   getTracksByCategory,
   getTrackById,
@@ -448,3 +448,4 @@ export default {
   resetFailureCounter,
   getAvailableTracks,
 }
+export default meditationLibrary
