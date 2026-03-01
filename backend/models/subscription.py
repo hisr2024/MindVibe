@@ -198,6 +198,9 @@ class Payment(SoftDeleteMixin, Base):
     razorpay_order_id: Mapped[str | None] = mapped_column(
         String(128), nullable=True, index=True
     )
+    paypal_order_id: Mapped[str | None] = mapped_column(
+        String(128), nullable=True, unique=True, index=True
+    )
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     currency: Mapped[str] = mapped_column(String(3), default="usd")
     status: Mapped[PaymentStatus] = mapped_column(

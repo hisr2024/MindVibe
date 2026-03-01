@@ -33,6 +33,8 @@ from backend.schemas.subscription import (
     CheckoutSessionOut,
     RazorpayPaymentVerification,
     SubscriptionCancelRequest,
+    PaymentOut,
+    PaymentHistoryOut,
 )
 from backend.schemas.cost_calculator import (
     CostCalculatorRequest,
@@ -44,6 +46,7 @@ from backend.services.subscription_service import (
     get_user_subscription,
     get_or_create_free_subscription,
     get_usage_stats,
+    get_user_payments,
 )
 from backend.services.subscription_cost_calculator import (
     calculate_subscription_costs,
@@ -579,6 +582,60 @@ async def get_current_usage(
     stats = await get_usage_stats(db, user_id, "kiaan_questions")
 
     return UsageStatsOut(**stats)
+
+
+@router.get("/payments", response_model=PaymentHistoryOut)
+async def get_payment_history(
+    request: Request,
+    page: int = 1,
+    page_size: int = 20,
+    db: AsyncSession = Depends(get_db),
+) -> PaymentHistoryOut:
+    """Get the current user's payment history.
+
+    Returns paginated payment transactions across all providers
+    (Stripe Card, Stripe PayPal, Razorpay UPI) with their statuses.
+    Most recent payments are returned first.
+
+    Query parameters:
+        page: Page number (1-indexed, default 1).
+        page_size: Number of records per page (default 20, max 100).
+
+    Returns:
+        PaymentHistoryOut: Paginated payment history.
+    """
+    user_id = await get_current_user_id(request)
+
+    if page < 1:
+        page = 1
+    if page_size < 1 or page_size > 100:
+        page_size = 20
+
+    result = await get_user_payments(db, user_id, page, page_size)
+
+    return PaymentHistoryOut(
+        payments=[
+            PaymentOut(
+                id=p.id,
+                payment_provider=p.payment_provider,
+                amount=p.amount,
+                currency=p.currency,
+                status=p.status.value if hasattr(p.status, "value") else str(p.status),
+                description=p.description,
+                stripe_payment_intent_id=p.stripe_payment_intent_id,
+                stripe_invoice_id=p.stripe_invoice_id,
+                razorpay_payment_id=p.razorpay_payment_id,
+                razorpay_order_id=p.razorpay_order_id,
+                paypal_order_id=getattr(p, "paypal_order_id", None),
+                created_at=p.created_at,
+            )
+            for p in result["payments"]
+        ],
+        total=result["total"],
+        page=result["page"],
+        page_size=result["page_size"],
+        has_more=result["has_more"],
+    )
 
 
 @router.post("/cost-calculator", response_model=CostCalculatorResponse)
