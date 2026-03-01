@@ -507,3 +507,177 @@ async def refund_payment(
         refunded=True,
         reason=payload.reason,
     )
+
+
+# =============================================================================
+# Subscription Link Routes (Razorpay)
+# =============================================================================
+
+@router.post("/links", response_model=dict)
+async def create_subscription_link_endpoint(
+    request: Request,
+    admin: AdminContext = Depends(get_current_admin),
+    _: None = Depends(PermissionChecker(AdminPermission.SUBSCRIPTIONS_MODIFY)),
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a Razorpay subscription link.
+
+    Creates a subscription via the Razorpay Subscriptions API that returns
+    a shareable short_url for customer checkout. The link is tracked locally.
+
+    Permissions required: subscriptions:modify
+    """
+    from backend.schemas.subscription import SubscriptionLinkCreateIn
+    from backend.services.razorpay_service import (
+        create_subscription_link as create_link,
+        is_razorpay_configured,
+    )
+
+    if not is_razorpay_configured():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error": "razorpay_unavailable",
+                "message": "Razorpay is not configured. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.",
+            },
+        )
+
+    body = await request.json()
+    payload = SubscriptionLinkCreateIn(**body)
+
+    try:
+        result = await create_link(
+            db=db,
+            plan_tier=payload.plan_tier,
+            billing_period=payload.billing_period,
+            total_count=payload.total_count,
+            start_at=payload.start_at,
+            expire_by=payload.expire_by,
+            customer_name=payload.customer_name,
+            customer_email=payload.customer_email,
+            customer_phone=payload.customer_phone,
+            offer_id=payload.offer_id,
+            addons=[a.model_dump() for a in payload.addons] if payload.addons else None,
+            notes=payload.notes,
+            description=payload.description,
+            admin_id=admin.admin.id,
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except RuntimeError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(e),
+        )
+
+    # Audit log
+    await create_audit_log(
+        db=db,
+        admin_id=admin.admin.id,
+        action=AdminAuditAction.SUBSCRIPTION_MODIFIED,
+        resource_type="subscription_link",
+        resource_id=str(result["id"]),
+        details={
+            "action": "create_subscription_link",
+            "plan_tier": payload.plan_tier.value,
+            "billing_period": payload.billing_period,
+            "short_url": result.get("short_url"),
+        },
+        ip_address=get_client_ip(request),
+        user_agent=get_user_agent(request),
+    )
+
+    return result
+
+
+@router.get("/links")
+async def list_subscription_links_endpoint(
+    request: Request,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    link_status: Optional[str] = Query(None, alias="status"),
+    tier: Optional[str] = None,
+    admin: AdminContext = Depends(get_current_admin),
+    _: None = Depends(PermissionChecker(AdminPermission.SUBSCRIPTIONS_VIEW)),
+    db: AsyncSession = Depends(get_db),
+):
+    """List subscription links with filtering and pagination.
+
+    Permissions required: subscriptions:view
+    """
+    from backend.services.razorpay_service import list_subscription_links
+
+    result = await list_subscription_links(
+        db=db,
+        page=page,
+        page_size=page_size,
+        status_filter=link_status,
+        tier_filter=tier,
+    )
+
+    return result
+
+
+@router.get("/links/{link_id}")
+async def get_subscription_link_endpoint(
+    link_id: int,
+    request: Request,
+    admin: AdminContext = Depends(get_current_admin),
+    _: None = Depends(PermissionChecker(AdminPermission.SUBSCRIPTIONS_VIEW)),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get a subscription link by ID, refreshing status from Razorpay.
+
+    Permissions required: subscriptions:view
+    """
+    from backend.services.razorpay_service import fetch_subscription_link_status
+
+    result = await fetch_subscription_link_status(db, link_id)
+
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Subscription link not found",
+        )
+
+    return result
+
+
+@router.post("/links/{link_id}/cancel")
+async def cancel_subscription_link_endpoint(
+    link_id: int,
+    request: Request,
+    admin: AdminContext = Depends(get_current_admin),
+    _: None = Depends(PermissionChecker(AdminPermission.SUBSCRIPTIONS_MODIFY)),
+    db: AsyncSession = Depends(get_db),
+):
+    """Cancel a subscription link.
+
+    Permissions required: subscriptions:modify
+    """
+    from backend.services.razorpay_service import cancel_subscription_link
+
+    success = await cancel_subscription_link(db, link_id)
+
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to cancel subscription link",
+        )
+
+    # Audit log
+    await create_audit_log(
+        db=db,
+        admin_id=admin.admin.id,
+        action=AdminAuditAction.SUBSCRIPTION_MODIFIED,
+        resource_type="subscription_link",
+        resource_id=str(link_id),
+        details={"action": "cancel_subscription_link"},
+        ip_address=get_client_ip(request),
+        user_agent=get_user_agent(request),
+    )
+
+    return {"success": True, "message": "Subscription link cancelled"}

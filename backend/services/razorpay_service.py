@@ -28,6 +28,8 @@ from backend.models import (
     SubscriptionTier,
     SubscriptionStatus,
     PaymentStatus,
+    SubscriptionLink,
+    SubscriptionLinkStatus,
 )
 from backend.services.subscription_service import (
     get_user_subscription,
@@ -560,6 +562,351 @@ async def _handle_subscription_cancelled(db: AsyncSession, payload: dict) -> boo
 
 # =============================================================================
 # Subscription Management
+# =============================================================================
+
+# =============================================================================
+# Subscription Link Creation (Razorpay Subscriptions API)
+# =============================================================================
+
+async def create_subscription_link(
+    db: AsyncSession,
+    plan_tier: SubscriptionTier,
+    billing_period: str = "monthly",
+    total_count: int = 0,
+    start_at: int | None = None,
+    expire_by: int | None = None,
+    customer_name: str | None = None,
+    customer_email: str | None = None,
+    customer_phone: str | None = None,
+    offer_id: str | None = None,
+    addons: list[dict] | None = None,
+    notes: dict | None = None,
+    description: str | None = None,
+    admin_id: int | None = None,
+) -> dict[str, Any]:
+    """Create a Razorpay subscription with a shareable payment link.
+
+    Uses the Razorpay Subscriptions API to create a subscription object
+    that includes a short_url customers can use to complete payment.
+    The link is also persisted locally for admin tracking.
+
+    Args:
+        db: Database session.
+        plan_tier: Which MindVibe tier to subscribe to.
+        billing_period: "monthly" or "yearly".
+        total_count: Number of billing cycles (0 = until cancelled).
+        start_at: Unix timestamp for subscription start (None = immediate).
+        expire_by: Unix timestamp when the link expires.
+        customer_name: Pre-fill customer name on checkout.
+        customer_email: Pre-fill customer email on checkout.
+        customer_phone: Pre-fill customer phone on checkout.
+        offer_id: Razorpay offer ID for discounts.
+        addons: List of add-on items, each with name/amount/currency/description.
+        notes: Key-value pairs attached to the subscription.
+        description: Human-readable description for admin reference.
+        admin_id: ID of the admin creating this link.
+
+    Returns:
+        dict with subscription link details including short_url.
+
+    Raises:
+        RuntimeError: If Razorpay is not configured.
+        ValueError: If plan ID is not configured for the tier/period.
+    """
+    if not is_razorpay_configured():
+        raise RuntimeError("Razorpay is not configured")
+
+    razorpay_plan_id = _get_razorpay_plan_id(plan_tier, billing_period)
+    client = _get_razorpay_client()
+
+    # Build subscription creation payload
+    subscription_data: dict[str, Any] = {
+        "plan_id": razorpay_plan_id,
+        "total_count": total_count if total_count > 0 else 6,
+        "customer_notify": 1,
+    }
+
+    if start_at:
+        subscription_data["start_at"] = start_at
+
+    if expire_by:
+        subscription_data["expire_by"] = expire_by
+
+    # Add customer details for pre-filling checkout
+    if customer_email or customer_phone or customer_name:
+        customer_data: dict[str, str] = {}
+        if customer_name:
+            customer_data["name"] = customer_name
+        if customer_email:
+            customer_data["email"] = customer_email
+        if customer_phone:
+            customer_data["contact"] = customer_phone
+        subscription_data["customer"] = customer_data
+
+    # Add offer if provided
+    if offer_id:
+        subscription_data["offer_id"] = offer_id
+
+    # Add add-ons: each add-on must have an item with name, amount, currency
+    if addons:
+        razorpay_addons = []
+        for addon in addons:
+            addon_item: dict[str, Any] = {
+                "name": addon.get("name", "Add-on"),
+                "amount": int(addon.get("amount", 0)),
+                "currency": addon.get("currency", "INR"),
+            }
+            if addon.get("description"):
+                addon_item["description"] = addon["description"]
+            razorpay_addons.append({"item": addon_item})
+        subscription_data["addons"] = razorpay_addons
+
+    # Attach notes (plan_tier and billing_period always included)
+    merged_notes = {
+        "plan_tier": plan_tier.value,
+        "billing_period": billing_period,
+        "source": "admin_subscription_link",
+    }
+    if notes:
+        merged_notes.update(notes)
+    subscription_data["notes"] = merged_notes
+
+    try:
+        result = client.subscription.create(data=subscription_data)
+    except Exception as e:
+        logger.error(f"Failed to create Razorpay subscription link: {e}")
+        raise
+
+    short_url = result.get("short_url", "")
+    razorpay_sub_id = result.get("id", "")
+
+    # Persist locally for admin tracking
+    from datetime import datetime, UTC
+    link = SubscriptionLink(
+        razorpay_subscription_id=razorpay_sub_id,
+        razorpay_plan_id=razorpay_plan_id,
+        plan_tier=plan_tier,
+        billing_period=billing_period,
+        short_url=short_url,
+        status=SubscriptionLinkStatus(result.get("status", "created")),
+        total_count=total_count if total_count > 0 else 6,
+        start_at=datetime.fromtimestamp(start_at, tz=UTC) if start_at else None,
+        expire_by=datetime.fromtimestamp(expire_by, tz=UTC) if expire_by else None,
+        customer_name=customer_name,
+        customer_email=customer_email,
+        customer_phone=customer_phone,
+        offer_id=offer_id,
+        addons_json=addons,
+        notes=merged_notes,
+        description=description,
+        created_by_admin_id=admin_id,
+    )
+    db.add(link)
+    await db.commit()
+    await db.refresh(link)
+
+    logger.info(
+        f"Created Razorpay subscription link {razorpay_sub_id} "
+        f"for plan {plan_tier.value}/{billing_period}, short_url={short_url}"
+    )
+
+    return {
+        "id": link.id,
+        "razorpay_subscription_id": razorpay_sub_id,
+        "razorpay_plan_id": razorpay_plan_id,
+        "plan_tier": plan_tier.value,
+        "billing_period": billing_period,
+        "short_url": short_url,
+        "status": result.get("status", "created"),
+        "total_count": subscription_data["total_count"],
+        "start_at": start_at,
+        "expire_by": expire_by,
+        "customer_name": customer_name,
+        "customer_email": customer_email,
+        "offer_id": offer_id,
+        "addons": addons,
+        "description": description,
+        "created_at": link.created_at.isoformat() if link.created_at else None,
+    }
+
+
+async def list_subscription_links(
+    db: AsyncSession,
+    page: int = 1,
+    page_size: int = 20,
+    status_filter: str | None = None,
+    tier_filter: str | None = None,
+) -> dict[str, Any]:
+    """List subscription links with optional filtering and pagination.
+
+    Args:
+        db: Database session.
+        page: 1-indexed page number.
+        page_size: Number of records per page.
+        status_filter: Filter by link status (e.g. "created", "active").
+        tier_filter: Filter by plan tier.
+
+    Returns:
+        dict with links list, total count, and pagination metadata.
+    """
+    from sqlalchemy import select, func
+
+    query = select(SubscriptionLink).where(SubscriptionLink.deleted_at.is_(None))
+    count_query = select(func.count(SubscriptionLink.id)).where(
+        SubscriptionLink.deleted_at.is_(None)
+    )
+
+    if status_filter:
+        status_enum = SubscriptionLinkStatus(status_filter)
+        query = query.where(SubscriptionLink.status == status_enum)
+        count_query = count_query.where(SubscriptionLink.status == status_enum)
+
+    if tier_filter:
+        tier_enum = SubscriptionTier(tier_filter)
+        query = query.where(SubscriptionLink.plan_tier == tier_enum)
+        count_query = count_query.where(SubscriptionLink.plan_tier == tier_enum)
+
+    query = query.order_by(SubscriptionLink.created_at.desc())
+
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+
+    offset = (page - 1) * page_size
+    query = query.offset(offset).limit(page_size)
+
+    result = await db.execute(query)
+    links = result.scalars().all()
+
+    return {
+        "links": [
+            {
+                "id": link.id,
+                "razorpay_subscription_id": link.razorpay_subscription_id,
+                "plan_tier": link.plan_tier.value,
+                "billing_period": link.billing_period,
+                "short_url": link.short_url,
+                "status": link.status.value,
+                "total_count": link.total_count,
+                "customer_name": link.customer_name,
+                "customer_email": link.customer_email,
+                "customer_phone": link.customer_phone,
+                "offer_id": link.offer_id,
+                "description": link.description,
+                "created_at": link.created_at.isoformat() if link.created_at else None,
+            }
+            for link in links
+        ],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "has_more": (page * page_size) < total,
+    }
+
+
+async def fetch_subscription_link_status(
+    db: AsyncSession,
+    link_id: int,
+) -> dict[str, Any] | None:
+    """Fetch a subscription link and refresh its status from Razorpay.
+
+    Args:
+        db: Database session.
+        link_id: Local database ID of the subscription link.
+
+    Returns:
+        Updated link details, or None if not found.
+    """
+    from sqlalchemy import select
+
+    stmt = select(SubscriptionLink).where(
+        SubscriptionLink.id == link_id,
+        SubscriptionLink.deleted_at.is_(None),
+    )
+    result = await db.execute(stmt)
+    link = result.scalars().first()
+
+    if not link:
+        return None
+
+    # Refresh status from Razorpay
+    if is_razorpay_configured():
+        try:
+            client = _get_razorpay_client()
+            rz_sub = client.subscription.fetch(link.razorpay_subscription_id)
+            new_status = rz_sub.get("status", link.status.value)
+            link.status = SubscriptionLinkStatus(new_status)
+            await db.commit()
+        except Exception as e:
+            logger.warning(f"Could not refresh Razorpay subscription status: {e}")
+
+    return {
+        "id": link.id,
+        "razorpay_subscription_id": link.razorpay_subscription_id,
+        "razorpay_plan_id": link.razorpay_plan_id,
+        "plan_tier": link.plan_tier.value,
+        "billing_period": link.billing_period,
+        "short_url": link.short_url,
+        "status": link.status.value,
+        "total_count": link.total_count,
+        "start_at": link.start_at.isoformat() if link.start_at else None,
+        "expire_by": link.expire_by.isoformat() if link.expire_by else None,
+        "customer_name": link.customer_name,
+        "customer_email": link.customer_email,
+        "customer_phone": link.customer_phone,
+        "offer_id": link.offer_id,
+        "addons": link.addons_json,
+        "notes": link.notes,
+        "description": link.description,
+        "created_at": link.created_at.isoformat() if link.created_at else None,
+    }
+
+
+async def cancel_subscription_link(
+    db: AsyncSession,
+    link_id: int,
+) -> bool:
+    """Cancel a subscription link (both in Razorpay and locally).
+
+    Args:
+        db: Database session.
+        link_id: Local database ID of the subscription link.
+
+    Returns:
+        True if cancelled successfully.
+    """
+    from sqlalchemy import select
+
+    stmt = select(SubscriptionLink).where(
+        SubscriptionLink.id == link_id,
+        SubscriptionLink.deleted_at.is_(None),
+    )
+    result = await db.execute(stmt)
+    link = result.scalars().first()
+
+    if not link:
+        return False
+
+    if link.status in (SubscriptionLinkStatus.CANCELLED, SubscriptionLinkStatus.COMPLETED):
+        return True
+
+    # Cancel in Razorpay
+    if is_razorpay_configured():
+        try:
+            client = _get_razorpay_client()
+            client.subscription.cancel(link.razorpay_subscription_id)
+        except Exception as e:
+            logger.error(f"Failed to cancel Razorpay subscription {link.razorpay_subscription_id}: {e}")
+            return False
+
+    link.status = SubscriptionLinkStatus.CANCELLED
+    await db.commit()
+
+    logger.info(f"Cancelled subscription link {link_id} (razorpay: {link.razorpay_subscription_id})")
+    return True
+
+
+# =============================================================================
+# Subscription Management (existing)
 # =============================================================================
 
 async def cancel_razorpay_subscription(
