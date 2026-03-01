@@ -707,7 +707,7 @@ async def create_subscription_link(
 
     logger.info(
         f"Created Razorpay subscription link {razorpay_sub_id} "
-        f"for plan {plan_tier.value}/{billing_period}, short_url={short_url}"
+        f"for plan {plan_tier.value}, short_url={short_url}"
     )
 
     return {
