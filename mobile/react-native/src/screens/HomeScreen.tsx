@@ -24,7 +24,6 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { colors, darkTheme, spacing, typography, radii, shadows } from '@theme/tokens';
-import type { Emotion } from '@app-types/index';
 
 // ---------------------------------------------------------------------------
 // Time-Aware Greeting
@@ -40,15 +39,21 @@ function getGreeting(): { text: string; emoji: string } {
 }
 
 // ---------------------------------------------------------------------------
-// Quick Mood Emotions
+// Quick Mood Options (maps UI labels to backend score range: -2 to 2)
 // ---------------------------------------------------------------------------
 
-const QUICK_EMOTIONS: Array<{ emotion: Emotion; emoji: string; label: string }> = [
-  { emotion: 'happy', emoji: '😊', label: 'Happy' },
-  { emotion: 'peaceful', emoji: '😌', label: 'Peaceful' },
-  { emotion: 'anxious', emoji: '😰', label: 'Anxious' },
-  { emotion: 'sad', emoji: '😢', label: 'Sad' },
-  { emotion: 'grateful', emoji: '🙏', label: 'Grateful' },
+interface QuickMoodOption {
+  score: number;
+  emoji: string;
+  label: string;
+}
+
+const QUICK_MOODS: QuickMoodOption[] = [
+  { score: 2, emoji: '😊', label: 'Happy' },
+  { score: 1, emoji: '😌', label: 'Peaceful' },
+  { score: -1, emoji: '😰', label: 'Anxious' },
+  { score: -2, emoji: '😢', label: 'Sad' },
+  { score: 2, emoji: '🙏', label: 'Grateful' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -60,8 +65,9 @@ export function HomeScreen() {
   const theme = darkTheme;
   const greeting = getGreeting();
 
-  const handleMoodSelect = useCallback((emotion: Emotion) => {
+  const handleMoodSelect = useCallback((_score: number) => {
     // In production: navigate to mood detail or quick-log via API
+    // api.moods.create({ score, tags: [label] })
   }, []);
 
   const handleVersePlay = useCallback(() => {
@@ -130,10 +136,10 @@ export function HomeScreen() {
           How are you feeling?
         </Text>
         <View style={styles.moodRow}>
-          {QUICK_EMOTIONS.map((item) => (
+          {QUICK_MOODS.map((item) => (
             <Pressable
-              key={item.emotion}
-              onPress={() => handleMoodSelect(item.emotion)}
+              key={item.label}
+              onPress={() => handleMoodSelect(item.score)}
               style={styles.moodButton}
               accessibilityRole="button"
               accessibilityLabel={`Log mood: ${item.label}`}

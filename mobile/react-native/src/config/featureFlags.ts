@@ -193,6 +193,9 @@ export class FeatureFlagService {
 
   constructor(config: Partial<FeatureFlagConfig> = {}) {
     this.config = {
+      // No public feature-flags endpoint exists yet (only admin).
+      // Flags are evaluated client-side from DEFAULT_FLAGS until
+      // a public endpoint is added to the backend.
       apiUrl: '/api/feature-flags',
       refreshInterval: 15 * 60 * 1000, // 15 minutes
       overrides: {},
@@ -273,33 +276,26 @@ export class FeatureFlagService {
 
   /**
    * Fetch fresh flags from the backend API.
+   *
+   * Currently a no-op because the backend does not expose a public
+   * feature-flags endpoint (only admin). Flags are evaluated locally
+   * from DEFAULT_FLAGS. When a public endpoint is added, uncomment
+   * the fetch logic below.
    */
   async refresh(): Promise<void> {
-    try {
-      const response = await fetch(this.config.apiUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          // Auth header added by API client interceptor
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Flag fetch failed: ${response.status}`);
-      }
-
-      const remoteFlags: FeatureFlag[] = await response.json();
-
-      // Merge remote flags with defaults (remote takes precedence)
-      for (const flag of remoteFlags) {
-        this.flags[flag.key] = flag;
-      }
-
-      // Persist to MMKV cache
-      this.saveToCache();
-    } catch {
-      // Network error — keep using cached/default flags
-    }
+    // No public endpoint available yet — use default flags.
+    // When /api/feature-flags is implemented, replace with:
+    //
+    // try {
+    //   const { data } = await apiClient.get(this.config.apiUrl);
+    //   const remoteFlags: FeatureFlag[] = data;
+    //   for (const flag of remoteFlags) {
+    //     this.flags[flag.key] = flag;
+    //   }
+    //   this.saveToCache();
+    // } catch {
+    //   // Network error — keep using cached/default flags
+    // }
   }
 
   /**
@@ -381,7 +377,6 @@ export function createFeatureFlagHook(service: FeatureFlagService) {
 // ---------------------------------------------------------------------------
 
 export const featureFlags = new FeatureFlagService({
-  apiUrl: '/api/feature-flags',
   refreshInterval: 15 * 60 * 1000,
 });
 

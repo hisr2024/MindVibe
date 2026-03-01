@@ -103,27 +103,19 @@ export interface GitaVerse {
 }
 
 // ---------------------------------------------------------------------------
-// Mood Types
+// Mood Types (matches backend MoodIn/MoodOut schemas)
 // ---------------------------------------------------------------------------
 
-export type Emotion =
-  | 'peaceful'
-  | 'anxious'
-  | 'sad'
-  | 'angry'
-  | 'lost'
-  | 'overwhelmed'
-  | 'grateful'
-  | 'happy'
-  | 'tired'
-  | 'confused';
-
 export interface MoodEntry {
-  id: string;
-  emotion: Emotion;
-  intensity: number; // 1-10
+  id: number;
+  /** Mood score on a -2 to 2 scale (very low to very high) */
+  score: number;
+  tags?: string[];
   note?: string;
-  createdAt: string;
+  /** ISO timestamp of mood creation */
+  at: string;
+  /** KIAAN empathetic micro-response returned on creation */
+  kiaanResponse?: string;
 }
 
 // ---------------------------------------------------------------------------

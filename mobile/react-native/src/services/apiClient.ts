@@ -229,47 +229,74 @@ export const api = {
   /** KIAAN chat — read-only consumption of KIAAN ecosystem */
   chat: {
     send: (message: string, sessionId?: string) =>
-      apiClient.post('/api/chat/send', { message, session_id: sessionId }),
-    history: (sessionId: string) =>
-      apiClient.get(`/api/chat/history/${sessionId}`),
+      apiClient.post('/api/chat/message', { message, session_id: sessionId }),
+    history: (sessionId?: string, limit?: number, offset?: number) =>
+      apiClient.get('/api/chat/history', {
+        params: { session_id: sessionId, limit, offset },
+      }),
     sessions: () => apiClient.get('/api/chat/sessions'),
   },
 
   /** Bhagavad Gita verses */
   gita: {
     chapters: () => apiClient.get('/api/gita/chapters'),
-    chapter: (num: number) => apiClient.get(`/api/gita/chapters/${num}`),
+    chapter: (chapterId: number) =>
+      apiClient.get(`/api/gita/chapters/${chapterId}`),
     verse: (chapter: number, verse: number) =>
-      apiClient.get(`/api/gita/chapters/${chapter}/verses/${verse}`),
+      apiClient.get(`/api/gita/verses/${chapter}/${verse}`),
     search: (query: string) =>
       apiClient.get('/api/gita/search', { params: { q: query } }),
   },
 
-  /** Mood tracking */
+  /** Mood tracking (score range: -2 to 2) */
   moods: {
-    list: () => apiClient.get('/moods/'),
-    create: (mood: { emotion: string; intensity: number; note?: string }) =>
-      apiClient.post('/moods/', mood),
+    create: (mood: { score: number; tags?: string[]; note?: string }) =>
+      apiClient.post('/api/moods', mood),
+    /** Get KIAAN empathetic micro-response (score range: 1-10) */
+    microResponse: (score: number) =>
+      apiClient.get('/api/moods/micro-response', { params: { score } }),
   },
 
   /** Encrypted journal */
   journal: {
-    list: () => apiClient.get('/journal/'),
+    list: () => apiClient.get('/api/journal/entries'),
     create: (entry: { content_encrypted: string; tags?: string[] }) =>
-      apiClient.post('/journal/', entry),
-    get: (id: string) => apiClient.get(`/journal/${id}`),
+      apiClient.post('/api/journal/entries', entry),
+    get: (entryId: string) =>
+      apiClient.get(`/api/journal/entries/${entryId}`),
   },
 
-  /** Wisdom journeys */
+  /** Journey engine — templates, active journeys, step completion */
   journeys: {
-    catalog: () => apiClient.get('/api/wisdom/journeys'),
-    get: (id: string) => apiClient.get(`/api/wisdom/journeys/${id}`),
-    start: (templateId: string) =>
-      apiClient.post('/api/wisdom/journeys/start', { template_id: templateId }),
-    completeStep: (journeyId: string, dayIndex: number) =>
-      apiClient.post(`/api/wisdom/journeys/${journeyId}/complete-step`, {
-        day_index: dayIndex,
+    templates: () => apiClient.get('/api/journey-engine/templates'),
+    template: (templateId: string) =>
+      apiClient.get(`/api/journey-engine/templates/${templateId}`),
+    list: (status?: string) =>
+      apiClient.get('/api/journey-engine/journeys', {
+        params: status ? { status } : undefined,
       }),
+    get: (journeyId: string) =>
+      apiClient.get(`/api/journey-engine/journeys/${journeyId}`),
+    start: (templateId: string) =>
+      apiClient.post('/api/journey-engine/journeys', {
+        template_id: templateId,
+      }),
+    completeStep: (journeyId: string, dayIndex: number) =>
+      apiClient.post(
+        `/api/journey-engine/journeys/${journeyId}/steps/${dayIndex}/complete`,
+      ),
+    currentStep: (journeyId: string) =>
+      apiClient.get(
+        `/api/journey-engine/journeys/${journeyId}/steps/current`,
+      ),
+    pause: (journeyId: string) =>
+      apiClient.post(`/api/journey-engine/journeys/${journeyId}/pause`),
+    resume: (journeyId: string) =>
+      apiClient.post(`/api/journey-engine/journeys/${journeyId}/resume`),
+    dashboard: () => apiClient.get('/api/journey-engine/dashboard'),
+    enemies: () => apiClient.get('/api/journey-engine/enemies'),
+    enemyProgress: (enemy: string) =>
+      apiClient.get(`/api/journey-engine/enemies/${enemy}`),
   },
 
   /** Audio / TTS */
@@ -282,15 +309,14 @@ export const api = {
       ),
   },
 
-  /** Feature flags */
-  featureFlags: {
-    list: () => apiClient.get('/api/feature-flags'),
-  },
-
   /** User profile */
   profile: {
-    get: () => apiClient.get('/api/auth/me'),
+    /** Get current user info from auth endpoint */
+    me: () => apiClient.get('/api/auth/me'),
+    /** Get full profile */
+    get: () => apiClient.get('/api/profile'),
+    /** Create or update profile (POST handles both) */
     update: (data: Record<string, unknown>) =>
-      apiClient.patch('/api/auth/me', data),
+      apiClient.post('/api/profile', data),
   },
 } as const;
