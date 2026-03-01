@@ -15,10 +15,10 @@ export const metadata: Metadata = {
     title: 'Sacred Wisdom Journeys | Sakha',
     description:
       'Embark on transformative spiritual journeys rooted in Bhagavad Gita wisdom. Multi-day guided paths for anger, attachment, purpose, and inner peace.',
-    url: 'https://mindvibe.life/journeys',
+    url: 'https://kiaanverse.com/journeys',
   },
   alternates: {
-    canonical: 'https://mindvibe.life/journeys',
+    canonical: 'https://kiaanverse.com/journeys',
   },
 }
 

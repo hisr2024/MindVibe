@@ -22,8 +22,8 @@ SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
-EMAIL_FROM_ADDRESS = os.getenv("EMAIL_FROM_ADDRESS", "noreply@mindvibe.app")
-EMAIL_FROM_NAME = os.getenv("EMAIL_FROM_NAME", "MindVibe")
+EMAIL_FROM_ADDRESS = os.getenv("EMAIL_FROM_ADDRESS", "noreply@kiaanverse.com")
+EMAIL_FROM_NAME = os.getenv("EMAIL_FROM_NAME", "Kiaanverse")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 

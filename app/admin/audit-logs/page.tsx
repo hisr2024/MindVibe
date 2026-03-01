@@ -27,7 +27,7 @@ export default function AdminAuditLogsPage() {
         {
           id: 1,
           adminId: 'admin-123',
-          adminEmail: 'admin@mindvibe.life',
+          adminEmail: 'admin@kiaanverse.com',
           action: 'user_suspended',
           resourceType: 'user',
           resourceId: 'user-456',
@@ -38,7 +38,7 @@ export default function AdminAuditLogsPage() {
         {
           id: 2,
           adminId: 'admin-123',
-          adminEmail: 'admin@mindvibe.life',
+          adminEmail: 'admin@kiaanverse.com',
           action: 'feature_flag_updated',
           resourceType: 'feature_flag',
           resourceId: '1',
@@ -49,7 +49,7 @@ export default function AdminAuditLogsPage() {
         {
           id: 3,
           adminId: 'admin-789',
-          adminEmail: 'moderator@mindvibe.life',
+          adminEmail: 'moderator@kiaanverse.com',
           action: 'content_approved',
           resourceType: 'flagged_content',
           resourceId: '5',
@@ -60,7 +60,7 @@ export default function AdminAuditLogsPage() {
         {
           id: 4,
           adminId: 'admin-123',
-          adminEmail: 'admin@mindvibe.life',
+          adminEmail: 'admin@kiaanverse.com',
           action: 'login',
           resourceType: null,
           resourceId: null,

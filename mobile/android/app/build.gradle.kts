@@ -34,7 +34,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "API_BASE_URL", "\"https://api.mindvibe.com\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://api.kiaanverse.com\"")
         }
         debug {
             applicationIdSuffix = ".debug"

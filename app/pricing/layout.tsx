@@ -16,10 +16,10 @@ export const metadata: Metadata = {
     title: 'Pricing — Sakha Spiritual Companion Plans',
     description:
       'Start free with 15 KIAAN questions/month. Upgrade for unlimited divine guidance, wisdom journeys, and sacred tools rooted in the Bhagavad Gita.',
-    url: 'https://mindvibe.life/pricing',
+    url: 'https://kiaanverse.com/pricing',
   },
   alternates: {
-    canonical: 'https://mindvibe.life/pricing',
+    canonical: 'https://kiaanverse.com/pricing',
   },
 }
 

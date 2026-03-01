@@ -57,7 +57,7 @@ export default function OnboardingPage() {
     // Save profile
     const profile = {
       displayName: name || 'Sakha User',
-      email: 'user@mindvibe.life',
+      email: 'user@kiaanverse.com',
       bio,
       goals,
       plan: selectedPlan,

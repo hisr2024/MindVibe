@@ -21,6 +21,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://mindvibe.life/sitemap.xml',
+    sitemap: 'https://kiaanverse.com/sitemap.xml',
   }
 }

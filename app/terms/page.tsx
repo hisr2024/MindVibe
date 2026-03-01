@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description:
     'Terms of Service for Sakha, your spiritual companion rooted in Bhagavad Gita wisdom. Read about usage, privacy, content, and your sacred responsibilities.',
   alternates: {
-    canonical: 'https://mindvibe.life/terms',
+    canonical: 'https://kiaanverse.com/terms',
   },
 }
 
@@ -73,10 +73,10 @@ export default function TermsOfServicePage() {
             accounts for deceptive purposes. If you suspect unauthorized access
             to your account, please contact us immediately at{' '}
             <a
-              href="mailto:care@mindvibe.life"
+              href="mailto:care@kiaanverse.com"
               className="text-[#e8b54a] hover:text-[#e8b54a] transition"
             >
-              care@mindvibe.life
+              care@kiaanverse.com
             </a>
             .
           </p>
@@ -236,10 +236,10 @@ export default function TermsOfServicePage() {
           <p className="text-white/70 leading-relaxed">
             You may close your account at any time by contacting us at{' '}
             <a
-              href="mailto:care@mindvibe.life"
+              href="mailto:care@kiaanverse.com"
               className="text-[#e8b54a] hover:text-[#e8b54a] transition"
             >
-              care@mindvibe.life
+              care@kiaanverse.com
             </a>
             . We may suspend or terminate your account if you violate these
             Terms, engage in harmful behavior, or if required by law.
@@ -278,10 +278,10 @@ export default function TermsOfServicePage() {
           <p className="text-white/70">
             Email:{' '}
             <a
-              href="mailto:care@mindvibe.life"
+              href="mailto:care@kiaanverse.com"
               className="text-[#e8b54a] hover:text-[#e8b54a] transition"
             >
-              care@mindvibe.life
+              care@kiaanverse.com
             </a>
           </p>
         </section>

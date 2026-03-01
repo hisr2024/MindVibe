@@ -170,7 +170,7 @@ export default function OnboardingStepPage() {
     // Save profile
     const profile = {
       displayName: state.name || 'Sakha User',
-      email: 'user@mindvibe.life',
+      email: 'user@kiaanverse.com',
       bio: state.bio,
       timezone: state.timezone,
       language: state.language,

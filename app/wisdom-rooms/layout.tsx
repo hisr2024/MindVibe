@@ -16,10 +16,10 @@ export const metadata: Metadata = {
     title: 'Wisdom Rooms — Sacred Spaces for Inner Peace',
     description:
       'Themed sacred spaces for grounding, gratitude, and spiritual clarity. Enter a Wisdom Room and find calm with KIAAN.',
-    url: 'https://mindvibe.life/wisdom-rooms',
+    url: 'https://kiaanverse.com/wisdom-rooms',
   },
   alternates: {
-    canonical: 'https://mindvibe.life/wisdom-rooms',
+    canonical: 'https://kiaanverse.com/wisdom-rooms',
   },
 }
 

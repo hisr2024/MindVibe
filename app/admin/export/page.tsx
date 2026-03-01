@@ -120,8 +120,8 @@ export default function AdminExportPage() {
         <h3 className="mb-4 font-semibold text-slate-100">Recent Exports</h3>
         <div className="space-y-3">
           {[
-            { type: 'users', format: 'csv', admin: 'admin@mindvibe.life', date: new Date('2026-02-14') },
-            { type: 'analytics', format: 'json', admin: 'admin@mindvibe.life', date: new Date('2026-02-13') },
+            { type: 'users', format: 'csv', admin: 'admin@kiaanverse.com', date: new Date('2026-02-14') },
+            { type: 'analytics', format: 'json', admin: 'admin@kiaanverse.com', date: new Date('2026-02-13') },
           ].map((item, idx) => (
             <div
               key={idx}

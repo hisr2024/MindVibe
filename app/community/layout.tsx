@@ -15,10 +15,10 @@ export const metadata: Metadata = {
     title: 'Wisdom Circles — Sakha Community',
     description:
       'Anonymous peer support for spiritual wellness. Share, reflect, and grow with fellow seekers in compassion-centered Wisdom Circles.',
-    url: 'https://mindvibe.life/community',
+    url: 'https://kiaanverse.com/community',
   },
   alternates: {
-    canonical: 'https://mindvibe.life/community',
+    canonical: 'https://kiaanverse.com/community',
   },
 }
 

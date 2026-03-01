@@ -15,10 +15,10 @@ export const metadata: Metadata = {
     title: 'Divine Introduction | Sakha',
     description:
       'Begin your spiritual journey with Krishna. Experience divine guidance, sacred tools, and AI-powered wisdom from the Bhagavad Gita.',
-    url: 'https://mindvibe.life/introduction',
+    url: 'https://kiaanverse.com/introduction',
   },
   alternates: {
-    canonical: 'https://mindvibe.life/introduction',
+    canonical: 'https://kiaanverse.com/introduction',
   },
 }
 

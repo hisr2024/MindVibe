@@ -93,7 +93,7 @@ export default function AdminLogin() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="w-full rounded-lg border border-slate-600 bg-slate-700/50 px-4 py-3 text-slate-100 placeholder-slate-400 focus:border-[#d4a44c] focus:outline-none focus:ring-1 focus:ring-[#d4a44c]"
-                    placeholder="admin@mindvibe.life"
+                    placeholder="admin@kiaanverse.com"
                     aria-invalid={!!error}
                     aria-describedby={error ? 'login-error' : undefined}
                   />

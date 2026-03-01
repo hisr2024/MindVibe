@@ -41,7 +41,7 @@ export function BreadcrumbSchema() {
   const segments = pathname.split('/').filter(Boolean)
   if (segments.length === 0) return null
 
-  const baseUrl = 'https://mindvibe.life'
+  const baseUrl = 'https://kiaanverse.com'
 
   const items = [
     {

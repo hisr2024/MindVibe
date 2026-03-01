@@ -15,10 +15,10 @@ export const metadata: Metadata = {
     title: 'KIAAN Companion — Your Divine Best Friend',
     description:
       'Talk to KIAAN, your voice-first divine companion. Mood-reactive orb interface with Bhagavad Gita wisdom and sacred wellness tools.',
-    url: 'https://mindvibe.life/companion',
+    url: 'https://kiaanverse.com/companion',
   },
   alternates: {
-    canonical: 'https://mindvibe.life/companion',
+    canonical: 'https://kiaanverse.com/companion',
   },
 }
 

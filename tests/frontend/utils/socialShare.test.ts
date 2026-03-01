@@ -52,7 +52,7 @@ describe('social sharing utilities', () => {
       
       expect(result).toContain('Shared from MindVibe - KIAAN AI:')
       expect(result).toContain('This is my message')
-      expect(result).toContain('mindvibe.life')
+      expect(result).toContain('kiaanverse.com')
     })
 
     it('should apply anonymization when requested', () => {
