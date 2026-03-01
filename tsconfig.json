@@ -60,6 +60,7 @@
     ".next",
     "out",
     "dist",
-    "native"
+    "native",
+    "mobile/react-native"
   ]
 }
