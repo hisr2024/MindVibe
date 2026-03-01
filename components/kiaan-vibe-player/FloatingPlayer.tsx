@@ -164,19 +164,29 @@ export function FloatingPlayer() {
       >
         <div
           className={`
-            rounded-2xl border border-white/10 bg-[#0d0d12]/95 backdrop-blur-xl
-            shadow-2xl shadow-black/50 overflow-hidden
+            rounded-2xl border border-[#d4a44c]/20 bg-[#0d0d12]/97 backdrop-blur-xl
+            shadow-2xl shadow-black/60 overflow-hidden
           `}
         >
+          {/* Top accent glow */}
+          <div className="h-px bg-gradient-to-r from-transparent via-[#d4a44c]/50 to-transparent" />
+
           {/* Mini Player (always visible) */}
           <div className="p-3">
+            {/* KIAAN Vibe Player branding label */}
+            <div className="flex items-center gap-1.5 mb-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-[#d4a44c] shadow-sm shadow-[#d4a44c]/40" />
+              <span className="text-[10px] font-semibold tracking-wider uppercase text-[#d4a44c]/80">KIAAN Vibe Player</span>
+            </div>
+
             <div className="flex items-center gap-3">
               {/* Album art / icon */}
               <div
                 className={`
                   flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden
-                  bg-gradient-to-br from-[#d4a44c]/20 to-[#d4a44c]/20
-                  flex items-center justify-center
+                  bg-gradient-to-br from-[#d4a44c]/25 to-amber-600/15
+                  flex items-center justify-center border border-[#d4a44c]/15
+                  shadow-inner shadow-[#d4a44c]/5
                 `}
               >
                 {currentTrack.albumArt ? (
@@ -189,13 +199,13 @@ export function FloatingPlayer() {
                     unoptimized
                   />
                 ) : (
-                  <Music2 className="w-6 h-6 text-[#d4a44c]" />
+                  <Music2 className="w-6 h-6 text-[#e8b54a]" />
                 )}
               </div>
 
               {/* Track info */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">
+                <p className="text-sm font-medium text-[#f5f0e8] truncate">
                   {currentTrack.title}
                 </p>
                 <p className="text-xs text-white/50 truncate">
