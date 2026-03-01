@@ -54,6 +54,16 @@ export const CORE_TOOLS: ToolConfig[] = [
     purposeDescKey: 'kiaan',
   },
   {
+    id: 'kiaan-vibe-player',
+    icon: '🎵',
+    title: 'KIAAN Vibe Player',
+    description: 'Divine Gita verses & meditation audio',
+    gradient: 'from-[#d4a44c]/30 to-amber-400/30',
+    href: '/kiaan-vibe',
+    badge: 'new',
+    purposeDescKey: 'kiaan-vibe',
+  },
+  {
     id: 'journal',
     icon: '📝',
     title: 'Private Journal',

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { TOOLS_BY_CATEGORY, type ToolConfig } from '@/lib/constants/tools'
+import { TOOLS_BY_CATEGORY, CORE_TOOLS, type ToolConfig } from '@/lib/constants/tools'
 import { useLanguage } from '@/hooks/useLanguage'
 
 export interface ToolItem {
@@ -124,6 +124,38 @@ export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps
           aria-orientation="vertical"
         >
           <div className="p-2">
+            {/* Featured: KIAAN Vibe Player */}
+            {(() => {
+              const vibePlayer = CORE_TOOLS.find(t => t.id === 'kiaan-vibe-player')
+              if (!vibePlayer) return null
+              return (
+                <div className="mb-2">
+                  <Link
+                    href={vibePlayer.href}
+                    onClick={() => setIsOpen(false)}
+                    className="group flex items-center gap-3 rounded-xl bg-gradient-to-r from-[#d4a44c]/10 to-amber-500/5 border border-[#d4a44c]/20 px-3 py-3 transition-all hover:border-[#d4a44c]/40 hover:from-[#d4a44c]/15 hover:to-amber-500/10"
+                    role="menuitem"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#d4a44c]/25 to-amber-600/20 text-xl shadow-sm border border-[#d4a44c]/15">
+                      {vibePlayer.icon}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-[#f5f0e8]">{vibePlayer.title}</span>
+                        {vibePlayer.badge && (
+                          <span className="rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-1.5 py-px text-[8px] font-bold uppercase tracking-wide text-white">
+                            {vibePlayer.badge}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-[#f5f0e8]/50">{vibePlayer.description}</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c]/40 group-hover:text-[#d4a44c] transition-colors flex-shrink-0"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                  </Link>
+                </div>
+              )
+            })()}
+
             {displayCategories.map((category, categoryIndex) => (
               <div key={category.id}>
                 {categoryIndex > 0 && (

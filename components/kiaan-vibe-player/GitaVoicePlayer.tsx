@@ -294,7 +294,7 @@ export function GitaVoicePlayer({
           onClick={() => setShowLanguages(!showLanguages)}
           className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 transition-colors w-full"
         >
-          <Globe className="w-4 h-4 text-[#d4a44c]" />
+          <Globe className="w-4 h-4 text-[#e8b54a] drop-shadow-[0_0_2px_rgba(212,164,76,0.3)]" />
           <span className="text-lg">{langInfo?.flag || '🌐'}</span>
           <span className="text-sm flex-1 text-left">{langInfo?.nativeName || 'Select Language'}</span>
           <ChevronDown className={`w-4 h-4 text-white/40 transition-transform ${showLanguages ? 'rotate-180' : ''}`} />

@@ -69,17 +69,17 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
 
   return (
     <div ref={dropdownRef} className={`relative ${className}`}>
-      {/* Trigger Button */}
+      {/* Trigger Button - Sleek, solid presence with gold accent */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-full border border-[#d4a44c]/40 bg-[#d4a44c]/15 px-3 py-2 text-sm font-medium text-[#f5f0e8] transition-all hover:bg-[#d4a44c]/25 hover:border-[#d4a44c]/60 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#d4a44c] focus:ring-offset-2 focus:ring-offset-slate-900"
+        className="flex items-center gap-2 rounded-full border border-[#d4a44c]/50 bg-[#d4a44c]/20 px-3 py-2 text-sm font-medium text-[#f5f0e8] shadow-sm shadow-[#d4a44c]/8 transition-all hover:bg-[#d4a44c]/30 hover:border-[#d4a44c]/65 hover:shadow-md hover:shadow-[#d4a44c]/12 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#d4a44c] focus:ring-offset-2 focus:ring-offset-slate-900"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         aria-label={`Current language: ${config.name}. Click to change language.`}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
-        {/* Globe icon */}
+        {/* Globe icon - solid gold, no transparency */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"
@@ -87,10 +87,10 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="2.25"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-[#d4a44c]"
+          className="text-[#e8b54a] drop-shadow-[0_0_3px_rgba(212,164,76,0.4)]"
         >
           <circle cx="12" cy="12" r="10"></circle>
           <path d="M2 12h20"></path>
@@ -111,7 +111,7 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
           strokeLinejoin="round"
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
-          className="text-white/60"
+          className="text-white/70"
         >
           <polyline points="6 9 12 15 18 9"></polyline>
         </motion.svg>

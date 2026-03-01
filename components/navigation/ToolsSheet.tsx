@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
-import { TOOLS_BY_CATEGORY, type ToolConfig } from '@/lib/constants/tools'
+import { TOOLS_BY_CATEGORY, type ToolConfig, CORE_TOOLS } from '@/lib/constants/tools'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useLanguage } from '@/hooks/useLanguage'
 import { Portal } from '@/components/ui/Portal'
@@ -244,7 +244,73 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                   paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 24px)',
                 }}
               >
-                {TOOLS_BY_CATEGORY.map((category, categoryIndex) => (
+                {/* Featured: KIAAN Vibe Player Card */}
+                {(() => {
+                  const vibePlayer = CORE_TOOLS.find(t => t.id === 'kiaan-vibe-player')
+                  if (!vibePlayer) return null
+                  return (
+                    <motion.div variants={itemVariants} className="mb-5">
+                      <Link
+                        href={vibePlayer.href}
+                        onClick={handleToolClick}
+                        className="group relative flex items-center gap-4 rounded-2xl border border-[#d4a44c]/30 bg-gradient-to-r from-[#d4a44c]/10 via-amber-500/5 to-[#d4a44c]/10 p-4 transition-all duration-200 hover:border-[#d4a44c]/50 hover:from-[#d4a44c]/15 hover:to-[#d4a44c]/15 active:scale-[0.98] shadow-lg shadow-[#d4a44c]/5"
+                      >
+                        {/* Glow accent */}
+                        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4a44c]/60 to-transparent" />
+
+                        {/* Icon */}
+                        <motion.span
+                          className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#d4a44c]/30 to-amber-600/25 text-3xl shadow-lg shadow-[#d4a44c]/10 border border-[#d4a44c]/20"
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          {vibePlayer.icon}
+                        </motion.span>
+
+                        {/* Text */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="text-base font-bold text-[#f5f0e8] group-hover:text-white">
+                              {vibePlayer.title}
+                            </p>
+                            {vibePlayer.badge && (
+                              <span className="rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white shadow-md">
+                                {vibePlayer.badge}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-white/50 mt-0.5">
+                            {vibePlayer.description}
+                          </p>
+                        </div>
+
+                        {/* Play arrow indicator */}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="text-[#d4a44c]/60 group-hover:text-[#d4a44c] transition-colors flex-shrink-0"
+                        >
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                      </Link>
+                    </motion.div>
+                  )
+                })()}
+
+                {TOOLS_BY_CATEGORY.map((category, categoryIndex) => {
+                  // Filter out the featured KIAAN Vibe Player from the grid
+                  // since it already appears as a prominent card above
+                  const filteredTools = category.tools.filter(
+                    (tool: ToolConfig) => tool.id !== 'kiaan-vibe-player'
+                  )
+                  if (filteredTools.length === 0) return null
+                  return (
                   <motion.div
                     key={category.id}
                     className={categoryIndex > 0 ? 'mt-6' : ''}
@@ -256,7 +322,7 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                       <span className="h-px flex-1 bg-gradient-to-l from-[#d4a44c]/30 to-transparent" />
                     </h3>
                     <div className="grid grid-cols-2 gap-2.5">
-                      {category.tools.map((tool: ToolConfig, toolIndex: number) => (
+                      {filteredTools.map((tool: ToolConfig, toolIndex: number) => (
                         <motion.div
                           key={tool.id}
                           variants={itemVariants}
@@ -297,7 +363,8 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                       ))}
                     </div>
                   </motion.div>
-                ))}
+                  )
+                })}
 
                 {/* Bottom spacer for safe area */}
                 <div className="h-4" />
