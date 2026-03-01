@@ -1,9 +1,14 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { BreathingAnimation } from './BreathingAnimation'
 import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
+import {
+  startEmotionalReset,
+  processStep as apiProcessStep,
+  completeSession as apiCompleteSession,
+} from '@/lib/api/emotional-reset'
 
 interface StepData {
   current_step: number
@@ -42,6 +47,58 @@ interface StepData {
   }
 }
 
+/**
+ * Retry a function with exponential backoff.
+ * Retries on network/timeout/server errors but not on 4xx client errors.
+ */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+): Promise<T> {
+  let lastError: Error | null = null
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn()
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err))
+
+      // Don't retry on client errors (rate limit messages are surfaced directly)
+      const msg = lastError.message.toLowerCase()
+      const isNonRetryable =
+        msg.includes('not found') ||
+        msg.includes('already been completed') ||
+        msg.includes('daily limit')
+      if (isNonRetryable) throw lastError
+
+      if (attempt < maxRetries) {
+        const delay = Math.min(1000 * Math.pow(2, attempt), 5000)
+        await new Promise(resolve => setTimeout(resolve, delay))
+      }
+    }
+  }
+
+  throw lastError || new Error('All retry attempts failed')
+}
+
+/**
+ * Convert API errors into compassionate, actionable user messages.
+ */
+function getFriendlyErrorMessage(err: unknown): string {
+  if (!(err instanceof Error)) return 'Something went wrong. Please try again.'
+
+  const msg = err.message.toLowerCase()
+
+  if (msg.includes('abort') || msg.includes('timeout') || msg.includes('timed out')) {
+    return 'The request timed out. The service may be busy — please try again in a moment.'
+  }
+  if (msg.includes('fetch') || msg.includes('network') || msg.includes('connect') || msg.includes('failed to fetch')) {
+    return 'Unable to connect. Please check your internet connection and try again.'
+  }
+  // Preserve server-side messages for rate limits, session errors, etc.
+  return err.message
+}
+
 interface EmotionalResetWizardProps {
   onComplete?: () => void
   onClose?: () => void
@@ -68,7 +125,8 @@ export function EmotionalResetWizard({
   const [isCompleted, setIsCompleted] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
+  // Track the last failed action so retry button can re-invoke it
+  const lastFailedAction = useRef<(() => void) | null>(null)
 
   // Track client-side mount to prevent hydration mismatch
   useEffect(() => {
@@ -86,22 +144,10 @@ export function EmotionalResetWizard({
   const startSession = async () => {
     setIsLoading(true)
     setError(null)
+    lastFailedAction.current = null
 
     try {
-      const response = await fetch(`${apiUrl}/api/emotional-reset/start`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      })
-
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.detail || 'Failed to start session')
-      }
-
-      const data = await response.json()
+      const data = await withRetry(() => startEmotionalReset())
       setSessionId(data.session_id)
       setStepData({
         current_step: data.current_step,
@@ -111,7 +157,8 @@ export function EmotionalResetWizard({
         progress: data.progress,
       })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to start session')
+      setError(getFriendlyErrorMessage(err))
+      lastFailedAction.current = startSession
     } finally {
       setIsLoading(false)
     }
@@ -122,30 +169,17 @@ export function EmotionalResetWizard({
 
     setIsLoading(true)
     setError(null)
+    lastFailedAction.current = null
 
     try {
-      const response = await fetch(`${apiUrl}/api/emotional-reset/step`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          session_id: sessionId,
-          current_step: currentStep,
-          user_input: currentStep === 1 ? userInput : null,
-        }),
-      })
+      const data = await withRetry(() =>
+        apiProcessStep(sessionId, currentStep, currentStep === 1 ? userInput : undefined)
+      )
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        if (data.crisis_detected) {
-          setCrisisDetected(true)
-          setCrisisResponse(data.crisis_response)
-          return
-        }
-        throw new Error(data.detail || 'Failed to process step')
+      if (data.crisis_detected) {
+        setCrisisDetected(true)
+        setCrisisResponse(data.crisis_response || null)
+        return
       }
 
       setCurrentStep(data.current_step)
@@ -153,38 +187,26 @@ export function EmotionalResetWizard({
       setUserInput('')
       setBreathingComplete(false)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to process step')
+      setError(getFriendlyErrorMessage(err))
+      lastFailedAction.current = processStep
     } finally {
       setIsLoading(false)
     }
-  }, [apiUrl, sessionId, currentStep, userInput])
+  }, [sessionId, currentStep, userInput])
 
   const completeSession = async () => {
     if (!sessionId) return
 
     setIsLoading(true)
+    lastFailedAction.current = null
 
     try {
-      const response = await fetch(`${apiUrl}/api/emotional-reset/complete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          session_id: sessionId,
-        }),
-      })
-
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.detail || 'Failed to complete session')
-      }
-
+      await withRetry(() => apiCompleteSession(sessionId))
       setIsCompleted(true)
       onComplete?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to complete session')
+      setError(getFriendlyErrorMessage(err))
+      lastFailedAction.current = completeSession
     } finally {
       setIsLoading(false)
     }
@@ -586,8 +608,19 @@ export function EmotionalResetWizard({
         {renderProgressBar()}
 
         {error && (
-          <div className="mb-4 p-3 bg-[#d4a44c]/8 border border-[#d4a44c]/20 rounded-xl text-[#e8b54a]/80 text-sm">
-            {error}
+          <div className="mb-4 p-3 bg-[#d4a44c]/8 border border-[#d4a44c]/20 rounded-xl text-[#e8b54a]/80 text-sm flex items-start justify-between gap-3">
+            <span>{error}</span>
+            {lastFailedAction.current && (
+              <button
+                onClick={() => {
+                  setError(null)
+                  lastFailedAction.current?.()
+                }}
+                className="flex-shrink-0 px-3 py-1.5 bg-[#d4a44c]/15 border border-[#d4a44c]/30 rounded-lg text-[#e8b54a] text-xs font-medium hover:bg-[#d4a44c]/25 transition"
+              >
+                Retry
+              </button>
+            )}
           </div>
         )}
 
