@@ -303,7 +303,14 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                   )
                 })()}
 
-                {TOOLS_BY_CATEGORY.map((category, categoryIndex) => (
+                {TOOLS_BY_CATEGORY.map((category, categoryIndex) => {
+                  // Filter out the featured KIAAN Vibe Player from the grid
+                  // since it already appears as a prominent card above
+                  const filteredTools = category.tools.filter(
+                    (tool: ToolConfig) => tool.id !== 'kiaan-vibe-player'
+                  )
+                  if (filteredTools.length === 0) return null
+                  return (
                   <motion.div
                     key={category.id}
                     className={categoryIndex > 0 ? 'mt-6' : ''}
@@ -315,7 +322,7 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                       <span className="h-px flex-1 bg-gradient-to-l from-[#d4a44c]/30 to-transparent" />
                     </h3>
                     <div className="grid grid-cols-2 gap-2.5">
-                      {category.tools.map((tool: ToolConfig, toolIndex: number) => (
+                      {filteredTools.map((tool: ToolConfig, toolIndex: number) => (
                         <motion.div
                           key={tool.id}
                           variants={itemVariants}
@@ -356,7 +363,8 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                       ))}
                     </div>
                   </motion.div>
-                ))}
+                  )
+                })}
 
                 {/* Bottom spacer for safe area */}
                 <div className="h-4" />
