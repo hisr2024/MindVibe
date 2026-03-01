@@ -124,15 +124,52 @@ class RazorpayPaymentVerification(BaseModel):
     billing_period: str = Field(default="monthly", pattern="^(monthly|yearly)$")
 
 
+class PaymentOut(BaseModel):
+    """Output schema for a payment transaction record.
+
+    Represents a single payment with provider details and status.
+    Used in the payment history endpoint to display all transactions.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    payment_provider: str
+    amount: Decimal
+    currency: str
+    status: str
+    description: str | None = None
+    stripe_payment_intent_id: str | None = None
+    stripe_invoice_id: str | None = None
+    razorpay_payment_id: str | None = None
+    razorpay_order_id: str | None = None
+    paypal_order_id: str | None = None
+    created_at: datetime
+
+
+class PaymentHistoryOut(BaseModel):
+    """Output schema for paginated payment history.
+
+    Contains the list of payments plus metadata for pagination
+    and summary statistics.
+    """
+
+    payments: list[PaymentOut]
+    total: int
+    page: int
+    page_size: int
+    has_more: bool
+
+
 class WebhookEvent(BaseModel):
     """Schema for incoming Stripe webhook events."""
-    
+
     type: str
     data: dict[str, Any]
 
 
 class SubscriptionCancelRequest(BaseModel):
     """Input schema for canceling a subscription."""
-    
+
     cancel_immediately: bool = False
     reason: str | None = None

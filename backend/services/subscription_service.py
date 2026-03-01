@@ -11,11 +11,12 @@ import logging
 from datetime import datetime, timedelta, UTC
 from typing import Optional
 
-from sqlalchemy import select, and_, update
+from sqlalchemy import select, and_, update, func, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import (
     User,
+    Payment,
     SubscriptionPlan,
     UserSubscription,
     UsageTracking,
@@ -696,3 +697,65 @@ async def _update_usage_limits(
         .values(usage_limit=plan.kiaan_questions_monthly)
     )
     await db.commit()
+
+
+# =============================================================================
+# Payment History
+# =============================================================================
+
+async def get_user_payments(
+    db: AsyncSession,
+    user_id: str,
+    page: int = 1,
+    page_size: int = 20,
+) -> dict:
+    """Get paginated payment history for a user.
+
+    Returns all payment transactions (succeeded, failed, pending, refunded)
+    ordered by most recent first. Respects soft deletes.
+
+    Args:
+        db: Database session.
+        user_id: The user's ID.
+        page: Page number (1-indexed).
+        page_size: Number of records per page (max 100).
+
+    Returns:
+        dict with payments list, total count, pagination metadata.
+    """
+    page_size = min(page_size, 100)
+    offset = (page - 1) * page_size
+
+    # Count total payments (excluding soft-deleted)
+    count_stmt = select(func.count(Payment.id)).where(
+        and_(
+            Payment.user_id == user_id,
+            Payment.deleted_at.is_(None),
+        )
+    )
+    total_result = await db.execute(count_stmt)
+    total = total_result.scalar() or 0
+
+    # Fetch page of payments, most recent first
+    stmt = (
+        select(Payment)
+        .where(
+            and_(
+                Payment.user_id == user_id,
+                Payment.deleted_at.is_(None),
+            )
+        )
+        .order_by(desc(Payment.created_at))
+        .offset(offset)
+        .limit(page_size)
+    )
+    result = await db.execute(stmt)
+    payments = list(result.scalars().all())
+
+    return {
+        "payments": payments,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "has_more": (offset + page_size) < total,
+    }

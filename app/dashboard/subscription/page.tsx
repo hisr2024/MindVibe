@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { CurrentPlanCard } from '@/components/dashboard/CurrentPlanCard'
 import { KiaanQuotaCard } from '@/components/dashboard/KiaanQuotaCard'
@@ -11,12 +11,66 @@ import { Card, CardContent, Button, Badge } from '@/components/ui'
 import { useSubscription, cancelSubscription } from '@/hooks/useSubscription'
 import { useKiaanQuota } from '@/hooks/useKiaanQuota'
 import { KiaanLogo } from '@/src/components/KiaanLogo'
+import { apiFetch } from '@/lib/api'
+
+interface RecentPayment {
+  id: number
+  payment_provider: string
+  amount: string | number
+  currency: string
+  status: string
+  description: string | null
+  created_at: string
+}
+
+const PROVIDER_LABELS: Record<string, string> = {
+  stripe_card: 'Card',
+  stripe_paypal: 'PayPal',
+  razorpay_upi: 'UPI',
+  free: 'Free',
+}
+
+const STATUS_VARIANTS: Record<string, 'success' | 'warning' | 'danger' | 'info' | 'default'> = {
+  succeeded: 'success',
+  pending: 'warning',
+  failed: 'danger',
+  refunded: 'info',
+}
+
+function formatPaymentAmount(amount: string | number, currency: string): string {
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount
+  const symbols: Record<string, string> = { usd: '$', eur: '\u20AC', inr: '\u20B9' }
+  const symbol = symbols[currency.toLowerCase()] ?? `${currency.toUpperCase()} `
+  return `${symbol}${num.toFixed(2)}`
+}
 
 export default function SubscriptionDashboardPage() {
   const router = useRouter()
   const { subscription, loading, refetch } = useSubscription()
   const quota = useKiaanQuota(subscription?.tierId ?? 'free')
   const [showCancelModal, setShowCancelModal] = useState(false)
+  const [recentPayments, setRecentPayments] = useState<RecentPayment[]>([])
+  const [paymentsLoading, setPaymentsLoading] = useState(true)
+
+  const fetchRecentPayments = useCallback(async () => {
+    try {
+      const response = await apiFetch('/api/subscriptions/payments?page=1&page_size=5', {
+        method: 'GET',
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setRecentPayments(data.payments ?? [])
+      }
+    } catch {
+      // Silently fail — billing history is non-critical
+    } finally {
+      setPaymentsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchRecentPayments()
+  }, [fetchRecentPayments])
 
   const handleUpgrade = () => {
     router.push('/pricing')
@@ -114,29 +168,64 @@ export default function SubscriptionDashboardPage() {
       <div className="grid md:grid-cols-2 gap-6 mb-8">
         <UsageCard items={usageItems} />
 
-        {/* Billing History */}
+        {/* Billing History (real data from payments API) */}
         <Card>
           <CardContent>
-            <h3 className="font-semibold text-[#f5f0e8] mb-4">Billing History</h3>
-            {subscription.tierId === 'free' ? (
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-[#f5f0e8]">Billing History</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/dashboard/payment-status')}
+              >
+                View All
+              </Button>
+            </div>
+            {paymentsLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="animate-pulse flex items-center justify-between py-2">
+                    <div className="space-y-2">
+                      <div className="h-4 w-32 rounded bg-[#d4a44c]/10" />
+                      <div className="h-3 w-20 rounded bg-[#d4a44c]/10" />
+                    </div>
+                    <div className="h-5 w-16 rounded bg-[#d4a44c]/10" />
+                  </div>
+                ))}
+              </div>
+            ) : recentPayments.length === 0 ? (
               <p className="text-sm text-[#f5f0e8]/60">
-                No billing history for free plan.
+                {subscription.tierId === 'free'
+                  ? 'No billing history for free plan.'
+                  : 'No payment records found.'}
               </p>
             ) : (
               <div className="space-y-3">
-                {[
-                  { date: new Date(), amount: subscription.isYearly ? ({ basic: 49.99, premium: 99.99, enterprise: 150.00, premier: 250.00 }[subscription.tierId] ?? 0) : ({ basic: 4.99, premium: 9.99, enterprise: 15.00, premier: 25.00 }[subscription.tierId] ?? 0), status: 'paid' },
-                ].map((invoice, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b border-[#d4a44c]/10 last:border-0">
+                {recentPayments.map((payment) => (
+                  <div key={payment.id} className="flex items-center justify-between py-2 border-b border-[#d4a44c]/10 last:border-0">
                     <div>
                       <p className="text-sm font-medium text-[#f5f0e8]">
-                        {invoice.date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                        {new Date(payment.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                       </p>
-                      <p className="text-xs text-[#f5f0e8]/60">{subscription.tierName} Plan</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-xs text-[#f5f0e8]/60">
+                          {payment.description || 'Payment'}
+                        </p>
+                        <span className="text-[10px] text-[#f5f0e8]/40">
+                          {PROVIDER_LABELS[payment.payment_provider] ?? payment.payment_provider}
+                        </span>
+                      </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-semibold text-[#f5f0e8]">${invoice.amount}</span>
-                      <Badge variant="success" size="sm">Paid</Badge>
+                      <span className="text-sm font-semibold text-[#f5f0e8] tabular-nums">
+                        {formatPaymentAmount(payment.amount, payment.currency)}
+                      </span>
+                      <Badge
+                        variant={STATUS_VARIANTS[payment.status] ?? 'default'}
+                        size="sm"
+                      >
+                        {payment.status === 'succeeded' ? 'Paid' : payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                      </Badge>
                     </div>
                   </div>
                 ))}
@@ -153,6 +242,9 @@ export default function SubscriptionDashboardPage() {
           <div className="flex flex-wrap gap-3">
             <Button onClick={handleUpgrade} variant="outline" size="sm">
               Change Plan
+            </Button>
+            <Button onClick={() => router.push('/dashboard/payment-status')} variant="outline" size="sm">
+              Payment History
             </Button>
             {subscription.tierId !== 'free' && (
               <Button onClick={() => setShowCancelModal(true)} variant="ghost" size="sm">
