@@ -8,7 +8,7 @@ import { ThemeToggle } from '@/components/ui'
 import { MindVibeLockup } from '@/components/branding'
 import { springConfigs, animationVariants } from '@/lib/animations/spring-configs'
 import { useLanguage } from '@/hooks/useLanguage'
-import { GlobalLanguageSelector } from '@/components/navigation/GlobalLanguageSelector'
+import { LanguageSelector } from '@/components/navigation/LanguageSelector'
 
 export default function SiteNav() {
   const pathname = usePathname()
@@ -119,7 +119,7 @@ export default function SiteNav() {
 
         <div className="flex items-center gap-2 md:gap-3">
           {/* Language Selector - Always visible */}
-          <GlobalLanguageSelector />
+          <LanguageSelector />
 
           <Link
             href="/dashboard/subscription"
