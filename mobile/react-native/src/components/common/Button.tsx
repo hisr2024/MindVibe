@@ -21,7 +21,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-import { colors, darkTheme, spacing, typography, radii, shadows, motion } from '@theme/tokens';
+import { colors, spacing, typography, radii, shadows, motion } from '@theme/tokens';
 
 // ---------------------------------------------------------------------------
 // Types

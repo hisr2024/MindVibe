@@ -11,7 +11,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
-import type { SyncQueueItem, SyncStatus } from '@types/index';
+import type { SyncQueueItem, SyncStatus } from '@app-types/index';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -49,51 +49,7 @@ export function useOfflineMode(): OfflineModeState & OfflineModeActions {
   const pendingQueue = useRef<SyncQueueItem[]>([]);
   const isSyncing = useRef(false);
 
-  // Listen for app state changes (foreground/background)
-  useEffect(() => {
-    const handleAppStateChange = (nextState: AppStateStatus) => {
-      if (nextState === 'active' && isOnline) {
-        // App came to foreground — try syncing
-        drainQueue();
-      }
-    };
-
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
-    return () => subscription.remove();
-  }, [isOnline]);
-
-  // In production, this subscribes to @react-native-community/netinfo
-  // For scaffold purposes, we monitor a simple online check
-  useEffect(() => {
-    // NetInfo.addEventListener((state) => setIsOnline(state.isConnected ?? false));
-    setIsOnline(true); // Default to online until NetInfo is wired up
-  }, []);
-
-  // Auto-sync when coming back online
-  useEffect(() => {
-    if (isOnline && pendingCount > 0) {
-      drainQueue();
-    }
-  }, [isOnline, pendingCount]);
-
-  const queueOperation = useCallback(
-    (item: Omit<SyncQueueItem, 'id' | 'createdAt' | 'retryCount'>) => {
-      const queueItem: SyncQueueItem = {
-        id: `sync_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-        createdAt: new Date().toISOString(),
-        retryCount: 0,
-        ...item,
-      };
-      pendingQueue.current.push(queueItem);
-      setPendingCount(pendingQueue.current.length);
-      setSyncStatus('pending');
-
-      // In production: persist to WatermelonDB
-      // await database.write(async () => { ... });
-    },
-    [],
-  );
-
+  // Define drainQueue first so effects can reference it
   const drainQueue = useCallback(async () => {
     if (isSyncing.current || !isOnline || pendingQueue.current.length === 0) {
       return;
@@ -136,6 +92,50 @@ export function useOfflineMode(): OfflineModeState & OfflineModeActions {
     setSyncStatus(pendingQueue.current.length > 0 ? 'pending' : 'synced');
     isSyncing.current = false;
   }, [isOnline]);
+
+  // Listen for app state changes (foreground/background)
+  useEffect(() => {
+    const handleAppStateChange = (nextState: AppStateStatus) => {
+      if (nextState === 'active' && isOnline) {
+        drainQueue();
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => subscription.remove();
+  }, [isOnline, drainQueue]);
+
+  // In production, this subscribes to @react-native-community/netinfo
+  // For scaffold purposes, we monitor a simple online check
+  useEffect(() => {
+    // NetInfo.addEventListener((state) => setIsOnline(state.isConnected ?? false));
+    setIsOnline(true); // Default to online until NetInfo is wired up
+  }, []);
+
+  // Auto-sync when coming back online
+  useEffect(() => {
+    if (isOnline && pendingCount > 0) {
+      drainQueue();
+    }
+  }, [isOnline, pendingCount, drainQueue]);
+
+  const queueOperation = useCallback(
+    (item: Omit<SyncQueueItem, 'id' | 'createdAt' | 'retryCount'>) => {
+      const queueItem: SyncQueueItem = {
+        id: `sync_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        createdAt: new Date().toISOString(),
+        retryCount: 0,
+        ...item,
+      };
+      pendingQueue.current.push(queueItem);
+      setPendingCount(pendingQueue.current.length);
+      setSyncStatus('pending');
+
+      // In production: persist to WatermelonDB
+      // await database.write(async () => { ... });
+    },
+    [],
+  );
 
   const syncNow = useCallback(async () => {
     await drainQueue();

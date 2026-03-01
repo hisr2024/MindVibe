@@ -24,7 +24,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { colors, darkTheme, spacing, typography, radii, shadows } from '@theme/tokens';
-import type { Emotion } from '@types/index';
+import type { Emotion } from '@app-types/index';
 
 // ---------------------------------------------------------------------------
 // Time-Aware Greeting

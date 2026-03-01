@@ -24,10 +24,9 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
   useSharedValue,
-  interpolateColor,
 } from 'react-native-reanimated';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { colors, darkTheme, spacing, typography, radii, shadows, motion } from '@theme/tokens';
+import { colors, darkTheme, spacing, typography, shadows, motion } from '@theme/tokens';
 
 // ---------------------------------------------------------------------------
 // Tab Configuration

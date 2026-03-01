@@ -97,7 +97,7 @@ const initialState: VibePlayerState = {
 const REPEAT_CYCLE: RepeatMode[] = ['off', 'all', 'one'];
 
 export const useVibePlayerStore = create<VibePlayerState & VibePlayerActions>(
-  (set, get) => ({
+  (set) => ({
     ...initialState,
 
     setCurrentTrack: (track) =>

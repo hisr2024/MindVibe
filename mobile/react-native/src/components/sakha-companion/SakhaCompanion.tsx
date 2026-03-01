@@ -385,8 +385,7 @@ export function SakhaCompanion({
           {greeting.greeting}
         </Text>
         <Text style={[styles.greetingSubtext, { color: theme.textSecondary }]}>
-          I am Sakha, your spiritual companion. Share what&apos;s on your mind, and I&apos;ll
-          offer wisdom from the Bhagavad Gita to guide your path.
+          {"I am Sakha, your spiritual companion. Share what's on your mind, and I'll offer wisdom from the Bhagavad Gita to guide your path."}
         </Text>
         <PrivacyToggle
           isLocalOnly={isLocalOnly}

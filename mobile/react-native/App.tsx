@@ -17,9 +17,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BottomTabBar } from '@components/navigation/BottomTabBar';
 import { VibePlayer, setupVibePlayer } from '@components/vibe-player/VibePlayer';
 import { useVibePlayerStore } from '@state/stores/vibePlayerStore';
-import { featureFlags } from '@config/featureFlags';
 import { darkTheme } from '@theme/tokens';
-import type { RootStackParamList, MainTabParamList } from '@types/index';
+import type { RootStackParamList, MainTabParamList } from '@app-types/index';
 
 // ---------------------------------------------------------------------------
 // Navigation Setup
@@ -111,8 +110,9 @@ export default function App() {
       // Initialize Track Player for audio playback
       await setupVibePlayer();
 
-      // Initialize feature flags
-      // In production: await featureFlags.initialize(userId, userTier);
+      // Initialize feature flags (in production):
+      // import { featureFlags } from '@config/featureFlags';
+      // await featureFlags.initialize(userId, userTier);
 
       setIsReady(true);
     }

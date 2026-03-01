@@ -101,16 +101,8 @@ export async function setupVibePlayer(): Promise<void> {
         Capability.Pause,
         Capability.SkipToNext,
       ],
-      notificationCapabilities: [
-        Capability.Play,
-        Capability.Pause,
-        Capability.SkipToNext,
-        Capability.SkipToPrevious,
-      ],
       // Lock screen and notification metadata
-      android: {
-        appKilledPlaybackBehavior: 'StopPlaybackAndRemoveNotification' as never,
-      },
+      progressUpdateEventInterval: 2,
     });
 
     // Default repeat mode: repeat queue
@@ -394,11 +386,6 @@ function FullPlayer({ onCollapse, theme }: FullPlayerProps) {
       await TrackPlayer.play();
     }
   }, [isPlaying]);
-
-  const handleSeek = useCallback(async (percent: number) => {
-    const seekPosition = percent * duration;
-    await TrackPlayer.seekTo(seekPosition);
-  }, [duration]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
