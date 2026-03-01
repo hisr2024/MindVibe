@@ -168,6 +168,69 @@ class UsageTracking(Base):
     )
 
 
+class SubscriptionLinkStatus(str, enum.Enum):
+    """Status of a Razorpay subscription link."""
+
+    CREATED = "created"
+    AUTHENTICATED = "authenticated"
+    ACTIVE = "active"
+    PENDING = "pending"
+    HALTED = "halted"
+    CANCELLED = "cancelled"
+    COMPLETED = "completed"
+    EXPIRED = "expired"
+
+
+class SubscriptionLink(SoftDeleteMixin, Base):
+    """Tracks Razorpay subscription links created by admins.
+
+    Each record maps to a Razorpay subscription object that includes
+    a shareable short_url for customer checkout. Admins create these
+    links through the admin panel and share them with users.
+    """
+
+    __tablename__ = "subscription_links"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    razorpay_subscription_id: Mapped[str] = mapped_column(
+        String(128), unique=True, index=True
+    )
+    razorpay_plan_id: Mapped[str] = mapped_column(String(128), index=True)
+    plan_tier: Mapped[SubscriptionTier] = mapped_column(
+        Enum(SubscriptionTier, native_enum=False, length=32), index=True
+    )
+    billing_period: Mapped[str] = mapped_column(String(16), default="monthly")
+    short_url: Mapped[str] = mapped_column(String(512))
+    status: Mapped[SubscriptionLinkStatus] = mapped_column(
+        Enum(SubscriptionLinkStatus, native_enum=False, length=32),
+        default=SubscriptionLinkStatus.CREATED,
+        index=True,
+    )
+    total_count: Mapped[int] = mapped_column(Integer, default=0)
+    start_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+    expire_by: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+    customer_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    customer_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    customer_phone: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    offer_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    addons_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    notes: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_by_admin_id: Mapped[int | None] = mapped_column(
+        Integer, nullable=True, index=True
+    )
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, onupdate=func.now()
+    )
+
+
 class Payment(SoftDeleteMixin, Base):
     """Records payment transactions."""
 

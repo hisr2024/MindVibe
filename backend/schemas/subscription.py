@@ -173,3 +173,94 @@ class SubscriptionCancelRequest(BaseModel):
 
     cancel_immediately: bool = False
     reason: str | None = None
+
+
+# =============================================================================
+# Subscription Link Schemas (Razorpay Subscription Links)
+# =============================================================================
+
+class SubscriptionLinkAddonIn(BaseModel):
+    """A single add-on item attached to a subscription link."""
+
+    name: str = Field(..., min_length=1, max_length=255)
+    amount: int = Field(..., ge=0, description="Amount in paisa (INR smallest unit)")
+    currency: str = Field(default="INR", pattern="^[A-Z]{3}$")
+    description: str | None = Field(default=None, max_length=512)
+
+
+class SubscriptionLinkCreateIn(BaseModel):
+    """Input schema for creating a Razorpay subscription link.
+
+    Maps to the multi-step form: Plan Details -> Add Ons -> Link Details -> Review.
+    """
+
+    # Step 1: Plan Details
+    plan_tier: SubscriptionTier
+    billing_period: str = Field(default="monthly", pattern="^(monthly|yearly)$")
+    total_count: int = Field(
+        default=0, ge=0, le=365,
+        description="Number of billing cycles (0 = until cancelled)",
+    )
+    start_at: int | None = Field(
+        default=None,
+        description="Unix timestamp for subscription start (None = immediate)",
+    )
+    offer_id: str | None = Field(
+        default=None, max_length=128,
+        description="Razorpay offer ID for discounts",
+    )
+
+    # Step 2: Add Ons
+    addons: list[SubscriptionLinkAddonIn] | None = Field(
+        default=None,
+        description="List of add-on items",
+    )
+
+    # Step 3: Link Details
+    customer_name: str | None = Field(default=None, max_length=255)
+    customer_email: str | None = Field(default=None, max_length=255)
+    customer_phone: str | None = Field(default=None, max_length=32)
+    expire_by: int | None = Field(
+        default=None,
+        description="Unix timestamp when the link expires",
+    )
+    description: str | None = Field(default=None, max_length=1024)
+    notes: dict[str, str] | None = Field(
+        default=None,
+        description="Key-value pairs attached to the subscription",
+    )
+
+
+class SubscriptionLinkOut(BaseModel):
+    """Output schema for a subscription link."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    razorpay_subscription_id: str
+    razorpay_plan_id: str | None = None
+    plan_tier: str
+    billing_period: str
+    short_url: str
+    status: str
+    total_count: int
+    start_at: int | None = None
+    expire_by: int | None = None
+    customer_name: str | None = None
+    customer_email: str | None = None
+    customer_phone: str | None = None
+    offer_id: str | None = None
+    addons: list[dict] | None = None
+    notes: dict | None = None
+    description: str | None = None
+    created_at: str | None = None
+
+
+class SubscriptionLinkListOut(BaseModel):
+    """Paginated list of subscription links."""
+
+    links: list[SubscriptionLinkOut]
+    total: int
+    page: int
+    page_size: int
+    has_more: bool

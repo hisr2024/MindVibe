@@ -8,6 +8,7 @@ const adminLinks = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
   { href: '/admin/users', label: 'Users', icon: '👥' },
   { href: '/admin/subscriptions', label: 'Subscriptions', icon: '💳' },
+  { href: '/admin/subscription-links', label: 'Sub Links', icon: '🔗' },
   { href: '/admin/moderation', label: 'Moderation', icon: '🛡️' },
   { href: '/admin/feature-flags', label: 'Feature Flags', icon: '🚩' },
   { href: '/admin/announcements', label: 'Announcements', icon: '📢' },
