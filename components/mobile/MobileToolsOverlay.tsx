@@ -25,6 +25,7 @@ import {
   Sparkles,
   Volume2,
   ChevronRight,
+  Music2,
 } from 'lucide-react'
 
 import { MobileBottomSheet } from './MobileBottomSheet'
@@ -44,6 +45,16 @@ interface OverlayTool {
 
 /** Spiritual wellness tools shown in the overlay */
 const OVERLAY_TOOLS: OverlayTool[] = [
+  {
+    id: 'kiaan-vibe',
+    label: 'KIAAN Vibe Player',
+    description: 'Divine Gita verses & meditation audio',
+    icon: Music2,
+    href: '/kiaan-vibe',
+    gradient: 'from-[#d4a44c]/15 to-amber-500/10',
+    iconColor: 'text-[#d4a44c]',
+    accentBorder: 'border-[#d4a44c]/20',
+  },
   {
     id: 'viyoga',
     label: 'Viyoga',

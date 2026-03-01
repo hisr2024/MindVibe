@@ -23,6 +23,7 @@ import {
   Brain,
   Volume2,
   Lock,
+  Music2,
 } from 'lucide-react'
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
@@ -47,6 +48,15 @@ const CORE_TOOLS: Tool[] = [
     icon: Sparkles,
     href: '/m/kiaan',
     gradient: 'from-[#d4a44c]/15 to-[#d4a44c]/15',
+    iconColor: 'text-[#d4a44c]',
+  },
+  {
+    id: 'kiaan-vibe',
+    label: 'KIAAN Vibe Player',
+    description: 'Divine verses & meditation',
+    icon: Music2,
+    href: '/kiaan-vibe',
+    gradient: 'from-[#d4a44c]/15 to-amber-500/15',
     iconColor: 'text-[#d4a44c]',
   },
   {

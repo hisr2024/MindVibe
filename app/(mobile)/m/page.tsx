@@ -24,6 +24,7 @@ import {
   RefreshCw,
   Mic,
   Users,
+  Music2,
 } from 'lucide-react'
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
@@ -50,6 +51,15 @@ const QUICK_ACTIONS = [
     icon: Sparkles,
     href: '/m/kiaan',
     gradient: 'from-[#d4a44c]/20 to-[#d4a44c]/20',
+    iconColor: 'text-[#d4a44c]',
+  },
+  {
+    id: 'vibe-player',
+    label: 'Vibe Player',
+    description: 'Sacred sounds & verses',
+    icon: Music2,
+    href: '/kiaan-vibe',
+    gradient: 'from-[#d4a44c]/20 to-amber-500/20',
     iconColor: 'text-[#d4a44c]',
   },
   {
