@@ -51,7 +51,7 @@ export default function EmotionalResetClient() {
         <FadeIn delay={0.05}>
           <div className="grid gap-4 md:grid-cols-2">
             <ToolActionCard
-              icon="\u{1F9D8}"
+              icon="🧘"
               title="Begin Sacred Reset Flow"
               description="A guided 7-step journey to process and release emotions (~10 minutes)."
               ctaLabel="Begin Now"
@@ -59,7 +59,7 @@ export default function EmotionalResetClient() {
               gradient="from-[#d4a44c]/10 to-amber-500/10"
             />
             <ToolActionCard
-              icon="\u{1F54A}\uFE0F"
+              icon="🕊️"
               title="Quick Sacred Breathing"
               description="A 60-second breathing reset for immediate calm and peace."
               ctaLabel="Start Breathing"
