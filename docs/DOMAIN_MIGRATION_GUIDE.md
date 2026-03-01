@@ -24,7 +24,7 @@ Your frontend is hosted on **Vercel**. You need to point the domain there.
 
 | Type | Host | Value | TTL |
 |------|------|-------|-----|
-| A Record | `@` | `76.76.21.21` | Automatic |
+| A Record | `@` | `216.150.1.1` | Automatic |
 | CNAME | `www` | `cname.vercel-dns.com.` | Automatic |
 
 > These are Vercel's official DNS values. The `@` means the root domain (kiaanverse.com).
