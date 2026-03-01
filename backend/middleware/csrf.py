@@ -24,9 +24,10 @@ logger = logging.getLogger(__name__)
 # 2. Use their own signature verification (webhooks)
 # 3. Are read-only health checks
 CSRF_EXEMPT_PATHS: Set[str] = {
-    # Webhook endpoints - use their own signature verification (e.g., Stripe signatures)
-    "/api/webhooks/stripe",
-    "/api/webhooks/payment",
+    # Webhook endpoints - use their own signature verification (HMAC-SHA256)
+    # Razorpay verifies via X-Razorpay-Signature, Stripe via Stripe-Signature
+    "/api/subscriptions/webhook",
+    "/api/subscriptions/webhook/razorpay",
     # Health check endpoints - read-only, no state changes
     "/health",
     "/",
