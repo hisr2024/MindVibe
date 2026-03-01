@@ -134,10 +134,12 @@ from backend.models.subscription import (
     SubscriptionStatus,
     PaymentStatus,
     PaymentProvider,
+    SubscriptionLinkStatus,
     SubscriptionPlan,
     UserSubscription,
     UsageTracking,
     Payment,
+    SubscriptionLink,
 )
 
 # Admin models
@@ -321,10 +323,12 @@ __all__ = [
     "UserQueryPattern",
     "ContentSourceRegistry",
     # Subscription models
+    "SubscriptionLinkStatus",
     "SubscriptionPlan",
     "UserSubscription",
     "UsageTracking",
     "Payment",
+    "SubscriptionLink",
     # Admin models
     "AdminUser",
     "AdminPermissionAssignment",
