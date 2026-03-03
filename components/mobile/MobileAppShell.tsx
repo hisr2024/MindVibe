@@ -104,8 +104,8 @@ const ROUTE_TO_TAB: Record<string, string> = {
   '/m/companion': 'kiaan',
   '/m/journal': 'journal',
   '/m/profile': 'profile',
-  '/m/tools': 'home',
-  '/m/journeys': 'home',
+  '/m/tools': 'tools',
+  '/m/journeys': 'tools',
   '/m/wisdom': 'home',
   '/m/wisdom-rooms': 'home',
 }
