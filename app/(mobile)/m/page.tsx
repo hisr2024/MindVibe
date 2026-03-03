@@ -478,13 +478,13 @@ export default function MobileHomePage() {
           </motion.div>
         </motion.section>
 
-        {/* Active Journey Card */}
-        {dashboardData.activeJourney && (
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
+        {/* Active Journey Card — or Start Journey CTA when no active journey */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          {dashboardData.activeJourney ? (
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={() =>
@@ -529,8 +529,32 @@ export default function MobileHomePage() {
                 </div>
               </div>
             </motion.button>
-          </motion.section>
-        )}
+          ) : (
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleQuickAction('/m/journeys')}
+              className="w-full p-4 rounded-2xl text-left bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-cyan-500/20"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-cyan-500/15 flex items-center justify-center flex-shrink-0">
+                  <Compass className="w-6 h-6 text-cyan-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-cyan-400 font-medium mb-0.5">
+                    Wisdom Journeys
+                  </p>
+                  <h3 className="text-base font-semibold text-white">
+                    Start Your Transformation
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    14-day guided paths to conquer inner enemies with Gita wisdom
+                  </p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-slate-500 flex-shrink-0" />
+              </div>
+            </motion.button>
+          )}
+        </motion.section>
 
         {/* Quick Actions Grid */}
         <motion.section

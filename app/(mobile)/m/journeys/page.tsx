@@ -189,11 +189,15 @@ export default function MobileJourneysPage() {
       hadError = true
     }
 
-    // Process available templates
-    if (templatesResult.status === 'fulfilled' && templatesResult.value) {
+    // Process available templates — use static catalog when backend returns
+    // empty fallback (proxy returns { templates: [], _fallback: true } on error)
+    if (
+      templatesResult.status === 'fulfilled' &&
+      templatesResult.value &&
+      templatesResult.value.templates.length > 0
+    ) {
       setAvailableTemplates(templatesResult.value.templates.map(mapTemplate))
     } else {
-      // Use static catalog as fallback
       setAvailableTemplates(STATIC_CATALOG)
       hadError = true
     }

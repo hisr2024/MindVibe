@@ -26,6 +26,7 @@ import {
   Volume2,
   ChevronRight,
   Music2,
+  Compass,
 } from 'lucide-react'
 
 import { MobileBottomSheet } from './MobileBottomSheet'
@@ -45,6 +46,16 @@ interface OverlayTool {
 
 /** Spiritual wellness tools shown in the overlay */
 const OVERLAY_TOOLS: OverlayTool[] = [
+  {
+    id: 'journeys',
+    label: 'Wisdom Journeys',
+    description: '14-day guided transformation with Gita wisdom',
+    icon: Compass,
+    href: '/m/journeys',
+    gradient: 'from-cyan-500/15 to-blue-500/10',
+    iconColor: 'text-cyan-400',
+    accentBorder: 'border-cyan-500/20',
+  },
   {
     id: 'kiaan-vibe',
     label: 'KIAAN Vibe Player',
