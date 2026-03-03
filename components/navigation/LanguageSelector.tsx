@@ -3,9 +3,10 @@
 /**
  * Unified Language Selector Component
  *
- * Renders a compact dropdown on desktop/tablet (>= 768 px) and a
- * full-width bottom sheet on mobile (< 768 px). Consumes the global
- * LanguageProvider context — no additional state management introduced.
+ * Desktop/Tablet (>= 768 px) — compact gold-pill dropdown.
+ * Mobile (< 768 px) — fully opaque bottom sheet with region groups.
+ *
+ * Consumes LanguageProvider context. No extra state management.
  *
  * Replaces: GlobalLanguageSelector, MinimalLanguageSelector (for nav use).
  * Does NOT replace: components/chat/LanguageSelector (KIAAN-specific).
@@ -38,11 +39,10 @@ export interface LanguageSelectorProps {
 /*  Constants                                                          */
 /* ------------------------------------------------------------------ */
 
-/** Breakpoint below which the bottom-sheet variant is used by default */
 const MOBILE_BREAKPOINT = 768
 
 /* ------------------------------------------------------------------ */
-/*  Inline SVG icons (avoids extra dependencies)                       */
+/*  Inline SVG icons                                                   */
 /* ------------------------------------------------------------------ */
 
 function GlobeIcon({ className = '' }: { className?: string }) {
@@ -79,7 +79,7 @@ function SearchIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
+      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30"
       aria-hidden="true"
     >
       <circle cx="11" cy="11" r="8" />
@@ -93,13 +93,14 @@ function CheckIcon({ className = '' }: { className?: string }) {
     <motion.svg
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
+      transition={{ type: 'spring', stiffness: 500, damping: 25 }}
       xmlns="http://www.w3.org/2000/svg"
       width="18"
       height="18"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -124,7 +125,7 @@ function ChevronIcon({ isOpen }: { isOpen: boolean }) {
       strokeLinejoin="round"
       animate={{ rotate: isOpen ? 180 : 0 }}
       transition={{ duration: 0.2 }}
-      className="text-white/70"
+      className="text-white/60"
       aria-hidden="true"
     >
       <polyline points="6 9 12 15 18 9" />
@@ -133,7 +134,7 @@ function ChevronIcon({ isOpen }: { isOpen: boolean }) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Shared language row used by both dropdown and sheet                 */
+/*  Language row — shared by dropdown and sheet                        */
 /* ------------------------------------------------------------------ */
 
 interface LanguageRowProps {
@@ -142,43 +143,52 @@ interface LanguageRowProps {
   name: string
   isSelected: boolean
   onSelect: () => void
-  /** min-height class (48 px dropdown, 52 px sheet) */
-  heightClass: string
+  mobile?: boolean
 }
 
-function LanguageRow({ code, nativeName, name, isSelected, onSelect, heightClass }: LanguageRowProps) {
+function LanguageRow({ code, nativeName, name, isSelected, onSelect, mobile }: LanguageRowProps) {
   return (
     <button
       key={code}
       onClick={onSelect}
-      className={`w-full flex items-center justify-between px-4 py-3 text-left transition-all ${heightClass} ${
-        isSelected
-          ? 'bg-[#d4a44c]/20 text-[#f5f0e8]'
-          : 'text-white/80 hover:bg-white/5'
-      }`}
+      className={`
+        w-full flex items-center justify-between text-left
+        transition-all active:scale-[0.98]
+        ${mobile
+          ? 'px-4 py-3.5 min-h-[56px] rounded-2xl'
+          : 'px-4 py-3 min-h-[48px]'
+        }
+        ${isSelected
+          ? 'bg-[#d4a44c]/15 text-[#f5f0e8] ring-1 ring-[#d4a44c]/25'
+          : 'text-white/80 hover:bg-white/[0.04] active:bg-white/[0.08]'
+        }
+      `}
       role="option"
       aria-selected={isSelected}
     >
-      <span className="flex flex-col min-w-0">
-        <span className="font-medium truncate">{nativeName}</span>
-        <span className={`text-xs truncate ${isSelected ? 'text-[#e8b54a]/70' : 'text-white/40'}`}>
+      <span className="flex flex-col min-w-0 gap-0.5">
+        <span className={`truncate ${mobile ? 'text-[15px]' : 'text-sm'} font-medium`}>
+          {nativeName}
+        </span>
+        <span className={`text-xs truncate ${isSelected ? 'text-[#e8b54a]/60' : 'text-white/35'}`}>
           {name}
         </span>
       </span>
-      {isSelected && <CheckIcon className="text-[#d4a44c] flex-shrink-0 ml-2" />}
+      {isSelected && (
+        <CheckIcon className="text-[#d4a44c] flex-shrink-0 ml-3" />
+      )}
     </button>
   )
 }
 
 /* ------------------------------------------------------------------ */
-/*  useIsMobile hook (self-contained, no external dep needed)          */
+/*  useIsMobile hook                                                   */
 /* ------------------------------------------------------------------ */
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    // SSR-safe: default to false, then correct on mount
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
     setIsMobile(mql.matches)
 
@@ -191,8 +201,28 @@ function useIsMobile() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Main component                                                     */
+/*  No-results helper                                                  */
 /* ------------------------------------------------------------------ */
+
+function hasNoGroupedResults(
+  grouped: Record<string, { code: string; nativeName: string; name: string }[]>,
+  search: string,
+): boolean {
+  if (!search) return false
+  const q = search.toLowerCase()
+  return Object.values(grouped).every((langs) =>
+    langs.every(
+      (l) =>
+        !l.nativeName.toLowerCase().includes(q) &&
+        !l.name.toLowerCase().includes(q) &&
+        !l.code.toLowerCase().includes(q),
+    ),
+  )
+}
+
+/* ================================================================== */
+/*  Main component                                                     */
+/* ================================================================== */
 
 export function LanguageSelector({
   className = '',
@@ -213,7 +243,7 @@ export function LanguageSelector({
   const { triggerHaptic } = useHapticFeedback()
   const { playSound } = useUISound()
 
-  /* ---- Filtered language entries ---- */
+  /* ---- Filtered language entries (dropdown) ---- */
   const allEntries = useMemo(() => Object.entries(LANGUAGES), [])
 
   const filtered = useMemo(() => {
@@ -226,10 +256,10 @@ export function LanguageSelector({
     )
   }, [allEntries, search])
 
-  /* ---- Grouped language entries for the sheet ---- */
+  /* ---- Grouped entries (sheet) ---- */
   const grouped = useMemo(() => getLanguagesByRegion(), [])
 
-  /* ---- Select handler ---- */
+  /* ---- Select ---- */
   const select = useCallback(
     (code: Language) => {
       setLanguage(code)
@@ -238,13 +268,12 @@ export function LanguageSelector({
       triggerHaptic('selection')
       playSound('select')
       onLanguageChange?.(code)
-      // Return focus to trigger after close
-      setTimeout(() => triggerRef.current?.focus(), 100)
+      setTimeout(() => triggerRef.current?.focus(), 120)
     },
     [setLanguage, onLanguageChange, triggerHaptic, playSound],
   )
 
-  /* ---- Open/close helpers ---- */
+  /* ---- Open / close ---- */
   const open = useCallback(() => {
     setIsOpen(true)
     triggerHaptic('light')
@@ -257,7 +286,7 @@ export function LanguageSelector({
     playSound('close')
   }, [playSound])
 
-  /* ---- Close dropdown on outside click ---- */
+  /* ---- Outside click (dropdown only) ---- */
   useEffect(() => {
     if (!isOpen || resolvedVariant !== 'dropdown') return
     const handler = (e: MouseEvent) => {
@@ -269,7 +298,7 @@ export function LanguageSelector({
     return () => document.removeEventListener('mousedown', handler)
   }, [isOpen, resolvedVariant, close])
 
-  /* ---- Close on Escape (dropdown only; sheet handles its own) ---- */
+  /* ---- Escape (dropdown only; sheet has its own) ---- */
   useEffect(() => {
     if (!isOpen || resolvedVariant !== 'dropdown') return
     const handler = (e: KeyboardEvent) => {
@@ -282,34 +311,42 @@ export function LanguageSelector({
     return () => document.removeEventListener('keydown', handler)
   }, [isOpen, resolvedVariant, close])
 
-  /* ---- Auto-focus search when dropdown opens ---- */
+  /* ---- Auto-focus search (dropdown) ---- */
   useEffect(() => {
     if (isOpen && resolvedVariant === 'dropdown') {
-      // Small delay to let AnimatePresence render the content
       const timer = setTimeout(() => searchInputRef.current?.focus(), 50)
       return () => clearTimeout(timer)
     }
   }, [isOpen, resolvedVariant])
 
   /* ================================================================ */
-  /*  Trigger button                                                   */
+  /*  Trigger                                                          */
   /* ================================================================ */
 
   const trigger = (
     <motion.button
       ref={triggerRef}
       onClick={() => (isOpen ? close() : open())}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      className={`flex items-center gap-2 rounded-full border border-[#d4a44c]/50 bg-[#d4a44c]/20 px-3 py-2 text-sm font-medium text-[#f5f0e8] shadow-sm shadow-[#d4a44c]/8 transition-all hover:bg-[#d4a44c]/30 hover:border-[#d4a44c]/65 hover:shadow-md hover:shadow-[#d4a44c]/12 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${className}`}
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.96 }}
+      className={`
+        flex items-center gap-2 rounded-full
+        border border-[#d4a44c]/40 bg-[#d4a44c]/15
+        px-3 py-2 text-sm font-medium text-[#f5f0e8]
+        shadow-sm shadow-black/20
+        transition-all duration-200
+        hover:bg-[#d4a44c]/25 hover:border-[#d4a44c]/55 hover:text-white
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]
+        focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900
+        ${className}
+      `}
       aria-label={`Current language: ${config.nativeName}. Click to change language.`}
       aria-expanded={isOpen}
       aria-haspopup="listbox"
     >
-      <GlobeIcon className="text-[#e8b54a] drop-shadow-[0_0_3px_rgba(212,164,76,0.4)]" />
-      {/* Desktop: show native name; small screens: 2-letter code */}
+      <GlobeIcon className="text-[#e8b54a] drop-shadow-[0_0_4px_rgba(212,164,76,0.35)]" />
       <span className="hidden sm:inline">{config.nativeName}</span>
-      <span className="sm:hidden uppercase text-xs font-bold">{language}</span>
+      <span className="sm:hidden uppercase text-xs font-bold tracking-wide">{language}</span>
       <ChevronIcon isOpen={isOpen} />
     </motion.button>
   )
@@ -317,7 +354,7 @@ export function LanguageSelector({
   if (triggerOnly) return trigger
 
   /* ================================================================ */
-  /*  Dropdown variant (desktop / tablet)                              */
+  /*  Dropdown (desktop / tablet)                                      */
   /* ================================================================ */
 
   if (resolvedVariant === 'dropdown') {
@@ -328,22 +365,27 @@ export function LanguageSelector({
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              initial={{ opacity: 0, y: -8, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              className="absolute right-0 top-full mt-2 z-50 w-72 overflow-hidden rounded-xl border border-white/10 bg-slate-950 backdrop-blur-xl shadow-2xl shadow-black/50"
+              exit={{ opacity: 0, y: -8, scale: 0.96 }}
+              transition={{ duration: 0.15, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="
+                absolute right-0 top-full mt-2 z-50 w-72
+                overflow-hidden rounded-2xl
+                border border-white/[0.08]
+                bg-[#0a0a0f] shadow-2xl shadow-black/60
+              "
               role="listbox"
               aria-label="Select language"
             >
               {/* Header */}
-              <div className="border-b border-white/10 bg-gradient-to-r from-[#d4a44c]/10 to-purple-500/10 px-4 py-3">
+              <div className="border-b border-white/[0.06] px-4 py-3 bg-gradient-to-r from-[#d4a44c]/[0.06] to-transparent">
                 <h3 className="text-sm font-semibold text-white/90">Select Language</h3>
-                <p className="text-xs text-white/50 mt-0.5">Choose your preferred language</p>
+                <p className="text-xs text-white/40 mt-0.5">Choose your preferred language</p>
               </div>
 
               {/* Search */}
-              <div className="p-3 border-b border-white/5">
+              <div className="p-3 border-b border-white/[0.04]">
                 <div className="relative">
                   <SearchIcon />
                   <input
@@ -352,7 +394,14 @@ export function LanguageSelector({
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search languages..."
-                    className="w-full rounded-lg border border-white/10 bg-white/5 pl-10 pr-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-[#d4a44c]/50 focus:ring-1 focus:ring-[#d4a44c]/30 transition-all"
+                    className="
+                      w-full rounded-xl border border-white/[0.08]
+                      bg-white/[0.03] pl-10 pr-3 py-2.5
+                      text-sm text-white outline-none
+                      placeholder:text-white/25
+                      focus:border-[#d4a44c]/40 focus:bg-white/[0.05]
+                      transition-all
+                    "
                     role="searchbox"
                     aria-label="Search languages"
                   />
@@ -360,7 +409,7 @@ export function LanguageSelector({
               </div>
 
               {/* Language list */}
-              <div className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+              <div className="max-h-72 overflow-y-auto overscroll-contain">
                 {filtered.length > 0 ? (
                   filtered.map(([code, cfg]) => (
                     <LanguageRow
@@ -370,20 +419,19 @@ export function LanguageSelector({
                       name={cfg.name}
                       isSelected={language === code}
                       onSelect={() => select(code as Language)}
-                      heightClass="min-h-[48px]"
                     />
                   ))
                 ) : (
-                  <div className="px-4 py-8 text-center">
-                    <p className="text-white/50 text-sm">No languages found</p>
-                    <p className="text-white/30 text-xs mt-1">Try a different search term</p>
+                  <div className="px-4 py-10 text-center">
+                    <p className="text-white/40 text-sm">No languages found</p>
+                    <p className="text-white/25 text-xs mt-1">Try a different search term</p>
                   </div>
                 )}
               </div>
 
               {/* Footer */}
-              <div className="border-t border-white/5 bg-white/[0.02] px-4 py-2">
-                <p className="text-xs text-white/40 text-center">
+              <div className="border-t border-white/[0.04] px-4 py-2.5 bg-white/[0.01]">
+                <p className="text-xs text-white/30 text-center">
                   {Object.keys(LANGUAGES).length} languages available
                 </p>
               </div>
@@ -395,7 +443,7 @@ export function LanguageSelector({
   }
 
   /* ================================================================ */
-  /*  Bottom sheet variant (mobile)                                    */
+  /*  Bottom sheet (mobile) — fully opaque, sleek                      */
   /* ================================================================ */
 
   return (
@@ -408,9 +456,11 @@ export function LanguageSelector({
         title="Select Language"
         subtitle="Choose your preferred language"
         height="auto"
+        className="!bg-[#08080c]"
+        zIndex={80}
       >
         {/* Search */}
-        <div className="mb-4">
+        <div className="mb-5">
           <div className="relative">
             <SearchIcon />
             <input
@@ -418,7 +468,15 @@ export function LanguageSelector({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search languages..."
-              className="w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 py-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-[#d4a44c]/50 focus:ring-1 focus:ring-[#d4a44c]/30 transition-all"
+              className="
+                w-full rounded-2xl
+                border border-white/[0.08] bg-white/[0.04]
+                pl-11 pr-4 py-3.5
+                text-[15px] text-white outline-none
+                placeholder:text-white/25
+                focus:border-[#d4a44c]/35 focus:bg-white/[0.06]
+                transition-all
+              "
               role="searchbox"
               aria-label="Search languages"
             />
@@ -426,7 +484,7 @@ export function LanguageSelector({
         </div>
 
         {/* Grouped list */}
-        <div className="space-y-4 pb-4" role="listbox" aria-label="Select language">
+        <div className="space-y-5 pb-6" role="listbox" aria-label="Select language">
           {Object.entries(grouped).map(([region, langs]) => {
             const visible = search
               ? langs.filter((l) => {
@@ -443,42 +501,40 @@ export function LanguageSelector({
 
             return (
               <div key={region}>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-white/40 px-1 mb-2">
+                <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/30 px-2 mb-2">
                   {region}
                 </h3>
-                {visible.map((lang) => (
-                  <LanguageRow
-                    key={lang.code}
-                    code={lang.code}
-                    nativeName={lang.nativeName}
-                    name={lang.name}
-                    isSelected={lang.code === language}
-                    onSelect={() => select(lang.code as Language)}
-                    heightClass="min-h-[52px] rounded-xl"
-                  />
-                ))}
+                <div className="space-y-1">
+                  {visible.map((lang) => (
+                    <LanguageRow
+                      key={lang.code}
+                      code={lang.code}
+                      nativeName={lang.nativeName}
+                      name={lang.name}
+                      isSelected={lang.code === language}
+                      onSelect={() => select(lang.code as Language)}
+                      mobile
+                    />
+                  ))}
+                </div>
               </div>
             )
           })}
 
-          {/* No results state */}
-          {search &&
-            Object.values(grouped).every((langs) =>
-              langs.every(
-                (l) =>
-                  !l.nativeName.toLowerCase().includes(search.toLowerCase()) &&
-                  !l.name.toLowerCase().includes(search.toLowerCase()) &&
-                  !l.code.toLowerCase().includes(search.toLowerCase()),
-              ),
-            ) && (
-              <div className="px-4 py-8 text-center">
-                <p className="text-white/50 text-sm">No languages found</p>
-                <p className="text-white/30 text-xs mt-1">Try a different search term</p>
-              </div>
-            )}
+          {/* No results */}
+          {hasNoGroupedResults(grouped, search) && (
+            <div className="px-4 py-10 text-center">
+              <p className="text-white/40 text-sm">No languages found</p>
+              <p className="text-white/25 text-xs mt-1">Try a different search term</p>
+            </div>
+          )}
         </div>
 
-        <p className="text-xs text-white/40 text-center pb-2">Saved locally</p>
+        <div className="border-t border-white/[0.04] -mx-5 px-5 pt-3 pb-1">
+          <p className="text-[11px] text-white/25 text-center tracking-wide">
+            Preference saved locally
+          </p>
+        </div>
       </MobileBottomSheet>
     </>
   )

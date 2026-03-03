@@ -271,7 +271,7 @@ export const MobileBottomSheet = forwardRef<HTMLDivElement, MobileBottomSheetPro
                   animate="visible"
                   exit="hidden"
                   onClick={closeOnBackdropClick ? onClose : undefined}
-                  className="fixed inset-0 bg-black/60 backdrop-blur-sm will-change-[opacity]"
+                  className="fixed inset-0 bg-black/80 backdrop-blur-md will-change-[opacity]"
                   style={{
                     zIndex: zIndex - 1,
                     WebkitBackfaceVisibility: 'hidden',
@@ -311,10 +311,11 @@ export const MobileBottomSheet = forwardRef<HTMLDivElement, MobileBottomSheetPro
                   overlay-bottom-sheet
                   fixed bottom-0 left-0 right-0
                   rounded-t-[28px] overflow-hidden
-                  bg-[#0f1624] border-t border-white/[0.08]
-                  shadow-2xl shadow-black/40
+                  border-t border-white/[0.06]
+                  shadow-2xl shadow-black/60
                   flex flex-col will-change-transform
                   ${isDragging ? 'cursor-grabbing' : ''}
+                  ${className.includes('!bg-') ? '' : 'bg-[#0a0a0f]'}
                   ${className}
                 `.trim()}
                 role="dialog"
