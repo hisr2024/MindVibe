@@ -201,7 +201,7 @@ function useIsMobile() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Compute no-results helper                                          */
+/*  No-results helper                                                  */
 /* ------------------------------------------------------------------ */
 
 function hasNoGroupedResults(
