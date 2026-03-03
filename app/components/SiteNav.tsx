@@ -252,6 +252,14 @@ export default function SiteNav() {
                   <ThemeToggle />
                 </motion.div>
 
+                <motion.div
+                  className="flex min-h-[48px] items-center justify-between rounded-xl bg-[#d4a44c]/5 px-4 py-3"
+                  variants={animationVariants.slideUp}
+                >
+                  <span className="text-base font-medium text-white/80">{t('navigation.mainNav.language', 'Language')}</span>
+                  <LanguageSelector variant="sheet" />
+                </motion.div>
+
               </motion.nav>
             </motion.div>
           </>

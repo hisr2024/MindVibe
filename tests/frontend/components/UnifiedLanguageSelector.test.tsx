@@ -59,6 +59,8 @@ vi.mock('@/components/mobile/MobileBottomSheet', () => ({
     title?: string
     subtitle?: string
     height?: string
+    className?: string
+    zIndex?: number
   }) => {
     if (!isOpen) return null
     return (
