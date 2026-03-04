@@ -49,7 +49,7 @@ export default function MobileJourneyDetailPage() {
   const router = useRouter()
   const params = useParams()
   const journeyId = params.id as string
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, loading: authLoading } = useAuth()
   const { triggerHaptic } = useHapticFeedback()
 
   const [loading, setLoading] = useState(true)
@@ -106,8 +106,16 @@ export default function MobileJourneyDetailPage() {
   }, [journeyId, journey])
 
   useEffect(() => {
-    if (isAuthenticated) loadJourney()
-  }, [isAuthenticated, loadJourney])
+    // Wait for auth to finish loading before deciding what to do
+    if (authLoading) return
+
+    if (isAuthenticated) {
+      loadJourney()
+    } else {
+      // Journey detail requires auth — redirect to onboarding
+      router.push('/onboarding')
+    }
+  }, [authLoading, isAuthenticated, loadJourney, router])
 
   const handleSelectDay = (day: number) => {
     triggerHaptic('selection')
