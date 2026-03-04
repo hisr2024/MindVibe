@@ -300,7 +300,7 @@ export default function MobileJourneysPage() {
       title="Journeys"
       largeTitle
       enablePullToRefresh
-      onRefresh={fetchData}
+      onRefresh={() => fetchData(isAuthenticated)}
       rightActions={
         <motion.button
           whileTap={{ scale: 0.9 }}
