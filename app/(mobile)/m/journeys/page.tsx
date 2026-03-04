@@ -169,22 +169,31 @@ export default function MobileJourneysPage() {
     rating: 4.8,
   })
 
-  // Fetch active journeys and available templates
-  const fetchData = useCallback(async () => {
+  // Fetch templates (public — works without auth) and active journeys (needs auth)
+  const fetchData = useCallback(async (authenticated: boolean) => {
     setIsLoading(true)
     setHasError(false)
 
-    const [activeResult, templatesResult] = await Promise.allSettled([
-      journeyEngineService.listJourneys({ status_filter: 'active' }).catch(() => null),
+    // Templates are public catalog data — always fetch regardless of auth
+    // Active journeys require auth — only fetch when authenticated
+    const promises: [
+      Promise<Awaited<ReturnType<typeof journeyEngineService.listJourneys>> | null>,
+      Promise<Awaited<ReturnType<typeof journeyEngineService.listTemplates>> | null>,
+    ] = [
+      authenticated
+        ? journeyEngineService.listJourneys({ status_filter: 'active' }).catch(() => null)
+        : Promise.resolve(null),
       journeyEngineService.listTemplates({ limit: 20 }).catch(() => null),
-    ])
+    ]
+
+    const [activeResult, templatesResult] = await Promise.allSettled(promises)
 
     let hadError = false
 
-    // Process active journeys
+    // Process active journeys (null when not authenticated — not an error)
     if (activeResult.status === 'fulfilled' && activeResult.value) {
       setActiveJourneys(activeResult.value.journeys.map(mapJourney))
-    } else {
+    } else if (authenticated) {
       setActiveJourneys([])
       hadError = true
     }
@@ -206,10 +215,17 @@ export default function MobileJourneysPage() {
     setIsLoading(false)
   }, [])
 
-  // Fetch on mount and when auth state changes
+  // Load templates immediately on mount (public data).
+  // Re-fetch with active journeys once auth resolves.
+  const hasLoadedRef = useRef(false)
   useEffect(() => {
-    if (!isAuthenticated) return
-    fetchData()
+    if (!hasLoadedRef.current) {
+      hasLoadedRef.current = true
+      fetchData(isAuthenticated)
+    } else if (isAuthenticated) {
+      // Auth resolved after initial load — re-fetch to include active journeys
+      fetchData(true)
+    }
   }, [isAuthenticated, fetchData])
 
   // Filter templates
@@ -229,6 +245,13 @@ export default function MobileJourneysPage() {
 
   // Handle template press → start journey then navigate
   const handleTemplatePress = useCallback(async (templateId: string) => {
+    // Require authentication to start a journey
+    if (!isAuthenticated) {
+      triggerHaptic('selection')
+      router.push('/onboarding')
+      return
+    }
+
     if (isStartingRef.current) return
     isStartingRef.current = true
     setStartingTemplateId(templateId)
@@ -257,7 +280,7 @@ export default function MobileJourneysPage() {
       isStartingRef.current = false
       setStartingTemplateId(null)
     }
-  }, [router, triggerHaptic])
+  }, [isAuthenticated, router, triggerHaptic])
 
   // Handle category change
   const handleCategoryChange = useCallback((categoryId: string) => {
@@ -277,7 +300,7 @@ export default function MobileJourneysPage() {
       title="Journeys"
       largeTitle
       enablePullToRefresh
-      onRefresh={fetchData}
+      onRefresh={() => fetchData(isAuthenticated)}
       rightActions={
         <motion.button
           whileTap={{ scale: 0.9 }}
