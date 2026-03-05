@@ -100,26 +100,42 @@ export function useAuth(): UseAuthResult {
 
     try {
       // Call backend signup API
-      const signupResponse = await apiFetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.toLowerCase(), password }),
-      })
+      let signupResponse: Response
+      try {
+        signupResponse = await apiFetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.toLowerCase(), password }),
+        })
+      } catch (fetchError) {
+        throw new Error('Unable to reach the server. Please check your connection and try again.')
+      }
 
       if (!signupResponse.ok) {
+        if (signupResponse.status === 503) {
+          throw new Error('The server is temporarily unavailable. Please try again in a moment.')
+        }
         const errorData = await signupResponse.json().catch(() => ({}))
         const message = errorData.detail || errorData.message || 'Failed to create account'
         throw new Error(typeof message === 'string' ? message : JSON.stringify(message))
       }
 
       // After signup, automatically login to get session cookies
-      const loginResponse = await apiFetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.toLowerCase(), password }),
-      })
+      let loginResponse: Response
+      try {
+        loginResponse = await apiFetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.toLowerCase(), password }),
+        })
+      } catch (fetchError) {
+        throw new Error('Account created but could not sign in automatically. Please try signing in.')
+      }
 
       if (!loginResponse.ok) {
+        if (loginResponse.status === 503) {
+          throw new Error('Account created but server is starting up. Please try signing in shortly.')
+        }
         const errorData = await loginResponse.json().catch(() => ({}))
         throw new Error(errorData.detail || 'Account created but login failed. Please try logging in.')
       }
@@ -155,17 +171,25 @@ export function useAuth(): UseAuthResult {
     setError(null)
 
     try {
-      const response = await apiFetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email.toLowerCase(),
-          password,
-          two_factor_code: twoFactorCode || null,
-        }),
-      })
+      let response: Response
+      try {
+        response = await apiFetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email.toLowerCase(),
+            password,
+            two_factor_code: twoFactorCode || null,
+          }),
+        })
+      } catch (fetchError) {
+        throw new Error('Unable to reach the server. Please check your connection and try again.')
+      }
 
       if (!response.ok) {
+        if (response.status === 503) {
+          throw new Error('The server is temporarily unavailable. Please try again in a moment.')
+        }
         const errorData = await response.json().catch(() => ({}))
         const message = errorData.detail || errorData.message || 'Invalid credentials'
         throw new Error(typeof message === 'string' ? message : JSON.stringify(message))

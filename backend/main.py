@@ -240,12 +240,12 @@ async def global_exception_handler(request: Request, exc: Exception):
         "Access-Control-Allow-Headers": ", ".join(ALLOWED_HEADERS),
     }
 
-    # Return proper HTTP status codes - never mask 500s as 200s
-    # The frontend should handle error status codes gracefully
+    # Return 500 for unhandled server errors (not 503 which implies temporary unavailability)
+    # 503 is reserved for migration failures and intentional maintenance modes
     return JSONResponse(
-        status_code=503,
+        status_code=500,
         content={
-            "error": "service_unavailable",
+            "error": "internal_server_error",
             "detail": "An unexpected error occurred. Please try again.",
         },
         headers=cors_headers,

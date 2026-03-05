@@ -729,13 +729,13 @@ function UnauthenticatedAccountView() {
             <div className="mt-6 flex items-center gap-2 rounded-2xl border border-[#d4a44c]/15 bg-[#d4a44c]/10 p-1 text-sm font-semibold text-[#f5f0e8]">
               <button
                 onClick={() => { setMode('create'); setNeedsTwoFactor(false); resetStatus(); }}
-                className={`flex-1 rounded-xl px-3 py-2 transition ${mode === 'create' ? 'bg-[#d4a44c]text-slate-950 shadow-md shadow-[#d4a44c]/30' : 'hover:bg-[#d4a44c]/20'}`}
+                className={`flex-1 rounded-xl px-3 py-2 transition ${mode === 'create' ? 'bg-[#d4a44c] text-slate-950 shadow-md shadow-[#d4a44c]/30' : 'hover:bg-[#d4a44c]/20'}`}
               >
                 Create Account
               </button>
               <button
                 onClick={() => { setMode('login'); resetStatus(); }}
-                className={`flex-1 rounded-xl px-3 py-2 transition ${mode === 'login' ? 'bg-[#d4a44c]text-slate-950 shadow-md shadow-[#d4a44c]/30' : 'hover:bg-[#d4a44c]/20'}`}
+                className={`flex-1 rounded-xl px-3 py-2 transition ${mode === 'login' ? 'bg-[#d4a44c] text-slate-950 shadow-md shadow-[#d4a44c]/30' : 'hover:bg-[#d4a44c]/20'}`}
               >
                 Sign In
               </button>
@@ -756,11 +756,12 @@ function UnauthenticatedAccountView() {
             )}
 
             {mode === 'create' ? (
-              <form className="mt-6 space-y-4" onSubmit={handleCreate}>
+              <form className="mt-6 space-y-4" onSubmit={handleCreate} autoComplete="on">
                 <div className="space-y-1">
-                  <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="name">Full name</label>
+                  <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="create-name">Full name</label>
                   <input
-                    id="name"
+                    id="create-name"
+                    name="name"
                     type="text"
                     autoComplete="name"
                     value={createForm.name}
@@ -771,9 +772,10 @@ function UnauthenticatedAccountView() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="email">Email</label>
+                  <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="create-email">Email</label>
                   <input
-                    id="email"
+                    id="create-email"
+                    name="username"
                     type="email"
                     autoComplete="email"
                     value={createForm.email}
@@ -784,9 +786,10 @@ function UnauthenticatedAccountView() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="password">Password</label>
+                  <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="create-password">Password</label>
                   <input
-                    id="password"
+                    id="create-password"
+                    name="password"
                     type="password"
                     autoComplete="new-password"
                     value={createForm.password}
@@ -812,13 +815,14 @@ function UnauthenticatedAccountView() {
                 <p className="text-center text-xs text-[#f5f0e8]/70">Your account is secured with bcrypt encryption.</p>
               </form>
             ) : (
-              <form className="mt-6 space-y-4" onSubmit={handleLogin}>
+              <form className="mt-6 space-y-4" onSubmit={handleLogin} autoComplete="on">
                 <div className="space-y-1">
                   <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="login-email">Email</label>
                   <input
                     id="login-email"
+                    name="username"
                     type="email"
-                    autoComplete="email"
+                    autoComplete="username"
                     value={loginForm.email}
                     onChange={event => setLoginForm({ ...loginForm, email: event.target.value.toLowerCase() })}
                     disabled={isSubmitting}
@@ -830,6 +834,7 @@ function UnauthenticatedAccountView() {
                   <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="login-password">Password</label>
                   <input
                     id="login-password"
+                    name="password"
                     type="password"
                     autoComplete="current-password"
                     value={loginForm.password}

@@ -168,8 +168,9 @@ export function createProxyHandler(
         return NextResponse.json(
           {
             detail: isTimeout
-              ? 'Server is starting up, please try again in a few seconds'
-              : 'Service temporarily unavailable'
+              ? 'Server is waking up, please try again in a few seconds.'
+              : 'Unable to connect to the server. Please try again shortly.',
+            error: 'service_unavailable',
           },
           { status: 503 }
         )
@@ -178,7 +179,7 @@ export function createProxyHandler(
 
     // Should not reach here, but handle gracefully
     return NextResponse.json(
-      { detail: 'Service temporarily unavailable' },
+      { detail: 'Unable to connect to the server. Please try again shortly.', error: 'service_unavailable' },
       { status: 503 }
     )
   }
