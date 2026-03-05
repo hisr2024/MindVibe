@@ -494,7 +494,7 @@ function AuthenticatedAccountView({
 /*  Unauthenticated Account View (Login / Signup)                      */
 /* ------------------------------------------------------------------ */
 function UnauthenticatedAccountView() {
-  const { login, signup, error: authError } = useAuth()
+  const { login, signup, error: authError, backendReady } = useAuth()
 
   const [mode, setMode] = useState<'create' | 'login'>('create')
   const [legacyAccounts, setLegacyAccounts] = useState<LegacyAccount[]>([])
@@ -740,6 +740,13 @@ function UnauthenticatedAccountView() {
                 Sign In
               </button>
             </div>
+
+            {!backendReady && (
+              <div className="mt-4 flex items-center gap-2 rounded-2xl border border-cyan-400/30 bg-cyan-400/10 p-3 text-sm text-cyan-50">
+                <div className="h-4 w-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin shrink-0" />
+                Waking up server... This may take a moment on first visit.
+              </div>
+            )}
 
             {status && (
               <div
