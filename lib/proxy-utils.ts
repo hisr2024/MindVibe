@@ -122,8 +122,8 @@ export function createProxyHandler(
   // Auth and critical endpoints get a longer timeout for Render cold starts
   const isAuthPath = backendPath.startsWith('/api/auth')
   const effectiveTimeout = timeoutMs ?? (isAuthPath ? 60000 : 15000)
-  // Auth endpoints retry twice on timeout (cold start can take 30-60s+)
-  const maxRetries = isAuthPath ? 2 : 0
+  // Auth endpoints retry 3x with exponential backoff (cold start can take 30-60s+)
+  const maxRetries = isAuthPath ? 3 : 0
 
   return async function handler(request: NextRequest) {
     const upperMethod = method.toUpperCase()
@@ -160,7 +160,9 @@ export function createProxyHandler(
         )
 
         if (attempt < maxRetries && isTimeout) {
-          console.warn(`${label} Timeout on attempt ${attempt + 1}, retrying...`)
+          const backoffMs = 1000 * Math.pow(2, attempt)
+          console.warn(`${label} Timeout on attempt ${attempt + 1}, retrying in ${backoffMs}ms...`)
+          await new Promise(resolve => setTimeout(resolve, backoffMs))
           continue
         }
 

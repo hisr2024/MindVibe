@@ -814,10 +814,10 @@ function UnauthenticatedAccountView() {
                 </div>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !backendReady}
                   className="w-full rounded-xl bg-gradient-to-r from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] px-4 py-3 text-sm font-semibold text-slate-900 shadow-lg shadow-[#d4a44c]/25 transition hover:scale-[1.01] disabled:opacity-50 disabled:hover:scale-100"
                 >
-                  {isSubmitting ? 'Creating account...' : 'Create account'}
+                  {!backendReady ? 'Connecting to server...' : isSubmitting ? 'Creating account...' : 'Create account'}
                 </button>
                 <p className="text-center text-xs text-[#f5f0e8]/70">Your account is secured with bcrypt encryption.</p>
               </form>
@@ -879,10 +879,10 @@ function UnauthenticatedAccountView() {
                 </div>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !backendReady}
                   className="w-full rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-300 px-4 py-3 text-sm font-semibold text-slate-900 shadow-lg shadow-emerald-400/20 transition hover:scale-[1.01] disabled:opacity-50 disabled:hover:scale-100"
                 >
-                  {isSubmitting ? 'Signing in...' : 'Sign in securely'}
+                  {!backendReady ? 'Connecting to server...' : isSubmitting ? 'Signing in...' : 'Sign in securely'}
                 </button>
                 <p className="text-center text-xs text-[#f5f0e8]/70">Secure authentication with session management.</p>
               </form>
