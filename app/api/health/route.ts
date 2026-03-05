@@ -3,7 +3,11 @@
  *
  * Proxies GET /api/health to the backend. Used by the frontend warm-up
  * mechanism to wake the Render free-tier backend before login attempts.
- * Without this route, the fallback rewrite in next.config.js returns 405.
+ *
+ * IMPORTANT: Always returns HTTP 200 to prevent browser console errors.
+ * The `ready` field in the JSON body indicates whether the backend is
+ * actually reachable. This eliminates the flood of red 503 errors in
+ * DevTools during Render cold starts (30-60s).
  */
 
 import { NextResponse } from 'next/server'
@@ -17,11 +21,21 @@ export async function GET() {
     })
 
     const data = await backendResponse.json().catch(() => ({ status: 'unknown' }))
-    return NextResponse.json(data, { status: backendResponse.status })
-  } catch {
+
+    if (backendResponse.ok) {
+      return NextResponse.json({ ...data, ready: true }, { status: 200 })
+    }
+
+    // Backend responded but with an error (e.g. migrations pending)
     return NextResponse.json(
-      { status: 'unavailable', detail: 'Backend is starting up' },
-      { status: 503 }
+      { ...data, ready: false, backendStatus: backendResponse.status },
+      { status: 200 }
+    )
+  } catch {
+    // Backend unreachable (cold start, network error, timeout)
+    return NextResponse.json(
+      { status: 'warming_up', ready: false, detail: 'Backend is starting up' },
+      { status: 200 }
     )
   }
 }
