@@ -152,7 +152,7 @@ async def get_analytics_snapshot(user_id: str = Depends(get_current_user_id)):
         }
     except Exception as e:
         logger.error(f"Failed to get analytics snapshot: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.")
 
 
 @router.get("/analytics/satisfaction-trend")

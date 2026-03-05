@@ -186,7 +186,7 @@ async def ensure_seed_data(db: AsyncSession) -> dict[str, Achievement]:
                 )
                 raise HTTPException(
                     status_code=500,
-                    detail=f"Achievement enum error: {str(e)}. Please check database enum definitions."
+                    detail="An internal error occurred. Please try again."
                 )
 
         await db.flush()
@@ -222,7 +222,7 @@ async def ensure_seed_data(db: AsyncSession) -> dict[str, Achievement]:
                 )
                 raise HTTPException(
                     status_code=500,
-                    detail=f"Unlockable enum error: {str(e)}. Please check database enum definitions."
+                    detail="An internal error occurred. Please try again."
                 )
 
         await db.flush()
@@ -234,13 +234,13 @@ async def ensure_seed_data(db: AsyncSession) -> dict[str, Achievement]:
         logger.error(f"Database error in ensure_seed_data: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail=f"Database error while seeding achievement data: {str(e)}"
+            detail="An internal error occurred. Please try again."
         )
     except Exception as e:
         logger.error(f"Unexpected error in ensure_seed_data: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail=f"Unexpected error in achievement system: {str(e)}"
+            detail="An internal error occurred. Please try again."
         )
 
 

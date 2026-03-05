@@ -4,7 +4,7 @@ These run after SQL migrations and handle operations that are too complex
 for Render's SQL parser (like conditional schema alterations).
 """
 
-from sqlalchemy. ext.asyncio import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy import text
 import logging
 

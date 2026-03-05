@@ -624,7 +624,7 @@ async def _generate_reframe(
         logger.error("ARDHA: OpenAI request failed: %s", exc, exc_info=True)
         raise HTTPException(
             status_code=503,
-            detail=f"AI service error: {str(exc)}",
+            detail="AI service is temporarily unavailable. Please try again.",
         ) from exc
 
 

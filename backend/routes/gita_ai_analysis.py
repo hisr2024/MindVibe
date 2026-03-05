@@ -183,7 +183,7 @@ async def analyze_emotion(request: EmotionAnalysisRequest) -> EmotionAnalysisRes
 
     except Exception as e:
         logger.error(f"Emotion analysis error: {e}")
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.")
 
 
 @router.post("/analyze-relationship", response_model=RelationshipAnalysisResponse)
@@ -226,7 +226,7 @@ async def analyze_relationship(request: RelationshipAnalysisRequest) -> Relation
 
     except Exception as e:
         logger.error(f"Relationship analysis error: {e}")
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.")
 
 
 @router.post("/analyze-communication", response_model=CommunicationAnalysisResponse)
@@ -269,7 +269,7 @@ async def analyze_communication(request: CommunicationAnalysisRequest) -> Commun
 
     except Exception as e:
         logger.error(f"Communication analysis error: {e}")
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.")
 
 
 @router.post("/analyze-attachment", response_model=AttachmentAnalysisResponse)
@@ -312,7 +312,7 @@ async def analyze_attachment(request: AttachmentAnalysisRequest) -> AttachmentAn
 
     except Exception as e:
         logger.error(f"Attachment analysis error: {e}")
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.")
 
 
 @router.get("/health")

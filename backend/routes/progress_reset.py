@@ -229,7 +229,7 @@ async def reset_user_progress(
         )
         raise HTTPException(
             status_code=500,
-            detail=f"Progress reset failed: {str(e)}",
+            detail="An internal error occurred. Please try again.",
         )
         
     except SQLAlchemyError as e:

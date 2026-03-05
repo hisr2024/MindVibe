@@ -281,7 +281,7 @@ async def register_verify(
         logger.warning("WebAuthn registration verification failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Registration verification failed: {e}",
+            detail="Registration failed. Please try again.",
         )
     except Exception as e:
         logger.error("WebAuthn registration error: %s", e, exc_info=True)
@@ -469,7 +469,7 @@ async def authenticate_verify(
         logger.warning("WebAuthn authentication failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Authentication failed: {e}",
+            detail="Authentication failed. Please try again.",
         )
     except Exception as e:
         logger.error("WebAuthn authentication error: %s", e, exc_info=True)

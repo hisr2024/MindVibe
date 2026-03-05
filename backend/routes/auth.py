@@ -175,7 +175,7 @@ async def _extract_auth_context(request: Request):
 async def _get_user_or_401(db: AsyncSession, user_id: str) -> User:
     stmt = select(User).where(User.id == user_id)
     user = (await db.execute(stmt)).scalars().first()
-    if not user:
+    if not user or user.deleted_at is not None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
         )
