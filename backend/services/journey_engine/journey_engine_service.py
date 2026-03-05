@@ -599,9 +599,9 @@ class JourneyEngineService:
         step_state.completed_at = datetime.utcnow()
 
         if reflection:
-            # Encrypt reflection (simplified - use proper encryption in production)
+            from backend.services.chat_data_encryption import encrypt_chat_field
             step_state.reflection_encrypted = {
-                "content": reflection,
+                "content": encrypt_chat_field(reflection),
                 "encrypted_at": datetime.utcnow().isoformat(),
             }
 

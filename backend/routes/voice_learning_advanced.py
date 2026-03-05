@@ -17,6 +17,8 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime
 import logging
 
+from backend.deps import get_current_user_flexible
+
 # Import services
 from backend.services.voice_learning.analytics_dashboard import (
     get_analytics_dashboard,
@@ -114,11 +116,8 @@ class InteractionRequest(BaseModel):
     content_category: Optional[str] = Field(None, alias="contentCategory")
 
 
-# Placeholder for user authentication
-def get_current_user_id() -> str:
-    """Get current user ID from auth context."""
-    # TODO: Implement actual auth
-    return "demo_user"
+# Use real auth dependency
+get_current_user_id = get_current_user_flexible
 
 
 # ==================== Analytics Dashboard Routes ====================
