@@ -19,6 +19,7 @@ interface UseAuthResult {
   signup: (email: string, password: string, name?: string) => Promise<AuthUser>
   logout: () => Promise<void>
   refreshSession: () => Promise<void>
+  backendReady: boolean
 }
 
 // Only store non-sensitive user profile data in localStorage (no tokens!)
@@ -54,6 +55,34 @@ export function useAuth(): UseAuthResult {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [backendReady, setBackendReady] = useState(false)
+
+  // Warm up the backend on mount (Render free tier cold starts take 30-60s)
+  useEffect(() => {
+    let cancelled = false
+    const warmUp = async () => {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const res = await fetch('/api/health', {
+            signal: AbortSignal.timeout(15000),
+          })
+          if (!cancelled && res.ok) {
+            setBackendReady(true)
+            return
+          }
+        } catch {
+          // Backend not ready yet, retry
+        }
+        if (!cancelled && attempt < 2) {
+          await new Promise(r => setTimeout(r, 3000))
+        }
+      }
+      // Even if warm-up fails, allow attempts (proxy will handle retries)
+      if (!cancelled) setBackendReady(true)
+    }
+    warmUp()
+    return () => { cancelled = true }
+  }, [])
 
   // Initialize: check stored profile, then verify session with backend
   useEffect(() => {
@@ -98,28 +127,66 @@ export function useAuth(): UseAuthResult {
     setLoading(true)
     setError(null)
 
+    const maxRetries = 3
+
     try {
-      // Call backend signup API
-      const signupResponse = await apiFetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.toLowerCase(), password }),
-      })
+      // Call backend signup API with auto-retry on 503
+      let signupResponse: Response | undefined
+
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          signupResponse = await apiFetch('/api/auth/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email.toLowerCase(), password }),
+          })
+        } catch (fetchError) {
+          if (attempt < maxRetries - 1) {
+            setError('Connecting to server... Please wait.')
+            await new Promise(r => setTimeout(r, 3000))
+            continue
+          }
+          throw new Error('Unable to reach the server. Please check your connection and try again.')
+        }
+
+        if (signupResponse.status === 503 && attempt < maxRetries - 1) {
+          setError('Server is starting up... Retrying automatically.')
+          await new Promise(r => setTimeout(r, 4000))
+          continue
+        }
+
+        break
+      }
+
+      if (!signupResponse) {
+        throw new Error('Unable to reach the server. Please check your connection and try again.')
+      }
 
       if (!signupResponse.ok) {
+        if (signupResponse.status === 503) {
+          throw new Error('The server is still starting up. Please wait a moment and try again.')
+        }
         const errorData = await signupResponse.json().catch(() => ({}))
         const message = errorData.detail || errorData.message || 'Failed to create account'
         throw new Error(typeof message === 'string' ? message : JSON.stringify(message))
       }
 
       // After signup, automatically login to get session cookies
-      const loginResponse = await apiFetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.toLowerCase(), password }),
-      })
+      let loginResponse: Response
+      try {
+        loginResponse = await apiFetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.toLowerCase(), password }),
+        })
+      } catch (fetchError) {
+        throw new Error('Account created but could not sign in automatically. Please try signing in.')
+      }
 
       if (!loginResponse.ok) {
+        if (loginResponse.status === 503) {
+          throw new Error('Account created but server is starting up. Please try signing in shortly.')
+        }
         const errorData = await loginResponse.json().catch(() => ({}))
         throw new Error(errorData.detail || 'Account created but login failed. Please try logging in.')
       }
@@ -154,18 +221,51 @@ export function useAuth(): UseAuthResult {
     setLoading(true)
     setError(null)
 
+    const maxRetries = 3
+
     try {
-      const response = await apiFetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email.toLowerCase(),
-          password,
-          two_factor_code: twoFactorCode || null,
-        }),
-      })
+      let response: Response | undefined
+      let lastError: Error | undefined
+
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          response = await apiFetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: email.toLowerCase(),
+              password,
+              two_factor_code: twoFactorCode || null,
+            }),
+          })
+        } catch (fetchError) {
+          lastError = new Error('Unable to reach the server. Please check your connection and try again.')
+          if (attempt < maxRetries - 1) {
+            setError('Connecting to server... Please wait.')
+            await new Promise(r => setTimeout(r, 3000))
+            continue
+          }
+          throw lastError
+        }
+
+        // If 503, auto-retry with feedback (backend is cold-starting)
+        if (response.status === 503 && attempt < maxRetries - 1) {
+          setError('Server is starting up... Retrying automatically.')
+          await new Promise(r => setTimeout(r, 4000))
+          continue
+        }
+
+        break
+      }
+
+      if (!response) {
+        throw lastError || new Error('Unable to reach the server.')
+      }
 
       if (!response.ok) {
+        if (response.status === 503) {
+          throw new Error('The server is still starting up. Please wait a moment and try again.')
+        }
         const errorData = await response.json().catch(() => ({}))
         const message = errorData.detail || errorData.message || 'Invalid credentials'
         throw new Error(typeof message === 'string' ? message : JSON.stringify(message))
@@ -264,6 +364,7 @@ export function useAuth(): UseAuthResult {
     signup,
     logout,
     refreshSession,
+    backendReady,
   }
 }
 

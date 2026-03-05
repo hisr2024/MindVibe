@@ -121,9 +121,9 @@ export function createProxyHandler(
 ) {
   // Auth and critical endpoints get a longer timeout for Render cold starts
   const isAuthPath = backendPath.startsWith('/api/auth')
-  const effectiveTimeout = timeoutMs ?? (isAuthPath ? 45000 : 15000)
-  // Auth endpoints retry once on timeout (cold start recovery)
-  const maxRetries = isAuthPath ? 1 : 0
+  const effectiveTimeout = timeoutMs ?? (isAuthPath ? 60000 : 15000)
+  // Auth endpoints retry twice on timeout (cold start can take 30-60s+)
+  const maxRetries = isAuthPath ? 2 : 0
 
   return async function handler(request: NextRequest) {
     const upperMethod = method.toUpperCase()
@@ -168,8 +168,9 @@ export function createProxyHandler(
         return NextResponse.json(
           {
             detail: isTimeout
-              ? 'Server is starting up, please try again in a few seconds'
-              : 'Service temporarily unavailable'
+              ? 'Server is waking up, please try again in a few seconds.'
+              : 'Unable to connect to the server. Please try again shortly.',
+            error: 'service_unavailable',
           },
           { status: 503 }
         )
@@ -178,7 +179,7 @@ export function createProxyHandler(
 
     // Should not reach here, but handle gracefully
     return NextResponse.json(
-      { detail: 'Service temporarily unavailable' },
+      { detail: 'Unable to connect to the server. Please try again shortly.', error: 'service_unavailable' },
       { status: 503 }
     )
   }

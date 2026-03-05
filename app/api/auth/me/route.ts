@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const backendResponse = await fetch(`${BACKEND_URL}/api/auth/me`, {
       method: 'GET',
       headers: proxyHeaders(request, 'GET'),
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(15000),
     })
 
     if (backendResponse.ok) {
@@ -38,9 +38,10 @@ export async function GET(request: NextRequest) {
       )
     )
   } catch (error) {
+    const isTimeout = error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')
     console.error('[Auth Me] Backend unavailable:', error instanceof Error ? error.message : 'Unknown error')
     return NextResponse.json(
-      { detail: 'Auth service unavailable' },
+      { detail: isTimeout ? 'Server is waking up, please try again.' : 'Unable to verify session. Please try again shortly.' },
       { status: 503 }
     )
   }

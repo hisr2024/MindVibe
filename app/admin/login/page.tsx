@@ -75,20 +75,21 @@ export default function AdminLogin() {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5" autoComplete="on">
             {!mfaRequired ? (
               <>
                 <div>
                   <label
-                    htmlFor="email"
+                    htmlFor="admin-email"
                     className="mb-2 block text-sm font-medium text-slate-300"
                   >
                     Email
                   </label>
                   <input
-                    id="email"
+                    id="admin-email"
+                    name="username"
                     type="email"
-                    autoComplete="email"
+                    autoComplete="username"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -100,13 +101,14 @@ export default function AdminLogin() {
                 </div>
                 <div>
                   <label
-                    htmlFor="password"
+                    htmlFor="admin-password"
                     className="mb-2 block text-sm font-medium text-slate-300"
                   >
                     Password
                   </label>
                   <input
-                    id="password"
+                    id="admin-password"
+                    name="password"
                     type="password"
                     autoComplete="current-password"
                     value={password}
