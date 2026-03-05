@@ -148,6 +148,14 @@ export function createProxyHandler(
           )
         }
 
+        // Retry on 503 (backend cold-starting or migrations pending)
+        if (backendResponse.status === 503 && attempt < maxRetries) {
+          const backoffMs = 2000 * Math.pow(2, attempt)
+          console.warn(`${label} Got 503, retrying in ${backoffMs}ms (attempt ${attempt + 1}/${maxRetries})...`)
+          await new Promise(resolve => setTimeout(resolve, backoffMs))
+          continue
+        }
+
         const data = await backendResponse.json().catch(() => ({}))
 
         return forwardCookies(

@@ -784,7 +784,7 @@ function UnauthenticatedAccountView() {
                     id="create-email"
                     name="username"
                     type="email"
-                    autoComplete="email"
+                    autoComplete="username"
                     value={createForm.email}
                     onChange={event => setCreateForm({ ...createForm, email: event.target.value })}
                     disabled={isSubmitting}

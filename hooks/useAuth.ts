@@ -134,38 +134,18 @@ export function useAuth(): UseAuthResult {
     setLoading(true)
     setError(null)
 
-    const maxRetries = 3
-
     try {
-      // Call backend signup API with auto-retry on 503
-      let signupResponse: Response | undefined
+      // The proxy layer handles 503 retries with exponential backoff,
+      // so we make a single request and let the server-side proxy absorb cold starts.
+      let signupResponse: Response
 
-      for (let attempt = 0; attempt < maxRetries; attempt++) {
-        try {
-          signupResponse = await apiFetch('/api/auth/signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email.toLowerCase(), password }),
-          })
-        } catch (fetchError) {
-          if (attempt < maxRetries - 1) {
-            setError('Connecting to server... Please wait.')
-            await new Promise(r => setTimeout(r, 3000))
-            continue
-          }
-          throw new Error('Unable to reach the server. Please check your connection and try again.')
-        }
-
-        if (signupResponse.status === 503 && attempt < maxRetries - 1) {
-          setError('Server is starting up... Retrying automatically.')
-          await new Promise(r => setTimeout(r, 4000))
-          continue
-        }
-
-        break
-      }
-
-      if (!signupResponse) {
+      try {
+        signupResponse = await apiFetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.toLowerCase(), password }),
+        })
+      } catch {
         throw new Error('Unable to reach the server. Please check your connection and try again.')
       }
 
@@ -228,45 +208,23 @@ export function useAuth(): UseAuthResult {
     setLoading(true)
     setError(null)
 
-    const maxRetries = 3
-
     try {
-      let response: Response | undefined
-      let lastError: Error | undefined
+      // The proxy layer handles 503 retries with exponential backoff,
+      // so we make a single request and let the server-side proxy absorb cold starts.
+      let response: Response
 
-      for (let attempt = 0; attempt < maxRetries; attempt++) {
-        try {
-          response = await apiFetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: email.toLowerCase(),
-              password,
-              two_factor_code: twoFactorCode || null,
-            }),
-          })
-        } catch (fetchError) {
-          lastError = new Error('Unable to reach the server. Please check your connection and try again.')
-          if (attempt < maxRetries - 1) {
-            setError('Connecting to server... Please wait.')
-            await new Promise(r => setTimeout(r, 3000))
-            continue
-          }
-          throw lastError
-        }
-
-        // If 503, auto-retry with feedback (backend is cold-starting)
-        if (response.status === 503 && attempt < maxRetries - 1) {
-          setError('Server is starting up... Retrying automatically.')
-          await new Promise(r => setTimeout(r, 4000))
-          continue
-        }
-
-        break
-      }
-
-      if (!response) {
-        throw lastError || new Error('Unable to reach the server.')
+      try {
+        response = await apiFetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email.toLowerCase(),
+            password,
+            two_factor_code: twoFactorCode || null,
+          }),
+        })
+      } catch {
+        throw new Error('Unable to reach the server. Please check your connection and try again.')
       }
 
       if (!response.ok) {
