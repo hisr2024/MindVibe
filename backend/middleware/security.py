@@ -14,8 +14,13 @@ from starlette.responses import Response
 
 
 # Backend API URL for connect-src (frontend needs to reach the API)
-_FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
-_API_URL = os.getenv("API_URL", os.getenv("NEXT_PUBLIC_API_URL", "http://localhost:8000"))
+# Sanitize: strip semicolons/commas to prevent CSP directive injection
+def _sanitize_csp_source(url: str) -> str:
+    """Remove characters that could break CSP directive parsing."""
+    return url.replace(";", " ").replace(",", " ").strip()
+
+_FRONTEND_URL = _sanitize_csp_source(os.getenv("FRONTEND_URL", "http://localhost:3000"))
+_API_URL = _sanitize_csp_source(os.getenv("API_URL", os.getenv("NEXT_PUBLIC_API_URL", "http://localhost:8000")))
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -65,6 +70,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "media-src 'self' https: blob:; "
             f"connect-src 'self' {_API_URL} {_FRONTEND_URL} "
             "https://mindvibe-api.onrender.com "
+            "https://kiaanverse.com "
+            "https://www.kiaanverse.com "
             "https://*.firebaseio.com "
             "https://*.googleapis.com "
             "https://cdn.pixabay.com "
