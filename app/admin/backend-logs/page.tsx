@@ -83,7 +83,7 @@ export default function BackendLogsPage() {
       if (levelFilter) params.set('level', levelFilter)
       if (searchQuery) params.set('search', searchQuery)
 
-      const res = await fetch(`${API_BASE_URL}/api/admin/backend-logs?${params}`, {
+      const res = await fetch(`/api/admin/backend-logs?${params}`, {
         credentials: 'include',
       })
 
@@ -103,7 +103,7 @@ export default function BackendLogsPage() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/admin/backend-logs/stats`, {
+      const res = await fetch(`/api/admin/backend-logs/stats`, {
         credentials: 'include',
       })
       if (res.ok) {

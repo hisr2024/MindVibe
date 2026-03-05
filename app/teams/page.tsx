@@ -66,19 +66,13 @@ export default function TeamsPage() {
   const [inviteRole, setInviteRole] = useState('member')
   const [inviteMessage, setInviteMessage] = useState('')
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-
   const getAuthHeaders = useCallback((): HeadersInit => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
-    return {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    }
+    return { 'Content-Type': 'application/json' }
   }, [])
 
   const fetchTeams = useCallback(async () => {
     try {
-      const res = await fetch(`${apiUrl}/api/teams`, { headers: getAuthHeaders() })
+      const res = await fetch(`/api/teams`, { headers: getAuthHeaders() })
       if (res.ok) {
         const data = await res.json()
         setTeams(data.teams || [])
@@ -86,11 +80,11 @@ export default function TeamsPage() {
     } catch (err) {
       console.error('Failed to fetch teams:', err)
     }
-  }, [apiUrl, getAuthHeaders])
+  }, [getAuthHeaders])
 
   const fetchPendingInvitations = useCallback(async () => {
     try {
-      const res = await fetch(`${apiUrl}/api/teams/invitations/pending`, {
+      const res = await fetch(`/api/teams/invitations/pending`, {
         headers: getAuthHeaders(),
       })
       if (res.ok) {
@@ -100,11 +94,11 @@ export default function TeamsPage() {
     } catch (err) {
       console.error('Failed to fetch invitations:', err)
     }
-  }, [apiUrl, getAuthHeaders])
+  }, [getAuthHeaders])
 
   const fetchTeamMembers = async (teamId: string) => {
     try {
-      const res = await fetch(`${apiUrl}/api/teams/${teamId}/members`, {
+      const res = await fetch(`/api/teams/${teamId}/members`, {
         headers: getAuthHeaders(),
       })
       if (res.ok) {
@@ -118,7 +112,7 @@ export default function TeamsPage() {
 
   const fetchMyPermissions = async (teamId: string) => {
     try {
-      const res = await fetch(`${apiUrl}/api/teams/${teamId}/permissions`, {
+      const res = await fetch(`/api/teams/${teamId}/permissions`, {
         headers: getAuthHeaders(),
       })
       if (res.ok) {
@@ -139,7 +133,7 @@ export default function TeamsPage() {
   const handleCreateTeam = async () => {
     if (!createName.trim()) return
     try {
-      const res = await fetch(`${apiUrl}/api/teams`, {
+      const res = await fetch(`/api/teams`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
@@ -161,7 +155,7 @@ export default function TeamsPage() {
   const handleInviteMember = async () => {
     if (!selectedTeam || !inviteEmail.trim()) return
     try {
-      const res = await fetch(`${apiUrl}/api/teams/${selectedTeam.id}/invitations`, {
+      const res = await fetch(`/api/teams/${selectedTeam.id}/invitations`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
@@ -183,7 +177,7 @@ export default function TeamsPage() {
 
   const handleAcceptInvitation = async (invitationId: string) => {
     try {
-      const res = await fetch(`${apiUrl}/api/teams/invitations/accept`, {
+      const res = await fetch(`/api/teams/invitations/accept`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({ invitation_id: invitationId }),
@@ -199,7 +193,7 @@ export default function TeamsPage() {
 
   const handleDeclineInvitation = async (invitationId: string) => {
     try {
-      const res = await fetch(`${apiUrl}/api/teams/invitations/${invitationId}/decline`, {
+      const res = await fetch(`/api/teams/invitations/${invitationId}/decline`, {
         method: 'POST',
         headers: getAuthHeaders(),
       })
@@ -214,7 +208,7 @@ export default function TeamsPage() {
   const handleLeaveTeam = async (teamId: string) => {
     if (!confirm('Are you sure you want to leave this team?')) return
     try {
-      const res = await fetch(`${apiUrl}/api/teams/${teamId}/leave`, {
+      const res = await fetch(`/api/teams/${teamId}/leave`, {
         method: 'POST',
         headers: getAuthHeaders(),
       })
