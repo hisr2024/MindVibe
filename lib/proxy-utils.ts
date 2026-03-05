@@ -110,46 +110,76 @@ export const BACKEND_URL =
  *   import { createProxyHandler } from '@/lib/proxy-utils'
  *   export const POST = createProxyHandler('/api/auth/login', 'POST')
  *   export const GET  = createProxyHandler('/api/auth/sessions', 'GET')
+ *
+ * Auth and critical endpoints use a longer timeout (45s) to handle
+ * Render free-tier cold starts (which can take 30-60s).
  */
 export function createProxyHandler(
   backendPath: string,
   method: string,
-  timeoutMs: number = 10000
+  timeoutMs?: number
 ) {
+  // Auth and critical endpoints get a longer timeout for Render cold starts
+  const isAuthPath = backendPath.startsWith('/api/auth')
+  const effectiveTimeout = timeoutMs ?? (isAuthPath ? 45000 : 15000)
+  // Auth endpoints retry once on timeout (cold start recovery)
+  const maxRetries = isAuthPath ? 1 : 0
+
   return async function handler(request: NextRequest) {
-    try {
-      const upperMethod = method.toUpperCase()
-      const hasBody = ['POST', 'PUT', 'PATCH'].includes(upperMethod)
-      const rawBody = hasBody ? await request.text() : undefined
-      const body = rawBody && rawBody.length > 0 ? rawBody : undefined
+    const upperMethod = method.toUpperCase()
+    const hasBody = ['POST', 'PUT', 'PATCH'].includes(upperMethod)
+    const rawBody = hasBody ? await request.text() : undefined
+    const body = rawBody && rawBody.length > 0 ? rawBody : undefined
+    const label = `[Proxy ${method} ${backendPath}]`
 
-      const backendResponse = await fetch(`${BACKEND_URL}${backendPath}`, {
-        method: upperMethod,
-        headers: proxyHeaders(request, upperMethod),
-        body,
-        signal: AbortSignal.timeout(timeoutMs),
-      })
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const backendResponse = await fetch(`${BACKEND_URL}${backendPath}`, {
+          method: upperMethod,
+          headers: proxyHeaders(request, upperMethod),
+          body,
+          signal: AbortSignal.timeout(effectiveTimeout),
+        })
 
-      if (backendResponse.status === 204) {
+        if (backendResponse.status === 204) {
+          return forwardCookies(
+            backendResponse,
+            new NextResponse(null, { status: 204 })
+          )
+        }
+
+        const data = await backendResponse.json().catch(() => ({}))
+
         return forwardCookies(
           backendResponse,
-          new NextResponse(null, { status: 204 })
+          NextResponse.json(data, { status: backendResponse.status })
+        )
+      } catch (error) {
+        const isTimeout = error instanceof Error && (
+          error.name === 'TimeoutError' || error.name === 'AbortError'
+        )
+
+        if (attempt < maxRetries && isTimeout) {
+          console.warn(`${label} Timeout on attempt ${attempt + 1}, retrying...`)
+          continue
+        }
+
+        console.error(`${label} Backend unavailable:`, error instanceof Error ? error.message : 'Unknown error')
+        return NextResponse.json(
+          {
+            detail: isTimeout
+              ? 'Server is starting up, please try again in a few seconds'
+              : 'Service temporarily unavailable'
+          },
+          { status: 503 }
         )
       }
-
-      const data = await backendResponse.json().catch(() => ({}))
-
-      return forwardCookies(
-        backendResponse,
-        NextResponse.json(data, { status: backendResponse.status })
-      )
-    } catch (error) {
-      const label = `[Proxy ${method} ${backendPath}]`
-      console.error(`${label} Backend unavailable:`, error instanceof Error ? error.message : 'Unknown error')
-      return NextResponse.json(
-        { detail: 'Service temporarily unavailable' },
-        { status: 503 }
-      )
     }
+
+    // Should not reach here, but handle gracefully
+    return NextResponse.json(
+      { detail: 'Service temporarily unavailable' },
+      { status: 503 }
+    )
   }
 }
