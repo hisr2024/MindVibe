@@ -61,23 +61,25 @@ export function useAuth(): UseAuthResult {
   useEffect(() => {
     let cancelled = false
     const warmUp = async () => {
-      for (let attempt = 0; attempt < 3; attempt++) {
+      for (let attempt = 0; attempt < 5; attempt++) {
         try {
           const res = await fetch('/api/health', {
-            signal: AbortSignal.timeout(15000),
+            signal: AbortSignal.timeout(30000),
           })
           if (!cancelled && res.ok) {
             setBackendReady(true)
             return
           }
+          // 503 = backend still starting, keep retrying
         } catch {
-          // Backend not ready yet, retry
+          // Network error or timeout, keep retrying
         }
-        if (!cancelled && attempt < 2) {
-          await new Promise(r => setTimeout(r, 3000))
+        if (cancelled) return
+        if (attempt < 4) {
+          await new Promise(r => setTimeout(r, 5000))
         }
       }
-      // Even if warm-up fails, allow attempts (proxy will handle retries)
+      // Even if warm-up fails after all attempts, allow login (proxy will retry)
       if (!cancelled) setBackendReady(true)
     }
     warmUp()
