@@ -216,44 +216,58 @@ SUBSCRIPTION_PLANS = [
 ]
 
 
-async def seed_subscription_plans(db_url: str | None = None) -> None:
+async def seed_subscription_plans(
+    db_url: str | None = None,
+    existing_engine=None,
+) -> None:
     """Seed the subscription plans into the database.
-    
+
     Args:
         db_url: Optional database URL. If not provided, uses DATABASE_URL env var.
+            NOTE: SQLAlchemy's ``str(engine.url)`` masks the password, so callers
+            should pass ``existing_engine`` instead when the engine is already
+            available.
+        existing_engine: Optional existing SQLAlchemy AsyncEngine to reuse.
+            When provided, ``db_url`` is ignored and no new engine is created.
+            This avoids password-masking issues with ``str(engine.url)``.
     """
-    if not db_url:
-        db_url = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
-        
-    # Convert postgres:// to postgresql+asyncpg://
-    if db_url.startswith("postgres://"):
-        db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
-    elif db_url.startswith("postgresql://") and "asyncpg" not in db_url:
-        db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    
-    engine = create_async_engine(
-        db_url,
-        echo=False,
-        connect_args=_get_ssl_connect_args(db_url)
-    )
-    session_maker = async_sessionmaker(engine, expire_on_commit=False)
-    
+    owns_engine = existing_engine is None
+
+    if existing_engine is not None:
+        local_engine = existing_engine
+    else:
+        if not db_url:
+            db_url = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+
+        # Convert postgres:// to postgresql+asyncpg://
+        if db_url.startswith("postgres://"):
+            db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif db_url.startswith("postgresql://") and "asyncpg" not in db_url:
+            db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+        local_engine = create_async_engine(
+            db_url,
+            echo=False,
+            connect_args=_get_ssl_connect_args(db_url),
+        )
+
+    session_maker = async_sessionmaker(local_engine, expire_on_commit=False)
+
     # Create tables if they don't exist
-    async with engine.begin() as conn:
+    async with local_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     async with session_maker() as db:
         for plan_data in SUBSCRIPTION_PLANS:
             tier = plan_data["tier"]
-            
+
             # Check if plan already exists
             stmt = select(SubscriptionPlan).where(SubscriptionPlan.tier == tier)
             result = await db.execute(stmt)
             existing = result.scalars().first()
-            
+
             if existing:
                 print(f"Updating existing plan: {tier.value}")
-                # Update existing plan
                 existing.name = plan_data["name"]
                 existing.description = plan_data["description"]
                 existing.price_monthly = plan_data["price_monthly"]
@@ -266,7 +280,6 @@ async def seed_subscription_plans(db_url: str | None = None) -> None:
                 existing.data_retention_days = plan_data["data_retention_days"]
             else:
                 print(f"Creating new plan: {tier.value}")
-                # Create new plan
                 plan = SubscriptionPlan(
                     tier=tier,
                     name=plan_data["name"],
@@ -281,11 +294,13 @@ async def seed_subscription_plans(db_url: str | None = None) -> None:
                     data_retention_days=plan_data["data_retention_days"],
                 )
                 db.add(plan)
-        
+
         await db.commit()
         print("✅ Subscription plans seeded successfully!")
-    
-    await engine.dispose()
+
+    # Only dispose if we created the engine ourselves
+    if owns_engine:
+        await local_engine.dispose()
 
 
 if __name__ == "__main__":

@@ -367,7 +367,9 @@ async def startup():
         startup_logger.info("\n🔧 Ensuring subscription plans exist...")
         try:
             from backend.scripts.seed_subscription_plans import seed_subscription_plans
-            await seed_subscription_plans(str(engine.url))
+            # Pass the existing engine directly to avoid password-masking
+            # issues with str(engine.url) which replaces the password with '***'
+            await seed_subscription_plans(existing_engine=engine)
             startup_logger.info("✅ Subscription plans ready")
         except Exception as seed_error:
             startup_logger.info(f"⚠️ Subscription plan seeding had issues: {seed_error}")
