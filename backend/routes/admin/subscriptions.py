@@ -1,5 +1,6 @@
 """Admin subscription management routes."""
 
+import logging
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
@@ -8,6 +9,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+logger = logging.getLogger(__name__)
 
 from backend.deps import get_db
 from backend.middleware.rbac import (
@@ -568,9 +571,10 @@ async def create_subscription_link_endpoint(
             detail=str(e),
         )
     except RuntimeError as e:
+        logger.error(f"Service unavailable during admin subscription operation: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=str(e),
+            detail="Service is temporarily unavailable. Please try again.",
         )
 
     # Audit log
