@@ -72,13 +72,35 @@ export function proxyHeaders(
     headers['Authorization'] = auth
   }
 
+  // Forward client IP headers so the backend rate limiter and audit logs
+  // see the real client IP instead of the Vercel proxy server IP.
+  // Without this, ALL users share the same rate limit (e.g., 5 logins/minute
+  // globally) because the backend sees every request as coming from one IP.
+  const forwardedFor = request.headers.get('X-Forwarded-For')
+  if (forwardedFor) {
+    headers['X-Forwarded-For'] = forwardedFor
+  }
+  const realIp = request.headers.get('X-Real-IP')
+  if (realIp) {
+    headers['X-Real-IP'] = realIp
+  }
+
   return headers
 }
 
 /**
  * The backend URL from environment, used by all proxy routes.
+ *
+ * CRITICAL: In production (Vercel), this MUST resolve to the real backend.
+ * If NEXT_PUBLIC_API_URL is not set, fall back to the Render production URL
+ * rather than localhost (which doesn't exist on Vercel and causes 503 errors
+ * on every proxy request — breaking login, signup, and all authenticated flows).
  */
-export const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+export const BACKEND_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === 'production'
+    ? 'https://mindvibe-api.onrender.com'
+    : 'http://localhost:8000')
 
 /**
  * Create a proxy handler that forwards a request to the backend and returns

@@ -627,7 +627,12 @@ function UnauthenticatedAccountView() {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed. Please try again.'
 
-      if (message.toLowerCase().includes('two-factor') || message.toLowerCase().includes('2fa')) {
+      const msgLower = message.toLowerCase()
+      if (
+        msgLower.includes('two-factor') ||
+        msgLower.includes('2fa') ||
+        msgLower.includes('additional_verification_required')
+      ) {
         setNeedsTwoFactor(true)
         setStatus({ type: 'info', message: 'Enter your two-factor authentication code.' })
       } else {

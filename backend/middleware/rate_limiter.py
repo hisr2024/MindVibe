@@ -68,7 +68,21 @@ def _get_rate_limit_key(request: Request) -> str:
     if session_token:
         return f"session:{session_token[:16]}"
 
-    # Fallback: IP address
+    # Fallback: IP address — prefer X-Forwarded-For from proxy so each real
+    # client gets its own rate-limit bucket.  Without this, ALL users behind
+    # the Vercel/Next.js proxy share a single bucket (the proxy server IP),
+    # meaning 5 login attempts total per minute across ALL users globally.
+    forwarded_for = request.headers.get("x-forwarded-for")
+    if forwarded_for:
+        # X-Forwarded-For may contain multiple IPs; the leftmost is the client
+        client_ip = forwarded_for.split(",")[0].strip()
+        if client_ip:
+            return client_ip
+
+    real_ip = request.headers.get("x-real-ip")
+    if real_ip:
+        return real_ip.strip()
+
     return get_remote_address(request)
 
 
@@ -81,6 +95,7 @@ limiter = Limiter(
 
 # Rate limit constants for different endpoint categories
 # These limits are INDEPENDENT - a user can hit each endpoint up to its limit
-AUTH_RATE_LIMIT = "5/minute"      # Strict: prevents brute force attacks
+AUTH_RATE_LIMIT = "15/minute"     # Per-IP limit; generous enough for proxy scenarios
+                                  # while still preventing brute force (lockout at 5 failed attempts)
 CHAT_RATE_LIMIT = "30/minute"     # Moderate: allows active conversation
 WISDOM_RATE_LIMIT = "60/minute"   # Relaxed: read-heavy, low cost operations

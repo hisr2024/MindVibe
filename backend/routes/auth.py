@@ -440,8 +440,8 @@ async def disable_two_factor(
     if not user.two_factor_enabled:
         raise HTTPException(status_code=400, detail="Two-factor not enabled")
 
-    # Verify password
-    if not user.password_hash or not verify_password(payload.password, user.password_hash):
+    # Verify password (field is hashed_password on the User model)
+    if not user.hashed_password or not verify_password(payload.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid password",
