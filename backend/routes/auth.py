@@ -214,7 +214,6 @@ async def signup(request: Request, payload: SignupIn, db: AsyncSession = Depends
         raise HTTPException(status_code=409, detail="Unable to create account with this email")
 
     # Generate a unique auth_uid
-    import secrets
     auth_uid = secrets.token_urlsafe(16)
     
     user = User(
@@ -714,6 +713,18 @@ async def refresh_tokens(
         samesite="strict",
         path="/api/auth",
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+    )
+
+    # Set new access_token cookie — without this, the browser keeps sending
+    # the old expired access_token on subsequent requests, causing 401 errors.
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=settings.SECURE_COOKIE,
+        samesite="lax",
+        path="/",
+        max_age=expires_in_seconds,
     )
 
     return RefreshOut(
