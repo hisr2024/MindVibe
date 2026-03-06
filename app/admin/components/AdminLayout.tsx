@@ -28,15 +28,13 @@ export default function AdminLayout({
   const pathname = usePathname()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [authChecked, setAuthChecked] = useState(false)
   const adminSession = typeof window !== 'undefined' ? getAdminSession() : null
+  const authChecked = typeof window !== 'undefined' && isAdminAuthenticated()
 
   useEffect(() => {
     if (!isAdminAuthenticated()) {
       router.replace('/admin/login')
-      return
     }
-    setAuthChecked(true)
   }, [router])
 
   const handleLogout = async () => {

@@ -177,7 +177,7 @@ export function useAuth(): UseAuthResult {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: email.toLowerCase(), password }),
         })
-      } catch (fetchError) {
+      } catch {
         throw new Error('Account created but could not sign in automatically. Please try signing in.')
       }
 
