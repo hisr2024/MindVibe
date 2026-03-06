@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import Link from 'next/link'
 
 const flowLinks = [
-  { href: '/flows/access', label: 'Access' },
+  { href: '/account', label: 'Account' },
   { href: '/flows/check-in', label: 'State check-in' },
   { href: '/flows/kiaan', label: 'Talk to KIAAN' },
   { href: '/flows/ardha', label: 'Ardha reframing' },

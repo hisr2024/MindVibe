@@ -34,6 +34,9 @@ from backend.services.session_service import (
     session_is_active,
     touch_session,
 )
+from backend.services.subscription_service import (
+    get_or_create_free_subscription,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +59,7 @@ class SignupOut(BaseModel):
     user_id: str
     email: EmailStr
     policy_passed: bool
+    subscription_tier: str = "free"
 
 
 class LoginIn(BaseModel):
@@ -71,6 +75,9 @@ class LoginOut(BaseModel):
     expires_in: int
     user_id: str
     email: EmailStr
+    subscription_tier: str = "free"
+    subscription_status: str = "active"
+    is_developer: bool = False
 
 
 class TwoFactorSetupOut(BaseModel):
@@ -95,6 +102,9 @@ class MeOut(BaseModel):
     session_expires_at: datetime | None
     session_last_used_at: datetime | None
     access_token_expires_in: int | None
+    subscription_tier: str = "free"
+    subscription_status: str = "active"
+    is_developer: bool = False
 
 
 class LogoutOut(BaseModel):
@@ -225,7 +235,13 @@ async def signup(request: Request, payload: SignupIn, db: AsyncSession = Depends
     await db.commit()
     await db.refresh(user)
 
-    return SignupOut(user_id=user.id, email=user.email, policy_passed=True)
+    # Auto-create free subscription for new user
+    try:
+        await get_or_create_free_subscription(db, user.id)
+    except Exception as sub_err:
+        logger.warning(f"Failed to create free subscription for new user {user.id}: {sub_err}")
+
+    return SignupOut(user_id=user.id, email=user.email, policy_passed=True, subscription_tier="free")
 
 
 # ----------------------
@@ -331,6 +347,25 @@ async def login(
         max_age=expires_in_seconds,
     )
 
+    # Fetch subscription info for the logged-in user
+    sub_tier = "free"
+    sub_status = "active"
+    try:
+        subscription = await get_or_create_free_subscription(db, user.id)
+        if subscription and subscription.plan:
+            sub_tier = subscription.plan.tier.value if hasattr(subscription.plan.tier, 'value') else str(subscription.plan.tier)
+            sub_status = subscription.status.value if hasattr(subscription.status, 'value') else str(subscription.status)
+    except Exception as sub_err:
+        logger.warning(f"Failed to fetch subscription for user {user.id}: {sub_err}")
+
+    # Check developer status
+    from backend.middleware.feature_access import is_developer as check_is_developer
+    is_dev = False
+    try:
+        is_dev = await check_is_developer(db, user.id)
+    except Exception:
+        pass
+
     return LoginOut(
         access_token=access_token,
         token_type="bearer",  # nosec B106
@@ -338,6 +373,9 @@ async def login(
         expires_in=expires_in_seconds,
         user_id=user.id,
         email=user.email,
+        subscription_tier="premier" if is_dev else sub_tier,
+        subscription_status=sub_status,
+        is_developer=is_dev,
     )
 
 
@@ -536,6 +574,25 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
         except Exception:
             access_token_expires_in = None
 
+    # Fetch subscription info
+    sub_tier = "free"
+    sub_status = "active"
+    try:
+        subscription = await get_or_create_free_subscription(db, user.id)
+        if subscription and subscription.plan:
+            sub_tier = subscription.plan.tier.value if hasattr(subscription.plan.tier, 'value') else str(subscription.plan.tier)
+            sub_status = subscription.status.value if hasattr(subscription.status, 'value') else str(subscription.status)
+    except Exception as sub_err:
+        logger.warning(f"Failed to fetch subscription for user {user.id}: {sub_err}")
+
+    # Check developer status
+    from backend.middleware.feature_access import is_developer as check_is_developer
+    is_dev = False
+    try:
+        is_dev = await check_is_developer(db, user.id)
+    except Exception:
+        pass
+
     return MeOut(
         user_id=user.id,
         email=user.email,
@@ -544,6 +601,9 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
         session_expires_at=session_row.expires_at,
         session_last_used_at=session_row.last_used_at,
         access_token_expires_in=access_token_expires_in,
+        subscription_tier="premier" if is_dev else sub_tier,
+        subscription_status=sub_status,
+        is_developer=is_dev,
     )
 
 
@@ -891,6 +951,8 @@ class DeveloperStatusOut(BaseModel):
     email: str | None = None
     effective_tier: str = "free"
     features_unlocked: bool = False
+    subscription_tier: str = "free"
+    subscription_status: str = "active"
 
 
 @router.get("/developer-status", response_model=DeveloperStatusOut)
@@ -935,9 +997,22 @@ async def developer_status(
 
     is_dev = await is_developer(db, user_id)
 
+    # Fetch subscription info
+    sub_tier = "free"
+    sub_status = "active"
+    try:
+        subscription = await get_or_create_free_subscription(db, user.id)
+        if subscription and subscription.plan:
+            sub_tier = subscription.plan.tier.value if hasattr(subscription.plan.tier, 'value') else str(subscription.plan.tier)
+            sub_status = subscription.status.value if hasattr(subscription.status, 'value') else str(subscription.status)
+    except Exception:
+        pass
+
     return DeveloperStatusOut(
         is_developer=is_dev,
         email=user.email,
-        effective_tier="premier" if is_dev else "free",
+        effective_tier="premier" if is_dev else sub_tier,
         features_unlocked=is_dev,
+        subscription_tier="premier" if is_dev else sub_tier,
+        subscription_status=sub_status,
     )

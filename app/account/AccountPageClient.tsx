@@ -876,6 +876,12 @@ function UnauthenticatedAccountView() {
                   >
                     Need an account? Create one
                   </button>
+                  <Link
+                    href="/auth/forgot-password"
+                    className="rounded-lg px-3 py-2 font-semibold text-[#d4a44c] transition hover:text-[#e8b54a] hover:bg-[#d4a44c]/10"
+                  >
+                    Forgot password?
+                  </Link>
                 </div>
                 <button
                   type="submit"

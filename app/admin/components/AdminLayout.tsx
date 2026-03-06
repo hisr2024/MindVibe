@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { isAdminAuthenticated, getAdminSession, adminLogout } from '@/lib/admin-api'
 
 const adminLinks = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
@@ -25,7 +26,31 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [authChecked, setAuthChecked] = useState(false)
+  const adminSession = typeof window !== 'undefined' ? getAdminSession() : null
+
+  useEffect(() => {
+    if (!isAdminAuthenticated()) {
+      router.replace('/admin/login')
+      return
+    }
+    setAuthChecked(true)
+  }, [router])
+
+  const handleLogout = async () => {
+    await adminLogout()
+    router.replace('/admin/login')
+  }
+
+  if (!authChecked) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-900">
+        <div className="text-slate-400">Verifying admin access...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-slate-900">
@@ -82,13 +107,19 @@ export default function AdminLayout({
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 border-t border-slate-700 p-4">
-          <Link
-            href="/admin/login"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
+          {adminSession && (
+            <div className="mb-2 px-3 py-1">
+              <p className="truncate text-xs font-medium text-slate-300">{adminSession.fullName}</p>
+              <p className="truncate text-xs text-slate-500">{adminSession.role}</p>
+            </div>
+          )}
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
           >
             <span>🚪</span>
             Logout
-          </Link>
+          </button>
         </div>
       </aside>
 
