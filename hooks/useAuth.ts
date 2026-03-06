@@ -65,17 +65,18 @@ export function useAuth(): UseAuthResult {
   const [error, setError] = useState<string | null>(null)
   const [backendReady, setBackendReady] = useState(false)
 
-  // Warm up the backend on mount (Render free tier cold starts take 30-60s)
-  // Uses exponential backoff: 2s, 4s, 8s, 16s, 16s, 16s, 16s, 16s (up to ~90s total)
-  // Health route always returns 200 to avoid console errors; check body.ready instead.
+  // Warm up the backend on mount (Render free tier cold starts take 30-60s).
+  // This is non-blocking: the user can sign in at any time.  The proxy layer
+  // has its own retry logic for 503s during cold starts.  We poll /api/health
+  // to update the informational banner and to prime the backend connection.
   useEffect(() => {
     let cancelled = false
     const warmUp = async () => {
-      const maxAttempts = 8
+      const maxAttempts = 5
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         try {
           const res = await fetch('/api/health', {
-            signal: AbortSignal.timeout(35000),
+            signal: AbortSignal.timeout(10000),
           })
           if (cancelled) return
           const data = await res.json().catch(() => ({ ready: false }))
@@ -88,11 +89,11 @@ export function useAuth(): UseAuthResult {
         }
         if (cancelled) return
         if (attempt < maxAttempts - 1) {
-          const delay = Math.min(2000 * Math.pow(2, attempt), 16000)
+          const delay = Math.min(3000 * Math.pow(2, attempt), 15000)
           await new Promise(r => setTimeout(r, delay))
         }
       }
-      // After all attempts, allow login anyway (proxy has its own retry logic)
+      // After all attempts, mark ready anyway (proxy handles retries)
       if (!cancelled) setBackendReady(true)
     }
     warmUp()
