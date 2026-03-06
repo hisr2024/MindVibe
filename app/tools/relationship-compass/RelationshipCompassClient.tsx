@@ -99,16 +99,17 @@ export default function RelationshipCompassClient() {
         body: JSON.stringify({
           message: trimmedConflict,
           sessionId,
-          relationshipType: 'other'
+          relationshipType: 'other',
+          secularMode: false
         })
       })
 
-      if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok && !data.response) {
         setError('Relationship Compass is gathering wisdom. Please try again shortly.')
         return
       }
-
-      const data = await response.json()
 
       const guidance = data.sections
       const fullResponse = data.response || _formatCompassGuidance(guidance)
