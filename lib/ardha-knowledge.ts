@@ -402,8 +402,15 @@ export function parseArdhaSections(response: string): Record<string, string> {
     const trimmed = line.trim()
     if (!trimmed) return
 
+    // Strip markdown heading markers (##, ###) and bold markers (**)
+    const stripped = trimmed
+      .replace(/^#{1,4}\s*/, '')
+      .replace(/^\*\*(.+?)\*\*$/, '$1')
+      .replace(/^[-—]\s*/, '')
+      .trim()
+
     const headingMatch = ARDHA_SECTION_HEADINGS.find(
-      (heading) => trimmed.toLowerCase().startsWith(heading.toLowerCase()),
+      (heading) => stripped.toLowerCase().startsWith(heading.toLowerCase()),
     )
 
     if (headingMatch) {

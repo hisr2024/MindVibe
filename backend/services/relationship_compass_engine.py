@@ -564,7 +564,8 @@ def build_fallback_response(
         f"Right now, part of you wants to {step1_urge}. "
         f"Pause. You feel {emotion} — and that feeling is real and valid. Name it. Sit with it for a moment. "
         f"Your mind is telling you a story about what this means — about your worth, about their intentions, about what you deserve. "
-        f"Notice that story. The disturbance is inside you, and recognizing that isn't weakness — it IS the practice. "
+        f"Notice that story. The Gita teaches (BG 2.56): 'One whose mind is not shaken by adversity — such is a sage of steady wisdom.' "
+        f"The disturbance is inside you, and recognizing that isn't weakness — it IS the practice. "
         f"That pause alone prevents 80% of the damage."
     )
 
@@ -582,12 +583,16 @@ def build_fallback_response(
         "enmeshment": "You were attached to their emotional state as if it were your own. Their mood became your mood. Their peace became your peace. That's not empathy — it's losing yourself.",
     }
 
-    step2 = attachment_maps.get(
+    step2_raw = attachment_maps.get(
         mechanism,
         "Ask yourself honestly: Were you attached to being valued? To being right? To immediate reassurance? "
         "The EVENT was what happened. The STORY your mind created is the interpretation, the fear, the meaning-making. "
-        "Separate the two. The Gita teaches that anger begins when desire is frustrated — so instead of blaming, "
-        "release the expectation first."
+        "Separate the two."
+    )
+    step2 = (
+        f"{step2_raw} The Gita reveals (BG 2.62-63): 'From contemplation of sense objects arises attachment, "
+        f"from attachment springs desire, from desire comes anger, from anger arises delusion.' "
+        f"Instead of blaming, release the expectation first."
     )
 
     # Step 3: Regulate Before You Communicate
@@ -680,8 +685,9 @@ def build_fallback_response(
         "If they misunderstand — can you resist the urge to over-explain? "
         "THAT is the real test. Modern life is constant mini Kurukshetras — group chats, work misunderstandings, "
         "social media triggers, relationship expectations. The battlefield has changed. The mind has not.\n\n"
-        "The Gita's 10/10 standard: You don't suppress emotions. You don't explode emotions. You observe them. "
-        "You act from clarity. You surrender the result. "
+        "The Gita teaches (BG 2.48): 'Perform action being steadfast in yoga, balanced in success and failure. "
+        "Equanimity is Yoga.' You don't suppress emotions. You don't explode emotions. You observe them. "
+        "You act from clarity. You surrender the result (BG 18.66). "
         "And most importantly — you protect your inner equilibrium more than your ego."
     )
 

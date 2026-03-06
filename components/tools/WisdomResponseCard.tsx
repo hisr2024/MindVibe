@@ -99,6 +99,15 @@ const SECTION_CONFIG = {
     icon: '🔄',
     name: 'Ardha',
     sectionMeta: {
+      // ARDHA 5-pillar framework (primary — these match the actual AI response headings)
+      atma_distinction: { title: 'Atma Distinction', icon: '👁️', order: 1 },
+      ragadvesha_scan: { title: 'Raga-Dvesha Scan', icon: '🔗', order: 2 },
+      dharma_alignment: { title: 'Dharma Alignment', icon: '⚖️', order: 3 },
+      hrdaya_samatvam: { title: 'Hrdaya Samatvam', icon: '🧘', order: 4 },
+      arpana: { title: 'Arpana', icon: '🙏', order: 5 },
+      gita_verse: { title: 'Gita Verse', icon: '📜', order: 6 },
+      compliance_check: { title: 'Compliance Check', icon: '✅', order: 7 },
+      // Legacy section keys (backward compatibility)
       distortion_detection: { title: 'Distortion Detection', icon: '🔍', order: 1 },
       emotional_precision: { title: 'Emotional Precision', icon: '🎯', order: 2 },
       mechanism_insight: { title: 'Mechanism Insight', icon: '🧠', order: 3 },

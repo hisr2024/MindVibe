@@ -9,26 +9,34 @@ const REQUEST_TIMEOUT = 60000
 const FALLBACK_RESPONSE = {
   response: `Mode: Conflict
 
-## Emotional Precision
-You're hurting — and that hurt runs deeper than the surface of what happened. There's a tightness in your chest, a weight that won't lift. That emotional intensity isn't a flaw or an overreaction. It's your heart telling you that something genuinely important is at stake here — a need for respect, for understanding, for being truly seen. Let yourself feel it. The emotion is information, and it deserves your attention.
+## Step 1: Pause Before Reacting
+Right now, part of you wants to react — to send a long message defending yourself, point out everything they did wrong, or call someone to vent. Pause. You feel distressed — and that feeling is real and valid. Name it. Sit with it for a moment. The Gita teaches (BG 2.56): "One whose mind is not shaken by adversity, who is free from attachment, fear, and anger — such a person is called a sage of steady wisdom." The disturbance is inside you, and recognizing that isn't weakness — it IS the practice. That pause alone prevents 80% of the damage.
 
-## What's Actually Happening
-Beneath this conflict, there's a deeper current at work. Much of our relationship pain comes from attachment — from the gap between what our heart hoped for and what actually happened. You carried an expectation of how they should respond, what they should understand, and when reality fell short of that picture, the pain rushed in. This is one of the most universal human experiences: the suffering that comes from holding tightly to how things should be. The event itself may have been small. But the disappointment of unmet hope — that's enormous.
+## Step 2: Identify the Attachment
+You were attached to a specific outcome — to how they SHOULD have responded, to what they SHOULD have understood. The pain lives in the gap between what you hoped for and what you got. The Gita reveals (BG 2.62-63): from contemplation of sense objects arises attachment, from attachment springs desire, from desire comes anger, from anger arises delusion. The EVENT was what happened. The STORY your mind created is the interpretation, the fear, the meaning-making. Separate the two.
 
-## The Hard Truth
-Here's what's true, even though it's hard to hear: you cannot win an argument and deepen a relationship at the same time. Acting from the need to be right is acting from ego — and ego never leads to peace. The real question isn't "Who's right?" It's "What do I actually need here, and can I ask for it without needing to defeat them first?" That shift — from winning to understanding — is where healing begins.
+## Step 3: Regulate Before You Communicate
+Write what you want to say. Don't send it. Wait 2 hours. Reread it. Rewrite from a place of calm. Go for a short walk. Breathe slowly. The Gita teaches (BG 6.35): "The mind is restless, but it can be controlled by practice and detachment." Do NOT text while your chest is still tight. Respond only when your nervous system is settled — not when you've rehearsed the perfect comeback.
 
-## What To Do
-Before your next interaction, give yourself the gift of a pause. Let the emotional storm pass through you — even 90 seconds of conscious breathing changes your entire inner landscape. When the mind is turbulent, wisdom can't reach you. Then ask yourself one honest question: "What do I actually NEED here?" Lead with that need, not the complaint. Instead of "You never listen," try "I need to feel heard right now. Can you just listen, without trying to fix it?" That vulnerable honesty changes everything.
+## Step 4: Speak Without Demanding an Outcome
+Instead of: "You always do this. You don't care." Try: "When [specific thing] happened, I felt [specific emotion]. I value this relationship, so I wanted to share that honestly. I'm not looking for you to fix it or defend yourself — I just need you to know where I'm at." The Gita teaches (BG 2.47): "You have the right to perform your duty, but not to the fruits of action." You are doing your duty — honesty. You release the fruit — their reaction.
 
-## Script
-"Hey, I want to talk about what happened — and I want us both to be in a good place for it. Here's what I experienced: [specific event]. What I felt in that moment was [emotion]. And what I really need underneath all of it is [need]. I'm not bringing this up to blame you or to win. I'm bringing it up because this relationship matters to me, and I want us to understand each other."`,
+## Step 5: See Their Humanity
+Instead of assuming they were trying to hurt you, consider: Maybe they're stressed. Maybe they're carrying something you can't see. The Gita teaches (BG 6.29): "One who sees all beings in the Self and the Self in all beings never shrinks from anything." Equal vision doesn't mean excusing the behavior — it means you don't reduce a whole person to one moment. Hold space for their complexity while protecting your own peace.
+
+## What This Looks Like in Practice
+"Hey, I realized I reacted internally because I had expectations. I value our relationship, so I wanted to say I felt [emotion] when [event]. No blame — I just wanted to be open. I'm good, and I hope we can stay steady with each other."
+
+## The Real Test
+The real practice begins after you act. If they reply coldly — can you stay peaceful? If they don't reply at all — can you stay steady? If they misunderstand — can you resist the urge to over-explain? THAT is the real test. The Gita's standard: You don't suppress emotions. You don't explode emotions. You observe them. You act from clarity. You surrender the result.`,
   sections: {
-    'Emotional Precision': "You're hurting — and that hurt runs deeper than the surface of what happened. That emotional intensity isn't a flaw. It's your heart telling you that something genuinely important is at stake — a need for respect, for understanding, for being truly seen. Let yourself feel it.",
-    "What's Actually Happening": "Beneath this conflict, there's a deeper current at work. Much of our relationship pain comes from attachment — from the gap between what our heart hoped for and what actually happened. The suffering comes from holding tightly to how things should be.",
-    'The Hard Truth': 'You cannot win an argument and deepen a relationship at the same time. Acting from the need to be right is acting from ego — and ego never leads to peace. The real question isn\'t "Who\'s right?" — it\'s "What do I actually need, and can I ask for it without defeating them first?"',
-    'What To Do': 'Give yourself the gift of a pause. Let the emotional storm pass through you. Then ask: "What do I actually NEED here?" Lead with that need, not the complaint. Instead of "You never listen," try "I need to feel heard right now."',
-    'Script': '"Hey, I want to talk about what happened. Here\'s what I experienced: [event]. What I felt was [emotion]. What I really need is [need]. I\'m not bringing this up to blame you — I\'m bringing it up because this relationship matters to me."',
+    'Step 1: Pause Before Reacting': 'Right now, part of you wants to react. Pause. The Gita teaches (BG 2.56): "One whose mind is not shaken by adversity — such a person is called a sage of steady wisdom." The disturbance is inside you, and recognizing that isn\'t weakness — it IS the practice.',
+    'Step 2: Identify the Attachment': 'You were attached to a specific outcome — to how they SHOULD have responded. The Gita reveals (BG 2.62-63): from attachment springs desire, from desire comes anger, from anger arises delusion. Separate the EVENT from the STORY your mind created.',
+    'Step 3: Regulate Before You Communicate': 'Write what you want to say. Don\'t send it. Wait 2 hours. The Gita teaches (BG 6.35): "The mind is restless, but it can be controlled by practice and detachment." Respond only when your nervous system is settled.',
+    'Step 4: Speak Without Demanding an Outcome': 'The Gita teaches (BG 2.47): "You have the right to perform your duty, but not to the fruits of action." Share your experience honestly. Release their reaction.',
+    'Step 5: See Their Humanity': 'The Gita teaches (BG 6.29): "One who sees all beings in the Self and the Self in all beings never shrinks from anything." Equal vision means not reducing a whole person to one moment.',
+    'What This Looks Like in Practice': '"Hey, I realized I reacted internally because I had expectations. I value our relationship, so I wanted to say I felt [emotion] when [event]. No blame — I just wanted to be open."',
+    'The Real Test': 'If they reply coldly — can you stay peaceful? If they don\'t reply — can you stay steady? That is the real test. You observe emotions. You act from clarity. You surrender the result.',
   },
   analysis: {
     mode: 'conflict',
@@ -36,7 +44,7 @@ Before your next interaction, give yourself the gift of a pause. Let the emotion
     secondary_emotions: [],
     emotional_intensity: 'moderate',
     mechanism: 'unmet_expectation',
-    mechanism_detail: 'Pain from the gap between heartfelt expectation and reality — attachment to outcome.',
+    mechanism_detail: 'Pain from the gap between heartfelt expectation and reality — attachment to outcome (BG 2.62-63).',
     power_dynamic: 'unknown',
     boundary_needed: false,
     safety_concern: false,
@@ -45,6 +53,20 @@ Before your next interaction, give yourself the gift of a pause. Let the emotion
     core_need: '',
     confidence: 0.3,
     analysis_depth: 'fallback',
+  },
+  wisdom: {
+    verse_citations: [
+      { ref: 'BG 2.56', teaching: 'Steady wisdom — unmoved by adversity' },
+      { ref: 'BG 2.62-63', teaching: 'Chain: attachment → desire → anger → delusion' },
+      { ref: 'BG 6.35', teaching: 'Mind controlled by practice and detachment' },
+      { ref: 'BG 2.47', teaching: 'Right to action, not to fruits' },
+      { ref: 'BG 6.29', teaching: 'Equal vision — seeing Self in all beings' },
+    ],
+    principle_citations: [],
+    verses_used: 5,
+    principles_used: 0,
+    corpus_size: 701,
+    gita_grounded: true,
   },
   provider: 'fallback',
   model: 'gita_wisdom_static',
