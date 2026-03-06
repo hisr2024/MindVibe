@@ -2,7 +2,9 @@
  * Centralized API client with error handling and retry logic
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+// Always use relative paths so requests go through the Next.js proxy.
+// The proxy handles cookie forwarding, retries, and backend cold starts.
+const API_BASE_URL = ''
 
 export class APIError extends Error {
   constructor(
