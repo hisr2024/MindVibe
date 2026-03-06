@@ -20,20 +20,15 @@ function getCsrfToken(): string | null {
  * - Credentials: Always included so httpOnly cookies are sent automatically
  */
 export async function apiFetch(path: string, options: RequestInit = {}) {
-  // Use relative path to go through Vercel proxy (avoids CORS issues)
-  // The vercel.json rewrites /api/* to the backend server
-  // Only use absolute URL for local development without Vercel
-  const isLocalDev = typeof window !== 'undefined' &&
-    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-
-  let url: string
-  if (isLocalDev && process.env.NEXT_PUBLIC_API_URL) {
-    // Local development - use direct API URL
-    url = process.env.NEXT_PUBLIC_API_URL + path
-  } else {
-    // Production/Vercel - use relative path for proxy
-    url = path
-  }
+  // ALWAYS use relative paths so requests go through the Next.js proxy layer.
+  // The proxy (app/api/*/route.ts + lib/proxy-utils.ts) forwards to the backend
+  // and correctly relays Set-Cookie headers back to the browser.
+  //
+  // Previously, local dev sent requests directly to http://localhost:8000,
+  // which caused cross-origin cookie failures (httpOnly cookies set on port 8000
+  // are not sent with subsequent requests to port 3000) and bypassed the proxy's
+  // retry logic for backend cold starts — resulting in 503 errors.
+  const url = path
 
   const headers = new Headers(options.headers || {})
 

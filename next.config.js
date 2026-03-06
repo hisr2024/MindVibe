@@ -16,9 +16,12 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
 
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:8000'),
-  },
+  // NOTE: Do NOT inject NEXT_PUBLIC_API_URL into the client bundle.
+  // The client must always use relative paths (e.g., /api/auth/login) so
+  // requests go through the Next.js proxy layer which handles cookie
+  // forwarding, retries, and backend cold-start resilience.
+  // The server-side proxy (lib/proxy-utils.ts) reads NEXT_PUBLIC_API_URL
+  // from process.env directly to know where the backend lives.
 
   // Output configuration for production
   output: 'standalone',
