@@ -11,6 +11,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Shield, AlertTriangle, CheckCircle, TrendingDown, Activity } from 'lucide-react'
+import { apiFetch } from '@/lib/api'
 
 interface RiskFactor {
   value: number
@@ -71,7 +72,7 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
   const fetchRiskAssessment = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/analytics/advanced/risk-assessment', { credentials: 'include' })
+      const response = await apiFetch('/api/analytics/advanced/risk-assessment')
 
       if (!response.ok) {
         throw new Error('Failed to fetch risk assessment')

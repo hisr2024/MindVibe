@@ -1,9 +1,32 @@
 /**
  * Offline Manager
  * Handles online/offline state detection, operation queueing, and auto-sync
+ *
+ * Security: Uses apiFetch for synced operations so CSRF tokens and auth
+ * cookies are included automatically. Validates endpoints against an
+ * allowlist to prevent queuing requests to arbitrary paths.
  */
 
 import { indexedDBManager, STORES } from './indexedDB'
+import { apiFetch } from '@/lib/api'
+
+/** Allowed endpoint prefixes for queued offline operations */
+const ALLOWED_ENDPOINT_PREFIXES = [
+  '/api/journal/',
+  '/api/journeys/',
+  '/api/moods',
+  '/api/sync/',
+  '/api/journey-engine/',
+  '/api/companion/',
+  '/api/voice-companion/',
+  '/api/feedback',
+  '/api/community/',
+  '/api/notifications/',
+  '/api/meditation/',
+  '/api/emotional-reset/',
+  '/api/karma-reset/',
+  '/api/chat/',
+]
 
 export interface QueuedOperation {
   id: string
@@ -99,9 +122,19 @@ class OfflineManager {
   }
 
   /**
-   * Queue an operation for later sync
+   * Queue an operation for later sync.
+   * Validates endpoint against allowlist to prevent arbitrary request queuing.
    */
   async queueOperation(operation: Omit<QueuedOperation, 'id' | 'timestamp' | 'retryCount'>): Promise<void> {
+    // Validate endpoint against allowlist
+    const isAllowed = ALLOWED_ENDPOINT_PREFIXES.some(
+      (prefix) => operation.endpoint.startsWith(prefix)
+    )
+    if (!isAllowed) {
+      console.warn('Offline queue: blocked operation to non-allowed endpoint:', operation.endpoint)
+      return
+    }
+
     const queuedOp: QueuedOperation = {
       ...operation,
       id: `op_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
@@ -192,20 +225,27 @@ class OfflineManager {
   }
 
   /**
-   * Execute a queued operation
+   * Execute a queued operation.
+   * Uses apiFetch to include CSRF tokens and auth cookies automatically.
+   * Includes a 30-second timeout to prevent indefinite hangs during sync.
    */
   private async executeOperation(operation: QueuedOperation): Promise<void> {
-    const response = await fetch(operation.endpoint, {
-      method: operation.type,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: operation.data ? JSON.stringify(operation.data) : undefined,
-    })
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30_000)
 
-    if (!response.ok) {
-      throw new Error(`Operation failed: ${response.statusText}`)
+    try {
+      const response = await apiFetch(operation.endpoint, {
+        method: operation.type,
+        headers: { 'Content-Type': 'application/json' },
+        body: operation.data ? JSON.stringify(operation.data) : undefined,
+        signal: controller.signal,
+      })
+
+      if (!response.ok) {
+        throw new Error(`Operation failed: ${response.status} ${response.statusText}`)
+      }
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 

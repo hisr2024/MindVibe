@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { Calendar, Tag } from 'lucide-react'
+import { apiFetch } from '@/lib/api'
 
 interface TagCorrelation {
   tag: string
@@ -65,7 +66,7 @@ export function PatternAnalysis({ className = '' }: PatternAnalysisProps) {
   const fetchPatterns = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/analytics/advanced/pattern-analysis', { credentials: 'include' })
+      const response = await apiFetch('/api/analytics/advanced/pattern-analysis')
 
       if (!response.ok) {
         throw new Error('Failed to fetch pattern analysis')

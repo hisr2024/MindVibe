@@ -359,7 +359,7 @@ async def perform_quantum_dive(
         logger.error(f"Quantum dive failed for user {user_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Quantum dive analysis failed: {str(e)}"
+            detail="An internal error occurred. Please try again."
         )
 
 
@@ -516,7 +516,7 @@ async def deep_dive_layer(
         logger.error(f"Layer deep dive failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Layer analysis failed: {str(e)}"
+            detail="An internal error occurred. Please try again."
         )
 
 

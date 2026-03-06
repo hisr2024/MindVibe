@@ -25,6 +25,11 @@ interface UseAuthResult {
 // Only store non-sensitive user profile data in localStorage (no tokens!)
 const AUTH_USER_KEY = 'mindvibe_auth_user'
 
+// Shared refresh promise to prevent concurrent refresh token requests.
+// If multiple components detect a 401 and call refreshSession() simultaneously,
+// only the first one makes the actual request; others await the same promise.
+let refreshPromise: Promise<void> | null = null
+
 function getStoredUser(): AuthUser | null {
   if (typeof window === 'undefined') return null
   const stored = localStorage.getItem(AUTH_USER_KEY)
@@ -134,38 +139,18 @@ export function useAuth(): UseAuthResult {
     setLoading(true)
     setError(null)
 
-    const maxRetries = 3
-
     try {
-      // Call backend signup API with auto-retry on 503
-      let signupResponse: Response | undefined
+      // The proxy layer handles 503 retries with exponential backoff,
+      // so we make a single request and let the server-side proxy absorb cold starts.
+      let signupResponse: Response
 
-      for (let attempt = 0; attempt < maxRetries; attempt++) {
-        try {
-          signupResponse = await apiFetch('/api/auth/signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email.toLowerCase(), password }),
-          })
-        } catch (fetchError) {
-          if (attempt < maxRetries - 1) {
-            setError('Connecting to server... Please wait.')
-            await new Promise(r => setTimeout(r, 3000))
-            continue
-          }
-          throw new Error('Unable to reach the server. Please check your connection and try again.')
-        }
-
-        if (signupResponse.status === 503 && attempt < maxRetries - 1) {
-          setError('Server is starting up... Retrying automatically.')
-          await new Promise(r => setTimeout(r, 4000))
-          continue
-        }
-
-        break
-      }
-
-      if (!signupResponse) {
+      try {
+        signupResponse = await apiFetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.toLowerCase(), password }),
+        })
+      } catch {
         throw new Error('Unable to reach the server. Please check your connection and try again.')
       }
 
@@ -228,45 +213,23 @@ export function useAuth(): UseAuthResult {
     setLoading(true)
     setError(null)
 
-    const maxRetries = 3
-
     try {
-      let response: Response | undefined
-      let lastError: Error | undefined
+      // The proxy layer handles 503 retries with exponential backoff,
+      // so we make a single request and let the server-side proxy absorb cold starts.
+      let response: Response
 
-      for (let attempt = 0; attempt < maxRetries; attempt++) {
-        try {
-          response = await apiFetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: email.toLowerCase(),
-              password,
-              two_factor_code: twoFactorCode || null,
-            }),
-          })
-        } catch (fetchError) {
-          lastError = new Error('Unable to reach the server. Please check your connection and try again.')
-          if (attempt < maxRetries - 1) {
-            setError('Connecting to server... Please wait.')
-            await new Promise(r => setTimeout(r, 3000))
-            continue
-          }
-          throw lastError
-        }
-
-        // If 503, auto-retry with feedback (backend is cold-starting)
-        if (response.status === 503 && attempt < maxRetries - 1) {
-          setError('Server is starting up... Retrying automatically.')
-          await new Promise(r => setTimeout(r, 4000))
-          continue
-        }
-
-        break
-      }
-
-      if (!response) {
-        throw lastError || new Error('Unable to reach the server.')
+      try {
+        response = await apiFetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email.toLowerCase(),
+            password,
+            two_factor_code: twoFactorCode || null,
+          }),
+        })
+      } catch {
+        throw new Error('Unable to reach the server. Please check your connection and try again.')
       }
 
       if (!response.ok) {
@@ -326,23 +289,35 @@ export function useAuth(): UseAuthResult {
   }, [])
 
   const refreshSession = useCallback(async () => {
-    try {
-      // httpOnly refresh_token cookie is sent automatically
-      const response = await apiFetch('/api/auth/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      })
-
-      if (!response.ok) {
-        throw new Error('Session refresh failed')
-      }
-      // Backend sets new httpOnly access_token cookie automatically
-    } catch (err) {
-      // Session refresh failed, user needs to re-login
-      clearAuthData()
-      setUser(null)
-      throw err
+    // If a refresh is already in flight, reuse it to prevent race conditions.
+    // Multiple concurrent 401s all share the same refresh request.
+    if (refreshPromise) {
+      return refreshPromise
     }
+
+    refreshPromise = (async () => {
+      try {
+        // httpOnly refresh_token cookie is sent automatically
+        const response = await apiFetch('/api/auth/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        })
+
+        if (!response.ok) {
+          throw new Error('Session refresh failed')
+        }
+        // Backend sets new httpOnly access_token cookie automatically
+      } catch (err) {
+        // Session refresh failed, user needs to re-login
+        clearAuthData()
+        setUser(null)
+        throw err
+      } finally {
+        refreshPromise = null
+      }
+    })()
+
+    return refreshPromise
   }, [])
 
   // Listen for storage changes (cross-tab sync of user profile)

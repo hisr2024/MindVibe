@@ -11,6 +11,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { LineChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { TrendingUp, AlertCircle } from 'lucide-react'
+import { apiFetch } from '@/lib/api'
 
 interface MoodPrediction {
   date: string
@@ -43,7 +44,7 @@ export function MoodForecastChart({ forecastDays = 7, className = '' }: MoodFore
   const fetchForecast = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/analytics/advanced/mood-predictions?forecast_days=${forecastDays}`, { credentials: 'include' })
+      const response = await apiFetch(`/api/analytics/advanced/mood-predictions?forecast_days=${forecastDays}`)
 
       if (!response.ok) {
         throw new Error('Failed to fetch mood forecast')

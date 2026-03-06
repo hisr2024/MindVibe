@@ -43,6 +43,8 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
     const csrfToken = getCsrfToken()
     if (csrfToken) {
       headers.set('X-CSRF-Token', csrfToken)
+    } else if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
+      console.warn(`[apiFetch] No CSRF token for ${method} ${path} — request may be rejected with 403`)
     }
   }
 

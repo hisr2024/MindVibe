@@ -9,8 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { selectWisdom, buildVerseContext, type WisdomResult } from '@/lib/wisdom-core'
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { BACKEND_URL } from '@/lib/proxy-utils'
 
 // Known backend error placeholders that should NEVER reach the user
 const BACKEND_ERROR_PLACEHOLDERS = [

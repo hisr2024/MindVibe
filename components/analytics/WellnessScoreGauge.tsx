@@ -12,6 +12,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Activity, TrendingUp, Target, Heart } from 'lucide-react'
+import { apiFetch } from '@/lib/api'
 
 interface WellnessScoreData {
   total_score: number
@@ -59,7 +60,7 @@ export function WellnessScoreGauge({ userId, className = '' }: WellnessScoreGaug
   const fetchWellnessScore = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/analytics/advanced/wellness-score', { credentials: 'include' })
+      const response = await apiFetch('/api/analytics/advanced/wellness-score')
 
       if (!response.ok) {
         throw new Error('Failed to fetch wellness score')

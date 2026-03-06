@@ -132,9 +132,13 @@ export function createProxyHandler(
     const body = rawBody && rawBody.length > 0 ? rawBody : undefined
     const label = `[Proxy ${method} ${backendPath}]`
 
+    // Forward query parameters from the original request
+    const queryString = new URL(request.url).search
+    const targetUrl = `${BACKEND_URL}${backendPath}${queryString}`
+
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        const backendResponse = await fetch(`${BACKEND_URL}${backendPath}`, {
+        const backendResponse = await fetch(targetUrl, {
           method: upperMethod,
           headers: proxyHeaders(request, upperMethod),
           body,
@@ -146,6 +150,14 @@ export function createProxyHandler(
             backendResponse,
             new NextResponse(null, { status: 204 })
           )
+        }
+
+        // Retry on 503 (backend cold-starting or migrations pending)
+        if (backendResponse.status === 503 && attempt < maxRetries) {
+          const backoffMs = 2000 * Math.pow(2, attempt)
+          console.warn(`${label} Got 503, retrying in ${backoffMs}ms (attempt ${attempt + 1}/${maxRetries})...`)
+          await new Promise(resolve => setTimeout(resolve, backoffMs))
+          continue
         }
 
         const data = await backendResponse.json().catch(() => ({}))

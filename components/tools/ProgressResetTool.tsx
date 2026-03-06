@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { apiFetch } from '@/lib/api'
 
 interface ResetPreview {
   will_reset: {
@@ -49,10 +50,7 @@ export function ProgressResetTool() {
     setError(null)
     
     try {
-      const response = await fetch('/api/progress/reset/preview', {
-        method: 'GET',
-        credentials: 'include',
-      })
+      const response = await apiFetch('/api/progress/reset/preview')
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
@@ -89,12 +87,9 @@ export function ProgressResetTool() {
     setError(null)
 
     try {
-      const response = await fetch('/api/progress/reset', {
+      const response = await apiFetch('/api/progress/reset', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           confirm: true,
           reason: 'User requested reset from dashboard',

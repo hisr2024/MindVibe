@@ -26,6 +26,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request
 from openai import AsyncOpenAI  # noqa: F401 - used at module level
 from pydantic import BaseModel, Field
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db, get_current_user_optional
@@ -690,8 +691,6 @@ async def reset_user_journey(
     - Assessments
     - Journey progress tracking
     """
-    from sqlalchemy import text
-
     request_id = str(uuid.uuid4())[:8]
     start_time = datetime.now()
 
@@ -842,7 +841,7 @@ Tone: warm, encouraging, deeply wise, grounded in Gita. Not generic self-help.
         )
         raise HTTPException(
             status_code=500,
-            detail=f"Journey reset failed: {str(e)}"
+            detail="Journey reset failed. Please try again later."
         )
 
 

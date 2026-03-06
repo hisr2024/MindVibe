@@ -17,6 +17,8 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime
 import logging
 
+from backend.deps import get_current_user_flexible
+
 # Import services
 from backend.services.voice_learning.analytics_dashboard import (
     get_analytics_dashboard,
@@ -114,11 +116,8 @@ class InteractionRequest(BaseModel):
     content_category: Optional[str] = Field(None, alias="contentCategory")
 
 
-# Placeholder for user authentication
-def get_current_user_id() -> str:
-    """Get current user ID from auth context."""
-    # TODO: Implement actual auth
-    return "demo_user"
+# Use real auth dependency
+get_current_user_id = get_current_user_flexible
 
 
 # ==================== Analytics Dashboard Routes ====================
@@ -152,7 +151,7 @@ async def get_analytics_snapshot(user_id: str = Depends(get_current_user_id)):
         }
     except Exception as e:
         logger.error(f"Failed to get analytics snapshot: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.")
 
 
 @router.get("/analytics/satisfaction-trend")

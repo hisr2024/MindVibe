@@ -140,8 +140,8 @@ def handle_service_error(error: JourneyServiceError) -> HTTPException:
     description="Get a paginated list of journeys for the current user.",
 )
 async def list_journeys(
-    status: Literal["draft", "active", "completed", "archived"] | None = Query(
-        None, description="Filter by status"
+    status_filter: Literal["draft", "active", "completed", "archived"] | None = Query(
+        None, alias="status", description="Filter by status"
     ),
     search: str | None = Query(None, max_length=100, description="Search in title"),
     sort_by: Literal["created_at", "updated_at", "title"] = Query(
@@ -163,7 +163,7 @@ async def list_journeys(
         service = JourneyService(db)
         result = await service.list_journeys(
             user_id,
-            status=status,
+            status=status_filter,
             search=search,
             sort_by=sort_by,
             sort_order=sort_order,

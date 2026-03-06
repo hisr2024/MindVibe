@@ -202,7 +202,7 @@ async def update_language_preferences(
         logger.error(f"Error updating language preferences: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update preferences: {str(e)}"
+            detail="An internal error occurred. Please try again."
         )
 
 
@@ -257,7 +257,7 @@ async def get_language_preferences(
         logger.error(f"Error retrieving language preferences: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve preferences: {str(e)}"
+            detail="An internal error occurred. Please try again."
         )
 
 
@@ -303,7 +303,7 @@ async def clear_translation_cache(request: Request) -> dict[str, Any]:
         logger.error(f"Error clearing cache: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to clear cache: {str(e)}"
+            detail="An internal error occurred. Please try again."
         )
 
 
@@ -331,5 +331,5 @@ async def get_cache_stats(request: Request) -> dict[str, Any]:
         logger.error(f"Error retrieving cache stats: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve cache stats: {str(e)}"
+            detail="An internal error occurred. Please try again."
         )

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { apiFetch } from '@/lib/api'
 
 interface TeamMember {
   id: number
@@ -66,19 +67,9 @@ export default function TeamsPage() {
   const [inviteRole, setInviteRole] = useState('member')
   const [inviteMessage, setInviteMessage] = useState('')
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-
-  const getAuthHeaders = useCallback((): HeadersInit => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
-    return {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    }
-  }, [])
-
   const fetchTeams = useCallback(async () => {
     try {
-      const res = await fetch(`${apiUrl}/api/teams`, { headers: getAuthHeaders() })
+      const res = await apiFetch(`/api/teams`)
       if (res.ok) {
         const data = await res.json()
         setTeams(data.teams || [])
@@ -86,12 +77,12 @@ export default function TeamsPage() {
     } catch (err) {
       console.error('Failed to fetch teams:', err)
     }
-  }, [apiUrl, getAuthHeaders])
+  }, [])
 
   const fetchPendingInvitations = useCallback(async () => {
     try {
-      const res = await fetch(`${apiUrl}/api/teams/invitations/pending`, {
-        headers: getAuthHeaders(),
+      const res = await apiFetch(`/api/teams/invitations/pending`, {
+        headers: { 'Content-Type': 'application/json' },
       })
       if (res.ok) {
         const data = await res.json()
@@ -100,12 +91,12 @@ export default function TeamsPage() {
     } catch (err) {
       console.error('Failed to fetch invitations:', err)
     }
-  }, [apiUrl, getAuthHeaders])
+  }, [])
 
   const fetchTeamMembers = async (teamId: string) => {
     try {
-      const res = await fetch(`${apiUrl}/api/teams/${teamId}/members`, {
-        headers: getAuthHeaders(),
+      const res = await apiFetch(`/api/teams/${teamId}/members`, {
+        headers: { 'Content-Type': 'application/json' },
       })
       if (res.ok) {
         const data = await res.json()
@@ -118,8 +109,8 @@ export default function TeamsPage() {
 
   const fetchMyPermissions = async (teamId: string) => {
     try {
-      const res = await fetch(`${apiUrl}/api/teams/${teamId}/permissions`, {
-        headers: getAuthHeaders(),
+      const res = await apiFetch(`/api/teams/${teamId}/permissions`, {
+        headers: { 'Content-Type': 'application/json' },
       })
       if (res.ok) {
         const data = await res.json()
@@ -139,9 +130,9 @@ export default function TeamsPage() {
   const handleCreateTeam = async () => {
     if (!createName.trim()) return
     try {
-      const res = await fetch(`${apiUrl}/api/teams`, {
+      const res = await apiFetch(`/api/teams`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: createName,
           description: createDescription || null,
@@ -161,9 +152,9 @@ export default function TeamsPage() {
   const handleInviteMember = async () => {
     if (!selectedTeam || !inviteEmail.trim()) return
     try {
-      const res = await fetch(`${apiUrl}/api/teams/${selectedTeam.id}/invitations`, {
+      const res = await apiFetch(`/api/teams/${selectedTeam.id}/invitations`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: inviteEmail,
           role: inviteRole,
@@ -183,9 +174,9 @@ export default function TeamsPage() {
 
   const handleAcceptInvitation = async (invitationId: string) => {
     try {
-      const res = await fetch(`${apiUrl}/api/teams/invitations/accept`, {
+      const res = await apiFetch(`/api/teams/invitations/accept`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ invitation_id: invitationId }),
       })
       if (res.ok) {
@@ -199,9 +190,9 @@ export default function TeamsPage() {
 
   const handleDeclineInvitation = async (invitationId: string) => {
     try {
-      const res = await fetch(`${apiUrl}/api/teams/invitations/${invitationId}/decline`, {
+      const res = await apiFetch(`/api/teams/invitations/${invitationId}/decline`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers: { 'Content-Type': 'application/json' },
       })
       if (res.ok) {
         fetchPendingInvitations()
@@ -214,9 +205,9 @@ export default function TeamsPage() {
   const handleLeaveTeam = async (teamId: string) => {
     if (!confirm('Are you sure you want to leave this team?')) return
     try {
-      const res = await fetch(`${apiUrl}/api/teams/${teamId}/leave`, {
+      const res = await apiFetch(`/api/teams/${teamId}/leave`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers: { 'Content-Type': 'application/json' },
       })
       if (res.ok) {
         setSelectedTeam(null)

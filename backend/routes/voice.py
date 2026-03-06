@@ -1712,7 +1712,7 @@ async def divine_voice_synthesize(
         raise
     except Exception as e:
         logger.error(f"Divine voice error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.")
 
 
 @router.post("/divine/shloka")
@@ -1768,7 +1768,7 @@ async def divine_voice_shloka(
         raise
     except Exception as e:
         logger.error(f"Shloka synthesis error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.")
 
 
 @router.post("/divine/stop")

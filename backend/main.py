@@ -5,7 +5,7 @@ import os
 import sys
 import traceback
 import ssl
-from typing import Any, Awaitable, Callable, Dict
+from typing import Any, Dict
 from urllib.parse import parse_qs, urlparse
 
 # Configure logging early
@@ -92,68 +92,6 @@ if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
 elif DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
-
-
-def _connect_args_for_ssl(db_url: str) -> Dict[str, Any]:
-    """Build asyncpg connect args to honor sslmode/ssl query params.
-
-    Render Postgres instances require TLS by default but use self-signed
-    certificates. When using asyncpg, the ``sslmode=require`` query parameter
-    from the connection string is ignored unless we translate it into the
-    ``ssl`` flag expected by asyncpg.
-
-    Auto-detection:
-    - Render environment: defaults to 'require' (SSL without cert verification)
-    - Other environments: defaults to 'require' for compatibility
-    - Override with DB_SSL_MODE environment variable
-    """
-    import ssl as ssl_module
-    from urllib.parse import parse_qs, urlparse
-    import logging
-
-    logger = logging.getLogger(__name__)
-    parsed = urlparse(db_url)
-    query_params = parse_qs(parsed.query)
-
-    ssl_pref = os.getenv("DB_SSL_MODE") or query_params.get("sslmode", [None])[0] or query_params.get("ssl", [None])[0]
-
-    # Auto-detect Render environment (Render sets RENDER=true)
-    is_render = os.getenv("RENDER", "").lower() == "true"
-
-    # Default SSL mode based on environment
-    if not ssl_pref:
-        if is_render:
-            ssl_pref = "require"
-            logger.info("Render environment detected - using SSL without certificate verification")
-        else:
-            ssl_pref = "verify-full"
-            logger.info("Production environment - using SSL with full certificate verification")
-
-    ssl_pref = ssl_pref.lower()
-
-    # Full verification (RECOMMENDED for production)
-    if ssl_pref in {"verify-ca", "verify-full", "true", "1"}:
-        return {"ssl": ssl_module.create_default_context()}
-
-    # Require SSL but don't verify certificates (INSECURE - use only if needed)
-    if ssl_pref in {"require-no-verify", "require", "required"}:
-        logger.warning(
-            "Database SSL certificate verification is DISABLED. "
-            "This is insecure and should only be used for development. "
-            "For production, use DB_SSL_MODE=verify-full"
-        )
-        ssl_context = ssl_module.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl_module.CERT_NONE
-        return {"ssl": ssl_context}
-
-    # Disable SSL (NOT RECOMMENDED)
-    if ssl_pref in {"disable", "false", "0"}:
-        logger.warning("Database SSL is DISABLED. This is not recommended for production.")
-        return {"ssl": False}
-
-    # Fallback to full verification
-    return {"ssl": ssl_module.create_default_context()}
 
 
 # Import engine and SessionLocal from deps.py to ensure single database connection pool
@@ -269,62 +207,6 @@ app.add_middleware(
     ],
     max_age=3600,
 )
-
-@app.middleware("http")
-async def add_cors(request: Request, call_next: Callable[[Request], Awaitable[JSONResponse]]) -> JSONResponse:
-    origin = request.headers.get("origin")
-
-    # Check if origin is allowed - be more flexible with www/non-www variants
-    if origin and origin in ALLOWED_ORIGINS:
-        allowed_origin = origin
-    elif origin:
-        # Check for www/non-www variant
-        if origin.startswith("https://www."):
-            non_www = origin.replace("https://www.", "https://")
-            if non_www in ALLOWED_ORIGINS:
-                allowed_origin = origin  # Allow the www variant
-            else:
-                allowed_origin = ALLOWED_ORIGINS[0] if ALLOWED_ORIGINS else "https://mind-vibe-universal.vercel.app"
-        elif origin.startswith("https://"):
-            www_variant = origin.replace("https://", "https://www.")
-            if www_variant in ALLOWED_ORIGINS:
-                allowed_origin = origin  # Allow the non-www variant
-            else:
-                allowed_origin = ALLOWED_ORIGINS[0] if ALLOWED_ORIGINS else "https://mind-vibe-universal.vercel.app"
-        else:
-            allowed_origin = ALLOWED_ORIGINS[0] if ALLOWED_ORIGINS else "https://mind-vibe-universal.vercel.app"
-    else:
-        # Fallback to first allowed origin (for non-browser clients)
-        allowed_origin = ALLOWED_ORIGINS[0] if ALLOWED_ORIGINS else "https://mind-vibe-universal.vercel.app"
-
-    cors_headers = {
-        "Access-Control-Allow-Origin": allowed_origin,
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-        "Access-Control-Allow-Headers": ", ".join(ALLOWED_HEADERS),
-    }
-
-    if request.method == "OPTIONS":
-        return JSONResponse(
-            content={"status": "ok"},
-            headers=cors_headers,
-        )
-
-    try:
-        response = await call_next(request)
-        # Add CORS headers to successful response
-        for key, value in cors_headers.items():
-            response.headers[key] = value
-        return response
-    except Exception as e:
-        # Ensure CORS headers are added even when errors occur
-        logger = logging.getLogger("mindvibe.cors")
-        logger.error(f"Error in request processing: {e}")
-        return JSONResponse(
-            status_code=500,
-            content={"detail": "Internal server error"},
-            headers=cors_headers,
-        )
 
 @app.on_event("startup")
 async def startup():
@@ -1054,7 +936,7 @@ except Exception as e:
 startup_logger.info("\n[Sync] Attempting to import Sync router...")
 try:
     from backend.routes.sync import router as sync_router
-    app.include_router(sync_router)
+    app.include_router(sync_router, prefix="/api")
     startup_logger.info("✅ [SUCCESS] Sync router loaded (Quantum Enhancement #2 - Offline-First)")
     startup_logger.info("   • POST   /api/sync/batch - Batch sync offline operations")
     startup_logger.info("   • POST   /api/sync/pull - Pull server-side changes")

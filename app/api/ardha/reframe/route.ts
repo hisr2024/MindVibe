@@ -10,8 +10,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { forwardCookies, BACKEND_URL } from '@/lib/proxy-utils';
 
 // Allow long-running Ardha generations (deep/quantum) on platforms that support route max duration.
 export const maxDuration = 180;
@@ -83,11 +82,14 @@ export async function POST(request: NextRequest) {
       const data = await response.json().catch(() => ({}));
 
       if (response.ok && data.response) {
-        return NextResponse.json({
-          response: data.response,
-          sources: data.sources || [],
-          depth,
-        });
+        return forwardCookies(
+          response,
+          NextResponse.json({
+            response: data.response,
+            sources: data.sources || [],
+            depth,
+          })
+        );
       }
 
       // Handle specific error codes from backend
