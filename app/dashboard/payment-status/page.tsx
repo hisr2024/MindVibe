@@ -94,15 +94,6 @@ function formatDate(dateStr: string): string {
   })
 }
 
-function formatDateTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
 
 // ---------------------------------------------------------------------------
 // Provider SVG icons (inline, no external deps)

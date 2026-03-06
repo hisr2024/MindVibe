@@ -8,6 +8,9 @@ export interface AuthUser {
   email: string
   name?: string
   sessionId?: string
+  subscriptionTier?: string
+  subscriptionStatus?: string
+  isDeveloper?: boolean
 }
 
 interface UseAuthResult {
@@ -114,6 +117,9 @@ export function useAuth(): UseAuthResult {
               email: data.email,
               name: storedUser?.name || data.email.split('@')[0],
               sessionId: data.session_id,
+              subscriptionTier: data.subscription_tier || storedUser?.subscriptionTier || 'free',
+              subscriptionStatus: data.subscription_status || storedUser?.subscriptionStatus || 'active',
+              isDeveloper: data.is_developer || storedUser?.isDeveloper || false,
             }
             storeUserProfile(verifiedUser)
             setUser(verifiedUser)
@@ -171,7 +177,7 @@ export function useAuth(): UseAuthResult {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: email.toLowerCase(), password }),
         })
-      } catch (fetchError) {
+      } catch {
         throw new Error('Account created but could not sign in automatically. Please try signing in.')
       }
 
@@ -191,6 +197,9 @@ export function useAuth(): UseAuthResult {
         email: loginData.email,
         name: name || email.split('@')[0],
         sessionId: loginData.session_id,
+        subscriptionTier: loginData.subscription_tier || 'free',
+        subscriptionStatus: loginData.subscription_status || 'active',
+        isDeveloper: loginData.is_developer || false,
       }
 
       storeUserProfile(authUser)
@@ -249,12 +258,15 @@ export function useAuth(): UseAuthResult {
         email: data.email,
         name: data.email.split('@')[0],
         sessionId: data.session_id,
+        subscriptionTier: data.subscription_tier || 'free',
+        subscriptionStatus: data.subscription_status || 'active',
+        isDeveloper: data.is_developer || false,
       }
 
       storeUserProfile(authUser)
       setUser(authUser)
 
-      // Dispatch event for other components
+      // Dispatch event for other components (subscription hook listens to this)
       window.dispatchEvent(new CustomEvent('auth-changed', { detail: { user: authUser } }))
 
       return authUser

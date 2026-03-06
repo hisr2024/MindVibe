@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 const pages = [
-  { href: '/flows/access', title: 'Page 1: Access', detail: 'Login ID, password, and first-time registration kept local.' },
+  { href: '/account', title: 'Page 1: Account', detail: 'Secure login, registration, and account management.' },
   { href: '/flows/check-in', title: 'Page 2: State check-in', detail: 'Quick mood capture with present-moment context.' },
   { href: '/flows/kiaan', title: 'Page 3: Talk to KIAAN', detail: 'Chat plus clarity pause watch with pass-through controls.' },
   { href: '/flows/ardha', title: 'Page 4: Ardha reframing', detail: 'Ancient wisdom-aligned reframes with validation and steps.' },

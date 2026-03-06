@@ -41,7 +41,22 @@ export default function AdminLogin() {
         return
       }
 
-      // Backend sets httpOnly cookies automatically - no localStorage token storage
+      // Store admin session token in sessionStorage (not localStorage for security)
+      // Admin RBAC middleware requires Authorization: Bearer <token> header
+      // sessionStorage is cleared when the browser tab is closed
+      if (data.access_token) {
+        sessionStorage.setItem('mindvibe_admin_token', data.access_token)
+        sessionStorage.setItem('mindvibe_admin_session', JSON.stringify({
+          adminId: data.admin_id,
+          email: data.email,
+          fullName: data.full_name,
+          role: data.role,
+          sessionId: data.session_id,
+          expiresIn: data.expires_in,
+          loginAt: new Date().toISOString(),
+        }))
+      }
+
       router.push('/admin')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
