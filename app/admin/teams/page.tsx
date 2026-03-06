@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { apiFetch } from '@/lib/api'
 
 interface TeamMember {
   id: number
@@ -60,7 +61,7 @@ export default function AdminTeamsPage() {
   const fetchTeams = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `/api/admin/teams?limit=${pageSize}&offset=${page * pageSize}&include_inactive=true`,
         { headers: getAuthHeaders() }
       )
@@ -79,7 +80,7 @@ export default function AdminTeamsPage() {
   const fetchTeamDetail = async (teamId: string) => {
     setDetailLoading(true)
     try {
-      const res = await fetch(`/api/admin/teams/${teamId}`, {
+      const res = await apiFetch(`/api/admin/teams/${teamId}`, {
         headers: getAuthHeaders(),
       })
       if (res.ok) {
@@ -97,7 +98,7 @@ export default function AdminTeamsPage() {
 
   const handleToggleActive = async (teamId: string, currentlyActive: boolean) => {
     try {
-      const res = await fetch(`/api/admin/teams/${teamId}`, {
+      const res = await apiFetch(`/api/admin/teams/${teamId}`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
         body: JSON.stringify({ is_active: !currentlyActive }),
@@ -116,7 +117,7 @@ export default function AdminTeamsPage() {
   const handleDeleteTeam = async (teamId: string) => {
     if (!confirm('Are you sure you want to delete this team? This action uses soft-delete and can be recovered.')) return
     try {
-      const res = await fetch(`/api/admin/teams/${teamId}`, {
+      const res = await apiFetch(`/api/admin/teams/${teamId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       })
@@ -132,7 +133,7 @@ export default function AdminTeamsPage() {
   const handleRemoveMember = async (teamId: string, userId: string) => {
     if (!confirm('Remove this member from the team?')) return
     try {
-      const res = await fetch(`/api/admin/teams/${teamId}/members/${userId}`, {
+      const res = await apiFetch(`/api/admin/teams/${teamId}/members/${userId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       })
@@ -147,7 +148,7 @@ export default function AdminTeamsPage() {
 
   const handleUpdateRole = async (teamId: string, userId: string, newRole: string) => {
     try {
-      const res = await fetch(`/api/admin/teams/${teamId}/members/${userId}/role`, {
+      const res = await apiFetch(`/api/admin/teams/${teamId}/members/${userId}/role`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
         body: JSON.stringify({ role: newRole }),

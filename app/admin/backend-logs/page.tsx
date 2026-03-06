@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { apiFetch } from '@/lib/api'
 
 interface LogEntry {
   timestamp: string
@@ -83,9 +82,7 @@ export default function BackendLogsPage() {
       if (levelFilter) params.set('level', levelFilter)
       if (searchQuery) params.set('search', searchQuery)
 
-      const res = await fetch(`/api/admin/backend-logs?${params}`, {
-        credentials: 'include',
-      })
+      const res = await apiFetch(`/api/admin/backend-logs?${params}`)
 
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`)
@@ -103,9 +100,7 @@ export default function BackendLogsPage() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/backend-logs/stats`, {
-        credentials: 'include',
-      })
+      const res = await apiFetch(`/api/admin/backend-logs/stats`)
       if (res.ok) {
         setStats(await res.json())
       }

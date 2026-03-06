@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { apiFetch } from '@/lib/api'
 
 interface CookiePreferences {
   necessary: boolean
@@ -74,12 +75,9 @@ export default function CookieBanner({
       const anonymousId = localStorage.getItem('anonymous_id') || generateId()
       localStorage.setItem('anonymous_id', anonymousId)
       
-      await fetch('/api/compliance/cookie-consent', {
+      await apiFetch('/api/compliance/cookie-consent', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...prefs,
           anonymous_id: anonymousId,
