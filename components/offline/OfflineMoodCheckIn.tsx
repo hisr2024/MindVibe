@@ -148,7 +148,7 @@ export function OfflineMoodCheckIn({
       }
     } catch (error) {
       if (process.env.NODE_ENV !== 'production') console.error('Failed to save mood:', error)
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to save mood')
+      setErrorMessage(error instanceof Error ? error.message : 'We\'re having trouble saving your mood. Please try again.')
       setSaveStatus('error')
     } finally {
       setSaving(false)

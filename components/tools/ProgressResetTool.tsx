@@ -111,7 +111,7 @@ export function ProgressResetTool() {
       }, 3000)
     } catch (err) {
       if (process.env.NODE_ENV !== 'production') console.error('Reset error:', err)
-      setError(err instanceof Error ? err.message : 'Reset failed')
+      setError(err instanceof Error ? err.message : 'We\'re having trouble completing the reset. Please try again.')
     } finally {
       setIsLoading(false)
     }
