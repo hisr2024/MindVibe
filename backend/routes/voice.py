@@ -137,7 +137,9 @@ async def synthesize_speech(
     except HTTPException:
         raise
     except Exception as e:
-        logger.warning(f"Subscription check failed for voice synthesis, allowing request: {e}")
+        logger.error(f"Subscription check failed for voice synthesis: {e}", exc_info=True)
+        # Fail open for voice since it's a non-critical feature - degraded UX is acceptable
+        # For security-sensitive features, fail closed instead
 
     logger.info(f"TTS request from user {user_id}: {len(payload.text)} chars, lang={payload.language}")
 

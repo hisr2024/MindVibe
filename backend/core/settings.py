@@ -127,7 +127,9 @@ class Settings(BaseSettings):
         import logging
 
         environment = os.getenv("ENVIRONMENT", "development").lower()
-        require_encryption = os.getenv("MINDVIBE_REQUIRE_ENCRYPTION", "true").lower() == "true"
+        require_encryption = parse_bool_strict(
+            os.getenv("MINDVIBE_REQUIRE_ENCRYPTION", "true"), "MINDVIBE_REQUIRE_ENCRYPTION"
+        )
 
         if require_encryption and not v:
             if environment in ("production", "prod"):
@@ -147,18 +149,24 @@ class Settings(BaseSettings):
         return v
 
     # Chat Data Encryption — encrypt user messages stored in database
-    ENCRYPT_CHAT_DATA: bool = os.getenv("ENCRYPT_CHAT_DATA", "true").lower() == "true"
+    ENCRYPT_CHAT_DATA: bool = parse_bool_strict(
+        os.getenv("ENCRYPT_CHAT_DATA", "true"), "ENCRYPT_CHAT_DATA"
+    )
 
     # Data Retention Policy — auto-purge soft-deleted chat data
     CHAT_RETENTION_DAYS: int = int(os.getenv("CHAT_RETENTION_DAYS", "90"))
-    RETENTION_CLEANUP_ENABLED: bool = os.getenv("RETENTION_CLEANUP_ENABLED", "true").lower() == "true"
+    RETENTION_CLEANUP_ENABLED: bool = parse_bool_strict(
+        os.getenv("RETENTION_CLEANUP_ENABLED", "true"), "RETENTION_CLEANUP_ENABLED"
+    )
 
     # Session settings
     SESSION_EXPIRE_DAYS: int = 7
     SESSION_TOUCH_INTERVAL_MINUTES: int = 5
 
     # Redis Configuration
-    REDIS_ENABLED: bool = os.getenv("REDIS_ENABLED", "false").lower() == "true"
+    REDIS_ENABLED: bool = parse_bool_strict(
+        os.getenv("REDIS_ENABLED", "false"), "REDIS_ENABLED"
+    )
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
     CACHE_KIAAN_RESPONSES: bool = False
     
@@ -174,7 +182,9 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
     
     # Storage Configuration
-    USE_S3_STORAGE: bool = os.getenv("USE_S3_STORAGE", "false").lower() == "true"
+    USE_S3_STORAGE: bool = parse_bool_strict(
+        os.getenv("USE_S3_STORAGE", "false"), "USE_S3_STORAGE"
+    )
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "./uploads")
 
     # ==========================================================================
@@ -182,8 +192,12 @@ class Settings(BaseSettings):
     # ==========================================================================
 
     # --- Offline Mode Settings ---
-    OFFLINE_MODE: bool = os.getenv("OFFLINE_MODE", "false").lower() == "true"
-    OFFLINE_FALLBACK_ENABLED: bool = os.getenv("OFFLINE_FALLBACK_ENABLED", "true").lower() == "true"
+    OFFLINE_MODE: bool = parse_bool_strict(
+        os.getenv("OFFLINE_MODE", "false"), "OFFLINE_MODE"
+    )
+    OFFLINE_FALLBACK_ENABLED: bool = parse_bool_strict(
+        os.getenv("OFFLINE_FALLBACK_ENABLED", "true"), "OFFLINE_FALLBACK_ENABLED"
+    )
     OFFLINE_MODEL_TIMEOUT: int = int(os.getenv("OFFLINE_MODEL_TIMEOUT", "120"))
     OFFLINE_CACHE_MAX_AGE_HOURS: int = int(os.getenv("OFFLINE_CACHE_MAX_AGE_HOURS", "168"))  # 1 week
     OFFLINE_QUEUE_ENABLED: bool = os.getenv("OFFLINE_QUEUE_ENABLED", "true").lower() == "true"

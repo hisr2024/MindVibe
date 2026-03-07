@@ -1,3 +1,7 @@
+-- Migration: Add refresh tokens table
+-- Dependencies: Requires 'users' and 'sessions' tables to exist.
+-- Must run AFTER the initial schema migration that creates those tables.
+
 CREATE TABLE IF NOT EXISTS refresh_tokens (
     id VARCHAR(64) PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -5,6 +7,8 @@ from typing import Optional
 from pydantic import BaseModel
 
 from backend.deps import get_db, get_current_user_or_create
+
+logger = logging.getLogger(__name__)
 from backend.models import Mood
 from backend.schemas import MoodIn, MoodOut
 
@@ -69,6 +73,7 @@ async def create_mood(
         await db.commit()
     except Exception as e:
         await db.rollback()
+        logger.error(f"Failed to create mood entry: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create mood entry. Please try again.",

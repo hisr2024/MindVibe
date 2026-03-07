@@ -137,7 +137,7 @@ class TestMe:
         # First login to get token
         login_response = await test_client.post(
             "/api/auth/login",
-            json={"email": "test@example.com", "password": "Test1234"},
+            json={"email": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD},
         )
         token = login_response.json()["access_token"]
 
@@ -180,7 +180,7 @@ class TestLogout:
         # Login first
         login_response = await test_client.post(
             "/api/auth/login",
-            json={"email": "test@example.com", "password": "Test1234"},
+            json={"email": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD},
         )
 
         # In CI environment, login may fail due to DNS/network issues
@@ -217,7 +217,7 @@ class TestRefresh:
         # Login to get refresh token
         login_response = await test_client.post(
             "/api/auth/login",
-            json={"email": "test@example.com", "password": "Test1234"},
+            json={"email": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD},
         )
 
         if login_response.status_code != 200:
@@ -265,7 +265,7 @@ class TestSessions:
         # Login to create a session
         login_response = await test_client.post(
             "/api/auth/login",
-            json={"email": "test@example.com", "password": "Test1234"},
+            json={"email": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD},
         )
         if login_response.status_code != 200:
             pytest.skip("Login failed (likely DNS resolution issue in CI)")
@@ -288,7 +288,7 @@ class TestSessions:
         # Login to create a session
         login_response = await test_client.post(
             "/api/auth/login",
-            json={"email": "test@example.com", "password": "Test1234"},
+            json={"email": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD},
         )
         if login_response.status_code != 200:
             pytest.skip("Login failed (likely DNS resolution issue in CI)")
