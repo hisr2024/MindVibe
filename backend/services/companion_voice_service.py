@@ -467,7 +467,7 @@ COMPANION_VOICES: dict[str, dict[str, Any]] = {
         "style": "divine",
         "elevenlabs_voice_id": "2EiwWnXFnvU5JabPnv8n",  # Clyde (storyteller)
         "elevenlabs_model": "eleven_multilingual_v2",
-        "sarvam_speaker": "arvind",
+        "sarvam_speaker": "abhilash",
         "description": "The divine flute-like voice of Lord Krishna — warm, playful, "
                        "infinitely wise. Speaks with the love of the universe.",
         "default_speed": 0.84,
