@@ -17,7 +17,7 @@
  * Color scheme: Gold (#d4a44c) on Black (#050507) — rich and divine.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
 import { Portal } from '@/components/ui/Portal'
 import { lockBodyScroll, unlockBodyScroll } from '@/lib/mobile/bodyScrollLock'
 
@@ -28,11 +28,15 @@ export function IntroOverlay() {
   const [isExiting, setIsExiting] = useState(false)
   const hasCleanedUp = useRef(false)
 
-  useEffect(() => {
+  // useLayoutEffect fires synchronously before the browser paints.
+  // This prevents the flicker where page content is visible for 1-2 frames
+  // before the overlay renders on top. The localStorage check + state update
+  // happen before the user ever sees any content.
+  useLayoutEffect(() => {
     try {
       const hasSeen = localStorage.getItem(STORAGE_KEY)
       if (!hasSeen) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- Standard mount detection for hydration safety; localStorage is only available client-side
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronous mount detection; must run before paint to prevent content flash behind overlay
         setIsVisible(true)
         lockBodyScroll()
       }

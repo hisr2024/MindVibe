@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 /**
@@ -10,6 +10,8 @@ import { createPortal } from 'react-dom'
  *
  * Features:
  * - SSR-safe (only renders portal client-side)
+ * - Uses useLayoutEffect to mount synchronously before browser paint,
+ *   preventing flicker when used with overlays
  * - Supports custom container targeting via id
  * - Falls back to document.body if container not found
  * - Proper cleanup on unmount
@@ -22,34 +24,26 @@ export interface PortalProps {
 }
 
 export function Portal({ children, containerId = 'overlay-root' }: PortalProps) {
-  const [mounted, setMounted] = useState(false)
   const [container, setContainer] = useState<HTMLElement | null>(null)
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Standard mount detection for hydration safety
-    setMounted(true)
-
-    // Try to find the specified container, fall back to body
+  // useLayoutEffect fires synchronously after DOM mutations but BEFORE
+  // the browser paints. This eliminates the 1-frame flash where the portal
+  // target doesn't exist yet and children render as null.
+  useLayoutEffect(() => {
     let targetContainer = document.getElementById(containerId)
 
     if (!targetContainer) {
-      // Create the overlay root if it doesn't exist
       targetContainer = document.createElement('div')
       targetContainer.id = containerId
       targetContainer.setAttribute('data-overlay-root', 'true')
-      // Ensure it's at the top level for proper z-index stacking
       document.body.appendChild(targetContainer)
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronous mount detection; must run before paint to prevent overlay flicker
     setContainer(targetContainer)
-
-    return () => {
-      // Don't remove the container on unmount - it's shared
-    }
   }, [containerId])
 
-  // Don't render anything on server or before mount
-  if (!mounted || !container) {
+  if (!container) {
     return null
   }
 
@@ -62,7 +56,7 @@ export function Portal({ children, containerId = 'overlay-root' }: PortalProps) 
 export function usePortalReady(): boolean {
   const [ready, setReady] = useState(false)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Standard mount detection for hydration safety
     setReady(true)
   }, [])

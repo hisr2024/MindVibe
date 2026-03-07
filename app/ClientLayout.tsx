@@ -2,19 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
-
-/**
- * IntroOverlay is loaded eagerly (not behind requestIdleCallback) because:
- * - It's the first thing a new visitor sees — deferring it causes a visible
- *   content flash where page content appears then gets covered by the overlay
- * - The component is now CSS-first (no Framer Motion), so its JS payload is small
- * - It checks localStorage synchronously and bails early for returning visitors,
- *   so the cost for repeat visits is near zero
- */
-const IntroOverlay = dynamic(
-  () => import('@/components/divine/IntroOverlay').then(mod => mod.IntroOverlay),
-  { ssr: false }
-)
+import { IntroOverlay } from '@/components/divine/IntroOverlay'
 
 const GodParticles = dynamic(
   () => import('@/components/divine/GodParticles').then(mod => mod.GodParticles),
@@ -56,7 +44,12 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
         {children}
       </PageTransitionWrapper>
       {/* Divine intro overlay — shown once to first-time visitors.
-          Loaded eagerly (not deferred) to prevent content flash. */}
+          Imported directly (not dynamic) so it's part of the main bundle.
+          This is intentional: dynamic() forces async chunk loading which
+          creates a multi-frame delay before the overlay can mount,
+          causing a visible content flash. The component is CSS-first
+          (no Framer Motion) so its bundle cost is negligible, and it
+          bails early via localStorage for returning visitors. */}
       <IntroOverlay />
     </>
   )
