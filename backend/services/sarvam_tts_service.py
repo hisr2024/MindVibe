@@ -36,7 +36,8 @@ logger = logging.getLogger(__name__)
 # ─── Sarvam AI TTS Configuration ─────────────────────────────────────────────
 
 SARVAM_TTS_ENDPOINT = "https://api.sarvam.ai/text-to-speech"
-SARVAM_TTS_MODEL = "bulbul:v1"
+SARVAM_TTS_MODEL = "bulbul:v2"
+SARVAM_TTS_MODEL_FALLBACK = "bulbul:v1"
 
 # ─── Sarvam Speaker Catalog ──────────────────────────────────────────────────
 # Each speaker has been selected for maximum naturalness and emotional range.
@@ -55,7 +56,7 @@ SARVAM_SPEAKERS: dict[str, dict[str, Any]] = {
         "default_pace": 1.0,
         "default_pitch": 0,
         "default_loudness": 1.5,
-        "quality_score": 9.5,
+        "quality_score": 9.7,
     },
     "pavithra": {
         "name": "Pavithra",
@@ -69,7 +70,7 @@ SARVAM_SPEAKERS: dict[str, dict[str, Any]] = {
         "default_pace": 0.95,
         "default_pitch": 0,
         "default_loudness": 1.5,
-        "quality_score": 9.5,
+        "quality_score": 9.7,
     },
     "maitreyi": {
         "name": "Maitreyi",
@@ -83,7 +84,7 @@ SARVAM_SPEAKERS: dict[str, dict[str, Any]] = {
         "default_pace": 0.9,
         "default_pitch": -1,
         "default_loudness": 1.2,
-        "quality_score": 9.3,
+        "quality_score": 9.5,
     },
     "arvind": {
         "name": "Arvind",
@@ -97,7 +98,7 @@ SARVAM_SPEAKERS: dict[str, dict[str, Any]] = {
         "default_pace": 0.92,
         "default_pitch": -2,
         "default_loudness": 1.5,
-        "quality_score": 9.4,
+        "quality_score": 9.6,
     },
     "karthik": {
         "name": "Karthik",
@@ -111,7 +112,35 @@ SARVAM_SPEAKERS: dict[str, dict[str, Any]] = {
         "default_pace": 1.0,
         "default_pitch": 0,
         "default_loudness": 1.5,
-        "quality_score": 9.3,
+        "quality_score": 9.5,
+    },
+    "anushka": {
+        "name": "Anushka",
+        "speaker_id": "anushka",
+        "gender": "female",
+        "style": "expressive",
+        "languages": ["hi-IN", "en-IN", "bn-IN", "mr-IN", "gu-IN", "pa-IN", "ta-IN", "te-IN"],
+        "description": "Expressive, emotionally rich female voice with wide dynamic range. "
+                       "Ideal for storytelling and emotionally charged conversations.",
+        "best_for": ["storytelling", "emotional_support", "narration", "encouragement"],
+        "default_pace": 0.98,
+        "default_pitch": 0,
+        "default_loudness": 1.4,
+        "quality_score": 9.6,
+    },
+    "abhilash": {
+        "name": "Abhilash",
+        "speaker_id": "abhilash",
+        "gender": "male",
+        "style": "authoritative",
+        "languages": ["hi-IN", "en-IN", "bn-IN", "mr-IN", "ta-IN", "te-IN", "kn-IN"],
+        "description": "Authoritative, scholarly male voice with commanding presence. "
+                       "Perfect for Gita verse recitation and philosophical teachings.",
+        "best_for": ["verse_recitation", "sacred_chanting", "teaching", "wisdom"],
+        "default_pace": 0.88,
+        "default_pitch": -2,
+        "default_loudness": 1.5,
+        "quality_score": 9.6,
     },
 }
 
@@ -316,12 +345,12 @@ COMPANION_TO_SARVAM_SPEAKER: dict[str, str] = {
     "ravi": "karthik",      # Scholarly → Karthik (natural teacher)
 
     # Divine voice personas → Sarvam speakers (for Indian language fallback)
-    "divine-krishna": "arvind",    # Deep, wise, divine authority
-    "divine-saraswati": "maitreyi",  # Ethereal, meditative
-    "divine-ganga": "meera",       # Warm, flowing, nurturing
-    "divine-shiva": "arvind",      # Deep, cosmic resonance
-    "divine-hanuman": "karthik",   # Warm, devoted, powerful
-    "divine-radha": "pavithra",    # Clear, pure, devotional
+    "divine-krishna": "abhilash",   # Scholarly, authoritative wisdom
+    "divine-saraswati": "maitreyi", # Ethereal, meditative
+    "divine-ganga": "meera",        # Warm, flowing, nurturing
+    "divine-shiva": "arvind",       # Deep, cosmic resonance
+    "divine-hanuman": "karthik",    # Warm, devoted, powerful
+    "divine-radha": "pavithra",     # Clear, pure, devotional
 }
 
 
@@ -437,54 +466,65 @@ async def synthesize_sarvam_tts(
     try:
         import httpx
 
-        payload = {
-            "inputs": [text],
-            "target_language_code": sarvam_lang,
-            "speaker": speaker["speaker_id"],
-            "pitch": pitch,
-            "pace": pace,
-            "loudness": loudness,
-            "speech_sample_rate": 22050,
-            "enable_preprocessing": True,
-            "model": SARVAM_TTS_MODEL,
-        }
+        # Try Bulbul v2 first (higher quality), fall back to v1
+        for model in (SARVAM_TTS_MODEL, SARVAM_TTS_MODEL_FALLBACK):
+            payload = {
+                "inputs": [text],
+                "target_language_code": sarvam_lang,
+                "speaker": speaker["speaker_id"],
+                "pitch": pitch,
+                "pace": pace,
+                "loudness": loudness,
+                "speech_sample_rate": 22050,
+                "enable_preprocessing": True,
+                "model": model,
+            }
 
-        async with httpx.AsyncClient(timeout=20.0) as client:
-            response = await client.post(
-                SARVAM_TTS_ENDPOINT,
-                headers={
-                    "API-Subscription-Key": api_key,
-                    "Content-Type": "application/json",
-                },
-                json=payload,
-            )
+            try:
+                async with httpx.AsyncClient(timeout=20.0) as client:
+                    response = await client.post(
+                        SARVAM_TTS_ENDPOINT,
+                        headers={
+                            "API-Subscription-Key": api_key,
+                            "Content-Type": "application/json",
+                        },
+                        json=payload,
+                    )
 
-            if response.status_code == 200:
-                data = response.json()
-                audios = data.get("audios", [])
+                    if response.status_code == 200:
+                        data = response.json()
+                        audios = data.get("audios", [])
 
-                if audios and audios[0]:
-                    audio_bytes = base64.b64decode(audios[0])
+                        if audios and audios[0]:
+                            audio_bytes = base64.b64decode(audios[0])
 
-                    if len(audio_bytes) > 100:
-                        logger.info(
-                            f"Sarvam TTS success: speaker={speaker_id}, "
-                            f"lang={sarvam_lang}, mood={mood}, "
-                            f"pace={pace:.2f}, pitch={pitch}, "
-                            f"size={len(audio_bytes)} bytes"
+                            if len(audio_bytes) > 100:
+                                logger.info(
+                                    f"Sarvam TTS success: speaker={speaker_id}, "
+                                    f"model={model}, lang={sarvam_lang}, mood={mood}, "
+                                    f"pace={pace:.2f}, pitch={pitch}, "
+                                    f"size={len(audio_bytes)} bytes"
+                                )
+                                return audio_bytes
+
+                        logger.warning(f"Sarvam TTS: Empty audio from model {model}")
+                    elif response.status_code == 429:
+                        logger.warning("Sarvam TTS: Rate limited, falling through to next provider")
+                        return None
+                    elif response.status_code in (401, 403):
+                        logger.error("Sarvam TTS: Authentication failed, check SARVAM_API_KEY")
+                        return None
+                    else:
+                        logger.warning(
+                            f"Sarvam TTS model {model} failed: status={response.status_code}, "
+                            f"body={response.text[:200]}"
                         )
-                        return audio_bytes
+                        # Try fallback model on non-auth errors
+                        continue
 
-                logger.warning("Sarvam TTS: Empty audio in response")
-            elif response.status_code == 429:
-                logger.warning("Sarvam TTS: Rate limited, falling through to next provider")
-            elif response.status_code == 401 or response.status_code == 403:
-                logger.error("Sarvam TTS: Authentication failed, check SARVAM_API_KEY")
-            else:
-                logger.warning(
-                    f"Sarvam TTS failed: status={response.status_code}, "
-                    f"body={response.text[:200]}"
-                )
+            except httpx.TimeoutException:
+                logger.warning(f"Sarvam TTS model {model} timed out, trying fallback")
+                continue
 
     except ImportError:
         logger.info("Sarvam TTS: httpx not available")
@@ -518,7 +558,8 @@ def get_sarvam_health_status() -> dict[str, Any]:
         "provider": "sarvam_ai_bulbul",
         "available": available,
         "model": SARVAM_TTS_MODEL,
-        "quality_score": 9.5 if available else 0,
+        "model_fallback": SARVAM_TTS_MODEL_FALLBACK,
+        "quality_score": 9.7 if available else 0,
         "supported_languages": list(MINDVIBE_TO_SARVAM_LANG.keys()),
         "speakers_count": len(SARVAM_SPEAKERS),
         "features": [

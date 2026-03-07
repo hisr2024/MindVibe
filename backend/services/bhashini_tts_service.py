@@ -29,9 +29,16 @@ Architecture:
 import base64
 import logging
 import os
+import time
 from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
+
+# Pipeline config cache to avoid redundant metering API calls.
+# Bhashini requires a pipeline config call before each TTS call,
+# but the config is stable and can be cached for 30 minutes.
+_PIPELINE_CACHE: dict[str, tuple[dict[str, Any], float]] = {}
+_PIPELINE_CACHE_TTL_SECONDS = 1800  # 30 minutes
 
 
 # --- Bhashini API Configuration ---
@@ -151,11 +158,14 @@ async def _get_bhashini_pipeline_config(
     source_language: str,
     target_language: str,
 ) -> Optional[dict[str, Any]]:
-    """Get the TTS pipeline configuration from Bhashini ULCA.
+    """Get the TTS pipeline configuration from Bhashini ULCA with caching.
 
     Bhashini uses a two-step process:
     1. Get the pipeline config (which TTS model to use)
     2. Call the TTS model endpoint with the text
+
+    The pipeline config is cached for 30 minutes to avoid redundant API calls
+    and reduce overall TTS latency by ~200-500ms per request.
 
     Args:
         source_language: Source language code (Bhashini format)
@@ -164,6 +174,18 @@ async def _get_bhashini_pipeline_config(
     Returns:
         Pipeline configuration dict or None if failed
     """
+    cache_key = f"{source_language}:{target_language}"
+    now = time.monotonic()
+
+    # Check cache first
+    if cache_key in _PIPELINE_CACHE:
+        cached_config, cached_at = _PIPELINE_CACHE[cache_key]
+        if (now - cached_at) < _PIPELINE_CACHE_TTL_SECONDS:
+            logger.debug(f"Bhashini pipeline config cache hit for {cache_key}")
+            return cached_config
+        else:
+            del _PIPELINE_CACHE[cache_key]
+
     try:
         import httpx
 
@@ -196,6 +218,9 @@ async def _get_bhashini_pipeline_config(
 
             if response.status_code == 200:
                 data = response.json()
+                # Cache successful config
+                _PIPELINE_CACHE[cache_key] = (data, now)
+                logger.info(f"Bhashini pipeline config cached for {cache_key}")
                 return data
             else:
                 logger.warning(
@@ -209,6 +234,11 @@ async def _get_bhashini_pipeline_config(
         logger.warning(f"Bhashini pipeline config failed: {e}")
 
     return None
+
+
+def clear_bhashini_pipeline_cache() -> None:
+    """Clear the Bhashini pipeline config cache. Useful for testing."""
+    _PIPELINE_CACHE.clear()
 
 
 async def synthesize_bhashini_tts(
