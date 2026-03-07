@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { apiFetch } from '@/lib/api'
 
@@ -24,6 +24,49 @@ export default function DeleteAccountModal({
     graceEndsAt: string
     daysRemaining: number
   } | null>(null)
+  const modalRef = useRef<HTMLDivElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
+
+  // Focus management: focus first element on open, restore on close
+  useEffect(() => {
+    if (isOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement | null
+      const timer = setTimeout(() => {
+        const focusTarget = modalRef.current?.querySelector<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+        focusTarget?.focus()
+      }, 50)
+      return () => clearTimeout(timer)
+    } else if (previousFocusRef.current && document.contains(previousFocusRef.current)) {
+      previousFocusRef.current.focus()
+    }
+  }, [isOpen])
+
+  // Focus trap: keep focus within the modal
+  useEffect(() => {
+    if (!isOpen) return
+    const handleTabKey = (e: KeyboardEvent) => {
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+        if (focusableElements.length === 0) return
+        const first = focusableElements[0]
+        const last = focusableElements[focusableElements.length - 1]
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
+        }
+      }
+      if (e.key === 'Escape') handleClose()
+    }
+    window.addEventListener('keydown', handleTabKey)
+    return () => window.removeEventListener('keydown', handleTabKey)
+  }, [isOpen])
 
   const handleSubmit = async () => {
     if (confirmText !== 'DELETE MY ACCOUNT') {
@@ -48,7 +91,7 @@ export default function DeleteAccountModal({
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.detail || 'Failed to request account deletion')
+        throw new Error(errorData.detail || 'We\'re having trouble processing your deletion request. Please try again.')
       }
 
       const data = await response.json()
@@ -59,7 +102,7 @@ export default function DeleteAccountModal({
       setStep('submitted')
       onConfirm?.()
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'An error occurred')
+      setErrorMessage(error instanceof Error ? error.message : 'We\'re having trouble processing your request. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -79,14 +122,14 @@ export default function DeleteAccountModal({
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.detail || 'Failed to cancel deletion')
+        throw new Error(errorData.detail || 'We\'re having trouble cancelling your deletion request. Please try again.')
       }
 
       setStep('warning')
       setDeletionInfo(null)
       onClose()
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'An error occurred')
+      setErrorMessage(error instanceof Error ? error.message : 'We\'re having trouble processing your request. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -110,11 +153,15 @@ export default function DeleteAccountModal({
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
         onClick={handleClose}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-account-title"
       >
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
+          ref={modalRef}
           onClick={(e) => e.stopPropagation()}
           className="w-full max-w-md rounded-2xl bg-gray-900 border border-red-500/30 shadow-2xl overflow-hidden"
         >
@@ -127,7 +174,7 @@ export default function DeleteAccountModal({
                 </svg>
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-red-400">Delete Account</h2>
+                <h2 id="delete-account-title" className="text-lg font-semibold text-red-400">Delete Account</h2>
                 <p className="text-sm text-[#f5f0e8]/50">This action cannot be undone</p>
               </div>
             </div>

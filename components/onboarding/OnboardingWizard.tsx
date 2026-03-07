@@ -44,10 +44,6 @@ export function OnboardingWizard({
     setCurrentStep((prev) => Math.max(0, prev - 1))
   }
 
-  const _updateStepData = (key: string, value: unknown) => {
-    setStepData((prev) => ({ ...prev, [key]: value }))
-  }
-
   return (
     <div className={`relative ${className}`}>
       {/* Progress bar */}

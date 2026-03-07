@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS wisdom_atoms (
     content_hash    VARCHAR(64) NOT NULL UNIQUE,
 
     -- Classification
-    category        VARCHAR(32) NOT NULL,  -- validation, reframe, action, wisdom, encouragement, grounding, reflection
+    -- validation, reframe, action, wisdom, encouragement, grounding, reflection
+    category        VARCHAR(32) NOT NULL,
     sub_category    VARCHAR(64),
 
     -- Context tags (JSONB for flexible matching)
@@ -30,8 +31,10 @@ CREATE TABLE IF NOT EXISTS wisdom_atoms (
     phase_tags      JSONB NOT NULL DEFAULT '[]',
 
     -- Verse association
-    verse_ref       VARCHAR(16),          -- e.g. "2.47"
-    psychology_frame VARCHAR(128),         -- e.g. "cognitive_defusion"
+    -- e.g. "2.47"
+    verse_ref       VARCHAR(16),
+    -- e.g. "cognitive_defusion"
+    psychology_frame VARCHAR(128),
 
     -- Quality metrics
     effectiveness_score FLOAT NOT NULL DEFAULT 0.5,
@@ -40,7 +43,8 @@ CREATE TABLE IF NOT EXISTS wisdom_atoms (
     negative_feedback INTEGER NOT NULL DEFAULT 0,
 
     -- Source tracking
-    source_llm_response_id VARCHAR(64),   -- FK to kiaan_chat_messages.id
+    -- FK to kiaan_chat_messages.id
+    source_llm_response_id VARCHAR(64),
     source_type     VARCHAR(32) NOT NULL DEFAULT 'llm_distillation',
 
     -- Soft delete
@@ -71,7 +75,8 @@ CREATE TABLE IF NOT EXISTS verse_application_edges (
     id              SERIAL PRIMARY KEY,
 
     -- Source: the verse
-    verse_ref       VARCHAR(16) NOT NULL,  -- e.g. "2.47"
+    -- e.g. "2.47"
+    verse_ref       VARCHAR(16) NOT NULL,
 
     -- Target: the situation
     mood            VARCHAR(32) NOT NULL,

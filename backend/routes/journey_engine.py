@@ -102,7 +102,7 @@ class StartJourneyRequest(BaseModel):
 class CompleteStepRequest(BaseModel):
     """Request to complete a journey step."""
 
-    reflection: str | None = Field(default=None, max_length=5000, description="User reflection")
+    reflection: str | None = Field(default=None, min_length=1, max_length=5000, description="User reflection")
     check_in: dict[str, Any] | None = Field(default=None, description="Check-in data")
 
 
@@ -351,7 +351,7 @@ async def get_template(
         )
     except TemplateNotFoundError as e:
         logger.warning(f"Template not found: {e}")
-        raise HTTPException(status_code=404, detail="Journey template not found.")
+        raise HTTPException(status_code=404, detail={"error": "TEMPLATE_NOT_FOUND", "message": "Journey template not found."})
 
 
 @router.get("/templates/slug/{slug}", response_model=TemplateResponse)
@@ -377,7 +377,7 @@ async def get_template_by_slug(
         )
     except TemplateNotFoundError as e:
         logger.warning(f"Template not found by slug: {e}")
-        raise HTTPException(status_code=404, detail="Journey template not found.")
+        raise HTTPException(status_code=404, detail={"error": "TEMPLATE_NOT_FOUND", "message": "Journey template not found."})
 
 
 # =============================================================================
@@ -477,13 +477,13 @@ async def start_journey(
         )
 
     except MaxActiveJourneysError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail={"error": "MAX_ACTIVE_JOURNEYS", "message": str(e)})
     except TemplateNotFoundError as e:
         logger.warning(f"Template not found when starting journey: {e}")
-        raise HTTPException(status_code=404, detail="Journey template not found.")
+        raise HTTPException(status_code=404, detail={"error": "TEMPLATE_NOT_FOUND", "message": "Journey template not found."})
     except Exception as e:
         logger.error(f"Error starting journey: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.")
+        raise HTTPException(status_code=500, detail={"error": "INTERNAL_ERROR", "message": "An internal error occurred. Please try again."})
 
 
 @router.get("/journeys/{journey_id}", response_model=JourneyResponse)
@@ -514,7 +514,7 @@ async def get_journey(
         )
     except JourneyNotFoundError as e:
         logger.warning(f"Journey not found: {e}")
-        raise HTTPException(status_code=404, detail="Journey not found.")
+        raise HTTPException(status_code=404, detail={"error": "JOURNEY_NOT_FOUND", "message": "Journey not found."})
 
 
 @router.post("/journeys/{journey_id}/pause", response_model=JourneyResponse)
@@ -549,10 +549,10 @@ async def pause_journey(
         )
     except JourneyNotFoundError as e:
         logger.warning(f"Journey not found for pause: {e}")
-        raise HTTPException(status_code=404, detail="Journey not found.")
+        raise HTTPException(status_code=404, detail={"error": "JOURNEY_NOT_FOUND", "message": "Journey not found."})
     except JourneyEngineError as e:
         logger.warning(f"Cannot pause journey: {e}")
-        raise HTTPException(status_code=400, detail="Cannot pause this journey.")
+        raise HTTPException(status_code=400, detail={"error": "JOURNEY_ERROR", "message": "Cannot pause this journey."})
 
 
 @router.post("/journeys/{journey_id}/resume", response_model=JourneyResponse)
@@ -587,10 +587,10 @@ async def resume_journey(
         )
     except JourneyNotFoundError as e:
         logger.warning(f"Journey not found for resume: {e}")
-        raise HTTPException(status_code=404, detail="Journey not found.")
+        raise HTTPException(status_code=404, detail={"error": "JOURNEY_NOT_FOUND", "message": "Journey not found."})
     except JourneyEngineError as e:
         logger.warning(f"Cannot resume journey: {e}")
-        raise HTTPException(status_code=400, detail="Cannot resume this journey.")
+        raise HTTPException(status_code=400, detail={"error": "JOURNEY_RESUME_ERROR", "message": "Cannot resume this journey."})
 
 
 @router.delete("/journeys/{journey_id}", response_model=JourneyResponse)
@@ -625,10 +625,10 @@ async def abandon_journey(
         )
     except JourneyNotFoundError as e:
         logger.warning(f"Journey not found for abandon: {e}")
-        raise HTTPException(status_code=404, detail="Journey not found.")
+        raise HTTPException(status_code=404, detail={"error": "JOURNEY_NOT_FOUND", "message": "Journey not found."})
     except JourneyAlreadyCompletedError as e:
         logger.warning(f"Cannot abandon completed journey: {e}")
-        raise HTTPException(status_code=400, detail="This journey has already been completed.")
+        raise HTTPException(status_code=400, detail={"error": "JOURNEY_ALREADY_COMPLETED", "message": "This journey has already been completed."})
 
 
 # =============================================================================
@@ -684,7 +684,7 @@ async def get_current_step(
         )
     except JourneyNotFoundError as e:
         logger.warning(f"Journey not found for current step: {e}")
-        raise HTTPException(status_code=404, detail="Journey not found.")
+        raise HTTPException(status_code=404, detail={"error": "JOURNEY_NOT_FOUND", "message": "Journey not found."})
 
 
 @router.get("/journeys/{journey_id}/steps/{day_index}", response_model=StepResponse)
@@ -729,10 +729,10 @@ async def get_step(
         )
     except JourneyNotFoundError as e:
         logger.warning(f"Journey not found for step: {e}")
-        raise HTTPException(status_code=404, detail="Journey not found.")
+        raise HTTPException(status_code=404, detail={"error": "JOURNEY_NOT_FOUND", "message": "Journey not found."})
     except StepNotAvailableError as e:
         logger.warning(f"Step not available: {e}")
-        raise HTTPException(status_code=400, detail="This step is not available.")
+        raise HTTPException(status_code=400, detail={"error": "STEP_NOT_AVAILABLE", "message": "This step is not available."})
 
 
 @router.post("/journeys/{journey_id}/steps/{day_index}/complete", response_model=CompletionResponse)
@@ -771,13 +771,13 @@ async def complete_step(
         )
     except JourneyNotFoundError as e:
         logger.warning(f"Journey not found for step completion: {e}")
-        raise HTTPException(status_code=404, detail="Journey not found.")
+        raise HTTPException(status_code=404, detail={"error": "JOURNEY_NOT_FOUND", "message": "Journey not found."})
     except StepNotAvailableError as e:
         logger.warning(f"Step not available for completion: {e}")
-        raise HTTPException(status_code=400, detail="This step is not available.")
+        raise HTTPException(status_code=400, detail={"error": "STEP_NOT_AVAILABLE", "message": "This step is not available."})
     except JourneyEngineError as e:
         logger.warning(f"Journey engine error during step completion: {e}")
-        raise HTTPException(status_code=400, detail="Unable to complete this step.")
+        raise HTTPException(status_code=400, detail={"error": "JOURNEY_ERROR", "message": "Unable to complete this step."})
 
 
 # =============================================================================

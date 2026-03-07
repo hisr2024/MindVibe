@@ -1,5 +1,5 @@
-# Development dependencies
-pytest>=7.0.0
+# Development & testing dependencies (not installed in production images)
+pytest>=7.3.1,<9.1.0
 pytest-cov>=4.0.0
 pytest-asyncio>=0.21.0
 pytest-mock>=3.10.0
@@ -8,6 +8,7 @@ mypy>=1.0.0
 black>=22.0.0
 flake8>=5.0.0
 isort>=5.0.0
+types-requests>=2.31.0,<3.0.0
 
 # Core dependencies (add your app's requirements here)
 flask>=2.0.0

@@ -516,9 +516,9 @@ export function ActionSheet({
       )}
 
       <div className="flex flex-col gap-1">
-        {options.map((option, index) => (
+        {options.map((option) => (
           <motion.button
-            key={index}
+            key={option.label}
             whileTap={{ scale: 0.98 }}
             onClick={() => {
               if (option.disabled) return

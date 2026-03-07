@@ -1,5 +1,5 @@
 [project]
-name = "aadi-api"
+name = "mindvibe-api"
 version = "0.1.0"
 dependencies = [
   "fastapi>=0.111",

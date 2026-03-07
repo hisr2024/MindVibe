@@ -10,6 +10,8 @@ export type CodexRequest = {
   response_format?: { type: 'json_object' | 'text' }
 }
 
+// TODO: Centralize environment variable access to config/environment.ts
+// to provide validation, type safety, and a single source of truth for all env vars.
 const CODEX_MODEL = process.env.CODEX_MODEL || 'gpt-4o-mini'
 const OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions'
 

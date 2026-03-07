@@ -154,11 +154,20 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
       }
 
       // Queue for offline sync
+      const syncData: Record<string, unknown> = {
+        id: entry.id,
+        title: entry.title,
+        body: entry.body,
+        tags: entry.tags,
+        mood: entry.mood,
+        createdAt: entry.createdAt,
+        updatedAt: entry.updatedAt,
+      }
       queueOfflineOperation(
         'journal',
         initialEntry?.id ? 'update' : 'create',
-        entry.id as string,
-        entry as unknown as Record<string, unknown>
+        entry.id ?? `draft_${Date.now()}`,
+        syncData
       )
 
       setSaveStatus('saved')

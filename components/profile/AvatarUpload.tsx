@@ -60,7 +60,7 @@ export function AvatarUpload({
       setShowCropModal(false)
       setPreview(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to upload avatar')
+      setError(err instanceof Error ? err.message : 'We\'re having trouble uploading your avatar. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -75,7 +75,7 @@ export function AvatarUpload({
     try {
       await onRemove()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to remove avatar')
+      setError(err instanceof Error ? err.message : 'We\'re having trouble removing your avatar. Please try again.')
     } finally {
       setLoading(false)
     }

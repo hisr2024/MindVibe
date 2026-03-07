@@ -5,6 +5,9 @@
  * To add a new language, simply drop a JSON file in data/gita/{languageCode}.json
  */
 
+// TODO: Centralize environment variable access to config/environment.ts
+// to provide validation, type safety, and a single source of truth for all env vars.
+
 import type { GitaChapter, GitaVerse } from './types'
 
 // ============ Types for JSON data ============
@@ -37,6 +40,8 @@ export interface LanguageInfo {
   direction: 'ltr' | 'rtl'
 }
 
+// Only languages with actual data files in data/gita/ are listed here.
+// To add a new language, create data/gita/{code}.json and add entry below.
 export const SUPPORTED_LANGUAGES: Record<string, LanguageInfo> = {
   en: {
     code: 'en',
@@ -57,62 +62,6 @@ export const SUPPORTED_LANGUAGES: Record<string, LanguageInfo> = {
     name: 'Sanskrit',
     nativeName: 'संस्कृत',
     flag: '🕉️',
-    direction: 'ltr',
-  },
-  ta: {
-    code: 'ta',
-    name: 'Tamil',
-    nativeName: 'தமிழ்',
-    flag: '🇮🇳',
-    direction: 'ltr',
-  },
-  te: {
-    code: 'te',
-    name: 'Telugu',
-    nativeName: 'తెలుగు',
-    flag: '🇮🇳',
-    direction: 'ltr',
-  },
-  bn: {
-    code: 'bn',
-    name: 'Bengali',
-    nativeName: 'বাংলা',
-    flag: '🇮🇳',
-    direction: 'ltr',
-  },
-  mr: {
-    code: 'mr',
-    name: 'Marathi',
-    nativeName: 'मराठी',
-    flag: '🇮🇳',
-    direction: 'ltr',
-  },
-  gu: {
-    code: 'gu',
-    name: 'Gujarati',
-    nativeName: 'ગુજરાતી',
-    flag: '🇮🇳',
-    direction: 'ltr',
-  },
-  kn: {
-    code: 'kn',
-    name: 'Kannada',
-    nativeName: 'ಕನ್ನಡ',
-    flag: '🇮🇳',
-    direction: 'ltr',
-  },
-  ml: {
-    code: 'ml',
-    name: 'Malayalam',
-    nativeName: 'മലയാളം',
-    flag: '🇮🇳',
-    direction: 'ltr',
-  },
-  pa: {
-    code: 'pa',
-    name: 'Punjabi',
-    nativeName: 'ਪੰਜਾਬੀ',
-    flag: '🇮🇳',
     direction: 'ltr',
   },
 }
@@ -145,6 +94,51 @@ export const GITA_CHAPTERS_META = [
 const languageDataCache: Map<string, GitaLanguageFile> = new Map()
 
 /**
+ * Validate that a loaded Gita language file has the required structure.
+ * Each verse must have at minimum: verseNumber and translation.
+ * Each chapter must have: chapterNumber, nameSanskrit, nameEnglish, verseCount, and verses array.
+ *
+ * JSON Schema (for reference):
+ * {
+ *   "languageCode": string (required),
+ *   "languageName": string (required),
+ *   "chapters": [{
+ *     "chapterNumber": number (required, 1-18),
+ *     "nameSanskrit": string (required),
+ *     "nameEnglish": string (required),
+ *     "verseCount": number (required),
+ *     "verses": [{
+ *       "verseNumber": number (required),
+ *       "translation": string (required),
+ *       "sanskrit": string (optional),
+ *       "transliteration": string (optional)
+ *     }] (required)
+ *   }] (required)
+ * }
+ */
+function validateGitaData(data: unknown): data is GitaLanguageFile {
+  if (!data || typeof data !== 'object') return false
+  const d = data as Record<string, unknown>
+  if (typeof d.languageCode !== 'string' || typeof d.languageName !== 'string') return false
+  if (!Array.isArray(d.chapters) || d.chapters.length === 0) return false
+
+  for (const chapter of d.chapters) {
+    if (typeof chapter.chapterNumber !== 'number') return false
+    if (typeof chapter.nameSanskrit !== 'string') return false
+    if (typeof chapter.nameEnglish !== 'string') return false
+    if (typeof chapter.verseCount !== 'number') return false
+    if (!Array.isArray(chapter.verses)) return false
+
+    for (const verse of chapter.verses) {
+      if (typeof verse.verseNumber !== 'number') return false
+      if (typeof verse.translation !== 'string') return false
+    }
+  }
+
+  return true
+}
+
+/**
  * Load Gita data for a specific language
  */
 export async function loadGitaLanguage(languageCode: string): Promise<GitaLanguageFile | null> {
@@ -156,6 +150,13 @@ export async function loadGitaLanguage(languageCode: string): Promise<GitaLangua
     // Dynamic import of JSON data
     const data = await import(`@/data/gita/${languageCode}.json`)
     const parsed = data.default as GitaLanguageFile
+
+    // Validate required fields before caching
+    if (!validateGitaData(parsed)) {
+      console.error(`[Gita] Invalid data structure for language: ${languageCode}. Missing required fields (languageCode, languageName, chapters with chapterNumber/nameSanskrit/nameEnglish/verseCount/verses, or verses missing verseNumber/translation).`)
+      return null
+    }
+
     languageDataCache.set(languageCode, parsed)
     return parsed
   } catch {

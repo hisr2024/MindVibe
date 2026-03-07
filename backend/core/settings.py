@@ -7,6 +7,33 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
 
 
+def parse_bool_strict(value: str, var_name: str = "unknown") -> bool:
+    """Parse a boolean from an environment variable string with strict validation.
+
+    Only accepts 'true', 'false', '1', '0' (case-insensitive).
+    Raises ValueError for any other value to prevent silent misconfiguration.
+
+    Args:
+        value: The string value to parse.
+        var_name: Name of the environment variable (for error messages).
+
+    Returns:
+        The parsed boolean value.
+
+    Raises:
+        ValueError: If the value is not one of the accepted boolean strings.
+    """
+    normalized = value.strip().lower()
+    if normalized in ("true", "1"):
+        return True
+    if normalized in ("false", "0"):
+        return False
+    raise ValueError(
+        f"Invalid boolean value '{value}' for {var_name}. "
+        f"Accepted values: 'true', 'false', '1', '0'."
+    )
+
+
 # Default paths for KIAAN local storage
 DEFAULT_MINDVIBE_HOME = Path.home() / ".mindvibe"
 DEFAULT_MODELS_PATH = DEFAULT_MINDVIBE_HOME / "models"
@@ -25,6 +52,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_ENABLE_BODY_RETURN: bool = False
 
     # Security
+    # SECURE_COOKIE is derived from ENVIRONMENT, not a boolean env var
     SECURE_COOKIE: bool = os.getenv("ENVIRONMENT", "development") == "production"
     SECRET_KEY: str = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
 
@@ -87,7 +115,12 @@ class Settings(BaseSettings):
         return v
     
     # Spiritual Wellness Data Encryption (enforced by default)
-    MINDVIBE_REQUIRE_ENCRYPTION: bool = os.getenv("MINDVIBE_REQUIRE_ENCRYPTION", "true").lower() == "true"
+    MINDVIBE_REQUIRE_ENCRYPTION: bool = parse_bool_strict(
+        os.getenv("MINDVIBE_REQUIRE_ENCRYPTION", "true"), "MINDVIBE_REQUIRE_ENCRYPTION"
+    )
+    # MINDVIBE_REFLECTION_KEY production validation is handled by
+    # validate_encryption_key() below (enforces non-empty in production
+    # when MINDVIBE_REQUIRE_ENCRYPTION is true).
     MINDVIBE_REFLECTION_KEY: str = os.getenv("MINDVIBE_REFLECTION_KEY", "")
 
     @field_validator("MINDVIBE_REFLECTION_KEY")
@@ -97,7 +130,9 @@ class Settings(BaseSettings):
         import logging
 
         environment = os.getenv("ENVIRONMENT", "development").lower()
-        require_encryption = os.getenv("MINDVIBE_REQUIRE_ENCRYPTION", "true").lower() == "true"
+        require_encryption = parse_bool_strict(
+            os.getenv("MINDVIBE_REQUIRE_ENCRYPTION", "true"), "MINDVIBE_REQUIRE_ENCRYPTION"
+        )
 
         if require_encryption and not v:
             if environment in ("production", "prod"):
@@ -117,19 +152,46 @@ class Settings(BaseSettings):
         return v
 
     # Chat Data Encryption — encrypt user messages stored in database
-    ENCRYPT_CHAT_DATA: bool = os.getenv("ENCRYPT_CHAT_DATA", "true").lower() == "true"
+    ENCRYPT_CHAT_DATA: bool = parse_bool_strict(
+        os.getenv("ENCRYPT_CHAT_DATA", "true"), "ENCRYPT_CHAT_DATA"
+    )
 
     # Data Retention Policy — auto-purge soft-deleted chat data
     CHAT_RETENTION_DAYS: int = int(os.getenv("CHAT_RETENTION_DAYS", "90"))
-    RETENTION_CLEANUP_ENABLED: bool = os.getenv("RETENTION_CLEANUP_ENABLED", "true").lower() == "true"
+    RETENTION_CLEANUP_ENABLED: bool = parse_bool_strict(
+        os.getenv("RETENTION_CLEANUP_ENABLED", "true"), "RETENTION_CLEANUP_ENABLED"
+    )
 
     # Session settings
     SESSION_EXPIRE_DAYS: int = 7
     SESSION_TOUCH_INTERVAL_MINUTES: int = 5
 
     # Redis Configuration
-    REDIS_ENABLED: bool = os.getenv("REDIS_ENABLED", "false").lower() == "true"
+    REDIS_ENABLED: bool = parse_bool_strict(
+        os.getenv("REDIS_ENABLED", "false"), "REDIS_ENABLED"
+    )
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
+
+    @field_validator("REDIS_URL")
+    @classmethod
+    def validate_redis_url(cls, v: str) -> str:
+        """Warn if REDIS_URL points to localhost in production.
+
+        In production, Redis should be a dedicated instance (not localhost)
+        for reliability and security.
+        """
+        import warnings
+
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        is_production = environment in ("production", "prod")
+
+        if is_production and ("localhost" in v or "127.0.0.1" in v):
+            warnings.warn(
+                "REDIS_URL points to localhost in production. "
+                "Use a dedicated Redis instance for production deployments.",
+                UserWarning,
+            )
+        return v
     CACHE_KIAAN_RESPONSES: bool = False
     
     # Rate Limiting
@@ -144,7 +206,9 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
     
     # Storage Configuration
-    USE_S3_STORAGE: bool = os.getenv("USE_S3_STORAGE", "false").lower() == "true"
+    USE_S3_STORAGE: bool = parse_bool_strict(
+        os.getenv("USE_S3_STORAGE", "false"), "USE_S3_STORAGE"
+    )
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "./uploads")
 
     # ==========================================================================
@@ -152,15 +216,25 @@ class Settings(BaseSettings):
     # ==========================================================================
 
     # --- Offline Mode Settings ---
-    OFFLINE_MODE: bool = os.getenv("OFFLINE_MODE", "false").lower() == "true"
-    OFFLINE_FALLBACK_ENABLED: bool = os.getenv("OFFLINE_FALLBACK_ENABLED", "true").lower() == "true"
+    OFFLINE_MODE: bool = parse_bool_strict(
+        os.getenv("OFFLINE_MODE", "false"), "OFFLINE_MODE"
+    )
+    OFFLINE_FALLBACK_ENABLED: bool = parse_bool_strict(
+        os.getenv("OFFLINE_FALLBACK_ENABLED", "true"), "OFFLINE_FALLBACK_ENABLED"
+    )
     OFFLINE_MODEL_TIMEOUT: int = int(os.getenv("OFFLINE_MODEL_TIMEOUT", "120"))
     OFFLINE_CACHE_MAX_AGE_HOURS: int = int(os.getenv("OFFLINE_CACHE_MAX_AGE_HOURS", "168"))  # 1 week
-    OFFLINE_QUEUE_ENABLED: bool = os.getenv("OFFLINE_QUEUE_ENABLED", "true").lower() == "true"
-    AUTO_SYNC_WHEN_ONLINE: bool = os.getenv("AUTO_SYNC_WHEN_ONLINE", "true").lower() == "true"
+    OFFLINE_QUEUE_ENABLED: bool = parse_bool_strict(
+        os.getenv("OFFLINE_QUEUE_ENABLED", "true"), "OFFLINE_QUEUE_ENABLED"
+    )
+    AUTO_SYNC_WHEN_ONLINE: bool = parse_bool_strict(
+        os.getenv("AUTO_SYNC_WHEN_ONLINE", "true"), "AUTO_SYNC_WHEN_ONLINE"
+    )
 
     # --- Local LLM Model Settings ---
-    LOCAL_MODELS_ENABLED: bool = os.getenv("LOCAL_MODELS_ENABLED", "true").lower() == "true"
+    LOCAL_MODELS_ENABLED: bool = parse_bool_strict(
+        os.getenv("LOCAL_MODELS_ENABLED", "true"), "LOCAL_MODELS_ENABLED"
+    )
     LOCAL_MODEL_PATH: str = os.getenv("LOCAL_MODEL_PATH", str(DEFAULT_MODELS_PATH))
     PREFERRED_LOCAL_MODEL: str = os.getenv("PREFERRED_LOCAL_MODEL", "mistral-7b-instruct")
     LOCAL_MODEL_QUANTIZATION: str = os.getenv("LOCAL_MODEL_QUANTIZATION", "q4_k_m")  # q4_k_m, q5_k_m, q8_0, fp16
@@ -168,14 +242,22 @@ class Settings(BaseSettings):
     MAX_LOCAL_MODEL_THREADS: int = int(os.getenv("MAX_LOCAL_MODEL_THREADS", "4"))
     LOCAL_MODEL_CONTEXT_SIZE: int = int(os.getenv("LOCAL_MODEL_CONTEXT_SIZE", "4096"))
     OLLAMA_URL: str = os.getenv("OLLAMA_URL", "http://localhost:11434")
-    OLLAMA_AUTO_START: bool = os.getenv("OLLAMA_AUTO_START", "false").lower() == "true"
+    OLLAMA_AUTO_START: bool = parse_bool_strict(
+        os.getenv("OLLAMA_AUTO_START", "false"), "OLLAMA_AUTO_START"
+    )
     LM_STUDIO_URL: str = os.getenv("LM_STUDIO_URL", "http://localhost:1234/v1")
-    LM_STUDIO_ENABLED: bool = os.getenv("LM_STUDIO_ENABLED", "false").lower() == "true"
-    HUGGINGFACE_HUB_ENABLED: bool = os.getenv("HUGGINGFACE_HUB_ENABLED", "true").lower() == "true"
+    LM_STUDIO_ENABLED: bool = parse_bool_strict(
+        os.getenv("LM_STUDIO_ENABLED", "false"), "LM_STUDIO_ENABLED"
+    )
+    HUGGINGFACE_HUB_ENABLED: bool = parse_bool_strict(
+        os.getenv("HUGGINGFACE_HUB_ENABLED", "true"), "HUGGINGFACE_HUB_ENABLED"
+    )
 
     # --- TTS (Text-to-Speech) Settings ---
     # Provider chain: Sarvam AI → Bhashini AI → ElevenLabs (browser fallback always available)
-    LOCAL_TTS_ENABLED: bool = os.getenv("LOCAL_TTS_ENABLED", "true").lower() == "true"
+    LOCAL_TTS_ENABLED: bool = parse_bool_strict(
+        os.getenv("LOCAL_TTS_ENABLED", "true"), "LOCAL_TTS_ENABLED"
+    )
     TTS_PROVIDER: str = os.getenv("TTS_PROVIDER", "auto")  # auto, sarvam, bhashini, elevenlabs
     TTS_FALLBACK_CHAIN: str = os.getenv("TTS_FALLBACK_CHAIN", "sarvam,bhashini,elevenlabs")
     LOCAL_TTS_QUALITY: str = os.getenv("LOCAL_TTS_QUALITY", "medium")  # low, medium, high
@@ -183,7 +265,9 @@ class Settings(BaseSettings):
     TTS_CACHE_MAX_SIZE_MB: int = int(os.getenv("TTS_CACHE_MAX_SIZE_MB", "500"))
 
     # --- Local STT (Speech-to-Text/Whisper) Settings ---
-    LOCAL_STT_ENABLED: bool = os.getenv("LOCAL_STT_ENABLED", "true").lower() == "true"
+    LOCAL_STT_ENABLED: bool = parse_bool_strict(
+        os.getenv("LOCAL_STT_ENABLED", "true"), "LOCAL_STT_ENABLED"
+    )
     STT_PROVIDER: str = os.getenv("STT_PROVIDER", "auto")  # auto, openai_whisper, local_whisper, browser
     WHISPER_MODEL_SIZE: str = os.getenv("WHISPER_MODEL_SIZE", "base")  # tiny, base, small, medium, large
     WHISPER_MODEL_PATH: str = os.getenv("WHISPER_MODEL_PATH", str(DEFAULT_MODELS_PATH / "whisper"))
@@ -195,15 +279,23 @@ class Settings(BaseSettings):
     MEMORY_BACKEND: str = os.getenv("MEMORY_BACKEND", "auto")  # auto, redis, sqlite, memory
     SQLITE_DB_PATH: str = os.getenv("SQLITE_DB_PATH", str(DEFAULT_MEMORY_DB_PATH))
     LOCAL_MEMORY_MAX_SIZE_MB: int = int(os.getenv("LOCAL_MEMORY_MAX_SIZE_MB", "500"))
-    MEMORY_BACKUP_ENABLED: bool = os.getenv("MEMORY_BACKUP_ENABLED", "true").lower() == "true"
+    MEMORY_BACKUP_ENABLED: bool = parse_bool_strict(
+        os.getenv("MEMORY_BACKUP_ENABLED", "true"), "MEMORY_BACKUP_ENABLED"
+    )
     MEMORY_BACKUP_INTERVAL_HOURS: int = int(os.getenv("MEMORY_BACKUP_INTERVAL_HOURS", "24"))
-    MEMORY_ENCRYPTION_ENABLED: bool = os.getenv("MEMORY_ENCRYPTION_ENABLED", "false").lower() == "true"
+    MEMORY_ENCRYPTION_ENABLED: bool = parse_bool_strict(
+        os.getenv("MEMORY_ENCRYPTION_ENABLED", "false"), "MEMORY_ENCRYPTION_ENABLED"
+    )
 
     # --- Offline Documentation Cache Settings ---
-    DOCS_CACHE_ENABLED: bool = os.getenv("DOCS_CACHE_ENABLED", "true").lower() == "true"
+    DOCS_CACHE_ENABLED: bool = parse_bool_strict(
+        os.getenv("DOCS_CACHE_ENABLED", "true"), "DOCS_CACHE_ENABLED"
+    )
     DOCS_CACHE_PATH: str = os.getenv("DOCS_CACHE_PATH", str(DEFAULT_DOCS_CACHE_PATH))
     DOCS_CACHE_MAX_SIZE_MB: int = int(os.getenv("DOCS_CACHE_MAX_SIZE_MB", "2000"))
-    DOCS_AUTO_DOWNLOAD: bool = os.getenv("DOCS_AUTO_DOWNLOAD", "false").lower() == "true"
+    DOCS_AUTO_DOWNLOAD: bool = parse_bool_strict(
+        os.getenv("DOCS_AUTO_DOWNLOAD", "false"), "DOCS_AUTO_DOWNLOAD"
+    )
     DOCS_UPDATE_INTERVAL_DAYS: int = int(os.getenv("DOCS_UPDATE_INTERVAL_DAYS", "7"))
 
     # --- Connectivity Settings ---

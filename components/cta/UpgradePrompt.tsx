@@ -92,8 +92,8 @@ export function UpgradePrompt({
             
             {features.length > 0 && (
               <ul className="space-y-2 mb-4">
-                {features.map((feature, index) => (
-                  <li key={index} className="flex items-center gap-2 text-sm text-[#f5f0e8]/80">
+                {features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-sm text-[#f5f0e8]/80">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
                       <polyline points="20 6 9 17 4 12" />
                     </svg>

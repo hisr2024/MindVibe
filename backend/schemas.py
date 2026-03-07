@@ -5,8 +5,8 @@ from pydantic import BaseModel, Field
 from pydantic import BaseModel, Field, field_validator
 
 class MoodIn(BaseModel):
-    score: Annotated[int, Field(ge=-2, le=2)]
-    tags: list[str] | None = None
+    score: Annotated[int, Field(ge=1, le=10)]
+    tags: Annotated[list[str], Field(max_length=20)] | None = None
     note: str | None = None
 
 class UserAuth(BaseModel):

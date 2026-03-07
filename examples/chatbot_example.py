@@ -9,10 +9,12 @@ Usage:
     python examples/chatbot_example.py
 
 Requirements:
-    - Server running at http://localhost:8000
+    - Server running (default: http://localhost:8000, override with API_URL env var)
     - Database seeded with wisdom verses (python seed_wisdom.py)
 """
 
+
+import os
 
 import requests
 
@@ -20,7 +22,7 @@ import requests
 class ChatbotClient:
     """Simple client for interacting with the MindVibe chatbot API."""
 
-    def __init__(self, base_url: str = "http://localhost:8000"):
+    def __init__(self, base_url: str = os.getenv("API_URL", "http://localhost:8000")):
         self.base_url = base_url
         self.session_id: str | None = None
 

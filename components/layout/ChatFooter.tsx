@@ -39,7 +39,7 @@ export function ChatFooter() {
           setIsOpen(true)
         }
       } catch (error) {
-        console.error('Failed to load footer state from localStorage:', error)
+        if (process.env.NODE_ENV !== 'production') console.error('Failed to load footer state from localStorage:', error)
       }
     }
   }, [])
@@ -50,7 +50,7 @@ export function ChatFooter() {
       try {
         localStorage.setItem('kiaan-footer-open', isOpen.toString())
       } catch (error) {
-        console.error('Failed to save footer state to localStorage:', error)
+        if (process.env.NODE_ENV !== 'production') console.error('Failed to save footer state to localStorage:', error)
       }
     }
   }, [isOpen, mounted])
@@ -82,8 +82,8 @@ export function ChatFooter() {
   }, [globalMessages, isOpen])
 
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'connecting' | 'error'>('connected')
-  const [_retryAttempt, setRetryAttempt] = useState(0)
-  const [_backendHealthy, setBackendHealthy] = useState<boolean | null>(null)
+  const [, setRetryAttempt] = useState(0)
+  const [, setBackendHealthy] = useState<boolean | null>(null)
   const MAX_RETRIES = 2
 
   // Health check on mount
@@ -112,7 +112,7 @@ export function ChatFooter() {
           setConnectionStatus('error')
         }
       } catch (error) {
-        console.error('Health check failed:', error)
+        if (process.env.NODE_ENV !== 'production') console.error('Health check failed:', error)
         setBackendHealthy(false)
         setConnectionStatus('error')
       }
@@ -169,7 +169,7 @@ export function ChatFooter() {
       setConnectionStatus('connected')
       setRetryAttempt(0)
     } catch (error) {
-      console.error('Chat error:', error)
+      if (process.env.NODE_ENV !== 'production') console.error('Chat error:', error)
       
       // Get user-friendly error message using shared utility
       const errorMessage = getBriefErrorMessage(error) || 'Unable to connect to KIAAN.'

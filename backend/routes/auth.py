@@ -232,7 +232,12 @@ async def signup(request: Request, payload: SignupIn, db: AsyncSession = Depends
         hashed_password=hash_password(payload.password),
     )
     db.add(user)
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Database commit failed during signup: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
     await db.refresh(user)
 
     # Auto-create free subscription for new user
@@ -277,7 +282,11 @@ async def login(
             await db.execute(
                 update(User).where(User.id == user.id).values(**update_values)
             )
-            await db.commit()
+            try:
+                await db.commit()
+            except Exception as e:
+                await db.rollback()
+                logger.error(f"Database commit failed during login attempt tracking: {e}", exc_info=True)
 
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
@@ -289,7 +298,11 @@ async def login(
                 locked_until=None,
             )
         )
-        await db.commit()
+        try:
+            await db.commit()
+        except Exception as e:
+            await db.rollback()
+            logger.error(f"Database commit failed during login attempt reset: {e}", exc_info=True)
 
     if user.two_factor_enabled:
         if not payload.two_factor_code:
@@ -405,7 +418,12 @@ async def initiate_two_factor(request: Request, db: AsyncSession = Depends(get_d
     await db.execute(
         update(User).where(User.id == user.id).values(two_factor_secret=secret)
     )
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Database commit failed during 2FA setup: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
 
     await touch_session(db, session_row)
     totp = pyotp.TOTP(secret)
@@ -440,7 +458,12 @@ async def verify_two_factor(
         .where(User.id == user.id)
         .values(two_factor_enabled=True)
     )
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Database commit failed during 2FA verification: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
 
     await touch_session(db, session_row)
 
@@ -499,7 +522,12 @@ async def disable_two_factor(
         .where(User.id == user.id)
         .values(two_factor_enabled=False, two_factor_secret=None, mfa_backup_codes=None)
     )
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Database commit failed during 2FA disable: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
 
     await touch_session(db, session_row)
 
@@ -547,7 +575,12 @@ async def regenerate_backup_codes(
         .where(User.id == user.id)
         .values(mfa_backup_codes=hashed_codes)
     )
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Database commit failed during backup code regeneration: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
 
     await touch_session(db, session_row)
 
@@ -714,7 +747,12 @@ async def revoke_specific_session(
     await db.execute(
         update(Session).where(Session.id == session_id).values(revoked_at=now)
     )
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Database commit failed during session revocation: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
 
     return RevokeSessionOut(
         session_id=session_id,
@@ -866,7 +904,13 @@ async def forgot_password(
         ip_address=request.client.host if request.client else None,
     )
     db.add(reset_row)
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Database commit failed during password reset token creation: {e}", exc_info=True)
+        # Return generic response to prevent account enumeration
+        return generic_response
 
     # Send email (non-blocking — failure logged but doesn't break the flow)
     sent = await send_password_reset_email(user.email, raw_token)
@@ -934,7 +978,12 @@ async def reset_password(
         .values(revoked_at=datetime.now(UTC))
     )
 
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Database commit failed during password reset: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
 
     logger.info("Password reset completed for user %s", matched_token.user_id)
 

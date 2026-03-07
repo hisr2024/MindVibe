@@ -28,13 +28,24 @@ startup_logger.info("=" * 80)
 # Set API key explicitly for this module
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 if not OPENAI_API_KEY:
-    startup_logger.warning(
-        "⚠️  OPENAI_API_KEY is NOT configured. "
-        "KIAAN AI features will be unavailable. "
-        "Set OPENAI_API_KEY in your environment to enable AI capabilities."
-    )
+    if os.getenv("ENVIRONMENT", "").lower() == "production":
+        startup_logger.critical(
+            "OPENAI_API_KEY is NOT configured. "
+            "KIAAN AI features require this key in production. "
+            "Refusing to start without it."
+        )
+        raise RuntimeError(
+            "OPENAI_API_KEY is required in production. "
+            "Set it in your environment variables to enable KIAAN AI features."
+        )
+    else:
+        startup_logger.warning(
+            "OPENAI_API_KEY is NOT configured. "
+            "KIAAN AI features will be unavailable. "
+            "Set OPENAI_API_KEY in your environment to enable AI capabilities."
+        )
 else:
-    startup_logger.info("✅ OPENAI_API_KEY: configured")
+    startup_logger.info("OPENAI_API_KEY: configured")
     os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
 from fastapi import FastAPI, HTTPException, Request, status
@@ -57,16 +68,27 @@ from backend.middleware.csrf import CSRFMiddleware
 from backend.models import Base
 
 # Get allowed origins from environment variable or use defaults
-ALLOWED_ORIGINS = [
-    origin.strip()
-    for origin in os.getenv(
-        "CORS_ALLOWED_ORIGINS",
-        "https://mind-vibe-universal.vercel.app,https://www.kiaanverse.com,https://kiaanverse.com,http://localhost:3000,http://localhost:3001"
-    ).split(",")
-]
+_cors_env = os.getenv("CORS_ALLOWED_ORIGINS", "")
+_is_production = os.getenv("ENVIRONMENT", "").lower() == "production"
 
-# Log CORS configuration at startup for debugging
-startup_logger.info(f"✅ CORS allowed origins: {ALLOWED_ORIGINS}")
+if _cors_env:
+    ALLOWED_ORIGINS = [origin.strip() for origin in _cors_env.split(",") if origin.strip()]
+elif _is_production:
+    ALLOWED_ORIGINS = [
+        "https://mind-vibe-universal.vercel.app",
+        "https://www.kiaanverse.com",
+        "https://kiaanverse.com",
+    ]
+else:
+    ALLOWED_ORIGINS = [
+        "https://mind-vibe-universal.vercel.app",
+        "https://www.kiaanverse.com",
+        "https://kiaanverse.com",
+        "http://localhost:3000",
+        "http://localhost:3001",
+    ]
+
+startup_logger.info(f"CORS allowed origins: {ALLOWED_ORIGINS}")
 
 # Explicitly list allowed headers (wildcards don't work with credentials: 'include')
 ALLOWED_HEADERS = [
@@ -81,6 +103,11 @@ ALLOWED_HEADERS = [
 ]
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
+# RUN_MIGRATIONS_ON_STARTUP controls whether SQL migrations execute during app
+# startup.  Default is "true".  Set to "false" in environments where migrations
+# are applied via a separate pre-deploy step (e.g. Render's preDeployCommand in
+# render.yaml runs `python scripts/run_migrations.py`).  Disabling avoids
+# duplicate migration attempts and reduces startup latency on hot restarts.
 RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in {
     "1",
     "true",

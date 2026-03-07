@@ -70,9 +70,9 @@ function CustomTooltip({
       <p className="text-xs font-medium mb-1">
         {labelFormatter ? labelFormatter(label as string) : label}
       </p>
-      {payload.map((entry, index) => (
+      {payload.map((entry) => (
         <p
-          key={index}
+          key={entry.dataKey || entry.name}
           className="text-sm font-bold"
           style={{ color: entry.color }}
         >
@@ -270,9 +270,9 @@ export function Chart({
               paddingAngle={2}
               isAnimationActive={animate}
             >
-              {data.map((_, index) => (
+              {data.map((entry, index) => (
                 <Cell
-                  key={`cell-${index}`}
+                  key={String(entry[xAxisKey] ?? index)}
                   fill={chartColors[index % chartColors.length]}
                 />
               ))}

@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { KiaanChat, type Message } from '@/components/chat/KiaanChat';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { apiCall, getErrorMessage, isQuotaExceeded, isFeatureLocked, getUpgradeUrl } from '@/lib/api-client';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -454,15 +455,17 @@ function KiaanChatPageInner() {
  */
 export default function KiaanChatPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#d4a44c] border-t-transparent mx-auto" />
-          <p className="text-[#d4a44c]/70">Loading...</p>
+    <ErrorBoundary>
+      <Suspense fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#d4a44c] border-t-transparent mx-auto" />
+            <p className="text-[#d4a44c]/70">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
-      <KiaanChatPageInner />
-    </Suspense>
+      }>
+        <KiaanChatPageInner />
+      </Suspense>
+    </ErrorBoundary>
   );
 }

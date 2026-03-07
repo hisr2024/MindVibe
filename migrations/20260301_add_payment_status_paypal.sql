@@ -1,4 +1,5 @@
 -- Migration: Add paypal_order_id column to payments table
+-- Dependencies: Requires 20251202_add_subscription_system.sql (creates payments table).
 -- Purpose: Support direct PayPal order tracking alongside Stripe PayPal integration.
 -- This column stores the PayPal order ID for payments made through PayPal,
 -- enabling payment status tracking across Stripe, Razorpay, and PayPal.

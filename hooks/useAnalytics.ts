@@ -150,7 +150,7 @@ export function useAnalytics(_userId?: string): UseAnalyticsResult {
     } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        overview: error instanceof Error ? error.message : 'Failed to load overview',
+        overview: error instanceof Error ? error.message : 'We\'re having trouble loading your overview. Please try again.',
       }))
     } finally {
       setLoading((prev) => ({ ...prev, overview: false }))
@@ -167,7 +167,7 @@ export function useAnalytics(_userId?: string): UseAnalyticsResult {
     } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        moodTrends: error instanceof Error ? error.message : 'Failed to load mood trends',
+        moodTrends: error instanceof Error ? error.message : 'We\'re having trouble loading mood trends. Please try again.',
       }))
     } finally {
       setLoading((prev) => ({ ...prev, moodTrends: false }))
@@ -184,7 +184,7 @@ export function useAnalytics(_userId?: string): UseAnalyticsResult {
     } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        journalStats: error instanceof Error ? error.message : 'Failed to load journal stats',
+        journalStats: error instanceof Error ? error.message : 'We\'re having trouble loading journal stats. Please try again.',
       }))
     } finally {
       setLoading((prev) => ({ ...prev, journalStats: false }))
@@ -201,7 +201,7 @@ export function useAnalytics(_userId?: string): UseAnalyticsResult {
     } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        kiaanInsights: error instanceof Error ? error.message : 'Failed to load KIAAN insights',
+        kiaanInsights: error instanceof Error ? error.message : 'We\'re having trouble loading KIAAN insights. Please try again.',
       }))
     } finally {
       setLoading((prev) => ({ ...prev, kiaanInsights: false }))
@@ -218,7 +218,7 @@ export function useAnalytics(_userId?: string): UseAnalyticsResult {
     } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        weeklySummary: error instanceof Error ? error.message : 'Failed to load weekly summary',
+        weeklySummary: error instanceof Error ? error.message : 'We\'re having trouble loading your weekly summary. Please try again.',
       }))
     } finally {
       setLoading((prev) => ({ ...prev, weeklySummary: false }))
@@ -235,7 +235,7 @@ export function useAnalytics(_userId?: string): UseAnalyticsResult {
     } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        achievements: error instanceof Error ? error.message : 'Failed to load achievements',
+        achievements: error instanceof Error ? error.message : 'We\'re having trouble loading achievements. Please try again.',
       }))
     } finally {
       setLoading((prev) => ({ ...prev, achievements: false }))

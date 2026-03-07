@@ -40,7 +40,7 @@ export function CancelSubscriptionModal({
       await onConfirm()
       setStep('complete')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to cancel subscription')
+      setError(err instanceof Error ? err.message : 'We\'re having trouble canceling your subscription. Please try again.')
     } finally {
       setLoading(false)
     }

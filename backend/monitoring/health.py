@@ -3,7 +3,7 @@
 import logging
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import psutil
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -19,12 +19,44 @@ router = APIRouter(prefix="/api/monitoring", tags=["monitoring"])
 
 
 @router.get("/health")
-async def basic_health():
+async def basic_health(
+    db: AsyncSession = Depends(get_db),
+):
     """Basic health check for load balancers. No auth required.
 
-    Returns only a simple status - no internal details exposed.
+    Performs lightweight dependency checks (database ping, Redis ping if enabled)
+    to confirm the service can handle requests. Returns degraded status if any
+    dependency is unreachable, so load balancers can route traffic accordingly.
     """
-    return {"status": "ok"}
+    status = "ok"
+    checks: dict = {}
+
+    # Database ping — lightweight SELECT 1
+    try:
+        await db.execute(text("SELECT 1"))
+        checks["database"] = "up"
+    except Exception:
+        checks["database"] = "down"
+        status = "degraded"
+        logger.warning("Health check: database unreachable")
+
+    # Redis ping — only if Redis is enabled
+    redis_enabled = os.getenv("REDIS_ENABLED", "false").lower() in ("true", "1")
+    if redis_enabled:
+        try:
+            import redis.asyncio as aioredis
+
+            redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+            r = aioredis.from_url(redis_url, socket_connect_timeout=2)
+            await r.ping()
+            await r.aclose()
+            checks["redis"] = "up"
+        except Exception:
+            checks["redis"] = "down"
+            status = "degraded"
+            logger.warning("Health check: Redis unreachable")
+
+    return {"status": status, "checks": checks}
 
 
 @router.get("/health/detailed")
@@ -36,7 +68,7 @@ async def detailed_health(
 
     health_data = {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "checks": {}
     }
 
@@ -79,7 +111,7 @@ async def get_metrics(
 ):
     """Application metrics for monitoring. Requires authentication."""
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     last_24h = now - timedelta(hours=24)
 
     # User metrics
@@ -139,7 +171,7 @@ async def security_status(
     circuit_breakers = get_all_circuit_breakers()
 
     return {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "ddos_protection": {
             "enabled": True,
         },

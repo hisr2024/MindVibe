@@ -2,6 +2,33 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 
+/**
+ * Smart scroll hook for chat-like interfaces.
+ *
+ * Automatically scrolls to the bottom when new messages arrive, but only
+ * if the user is already near the bottom. If the user has scrolled up to
+ * read older messages, a "new message" indicator is shown instead.
+ *
+ * @param messageCount - The current number of messages. When this increases,
+ *   the hook decides whether to auto-scroll or show the new-message indicator.
+ * @returns An object containing:
+ *   - `scrollRef` - Ref to attach to the scrollable container element.
+ *   - `messagesEndRef` - Ref to attach to a sentinel element at the end of messages.
+ *   - `hasNewMessage` - Whether there are unread messages below the viewport.
+ *   - `scrollToBottom` - Function to programmatically scroll to the bottom.
+ *
+ * @example
+ * ```tsx
+ * const { scrollRef, messagesEndRef, hasNewMessage, scrollToBottom } = useSmartScroll(messages.length);
+ * return (
+ *   <div ref={scrollRef}>
+ *     {messages.map(m => <Message key={m.id} {...m} />)}
+ *     <div ref={messagesEndRef} />
+ *     {hasNewMessage && <button onClick={scrollToBottom}>New messages</button>}
+ *   </div>
+ * );
+ * ```
+ */
 export function useSmartScroll(messageCount: number) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)

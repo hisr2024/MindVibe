@@ -13,7 +13,7 @@ legitimate KIAAN interactions.
 import html
 import logging
 import re
-from typing import Awaitable, Callable, Any
+from typing import Awaitable, Callable, Any, Union, overload
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -96,16 +96,21 @@ def detect_path_traversal(value: str) -> bool:
     return bool(PATH_TRAVERSAL_REGEX.search(value))
 
 
-def sanitize_value(value: Any, sanitize: bool = False) -> Any:
+SanitizableValue = Union[str, dict, list, int, float, bool, None]
+
+
+def sanitize_value(value: SanitizableValue, sanitize: bool = False) -> SanitizableValue:
     """
     Recursively sanitize a value (string, dict, or list).
-    
+
     Args:
-        value: The value to sanitize
-        sanitize: If True, sanitize strings; if False, just detect issues
-        
+        value: The value to sanitize — strings, dicts, lists, or passthrough scalars.
+        sanitize: If True, sanitize strings; if False, just detect issues.
+
     Returns:
-        The sanitized value (or original if not sanitizing)
+        The sanitized value with the same structure as the input.
+        Strings may be HTML-escaped; dicts and lists are processed recursively;
+        other scalar types (int, float, bool, None) are returned unchanged.
     """
     if isinstance(value, str):
         if sanitize:

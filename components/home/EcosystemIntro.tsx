@@ -43,9 +43,9 @@ export function EcosystemIntro() {
 
       {/* Three Pillars */}
       <div className="grid gap-4 md:grid-cols-3">
-        {pillars.map((pillar, index) => (
+        {pillars.map((pillar) => (
           <div
-            key={index}
+            key={pillar.title}
             className={`group relative overflow-hidden rounded-2xl border ${pillar.border} bg-gradient-to-br ${pillar.gradient} p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl`}
           >
             {/* Glow effect */}

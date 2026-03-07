@@ -13,7 +13,7 @@ from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional, Literal
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 from backend.deps import get_db, get_current_user_flexible
@@ -413,7 +413,7 @@ async def sync_batch(
 
     return SyncBatchResponse(
         results=results,
-        server_timestamp=datetime.utcnow(),
+        server_timestamp=datetime.now(tz=timezone.utc),
         conflicts_count=conflicts_count,
         success_count=success_count,
         error_count=error_count
@@ -488,7 +488,7 @@ async def pull_server_changes(
 
     return ServerChangesResponse(
         changes=changes,
-        server_timestamp=datetime.utcnow(),
+        server_timestamp=datetime.now(tz=timezone.utc),
         has_more=False  # Pagination could be added if needed
     )
 
@@ -503,7 +503,7 @@ async def sync_status(
     """
     return {
         "status": "healthy",
-        "server_timestamp": datetime.utcnow().isoformat(),
+        "server_timestamp": datetime.now(tz=timezone.utc).isoformat(),
         "user_id": user_id,
         "sync_version": "1.0"
     }

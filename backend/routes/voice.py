@@ -137,7 +137,9 @@ async def synthesize_speech(
     except HTTPException:
         raise
     except Exception as e:
-        logger.warning(f"Subscription check failed for voice synthesis, allowing request: {e}")
+        logger.error(f"Subscription check failed for voice synthesis: {e}", exc_info=True)
+        # Fail open for voice since it's a non-critical feature - degraded UX is acceptable
+        # For security-sensitive features, fail closed instead
 
     logger.info(f"TTS request from user {user_id}: {len(payload.text)} chars, lang={payload.language}")
 
@@ -147,8 +149,11 @@ async def synthesize_speech(
     if payload.language not in tts_service.get_supported_languages():
         raise HTTPException(
             status_code=400,
-            detail=f"Language '{payload.language}' not supported. "
-                   f"Supported: {', '.join(tts_service.get_supported_languages())}"
+            detail={
+                "error": "UNSUPPORTED_LANGUAGE",
+                "message": f"Language '{payload.language}' is not supported.",
+                "supported_languages": list(tts_service.get_supported_languages()),
+            }
         )
 
     # Generate audio
@@ -379,7 +384,7 @@ async def batch_download_verses(
                 })
 
         except Exception as e:
-            logger.error(f"Batch download error for {verse_id}: {e}")
+            logger.error(f"Batch download error for {verse_id}: {e}", exc_info=True)
             results.append({
                 "verse_id": verse_id,
                 "status": "error",
@@ -685,7 +690,7 @@ async def process_voice_query(
         )
 
     except Exception as e:
-        logger.error(f"Voice query error: {e}")
+        logger.error(f"Voice query error: {e}", exc_info=True)
 
         # Fallback response
         return VoiceQueryResponse(
@@ -1199,7 +1204,7 @@ async def process_enhanced_voice_query(
         }
 
     except Exception as e:
-        logger.error(f"Enhanced voice query error: {e}")
+        logger.error(f"Enhanced voice query error: {e}", exc_info=True)
 
         return {
             "conversation_id": None,
@@ -1694,7 +1699,7 @@ async def divine_voice_synthesize(
 
         if not result.success:
             logger.error(f"Divine voice synthesis failed: {result.error}")
-            raise HTTPException(status_code=500, detail=result.error or "Synthesis failed")
+            raise HTTPException(status_code=500, detail={"error": "SYNTHESIS_FAILED", "message": result.error or "Voice synthesis failed."})
 
         # Return audio
         return Response(
@@ -1712,7 +1717,7 @@ async def divine_voice_synthesize(
         raise
     except Exception as e:
         logger.error(f"Divine voice error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.")
+        raise HTTPException(status_code=500, detail={"error": "INTERNAL_ERROR", "message": "An internal error occurred. Please try again."})
 
 
 @router.post("/divine/shloka")
@@ -1752,7 +1757,7 @@ async def divine_voice_shloka(
 
         if not result.success:
             logger.error(f"Shloka synthesis failed: {result.error}")
-            raise HTTPException(status_code=500, detail=result.error or "Synthesis failed")
+            raise HTTPException(status_code=500, detail={"error": "SYNTHESIS_FAILED", "message": result.error or "Voice synthesis failed."})
 
         return Response(
             content=result.audio_data,
@@ -1768,7 +1773,7 @@ async def divine_voice_shloka(
         raise
     except Exception as e:
         logger.error(f"Shloka synthesis error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="An internal error occurred. Please try again.")
+        raise HTTPException(status_code=500, detail={"error": "INTERNAL_ERROR", "message": "An internal error occurred. Please try again."})
 
 
 @router.post("/divine/stop")

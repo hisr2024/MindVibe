@@ -1,5 +1,7 @@
 """Integration tests for Auth API endpoints."""
 
+import os
+
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,14 +9,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.models import User
 from backend.security.password_hash import hash_password
 
+# Test credentials sourced from environment variables with safe defaults.
+# Override via env vars in CI to avoid committing real credentials.
+TEST_USER_EMAIL = os.getenv("TEST_USER_EMAIL", "test@example.com")
+TEST_USER_PASSWORD = os.getenv("TEST_USER_PASSWORD", "Test1234")
+
 
 @pytest.fixture
 async def test_user(test_db: AsyncSession):
     """Create a test user."""
     user = User(
         auth_uid="test-auth-uid-123",
-        email="test@example.com",
-        hashed_password=hash_password("Test1234"),
+        email=TEST_USER_EMAIL,
+        hashed_password=hash_password(TEST_USER_PASSWORD),
     )
     test_db.add(user)
     await test_db.commit()
@@ -45,7 +52,7 @@ class TestSignup:
         """Test signup with duplicate email."""
         response = await test_client.post(
             "/api/auth/signup",
-            json={"email": "test@example.com", "password": "Test1234!"},
+            json={"email": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD + "!"},
         )
 
         # Accept 409 (conflict) or 422 (validation) or 500 (DNS failure)
@@ -64,7 +71,7 @@ class TestSignup:
         """Test signup with invalid email."""
         response = await test_client.post(
             "/api/auth/signup",
-            json={"email": "not-an-email", "password": "Test1234"},
+            json={"email": "not-an-email", "password": TEST_USER_PASSWORD},
         )
 
         assert response.status_code == 422
@@ -78,7 +85,7 @@ class TestLogin:
         """Test successful login."""
         response = await test_client.post(
             "/api/auth/login",
-            json={"email": "test@example.com", "password": "Test1234"},
+            json={"email": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD},
         )
 
         assert response.status_code == 200
@@ -97,7 +104,7 @@ class TestLogin:
         """Test login with wrong password."""
         response = await test_client.post(
             "/api/auth/login",
-            json={"email": "test@example.com", "password": "WrongPass123"},
+            json={"email": TEST_USER_EMAIL, "password": "WrongPass123"},
         )
 
         assert response.status_code == 401
@@ -106,7 +113,7 @@ class TestLogin:
         """Test login with nonexistent user."""
         response = await test_client.post(
             "/api/auth/login",
-            json={"email": "nobody@example.com", "password": "Test1234"},
+            json={"email": "nobody@example.com", "password": TEST_USER_PASSWORD},
         )
 
         assert response.status_code == 401
@@ -115,7 +122,7 @@ class TestLogin:
         """Test login with different case email."""
         response = await test_client.post(
             "/api/auth/login",
-            json={"email": "TEST@EXAMPLE.COM", "password": "Test1234"},
+            json={"email": TEST_USER_EMAIL.upper(), "password": TEST_USER_PASSWORD},
         )
 
         assert response.status_code == 200
@@ -130,7 +137,7 @@ class TestMe:
         # First login to get token
         login_response = await test_client.post(
             "/api/auth/login",
-            json={"email": "test@example.com", "password": "Test1234"},
+            json={"email": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD},
         )
         token = login_response.json()["access_token"]
 
@@ -173,7 +180,7 @@ class TestLogout:
         # Login first
         login_response = await test_client.post(
             "/api/auth/login",
-            json={"email": "test@example.com", "password": "Test1234"},
+            json={"email": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD},
         )
 
         # In CI environment, login may fail due to DNS/network issues
@@ -210,7 +217,7 @@ class TestRefresh:
         # Login to get refresh token
         login_response = await test_client.post(
             "/api/auth/login",
-            json={"email": "test@example.com", "password": "Test1234"},
+            json={"email": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD},
         )
 
         if login_response.status_code != 200:
@@ -258,7 +265,7 @@ class TestSessions:
         # Login to create a session
         login_response = await test_client.post(
             "/api/auth/login",
-            json={"email": "test@example.com", "password": "Test1234"},
+            json={"email": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD},
         )
         if login_response.status_code != 200:
             pytest.skip("Login failed (likely DNS resolution issue in CI)")
@@ -281,7 +288,7 @@ class TestSessions:
         # Login to create a session
         login_response = await test_client.post(
             "/api/auth/login",
-            json={"email": "test@example.com", "password": "Test1234"},
+            json={"email": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD},
         )
         if login_response.status_code != 200:
             pytest.skip("Login failed (likely DNS resolution issue in CI)")

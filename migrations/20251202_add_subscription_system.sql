@@ -1,5 +1,6 @@
 -- Migration: Add subscription system tables
 -- Description: Creates tables for subscription plans, user subscriptions, usage tracking, and payments
+-- Dependencies: Requires 'users' table to exist (references users.id).
 -- Note: Using VARCHAR with CHECK constraints instead of PostgreSQL ENUM types.
 --       This approach is fully idempotent and avoids DO block parsing issues with the migration runner.
 --       CHECK constraints provide equivalent data validation at the database level.
@@ -49,7 +50,8 @@ BEGIN
         BEGIN
             ALTER TABLE subscription_plans ALTER COLUMN code DROP NOT NULL;
         EXCEPTION
-            WHEN undefined_column THEN NULL; -- already removed in some environments
+            -- already removed in some environments
+            WHEN undefined_column THEN NULL;
         END;
     END IF;
 

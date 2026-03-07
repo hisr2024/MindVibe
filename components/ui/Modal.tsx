@@ -57,6 +57,9 @@ export function Modal({
     setIsVisible(true)
   }
 
+  // Store previously focused element for focus restoration
+  const previousFocusRef = useRef<HTMLElement | null>(null)
+
   // Handle escape key
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (event.key === 'Escape') {
@@ -70,6 +73,57 @@ export function Modal({
       return () => document.removeEventListener('keydown', handleKeyDown)
     }
   }, [open, handleKeyDown])
+
+  // Focus management: trap focus within modal and restore on close
+  useEffect(() => {
+    if (open) {
+      previousFocusRef.current = document.activeElement as HTMLElement | null
+
+      // Focus the first focusable element after render
+      const timer = setTimeout(() => {
+        const focusTarget = contentRef.current?.querySelector<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+        focusTarget?.focus()
+      }, 50)
+
+      return () => {
+        clearTimeout(timer)
+        // Restore focus to the previously focused element
+        if (previousFocusRef.current && document.contains(previousFocusRef.current)) {
+          previousFocusRef.current.focus()
+        }
+      }
+    }
+  }, [open])
+
+  // Focus trap: keep focus within the modal
+  useEffect(() => {
+    if (!open) return
+
+    const handleTabKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab' || !contentRef.current) return
+
+      const focusableElements = contentRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusableElements.length === 0) return
+
+      const firstElement = focusableElements[0]
+      const lastElement = focusableElements[focusableElements.length - 1]
+
+      if (e.shiftKey && document.activeElement === firstElement) {
+        e.preventDefault()
+        lastElement.focus()
+      } else if (!e.shiftKey && document.activeElement === lastElement) {
+        e.preventDefault()
+        firstElement.focus()
+      }
+    }
+
+    window.addEventListener('keydown', handleTabKey)
+    return () => window.removeEventListener('keydown', handleTabKey)
+  }, [open])
 
   // Handle outside click
   const handleOverlayClick = (event: React.MouseEvent) => {

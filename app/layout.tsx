@@ -10,6 +10,7 @@ import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
 import { KiaanFooter } from '@/components/layout/KiaanFooter'
 import { GlobalWakeWordListener } from '@/components/wake-word/GlobalWakeWordListener'
 import KiaanVoiceFAB from '@/components/voice/KiaanVoiceFAB'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import { ClientLayout } from './ClientLayout'
 import { OverlayRoot } from '@/components/ui/OverlayRoot'
 import { MobileRouteGuard, MobileContentWrapper } from '@/components/mobile/MobileRouteGuard'
@@ -124,6 +125,25 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Preload and load Crimson Text font with display swap for optimal LCP */}
+        <link
+          rel="preconnect"
+          href="https://fonts.googleapis.com"
+        />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          as="style"
+          href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        />
         {/* JSON-LD structured data for search engine rich results */}
         <script
           type="application/ld+json"
@@ -195,9 +215,13 @@ export default async function RootLayout({
               {/* Mobile bottom navigation (for standard non /m/* routes) */}
               <MobileNav />
               {/* OM floating chat widget */}
-              <KiaanFooter />
+              <ErrorBoundary fallback={null}>
+                <KiaanFooter />
+              </ErrorBoundary>
               {/* Global voice FAB - tap to talk to KIAAN */}
-              <KiaanVoiceFAB />
+              <ErrorBoundary fallback={null}>
+                <KiaanVoiceFAB />
+              </ErrorBoundary>
             </MobileRouteGuard>
             {/* Global wake word listener - "Hey KIAAN" from anywhere */}
             <GlobalWakeWordListener />

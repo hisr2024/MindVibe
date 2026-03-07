@@ -33,17 +33,17 @@ export function SacredMessage({
     // Convert *text* to italics (sacred pauses)
     const parts = text.split(/(\*[^*]+\*)/g);
 
-    return parts.map((part, index) => {
+    return parts.map((part, partIndex) => {
       if (part.startsWith('*') && part.endsWith('*')) {
         return (
-          <span key={index} className="block my-4 text-white/60 italic text-center">
+          <span key={`sacred-${partIndex}`} className="block my-4 text-white/60 italic text-center">
             {part.slice(1, -1)}
           </span>
         );
       }
       // Handle line breaks
       return part.split('\n').map((line, lineIndex) => (
-        <React.Fragment key={`${index}-${lineIndex}`}>
+        <React.Fragment key={`${partIndex}-${lineIndex}`}>
           {lineIndex > 0 && <br />}
           {line}
         </React.Fragment>

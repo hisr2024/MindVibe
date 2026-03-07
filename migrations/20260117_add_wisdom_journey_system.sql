@@ -25,13 +25,17 @@ CREATE TABLE IF NOT EXISTS wisdom_journeys (
     progress_percentage INTEGER NOT NULL DEFAULT 0,
 
     -- Personalization metadata
-    recommended_by VARCHAR(64),  -- "ai", "mood_based", "journal_based", "manual"
-    recommendation_score NUMERIC(5, 4),  -- 0.0-1.0
+    -- "ai", "mood_based", "journal_based", "manual"
+    recommended_by VARCHAR(64),
+    -- 0.0-1.0
+    recommendation_score NUMERIC(5, 4),
     recommendation_reason TEXT,
 
     -- Source data for personalization (privacy-preserving)
-    source_mood_scores JSON,  -- Last 7 days mood averages
-    source_themes JSON,  -- Extracted journal themes
+    -- Last 7 days mood averages
+    source_mood_scores JSON,
+    -- Extracted journal themes
+    source_themes JSON,
 
     -- Timestamps
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -93,7 +97,8 @@ CREATE TABLE IF NOT EXISTS journey_recommendations (
 
     -- Recommendation details
     journey_template VARCHAR(128) NOT NULL,
-    relevance_score NUMERIC(5, 4) NOT NULL,  -- 0.0-1.0
+    -- 0.0-1.0
+    relevance_score NUMERIC(5, 4) NOT NULL,
     reason TEXT,
 
     -- User interaction

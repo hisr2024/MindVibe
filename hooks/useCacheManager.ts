@@ -62,7 +62,7 @@ export function useCacheManager() {
         storageQuota: storageEstimate?.quota || 0,
       })
     } catch (error) {
-      console.error('Failed to load cache stats:', error)
+      if (process.env.NODE_ENV !== 'production') console.error('Failed to load cache stats:', error)
     } finally {
       setLoading(false)
     }
@@ -86,7 +86,7 @@ export function useCacheManager() {
       }
       await loadStats()
     } catch (error) {
-      console.error('Failed to clear cache:', error)
+      if (process.env.NODE_ENV !== 'production') console.error('Failed to clear cache:', error)
     } finally {
       setLoading(false)
     }
@@ -101,7 +101,7 @@ export function useCacheManager() {
       ])
       await loadStats()
     } catch (error) {
-      console.error('Failed to cleanup expired cache:', error)
+      if (process.env.NODE_ENV !== 'production') console.error('Failed to cleanup expired cache:', error)
     } finally {
       setLoading(false)
     }

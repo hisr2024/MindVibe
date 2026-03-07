@@ -60,11 +60,6 @@ interface StateCheckInProps {
   className?: string
 }
 
-// Constants
-const _INTENSITY_PERCENTAGE_MULTIPLIER = 10
-const _MIN_INTENSITY = 1
-const _MAX_INTENSITY = 10
-
 export function StateCheckIn({ onStateSelect, className = '' }: StateCheckInProps) {
   const [selectedState, setSelectedState] = useState<EmotionalState | null>(null)
   const [intensity, setIntensity] = useState(5)

@@ -18,7 +18,7 @@ import logging
 import time
 from typing import Awaitable, Callable, Dict, List, Set, Optional, Tuple
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -306,7 +306,7 @@ class ThreatDetectionMiddleware(BaseHTTPMiddleware):
             return
 
         log_data = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "ip": ip,
             "threat_type": threat_type,
             "details": details,

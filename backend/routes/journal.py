@@ -77,18 +77,27 @@ async def _check_journal_permission(request: Request, db: AsyncSession, premium:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail={
-                        "error": "feature_not_available",
-                        "feature": "encrypted_journal",
+                        "error": "FEATURE_NOT_AVAILABLE",
                         "message": "This capability requires an active subscription.",
+                        "feature": "encrypted_journal",
                         "upgrade_url": "/subscription/upgrade",
                     },
                 )
     except HTTPException:
         raise
     except Exception as e:
-        # Log but allow access on error - graceful degradation
+        # SECURITY: Fail closed - deny access when subscription check fails.
+        # Granting access on error would allow bypassing subscription checks
+        # by inducing failures in the subscription service.
         import logging
-        logging.warning(f"Journal access check failed, allowing access: {e}")
+        logging.error(f"Journal access check failed, denying access: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error": "SERVICE_UNAVAILABLE",
+                "message": "Unable to verify access. Please try again shortly.",
+            },
+        )
 
 
 @router.post("/quick-save", response_model=QuickSaveOut)
@@ -113,7 +122,7 @@ async def quick_save_to_journal(
     await _check_journal_permission(request, db)
     
     # Create a formatted journal entry
-    timestamp = dt.datetime.utcnow()
+    timestamp = datetime.now(tz=dt.timezone.utc)
     formatted_content = {
         "type": "kiaan_insight",
         "content": payload.content,
@@ -223,7 +232,7 @@ async def create_entry(
     entry_id = payload.entry_id or str(uuid.uuid4())
     existing = await db.get(JournalEntry, entry_id)
     if existing:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Entry already exists")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={"error": "ENTRY_EXISTS", "message": "Entry already exists."})
 
     entry = JournalEntry(
         id=entry_id,
@@ -287,7 +296,7 @@ async def get_entry(
     await _check_journal_permission(request, db, premium=False)
     entry = await db.get(JournalEntry, entry_id)
     if not entry or entry.user_id != user_id or entry.deleted_at:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entry not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"error": "ENTRY_NOT_FOUND", "message": "Entry not found."})
     return _entry_to_out(entry)
 
 
@@ -302,11 +311,11 @@ async def update_entry(
     await _check_journal_permission(request, db, premium=False)
     entry = await db.get(JournalEntry, entry_id)
     if not entry or entry.user_id != user_id or entry.deleted_at:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entry not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"error": "ENTRY_NOT_FOUND", "message": "Entry not found."})
 
     # Simple timestamp-based conflict detection
     if payload.client_updated_at <= entry.client_updated_at:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Client update is older than server copy")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={"error": "CONFLICT_STALE_UPDATE", "message": "Client update is older than server copy."})
 
     if payload.title:
         entry.encrypted_title = payload.title.dict()
@@ -334,7 +343,7 @@ async def update_entry(
             )
 
     entry.client_updated_at = payload.client_updated_at
-    entry.updated_at = dt.datetime.utcnow()
+    entry.updated_at = datetime.now(tz=dt.timezone.utc)
 
     await _record_version(db, entry, user_id, payload)
     await db.commit()
@@ -352,10 +361,10 @@ async def delete_entry(
     await _check_journal_permission(request, db, premium=False)
     entry = await db.get(JournalEntry, entry_id)
     if not entry or entry.user_id != user_id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entry not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"error": "ENTRY_NOT_FOUND", "message": "Entry not found."})
 
     entry.soft_delete()
-    entry.updated_at = dt.datetime.utcnow()
+    entry.updated_at = datetime.now(tz=dt.timezone.utc)
     await db.commit()
     return {"status": "deleted", "id": entry_id}
 
@@ -393,7 +402,7 @@ async def sync_entries(
     return SyncResponse(
         entries=[_entry_to_out(e) for e in entries if e.deleted_at is None],
         deleted=deleted_ids,
-        server_timestamp=dt.datetime.utcnow(),
+        server_timestamp=datetime.now(tz=dt.timezone.utc),
     )
 
 
@@ -450,7 +459,7 @@ async def journal_analytics(
     )
 
     # streak calculation: count consecutive days ending today with at least one entry
-    today = dt.datetime.utcnow().date()
+    today = datetime.now(tz=dt.timezone.utc).date()
     streak = 0
     longest = 0
     res = await db.execute(

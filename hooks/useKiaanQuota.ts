@@ -98,7 +98,7 @@ export function useKiaanQuota(tier: string = 'free'): UseKiaanQuotaResult {
         localStorage.setItem(KIAAN_USAGE_STORAGE_KEY, JSON.stringify(newData))
       }
     } catch (e) {
-      console.warn('Failed to load KIAAN quota from localStorage', e)
+      if (process.env.NODE_ENV !== 'production') console.warn('Failed to load KIAAN quota from localStorage', e)
     }
     setLoading(false)
   }, [tier])

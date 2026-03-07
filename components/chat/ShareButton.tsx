@@ -54,6 +54,8 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
   const [anonymize, setAnonymize] = useState(false)
   const [sharing, setSharing] = useState(false)
   const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
+  const [toastType, setToastType] = useState<'success' | 'error'>('success')
 
   const handleShare = async (platform: SharePlatform) => {
     if (showWarning) {
@@ -65,10 +67,14 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
     const result = await shareContent(platform, text, anonymize)
 
     if (result.success && platform === 'instagram') {
+      setToastMessage('Text copied to clipboard! You can now paste it into Instagram.')
+      setToastType('success')
       setShowToast(true)
     } else if (!result.success && result.error) {
-      // Log error for debugging, could also show toast notification
       console.error(`Share failed: ${result.error}`)
+      setToastMessage('Unable to share. Please try again or use a different platform.')
+      setToastType('error')
+      setShowToast(true)
     }
 
     setSharing(false)
@@ -244,8 +250,8 @@ export function ShareButton({ text, className = '' }: ShareButtonProps) {
       {/* Toast notification for Instagram */}
       {showToast && (
         <Toast
-          message="Text copied to clipboard! You can now paste it into Instagram."
-          type="success"
+          message={toastMessage}
+          type={toastType}
           duration={4000}
           onClose={() => setShowToast(false)}
         />

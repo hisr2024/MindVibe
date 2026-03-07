@@ -1074,7 +1074,7 @@ class OfflineDocumentationCache:
             except Exception:
                 # Fallback to LIKE search
                 cursor.execute("""
-                    SELECT * FROM documentation
+                    SELECT id, package_name, version, section, title, content, url, cached_at, language FROM documentation
                     WHERE content LIKE ? OR title LIKE ? OR package_name LIKE ?
                     LIMIT ?
                 """, (f"%{query}%", f"%{query}%", f"%{query}%", limit))
@@ -1098,7 +1098,7 @@ class OfflineDocumentationCache:
             cursor = conn.cursor()
 
             cursor.execute(
-                "SELECT * FROM documentation WHERE package_name = ?",
+                "SELECT id, package_name, version, section, title, content, url, cached_at, language FROM documentation WHERE package_name = ?",
                 (package_name,)
             )
 

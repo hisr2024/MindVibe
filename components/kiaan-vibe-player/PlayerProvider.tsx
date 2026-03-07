@@ -10,6 +10,7 @@
 import React, { useEffect } from 'react'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
 import { FloatingPlayer } from './FloatingPlayer'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 interface KiaanVibePlayerProviderProps {
   children: React.ReactNode
@@ -24,7 +25,9 @@ export function KiaanVibePlayerProvider({ children }: KiaanVibePlayerProviderPro
   return (
     <>
       {children}
-      <FloatingPlayer />
+      <ErrorBoundary fallback={null}>
+        <FloatingPlayer />
+      </ErrorBoundary>
     </>
   )
 }

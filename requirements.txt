@@ -2,9 +2,9 @@
 fastapi>=0.100.0,<1.0.0
 uvicorn>=0.22.0,<0.41.0
 python-multipart>=0.0.5,<0.0.22
-httpx>=0.27.0
-aiohttp>=3.9.0
-websockets>=12.0
+httpx>=0.27.0,<0.29.0
+aiohttp>=3.9.0,<4.0.0
+websockets>=12.0,<14.0
 
 # Pydantic & Validation
 pydantic[email]>=2.0.0,<3.0.0
@@ -14,7 +14,7 @@ pydantic-settings>=2.0.0,<3.0.0
 sqlalchemy>=2.0.0,<3.0.0
 asyncpg>=0.27.0,<0.32.0
 psycopg2-binary>=2.9.0,<3.0.0
-aiosqlite>=0.19.0
+aiosqlite>=0.19.0,<0.21.0
 
 # Authentication
 python-jose[cryptography]>=3.3.0,<4.0.0
@@ -26,7 +26,8 @@ cbor2>=5.6.0,<6.0.0
 # Environment
 python-dotenv>=1.0.0,<2.0.0
 
-openai>=1.3.0
+# AI
+openai>=1.3.0,<2.0.0
 tenacity>=8.2.0,<9.0.0
 tiktoken>=0.5.0,<1.0.0
 
@@ -36,18 +37,16 @@ prometheus-client>=0.19.0,<1.0.0
 # File handling
 aiofiles>=23.0.0,<26.0.0
 
-# Testing
-pytest>=7.3.1,<9.1.0
-
-# Type hints
-types-requests>=2.31.0
+# NOTE: Dev-only packages (pytest, types-requests, black, mypy, etc.) belong
+# in requirements-dev.txt.  They were previously listed here; moved to keep
+# production images lean and avoid installing test tooling in deployed containers.
 
 # Security & Rate Limiting
-slowapi>=0.1.9
-redis>=5.0.0
+slowapi>=0.1.9,<0.2.0
+redis>=5.0.0,<6.0.0
 
 # Payment Providers
-razorpay>=1.4.1
+razorpay>=1.4.1,<2.0.0
 
 # Machine Learning (pinned for security and compatibility)
 scikit-learn>=1.3.0,<1.9.0
@@ -56,37 +55,12 @@ numpy>=1.24.0,<2.0.0
 # Monitoring & Observability
 psutil>=5.9.0,<8.0.0
 
-# =============================================================================
-# KIAAN AI INDEPENDENCE - Full Offline Support (v3.0)
-# =============================================================================
-
-# Async SQLite for offline memory persistence (already included above in Database section)
-
-# --- Local LLM Support ---
-# llama-cpp-python for local GGUF model inference (optional, requires build)
-# Install with: pip install llama-cpp-python
-# For GPU support: CMAKE_ARGS="-DLLAMA_CUBLAS=on" pip install llama-cpp-python
-# llama-cpp-python>=0.2.0
-
 # HuggingFace Hub for model downloads
-huggingface-hub>=0.21.0
-
-# --- TTS (Text-to-Speech) ---
-# Sarvam AI Bulbul + Bhashini AI + ElevenLabs (API-based, no local deps)
-# Audio processing deps below handle WAV/MP3 conversion
-
-# --- Local STT (Speech-to-Text) ---
-# faster-whisper for local Whisper inference (optional, requires build)
-# Install with: pip install faster-whisper
-# faster-whisper>=0.10.0
+huggingface-hub>=0.21.0,<1.0.0
 
 # Audio processing
-soundfile>=0.12.0
-pydub>=0.25.1
-
-# --- Local Embeddings & Search (optional) ---
-# sentence-transformers for local semantic search
-# sentence-transformers>=2.3.0
+soundfile>=0.12.0,<0.14.0
+pydub>=0.25.1,<0.26.0
 
 # Tokenizers for local token counting
-transformers>=4.36.0
+transformers>=4.36.0,<5.0.0

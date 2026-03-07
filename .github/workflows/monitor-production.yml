@@ -8,25 +8,26 @@ on:
 jobs:
   monitor:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Check Fly.io Analytics Endpoint
-      run: curl -f https://mindvibe.fly.dev/analytics/dashboard || exit 1
-    
-    - name: Check Fly.io Monitoring Endpoint
-      run: curl -f https://mindvibe.fly.dev/monitoring/health || exit 1
-    
-    - name: Check Render Analytics Endpoint
-      run: curl -f https://mindvibe-api.onrender.com/analytics/dashboard || exit 1
-    
-    - name: Check Render Monitoring Endpoint
-      run: curl -f https://mindvibe-api.onrender.com/monitoring/health || exit 1
-    
-    - name: Check Vercel Endpoint
-      run: curl -f https://mindvibe.vercel.app/health || exit 1
-    
+    - name: Check Backend Health
+      run: |
+        BACKEND_URL="${{ secrets.BACKEND_URL }}"
+        if [ -z "$BACKEND_URL" ]; then
+          BACKEND_URL="https://mindvibe-api.onrender.com"
+        fi
+        curl -f --max-time 15 "$BACKEND_URL/health" || exit 1
+
+    - name: Check Frontend Health
+      run: |
+        FRONTEND_URL="${{ secrets.FRONTEND_URL }}"
+        if [ -z "$FRONTEND_URL" ]; then
+          FRONTEND_URL="https://mindvibe.vercel.app"
+        fi
+        curl -f --max-time 15 "$FRONTEND_URL" > /dev/null || exit 1
+
     - name: All Systems Operational
       run: |
-        echo "✅ All production endpoints operational"
-        echo "✅ Monitoring status: ACTIVE"
-        echo "✅ System health: HEALTHY"
+        echo "All production endpoints operational"
+        echo "Monitoring status: ACTIVE"
+        echo "System health: HEALTHY"

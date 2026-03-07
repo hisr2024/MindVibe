@@ -60,8 +60,8 @@ export function ProgressResetTool() {
       const data = await response.json()
       setPreview(data)
     } catch (err) {
-      console.error('Preview error:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load preview')
+      if (process.env.NODE_ENV !== 'production') console.error('Preview error:', err)
+      setError(err instanceof Error ? err.message : 'We\'re having trouble loading the reset preview. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -110,8 +110,8 @@ export function ProgressResetTool() {
         window.location.reload()
       }, 3000)
     } catch (err) {
-      console.error('Reset error:', err)
-      setError(err instanceof Error ? err.message : 'Reset failed')
+      if (process.env.NODE_ENV !== 'production') console.error('Reset error:', err)
+      setError(err instanceof Error ? err.message : 'We\'re having trouble completing the reset. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -214,6 +214,9 @@ export function ProgressResetTool() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
             onClick={() => setShowConfirmDialog(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="progress-reset-title"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -222,7 +225,7 @@ export function ProgressResetTool() {
               className="w-full max-w-lg rounded-xl border border-slate-600 bg-slate-800 p-6 shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-xl font-bold text-slate-100 mb-4 flex items-center gap-2">
+              <h3 id="progress-reset-title" className="text-xl font-bold text-slate-100 mb-4 flex items-center gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6 text-[#d4a44c]"

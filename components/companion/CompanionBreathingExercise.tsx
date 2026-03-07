@@ -39,7 +39,7 @@ export default function CompanionBreathingExercise({
 }: BreathingExerciseProps) {
   const [phase, setPhase] = useState<Phase>('ready')
   const [currentCycle, setCurrentCycle] = useState(0)
-  const [_phaseIndex, setPhaseIndex] = useState(0)
+  const [, setPhaseIndex] = useState(0)
   const [progress, setProgress] = useState(0)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const progressRef = useRef<NodeJS.Timeout | null>(null)

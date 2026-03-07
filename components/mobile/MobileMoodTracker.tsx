@@ -271,7 +271,6 @@ export const MobileMoodTracker = forwardRef<HTMLDivElement, MobileMoodTrackerPro
           <div className="flex justify-between gap-2">
             {MOODS.map((mood, index) => {
               const isSelected = selectedMood === mood.id
-              const _MoodIcon = mood.icon
 
               return (
                 <motion.button
@@ -495,10 +494,11 @@ export const MobileMoodTracker = forwardRef<HTMLDivElement, MobileMoodTrackerPro
                 {Array.from({ length: 7 }).map((_, index) => {
                   const dayHistory = history[6 - index]
                   const mood = dayHistory ? getMoodData(dayHistory.mood) : null
+                  const dayLabel = ['S', 'M', 'T', 'W', 'T', 'F', 'S'][new Date(Date.now() - (6 - index) * 86400000).getDay()]
 
                   return (
                     <div
-                      key={index}
+                      key={`day-${6 - index}`}
                       className="flex-1 flex flex-col items-center gap-1"
                     >
                       <div
@@ -517,7 +517,7 @@ export const MobileMoodTracker = forwardRef<HTMLDivElement, MobileMoodTrackerPro
                         )}
                       </div>
                       <span className="text-[9px] text-slate-500">
-                        {['S', 'M', 'T', 'W', 'T', 'F', 'S'][new Date(Date.now() - (6 - index) * 86400000).getDay()]}
+                        {dayLabel}
                       </span>
                     </div>
                   )

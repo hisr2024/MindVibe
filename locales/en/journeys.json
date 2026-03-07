@@ -1,4 +1,5 @@
 {
+  "_template_variables_note": "This file uses i18next template variables: {{current}}, {{total}}, {{day}}, {{title}}. Any rename or removal of these variables will break the UI. Ensure all referenced variables are passed by the consuming components (JourneyCard, JourneyStep, JourneyComplete).",
   "title": "Wisdom Journeys",
   "subtitle": "Transform your inner world by loosening the grip of the six inner tendencies (Sad-Ripu). Select one or more journeys to begin your path to inner peace.",
   "featured": "Featured Journeys",

@@ -257,7 +257,6 @@ export function AmbientSoundscapeControl({
 }: AmbientSoundscapeControlProps) {
   // Connect to audio context (stubbed - feature to be reimplemented in new player)
   const { startAmbient, stopAmbient, state: audioState, playSound } = useAudioStub()
-  const _setAmbientVolume = (_v: number) => {}
 
   const [playing, setPlaying] = useState(isActive)
   const [activeSounds, setActiveSounds] = useState<ActiveSound[]>([])

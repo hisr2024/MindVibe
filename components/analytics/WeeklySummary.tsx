@@ -189,7 +189,7 @@ export function WeeklySummary({
           <div className="space-y-3">
             {summary.insights.map((insight, index) => (
               <motion.div
-                key={index}
+                key={`${insight.type}-${insight.title}`}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
