@@ -218,7 +218,7 @@ export function useAnalytics(_userId?: string): UseAnalyticsResult {
     } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        weeklySummary: error instanceof Error ? error.message : 'Failed to load weekly summary',
+        weeklySummary: error instanceof Error ? error.message : 'We\'re having trouble loading your weekly summary. Please try again.',
       }))
     } finally {
       setLoading((prev) => ({ ...prev, weeklySummary: false }))
@@ -235,7 +235,7 @@ export function useAnalytics(_userId?: string): UseAnalyticsResult {
     } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        achievements: error instanceof Error ? error.message : 'Failed to load achievements',
+        achievements: error instanceof Error ? error.message : 'We\'re having trouble loading achievements. Please try again.',
       }))
     } finally {
       setLoading((prev) => ({ ...prev, achievements: false }))

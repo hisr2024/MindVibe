@@ -38,7 +38,7 @@ export function ProfileEditForm({
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save profile')
+      setError(err instanceof Error ? err.message : 'We\'re having trouble saving your profile. Please try again.')
     } finally {
       setLoading(false)
     }
