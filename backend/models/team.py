@@ -207,7 +207,8 @@ class TeamMember(SoftDeleteMixin, Base):
         String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     role: Mapped[TeamRole] = mapped_column(
-        Enum(TeamRole, native_enum=False, length=32),
+        Enum(TeamRole, native_enum=False, length=32,
+             values_callable=lambda x: [e.value for e in x]),
         default=TeamRole.MEMBER,
         index=True,
     )
@@ -260,11 +261,13 @@ class TeamInvitation(SoftDeleteMixin, Base):
     )
     # The role the invitee will receive upon acceptance
     role: Mapped[TeamRole] = mapped_column(
-        Enum(TeamRole, native_enum=False, length=32),
+        Enum(TeamRole, native_enum=False, length=32,
+             values_callable=lambda x: [e.value for e in x]),
         default=TeamRole.MEMBER,
     )
     status: Mapped[InvitationStatus] = mapped_column(
-        Enum(InvitationStatus, native_enum=False, length=32),
+        Enum(InvitationStatus, native_enum=False, length=32,
+             values_callable=lambda x: [e.value for e in x]),
         default=InvitationStatus.PENDING,
         index=True,
     )
