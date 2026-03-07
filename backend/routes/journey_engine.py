@@ -102,7 +102,7 @@ class StartJourneyRequest(BaseModel):
 class CompleteStepRequest(BaseModel):
     """Request to complete a journey step."""
 
-    reflection: str | None = Field(default=None, max_length=5000, description="User reflection")
+    reflection: str | None = Field(default=None, min_length=1, max_length=5000, description="User reflection")
     check_in: dict[str, Any] | None = Field(default=None, description="Check-in data")
 
 

@@ -7,6 +7,33 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
 
 
+def parse_bool_strict(value: str, var_name: str = "unknown") -> bool:
+    """Parse a boolean from an environment variable string with strict validation.
+
+    Only accepts 'true', 'false', '1', '0' (case-insensitive).
+    Raises ValueError for any other value to prevent silent misconfiguration.
+
+    Args:
+        value: The string value to parse.
+        var_name: Name of the environment variable (for error messages).
+
+    Returns:
+        The parsed boolean value.
+
+    Raises:
+        ValueError: If the value is not one of the accepted boolean strings.
+    """
+    normalized = value.strip().lower()
+    if normalized in ("true", "1"):
+        return True
+    if normalized in ("false", "0"):
+        return False
+    raise ValueError(
+        f"Invalid boolean value '{value}' for {var_name}. "
+        f"Accepted values: 'true', 'false', '1', '0'."
+    )
+
+
 # Default paths for KIAAN local storage
 DEFAULT_MINDVIBE_HOME = Path.home() / ".mindvibe"
 DEFAULT_MODELS_PATH = DEFAULT_MINDVIBE_HOME / "models"
@@ -25,6 +52,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_ENABLE_BODY_RETURN: bool = False
 
     # Security
+    # SECURE_COOKIE is derived from ENVIRONMENT, not a boolean env var
     SECURE_COOKIE: bool = os.getenv("ENVIRONMENT", "development") == "production"
     SECRET_KEY: str = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
 
@@ -87,7 +115,9 @@ class Settings(BaseSettings):
         return v
     
     # Spiritual Wellness Data Encryption (enforced by default)
-    MINDVIBE_REQUIRE_ENCRYPTION: bool = os.getenv("MINDVIBE_REQUIRE_ENCRYPTION", "true").lower() == "true"
+    MINDVIBE_REQUIRE_ENCRYPTION: bool = parse_bool_strict(
+        os.getenv("MINDVIBE_REQUIRE_ENCRYPTION", "true"), "MINDVIBE_REQUIRE_ENCRYPTION"
+    )
     MINDVIBE_REFLECTION_KEY: str = os.getenv("MINDVIBE_REFLECTION_KEY", "")
 
     @field_validator("MINDVIBE_REFLECTION_KEY")

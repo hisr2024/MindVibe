@@ -158,6 +158,12 @@ jobs:
       - name: Run Python static security analysis (Bandit)
         run: bandit -r backend/ -f json -o bandit-report.json || true && bandit -r backend/
 
+      - name: Run secrets scanning (detect-secrets)
+        run: |
+          pip install detect-secrets
+          detect-secrets scan --all-files --exclude-files '\.secrets\.baseline$' > .secrets-scan-results.json
+          detect-secrets audit --report --json .secrets-scan-results.json || echo "Review secrets scan results in artifacts"
+
       - name: Run npm audit
         run: npm audit --audit-level=high
 
@@ -168,4 +174,5 @@ jobs:
           name: security-reports
           path: |
             bandit-report.json
+            .secrets-scan-results.json
           retention-days: 14

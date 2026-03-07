@@ -47,6 +47,10 @@ export function AnimatedIntensitySlider({
           max={max}
           value={value}
           onChange={handleChange}
+          aria-label={`Intensity level: ${value} of ${max}`}
+          aria-valuemin={min}
+          aria-valuemax={max}
+          aria-valuenow={value}
           className="w-full h-2 rounded-full appearance-none cursor-pointer"
           style={{
             background: `linear-gradient(to right, ${color} 0%, ${color} ${percentage}%, rgba(255, 255, 255, 0.1) ${percentage}%, rgba(255, 255, 255, 0.1) 100%)`,

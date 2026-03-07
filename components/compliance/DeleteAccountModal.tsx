@@ -110,6 +110,9 @@ export default function DeleteAccountModal({
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
         onClick={handleClose}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-account-title"
       >
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
@@ -127,7 +130,7 @@ export default function DeleteAccountModal({
                 </svg>
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-red-400">Delete Account</h2>
+                <h2 id="delete-account-title" className="text-lg font-semibold text-red-400">Delete Account</h2>
                 <p className="text-sm text-[#f5f0e8]/50">This action cannot be undone</p>
               </div>
             </div>

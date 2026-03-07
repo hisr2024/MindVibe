@@ -203,7 +203,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
     <Modal open={isOpen} onClose={onClose} size="2xl" title="KIAAN — Your Divine Companion">
       <div className="flex flex-col h-[min(600px,70vh)]">
         {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4" role="log" aria-label="Conversation with KIAAN" aria-live="polite">
           {globalMessages.length === 0 && (
             <div className="divine-companion-welcome text-center py-12 px-4">
               <div className="divine-companion-avatar h-16 w-16 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center mx-auto mb-4">
@@ -304,6 +304,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Speak from your heart..."
+              aria-label="Message to KIAAN"
               className="flex-1 bg-[#0a0a12]/80 text-[#f5f0e8] placeholder-[#f5f0e8]/30 border border-[#d4a44c]/15 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/40 focus:border-[#d4a44c]/25 min-h-[60px] max-h-[120px] transition-all"
               disabled={isLoading}
             />
@@ -321,6 +322,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
             <Button
               onClick={sendMessage}
               disabled={!input.trim() || isLoading}
+              aria-label="Send message"
               className="kiaan-btn-golden px-6 py-3 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Send
