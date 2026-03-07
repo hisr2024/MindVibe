@@ -49,7 +49,8 @@ BEGIN
         BEGIN
             ALTER TABLE subscription_plans ALTER COLUMN code DROP NOT NULL;
         EXCEPTION
-            WHEN undefined_column THEN NULL; -- already removed in some environments
+            -- already removed in some environments
+            WHEN undefined_column THEN NULL;
         END;
     END IF;
 

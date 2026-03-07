@@ -21,8 +21,8 @@ export function UsageCard({ items, className = '' }: UsageCardProps) {
       <CardContent>
         <h3 className="font-semibold text-orange-50 mb-4">Feature Usage</h3>
         <div className="space-y-4">
-          {items.map((item, index) => (
-            <div key={index}>
+          {items.map((item) => (
+            <div key={item.name}>
               {item.limit === 'unlimited' ? (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-orange-100">{item.name}</span>

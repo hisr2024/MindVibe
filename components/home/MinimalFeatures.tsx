@@ -66,7 +66,7 @@ export function MinimalFeatures() {
       <div className="grid gap-4 md:grid-cols-3">
         {features.map((feature, index) => (
           <motion.div
-            key={index}
+            key={feature.link}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

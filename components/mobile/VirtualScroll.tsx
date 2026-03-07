@@ -208,7 +208,7 @@ export function VirtualScroll<T>({
         }}
       >
         {visibleItems.map(({ item, index, style }) => (
-          <div key={index} style={style}>
+          <div key={`vs-item-${index}`} style={style}>
             {renderItem(item, index, style)}
           </div>
         ))}

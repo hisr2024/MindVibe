@@ -1,10 +1,14 @@
 # Stage 1: backend-base
-FROM python:3.11-slim AS backend-base
+FROM python:3.11.9-slim AS backend-base
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y gcc postgresql-client curl
+# Install system dependencies and clean up APT cache
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc postgresql-client curl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Set the working directory
+# Create non-root user
+RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin appuser
+
 WORKDIR /app
 
 # Copy requirements and install Python packages
@@ -20,35 +24,33 @@ COPY scripts/ ./scripts/
 # Build the Relationship Compass index
 RUN python scripts/build-relationship-compass-index-local.py
 
-# Expose port and add health check
-EXPOSE 8000
-HEALTHCHECK CMD curl --fail http://localhost:8000/health || exit 1
+# Change ownership to non-root user
+RUN chown -R appuser:appuser /app
 
-# Run the FastAPI application
+USER appuser
+
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+  CMD curl --fail http://localhost:8000/health || exit 1
+
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # Stage 2: frontend-deps
-FROM node:20-alpine AS frontend-deps
+FROM node:20-slim AS frontend-deps
 
-# Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json from root
 COPY package.json package-lock.json ./
 
-# Install production dependencies
 RUN npm ci --only=production
 
 # Stage 3: frontend-builder
-FROM node:20-alpine AS frontend-builder
+FROM node:20-slim AS frontend-builder
 
-# Set the working directory
 WORKDIR /app
 
-# Copy node_modules from deps stage
 COPY --from=frontend-deps /app/node_modules ./node_modules
 
-# Copy Next.js configuration and frontend files
 COPY package.json next.config.js tsconfig.json postcss.config.js tailwind.config.ts ./
 COPY middleware.ts ./
 COPY vendor/ ./vendor/
@@ -66,26 +68,28 @@ COPY brand/ ./brand/
 COPY public/ ./public/
 COPY styles/ ./styles/
 
-# Disable Next.js telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Build the Next.js application
 RUN npm run build
 
 # Stage 4: frontend-runner
-FROM node:20-alpine AS frontend-runner
+FROM node:20-slim AS frontend-runner
 
-# Set the working directory
+# Create non-root user
+RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin appuser
+
 WORKDIR /app
 
-# Copy standalone build output (includes node_modules and server.js)
 COPY --from=frontend-builder /app/public ./public
 COPY --from=frontend-builder /app/.next/standalone ./
 COPY --from=frontend-builder /app/.next/static ./.next/static
 
-# Expose port and add health check
-EXPOSE 3000
-HEALTHCHECK CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+RUN chown -R appuser:appuser /app
 
-# Run the Next.js standalone server
+USER appuser
+
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+
 CMD ["node", "server.js"]

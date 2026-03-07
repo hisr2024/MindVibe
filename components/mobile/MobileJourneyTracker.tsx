@@ -93,8 +93,6 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
     const [currentDayIndex, setCurrentDayIndex] = useState(journey.currentDay)
     const [isCompleting, setIsCompleting] = useState(false)
     const isCompletingRef = useRef(false)
-    const [_showContent, _setShowContent] = useState(false)
-
     const containerRef = useRef<HTMLDivElement>(null)
 
     // Get current step data
@@ -132,7 +130,7 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
     }, [currentDayIndex, journey.totalDays, journey.steps, triggerHaptic, controls])
 
     // Handle swipe gesture
-    const handlePanEnd = useCallback((event: PointerEvent, info: PanInfo) => {
+    const handlePanEnd = useCallback((_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
       const swipeThreshold = 50
       const velocity = info.velocity.x
 
@@ -255,8 +253,7 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
         <motion.div
           ref={containerRef}
           className="flex-1 overflow-hidden"
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onPanEnd={handlePanEnd as any}
+          onPanEnd={handlePanEnd}
         >
           <motion.div
             animate={controls}

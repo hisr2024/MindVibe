@@ -5,7 +5,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Restrict permissions for security
 permissions:
   contents: read
   actions: read
@@ -14,10 +13,10 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -38,7 +37,7 @@ jobs:
           pip install pytest-cov pytest-asyncio
 
       - name: Install Node.js dependencies
-        run: npm ci || npm install --legacy-peer-deps
+        run: npm ci
 
       - name: Run backend tests (pytest)
         run: |
@@ -48,7 +47,6 @@ jobs:
 
       - name: Run frontend tests (vitest)
         run: npm run test:coverage
-        continue-on-error: true
 
       - name: TypeScript type checking
         run: npm run typecheck
@@ -57,34 +55,44 @@ jobs:
         run: npm run build
 
       - name: Upload test artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
           path: |
             coverage.xml
             coverage/
-          retention-days: 7
+          retention-days: 14
 
   deploy-backend:
     name: Deploy Backend to Render
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Deploy to Render
         env:
           RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
         run: |
-          if [ -n "$RENDER_DEPLOY_HOOK" ]; then
-            curl -X POST "$RENDER_DEPLOY_HOOK"
-            echo "✅ Backend deployment triggered"
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "::warning::RENDER_DEPLOY_HOOK not configured, skipping deployment"
+            exit 0
+          fi
+
+          response=$(curl -s -w "\n%{http_code}" -f --max-time 30 --retry 3 --retry-delay 5 -X POST "$RENDER_DEPLOY_HOOK")
+          http_code=$(echo "$response" | tail -1)
+          body=$(echo "$response" | head -n -1)
+
+          if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
+            echo "Backend deployment triggered successfully (HTTP $http_code)"
           else
-            echo "⚠️ RENDER_DEPLOY_HOOK not configured, skipping deployment"
+            echo "::error::Render deploy hook failed with HTTP $http_code"
+            echo "Response: $body"
+            exit 1
           fi
 
       - name: Wait for deployment
@@ -96,31 +104,29 @@ jobs:
           if [ -z "$BACKEND_URL" ]; then
             BACKEND_URL="https://mindvibe-api.onrender.com"
           fi
-          
+
           echo "Checking backend health at $BACKEND_URL/health"
-          
-          # Retry up to 5 times with 10s delay
+
           for i in 1 2 3 4 5; do
             if curl -sf "$BACKEND_URL/health" > /dev/null; then
-              echo "✅ Backend health check passed"
+              echo "Backend health check passed"
               exit 0
             fi
             echo "Attempt $i failed, retrying in 10s..."
             sleep 10
           done
-          
-          echo "⚠️ Backend health check failed after 5 attempts"
-          exit 0  # Don't fail workflow for health check
+
+          echo "::warning::Backend health check failed after 5 attempts"
 
   deploy-frontend:
     name: Deploy Frontend to Vercel
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -132,34 +138,18 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: |
-          if [ -n "${{ secrets.VERCEL_TOKEN }}" ]; then
-            vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          else
-            echo "⚠️ VERCEL_TOKEN not configured"
-          fi
-        continue-on-error: true
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
-        run: |
-          if [ -n "${{ secrets.VERCEL_TOKEN }}" ]; then
-            vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          else
-            npm ci
-            npm run build
-            echo "⚠️ Built locally, deployment skipped"
-          fi
-        continue-on-error: true
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
         run: |
-          if [ -n "${{ secrets.VERCEL_TOKEN }}" ]; then
-            vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-            echo "✅ Frontend deployment complete"
-          else
-            echo "⚠️ VERCEL_TOKEN not configured, skipping deployment"
-          fi
-        continue-on-error: true
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+          echo "Frontend deployment complete"
 
       - name: Verify deployment
         run: |
@@ -167,31 +157,29 @@ jobs:
           if [ -z "$FRONTEND_URL" ]; then
             FRONTEND_URL="https://mindvibe.vercel.app"
           fi
-          
+
           echo "Verifying frontend deployment at $FRONTEND_URL"
-          
-          # Retry up to 5 times with 10s delay
+
           for i in 1 2 3 4 5; do
             if curl -sf "$FRONTEND_URL" > /dev/null; then
-              echo "✅ Frontend verification passed"
+              echo "Frontend verification passed"
               exit 0
             fi
             echo "Attempt $i failed, retrying in 10s..."
             sleep 10
           done
-          
-          echo "⚠️ Frontend verification failed after 5 attempts"
-          exit 0
+
+          echo "::warning::Frontend verification failed after 5 attempts"
 
   smoke-test:
     name: Production Smoke Tests
     needs: [deploy-backend, deploy-frontend]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -208,17 +196,16 @@ jobs:
           if [ -z "$BACKEND_URL" ]; then
             BACKEND_URL="https://mindvibe-api.onrender.com"
           fi
-          
+
           echo "Testing KIAAN at $BACKEND_URL/api/chat/health"
-          
+
           response=$(curl -sf "$BACKEND_URL/api/chat/health" || echo '{"status":"unavailable"}')
           echo "Response: $response"
-          
-          # Check for KIAAN identity
+
           if echo "$response" | grep -q "KIAAN"; then
-            echo "✅ KIAAN identity verified"
+            echo "KIAAN identity verified"
           else
-            echo "⚠️ Could not verify KIAAN identity (service may be starting)"
+            echo "::warning::Could not verify KIAAN identity (service may be starting)"
           fi
 
       - name: Test subscription API
@@ -227,16 +214,16 @@ jobs:
           if [ -z "$BACKEND_URL" ]; then
             BACKEND_URL="https://mindvibe-api.onrender.com"
           fi
-          
+
           echo "Testing subscription API at $BACKEND_URL/api/subscriptions/tiers"
-          
+
           response=$(curl -sf "$BACKEND_URL/api/subscriptions/tiers" || echo '[]')
           echo "Response: $response"
-          
+
           if echo "$response" | grep -q "tier"; then
-            echo "✅ Subscription API responding"
+            echo "Subscription API responding"
           else
-            echo "⚠️ Subscription API response unexpected"
+            echo "::warning::Subscription API response unexpected"
           fi
 
       - name: Test Gita verses endpoint
@@ -245,53 +232,44 @@ jobs:
           if [ -z "$BACKEND_URL" ]; then
             BACKEND_URL="https://mindvibe-api.onrender.com"
           fi
-          
+
           echo "Testing Gita API at $BACKEND_URL/api/gita/chapters"
-          
+
           response=$(curl -sf "$BACKEND_URL/api/gita/chapters" || echo '[]')
-          
+
           if [ -n "$response" ]; then
-            echo "✅ Gita API accessible"
+            echo "Gita API accessible"
           else
-            echo "⚠️ Gita API not responding"
+            echo "::warning::Gita API not responding"
           fi
 
       - name: Smoke test summary
         run: |
           echo "========================================="
-          echo "🚀 Production Smoke Tests Complete"
+          echo "Production Smoke Tests Complete"
           echo "========================================="
           echo ""
           echo "Services Tested:"
           echo "  - KIAAN Chat API"
           echo "  - Subscription API"
           echo "  - Gita Wisdom API"
-          echo ""
-          echo "Note: Some services may take time to warm up"
-          echo "Check monitoring dashboard for full status"
 
   notify-success:
     name: Deployment Success Notification
     needs: [smoke-test]
     runs-on: ubuntu-latest
     if: success() && github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Deployment success
         run: |
           echo "========================================="
-          echo "✅ PRODUCTION DEPLOYMENT SUCCESSFUL"
+          echo "PRODUCTION DEPLOYMENT SUCCESSFUL"
           echo "========================================="
           echo ""
           echo "Deployed Services:"
           echo "  - Backend: Render"
           echo "  - Frontend: Vercel"
-          echo ""
-          echo "Verification Status:"
-          echo "  - Tests: Passed"
-          echo "  - KIAAN: Operational"
-          echo "  - Subscriptions: Active"
-          echo "  - Gita Wisdom: Accessible"
           echo ""
           echo "Commit: ${{ github.sha }}"
           echo "Time: $(date -u)"

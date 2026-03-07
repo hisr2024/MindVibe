@@ -9,7 +9,13 @@ function getBaseKey(): Buffer {
   if (!key) {
     throw new Error('Missing JOURNAL_ENCRYPTION_KEY environment variable')
   }
-  return Buffer.from(key, 'utf-8')
+  const buf = Buffer.from(key, 'base64')
+  if (buf.length < 16) {
+    throw new Error(
+      `JOURNAL_ENCRYPTION_KEY too short: expected at least 16 bytes, got ${buf.length}`
+    )
+  }
+  return buf
 }
 
 function deriveUserKey(userId: string): Buffer {

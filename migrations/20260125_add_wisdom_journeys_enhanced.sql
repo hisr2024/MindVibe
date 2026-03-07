@@ -62,7 +62,8 @@ CREATE TABLE IF NOT EXISTS journey_template_steps (
 
     -- Verse selection configuration
     verse_selector JSONB DEFAULT '{"tags": [], "max_verses": 3, "avoid_recent": 20}',
-    static_verse_refs JSONB, -- Optional: fixed verses like [{"chapter": 2, "verse": 63}]
+    -- Optional: fixed verses like [{"chapter": 2, "verse": 63}]
+    static_verse_refs JSONB,
 
     -- Safety notes for sensitive content
     safety_notes TEXT,
@@ -142,8 +143,10 @@ CREATE TABLE IF NOT EXISTS user_journey_step_state (
     -- }
 
     -- User reflection (encrypted reference or FK to journal)
-    reflection_reference VARCHAR(64), -- FK to journal_entries.id
-    reflection_encrypted JSONB, -- Or encrypted blob if not linked
+    -- FK to journal_entries.id
+    reflection_reference VARCHAR(64),
+    -- Or encrypted blob if not linked
+    reflection_encrypted JSONB,
 
     -- Check-in data
     check_in JSONB,

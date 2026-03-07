@@ -1,0 +1,82 @@
+{
+  "title": "Wisdom Journeys",
+  "subtitle": "Transform your inner world by loosening the grip of the six inner tendencies (Sad-Ripu). Select one or more journeys to begin your path to inner peace.",
+  "featured": "Featured Journeys",
+  "all": "All Journeys",
+  "active": "Your Active Journeys",
+  "empty": {
+    "title": "No Journeys Available",
+    "description": "Check back soon for new wisdom journeys."
+  },
+  "trial": {
+    "title": "Free Trial Access",
+    "description": "Try 1 journey for 3 days free! Experience the transformation.",
+    "upgrade": "Upgrade for Full Access"
+  },
+  "card": {
+    "start": "Start Journey",
+    "continue": "Continue Journey",
+    "locked": "Complete or pause an active journey to start this one",
+    "free": "Free",
+    "featured": "Featured",
+    "inProgress": "In Progress",
+    "day": "Day {{current}} of {{total}}"
+  },
+  "step": {
+    "title": "Today's Journey Step",
+    "backToJourneys": "Back to Journeys",
+    "complete": "Complete Day {{day}}",
+    "completing": "Completing...",
+    "completed": {
+      "title": "Day {{day}} Complete!",
+      "message": "Great work! Come back tomorrow for your next step.",
+      "viewAll": "View All Journeys"
+    },
+    "journeyComplete": {
+      "title": "Journey Complete!",
+      "message": "Congratulations on completing {{title}}! You've taken a meaningful step toward inner peace.",
+      "startAnother": "Start Another Journey"
+    },
+    "day14": {
+      "title": "Practice continues",
+      "body": "The 14 days are a beginning, not an end. Carry what you have practised into everyday moments — the work deepens from here.",
+      "linkTrigger": "Handle today's trigger",
+      "linkPractice": "Daily micro-practice"
+    }
+  },
+  "sections": {
+    "teaching": "Today's Teaching",
+    "reflection": "Guided Reflection",
+    "practice": "Practice",
+    "commitment": "Today's Micro Commitment",
+    "microPractice": "Today's micro-practice",
+    "markPracticed": "Mark practiced"
+  },
+  "checkIn": {
+    "label": "Your Reflection (optional)",
+    "placeholder": "Write your thoughts, insights, or feelings..."
+  },
+  "difficulty": {
+    "1": "Beginner",
+    "2": "Easy",
+    "3": "Moderate",
+    "4": "Challenging",
+    "5": "Advanced"
+  },
+  "enemies": {
+    "kama": "Desire (Kama)",
+    "krodha": "Anger (Krodha)",
+    "lobha": "Greed (Lobha)",
+    "moha": "Attachment (Moha)",
+    "mada": "Ego (Mada)",
+    "matsarya": "Envy (Matsarya)",
+    "mixed": "Combined Journey",
+    "general": "General Wisdom"
+  },
+  "errors": {
+    "loadFailed": "Failed to load journeys. Please try again.",
+    "startFailed": "Failed to start journey. Please try again.",
+    "completeFailed": "Failed to complete step. Please try again.",
+    "networkError": "Network error. Please check your connection."
+  }
+}

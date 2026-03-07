@@ -57,25 +57,21 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         )
 
         # Content-Security-Policy: Restricts resource loading
-        # Uses 'unsafe-inline' for scripts to match frontend proxy.ts CSP.
-        # The backend primarily serves JSON APIs; this CSP protects any
+        # Backend primarily serves JSON APIs; this CSP protects any
         # HTML responses (e.g., OpenAPI docs, error pages).
+        # Nonce-based script policy replaces unsafe-inline/unsafe-eval.
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+            f"script-src 'self' 'nonce-{csp_nonce}'; "
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-            "img-src 'self' data: https:; "
+            "img-src 'self' data: https://kiaanverse.com https://*.kiaanverse.com; "
             "font-src 'self' data: https://fonts.gstatic.com; "
-            "media-src 'self' https: blob:; "
+            "media-src 'self' blob:; "
             f"connect-src 'self' {_API_URL} {_FRONTEND_URL} "
             "https://mindvibe-api.onrender.com "
             "https://kiaanverse.com "
-            "https://www.kiaanverse.com "
-            "https://*.firebaseio.com "
-            "https://*.googleapis.com "
-            "https://cdn.pixabay.com "
-            "https://*.freesound.org; "
+            "https://www.kiaanverse.com; "
             "frame-ancestors 'none'; "
             "base-uri 'self'; "
             "form-action 'self'; "

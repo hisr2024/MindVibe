@@ -59,7 +59,8 @@ CREATE TABLE IF NOT EXISTS learned_wisdom (
 
     -- Content
     content TEXT NOT NULL,
-    content_hash VARCHAR(64) NOT NULL UNIQUE,  -- SHA-256 for deduplication
+    -- SHA-256 for deduplication
+    content_hash VARCHAR(64) NOT NULL UNIQUE,
 
     -- Source information
     source_type content_source_type NOT NULL,
@@ -71,12 +72,15 @@ CREATE TABLE IF NOT EXISTS learned_wisdom (
     language VARCHAR(10) NOT NULL DEFAULT 'en',
 
     -- Gita references (JSON arrays)
-    chapter_refs JSONB NOT NULL DEFAULT '[]'::jsonb,  -- [1, 2, 6]
-    verse_refs JSONB NOT NULL DEFAULT '[]'::jsonb,    -- [[2, 47], [6, 5]]
+    -- [1, 2, 6]
+    chapter_refs JSONB NOT NULL DEFAULT '[]'::jsonb,
+    -- [[2, 47], [6, 5]]
+    verse_refs JSONB NOT NULL DEFAULT '[]'::jsonb,
 
     -- Categorization (JSON arrays)
     themes JSONB NOT NULL DEFAULT '[]'::jsonb,
-    shad_ripu_tags JSONB NOT NULL DEFAULT '[]'::jsonb,  -- Inner enemies
+    -- Inner enemies
+    shad_ripu_tags JSONB NOT NULL DEFAULT '[]'::jsonb,
     keywords JSONB NOT NULL DEFAULT '[]'::jsonb,
 
     -- Spiritual wellness mapping
@@ -85,7 +89,8 @@ CREATE TABLE IF NOT EXISTS learned_wisdom (
     mental_health_applications JSONB,
 
     -- Quality & validation
-    quality_score NUMERIC(3, 2) NOT NULL DEFAULT 0.00,  -- 0.00 - 1.00
+    -- 0.00 - 1.00
+    quality_score NUMERIC(3, 2) NOT NULL DEFAULT 0.00,
     validation_status validation_status NOT NULL DEFAULT 'pending',
     validated_by VARCHAR(64),
     validated_at TIMESTAMPTZ,
@@ -105,7 +110,8 @@ CREATE TABLE IF NOT EXISTS learned_wisdom (
     learned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ,
-    deleted_at TIMESTAMPTZ  -- Soft delete
+    -- Soft delete
+    deleted_at TIMESTAMPTZ
 );
 
 -- Indexes for learned_wisdom
@@ -137,7 +143,8 @@ CREATE TABLE IF NOT EXISTS user_query_patterns (
 
     -- Pattern definition
     query_template TEXT NOT NULL,
-    query_hash VARCHAR(64) NOT NULL UNIQUE,  -- For deduplication
+    -- For deduplication
+    query_hash VARCHAR(64) NOT NULL UNIQUE,
     intent VARCHAR(128) NOT NULL,
 
     -- Gita mappings (JSON arrays)
@@ -157,7 +164,8 @@ CREATE TABLE IF NOT EXISTS user_query_patterns (
     last_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ,
-    deleted_at TIMESTAMPTZ  -- Soft delete
+    -- Soft delete
+    deleted_at TIMESTAMPTZ
 );
 
 -- Indexes for user_query_patterns
@@ -206,7 +214,8 @@ CREATE TABLE IF NOT EXISTS content_source_registry (
     -- Timestamps
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ,
-    deleted_at TIMESTAMPTZ  -- Soft delete
+    -- Soft delete
+    deleted_at TIMESTAMPTZ
 );
 
 -- Indexes for content_source_registry

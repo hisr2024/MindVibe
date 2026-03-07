@@ -37,6 +37,8 @@ export interface LanguageInfo {
   direction: 'ltr' | 'rtl'
 }
 
+// Only languages with actual data files in data/gita/ are listed here.
+// To add a new language, create data/gita/{code}.json and add entry below.
 export const SUPPORTED_LANGUAGES: Record<string, LanguageInfo> = {
   en: {
     code: 'en',
@@ -57,62 +59,6 @@ export const SUPPORTED_LANGUAGES: Record<string, LanguageInfo> = {
     name: 'Sanskrit',
     nativeName: 'संस्कृत',
     flag: '🕉️',
-    direction: 'ltr',
-  },
-  ta: {
-    code: 'ta',
-    name: 'Tamil',
-    nativeName: 'தமிழ்',
-    flag: '🇮🇳',
-    direction: 'ltr',
-  },
-  te: {
-    code: 'te',
-    name: 'Telugu',
-    nativeName: 'తెలుగు',
-    flag: '🇮🇳',
-    direction: 'ltr',
-  },
-  bn: {
-    code: 'bn',
-    name: 'Bengali',
-    nativeName: 'বাংলা',
-    flag: '🇮🇳',
-    direction: 'ltr',
-  },
-  mr: {
-    code: 'mr',
-    name: 'Marathi',
-    nativeName: 'मराठी',
-    flag: '🇮🇳',
-    direction: 'ltr',
-  },
-  gu: {
-    code: 'gu',
-    name: 'Gujarati',
-    nativeName: 'ગુજરાતી',
-    flag: '🇮🇳',
-    direction: 'ltr',
-  },
-  kn: {
-    code: 'kn',
-    name: 'Kannada',
-    nativeName: 'ಕನ್ನಡ',
-    flag: '🇮🇳',
-    direction: 'ltr',
-  },
-  ml: {
-    code: 'ml',
-    name: 'Malayalam',
-    nativeName: 'മലയാളം',
-    flag: '🇮🇳',
-    direction: 'ltr',
-  },
-  pa: {
-    code: 'pa',
-    name: 'Punjabi',
-    nativeName: 'ਪੰਜਾਬੀ',
-    flag: '🇮🇳',
     direction: 'ltr',
   },
 }

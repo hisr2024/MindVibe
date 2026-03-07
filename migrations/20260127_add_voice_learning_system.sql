@@ -193,7 +193,8 @@ CREATE TABLE IF NOT EXISTS voice_interaction_logs (
     fingerprint_id VARCHAR(64) REFERENCES voice_fingerprints(id) ON DELETE SET NULL,
 
     -- Interaction details
-    interaction_type VARCHAR(20) NOT NULL, -- rating, skip, replay, complete
+    -- rating, skip, replay, complete
+    interaction_type VARCHAR(20) NOT NULL,
     value NUMERIC(3, 2),
 
     -- Context
@@ -386,7 +387,8 @@ CREATE TABLE IF NOT EXISTS voice_adaptation_history (
     response_text_hash VARCHAR(32),
     sentence_count INTEGER,
     transition_count INTEGER,
-    arc_type VARCHAR(20), -- ascending, descending, stable, volatile
+    -- ascending, descending, stable, volatile
+    arc_type VARCHAR(20),
 
     -- Emotions detected (JSON array)
     emotions_detected JSON,
@@ -566,7 +568,8 @@ CREATE INDEX IF NOT EXISTS idx_feedback_created ON voice_feedback_signals(create
 CREATE TABLE IF NOT EXISTS voice_reward_models (
     id VARCHAR(64) PRIMARY KEY,
     model_name VARCHAR(100) UNIQUE NOT NULL,
-    context_type VARCHAR(50), -- NULL = global model
+    -- NULL = global model
+    context_type VARCHAR(50),
 
     -- Model parameters (JSON)
     weights JSON DEFAULT '{}',

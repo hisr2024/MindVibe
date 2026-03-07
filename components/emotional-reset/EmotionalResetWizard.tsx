@@ -369,7 +369,7 @@ export function EmotionalResetWizard({
         {stepData?.guidance}
       </p>
       {stepData?.wisdom?.map((item, index) => (
-        <div key={index} className="divine-step-card rounded-2xl p-5 space-y-3">
+        <div key={`wisdom-${index}`} className="divine-step-card rounded-2xl p-5 space-y-3">
           <div className="flex items-start justify-between gap-3">
             <p className="text-[#f5f0e8]/90 leading-relaxed flex-1 font-sacred">
               &ldquo;{item.wisdom}&rdquo;
@@ -398,7 +398,7 @@ export function EmotionalResetWizard({
       <div className="space-y-3">
         {stepData?.affirmations?.map((affirmation, index) => (
           <div
-            key={index}
+            key={`affirmation-${index}`}
             className="divine-step-card rounded-xl p-4 flex items-start gap-3"
           >
             <span className="divine-diya h-2 w-2 rounded-full bg-[#e8b54a] mt-1.5 flex-shrink-0" />
@@ -462,7 +462,7 @@ export function EmotionalResetWizard({
             </h4>
             <ul className="space-y-2">
               {stepData.summary.next_steps.map((step, index) => (
-                <li key={index} className="flex items-start gap-2.5 text-[#f5f0e8]/75 text-sm">
+                <li key={`next-step-${index}`} className="flex items-start gap-2.5 text-[#f5f0e8]/75 text-sm">
                   <span className="divine-diya h-1.5 w-1.5 rounded-full bg-[#e8b54a] mt-1.5 flex-shrink-0" />
                   {step}
                 </li>

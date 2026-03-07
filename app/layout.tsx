@@ -10,6 +10,7 @@ import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
 import { KiaanFooter } from '@/components/layout/KiaanFooter'
 import { GlobalWakeWordListener } from '@/components/wake-word/GlobalWakeWordListener'
 import KiaanVoiceFAB from '@/components/voice/KiaanVoiceFAB'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import { ClientLayout } from './ClientLayout'
 import { OverlayRoot } from '@/components/ui/OverlayRoot'
 import { MobileRouteGuard, MobileContentWrapper } from '@/components/mobile/MobileRouteGuard'
@@ -195,9 +196,13 @@ export default async function RootLayout({
               {/* Mobile bottom navigation (for standard non /m/* routes) */}
               <MobileNav />
               {/* OM floating chat widget */}
-              <KiaanFooter />
+              <ErrorBoundary fallback={null}>
+                <KiaanFooter />
+              </ErrorBoundary>
               {/* Global voice FAB - tap to talk to KIAAN */}
-              <KiaanVoiceFAB />
+              <ErrorBoundary fallback={null}>
+                <KiaanVoiceFAB />
+              </ErrorBoundary>
             </MobileRouteGuard>
             {/* Global wake word listener - "Hey KIAAN" from anywhere */}
             <GlobalWakeWordListener />
