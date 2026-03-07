@@ -169,7 +169,7 @@ export function ChatFooter() {
       setConnectionStatus('connected')
       setRetryAttempt(0)
     } catch (error) {
-      console.error('Chat error:', error)
+      if (process.env.NODE_ENV !== 'production') console.error('Chat error:', error)
       
       // Get user-friendly error message using shared utility
       const errorMessage = getBriefErrorMessage(error) || 'Unable to connect to KIAAN.'

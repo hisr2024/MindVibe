@@ -15,14 +15,20 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend, migrations, data directories, and scripts
+# Copy data and index-build script first (changes rarely) so the expensive
+# index build is cached by Docker's layer cache and does not re-run on every
+# backend code change.
+COPY data/ ./data/
+COPY scripts/build-relationship-compass-index-local.py ./scripts/build-relationship-compass-index-local.py
+
+# Build the Relationship Compass index (cached unless data/ or the script change)
+RUN python scripts/build-relationship-compass-index-local.py
+
+# Now copy the rest of the source (changes frequently — but the index layer
+# above stays cached).
 COPY backend/ ./backend/
 COPY migrations/ ./migrations/
-COPY data/ ./data/
 COPY scripts/ ./scripts/
-
-# Build the Relationship Compass index
-RUN python scripts/build-relationship-compass-index-local.py
 
 # Change ownership to non-root user
 RUN chown -R appuser:appuser /app

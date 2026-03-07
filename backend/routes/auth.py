@@ -978,7 +978,12 @@ async def reset_password(
         .values(revoked_at=datetime.now(UTC))
     )
 
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Database commit failed during password reset: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
 
     logger.info("Password reset completed for user %s", matched_token.user_id)
 

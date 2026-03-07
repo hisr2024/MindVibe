@@ -152,7 +152,7 @@ export function usePullToRefresh({
       try {
         await onRefresh()
       } catch (error) {
-        console.error('Pull to refresh error:', error)
+        if (process.env.NODE_ENV !== 'production') console.error('Pull to refresh error:', error)
         triggerHaptic('error')
       } finally {
         setIsRefreshing(false)

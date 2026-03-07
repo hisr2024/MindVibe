@@ -53,6 +53,9 @@ databases:
   # PostgreSQL Database with SSL enforced
   - name: mindvibe-db
     plan: standard
+    # databaseName and user are set here as Render blueprint defaults.
+    # The actual connection string is injected via the DATABASE_URL envVar
+    # above (fromDatabase), so these only affect initial provisioning.
     databaseName: mindvibe
     user: navi
     # SSL is enabled by default on Render PostgreSQL

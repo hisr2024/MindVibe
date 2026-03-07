@@ -139,7 +139,7 @@ export function OfflineMoodCheckIn({
           resetForm()
         } catch (apiError) {
           // Online but API failed - queue for later
-          console.warn('API save failed, queueing offline:', apiError)
+          if (process.env.NODE_ENV !== 'production') console.warn('API save failed, queueing offline:', apiError)
           await queueOffline(moodData)
         }
       } else {
@@ -147,7 +147,7 @@ export function OfflineMoodCheckIn({
         await queueOffline(moodData)
       }
     } catch (error) {
-      console.error('Failed to save mood:', error)
+      if (process.env.NODE_ENV !== 'production') console.error('Failed to save mood:', error)
       setErrorMessage(error instanceof Error ? error.message : 'Failed to save mood')
       setSaveStatus('error')
     } finally {

@@ -86,9 +86,18 @@ async def _check_journal_permission(request: Request, db: AsyncSession, premium:
     except HTTPException:
         raise
     except Exception as e:
-        # Log but allow access on error - graceful degradation
+        # SECURITY: Fail closed - deny access when subscription check fails.
+        # Granting access on error would allow bypassing subscription checks
+        # by inducing failures in the subscription service.
         import logging
-        logging.warning(f"Journal access check failed, allowing access: {e}")
+        logging.error(f"Journal access check failed, denying access: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error": "SERVICE_UNAVAILABLE",
+                "message": "Unable to verify access. Please try again shortly.",
+            },
+        )
 
 
 @router.post("/quick-save", response_model=QuickSaveOut)
