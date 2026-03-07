@@ -102,7 +102,7 @@ export default function DeleteAccountModal({
       setStep('submitted')
       onConfirm?.()
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'An error occurred')
+      setErrorMessage(error instanceof Error ? error.message : 'We\'re having trouble processing your request. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -129,7 +129,7 @@ export default function DeleteAccountModal({
       setDeletionInfo(null)
       onClose()
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'An error occurred')
+      setErrorMessage(error instanceof Error ? error.message : 'We\'re having trouble processing your request. Please try again.')
     } finally {
       setIsLoading(false)
     }

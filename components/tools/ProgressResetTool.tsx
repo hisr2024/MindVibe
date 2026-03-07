@@ -61,7 +61,7 @@ export function ProgressResetTool() {
       setPreview(data)
     } catch (err) {
       if (process.env.NODE_ENV !== 'production') console.error('Preview error:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load preview')
+      setError(err instanceof Error ? err.message : 'We\'re having trouble loading the reset preview. Please try again.')
     } finally {
       setIsLoading(false)
     }
