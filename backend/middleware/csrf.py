@@ -124,7 +124,14 @@ class CSRFMiddleware(BaseHTTPMiddleware):
                 response.set_cookie(
                     key=CSRF_COOKIE_NAME,
                     value=new_token,
-                    httponly=False,  # Must be readable by JS to include in headers
+                    # httponly=False is intentional: the CSRF token MUST be readable
+                    # by JavaScript so the frontend can include it in X-CSRF-Token
+                    # request headers. This is safe because:
+                    # 1. The token is not a session credential — it only proves same-origin.
+                    # 2. XSS is mitigated by Content-Security-Policy (CSP) headers.
+                    # 3. SameSite cookie attribute prevents cross-site sending.
+                    # If CSP is weakened or removed, this becomes an attack surface.
+                    httponly=False,
                     samesite=self.cookie_samesite,
                     secure=self.cookie_secure,
                     max_age=86400,  # 24 hours

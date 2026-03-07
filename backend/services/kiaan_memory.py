@@ -207,7 +207,7 @@ class SQLiteMemoryBackend:
             async with aiosqlite.connect(str(self.db_path)) as db:
                 db.row_factory = aiosqlite.Row
                 async with db.execute(
-                    "SELECT * FROM memories WHERE id = ?",
+                    "SELECT id, type, content, metadata, created_at, accessed_at, access_count, relevance_score, ttl_hours, user_id FROM memories WHERE id = ?",
                     (memory_id,)
                 ) as cursor:
                     row = await cursor.fetchone()
@@ -282,7 +282,7 @@ class SQLiteMemoryBackend:
             async with aiosqlite.connect(str(self.db_path)) as db:
                 db.row_factory = aiosqlite.Row
 
-                sql = "SELECT * FROM memories WHERE content LIKE ?"
+                sql = "SELECT id, type, content, metadata, created_at, accessed_at, access_count, relevance_score, ttl_hours, user_id FROM memories WHERE content LIKE ?"
                 params = [f"%{query}%"]
 
                 if memory_type:
@@ -319,10 +319,10 @@ class SQLiteMemoryBackend:
                 db.row_factory = aiosqlite.Row
 
                 if user_id:
-                    sql = "SELECT * FROM memories WHERE type = ? AND user_id = ? ORDER BY created_at DESC LIMIT ?"
+                    sql = "SELECT id, type, content, metadata, created_at, accessed_at, access_count, relevance_score, ttl_hours, user_id FROM memories WHERE type = ? AND user_id = ? ORDER BY created_at DESC LIMIT ?"
                     params = (memory_type.value, user_id, limit)
                 else:
-                    sql = "SELECT * FROM memories WHERE type = ? ORDER BY created_at DESC LIMIT ?"
+                    sql = "SELECT id, type, content, metadata, created_at, accessed_at, access_count, relevance_score, ttl_hours, user_id FROM memories WHERE type = ? ORDER BY created_at DESC LIMIT ?"
                     params = (memory_type.value, limit)
 
                 async with db.execute(sql, params) as cursor:
@@ -366,7 +366,7 @@ class SQLiteMemoryBackend:
         try:
             async with aiosqlite.connect(str(self.db_path)) as db:
                 db.row_factory = aiosqlite.Row
-                async with db.execute("SELECT * FROM memories") as cursor:
+                async with db.execute("SELECT id, type, content, metadata, created_at, accessed_at, access_count, relevance_score, ttl_hours, user_id FROM memories") as cursor:
                     rows = await cursor.fetchall()
                     entries = [dict(row) for row in rows]
 

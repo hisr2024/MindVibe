@@ -113,7 +113,7 @@ async def quick_save_to_journal(
     await _check_journal_permission(request, db)
     
     # Create a formatted journal entry
-    timestamp = dt.datetime.utcnow()
+    timestamp = datetime.now(tz=dt.timezone.utc)
     formatted_content = {
         "type": "kiaan_insight",
         "content": payload.content,
@@ -334,7 +334,7 @@ async def update_entry(
             )
 
     entry.client_updated_at = payload.client_updated_at
-    entry.updated_at = dt.datetime.utcnow()
+    entry.updated_at = datetime.now(tz=dt.timezone.utc)
 
     await _record_version(db, entry, user_id, payload)
     await db.commit()
@@ -355,7 +355,7 @@ async def delete_entry(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entry not found")
 
     entry.soft_delete()
-    entry.updated_at = dt.datetime.utcnow()
+    entry.updated_at = datetime.now(tz=dt.timezone.utc)
     await db.commit()
     return {"status": "deleted", "id": entry_id}
 
@@ -393,7 +393,7 @@ async def sync_entries(
     return SyncResponse(
         entries=[_entry_to_out(e) for e in entries if e.deleted_at is None],
         deleted=deleted_ids,
-        server_timestamp=dt.datetime.utcnow(),
+        server_timestamp=datetime.now(tz=dt.timezone.utc),
     )
 
 
@@ -450,7 +450,7 @@ async def journal_analytics(
     )
 
     # streak calculation: count consecutive days ending today with at least one entry
-    today = dt.datetime.utcnow().date()
+    today = datetime.now(tz=dt.timezone.utc).date()
     streak = 0
     longest = 0
     res = await db.execute(

@@ -3,7 +3,7 @@
 import logging
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import psutil
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -36,7 +36,7 @@ async def detailed_health(
 
     health_data = {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "checks": {}
     }
 
@@ -79,7 +79,7 @@ async def get_metrics(
 ):
     """Application metrics for monitoring. Requires authentication."""
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     last_24h = now - timedelta(hours=24)
 
     # User metrics
@@ -139,7 +139,7 @@ async def security_status(
     circuit_breakers = get_all_circuit_breakers()
 
     return {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "ddos_protection": {
             "enabled": True,
         },

@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import logging
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -214,7 +214,7 @@ class ResponseCompositionEngine:
             .where(CompositionTemplate.id == selected.id)
             .values(
                 times_used=CompositionTemplate.times_used + 1,
-                last_used_at=datetime.utcnow(),
+                last_used_at=datetime.now(timezone.utc),
             )
         )
         await db.commit()
@@ -310,7 +310,7 @@ class ResponseCompositionEngine:
                     .where(WisdomAtom.id == atom.id)
                     .values(
                         times_used=WisdomAtom.times_used + 1,
-                        last_used_at=datetime.utcnow(),
+                        last_used_at=datetime.now(timezone.utc),
                     )
                 )
 

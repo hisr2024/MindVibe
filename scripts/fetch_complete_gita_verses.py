@@ -83,10 +83,8 @@ def fetch_json(url: str) -> Any:
     """Fetch JSON data from URL."""
     print(f"  Fetching: {url}")
 
-    # Create SSL context that doesn't verify certificates (for some corporate networks)
+    # Always verify SSL certificates to prevent MITM attacks
     ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
 
     try:
         with urllib.request.urlopen(url, context=ctx, timeout=30) as response:

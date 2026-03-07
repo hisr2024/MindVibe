@@ -397,7 +397,7 @@ class EpisodicMemory:
             try:
                 async with aiosqlite.connect(str(self._db_path)) as db:
                     cursor = await db.execute(
-                        "SELECT * FROM episodes WHERE user_id = ? ORDER BY timestamp DESC LIMIT 200",
+                        "SELECT id, user_id, timestamp, query, response_summary, emotional_valence, consciousness_level, gita_verses, themes, consolidation_state, integrity_hash, decay_factor, importance_score, access_count FROM episodes WHERE user_id = ? ORDER BY timestamp DESC LIMIT 200",
                         (user_id,)
                     )
                     rows = await cursor.fetchall()

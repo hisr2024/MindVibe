@@ -29,9 +29,14 @@ startup_logger.info("=" * 80)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 if not OPENAI_API_KEY:
     if os.getenv("ENVIRONMENT", "").lower() == "production":
-        startup_logger.error(
+        startup_logger.critical(
             "OPENAI_API_KEY is NOT configured. "
-            "KIAAN AI features will be unavailable in production."
+            "KIAAN AI features require this key in production. "
+            "Refusing to start without it."
+        )
+        raise RuntimeError(
+            "OPENAI_API_KEY is required in production. "
+            "Set it in your environment variables to enable KIAAN AI features."
         )
     else:
         startup_logger.warning(
