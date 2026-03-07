@@ -108,7 +108,7 @@ export function UniversalVoiceInput({
   // Close consent info when clicking outside
   useEffect(() => {
     if (!showConsentInfo) return
-    const handler = (e: MouseEvent) => {
+    const handler = () => {
       setShowConsentInfo(false)
     }
     const timer = setTimeout(() => document.addEventListener('click', handler), 0)

@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { MoodParticles } from './MoodParticles'
 import { AnimatedIntensitySlider } from './AnimatedIntensitySlider'
 import { StateGlowEffect } from './StateGlowEffect'
 import { useHapticFeedback } from '@/hooks'
+import { useVoiceToText } from '@/hooks/useVoiceToText'
+import { useLanguage } from '@/hooks/useLanguage'
 
 /**
  * State Check-In Component
@@ -55,17 +57,93 @@ const EMOTIONAL_STATES: EmotionalState[] = [
   { id: 'depressed', label: 'Depressed', category: 'heavy', color: '#64748b', glowColor: 'rgba(100, 116, 139, 0.4)', emoji: '😥' },
 ]
 
+/** Map spoken emotion keywords to state IDs for voice-driven state selection */
+const EMOTION_KEYWORD_MAP: Record<string, string> = {
+  peaceful: 'peaceful', peace: 'peaceful', calm: 'peaceful', serene: 'peaceful',
+  happy: 'happy', joy: 'happy', joyful: 'happy', glad: 'happy',
+  grateful: 'grateful', thankful: 'grateful', gratitude: 'grateful',
+  charged: 'charged', energized: 'charged', excited: 'charged', pumped: 'charged',
+  open: 'open', receptive: 'open',
+  determined: 'determined', motivated: 'determined', driven: 'determined', focused: 'determined',
+  neutral: 'neutral', okay: 'neutral', fine: 'neutral', normal: 'neutral',
+  reflective: 'reflective', thinking: 'reflective', contemplative: 'reflective',
+  tender: 'tender', sensitive: 'tender', vulnerable: 'tender',
+  tired: 'tired', exhausted: 'tired', fatigued: 'tired', sleepy: 'tired',
+  anxious: 'anxious', anxiety: 'anxious', nervous: 'anxious', stressed: 'anxious',
+  worried: 'worried', worry: 'worried', concerned: 'worried',
+  heavy: 'heavy', burdened: 'heavy', weighed: 'heavy',
+  angry: 'angry', anger: 'angry', furious: 'angry', frustrated: 'angry', mad: 'angry',
+  sad: 'sad', sadness: 'sad', sorrowful: 'sad', unhappy: 'sad',
+  lonely: 'loneliness', loneliness: 'loneliness', alone: 'loneliness', isolated: 'loneliness',
+  depressed: 'depressed', depression: 'depressed', hopeless: 'depressed', despair: 'depressed',
+}
+
+/**
+ * Match a spoken transcript to an emotional state using keyword matching.
+ * Returns the matched state or null if no match found.
+ */
+function matchEmotionFromTranscript(transcript: string): EmotionalState | null {
+  const words = transcript.toLowerCase().split(/\s+/)
+  for (const word of words) {
+    const stateId = EMOTION_KEYWORD_MAP[word]
+    if (stateId) {
+      return EMOTIONAL_STATES.find((s) => s.id === stateId) || null
+    }
+  }
+  return null
+}
+
 interface StateCheckInProps {
   onStateSelect?: (state: EmotionalState, intensity: number) => void
   className?: string
+  /** Enable voice-based emotion check-in (default: true) */
+  enableVoice?: boolean
 }
 
-export function StateCheckIn({ onStateSelect, className = '' }: StateCheckInProps) {
+export function StateCheckIn({ onStateSelect, className = '', enableVoice = true }: StateCheckInProps) {
   const [selectedState, setSelectedState] = useState<EmotionalState | null>(null)
   const [intensity, setIntensity] = useState(5)
   const [hoveredState, setHoveredState] = useState<string | null>(null)
   const [particleTrigger, setParticleTrigger] = useState<{ id: string; origin: { x: number; y: number } } | null>(null)
+  const [voiceMatchFeedback, setVoiceMatchFeedback] = useState<string | null>(null)
   const { triggerHaptic } = useHapticFeedback()
+  const { language } = useLanguage()
+
+  // Voice-driven emotion detection
+  const handleVoiceTranscript = useCallback(
+    (text: string, isFinal: boolean) => {
+      if (!isFinal) return
+
+      const matched = matchEmotionFromTranscript(text)
+      if (matched) {
+        setSelectedState(matched)
+        triggerHaptic('medium')
+        setVoiceMatchFeedback(`Detected: ${matched.label}`)
+        if (onStateSelect) {
+          onStateSelect(matched, intensity)
+        }
+        // Clear feedback after 3 seconds
+        setTimeout(() => setVoiceMatchFeedback(null), 3000)
+      } else {
+        setVoiceMatchFeedback(`"${text}" — no emotion matched. Try saying an emotion like "anxious" or "peaceful".`)
+        setTimeout(() => setVoiceMatchFeedback(null), 4000)
+      }
+    },
+    [intensity, onStateSelect, triggerHaptic],
+  )
+
+  const {
+    isListening: voiceListening,
+    interimTranscript: voiceInterim,
+    isSupported: voiceSupported,
+    error: voiceError,
+    startListening: voiceStart,
+    stopListening: voiceStop,
+  } = useVoiceToText({
+    language,
+    module: 'emotional-compass',
+    onTranscript: handleVoiceTranscript,
+  })
 
   const handleStateClick = (state: EmotionalState, event: React.MouseEvent) => {
     setSelectedState(state)
@@ -97,6 +175,62 @@ export function StateCheckIn({ onStateSelect, className = '' }: StateCheckInProp
 
   return (
     <div className={`space-y-6 ${className}`}>
+      {/* Voice Emotion Check-In */}
+      {enableVoice && voiceSupported && (
+        <div className="rounded-2xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d0f]/80 to-[#120a07]/60 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-[#f5f0e8]/80">
+                Speak how you feel
+              </p>
+              <p className="text-[11px] text-[#f5f0e8]/40 mt-0.5">
+                Say an emotion like &quot;I feel anxious&quot; or &quot;peaceful&quot;
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => (voiceListening ? voiceStop() : voiceStart())}
+              className={`flex h-10 w-10 items-center justify-center rounded-2xl border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 ${
+                voiceListening
+                  ? 'border-red-500/60 bg-red-500/20 text-red-400 animate-pulse'
+                  : 'border-[#d4a44c]/25 bg-slate-950/70 text-[#d4a44c] hover:bg-slate-900/70 hover:border-[#d4a44c]/40'
+              }`}
+              aria-label={voiceListening ? 'Stop voice check-in' : 'Start voice check-in'}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" x2="12" y1="19" y2="22" />
+              </svg>
+              {voiceListening && (
+                <span className="absolute inset-0 rounded-2xl border-2 border-red-400/50 animate-ping" />
+              )}
+            </button>
+          </div>
+
+          {/* Live interim transcript */}
+          {voiceListening && voiceInterim && (
+            <div className="mt-2 text-xs italic text-[#f5f0e8]/60" aria-live="polite">
+              &quot;{voiceInterim}&quot;
+            </div>
+          )}
+
+          {/* Voice match feedback */}
+          {voiceMatchFeedback && (
+            <div className="mt-2 text-xs text-[#e8b54a]/80" role="status">
+              {voiceMatchFeedback}
+            </div>
+          )}
+
+          {/* Voice error */}
+          {voiceError && !voiceListening && (
+            <div className="mt-2 text-xs text-red-400/70" role="alert">
+              {voiceError}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Category: Uplifted */}
       <div className="space-y-3">
         <h3 className="text-lg font-semibold text-[#f5f0e8] flex items-center gap-2">
