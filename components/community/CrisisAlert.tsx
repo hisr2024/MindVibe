@@ -112,7 +112,7 @@ export function CrisisAlert({ resources = DEFAULT_RESOURCES, onClose, className 
 
       {/* Support Resources */}
       <div className="space-y-3 mb-6">
-        {resources.map((resource) => (
+        {resources.map((resource, index) => (
           <motion.div
             key={resource.name}
             initial={{ opacity: 0, x: -20 }}
