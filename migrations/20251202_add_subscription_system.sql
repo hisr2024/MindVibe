@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS subscription_plans (
     price_yearly NUMERIC(10, 2),
     stripe_price_id_monthly VARCHAR(128),
     stripe_price_id_yearly VARCHAR(128),
+    razorpay_plan_id_monthly VARCHAR(128),
+    razorpay_plan_id_yearly VARCHAR(128),
     features JSONB DEFAULT '{}',
     kiaan_questions_monthly INTEGER DEFAULT 10,
     encrypted_journal BOOLEAN DEFAULT FALSE,
@@ -131,6 +133,20 @@ BEGIN
         WHERE table_name = 'subscription_plans' AND column_name = 'stripe_price_id_yearly'
     ) THEN
         ALTER TABLE subscription_plans ADD COLUMN stripe_price_id_yearly VARCHAR(128);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'razorpay_plan_id_monthly'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN razorpay_plan_id_monthly VARCHAR(128);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'razorpay_plan_id_yearly'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN razorpay_plan_id_yearly VARCHAR(128);
     END IF;
 
     IF NOT EXISTS (
