@@ -103,6 +103,35 @@ class TestElevenLabsFlashMode:
             assert voice.get("voice_id"), f"Voice {vid} missing voice_id"
             assert len(voice["voice_id"]) > 10, f"Voice {vid} has short voice_id"
 
+    def test_all_voices_have_unique_voice_ids(self):
+        """Every ElevenLabs voice must have a unique voice_id (no duplicates)."""
+        from backend.services.elevenlabs_tts_service import ELEVENLABS_VOICES
+        voice_ids = [v["voice_id"] for v in ELEVENLABS_VOICES.values()]
+        assert len(voice_ids) == len(set(voice_ids)), (
+            f"Duplicate voice_ids found: "
+            f"{[vid for vid in voice_ids if voice_ids.count(vid) > 1]}"
+        )
+
+    def test_synthesis_text_assigned_before_model_selection(self):
+        """synthesis_text must be assigned before it is used in model selection.
+
+        Regression test: synthesis_text was previously referenced in
+        len(synthesis_text) < 100 check BEFORE the assignment on the next line,
+        causing NameError at runtime when use_turbo=False.
+        """
+        import inspect
+        from backend.services.elevenlabs_tts_service import synthesize_elevenlabs_tts
+        source = inspect.getsource(synthesize_elevenlabs_tts)
+        # Find the positions of assignment and first usage
+        assign_pos = source.find("synthesis_text = pronunciation_text or text")
+        usage_pos = source.find("len(synthesis_text)")
+        assert assign_pos > 0, "synthesis_text assignment not found"
+        assert usage_pos > 0, "synthesis_text usage not found"
+        assert assign_pos < usage_pos, (
+            "CRITICAL: synthesis_text is used before assignment — "
+            f"assignment at char {assign_pos}, usage at char {usage_pos}"
+        )
+
     def test_health_status_includes_flash(self):
         """Health status should list flash model."""
         from backend.services.elevenlabs_tts_service import get_elevenlabs_health_status
@@ -242,6 +271,15 @@ class TestCompanionVoiceProviderMappings:
         assert get_sarvam_speaker_for_companion("priya") == "meera"
         assert get_sarvam_speaker_for_companion("arjun") == "arvind"
         assert get_sarvam_speaker_for_companion("maya") == "pavithra"
+
+    def test_divine_krishna_sarvam_speaker_is_abhilash(self):
+        """divine-krishna must map to abhilash (authoritative) not arvind.
+
+        Regression test: frontend voiceCatalog.ts had sarvamSpeaker='arvind'
+        while backend had 'abhilash', causing voice mismatch.
+        """
+        from backend.services.sarvam_tts_service import COMPANION_TO_SARVAM_SPEAKER
+        assert COMPANION_TO_SARVAM_SPEAKER["divine-krishna"] == "abhilash"
 
 
 class TestCircuitBreakerHealth:

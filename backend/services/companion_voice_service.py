@@ -8,7 +8,7 @@ Voice Provider Chain (highest quality first):
 │  1. ElevenLabs (10/10) - Most human-like voices ever         │
 │     → Requires ELEVENLABS_API_KEY                            │
 │     → Dedicated service: elevenlabs_tts_service.py           │
-│  2. Sarvam AI Bulbul (9.5/10) - Best Indian language voices  │
+│  2. Sarvam AI Bulbul v2 (9.7/10) - Best Indian language voices│
 │     → Uses SARVAM_API_KEY, activated for Indian languages    │
 │     → Hindi, Tamil, Telugu, Bengali, Kannada, Malayalam, etc. │
 │  3. Bhashini AI (9/10) - Government of India, 22 languages   │
@@ -784,86 +784,66 @@ async def synthesize_companion_voice(
     # Determine optimal provider order based on language and quality data
     _provider_order = _get_optimal_provider_order(language)
 
-    # 1. Try ElevenLabs via dedicated service (most natural, most human-like)
-    if ELEVENLABS_SERVICE_AVAILABLE and _el_available() and _provider_is_healthy("elevenlabs"):
-        try:
-            el_pronunciation_text = plain_text
-            if PRONUNCIATION_ENGINE_AVAILABLE:
-                el_engine = PronunciationEngine(language=language)
-                el_pronunciation_text = el_engine.correct_text(
-                    plain_text, provider="elevenlabs"
-                )
+    # Provider quality metadata
+    _provider_meta = {
+        "elevenlabs": {"content_type": "audio/mpeg", "provider_name": "elevenlabs", "quality_score": 10.0},
+        "sarvam": {"content_type": "audio/wav", "provider_name": "sarvam_ai_bulbul", "quality_score": 9.7},
+        "bhashini": {"content_type": "audio/wav", "provider_name": "bhashini_ai", "quality_score": 9.0},
+    }
 
-            audio = await synthesize_elevenlabs_tts(
-                text=plain_text,
-                language=language,
-                voice_id=voice_id,
-                mood=mood,
-                pronunciation_text=el_pronunciation_text,
-            )
-            if audio:
-                _record_provider_success("elevenlabs")
-                _record_quality_metric("elevenlabs", language, voice_id, _synth_start, len(audio))
-                return {
-                    "audio": audio,
-                    "content_type": "audio/mpeg",
-                    "ssml": ssml_data["ssml"],
-                    "provider": "elevenlabs",
-                    "voice_persona": ssml_data["voice_persona"],
-                    "quality_score": 10.0,
-                    "fallback_to_browser": False,
-                }
-            _record_provider_failure("elevenlabs")
-        except Exception as e:
-            _record_provider_failure("elevenlabs")
-            logger.warning(f"ElevenLabs dedicated service failed: {e}")
+    # Try providers in optimal order determined by language + quality data
+    for _provider in _provider_order:
+        if not _provider_is_healthy(_provider):
+            continue
 
-    # 1b. Fallback: Try ElevenLabs via inline implementation
-    if _provider_is_healthy("elevenlabs"):
-        audio = await _try_elevenlabs_tts(pronunciation_corrected_text, ssml_data)
+        meta = _provider_meta.get(_provider)
+        if not meta:
+            continue
+
+        audio = None
+
+        if _provider == "elevenlabs":
+            # Try dedicated ElevenLabs service first (highest quality)
+            if ELEVENLABS_SERVICE_AVAILABLE and _el_available():
+                try:
+                    el_pronunciation_text = plain_text
+                    if PRONUNCIATION_ENGINE_AVAILABLE:
+                        el_engine = PronunciationEngine(language=language)
+                        el_pronunciation_text = el_engine.correct_text(
+                            plain_text, provider="elevenlabs"
+                        )
+                    audio = await synthesize_elevenlabs_tts(
+                        text=plain_text,
+                        language=language,
+                        voice_id=voice_id,
+                        mood=mood,
+                        pronunciation_text=el_pronunciation_text,
+                    )
+                except Exception as e:
+                    logger.warning(f"ElevenLabs dedicated service failed: {e}")
+            # Fallback: inline ElevenLabs implementation
+            if not audio:
+                audio = await _try_elevenlabs_tts(pronunciation_corrected_text, ssml_data)
+
+        elif _provider == "sarvam":
+            audio = await _try_sarvam_tts(plain_text, ssml_data, mood, voice_id)
+
+        elif _provider == "bhashini":
+            audio = await _try_bhashini_tts(plain_text, ssml_data, mood, voice_id)
+
         if audio:
-            _record_provider_success("elevenlabs")
+            _record_provider_success(_provider)
+            _record_quality_metric(_provider, language, voice_id, _synth_start, len(audio))
             return {
                 "audio": audio,
-                "content_type": "audio/mpeg",
+                "content_type": meta["content_type"],
                 "ssml": ssml_data["ssml"],
-                "provider": "elevenlabs",
+                "provider": meta["provider_name"],
                 "voice_persona": ssml_data["voice_persona"],
-                "quality_score": 10.0,
+                "quality_score": meta["quality_score"],
                 "fallback_to_browser": False,
             }
-
-    # 2. Try Sarvam AI Bulbul (best Indian language voices)
-    if _provider_is_healthy("sarvam"):
-        audio = await _try_sarvam_tts(plain_text, ssml_data, mood, voice_id)
-        if audio:
-            _record_provider_success("sarvam")
-            return {
-                "audio": audio,
-                "content_type": "audio/wav",
-                "ssml": ssml_data["ssml"],
-                "provider": "sarvam_ai_bulbul",
-                "voice_persona": ssml_data["voice_persona"],
-                "quality_score": 9.5,
-                "fallback_to_browser": False,
-            }
-        _record_provider_failure("sarvam")
-
-    # 3. Try Bhashini AI (Government of India, 22 Indian languages)
-    if _provider_is_healthy("bhashini"):
-        audio = await _try_bhashini_tts(plain_text, ssml_data, mood, voice_id)
-        if audio:
-            _record_provider_success("bhashini")
-            return {
-                "audio": audio,
-                "content_type": "audio/wav",
-                "ssml": ssml_data["ssml"],
-                "provider": "bhashini_ai",
-                "voice_persona": ssml_data["voice_persona"],
-                "quality_score": 9.0,
-                "fallback_to_browser": False,
-            }
-        _record_provider_failure("bhashini")
+        _record_provider_failure(_provider)
 
     # 4. Return config for browser-side synthesis
     return {

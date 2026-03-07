@@ -7,7 +7,7 @@
  *
  * Provider Quality Chain:
  * 1. ElevenLabs (10/10) - Most human-like international voices
- * 2. Sarvam AI Bulbul (9.5/10) - Best Indian language voices
+ * 2. Sarvam AI Bulbul v2 (9.7/10) - Best Indian language voices
  * 3. Bhashini AI (9/10) - Government of India, 22 scheduled languages
  *
  * Fallback:
@@ -265,7 +265,7 @@ export const VOICE_SPEAKERS: VoiceSpeaker[] = [
     category: 'sacred',
     tags: ['divine', 'sacred', 'krishna', 'gita', 'wisdom', 'love'],
     previewText: 'Whenever dharma declines and adharma prevails, I manifest myself. For the protection of the good, I appear in every age.',
-    backendConfig: { voiceType: 'wisdom', speed: 0.84, language: 'sa', sarvamSpeaker: 'arvind', voiceId: 'divine-krishna' },
+    backendConfig: { voiceType: 'wisdom', speed: 0.84, language: 'sa', sarvamSpeaker: 'abhilash', voiceId: 'divine-krishna' },
     browserConfig: {
       voicePatterns: [/Prabhat/i, /Google.*Hindi/i, /Daniel/i, /Guy/i],
       rate: 0.84,

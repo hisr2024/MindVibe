@@ -105,7 +105,7 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
         "default_style": 0.40,
     },
     "bella": {
-        "voice_id": "EXAVITQu4vr4xnSDxMaL",
+        "voice_id": "jBpfuIE2acCO8z3wKNLl",
         "name": "Bella",
         "gender": "female",
         "accent": "American English",
@@ -561,6 +561,9 @@ async def synthesize_elevenlabs_tts(
     similarity = max(0.0, min(1.0, similarity))
     style_value = max(0.0, min(1.0, style_value))
 
+    # Use pronunciation-corrected text if available
+    synthesis_text = pronunciation_text or text
+
     # Select model based on latency requirements and content type
     if use_turbo:
         model_id = ELEVENLABS_MODEL_TURBO
@@ -569,9 +572,6 @@ async def synthesize_elevenlabs_tts(
         model_id = ELEVENLABS_MODEL_FLASH
     else:
         model_id = ELEVENLABS_MODEL_QUALITY
-
-    # Use pronunciation-corrected text if available
-    synthesis_text = pronunciation_text or text
 
     # Truncate to ElevenLabs limit (5000 chars)
     if len(synthesis_text) > 5000:
