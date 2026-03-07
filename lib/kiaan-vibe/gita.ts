@@ -5,6 +5,9 @@
  * To add a new language, simply drop a JSON file in data/gita/{languageCode}.json
  */
 
+// TODO: Centralize environment variable access to config/environment.ts
+// to provide validation, type safety, and a single source of truth for all env vars.
+
 import type { GitaChapter, GitaVerse } from './types'
 
 // ============ Types for JSON data ============

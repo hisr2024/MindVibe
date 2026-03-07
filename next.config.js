@@ -12,6 +12,9 @@ const nextConfig = {
   },
 
   images: {
+    // remotePatterns is intentionally empty — all images are served from the
+    // same origin or inlined as data URIs.  Add entries here when the app
+    // starts loading images from external CDNs or user-uploaded storage.
     remotePatterns: [],
     formats: ['image/avif', 'image/webp'],
   },

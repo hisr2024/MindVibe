@@ -103,6 +103,11 @@ ALLOWED_HEADERS = [
 ]
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
+# RUN_MIGRATIONS_ON_STARTUP controls whether SQL migrations execute during app
+# startup.  Default is "true".  Set to "false" in environments where migrations
+# are applied via a separate pre-deploy step (e.g. Render's preDeployCommand in
+# render.yaml runs `python scripts/run_migrations.py`).  Disabling avoids
+# duplicate migration attempts and reduces startup latency on hot restarts.
 RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower() in {
     "1",
     "true",

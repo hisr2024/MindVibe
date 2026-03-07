@@ -1,5 +1,7 @@
 -- Migration: Add deleted_at column to journey tables for soft delete support
 -- Date: 2026-02-04
+-- Dependencies: Requires 20260125_add_wisdom_journeys_enhanced.sql (creates user_journeys
+--   and user_journey_step_state tables that this migration alters).
 -- Description: The UserJourney and UserJourneyStepState models use SoftDeleteMixin
 --              which requires a deleted_at column. This was missing from the original migration.
 

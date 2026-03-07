@@ -1,3 +1,8 @@
+# No top-level `version:` key — Docker Compose V2+ (the `docker compose` CLI
+# plugin) ignores it and treats it as obsolete.  Omitting it silences the
+# "version is obsolete" warning while remaining compatible with V1 (`docker-compose`)
+# which defaults to the latest schema when the key is absent.
+
 services:
   # PostgreSQL Database
   db:

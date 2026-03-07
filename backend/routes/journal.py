@@ -77,9 +77,9 @@ async def _check_journal_permission(request: Request, db: AsyncSession, premium:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail={
-                        "error": "feature_not_available",
-                        "feature": "encrypted_journal",
+                        "error": "FEATURE_NOT_AVAILABLE",
                         "message": "This capability requires an active subscription.",
+                        "feature": "encrypted_journal",
                         "upgrade_url": "/subscription/upgrade",
                     },
                 )

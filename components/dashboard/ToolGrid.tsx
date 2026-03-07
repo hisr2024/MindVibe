@@ -22,6 +22,12 @@ export interface ToolGridProps {
  * - Section title with optional help icon
  * - Responsive grid layout (3 cols desktop, 2 cols tablet, 1 col mobile)
  * - MindVibe brand styling
+ *
+ * TODO(F-14): Refactor prop drilling - ToolCard receives individual props
+ * (icon, title, description, gradient, href, badge, disabled) that are
+ * manually spread from ToolConfig. Consider using React Context or passing
+ * the full ToolConfig object to reduce prop drilling across the dashboard
+ * component tree (ToolsDashboardSection -> ToolGrid -> ToolCard).
  */
 export function ToolGrid({
   title,

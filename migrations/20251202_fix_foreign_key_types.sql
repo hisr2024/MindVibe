@@ -1,6 +1,7 @@
 -- Migration: Fix foreign key type mismatch for user_id columns
 -- Description: Changes user_id columns from INTEGER to VARCHAR(255) to match users.id type
 -- Date: 2025-12-02
+-- Dependencies: Must run AFTER all migrations that created the original user_id INTEGER columns.
 
 -- This migration fixes the foreign key type mismatch where:
 -- - users.id is VARCHAR (string/UUID from authentication system)

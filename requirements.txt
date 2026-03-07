@@ -37,11 +37,9 @@ prometheus-client>=0.19.0,<1.0.0
 # File handling
 aiofiles>=23.0.0,<26.0.0
 
-# Testing
-pytest>=7.3.1,<9.1.0
-
-# Type hints
-types-requests>=2.31.0,<3.0.0
+# NOTE: Dev-only packages (pytest, types-requests, black, mypy, etc.) belong
+# in requirements-dev.txt.  They were previously listed here; moved to keep
+# production images lean and avoid installing test tooling in deployed containers.
 
 # Security & Rate Limiting
 slowapi>=0.1.9,<0.2.0

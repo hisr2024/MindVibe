@@ -149,8 +149,11 @@ async def synthesize_speech(
     if payload.language not in tts_service.get_supported_languages():
         raise HTTPException(
             status_code=400,
-            detail=f"Language '{payload.language}' not supported. "
-                   f"Supported: {', '.join(tts_service.get_supported_languages())}"
+            detail={
+                "error": "UNSUPPORTED_LANGUAGE",
+                "message": f"Language '{payload.language}' is not supported.",
+                "supported_languages": list(tts_service.get_supported_languages()),
+            }
         )
 
     # Generate audio

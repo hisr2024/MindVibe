@@ -39,7 +39,7 @@ export function ChatFooter() {
           setIsOpen(true)
         }
       } catch (error) {
-        console.error('Failed to load footer state from localStorage:', error)
+        if (process.env.NODE_ENV !== 'production') console.error('Failed to load footer state from localStorage:', error)
       }
     }
   }, [])
@@ -50,7 +50,7 @@ export function ChatFooter() {
       try {
         localStorage.setItem('kiaan-footer-open', isOpen.toString())
       } catch (error) {
-        console.error('Failed to save footer state to localStorage:', error)
+        if (process.env.NODE_ENV !== 'production') console.error('Failed to save footer state to localStorage:', error)
       }
     }
   }, [isOpen, mounted])
@@ -112,7 +112,7 @@ export function ChatFooter() {
           setConnectionStatus('error')
         }
       } catch (error) {
-        console.error('Health check failed:', error)
+        if (process.env.NODE_ENV !== 'production') console.error('Health check failed:', error)
         setBackendHealthy(false)
         setConnectionStatus('error')
       }

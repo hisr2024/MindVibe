@@ -1,5 +1,7 @@
 -- Fix Wisdom Journeys Schema Issues
 -- Migration: 20260129_fix_wisdom_journeys_schema.sql
+-- Dependencies: Requires 20260125_add_wisdom_journeys_enhanced.sql (creates journey_templates,
+--   journey_template_steps, user_journeys, user_journey_step_state tables).
 --
 -- This migration fixes:
 -- 1. Missing deleted_at columns for soft delete support (SoftDeleteMixin)

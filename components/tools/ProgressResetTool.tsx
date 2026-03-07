@@ -60,7 +60,7 @@ export function ProgressResetTool() {
       const data = await response.json()
       setPreview(data)
     } catch (err) {
-      console.error('Preview error:', err)
+      if (process.env.NODE_ENV !== 'production') console.error('Preview error:', err)
       setError(err instanceof Error ? err.message : 'Failed to load preview')
     } finally {
       setIsLoading(false)
@@ -110,7 +110,7 @@ export function ProgressResetTool() {
         window.location.reload()
       }, 3000)
     } catch (err) {
-      console.error('Reset error:', err)
+      if (process.env.NODE_ENV !== 'production') console.error('Reset error:', err)
       setError(err instanceof Error ? err.message : 'Reset failed')
     } finally {
       setIsLoading(false)

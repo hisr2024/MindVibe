@@ -134,7 +134,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
       }
 
     } catch (error) {
-      console.error('Chat error:', error)
+      if (process.env.NODE_ENV !== 'production') console.error('Chat error:', error)
 
       // Fallback to non-streaming endpoint
       try {

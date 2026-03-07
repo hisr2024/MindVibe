@@ -62,7 +62,7 @@ jobs:
           path: |
             coverage.xml
             coverage/
-          retention-days: 14
+          retention-days: 30
 
   deploy-backend:
     name: Deploy Backend to Render

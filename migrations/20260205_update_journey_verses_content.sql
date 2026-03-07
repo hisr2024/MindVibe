@@ -1,5 +1,7 @@
 -- Migration: Update Journey Verses with Actual Sanskrit Content
 -- Date: 2026-02-05
+-- Dependencies: Requires 20251109_add_gita_wisdom_database.sql (creates gita_verses table with
+--   initial seed data that this migration updates).
 -- Description: Updates gita_verses with proper Sanskrit, transliteration, Hindi, and English for verses used in journeys
 -- Using UPDATE statements (verses already exist in table)
 

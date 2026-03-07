@@ -1,4 +1,5 @@
--- Chat rooms and real-time messaging tables
+-- Migration: Add chat rooms and real-time messaging tables
+-- Dependencies: Requires 'users' table to exist (references users.id).
 CREATE TABLE IF NOT EXISTS chat_rooms (
     id VARCHAR(64) PRIMARY KEY,
     slug VARCHAR(64) UNIQUE NOT NULL,

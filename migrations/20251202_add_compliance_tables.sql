@@ -1,6 +1,7 @@
 -- Migration: Add compliance and GDPR tables
 -- Created: 2025-12-02
 -- Purpose: HIPAA/GDPR compliance with user consent, data export, and deletion tracking
+-- Dependencies: Requires 'users' table to exist (references users.id).
 
 -- User consent tracking for GDPR compliance
 CREATE TABLE IF NOT EXISTS user_consents (

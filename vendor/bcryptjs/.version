@@ -1,0 +1,11 @@
+# Vendored bcryptjs version tracking
+# This file tracks the version of the vendored bcryptjs package.
+# The vendor copy exists to support offline hashing without npm registry access.
+#
+# Source: https://www.npmjs.com/package/bcryptjs
+# Version: 2.4.3
+# Vendored on: 2026-03-07
+# License: MIT
+#
+# To update: download the new version from npm, replace index.js and index.d.ts,
+# update package.json version, and update this file.

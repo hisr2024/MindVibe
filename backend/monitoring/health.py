@@ -19,12 +19,44 @@ router = APIRouter(prefix="/api/monitoring", tags=["monitoring"])
 
 
 @router.get("/health")
-async def basic_health():
+async def basic_health(
+    db: AsyncSession = Depends(get_db),
+):
     """Basic health check for load balancers. No auth required.
 
-    Returns only a simple status - no internal details exposed.
+    Performs lightweight dependency checks (database ping, Redis ping if enabled)
+    to confirm the service can handle requests. Returns degraded status if any
+    dependency is unreachable, so load balancers can route traffic accordingly.
     """
-    return {"status": "ok"}
+    status = "ok"
+    checks: dict = {}
+
+    # Database ping — lightweight SELECT 1
+    try:
+        await db.execute(text("SELECT 1"))
+        checks["database"] = "up"
+    except Exception:
+        checks["database"] = "down"
+        status = "degraded"
+        logger.warning("Health check: database unreachable")
+
+    # Redis ping — only if Redis is enabled
+    redis_enabled = os.getenv("REDIS_ENABLED", "false").lower() in ("true", "1")
+    if redis_enabled:
+        try:
+            import redis.asyncio as aioredis
+
+            redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+            r = aioredis.from_url(redis_url, socket_connect_timeout=2)
+            await r.ping()
+            await r.aclose()
+            checks["redis"] = "up"
+        except Exception:
+            checks["redis"] = "down"
+            status = "degraded"
+            logger.warning("Health check: Redis unreachable")
+
+    return {"status": status, "checks": checks}
 
 
 @router.get("/health/detailed")

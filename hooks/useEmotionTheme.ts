@@ -82,7 +82,7 @@ export function useEmotionTheme(): UseEmotionThemeReturn {
         return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) }
       }
     } catch (error) {
-      console.error('Failed to load emotion theme settings:', error)
+      if (process.env.NODE_ENV !== 'production') console.error('Failed to load emotion theme settings:', error)
     }
     return DEFAULT_SETTINGS
   })
@@ -101,7 +101,7 @@ export function useEmotionTheme(): UseEmotionThemeReturn {
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(newSettings))
     } catch (error) {
-      console.error('Failed to save emotion theme settings:', error)
+      if (process.env.NODE_ENV !== 'production') console.error('Failed to save emotion theme settings:', error)
     }
   }, [])
 

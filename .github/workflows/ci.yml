@@ -55,7 +55,7 @@ jobs:
           path: |
             coverage.xml
             .coverage
-          retention-days: 14
+          retention-days: 30
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -111,7 +111,7 @@ jobs:
           name: nodejs-test-results
           path: |
             coverage/
-          retention-days: 14
+          retention-days: 30
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -175,4 +175,4 @@ jobs:
           path: |
             bandit-report.json
             .secrets-scan-results.json
-          retention-days: 14
+          retention-days: 30
