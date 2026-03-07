@@ -232,7 +232,7 @@ async def create_entry(
     entry_id = payload.entry_id or str(uuid.uuid4())
     existing = await db.get(JournalEntry, entry_id)
     if existing:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Entry already exists")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={"error": "ENTRY_EXISTS", "message": "Entry already exists."})
 
     entry = JournalEntry(
         id=entry_id,
@@ -296,7 +296,7 @@ async def get_entry(
     await _check_journal_permission(request, db, premium=False)
     entry = await db.get(JournalEntry, entry_id)
     if not entry or entry.user_id != user_id or entry.deleted_at:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entry not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"error": "ENTRY_NOT_FOUND", "message": "Entry not found."})
     return _entry_to_out(entry)
 
 
@@ -311,11 +311,11 @@ async def update_entry(
     await _check_journal_permission(request, db, premium=False)
     entry = await db.get(JournalEntry, entry_id)
     if not entry or entry.user_id != user_id or entry.deleted_at:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entry not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"error": "ENTRY_NOT_FOUND", "message": "Entry not found."})
 
     # Simple timestamp-based conflict detection
     if payload.client_updated_at <= entry.client_updated_at:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Client update is older than server copy")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={"error": "CONFLICT_STALE_UPDATE", "message": "Client update is older than server copy."})
 
     if payload.title:
         entry.encrypted_title = payload.title.dict()
@@ -361,7 +361,7 @@ async def delete_entry(
     await _check_journal_permission(request, db, premium=False)
     entry = await db.get(JournalEntry, entry_id)
     if not entry or entry.user_id != user_id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entry not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"error": "ENTRY_NOT_FOUND", "message": "Entry not found."})
 
     entry.soft_delete()
     entry.updated_at = datetime.now(tz=dt.timezone.utc)

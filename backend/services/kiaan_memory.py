@@ -244,7 +244,9 @@ class SQLiteMemoryBackend:
 
                 # Build query
                 sql = """
-                    SELECT m.* FROM memories m
+                    SELECT m.id, m.type, m.content, m.metadata, m.created_at,
+                           m.accessed_at, m.access_count, m.relevance_score,
+                           m.ttl_hours, m.user_id FROM memories m
                     JOIN memories_fts fts ON m.id = fts.id
                     WHERE memories_fts MATCH ?
                 """
