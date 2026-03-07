@@ -20,13 +20,30 @@ class WisdomKnowledgeBase:
 
     Integrates with GitaService to provide access to 700+ Bhagavad Gita verses
     while preserving text sanitization and spiritual wellness tagging functionality.
+
+    SINGLETON: All instances share the same object via __new__, so the 700-verse
+    in-memory cache and keyword indices are built once and reused across all callers
+    (kiaan_core, voice_companion, chat, guidance, karma_reset, emotional_reset, etc.).
     """
 
     # Spiritual wellness tag boost for search scoring
     TAG_BOOST = 0.2
 
+    _instance: "WisdomKnowledgeBase | None" = None
+    _initialized: bool = False
+
+    def __new__(cls) -> "WisdomKnowledgeBase":
+        """Return singleton instance — all callers share the same cache."""
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
     def __init__(self) -> None:
-        """Initialize the wisdom knowledge base."""
+        """Initialize the wisdom knowledge base (runs only once due to singleton)."""
+        if WisdomKnowledgeBase._initialized:
+            return
+        WisdomKnowledgeBase._initialized = True
+
         self._verse_cache: list[dict[str, Any]] | None = None
         self._gita_service = GitaService()
         # Pre-built keyword index for O(1) verse lookup (built on first cache load)
@@ -723,12 +740,12 @@ class _GitaVerseWrapper:
 
     def __init__(self, verse_dict: dict[str, Any]) -> None:
         self._data = verse_dict
-        self. verse_id = verse_dict. get("verse_id", "")
+        self.verse_id = verse_dict.get("verse_id", "")
         self.chapter = verse_dict.get("chapter", 0)
         self.verse_number = verse_dict.get("verse_number", 0)
-        self.theme = verse_dict. get("theme", "")
-        self.english = verse_dict. get("english", "")
-        self.hindi = verse_dict. get("hindi", "")
+        self.theme = verse_dict.get("theme", "")
+        self.english = verse_dict.get("english", "")
+        self.hindi = verse_dict.get("hindi", "")
         self.sanskrit = verse_dict.get("sanskrit", "")
         self.context = verse_dict.get("context", "")
         self.mental_health_applications = verse_dict.get("mental_health_applications", [])
