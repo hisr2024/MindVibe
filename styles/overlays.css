@@ -150,12 +150,14 @@
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 
-  /* Entrance: fade in the entire overlay */
+  /* Entrance: fade in the entire overlay.
+     Transition duration matches exit (300ms) to prevent timing misalignment
+     that can cause a brief opacity jump between states. */
   opacity: 1;
-  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Exit state: fade out */
+/* Exit state: fade out — same duration as entrance for symmetry */
 .intro-overlay--exiting {
   opacity: 0;
   pointer-events: none;
@@ -261,9 +263,12 @@
   opacity: 0;
   animation: introFadeSlideUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   animation-delay: calc(var(--stagger-index, 0) * 80ms + 100ms);
-  /* GPU acceleration for the transform */
+  /* GPU layer promotion — prevents compositor-level repaint flicker
+     by keeping each stagger child on its own layer during animation */
   transform: translateZ(0);
+  will-change: opacity, transform;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* OM gets a scale entrance instead of slide */
