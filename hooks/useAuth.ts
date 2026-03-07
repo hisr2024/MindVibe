@@ -166,7 +166,7 @@ export function useAuth(): UseAuthResult {
           throw new Error('The server is still starting up. Please wait a moment and try again.')
         }
         const errorData = await signupResponse.json().catch(() => ({}))
-        const message = errorData.detail || errorData.message || 'Failed to create account'
+        const message = errorData.detail || errorData.message || 'We\'re having trouble creating your account. Please try again.'
         throw new Error(typeof message === 'string' ? message : JSON.stringify(message))
       }
 
@@ -211,7 +211,7 @@ export function useAuth(): UseAuthResult {
 
       return authUser
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to create account'
+      const message = err instanceof Error ? err.message : 'We\'re having trouble creating your account. Please try again.'
       setError(message)
       throw err
     } finally {

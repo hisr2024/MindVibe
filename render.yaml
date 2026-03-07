@@ -6,6 +6,8 @@ services:
     runtime: python
     plan: standard
     region: oregon
+    # The index build script is skipped if the index file already exists (idempotent).
+    # This avoids blocking every deploy with an expensive rebuild.
     buildCommand: pip install --upgrade pip && pip install -r requirements.txt && python scripts/build-relationship-compass-index-local.py
     preDeployCommand: python scripts/run_migrations.py
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
