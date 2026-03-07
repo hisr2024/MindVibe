@@ -1,13 +1,16 @@
--- Migration: Add missing Razorpay columns to subscription-related tables
+-- Migration: Fix subscription schema gaps (model vs database alignment)
 -- Dependencies: Requires 20251202_add_subscription_system.sql
--- Purpose: The SQLAlchemy model defines razorpay_plan_id_monthly and
---          razorpay_plan_id_yearly on subscription_plans, plus Razorpay and
---          payment_provider columns on user_subscriptions and payments, but
---          the original migration never created them. This causes
---          asyncpg.exceptions.UndefinedColumnError at runtime.
+-- Purpose: The SQLAlchemy models define columns that the original migration
+--          never created, causing asyncpg.exceptions.UndefinedColumnError.
 --
--- Also relaxes the tier CHECK constraint to include the 'premier' tier
--- which was added to the SubscriptionTier enum after the initial migration.
+-- Fixes applied:
+--   1. subscription_plans: Add razorpay_plan_id_monthly/yearly columns
+--   2. user_subscriptions: Add razorpay + payment_provider columns
+--   3. payments: Add razorpay + payment_provider columns
+--   4. Tier CHECK constraint: Include 'premier' tier
+--   5. subscription_links: Create table (was only in SQLAlchemy model)
+--   6. Default value alignment: kiaan_questions_monthly, usage_limit
+--   7. Missing index: stripe_invoice_id on payments
 --
 -- Idempotent: Safe to run multiple times (uses IF NOT EXISTS / exception handling).
 
@@ -92,3 +95,65 @@ EXCEPTION
         -- Constraint already exists with correct definition
         NULL;
 END $$;
+
+-- ============================================================
+-- 5. Create subscription_links table (Razorpay subscription links)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS subscription_links (
+    id SERIAL PRIMARY KEY,
+    razorpay_subscription_id VARCHAR(128) NOT NULL UNIQUE,
+    razorpay_plan_id VARCHAR(128) NOT NULL,
+    plan_tier VARCHAR(32) NOT NULL CHECK (plan_tier IN ('free', 'basic', 'premium', 'enterprise', 'premier')),
+    billing_period VARCHAR(16) DEFAULT 'monthly',
+    short_url VARCHAR(512) NOT NULL,
+    status VARCHAR(32) DEFAULT 'created' CHECK (status IN ('created', 'authenticated', 'active', 'pending', 'halted', 'cancelled', 'completed', 'expired')),
+    total_count INTEGER DEFAULT 0,
+    start_at TIMESTAMPTZ,
+    expire_by TIMESTAMPTZ,
+    customer_name VARCHAR(255),
+    customer_email VARCHAR(255),
+    customer_phone VARCHAR(32),
+    offer_id VARCHAR(128),
+    addons_json JSONB,
+    notes JSONB,
+    description TEXT,
+    created_by_admin_id INTEGER,
+    deleted_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_subscription_links_razorpay_sub_id
+    ON subscription_links (razorpay_subscription_id);
+
+CREATE INDEX IF NOT EXISTS idx_subscription_links_razorpay_plan_id
+    ON subscription_links (razorpay_plan_id);
+
+CREATE INDEX IF NOT EXISTS idx_subscription_links_plan_tier
+    ON subscription_links (plan_tier);
+
+CREATE INDEX IF NOT EXISTS idx_subscription_links_status
+    ON subscription_links (status);
+
+CREATE INDEX IF NOT EXISTS idx_subscription_links_created_by_admin_id
+    ON subscription_links (created_by_admin_id)
+    WHERE created_by_admin_id IS NOT NULL;
+
+-- ============================================================
+-- 6. Fix default value mismatches (model vs migration)
+-- ============================================================
+
+-- kiaan_questions_monthly: model default=20, original migration default=10
+ALTER TABLE subscription_plans
+    ALTER COLUMN kiaan_questions_monthly SET DEFAULT 20;
+
+-- usage_limit: model default=20, original migration default=10
+ALTER TABLE usage_tracking
+    ALTER COLUMN usage_limit SET DEFAULT 20;
+
+-- ============================================================
+-- 7. Add missing index on payments.stripe_invoice_id
+-- ============================================================
+CREATE INDEX IF NOT EXISTS idx_payments_stripe_invoice_id
+    ON payments (stripe_invoice_id)
+    WHERE stripe_invoice_id IS NOT NULL;
