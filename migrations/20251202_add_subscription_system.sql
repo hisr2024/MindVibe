@@ -14,8 +14,10 @@ CREATE TABLE IF NOT EXISTS subscription_plans (
     price_yearly NUMERIC(10, 2),
     stripe_price_id_monthly VARCHAR(128),
     stripe_price_id_yearly VARCHAR(128),
+    razorpay_plan_id_monthly VARCHAR(128),
+    razorpay_plan_id_yearly VARCHAR(128),
     features JSONB DEFAULT '{}',
-    kiaan_questions_monthly INTEGER DEFAULT 10,
+    kiaan_questions_monthly INTEGER DEFAULT 20,
     encrypted_journal BOOLEAN DEFAULT FALSE,
     data_retention_days INTEGER DEFAULT 30,
     is_active BOOLEAN DEFAULT TRUE,
@@ -135,6 +137,20 @@ BEGIN
 
     IF NOT EXISTS (
         SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'razorpay_plan_id_monthly'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN razorpay_plan_id_monthly VARCHAR(128);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'subscription_plans' AND column_name = 'razorpay_plan_id_yearly'
+    ) THEN
+        ALTER TABLE subscription_plans ADD COLUMN razorpay_plan_id_yearly VARCHAR(128);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
         WHERE table_name = 'subscription_plans' AND column_name = 'features'
     ) THEN
         ALTER TABLE subscription_plans ADD COLUMN features JSONB DEFAULT '{}';
@@ -144,7 +160,7 @@ BEGIN
         SELECT 1 FROM information_schema.columns
         WHERE table_name = 'subscription_plans' AND column_name = 'kiaan_questions_monthly'
     ) THEN
-        ALTER TABLE subscription_plans ADD COLUMN kiaan_questions_monthly INTEGER DEFAULT 10;
+        ALTER TABLE subscription_plans ADD COLUMN kiaan_questions_monthly INTEGER DEFAULT 20;
     END IF;
 
     IF NOT EXISTS (
@@ -217,7 +233,7 @@ CREATE TABLE IF NOT EXISTS usage_tracking (
     period_start TIMESTAMPTZ NOT NULL,
     period_end TIMESTAMPTZ NOT NULL,
     usage_count INTEGER DEFAULT 0,
-    usage_limit INTEGER DEFAULT 10,
+    usage_limit INTEGER DEFAULT 20,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ
 );
