@@ -58,7 +58,9 @@ class SubscriptionPlan(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tier: Mapped[SubscriptionTier] = mapped_column(
-        Enum(SubscriptionTier, native_enum=False, length=32), unique=True, index=True
+        Enum(SubscriptionTier, native_enum=False, length=32,
+             values_callable=lambda x: [e.value for e in x]),
+        unique=True, index=True
     )
     name: Mapped[str] = mapped_column(String(64))
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -102,7 +104,8 @@ class UserSubscription(SoftDeleteMixin, Base):
         Integer, ForeignKey("subscription_plans.id", ondelete="RESTRICT"), index=True
     )
     status: Mapped[SubscriptionStatus] = mapped_column(
-        Enum(SubscriptionStatus, native_enum=False, length=32),
+        Enum(SubscriptionStatus, native_enum=False, length=32,
+             values_callable=lambda x: [e.value for e in x]),
         default=SubscriptionStatus.ACTIVE,
         index=True,
     )
@@ -197,12 +200,15 @@ class SubscriptionLink(SoftDeleteMixin, Base):
     )
     razorpay_plan_id: Mapped[str] = mapped_column(String(128), index=True)
     plan_tier: Mapped[SubscriptionTier] = mapped_column(
-        Enum(SubscriptionTier, native_enum=False, length=32), index=True
+        Enum(SubscriptionTier, native_enum=False, length=32,
+             values_callable=lambda x: [e.value for e in x]),
+        index=True
     )
     billing_period: Mapped[str] = mapped_column(String(16), default="monthly")
     short_url: Mapped[str] = mapped_column(String(512))
     status: Mapped[SubscriptionLinkStatus] = mapped_column(
-        Enum(SubscriptionLinkStatus, native_enum=False, length=32),
+        Enum(SubscriptionLinkStatus, native_enum=False, length=32,
+             values_callable=lambda x: [e.value for e in x]),
         default=SubscriptionLinkStatus.CREATED,
         index=True,
     )
@@ -267,7 +273,8 @@ class Payment(SoftDeleteMixin, Base):
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     currency: Mapped[str] = mapped_column(String(3), default="usd")
     status: Mapped[PaymentStatus] = mapped_column(
-        Enum(PaymentStatus, native_enum=False, length=32),
+        Enum(PaymentStatus, native_enum=False, length=32,
+             values_callable=lambda x: [e.value for e in x]),
         default=PaymentStatus.PENDING,
         index=True,
     )

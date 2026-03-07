@@ -110,7 +110,8 @@ class WisdomJourney(SoftDeleteMixin, Base):
 
     # Status and progress
     status: Mapped[JourneyStatus] = mapped_column(
-        Enum(JourneyStatus, native_enum=False, length=32),
+        Enum(JourneyStatus, native_enum=False, length=32,
+             values_callable=lambda x: [e.value for e in x]),
         default=JourneyStatus.ACTIVE,
         index=True,
     )

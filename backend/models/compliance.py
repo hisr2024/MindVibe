@@ -62,7 +62,9 @@ class UserConsent(Base):
         String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     consent_type: Mapped[ConsentType] = mapped_column(
-        Enum(ConsentType, native_enum=False, length=64), index=True
+        Enum(ConsentType, native_enum=False, length=64,
+             values_callable=lambda x: [e.value for e in x]),
+        index=True
     )
     granted: Mapped[bool] = mapped_column(Boolean, default=False)
     version: Mapped[str] = mapped_column(String(32), default="1.0")
@@ -124,7 +126,8 @@ class DataExportRequest(Base):
         String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
     status: Mapped[DataExportStatus] = mapped_column(
-        Enum(DataExportStatus, native_enum=False, length=32),
+        Enum(DataExportStatus, native_enum=False, length=32,
+             values_callable=lambda x: [e.value for e in x]),
         default=DataExportStatus.PENDING,
         index=True,
     )
@@ -158,7 +161,8 @@ class DeletionRequest(Base):
         String(255), ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True
     )
     status: Mapped[DeletionRequestStatus] = mapped_column(
-        Enum(DeletionRequestStatus, native_enum=False, length=32),
+        Enum(DeletionRequestStatus, native_enum=False, length=32,
+             values_callable=lambda x: [e.value for e in x]),
         default=DeletionRequestStatus.PENDING,
         index=True,
     )

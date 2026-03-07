@@ -194,7 +194,8 @@ class AdminUser(SoftDeleteMixin, Base):
     hashed_password: Mapped[str] = mapped_column(String(256))
     full_name: Mapped[str] = mapped_column(String(256))
     role: Mapped[AdminRole] = mapped_column(
-        Enum(AdminRole, native_enum=False, length=32),
+        Enum(AdminRole, native_enum=False, length=32,
+             values_callable=lambda x: [e.value for e in x]),
         default=AdminRole.SUPPORT,
         index=True,
     )
@@ -232,7 +233,8 @@ class AdminPermissionAssignment(Base):
         String(255), ForeignKey("admin_users.id", ondelete="CASCADE"), index=True
     )
     permission: Mapped[AdminPermission] = mapped_column(
-        Enum(AdminPermission, native_enum=False, length=64)
+        Enum(AdminPermission, native_enum=False, length=64,
+             values_callable=lambda x: [e.value for e in x])
     )
     granted: Mapped[bool] = mapped_column(
         Boolean, default=True
@@ -281,7 +283,9 @@ class AdminAuditLog(Base):
         index=True,
     )
     action: Mapped[AdminAuditAction] = mapped_column(
-        Enum(AdminAuditAction, native_enum=False, length=64), index=True
+        Enum(AdminAuditAction, native_enum=False, length=64,
+             values_callable=lambda x: [e.value for e in x]),
+        index=True
     )
     resource_type: Mapped[str | None] = mapped_column(
         String(64), nullable=True, index=True
@@ -334,7 +338,8 @@ class Announcement(SoftDeleteMixin, Base):
     title: Mapped[str] = mapped_column(String(256))
     content: Mapped[str] = mapped_column(Text)
     type: Mapped[AnnouncementType] = mapped_column(
-        Enum(AnnouncementType, native_enum=False, length=32),
+        Enum(AnnouncementType, native_enum=False, length=32,
+             values_callable=lambda x: [e.value for e in x]),
         default=AnnouncementType.BANNER,
     )
     # Targeting
@@ -375,7 +380,8 @@ class ABTest(SoftDeleteMixin, Base):
     traffic_percentage: Mapped[int] = mapped_column(Integer, default=100)
     # Status
     status: Mapped[ABTestStatus] = mapped_column(
-        Enum(ABTestStatus, native_enum=False, length=32),
+        Enum(ABTestStatus, native_enum=False, length=32,
+             values_callable=lambda x: [e.value for e in x]),
         default=ABTestStatus.DRAFT,
         index=True,
     )
@@ -451,7 +457,8 @@ class FlaggedContent(SoftDeleteMixin, Base):
     details: Mapped[str | None] = mapped_column(Text, nullable=True)
     # Moderation
     status: Mapped[ModerationStatus] = mapped_column(
-        Enum(ModerationStatus, native_enum=False, length=32),
+        Enum(ModerationStatus, native_enum=False, length=32,
+             values_callable=lambda x: [e.value for e in x]),
         default=ModerationStatus.PENDING,
         index=True,
     )
