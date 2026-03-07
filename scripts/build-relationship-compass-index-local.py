@@ -212,6 +212,14 @@ def save_entries(conn: sqlite3.Connection, entries: list[VerseEntry]) -> None:
 
 
 def main() -> None:
+    # Skip rebuild when the index already exists and FORCE_REBUILD is not set.
+    # This prevents the build script from blocking every Docker build / deploy
+    # when the underlying data has not changed.
+    if INDEX_PATH.exists() and not os.getenv("FORCE_REBUILD_INDEX"):
+        print(f"Index already exists at {INDEX_PATH} — skipping rebuild.")
+        print("Set FORCE_REBUILD_INDEX=1 to force a rebuild.")
+        return
+
     print("Loading Gita verses...")
     entries = load_gita_entries()
     if not entries:
