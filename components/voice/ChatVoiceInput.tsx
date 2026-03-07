@@ -76,18 +76,11 @@ export function ChatVoiceInput({
     onTranscript: (text, isFinal) => {
       if (isFinal && text.trim()) {
         setTextInput(text)
+        // Focus the text input so user can review/edit before sending
+        inputRef.current?.focus()
       }
     },
   })
-
-  // When a final transcript arrives, populate the input
-  useEffect(() => {
-    if (transcript && status !== 'listening') {
-      setTextInput(transcript)
-      // Focus the text input so user can review/edit before sending
-      inputRef.current?.focus()
-    }
-  }, [transcript, status])
 
   const handleSubmit = useCallback(
     (e?: React.FormEvent) => {

@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       backendFormData.append('language', language)
 
       try {
-        const response = await fetch(`${BACKEND_URL}/api/voice/transcribe`, {
+        const response = await fetch(`${BACKEND_URL}/api/kiaan/transcribe`, {
           method: 'POST',
           headers: {
             // Don't set Content-Type — fetch handles multipart boundary automatically
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
           },
           { status: response.status },
         )
-      } catch (fetchError) {
+      } catch {
         // Backend unreachable — return graceful fallback
         return NextResponse.json(
           {
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
       }
 
       try {
-        const response = await fetch(`${BACKEND_URL}/api/voice/transcribe`, {
+        const response = await fetch(`${BACKEND_URL}/api/kiaan/transcribe`, {
           method: 'POST',
           headers: proxyHeaders(request, 'POST'),
           body: JSON.stringify({ audio_base64, language, format }),

@@ -136,7 +136,11 @@ export function useVoiceToText(options: UseVoiceToTextOptions = {}): UseVoiceToT
 
   const recognitionRef = useRef<SpeechRecognitionService | null>(null)
   const moduleRef = useRef(module)
-  moduleRef.current = module
+
+  // Keep moduleRef in sync for callbacks
+  useEffect(() => {
+    moduleRef.current = module
+  }, [module])
 
   // Track online/offline status for awareness
   useEffect(() => {

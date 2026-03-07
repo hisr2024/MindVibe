@@ -14,8 +14,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
-import { classifyIntent, resolveRoute, executeIntent } from '@/lib/voice-controller'
-import type { UserIntent, VoiceControllerResult } from '@/types/voice-controller.types'
+import { classifyIntent, executeIntent } from '@/lib/voice-controller'
+import type { VoiceControllerResult } from '@/types/voice-controller.types'
 
 type NavState = 'idle' | 'listening' | 'processing' | 'result'
 
@@ -30,7 +30,6 @@ export function KiaanVoiceNav() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const {
-    isListening,
     interimTranscript,
     isSupported,
     startListening,
@@ -46,12 +45,7 @@ export function KiaanVoiceNav() {
     },
   })
 
-  // Sync listening state
-  useEffect(() => {
-    if (isListening) {
-      setState('listening')
-    }
-  }, [isListening])
+  // Note: 'listening' state is set eagerly in handleMicClick when startListening is called
 
   // Clean up timeout on unmount
   useEffect(() => {
@@ -114,6 +108,7 @@ export function KiaanVoiceNav() {
       setResult(null)
     } else {
       if (isSupported) {
+        setState('listening')
         startListening()
       } else {
         setShowTextInput(true)
