@@ -91,7 +91,7 @@ export default function DeleteAccountModal({
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.detail || 'Failed to request account deletion')
+        throw new Error(errorData.detail || 'We\'re having trouble processing your deletion request. Please try again.')
       }
 
       const data = await response.json()
@@ -122,7 +122,7 @@ export default function DeleteAccountModal({
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.detail || 'Failed to cancel deletion')
+        throw new Error(errorData.detail || 'We\'re having trouble cancelling your deletion request. Please try again.')
       }
 
       setStep('warning')
