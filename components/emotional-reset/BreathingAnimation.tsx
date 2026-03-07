@@ -69,9 +69,6 @@ export function BreathingAnimation({
     isPausedRef.current = isPaused
   }, [isPaused])
 
-  // Calculate total cycle duration
-  const _cycleDuration = pattern.inhale + pattern.hold_in + pattern.exhale + pattern.hold_out
-
   // Get current phase duration
   const getPhaseDuration = useCallback((phase: Phase) => {
     switch (phase) {

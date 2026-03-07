@@ -57,8 +57,6 @@ export interface KarmicTreeClientProps {
   className?: string
 }
 
-const _apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-
 // Fallback mock data for UI development
 const fallbackProgress: ProgressResponse = {
   level: 1,

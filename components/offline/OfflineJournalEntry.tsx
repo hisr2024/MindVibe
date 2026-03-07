@@ -53,7 +53,7 @@ export function OfflineJournalEntry({
 
   const {
     submitForm,
-    status, // eslint-disable-line @typescript-eslint/no-unused-vars
+    status: _status,
     error,
     isOnline,
     isSaving,

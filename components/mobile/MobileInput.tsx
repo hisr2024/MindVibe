@@ -55,8 +55,6 @@ export const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
     ref
   ) {
     const [isFocused, setIsFocused] = useState(false)
-    const _hasValue = Boolean(props.value || props.defaultValue)
-
     // Size styles
     const sizeStyles: Record<string, { input: string; text: string }> = {
       sm: {
@@ -234,7 +232,7 @@ export const MobileTextarea = forwardRef<HTMLTextAreaElement, MobileTextareaProp
       error,
       helperText,
       minRows = 3,
-      maxRows = 8, // eslint-disable-line @typescript-eslint/no-unused-vars
+      maxRows: _maxRows = 8, // reserved for future auto-sizing
       className = '',
       containerClassName = '',
       disabled,

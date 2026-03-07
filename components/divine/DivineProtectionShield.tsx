@@ -103,8 +103,6 @@ const GROUNDING_STEPS = [
 export function DivineProtectionShield({
   isOpen = false,
   onClose,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  className = '',
 }: DivineProtectionShieldProps) {
   const { actions } = useDivineConsciousness();
   const [isActive, setIsActive] = useState(isOpen);

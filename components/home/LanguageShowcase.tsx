@@ -7,10 +7,6 @@ export function LanguageShowcase() {
   // Use the global language context - single source of truth
   const { language, setLanguage } = useLanguage()
 
-  // The current locale comes from the context
-  const currentLocale = language
-  const selectedLang = language
-
   const handleLanguageSelect = (langCode: string) => {
     // Use the context's setLanguage which handles:
     // - State update
@@ -62,7 +58,7 @@ export function LanguageShowcase() {
     }
   }
 
-  const currentTranslation = translations[currentLocale] || translations.en
+  const currentTranslation = translations[language] || translations.en
 
   // Helper function to get translated stat labels
   const getStatLabel = (key: 'languages' | 'verses' | 'support'): string => {
@@ -98,7 +94,7 @@ export function LanguageShowcase() {
         zh: '全球支持',
       },
     }
-    return labels[key][currentLocale] || labels[key].en
+    return labels[key][language] || labels[key].en
   }
 
   const getInfoText = (): string => {
@@ -112,7 +108,7 @@ export function LanguageShowcase() {
       ja: '言語選択はローカルに保存され、次回の訪問時に自動的に適用されます。',
       zh: '语言选择保存在本地，下次访问时自动应用。',
     }
-    return texts[currentLocale] || texts.en
+    return texts[language] || texts.en
   }
 
   return (
@@ -140,14 +136,14 @@ export function LanguageShowcase() {
               key={lang.code}
               onClick={() => handleLanguageSelect(lang.code)}
               className={`group relative overflow-hidden p-5 md:p-6 rounded-2xl border text-center cursor-pointer transition-all duration-300 hover:-translate-y-1 ${
-                selectedLang === lang.code
+                language === lang.code
                   ? 'border-[#d4a44c] bg-[#d4a44c]/10 shadow-lg shadow-[#d4a44c]/25'
                   : 'border-[#d4a44c]/20 bg-white/5 hover:bg-white/10 hover:border-[#d4a44c]/40'
               }`}
               aria-label={`Switch to ${lang.name}`}
             >
               {/* Gradient overlay on hover */}
-              <div className={`absolute inset-0 bg-gradient-to-br from-[#d4a44c]/20 via-[#ff9933]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity ${selectedLang === lang.code ? 'opacity-100' : ''}`} />
+              <div className={`absolute inset-0 bg-gradient-to-br from-[#d4a44c]/20 via-[#ff9933]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity ${language === lang.code ? 'opacity-100' : ''}`} />
               
               {/* Content */}
               <div className="relative z-10">
@@ -163,7 +159,7 @@ export function LanguageShowcase() {
               </div>
 
               {/* Selected indicator */}
-              {selectedLang === lang.code && (
+              {language === lang.code && (
                 <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-[#d4a44c] animate-pulse" />
               )}
             </button>
