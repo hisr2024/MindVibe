@@ -10,6 +10,7 @@ import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
 import { KiaanFooter } from '@/components/layout/KiaanFooter'
 import { GlobalWakeWordListener } from '@/components/wake-word/GlobalWakeWordListener'
 import KiaanVoiceFAB from '@/components/voice/KiaanVoiceFAB'
+import { KiaanVoiceNav } from '@/components/voice/KiaanVoiceNav'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { ClientLayout } from './ClientLayout'
 import { OverlayRoot } from '@/components/ui/OverlayRoot'
@@ -221,6 +222,10 @@ export default async function RootLayout({
               {/* Global voice FAB - tap to talk to KIAAN */}
               <ErrorBoundary fallback={null}>
                 <KiaanVoiceFAB />
+              </ErrorBoundary>
+              {/* Voice navigation FAB - tap to navigate by voice */}
+              <ErrorBoundary fallback={null}>
+                <KiaanVoiceNav />
               </ErrorBoundary>
             </MobileRouteGuard>
             {/* Global wake word listener - "Hey KIAAN" from anywhere */}

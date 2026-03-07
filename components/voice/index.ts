@@ -9,6 +9,8 @@
 export { VoiceInputButton, type VoiceInputButtonProps } from './VoiceInputButton'
 export { VoiceResponseButton, type VoiceResponseButtonProps } from './VoiceResponseButton'
 export { VoiceOutputButton, type VoiceOutputButtonProps } from './VoiceOutputButton'
+export { UniversalVoiceInput, type UniversalVoiceInputProps } from './UniversalVoiceInput'
+export { KiaanVoiceNav } from './KiaanVoiceNav'
 
 // Voice Enhancements UI (used by Quantum Dive and other KIAAN tools)
 export {
