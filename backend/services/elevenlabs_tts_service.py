@@ -41,7 +41,13 @@ ELEVENLABS_TTS_ENDPOINT = f"{ELEVENLABS_API_BASE}/text-to-speech"
 # Models: multilingual_v2 for quality, turbo_v2_5 for speed
 ELEVENLABS_MODEL_QUALITY = "eleven_multilingual_v2"
 ELEVENLABS_MODEL_TURBO = "eleven_turbo_v2_5"
+ELEVENLABS_MODEL_FLASH = "eleven_flash_v2_5"
 ELEVENLABS_MODEL_ENGLISH = "eleven_monolingual_v1"
+
+# Model selection strategy:
+# - QUALITY: Best naturalness, highest latency (~2-3s). Use for pre-cached audio.
+# - TURBO: Good quality, lower latency (~1s). Use for streaming responses.
+# - FLASH: Fastest response, acceptable quality (~500ms). Use for real-time chat.
 
 
 # ─── Premium Voice Catalog ────────────────────────────────────────────────
@@ -210,6 +216,38 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
         "default_stability": 0.58,
         "default_similarity": 0.82,
         "default_style": 0.42,
+    },
+    "nicole": {
+        "voice_id": "piTKgcLEGmPE4e6mEKli",
+        "name": "Nicole",
+        "gender": "female",
+        "accent": "American English",
+        "style": "soothing",
+        "age": "adult",
+        "description": "Soothing, measured voice with crystal-clear enunciation. "
+                       "Excellent for guided meditation, breathing exercises, and healing.",
+        "best_for": ["meditation", "breathing", "healing", "sleep", "affirmation"],
+        "languages": ["en", "hi", "es", "fr", "de", "pt", "ja", "zh"],
+        "quality_score": 9.7,
+        "default_stability": 0.62,
+        "default_similarity": 0.84,
+        "default_style": 0.35,
+    },
+    "george": {
+        "voice_id": "JBFqnCBsd6RMkjVDRZzb",
+        "name": "George",
+        "gender": "male",
+        "accent": "British English",
+        "style": "wise",
+        "age": "mature",
+        "description": "Measured, wise British voice with natural gravitas. "
+                       "Ideal for philosophical teachings and Gita commentary.",
+        "best_for": ["wisdom", "teaching", "narration", "verse_recitation"],
+        "languages": ["en", "hi", "fr", "de"],
+        "quality_score": 9.6,
+        "default_stability": 0.58,
+        "default_similarity": 0.82,
+        "default_style": 0.38,
     },
 }
 
@@ -523,13 +561,12 @@ async def synthesize_elevenlabs_tts(
     similarity = max(0.0, min(1.0, similarity))
     style_value = max(0.0, min(1.0, style_value))
 
-    # Select model
+    # Select model based on latency requirements and content type
     if use_turbo:
         model_id = ELEVENLABS_MODEL_TURBO
-    elif language == "en" and not any(
-        c for c in text if ord(c) > 127
-    ):
-        model_id = ELEVENLABS_MODEL_QUALITY
+    elif len(synthesis_text) < 100:
+        # Short text benefits from flash for snappy responses
+        model_id = ELEVENLABS_MODEL_FLASH
     else:
         model_id = ELEVENLABS_MODEL_QUALITY
 
@@ -712,6 +749,7 @@ def get_elevenlabs_health_status() -> dict[str, Any]:
         "models": [
             ELEVENLABS_MODEL_QUALITY,
             ELEVENLABS_MODEL_TURBO,
+            ELEVENLABS_MODEL_FLASH,
         ] if available else [],
         "quality_score": 10.0 if available else 0,
         "supported_languages": list(ELEVENLABS_LANGUAGE_CODES.keys()),

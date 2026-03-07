@@ -550,7 +550,7 @@ export function getProviderDisplayInfo(provider?: VoiceProvider): {
     case 'elevenlabs':
       return { label: 'ElevenLabs HD', color: 'text-amber-400', quality: '10/10' }
     case 'sarvam':
-      return { label: 'Sarvam AI', color: 'text-emerald-400', quality: '9.5/10' }
+      return { label: 'Sarvam AI v2', color: 'text-emerald-400', quality: '9.7/10' }
     case 'bhashini':
       return { label: 'Bhashini AI', color: 'text-sky-400', quality: '9/10' }
     default:

@@ -108,6 +108,17 @@ except ImportError:
     PRONUNCIATION_ENGINE_AVAILABLE = False
     logger.debug("Pronunciation engine not available (optional)")
 
+# Import voice quality evaluator for intelligent provider selection
+try:
+    from backend.services.voice_quality_evaluator import (
+        get_voice_quality_evaluator,
+        VoiceQualityEvaluator,
+    )
+    QUALITY_EVALUATOR_AVAILABLE = True
+except ImportError:
+    QUALITY_EVALUATOR_AVAILABLE = False
+    logger.debug("Voice quality evaluator not available (optional)")
+
 # Import dedicated ElevenLabs service for premium voice synthesis
 try:
     from backend.services.elevenlabs_tts_service import (
@@ -767,6 +778,12 @@ async def synthesize_companion_voice(
             logger.warning(f"Pronunciation correction failed: {e}")
             pronunciation_corrected_text = plain_text
 
+    # Track synthesis start time for quality metrics
+    _synth_start = time.monotonic()
+
+    # Determine optimal provider order based on language and quality data
+    _provider_order = _get_optimal_provider_order(language)
+
     # 1. Try ElevenLabs via dedicated service (most natural, most human-like)
     if ELEVENLABS_SERVICE_AVAILABLE and _el_available() and _provider_is_healthy("elevenlabs"):
         try:
@@ -786,6 +803,7 @@ async def synthesize_companion_voice(
             )
             if audio:
                 _record_provider_success("elevenlabs")
+                _record_quality_metric("elevenlabs", language, voice_id, _synth_start, len(audio))
                 return {
                     "audio": audio,
                     "content_type": "audio/mpeg",
@@ -1138,10 +1156,11 @@ def get_bhashini_voice_status() -> dict[str, Any]:
 
 def get_all_voice_providers_status() -> dict[str, Any]:
     """Get combined health status for all voice providers."""
-    return {
+    status = {
         "elevenlabs": get_elevenlabs_voice_status(),
         "sarvam_ai": get_sarvam_voice_status(),
         "bhashini_ai": get_bhashini_voice_status(),
+        "circuit_breaker": get_provider_health_status(),
         "pronunciation_engine": {
             "available": PRONUNCIATION_ENGINE_AVAILABLE,
             "features": [
@@ -1152,3 +1171,99 @@ def get_all_voice_providers_status() -> dict[str, Any]:
             ] if PRONUNCIATION_ENGINE_AVAILABLE else [],
         },
     }
+    if QUALITY_EVALUATOR_AVAILABLE:
+        evaluator = get_voice_quality_evaluator()
+        status["quality_report"] = evaluator.get_provider_report()
+    return status
+
+
+# ─── Intelligent Provider Routing ──────────────────────────────────────────
+
+# Language-to-provider priority mapping (best provider first per language).
+# Based on comprehensive voice quality evaluation across all providers.
+LANGUAGE_PROVIDER_PRIORITY: dict[str, list[str]] = {
+    # Indian languages: Sarvam AI v2 is best, Bhashini is excellent fallback
+    "hi": ["sarvam", "bhashini", "elevenlabs"],
+    "ta": ["sarvam", "bhashini", "elevenlabs"],
+    "te": ["sarvam", "bhashini", "elevenlabs"],
+    "bn": ["sarvam", "bhashini", "elevenlabs"],
+    "kn": ["sarvam", "bhashini", "elevenlabs"],
+    "ml": ["sarvam", "bhashini", "elevenlabs"],
+    "mr": ["sarvam", "bhashini", "elevenlabs"],
+    "gu": ["sarvam", "bhashini", "elevenlabs"],
+    "pa": ["sarvam", "bhashini", "elevenlabs"],
+    "sa": ["sarvam", "bhashini", "elevenlabs"],
+    "en-IN": ["sarvam", "elevenlabs", "bhashini"],
+    # International: ElevenLabs is best
+    "en": ["elevenlabs", "sarvam", "bhashini"],
+    "es": ["elevenlabs", "sarvam"],
+    "fr": ["elevenlabs", "sarvam"],
+    "de": ["elevenlabs", "sarvam"],
+    "pt": ["elevenlabs", "sarvam"],
+    "ja": ["elevenlabs"],
+    "zh": ["elevenlabs"],
+    "ar": ["elevenlabs"],
+    # Bhashini-only languages (Government of India scheduled languages)
+    "od": ["bhashini", "sarvam"],
+    "as": ["bhashini"],
+    "ne": ["bhashini"],
+    "ur": ["bhashini", "sarvam"],
+    "sd": ["bhashini"],
+    "doi": ["bhashini"],
+    "mai": ["bhashini"],
+    "kok": ["bhashini"],
+}
+
+
+def _get_optimal_provider_order(language: str) -> list[str]:
+    """Get the optimal provider order for a language based on quality data.
+
+    Uses a combination of static quality rankings and real-time quality tracking
+    to determine the best provider for each language.
+    """
+    static_order = LANGUAGE_PROVIDER_PRIORITY.get(
+        language,
+        ["elevenlabs", "sarvam", "bhashini"],
+    )
+
+    if QUALITY_EVALUATOR_AVAILABLE:
+        evaluator = get_voice_quality_evaluator()
+        best = evaluator.get_best_provider_for_language(
+            language,
+            available_providers=[
+                p.replace("sarvam", "sarvam_ai").replace("bhashini", "bhashini_ai")
+                for p in static_order
+            ],
+        )
+        # Promote the quality-evaluated best provider to front
+        normalized_best = best.replace("sarvam_ai", "sarvam").replace("bhashini_ai", "bhashini")
+        if normalized_best in static_order and static_order[0] != normalized_best:
+            reordered = [normalized_best] + [p for p in static_order if p != normalized_best]
+            return reordered
+
+    return static_order
+
+
+def _record_quality_metric(
+    provider: str,
+    language: str,
+    voice_id: str,
+    start_time: float,
+    audio_size: int,
+) -> None:
+    """Record a quality metric for provider tracking."""
+    if not QUALITY_EVALUATOR_AVAILABLE:
+        return
+    try:
+        latency_ms = (time.monotonic() - start_time) * 1000
+        evaluator = get_voice_quality_evaluator()
+        evaluator.record_synthesis(
+            provider=provider,
+            language=language,
+            voice_id=voice_id,
+            latency_ms=latency_ms,
+            audio_size_bytes=audio_size,
+            success=True,
+        )
+    except Exception as e:
+        logger.debug(f"Quality metric recording failed: {e}")
