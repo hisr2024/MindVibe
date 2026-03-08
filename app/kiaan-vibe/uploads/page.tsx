@@ -212,7 +212,7 @@ export default function UploadsPage() {
               <Upload className="w-8 h-8 text-white/60" />
             </div>
             <p className="text-white font-medium mb-1">Upload Audio Files</p>
-            <p className="text-sm text-white/50">
+            <p className="text-sm text-white/70">
               MP3, M4A, WAV, OGG up to 100MB
             </p>
             <button className="mt-4 px-4 py-2 rounded-full bg-orange-500 text-white text-sm font-medium hover:bg-orange-400 transition-colors">
@@ -305,7 +305,7 @@ export default function UploadsPage() {
                   <p className={`font-medium truncate ${isPlaying ? 'text-orange-400' : 'text-white'}`}>
                     {upload.title}
                   </p>
-                  <div className="flex items-center gap-3 text-sm text-white/50">
+                  <div className="flex items-center gap-3 text-sm text-white/70">
                     <span className="flex items-center gap-1">
                       <FileAudio className="w-3 h-3" />
                       {formatFileSize(upload.fileSize)}
@@ -322,7 +322,7 @@ export default function UploadsPage() {
                 {/* Delete button */}
                 <button
                   onClick={() => handleDelete(upload.id)}
-                  className="p-2 text-white/30 hover:text-red-400 transition-colors"
+                  className="p-2 text-white/70 hover:text-red-400 transition-colors"
                   aria-label="Delete track"
                 >
                   <Trash2 className="w-5 h-5" />
@@ -334,8 +334,8 @@ export default function UploadsPage() {
       ) : (
         <div className="text-center py-12">
           <Music2 className="w-12 h-12 text-white/20 mx-auto mb-4" />
-          <p className="text-white/40">No uploads yet</p>
-          <p className="text-sm text-white/30 mt-1">
+          <p className="text-white/70">No uploads yet</p>
+          <p className="text-sm text-white/70 mt-1">
             Upload your favorite meditation tracks
           </p>
         </div>

@@ -1,9 +1,12 @@
 import type { Metric } from 'web-vitals'
+import * as Sentry from '@sentry/nextjs'
 
 /**
  * Report Core Web Vitals metrics.
- * Logs metrics locally in development. In production, metrics are collected
- * client-side only to avoid 405 errors from the backend analytics endpoint.
+ *
+ * In development, logs metrics to the console.
+ * In production, sends metrics to Sentry for performance monitoring
+ * dashboards and alerting on regressions.
  */
 export function reportWebVitals(metric: Metric): void {
   const { name, value, rating } = metric
@@ -13,4 +16,17 @@ export function reportWebVitals(metric: Metric): void {
     // eslint-disable-next-line no-console
     console.info(`[Web Vitals] ${name}: ${Math.round(value)} (${rating})`)
   }
+
+  // Send to Sentry for production monitoring
+  Sentry.captureMessage(`Web Vital: ${name}`, {
+    level: rating === 'poor' ? 'warning' : 'info',
+    tags: {
+      webVitalName: name,
+      webVitalRating: rating,
+    },
+    extra: {
+      value: Math.round(value),
+      rating,
+    },
+  })
 }

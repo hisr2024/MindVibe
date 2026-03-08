@@ -183,7 +183,7 @@ export function StateCheckIn({ onStateSelect, className = '', enableVoice = true
               <p className="text-sm font-medium text-[#f5f0e8]/80">
                 Speak how you feel
               </p>
-              <p className="text-[11px] text-[#f5f0e8]/40 mt-0.5">
+              <p className="text-[11px] text-[#f5f0e8]/70 mt-0.5">
                 Say an emotion like &quot;I feel anxious&quot; or &quot;peaceful&quot;
               </p>
             </div>
@@ -210,7 +210,7 @@ export function StateCheckIn({ onStateSelect, className = '', enableVoice = true
 
           {/* Live interim transcript */}
           {voiceListening && voiceInterim && (
-            <div className="mt-2 text-xs italic text-[#f5f0e8]/60" aria-live="polite">
+            <div className="mt-2 text-xs italic text-[#f5f0e8]/75" aria-live="polite">
               &quot;{voiceInterim}&quot;
             </div>
           )}
@@ -308,7 +308,7 @@ export function StateCheckIn({ onStateSelect, className = '', enableVoice = true
             </div>
             <button
               onClick={() => setSelectedState(null)}
-              className="rounded-lg p-2 text-[#f5f0e8]/60 hover:bg-[#d4a44c]/10 hover:text-[#f5f0e8] transition-colors"
+              className="rounded-lg p-2 text-[#f5f0e8]/75 hover:bg-[#d4a44c]/10 hover:text-[#f5f0e8] transition-colors"
               aria-label="Clear selection"
             >
               ✕

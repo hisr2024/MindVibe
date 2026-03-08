@@ -179,12 +179,12 @@ function SleepProgressIndicator({
             <span className="text-lg font-semibold text-white">
               {Math.floor(timerMinutes - elapsedMinutes)}
             </span>
-            <span className="text-[10px] text-white/50">min left</span>
+            <span className="text-[10px] text-white/70">min left</span>
           </>
         ) : (
           <>
             <Moon className="w-8 h-8 text-indigo-400/50" />
-            <span className="text-xs text-white/40 mt-1">Ready</span>
+            <span className="text-xs text-white/70 mt-1">Ready</span>
           </>
         )}
       </div>
@@ -276,7 +276,7 @@ export function SleepModeControl({
             </div>
             <div>
               <p className="text-xs font-medium text-white">Sleep Mode</p>
-              <p className="text-[10px] text-white/50">{timerMinutes} min • {currentContent.name}</p>
+              <p className="text-[10px] text-white/70">{timerMinutes} min • {currentContent.name}</p>
             </div>
           </div>
           <button
@@ -284,7 +284,7 @@ export function SleepModeControl({
             className={`p-2 rounded-lg transition-all ${
               playing
                 ? 'bg-indigo-500/30 text-indigo-300'
-                : 'bg-white/5 text-white/50 hover:bg-white/10'
+                : 'bg-white/5 text-white/70 hover:bg-white/10'
             }`}
           >
             {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -310,7 +310,7 @@ export function SleepModeControl({
             </div>
             <div>
               <h3 className="font-semibold text-white">Sleep Mode</h3>
-              <p className="text-xs text-white/50">Gradual Rest Induction</p>
+              <p className="text-xs text-white/70">Gradual Rest Induction</p>
             </div>
           </div>
 
@@ -338,7 +338,7 @@ export function SleepModeControl({
 
       {/* Content Selection */}
       <div className="p-4 border-t border-white/5">
-        <p className="text-xs font-medium text-white/50 mb-3">Sleep Content</p>
+        <p className="text-xs font-medium text-white/70 mb-3">Sleep Content</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {(Object.keys(SLEEP_CONTENT) as SleepContentType[]).map((content) => {
             const config = SLEEP_CONTENT[content]
@@ -355,11 +355,11 @@ export function SleepModeControl({
                     : 'border-white/10 bg-white/5 hover:bg-white/10'
                 }`}
               >
-                <Icon className={`w-5 h-5 mx-auto mb-1.5 ${isSelected ? config.color : 'text-white/40'}`} />
+                <Icon className={`w-5 h-5 mx-auto mb-1.5 ${isSelected ? config.color : 'text-white/70'}`} />
                 <p className={`text-xs font-medium ${isSelected ? 'text-white' : 'text-white/60'}`}>
                   {config.name}
                 </p>
-                <p className="text-[10px] text-white/30">{config.duration}</p>
+                <p className="text-[10px] text-white/70">{config.duration}</p>
               </button>
             )
           })}
@@ -369,8 +369,8 @@ export function SleepModeControl({
       {/* Timer Selection */}
       <div className="p-4 border-t border-white/5">
         <div className="flex items-center gap-2 mb-3">
-          <Clock className="w-4 h-4 text-white/50" />
-          <span className="text-xs font-medium text-white/50">Sleep Timer</span>
+          <Clock className="w-4 h-4 text-white/70" />
+          <span className="text-xs font-medium text-white/70">Sleep Timer</span>
         </div>
         <div className="flex gap-2">
           {TIMER_OPTIONS.map((minutes) => (
@@ -380,7 +380,7 @@ export function SleepModeControl({
               className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors ${
                 timerMinutes === minutes
                   ? 'bg-indigo-500/30 text-indigo-300 border border-indigo-500/30'
-                  : 'bg-white/5 text-white/50 border border-white/10 hover:bg-white/10'
+                  : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10'
               }`}
             >
               {minutes}m
@@ -394,14 +394,14 @@ export function SleepModeControl({
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Sun className="w-4 h-4 text-[#d4a44c]" />
-            <span className="text-xs font-medium text-white/50">Gentle Wake-Up</span>
+            <span className="text-xs font-medium text-white/70">Gentle Wake-Up</span>
           </div>
           <button
             onClick={() => setShowWakeUp(!showWakeUp)}
             className={`px-3 py-1 rounded-lg text-xs transition-colors ${
               wakeUpTime
                 ? 'bg-[#d4a44c]/20 text-[#e8b54a]'
-                : 'bg-white/5 text-white/40'
+                : 'bg-white/5 text-white/70'
             }`}
           >
             {wakeUpTime || 'Set alarm'}
@@ -426,13 +426,13 @@ export function SleepModeControl({
                 {wakeUpTime && (
                   <button
                     onClick={() => handleWakeUpChange(null)}
-                    className="text-xs text-white/40 hover:text-white/70"
+                    className="text-xs text-white/70 hover:text-white/70"
                   >
                     Clear
                   </button>
                 )}
               </div>
-              <p className="text-[10px] text-white/30 mt-2 ml-1">
+              <p className="text-[10px] text-white/70 mt-2 ml-1">
                 Volume will gradually increase to wake you gently
               </p>
             </motion.div>
@@ -444,7 +444,7 @@ export function SleepModeControl({
       <div className="px-4 pb-4">
         <div className="flex items-center justify-between p-3 rounded-xl bg-white/5">
           <div className="flex items-center gap-2">
-            <Volume2 className="w-4 h-4 text-white/50" />
+            <Volume2 className="w-4 h-4 text-white/70" />
             <span className="text-xs text-white/70">Auto-fade volume</span>
           </div>
           <button

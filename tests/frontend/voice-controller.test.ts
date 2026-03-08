@@ -5,7 +5,7 @@
  * route resolution, and intent execution.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { classifyIntent, resolveRoute, executeIntent } from '@/lib/voice-controller'
 
 // Mock ecosystemNavigator since it uses localStorage

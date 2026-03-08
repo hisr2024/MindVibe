@@ -83,7 +83,7 @@ export function GitaSoundscapeCard({
           <p className={`text-sm font-medium truncate ${isActive ? 'text-white' : 'text-white/80'}`}>
             {soundscape.name}
           </p>
-          <p className="text-xs text-white/40 truncate">{soundscape.nameHindi}</p>
+          <p className="text-xs text-white/70 truncate">{soundscape.nameHindi}</p>
         </div>
 
         {/* Playing indicator */}
@@ -169,15 +169,15 @@ export function GitaSoundscapeCard({
 
             {/* Time recommendation */}
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-black/20">
-              <Clock className="w-3 h-3 text-white/50" />
-              <span className="text-xs text-white/50">{soundscape.recommendedTime}</span>
+              <Clock className="w-3 h-3 text-white/70" />
+              <span className="text-xs text-white/70">{soundscape.recommendedTime}</span>
             </div>
           </div>
 
           {/* Title */}
           <h3 className="text-xl font-bold text-white mb-1">{soundscape.name}</h3>
           <p className="text-sm text-white/60 mb-1">{soundscape.nameHindi}</p>
-          <p className="text-sm text-white/50 mb-4 line-clamp-2">{soundscape.description}</p>
+          <p className="text-sm text-white/70 mb-4 line-clamp-2">{soundscape.description}</p>
 
           {/* Benefits */}
           <div className="flex flex-wrap gap-1.5 mb-4">
@@ -193,8 +193,8 @@ export function GitaSoundscapeCard({
 
           {/* Ambient sounds preview */}
           <div className="flex items-center gap-2">
-            <Volume2 className="w-3.5 h-3.5 text-white/40" />
-            <span className="text-xs text-white/40">
+            <Volume2 className="w-3.5 h-3.5 text-white/70" />
+            <span className="text-xs text-white/70">
               {soundscape.ambientSounds.length} ambient layers
             </span>
           </div>
@@ -260,7 +260,7 @@ export function GitaSoundscapeCard({
             <h4 className="font-medium text-white text-sm truncate">
               {soundscape.name}
             </h4>
-            <p className="text-xs text-white/50 truncate">{soundscape.nameHindi}</p>
+            <p className="text-xs text-white/70 truncate">{soundscape.nameHindi}</p>
           </div>
 
           {/* Playing indicator */}
@@ -283,19 +283,19 @@ export function GitaSoundscapeCard({
         </div>
 
         {/* Description */}
-        <p className="text-xs text-white/50 line-clamp-2 mb-2">
+        <p className="text-xs text-white/70 line-clamp-2 mb-2">
           {soundscape.description}
         </p>
 
         {/* Meta */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
-            <Volume2 className="w-3 h-3 text-white/30" />
-            <span className="text-[10px] text-white/30">
+            <Volume2 className="w-3 h-3 text-white/70" />
+            <span className="text-[10px] text-white/70">
               {soundscape.ambientSounds.length} sounds
             </span>
           </div>
-          <span className="text-[10px] text-white/30">
+          <span className="text-[10px] text-white/70">
             {soundscape.theme}
           </span>
         </div>

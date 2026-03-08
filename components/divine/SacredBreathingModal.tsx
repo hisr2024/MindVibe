@@ -148,7 +148,7 @@ export function SacredBreathingModal({
 
             {/* Bottom guidance */}
             <motion.p
-              className="absolute bottom-8 left-0 right-0 text-center text-white/40 text-sm pointer-events-none"
+              className="absolute bottom-8 left-0 right-0 text-center text-white/70 text-sm pointer-events-none"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}

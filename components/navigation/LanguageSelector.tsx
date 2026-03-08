@@ -79,7 +79,7 @@ function SearchIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30"
+      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/70"
       aria-hidden="true"
     >
       <circle cx="11" cy="11" r="8" />
@@ -383,7 +383,7 @@ export function LanguageSelector({
               {/* Header */}
               <div className="border-b border-white/[0.06] px-4 py-3 bg-gradient-to-r from-[#d4a44c]/[0.06] to-transparent">
                 <h3 className="text-sm font-semibold text-white/90">Select Language</h3>
-                <p className="text-xs text-white/40 mt-0.5">Choose your preferred language</p>
+                <p className="text-xs text-white/70 mt-0.5">Choose your preferred language</p>
               </div>
 
               {/* Search */}
@@ -425,7 +425,7 @@ export function LanguageSelector({
                   ))
                 ) : (
                   <div className="px-4 py-10 text-center">
-                    <p className="text-white/40 text-sm">No languages found</p>
+                    <p className="text-white/70 text-sm">No languages found</p>
                     <p className="text-white/25 text-xs mt-1">Try a different search term</p>
                   </div>
                 )}
@@ -433,7 +433,7 @@ export function LanguageSelector({
 
               {/* Footer */}
               <div className="border-t border-white/[0.04] px-4 py-2.5 bg-white/[0.01]">
-                <p className="text-xs text-white/30 text-center">
+                <p className="text-xs text-white/70 text-center">
                   {Object.keys(LANGUAGES).length} languages available
                 </p>
               </div>
@@ -503,7 +503,7 @@ export function LanguageSelector({
 
             return (
               <div key={region}>
-                <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/30 px-2 mb-2">
+                <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/70 px-2 mb-2">
                   {region}
                 </h3>
                 <div className="space-y-1">
@@ -526,7 +526,7 @@ export function LanguageSelector({
           {/* No results */}
           {hasNoGroupedResults(grouped, search) && (
             <div className="px-4 py-10 text-center">
-              <p className="text-white/40 text-sm">No languages found</p>
+              <p className="text-white/70 text-sm">No languages found</p>
               <p className="text-white/25 text-xs mt-1">Try a different search term</p>
             </div>
           )}

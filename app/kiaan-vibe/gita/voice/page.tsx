@@ -119,7 +119,7 @@ export default function GitaDivineVoicePage() {
       <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-4">
         {/* Language Selector */}
         <div className="relative">
-          <label className="text-xs text-white/40 uppercase tracking-wider mb-2 block">
+          <label className="text-xs text-white/70 uppercase tracking-wider mb-2 block">
             Voice Language
           </label>
           <button
@@ -130,9 +130,9 @@ export default function GitaDivineVoicePage() {
             <span className="text-xl">{langInfo?.flag || '🌐'}</span>
             <div className="flex-1 text-left">
               <p className="text-sm font-medium">{langInfo?.nativeName || 'Select'}</p>
-              <p className="text-xs text-white/40">{langInfo?.name || ''}</p>
+              <p className="text-xs text-white/70">{langInfo?.name || ''}</p>
             </div>
-            <ChevronDown className={`w-4 h-4 text-white/40 transition-transform ${showLanguages ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-white/70 transition-transform ${showLanguages ? 'rotate-180' : ''}`} />
           </button>
 
           {showLanguages && (
@@ -144,7 +144,7 @@ export default function GitaDivineVoicePage() {
                 className="absolute top-full left-0 right-0 mt-2 z-50 rounded-xl bg-[#1a1a1f] border border-white/10 shadow-2xl overflow-hidden"
               >
                 <div className="p-2 max-h-64 overflow-y-auto">
-                  <p className="px-3 py-2 text-xs font-medium text-white/40 uppercase tracking-wider">
+                  <p className="px-3 py-2 text-xs font-medium text-white/70 uppercase tracking-wider">
                     Supported Languages
                   </p>
                   {Object.entries(SUPPORTED_LANGUAGES).map(([code, info]) => (
@@ -159,7 +159,7 @@ export default function GitaDivineVoicePage() {
                       <span className="text-lg">{info.flag}</span>
                       <div className="flex-1 text-left">
                         <p className="text-sm font-medium">{info.nativeName}</p>
-                        <p className="text-xs text-white/40">{info.name}</p>
+                        <p className="text-xs text-white/70">{info.name}</p>
                       </div>
                       {code === selectedLang && <div className="w-2 h-2 rounded-full bg-orange-500" />}
                     </button>
@@ -172,7 +172,7 @@ export default function GitaDivineVoicePage() {
 
         {/* Voice Style */}
         <div>
-          <label className="text-xs text-white/40 uppercase tracking-wider mb-2 block">
+          <label className="text-xs text-white/70 uppercase tracking-wider mb-2 block">
             Voice Style
           </label>
           <div className="flex gap-2">
@@ -239,14 +239,14 @@ export default function GitaDivineVoicePage() {
                   <h3 className="font-semibold text-white text-sm group-hover:text-orange-400 transition-colors">
                     {meta.name}
                   </h3>
-                  <p className="text-xs text-white/50 line-clamp-2 mt-0.5">
+                  <p className="text-xs text-white/70 line-clamp-2 mt-0.5">
                     {meta.description}
                   </p>
-                  <p className="text-xs text-white/30 mt-1">
+                  <p className="text-xs text-white/70 mt-1">
                     {meta.verseCount} sacred verses
                   </p>
                 </div>
-                <Play className="w-5 h-5 text-white/30 group-hover:text-orange-400 flex-shrink-0 mt-1 transition-colors" />
+                <Play className="w-5 h-5 text-white/70 group-hover:text-orange-400 flex-shrink-0 mt-1 transition-colors" />
               </motion.button>
             )
           })}
@@ -259,7 +259,7 @@ export default function GitaDivineVoicePage() {
           <BookOpen className="w-5 h-5 text-orange-400" />
           Play Full Chapters
         </h2>
-        <p className="text-sm text-white/50 mb-4">
+        <p className="text-sm text-white/70 mb-4">
           Listen to complete chapters with divine voice recitation. Each verse plays sequentially
           through the KIAAN Vibe Player.
         </p>
@@ -319,15 +319,15 @@ export default function GitaDivineVoicePage() {
                     <h3 className={`font-medium text-sm ${isCurrentChapter && isPlaying ? 'text-orange-400' : 'text-white group-hover:text-orange-400'} transition-colors`}>
                       {chapter.nameSanskrit}
                     </h3>
-                    <p className="text-xs text-white/50">
+                    <p className="text-xs text-white/70">
                       {chapter.name} - {chapter.verseCount} verses
                     </p>
                   </div>
 
                   {/* Play icon */}
                   <div className="flex items-center gap-2">
-                    <ListMusic className="w-4 h-4 text-white/30 group-hover:text-orange-400 transition-colors" />
-                    <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-white/40 group-hover:translate-x-0.5 transition-all" />
+                    <ListMusic className="w-4 h-4 text-white/70 group-hover:text-orange-400 transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-white/70 group-hover:translate-x-0.5 transition-all" />
                   </div>
                 </button>
               </motion.div>
@@ -339,7 +339,7 @@ export default function GitaDivineVoicePage() {
       {/* Info section */}
       <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
         <h3 className="text-sm font-medium text-white mb-2">About Divine Voice</h3>
-        <div className="space-y-2 text-xs text-white/50">
+        <div className="space-y-2 text-xs text-white/70">
           <p>
             Divine Voice uses advanced AI text-to-speech to recite Bhagavad Gita verses
             with precise Sanskrit pronunciation using Sarvam AI and Google Neural2 voices.

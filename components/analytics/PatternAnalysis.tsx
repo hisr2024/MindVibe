@@ -123,7 +123,7 @@ export function PatternAnalysis({ className = '' }: PatternAnalysisProps) {
           <Calendar className="h-5 w-5 text-[#d4a44c]" />
           Pattern Analysis
         </h3>
-        <p className="text-sm text-[#f5f0e8]/60">Discover your behavioral rhythms</p>
+        <p className="text-sm text-[#f5f0e8]/75">Discover your behavioral rhythms</p>
       </div>
 
       {/* Weekly Patterns Section */}
@@ -204,7 +204,7 @@ export function PatternAnalysis({ className = '' }: PatternAnalysisProps) {
                   <span className="text-sm font-medium text-[#f5f0e8] capitalize">{tag.tag}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-[#f5f0e8]/60">{tag.count} times</span>
+                  <span className="text-xs text-[#f5f0e8]/75">{tag.count} times</span>
                   <span className="text-sm font-bold text-[#f5f0e8]">{tag.average_mood.toFixed(1)}</span>
                 </div>
               </div>
@@ -239,7 +239,7 @@ export function PatternAnalysis({ className = '' }: PatternAnalysisProps) {
       )}
 
       {/* Last Updated */}
-      <div className="mt-4 text-xs text-center text-[#f5f0e8]/40">
+      <div className="mt-4 text-xs text-center text-[#f5f0e8]/70">
         Analyzed {new Date(patternData.analyzed_at).toLocaleString()}
       </div>
     </div>

@@ -316,7 +316,7 @@ export function ChatFooter() {
                         <span className="h-2 w-2 rounded-full bg-red-500"></span>
                       )}
                     </div>
-                    <p className="text-[10px] text-[#f5f0e8]/60">
+                    <p className="text-[10px] text-[#f5f0e8]/75">
                       {connectionStatus === 'connected' && 'Online'}
                       {connectionStatus === 'connecting' && 'Connecting...'}
                       {connectionStatus === 'error' && 'Connection issues'}
@@ -335,7 +335,7 @@ export function ChatFooter() {
                   )}
                   <button
                     onClick={toggleOpen}
-                    className="rounded-lg p-1.5 text-[#f5f0e8]/60 hover:bg-[#d4a44c]/10 hover:text-[#f5f0e8] transition-colors"
+                    className="rounded-lg p-1.5 text-[#f5f0e8]/75 hover:bg-[#d4a44c]/10 hover:text-[#f5f0e8] transition-colors"
                     aria-label="Minimize chat"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

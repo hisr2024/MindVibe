@@ -119,7 +119,7 @@ export const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
         <div className="relative">
           {/* Left element */}
           {leftElement && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70">
               {leftElement}
             </div>
           )}
@@ -146,7 +146,7 @@ export const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
 
           {/* Right element */}
           {rightElement && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70">
               {rightElement}
             </div>
           )}
@@ -190,7 +190,7 @@ export const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
           {!error && helperText && (
             <motion.p
               key="helper"
-              className="text-xs text-[#f5f0e8]/50"
+              className="text-xs text-[#f5f0e8]/70"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -312,7 +312,7 @@ export const MobileTextarea = forwardRef<HTMLTextAreaElement, MobileTextareaProp
           {!error && helperText && (
             <motion.p
               key="helper"
-              className="text-xs text-[#f5f0e8]/50"
+              className="text-xs text-[#f5f0e8]/70"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

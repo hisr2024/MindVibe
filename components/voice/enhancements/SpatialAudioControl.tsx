@@ -252,7 +252,7 @@ export function SpatialAudioControl({
             </div>
             <div>
               <p className="text-xs font-medium text-white">3D Spatial Audio</p>
-              <p className="text-[10px] text-white/50">{currentEnv.name}</p>
+              <p className="text-[10px] text-white/70">{currentEnv.name}</p>
             </div>
           </div>
           <button
@@ -260,7 +260,7 @@ export function SpatialAudioControl({
             className={`p-2 rounded-lg transition-all ${
               playing
                 ? 'bg-blue-500/30 text-blue-300'
-                : 'bg-white/5 text-white/50 hover:bg-white/10'
+                : 'bg-white/5 text-white/70 hover:bg-white/10'
             }`}
           >
             {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -286,7 +286,7 @@ export function SpatialAudioControl({
             </div>
             <div>
               <h3 className="font-semibold text-white">3D Spatial Audio</h3>
-              <p className="text-xs text-white/50">Immersive Sound Positioning</p>
+              <p className="text-xs text-white/70">Immersive Sound Positioning</p>
             </div>
           </div>
 
@@ -294,7 +294,7 @@ export function SpatialAudioControl({
             <button
               onClick={() => setShowSettings(!showSettings)}
               className={`p-2 rounded-lg transition-colors ${
-                showSettings ? 'bg-blue-500/20 text-blue-300' : 'bg-white/5 text-white/50 hover:bg-white/10'
+                showSettings ? 'bg-blue-500/20 text-blue-300' : 'bg-white/5 text-white/70 hover:bg-white/10'
               }`}
             >
               <Settings2 className="w-4 h-4" />
@@ -325,7 +325,7 @@ export function SpatialAudioControl({
 
       {/* Environment Selection */}
       <div className="p-4 border-t border-white/5">
-        <p className="text-xs font-medium text-white/50 mb-3">Environment</p>
+        <p className="text-xs font-medium text-white/70 mb-3">Environment</p>
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
           {(Object.keys(ENVIRONMENTS) as RoomEnvironment[]).map((env) => {
             const config = ENVIRONMENTS[env]
@@ -342,7 +342,7 @@ export function SpatialAudioControl({
                     : 'border-white/10 bg-white/5 hover:bg-white/10'
                 }`}
               >
-                <Icon className={`w-4 h-4 mx-auto mb-1 ${isSelected ? config.color : 'text-white/40'}`} />
+                <Icon className={`w-4 h-4 mx-auto mb-1 ${isSelected ? config.color : 'text-white/70'}`} />
                 <p className={`text-xs whitespace-nowrap ${isSelected ? 'text-white' : 'text-white/60'}`}>
                   {config.name}
                 </p>
@@ -362,7 +362,7 @@ export function SpatialAudioControl({
             className="border-t border-white/5"
           >
             <div className="p-4">
-              <p className="text-xs font-medium text-white/50 mb-3">Sound Movement</p>
+              <p className="text-xs font-medium text-white/70 mb-3">Sound Movement</p>
               <div className="grid grid-cols-5 gap-2">
                 {(Object.keys(MOVEMENT_PATHS) as MovementPath[]).map((path) => {
                   const config = MOVEMENT_PATHS[path]
@@ -379,8 +379,8 @@ export function SpatialAudioControl({
                           : 'border-white/10 bg-white/5 hover:bg-white/10'
                       }`}
                     >
-                      <Icon className={`w-4 h-4 mx-auto ${isSelected ? 'text-blue-400' : 'text-white/40'}`} />
-                      <p className={`text-[10px] mt-1 ${isSelected ? 'text-white' : 'text-white/50'}`}>
+                      <Icon className={`w-4 h-4 mx-auto ${isSelected ? 'text-blue-400' : 'text-white/70'}`} />
+                      <p className={`text-[10px] mt-1 ${isSelected ? 'text-white' : 'text-white/70'}`}>
                         {config.name}
                       </p>
                     </button>
@@ -391,7 +391,7 @@ export function SpatialAudioControl({
               {/* Reverb Level Display */}
               <div className="mt-4 p-3 rounded-xl bg-white/5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-white/50">Reverb Level</span>
+                  <span className="text-xs text-white/70">Reverb Level</span>
                   <span className="text-xs text-white/70">{Math.round(currentEnv.reverbLevel * 100)}%</span>
                 </div>
                 <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">

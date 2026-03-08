@@ -83,7 +83,7 @@ export function GitaChapterCard({
           <p className={`text-sm font-medium truncate ${isActive ? 'text-white' : 'text-white/80'}`}>
             {chapter.nameSanskrit}
           </p>
-          <p className="text-xs text-white/40 truncate">{chapter.nameEnglish}</p>
+          <p className="text-xs text-white/70 truncate">{chapter.nameEnglish}</p>
         </div>
 
         {/* Playing indicator */}
@@ -106,7 +106,7 @@ export function GitaChapterCard({
 
         {/* Duration */}
         {!isActive && (
-          <span className="text-xs text-white/40">{chapter.duration}</span>
+          <span className="text-xs text-white/70">{chapter.duration}</span>
         )}
       </motion.button>
     )
@@ -152,8 +152,8 @@ export function GitaChapterCard({
             </div>
 
             <div className="flex items-center gap-2">
-              <Clock className="w-3 h-3 text-white/50" />
-              <span className="text-xs text-white/50">{chapter.duration}</span>
+              <Clock className="w-3 h-3 text-white/70" />
+              <span className="text-xs text-white/70">{chapter.duration}</span>
             </div>
           </div>
 
@@ -162,7 +162,7 @@ export function GitaChapterCard({
             {chapter.nameSanskrit}
           </h3>
           <p className="text-sm text-white/70 mb-1">{chapter.nameEnglish}</p>
-          <p className="text-xs text-white/50 mb-4">{chapter.nameHindi}</p>
+          <p className="text-xs text-white/70 mb-4">{chapter.nameHindi}</p>
 
           {/* Description */}
           <p className="text-sm text-white/60 mb-4 line-clamp-2">
@@ -172,10 +172,10 @@ export function GitaChapterCard({
           {/* Meta */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
-              <BookOpen className="w-3.5 h-3.5 text-white/40" />
-              <span className="text-xs text-white/40">{chapter.verseCount} verses</span>
+              <BookOpen className="w-3.5 h-3.5 text-white/70" />
+              <span className="text-xs text-white/70">{chapter.verseCount} verses</span>
             </div>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-white/50">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-white/70">
               {chapter.yogaType}
             </span>
           </div>
@@ -241,7 +241,7 @@ export function GitaChapterCard({
             <h4 className="font-medium text-white text-sm truncate">
               {chapter.nameSanskrit}
             </h4>
-            <p className="text-xs text-white/50 truncate">{chapter.nameEnglish}</p>
+            <p className="text-xs text-white/70 truncate">{chapter.nameEnglish}</p>
           </div>
 
           {/* Playing indicator or duration */}
@@ -261,17 +261,17 @@ export function GitaChapterCard({
               ))}
             </div>
           ) : (
-            <span className="text-xs text-white/40">{chapter.duration}</span>
+            <span className="text-xs text-white/70">{chapter.duration}</span>
           )}
         </div>
 
         {/* Description */}
-        <p className="text-xs text-white/50 line-clamp-2">{chapter.theme}</p>
+        <p className="text-xs text-white/70 line-clamp-2">{chapter.theme}</p>
 
         {/* Verse count */}
         <div className="mt-2 flex items-center gap-1">
-          <BookOpen className="w-3 h-3 text-white/30" />
-          <span className="text-[10px] text-white/30">{chapter.verseCount} verses</span>
+          <BookOpen className="w-3 h-3 text-white/70" />
+          <span className="text-[10px] text-white/70">{chapter.verseCount} verses</span>
         </div>
       </div>
     </motion.button>

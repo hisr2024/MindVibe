@@ -13,7 +13,7 @@ export function BillingToggle({ isYearly, onToggle, yearlySavings = 20, classNam
       <button
         onClick={() => onToggle(false)}
         className={`text-sm font-semibold transition-colors min-w-[70px] text-right ${
-          !isYearly ? 'text-[#f5f0e8]' : 'text-[#f5f0e8]/60 hover:text-[#f5f0e8]/80'
+          !isYearly ? 'text-[#f5f0e8]' : 'text-[#f5f0e8]/75 hover:text-[#f5f0e8]/80'
         }`}
       >
         Monthly
@@ -35,7 +35,7 @@ export function BillingToggle({ isYearly, onToggle, yearlySavings = 20, classNam
         <button
           onClick={() => onToggle(true)}
           className={`text-sm font-semibold transition-colors ${
-            isYearly ? 'text-[#f5f0e8]' : 'text-[#f5f0e8]/60 hover:text-[#f5f0e8]/80'
+            isYearly ? 'text-[#f5f0e8]' : 'text-[#f5f0e8]/75 hover:text-[#f5f0e8]/80'
           }`}
         >
           Yearly

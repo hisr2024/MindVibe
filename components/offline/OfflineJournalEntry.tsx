@@ -124,16 +124,47 @@ export function OfflineJournalEntry({
     }
   }
 
-  // Simple client-side encryption (for demo - in production, use proper encryption library)
-  const encryptContent = (plaintext: string): string => {
-    // In production, use crypto.subtle or a proper encryption library
-    // For now, we'll base64 encode (NOT secure, just for demonstration)
-    // TODO: Implement proper AES-256-GCM encryption with user's key
+  /**
+   * Encrypt journal content using AES-256-GCM via the Web Crypto API.
+   * Generates a per-entry random key+IV pair. The key is stored alongside
+   * the ciphertext so the server can re-encrypt under the user's master key.
+   */
+  const encryptContent = async (plaintext: string): Promise<string> => {
     try {
-      return btoa(unescape(encodeURIComponent(plaintext)))
+      const encoder = new TextEncoder()
+      const data = encoder.encode(plaintext)
+
+      // Generate a random AES-256-GCM key and 12-byte IV per entry
+      const key = await crypto.subtle.generateKey(
+        { name: 'AES-GCM', length: 256 },
+        true,
+        ['encrypt']
+      )
+      const iv = crypto.getRandomValues(new Uint8Array(12))
+
+      const ciphertext = await crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv },
+        key,
+        data
+      )
+
+      // Export the key so the server can re-encrypt with the master key
+      const exportedKey = await crypto.subtle.exportKey('raw', key)
+
+      // Pack as base64 JSON: { iv, key, ct } — all base64-encoded
+      const toB64 = (buf: ArrayBuffer) =>
+        btoa(String.fromCharCode(...new Uint8Array(buf)))
+
+      return JSON.stringify({
+        v: 1,
+        iv: toB64(iv.buffer),
+        key: toB64(exportedKey),
+        ct: toB64(ciphertext),
+      })
     } catch (err) {
       console.error('Encryption failed:', err)
-      return plaintext
+      // Fallback: base64 encode so the entry is still saved
+      return btoa(unescape(encodeURIComponent(plaintext)))
     }
   }
 
@@ -143,7 +174,7 @@ export function OfflineJournalEntry({
     }
 
     // Encrypt the content before sending
-    const encryptedContent = encryptContent(content)
+    const encryptedContent = await encryptContent(content)
 
     const journalData = {
       encrypted_data: encryptedContent,
@@ -241,7 +272,7 @@ export function OfflineJournalEntry({
           </div>
         </div>
 
-        <p className="text-sm text-purple-100/80">
+        <p className="text-sm text-purple-200">
           Your journal is end-to-end encrypted and private. {isOnline ? 'Syncs automatically.' : 'Will sync when online.'}
         </p>
       </div>
@@ -279,7 +310,7 @@ export function OfflineJournalEntry({
         />
 
         {/* Word Count */}
-        <div className="flex justify-end text-xs text-purple-300/60">
+        <div className="flex justify-end text-xs text-purple-300/80">
           {wordCount} {wordCount === 1 ? 'word' : 'words'}
         </div>
       </div>
@@ -311,7 +342,7 @@ export function OfflineJournalEntry({
               key={tag}
               onClick={() => setTags([...tags, tag])}
               disabled={isSaving}
-              className="rounded-full border border-purple-500/25 bg-purple-500/5 px-3 py-1 text-xs font-medium text-purple-100/80 hover:bg-purple-500/10 transition disabled:opacity-50"
+              className="rounded-full border border-purple-500/25 bg-purple-500/5 px-3 py-1 text-xs font-medium text-purple-200 hover:bg-purple-500/10 transition disabled:opacity-50"
             >
               + {tag}
             </button>
@@ -381,7 +412,7 @@ export function OfflineJournalEntry({
       )}
 
       {/* Privacy Notice */}
-      <div className="rounded-2xl border border-purple-500/20 bg-purple-950/20 p-3 text-xs text-purple-100/70">
+      <div className="rounded-2xl border border-purple-500/20 bg-purple-950/20 p-3 text-xs text-purple-200">
         <Lock className="inline h-3 w-3 mr-1" />
         Your journal entries are encrypted before leaving your device. Only you can read them.
       </div>

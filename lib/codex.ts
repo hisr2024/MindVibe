@@ -10,17 +10,12 @@ export type CodexRequest = {
   response_format?: { type: 'json_object' | 'text' }
 }
 
-// TODO: Centralize environment variable access to config/environment.ts
-// to provide validation, type safety, and a single source of truth for all env vars.
-const CODEX_MODEL = process.env.CODEX_MODEL || 'gpt-4o-mini'
+import { env } from '@/config/environment'
+
 const OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions'
 
-export async function codex({ model = CODEX_MODEL, messages, temperature = 0.7, response_format }: CodexRequest) {
-  const apiKey = process.env.OPENAI_API_KEY || process.env.CODEX_API_KEY
-
-  if (!apiKey) {
-    throw new Error('Missing OpenAI API key for codex helper')
-  }
+export async function codex({ model = env.CODEX_MODEL, messages, temperature = 0.7, response_format }: CodexRequest) {
+  const apiKey = env.OPENAI_API_KEY
 
   const response = await fetch(OPENAI_ENDPOINT, {
     method: 'POST',

@@ -13,7 +13,6 @@ import type {
   KarmicPathKey,
   KarmicPathConfig,
   DeepKarmaResetApiResponse,
-  KARMIC_PATHS_CONFIG,
 } from '@/types/karma-reset.types'
 import type {
   KarmaResetContext,

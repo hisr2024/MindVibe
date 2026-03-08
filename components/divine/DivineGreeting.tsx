@@ -72,7 +72,7 @@ export function DivineGreeting({
           <p className="text-white/90 font-light">
             {greetingText}{userName ? `, ${userName}` : ''}
           </p>
-          <p className="text-white/50 text-sm">{messageText}</p>
+          <p className="text-white/70 text-sm">{messageText}</p>
         </div>
       </motion.div>
     );
@@ -125,7 +125,7 @@ export function DivineGreeting({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.6 }}
         >
-          <p className="text-xs text-white/40 uppercase tracking-wider mb-2">
+          <p className="text-xs text-white/70 uppercase tracking-wider mb-2">
             {t('divine.sacred.moodCheckin.todaysAffirmation', "Today's Affirmation")}
           </p>
           <p className="text-white/80 italic">&quot;{affirmation}&quot;</p>
@@ -135,7 +135,7 @@ export function DivineGreeting({
       {/* Divine reminder */}
       {showReminder && reminder && (
         <motion.p
-          className="text-white/50 text-sm italic max-w-sm mx-auto"
+          className="text-white/70 text-sm italic max-w-sm mx-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}

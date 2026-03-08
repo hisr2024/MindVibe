@@ -198,7 +198,7 @@ export function SakhaModeToggle({
           <span className={`font-medium ${isActive ? 'text-[#e8b54a]' : 'text-white/70'}`}>
             {t('divine.sacred.sakha.sakhaMode', 'Sakha Mode')}
           </span>
-          <span className="text-xs text-white/50">
+          <span className="text-xs text-white/70">
             {isActive ? t('divine.sacred.sakha.krishnaAsFriend', 'Krishna as Friend') : t('divine.sacred.sakha.standardKiaan', 'Standard KIAAN')}
           </span>
         </div>

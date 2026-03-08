@@ -235,7 +235,7 @@ export function ChatVoiceInput({
                   Voice is processed locally by your browser. Audio is never sent to our
                   servers — only the final text transcript is used.
                 </p>
-                <p className="text-[10px] text-[#f5f0e8]/40 mt-1.5">
+                <p className="text-[10px] text-[#f5f0e8]/70 mt-1.5">
                   You can type instead at any time.
                 </p>
               </div>
@@ -284,7 +284,7 @@ export function ChatVoiceInput({
               style={{ width: `${Math.round(confidence * 100)}%` }}
             />
           </div>
-          <span className="text-[10px] text-[#f5f0e8]/40">
+          <span className="text-[10px] text-[#f5f0e8]/70">
             {Math.round(confidence * 100)}% confidence
           </span>
         </div>
@@ -302,7 +302,7 @@ export function ChatVoiceInput({
 
       {/* Permission denied guidance */}
       {isDenied && (
-        <div className="mt-2 rounded-lg bg-[#d4a44c]/5 border border-[#d4a44c]/20 px-3 py-2 text-xs text-[#f5f0e8]/60">
+        <div className="mt-2 rounded-lg bg-[#d4a44c]/5 border border-[#d4a44c]/20 px-3 py-2 text-xs text-[#f5f0e8]/75">
           Microphone access denied. Look for the lock icon in your address bar to allow access, or type your message instead.
         </div>
       )}

@@ -126,7 +126,7 @@ const trendIcons = {
 const trendColors = {
   up: 'text-emerald-400',
   down: 'text-red-400',
-  stable: 'text-[#f5f0e8]/60',
+  stable: 'text-[#f5f0e8]/75',
 }
 
 export function StatCard({
@@ -166,7 +166,7 @@ export function StatCard({
             {value}
           </p>
           {subtitle && (
-            <p className={`text-[#f5f0e8]/50 ${sizeStyle.subtitle} mt-1`}>
+            <p className={`text-[#f5f0e8]/70 ${sizeStyle.subtitle} mt-1`}>
               {subtitle}
             </p>
           )}

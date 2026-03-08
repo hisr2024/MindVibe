@@ -70,7 +70,7 @@ export function FeatureComparison({ tiers, features, className = '' }: FeatureCo
                   <td className="p-4">
                     <div className="text-sm font-medium text-[#f5f0e8]">{item.name}</div>
                     {item.description && (
-                      <div className="text-xs text-[#f5f0e8]/50 mt-0.5">{item.description}</div>
+                      <div className="text-xs text-[#f5f0e8]/70 mt-0.5">{item.description}</div>
                     )}
                   </td>
                   {tiers.map(tier => (

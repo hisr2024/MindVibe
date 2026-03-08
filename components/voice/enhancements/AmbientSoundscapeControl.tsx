@@ -200,8 +200,8 @@ function SoundMixerItem({
     }`}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <Icon className={`w-4 h-4 ${isActive ? config.color : 'text-white/40'}`} />
-          <span className={`text-xs font-medium ${isActive ? 'text-white' : 'text-white/50'}`}>
+          <Icon className={`w-4 h-4 ${isActive ? config.color : 'text-white/70'}`} />
+          <span className={`text-xs font-medium ${isActive ? 'text-white' : 'text-white/70'}`}>
             {config.name}
           </span>
         </div>
@@ -210,7 +210,7 @@ function SoundMixerItem({
           className={`p-1.5 rounded-lg transition-colors ${
             isActive
               ? 'bg-[#d4a44c]/30 text-[#e8b54a]'
-              : 'bg-white/10 text-white/30 hover:bg-white/15'
+              : 'bg-white/10 text-white/70 hover:bg-white/15'
           }`}
         >
           {isActive ? <X className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
@@ -219,7 +219,7 @@ function SoundMixerItem({
 
       {isActive && (
         <div className="flex items-center gap-2">
-          <Volume2 className="w-3 h-3 text-white/30" />
+          <Volume2 className="w-3 h-3 text-white/70" />
           <input
             type="range"
             min="0"
@@ -229,7 +229,7 @@ function SoundMixerItem({
             onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
             className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer bg-white/10 accent-[#d4a44c]"
           />
-          <span className="text-[10px] text-white/40 w-7">{Math.round(volume * 100)}%</span>
+          <span className="text-[10px] text-white/70 w-7">{Math.round(volume * 100)}%</span>
         </div>
       )}
     </div>
@@ -337,7 +337,7 @@ export function AmbientSoundscapeControl({
             </div>
             <div>
               <p className="text-xs font-medium text-white">Soundscapes</p>
-              <p className="text-[10px] text-white/50">{activeSounds.length} sounds active</p>
+              <p className="text-[10px] text-white/70">{activeSounds.length} sounds active</p>
             </div>
           </div>
           <button
@@ -345,7 +345,7 @@ export function AmbientSoundscapeControl({
             className={`p-2 rounded-lg transition-all ${
               playing
                 ? 'bg-[#d4a44c]/30 text-[#e8b54a]'
-                : 'bg-white/5 text-white/50 hover:bg-white/10'
+                : 'bg-white/5 text-white/70 hover:bg-white/10'
             }`}
           >
             {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -371,7 +371,7 @@ export function AmbientSoundscapeControl({
             </div>
             <div>
               <h3 className="font-semibold text-white">Ambient Soundscapes</h3>
-              <p className="text-xs text-white/50">Layered Audio Environments</p>
+              <p className="text-xs text-white/70">Layered Audio Environments</p>
             </div>
           </div>
 
@@ -390,7 +390,7 @@ export function AmbientSoundscapeControl({
 
       {/* Quick Presets */}
       <div className="p-4 border-b border-white/5">
-        <p className="text-xs font-medium text-white/50 mb-3">Quick Presets</p>
+        <p className="text-xs font-medium text-white/70 mb-3">Quick Presets</p>
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
           {PRESETS.map((preset, idx) => {
             const Icon = preset.icon
@@ -402,7 +402,7 @@ export function AmbientSoundscapeControl({
               >
                 <Icon className="w-4 h-4 mx-auto mb-1 text-[#d4a44c]" />
                 <p className="text-xs text-white whitespace-nowrap">{preset.name}</p>
-                <p className="text-[10px] text-white/40">{preset.nameHindi}</p>
+                <p className="text-[10px] text-white/70">{preset.nameHindi}</p>
               </button>
             )
           })}
@@ -419,7 +419,7 @@ export function AmbientSoundscapeControl({
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium capitalize transition-colors ${
                 selectedCategory === cat
                   ? 'bg-[#d4a44c]/30 text-[#e8b54a]'
-                  : 'text-white/50 hover:text-white/70'
+                  : 'text-white/70 hover:text-white/70'
               }`}
             >
               {cat}
@@ -447,10 +447,10 @@ export function AmbientSoundscapeControl({
       {/* Active Sounds Summary & Master Volume */}
       <div className="p-4 border-t border-white/5">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-white/50">
+          <span className="text-xs text-white/70">
             Active: <span className="text-[#d4a44c]">{activeSounds.length}</span> sounds
           </span>
-          <span className="text-xs text-white/50">
+          <span className="text-xs text-white/70">
             Master: <span className="text-white/70">{Math.round(masterVolume * 100)}%</span>
           </span>
         </div>

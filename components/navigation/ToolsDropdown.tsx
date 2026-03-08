@@ -148,7 +148,7 @@ export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-[#f5f0e8]/50">{vibePlayer.description}</div>
+                      <div className="text-xs text-[#f5f0e8]/70">{vibePlayer.description}</div>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#d4a44c]/40 group-hover:text-[#d4a44c] transition-colors flex-shrink-0"><polygon points="5 3 19 12 5 21 5 3" /></svg>
                   </Link>
@@ -162,7 +162,7 @@ export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps
                   <div className="my-2 border-t border-white/5" />
                 )}
                 <div className="px-3 py-2">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[#f5f0e8]/50">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#f5f0e8]/70">
                     {category.name}
                   </span>
                 </div>
@@ -182,7 +182,7 @@ export function ToolsDropdown({ categories, className = '' }: ToolsDropdownProps
                         <div className="text-sm font-medium text-[#f5f0e8]">
                           {item.name}
                         </div>
-                        <div className="text-xs text-[#f5f0e8]/60">
+                        <div className="text-xs text-[#f5f0e8]/75">
                           {item.description}
                         </div>
                         {item.purposeDescKey && (

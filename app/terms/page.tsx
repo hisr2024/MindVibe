@@ -25,7 +25,7 @@ export default function TermsOfServicePage() {
         <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
           Terms of Service
         </h1>
-        <p className="text-sm text-white/50">
+        <p className="text-sm text-white/70">
           Last updated: February 22, 2026
         </p>
 
@@ -288,7 +288,7 @@ export default function TermsOfServicePage() {
 
         {/* Closing */}
         <section className="mt-12 border-t border-white/10 pt-8">
-          <p className="text-center text-sm text-white/40 italic">
+          <p className="text-center text-sm text-white/70 italic">
             &quot;Set thy heart upon thy work, but never on its reward.&quot;
             <br />
             <span className="text-[#d4a44c]/50">

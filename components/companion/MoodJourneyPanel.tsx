@@ -107,7 +107,7 @@ export default function MoodJourneyPanel({ onClose }: MoodJourneyPanelProps) {
             <button
               onClick={() => setTab('trends')}
               className={`px-3 py-1 text-[10px] rounded-md transition-all ${
-                tab === 'trends' ? 'bg-white/10 text-white/90' : 'text-white/40 hover:text-white/60'
+                tab === 'trends' ? 'bg-white/10 text-white/90' : 'text-white/70 hover:text-white/60'
               }`}
             >
               Mood Map
@@ -115,13 +115,13 @@ export default function MoodJourneyPanel({ onClose }: MoodJourneyPanelProps) {
             <button
               onClick={() => setTab('milestones')}
               className={`px-3 py-1 text-[10px] rounded-md transition-all ${
-                tab === 'milestones' ? 'bg-white/10 text-white/90' : 'text-white/40 hover:text-white/60'
+                tab === 'milestones' ? 'bg-white/10 text-white/90' : 'text-white/70 hover:text-white/60'
               }`}
             >
               Milestones
             </button>
           </div>
-          <button onClick={onClose} className="p-1 text-white/30 hover:text-white/60 transition-colors" aria-label="Close mood journey panel">
+          <button onClick={onClose} className="p-1 text-white/70 hover:text-white/60 transition-colors" aria-label="Close mood journey panel">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -155,7 +155,7 @@ function TrendsView({
   if (!trends || trends.total_entries === 0) {
     return (
       <div className="text-center py-6">
-        <p className="text-white/40 text-xs">Start chatting with KIAAN to see your mood patterns here.</p>
+        <p className="text-white/70 text-xs">Start chatting with KIAAN to see your mood patterns here.</p>
       </div>
     )
   }
@@ -169,24 +169,24 @@ function TrendsView({
         <span className={`text-lg ${trendConfig.color}`}>{trendConfig.icon}</span>
         <div>
           <p className={`text-xs font-medium ${trendConfig.color}`}>{trendConfig.label}</p>
-          <p className="text-[10px] text-white/30">Last 30 days - {trends.total_entries} check-ins</p>
+          <p className="text-[10px] text-white/70">Last 30 days - {trends.total_entries} check-ins</p>
         </div>
       </div>
 
       {/* Mood distribution bars */}
       <div className="space-y-1.5">
-        <p className="text-[10px] text-white/40 uppercase tracking-wider mb-2">Mood Map</p>
+        <p className="text-[10px] text-white/70 uppercase tracking-wider mb-2">Mood Map</p>
         {Object.entries(trends.mood_distribution).slice(0, 8).map(([mood, percent]) => (
           <div key={mood} className="flex items-center gap-2">
             <span className="text-xs w-4">{MOOD_EMOJI[mood] || ''}</span>
-            <span className="text-[10px] text-white/50 w-16 truncate capitalize">{mood}</span>
+            <span className="text-[10px] text-white/70 w-16 truncate capitalize">{mood}</span>
             <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-400 transition-all duration-700"
                 style={{ width: `${(percent / maxPercent) * 100}%` }}
               />
             </div>
-            <span className="text-[10px] text-white/30 w-8 text-right">{percent}%</span>
+            <span className="text-[10px] text-white/70 w-8 text-right">{percent}%</span>
           </div>
         ))}
       </div>
@@ -194,14 +194,14 @@ function TrendsView({
       {/* Timeline (last 7 days) */}
       {trends.timeline.length > 0 && (
         <div>
-          <p className="text-[10px] text-white/40 uppercase tracking-wider mb-2">Recent Days</p>
+          <p className="text-[10px] text-white/70 uppercase tracking-wider mb-2">Recent Days</p>
           <div className="flex gap-1.5">
             {trends.timeline.slice(-7).map((day) => (
               <div key={day.date} className="flex-1 text-center">
                 <div className="w-full aspect-square rounded-lg bg-white/5 flex items-center justify-center mb-0.5">
                   <span className="text-sm">{MOOD_EMOJI[day.primary_mood] || '\uD83D\uDE0C'}</span>
                 </div>
-                <p className="text-[8px] text-white/30">{day.date.slice(8)}</p>
+                <p className="text-[8px] text-white/70">{day.date.slice(8)}</p>
               </div>
             ))}
           </div>
@@ -211,7 +211,7 @@ function TrendsView({
       {/* Insights */}
       {trends.insights.length > 0 && (
         <div className="space-y-1.5">
-          <p className="text-[10px] text-white/40 uppercase tracking-wider">Insights</p>
+          <p className="text-[10px] text-white/70 uppercase tracking-wider">Insights</p>
           {trends.insights.map((insight, i) => (
             <p key={i} className="text-[11px] text-white/60 pl-3 border-l-2 border-violet-500/30">
               {insight}
@@ -227,7 +227,7 @@ function MilestonesView({ milestones }: { milestones: MilestoneData | null }) {
   if (!milestones) {
     return (
       <div className="text-center py-6">
-        <p className="text-white/40 text-xs">Start your journey to unlock milestones.</p>
+        <p className="text-white/70 text-xs">Start your journey to unlock milestones.</p>
       </div>
     )
   }
@@ -238,15 +238,15 @@ function MilestonesView({ milestones }: { milestones: MilestoneData | null }) {
       <div className="grid grid-cols-3 gap-2">
         <div className="text-center px-2 py-2 rounded-xl bg-white/5">
           <p className="text-lg font-bold text-violet-400">{milestones.total_sessions}</p>
-          <p className="text-[9px] text-white/30">Sessions</p>
+          <p className="text-[9px] text-white/70">Sessions</p>
         </div>
         <div className="text-center px-2 py-2 rounded-xl bg-white/5">
           <p className="text-lg font-bold text-amber-400">{milestones.current_streak}</p>
-          <p className="text-[9px] text-white/30">Streak</p>
+          <p className="text-[9px] text-white/70">Streak</p>
         </div>
         <div className="text-center px-2 py-2 rounded-xl bg-white/5">
           <p className="text-lg font-bold text-emerald-400">{milestones.sessions_with_improvement}</p>
-          <p className="text-[9px] text-white/30">Improved</p>
+          <p className="text-[9px] text-white/70">Improved</p>
         </div>
       </div>
 
@@ -260,13 +260,13 @@ function MilestonesView({ milestones }: { milestones: MilestoneData | null }) {
         }</span>
         <div>
           <p className="text-xs font-medium text-violet-300 capitalize">{milestones.friendship_level} Friend</p>
-          <p className="text-[10px] text-white/30">{milestones.total_days_active} days together</p>
+          <p className="text-[10px] text-white/70">{milestones.total_days_active} days together</p>
         </div>
       </div>
 
       {/* Milestones list */}
       <div className="space-y-1.5">
-        <p className="text-[10px] text-white/40 uppercase tracking-wider">Milestones</p>
+        <p className="text-[10px] text-white/70 uppercase tracking-wider">Milestones</p>
         {milestones.milestones.map((m, i) => (
           <div
             key={i}
@@ -276,10 +276,10 @@ function MilestonesView({ milestones }: { milestones: MilestoneData | null }) {
           >
             <span className="text-sm">{MILESTONE_ICONS[m.level] || '\u2B50'}</span>
             <div className="flex-1 min-w-0">
-              <p className={`text-[11px] font-medium ${m.achieved ? 'text-white/80' : 'text-white/30'}`}>
+              <p className={`text-[11px] font-medium ${m.achieved ? 'text-white/80' : 'text-white/70'}`}>
                 {m.title}
               </p>
-              <p className="text-[9px] text-white/30 truncate">{m.description}</p>
+              <p className="text-[9px] text-white/70 truncate">{m.description}</p>
             </div>
             {m.achieved && (
               <svg className="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">

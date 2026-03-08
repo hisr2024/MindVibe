@@ -334,7 +334,7 @@ export default function OnboardingStepPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold text-[#f5f0e8]">Daily Reminders</p>
-                  <p className="text-xs text-[#f5f0e8]/50">Get gentle nudges for journaling</p>
+                  <p className="text-xs text-[#f5f0e8]/70">Get gentle nudges for journaling</p>
                 </div>
                 <button
                   onClick={() => updateState({ notifications: !state.notifications })}
@@ -395,7 +395,7 @@ export default function OnboardingStepPage() {
   if (!isClient || !isValidStep) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-[#f5f0e8]/50">Loading...</div>
+        <div className="animate-pulse text-[#f5f0e8]/70">Loading...</div>
       </div>
     )
   }

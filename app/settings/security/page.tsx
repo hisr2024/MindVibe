@@ -475,7 +475,7 @@ export default function SecuritySettingsPage() {
               <CardContent className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-[#f5f0e8]">Enable 2FA</p>
-                  <p className="text-xs text-[#f5f0e8]/50">
+                  <p className="text-xs text-[#f5f0e8]/70">
                     Use an authenticator app like Google Authenticator or Authy
                   </p>
                 </div>
@@ -529,7 +529,7 @@ export default function SecuritySettingsPage() {
             )}
 
             <div className="text-center">
-              <p className="text-xs text-[#f5f0e8]/50 mb-2">
+              <p className="text-xs text-[#f5f0e8]/70 mb-2">
                 Or enter this code manually:
               </p>
               <code className="px-4 py-2 bg-black/30 rounded-lg text-[#e8b54a] font-mono text-sm">
@@ -667,7 +667,7 @@ export default function SecuritySettingsPage() {
           <CardContent className="flex items-center justify-between">
             <div>
               <p className="font-medium text-[#f5f0e8]">View All Sessions</p>
-              <p className="text-xs text-[#f5f0e8]/50">
+              <p className="text-xs text-[#f5f0e8]/70">
                 See and revoke access from other devices
               </p>
             </div>
@@ -694,7 +694,7 @@ export default function SecuritySettingsPage() {
               </div>
               <div>
                 <p className="font-medium text-[#f5f0e8] text-sm">Use a strong, unique password</p>
-                <p className="text-xs text-[#f5f0e8]/50 mt-1">
+                <p className="text-xs text-[#f5f0e8]/70 mt-1">
                   Combine uppercase, lowercase, numbers, and symbols. Never reuse passwords.
                 </p>
               </div>
@@ -709,7 +709,7 @@ export default function SecuritySettingsPage() {
               </div>
               <div>
                 <p className="font-medium text-[#f5f0e8] text-sm">Enable two-factor authentication</p>
-                <p className="text-xs text-[#f5f0e8]/50 mt-1">
+                <p className="text-xs text-[#f5f0e8]/70 mt-1">
                   Adds an extra layer of protection even if your password is compromised.
                 </p>
               </div>
@@ -724,7 +724,7 @@ export default function SecuritySettingsPage() {
               </div>
               <div>
                 <p className="font-medium text-[#f5f0e8] text-sm">Review active sessions regularly</p>
-                <p className="text-xs text-[#f5f0e8]/50 mt-1">
+                <p className="text-xs text-[#f5f0e8]/70 mt-1">
                   Revoke access from devices you don&apos;t recognize or no longer use.
                 </p>
               </div>
@@ -739,7 +739,7 @@ export default function SecuritySettingsPage() {
               </div>
               <div>
                 <p className="font-medium text-[#f5f0e8] text-sm">Be cautious of phishing</p>
-                <p className="text-xs text-[#f5f0e8]/50 mt-1">
+                <p className="text-xs text-[#f5f0e8]/70 mt-1">
                   Never share your password or 2FA codes. We&apos;ll never ask for them via email.
                 </p>
               </div>

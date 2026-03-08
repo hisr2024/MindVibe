@@ -199,7 +199,7 @@ export default function SessionsPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-[#f5f0e8]/50">
+                      <p className="text-xs text-[#f5f0e8]/70">
                         Last active: {getRelativeTime(session.last_used_at)}
                       </p>
                       <p className="text-xs text-[#f5f0e8]/30 mt-1">
@@ -223,7 +223,7 @@ export default function SessionsPage() {
           ))}
 
           {activeSessions.length === 0 && (
-            <div className="text-center py-8 text-[#f5f0e8]/50">
+            <div className="text-center py-8 text-[#f5f0e8]/70">
               No active sessions found
             </div>
           )}
@@ -257,7 +257,7 @@ export default function SessionsPage() {
                   </div>
                   <div>
                     <p className="font-medium text-[#f5f0e8]/70">Expired Session</p>
-                    <p className="text-xs text-[#f5f0e8]/40">
+                    <p className="text-xs text-[#f5f0e8]/70">
                       {session.revoked_at
                         ? `Revoked: ${formatDate(session.revoked_at)}`
                         : `Expired: ${formatDate(session.expires_at)}`}

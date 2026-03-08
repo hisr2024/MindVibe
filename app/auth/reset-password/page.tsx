@@ -32,7 +32,7 @@ function ResetPasswordForm() {
       <main className="mx-auto max-w-md px-4 py-12 sm:py-20">
         <div className="rounded-3xl border border-red-400/20 bg-black/60 p-6 sm:p-8 text-center">
           <h1 className="text-2xl font-bold text-[#f5f0e8] mb-4">Invalid Reset Link</h1>
-          <p className="text-sm text-[#f5f0e8]/60 mb-6">
+          <p className="text-sm text-[#f5f0e8]/75 mb-6">
             This password reset link is invalid or has expired. Please request a new one.
           </p>
           <Link
@@ -99,7 +99,7 @@ function ResetPasswordForm() {
       <div className="rounded-3xl border border-[#d4a44c]/20 bg-black/60 p-6 sm:p-8 shadow-[0_20px_70px_rgba(255,115,39,0.14)]">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold text-[#f5f0e8]">Set New Password</h1>
-          <p className="mt-2 text-sm text-[#f5f0e8]/60">
+          <p className="mt-2 text-sm text-[#f5f0e8]/75">
             Choose a strong password for your account.
           </p>
         </div>

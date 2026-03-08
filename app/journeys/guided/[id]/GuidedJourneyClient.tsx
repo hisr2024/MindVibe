@@ -201,7 +201,7 @@ function StepContent({ step, onComplete, isCompleting }: StepContentProps) {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-white">Wisdom from the Gita</h3>
-              <p className="text-xs text-white/50">Sacred verse for today&apos;s practice</p>
+              <p className="text-xs text-white/70">Sacred verse for today&apos;s practice</p>
             </div>
           </div>
           <div className="space-y-5">
@@ -330,7 +330,7 @@ function StepContent({ step, onComplete, isCompleting }: StepContentProps) {
                   rows={5}
                   maxLength={5000}
                 />
-                <p className="mt-2 text-xs text-white/40 text-right">
+                <p className="mt-2 text-xs text-white/70 text-right">
                   {reflection.length}/5000 characters
                 </p>
               </motion.div>
@@ -363,7 +363,7 @@ function StepContent({ step, onComplete, isCompleting }: StepContentProps) {
           </div>
           <p className="text-green-400 font-semibold text-lg">Step Completed</p>
           {step.completed_at && (
-            <p className="text-sm text-white/50 mt-2">
+            <p className="text-sm text-white/70 mt-2">
               Completed on {new Date(step.completed_at).toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
@@ -421,7 +421,7 @@ function DaySelector({ totalDays, currentDay, completedDays, selectedDay, onSele
                 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                 : isAccessible
                 ? 'bg-white/10 text-white/70 hover:bg-white/20'
-                : 'bg-white/5 text-white/30 cursor-not-allowed'
+                : 'bg-white/5 text-white/70 cursor-not-allowed'
             }`}
           >
             {day}
@@ -656,7 +656,7 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
         <div className="mb-6">
           <Link
             href="/journeys"
-            className="text-sm text-white/50 hover:text-white/70 mb-2 inline-block"
+            className="text-sm text-white/70 hover:text-white/70 mb-2 inline-block"
           >
             ← Back to Journeys
           </Link>
@@ -750,7 +750,7 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
 
         {/* Day selector */}
         <div className="mb-6">
-          <h3 className="text-sm font-medium text-white/50 mb-2">Jump to Day</h3>
+          <h3 className="text-sm font-medium text-white/70 mb-2">Jump to Day</h3>
           <DaySelector
             totalDays={journey.total_days}
             currentDay={journey.current_day}

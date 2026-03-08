@@ -175,7 +175,7 @@ export default function DeleteAccountModal({
               </div>
               <div>
                 <h2 id="delete-account-title" className="text-lg font-semibold text-red-400">Delete Account</h2>
-                <p className="text-sm text-[#f5f0e8]/50">This action cannot be undone</p>
+                <p className="text-sm text-[#f5f0e8]/70">This action cannot be undone</p>
               </div>
             </div>
           </div>
@@ -341,7 +341,7 @@ export default function DeleteAccountModal({
 
           {/* Footer */}
           <div className="px-6 py-4 bg-gray-800/50 border-t border-gray-700">
-            <p className="text-xs text-[#f5f0e8]/40 text-center">
+            <p className="text-xs text-[#f5f0e8]/70 text-center">
               GDPR Article 17: You have the right to request erasure of your personal data.
             </p>
           </div>

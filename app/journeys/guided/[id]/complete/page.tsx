@@ -193,19 +193,19 @@ export default function JourneyCompletePage() {
                 <div className="text-3xl font-bold text-amber-400">
                   {journey.total_days}
                 </div>
-                <div className="text-xs text-white/50">Days Completed</div>
+                <div className="text-xs text-white/70">Days Completed</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-green-400">
                   100%
                 </div>
-                <div className="text-xs text-white/50">Progress</div>
+                <div className="text-xs text-white/70">Progress</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-purple-400">
                   {journey.streak_days}
                 </div>
-                <div className="text-xs text-white/50">Day Streak</div>
+                <div className="text-xs text-white/70">Day Streak</div>
               </div>
             </div>
           </motion.div>
@@ -248,7 +248,7 @@ export default function JourneyCompletePage() {
           {/* Recommendations */}
           {recommendations.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium text-white/50 mb-3 text-center">
+              <h3 className="text-sm font-medium text-white/70 mb-3 text-center">
                 Recommended Next Journeys
               </h3>
               <div className="space-y-2">
@@ -273,11 +273,11 @@ export default function JourneyCompletePage() {
                           <div className="text-sm font-medium text-white truncate">
                             {template.title}
                           </div>
-                          <div className="text-xs text-white/50">
+                          <div className="text-xs text-white/70">
                             {template.duration_days} days
                           </div>
                         </div>
-                        <span className="text-white/40">→</span>
+                        <span className="text-white/70">→</span>
                       </div>
                     </Link>
                   )

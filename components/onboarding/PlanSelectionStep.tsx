@@ -41,10 +41,10 @@ export function PlanSelectionStep({
               <h3 className="text-lg font-semibold text-[#f5f0e8] mb-1">{tier.name}</h3>
               <div className="flex items-baseline gap-1 mb-2">
                 <span className="text-2xl font-bold text-[#f5f0e8]">${tier.monthlyPrice}</span>
-                <span className="text-xs text-[#f5f0e8]/60">/month</span>
+                <span className="text-xs text-[#f5f0e8]/75">/month</span>
               </div>
               <p className="text-xs text-[#f5f0e8]/70 mb-3">{tier.description}</p>
-              <div className="text-xs text-[#f5f0e8]/60 mb-2">
+              <div className="text-xs text-[#f5f0e8]/75 mb-2">
                 KIAAN: {tier.kiaanQuota === 'unlimited' ? 'Unlimited' : `${tier.kiaanQuota}/month`}
               </div>
               <ul className="space-y-1 flex-1">

@@ -98,7 +98,7 @@ export function GitaVerseDisplay({
               <h3 className="font-medium text-white">
                 Chapter {verse.chapter}, Verse {verse.verse}
               </h3>
-              <p className="text-xs text-white/50">
+              <p className="text-xs text-white/70">
                 अध्याय {verse.chapter}, श्लोक {verse.verse}
               </p>
             </div>
@@ -109,7 +109,7 @@ export function GitaVerseDisplay({
             <button
               onClick={handleFavorite}
               className={`p-2 rounded-lg transition-colors ${
-                isFavorite ? 'text-rose-400 bg-rose-500/10' : 'text-white/40 hover:text-white/60'
+                isFavorite ? 'text-rose-400 bg-rose-500/10' : 'text-white/70 hover:text-white/60'
               }`}
               aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             >
@@ -118,7 +118,7 @@ export function GitaVerseDisplay({
             <button
               onClick={handleBookmark}
               className={`p-2 rounded-lg transition-colors ${
-                isBookmarked ? 'text-amber-400 bg-amber-500/10' : 'text-white/40 hover:text-white/60'
+                isBookmarked ? 'text-amber-400 bg-amber-500/10' : 'text-white/70 hover:text-white/60'
               }`}
               aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark verse'}
             >
@@ -126,14 +126,14 @@ export function GitaVerseDisplay({
             </button>
             <button
               onClick={onCopy}
-              className="p-2 rounded-lg text-white/40 hover:text-white/60 transition-colors"
+              className="p-2 rounded-lg text-white/70 hover:text-white/60 transition-colors"
               aria-label="Copy verse"
             >
               <Copy className="w-4 h-4" />
             </button>
             <button
               onClick={onShare}
-              className="p-2 rounded-lg text-white/40 hover:text-white/60 transition-colors"
+              className="p-2 rounded-lg text-white/70 hover:text-white/60 transition-colors"
               aria-label="Share verse"
             >
               <Share2 className="w-4 h-4" />
@@ -192,10 +192,10 @@ export function GitaVerseDisplay({
             className="w-full flex items-center justify-between text-left"
           >
             <div className="flex items-center gap-2">
-              <Languages className="w-4 h-4 text-white/40" />
+              <Languages className="w-4 h-4 text-white/70" />
               <span className="text-sm font-medium text-white/70">Transliteration</span>
             </div>
-            <ChevronDown className={`w-4 h-4 text-white/40 transition-transform ${
+            <ChevronDown className={`w-4 h-4 text-white/70 transition-transform ${
               expandedSection === 'transliteration' ? 'rotate-180' : ''
             }`} />
           </button>
@@ -225,10 +225,10 @@ export function GitaVerseDisplay({
             className="w-full flex items-center justify-between text-left"
           >
             <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-white/40" />
+              <BookOpen className="w-4 h-4 text-white/70" />
               <span className="text-sm font-medium text-white/70">Word by Word</span>
             </div>
-            <ChevronDown className={`w-4 h-4 text-white/40 transition-transform ${
+            <ChevronDown className={`w-4 h-4 text-white/70 transition-transform ${
               expandedSection === 'wordMeaning' ? 'rotate-180' : ''
             }`} />
           </button>
@@ -252,7 +252,7 @@ export function GitaVerseDisplay({
 
       {/* Translation */}
       <div className="p-6 border-b border-white/5 bg-white/[0.02]">
-        <h4 className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3">
+        <h4 className="text-xs font-medium text-white/70 uppercase tracking-wider mb-3">
           Translation
         </h4>
         <p className="text-base text-white/80 leading-relaxed">
@@ -268,10 +268,10 @@ export function GitaVerseDisplay({
             className="w-full flex items-center justify-between text-left"
           >
             <div className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-white/40" />
+              <MessageSquare className="w-4 h-4 text-white/70" />
               <span className="text-sm font-medium text-white/70">Commentary</span>
             </div>
-            <ChevronDown className={`w-4 h-4 text-white/40 transition-transform ${
+            <ChevronDown className={`w-4 h-4 text-white/70 transition-transform ${
               expandedSection === 'commentary' ? 'rotate-180' : ''
             }`} />
           </button>

@@ -101,12 +101,12 @@ export function PricingCard({
           <span className="text-4xl font-bold text-[#f5f0e8]">
             {displayPrice}
           </span>
-          <span className="text-[#f5f0e8]/60">
+          <span className="text-[#f5f0e8]/75">
             /{isYearly ? 'year' : 'month'}
           </span>
         </div>
         {isYearly && tier.monthlyPrice > 0 && displayMonthlyEquivalent && (
-          <p className="mt-1 text-xs text-[#f5f0e8]/50">
+          <p className="mt-1 text-xs text-[#f5f0e8]/70">
             {displayMonthlyEquivalent}/month when billed yearly
           </p>
         )}

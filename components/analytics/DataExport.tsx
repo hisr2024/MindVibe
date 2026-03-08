@@ -158,7 +158,7 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
                 </h2>
                 <button
                   onClick={handleClose}
-                  className="text-[#f5f0e8]/60 hover:text-[#f5f0e8] transition"
+                  className="text-[#f5f0e8]/75 hover:text-[#f5f0e8] transition"
                   aria-label="Close export dialog"
                 >
                   <svg
@@ -197,7 +197,7 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
                       <span className="text-sm font-medium text-[#f5f0e8]">
                         {format.label}
                       </span>
-                      <span className="text-[10px] text-[#f5f0e8]/50">
+                      <span className="text-[10px] text-[#f5f0e8]/70">
                         {format.description}
                       </span>
                     </button>
@@ -235,7 +235,7 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-[#f5f0e8]/50 mb-1">
+                    <label className="block text-xs text-[#f5f0e8]/70 mb-1">
                       From
                     </label>
                     <input
@@ -248,7 +248,7 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-[#f5f0e8]/50 mb-1">
+                    <label className="block text-xs text-[#f5f0e8]/70 mb-1">
                       To
                     </label>
                     <input
@@ -273,7 +273,7 @@ export function DataExport({ analyticsData, className = '' }: DataExportProps) {
               {/* Progress */}
               {isExporting && progress && (
                 <div className="mb-4">
-                  <div className="flex items-center justify-between text-sm text-[#f5f0e8]/60 mb-2">
+                  <div className="flex items-center justify-between text-sm text-[#f5f0e8]/75 mb-2">
                     <span>Exporting...</span>
                     <span>{progress.progress}%</span>
                   </div>

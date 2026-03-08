@@ -95,8 +95,8 @@ export function DeepResetPlanCard({
                     isActive
                       ? 'text-[#f5f0e8]'
                       : isCompleted
-                      ? 'text-[#f5f0e8]/60'
-                      : 'text-[#f5f0e8]/40'
+                      ? 'text-[#f5f0e8]/75'
+                      : 'text-[#f5f0e8]/70'
                   }`}
                 >
                   {phase.name}

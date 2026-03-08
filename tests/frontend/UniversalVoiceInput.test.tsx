@@ -17,7 +17,7 @@ let mockError: string | null = null
 let mockInterimTranscript = ''
 
 vi.mock('@/hooks/useVoiceInput', () => ({
-  useVoiceInput: (opts: { onTranscript?: (text: string, isFinal: boolean) => void }) => ({
+  useVoiceInput: (_opts: { onTranscript?: (text: string, isFinal: boolean) => void }) => ({
     isListening: mockIsListening,
     transcript: '',
     interimTranscript: mockInterimTranscript,

@@ -308,7 +308,7 @@ export default function ProfilePage() {
       {/* Page Header */}
       <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-[#f5f0e8] mb-1">My Profile</h1>
-        <p className="text-sm text-[#f5f0e8]/60">Your personal space on Sakha</p>
+        <p className="text-sm text-[#f5f0e8]/75">Your personal space on Sakha</p>
       </div>
 
       {error && (
@@ -338,7 +338,7 @@ export default function ProfilePage() {
             <CardContent className="py-4">
               <span className="text-xl mb-1 block">{stat.icon}</span>
               <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-              <p className="text-xs text-[#f5f0e8]/50 mt-1">{stat.label}</p>
+              <p className="text-xs text-[#f5f0e8]/70 mt-1">{stat.label}</p>
             </CardContent>
           </Card>
         ))}
@@ -381,7 +381,7 @@ export default function ProfilePage() {
               {profile.bio ? (
                 <p className="text-sm text-[#f5f0e8]/80">{profile.bio}</p>
               ) : (
-                <p className="text-sm text-[#f5f0e8]/50 italic">
+                <p className="text-sm text-[#f5f0e8]/70 italic">
                   Add a bio to tell others about yourself...
                 </p>
               )}
@@ -401,19 +401,19 @@ export default function ProfilePage() {
               {/* Tier details */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
                 <div className="rounded-xl border border-[#d4a44c]/10 bg-white/[0.02] p-3">
-                  <p className="text-xs text-[#f5f0e8]/50 mb-1">KIAAN Questions</p>
+                  <p className="text-xs text-[#f5f0e8]/70 mb-1">KIAAN Questions</p>
                   <p className="text-sm font-semibold text-[#f5f0e8]">
                     {isKiaanUnlimited ? 'Unlimited' : `${kiaanQuota}/month`}
                   </p>
                 </div>
                 <div className="rounded-xl border border-[#d4a44c]/10 bg-white/[0.02] p-3">
-                  <p className="text-xs text-[#f5f0e8]/50 mb-1">Active Journeys</p>
+                  <p className="text-xs text-[#f5f0e8]/70 mb-1">Active Journeys</p>
                   <p className="text-sm font-semibold text-[#f5f0e8]">
                     {journeyLimit === -1 ? 'Unlimited' : `${journeyLimit} max`}
                   </p>
                 </div>
                 <div className="rounded-xl border border-[#d4a44c]/10 bg-white/[0.02] p-3 col-span-2 sm:col-span-1">
-                  <p className="text-xs text-[#f5f0e8]/50 mb-1">Plan Status</p>
+                  <p className="text-xs text-[#f5f0e8]/70 mb-1">Plan Status</p>
                   <p className="text-sm font-semibold text-[#f5f0e8]">
                     {subscription?.status === 'active' ? 'Active' : subscription?.status ?? 'Active'}
                   </p>
@@ -456,7 +456,7 @@ export default function ProfilePage() {
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#d4a44c]/10 text-sm font-black text-[#d4a44c]">K</span>
                 <div>
                   <h2 className="text-lg font-semibold text-[#f5f0e8]">KIAAN AI Ecosystem</h2>
-                  <p className="text-xs text-[#f5f0e8]/50">{kiaanTools.length} wisdom-powered tools</p>
+                  <p className="text-xs text-[#f5f0e8]/70">{kiaanTools.length} wisdom-powered tools</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -482,7 +482,7 @@ export default function ProfilePage() {
                 <Link href="/account" className="flex items-center justify-between py-2 group">
                   <div>
                     <p className="text-sm font-medium text-[#f5f0e8] group-hover:text-[#e8b54a] transition">Account Settings</p>
-                    <p className="text-xs text-[#f5f0e8]/50">Security, sessions, and data management</p>
+                    <p className="text-xs text-[#f5f0e8]/70">Security, sessions, and data management</p>
                   </div>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#f5f0e8]/30 group-hover:text-[#e8b54a] transition">
                     <polyline points="9 18 15 12 9 6" />
@@ -492,7 +492,7 @@ export default function ProfilePage() {
                 <Link href="/kiaan/chat" className="flex items-center justify-between py-2 group">
                   <div>
                     <p className="text-sm font-medium text-[#f5f0e8] group-hover:text-[#e8b54a] transition">KIAAN Chat</p>
-                    <p className="text-xs text-[#f5f0e8]/50">Your AI wisdom companion</p>
+                    <p className="text-xs text-[#f5f0e8]/70">Your AI wisdom companion</p>
                   </div>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#f5f0e8]/30 group-hover:text-[#e8b54a] transition">
                     <polyline points="9 18 15 12 9 6" />
@@ -502,7 +502,7 @@ export default function ProfilePage() {
                 <Link href="/settings" className="flex items-center justify-between py-2 group">
                   <div>
                     <p className="text-sm font-medium text-[#f5f0e8] group-hover:text-[#e8b54a] transition">App Settings</p>
-                    <p className="text-xs text-[#f5f0e8]/50">Notifications, privacy, and accessibility</p>
+                    <p className="text-xs text-[#f5f0e8]/70">Notifications, privacy, and accessibility</p>
                   </div>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#f5f0e8]/30 group-hover:text-[#e8b54a] transition">
                     <polyline points="9 18 15 12 9 6" />

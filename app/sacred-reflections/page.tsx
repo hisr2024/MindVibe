@@ -411,7 +411,7 @@ export default function SacredReflectionsPage() {
                 placeholder="Required for decryption and sync"
                 className="mt-2 w-full bg-black/50 border border-[#d4a44c]/60 rounded-2xl px-4 py-3 text-[#f5f0e8] placeholder:text-[#f5f0e8]/50 focus:ring-2 focus:ring-[#d4a44c]/50 outline-none"
               />
-              <p className="mt-1 text-xs text-[#f5f0e8]/60">Stored only in your browser. Sakha never sees it.</p>
+              <p className="mt-1 text-xs text-[#f5f0e8]/75">Stored only in your browser. Sakha never sees it.</p>
             </div>
 
             {/* Mood Selection */}
@@ -484,7 +484,7 @@ export default function SacredReflectionsPage() {
           <section className="rounded-2xl sm:rounded-3xl border border-[#d4a44c]/15 bg-[#0d0d10]/85 p-4 sm:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-4 sm:space-y-5">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-[#f5f0e8]">Weekly Assessment</h2>
-              <span className="text-xs text-[#f5f0e8]/60">Auto-updates</span>
+              <span className="text-xs text-[#f5f0e8]/75">Auto-updates</span>
             </div>
 
             <div className="rounded-2xl bg-black/40 border border-[#d4a44c]/20 p-4 space-y-3">
@@ -518,7 +518,7 @@ export default function SacredReflectionsPage() {
             </div>
 
             <div className="text-center">
-              <span className="text-xs text-[#f5f0e8]/50">Entries this week: {weeklyEntries.length}</span>
+              <span className="text-xs text-[#f5f0e8]/70">Entries this week: {weeklyEntries.length}</span>
             </div>
           </section>
         </div>
@@ -527,7 +527,7 @@ export default function SacredReflectionsPage() {
         <section className="rounded-2xl sm:rounded-3xl border border-[#d4a44c]/15 bg-[#0c0c10]/85 p-4 sm:p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-[#f5f0e8]">Recent Reflections</h2>
-            <span className="text-xs text-[#f5f0e8]/60">Stored locally • Newest first</span>
+            <span className="text-xs text-[#f5f0e8]/75">Stored locally • Newest first</span>
           </div>
 
           {entries.length === 0 ? (

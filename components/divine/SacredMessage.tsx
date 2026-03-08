@@ -86,7 +86,7 @@ export function SacredMessage({
               animate={{ opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
-            <span className="text-xs text-white/50 font-medium tracking-wider uppercase">
+            <span className="text-xs text-white/70 font-medium tracking-wider uppercase">
               KIAAN
             </span>
           </div>

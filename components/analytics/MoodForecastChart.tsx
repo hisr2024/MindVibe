@@ -108,7 +108,7 @@ export function MoodForecastChart({ forecastDays = 7, className = '' }: MoodFore
             <TrendingUp className="h-5 w-5 text-[#d4a44c]" />
             Mood Forecast
           </h3>
-          <p className="text-sm text-[#f5f0e8]/60">
+          <p className="text-sm text-[#f5f0e8]/75">
             {forecastDays}-day prediction with confidence intervals
           </p>
         </div>
@@ -130,17 +130,17 @@ export function MoodForecastChart({ forecastDays = 7, className = '' }: MoodFore
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 p-3">
-          <div className="text-xs text-[#f5f0e8]/60 mb-1">Avg Predicted</div>
+          <div className="text-xs text-[#f5f0e8]/75 mb-1">Avg Predicted</div>
           <div className="text-2xl font-bold text-[#f5f0e8]">{avgPredicted.toFixed(1)}</div>
         </div>
         <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 p-3">
-          <div className="text-xs text-[#f5f0e8]/60 mb-1">Best Day</div>
+          <div className="text-xs text-[#f5f0e8]/75 mb-1">Best Day</div>
           <div className="text-2xl font-bold text-green-400">
             {(scores.length > 0 ? Math.max(...scores) : 0).toFixed(1)}
           </div>
         </div>
         <div className="rounded-2xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 p-3">
-          <div className="text-xs text-[#f5f0e8]/60 mb-1">Lowest Day</div>
+          <div className="text-xs text-[#f5f0e8]/75 mb-1">Lowest Day</div>
           <div className="text-2xl font-bold text-red-400">
             {(scores.length > 0 ? Math.min(...scores) : 0).toFixed(1)}
           </div>
@@ -213,7 +213,7 @@ export function MoodForecastChart({ forecastDays = 7, className = '' }: MoodFore
       </div>
 
       {/* Model Info */}
-      <div className="mt-3 text-xs text-center text-[#f5f0e8]/40">
+      <div className="mt-3 text-xs text-center text-[#f5f0e8]/70">
         Model: {forecastData.model_info.type} • Updated{' '}
         {new Date(forecastData.model_info.last_updated).toLocaleString()}
       </div>

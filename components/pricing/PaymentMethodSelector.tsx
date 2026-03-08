@@ -59,7 +59,7 @@ export function PaymentMethodSelector({
             className={`flex flex-col items-center gap-1 rounded-xl px-5 py-3 text-sm font-medium border transition-all duration-200 min-w-[100px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${
               selected === method.id
                 ? 'border-[#d4a44c]/50 bg-[#d4a44c]/15 text-[#f5f0e8] shadow-md shadow-[#d4a44c]/10'
-                : 'border-[#d4a44c]/15 bg-[#0d0d10]/85 text-[#f5f0e8]/60 hover:border-[#d4a44c]/30 hover:text-[#f5f0e8]/80'
+                : 'border-[#d4a44c]/15 bg-[#0d0d10]/85 text-[#f5f0e8]/75 hover:border-[#d4a44c]/30 hover:text-[#f5f0e8]/80'
             }`}
           >
             <span className="text-base font-semibold">{method.label}</span>

@@ -132,7 +132,7 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
             {/* Header */}
             <div className="border-b border-white/10 bg-gradient-to-r from-[#d4a44c]/10 to-purple-500/10 px-4 py-3">
               <h3 className="text-sm font-semibold text-white/90">Select Language</h3>
-              <p className="text-xs text-white/50 mt-0.5">Choose your preferred language</p>
+              <p className="text-xs text-white/70 mt-0.5">Choose your preferred language</p>
             </div>
 
             {/* Search Input */}
@@ -148,7 +148,7 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70"
                 >
                   <circle cx="11" cy="11" r="8"></circle>
                   <path d="m21 21-4.3-4.3"></path>
@@ -184,7 +184,7 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
                     >
                       <span className="flex flex-col">
                         <span className="font-medium">{langConfig.nativeName}</span>
-                        <span className={`text-xs ${isSelected ? 'text-[#e8b54a]/70' : 'text-white/40'}`}>
+                        <span className={`text-xs ${isSelected ? 'text-[#e8b54a]/70' : 'text-white/70'}`}>
                           {langConfig.name}
                         </span>
                       </span>
@@ -211,15 +211,15 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
                 })
               ) : (
                 <div className="px-4 py-8 text-center">
-                  <p className="text-white/50 text-sm">No languages found</p>
-                  <p className="text-white/30 text-xs mt-1">Try a different search term</p>
+                  <p className="text-white/70 text-sm">No languages found</p>
+                  <p className="text-white/70 text-xs mt-1">Try a different search term</p>
                 </div>
               )}
             </div>
 
             {/* Footer */}
             <div className="border-t border-white/5 bg-white/[0.02] px-4 py-2">
-              <p className="text-xs text-white/40 text-center">
+              <p className="text-xs text-white/70 text-center">
                 {Object.keys(LANGUAGES).length} languages available
               </p>
             </div>

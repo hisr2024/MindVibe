@@ -22,7 +22,7 @@ export function Day14Completed({ className = '' }: Day14CompletedProps) {
       data-testid="day14-completed"
       className={`rounded-xl border border-white/10 bg-white/5 p-8 text-center ${className}`}
     >
-      <p className="text-sm text-white/40 uppercase tracking-widest mb-3">
+      <p className="text-sm text-white/70 uppercase tracking-widest mb-3">
         Day 14
       </p>
 
@@ -35,7 +35,7 @@ export function Day14Completed({ className = '' }: Day14CompletedProps) {
 
       <p
         data-testid="day14-body"
-        className="text-white/50 mb-6 leading-relaxed max-w-md mx-auto"
+        className="text-white/70 mb-6 leading-relaxed max-w-md mx-auto"
       >
         The 14 days are a beginning, not an end. Carry what you have practised
         into everyday moments — the work deepens from here.

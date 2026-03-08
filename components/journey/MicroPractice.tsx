@@ -56,7 +56,7 @@ export function MicroPractice({ journeyId, day, className = '' }: MicroPracticeP
       data-testid="micro-practice"
     >
       <h3
-        className="text-xs font-medium uppercase tracking-wider text-white/50 mb-3"
+        className="text-xs font-medium uppercase tracking-wider text-white/70 mb-3"
         data-testid="micro-practice-title"
       >
         Today&apos;s micro-practice
@@ -72,7 +72,7 @@ export function MicroPractice({ journeyId, day, className = '' }: MicroPracticeP
       <div className="flex items-center justify-between">
         <label
           htmlFor={`practice-toggle-${day}`}
-          className="text-sm text-white/50 cursor-pointer select-none"
+          className="text-sm text-white/70 cursor-pointer select-none"
           data-testid="micro-practice-label"
         >
           Mark practiced

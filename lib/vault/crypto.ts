@@ -1,16 +1,12 @@
 import crypto from 'crypto'
+import { env } from '@/config/environment'
 
 const ENCRYPTION_KEY_LENGTH = 32
 const IV_LENGTH = 12
 const JOURNAL_KDF_INFO = 'mindvibe-journal'
 
-// TODO: Centralize environment variable access to config/environment.ts
-// to provide validation, type safety, and a single source of truth for all env vars.
 function getBaseKey(): Buffer {
-  const key = process.env.JOURNAL_ENCRYPTION_KEY
-  if (!key) {
-    throw new Error('Missing JOURNAL_ENCRYPTION_KEY environment variable')
-  }
+  const key = env.JOURNAL_ENCRYPTION_KEY
   const buf = Buffer.from(key, 'base64')
   if (buf.length < 16) {
     throw new Error(

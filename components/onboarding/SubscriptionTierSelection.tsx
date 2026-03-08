@@ -51,7 +51,7 @@ export function SubscriptionTierSelection({
       <div className="flex items-center justify-center gap-4 mb-8">
         <span
           className={`text-sm ${
-            billingCycle === 'monthly' ? 'text-[#f5f0e8]' : 'text-[#f5f0e8]/60'
+            billingCycle === 'monthly' ? 'text-[#f5f0e8]' : 'text-[#f5f0e8]/75'
           }`}
         >
           Monthly
@@ -70,7 +70,7 @@ export function SubscriptionTierSelection({
         </button>
         <span
           className={`text-sm flex items-center gap-2 ${
-            billingCycle === 'yearly' ? 'text-[#f5f0e8]' : 'text-[#f5f0e8]/60'
+            billingCycle === 'yearly' ? 'text-[#f5f0e8]' : 'text-[#f5f0e8]/75'
           }`}
         >
           Yearly
@@ -119,7 +119,7 @@ export function SubscriptionTierSelection({
                 <span className="text-2xl font-bold text-[#f5f0e8]">
                   ${price === 0 ? '0' : price}
                 </span>
-                <span className="text-xs text-[#f5f0e8]/60">
+                <span className="text-xs text-[#f5f0e8]/75">
                   /{billingCycle === 'yearly' ? 'year' : 'month'}
                 </span>
               </div>
@@ -141,7 +141,7 @@ export function SubscriptionTierSelection({
               <p className="text-xs text-[#f5f0e8]/70 mb-3">{tier.description}</p>
 
               {/* KIAAN quota */}
-              <div className="text-xs text-[#f5f0e8]/60 mb-3 pb-3 border-b border-[#d4a44c]/10">
+              <div className="text-xs text-[#f5f0e8]/75 mb-3 pb-3 border-b border-[#d4a44c]/10">
                 KIAAN:{' '}
                 {tier.kiaanQuota === 'unlimited'
                   ? 'Unlimited'
@@ -188,7 +188,7 @@ export function SubscriptionTierSelection({
                     <span>
                       {feature.name}
                       {feature.limit && (
-                        <span className="text-[#f5f0e8]/40"> ({feature.limit})</span>
+                        <span className="text-[#f5f0e8]/70"> ({feature.limit})</span>
                       )}
                     </span>
                   </li>
@@ -209,7 +209,7 @@ export function SubscriptionTierSelection({
       </div>
 
       {/* Note */}
-      <p className="text-center text-xs text-[#f5f0e8]/50 mt-6">
+      <p className="text-center text-xs text-[#f5f0e8]/70 mt-6">
         You can upgrade or change your plan anytime. All paid plans include a 15-day free trial.
       </p>
     </div>

@@ -2,21 +2,23 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import type { ToolBadge } from '@/lib/constants/tools'
+import type { ToolBadge, ToolConfig } from '@/lib/constants/tools'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useCallback } from 'react'
 
 export interface ToolCardProps {
+  /** Full tool configuration object (preferred over individual props) */
+  config?: ToolConfig
   /** Icon emoji or text to display */
-  icon: string
+  icon?: string
   /** Title of the tool */
-  title: string
+  title?: string
   /** Description of the tool (1 line) */
-  description: string
+  description?: string
   /** Tailwind gradient classes for icon background */
-  gradient: string
+  gradient?: string
   /** Link destination */
-  href: string
+  href?: string
   /** Optional badge indicator */
   badge?: ToolBadge
   /** Whether the tool is disabled */
@@ -101,16 +103,25 @@ const badgeVariants = {
  * - MindVibe brand styling (dark theme)
  */
 export function ToolCard({
-  icon,
-  title,
-  description,
-  gradient,
-  href,
-  badge,
-  disabled = false,
+  config,
+  icon: iconProp,
+  title: titleProp,
+  description: descriptionProp,
+  gradient: gradientProp,
+  href: hrefProp,
+  badge: badgeProp,
+  disabled: disabledProp,
   className = '',
   delay = 0,
 }: ToolCardProps) {
+  // Resolve props: config object takes precedence, individual props override
+  const icon = iconProp ?? config?.icon ?? ''
+  const title = titleProp ?? config?.title ?? ''
+  const description = descriptionProp ?? config?.description ?? ''
+  const gradient = gradientProp ?? config?.gradient ?? ''
+  const href = hrefProp ?? config?.href ?? '#'
+  const badge = badgeProp ?? config?.badge
+  const disabled = disabledProp ?? config?.disabled ?? false
   const { triggerHaptic } = useHapticFeedback()
 
   const badgeStyles: Record<ToolBadge, string> = {
@@ -158,7 +169,7 @@ export function ToolCard({
         <h3 className="text-sm font-semibold text-[#f5f0e8] transition-colors duration-200 group-hover:text-white">
           {title}
         </h3>
-        <p className="mt-1 text-xs text-[#f5f0e8]/60 line-clamp-2 leading-relaxed">
+        <p className="mt-1 text-xs text-[#f5f0e8]/75 line-clamp-2 leading-relaxed">
           {description}
         </p>
       </div>

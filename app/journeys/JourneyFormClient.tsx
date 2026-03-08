@@ -284,7 +284,7 @@ export default function JourneyFormClient({ mode, journeyId }: JourneyFormClient
             {fieldErrors.description && (
               <p id="description-error" className="mt-1 text-sm text-red-400">{fieldErrors.description}</p>
             )}
-            <p className="mt-1 text-right text-xs text-white/40">
+            <p className="mt-1 text-right text-xs text-white/70">
               {form.description.length}/5000
             </p>
           </div>
@@ -383,7 +383,7 @@ export default function JourneyFormClient({ mode, journeyId }: JourneyFormClient
             {fieldErrors.tags && (
               <p id="tags-error" className="mt-1 text-sm text-red-400">{fieldErrors.tags}</p>
             )}
-            <p className="mt-2 text-xs text-white/40">
+            <p className="mt-2 text-xs text-white/70">
               {form.tags.length}/10 tags
             </p>
           </div>

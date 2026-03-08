@@ -201,7 +201,7 @@ export function UniversalVoiceInput({
                 Voice is processed locally by your browser. Audio is never sent to our servers — only the
                 final text transcript is used.
               </p>
-              <p className="text-[10px] text-[#f5f0e8]/40 mt-1.5">
+              <p className="text-[10px] text-[#f5f0e8]/70 mt-1.5">
                 You can type instead at any time.
               </p>
             </div>

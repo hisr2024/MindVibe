@@ -182,7 +182,7 @@ export default function JourneyDetailPage() {
           </Link>
           <div className="text-center">
             <h1 className="text-lg font-semibold text-white">{journey.title}</h1>
-            <p className="text-xs text-white/50">
+            <p className="text-xs text-white/70">
               Day {journey.current_day} of {journey.total_days} | {journey.progress_percentage}% complete
             </p>
           </div>
@@ -247,7 +247,7 @@ export default function JourneyDetailPage() {
                       ? 'bg-green-500/30 text-green-400 border border-green-500/30'
                       : isCurrent
                       ? 'bg-purple-500/30 text-purple-300 border border-purple-500/30'
-                      : 'bg-white/5 text-white/30 border border-white/10'
+                      : 'bg-white/5 text-white/70 border border-white/10'
                     }
                     ${!isAccessible ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
                   `}
@@ -269,7 +269,7 @@ export default function JourneyDetailPage() {
                   {enemyInfo.icon === 'flame' ? '🔥' : enemyInfo.icon === 'zap' ? '⚡' : enemyInfo.icon === 'coins' ? '💰' : enemyInfo.icon === 'cloud' ? '☁️' : enemyInfo.icon === 'crown' ? '👑' : '👁️'}
                 </div>
                 <div>
-                  <div className="text-sm text-white/50">Working on conquering</div>
+                  <div className="text-sm text-white/70">Working on conquering</div>
                   <div className="font-semibold text-white">{enemyInfo.sanskrit} ({enemyInfo.name})</div>
                 </div>
               </div>

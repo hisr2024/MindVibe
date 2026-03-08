@@ -115,7 +115,7 @@ export default function CompanionChatBubble({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between mt-2 text-[10px] text-white/30">
+        <div className="flex items-center justify-between mt-2 text-[10px] text-white/70">
           {timestamp && (
             <span>
               {timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -125,7 +125,7 @@ export default function CompanionChatBubble({
           {!isUser && onSpeak && (
             <button
               onClick={() => onSpeak(content)}
-              className="ml-2 p-1 rounded-full hover:bg-white/10 transition-colors text-white/40 hover:text-white/70"
+              className="ml-2 p-1 rounded-full hover:bg-white/10 transition-colors text-white/70 hover:text-white/70"
               aria-label="Listen to this message"
               title="Listen"
             >

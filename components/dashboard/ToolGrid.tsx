@@ -22,12 +22,6 @@ export interface ToolGridProps {
  * - Section title with optional help icon
  * - Responsive grid layout (3 cols desktop, 2 cols tablet, 1 col mobile)
  * - MindVibe brand styling
- *
- * TODO(F-14): Refactor prop drilling - ToolCard receives individual props
- * (icon, title, description, gradient, href, badge, disabled) that are
- * manually spread from ToolConfig. Consider using React Context or passing
- * the full ToolConfig object to reduce prop drilling across the dashboard
- * component tree (ToolsDashboardSection -> ToolGrid -> ToolCard).
  */
 export function ToolGrid({
   title,
@@ -48,16 +42,7 @@ export function ToolGrid({
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {tools.map((tool) => (
-          <ToolCard
-            key={tool.id}
-            icon={tool.icon}
-            title={tool.title}
-            description={tool.description}
-            gradient={tool.gradient}
-            href={tool.href}
-            badge={tool.badge}
-            disabled={tool.disabled}
-          />
+          <ToolCard key={tool.id} config={tool} />
         ))}
       </div>
     </section>

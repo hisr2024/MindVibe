@@ -116,7 +116,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
             <Sparkles className="h-5 w-5 text-[#d4a44c]" />
             AI-Powered Insights
           </h3>
-          <p className="text-sm text-[#f5f0e8]/60">
+          <p className="text-sm text-[#f5f0e8]/75">
             Personalized guidance based on your patterns
           </p>
         </div>
@@ -159,7 +159,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
                   <span className="text-2xl">{insight.icon}</span>
                   <div>
                     <h4 className="text-sm font-semibold text-[#f5f0e8]">{insight.title}</h4>
-                    <p className="text-xs text-[#f5f0e8]/60 capitalize">{insight.type.replace(/_/g, ' ')}</p>
+                    <p className="text-xs text-[#f5f0e8]/75 capitalize">{insight.type.replace(/_/g, ' ')}</p>
                   </div>
                 </div>
 
@@ -181,10 +181,10 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
       {/* Footer */}
       <div className="mt-6 pt-4 border-t border-[#d4a44c]/10">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-[#f5f0e8]/60">
+          <span className="text-[#f5f0e8]/75">
             Generated {new Date(insightsData.generated_at).toLocaleString()}
           </span>
-          <span className="text-[#f5f0e8]/40">
+          <span className="text-[#f5f0e8]/70">
             {insightsData.insights.length} insights
           </span>
         </div>

@@ -115,7 +115,7 @@ export function CircleList({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-2xl font-bold text-[#f5f0e8] mb-1">Community Circles</h2>
-            <p className="text-sm text-[#f5f0e8]/60">
+            <p className="text-sm text-[#f5f0e8]/75">
               Join anonymous peer support spaces for shared experiences
             </p>
           </div>
@@ -135,7 +135,7 @@ export function CircleList({
         <div className="flex flex-col md:flex-row gap-3">
           {/* Search */}
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#f5f0e8]/40" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#f5f0e8]/70" />
             <input
               type="text"
               value={searchQuery}
@@ -147,7 +147,7 @@ export function CircleList({
 
           {/* Category Filter */}
           <div className="relative">
-            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#f5f0e8]/40 pointer-events-none" />
+            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#f5f0e8]/70 pointer-events-none" />
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -180,7 +180,7 @@ export function CircleList({
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <Loader2 className="h-12 w-12 text-[#d4a44c] animate-spin mx-auto mb-3" />
-            <p className="text-sm text-[#f5f0e8]/60">Loading circles...</p>
+            <p className="text-sm text-[#f5f0e8]/75">Loading circles...</p>
           </div>
         </div>
       )}
@@ -208,7 +208,7 @@ export function CircleList({
               </div>
             </div>
             <h3 className="text-lg font-semibold text-[#f5f0e8] mb-2">No circles found</h3>
-            <p className="text-sm text-[#f5f0e8]/60 mb-4">
+            <p className="text-sm text-[#f5f0e8]/75 mb-4">
               {searchQuery
                 ? 'Try adjusting your search or filters'
                 : showMyCircles
@@ -231,7 +231,7 @@ export function CircleList({
       {!loading && !error && filteredCircles.length > 0 && (
         <div>
           <div className="mb-4 flex items-center justify-between">
-            <p className="text-sm text-[#f5f0e8]/60">
+            <p className="text-sm text-[#f5f0e8]/75">
               {filteredCircles.length} {filteredCircles.length === 1 ? 'circle' : 'circles'} found
             </p>
           </div>

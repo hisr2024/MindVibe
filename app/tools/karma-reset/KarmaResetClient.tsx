@@ -447,7 +447,7 @@ export default function KarmaResetClient() {
                       </span>
                       <button
                         onClick={() => setSelectedCategory(null)}
-                        className="ml-auto text-xs text-[#f5f0e8]/40 hover:text-[#f5f0e8]/60"
+                        className="ml-auto text-xs text-[#f5f0e8]/70 hover:text-[#f5f0e8]/75"
                       >
                         {'\u2715'}
                       </button>
@@ -820,7 +820,7 @@ export default function KarmaResetClient() {
                               </p>
                             )}
                             {deepResponse.deep_guidance.core_verse.transliteration && (
-                              <p className="text-xs text-[#f5f0e8]/50 italic mb-2">
+                              <p className="text-xs text-[#f5f0e8]/70 italic mb-2">
                                 {deepResponse.deep_guidance.core_verse.transliteration}
                               </p>
                             )}
@@ -975,25 +975,25 @@ export default function KarmaResetClient() {
                               <p className="text-lg font-bold text-[#e8b54a]">
                                 {deepResponse.kiaan_metadata.compliance_level || 'N/A'}
                               </p>
-                              <p className="text-[10px] text-[#f5f0e8]/40 uppercase">Compliance</p>
+                              <p className="text-[10px] text-[#f5f0e8]/70 uppercase">Compliance</p>
                             </div>
                             <div className="p-3 rounded-xl bg-black/20 border border-[#d4a44c]/10 text-center">
                               <p className="text-lg font-bold text-[#e8b54a]">
                                 {deepResponse.kiaan_metadata.pillars_met}/5
                               </p>
-                              <p className="text-[10px] text-[#f5f0e8]/40 uppercase">Pillars Met</p>
+                              <p className="text-[10px] text-[#f5f0e8]/70 uppercase">Pillars Met</p>
                             </div>
                             <div className="p-3 rounded-xl bg-black/20 border border-[#d4a44c]/10 text-center">
                               <p className="text-lg font-bold text-[#e8b54a]">
                                 {deepResponse.kiaan_metadata.verses_used}
                               </p>
-                              <p className="text-[10px] text-[#f5f0e8]/40 uppercase">Verses Used</p>
+                              <p className="text-[10px] text-[#f5f0e8]/70 uppercase">Verses Used</p>
                             </div>
                             <div className="p-3 rounded-xl bg-black/20 border border-[#d4a44c]/10 text-center">
                               <p className="text-lg font-bold text-[#e8b54a]">
                                 {Math.round((deepResponse.kiaan_metadata.five_pillar_score || 0) * 100)}%
                               </p>
-                              <p className="text-[10px] text-[#f5f0e8]/40 uppercase">Five Pillar</p>
+                              <p className="text-[10px] text-[#f5f0e8]/70 uppercase">Five Pillar</p>
                             </div>
                           </div>
                         </div>

@@ -302,7 +302,7 @@ export default function ViyogClient() {
         style={{ boxShadow: '0 4px 24px rgba(212, 164, 76, 0.03)' }}
       >
         <h3 className="text-xs font-semibold text-[#f5e6c8]/60 mb-3">The Path of Viyoga</h3>
-        <p className="text-xs text-[#f5f0e8]/40 leading-relaxed">
+        <p className="text-xs text-[#f5f0e8]/70 leading-relaxed">
           Viyoga is the Gita&apos;s teaching of releasing attachment to outcomes.
           Not suppression, but freedom. You act with full effort, then release
           the result to the Divine. This is the path Krishna teaches Arjuna.

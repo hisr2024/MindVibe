@@ -289,7 +289,7 @@ export function EmotionalResetWizard({
           aria-label="Share your feelings"
           maxLength={200}
         />
-        <span className="absolute bottom-3 right-3 text-xs text-[#f5f0e8]/50">
+        <span className="absolute bottom-3 right-3 text-xs text-[#f5f0e8]/70">
           {userInput.length}/200
         </span>
       </div>
@@ -382,7 +382,7 @@ export function EmotionalResetWizard({
             />
           </div>
           <div className="divine-sacred-thread w-full" />
-          <p className="text-sm text-[#f5f0e8]/60 leading-relaxed">
+          <p className="text-sm text-[#f5f0e8]/75 leading-relaxed">
             {item.application}
           </p>
         </div>
@@ -471,7 +471,7 @@ export function EmotionalResetWizard({
           </div>
 
           <div className="divine-sacred-thread w-full" />
-          <p className="text-center text-[#f5f0e8]/60 font-sacred leading-relaxed">
+          <p className="text-center text-[#f5f0e8]/75 font-sacred leading-relaxed">
             {stepData.summary.closing_message}
           </p>
         </>
@@ -596,7 +596,7 @@ export function EmotionalResetWizard({
             className="p-2 hover:bg-white/10 rounded-lg transition"
             aria-label="Close"
           >
-            <svg className="w-5 h-5 text-[#f5f0e8]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-[#f5f0e8]/75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>

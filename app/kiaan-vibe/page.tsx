@@ -103,7 +103,7 @@ export default function KiaanVibePage() {
         >
           <BookOpen className="w-8 h-8 text-orange-400 mb-2 group-hover:scale-110 transition-transform" />
           <h3 className="font-semibold text-white">Bhagavad Gita</h3>
-          <p className="text-xs text-white/50">All languages</p>
+          <p className="text-xs text-white/70">All languages</p>
         </Link>
 
         <Link
@@ -115,7 +115,7 @@ export default function KiaanVibePage() {
           </div>
           <Volume2 className="w-8 h-8 text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
           <h3 className="font-semibold text-white">Divine Voices</h3>
-          <p className="text-xs text-white/50">Sanskrit recitation</p>
+          <p className="text-xs text-white/70">Sanskrit recitation</p>
         </Link>
 
         <Link
@@ -124,7 +124,7 @@ export default function KiaanVibePage() {
         >
           <Music2 className="w-8 h-8 text-purple-400 mb-2 group-hover:scale-110 transition-transform" />
           <h3 className="font-semibold text-white">Library</h3>
-          <p className="text-xs text-white/50">Meditation tracks</p>
+          <p className="text-xs text-white/70">Meditation tracks</p>
         </Link>
 
         <Link
@@ -133,7 +133,7 @@ export default function KiaanVibePage() {
         >
           <Upload className="w-8 h-8 text-green-400 mb-2 group-hover:scale-110 transition-transform" />
           <h3 className="font-semibold text-white">My Uploads</h3>
-          <p className="text-xs text-white/50">Your music</p>
+          <p className="text-xs text-white/70">Your music</p>
         </Link>
 
         <Link
@@ -142,7 +142,7 @@ export default function KiaanVibePage() {
         >
           <ListMusic className="w-8 h-8 text-pink-400 mb-2 group-hover:scale-110 transition-transform" />
           <h3 className="font-semibold text-white">Playlists</h3>
-          <p className="text-xs text-white/50">Your collections</p>
+          <p className="text-xs text-white/70">Your collections</p>
         </Link>
       </div>
 
@@ -245,13 +245,13 @@ export default function KiaanVibePage() {
                   <p className={`font-medium truncate ${isPlaying ? 'text-orange-400' : 'text-white'}`}>
                     {track.title}
                   </p>
-                  <p className="text-sm text-white/50 truncate">
+                  <p className="text-sm text-white/70 truncate">
                     {track.artist || 'KIAAN Vibe'}
                   </p>
                 </div>
 
                 {/* Duration */}
-                <div className="flex items-center gap-2 text-white/50">
+                <div className="flex items-center gap-2 text-white/70">
                   <Clock className="w-4 h-4" />
                   <span className="text-sm">{formatDuration(track.duration || 0)}</span>
                 </div>

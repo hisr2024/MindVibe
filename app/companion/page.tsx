@@ -480,7 +480,7 @@ export default function CompanionPage() {
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a14 0%, #12082a 50%, #0a0a14 100%)' }}>
         <div className="text-center">
           <CompanionMoodRing mood="neutral" size="xl" />
-          <p className="mt-8 text-white/40 text-sm animate-pulse">KIAAN is getting ready...</p>
+          <p className="mt-8 text-white/70 text-sm animate-pulse">KIAAN is getting ready...</p>
         </div>
       </div>
     )
@@ -517,7 +517,7 @@ export default function CompanionPage() {
 
       {/* ─── Header ─── */}
       <header className="relative z-10 flex items-center justify-between px-4 py-3 pt-safe-top">
-        <Link href="/dashboard" className="p-2 rounded-full text-white/40 hover:text-white/70 hover:bg-white/5 transition-all">
+        <Link href="/dashboard" className="p-2 rounded-full text-white/70 hover:text-white/70 hover:bg-white/5 transition-all">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
@@ -531,7 +531,7 @@ export default function CompanionPage() {
                 ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10'
                 : aiStatus === 'offline'
                 ? 'border-[#d4a44c]/30 text-[#d4a44c] bg-[#d4a44c]/10'
-                : 'border-white/10 text-white/40 bg-white/5'
+                : 'border-white/10 text-white/70 bg-white/5'
             }`}
             title={aiStatus === 'connected' ? 'AI-powered responses active' : 'Using offline wisdom'}
           >
@@ -544,7 +544,7 @@ export default function CompanionPage() {
           </span>
 
           {/* Friendship badge */}
-          <span className="text-[10px] px-2.5 py-1 rounded-full border border-white/10 text-white/50 bg-white/5">
+          <span className="text-[10px] px-2.5 py-1 rounded-full border border-white/10 text-white/70 bg-white/5">
             {session.friendshipLevel === 'deep' ? 'Best Friend' :
              session.friendshipLevel === 'close' ? 'Close Friend' :
              session.friendshipLevel === 'familiar' ? 'Friend' :
@@ -557,7 +557,7 @@ export default function CompanionPage() {
             className={`p-2 rounded-full transition-all ${
               showVoiceSettings
                 ? 'bg-purple-500/20 text-purple-400'
-                : 'text-white/30 hover:text-white/60 hover:bg-white/5'
+                : 'text-white/70 hover:text-white/60 hover:bg-white/5'
             }`}
             title="Voice, Language & Speaker Settings"
           >
@@ -573,7 +573,7 @@ export default function CompanionPage() {
             className={`p-2 rounded-full transition-all ${
               voiceConfig.autoPlay
                 ? 'bg-violet-500/20 text-violet-400'
-                : 'text-white/30 hover:text-white/60 hover:bg-white/5'
+                : 'text-white/70 hover:text-white/60 hover:bg-white/5'
             }`}
             title={voiceConfig.autoPlay ? 'Voice auto-play ON' : 'Voice auto-play OFF'}
           >
@@ -594,7 +594,7 @@ export default function CompanionPage() {
             className={`p-2 rounded-full transition-all ${
               showBreathing
                 ? 'bg-sky-500/20 text-sky-400'
-                : 'text-white/30 hover:text-white/60 hover:bg-white/5'
+                : 'text-white/70 hover:text-white/60 hover:bg-white/5'
             }`}
             title="Guided breathing"
           >
@@ -610,7 +610,7 @@ export default function CompanionPage() {
             className={`p-2 rounded-full transition-all ${
               showMoodJourney
                 ? 'bg-emerald-500/20 text-emerald-400'
-                : 'text-white/30 hover:text-white/60 hover:bg-white/5'
+                : 'text-white/70 hover:text-white/60 hover:bg-white/5'
             }`}
             title="Your mood journey & milestones"
           >
@@ -623,7 +623,7 @@ export default function CompanionPage() {
           {session.isActive && (
             <button
               onClick={endSession}
-              className="text-[10px] text-white/30 hover:text-white/60 px-2.5 py-1 rounded-full border border-white/10 hover:bg-white/5 transition-all"
+              className="text-[10px] text-white/70 hover:text-white/60 px-2.5 py-1 rounded-full border border-white/10 hover:bg-white/5 transition-all"
               title="End conversation"
             >
               End
@@ -695,7 +695,7 @@ export default function CompanionPage() {
           />
 
           <h2 className="mt-6 text-lg font-semibold text-white/90 tracking-wide">KIAAN</h2>
-          <p className="text-xs text-white/40 mt-0.5">
+          <p className="text-xs text-white/70 mt-0.5">
             {isLoading ? 'Thinking...' : session.isActive ? 'Your best friend' : 'Session ended'}
           </p>
 
@@ -863,7 +863,7 @@ export default function CompanionPage() {
       ) : (
         <footer className="relative z-10 border-t border-white/5 p-4" style={{ background: 'rgba(10,10,20,0.8)', backdropFilter: 'blur(20px)' }}>
           <div className="max-w-xl mx-auto text-center pb-safe-bottom">
-            <p className="text-sm text-white/40 mb-3">This conversation has ended.</p>
+            <p className="text-sm text-white/70 mb-3">This conversation has ended.</p>
             <button
               onClick={startSession}
               className="px-6 py-2.5 rounded-full text-sm font-medium text-white transition-all hover:scale-105"

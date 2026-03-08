@@ -25,7 +25,7 @@ export function OnboardingWizard({
   className = '',
 }: OnboardingWizardProps) {
   const [currentStep, setCurrentStep] = useState(0)
-  const [stepData, setStepData] = useState<Record<string, unknown>>({})
+  const [stepData, _setStepData] = useState<Record<string, unknown>>({})
 
   const step = steps[currentStep]
   const isFirstStep = currentStep === 0
@@ -49,13 +49,13 @@ export function OnboardingWizard({
       {/* Progress bar */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xs text-[#f5f0e8]/60">
+          <p className="text-xs text-[#f5f0e8]/75">
             Step {currentStep + 1} of {steps.length}
           </p>
           {onSkip && (
             <button
               onClick={onSkip}
-              className="text-xs text-[#f5f0e8]/50 hover:text-[#f5f0e8]/80 transition"
+              className="text-xs text-[#f5f0e8]/70 hover:text-[#f5f0e8]/80 transition"
             >
               Skip onboarding
             </button>

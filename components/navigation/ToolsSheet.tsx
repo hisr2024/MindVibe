@@ -206,7 +206,7 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
               <div className="flex items-center justify-between border-b border-white/10 px-4 pb-3 bg-gradient-to-b from-[#111118] to-transparent sticky top-0">
                 <div>
                   <h2 className="text-xl font-bold text-[#f5f0e8]">All Tools</h2>
-                  <p className="text-xs text-white/50 mt-0.5">Tap to explore your wellness toolkit</p>
+                  <p className="text-xs text-white/70 mt-0.5">Tap to explore your wellness toolkit</p>
                 </div>
                 <motion.button
                   type="button"
@@ -278,7 +278,7 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-white/50 mt-0.5">
+                          <p className="text-xs text-white/70 mt-0.5">
                             {vibePlayer.description}
                           </p>
                         </div>
@@ -349,7 +349,7 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
                               <p className="text-sm font-semibold text-[#f5f0e8] group-hover:text-white truncate">
                                 {tool.title}
                               </p>
-                              <p className="text-[10px] text-white/40 mt-0.5 truncate">
+                              <p className="text-[10px] text-white/70 mt-0.5 truncate">
                                 {tool.description}
                               </p>
                               {tool.purposeDescKey && (

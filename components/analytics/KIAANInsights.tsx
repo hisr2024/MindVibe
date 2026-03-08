@@ -144,7 +144,7 @@ export function KIAANInsights({
             />
           ) : (
             <div className="h-[180px] flex items-center justify-center">
-              <p className="text-[#f5f0e8]/50 text-sm">No activity data</p>
+              <p className="text-[#f5f0e8]/70 text-sm">No activity data</p>
             </div>
           )}
         </div>
@@ -158,11 +158,11 @@ export function KIAANInsights({
             <div className="space-y-3">
               {topTopicsData.map((topic, index) => (
                 <div key={topic.tag} className="flex items-center gap-3">
-                  <span className="text-sm text-[#f5f0e8]/60 w-4">{index + 1}.</span>
+                  <span className="text-sm text-[#f5f0e8]/75 w-4">{index + 1}.</span>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm text-[#f5f0e8] capitalize">{topic.tag}</span>
-                      <span className="text-xs text-[#f5f0e8]/50">{topic.count}</span>
+                      <span className="text-xs text-[#f5f0e8]/70">{topic.count}</span>
                     </div>
                     <div className="h-1.5 w-full rounded-full bg-[#d4a44c]/10 overflow-hidden">
                       <div
@@ -176,7 +176,7 @@ export function KIAANInsights({
             </div>
           ) : (
             <div className="h-[180px] flex items-center justify-center">
-              <p className="text-[#f5f0e8]/50 text-sm">Start chatting to see topics</p>
+              <p className="text-[#f5f0e8]/70 text-sm">Start chatting to see topics</p>
             </div>
           )}
         </div>
@@ -184,7 +184,7 @@ export function KIAANInsights({
 
       {/* Response Time */}
       <div className="mt-6 pt-6 border-t border-[#d4a44c]/10">
-        <div className="flex items-center justify-center gap-2 text-sm text-[#f5f0e8]/60">
+        <div className="flex items-center justify-center gap-2 text-sm text-[#f5f0e8]/75">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"

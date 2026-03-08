@@ -42,7 +42,7 @@ export function EmotionalResetCard({
             <p className="text-[10px] text-[#d4a44c]/50 tracking-wide mt-0.5">7-Step Sacred Flow</p>
           </div>
         </div>
-        <p className="text-sm text-[#f5f0e8]/60 mb-4 font-sacred leading-relaxed">
+        <p className="text-sm text-[#f5f0e8]/75 mb-4 font-sacred leading-relaxed">
           Process emotions, find calm, and restore your inner peace with a sacred 7-step guided flow.
         </p>
         <Link

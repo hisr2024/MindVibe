@@ -180,13 +180,13 @@ export function VoiceInputButton({
               <p className="text-[11px] text-[#f5f0e8]/70 leading-relaxed">
                 To use voice input, allow microphone access in your browser settings. Look for the lock or camera icon in your address bar.
               </p>
-              <p className="text-[10px] text-[#f5f0e8]/50">Your audio is processed locally — never stored.</p>
+              <p className="text-[10px] text-[#f5f0e8]/70">Your audio is processed locally — never stored.</p>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setShowPermissionHint(false)}
-            className="absolute top-2 right-2 text-[#f5f0e8]/40 hover:text-[#f5f0e8]/70 transition-colors"
+            className="absolute top-2 right-2 text-[#f5f0e8]/70 hover:text-[#f5f0e8]/70 transition-colors"
             aria-label="Dismiss"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

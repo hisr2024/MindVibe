@@ -238,7 +238,7 @@ export default function JourneyDetailClient({ journeyId }: JourneyDetailClientPr
         >
           {/* Description */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-            <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-white/50">
+            <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-white/70">
               Description
             </h2>
             <p className="whitespace-pre-wrap text-white/80">
@@ -249,7 +249,7 @@ export default function JourneyDetailClient({ journeyId }: JourneyDetailClientPr
           {/* Tags */}
           {journey.tags.length > 0 && (
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-white/50">
+              <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-white/70">
                 Tags
               </h2>
               <div className="flex flex-wrap gap-2">
@@ -267,24 +267,24 @@ export default function JourneyDetailClient({ journeyId }: JourneyDetailClientPr
 
           {/* Metadata */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-white/50">
+            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-white/70">
               Details
             </h2>
             <dl className="grid gap-4 sm:grid-cols-2">
               <div>
-                <dt className="text-sm text-white/40">Created</dt>
+                <dt className="text-sm text-white/70">Created</dt>
                 <dd className="mt-1 text-white/80">{formatDate(journey.created_at)}</dd>
               </div>
               <div>
-                <dt className="text-sm text-white/40">Last Updated</dt>
+                <dt className="text-sm text-white/70">Last Updated</dt>
                 <dd className="mt-1 text-white/80">{formatDate(journey.updated_at)}</dd>
               </div>
               <div>
-                <dt className="text-sm text-white/40">Journey ID</dt>
+                <dt className="text-sm text-white/70">Journey ID</dt>
                 <dd className="mt-1 font-mono text-sm text-white/60">{journey.id}</dd>
               </div>
               <div>
-                <dt className="text-sm text-white/40">Owner ID</dt>
+                <dt className="text-sm text-white/70">Owner ID</dt>
                 <dd className="mt-1 font-mono text-sm text-white/60">{journey.owner_id}</dd>
               </div>
             </dl>

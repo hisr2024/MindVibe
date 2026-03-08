@@ -228,7 +228,7 @@ export default function MobileVoiceCompanionPage() {
               className="p-2 rounded-full"
             >
               {isMuted ? (
-                <VolumeX className="w-5 h-5 text-white/40" />
+                <VolumeX className="w-5 h-5 text-white/70" />
               ) : (
                 <Volume2 className="w-5 h-5 text-white/70" />
               )}
@@ -237,7 +237,7 @@ export default function MobileVoiceCompanionPage() {
               onClick={() => setShowTranscript(!showTranscript)}
               className="p-2 rounded-full"
             >
-              <MessageSquare className={`w-5 h-5 ${showTranscript ? 'text-[#d4a44c]' : 'text-white/40'}`} />
+              <MessageSquare className={`w-5 h-5 ${showTranscript ? 'text-[#d4a44c]' : 'text-white/70'}`} />
             </button>
           </div>
         </div>
@@ -260,7 +260,7 @@ export default function MobileVoiceCompanionPage() {
                 }`}>
                   <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                   {msg.mood && (
-                    <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/50">
+                    <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/70">
                       {msg.mood}
                     </span>
                   )}
@@ -386,7 +386,7 @@ export default function MobileVoiceCompanionPage() {
           </div>
 
           {/* Status text */}
-          <p className="text-center text-xs text-white/40 mt-3">
+          <p className="text-center text-xs text-white/70 mt-3">
             {isListening
               ? 'Listening... Tap to stop'
               : isSpeaking
@@ -400,7 +400,7 @@ export default function MobileVoiceCompanionPage() {
           <div className="flex justify-center mt-4">
             <button
               onClick={() => router.push('/m/kiaan')}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.06] border border-white/[0.08] text-xs text-white/50"
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.06] border border-white/[0.08] text-xs text-white/70"
             >
               <MessageSquare className="w-3.5 h-3.5" />
               Switch to Text Chat

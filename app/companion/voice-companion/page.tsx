@@ -498,7 +498,7 @@ export default function VoiceCompanionPage() {
               <h1 className="text-lg font-bold bg-gradient-to-r from-purple-300 to-amber-300 bg-clip-text text-transparent">
                 KIAAN
               </h1>
-              <p className="text-xs text-white/40">
+              <p className="text-xs text-white/70">
                 {pageMode === 'friend' ? 'Your Best Friend' : `Gita Guide \u00B7 ${totalVerses} verses`}
               </p>
             </div>
@@ -511,7 +511,7 @@ export default function VoiceCompanionPage() {
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                   pageMode === 'friend'
                     ? 'bg-purple-500/30 text-purple-300 shadow-lg shadow-purple-500/10'
-                    : 'text-white/40 hover:text-white/60'
+                    : 'text-white/70 hover:text-white/60'
                 }`}
               >
                 Friend
@@ -521,7 +521,7 @@ export default function VoiceCompanionPage() {
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                   pageMode === 'guide'
                     ? 'bg-amber-500/30 text-amber-300 shadow-lg shadow-amber-500/10'
-                    : 'text-white/40 hover:text-white/60'
+                    : 'text-white/70 hover:text-white/60'
                 }`}
               >
                 Gita Guide
@@ -574,7 +574,7 @@ export default function VoiceCompanionPage() {
               <span className="text-amber-400 text-lg">OM</span>
               <h2 className="text-sm font-semibold text-amber-300/80 uppercase tracking-wider">Today&apos;s Wisdom</h2>
               {dailyWisdom && (
-                <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300/60 border border-purple-400/10">
+                <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300/80 border border-purple-400/10">
                   Ch.{dailyWisdom.chapter}
                 </span>
               )}
@@ -585,7 +585,7 @@ export default function VoiceCompanionPage() {
                 <p className="text-sm text-white/70 leading-relaxed mb-3">{dailyWisdom.insight}</p>
                 <div className="p-3 rounded-xl bg-white/5 border border-white/5 mb-3">
                   <p className="text-xs text-purple-300/70 font-medium mb-1">Psychology</p>
-                  <p className="text-xs text-white/50 leading-relaxed">{dailyWisdom.psychology}</p>
+                  <p className="text-xs text-white/70 leading-relaxed">{dailyWisdom.psychology}</p>
                 </div>
                 <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-400/10">
                   <p className="text-xs text-amber-300/70 font-medium mb-1">Today&apos;s Practice</p>
@@ -593,7 +593,7 @@ export default function VoiceCompanionPage() {
                 </div>
                 <div className="flex flex-wrap gap-1 mt-3">
                   {dailyWisdom.applies_to.map(tag => (
-                    <span key={tag} className="px-2 py-0.5 text-[10px] rounded-full bg-white/5 text-white/30">{tag}</span>
+                    <span key={tag} className="px-2 py-0.5 text-[10px] rounded-full bg-white/5 text-white/70">{tag}</span>
                   ))}
                 </div>
               </>
@@ -602,7 +602,7 @@ export default function VoiceCompanionPage() {
                 <p className="text-lg text-amber-100/90 font-serif italic mb-2">{dailyVerse.sanskrit}</p>
                 <p className="text-sm text-white/70 mb-3">{dailyVerse.translation}</p>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-white/40">Ch.{dailyVerse.chapter} V.{dailyVerse.verse}</span>
+                  <span className="text-xs text-white/70">Ch.{dailyVerse.chapter} V.{dailyVerse.verse}</span>
                   <button onClick={() => playVerse(dailyVerse)} className="px-3 py-1.5 text-xs rounded-full bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 transition-colors">
                     {isPlaying === `${dailyVerse.chapter}.${dailyVerse.verse}` ? 'Stop' : 'Listen'}
                   </button>
@@ -627,7 +627,7 @@ export default function VoiceCompanionPage() {
               </button>
               <button
                 onClick={() => setPageMode('guide')}
-                className="px-4 py-2 rounded-xl bg-white/5 text-white/50 hover:bg-white/10 text-sm transition-all"
+                className="px-4 py-2 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 text-sm transition-all"
               >
                 Explore Gita Wisdom
               </button>
@@ -642,7 +642,7 @@ export default function VoiceCompanionPage() {
                   </div>
                   <span className="text-xs font-medium text-teal-300">Mood Check-in</span>
                   <button onClick={() => setShowMoodCheckin(false)} className="ml-auto p-1 rounded-full hover:bg-white/10">
-                    <svg className="w-4 h-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-4 h-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -676,7 +676,7 @@ export default function VoiceCompanionPage() {
                         <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                           <span className="text-[8px] text-white font-bold">K</span>
                         </div>
-                        <span className="text-[10px] text-white/30">KIAAN</span>
+                        <span className="text-[10px] text-white/70">KIAAN</span>
                         {msg.mode === 'gita_guide' && (
                           <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300/60">Guide</span>
                         )}
@@ -696,10 +696,10 @@ export default function VoiceCompanionPage() {
                     {msg.gitaInsight && (
                       <div className="mt-2 p-3 rounded-xl bg-amber-500/5 border border-amber-400/10">
                         <p className="text-xs text-amber-300/70 font-medium">{msg.gitaInsight.modern_title} (Ch.{msg.gitaInsight.chapter})</p>
-                        <p className="text-xs text-white/50 mt-1">{msg.gitaInsight.modern_lesson}</p>
+                        <p className="text-xs text-white/70 mt-1">{msg.gitaInsight.modern_lesson}</p>
                         <button
                           onClick={() => { setPageMode('guide'); loadChapterVerses(msg.gitaInsight!.chapter) }}
-                          className="mt-2 text-[10px] text-purple-300/60 hover:text-purple-300 transition-colors"
+                          className="mt-2 text-[10px] text-purple-300/80 hover:text-purple-300 transition-colors"
                         >
                           Explore this chapter &rarr;
                         </button>
@@ -767,7 +767,7 @@ export default function VoiceCompanionPage() {
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                       dynamicEmotion === 'neutral'
                         ? 'bg-purple-500/20 text-purple-300 border border-purple-400/30'
-                        : 'bg-white/5 text-white/50 hover:bg-white/10'
+                        : 'bg-white/5 text-white/70 hover:bg-white/10'
                     }`}
                   >
                     Browse Chapters
@@ -777,14 +777,14 @@ export default function VoiceCompanionPage() {
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                       dynamicEmotion !== 'neutral'
                         ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
-                        : 'bg-white/5 text-white/50 hover:bg-white/10'
+                        : 'bg-white/5 text-white/70 hover:bg-white/10'
                     }`}
                   >
                     Guide Me (by Emotion)
                   </button>
                   <button
                     onClick={() => setPageMode('friend')}
-                    className="ml-auto px-3 py-2 rounded-xl bg-white/5 text-white/40 hover:bg-white/10 text-sm transition-all"
+                    className="ml-auto px-3 py-2 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 text-sm transition-all"
                   >
                     Talk to KIAAN
                   </button>
@@ -793,7 +793,7 @@ export default function VoiceCompanionPage() {
                 {/* Emotion Selector */}
                 {dynamicEmotion !== 'neutral' && (
                   <div className="space-y-3">
-                    <p className="text-sm text-white/50">How are you feeling? KIAAN will guide you to the right wisdom.</p>
+                    <p className="text-sm text-white/70">How are you feeling? KIAAN will guide you to the right wisdom.</p>
                     <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
                       {EMOTION_OPTIONS.map(em => (
                         <button key={em.id} onClick={() => handleEmotionSelect(em.id)}
@@ -804,7 +804,7 @@ export default function VoiceCompanionPage() {
                           }`}
                         >
                           <span className="text-2xl">{em.icon}</span>
-                          <span className="text-[10px] text-white/50">{em.label}</span>
+                          <span className="text-[10px] text-white/70">{em.label}</span>
                         </button>
                       ))}
                     </div>
@@ -818,7 +818,7 @@ export default function VoiceCompanionPage() {
                       placeholder="Search chapters by name, theme, or focus..."
                       className="w-full px-4 py-3 pl-10 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-purple-400/30"
                     />
-                    <svg className="absolute left-3 top-3.5 w-4 h-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="absolute left-3 top-3.5 w-4 h-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
@@ -832,13 +832,13 @@ export default function VoiceCompanionPage() {
                     >
                       <div className="flex items-start justify-between mb-2">
                         <span className="text-2xl font-bold text-purple-400/60 group-hover:text-purple-300 transition-colors">{ch.number}</span>
-                        <span className="text-[10px] text-white/30 px-2 py-0.5 rounded-full bg-white/5">{ch.verseCount} verses</span>
+                        <span className="text-[10px] text-white/70 px-2 py-0.5 rounded-full bg-white/5">{ch.verseCount} verses</span>
                       </div>
                       <h3 className="text-sm font-semibold text-white/90 group-hover:text-purple-200 transition-colors">{ch.englishName}</h3>
                       <p className="text-xs text-amber-400/60 mt-0.5">{ch.sanskritName}</p>
                       <div className="flex flex-wrap gap-1 mt-2">
                         {ch.themes.slice(0, 2).map(t => (
-                          <span key={t} className="px-2 py-0.5 text-[10px] rounded-full bg-white/5 text-white/40">{t}</span>
+                          <span key={t} className="px-2 py-0.5 text-[10px] rounded-full bg-white/5 text-white/70">{t}</span>
                         ))}
                       </div>
                       <p className="text-[10px] text-purple-300/50 mt-2">{ch.spiritualFocus}</p>
@@ -867,7 +867,7 @@ export default function VoiceCompanionPage() {
                         <p className="text-sm text-amber-400/70">{selectedChapterData.sanskritName}</p>
                       </div>
                     </div>
-                    <p className="text-xs text-white/40 mt-1">
+                    <p className="text-xs text-white/70 mt-1">
                       {selectedChapterData.verseCount} verses &middot; {selectedChapterData.yogaType} &middot; {selectedChapterData.spiritualFocus}
                     </p>
                     <div className="flex flex-wrap gap-1 mt-2">
@@ -891,7 +891,7 @@ export default function VoiceCompanionPage() {
                     <p className="text-xs text-teal-300/70 mb-3">{chapterGuide.secular_theme}</p>
                     {chapterGuide.psychology_connection && (
                       <div className="p-3 rounded-lg bg-white/5 border border-white/5 mb-3">
-                        <p className="text-[10px] text-purple-300/60 font-medium uppercase tracking-wider mb-1">Behavioral Science</p>
+                        <p className="text-[10px] text-purple-300/80 font-medium uppercase tracking-wider mb-1">Behavioral Science</p>
                         <p className="text-xs text-white/60 leading-relaxed">{chapterGuide.psychology_connection}</p>
                       </div>
                     )}
@@ -902,7 +902,7 @@ export default function VoiceCompanionPage() {
                     </div>
                     <div className="flex flex-wrap gap-1 mt-3">
                       {chapterGuide.applies_to.map(tag => (
-                        <span key={tag} className="px-2 py-0.5 text-[10px] rounded-full bg-white/5 text-white/30">{tag}</span>
+                        <span key={tag} className="px-2 py-0.5 text-[10px] rounded-full bg-white/5 text-white/70">{tag}</span>
                       ))}
                     </div>
                   </div>
@@ -911,7 +911,7 @@ export default function VoiceCompanionPage() {
                 {/* Verses List */}
                 <div className="space-y-3">
                   {verses.length === 0 ? (
-                    <div className="text-center py-12 text-white/30">
+                    <div className="text-center py-12 text-white/70">
                       <p>Loading verses...</p>
                       <p className="text-xs mt-2">Full verse data loads from the API</p>
                     </div>
@@ -928,7 +928,7 @@ export default function VoiceCompanionPage() {
                             <span className="text-xs text-purple-400/60 font-mono mt-1 flex-shrink-0 w-8">{verse.verse}</span>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm text-amber-200/80 font-serif leading-relaxed">{verse.sanskrit}</p>
-                              {verse.transliteration && <p className="text-xs text-white/30 mt-1 italic">{verse.transliteration}</p>}
+                              {verse.transliteration && <p className="text-xs text-white/70 mt-1 italic">{verse.transliteration}</p>}
                               <p className="text-sm text-white/70 mt-2 leading-relaxed">{verse.translation}</p>
                               {verse.theme && (
                                 <span className="inline-block mt-2 px-2 py-0.5 text-[10px] rounded-full bg-amber-500/10 text-amber-300/60">{verse.theme}</span>
@@ -936,7 +936,7 @@ export default function VoiceCompanionPage() {
                             </div>
                             <div className="flex flex-col gap-2 flex-shrink-0">
                               <button onClick={() => playVerse(verse)}
-                                className={`p-2 rounded-full transition-colors ${isVersePlaying ? 'bg-purple-500/30 text-purple-300' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                                className={`p-2 rounded-full transition-colors ${isVersePlaying ? 'bg-purple-500/30 text-purple-300' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}
                                 aria-label={isVersePlaying ? 'Stop' : 'Play'}>
                                 {isVersePlaying ? (
                                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
@@ -945,7 +945,7 @@ export default function VoiceCompanionPage() {
                                 )}
                               </button>
                               <button onClick={() => askKiaanAboutVerse(verse)}
-                                className="p-2 rounded-full bg-white/5 text-white/40 hover:bg-purple-500/20 hover:text-purple-300 transition-colors"
+                                className="p-2 rounded-full bg-white/5 text-white/70 hover:bg-purple-500/20 hover:text-purple-300 transition-colors"
                                 aria-label="Ask KIAAN" title="Ask KIAAN">
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -957,7 +957,7 @@ export default function VoiceCompanionPage() {
                           {isAskingKiaan && (
                             <div className="mt-4 pt-4 border-t border-purple-400/10">
                               {isKiaanThinking ? (
-                                <div className="flex items-center gap-2 text-purple-300/60">
+                                <div className="flex items-center gap-2 text-purple-300/80">
                                   <div className="animate-pulse flex gap-1">
                                     <div className="w-1.5 h-1.5 rounded-full bg-purple-400/60 animate-bounce" style={{ animationDelay: '0ms' }} />
                                     <div className="w-1.5 h-1.5 rounded-full bg-purple-400/60 animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -987,13 +987,13 @@ export default function VoiceCompanionPage() {
                 {/* Chapter Navigation */}
                 <div className="flex items-center justify-between pt-4">
                   {selectedChapter > 1 && (
-                    <button onClick={() => loadChapterVerses(selectedChapter - 1)} className="px-4 py-2 rounded-xl bg-white/5 text-white/50 hover:bg-white/10 text-sm transition-colors">
+                    <button onClick={() => loadChapterVerses(selectedChapter - 1)} className="px-4 py-2 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 text-sm transition-colors">
                       &larr; Chapter {selectedChapter - 1}
                     </button>
                   )}
                   <div className="flex-1" />
                   {selectedChapter < 18 && (
-                    <button onClick={() => loadChapterVerses(selectedChapter + 1)} className="px-4 py-2 rounded-xl bg-white/5 text-white/50 hover:bg-white/10 text-sm transition-colors">
+                    <button onClick={() => loadChapterVerses(selectedChapter + 1)} className="px-4 py-2 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 text-sm transition-colors">
                       Chapter {selectedChapter + 1} &rarr;
                     </button>
                   )}

@@ -137,7 +137,7 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
                 >
                   {link.label}
                   {'purposeDescKey' in link && link.purposeDescKey && (
-                    <span className="block text-[10px] font-normal text-white/40 truncate">
+                    <span className="block text-[10px] font-normal text-white/70 truncate">
                       {t(`dashboard.tool_desc.${link.purposeDescKey}`, '')}
                     </span>
                   )}
@@ -145,7 +145,7 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
               )
             })}
             <div className="border-t border-white/5 pt-2 mt-2">
-              <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white/40">
+              <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white/70">
                 {t('common.buttons.tools', 'Tools')}
               </span>
               {allTools.map((item: ToolConfig) => (
@@ -159,7 +159,7 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
                   <span className="min-w-0">
                     <span className="block">{t(`dashboard.tools.${item.id}.title`, item.title)}</span>
                     {item.purposeDescKey && (
-                      <span className="block text-[10px] text-white/40 truncate">
+                      <span className="block text-[10px] text-white/70 truncate">
                         {t(`dashboard.tool_desc.${item.purposeDescKey}`, '')}
                       </span>
                     )}

@@ -70,7 +70,7 @@ function AccordionItem({ item }: { item: { id: string; title: string; preview?: 
           <div className="flex-1">
             <span className="text-sm font-semibold text-[#f5f0e8]">{item.title}</span>
             {item.preview && (
-              <span className="ml-2 text-xs text-[#f5f0e8]/60">{item.preview}</span>
+              <span className="ml-2 text-xs text-[#f5f0e8]/75">{item.preview}</span>
             )}
           </div>
           <svg
@@ -117,7 +117,7 @@ export function DisclosureItem({ title, preview, children, defaultOpen = false, 
         <div className="flex-1">
           <span className="text-sm font-semibold text-[#f5f0e8]">{title}</span>
           {preview && !isOpen && (
-            <span className="ml-2 text-xs text-[#f5f0e8]/60">{preview}</span>
+            <span className="ml-2 text-xs text-[#f5f0e8]/75">{preview}</span>
           )}
         </div>
         <motion.svg

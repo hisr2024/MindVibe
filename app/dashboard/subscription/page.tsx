@@ -194,7 +194,7 @@ export default function SubscriptionDashboardPage() {
                 ))}
               </div>
             ) : recentPayments.length === 0 ? (
-              <p className="text-sm text-[#f5f0e8]/60">
+              <p className="text-sm text-[#f5f0e8]/75">
                 {subscription.tierId === 'free'
                   ? 'No billing history for free plan.'
                   : 'No payment records found.'}
@@ -208,10 +208,10 @@ export default function SubscriptionDashboardPage() {
                         {new Date(payment.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-xs text-[#f5f0e8]/60">
+                        <p className="text-xs text-[#f5f0e8]/75">
                           {payment.description || 'Payment'}
                         </p>
-                        <span className="text-[10px] text-[#f5f0e8]/40">
+                        <span className="text-[10px] text-[#f5f0e8]/70">
                           {PROVIDER_LABELS[payment.payment_provider] ?? payment.payment_provider}
                         </span>
                       </div>

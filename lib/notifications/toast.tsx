@@ -118,7 +118,7 @@ function ToastContainer({ toasts, removeToast }: { toasts: Toast[]; removeToast:
           </div>
           <button
             onClick={() => removeToast(toast.id)}
-            className="shrink-0 rounded-lg p-1 text-[#f5f0e8]/50 hover:text-[#f5f0e8] hover:bg-white/10"
+            className="shrink-0 rounded-lg p-1 text-[#f5f0e8]/70 hover:text-[#f5f0e8] hover:bg-white/10"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />

@@ -140,7 +140,7 @@ export function PostComposer({
       {/* Header */}
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-[#f5f0e8] mb-1">Share in {circleName}</h3>
-        <p className="text-sm text-[#f5f0e8]/60">
+        <p className="text-sm text-[#f5f0e8]/75">
           Your identity is anonymous. Be authentic and compassionate.
         </p>
       </div>
@@ -181,7 +181,7 @@ export function PostComposer({
       {!showGuidelines && (
         <button
           onClick={() => setShowGuidelines(true)}
-          className="mb-4 text-xs text-[#f5f0e8]/60 hover:text-[#f5f0e8]"
+          className="mb-4 text-xs text-[#f5f0e8]/75 hover:text-[#f5f0e8]"
         >
           Show guidelines
         </button>
@@ -202,10 +202,10 @@ export function PostComposer({
           <span
             className={
               charCount < minLength
-                ? 'text-[#f5f0e8]/40'
+                ? 'text-[#f5f0e8]/70'
                 : charCount > charLimit * 0.9
                 ? 'text-red-400'
-                : 'text-[#f5f0e8]/60'
+                : 'text-[#f5f0e8]/75'
             }
           >
             {charCount} / {charLimit} characters
@@ -339,7 +339,7 @@ export function PostComposer({
 
       {/* Community Guidelines */}
       <div className="mt-4 p-3 rounded-2xl border border-[#d4a44c]/10 bg-[#d4a44c]/5">
-        <p className="text-xs text-[#f5f0e8]/60 leading-relaxed">
+        <p className="text-xs text-[#f5f0e8]/75 leading-relaxed">
           <strong>Sacred Space:</strong> All posts are reviewed to maintain a compassionate and respectful community. Your identity
           remains anonymous. This is a space of spiritual fellowship and mutual support.
         </p>

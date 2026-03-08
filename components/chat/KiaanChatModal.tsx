@@ -212,7 +212,7 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
               <h3 className="text-lg font-semibold text-[#f5f0e8] mb-1">KIAAN</h3>
               <p className="text-[10px] text-[#d4a44c]/55 tracking-[0.12em] uppercase mb-3">Your Divine Friend</p>
               <div className="divine-sacred-thread w-16 mx-auto mb-3" />
-              <p className="text-sm text-[#f5f0e8]/60 max-w-xs mx-auto font-sacred leading-relaxed">Share what&apos;s on your heart. I am here to listen, support, and walk beside you with wisdom.</p>
+              <p className="text-sm text-[#f5f0e8]/75 max-w-xs mx-auto font-sacred leading-relaxed">Share what&apos;s on your heart. I am here to listen, support, and walk beside you with wisdom.</p>
             </div>
           )}
 

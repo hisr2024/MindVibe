@@ -23,44 +23,44 @@ export default function SiteFooter() {
             </span>
             <span className="text-orange-100/60">{t('common.app.taglineSuffix', 'Companion')}</span>
           </p>
-          <p className="text-sm leading-relaxed text-white/50">
+          <p className="text-sm leading-relaxed text-white/70">
             {t('navigation.footer.description', 'Your spiritual companion and divine friend — rooted in the Bhagavad Gita. Walk with Krishna through sacred wisdom, guided journeys, and inner peace.')}
           </p>
         </div>
         <div className="grid grid-cols-2 gap-8 md:grid-cols-3">
           <nav className="space-y-3 text-sm" aria-label="Footer explore links">
-            <p className="text-xs font-semibold uppercase tracking-widest text-white/40">{t('navigation.footer.explore', 'Explore')}</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-white/70">{t('navigation.footer.explore', 'Explore')}</p>
             <div className="flex flex-col gap-2.5">
-              <Link className="text-white/50 transition hover:text-[#e8b54a]" href="/about">
+              <Link className="text-white/70 transition hover:text-[#e8b54a]" href="/about">
                 {t('navigation.mainNav.about', 'About')}
               </Link>
-              <Link className="text-white/50 transition hover:text-[#e8b54a]" href="/features">
+              <Link className="text-white/70 transition hover:text-[#e8b54a]" href="/features">
                 {t('navigation.mainNav.features', 'Features')}
               </Link>
-              <Link className="text-white/50 transition hover:text-[#e8b54a]" href="/dashboard">
+              <Link className="text-white/70 transition hover:text-[#e8b54a]" href="/dashboard">
                 {t('navigation.mainNav.dashboard', 'Dashboard')}
               </Link>
             </div>
           </nav>
           <nav className="space-y-3 text-sm" aria-label="Footer support links">
-            <p className="text-xs font-semibold uppercase tracking-widest text-white/40">{t('navigation.footer.support', 'Support')}</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-white/70">{t('navigation.footer.support', 'Support')}</p>
             <div className="flex flex-col gap-2.5">
-              <Link className="text-white/50 transition hover:text-[#e8b54a]" href="/contact">
+              <Link className="text-white/70 transition hover:text-[#e8b54a]" href="/contact">
                 {t('navigation.mainNav.contact', 'Contact')}
               </Link>
-              <Link className="text-white/50 transition hover:text-[#e8b54a]" href="/privacy">
+              <Link className="text-white/70 transition hover:text-[#e8b54a]" href="/privacy">
                 {t('navigation.footer.privacy', 'Privacy')}
               </Link>
-              <Link className="text-white/50 transition hover:text-[#e8b54a]" href="/terms">
+              <Link className="text-white/70 transition hover:text-[#e8b54a]" href="/terms">
                 {t('navigation.footer.terms', 'Terms of Service')}
               </Link>
-              <a className="text-white/50 transition hover:text-[#e8b54a]" href="mailto:care@kiaanverse.com">
+              <a className="text-white/70 transition hover:text-[#e8b54a]" href="mailto:care@kiaanverse.com">
                 {t('navigation.footer.emailUs', 'Email us')}
               </a>
             </div>
           </nav>
           <div className="space-y-3 text-sm">
-            <p className="text-xs font-semibold uppercase tracking-widest text-white/40">{t('navigation.footer.safety', 'Sacred Trust')}</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-white/70">{t('navigation.footer.safety', 'Sacred Trust')}</p>
             <div className="flex flex-col gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#d4a44c]/10 bg-[#d4a44c]/[0.03] px-2.5 py-1 text-xs text-white/70">
                 <svg className="h-3 w-3 text-[#d4a44c]/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -80,7 +80,7 @@ export default function SiteFooter() {
       </div>
       {/* Copyright bar */}
       <div className="border-t border-white/[0.04] py-4">
-        <p className="text-center text-xs text-white/30">
+        <p className="text-center text-xs text-white/70">
           {new Date().getFullYear()} Sakha. Crafted with reverence for inner peace.
         </p>
       </div>

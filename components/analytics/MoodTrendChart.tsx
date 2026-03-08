@@ -84,11 +84,11 @@ export function MoodTrendChart({
         <div>
           <h3 className="text-lg font-semibold text-[#f5f0e8] flex items-center gap-2">
             Mood Trends
-            <span className="text-sm font-normal text-[#f5f0e8]/60">
+            <span className="text-sm font-normal text-[#f5f0e8]/75">
               {trendInfo.emoji} {trendInfo.text} ({trendInfo.change})
             </span>
           </h3>
-          <p className="text-sm text-[#f5f0e8]/50 mt-1">
+          <p className="text-sm text-[#f5f0e8]/70 mt-1">
             Avg: {data.averageScore.toFixed(1)} • High: {data.highestScore.toFixed(1)} • Low: {data.lowestScore.toFixed(1)}
           </p>
         </div>
@@ -104,7 +104,7 @@ export function MoodTrendChart({
                   className={`px-3 py-1.5 text-xs font-medium transition ${
                     period === opt.value
                       ? 'bg-[#d4a44c]/20 text-[#f5f0e8]'
-                      : 'text-[#f5f0e8]/60 hover:bg-[#d4a44c]/10'
+                      : 'text-[#f5f0e8]/75 hover:bg-[#d4a44c]/10'
                   }`}
                 >
                   {opt.label}
@@ -120,7 +120,7 @@ export function MoodTrendChart({
               className={`px-3 py-1.5 text-xs transition ${
                 chartType === 'area'
                   ? 'bg-[#d4a44c]/20 text-[#f5f0e8]'
-                  : 'text-[#f5f0e8]/60 hover:bg-[#d4a44c]/10'
+                  : 'text-[#f5f0e8]/75 hover:bg-[#d4a44c]/10'
               }`}
               title="Area Chart"
             >
@@ -134,7 +134,7 @@ export function MoodTrendChart({
               className={`px-3 py-1.5 text-xs transition ${
                 chartType === 'line'
                   ? 'bg-[#d4a44c]/20 text-[#f5f0e8]'
-                  : 'text-[#f5f0e8]/60 hover:bg-[#d4a44c]/10'
+                  : 'text-[#f5f0e8]/75 hover:bg-[#d4a44c]/10'
               }`}
               title="Line Chart"
             >
@@ -161,7 +161,7 @@ export function MoodTrendChart({
         />
       ) : (
         <div className="h-[250px] flex items-center justify-center">
-          <p className="text-[#f5f0e8]/50 text-sm">No mood data available</p>
+          <p className="text-[#f5f0e8]/70 text-sm">No mood data available</p>
         </div>
       )}
     </motion.div>
