@@ -21,7 +21,7 @@ export class MoodEntry extends Model {
   @field('note') note!: string | null;
   @field('kiaan_response') kiaanResponse!: string | null;
   @field('server_id') serverId!: string | null;
-  @field('sync_status') syncStatus!: 'synced' | 'pending' | 'error';
+  @field('sync_status') localSyncStatus!: 'synced' | 'pending' | 'error';
   @readonly @date('created_at') createdAt!: Date;
   @readonly @date('updated_at') updatedAt!: Date;
 }

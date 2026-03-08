@@ -118,7 +118,26 @@ export const lightTheme = {
   statusBarStyle: 'dark-content' as const,
 } as const;
 
-export type ThemeColors = typeof darkTheme;
+export interface ThemeColors {
+  readonly background: string;
+  readonly surface: string;
+  readonly surfaceElevated: string;
+  readonly card: string;
+  readonly cardBorder: string;
+  readonly textPrimary: string;
+  readonly textSecondary: string;
+  readonly textTertiary: string;
+  readonly accent: string;
+  readonly accentLight: string;
+  readonly tabBarBackground: string;
+  readonly tabBarBorder: string;
+  readonly miniPlayerBackground: string;
+  readonly inputBackground: string;
+  readonly inputBorder: string;
+  readonly divider: string;
+  readonly overlay: string;
+  readonly statusBarStyle: 'light-content' | 'dark-content';
+}
 
 /** Typography scale (sp units for React Native) */
 export const typography = {

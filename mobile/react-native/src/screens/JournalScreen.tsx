@@ -29,6 +29,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@services/apiClient';
 import { darkTheme, typography, spacing, radii, colors } from '@theme/tokens';
 
+interface JournalEntryItem {
+  id?: string;
+  content_encrypted?: string;
+  content?: string;
+  tags?: string[];
+  created_at?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Tags
 // ---------------------------------------------------------------------------
@@ -83,7 +91,7 @@ export function JournalScreen() {
     },
   });
 
-  const entries = Array.isArray(entriesData) ? entriesData : entriesData?.entries ?? [];
+  const entries: JournalEntryItem[] = Array.isArray(entriesData) ? entriesData : entriesData?.entries ?? [];
 
   const toggleTag = useCallback((tagId: string) => {
     setSelectedTags((prev) =>
@@ -195,18 +203,18 @@ export function JournalScreen() {
       {/* Entries List */}
       <FlatList
         data={entries}
-        keyExtractor={(item: Record<string, unknown>, i) => (item.id as string) ?? String(i)}
-        renderItem={({ item }: { item: Record<string, unknown> }) => (
+        keyExtractor={(item, i) => item.id ?? String(i)}
+        renderItem={({ item }) => (
           <View style={[styles.entryCard, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
             <Text style={[styles.entryDate, { color: theme.textTertiary }]}>
-              {formatDate((item.created_at as string) ?? new Date().toISOString())}
+              {formatDate(item.created_at ?? new Date().toISOString())}
             </Text>
             <Text style={[styles.entryContent, { color: theme.textPrimary }]} numberOfLines={4}>
-              {(item.content_encrypted as string) ?? (item.content as string) ?? ''}
+              {item.content_encrypted ?? item.content ?? ''}
             </Text>
-            {item.tags && (item.tags as string[]).length > 0 && (
+            {item.tags && item.tags.length > 0 && (
               <View style={styles.entryTags}>
-                {(item.tags as string[]).map((tagId) => {
+                {item.tags.map((tagId) => {
                   const tag = TAGS.find((t) => t.id === tagId);
                   return tag ? (
                     <Text key={tagId} style={[styles.entryTag, { color: theme.textTertiary }]}>

@@ -47,11 +47,11 @@ const PLAYLISTS: Playlist[] = [
     emoji: '🌅',
     trackCount: 5,
     tracks: [
-      { id: 'ms-1', title: 'Chapter 2 Opening', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 2.1' },
-      { id: 'ms-2', title: 'Yoga of Knowledge', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 2.11' },
-      { id: 'ms-3', title: 'The Eternal Soul', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 2.20' },
-      { id: 'ms-4', title: 'Karma Yoga', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 3.19' },
-      { id: 'ms-5', title: 'Equanimity', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 2.48' },
+      { id: 'ms-1', title: 'Chapter 2 Opening', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 2.1' },
+      { id: 'ms-2', title: 'Yoga of Knowledge', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 2.11' },
+      { id: 'ms-3', title: 'The Eternal Soul', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 2.20' },
+      { id: 'ms-4', title: 'Karma Yoga', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 3.19' },
+      { id: 'ms-5', title: 'Equanimity', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 2.48' },
     ],
   },
   {
@@ -61,11 +61,11 @@ const PLAYLISTS: Playlist[] = [
     emoji: '🕊️',
     trackCount: 5,
     tracks: [
-      { id: 'ip-1', title: 'The Steady Mind', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 2.54' },
-      { id: 'ip-2', title: 'Meditation', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 6.10' },
-      { id: 'ip-3', title: 'Peace Formula', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 5.29' },
-      { id: 'ip-4', title: 'Self Mastery', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 6.5' },
-      { id: 'ip-5', title: 'Divine Qualities', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 16.1' },
+      { id: 'ip-1', title: 'The Steady Mind', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 2.54' },
+      { id: 'ip-2', title: 'Meditation', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 6.10' },
+      { id: 'ip-3', title: 'Peace Formula', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 5.29' },
+      { id: 'ip-4', title: 'Self Mastery', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 6.5' },
+      { id: 'ip-5', title: 'Divine Qualities', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 16.1' },
     ],
   },
   {
@@ -75,10 +75,10 @@ const PLAYLISTS: Playlist[] = [
     emoji: '⚡',
     trackCount: 4,
     tracks: [
-      { id: 'ca-1', title: 'The Chain of Anger', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 2.62' },
-      { id: 'ca-2', title: 'Anger to Delusion', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 2.63' },
-      { id: 'ca-3', title: 'Rise Above', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 3.37' },
-      { id: 'ca-4', title: 'Compassion', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 12.13' },
+      { id: 'ca-1', title: 'The Chain of Anger', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 2.62' },
+      { id: 'ca-2', title: 'Anger to Delusion', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 2.63' },
+      { id: 'ca-3', title: 'Rise Above', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 3.37' },
+      { id: 'ca-4', title: 'Compassion', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 12.13' },
     ],
   },
   {
@@ -88,10 +88,10 @@ const PLAYLISTS: Playlist[] = [
     emoji: '🙏',
     trackCount: 4,
     tracks: [
-      { id: 'bk-1', title: 'Supreme Devotion', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 11.55' },
-      { id: 'bk-2', title: 'Devotee Qualities', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 12.13' },
-      { id: 'bk-3', title: 'Surrender', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 18.66' },
-      { id: 'bk-4', title: 'Love Supreme', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 9.34' },
+      { id: 'bk-1', title: 'Supreme Devotion', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 11.55' },
+      { id: 'bk-2', title: 'Devotee Qualities', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 12.13' },
+      { id: 'bk-3', title: 'Surrender', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 18.66' },
+      { id: 'bk-4', title: 'Love Supreme', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 9.34' },
     ],
   },
   {
@@ -101,10 +101,10 @@ const PLAYLISTS: Playlist[] = [
     emoji: '🌙',
     trackCount: 4,
     tracks: [
-      { id: 'er-1', title: 'Night of Creation', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 8.17' },
-      { id: 'er-2', title: 'Detachment', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 2.47' },
-      { id: 'er-3', title: 'The Wise Sleep', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 2.69' },
-      { id: 'er-4', title: 'Final Promise', artist: 'Bhagavad Gita', audioUrl: '', verseRef: 'BG 18.78' },
+      { id: 'er-1', title: 'Night of Creation', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 8.17' },
+      { id: 'er-2', title: 'Detachment', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 2.47' },
+      { id: 'er-3', title: 'The Wise Sleep', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 2.69' },
+      { id: 'er-4', title: 'Final Promise', subtitle: 'Bhagavad Gita', url: '', verseRef: 'BG 18.78' },
     ],
   },
 ];

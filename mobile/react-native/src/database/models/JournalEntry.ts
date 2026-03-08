@@ -19,7 +19,7 @@ export class JournalEntry extends Model {
   @field('content_encrypted') contentEncrypted!: string;
   @json('tags', sanitizeTags) tags!: string[];
   @field('server_id') serverId!: string | null;
-  @field('sync_status') syncStatus!: 'synced' | 'pending' | 'error';
+  @field('sync_status') localSyncStatus!: 'synced' | 'pending' | 'error';
   @readonly @date('created_at') createdAt!: Date;
   @readonly @date('updated_at') updatedAt!: Date;
 }

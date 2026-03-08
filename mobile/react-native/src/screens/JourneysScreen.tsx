@@ -128,7 +128,8 @@ export function JourneysScreen() {
 
   // Active journey card
   const renderActiveJourney = (item: Record<string, unknown>) => {
-    const enemyTheme = getEnemyTheme((item.category ?? item.primary_enemies?.[0] ?? 'krodha') as string);
+    const enemies = item.primary_enemies as string[] | undefined;
+    const enemyTheme = getEnemyTheme((item.category ?? enemies?.[0] ?? 'krodha') as string);
     const progress = Number(item.progress_percentage ?? 0);
     const currentDay = Number(item.current_day ?? 0);
     const totalDays = Number(item.total_days ?? item.duration_days ?? 14);
@@ -147,7 +148,7 @@ export function JourneysScreen() {
               {item.title as string}
             </Text>
             <Text style={[styles.activeSubtitle, { color: theme.textSecondary }]}>
-              Day {currentDay} of {totalDays} · {item.streak_days ?? 0} day streak
+              Day {currentDay} of {totalDays} · {String(item.streak_days ?? 0)} day streak
             </Text>
           </View>
           <View style={[styles.statusBadge, { backgroundColor: enemyTheme.color + '22' }]}>
@@ -190,7 +191,7 @@ export function JourneysScreen() {
           <Text style={styles.templateEmoji}>{enemyTheme.emoji}</Text>
           <View style={[styles.durationBadge, { backgroundColor: colors.alpha.goldLight }]}>
             <Text style={[styles.durationText, { color: theme.accent }]}>
-              {item.duration_days ?? 14} days
+              {String(item.duration_days ?? 14)} days
             </Text>
           </View>
         </View>
@@ -200,10 +201,10 @@ export function JourneysScreen() {
         <Text style={[styles.templateDesc, { color: theme.textSecondary }]} numberOfLines={2}>
           {item.description as string}
         </Text>
-        {item.difficulty && (
+        {typeof item.difficulty === 'string' && (
           <View style={[styles.difficultyBadge, { backgroundColor: theme.inputBackground }]}>
             <Text style={[styles.difficultyText, { color: theme.textTertiary }]}>
-              {(item.difficulty as string).charAt(0).toUpperCase() + (item.difficulty as string).slice(1)}
+              {item.difficulty.charAt(0).toUpperCase() + item.difficulty.slice(1)}
             </Text>
           </View>
         )}

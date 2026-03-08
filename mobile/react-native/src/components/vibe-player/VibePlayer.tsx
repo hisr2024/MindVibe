@@ -41,7 +41,7 @@ import Animated, {
   Extrapolation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { colors, darkTheme, spacing, typography, radii, shadows, motion } from '@theme/tokens';
+import { colors, darkTheme, spacing, typography, radii, shadows, motion, type ThemeColors } from '@theme/tokens';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -70,7 +70,7 @@ export interface VibePlayerProps {
   /** Callback when expansion state changes */
   onToggleExpand: (expanded: boolean) => void;
   /** Current theme colors */
-  theme?: typeof darkTheme;
+  theme?: ThemeColors;
 }
 
 // ---------------------------------------------------------------------------
@@ -230,7 +230,7 @@ function Waveform({ barCount = 40, isPlaying, progress }: WaveformProps) {
 
 interface MiniPlayerProps {
   onExpand: () => void;
-  theme: typeof darkTheme;
+  theme: ThemeColors;
 }
 
 function MiniPlayer({ onExpand, theme }: MiniPlayerProps) {
@@ -346,7 +346,7 @@ function MiniPlayer({ onExpand, theme }: MiniPlayerProps) {
 
 interface FullPlayerProps {
   onCollapse: () => void;
-  theme: typeof darkTheme;
+  theme: ThemeColors;
 }
 
 function FullPlayer({ onCollapse, theme }: FullPlayerProps) {
