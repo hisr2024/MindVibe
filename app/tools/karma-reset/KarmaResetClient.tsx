@@ -24,7 +24,7 @@ import { springConfigs } from '@/lib/animations/spring-configs'
 import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
 import CompanionCTA from '@/components/companion/CompanionCTA'
-import { KarmaResetTestimonials } from '@/components/testimonials'
+// Testimonials removed — will be populated with real user stories
 import {
   KARMIC_PATHS_CONFIG,
   PHASE_ICONS,
@@ -1036,8 +1036,7 @@ export default function KarmaResetClient() {
           </div>
         </div>
 
-        {/* Testimonials */}
-        <KarmaResetTestimonials />
+        {/* Testimonials section — will be added when real user stories are collected */}
 
         <CompanionCTA fromTool="karma-reset" />
       </div>
