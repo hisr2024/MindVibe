@@ -65,15 +65,6 @@ const howItWorks = [
   },
 ]
 
-// Flow pages for exploring different features
-const flowPages = [
-  { href: '/emotional-reset', title: 'Emotional Reset', detail: '7-step guided wellness flow with ancient wisdom' },
-  { href: '/flows/check-in', title: 'State check-in', detail: 'Quick mood capture with empathetic responses' },
-  { href: '/flows/kiaan', title: 'Talk to KIAAN', detail: 'Chat with clarity pause watch' },
-  { href: '/flows/ardha', title: 'Ardha reframing', detail: 'Reframes with validation and steps' },
-  { href: '/flows/viyog', title: 'Viyoga outcome reducer', detail: 'Detachment coaching' },
-  { href: '/flows/journal', title: 'Private journal', detail: 'AES-GCM encrypted storage' },
-]
 
 export default function FeaturesPage() {
   return (
@@ -142,26 +133,6 @@ export default function FeaturesPage() {
               </StaggerItem>
             ))}
           </StaggerContainer>
-        </section>
-      </FadeIn>
-
-      {/* Explore Flows - Quick Navigation */}
-      <FadeIn delay={0.3}>
-        <section className="rounded-3xl border border-[#d4a44c]/15 bg-black/40 p-6">
-          <h3 className="text-lg font-semibold text-[#f5f0e8] mb-4">Explore Flows</h3>
-          <p className="text-sm text-[#f5f0e8]/70 mb-4">Dive deeper into specific wellness experiences</p>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {flowPages.map(page => (
-              <Link
-                key={page.href}
-                href={page.href}
-                className="rounded-2xl border border-[#d4a44c]/20 bg-black/50 p-4 shadow-sm transition hover:border-[#d4a44c]/70 hover:shadow-[#d4a44c]/10 hover:scale-[1.02]"
-              >
-                <h4 className="text-sm font-semibold text-[#f5f0e8]">{page.title}</h4>
-                <p className="mt-1 text-xs text-[#f5f0e8]/70">{page.detail}</p>
-              </Link>
-            ))}
-          </div>
         </section>
       </FadeIn>
 

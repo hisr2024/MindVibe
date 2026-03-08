@@ -164,22 +164,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })
   )
 
-  // ── Guided flows ─────────────────────────────────────────────────────
-  const flowPages: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/flows`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-  ]
-
   return [
     ...corePages,
     ...featurePages,
     ...kiaanVibePages,
     ...toolPages,
     ...gitaChapterPages,
-    ...flowPages,
   ]
 }
