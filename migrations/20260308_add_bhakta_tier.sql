@@ -5,8 +5,17 @@
 -- Dependencies: Requires subscription_plans and user_subscriptions tables.
 
 -- Clean up legacy/typo tier values before applying the new CHECK constraint.
--- 'premier' is a known typo for 'premium'; any other unknown values get mapped to 'free'.
+-- 'premier' is a known typo for 'premium'. If 'premium' already exists, delete the
+-- duplicate 'premier' row; otherwise rename it.
+DELETE FROM subscription_plans
+    WHERE tier = 'premier'
+    AND EXISTS (SELECT 1 FROM subscription_plans sp2 WHERE sp2.tier = 'premium');
 UPDATE subscription_plans SET tier = 'premium' WHERE tier = 'premier';
+-- Map any other unknown tier values to 'free' (skip if 'free' row already exists to
+-- avoid unique constraint violations — just delete the unknown rows instead).
+DELETE FROM subscription_plans
+    WHERE tier NOT IN ('free', 'bhakta', 'basic', 'sadhak', 'premium', 'siddha', 'enterprise')
+    AND EXISTS (SELECT 1 FROM subscription_plans sp2 WHERE sp2.tier = 'free');
 UPDATE subscription_plans SET tier = 'free'
     WHERE tier NOT IN ('free', 'bhakta', 'basic', 'sadhak', 'premium', 'siddha', 'enterprise');
 
