@@ -5,7 +5,20 @@ import Link from 'next/link'
 import { KiaanLogo } from '@/src/components/KiaanLogo'
 import { apiFetch } from '@/lib/api'
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+/**
+ * Derive the backend WebSocket URL at runtime.
+ * In production, NEXT_PUBLIC_API_URL points to the backend (e.g. Render).
+ * In development, fallback to localhost:8000.
+ * WebSocket connections go directly to the backend because Next.js cannot proxy them.
+ */
+function getBackendWsUrl(): string {
+  const backendUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    (typeof window !== 'undefined' && process.env.NODE_ENV === 'production'
+      ? 'https://mindvibe-api.onrender.com'
+      : 'http://localhost:8000')
+  return backendUrl.replace(/^http/, 'ws')
+}
 
 const defaultRooms: RoomSummary[] = [
   { id: 'grounding', slug: 'grounding', name: 'Calm Grounding', theme: 'Gentle check-ins and deep breaths' },
@@ -105,7 +118,8 @@ export default function WisdomRoomsPage() {
     setAlert(null)
 
     // Auth is handled via httpOnly cookies sent automatically during WebSocket upgrade
-    const wsUrl = `${apiUrl.replace(/^http/, 'ws')}/api/rooms/${roomId}/ws`
+    const wsBase = getBackendWsUrl()
+    const wsUrl = `${wsBase}/api/rooms/${roomId}/ws`
     const ws = new WebSocket(wsUrl)
 
     ws.onopen = () => {

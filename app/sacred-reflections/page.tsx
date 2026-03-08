@@ -295,7 +295,7 @@ export default function SacredReflectionsPage() {
     }
   }
 
-  // Weekly assessment
+  // Weekly mood assessment (local journal entries)
   const sevenDaysAgo = new Date()
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
   const weeklyEntries = entries.filter(e => new Date(e.at) >= sevenDaysAgo)
@@ -313,7 +313,7 @@ export default function SacredReflectionsPage() {
   const positiveDays = weeklyEntries.filter(e => positiveMoods.has(e.mood ?? '')).length
   const challengingDays = weeklyEntries.filter(e => challengingMoods.has(e.mood ?? '')).length
 
-  const assessment = (() => {
+  const moodAssessment = (() => {
     if (weeklyEntries.length === 0) {
       return {
         headline: 'KIAAN gently invites you to begin your journal practice this week.',
@@ -342,6 +342,100 @@ export default function SacredReflectionsPage() {
       ]
     }
   })()
+
+  // Structured weekly assessment (backend-powered)
+  type AssessmentQuestion = {
+    id: string
+    question: string
+    type: 'scale' | 'multiselect'
+    scale?: { min: number; max: number; labels: string[] }
+    options?: string[]
+  }
+
+  type AssessmentResult = {
+    id: number
+    assessment_date: string
+    calculated_scores: Record<string, number>
+    recommended_focus_areas: string[]
+    personalized_verses: Array<{
+      chapter: number
+      verse: number
+      english?: string
+      sanskrit?: string
+      theme?: string
+    }>
+    overall_score: number | null
+    completed: boolean
+  }
+
+  const [assessmentTab, setAssessmentTab] = useState<'mood' | 'structured'>('mood')
+  const [assessmentQuestions, setAssessmentQuestions] = useState<AssessmentQuestion[]>([])
+  const [assessmentResponses, setAssessmentResponses] = useState<Record<string, number | string[]>>({})
+  const [assessmentSubmitting, setAssessmentSubmitting] = useState(false)
+  const [assessmentResult, setAssessmentResult] = useState<AssessmentResult | null>(null)
+  const [assessmentError, setAssessmentError] = useState<string | null>(null)
+
+  // Load assessment questions from backend
+  useEffect(() => {
+    async function loadQuestions() {
+      try {
+        const response = await apiFetch('/api/kiaan/weekly-assessment')
+        if (response.ok) {
+          const data = await response.json()
+          setAssessmentQuestions(data.questions || [])
+        }
+      } catch {
+        // Questions unavailable — structured assessment hidden
+      }
+    }
+    loadQuestions()
+  }, [])
+
+  // Load latest assessment result
+  useEffect(() => {
+    async function loadLatest() {
+      try {
+        const response = await apiFetch('/api/kiaan/weekly-assessment/latest')
+        if (response.ok) {
+          const data = await response.json()
+          if (data && data.id) {
+            setAssessmentResult(data)
+          }
+        }
+      } catch {
+        // No previous assessment
+      }
+    }
+    loadLatest()
+  }, [])
+
+  async function submitAssessment() {
+    setAssessmentSubmitting(true)
+    setAssessmentError(null)
+    try {
+      const response = await apiFetch('/api/kiaan/weekly-assessment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ responses: assessmentResponses })
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setAssessmentResult(data)
+        setAssessmentResponses({})
+      } else {
+        const errData = await response.json().catch(() => ({}))
+        setAssessmentError(errData.detail || 'Could not submit assessment. Please try again.')
+      }
+    } catch {
+      setAssessmentError('Connection issue. Try again in a moment.')
+    } finally {
+      setAssessmentSubmitting(false)
+    }
+  }
+
+  const allScaleQuestionsAnswered = assessmentQuestions
+    .filter(q => q.type === 'scale')
+    .every(q => assessmentResponses[q.id] !== undefined)
 
   return (
     <SubscriptionGate feature="encrypted_journal">
@@ -487,39 +581,196 @@ export default function SacredReflectionsPage() {
               <span className="text-xs text-[#f5f0e8]/75">Auto-updates</span>
             </div>
 
-            <div className="rounded-2xl bg-black/40 border border-[#d4a44c]/20 p-4 space-y-3">
-              <div className="text-sm text-[#f5f0e8]/85">
-                Most present mood: <span className="font-semibold text-[#f5f0e8]">{mostCommonMood}</span>
-              </div>
+            {/* Tab switcher */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setAssessmentTab('mood')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  assessmentTab === 'mood'
+                    ? 'bg-[#d4a44c]/70 text-black'
+                    : 'bg-white/5 text-[#f5f0e8]/70 hover:bg-white/10'
+                }`}
+              >
+                Mood Summary
+              </button>
+              <button
+                onClick={() => setAssessmentTab('structured')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  assessmentTab === 'structured'
+                    ? 'bg-[#d4a44c]/70 text-black'
+                    : 'bg-white/5 text-[#f5f0e8]/70 hover:bg-white/10'
+                }`}
+              >
+                Wellness Check-in
+              </button>
+            </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white/5 rounded-xl p-3 border border-[#d4a44c]/20">
-                  <div className="text-xs text-[#e8b54a]/80">Positive moments</div>
-                  <div className="text-2xl font-semibold text-[#f5f0e8]">{positiveDays}</div>
+            {assessmentTab === 'mood' && (
+              <>
+                <div className="rounded-2xl bg-black/40 border border-[#d4a44c]/20 p-4 space-y-3">
+                  <div className="text-sm text-[#f5f0e8]/85">
+                    Most present mood: <span className="font-semibold text-[#f5f0e8]">{mostCommonMood}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-white/5 rounded-xl p-3 border border-[#d4a44c]/20">
+                      <div className="text-xs text-[#e8b54a]/80">Positive moments</div>
+                      <div className="text-2xl font-semibold text-[#f5f0e8]">{positiveDays}</div>
+                    </div>
+                    <div className="bg-white/5 rounded-xl p-3 border border-[#d4a44c]/20">
+                      <div className="text-xs text-[#e8b54a]/80">Tender days</div>
+                      <div className="text-2xl font-semibold text-[#f5f0e8]">{challengingDays}</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="bg-white/5 rounded-xl p-3 border border-[#d4a44c]/20">
-                  <div className="text-xs text-[#e8b54a]/80">Tender days</div>
-                  <div className="text-2xl font-semibold text-[#f5f0e8]">{challengingDays}</div>
+
+                <div className="rounded-2xl bg-gradient-to-br from-[#d4a44c]/10 to-transparent border border-[#d4a44c]/20 p-4">
+                  <h3 className="text-sm font-semibold text-[#f5f0e8] mb-2">KIAAN&apos;s gentle guidance</h3>
+                  <p className="text-sm text-[#f5f0e8]/80 leading-relaxed">{moodAssessment.headline}</p>
+                  <ul className="mt-3 space-y-2 text-xs text-[#f5f0e8]/70">
+                    {moodAssessment.guidance.map((tip, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="text-[#d4a44c]">•</span>
+                        <span>{tip}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
-            </div>
 
-            <div className="rounded-2xl bg-gradient-to-br from-[#d4a44c]/10 to-transparent border border-[#d4a44c]/20 p-4">
-              <h3 className="text-sm font-semibold text-[#f5f0e8] mb-2">KIAAN&apos;s gentle guidance</h3>
-              <p className="text-sm text-[#f5f0e8]/80 leading-relaxed">{assessment.headline}</p>
-              <ul className="mt-3 space-y-2 text-xs text-[#f5f0e8]/70">
-                {assessment.guidance.map((tip, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="text-[#d4a44c]">•</span>
-                    <span>{tip}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                <div className="text-center">
+                  <span className="text-xs text-[#f5f0e8]/70">Entries this week: {weeklyEntries.length}</span>
+                </div>
+              </>
+            )}
 
-            <div className="text-center">
-              <span className="text-xs text-[#f5f0e8]/70">Entries this week: {weeklyEntries.length}</span>
-            </div>
+            {assessmentTab === 'structured' && (
+              <>
+                {/* Show previous result if exists */}
+                {assessmentResult && (
+                  <div className="rounded-2xl bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-400/20 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-[#f5f0e8]">Latest Wellness Score</h3>
+                      <span className="text-xs text-[#f5f0e8]/60">
+                        {new Date(assessmentResult.assessment_date).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="text-3xl font-bold text-emerald-300">
+                        {assessmentResult.overall_score ?? '--'}
+                      </div>
+                      <div className="text-xs text-[#f5f0e8]/70">out of 100</div>
+                    </div>
+                    {assessmentResult.recommended_focus_areas.length > 0 && (
+                      <div>
+                        <p className="text-xs font-semibold text-[#f5f0e8]/80 mb-1">Focus areas:</p>
+                        <ul className="space-y-1">
+                          {assessmentResult.recommended_focus_areas.map((area, i) => (
+                            <li key={i} className="text-xs text-[#f5f0e8]/70 flex items-start gap-2">
+                              <span className="text-[#d4a44c]">•</span>
+                              <span>{area}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {assessmentResult.personalized_verses.length > 0 && (
+                      <div>
+                        <p className="text-xs font-semibold text-[#f5f0e8]/80 mb-1">Recommended verses:</p>
+                        <ul className="space-y-1">
+                          {assessmentResult.personalized_verses.map((v, i) => (
+                            <li key={i} className="text-xs text-[#e8b54a]/80">
+                              Ch.{v.chapter} V.{v.verse}{v.theme ? ` — ${v.theme}` : ''}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Assessment form */}
+                {assessmentQuestions.length > 0 ? (
+                  <div className="space-y-4">
+                    <p className="text-xs text-[#f5f0e8]/70">
+                      Take a moment to reflect on your week. KIAAN will offer personalized Gita wisdom based on your responses.
+                    </p>
+                    {assessmentQuestions.map(q => (
+                      <div key={q.id} className="rounded-2xl bg-black/40 border border-[#d4a44c]/20 p-3 space-y-2">
+                        <p className="text-sm text-[#f5f0e8]/90">{q.question}</p>
+                        {q.type === 'scale' && q.scale && (
+                          <div className="space-y-1">
+                            <input
+                              type="range"
+                              min={q.scale.min}
+                              max={q.scale.max}
+                              value={(assessmentResponses[q.id] as number) ?? 5}
+                              onChange={e => setAssessmentResponses(prev => ({
+                                ...prev,
+                                [q.id]: parseInt(e.target.value, 10)
+                              }))}
+                              className="w-full accent-[#d4a44c] h-2 bg-white/10 rounded-full cursor-pointer"
+                            />
+                            <div className="flex justify-between text-[10px] text-[#f5f0e8]/50">
+                              <span>{q.scale.labels[0]}</span>
+                              <span className="text-sm font-semibold text-[#e8b54a]">
+                                {(assessmentResponses[q.id] as number) ?? 5}
+                              </span>
+                              <span>{q.scale.labels[1]}</span>
+                            </div>
+                          </div>
+                        )}
+                        {q.type === 'multiselect' && q.options && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {q.options.map(option => {
+                              const selected = ((assessmentResponses[q.id] as string[]) || []).includes(option)
+                              return (
+                                <button
+                                  key={option}
+                                  onClick={() => {
+                                    setAssessmentResponses(prev => {
+                                      const current = (prev[q.id] as string[]) || []
+                                      return {
+                                        ...prev,
+                                        [q.id]: selected
+                                          ? current.filter(o => o !== option)
+                                          : [...current, option]
+                                      }
+                                    })
+                                  }}
+                                  className={`px-2 py-1 rounded-lg text-[11px] border transition-all ${
+                                    selected
+                                      ? 'bg-[#d4a44c]/60 border-[#d4a44c] text-white'
+                                      : 'bg-black/30 border-[#d4a44c]/30 text-[#f5f0e8]/70 hover:border-[#d4a44c]/60'
+                                  }`}
+                                >
+                                  {option}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {assessmentError && (
+                      <p className="text-xs text-red-400">{assessmentError}</p>
+                    )}
+
+                    <button
+                      onClick={submitAssessment}
+                      disabled={assessmentSubmitting || !allScaleQuestionsAnswered}
+                      className="w-full px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#d4a44c] via-[#e8b54a] to-[#f0c96d] text-slate-950 font-semibold shadow-lg shadow-[#d4a44c]/25 disabled:opacity-50 disabled:cursor-not-allowed transition hover:scale-[1.02] text-sm"
+                    >
+                      {assessmentSubmitting ? 'Reflecting...' : 'Submit Weekly Check-in'}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-[#f5f0e8]/60">Sign in to access the wellness check-in.</p>
+                  </div>
+                )}
+              </>
+            )}
           </section>
         </div>
 
