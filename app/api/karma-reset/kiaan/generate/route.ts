@@ -252,12 +252,16 @@ interface KarmaResetRequest {
   situation: string
   feeling?: string
   repair_type: string
+  problem_category?: string
+  problem_id?: string
+  shad_ripu?: string
+  healing_insight?: string
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: KarmaResetRequest = await request.json()
-    const { situation, feeling, repair_type } = body
+    const { situation, feeling, repair_type, problem_category, problem_id, shad_ripu, healing_insight } = body
 
     // Validate input
     if (!situation || typeof situation !== 'string') {
@@ -299,6 +303,10 @@ export async function POST(request: NextRequest) {
             situation: sanitizedSituation,
             feeling: sanitizedFeeling,
             repair_type,
+            problem_category: problem_category || '',
+            problem_id: problem_id || '',
+            shad_ripu: shad_ripu || '',
+            healing_insight: healing_insight || '',
           }),
           signal: controller.signal,
           cache: 'no-store',

@@ -40,6 +40,29 @@ const EMOTION_TO_PATH: Record<string, KarmicPathKey> = {
   resentment: 'ahimsa',
 }
 
+/** Map emotion strings to shad-ripu (inner enemy) for problem context */
+const EMOTION_TO_SHAD_RIPU: Record<string, string> = {
+  guilt: 'moha',
+  shame: 'moha',
+  regret: 'moha',
+  anger: 'krodha',
+  rage: 'krodha',
+  anxiety: 'moha',
+  fear: 'moha',
+  sadness: 'moha',
+  grief: 'moha',
+  confusion: 'moha',
+  overwhelm: 'moha',
+  loneliness: 'moha',
+  betrayal: 'krodha',
+  resentment: 'krodha',
+  jealousy: 'matsarya',
+  envy: 'matsarya',
+  greed: 'lobha',
+  pride: 'mada',
+  desire: 'kama',
+}
+
 /**
  * Capture context from the current module for karma reset.
  * Assembles all relevant data (source, query, emotion, history).
@@ -75,11 +98,27 @@ export function selectKarmicPath(emotionalState: string | null): KarmicPathKey {
 }
 
 /**
+ * Select the shad-ripu (inner enemy) based on emotional state.
+ * Falls back to 'moha' (delusion) if no match found.
+ */
+export function selectShadRipu(emotionalState: string | null): string {
+  if (!emotionalState) return 'moha'
+  const lower = emotionalState.toLowerCase()
+
+  for (const [keyword, enemy] of Object.entries(EMOTION_TO_SHAD_RIPU)) {
+    if (lower.includes(keyword)) return enemy
+  }
+
+  return 'moha'
+}
+
+/**
  * Generate karma reset guidance from the backend with self-reinforcing context.
  * Calls /api/karma-reset/kiaan/generate and enriches the response.
  */
 export async function generateGuidance(context: KarmaResetContext): Promise<KarmaResetResult> {
   const karmicPath = selectKarmicPath(context.emotionalState)
+  const shadRipu = selectShadRipu(context.emotionalState)
 
   const response = await apiFetch('/api/karma-reset/kiaan/generate', {
     method: 'POST',
@@ -88,6 +127,7 @@ export async function generateGuidance(context: KarmaResetContext): Promise<Karm
       situation: context.userQuery,
       feeling: context.emotionalState || 'seeking peace',
       repair_type: karmicPath,
+      shad_ripu: shadRipu,
     }),
   })
 
