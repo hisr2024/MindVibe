@@ -34,7 +34,7 @@ vi.mock('next/navigation', () => ({
 // Mock useFeatureAccess so SubscriptionGate renders children instead of loading spinner
 vi.mock('@/hooks/useFeatureAccess', () => ({
   useFeatureAccess: () => ({
-    tier: 'premier',
+    tier: 'siddha',
     hasAccess: () => true,
     requiredTier: () => 'free',
     featureLabel: () => '',

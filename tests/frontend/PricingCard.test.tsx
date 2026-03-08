@@ -13,42 +13,42 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { PricingCard, type PricingTier } from '@/components/pricing/PricingCard'
 
 const mockTier: PricingTier = {
-  id: 'basic',
-  name: 'Plus',
-  description: 'Build a steady practice with guided support',
-  monthlyPrice: 4.99,
-  yearlyPrice: 49.99,
+  id: 'bhakta',
+  name: 'Bhakta',
+  description: 'More questions and encrypted journal for devoted seekers',
+  monthlyPrice: 6.99,
+  yearlyPrice: 47.99,
   features: [
-    '150 KIAAN questions/month',
+    '50 KIAAN questions/month',
     'Encrypted journal',
-    'Voice synthesis',
     '3 Wisdom Journeys',
+    '90-day data retention',
   ],
   cta: 'Get Started',
-  kiaanQuota: 150,
+  kiaanQuota: 50,
 }
 
 const mockFreeTier: PricingTier = {
   id: 'free',
-  name: 'Free',
-  description: 'Perfect for getting started with KIAAN',
+  name: 'Seeker',
+  description: 'Begin your spiritual journey with KIAAN',
   monthlyPrice: 0,
   yearlyPrice: 0,
   features: [
-    '15 KIAAN questions/month',
+    '5 KIAAN questions/month',
     'Mood tracking',
     'Community access',
   ],
   cta: 'Start Free',
-  kiaanQuota: 15,
+  kiaanQuota: 5,
 }
 
-const mockPremiumTier: PricingTier = {
-  id: 'premium',
-  name: 'Pro',
-  description: '300 KIAAN questions with all features unlocked',
-  monthlyPrice: 9.99,
-  yearlyPrice: 99.99,
+const mockSadhakTier: PricingTier = {
+  id: 'sadhak',
+  name: 'Sadhak',
+  description: 'Full access to all features with 300 KIAAN questions',
+  monthlyPrice: 14.99,
+  yearlyPrice: 107.99,
   features: [
     '300 KIAAN questions/month',
     'Advanced analytics',
@@ -56,7 +56,7 @@ const mockPremiumTier: PricingTier = {
   ],
   highlighted: true,
   badge: 'Most Popular',
-  cta: 'Go Pro',
+  cta: 'Go Sadhak',
   kiaanQuota: 300,
 }
 
@@ -77,7 +77,7 @@ describe('PricingCard', () => {
         />
       )
 
-      expect(screen.getByText('Plus')).toBeInTheDocument()
+      expect(screen.getByText('Bhakta')).toBeInTheDocument()
     })
 
     it('renders tier description', () => {
@@ -89,7 +89,7 @@ describe('PricingCard', () => {
         />
       )
 
-      expect(screen.getByText(/Build a steady practice/)).toBeInTheDocument()
+      expect(screen.getByText(/More questions and encrypted journal/)).toBeInTheDocument()
     })
 
     it('renders all features', () => {
@@ -129,7 +129,7 @@ describe('PricingCard', () => {
         />
       )
 
-      expect(screen.getByText('150/month')).toBeInTheDocument()
+      expect(screen.getByText('50/month')).toBeInTheDocument()
     })
 
     it('displays free tier quota (15 questions)', () => {
@@ -141,7 +141,7 @@ describe('PricingCard', () => {
         />
       )
 
-      expect(screen.getByText('15/month')).toBeInTheDocument()
+      expect(screen.getByText('5/month')).toBeInTheDocument()
     })
 
     it('shows KIAAN Questions label', () => {
@@ -167,7 +167,7 @@ describe('PricingCard', () => {
         />
       )
 
-      expect(screen.getByText('$4.99')).toBeInTheDocument()
+      expect(screen.getByText('$6.99')).toBeInTheDocument()
       expect(screen.getByText('/month')).toBeInTheDocument()
     })
 
@@ -180,7 +180,7 @@ describe('PricingCard', () => {
         />
       )
 
-      expect(screen.getByText('$49.99')).toBeInTheDocument()
+      expect(screen.getByText('$47.99')).toBeInTheDocument()
       expect(screen.getByText('/year')).toBeInTheDocument()
     })
 
@@ -190,12 +190,12 @@ describe('PricingCard', () => {
           tier={mockTier}
           isYearly={true}
           onSelect={mockOnSelect}
-          formattedMonthlyEquivalent="$4.17"
+          formattedMonthlyEquivalent="$4.00"
         />
       )
 
-      // $49.99 / 12 = ~$4.17
-      expect(screen.getByText(/\$4\.17\/month when billed yearly/)).toBeInTheDocument()
+      // $47.99 / 12 = ~$4.00
+      expect(screen.getByText(/\$4\.00\/month when billed yearly/)).toBeInTheDocument()
     })
 
     it('displays $0 for free tier', () => {
@@ -215,7 +215,7 @@ describe('PricingCard', () => {
     it('renders badge when provided', () => {
       render(
         <PricingCard
-          tier={mockPremiumTier}
+          tier={mockSadhakTier}
           isYearly={false}
           onSelect={mockOnSelect}
         />
@@ -249,7 +249,7 @@ describe('PricingCard', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Get Started' }))
 
-      expect(mockOnSelect).toHaveBeenCalledWith('basic')
+      expect(mockOnSelect).toHaveBeenCalledWith('bhakta')
       expect(mockOnSelect).toHaveBeenCalledTimes(1)
     })
 
@@ -259,7 +259,7 @@ describe('PricingCard', () => {
           tier={mockTier}
           isYearly={false}
           onSelect={mockOnSelect}
-          currentPlan="basic"
+          currentPlan="bhakta"
         />
       )
 
@@ -272,7 +272,7 @@ describe('PricingCard', () => {
           tier={mockTier}
           isYearly={false}
           onSelect={mockOnSelect}
-          currentPlan="basic"
+          currentPlan="bhakta"
         />
       )
 

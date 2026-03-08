@@ -7,16 +7,16 @@ import { Button, Card, CardContent } from '@/components/ui'
 import { updateSubscription, type Subscription } from '@/hooks/useSubscription'
 
 const tierNames: Record<string, string> = {
-  free: 'Free',
-  basic: 'Basic',
-  premium: 'Premium',
-  enterprise: 'Enterprise',
+  free: 'Seeker',
+  bhakta: 'Bhakta',
+  sadhak: 'Sadhak',
+  siddha: 'Siddha',
 }
 
 function SuccessContent() {
   const searchParams = useSearchParams()
   const _router = useRouter()
-  const tier = searchParams.get('tier') || 'basic'
+  const tier = searchParams.get('tier') || 'bhakta'
   const yearly = searchParams.get('yearly') === 'true'
   const sessionId = searchParams.get('session_id')
   const [validating, setValidating] = useState(true)
@@ -34,7 +34,7 @@ function SuccessContent() {
           const subscription: Subscription = {
             id: String(data.id ?? `sub_${tier}`),
             tierId: data.effective_tier ?? data.plan?.tier ?? tier,
-            tierName: data.plan?.name ?? tierNames[tier] ?? 'Basic',
+            tierName: data.plan?.name ?? tierNames[tier] ?? 'Bhakta',
             status: (data.status as Subscription['status']) ?? 'active',
             currentPeriodEnd: data.current_period_end
               ? new Date(data.current_period_end).toISOString()
@@ -77,10 +77,10 @@ function SuccessContent() {
           </div>
 
           <h1 className="text-2xl font-bold text-[#f5f0e8] mb-2">
-            Welcome to {tierNames[tier] || 'Basic'}!
+            Welcome to {tierNames[tier] || 'Bhakta'}!
           </h1>
           <p className="text-sm text-[#f5f0e8]/70 mb-6">
-            Your subscription is now active. You have access to all {tierNames[tier] || 'Basic'} features.
+            Your subscription is now active. You have access to all {tierNames[tier] || 'Bhakta'} features.
           </p>
 
           <div className="rounded-xl bg-[#d4a44c]/10 border border-[#d4a44c]/20 p-4 mb-6 text-left">
