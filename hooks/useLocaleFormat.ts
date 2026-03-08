@@ -61,8 +61,8 @@ export interface LocaleFormatters {
   /** Format a relative time (e.g., "2 days ago", "in 3 hours"). */
   formatRelative: (value: number, unit: Intl.RelativeTimeFormatUnit) => string
 
-  /** Format a list (e.g., "A, B, and C"). */
-  formatList: (items: string[], options?: Intl.ListFormatOptions) => string
+  /** Format a list (e.g., "A, B, and C"). Uses Intl.ListFormat when available. */
+  formatList: (items: string[], options?: { type?: 'conjunction' | 'disjunction' | 'unit'; style?: 'long' | 'short' | 'narrow' }) => string
 
   /** The resolved Intl locale tag (BCP 47). */
   intlLocale: string
@@ -115,12 +115,23 @@ export function useLocaleFormat(): LocaleFormatters {
         return relativeFormatter.format(value, unit)
       },
 
-      formatList(items: string[], options?: Intl.ListFormatOptions): string {
-        return new Intl.ListFormat(intlLocale, {
-          style: 'long',
-          type: 'conjunction',
-          ...options,
-        }).format(items)
+      formatList(
+        items: string[],
+        options?: { type?: 'conjunction' | 'disjunction' | 'unit'; style?: 'long' | 'short' | 'narrow' },
+      ): string {
+        // Intl.ListFormat is ES2021+; use it when available, otherwise fallback
+        if (typeof globalThis.Intl !== 'undefined' && 'ListFormat' in Intl) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const ListFormat = (Intl as any).ListFormat
+          return new ListFormat(intlLocale, {
+            style: 'long',
+            type: 'conjunction',
+            ...options,
+          }).format(items)
+        }
+        // Fallback: simple comma-separated join
+        if (items.length <= 1) return items[0] ?? ''
+        return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1]
       },
 
       intlLocale,

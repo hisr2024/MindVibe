@@ -13,7 +13,7 @@
 
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useLanguage } from '@/hooks/useLanguage'
 
 /** Track missing translations reported by next-intl's onError. */
@@ -41,19 +41,21 @@ export function TranslationStatus() {
     return () => window.removeEventListener('i18n-missing-key', handler)
   }, [])
 
-  // Reset on language change
+  // Reset missing keys when language changes
+  const prevLanguage = useRef(language)
   useEffect(() => {
-    missingKeys.clear()
-    setCount(0)
+    if (prevLanguage.current !== language) {
+      prevLanguage.current = language
+      missingKeys.clear()
+    }
   }, [language])
 
   const logMissingKeys = useCallback(() => {
     if (missingKeys.size > 0) {
-      console.group(`Missing translations for locale "${language}" (${missingKeys.size})`)
+      console.warn(`Missing translations for locale "${language}" (${missingKeys.size}):`)
       for (const key of missingKeys) {
-        console.warn(`  ${key}`)
+        console.warn(`  - ${key}`)
       }
-      console.groupEnd()
     }
     setExpanded((prev) => !prev)
   }, [language])

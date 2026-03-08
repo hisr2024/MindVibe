@@ -14,7 +14,7 @@
 
 import { forwardRef, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { useLanguage, type Language } from '@/hooks/useLanguage'
+import { useLanguage } from '@/hooks/useLanguage'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
