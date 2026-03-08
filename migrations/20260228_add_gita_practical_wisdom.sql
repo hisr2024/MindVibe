@@ -68,5 +68,5 @@ CREATE INDEX IF NOT EXISTS idx_gita_practical_wisdom_life_domain
     ON gita_practical_wisdom (life_domain);
 
 -- Composite index for deduplication checks (verse + domain)
-CREATE INDEX IF NOT EXISTS idx_gita_practical_wisdom_verse_domain
+CREATE UNIQUE INDEX IF NOT EXISTS idx_gita_practical_wisdom_verse_domain
     ON gita_practical_wisdom (verse_ref, life_domain);

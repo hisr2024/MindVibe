@@ -13,6 +13,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column
@@ -164,6 +165,9 @@ class GitaPracticalWisdom(Base):
     """
 
     __tablename__ = "gita_practical_wisdom"
+    __table_args__ = (
+        UniqueConstraint("verse_ref", "life_domain", name="uq_wisdom_verse_domain"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 

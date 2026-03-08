@@ -1494,6 +1494,8 @@ class GitaWisdomAutoEnricher:
             verse_context = self._fetcher.get_verse_context(chapter, verse)
 
             if not verse_context:
+                logger.debug(f"Verse {verse_ref} not found in local corpus, skipping")
+                rejected_count += 1
                 continue
 
             # Determine which domains this verse already has entries for
@@ -1513,20 +1515,27 @@ class GitaWisdomAutoEnricher:
             )
 
             if entry_data:
-                # Store in database
+                # Store in database with duplicate protection
                 try:
                     entry = GitaPracticalWisdom(**entry_data)
                     db.add(entry)
+                    await db.flush()  # Validate immediately, catches UNIQUE violations
                     enriched_count += 1
                 except Exception as e:
-                    logger.warning(f"Failed to store wisdom for {verse_ref}: {e}")
+                    await db.rollback()  # Clean up dirty session state
+                    logger.warning(f"Failed to store wisdom for {verse_ref}/{domain}: {e}")
                     rejected_count += 1
             else:
                 rejected_count += 1
 
-        # Commit batch
+        # Commit all flushed entries
         if enriched_count > 0:
-            await db.commit()
+            try:
+                await db.commit()
+            except Exception as e:
+                await db.rollback()
+                logger.error(f"Failed to commit enrichment batch: {e}")
+                enriched_count = 0
 
         self._total_enriched += enriched_count
         self._total_rejected += rejected_count
@@ -1645,7 +1654,10 @@ class GitaWisdomAutoEnricher:
                 if keyword in app_lower and domain in available_domains:
                     return domain
 
-        # Default: pick first available
+        # Default: pick first available (no theme match found)
+        logger.debug(
+            f"No theme match for '{theme}', defaulting to '{available_domains[0]}'"
+        )
         return available_domains[0]
 
     def get_status(self) -> dict:
