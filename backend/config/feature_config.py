@@ -2,8 +2,9 @@
 
 Defines which features are available for each subscription tier.
 
-Three-tier structure (March 2026 consolidation):
+Four-tier structure (March 2026):
 - FREE (Seeker): Minimal AI access to drive conversion
+- BHAKTA ($6.99/mo): 50 questions + encrypted journal for devoted seekers
 - SADHAK ($12.99/mo): Full feature access with 300 questions
 - SIDDHA ($22.99/mo): Unlimited everything with dedicated support
 """
@@ -28,11 +29,9 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         "sso": False,
         "dedicated_support": False,
         "data_retention_days": 30,
-        # Wisdom Journeys - Trial access for free users
-        "wisdom_journeys": True,  # Allow trial access
-        "wisdom_journeys_limit": 1,  # 1 trial journey
-        "wisdom_journeys_trial": True,  # This is a trial (limited to 3 days)
-        "wisdom_journeys_trial_days": 3,  # Trial limited to first 3 days
+        # Wisdom Journeys - Limited access for free users
+        "wisdom_journeys": True,
+        "wisdom_journeys_limit": 1,
         # KIAAN Ecosystem - Gated per tier
         "kiaan_divine_chat": True,  # Basic divine chat allowed
         "kiaan_friend_mode": True,  # Friend mode allowed (shares quota)
@@ -41,6 +40,30 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         "kiaan_soul_reading": False,  # Soul reading is Sadhak+
         "kiaan_voice_synthesis": False,  # Voice synthesis is Sadhak+
         "kiaan_quantum_dive": False,  # Quantum dive is Sadhak+
+    },
+    SubscriptionTier.BHAKTA: {
+        "kiaan_questions_monthly": 50,
+        "encrypted_journal": True,
+        "mood_tracking": True,
+        "wisdom_access": True,
+        "advanced_analytics": False,
+        "priority_support": False,
+        "offline_access": False,
+        "white_label": False,
+        "sso": False,
+        "dedicated_support": False,
+        "data_retention_days": 90,
+        # Wisdom Journeys - 3 active journeys for Bhakta
+        "wisdom_journeys": True,
+        "wisdom_journeys_limit": 3,
+        # KIAAN Ecosystem - Basic + Divine Chat & Friend Mode
+        "kiaan_divine_chat": True,
+        "kiaan_friend_mode": True,
+        "kiaan_voice_companion": False,
+        "kiaan_agent": False,
+        "kiaan_soul_reading": False,
+        "kiaan_voice_synthesis": False,
+        "kiaan_quantum_dive": False,
     },
     SubscriptionTier.SADHAK: {
         "kiaan_questions_monthly": 300,
@@ -156,25 +179,3 @@ def get_wisdom_journeys_limit(tier: SubscriptionTier) -> int:
     return get_tier_features(tier).get("wisdom_journeys_limit", 0)
 
 
-def is_wisdom_journeys_trial(tier: SubscriptionTier) -> bool:
-    """Check if the tier has trial access to Wisdom Journeys.
-
-    Args:
-        tier: The subscription tier.
-
-    Returns:
-        bool: True if this is trial access (limited days).
-    """
-    return get_tier_features(tier).get("wisdom_journeys_trial", False)
-
-
-def get_wisdom_journeys_trial_days(tier: SubscriptionTier) -> int:
-    """Get the trial days limit for Wisdom Journeys.
-
-    Args:
-        tier: The subscription tier.
-
-    Returns:
-        int: Maximum days allowed in trial (0 = no limit).
-    """
-    return get_tier_features(tier).get("wisdom_journeys_trial_days", 0)

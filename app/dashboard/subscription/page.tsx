@@ -157,7 +157,7 @@ export default function SubscriptionDashboardPage() {
         <UpgradePrompt
           variant="banner"
           title="Unlock More Features"
-          description="Upgrade to Sadhak ($12.99/mo) for 300 KIAAN questions and all features, or Siddha ($22.99/mo) for unlimited everything."
+          description="Upgrade to Bhakta ($6.99/mo) for 50 questions and encrypted journal, Sadhak ($12.99/mo) for 300 questions and all features, or Siddha ($22.99/mo) for unlimited everything."
           ctaText="View Plans"
           ctaLink="/pricing"
           className="mb-8"

@@ -330,7 +330,8 @@ class WisdomJourneysAccessRequired:
 
     Checks both feature access and journey limits based on subscription tier:
     - DEVELOPER: Full unlimited access (bypasses all restrictions)
-    - FREE: Trial access - 1 journey, limited to 3 days
+    - FREE: 1 Wisdom Journey
+    - BHAKTA: Up to 3 active journeys (full duration)
     - SADHAK: Up to 10 active journeys (full duration)
     - SIDDHA: Unlimited journeys
     """
@@ -394,8 +395,8 @@ class WisdomJourneysAccessRequired:
             # Provide tier-appropriate message
             if tier.value == "free":
                 message = (
-                    "Your free trial for Wisdom Journeys has ended or you've reached your trial limit. "
-                    "Upgrade to continue your spiritual transformation journey."
+                    "You've reached your free tier Wisdom Journey limit. "
+                    "Upgrade to Bhakta or higher for more journeys."
                 )
             else:
                 message = (

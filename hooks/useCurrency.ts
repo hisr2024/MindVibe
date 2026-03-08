@@ -16,16 +16,18 @@ export const CURRENCIES: Record<Currency, CurrencyConfig> = {
   INR: { symbol: '₹', code: 'INR', name: 'Indian Rupee' },
 }
 
-/** Monthly prices in USD — 3-tier structure (March 2026) */
+/** Monthly prices in USD — 4-tier structure (March 2026) */
 export const BASE_PRICES_USD: Record<string, number> = {
   free: 0,
+  bhakta: 6.99,      // Bhakta (devotee)
   sadhak: 12.99,     // Sadhak (spiritual practitioner)
   siddha: 22.99,     // Siddha (mastery / unlimited)
 }
 
-/** Yearly prices in USD — save 42% on Sadhak, 38% on Siddha */
+/** Yearly prices in USD — save 43% on Bhakta, 42% on Sadhak, 38% on Siddha */
 export const YEARLY_PRICES_USD: Record<string, number> = {
   free: 0,
+  bhakta: 47.99,     // Bhakta yearly (~$4.00/mo)
   sadhak: 89.99,     // Sadhak yearly (~$7.50/mo)
   siddha: 169.99,    // Siddha yearly (~$14.17/mo)
 }

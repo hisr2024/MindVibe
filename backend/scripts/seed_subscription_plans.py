@@ -3,8 +3,9 @@
 This script creates the initial subscription plans in the database.
 Run with: python -m backend.scripts.seed_subscription_plans
 
-Three-tier structure (March 2026 consolidation):
-- FREE (Seeker): 5 KIAAN questions/month, 1 trial wisdom journey (3-day limit)
+Four-tier structure (March 2026):
+- FREE (Seeker): 5 KIAAN questions/month, 1 Wisdom Journey
+- BHAKTA: 50 questions/month, encrypted journal, 3 wisdom journeys ($6.99/month, $47.99/year)
 - SADHAK: 300 questions/month, all features, 10 wisdom journeys ($12.99/month, $89.99/year)
 - SIDDHA: Unlimited questions, unlimited everything ($22.99/month, $169.99/year)
 """
@@ -86,7 +87,7 @@ def _get_ssl_connect_args(db_url: str) -> Dict[str, Any]:
     return {"ssl": ssl_context}
 
 
-# Plan definitions — 3-tier structure (March 2026)
+# Plan definitions — 4-tier structure (March 2026)
 SUBSCRIPTION_PLANS = [
     {
         "tier": SubscriptionTier.FREE,
@@ -107,12 +108,34 @@ SUBSCRIPTION_PLANS = [
             "data_retention_days": 30,
             "wisdom_journeys": True,
             "wisdom_journeys_limit": 1,
-            "wisdom_journeys_trial": True,
-            "wisdom_journeys_trial_days": 3,
         },
         "kiaan_questions_monthly": 5,
         "encrypted_journal": False,
         "data_retention_days": 30,
+    },
+    {
+        "tier": SubscriptionTier.BHAKTA,
+        "name": "Bhakta",
+        "description": "50 KIAAN questions with encrypted journal and 3 Wisdom Journeys",
+        "price_monthly": Decimal("6.99"),
+        "price_yearly": Decimal("47.99"),
+        "stripe_price_id_monthly": os.getenv("STRIPE_BHAKTA_MONTHLY_PRICE_ID"),
+        "stripe_price_id_yearly": os.getenv("STRIPE_BHAKTA_YEARLY_PRICE_ID"),
+        "features": {
+            "kiaan_questions_monthly": 50,
+            "encrypted_journal": True,
+            "mood_tracking": True,
+            "wisdom_access": True,
+            "advanced_analytics": False,
+            "priority_support": False,
+            "offline_access": False,
+            "data_retention_days": 90,
+            "wisdom_journeys": True,
+            "wisdom_journeys_limit": 3,
+        },
+        "kiaan_questions_monthly": 50,
+        "encrypted_journal": True,
+        "data_retention_days": 90,
     },
     {
         "tier": SubscriptionTier.SADHAK,

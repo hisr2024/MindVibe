@@ -23,7 +23,7 @@ type StepId = (typeof STEPS)[number]
 
 const STEP_TITLES = ['Welcome', 'Profile', 'Preferences', 'Plan', 'Complete']
 
-// Pricing tiers for plan selection — 3-tier structure (March 2026)
+// Pricing tiers for plan selection — 4-tier structure (March 2026)
 const pricingTiers: PricingTier[] = [
   {
     id: 'free',
@@ -36,6 +36,16 @@ const pricingTiers: PricingTier[] = [
     cta: 'Start Free',
   },
   {
+    id: 'bhakta',
+    name: 'Bhakta',
+    description: '50 questions with encrypted journal',
+    monthlyPrice: 6.99,
+    yearlyPrice: 47.99,
+    kiaanQuota: 50,
+    features: ['50 questions/month', 'Encrypted journal', '3 Wisdom Journeys', '90-day retention'],
+    cta: 'Choose Bhakta',
+  },
+  {
     id: 'sadhak',
     name: 'Sadhak',
     description: '300 questions with all features unlocked',
@@ -45,7 +55,7 @@ const pricingTiers: PricingTier[] = [
     highlighted: true,
     badge: 'Most Popular',
     features: ['300 questions/month', 'All AI tools & Voice', 'Encrypted journal', '10 Wisdom Journeys', 'Priority support'],
-    cta: 'Start 7-day trial',
+    cta: 'Choose Sadhak',
   },
   {
     id: 'siddha',
@@ -56,7 +66,7 @@ const pricingTiers: PricingTier[] = [
     kiaanQuota: 'unlimited' as unknown as number,
     badge: 'Unlimited',
     features: ['Unlimited questions', 'All Sadhak features', 'Unlimited Journeys', 'Dedicated support'],
-    cta: 'Start 7-day trial',
+    cta: 'Choose Siddha',
   },
 ]
 

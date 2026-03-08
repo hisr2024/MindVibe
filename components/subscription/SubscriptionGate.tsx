@@ -38,7 +38,7 @@ export function SubscriptionGate({ feature, children, fallback }: SubscriptionGa
     return <>{fallback}</>
   }
 
-  const tierNames: Record<string, string> = { free: 'Seeker', sadhak: 'Sadhak', siddha: 'Siddha' }
+  const tierNames: Record<string, string> = { free: 'Seeker', bhakta: 'Bhakta', sadhak: 'Sadhak', siddha: 'Siddha' }
   const tierLabel = tierNames[requiredTier(feature)] ?? requiredTier(feature)
   const label = featureLabel(feature)
 
@@ -74,13 +74,21 @@ export function SubscriptionGate({ feature, children, fallback }: SubscriptionGa
                     <FeatureItem text="Dedicated support" />
                     <FeatureItem text="Starting at $22.99/month" />
                   </>
-                ) : (
+                ) : tierLabel === 'Sadhak' ? (
                   <>
                     <FeatureItem text="300 KIAAN questions/month" />
                     <FeatureItem text="Voice Companion & Soul Reading" />
                     <FeatureItem text="Advanced analytics & insights" />
                     <FeatureItem text="10 Wisdom Journeys" />
                     <FeatureItem text="Starting at $12.99/month" />
+                  </>
+                ) : (
+                  <>
+                    <FeatureItem text="50 KIAAN questions/month" />
+                    <FeatureItem text="Encrypted journal" />
+                    <FeatureItem text="3 Wisdom Journeys" />
+                    <FeatureItem text="90-day data retention" />
+                    <FeatureItem text="Starting at $6.99/month" />
                   </>
                 )}
               </ul>

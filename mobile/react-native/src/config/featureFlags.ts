@@ -17,7 +17,7 @@
 // Types
 // ---------------------------------------------------------------------------
 
-export type SubscriptionTier = 'FREE' | 'SADHAK' | 'SIDDHA';
+export type SubscriptionTier = 'FREE' | 'BHAKTA' | 'SADHAK' | 'SIDDHA';
 
 export interface FeatureFlag {
   /** Unique identifier (e.g., "vibe_player_sleep_timer") */
@@ -98,7 +98,7 @@ export const DEFAULT_FLAGS: Record<string, FeatureFlag> = {
   journal_encryption: {
     key: 'journal_encryption',
     enabled: true,
-    minTier: 'SADHAK',
+    minTier: 'BHAKTA',
     rolloutPercent: 100,
   },
   journey_system: {
@@ -106,7 +106,7 @@ export const DEFAULT_FLAGS: Record<string, FeatureFlag> = {
     enabled: true,
     minTier: null,
     rolloutPercent: 100,
-    metadata: { freeTrialDays: 3 },
+    metadata: {},
   },
   analytics_dashboard: {
     key: 'analytics_dashboard',
