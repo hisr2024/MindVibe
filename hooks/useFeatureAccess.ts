@@ -7,17 +7,16 @@ import { useSubscription } from './useSubscription'
  * Feature access definitions by tier.
  *
  * Mirrors backend/config/feature_config.py — keep in sync when tiers change.
- * Tiers are ordered: free < basic < premium < enterprise < premier
+ * Tiers are ordered: free < bhakta < sadhak < siddha (4-tier structure, March 2026)
  */
 
-type TierId = 'free' | 'basic' | 'premium' | 'enterprise' | 'premier'
+type TierId = 'free' | 'bhakta' | 'sadhak' | 'siddha'
 
 const TIER_RANK: Record<TierId, number> = {
   free: 0,
-  basic: 1,
-  premium: 2,
-  enterprise: 3,
-  premier: 4,
+  bhakta: 1,
+  sadhak: 2,
+  siddha: 3,
 }
 
 interface FeatureDef {
@@ -31,37 +30,35 @@ interface FeatureDef {
  * All gated features and the minimum tier needed to access them.
  */
 const FEATURE_MAP: Record<string, FeatureDef> = {
-  encrypted_journal: { minTier: 'basic', label: 'Encrypted Journal' },
-  voice_synthesis: { minTier: 'basic', label: 'Voice Synthesis' },
-  wisdom_journeys_full: { minTier: 'basic', label: 'Full Wisdom Journeys' },
-  ardha_reframing: { minTier: 'basic', label: 'Ardha Cognitive Reframing' },
-  viyoga_detachment: { minTier: 'basic', label: 'Viyoga Detachment Coach' },
-  voice_companion: { minTier: 'premium', label: 'Voice Companion' },
-  soul_reading: { minTier: 'premium', label: 'Soul Reading' },
-  quantum_dive: { minTier: 'premium', label: 'Quantum Dive' },
-  kiaan_agent: { minTier: 'premium', label: 'KIAAN Agent' },
-  relationship_compass: { minTier: 'premium', label: 'Relationship Compass' },
-  advanced_analytics: { minTier: 'premium', label: 'Advanced Analytics' },
-  priority_support: { minTier: 'premium', label: 'Priority Support' },
-  offline_access: { minTier: 'premium', label: 'Offline Access' },
+  encrypted_journal: { minTier: 'bhakta', label: 'Encrypted Journal' },
+  voice_synthesis: { minTier: 'bhakta', label: 'Voice Synthesis' },
+  wisdom_journeys_full: { minTier: 'bhakta', label: 'Full Wisdom Journeys' },
+  ardha_reframing: { minTier: 'sadhak', label: 'Ardha Cognitive Reframing' },
+  viyoga_detachment: { minTier: 'sadhak', label: 'Viyoga Detachment Coach' },
+  voice_companion: { minTier: 'sadhak', label: 'Voice Companion' },
+  soul_reading: { minTier: 'sadhak', label: 'Soul Reading' },
+  quantum_dive: { minTier: 'sadhak', label: 'Quantum Dive' },
+  kiaan_agent: { minTier: 'sadhak', label: 'KIAAN Agent' },
+  relationship_compass: { minTier: 'sadhak', label: 'Relationship Compass' },
+  advanced_analytics: { minTier: 'sadhak', label: 'Advanced Analytics' },
+  priority_support: { minTier: 'sadhak', label: 'Priority Support' },
+  offline_access: { minTier: 'sadhak', label: 'Offline Access' },
 }
 
 /** KIAAN question quotas by tier (-1 = unlimited) */
 const TIER_QUOTAS: Record<TierId, number> = {
-  free: 15,
-  basic: 150,      // Plus
-  premium: 300,    // Pro
-  enterprise: 800, // Elite
-  premier: -1,     // Premier — unlimited
+  free: 5,
+  bhakta: 50,
+  sadhak: 300,
+  siddha: -1,      // Unlimited
 }
 
 /** Wisdom Journey limits by tier (-1 = unlimited) */
 const JOURNEY_LIMITS: Record<TierId, number> = {
   free: 1,
-  basic: 3,
-  premium: 10,
-  enterprise: -1,  // Elite — unlimited
-  premier: -1,     // Premier — unlimited
+  bhakta: 3,
+  sadhak: 10,
+  siddha: -1,      // Unlimited
 }
 
 export interface FeatureAccessResult {
@@ -124,8 +121,8 @@ export function useFeatureAccess(): FeatureAccessResult {
       hasAccess,
       requiredTier,
       featureLabel,
-      isPaid: isDeveloper || tierRank >= TIER_RANK.basic,
-      isPremium: isDeveloper || tierRank >= TIER_RANK.premium,
+      isPaid: isDeveloper || tierRank >= TIER_RANK.bhakta,
+      isPremium: isDeveloper || tierRank >= TIER_RANK.sadhak,
       kiaanQuota: isDeveloper ? -1 : (TIER_QUOTAS[tier] ?? 50),
       isKiaanUnlimited: isDeveloper || (TIER_QUOTAS[tier] ?? 50) === -1,
       journeyLimit: isDeveloper ? -1 : (JOURNEY_LIMITS[tier] ?? 1),

@@ -60,16 +60,15 @@ interface LinkListResponse {
 // =============================================================================
 
 const PLAN_TIERS = [
-  { value: 'basic', label: 'Plus (Basic)', price: '$4.99/mo' },
-  { value: 'premium', label: 'Pro (Premium)', price: '$9.99/mo' },
-  { value: 'enterprise', label: 'Elite (Enterprise)', price: '$15.00/mo' },
-  { value: 'premier', label: 'Premier', price: '$25.00/mo' },
+  { value: 'bhakta', label: 'Bhakta', price: '$6.99/mo' },
+  { value: 'sadhak', label: 'Sadhak', price: '$14.99/mo' },
+  { value: 'siddha', label: 'Siddha', price: '$24.99/mo' },
 ]
 
 const STEPS = ['Plan Details', 'Add Ons', 'Link Details', 'Review']
 
 const DEFAULT_FORM: SubscriptionLinkForm = {
-  plan_tier: 'premium',
+  plan_tier: 'sadhak',
   billing_period: 'monthly',
   total_count: 0,
   start_at: '',

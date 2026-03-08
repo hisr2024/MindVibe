@@ -453,9 +453,9 @@ export default function TeamsPage() {
                     </div>
                     <span
                       className={`px-2 py-0.5 text-xs rounded-full capitalize ${
-                        team.subscription_tier === 'premium'
+                        team.subscription_tier === 'sadhak'
                           ? 'bg-purple-100 text-purple-800'
-                          : team.subscription_tier === 'enterprise'
+                          : team.subscription_tier === 'siddha'
                           ? 'bg-blue-100 text-blue-800'
                           : 'bg-gray-100 text-gray-700'
                       }`}
