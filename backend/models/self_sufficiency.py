@@ -24,6 +24,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.models.base import Base, SoftDeleteMixin
@@ -68,12 +69,12 @@ class WisdomAtom(SoftDeleteMixin, Base):
     )  # validation, reframe, action, wisdom, encouragement, grounding
     sub_category: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
-    # Context tags (JSON arrays for flexible matching)
-    mood_tags: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
-    topic_tags: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
-    intent_tags: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    # Context tags (JSONB for GIN index support)
+    mood_tags: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    topic_tags: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    intent_tags: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
     phase_tags: Mapped[list[str]] = mapped_column(
-        JSON, nullable=False, default=list
+        JSONB, nullable=False, default=list
     )  # connect, listen, guide, empower
 
     # Verse association (if this atom references Gita wisdom)

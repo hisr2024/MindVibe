@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS learned_wisdom (
     -- Quality & validation
     -- 0.00 - 1.00
     quality_score NUMERIC(3, 2) NOT NULL DEFAULT 0.00,
-    validation_status validation_status NOT NULL DEFAULT 'pending',
+    validation_status validation_status NOT NULL DEFAULT 'PENDING',
     validated_by VARCHAR(64),
     validated_at TIMESTAMPTZ,
     rejection_reason TEXT,
@@ -229,22 +229,22 @@ CREATE INDEX IF NOT EXISTS idx_content_source_registry_deleted_at ON content_sou
 -- =============================================================================
 -- Pre-register trusted Gita content sources
 
-INSERT INTO content_source_registry (name, source_type, url, credibility_rating, metadata)
+INSERT INTO content_source_registry (id, name, source_type, url, credibility_rating, metadata, fetch_interval_seconds, enabled, priority, consecutive_failures, total_items_fetched)
 VALUES
-    ('ISKCON Official', 'youtube', 'https://www.youtube.com/@iskaboradioTV', 10,
-     '{"description": "Official ISKCON channel - highest credibility for Gita teachings"}'),
-    ('Swami Mukundananda', 'youtube', 'https://www.youtube.com/@SwamiMukundananda', 9,
-     '{"description": "Swami Mukundananda - authentic Gita commentary"}'),
-    ('Gaur Gopal Das', 'youtube', 'https://www.youtube.com/@GaurGopalDas', 9,
-     '{"description": "Gaur Gopal Das - modern Gita wisdom"}'),
-    ('Swami Sarvapriyananda', 'youtube', 'https://www.youtube.com/@VedantaNewYork', 10,
-     '{"description": "Vedanta Society - authentic Advaita Vedanta teachings"}'),
-    ('IIT Kanpur Gita Supersite', 'web', 'https://www.gitasupersite.iitk.ac.in/', 10,
-     '{"description": "IIT Kanpur - academic source for Gita verses"}'),
-    ('Holy Bhagavad Gita', 'web', 'https://www.holy-bhagavad-gita.org/', 8,
-     '{"description": "Online Gita resource with multiple translations"}'),
-    ('Vedabase', 'web', 'https://vedabase.io/', 9,
-     '{"description": "ISKCON Vedabase - comprehensive Gita resource"}')
+    (gen_random_uuid()::text, 'ISKCON Official', 'YOUTUBE', 'https://www.youtube.com/@iskaboradioTV', 10,
+     '{"description": "Official ISKCON channel - highest credibility for Gita teachings"}', 3600, true, 1, 0, 0),
+    (gen_random_uuid()::text, 'Swami Mukundananda', 'YOUTUBE', 'https://www.youtube.com/@SwamiMukundananda', 9,
+     '{"description": "Swami Mukundananda - authentic Gita commentary"}', 3600, true, 2, 0, 0),
+    (gen_random_uuid()::text, 'Gaur Gopal Das', 'YOUTUBE', 'https://www.youtube.com/@GaurGopalDas', 9,
+     '{"description": "Gaur Gopal Das - modern Gita wisdom"}', 3600, true, 3, 0, 0),
+    (gen_random_uuid()::text, 'Swami Sarvapriyananda', 'YOUTUBE', 'https://www.youtube.com/@VedantaNewYork', 10,
+     '{"description": "Vedanta Society - authentic Advaita Vedanta teachings"}', 3600, true, 4, 0, 0),
+    (gen_random_uuid()::text, 'IIT Kanpur Gita Supersite', 'WEB', 'https://www.gitasupersite.iitk.ac.in/', 10,
+     '{"description": "IIT Kanpur - academic source for Gita verses"}', 3600, true, 5, 0, 0),
+    (gen_random_uuid()::text, 'Holy Bhagavad Gita', 'WEB', 'https://www.holy-bhagavad-gita.org/', 8,
+     '{"description": "Online Gita resource with multiple translations"}', 3600, true, 6, 0, 0),
+    (gen_random_uuid()::text, 'Vedabase', 'WEB', 'https://vedabase.io/', 9,
+     '{"description": "ISKCON Vedabase - comprehensive Gita resource"}', 3600, true, 7, 0, 0)
 ON CONFLICT (name) DO NOTHING;
 
 -- =============================================================================

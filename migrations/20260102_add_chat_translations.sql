@@ -46,6 +46,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_chat_translations_updated_at ON chat_translations;
 CREATE TRIGGER trigger_update_chat_translations_updated_at
     BEFORE UPDATE ON chat_translations
     FOR EACH ROW
