@@ -319,4 +319,48 @@ export const api = {
     update: (data: Record<string, unknown>) =>
       apiClient.post('/api/profile', data),
   },
+
+  /** Emotional Reset */
+  emotionalReset: {
+    start: (emotion: string, intensity: number) =>
+      apiClient.post('/api/emotional-reset/start', { emotion, intensity }),
+    step: (sessionId: string, stepData: Record<string, unknown>) =>
+      apiClient.post('/api/emotional-reset/step', { session_id: sessionId, ...stepData }),
+    complete: (sessionId: string) =>
+      apiClient.post('/api/emotional-reset/complete', { session_id: sessionId }),
+  },
+
+  /** Analytics */
+  analytics: {
+    dashboard: () => apiClient.get('/analytics/dashboard'),
+    moodTrends: () => apiClient.get('/analytics/mood-trends'),
+    weeklyInsights: () => apiClient.get('/analytics/weekly-summary'),
+    achievements: () => apiClient.get('/analytics/achievements'),
+  },
+
+  /** Subscriptions */
+  subscriptions: {
+    tiers: () => apiClient.get('/api/subscriptions/tiers'),
+    current: () => apiClient.get('/api/subscriptions/current'),
+    usage: () => apiClient.get('/api/subscriptions/usage'),
+  },
+
+  /** Sync (offline batch) */
+  sync: {
+    batch: (operations: Record<string, unknown>[]) =>
+      apiClient.post('/sync/batch', { operations }),
+    pull: (lastSyncTimestamp?: number) =>
+      apiClient.post('/sync/pull', { since: lastSyncTimestamp }),
+    status: () => apiClient.get('/sync/status'),
+  },
+
+  /** Divine Consciousness (micro-features) */
+  divine: {
+    greeting: () => apiClient.get('/divine/greeting'),
+    affirmation: () => apiClient.get('/divine/affirmation'),
+    breathingExercise: (pattern: string) =>
+      apiClient.get(`/divine/breathing/${pattern}`),
+    moodResponse: (mood: string) =>
+      apiClient.post('/divine/mood-response', { mood }),
+  },
 } as const;

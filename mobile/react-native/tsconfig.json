@@ -25,7 +25,9 @@
       "@theme/*": ["src/theme/*"],
       "@utils/*": ["src/utils/*"],
       "@config/*": ["src/config/*"],
-      "@app-types/*": ["src/types/*"]
+      "@app-types/*": ["src/types/*"],
+      "@database/*": ["src/database/*"],
+      "@database": ["src/database/index"]
     }
   },
   "include": ["src/**/*", "index.js", "App.tsx"],
