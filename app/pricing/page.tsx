@@ -9,7 +9,7 @@ import { useSubscription } from '@/hooks/useSubscription'
 import { useCurrency, CURRENCIES, type Currency } from '@/hooks/useCurrency'
 
 // Pricing tiers aligned with backend SubscriptionTier enum:
-// FREE, BASIC (Plus), PREMIUM (Pro), ENTERPRISE (Elite), PREMIER
+// FREE (Seeker), SADHAK, SIDDHA — 3-tier structure (March 2026)
 const createPricingTiers = (
   currency: Currency,
   formatPrice: (amount: number, options?: { showDecimals?: boolean }) => string,
@@ -18,93 +18,64 @@ const createPricingTiers = (
 ): PricingTier[] => [
   {
     id: 'free',
-    name: 'Free',
-    description: 'Perfect for getting started with KIAAN',
+    name: 'Seeker',
+    description: 'Begin your spiritual journey with KIAAN',
     monthlyPrice: 0,
     yearlyPrice: 0,
-    kiaanQuota: 15,
+    kiaanQuota: 5,
     features: [
-      '15 KIAAN questions/month',
+      '5 KIAAN questions/month',
+      'Divine Chat & Friend Mode',
       'Mood tracking',
       'Daily wisdom',
       'Basic breathing exercises',
-      '1 trial Wisdom Journey',
+      '1 trial Wisdom Journey (3 days)',
+      'Community access',
     ],
     cta: 'Get Started Free',
   },
   {
-    id: 'basic',
-    name: 'Plus',
-    description: 'Build a steady practice with guided support',
-    monthlyPrice: getMonthlyPrice('basic'),
-    yearlyPrice: getYearlyPrice('basic'),
-    kiaanQuota: 150,
-    features: [
-      '150 KIAAN questions/month',
-      'All Free features',
-      'Journal with encryption',
-      'Voice synthesis',
-      '3 Wisdom Journeys',
-      'Ardha Cognitive Reframing',
-      'Viyoga Detachment Coach',
-    ],
-    cta: 'Start 15-day free trial',
-    trialAvailable: true,
-  },
-  {
-    id: 'premium',
-    name: 'Pro',
-    description: '300 KIAAN questions with all features unlocked',
-    monthlyPrice: getMonthlyPrice('premium'),
-    yearlyPrice: getYearlyPrice('premium'),
+    id: 'sadhak',
+    name: 'Sadhak',
+    description: 'Full access to all features with 300 KIAAN questions',
+    monthlyPrice: getMonthlyPrice('sadhak'),
+    yearlyPrice: getYearlyPrice('sadhak'),
     kiaanQuota: 300,
     highlighted: true,
     badge: 'Most Popular',
     features: [
       '300 KIAAN questions/month',
-      'All Plus features',
-      'Voice Companion',
+      'All Seeker features',
+      'Encrypted journal with versions',
+      'Voice Companion (17 languages)',
       'Soul Reading & Quantum Dive',
       'KIAAN Agent',
+      'Ardha, Viyoga & Emotional Reset',
       'Relationship Compass',
       '10 Wisdom Journeys',
       'Advanced mood analytics',
-      'Priority support & offline access',
+      'Offline access & priority support',
     ],
-    cta: 'Start 15-day free trial',
+    cta: 'Start 7-day free trial',
     trialAvailable: true,
   },
   {
-    id: 'enterprise',
-    name: 'Elite',
-    description: '800 KIAAN questions with unlimited Wisdom Journeys',
-    monthlyPrice: getMonthlyPrice('enterprise'),
-    yearlyPrice: getYearlyPrice('enterprise'),
-    kiaanQuota: 800,
-    features: [
-      '800 KIAAN questions/month',
-      'All Pro features',
-      'Unlimited Wisdom Journeys',
-      'Dedicated support',
-    ],
-    cta: 'Start 15-day free trial',
-    trialAvailable: true,
-  },
-  {
-    id: 'premier',
-    name: 'Premier',
-    description: 'Unlimited KIAAN with unlimited access to everything',
-    monthlyPrice: getMonthlyPrice('premier'),
-    yearlyPrice: getYearlyPrice('premier'),
+    id: 'siddha',
+    name: 'Siddha',
+    description: 'Unlimited KIAAN with unlimited everything',
+    monthlyPrice: getMonthlyPrice('siddha'),
+    yearlyPrice: getYearlyPrice('siddha'),
     kiaanQuota: 'unlimited',
-    badge: 'Best Value',
+    badge: 'Unlimited',
     features: [
       'Unlimited KIAAN questions',
-      'All Elite features',
-      'Unlimited everything',
+      'All Sadhak features',
+      'Unlimited Wisdom Journeys',
       'Dedicated support',
+      'Team features',
+      'Priority voice processing',
     ],
-    cta: 'Start 15-day free trial',
+    cta: 'Start 7-day free trial',
     trialAvailable: true,
   },
 ]
@@ -113,49 +84,50 @@ const comparisonFeatures = [
   {
     category: 'KIAAN Chat',
     items: [
-      { name: 'Monthly Questions', values: { free: '15', basic: '150', premium: '300', enterprise: '800', premier: 'Unlimited' } },
-      { name: 'Response Quality', values: { free: 'Same for all', basic: 'Same for all', premium: 'Same for all', enterprise: 'Same for all', premier: 'Same for all' } },
-      { name: 'Conversation History', values: { free: true, basic: true, premium: true, enterprise: true, premier: true } },
+      { name: 'Monthly Questions', values: { free: '5', sadhak: '300', siddha: 'Unlimited' } },
+      { name: 'Response Quality', values: { free: 'Same for all', sadhak: 'Same for all', siddha: 'Same for all' } },
+      { name: 'Conversation History', values: { free: true, sadhak: true, siddha: true } },
     ],
   },
   {
     category: 'Assistants',
     items: [
-      { name: 'Ardha Reframing', values: { free: false, basic: true, premium: true, enterprise: true, premier: true } },
-      { name: 'Viyoga Detachment', values: { free: false, basic: true, premium: true, enterprise: true, premier: true } },
-      { name: 'Relationship Compass', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
-      { name: 'Emotional Reset Guide', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
+      { name: 'Ardha Reframing', values: { free: false, sadhak: true, siddha: true } },
+      { name: 'Viyoga Detachment', values: { free: false, sadhak: true, siddha: true } },
+      { name: 'Relationship Compass', values: { free: false, sadhak: true, siddha: true } },
+      { name: 'Emotional Reset Guide', values: { free: false, sadhak: true, siddha: true } },
     ],
   },
   {
     category: 'KIAAN Ecosystem',
     items: [
-      { name: 'Divine Chat', values: { free: true, basic: true, premium: true, enterprise: true, premier: true } },
-      { name: 'Friend Mode', values: { free: true, basic: true, premium: true, enterprise: true, premier: true } },
-      { name: 'Voice Synthesis', values: { free: false, basic: true, premium: true, enterprise: true, premier: true } },
-      { name: 'Voice Companion', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
-      { name: 'Soul Reading', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
-      { name: 'Quantum Dive', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
-      { name: 'KIAAN Agent', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
+      { name: 'Divine Chat', values: { free: true, sadhak: true, siddha: true } },
+      { name: 'Friend Mode', values: { free: true, sadhak: true, siddha: true } },
+      { name: 'Voice Synthesis (17 languages)', values: { free: false, sadhak: true, siddha: true } },
+      { name: 'Voice Companion', values: { free: false, sadhak: true, siddha: true } },
+      { name: 'Soul Reading', values: { free: false, sadhak: true, siddha: true } },
+      { name: 'Quantum Dive', values: { free: false, sadhak: true, siddha: true } },
+      { name: 'KIAAN Agent', values: { free: false, sadhak: true, siddha: true } },
     ],
   },
   {
     category: 'Features',
     items: [
-      { name: 'Encrypted Journal', values: { free: false, basic: true, premium: true, enterprise: true, premier: true } },
-      { name: 'Mood Tracking', values: { free: true, basic: true, premium: true, enterprise: true, premier: true } },
-      { name: 'Daily Wisdom', values: { free: true, basic: true, premium: true, enterprise: true, premier: true } },
-      { name: 'Advanced Analytics', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
-      { name: 'Unlimited Journeys', values: { free: false, basic: false, premium: false, enterprise: true, premier: true } },
+      { name: 'Encrypted Journal', values: { free: false, sadhak: true, siddha: true } },
+      { name: 'Mood Tracking', values: { free: true, sadhak: true, siddha: true } },
+      { name: 'Daily Wisdom', values: { free: true, sadhak: true, siddha: true } },
+      { name: 'Advanced Analytics', values: { free: false, sadhak: true, siddha: true } },
+      { name: 'Wisdom Journeys', values: { free: '1 trial', sadhak: '10', siddha: 'Unlimited' } },
+      { name: 'Offline Access', values: { free: false, sadhak: true, siddha: true } },
+      { name: 'Data Retention', values: { free: '30 days', sadhak: 'Unlimited', siddha: 'Unlimited' } },
     ],
   },
   {
     category: 'Support',
     items: [
-      { name: 'Community Access', values: { free: true, basic: true, premium: true, enterprise: true, premier: true } },
-      { name: 'Email Support', values: { free: false, basic: true, premium: true, enterprise: true, premier: true } },
-      { name: 'Priority Support', values: { free: false, basic: false, premium: true, enterprise: true, premier: true } },
-      { name: 'Dedicated Support', values: { free: false, basic: false, premium: false, enterprise: true, premier: true } },
+      { name: 'Community Access', values: { free: true, sadhak: true, siddha: true } },
+      { name: 'Priority Support', values: { free: false, sadhak: true, siddha: true } },
+      { name: 'Dedicated Support', values: { free: false, sadhak: false, siddha: true } },
     ],
   },
 ]
@@ -573,7 +545,7 @@ export default function PricingPage() {
             </div>
           </div>
           <p className="text-sm text-[#f5f0e8]/70">
-            INR pricing is always 25% less than USD/EUR. Save with yearly billing — get 2 months free.
+            INR pricing is 25% less than USD/EUR. Save up to 42% with yearly billing.
           </p>
           <PaymentMethodSelector
             selected={paymentMethod}
@@ -591,7 +563,7 @@ export default function PricingPage() {
         tabIndex={0}
         role="region"
         aria-label="Pricing plans carousel"
-        className={`subscription-scroll grid gap-6 pb-6 mb-16 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-lg sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 ${
+        className={`subscription-scroll grid gap-6 pb-6 mb-16 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-lg sm:grid-cols-2 lg:grid-cols-3 ${
           isScrolling ? 'scrolling' : ''
         }`}
         style={{

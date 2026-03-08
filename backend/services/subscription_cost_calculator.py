@@ -60,29 +60,23 @@ DEFAULT_AVG_COMPLETION_TOKENS = 200  # Average KIAAN response length
 # Covers: server compute, PostgreSQL, Redis, CDN, monitoring, backups.
 # ---------------------------------------------------------------------------
 INFRA_COST_PER_TIER: dict[str, float] = {
-    "free":       0.00,   # Subsidized by paid tiers
-    "basic":      1.50,   # Shared infra allocation
-    "premium":    3.00,   # Higher resource allocation
-    "enterprise": 5.00,   # Elite tier — higher usage allocation
-    "premier":    8.00,   # Premier tier — highest usage
+    "free":    0.00,   # Subsidized by paid tiers
+    "sadhak":  3.00,   # Shared infra allocation
+    "siddha":  8.00,   # Highest usage allocation
 }
 
 # Default profit margin percentages by tier
 DEFAULT_PROFIT_MARGINS: dict[str, float] = {
-    "free":       0.0,    # 0% - loss leader / acquisition funnel
-    "basic":      60.0,   # 60% margin target
-    "premium":    65.0,   # 65% margin target
-    "enterprise": 65.0,   # 65% margin target (Elite)
-    "premier":    70.0,   # 70% margin target (Premier)
+    "free":    0.0,    # 0% - loss leader / acquisition funnel
+    "sadhak":  76.0,   # 76% margin target ($12.99 price)
+    "siddha":  63.0,   # 63% margin target ($22.99 price)
 }
 
 # Tier quota definitions (mirrors feature_config.py, kept here for standalone use)
 TIER_QUOTAS: dict[str, int] = {
-    "free":       15,
-    "basic":      150,   # Plus tier
-    "premium":    300,   # Pro tier
-    "enterprise": 800,   # Elite tier
-    "premier":    2000,  # Premier tier — unlimited, estimate for costing
+    "free":    5,
+    "sadhak":  300,    # Sadhak tier
+    "siddha":  2000,   # Siddha tier — unlimited, estimate for costing
 }
 
 
@@ -251,10 +245,8 @@ def calculate_subscription_costs(
     margins = {**DEFAULT_PROFIT_MARGINS, **(profit_margins or {})}
     prices = current_prices or {
         "free": 0.00,
-        "basic": 4.99,      # Plus tier
-        "premium": 9.99,    # Pro tier
-        "enterprise": 15.00,  # Elite tier
-        "premier": 25.00,    # Premier tier
+        "sadhak": 12.99,    # Sadhak tier
+        "siddha": 22.99,    # Siddha tier
     }
     infra = {**INFRA_COST_PER_TIER, **(infra_costs or {})}
     quotas = {**TIER_QUOTAS, **(tier_quotas or {})}
@@ -271,7 +263,7 @@ def calculate_subscription_costs(
     total_revenue = 0.0
     total_cost = 0.0
 
-    for tier_name in ["free", "basic", "premium", "enterprise", "premier"]:
+    for tier_name in ["free", "sadhak", "siddha"]:
         monthly_q = quotas.get(tier_name, 0)
 
         breakdown = calculate_tier_cost(

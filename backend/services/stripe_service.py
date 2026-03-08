@@ -203,12 +203,18 @@ async def create_checkout_session(
             cancel_url = f"{frontend_url}/subscription/cancel"
         
         # Build payment method types based on preference
+        # Google Pay is handled by Stripe automatically when "card" is included
+        # and the user's browser/device supports it (Payment Request API).
         if payment_method == "paypal":
             payment_method_types = ["paypal"]
+        elif payment_method == "google_pay":
+            # Google Pay flows through Stripe's card payment method type.
+            # Stripe Checkout automatically shows Google Pay when available.
+            payment_method_types = ["card"]
         elif payment_method == "card":
             payment_method_types = ["card"]
         else:
-            # Default: offer both card and PayPal
+            # Default: offer card (includes Google Pay) and PayPal
             payment_method_types = ["card", "paypal"]
 
         # Create checkout session

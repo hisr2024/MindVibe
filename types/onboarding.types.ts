@@ -74,8 +74,8 @@ export interface PreferencesData {
   notifications: NotificationSettings
 }
 
-/** Subscription tier identifiers */
-export type SubscriptionTierId = 'free' | 'basic' | 'premium' | 'enterprise' | 'premier'
+/** Subscription tier identifiers — 3-tier structure (March 2026) */
+export type SubscriptionTierId = 'free' | 'sadhak' | 'siddha'
 
 /** Billing cycle options */
 export type BillingCycle = 'monthly' | 'yearly'

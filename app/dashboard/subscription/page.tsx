@@ -157,7 +157,7 @@ export default function SubscriptionDashboardPage() {
         <UpgradePrompt
           variant="banner"
           title="Unlock More Features"
-          description="Upgrade to Plus ($4.99/mo), Pro ($9.99/mo), Elite ($15/mo), or Premier ($25/mo) for more KIAAN questions and all features."
+          description="Upgrade to Sadhak ($12.99/mo) for 300 KIAAN questions and all features, or Siddha ($22.99/mo) for unlimited everything."
           ctaText="View Plans"
           ctaLink="/pricing"
           className="mb-8"

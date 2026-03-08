@@ -3,12 +3,10 @@
 This script creates the initial subscription plans in the database.
 Run with: python -m backend.scripts.seed_subscription_plans
 
-Plans created:
-- FREE: 15 KIAAN questions/month, 1 trial wisdom journey (3-day limit)
-- PLUS (basic): 150 questions/month, journal access, 3 wisdom journeys ($4.99/month, $49.99/year)
-- PRO (premium): 300 questions/month, all features, 10 wisdom journeys ($9.99/month, $99.99/year)
-- ELITE (enterprise): 800 questions/month, unlimited wisdom journeys ($15/month, $150/year)
-- PREMIER: Unlimited questions, unlimited everything ($25/month, $250/year)
+Three-tier structure (March 2026 consolidation):
+- FREE (Seeker): 5 KIAAN questions/month, 1 trial wisdom journey (3-day limit)
+- SADHAK: 300 questions/month, all features, 10 wisdom journeys ($12.99/month, $89.99/year)
+- SIDDHA: Unlimited questions, unlimited everything ($22.99/month, $169.99/year)
 """
 
 import asyncio
@@ -88,18 +86,18 @@ def _get_ssl_connect_args(db_url: str) -> Dict[str, Any]:
     return {"ssl": ssl_context}
 
 
-# Plan definitions
+# Plan definitions — 3-tier structure (March 2026)
 SUBSCRIPTION_PLANS = [
     {
         "tier": SubscriptionTier.FREE,
-        "name": "Free",
-        "description": "Get started with MindVibe's core features and trial Wisdom Journeys",
+        "name": "Seeker",
+        "description": "Begin your spiritual journey with KIAAN's core guidance",
         "price_monthly": Decimal("0.00"),
         "price_yearly": None,
         "stripe_price_id_monthly": None,
         "stripe_price_id_yearly": None,
         "features": {
-            "kiaan_questions_monthly": 15,
+            "kiaan_questions_monthly": 5,
             "encrypted_journal": False,
             "mood_tracking": True,
             "wisdom_access": True,
@@ -112,42 +110,18 @@ SUBSCRIPTION_PLANS = [
             "wisdom_journeys_trial": True,
             "wisdom_journeys_trial_days": 3,
         },
-        "kiaan_questions_monthly": 15,
+        "kiaan_questions_monthly": 5,
         "encrypted_journal": False,
         "data_retention_days": 30,
     },
     {
-        "tier": SubscriptionTier.BASIC,
-        "name": "Plus",
-        "description": "Unlock journal access, Wisdom Journeys, and 150 KIAAN conversations",
-        "price_monthly": Decimal("4.99"),
-        "price_yearly": Decimal("49.99"),
-        "stripe_price_id_monthly": os.getenv("STRIPE_BASIC_MONTHLY_PRICE_ID"),
-        "stripe_price_id_yearly": os.getenv("STRIPE_BASIC_YEARLY_PRICE_ID"),
-        "features": {
-            "kiaan_questions_monthly": 150,
-            "encrypted_journal": True,
-            "mood_tracking": True,
-            "wisdom_access": True,
-            "advanced_analytics": False,
-            "priority_support": False,
-            "offline_access": False,
-            "data_retention_days": 365,
-            "wisdom_journeys": True,
-            "wisdom_journeys_limit": 3,
-        },
-        "kiaan_questions_monthly": 150,
-        "encrypted_journal": True,
-        "data_retention_days": 365,
-    },
-    {
-        "tier": SubscriptionTier.PREMIUM,
-        "name": "Pro",
-        "description": "300 KIAAN questions with advanced analytics and all premium features",
-        "price_monthly": Decimal("9.99"),
-        "price_yearly": Decimal("99.99"),
-        "stripe_price_id_monthly": os.getenv("STRIPE_PREMIUM_MONTHLY_PRICE_ID"),
-        "stripe_price_id_yearly": os.getenv("STRIPE_PREMIUM_YEARLY_PRICE_ID"),
+        "tier": SubscriptionTier.SADHAK,
+        "name": "Sadhak",
+        "description": "300 KIAAN questions with all features, Voice Companion, and 10 Wisdom Journeys",
+        "price_monthly": Decimal("12.99"),
+        "price_yearly": Decimal("89.99"),
+        "stripe_price_id_monthly": os.getenv("STRIPE_SADHAK_MONTHLY_PRICE_ID"),
+        "stripe_price_id_yearly": os.getenv("STRIPE_SADHAK_YEARLY_PRICE_ID"),
         "features": {
             "kiaan_questions_monthly": 300,
             "encrypted_journal": True,
@@ -165,37 +139,13 @@ SUBSCRIPTION_PLANS = [
         "data_retention_days": -1,  # Unlimited
     },
     {
-        "tier": SubscriptionTier.ENTERPRISE,
-        "name": "Elite",
-        "description": "800 KIAAN questions with unlimited Wisdom Journeys and all features",
-        "price_monthly": Decimal("15.00"),
-        "price_yearly": Decimal("150.00"),
-        "stripe_price_id_monthly": os.getenv("STRIPE_ENTERPRISE_MONTHLY_PRICE_ID"),
-        "stripe_price_id_yearly": os.getenv("STRIPE_ENTERPRISE_YEARLY_PRICE_ID"),
-        "features": {
-            "kiaan_questions_monthly": 800,
-            "encrypted_journal": True,
-            "mood_tracking": True,
-            "wisdom_access": True,
-            "advanced_analytics": True,
-            "priority_support": True,
-            "offline_access": True,
-            "data_retention_days": -1,
-            "wisdom_journeys": True,
-            "wisdom_journeys_limit": -1,  # Unlimited
-        },
-        "kiaan_questions_monthly": 800,
-        "encrypted_journal": True,
-        "data_retention_days": -1,  # Unlimited
-    },
-    {
-        "tier": SubscriptionTier.PREMIER,
-        "name": "Premier",
-        "description": "Unlimited KIAAN questions with unlimited access to everything",
-        "price_monthly": Decimal("25.00"),
-        "price_yearly": Decimal("250.00"),
-        "stripe_price_id_monthly": os.getenv("STRIPE_PREMIER_MONTHLY_PRICE_ID"),
-        "stripe_price_id_yearly": os.getenv("STRIPE_PREMIER_YEARLY_PRICE_ID"),
+        "tier": SubscriptionTier.SIDDHA,
+        "name": "Siddha",
+        "description": "Unlimited KIAAN questions, unlimited Wisdom Journeys, and dedicated support",
+        "price_monthly": Decimal("22.99"),
+        "price_yearly": Decimal("169.99"),
+        "stripe_price_id_monthly": os.getenv("STRIPE_SIDDHA_MONTHLY_PRICE_ID"),
+        "stripe_price_id_yearly": os.getenv("STRIPE_SIDDHA_YEARLY_PRICE_ID"),
         "features": {
             "kiaan_questions_monthly": -1,  # Unlimited
             "encrypted_journal": True,

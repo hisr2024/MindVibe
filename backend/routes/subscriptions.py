@@ -97,7 +97,7 @@ async def get_current_subscription(
     """Get the current user's subscription.
 
     If the user doesn't have a subscription, one will be created with the free tier.
-    Developers (configured via DEVELOPER_EMAILS) get an effective tier of PREMIER
+    Developers (configured via DEVELOPER_EMAILS) get an effective tier of SIDDHA
     with all features unlocked, regardless of their actual subscription record.
 
     Returns:
@@ -130,13 +130,13 @@ async def get_current_subscription(
     # Check if user is a developer — they get full premium access
     user_is_developer = await is_developer(db, user_id)
 
-    # Build plan output — developers see PREMIER-level features
+    # Build plan output — developers see SIDDHA-level features
     if user_is_developer:
         from backend.config.feature_config import get_tier_features, get_kiaan_quota
-        premier_features = get_tier_features(SubscriptionTier.PREMIER)
+        premier_features = get_tier_features(SubscriptionTier.SIDDHA)
         plan_out = SubscriptionPlanOut(
             id=subscription.plan.id,
-            tier=SubscriptionTier.PREMIER,
+            tier=SubscriptionTier.SIDDHA,
             name="Developer (All Access)",
             description="Full unlimited access for developers",
             price_monthly=subscription.plan.price_monthly,
@@ -171,7 +171,7 @@ async def get_current_subscription(
         canceled_at=subscription.canceled_at,
         created_at=subscription.created_at,
         is_developer=user_is_developer,
-        effective_tier=SubscriptionTier.PREMIER if user_is_developer else subscription.plan.tier,
+        effective_tier=SubscriptionTier.SIDDHA if user_is_developer else subscription.plan.tier,
     )
 
 
@@ -219,9 +219,11 @@ async def create_checkout(
         )
 
     # Route to the appropriate payment provider
+    # Google Pay is handled by Stripe (card payment method with Payment Request API)
     if payload.payment_method == "upi":
         return await _create_razorpay_checkout(db, user, payload)
     else:
+        # card, paypal, and google_pay all route through Stripe
         return await _create_stripe_checkout(db, user, payload)
 
 

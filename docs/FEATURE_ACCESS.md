@@ -22,13 +22,13 @@ from backend.middleware.feature_access import (
 async def protected_route(user_id: int = Depends(require_subscription)):
     return {"message": "You have an active subscription"}
 
-# Require KIAAN quota (enforces 10 question limit for free tier)
+# Require KIAAN quota (enforces 5 question limit for free tier)
 @router.post("/chat")
 async def chat_route(quota_info: tuple = Depends(require_kiaan_quota)):
     user_id, usage_count, usage_limit = quota_info
     return {"user_id": user_id, "remaining": usage_limit - usage_count}
 
-# Require journal access (paid subscribers only)
+# Require journal access (Sadhak+ subscribers only)
 @router.post("/journal")
 async def journal_route(user_id: int = Depends(require_journal_access)):
     return {"message": "You can access your journal"}
@@ -63,9 +63,9 @@ Enforces KIAAN question limits based on subscription tier.
 ```json
 {
   "error": "quota_exceeded",
-  "message": "You have reached your monthly limit of 10 KIAAN questions. Upgrade your subscription for more questions.",
-  "usage_count": 10,
-  "usage_limit": 10,
+  "message": "You have reached your monthly limit of 5 KIAAN questions. Upgrade your subscription for more questions.",
+  "usage_count": 5,
+  "usage_limit": 5,
   "tier": "free",
   "upgrade_url": "/subscription/upgrade"
 }
@@ -73,7 +73,7 @@ Enforces KIAAN question limits based on subscription tier.
 
 ### `require_journal_access`
 
-Ensures the user has access to the encrypted journal feature (Basic tier or higher).
+Ensures the user has access to the encrypted journal feature (Sadhak tier or higher).
 
 **Returns:** `int` - The user ID
 
@@ -85,7 +85,7 @@ Ensures the user has access to the encrypted journal feature (Basic tier or high
 {
   "error": "feature_not_available",
   "feature": "encrypted_journal",
-  "message": "Encrypted journal is a premium feature. Upgrade to Basic or higher to access your private journal.",
+  "message": "Encrypted journal is a Sadhak feature. Upgrade to Sadhak or higher to access your private journal.",
   "tier": "free",
   "upgrade_url": "/subscription/upgrade"
 }
@@ -107,17 +107,17 @@ Generic feature guard that checks if the user has access to a specific feature.
 
 Available feature names that can be checked:
 
-| Feature Name | FREE | BASIC | PREMIUM | ENTERPRISE |
-|-------------|------|-------|---------|------------|
-| `mood_tracking` | ✅ | ✅ | ✅ | ✅ |
-| `wisdom_access` | ✅ | ✅ | ✅ | ✅ |
-| `encrypted_journal` | ❌ | ✅ | ✅ | ✅ |
-| `advanced_analytics` | ❌ | ✅ | ✅ | ✅ |
-| `priority_support` | ❌ | ❌ | ✅ | ✅ |
-| `offline_access` | ❌ | ❌ | ✅ | ✅ |
-| `white_label` | ❌ | ❌ | ❌ | ✅ |
-| `sso` | ❌ | ❌ | ❌ | ✅ |
-| `dedicated_support` | ❌ | ❌ | ❌ | ✅ |
+| Feature Name | FREE | SADHAK | SIDDHA |
+|-------------|------|--------|--------|
+| `mood_tracking` | yes | yes | yes |
+| `wisdom_access` | yes | yes | yes |
+| `encrypted_journal` | no | yes | yes |
+| `advanced_analytics` | no | yes | yes |
+| `priority_support` | no | yes | yes |
+| `offline_access` | no | yes | yes |
+| `dedicated_support` | no | no | yes |
+| `white_label` | no | no | no |
+| `sso` | no | no | no |
 
 ## Using the Service Layer
 
@@ -166,14 +166,14 @@ from backend.config.feature_config import (
 )
 
 # Get all features for a tier
-features = get_tier_features(SubscriptionTier.BASIC)
+features = get_tier_features(SubscriptionTier.SADHAK)
 
 # Check if a tier has access to a feature
 has_access = has_feature_access(SubscriptionTier.FREE, "encrypted_journal")
 
 # Get KIAAN quota for a tier
-quota = get_kiaan_quota(SubscriptionTier.FREE)  # Returns 10
-quota = get_kiaan_quota(SubscriptionTier.PREMIUM)  # Returns -1 (unlimited)
+quota = get_kiaan_quota(SubscriptionTier.FREE)  # Returns 5
+quota = get_kiaan_quota(SubscriptionTier.SIDDHA)  # Returns -1 (unlimited)
 ```
 
 ## Graceful Degradation
@@ -205,12 +205,12 @@ from backend.models import SubscriptionTier
 def test_free_tier_no_journal():
     assert has_feature_access(SubscriptionTier.FREE, "encrypted_journal") is False
 
-def test_basic_tier_has_journal():
-    assert has_feature_access(SubscriptionTier.BASIC, "encrypted_journal") is True
+def test_sadhak_tier_has_journal():
+    assert has_feature_access(SubscriptionTier.SADHAK, "encrypted_journal") is True
 
 def test_free_tier_quota():
-    assert get_kiaan_quota(SubscriptionTier.FREE) == 10
+    assert get_kiaan_quota(SubscriptionTier.FREE) == 5
 
-def test_premium_unlimited():
-    assert get_kiaan_quota(SubscriptionTier.PREMIUM) == -1
+def test_siddha_unlimited():
+    assert get_kiaan_quota(SubscriptionTier.SIDDHA) == -1
 ```

@@ -4,7 +4,7 @@
  * Provides controlled feature rollout with:
  * - Remote flag fetching from backend API
  * - Local MMKV cache for offline availability
- * - Subscription-tier gating (FREE, BASIC, PREMIUM, ENTERPRISE)
+ * - Subscription-tier gating (FREE, SADHAK, SIDDHA)
  * - Percentage-based progressive rollout
  * - Override support for development/testing
  *
@@ -17,7 +17,7 @@
 // Types
 // ---------------------------------------------------------------------------
 
-export type SubscriptionTier = 'FREE' | 'BASIC' | 'PREMIUM' | 'ENTERPRISE';
+export type SubscriptionTier = 'FREE' | 'SADHAK' | 'SIDDHA';
 
 export interface FeatureFlag {
   /** Unique identifier (e.g., "vibe_player_sleep_timer") */
@@ -82,23 +82,23 @@ export const DEFAULT_FLAGS: Record<string, FeatureFlag> = {
     rolloutPercent: 100,
   },
 
-  // Tier-gated features
+  // Tier-gated features (Sadhak+)
   sakha_companion_voice: {
     key: 'sakha_companion_voice',
     enabled: true,
-    minTier: 'BASIC',
+    minTier: 'SADHAK',
     rolloutPercent: 100,
   },
   vibe_player_offline_cache: {
     key: 'vibe_player_offline_cache',
     enabled: true,
-    minTier: 'BASIC',
+    minTier: 'SADHAK',
     rolloutPercent: 100,
   },
   journal_encryption: {
     key: 'journal_encryption',
     enabled: true,
-    minTier: 'BASIC',
+    minTier: 'SADHAK',
     rolloutPercent: 100,
   },
   journey_system: {
@@ -111,13 +111,13 @@ export const DEFAULT_FLAGS: Record<string, FeatureFlag> = {
   analytics_dashboard: {
     key: 'analytics_dashboard',
     enabled: true,
-    minTier: 'BASIC',
+    minTier: 'SADHAK',
     rolloutPercent: 100,
   },
   wisdom_rooms: {
     key: 'wisdom_rooms',
     enabled: true,
-    minTier: 'PREMIUM',
+    minTier: 'SADHAK',
     rolloutPercent: 100,
   },
 
@@ -137,7 +137,7 @@ export const DEFAULT_FLAGS: Record<string, FeatureFlag> = {
   wake_word_detection: {
     key: 'wake_word_detection',
     enabled: false,
-    minTier: 'PREMIUM',
+    minTier: 'SADHAK',
     rolloutPercent: 0,
     metadata: { phrases: ['hey kiaan', 'namaste kiaan'] },
   },
@@ -149,9 +149,8 @@ export const DEFAULT_FLAGS: Record<string, FeatureFlag> = {
 
 const TIER_LEVELS: Record<SubscriptionTier, number> = {
   FREE: 0,
-  BASIC: 1,
-  PREMIUM: 2,
-  ENTERPRISE: 3,
+  SADHAK: 1,
+  SIDDHA: 2,
 };
 
 function isTierSufficient(

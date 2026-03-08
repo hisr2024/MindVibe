@@ -78,7 +78,7 @@ export interface User {
   createdAt: string;
 }
 
-export type SubscriptionTier = 'FREE' | 'BASIC' | 'PREMIUM' | 'ENTERPRISE';
+export type SubscriptionTier = 'FREE' | 'SADHAK' | 'SIDDHA';
 
 // ---------------------------------------------------------------------------
 // Gita Verse Types
