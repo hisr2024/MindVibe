@@ -186,7 +186,7 @@ async def get_all_plans(db: AsyncSession) -> list[SubscriptionPlan]:
 async def get_user_tier(db: AsyncSession, user_id: str) -> SubscriptionTier:
     """Get the effective subscription tier for a user.
 
-    Developers (configured via DEVELOPER_EMAILS env var) are treated as PREMIER tier
+    Developers (configured via DEVELOPER_EMAILS env var) are treated as SIDDHA tier
     with full unlimited access, regardless of their actual subscription record.
 
     Args:
@@ -194,13 +194,13 @@ async def get_user_tier(db: AsyncSession, user_id: str) -> SubscriptionTier:
         user_id: The user's ID.
 
     Returns:
-        SubscriptionTier: The user's effective tier (PREMIER for developers, FREE if no subscription).
+        SubscriptionTier: The user's effective tier (SIDDHA for developers, FREE if no subscription).
     """
     # Check for developer access — developers get highest tier
     from backend.middleware.feature_access import is_developer
     try:
         if await is_developer(db, user_id):
-            return SubscriptionTier.PREMIER
+            return SubscriptionTier.SIDDHA
     except Exception:
         # If developer check fails, fall through to normal tier logic
         pass
@@ -252,7 +252,7 @@ async def check_wisdom_journeys_access(
     """Check if a user has access to Wisdom Journeys and their current usage.
 
     Enforces:
-    - Journey limit per tier (FREE=1, BASIC=1, PREMIUM=5, ENTERPRISE=unlimited)
+    - Journey limit per tier (FREE=1, SADHAK=10, SIDDHA=unlimited)
     - Trial day limit for FREE tier (3 days max per journey)
 
     Args:

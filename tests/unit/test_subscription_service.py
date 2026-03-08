@@ -33,64 +33,42 @@ class TestFeatureConfig:
         from backend.config.feature_config import get_tier_features, TIER_FEATURES
 
         features = get_tier_features(SubscriptionTier.FREE)
-        assert features["kiaan_questions_monthly"] == 15
+        assert features["kiaan_questions_monthly"] == 5
         assert features["encrypted_journal"] is False
         assert features["mood_tracking"] is True
         assert features["wisdom_access"] is True
         assert features["data_retention_days"] == 30
 
-    def test_tier_features_basic(self):
-        """Test BASIC tier features."""
+    def test_tier_features_sadhak(self):
+        """Test SADHAK tier features."""
         from backend.config.feature_config import get_tier_features
 
-        features = get_tier_features(SubscriptionTier.BASIC)
-        assert features["kiaan_questions_monthly"] == 150
-        assert features["encrypted_journal"] is True
-        assert features["advanced_analytics"] is False
-        assert features["data_retention_days"] == 365
-
-    def test_tier_features_premium(self):
-        """Test PREMIUM tier features."""
-        from backend.config.feature_config import get_tier_features
-
-        features = get_tier_features(SubscriptionTier.PREMIUM)
+        features = get_tier_features(SubscriptionTier.SADHAK)
         assert features["kiaan_questions_monthly"] == 300
         assert features["encrypted_journal"] is True
-        assert features["priority_support"] is True
-        assert features["offline_access"] is True
+        assert features["advanced_analytics"] is True
+        assert features["data_retention_days"] == -1  # Unlimited
 
-    def test_tier_features_enterprise(self):
-        """Test ENTERPRISE (Elite) tier features."""
+    def test_tier_features_siddha(self):
+        """Test SIDDHA tier features."""
         from backend.config.feature_config import get_tier_features
 
-        features = get_tier_features(SubscriptionTier.ENTERPRISE)
-        assert features["kiaan_questions_monthly"] == 800
-        assert features["white_label"] is False
-        assert features["sso"] is False
-        assert features["dedicated_support"] is True
-        assert features["wisdom_journeys_limit"] == -1  # Unlimited
-
-    def test_tier_features_premier(self):
-        """Test PREMIER tier features."""
-        from backend.config.feature_config import get_tier_features
-
-        features = get_tier_features(SubscriptionTier.PREMIER)
+        features = get_tier_features(SubscriptionTier.SIDDHA)
         assert features["kiaan_questions_monthly"] == -1  # Unlimited
-        assert features["white_label"] is False
-        assert features["sso"] is False
+        assert features["encrypted_journal"] is True
         assert features["dedicated_support"] is True
         assert features["wisdom_journeys_limit"] == -1  # Unlimited
 
     def test_has_feature_access(self):
         """Test has_feature_access function."""
         from backend.config.feature_config import has_feature_access
-        
+
         # Free tier should NOT have journal access
         assert has_feature_access(SubscriptionTier.FREE, "encrypted_journal") is False
-        
-        # Basic tier should have journal access
-        assert has_feature_access(SubscriptionTier.BASIC, "encrypted_journal") is True
-        
+
+        # Sadhak tier should have journal access
+        assert has_feature_access(SubscriptionTier.SADHAK, "encrypted_journal") is True
+
         # Free tier should have mood tracking
         assert has_feature_access(SubscriptionTier.FREE, "mood_tracking") is True
 
@@ -98,11 +76,9 @@ class TestFeatureConfig:
         """Test get_kiaan_quota function."""
         from backend.config.feature_config import get_kiaan_quota
 
-        assert get_kiaan_quota(SubscriptionTier.FREE) == 15
-        assert get_kiaan_quota(SubscriptionTier.BASIC) == 150
-        assert get_kiaan_quota(SubscriptionTier.PREMIUM) == 300
-        assert get_kiaan_quota(SubscriptionTier.ENTERPRISE) == 800  # Elite tier
-        assert get_kiaan_quota(SubscriptionTier.PREMIER) == -1  # Premier — unlimited
+        assert get_kiaan_quota(SubscriptionTier.FREE) == 5
+        assert get_kiaan_quota(SubscriptionTier.SADHAK) == 300
+        assert get_kiaan_quota(SubscriptionTier.SIDDHA) == -1  # Unlimited
 
 
 class TestSubscriptionModels:
@@ -116,8 +92,8 @@ class TestSubscriptionModels:
             name="Free",
             description="Free tier description",
             price_monthly=Decimal("0.00"),
-            features={"kiaan_questions_monthly": 10},
-            kiaan_questions_monthly=10,
+            features={"kiaan_questions_monthly": 5},
+            kiaan_questions_monthly=5,
             encrypted_journal=False,
             data_retention_days=30,
         )
@@ -128,7 +104,7 @@ class TestSubscriptionModels:
         assert plan.id is not None
         assert plan.tier == SubscriptionTier.FREE
         assert plan.price_monthly == Decimal("0.00")
-        assert plan.kiaan_questions_monthly == 10
+        assert plan.kiaan_questions_monthly == 5
         assert plan.encrypted_journal is False
 
     @pytest.mark.asyncio
@@ -146,12 +122,12 @@ class TestSubscriptionModels:
 
         # Create plan
         plan = SubscriptionPlan(
-            tier=SubscriptionTier.BASIC,
-            name="Basic",
-            price_monthly=Decimal("9.99"),
-            kiaan_questions_monthly=100,
+            tier=SubscriptionTier.SADHAK,
+            name="Sadhak",
+            price_monthly=Decimal("12.99"),
+            kiaan_questions_monthly=300,
             encrypted_journal=True,
-            data_retention_days=365,
+            data_retention_days=-1,
         )
         test_db.add(plan)
         await test_db.commit()
@@ -230,7 +206,5 @@ class TestSubscriptionTierEnum:
     def test_subscription_tier_values(self):
         """Test that all expected tier values exist."""
         assert SubscriptionTier.FREE.value == "free"
-        assert SubscriptionTier.BASIC.value == "basic"
-        assert SubscriptionTier.PREMIUM.value == "premium"
-        assert SubscriptionTier.ENTERPRISE.value == "enterprise"
-        assert SubscriptionTier.PREMIER.value == "premier"
+        assert SubscriptionTier.SADHAK.value == "sadhak"
+        assert SubscriptionTier.SIDDHA.value == "siddha"

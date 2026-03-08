@@ -2,7 +2,7 @@
 
 import { type Currency } from '@/hooks/useCurrency'
 
-export type PaymentMethod = 'card' | 'paypal' | 'upi'
+export type PaymentMethod = 'card' | 'paypal' | 'upi' | 'google_pay'
 
 interface PaymentMethodSelectorProps {
   selected: PaymentMethod
@@ -19,6 +19,12 @@ const METHODS: { id: PaymentMethod; label: string; description: string; inrOnly:
     inrOnly: false,
   },
   {
+    id: 'google_pay',
+    label: 'Google Pay',
+    description: 'Pay with Google Pay',
+    inrOnly: false,
+  },
+  {
     id: 'paypal',
     label: 'PayPal',
     description: 'Pay with PayPal',
@@ -27,7 +33,7 @@ const METHODS: { id: PaymentMethod; label: string; description: string; inrOnly:
   {
     id: 'upi',
     label: 'UPI',
-    description: 'Google Pay, PhonePe, etc.',
+    description: 'GPay, PhonePe, etc.',
     inrOnly: true,
   },
 ]

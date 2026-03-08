@@ -32,7 +32,7 @@ class TestStripeServiceConfiguration:
     def test_stripe_not_configured_by_default(self):
         """Test that Stripe is not configured without environment variables."""
         from backend.services.stripe_service import is_stripe_configured
-        
+
         with patch.dict('os.environ', {'STRIPE_SECRET_KEY': ''}, clear=True):
             # Stripe should not be configured without the secret key
             result = is_stripe_configured()
@@ -42,7 +42,7 @@ class TestStripeServiceConfiguration:
     def test_stripe_configured_with_key(self):
         """Test that Stripe is configured with secret key."""
         from backend.services.stripe_service import is_stripe_configured, _get_stripe_keys
-        
+
         with patch.dict('os.environ', {'STRIPE_SECRET_KEY': 'sk_test_123'}):
             secret_key, _, _ = _get_stripe_keys()
             assert secret_key == 'sk_test_123'
@@ -67,11 +67,11 @@ class TestPaymentModels:
         # Create payment
         payment = Payment(
             user_id=user.id,
-            amount=Decimal("9.99"),
+            amount=Decimal("12.99"),
             currency="USD",
             status=PaymentStatus.PENDING,
             stripe_payment_intent_id="pi_test_123",
-            description="Subscription payment",
+            description="Sadhak subscription payment",
         )
         test_db.add(payment)
         await test_db.commit()
@@ -79,7 +79,7 @@ class TestPaymentModels:
 
         assert payment.id is not None
         assert payment.user_id == user.id
-        assert payment.amount == Decimal("9.99")
+        assert payment.amount == Decimal("12.99")
         assert payment.currency == "USD"
         assert payment.status == PaymentStatus.PENDING
         assert payment.stripe_payment_intent_id == "pi_test_123"
@@ -100,18 +100,18 @@ class TestPaymentModels:
         # Create payment in pending state
         payment = Payment(
             user_id=user.id,
-            amount=Decimal("19.99"),
+            amount=Decimal("22.99"),
             currency="USD",
             status=PaymentStatus.PENDING,
         )
         test_db.add(payment)
         await test_db.commit()
-        
+
         # Transition to succeeded
         payment.status = PaymentStatus.SUCCEEDED
         await test_db.commit()
         await test_db.refresh(payment)
-        
+
         assert payment.status == PaymentStatus.SUCCEEDED
 
 
@@ -133,7 +133,7 @@ class TestCheckoutSessionCreation:
     async def test_checkout_requires_stripe_configured(self):
         """Test that checkout requires Stripe to be configured."""
         from backend.services.stripe_service import create_checkout_session, is_stripe_configured
-        
+
         # When Stripe is not configured, checkout should fail
         if not is_stripe_configured():
             # Function should handle gracefully
@@ -146,7 +146,7 @@ class TestWebhookSignatureVerification:
     def test_verify_webhook_signature_missing_secret(self):
         """Test webhook verification with missing secret."""
         from backend.services.stripe_service import verify_webhook_signature
-        
+
         with patch.dict('os.environ', {'STRIPE_WEBHOOK_SECRET': ''}):
             result = verify_webhook_signature(b'payload', 'signature')
             # Should return None when secret is missing
@@ -173,12 +173,12 @@ class TestSubscriptionCancellation:
 
         # Create plan
         plan = SubscriptionPlan(
-            tier=SubscriptionTier.BASIC,
-            name="Basic",
-            price_monthly=Decimal("9.99"),
-            kiaan_questions_monthly=100,
+            tier=SubscriptionTier.SADHAK,
+            name="Sadhak",
+            price_monthly=Decimal("12.99"),
+            kiaan_questions_monthly=300,
             encrypted_journal=True,
-            data_retention_days=365,
+            data_retention_days=-1,
         )
         test_db.add(plan)
         await test_db.commit()
@@ -234,25 +234,25 @@ class TestSubscriptionUpgrade:
             tier=SubscriptionTier.FREE,
             name="Free",
             price_monthly=Decimal("0.00"),
-            kiaan_questions_monthly=10,
+            kiaan_questions_monthly=5,
             encrypted_journal=False,
             data_retention_days=30,
         )
         test_db.add(free_plan)
 
-        # Create premium plan
-        premium_plan = SubscriptionPlan(
-            tier=SubscriptionTier.PREMIUM,
-            name="Premium",
-            price_monthly=Decimal("19.99"),
+        # Create Siddha plan
+        siddha_plan = SubscriptionPlan(
+            tier=SubscriptionTier.SIDDHA,
+            name="Siddha",
+            price_monthly=Decimal("22.99"),
             kiaan_questions_monthly=-1,  # Unlimited
             encrypted_journal=True,
-            data_retention_days=365,
+            data_retention_days=-1,
         )
-        test_db.add(premium_plan)
+        test_db.add(siddha_plan)
         await test_db.commit()
         await test_db.refresh(free_plan)
-        await test_db.refresh(premium_plan)
+        await test_db.refresh(siddha_plan)
 
         # Create free subscription
         now = datetime.now(UTC)
@@ -266,16 +266,16 @@ class TestSubscriptionUpgrade:
         test_db.add(subscription)
         await test_db.commit()
 
-        # Upgrade to premium
+        # Upgrade to Siddha
         upgraded = await upgrade_subscription(
             test_db,
             user.id,
-            premium_plan.id,
+            siddha_plan.id,
             stripe_subscription_id="sub_test_123",
         )
 
         assert upgraded is not None
-        assert upgraded.plan_id == premium_plan.id
+        assert upgraded.plan_id == siddha_plan.id
         assert upgraded.stripe_subscription_id == "sub_test_123"
         assert upgraded.status == SubscriptionStatus.ACTIVE
 
@@ -293,7 +293,7 @@ class TestStripeWebhookHandling:
             "invoice.payment_succeeded",
             "invoice.payment_failed",
         ]
-        
+
         # Verify these are string constants
         for event in expected_events:
             assert isinstance(event, str)

@@ -23,39 +23,40 @@ type StepId = (typeof STEPS)[number]
 
 const STEP_TITLES = ['Welcome', 'Profile', 'Preferences', 'Plan', 'Complete']
 
-// Pricing tiers for plan selection
+// Pricing tiers for plan selection — 3-tier structure (March 2026)
 const pricingTiers: PricingTier[] = [
   {
     id: 'free',
-    name: 'Free',
-    description: 'Get started with 20 KIAAN questions/month',
+    name: 'Seeker',
+    description: 'Begin your journey with 5 KIAAN questions/month',
     monthlyPrice: 0,
     yearlyPrice: 0,
-    kiaanQuota: 20,
-    features: ['20 questions/month', 'Journal & mood tracking', 'Daily wisdom'],
+    kiaanQuota: 5,
+    features: ['5 questions/month', 'Mood tracking', 'Daily wisdom', 'Community access'],
     cta: 'Start Free',
   },
   {
-    id: 'basic',
-    name: 'Basic',
-    description: 'More questions and extra features',
-    monthlyPrice: 9.99,
-    yearlyPrice: 99.99,
-    kiaanQuota: 50,
-    features: ['50 questions/month', 'All assistants', 'Email support'],
-    cta: 'Go Basic',
-  },
-  {
-    id: 'premium',
-    name: 'Premium',
-    description: 'Full access to everything',
-    monthlyPrice: 19.99,
-    yearlyPrice: 199.99,
+    id: 'sadhak',
+    name: 'Sadhak',
+    description: '300 questions with all features unlocked',
+    monthlyPrice: 12.99,
+    yearlyPrice: 89.99,
     kiaanQuota: 300,
     highlighted: true,
-    badge: 'Best Value',
-    features: ['300 questions/month', 'Advanced features', 'Priority support'],
-    cta: 'Go Premium',
+    badge: 'Most Popular',
+    features: ['300 questions/month', 'All AI tools & Voice', 'Encrypted journal', '10 Wisdom Journeys', 'Priority support'],
+    cta: 'Start 7-day trial',
+  },
+  {
+    id: 'siddha',
+    name: 'Siddha',
+    description: 'Unlimited KIAAN with unlimited everything',
+    monthlyPrice: 22.99,
+    yearlyPrice: 169.99,
+    kiaanQuota: 'unlimited' as unknown as number,
+    badge: 'Unlimited',
+    features: ['Unlimited questions', 'All Sadhak features', 'Unlimited Journeys', 'Dedicated support'],
+    cta: 'Start 7-day trial',
   },
 ]
 

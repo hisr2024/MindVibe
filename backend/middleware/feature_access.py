@@ -45,7 +45,7 @@ DEFAULT_DEVELOPER_EMAILS: set[str] = {
 #   - Unlimited Wisdom Journeys
 #   - All premium features (Voice Companion, Relationship Compass, Ardha, Viyoga, etc.)
 #   - No subscription required
-#   - Effective tier shown as PREMIER (highest tier)
+#   - Effective tier shown as SIDDHA (highest tier)
 
 # Additional developer emails from environment variable
 # Format: comma-separated list of emails (e.g., DEVELOPER_EMAILS=dev1@example.com,dev2@example.com)
@@ -331,9 +331,8 @@ class WisdomJourneysAccessRequired:
     Checks both feature access and journey limits based on subscription tier:
     - DEVELOPER: Full unlimited access (bypasses all restrictions)
     - FREE: Trial access - 1 journey, limited to 3 days
-    - BASIC: Up to 3 active journeys (full duration)
-    - PREMIUM: Up to 10 active journeys
-    - ENTERPRISE/PREMIER: Unlimited journeys
+    - SADHAK: Up to 10 active journeys (full duration)
+    - SIDDHA: Unlimited journeys
     """
 
     def __init__(self, check_limit: bool = False, requested_count: int = 1):

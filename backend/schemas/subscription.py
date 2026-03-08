@@ -79,8 +79,8 @@ class CheckoutSessionCreate(BaseModel):
     billing_period: str = Field(default="monthly", pattern="^(monthly|yearly)$")
     payment_method: str = Field(
         default="card",
-        pattern="^(card|paypal|upi)$",
-        description="Payment method: 'card' (Stripe), 'paypal' (Stripe), or 'upi' (Razorpay)",
+        pattern="^(card|paypal|upi|google_pay)$",
+        description="Payment method: 'card' (Stripe), 'paypal' (Stripe), 'google_pay' (Stripe), or 'upi' (Razorpay)",
     )
     currency: str = Field(
         default="usd",

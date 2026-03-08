@@ -38,7 +38,7 @@ export function SubscriptionGate({ feature, children, fallback }: SubscriptionGa
     return <>{fallback}</>
   }
 
-  const tierNames: Record<string, string> = { free: 'Free', basic: 'Plus', premium: 'Pro', enterprise: 'Elite', premier: 'Premier' }
+  const tierNames: Record<string, string> = { free: 'Seeker', sadhak: 'Sadhak', siddha: 'Siddha' }
   const tierLabel = tierNames[requiredTier(feature)] ?? requiredTier(feature)
   const label = featureLabel(feature)
 
@@ -66,29 +66,13 @@ export function SubscriptionGate({ feature, children, fallback }: SubscriptionGa
             <div className="rounded-xl bg-gradient-to-r from-[#d4a44c]/10 via-[#d4a44c]/10 to-[#d4a44c]/10 border border-[#d4a44c]/30 p-4 mb-6">
               <p className="text-sm font-medium text-[#f5f0e8] mb-3">{tierLabel} plan includes:</p>
               <ul className="text-sm text-[#f5f0e8]/80 space-y-2 text-left">
-                {tierLabel === 'Plus' ? (
-                  <>
-                    <FeatureItem text="150 KIAAN questions/month" />
-                    <FeatureItem text="Encrypted journal" />
-                    <FeatureItem text="Voice synthesis" />
-                    <FeatureItem text="3 Wisdom Journeys" />
-                    <FeatureItem text="Starting at $4.99/month" />
-                  </>
-                ) : tierLabel === 'Elite' ? (
-                  <>
-                    <FeatureItem text="800 KIAAN questions/month" />
-                    <FeatureItem text="All Pro features" />
-                    <FeatureItem text="Unlimited Wisdom Journeys" />
-                    <FeatureItem text="Dedicated support" />
-                    <FeatureItem text="Starting at $15/month" />
-                  </>
-                ) : tierLabel === 'Premier' ? (
+                {tierLabel === 'Siddha' ? (
                   <>
                     <FeatureItem text="Unlimited KIAAN questions" />
-                    <FeatureItem text="All Elite features" />
-                    <FeatureItem text="Unlimited everything" />
+                    <FeatureItem text="All Sadhak features" />
+                    <FeatureItem text="Unlimited Wisdom Journeys" />
                     <FeatureItem text="Dedicated support" />
-                    <FeatureItem text="Starting at $25/month" />
+                    <FeatureItem text="Starting at $22.99/month" />
                   </>
                 ) : (
                   <>
@@ -96,7 +80,7 @@ export function SubscriptionGate({ feature, children, fallback }: SubscriptionGa
                     <FeatureItem text="Voice Companion & Soul Reading" />
                     <FeatureItem text="Advanced analytics & insights" />
                     <FeatureItem text="10 Wisdom Journeys" />
-                    <FeatureItem text="Starting at $9.99/month" />
+                    <FeatureItem text="Starting at $12.99/month" />
                   </>
                 )}
               </ul>

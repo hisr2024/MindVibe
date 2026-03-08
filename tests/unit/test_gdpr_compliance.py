@@ -39,7 +39,7 @@ class TestDataExportCompliance:
             "email": user.email,
             "created_at": user.created_at.isoformat() if user.created_at else None,
         }
-        
+
         # Verify data can be serialized
         import json
         serialized = json.dumps(user_data)
@@ -60,10 +60,10 @@ class TestDataExportCompliance:
         # Exported data should not include password
         exportable_fields = ["email", "created_at"]
         non_exportable_fields = ["hashed_password", "two_factor_secret"]
-        
+
         for field in exportable_fields:
             assert hasattr(user, field)
-        
+
         # Ensure these fields exist but should be excluded from export
         assert hasattr(user, "hashed_password")
 
@@ -84,13 +84,13 @@ class TestDataDeletionCompliance:
         await test_db.refresh(user)
 
         original_id = user.id
-        
+
         # Soft delete by marking deleted_at
         if hasattr(user, 'deleted_at'):
             user.deleted_at = datetime.now(UTC)
             await test_db.commit()
             await test_db.refresh(user)
-            
+
             assert user.deleted_at is not None
 
     @pytest.mark.asyncio
@@ -125,7 +125,7 @@ class TestConsentManagement:
             "marketing",
             "functional",
         ]
-        
+
         # All consent types should be standard strings
         for consent in expected_consent_types:
             assert isinstance(consent, str)
@@ -140,10 +140,10 @@ class TestConsentManagement:
             "marketing": False,
             "functional": True,
         }
-        
+
         # After processing, necessary should still be True
         consent_input["necessary"] = True  # Business logic forces this
-        
+
         assert consent_input["necessary"] is True
 
 
@@ -153,14 +153,14 @@ class TestPrivacyPreservingOperations:
     def test_password_is_hashed(self):
         """Test that passwords are stored hashed, not plain text."""
         from backend.security.password_hash import hash_password, verify_password
-        
+
         plain_password = "SecurePassword123!"
         hashed = hash_password(plain_password)
-        
+
         # Password should be hashed
         assert hashed != plain_password
         assert len(hashed) > len(plain_password)
-        
+
         # Verification should work
         assert verify_password(plain_password, hashed) is True
         assert verify_password("WrongPassword", hashed) is False
@@ -168,14 +168,14 @@ class TestPrivacyPreservingOperations:
     def test_tokens_are_cryptographically_secure(self):
         """Test that generated tokens are cryptographically secure."""
         import secrets
-        
+
         # Tokens should be generated with adequate entropy
         token1 = secrets.token_urlsafe(32)
         token2 = secrets.token_urlsafe(32)
-        
+
         # Tokens should be unique
         assert token1 != token2
-        
+
         # Tokens should have sufficient length
         assert len(token1) >= 32
         assert len(token2) >= 32
@@ -188,18 +188,18 @@ class TestDataRetention:
         """Test that data retention periods are defined for each tier."""
         from backend.config.feature_config import get_tier_features
         from backend.models import SubscriptionTier
-        
+
         # Free tier has 30-day retention
         free_features = get_tier_features(SubscriptionTier.FREE)
         assert free_features["data_retention_days"] == 30
-        
-        # Basic tier has 365-day retention
-        basic_features = get_tier_features(SubscriptionTier.BASIC)
-        assert basic_features["data_retention_days"] == 365
-        
-        # Premium tier has unlimited retention (represented as -1 or 365+)
-        premium_features = get_tier_features(SubscriptionTier.PREMIUM)
-        assert premium_features["data_retention_days"] in [-1, 365, 730]
+
+        # Sadhak tier has unlimited retention
+        sadhak_features = get_tier_features(SubscriptionTier.SADHAK)
+        assert sadhak_features["data_retention_days"] == -1
+
+        # Siddha tier has unlimited retention
+        siddha_features = get_tier_features(SubscriptionTier.SIDDHA)
+        assert siddha_features["data_retention_days"] == -1
 
 
 class TestKIAANConversationPrivacy:
@@ -209,7 +209,7 @@ class TestKIAANConversationPrivacy:
         """Test that conversation encryption is conceptually implemented."""
         # KIAAN conversations should be encrypted at rest
         # This test verifies the concept is in place
-        
+
         # Conversation data structure
         conversation = {
             "session_id": "test-session",
@@ -218,7 +218,7 @@ class TestKIAANConversationPrivacy:
                 {"role": "assistant", "content": "Hi there!"},
             ],
         }
-        
+
         # Encrypted conversations should not be readable in plain text
         # (In production, this would use actual encryption)
         assert "messages" in conversation
@@ -228,13 +228,13 @@ class TestKIAANConversationPrivacy:
         """Test that admin access to conversations is restricted."""
         # Admin should not have direct access to user conversations
         # This is a policy verification test
-        
+
         admin_permissions = [
             "user_management",
             "subscription_management",
             "audit_log_view",
         ]
-        
+
         # Conversation access should NOT be in admin permissions
         assert "conversation_read" not in admin_permissions
         assert "conversation_view" not in admin_permissions
@@ -251,7 +251,7 @@ class TestGDPRCompliantResponses:
             "User not found",
             "Invalid request",
         ]
-        
+
         # These should not reveal system internals
         for msg in error_messages:
             assert "password" not in msg.lower()
@@ -263,11 +263,11 @@ class TestGDPRCompliantResponses:
         # User model should only collect necessary data
         required_fields = ["email", "hashed_password", "auth_uid"]
         optional_fields = ["display_name", "profile_photo_url"]
-        
+
         # All fields should be justified
         for field in required_fields:
             assert isinstance(field, str)
-        
+
         for field in optional_fields:
             assert isinstance(field, str)
 
@@ -295,7 +295,7 @@ class TestDataSubjectRights:
     def test_right_to_data_portability_format(self):
         """Test that exported data is in a portable format."""
         import json
-        
+
         sample_export = {
             "user": {
                 "email": "user@example.com",
@@ -305,9 +305,9 @@ class TestDataSubjectRights:
             "journal_entries": [],
             "mood_logs": [],
         }
-        
+
         # Should be serializable to JSON
         json_string = json.dumps(sample_export)
         parsed = json.loads(json_string)
-        
+
         assert parsed["user"]["email"] == "user@example.com"

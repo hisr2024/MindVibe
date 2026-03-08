@@ -1,6 +1,11 @@
 """Feature configuration for subscription tiers.
 
 Defines which features are available for each subscription tier.
+
+Three-tier structure (March 2026 consolidation):
+- FREE (Seeker): Minimal AI access to drive conversion
+- SADHAK ($12.99/mo): Full feature access with 300 questions
+- SIDDHA ($22.99/mo): Unlimited everything with dedicated support
 """
 
 from typing import Any
@@ -12,7 +17,7 @@ from backend.models import SubscriptionTier
 # kiaan_questions_monthly: -1 = unlimited
 TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
     SubscriptionTier.FREE: {
-        "kiaan_questions_monthly": 15,
+        "kiaan_questions_monthly": 5,
         "encrypted_journal": False,
         "mood_tracking": True,
         "wisdom_access": True,
@@ -31,37 +36,13 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         # KIAAN Ecosystem - Gated per tier
         "kiaan_divine_chat": True,  # Basic divine chat allowed
         "kiaan_friend_mode": True,  # Friend mode allowed (shares quota)
-        "kiaan_voice_companion": False,  # Voice companion is Premium+
-        "kiaan_agent": False,  # Agent is Premium+
-        "kiaan_soul_reading": False,  # Soul reading is Premium+
-        "kiaan_voice_synthesis": False,  # Voice synthesis is Basic+
-        "kiaan_quantum_dive": False,  # Quantum dive is Premium+
+        "kiaan_voice_companion": False,  # Voice companion is Sadhak+
+        "kiaan_agent": False,  # Agent is Sadhak+
+        "kiaan_soul_reading": False,  # Soul reading is Sadhak+
+        "kiaan_voice_synthesis": False,  # Voice synthesis is Sadhak+
+        "kiaan_quantum_dive": False,  # Quantum dive is Sadhak+
     },
-    SubscriptionTier.BASIC: {
-        "kiaan_questions_monthly": 150,
-        "encrypted_journal": True,
-        "mood_tracking": True,
-        "wisdom_access": True,
-        "advanced_analytics": False,
-        "priority_support": False,
-        "offline_access": False,
-        "white_label": False,
-        "sso": False,
-        "dedicated_support": False,
-        "data_retention_days": 365,
-        # Wisdom Journeys - Access for Basic
-        "wisdom_journeys": True,
-        "wisdom_journeys_limit": 3,  # Can have 3 active journeys
-        # KIAAN Ecosystem
-        "kiaan_divine_chat": True,
-        "kiaan_friend_mode": True,
-        "kiaan_voice_companion": False,  # Voice companion is Premium+
-        "kiaan_agent": False,  # Agent is Premium+
-        "kiaan_soul_reading": False,  # Soul reading is Premium+
-        "kiaan_voice_synthesis": True,  # Voice synthesis unlocked
-        "kiaan_quantum_dive": False,  # Quantum dive is Premium+
-    },
-    SubscriptionTier.PREMIUM: {
+    SubscriptionTier.SADHAK: {
         "kiaan_questions_monthly": 300,
         "encrypted_journal": True,
         "mood_tracking": True,
@@ -73,7 +54,7 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         "sso": False,
         "dedicated_support": False,
         "data_retention_days": -1,  # Unlimited retention
-        # Wisdom Journeys - Full access for Premium
+        # Wisdom Journeys - Full access for Sadhak
         "wisdom_journeys": True,
         "wisdom_journeys_limit": 10,  # Can have up to 10 active journeys
         # KIAAN Ecosystem - Full access
@@ -85,33 +66,7 @@ TIER_FEATURES: dict[SubscriptionTier, dict[str, Any]] = {
         "kiaan_voice_synthesis": True,
         "kiaan_quantum_dive": True,
     },
-    # Elite tier (uses ENTERPRISE enum in DB for backward compatibility)
-    SubscriptionTier.ENTERPRISE: {
-        "kiaan_questions_monthly": 800,
-        "encrypted_journal": True,
-        "mood_tracking": True,
-        "wisdom_access": True,
-        "advanced_analytics": True,
-        "priority_support": True,
-        "offline_access": True,
-        "white_label": False,
-        "sso": False,
-        "dedicated_support": True,
-        "data_retention_days": -1,  # Unlimited retention
-        # Wisdom Journeys - Unlimited for Elite
-        "wisdom_journeys": True,
-        "wisdom_journeys_limit": -1,  # Unlimited active journeys
-        # KIAAN Ecosystem - Full access
-        "kiaan_divine_chat": True,
-        "kiaan_friend_mode": True,
-        "kiaan_voice_companion": True,
-        "kiaan_agent": True,
-        "kiaan_soul_reading": True,
-        "kiaan_voice_synthesis": True,
-        "kiaan_quantum_dive": True,
-    },
-    # Premier tier — unlimited everything
-    SubscriptionTier.PREMIER: {
+    SubscriptionTier.SIDDHA: {
         "kiaan_questions_monthly": -1,  # Unlimited
         "encrypted_journal": True,
         "mood_tracking": True,
@@ -186,7 +141,7 @@ def get_kiaan_quota(tier: SubscriptionTier) -> int:
     Returns:
         int: Monthly KIAAN questions limit (-1 = unlimited).
     """
-    return get_tier_features(tier).get("kiaan_questions_monthly", 10)
+    return get_tier_features(tier).get("kiaan_questions_monthly", 5)
 
 
 def get_wisdom_journeys_limit(tier: SubscriptionTier) -> int:
