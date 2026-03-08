@@ -264,20 +264,20 @@ CREATE INDEX IF NOT EXISTS idx_payments_stripe_payment_intent_id ON payments(str
 CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
 
 -- Insert default subscription plans
-INSERT INTO subscription_plans (tier, name, description, price_monthly, price_yearly, features, kiaan_questions_monthly, encrypted_journal, data_retention_days)
-VALUES 
-    ('free', 'Free', 'Get started with MindVibe core features', 0.00, NULL, 
+INSERT INTO subscription_plans (tier, name, description, price_monthly, price_yearly, features, kiaan_questions_monthly, encrypted_journal, data_retention_days, is_active)
+VALUES
+    ('free', 'Free', 'Get started with MindVibe core features', 0.00, NULL,
      '{"kiaan_questions_monthly": 10, "encrypted_journal": false, "mood_tracking": true, "wisdom_access": true, "advanced_analytics": false, "priority_support": false, "offline_access": false, "data_retention_days": 30}',
-     10, FALSE, 30),
+     10, FALSE, 30, TRUE),
     ('basic', 'Basic', 'Unlock journal access and more KIAAN conversations', 9.99, 99.99,
      '{"kiaan_questions_monthly": 100, "encrypted_journal": true, "mood_tracking": true, "wisdom_access": true, "advanced_analytics": true, "priority_support": false, "offline_access": false, "data_retention_days": 365}',
-     100, TRUE, 365),
+     100, TRUE, 365, TRUE),
     ('premium', 'Premium', 'Unlimited KIAAN access with priority support', 19.99, 199.99,
      '{"kiaan_questions_monthly": -1, "encrypted_journal": true, "mood_tracking": true, "wisdom_access": true, "advanced_analytics": true, "priority_support": true, "offline_access": true, "data_retention_days": -1}',
-     -1, TRUE, -1),
+     -1, TRUE, -1, TRUE),
     ('enterprise', 'Enterprise', 'Complete solution for organizations', 499.00, 4999.00,
      '{"kiaan_questions_monthly": -1, "encrypted_journal": true, "mood_tracking": true, "wisdom_access": true, "advanced_analytics": true, "priority_support": true, "offline_access": true, "white_label": true, "sso": true, "dedicated_support": true, "data_retention_days": -1}',
-     -1, TRUE, -1)
+     -1, TRUE, -1, TRUE)
 ON CONFLICT (tier) DO UPDATE SET
     name = EXCLUDED.name,
     description = EXCLUDED.description,

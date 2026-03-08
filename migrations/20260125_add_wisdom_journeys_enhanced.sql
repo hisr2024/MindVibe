@@ -208,11 +208,11 @@ CREATE TABLE IF NOT EXISTS ai_provider_configs (
 );
 
 -- Insert default providers
-INSERT INTO ai_provider_configs (provider_name, display_name, is_enabled, is_default, priority)
+INSERT INTO ai_provider_configs (id, provider_name, display_name, is_enabled, is_default, priority, rate_limit_per_minute, rate_limit_per_hour)
 VALUES
-    ('openai', 'OpenAI (GPT-4o-mini)', true, true, 1),
-    ('sarvam', 'Sarvam AI', true, false, 2),
-    ('oai_compat', 'OpenAI Compatible', false, false, 3)
+    (gen_random_uuid()::text, 'openai', 'OpenAI (GPT-4o-mini)', true, true, 1, 60, 1000),
+    (gen_random_uuid()::text, 'sarvam', 'Sarvam AI', true, false, 2, 60, 1000),
+    (gen_random_uuid()::text, 'oai_compat', 'OpenAI Compatible', false, false, 3, 60, 1000)
 ON CONFLICT (provider_name) DO UPDATE SET
     updated_at = NOW();
 
