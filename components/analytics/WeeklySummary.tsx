@@ -65,7 +65,7 @@ export function WeeklySummary({
   const getChangeColor = (change: number) => {
     if (change > 0) return 'text-emerald-400'
     if (change < 0) return 'text-red-400'
-    return 'text-[#f5f0e8]/60'
+    return 'text-[#f5f0e8]/75'
   }
 
   const getChangePrefix = (change: number) => {
@@ -85,7 +85,7 @@ export function WeeklySummary({
         <h3 className="text-lg font-semibold text-[#f5f0e8]">
           Weekly Summary
         </h3>
-        <span className="text-sm text-[#f5f0e8]/60">
+        <span className="text-sm text-[#f5f0e8]/75">
           {formatDateRange()}
         </span>
       </div>
@@ -120,7 +120,7 @@ export function WeeklySummary({
           <p className="text-2xl font-bold text-[#f5f0e8]">
             {summary.journalSummary.entriesCount} entries
           </p>
-          <div className="mt-2 text-xs text-[#f5f0e8]/60">
+          <div className="mt-2 text-xs text-[#f5f0e8]/75">
             <p>{summary.journalSummary.totalWords.toLocaleString()} words</p>
             {summary.journalSummary.topTopics.length > 0 && (
               <p className="mt-1">
@@ -157,21 +157,21 @@ export function WeeklySummary({
         </h4>
         <div className="flex flex-wrap gap-6">
           <div>
-            <span className="text-xs text-[#f5f0e8]/50">Mood</span>
+            <span className="text-xs text-[#f5f0e8]/70">Mood</span>
             <p className={`text-sm font-semibold ${getChangeColor(summary.comparisonToPreviousWeek.moodChange)}`}>
               {getChangePrefix(summary.comparisonToPreviousWeek.moodChange)}
               {summary.comparisonToPreviousWeek.moodChange}%
             </p>
           </div>
           <div>
-            <span className="text-xs text-[#f5f0e8]/50">Entries</span>
+            <span className="text-xs text-[#f5f0e8]/70">Entries</span>
             <p className={`text-sm font-semibold ${getChangeColor(summary.comparisonToPreviousWeek.entriesChange)}`}>
               {getChangePrefix(summary.comparisonToPreviousWeek.entriesChange)}
               {summary.comparisonToPreviousWeek.entriesChange}%
             </p>
           </div>
           <div>
-            <span className="text-xs text-[#f5f0e8]/50">KIAAN</span>
+            <span className="text-xs text-[#f5f0e8]/70">KIAAN</span>
             <p className={`text-sm font-semibold ${getChangeColor(summary.comparisonToPreviousWeek.kiaanChange)}`}>
               {getChangePrefix(summary.comparisonToPreviousWeek.kiaanChange)}
               {summary.comparisonToPreviousWeek.kiaanChange}%
@@ -202,7 +202,7 @@ export function WeeklySummary({
                   <p className="text-sm font-medium text-[#f5f0e8]">
                     {insight.title}
                   </p>
-                  <p className="text-xs text-[#f5f0e8]/60">
+                  <p className="text-xs text-[#f5f0e8]/75">
                     {insight.description}
                   </p>
                 </div>

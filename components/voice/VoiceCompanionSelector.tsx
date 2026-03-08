@@ -250,7 +250,7 @@ export default function VoiceCompanionSelector({
       <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
         <div>
           <h3 className="text-base font-semibold text-white/90">Voice & Language</h3>
-          <p className="text-[11px] text-white/40 mt-0.5">
+          <p className="text-[11px] text-white/70 mt-0.5">
             {selectedVoice
               ? `${selectedVoice.name} \u00B7 ${selectedLangInfo?.nativeName || selectedLang}`
               : 'Choose your companion voice'}
@@ -265,7 +265,7 @@ export default function VoiceCompanionSelector({
                 ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
                 : selectedVoice.poweredBy === 'bhashini'
                 ? 'border-sky-500/20 bg-sky-500/10 text-sky-400'
-                : 'border-white/10 bg-white/5 text-white/40'
+                : 'border-white/10 bg-white/5 text-white/70'
             }`}>
               {getProviderDisplayInfo(selectedVoice.poweredBy).label}
             </span>
@@ -273,7 +273,7 @@ export default function VoiceCompanionSelector({
           {onClose && (
             <button
               onClick={onClose}
-              className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white/70 transition-colors"
+              className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-white/70 transition-colors"
               aria-label="Close"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -351,7 +351,7 @@ export default function VoiceCompanionSelector({
                         }`}>
                           {lang.nativeName}
                         </span>
-                        <span className="text-[8px] text-white/30">{voiceCount} voice{voiceCount !== 1 ? 's' : ''}</span>
+                        <span className="text-[8px] text-white/70">{voiceCount} voice{voiceCount !== 1 ? 's' : ''}</span>
                       </button>
                     )
                   })}
@@ -366,7 +366,7 @@ export default function VoiceCompanionSelector({
           <div className="p-4">
             {/* Gender filter */}
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-[10px] text-white/30">Filter:</span>
+              <span className="text-[10px] text-white/70">Filter:</span>
               {(['all', 'female', 'male'] as const).map(g => (
                 <button
                   key={g}
@@ -390,7 +390,7 @@ export default function VoiceCompanionSelector({
             <div className="space-y-2">
               {availableVoices.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-sm text-white/30">No voices match your filters</p>
+                  <p className="text-sm text-white/70">No voices match your filters</p>
                   <button
                     onClick={() => setFilterGender('all')}
                     className="mt-2 text-xs text-[#d4a44c]/70 hover:text-[#d4a44c] transition-colors"
@@ -474,7 +474,7 @@ export default function VoiceCompanionSelector({
                         </div>
 
                         {/* Description */}
-                        <p className="text-[10px] text-white/40 leading-relaxed mt-1.5 line-clamp-2 ml-[46px]">
+                        <p className="text-[10px] text-white/70 leading-relaxed mt-1.5 line-clamp-2 ml-[46px]">
                           {voice.description}
                         </p>
 
@@ -543,7 +543,7 @@ export default function VoiceCompanionSelector({
                         {tone.label}
                       </span>
                     </div>
-                    <p className="text-[9px] text-white/30 mt-1 ml-[18px]">{tone.description}</p>
+                    <p className="text-[9px] text-white/70 mt-1 ml-[18px]">{tone.description}</p>
                   </button>
                 )
               })}
@@ -557,7 +557,7 @@ export default function VoiceCompanionSelector({
             {/* Speed */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label htmlFor="voice-speed" className="text-[11px] text-white/50 font-medium">Speaking Speed</label>
+                <label htmlFor="voice-speed" className="text-[11px] text-white/70 font-medium">Speaking Speed</label>
                 <span className="text-[11px] font-mono text-[#e8b54a]/70">{speed.toFixed(2)}x</span>
               </div>
               <input
@@ -584,7 +584,7 @@ export default function VoiceCompanionSelector({
             {/* Pitch */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label htmlFor="voice-pitch" className="text-[11px] text-white/50 font-medium">Voice Pitch</label>
+                <label htmlFor="voice-pitch" className="text-[11px] text-white/70 font-medium">Voice Pitch</label>
                 <span className="text-[11px] font-mono text-[#e8b54a]/70">{pitch > 0 ? '+' : ''}{pitch.toFixed(1)}</span>
               </div>
               <input
@@ -612,7 +612,7 @@ export default function VoiceCompanionSelector({
             <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
               <div>
                 <div className="text-[11px] text-white/70 font-medium">Auto-play Responses</div>
-                <div className="text-[9px] text-white/30 mt-0.5">Automatically speak KIAAN&apos;s replies aloud</div>
+                <div className="text-[9px] text-white/70 mt-0.5">Automatically speak KIAAN&apos;s replies aloud</div>
               </div>
               <button
                 onClick={() => {
@@ -673,7 +673,7 @@ export default function VoiceCompanionSelector({
                 ? 'bg-emerald-500/20 text-emerald-400'
                 : selectedVoice.poweredBy === 'bhashini'
                 ? 'bg-sky-500/20 text-sky-400'
-                : 'bg-white/10 text-white/40'
+                : 'bg-white/10 text-white/70'
             }`}>
               {selectedVoice.name[0]}
             </div>

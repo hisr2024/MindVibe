@@ -148,7 +148,7 @@ export function MobileVibePlayer() {
                 <p className={`font-medium text-white truncate ${isExpanded ? 'text-base' : 'text-sm'}`}>
                   {currentTrack.title}
                 </p>
-                <p className="text-xs text-white/50 truncate">
+                <p className="text-xs text-white/70 truncate">
                   {currentTrack.artist || 'KIAAN Vibe'}
                 </p>
               </div>
@@ -193,7 +193,7 @@ export function MobileVibePlayer() {
                     <ChevronDown className="w-5 h-5" />
                   </button>
                 ) : (
-                  <button onClick={() => clearQueue()} className="p-2 text-white/30" aria-label="Close">
+                  <button onClick={() => clearQueue()} className="p-2 text-white/70" aria-label="Close">
                     <X className="w-4 h-4" />
                   </button>
                 )}
@@ -219,7 +219,7 @@ export function MobileVibePlayer() {
 
             {/* Time display (expanded) */}
             {isExpanded && (
-              <div className="flex items-center justify-between text-[11px] text-white/40 mt-1.5">
+              <div className="flex items-center justify-between text-[11px] text-white/70 mt-1.5">
                 <span>{formatDuration(position)}</span>
                 <span>{formatDuration(duration)}</span>
               </div>
@@ -234,7 +234,7 @@ export function MobileVibePlayer() {
                   <button onClick={() => retryPlayback()} className="p-1 rounded bg-[#d4a44c]/20 text-[#d4a44c]" aria-label="Retry">
                     <RefreshCw className="w-3 h-3" />
                   </button>
-                  <button onClick={() => clearAudioError()} className="p-1 rounded bg-white/5 text-white/40" aria-label="Dismiss">
+                  <button onClick={() => clearAudioError()} className="p-1 rounded bg-white/5 text-white/70" aria-label="Dismiss">
                     <X className="w-3 h-3" />
                   </button>
                 </div>
@@ -285,7 +285,7 @@ export function MobileVibePlayer() {
                 <div className="flex items-center justify-center gap-6">
                   <button
                     onClick={toggleShuffle}
-                    className={`p-2 rounded-lg ${shuffle ? 'text-[#d4a44c] bg-[#d4a44c]/20' : 'text-white/40'}`}
+                    className={`p-2 rounded-lg ${shuffle ? 'text-[#d4a44c] bg-[#d4a44c]/20' : 'text-white/70'}`}
                     aria-label="Shuffle"
                   >
                     <Shuffle className="w-5 h-5" />
@@ -293,7 +293,7 @@ export function MobileVibePlayer() {
 
                   <button
                     onClick={cycleRepeatMode}
-                    className={`p-2 rounded-lg ${repeatMode !== 'off' ? 'text-[#d4a44c] bg-[#d4a44c]/20' : 'text-white/40'}`}
+                    className={`p-2 rounded-lg ${repeatMode !== 'off' ? 'text-[#d4a44c] bg-[#d4a44c]/20' : 'text-white/70'}`}
                     aria-label={`Repeat: ${repeatMode}`}
                   >
                     {repeatMode === 'one' ? <Repeat1 className="w-5 h-5" /> : <Repeat className="w-5 h-5" />}
@@ -301,7 +301,7 @@ export function MobileVibePlayer() {
 
                   <button
                     onClick={() => setShowQueue(!showQueue)}
-                    className={`p-2 rounded-lg ${showQueue ? 'text-[#d4a44c] bg-[#d4a44c]/20' : 'text-white/40'}`}
+                    className={`p-2 rounded-lg ${showQueue ? 'text-[#d4a44c] bg-[#d4a44c]/20' : 'text-white/70'}`}
                     aria-label="Queue"
                   >
                     <ListMusic className="w-5 h-5" />
@@ -310,7 +310,7 @@ export function MobileVibePlayer() {
 
                 {/* Speed */}
                 <div className="flex items-center gap-2 justify-center">
-                  <span className="text-xs text-white/40">Speed:</span>
+                  <span className="text-xs text-white/70">Speed:</span>
                   <div className="flex gap-1">
                     {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
                       <button
@@ -319,7 +319,7 @@ export function MobileVibePlayer() {
                         className={`px-2.5 py-1.5 text-xs rounded-lg ${
                           playbackRate === rate
                             ? 'bg-[#d4a44c] text-white'
-                            : 'bg-white/10 text-white/50'
+                            : 'bg-white/10 text-white/70'
                         }`}
                       >
                         {rate}x
@@ -337,7 +337,7 @@ export function MobileVibePlayer() {
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden"
                     >
-                      <p className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2">
+                      <p className="text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
                         Queue ({queue.length} tracks)
                       </p>
                       <div className="space-y-1 max-h-48 overflow-y-auto">
@@ -350,10 +350,10 @@ export function MobileVibePlayer() {
                                 : 'bg-white/[0.03]'
                             }`}
                           >
-                            <span className="text-xs text-white/30 w-5 text-center">{index + 1}</span>
+                            <span className="text-xs text-white/70 w-5 text-center">{index + 1}</span>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm text-white truncate">{track.title}</p>
-                              <p className="text-[10px] text-white/40 truncate">{track.artist || 'KIAAN Vibe'}</p>
+                              <p className="text-[10px] text-white/70 truncate">{track.artist || 'KIAAN Vibe'}</p>
                             </div>
                             {index !== queueIndex && (
                               <button onClick={() => removeFromQueue(index)} className="p-1 text-white/20" aria-label="Remove">

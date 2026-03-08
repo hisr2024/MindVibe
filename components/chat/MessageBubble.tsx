@@ -132,7 +132,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="space-y-2.5 group divine-companion-message"
     >
-      <div className="flex items-center gap-2 text-xs text-[#f5f0e8]/50">
+      <div className="flex items-center gap-2 text-xs text-[#f5f0e8]/70">
         {sender === 'assistant' && (
           <div className="divine-companion-avatar h-6 w-6 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center mr-0.5">
             <span className="text-[9px] font-bold text-[#0a0a12]">K</span>
@@ -224,7 +224,7 @@ export function MessageBubble({ sender, text, timestamp, status, onSaveToJournal
                   Sacred Essence
                 </span>
               )}
-              <div className="text-[11px] uppercase tracking-[0.14em] text-[#f5f0e8]/50">
+              <div className="text-[11px] uppercase tracking-[0.14em] text-[#f5f0e8]/70">
                 {viewMode === 'summary'
                   ? (isAISummary ? 'Key Insights' : 'Quick Summary')
                   : 'Full Wisdom Response'

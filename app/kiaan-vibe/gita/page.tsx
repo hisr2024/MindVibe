@@ -86,7 +86,7 @@ export default function GitaChaptersPage() {
               className="absolute top-full left-0 mt-2 z-50 w-64 rounded-xl bg-[#1a1a1f] border border-white/10 shadow-2xl overflow-hidden"
             >
               <div className="p-2 max-h-64 overflow-y-auto">
-                <p className="px-3 py-2 text-xs font-medium text-white/50 uppercase tracking-wider">
+                <p className="px-3 py-2 text-xs font-medium text-white/70 uppercase tracking-wider">
                   Select Language
                 </p>
                 {availableLanguages.map((code) => {
@@ -109,7 +109,7 @@ export default function GitaChaptersPage() {
                       <span className="text-lg">{lang.flag}</span>
                       <div className="flex-1 text-left">
                         <p className="text-sm font-medium">{lang.nativeName}</p>
-                        <p className="text-xs text-white/50">{lang.name}</p>
+                        <p className="text-xs text-white/70">{lang.name}</p>
                       </div>
                       {isActive && (
                         <div className="w-2 h-2 rounded-full bg-orange-500" />
@@ -124,7 +124,7 @@ export default function GitaChaptersPage() {
 
         {/* Search */}
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70" />
           <input
             type="text"
             value={searchQuery}
@@ -155,11 +155,11 @@ export default function GitaChaptersPage() {
           <h3 className="font-semibold text-white group-hover:text-orange-400 transition-colors">
             Divine Voices
           </h3>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-white/70">
             Listen to Gita verses with sacred voice in {currentLang.nativeName} and 10+ languages
           </p>
         </div>
-        <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-orange-400 group-hover:translate-x-1 transition-all" />
+        <ChevronRight className="w-5 h-5 text-white/70 group-hover:text-orange-400 group-hover:translate-x-1 transition-all" />
       </Link>
 
       {/* Chapters List */}
@@ -188,13 +188,13 @@ export default function GitaChaptersPage() {
                 <p className="text-sm text-white/60 truncate">
                   {chapter.name}
                 </p>
-                <p className="text-xs text-white/40">
+                <p className="text-xs text-white/70">
                   {chapter.verseCount} verses
                 </p>
               </div>
 
               {/* Arrow */}
-              <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-orange-400 group-hover:translate-x-1 transition-all" />
+              <ChevronRight className="w-5 h-5 text-white/70 group-hover:text-orange-400 group-hover:translate-x-1 transition-all" />
             </motion.div>
           </Link>
         ))}
@@ -202,7 +202,7 @@ export default function GitaChaptersPage() {
         {filteredChapters.length === 0 && (
           <div className="text-center py-12">
             <BookOpen className="w-12 h-12 text-white/20 mx-auto mb-4" />
-            <p className="text-white/40">No chapters found</p>
+            <p className="text-white/70">No chapters found</p>
           </div>
         )}
       </div>

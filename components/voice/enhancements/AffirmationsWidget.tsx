@@ -156,7 +156,7 @@ export function AffirmationsWidget({
             </div>
             <div>
               <p className="text-xs font-medium text-white">Affirmations</p>
-              <p className="text-[10px] text-white/50">{categoryConfig.name}</p>
+              <p className="text-[10px] text-white/70">{categoryConfig.name}</p>
             </div>
           </div>
           <button
@@ -164,7 +164,7 @@ export function AffirmationsWidget({
             className={`p-2 rounded-lg transition-all ${
               isPlaying
                 ? 'bg-purple-500/30 text-purple-300'
-                : 'bg-white/5 text-white/50 hover:bg-white/10'
+                : 'bg-white/5 text-white/70 hover:bg-white/10'
             }`}
           >
             {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -193,7 +193,7 @@ export function AffirmationsWidget({
             </div>
             <div>
               <h3 className="font-semibold text-white">Affirmations</h3>
-              <p className="text-xs text-white/50">Positive Voice Guidance</p>
+              <p className="text-xs text-white/70">Positive Voice Guidance</p>
             </div>
           </div>
 
@@ -201,7 +201,7 @@ export function AffirmationsWidget({
             <button
               onClick={() => setShowHindi(!showHindi)}
               className={`px-2 py-1 rounded-lg text-xs transition-colors ${
-                showHindi ? 'bg-purple-500/20 text-purple-300' : 'bg-white/5 text-white/40'
+                showHindi ? 'bg-purple-500/20 text-purple-300' : 'bg-white/5 text-white/70'
               }`}
             >
               हिंदी
@@ -228,7 +228,7 @@ export function AffirmationsWidget({
                     : 'border-white/10 bg-white/5 hover:bg-white/10'
                 }`}
               >
-                <Icon className={`w-4 h-4 mx-auto mb-1 ${isSelected ? config.color : 'text-white/40'}`} />
+                <Icon className={`w-4 h-4 mx-auto mb-1 ${isSelected ? config.color : 'text-white/70'}`} />
                 <p className={`text-xs whitespace-nowrap ${isSelected ? 'text-white' : 'text-white/60'}`}>
                   {config.name}
                 </p>
@@ -239,7 +239,7 @@ export function AffirmationsWidget({
 
         {/* More categories */}
         <details className="mt-2">
-          <summary className="text-xs text-white/40 cursor-pointer hover:text-white/60">
+          <summary className="text-xs text-white/70 cursor-pointer hover:text-white/60">
             More categories...
           </summary>
           <div className="flex gap-2 flex-wrap mt-2">
@@ -254,7 +254,7 @@ export function AffirmationsWidget({
                   className={`px-3 py-1.5 rounded-lg text-xs transition-colors ${
                     isSelected
                       ? 'bg-purple-500/20 text-purple-300'
-                      : 'bg-white/5 text-white/50 hover:bg-white/10'
+                      : 'bg-white/5 text-white/70 hover:bg-white/10'
                   }`}
                 >
                   {config.name}
@@ -283,7 +283,7 @@ export function AffirmationsWidget({
 
               {/* Hindi Translation */}
               {showHindi && currentAffirmation.textHindi && (
-                <p className="text-sm text-white/50 mb-4">
+                <p className="text-sm text-white/70 mb-4">
                   {currentAffirmation.textHindi}
                 </p>
               )}
@@ -291,7 +291,7 @@ export function AffirmationsWidget({
               {/* Category Badge */}
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5">
                 <CategoryIcon className={`w-3 h-3 ${categoryConfig.color}`} />
-                <span className="text-xs text-white/50">{categoryConfig.name}</span>
+                <span className="text-xs text-white/70">{categoryConfig.name}</span>
               </div>
             </motion.div>
           )}
@@ -304,7 +304,7 @@ export function AffirmationsWidget({
           {/* Random */}
           <button
             onClick={handleRandom}
-            className="p-2.5 rounded-xl bg-white/5 text-white/50 hover:bg-white/10 transition-colors"
+            className="p-2.5 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 transition-colors"
             title="Random"
             aria-label="Random affirmation"
           >
@@ -327,7 +327,7 @@ export function AffirmationsWidget({
           {/* Next */}
           <button
             onClick={handleNext}
-            className="p-2.5 rounded-xl bg-white/5 text-white/50 hover:bg-white/10 transition-colors"
+            className="p-2.5 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 transition-colors"
             title="Next"
             aria-label="Next affirmation"
           >
@@ -340,7 +340,7 @@ export function AffirmationsWidget({
             className={`p-2.5 rounded-xl transition-colors ${
               isFavorited
                 ? 'bg-pink-500/20 text-pink-400'
-                : 'bg-white/5 text-white/50 hover:bg-white/10'
+                : 'bg-white/5 text-white/70 hover:bg-white/10'
             }`}
             title="Favorite"
             aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
@@ -351,7 +351,7 @@ export function AffirmationsWidget({
 
         {/* Auto-play Toggle */}
         <div className="flex items-center justify-center gap-3 mt-4 pt-4 border-t border-white/5">
-          <span className="text-xs text-white/50">Auto-play next</span>
+          <span className="text-xs text-white/70">Auto-play next</span>
           <button
             onClick={() => setAutoPlay(!autoPlay)}
             className={`relative w-10 h-6 rounded-full transition-colors ${

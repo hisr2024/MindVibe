@@ -59,10 +59,10 @@ export function ProgressIndicator({
     return (
       <div className={className}>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-[#f5f0e8]/60">
+          <span className="text-xs text-[#f5f0e8]/75">
             Step {currentStep + 1} of {steps.length}
           </span>
-          <span className="text-xs text-[#f5f0e8]/60">
+          <span className="text-xs text-[#f5f0e8]/75">
             {steps[currentStep]?.title}
           </span>
         </div>
@@ -99,7 +99,7 @@ export function ProgressIndicator({
                     ? 'bg-[#d4a44c] border-[#d4a44c] text-slate-900'
                     : index === currentStep
                     ? 'border-[#d4a44c] bg-[#d4a44c]/20 text-[#f5f0e8]'
-                    : 'border-[#d4a44c]/30 bg-transparent text-[#f5f0e8]/40'
+                    : 'border-[#d4a44c]/30 bg-transparent text-[#f5f0e8]/70'
                 }`}
               >
                 {index < currentStep ? (
@@ -123,7 +123,7 @@ export function ProgressIndicator({
                 className={`mt-2 text-xs font-medium whitespace-nowrap ${
                   index <= currentStep
                     ? 'text-[#f5f0e8]'
-                    : 'text-[#f5f0e8]/40'
+                    : 'text-[#f5f0e8]/70'
                 }`}
               >
                 {step.title}
@@ -150,10 +150,10 @@ export function ProgressIndicator({
       {/* Mobile view - use compact variant */}
       <div className="md:hidden">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-[#f5f0e8]/60">
+          <span className="text-xs text-[#f5f0e8]/75">
             Step {currentStep + 1} of {steps.length}
           </span>
-          <span className="text-xs text-[#f5f0e8]/60">
+          <span className="text-xs text-[#f5f0e8]/75">
             {steps[currentStep]?.title}
           </span>
         </div>

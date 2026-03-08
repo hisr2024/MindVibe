@@ -18,6 +18,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useOfflineMode } from '@/hooks/useOfflineMode'
 import { indexedDBManager, STORES } from '@/lib/offline/indexedDB'
+import { queueOfflineOperation } from '@/lib/offline/syncService'
 import { AlertCircle, Book, BookOpen, Cloud, CloudOff, Heart, Loader2, Search } from 'lucide-react'
 
 interface Verse {
@@ -136,7 +137,10 @@ export function OfflineVerseReader({
       console.error('Failed to save favorites:', err)
     }
 
-    // TODO: Queue sync operation to save favorites online
+    // Queue sync so favorites persist on the server when back online
+    queueOfflineOperation('favorites', 'update', userId, {
+      favorites: [...newFavorites],
+    })
   }
 
   const handleVerseSelect = (verse: Verse) => {
@@ -238,7 +242,7 @@ export function OfflineVerseReader({
           {/* Search */}
           {showSearch && (
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#f5f0e8]/60" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#f5f0e8]/75" />
               <input
                 type="text"
                 value={searchQuery}
@@ -252,7 +256,7 @@ export function OfflineVerseReader({
           {/* Verse List */}
           <div className="space-y-2 max-h-[600px] overflow-y-auto">
             {filteredVerses.length === 0 ? (
-              <div className="py-12 text-center text-[#f5f0e8]/60">
+              <div className="py-12 text-center text-[#f5f0e8]/75">
                 {searchQuery ? 'No verses found matching your search' : 'No verses available'}
               </div>
             ) : (
@@ -271,7 +275,7 @@ export function OfflineVerseReader({
                         {verse.tags && verse.tags.length > 0 && (
                           <div className="flex gap-1">
                             {verse.tags.slice(0, 2).map(tag => (
-                              <span key={tag} className="text-xs text-[#f5f0e8]/50">
+                              <span key={tag} className="text-xs text-[#f5f0e8]/70">
                                 #{tag}
                               </span>
                             ))}
@@ -299,7 +303,7 @@ export function OfflineVerseReader({
                         className={`h-4 w-4 transition ${
                           favorites.has(verse.id)
                             ? 'fill-red-400 text-red-400'
-                            : 'text-[#f5f0e8]/40 hover:text-[#f5f0e8]/60'
+                            : 'text-[#f5f0e8]/70 hover:text-[#f5f0e8]/75'
                         }`}
                       />
                     </button>
@@ -337,7 +341,7 @@ export function OfflineVerseReader({
                     className={`h-5 w-5 transition ${
                       favorites.has(selectedVerse.id)
                         ? 'fill-red-400 text-red-400'
-                        : 'text-[#f5f0e8]/40 hover:text-[#f5f0e8]/60'
+                        : 'text-[#f5f0e8]/70 hover:text-[#f5f0e8]/75'
                     }`}
                   />
                 </button>

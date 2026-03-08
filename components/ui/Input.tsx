@@ -31,7 +31,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           <p className="text-xs text-red-400">{error}</p>
         )}
         {hint && !error && (
-          <p className="text-xs text-[#f5f0e8]/60">{hint}</p>
+          <p className="text-xs text-[#f5f0e8]/75">{hint}</p>
         )}
       </div>
     )

@@ -193,7 +193,7 @@ export default function CommunityPage() {
               </button>
               <div className="flex-1">
                 <h2 className="text-xl font-bold text-[#f5f0e8]">{selectedCircle.name}</h2>
-                <p className="text-sm text-[#f5f0e8]/60">{selectedCircle.description}</p>
+                <p className="text-sm text-[#f5f0e8]/75">{selectedCircle.description}</p>
               </div>
             </div>
 
@@ -211,7 +211,7 @@ export default function CommunityPage() {
               </div>
             ) : posts.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-[#f5f0e8]/60">No posts yet. Be the first to share!</p>
+                <p className="text-[#f5f0e8]/75">No posts yet. Be the first to share!</p>
               </div>
             ) : (
               <PostFeed
@@ -235,7 +235,7 @@ export default function CommunityPage() {
           <h3 className="font-semibold text-[#f5f0e8] mb-1">
             {t('community.features.anonymous.title', 'Anonymous & Safe')}
           </h3>
-          <p className="text-xs text-[#f5f0e8]/60">
+          <p className="text-xs text-[#f5f0e8]/75">
             {t('community.features.anonymous.description', 'Your identity is protected with cryptographic anonymization. Share freely without fear.')}
           </p>
         </motion.div>
@@ -250,7 +250,7 @@ export default function CommunityPage() {
           <h3 className="font-semibold text-[#f5f0e8] mb-1">
             {t('community.features.moderated.title', 'AI Moderated')}
           </h3>
-          <p className="text-xs text-[#f5f0e8]/60">
+          <p className="text-xs text-[#f5f0e8]/75">
             {t('community.features.moderated.description', 'Every post is nurtured for compassion and respect. A sacred space where seekers support one another.')}
           </p>
         </motion.div>
@@ -265,7 +265,7 @@ export default function CommunityPage() {
           <h3 className="font-semibold text-[#f5f0e8] mb-1">
             {t('community.features.compassion.title', 'Compassion First')}
           </h3>
-          <p className="text-xs text-[#f5f0e8]/60">
+          <p className="text-xs text-[#f5f0e8]/75">
             {t('community.features.compassion.description', 'Earn badges for supportive messages. Build a community rooted in empathy and understanding.')}
           </p>
         </motion.div>

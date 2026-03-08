@@ -101,7 +101,7 @@ export function WellnessScoreGauge({ userId, className = '' }: WellnessScoreGaug
       {/* Header */}
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-[#f5f0e8] mb-1">Wellness Score</h3>
-        <p className="text-sm text-[#f5f0e8]/60">Comprehensive health assessment</p>
+        <p className="text-sm text-[#f5f0e8]/75">Comprehensive health assessment</p>
       </div>
 
       {/* Radial Gauge */}
@@ -145,7 +145,7 @@ export function WellnessScoreGauge({ userId, className = '' }: WellnessScoreGaug
               <div className="text-4xl font-bold" style={{ color: levelConfig.primary }}>
                 {wellnessData.total_score}
               </div>
-              <div className="text-xs text-[#f5f0e8]/60">out of 100</div>
+              <div className="text-xs text-[#f5f0e8]/75">out of 100</div>
             </motion.div>
           </div>
         </div>
@@ -185,7 +185,7 @@ export function WellnessScoreGauge({ userId, className = '' }: WellnessScoreGaug
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-[#f5f0e8]/60">{component.weight}</span>
+                  <span className="text-xs text-[#f5f0e8]/75">{component.weight}</span>
                   <span className="text-sm font-semibold text-[#f5f0e8]">
                     {componentScore.toFixed(1)}
                   </span>
@@ -228,7 +228,7 @@ export function WellnessScoreGauge({ userId, className = '' }: WellnessScoreGaug
       )}
 
       {/* Last Updated */}
-      <div className="mt-4 text-xs text-center text-[#f5f0e8]/40">
+      <div className="mt-4 text-xs text-center text-[#f5f0e8]/70">
         Updated {new Date(wellnessData.calculated_at).toLocaleString()}
       </div>
     </div>

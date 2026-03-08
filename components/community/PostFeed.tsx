@@ -130,7 +130,7 @@ export function PostFeed({
             </div>
           </div>
           <h3 className="text-lg font-semibold text-[#f5f0e8] mb-2">No posts yet</h3>
-          <p className="text-sm text-[#f5f0e8]/60">
+          <p className="text-sm text-[#f5f0e8]/75">
             Be the first to share and start a supportive conversation in this circle.
           </p>
         </div>
@@ -193,14 +193,14 @@ export function PostFeed({
                       </div>
                     )}
                   </div>
-                  <span className="text-xs text-[#f5f0e8]/60">{formatTimestamp(post.created_at)}</span>
+                  <span className="text-xs text-[#f5f0e8]/75">{formatTimestamp(post.created_at)}</span>
                 </div>
               </div>
 
               {/* More Menu */}
               <button
                 onClick={() => onReport?.(post.id)}
-                className="text-[#f5f0e8]/60 hover:text-[#f5f0e8] transition"
+                className="text-[#f5f0e8]/75 hover:text-[#f5f0e8] transition"
               >
                 <MoreHorizontal className="h-5 w-5" />
               </button>
@@ -227,7 +227,7 @@ export function PostFeed({
 
             {/* Reactions Bar */}
             <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#d4a44c]/10">
-              <div className="flex items-center gap-4 text-xs text-[#f5f0e8]/60">
+              <div className="flex items-center gap-4 text-xs text-[#f5f0e8]/75">
                 {totalReactions > 0 && (
                   <span>{totalReactions} {totalReactions === 1 ? 'reaction' : 'reactions'}</span>
                 )}
@@ -322,7 +322,7 @@ export function PostFeed({
                             <span className="text-lg">{icon}</span>
                             <div className="flex-1">
                               <div className="text-xs font-medium text-[#f5f0e8] capitalize">{type}</div>
-                              <div className="text-xs text-[#f5f0e8]/60">
+                              <div className="text-xs text-[#f5f0e8]/75">
                                 {BADGE_DESCRIPTIONS[type as keyof typeof BADGE_DESCRIPTIONS]}
                               </div>
                             </div>
@@ -337,7 +337,7 @@ export function PostFeed({
               {/* Report Button */}
               <button
                 onClick={() => onReport?.(post.id)}
-                className="px-3 py-2 rounded-xl border border-[#d4a44c]/20 text-[#f5f0e8]/60 text-sm hover:border-red-400/40 hover:text-red-400 transition"
+                className="px-3 py-2 rounded-xl border border-[#d4a44c]/20 text-[#f5f0e8]/75 text-sm hover:border-red-400/40 hover:text-red-400 transition"
                 title="Report post"
               >
                 <Flag className="h-4 w-4" />

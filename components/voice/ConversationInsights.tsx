@@ -148,7 +148,7 @@ export default function ConversationInsights({
           <h2 className="text-sm font-semibold text-white">Session Insights</h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-white/50"
+            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-white/70"
             aria-label="Close insights"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -160,7 +160,7 @@ export default function ConversationInsights({
         <div className="px-5 py-4 space-y-6">
           {/* Session Stats */}
           <section>
-            <h3 className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3">This Session</h3>
+            <h3 className="text-xs font-medium text-white/70 uppercase tracking-wider mb-3">This Session</h3>
             <div className="grid grid-cols-2 gap-2.5">
               {[
                 { label: 'Your messages', value: stats.userCount, color: 'text-mv-sunrise' },
@@ -170,7 +170,7 @@ export default function ConversationInsights({
               ].map(({ label, value, color }) => (
                 <div key={label} className="bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/5">
                   <p className={`text-lg font-semibold ${color}`}>{value}</p>
-                  <p className="text-[10px] text-white/40 mt-0.5">{label}</p>
+                  <p className="text-[10px] text-white/70 mt-0.5">{label}</p>
                 </div>
               ))}
             </div>
@@ -189,7 +189,7 @@ export default function ConversationInsights({
                   ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
                   : stats.moodShift === 'needs-care'
                   ? 'bg-[#d4a44c]/10 border-[#d4a44c]/20 text-[#d4a44c]'
-                  : 'bg-white/5 border-white/10 text-white/50'
+                  : 'bg-white/5 border-white/10 text-white/70'
               }`}>
                 <span className="text-sm">
                   {stats.moodShift === 'improved' ? '↑' : stats.moodShift === 'needs-care' ? '↓' : '→'}
@@ -209,7 +209,7 @@ export default function ConversationInsights({
           {/* Emotion Distribution Bar Chart */}
           {emotionDistribution.length > 0 && (
             <section>
-              <h3 className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3">Emotion Breakdown</h3>
+              <h3 className="text-xs font-medium text-white/70 uppercase tracking-wider mb-3">Emotion Breakdown</h3>
               <div className="space-y-2">
                 {emotionDistribution.map(({ emotion, count, percent, config }) => (
                   <div key={emotion} className="flex items-center gap-2.5">
@@ -226,7 +226,7 @@ export default function ConversationInsights({
                         }}
                       />
                     </div>
-                    <span className="text-[10px] text-white/30 w-6 text-right">{count}</span>
+                    <span className="text-[10px] text-white/70 w-6 text-right">{count}</span>
                   </div>
                 ))}
               </div>
@@ -236,7 +236,7 @@ export default function ConversationInsights({
           {/* Emotional Journey Timeline */}
           {emotionalJourney.length > 0 && (
             <section>
-              <h3 className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3">Emotional Journey</h3>
+              <h3 className="text-xs font-medium text-white/70 uppercase tracking-wider mb-3">Emotional Journey</h3>
               <div className="space-y-0">
                 {emotionalJourney.map((entry, i) => {
                   const config = EMOTION_CONFIG[entry.emotion]
@@ -258,11 +258,11 @@ export default function ConversationInsights({
                       <div className="pb-4 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium" style={{ color: config.color }}>{config.label}</span>
-                          <span className="text-[10px] text-white/30">
+                          <span className="text-[10px] text-white/70">
                             {entry.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
-                        <p className="text-[11px] text-white/40 mt-0.5 truncate">{entry.snippet}</p>
+                        <p className="text-[11px] text-white/70 mt-0.5 truncate">{entry.snippet}</p>
                       </div>
                     </div>
                   )
@@ -274,7 +274,7 @@ export default function ConversationInsights({
           {/* Referenced Verses */}
           {verses.length > 0 && (
             <section>
-              <h3 className="text-xs font-medium text-white/40 uppercase tracking-wider mb-3">Verses Shared</h3>
+              <h3 className="text-xs font-medium text-white/70 uppercase tracking-wider mb-3">Verses Shared</h3>
               <div className="space-y-2">
                 {verses.map((verse, i) => (
                   <div key={i} className="bg-white/[0.03] rounded-xl px-3.5 py-3 border border-white/5">
@@ -293,7 +293,7 @@ export default function ConversationInsights({
           {/* Empty state */}
           {messages.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-sm text-white/30">Start a conversation to see insights here.</p>
+              <p className="text-sm text-white/70">Start a conversation to see insights here.</p>
             </div>
           )}
 

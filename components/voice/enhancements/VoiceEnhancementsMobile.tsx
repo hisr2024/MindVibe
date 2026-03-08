@@ -188,12 +188,12 @@ function EnhancementsBottomSheet({
                 </div>
                 <div>
                   <h3 className="font-semibold text-white">Voice Enhancements</h3>
-                  <p className="text-xs text-white/50">{activeEnhancements.size} active</p>
+                  <p className="text-xs text-white/70">{activeEnhancements.size} active</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg bg-white/5 text-white/50"
+                className="p-2 rounded-lg bg-white/5 text-white/70"
                 aria-label="Close voice enhancements"
               >
                 <X className="w-5 h-5" />
@@ -224,7 +224,7 @@ function EnhancementsBottomSheet({
                       }`}
                     >
                       <Icon className={`w-6 h-6 mx-auto mb-1.5 ${
-                        isActive ? enhancement.color : 'text-white/40'
+                        isActive ? enhancement.color : 'text-white/70'
                       }`} />
                       <p className="text-[10px] text-white/70 text-center">{enhancement.name}</p>
                       {isActive && (
@@ -261,7 +261,7 @@ function EnhancementsBottomSheet({
                       }`}
                     >
                       <Icon className={`w-5 h-5 mx-auto mb-1 ${
-                        isActive ? enhancement.color : 'text-white/40'
+                        isActive ? enhancement.color : 'text-white/70'
                       }`} />
                       <p className="text-[10px] text-white/70 text-center">{enhancement.name}</p>
                     </button>
@@ -269,7 +269,7 @@ function EnhancementsBottomSheet({
                 })}
               </div>
 
-              <p className="text-[10px] text-white/30 text-center mt-2">
+              <p className="text-[10px] text-white/70 text-center mt-2">
                 Tap to expand • Double-tap to toggle
               </p>
             </div>
@@ -384,7 +384,7 @@ function MiniPlayerBar({
               <p className="text-sm font-medium text-white">
                 {activeEnhancements.size} Enhancement{activeEnhancements.size > 1 ? 's' : ''} Active
               </p>
-              <p className="text-[10px] text-white/50">
+              <p className="text-[10px] text-white/70">
                 {firstEnhancement?.name}
                 {activeList.length > 1 ? ` +${activeList.length - 1} more` : ''}
               </p>
@@ -397,7 +397,7 @@ function MiniPlayerBar({
               transition={{ duration: 2, repeat: Infinity }}
               className="w-2 h-2 rounded-full bg-emerald-400"
             />
-            <ChevronUp className="w-5 h-5 text-white/50" />
+            <ChevronUp className="w-5 h-5 text-white/70" />
           </div>
         </div>
       </div>

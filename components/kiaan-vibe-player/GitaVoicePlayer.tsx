@@ -253,14 +253,14 @@ export function GitaVoicePlayer({
           <Volume2 className="w-4 h-4 text-[#d4a44c]" />
           <span className="text-sm font-medium text-white">Divine Voice Player</span>
         </div>
-        <span className="text-xs text-white/40">KIAAN Vibe</span>
+        <span className="text-xs text-white/70">KIAAN Vibe</span>
       </div>
 
       {/* Voice Style Selector */}
       <div className="mb-3">
         <button
           onClick={() => setShowStyles(!showStyles)}
-          className="flex items-center gap-1 text-xs text-white/50 mb-2 hover:text-white/70 transition-colors"
+          className="flex items-center gap-1 text-xs text-white/70 mb-2 hover:text-white/70 transition-colors"
         >
           Voice Style
           <ChevronDown className={`w-3 h-3 transition-transform ${showStyles ? 'rotate-180' : ''}`} />
@@ -297,7 +297,7 @@ export function GitaVoicePlayer({
           <Globe className="w-4 h-4 text-[#e8b54a] drop-shadow-[0_0_2px_rgba(212,164,76,0.3)]" />
           <span className="text-lg">{langInfo?.flag || '🌐'}</span>
           <span className="text-sm flex-1 text-left">{langInfo?.nativeName || 'Select Language'}</span>
-          <ChevronDown className={`w-4 h-4 text-white/40 transition-transform ${showLanguages ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-4 h-4 text-white/70 transition-transform ${showLanguages ? 'rotate-180' : ''}`} />
         </button>
 
         <AnimatePresence>
@@ -467,10 +467,10 @@ export function DivineCollectionPlayer({ collectionKey }: DivineCollectionPlayer
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-white text-sm">{meta.name}</h3>
-          <p className="text-xs text-white/50 line-clamp-2">{meta.description}</p>
-          <p className="text-xs text-white/30 mt-1">{meta.verseCount} verses</p>
+          <p className="text-xs text-white/70 line-clamp-2">{meta.description}</p>
+          <p className="text-xs text-white/70 mt-1">{meta.verseCount} verses</p>
         </div>
-        <Play className="w-5 h-5 text-white/40 flex-shrink-0 mt-1" />
+        <Play className="w-5 h-5 text-white/70 flex-shrink-0 mt-1" />
       </div>
     </motion.div>
   )

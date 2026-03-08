@@ -178,7 +178,7 @@ function EnhancementSection({
           </div>
           <div>
             <h4 className="text-sm font-medium text-white">{enhancement.name}</h4>
-            <p className="text-[10px] text-white/40">{enhancement.nameHindi}</p>
+            <p className="text-[10px] text-white/70">{enhancement.nameHindi}</p>
           </div>
         </div>
 
@@ -192,14 +192,14 @@ function EnhancementSection({
             className={`p-1.5 rounded-lg transition-colors ${
               isActive
                 ? 'bg-white/20 text-white'
-                : 'bg-white/5 text-white/30 hover:bg-white/10'
+                : 'bg-white/5 text-white/70 hover:bg-white/10'
             }`}
           >
             <Power className="w-3.5 h-3.5" />
           </button>
 
           {/* Expand Toggle */}
-          <button className="p-1.5 rounded-lg bg-white/5 text-white/50 hover:bg-white/10">
+          <button className="p-1.5 rounded-lg bg-white/5 text-white/70 hover:bg-white/10">
             {isExpanded ? (
               <ChevronUp className="w-4 h-4" />
             ) : (
@@ -339,15 +339,15 @@ export function VoiceEnhancementsPanel({
               </div>
               <div>
                 <h3 className="font-semibold text-white">Voice Enhancements</h3>
-                <p className="text-xs text-white/50">
+                <p className="text-xs text-white/70">
                   {activeCount} active
                 </p>
               </div>
             </div>
             {showPanel ? (
-              <ChevronUp className="w-5 h-5 text-white/50" />
+              <ChevronUp className="w-5 h-5 text-white/70" />
             ) : (
-              <ChevronDown className="w-5 h-5 text-white/50" />
+              <ChevronDown className="w-5 h-5 text-white/70" />
             )}
           </div>
         </div>
@@ -398,7 +398,7 @@ export function VoiceEnhancementsPanel({
             </div>
             <div>
               <h2 className="text-lg font-semibold text-white">Voice Enhancements</h2>
-              <p className="text-sm text-white/50">
+              <p className="text-sm text-white/70">
                 {activeCount} enhancement{activeCount !== 1 ? 's' : ''} active
               </p>
             </div>
@@ -427,7 +427,7 @@ export function VoiceEnhancementsPanel({
             </div>
 
             {/* Settings */}
-            <button className="p-2 rounded-lg bg-white/5 text-white/50 hover:bg-white/10" aria-label="Voice enhancement settings">
+            <button className="p-2 rounded-lg bg-white/5 text-white/70 hover:bg-white/10" aria-label="Voice enhancement settings">
               <Settings2 className="w-4 h-4" />
             </button>
           </div>
@@ -451,8 +451,8 @@ export function VoiceEnhancementsPanel({
                     : 'border-white/10 bg-white/5 hover:bg-white/10'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? enhancement.color : 'text-white/40'}`} />
-                <span className={`text-xs ${isActive ? 'text-white' : 'text-white/50'}`}>
+                <Icon className={`w-3.5 h-3.5 ${isActive ? enhancement.color : 'text-white/70'}`} />
+                <span className={`text-xs ${isActive ? 'text-white' : 'text-white/70'}`}>
                   {enhancement.name}
                 </span>
               </button>
@@ -478,7 +478,7 @@ export function VoiceEnhancementsPanel({
 
       {/* Footer */}
       <div className="px-4 py-3 border-t border-white/5 bg-white/[0.02]">
-        <div className="flex items-center justify-between text-xs text-white/40">
+        <div className="flex items-center justify-between text-xs text-white/70">
           <span>Voice-first experience by KIAAN</span>
           <span className="flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

@@ -105,7 +105,7 @@ export default function FeaturesPage() {
                 <div className="mx-auto mb-3 h-16 w-16 rounded-full bg-gradient-to-br from-[#d4a44c] to-amber-300 flex items-center justify-center text-2xl font-bold text-slate-900 shadow-lg shadow-[#d4a44c]/25">
                   {icon}
                 </div>
-                <div className="text-xs text-[#f5f0e8]/60 mb-1">Step {step}</div>
+                <div className="text-xs text-[#f5f0e8]/75 mb-1">Step {step}</div>
                 <h3 className="text-base font-semibold text-[#f5f0e8] mb-1">{title}</h3>
                 <p className="text-sm text-[#f5f0e8]/70">{description}</p>
               </div>

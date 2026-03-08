@@ -55,7 +55,7 @@ function AccountSection({
         </div>
         <div>
           <h2 className="text-lg font-semibold text-[#f5f0e8]">{title}</h2>
-          {subtitle && <p className="text-xs text-[#f5f0e8]/50">{subtitle}</p>}
+          {subtitle && <p className="text-xs text-[#f5f0e8]/70">{subtitle}</p>}
         </div>
       </div>
       {children}
@@ -87,7 +87,7 @@ function NavRow({
     <>
       <div className="text-left">
         <p className={`text-sm font-medium transition ${labelClass}`}>{label}</p>
-        <p className="text-xs text-[#f5f0e8]/50 mt-0.5">{description}</p>
+        <p className="text-xs text-[#f5f0e8]/70 mt-0.5">{description}</p>
       </div>
       {trailingIcon ?? <ChevronRight />}
     </>
@@ -203,7 +203,7 @@ function AuthenticatedAccountView({
       {/* Page Header */}
       <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-[#f5f0e8] mb-1">Account</h1>
-        <p className="text-sm text-[#f5f0e8]/60">Manage your account settings, security, and data</p>
+        <p className="text-sm text-[#f5f0e8]/75">Manage your account settings, security, and data</p>
       </div>
 
       {actionStatus && (
@@ -226,7 +226,7 @@ function AuthenticatedAccountView({
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-lg font-semibold text-[#f5f0e8] truncate">{userName}</p>
-            <p className="text-sm text-[#f5f0e8]/60 truncate">{user.email}</p>
+            <p className="text-sm text-[#f5f0e8]/75 truncate">{user.email}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${tierBadgeClass}`}>
@@ -242,19 +242,19 @@ function AuthenticatedAccountView({
         {/* Subscription Summary */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-4 border-t border-[#d4a44c]/10">
           <div className="rounded-xl bg-white/[0.03] p-3">
-            <p className="text-xs text-[#f5f0e8]/50 mb-1">KIAAN Quota</p>
+            <p className="text-xs text-[#f5f0e8]/70 mb-1">KIAAN Quota</p>
             <p className="text-sm font-semibold text-[#f5f0e8]">
               {isKiaanUnlimited ? 'Unlimited' : `${kiaanQuota}/month`}
             </p>
           </div>
           <div className="rounded-xl bg-white/[0.03] p-3">
-            <p className="text-xs text-[#f5f0e8]/50 mb-1">Journey Limit</p>
+            <p className="text-xs text-[#f5f0e8]/70 mb-1">Journey Limit</p>
             <p className="text-sm font-semibold text-[#f5f0e8]">
               {journeyLimit === -1 ? 'Unlimited' : `${journeyLimit} active`}
             </p>
           </div>
           <div className="rounded-xl bg-white/[0.03] p-3 col-span-2 sm:col-span-1">
-            <p className="text-xs text-[#f5f0e8]/50 mb-1">Plan</p>
+            <p className="text-xs text-[#f5f0e8]/70 mb-1">Plan</p>
             <Link href="/dashboard/subscription" className="text-sm font-semibold text-[#e8b54a] hover:text-[#e8b54a] transition">
               {isPaid ? `${tierDisplayName} Plan` : 'Free Plan'} &rarr;
             </Link>
@@ -415,7 +415,7 @@ function AuthenticatedAccountView({
           >
             <div className="text-left">
               <p className="text-sm font-medium text-[#f5f0e8] group-hover:text-[#e8b54a] transition">Sign Out</p>
-              <p className="text-xs text-[#f5f0e8]/50 mt-0.5">Sign out of your current session</p>
+              <p className="text-xs text-[#f5f0e8]/70 mt-0.5">Sign out of your current session</p>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#f5f0e8]/30 group-hover:text-[#e8b54a] transition shrink-0">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -429,7 +429,7 @@ function AuthenticatedAccountView({
           >
             <div className="text-left">
               <p className="text-sm font-medium text-red-400 group-hover:text-red-300 transition">Delete Account</p>
-              <p className="text-xs text-[#f5f0e8]/50 mt-0.5">Permanently delete your account and all data</p>
+              <p className="text-xs text-[#f5f0e8]/70 mt-0.5">Permanently delete your account and all data</p>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400/50 group-hover:text-red-300 transition shrink-0">
               <polyline points="3 6 5 6 21 6" />
@@ -652,7 +652,7 @@ function UnauthenticatedAccountView() {
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.26em] text-[#f5f0e8]/75">Account Access</p>
           <h1 className="text-3xl font-bold text-[#f5f0e8]">Welcome to Sakha</h1>
-          <p className="text-sm text-[#f5f0e8]/60">Create an account or sign in to sync your spiritual journey across devices</p>
+          <p className="text-sm text-[#f5f0e8]/75">Create an account or sign in to sync your spiritual journey across devices</p>
         </div>
       </section>
 
@@ -671,7 +671,7 @@ function UnauthenticatedAccountView() {
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#d4a44c]/10 text-base font-black text-[#d4a44c]">K</span>
               <div>
                 <p className="text-sm font-semibold text-[#f5f0e8]">KIAAN AI Ecosystem</p>
-                <p className="text-xs text-[#f5f0e8]/50">{kiaanTools.length} wisdom-powered tools await you</p>
+                <p className="text-xs text-[#f5f0e8]/70">{kiaanTools.length} wisdom-powered tools await you</p>
               </div>
             </div>
             <div className="grid grid-cols-4 gap-2">
@@ -681,18 +681,18 @@ function UnauthenticatedAccountView() {
                   className="rounded-xl border border-[#d4a44c]/10 bg-white/[0.02] p-2 text-center opacity-60"
                 >
                   <span className="text-lg block">{tool.icon}</span>
-                  <span className="text-[10px] text-[#f5f0e8]/50 line-clamp-1">{tool.name}</span>
+                  <span className="text-[10px] text-[#f5f0e8]/70 line-clamp-1">{tool.name}</span>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-[#f5f0e8]/40 mt-3 text-center">Sign in to access all tools</p>
+            <p className="text-xs text-[#f5f0e8]/70 mt-3 text-center">Sign in to access all tools</p>
           </div>
 
           {/* Legacy accounts */}
           {legacyAccounts.length > 0 && (
             <div className="rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-5 text-sm text-[#f5f0e8]/80">
-              <p className="text-xs uppercase tracking-[0.18em] text-[#f5f0e8]/60">Previous local accounts</p>
-              <p className="mt-2 text-xs text-[#f5f0e8]/50">These accounts were stored locally. Create a new account to sync your data securely.</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-[#f5f0e8]/75">Previous local accounts</p>
+              <p className="mt-2 text-xs text-[#f5f0e8]/70">These accounts were stored locally. Create a new account to sync your data securely.</p>
               <ul className="mt-3 space-y-3">
                 {legacyAccounts
                   .slice()

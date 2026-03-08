@@ -94,7 +94,7 @@ export function CircleCard({ circle, onJoin, onLeave, onView, className = '' }: 
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <h3 className="text-lg font-semibold text-[#f5f0e8]">{circle.name}</h3>
-            {PrivacyIcon && <PrivacyIcon className="h-4 w-4 text-[#f5f0e8]/60" />}
+            {PrivacyIcon && <PrivacyIcon className="h-4 w-4 text-[#f5f0e8]/75" />}
           </div>
 
           {/* Category Badge */}
@@ -117,7 +117,7 @@ export function CircleCard({ circle, onJoin, onLeave, onView, className = '' }: 
       <p className="text-sm text-[#f5f0e8]/80 mb-4 line-clamp-2">{circle.description}</p>
 
       {/* Stats */}
-      <div className="flex items-center gap-4 mb-4 text-sm text-[#f5f0e8]/60">
+      <div className="flex items-center gap-4 mb-4 text-sm text-[#f5f0e8]/75">
         <div className="flex items-center gap-1.5">
           <Users className="h-4 w-4" />
           <span>{circle.member_count} members</span>
@@ -140,7 +140,7 @@ export function CircleCard({ circle, onJoin, onLeave, onView, className = '' }: 
 
       {circle.privacy === 'invite_only' && (
         <div className="mb-4 p-3 rounded-2xl border border-purple-400/20 bg-purple-950/20">
-          <p className="text-xs text-purple-100/80 flex items-center gap-2">
+          <p className="text-xs text-purple-200 flex items-center gap-2">
             <Lock className="h-3.5 w-3.5" />
             <span>This is a private circle. You need an invitation to join.</span>
           </p>
@@ -194,7 +194,7 @@ export function CircleCard({ circle, onJoin, onLeave, onView, className = '' }: 
 
       {/* Footer Info */}
       <div className="mt-4 pt-4 border-t border-[#d4a44c]/10">
-        <p className="text-xs text-[#f5f0e8]/40 flex items-center justify-between">
+        <p className="text-xs text-[#f5f0e8]/70 flex items-center justify-between">
           <span>Anonymous participation • Compassionate moderation</span>
           <span>{circle.moderator_count} moderators</span>
         </p>

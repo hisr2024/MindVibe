@@ -579,7 +579,7 @@ export function WisdomLoadingState({ tool, secularMode = true }: { tool: 'viyoga
       <p className="text-[#f0c96d] font-medium animate-pulse">
         {messages[messageIndex]}
       </p>
-      <p className="text-xs text-[#f5f0e8]/50 mt-2">
+      <p className="text-xs text-[#f5f0e8]/70 mt-2">
         {subtitleText}
       </p>
 

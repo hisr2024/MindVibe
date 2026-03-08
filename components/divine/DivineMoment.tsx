@@ -227,7 +227,7 @@ export function DivineMoment({
               {/* Close button */}
               <button
                 onClick={handleClose}
-                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-white/40 hover:text-white/80 transition-colors"
+                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-white/70 hover:text-white/80 transition-colors"
                 aria-label="Close divine moment"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -279,7 +279,7 @@ export function DivineMoment({
               {/* Closing indicator */}
               {currentIndex >= content.guidance.length && (
                 <motion.p
-                  className="text-center text-white/50 mt-6"
+                  className="text-center text-white/70 mt-6"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1 }}

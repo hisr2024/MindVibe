@@ -129,7 +129,7 @@ export function GitaLearningMode({
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">Learning Mode</h2>
-              <p className="text-sm text-white/50">
+              <p className="text-sm text-white/70">
                 Chapter {chapter}: {chapterInfo?.nameEnglish}
               </p>
             </div>
@@ -146,10 +146,10 @@ export function GitaLearningMode({
         {/* Progress bar */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-white/50">
+            <span className="text-white/70">
               Verse {currentVerse} of {totalVerses}
             </span>
-            <span className="text-white/50">
+            <span className="text-white/70">
               {completedVerses.size} completed
             </span>
           </div>
@@ -168,17 +168,17 @@ export function GitaLearningMode({
           <div className="p-3 rounded-xl bg-white/5 text-center">
             <Target className="w-5 h-5 text-violet-400 mx-auto mb-1" />
             <p className="text-lg font-bold text-white">{Math.round(progress)}%</p>
-            <p className="text-xs text-white/50">Progress</p>
+            <p className="text-xs text-white/70">Progress</p>
           </div>
           <div className="p-3 rounded-xl bg-white/5 text-center">
             <RotateCcw className="w-5 h-5 text-amber-400 mx-auto mb-1" />
             <p className="text-lg font-bold text-white">{repeatCount}</p>
-            <p className="text-xs text-white/50">Repeats</p>
+            <p className="text-xs text-white/70">Repeats</p>
           </div>
           <div className="p-3 rounded-xl bg-white/5 text-center">
             <Trophy className="w-5 h-5 text-emerald-400 mx-auto mb-1" />
             <p className="text-lg font-bold text-white">{streak}</p>
-            <p className="text-xs text-white/50">Streak</p>
+            <p className="text-xs text-white/70">Streak</p>
           </div>
         </div>
       </div>
@@ -200,7 +200,7 @@ export function GitaLearningMode({
           {/* Repeat */}
           <button
             onClick={repeatVerse}
-            className="p-2 rounded-full text-white/50 hover:text-white/70 transition-colors"
+            className="p-2 rounded-full text-white/70 hover:text-white/70 transition-colors"
             aria-label="Repeat verse"
           >
             <RotateCcw className="w-5 h-5" />
@@ -247,7 +247,7 @@ export function GitaLearningMode({
 
           {/* Volume */}
           <button
-            className="p-2 rounded-full text-white/50 hover:text-white/70 transition-colors"
+            className="p-2 rounded-full text-white/70 hover:text-white/70 transition-colors"
             aria-label="Volume"
           >
             <Volume2 className="w-5 h-5" />
@@ -272,7 +272,7 @@ export function GitaLearningMode({
             />
           ))}
           {totalVerses > 20 && (
-            <span className="text-xs text-white/40 ml-1">+{totalVerses - 20} more</span>
+            <span className="text-xs text-white/70 ml-1">+{totalVerses - 20} more</span>
           )}
         </div>
       </div>

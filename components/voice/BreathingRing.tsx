@@ -172,7 +172,7 @@ export default function BreathingRing({ steps, onComplete }: BreathingRingProps)
       </div>
 
       {/* Instruction + step counter */}
-      <p className="text-xs text-white/40 mt-3 text-center max-w-[200px]">
+      <p className="text-xs text-white/70 mt-3 text-center max-w-[200px]">
         {step?.instruction}
       </p>
       <p className="text-[10px] text-white/20 mt-1">
@@ -200,7 +200,7 @@ export default function BreathingRing({ steps, onComplete }: BreathingRingProps)
       {/* Skip button */}
       <button
         onClick={() => { setIsActive(false); onComplete() }}
-        className="text-[10px] text-white/20 hover:text-white/40 transition-colors mt-3"
+        className="text-[10px] text-white/20 hover:text-white/70 transition-colors mt-3"
       >
         End breathing
       </button>

@@ -192,11 +192,11 @@ export function KiaanFooter() {
                 <h3 className="text-sm font-semibold text-[#f5f0e8]">
                   {t('navigation.spiritual_tools.title', 'Spiritual Tools')}
                 </h3>
-                <p className="text-[10px] text-[#f5f0e8]/50 mt-0.5">{t('navigation.tools.quickAccess', 'Quick access')}</p>
+                <p className="text-[10px] text-[#f5f0e8]/70 mt-0.5">{t('navigation.tools.quickAccess', 'Quick access')}</p>
               </div>
               <motion.button
                 onClick={() => setIsOpen(false)}
-                className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-[#f5f0e8]/60 hover:bg-white/10 hover:text-[#f5f0e8] transition-colors"
+                className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-[#f5f0e8]/75 hover:bg-white/10 hover:text-[#f5f0e8] transition-colors"
                 aria-label="Close"
                 whileTap={{ scale: 0.9 }}
               >
@@ -227,7 +227,7 @@ export function KiaanFooter() {
                       <p className="text-sm font-semibold text-[#f5f0e8] group-hover:text-white transition-colors truncate">
                         {t(tool.labelKey, tool.labelFallback)}
                       </p>
-                      <p className="text-[10px] text-[#f5f0e8]/60 truncate">
+                      <p className="text-[10px] text-[#f5f0e8]/75 truncate">
                         {t(tool.descKey, tool.descFallback)}
                       </p>
                     </div>

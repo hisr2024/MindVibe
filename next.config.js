@@ -1,3 +1,5 @@
+const { withSentryConfig } = require('@sentry/nextjs')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -71,7 +73,7 @@ const nextConfig = {
                 "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
                 "font-src 'self' https://fonts.gstatic.com",
                 "img-src 'self' data: https://kiaanverse.com https://*.kiaanverse.com https://fonts.gstatic.com",
-                `connect-src 'self' ${apiUrl} https://kiaanverse.com https://www.kiaanverse.com https://mindvibe-api.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com`,
+                `connect-src 'self' ${apiUrl} https://kiaanverse.com https://www.kiaanverse.com https://mindvibe-api.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com https://*.ingest.sentry.io`,
                 "media-src 'self' blob: data:",
                 "worker-src 'self' blob:",
                 "frame-ancestors 'none'",
@@ -157,4 +159,16 @@ nextConfig.experimental = {
   ],
 };
 
-module.exports = nextConfig;
+// Wrap with Sentry only when SENTRY_DSN is configured
+module.exports = process.env.NEXT_PUBLIC_SENTRY_DSN
+  ? withSentryConfig(nextConfig, {
+      // Suppress source map upload logs in CI
+      silent: true,
+      // Upload source maps for better stack traces
+      widenClientFileUpload: true,
+      // Hide source maps from users
+      hideSourceMaps: true,
+      // Automatically instrument server components
+      autoInstrumentServerFunctions: true,
+    })
+  : nextConfig;

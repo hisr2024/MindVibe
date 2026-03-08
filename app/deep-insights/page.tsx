@@ -110,7 +110,7 @@ export default function DeepInsightsPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
                     <h2 className="text-xl font-semibold text-white">{tool.title}</h2>
-                    <p className="text-xs text-white/50 truncate">
+                    <p className="text-xs text-white/70 truncate">
                       {t(`dashboard.tool_desc.${tool.purposeDescKey}`, '')}
                     </p>
                     <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">

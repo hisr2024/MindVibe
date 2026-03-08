@@ -230,7 +230,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                     className={`relative flex min-h-[68px] min-w-[60px] flex-1 flex-col items-center justify-center gap-1.5 py-2 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#d4a44c]/60 ${
                       toolsSheetOpen
                         ? 'text-[#d4a44c]'
-                        : 'text-white/50'
+                        : 'text-white/70'
                     }`}
                     aria-expanded={toolsSheetOpen}
                     aria-haspopup="dialog"
@@ -246,7 +246,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                     </motion.span>
                     <span
                       className={`text-[11px] leading-tight ${
-                        toolsSheetOpen ? 'font-bold text-[#d4a44c]' : 'font-medium text-white/50'
+                        toolsSheetOpen ? 'font-bold text-[#d4a44c]' : 'font-medium text-white/70'
                       }`}
                     >
                       {getTabLabel(tab.id, tab.label)}
@@ -340,7 +340,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                   >
                     <motion.span
                       className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-all duration-200 ${
-                        isActive ? 'text-[#d4a44c] bg-[#d4a44c]/15' : 'text-white/50 bg-white/5'
+                        isActive ? 'text-[#d4a44c] bg-[#d4a44c]/15' : 'text-white/70 bg-white/5'
                       }`}
                       variants={iconGlowVariants}
                       animate={isActive ? 'active' : 'inactive'}
@@ -349,7 +349,7 @@ export function MobileNav({ tabs = defaultTabs, className = '' }: MobileNavProps
                     </motion.span>
                     <span
                       className={`text-[11px] leading-tight ${
-                        isActive ? 'font-bold text-[#d4a44c]' : 'font-medium text-white/50'
+                        isActive ? 'font-bold text-[#d4a44c]' : 'font-medium text-white/70'
                       }`}
                     >
                       {getTabLabel(tab.id, tab.label)}

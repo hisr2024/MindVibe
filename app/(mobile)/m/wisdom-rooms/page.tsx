@@ -225,7 +225,7 @@ export default function MobileWisdomRoomsPage() {
                 <span className={`w-1.5 h-1.5 rounded-full ${
                   status === 'connected' ? 'bg-green-400 animate-pulse' : status === 'connecting' ? 'bg-[#d4a44c]' : 'bg-white/30'
                 }`} />
-                <span className="text-[10px] text-white/50">
+                <span className="text-[10px] text-white/70">
                   {status === 'connected' ? 'Live' : status === 'connecting' ? 'Connecting...' : 'Offline'}
                 </span>
               </div>
@@ -269,7 +269,7 @@ export default function MobileWisdomRoomsPage() {
           {/* Room theme */}
           {activeRoom && (
             <div className="px-4 pb-2">
-              <p className="text-[10px] text-white/40">{activeRoom.theme}</p>
+              <p className="text-[10px] text-white/70">{activeRoom.theme}</p>
             </div>
           )}
         </div>
@@ -284,11 +284,11 @@ export default function MobileWisdomRoomsPage() {
               className="overflow-hidden border-b border-white/[0.06] bg-white/[0.02]"
             >
               <div className="px-4 py-3">
-                <p className="text-xs font-medium text-white/50 mb-2">
+                <p className="text-xs font-medium text-white/70 mb-2">
                   Active ({activeParticipants.length})
                 </p>
                 {activeParticipants.length === 0 ? (
-                  <p className="text-xs text-white/30">No one is here yet.</p>
+                  <p className="text-xs text-white/70">No one is here yet.</p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {activeParticipants.map(person => (
@@ -323,7 +323,7 @@ export default function MobileWisdomRoomsPage() {
           {activeMessages.length === 0 && (
             <div className="text-center py-12">
               <MessageCircle className="w-10 h-10 text-white/10 mx-auto mb-3" />
-              <p className="text-sm text-white/30">No messages yet.</p>
+              <p className="text-sm text-white/70">No messages yet.</p>
               <p className="text-xs text-white/20 mt-1">Say hello to open the conversation.</p>
             </div>
           )}
@@ -346,7 +346,7 @@ export default function MobileWisdomRoomsPage() {
                     <p className="text-[10px] font-medium text-[#d4a44c]/70 mb-1">Participant</p>
                   )}
                   <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                  <p className="text-[10px] text-white/30 mt-1">
+                  <p className="text-[10px] text-white/70 mt-1">
                     {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>

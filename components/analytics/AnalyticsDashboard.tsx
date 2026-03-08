@@ -61,7 +61,7 @@ export function AnalyticsDashboard({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-[#f5f0e8]">Analytics</h1>
-          <p className="text-sm text-[#f5f0e8]/60 mt-1">
+          <p className="text-sm text-[#f5f0e8]/75 mt-1">
             Track your wellness journey
           </p>
         </div>
@@ -101,7 +101,7 @@ export function AnalyticsDashboard({
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition ${
               activeTab === tab.id
                 ? 'bg-[#d4a44c]/20 text-[#f5f0e8] border border-[#d4a44c]/50'
-                : 'text-[#f5f0e8]/60 hover:text-[#f5f0e8] hover:bg-[#d4a44c]/10 border border-transparent'
+                : 'text-[#f5f0e8]/75 hover:text-[#f5f0e8] hover:bg-[#d4a44c]/10 border border-transparent'
             }`}
           >
             <span>{tab.icon}</span>

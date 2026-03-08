@@ -83,7 +83,7 @@ export function CrisisAlert({ resources = DEFAULT_RESOURCES, onClose, className 
       {onClose && (
         <button
           onClick={handleDismiss}
-          className="float-right text-[#f5f0e8]/60 hover:text-[#f5f0e8] transition"
+          className="float-right text-[#f5f0e8]/75 hover:text-[#f5f0e8] transition"
           aria-label="Dismiss crisis alert"
         >
           <X className="h-5 w-5" />
@@ -179,7 +179,7 @@ export function CrisisAlert({ resources = DEFAULT_RESOURCES, onClose, className 
           &quot;For one who has conquered the mind, the mind is the best of friends;
           but for one who has failed to do so, their mind will remain the greatest enemy.&quot;
         </p>
-        <p className="text-xs text-[#f5f0e8]/60">— Bhagavad Gita 6.6</p>
+        <p className="text-xs text-[#f5f0e8]/75">— Bhagavad Gita 6.6</p>
       </div>
     </motion.div>
   )

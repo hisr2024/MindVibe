@@ -92,7 +92,7 @@ export default function LibraryPage() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70" />
         <input
           type="text"
           value={searchQuery}
@@ -192,7 +192,7 @@ export default function LibraryPage() {
                   <p className={`font-medium truncate ${isPlaying ? 'text-orange-400' : 'text-white'}`}>
                     {track.title}
                   </p>
-                  <p className="text-sm text-white/50 truncate">
+                  <p className="text-sm text-white/70 truncate">
                     {track.artist || 'KIAAN Vibe'}
                   </p>
                   {track.tags && track.tags.length > 0 && (
@@ -200,7 +200,7 @@ export default function LibraryPage() {
                       {track.tags.slice(0, 3).map((tag) => (
                         <span
                           key={tag}
-                          className="px-2 py-0.5 rounded-full bg-white/10 text-xs text-white/50"
+                          className="px-2 py-0.5 rounded-full bg-white/10 text-xs text-white/70"
                         >
                           {tag}
                         </span>
@@ -210,7 +210,7 @@ export default function LibraryPage() {
                 </div>
 
                 {/* Duration */}
-                <div className="flex items-center gap-2 text-white/50">
+                <div className="flex items-center gap-2 text-white/70">
                   <Clock className="w-4 h-4" />
                   <span className="text-sm">{formatDuration(track.duration || 0)}</span>
                 </div>
@@ -238,7 +238,7 @@ export default function LibraryPage() {
         ) : (
           <div className="text-center py-12">
             <Music2 className="w-12 h-12 text-white/20 mx-auto mb-4" />
-            <p className="text-white/40">No tracks found</p>
+            <p className="text-white/70">No tracks found</p>
           </div>
         )}
       </div>

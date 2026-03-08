@@ -187,7 +187,7 @@ export default function CompanionBreathingExercise({
       )}
 
       {/* Status text */}
-      <p className="text-[10px] text-white/40">
+      <p className="text-[10px] text-white/70">
         {phase === 'ready' && 'Take a moment to breathe with me'}
         {phase === 'complete' && 'How do you feel now?'}
         {phase !== 'ready' && phase !== 'complete' &&

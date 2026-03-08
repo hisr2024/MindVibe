@@ -249,7 +249,7 @@ export function BinauraBeatsControl({
             </div>
             <div>
               <p className="text-xs font-medium text-white">Binaural Beats</p>
-              <p className="text-[10px] text-white/50">{currentPreset.name}</p>
+              <p className="text-[10px] text-white/70">{currentPreset.name}</p>
             </div>
           </div>
           <button
@@ -257,7 +257,7 @@ export function BinauraBeatsControl({
             className={`p-2 rounded-lg transition-all ${
               playing
                 ? 'bg-purple-500/30 text-purple-300'
-                : 'bg-white/5 text-white/50 hover:bg-white/10'
+                : 'bg-white/5 text-white/70 hover:bg-white/10'
             }`}
           >
             {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -283,7 +283,7 @@ export function BinauraBeatsControl({
             </div>
             <div>
               <h3 className="font-semibold text-white">Binaural Beats</h3>
-              <p className="text-xs text-white/50">Brainwave Entrainment</p>
+              <p className="text-xs text-white/70">Brainwave Entrainment</p>
             </div>
           </div>
 
@@ -294,7 +294,7 @@ export function BinauraBeatsControl({
               className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
             >
               {muted ? (
-                <VolumeX className="w-4 h-4 text-white/50" />
+                <VolumeX className="w-4 h-4 text-white/70" />
               ) : (
                 <Volume2 className="w-4 h-4 text-white/70" />
               )}
@@ -342,7 +342,7 @@ export function BinauraBeatsControl({
                 />
               ))}
             </div>
-            <p className="text-center text-xs text-white/40 mt-2">
+            <p className="text-center text-xs text-white/70 mt-2">
               {displayFrequency} Hz binaural • {currentPreset.baseFrequency} Hz carrier
             </p>
           </motion.div>
@@ -351,7 +351,7 @@ export function BinauraBeatsControl({
 
       {/* Preset Selection */}
       <div className="p-4">
-        <p className="text-xs font-medium text-white/50 mb-3">Select Brainwave State</p>
+        <p className="text-xs font-medium text-white/70 mb-3">Select Brainwave State</p>
         <div className="grid grid-cols-3 gap-2">
           {(Object.keys(PRESETS) as BrainwavePreset[]).filter(p => p !== 'custom').map((preset) => {
             const config = PRESETS[preset]
@@ -368,11 +368,11 @@ export function BinauraBeatsControl({
                     : 'border-white/10 bg-white/5 hover:bg-white/10'
                 }`}
               >
-                <Icon className={`w-5 h-5 mx-auto mb-1.5 ${isSelected ? config.color : 'text-white/40'}`} />
+                <Icon className={`w-5 h-5 mx-auto mb-1.5 ${isSelected ? config.color : 'text-white/70'}`} />
                 <p className={`text-xs font-medium ${isSelected ? 'text-white' : 'text-white/60'}`}>
                   {config.name}
                 </p>
-                <p className="text-[10px] text-white/40">{config.nameHindi}</p>
+                <p className="text-[10px] text-white/70">{config.nameHindi}</p>
               </button>
             )
           })}
@@ -383,15 +383,15 @@ export function BinauraBeatsControl({
           <div className="flex items-center gap-2 mb-2">
             <PresetIcon className={`w-4 h-4 ${currentPreset.color}`} />
             <span className="text-sm font-medium text-white">{currentPreset.name}</span>
-            <span className="text-xs text-white/40">• {currentPreset.nameHindi}</span>
+            <span className="text-xs text-white/70">• {currentPreset.nameHindi}</span>
           </div>
-          <p className="text-xs text-white/50">{currentPreset.description}</p>
+          <p className="text-xs text-white/70">{currentPreset.description}</p>
         </div>
 
         {/* Volume Slider */}
         <div className="mt-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-white/50">Volume</span>
+            <span className="text-xs text-white/70">Volume</span>
             <span className="text-xs text-white/70">{Math.round(volume * 100)}%</span>
           </div>
           <input
@@ -415,7 +415,7 @@ export function BinauraBeatsControl({
               className="mt-4"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-white/50">Custom Frequency</span>
+                <span className="text-xs text-white/70">Custom Frequency</span>
                 <span className="text-xs text-white/70">{customFrequency} Hz</span>
               </div>
               <input
@@ -427,7 +427,7 @@ export function BinauraBeatsControl({
                 onChange={(e) => setCustomFrequency(parseFloat(e.target.value))}
                 className="w-full h-2 rounded-full appearance-none cursor-pointer bg-white/10 accent-purple-500"
               />
-              <div className="flex justify-between text-[10px] text-white/30 mt-1">
+              <div className="flex justify-between text-[10px] text-white/70 mt-1">
                 <span>1 Hz (Delta)</span>
                 <span>40 Hz (Gamma)</span>
               </div>

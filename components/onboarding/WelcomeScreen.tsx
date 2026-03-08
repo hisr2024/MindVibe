@@ -88,7 +88,7 @@ export function WelcomeScreen({ className = '' }: WelcomeScreenProps) {
             <p className="text-xs font-medium text-[#f5f0e8]/80 mb-1">
               {feature.label}
             </p>
-            <p className="text-[10px] text-[#f5f0e8]/50">{feature.description}</p>
+            <p className="text-[10px] text-[#f5f0e8]/70">{feature.description}</p>
           </motion.div>
         ))}
       </motion.div>
@@ -96,7 +96,7 @@ export function WelcomeScreen({ className = '' }: WelcomeScreenProps) {
       {/* Tagline */}
       <motion.p
         variants={itemVariants}
-        className="mt-8 text-xs text-[#f5f0e8]/50 italic"
+        className="mt-8 text-xs text-[#f5f0e8]/70 italic"
       >
         &quot;The mind is everything. What you think, you become.&quot;
       </motion.p>

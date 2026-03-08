@@ -120,7 +120,7 @@ function MoodTrendChart({ checkIns }: { checkIns: CheckInData[] }) {
 
   if (last7.length === 0) {
     return (
-      <div className="flex items-center justify-center h-16 text-xs text-white/30">
+      <div className="flex items-center justify-center h-16 text-xs text-white/70">
         No recent check-ins
       </div>
     )
@@ -134,7 +134,7 @@ function MoodTrendChart({ checkIns }: { checkIns: CheckInData[] }) {
             className="w-full rounded-t-sm bg-gradient-to-t from-emerald-500/50 to-emerald-400/50"
             style={{ height: `${(checkIn.mood / 5) * 100}%` }}
           />
-          <span className="text-[8px] text-white/30">
+          <span className="text-[8px] text-white/70">
             {new Date(checkIn.timestamp).toLocaleDateString('en', { weekday: 'narrow' })}
           </span>
         </div>
@@ -216,7 +216,7 @@ export function DailyCheckInWidget({
             </div>
             <div>
               <p className="text-xs font-medium text-white">Daily Check-In</p>
-              <p className="text-[10px] text-white/50">{checkInConfig.name}</p>
+              <p className="text-[10px] text-white/70">{checkInConfig.name}</p>
             </div>
           </div>
           <button
@@ -246,7 +246,7 @@ export function DailyCheckInWidget({
             </div>
             <div>
               <h3 className="font-semibold text-white">Daily Check-In</h3>
-              <p className="text-xs text-white/50">{checkInConfig.nameHindi}</p>
+              <p className="text-xs text-white/70">{checkInConfig.nameHindi}</p>
             </div>
           </div>
 
@@ -370,7 +370,7 @@ export function DailyCheckInWidget({
                   <button
                     onClick={() => setIsListening(!isListening)}
                     className={`absolute bottom-3 right-3 p-2 rounded-lg transition-colors ${
-                      isListening ? 'bg-red-500/30 text-red-300' : 'bg-white/10 text-white/50'
+                      isListening ? 'bg-red-500/30 text-red-300' : 'bg-white/10 text-white/70'
                     }`}
                   >
                     <Mic className="w-4 h-4" />
@@ -403,7 +403,7 @@ export function DailyCheckInWidget({
                   <ThumbsUp className="w-8 h-8 text-emerald-400" />
                 </motion.div>
                 <h4 className="text-lg font-semibold text-white mb-1">Check-In Complete!</h4>
-                <p className="text-sm text-white/50">Thank you for taking time to reflect</p>
+                <p className="text-sm text-white/70">Thank you for taking time to reflect</p>
               </motion.div>
             )}
           </motion.div>
@@ -423,7 +423,7 @@ export function DailyCheckInWidget({
               <div className="p-3 rounded-xl bg-white/5 border border-white/10">
                 <div className="flex items-center gap-2 mb-2">
                   <Heart className="w-4 h-4 text-pink-400" />
-                  <span className="text-xs text-white/50">Avg Mood</span>
+                  <span className="text-xs text-white/70">Avg Mood</span>
                 </div>
                 <p className="text-lg font-semibold text-white">
                   {recentCheckIns.length > 0
@@ -434,7 +434,7 @@ export function DailyCheckInWidget({
               <div className="p-3 rounded-xl bg-white/5 border border-white/10">
                 <div className="flex items-center gap-2 mb-2">
                   <Zap className="w-4 h-4 text-yellow-400" />
-                  <span className="text-xs text-white/50">Check-Ins</span>
+                  <span className="text-xs text-white/70">Check-Ins</span>
                 </div>
                 <p className="text-lg font-semibold text-white">{recentCheckIns.length}</p>
               </div>
@@ -444,7 +444,7 @@ export function DailyCheckInWidget({
             <div className="p-3 rounded-xl bg-white/5 border border-white/10">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs text-white/50">7-Day Mood Trend</span>
+                <span className="text-xs text-white/70">7-Day Mood Trend</span>
               </div>
               <MoodTrendChart checkIns={recentCheckIns} />
             </div>

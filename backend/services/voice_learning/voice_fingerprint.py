@@ -364,7 +364,21 @@ class VoiceFingerprintService:
             except Exception as e:
                 logger.warning(f"Redis get failed: {e}")
 
-        # TODO: Load from database if needed
+        # Load from database as persistent fallback
+        if self.db_session:
+            try:
+                result = await self.db_session.execute(
+                    "SELECT profile_data FROM voice_profiles WHERE user_id = :uid",
+                    {"uid": user_id},
+                )
+                row = result.fetchone()
+                if row and row[0]:
+                    data = json.loads(row[0]) if isinstance(row[0], str) else row[0]
+                    profile = self._profile_from_dict(data)
+                    self._user_profiles[user_id] = profile
+                    return profile
+            except Exception as e:
+                logger.warning(f"Database voice profile load failed: {e}")
 
         return None
 
@@ -385,7 +399,20 @@ class VoiceFingerprintService:
             except Exception as e:
                 logger.warning(f"Redis save failed: {e}")
 
-        # TODO: Save to database for persistence
+        # Save to database for durable persistence across Redis evictions
+        if self.db_session:
+            try:
+                profile_json = json.dumps(profile.to_dict())
+                await self.db_session.execute(
+                    """INSERT INTO voice_profiles (user_id, profile_data, updated_at)
+                       VALUES (:uid, :data, NOW())
+                       ON CONFLICT (user_id)
+                       DO UPDATE SET profile_data = :data, updated_at = NOW()""",
+                    {"uid": profile.user_id, "data": profile_json},
+                )
+                await self.db_session.commit()
+            except Exception as e:
+                logger.warning(f"Database voice profile save failed: {e}")
 
     def _profile_from_dict(self, data: Dict) -> UserVoiceProfile:
         """Create UserVoiceProfile from dictionary."""

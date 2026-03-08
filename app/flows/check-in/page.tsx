@@ -386,7 +386,7 @@ export default function SacredCheckIn() {
                       </motion.span>
 
                       <span className="text-sm font-semibold text-white/85">{emotion.label}</span>
-                      <span className="text-[11px] text-white/40 leading-tight">{emotion.description}</span>
+                      <span className="text-[11px] text-white/70 leading-tight">{emotion.description}</span>
 
                       {/* Selection glow ring */}
                       {isSelected && (
@@ -499,7 +499,7 @@ export default function SacredCheckIn() {
                           <span className={`block text-sm font-medium transition-colors ${isActive ? 'text-white/90' : 'text-white/60'}`}>
                             {chakra.label}
                           </span>
-                          <span className={`block text-[11px] leading-tight transition-colors ${isActive ? 'text-white/50' : 'text-white/30'}`}>
+                          <span className={`block text-[11px] leading-tight transition-colors ${isActive ? 'text-white/70' : 'text-white/70'}`}>
                             {chakra.hint}
                           </span>
                         </span>
@@ -584,11 +584,11 @@ export default function SacredCheckIn() {
                   transition={{ delay: 0.3 }}
                 >
                   <span className="text-lg">{selectedEmotion.icon}</span>
-                  <span className="text-xs text-white/50">
+                  <span className="text-xs text-white/70">
                     Feeling <span className="text-white/70 font-medium">{selectedEmotion.label}</span>
                   </span>
                   {selectedChakras.length > 0 && (
-                    <span className="text-xs text-white/40">
+                    <span className="text-xs text-white/70">
                       &middot; {selectedChakras.length} chakra{selectedChakras.length > 1 ? 's' : ''} touched
                     </span>
                   )}

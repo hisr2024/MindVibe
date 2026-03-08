@@ -102,7 +102,7 @@ export function SacredDashboardWidget({
           </motion.div>
           <div>
             <h3 className="text-white/90 font-medium">{t('divine.sacred.dashboard.sacredSpace', 'Sacred Space')}</h3>
-            <p className="text-white/50 text-xs">{t('divine.sacred.dashboard.findPeace', 'Find peace in any moment')}</p>
+            <p className="text-white/70 text-xs">{t('divine.sacred.dashboard.findPeace', 'Find peace in any moment')}</p>
           </div>
         </div>
 
@@ -131,7 +131,7 @@ export function SacredDashboardWidget({
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
         >
-          <p className="text-white/40 text-xs mb-1">✨ {t('divine.sacred.dashboard.divineReminder', 'Divine Reminder (tap to refresh)')}</p>
+          <p className="text-white/70 text-xs mb-1">✨ {t('divine.sacred.dashboard.divineReminder', 'Divine Reminder (tap to refresh)')}</p>
           <p className="text-white/80 text-sm italic">{reminder}</p>
         </motion.div>
       )}
@@ -150,7 +150,7 @@ export function SacredDashboardWidget({
                 <span className="text-white/80 text-sm">{t('divine.sacred.dashboard.sacredBreathing', 'Sacred Breathing')}</span>
               </div>
               <motion.span
-                className="text-white/40"
+                className="text-white/70"
                 animate={{ rotate: activeSection === 'breathing' ? 180 : 0 }}
               >
                 ▼
@@ -176,7 +176,7 @@ export function SacredDashboardWidget({
                       >
                         <span className="text-xl mb-1">{icon}</span>
                         <span className="text-white/70 text-xs">{t(nameKey, nameFallback)}</span>
-                        <span className="text-white/40 text-[10px]">{duration}</span>
+                        <span className="text-white/70 text-[10px]">{duration}</span>
                       </motion.button>
                     ))}
                   </div>
@@ -198,7 +198,7 @@ export function SacredDashboardWidget({
                 <span className="text-white/80 text-sm">{t('divine.sacred.dashboard.divineMoments', 'Divine Moments')}</span>
               </div>
               <motion.span
-                className="text-white/40"
+                className="text-white/70"
                 animate={{ rotate: activeSection === 'moments' ? 180 : 0 }}
               >
                 ▼

@@ -162,7 +162,7 @@ export default function CookieBanner({
                             <span className="text-sm font-medium text-[#f5f0e8]">
                               Necessary Cookies
                             </span>
-                            <p className="text-xs text-[#f5f0e8]/50">
+                            <p className="text-xs text-[#f5f0e8]/70">
                               Required for the website to function properly. Cannot be disabled.
                             </p>
                           </div>
@@ -177,7 +177,7 @@ export default function CookieBanner({
                             <span className="text-sm font-medium text-[#f5f0e8]">
                               Analytics Cookies
                             </span>
-                            <p className="text-xs text-[#f5f0e8]/50">
+                            <p className="text-xs text-[#f5f0e8]/70">
                               Help us understand how visitors interact with our website.
                             </p>
                           </div>
@@ -205,7 +205,7 @@ export default function CookieBanner({
                             <span className="text-sm font-medium text-[#f5f0e8]">
                               Marketing Cookies
                             </span>
-                            <p className="text-xs text-[#f5f0e8]/50">
+                            <p className="text-xs text-[#f5f0e8]/70">
                               Used to track visitors across websites for advertising purposes.
                             </p>
                           </div>
@@ -233,7 +233,7 @@ export default function CookieBanner({
                             <span className="text-sm font-medium text-[#f5f0e8]">
                               Functional Cookies
                             </span>
-                            <p className="text-xs text-[#f5f0e8]/50">
+                            <p className="text-xs text-[#f5f0e8]/70">
                               Enable enhanced functionality and personalization.
                             </p>
                           </div>

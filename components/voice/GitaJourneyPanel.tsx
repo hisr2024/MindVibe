@@ -86,7 +86,7 @@ export default function GitaJourneyPanel({
           <div className="flex items-center justify-between mb-3">
             <div>
               <h2 className="text-lg font-semibold text-white/90">Gita Journey</h2>
-              <p className="text-xs text-white/40 mt-0.5">
+              <p className="text-xs text-white/70 mt-0.5">
                 {journey
                   ? journeyDone
                     ? 'Journey complete! Namaste.'
@@ -96,7 +96,7 @@ export default function GitaJourneyPanel({
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl hover:bg-white/10 transition-colors text-white/40"
+              className="p-2 rounded-xl hover:bg-white/10 transition-colors text-white/70"
               aria-label="Close journey panel"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -109,7 +109,7 @@ export default function GitaJourneyPanel({
           {journey && (
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-[10px]">
-                <span className="text-white/40">{completed.length} of 18 chapters</span>
+                <span className="text-white/70">{completed.length} of 18 chapters</span>
                 <span className="text-mv-aurora/60 font-medium">{progress}%</span>
               </div>
               <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
@@ -130,7 +130,7 @@ export default function GitaJourneyPanel({
                 <p className="text-xs text-mv-aurora/70 font-medium">
                   Now Playing: Chapter {activeSession.chapter}
                 </p>
-                <p className="text-[10px] text-white/40 mt-0.5">
+                <p className="text-[10px] text-white/70 mt-0.5">
                   {SEGMENT_LABELS[activeSession.currentSegmentType]} ({activeSession.segmentIndex + 1}/{activeSession.totalSegments})
                 </p>
               </div>
@@ -148,7 +148,7 @@ export default function GitaJourneyPanel({
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={onStop}
-                className="p-2 rounded-xl bg-white/[0.06] hover:bg-white/10 transition-colors text-white/50"
+                className="p-2 rounded-xl bg-white/[0.06] hover:bg-white/10 transition-colors text-white/70"
                 title="Stop session"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -175,7 +175,7 @@ export default function GitaJourneyPanel({
 
               <button
                 onClick={onSkip}
-                className="p-2 rounded-xl bg-white/[0.06] hover:bg-white/10 transition-colors text-white/50"
+                className="p-2 rounded-xl bg-white/[0.06] hover:bg-white/10 transition-colors text-white/70"
                 title="Skip to next segment"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -197,7 +197,7 @@ export default function GitaJourneyPanel({
               <h3 className="text-base font-medium text-white/80 mb-2">
                 Begin Your Journey
               </h3>
-              <p className="text-xs text-white/40 leading-relaxed mb-6 max-w-[260px]">
+              <p className="text-xs text-white/70 leading-relaxed mb-6 max-w-[260px]">
                 KIAAN will walk you through all 18 chapters of the Bhagavad Gita as your divine best friend. Each chapter is a voice session with practical wisdom, exercises, and reflections.
               </p>
               <button
@@ -256,7 +256,7 @@ export default function GitaJourneyPanel({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className={`text-sm font-medium truncate ${
-                          isCompleted ? 'text-white/50' : isCurrent ? 'text-white/80' : 'text-white/30'
+                          isCompleted ? 'text-white/70' : isCurrent ? 'text-white/80' : 'text-white/70'
                         }`}>
                           {ch.title}
                         </p>
@@ -269,7 +269,7 @@ export default function GitaJourneyPanel({
                       <p className={`text-[10px] mt-0.5 ${isCompleted ? 'text-white/25' : 'text-white/35'}`}>
                         {ch.sanskritTitle}
                       </p>
-                      <p className={`text-[11px] mt-1 leading-relaxed ${isCompleted ? 'text-white/30' : 'text-white/40'}`}>
+                      <p className={`text-[11px] mt-1 leading-relaxed ${isCompleted ? 'text-white/70' : 'text-white/70'}`}>
                         {ch.coreTheme}
                       </p>
                       <p className="text-[9px] text-white/20 mt-1">
@@ -297,7 +297,7 @@ export default function GitaJourneyPanel({
               )}
               <button
                 onClick={onResetJourney}
-                className="px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] text-xs text-white/30 hover:text-white/50 hover:bg-white/[0.06] transition-all"
+                className="px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] text-xs text-white/70 hover:text-white/70 hover:bg-white/[0.06] transition-all"
                 title="Reset journey"
               >
                 Reset

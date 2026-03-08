@@ -88,11 +88,11 @@ export function JournalStatistics({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="rounded-xl border border-[#d4a44c]/15 bg-[#d4a44c]/5 p-3 text-center">
           <p className="text-2xl font-bold text-[#f5f0e8]">{stats.totalEntries}</p>
-          <p className="text-xs text-[#f5f0e8]/60">Total Entries</p>
+          <p className="text-xs text-[#f5f0e8]/75">Total Entries</p>
         </div>
         <div className="rounded-xl border border-[#d4a44c]/15 bg-[#d4a44c]/5 p-3 text-center">
           <p className="text-2xl font-bold text-[#f5f0e8]">{stats.totalWords.toLocaleString()}</p>
-          <p className="text-xs text-[#f5f0e8]/60">Words Written</p>
+          <p className="text-xs text-[#f5f0e8]/75">Words Written</p>
         </div>
         <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/5 p-3 text-center">
           <p className="text-2xl font-bold text-emerald-50">{stats.currentStreak}</p>
@@ -124,7 +124,7 @@ export function JournalStatistics({
             />
           ) : (
             <div className="h-[200px] flex items-center justify-center">
-              <p className="text-[#f5f0e8]/50 text-sm">No sentiment data</p>
+              <p className="text-[#f5f0e8]/70 text-sm">No sentiment data</p>
             </div>
           )}
           {/* Legend */}
@@ -160,7 +160,7 @@ export function JournalStatistics({
             />
           ) : (
             <div className="h-[200px] flex items-center justify-center">
-              <p className="text-[#f5f0e8]/50 text-sm">No topics detected yet</p>
+              <p className="text-[#f5f0e8]/70 text-sm">No topics detected yet</p>
             </div>
           )}
         </div>
@@ -190,11 +190,11 @@ export function JournalStatistics({
         <div className="flex flex-wrap gap-6 justify-center text-center">
           <div>
             <p className="text-xl font-bold text-[#f5f0e8]">{stats.longestStreak}</p>
-            <p className="text-xs text-[#f5f0e8]/50">Longest Streak</p>
+            <p className="text-xs text-[#f5f0e8]/70">Longest Streak</p>
           </div>
           <div>
             <p className="text-xl font-bold text-[#f5f0e8]">{stats.avgEntriesPerWeek.toFixed(1)}</p>
-            <p className="text-xs text-[#f5f0e8]/50">Avg Entries/Week</p>
+            <p className="text-xs text-[#f5f0e8]/70">Avg Entries/Week</p>
           </div>
         </div>
       </div>

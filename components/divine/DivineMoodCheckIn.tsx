@@ -266,7 +266,7 @@ export function DivineMoodCheckIn({
     return (
       <div className={`w-full max-w-lg mx-auto ${className}`}>
         <div className="text-center py-4">
-          <div className="text-white/40 text-sm">{t('divine.sacred.moodCheckin.preparingSacredSpace', 'Preparing sacred space...')}</div>
+          <div className="text-white/70 text-sm">{t('divine.sacred.moodCheckin.preparingSacredSpace', 'Preparing sacred space...')}</div>
         </div>
       </div>
     );
@@ -322,9 +322,9 @@ export function DivineMoodCheckIn({
 
               {/* Labels */}
               <div className="flex justify-between mt-3 w-full max-w-md mx-auto px-2">
-                <span className="text-[10px] sm:text-xs text-white/40">{t('divine.sacred.moodCheckin.levels.struggling', 'Struggling')}</span>
-                <span className="text-[10px] sm:text-xs text-white/40">{t('divine.sacred.moodCheckin.levels.steady', 'Steady')}</span>
-                <span className="text-[10px] sm:text-xs text-white/40">{t('divine.sacred.moodCheckin.levels.radiant', 'Radiant')}</span>
+                <span className="text-[10px] sm:text-xs text-white/70">{t('divine.sacred.moodCheckin.levels.struggling', 'Struggling')}</span>
+                <span className="text-[10px] sm:text-xs text-white/70">{t('divine.sacred.moodCheckin.levels.steady', 'Steady')}</span>
+                <span className="text-[10px] sm:text-xs text-white/70">{t('divine.sacred.moodCheckin.levels.radiant', 'Radiant')}</span>
               </div>
             </div>
           </motion.div>
@@ -343,7 +343,7 @@ export function DivineMoodCheckIn({
             <h3 className="text-lg sm:text-xl font-light text-white/90 mb-2">
               {t('divine.sacred.moodCheckin.whatDescribes', 'What best describes this feeling?')}
             </h3>
-            <p className="text-white/50 text-xs sm:text-sm mb-5 sm:mb-6">
+            <p className="text-white/70 text-xs sm:text-sm mb-5 sm:mb-6">
               {t('divine.sacred.moodCheckin.selectEmotion', 'Select the emotion closest to your experience')}
             </p>
 
@@ -373,7 +373,7 @@ export function DivineMoodCheckIn({
 
             <button
               onClick={() => setStep('mood')}
-              className="mt-5 sm:mt-6 text-white/40 hover:text-white/60 text-sm transition-colors px-4 py-2"
+              className="mt-5 sm:mt-6 text-white/70 hover:text-white/60 text-sm transition-colors px-4 py-2"
             >
               ← Back
             </button>
@@ -428,7 +428,7 @@ export function DivineMoodCheckIn({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}
               >
-                <p className="text-sm text-white/50 mb-2">🙏 {t('divine.sacred.moodCheckin.sacredPractice', 'Sacred Practice')}</p>
+                <p className="text-sm text-white/70 mb-2">🙏 {t('divine.sacred.moodCheckin.sacredPractice', 'Sacred Practice')}</p>
                 <p className="text-white/80 text-sm">{response.practice}</p>
               </motion.div>
             )}
@@ -441,7 +441,7 @@ export function DivineMoodCheckIn({
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1 }}
               >
-                <p className="text-sm text-white/50 mb-1">✨ {t('divine.sacred.moodCheckin.affirmationLabel', 'Affirmation')}</p>
+                <p className="text-sm text-white/70 mb-1">✨ {t('divine.sacred.moodCheckin.affirmationLabel', 'Affirmation')}</p>
                 <p className="text-white/80 italic">&quot;{response.affirmation}&quot;</p>
               </motion.div>
             )}

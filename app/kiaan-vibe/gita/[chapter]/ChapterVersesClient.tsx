@@ -196,7 +196,7 @@ export default function ChapterVersesPage({ params }: PageProps) {
                   </div>
 
                   {/* Arrow */}
-                  <ChevronRight className="flex-shrink-0 w-5 h-5 text-white/30 group-hover:text-orange-400 group-hover:translate-x-1 transition-all mt-2" />
+                  <ChevronRight className="flex-shrink-0 w-5 h-5 text-white/70 group-hover:text-orange-400 group-hover:translate-x-1 transition-all mt-2" />
                 </div>
               </motion.div>
             </Link>
@@ -205,7 +205,7 @@ export default function ChapterVersesPage({ params }: PageProps) {
       ) : (
         <div className="text-center py-12">
           <BookOpen className="w-12 h-12 text-white/20 mx-auto mb-4" />
-          <p className="text-white/40">
+          <p className="text-white/70">
             Verses not available for this language yet.
           </p>
           <Link

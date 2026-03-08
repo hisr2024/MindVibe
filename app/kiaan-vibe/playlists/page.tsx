@@ -186,7 +186,7 @@ export default function PlaylistsPage() {
                     <h3 className="font-semibold text-white truncate">
                       {playlist.name}
                     </h3>
-                    <p className="text-sm text-white/50">
+                    <p className="text-sm text-white/70">
                       {trackCount} track{trackCount !== 1 ? 's' : ''}
                     </p>
                   </div>
@@ -195,14 +195,14 @@ export default function PlaylistsPage() {
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => openEditModal(playlist)}
-                      className="p-2 text-white/50 hover:text-white transition-colors"
+                      className="p-2 text-white/70 hover:text-white transition-colors"
                       aria-label="Edit playlist"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDeletePlaylist(playlist.id)}
-                      className="p-2 text-white/50 hover:text-red-400 transition-colors"
+                      className="p-2 text-white/70 hover:text-red-400 transition-colors"
                       aria-label="Delete playlist"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -218,17 +218,17 @@ export default function PlaylistsPage() {
                         key={track?.id || i}
                         className="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-500/20 to-amber-500/10 flex items-center justify-center"
                       >
-                        <Music2 className="w-5 h-5 text-white/40" />
+                        <Music2 className="w-5 h-5 text-white/70" />
                       </div>
                     ))
                   ) : (
                     <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
-                      <ListMusic className="w-5 h-5 text-white/30" />
+                      <ListMusic className="w-5 h-5 text-white/70" />
                     </div>
                   )}
                   {trackCount > 4 && (
                     <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
-                      <span className="text-xs text-white/50">+{trackCount - 4}</span>
+                      <span className="text-xs text-white/70">+{trackCount - 4}</span>
                     </div>
                   )}
                 </div>
@@ -249,7 +249,7 @@ export default function PlaylistsPage() {
       ) : (
         <div className="text-center py-12">
           <ListMusic className="w-12 h-12 text-white/20 mx-auto mb-4" />
-          <p className="text-white/40">No playlists yet</p>
+          <p className="text-white/70">No playlists yet</p>
           <button
             onClick={() => setShowCreateModal(true)}
             className="mt-4 px-4 py-2 rounded-full bg-orange-500 text-white text-sm font-medium hover:bg-orange-400 transition-colors"
@@ -283,7 +283,7 @@ export default function PlaylistsPage() {
                 </h2>
                 <button
                   onClick={closeModal}
-                  className="p-2 text-white/50 hover:text-white transition-colors"
+                  className="p-2 text-white/70 hover:text-white transition-colors"
                   aria-label="Close playlist dialog"
                 >
                   <X className="w-5 h-5" />
@@ -340,7 +340,7 @@ export default function PlaylistsPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm text-white truncate">{track.title}</p>
-                            <p className="text-xs text-white/50 truncate">
+                            <p className="text-xs text-white/70 truncate">
                               {track.artist || 'KIAAN Vibe'}
                             </p>
                           </div>

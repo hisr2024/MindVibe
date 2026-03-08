@@ -48,7 +48,7 @@ export function VoiceToTextSettings({
           <h3 className="text-base font-semibold text-[#f5f0e8]">
             Voice-to-Text
           </h3>
-          <p className="text-xs text-[#f5f0e8]/50 mt-0.5">
+          <p className="text-xs text-[#f5f0e8]/70 mt-0.5">
             Speak your thoughts instead of typing
           </p>
         </div>
@@ -115,7 +115,7 @@ export function VoiceToTextSettings({
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
               <div className="flex-1">
-                <p className="text-xs text-[#f5f0e8]/60 leading-relaxed">
+                <p className="text-xs text-[#f5f0e8]/75 leading-relaxed">
                   Voice is processed locally by your browser. Audio is never sent to or stored on our servers — only the final text transcript is used.
                 </p>
               </div>
@@ -167,7 +167,7 @@ function ToggleRow({
     >
       <div className="flex-1 min-w-0">
         <span className="text-sm text-[#f5f0e8]/90 block">{label}</span>
-        <span className="text-[11px] text-[#f5f0e8]/40 block mt-0.5">{description}</span>
+        <span className="text-[11px] text-[#f5f0e8]/70 block mt-0.5">{description}</span>
       </div>
       <button
         type="button"

@@ -20,7 +20,7 @@ import { apiFetch } from '@/lib/api'
 
 // Types for sync operations
 export type SyncOperationType = 'create' | 'update' | 'delete'
-export type SyncEntityType = 'mood' | 'journal' | 'journey_progress' | 'chat_message'
+export type SyncEntityType = 'mood' | 'journal' | 'journey_progress' | 'chat_message' | 'favorites'
 export type SyncStatus = 'pending' | 'syncing' | 'synced' | 'failed' | 'conflict'
 
 export interface SyncOperation {
@@ -309,6 +309,10 @@ class OfflineSyncService {
       chat_message: {
         endpoint: '/api/chat/history', // Chat history endpoint
         supportedOps: [], // Full CRUD not implemented
+      },
+      favorites: {
+        endpoint: '/api/gita/favorites',
+        supportedOps: ['update'],
       },
     }
 

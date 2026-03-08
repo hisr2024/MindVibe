@@ -17,8 +17,7 @@ export function LanguageShowcase() {
     setLanguage(langCode as ContextLanguage)
   }
 
-  // Translations object - temporary inline translations for showcase section
-  // TODO: Replace with proper i18n hook once next-intl is fully integrated
+  // Inline translations for the language showcase section
   const translations: Record<string, { title: string; subtitle: string }> = {
     en: {
       title: 'Available in Your Language',
@@ -153,7 +152,7 @@ export function LanguageShowcase() {
                 <div className="font-semibold text-[#f5f0e8] text-sm md:text-base mb-1">
                   {lang.nativeName}
                 </div>
-                <div className="text-xs text-[#f5f0e8]/60">
+                <div className="text-xs text-[#f5f0e8]/75">
                   {lang.name}
                 </div>
               </div>
@@ -172,7 +171,7 @@ export function LanguageShowcase() {
             <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#d4a44c] to-[#ffb347] bg-clip-text text-transparent">
               8+
             </div>
-            <div className="text-xs md:text-sm text-[#f5f0e8]/60 mt-1">
+            <div className="text-xs md:text-sm text-[#f5f0e8]/75 mt-1">
               {getStatLabel('languages')}
             </div>
           </div>
@@ -180,7 +179,7 @@ export function LanguageShowcase() {
             <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#d4a44c] to-[#ffb347] bg-clip-text text-transparent">
               700+
             </div>
-            <div className="text-xs md:text-sm text-[#f5f0e8]/60 mt-1">
+            <div className="text-xs md:text-sm text-[#f5f0e8]/75 mt-1">
               {getStatLabel('verses')}
             </div>
           </div>
@@ -188,7 +187,7 @@ export function LanguageShowcase() {
             <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#d4a44c] to-[#ffb347] bg-clip-text text-transparent">
               24/7
             </div>
-            <div className="text-xs md:text-sm text-[#f5f0e8]/60 mt-1">
+            <div className="text-xs md:text-sm text-[#f5f0e8]/75 mt-1">
               {getStatLabel('support')}
             </div>
           </div>
@@ -196,7 +195,7 @@ export function LanguageShowcase() {
 
         {/* Informational note */}
         <div className="mt-8 text-center">
-          <p className="text-xs text-[#f5f0e8]/50 max-w-2xl mx-auto">
+          <p className="text-xs text-[#f5f0e8]/70 max-w-2xl mx-auto">
             {getInfoText()}
           </p>
         </div>

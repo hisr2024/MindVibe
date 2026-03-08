@@ -51,7 +51,7 @@ export function KarmaResetTestimonials() {
         <h2 className="text-xl font-semibold text-[#f5f0e8]/90">
           Voices from the journey
         </h2>
-        <p className="mt-1 text-sm text-[#f5f0e8]/50">
+        <p className="mt-1 text-sm text-[#f5f0e8]/70">
           Real experiences from those who walked this path
         </p>
       </div>

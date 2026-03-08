@@ -305,7 +305,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                 <h2 className="text-xl font-bold text-white mb-2">
                   Welcome, Seeker
                 </h2>
-                <p className="text-sm text-white/50 max-w-[280px] leading-relaxed">
+                <p className="text-sm text-white/70 max-w-[280px] leading-relaxed">
                   I am KIAAN, your wisdom companion rooted in the eternal teachings of the Bhagavad Gita.
                   Share what weighs on your heart.
                 </p>
@@ -399,7 +399,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
 
                     {/* Message metadata */}
                     <div className="flex items-center justify-end gap-2 mt-2 relative">
-                      <span className={`text-[10px] ${message.sender === 'assistant' ? 'text-[#d4a44c]/40' : 'text-white/30'}`}>
+                      <span className={`text-[10px] ${message.sender === 'assistant' ? 'text-[#d4a44c]/40' : 'text-white/70'}`}>
                         {formatTime(message.timestamp)}
                       </span>
                       {message.status === 'sending' && (
@@ -435,7 +435,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                           {copiedId === message.id ? (
                             <Check className="w-3.5 h-3.5 text-emerald-400" />
                           ) : (
-                            <Copy className="w-3.5 h-3.5 text-white/30" />
+                            <Copy className="w-3.5 h-3.5 text-white/70" />
                           )}
                         </motion.button>
 
@@ -445,7 +445,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                           className="w-7 h-7 rounded-full bg-white/[0.04] border border-white/[0.06] flex items-center justify-center active:bg-white/[0.08]"
                           aria-label="Share message"
                         >
-                          <Share2 className="w-3.5 h-3.5 text-white/30" />
+                          <Share2 className="w-3.5 h-3.5 text-white/70" />
                         </motion.button>
 
                         {message.sender === 'assistant' && onSaveToJournal && (
@@ -466,7 +466,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                             className="w-7 h-7 rounded-full bg-white/[0.04] border border-white/[0.06] flex items-center justify-center active:bg-white/[0.08]"
                             aria-label="Listen to message"
                           >
-                            <Volume2 className="w-3.5 h-3.5 text-white/30" />
+                            <Volume2 className="w-3.5 h-3.5 text-white/70" />
                           </motion.button>
                         )}
                       </motion.div>
@@ -590,7 +590,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                   className={`absolute right-2 bottom-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
                     isListening
                       ? 'bg-[#d4a44c] text-[#0a0a10] shadow-md shadow-[#d4a44c]/30'
-                      : 'bg-white/[0.06] text-white/30 hover:text-white/50'
+                      : 'bg-white/[0.06] text-white/70 hover:text-white/70'
                   }`}
                   aria-label={isListening ? 'Stop listening' : 'Start voice input'}
                 >

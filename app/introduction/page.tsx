@@ -297,7 +297,7 @@ export default function IntroductionPage() {
                 <Heart className="w-6 h-6 sm:w-7 sm:h-7 text-[#d4a44c]/70" />
                 <div className="text-center">
                   <h3 className="text-white/85 font-medium text-base sm:text-lg">{t('home.introduction.howIsHeart', 'How is your heart?')}</h3>
-                  <p className="text-white/50 text-xs sm:text-sm">{t('home.introduction.shareFeelings', 'Share your feelings with Krishna')}</p>
+                  <p className="text-white/70 text-xs sm:text-sm">{t('home.introduction.shareFeelings', 'Share your feelings with Krishna')}</p>
                 </div>
               </div>
               <DivineMoodCheckIn compact={true} />
@@ -355,7 +355,7 @@ export default function IntroductionPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-white/85 font-semibold text-base sm:text-lg">{t('home.introduction.goToDashboard', 'Go to Dashboard')}</h3>
-                      <p className="text-white/50 text-xs sm:text-sm">{t('home.introduction.accessTools', 'Access all tools & features')}</p>
+                      <p className="text-white/70 text-xs sm:text-sm">{t('home.introduction.accessTools', 'Access all tools & features')}</p>
                     </div>
                     <div className="text-[#d4a44c]/40 group-hover:text-[#d4a44c]/70 transition-colors flex-shrink-0">
                       <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -416,7 +416,7 @@ export default function IntroductionPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8 }}
           >
-            <p className="text-white/50 text-xs sm:text-sm italic font-sacred max-w-md mx-auto px-4 leading-relaxed">
+            <p className="text-white/70 text-xs sm:text-sm italic font-sacred max-w-md mx-auto px-4 leading-relaxed">
               {t('home.introduction.footerVerse', '"I am the Self seated in the hearts of all beings. I am the beginning, the middle, and the end."')}
             </p>
             <p className="text-[#d4a44c]/50 text-xs mt-2 font-medium">{t('home.introduction.footerVerseRef', '— Bhagavad Gita 10.20')}</p>

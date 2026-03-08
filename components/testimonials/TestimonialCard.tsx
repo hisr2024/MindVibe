@@ -39,7 +39,7 @@ export function TestimonialCard({ testimonial, index }: TestimonialCardProps) {
               {testimonial.initial}
             </span>
           </div>
-          <span className="text-sm font-medium text-[#f5f0e8]/60">
+          <span className="text-sm font-medium text-[#f5f0e8]/75">
             {testimonial.name}
           </span>
         </div>

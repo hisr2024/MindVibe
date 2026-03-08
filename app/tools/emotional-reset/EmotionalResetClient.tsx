@@ -39,7 +39,7 @@ export default function EmotionalResetClient() {
             </div>
           </div>
           <div className="divine-sacred-thread w-full my-4" />
-          <p className="text-sm text-[#f5f0e8]/60 font-sacred leading-relaxed mb-2">
+          <p className="text-sm text-[#f5f0e8]/75 font-sacred leading-relaxed mb-2">
             A calming 7-step sacred flow to process emotions, find inner peace, and restore your spirit with gentle, divine guidance.
           </p>
           <a href="/dashboard" className="text-xs text-[#d4a44c]/50 hover:text-[#d4a44c]/70 transition">
@@ -83,7 +83,7 @@ export default function EmotionalResetClient() {
         {/* Footer info — gentle sacred notes */}
         <FadeIn delay={0.2}>
           <div className="divine-step-card rounded-2xl p-4">
-            <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-[#f5f0e8]/50">
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-[#f5f0e8]/70">
               <span className="flex items-center gap-1.5">
                 <span className="divine-diya h-1.5 w-1.5 rounded-full bg-[#e8b54a]" aria-hidden="true"></span>
                 Max 10 sacred sessions/day

@@ -136,9 +136,9 @@ export function OnboardingComplete({
         variants={itemVariants}
         className="rounded-xl bg-[#d4a44c]/10 border border-[#d4a44c]/20 p-4 mb-8"
       >
-        <p className="text-xs text-[#f5f0e8]/60 mb-2">Your selected plan:</p>
+        <p className="text-xs text-[#f5f0e8]/75 mb-2">Your selected plan:</p>
         <p className="text-lg font-semibold text-[#f5f0e8]">{selectedPlan}</p>
-        <p className="text-xs text-[#f5f0e8]/60 mt-1">
+        <p className="text-xs text-[#f5f0e8]/75 mt-1">
           {kiaanQuota === 'unlimited'
             ? 'Unlimited KIAAN questions'
             : `${kiaanQuota} KIAAN questions per month`}
@@ -167,7 +167,7 @@ export function OnboardingComplete({
             <span className="text-2xl">{action.icon}</span>
             <div className="text-left">
               <p className="text-sm font-medium text-[#f5f0e8]">{action.label}</p>
-              <p className="text-xs text-[#f5f0e8]/50">{action.description}</p>
+              <p className="text-xs text-[#f5f0e8]/70">{action.description}</p>
             </div>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -177,7 +177,7 @@ export function OnboardingComplete({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="w-5 h-5 text-[#f5f0e8]/40 ml-auto"
+              className="w-5 h-5 text-[#f5f0e8]/70 ml-auto"
             >
               <polyline points="9 18 15 12 9 6" />
             </svg>
@@ -190,7 +190,7 @@ export function OnboardingComplete({
         <motion.button
           variants={itemVariants}
           onClick={onGoToDashboard}
-          className="mt-8 text-sm text-[#f5f0e8]/60 hover:text-[#f5f0e8] transition underline underline-offset-4"
+          className="mt-8 text-sm text-[#f5f0e8]/75 hover:text-[#f5f0e8] transition underline underline-offset-4"
         >
           Or go to dashboard →
         </motion.button>

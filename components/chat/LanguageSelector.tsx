@@ -112,7 +112,7 @@ export function LanguageSelector({
                 </button>
               ))}
               {filteredLanguages.length === 0 && (
-                <div className="px-4 py-6 text-center text-[#f5f0e8]/60 text-sm">
+                <div className="px-4 py-6 text-center text-[#f5f0e8]/75 text-sm">
                   No languages found
                 </div>
               )}
@@ -184,7 +184,7 @@ export function LanguageSelector({
                   </button>
                 ))}
                 {filteredLanguages.length === 0 && (
-                  <div className="px-4 py-6 text-center text-[#f5f0e8]/60 text-sm">
+                  <div className="px-4 py-6 text-center text-[#f5f0e8]/75 text-sm">
                     No languages found
                   </div>
                 )}
@@ -194,7 +194,7 @@ export function LanguageSelector({
         </div>
         
         {/* Helper text */}
-        <p className="text-xs text-[#f5f0e8]/60">
+        <p className="text-xs text-[#f5f0e8]/75">
           KIAAN will respond in {config.name}. You can type in any language.
         </p>
       </div>

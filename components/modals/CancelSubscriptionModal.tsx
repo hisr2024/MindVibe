@@ -177,7 +177,7 @@ export function CancelSubscriptionModal({
             until {endDate.toLocaleDateString()}.
           </p>
 
-          <p className="text-sm text-[#f5f0e8]/50 mb-6">
+          <p className="text-sm text-[#f5f0e8]/70 mb-6">
             Changed your mind? You can resubscribe anytime from the pricing page.
           </p>
 

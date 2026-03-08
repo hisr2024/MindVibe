@@ -264,7 +264,7 @@ export default function MobileJourneyDetailPage() {
 
         {/* Progress bar */}
         <div className="px-4 pb-3">
-          <div className="flex items-center justify-between text-xs text-white/50 mb-1.5">
+          <div className="flex items-center justify-between text-xs text-white/70 mb-1.5">
             <span>Day {journey.current_day} of {journey.total_days}</span>
             <span>{progressPercent}% complete</span>
           </div>
@@ -331,9 +331,9 @@ export default function MobileJourneyDetailPage() {
             className="mx-4 mt-3 rounded-2xl border border-white/10 bg-[#0d0d12] p-3 space-y-2"
           >
             <div className="flex items-center justify-between px-2 pb-2 border-b border-white/[0.06]">
-              <span className="text-xs text-white/50">{getJourneyStatusLabel(journey.status)}</span>
+              <span className="text-xs text-white/70">{getJourneyStatusLabel(journey.status)}</span>
               <button onClick={() => setShowActions(false)}>
-                <X className="w-4 h-4 text-white/40" />
+                <X className="w-4 h-4 text-white/70" />
               </button>
             </div>
             {journey.status === 'active' && (
@@ -580,7 +580,7 @@ export default function MobileJourneyDetailPage() {
                 <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto mb-3" />
                 <p className="text-green-400 font-semibold">Step Completed</p>
                 {step.completed_at && (
-                  <p className="text-xs text-white/50 mt-1">
+                  <p className="text-xs text-white/70 mt-1">
                     {new Date(step.completed_at).toLocaleDateString('en-US', {
                       weekday: 'long', month: 'long', day: 'numeric'
                     })}

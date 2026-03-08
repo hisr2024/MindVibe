@@ -67,7 +67,7 @@ export function ProfileHeader({
         </div>
         <p className="text-sm text-[#f5f0e8]/70 truncate mb-2">{email}</p>
         {memberSince && (
-          <p className="text-xs text-[#f5f0e8]/50">
+          <p className="text-xs text-[#f5f0e8]/70">
             Member since {memberSince.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           </p>
         )}

@@ -348,7 +348,7 @@ export default function ArdhaClient() {
         style={{ boxShadow: '0 4px 24px rgba(212, 164, 76, 0.03)' }}
       >
         <h3 className="text-xs font-semibold text-[#f5e6c8]/60 mb-3">ARDHA vs CBT</h3>
-        <p className="text-xs text-[#f5f0e8]/40 leading-relaxed">
+        <p className="text-xs text-[#f5f0e8]/70 leading-relaxed">
           CBT corrects <em>distorted thinking</em>. ARDHA corrects <em>mistaken identity</em>.
           Where CBT strengthens the functional ego, ARDHA loosens ego-identification
           toward inner freedom through right action.

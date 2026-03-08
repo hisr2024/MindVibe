@@ -116,7 +116,7 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
           <Shield className="h-5 w-5 text-[#d4a44c]" />
           Risk Assessment
         </h3>
-        <p className="text-sm text-[#f5f0e8]/60">Spiritual wellness stability indicators</p>
+        <p className="text-sm text-[#f5f0e8]/75">Spiritual wellness stability indicators</p>
       </div>
 
       {/* Risk Score Gauge */}
@@ -155,7 +155,7 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
             <div className="text-3xl font-bold" style={{ color: config.color }}>
               {riskData.risk_score}
             </div>
-            <div className="text-xs text-[#f5f0e8]/60">Risk Score</div>
+            <div className="text-xs text-[#f5f0e8]/75">Risk Score</div>
           </div>
         </div>
       </div>
@@ -199,7 +199,7 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
               transition={{ duration: 1, delay: 0.2 }}
             />
           </div>
-          <p className="text-xs text-[#f5f0e8]/60">
+          <p className="text-xs text-[#f5f0e8]/75">
             Contributes {riskData.factors.mood_average.risk.toFixed(1)} points to risk score
           </p>
         </div>
@@ -223,7 +223,7 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
               transition={{ duration: 1, delay: 0.3 }}
             />
           </div>
-          <p className="text-xs text-[#f5f0e8]/60">
+          <p className="text-xs text-[#f5f0e8]/75">
             Contributes {riskData.factors.trend.risk.toFixed(1)} points to risk score
           </p>
         </div>
@@ -247,7 +247,7 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
               transition={{ duration: 1, delay: 0.4 }}
             />
           </div>
-          <p className="text-xs text-[#f5f0e8]/60">
+          <p className="text-xs text-[#f5f0e8]/75">
             Contributes {riskData.factors.volatility.risk.toFixed(1)} points to risk score
           </p>
         </div>
@@ -279,7 +279,7 @@ export function RiskAssessment({ className = '' }: RiskAssessmentProps) {
       </div>
 
       {/* Last Updated */}
-      <div className="mt-4 text-xs text-center text-[#f5f0e8]/40">
+      <div className="mt-4 text-xs text-center text-[#f5f0e8]/70">
         Assessed {new Date(riskData.assessed_at).toLocaleString()}
       </div>
     </div>

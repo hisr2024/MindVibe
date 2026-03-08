@@ -205,7 +205,7 @@ export function FloatingPlayer() {
                 <p className="text-sm font-medium text-[#f5f0e8] truncate">
                   {currentTrack.title}
                 </p>
-                <p className="text-xs text-white/50 truncate">
+                <p className="text-xs text-white/70 truncate">
                   {currentTrack.artist || 'KIAAN Vibe'}
                 </p>
               </div>
@@ -267,7 +267,7 @@ export function FloatingPlayer() {
 
                 <button
                   onClick={() => clearQueue()}
-                  className="p-2 text-white/40 hover:text-red-400 transition-colors"
+                  className="p-2 text-white/70 hover:text-red-400 transition-colors"
                   aria-label="Close player"
                   title="Close player"
                 >
@@ -308,7 +308,7 @@ export function FloatingPlayer() {
                     </button>
                     <button
                       onClick={() => clearAudioError()}
-                      className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-white/50 transition-colors"
+                      className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-white/70 transition-colors"
                       aria-label="Dismiss error"
                       title="Dismiss"
                     >
@@ -332,7 +332,7 @@ export function FloatingPlayer() {
               >
                 <div className="px-3 pb-3 space-y-4 border-t border-white/5 pt-3">
                   {/* Time display */}
-                  <div className="flex items-center justify-between text-xs text-white/50">
+                  <div className="flex items-center justify-between text-xs text-white/70">
                     <span>{formatDuration(position)}</span>
                     <span>{formatDuration(duration)}</span>
                   </div>
@@ -343,7 +343,7 @@ export function FloatingPlayer() {
                     <button
                       onClick={toggleShuffle}
                       className={`p-2 rounded-lg transition-colors ${
-                        shuffle ? 'text-[#d4a44c] bg-[#d4a44c]/20' : 'text-white/50 hover:text-white'
+                        shuffle ? 'text-[#d4a44c] bg-[#d4a44c]/20' : 'text-white/70 hover:text-white'
                       }`}
                       aria-label="Shuffle"
                     >
@@ -354,7 +354,7 @@ export function FloatingPlayer() {
                     <button
                       onClick={cycleRepeatMode}
                       className={`p-2 rounded-lg transition-colors ${
-                        repeatMode !== 'off' ? 'text-[#d4a44c] bg-[#d4a44c]/20' : 'text-white/50 hover:text-white'
+                        repeatMode !== 'off' ? 'text-[#d4a44c] bg-[#d4a44c]/20' : 'text-white/70 hover:text-white'
                       }`}
                       aria-label={`Repeat: ${repeatMode}`}
                     >
@@ -369,7 +369,7 @@ export function FloatingPlayer() {
                     <button
                       onClick={() => setShowQueue(!showQueue)}
                       className={`p-2 rounded-lg transition-colors ${
-                        showQueue ? 'text-[#d4a44c] bg-[#d4a44c]/20' : 'text-white/50 hover:text-white'
+                        showQueue ? 'text-[#d4a44c] bg-[#d4a44c]/20' : 'text-white/70 hover:text-white'
                       }`}
                       aria-label="Queue"
                     >
@@ -380,7 +380,7 @@ export function FloatingPlayer() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={toggleMute}
-                        className="p-2 text-white/50 hover:text-white transition-colors"
+                        className="p-2 text-white/70 hover:text-white transition-colors"
                         aria-label={muted ? 'Unmute' : 'Mute'}
                       >
                         {muted || volume === 0 ? (
@@ -403,7 +403,7 @@ export function FloatingPlayer() {
 
                   {/* Playback speed */}
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-white/50">Speed:</span>
+                    <span className="text-xs text-white/70">Speed:</span>
                     <div className="flex gap-1">
                       {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
                         <button
@@ -431,7 +431,7 @@ export function FloatingPlayer() {
                         className="overflow-hidden"
                       >
                         <div className="space-y-1 max-h-48 overflow-y-auto">
-                          <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">
+                          <p className="text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
                             Queue ({queue.length} tracks)
                           </p>
                           {queue.map((track, index) => (
@@ -445,17 +445,17 @@ export function FloatingPlayer() {
                                 }
                               `}
                             >
-                              <span className="text-xs text-white/40 w-5">{index + 1}</span>
+                              <span className="text-xs text-white/70 w-5">{index + 1}</span>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm text-white truncate">{track.title}</p>
-                                <p className="text-xs text-white/50 truncate">
+                                <p className="text-xs text-white/70 truncate">
                                   {track.artist || 'KIAAN Vibe'}
                                 </p>
                               </div>
                               {index !== queueIndex && (
                                 <button
                                   onClick={() => removeFromQueue(index)}
-                                  className="p-1 text-white/30 hover:text-white/60 transition-colors"
+                                  className="p-1 text-white/70 hover:text-white/60 transition-colors"
                                   aria-label="Remove from queue"
                                 >
                                   <X className="w-3 h-3" />

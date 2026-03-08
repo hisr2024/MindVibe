@@ -51,10 +51,10 @@ export function JourneyDayHeader({
           data-testid="day-counter"
         >
           Day {currentDay}{' '}
-          <span className="text-white/40 font-normal">/ {totalDays}</span>
+          <span className="text-white/70 font-normal">/ {totalDays}</span>
         </h2>
         <span
-          className="text-xs text-white/40 tabular-nums"
+          className="text-xs text-white/70 tabular-nums"
           data-testid="progress-label"
         >
           {progress}%
@@ -85,7 +85,7 @@ export function JourneyDayHeader({
           <p className="text-sm text-white/60" data-testid="day-theme">
             {isFinalDay ? dayMeta.theme : `Today\u2019s theme: ${dayMeta.theme}`}
           </p>
-          <p className="text-xs text-white/40" data-testid="day-focus">
+          <p className="text-xs text-white/70" data-testid="day-focus">
             Focus: {dayMeta.focus}
           </p>
         </div>

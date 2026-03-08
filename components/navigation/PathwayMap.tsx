@@ -63,7 +63,7 @@ export function PathwayMap() {
                   focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950
                   ${isActive
                     ? 'text-[#f5f0e8] after:absolute after:inset-x-2 after:bottom-0 after:h-[2px] after:rounded-full after:bg-[#d4a44c]'
-                    : 'text-white/50 hover:text-white/80'
+                    : 'text-white/70 hover:text-white/80'
                   }
                 `}
               >

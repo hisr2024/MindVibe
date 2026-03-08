@@ -132,7 +132,7 @@ export function AvatarUpload({
               Remove
             </Button>
           )}
-          <p className="text-xs text-[#f5f0e8]/50">JPG, PNG, GIF. Max 5MB.</p>
+          <p className="text-xs text-[#f5f0e8]/70">JPG, PNG, GIF. Max 5MB.</p>
         </div>
       </div>
 

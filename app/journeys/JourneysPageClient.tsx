@@ -222,7 +222,7 @@ function EnemyMasteryCard({
             {getMasteryDescription(mastery)}
           </span>
         </div>
-        <div className="text-[11px] font-medium text-white/50">{info.sanskrit}</div>
+        <div className="text-[11px] font-medium text-white/70">{info.sanskrit}</div>
         <div className="text-sm font-semibold text-white">{info.name}</div>
         <div className="mt-2 h-1 bg-white/10 rounded-full overflow-hidden">
           <motion.div
@@ -232,7 +232,7 @@ function EnemyMasteryCard({
             transition={{ duration: 0.6, delay: 0.2 }}
           />
         </div>
-        <div className="mt-1 text-[10px] text-white/40">{mastery}% mastery</div>
+        <div className="mt-1 text-[10px] text-white/70">{mastery}% mastery</div>
       </div>
     </motion.button>
   )
@@ -284,7 +284,7 @@ function ActiveJourneyCard({ journey }: { journey: JourneyResponse }) {
             {journey.title}
           </h3>
 
-          <div className="flex items-center justify-between text-xs text-white/50">
+          <div className="flex items-center justify-between text-xs text-white/70">
             <span>Day {journey.current_day} of {journey.total_days}</span>
             <span className="font-bold text-[#e8b54a]">{Math.round(journey.progress_percentage)}%</span>
           </div>
@@ -362,7 +362,7 @@ function TemplateCard({
                 {enemyInfo?.sanskrit || 'Journey'}
               </div>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-[10px] text-white/40">{template.duration_days} days</span>
+                <span className="text-[10px] text-white/70">{template.duration_days} days</span>
                 <span className={`text-[10px] ${getDifficultyColor(template.difficulty)}`}>
                   {getDifficultyLabel(template.difficulty)}
                 </span>
@@ -380,7 +380,7 @@ function TemplateCard({
         <h3 className="mb-1.5 text-sm font-semibold text-white line-clamp-2">
           {template.title}
         </h3>
-        <p className="mb-4 text-xs text-white/50 line-clamp-2">
+        <p className="mb-4 text-xs text-white/70 line-clamp-2">
           {template.description || 'Begin your journey of inner transformation'}
         </p>
 
@@ -480,7 +480,7 @@ function StatCard({
         <div className="text-2xl sm:text-3xl font-bold text-white">
           {value}
           {suffix && <span className="text-lg text-white/60">{suffix}</span>}
-          {max !== undefined && <span className="text-lg text-white/30">/{max}</span>}
+          {max !== undefined && <span className="text-lg text-white/70">/{max}</span>}
         </div>
         <div className="text-[11px] text-white/55 mt-1">{label}</div>
       </div>
@@ -638,7 +638,7 @@ export default function JourneysPageClient() {
                   (Shadripu)
                 </span>
               </h1>
-              <p className="mt-3 text-white/50 max-w-xl mx-auto text-sm leading-relaxed">
+              <p className="mt-3 text-white/70 max-w-xl mx-auto text-sm leading-relaxed">
                 According to the Bhagavad Gita, these six inner enemies prevent us from attaining peace.
                 Master them through guided journeys of wisdom and practice.
               </p>
@@ -653,7 +653,7 @@ export default function JourneysPageClient() {
             >
               <div className="text-5xl mb-4">{'\uD83D\uDE4F'}</div>
               <h3 className="text-lg font-semibold text-white mb-2">Sign In to Begin Your Journey</h3>
-              <p className="text-white/50 mb-6 max-w-md mx-auto text-sm">
+              <p className="text-white/70 mb-6 max-w-md mx-auto text-sm">
                 Discover guided journeys to strengthen your inner steadiness.
                 Track progress, build streaks, and transform from within.
               </p>
@@ -687,7 +687,7 @@ export default function JourneysPageClient() {
                         {enemyEmoji(info.icon)}
                       </div>
                       <div className="text-sm font-semibold" style={{ color: info.color }}>{info.sanskrit}</div>
-                      <div className="text-[11px] text-white/50">{info.name}</div>
+                      <div className="text-[11px] text-white/70">{info.name}</div>
                     </motion.div>
                   )
                 })}
@@ -727,7 +727,7 @@ export default function JourneysPageClient() {
         <main className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white">Strengthen Steadiness Within</h1>
-            <p className="mt-2 text-white/50 text-sm">Loading your journey...</p>
+            <p className="mt-2 text-white/70 text-sm">Loading your journey...</p>
           </div>
           <div className="flex items-center justify-center py-20">
             <div className="relative">
@@ -772,7 +772,7 @@ export default function JourneysPageClient() {
                   (Shadripu)
                 </span>
               </motion.h1>
-              <p className="mt-1.5 text-white/50 text-sm max-w-lg">
+              <p className="mt-1.5 text-white/70 text-sm max-w-lg">
                 Master the inner enemies through guided journeys of Gita wisdom and daily practice.
               </p>
               <p className="mt-1 text-[11px] tracking-wide text-[#d4a44c]/35" data-testid="mode-label">
@@ -852,7 +852,7 @@ export default function JourneysPageClient() {
                   </button>
                   <button
                     onClick={() => { setError(null); setIsStuckError(false) }}
-                    className="text-xs text-white/50 underline hover:text-white/70 transition"
+                    className="text-xs text-white/70 underline hover:text-white/70 transition"
                   >
                     Dismiss
                   </button>
@@ -915,7 +915,7 @@ export default function JourneysPageClient() {
                   >
                     <div>
                       <div className="text-sm font-medium text-white">{step.step_title}</div>
-                      <div className="text-xs text-white/40">Day {step.day_index}</div>
+                      <div className="text-xs text-white/70">Day {step.day_index}</div>
                     </div>
                     {step.is_completed ? (
                       <span className="text-xs text-emerald-400 font-medium">{'\u2713'} Complete</span>
@@ -1053,7 +1053,7 @@ export default function JourneysPageClient() {
                   <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-8 text-center">
                     <div className="text-3xl mb-3">{'\uD83D\uDCDA'}</div>
                     <h3 className="text-base font-medium text-white mb-1">No Templates Available</h3>
-                    <p className="text-sm text-white/40">
+                    <p className="text-sm text-white/70">
                       {selectedEnemy
                         ? `No journeys found for ${ENEMY_INFO[selectedEnemy].name}. Try a different enemy.`
                         : 'Journey templates are being prepared. Please check back soon.'}

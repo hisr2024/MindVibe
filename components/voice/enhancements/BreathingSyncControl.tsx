@@ -205,12 +205,12 @@ function BreathingVisualizer({
             >
               {phaseInfo.label}
             </motion.span>
-            <span className="text-xs text-white/40">{phaseInfo.labelHindi}</span>
+            <span className="text-xs text-white/70">{phaseInfo.labelHindi}</span>
           </>
         ) : (
           <>
             <Wind className={`w-8 h-8 ${config.color} mb-1`} />
-            <span className="text-xs text-white/50">Ready</span>
+            <span className="text-xs text-white/70">Ready</span>
           </>
         )}
       </div>
@@ -334,7 +334,7 @@ export function BreathingSyncControl({
             </div>
             <div>
               <p className="text-xs font-medium text-white">Breathing Sync</p>
-              <p className="text-[10px] text-white/50">{currentPattern.name}</p>
+              <p className="text-[10px] text-white/70">{currentPattern.name}</p>
             </div>
           </div>
           <button
@@ -342,7 +342,7 @@ export function BreathingSyncControl({
             className={`p-2 rounded-lg transition-all ${
               playing
                 ? 'bg-emerald-500/30 text-emerald-300'
-                : 'bg-white/5 text-white/50 hover:bg-white/10'
+                : 'bg-white/5 text-white/70 hover:bg-white/10'
             }`}
           >
             {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -368,7 +368,7 @@ export function BreathingSyncControl({
             </div>
             <div>
               <h3 className="font-semibold text-white">Breathing Guide</h3>
-              <p className="text-xs text-white/50">Voice-Synced Breathwork</p>
+              <p className="text-xs text-white/70">Voice-Synced Breathwork</p>
             </div>
           </div>
 
@@ -377,7 +377,7 @@ export function BreathingSyncControl({
             <button
               onClick={() => setAudioCues(!audioCues)}
               className={`p-2 rounded-lg transition-colors ${
-                audioCues ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/5 text-white/50'
+                audioCues ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/5 text-white/70'
               }`}
             >
               {audioCues ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
@@ -410,12 +410,12 @@ export function BreathingSyncControl({
         {/* Cycle Counter */}
         {playing && (
           <div className="flex items-center justify-center gap-4 mt-4">
-            <div className="flex items-center gap-1.5 text-white/50">
+            <div className="flex items-center gap-1.5 text-white/70">
               <Clock className="w-3.5 h-3.5" />
               <span className="text-xs">{cycleDuration}s/cycle</span>
             </div>
             <div className="w-px h-4 bg-white/20" />
-            <div className="text-xs text-white/50">
+            <div className="text-xs text-white/70">
               Cycles: <span className="text-emerald-400 font-medium">{cycles}</span>
             </div>
           </div>
@@ -424,7 +424,7 @@ export function BreathingSyncControl({
 
       {/* Pattern Selection */}
       <div className="p-4 border-t border-white/5">
-        <p className="text-xs font-medium text-white/50 mb-3">Breathing Pattern</p>
+        <p className="text-xs font-medium text-white/70 mb-3">Breathing Pattern</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {(Object.keys(PATTERNS) as BreathingPattern[]).slice(0, 4).map((p) => {
             const config = PATTERNS[p]
@@ -441,7 +441,7 @@ export function BreathingSyncControl({
                     : 'border-white/10 bg-white/5 hover:bg-white/10'
                 }`}
               >
-                <Icon className={`w-4 h-4 mx-auto mb-1 ${isSelected ? config.color : 'text-white/40'}`} />
+                <Icon className={`w-4 h-4 mx-auto mb-1 ${isSelected ? config.color : 'text-white/70'}`} />
                 <p className={`text-xs ${isSelected ? 'text-white' : 'text-white/60'}`}>
                   {config.name}
                 </p>
@@ -452,7 +452,7 @@ export function BreathingSyncControl({
 
         {/* More patterns (collapsible) */}
         <details className="mt-3">
-          <summary className="text-xs text-white/40 cursor-pointer hover:text-white/60">
+          <summary className="text-xs text-white/70 cursor-pointer hover:text-white/60">
             More patterns...
           </summary>
           <div className="grid grid-cols-3 gap-2 mt-2">
@@ -471,7 +471,7 @@ export function BreathingSyncControl({
                       : 'border-white/10 bg-white/5 hover:bg-white/10'
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 mx-auto mb-1 ${isSelected ? config.color : 'text-white/40'}`} />
+                  <Icon className={`w-3.5 h-3.5 mx-auto mb-1 ${isSelected ? config.color : 'text-white/70'}`} />
                   <p className={`text-[10px] ${isSelected ? 'text-white' : 'text-white/60'}`}>
                     {config.name}
                   </p>
@@ -489,7 +489,7 @@ export function BreathingSyncControl({
             <PatternIcon className={`w-4 h-4 ${currentPattern.color}`} />
             <span className="text-sm font-medium text-white">{currentPattern.name}</span>
           </div>
-          <p className="text-xs text-white/50">{currentPattern.description}</p>
+          <p className="text-xs text-white/70">{currentPattern.description}</p>
           <div className="flex gap-2 mt-2">
             {currentPattern.phases.map((phase, idx) => (
               <span
@@ -497,7 +497,7 @@ export function BreathingSyncControl({
                 className={`text-[10px] px-2 py-0.5 rounded-full ${
                   playing && idx === currentPhaseIndex
                     ? 'bg-emerald-500/30 text-emerald-300'
-                    : 'bg-white/10 text-white/40'
+                    : 'bg-white/10 text-white/70'
                 }`}
               >
                 {phase.duration}s {PHASE_LABELS[phase.phase].label.toLowerCase()}

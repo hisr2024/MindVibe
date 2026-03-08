@@ -293,7 +293,7 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
   if (!verse) {
     return (
       <div className="text-center py-12">
-        <p className="text-white/40">Verse not found</p>
+        <p className="text-white/70">Verse not found</p>
         <Link
           href={`/kiaan-vibe/gita/${chapterNumber}?lang=${languageCode}`}
           className="mt-4 inline-block text-orange-400 hover:text-orange-300"
@@ -398,7 +398,7 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
           transition={{ delay: 0.1 }}
           className="p-6 rounded-2xl bg-white/5 border border-white/10"
         >
-          <p className="text-xs uppercase tracking-wider text-white/50 mb-3">Transliteration</p>
+          <p className="text-xs uppercase tracking-wider text-white/70 mb-3">Transliteration</p>
           <p className="text-white/80 italic leading-relaxed">
             {verse.transliteration}
           </p>
@@ -413,7 +413,7 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
         className="p-6 rounded-2xl bg-white/5 border border-white/10"
       >
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs uppercase tracking-wider text-white/50">
+          <p className="text-xs uppercase tracking-wider text-white/70">
             Translation • {langInfo.flag} {langInfo.nativeName}
           </p>
           <div className="flex items-center gap-2">
@@ -433,7 +433,7 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
               return (
                 <div key={lang} className="pb-4 border-b border-white/10 last:border-0 last:pb-0">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs text-white/40">
+                    <p className="text-xs text-white/70">
                       {langConfig?.flag} {langConfig?.nativeName || lang}
                     </p>
                     <button

@@ -554,7 +554,7 @@ export function getProviderDisplayInfo(provider?: VoiceProvider): {
     case 'bhashini':
       return { label: 'Bhashini AI', color: 'text-sky-400', quality: '9/10' }
     default:
-      return { label: 'Voice', color: 'text-white/40', quality: '' }
+      return { label: 'Voice', color: 'text-white/70', quality: '' }
   }
 }
 

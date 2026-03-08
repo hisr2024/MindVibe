@@ -269,7 +269,7 @@ export default function WisdomRoomsPage() {
             <aside className="p-4 md:p-6 bg-white/5">
               <h3 className="text-sm font-semibold text-[#f5f0e8] mb-2">Active participants</h3>
               <div className="space-y-2 text-sm text-[#f5f0e8]/80">
-                {activeParticipants.length === 0 && <p className="text-[#f5f0e8]/60">No one is here yet.</p>}
+                {activeParticipants.length === 0 && <p className="text-[#f5f0e8]/75">No one is here yet.</p>}
                 {activeParticipants.map(person => (
                   <div key={person.id} className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-green-400" />

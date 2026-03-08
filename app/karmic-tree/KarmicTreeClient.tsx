@@ -142,7 +142,7 @@ function AchievementBadge({ achievement }: { achievement: AchievementProgress })
         </span>
       </div>
       {achievement.reward_hint && (
-        <p className="text-[11px] text-[#f5f0e8]/60">{achievement.reward_hint}</p>
+        <p className="text-[11px] text-[#f5f0e8]/75">{achievement.reward_hint}</p>
       )}
     </div>
   )
@@ -356,7 +356,7 @@ export default function KarmicTreeClient() {
               <span className="text-2xl">{'\u{1F4CA}'}</span>
               <h2 className="text-xl sm:text-2xl font-bold text-[#f5f0e8]">Your Analytics</h2>
             </div>
-            <p className="text-sm text-[#f5f0e8]/60">
+            <p className="text-sm text-[#f5f0e8]/75">
               Real insights from your wellness journey — all data comes from your actual activity.
             </p>
           </div>
