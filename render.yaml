@@ -37,6 +37,17 @@ services:
         value: "true"
       - key: RATE_LIMIT_ENABLED
         value: "true"
+      # Redis caching
+      - key: REDIS_ENABLED
+        value: "true"
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: mindvibe-redis
+          property: connectionString
+      # Sentry error tracking (set DSN in Render Dashboard)
+      - key: SENTRY_DSN
+        value: ""
       # Encryption key for data at rest (generated securely)
       - key: ENCRYPTION_KEY
         generateValue: true
@@ -50,6 +61,14 @@ services:
       maxInstances: 3
       targetMemoryPercent: 80
       targetCPUPercent: 80
+
+  # Redis Cache Service
+  - type: redis
+    name: mindvibe-redis
+    plan: starter
+    region: oregon
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []  # Only allow internal connections
 
 databases:
   # PostgreSQL Database with SSL enforced

@@ -55,6 +55,7 @@ numpy>=1.24.0,<2.0.0
 
 # Monitoring & Observability
 psutil>=5.9.0,<8.0.0
+sentry-sdk[fastapi]>=2.0.0,<3.0.0
 
 # HuggingFace Hub for model downloads
 huggingface-hub>=0.21.0,<1.0.0
