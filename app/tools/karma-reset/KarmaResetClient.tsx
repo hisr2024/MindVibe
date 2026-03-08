@@ -43,7 +43,7 @@ type ResetStep = 'problem_select' | 'input' | 'path_selection' | 'breathing' | '
 /** Timing constants */
 const BREATHING_DURATION_MS = 8000
 
-/** Common problem templates for quick selection */
+/** Common problem templates for quick selection — each carries its shad_ripu and healing insight */
 const QUICK_PROBLEMS: Array<{
   id: string
   label: string
@@ -53,15 +53,17 @@ const QUICK_PROBLEMS: Array<{
   category: ProblemCategoryKey
   path: KarmicPathKey
   gita_ref: string
+  shad_ripu: string
+  healing_insight: string
 }> = [
-  { id: 'hurt_partner', label: 'I hurt my partner', icon: '\u{1F494}', situation: 'I said something hurtful to my partner during an argument and now they are deeply hurt.', feeling: 'My partner', category: 'relationship_conflict', path: 'kshama', gita_ref: 'BG 16.3' },
-  { id: 'constant_anxiety', label: 'Constant anxiety', icon: '\u{1F9E0}', situation: 'I live with constant anxiety — racing thoughts, restlessness, and a feeling of impending doom that won\'t let me find peace.', feeling: 'My mind, body, and daily life', category: 'anxiety_health', path: 'shanti', gita_ref: 'BG 2.66' },
-  { id: 'not_good_enough', label: 'I feel not good enough', icon: '\u{1FA9E}', situation: 'No matter what I achieve, I feel like I\'m not good enough. Self-doubt and imposter syndrome haunt me constantly.', feeling: 'Myself — my inner self', category: 'self_worth', path: 'atma_kshama', gita_ref: 'BG 6.5' },
-  { id: 'unfair_treatment', label: 'Unfair treatment at work', icon: '\u{1F4BC}', situation: 'I feel I\'m being treated unfairly at my workplace — overlooked for promotions and not recognized for my contributions.', feeling: 'My professional worth', category: 'work_career', path: 'shanti', gita_ref: 'BG 2.48' },
-  { id: 'family_expectations', label: 'Family expectations crushing me', icon: '\u{1F3E0}', situation: 'The weight of family expectations is crushing my spirit and preventing me from living authentically.', feeling: 'Myself and my authentic expression', category: 'family_tensions', path: 'tyaga', gita_ref: 'BG 3.35' },
-  { id: 'lost_someone', label: 'I lost someone I love', icon: '\u{1F327}\uFE0F', situation: 'Someone I loved deeply has passed away or left my life permanently. The grief feels unbearable.', feeling: 'My heart and everyone who loved them', category: 'loss_grief', path: 'daya', gita_ref: 'BG 2.20' },
-  { id: 'trust_broken', label: 'Someone broke my trust', icon: '\u{1F6E1}\uFE0F', situation: 'The person I loved and trusted has betrayed me. The betrayal has shattered my trust and sense of self.', feeling: 'My trust and self-worth', category: 'betrayal_injustice', path: 'ahimsa', gita_ref: 'BG 2.56' },
-  { id: 'lost_purpose', label: 'I feel lost and purposeless', icon: '\u{1F9ED}', situation: 'I feel purposeless — like my life has no direction or meaning anymore.', feeling: 'My spirit and will to thrive', category: 'spiritual_crisis', path: 'satya', gita_ref: 'BG 3.35' },
+  { id: 'hurt_partner', label: 'I hurt my partner', icon: '\u{1F494}', situation: 'I said something hurtful to my partner during an argument and now they are deeply hurt.', feeling: 'My partner', category: 'relationship_conflict', path: 'kshama', gita_ref: 'BG 16.3', shad_ripu: 'krodha', healing_insight: 'Kshama (forgiveness) is listed among divine qualities. Your words arose from krodha (anger) \u2014 a rajasic force. The path of forgiveness begins with acknowledging the wound you caused.' },
+  { id: 'constant_anxiety', label: 'Constant anxiety', icon: '\u{1F9E0}', situation: 'I live with constant anxiety \u2014 racing thoughts, restlessness, and a feeling of impending doom that won\'t let me find peace.', feeling: 'My mind, body, and daily life', category: 'anxiety_health', path: 'shanti', gita_ref: 'BG 2.66', shad_ripu: 'moha', healing_insight: 'Shanti (peace) is the Gita\'s antidote to anxiety. For one who has no peace, how can there be happiness? Equanimity (samatva) is the foundation.' },
+  { id: 'not_good_enough', label: 'I feel not good enough', icon: '\u{1FA9E}', situation: 'No matter what I achieve, I feel like I\'m not good enough. Self-doubt and imposter syndrome haunt me constantly.', feeling: 'Myself \u2014 my inner self', category: 'self_worth', path: 'atma_kshama', gita_ref: 'BG 6.5', shad_ripu: 'moha', healing_insight: 'The Gita teaches: Let one lift oneself by one\'s own Self; let not one degrade oneself. You are the eternal atman \u2014 infinitely worthy beyond any worldly measure.' },
+  { id: 'unfair_treatment', label: 'Unfair treatment at work', icon: '\u{1F4BC}', situation: 'I feel I\'m being treated unfairly at my workplace \u2014 overlooked for promotions and not recognized for my contributions.', feeling: 'My professional worth', category: 'work_career', path: 'shanti', gita_ref: 'BG 2.48', shad_ripu: 'krodha', healing_insight: 'The Gita\'s teaching on samatva (equanimity) is your shield. Perform your duty with excellence without attachment to recognition.' },
+  { id: 'family_expectations', label: 'Family expectations crushing me', icon: '\u{1F3E0}', situation: 'The weight of family expectations is crushing my spirit and preventing me from living authentically.', feeling: 'Myself and my authentic expression', category: 'family_tensions', path: 'tyaga', gita_ref: 'BG 3.35', shad_ripu: 'moha', healing_insight: 'The Gita teaches: Better is one\'s own dharma, though imperfect, than the dharma of another. Release expectations that are not your own.' },
+  { id: 'lost_someone', label: 'I lost someone I love', icon: '\u{1F327}\uFE0F', situation: 'Someone I loved deeply has passed away or left my life permanently. The grief feels unbearable.', feeling: 'My heart and everyone who loved them', category: 'loss_grief', path: 'daya', gita_ref: 'BG 2.20', shad_ripu: 'moha', healing_insight: 'The atman is never born and never dies. It has no origin and no end. Love transcends the physical form.' },
+  { id: 'trust_broken', label: 'Someone broke my trust', icon: '\u{1F6E1}\uFE0F', situation: 'The person I loved and trusted has betrayed me. The betrayal has shattered my trust and sense of self.', feeling: 'My trust and self-worth', category: 'betrayal_injustice', path: 'ahimsa', gita_ref: 'BG 2.56', shad_ripu: 'krodha', healing_insight: 'Ahimsa (non-harm) means not harming yourself through prolonged bitterness. The sthitaprajna is undisturbed by suffering, free from attachment, fear and anger.' },
+  { id: 'lost_purpose', label: 'I feel lost and purposeless', icon: '\u{1F9ED}', situation: 'I feel purposeless \u2014 like my life has no direction or meaning anymore.', feeling: 'My spirit and will to thrive', category: 'spiritual_crisis', path: 'satya', gita_ref: 'BG 3.35', shad_ripu: 'moha', healing_insight: 'Satya (truth) helps you find your swadharma \u2014 your unique purpose. Better is one\'s own dharma, though imperfect. Your purpose awaits rediscovery through truth.' },
 ]
 
 export default function KarmaResetClient() {
@@ -131,6 +133,11 @@ export default function KarmaResetClient() {
           situation,
           feeling: whoFelt,
           repair_type: selectedPath,
+          // Pass problem analysis context so 7 phases address the specific problem
+          problem_category: analysisResult?.recommended_category || selectedCategory || '',
+          problem_id: analysisResult?.matched_problem?.id || '',
+          shad_ripu: analysisResult?.shad_ripu || '',
+          healing_insight: analysisResult?.healing_insight || '',
         }),
       })
 
@@ -159,7 +166,7 @@ export default function KarmaResetClient() {
       return
     }
     setLoading(false)
-  }, [situation, whoFelt, selectedPath])
+  }, [situation, whoFelt, selectedPath, analysisResult, selectedCategory])
 
   // Analyze situation text to recommend a karmic path
   const analyzeSituation = useCallback(async (text: string) => {
@@ -184,12 +191,38 @@ export default function KarmaResetClient() {
     setAnalyzing(false)
   }, [])
 
-  // Handle quick problem selection
+  // Handle quick problem selection — pre-populate everything including analysis
   const handleQuickProblem = (problem: typeof QUICK_PROBLEMS[0]) => {
     setSituation(problem.situation)
     setWhoFelt(problem.feeling)
     setSelectedPath(problem.path)
     setSelectedCategory(problem.category)
+    // Pre-populate analysis result so problem context flows to the 7 phases
+    setAnalysisResult({
+      recommended_category: problem.category,
+      category_name: problem.label,
+      category_sanskrit: '',
+      recommended_path: problem.path,
+      path_name: '',
+      path_sanskrit: '',
+      secondary_path: problem.path,
+      confidence: 1.0,
+      matched_keywords: [],
+      healing_insight: problem.healing_insight,
+      gita_ref: problem.gita_ref,
+      matched_problem: {
+        id: problem.id,
+        label: problem.label,
+        situation_template: problem.situation,
+        feeling_template: problem.feeling,
+        shad_ripu: problem.shad_ripu as SituationAnalysis['shad_ripu'],
+        primary_path: problem.path,
+        secondary_path: problem.path,
+        gita_ref: problem.gita_ref,
+        healing_insight: problem.healing_insight,
+      },
+      shad_ripu: problem.shad_ripu as SituationAnalysis['shad_ripu'],
+    })
     setCurrentStep('input')
   }
 

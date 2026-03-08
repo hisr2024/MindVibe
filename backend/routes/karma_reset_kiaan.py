@@ -68,6 +68,27 @@ class KarmaResetKiaanRequest(BaseModel):
         max_length=100,
         description="Karmic path key (e.g., kshama, satya, shanti) or legacy type (apology, clarification)"
     )
+    # Problem analysis context — enriches the 7-phase guidance
+    problem_category: str = Field(
+        default="",
+        max_length=100,
+        description="Life problem category (e.g., relationship_conflict, anxiety_health)"
+    )
+    problem_id: str = Field(
+        default="",
+        max_length=100,
+        description="Specific problem template ID (e.g., hurt_partner)"
+    )
+    shad_ripu: str = Field(
+        default="",
+        max_length=32,
+        description="Identified inner enemy (kama, krodha, lobha, moha, mada, matsarya)"
+    )
+    healing_insight: str = Field(
+        default="",
+        max_length=1000,
+        description="Gita-grounded healing insight for this problem"
+    )
 
 
 class CoreVerseData(BaseModel):
@@ -145,18 +166,30 @@ class KarmaResetKiaanResponse(BaseModel):
 
 # ==================== DEEP FALLBACK RESPONSES ====================
 
-def get_deep_fallback_guidance(karmic_path: dict) -> dict:
+def get_deep_fallback_guidance(
+    karmic_path: dict,
+    situation: str = "",
+    feeling: str = "",
+    shad_ripu: str = "",
+    healing_insight: str = "",
+    problem_category: str = "",
+) -> dict:
     """
     Generate deep fallback guidance from static Gita wisdom when AI is unavailable.
 
     Uses the karmic path's pre-mapped teachings, verses, and sadhana to provide
-    meaningful guidance even without AI generation.
+    meaningful guidance personalized to the user's specific problem.
 
     Args:
         karmic_path: Full karmic path data from KARMIC_PATHS
+        situation: User's description of their problem
+        feeling: Who was affected
+        shad_ripu: Identified inner enemy driving the problem
+        healing_insight: Gita-based healing insight for the problem
+        problem_category: Life problem category
 
     Returns:
-        Complete guidance dictionary with 7 phases and sadhana
+        Complete guidance dictionary with 7 personalized phases and sadhana
     """
     path_name = karmic_path.get("name", "The Path of Wisdom")
     core_verse = karmic_path.get("core_verse", {})
@@ -164,81 +197,158 @@ def get_deep_fallback_guidance(karmic_path: dict) -> dict:
     sadhana = karmic_path.get("sadhana", [])
     guna = karmic_path.get("guna_analysis", "")
 
-    # Build 7-phase guidance from static wisdom
+    # Build situation-aware phrases
+    situation_short = situation[:120] if situation else "this karmic moment"
+    feeling_text = feeling if feeling else "those around you"
+
+    # Map shad_ripu to human-readable descriptions for weaving into guidance
+    shad_ripu_descriptions = {
+        "kama": "desire and attachment (kama) — the craving that blinds the wise",
+        "krodha": "anger (krodha) — the fire that the Gita calls the gate to self-destruction",
+        "lobha": "greed and grasping (lobha) — the hunger that can never be satisfied",
+        "moha": "delusion and attachment (moha) — the veil that obscures your true nature",
+        "mada": "ego and pride (mada) — the false self that mistakes itself for the atman",
+        "matsarya": "envy and jealousy (matsarya) — the poison of comparison that steals peace",
+    }
+    enemy_desc = shad_ripu_descriptions.get(shad_ripu, "the restless gunas of prakriti")
+    enemy_name = shad_ripu.title() if shad_ripu else "Rajas"
+
+    # Build 7-phase guidance from static wisdom, personalized to the problem
     phases = []
     phase_defs = SEVEN_PHASES
 
-    # Phase 1: Sthiti Pariksha (Witness Awareness)
+    # Phase 1: Sthiti Pariksha (Witness Awareness) — Name their problem
     phases.append({
         "phase": 1,
         "name": phase_defs[0]["name"],
         "sanskrit_name": phase_defs[0]["sanskrit_name"],
         "english_name": phase_defs[0]["english_name"],
         "icon": phase_defs[0]["icon"],
-        "guidance": "Close your eyes. Step back from the situation and become the witness — the sakshi. You are not the anger, not the guilt, not the situation. You are the eternal awareness observing all of this. The Gita teaches: the Supreme Self in the body is the witness, the consenter, the sustainer. From this witnessing place, you can see clearly."
+        "guidance": (
+            f"Close your eyes and breathe. You came here carrying the weight of {situation_short}. "
+            f"Step back now and become the sakshi — the witness. You are not this pain. You are not this situation. "
+            f"You are the eternal awareness observing all of it. The Gita teaches (BG 13.22): the Supreme Self "
+            f"in the body is the witness, the consenter, the sustainer. From this witnessing place, "
+            f"your problem looks different — it becomes something you are experiencing, not something you ARE."
+        ),
     })
 
-    # Phase 2: Karma Darshan (Karmic Insight)
+    # Phase 2: Karma Darshan (Karmic Insight) — Diagnose the inner enemy
     phases.append({
         "phase": 2,
         "name": phase_defs[1]["name"],
         "sanskrit_name": phase_defs[1]["sanskrit_name"],
         "english_name": phase_defs[1]["english_name"],
         "icon": phase_defs[1]["icon"],
-        "guidance": f"Now see the karmic pattern clearly. {guna} Understanding which quality of nature drove your action is the first step to transformation. The Gita teaches: all actions are performed by the gunas of prakriti — the self, deluded by ego, thinks 'I am the doer.' You are not the doer. But you can transform the instrument."
+        "guidance": (
+            f"Now see the karmic pattern clearly. Your situation — {situation_short} — "
+            f"has its root in {enemy_desc}. {guna} "
+            f"The Gita teaches (BG 3.27): all actions are performed by the gunas of prakriti — "
+            f"the self, deluded by ego, thinks 'I am the doer.' {enemy_name} acted through you, "
+            f"but it is not you. Seeing this clearly is the first step to freedom. "
+            f"You are not the doer — but you can choose to transform the instrument."
+        ),
     })
 
-    # Phase 3: Pranayama Shuddhi (Sacred Breath)
+    # Phase 3: Pranayama Shuddhi (Sacred Breath) — Targeted to their emotional state
+    breath_context = {
+        "krodha": "With each exhale, release the fire of anger. Let the cool breath dissolve the heat that burns both you and others.",
+        "moha": "With each exhale, release the fog of confusion. Let clarity flow in with each inhale, dissolving the veil of attachment.",
+        "kama": "With each exhale, release the grip of craving. Let contentment fill the space where desire once consumed you.",
+        "lobha": "With each exhale, release the grasping. Let your hands and heart open, trusting that what is yours will come.",
+        "mada": "With each exhale, release the weight of ego. Let humility soften the hardened shell of pride.",
+        "matsarya": "With each exhale, release the poison of comparison. Let gratitude for your unique path fill each inhale.",
+    }
+    breath_line = breath_context.get(shad_ripu, "With each exhale, release the agitated energy that clouds your vision.")
     phases.append({
         "phase": 3,
         "name": phase_defs[2]["name"],
         "sanskrit_name": phase_defs[2]["sanskrit_name"],
         "english_name": phase_defs[2]["english_name"],
         "icon": phase_defs[2]["icon"],
-        "guidance": "Take seven deep breaths using the 4-7-8 pattern: inhale for 4 counts, hold for 7, exhale for 8. With each breath, release the agitated energy. The Gita teaches that some offer the outgoing breath into the incoming, restraining both — this sacred breath purification calms the storm within and creates the inner clarity needed for genuine repair."
+        "guidance": (
+            f"Take seven deep breaths using the 4-7-8 pattern: inhale for 4 counts, hold for 7, exhale for 8. "
+            f"{breath_line} "
+            f"The Gita teaches (BG 4.29): some offer the outgoing breath into the incoming, restraining both — "
+            f"this sacred breath purification calms the storm within and creates the clarity needed to face "
+            f"your situation with wisdom rather than reactivity."
+        ),
     })
 
-    # Phase 4: Pashchataap (Deep Acknowledgment)
+    # Phase 4: Pashchataap (Deep Acknowledgment) — Specific to their ripple
     phases.append({
         "phase": 4,
         "name": phase_defs[3]["name"],
         "sanskrit_name": phase_defs[3]["sanskrit_name"],
         "english_name": phase_defs[3]["english_name"],
         "icon": phase_defs[3]["icon"],
-        "guidance": "Acknowledge the full impact of your action. Not with guilt — which is tamasic and leads to paralysis — but with dharmic clarity. See the ripple you caused. Feel it. Name it honestly. This is not self-punishment; this is the courage of truthful self-assessment that the Gita praises. Only by fully seeing can you fully heal."
+        "guidance": (
+            f"Now acknowledge the full reality with dharmic clarity — not guilt, which is tamasic and leads to paralysis, "
+            f"but honest recognition. Your situation affected {feeling_text}. The ripple it created is real. "
+            f"See it fully. Name it honestly. The Gita praises the courage of truthful self-assessment. "
+            f"This is not self-punishment — this is the sacred act of seeing clearly, "
+            f"which is the only foundation upon which genuine transformation can be built."
+        ),
     })
 
-    # Phase 5: Prayaschitta (Sacred Repair)
-    repair_teaching = teaching[:300] if teaching else "Perform your repair as sacred duty — nishkama karma. Do not attach to the outcome."
+    # Phase 5: Prayaschitta (Sacred Repair) — THE SOLUTION, specific to path + problem
+    repair_teaching = teaching[:400] if teaching else "The path of dharmic action transforms suffering into wisdom."
+    healing_line = f" {healing_insight}" if healing_insight else ""
     phases.append({
         "phase": 5,
         "name": phase_defs[4]["name"],
         "sanskrit_name": phase_defs[4]["sanskrit_name"],
         "english_name": phase_defs[4]["english_name"],
         "icon": phase_defs[4]["icon"],
-        "guidance": f"Now perform the sacred repair. {repair_teaching} Remember: your right is to the action alone, never to its fruits. Perform this repair because it is dharma — your sacred duty — not because you seek forgiveness or relief from guilt."
+        "guidance": (
+            f"Here is where your transformation takes concrete form through {path_name}. "
+            f"{repair_teaching}{healing_line} "
+            f"The Gita teaches (BG 2.47): your right is to the action alone, never to its fruits. "
+            f"Perform this repair as nishkama karma — sacred, desireless action. "
+            f"Do it because it is dharma, not because you seek relief from guilt or a specific outcome. "
+            f"The repair itself is the offering. Let it flow from your highest self."
+        ),
     })
 
-    # Phase 6: Sankalpa (Sacred Intention)
+    # Phase 6: Sankalpa (Sacred Intention) — Transform the pattern, not just the incident
     phases.append({
         "phase": 6,
         "name": phase_defs[5]["name"],
         "sanskrit_name": phase_defs[5]["sanskrit_name"],
         "english_name": phase_defs[5]["english_name"],
         "icon": phase_defs[5]["icon"],
-        "guidance": "Set your sankalpa — your sacred intention for transformation. This is not a wish but a dharmic commitment. The Gita teaches: let one lift oneself by one's own Self. Your sankalpa transforms not just this situation, but the karmic pattern that created it. Commit to the daily sadhana that will sustain this transformation."
+        "guidance": (
+            f"Set your sankalpa — your sacred intention — not just for this situation, but to transform "
+            f"your relationship with {enemy_desc} itself. The Gita teaches (BG 6.5): 'Let one lift oneself "
+            f"by one's own Self; let not one degrade oneself.' Your sankalpa is: 'When {enemy_name} arises "
+            f"in me again, I will recognize it as the guna acting, not as my true self. I choose the path of "
+            f"{path_name} as my dharmic response.' Commit to the daily sadhana below — this is how you "
+            f"sustain the transformation beyond today."
+        ),
     })
 
-    # Phase 7: Gita Darshan (Wisdom Integration)
+    # Phase 7: Gita Darshan (Wisdom Integration) — The verse speaks to THEIR situation
     verse_text = core_verse.get("english", "Perform your duty without attachment to results.")
     sanskrit_text = core_verse.get("sanskrit", "")
+    chapter = core_verse.get("chapter", "")
+    verse_num = core_verse.get("verse", "")
+    verse_ref = f"BG {chapter}.{verse_num}" if chapter and verse_num else ""
     phases.append({
         "phase": 7,
         "name": phase_defs[6]["name"],
         "sanskrit_name": phase_defs[6]["sanskrit_name"],
         "english_name": phase_defs[6]["english_name"],
         "icon": phase_defs[6]["icon"],
-        "guidance": f"Receive this wisdom from the Gita, spoken directly to your situation: \"{verse_text}\" {f'({sanskrit_text})' if sanskrit_text else ''} Let this teaching settle into your heart. It has guided seekers for thousands of years, and it guides you now. Carry it with you as you walk forward on the path of dharma."
+        "guidance": (
+            f"Receive this teaching from the Gita, spoken across millennia directly to your heart"
+            f"{f' ({verse_ref})' if verse_ref else ''}: "
+            f"\"{verse_text}\" "
+            f"{f'— {sanskrit_text}' if sanskrit_text else ''} "
+            f"This verse was written for seekers exactly like you — carrying exactly what you carry. "
+            f"Through the path of {path_name}, your situation transforms from suffering into wisdom, "
+            f"from karma into dharma. You are not the same person who began this journey seven phases ago. "
+            f"Carry this teaching as a living flame within you."
+        ),
     })
 
     return {
@@ -344,12 +454,20 @@ async def generate_kiaan_karma_reset(
     feeling = body.feeling or "Someone I care about"
     path_key = body.repair_type or "kshama"
 
+    # Problem analysis context for personalized guidance
+    problem_category = body.problem_category or ""
+    problem_id = body.problem_id or ""
+    shad_ripu = body.shad_ripu or ""
+    healing_insight = body.healing_insight or ""
+
     logger.info(
         f"[{request_id}] Deep KIAAN Karma Reset request",
         extra={
             "request_id": request_id,
             "situation_length": len(situation),
-            "karmic_path": path_key
+            "karmic_path": path_key,
+            "problem_category": problem_category,
+            "shad_ripu": shad_ripu,
         }
     )
 
@@ -396,41 +514,63 @@ async def generate_kiaan_karma_reset(
         try:
             wisdom_context = deep_data.get("wisdom_context", "")
 
+            # Build problem-specific context block for the AI
+            problem_context_block = ""
+            if problem_category or shad_ripu or healing_insight:
+                problem_context_block = "\nPROBLEM ANALYSIS (weave this into EVERY phase):"
+                if problem_category:
+                    problem_context_block += f"\n- LIFE AREA: {problem_category.replace('_', ' ').title()}"
+                if shad_ripu:
+                    shad_ripu_names = {
+                        "kama": "Kama (desire/attachment)",
+                        "krodha": "Krodha (anger/rage)",
+                        "lobha": "Lobha (greed/grasping)",
+                        "moha": "Moha (delusion/confusion)",
+                        "mada": "Mada (ego/pride)",
+                        "matsarya": "Matsarya (envy/jealousy)",
+                    }
+                    enemy_name = shad_ripu_names.get(shad_ripu, shad_ripu.title())
+                    problem_context_block += f"\n- INNER ENEMY (Shad-Ripu): {enemy_name} — this is the root force driving their suffering. Each phase must name and address this enemy specifically."
+                if healing_insight:
+                    problem_context_block += f"\n- GITA HEALING INSIGHT: {healing_insight}"
+                problem_context_block += "\n"
+
             system_prompt = f"""You are KIAAN — a sacred wisdom guide for deep karmic transformation, strictly grounded in Bhagavad Gita teachings.
 
-A seeker comes to you:
-- SITUATION: "{situation}"
-- WHO WAS AFFECTED: "{feeling}"
+A seeker comes to you with a REAL problem that is causing them suffering:
+- THEIR PROBLEM: "{situation}"
+- WHO IS AFFECTED: "{feeling}"
 - CHOSEN KARMIC PATH: "{resolved_path.get('name', 'Kshama')}"
-
+{problem_context_block}
 {wisdom_context}
 
-Generate a DEEP 7-phase karmic transformation response. Each phase must be substantial (3-5 sentences), philosophically grounded in the Gita, and personally applicable to the seeker's situation.
+MISSION: Generate a DEEP 7-phase karmic transformation that makes this person FEEL their specific problem is being addressed and resolved through Gita wisdom. Each phase must directly reference their problem, provide a concrete solution/perspective shift, and show how the chosen karmic path transforms their specific suffering.
 
 Respond in JSON format with these exact keys:
 
 {{
-  "phase_1_witness_awareness": "3-5 sentences guiding the seeker to step back and become the sakshi (witness). Reference the atman being untouched by karma. Make it personal to their situation.",
-  "phase_2_karmic_insight": "3-5 sentences helping them see the karmic pattern and which guna (rajas/tamas) drove the action. Reference specific Gita teachings. Identify the root, not just the symptom.",
-  "phase_3_sacred_breath": "2-3 sentences for sacred breath purification. Guide them through pranayama that calms the agitated prana and creates inner equilibrium.",
-  "phase_4_deep_acknowledgment": "3-5 sentences for sincere pashchataap (acknowledgment). Not guilt (tamasic) but dharmic recognition. Help them see the full ripple of their action with clarity and compassion.",
-  "phase_5_sacred_repair": "4-6 sentences with the specific repair action for their karmic path. Ground it in nishkama karma — desireless action. Make it concrete, specific to their situation, and grounded in the chosen path's teaching.",
-  "phase_6_sacred_intention": "3-4 sentences for sankalpa — sacred intention for lasting transformation. Help them commit not just to this repair but to transforming the underlying pattern.",
-  "phase_7_wisdom_integration": "3-5 sentences integrating the Gita verse wisdom. Reference the core verse naturally. Help them carry this teaching forward as a living practice, not just an intellectual understanding.",
-  "breathingLine": "1-2 sentences for centering breath (legacy compatibility)",
-  "rippleSummary": "1-2 sentences acknowledging the impact (legacy compatibility)",
-  "repairAction": "1-2 sentences for the repair action (legacy compatibility)",
-  "forwardIntention": "1-2 sentences for future intention (legacy compatibility)"
+  "phase_1_witness_awareness": "3-5 sentences. NAME their specific problem. Help them step back from it and become the sakshi (witness). Show them that they are NOT this problem — the atman is untouched. Example: 'You feel [their problem], but step back and see: you are the eternal awareness OBSERVING this pain, not the pain itself.'",
+  "phase_2_karmic_insight": "3-5 sentences. DIAGNOSE the karmic root of their specific problem. Name the inner enemy ({shad_ripu or 'rajas/tamas'}) that fuels it. Show EXACTLY how this enemy created their situation. Reference the Gita's teaching on gunas. Example: 'Your [problem] arose from [shad_ripu] — the Gita teaches that this force blinds the wise. Here is how it operates in YOUR situation...'",
+  "phase_3_sacred_breath": "2-3 sentences. Connect the breath practice to THEIR specific emotional state. If anxious, calm the racing mind. If angry, cool the fire. If grieving, soften the heaviness. Make the pranayama feel like medicine for THEIR pain.",
+  "phase_4_deep_acknowledgment": "3-5 sentences. Help them see the FULL picture of their specific situation with dharmic clarity. Not guilt (tamasic) but honest recognition. Name the specific ripple their situation created. Show them the Gita's teaching that acknowledgment is the first step to freedom.",
+  "phase_5_sacred_repair": "4-6 sentences. THIS IS THE MOST IMPORTANT PHASE. Give them a CONCRETE, ACTIONABLE solution for their specific problem through the lens of the chosen karmic path. What should they DO? What should they SAY? How should they CHANGE? Ground it in nishkama karma. Make it so specific that they can act on it TODAY.",
+  "phase_6_sacred_intention": "3-4 sentences. Help them set a sankalpa that directly addresses the PATTERN behind their problem, not just this one incident. Show how the karmic path transforms not just this situation but their entire relationship with {shad_ripu or 'this pattern'}. Give them a specific daily practice.",
+  "phase_7_wisdom_integration": "3-5 sentences. Deliver the core Gita verse AS IF IT WAS WRITTEN FOR THEIR EXACT SITUATION. Show them how this ancient teaching speaks DIRECTLY to what they are going through. End with hope — show them the transformation that awaits on this path.",
+  "breathingLine": "1-2 sentences connecting breath to their specific emotional state",
+  "rippleSummary": "1-2 sentences naming the specific impact of their situation",
+  "repairAction": "1-2 sentences with the concrete repair action for their problem",
+  "forwardIntention": "1-2 sentences for how their life changes after this reset"
 }}
 
 CRITICAL REQUIREMENTS:
-- Every phase must reference or embody Gita wisdom (not generic self-help)
+- The seeker must feel "YES, this is speaking DIRECTLY to MY problem" — not generic guidance
+- EVERY phase must reference their specific situation, not abstract concepts
+- Name the inner enemy ({shad_ripu or 'the driving force'}) by name in phases 2, 5, and 6
+- Phase 5 must contain ACTIONABLE steps — what to do, what to say, how to change
 - Use Gita terminology naturally: karma, dharma, atman, guna, prakriti, nishkama, sakshi, samatva
-- Be warm, compassionate, and non-judgmental — but also deeply wise
-- Do not water down the teaching — the seeker needs REAL wisdom, not platitudes
-- Make every word count — this should feel like receiving ancient wisdom from a sage
-- The teaching should be personally applicable to the seeker's specific situation
-- Include both the philosophical depth AND practical applicability
+- Be warm, compassionate, and non-judgmental — but also deeply wise and specific
+- The teaching should feel like a sage who KNOWS their exact situation and has the answer
+- Include both philosophical depth AND practical, concrete applicability
 """
 
             response = await client.chat.completions.create(
@@ -511,7 +651,14 @@ CRITICAL REQUIREMENTS:
     # Use fallback if AI failed
     if ai_guidance is None:
         logger.info(f"[{request_id}] Using deep fallback guidance from static Gita wisdom")
-        fallback = get_deep_fallback_guidance(resolved_path)
+        fallback = get_deep_fallback_guidance(
+            resolved_path,
+            situation=situation,
+            feeling=feeling,
+            shad_ripu=shad_ripu,
+            healing_insight=healing_insight,
+            problem_category=problem_category,
+        )
         ai_guidance = fallback
 
     if legacy_guidance is None:
