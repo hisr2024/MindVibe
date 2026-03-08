@@ -20,6 +20,10 @@ export interface RecognitionConfig {
   // Enhanced options
   confidenceThreshold?: number
   silenceTimeoutMs?: number
+  /** Auto-restart on no-speech error instead of stopping (default: true) */
+  autoRestartOnNoSpeech?: boolean
+  /** Max consecutive auto-restarts before giving up (default: 3) */
+  maxAutoRestarts?: number
 }
 
 export interface RecognitionCallbacks {
@@ -41,6 +45,10 @@ export class SpeechRecognitionService {
   private readonly maxStartAttempts = 5
   private confidenceThreshold: number = 0
   private silenceTimeoutMs: number = 1500
+  private autoRestartOnNoSpeech: boolean = true
+  private maxAutoRestarts: number = 3
+  private autoRestartCount: number = 0
+  private micPermissionGranted: boolean = false
 
   constructor(config: RecognitionConfig = {}) {
     const SpeechRecognitionConstructor = getSpeechRecognition()
@@ -52,10 +60,12 @@ export class SpeechRecognitionService {
 
     this.confidenceThreshold = config.confidenceThreshold ?? 0.0 // Accept all results by default
     this.silenceTimeoutMs = config.silenceTimeoutMs ?? 1500
+    this.autoRestartOnNoSpeech = config.autoRestartOnNoSpeech ?? true
+    this.maxAutoRestarts = config.maxAutoRestarts ?? 3
 
     this.recognition = new SpeechRecognitionConstructor()
     this.recognition.lang = getSpeechLanguage(config.language || 'en')
-    this.recognition.continuous = config.continuous ?? false
+    this.recognition.continuous = config.continuous ?? true  // Default to continuous for better UX
     this.recognition.interimResults = config.interimResults ?? true
     // Request multiple alternatives for better accuracy
     this.recognition.maxAlternatives = config.maxAlternatives ?? 3
@@ -96,6 +106,9 @@ export class SpeechRecognitionService {
         return
       }
 
+      // Reset auto-restart counter on successful result — mic is working
+      this.autoRestartCount = 0
+
       this.callbacks.onResult?.(bestTranscript, isFinal, bestConfidence)
 
       // Auto-stop after silence on final result (non-continuous mode)
@@ -117,6 +130,18 @@ export class SpeechRecognitionService {
     }
 
     this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      // Auto-restart on no-speech instead of killing the session.
+      // This is the most common "false failure" — the user simply hasn't
+      // spoken yet or the mic needs a moment to warm up.
+      if (event.error === 'no-speech' && this.autoRestartOnNoSpeech) {
+        if (this.autoRestartCount < this.maxAutoRestarts) {
+          this.autoRestartCount++
+          // Recognition will fire onend after this error — we restart there
+          return
+        }
+        // Exhausted auto-restarts, fall through to report error
+      }
+
       let errorMessage = 'Speech recognition error'
 
       switch (event.error) {
@@ -148,9 +173,39 @@ export class SpeechRecognitionService {
     }
 
     this.recognition.onend = () => {
+      this.resetSilenceTimer()
+
+      // Auto-restart if we still have restarts remaining (no-speech recovery).
+      // The browser fires onend after a no-speech error even in continuous mode,
+      // so we need to explicitly restart to keep listening.
+      if (
+        this.autoRestartOnNoSpeech &&
+        this.autoRestartCount > 0 &&
+        this.autoRestartCount <= this.maxAutoRestarts &&
+        !this.isStopping &&
+        this.recognition
+      ) {
+        // Small delay to avoid rapid restart loops
+        setTimeout(() => {
+          if (this.recognition && !this.isStopping) {
+            try {
+              this.recognition.start()
+              // Keep isListening true — the session never visually ended
+            } catch {
+              // If restart fails, end normally
+              this.isListening = false
+              this.isStopping = false
+              this.autoRestartCount = 0
+              this.callbacks.onEnd?.()
+            }
+          }
+        }, 300)
+        return
+      }
+
       this.isListening = false
       this.isStopping = false
-      this.resetSilenceTimer()
+      this.autoRestartCount = 0
       this.callbacks.onEnd?.()
     }
   }
@@ -159,6 +214,30 @@ export class SpeechRecognitionService {
     if (this.silenceTimer) {
       clearTimeout(this.silenceTimer)
       this.silenceTimer = null
+    }
+  }
+
+  /**
+   * Ensure microphone permission is granted before starting recognition.
+   * Many browsers (especially mobile) require an explicit getUserMedia call
+   * to trigger the permission dialog. The Web Speech API alone may not prompt.
+   */
+  private async ensureMicrophonePermission(): Promise<boolean> {
+    if (this.micPermissionGranted) return true
+
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+      // Can't check — assume permission will be handled by recognition.start()
+      return true
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      // Release the stream immediately — we only needed the permission grant
+      stream.getTracks().forEach(track => track.stop())
+      this.micPermissionGranted = true
+      return true
+    } catch {
+      return false
     }
   }
 
@@ -198,28 +277,39 @@ export class SpeechRecognitionService {
 
     this.callbacks = callbacks
     this.startAttempts = 0
+    this.autoRestartCount = 0
 
-    try {
-      this.recognition.start()
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Failed to start recognition'
-
-      // Handle "already started" error by aborting and retrying
-      if (errorMsg.includes('already started')) {
-        if (this.startAttempts < this.maxStartAttempts) {
-          this.startAttempts++
-          this.abort()
-          setTimeout(() => this.start(callbacks), 200 + this.startAttempts * 50)
-          return
-        }
-        // Last resort: force state reset
-        this.isListening = false
-        this.isStopping = false
-        this.startAttempts = 0
+    // Request microphone permission first, then start recognition.
+    // This is critical: on many browsers the Web Speech API does NOT trigger
+    // the mic permission dialog on its own, causing silent failure.
+    this.ensureMicrophonePermission().then((granted) => {
+      if (!granted) {
+        this.callbacks.onError?.('not-allowed: Microphone permission denied.')
+        return
       }
 
-      this.callbacks.onError?.(errorMsg)
-    }
+      try {
+        this.recognition?.start()
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Failed to start recognition'
+
+        // Handle "already started" error by aborting and retrying
+        if (errorMsg.includes('already started')) {
+          if (this.startAttempts < this.maxStartAttempts) {
+            this.startAttempts++
+            this.abort()
+            setTimeout(() => this.start(callbacks), 200 + this.startAttempts * 50)
+            return
+          }
+          // Last resort: force state reset
+          this.isListening = false
+          this.isStopping = false
+          this.startAttempts = 0
+        }
+
+        this.callbacks.onError?.(errorMsg)
+      }
+    })
   }
 
   /**
@@ -233,6 +323,7 @@ export class SpeechRecognitionService {
     }
 
     this.isStopping = true
+    this.autoRestartCount = 0
     this.resetSilenceTimer()
 
     try {
@@ -250,6 +341,7 @@ export class SpeechRecognitionService {
     if (!this.recognition) return
 
     this.isStopping = true
+    this.autoRestartCount = 0
     this.resetSilenceTimer()
 
     try {
