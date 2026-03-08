@@ -59,7 +59,7 @@ const GUIDANCE_PATHS = [
 ]
 
 export default function RelationshipCompassClient() {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const [conflict, setConflict] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -180,6 +180,7 @@ export default function RelationshipCompassClient() {
           {/* Voice input — positioned inside the textarea for easy access */}
           <div className="absolute bottom-3 right-3">
             <VoiceInputButton
+              language={language}
               onTranscript={handleVoiceTranscript}
               disabled={loading}
             />

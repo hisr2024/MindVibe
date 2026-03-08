@@ -30,16 +30,21 @@ export function VoiceInputButton({
 }: VoiceInputButtonProps) {
   const {
     isListening,
-    transcript,
     interimTranscript,
     isSupported,
     error,
     startListening,
     stopListening,
-    resetTranscript,
   } = useVoiceInput({
     language,
     onError,
+    onTranscript: (text, isFinal) => {
+      // Forward final transcript immediately via callback instead of
+      // waiting for !isListening (which never fires in continuous mode).
+      if (isFinal && text.trim()) {
+        onTranscript?.(text.trim())
+      }
+    },
   })
 
   const [micPermission, setMicPermission] = useState<MicPermission>('unknown')
@@ -61,14 +66,6 @@ export function VoiceInputButton({
       // keep default 'unknown'
     })
   }, [])
-
-  // Send final transcript to parent
-  useEffect(() => {
-    if (transcript && !isListening) {
-      onTranscript?.(transcript)
-      resetTranscript()
-    }
-  }, [transcript, isListening, onTranscript, resetTranscript])
 
   // Detect denial from error message
   useEffect(() => {
