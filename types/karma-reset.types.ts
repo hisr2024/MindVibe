@@ -23,6 +23,7 @@ export type RepairType = 'apology' | 'clarification' | 'calm_followup'
 
 /** Reset flow step identifiers - expanded for deep reset */
 export type ResetStep =
+  | 'problem_select'
   | 'input'
   | 'path_selection'
   | 'breathing'

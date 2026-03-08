@@ -774,6 +774,15 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Karma Reset KIAAN router: {e}")
 
+# Load Karma Problem Analysis router (Problem-to-Karmic-Path resolution)
+startup_logger.info("\n[Karma Problems] Attempting to import Karma Problem Analysis router...")
+try:
+    from backend.routes.karma_problems import router as karma_problems_router
+    app.include_router(karma_problems_router)
+    startup_logger.info("✅ [SUCCESS] Karma Problem Analysis router loaded")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Karma Problem Analysis router: {e}")
+
 # Load Progress Reset router (User data reset with comprehensive error handling)
 startup_logger.info("\n[Progress Reset] Attempting to import Progress Reset router...")
 try:
