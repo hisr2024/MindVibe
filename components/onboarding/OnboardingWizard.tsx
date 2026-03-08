@@ -25,7 +25,7 @@ export function OnboardingWizard({
   className = '',
 }: OnboardingWizardProps) {
   const [currentStep, setCurrentStep] = useState(0)
-  const [stepData, setStepData] = useState<Record<string, unknown>>({})
+  const [stepData, _setStepData] = useState<Record<string, unknown>>({})
 
   const step = steps[currentStep]
   const isFirstStep = currentStep === 0
