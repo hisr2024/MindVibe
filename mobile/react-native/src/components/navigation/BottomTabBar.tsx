@@ -26,7 +26,7 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { colors, darkTheme, spacing, typography, shadows, motion } from '@theme/tokens';
+import { colors, darkTheme, spacing, typography, shadows, motion, type ThemeColors } from '@theme/tokens';
 
 // ---------------------------------------------------------------------------
 // Tab Configuration
@@ -81,7 +81,7 @@ interface TabItemProps {
   isFocused: boolean;
   onPress: () => void;
   onLongPress: () => void;
-  theme: typeof darkTheme;
+  theme: ThemeColors;
 }
 
 function TabItem({ routeName, isFocused, onPress, onLongPress, theme }: TabItemProps) {

@@ -37,7 +37,7 @@ import Animated, {
   withTiming,
   withSequence,
 } from 'react-native-reanimated';
-import { colors, darkTheme, spacing, typography, radii, shadows } from '@theme/tokens';
+import { colors, darkTheme, spacing, typography, radii, shadows, type ThemeColors } from '@theme/tokens';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -74,7 +74,7 @@ export interface SakhaCompanionProps {
   /** Save a message to the journal */
   onSaveToJournal: (message: SakhaMessage) => void;
   /** Current theme */
-  theme?: typeof darkTheme;
+  theme?: ThemeColors;
   /** Whether data stays on-device only */
   isLocalOnly: boolean;
   /** Toggle local-only mode */
@@ -109,7 +109,7 @@ function getTimeAwareGreeting(): { greeting: string; emoji: string } {
 
 interface ChatBubbleProps {
   message: SakhaMessage;
-  theme: typeof darkTheme;
+  theme: ThemeColors;
   onPlayVerse?: (verseRef: string) => void;
   onSaveToJournal?: (message: SakhaMessage) => void;
 }
@@ -204,7 +204,7 @@ function ChatBubble({
 // Thinking Indicator (animated dots)
 // ---------------------------------------------------------------------------
 
-function ThinkingIndicator({ theme }: { theme: typeof darkTheme }) {
+function ThinkingIndicator({ theme }: { theme: ThemeColors }) {
   const opacity1 = useSharedValue(0.3);
   const opacity2 = useSharedValue(0.3);
   const opacity3 = useSharedValue(0.3);
@@ -264,7 +264,7 @@ function ThinkingIndicator({ theme }: { theme: typeof darkTheme }) {
 // Voice Orb (animated indicator for voice mode)
 // ---------------------------------------------------------------------------
 
-function VoiceOrb({ isActive, theme }: { isActive: boolean; theme: typeof darkTheme }) {
+function VoiceOrb({ isActive, theme }: { isActive: boolean; theme: ThemeColors }) {
   const scale = useSharedValue(1);
 
   useEffect(() => {
@@ -302,7 +302,7 @@ function VoiceOrb({ isActive, theme }: { isActive: boolean; theme: typeof darkTh
 interface PrivacyToggleProps {
   isLocalOnly: boolean;
   onToggle: () => void;
-  theme: typeof darkTheme;
+  theme: ThemeColors;
 }
 
 function PrivacyToggle({ isLocalOnly, onToggle, theme }: PrivacyToggleProps) {
