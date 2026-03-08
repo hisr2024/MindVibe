@@ -34,7 +34,7 @@ export interface UseVoiceToTextOptions {
   onError?: (error: string) => void
   /** Called when listening status changes */
   onStatusChange?: (status: VTTStatus) => void
-  /** Enable continuous listening mode (default: false) */
+  /** Enable continuous listening mode (default: true for better voice detection) */
   continuous?: boolean
   /** Apply basic punctuation post-processing (default: true) */
   punctuationAssist?: boolean
@@ -95,13 +95,13 @@ function getCompassionateError(rawError: string): string {
     return 'Microphone access is needed for voice input. Please allow microphone permissions in your browser settings.'
   }
   if (rawError.includes('no-speech')) {
-    return 'No speech was detected. Please speak clearly and try again when you are ready.'
+    return 'No speech was detected. Please speak clearly near your microphone and try again.'
   }
   if (rawError.includes('network')) {
     return 'A network issue occurred. Voice input works best with a stable connection.'
   }
   if (rawError.includes('audio-capture')) {
-    return 'Microphone not found. Please check your microphone connection.'
+    return 'Microphone not found or not accessible. Please check your microphone connection and ensure no other app is using it.'
   }
   if (rawError.includes('service-not-allowed')) {
     return 'Speech recognition service is unavailable. Please try again later.'
@@ -119,7 +119,7 @@ export function useVoiceToText(options: UseVoiceToTextOptions = {}): UseVoiceToT
     onTranscript,
     onError,
     onStatusChange,
-    continuous = false,
+    continuous = true,
     punctuationAssist = true,
     confidenceThreshold = 0,
   } = options

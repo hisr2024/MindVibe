@@ -40,6 +40,7 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
 }, ref) {
   const [state, setState] = useState<RecordingState>('idle')
   const [duration, setDuration] = useState(0)
+  const [liveTranscript, setLiveTranscript] = useState('')
   const [unsupported, setUnsupported] = useState(false)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
@@ -73,40 +74,81 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
     }
 
     try {
+      // Pre-request microphone permission via getUserMedia.
+      // Many browsers require this explicit call to trigger the permission
+      // dialog — the Web Speech API alone may not prompt, causing silent failure.
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        stream.getTracks().forEach(track => track.stop())
+      } catch {
+        // Permission denied or no mic — let recognition.start() handle the error
+      }
+
       const recognition = new SpeechRecognition()
-      recognition.continuous = false
-      recognition.interimResults = false
+      recognition.continuous = true
+      recognition.interimResults = true
       recognition.lang = LANGUAGE_BCP47[language] || 'en-US'
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
-        if (event.results?.length > 0 && event.results[0]?.length > 0) {
-          const transcript = event.results[0][0].transcript
+        const lastResult = event.results[event.results.length - 1]
+        if (!lastResult) return
+
+        if (lastResult.isFinal) {
+          const transcript = lastResult[0]?.transcript
           if (transcript?.trim()) {
             onTranscription(transcript.trim())
           }
+          setLiveTranscript('')
+          setState('idle')
+          setDuration(0)
+          // Stop after receiving final result
+          try { recognition.stop() } catch { /* may already be stopped */ }
+        } else {
+          // Show interim results for live feedback
+          const interim = lastResult[0]?.transcript || ''
+          setLiveTranscript(interim)
+        }
+      }
+
+      let noSpeechRestarts = 0
+      const maxNoSpeechRestarts = 3
+
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        // Auto-restart on no-speech instead of giving up immediately
+        if (event.error === 'no-speech' && noSpeechRestarts < maxNoSpeechRestarts) {
+          noSpeechRestarts++
+          return // onend will fire and we restart there
         }
         setState('idle')
         setDuration(0)
-      }
-
-      recognition.onerror = () => {
-        setState('idle')
-        setDuration(0)
+        setLiveTranscript('')
       }
 
       // Use stateRef (not state) to read the CURRENT recording state.
-      // Without this, the closure captures state='idle' from when
-      // startRecording was called, so the guard never fires.
       recognition.onend = () => {
+        // Auto-restart on no-speech error while still in recording state
+        if (stateRef.current === 'recording' && noSpeechRestarts > 0 && noSpeechRestarts <= maxNoSpeechRestarts) {
+          try {
+            setTimeout(() => {
+              if (stateRef.current === 'recording') {
+                recognition.start()
+              }
+            }, 300)
+            return
+          } catch { /* fall through to idle */ }
+        }
+
         if (stateRef.current === 'recording') {
           setState('idle')
           setDuration(0)
+          setLiveTranscript('')
         }
       }
 
       recognitionRef.current = recognition
       recognition.start()
       setState('recording')
+      setLiveTranscript('')
 
       // Duration timer
       const startTime = Date.now()
@@ -132,6 +174,7 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
     }
     setState('idle')
     setDuration(0)
+    setLiveTranscript('')
   }, [])
 
   const toggleRecording = useCallback(() => {
@@ -191,6 +234,13 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
       {state === 'recording' && (
         <span className="text-xs text-red-500 font-mono animate-pulse">
           {formatDuration(duration)}
+        </span>
+      )}
+
+      {/* Live transcription feedback */}
+      {state === 'recording' && liveTranscript && (
+        <span className="text-xs text-violet-400 italic max-w-[200px] truncate">
+          {liveTranscript}
         </span>
       )}
 

@@ -44,7 +44,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
 
     recognitionRef.current = new SpeechRecognitionService({
       language,
-      continuous: false,
+      continuous: true,
       interimResults: true,
     })
 
