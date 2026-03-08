@@ -718,6 +718,23 @@ export default function KarmaResetClient() {
                       {deepResponse.karmic_path?.sanskrit_name ?? ''}
                     </p>
 
+                    {/* Your situation context — so user sees their problem is being addressed */}
+                    {situation && (
+                      <div className="mt-3 mx-auto max-w-md px-4 py-2.5 rounded-xl bg-[#d4a44c]/5 border border-[#d4a44c]/15">
+                        <p className="text-[10px] uppercase tracking-wider text-[#d4a44c]/40 mb-1">
+                          Gita&apos;s guidance for your situation
+                        </p>
+                        <p className="text-xs text-[#f5f0e8]/60 leading-relaxed italic line-clamp-2">
+                          &ldquo;{situation}&rdquo;
+                        </p>
+                        {analysisResult?.shad_ripu && (
+                          <p className="text-[10px] text-[#e8b54a]/50 mt-1">
+                            Inner pattern: {analysisResult.shad_ripu.charAt(0).toUpperCase() + analysisResult.shad_ripu.slice(1)} &middot; Path: {deepResponse.karmic_path?.name?.split(' - ')[0] ?? ''}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
                     {/* Phase progress bar */}
                     <div className="flex items-center justify-center gap-1.5 mt-4 mb-2">
                       {(deepResponse.deep_guidance?.phases ?? []).map((phase, idx) => (
