@@ -32,18 +32,49 @@ import {
   type DeepKarmaResetApiResponse,
   type PhaseGuidance,
 } from '@/types/karma-reset.types'
+import {
+  PROBLEM_CATEGORIES_CONFIG,
+  type ProblemCategoryKey,
+  type SituationAnalysis,
+} from '@/types/karma-problems.types'
 
-type ResetStep = 'input' | 'path_selection' | 'breathing' | 'deep_journey' | 'complete'
+type ResetStep = 'problem_select' | 'input' | 'path_selection' | 'breathing' | 'deep_journey' | 'complete'
 
 /** Timing constants */
 const BREATHING_DURATION_MS = 8000
 
+/** Common problem templates for quick selection */
+const QUICK_PROBLEMS: Array<{
+  id: string
+  label: string
+  icon: string
+  situation: string
+  feeling: string
+  category: ProblemCategoryKey
+  path: KarmicPathKey
+  gita_ref: string
+}> = [
+  { id: 'hurt_partner', label: 'I hurt my partner', icon: '\u{1F494}', situation: 'I said something hurtful to my partner during an argument and now they are deeply hurt.', feeling: 'My partner', category: 'relationship_conflict', path: 'kshama', gita_ref: 'BG 16.3' },
+  { id: 'constant_anxiety', label: 'Constant anxiety', icon: '\u{1F9E0}', situation: 'I live with constant anxiety — racing thoughts, restlessness, and a feeling of impending doom that won\'t let me find peace.', feeling: 'My mind, body, and daily life', category: 'anxiety_health', path: 'shanti', gita_ref: 'BG 2.66' },
+  { id: 'not_good_enough', label: 'I feel not good enough', icon: '\u{1FA9E}', situation: 'No matter what I achieve, I feel like I\'m not good enough. Self-doubt and imposter syndrome haunt me constantly.', feeling: 'Myself — my inner self', category: 'self_worth', path: 'atma_kshama', gita_ref: 'BG 6.5' },
+  { id: 'unfair_treatment', label: 'Unfair treatment at work', icon: '\u{1F4BC}', situation: 'I feel I\'m being treated unfairly at my workplace — overlooked for promotions and not recognized for my contributions.', feeling: 'My professional worth', category: 'work_career', path: 'shanti', gita_ref: 'BG 2.48' },
+  { id: 'family_expectations', label: 'Family expectations crushing me', icon: '\u{1F3E0}', situation: 'The weight of family expectations is crushing my spirit and preventing me from living authentically.', feeling: 'Myself and my authentic expression', category: 'family_tensions', path: 'tyaga', gita_ref: 'BG 3.35' },
+  { id: 'lost_someone', label: 'I lost someone I love', icon: '\u{1F327}\uFE0F', situation: 'Someone I loved deeply has passed away or left my life permanently. The grief feels unbearable.', feeling: 'My heart and everyone who loved them', category: 'loss_grief', path: 'daya', gita_ref: 'BG 2.20' },
+  { id: 'trust_broken', label: 'Someone broke my trust', icon: '\u{1F6E1}\uFE0F', situation: 'The person I loved and trusted has betrayed me. The betrayal has shattered my trust and sense of self.', feeling: 'My trust and self-worth', category: 'betrayal_injustice', path: 'ahimsa', gita_ref: 'BG 2.56' },
+  { id: 'lost_purpose', label: 'I feel lost and purposeless', icon: '\u{1F9ED}', situation: 'I feel purposeless — like my life has no direction or meaning anymore.', feeling: 'My spirit and will to thrive', category: 'spiritual_crisis', path: 'satya', gita_ref: 'BG 3.35' },
+]
+
 export default function KarmaResetClient() {
   // Flow state
-  const [currentStep, setCurrentStep] = useState<ResetStep>('input')
+  const [currentStep, setCurrentStep] = useState<ResetStep>('problem_select')
   const [situation, setSituation] = useState('')
   const [whoFelt, setWhoFelt] = useState('')
   const [selectedPath, setSelectedPath] = useState<KarmicPathKey>('kshama')
+  const [selectedCategory, setSelectedCategory] = useState<ProblemCategoryKey | null>(null)
+
+  // Problem analysis state
+  const [analysisResult, setAnalysisResult] = useState<SituationAnalysis | null>(null)
+  const [analyzing, setAnalyzing] = useState(false)
 
   // Response data
   const [deepResponse, setDeepResponse] = useState<DeepKarmaResetApiResponse | null>(null)
@@ -130,9 +161,43 @@ export default function KarmaResetClient() {
     setLoading(false)
   }, [situation, whoFelt, selectedPath])
 
+  // Analyze situation text to recommend a karmic path
+  const analyzeSituation = useCallback(async (text: string) => {
+    if (text.length < 10) return
+    setAnalyzing(true)
+    try {
+      const response = await apiFetch('/api/karma-reset/problems/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ situation: text }),
+      })
+      if (response.ok) {
+        const data: SituationAnalysis = await response.json()
+        setAnalysisResult(data)
+        if (data.confidence >= 0.3 && data.recommended_path) {
+          setSelectedPath(data.recommended_path as KarmicPathKey)
+        }
+      }
+    } catch {
+      // Silently fail — analysis is a nice-to-have enhancement
+    }
+    setAnalyzing(false)
+  }, [])
+
+  // Handle quick problem selection
+  const handleQuickProblem = (problem: typeof QUICK_PROBLEMS[0]) => {
+    setSituation(problem.situation)
+    setWhoFelt(problem.feeling)
+    setSelectedPath(problem.path)
+    setSelectedCategory(problem.category)
+    setCurrentStep('input')
+  }
+
   const handleInputSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!situation.trim()) return
+    // Trigger analysis in background while moving to path selection
+    analyzeSituation(situation)
     setCurrentStep('path_selection')
   }
 
@@ -164,10 +229,12 @@ export default function KarmaResetClient() {
   }
 
   const resetForm = () => {
-    setCurrentStep('input')
+    setCurrentStep('problem_select')
     setSituation('')
     setWhoFelt('')
     setSelectedPath('kshama')
+    setSelectedCategory(null)
+    setAnalysisResult(null)
     setDeepResponse(null)
     setCurrentPhase(0)
     setError(null)
@@ -243,6 +310,86 @@ export default function KarmaResetClient() {
             </div>
 
             <AnimatePresence mode="wait">
+              {/* ==================== STEP 0: PROBLEM SELECT ==================== */}
+              {currentStep === 'problem_select' && (
+                <motion.div
+                  key="problem_select"
+                  className="space-y-6"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={springConfigs.smooth}
+                >
+                  {/* Quick problems — common life situations */}
+                  <div className="divine-reset-container rounded-3xl p-6 sm:p-8">
+                    <div className="text-center mb-6">
+                      <h2 className="text-2xl font-bold kiaan-text-golden mb-2">
+                        What are you going through?
+                      </h2>
+                      <p className="text-sm text-[#f5f0e8]/55 max-w-lg mx-auto">
+                        Every problem has a karmic root. Select what resonates, or describe your situation in your own words.
+                        The Gita&apos;s wisdom will meet you exactly where you are.
+                      </p>
+                      <div className="divine-sacred-thread w-20 mx-auto mt-4" />
+                    </div>
+
+                    {/* Quick problem cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                      {QUICK_PROBLEMS.map((problem) => (
+                        <motion.button
+                          key={problem.id}
+                          onClick={() => handleQuickProblem(problem)}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="text-left p-4 rounded-2xl divine-step-card border-[#d4a44c]/15 hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/5 transition-all duration-300"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl flex-shrink-0">{problem.icon}</span>
+                            <div className="min-w-0">
+                              <span className="font-semibold text-[#f5f0e8] text-sm">{problem.label}</span>
+                              <p className="text-[10px] text-[#d4a44c]/50 mt-0.5">{problem.gita_ref}</p>
+                            </div>
+                          </div>
+                        </motion.button>
+                      ))}
+                    </div>
+
+                    {/* Problem categories */}
+                    <div className="mb-6">
+                      <p className="text-xs text-[#d4a44c]/50 uppercase tracking-wider mb-3 text-center">
+                        Or explore by life area
+                      </p>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {PROBLEM_CATEGORIES_CONFIG.map((cat) => (
+                          <button
+                            key={cat.key}
+                            onClick={() => {
+                              setSelectedCategory(cat.key)
+                              setCurrentStep('input')
+                            }}
+                            className="px-3 py-1.5 rounded-full text-xs font-medium border border-[#d4a44c]/20 hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/10 text-[#f5f0e8]/70 transition-all duration-200"
+                          >
+                            {cat.icon} {cat.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="divine-sacred-thread w-full mb-4" />
+
+                    {/* Or describe your own */}
+                    <div className="text-center">
+                      <button
+                        onClick={() => setCurrentStep('input')}
+                        className="kiaan-btn-golden px-8 py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-[1.02]"
+                      >
+                        Describe My Situation in My Own Words
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {/* ==================== STEP 1: INPUT ==================== */}
               {currentStep === 'input' && (
                 <motion.div
@@ -253,6 +400,27 @@ export default function KarmaResetClient() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={springConfigs.smooth}
                 >
+                  {/* Selected category indicator */}
+                  {selectedCategory && (
+                    <div className="flex items-center gap-2 mb-4 pb-4 border-b border-[#d4a44c]/10">
+                      <span className="text-sm">
+                        {PROBLEM_CATEGORIES_CONFIG.find(c => c.key === selectedCategory)?.icon}
+                      </span>
+                      <span className="text-xs text-[#d4a44c]/60">
+                        {PROBLEM_CATEGORIES_CONFIG.find(c => c.key === selectedCategory)?.name}
+                      </span>
+                      <span className="text-xs text-[#d4a44c]/40 ml-1">
+                        {PROBLEM_CATEGORIES_CONFIG.find(c => c.key === selectedCategory)?.sanskrit_label}
+                      </span>
+                      <button
+                        onClick={() => setSelectedCategory(null)}
+                        className="ml-auto text-xs text-[#f5f0e8]/40 hover:text-[#f5f0e8]/60"
+                      >
+                        {'\u2715'}
+                      </button>
+                    </div>
+                  )}
+
                   <form onSubmit={handleInputSubmit} className="space-y-6">
                     {/* Situation */}
                     <div>
@@ -312,14 +480,23 @@ export default function KarmaResetClient() {
                       </div>
                     )}
 
-                    {/* Continue to path selection */}
-                    <button
-                      type="submit"
-                      disabled={!situation.trim()}
-                      className="w-full py-4 px-6 rounded-xl kiaan-btn-golden text-lg font-semibold transition-all duration-200 hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    >
-                      Choose Your Karmic Path
-                    </button>
+                    {/* Navigation */}
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep('problem_select')}
+                        className="px-6 py-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-[#d4a44c]/20 hover:border-[#d4a44c]/35 text-[#f5f0e8]/80 font-semibold transition-all duration-200"
+                      >
+                        Back
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!situation.trim()}
+                        className="flex-1 py-4 px-6 rounded-xl kiaan-btn-golden text-lg font-semibold transition-all duration-200 hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+                      >
+                        Choose Your Karmic Path
+                      </button>
+                    </div>
                   </form>
                 </motion.div>
               )}
@@ -341,6 +518,45 @@ export default function KarmaResetClient() {
                     </p>
                     <div className="divine-sacred-thread w-20 mx-auto mt-3" />
                   </div>
+
+                  {/* Smart recommendation from analysis */}
+                  {analysisResult && analysisResult.confidence >= 0.3 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-4 rounded-2xl bg-[#d4a44c]/8 border border-[#d4a44c]/25"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="text-lg flex-shrink-0">{'\u{1F549}\uFE0F'}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-[#d4a44c]/70 uppercase tracking-wider mb-1">
+                            KIAAN Recommends &middot; {analysisResult.gita_ref}
+                          </p>
+                          <p className="text-sm font-semibold text-[#e8b54a] mb-1">
+                            {analysisResult.path_name}
+                            <span className="text-xs text-[#d4a44c]/50 ml-2">{analysisResult.path_sanskrit}</span>
+                          </p>
+                          {analysisResult.healing_insight && (
+                            <p className="text-xs text-[#f5f0e8]/55 leading-relaxed font-sacred">
+                              {analysisResult.healing_insight}
+                            </p>
+                          )}
+                          {analysisResult.shad_ripu && (
+                            <p className="text-[10px] text-[#d4a44c]/40 mt-2">
+                              Inner enemy identified: <span className="text-[#e8b54a]/60 capitalize">{analysisResult.shad_ripu}</span>
+                              {' '}&middot; Confidence: {Math.round(analysisResult.confidence * 100)}%
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {analyzing && (
+                    <div className="text-center text-xs text-[#d4a44c]/40 animate-pulse">
+                      KIAAN is analyzing your situation...
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {KARMIC_PATHS_CONFIG.map((path) => (
