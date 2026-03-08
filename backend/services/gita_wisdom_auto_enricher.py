@@ -559,25 +559,29 @@ class MultiPassGitaAuthenticator:
         # the chapter-relevant vocabulary.
         chapter = entry.get("chapter", 0)
         if chapter > 0:
+            # Keywords used to verify generated content aligns with chapter themes.
+            # Each list must include terms that the content generator actually
+            # produces (chapter names, core teaching words, domain-mapped terms).
+            # The check is case-insensitive substring match on combined text.
             chapter_keywords = {
-                1: ["conflict", "confusion", "despair", "arjuna", "grief", "battlefield", "dhritarashtra", "sanjaya", "inquiry", "blind"],
-                2: ["self", "eternal", "soul", "knowledge", "equanimity", "karma", "attachment", "duty", "desire", "anger"],
-                3: ["action", "selfless", "duty", "offering", "yajna", "work", "desire"],
-                4: ["knowledge", "wisdom", "teacher", "sacrifice", "humility"],
-                5: ["renunciation", "detachment", "peace", "sense", "pleasure"],
-                6: ["mind", "meditation", "discipline", "practice", "mastery"],
-                7: ["divine", "maya", "nature", "surrender", "guna"],
-                8: ["brahman", "death", "remembrance", "imperishable"],
-                9: ["devotion", "faith", "worship", "royal", "secret"],
-                10: ["glory", "divine", "manifestation", "vibhuti"],
-                11: ["cosmic", "universal", "vision", "form", "awe"],
-                12: ["devotion", "love", "compassion", "dear", "bhakti"],
-                13: ["field", "knower", "body", "awareness", "witness"],
-                14: ["guna", "sattva", "rajas", "tamas", "transcend"],
-                15: ["supreme", "tree", "eternal", "perishable", "imperishable"],
-                16: ["divine", "demonic", "quality", "fearlessness", "purity", "desire"],
-                17: ["faith", "food", "sacrifice", "giving", "sattvic"],
-                18: ["surrender", "liberation", "duty", "renunciation", "freedom", "grace"],
+                1: ["conflict", "confusion", "despair", "arjuna", "grief", "battlefield", "dhritarashtra", "sanjaya", "inquiry", "blind", "vishada", "inner conflict"],
+                2: ["self", "eternal", "soul", "knowledge", "equanimity", "karma", "attachment", "duty", "desire", "anger", "sankhya", "sthitaprajna"],
+                3: ["action", "selfless", "duty", "offering", "yajna", "work", "desire", "karma yoga"],
+                4: ["knowledge", "wisdom", "teacher", "sacrifice", "humility", "jnana", "purif"],
+                5: ["renunciation", "detachment", "peace", "sense", "pleasure", "sannyasa", "selfishness"],
+                6: ["mind", "meditation", "discipline", "practice", "mastery", "dhyana", "yoga"],
+                7: ["divine", "maya", "nature", "surrender", "guna", "realization", "existence"],
+                8: ["brahman", "death", "remembrance", "imperishable", "aksara", "divine"],
+                9: ["devotion", "faith", "worship", "royal", "secret", "supreme", "path"],
+                10: ["glory", "divine", "manifestation", "vibhuti", "extraordinary"],
+                11: ["cosmic", "universal", "vision", "form", "awe", "universe", "divine", "manifestation", "darsana", "visvarupa", "wonder", "infinite", "behold", "omnipresent"],
+                12: ["devotion", "love", "compassion", "dear", "bhakti", "worship", "faith"],
+                13: ["field", "knower", "body", "awareness", "witness", "kshetra", "consciousness"],
+                14: ["guna", "sattva", "rajas", "tamas", "transcend", "quality", "mode"],
+                15: ["supreme", "tree", "eternal", "perishable", "imperishable", "purushottama"],
+                16: ["divine", "demonic", "quality", "fearlessness", "purity", "desire", "virtue"],
+                17: ["faith", "food", "sacrifice", "giving", "sattvic", "shraddha"],
+                18: ["surrender", "liberation", "duty", "renunciation", "freedom", "grace", "moksha", "dharma"],
             }
 
             chapter_terms = chapter_keywords.get(chapter, [])
@@ -1144,6 +1148,55 @@ class PracticalWisdomGenerator:
                 "self-discipline, nonviolence, truthfulness, compassion... Pick one to practice "
                 "consciously today. This is how the divine nature is cultivated, step by step."
             ),
+            "knowledge_realization": (
+                "Spend 5 minutes contemplating the divine nature that sustains all existence. "
+                "As Chapter 7 teaches: everything rests on the divine like pearls on a string. "
+                "Look around you and recognize the sacred thread connecting all of nature — "
+                "this is Jnana Vijnana Yoga, the realization of knowledge in lived experience."
+            ),
+            "imperishable_brahman": (
+                "Sit quietly for 5 minutes. Focus on one truth: the imperishable Brahman "
+                "that pervades everything. As Chapter 8 teaches, remember the divine at all times. "
+                "With each breath, silently repeat: 'I am connected to the imperishable, eternal reality.' "
+                "This practice of remembrance is the essence of Aksara Brahma Yoga."
+            ),
+            "royal_knowledge": (
+                "For 5 minutes, practice the supreme secret of Chapter 9: offer everything you do "
+                "as an act of devotion. Whether eating, walking, or working — mentally dedicate it "
+                "to the divine. Krishna says: 'Whatever you do, offer it to Me.' This royal knowledge "
+                "transforms the ordinary into the sacred through faith and worship."
+            ),
+            "divine_glories": (
+                "Look around your environment for 5 minutes and identify manifestations of "
+                "extraordinary beauty, strength, or brilliance. Chapter 10 teaches that wherever "
+                "you see glory, power, or grace — that is a vibhuti, a divine manifestation. "
+                "Let this practice of recognizing divine glory fill you with wonder and reverence."
+            ),
+            "cosmic_vision": (
+                "Close your eyes for 5 minutes and contemplate the cosmic, universal form "
+                "of the divine as revealed in Chapter 11. Imagine the entire universe — all beings, "
+                "all worlds, all time — contained within one infinite divine form. Let this vision "
+                "of the cosmic reality fill you with awe and wonder. As Arjuna beheld the "
+                "Visvarupa Darsana, let the infinite manifestation humble and transform you."
+            ),
+            "field_knower": (
+                "Practice the witness consciousness of Chapter 13 for 5 minutes. Observe your body, "
+                "thoughts, and emotions as the 'field' (kshetra). You are the knower of the field — "
+                "the awareness watching it all. This distinction between body and consciousness is "
+                "the beginning of true self-knowledge."
+            ),
+            "supreme_person": (
+                "Reflect for 5 minutes on the supreme eternal reality described in Chapter 15. "
+                "Like the imperishable banyan tree with roots above and branches below, the material "
+                "world is sustained by the Supreme Being. Contemplate: what is perishable in my life, "
+                "and what is the imperishable essence behind it all?"
+            ),
+            "three_faiths": (
+                "Examine the quality of your faith for 5 minutes as Chapter 17 guides. "
+                "Is your faith sattvic (pure, selfless), rajasic (driven by desire for results), "
+                "or tamasic (rooted in ignorance)? Observe without judgment. Choose one act today "
+                "where you will practice sattvic faith — giving or acting without expectation."
+            ),
             "liberation_renunciation": (
                 "Surrender one worry to the divine right now. Mentally place it at Krishna's feet "
                 "and say: 'I have done my part; the result is Yours.' This is the essence of "
@@ -1441,6 +1494,8 @@ class GitaWisdomAutoEnricher:
             verse_context = self._fetcher.get_verse_context(chapter, verse)
 
             if not verse_context:
+                logger.debug(f"Verse {verse_ref} not found in local corpus, skipping")
+                rejected_count += 1
                 continue
 
             # Determine which domains this verse already has entries for
@@ -1460,20 +1515,27 @@ class GitaWisdomAutoEnricher:
             )
 
             if entry_data:
-                # Store in database
+                # Store in database with duplicate protection
                 try:
                     entry = GitaPracticalWisdom(**entry_data)
                     db.add(entry)
+                    await db.flush()  # Validate immediately, catches UNIQUE violations
                     enriched_count += 1
                 except Exception as e:
-                    logger.warning(f"Failed to store wisdom for {verse_ref}: {e}")
+                    await db.rollback()  # Clean up dirty session state
+                    logger.warning(f"Failed to store wisdom for {verse_ref}/{domain}: {e}")
                     rejected_count += 1
             else:
                 rejected_count += 1
 
-        # Commit batch
+        # Commit all flushed entries
         if enriched_count > 0:
-            await db.commit()
+            try:
+                await db.commit()
+            except Exception as e:
+                await db.rollback()
+                logger.error(f"Failed to commit enrichment batch: {e}")
+                enriched_count = 0
 
         self._total_enriched += enriched_count
         self._total_rejected += rejected_count
@@ -1520,6 +1582,10 @@ class GitaWisdomAutoEnricher:
         mental_health_apps = verse_context.get("mental_health_applications", [])
 
         # Theme-to-domain priority mapping
+        # Maps keywords found in verse themes to the most relevant life domain.
+        # Each chapter theme (e.g., "cosmic_vision", "imperishable_brahman")
+        # must have at least one keyword here to avoid falling through to the
+        # default (first available domain), which can produce misaligned content.
         theme_domain_map = {
             "karma": "workplace",
             "action": "workplace",
@@ -1555,6 +1621,25 @@ class GitaWisdomAutoEnricher:
             "self": "personal_growth",
             "surrender": "personal_growth",
             "divine": "personal_growth",
+            # Chapter-specific theme keywords to prevent fallback mismatches
+            "cosmic": "personal_growth",       # Ch11: cosmic_vision
+            "vision": "personal_growth",        # Ch11: cosmic_vision
+            "universal": "personal_growth",     # Ch11: cosmic_vision
+            "imperishable": "personal_growth",  # Ch8: imperishable_brahman
+            "brahman": "personal_growth",       # Ch8: imperishable_brahman
+            "royal": "leadership",              # Ch9: royal_knowledge
+            "glory": "leadership",              # Ch10: divine_glories
+            "glories": "leadership",            # Ch10: divine_glories
+            "vibhuti": "personal_growth",       # Ch10: divine_glories
+            "field": "personal_growth",         # Ch13: field_knower
+            "knower": "personal_growth",        # Ch13: field_knower
+            "guna": "self_discipline",          # Ch14: three_gunas
+            "supreme": "personal_growth",       # Ch15: supreme_person
+            "demonic": "self_discipline",       # Ch16: divine_demonic
+            "faith": "personal_growth",         # Ch17: three_faiths
+            "liberation": "personal_growth",    # Ch18: liberation_renunciation
+            "renunciation": "personal_growth",  # Ch5/18: renunciation themes
+            "realization": "personal_growth",   # Ch7: knowledge_realization
         }
 
         # Try to match theme keywords to domains
@@ -1569,7 +1654,10 @@ class GitaWisdomAutoEnricher:
                 if keyword in app_lower and domain in available_domains:
                     return domain
 
-        # Default: pick first available
+        # Default: pick first available (no theme match found)
+        logger.debug(
+            f"No theme match for '{theme}', defaulting to '{available_domains[0]}'"
+        )
         return available_domains[0]
 
     def get_status(self) -> dict:

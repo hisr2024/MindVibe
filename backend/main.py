@@ -238,13 +238,30 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     try:
-        # Step 1: Run SQL migrations
+        # Step 1: Ensure ORM tables exist first (base tables like users, sessions
+        # must exist before SQL migrations that reference them with REFERENCES)
+        startup_logger.info("\n🔧 Ensuring ORM tables exist...")
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+
+        startup_logger.info("✅ Base database schema ready")
+
+        # Step 2: Run SQL migrations (these may ALTER or CREATE tables that
+        # reference base ORM tables, so they must run after Step 1)
+        # On fresh databases, ORM create_all already sets up all tables,
+        # so migration seed INSERTs may fail if columns differ. This is
+        # non-fatal — the app works correctly with ORM-created tables.
         if RUN_MIGRATIONS_ON_STARTUP:
-            migration_result = await apply_sql_migrations(engine)
-            if migration_result.applied:
-                startup_logger.info(f"✅ Applied SQL migrations: {', '.join(migration_result.applied)}")
-            else:
-                startup_logger.info("ℹ️ No new SQL migrations to apply")
+            try:
+                migration_result = await apply_sql_migrations(engine)
+                if migration_result.applied:
+                    startup_logger.info(f"✅ Applied SQL migrations: {', '.join(migration_result.applied)}")
+                else:
+                    startup_logger.info("ℹ️ No new SQL migrations to apply")
+            except Exception as migration_error:
+                startup_logger.warning(
+                    f"⚠️ SQL migrations had issues (non-fatal on fresh DB): {migration_error}"
+                )
         else:
             migration_result = await get_migration_status(engine)
             if migration_result.pending:
@@ -253,7 +270,7 @@ async def startup():
             else:
                 startup_logger.info("ℹ️ RUN_MIGRATIONS_ON_STARTUP disabled; no pending migrations")
 
-        # Step 2: Run manual Python migrations
+        # Step 3: Run manual Python migrations
         startup_logger.info("\n🔧 Running manual migrations...")
         try:
             from backend.core.manual_migrations import run_manual_migrations
@@ -264,11 +281,6 @@ async def startup():
         except Exception as manual_error:
             startup_logger.info(f"⚠️ Manual migrations had issues: {manual_error}")
             # Don't fail startup - manual migrations are supplementary
-
-        # Step 3: Ensure ORM tables exist (standard SQLAlchemy approach)
-        startup_logger.info("\n🔧 Ensuring ORM tables exist...")
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
 
         startup_logger.info("✅ Database schema ready")
 

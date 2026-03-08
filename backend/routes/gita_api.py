@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db
 from backend.models import GitaVerse
+from backend.models.wisdom import GitaPracticalWisdom
 
 router = APIRouter(prefix="/api/gita", tags=["gita"])
 
@@ -803,4 +804,206 @@ def generate_template_gita_response(
 4. Seek guidance from those learned in Gita wisdom for deeper understanding
 
 **Deeper Understanding:** The Bhagavad Gita addresses all human challenges through eternal wisdom about the Self, duty, devotion, and knowledge. Your situation is an opportunity to apply these sacred teachings and discover your true nature.""",
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Practical Wisdom Database Endpoints
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class PracticalWisdomResponse(BaseModel):
+    """Response model for a single practical wisdom entry."""
+
+    id: int
+    verse_ref: str
+    chapter: int
+    verse_number: int
+    life_domain: str
+    principle_in_action: str
+    micro_practice: str
+    action_steps: list[str]
+    reflection_prompt: str
+    modern_scenario: str
+    counter_pattern: str | None = None
+    shad_ripu_tags: list[str] | None = None
+    wellness_domains: list[str] | None = None
+    source_attribution: str | None = None
+    effectiveness_score: float
+    enrichment_source: str
+
+
+class PracticalWisdomListResponse(BaseModel):
+    """Paginated list of practical wisdom entries."""
+
+    items: list[PracticalWisdomResponse]
+    total: int
+    page: int
+    page_size: int
+
+
+class PracticalWisdomCoverageResponse(BaseModel):
+    """Coverage stats for the practical wisdom database."""
+
+    total_entries: int
+    unique_verses_covered: int
+    total_verses: int
+    coverage_percent: float
+    domains_distribution: dict[str, int]
+    enrichment_source_distribution: dict[str, int]
+
+
+@router.get("/practical-wisdom/verse/{chapter}/{verse}")
+async def get_practical_wisdom_by_verse(
+    chapter: int,
+    verse: int,
+    db: AsyncSession = Depends(get_db),
+) -> list[PracticalWisdomResponse]:
+    """Get all practical wisdom entries for a specific verse."""
+    if chapter < 1 or chapter > 18:
+        raise HTTPException(status_code=400, detail="Chapter must be 1-18")
+
+    verse_ref = f"{chapter}.{verse}"
+    result = await db.execute(
+        select(GitaPracticalWisdom)
+        .where(GitaPracticalWisdom.verse_ref == verse_ref)
+        .order_by(GitaPracticalWisdom.effectiveness_score.desc())
+    )
+    entries = result.scalars().all()
+    return [
+        PracticalWisdomResponse(
+            id=e.id,
+            verse_ref=e.verse_ref,
+            chapter=e.chapter,
+            verse_number=e.verse_number,
+            life_domain=e.life_domain,
+            principle_in_action=e.principle_in_action,
+            micro_practice=e.micro_practice,
+            action_steps=e.action_steps or [],
+            reflection_prompt=e.reflection_prompt,
+            modern_scenario=e.modern_scenario,
+            counter_pattern=e.counter_pattern,
+            shad_ripu_tags=e.shad_ripu_tags,
+            wellness_domains=e.wellness_domains,
+            source_attribution=e.source_attribution,
+            effectiveness_score=e.effectiveness_score,
+            enrichment_source=e.enrichment_source,
+        )
+        for e in entries
+    ]
+
+
+@router.get("/practical-wisdom/domain/{domain}")
+async def get_practical_wisdom_by_domain(
+    domain: str,
+    page: int = 1,
+    page_size: int = 20,
+    db: AsyncSession = Depends(get_db),
+) -> PracticalWisdomListResponse:
+    """Get practical wisdom entries for a specific life domain."""
+    valid_domains = [
+        "workplace", "relationships", "family", "finance", "health",
+        "education", "social_media", "daily_life", "personal_growth",
+        "parenting", "leadership", "community", "creativity",
+        "decision_making", "conflict_resolution", "self_discipline",
+    ]
+    if domain not in valid_domains:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid domain. Must be one of: {', '.join(valid_domains)}",
+        )
+
+    offset = (max(1, page) - 1) * page_size
+    page_size = min(page_size, 100)
+
+    # Count total
+    count_result = await db.execute(
+        select(func.count(GitaPracticalWisdom.id)).where(
+            GitaPracticalWisdom.life_domain == domain
+        )
+    )
+    total = count_result.scalar() or 0
+
+    # Fetch page
+    result = await db.execute(
+        select(GitaPracticalWisdom)
+        .where(GitaPracticalWisdom.life_domain == domain)
+        .order_by(GitaPracticalWisdom.effectiveness_score.desc())
+        .offset(offset)
+        .limit(page_size)
+    )
+    entries = result.scalars().all()
+
+    return PracticalWisdomListResponse(
+        items=[
+            PracticalWisdomResponse(
+                id=e.id,
+                verse_ref=e.verse_ref,
+                chapter=e.chapter,
+                verse_number=e.verse_number,
+                life_domain=e.life_domain,
+                principle_in_action=e.principle_in_action,
+                micro_practice=e.micro_practice,
+                action_steps=e.action_steps or [],
+                reflection_prompt=e.reflection_prompt,
+                modern_scenario=e.modern_scenario,
+                counter_pattern=e.counter_pattern,
+                shad_ripu_tags=e.shad_ripu_tags,
+                wellness_domains=e.wellness_domains,
+                source_attribution=e.source_attribution,
+                effectiveness_score=e.effectiveness_score,
+                enrichment_source=e.enrichment_source,
+            )
+            for e in entries
+        ],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.get("/practical-wisdom/coverage")
+async def get_practical_wisdom_coverage(
+    db: AsyncSession = Depends(get_db),
+) -> PracticalWisdomCoverageResponse:
+    """Get coverage statistics for the practical wisdom database."""
+    # Total entries
+    total_result = await db.execute(
+        select(func.count(GitaPracticalWisdom.id))
+    )
+    total_entries = total_result.scalar() or 0
+
+    # Unique verses covered
+    verse_result = await db.execute(
+        select(func.count(distinct(GitaPracticalWisdom.verse_ref)))
+    )
+    unique_verses = verse_result.scalar() or 0
+
+    # Domain distribution
+    domain_result = await db.execute(
+        select(
+            GitaPracticalWisdom.life_domain,
+            func.count(GitaPracticalWisdom.id),
+        ).group_by(GitaPracticalWisdom.life_domain)
+    )
+    domains_dist = {row[0]: row[1] for row in domain_result.all()}
+
+    # Enrichment source distribution
+    source_result = await db.execute(
+        select(
+            GitaPracticalWisdom.enrichment_source,
+            func.count(GitaPracticalWisdom.id),
+        ).group_by(GitaPracticalWisdom.enrichment_source)
+    )
+    source_dist = {row[0]: row[1] for row in source_result.all()}
+
+    total_verses = 700  # Bhagavad Gita has 700 verses
+
+    return PracticalWisdomCoverageResponse(
+        total_entries=total_entries,
+        unique_verses_covered=unique_verses,
+        total_verses=total_verses,
+        coverage_percent=round((unique_verses / total_verses) * 100, 1) if total_verses else 0,
+        domains_distribution=domains_dist,
+        enrichment_source_distribution=source_dist,
     )
