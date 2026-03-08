@@ -17,13 +17,15 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 class SubscriptionTier(str, enum.Enum):
     """Subscription tier levels.
 
-    Three-tier structure (March 2026 consolidation):
+    Four-tier structure (March 2026):
     - FREE (Seeker): Entry-level with 5 KIAAN questions/month
+    - BHAKTA: Entry paid ($6.99/mo) with 50 questions and encrypted journal
     - SADHAK: Mid-tier ($12.99/mo) with 300 questions and all features
     - SIDDHA: Premium ($22.99/mo) with unlimited questions and dedicated support
     """
 
     FREE = "free"
+    BHAKTA = "bhakta"
     SADHAK = "sadhak"
     SIDDHA = "siddha"
 

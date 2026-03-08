@@ -196,37 +196,48 @@ class TestKiaanResponseQuality:
 
 
 class TestWisdomJourneysAccess:
-    """Test Wisdom Journeys access across tiers.
+    """Test Wisdom Journeys access across tiers."""
 
-    Critical: FREE tier should have trial access (1 journey, 3 days).
-    """
-
-    def test_free_tier_has_trial_access(self):
-        """Test that FREE tier has trial access to Wisdom Journeys."""
+    def test_free_tier_has_limited_access(self):
+        """Test that FREE tier has 1 Wisdom Journey (no trial)."""
         from backend.config.feature_config import (
             get_wisdom_journeys_limit,
-            is_wisdom_journeys_trial,
-            get_wisdom_journeys_trial_days,
             has_feature_access,
         )
 
-        # FREE tier should have trial access
         assert has_feature_access(SubscriptionTier.FREE, "wisdom_journeys") is True
         assert get_wisdom_journeys_limit(SubscriptionTier.FREE) == 1
-        assert is_wisdom_journeys_trial(SubscriptionTier.FREE) is True
-        assert get_wisdom_journeys_trial_days(SubscriptionTier.FREE) == 3
+
+    def test_bhakta_tier_wisdom_journeys(self):
+        """Test that BHAKTA tier has 3 Wisdom Journeys."""
+        from backend.config.feature_config import (
+            get_wisdom_journeys_limit,
+            has_feature_access,
+        )
+
+        assert has_feature_access(SubscriptionTier.BHAKTA, "wisdom_journeys") is True
+        assert get_wisdom_journeys_limit(SubscriptionTier.BHAKTA) == 3
+
+    def test_bhakta_tier_features(self):
+        """Test that BHAKTA tier has encrypted journal and 50 questions."""
+        from backend.config.feature_config import (
+            get_kiaan_quota,
+            has_feature_access,
+        )
+
+        assert get_kiaan_quota(SubscriptionTier.BHAKTA) == 50
+        assert has_feature_access(SubscriptionTier.BHAKTA, "encrypted_journal") is True
+        assert has_feature_access(SubscriptionTier.BHAKTA, "advanced_analytics") is False
 
     def test_sadhak_tier_wisdom_journeys(self):
         """Test that SADHAK tier has full Wisdom Journeys access with 10 journeys."""
         from backend.config.feature_config import (
             get_wisdom_journeys_limit,
-            is_wisdom_journeys_trial,
             has_feature_access,
         )
 
         assert has_feature_access(SubscriptionTier.SADHAK, "wisdom_journeys") is True
         assert get_wisdom_journeys_limit(SubscriptionTier.SADHAK) == 10
-        assert is_wisdom_journeys_trial(SubscriptionTier.SADHAK) is False
 
     def test_siddha_tier_unlimited_journeys(self):
         """Test that SIDDHA tier has unlimited journeys."""

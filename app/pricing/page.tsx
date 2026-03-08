@@ -9,7 +9,7 @@ import { useSubscription } from '@/hooks/useSubscription'
 import { useCurrency, CURRENCIES, type Currency } from '@/hooks/useCurrency'
 
 // Pricing tiers aligned with backend SubscriptionTier enum:
-// FREE (Seeker), SADHAK, SIDDHA — 3-tier structure (March 2026)
+// FREE (Seeker), BHAKTA, SADHAK, SIDDHA — 4-tier structure (March 2026)
 const createPricingTiers = (
   currency: Currency,
   formatPrice: (amount: number, options?: { showDecimals?: boolean }) => string,
@@ -29,10 +29,26 @@ const createPricingTiers = (
       'Mood tracking',
       'Daily wisdom',
       'Basic breathing exercises',
-      '1 trial Wisdom Journey (3 days)',
+      '1 Wisdom Journey',
       'Community access',
     ],
     cta: 'Get Started Free',
+  },
+  {
+    id: 'bhakta',
+    name: 'Bhakta',
+    description: 'More questions and encrypted journal for devoted seekers',
+    monthlyPrice: getMonthlyPrice('bhakta'),
+    yearlyPrice: getYearlyPrice('bhakta'),
+    kiaanQuota: 50,
+    features: [
+      '50 KIAAN questions/month',
+      'All Seeker features',
+      'Encrypted journal',
+      '3 Wisdom Journeys',
+      '90-day data retention',
+    ],
+    cta: 'Subscribe Now',
   },
   {
     id: 'sadhak',
@@ -45,8 +61,7 @@ const createPricingTiers = (
     badge: 'Most Popular',
     features: [
       '300 KIAAN questions/month',
-      'All Seeker features',
-      'Encrypted journal with versions',
+      'All Bhakta features',
       'Voice Companion (17 languages)',
       'Soul Reading & Quantum Dive',
       'KIAAN Agent',
@@ -56,8 +71,7 @@ const createPricingTiers = (
       'Advanced mood analytics',
       'Offline access & priority support',
     ],
-    cta: 'Start 7-day free trial',
-    trialAvailable: true,
+    cta: 'Subscribe Now',
   },
   {
     id: 'siddha',
@@ -75,8 +89,7 @@ const createPricingTiers = (
       'Team features',
       'Priority voice processing',
     ],
-    cta: 'Start 7-day free trial',
-    trialAvailable: true,
+    cta: 'Subscribe Now',
   },
 ]
 
@@ -84,50 +97,50 @@ const comparisonFeatures = [
   {
     category: 'KIAAN Chat',
     items: [
-      { name: 'Monthly Questions', values: { free: '5', sadhak: '300', siddha: 'Unlimited' } },
-      { name: 'Response Quality', values: { free: 'Same for all', sadhak: 'Same for all', siddha: 'Same for all' } },
-      { name: 'Conversation History', values: { free: true, sadhak: true, siddha: true } },
+      { name: 'Monthly Questions', values: { free: '5', bhakta: '50', sadhak: '300', siddha: 'Unlimited' } },
+      { name: 'Response Quality', values: { free: 'Same for all', bhakta: 'Same for all', sadhak: 'Same for all', siddha: 'Same for all' } },
+      { name: 'Conversation History', values: { free: true, bhakta: true, sadhak: true, siddha: true } },
     ],
   },
   {
     category: 'Assistants',
     items: [
-      { name: 'Ardha Reframing', values: { free: false, sadhak: true, siddha: true } },
-      { name: 'Viyoga Detachment', values: { free: false, sadhak: true, siddha: true } },
-      { name: 'Relationship Compass', values: { free: false, sadhak: true, siddha: true } },
-      { name: 'Emotional Reset Guide', values: { free: false, sadhak: true, siddha: true } },
+      { name: 'Ardha Reframing', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
+      { name: 'Viyoga Detachment', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
+      { name: 'Relationship Compass', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
+      { name: 'Emotional Reset Guide', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
     ],
   },
   {
     category: 'KIAAN Ecosystem',
     items: [
-      { name: 'Divine Chat', values: { free: true, sadhak: true, siddha: true } },
-      { name: 'Friend Mode', values: { free: true, sadhak: true, siddha: true } },
-      { name: 'Voice Synthesis (17 languages)', values: { free: false, sadhak: true, siddha: true } },
-      { name: 'Voice Companion', values: { free: false, sadhak: true, siddha: true } },
-      { name: 'Soul Reading', values: { free: false, sadhak: true, siddha: true } },
-      { name: 'Quantum Dive', values: { free: false, sadhak: true, siddha: true } },
-      { name: 'KIAAN Agent', values: { free: false, sadhak: true, siddha: true } },
+      { name: 'Divine Chat', values: { free: true, bhakta: true, sadhak: true, siddha: true } },
+      { name: 'Friend Mode', values: { free: true, bhakta: true, sadhak: true, siddha: true } },
+      { name: 'Voice Synthesis (17 languages)', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
+      { name: 'Voice Companion', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
+      { name: 'Soul Reading', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
+      { name: 'Quantum Dive', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
+      { name: 'KIAAN Agent', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
     ],
   },
   {
     category: 'Features',
     items: [
-      { name: 'Encrypted Journal', values: { free: false, sadhak: true, siddha: true } },
-      { name: 'Mood Tracking', values: { free: true, sadhak: true, siddha: true } },
-      { name: 'Daily Wisdom', values: { free: true, sadhak: true, siddha: true } },
-      { name: 'Advanced Analytics', values: { free: false, sadhak: true, siddha: true } },
-      { name: 'Wisdom Journeys', values: { free: '1 trial', sadhak: '10', siddha: 'Unlimited' } },
-      { name: 'Offline Access', values: { free: false, sadhak: true, siddha: true } },
-      { name: 'Data Retention', values: { free: '30 days', sadhak: 'Unlimited', siddha: 'Unlimited' } },
+      { name: 'Encrypted Journal', values: { free: false, bhakta: true, sadhak: true, siddha: true } },
+      { name: 'Mood Tracking', values: { free: true, bhakta: true, sadhak: true, siddha: true } },
+      { name: 'Daily Wisdom', values: { free: true, bhakta: true, sadhak: true, siddha: true } },
+      { name: 'Advanced Analytics', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
+      { name: 'Wisdom Journeys', values: { free: '1', bhakta: '3', sadhak: '10', siddha: 'Unlimited' } },
+      { name: 'Offline Access', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
+      { name: 'Data Retention', values: { free: '30 days', bhakta: '90 days', sadhak: 'Unlimited', siddha: 'Unlimited' } },
     ],
   },
   {
     category: 'Support',
     items: [
-      { name: 'Community Access', values: { free: true, sadhak: true, siddha: true } },
-      { name: 'Priority Support', values: { free: false, sadhak: true, siddha: true } },
-      { name: 'Dedicated Support', values: { free: false, sadhak: false, siddha: true } },
+      { name: 'Community Access', values: { free: true, bhakta: true, sadhak: true, siddha: true } },
+      { name: 'Priority Support', values: { free: false, bhakta: false, sadhak: true, siddha: true } },
+      { name: 'Dedicated Support', values: { free: false, bhakta: false, sadhak: false, siddha: true } },
     ],
   },
 ]
@@ -563,7 +576,7 @@ export default function PricingPage() {
         tabIndex={0}
         role="region"
         aria-label="Pricing plans carousel"
-        className={`subscription-scroll grid gap-6 pb-6 mb-16 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-lg sm:grid-cols-2 lg:grid-cols-3 ${
+        className={`subscription-scroll grid gap-6 pb-6 mb-16 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 rounded-lg sm:grid-cols-2 lg:grid-cols-4 ${
           isScrolling ? 'scrolling' : ''
         }`}
         style={{

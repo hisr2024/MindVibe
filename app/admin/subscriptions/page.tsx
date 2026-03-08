@@ -37,6 +37,7 @@ export default function AdminSubscriptionsPage() {
         totalActive: 892,
         totalByTier: {
           free: 450,
+          bhakta: 180,
           sadhak: 310,
           siddha: 132,
         },

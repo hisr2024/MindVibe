@@ -27,8 +27,6 @@ from backend.config.feature_config import (
     get_tier_features,
     get_kiaan_quota,
     get_wisdom_journeys_limit,
-    is_wisdom_journeys_trial,
-    get_wisdom_journeys_trial_days,
 )
 
 logger = logging.getLogger(__name__)
@@ -107,7 +105,7 @@ async def get_or_create_free_subscription(
         free_plan = SubscriptionPlan(
             tier=SubscriptionTier.FREE,
             name="Free",
-            description="Get started with MindVibe's core features and trial Wisdom Journeys",
+            description="Get started with MindVibe's core features",
             price_monthly=0,
             price_yearly=None,
             features={
@@ -117,8 +115,6 @@ async def get_or_create_free_subscription(
                 "wisdom_access": True,
                 "wisdom_journeys": True,
                 "wisdom_journeys_limit": 1,
-                "wisdom_journeys_trial": True,
-                "wisdom_journeys_trial_days": 3,
             },
             kiaan_questions_monthly=20,
             encrypted_journal=False,
@@ -252,8 +248,7 @@ async def check_wisdom_journeys_access(
     """Check if a user has access to Wisdom Journeys and their current usage.
 
     Enforces:
-    - Journey limit per tier (FREE=1, SADHAK=10, SIDDHA=unlimited)
-    - Trial day limit for FREE tier (3 days max per journey)
+    - Journey limit per tier (FREE=1, BHAKTA=3, SADHAK=10, SIDDHA=unlimited)
 
     Args:
         db: Database session.
@@ -319,31 +314,6 @@ async def check_wisdom_journeys_access(
         # Table might not exist - this is ok
         logger.debug(f"Could not count legacy journeys (table may not exist): {e}")
 
-    # 3. Check trial day enforcement for free tier (legacy journeys only)
-    is_trial = is_wisdom_journeys_trial(tier)
-    if is_trial and legacy_journeys:
-        try:
-            from backend.models import JourneyStatus as LegacyStatus
-            trial_days = get_wisdom_journeys_trial_days(tier)
-            if trial_days > 0:
-                now = datetime.now(UTC)
-                for journey in legacy_journeys:
-                    # Check if journey has exceeded trial days
-                    if journey.created_at:
-                        days_active = (now - journey.created_at).days
-                        if days_active > trial_days:
-                            # Auto-pause journeys that exceed trial limit
-                            journey.status = LegacyStatus.PAUSED
-                            logger.info(
-                                f"Trial journey {journey.id} paused after {days_active} days "
-                                f"(limit: {trial_days} days)"
-                            )
-                            active_count -= 1
-
-                await db.commit()
-        except Exception as e:
-            logger.warning(f"Failed to enforce trial limits: {e}")
-
     logger.info(f"Total active journeys for user {user_id}: {active_count} (enhanced: {len(enhanced_journeys)}, legacy: {len(legacy_journeys)})")
     return True, active_count, journey_limit
 
@@ -356,16 +326,12 @@ async def get_wisdom_journeys_stats(db: AsyncSession, user_id: str) -> dict:
         user_id: The user's ID.
 
     Returns:
-        dict: Journey statistics including access, limits, usage, and trial info.
+        dict: Journey statistics including access, limits, and usage.
     """
     has_access, active_count, journey_limit = await check_wisdom_journeys_access(
         db, user_id
     )
     tier = await get_user_tier(db, user_id)
-
-    # Check trial status
-    is_trial = is_wisdom_journeys_trial(tier)
-    trial_days = get_wisdom_journeys_trial_days(tier)
 
     return {
         "feature": "wisdom_journeys",
@@ -376,9 +342,6 @@ async def get_wisdom_journeys_stats(db: AsyncSession, user_id: str) -> dict:
         "remaining": -1 if journey_limit == -1 else max(0, journey_limit - active_count),
         "is_unlimited": journey_limit == -1,
         "can_start_more": has_access and (journey_limit == -1 or active_count < journey_limit),
-        # Trial info
-        "is_trial": is_trial,
-        "trial_days_limit": trial_days,
     }
 
 

@@ -206,5 +206,6 @@ class TestSubscriptionTierEnum:
     def test_subscription_tier_values(self):
         """Test that all expected tier values exist."""
         assert SubscriptionTier.FREE.value == "free"
+        assert SubscriptionTier.BHAKTA.value == "bhakta"
         assert SubscriptionTier.SADHAK.value == "sadhak"
         assert SubscriptionTier.SIDDHA.value == "siddha"

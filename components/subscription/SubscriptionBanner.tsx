@@ -32,7 +32,7 @@ export function SubscriptionBanner({
   if (hasAccess(feature)) return null
 
   const label = featureLabel(feature)
-  const defaultMessage = `Unlock ${label} and more — Sadhak starts at just $12.99/mo`
+  const defaultMessage = `Unlock ${label} and more — plans start at just $6.99/mo`
 
   return (
     <div
