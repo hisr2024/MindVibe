@@ -27,7 +27,7 @@ const API_CONFIG = {
   /** Base URL — overridden by environment config */
   baseURL: __DEV__
     ? 'http://localhost:8000'
-    : 'https://api.mindvibe.com',
+    : 'https://mindvibe-api.onrender.com',
 
   /** Request timeout */
   timeout: 15_000,

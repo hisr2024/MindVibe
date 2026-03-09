@@ -12,7 +12,7 @@ function getCsrfToken(): string | null {
 // Shared refresh promise so concurrent 401s only trigger one refresh request.
 let _refreshPromise: Promise<boolean> | null = null
 
-async function tryRefreshToken(): Promise<boolean> {
+export async function tryRefreshToken(): Promise<boolean> {
   // If the user never logged in (no profile in localStorage), there is no
   // refresh_token cookie to send.  Skipping the request avoids a guaranteed
   // 400 "Missing refresh token" that clutters the browser console.

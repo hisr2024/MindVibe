@@ -2,6 +2,8 @@
  * Centralized API client with error handling and retry logic
  */
 
+import { tryRefreshToken } from './api'
+
 // Always use relative paths so requests go through the Next.js proxy.
 // The proxy handles cookie forwarding, retries, and backend cold starts.
 const API_BASE_URL = ''
@@ -85,13 +87,30 @@ export async function apiCall(
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), timeout)
 
-    const response = await fetch(url, {
+    let response = await fetch(url, {
       ...defaultOptions,
       credentials: 'include',
       signal: controller.signal,
     })
 
     clearTimeout(timeoutId)
+
+    // Auto-refresh token on 401 (expired access token), then retry once.
+    // Skip refresh for auth endpoints to avoid infinite loops.
+    if (response.status === 401 && !endpoint.startsWith('/api/auth/')) {
+      const refreshed = await tryRefreshToken()
+      if (refreshed) {
+        // Retry with a fresh timeout
+        const retryController = new AbortController()
+        const retryTimeout = setTimeout(() => retryController.abort(), timeout)
+        response = await fetch(url, {
+          ...defaultOptions,
+          credentials: 'include',
+          signal: retryController.signal,
+        })
+        clearTimeout(retryTimeout)
+      }
+    }
 
     if (!response.ok) {
       // Enhanced error detection

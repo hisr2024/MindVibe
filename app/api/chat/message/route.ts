@@ -9,7 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { selectWisdom, buildVerseContext, type WisdomResult } from '@/lib/wisdom-core'
-import { BACKEND_URL } from '@/lib/proxy-utils'
+import { BACKEND_URL, proxyHeaders, forwardCookies } from '@/lib/proxy-utils'
 
 // Known backend error placeholders that should NEVER reach the user
 const BACKEND_ERROR_PLACEHOLDERS = [
@@ -242,11 +242,7 @@ export async function POST(request: NextRequest) {
     try {
       const response = await fetch(`${BACKEND_URL}/api/chat/message`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          cookie: request.headers.get('cookie') || '',
-        },
+        headers: proxyHeaders(request, 'POST', { 'Accept': 'application/json' }),
         body: JSON.stringify({
           message: sanitizedMessage,
           language,
@@ -278,8 +274,8 @@ export async function POST(request: NextRequest) {
 
         // Detect backend error responses masquerading as HTTP 200
         if (!isBackendErrorResponse(data)) {
-          // Backend returned a real, valid response
-          return NextResponse.json({
+          // Backend returned a real, valid response — forward Set-Cookie headers
+          const clientRes = NextResponse.json({
             success: true,
             response: data.response || data.message,
             summary: data.summary || null,
@@ -288,6 +284,7 @@ export async function POST(request: NextRequest) {
             emotion: data.detected_emotion || data.emotion,
             ai_powered: true,
           })
+          return forwardCookies(response, clientRes)
         }
 
         // Backend returned an error state — fall through to Layer 2
