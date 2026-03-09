@@ -53,6 +53,11 @@ export default function SubscriptionDashboardPage() {
   const [paymentsLoading, setPaymentsLoading] = useState(true)
 
   const fetchRecentPayments = useCallback(async () => {
+    // Skip API call when no session exists — avoids 401 → refresh 400 console noise
+    if (typeof window !== 'undefined' && !localStorage.getItem('mindvibe_auth_user')) {
+      setPaymentsLoading(false)
+      return
+    }
     try {
       const response = await apiFetch('/api/subscriptions/payments?page=1&page_size=5', {
         method: 'GET',
