@@ -253,7 +253,7 @@ class TestEffectivenessWeightedSelection:
         mock_db.execute = AsyncMock(return_value=mock_result)
 
         import asyncio
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             corpus.get_effectiveness_weighted_verse(
                 db=mock_db,
                 mood="anxious",
@@ -290,7 +290,7 @@ class TestEffectivenessWeightedSelection:
 
         import asyncio
         # Request with history containing "2.47" — should only get "2.48"
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             corpus.get_effectiveness_weighted_verse(
                 db=mock_db,
                 mood="anxious",
@@ -365,7 +365,7 @@ class TestCacheInvalidation:
         mock_db = AsyncMock()
 
         import asyncio
-        scores = asyncio.get_event_loop().run_until_complete(
+        scores = asyncio.run(
             corpus._get_effectiveness_scores(mock_db, "anxious")
         )
         assert scores == [("2.47", 0.8)]

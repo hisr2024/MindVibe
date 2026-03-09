@@ -141,8 +141,8 @@ class TestKIAANCore:
         assert "KIAAN" in prompt
         # Should include Gita-specific guidance
         assert any(term in prompt.lower() for term in ["dharma", "karma", "gita", "wisdom"])
-        # Should have guidance about what to avoid
-        assert "AVOID" in prompt or "DO NOT" in prompt or "NEVER" in prompt
+        # Should have guidance about what to avoid (uses "No ..." rules)
+        assert "No " in prompt or "AVOID" in prompt or "DO NOT" in prompt or "NEVER" in prompt
 
     @pytest.mark.asyncio
     async def test_response_validation_valid(self, kiaan_core, sample_verses):

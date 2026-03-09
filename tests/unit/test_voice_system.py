@@ -176,10 +176,10 @@ class TestSarvamSpeakerMapping:
         from backend.services.sarvam_tts_service import get_sarvam_speaker_for_companion
         assert get_sarvam_speaker_for_companion("sarvam-rishi") == "arvind"
 
-    def test_divine_krishna_maps_to_arvind(self):
-        """divine-krishna should fall back to Arvind for Indian languages."""
+    def test_divine_krishna_maps_to_abhilash(self):
+        """divine-krishna should map to Abhilash (scholarly, authoritative wisdom)."""
         from backend.services.sarvam_tts_service import get_sarvam_speaker_for_companion
-        assert get_sarvam_speaker_for_companion("divine-krishna") == "arvind"
+        assert get_sarvam_speaker_for_companion("divine-krishna") == "abhilash"
 
     def test_divine_ganga_maps_to_meera(self):
         """divine-ganga should fall back to Meera for Indian languages."""

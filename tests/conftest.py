@@ -274,6 +274,19 @@ def test_db() -> AsyncGenerator[AsyncSession, None]:
                 if hasattr(cls, "__table__") and cls.__table__ not in tables_to_create:
                     tables_to_create.append(cls.__table__)
 
+        # Add compliance / GDPR tables
+        for cls_name in [
+            "UserConsent",
+            "CookiePreference",
+            "DataExportRequest",
+            "DeletionRequest",
+            "ComplianceAuditLog",
+        ]:
+            if hasattr(models, cls_name):
+                cls = getattr(models, cls_name)
+                if hasattr(cls, "__table__") and cls.__table__ not in tables_to_create:
+                    tables_to_create.append(cls.__table__)
+
         # Also add enhanced journey tables if they exist
         for table_name in [
             "journey_templates",

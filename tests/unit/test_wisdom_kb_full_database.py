@@ -17,8 +17,10 @@ class TestWisdomKnowledgeBaseFullDatabase:
 
     @pytest.fixture
     def kb(self):
-        """Create a WisdomKnowledgeBase instance."""
-        return WisdomKnowledgeBase()
+        """Create a WisdomKnowledgeBase instance with clean state."""
+        instance = WisdomKnowledgeBase()
+        instance.clear_cache()
+        return instance
 
     @pytest.fixture
     def mock_gita_verses(self):
@@ -175,8 +177,9 @@ class TestWisdomKnowledgeBaseFullDatabase:
             },
         ]
 
-        # Pre-populate cache
+        # Pre-populate cache and rebuild keyword index to match
         kb._verse_cache = test_verses
+        kb._build_keyword_index()
 
         # Search with query matching anxiety tag
         result = await kb.search_relevant_verses_full_db(
@@ -207,6 +210,7 @@ class TestWisdomKnowledgeBaseFullDatabase:
             for i in range(1, 6)
             for j in range(1, 6)
         ]
+        kb._build_keyword_index()
 
         result = await kb.search_relevant_verses_full_db(
             mock_db, "peace", limit=3
@@ -402,8 +406,10 @@ class TestMentalHealthTagBoost:
 
     @pytest.fixture
     def kb(self):
-        """Create a WisdomKnowledgeBase instance."""
-        return WisdomKnowledgeBase()
+        """Create a WisdomKnowledgeBase instance with clean state."""
+        instance = WisdomKnowledgeBase()
+        instance.clear_cache()
+        return instance
 
     def test_tag_boost_constant(self):
         """Test that TAG_BOOST is set correctly."""
@@ -415,13 +421,15 @@ class TestMentalHealthTagBoost:
         mock_db = AsyncMock()
 
         # Create test verses - one with matching tag, one without
+        # Both verses share common text so both are retrievable by keyword,
+        # but only the first has an anxiety-related mental_health_application tag.
         kb._verse_cache = [
             {
                 "verse_id": "2.47",
                 "chapter": 2,
                 "verse_number": 47,
                 "theme": "action",
-                "english": "Focus on work",
+                "english": "Focus on managing your anxiety through work",
                 "context": "About duty",
                 "mental_health_applications": ["anxiety_management"],
             },
@@ -430,18 +438,19 @@ class TestMentalHealthTagBoost:
                 "chapter": 2,
                 "verse_number": 56,
                 "theme": "peace",
-                "english": "Focus on work",  # Same text for equal base score
-                "context": "About duty",  # Same context
+                "english": "Focus on managing your anxiety through peace",
+                "context": "About duty",
                 "mental_health_applications": ["meditation_support"],
             },
         ]
+        kb._build_keyword_index()
 
         # Search with query that matches anxiety tag
         result = await kb.search_relevant_verses_full_db(
             mock_db, "anxiety management help", limit=2
         )
 
-        # Verse with anxiety_management tag should have higher score
+        # Both verses should be returned since they share query keywords
         assert len(result) == 2
         first_verse = result[0]["verse"]
         # The anxiety verse should be ranked higher due to tag boost
