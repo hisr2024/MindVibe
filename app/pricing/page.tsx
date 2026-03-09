@@ -225,6 +225,8 @@ export default function PricingPage() {
   const snapTimeoutRef = useRef<NodeJS.Timeout>()
   const isDraggingRef = useRef(false)
   const lastDragXRef = useRef(0)
+  const dragStartXRef = useRef(0)
+  const hasDraggedRef = useRef(false)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
 
   // Get pricing tiers with current currency
@@ -358,16 +360,27 @@ export default function PricingPage() {
 
     const handlePointerDown = (event: PointerEvent) => {
       if (event.pointerType === 'mouse' && event.button !== 0) return
+      // Don't capture pointer events on interactive elements (buttons, links)
+      const target = event.target as HTMLElement
+      if (target.closest('button, a, input, [role="button"]')) return
       isDraggingRef.current = true
+      dragStartXRef.current = event.clientX
       lastDragXRef.current = event.clientX
+      hasDraggedRef.current = false
       container.setPointerCapture(event.pointerId)
       container.style.scrollBehavior = 'auto'
     }
 
     const handlePointerMove = (event: PointerEvent) => {
       if (!isDraggingRef.current) return
-      event.preventDefault()
       const deltaX = event.clientX - lastDragXRef.current
+      // Only start dragging after a minimum threshold to avoid eating clicks
+      if (!hasDraggedRef.current) {
+        const totalDelta = Math.abs(event.clientX - dragStartXRef.current)
+        if (totalDelta < 5) return
+        hasDraggedRef.current = true
+      }
+      event.preventDefault()
       container.scrollLeft -= deltaX
       lastDragXRef.current = event.clientX
       handleActiveScroll()
@@ -376,6 +389,7 @@ export default function PricingPage() {
     const handlePointerUp = (event: PointerEvent) => {
       if (!isDraggingRef.current) return
       isDraggingRef.current = false
+      hasDraggedRef.current = false
       if (container.hasPointerCapture(event.pointerId)) {
         container.releasePointerCapture(event.pointerId)
       }
