@@ -4,10 +4,14 @@ import os
 import ssl as ssl_module
 from typing import AsyncGenerator, Optional, Any, Dict
 from urllib.parse import parse_qs, urlparse
+from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy import select
 from fastapi import Depends, HTTPException, Request, status
 import logging
+
+# Load .env BEFORE reading DATABASE_URL so env vars are available at import time
+load_dotenv()
 
 from backend.security.jwt import decode_access_token
 from backend.models import User

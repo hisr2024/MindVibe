@@ -21,10 +21,13 @@ CREATE INDEX IF NOT EXISTS idx_personal_journeys_status ON personal_journeys(sta
 CREATE INDEX IF NOT EXISTS idx_personal_journeys_created_at ON personal_journeys(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_personal_journeys_updated_at ON personal_journeys(updated_at DESC NULLS LAST);
 
--- Add check constraint for status values
-ALTER TABLE personal_journeys
+-- Add check constraint for status values (idempotent)
+DO $$ BEGIN
+    ALTER TABLE personal_journeys
     ADD CONSTRAINT chk_personal_journeys_status
     CHECK (status IN ('draft', 'active', 'completed', 'archived'));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Comment on table
 COMMENT ON TABLE personal_journeys IS 'User personal journeys for goal tracking and progress management';

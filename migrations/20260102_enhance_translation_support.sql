@@ -22,19 +22,27 @@ ADD COLUMN IF NOT EXISTS detected_language VARCHAR(10);
 -- Add index for detected_language
 CREATE INDEX IF NOT EXISTS idx_chat_translations_detected_language ON chat_translations(detected_language);
 
--- Add constraint to ensure language codes are valid
--- This helps prevent invalid language codes from being stored
-ALTER TABLE chat_translations
-ADD CONSTRAINT check_original_language_format 
-CHECK (original_language ~* '^[a-z]{2}(-[A-Z]{2})?$' OR original_language IS NULL);
+-- Add constraint to ensure language codes are valid (idempotent)
+DO $$ BEGIN
+    ALTER TABLE chat_translations
+    ADD CONSTRAINT check_original_language_format
+    CHECK (original_language ~* '^[a-z]{2}(-[A-Z]{2})?$' OR original_language IS NULL);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-ALTER TABLE chat_translations
-ADD CONSTRAINT check_target_language_format 
-CHECK (target_language ~* '^[a-z]{2}(-[A-Z]{2})?$' OR target_language IS NULL);
+DO $$ BEGIN
+    ALTER TABLE chat_translations
+    ADD CONSTRAINT check_target_language_format
+    CHECK (target_language ~* '^[a-z]{2}(-[A-Z]{2})?$' OR target_language IS NULL);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-ALTER TABLE chat_translations
-ADD CONSTRAINT check_detected_language_format 
-CHECK (detected_language ~* '^[a-z]{2}(-[A-Z]{2})?$' OR detected_language IS NULL);
+DO $$ BEGIN
+    ALTER TABLE chat_translations
+    ADD CONSTRAINT check_detected_language_format
+    CHECK (detected_language ~* '^[a-z]{2}(-[A-Z]{2})?$' OR detected_language IS NULL);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Update comments
 COMMENT ON COLUMN chat_translations.detected_language IS 'Auto-detected language code of the original message';

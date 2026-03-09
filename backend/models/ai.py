@@ -18,6 +18,7 @@ from sqlalchemy import (
     Text,
     func,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.models.base import Base, SoftDeleteMixin
@@ -79,14 +80,14 @@ class LearnedWisdom(SoftDeleteMixin, Base):
     # Language
     language: Mapped[str] = mapped_column(String(10), nullable=False, default="en", index=True)
 
-    # Gita references
-    chapter_refs: Mapped[list[int]] = mapped_column(JSON, nullable=False, default=list)
+    # Gita references (JSONB for GIN index support)
+    chapter_refs: Mapped[list[int]] = mapped_column(JSONB, nullable=False, default=list)
     verse_refs: Mapped[list[list[int]]] = mapped_column(JSON, nullable=False, default=list)
 
-    # Categorization
-    themes: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
-    shad_ripu_tags: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
-    keywords: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    # Categorization (JSONB for GIN index support)
+    themes: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    shad_ripu_tags: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    keywords: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
 
     # Spiritual wellness mapping (similar to GitaVerse)
     primary_domain: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
@@ -152,10 +153,10 @@ class UserQueryPattern(SoftDeleteMixin, Base):
     )  # For deduplication
     intent: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
 
-    # Gita mappings
-    related_chapters: Mapped[list[int]] = mapped_column(JSON, nullable=False, default=list)
+    # Gita mappings (JSONB for GIN index support)
+    related_chapters: Mapped[list[int]] = mapped_column(JSONB, nullable=False, default=list)
     related_verses: Mapped[list[list[int]]] = mapped_column(JSON, nullable=False, default=list)
-    related_themes: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    related_themes: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
 
     # Response template (for AI-free responses)
     response_template: Mapped[str | None] = mapped_column(Text, nullable=True)
