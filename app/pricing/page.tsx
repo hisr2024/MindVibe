@@ -7,6 +7,7 @@ import { loadRazorpayScript, openRazorpayCheckout, type RazorpayPaymentResponse 
 import { Card, CardContent } from '@/components/ui'
 import { useSubscription } from '@/hooks/useSubscription'
 import { useCurrency, CURRENCIES, type Currency } from '@/hooks/useCurrency'
+import { useAuth } from '@/hooks/useAuth'
 import { apiFetch } from '@/lib/api'
 
 // Pricing tiers aligned with backend SubscriptionTier enum:
@@ -213,11 +214,13 @@ function CurrencySwitcher({
 
 export default function PricingPage() {
   const router = useRouter()
+  const { isAuthenticated } = useAuth()
   const { subscription } = useSubscription()
   const { currency, setCurrency, formatPrice, getMonthlyPrice, getYearlyPrice } = useCurrency()
   const [isYearly, setIsYearly] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card')
   const [loading, setLoading] = useState<string | null>(null)
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const [centeredCardIndex, setCenteredCardIndex] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -503,6 +506,15 @@ export default function PricingPage() {
       return
     }
 
+    // Clear previous error
+    setCheckoutError(null)
+
+    // Redirect unauthenticated users to login first
+    if (!isAuthenticated) {
+      router.push(`/account?redirect=/pricing`)
+      return
+    }
+
     setLoading(tierId)
 
     try {
@@ -520,6 +532,11 @@ export default function PricingPage() {
       })
 
       if (!response.ok) {
+        // Handle 401 specifically: session expired, redirect to login
+        if (response.status === 401) {
+          router.push(`/account?redirect=/pricing`)
+          return
+        }
         const error = await response.json().catch(() => ({}))
         throw new Error(error.detail || error.message || 'Failed to start checkout')
       }
@@ -532,7 +549,9 @@ export default function PricingPage() {
         window.location.href = data.checkout_url
       }
     } catch (err) {
+      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
       console.error('Checkout error:', err)
+      setCheckoutError(message)
       setLoading(null)
     }
   }
@@ -553,6 +572,22 @@ export default function PricingPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-12">
+      {/* Checkout Error Banner */}
+      {checkoutError && (
+        <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <div className="flex items-center justify-between">
+            <span>{checkoutError}</span>
+            <button
+              onClick={() => setCheckoutError(null)}
+              className="ml-4 text-red-400 hover:text-red-200"
+              aria-label="Dismiss error"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-[#f5f0e8] mb-4">
