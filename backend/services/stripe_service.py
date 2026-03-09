@@ -327,7 +327,11 @@ async def create_checkout_session(
                 "billing_period": billing_period,
             },
             "subscription_data": {
-                "description": f"MindVibe {plan_tier.value.capitalize()} ({billing_period})",
+                "description": f"KIAANVerse {plan_tier.value.capitalize()} Plan ({billing_period})",
+            },
+            "invoice_settings": {
+                "description": f"KIAANVerse - {plan_tier.value.capitalize()} Plan ({billing_period})",
+                "footer": "Thank you for your spiritual wellness journey with KIAANVerse. For support: support@kiaanverse.com",
             },
         }
 
