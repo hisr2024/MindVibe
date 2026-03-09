@@ -62,7 +62,7 @@ export default function MobileWisdomPage() {
   const { triggerHaptic } = useHapticFeedback()
 
   const [dailyVerse, setDailyVerse] = useState<DailyVerse>(FALLBACK_VERSE)
-  const [_isPageLoading, setIsPageLoading] = useState(true)
+  const [isPageLoading, setIsPageLoading] = useState(true)
   const [isFavorited, setIsFavorited] = useState(false)
   const [copied, setCopied] = useState(false)
 
