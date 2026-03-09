@@ -186,3 +186,10 @@ async def security_status(
             "frame_options": True,
         }
     }
+
+
+@router.get("/sentry-test")
+async def sentry_test():
+    """Send a test event to Sentry to verify the integration is working."""
+    from backend.monitoring.error_tracking import trigger_test_error
+    return trigger_test_error()
