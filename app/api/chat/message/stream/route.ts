@@ -65,6 +65,33 @@ export async function POST(request: NextRequest) {
         })
         return forwardCookies(response, streamResponse)
       }
+
+      // Access control errors must NEVER fall through to fallback responses.
+      // Only genuine infrastructure failures (5xx, timeouts) should trigger fallbacks.
+      if ([401, 402, 403, 429].includes(response.status)) {
+        const errorText = await response.text().catch(() => 'Access denied')
+        const messages: Record<number, string> = {
+          401: 'Please sign in to continue.',
+          402: 'A subscription is required. Please upgrade to access this feature.',
+          403: 'Access denied. Please try again or contact support.',
+          429: 'Too many requests. Please wait a moment and try again.',
+        }
+        const errorStream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(encoder.encode(`data: ${messages[response.status] || errorText}\n\n`))
+            controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+            controller.close()
+          },
+        })
+        return new Response(errorStream, {
+          status: response.status,
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+          },
+        })
+      }
     } catch (backendError) {
       console.warn('[Chat Stream] Backend streaming failed:', backendError)
     }
@@ -80,6 +107,31 @@ export async function POST(request: NextRequest) {
         }),
         signal: AbortSignal.timeout(10000),
       })
+
+      // Access control errors — stop, don't fall through to fallback
+      if ([401, 402, 403, 429].includes(response.status)) {
+        const messages: Record<number, string> = {
+          401: 'Please sign in to continue.',
+          402: 'A subscription is required. Please upgrade to access this feature.',
+          403: 'Access denied. Please try again or contact support.',
+          429: 'Too many requests. Please wait a moment and try again.',
+        }
+        const errorStream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(encoder.encode(`data: ${messages[response.status]}\n\n`))
+            controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+            controller.close()
+          },
+        })
+        return new Response(errorStream, {
+          status: response.status,
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+          },
+        })
+      }
 
       if (response.ok) {
         const data = await response.json()

@@ -293,17 +293,30 @@ export async function POST(request: NextRequest) {
         const errorText = await response.text().catch(() => 'Unknown error')
         console.error(`[Chat API] Backend returned ${response.status}: ${errorText}`)
 
-        // Hard errors that should NOT fall through
-        if (response.status === 429) {
+        // Access control errors must NEVER fall through to Layer 2/3.
+        // Only genuine infrastructure failures (5xx, timeouts) should trigger fallbacks.
+        if (response.status === 401) {
           return NextResponse.json(
-            { error: 'Too many requests. Please wait a moment and try again.', success: false },
-            { status: 429 }
+            { error: 'Please sign in to continue.', success: false },
+            { status: 401 }
+          )
+        }
+        if (response.status === 402) {
+          return NextResponse.json(
+            { error: 'A subscription is required. Please upgrade to access this feature.', success: false },
+            { status: 402 }
           )
         }
         if (response.status === 403) {
           return NextResponse.json(
             { error: 'Access denied. Please try again or contact support.', success: false },
             { status: 403 }
+          )
+        }
+        if (response.status === 429) {
+          return NextResponse.json(
+            { error: 'Too many requests. Please wait a moment and try again.', success: false },
+            { status: 429 }
           )
         }
       }
