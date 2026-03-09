@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { useSubscription } from '@/hooks/useSubscription'
@@ -904,7 +905,19 @@ function UnauthenticatedAccountView() {
 /* ------------------------------------------------------------------ */
 export default function AccountPageClient() {
   const { user, isAuthenticated, logout, loading: authLoading } = useAuth()
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // After login, redirect to the page the user came from (e.g., /pricing)
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      const redirect = searchParams.get('redirect')
+      if (redirect && redirect.startsWith('/')) {
+        router.push(redirect)
+      }
+    }
+  }, [isAuthenticated, authLoading, searchParams, router])
 
   const signOut = async () => {
     setIsSubmitting(true)
