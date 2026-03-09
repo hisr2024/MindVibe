@@ -201,6 +201,18 @@ class Settings(BaseSettings):
     STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "")
     STRIPE_PUBLISHABLE_KEY: str = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
     STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+
+    # Stripe Public Details (visible on customer statements, invoices, receipts)
+    # Statement descriptor: 5-22 chars, appears on bank/credit card statements
+    STRIPE_STATEMENT_DESCRIPTOR: str = os.getenv("STRIPE_STATEMENT_DESCRIPTOR", "MINDVIBE")
+    # Statement descriptor suffix: 2-10 chars, appended for individual products
+    STRIPE_STATEMENT_DESCRIPTOR_SUFFIX: str = os.getenv("STRIPE_STATEMENT_DESCRIPTOR_SUFFIX", "")
+    # Customer support phone number displayed on receipts and invoices
+    STRIPE_SUPPORT_PHONE: str = os.getenv("STRIPE_SUPPORT_PHONE", "")
+    # Customer support email displayed on receipts and invoices
+    STRIPE_SUPPORT_EMAIL: str = os.getenv("STRIPE_SUPPORT_EMAIL", "")
+    # Customer support URL displayed on receipts and invoices
+    STRIPE_SUPPORT_URL: str = os.getenv("STRIPE_SUPPORT_URL", "")
     
     # Frontend URLs
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:3000")

@@ -685,3 +685,85 @@ async def cancel_subscription_link_endpoint(
     )
 
     return {"success": True, "message": "Subscription link cancelled"}
+
+
+# =============================================================================
+# Stripe Public Details (Statement Descriptors & Customer Support)
+# =============================================================================
+
+class StripePublicDetailsOut(BaseModel):
+    """Stripe public details visible on customer statements, invoices, receipts."""
+    statement_descriptor: str
+    statement_descriptor_suffix: str
+    support_phone: str
+    support_email: str
+    support_url: str
+
+
+@router.get("/stripe/public-details", response_model=StripePublicDetailsOut)
+async def get_stripe_public_details_endpoint(
+    request: Request,
+    admin: AdminContext = Depends(get_current_admin),
+    _: None = Depends(PermissionChecker(AdminPermission.SUBSCRIPTIONS_VIEW)),
+):
+    """Get currently configured Stripe public details.
+
+    Returns the statement descriptor, support phone, email, and URL
+    that appear on customer bank statements, invoices, and receipts.
+
+    Permissions required: subscriptions:view
+    """
+    from backend.services.stripe_service import get_stripe_public_details
+
+    details = get_stripe_public_details()
+    return StripePublicDetailsOut(**details)
+
+
+@router.post("/stripe/public-details/apply")
+async def apply_stripe_public_details_endpoint(
+    request: Request,
+    admin: AdminContext = Depends(get_current_admin),
+    _: None = Depends(PermissionChecker(AdminPermission.SUBSCRIPTIONS_MODIFY)),
+    db: AsyncSession = Depends(get_db),
+):
+    """Apply configured Stripe public details to the Stripe account.
+
+    Pushes the statement descriptor, support phone, email, and URL
+    from environment variables to the Stripe account settings.
+
+    Permissions required: subscriptions:modify
+    """
+    from backend.services.stripe_service import (
+        configure_stripe_public_details,
+        get_stripe_public_details,
+        is_stripe_configured,
+    )
+
+    if not is_stripe_configured():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Stripe is not configured. Set STRIPE_SECRET_KEY.",
+        )
+
+    result = configure_stripe_public_details()
+
+    # Audit log
+    await create_audit_log(
+        db=db,
+        admin_id=admin.admin.id,
+        action=AdminAuditAction.SUBSCRIPTION_MODIFIED,
+        resource_type="stripe_account",
+        resource_id="public_details",
+        details={
+            "action": "apply_stripe_public_details",
+            **get_stripe_public_details(),
+        },
+        ip_address=get_client_ip(request),
+        user_agent=get_user_agent(request),
+    )
+
+    return {
+        "success": bool(result),
+        "message": "Stripe public details applied successfully" if result else "No details to apply",
+        "details": get_stripe_public_details(),
+    }

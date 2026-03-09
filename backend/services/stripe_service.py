@@ -74,6 +74,95 @@ def _init_stripe() -> None:
 
 
 # =============================================================================
+# Account-Level Public Details Configuration
+# =============================================================================
+
+def configure_stripe_public_details() -> dict[str, Any]:
+    """Configure Stripe account-level public details for customer-facing documents.
+
+    Sets the statement descriptor, support phone, email, and URL that appear on
+    customer bank statements, invoices, and receipts. These details help prevent
+    chargebacks by making charges recognizable to customers.
+
+    Returns:
+        dict: The updated account settings, or empty dict if not configured.
+
+    Environment Variables:
+        STRIPE_STATEMENT_DESCRIPTOR: 5-22 chars, appears on bank statements
+        STRIPE_STATEMENT_DESCRIPTOR_SUFFIX: 2-10 chars, per-product suffix (optional)
+        STRIPE_SUPPORT_PHONE: Customer support phone number
+        STRIPE_SUPPORT_EMAIL: Customer support email
+        STRIPE_SUPPORT_URL: Customer support URL
+    """
+    if not is_stripe_configured():
+        logger.warning("Stripe not configured. Cannot set public details.")
+        return {}
+
+    try:
+        _init_stripe()
+
+        # Build account update payload with configured public details
+        update_params: dict[str, Any] = {}
+
+        statement_descriptor = os.getenv("STRIPE_STATEMENT_DESCRIPTOR", "")
+        if statement_descriptor and 5 <= len(statement_descriptor) <= 22:
+            update_params["statement_descriptor"] = statement_descriptor
+
+        statement_suffix = os.getenv("STRIPE_STATEMENT_DESCRIPTOR_SUFFIX", "")
+        if statement_suffix and 2 <= len(statement_suffix) <= 10:
+            update_params["statement_descriptor_suffix"] = statement_suffix
+
+        # Build support details for receipts and invoices
+        support_phone = os.getenv("STRIPE_SUPPORT_PHONE", "")
+        support_email = os.getenv("STRIPE_SUPPORT_EMAIL", "")
+        support_url = os.getenv("STRIPE_SUPPORT_URL", "")
+
+        support_address: dict[str, str] = {}
+        if support_phone:
+            update_params["support_phone"] = support_phone
+            support_address["phone"] = support_phone
+        if support_email:
+            update_params["support_email"] = support_email
+        if support_url:
+            update_params["support_url"] = support_url
+
+        if not update_params:
+            logger.info("No Stripe public details configured. Skipping.")
+            return {}
+
+        # Update the Stripe account settings
+        account = stripe.Account.modify("", **update_params)  # type: ignore[arg-type]
+
+        logger.info(
+            "Stripe public details configured: "
+            f"descriptor={statement_descriptor!r}, "
+            f"support_phone={bool(support_phone)}, "
+            f"support_email={bool(support_email)}, "
+            f"support_url={bool(support_url)}"
+        )
+        return dict(account) if account else {}
+
+    except Exception as e:
+        logger.error(f"Failed to configure Stripe public details: {e}")
+        return {}
+
+
+def get_stripe_public_details() -> dict[str, str]:
+    """Get the currently configured Stripe public details (from env vars).
+
+    Returns:
+        dict: The configured public details for display/verification.
+    """
+    return {
+        "statement_descriptor": os.getenv("STRIPE_STATEMENT_DESCRIPTOR", "MINDVIBE"),
+        "statement_descriptor_suffix": os.getenv("STRIPE_STATEMENT_DESCRIPTOR_SUFFIX", ""),
+        "support_phone": os.getenv("STRIPE_SUPPORT_PHONE", ""),
+        "support_email": os.getenv("STRIPE_SUPPORT_EMAIL", ""),
+        "support_url": os.getenv("STRIPE_SUPPORT_URL", ""),
+    }
+
+
+# =============================================================================
 # Customer Management
 # =============================================================================
 
@@ -217,7 +306,10 @@ async def create_checkout_session(
             # Default: offer card (includes Google Pay) and PayPal
             payment_method_types = ["card", "paypal"]
 
-        # Create checkout session
+        # Create checkout session with public details for customer statements
+        statement_descriptor = os.getenv("STRIPE_STATEMENT_DESCRIPTOR", "MINDVIBE")
+        statement_descriptor_suffix = os.getenv("STRIPE_STATEMENT_DESCRIPTOR_SUFFIX", "")
+
         session_params: dict[str, Any] = {
             "mode": "subscription",
             "payment_method_types": payment_method_types,
@@ -229,7 +321,19 @@ async def create_checkout_session(
                 "plan_tier": plan_tier.value,
                 "billing_period": billing_period,
             },
+            "subscription_data": {
+                "description": f"MindVibe {plan_tier.value.capitalize()} ({billing_period})",
+            },
         }
+
+        # Add payment intent data with statement descriptor for card payments
+        if "card" in payment_method_types:
+            payment_intent_data: dict[str, Any] = {
+                "statement_descriptor": statement_descriptor[:22],
+            }
+            if statement_descriptor_suffix:
+                payment_intent_data["statement_descriptor_suffix"] = statement_descriptor_suffix[:10]
+            session_params["payment_intent_data"] = payment_intent_data
         
         if customer_id:
             session_params["customer"] = customer_id
