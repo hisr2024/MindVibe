@@ -9,10 +9,37 @@ function getCsrfToken(): string | null {
   return match ? decodeURIComponent(match[1]) : null
 }
 
+// Shared refresh promise so concurrent 401s only trigger one refresh request.
+let _refreshPromise: Promise<boolean> | null = null
+
+async function tryRefreshToken(): Promise<boolean> {
+  if (_refreshPromise) return _refreshPromise
+
+  _refreshPromise = (async () => {
+    try {
+      const res = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      })
+      return res.ok
+    } catch {
+      return false
+    } finally {
+      _refreshPromise = null
+    }
+  })()
+
+  return _refreshPromise
+}
+
 /**
- * API Fetch utility
- * Uses relative paths to leverage Vercel proxy rewrites for CORS handling
- * The proxy rewrite in vercel.json routes /api/* to the backend
+ * API Fetch utility with automatic token refresh on 401.
+ *
+ * Uses relative paths so requests go through the Next.js proxy layer.
+ * On 401 (expired access token), automatically calls /api/auth/refresh
+ * to get a new access token via the httpOnly refresh_token cookie,
+ * then retries the original request once.
  *
  * Security features:
  * - Authentication: Uses httpOnly cookies exclusively (XSS-protected)
@@ -20,36 +47,36 @@ function getCsrfToken(): string | null {
  * - Credentials: Always included so httpOnly cookies are sent automatically
  */
 export async function apiFetch(path: string, options: RequestInit = {}) {
-  // ALWAYS use relative paths so requests go through the Next.js proxy layer.
-  // The proxy (app/api/*/route.ts + lib/proxy-utils.ts) forwards to the backend
-  // and correctly relays Set-Cookie headers back to the browser.
-  //
-  // Previously, local dev sent requests directly to http://localhost:8000,
-  // which caused cross-origin cookie failures (httpOnly cookies set on port 8000
-  // are not sent with subsequent requests to port 3000) and bypassed the proxy's
-  // retry logic for backend cold starts — resulting in 503 errors.
   const url = path
 
-  const headers = new Headers(options.headers || {})
+  const buildHeaders = () => {
+    const headers = new Headers(options.headers || {})
+    const method = (options.method || 'GET').toUpperCase()
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+      const csrfToken = getCsrfToken()
+      if (csrfToken) {
+        headers.set('X-CSRF-Token', csrfToken)
+      } else if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
+        console.warn(`[apiFetch] No CSRF token for ${method} ${path} — request may be rejected with 403`)
+      }
+    }
+    return headers
+  }
 
-  // Add CSRF token for state-changing requests (POST, PUT, PATCH, DELETE)
-  const method = (options.method || 'GET').toUpperCase()
-  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-    const csrfToken = getCsrfToken()
-    if (csrfToken) {
-      headers.set('X-CSRF-Token', csrfToken)
-    } else if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
-      console.warn(`[apiFetch] No CSRF token for ${method} ${path} — request may be rejected with 403`)
+  const doFetch = () =>
+    fetch(url, { ...options, headers: buildHeaders(), credentials: 'include' })
+
+  const response = await doFetch()
+
+  // Skip auto-refresh for auth endpoints to avoid infinite loops
+  if (response.status === 401 && !path.startsWith('/api/auth/')) {
+    const refreshed = await tryRefreshToken()
+    if (refreshed) {
+      return doFetch()
     }
   }
 
-  // Use credentials: 'include' to send httpOnly cookies automatically
-  // This is the primary (XSS-protected) auth mechanism
-  return fetch(url, {
-    ...options,
-    headers,
-    credentials: 'include',
-  })
+  return response
 }
 
 /**
