@@ -7,6 +7,7 @@ import { loadRazorpayScript, openRazorpayCheckout, type RazorpayPaymentResponse 
 import { Card, CardContent } from '@/components/ui'
 import { useSubscription } from '@/hooks/useSubscription'
 import { useCurrency, CURRENCIES, type Currency } from '@/hooks/useCurrency'
+import { apiFetch } from '@/lib/api'
 
 // Pricing tiers aligned with backend SubscriptionTier enum:
 // FREE (Seeker), BHAKTA, SADHAK, SIDDHA — 4-tier structure (March 2026)
@@ -465,10 +466,9 @@ export default function PricingPage() {
       },
       handler: async (response: RazorpayPaymentResponse) => {
         try {
-          const verifyResponse = await fetch('/api/subscriptions/verify-razorpay-payment', {
+          const verifyResponse = await apiFetch('/api/subscriptions/verify-razorpay-payment', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
             body: JSON.stringify({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -506,10 +506,9 @@ export default function PricingPage() {
     setLoading(tierId)
 
     try {
-      const response = await fetch('/api/subscriptions/checkout', {
+      const response = await apiFetch('/api/subscriptions/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({
           plan_tier: tierId,
           billing_period: isYearly ? 'yearly' : 'monthly',
