@@ -44,24 +44,20 @@ def _get_rate_limit_key(request: Request) -> str:
     if user_id:
         return f"user:{user_id}"
 
-    # Try Authorization header (JWT token -> extract sub claim without full verification)
+    # Try Authorization header — use a hash of the raw token as a rate-limit key.
+    # SECURITY: We intentionally do NOT decode JWT claims here because the rate
+    # limiter runs BEFORE auth middleware.  Trusting unverified claims would let
+    # an attacker forge a JWT with any "sub" to (a) evade their own rate limits
+    # by rotating user_ids, or (b) exhaust another user's rate-limit bucket (DoS).
+    # Hashing the raw token produces a deterministic, per-token key that is safe
+    # against both attacks while still giving each real token its own bucket.
     auth_header = request.headers.get("authorization", "")
     if auth_header.startswith("Bearer "):
-        try:
-            import base64
-            import json
-            token = auth_header[7:]
-            # Decode JWT payload (middle segment) without verification — just for key extraction
-            payload_b64 = token.split(".")[1]
-            # Add padding
-            padding = 4 - len(payload_b64) % 4
-            payload_b64 += "=" * padding
-            payload = json.loads(base64.urlsafe_b64decode(payload_b64))
-            sub = payload.get("sub") or payload.get("user_id")
-            if sub:
-                return f"user:{sub}"
-        except Exception:
-            pass  # Fall through to IP-based
+        import hashlib
+        token = auth_header[7:]
+        if token:
+            token_hash = hashlib.sha256(token.encode()).hexdigest()[:32]
+            return f"token:{token_hash}"
 
     # Try session cookie
     session_token = request.cookies.get("session_token")

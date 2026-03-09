@@ -191,10 +191,9 @@ function AuthenticatedAccountView({
   const tierDisplayName = subscription?.tierName ?? 'Free'
   const tierColors: Record<string, string> = {
     free: 'border-[#d4a44c]/30 bg-[#d4a44c]/10 text-[#e8b54a]',
-    basic: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-300',
-    premium: 'border-purple-400/30 bg-purple-400/10 text-purple-300',
-    enterprise: 'border-[#d4a44c]/30 bg-[#d4a44c]/10 text-[#e8b54a]',
-    premier: 'border-rose-400/30 bg-rose-400/10 text-rose-300',
+    bhakta: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-300',
+    sadhak: 'border-purple-400/30 bg-purple-400/10 text-purple-300',
+    siddha: 'border-rose-400/30 bg-rose-400/10 text-rose-300',
   }
   const tierBadgeClass = tierColors[tier] || tierColors.free
 

@@ -2,7 +2,7 @@
 
 import logging
 from collections import deque
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -31,7 +31,7 @@ class BufferedLogHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         try:
             entry = {
-                "timestamp": datetime.utcfromtimestamp(record.created).isoformat() + "Z",
+                "timestamp": datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
                 "level": record.levelname,
                 "logger": record.name,
                 "message": self.format(record),

@@ -265,7 +265,7 @@ async def get_kiaan_quota_usage(
     
     # Usage by tier (simplified - group by limit as proxy for tier)
     usage_by_tier: dict[str, dict] = {}
-    tier_limits = {10: "free", 50: "basic", 200: "premium", 1000: "enterprise"}
+    tier_limits = {5: "free", 50: "bhakta", 300: "sadhak", -1: "siddha"}
     
     for limit, tier_name in tier_limits.items():
         tier_stmt = select(

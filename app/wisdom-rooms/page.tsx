@@ -13,10 +13,7 @@ import { apiFetch } from '@/lib/api'
  */
 function getBackendWsUrl(): string {
   const backendUrl =
-    process.env.NEXT_PUBLIC_API_URL ||
-    (typeof window !== 'undefined' && process.env.NODE_ENV === 'production'
-      ? 'https://mindvibe-api.onrender.com'
-      : 'http://localhost:8000')
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
   return backendUrl.replace(/^http/, 'ws')
 }
 

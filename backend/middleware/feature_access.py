@@ -2,7 +2,7 @@
 
 Provides decorators and dependencies for enforcing subscription-based access control:
 - require_subscription() - Ensures user has active subscription
-- require_kiaan_quota() - Enforces 15 question limit for free tier
+- require_kiaan_quota() - Enforces 5 question limit for free tier
 - require_journal_access() - Blocks free tier from journal
 - require_feature(feature_name) - Generic feature guard
 - Developer bypass for app owners
@@ -220,7 +220,7 @@ class SubscriptionRequired:
 class KiaanQuotaRequired:
     """Dependency that enforces KIAAN question quota.
 
-    Free tier users are limited to 15 questions per month.
+    Free tier users are limited to 5 questions per month.
     """
 
     async def __call__(
@@ -316,7 +316,7 @@ class JournalAccessRequired:
                     "error": "feature_not_available",
                     "feature": "encrypted_journal",
                     "message": "Encrypted journal is a premium feature. "
-                              "Upgrade to Basic or higher to access your private journal.",
+                              "Upgrade to Bhakta or higher to access your private journal.",
                     "tier": tier.value,
                     "upgrade_url": "/subscription/upgrade",
                 },

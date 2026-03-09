@@ -155,17 +155,23 @@ async def admin_login(
     # Check MFA requirement
     if admin.mfa_enabled:
         if not payload.mfa_code:
-            # Return indicator that MFA is required
-            return AdminLoginOut(
-                access_token="",
-                token_type="bearer",
-                session_id="",
-                expires_in=0,
-                admin_id=admin.id,
-                email=admin.email,
-                full_name=admin.full_name,
-                role=admin.role.value,
-                mfa_required=True,
+            # Return HTTP 202 to indicate MFA step is needed.
+            # Using 202 (Accepted) instead of 200 with an empty token avoids
+            # confusing the frontend into treating "" as a valid credential.
+            return Response(
+                content=AdminLoginOut(
+                    access_token="",
+                    token_type="bearer",
+                    session_id="",
+                    expires_in=0,
+                    admin_id=admin.id,
+                    email=admin.email,
+                    full_name=admin.full_name,
+                    role=admin.role.value,
+                    mfa_required=True,
+                ).model_dump_json(),
+                status_code=status.HTTP_202_ACCEPTED,
+                media_type="application/json",
             )
         
         # Verify MFA code
