@@ -171,8 +171,14 @@ class SarvamProvider(AIProvider):
                     status_code=response.status_code,
                 )
 
-            # Parse response
-            data = response.json()
+            # Parse response — guard against malformed JSON (e.g. HTML error pages)
+            try:
+                data = response.json()
+            except json.JSONDecodeError as exc:
+                raise InvalidResponseError(
+                    f"Sarvam returned non-JSON response: {response.text[:200]}",
+                    self.name,
+                ) from exc
 
             # Extract content
             choices = data.get("choices", [])
