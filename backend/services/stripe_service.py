@@ -154,7 +154,7 @@ def get_stripe_public_details() -> dict[str, str]:
         dict: The configured public details for display/verification.
     """
     return {
-        "statement_descriptor": os.getenv("STRIPE_STATEMENT_DESCRIPTOR", "MINDVIBE"),
+        "statement_descriptor": os.getenv("STRIPE_STATEMENT_DESCRIPTOR", "KIAANVERSE.COM"),
         "statement_descriptor_suffix": os.getenv("STRIPE_STATEMENT_DESCRIPTOR_SUFFIX", ""),
         "support_phone": os.getenv("STRIPE_SUPPORT_PHONE", ""),
         "support_email": os.getenv("STRIPE_SUPPORT_EMAIL", ""),
@@ -307,8 +307,13 @@ async def create_checkout_session(
             payment_method_types = ["card", "paypal"]
 
         # Create checkout session with public details for customer statements
-        statement_descriptor = os.getenv("STRIPE_STATEMENT_DESCRIPTOR", "MINDVIBE")
-        statement_descriptor_suffix = os.getenv("STRIPE_STATEMENT_DESCRIPTOR_SUFFIX", "")
+        statement_descriptor = os.getenv("STRIPE_STATEMENT_DESCRIPTOR", "KIAANVERSE.COM")
+        # Dynamic suffix per tier: customers see "KIAANVERSE.COM* BHAKTA" etc.
+        # Falls back to static STRIPE_STATEMENT_DESCRIPTOR_SUFFIX if set, else uses tier name
+        tier_suffix = plan_tier.value.upper()[:10]  # e.g. "BHAKTA", "SADHAK", "SIDDHA"
+        statement_descriptor_suffix = (
+            os.getenv("STRIPE_STATEMENT_DESCRIPTOR_SUFFIX", "") or tier_suffix
+        )
 
         session_params: dict[str, Any] = {
             "mode": "subscription",
@@ -327,12 +332,12 @@ async def create_checkout_session(
         }
 
         # Add payment intent data with statement descriptor for card payments
+        # Customers see: "KIAANVERSE.COM* BHAKTA" on their bank statement
         if "card" in payment_method_types:
             payment_intent_data: dict[str, Any] = {
                 "statement_descriptor": statement_descriptor[:22],
+                "statement_descriptor_suffix": statement_descriptor_suffix[:10],
             }
-            if statement_descriptor_suffix:
-                payment_intent_data["statement_descriptor_suffix"] = statement_descriptor_suffix[:10]
             session_params["payment_intent_data"] = payment_intent_data
         
         if customer_id:

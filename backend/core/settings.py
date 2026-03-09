@@ -204,7 +204,7 @@ class Settings(BaseSettings):
 
     # Stripe Public Details (visible on customer statements, invoices, receipts)
     # Statement descriptor: 5-22 chars, appears on bank/credit card statements
-    STRIPE_STATEMENT_DESCRIPTOR: str = os.getenv("STRIPE_STATEMENT_DESCRIPTOR", "MINDVIBE")
+    STRIPE_STATEMENT_DESCRIPTOR: str = os.getenv("STRIPE_STATEMENT_DESCRIPTOR", "KIAANVERSE.COM")
     # Statement descriptor suffix: 2-10 chars, appended for individual products
     STRIPE_STATEMENT_DESCRIPTOR_SUFFIX: str = os.getenv("STRIPE_STATEMENT_DESCRIPTOR_SUFFIX", "")
     # Customer support phone number displayed on receipts and invoices
