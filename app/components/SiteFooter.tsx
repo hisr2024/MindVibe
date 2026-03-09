@@ -48,6 +48,9 @@ export default function SiteFooter() {
               <Link className="text-white/70 transition hover:text-[#e8b54a]" href="/contact">
                 {t('navigation.mainNav.contact', 'Contact')}
               </Link>
+              <Link className="text-white/70 transition hover:text-[#e8b54a]" href="/feedback">
+                {t('navigation.footer.feedback', 'Feedback')}
+              </Link>
               <Link className="text-white/70 transition hover:text-[#e8b54a]" href="/privacy">
                 {t('navigation.footer.privacy', 'Privacy')}
               </Link>
