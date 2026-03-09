@@ -2,6 +2,7 @@
 
 import { useState, useCallback, type FormEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import Link from 'next/link'
 import {
   MessageSquareHeart,
   X,
@@ -154,12 +155,12 @@ export default function FeedbackWidget() {
                   <h3 className="text-sm font-semibold text-[#f5f0e8]">
                     Quick Feedback
                   </h3>
-                  <a
+                  <Link
                     href="/feedback"
                     className="text-[10px] text-[#d4a44c]/60 underline underline-offset-2 transition hover:text-[#d4a44c]"
                   >
                     Detailed form
-                  </a>
+                  </Link>
                 </div>
 
                 {/* Type Selector */}

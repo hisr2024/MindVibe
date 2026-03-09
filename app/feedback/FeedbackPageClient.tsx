@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useCallback, useRef, type FormEvent } from 'react'
+import { useState, useCallback, type FormEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Link from 'next/link'
 import {
   MessageSquareHeart,
   Star,
@@ -124,7 +125,6 @@ export default function FeedbackPageClient() {
   const [formData, setFormData] = useState<FeedbackFormData>(INITIAL_FORM_DATA)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [hoveredRating, setHoveredRating] = useState(0)
-  const formRef = useRef<HTMLFormElement>(null)
 
   const selectedCategory = CATEGORIES.find((c) => c.id === formData.category)
 
@@ -244,7 +244,7 @@ export default function FeedbackPageClient() {
                     className={`group flex items-start gap-3 rounded-2xl border border-[#d4a44c]/10 bg-gradient-to-br ${cat.gradient} p-4 text-left transition-all duration-200 hover:border-[#d4a44c]/30 hover:shadow-[0_8px_40px_rgba(212,164,76,0.08)] active:scale-[0.98]`}
                   >
                     <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#d4a44c]/10 transition-colors group-hover:bg-[#d4a44c]/20">
-                      <Icon className="h-4.5 w-4.5 text-[#d4a44c]" />
+                      <Icon className="h-[18px] w-[18px] text-[#d4a44c]" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-[#f5f0e8]">
@@ -392,7 +392,7 @@ export default function FeedbackPageClient() {
               </div>
             </div>
 
-            <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* Title */}
               <div className="space-y-1.5">
                 <label
@@ -603,13 +603,13 @@ export default function FeedbackPageClient() {
               >
                 Share More Feedback
               </button>
-              <a
+              <Link
                 href="/dashboard"
                 className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#d4a44c] to-[#e8b54a] px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:scale-[1.02]"
               >
                 Return to Dashboard
                 <ChevronRight className="h-3.5 w-3.5" />
-              </a>
+              </Link>
             </div>
           </motion.section>
         )}
