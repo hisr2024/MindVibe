@@ -86,10 +86,10 @@ BEGIN
             DROP CONSTRAINT subscription_plans_tier_check;
     END IF;
 
-    -- Add updated constraint that includes 'premier'
+    -- Add updated constraint with canonical tier names
     ALTER TABLE subscription_plans
         ADD CONSTRAINT subscription_plans_tier_check
-        CHECK (tier IN ('free', 'basic', 'premium', 'enterprise', 'premier'));
+        CHECK (tier IN ('free', 'bhakta', 'sadhak', 'siddha'));
 EXCEPTION
     WHEN duplicate_object THEN
         -- Constraint already exists with correct definition
@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS subscription_links (
     id SERIAL PRIMARY KEY,
     razorpay_subscription_id VARCHAR(128) NOT NULL UNIQUE,
     razorpay_plan_id VARCHAR(128) NOT NULL,
-    plan_tier VARCHAR(32) NOT NULL CHECK (plan_tier IN ('free', 'basic', 'premium', 'enterprise', 'premier')),
+    plan_tier VARCHAR(32) NOT NULL CHECK (plan_tier IN ('free', 'bhakta', 'sadhak', 'siddha')),
     billing_period VARCHAR(16) DEFAULT 'monthly',
     short_url VARCHAR(512) NOT NULL,
     status VARCHAR(32) DEFAULT 'created' CHECK (status IN ('created', 'authenticated', 'active', 'pending', 'halted', 'cancelled', 'completed', 'expired')),
@@ -143,13 +143,13 @@ CREATE INDEX IF NOT EXISTS idx_subscription_links_created_by_admin_id
 -- 6. Fix default value mismatches (model vs migration)
 -- ============================================================
 
--- kiaan_questions_monthly: model default=20, original migration default=10
+-- kiaan_questions_monthly: free tier default=5 (matches feature_config.py)
 ALTER TABLE subscription_plans
-    ALTER COLUMN kiaan_questions_monthly SET DEFAULT 20;
+    ALTER COLUMN kiaan_questions_monthly SET DEFAULT 5;
 
--- usage_limit: model default=20, original migration default=10
+-- usage_limit: free tier default=5 (matches feature_config.py)
 ALTER TABLE usage_tracking
-    ALTER COLUMN usage_limit SET DEFAULT 20;
+    ALTER COLUMN usage_limit SET DEFAULT 5;
 
 -- ============================================================
 -- 7. Add missing index on payments.stripe_invoice_id

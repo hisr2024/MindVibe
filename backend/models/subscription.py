@@ -79,7 +79,7 @@ class SubscriptionPlan(Base):
         String(128), nullable=True
     )
     features: Mapped[dict] = mapped_column(JSON, default=dict)
-    kiaan_questions_monthly: Mapped[int] = mapped_column(Integer, default=20)
+    kiaan_questions_monthly: Mapped[int] = mapped_column(Integer, default=5)
     encrypted_journal: Mapped[bool] = mapped_column(Boolean, default=False)
     data_retention_days: Mapped[int] = mapped_column(Integer, default=30)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -162,7 +162,7 @@ class UsageTracking(Base):
     )
     period_end: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True))
     usage_count: Mapped[int] = mapped_column(Integer, default=0)
-    usage_limit: Mapped[int] = mapped_column(Integer, default=20)
+    usage_limit: Mapped[int] = mapped_column(Integer, default=5)
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )

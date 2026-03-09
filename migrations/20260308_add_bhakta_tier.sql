@@ -5,27 +5,28 @@
 -- Dependencies: Requires subscription_plans and user_subscriptions tables.
 
 -- Clean up legacy/typo tier values before applying the new CHECK constraint.
--- 'premier' is a known typo for 'premium'. If 'premium' already exists, delete the
--- duplicate 'premier' row; otherwise rename it.
+-- Remap all old tier names to the canonical 4-tier system:
+--   basic → bhakta, premium/premier → sadhak, enterprise → siddha
+-- Delete duplicates first, then remap.
 DELETE FROM subscription_plans
-    WHERE tier = 'premier'
-    AND EXISTS (SELECT 1 FROM subscription_plans sp2 WHERE sp2.tier = 'premium');
-UPDATE subscription_plans SET tier = 'premium' WHERE tier = 'premier';
--- Map any other unknown tier values to 'free' (skip if 'free' row already exists to
--- avoid unique constraint violations — just delete the unknown rows instead).
+    WHERE tier IN ('premier', 'basic', 'premium', 'enterprise')
+    AND EXISTS (SELECT 1 FROM subscription_plans sp2 WHERE sp2.tier IN ('free', 'bhakta', 'sadhak', 'siddha') AND sp2.tier != subscription_plans.tier);
+UPDATE subscription_plans SET tier = 'bhakta' WHERE tier = 'basic';
+UPDATE subscription_plans SET tier = 'sadhak' WHERE tier IN ('premium', 'premier');
+UPDATE subscription_plans SET tier = 'siddha' WHERE tier = 'enterprise';
+-- Map any remaining unknown tier values to 'free'
 DELETE FROM subscription_plans
-    WHERE tier NOT IN ('free', 'bhakta', 'basic', 'sadhak', 'premium', 'siddha', 'enterprise')
+    WHERE tier NOT IN ('free', 'bhakta', 'sadhak', 'siddha')
     AND EXISTS (SELECT 1 FROM subscription_plans sp2 WHERE sp2.tier = 'free');
 UPDATE subscription_plans SET tier = 'free'
-    WHERE tier NOT IN ('free', 'bhakta', 'basic', 'sadhak', 'premium', 'siddha', 'enterprise');
+    WHERE tier NOT IN ('free', 'bhakta', 'sadhak', 'siddha');
 
--- Update the CHECK constraint on subscription_plans.tier to include new tiers
--- First drop the old constraint, then add the new one
+-- Update the CHECK constraint on subscription_plans.tier to canonical 4 tiers only
 ALTER TABLE subscription_plans DROP CONSTRAINT IF EXISTS subscription_plans_tier_check;
 ALTER TABLE subscription_plans ADD CONSTRAINT subscription_plans_tier_check
-    CHECK (tier IN ('free', 'bhakta', 'basic', 'sadhak', 'premium', 'siddha', 'enterprise'));
+    CHECK (tier IN ('free', 'bhakta', 'sadhak', 'siddha'));
 
 -- Update any CHECK constraints on subscription_links.plan_tier
 ALTER TABLE subscription_links DROP CONSTRAINT IF EXISTS subscription_links_plan_tier_check;
 ALTER TABLE subscription_links ADD CONSTRAINT subscription_links_plan_tier_check
-    CHECK (plan_tier IN ('free', 'bhakta', 'basic', 'sadhak', 'premium', 'siddha', 'enterprise'));
+    CHECK (plan_tier IN ('free', 'bhakta', 'sadhak', 'siddha'));
