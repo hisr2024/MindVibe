@@ -11,11 +11,11 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Pricing | Sakha',
   description:
-    'Choose the perfect Sakha plan for your spiritual journey. Free, Plus, Pro, and Elite tiers with KIAAN AI guidance, sacred wisdom journeys, and divine tools.',
+    'Choose the perfect Sakha plan for your spiritual journey. Free, Bhakta, Sadhak, and Siddha tiers with KIAAN AI guidance, sacred wisdom journeys, and divine tools.',
   openGraph: {
     title: 'Pricing — Sakha Spiritual Companion Plans',
     description:
-      'Start free with 15 KIAAN questions/month. Upgrade for unlimited divine guidance, wisdom journeys, and sacred tools rooted in the Bhagavad Gita.',
+      'Start free with 5 KIAAN questions/month. Upgrade for unlimited divine guidance, wisdom journeys, and sacred tools rooted in the Bhagavad Gita.',
     url: 'https://kiaanverse.com/pricing',
   },
   alternates: {

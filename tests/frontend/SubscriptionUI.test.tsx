@@ -67,37 +67,37 @@ const SubscriptionStatus = ({
 }
 
 describe('QuotaDisplay Component', () => {
-  describe('Free Tier Quota (20 questions)', () => {
+  describe('Free Tier Quota (5 questions)', () => {
     it('displays used count', () => {
       render(
-        <QuotaDisplay used={5} limit={20} feature="KIAAN Questions" />
+        <QuotaDisplay used={3} limit={5} feature="KIAAN Questions" />
       )
 
-      expect(screen.getByTestId('quota-used')).toHaveTextContent('5 used')
+      expect(screen.getByTestId('quota-used')).toHaveTextContent('3 used')
     })
 
     it('displays remaining count', () => {
       render(
-        <QuotaDisplay used={5} limit={20} feature="KIAAN Questions" />
+        <QuotaDisplay used={3} limit={5} feature="KIAAN Questions" />
       )
 
-      expect(screen.getByTestId('quota-remaining')).toHaveTextContent('15 remaining')
+      expect(screen.getByTestId('quota-remaining')).toHaveTextContent('2 remaining')
     })
 
     it('displays progress bar', () => {
       render(
-        <QuotaDisplay used={5} limit={20} feature="KIAAN Questions" />
+        <QuotaDisplay used={3} limit={5} feature="KIAAN Questions" />
       )
 
       const progressBar = screen.getByRole('progressbar')
       expect(progressBar).toBeInTheDocument()
-      expect(progressBar).toHaveAttribute('aria-valuenow', '5')
-      expect(progressBar).toHaveAttribute('aria-valuemax', '20')
+      expect(progressBar).toHaveAttribute('aria-valuenow', '3')
+      expect(progressBar).toHaveAttribute('aria-valuemax', '5')
     })
 
     it('shows 0 remaining when quota exhausted', () => {
       render(
-        <QuotaDisplay used={20} limit={20} feature="KIAAN Questions" />
+        <QuotaDisplay used={5} limit={5} feature="KIAAN Questions" />
       )
 
       expect(screen.getByTestId('quota-remaining')).toHaveTextContent('0 remaining')
@@ -105,15 +105,15 @@ describe('QuotaDisplay Component', () => {
 
     it('shows full usage at 100%', () => {
       render(
-        <QuotaDisplay used={20} limit={20} feature="KIAAN Questions" />
+        <QuotaDisplay used={5} limit={5} feature="KIAAN Questions" />
       )
 
       expect(screen.getByTestId('quota-progress')).toHaveTextContent('100%')
     })
   })
 
-  describe('Premium Tier Quota (Unlimited)', () => {
-    it('displays unlimited for premium users', () => {
+  describe('Siddha Tier Quota (Unlimited)', () => {
+    it('displays unlimited for siddha users', () => {
       render(
         <QuotaDisplay used={150} limit="unlimited" feature="KIAAN Questions" />
       )
@@ -141,7 +141,7 @@ describe('QuotaDisplay Component', () => {
   describe('Accessibility', () => {
     it('has accessible status role', () => {
       render(
-        <QuotaDisplay used={5} limit={20} feature="KIAAN Questions" />
+        <QuotaDisplay used={3} limit={5} feature="KIAAN Questions" />
       )
 
       expect(screen.getByRole('status')).toBeInTheDocument()
@@ -153,15 +153,15 @@ describe('SubscriptionStatus Component', () => {
   describe('Active Subscription', () => {
     it('displays tier name', () => {
       render(
-        <SubscriptionStatus tier="Premium" status="active" renewsAt="2024-02-01" />
+        <SubscriptionStatus tier="Sadhak" status="active" renewsAt="2024-02-01" />
       )
 
-      expect(screen.getByTestId('tier')).toHaveTextContent('Premium')
+      expect(screen.getByTestId('tier')).toHaveTextContent('Sadhak')
     })
 
     it('displays active status', () => {
       render(
-        <SubscriptionStatus tier="Premium" status="active" renewsAt="2024-02-01" />
+        <SubscriptionStatus tier="Sadhak" status="active" renewsAt="2024-02-01" />
       )
 
       expect(screen.getByTestId('status')).toHaveTextContent('active')
@@ -169,7 +169,7 @@ describe('SubscriptionStatus Component', () => {
 
     it('displays renewal date', () => {
       render(
-        <SubscriptionStatus tier="Premium" status="active" renewsAt="2024-02-01" />
+        <SubscriptionStatus tier="Sadhak" status="active" renewsAt="2024-02-01" />
       )
 
       expect(screen.getByTestId('renews-at')).toHaveTextContent('Renews: 2024-02-01')
@@ -179,7 +179,7 @@ describe('SubscriptionStatus Component', () => {
   describe('Canceled Subscription', () => {
     it('displays canceled status', () => {
       render(
-        <SubscriptionStatus tier="Basic" status="canceled" />
+        <SubscriptionStatus tier="Bhakta" status="canceled" />
       )
 
       expect(screen.getByTestId('status')).toHaveTextContent('canceled')
@@ -187,7 +187,7 @@ describe('SubscriptionStatus Component', () => {
 
     it('does not show renewal date when canceled', () => {
       render(
-        <SubscriptionStatus tier="Basic" status="canceled" />
+        <SubscriptionStatus tier="Bhakta" status="canceled" />
       )
 
       expect(screen.queryByTestId('renews-at')).not.toBeInTheDocument()
@@ -197,7 +197,7 @@ describe('SubscriptionStatus Component', () => {
   describe('Past Due Subscription', () => {
     it('displays past_due status', () => {
       render(
-        <SubscriptionStatus tier="Premium" status="past_due" />
+        <SubscriptionStatus tier="Sadhak" status="past_due" />
       )
 
       expect(screen.getByTestId('status')).toHaveTextContent('past_due')
@@ -216,8 +216,8 @@ describe('SubscriptionStatus Component', () => {
 })
 
 describe('Subscription UI Integration', () => {
-  it('displays correct quota for free tier (20 questions)', () => {
-    const freeUserQuota = { used: 3, limit: 20 }
+  it('displays correct quota for free tier (5 questions)', () => {
+    const freeUserQuota = { used: 3, limit: 5 }
 
     render(
       <QuotaDisplay
@@ -228,16 +228,16 @@ describe('Subscription UI Integration', () => {
     )
 
     expect(screen.getByTestId('quota-used')).toHaveTextContent('3 used')
-    expect(screen.getByTestId('quota-remaining')).toHaveTextContent('17 remaining')
+    expect(screen.getByTestId('quota-remaining')).toHaveTextContent('2 remaining')
   })
 
-  it('displays correct quota for basic tier (50 questions)', () => {
-    const basicUserQuota = { used: 45, limit: 50 }
+  it('displays correct quota for bhakta tier (50 questions)', () => {
+    const bhaktaUserQuota = { used: 45, limit: 50 }
 
     render(
       <QuotaDisplay
-        used={basicUserQuota.used}
-        limit={basicUserQuota.limit}
+        used={bhaktaUserQuota.used}
+        limit={bhaktaUserQuota.limit}
         feature="KIAAN Questions"
       />
     )

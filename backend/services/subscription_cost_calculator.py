@@ -61,6 +61,7 @@ DEFAULT_AVG_COMPLETION_TOKENS = 200  # Average KIAAN response length
 # ---------------------------------------------------------------------------
 INFRA_COST_PER_TIER: dict[str, float] = {
     "free":    0.00,   # Subsidized by paid tiers
+    "bhakta":  1.50,   # Entry paid tier infra allocation
     "sadhak":  3.00,   # Shared infra allocation
     "siddha":  8.00,   # Highest usage allocation
 }
@@ -68,6 +69,7 @@ INFRA_COST_PER_TIER: dict[str, float] = {
 # Default profit margin percentages by tier
 DEFAULT_PROFIT_MARGINS: dict[str, float] = {
     "free":    0.0,    # 0% - loss leader / acquisition funnel
+    "bhakta":  80.0,   # 80% margin target ($6.99 price)
     "sadhak":  76.0,   # 76% margin target ($12.99 price)
     "siddha":  63.0,   # 63% margin target ($22.99 price)
 }
@@ -75,6 +77,7 @@ DEFAULT_PROFIT_MARGINS: dict[str, float] = {
 # Tier quota definitions (mirrors feature_config.py, kept here for standalone use)
 TIER_QUOTAS: dict[str, int] = {
     "free":    5,
+    "bhakta":  50,     # Bhakta tier
     "sadhak":  300,    # Sadhak tier
     "siddha":  2000,   # Siddha tier — unlimited, estimate for costing
 }
@@ -165,7 +168,7 @@ def calculate_tier_cost(
     """Calculate the full cost breakdown for a subscription tier.
 
     Args:
-        tier: Tier name (free, basic, premium, enterprise, premier).
+        tier: Tier name (free, bhakta, sadhak, siddha).
         cost_per_question: OpenAI cost per single KIAAN question.
         monthly_questions: Expected monthly questions for the tier.
         infra_cost: Monthly infrastructure cost allocation.
@@ -245,6 +248,7 @@ def calculate_subscription_costs(
     margins = {**DEFAULT_PROFIT_MARGINS, **(profit_margins or {})}
     prices = current_prices or {
         "free": 0.00,
+        "bhakta": 6.99,     # Bhakta tier
         "sadhak": 12.99,    # Sadhak tier
         "siddha": 22.99,    # Siddha tier
     }
@@ -263,7 +267,7 @@ def calculate_subscription_costs(
     total_revenue = 0.0
     total_cost = 0.0
 
-    for tier_name in ["free", "sadhak", "siddha"]:
+    for tier_name in ["free", "bhakta", "sadhak", "siddha"]:
         monthly_q = quotas.get(tier_name, 0)
 
         breakdown = calculate_tier_cost(

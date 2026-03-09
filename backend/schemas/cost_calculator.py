@@ -28,13 +28,13 @@ class CostCalculatorRequest(BaseModel):
     )
     profit_margins: dict[str, float] | None = Field(
         default=None,
-        description="Target profit margin % per tier. Keys: free, basic, premium, enterprise. Values: 0-99.",
+        description="Target profit margin % per tier. Keys: free, bhakta, sadhak, siddha. Values: 0-99.",
     )
     enterprise_estimated_questions: int = Field(
         default=2000,
         ge=100,
         le=100000,
-        description="Estimated monthly questions for enterprise tier (unlimited quota).",
+        description="Estimated monthly questions for siddha tier (unlimited quota).",
     )
 
 

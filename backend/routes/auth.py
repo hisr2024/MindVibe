@@ -386,7 +386,7 @@ async def login(
         expires_in=expires_in_seconds,
         user_id=user.id,
         email=user.email,
-        subscription_tier="premier" if is_dev else sub_tier,
+        subscription_tier="siddha" if is_dev else sub_tier,
         subscription_status=sub_status,
         is_developer=is_dev,
     )
@@ -634,7 +634,7 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
         session_expires_at=session_row.expires_at,
         session_last_used_at=session_row.last_used_at,
         access_token_expires_in=access_token_expires_in,
-        subscription_tier="premier" if is_dev else sub_tier,
+        subscription_tier="siddha" if is_dev else sub_tier,
         subscription_status=sub_status,
         is_developer=is_dev,
     )
@@ -1060,8 +1060,8 @@ async def developer_status(
     return DeveloperStatusOut(
         is_developer=is_dev,
         email=user.email,
-        effective_tier="premier" if is_dev else sub_tier,
+        effective_tier="siddha" if is_dev else sub_tier,
         features_unlocked=is_dev,
-        subscription_tier="premier" if is_dev else sub_tier,
+        subscription_tier="siddha" if is_dev else sub_tier,
         subscription_status=sub_status,
     )

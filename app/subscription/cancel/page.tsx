@@ -25,7 +25,7 @@ export default function SubscriptionCancelPage() {
 
           <div className="rounded-xl bg-[#d4a44c]/10 border border-[#d4a44c]/20 p-4 mb-6">
             <p className="text-sm text-[#f5f0e8]/80">
-              You&apos;re currently on the <span className="font-semibold text-[#f5f0e8]">Free</span> plan with 20 KIAAN questions per month.
+              You&apos;re currently on the <span className="font-semibold text-[#f5f0e8]">Free</span> plan with 5 KIAAN questions per month.
             </p>
           </div>
 
