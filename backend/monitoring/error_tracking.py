@@ -60,6 +60,21 @@ if SENTRY_DSN:
         logger.warning("Sentry SDK not installed, error tracking disabled")
 
 
+def trigger_test_error() -> dict:
+    """Send a test event to Sentry to verify the integration is working."""
+    if not _sentry_available:
+        return {"success": False, "message": "Sentry is not configured (SENTRY_DSN not set)"}
+
+    import sentry_sdk
+    event_id = sentry_sdk.capture_message("MindVibe backend Sentry test")
+    logger.info(f"Sentry test event sent: {event_id}")
+    return {
+        "success": True,
+        "message": "Test event sent to Sentry. Check your Sentry dashboard.",
+        "event_id": str(event_id),
+    }
+
+
 def track_errors(func: F) -> F:
     """Decorator to track errors in endpoints with Sentry context."""
     @wraps(func)
