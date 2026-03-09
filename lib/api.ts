@@ -13,6 +13,13 @@ function getCsrfToken(): string | null {
 let _refreshPromise: Promise<boolean> | null = null
 
 async function tryRefreshToken(): Promise<boolean> {
+  // If the user never logged in (no profile in localStorage), there is no
+  // refresh_token cookie to send.  Skipping the request avoids a guaranteed
+  // 400 "Missing refresh token" that clutters the browser console.
+  if (typeof window !== 'undefined' && !localStorage.getItem('mindvibe_auth_user')) {
+    return false
+  }
+
   if (_refreshPromise) return _refreshPromise
 
   _refreshPromise = (async () => {
