@@ -12,6 +12,7 @@ import { LanguageSelector } from '@/components/chat/LanguageSelector';
 import { getNextStepSuggestion, extractThemes } from '@/lib/suggestions/nextStep';
 import { useNextStepStore } from '@/lib/suggestions/store';
 import { useKiaanQuota } from '@/hooks/useKiaanQuota';
+import { useSubscription } from '@/hooks/useSubscription';
 
 // Dynamic imports for secondary UI components
 const PathwayMap = dynamic(
@@ -37,8 +38,11 @@ function KiaanChatPageInner() {
   // Session tracking for conversation continuity
   const [sessionId] = useState(() => crypto.randomUUID());
 
+  // Get user's actual subscription tier for accurate quota tracking
+  const { subscription } = useSubscription();
+
   // KIAAN quota tracking — shows remaining questions, warns before limit
-  const quota = useKiaanQuota('free');
+  const quota = useKiaanQuota(subscription?.tierId ?? 'free');
 
   // Ref to always access the latest handleSendMessage without stale closures
   const handleSendMessageRef = useRef<(text: string) => Promise<void>>();
