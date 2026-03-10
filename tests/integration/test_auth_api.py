@@ -22,6 +22,7 @@ async def test_user(test_db: AsyncSession):
         auth_uid="test-auth-uid-123",
         email=TEST_USER_EMAIL,
         hashed_password=hash_password(TEST_USER_PASSWORD),
+        email_verified=True,
     )
     test_db.add(user)
     await test_db.commit()
