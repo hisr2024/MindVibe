@@ -546,7 +546,11 @@ export default function PricingPage() {
       if (data.provider === 'razorpay') {
         await handleRazorpayCheckout(data, tierId)
       } else if (data.checkout_url) {
+        // Redirect to Stripe Checkout — page will navigate away
         window.location.href = data.checkout_url
+      } else {
+        // Backend returned success but no checkout URL — surface the error
+        throw new Error('No payment link received. Please try again or contact support.')
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.'

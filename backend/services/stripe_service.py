@@ -306,14 +306,10 @@ async def create_checkout_session(
             # Default: offer card (includes Google Pay) and PayPal
             payment_method_types = ["card", "paypal"]
 
-        # Create checkout session with public details for customer statements
-        statement_descriptor = os.getenv("STRIPE_STATEMENT_DESCRIPTOR", "KIAANVERSE.COM")
-        # Dynamic suffix per tier: customers see "KIAANVERSE.COM* BHAKTA" etc.
-        # Falls back to static STRIPE_STATEMENT_DESCRIPTOR_SUFFIX if set, else uses tier name
-        tier_suffix = plan_tier.value.upper()[:10]  # e.g. "BHAKTA", "SADHAK", "SIDDHA"
-        statement_descriptor_suffix = (
-            os.getenv("STRIPE_STATEMENT_DESCRIPTOR_SUFFIX", "") or tier_suffix
-        )
+        # Statement descriptors for recurring subscription payments are configured
+        # at the Stripe product/price level or via Account settings (see
+        # configure_stripe_public_details). They CANNOT be set via
+        # payment_intent_data in subscription-mode Checkout Sessions.
 
         session_params: dict[str, Any] = {
             "mode": "subscription",
@@ -335,14 +331,20 @@ async def create_checkout_session(
             },
         }
 
-        # Add payment intent data with statement descriptor for card payments
-        # Customers see: "KIAANVERSE.COM* BHAKTA" on their bank statement
+        # Set statement descriptor on the subscription itself so it appears
+        # on every recurring invoice. Stripe Checkout in subscription mode
+        # does NOT support statement_descriptor inside payment_intent_data
+        # (only metadata, description, and setup_future_usage are allowed).
+        # Passing it there causes InvalidRequestError → 500 → no payment link.
         if "card" in payment_method_types:
-            payment_intent_data: dict[str, Any] = {
-                "statement_descriptor": statement_descriptor[:22],
-                "statement_descriptor_suffix": statement_descriptor_suffix[:10],
+            session_params["subscription_data"]["metadata"] = {
+                "user_id": str(user.id),
+                "plan_tier": plan_tier.value,
+                "billing_period": billing_period,
             }
-            session_params["payment_intent_data"] = payment_intent_data
+            # Statement descriptors for subscriptions are set at the
+            # Stripe product/price level or via the Account settings.
+            # We configure them via configure_stripe_public_details() on startup.
         
         if customer_id:
             session_params["customer"] = customer_id
