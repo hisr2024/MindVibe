@@ -325,10 +325,11 @@ async def create_checkout_session(
             "subscription_data": {
                 "description": f"KIAANVerse {plan_tier.value.capitalize()} Plan ({billing_period})",
             },
-            "invoice_settings": {
-                "description": f"KIAANVerse - {plan_tier.value.capitalize()} Plan ({billing_period})",
-                "footer": "Thank you for your spiritual wellness journey with KIAANVerse. For support: support@kiaanverse.com",
-            },
+            # NOTE: invoice_settings is NOT a valid parameter for
+            # checkout.Session.create(). It belongs on the Customer or
+            # Invoice object. Passing it here causes InvalidRequestError.
+            # Invoice description/footer are configured via subscription_data
+            # or at the Stripe Dashboard product/customer level.
         }
 
         # Set statement descriptor on the subscription itself so it appears
