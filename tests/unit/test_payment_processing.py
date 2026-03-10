@@ -139,6 +139,146 @@ class TestCheckoutSessionCreation:
             # Function should handle gracefully
             pass  # Expected behavior
 
+    @pytest.mark.asyncio
+    async def test_checkout_session_params_no_invalid_keys(self, test_db: AsyncSession):
+        """Test that Stripe checkout session params don't contain invalid keys.
+
+        Stripe Checkout in subscription mode rejects:
+        - payment_intent_data with statement_descriptor (only metadata/description/setup_future_usage allowed)
+        - invoice_settings (belongs on Customer/Invoice objects, not Checkout Session)
+
+        These caused InvalidRequestError → 500 → no payment link opened.
+        """
+        from backend.services.stripe_service import create_checkout_session
+
+        # Create user
+        user = User(
+            auth_uid="checkout-params-user",
+            email="checkout-params@example.com",
+            hashed_password="hashed_password",
+        )
+        test_db.add(user)
+        await test_db.commit()
+        await test_db.refresh(user)
+
+        # Create plan with a fake Stripe price ID
+        plan = SubscriptionPlan(
+            tier=SubscriptionTier.SADHAK,
+            name="Sadhak",
+            price_monthly=Decimal("14.99"),
+            kiaan_questions_monthly=300,
+            encrypted_journal=True,
+            data_retention_days=-1,
+            stripe_price_id_monthly="price_test_sadhak_monthly",
+        )
+        test_db.add(plan)
+        await test_db.commit()
+
+        # Mock Stripe to capture the session params
+        captured_params = {}
+
+        class FakeSession:
+            id = "cs_test_123"
+            url = "https://checkout.stripe.com/c/pay/cs_test_123"
+
+        def capture_create(**kwargs):
+            captured_params.update(kwargs)
+            return FakeSession()
+
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "sk_test_fake"}):
+            with patch("stripe.checkout.Session.create", side_effect=capture_create):
+                with patch("stripe.Customer.create", return_value=MagicMock(id="cus_test_123")):
+                    result = await create_checkout_session(
+                        test_db,
+                        user,
+                        SubscriptionTier.SADHAK,
+                        "monthly",
+                        "https://example.com/success",
+                        "https://example.com/cancel",
+                        payment_method="card",
+                    )
+
+        # Verify no invalid params were passed to Stripe
+        assert "invoice_settings" not in captured_params, (
+            "invoice_settings is not a valid checkout.Session.create() parameter"
+        )
+        assert "payment_intent_data" not in captured_params or (
+            "statement_descriptor" not in captured_params.get("payment_intent_data", {})
+        ), (
+            "payment_intent_data.statement_descriptor is not allowed in subscription mode"
+        )
+
+        # Verify valid params are present
+        assert captured_params["mode"] == "subscription"
+        assert captured_params["success_url"] == "https://example.com/success"
+        assert captured_params["cancel_url"] == "https://example.com/cancel"
+        assert captured_params["payment_method_types"] == ["card"]
+        assert len(captured_params["line_items"]) == 1
+        assert captured_params["line_items"][0]["price"] == "price_test_sadhak_monthly"
+
+        # Verify result
+        assert result is not None
+        assert result["checkout_url"] == "https://checkout.stripe.com/c/pay/cs_test_123"
+        assert result["session_id"] == "cs_test_123"
+
+    @pytest.mark.asyncio
+    async def test_checkout_session_paypal_no_payment_intent_data(self, test_db: AsyncSession):
+        """Test that PayPal checkout doesn't include payment_intent_data.
+
+        PayPal + payment_intent_data causes Stripe InvalidRequestError.
+        """
+        from backend.services.stripe_service import create_checkout_session
+
+        user = User(
+            auth_uid="paypal-params-user",
+            email="paypal-params@example.com",
+            hashed_password="hashed_password",
+        )
+        test_db.add(user)
+        await test_db.commit()
+        await test_db.refresh(user)
+
+        plan = SubscriptionPlan(
+            tier=SubscriptionTier.BHAKTA,
+            name="Bhakta",
+            price_monthly=Decimal("6.99"),
+            kiaan_questions_monthly=50,
+            encrypted_journal=True,
+            data_retention_days=90,
+            stripe_price_id_monthly="price_test_bhakta_monthly",
+        )
+        test_db.add(plan)
+        await test_db.commit()
+
+        captured_params = {}
+
+        class FakeSession:
+            id = "cs_test_paypal"
+            url = "https://checkout.stripe.com/c/pay/cs_test_paypal"
+
+        def capture_create(**kwargs):
+            captured_params.update(kwargs)
+            return FakeSession()
+
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "sk_test_fake"}):
+            with patch("stripe.checkout.Session.create", side_effect=capture_create):
+                with patch("stripe.Customer.create", return_value=MagicMock(id="cus_test_456")):
+                    result = await create_checkout_session(
+                        test_db,
+                        user,
+                        SubscriptionTier.BHAKTA,
+                        "monthly",
+                        "https://example.com/success",
+                        "https://example.com/cancel",
+                        payment_method="paypal",
+                    )
+
+        # PayPal must never have payment_intent_data
+        assert "payment_intent_data" not in captured_params, (
+            "payment_intent_data must not be present for PayPal checkouts"
+        )
+        assert captured_params["payment_method_types"] == ["paypal"]
+
 
 class TestWebhookSignatureVerification:
     """Test webhook signature verification."""
