@@ -1,4 +1,4 @@
-"""Authentication models: Session, RefreshToken, PasswordResetToken."""
+"""Authentication models: Session, RefreshToken, PasswordResetToken, EmailVerificationToken."""
 
 from __future__ import annotations
 
@@ -75,6 +75,32 @@ class PasswordResetToken(Base):
     """
 
     __tablename__ = "password_reset_tokens"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(
+        String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    token_hash: Mapped[str] = mapped_column(String(256), unique=True, index=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    expires_at: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True))
+    used_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True
+    )
+    ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
+
+
+class EmailVerificationToken(Base):
+    """Token for email address verification.
+
+    Token lifecycle:
+    1. User signs up → row created with hashed token, expires in 24 hours
+    2. User clicks email link → token verified, user.email_verified set True
+    3. Expired/used tokens are ignored on subsequent attempts
+    """
+
+    __tablename__ = "email_verification_tokens"
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     user_id: Mapped[str] = mapped_column(

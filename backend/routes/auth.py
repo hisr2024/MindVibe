@@ -13,11 +13,15 @@ from backend.core.settings import settings
 from backend.deps import get_db
 from backend.middleware.rate_limiter import limiter, AUTH_RATE_LIMIT
 from backend.models import Session, User
-from backend.models.auth import PasswordResetToken
+from backend.models.auth import EmailVerificationToken, PasswordResetToken
 from backend.security.jwt import create_access_token, decode_access_token
 from backend.security.password_hash import hash_password, verify_password
 from backend.security.password_policy import policy
-from backend.services.email_service import send_password_reset_email
+from backend.services.email_service import (
+    send_email_verification,
+    send_password_reset_email,
+    send_two_factor_code_email,
+)
 from backend.services.refresh_service import (
     create_refresh_token,
     get_refresh_token_by_raw,
@@ -60,6 +64,7 @@ class SignupOut(BaseModel):
     email: EmailStr
     policy_passed: bool
     subscription_tier: str = "free"
+    email_verification_sent: bool = False
 
 
 class LoginIn(BaseModel):
@@ -75,6 +80,7 @@ class LoginOut(BaseModel):
     expires_in: int
     user_id: str
     email: EmailStr
+    email_verified: bool = False
     subscription_tier: str = "free"
     subscription_status: str = "active"
     is_developer: bool = False
@@ -97,6 +103,7 @@ class TwoFactorStatusOut(BaseModel):
 class MeOut(BaseModel):
     user_id: str
     email: EmailStr
+    email_verified: bool = False
     session_id: str | None
     session_active: bool
     session_expires_at: datetime | None
@@ -246,7 +253,33 @@ async def signup(request: Request, payload: SignupIn, db: AsyncSession = Depends
     except Exception as sub_err:
         logger.warning(f"Failed to create free subscription for new user {user.id}: {sub_err}")
 
-    return SignupOut(user_id=user.id, email=user.email, policy_passed=True, subscription_tier="free")
+    # Send email verification token
+    verification_sent = False
+    try:
+        raw_token = secrets.token_urlsafe(32)
+        token_hash_val = hash_password(raw_token)
+        verification_row = EmailVerificationToken(
+            id=str(uuid.uuid4()),
+            user_id=user.id,
+            token_hash=token_hash_val,
+            expires_at=datetime.now(UTC) + timedelta(hours=24),
+            ip_address=request.client.host if request.client else None,
+        )
+        db.add(verification_row)
+        await db.commit()
+        verification_sent = await send_email_verification(user.email, raw_token)
+        if not verification_sent:
+            logger.warning(f"Failed to send verification email to user {user.id}")
+    except Exception as ver_err:
+        logger.warning(f"Failed to create verification token for user {user.id}: {ver_err}")
+
+    return SignupOut(
+        user_id=user.id,
+        email=user.email,
+        policy_passed=True,
+        subscription_tier="free",
+        email_verification_sent=verification_sent,
+    )
 
 
 # ----------------------
@@ -289,6 +322,13 @@ async def login(
                 logger.error(f"Database commit failed during login attempt tracking: {e}", exc_info=True)
 
         raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    # Block login if email is not verified
+    if not user.email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="email_not_verified",
+        )
 
     # Reset failed attempts on successful login
     if user.failed_login_attempts and user.failed_login_attempts > 0:
@@ -386,6 +426,7 @@ async def login(
         expires_in=expires_in_seconds,
         user_id=user.id,
         email=user.email,
+        email_verified=bool(user.email_verified),
         subscription_tier="siddha" if is_dev else sub_tier,
         subscription_status=sub_status,
         is_developer=is_dev,
@@ -629,6 +670,7 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
     return MeOut(
         user_id=user.id,
         email=user.email,
+        email_verified=bool(user.email_verified),
         session_id=str(session_row.id),
         session_active=True,
         session_expires_at=session_row.expires_at,
@@ -989,6 +1031,385 @@ async def reset_password(
 
     return ResetPasswordOut(
         message="Password has been reset successfully. Please log in with your new password."
+    )
+
+
+# ----------------------
+# Email Verification
+# ----------------------
+VERIFICATION_TOKEN_EXPIRE_HOURS = 24
+
+
+class VerifyEmailIn(BaseModel):
+    token: str
+
+
+class VerifyEmailOut(BaseModel):
+    verified: bool
+    message: str
+
+
+class ResendVerificationOut(BaseModel):
+    message: str
+    sent: bool
+
+
+@router.post("/verify-email", response_model=VerifyEmailOut)
+@limiter.limit("10/minute")
+async def verify_email(
+    request: Request, payload: VerifyEmailIn, db: AsyncSession = Depends(get_db)
+):
+    """Verify a user's email address using the token from the verification link.
+
+    The token is single-use and expires after 24 hours.
+    On success, the user's email_verified flag is set to True.
+    """
+    # Find all non-expired, unused verification tokens
+    stmt = select(EmailVerificationToken).where(
+        EmailVerificationToken.used_at.is_(None),
+        EmailVerificationToken.expires_at > datetime.now(UTC),
+    )
+    candidates = (await db.execute(stmt)).scalars().all()
+
+    # Verify token against hashed candidates
+    matched_token = None
+    for candidate in candidates:
+        if verify_password(payload.token, candidate.token_hash):
+            matched_token = candidate
+            break
+
+    if not matched_token:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired verification token. Please request a new one.",
+        )
+
+    # Mark token as used
+    matched_token.used_at = datetime.now(UTC)
+
+    # Mark user email as verified
+    now = datetime.now(UTC)
+    await db.execute(
+        update(User)
+        .where(User.id == matched_token.user_id)
+        .values(email_verified=True, email_verified_at=now)
+    )
+
+    # Invalidate any other unused verification tokens for this user
+    await db.execute(
+        update(EmailVerificationToken)
+        .where(
+            EmailVerificationToken.user_id == matched_token.user_id,
+            EmailVerificationToken.id != matched_token.id,
+            EmailVerificationToken.used_at.is_(None),
+        )
+        .values(used_at=now)
+    )
+
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Database commit failed during email verification: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
+
+    logger.info("Email verified for user %s", matched_token.user_id)
+
+    return VerifyEmailOut(
+        verified=True,
+        message="Email verified successfully. You can now log in.",
+    )
+
+
+@router.post("/resend-verification", response_model=ResendVerificationOut)
+@limiter.limit("3/minute")
+async def resend_verification(
+    request: Request, payload: ForgotPasswordIn, db: AsyncSession = Depends(get_db)
+):
+    """Resend email verification link.
+
+    Always returns success to prevent account enumeration.
+    Rate limited to 3 per minute to prevent abuse.
+    """
+    email_norm = payload.email.lower()
+
+    generic_response = ResendVerificationOut(
+        message="If an account with that email exists and is unverified, a verification link has been sent.",
+        sent=True,
+    )
+
+    stmt = select(User).where(User.email == email_norm, User.deleted_at.is_(None))
+    user = (await db.execute(stmt)).scalars().first()
+
+    if not user:
+        return generic_response
+
+    if user.email_verified:
+        return generic_response
+
+    # Invalidate existing unused verification tokens
+    await db.execute(
+        update(EmailVerificationToken)
+        .where(
+            EmailVerificationToken.user_id == user.id,
+            EmailVerificationToken.used_at.is_(None),
+        )
+        .values(used_at=datetime.now(UTC))
+    )
+
+    # Generate new verification token
+    raw_token = secrets.token_urlsafe(32)
+    token_hash_val = hash_password(raw_token)
+
+    verification_row = EmailVerificationToken(
+        id=str(uuid.uuid4()),
+        user_id=user.id,
+        token_hash=token_hash_val,
+        expires_at=datetime.now(UTC) + timedelta(hours=VERIFICATION_TOKEN_EXPIRE_HOURS),
+        ip_address=request.client.host if request.client else None,
+    )
+    db.add(verification_row)
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Database commit failed during resend verification: {e}", exc_info=True)
+        return generic_response
+
+    sent = await send_email_verification(user.email, raw_token)
+    if not sent:
+        logger.warning("Failed to send verification email to user %s", user.id)
+
+    logger.info("Verification email resent for user %s", user.id)
+    return generic_response
+
+
+# ----------------------
+# Email-based 2FA (OTP via email)
+# ----------------------
+EMAIL_2FA_CODE_LENGTH = 6
+EMAIL_2FA_EXPIRE_MINUTES = 10
+
+
+class Email2FARequestIn(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class Email2FARequestOut(BaseModel):
+    message: str
+    code_sent: bool
+
+
+class Email2FAVerifyIn(BaseModel):
+    email: EmailStr
+    password: str
+    code: str
+
+
+@router.post("/2fa/email/send", response_model=Email2FARequestOut)
+@limiter.limit("5/minute")
+async def send_email_2fa_code(
+    request: Request, payload: Email2FARequestIn, db: AsyncSession = Depends(get_db)
+):
+    """Send a 2FA verification code via email during login.
+
+    This endpoint is called when a user has email-based 2FA enabled
+    and needs a code to complete their login. It validates credentials
+    first, then sends the code.
+    """
+    email_norm = payload.email.lower()
+    stmt = select(User).where(User.email == email_norm)
+    user = (await db.execute(stmt)).scalars().first()
+
+    # Use generic error to prevent account enumeration
+    generic_error = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid credentials",
+    )
+
+    if not user or not verify_password(payload.password, user.hashed_password):
+        raise generic_error
+
+    if not user.email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="email_not_verified",
+        )
+
+    # Generate 6-digit code
+    code = "".join([str(secrets.randbelow(10)) for _ in range(EMAIL_2FA_CODE_LENGTH)])
+
+    # Store code as a TOTP-compatible hash (reuse EmailVerificationToken table
+    # with a short expiry to avoid creating another table)
+    code_hash = hash_password(code)
+    token_row = EmailVerificationToken(
+        id=f"2fa-{uuid.uuid4()}",
+        user_id=user.id,
+        token_hash=code_hash,
+        expires_at=datetime.now(UTC) + timedelta(minutes=EMAIL_2FA_EXPIRE_MINUTES),
+        ip_address=request.client.host if request.client else None,
+    )
+
+    # Invalidate previous unused email 2FA codes for this user
+    await db.execute(
+        update(EmailVerificationToken)
+        .where(
+            EmailVerificationToken.user_id == user.id,
+            EmailVerificationToken.id.like("2fa-%"),
+            EmailVerificationToken.used_at.is_(None),
+        )
+        .values(used_at=datetime.now(UTC))
+    )
+
+    db.add(token_row)
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Database commit failed during email 2FA code creation: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
+
+    sent = await send_two_factor_code_email(user.email, code)
+    if not sent:
+        logger.warning("Failed to send 2FA code email to user %s", user.id)
+
+    return Email2FARequestOut(
+        message="Verification code sent to your email.",
+        code_sent=sent,
+    )
+
+
+@router.post("/2fa/email/verify", response_model=LoginOut)
+@limiter.limit(AUTH_RATE_LIMIT)
+async def verify_email_2fa_code(
+    request: Request,
+    payload: Email2FAVerifyIn,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
+    """Verify email 2FA code and complete login.
+
+    This combines code verification with session creation, so the user
+    doesn't need to call login again after verifying the code.
+    """
+    email_norm = payload.email.lower()
+    stmt = select(User).where(User.email == email_norm)
+    user = (await db.execute(stmt)).scalars().first()
+
+    generic_error = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid credentials",
+    )
+
+    if not user or not verify_password(payload.password, user.hashed_password):
+        raise generic_error
+
+    if not user.email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="email_not_verified",
+        )
+
+    # Find valid 2FA code tokens for this user
+    code_clean = payload.code.strip().replace(" ", "")
+    stmt = select(EmailVerificationToken).where(
+        EmailVerificationToken.user_id == user.id,
+        EmailVerificationToken.id.like("2fa-%"),
+        EmailVerificationToken.used_at.is_(None),
+        EmailVerificationToken.expires_at > datetime.now(UTC),
+    )
+    candidates = (await db.execute(stmt)).scalars().all()
+
+    matched_code = None
+    for candidate in candidates:
+        if verify_password(code_clean, candidate.token_hash):
+            matched_code = candidate
+            break
+
+    if not matched_code:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired verification code.",
+        )
+
+    # Mark code as used
+    matched_code.used_at = datetime.now(UTC)
+
+    # Reset failed attempts
+    if user.failed_login_attempts and user.failed_login_attempts > 0:
+        await db.execute(
+            update(User).where(User.id == user.id).values(
+                failed_login_attempts=0,
+                locked_until=None,
+            )
+        )
+
+    # Create session and tokens (same as login flow)
+    client_ip = request.client.host if request.client else None
+    user_agent = request.headers.get("User-Agent")
+    session = await create_session(db, user_id=user.id, ip=client_ip, ua=user_agent)
+    access_token = create_access_token(user_id=user.id, session_id=session.id)
+    expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+
+    _, raw_refresh = await create_refresh_token(
+        db, user_id=user.id, session_id=session.id
+    )
+    response.set_cookie(
+        key="refresh_token",
+        value=raw_refresh,
+        httponly=True,
+        secure=settings.SECURE_COOKIE,
+        samesite="strict",
+        path="/api/auth",
+        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+    )
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=settings.SECURE_COOKIE,
+        samesite="lax",
+        path="/",
+        max_age=expires_in_seconds,
+    )
+
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Database commit failed during email 2FA verification: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
+
+    # Fetch subscription info
+    sub_tier = "free"
+    sub_status = "active"
+    try:
+        subscription = await get_or_create_free_subscription(db, user.id)
+        if subscription and subscription.plan:
+            sub_tier = subscription.plan.tier.value if hasattr(subscription.plan.tier, 'value') else str(subscription.plan.tier)
+            sub_status = subscription.status.value if hasattr(subscription.status, 'value') else str(subscription.status)
+    except Exception as sub_err:
+        logger.warning(f"Failed to fetch subscription for user {user.id}: {sub_err}")
+
+    from backend.middleware.feature_access import is_developer as check_is_developer
+    is_dev = False
+    try:
+        is_dev = await check_is_developer(db, user.id)
+    except Exception:
+        pass
+
+    return LoginOut(
+        access_token=access_token,
+        token_type="bearer",
+        session_id=str(session.id),
+        expires_in=expires_in_seconds,
+        user_id=user.id,
+        email=user.email,
+        email_verified=True,
+        subscription_tier="siddha" if is_dev else sub_tier,
+        subscription_status=sub_status,
+        is_developer=is_dev,
     )
 
 

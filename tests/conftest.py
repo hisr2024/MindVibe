@@ -233,7 +233,7 @@ def test_db() -> AsyncGenerator[AsyncSession, None]:
                     tables_to_create.append(cls.__table__)
 
         # Add auth-related tables
-        for cls_name in ["Session", "AdminUser", "RefreshToken"]:
+        for cls_name in ["Session", "AdminUser", "RefreshToken", "EmailVerificationToken", "PasswordResetToken"]:
             if hasattr(models, cls_name):
                 cls = getattr(models, cls_name)
                 if hasattr(cls, "__table__") and cls.__table__ not in tables_to_create:

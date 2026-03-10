@@ -26,6 +26,7 @@ from backend.models.auth import (
     Session,
     RefreshToken,
     PasswordResetToken,
+    EmailVerificationToken,
 )
 
 # WebAuthn (biometric) models
@@ -285,6 +286,7 @@ __all__ = [
     "Session",
     "RefreshToken",
     "PasswordResetToken",
+    "EmailVerificationToken",
     "WebAuthnCredential",
     # Achievement & Gamification models
     "Achievement",

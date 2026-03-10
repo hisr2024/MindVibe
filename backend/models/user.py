@@ -36,6 +36,11 @@ class User(SoftDeleteMixin, Base):
     )
     two_factor_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
     mfa_backup_codes: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    # Email verification
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    email_verified_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=True, default=None
+    )
     # Account lockout fields for brute force protection
     failed_login_attempts: Mapped[int] = mapped_column(Integer, default=0)
     locked_until: Mapped[datetime.datetime | None] = mapped_column(
