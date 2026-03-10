@@ -11,24 +11,33 @@ interface PaymentMethodSelectorProps {
   className?: string
 }
 
-const METHODS: { id: PaymentMethod; label: string; description: string; inrOnly: boolean }[] = [
+interface MethodDef {
+  id: PaymentMethod
+  label: string
+  description: string
+  /** Only show when currency is INR */
+  inrOnly?: boolean
+  /** Hide when currency is INR (e.g. PayPal doesn't support INR via Stripe) */
+  hideForInr?: boolean
+}
+
+const METHODS: MethodDef[] = [
   {
     id: 'card',
     label: 'Card',
     description: 'Credit or Debit Card',
-    inrOnly: false,
   },
   {
     id: 'google_pay',
     label: 'Google Pay',
     description: 'Pay with Google Pay',
-    inrOnly: false,
+    hideForInr: true,
   },
   {
     id: 'paypal',
     label: 'PayPal',
     description: 'Pay with PayPal',
-    inrOnly: false,
+    hideForInr: true,
   },
   {
     id: 'upi',
@@ -44,7 +53,11 @@ export function PaymentMethodSelector({
   currency,
   className = '',
 }: PaymentMethodSelectorProps) {
-  const availableMethods = METHODS.filter((m) => !m.inrOnly || currency === 'INR')
+  const availableMethods = METHODS.filter((m) => {
+    if (m.inrOnly && currency !== 'INR') return false
+    if (m.hideForInr && currency === 'INR') return false
+    return true
+  })
 
   return (
     <div className={`w-full max-w-xl ${className}`}>
@@ -76,6 +89,16 @@ export function PaymentMethodSelector({
       {currency === 'INR' && selected === 'upi' && (
         <p className="mt-2 text-center text-xs text-emerald-400/80">
           Pay instantly with UPI — Google Pay, PhonePe, Paytm, and more.
+        </p>
+      )}
+      {selected === 'google_pay' && currency !== 'INR' && (
+        <p className="mt-2 text-center text-xs text-[#f5f0e8]/60">
+          Google Pay will appear on the checkout page if supported by your device.
+        </p>
+      )}
+      {selected === 'paypal' && (
+        <p className="mt-2 text-center text-xs text-[#f5f0e8]/60">
+          You&apos;ll be redirected to PayPal to complete your payment.
         </p>
       )}
     </div>

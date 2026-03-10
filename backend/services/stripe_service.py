@@ -291,19 +291,24 @@ async def create_checkout_session(
         if not cancel_url:
             cancel_url = f"{frontend_url}/subscription/cancel"
         
-        # Build payment method types based on preference
-        # Google Pay is handled by Stripe automatically when "card" is included
-        # and the user's browser/device supports it (Payment Request API).
+        # Build payment method types based on user preference.
+        #
+        # Google Pay / Apple Pay: Stripe surfaces these automatically via the
+        #   "card" payment method type using the Payment Request API. There is
+        #   no separate "google_pay" type in Stripe — it's always through card.
+        #
+        # PayPal: Supported for Stripe subscriptions. We include "card" as a
+        #   fallback so checkout still works if PayPal isn't configured or
+        #   the user's PayPal account has issues. This also surfaces Google
+        #   Pay / Apple Pay alongside PayPal on the Stripe Checkout page.
+        #   PayPal does NOT support INR — validated in the route layer.
         if payment_method == "paypal":
-            payment_method_types = ["paypal"]
+            payment_method_types = ["card", "paypal"]
         elif payment_method == "google_pay":
-            # Google Pay flows through Stripe's card payment method type.
-            # Stripe Checkout automatically shows Google Pay when available.
             payment_method_types = ["card"]
         elif payment_method == "card":
             payment_method_types = ["card"]
         else:
-            # Default: offer card (includes Google Pay) and PayPal
             payment_method_types = ["card", "paypal"]
 
         # Statement descriptors for recurring subscription payments are configured
@@ -332,21 +337,14 @@ async def create_checkout_session(
             # or at the Stripe Dashboard product/customer level.
         }
 
-        # Set statement descriptor on the subscription itself so it appears
-        # on every recurring invoice. Stripe Checkout in subscription mode
-        # does NOT support statement_descriptor inside payment_intent_data
-        # (only metadata, description, and setup_future_usage are allowed).
-        # Passing it there causes InvalidRequestError → 500 → no payment link.
-        if "card" in payment_method_types:
-            session_params["subscription_data"]["metadata"] = {
-                "user_id": str(user.id),
-                "plan_tier": plan_tier.value,
-                "billing_period": billing_period,
-            }
-            # Statement descriptors for subscriptions are set at the
-            # Stripe product/price level or via the Account settings.
-            # We configure them via configure_stripe_public_details() on startup.
-        
+        # Attach metadata to the subscription for ALL payment methods so
+        # webhooks can identify user/plan regardless of how the user paid.
+        session_params["subscription_data"]["metadata"] = {
+            "user_id": str(user.id),
+            "plan_tier": plan_tier.value,
+            "billing_period": billing_period,
+        }
+
         if customer_id:
             session_params["customer"] = customer_id
         else:

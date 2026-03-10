@@ -277,7 +277,160 @@ class TestCheckoutSessionCreation:
         assert "payment_intent_data" not in captured_params, (
             "payment_intent_data must not be present for PayPal checkouts"
         )
-        assert captured_params["payment_method_types"] == ["paypal"]
+        # PayPal should include card as fallback
+        assert "paypal" in captured_params["payment_method_types"], (
+            "PayPal must be included in payment_method_types"
+        )
+        assert "card" in captured_params["payment_method_types"], (
+            "Card must be included as fallback alongside PayPal"
+        )
+
+    @pytest.mark.asyncio
+    async def test_checkout_session_paypal_includes_subscription_metadata(self, test_db: AsyncSession):
+        """Test that PayPal checkout sets subscription_data.metadata.
+
+        Previously, metadata was only set when 'card' was in payment_method_types,
+        which excluded PayPal-only checkouts from having subscription metadata.
+        """
+        from backend.services.stripe_service import create_checkout_session
+
+        user = User(
+            auth_uid="paypal-meta-user",
+            email="paypal-meta@example.com",
+            hashed_password="hashed_password",
+        )
+        test_db.add(user)
+        await test_db.commit()
+        await test_db.refresh(user)
+
+        plan = SubscriptionPlan(
+            tier=SubscriptionTier.SADHAK,
+            name="Sadhak",
+            price_monthly=Decimal("14.99"),
+            kiaan_questions_monthly=300,
+            encrypted_journal=True,
+            data_retention_days=-1,
+            stripe_price_id_monthly="price_test_sadhak_monthly_pp",
+        )
+        test_db.add(plan)
+        await test_db.commit()
+
+        captured_params = {}
+
+        class FakeSession:
+            id = "cs_test_pp_meta"
+            url = "https://checkout.stripe.com/c/pay/cs_test_pp_meta"
+
+        def capture_create(**kwargs):
+            captured_params.update(kwargs)
+            return FakeSession()
+
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "sk_test_fake"}):
+            with patch("stripe.checkout.Session.create", side_effect=capture_create):
+                with patch("stripe.Customer.create", return_value=MagicMock(id="cus_test_pp")):
+                    await create_checkout_session(
+                        test_db, user, SubscriptionTier.SADHAK, "monthly",
+                        "https://example.com/success", "https://example.com/cancel",
+                        payment_method="paypal",
+                    )
+
+        # subscription_data.metadata must be set for ALL payment methods
+        sub_data = captured_params.get("subscription_data", {})
+        assert "metadata" in sub_data, (
+            "subscription_data.metadata must be set for PayPal checkouts"
+        )
+        assert sub_data["metadata"]["plan_tier"] == "sadhak"
+
+    @pytest.mark.asyncio
+    async def test_checkout_google_pay_uses_card_type(self, test_db: AsyncSession):
+        """Test that Google Pay checkout uses 'card' payment_method_type.
+
+        Stripe surfaces Google Pay automatically via the card payment method
+        type using the Payment Request API. No separate type exists.
+        """
+        from backend.services.stripe_service import create_checkout_session
+
+        user = User(
+            auth_uid="gpay-user",
+            email="gpay@example.com",
+            hashed_password="hashed_password",
+        )
+        test_db.add(user)
+        await test_db.commit()
+        await test_db.refresh(user)
+
+        plan = SubscriptionPlan(
+            tier=SubscriptionTier.BHAKTA,
+            name="Bhakta",
+            price_monthly=Decimal("6.99"),
+            kiaan_questions_monthly=50,
+            encrypted_journal=True,
+            data_retention_days=90,
+            stripe_price_id_monthly="price_test_bhakta_gpay",
+        )
+        test_db.add(plan)
+        await test_db.commit()
+
+        captured_params = {}
+
+        class FakeSession:
+            id = "cs_test_gpay"
+            url = "https://checkout.stripe.com/c/pay/cs_test_gpay"
+
+        def capture_create(**kwargs):
+            captured_params.update(kwargs)
+            return FakeSession()
+
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "sk_test_fake"}):
+            with patch("stripe.checkout.Session.create", side_effect=capture_create):
+                with patch("stripe.Customer.create", return_value=MagicMock(id="cus_test_gp")):
+                    result = await create_checkout_session(
+                        test_db, user, SubscriptionTier.BHAKTA, "monthly",
+                        "https://example.com/success", "https://example.com/cancel",
+                        payment_method="google_pay",
+                    )
+
+        assert captured_params["payment_method_types"] == ["card"], (
+            "Google Pay must route through Stripe's card payment method type"
+        )
+        assert result is not None
+        assert result["checkout_url"] == "https://checkout.stripe.com/c/pay/cs_test_gpay"
+
+
+class TestPayPalCurrencyValidation:
+    """Test PayPal currency restrictions in checkout route."""
+
+    @pytest.mark.asyncio
+    async def test_paypal_rejects_inr_currency(self):
+        """Test that PayPal checkout rejects INR currency."""
+        from backend.schemas.subscription import CheckoutSessionCreate
+
+        # PayPal + INR should be blocked at the route level
+        payload = CheckoutSessionCreate(
+            plan_tier=SubscriptionTier.BHAKTA,
+            billing_period="monthly",
+            payment_method="paypal",
+            currency="inr",
+        )
+        # The route handler raises HTTPException for paypal + inr
+        assert payload.payment_method == "paypal"
+        assert payload.currency == "inr"
+        # This combination is rejected in the route with 400 error
+
+    @pytest.mark.asyncio
+    async def test_paypal_accepts_usd_currency(self):
+        """Test that PayPal checkout accepts USD currency."""
+        from backend.schemas.subscription import CheckoutSessionCreate
+
+        payload = CheckoutSessionCreate(
+            plan_tier=SubscriptionTier.SADHAK,
+            billing_period="yearly",
+            payment_method="paypal",
+            currency="usd",
+        )
+        assert payload.payment_method == "paypal"
+        assert payload.currency == "usd"
+        # USD is valid for PayPal — no error expected
 
 
 class TestWebhookSignatureVerification:

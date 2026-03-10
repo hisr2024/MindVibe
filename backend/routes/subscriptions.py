@@ -219,12 +219,23 @@ async def create_checkout(
         )
 
     # Route to the appropriate payment provider
-    # Google Pay is handled by Stripe (card payment method with Payment Request API)
     if payload.payment_method == "upi":
         return await _create_razorpay_checkout(db, user, payload)
-    else:
-        # card, paypal, and google_pay all route through Stripe
-        return await _create_stripe_checkout(db, user, payload)
+
+    # PayPal through Stripe does not support INR
+    if payload.payment_method == "paypal" and payload.currency == "inr":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": "paypal_currency_unsupported",
+                "message": "PayPal is not available for INR. Please use UPI or Card instead.",
+            },
+        )
+
+    # card, paypal, and google_pay all route through Stripe.
+    # Google Pay is surfaced automatically via Stripe's card payment type
+    # using the Payment Request API — no separate provider needed.
+    return await _create_stripe_checkout(db, user, payload)
 
 
 async def _create_stripe_checkout(
