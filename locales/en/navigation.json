@@ -22,7 +22,10 @@
     "karmicTree": "Karmic Tree",
     "emotionalReset": "Emotional Reset",
     "deepInsights": "Deep Insights",
-    "wisdomRooms": "Wisdom Rooms"
+    "wisdomRooms": "Wisdom Rooms",
+    "gitaVR": "Gita VR",
+    "wisdomJourneys": "Journeys",
+    "companion": "Companion"
   },
   "actions": {
     "openChat": "Open Chat",

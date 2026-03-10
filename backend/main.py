@@ -482,6 +482,18 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Gita API router: {e}")
 
+# Load Gita VR Experience router
+startup_logger.info("\n[Gita VR] Attempting to import Gita VR API router...")
+try:
+    from backend.routes.gita_vr_api import router as gita_vr_router
+    app.include_router(gita_vr_router)
+    startup_logger.info("✅ [SUCCESS] Gita VR API router loaded")
+    startup_logger.info("   • POST   /api/gita-vr/ask-krishna - Ask Krishna in VR")
+    startup_logger.info("   • GET    /api/gita-vr/verse-teaching/{ch}/{v} - Verse teaching")
+    startup_logger.info("   • GET    /api/gita-vr/chapter-intro/{ch} - Chapter intro")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Gita VR API router: {e}")
+
 # Load Indian Gita Sources router (authentic Indian data sources)
 startup_logger.info("\n[Indian Gita Sources] Attempting to import Indian Gita Sources router...")
 try:
