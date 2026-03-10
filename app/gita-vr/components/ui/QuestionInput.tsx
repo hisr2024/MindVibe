@@ -59,7 +59,13 @@ export default function QuestionInput({ onAskQuestion }: QuestionInputProps) {
     recognition.onerror = () => setIsListening(false)
     recognition.onend = () => setIsListening(false)
 
-    recognition.start()
+    try {
+      recognition.start()
+    } catch {
+      // Permission denied or already started — fall back to text mode
+      setIsListening(false)
+      setInteractionMode('text')
+    }
   }, [setInteractionMode, onAskQuestion])
 
   // Don't show during intro/loading

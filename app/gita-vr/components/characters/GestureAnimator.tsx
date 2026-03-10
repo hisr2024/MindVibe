@@ -16,6 +16,7 @@ interface GestureState {
   transitionProgress: number
   queue: GestureCue[]
   startTime: number
+  activeTimers: ReturnType<typeof setTimeout>[]
 }
 
 export function useGestureAnimator() {
@@ -24,12 +25,21 @@ export function useGestureAnimator() {
     transitionProgress: 0,
     queue: [],
     startTime: 0,
+    activeTimers: [],
   })
 
   const setKrishnaState = useGitaVRStore((s) => s.setKrishnaState)
 
+  const clearTimers = useCallback(() => {
+    stateRef.current.activeTimers.forEach(clearTimeout)
+    stateRef.current.activeTimers = []
+  }, [])
+
   const playGestures = useCallback((gestures: GestureCue[]) => {
-    if (gestures.length === 0) return
+    if (!gestures || gestures.length === 0) return
+
+    // Clear any previously scheduled gesture timers
+    clearTimers()
 
     stateRef.current.queue = [...gestures].sort((a, b) => a.timestamp_ms - b.timestamp_ms)
     stateRef.current.startTime = Date.now()
@@ -44,7 +54,7 @@ export function useGestureAnimator() {
 
     // Schedule gesture transitions
     gestures.forEach((cue) => {
-      setTimeout(() => {
+      const startTimer = setTimeout(() => {
         stateRef.current.currentGesture = cue.type
         if (cue.type === 'blessing') {
           setKrishnaState('blessing')
@@ -52,29 +62,33 @@ export function useGestureAnimator() {
           setKrishnaState('speaking')
         }
       }, cue.timestamp_ms)
+      stateRef.current.activeTimers.push(startTimer)
 
       // Return to idle after gesture duration
-      setTimeout(() => {
+      const endTimer = setTimeout(() => {
         if (stateRef.current.currentGesture === cue.type) {
           stateRef.current.currentGesture = 'idle'
         }
       }, cue.timestamp_ms + cue.duration_ms)
+      stateRef.current.activeTimers.push(endTimer)
     })
-  }, [setKrishnaState])
+  }, [setKrishnaState, clearTimers])
 
   const getCurrentGesture = useCallback((): GestureType => {
     return stateRef.current.currentGesture
   }, [])
 
   const resetGestures = useCallback(() => {
+    clearTimers()
     stateRef.current = {
       currentGesture: 'idle',
       transitionProgress: 0,
       queue: [],
       startTime: 0,
+      activeTimers: [],
     }
     setKrishnaState('idle')
-  }, [setKrishnaState])
+  }, [setKrishnaState, clearTimers])
 
   return {
     playGestures,

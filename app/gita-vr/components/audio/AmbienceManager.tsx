@@ -46,8 +46,13 @@ export default function AmbienceManager() {
     startedRef.current = true
 
     try {
-      if (typeof AudioContext === 'undefined') return
-      const ctx = new AudioContext()
+      const AudioCtx = typeof AudioContext !== 'undefined'
+        ? AudioContext
+        : (typeof (window as unknown as Record<string, unknown>).webkitAudioContext !== 'undefined'
+          ? (window as unknown as Record<string, unknown>).webkitAudioContext as typeof AudioContext
+          : null)
+      if (!AudioCtx) return
+      const ctx = new AudioCtx()
       audioContextRef.current = ctx
 
       const gain = ctx.createGain()

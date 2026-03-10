@@ -8,7 +8,7 @@
 
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useRef, useEffect } from 'react'
 import { useGitaVRStore } from '@/stores/gitaVRStore'
 import { askKrishna, getChapterIntro } from '@/services/gitaVRService'
 import { useLipSync } from '@/app/gita-vr/components/characters/LipSyncController'
@@ -19,10 +19,29 @@ export function useGitaVR() {
   const store = useGitaVRStore()
   const { playAudio, stopAudio } = useLipSync()
   const { playGestures, resetGestures } = useGestureAnimator()
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  // Cleanup all pending timers on unmount
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach(clearTimeout)
+      timersRef.current = []
+    }
+  }, [])
+
+  const scheduleTimeout = useCallback((fn: () => void, ms: number) => {
+    const id = setTimeout(() => {
+      fn()
+      // Remove from active timers
+      timersRef.current = timersRef.current.filter((t) => t !== id)
+    }, ms)
+    timersRef.current.push(id)
+    return id
+  }, [])
 
   const handleKrishnaResponse = useCallback(async (response: KrishnaResponse) => {
     store.setKrishnaResponse(response)
-    store.setSubtitleText(response.answer)
+    store.setSubtitleText(response.answer ?? '')
     store.setArjunaState('listening')
 
     // Show verse if referenced
@@ -31,7 +50,7 @@ export function useGitaVR() {
     }
 
     // Play gesture animations
-    if (response.gestures.length > 0) {
+    if (response.gestures && response.gestures.length > 0) {
       playGestures(response.gestures)
     }
 
@@ -46,14 +65,14 @@ export function useGitaVR() {
       const displayMs = Math.max(3000, wordCount * 300)
 
       await new Promise<void>((resolve) => {
-        setTimeout(() => {
+        scheduleTimeout(() => {
           store.setKrishnaState('idle')
           store.setSubtitleText('')
           resolve()
         }, displayMs)
       })
     }
-  }, [store, playAudio, playGestures])
+  }, [store, playAudio, playGestures, scheduleTimeout])
 
   const askQuestion = useCallback(async (question: string) => {
     if (store.isProcessingQuestion) return
@@ -80,14 +99,14 @@ export function useGitaVR() {
       )
       store.setKrishnaState('blessing')
 
-      setTimeout(() => {
+      scheduleTimeout(() => {
         store.setSubtitleText('')
         store.setKrishnaState('idle')
       }, 4000)
     } finally {
       store.setIsProcessingQuestion(false)
     }
-  }, [store, handleKrishnaResponse])
+  }, [store, handleKrishnaResponse, scheduleTimeout])
 
   const navigateToChapter = useCallback(async (chapter: number) => {
     store.setCurrentChapter(chapter)
@@ -105,19 +124,19 @@ export function useGitaVR() {
 
     try {
       const intro = await getChapterIntro(chapter)
-      store.setSubtitleText(intro.intro_text)
+      store.setSubtitleText(intro.intro_text ?? '')
       store.setKrishnaState('speaking')
 
       // Display for a readable duration
       const wordCount = (intro.intro_text ?? '').split(' ').length
-      setTimeout(() => {
+      scheduleTimeout(() => {
         store.setSubtitleText('')
         store.setKrishnaState('idle')
       }, Math.max(4000, wordCount * 300))
     } catch {
       // Silently fail — chapter navigation still works
     }
-  }, [store, resetGestures, stopAudio])
+  }, [store, resetGestures, stopAudio, scheduleTimeout])
 
   const startExperience = useCallback(() => {
     store.setSceneState('intro')
@@ -125,7 +144,7 @@ export function useGitaVR() {
     store.setArjunaState('distressed')
 
     // After intro delay, transition to teaching
-    setTimeout(() => {
+    scheduleTimeout(() => {
       store.setSceneState('teaching')
       store.setArjunaState('listening')
       store.setSubtitleText(
@@ -133,12 +152,12 @@ export function useGitaVR() {
       )
       store.setKrishnaState('speaking')
 
-      setTimeout(() => {
+      scheduleTimeout(() => {
         store.setSubtitleText('')
         store.setKrishnaState('idle')
       }, 6000)
     }, 3000)
-  }, [store])
+  }, [store, scheduleTimeout])
 
   return {
     ...store,

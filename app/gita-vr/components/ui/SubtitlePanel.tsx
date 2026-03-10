@@ -13,9 +13,10 @@ import { useGitaVRStore } from '@/stores/gitaVRStore'
 export default function SubtitlePanel() {
   const subtitleText = useGitaVRStore((s) => s.subtitleText)
   const subtitlesEnabled = useGitaVRStore((s) => s.subtitlesEnabled)
-  const audioPlaying = useGitaVRStore((s) => s.audioPlaying)
+  const krishnaState = useGitaVRStore((s) => s.krishnaState)
 
-  if (!subtitlesEnabled || !subtitleText || !audioPlaying) return null
+  // Show subtitles when Krishna is speaking (with or without TTS audio)
+  if (!subtitlesEnabled || !subtitleText || krishnaState === 'idle') return null
 
   return (
     <Html

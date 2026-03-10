@@ -11,6 +11,15 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { useGitaVRStore } from '@/stores/gitaVRStore'
 
+// Cross-browser AudioContext
+const getAudioContextClass = (): typeof AudioContext | null => {
+  if (typeof AudioContext !== 'undefined') return AudioContext
+  if (typeof (window as unknown as Record<string, unknown>).webkitAudioContext !== 'undefined') {
+    return (window as unknown as Record<string, unknown>).webkitAudioContext as typeof AudioContext
+  }
+  return null
+}
+
 export function useLipSync() {
   const audioContextRef = useRef<AudioContext | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
@@ -24,8 +33,10 @@ export function useLipSync() {
   const setSubtitleText = useGitaVRStore((s) => s.setSubtitleText)
 
   const initAudioContext = useCallback(() => {
-    if (!audioContextRef.current && typeof AudioContext !== 'undefined') {
-      audioContextRef.current = new AudioContext()
+    if (!audioContextRef.current) {
+      const AudioCtx = getAudioContextClass()
+      if (!AudioCtx) return
+      audioContextRef.current = new AudioCtx()
       analyserRef.current = audioContextRef.current.createAnalyser()
       analyserRef.current.fftSize = 256
       analyserRef.current.smoothingTimeConstant = 0.8
@@ -57,7 +68,9 @@ export function useLipSync() {
     try {
       initAudioContext()
 
+      // Clean up previous audio element
       if (audioElementRef.current) {
+        audioElementRef.current.onended = null
         audioElementRef.current.pause()
         audioElementRef.current.src = ''
       }
@@ -79,25 +92,28 @@ export function useLipSync() {
         setSubtitleText(subtitles)
       }
 
-      setAudioPlaying(true)
-      startAnalysis()
-
-      await audio.play()
-
+      // Register onended BEFORE play() to avoid race condition
       audio.onended = () => {
         setAudioPlaying(false)
         amplitudeRef.current = 0
         cancelAnimationFrame(animationFrameRef.current)
         setSubtitleText('')
       }
+
+      setAudioPlaying(true)
+      startAnalysis()
+
+      await audio.play()
     } catch {
       setAudioPlaying(false)
       amplitudeRef.current = 0
+      cancelAnimationFrame(animationFrameRef.current)
     }
   }, [initAudioContext, startAnalysis, setAudioPlaying, setSubtitleText])
 
   const stopAudio = useCallback(() => {
     if (audioElementRef.current) {
+      audioElementRef.current.onended = null
       audioElementRef.current.pause()
       audioElementRef.current.src = ''
     }
@@ -110,6 +126,7 @@ export function useLipSync() {
     return () => {
       cancelAnimationFrame(animationFrameRef.current)
       if (audioElementRef.current) {
+        audioElementRef.current.onended = null
         audioElementRef.current.pause()
       }
       if (audioContextRef.current?.state !== 'closed') {
