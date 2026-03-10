@@ -19,7 +19,6 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useGitaVRStore } from '@/stores/gitaVRStore'
 
-const KRISHNA_BLUE = '#1a3a6a'
 const KRISHNA_SKIN = '#4a7ab5'
 const GOLD = '#d4a44c'
 const BRIGHT_GOLD = '#FFD700'

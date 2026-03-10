@@ -7,38 +7,40 @@
 
 'use client'
 
-import { useRef, useMemo } from 'react'
+import { useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useGitaVRStore } from '@/stores/gitaVRStore'
 
 const PARTICLE_COUNT = 500
 
+function generateParticleData() {
+  const pos = new Float32Array(PARTICLE_COUNT * 3)
+  const data = new Float32Array(PARTICLE_COUNT * 3) // radius, angle, speed
+
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const radius = 2 + Math.random() * 6
+    const angle = Math.random() * Math.PI * 2
+    const height = (Math.random() - 0.3) * 5
+
+    pos[i * 3] = Math.cos(angle) * radius
+    pos[i * 3 + 1] = height + 1.5
+    pos[i * 3 + 2] = Math.sin(angle) * radius
+
+    data[i * 3] = radius
+    data[i * 3 + 1] = angle
+    data[i * 3 + 2] = 0.1 + Math.random() * 0.3 // orbit speed
+  }
+
+  return { positions: pos, initialData: data }
+}
+
 export default function CosmicParticles3D() {
   const pointsRef = useRef<THREE.Points>(null)
   const materialRef = useRef<THREE.PointsMaterial>(null)
   const audioPlaying = useGitaVRStore((s) => s.audioPlaying)
 
-  const { positions, initialData } = useMemo(() => {
-    const pos = new Float32Array(PARTICLE_COUNT * 3)
-    const data = new Float32Array(PARTICLE_COUNT * 3) // radius, angle, speed
-
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      const radius = 2 + Math.random() * 6
-      const angle = Math.random() * Math.PI * 2
-      const height = (Math.random() - 0.3) * 5
-
-      pos[i * 3] = Math.cos(angle) * radius
-      pos[i * 3 + 1] = height + 1.5
-      pos[i * 3 + 2] = Math.sin(angle) * radius
-
-      data[i * 3] = radius
-      data[i * 3 + 1] = angle
-      data[i * 3 + 2] = 0.1 + Math.random() * 0.3 // orbit speed
-    }
-
-    return { positions: pos, initialData: data }
-  }, [])
+  const [{ positions, initialData }] = useState(generateParticleData)
 
   useFrame((state) => {
     if (!pointsRef.current) return

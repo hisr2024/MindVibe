@@ -7,23 +7,26 @@
 
 'use client'
 
-import { useRef, useMemo } from 'react'
+import { useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
+const PETAL_COUNT = 100
+
+function generatePetalPositions() {
+  const pos = new Float32Array(PETAL_COUNT * 3)
+  for (let i = 0; i < PETAL_COUNT; i++) {
+    pos[i * 3] = (Math.random() - 0.5) * 40
+    pos[i * 3 + 1] = 2 + Math.random() * 8
+    pos[i * 3 + 2] = (Math.random() - 0.5) * 40
+  }
+  return pos
+}
+
 function LotusPetals() {
   const pointsRef = useRef<THREE.Points>(null)
-  const petalCount = 100
 
-  const positions = useMemo(() => {
-    const pos = new Float32Array(petalCount * 3)
-    for (let i = 0; i < petalCount; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 40
-      pos[i * 3 + 1] = 2 + Math.random() * 8
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 40
-    }
-    return pos
-  }, [])
+  const [positions] = useState(generatePetalPositions)
 
   useFrame((state) => {
     if (!pointsRef.current) return
@@ -31,7 +34,7 @@ function LotusPetals() {
     const arr = posAttr.array as Float32Array
     const time = state.clock.elapsedTime
 
-    for (let i = 0; i < petalCount; i++) {
+    for (let i = 0; i < PETAL_COUNT; i++) {
       arr[i * 3] += Math.sin(time * 0.3 + i) * 0.005
       arr[i * 3 + 1] -= 0.003
       arr[i * 3 + 2] += Math.cos(time * 0.2 + i * 0.5) * 0.003

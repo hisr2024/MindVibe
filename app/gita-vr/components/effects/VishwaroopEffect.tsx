@@ -8,55 +8,59 @@
 
 'use client'
 
-import { useRef, useMemo } from 'react'
+import { useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useGitaVRStore } from '@/stores/gitaVRStore'
 
 const COSMIC_PARTICLE_COUNT = 2000
 
+function generateCosmicData() {
+  const pos = new Float32Array(COSMIC_PARTICLE_COUNT * 3)
+  const vel = new Float32Array(COSMIC_PARTICLE_COUNT * 3)
+  const col = new Float32Array(COSMIC_PARTICLE_COUNT * 3)
+
+  for (let i = 0; i < COSMIC_PARTICLE_COUNT; i++) {
+    // Start from center
+    pos[i * 3] = (Math.random() - 0.5) * 0.5
+    pos[i * 3 + 1] = 1.5 + (Math.random() - 0.5) * 0.5
+    pos[i * 3 + 2] = (Math.random() - 0.5) * 0.5
+
+    // Radial velocity
+    const speed = 0.02 + Math.random() * 0.08
+    const theta = Math.random() * Math.PI * 2
+    const phi = Math.random() * Math.PI
+    vel[i * 3] = Math.sin(phi) * Math.cos(theta) * speed
+    vel[i * 3 + 1] = Math.cos(phi) * speed
+    vel[i * 3 + 2] = Math.sin(phi) * Math.sin(theta) * speed
+
+    // Cosmic colors: gold, blue, purple, white
+    const colorChoice = Math.random()
+    if (colorChoice < 0.3) {
+      col[i * 3] = 1; col[i * 3 + 1] = 0.84; col[i * 3 + 2] = 0 // Gold
+    } else if (colorChoice < 0.5) {
+      col[i * 3] = 0.3; col[i * 3 + 1] = 0.5; col[i * 3 + 2] = 1 // Blue
+    } else if (colorChoice < 0.7) {
+      col[i * 3] = 0.6; col[i * 3 + 1] = 0.2; col[i * 3 + 2] = 0.8 // Purple
+    } else {
+      col[i * 3] = 1; col[i * 3 + 1] = 1; col[i * 3 + 2] = 0.9 // White
+    }
+  }
+
+  return { positions: pos, velocities: vel, colors: col }
+}
+
 function CosmicExplosion() {
   const pointsRef = useRef<THREE.Points>(null)
 
-  const { positions, velocities, colors } = useMemo(() => {
-    const pos = new Float32Array(COSMIC_PARTICLE_COUNT * 3)
-    const vel = new Float32Array(COSMIC_PARTICLE_COUNT * 3)
-    const col = new Float32Array(COSMIC_PARTICLE_COUNT * 3)
-
-    for (let i = 0; i < COSMIC_PARTICLE_COUNT; i++) {
-      // Start from center
-      pos[i * 3] = (Math.random() - 0.5) * 0.5
-      pos[i * 3 + 1] = 1.5 + (Math.random() - 0.5) * 0.5
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 0.5
-
-      // Radial velocity
-      const speed = 0.02 + Math.random() * 0.08
-      const theta = Math.random() * Math.PI * 2
-      const phi = Math.random() * Math.PI
-      vel[i * 3] = Math.sin(phi) * Math.cos(theta) * speed
-      vel[i * 3 + 1] = Math.cos(phi) * speed
-      vel[i * 3 + 2] = Math.sin(phi) * Math.sin(theta) * speed
-
-      // Cosmic colors: gold, blue, purple, white
-      const colorChoice = Math.random()
-      if (colorChoice < 0.3) {
-        col[i * 3] = 1; col[i * 3 + 1] = 0.84; col[i * 3 + 2] = 0 // Gold
-      } else if (colorChoice < 0.5) {
-        col[i * 3] = 0.3; col[i * 3 + 1] = 0.5; col[i * 3 + 2] = 1 // Blue
-      } else if (colorChoice < 0.7) {
-        col[i * 3] = 0.6; col[i * 3 + 1] = 0.2; col[i * 3 + 2] = 0.8 // Purple
-      } else {
-        col[i * 3] = 1; col[i * 3 + 1] = 1; col[i * 3 + 2] = 0.9 // White
-      }
-    }
-
-    return { positions: pos, velocities: vel, colors: col }
-  }, [])
+  const [{ positions, colors }] = useState(generateCosmicData)
+  const velocitiesRef = useRef(generateCosmicData().velocities)
 
   useFrame(() => {
     if (!pointsRef.current) return
     const posAttr = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute
     const arr = posAttr.array as Float32Array
+    const velocities = velocitiesRef.current
 
     for (let i = 0; i < COSMIC_PARTICLE_COUNT; i++) {
       arr[i * 3] += velocities[i * 3]
@@ -107,6 +111,18 @@ function CosmicExplosion() {
   )
 }
 
+function generateSpiralPoints() {
+  const points = new Float32Array(300 * 3)
+  for (let i = 0; i < 300; i++) {
+    const t = i / 300 * Math.PI * 6
+    const r = t * 0.5
+    points[i * 3] = Math.cos(t) * r
+    points[i * 3 + 1] = (Math.random() - 0.5) * 0.5
+    points[i * 3 + 2] = Math.sin(t) * r
+  }
+  return points
+}
+
 function GalaxySpiral() {
   const groupRef = useRef<THREE.Group>(null)
 
@@ -117,17 +133,7 @@ function GalaxySpiral() {
     }
   })
 
-  const spiralPoints = useMemo(() => {
-    const points = new Float32Array(300 * 3)
-    for (let i = 0; i < 300; i++) {
-      const t = i / 300 * Math.PI * 6
-      const r = t * 0.5
-      points[i * 3] = Math.cos(t) * r
-      points[i * 3 + 1] = (Math.random() - 0.5) * 0.5
-      points[i * 3 + 2] = Math.sin(t) * r
-    }
-    return points
-  }, [])
+  const [spiralPoints] = useState(generateSpiralPoints)
 
   return (
     <group ref={groupRef} position={[0, 3, 0]} rotation={[0.5, 0, 0]}>

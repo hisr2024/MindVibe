@@ -8,12 +8,39 @@
 
 'use client'
 
-import { useRef, useMemo, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import * as THREE from 'three'
 
 interface ArmyProps {
   side: 'pandava' | 'kaurava'
   count?: number
+}
+
+function generateArmyMatrices(count: number, baseX: number, side: 'pandava' | 'kaurava') {
+  const soldierMatrices: THREE.Matrix4[] = []
+  const spearMatrices: THREE.Matrix4[] = []
+  const dummy = new THREE.Object3D()
+
+  for (let i = 0; i < count; i++) {
+    const row = Math.floor(i / 15)
+    const col = i % 15
+    const xOffset = baseX + (side === 'pandava' ? -row * 4 : row * 4)
+    const zOffset = (col - 7.5) * 3 + (Math.random() - 0.5) * 1.5
+
+    // Soldier body
+    dummy.position.set(xOffset + (Math.random() - 0.5), 0.5, zOffset)
+    dummy.scale.setScalar(0.8 + Math.random() * 0.3)
+    dummy.updateMatrix()
+    soldierMatrices.push(dummy.matrix.clone())
+
+    // Spear
+    dummy.position.set(xOffset + (Math.random() - 0.5), 2.0, zOffset)
+    dummy.scale.set(1, 1.5 + Math.random() * 0.5, 1)
+    dummy.updateMatrix()
+    spearMatrices.push(dummy.matrix.clone())
+  }
+
+  return { soldierMatrices, spearMatrices }
 }
 
 function ArmyGroup({ side, count = 150 }: ArmyProps) {
@@ -23,45 +50,22 @@ function ArmyGroup({ side, count = 150 }: ArmyProps) {
   const baseX = side === 'pandava' ? -60 : 60
   const color = side === 'pandava' ? '#2a3a5c' : '#5c2a2a'
 
-  const matrices = useMemo(() => {
-    const soldierMatrices: THREE.Matrix4[] = []
-    const spearMatrices: THREE.Matrix4[] = []
-    const dummy = new THREE.Object3D()
-
-    for (let i = 0; i < count; i++) {
-      const row = Math.floor(i / 15)
-      const col = i % 15
-      const xOffset = baseX + (side === 'pandava' ? -row * 4 : row * 4)
-      const zOffset = (col - 7.5) * 3 + (Math.random() - 0.5) * 1.5
-
-      // Soldier body
-      dummy.position.set(xOffset + (Math.random() - 0.5), 0.5, zOffset)
-      dummy.scale.setScalar(0.8 + Math.random() * 0.3)
-      dummy.updateMatrix()
-      soldierMatrices.push(dummy.matrix.clone())
-
-      // Spear
-      dummy.position.set(xOffset + (Math.random() - 0.5), 2.0, zOffset)
-      dummy.scale.set(1, 1.5 + Math.random() * 0.5, 1)
-      dummy.updateMatrix()
-      spearMatrices.push(dummy.matrix.clone())
-    }
-
-    return { soldierMatrices, spearMatrices }
-  }, [count, baseX, side])
+  const [matrices] = useState(() => generateArmyMatrices(count, baseX, side))
 
   useEffect(() => {
-    if (meshRef.current) {
+    const mesh = meshRef.current
+    const spear = spearRef.current
+    if (mesh) {
       matrices.soldierMatrices.forEach((matrix, i) => {
-        meshRef.current!.setMatrixAt(i, matrix)
+        mesh.setMatrixAt(i, matrix)
       })
-      meshRef.current.instanceMatrix.needsUpdate = true
+      mesh.instanceMatrix.needsUpdate = true
     }
-    if (spearRef.current) {
+    if (spear) {
       matrices.spearMatrices.forEach((matrix, i) => {
-        spearRef.current!.setMatrixAt(i, matrix)
+        spear.setMatrixAt(i, matrix)
       })
-      spearRef.current.instanceMatrix.needsUpdate = true
+      spear.instanceMatrix.needsUpdate = true
     }
   }, [matrices])
 

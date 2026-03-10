@@ -33,7 +33,7 @@ interface Tool {
   id: string
   label: string
   description: string
-  icon: React.ElementType
+  icon: React.ComponentType<{ className?: string }>
   href: string
   gradient: string
   iconColor: string

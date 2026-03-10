@@ -46,6 +46,7 @@ export default function AmbienceManager() {
     startedRef.current = true
 
     try {
+      if (typeof AudioContext === 'undefined') return
       const ctx = new AudioContext()
       audioContextRef.current = ctx
 

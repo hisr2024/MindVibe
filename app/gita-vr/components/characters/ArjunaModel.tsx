@@ -14,7 +14,6 @@ import * as THREE from 'three'
 import { useGitaVRStore } from '@/stores/gitaVRStore'
 
 const ARMOR_SILVER = '#C0C0C0'
-const ARMOR_DARK = '#4a4a5a'
 const SKIN = '#C68642'
 const BROWN = '#4a2a0a'
 const GOLD = '#d4a44c'

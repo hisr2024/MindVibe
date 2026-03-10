@@ -19,6 +19,7 @@ import { Suspense, useEffect, useCallback } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Preload } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
+import Link from 'next/link'
 
 // Scene
 import KurukshetraScene from './components/scene/KurukshetraScene'
@@ -49,7 +50,7 @@ import AmbienceManager from './components/audio/AmbienceManager'
 import { useGitaVR } from '@/hooks/useGitaVR'
 
 function Scene() {
-  const { askQuestion, startExperience, sceneState } = useGitaVR()
+  const { askQuestion, startExperience } = useGitaVR()
 
   useEffect(() => {
     startExperience()
@@ -132,12 +133,12 @@ export default function GitaVRExperience() {
 
       {/* HTML Overlay — Back button (always visible) */}
       <div className="pointer-events-none absolute inset-0">
-        <a
+        <Link
           href="/"
           className="pointer-events-auto absolute left-4 top-4 rounded-lg border border-white/10 bg-black/50 px-4 py-2 text-sm text-white/60 backdrop-blur-sm transition hover:bg-black/70 hover:text-white"
         >
           ← Back
-        </a>
+        </Link>
 
         {/* VR Entry badge */}
         <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2">

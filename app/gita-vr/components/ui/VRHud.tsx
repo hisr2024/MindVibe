@@ -9,6 +9,7 @@
 'use client'
 
 import { Html } from '@react-three/drei'
+import Link from 'next/link'
 import { useGitaVRStore } from '@/stores/gitaVRStore'
 import { CHAPTERS } from '@/data/gitaVerses'
 
@@ -79,12 +80,12 @@ export default function VRHud() {
         </div>
 
         {/* Exit button */}
-        <a
+        <Link
           href="/"
           className="mt-1 block rounded-md bg-white/5 py-1 text-center text-xs text-white/40 transition hover:bg-white/10 hover:text-white/70"
         >
           Exit VR
-        </a>
+        </Link>
       </div>
     </Html>
   )

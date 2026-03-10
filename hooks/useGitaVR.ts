@@ -42,7 +42,7 @@ export function useGitaVR() {
     } else {
       // No audio — show text for a duration based on word count
       store.setKrishnaState('speaking')
-      const wordCount = response.answer.split(' ').length
+      const wordCount = (response.answer ?? '').split(' ').length
       const displayMs = Math.max(3000, wordCount * 300)
 
       await new Promise<void>((resolve) => {
@@ -73,7 +73,7 @@ export function useGitaVR() {
 
       store.setSceneState('teaching')
       await handleKrishnaResponse(response)
-    } catch (error) {
+    } catch {
       // Graceful fallback — show compassionate message
       store.setSubtitleText(
         'My dear friend, the connection to divine wisdom is momentarily interrupted. Please ask again.'
@@ -109,7 +109,7 @@ export function useGitaVR() {
       store.setKrishnaState('speaking')
 
       // Display for a readable duration
-      const wordCount = intro.intro_text.split(' ').length
+      const wordCount = (intro.intro_text ?? '').split(' ').length
       setTimeout(() => {
         store.setSubtitleText('')
         store.setKrishnaState('idle')

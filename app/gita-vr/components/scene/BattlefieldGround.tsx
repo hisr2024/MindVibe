@@ -7,7 +7,7 @@
 
 'use client'
 
-import { useRef, useMemo } from 'react'
+import { useRef, useState, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
@@ -62,30 +62,35 @@ const groundFragmentShader = `
   }
 `
 
+const DUST_PARTICLE_COUNT = 200
+
+function generateDustData() {
+  const pos = new Float32Array(DUST_PARTICLE_COUNT * 3)
+  const vel = new Float32Array(DUST_PARTICLE_COUNT * 3)
+  for (let i = 0; i < DUST_PARTICLE_COUNT; i++) {
+    pos[i * 3] = (Math.random() - 0.5) * 30
+    pos[i * 3 + 1] = Math.random() * 3
+    pos[i * 3 + 2] = (Math.random() - 0.5) * 30
+    vel[i * 3] = (Math.random() - 0.5) * 0.02
+    vel[i * 3 + 1] = Math.random() * 0.01
+    vel[i * 3 + 2] = (Math.random() - 0.5) * 0.02
+  }
+  return { positions: pos, velocities: vel }
+}
+
 function DustParticles() {
   const pointsRef = useRef<THREE.Points>(null)
-  const particleCount = 200
 
-  const { positions, velocities } = useMemo(() => {
-    const pos = new Float32Array(particleCount * 3)
-    const vel = new Float32Array(particleCount * 3)
-    for (let i = 0; i < particleCount; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 30
-      pos[i * 3 + 1] = Math.random() * 3
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 30
-      vel[i * 3] = (Math.random() - 0.5) * 0.02
-      vel[i * 3 + 1] = Math.random() * 0.01
-      vel[i * 3 + 2] = (Math.random() - 0.5) * 0.02
-    }
-    return { positions: pos, velocities: vel }
-  }, [])
+  const [{ positions }] = useState(generateDustData)
+  const velocitiesRef = useRef(generateDustData().velocities)
 
   useFrame(() => {
     if (!pointsRef.current) return
     const posAttr = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute
     const posArray = posAttr.array as Float32Array
+    const velocities = velocitiesRef.current
 
-    for (let i = 0; i < particleCount; i++) {
+    for (let i = 0; i < DUST_PARTICLE_COUNT; i++) {
       posArray[i * 3] += velocities[i * 3]
       posArray[i * 3 + 1] += velocities[i * 3 + 1]
       posArray[i * 3 + 2] += velocities[i * 3 + 2]
