@@ -212,22 +212,6 @@ async def get_current_user_optional(
         return None
 
 
-async def get_current_user_or_create(
-    request: Request,
-    db: AsyncSession = Depends(get_db),
-) -> str:
-    """Get current user from JWT token.
-
-    SECURITY: This function now delegates to get_current_user() which only
-    accepts cryptographically signed JWT tokens. The previous X-Auth-UID
-    header bypass and dev-anon auto-creation have been removed because:
-    - X-Auth-UID allowed any client to impersonate any user
-    - dev-anon shared a single account across all unauthenticated requests
-
-    All callers that previously relied on X-Auth-UID or anonymous access
-    now require proper JWT authentication.
-    """
-    return await get_current_user(request, db)
 
 async def get_current_user_flexible(
     request: Request,

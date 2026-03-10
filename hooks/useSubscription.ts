@@ -173,6 +173,9 @@ export function useSubscription(): UseSubscriptionResult {
     } catch (err) {
       console.warn('Falling back to cached subscription', err)
       const cached = getCachedSubscription()
+      // Never trust developer status from cache — it must come from the server.
+      // A stale isDeveloper:true would grant full access to non-developer users.
+      cached.isDeveloper = false
       setSubscription(cached)
       setError(err instanceof Error ? err.message : 'Failed to load subscription')
     } finally {
@@ -214,7 +217,10 @@ export function useSubscription(): UseSubscriptionResult {
 }
 
 export function updateSubscription(subscription: Subscription) {
-  const merged = { ...getCachedSubscription(), ...subscription }
+  const cached = getCachedSubscription()
+  // Never inherit isDeveloper from the cache — only use the explicit value from the update.
+  // This prevents stale developer access from leaking across user sessions.
+  const merged = { ...cached, ...subscription, isDeveloper: subscription.isDeveloper ?? false }
   persistSubscription(merged)
   window.dispatchEvent(new Event('subscription-updated'))
 }

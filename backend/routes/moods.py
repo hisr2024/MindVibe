@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from pydantic import BaseModel
 
-from backend.deps import get_db, get_current_user_or_create
+from backend.deps import get_db, get_current_user
 
 logger = logging.getLogger(__name__)
 from backend.models import Mood
@@ -55,7 +55,7 @@ def get_micro_response(score: int) -> str:
 async def create_mood(
     payload: MoodIn,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user_or_create),
+    user_id: str = Depends(get_current_user),
 ) -> MoodOut:
     """Create a new mood entry for the authenticated user."""
     try:

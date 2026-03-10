@@ -52,6 +52,8 @@ function storeUserProfile(user: AuthUser) {
 function clearAuthData() {
   if (typeof window === 'undefined') return
   localStorage.removeItem(AUTH_USER_KEY)
+  // Clear subscription cache to prevent stale isDeveloper access leaking across accounts
+  localStorage.removeItem('mindvibe_subscription')
   // Clear any legacy token storage from previous versions
   localStorage.removeItem('mindvibe_access_token')
   localStorage.removeItem('access_token')
@@ -120,7 +122,7 @@ export function useAuth(): UseAuthResult {
               sessionId: data.session_id,
               subscriptionTier: data.subscription_tier || storedUser?.subscriptionTier || 'free',
               subscriptionStatus: data.subscription_status || storedUser?.subscriptionStatus || 'active',
-              isDeveloper: data.is_developer || storedUser?.isDeveloper || false,
+              isDeveloper: data.is_developer === true,
             }
             storeUserProfile(verifiedUser)
             setUser(verifiedUser)
