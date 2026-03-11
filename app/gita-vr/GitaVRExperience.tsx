@@ -67,9 +67,9 @@ export default function GitaVRExperience() {
       <VishwaroopEffect2D />
 
       {/* === LAYER 3: CHARACTERS === */}
-      <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-[6%] sm:pb-[8%]">
+      <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-[4%] sm:pb-[6%]">
         {/* Character staging — cinematic positioning */}
-        <div className="relative flex items-end gap-4 sm:gap-10 md:gap-16 lg:gap-24">
+        <div className="relative flex items-end gap-2 sm:gap-6 md:gap-10 lg:gap-16">
           {/* Krishna — left-center, larger, main character */}
           <motion.div
             className="relative z-10"

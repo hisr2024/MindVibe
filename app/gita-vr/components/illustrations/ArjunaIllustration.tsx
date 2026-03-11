@@ -1,17 +1,14 @@
 /**
- * ArjunaIllustration — Disney-level animated Arjuna
+ * ArjunaIllustration — Elegant silhouette art style
  *
- * Richly detailed SVG warrior-prince in Kshatriya armor:
- * - Ornate Kirita crown with sapphire centerpiece
- * - Kavach (chest armor) with intricate detailing
- * - Gandiva bow held at his side
- * - Warrior dhoti with royal blue/maroon
+ * Dark bronze/amber warrior silhouette with warm edge-glow.
+ * Recognizable by: warrior crown, broad pauldrons, Gandiva bow, quiver on back.
  *
- * State-driven animation via Framer Motion:
- * - distressed: slumped posture, head bowed (Chapter 1 despair)
- * - listening: upright, gazing at Krishna with reverence
- * - enlightened: radiant glow, confident stance
- * - idle: gentle breathing
+ * State-driven posture via Framer Motion:
+ * - idle: Standing upright, bow at side
+ * - distressed: Slumped posture, head bowed (Chapter 1 despair)
+ * - listening: Upright, turned slightly toward Krishna
+ * - enlightened: Radiant golden glow, confident stance
  */
 
 'use client'
@@ -20,240 +17,368 @@ import { useMemo } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useGitaVRStore } from '@/stores/gitaVRStore'
 
+/**
+ * Arjuna idle/listening silhouette — standing warrior with bow at side.
+ * Profile shows: warrior crown, broad shoulders with pauldrons, Gandiva bow
+ * held vertically beside him, quiver of arrows on back, warrior dhoti.
+ */
+const ARJUNA_UPRIGHT = `
+  M160,52
+  L168,32 L166,54
+  L180,20 L174,56
+  L190,38 L182,58
+
+  Q192,54 195,60
+  Q200,56 204,60
+  Q206,54 208,58
+
+  L210,38 L216,56
+  L220,20 L224,54
+  L232,32 L230,52
+
+  Q234,56 236,64
+  Q240,74 238,90
+  Q236,110 228,122
+
+  Q250,128 268,140
+  Q280,150 286,164
+  Q292,176 292,186
+  Q290,192 286,194
+  L280,190
+  Q274,182 268,190
+  Q264,196 262,210
+
+  Q260,240 264,270
+  Q268,300 266,330
+  Q264,352 262,370
+
+  Q258,390 262,420
+  Q268,460 278,500
+  Q288,540 294,570
+  Q300,592 296,608
+  Q292,624 282,630
+  L268,632
+  Q262,626 256,632
+  L240,632
+
+  Q244,612 240,590
+  Q232,555 222,525
+  Q212,505 200,498
+
+  Q188,505 178,525
+  Q168,555 160,590
+  Q156,612 160,632
+
+  L144,632
+  Q138,626 132,632
+  L118,630
+  Q108,624 104,608
+  Q100,592 106,570
+  Q112,540 122,500
+  Q132,460 138,420
+  Q142,390 138,370
+
+  Q136,352 134,330
+  Q132,300 136,270
+  Q138,240 136,210
+  Q134,196 128,190
+  Q122,182 116,190
+  L110,194
+  Q106,192 104,186
+  Q104,176 110,164
+  Q118,150 130,140
+  Q148,128 162,122
+
+  Q154,110 152,90
+  Q150,74 154,64
+  Q156,56 160,52
+  Z
+
+  M290,180
+  Q298,170 302,152
+  Q306,130 308,110
+  Q310,90 306,76
+  Q302,66 296,72
+  Q290,82 288,96
+  Q286,120 288,144
+  Q290,160 290,180
+  Z
+
+  M286,96
+  L290,30
+  Q292,24 294,30
+  L294,70
+
+  M300,90
+  L304,28
+  Q306,22 308,28
+  L306,74
+`
+
+/**
+ * Arjuna distressed silhouette — slumped, head bowed, bow drooping.
+ * Conveys Chapter 1 despair: shoulders hunched, posture collapsed.
+ */
+const ARJUNA_DISTRESSED = `
+  M170,70
+  L176,52 L174,72
+  L186,40 L182,74
+  L194,56 L190,76
+
+  Q196,74 200,78
+  Q204,74 210,76
+
+  L206,56 L218,74
+  L214,40 L226,72
+  L224,52 L230,70
+
+  Q234,72 236,80
+  Q240,90 238,108
+  Q234,126 226,136
+
+  Q242,144 256,158
+  Q266,170 274,182
+  Q280,192 280,202
+  Q278,208 274,210
+  L268,206
+  Q262,198 256,204
+  Q252,212 250,226
+
+  Q248,256 252,286
+  Q256,316 254,346
+  Q252,368 250,386
+
+  Q246,406 250,436
+  Q256,476 266,516
+  Q276,556 282,586
+  Q288,608 284,624
+  Q280,640 270,646
+  L256,648
+  Q250,642 244,648
+  L228,648
+
+  Q232,628 228,606
+  Q220,571 210,541
+  Q200,521 192,516
+
+  Q184,521 178,541
+  Q168,571 160,606
+  Q156,628 160,648
+
+  L144,648
+  Q138,642 132,648
+  L118,646
+  Q108,640 104,624
+  Q100,608 106,586
+  Q112,556 122,516
+  Q132,476 138,436
+  Q142,406 138,386
+
+  Q136,368 134,346
+  Q132,316 136,286
+  Q138,256 136,226
+  Q134,212 128,204
+  Q122,198 116,206
+  L110,210
+  Q106,208 104,202
+  Q104,192 110,182
+  Q118,170 130,158
+  Q144,144 158,136
+
+  Q150,126 150,108
+  Q150,90 156,80
+  Q162,72 170,70
+  Z
+`
+
 export default function ArjunaIllustration() {
   const arjunaState = useGitaVRStore((s) => s.arjunaState)
   const reduceMotion = useReducedMotion()
 
+  const isEnlightened = arjunaState === 'enlightened'
+  const isDistressed = arjunaState === 'distressed'
+
   const bodyVariants = useMemo(() => ({
     idle: { y: [0, -2, 0], transition: { duration: 4.5, repeat: Infinity, ease: 'easeInOut' as const } },
-    distressed: { y: [8, 6, 8], rotate: [2, 3, 2], transition: { duration: 6, repeat: Infinity, ease: 'easeInOut' as const } },
+    distressed: { y: [4, 6, 4], transition: { duration: 6, repeat: Infinity, ease: 'easeInOut' as const } },
     listening: { y: [0, -3, 0], transition: { duration: 4, repeat: Infinity, ease: 'easeInOut' as const } },
     enlightened: { y: [0, -4, 0], transition: { duration: 3.5, repeat: Infinity, ease: 'easeInOut' as const } },
   }), [])
 
-  const headVariants = useMemo(() => ({
-    idle: { rotate: 0, y: 0 },
-    distressed: { rotate: [12, 14, 12], y: [6, 8, 6], transition: { duration: 5, repeat: Infinity, ease: 'easeInOut' as const } },
-    listening: { rotate: [-5, -7, -5], y: [-2, -3, -2], transition: { duration: 4, repeat: Infinity, ease: 'easeInOut' as const } },
-    enlightened: { rotate: 0, y: -3, transition: { type: 'spring' as const, stiffness: 40, damping: 15 } },
-  }), [])
-
-  const glowFilter = useMemo(() => {
-    if (arjunaState === 'enlightened') return 'drop-shadow(0 0 40px rgba(255,215,0,0.3)) drop-shadow(0 0 80px rgba(75,0,200,0.1))'
-    if (arjunaState === 'distressed') return 'drop-shadow(0 0 10px rgba(100,100,120,0.1))'
-    return 'drop-shadow(0 0 20px rgba(112,128,144,0.15))'
-  }, [arjunaState])
+  const silhouettePath = isDistressed ? ARJUNA_DISTRESSED : ARJUNA_UPRIGHT
 
   if (reduceMotion) {
-    return <div className="relative h-[440px] w-[220px]" aria-label="Arjuna" />
+    return (
+      <div className="relative h-[500px] w-[260px]" aria-label="Arjuna">
+        <svg viewBox="0 0 400 680" className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="as-fill" x1="0.5" y1="0" x2="0.5" y2="1">
+              <stop offset="0%" stopColor="#3a2510" />
+              <stop offset="100%" stopColor="#1a0d05" />
+            </linearGradient>
+          </defs>
+          <path d={ARJUNA_UPRIGHT} fill="url(#as-fill)" />
+        </svg>
+      </div>
+    )
   }
 
   return (
-    <div className="relative h-[440px] w-[220px]" aria-label="Arjuna">
+    <div className="relative h-[500px] w-[260px]" aria-label="Arjuna">
+      {/* === WARM BACKLIGHT (subtle, secondary character) === */}
       <motion.div
-        className="h-full w-full"
-        animate={{ filter: glowFilter }}
-        transition={{ duration: 1.2, ease: 'easeInOut' }}
+        className="pointer-events-none absolute inset-0 flex items-center justify-center"
+        animate={{
+          opacity: isEnlightened ? 0.3 : 0.1,
+          scale: [1, 1.03, 1],
+        }}
+        transition={{
+          opacity: { duration: 1.2, ease: 'easeOut' },
+          scale: { duration: 5, repeat: Infinity, ease: 'easeInOut' },
+        }}
       >
-        <svg viewBox="0 0 320 650" className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
+        <div
+          className="h-[110%] w-[140%] rounded-full"
+          style={{
+            background: isEnlightened
+              ? 'radial-gradient(ellipse, rgba(255,215,0,0.15) 0%, rgba(200,160,60,0.06) 40%, transparent 65%)'
+              : 'radial-gradient(ellipse, rgba(200,160,100,0.08) 0%, rgba(140,100,60,0.03) 40%, transparent 65%)',
+          }}
+        />
+      </motion.div>
+
+      {/* === MAIN SVG === */}
+      <motion.div
+        className="relative h-full w-full"
+        variants={bodyVariants}
+        animate={arjunaState}
+        style={{ originX: '50%', originY: '90%' }}
+      >
+        <svg viewBox="0 0 400 680" className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="a-skin" x1="0.3" y1="0" x2="0.7" y2="1">
-              <stop offset="0%" stopColor="#D4965A" />
-              <stop offset="100%" stopColor="#A0622D" />
+            {/* Warm bronze gradient fill */}
+            <linearGradient id="a-fill" x1="0.5" y1="0" x2="0.5" y2="1">
+              <stop offset="0%" stopColor="#3a2510" />
+              <stop offset="40%" stopColor="#2a1a0a" />
+              <stop offset="100%" stopColor="#1a0d05" />
             </linearGradient>
-            <linearGradient id="a-armor" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#8899AA" />
-              <stop offset="30%" stopColor="#6B7D8D" />
-              <stop offset="100%" stopColor="#4A5B6A" />
+
+            {/* Inner depth gradient */}
+            <linearGradient id="a-inner" x1="0.3" y1="0.2" x2="0.7" y2="0.8">
+              <stop offset="0%" stopColor="#5a3a20" stopOpacity="0.2" />
+              <stop offset="100%" stopColor="#1a0d05" stopOpacity="0" />
             </linearGradient>
-            <linearGradient id="a-armor-highlight" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#AABBCC" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#6B7D8D" stopOpacity="0" />
-            </linearGradient>
-            <linearGradient id="a-dhoti" x1="0.2" y1="0" x2="0.8" y2="1">
-              <stop offset="0%" stopColor="#8B3A3A" />
-              <stop offset="100%" stopColor="#5C1F1F" />
-            </linearGradient>
-            <filter id="a-glow">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+
+            {/* Warm amber edge glow */}
+            <filter id="a-edge-glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feMorphology operator="dilate" radius="1" in="SourceAlpha" result="dilated" />
+              <feGaussianBlur stdDeviation="6" in="dilated" result="blurred" />
+              <feFlood floodColor="#C68642" floodOpacity="0.35" result="glowColor" />
+              <feComposite in="glowColor" in2="blurred" operator="in" result="glow" />
+              <feMerge>
+                <feMergeNode in="glow" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
             </filter>
-            <filter id="a-shadow">
-              <feDropShadow dx="2" dy="3" stdDeviation="2" floodColor="#1a1a2e" floodOpacity="0.25" />
+
+            {/* Enlightened golden glow */}
+            <filter id="a-edge-glow-enlightened" x="-25%" y="-25%" width="150%" height="150%">
+              <feMorphology operator="dilate" radius="2" in="SourceAlpha" result="dilated" />
+              <feGaussianBlur stdDeviation="10" in="dilated" result="blurred" />
+              <feFlood floodColor="#FFD700" floodOpacity="0.5" result="glowColor" />
+              <feComposite in="glowColor" in2="blurred" operator="in" result="glow" />
+              <feMerge>
+                <feMergeNode in="glow" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+
+            {/* Distressed dim glow */}
+            <filter id="a-edge-glow-dim" x="-15%" y="-15%" width="130%" height="130%">
+              <feMorphology operator="dilate" radius="0.5" in="SourceAlpha" result="dilated" />
+              <feGaussianBlur stdDeviation="4" in="dilated" result="blurred" />
+              <feFlood floodColor="#8B6914" floodOpacity="0.2" result="glowColor" />
+              <feComposite in="glowColor" in2="blurred" operator="in" result="glow" />
+              <feMerge>
+                <feMergeNode in="glow" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+
+            <filter id="a-jewel">
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
             </filter>
           </defs>
 
-          <motion.g
-            variants={bodyVariants}
-            animate={arjunaState}
-            style={{ originX: '160px', originY: '580px' }}
-          >
-            {/* === DHOTI (warrior lower garment) === */}
-            <motion.g
-              animate={arjunaState === 'distressed'
-                ? { skewX: [0, 0.3, 0], transition: { duration: 7, repeat: Infinity } }
-                : { skewX: [0, 0.6, -0.4, 0], transition: { duration: 5, repeat: Infinity, ease: 'easeInOut' } }
-              }
-              style={{ originX: '160px', originY: '365px' }}
-            >
-              <path
-                d="M130,365 Q122,410 118,470 Q115,520 108,570 L160,590 L212,570 Q205,520 202,470 Q198,410 190,365 Z"
-                fill="url(#a-dhoti)" filter="url(#a-shadow)"
-              />
-              {/* Fold lines */}
-              <path d="M145,375 Q143,430 138,500" fill="none" stroke="#3D1515" strokeWidth="0.8" opacity="0.25" />
-              <path d="M172,375 Q174,430 178,500" fill="none" stroke="#3D1515" strokeWidth="0.8" opacity="0.25" />
-              {/* Gold border */}
-              <path d="M108,570 L160,590 L212,570" fill="none" stroke="#DAA520" strokeWidth="2.5" opacity="0.5" />
-            </motion.g>
+          {/* === SILHOUETTE with state-driven glow === */}
+          <path
+            d={silhouettePath}
+            fill="url(#a-fill)"
+            filter={
+              isEnlightened ? 'url(#a-edge-glow-enlightened)'
+              : isDistressed ? 'url(#a-edge-glow-dim)'
+              : 'url(#a-edge-glow)'
+            }
+          />
 
-            {/* Feet */}
-            <ellipse cx="138" cy="592" rx="16" ry="6" fill="url(#a-skin)" />
-            <ellipse cx="182" cy="592" rx="16" ry="6" fill="url(#a-skin)" />
-            {/* Warrior sandals */}
-            <path d="M122,592 Q138,598 154,592" fill="none" stroke="#654321" strokeWidth="1.5" />
-            <path d="M166,592 Q182,598 198,592" fill="none" stroke="#654321" strokeWidth="1.5" />
+          {/* Inner gradient overlay */}
+          <path d={silhouettePath} fill="url(#a-inner)" />
 
-            {/* === ARMOR / TORSO (Kavach) === */}
+          {/* === SUBTLE HIGHLIGHTS === */}
+
+          {/* Crown sapphire glow */}
+          <motion.circle
+            cx="200" cy={isDistressed ? 76 : 56}
+            r="3"
+            fill="#4169E1"
+            filter="url(#a-jewel)"
+            animate={{ opacity: [0.3, 0.7, 0.3] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          />
+
+          {/* Armor highlight line — subtle chest plate reflection */}
+          {!isDistressed && (
             <path
-              d="M132,215 Q126,240 128,290 Q130,330 130,365 L190,365 Q190,330 192,290 Q194,240 188,215 Z"
-              fill="url(#a-armor)" filter="url(#a-shadow)"
-            />
-            {/* Armor highlights */}
-            <path d="M140,220 Q138,280 140,360" fill="none" stroke="url(#a-armor-highlight)" strokeWidth="2" />
-            <path d="M178,220 Q180,280 178,360" fill="none" stroke="url(#a-armor-highlight)" strokeWidth="2" />
-            {/* Center plate line */}
-            <line x1="160" y1="220" x2="160" y2="350" stroke="#AABBCC" strokeWidth="1" opacity="0.2" />
-            {/* Armor rivets */}
-            {[140, 150, 160, 170, 180].map((x, i) => (
-              <circle key={`rivet-${i}`} cx={x} cy="230" r="1.5" fill="#AABBCC" opacity="0.4" />
-            ))}
-
-            {/* Shoulder guards (pauldrons) */}
-            <ellipse cx="128" cy="218" rx="18" ry="10" fill="url(#a-armor)" stroke="#5A6B7A" strokeWidth="0.5" />
-            <ellipse cx="192" cy="218" rx="18" ry="10" fill="url(#a-armor)" stroke="#5A6B7A" strokeWidth="0.5" />
-            {/* Shoulder guard detail */}
-            <path d="M115,218 Q128,210 141,218" fill="none" stroke="#AABBCC" strokeWidth="0.5" opacity="0.3" />
-            <path d="M179,218 Q192,210 205,218" fill="none" stroke="#AABBCC" strokeWidth="0.5" opacity="0.3" />
-
-            {/* === LEFT ARM === */}
-            <path
-              d="M132,220 Q115,245 105,275 Q100,295 102,310"
-              fill="none" stroke="url(#a-skin)" strokeWidth="18" strokeLinecap="round"
-            />
-            <ellipse cx="102" cy="314" rx="8" ry="7" fill="#C68642" />
-            {/* Arm guard */}
-            <ellipse cx="115" cy="255" rx="11" ry="4" fill="url(#a-armor)" stroke="#5A6B7A" strokeWidth="0.5" />
-
-            {/* === RIGHT ARM (holds Gandiva) === */}
-            <path
-              d="M188,220 Q205,245 212,275 Q215,295 214,310"
-              fill="none" stroke="url(#a-skin)" strokeWidth="18" strokeLinecap="round"
-            />
-            <ellipse cx="214" cy="314" rx="8" ry="7" fill="#C68642" />
-            {/* Arm guard */}
-            <ellipse cx="202" cy="255" rx="11" ry="4" fill="url(#a-armor)" stroke="#5A6B7A" strokeWidth="0.5" />
-
-            {/* === GANDIVA BOW === */}
-            <g>
-              {/* Bow limbs — elegant curve */}
-              <path
-                d="M222,230 Q248,300 240,380 Q235,420 222,450"
-                fill="none" stroke="#6B3A1F" strokeWidth="4" strokeLinecap="round"
-              />
-              {/* Bow grip */}
-              <rect x="218" y="330" width="8" height="25" rx="4" fill="#8B4513" />
-              {/* Bowstring */}
-              <line x1="222" y1="230" x2="222" y2="450" stroke="#C0C0C0" strokeWidth="1" opacity="0.6" />
-              {/* Golden tips */}
-              <circle cx="222" cy="228" r="3" fill="#DAA520" />
-              <circle cx="222" cy="452" r="3" fill="#DAA520" />
-            </g>
-
-            {/* === HEAD GROUP === */}
-            <motion.g
-              variants={headVariants}
-              animate={arjunaState}
-              style={{ originX: '160px', originY: '190px' }}
-            >
-              {/* Neck */}
-              <rect x="150" y="195" width="20" height="22" rx="10" fill="url(#a-skin)" />
-
-              {/* Face */}
-              <ellipse cx="160" cy="168" rx="28" ry="33" fill="url(#a-skin)" />
-              {/* Jawline */}
-              <path d="M134,168 Q136,190 160,200 Q184,190 186,168" fill="none" stroke="#A0622D" strokeWidth="0.8" opacity="0.3" />
-
-              {/* Hair — warrior tied back */}
-              <path
-                d="M132,162 Q132,132 160,124 Q188,132 188,162 Q185,148 175,138 Q165,132 160,130 Q155,132 145,138 Q135,148 132,162"
-                fill="#1a1010"
-              />
-              {/* Hair bun */}
-              <ellipse cx="168" cy="128" rx="10" ry="8" fill="#1a1010" />
-              {/* Hair ribbon */}
-              <path d="M170,122 Q180,115 175,108" fill="none" stroke="#8B3A3A" strokeWidth="2" />
-
-              {/* Eyes */}
-              <g>
-                <ellipse cx="150" cy="166" rx="7" ry="4.5" fill="#FFFFF0" />
-                <ellipse cx="170" cy="166" rx="7" ry="4.5" fill="#FFFFF0" />
-                <motion.g
-                  animate={{ scaleY: [1, 1, 0.08, 1, 1] }}
-                  transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', times: [0, 0.48, 0.5, 0.52, 1] }}
-                  style={{ originX: '160px', originY: '166px' }}
-                >
-                  <circle cx="151" cy="166" r="3.5" fill="#2D1500" />
-                  <circle cx="171" cy="166" r="3.5" fill="#2D1500" />
-                  <circle cx="152" cy="165" r="1.2" fill="white" opacity="0.8" />
-                  <circle cx="172" cy="165" r="1.2" fill="white" opacity="0.8" />
-                </motion.g>
-                {/* Eye outline */}
-                <path d="M142,166 Q146,161 155,161 Q158,162 158,166 Q158,171 155,172 Q146,172 142,166" fill="none" stroke="#1a1010" strokeWidth="1" />
-                <path d="M162,166 Q166,161 175,161 Q178,162 178,166 Q178,171 175,172 Q166,172 162,166" fill="none" stroke="#1a1010" strokeWidth="1" />
-              </g>
-
-              {/* Eyebrows — strong warrior brows */}
-              <path d="M140,158 Q150,153 159,158" fill="none" stroke="#1a1010" strokeWidth="2" strokeLinecap="round" />
-              <path d="M161,158 Q170,153 180,158" fill="none" stroke="#1a1010" strokeWidth="2" strokeLinecap="round" />
-
-              {/* Nose */}
-              <path d="M160,168 Q158,175 160,180" fill="none" stroke="#8B5A30" strokeWidth="0.8" opacity="0.5" />
-
-              {/* Expression — changes with state */}
-              {arjunaState === 'distressed' ? (
-                <path d="M150,185 Q155,183 160,183 Q165,183 170,185" fill="none" stroke="#654321" strokeWidth="1.2" strokeLinecap="round" />
-              ) : arjunaState === 'enlightened' ? (
-                <path d="M150,184 Q155,189 160,190 Q165,189 170,184" fill="none" stroke="#654321" strokeWidth="1.2" strokeLinecap="round" />
-              ) : (
-                <path d="M151,185 Q156,187 160,187 Q164,187 169,185" fill="none" stroke="#654321" strokeWidth="1" strokeLinecap="round" />
-              )}
-
-              {/* Warrior crown (Kirita) */}
-              <path d="M135,148 L160,132 L185,148" fill="none" stroke="#DAA520" strokeWidth="3" />
-              <path d="M137,152 Q160,142 183,152" fill="url(#a-armor)" stroke="#DAA520" strokeWidth="1.5" />
-              {/* Crown sapphire */}
-              <motion.circle
-                cx="160" cy="143" r="4"
-                fill="#4169E1" filter="url(#a-glow)"
-                animate={{ opacity: [0.7, 1, 0.7] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-              />
-              <circle cx="159" cy="142" r="1.5" fill="white" opacity="0.4" />
-            </motion.g>
-          </motion.g>
-
-          {/* Enlightened glow overlay */}
-          {arjunaState === 'enlightened' && (
-            <motion.ellipse
-              cx="160" cy="350" rx="120" ry="250"
-              fill="url(#a-skin)" opacity="0"
-              animate={{ opacity: [0, 0.05, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              d="M185,180 Q200,175 215,180"
+              fill="none" stroke="#8B7355" strokeWidth="1" opacity="0.2"
             />
           )}
         </svg>
       </motion.div>
+
+      {/* Enlightened state — golden particles */}
+      {isEnlightened && (
+        <div className="pointer-events-none absolute inset-0">
+          {Array.from({ length: 6 }, (_, i) => (
+            <motion.div
+              key={`ep-${i}`}
+              className="absolute rounded-full"
+              style={{
+                width: 2 + (i % 2),
+                height: 2 + (i % 2),
+                left: 40 + (i * 97) % 180,
+                top: 80 + (i * 67) % 350,
+                background: 'radial-gradient(circle, rgba(255,235,150,0.9) 0%, transparent 70%)',
+                boxShadow: `0 0 8px rgba(255,215,0,0.4)`,
+              }}
+              animate={{
+                y: [0, -12, 0],
+                opacity: [0.2, 0.6, 0.2],
+              }}
+              transition={{
+                duration: 3 + (i % 3),
+                repeat: Infinity,
+                ease: 'easeInOut',
+                delay: i * 0.5,
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
