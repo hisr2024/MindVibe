@@ -145,23 +145,23 @@ export default function KiaanverseExperience() {
           <AdaptiveDpr pixelated />
           <AdaptiveEvents />
 
-          {/* Subtle global lighting */}
-          <ambientLight intensity={0.2} color="#ffeedd" />
-          <directionalLight position={[5, 8, 3]} intensity={0.5} color="#ffd700" castShadow />
+          {/* Strong warm global lighting — scenes should never feel black */}
+          <ambientLight intensity={0.35} color="#ffeedd" />
+          <directionalLight position={[5, 8, 3]} intensity={1.0} color="#ffd700" />
 
           <Suspense fallback={null}>
             <ActiveScene scene={currentScene} />
 
-            {/* Divine Presence — sacred geometry + particles (replaces character avatars) */}
+            {/* Divine Presence — warm luminous orb (replaces character avatars) */}
             <DivinePresence position={[0, 0, 0]} />
 
             {/* Cosmic starfield */}
-            <Stars radius={120} depth={60} count={4000} factor={3} saturation={0.05} fade speed={0.3} />
+            <Stars radius={120} depth={60} count={4000} factor={3} saturation={0.1} fade speed={0.3} />
 
-            {/* Procedural sunset-warm environment lighting */}
-            <hemisphereLight args={['#ff8844', '#223366', 0.1]} />
-            <directionalLight position={[-3, 2, -5]} intensity={0.15} color="#ff6633" />
-            <pointLight position={[3, 5, -2]} intensity={0.1} color="#ffaa55" distance={20} />
+            {/* Warm environment fill lighting */}
+            <hemisphereLight args={['#ffcc88', '#334466', 0.2]} />
+            <directionalLight position={[-3, 2, -5]} intensity={0.3} color="#ff8844" />
+            <pointLight position={[3, 5, -2]} intensity={0.25} color="#ffaa55" distance={25} />
 
             <Preload all />
           </Suspense>
