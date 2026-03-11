@@ -1,23 +1,21 @@
 /**
  * SubtitleOverlay — Displays Krishna's spoken words as elegant subtitles.
  *
- * Shows the latest Krishna response with a gentle fade-in animation.
- * Positioned at the bottom-center of the scene, above the question input.
- * Text appears letter-by-letter for a typewriter feel.
+ * Typewriter effect for immersive narration feel.
+ * Positioned above the question input at bottom-center.
  */
 
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useGitaVRStore } from '@/stores/gitaVRStore'
+import { useKiaanverseStore } from '@/stores/kiaanverseStore'
 
 export default function SubtitleOverlay() {
-  const subtitleText = useGitaVRStore((s) => s.subtitleText)
+  const subtitleText = useKiaanverseStore((s) => s.subtitleText)
   const [displayed, setDisplayed] = useState('')
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  /* Typewriter effect */
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current)
     setDisplayed('')
@@ -31,7 +29,7 @@ export default function SubtitleOverlay() {
       if (idx >= subtitleText.length && intervalRef.current) {
         clearInterval(intervalRef.current)
       }
-    }, 28)
+    }, 25)
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)

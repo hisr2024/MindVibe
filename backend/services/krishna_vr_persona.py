@@ -22,7 +22,7 @@ from backend.services.gita_wisdom_retrieval import GitaWisdomRetrieval
 
 logger = logging.getLogger(__name__)
 
-KRISHNA_SYSTEM_PROMPT = """You are Lord Krishna, the Supreme Personality of Godhead,
+KRISHNA_SAKHA_PROMPT = """You are Lord Krishna, the Supreme Personality of Godhead,
 speaking directly to your dear friend and devotee on the sacred battlefield of Kurukshetra.
 
 You speak with:
@@ -43,6 +43,26 @@ Guidelines:
 Current chapter context: Chapter {chapter}
 Respond ONLY with the JSON format specified."""
 
+KRISHNA_RECITAL_PROMPT = """You are Lord Krishna, the Supreme Personality of Godhead,
+reciting and narrating the Bhagavad Gita on the sacred battlefield of Kurukshetra.
+
+You speak with:
+- Majestic, divine authority befitting sacred scripture recitation
+- Rhythmic, flowing narration that honors the poetic structure of the Gita
+- Deep reverence for each verse's meaning and spiritual significance
+- A tone of cosmic revelation — unveiling eternal truths
+
+Guidelines:
+1. ALWAYS speak in first person as Krishna ("I", "My dear Arjuna")
+2. Recite the relevant verse in Sanskrit first, then provide transliteration and translation
+3. Narrate the teaching with gravitas — this is divine revelation, not casual conversation
+4. Focus on the verse's direct meaning before expanding on deeper significance
+5. Keep recitations focused (200-400 words) for VR immersion
+6. Transition naturally between verses when narrating a sequence
+
+Current chapter context: Chapter {chapter}
+Respond ONLY with the JSON format specified."""
+
 RESPONSE_FORMAT_PROMPT = """
 Respond in this exact JSON format:
 {{
@@ -51,7 +71,7 @@ Respond in this exact JSON format:
   "verse_number": <verse number or null>,
   "emotion": "compassionate|wise|playful|serene|powerful|loving",
   "gestures": [
-    {{"type": "blessing|pointing_up|open_palms|touching_heart|namaste|beckoning", "timestamp_ms": 0, "duration_ms": 3000}}
+    {{"type": "blessing|pointing_up|open_palms|touching_heart|namaste|beckoning|flute_playing|cosmic_reveal", "timestamp_ms": 0, "duration_ms": 3000}}
   ]
 }}
 """
@@ -69,6 +89,7 @@ class KrishnaVRPersona:
         question: str,
         chapter_context: int = 1,
         language: str = "en",
+        mode: str = "sakha",
         db_session: Optional[object] = None,
     ) -> dict:
         """
@@ -76,9 +97,17 @@ class KrishnaVRPersona:
 
         Uses KIAAN core wisdom engine with Krishna persona overlay.
         Returns structured response with verse reference, emotion, and gesture cues.
+
+        Args:
+            question: The seeker's question or recital request.
+            chapter_context: Current Gita chapter (1-18).
+            language: Response language code.
+            mode: Interaction mode — 'sakha' for Q&A, 'recital' for verse narration.
+            db_session: Optional database session (unused, kept for interface compat).
         """
         try:
-            system_prompt = KRISHNA_SYSTEM_PROMPT.format(chapter=chapter_context)
+            base_prompt = KRISHNA_RECITAL_PROMPT if mode == "recital" else KRISHNA_SAKHA_PROMPT
+            system_prompt = base_prompt.format(chapter=chapter_context)
             full_prompt = f"{system_prompt}\n\n{RESPONSE_FORMAT_PROMPT}\n\nSeeker's question: {question}"
 
             # Use the AI provider for response generation

@@ -1,19 +1,18 @@
 /**
- * VerseCard — Displays a referenced Gita verse with Sanskrit,
- * transliteration, and English translation.
+ * VerseCard — Displays a referenced Gita verse overlay.
  *
- * Appears when Krishna references a specific verse in response.
- * Slides in from the right side with a divine golden border.
+ * Shows Sanskrit, transliteration, and English translation
+ * when Krishna references a specific verse. Slides in from right.
  */
 
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useGitaVRStore } from '@/stores/gitaVRStore'
+import { useKiaanverseStore } from '@/stores/kiaanverseStore'
 
 export default function VerseCard() {
-  const verse = useGitaVRStore((s) => s.activeVerse)
-  const setActiveVerse = useGitaVRStore((s) => s.setActiveVerse)
+  const verse = useKiaanverseStore((s) => s.activeVerse)
+  const setActiveVerse = useKiaanverseStore((s) => s.setActiveVerse)
 
   return (
     <AnimatePresence>
@@ -25,7 +24,7 @@ export default function VerseCard() {
           exit={{ opacity: 0, x: 40 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
         >
-          <div className="rounded-xl border border-amber-400/25 bg-black/50 p-5 backdrop-blur-lg">
+          <div className="rounded-xl border border-amber-400/25 bg-black/60 p-5 backdrop-blur-xl">
             {/* Header */}
             <div className="mb-3 flex items-center justify-between">
               <span className="text-xs font-medium uppercase tracking-widest text-amber-400/70">

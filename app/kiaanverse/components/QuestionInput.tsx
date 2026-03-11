@@ -1,29 +1,30 @@
 /**
- * QuestionInput — Text input for asking Krishna questions.
+ * QuestionInput — Text input for asking Krishna questions (Sakha Mode)
+ * or requesting verse recitation (Recital Mode).
  *
- * Fixed at the bottom of the screen. Sends the question to the
- * backend via the store, which triggers Krishna's response flow.
+ * Fixed at the bottom of the screen. Routes through Kiaanverse service.
  */
 
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { useGitaVRStore } from '@/stores/gitaVRStore'
-import { gitaVRService } from '@/services/gitaVRService'
+import { useKiaanverseStore } from '@/stores/kiaanverseStore'
+import { kiaanverseService } from '@/services/kiaanverseService'
 
 export default function QuestionInput() {
   const [text, setText] = useState('')
-  const isLoading = useGitaVRStore((s) => s.isLoading)
-  const currentChapter = useGitaVRStore((s) => s.currentChapter)
-  const addUserMessage = useGitaVRStore((s) => s.addUserMessage)
-  const addKrishnaResponse = useGitaVRStore((s) => s.addKrishnaResponse)
-  const setIsLoading = useGitaVRStore((s) => s.setIsLoading)
-  const setKrishnaState = useGitaVRStore((s) => s.setKrishnaState)
-  const setArjunaState = useGitaVRStore((s) => s.setArjunaState)
-  const setSubtitleText = useGitaVRStore((s) => s.setSubtitleText)
+  const isLoading = useKiaanverseStore((s) => s.isLoading)
+  const currentChapter = useKiaanverseStore((s) => s.currentChapter)
+  const interactionMode = useKiaanverseStore((s) => s.interactionMode)
+  const addUserMessage = useKiaanverseStore((s) => s.addUserMessage)
+  const addKrishnaResponse = useKiaanverseStore((s) => s.addKrishnaResponse)
+  const setIsLoading = useKiaanverseStore((s) => s.setIsLoading)
+  const setKrishnaState = useKiaanverseStore((s) => s.setKrishnaState)
+  const setKrishnaEmotion = useKiaanverseStore((s) => s.setKrishnaEmotion)
+  const setArjunaState = useKiaanverseStore((s) => s.setArjunaState)
+  const setSubtitleText = useKiaanverseStore((s) => s.setSubtitleText)
 
-  /* Track idle-reset timer so we can clear it on unmount or rapid resubmit */
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -36,7 +37,6 @@ export default function QuestionInput() {
     const question = text.trim()
     if (!question || isLoading) return
 
-    /* Clear any pending idle timer from a previous question */
     if (idleTimerRef.current) {
       clearTimeout(idleTimerRef.current)
       idleTimerRef.current = null
@@ -49,17 +49,19 @@ export default function QuestionInput() {
     setKrishnaState('listening')
 
     try {
-      const response = await gitaVRService.askKrishna({
+      const response = await kiaanverseService.askKrishna({
         question,
         chapter_context: currentChapter,
         language: 'en',
+        mode: interactionMode,
       })
 
+      setIsLoading(false)
       setKrishnaState('speaking')
+      setKrishnaEmotion(response.emotion)
       setSubtitleText(response.answer)
       addKrishnaResponse(response)
 
-      /* Return to idle after display time (timer is tracked for cleanup) */
       const readTime = Math.max(4000, response.answer.length * 30)
       idleTimerRef.current = setTimeout(() => {
         setKrishnaState('idle')
@@ -70,9 +72,16 @@ export default function QuestionInput() {
       setKrishnaState('idle')
       setArjunaState('idle')
       setIsLoading(false)
-      setSubtitleText('My dear friend, my words could not reach you just now. Please ask again.')
+      setSubtitleText(
+        'My dear friend, my words could not reach you just now. Please ask again.'
+      )
     }
   }
+
+  const placeholder =
+    interactionMode === 'recital'
+      ? 'Request a verse (e.g. "Recite Chapter 2, Verse 47")...'
+      : 'Ask Krishna a question...'
 
   return (
     <div className="absolute bottom-4 left-1/2 z-50 w-[92%] max-w-xl -translate-x-1/2">
@@ -81,22 +90,22 @@ export default function QuestionInput() {
           e.preventDefault()
           handleSubmit()
         }}
-        className="flex items-center gap-2 rounded-2xl border border-amber-400/20 bg-black/40 px-4 py-2 backdrop-blur-lg"
+        className="flex items-center gap-2 rounded-2xl border border-amber-400/20 bg-black/50 px-4 py-2 backdrop-blur-xl"
       >
         <input
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Ask Krishna a question..."
+          placeholder={placeholder}
           disabled={isLoading}
-          className="flex-1 bg-transparent text-sm text-amber-50/90 placeholder-amber-200/40 outline-none md:text-base"
+          className="flex-1 bg-transparent text-sm text-amber-50/90 placeholder-amber-200/35 outline-none md:text-base"
           maxLength={500}
         />
         <button
           type="submit"
           disabled={isLoading || !text.trim()}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-300 transition-colors hover:bg-amber-500/30 disabled:opacity-30"
-          aria-label="Send question"
+          aria-label="Send"
         >
           {isLoading ? (
             <motion.div

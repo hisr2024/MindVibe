@@ -1,6 +1,6 @@
 /**
- * Next.js API proxy for the Gita VR ask-krishna endpoint.
- * Forwards requests to the FastAPI backend.
+ * Next.js API route for Kiaanverse ask-krishna endpoint.
+ * Proxies to FastAPI backend's KIAAN Krishna VR persona service.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    const backendRes = await fetch(`${BACKEND_URL}/api/gita-vr/ask-krishna`, {
+    const backendRes = await fetch(`${BACKEND_URL}/api/kiaanverse/ask-krishna`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     if (!backendRes.ok) {
       const errorText = await backendRes.text()
-      console.error(`[gita-vr/ask-krishna] Backend error ${backendRes.status}: ${errorText}`)
+      console.error(`[kiaanverse/ask-krishna] Backend error ${backendRes.status}: ${errorText}`)
       return NextResponse.json(
         { error: errorText },
         { status: backendRes.status }
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const data = await backendRes.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error('[gita-vr/ask-krishna] Proxy error:', error)
+    console.error('[kiaanverse/ask-krishna] Proxy error:', error)
     return NextResponse.json(
       { error: "Krishna's wisdom is momentarily unreachable. Please try again." },
       { status: 503 }
