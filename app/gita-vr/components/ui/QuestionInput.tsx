@@ -45,14 +45,14 @@ export default function QuestionInput({ onAskQuestion }: QuestionInputProps) {
 
     recognition.onstart = () => setIsListening(true)
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    recognition.onresult = async (event: SpeechRecognitionEvent) => {
       const transcript = event.results?.[0]?.[0]?.transcript ?? ''
       setInputText(transcript)
       setIsListening(false)
       // Auto-submit voice input
       if (transcript.trim()) {
-        onAskQuestion(transcript.trim())
         setInputText('')
+        await onAskQuestion(transcript.trim())
       }
     }
 

@@ -261,10 +261,9 @@ export default function VishwaroopEffect2D() {
                 rotate: [echo.rotate, echo.rotate + 3, echo.rotate],
               }}
               transition={{
-                opacity: { duration: 5 + i * 2, repeat: Infinity, ease: 'easeInOut' },
-                scale: { duration: 6 + i * 2, repeat: Infinity, ease: 'easeInOut' },
-                rotate: { duration: 8 + i * 3, repeat: Infinity, ease: 'easeInOut' },
-                delay: echo.delay,
+                opacity: { duration: 5 + i * 2, repeat: Infinity, ease: 'easeInOut', delay: echo.delay },
+                scale: { duration: 6 + i * 2, repeat: Infinity, ease: 'easeInOut', delay: echo.delay },
+                rotate: { duration: 8 + i * 3, repeat: Infinity, ease: 'easeInOut', delay: echo.delay },
               }}
             />
           ))}
