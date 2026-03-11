@@ -1,72 +1,43 @@
 /**
- * Bhagavad Gita VR Service - Frontend API Client
+ * Frontend API client for the Gita VR backend.
  *
- * Handles all communication with the Krishna VR API endpoints.
- * Provides typed methods for asking Krishna questions, fetching
- * verse teachings, and chapter introductions.
+ * All requests go through the Next.js API proxy at /api/gita-vr/*
+ * which forwards to the FastAPI backend.
  */
 
 import type {
-  KrishnaRequest,
-  KrishnaResponse,
+  AskKrishnaRequest,
+  AskKrishnaResponse,
   VerseTeaching,
   ChapterIntro,
 } from '@/types/gitaVR.types'
 
-const API_BASE = '/api/gita-vr'
+const BASE = '/api/gita-vr'
 
-async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(url, {
+async function request<T>(url: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(url, {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   })
-
-  if (!response.ok) {
-    const errorText = await response.text().catch(() => 'Unknown error')
-    throw new Error(`API error ${response.status}: ${errorText}`)
+  if (!res.ok) {
+    throw new Error(`Gita VR API error: ${res.status}`)
   }
-
-  return response.json() as Promise<T>
+  return res.json()
 }
 
-/**
- * Ask Krishna a question — KIAAN AI responds as Lord Krishna
- * with Gita wisdom, verse references, and animation cues.
- */
-export async function askKrishna(
-  question: string,
-  chapterContext: number = 1,
-  language: string = 'en'
-): Promise<KrishnaResponse> {
-  const body: KrishnaRequest = {
-    question,
-    chapter_context: chapterContext,
-    language,
-  }
+export const gitaVRService = {
+  askKrishna(req: AskKrishnaRequest): Promise<AskKrishnaResponse> {
+    return request<AskKrishnaResponse>(`${BASE}/ask-krishna`, {
+      method: 'POST',
+      body: JSON.stringify(req),
+    })
+  },
 
-  return fetchJSON<KrishnaResponse>(`${API_BASE}/ask-krishna`, {
-    method: 'POST',
-    body: JSON.stringify(body),
-  })
-}
+  getVerseTeaching(chapter: number, verse: number): Promise<VerseTeaching> {
+    return request<VerseTeaching>(`${BASE}/verse-teaching/${chapter}/${verse}`)
+  },
 
-/**
- * Get a specific verse teaching with Sanskrit text, translation, and themes.
- */
-export async function getVerseTeaching(
-  chapter: number,
-  verse: number
-): Promise<VerseTeaching> {
-  return fetchJSON<VerseTeaching>(
-    `${API_BASE}/verse-teaching/${chapter}/${verse}`
-  )
-}
-
-/**
- * Get chapter introduction for scene transition narration.
- */
-export async function getChapterIntro(
-  chapter: number
-): Promise<ChapterIntro> {
-  return fetchJSON<ChapterIntro>(`${API_BASE}/chapter-intro/${chapter}`)
+  getChapterIntro(chapter: number): Promise<ChapterIntro> {
+    return request<ChapterIntro>(`${BASE}/chapter-intro/${chapter}`)
+  },
 }

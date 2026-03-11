@@ -1,55 +1,105 @@
 /**
- * Bhagavad Gita VR Experience - Zustand State Store
+ * Zustand store for the Gita VR experience.
  *
- * Manages all state for the immersive 3D VR experience including
- * scene state, character states, audio, UI, and KIAAN AI responses.
+ * Manages character states, current chapter/verse, conversation,
+ * scene phase, and UI toggles. Single source of truth for
+ * all VR experience state.
  */
 
 import { create } from 'zustand'
-import type { GitaVRState, GitaVRActions } from '@/types/gitaVR.types'
+import type {
+  KrishnaState,
+  ArjunaState,
+  ScenePhase,
+  VerseReference,
+  AskKrishnaResponse,
+} from '@/types/gitaVR.types'
 
-const initialState: GitaVRState = {
-  currentChapter: 1,
-  currentVerse: 1,
-  vrMode: 'desktop',
-  sceneState: 'loading',
-  krishnaState: 'idle',
-  arjunaState: 'idle',
-  interactionMode: 'text',
-  audioPlaying: false,
-  subtitleText: '',
-  currentVerse_sanskrit: '',
-  userQuestion: '',
-  isProcessingQuestion: false,
-  krishnaResponse: null,
-  showChapterSelector: false,
-  showVerseDisplay: false,
-  subtitlesEnabled: true,
-  volume: 0.8,
-  assetsLoaded: false,
-  loadingProgress: 0,
+interface ConversationEntry {
+  role: 'user' | 'krishna'
+  text: string
+  verse?: VerseReference | null
+  emotion?: string
+  timestamp: number
 }
 
-export const useGitaVRStore = create<GitaVRState & GitaVRActions>((set) => ({
-  ...initialState,
+interface GitaVRState {
+  /* Scene */
+  scenePhase: ScenePhase
+  setScenePhase: (phase: ScenePhase) => void
 
-  setCurrentChapter: (chapter) => set({ currentChapter: chapter }),
-  setCurrentVerse: (verse) => set({ currentVerse: verse }),
-  setVRMode: (mode) => set({ vrMode: mode }),
-  setSceneState: (state) => set({ sceneState: state }),
-  setKrishnaState: (state) => set({ krishnaState: state }),
-  setArjunaState: (state) => set({ arjunaState: state }),
-  setInteractionMode: (mode) => set({ interactionMode: mode }),
-  setAudioPlaying: (playing) => set({ audioPlaying: playing }),
-  setSubtitleText: (text) => set({ subtitleText: text }),
-  setUserQuestion: (question) => set({ userQuestion: question }),
-  setIsProcessingQuestion: (processing) => set({ isProcessingQuestion: processing }),
-  setKrishnaResponse: (response) => set({ krishnaResponse: response }),
-  setShowChapterSelector: (show) => set({ showChapterSelector: show }),
-  setShowVerseDisplay: (show) => set({ showVerseDisplay: show }),
-  setSubtitlesEnabled: (enabled) => set({ subtitlesEnabled: enabled }),
-  setVolume: (volume) => set({ volume: Math.max(0, Math.min(1, volume)) }),
-  setAssetsLoaded: (loaded) => set({ assetsLoaded: loaded }),
-  setLoadingProgress: (progress) => set({ loadingProgress: Math.max(0, Math.min(100, progress)) }),
-  reset: () => set(initialState),
+  /* Chapter & Verse */
+  currentChapter: number
+  currentVerse: number
+  setChapter: (ch: number) => void
+  setVerse: (v: number) => void
+
+  /* Character states */
+  krishnaState: KrishnaState
+  arjunaState: ArjunaState
+  setKrishnaState: (s: KrishnaState) => void
+  setArjunaState: (s: ArjunaState) => void
+
+  /* Conversation */
+  conversation: ConversationEntry[]
+  isLoading: boolean
+  addUserMessage: (text: string) => void
+  addKrishnaResponse: (resp: AskKrishnaResponse) => void
+  setIsLoading: (v: boolean) => void
+
+  /* Active verse display */
+  activeVerse: VerseReference | null
+  setActiveVerse: (v: VerseReference | null) => void
+
+  /* UI toggles */
+  showChapterNav: boolean
+  toggleChapterNav: () => void
+  subtitleText: string
+  setSubtitleText: (t: string) => void
+}
+
+export const useGitaVRStore = create<GitaVRState>((set) => ({
+  scenePhase: 'loading',
+  setScenePhase: (phase) => set({ scenePhase: phase }),
+
+  currentChapter: 1,
+  currentVerse: 1,
+  setChapter: (ch) => set({ currentChapter: ch, currentVerse: 1 }),
+  setVerse: (v) => set({ currentVerse: v }),
+
+  krishnaState: 'idle',
+  arjunaState: 'idle',
+  setKrishnaState: (s) => set({ krishnaState: s }),
+  setArjunaState: (s) => set({ arjunaState: s }),
+
+  conversation: [],
+  isLoading: false,
+  addUserMessage: (text) =>
+    set((st) => ({
+      conversation: [...st.conversation, { role: 'user', text, timestamp: Date.now() }],
+    })),
+  addKrishnaResponse: (resp) =>
+    set((st) => ({
+      conversation: [
+        ...st.conversation,
+        {
+          role: 'krishna',
+          text: resp.answer,
+          verse: resp.verse_reference,
+          emotion: resp.emotion,
+          timestamp: Date.now(),
+        },
+      ],
+      activeVerse: resp.verse_reference,
+      isLoading: false,
+    })),
+  setIsLoading: (v) => set({ isLoading: v }),
+
+  activeVerse: null,
+  setActiveVerse: (v) => set({ activeVerse: v }),
+
+  showChapterNav: false,
+  toggleChapterNav: () => set((st) => ({ showChapterNav: !st.showChapterNav })),
+  subtitleText: '',
+  setSubtitleText: (t) => set({ subtitleText: t }),
 }))

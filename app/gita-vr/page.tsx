@@ -1,44 +1,24 @@
 /**
- * Gita VR Page — Route Entry Point
+ * Gita VR Experience — Page entry point.
  *
- * Dynamically imports the full Gita experience to keep the main
- * app bundle lean. SSR disabled since Web Audio API requires browser.
+ * Dynamically imports the main experience component to keep
+ * the initial bundle lean. Shows a sacred loading screen while
+ * the heavy components load.
  */
 
 'use client'
 
 import dynamic from 'next/dynamic'
 
-const GitaVRExperience = dynamic(
-  () => import('./GitaVRExperience'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-black">
-        <div className="relative flex items-center justify-center">
-          <div
-            className="absolute h-48 w-48 animate-pulse rounded-full"
-            style={{
-              background: 'radial-gradient(circle, rgba(212, 164, 76, 0.15) 0%, transparent 70%)',
-            }}
-          />
-          <span
-            className="relative text-7xl"
-            style={{
-              color: '#d4a44c',
-              textShadow: '0 0 30px rgba(212, 164, 76, 0.5)',
-            }}
-          >
-            &#x0950;
-          </span>
-        </div>
-        <p className="mt-8 text-sm tracking-widest text-[#d4a44c]/60">
-          Preparing the Sacred Battlefield...
-        </p>
-      </div>
-    ),
-  }
-)
+const GitaVRExperience = dynamic(() => import('./GitaVRExperience'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[100dvh] w-full flex-col items-center justify-center bg-black">
+      <div className="mb-4 animate-pulse text-5xl text-amber-400/70">&#x0950;</div>
+      <p className="text-xs tracking-widest text-amber-200/40">Loading sacred experience...</p>
+    </div>
+  ),
+})
 
 export default function GitaVRPage() {
   return <GitaVRExperience />
