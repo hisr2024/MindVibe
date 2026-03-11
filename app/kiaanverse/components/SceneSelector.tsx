@@ -6,6 +6,7 @@
 
 'use client'
 
+import { useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useKiaanverseStore } from '@/stores/kiaanverseStore'
 import type { VRScene } from '@/types/kiaanverse.types'
@@ -24,12 +25,23 @@ export default function SceneSelector() {
   const currentScene = useKiaanverseStore((s) => s.currentScene)
   const setScene = useKiaanverseStore((s) => s.setScene)
   const setScenePhase = useKiaanverseStore((s) => s.setScenePhase)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
 
   const handleSelect = (scene: VRScene) => {
+    if (timerRef.current) clearTimeout(timerRef.current)
     setScene(scene)
     toggleSceneSelector()
     setScenePhase('transitioning')
-    setTimeout(() => setScenePhase('active'), 1500)
+    timerRef.current = setTimeout(() => {
+      setScenePhase('active')
+      timerRef.current = null
+    }, 1500)
   }
 
   return (

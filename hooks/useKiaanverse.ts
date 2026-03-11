@@ -53,6 +53,7 @@ export function useKiaanverse() {
           mode: interactionMode,
         })
 
+        setIsLoading(false)
         setKrishnaState('speaking')
         setKrishnaEmotion(response.emotion)
         setSubtitleText(response.answer)

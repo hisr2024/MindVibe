@@ -71,7 +71,7 @@ Respond in this exact JSON format:
   "verse_number": <verse number or null>,
   "emotion": "compassionate|wise|playful|serene|powerful|loving",
   "gestures": [
-    {{"type": "blessing|pointing_up|open_palms|touching_heart|namaste|beckoning", "timestamp_ms": 0, "duration_ms": 3000}}
+    {{"type": "blessing|pointing_up|open_palms|touching_heart|namaste|beckoning|flute_playing|cosmic_reveal", "timestamp_ms": 0, "duration_ms": 3000}}
   ]
 }}
 """

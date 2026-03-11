@@ -11,6 +11,7 @@ Does NOT modify any KIAAN ecosystem responses — only adds VR persona layer.
 """
 
 import logging
+from typing import Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
@@ -26,7 +27,7 @@ class AskKrishnaRequest(BaseModel):
     question: str = Field(..., min_length=1, max_length=1000, description="The seeker's question")
     chapter_context: int = Field(default=1, ge=1, le=18, description="Current chapter context (1-18)")
     language: str = Field(default="en", max_length=5, description="Response language code")
-    mode: str = Field(default="sakha", description="Interaction mode: sakha or recital")
+    mode: Literal["sakha", "recital"] = Field(default="sakha", description="Interaction mode: sakha or recital")
 
 
 class GestureCueResponse(BaseModel):

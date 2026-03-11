@@ -56,6 +56,7 @@ export default function QuestionInput() {
         mode: interactionMode,
       })
 
+      setIsLoading(false)
       setKrishnaState('speaking')
       setKrishnaEmotion(response.emotion)
       setSubtitleText(response.answer)

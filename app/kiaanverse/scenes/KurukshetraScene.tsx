@@ -99,8 +99,8 @@ function SacredChariot() {
         <meshStandardMaterial color="#4a3520" roughness={0.8} />
       </mesh>
       {/* Chariot wheels */}
-      {[-1.2, 1.2].map((x) => (
-        <mesh key={x} position={[x, 0.4, 1]} rotation={[0, 0, Math.PI / 2]}>
+      {[-1.2, 1.2].map((x, i) => (
+        <mesh key={`wheel-${i}`} position={[x, 0.4, 1]} rotation={[0, 0, Math.PI / 2]}>
           <torusGeometry args={[0.4, 0.05, 8, 16]} />
           <meshStandardMaterial color="#8b7355" metalness={0.6} roughness={0.4} />
         </mesh>
