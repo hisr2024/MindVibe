@@ -15,7 +15,7 @@
 
 'use client'
 
-import { useEffect, useCallback } from 'react'
+import { useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGitaVRStore } from '@/stores/gitaVRStore'
 
@@ -34,35 +34,38 @@ export default function GitaVRExperience() {
   const setSubtitleText = useGitaVRStore((s) => s.setSubtitleText)
   const setKrishnaState = useGitaVRStore((s) => s.setKrishnaState)
 
-  /* Scene intro sequence */
-  const startIntro = useCallback(() => {
-    setScenePhase('intro')
-
-    /* After a brief intro, activate the scene */
-    const timer1 = setTimeout(() => {
-      setScenePhase('active')
-      setKrishnaState('speaking')
-      setSubtitleText(
-        'Welcome, dear friend. I am here on this sacred battlefield of Kurukshetra. ' +
-        'Ask me anything — about dharma, about life, about the truth within your heart.'
-      )
-    }, 2000)
-
-    const timer2 = setTimeout(() => {
-      setKrishnaState('idle')
-    }, 12000)
-
-    return () => {
-      clearTimeout(timer1)
-      clearTimeout(timer2)
-    }
-  }, [setScenePhase, setSubtitleText, setKrishnaState])
+  /* Track all timers for cleanup */
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
 
   useEffect(() => {
-    /* Simulate a short loading period then start intro */
-    const t = setTimeout(() => startIntro(), 1500)
-    return () => clearTimeout(t)
-  }, [startIntro])
+    /* Phase 1: loading → intro after 1.5s */
+    const t0 = setTimeout(() => {
+      setScenePhase('intro')
+
+      /* Phase 2: intro → active after another 2s */
+      const t1 = setTimeout(() => {
+        setScenePhase('active')
+        setKrishnaState('speaking')
+        setSubtitleText(
+          'Welcome, dear friend. I am here on this sacred battlefield of Kurukshetra. ' +
+          'Ask me anything — about dharma, about life, about the truth within your heart.'
+        )
+      }, 2000)
+      timersRef.current.push(t1)
+
+      /* Phase 3: Krishna returns to idle after welcome message */
+      const t2 = setTimeout(() => {
+        setKrishnaState('idle')
+      }, 12000)
+      timersRef.current.push(t2)
+    }, 1500)
+    timersRef.current.push(t0)
+
+    return () => {
+      timersRef.current.forEach(clearTimeout)
+      timersRef.current = []
+    }
+  }, [setScenePhase, setSubtitleText, setKrishnaState])
 
   return (
     <div className="relative h-[100dvh] w-full select-none overflow-hidden bg-black">
@@ -73,19 +76,17 @@ export default function GitaVRExperience() {
       <AnimatePresence>
         {scenePhase !== 'loading' && (
           <motion.div
+            key="characters"
             className="absolute inset-0 z-10"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 1.5 }}
           >
-            {/* Character stage — positions the two figures */}
             <div className="absolute bottom-[8%] left-0 right-0 flex items-end justify-center gap-4 px-4 md:gap-12 lg:gap-20">
-              {/* Krishna (left, larger — divine presence) */}
               <div className="relative h-[55vh] max-h-[500px] min-h-[280px] w-[40%] max-w-[260px]">
                 <KrishnaFigure />
               </div>
-
-              {/* Arjuna (right, slightly smaller — mortal) */}
               <div className="relative h-[48vh] max-h-[440px] min-h-[240px] w-[35%] max-w-[220px]">
                 <ArjunaFigure />
               </div>
@@ -94,28 +95,37 @@ export default function GitaVRExperience() {
         )}
       </AnimatePresence>
 
-      {/* ═══ UI LAYERS ═══ */}
+      {/* ═══ UI LAYERS (individually keyed for AnimatePresence) ═══ */}
       <AnimatePresence>
         {scenePhase === 'active' && (
-          <>
+          <motion.div
+            key="ui-layer"
+            className="absolute inset-0 z-20"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <HUD />
             <SubtitleOverlay />
             <VerseCard />
             <QuestionInput />
             <ChapterNav />
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ═══ LOADING / INTRO OVERLAY ═══ */}
+      {/* ═══ LOADING OVERLAY ═══ */}
       <AnimatePresence>
         {scenePhase === 'loading' && (
           <motion.div
+            key="loading"
             className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1 }}
           >
-            {/* OM symbol */}
             <motion.div
               className="mb-6 text-6xl text-amber-400/80"
               animate={{ scale: [1, 1.08, 1], opacity: [0.6, 1, 0.6] }}
@@ -130,9 +140,11 @@ export default function GitaVRExperience() {
         )}
       </AnimatePresence>
 
+      {/* ═══ INTRO OVERLAY ═══ */}
       <AnimatePresence>
         {scenePhase === 'intro' && (
           <motion.div
+            key="intro"
             className="absolute inset-0 z-40 flex items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

@@ -7,7 +7,7 @@
 
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useGitaVRStore } from '@/stores/gitaVRStore'
 import { gitaVRService } from '@/services/gitaVRService'
@@ -23,9 +23,24 @@ export default function QuestionInput() {
   const setArjunaState = useGitaVRStore((s) => s.setArjunaState)
   const setSubtitleText = useGitaVRStore((s) => s.setSubtitleText)
 
-  const handleSubmit = useCallback(async () => {
+  /* Track idle-reset timer so we can clear it on unmount or rapid resubmit */
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
+    }
+  }, [])
+
+  const handleSubmit = async () => {
     const question = text.trim()
     if (!question || isLoading) return
+
+    /* Clear any pending idle timer from a previous question */
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current)
+      idleTimerRef.current = null
+    }
 
     setText('')
     addUserMessage(question)
@@ -44,11 +59,12 @@ export default function QuestionInput() {
       setSubtitleText(response.answer)
       addKrishnaResponse(response)
 
-      /* Return to idle after response display time */
+      /* Return to idle after display time (timer is tracked for cleanup) */
       const readTime = Math.max(4000, response.answer.length * 30)
-      setTimeout(() => {
+      idleTimerRef.current = setTimeout(() => {
         setKrishnaState('idle')
         setArjunaState('idle')
+        idleTimerRef.current = null
       }, readTime)
     } catch {
       setKrishnaState('idle')
@@ -56,18 +72,10 @@ export default function QuestionInput() {
       setIsLoading(false)
       setSubtitleText('My dear friend, my words could not reach you just now. Please ask again.')
     }
-  }, [
-    text, isLoading, currentChapter, addUserMessage, addKrishnaResponse,
-    setIsLoading, setKrishnaState, setArjunaState, setSubtitleText,
-  ])
+  }
 
   return (
-    <motion.div
-      className="absolute bottom-4 left-1/2 z-50 w-[92%] max-w-xl -translate-x-1/2"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 1, duration: 0.6 }}
-    >
+    <div className="absolute bottom-4 left-1/2 z-50 w-[92%] max-w-xl -translate-x-1/2">
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -104,6 +112,6 @@ export default function QuestionInput() {
           )}
         </button>
       </form>
-    </motion.div>
+    </div>
   )
 }

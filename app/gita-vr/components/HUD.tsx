@@ -8,24 +8,21 @@
 
 'use client'
 
-import { motion } from 'framer-motion'
 import { useGitaVRStore } from '@/stores/gitaVRStore'
 import Link from 'next/link'
 
 export default function HUD() {
   const currentChapter = useGitaVRStore((s) => s.currentChapter)
+  const showChapterNav = useGitaVRStore((s) => s.showChapterNav)
   const toggleChapterNav = useGitaVRStore((s) => s.toggleChapterNav)
 
   return (
-    <motion.div
-      className="absolute inset-x-0 top-0 z-30 flex items-start justify-between p-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.8, duration: 0.6 }}
-    >
+    <div className="absolute inset-x-0 top-0 z-30 flex items-start justify-between p-4">
       {/* Chapter indicator */}
       <button
         onClick={toggleChapterNav}
+        aria-label={`Chapter ${currentChapter}. Open chapter navigation`}
+        aria-expanded={showChapterNav}
         className="rounded-lg border border-amber-400/15 bg-black/30 px-3 py-1.5 text-sm text-amber-200/70 backdrop-blur-md transition-colors hover:bg-black/50 hover:text-amber-200"
       >
         Chapter {currentChapter}
@@ -35,6 +32,7 @@ export default function HUD() {
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
+          aria-hidden="true"
         >
           <path d="M6 9l6 6 6-6" />
         </svg>
@@ -43,10 +41,11 @@ export default function HUD() {
       {/* Exit */}
       <Link
         href="/"
+        aria-label="Exit Gita experience"
         className="rounded-lg border border-amber-400/15 bg-black/30 px-3 py-1.5 text-sm text-amber-200/50 backdrop-blur-md transition-colors hover:bg-black/50 hover:text-amber-200"
       >
         Exit
       </Link>
-    </motion.div>
+    </div>
   )
 }

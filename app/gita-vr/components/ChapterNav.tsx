@@ -48,15 +48,24 @@ export default function ChapterNav() {
         <>
           {/* Backdrop */}
           <motion.div
+            key="chapter-backdrop"
             className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            role="button"
+            tabIndex={0}
+            aria-label="Close chapter navigation"
             onClick={toggleChapterNav}
+            onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter') toggleChapterNav() }}
           />
 
           {/* Panel */}
           <motion.div
+            key="chapter-panel"
+            role="dialog"
+            aria-label="Chapter navigation"
+            aria-modal="true"
             className="absolute inset-x-4 top-16 z-50 max-h-[75vh] overflow-y-auto rounded-2xl border border-amber-400/15 bg-black/70 p-4 backdrop-blur-xl md:inset-x-[10%]"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}

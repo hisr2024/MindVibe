@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
 
     if (!backendRes.ok) {
       const errorText = await backendRes.text()
+      console.error(`[gita-vr/ask-krishna] Backend error ${backendRes.status}: ${errorText}`)
       return NextResponse.json(
         { error: errorText },
         { status: backendRes.status }
@@ -28,6 +29,7 @@ export async function POST(request: NextRequest) {
     const data = await backendRes.json()
     return NextResponse.json(data)
   } catch (error) {
+    console.error('[gita-vr/ask-krishna] Proxy error:', error)
     return NextResponse.json(
       { error: "Krishna's wisdom is momentarily unreachable. Please try again." },
       { status: 503 }
