@@ -12,7 +12,6 @@
 
 import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Plane, Sphere } from '@react-three/drei'
 import * as THREE from 'three'
 
 function seeded(seed: number): number {
@@ -20,16 +19,21 @@ function seeded(seed: number): number {
   return x - Math.floor(x)
 }
 
-/** Warm brown battlefield ground */
 function BattlefieldGround() {
   return (
-    <Plane args={[200, 200, 1, 1]} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
-      <meshStandardMaterial color="#3a2210" roughness={0.95} metalness={0.02} />
-    </Plane>
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
+      <planeGeometry args={[200, 200]} />
+      <meshStandardMaterial
+        color="#5a3a1a"
+        emissive="#3a2210"
+        emissiveIntensity={0.15}
+        roughness={0.9}
+        metalness={0.05}
+      />
+    </mesh>
   )
 }
 
-/** Visible mountain silhouettes */
 function DistantMountains() {
   const mountains = useMemo(() => [
     { x: -40, h: 14, s: 10 }, { x: -28, h: 20, s: 13 }, { x: -15, h: 11, s: 8 },
@@ -41,15 +45,20 @@ function DistantMountains() {
     <group position={[0, 0, -70]}>
       {mountains.map((m, i) => (
         <mesh key={i} position={[m.x, m.h * 0.35, 0]}>
-          <coneGeometry args={[m.s, m.h, 5]} />
-          <meshStandardMaterial color="#1a0e08" transparent opacity={0.65} />
+          <coneGeometry args={[m.s, m.h, 6]} />
+          <meshStandardMaterial
+            color="#2a1808"
+            emissive="#1a0e05"
+            emissiveIntensity={0.1}
+            transparent
+            opacity={0.7}
+          />
         </mesh>
       ))}
     </group>
   )
 }
 
-/** Faint army silhouettes */
 function ArmySilhouettes({ side }: { side: 'left' | 'right' }) {
   const xBase = side === 'left' ? -28 : 28
   const xDir = side === 'left' ? -1 : 1
@@ -64,12 +73,12 @@ function ArmySilhouettes({ side }: { side: 'left' | 'right' }) {
         return (
           <group key={i} position={[x, 0, zOff]}>
             <mesh position={[0, height / 2, 0]}>
-              <cylinderGeometry args={[0.02, 0.02, height, 3]} />
-              <meshStandardMaterial color="#2a1808" transparent opacity={0.25} />
+              <cylinderGeometry args={[0.03, 0.03, height, 4]} />
+              <meshStandardMaterial color="#3a2210" transparent opacity={0.35} />
             </mesh>
             <mesh position={[0, height + 0.12, 0]}>
-              <coneGeometry args={[0.05, 0.25, 3]} />
-              <meshStandardMaterial color="#3a2210" transparent opacity={0.25} />
+              <coneGeometry args={[0.06, 0.3, 4]} />
+              <meshStandardMaterial color="#4a3018" transparent opacity={0.35} />
             </mesh>
           </group>
         )
@@ -78,146 +87,117 @@ function ArmySilhouettes({ side }: { side: 'left' | 'right' }) {
   )
 }
 
-/** Sacred chariot */
 function SacredChariot() {
   return (
     <group position={[0, 0, -2.5]}>
-      {/* Platform */}
       <mesh position={[0, 0.25, 0]}>
         <boxGeometry args={[3.2, 0.12, 2.2]} />
-        <meshStandardMaterial color="#4a3018" roughness={0.8} />
+        <meshStandardMaterial color="#6a4828" emissive="#3a2818" emissiveIntensity={0.15} roughness={0.75} />
       </mesh>
-      {/* Wheels */}
       {[-1.3, 1.3].map((x, i) => (
         <mesh key={i} position={[x, 0.35, 1.05]} rotation={[0, 0, Math.PI / 2]}>
-          <torusGeometry args={[0.38, 0.04, 8, 20]} />
-          <meshStandardMaterial color="#aa8855" metalness={0.6} roughness={0.35} />
+          <torusGeometry args={[0.38, 0.05, 12, 24]} />
+          <meshStandardMaterial color="#cc9944" emissive="#aa7722" emissiveIntensity={0.2} metalness={0.7} roughness={0.3} />
         </mesh>
       ))}
-      {/* Canopy posts */}
       {[[-1.05, 0.25, -0.85], [1.05, 0.25, -0.85], [-1.05, 0.25, 0.85], [1.05, 0.25, 0.85]].map((pos, i) => (
         <mesh key={i} position={pos as [number, number, number]}>
-          <cylinderGeometry args={[0.025, 0.025, 2.6, 6]} />
-          <meshStandardMaterial color="#d4a44c" metalness={0.6} roughness={0.35} />
+          <cylinderGeometry args={[0.03, 0.03, 2.6, 8]} />
+          <meshStandardMaterial color="#d4a44c" emissive="#aa8833" emissiveIntensity={0.2} metalness={0.6} roughness={0.35} />
         </mesh>
       ))}
-      {/* Canopy */}
       <mesh position={[0, 2.8, 0]}>
         <boxGeometry args={[2.5, 0.05, 2.1]} />
-        <meshStandardMaterial color="#8b1a1a" emissive="#5a0a0a" emissiveIntensity={0.25} transparent opacity={0.8} />
+        <meshStandardMaterial color="#aa2222" emissive="#881111" emissiveIntensity={0.4} transparent opacity={0.85} />
       </mesh>
-      {/* Flag pole */}
       <mesh position={[0, 3.6, -0.9]}>
-        <cylinderGeometry args={[0.012, 0.012, 1.5, 4]} />
+        <cylinderGeometry args={[0.015, 0.015, 1.5, 6]} />
         <meshStandardMaterial color="#d4a44c" metalness={0.7} roughness={0.25} />
       </mesh>
-      {/* Flag */}
       <mesh position={[0.12, 3.9, -0.9]} rotation={[0, 0, 0.1]}>
         <planeGeometry args={[0.3, 0.2]} />
-        <meshStandardMaterial color="#ff5500" emissive="#ff3300" emissiveIntensity={0.2} transparent opacity={0.7} side={THREE.DoubleSide} />
+        <meshStandardMaterial color="#ff6600" emissive="#ff4400" emissiveIntensity={0.5} transparent opacity={0.8} side={THREE.DoubleSide} />
       </mesh>
     </group>
   )
 }
 
-/** BRIGHT sunset orb — the hero of this scene */
 function SunsetOrb() {
   const ref = useRef<THREE.Mesh>(null)
-  const glowRef = useRef<THREE.Mesh>(null)
+  const glow1Ref = useRef<THREE.Mesh>(null)
+  const glow2Ref = useRef<THREE.Mesh>(null)
 
   useFrame(({ clock }) => {
+    const t = clock.elapsedTime
     if (ref.current) {
       const mat = ref.current.material as THREE.MeshBasicMaterial
-      mat.opacity = 0.85 + Math.sin(clock.elapsedTime * 0.2) * 0.06
+      mat.opacity = 0.92 + Math.sin(t * 0.2) * 0.05
     }
-    if (glowRef.current) {
-      glowRef.current.scale.setScalar(1.8 + Math.sin(clock.elapsedTime * 0.15) * 0.2)
-      const mat = glowRef.current.material as THREE.MeshBasicMaterial
-      mat.opacity = 0.15 + Math.sin(clock.elapsedTime * 0.25) * 0.04
+    if (glow1Ref.current) {
+      glow1Ref.current.scale.setScalar(1.6 + Math.sin(t * 0.15) * 0.15)
+      const mat = glow1Ref.current.material as THREE.MeshBasicMaterial
+      mat.opacity = 0.3 + Math.sin(t * 0.25) * 0.06
+    }
+    if (glow2Ref.current) {
+      glow2Ref.current.scale.setScalar(2.5 + Math.sin(t * 0.1) * 0.3)
+      const mat = glow2Ref.current.material as THREE.MeshBasicMaterial
+      mat.opacity = 0.12 + Math.sin(t * 0.18) * 0.03
     }
   })
 
   return (
     <group position={[0, 12, -55]}>
-      {/* Bright sun */}
-      <Sphere ref={ref} args={[5, 32, 32]}>
-        <meshBasicMaterial color="#ff9944" transparent opacity={0.85} />
-      </Sphere>
-      {/* Sun glow halo */}
-      <Sphere ref={glowRef} args={[6, 16, 16]}>
+      {/* Bright blazing sun */}
+      <mesh ref={ref}>
+        <sphereGeometry args={[5, 32, 32]} />
+        <meshBasicMaterial color="#ffaa44" transparent opacity={0.92} />
+      </mesh>
+      {/* Inner glow */}
+      <mesh ref={glow1Ref}>
+        <sphereGeometry args={[7, 24, 24]} />
         <meshBasicMaterial
-          color="#ff7722"
+          color="#ff8822"
           transparent
-          opacity={0.12}
+          opacity={0.25}
           side={THREE.BackSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
-      </Sphere>
+      </mesh>
+      {/* Outer warm haze */}
+      <mesh ref={glow2Ref}>
+        <sphereGeometry args={[10, 16, 16]} />
+        <meshBasicMaterial
+          color="#ff6611"
+          transparent
+          opacity={0.1}
+          side={THREE.BackSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
     </group>
   )
 }
 
-/** Sun rays — visible golden streaks */
-function SunRays() {
-  const ref = useRef<THREE.Points>(null)
-  const count = 100
-
-  const positions = useMemo(() => {
-    const pos = new Float32Array(count * 3)
-    for (let i = 0; i < count; i++) {
-      const angle = seeded(i + 300) * Math.PI * 0.6 - Math.PI * 0.3
-      const dist = 8 + seeded(i + 400) * 35
-      pos[i * 3] = Math.sin(angle) * dist
-      pos[i * 3 + 1] = 6 + seeded(i + 500) * 12
-      pos[i * 3 + 2] = -25 - seeded(i + 600) * 30
-    }
-    return pos
-  }, [])
-
-  useFrame(({ clock }) => {
-    if (!ref.current) return
-    const mat = ref.current.material as THREE.PointsMaterial
-    mat.opacity = 0.3 + Math.sin(clock.elapsedTime * 0.3) * 0.08
-  })
-
-  return (
-    <points ref={ref}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-      </bufferGeometry>
-      <pointsMaterial
-        color="#ffaa44"
-        size={0.4}
-        transparent
-        opacity={0.3}
-        sizeAttenuation
-        blending={THREE.AdditiveBlending}
-        depthWrite={false}
-      />
-    </points>
-  )
-}
-
-/** Golden dust particles rising — visible and warm */
 function GoldenDust() {
   const ref = useRef<THREE.Points>(null)
-  const count = 300
+  const count = 350
 
   const positions = useMemo(() =>
     Float32Array.from({ length: count * 3 }, (_, i) => {
       const axis = i % 3
-      if (axis === 0) return (seeded(i + 500) - 0.5) * 40
-      if (axis === 1) return seeded(i + 700) * 4
-      return (seeded(i + 900) - 0.5) * 25 - 5
+      if (axis === 0) return (seeded(i + 500) - 0.5) * 45
+      if (axis === 1) return seeded(i + 700) * 5
+      return (seeded(i + 900) - 0.5) * 30 - 5
     }), [])
 
   useFrame(({ clock }) => {
     if (!ref.current) return
     const pos = ref.current.geometry.attributes.position.array as Float32Array
     for (let i = 0; i < count; i++) {
-      pos[i * 3 + 1] += Math.sin(clock.elapsedTime * 0.2 + i * 0.8) * 0.002
-      if (pos[i * 3 + 1] > 5) pos[i * 3 + 1] = 0
+      pos[i * 3 + 1] += 0.003 + Math.sin(clock.elapsedTime * 0.2 + i * 0.8) * 0.002
+      if (pos[i * 3 + 1] > 6) pos[i * 3 + 1] = 0
     }
     ref.current.geometry.attributes.position.needsUpdate = true
   })
@@ -229,9 +209,9 @@ function GoldenDust() {
       </bufferGeometry>
       <pointsMaterial
         color="#ffd700"
-        size={0.05}
+        size={0.07}
         transparent
-        opacity={0.5}
+        opacity={0.65}
         sizeAttenuation
         blending={THREE.AdditiveBlending}
         depthWrite={false}
@@ -249,19 +229,17 @@ export default function KurukshetraScene() {
       <ArmySilhouettes side="right" />
       <SacredChariot />
       <SunsetOrb />
-      <SunRays />
       <GoldenDust />
 
-      {/* STRONG warm battlefield lighting from sunset */}
-      <pointLight position={[0, 12, -55]} intensity={4} color="#ff8833" distance={100} decay={1} />
-      <pointLight position={[-10, 4, -6]} intensity={0.8} color="#ff7722" distance={28} decay={1.5} />
-      <pointLight position={[10, 4, -6]} intensity={0.8} color="#ff5522" distance={28} decay={1.5} />
-      <pointLight position={[0, 1.5, 4]} intensity={0.4} color="#ffc040" distance={10} decay={2} />
+      {/* Strong warm battlefield lighting from sunset */}
+      <pointLight position={[0, 14, -55]} intensity={6.0} color="#ff9944" distance={120} decay={0.8} />
+      <pointLight position={[-12, 6, -6]} intensity={1.5} color="#ff7722" distance={35} decay={1.2} />
+      <pointLight position={[12, 6, -6]} intensity={1.5} color="#ff5522" distance={35} decay={1.2} />
+      <pointLight position={[0, 2, 6]} intensity={0.8} color="#ffc040" distance={14} decay={1.5} />
 
-      {/* Base ambient — warm brown, not black */}
-      <ambientLight intensity={0.12} color="#2a1a0a" />
+      <ambientLight intensity={0.25} color="#4a2a10" />
 
-      <fog attach="fog" args={['#1a1008', 18, 90]} />
+      <fog attach="fog" args={['#2a1810', 25, 100]} />
     </group>
   )
 }
