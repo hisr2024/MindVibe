@@ -72,14 +72,14 @@ export const CORE_TOOLS: ToolConfig[] = [
     href: '/sacred-reflections', // Same page as Sacred Reflections - encrypted journaling feature
   },
   {
-    id: 'gita-vr',
+    id: 'kiaanverse',
     icon: '🙏',
-    title: 'Gita VR Experience',
-    description: 'Immersive Bhagavad Gita in VR with Krishna',
+    title: 'Kiaanverse — Gita VR',
+    description: 'Immersive Bhagavad Gita VR with Krishna as your Sakha',
     gradient: 'from-amber-400/30 to-yellow-400/30',
-    href: '/gita-vr',
+    href: '/kiaanverse',
     badge: 'new',
-    purposeDescKey: 'gita-vr',
+    purposeDescKey: 'kiaanverse',
   },
   {
     id: 'wisdom',

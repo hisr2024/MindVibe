@@ -1,14 +1,15 @@
 /**
- * ChapterNav — Chapter selector overlay for navigating the 18 chapters.
+ * ChapterNav — Chapter selector overlay for navigating the 18 Gita chapters.
  *
- * Opens as a slide-down panel. Each chapter shows its Sanskrit name.
- * Selecting a chapter updates the store and closes the panel.
+ * Shows Sanskrit names and English labels.
+ * Selecting a chapter loads the intro via KIAAN AI.
  */
 
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useGitaVRStore } from '@/stores/gitaVRStore'
+import { useKiaanverseStore } from '@/stores/kiaanverseStore'
+import { kiaanverseService } from '@/services/kiaanverseService'
 
 const CHAPTERS = [
   { ch: 1, name: 'Arjuna Vishada Yoga', label: 'The Grief of Arjuna' },
@@ -32,21 +33,29 @@ const CHAPTERS = [
 ]
 
 export default function ChapterNav() {
-  const showChapterNav = useGitaVRStore((s) => s.showChapterNav)
-  const toggleChapterNav = useGitaVRStore((s) => s.toggleChapterNav)
-  const currentChapter = useGitaVRStore((s) => s.currentChapter)
-  const setChapter = useGitaVRStore((s) => s.setChapter)
+  const showChapterNav = useKiaanverseStore((s) => s.showChapterNav)
+  const toggleChapterNav = useKiaanverseStore((s) => s.toggleChapterNav)
+  const currentChapter = useKiaanverseStore((s) => s.currentChapter)
+  const setChapter = useKiaanverseStore((s) => s.setChapter)
+  const setSubtitleText = useKiaanverseStore((s) => s.setSubtitleText)
+  const setKrishnaState = useKiaanverseStore((s) => s.setKrishnaState)
 
-  const handleSelect = (ch: number) => {
+  const handleSelect = async (ch: number) => {
     setChapter(ch)
     toggleChapterNav()
+    try {
+      const intro = await kiaanverseService.getChapterIntro(ch)
+      setSubtitleText(intro.intro_text)
+      setKrishnaState('speaking')
+    } catch {
+      setSubtitleText(`Welcome to Chapter ${ch} of the Bhagavad Gita.`)
+    }
   }
 
   return (
     <AnimatePresence>
       {showChapterNav && (
         <>
-          {/* Backdrop */}
           <motion.div
             key="chapter-backdrop"
             className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm"
@@ -60,13 +69,12 @@ export default function ChapterNav() {
             onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter') toggleChapterNav() }}
           />
 
-          {/* Panel */}
           <motion.div
             key="chapter-panel"
             role="dialog"
             aria-label="Chapter navigation"
             aria-modal="true"
-            className="absolute inset-x-4 top-16 z-50 max-h-[75vh] overflow-y-auto rounded-2xl border border-amber-400/15 bg-black/70 p-4 backdrop-blur-xl md:inset-x-[10%]"
+            className="absolute inset-x-4 top-16 z-50 max-h-[75vh] overflow-y-auto rounded-2xl border border-amber-400/15 bg-black/80 p-4 backdrop-blur-xl md:inset-x-[10%]"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
