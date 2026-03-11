@@ -10,10 +10,16 @@
 
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Sphere } from '@react-three/drei'
 import * as THREE from 'three'
+
+/** Deterministic pseudo-random from seed (0–1 range) */
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed * 9301 + 49297) * 49297
+  return x - Math.floor(x)
+}
 
 function CosmicCore() {
   const ref = useRef<THREE.Mesh>(null)
@@ -66,17 +72,20 @@ function ThousandSuns() {
   const ref = useRef<THREE.Points>(null)
   const count = 500
 
-  const positions = useRef(
-    Float32Array.from({ length: count * 3 }, () => (Math.random() - 0.5) * 100)
+  const positions = useMemo(
+    () => Float32Array.from({ length: count * 3 }, (_, i) => (seededRandom(i + 1000) - 0.5) * 100),
+    []
   )
 
-  const colors = useRef(
-    Float32Array.from({ length: count * 3 }, (_, i) => {
-      const channel = i % 3
-      if (channel === 0) return 0.8 + Math.random() * 0.2
-      if (channel === 1) return 0.5 + Math.random() * 0.4
-      return Math.random() * 0.5
-    })
+  const colors = useMemo(
+    () =>
+      Float32Array.from({ length: count * 3 }, (_, i) => {
+        const channel = i % 3
+        if (channel === 0) return 0.8 + seededRandom(i + 2000) * 0.2
+        if (channel === 1) return 0.5 + seededRandom(i + 3000) * 0.4
+        return seededRandom(i + 4000) * 0.5
+      }),
+    []
   )
 
   useFrame(({ clock }) => {
@@ -88,8 +97,8 @@ function ThousandSuns() {
   return (
     <points ref={ref}>
       <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions.current, 3]} />
-        <bufferAttribute attach="attributes-color" args={[colors.current, 3]} />
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        <bufferAttribute attach="attributes-color" args={[colors, 3]} />
       </bufferGeometry>
       <pointsMaterial
         size={0.3}
@@ -106,16 +115,18 @@ function CosmicEnergy() {
   const ref = useRef<THREE.Points>(null)
   const count = 300
 
-  const positions = useRef(
-    Float32Array.from({ length: count * 3 }, (_, i) => {
-      const idx = Math.floor(i / 3)
-      const angle = (idx / count) * Math.PI * 20
-      const radius = 2 + (idx / count) * 15
-      const axis = i % 3
-      if (axis === 0) return Math.cos(angle) * radius
-      if (axis === 1) return (Math.random() - 0.5) * 8
-      return Math.sin(angle) * radius - 8
-    })
+  const positions = useMemo(
+    () =>
+      Float32Array.from({ length: count * 3 }, (_, i) => {
+        const idx = Math.floor(i / 3)
+        const angle = (idx / count) * Math.PI * 20
+        const radius = 2 + (idx / count) * 15
+        const axis = i % 3
+        if (axis === 0) return Math.cos(angle) * radius
+        if (axis === 1) return (seededRandom(i + 5000) - 0.5) * 8
+        return Math.sin(angle) * radius - 8
+      }),
+    []
   )
 
   useFrame(({ clock }) => {
@@ -126,7 +137,7 @@ function CosmicEnergy() {
   return (
     <points ref={ref}>
       <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions.current, 3]} />
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial
         color="#ffa500"

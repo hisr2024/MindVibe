@@ -10,10 +10,16 @@
 
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Plane, Sphere } from '@react-three/drei'
 import * as THREE from 'three'
+
+/** Deterministic pseudo-random from seed (0–1 range) */
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed * 9301 + 49297) * 49297
+  return x - Math.floor(x)
+}
 
 function SacredGround() {
   return (
@@ -85,13 +91,15 @@ function Fireflies() {
   const ref = useRef<THREE.Points>(null)
   const count = 60
 
-  const positions = useRef(
-    Float32Array.from({ length: count * 3 }, (_, i) => {
-      const axis = i % 3
-      if (axis === 0) return (Math.random() - 0.5) * 12
-      if (axis === 1) return Math.random() * 6 + 0.5
-      return (Math.random() - 0.5) * 12 - 3
-    })
+  const positions = useMemo(
+    () =>
+      Float32Array.from({ length: count * 3 }, (_, i) => {
+        const axis = i % 3
+        if (axis === 0) return (seededRandom(i + 200) - 0.5) * 12
+        if (axis === 1) return seededRandom(i + 400) * 6 + 0.5
+        return (seededRandom(i + 600) - 0.5) * 12 - 3
+      }),
+    []
   )
 
   useFrame(({ clock }) => {
@@ -111,7 +119,7 @@ function Fireflies() {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          args={[positions.current, 3]}
+          args={[positions, 3]}
         />
       </bufferGeometry>
       <pointsMaterial

@@ -10,7 +10,7 @@
 
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Plane, Sphere } from '@react-three/drei'
 import * as THREE from 'three'
@@ -53,18 +53,26 @@ function DistantMountains() {
   )
 }
 
+/** Deterministic pseudo-random from seed (0–1 range) */
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed * 9301 + 49297) * 49297
+  return x - Math.floor(x)
+}
+
 function ArmySilhouettes({ side }: { side: 'left' | 'right' }) {
   const xBase = side === 'left' ? -25 : 25
   const xDir = side === 'left' ? -1 : 1
+  const sideSeed = side === 'left' ? 0 : 1000
 
   return (
     <group position={[xBase, 0, -15]}>
       {/* Spear/lance array representing distant armies */}
       {Array.from({ length: 20 }).map((_, i) => {
         const x = i * 1.2 * xDir
-        const height = 3 + Math.random() * 1.5
+        const height = 3 + seededRandom(sideSeed + i) * 1.5
+        const zOff = seededRandom(sideSeed + i + 100) * 5 - 2.5
         return (
-          <group key={i} position={[x, 0, Math.random() * 5 - 2.5]}>
+          <group key={i} position={[x, 0, zOff]}>
             {/* Spear shaft */}
             <mesh position={[0, height / 2, 0]}>
               <cylinderGeometry args={[0.02, 0.02, height, 4]} />
@@ -148,13 +156,15 @@ function GoldenDust() {
   const ref = useRef<THREE.Points>(null)
   const count = 200
 
-  const positions = useRef(
-    Float32Array.from({ length: count * 3 }, (_, i) => {
-      const axis = i % 3
-      if (axis === 0) return (Math.random() - 0.5) * 40
-      if (axis === 1) return Math.random() * 4
-      return (Math.random() - 0.5) * 20 - 5
-    })
+  const positions = useMemo(
+    () =>
+      Float32Array.from({ length: count * 3 }, (_, i) => {
+        const axis = i % 3
+        if (axis === 0) return (seededRandom(i + 500) - 0.5) * 40
+        if (axis === 1) return seededRandom(i + 700) * 4
+        return (seededRandom(i + 900) - 0.5) * 20 - 5
+      }),
+    []
   )
 
   useFrame(({ clock }) => {
@@ -172,7 +182,7 @@ function GoldenDust() {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          args={[positions.current, 3]}
+          args={[positions, 3]}
         />
       </bufferGeometry>
       <pointsMaterial

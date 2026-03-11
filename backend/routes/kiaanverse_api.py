@@ -96,6 +96,7 @@ async def ask_krishna(request: AskKrishnaRequest) -> AskKrishnaResponse:
             question=request.question,
             chapter_context=request.chapter_context,
             language=request.language,
+            mode=request.mode,
         )
 
         return AskKrishnaResponse(
