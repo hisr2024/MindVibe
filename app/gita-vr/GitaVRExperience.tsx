@@ -1,11 +1,11 @@
 /**
- * GitaVRExperience — Cinematic 2D Gita Experience
+ * GitaVRExperience — Cinematic 2D Bhagavad Gita Experience
  *
- * Layered 2D composition replacing the Three.js 3D scene:
- * Layer 0: Battlefield backdrop (CSS gradients + SVG silhouettes)
- * Layer 1: Divine aura effect (CSS radial gradient)
- * Layer 2: Vishwaroop cosmic effect (CSS, Chapter 11 only)
- * Layer 3: Characters (Krishna + Arjuna SVG illustrations)
+ * Disney-level layered composition with Framer Motion:
+ * Layer 0: Battlefield backdrop (parallax SVG/CSS panorama)
+ * Layer 1: Divine aura effect (multi-layered golden radiance)
+ * Layer 2: Vishwaroop cosmic effect (Chapter 11 cosmic form)
+ * Layer 3: Characters (Krishna + Arjuna SVG illustrations with spring animations)
  * Layer 4: UI overlays (HUD, subtitles, chapter selector, question input, verse display)
  *
  * No WebGL, no Canvas, no Three.js — pure DOM/CSS/SVG.
@@ -15,6 +15,7 @@
 'use client'
 
 import { useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 
 // Illustrations
@@ -52,6 +53,8 @@ export default function GitaVRExperience() {
     await askQuestion(question)
   }, [askQuestion])
 
+  const isVishwaroop = sceneState === 'vishwaroop'
+
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-black select-none">
       {/* === LAYER 0: BATTLEFIELD BACKDROP === */}
@@ -64,59 +67,79 @@ export default function GitaVRExperience() {
       <VishwaroopEffect2D />
 
       {/* === LAYER 3: CHARACTERS === */}
-      <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-[8%]">
-        {/* Character container — centered, responsive */}
-        <div className="relative flex items-end gap-8 sm:gap-16 md:gap-24">
-          {/* Krishna — left-center, larger */}
-          <div
-            className="relative z-10 transition-transform duration-1000"
-            style={{
-              transform: sceneState === 'vishwaroop' ? 'scale(1.15)' : 'scale(1)',
+      <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-[6%] sm:pb-[8%]">
+        {/* Character staging — cinematic positioning */}
+        <div className="relative flex items-end gap-4 sm:gap-10 md:gap-16 lg:gap-24">
+          {/* Krishna — left-center, larger, main character */}
+          <motion.div
+            className="relative z-10"
+            animate={{
+              scale: isVishwaroop ? 1.2 : 1,
+              y: isVishwaroop ? -20 : 0,
+            }}
+            transition={{
+              type: 'spring',
+              stiffness: 30,
+              damping: 15,
+              mass: 1.2,
             }}
           >
             <KrishnaIllustration />
-          </div>
+          </motion.div>
 
-          {/* Arjuna — right, slightly smaller and further back */}
-          <div className="relative z-[5] opacity-90">
+          {/* Arjuna — right, slightly smaller for perspective depth */}
+          <motion.div
+            className="relative z-[5]"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{
+              opacity: isVishwaroop ? 0.75 : 0.92,
+              x: 0,
+              scale: isVishwaroop ? 0.9 : 1,
+            }}
+            transition={{
+              type: 'spring',
+              stiffness: 40,
+              damping: 18,
+            }}
+          >
             <ArjunaIllustration />
-          </div>
+          </motion.div>
         </div>
       </div>
 
       {/* === LAYER 4: UI OVERLAYS === */}
       <div className="pointer-events-none absolute inset-0">
         {/* HUD — top center */}
-        <div className="pointer-events-auto absolute left-1/2 top-4 -translate-x-1/2">
+        <div className="pointer-events-auto absolute left-1/2 top-4 z-20 -translate-x-1/2">
           <VRHud />
         </div>
 
         {/* Subtitle Panel — bottom center, above question input */}
-        <div className="pointer-events-none absolute bottom-[160px] left-1/2 -translate-x-1/2">
+        <div className="pointer-events-none absolute bottom-[160px] left-1/2 z-20 -translate-x-1/2">
           <SubtitlePanel />
         </div>
 
         {/* Question Input — bottom center */}
-        <div className="pointer-events-auto absolute bottom-6 left-1/2 -translate-x-1/2">
+        <div className="pointer-events-auto absolute bottom-6 left-1/2 z-20 -translate-x-1/2">
           <QuestionInput onAskQuestion={handleAskQuestion} />
         </div>
 
         {/* Chapter Selector — centered overlay */}
-        <div className="pointer-events-auto absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div className="pointer-events-auto absolute left-1/2 top-1/2 z-30 -translate-x-1/2 -translate-y-1/2">
           <ChapterSelector />
         </div>
 
         {/* Verse Display — right side */}
-        <div className="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2">
+        <div className="pointer-events-none absolute right-6 top-1/2 z-20 -translate-y-1/2">
           <VerseDisplay />
         </div>
 
         {/* Back button — top left */}
         <Link
           href="/"
-          className="pointer-events-auto absolute left-4 top-4 rounded-lg border border-white/10 bg-black/50 px-4 py-2 text-sm text-white/60 backdrop-blur-sm transition hover:bg-black/70 hover:text-white"
+          className="pointer-events-auto absolute left-4 top-4 z-20 rounded-lg border border-white/10 bg-black/50 px-4 py-2 text-sm text-white/60 backdrop-blur-sm transition hover:bg-black/70 hover:text-white"
         >
-          ← Back
+          &larr; Back
         </Link>
 
         {/* Scene badge — bottom center */}
@@ -130,31 +153,41 @@ export default function GitaVRExperience() {
       {/* === AUDIO (non-visual) === */}
       <AmbienceManager />
 
-      {/* Intro overlay — fade out after scene starts */}
-      {sceneState === 'loading' && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black">
-          <div className="relative flex items-center justify-center">
-            <div
-              className="absolute h-48 w-48 animate-pulse rounded-full"
-              style={{
-                background: 'radial-gradient(circle, rgba(212, 164, 76, 0.15) 0%, transparent 70%)',
-              }}
-            />
-            <span
-              className="relative text-7xl"
-              style={{
-                color: '#d4a44c',
-                textShadow: '0 0 30px rgba(212, 164, 76, 0.5)',
-              }}
-            >
-              &#x0950;
-            </span>
-          </div>
-          <p className="mt-8 text-sm tracking-widest text-[#d4a44c]/60">
-            Preparing the Sacred Battlefield...
-          </p>
-        </div>
-      )}
+      {/* === INTRO OVERLAY — cinematic fade === */}
+      <AnimatePresence>
+        {sceneState === 'loading' && (
+          <motion.div
+            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black"
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: 'easeInOut' }}
+          >
+            <div className="relative flex items-center justify-center">
+              <motion.div
+                className="absolute h-48 w-48 rounded-full"
+                animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                style={{
+                  background: 'radial-gradient(circle, rgba(212, 164, 76, 0.2) 0%, transparent 70%)',
+                }}
+              />
+              <motion.span
+                className="relative text-7xl"
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                style={{
+                  color: '#d4a44c',
+                  textShadow: '0 0 30px rgba(212, 164, 76, 0.5), 0 0 60px rgba(212, 164, 76, 0.2)',
+                }}
+              >
+                &#x0950;
+              </motion.span>
+            </div>
+            <p className="mt-8 text-sm tracking-widest text-[#d4a44c]/60">
+              Preparing the Sacred Battlefield...
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
