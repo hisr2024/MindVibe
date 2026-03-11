@@ -1,46 +1,17 @@
 /**
- * Bhagavad Gita VR Experience - Type Definitions
+ * Type definitions for the Bhagavad Gita VR Experience.
  *
- * Types for the immersive 3D Kurukshetra battlefield experience
- * where Krishna delivers Gita teachings to Arjuna, powered by KIAAN AI.
+ * Covers API request/response shapes, character states,
+ * scene states, and verse data structures.
  */
 
-// ─── Scene & State Types ──────────────────────────────────────────────────────
-
-export type VRMode = 'desktop' | 'mobile' | 'vr-headset'
-
-export type SceneState = 'loading' | 'intro' | 'teaching' | 'question' | 'vishwaroop'
+/* ── Character & Scene States ── */
 
 export type KrishnaState = 'idle' | 'speaking' | 'listening' | 'blessing'
-
 export type ArjunaState = 'idle' | 'distressed' | 'listening' | 'enlightened'
+export type ScenePhase = 'loading' | 'intro' | 'active' | 'vishwaroop'
 
-export type InteractionMode = 'voice' | 'text'
-
-export type GestureType =
-  | 'blessing'
-  | 'pointing_up'
-  | 'open_palms'
-  | 'touching_heart'
-  | 'namaste'
-  | 'beckoning'
-  | 'idle'
-
-export type KrishnaEmotion =
-  | 'compassionate'
-  | 'wise'
-  | 'playful'
-  | 'serene'
-  | 'powerful'
-  | 'loving'
-
-// ─── API Types ────────────────────────────────────────────────────────────────
-
-export interface KrishnaRequest {
-  question: string
-  chapter_context: number
-  language: string
-}
+/* ── Verse Data ── */
 
 export interface VerseReference {
   chapter: number
@@ -50,19 +21,31 @@ export interface VerseReference {
   translation: string
 }
 
+/* ── Gesture Cues ── */
+
 export interface GestureCue {
-  type: GestureType
+  type: 'blessing' | 'namaste' | 'open_palms' | 'touching_heart' | 'pointing_up' | 'beckoning'
   timestamp_ms: number
   duration_ms: number
 }
 
-export interface KrishnaResponse {
+/* ── API: Ask Krishna ── */
+
+export interface AskKrishnaRequest {
+  question: string
+  chapter_context: number
+  language: string
+}
+
+export interface AskKrishnaResponse {
   answer: string
   verse_reference: VerseReference | null
   audio_url: string | null
   gestures: GestureCue[]
-  emotion: KrishnaEmotion
+  emotion: 'compassionate' | 'wise' | 'playful' | 'serene' | 'powerful' | 'loving'
 }
+
+/* ── API: Verse Teaching ── */
 
 export interface VerseTeaching {
   chapter: number
@@ -75,6 +58,8 @@ export interface VerseTeaching {
   themes: string[]
 }
 
+/* ── API: Chapter Intro ── */
+
 export interface ChapterIntro {
   chapter: number
   name: string
@@ -83,50 +68,4 @@ export interface ChapterIntro {
   audio_url: string | null
   key_themes: string[]
   total_verses: number
-}
-
-// ─── VR Store State ───────────────────────────────────────────────────────────
-
-export interface GitaVRState {
-  currentChapter: number
-  currentVerse: number
-  vrMode: VRMode
-  sceneState: SceneState
-  krishnaState: KrishnaState
-  arjunaState: ArjunaState
-  interactionMode: InteractionMode
-  audioPlaying: boolean
-  subtitleText: string
-  currentVerse_sanskrit: string
-  userQuestion: string
-  isProcessingQuestion: boolean
-  krishnaResponse: KrishnaResponse | null
-  showChapterSelector: boolean
-  showVerseDisplay: boolean
-  subtitlesEnabled: boolean
-  volume: number
-  assetsLoaded: boolean
-  loadingProgress: number
-}
-
-export interface GitaVRActions {
-  setCurrentChapter: (chapter: number) => void
-  setCurrentVerse: (verse: number) => void
-  setVRMode: (mode: VRMode) => void
-  setSceneState: (state: SceneState) => void
-  setKrishnaState: (state: KrishnaState) => void
-  setArjunaState: (state: ArjunaState) => void
-  setInteractionMode: (mode: InteractionMode) => void
-  setAudioPlaying: (playing: boolean) => void
-  setSubtitleText: (text: string) => void
-  setUserQuestion: (question: string) => void
-  setIsProcessingQuestion: (processing: boolean) => void
-  setKrishnaResponse: (response: KrishnaResponse | null) => void
-  setShowChapterSelector: (show: boolean) => void
-  setShowVerseDisplay: (show: boolean) => void
-  setSubtitlesEnabled: (enabled: boolean) => void
-  setVolume: (volume: number) => void
-  setAssetsLoaded: (loaded: boolean) => void
-  setLoadingProgress: (progress: number) => void
-  reset: () => void
 }
