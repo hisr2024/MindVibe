@@ -16,7 +16,12 @@ import { useGestureAnimator } from '@/app/gita-vr/components/characters/GestureA
 import type { KrishnaResponse } from '@/types/gitaVR.types'
 
 export function useGitaVR() {
-  const store = useGitaVRStore()
+  // Use getState() for imperative writes inside callbacks to avoid
+  // subscribing to the entire store (which causes infinite re-render loops
+  // when setSceneState triggers a state change → store ref changes →
+  // useCallback recreates → useEffect re-fires → setSceneState again).
+  const getStore = useCallback(() => useGitaVRStore.getState(), [])
+
   const { playAudio, stopAudio } = useLipSync()
   const { playGestures, resetGestures } = useGestureAnimator()
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
@@ -40,13 +45,14 @@ export function useGitaVR() {
   }, [])
 
   const handleKrishnaResponse = useCallback(async (response: KrishnaResponse) => {
-    store.setKrishnaResponse(response)
-    store.setSubtitleText(response.answer ?? '')
-    store.setArjunaState('listening')
+    const s = getStore()
+    s.setKrishnaResponse(response)
+    s.setSubtitleText(response.answer ?? '')
+    s.setArjunaState('listening')
 
     // Show verse if referenced
     if (response.verse_reference) {
-      store.setShowVerseDisplay(true)
+      s.setShowVerseDisplay(true)
     }
 
     // Play gesture animations
@@ -56,111 +62,114 @@ export function useGitaVR() {
 
     // Play audio if available
     if (response.audio_url) {
-      store.setKrishnaState('speaking')
+      s.setKrishnaState('speaking')
       await playAudio(response.audio_url, response.answer)
     } else {
       // No audio — show text for a duration based on word count
-      store.setKrishnaState('speaking')
+      s.setKrishnaState('speaking')
       const wordCount = (response.answer ?? '').split(' ').length
       const displayMs = Math.max(3000, wordCount * 300)
 
       await new Promise<void>((resolve) => {
         scheduleTimeout(() => {
-          store.setKrishnaState('idle')
-          store.setSubtitleText('')
+          getStore().setKrishnaState('idle')
+          getStore().setSubtitleText('')
           resolve()
         }, displayMs)
       })
     }
-  }, [store, playAudio, playGestures, scheduleTimeout])
+  }, [getStore, playAudio, playGestures, scheduleTimeout])
 
   const askQuestion = useCallback(async (question: string) => {
-    if (store.isProcessingQuestion) return
+    const s = getStore()
+    if (s.isProcessingQuestion) return
 
-    store.setIsProcessingQuestion(true)
-    store.setSceneState('question')
-    store.setKrishnaState('listening')
-    store.setArjunaState('listening')
-    store.setUserQuestion(question)
+    s.setIsProcessingQuestion(true)
+    s.setSceneState('question')
+    s.setKrishnaState('listening')
+    s.setArjunaState('listening')
+    s.setUserQuestion(question)
 
     try {
       const response = await askKrishna(
         question,
-        store.currentChapter,
+        getStore().currentChapter,
         'en'
       )
 
-      store.setSceneState('teaching')
+      getStore().setSceneState('teaching')
       await handleKrishnaResponse(response)
     } catch {
       // Graceful fallback — show compassionate message
-      store.setSubtitleText(
+      getStore().setSubtitleText(
         'My dear friend, the connection to divine wisdom is momentarily interrupted. Please ask again.'
       )
-      store.setKrishnaState('blessing')
+      getStore().setKrishnaState('blessing')
 
       scheduleTimeout(() => {
-        store.setSubtitleText('')
-        store.setKrishnaState('idle')
+        getStore().setSubtitleText('')
+        getStore().setKrishnaState('idle')
       }, 4000)
     } finally {
-      store.setIsProcessingQuestion(false)
+      getStore().setIsProcessingQuestion(false)
     }
-  }, [store, handleKrishnaResponse, scheduleTimeout])
+  }, [getStore, handleKrishnaResponse, scheduleTimeout])
 
   const navigateToChapter = useCallback(async (chapter: number) => {
-    store.setCurrentChapter(chapter)
-    store.setCurrentVerse(1)
+    const s = getStore()
+    s.setCurrentChapter(chapter)
+    s.setCurrentVerse(1)
     resetGestures()
     stopAudio()
 
     if (chapter === 11) {
-      store.setSceneState('vishwaroop')
-      store.setArjunaState('enlightened')
+      s.setSceneState('vishwaroop')
+      s.setArjunaState('enlightened')
     } else {
-      store.setSceneState('teaching')
-      store.setArjunaState('listening')
+      s.setSceneState('teaching')
+      s.setArjunaState('listening')
     }
 
     try {
       const intro = await getChapterIntro(chapter)
-      store.setSubtitleText(intro.intro_text ?? '')
-      store.setKrishnaState('speaking')
+      getStore().setSubtitleText(intro.intro_text ?? '')
+      getStore().setKrishnaState('speaking')
 
       // Display for a readable duration
       const wordCount = (intro.intro_text ?? '').split(' ').length
       scheduleTimeout(() => {
-        store.setSubtitleText('')
-        store.setKrishnaState('idle')
+        getStore().setSubtitleText('')
+        getStore().setKrishnaState('idle')
       }, Math.max(4000, wordCount * 300))
     } catch {
       // Silently fail — chapter navigation still works
     }
-  }, [store, resetGestures, stopAudio, scheduleTimeout])
+  }, [getStore, resetGestures, stopAudio, scheduleTimeout])
 
   const startExperience = useCallback(() => {
-    store.setSceneState('intro')
-    store.setAssetsLoaded(true)
-    store.setArjunaState('distressed')
+    const s = getStore()
+    s.setSceneState('intro')
+    s.setAssetsLoaded(true)
+    s.setArjunaState('distressed')
 
     // After intro delay, transition to teaching
     scheduleTimeout(() => {
-      store.setSceneState('teaching')
-      store.setArjunaState('listening')
-      store.setSubtitleText(
+      const st = getStore()
+      st.setSceneState('teaching')
+      st.setArjunaState('listening')
+      st.setSubtitleText(
         'Welcome, dear seeker. I am Krishna, your eternal friend. Ask me anything, and I shall guide you with the wisdom of the Bhagavad Gita.'
       )
-      store.setKrishnaState('speaking')
+      st.setKrishnaState('speaking')
 
       scheduleTimeout(() => {
-        store.setSubtitleText('')
-        store.setKrishnaState('idle')
+        getStore().setSubtitleText('')
+        getStore().setKrishnaState('idle')
       }, 6000)
     }, 3000)
-  }, [store, scheduleTimeout])
+  }, [getStore, scheduleTimeout])
 
   return {
-    ...store,
     askQuestion,
     navigateToChapter,
     startExperience,
