@@ -18,7 +18,6 @@ export function useKiaanverse() {
   const currentVerse = useKiaanverseStore((s) => s.currentVerse)
   const krishnaState = useKiaanverseStore((s) => s.krishnaState)
   const krishnaEmotion = useKiaanverseStore((s) => s.krishnaEmotion)
-  const arjunaState = useKiaanverseStore((s) => s.arjunaState)
   const conversation = useKiaanverseStore((s) => s.conversation)
   const isLoading = useKiaanverseStore((s) => s.isLoading)
   const activeVerse = useKiaanverseStore((s) => s.activeVerse)
@@ -30,7 +29,6 @@ export function useKiaanverse() {
   const setChapter = useKiaanverseStore((s) => s.setChapter)
   const setKrishnaState = useKiaanverseStore((s) => s.setKrishnaState)
   const setKrishnaEmotion = useKiaanverseStore((s) => s.setKrishnaEmotion)
-  const setArjunaState = useKiaanverseStore((s) => s.setArjunaState)
   const addUserMessage = useKiaanverseStore((s) => s.addUserMessage)
   const addKrishnaResponse = useKiaanverseStore((s) => s.addKrishnaResponse)
   const setIsLoading = useKiaanverseStore((s) => s.setIsLoading)
@@ -42,7 +40,6 @@ export function useKiaanverse() {
     async (question: string) => {
       setIsLoading(true)
       setKrishnaState('listening')
-      setArjunaState('listening')
       addUserMessage(question)
 
       try {
@@ -62,14 +59,13 @@ export function useKiaanverse() {
         return response
       } catch (error) {
         setKrishnaState('idle')
-        setArjunaState('idle')
         setIsLoading(false)
         throw error
       }
     },
     [
       currentChapter, interactionMode, setIsLoading, setKrishnaState,
-      setKrishnaEmotion, setArjunaState, addUserMessage,
+      setKrishnaEmotion, addUserMessage,
       setSubtitleText, addKrishnaResponse,
     ]
   )
@@ -107,7 +103,7 @@ export function useKiaanverse() {
         setSubtitleText('Let me recite the sacred verses for you, dear friend...')
       } else {
         setKrishnaState('idle')
-        setSubtitleText('Ask me anything, my dear friend. I am here as your Sakha.')
+        setSubtitleText('Ask me anything, dear friend. I am here as your Sakha.')
       }
     },
     [setInteractionMode, setKrishnaState, setSubtitleText]
@@ -143,11 +139,11 @@ export function useKiaanverse() {
   return {
     /* State */
     currentScene, scenePhase, interactionMode, currentChapter, currentVerse,
-    krishnaState, krishnaEmotion, arjunaState, conversation, isLoading,
+    krishnaState, krishnaEmotion, conversation, isLoading,
     activeVerse, subtitleText,
     /* Actions */
     askKrishna, loadChapter, navigateScene, switchMode, requestVerse,
-    setKrishnaState, setArjunaState, setSubtitleText, setScenePhase,
+    setKrishnaState, setSubtitleText, setScenePhase,
     setActiveVerse,
   }
 }

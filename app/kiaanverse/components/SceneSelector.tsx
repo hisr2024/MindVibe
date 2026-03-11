@@ -1,7 +1,7 @@
 /**
- * SceneSelector — VR scene navigation overlay.
+ * SceneSelector — Refined VR scene navigation overlay.
  *
- * Allows users to teleport between the 5 VR environments.
+ * Teleport between the 5 sacred realms.
  */
 
 'use client'
@@ -15,7 +15,7 @@ const SCENES: { id: VRScene; name: string; description: string }[] = [
   { id: 'cosmic-ocean', name: 'Cosmic Ocean', description: 'The infinite Kshira Sagara — entry portal' },
   { id: 'kurukshetra', name: 'Kurukshetra', description: 'The sacred battlefield at golden sunset' },
   { id: 'dialogue-space', name: 'Sacred Grove', description: 'A serene banyan grove for deep dialogue' },
-  { id: 'vishvarupa', name: 'Vishvarupa', description: 'The cosmic universal form of Krishna' },
+  { id: 'vishvarupa', name: 'Vishvarupa', description: 'The cosmic universal form revealed' },
   { id: 'lotus-meditation', name: 'Lotus Realm', description: 'A tranquil lotus pond for meditation' },
 ]
 
@@ -50,7 +50,7 @@ export default function SceneSelector() {
         <>
           <motion.div
             key="scene-backdrop"
-            className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 z-50 bg-black/65 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -66,29 +66,29 @@ export default function SceneSelector() {
             role="dialog"
             aria-label="Scene navigation"
             aria-modal="true"
-            className="absolute inset-x-4 top-16 z-50 max-w-lg mx-auto rounded-2xl border border-amber-400/15 bg-black/80 p-5 backdrop-blur-xl"
-            initial={{ opacity: 0, y: -20 }}
+            className="absolute inset-x-4 top-14 z-50 mx-auto max-w-md rounded-2xl border border-white/[0.06] bg-black/75 p-5 backdrop-blur-2xl"
+            initial={{ opacity: 0, y: -15 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.35 }}
           >
-            <h2 className="mb-4 text-center text-sm font-medium uppercase tracking-widest text-amber-400/70">
+            <h2 className="mb-5 text-center text-[10px] font-light uppercase tracking-[0.3em] text-amber-400/50">
               Sacred Realms
             </h2>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5">
               {SCENES.map(({ id, name, description }) => (
                 <button
                   key={id}
                   onClick={() => handleSelect(id)}
-                  className={`rounded-lg px-4 py-3 text-left transition-colors ${
+                  className={`rounded-xl px-4 py-3 text-left transition-all ${
                     id === currentScene
-                      ? 'border border-amber-400/30 bg-amber-500/15 text-amber-200'
-                      : 'border border-transparent text-amber-100/60 hover:bg-amber-500/10 hover:text-amber-100/90'
+                      ? 'border border-amber-400/20 bg-amber-500/10 text-amber-200'
+                      : 'border border-transparent text-amber-100/45 hover:bg-amber-500/[0.06] hover:text-amber-100/80'
                   }`}
                 >
-                  <p className="text-sm font-medium">{name}</p>
-                  <p className="text-[11px] text-amber-300/40">{description}</p>
+                  <p className="text-[13px] font-light">{name}</p>
+                  <p className="mt-0.5 text-[10px] font-light tracking-wide text-amber-300/30">{description}</p>
                 </button>
               ))}
             </div>

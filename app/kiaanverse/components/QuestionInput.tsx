@@ -1,8 +1,9 @@
 /**
- * QuestionInput — Text input for asking Krishna questions (Sakha Mode)
- * or requesting verse recitation (Recital Mode).
+ * QuestionInput — Refined text input for divine dialogue.
  *
- * Fixed at the bottom of the screen. Routes through Kiaanverse service.
+ * Sakha Mode: Ask questions, receive Gita wisdom.
+ * Recital Mode: Request verse recitations.
+ * Fixed at bottom, ultra-minimal glassmorphism.
  */
 
 'use client'
@@ -22,7 +23,6 @@ export default function QuestionInput() {
   const setIsLoading = useKiaanverseStore((s) => s.setIsLoading)
   const setKrishnaState = useKiaanverseStore((s) => s.setKrishnaState)
   const setKrishnaEmotion = useKiaanverseStore((s) => s.setKrishnaEmotion)
-  const setArjunaState = useKiaanverseStore((s) => s.setArjunaState)
   const setSubtitleText = useKiaanverseStore((s) => s.setSubtitleText)
 
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -45,7 +45,6 @@ export default function QuestionInput() {
     setText('')
     addUserMessage(question)
     setIsLoading(true)
-    setArjunaState('listening')
     setKrishnaState('listening')
 
     try {
@@ -65,12 +64,10 @@ export default function QuestionInput() {
       const readTime = Math.max(4000, response.answer.length * 30)
       idleTimerRef.current = setTimeout(() => {
         setKrishnaState('idle')
-        setArjunaState('idle')
         idleTimerRef.current = null
       }, readTime)
     } catch {
       setKrishnaState('idle')
-      setArjunaState('idle')
       setIsLoading(false)
       setSubtitleText(
         'My dear friend, my words could not reach you just now. Please ask again.'
@@ -81,16 +78,16 @@ export default function QuestionInput() {
   const placeholder =
     interactionMode === 'recital'
       ? 'Request a verse (e.g. "Recite Chapter 2, Verse 47")...'
-      : 'Ask Krishna a question...'
+      : 'Ask a question...'
 
   return (
-    <div className="absolute bottom-4 left-1/2 z-50 w-[92%] max-w-xl -translate-x-1/2">
+    <div className="absolute bottom-4 left-1/2 z-50 w-[90%] max-w-lg -translate-x-1/2">
       <form
         onSubmit={(e) => {
           e.preventDefault()
           handleSubmit()
         }}
-        className="flex items-center gap-2 rounded-2xl border border-amber-400/20 bg-black/50 px-4 py-2 backdrop-blur-xl"
+        className="flex items-center gap-2.5 rounded-full border border-white/[0.06] bg-black/35 px-5 py-2.5 backdrop-blur-2xl"
       >
         <input
           type="text"
@@ -98,23 +95,23 @@ export default function QuestionInput() {
           onChange={(e) => setText(e.target.value)}
           placeholder={placeholder}
           disabled={isLoading}
-          className="flex-1 bg-transparent text-sm text-amber-50/90 placeholder-amber-200/35 outline-none md:text-base"
+          className="flex-1 bg-transparent text-sm font-light tracking-wide text-amber-50/85 placeholder-amber-200/25 outline-none"
           maxLength={500}
         />
         <button
           type="submit"
           disabled={isLoading || !text.trim()}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-300 transition-colors hover:bg-amber-500/30 disabled:opacity-30"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-300/70 transition-all hover:bg-amber-500/25 hover:text-amber-300 disabled:opacity-20"
           aria-label="Send"
         >
           {isLoading ? (
             <motion.div
-              className="h-4 w-4 rounded-full border-2 border-amber-300/50 border-t-amber-300"
+              className="h-3.5 w-3.5 rounded-full border border-amber-300/40 border-t-amber-300"
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
             />
           ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M22 2L11 13" />
               <path d="M22 2L15 22L11 13L2 9L22 2Z" />
             </svg>

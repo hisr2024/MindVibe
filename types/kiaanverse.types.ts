@@ -1,7 +1,7 @@
 /**
  * Kiaanverse — Bhagavad Gita VR Experience Type Definitions
  *
- * Covers all API contracts, VR scene states, AI character states,
+ * Covers all API contracts, VR scene states, divine presence states,
  * interaction modes, and verse data structures for the immersive
  * WebXR spiritual experience.
  */
@@ -21,7 +21,7 @@ export type ScenePhase = 'loading' | 'entering' | 'active' | 'transitioning'
 
 export type InteractionMode = 'recital' | 'sakha'
 
-/* ── Krishna AI Character States ── */
+/* ── Divine Presence States (drives sacred geometry + particle animation) ── */
 
 export type KrishnaState =
   | 'idle'
@@ -39,16 +39,7 @@ export type KrishnaEmotion =
   | 'powerful'
   | 'loving'
 
-/* ── Arjuna Character States ── */
-
-export type ArjunaState =
-  | 'idle'
-  | 'distressed'
-  | 'listening'
-  | 'enlightened'
-  | 'awestruck'
-
-/* ── Gesture Cues for 3D Animation ── */
+/* ── Gesture Cues for Animation ── */
 
 export interface GestureCue {
   type:

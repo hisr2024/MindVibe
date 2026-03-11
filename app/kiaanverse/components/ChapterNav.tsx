@@ -1,7 +1,7 @@
 /**
- * ChapterNav — Chapter selector overlay for navigating the 18 Gita chapters.
+ * ChapterNav — Refined chapter selector for the 18 Gita chapters.
  *
- * Shows Sanskrit names and English labels.
+ * Shows Sanskrit names and English labels in a clean grid.
  * Selecting a chapter loads the intro via KIAAN AI.
  */
 
@@ -58,7 +58,7 @@ export default function ChapterNav() {
         <>
           <motion.div
             key="chapter-backdrop"
-            className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 z-50 bg-black/65 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -74,30 +74,30 @@ export default function ChapterNav() {
             role="dialog"
             aria-label="Chapter navigation"
             aria-modal="true"
-            className="absolute inset-x-4 top-16 z-50 max-h-[75vh] overflow-y-auto rounded-2xl border border-amber-400/15 bg-black/80 p-4 backdrop-blur-xl md:inset-x-[10%]"
-            initial={{ opacity: 0, y: -20 }}
+            className="absolute inset-x-4 top-14 z-50 max-h-[78vh] overflow-y-auto rounded-2xl border border-white/[0.06] bg-black/75 p-5 backdrop-blur-2xl md:inset-x-[10%]"
+            initial={{ opacity: 0, y: -15 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.35 }}
           >
-            <h2 className="mb-4 text-center text-sm font-medium uppercase tracking-widest text-amber-400/70">
+            <h2 className="mb-5 text-center text-[10px] font-light uppercase tracking-[0.3em] text-amber-400/50">
               Bhagavad Gita — 18 Chapters
             </h2>
 
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
               {CHAPTERS.map(({ ch, name, label }) => (
                 <button
                   key={ch}
                   onClick={() => handleSelect(ch)}
-                  className={`rounded-lg px-3 py-2.5 text-left transition-colors ${
+                  className={`rounded-xl px-3.5 py-2.5 text-left transition-all ${
                     ch === currentChapter
-                      ? 'border border-amber-400/30 bg-amber-500/15 text-amber-200'
-                      : 'border border-transparent text-amber-100/60 hover:bg-amber-500/10 hover:text-amber-100/90'
+                      ? 'border border-amber-400/20 bg-amber-500/10 text-amber-200'
+                      : 'border border-transparent text-amber-100/45 hover:bg-amber-500/[0.06] hover:text-amber-100/80'
                   }`}
                 >
-                  <span className="text-xs text-amber-400/50">Chapter {ch}</span>
-                  <p className="text-sm font-medium">{label}</p>
-                  <p className="text-[10px] italic text-amber-300/40">{name}</p>
+                  <span className="text-[10px] font-light tracking-wider text-amber-400/35">Chapter {ch}</span>
+                  <p className="text-[13px] font-light">{label}</p>
+                  <p className="text-[9px] font-light italic tracking-wide text-amber-300/25">{name}</p>
                 </button>
               ))}
             </div>
