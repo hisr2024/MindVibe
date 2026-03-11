@@ -1,8 +1,8 @@
 /**
  * Gita VR Page — Route Entry Point
  *
- * Dynamically imports the full VR experience to keep the main
- * app bundle lean. SSR disabled since Three.js requires browser APIs.
+ * Dynamically imports the full Gita experience to keep the main
+ * app bundle lean. SSR disabled since Web Audio API requires browser.
  */
 
 'use client'
