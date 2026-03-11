@@ -1,8 +1,9 @@
 /**
- * SubtitleOverlay — Displays Krishna's spoken words as elegant subtitles.
+ * SubtitleOverlay — Displays divine words as elegant floating text.
  *
  * Typewriter effect for immersive narration feel.
  * Positioned above the question input at bottom-center.
+ * Ultra-refined glassmorphism treatment.
  */
 
 'use client'
@@ -29,7 +30,7 @@ export default function SubtitleOverlay() {
       if (idx >= subtitleText.length && intervalRef.current) {
         clearInterval(intervalRef.current)
       }
-    }, 25)
+    }, 22)
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
@@ -40,14 +41,14 @@ export default function SubtitleOverlay() {
     <AnimatePresence>
       {displayed && (
         <motion.div
-          className="pointer-events-none absolute bottom-28 left-1/2 z-40 w-[90%] max-w-2xl -translate-x-1/2"
-          initial={{ opacity: 0, y: 10 }}
+          className="pointer-events-none absolute bottom-28 left-1/2 z-40 w-[88%] max-w-2xl -translate-x-1/2"
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 10 }}
-          transition={{ duration: 0.5 }}
+          exit={{ opacity: 0, y: 12 }}
+          transition={{ duration: 0.6 }}
         >
-          <div className="rounded-xl bg-black/50 px-6 py-4 backdrop-blur-md">
-            <p className="text-center font-serif text-base leading-relaxed text-amber-50/90 md:text-lg">
+          <div className="rounded-2xl border border-white/[0.04] bg-black/40 px-7 py-5 backdrop-blur-2xl">
+            <p className="text-center font-serif text-base font-light leading-relaxed tracking-wide text-amber-50/85 md:text-lg">
               &ldquo;{displayed}&rdquo;
             </p>
           </div>

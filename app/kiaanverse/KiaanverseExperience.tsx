@@ -1,11 +1,13 @@
 /**
- * KiaanverseExperience — Main orchestrator for the immersive VR Gita experience.
+ * KiaanverseExperience — Main orchestrator for the immersive divine Gita experience.
  *
- * Composes React Three Fiber Canvas with WebXR support, VR scenes,
- * Krishna AI character, and 2D UI overlay (HUD, subtitles, input, verse card).
+ * Composes React Three Fiber Canvas with VR scenes, sacred DivinePresence
+ * (replacing character avatars), and refined 2D UI overlay.
  *
  * Scene lifecycle: loading → entering → active
  * Interaction modes: Recital (narration) | Sakha (Q&A)
+ *
+ * The user IS Arjuna — no second avatar needed.
  */
 
 'use client'
@@ -19,8 +21,7 @@ import { useKiaanverseStore } from '@/stores/kiaanverseStore'
 
 /**
  * Error boundary that catches WebGL / R3F render failures
- * (e.g. context lost, asset load errors) and shows a graceful fallback
- * instead of crashing the entire page.
+ * and shows a graceful fallback instead of crashing the page.
  */
 class CanvasErrorBoundary extends Component<
   { children: ReactNode },
@@ -43,12 +44,12 @@ class CanvasErrorBoundary extends Component<
     if (this.state.hasError) {
       return (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black">
-          <div className="mb-4 text-5xl text-amber-400/60">&#x0950;</div>
-          <p className="text-lg text-amber-200/70">
+          <div className="mb-6 text-6xl text-amber-400/40">&#x0950;</div>
+          <p className="text-lg font-light tracking-wide text-amber-200/60">
             The sacred realm could not be rendered.
           </p>
           <button
-            className="mt-4 rounded-lg border border-amber-400/30 px-5 py-2 text-sm text-amber-300/80 transition hover:bg-amber-400/10"
+            className="mt-6 rounded-full border border-amber-400/20 px-6 py-2 text-sm font-light tracking-wider text-amber-300/60 transition hover:bg-amber-400/10 hover:text-amber-300"
             onClick={() => this.setState({ hasError: false })}
           >
             Try Again
@@ -65,8 +66,7 @@ import KurukshetraScene from './scenes/KurukshetraScene'
 import DialogueSpaceScene from './scenes/DialogueSpaceScene'
 import VishvarupaScene from './scenes/VishvarupaScene'
 import LotusMeditationScene from './scenes/LotusMeditationScene'
-import KrishnaAvatar from './components/KrishnaAvatar'
-import ArjunaAvatar from './components/ArjunaAvatar'
+import DivinePresence from './components/DivinePresence'
 import VRHud from './components/VRHud'
 import SubtitleOverlay from './components/SubtitleOverlay'
 import VerseCard from './components/VerseCard'
@@ -75,7 +75,6 @@ import ChapterNav from './components/ChapterNav'
 import SceneSelector from './components/SceneSelector'
 import ModeSelector from './components/ModeSelector'
 
-/** Maps scene keys to their R3F components */
 function ActiveScene({ scene }: { scene: string }) {
   switch (scene) {
     case 'cosmic-ocean':
@@ -103,28 +102,24 @@ export default function KiaanverseExperience() {
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
 
   useEffect(() => {
-    /* Phase 1: loading → entering after 1.5s */
     const t0 = setTimeout(() => {
       setScenePhase('entering')
 
-      /* Phase 2: entering → active after 2s */
       const t1 = setTimeout(() => {
         setScenePhase('active')
         setKrishnaState('speaking')
         setSubtitleText(
-          'Welcome to the sacred battlefield of Kurukshetra, my dear friend. ' +
-          'I am Krishna, your Sakha — your divine companion. ' +
+          'Welcome, dear friend. I am here as your Sakha — your divine companion. ' +
           'Ask me anything about dharma, about life, about the truth within your heart.'
         )
-      }, 2000)
+      }, 2500)
       timersRef.current.push(t1)
 
-      /* Krishna returns to idle after welcome */
       const t2 = setTimeout(() => {
         setKrishnaState('idle')
       }, 14000)
       timersRef.current.push(t2)
-    }, 1500)
+    }, 2000)
     timersRef.current.push(t0)
 
     return () => {
@@ -135,7 +130,7 @@ export default function KiaanverseExperience() {
 
   return (
     <div className="relative h-[100dvh] w-full select-none overflow-hidden bg-black">
-      {/* ═══ 3D CANVAS (React Three Fiber + WebXR) ═══ */}
+      {/* ═══ 3D CANVAS ═══ */}
       <CanvasErrorBoundary>
         <Canvas
           className="absolute inset-0"
@@ -150,33 +145,23 @@ export default function KiaanverseExperience() {
           <AdaptiveDpr pixelated />
           <AdaptiveEvents />
 
-          {/* Global lighting */}
-          <ambientLight intensity={0.3} color="#ffeedd" />
-          <directionalLight position={[5, 8, 3]} intensity={0.6} color="#ffd700" castShadow />
-          <pointLight position={[0, 4, 0]} intensity={0.4} color="#ff9944" distance={15} />
+          {/* Subtle global lighting */}
+          <ambientLight intensity={0.2} color="#ffeedd" />
+          <directionalLight position={[5, 8, 3]} intensity={0.5} color="#ffd700" castShadow />
 
           <Suspense fallback={null}>
-            {/* Active VR scene environment */}
             <ActiveScene scene={currentScene} />
 
-            {/* Krishna AI avatar (3D) */}
-            <KrishnaAvatar position={[-1.2, 0, 0]} />
+            {/* Divine Presence — sacred geometry + particles (replaces character avatars) */}
+            <DivinePresence position={[0, 0, 0]} />
 
-            {/* Arjuna avatar (3D) */}
-            <ArjunaAvatar position={[1.2, 0, 0]} />
+            {/* Cosmic starfield */}
+            <Stars radius={120} depth={60} count={4000} factor={3} saturation={0.05} fade speed={0.3} />
 
-            {/* Cosmic star field */}
-            <Stars radius={100} depth={50} count={3000} factor={3} saturation={0.1} fade speed={0.5} />
-
-            {/*
-             * Procedural sunset environment lighting.
-             * Replaces <Environment preset="sunset" /> which fetched an external
-             * HDRI from raw.githack.com — blocked by CSP connect-src policy.
-             * These lights replicate warm sunset reflections without any fetch.
-             */}
-            <hemisphereLight args={['#ff8844', '#334488', 0.15]} />
-            <directionalLight position={[-3, 2, -5]} intensity={0.2} color="#ff6633" />
-            <pointLight position={[3, 5, -2]} intensity={0.15} color="#ffaa55" distance={20} />
+            {/* Procedural sunset-warm environment lighting */}
+            <hemisphereLight args={['#ff8844', '#223366', 0.1]} />
+            <directionalLight position={[-3, 2, -5]} intensity={0.15} color="#ff6633" />
+            <pointLight position={[3, 5, -2]} intensity={0.1} color="#ffaa55" distance={20} />
 
             <Preload all />
           </Suspense>
@@ -192,7 +177,7 @@ export default function KiaanverseExperience() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.8 }}
           >
             <div className="pointer-events-auto">
               <VRHud />
@@ -216,21 +201,23 @@ export default function KiaanverseExperience() {
             initial={{ opacity: 1 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.2 }}
+            transition={{ duration: 1.5 }}
           >
             <motion.div
-              className="mb-6 text-7xl text-amber-400/80"
-              animate={{ scale: [1, 1.08, 1], opacity: [0.6, 1, 0.6] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              className="mb-8 text-8xl font-light text-amber-400/60"
+              animate={{ scale: [1, 1.05, 1], opacity: [0.4, 0.8, 0.4] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             >
               &#x0950;
             </motion.div>
-            <p className="mb-2 text-lg font-light tracking-[0.3em] text-amber-200/60">
+            <p className="mb-2 text-sm font-light tracking-[0.4em] text-amber-200/40">
               KIAANVERSE
             </p>
-            <p className="text-xs tracking-widest text-amber-200/30">
-              Preparing the sacred realm...
-            </p>
+            <motion.div
+              className="mt-4 h-px w-24 bg-gradient-to-r from-transparent via-amber-400/30 to-transparent"
+              animate={{ opacity: [0.3, 0.7, 0.3] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -244,24 +231,33 @@ export default function KiaanverseExperience() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.5 }}
+            transition={{ duration: 1.8 }}
           >
             <motion.div
               className="text-center"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 1 }}
+              transition={{ duration: 1.2 }}
             >
-              <h1 className="font-serif text-4xl font-light tracking-wide text-amber-200/80 md:text-5xl">
+              <motion.div
+                className="mx-auto mb-6 h-px w-16 bg-gradient-to-r from-transparent via-amber-400/40 to-transparent"
+                initial={{ width: 0 }}
+                animate={{ width: 64 }}
+                transition={{ duration: 1.5, ease: 'easeOut' }}
+              />
+              <h1 className="font-serif text-4xl font-extralight tracking-wider text-amber-100/70 md:text-5xl">
                 Bhagavad Gita
               </h1>
-              <p className="mt-3 text-lg font-light text-amber-300/50">
+              <p className="mt-4 text-base font-extralight tracking-widest text-amber-200/35">
                 The Song of God
               </p>
-              <p className="mt-1 text-xs tracking-widest text-amber-200/30">
-                Experience Krishna as your Divine Friend
-              </p>
+              <motion.div
+                className="mx-auto mt-6 h-px w-16 bg-gradient-to-r from-transparent via-amber-400/40 to-transparent"
+                initial={{ width: 0 }}
+                animate={{ width: 64 }}
+                transition={{ duration: 1.5, delay: 0.3, ease: 'easeOut' }}
+              />
             </motion.div>
           </motion.div>
         )}
@@ -272,16 +268,16 @@ export default function KiaanverseExperience() {
         {scenePhase === 'transitioning' && (
           <motion.div
             key="transition"
-            className="absolute inset-0 z-45 flex items-center justify-center bg-black/80"
+            className="absolute inset-0 z-[45] flex items-center justify-center bg-black/85"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 1 }}
           >
             <motion.div
-              className="text-3xl text-amber-400/60"
-              animate={{ scale: [1, 1.1, 1], opacity: [0.4, 0.8, 0.4] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
+              className="text-4xl font-light text-amber-400/40"
+              animate={{ scale: [1, 1.08, 1], opacity: [0.3, 0.6, 0.3] }}
+              transition={{ duration: 2, repeat: Infinity }}
             >
               &#x0950;
             </motion.div>

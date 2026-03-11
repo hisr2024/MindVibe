@@ -1,9 +1,10 @@
 /**
- * VRHud — Minimal heads-up display overlay for Kiaanverse.
+ * VRHud — Minimal, barely-there heads-up display.
  *
- * Top-left:  Chapter indicator + scene name
- * Top-right: Exit button
- * Top-center: Mode toggle (Recital | Sakha)
+ * Whispered guidance, not loud controls. Premium transparency.
+ * Top-left: Chapter + Scene selectors
+ * Top-center: Mode indicator
+ * Top-right: Exit
  */
 
 'use client'
@@ -29,41 +30,41 @@ export default function VRHud() {
   const interactionMode = useKiaanverseStore((s) => s.interactionMode)
 
   return (
-    <div className="absolute inset-x-0 top-0 z-30 flex items-start justify-between p-4">
+    <div className="absolute inset-x-0 top-0 z-30 flex items-start justify-between px-5 py-4">
       {/* Left: Chapter + Scene */}
       <div className="flex gap-2">
         <button
           onClick={toggleChapterNav}
           aria-label={`Chapter ${currentChapter}. Open chapter navigation`}
           aria-expanded={showChapterNav}
-          className="rounded-lg border border-amber-400/15 bg-black/40 px-3 py-1.5 text-sm text-amber-200/70 backdrop-blur-md transition-colors hover:bg-black/60 hover:text-amber-200"
+          className="rounded-full border border-white/[0.06] bg-black/30 px-3.5 py-1.5 text-[11px] font-light tracking-wider text-amber-200/50 backdrop-blur-xl transition-all hover:border-white/[0.12] hover:text-amber-200/80"
         >
           Ch. {currentChapter}
-          <svg className="ml-1 inline-block h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <svg className="ml-1.5 inline-block h-2.5 w-2.5 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M6 9l6 6 6-6" />
           </svg>
         </button>
         <button
           onClick={toggleSceneSelector}
-          className="rounded-lg border border-amber-400/15 bg-black/40 px-3 py-1.5 text-sm text-amber-200/50 backdrop-blur-md transition-colors hover:bg-black/60 hover:text-amber-200"
+          className="rounded-full border border-white/[0.06] bg-black/30 px-3.5 py-1.5 text-[11px] font-light tracking-wider text-amber-200/35 backdrop-blur-xl transition-all hover:border-white/[0.12] hover:text-amber-200/70"
         >
           {SCENE_LABELS[currentScene] || 'Scene'}
         </button>
       </div>
 
-      {/* Center: Mode toggle */}
+      {/* Center: Mode */}
       <button
         onClick={toggleModeSelector}
-        className="rounded-lg border border-amber-400/15 bg-black/40 px-4 py-1.5 text-xs uppercase tracking-widest text-amber-300/60 backdrop-blur-md transition-colors hover:bg-black/60 hover:text-amber-300"
+        className="rounded-full border border-white/[0.06] bg-black/30 px-4 py-1.5 text-[10px] font-light uppercase tracking-[0.2em] text-amber-300/40 backdrop-blur-xl transition-all hover:border-white/[0.12] hover:text-amber-300/70"
       >
-        {interactionMode === 'recital' ? 'Recital Mode' : 'Sakha Mode'}
+        {interactionMode === 'recital' ? 'Recital' : 'Sakha'}
       </button>
 
       {/* Right: Exit */}
       <Link
         href="/"
         aria-label="Exit Kiaanverse"
-        className="rounded-lg border border-amber-400/15 bg-black/40 px-3 py-1.5 text-sm text-amber-200/40 backdrop-blur-md transition-colors hover:bg-black/60 hover:text-amber-200"
+        className="rounded-full border border-white/[0.06] bg-black/30 px-3.5 py-1.5 text-[11px] font-light tracking-wider text-amber-200/30 backdrop-blur-xl transition-all hover:border-white/[0.12] hover:text-amber-200/60"
       >
         Exit
       </Link>

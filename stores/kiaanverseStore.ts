@@ -1,8 +1,10 @@
 /**
  * Kiaanverse Zustand Store — Single source of truth for VR experience state.
  *
- * Manages: scene navigation, AI mode, character states, conversation,
+ * Manages: scene navigation, AI mode, divine presence states, conversation,
  * chapter/verse selection, and UI toggles.
+ *
+ * Arjuna state removed — the user IS Arjuna.
  */
 
 import { create } from 'zustand'
@@ -12,7 +14,6 @@ import type {
   InteractionMode,
   KrishnaState,
   KrishnaEmotion,
-  ArjunaState,
   VerseReference,
   AskKrishnaResponse,
   ConversationEntry,
@@ -35,15 +36,11 @@ interface KiaanverseState {
   setChapter: (ch: number) => void
   setVerse: (v: number) => void
 
-  /* Krishna character state */
+  /* Divine presence state (drives DivinePresence component animation) */
   krishnaState: KrishnaState
   krishnaEmotion: KrishnaEmotion
   setKrishnaState: (s: KrishnaState) => void
   setKrishnaEmotion: (e: KrishnaEmotion) => void
-
-  /* Arjuna character state */
-  arjunaState: ArjunaState
-  setArjunaState: (s: ArjunaState) => void
 
   /* Conversation */
   conversation: ConversationEntry[]
@@ -87,15 +84,11 @@ export const useKiaanverseStore = create<KiaanverseState>((set) => ({
   setChapter: (ch) => set({ currentChapter: ch, currentVerse: 1 }),
   setVerse: (v) => set({ currentVerse: v }),
 
-  /* Krishna character */
+  /* Divine presence */
   krishnaState: 'idle',
   krishnaEmotion: 'serene',
   setKrishnaState: (s) => set({ krishnaState: s }),
   setKrishnaEmotion: (e) => set({ krishnaEmotion: e }),
-
-  /* Arjuna character */
-  arjunaState: 'idle',
-  setArjunaState: (s) => set({ arjunaState: s }),
 
   /* Conversation */
   conversation: [],
