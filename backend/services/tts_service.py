@@ -29,7 +29,7 @@ import json
 
 logger = logging.getLogger(__name__)
 
-VoiceType = Literal["calm", "wisdom", "friendly"]
+VoiceType = Literal["calm", "wisdom", "friendly", "energetic", "soothing", "storytelling", "chanting"]
 VoiceGender = Literal["male", "female", "neutral"]
 
 # Emotion-to-prosody mapping for adaptive voice
@@ -471,6 +471,10 @@ class TTSService:
                 "calm": "sarvam-aura",
                 "wisdom": "sarvam-rishi",
                 "friendly": "sarvam-aura",
+                "energetic": "sarvam-aura",
+                "soothing": "sarvam-aura",
+                "storytelling": "sarvam-rishi",
+                "chanting": "sarvam-rishi",
             }.get(voice_type, "sarvam-aura")
 
         if self._is_indian_language(language):
