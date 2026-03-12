@@ -33,12 +33,12 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
   // Main navigation links with translations
   const mainNavLinks = useMemo(() => [
     { href: '/', label: t('navigation.mainNav.home', 'Home') },
+    { href: '/sadhana', label: t('navigation.features.sadhana', 'Sadhana') },
     { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN'), purposeDescKey: 'kiaan' },
     { href: '/companion', label: t('navigation.features.companion', 'Companion'), purposeDescKey: 'kiaan' },
     { href: '/dashboard', label: t('navigation.mainNav.dashboard', 'Dashboard') },
     { href: '/journeys', label: t('navigation.features.wisdomJourneys', 'Journeys'), premium: true, purposeDescKey: 'journey' },
-    { href: '/kiaanverse', label: t('navigation.features.kiaanverse', 'Kiaanverse'), purposeDescKey: 'kiaanverse' },
-    { href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Sacred Reflections') },
+{ href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Sacred Reflections') },
     { href: '/tools/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
     { href: '/profile', label: t('navigation.mainNav.profile', 'Profile') },
     { href: '/account', label: t('navigation.mainNav.account', 'Account') },

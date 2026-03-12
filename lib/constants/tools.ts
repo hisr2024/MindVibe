@@ -35,6 +35,16 @@ export interface ToolCategory {
  */
 export const CORE_TOOLS: ToolConfig[] = [
   {
+    id: 'sadhana',
+    icon: '🙏',
+    title: 'Nityam Sadhana',
+    description: 'Daily sacred practice',
+    gradient: 'from-[#d4a44c]/30 to-[#FFD700]/30',
+    href: '/sadhana',
+    badge: 'new',
+    purposeDescKey: 'sadhana',
+  },
+  {
     id: 'kiaan',
     icon: '💬',
     title: 'KIAAN Chat',
@@ -71,17 +81,7 @@ export const CORE_TOOLS: ToolConfig[] = [
     gradient: 'from-[#d4a44c]/30 to-[#d4a44c]/30',
     href: '/sacred-reflections', // Same page as Sacred Reflections - encrypted journaling feature
   },
-  {
-    id: 'kiaanverse',
-    icon: '🙏',
-    title: 'Kiaanverse — Gita VR',
-    description: 'Immersive Bhagavad Gita VR with Krishna as your Sakha',
-    gradient: 'from-amber-400/30 to-yellow-400/30',
-    href: '/kiaanverse',
-    badge: 'new',
-    purposeDescKey: 'kiaanverse',
-  },
-  {
+{
     id: 'wisdom',
     icon: '🌍',
     title: 'Wisdom Rooms',
