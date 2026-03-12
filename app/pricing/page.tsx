@@ -549,10 +549,20 @@ export default function PricingPage() {
 
       const data = await response.json()
 
+      // If the requested payment method (e.g. PayPal) was unavailable,
+      // Stripe fell back to card-only checkout. Show the user a notice
+      // before redirecting so they understand why they see a card form.
+      if (data.payment_method_message) {
+        setCheckoutError(data.payment_method_message)
+      }
+
       if (data.provider === 'razorpay') {
         await handleRazorpayCheckout(data, tierId)
       } else if (data.checkout_url) {
-        // Redirect to Stripe Checkout — page will navigate away
+        // Redirect to Stripe Checkout — page will navigate away.
+        // For Google Pay: Stripe Checkout automatically shows the Google Pay
+        // button when the user's browser/device supports Payment Request API.
+        // For PayPal: Stripe Checkout shows PayPal alongside card options.
         window.location.href = data.checkout_url
       } else {
         // Backend returned success but no checkout URL — surface the error

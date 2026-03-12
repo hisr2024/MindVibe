@@ -30,7 +30,7 @@ const METHODS: MethodDef[] = [
   {
     id: 'google_pay',
     label: 'Google Pay',
-    description: 'Pay with Google Pay',
+    description: 'Fast & secure',
     hideForInr: true,
   },
   {
@@ -93,12 +93,12 @@ export function PaymentMethodSelector({
       )}
       {selected === 'google_pay' && currency !== 'INR' && (
         <p className="mt-2 text-center text-xs text-[#f5f0e8]/60">
-          Google Pay will appear on the checkout page if supported by your device.
+          Google Pay will appear on the secure checkout page. You can also use a card as a backup.
         </p>
       )}
       {selected === 'paypal' && (
         <p className="mt-2 text-center text-xs text-[#f5f0e8]/60">
-          You&apos;ll be redirected to PayPal to complete your payment.
+          You&apos;ll be redirected to a secure checkout page where you can sign in with PayPal.
         </p>
       )}
     </div>
