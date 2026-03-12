@@ -30,7 +30,7 @@ const METHODS: MethodDef[] = [
   {
     id: 'google_pay',
     label: 'Google Pay',
-    description: 'Pay with Google Pay',
+    description: 'Fast & secure',
     hideForInr: true,
   },
   {
@@ -98,7 +98,7 @@ export function PaymentMethodSelector({
       )}
       {selected === 'paypal' && (
         <p className="mt-2 text-center text-xs text-[#f5f0e8]/60">
-          You&apos;ll be redirected to PayPal to complete your payment.
+          You&apos;ll be redirected to a secure checkout page where you can sign in with PayPal.
         </p>
       )}
     </div>

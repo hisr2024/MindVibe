@@ -302,14 +302,17 @@ async def create_checkout_session(
         #   the user's PayPal account has issues. This also surfaces Google
         #   Pay / Apple Pay alongside PayPal on the Stripe Checkout page.
         #   PayPal does NOT support INR — validated in the route layer.
-        if payment_method == "paypal":
+        requested_method = payment_method or "card"
+        if requested_method == "paypal":
             payment_method_types = ["card", "paypal"]
-        elif payment_method == "google_pay":
+        elif requested_method == "google_pay":
+            # Google Pay surfaces via Payment Request API on the Stripe
+            # Checkout page when "card" is included. No separate type needed.
             payment_method_types = ["card"]
-        elif payment_method == "card":
+        elif requested_method == "card":
             payment_method_types = ["card"]
         else:
-            payment_method_types = ["card", "paypal"]
+            payment_method_types = ["card"]
 
         # Statement descriptors for recurring subscription payments are configured
         # at the Stripe product/price level or via Account settings (see
@@ -326,15 +329,11 @@ async def create_checkout_session(
                 "user_id": str(user.id),
                 "plan_tier": plan_tier.value,
                 "billing_period": billing_period,
+                "requested_payment_method": requested_method,
             },
             "subscription_data": {
                 "description": f"KIAANVerse {plan_tier.value.capitalize()} Plan ({billing_period})",
             },
-            # NOTE: invoice_settings is NOT a valid parameter for
-            # checkout.Session.create(). It belongs on the Customer or
-            # Invoice object. Passing it here causes InvalidRequestError.
-            # Invoice description/footer are configured via subscription_data
-            # or at the Stripe Dashboard product/customer level.
         }
 
         # Attach metadata to the subscription for ALL payment methods so
@@ -349,21 +348,59 @@ async def create_checkout_session(
             session_params["customer"] = customer_id
         else:
             session_params["customer_email"] = user.email
-        
-        session = stripe.checkout.Session.create(**session_params)
-        
+
+        # Attempt to create the checkout session. If PayPal was requested but
+        # isn't activated on the Stripe account, retry with card-only so the
+        # user can still complete checkout instead of seeing a generic error.
+        paypal_fallback_used = False
+        try:
+            session = stripe.checkout.Session.create(**session_params)
+        except stripe.InvalidRequestError as e:
+            error_msg = str(e).lower()
+            is_paypal_error = (
+                "paypal" in error_msg
+                and ("not activated" in error_msg or "not available" in error_msg
+                     or "not supported" in error_msg or "invalid" in error_msg)
+            )
+            if is_paypal_error and "paypal" in payment_method_types:
+                logger.warning(
+                    f"PayPal not available on Stripe account, falling back to card-only "
+                    f"for user {user.id}"
+                )
+                session_params["payment_method_types"] = ["card"]
+                paypal_fallback_used = True
+                session = stripe.checkout.Session.create(**session_params)
+            else:
+                raise
+
         logger.info(
             f"Created checkout session {session.id} for user {user.id}, "
-            f"plan {plan_tier}, period {billing_period}"
+            f"plan {plan_tier}, period {billing_period}, "
+            f"methods={session_params['payment_method_types']}"
+            f"{' (PayPal fallback to card)' if paypal_fallback_used else ''}"
         )
-        
+
         return {
             "checkout_url": session.url,
             "session_id": session.id,
+            "payment_method_used": "card" if paypal_fallback_used else requested_method,
+            "paypal_fallback": paypal_fallback_used,
         }
-        
+
+    except stripe.InvalidRequestError as e:
+        logger.error(f"Stripe invalid request for user {user.id}: {e}")
+        raise ValueError(f"Payment configuration error: {e.user_message or str(e)}")
+    except stripe.AuthenticationError:
+        logger.error("Stripe authentication failed — check STRIPE_SECRET_KEY")
+        raise RuntimeError("Payment service authentication failed")
+    except stripe.APIConnectionError as e:
+        logger.error(f"Stripe API connection error: {e}")
+        raise RuntimeError("Unable to reach payment service. Please try again.")
+    except stripe.StripeError as e:
+        logger.error(f"Stripe error for user {user.id}: {e}")
+        raise ValueError(f"Payment error: {e.user_message or str(e)}")
     except Exception as e:
-        logger.error(f"Failed to create checkout session: {e}")
+        logger.error(f"Unexpected error creating checkout session: {e}")
         raise
 
 
