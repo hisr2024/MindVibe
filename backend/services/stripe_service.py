@@ -689,7 +689,10 @@ async def _handle_payment_succeeded(db: AsyncSession, data: dict) -> bool:
         except Exception:
             pass  # Fall back to "stripe_card"
 
-    # Record the payment
+    # Record the payment with the actual currency from the Stripe invoice.
+    # Stripe invoices include a "currency" field (e.g. "usd", "eur", "inr").
+    invoice_currency = data.get("currency", "usd")
+
     payment = Payment(
         user_id=subscription.user_id,
         subscription_id=subscription.id,
@@ -697,7 +700,7 @@ async def _handle_payment_succeeded(db: AsyncSession, data: dict) -> bool:
         stripe_payment_intent_id=payment_intent,
         stripe_invoice_id=invoice_id,
         amount=Decimal(str(amount_paid)),
-        currency="usd",
+        currency=invoice_currency,
         status=PaymentStatus.SUCCEEDED,
         description=f"Subscription payment for {subscription.plan.tier.value if subscription.plan else 'unknown'} tier",
     )
