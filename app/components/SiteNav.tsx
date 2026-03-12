@@ -44,6 +44,7 @@ export default function SiteNav() {
 
   const links = useMemo(() => [
     { href: '/', label: t('navigation.mainNav.home', 'Home'), divine: true },
+    { href: '/sadhana', label: t('navigation.features.sadhana', 'Sadhana'), divine: true },
     { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN'), highlight: true },
     { href: '/dashboard', label: t('navigation.mainNav.dashboard', 'Dashboard') },
     { href: '/journeys', label: t('navigation.features.wisdomJourneys', 'Journeys'), premium: true },
