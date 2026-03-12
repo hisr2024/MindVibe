@@ -544,7 +544,20 @@ export default function PricingPage() {
           return
         }
         const error = await response.json().catch(() => ({}))
-        throw new Error(error.detail || error.message || 'Failed to start checkout')
+        // Extract message from structured error responses {error, message}
+        // or plain {detail} strings from the backend
+        const detail = error.detail
+        const errorMessage = typeof detail === 'object' && detail?.message
+          ? detail.message
+          : typeof detail === 'string'
+            ? detail
+            : error.message || 'Failed to start checkout'
+
+        // If payment method specific, suggest switching to Card
+        if (response.status === 503 && paymentMethod !== 'card') {
+          throw new Error(`${errorMessage} Try selecting "Card" as your payment method.`)
+        }
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
@@ -597,10 +610,23 @@ export default function PricingPage() {
       {checkoutError && (
         <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
           <div className="flex items-center justify-between">
-            <span>{checkoutError}</span>
+            <div className="flex flex-col gap-2">
+              <span>{checkoutError}</span>
+              {paymentMethod !== 'card' && (
+                <button
+                  onClick={() => {
+                    setPaymentMethod('card')
+                    setCheckoutError(null)
+                  }}
+                  className="inline-flex w-fit items-center gap-1 rounded-lg bg-[#d4a44c]/20 px-3 py-1.5 text-xs font-medium text-[#d4a44c] hover:bg-[#d4a44c]/30 transition-colors"
+                >
+                  Switch to Card payment
+                </button>
+              )}
+            </div>
             <button
               onClick={() => setCheckoutError(null)}
-              className="ml-4 text-red-400 hover:text-red-200"
+              className="ml-4 shrink-0 text-red-400 hover:text-red-200"
               aria-label="Dismiss error"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>

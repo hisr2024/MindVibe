@@ -241,7 +241,12 @@ async def create_checkout(
 async def _create_stripe_checkout(
     db: AsyncSession, user: User, payload: CheckoutSessionCreate,
 ) -> CheckoutSessionOut:
-    """Create Stripe checkout session (card or PayPal)."""
+    """Create Stripe checkout session (card, PayPal, or Google Pay).
+
+    If PayPal is requested but not activated on the Stripe account, the service
+    layer automatically falls back to card-only checkout. The response includes
+    a flag so the frontend can inform the user.
+    """
     if not is_stripe_configured():
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -265,7 +270,10 @@ async def _create_stripe_checkout(
         if not result:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create checkout session",
+                detail={
+                    "error": "checkout_failed",
+                    "message": "Unable to create checkout session. Please try again or use a different payment method.",
+                },
             )
 
         return CheckoutSessionOut(
@@ -277,17 +285,41 @@ async def _create_stripe_checkout(
         )
 
     except ValueError as e:
+        # Raised by stripe_service for configuration/validation issues
+        error_str = str(e).lower()
+        if "price" in error_str and ("not found" in error_str or "configured" in error_str):
+            detail_msg = "This plan is not yet configured for payments. Please contact support."
+        elif "payment" in error_str:
+            detail_msg = str(e)
+        else:
+            detail_msg = str(e)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
+            detail={
+                "error": "checkout_validation_error",
+                "message": detail_msg,
+            },
+        )
+    except RuntimeError as e:
+        # Raised by stripe_service for auth/connection failures
+        logger.error(f"Stripe service error for user {user.id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error": "payment_service_error",
+                "message": str(e),
+            },
         )
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Stripe checkout creation failed: {e}")
+        logger.error(f"Stripe checkout creation failed for user {user.id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create checkout session",
+            detail={
+                "error": "checkout_failed",
+                "message": "Unable to create checkout session. Please try again or use a different payment method.",
+            },
         )
 
 
