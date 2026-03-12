@@ -2,9 +2,20 @@
  * Maps MindVibe locale codes to browser Speech API language codes
  */
 
-export type SupportedLocale = 'en' | 'hi' | 'ta' | 'te' | 'bn' | 'mr' | 'gu' | 'kn' | 'ml' | 'pa' | 'sa' | 'es' | 'fr' | 'de' | 'pt' | 'ja' | 'zh-CN'
+export type SupportedLocale =
+  | 'en' | 'hi' | 'ta' | 'te' | 'bn' | 'mr' | 'gu' | 'kn' | 'ml' | 'pa' | 'sa'
+  | 'es' | 'fr' | 'de' | 'pt' | 'ja' | 'zh-CN'
+  | 'ko' | 'it' | 'ru' | 'tr' | 'th' | 'vi' | 'id'
+  | 'nl' | 'pl' | 'sv' | 'ar' | 'sw' | 'zh'
 
+/**
+ * Maps MindVibe locale codes to browser Web Speech API language codes.
+ * 29 languages — inspired by the broadest voice assistant coverage
+ * (Siri 40+, Google 30+, Alexa 20+). Each mapped to the most natural
+ * recognition variant for that language.
+ */
 export const SPEECH_LANGUAGE_MAP: Record<SupportedLocale, string> = {
+  // Indian languages
   en: 'en-US',
   hi: 'hi-IN',
   ta: 'ta-IN',
@@ -15,13 +26,29 @@ export const SPEECH_LANGUAGE_MAP: Record<SupportedLocale, string> = {
   kn: 'kn-IN',
   ml: 'ml-IN',
   pa: 'pa-IN',
-  sa: 'hi-IN', // Sanskrit falls back to Hindi for speech
+  sa: 'hi-IN', // Sanskrit falls back to Hindi for speech recognition
+  // European languages
   es: 'es-ES',
   fr: 'fr-FR',
   de: 'de-DE',
   pt: 'pt-PT',
+  it: 'it-IT',
+  nl: 'nl-NL',
+  pl: 'pl-PL',
+  sv: 'sv-SE',
+  ru: 'ru-RU',
+  // Asian languages
   ja: 'ja-JP',
   'zh-CN': 'zh-CN',
+  zh: 'zh-CN',
+  ko: 'ko-KR',
+  th: 'th-TH',
+  vi: 'vi-VN',
+  id: 'id-ID',
+  // Middle Eastern & African
+  ar: 'ar-SA',
+  tr: 'tr-TR',
+  sw: 'sw-KE',
 }
 
 /**
