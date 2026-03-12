@@ -26,6 +26,8 @@ export type VoiceLanguage =
   | 'en' | 'hi' | 'en-IN' | 'sa'
   | 'ta' | 'te' | 'bn' | 'kn' | 'ml' | 'mr' | 'gu' | 'pa'
   | 'es' | 'fr' | 'de' | 'ja' | 'pt' | 'ar' | 'zh'
+  | 'ko' | 'it' | 'ru' | 'tr' | 'th' | 'vi' | 'id'
+  | 'nl' | 'pl' | 'sv' | 'sw'
 
 export type VoiceCategory = 'conversational' | 'meditation' | 'narration' | 'sacred' | 'energetic'
 
@@ -103,6 +105,17 @@ export const VOICE_LANGUAGES: VoiceLanguageInfo[] = [
   { code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷' },
   { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
   { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳' },
+  { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
+  { code: 'it', name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹' },
+  { code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
+  { code: 'tr', name: 'Turkish', nativeName: 'Türkçe', flag: '🇹🇷' },
+  { code: 'th', name: 'Thai', nativeName: 'ไทย', flag: '🇹🇭' },
+  { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳' },
+  { code: 'id', name: 'Indonesian', nativeName: 'Bahasa Indonesia', flag: '🇮🇩' },
+  { code: 'nl', name: 'Dutch', nativeName: 'Nederlands', flag: '🇳🇱' },
+  { code: 'pl', name: 'Polish', nativeName: 'Polski', flag: '🇵🇱' },
+  { code: 'sv', name: 'Swedish', nativeName: 'Svenska', flag: '🇸🇪' },
+  { code: 'sw', name: 'Swahili', nativeName: 'Kiswahili', flag: '🇰🇪' },
 ]
 
 // ─── Sarvam AI Priority Languages ────────────────────────────────────────────
@@ -387,6 +400,119 @@ export const VOICE_SPEAKERS: VoiceSpeaker[] = [
     clarity: 0.96,
     poweredBy: 'elevenlabs',
   },
+  // ─── Multilingual Natural Voices ──────────────────────────────────
+  // Inspired by the most natural voices across Siri, Alexa, Google
+  // Each voice tuned for maximum naturalness in its primary languages
+  {
+    id: 'elevenlabs-aria',
+    name: 'Aria',
+    description: 'Warm, natural European voice. Fluent across Italian, Dutch, Swedish, Polish — like a caring friend from the heart of Europe.',
+    gender: 'female',
+    languages: ['en', 'it', 'nl', 'sv', 'pl', 'de', 'fr'],
+    primaryLanguage: 'it',
+    category: 'conversational',
+    tags: ['natural', 'european', 'multilingual', 'warm', 'italian'],
+    previewText: 'Every moment of stillness is a gift you give yourself. Let me be here with you as you find your center.',
+    backendConfig: { voiceType: 'friendly', speed: 0.95, language: 'it', voiceId: 'elevenlabs-aria' },
+    browserConfig: {
+      voicePatterns: [/Google.*Italian/i, /Federica/i, /Alice/i, /Jenny/i],
+      rate: 0.95,
+      pitch: 1.04,
+    },
+    premium: true,
+    accent: 'European',
+    warmth: 0.94,
+    clarity: 0.96,
+    poweredBy: 'elevenlabs',
+  },
+  {
+    id: 'elevenlabs-matilda',
+    name: 'Matilda',
+    description: 'Gentle, reassuring voice with exceptional clarity. Native quality across Korean, Japanese, Thai — the voice of East Asian calm.',
+    gender: 'female',
+    languages: ['en', 'ko', 'ja', 'th', 'vi', 'zh'],
+    primaryLanguage: 'ko',
+    category: 'meditation',
+    tags: ['natural', 'asian', 'multilingual', 'gentle', 'korean'],
+    previewText: 'Close your eyes gently. The peace you are searching for has been waiting inside you all along.',
+    backendConfig: { voiceType: 'calm', speed: 0.92, language: 'ko', voiceId: 'elevenlabs-matilda' },
+    browserConfig: {
+      voicePatterns: [/Google.*Korean/i, /Google.*Japanese/i, /Yuna/i, /Samantha/i],
+      rate: 0.92,
+      pitch: 1.05,
+    },
+    premium: true,
+    accent: 'Neutral Asian',
+    warmth: 0.95,
+    clarity: 0.98,
+    poweredBy: 'elevenlabs',
+  },
+  {
+    id: 'elevenlabs-fin',
+    name: 'Fin',
+    description: 'Thoughtful, poetic voice with natural warmth. Excellent across Russian, Turkish, and Slavic languages — wisdom with depth.',
+    gender: 'male',
+    languages: ['en', 'ru', 'tr', 'pl', 'sv', 'nl'],
+    primaryLanguage: 'ru',
+    category: 'narration',
+    tags: ['natural', 'slavic', 'multilingual', 'thoughtful', 'russian'],
+    previewText: 'Strength is not found in force. It is found in the stillness that comes from knowing who you truly are.',
+    backendConfig: { voiceType: 'wisdom', speed: 0.92, language: 'ru', voiceId: 'elevenlabs-fin' },
+    browserConfig: {
+      voicePatterns: [/Google.*Russian/i, /Google.*Turkish/i, /Dmitry/i, /Daniel/i],
+      rate: 0.92,
+      pitch: 0.92,
+    },
+    premium: true,
+    accent: 'European',
+    warmth: 0.88,
+    clarity: 0.96,
+    poweredBy: 'elevenlabs',
+  },
+  {
+    id: 'elevenlabs-charlotte',
+    name: 'Charlotte',
+    description: 'Serene Scandinavian voice — naturally calm, clear as Nordic waters. The most soothing voice for sleep and deep meditation.',
+    gender: 'female',
+    languages: ['en', 'sv', 'nl', 'de', 'fr', 'it'],
+    primaryLanguage: 'sv',
+    category: 'meditation',
+    tags: ['natural', 'scandinavian', 'serene', 'sleep', 'swedish'],
+    previewText: 'Breathe in deeply. Feel the warmth filling your chest. You are safe. You are held. Let everything else fall away.',
+    backendConfig: { voiceType: 'soothing', speed: 0.88, language: 'sv', voiceId: 'elevenlabs-charlotte' },
+    browserConfig: {
+      voicePatterns: [/Google.*Swedish/i, /Alva/i, /Samantha/i, /Jenny/i],
+      rate: 0.88,
+      pitch: 1.02,
+    },
+    premium: true,
+    accent: 'Scandinavian',
+    warmth: 0.97,
+    clarity: 0.95,
+    poweredBy: 'elevenlabs',
+  },
+  {
+    id: 'elevenlabs-liam',
+    name: 'Liam',
+    description: 'Grounded, reliable voice with fluid multilingual delivery. Natural across Indonesian, Vietnamese, Swahili — a global companion.',
+    gender: 'male',
+    languages: ['en', 'id', 'vi', 'sw', 'th', 'ko', 'tr'],
+    primaryLanguage: 'id',
+    category: 'conversational',
+    tags: ['natural', 'global', 'multilingual', 'grounded', 'indonesian'],
+    previewText: 'No matter where you are, you carry within you everything you need. Let me walk beside you on this journey.',
+    backendConfig: { voiceType: 'friendly', speed: 0.95, language: 'id', voiceId: 'elevenlabs-liam' },
+    browserConfig: {
+      voicePatterns: [/Google.*Indonesian/i, /Google.*Vietnamese/i, /Guy/i, /Daniel/i],
+      rate: 0.95,
+      pitch: 0.95,
+    },
+    premium: true,
+    accent: 'Neutral global',
+    warmth: 0.90,
+    clarity: 0.94,
+    poweredBy: 'elevenlabs',
+  },
 ]
 
 export function getVoiceById(id: string): VoiceSpeaker | undefined {
@@ -475,6 +601,17 @@ export function getBrowserLanguageCode(lang: VoiceLanguage): string {
     case 'pt': return 'pt-BR'
     case 'ar': return 'ar-SA'
     case 'zh': return 'zh-CN'
+    case 'ko': return 'ko-KR'
+    case 'it': return 'it-IT'
+    case 'ru': return 'ru-RU'
+    case 'tr': return 'tr-TR'
+    case 'th': return 'th-TH'
+    case 'vi': return 'vi-VN'
+    case 'id': return 'id-ID'
+    case 'nl': return 'nl-NL'
+    case 'pl': return 'pl-PL'
+    case 'sv': return 'sv-SE'
+    case 'sw': return 'sw-KE'
     default: return 'en-US'
   }
 }
@@ -500,7 +637,8 @@ export function isBhashiniPriorityLanguage(lang: VoiceLanguage): boolean {
 
 /** ElevenLabs priority languages (best quality from ElevenLabs) */
 export const ELEVENLABS_PRIORITY_LANGUAGES: VoiceLanguage[] = [
-  'en', 'es', 'fr', 'de', 'pt', 'ja', 'zh', 'ar',
+  'en', 'es', 'fr', 'de', 'pt', 'it', 'nl', 'pl', 'sv', 'ru',
+  'ja', 'zh', 'ko', 'th', 'vi', 'id', 'ar', 'tr', 'sw',
 ]
 
 export function isElevenLabsPriorityLanguage(lang: VoiceLanguage): boolean {

@@ -249,6 +249,88 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
         "default_similarity": 0.82,
         "default_style": 0.38,
     },
+    # ─── Expanded Multilingual Voices ────────────────────────────────
+    # Premium voices with native fluency in newly supported languages
+    "aria": {
+        "voice_id": "9BWtsMINqrJLrRacOk9x",
+        "name": "Aria",
+        "gender": "female",
+        "accent": "European",
+        "style": "warm",
+        "age": "young-adult",
+        "description": "Warm, natural European voice fluent across Italian, "
+                       "Dutch, Swedish, and Polish. Crystal-clear multilingual.",
+        "best_for": ["conversation", "emotional_support", "meditation"],
+        "languages": ["en", "it", "nl", "sv", "pl", "de", "fr"],
+        "quality_score": 9.6,
+        "default_stability": 0.50,
+        "default_similarity": 0.80,
+        "default_style": 0.50,
+    },
+    "matilda": {
+        "voice_id": "XrExE9yKIg1WjnnlVkGX",
+        "name": "Matilda",
+        "gender": "female",
+        "accent": "Neutral",
+        "style": "gentle",
+        "age": "adult",
+        "description": "Gentle, reassuring voice with exceptional clarity. "
+                       "Native quality across Korean, Japanese, and Thai.",
+        "best_for": ["meditation", "healing", "breathing", "affirmation"],
+        "languages": ["en", "ko", "ja", "th", "vi", "zh"],
+        "quality_score": 9.7,
+        "default_stability": 0.55,
+        "default_similarity": 0.82,
+        "default_style": 0.42,
+    },
+    "fin": {
+        "voice_id": "D38z5RcWu1voky8WS1ja",
+        "name": "Fin",
+        "gender": "male",
+        "accent": "Irish English",
+        "style": "thoughtful",
+        "age": "adult",
+        "description": "Thoughtful, poetic voice with natural Irish warmth. "
+                       "Excellent for Russian, Turkish, and Slavic languages.",
+        "best_for": ["narration", "wisdom", "storytelling", "verse_recitation"],
+        "languages": ["en", "ru", "tr", "pl", "sv", "nl"],
+        "quality_score": 9.5,
+        "default_stability": 0.52,
+        "default_similarity": 0.80,
+        "default_style": 0.48,
+    },
+    "charlotte": {
+        "voice_id": "XB0fDUnXU5powFXDhCwa",
+        "name": "Charlotte",
+        "gender": "female",
+        "accent": "Swedish English",
+        "style": "serene",
+        "age": "adult",
+        "description": "Serene Scandinavian voice — naturally calm and clear. "
+                       "The most soothing voice for sleep and meditation.",
+        "best_for": ["sleep", "meditation", "breathing", "affirmation"],
+        "languages": ["en", "sv", "nl", "de", "fr", "it"],
+        "quality_score": 9.6,
+        "default_stability": 0.62,
+        "default_similarity": 0.85,
+        "default_style": 0.32,
+    },
+    "liam": {
+        "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+        "name": "Liam",
+        "gender": "male",
+        "accent": "American English",
+        "style": "grounded",
+        "age": "young-adult",
+        "description": "Grounded, reliable voice with fluid multilingual "
+                       "delivery. Natural across Indonesian, Vietnamese, Swahili.",
+        "best_for": ["conversation", "daily_wisdom", "encouragement"],
+        "languages": ["en", "id", "vi", "sw", "th", "ko", "tr"],
+        "quality_score": 9.5,
+        "default_stability": 0.48,
+        "default_similarity": 0.78,
+        "default_style": 0.55,
+    },
 }
 
 
@@ -286,6 +368,13 @@ PERSONA_TO_ELEVENLABS: dict[str, str] = {
     "divine-shiva": "arnold",        # Commanding, cosmic power
     "divine-hanuman": "josh",        # Warm, devoted, courageous
     "divine-radha": "rachel",        # Calm, pure devotion
+
+    # New multilingual personas
+    "elevenlabs-aria": "aria",       # European multilingual
+    "elevenlabs-matilda": "matilda", # Asian multilingual
+    "elevenlabs-fin": "fin",         # Slavic/Turkish multilingual
+    "elevenlabs-charlotte": "charlotte",  # Scandinavian serene
+    "elevenlabs-liam": "liam",      # Global conversational
 }
 
 
@@ -444,7 +533,10 @@ EMOTION_ELEVENLABS_SETTINGS: dict[str, dict[str, float]] = {
 # ElevenLabs multilingual_v2 auto-detects language, but explicit codes
 # improve pronunciation accuracy.
 
+# ElevenLabs multilingual_v2 supports 29+ languages natively.
+# Inspired by the broadest voice assistant coverage (Google 40+, Siri 40+).
 ELEVENLABS_LANGUAGE_CODES: dict[str, str] = {
+    # Indian languages
     "en": "en",
     "en-IN": "en",
     "hi": "hi",
@@ -457,18 +549,33 @@ ELEVENLABS_LANGUAGE_CODES: dict[str, str] = {
     "mr": "mr",
     "gu": "gu",
     "pa": "pa",
+    # European languages
     "es": "es",
     "fr": "fr",
     "de": "de",
     "pt": "pt",
+    "it": "it",
+    "nl": "nl",
+    "pl": "pl",
+    "sv": "sv",
+    "ru": "ru",
+    # Asian languages
     "ja": "ja",
     "zh": "zh",
+    "ko": "ko",
+    "th": "th",
+    "vi": "vi",
+    "id": "id",
+    # Middle Eastern & African
     "ar": "ar",
+    "tr": "tr",
+    "sw": "sw",
 }
 
 # Languages where ElevenLabs provides best-in-class pronunciation
 ELEVENLABS_PRIORITY_LANGUAGES = {
-    "en", "es", "fr", "de", "pt", "ja", "zh", "ar",
+    "en", "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
+    "ja", "zh", "ko", "th", "vi", "id", "ar", "tr", "sw",
 }
 
 

@@ -29,7 +29,7 @@ import json
 
 logger = logging.getLogger(__name__)
 
-VoiceType = Literal["calm", "wisdom", "friendly"]
+VoiceType = Literal["calm", "wisdom", "friendly", "energetic", "soothing", "storytelling", "chanting"]
 VoiceGender = Literal["male", "female", "neutral"]
 
 # Emotion-to-prosody mapping for adaptive voice
@@ -60,28 +60,112 @@ SPIRITUAL_TERMS = [
 ]
 
 # Voice type specific settings for natural speech prosody
+# Inspired by the most natural-sounding voice assistants:
+# - Siri's conversational warmth with natural breath pauses
+# - Alexa's clear articulation and emotional expressiveness
+# - Google Assistant's fluid multilingual pronunciation
 VOICE_TYPE_SETTINGS: Dict[str, Dict[str, float]] = {
     "calm": {
         "speed": 0.92,
         "pitch": -0.8,
         "volume_gain": 0.0,
+        "breath_pause_ms": 300,
+        "sentence_pause_ms": 600,
+        "warmth": 0.95,
     },
     "wisdom": {
         "speed": 0.94,
         "pitch": -0.3,
         "volume_gain": 0.5,
+        "breath_pause_ms": 250,
+        "sentence_pause_ms": 500,
+        "warmth": 0.85,
     },
     "friendly": {
         "speed": 0.97,
         "pitch": 0.3,
         "volume_gain": 0.0,
+        "breath_pause_ms": 150,
+        "sentence_pause_ms": 350,
+        "warmth": 0.92,
+    },
+    "energetic": {
+        "speed": 1.02,
+        "pitch": 0.5,
+        "volume_gain": 0.2,
+        "breath_pause_ms": 100,
+        "sentence_pause_ms": 250,
+        "warmth": 0.88,
+    },
+    "soothing": {
+        "speed": 0.88,
+        "pitch": -1.0,
+        "volume_gain": -0.3,
+        "breath_pause_ms": 400,
+        "sentence_pause_ms": 800,
+        "warmth": 0.98,
+    },
+    "storytelling": {
+        "speed": 0.93,
+        "pitch": 0.0,
+        "volume_gain": 0.3,
+        "breath_pause_ms": 200,
+        "sentence_pause_ms": 450,
+        "warmth": 0.90,
+    },
+    "chanting": {
+        "speed": 0.82,
+        "pitch": -2.0,
+        "volume_gain": 0.0,
+        "breath_pause_ms": 500,
+        "sentence_pause_ms": 1000,
+        "warmth": 0.96,
     },
 }
 
+# Natural speech enhancement: language-specific intonation curves
+# Tuned per-language for the most natural prosody patterns
+LANGUAGE_NATURALNESS_PROFILES: Dict[str, Dict[str, float]] = {
+    "en": {"intonation_rise": 0.3, "sentence_fall": 0.5, "question_rise": 1.2, "emphasis_boost": 0.15},
+    "hi": {"intonation_rise": 0.5, "sentence_fall": 0.4, "question_rise": 1.0, "emphasis_boost": 0.20},
+    "ta": {"intonation_rise": 0.4, "sentence_fall": 0.3, "question_rise": 0.8, "emphasis_boost": 0.18},
+    "te": {"intonation_rise": 0.4, "sentence_fall": 0.3, "question_rise": 0.9, "emphasis_boost": 0.18},
+    "bn": {"intonation_rise": 0.5, "sentence_fall": 0.4, "question_rise": 1.0, "emphasis_boost": 0.20},
+    "ja": {"intonation_rise": 0.2, "sentence_fall": 0.6, "question_rise": 1.5, "emphasis_boost": 0.10},
+    "ko": {"intonation_rise": 0.3, "sentence_fall": 0.5, "question_rise": 1.3, "emphasis_boost": 0.12},
+    "zh": {"intonation_rise": 0.1, "sentence_fall": 0.3, "question_rise": 0.5, "emphasis_boost": 0.08},
+    "fr": {"intonation_rise": 0.4, "sentence_fall": 0.5, "question_rise": 1.4, "emphasis_boost": 0.15},
+    "de": {"intonation_rise": 0.3, "sentence_fall": 0.6, "question_rise": 1.1, "emphasis_boost": 0.12},
+    "es": {"intonation_rise": 0.5, "sentence_fall": 0.4, "question_rise": 1.3, "emphasis_boost": 0.18},
+    "it": {"intonation_rise": 0.6, "sentence_fall": 0.4, "question_rise": 1.4, "emphasis_boost": 0.20},
+    "pt": {"intonation_rise": 0.5, "sentence_fall": 0.4, "question_rise": 1.2, "emphasis_boost": 0.18},
+    "ru": {"intonation_rise": 0.3, "sentence_fall": 0.5, "question_rise": 1.0, "emphasis_boost": 0.14},
+    "ar": {"intonation_rise": 0.4, "sentence_fall": 0.5, "question_rise": 1.1, "emphasis_boost": 0.16},
+    "tr": {"intonation_rise": 0.4, "sentence_fall": 0.4, "question_rise": 1.2, "emphasis_boost": 0.15},
+    "th": {"intonation_rise": 0.2, "sentence_fall": 0.3, "question_rise": 0.6, "emphasis_boost": 0.10},
+    "vi": {"intonation_rise": 0.2, "sentence_fall": 0.3, "question_rise": 0.5, "emphasis_boost": 0.08},
+    "id": {"intonation_rise": 0.3, "sentence_fall": 0.4, "question_rise": 1.0, "emphasis_boost": 0.14},
+    "nl": {"intonation_rise": 0.3, "sentence_fall": 0.5, "question_rise": 1.2, "emphasis_boost": 0.13},
+    "pl": {"intonation_rise": 0.3, "sentence_fall": 0.5, "question_rise": 1.1, "emphasis_boost": 0.14},
+    "sv": {"intonation_rise": 0.5, "sentence_fall": 0.6, "question_rise": 1.3, "emphasis_boost": 0.12},
+    "sw": {"intonation_rise": 0.4, "sentence_fall": 0.4, "question_rise": 1.0, "emphasis_boost": 0.15},
+    "sa": {"intonation_rise": 0.4, "sentence_fall": 0.3, "question_rise": 0.8, "emphasis_boost": 0.22},
+}
+
 # Supported languages across all premium providers
+# Inspired by Siri (40+), Alexa (20+), Google Assistant (30+)
+# KIAAN supports 29 languages with premium natural voices
 SUPPORTED_LANGUAGES = [
+    # Indian languages (Sarvam AI + Bhashini AI)
     "en", "hi", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "sa",
-    "es", "fr", "de", "pt", "ja", "zh", "ar",
+    # European languages (ElevenLabs)
+    "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
+    # Asian languages (ElevenLabs)
+    "ja", "zh", "ko", "th", "vi", "id",
+    # Middle Eastern (ElevenLabs)
+    "ar", "tr",
+    # African (ElevenLabs)
+    "sw",
 ]
 
 # Indian languages where Sarvam AI / Bhashini excel
@@ -91,7 +175,8 @@ INDIAN_LANGUAGES = {
 
 # International languages where ElevenLabs excels
 INTERNATIONAL_LANGUAGES = {
-    "en", "es", "fr", "de", "pt", "ja", "zh", "ar",
+    "en", "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
+    "ja", "zh", "ko", "th", "vi", "id", "ar", "tr", "sw",
 }
 
 
@@ -386,6 +471,10 @@ class TTSService:
                 "calm": "sarvam-aura",
                 "wisdom": "sarvam-rishi",
                 "friendly": "sarvam-aura",
+                "energetic": "sarvam-aura",
+                "soothing": "sarvam-aura",
+                "storytelling": "sarvam-rishi",
+                "chanting": "sarvam-rishi",
             }.get(voice_type, "sarvam-aura")
 
         if self._is_indian_language(language):

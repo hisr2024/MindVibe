@@ -38,6 +38,10 @@ class VoiceType(str, enum.Enum):
     CALM = "calm"
     WISDOM = "wisdom"
     FRIENDLY = "friendly"
+    ENERGETIC = "energetic"
+    SOOTHING = "soothing"
+    STORYTELLING = "storytelling"
+    CHANTING = "chanting"
 
 
 class AudioQuality(str, enum.Enum):

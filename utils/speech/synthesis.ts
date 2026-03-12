@@ -33,27 +33,57 @@ export interface SynthesisCallbacks {
 }
 
 // Voice quality scoring - higher is better
+// Inspired by the most natural voice assistants: Siri (Apple Neural TTS),
+// Google Assistant (WaveNet/Neural2), Alexa (Neural TTS).
+// We prioritize voices that sound most human-like and expressive.
 const VOICE_QUALITY_PATTERNS: { pattern: RegExp; score: number }[] = [
   // Neural/Natural voices (Edge, modern browsers) - best quality
   { pattern: /Natural/i, score: 100 },
   { pattern: /Neural/i, score: 95 },
-  // Google's cloud voices (Chrome) - excellent quality
+  // Google's cloud voices (Chrome) - excellent quality across all languages
   { pattern: /Google.*English/i, score: 90 },
+  { pattern: /Google.*Hindi/i, score: 90 },
+  { pattern: /Google.*Korean/i, score: 90 },
+  { pattern: /Google.*Japanese/i, score: 90 },
+  { pattern: /Google.*Italian/i, score: 90 },
+  { pattern: /Google.*Russian/i, score: 90 },
+  { pattern: /Google.*Turkish/i, score: 90 },
+  { pattern: /Google.*Thai/i, score: 90 },
+  { pattern: /Google.*Vietnamese/i, score: 90 },
+  { pattern: /Google.*Indonesian/i, score: 90 },
+  { pattern: /Google.*Dutch/i, score: 90 },
+  { pattern: /Google.*Polish/i, score: 90 },
+  { pattern: /Google.*Swedish/i, score: 90 },
   { pattern: /Google/i, score: 85 },
   // Microsoft Online voices (Edge) - excellent quality
   { pattern: /Online/i, score: 88 },
   { pattern: /Microsoft.*Jenny/i, score: 92 },
   { pattern: /Microsoft.*Aria/i, score: 91 },
   { pattern: /Microsoft.*Guy/i, score: 89 },
+  { pattern: /Microsoft.*Seoyeon/i, score: 91 }, // Korean
+  { pattern: /Microsoft.*Nanami/i, score: 91 },  // Japanese
+  { pattern: /Microsoft.*Xiaoxiao/i, score: 91 }, // Chinese
+  { pattern: /Microsoft.*Elsa/i, score: 90 },    // Italian
+  { pattern: /Microsoft.*Svetlana/i, score: 90 }, // Russian
+  { pattern: /Microsoft.*Emel/i, score: 90 },    // Turkish
   { pattern: /Microsoft/i, score: 80 },
-  // Enhanced voices (macOS/iOS) - good quality
+  // Apple voices (macOS/iOS) - excellent naturalness
   { pattern: /Enhanced/i, score: 75 },
   { pattern: /Premium/i, score: 78 },
+  { pattern: /Compact/i, score: 40 },
   // Specific high-quality system voices
   { pattern: /Samantha/i, score: 70 },
   { pattern: /Karen/i, score: 68 },
   { pattern: /Daniel/i, score: 65 },
   { pattern: /Moira/i, score: 65 },
+  { pattern: /Yuna/i, score: 68 },      // Korean
+  { pattern: /Kyoko/i, score: 68 },     // Japanese
+  { pattern: /Tingting/i, score: 68 },   // Chinese
+  { pattern: /Federica/i, score: 68 },   // Italian
+  { pattern: /Milena/i, score: 68 },     // Russian
+  { pattern: /Yelda/i, score: 68 },      // Turkish
+  { pattern: /Kanya/i, score: 68 },      // Thai
+  { pattern: /Damayanti/i, score: 68 },  // Indonesian
   // Female voices tend to sound warmer for companion use
   { pattern: /Female/i, score: 10 },
 ]

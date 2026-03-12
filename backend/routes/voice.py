@@ -62,7 +62,7 @@ class SynthesizeRequest(BaseModel):
     """Request to synthesize text to speech with ULTRA-NATURAL voice settings"""
     text: str = Field(..., min_length=1, max_length=5000, description="Text to synthesize")
     language: str = Field("en", description="Language code (en, hi, ta, etc.)")
-    voice_type: VoiceType = Field("friendly", description="Voice persona (calm, wisdom, friendly)")
+    voice_type: VoiceType = Field("friendly", description="Voice persona (calm, wisdom, friendly, energetic, soothing, storytelling, chanting)")
     # Speed defaults match VOICE_TYPE_SETTINGS in tts_service.py:
     # calm=0.92, wisdom=0.94, friendly=0.97
     # Using None as default so backend applies voice type-specific defaults
@@ -711,7 +711,7 @@ class EnhancedVoiceSettings(BaseModel):
     speed: float = Field(0.9, ge=0.5, le=2.0)
     pitch: float = Field(0.0, ge=-20.0, le=20.0)
     voice_gender: Literal["male", "female", "neutral"] = "female"
-    voice_type: Literal["calm", "wisdom", "friendly"] = "friendly"
+    voice_type: Literal["calm", "wisdom", "friendly", "energetic", "soothing", "storytelling", "chanting"] = "friendly"
 
     # Language
     preferred_language: str = "en"
@@ -782,7 +782,7 @@ async def get_enhanced_voice_settings(
                 "haptic_feedback": prefs.haptic_feedback,
             },
             "supported_languages": tts_service.get_supported_languages(),
-            "voice_types": ["calm", "wisdom", "friendly"],
+            "voice_types": ["calm", "wisdom", "friendly", "energetic", "soothing", "storytelling", "chanting"],
             "audio_qualities": ["low", "medium", "high", "ultra"],
             "binaural_frequencies": ["delta", "theta", "alpha", "beta", "gamma"],
             "ambient_sounds": ["nature", "rain", "ocean", "forest", "fire", "wind"],
@@ -792,7 +792,7 @@ async def get_enhanced_voice_settings(
     return {
         "settings": EnhancedVoiceSettings().dict(),
         "supported_languages": tts_service.get_supported_languages(),
-        "voice_types": ["calm", "wisdom", "friendly"],
+        "voice_types": ["calm", "wisdom", "friendly", "energetic", "soothing", "storytelling", "chanting"],
         "audio_qualities": ["low", "medium", "high", "ultra"],
         "binaural_frequencies": ["delta", "theta", "alpha", "beta", "gamma"],
         "ambient_sounds": ["nature", "rain", "ocean", "forest", "fire", "wind"],
@@ -1232,7 +1232,7 @@ from backend.services.kiaan_divine_voice import (
 class DivineConversationStartRequest(BaseModel):
     """Request to start a divine voice conversation."""
     language: str = Field("en", description="Language code")
-    voice_preference: str = Field("calm", description="Voice preference: calm, wisdom, friendly")
+    voice_preference: str = Field("calm", description="Voice preference: calm, wisdom, friendly, energetic, soothing, storytelling, chanting")
 
 
 class DivineConversationMessageRequest(BaseModel):
@@ -1684,6 +1684,9 @@ async def divine_voice_synthesize(
             "calm": VoiceStyle.CALM,
             "wisdom": VoiceStyle.WISDOM,
             "friendly": VoiceStyle.FRIENDLY,
+            "energetic": VoiceStyle.ENERGETIC,
+            "soothing": VoiceStyle.SOOTHING,
+            "storytelling": VoiceStyle.STORYTELLING,
             "chanting": VoiceStyle.CHANTING,
         }
         style = style_map.get(payload.style, VoiceStyle.FRIENDLY)

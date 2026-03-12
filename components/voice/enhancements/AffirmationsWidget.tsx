@@ -193,7 +193,7 @@ export function AffirmationsWidget({
             </div>
             <div>
               <h3 className="font-semibold text-white">Affirmations</h3>
-              <p className="text-xs text-white/70">Positive Voice Guidance</p>
+              <p className="text-xs text-white/70">Positive KIAAN Voice</p>
             </div>
           </div>
 

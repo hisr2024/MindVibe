@@ -25,6 +25,7 @@
 
 import { useMemo, useEffect, useState, useRef } from 'react'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
+import { ShankhaIcon } from '@/components/icons/ShankhaIcon'
 
 export type OrbState =
   | 'idle'
@@ -208,12 +209,7 @@ export default function KiaanVoiceOrb({
     switch (state) {
       case 'listening':
         return (
-          <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-            <line x1="12" y1="19" x2="12" y2="23" />
-            <line x1="8" y1="23" x2="16" y2="23" />
-          </svg>
+          <ShankhaIcon size={iconSize} color="white" strokeWidth={strokeWidth} className="drop-shadow-lg" filled />
         )
       case 'processing':
         return (
@@ -245,14 +241,9 @@ export default function KiaanVoiceOrb({
           </svg>
         )
       default:
-        // idle / wake-listening: mic icon
+        // idle / wake-listening: Shankha (sacred conch) icon
         return (
-          <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg opacity-80">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-            <line x1="12" y1="19" x2="12" y2="23" />
-            <line x1="8" y1="23" x2="16" y2="23" />
-          </svg>
+          <ShankhaIcon size={iconSize} color="white" strokeWidth={strokeWidth} className="drop-shadow-lg opacity-80" />
         )
     }
   }, [state, size])

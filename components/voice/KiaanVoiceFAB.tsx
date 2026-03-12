@@ -17,8 +17,6 @@
  * - Respects prefers-reduced-motion
  */
 
-'use client'
-
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
@@ -26,6 +24,7 @@ import { useKiaanVoice } from '@/hooks/useKiaanVoice'
 import { useGlobalWakeWord } from '@/contexts/WakeWordContext'
 import { KiaanFriendEngine } from '@/lib/kiaan-friend-engine'
 import { apiFetch } from '@/lib/api'
+import { ShankhaIcon } from '@/components/icons/ShankhaIcon'
 
 type FABState = 'idle' | 'listening' | 'processing' | 'responding'
 
@@ -88,6 +87,90 @@ export default function KiaanVoiceFAB() {
   }, [])
 
   const processQuery = useCallback(async (query: string) => {
+    // First try the unified Voice Guide engine for ecosystem navigation/input
+    try {
+      const guideRes = await apiFetch('/api/voice-companion/voice-guide/command', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript: query,
+          current_tool: typeof window !== 'undefined' ? window.location.pathname : null,
+        }),
+      })
+
+      if (guideRes.ok) {
+        const guideData = await guideRes.json()
+
+        // Handle navigation commands - route to the target tool
+        if (guideData.action === 'navigate' && guideData.route) {
+          setResponse(guideData.response)
+          setShowResponse(true)
+          setFabState('responding')
+          speak(guideData.response)
+          // Navigate after speaking
+          setTimeout(() => {
+            router.push(guideData.route)
+          }, 1500)
+          return
+        }
+
+        // Handle tool input injection
+        if (guideData.action === 'input_to_tool' && guideData.route) {
+          setResponse(guideData.response)
+          setShowResponse(true)
+          setFabState('responding')
+          speak(guideData.response)
+          setTimeout(() => {
+            const inputParam = guideData.input_payload?.content
+              ? `?voice_input=${encodeURIComponent(guideData.input_payload.content)}`
+              : ''
+            router.push(`${guideData.route}${inputParam}`)
+          }, 1500)
+          return
+        }
+
+        // Handle control commands
+        if (guideData.action === 'control') {
+          if (guideData.context?.command === 'stop') {
+            stopAll()
+            setShowResponse(false)
+            setFabState('idle')
+            setResponse('')
+            return
+          }
+          setResponse(guideData.response)
+          setShowResponse(true)
+          setFabState('responding')
+          speak(guideData.response)
+          return
+        }
+
+        // Handle verse lookup
+        if (guideData.action === 'verse_lookup' && guideData.route) {
+          setResponse(guideData.response)
+          setShowResponse(true)
+          setFabState('responding')
+          speak(guideData.response)
+          setTimeout(() => {
+            router.push(guideData.route)
+          }, 1500)
+          return
+        }
+
+        // For other responses with content, use them
+        if (guideData.response) {
+          setResponse(guideData.response)
+          setShowResponse(true)
+          setFabState('responding')
+          speak(guideData.response)
+          return
+        }
+      }
+    } catch {
+      // Voice Guide unavailable, fall through to quick-response
+    }
+
+    // Fallback to quick-response endpoint
     try {
       const res = await apiFetch('/api/voice-companion/quick-response', {
         method: 'POST',
@@ -127,7 +210,7 @@ export default function KiaanVoiceFAB() {
       setFabState('responding')
       speak(fallback)
     }
-  }, [speak])
+  }, [speak, router, stopAll])
 
   // Keep processQueryRef in sync with latest processQuery
   useEffect(() => {
@@ -164,7 +247,7 @@ export default function KiaanVoiceFAB() {
   const handleLongPressStart = useCallback(() => {
     longPressTimerRef.current = setTimeout(() => {
       stopAll()
-      router.push('/kiaan-voice-companion')
+      router.push('/companion')
     }, 800)
   }, [router, stopAll])
 
@@ -217,7 +300,7 @@ export default function KiaanVoiceFAB() {
                   stopAll()
                   setShowResponse(false)
                   setFabState('idle')
-                  router.push('/kiaan-voice-companion')
+                  router.push('/companion')
                 }}
                 className="mt-3 w-full rounded-xl bg-gradient-to-r from-[#d4a44c]/15 to-[#e8b54a]/15 border border-[#d4a44c]/20 px-3 py-2 text-xs font-medium text-[#e8b54a]/80 transition-all hover:from-[#d4a44c]/25 hover:to-[#e8b54a]/25 active:scale-[0.98]"
               >
@@ -302,23 +385,19 @@ export default function KiaanVoiceFAB() {
             }}
           />
 
-          {/* Center icon */}
+          {/* Center icon - Shankha (Sacred Conch) for KIAAN Voice */}
           <div className="absolute inset-0 flex items-center justify-center">
             {fabState === 'listening' ? (
-              <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                <line x1="12" y1="19" x2="12" y2="23" />
-                <line x1="8" y1="23" x2="16" y2="23" />
-              </svg>
+              <ShankhaIcon size={22} color="white" strokeWidth={2} filled />
             ) : fabState === 'processing' ? (
-              <motion.svg
-                width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round"
+              <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
               >
-                <circle cx="12" cy="12" r="10" strokeDasharray="32 32" />
-              </motion.svg>
+                <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round">
+                  <circle cx="12" cy="12" r="10" strokeDasharray="32 32" />
+                </svg>
+              </motion.div>
             ) : fabState === 'responding' ? (
               <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 18V5l12-2v13" />
@@ -326,13 +405,8 @@ export default function KiaanVoiceFAB() {
                 <circle cx="18" cy="16" r="3" />
               </svg>
             ) : (
-              /* Idle: KIAAN mic/orb icon */
-              <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="opacity-90">
-                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                <line x1="12" y1="19" x2="12" y2="23" />
-                <line x1="8" y1="23" x2="16" y2="23" />
-              </svg>
+              /* Idle: Shankha - KIAAN's always-awake sacred conch symbol */
+              <ShankhaIcon size={22} color="white" strokeWidth={2} className="opacity-90" />
             )}
           </div>
         </div>

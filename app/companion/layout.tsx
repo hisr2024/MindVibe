@@ -8,13 +8,13 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'KIAAN Companion — Your Divine Best Friend | Sakha',
+  title: 'KIAAN Voice — Always-Awake Divine Companion | Sakha',
   description:
-    'Meet KIAAN, your divine best friend and voice-first spiritual companion. An immersive orb interface with mood-reactive responses, Gita wisdom, and every wellness tool at your fingertips.',
+    'Meet KIAAN, your always-awake divine voice companion with three engines: Guidance (Gita wisdom), Friend (best friend), and Voice Guide (ecosystem navigation). Speak naturally, navigate anywhere, input to any tool.',
   openGraph: {
-    title: 'KIAAN Companion — Your Divine Best Friend',
+    title: 'KIAAN Voice — Always-Awake Divine Companion',
     description:
-      'Talk to KIAAN, your voice-first divine companion. Mood-reactive orb interface with Bhagavad Gita wisdom and sacred wellness tools.',
+      'Talk to KIAAN, your always-awake voice companion. Three engines: Guidance, Friend, and Voice Guide. Navigate the entire spiritual wellness ecosystem by voice.',
     url: 'https://kiaanverse.com/companion',
   },
   alternates: {

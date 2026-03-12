@@ -65,10 +65,16 @@ const LANGUAGE_GROUPS = [
     languages: ['hi', 'sa', 'ta', 'te', 'bn', 'mr', 'gu', 'kn', 'ml', 'pa', 'en-IN'] as VoiceLanguage[],
   },
   {
-    label: 'International',
-    description: 'Powered by ElevenLabs HD voices',
+    label: 'European',
+    description: 'Natural HD voices by ElevenLabs — Siri-class quality',
     provider: 'elevenlabs' as VoiceProvider,
-    languages: ['en', 'es', 'fr', 'de', 'pt', 'ja', 'zh', 'ar'] as VoiceLanguage[],
+    languages: ['en', 'es', 'fr', 'de', 'pt', 'it', 'nl', 'pl', 'sv', 'ru'] as VoiceLanguage[],
+  },
+  {
+    label: 'Asian & Global',
+    description: 'Natural HD voices across Asia, Middle East & Africa',
+    provider: 'elevenlabs' as VoiceProvider,
+    languages: ['ja', 'zh', 'ko', 'th', 'vi', 'id', 'ar', 'tr', 'sw'] as VoiceLanguage[],
   },
 ]
 
@@ -205,10 +211,12 @@ export default function VoiceCompanionSelector({
         utterance.pitch = voice.browserConfig.pitch
         // Set language so browser picks the right accent/voice
         const langMap: Record<string, string> = {
-          en: 'en-IN', hi: 'hi-IN', sa: 'hi-IN', ta: 'ta-IN', te: 'te-IN',
+          en: 'en-US', hi: 'hi-IN', sa: 'hi-IN', ta: 'ta-IN', te: 'te-IN',
           bn: 'bn-IN', mr: 'mr-IN', gu: 'gu-IN', kn: 'kn-IN', ml: 'ml-IN',
           pa: 'pa-IN', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', pt: 'pt-BR',
-          ja: 'ja-JP', zh: 'zh-CN',
+          ja: 'ja-JP', zh: 'zh-CN', ko: 'ko-KR', it: 'it-IT', ru: 'ru-RU',
+          tr: 'tr-TR', th: 'th-TH', vi: 'vi-VN', id: 'id-ID', nl: 'nl-NL',
+          pl: 'pl-PL', sv: 'sv-SE', ar: 'ar-SA', sw: 'sw-KE',
         }
         utterance.lang = langMap[voice.primaryLanguage] || voice.primaryLanguage
         // Try to match a voice from the browser voices for this language
