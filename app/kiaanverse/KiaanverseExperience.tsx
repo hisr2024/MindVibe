@@ -19,10 +19,6 @@ import { Stars, AdaptiveDpr, AdaptiveEvents, Preload } from '@react-three/drei'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useKiaanverseStore } from '@/stores/kiaanverseStore'
 
-/**
- * Error boundary that catches WebGL / R3F render failures
- * and shows a graceful fallback instead of crashing the page.
- */
 class CanvasErrorBoundary extends Component<
   { children: ReactNode },
   { hasError: boolean }
@@ -109,7 +105,7 @@ export default function KiaanverseExperience() {
         setScenePhase('active')
         setKrishnaState('speaking')
         setSubtitleText(
-          'Welcome, dear friend. I am here as your Sakha — your divine companion. ' +
+          'Welcome, dear friend. I am here as your Sakha \u2014 your divine companion. ' +
           'Ask me anything about dharma, about life, about the truth within your heart.'
         )
       }, 2500)
@@ -130,7 +126,6 @@ export default function KiaanverseExperience() {
 
   return (
     <div className="relative h-[100dvh] w-full select-none overflow-hidden bg-black">
-      {/* ═══ 3D CANVAS ═══ */}
       <CanvasErrorBoundary>
         <Canvas
           className="absolute inset-0"
@@ -139,36 +134,30 @@ export default function KiaanverseExperience() {
             antialias: true,
             alpha: false,
             powerPreference: 'high-performance',
+            toneMapping: 4,
+            toneMappingExposure: 1.8,
           }}
           dpr={[1, 1.5]}
         >
           <AdaptiveDpr pixelated />
           <AdaptiveEvents />
 
-          {/* Subtle global lighting */}
-          <ambientLight intensity={0.2} color="#ffeedd" />
-          <directionalLight position={[5, 8, 3]} intensity={0.5} color="#ffd700" castShadow />
+          {/* Strong warm global fill — prevents any scene from looking black */}
+          <ambientLight intensity={0.6} color="#ffeedd" />
+          <hemisphereLight args={['#ffd699', '#445577', 0.5]} />
+          <directionalLight position={[5, 10, 3]} intensity={1.5} color="#ffd700" />
+          <directionalLight position={[-4, 6, -3]} intensity={0.6} color="#ff9944" />
 
           <Suspense fallback={null}>
             <ActiveScene scene={currentScene} />
-
-            {/* Divine Presence — sacred geometry + particles (replaces character avatars) */}
             <DivinePresence position={[0, 0, 0]} />
-
-            {/* Cosmic starfield */}
-            <Stars radius={120} depth={60} count={4000} factor={3} saturation={0.05} fade speed={0.3} />
-
-            {/* Procedural sunset-warm environment lighting */}
-            <hemisphereLight args={['#ff8844', '#223366', 0.1]} />
-            <directionalLight position={[-3, 2, -5]} intensity={0.15} color="#ff6633" />
-            <pointLight position={[3, 5, -2]} intensity={0.1} color="#ffaa55" distance={20} />
-
+            <Stars radius={120} depth={60} count={4000} factor={3} saturation={0.1} fade speed={0.3} />
             <Preload all />
           </Suspense>
         </Canvas>
       </CanvasErrorBoundary>
 
-      {/* ═══ 2D UI OVERLAY ═══ */}
+      {/* 2D UI Overlay */}
       <AnimatePresence>
         {scenePhase === 'active' && (
           <motion.div
@@ -192,7 +181,7 @@ export default function KiaanverseExperience() {
         )}
       </AnimatePresence>
 
-      {/* ═══ LOADING OVERLAY ═══ */}
+      {/* Loading overlay */}
       <AnimatePresence>
         {scenePhase === 'loading' && (
           <motion.div
@@ -222,7 +211,7 @@ export default function KiaanverseExperience() {
         )}
       </AnimatePresence>
 
-      {/* ═══ ENTERING OVERLAY ═══ */}
+      {/* Entering overlay */}
       <AnimatePresence>
         {scenePhase === 'entering' && (
           <motion.div
@@ -263,7 +252,7 @@ export default function KiaanverseExperience() {
         )}
       </AnimatePresence>
 
-      {/* ═══ SCENE TRANSITION OVERLAY ═══ */}
+      {/* Scene transition overlay */}
       <AnimatePresence>
         {scenePhase === 'transitioning' && (
           <motion.div

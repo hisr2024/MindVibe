@@ -1,13 +1,11 @@
 /**
- * DivinePresence — Sacred geometry mandala representing Krishna's divine energy.
+ * DivinePresence — Radiant divine light representing Krishna's presence.
  *
- * Replaces physical character avatars with pure luminous presence:
- * - Rotating Sri Yantra–inspired triangular rings
- * - Breathing particle field that responds to interaction state
- * - Golden light rays and lotus base
- * - State-driven intensity (idle → speaking → blessing → cosmic)
+ * A blazing, warm golden orb that breathes with divine life —
+ * surrounded by soft volumetric glow layers, warm particle wisps,
+ * and a luminous lotus pedestal. No wireframes, no thin lines.
  *
- * The divine is felt, not depicted.
+ * State-driven intensity (idle → speaking → blessing → cosmic).
  */
 
 'use client'
@@ -17,137 +15,149 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useKiaanverseStore } from '@/stores/kiaanverseStore'
 
-/** Deterministic pseudo-random from seed (0–1 range) */
 function seeded(seed: number): number {
   const x = Math.sin(seed * 9301 + 49297) * 49297
   return x - Math.floor(x)
 }
 
-/* ── Sacred Geometry Rings (Sri Yantra–inspired) ── */
+/* ── Central Divine Light — blazing warm core ── */
 
-function SacredRings() {
+function DivineLightCore() {
+  const coreRef = useRef<THREE.Mesh>(null)
+  const glow1Ref = useRef<THREE.Mesh>(null)
+  const glow2Ref = useRef<THREE.Mesh>(null)
+  const glow3Ref = useRef<THREE.Mesh>(null)
+  const krishnaState = useKiaanverseStore((s) => s.krishnaState)
+
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime
+    const isCosmic = krishnaState === 'cosmic-form'
+    const isSpeaking = krishnaState === 'speaking' || krishnaState === 'reciting'
+
+    const breathSpeed = isCosmic ? 0.8 : isSpeaking ? 1.2 : 0.5
+    const breathAmp = isCosmic ? 0.2 : isSpeaking ? 0.1 : 0.05
+    const baseScale = isCosmic ? 1.8 : isSpeaking ? 1.2 : 1.0
+    const s = baseScale + Math.sin(t * breathSpeed) * breathAmp
+
+    if (coreRef.current) coreRef.current.scale.setScalar(s)
+    if (glow1Ref.current) {
+      glow1Ref.current.scale.setScalar(s * 2.8 + Math.sin(t * 0.4) * 0.3)
+      const m = glow1Ref.current.material as THREE.MeshBasicMaterial
+      m.opacity = isCosmic ? 0.45 : isSpeaking ? 0.35 : 0.25
+    }
+    if (glow2Ref.current) {
+      glow2Ref.current.scale.setScalar(s * 5.0 + Math.sin(t * 0.25) * 0.5)
+      const m = glow2Ref.current.material as THREE.MeshBasicMaterial
+      m.opacity = isCosmic ? 0.2 : isSpeaking ? 0.14 : 0.1
+    }
+    if (glow3Ref.current) {
+      glow3Ref.current.scale.setScalar(s * 8.0 + Math.sin(t * 0.15) * 0.8)
+      const m = glow3Ref.current.material as THREE.MeshBasicMaterial
+      m.opacity = isCosmic ? 0.1 : 0.06
+    }
+  })
+
+  return (
+    <group position={[0, 1.8, 0]}>
+      {/* Blazing inner core — bright warm white */}
+      <mesh ref={coreRef}>
+        <sphereGeometry args={[0.4, 32, 32]} />
+        <meshBasicMaterial color="#fffaf0" transparent opacity={0.98} />
+      </mesh>
+
+      {/* First glow layer — rich gold */}
+      <mesh ref={glow1Ref}>
+        <sphereGeometry args={[1, 32, 32]} />
+        <meshBasicMaterial
+          color="#ffd700"
+          transparent
+          opacity={0.3}
+          side={THREE.BackSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+
+      {/* Second glow layer — warm amber */}
+      <mesh ref={glow2Ref}>
+        <sphereGeometry args={[1, 24, 24]} />
+        <meshBasicMaterial
+          color="#ffaa33"
+          transparent
+          opacity={0.12}
+          side={THREE.BackSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+
+      {/* Third glow layer — softest outer haze */}
+      <mesh ref={glow3Ref}>
+        <sphereGeometry args={[1, 16, 16]} />
+        <meshBasicMaterial
+          color="#ff8844"
+          transparent
+          opacity={0.06}
+          side={THREE.BackSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+    </group>
+  )
+}
+
+/* ── Radiant Halo Rings — thick glowing bands, NOT wireframe tori ── */
+
+function RadiantHalos() {
   const groupRef = useRef<THREE.Group>(null)
   const krishnaState = useKiaanverseStore((s) => s.krishnaState)
 
   useFrame(({ clock }) => {
     if (!groupRef.current) return
     const t = clock.elapsedTime
-    const isCosmic = krishnaState === 'cosmic-form'
-    const speed = isCosmic ? 0.4 : 0.12
-
+    const speed = krishnaState === 'cosmic-form' ? 0.25 : 0.06
     groupRef.current.rotation.y = t * speed
+
     groupRef.current.children.forEach((child, i) => {
-      child.rotation.z = t * (0.05 + i * 0.02) * (i % 2 === 0 ? 1 : -1)
-      child.rotation.x = Math.sin(t * 0.3 + i) * 0.15
+      child.rotation.x = Math.PI / 2 + Math.sin(t * 0.15 + i * 1.2) * 0.08
+      child.rotation.z = t * (0.02 + i * 0.01) * (i % 2 === 0 ? 1 : -1)
     })
   })
 
-  const isActive = krishnaState === 'speaking' || krishnaState === 'blessing' || krishnaState === 'reciting'
   const isCosmic = krishnaState === 'cosmic-form'
-  const baseOpacity = isCosmic ? 0.6 : isActive ? 0.35 : 0.2
-
-  const rings = useMemo(() => [
-    { radius: 0.6, tube: 0.008, color: '#ffd700', segments: 3 },
-    { radius: 0.9, tube: 0.006, color: '#ffaa33', segments: 3 },
-    { radius: 1.2, tube: 0.005, color: '#ff8844', segments: 6 },
-    { radius: 1.6, tube: 0.004, color: '#ffd700', segments: 6 },
-    { radius: 2.0, tube: 0.003, color: '#ffcc55', segments: 8 },
-  ], [])
+  const isActive = krishnaState === 'speaking' || krishnaState === 'blessing' || krishnaState === 'reciting'
+  const opacity = isCosmic ? 0.6 : isActive ? 0.4 : 0.25
 
   return (
-    <group ref={groupRef} position={[0, 1.6, 0]}>
-      {rings.map((ring, i) => (
+    <group ref={groupRef} position={[0, 1.8, 0]}>
+      {/* Thick glowing rings using torus with substantial tube radius */}
+      {[
+        { radius: 1.0, tube: 0.06, color: '#ffd700' },
+        { radius: 1.5, tube: 0.05, color: '#ffcc44' },
+        { radius: 2.1, tube: 0.04, color: '#ffaa33' },
+      ].map((ring, i) => (
         <mesh key={i} rotation={[Math.PI / 2 + i * 0.4, i * 0.6, 0]}>
-          <torusGeometry args={[ring.radius, ring.tube, 8, ring.segments]} />
+          <torusGeometry args={[ring.radius, ring.tube, 24, 80]} />
           <meshBasicMaterial
             color={ring.color}
             transparent
-            opacity={baseOpacity + (isCosmic ? 0.2 : 0)}
+            opacity={opacity - i * 0.06}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
           />
         </mesh>
       ))}
-
-      {/* Inner triangle pointing up (Shiva principle) */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.28, 0.3, 3]} />
-        <meshBasicMaterial color="#ffd700" transparent opacity={baseOpacity * 1.5} side={THREE.DoubleSide} />
-      </mesh>
-
-      {/* Inner triangle pointing down (Shakti principle) */}
-      <mesh rotation={[Math.PI / 2, 0, Math.PI]}>
-        <ringGeometry args={[0.22, 0.24, 3]} />
-        <meshBasicMaterial color="#ffaa00" transparent opacity={baseOpacity * 1.3} side={THREE.DoubleSide} />
-      </mesh>
     </group>
   )
 }
 
-/* ── Central Light Core ── */
+/* ── Warm Particle Cloud ── */
 
-function LightCore() {
-  const meshRef = useRef<THREE.Mesh>(null)
-  const krishnaState = useKiaanverseStore((s) => s.krishnaState)
-
-  useFrame(({ clock }) => {
-    if (!meshRef.current) return
-    const t = clock.elapsedTime
-    const isCosmic = krishnaState === 'cosmic-form'
-    const isSpeaking = krishnaState === 'speaking' || krishnaState === 'reciting'
-
-    const breathScale = isCosmic
-      ? 1.4 + Math.sin(t * 0.8) * 0.3
-      : isSpeaking
-        ? 1.0 + Math.sin(t * 1.2) * 0.12
-        : 0.8 + Math.sin(t * 0.5) * 0.06
-
-    meshRef.current.scale.setScalar(breathScale)
-
-    const mat = meshRef.current.material as THREE.MeshBasicMaterial
-    mat.opacity = isCosmic ? 0.9 : isSpeaking ? 0.6 : 0.35
-  })
-
-  return (
-    <mesh ref={meshRef} position={[0, 1.6, 0]}>
-      <sphereGeometry args={[0.25, 32, 32]} />
-      <meshBasicMaterial color="#fff8e7" transparent opacity={0.4} />
-    </mesh>
-  )
-}
-
-/* ── Radiance Glow (outer soft sphere) ── */
-
-function RadianceGlow() {
-  const meshRef = useRef<THREE.Mesh>(null)
-  const krishnaState = useKiaanverseStore((s) => s.krishnaState)
-
-  useFrame(({ clock }) => {
-    if (!meshRef.current) return
-    const t = clock.elapsedTime
-    const isCosmic = krishnaState === 'cosmic-form'
-    const isBlessing = krishnaState === 'blessing'
-
-    const scale = isCosmic ? 3.5 : isBlessing ? 2.8 : 2.0
-    const pulse = Math.sin(t * 0.4) * 0.2
-    meshRef.current.scale.setScalar(scale + pulse)
-
-    const mat = meshRef.current.material as THREE.MeshBasicMaterial
-    mat.opacity = isCosmic ? 0.12 : isBlessing ? 0.08 : 0.04
-  })
-
-  return (
-    <mesh ref={meshRef} position={[0, 1.6, 0]}>
-      <sphereGeometry args={[1, 32, 32]} />
-      <meshBasicMaterial color="#ffd700" transparent opacity={0.05} side={THREE.BackSide} />
-    </mesh>
-  )
-}
-
-/* ── Breathing Particle Field ── */
-
-function PresenceParticles() {
+function WarmParticles() {
   const ref = useRef<THREE.Points>(null)
   const krishnaState = useKiaanverseStore((s) => s.krishnaState)
-  const count = 400
+  const count = 250
 
   const { positions, seeds } = useMemo(() => {
     const pos = new Float32Array(count * 3)
@@ -155,9 +165,9 @@ function PresenceParticles() {
     for (let i = 0; i < count; i++) {
       const theta = seeded(i) * Math.PI * 2
       const phi = Math.acos(2 * seeded(i + 500) - 1)
-      const r = 0.4 + seeded(i + 1000) * 1.8
+      const r = 0.6 + seeded(i + 1000) * 2.5
       pos[i * 3] = r * Math.sin(phi) * Math.cos(theta)
-      pos[i * 3 + 1] = 1.6 + r * Math.sin(phi) * Math.sin(theta) * 0.6
+      pos[i * 3 + 1] = 1.8 + r * Math.sin(phi) * Math.sin(theta) * 0.6
       pos[i * 3 + 2] = r * Math.cos(phi)
       s[i] = seeded(i + 2000)
     }
@@ -169,8 +179,8 @@ function PresenceParticles() {
     for (let i = 0; i < count; i++) {
       const warmth = seeded(i + 3000)
       c[i * 3] = 1.0
-      c[i * 3 + 1] = 0.75 + warmth * 0.2
-      c[i * 3 + 2] = 0.3 + warmth * 0.3
+      c[i * 3 + 1] = 0.85 + warmth * 0.12
+      c[i * 3 + 2] = 0.5 + warmth * 0.3
     }
     return c
   }, [])
@@ -182,25 +192,21 @@ function PresenceParticles() {
     const isCosmic = krishnaState === 'cosmic-form'
     const isSpeaking = krishnaState === 'speaking' || krishnaState === 'reciting'
     const isBlessing = krishnaState === 'blessing'
-
-    const expansionMult = isCosmic ? 2.2 : isBlessing ? 1.5 : isSpeaking ? 1.15 : 1.0
-    const speed = isSpeaking ? 1.5 : 0.6
+    const expansion = isCosmic ? 2.2 : isBlessing ? 1.5 : isSpeaking ? 1.2 : 1.0
 
     for (let i = 0; i < count; i++) {
       const seed = seeds[i]
-      const theta = seed * Math.PI * 2 + t * 0.1 * (seed > 0.5 ? 1 : -1)
+      const theta = seed * Math.PI * 2 + t * 0.06 * (seed > 0.5 ? 1 : -1)
       const phi = Math.acos(2 * seeded(i + 500) - 1)
-      const baseR = 0.4 + seed * 1.8
-      const r = baseR * expansionMult + Math.sin(t * speed + seed * 10) * 0.15
+      const baseR = 0.6 + seed * 2.5
+      const r = baseR * expansion + Math.sin(t * 0.5 + seed * 10) * 0.15
 
       pos[i * 3] = r * Math.sin(phi) * Math.cos(theta)
-      pos[i * 3 + 1] = 1.6 + r * Math.sin(phi) * Math.sin(theta) * 0.6
+      pos[i * 3 + 1] = 1.8 + r * Math.sin(phi) * Math.sin(theta) * 0.6
       pos[i * 3 + 2] = r * Math.cos(phi)
     }
     ref.current.geometry.attributes.position.needsUpdate = true
   })
-
-  const particleSize = krishnaState === 'cosmic-form' ? 0.045 : 0.03
 
   return (
     <points ref={ref}>
@@ -209,9 +215,9 @@ function PresenceParticles() {
         <bufferAttribute attach="attributes-color" args={[colors, 3]} />
       </bufferGeometry>
       <pointsMaterial
-        size={particleSize}
+        size={0.09}
         transparent
-        opacity={0.7}
+        opacity={0.9}
         vertexColors
         sizeAttenuation
         blending={THREE.AdditiveBlending}
@@ -221,11 +227,11 @@ function PresenceParticles() {
   )
 }
 
-/* ── Rising Light Motes (upward drifting sparks) ── */
+/* ── Rising Light Motes ── */
 
 function RisingMotes() {
   const ref = useRef<THREE.Points>(null)
-  const count = 120
+  const count = 60
   const krishnaState = useKiaanverseStore((s) => s.krishnaState)
 
   const positions = useMemo(() => {
@@ -242,13 +248,12 @@ function RisingMotes() {
     if (!ref.current) return
     const pos = ref.current.geometry.attributes.position.array as Float32Array
     const isActive = krishnaState === 'speaking' || krishnaState === 'blessing' || krishnaState === 'cosmic-form'
-    const riseSpeed = isActive ? 0.012 : 0.004
+    const riseSpeed = isActive ? 0.012 : 0.005
 
     for (let i = 0; i < count; i++) {
       pos[i * 3 + 1] += riseSpeed + Math.sin(clock.elapsedTime + i) * 0.002
       pos[i * 3] += Math.sin(clock.elapsedTime * 0.3 + i * 0.5) * 0.003
-
-      if (pos[i * 3 + 1] > 5) {
+      if (pos[i * 3 + 1] > 6) {
         pos[i * 3 + 1] = -0.5
         pos[i * 3] = (seeded(i + 7000 + Math.floor(clock.elapsedTime)) - 0.5) * 4
       }
@@ -263,9 +268,9 @@ function RisingMotes() {
       </bufferGeometry>
       <pointsMaterial
         color="#ffeebb"
-        size={0.02}
+        size={0.06}
         transparent
-        opacity={0.5}
+        opacity={0.7}
         sizeAttenuation
         blending={THREE.AdditiveBlending}
         depthWrite={false}
@@ -274,67 +279,67 @@ function RisingMotes() {
   )
 }
 
-/* ── Lotus Base ── */
+/* ── Lotus Base — luminous warm petals ── */
 
 function LotusBase() {
   const groupRef = useRef<THREE.Group>(null)
 
   useFrame(({ clock }) => {
     if (!groupRef.current) return
-    groupRef.current.rotation.y = clock.elapsedTime * 0.03
+    groupRef.current.rotation.y = clock.elapsedTime * 0.025
   })
 
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
-      {/* Lotus petals arranged in a circle at the base */}
-      {Array.from({ length: 12 }).map((_, i) => {
-        const angle = (i / 12) * Math.PI * 2
-        const r = 0.5
+      {/* Outer petals — bright pink with strong emissive */}
+      {Array.from({ length: 10 }).map((_, i) => {
+        const angle = (i / 10) * Math.PI * 2
         return (
           <mesh
             key={i}
-            position={[Math.cos(angle) * r, 0.06, Math.sin(angle) * r]}
-            rotation={[0.6, angle, 0]}
+            position={[Math.cos(angle) * 0.6, 0.06, Math.sin(angle) * 0.6]}
+            rotation={[0.5, angle, 0]}
           >
-            <sphereGeometry args={[0.15, 6, 4, 0, Math.PI]} />
+            <coneGeometry args={[0.14, 0.35, 6]} />
             <meshStandardMaterial
-              color="#ffb6c1"
-              emissive="#ff69b4"
-              emissiveIntensity={0.15}
+              color="#ff99bb"
+              emissive="#ff6699"
+              emissiveIntensity={1.2}
               transparent
-              opacity={0.5}
+              opacity={0.85}
               side={THREE.DoubleSide}
             />
           </mesh>
         )
       })}
-      {/* Inner ring */}
-      {Array.from({ length: 8 }).map((_, i) => {
-        const angle = (i / 8) * Math.PI * 2 + 0.2
-        const r = 0.28
+      {/* Inner petals */}
+      {Array.from({ length: 7 }).map((_, i) => {
+        const angle = (i / 7) * Math.PI * 2 + 0.25
         return (
           <mesh
             key={`inner-${i}`}
-            position={[Math.cos(angle) * r, 0.12, Math.sin(angle) * r]}
-            rotation={[0.4, angle, 0]}
+            position={[Math.cos(angle) * 0.32, 0.12, Math.sin(angle) * 0.32]}
+            rotation={[0.35, angle, 0]}
           >
-            <sphereGeometry args={[0.1, 6, 4, 0, Math.PI]} />
+            <coneGeometry args={[0.09, 0.25, 6]} />
             <meshStandardMaterial
-              color="#ffe4e1"
-              emissive="#ffb6c1"
-              emissiveIntensity={0.2}
+              color="#ffbbdd"
+              emissive="#ff88bb"
+              emissiveIntensity={1.5}
               transparent
-              opacity={0.6}
+              opacity={0.9}
               side={THREE.DoubleSide}
             />
           </mesh>
         )
       })}
       {/* Golden center */}
-      <mesh position={[0, 0.15, 0]}>
-        <sphereGeometry args={[0.06, 12, 12]} />
-        <meshStandardMaterial color="#ffd700" emissive="#ffa500" emissiveIntensity={0.6} />
+      <mesh position={[0, 0.16, 0]}>
+        <sphereGeometry args={[0.08, 12, 12]} />
+        <meshBasicMaterial color="#ffd700" />
       </mesh>
+      {/* Lotus glow */}
+      <pointLight position={[0, 0.3, 0]} intensity={1.5} color="#ffcc88" distance={5} decay={2} />
     </group>
   )
 }
@@ -354,27 +359,35 @@ export default function DivinePresence({ position = [0, 0, 0] }: DivinePresenceP
   return (
     <group position={position}>
       <LotusBase />
-      <SacredRings />
-      <LightCore />
-      <RadianceGlow />
-      <PresenceParticles />
+      <DivineLightCore />
+      <RadiantHalos />
+      <WarmParticles />
       <RisingMotes />
 
-      {/* Divine point light emanating from presence center */}
+      {/* Primary divine light — warm, strong, illuminates the scene */}
       <pointLight
-        position={[0, 1.6, 0.5]}
-        intensity={isCosmic ? 3.0 : isActive ? 1.8 : 0.8}
+        position={[0, 1.8, 0.5]}
+        intensity={isCosmic ? 8.0 : isActive ? 5.0 : 3.0}
         color="#ffd700"
-        distance={isCosmic ? 15 : 8}
-        decay={2}
+        distance={isCosmic ? 30 : 18}
+        decay={1.2}
       />
 
-      {/* Subtle warm fill from below */}
+      {/* Fill from behind */}
       <pointLight
-        position={[0, 0.3, 0]}
-        intensity={0.3}
+        position={[0, 1.8, -1]}
+        intensity={isCosmic ? 3.0 : isActive ? 2.0 : 1.0}
+        color="#ffcc66"
+        distance={15}
+        decay={1.5}
+      />
+
+      {/* Warm uplight from lotus */}
+      <pointLight
+        position={[0, 0.4, 0]}
+        intensity={1.0}
         color="#ff9944"
-        distance={4}
+        distance={6}
         decay={2}
       />
     </group>
