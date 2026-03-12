@@ -482,17 +482,6 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Gita API router: {e}")
 
-# Load Kiaanverse — Bhagavad Gita VR Experience router
-startup_logger.info("\n[Kiaanverse] Attempting to import Kiaanverse API router...")
-try:
-    from backend.routes.kiaanverse_api import router as kiaanverse_router
-    app.include_router(kiaanverse_router)
-    startup_logger.info("✅ [SUCCESS] Kiaanverse API router loaded")
-    startup_logger.info("   • POST   /api/kiaanverse/ask-krishna - Ask Krishna in VR")
-    startup_logger.info("   • GET    /api/kiaanverse/verse-teaching/{ch}/{v} - Verse teaching")
-    startup_logger.info("   • GET    /api/kiaanverse/chapter-intro/{ch} - Chapter intro")
-except Exception as e:
-    startup_logger.info(f"❌ [ERROR] Failed to load Kiaanverse API router: {e}")
 
 # Load Indian Gita Sources router (authentic Indian data sources)
 startup_logger.info("\n[Indian Gita Sources] Attempting to import Indian Gita Sources router...")
