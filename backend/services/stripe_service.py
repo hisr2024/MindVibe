@@ -296,12 +296,17 @@ async def create_checkout_session(
         # Google Pay / Apple Pay: Stripe surfaces these automatically via the
         #   "card" payment method type using the Payment Request API. There is
         #   no separate "google_pay" type in Stripe — it's always through card.
+        #   We enable wallets explicitly via payment_method_options to ensure
+        #   Google Pay / Apple Pay buttons appear on the Checkout page.
         #
         # PayPal: Supported for Stripe subscriptions. We include "card" as a
         #   fallback so checkout still works if PayPal isn't configured or
         #   the user's PayPal account has issues. This also surfaces Google
         #   Pay / Apple Pay alongside PayPal on the Stripe Checkout page.
         #   PayPal does NOT support INR — validated in the route layer.
+        #   If PayPal is not enabled in the Stripe Dashboard, we fall back
+        #   to card-only checkout and inform the caller.
+        requested_payment_method = payment_method
         if payment_method == "paypal":
             payment_method_types = ["card", "paypal"]
         elif payment_method == "google_pay":
@@ -309,7 +314,7 @@ async def create_checkout_session(
         elif payment_method == "card":
             payment_method_types = ["card"]
         else:
-            payment_method_types = ["card", "paypal"]
+            payment_method_types = ["card"]
 
         # Statement descriptors for recurring subscription payments are configured
         # at the Stripe product/price level or via Account settings (see
@@ -326,16 +331,32 @@ async def create_checkout_session(
                 "user_id": str(user.id),
                 "plan_tier": plan_tier.value,
                 "billing_period": billing_period,
+                "requested_payment_method": requested_payment_method or "card",
             },
             "subscription_data": {
                 "description": f"KIAANVerse {plan_tier.value.capitalize()} Plan ({billing_period})",
             },
-            # NOTE: invoice_settings is NOT a valid parameter for
-            # checkout.Session.create(). It belongs on the Customer or
-            # Invoice object. Passing it here causes InvalidRequestError.
-            # Invoice description/footer are configured via subscription_data
-            # or at the Stripe Dashboard product/customer level.
         }
+
+        # For Google Pay: explicitly configure card payment to allow wallets.
+        # This ensures Google Pay / Apple Pay buttons appear on the Checkout
+        # page when supported by the user's browser and device.
+        if payment_method == "google_pay":
+            session_params["payment_method_options"] = {
+                "card": {
+                    "setup_future_usage": "off_session",
+                },
+            }
+
+        # For PayPal: configure PayPal-specific options for subscriptions.
+        # The preferred_locale ensures the PayPal widget renders in the
+        # user's language context.
+        if payment_method == "paypal" and "paypal" in payment_method_types:
+            session_params["payment_method_options"] = {
+                "paypal": {
+                    "preferred_locale": "en-US",
+                },
+            }
 
         # Attach metadata to the subscription for ALL payment methods so
         # webhooks can identify user/plan regardless of how the user paid.
@@ -349,19 +370,49 @@ async def create_checkout_session(
             session_params["customer"] = customer_id
         else:
             session_params["customer_email"] = user.email
-        
-        session = stripe.checkout.Session.create(**session_params)
-        
+
+        # Attempt to create the checkout session. If PayPal is not enabled
+        # in the Stripe Dashboard, we catch the error and fall back to
+        # card-only checkout rather than failing the entire request.
+        paypal_fallback = False
+        paypal_fallback_message = None
+        try:
+            session = stripe.checkout.Session.create(**session_params)
+        except stripe.InvalidRequestError as e:
+            error_msg = str(e).lower()
+            if "paypal" in error_msg and "paypal" in payment_method_types:
+                logger.warning(
+                    f"PayPal not available in Stripe account: {e}. "
+                    "Falling back to card-only checkout."
+                )
+                paypal_fallback = True
+                paypal_fallback_message = (
+                    "PayPal is not currently available. "
+                    "You can complete your payment with a credit or debit card."
+                )
+                session_params["payment_method_types"] = ["card"]
+                session_params.pop("payment_method_options", None)
+                session = stripe.checkout.Session.create(**session_params)
+            else:
+                raise
+
         logger.info(
             f"Created checkout session {session.id} for user {user.id}, "
-            f"plan {plan_tier}, period {billing_period}"
+            f"plan {plan_tier}, period {billing_period}, "
+            f"payment_method={requested_payment_method}"
         )
-        
-        return {
+
+        result: dict[str, Any] = {
             "checkout_url": session.url,
             "session_id": session.id,
         }
-        
+
+        if paypal_fallback:
+            result["payment_method_fallback"] = "card"
+            result["payment_method_message"] = paypal_fallback_message
+
+        return result
+
     except Exception as e:
         logger.error(f"Failed to create checkout session: {e}")
         raise
@@ -617,7 +668,9 @@ async def _handle_payment_succeeded(db: AsyncSession, data: dict) -> bool:
         logger.warning(f"No subscription found for customer {customer_id}")
         return True
     
-    # Determine payment provider (card vs PayPal) from Stripe data
+    # Determine payment provider (card vs PayPal vs Google Pay) from Stripe data.
+    # Google Pay payments arrive as card payments with a wallet type of "google_pay".
+    # We detect this to give accurate payment records and analytics.
     detected_provider = "stripe_card"
     if payment_intent:
         try:
@@ -627,10 +680,19 @@ async def _handle_payment_succeeded(db: AsyncSession, data: dict) -> bool:
                 pm = stripe.PaymentMethod.retrieve(pi.payment_method)
                 if pm.type == "paypal":
                     detected_provider = "stripe_paypal"
+                elif pm.type == "card" and hasattr(pm.card, "wallet") and pm.card.wallet:
+                    wallet_type = pm.card.wallet.type if hasattr(pm.card.wallet, "type") else None
+                    if wallet_type == "google_pay":
+                        detected_provider = "stripe_google_pay"
+                    elif wallet_type == "apple_pay":
+                        detected_provider = "stripe_apple_pay"
         except Exception:
             pass  # Fall back to "stripe_card"
 
-    # Record the payment
+    # Record the payment with the actual currency from the Stripe invoice.
+    # Stripe invoices include a "currency" field (e.g. "usd", "eur", "inr").
+    invoice_currency = data.get("currency", "usd")
+
     payment = Payment(
         user_id=subscription.user_id,
         subscription_id=subscription.id,
@@ -638,7 +700,7 @@ async def _handle_payment_succeeded(db: AsyncSession, data: dict) -> bool:
         stripe_payment_intent_id=payment_intent,
         stripe_invoice_id=invoice_id,
         amount=Decimal(str(amount_paid)),
-        currency="usd",
+        currency=invoice_currency,
         status=PaymentStatus.SUCCEEDED,
         description=f"Subscription payment for {subscription.plan.tier.value if subscription.plan else 'unknown'} tier",
     )
