@@ -60,6 +60,9 @@ class VoiceStyle(Enum):
     CALM = "calm"               # Meditation, relaxation
     WISDOM = "wisdom"           # Teaching, verses
     FRIENDLY = "friendly"       # Conversational KIAAN
+    ENERGETIC = "energetic"     # Uplifting, motivational
+    SOOTHING = "soothing"       # Gentle, comforting
+    STORYTELLING = "storytelling"  # Narrative, expressive
     CHANTING = "chanting"       # Mantra, shloka recitation
 
 
@@ -129,6 +132,39 @@ SARVAM_VOICES = {
         pitch=-1.5,
         description="Calm voice for meditation guidance"
     ),
+    "energetic_female": VoiceConfig(
+        provider=VoiceProvider.SARVAM_AI,
+        voice_id="anushka",
+        language="hi-IN",
+        gender=VoiceGender.FEMALE,
+        style=VoiceStyle.ENERGETIC,
+        quality_score=9.4,
+        speed=1.02,
+        pitch=0.5,
+        description="Energetic voice for uplifting motivation"
+    ),
+    "soothing_female": VoiceConfig(
+        provider=VoiceProvider.SARVAM_AI,
+        voice_id="vidya",
+        language="hi-IN",
+        gender=VoiceGender.FEMALE,
+        style=VoiceStyle.SOOTHING,
+        quality_score=9.5,
+        speed=0.88,
+        pitch=-1.0,
+        description="Soothing voice for gentle comfort"
+    ),
+    "storytelling_male": VoiceConfig(
+        provider=VoiceProvider.SARVAM_AI,
+        voice_id="abhilash",
+        language="hi-IN",
+        gender=VoiceGender.MALE,
+        style=VoiceStyle.STORYTELLING,
+        quality_score=9.4,
+        speed=0.93,
+        pitch=0.0,
+        description="Expressive voice for narrative storytelling"
+    ),
 }
 
 # ElevenLabs Voices (Studio-grade for English/International)
@@ -176,6 +212,39 @@ ELEVENLABS_VOICES = {
         speed=0.95,
         pitch=0.5,
         description="Conversational, friendly voice"
+    ),
+    "energetic_female_en": VoiceConfig(
+        provider=VoiceProvider.ELEVENLABS,
+        voice_id="EXAVITQu4vr4xnSDxMaL",  # Bella
+        language="en-US",
+        gender=VoiceGender.FEMALE,
+        style=VoiceStyle.ENERGETIC,
+        quality_score=9.3,
+        speed=1.02,
+        pitch=0.5,
+        description="Energetic, uplifting voice"
+    ),
+    "soothing_female_en": VoiceConfig(
+        provider=VoiceProvider.ELEVENLABS,
+        voice_id="jBpfAIEiAUkR2KqPSoCY",  # Emily
+        language="en-US",
+        gender=VoiceGender.FEMALE,
+        style=VoiceStyle.SOOTHING,
+        quality_score=9.3,
+        speed=0.88,
+        pitch=-1.0,
+        description="Gentle, soothing voice for comfort"
+    ),
+    "storytelling_male_en": VoiceConfig(
+        provider=VoiceProvider.ELEVENLABS,
+        voice_id="onwK4e9ZLuTAKqWW03F9",  # Daniel
+        language="en-US",
+        gender=VoiceGender.MALE,
+        style=VoiceStyle.STORYTELLING,
+        quality_score=9.3,
+        speed=0.93,
+        pitch=0.0,
+        description="Expressive narrative voice"
     ),
 }
 

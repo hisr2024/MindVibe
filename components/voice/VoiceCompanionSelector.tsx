@@ -211,7 +211,7 @@ export default function VoiceCompanionSelector({
         utterance.pitch = voice.browserConfig.pitch
         // Set language so browser picks the right accent/voice
         const langMap: Record<string, string> = {
-          en: 'en-IN', hi: 'hi-IN', sa: 'hi-IN', ta: 'ta-IN', te: 'te-IN',
+          en: 'en-US', hi: 'hi-IN', sa: 'hi-IN', ta: 'ta-IN', te: 'te-IN',
           bn: 'bn-IN', mr: 'mr-IN', gu: 'gu-IN', kn: 'kn-IN', ml: 'ml-IN',
           pa: 'pa-IN', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', pt: 'pt-BR',
           ja: 'ja-JP', zh: 'zh-CN', ko: 'ko-KR', it: 'it-IT', ru: 'ru-RU',

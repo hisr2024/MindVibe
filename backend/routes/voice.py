@@ -1232,7 +1232,7 @@ from backend.services.kiaan_divine_voice import (
 class DivineConversationStartRequest(BaseModel):
     """Request to start a divine voice conversation."""
     language: str = Field("en", description="Language code")
-    voice_preference: str = Field("calm", description="Voice preference: calm, wisdom, friendly")
+    voice_preference: str = Field("calm", description="Voice preference: calm, wisdom, friendly, energetic, soothing, storytelling, chanting")
 
 
 class DivineConversationMessageRequest(BaseModel):
@@ -1684,6 +1684,9 @@ async def divine_voice_synthesize(
             "calm": VoiceStyle.CALM,
             "wisdom": VoiceStyle.WISDOM,
             "friendly": VoiceStyle.FRIENDLY,
+            "energetic": VoiceStyle.ENERGETIC,
+            "soothing": VoiceStyle.SOOTHING,
+            "storytelling": VoiceStyle.STORYTELLING,
             "chanting": VoiceStyle.CHANTING,
         }
         style = style_map.get(payload.style, VoiceStyle.FRIENDLY)
