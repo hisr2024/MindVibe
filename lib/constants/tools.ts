@@ -35,6 +35,16 @@ export interface ToolCategory {
  */
 export const CORE_TOOLS: ToolConfig[] = [
   {
+    id: 'sadhana',
+    icon: '🙏',
+    title: 'Nityam Sadhana',
+    description: 'Daily sacred practice',
+    gradient: 'from-[#d4a44c]/30 to-[#FFD700]/30',
+    href: '/sadhana',
+    badge: 'new',
+    purposeDescKey: 'sadhana',
+  },
+  {
     id: 'kiaan',
     icon: '💬',
     title: 'KIAAN Chat',

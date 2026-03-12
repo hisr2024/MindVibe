@@ -33,6 +33,7 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
   // Main navigation links with translations
   const mainNavLinks = useMemo(() => [
     { href: '/', label: t('navigation.mainNav.home', 'Home') },
+    { href: '/sadhana', label: t('navigation.features.sadhana', 'Sadhana') },
     { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN'), purposeDescKey: 'kiaan' },
     { href: '/companion', label: t('navigation.features.companion', 'Companion'), purposeDescKey: 'kiaan' },
     { href: '/dashboard', label: t('navigation.mainNav.dashboard', 'Dashboard') },

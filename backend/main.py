@@ -1162,6 +1162,17 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Guided Meditation router: {e}")
 
+# Load Nityam Sadhana router
+startup_logger.info("\n[Sadhana] Attempting to import Nityam Sadhana router...")
+try:
+    from backend.routes.sadhana_api import router as sadhana_router
+    app.include_router(sadhana_router)
+    startup_logger.info("✅ [SUCCESS] Nityam Sadhana router loaded")
+    startup_logger.info("   • POST   /api/sadhana/compose - Compose daily practice")
+    startup_logger.info("   • POST   /api/sadhana/complete - Record practice completion")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Nityam Sadhana router: {e}")
+
 # Load Content router
 startup_logger.info("\n[Content] Attempting to import Content router...")
 try:
