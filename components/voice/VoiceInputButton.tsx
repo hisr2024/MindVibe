@@ -10,6 +10,7 @@
 
 import { useEffect, useState } from 'react'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
+import { ShankhaIcon } from '@/components/icons/ShankhaIcon'
 
 export interface VoiceInputButtonProps {
   language?: string
@@ -125,23 +126,14 @@ export function VoiceInputButton({
             : 'Click to start voice input'
         }
       >
-        {/* Microphone Icon */}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+        {/* Shankha (Sacred Conch) Icon - KIAAN Voice Symbol */}
+        <ShankhaIcon
+          size={20}
+          color="currentColor"
+          strokeWidth={2}
           className={isListening ? 'scale-110' : ''}
-        >
-          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-          <line x1="12" x2="12" y1="19" y2="22" />
-        </svg>
+          filled={isListening}
+        />
 
         {/* Denied slash indicator */}
         {isDenied && (
@@ -169,11 +161,7 @@ export function VoiceInputButton({
         <div className="absolute right-0 top-full mt-2 z-30 w-[280px] rounded-xl bg-slate-900/98 px-4 py-3 shadow-xl border border-[#d4a44c]/30 backdrop-blur-md">
           <div className="flex items-start gap-2.5">
             <span className="mt-0.5 text-[#d4a44c] flex-shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                <line x1="12" x2="12" y1="19" y2="22" />
-              </svg>
+              <ShankhaIcon size={16} color="currentColor" strokeWidth={2} />
             </span>
             <div className="flex-1 space-y-1.5">
               <p className="text-xs font-medium text-[#f5f0e8]">Microphone access needed</p>

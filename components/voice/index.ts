@@ -6,6 +6,7 @@
  * are imported directly by the voice-companion page.
  */
 
+export { ShankhaIcon } from '@/components/icons/ShankhaIcon'
 export { VoiceInputButton, type VoiceInputButtonProps } from './VoiceInputButton'
 export { VoiceResponseButton, type VoiceResponseButtonProps } from './VoiceResponseButton'
 export { VoiceOutputButton, type VoiceOutputButtonProps } from './VoiceOutputButton'

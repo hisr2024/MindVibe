@@ -1,9 +1,14 @@
 /**
- * Voice Controller Service
+ * Voice Controller Service - Unified KIAAN Voice Guide Integration
  *
  * Classifies user intent from natural language (voice or text), resolves
  * to ecosystem tool routes, and executes navigation or data actions.
  * Builds on the existing ecosystemNavigator for tool matching.
+ *
+ * Now integrates with the backend Voice Guide engine (Engine 3) for:
+ * - Ecosystem-wide navigation via voice commands
+ * - Voice input injection into any KIAAN tool
+ * - Always-awake assistant capabilities
  */
 
 'use client'
@@ -26,6 +31,22 @@ const NAVIGATION_PATTERNS: Array<{ pattern: RegExp; extractTool: (match: RegExpM
   { pattern: /(?:take me to|go to|open|show me|navigate to|switch to)\s+(.+)/i, extractTool: (m) => m[1].trim() },
   { pattern: /^(?:let's|lets)\s+(?:go to|try|use|open)\s+(.+)/i, extractTool: (m) => m[1].trim() },
   { pattern: /^(?:start|begin|launch)\s+(.+)/i, extractTool: (m) => m[1].trim() },
+]
+
+/** Tool input injection patterns: "tell ardha that...", "write in journal..." */
+const INPUT_INJECTION_PATTERNS: Array<{ pattern: RegExp; extractToolAndContent: (match: RegExpMatchArray) => { tool: string; content: string } }> = [
+  {
+    pattern: /(?:tell|say to|input to|type in|write in|send to)\s+(\w+)\s+(?:that\s+)?(.+)/i,
+    extractToolAndContent: (m) => ({ tool: m[1].trim(), content: m[2].trim() }),
+  },
+  {
+    pattern: /(?:add|put|enter)\s+(?:this\s+)?(?:in|into|to)\s+(\w+)[:]\s*(.+)/i,
+    extractToolAndContent: (m) => ({ tool: m[1].trim(), content: m[2].trim() }),
+  },
+  {
+    pattern: /(?:journal|reflect|note)[:]\s*(.+)/i,
+    extractToolAndContent: (m) => ({ tool: 'sacred-reflections', content: m[1].trim() }),
+  },
 ]
 
 /** Karma reset trigger patterns */
@@ -70,10 +91,11 @@ const EMOTION_KEYWORDS: Record<string, string[]> = {
  * Priority order:
  * 1. Control commands (stop, pause, resume)
  * 2. Direct navigation ("take me to Ardha")
- * 3. Karma reset triggers
- * 4. Verse lookup
- * 5. Ecosystem tool suggestion (keyword + emotion matching)
- * 6. General KIAAN query (fallback)
+ * 3. Tool input injection ("tell journal I feel grateful")
+ * 4. Karma reset triggers
+ * 5. Verse lookup
+ * 6. Ecosystem tool suggestion (keyword + emotion matching)
+ * 7. General KIAAN query (fallback)
  */
 export function classifyIntent(transcript: string, emotion?: string): UserIntent {
   const text = transcript.trim()
@@ -102,7 +124,19 @@ export function classifyIntent(transcript: string, emotion?: string): UserIntent
     }
   }
 
-  // 3. Karma reset
+  // 3. Tool input injection (Voice Guide Engine 3 capability)
+  for (const { pattern, extractToolAndContent } of INPUT_INJECTION_PATTERNS) {
+    const match = lower.match(pattern)
+    if (match) {
+      const { tool, content } = extractToolAndContent(match)
+      const resolvedTool = resolveToolByName(tool)
+      if (resolvedTool) {
+        return buildIntent('input_to_tool', resolvedTool.id, text, emotion || null, 'voice_input', [content], 0.85)
+      }
+    }
+  }
+
+  // 4. Karma reset
   for (const pattern of KARMA_RESET_PATTERNS) {
     if (pattern.test(lower)) {
       const detectedEmotion = emotion || detectEmotion(lower)
@@ -157,6 +191,18 @@ export function resolveRoute(intent: UserIntent): { route: string; params: Recor
     }
   }
 
+  // Voice Guide Engine 3: input injection routes to tool with voice_input param
+  if (intent.action === 'input_to_tool' && intent.targetTool) {
+    const tool = ECOSYSTEM_TOOLS.find((t) => t.id === intent.targetTool)
+    if (tool) {
+      const content = intent.extractedContext.entities[0] || intent.query
+      return {
+        route: `${tool.route}?voice_input=${encodeURIComponent(content)}`,
+        params: { voice_input: content },
+      }
+    }
+  }
+
   if (intent.targetTool) {
     const tool = ECOSYSTEM_TOOLS.find((t) => t.id === intent.targetTool)
     if (tool) {
@@ -183,6 +229,13 @@ export async function executeIntent(intent: UserIntent): Promise<VoiceController
     if (tool) {
       response = `Opening ${tool.name}...`
       suggestedFollowUp = tool.friendDescription
+    }
+  } else if (intent.action === 'input_to_tool' && intent.targetTool) {
+    // Voice Guide Engine 3: input injection
+    const tool = ECOSYSTEM_TOOLS.find((t) => t.id === intent.targetTool)
+    if (tool) {
+      response = `Sending your input to ${tool.name}...`
+      suggestedFollowUp = `Your voice input has been sent to ${tool.name}. Navigate there to see it.`
     }
   } else if (intent.action === 'query') {
     response = null // Let the caller handle KIAAN chat

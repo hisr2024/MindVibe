@@ -16,6 +16,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
 import { classifyIntent, executeIntent } from '@/lib/voice-controller'
 import type { VoiceControllerResult } from '@/types/voice-controller.types'
+import { ShankhaIcon } from '@/components/icons/ShankhaIcon'
 
 type NavState = 'idle' | 'listening' | 'processing' | 'result'
 
@@ -209,11 +210,8 @@ export function KiaanVoiceNav() {
             <path d="M21 12a9 9 0 11-6.219-8.56" />
           </svg>
         ) : (
-          /* Compass/nav icon */
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-            <circle cx="12" cy="12" r="10" />
-            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
-          </svg>
+          /* Shankha (Sacred Conch) - KIAAN Voice navigation symbol */
+          <ShankhaIcon size={18} color="white" strokeWidth={2} />
         )}
 
         {/* Listening pulse */}

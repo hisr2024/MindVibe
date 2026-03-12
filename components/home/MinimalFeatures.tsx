@@ -15,13 +15,13 @@ export function MinimalFeatures() {
   
   const features = [
     {
-      icon: '🎙️',
-      title: t('home.features.voice.title', 'Voice Guidance'),
-      description: t('home.features.voice.description', 'Talk naturally with KIAAN using voice input for a more personal experience.'),
+      icon: '🐚',
+      title: t('home.features.voice.title', 'KIAAN Voice'),
+      description: t('home.features.voice.description', 'Talk naturally with KIAAN using voice input. Always awake, guiding you anywhere in the ecosystem.'),
       gradient: 'from-purple-500/20 to-violet-500/20',
       border: 'border-purple-400/30',
-      link: '/kiaan',
-      linkText: t('home.features.voice.cta', 'Try Voice Chat'),
+      link: '/companion',
+      linkText: t('home.features.voice.cta', 'Talk to KIAAN'),
     },
     {
       icon: '📱',

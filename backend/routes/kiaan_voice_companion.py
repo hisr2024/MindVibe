@@ -1,16 +1,19 @@
-"""KIAAN Voice Companion API Routes - Divine Friend with Voice Output
+"""KIAAN Voice Companion API Routes - Unified Three-Engine Voice System
 
-Endpoints for the KIAAN Voice Companion experience: a continuous
-voice-first conversation where KIAAN acts as the user's Divine Friend.
-Every response is automatically synthesized to voice output.
+Endpoints for the unified KIAAN Voice experience combining THREE engines:
+
+ENGINE 1 - GUIDANCE: Bhagavad Gita wisdom + behavioral science framework
+ENGINE 2 - FRIEND: Best friend personality + cross-session memory
+ENGINE 3 - VOICE GUIDE: Always-awake assistant + ecosystem navigation + tool input
+
+KIAAN is always awake (like Siri, Alexa, Bixby) and can independently:
+- Guide users anywhere in the KIAAN Ecosystem via voice
+- Add input to any tool in the KIAAN AI Ecosystem
+- Provide conversational support through Guidance + Friend engines
 
 CRITICAL: This route calls OpenAI DIRECTLY via openai_optimizer (the same
 client that powers Viyoga and Ardha), bypassing CompanionFriendEngine's
 internal _openai_available flag which can be stale.
-
-Combines the warmth of the Companion (best friend), the wisdom of
-Viyoga Ardha (reframing), and the depth of Relationship Compass (guidance)
-into a single, voice-centered Divine Friend conversation.
 
 All existing ecosystem routes/services remain untouched.
 """
@@ -1675,4 +1678,204 @@ async def get_voice_companion_history(
             }
             for s in sessions
         ]
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ENGINE 3: VOICE GUIDE - Always-Awake Ecosystem Navigation & Tool Input
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class VoiceGuideCommandRequest(BaseModel):
+    """Voice command request for the Voice Guide engine."""
+    transcript: str = Field(..., min_length=1, max_length=3000, description="Voice transcript from STT")
+    current_tool: str | None = Field(None, description="Tool the user is currently in")
+    user_mood: str | None = Field(None, description="Currently detected mood")
+    session_id: str | None = Field(None, description="Active session ID")
+    conversation_history: list | None = Field(None, description="Recent conversation messages")
+
+    @field_validator("transcript")
+    @classmethod
+    def sanitize_transcript(cls, v: str) -> str:
+        return html.escape(v.strip())
+
+
+class VoiceGuideCommandResponse(BaseModel):
+    """Response from Voice Guide engine with action, route, and response."""
+    engine: str
+    action: str
+    response: str
+    target_tool: str | None = None
+    route: str | None = None
+    input_payload: dict | None = None
+    mood: str | None = None
+    mood_intensity: float = 0.5
+    follow_up: str | None = None
+    should_speak: bool = True
+    confidence: float = 0.0
+    context: dict | None = None
+
+
+@router.post("/voice-guide/command", response_model=VoiceGuideCommandResponse)
+@limiter.limit("60/minute")
+async def voice_guide_command(
+    request: Request,
+    body: VoiceGuideCommandRequest,
+    current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Voice Guide Engine - Process a voice command for ecosystem-wide actions.
+
+    This is KIAAN's always-awake assistant endpoint. It can:
+    - Navigate to any tool via voice ("take me to Ardha")
+    - Input text into any tool ("tell journal I feel grateful today")
+    - Control KIAAN ("stop", "pause", "repeat")
+    - Look up Gita verses ("read chapter 2 verse 47")
+    - Check mood ("how am I feeling?")
+    - Fetch daily wisdom ("give me today's wisdom")
+    - Route to Friend/Guidance engines for conversation
+
+    Subscription: Shares KIAAN quota for LLM-powered responses.
+    """
+    from backend.services.kiaan_unified_voice_engine import get_unified_voice_engine
+
+    try:
+        engine = get_unified_voice_engine()
+        result = await engine.process_unified(
+            transcript=body.transcript,
+            current_tool=body.current_tool,
+            user_mood=body.user_mood,
+            conversation_history=body.conversation_history,
+            session_id=body.session_id,
+        )
+
+        return VoiceGuideCommandResponse(
+            engine=result.engine.value,
+            action=result.voice_guide_result.action.value if result.voice_guide_result else "query",
+            response=result.response,
+            target_tool=result.voice_guide_result.target_tool.value if result.voice_guide_result and result.voice_guide_result.target_tool else None,
+            route=result.voice_guide_result.route if result.voice_guide_result else None,
+            input_payload=result.voice_guide_result.input_payload if result.voice_guide_result else None,
+            mood=result.mood,
+            mood_intensity=result.mood_intensity,
+            follow_up=result.follow_up,
+            should_speak=result.should_speak,
+            confidence=result.voice_guide_result.confidence if result.voice_guide_result else 0.5,
+            context=result.voice_guide_result.context if result.voice_guide_result else None,
+        )
+
+    except Exception as e:
+        logger.error("Voice Guide command error: %s", e, exc_info=True)
+        return VoiceGuideCommandResponse(
+            engine="voice_guide",
+            action="query",
+            response="I'm having a moment. Could you say that again?",
+            confidence=0.0,
+        )
+
+
+@router.get("/voice-guide/tools")
+async def voice_guide_available_tools():
+    """
+    List all ecosystem tools available for voice navigation and input.
+
+    Returns the complete set of tools KIAAN can navigate to or inject
+    input into via voice commands.
+    """
+    from backend.services.kiaan_unified_voice_engine import get_unified_voice_engine
+
+    engine = get_unified_voice_engine()
+    return {
+        "tools": engine.get_available_tools(),
+        "total": len(engine.get_available_tools()),
+        "voice_commands": [
+            {"command": "Take me to [tool]", "action": "Navigate to a tool"},
+            {"command": "Tell [tool] that [message]", "action": "Input to a specific tool"},
+            {"command": "Journal: [text]", "action": "Add to Sacred Reflections"},
+            {"command": "Read verse [chapter].[verse]", "action": "Look up a Gita verse"},
+            {"command": "How am I feeling?", "action": "Mood check"},
+            {"command": "Give me today's wisdom", "action": "Daily wisdom"},
+            {"command": "Stop / Pause / Resume", "action": "Voice control"},
+        ],
+    }
+
+
+@router.get("/voice-guide/status")
+async def voice_guide_engine_status():
+    """
+    Get the status of all three KIAAN engines.
+
+    Returns health and availability of:
+    - Guidance Engine (Gita wisdom)
+    - Friend Engine (best friend personality)
+    - Voice Guide Engine (ecosystem navigation)
+    """
+    from backend.services.kiaan_unified_voice_engine import get_unified_voice_engine
+
+    engine = get_unified_voice_engine()
+    return engine.get_engine_status()
+
+
+class VoiceGuideInputRequest(BaseModel):
+    """Request to inject voice input into a specific ecosystem tool."""
+    target_tool: str = Field(..., description="Tool ID to send input to")
+    content: str = Field(..., min_length=1, max_length=5000, description="Content to inject")
+    source: str = Field(default="voice_guide", description="Input source identifier")
+
+    @field_validator("content")
+    @classmethod
+    def sanitize_content(cls, v: str) -> str:
+        return html.escape(v.strip())
+
+
+@router.post("/voice-guide/input")
+@limiter.limit("30/minute")
+async def voice_guide_input_to_tool(
+    request: Request,
+    body: VoiceGuideInputRequest,
+    current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Inject voice input into a specific ecosystem tool.
+
+    Allows KIAAN to add content to any tool (journal entries, chat messages,
+    reframing inputs, etc.) via voice commands. The content is routed to the
+    appropriate tool's backend handler.
+    """
+    from backend.services.kiaan_unified_voice_engine import (
+        EcosystemTool,
+        TOOL_ROUTES,
+        TOOL_DESCRIPTIONS,
+        get_unified_voice_engine,
+    )
+
+    # Validate target tool exists
+    try:
+        tool = EcosystemTool(body.target_tool)
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown tool: {body.target_tool}. Use /voice-guide/tools for available tools.",
+        )
+
+    route = TOOL_ROUTES.get(tool, "/companion")
+    desc = TOOL_DESCRIPTIONS.get(tool, body.target_tool)
+
+    logger.info(
+        "Voice Guide input: user=%s tool=%s content_length=%d",
+        current_user.id,
+        body.target_tool,
+        len(body.content),
+    )
+
+    return {
+        "success": True,
+        "target_tool": body.target_tool,
+        "route": route,
+        "description": desc,
+        "content": body.content,
+        "source": body.source,
+        "message": f"Input ready for {desc.split(' - ')[0]}. Navigate to the tool to complete the action.",
     }

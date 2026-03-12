@@ -9,11 +9,12 @@ import type { KarmicPathKey, GitaVerse, KiaanResetResponse } from './karma-reset
 
 /** Supported intent actions from voice or text input */
 export type IntentAction =
-  | 'navigate'      // Go to a page/tool
-  | 'query'         // Ask KIAAN a question
-  | 'karma_reset'   // Invoke karma reset with context
-  | 'fetch_data'    // Retrieve information (e.g., verse lookup)
-  | 'control'       // Start/stop/pause an action
+  | 'navigate'       // Go to a page/tool
+  | 'query'          // Ask KIAAN a question
+  | 'karma_reset'    // Invoke karma reset with context
+  | 'fetch_data'     // Retrieve information (e.g., verse lookup)
+  | 'control'        // Start/stop/pause an action
+  | 'input_to_tool'  // Voice Guide Engine 3: inject voice input into a specific tool
 
 /** Classified user intent from natural language input */
 export interface UserIntent {

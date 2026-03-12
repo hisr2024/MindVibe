@@ -1201,20 +1201,27 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Voice Companion router: {e}")
 
-# Load KIAAN Voice Companion (Divine Friend with Voice Output)
-startup_logger.info("\n[Voice Companion] Attempting to import KIAAN Voice Companion router...")
+# Load KIAAN Unified Voice Companion (3-Engine: Guidance + Friend + Voice Guide)
+startup_logger.info("\n[Voice Companion] Attempting to import KIAAN Unified Voice Companion router...")
 try:
     from backend.routes.kiaan_voice_companion import router as kiaan_voice_companion_router
     app.include_router(kiaan_voice_companion_router)
-    startup_logger.info("✅ [SUCCESS] KIAAN Voice Companion router loaded (Divine Friend)")
+    startup_logger.info("✅ [SUCCESS] KIAAN Unified Voice Companion router loaded (3-Engine System)")
+    startup_logger.info("   ENGINE 1 - GUIDANCE: Bhagavad Gita wisdom + behavioral science")
+    startup_logger.info("   ENGINE 2 - FRIEND: Best friend personality + cross-session memory")
+    startup_logger.info("   ENGINE 3 - VOICE GUIDE: Always-awake + ecosystem navigation + tool input")
     startup_logger.info("   • POST   /api/voice-companion/session/start - Start voice session")
     startup_logger.info("   • POST   /api/voice-companion/message - Send message (voice-first)")
     startup_logger.info("   • POST   /api/voice-companion/session/end - End voice session")
     startup_logger.info("   • POST   /api/voice-companion/synthesize - Synthesize voice")
     startup_logger.info("   • GET    /api/voice-companion/history - Conversation history")
     startup_logger.info("   • GET    /api/voice-companion/health - Health check")
+    startup_logger.info("   • POST   /api/voice-companion/voice-guide/command - Voice Guide command")
+    startup_logger.info("   • GET    /api/voice-companion/voice-guide/tools - Available ecosystem tools")
+    startup_logger.info("   • GET    /api/voice-companion/voice-guide/status - Engine status")
+    startup_logger.info("   • POST   /api/voice-companion/voice-guide/input - Inject input to tool")
 except Exception as e:
-    startup_logger.info(f"❌ [ERROR] Failed to load KIAAN Voice Companion router: {e}")
+    startup_logger.info(f"❌ [ERROR] Failed to load KIAAN Unified Voice Companion router: {e}")
 
 # Load KIAAN Friend Mode router (Dual-mode: Best Friend + Gita Guide)
 startup_logger.info("\n[KIAAN Friend Mode] Attempting to import KIAAN Friend Mode router...")
