@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -24,7 +24,7 @@ interface SetupData {
 
 type SetupStep = 'initial' | 'scanning' | 'verify' | 'backup' | 'complete'
 
-export default function SecuritySettingsPage() {
+function SecuritySettingsContent() {
   const { isAuthenticated, loading: authLoading } = useAuth()
   const searchParams = useSearchParams()
   const isMandatory2FASetup = searchParams.get('setup2fa') === 'true'
@@ -75,15 +75,6 @@ export default function SecuritySettingsPage() {
     }
   }, [fetchStatus, authLoading, isAuthenticated])
 
-  // Auto-start 2FA setup when redirected for mandatory setup
-  useEffect(() => {
-    if (isMandatory2FASetup && !loading && twoFactorStatus && !twoFactorStatus.enabled && setupStep === 'initial') {
-      startSetup()
-    }
-    // Only run when status is first loaded for mandatory setup
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMandatory2FASetup, loading, twoFactorStatus])
-
   const startSetup = async () => {
     try {
       setError(null)
@@ -104,6 +95,15 @@ export default function SecuritySettingsPage() {
       setError('Network error. Please try again.')
     }
   }
+
+  // Auto-start 2FA setup when redirected for mandatory setup
+  useEffect(() => {
+    if (isMandatory2FASetup && !loading && twoFactorStatus && !twoFactorStatus.enabled && setupStep === 'initial') {
+      startSetup()
+    }
+    // Only run when status is first loaded for mandatory setup
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMandatory2FASetup, loading, twoFactorStatus])
 
   const verifySetup = async () => {
     if (!verifyCode || verifyCode.length !== 6) {
@@ -783,5 +783,23 @@ export default function SecuritySettingsPage() {
         </div>
       </SettingsSection>
     </main>
+  )
+}
+
+export default function SecuritySettingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="mx-auto max-w-3xl px-4 py-12">
+          <div className="animate-pulse">
+            <div className="h-8 bg-[#d4a44c]/20 rounded w-48 mb-4" />
+            <div className="h-4 bg-[#d4a44c]/10 rounded w-64 mb-8" />
+            <div className="h-64 bg-[#d4a44c]/10 rounded-xl" />
+          </div>
+        </main>
+      }
+    >
+      <SecuritySettingsContent />
+    </Suspense>
   )
 }

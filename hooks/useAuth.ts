@@ -152,6 +152,7 @@ export function useAuth(): UseAuthResult {
     }
   }, [])
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const signup = useCallback(async (email: string, password: string, name?: string): Promise<SignupResult> => {
     setLoading(true)
     setError(null)
@@ -226,7 +227,7 @@ export function useAuth(): UseAuthResult {
         const detail = errorData.detail || ''
 
         // Handle email not verified — throw specific error for UI to catch
-        if (detail === 'email_not_verified' || response.status === 403) {
+        if (detail === 'email_not_verified') {
           const err = new Error('email_not_verified')
           ;(err as Error & { code: string }).code = 'EMAIL_NOT_VERIFIED'
           throw err

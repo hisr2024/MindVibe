@@ -533,7 +533,7 @@ function UnauthenticatedAccountView() {
   }, [])
 
   useEffect(() => {
-    if (authError) {
+    if (authError && authError !== 'email_not_verified') {
       setStatus({ type: 'error', message: authError })
     }
   }, [authError])
@@ -664,6 +664,8 @@ function UnauthenticatedAccountView() {
         body: JSON.stringify({ email: emailToVerify }),
       })
       const data = await response.json().catch(() => ({}))
+      setEmailNotVerified(false)
+      setSignupSuccess(false)
       setStatus({
         type: 'success',
         message: data.message || 'Verification email sent! Please check your inbox and spam folder.',
