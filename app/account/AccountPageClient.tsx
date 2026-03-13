@@ -506,6 +506,7 @@ function UnauthenticatedAccountView() {
     name: '',
     email: '',
     password: '',
+    confirmPassword: '',
   })
 
   const [loginForm, setLoginForm] = useState({
@@ -579,6 +580,11 @@ function UnauthenticatedAccountView() {
       return
     }
 
+    if (createForm.password !== createForm.confirmPassword) {
+      setStatus({ type: 'error', message: 'Passwords do not match. Please re-enter your password.' })
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -593,15 +599,22 @@ function UnauthenticatedAccountView() {
           ? 'Account created! We sent a verification link to your email. Please check your inbox (and spam folder) to verify before signing in.'
           : 'Account created! Please check your email for a verification link to complete registration.',
       })
-      setCreateForm({ name: '', email: '', password: '' })
+      setCreateForm({ name: '', email: '', password: '', confirmPassword: '' })
       setLoginForm({ email: result.email, password: '', twoFactorCode: '' })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create account. Please try again.'
-      setStatus({ type: 'error', message })
+      const msgLower = message.toLowerCase()
 
-      if (message.toLowerCase().includes('already registered') || message.toLowerCase().includes('already exists') || message.toLowerCase().includes('unable to create account')) {
+      if (msgLower.includes('already registered') || msgLower.includes('already exists') || msgLower.includes('unable to create account')) {
+        // Email already registered — guide user to sign in
         setMode('login')
         setLoginForm(prev => ({ ...prev, email: createForm.email.trim().toLowerCase() }))
+        setStatus({
+          type: 'info',
+          message: 'An account with this email already exists. Please sign in below, or use "Forgot password?" if you need to reset your credentials.',
+        })
+      } else {
+        setStatus({ type: 'error', message })
       }
     } finally {
       setIsSubmitting(false)
@@ -902,15 +915,57 @@ function UnauthenticatedAccountView() {
                     </div>
                     <span className="min-w-[88px] text-right font-semibold text-[#f5f0e8]">{passwordStrength.label}</span>
                   </div>
+                  {createForm.password.length >= 8 && (
+                    <ul className="text-[11px] text-[#f5f0e8]/60 space-y-0.5 mt-1">
+                      <li className={/[A-Z]/.test(createForm.password) ? 'text-emerald-400' : ''}>
+                        {/[A-Z]/.test(createForm.password) ? '\u2713' : '\u2022'} Uppercase letter
+                      </li>
+                      <li className={/[a-z]/.test(createForm.password) ? 'text-emerald-400' : ''}>
+                        {/[a-z]/.test(createForm.password) ? '\u2713' : '\u2022'} Lowercase letter
+                      </li>
+                      <li className={/[0-9]/.test(createForm.password) ? 'text-emerald-400' : ''}>
+                        {/[0-9]/.test(createForm.password) ? '\u2713' : '\u2022'} Number
+                      </li>
+                      <li className={/[^A-Za-z0-9]/.test(createForm.password) ? 'text-emerald-400' : ''}>
+                        {/[^A-Za-z0-9]/.test(createForm.password) ? '\u2713' : '\u2022'} Special character
+                      </li>
+                    </ul>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="create-confirm-password">Confirm Password</label>
+                  <input
+                    id="create-confirm-password"
+                    name="confirm-password"
+                    type="password"
+                    autoComplete="new-password"
+                    value={createForm.confirmPassword}
+                    onChange={event => setCreateForm({ ...createForm, confirmPassword: event.target.value })}
+                    disabled={isSubmitting}
+                    className={`w-full rounded-xl border ${
+                      createForm.confirmPassword && createForm.password !== createForm.confirmPassword
+                        ? 'border-red-400/60 focus:border-red-400 focus:ring-red-400/40'
+                        : createForm.confirmPassword && createForm.password === createForm.confirmPassword
+                        ? 'border-emerald-400/60 focus:border-emerald-400 focus:ring-emerald-400/40'
+                        : 'border-[#d4a44c]/20 focus:border-[#d4a44c] focus:ring-[#d4a44c]/40'
+                    } bg-slate-900/70 px-3 py-3 text-sm text-[#f5f0e8] outline-none transition focus:ring-2 disabled:opacity-50`}
+                    placeholder="Re-enter your password"
+                  />
+                  {createForm.confirmPassword && createForm.password !== createForm.confirmPassword && (
+                    <p className="text-xs text-red-400 mt-1">Passwords do not match</p>
+                  )}
+                  {createForm.confirmPassword && createForm.password === createForm.confirmPassword && (
+                    <p className="text-xs text-emerald-400 mt-1">Passwords match</p>
+                  )}
                 </div>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || (!!createForm.confirmPassword && createForm.password !== createForm.confirmPassword)}
                   className="w-full rounded-xl bg-gradient-to-r from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] px-4 py-3 text-sm font-semibold text-slate-900 shadow-lg shadow-[#d4a44c]/25 transition hover:scale-[1.01] disabled:opacity-50 disabled:hover:scale-100"
                 >
-                  {isSubmitting ? 'Creating account...' : 'Create account'}
+                  {isSubmitting ? 'Creating account...' : 'Create secure account'}
                 </button>
-                <p className="text-center text-xs text-[#f5f0e8]/70">Your account is secured with bcrypt encryption.</p>
+                <p className="text-center text-xs text-[#f5f0e8]/70">Secured with bcrypt encryption + email verification + 2FA</p>
               </form>
             ) : (
               <form className="mt-6 space-y-4" onSubmit={handleLogin} autoComplete="on">
