@@ -338,25 +338,17 @@ async def create_checkout_session(
             },
         }
 
-        # For Google Pay: explicitly configure card payment to allow wallets.
-        # This ensures Google Pay / Apple Pay buttons appear on the Checkout
-        # page when supported by the user's browser and device.
-        if payment_method == "google_pay":
-            session_params["payment_method_options"] = {
-                "card": {
-                    "setup_future_usage": "off_session",
-                },
-            }
+        # Google Pay / Apple Pay: Stripe Checkout surfaces wallet buttons
+        # automatically when payment_method_types includes "card" and the
+        # user's browser/device supports the Payment Request API.  No
+        # payment_method_options are needed — and importantly,
+        # setup_future_usage CANNOT be set in subscription mode (Stripe
+        # manages recurring payment methods automatically for subscriptions).
 
-        # For PayPal: configure PayPal-specific options for subscriptions.
-        # The preferred_locale ensures the PayPal widget renders in the
-        # user's language context.
-        if payment_method == "paypal" and "paypal" in payment_method_types:
-            session_params["payment_method_options"] = {
-                "paypal": {
-                    "preferred_locale": "en-US",
-                },
-            }
+        # PayPal: No payment_method_options needed for subscription mode.
+        # Stripe handles locale detection automatically.  Adding explicit
+        # options like preferred_locale can cause InvalidRequestError when
+        # PayPal isn't fully enabled in the Stripe Dashboard.
 
         # Attach metadata to the subscription for ALL payment methods so
         # webhooks can identify user/plan regardless of how the user paid.
@@ -371,18 +363,17 @@ async def create_checkout_session(
         else:
             session_params["customer_email"] = user.email
 
-        # Attempt to create the checkout session. If PayPal is not enabled
-        # in the Stripe Dashboard, we catch the error and fall back to
-        # card-only checkout rather than failing the entire request.
+        # Attempt to create the checkout session.  If a non-card payment
+        # method (e.g. PayPal) isn't enabled in the Stripe Dashboard, we
+        # fall back to card-only checkout rather than failing the request.
         paypal_fallback = False
         paypal_fallback_message = None
         try:
             session = stripe.checkout.Session.create(**session_params)
-        except stripe.InvalidRequestError as e:
-            error_msg = str(e).lower()
-            if "paypal" in error_msg and "paypal" in payment_method_types:
+        except stripe.error.InvalidRequestError as e:
+            if "paypal" in payment_method_types:
                 logger.warning(
-                    f"PayPal not available in Stripe account: {e}. "
+                    f"PayPal checkout failed ({e}). "
                     "Falling back to card-only checkout."
                 )
                 paypal_fallback = True

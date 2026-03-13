@@ -9,6 +9,7 @@ Tests the Stripe integration including:
 """
 
 import pytest
+import stripe
 from datetime import datetime, timedelta, UTC
 from decimal import Decimal
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -284,6 +285,12 @@ class TestCheckoutSessionCreation:
         assert "card" in captured_params["payment_method_types"], (
             "Card must be included as fallback alongside PayPal"
         )
+        # subscription mode: no payment_method_options needed — Stripe handles
+        # locale detection and recurring setup automatically.
+        assert "payment_method_options" not in captured_params, (
+            "PayPal subscription checkout must not set payment_method_options "
+            "(can cause InvalidRequestError if PayPal is not fully enabled)"
+        )
 
     @pytest.mark.asyncio
     async def test_checkout_session_paypal_includes_subscription_metadata(self, test_db: AsyncSession):
@@ -393,6 +400,12 @@ class TestCheckoutSessionCreation:
         assert captured_params["payment_method_types"] == ["card"], (
             "Google Pay must route through Stripe's card payment method type"
         )
+        # subscription mode: setup_future_usage is managed by Stripe automatically,
+        # so payment_method_options must NOT be set (causes InvalidRequestError).
+        assert "payment_method_options" not in captured_params, (
+            "Google Pay subscription checkout must not set payment_method_options "
+            "(setup_future_usage is invalid in subscription mode)"
+        )
         assert result is not None
         assert result["checkout_url"] == "https://checkout.stripe.com/c/pay/cs_test_gpay"
 
@@ -431,6 +444,67 @@ class TestPayPalCurrencyValidation:
         assert payload.payment_method == "paypal"
         assert payload.currency == "usd"
         # USD is valid for PayPal — no error expected
+
+
+class TestPayPalFallback:
+    """Test PayPal graceful fallback when Stripe rejects the payment method."""
+
+    @pytest.mark.asyncio
+    async def test_paypal_falls_back_to_card_on_invalid_request(self, test_db: AsyncSession):
+        """When Stripe rejects PayPal (not enabled), fall back to card-only checkout."""
+        from backend.services.stripe_service import create_checkout_session
+
+        user = User(
+            auth_uid="paypal-fallback-user",
+            email="paypal-fallback@example.com",
+            hashed_password="hashed_password",
+        )
+        test_db.add(user)
+        await test_db.commit()
+        await test_db.refresh(user)
+
+        plan = SubscriptionPlan(
+            tier=SubscriptionTier.BHAKTA,
+            name="Bhakta",
+            price_monthly=Decimal("6.99"),
+            kiaan_questions_monthly=50,
+            encrypted_journal=True,
+            data_retention_days=90,
+            stripe_price_id_monthly="price_test_bhakta_fb",
+        )
+        test_db.add(plan)
+        await test_db.commit()
+
+        call_count = 0
+
+        class FakeSession:
+            id = "cs_test_fallback"
+            url = "https://checkout.stripe.com/c/pay/cs_test_fallback"
+
+        def mock_create(**kwargs):
+            nonlocal call_count
+            call_count += 1
+            if "paypal" in kwargs.get("payment_method_types", []):
+                raise stripe.error.InvalidRequestError(
+                    "The payment method type 'paypal' is invalid",
+                    param="payment_method_types",
+                )
+            return FakeSession()
+
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "sk_test_fake"}):
+            with patch("stripe.checkout.Session.create", side_effect=mock_create):
+                with patch("stripe.Customer.create", return_value=MagicMock(id="cus_fb")):
+                    result = await create_checkout_session(
+                        test_db, user, SubscriptionTier.BHAKTA, "monthly",
+                        "https://example.com/success", "https://example.com/cancel",
+                        payment_method="paypal",
+                    )
+
+        assert call_count == 2, "Should retry once with card-only after PayPal fails"
+        assert result is not None
+        assert result["checkout_url"] == "https://checkout.stripe.com/c/pay/cs_test_fallback"
+        assert result["payment_method_fallback"] == "card"
+        assert result["payment_method_message"] is not None
 
 
 class TestWebhookSignatureVerification:

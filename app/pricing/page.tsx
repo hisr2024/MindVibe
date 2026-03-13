@@ -544,7 +544,10 @@ export default function PricingPage() {
           return
         }
         const error = await response.json().catch(() => ({}))
-        throw new Error(error.detail || error.message || 'Failed to start checkout')
+        const detail = typeof error.detail === 'string' ? error.detail : error.detail?.message
+        throw new Error(
+          detail || error.message || 'Unable to create checkout session. Please try again or use a different payment method.'
+        )
       }
 
       const data = await response.json()
@@ -597,10 +600,23 @@ export default function PricingPage() {
       {checkoutError && (
         <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
           <div className="flex items-center justify-between">
-            <span>{checkoutError}</span>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <span>{checkoutError}</span>
+              {paymentMethod !== 'card' && (
+                <button
+                  onClick={() => {
+                    setPaymentMethod('card')
+                    setCheckoutError(null)
+                  }}
+                  className="whitespace-nowrap rounded-md bg-[#c9a96e]/20 px-3 py-1 text-xs font-medium text-[#c9a96e] hover:bg-[#c9a96e]/30 transition-colors"
+                >
+                  Switch to Card payment
+                </button>
+              )}
+            </div>
             <button
               onClick={() => setCheckoutError(null)}
-              className="ml-4 text-red-400 hover:text-red-200"
+              className="ml-4 shrink-0 text-red-400 hover:text-red-200"
               aria-label="Dismiss error"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
