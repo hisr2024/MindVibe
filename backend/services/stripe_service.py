@@ -344,11 +344,12 @@ async def create_checkout_session(
         # payment_method_options are needed — and importantly,
         # setup_future_usage CANNOT be set in subscription mode (Stripe
         # manages recurring payment methods automatically for subscriptions).
+        # Setting it causes InvalidRequestError.
 
         # PayPal: No payment_method_options needed for subscription mode.
         # Stripe handles locale detection automatically.  Adding explicit
         # options like preferred_locale can cause InvalidRequestError when
-        # PayPal isn't fully enabled in the Stripe Dashboard.
+        # PayPal isn't fully enabled or for certain account configurations.
 
         # Attach metadata to the subscription for ALL payment methods so
         # webhooks can identify user/plan regardless of how the user paid.
