@@ -413,7 +413,7 @@ export default function MobileJourneyDetailPage() {
             </section>
 
             {/* Verses */}
-            {step.verses.length > 0 && (
+            {step.verses?.length > 0 && (
               <section className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-[#d4a44c]" />
@@ -452,7 +452,7 @@ export default function MobileJourneyDetailPage() {
             )}
 
             {/* Guided Reflection */}
-            {step.guided_reflection.length > 0 && (
+            {step.guided_reflection?.length > 0 && (
               <section className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-purple-950/10">
                 <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-purple-500 to-violet-500" />
                 <div className="p-5 pl-6">

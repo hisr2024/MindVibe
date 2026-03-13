@@ -193,7 +193,7 @@ function StepContent({ step, onComplete, isCompleting }: StepContentProps) {
       </section>
 
       {/* Wisdom from the Gita - Premium Verse Display */}
-      {step.verses.length > 0 && (
+      {step.verses?.length > 0 && (
         <section>
           <div className="flex items-center gap-3 mb-5">
             <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
@@ -213,7 +213,7 @@ function StepContent({ step, onComplete, isCompleting }: StepContentProps) {
       )}
 
       {/* Guided Reflection - Elegant Card */}
-      {step.guided_reflection.length > 0 && (
+      {step.guided_reflection?.length > 0 && (
         <section className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-950/30 to-purple-900/10">
           <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-purple-500 to-violet-500" />
           <div className="p-6 pl-8">
