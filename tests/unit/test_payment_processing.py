@@ -213,7 +213,11 @@ class TestCheckoutSessionCreation:
         assert captured_params["mode"] == "subscription"
         assert captured_params["success_url"] == "https://example.com/success"
         assert captured_params["cancel_url"] == "https://example.com/cancel"
-        assert captured_params["payment_method_types"] == ["card"]
+        # payment_method_types should NOT be set — Stripe dynamically surfaces
+        # all enabled payment methods (Card, Google Pay, PayPal, etc.) from Dashboard
+        assert "payment_method_types" not in captured_params, (
+            "payment_method_types must not be set — let Stripe use Dashboard settings"
+        )
         assert len(captured_params["line_items"]) == 1
         assert captured_params["line_items"][0]["price"] == "price_test_sadhak_monthly"
 
@@ -278,12 +282,10 @@ class TestCheckoutSessionCreation:
         assert "payment_intent_data" not in captured_params, (
             "payment_intent_data must not be present for PayPal checkouts"
         )
-        # PayPal should include card as fallback
-        assert "paypal" in captured_params["payment_method_types"], (
-            "PayPal must be included in payment_method_types"
-        )
-        assert "card" in captured_params["payment_method_types"], (
-            "Card must be included as fallback alongside PayPal"
+        # payment_method_types should NOT be set — Stripe dynamically surfaces
+        # all enabled payment methods from Dashboard settings
+        assert "payment_method_types" not in captured_params, (
+            "payment_method_types must not be set — let Stripe use Dashboard settings"
         )
         # subscription mode: no payment_method_options needed — Stripe handles
         # locale detection and recurring setup automatically.
@@ -397,8 +399,11 @@ class TestCheckoutSessionCreation:
                         payment_method="google_pay",
                     )
 
-        assert captured_params["payment_method_types"] == ["card"], (
-            "Google Pay must route through Stripe's card payment method type"
+        # payment_method_types should NOT be set — Stripe dynamically surfaces
+        # Google Pay (and all other enabled methods) from Dashboard settings
+        assert "payment_method_types" not in captured_params, (
+            "payment_method_types must not be set — let Stripe use Dashboard settings "
+            "to automatically surface Google Pay, Apple Pay, PayPal, etc."
         )
         # subscription mode: setup_future_usage is managed by Stripe automatically,
         # so payment_method_options must NOT be set (causes InvalidRequestError).
@@ -507,17 +512,24 @@ class TestPayPalCurrencyValidation:
         # USD is valid for PayPal — no error expected
 
 
-class TestPayPalFallback:
-    """Test PayPal graceful fallback when Stripe rejects the payment method."""
+class TestDynamicPaymentMethods:
+    """Test that checkout uses Stripe's dynamic payment method selection."""
 
     @pytest.mark.asyncio
-    async def test_paypal_falls_back_to_card_on_invalid_request(self, test_db: AsyncSession):
-        """When Stripe rejects PayPal (not enabled), fall back to card-only checkout."""
+    async def test_no_payment_method_types_sent_to_stripe(self, test_db: AsyncSession):
+        """Verify payment_method_types is never sent — Stripe uses Dashboard settings.
+
+        By omitting payment_method_types, Stripe dynamically surfaces all enabled
+        payment methods (Card, Google Pay, Apple Pay, PayPal, etc.) based on the
+        Dashboard configuration, currency, and user device. This prevents the
+        issue where users see only card entry even when Google Pay or PayPal are
+        enabled in the Stripe Dashboard.
+        """
         from backend.services.stripe_service import create_checkout_session
 
         user = User(
-            auth_uid="paypal-fallback-user",
-            email="paypal-fallback@example.com",
+            auth_uid="dynamic-pm-user",
+            email="dynamic-pm@example.com",
             hashed_password="hashed_password",
         )
         test_db.add(user)
@@ -531,41 +543,38 @@ class TestPayPalFallback:
             kiaan_questions_monthly=50,
             encrypted_journal=True,
             data_retention_days=90,
-            stripe_price_id_monthly="price_test_bhakta_fb",
+            stripe_price_id_monthly="price_test_bhakta_dpm",
         )
         test_db.add(plan)
         await test_db.commit()
 
-        call_count = 0
-
         class FakeSession:
-            id = "cs_test_fallback"
-            url = "https://checkout.stripe.com/c/pay/cs_test_fallback"
+            id = "cs_test_dynamic"
+            url = "https://checkout.stripe.com/c/pay/cs_test_dynamic"
 
-        def mock_create(**kwargs):
-            nonlocal call_count
-            call_count += 1
-            if "paypal" in kwargs.get("payment_method_types", []):
-                raise stripe.error.InvalidRequestError(
-                    "The payment method type 'paypal' is invalid",
-                    param="payment_method_types",
-                )
+        captured_params = {}
+
+        def capture_create(**kwargs):
+            captured_params.update(kwargs)
             return FakeSession()
 
-        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "sk_test_fake"}):
-            with patch("stripe.checkout.Session.create", side_effect=mock_create):
-                with patch("stripe.Customer.create", return_value=MagicMock(id="cus_fb")):
-                    result = await create_checkout_session(
-                        test_db, user, SubscriptionTier.BHAKTA, "monthly",
-                        "https://example.com/success", "https://example.com/cancel",
-                        payment_method="paypal",
-                    )
+        for method in ["card", "paypal", "google_pay"]:
+            captured_params.clear()
+            with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "sk_test_fake"}):
+                with patch("stripe.checkout.Session.create", side_effect=capture_create):
+                    with patch("stripe.Customer.create", return_value=MagicMock(id="cus_dpm")):
+                        result = await create_checkout_session(
+                            test_db, user, SubscriptionTier.BHAKTA, "monthly",
+                            "https://example.com/success", "https://example.com/cancel",
+                            payment_method=method,
+                        )
 
-        assert call_count == 2, "Should retry once with card-only after PayPal fails"
-        assert result is not None
-        assert result["checkout_url"] == "https://checkout.stripe.com/c/pay/cs_test_fallback"
-        assert result["payment_method_fallback"] == "card"
-        assert result["payment_method_message"] is not None
+            assert "payment_method_types" not in captured_params, (
+                f"payment_method_types must not be set for {method} — "
+                "let Stripe use Dashboard settings"
+            )
+            assert result is not None
+            assert result["checkout_url"] is not None
 
 
 class TestWebhookSignatureVerification:

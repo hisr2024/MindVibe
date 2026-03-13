@@ -280,8 +280,6 @@ async def _create_stripe_checkout(
             provider="stripe",
             checkout_url=result["checkout_url"],
             session_id=result["session_id"],
-            payment_method_fallback=result.get("payment_method_fallback"),
-            payment_method_message=result.get("payment_method_message"),
         )
 
     except ValueError as e:

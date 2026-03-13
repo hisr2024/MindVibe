@@ -97,9 +97,8 @@ class CheckoutSessionOut(BaseModel):
     When provider="stripe": checkout_url and session_id are populated.
     When provider="razorpay": order_id, razorpay_key_id, amount, etc. are populated.
 
-    When a requested payment method (e.g. PayPal) is unavailable,
-    payment_method_fallback indicates the method actually used and
-    payment_method_message contains a user-friendly explanation.
+    Stripe dynamically surfaces all payment methods enabled in the Dashboard
+    (Card, Google Pay, Apple Pay, PayPal, etc.) based on currency and device.
     """
 
     provider: str = "stripe"
@@ -116,10 +115,6 @@ class CheckoutSessionOut(BaseModel):
     name: str | None = None
     description: str | None = None
     user_email: str | None = None
-
-    # Payment method fallback info (when requested method is unavailable)
-    payment_method_fallback: str | None = None
-    payment_method_message: str | None = None
 
 
 class RazorpayPaymentVerification(BaseModel):

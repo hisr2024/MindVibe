@@ -291,30 +291,14 @@ async def create_checkout_session(
         if not cancel_url:
             cancel_url = f"{frontend_url}/subscription/cancel"
         
-        # Build payment method types based on user preference.
-        #
-        # Google Pay / Apple Pay: Stripe surfaces wallet buttons automatically
-        #   when payment_method_types includes "card" and the user's browser
-        #   supports the Payment Request API. No separate type or options needed.
-        #   IMPORTANT: Do NOT set payment_method_options.card.setup_future_usage
-        #   in subscription mode — Stripe manages recurring payment setup
-        #   automatically. Setting it causes InvalidRequestError.
-        #
-        # PayPal: We include "card" as a fallback so checkout still works if
-        #   PayPal isn't configured. PayPal does NOT support INR — validated
-        #   in the route layer. If PayPal is not enabled in the Stripe
-        #   Dashboard, we catch the error and fall back to card-only checkout.
+        # Dynamic payment methods: Do NOT hardcode payment_method_types.
+        # By omitting payment_method_types, Stripe Checkout automatically
+        # surfaces all payment methods enabled in the Stripe Dashboard that
+        # are compatible with the session's currency and mode (subscription).
+        # This includes Card, Google Pay, Apple Pay, PayPal, and any other
+        # methods activated in the Dashboard — no code changes needed when
+        # enabling/disabling payment methods.
         requested_payment_method = payment_method or "card"
-        if requested_payment_method == "paypal":
-            payment_method_types = ["card", "paypal"]
-        elif requested_payment_method == "google_pay":
-            # Google Pay surfaces via Payment Request API on the Stripe
-            # Checkout page when "card" is included. No separate type needed.
-            payment_method_types = ["card"]
-        elif requested_payment_method == "card":
-            payment_method_types = ["card"]
-        else:
-            payment_method_types = ["card"]
 
         # Statement descriptors for recurring subscription payments are configured
         # at the Stripe product/price level or via Account settings (see
@@ -323,7 +307,6 @@ async def create_checkout_session(
 
         session_params: dict[str, Any] = {
             "mode": "subscription",
-            "payment_method_types": payment_method_types,
             "line_items": [{"price": price_id, "quantity": 1}],
             "success_url": success_url,
             "cancel_url": cancel_url,
@@ -338,19 +321,6 @@ async def create_checkout_session(
             },
         }
 
-        # Google Pay / Apple Pay: Stripe Checkout surfaces wallet buttons
-        # automatically when payment_method_types includes "card" and the
-        # user's browser/device supports the Payment Request API.  No
-        # payment_method_options are needed — and importantly,
-        # setup_future_usage CANNOT be set in subscription mode (Stripe
-        # manages recurring payment methods automatically for subscriptions).
-        # Setting it causes InvalidRequestError.
-
-        # PayPal: No payment_method_options needed for subscription mode.
-        # Stripe handles locale detection automatically.  Adding explicit
-        # options like preferred_locale can cause InvalidRequestError when
-        # PayPal isn't fully enabled or for certain account configurations.
-
         # Attach metadata to the subscription for ALL payment methods so
         # webhooks can identify user/plan regardless of how the user paid.
         session_params["subscription_data"]["metadata"] = {
@@ -364,47 +334,19 @@ async def create_checkout_session(
         else:
             session_params["customer_email"] = user.email
 
-        # Attempt to create the checkout session.  If a non-card payment
-        # method (e.g. PayPal) isn't enabled in the Stripe Dashboard, we
-        # fall back to card-only checkout rather than failing the request.
-        paypal_fallback = False
-        paypal_fallback_message = None
-        try:
-            session = stripe.checkout.Session.create(**session_params)
-        except stripe.error.InvalidRequestError as e:
-            if "paypal" in payment_method_types:
-                logger.warning(
-                    f"PayPal checkout failed ({e}). "
-                    "Falling back to card-only checkout."
-                )
-                paypal_fallback = True
-                paypal_fallback_message = (
-                    "PayPal is not currently available. "
-                    "You can complete your payment with a credit or debit card."
-                )
-                session_params["payment_method_types"] = ["card"]
-                session_params.pop("payment_method_options", None)
-                session = stripe.checkout.Session.create(**session_params)
-            else:
-                raise
+        session = stripe.checkout.Session.create(**session_params)
 
         logger.info(
             f"Created checkout session {session.id} for user {user.id}, "
             f"plan {plan_tier}, period {billing_period}, "
             f"payment_method={requested_payment_method}"
-            f"{' (PayPal fallback to card)' if paypal_fallback else ''}"
         )
 
         result: dict[str, Any] = {
             "checkout_url": session.url,
             "session_id": session.id,
-            "payment_method_used": "card" if paypal_fallback else requested_payment_method,
-            "paypal_fallback": paypal_fallback,
+            "payment_method_used": requested_payment_method,
         }
-
-        if paypal_fallback:
-            result["payment_method_fallback"] = "card"
-            result["payment_method_message"] = paypal_fallback_message
 
         return result
 
