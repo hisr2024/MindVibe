@@ -544,10 +544,20 @@ export default function PricingPage() {
           return
         }
         const error = await response.json().catch(() => ({}))
-        const detail = typeof error.detail === 'string' ? error.detail : error.detail?.message
-        throw new Error(
-          detail || error.message || 'Unable to create checkout session. Please try again or use a different payment method.'
-        )
+        // Extract message from structured error responses {error, message}
+        // or plain {detail} strings from the backend
+        const detail = error.detail
+        const errorMessage = typeof detail === 'object' && detail?.message
+          ? detail.message
+          : typeof detail === 'string'
+            ? detail
+            : error.message || 'Unable to create checkout session. Please try again or use a different payment method.'
+
+        // If payment method specific, suggest switching to Card
+        if (response.status === 503 && paymentMethod !== 'card') {
+          throw new Error(`${errorMessage} Try selecting "Card" as your payment method.`)
+        }
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
@@ -600,7 +610,7 @@ export default function PricingPage() {
       {checkoutError && (
         <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
           <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex flex-col gap-2">
               <span>{checkoutError}</span>
               {paymentMethod !== 'card' && (
                 <button
@@ -608,7 +618,7 @@ export default function PricingPage() {
                     setPaymentMethod('card')
                     setCheckoutError(null)
                   }}
-                  className="whitespace-nowrap rounded-md bg-[#c9a96e]/20 px-3 py-1 text-xs font-medium text-[#c9a96e] hover:bg-[#c9a96e]/30 transition-colors"
+                  className="inline-flex w-fit items-center gap-1 rounded-lg bg-[#d4a44c]/20 px-3 py-1.5 text-xs font-medium text-[#d4a44c] hover:bg-[#d4a44c]/30 transition-colors"
                 >
                   Switch to Card payment
                 </button>

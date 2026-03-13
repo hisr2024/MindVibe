@@ -304,12 +304,14 @@ async def create_checkout_session(
         #   PayPal isn't configured. PayPal does NOT support INR — validated
         #   in the route layer. If PayPal is not enabled in the Stripe
         #   Dashboard, we catch the error and fall back to card-only checkout.
-        requested_payment_method = payment_method
-        if payment_method == "paypal":
+        requested_payment_method = payment_method or "card"
+        if requested_payment_method == "paypal":
             payment_method_types = ["card", "paypal"]
-        elif payment_method == "google_pay":
+        elif requested_payment_method == "google_pay":
+            # Google Pay surfaces via Payment Request API on the Stripe
+            # Checkout page when "card" is included. No separate type needed.
             payment_method_types = ["card"]
-        elif payment_method == "card":
+        elif requested_payment_method == "card":
             payment_method_types = ["card"]
         else:
             payment_method_types = ["card"]
@@ -329,7 +331,7 @@ async def create_checkout_session(
                 "user_id": str(user.id),
                 "plan_tier": plan_tier.value,
                 "billing_period": billing_period,
-                "requested_payment_method": requested_payment_method or "card",
+                "requested_payment_method": requested_payment_method,
             },
             "subscription_data": {
                 "description": f"KIAANVerse {plan_tier.value.capitalize()} Plan ({billing_period})",
@@ -389,11 +391,14 @@ async def create_checkout_session(
             f"Created checkout session {session.id} for user {user.id}, "
             f"plan {plan_tier}, period {billing_period}, "
             f"payment_method={requested_payment_method}"
+            f"{' (PayPal fallback to card)' if paypal_fallback else ''}"
         )
 
         result: dict[str, Any] = {
             "checkout_url": session.url,
             "session_id": session.id,
+            "payment_method_used": "card" if paypal_fallback else requested_payment_method,
+            "paypal_fallback": paypal_fallback,
         }
 
         if paypal_fallback:
@@ -402,8 +407,20 @@ async def create_checkout_session(
 
         return result
 
+    except stripe.error.InvalidRequestError as e:
+        logger.error(f"Stripe invalid request for user {user.id}: {e}")
+        raise ValueError(f"Payment configuration error: {e.user_message or str(e)}")
+    except stripe.error.AuthenticationError:
+        logger.error("Stripe authentication failed — check STRIPE_SECRET_KEY")
+        raise RuntimeError("Payment service authentication failed")
+    except stripe.error.APIConnectionError as e:
+        logger.error(f"Stripe API connection error: {e}")
+        raise RuntimeError("Unable to reach payment service. Please try again.")
+    except stripe.error.StripeError as e:
+        logger.error(f"Stripe error for user {user.id}: {e}")
+        raise ValueError(f"Payment error: {e.user_message or str(e)}")
     except Exception as e:
-        logger.error(f"Failed to create checkout session: {e}")
+        logger.error(f"Unexpected error creating checkout session: {e}")
         raise
 
 
