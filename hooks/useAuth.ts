@@ -11,6 +11,13 @@ export interface AuthUser {
   subscriptionTier?: string
   subscriptionStatus?: string
   isDeveloper?: boolean
+  twoFactorRequired?: boolean
+}
+
+export interface SignupResult {
+  userId: string
+  email: string
+  emailVerificationSent: boolean
 }
 
 interface UseAuthResult {
@@ -19,7 +26,7 @@ interface UseAuthResult {
   error: string | null
   isAuthenticated: boolean
   login: (email: string, password: string, twoFactorCode?: string) => Promise<AuthUser>
-  signup: (email: string, password: string, name?: string) => Promise<AuthUser>
+  signup: (email: string, password: string, name?: string) => Promise<SignupResult>
   logout: () => Promise<void>
   refreshSession: () => Promise<void>
   backendReady: boolean
@@ -123,6 +130,7 @@ export function useAuth(): UseAuthResult {
               subscriptionTier: data.subscription_tier || storedUser?.subscriptionTier || 'free',
               subscriptionStatus: data.subscription_status || storedUser?.subscriptionStatus || 'active',
               isDeveloper: data.is_developer === true,
+              twoFactorRequired: data.two_factor_enabled === false,
             }
             storeUserProfile(verifiedUser)
             setUser(verifiedUser)
@@ -144,13 +152,11 @@ export function useAuth(): UseAuthResult {
     }
   }, [])
 
-  const signup = useCallback(async (email: string, password: string, name?: string): Promise<AuthUser> => {
+  const signup = useCallback(async (email: string, password: string, name?: string): Promise<SignupResult> => {
     setLoading(true)
     setError(null)
 
     try {
-      // The proxy layer handles 503 retries with exponential backoff,
-      // so we make a single request and let the server-side proxy absorb cold starts.
       let signupResponse: Response
 
       try {
@@ -172,46 +178,14 @@ export function useAuth(): UseAuthResult {
         throw new Error(typeof message === 'string' ? message : JSON.stringify(message))
       }
 
-      // After signup, automatically login to get session cookies
-      let loginResponse: Response
-      try {
-        loginResponse = await apiFetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email.toLowerCase(), password }),
-        })
-      } catch {
-        throw new Error('Account created but could not sign in automatically. Please try signing in.')
+      const signupData = await signupResponse.json()
+
+      // Do NOT auto-login — user must verify email first
+      return {
+        userId: signupData.user_id,
+        email: signupData.email,
+        emailVerificationSent: signupData.email_verification_sent ?? false,
       }
-
-      if (!loginResponse.ok) {
-        if (loginResponse.status === 503) {
-          throw new Error('Account created but server is starting up. Please try signing in shortly.')
-        }
-        const errorData = await loginResponse.json().catch(() => ({}))
-        throw new Error(errorData.detail || 'Account created but login failed. Please try logging in.')
-      }
-
-      const loginData = await loginResponse.json()
-
-      // Backend sets httpOnly cookies automatically - we only store profile info
-      const authUser: AuthUser = {
-        id: loginData.user_id,
-        email: loginData.email,
-        name: name || email.split('@')[0],
-        sessionId: loginData.session_id,
-        subscriptionTier: loginData.subscription_tier || 'free',
-        subscriptionStatus: loginData.subscription_status || 'active',
-        isDeveloper: loginData.is_developer || false,
-      }
-
-      storeUserProfile(authUser)
-      setUser(authUser)
-
-      // Dispatch event for other components
-      window.dispatchEvent(new CustomEvent('auth-changed', { detail: { user: authUser } }))
-
-      return authUser
     } catch (err) {
       const message = err instanceof Error ? err.message : 'We\'re having trouble creating your account. Please try again.'
       setError(message)
@@ -249,11 +223,23 @@ export function useAuth(): UseAuthResult {
           throw new Error('The server is still starting up. Please wait a moment and try again.')
         }
         const errorData = await response.json().catch(() => ({}))
-        const message = errorData.detail || errorData.message || 'We couldn\'t verify your credentials. Please check your email and password.'
+        const detail = errorData.detail || ''
+
+        // Handle email not verified — throw specific error for UI to catch
+        if (detail === 'email_not_verified' || response.status === 403) {
+          const err = new Error('email_not_verified')
+          ;(err as Error & { code: string }).code = 'EMAIL_NOT_VERIFIED'
+          throw err
+        }
+
+        const message = detail || errorData.message || 'We couldn\'t verify your credentials. Please check your email and password.'
         throw new Error(typeof message === 'string' ? message : JSON.stringify(message))
       }
 
       const data = await response.json()
+
+      // Check if 2FA is required but not yet set up
+      const twoFactorRequired = data.two_factor_required === true
 
       // Backend sets httpOnly cookies automatically - we only store profile info
       const authUser: AuthUser = {
@@ -264,6 +250,7 @@ export function useAuth(): UseAuthResult {
         subscriptionTier: data.subscription_tier || 'free',
         subscriptionStatus: data.subscription_status || 'active',
         isDeveloper: data.is_developer || false,
+        twoFactorRequired,
       }
 
       storeUserProfile(authUser)
