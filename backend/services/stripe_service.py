@@ -293,19 +293,17 @@ async def create_checkout_session(
         
         # Build payment method types based on user preference.
         #
-        # Google Pay / Apple Pay: Stripe surfaces these automatically via the
-        #   "card" payment method type using the Payment Request API. There is
-        #   no separate "google_pay" type in Stripe — it's always through card.
-        #   We enable wallets explicitly via payment_method_options to ensure
-        #   Google Pay / Apple Pay buttons appear on the Checkout page.
+        # Google Pay / Apple Pay: Stripe surfaces wallet buttons automatically
+        #   when payment_method_types includes "card" and the user's browser
+        #   supports the Payment Request API. No separate type or options needed.
+        #   IMPORTANT: Do NOT set payment_method_options.card.setup_future_usage
+        #   in subscription mode — Stripe manages recurring payment setup
+        #   automatically. Setting it causes InvalidRequestError.
         #
-        # PayPal: Supported for Stripe subscriptions. We include "card" as a
-        #   fallback so checkout still works if PayPal isn't configured or
-        #   the user's PayPal account has issues. This also surfaces Google
-        #   Pay / Apple Pay alongside PayPal on the Stripe Checkout page.
-        #   PayPal does NOT support INR — validated in the route layer.
-        #   If PayPal is not enabled in the Stripe Dashboard, we fall back
-        #   to card-only checkout and inform the caller.
+        # PayPal: We include "card" as a fallback so checkout still works if
+        #   PayPal isn't configured. PayPal does NOT support INR — validated
+        #   in the route layer. If PayPal is not enabled in the Stripe
+        #   Dashboard, we catch the error and fall back to card-only checkout.
         requested_payment_method = payment_method
         if payment_method == "paypal":
             payment_method_types = ["card", "paypal"]
@@ -502,7 +500,7 @@ def verify_webhook_signature(payload: bytes, signature: str) -> Optional[dict]:
         _init_stripe()
         event = stripe.Webhook.construct_event(payload, signature, webhook_secret)
         return event
-    except stripe.SignatureVerificationError as e:
+    except stripe.error.SignatureVerificationError as e:
         logger.error(f"Webhook signature verification failed: {e}")
         return None
     except Exception as e:

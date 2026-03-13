@@ -410,6 +410,67 @@ class TestCheckoutSessionCreation:
         assert result["checkout_url"] == "https://checkout.stripe.com/c/pay/cs_test_gpay"
 
 
+    @pytest.mark.asyncio
+    async def test_checkout_google_pay_subscription_metadata(self, test_db: AsyncSession):
+        """Google Pay checkout must include subscription_data.metadata for webhooks."""
+        from backend.services.stripe_service import create_checkout_session
+
+        user = User(
+            auth_uid="gpay-meta-user",
+            email="gpay-meta@example.com",
+            hashed_password="hashed_password",
+        )
+        test_db.add(user)
+        await test_db.commit()
+        await test_db.refresh(user)
+
+        plan = SubscriptionPlan(
+            tier=SubscriptionTier.SADHAK,
+            name="Sadhak",
+            price_monthly=Decimal("12.99"),
+            kiaan_questions_monthly=300,
+            encrypted_journal=True,
+            data_retention_days=-1,
+            stripe_price_id_monthly="price_test_sadhak_gpay",
+        )
+        test_db.add(plan)
+        await test_db.commit()
+
+        captured_params = {}
+
+        class FakeSession:
+            id = "cs_test_gpay_meta"
+            url = "https://checkout.stripe.com/c/pay/cs_test_gpay_meta"
+
+        def capture_create(**kwargs):
+            captured_params.update(kwargs)
+            return FakeSession()
+
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "sk_test_fake"}):
+            with patch("stripe.checkout.Session.create", side_effect=capture_create):
+                with patch("stripe.Customer.create", return_value=MagicMock(id="cus_gp_meta")):
+                    result = await create_checkout_session(
+                        test_db, user, SubscriptionTier.SADHAK, "monthly",
+                        "https://example.com/success", "https://example.com/cancel",
+                        payment_method="google_pay",
+                    )
+
+        # Must have subscription_data.metadata for webhook identification
+        sub_data = captured_params.get("subscription_data", {})
+        assert "metadata" in sub_data, (
+            "subscription_data.metadata must be set for Google Pay checkouts"
+        )
+        assert sub_data["metadata"]["plan_tier"] == "sadhak"
+        assert sub_data["metadata"]["user_id"] == str(user.id)
+
+        # session metadata must record google_pay as requested method
+        assert captured_params["metadata"]["requested_payment_method"] == "google_pay"
+
+        # Must not have payment_intent_data (invalid for subscription mode)
+        assert "payment_intent_data" not in captured_params
+        assert result is not None
+
+
 class TestPayPalCurrencyValidation:
     """Test PayPal currency restrictions in checkout route."""
 
@@ -518,6 +579,25 @@ class TestWebhookSignatureVerification:
             result = verify_webhook_signature(b'payload', 'signature')
             # Should return None when secret is missing
             assert result is None or result is False
+
+    def test_verify_webhook_signature_invalid_signature(self):
+        """Test that invalid signature returns None instead of crashing.
+
+        Previously used stripe.SignatureVerificationError (wrong path) which
+        meant the except clause never matched and errors propagated as 500s.
+        """
+        from backend.services.stripe_service import verify_webhook_signature
+
+        with patch.dict('os.environ', {
+            'STRIPE_SECRET_KEY': 'sk_test_fake',
+            'STRIPE_WEBHOOK_SECRET': 'whsec_test_fake',
+        }):
+            with patch('stripe.Webhook.construct_event',
+                       side_effect=stripe.error.SignatureVerificationError(
+                           "Invalid signature", sig_header="bad_sig")):
+                result = verify_webhook_signature(b'payload', 'bad_sig')
+                # Must return None gracefully, not raise
+                assert result is None
 
 
 class TestSubscriptionCancellation:
