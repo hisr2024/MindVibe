@@ -84,6 +84,7 @@ class LoginOut(BaseModel):
     subscription_tier: str = "free"
     subscription_status: str = "active"
     is_developer: bool = False
+    two_factor_required: bool = False
 
 
 class TwoFactorSetupOut(BaseModel):
@@ -112,6 +113,7 @@ class MeOut(BaseModel):
     subscription_tier: str = "free"
     subscription_status: str = "active"
     is_developer: bool = False
+    two_factor_enabled: bool = False
 
 
 class LogoutOut(BaseModel):
@@ -419,6 +421,9 @@ async def login(
     except Exception:
         pass
 
+    # Flag if 2FA is not yet configured — frontend must enforce setup
+    two_factor_required = not user.two_factor_enabled
+
     return LoginOut(
         access_token=access_token,
         token_type="bearer",  # nosec B106
@@ -430,6 +435,7 @@ async def login(
         subscription_tier="siddha" if is_dev else sub_tier,
         subscription_status=sub_status,
         is_developer=is_dev,
+        two_factor_required=two_factor_required,
     )
 
 
@@ -679,6 +685,7 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
         subscription_tier="siddha" if is_dev else sub_tier,
         subscription_status=sub_status,
         is_developer=is_dev,
+        two_factor_enabled=bool(user.two_factor_enabled),
     )
 
 
@@ -1399,6 +1406,8 @@ async def verify_email_2fa_code(
     except Exception:
         pass
 
+    two_factor_required = not user.two_factor_enabled
+
     return LoginOut(
         access_token=access_token,
         token_type="bearer",
@@ -1410,6 +1419,7 @@ async def verify_email_2fa_code(
         subscription_tier="siddha" if is_dev else sub_tier,
         subscription_status=sub_status,
         is_developer=is_dev,
+        two_factor_required=two_factor_required,
     )
 
 

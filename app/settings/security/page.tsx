@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Card, CardContent } from '@/components/ui'
 import { SettingsSection } from '@/components/settings'
@@ -23,8 +24,10 @@ interface SetupData {
 
 type SetupStep = 'initial' | 'scanning' | 'verify' | 'backup' | 'complete'
 
-export default function SecuritySettingsPage() {
+function SecuritySettingsContent() {
   const { isAuthenticated, loading: authLoading } = useAuth()
+  const searchParams = useSearchParams()
+  const isMandatory2FASetup = searchParams.get('setup2fa') === 'true'
   const [twoFactorStatus, setTwoFactorStatus] = useState<TwoFactorStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -92,6 +95,15 @@ export default function SecuritySettingsPage() {
       setError('Network error. Please try again.')
     }
   }
+
+  // Auto-start 2FA setup when redirected for mandatory setup
+  useEffect(() => {
+    if (isMandatory2FASetup && !loading && twoFactorStatus && !twoFactorStatus.enabled && setupStep === 'initial') {
+      startSetup()
+    }
+    // Only run when status is first loaded for mandatory setup
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMandatory2FASetup, loading, twoFactorStatus])
 
   const verifySetup = async () => {
     if (!verifyCode || verifyCode.length !== 6) {
@@ -247,6 +259,29 @@ export default function SecuritySettingsPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Mandatory 2FA Setup Banner */}
+      {isMandatory2FASetup && !twoFactorStatus?.enabled && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 rounded-xl bg-amber-500/10 border border-amber-500/30 p-5"
+        >
+          <div className="flex items-start gap-3">
+            <svg className="w-6 h-6 text-amber-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <div>
+              <p className="font-semibold text-amber-200 text-sm">Two-Factor Authentication Required</p>
+              <p className="text-xs text-amber-200/70 mt-1">
+                For your security, you must set up two-factor authentication before using MindVibe.
+                This protects your spiritual wellness data and personal reflections.
+                Please set up 2FA using an authenticator app below.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Two-Factor Authentication */}
       <SettingsSection
@@ -748,5 +783,23 @@ export default function SecuritySettingsPage() {
         </div>
       </SettingsSection>
     </main>
+  )
+}
+
+export default function SecuritySettingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="mx-auto max-w-3xl px-4 py-12">
+          <div className="animate-pulse">
+            <div className="h-8 bg-[#d4a44c]/20 rounded w-48 mb-4" />
+            <div className="h-4 bg-[#d4a44c]/10 rounded w-64 mb-8" />
+            <div className="h-64 bg-[#d4a44c]/10 rounded-xl" />
+          </div>
+        </main>
+      }
+    >
+      <SecuritySettingsContent />
+    </Suspense>
   )
 }

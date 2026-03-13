@@ -514,6 +514,11 @@ function UnauthenticatedAccountView() {
   })
 
   const [needsTwoFactor, setNeedsTwoFactor] = useState(false)
+  const [emailNotVerified, setEmailNotVerified] = useState(false)
+  const [unverifiedEmail, setUnverifiedEmail] = useState('')
+  const [isResendingVerification, setIsResendingVerification] = useState(false)
+  const [signupSuccess, setSignupSuccess] = useState(false)
+  const [signupEmail, setSignupEmail] = useState('')
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -528,7 +533,7 @@ function UnauthenticatedAccountView() {
   }, [])
 
   useEffect(() => {
-    if (authError) {
+    if (authError && authError !== 'email_not_verified') {
       setStatus({ type: 'error', message: authError })
     }
   }, [authError])
@@ -576,29 +581,24 @@ function UnauthenticatedAccountView() {
     setIsSubmitting(true)
 
     try {
-      const authUser = await signup(createForm.email.trim(), createForm.password, createForm.name.trim())
+      const result = await signup(createForm.email.trim(), createForm.password, createForm.name.trim())
 
-      try {
-        await apiFetch('/api/profile', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            full_name: createForm.name.trim(),
-            base_experience: 'new_user',
-          }),
-        })
-      } catch (profileError) {
-        console.warn('Profile creation failed:', profileError)
-      }
-
-      setStatus({ type: 'success', message: 'Account created successfully! You are now signed in.' })
+      // Show verification email confirmation — do NOT auto-login
+      setSignupSuccess(true)
+      setSignupEmail(result.email)
+      setStatus({
+        type: 'success',
+        message: result.emailVerificationSent
+          ? 'Account created! We sent a verification link to your email. Please check your inbox (and spam folder) to verify before signing in.'
+          : 'Account created! Please check your email for a verification link to complete registration.',
+      })
       setCreateForm({ name: '', email: '', password: '' })
-      setLoginForm({ email: authUser.email, password: '', twoFactorCode: '' })
+      setLoginForm({ email: result.email, password: '', twoFactorCode: '' })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create account. Please try again.'
       setStatus({ type: 'error', message })
 
-      if (message.toLowerCase().includes('already registered') || message.toLowerCase().includes('already exists')) {
+      if (message.toLowerCase().includes('already registered') || message.toLowerCase().includes('already exists') || message.toLowerCase().includes('unable to create account')) {
         setMode('login')
         setLoginForm(prev => ({ ...prev, email: createForm.email.trim().toLowerCase() }))
       }
@@ -624,22 +624,59 @@ function UnauthenticatedAccountView() {
       setStatus({ type: 'success', message: 'Signed in successfully! Your journey awaits.' })
       setLoginForm({ email: '', password: '', twoFactorCode: '' })
       setNeedsTwoFactor(false)
+      setEmailNotVerified(false)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed. Please try again.'
+      const errCode = (err as Error & { code?: string })?.code
 
-      const msgLower = message.toLowerCase()
-      if (
-        msgLower.includes('two-factor') ||
-        msgLower.includes('2fa') ||
-        msgLower.includes('additional_verification_required')
-      ) {
-        setNeedsTwoFactor(true)
-        setStatus({ type: 'info', message: 'Enter your two-factor authentication code.' })
+      if (errCode === 'EMAIL_NOT_VERIFIED' || message === 'email_not_verified') {
+        setEmailNotVerified(true)
+        setUnverifiedEmail(loginForm.email.trim().toLowerCase())
+        setStatus({
+          type: 'error',
+          message: 'Your email address has not been verified yet. Please check your inbox for the verification link, or resend it below.',
+        })
       } else {
-        setStatus({ type: 'error', message })
+        const msgLower = message.toLowerCase()
+        if (
+          msgLower.includes('two-factor') ||
+          msgLower.includes('2fa') ||
+          msgLower.includes('additional_verification_required')
+        ) {
+          setNeedsTwoFactor(true)
+          setStatus({ type: 'info', message: 'Enter your two-factor authentication code.' })
+        } else {
+          setEmailNotVerified(false)
+          setStatus({ type: 'error', message })
+        }
       }
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleResendVerification = async (emailToVerify: string) => {
+    setIsResendingVerification(true)
+    try {
+      const response = await apiFetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailToVerify }),
+      })
+      const data = await response.json().catch(() => ({}))
+      setEmailNotVerified(false)
+      setSignupSuccess(false)
+      setStatus({
+        type: 'success',
+        message: data.message || 'Verification email sent! Please check your inbox and spam folder.',
+      })
+    } catch {
+      setStatus({
+        type: 'error',
+        message: 'Unable to resend verification email. Please try again later.',
+      })
+    } finally {
+      setIsResendingVerification(false)
     }
   }
 
@@ -759,6 +796,47 @@ function UnauthenticatedAccountView() {
                 }`}
               >
                 {status.message}
+
+                {/* Resend verification button when email is not verified */}
+                {emailNotVerified && unverifiedEmail && (
+                  <div className="mt-3 flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleResendVerification(unverifiedEmail)}
+                      disabled={isResendingVerification}
+                      className="w-full rounded-xl bg-[#d4a44c] px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-[#e8b54a] disabled:opacity-50"
+                    >
+                      {isResendingVerification ? 'Sending...' : 'Resend Verification Email'}
+                    </button>
+                    <Link
+                      href="/auth/verify-email"
+                      className="text-center text-xs text-[#d4a44c] hover:text-[#e8b54a] transition"
+                    >
+                      Or enter your email to request a new link
+                    </Link>
+                  </div>
+                )}
+
+                {/* Post-signup: show link to resend or check email */}
+                {signupSuccess && signupEmail && (
+                  <div className="mt-3 flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleResendVerification(signupEmail)}
+                      disabled={isResendingVerification}
+                      className="w-full rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-2.5 text-sm font-semibold text-emerald-50 transition hover:bg-emerald-400/20 disabled:opacity-50"
+                    >
+                      {isResendingVerification ? 'Sending...' : 'Resend Verification Email'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setMode('login'); setSignupSuccess(false); resetStatus(); }}
+                      className="text-center text-xs text-[#d4a44c] hover:text-[#e8b54a] transition"
+                    >
+                      Already verified? Sign in here
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -909,15 +987,21 @@ export default function AccountPageClient() {
   const searchParams = useSearchParams()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // After login, redirect to the page the user came from (e.g., /pricing)
+  // After login, enforce 2FA setup if not configured, then redirect
   useEffect(() => {
-    if (isAuthenticated && !authLoading) {
+    if (isAuthenticated && !authLoading && user) {
+      // Mandatory 2FA: redirect to security settings if 2FA is not set up
+      if (user.twoFactorRequired) {
+        router.push('/settings/security?setup2fa=true')
+        return
+      }
+
       const redirect = searchParams.get('redirect')
       if (redirect && redirect.startsWith('/')) {
         router.push(redirect)
       }
     }
-  }, [isAuthenticated, authLoading, searchParams, router])
+  }, [isAuthenticated, authLoading, user, searchParams, router])
 
   const signOut = async () => {
     setIsSubmitting(true)
