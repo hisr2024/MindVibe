@@ -495,6 +495,7 @@ function AuthenticatedAccountView({
 /* ------------------------------------------------------------------ */
 function UnauthenticatedAccountView() {
   const { login, signup, error: authError, backendReady } = useAuth()
+  const router = useRouter()
 
   const [mode, setMode] = useState<'create' | 'login'>('create')
   const [legacyAccounts, setLegacyAccounts] = useState<LegacyAccount[]>([])
@@ -619,12 +620,19 @@ function UnauthenticatedAccountView() {
     setIsSubmitting(true)
 
     try {
-      await login(loginForm.email.trim(), loginForm.password, loginForm.twoFactorCode || undefined)
+      const authUser = await login(loginForm.email.trim(), loginForm.password, loginForm.twoFactorCode || undefined)
 
       setStatus({ type: 'success', message: 'Signed in successfully! Your journey awaits.' })
       setLoginForm({ email: '', password: '', twoFactorCode: '' })
       setNeedsTwoFactor(false)
       setEmailNotVerified(false)
+
+      // Redirect: mandatory 2FA setup if not configured, otherwise dashboard
+      if (authUser.twoFactorRequired) {
+        router.push('/settings/security?setup2fa=true')
+      } else {
+        router.push('/dashboard')
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed. Please try again.'
       const errCode = (err as Error & { code?: string })?.code
@@ -663,6 +671,10 @@ function UnauthenticatedAccountView() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailToVerify }),
       })
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}))
+        throw new Error(errData.detail || 'Failed to resend verification email.')
+      }
       const data = await response.json().catch(() => ({}))
       setEmailNotVerified(false)
       setSignupSuccess(false)
@@ -670,10 +682,11 @@ function UnauthenticatedAccountView() {
         type: 'success',
         message: data.message || 'Verification email sent! Please check your inbox and spam folder.',
       })
-    } catch {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unable to resend verification email. Please try again later.'
       setStatus({
         type: 'error',
-        message: 'Unable to resend verification email. Please try again later.',
+        message,
       })
     } finally {
       setIsResendingVerification(false)
@@ -1027,6 +1040,18 @@ export default function AccountPageClient() {
   }
 
   if (isAuthenticated && user) {
+    // Don't render the full dashboard if 2FA setup is pending — redirect is in progress
+    if (user.twoFactorRequired) {
+      return (
+        <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
+          <div className="text-center py-12">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-[#d4a44c]/30 border-t-[#d4a44c]" />
+            <p className="mt-4 text-sm text-[#f5f0e8]/75">Setting up account security...</p>
+          </div>
+        </main>
+      )
+    }
+
     return (
       <AuthenticatedAccountView
         user={user}
