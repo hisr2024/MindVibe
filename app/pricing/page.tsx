@@ -551,7 +551,7 @@ export default function PricingPage() {
           ? detail.message
           : typeof detail === 'string'
             ? detail
-            : error.message || 'Failed to start checkout'
+            : error.message || 'Unable to create checkout session. Please try again or use a different payment method.'
 
         // If payment method specific, suggest switching to Card
         if (response.status === 503 && paymentMethod !== 'card') {
