@@ -765,10 +765,6 @@ export default function PricingPage() {
               q: 'Is my data secure?',
               a: 'Absolutely. Your journal entries are encrypted on your device. We never sell your data and maintain strict privacy standards.',
             },
-            {
-              q: 'Can I get a refund?',
-              a: 'We offer a 14-day money-back guarantee for all paid plans. If you&apos;re not satisfied, contact us for a full refund.',
-            },
           ].map((faq, i) => (
             <Card key={i} variant="bordered">
               <CardContent>
