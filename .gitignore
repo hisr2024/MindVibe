@@ -88,3 +88,4 @@ data/relationship_compass/store.json
 
 # Allow Relationship Compass index (required for production)
 !data/relationship_compass/gita_index.sqlite
+*.egg-info/
