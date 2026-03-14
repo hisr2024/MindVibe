@@ -32,10 +32,14 @@ import dynamic from 'next/dynamic'
 import { apiFetch } from '@/lib/api'
 import type { VoiceLanguage } from '@/utils/voice/voiceCatalog'
 
-// Dynamic import for voice selector - loaded on demand
+// Dynamic imports - loaded on demand
 const VoiceCompanionSelector = dynamic(() => import('@/components/voice/VoiceCompanionSelector'), {
   ssr: false,
   loading: () => <div className="h-32 animate-pulse rounded-xl bg-slate-800/30" />,
+})
+const CompanionVoiceRecorder = dynamic(() => import('@/components/companion/CompanionVoiceRecorder'), {
+  ssr: false,
+  loading: () => <div className="h-12 w-12 animate-pulse rounded-full bg-slate-800/50" />,
 })
 
 // ─── Types ──────────────────────────────────────────────────────────────
@@ -244,10 +248,10 @@ export default function VoiceCompanionPage() {
   // BEST FRIEND CHAT
   // ═══════════════════════════════════════════════════════════════════
 
-  const sendMessage = async () => {
-    if (!chatInput.trim() || isChatLoading) return
-    const msg = chatInput.trim()
-    setChatInput('')
+  const sendMessage = async (directText?: string) => {
+    const msg = directText?.trim() || chatInput.trim()
+    if (!msg || isChatLoading) return
+    if (!directText) setChatInput('')
 
     const userMsg: ChatMessage = {
       id: `user_${Date.now()}`,
@@ -317,6 +321,12 @@ export default function VoiceCompanionPage() {
       setIsChatLoading(false)
     }
   }
+
+  // ── Voice Input Handler ──────────────────────────────────────────
+  const handleVoiceTranscription = useCallback((text: string) => {
+    sendMessage(text)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // ═══════════════════════════════════════════════════════════════════
   // MOOD CHECK-IN
@@ -725,6 +735,15 @@ export default function VoiceCompanionPage() {
             {/* Chat Input */}
             <div className="sticky bottom-0 pt-2 pb-4 bg-gradient-to-t from-gray-950 via-gray-950/95 to-transparent">
               <div className="flex items-center gap-2">
+                {/* Voice recorder */}
+                <div className="dark">
+                  <CompanionVoiceRecorder
+                    onTranscription={handleVoiceTranscription}
+                    isDisabled={false}
+                    isProcessing={isChatLoading}
+                    language={voiceConfig.language}
+                  />
+                </div>
                 <input
                   ref={chatInputRef}
                   type="text"
@@ -736,7 +755,7 @@ export default function VoiceCompanionPage() {
                   disabled={isChatLoading}
                 />
                 <button
-                  onClick={sendMessage}
+                  onClick={() => sendMessage()}
                   disabled={!chatInput.trim() || isChatLoading}
                   className="p-3 rounded-xl bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   aria-label="Send message"

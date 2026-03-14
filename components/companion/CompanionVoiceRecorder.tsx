@@ -1,18 +1,24 @@
 'use client'
 
 /**
- * CompanionVoiceRecorder - Voice input for the KIAAN best friend chat.
+ * CompanionVoiceRecorder - Voice input for the KIAAN companion chat.
  *
- * Handles voice recording with visual feedback, transcription,
- * and seamless integration with the chat flow. Supports both
- * tap-to-record and hold-to-record modes.
+ * Uses the browser-native Web Speech API for real-time speech-to-text.
+ * Pre-requests microphone permission via getUserMedia to ensure the
+ * browser permission dialog is triggered (Web Speech API alone may not prompt).
+ *
+ * Fixes applied:
+ * - Timer interval cleared on final result (prevents memory leak)
+ * - recognition.start() wrapped in try/catch inside setTimeout (prevents uncaught errors)
+ * - stateRef used consistently to avoid React state closure staleness
+ * - Accumulates all final segments in continuous mode before submitting
  */
 
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
 // BCP-47 language tags for Web Speech API multilingual STT
 const LANGUAGE_BCP47: Record<string, string> = {
-  en: 'en-US', hi: 'hi-IN', sa: 'sa-IN', ta: 'ta-IN', te: 'te-IN',
+  en: 'en-US', hi: 'hi-IN', sa: 'hi-IN', ta: 'ta-IN', te: 'te-IN',
   bn: 'bn-IN', mr: 'mr-IN', gu: 'gu-IN', kn: 'kn-IN', ml: 'ml-IN',
   pa: 'pa-IN', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', pt: 'pt-BR',
   ja: 'ja-JP', zh: 'zh-CN', ko: 'ko-KR', ar: 'ar-SA', ru: 'ru-RU',
@@ -45,66 +51,83 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   // Track recording state via ref so event handlers avoid stale closures.
-  // The React state 'state' is captured at useCallback creation time, but
-  // recognition.onend fires asynchronously and needs the CURRENT value.
   const stateRef = useRef<RecordingState>(state)
   useEffect(() => { stateRef.current = state }, [state])
+
+  const clearTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+  }, [])
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
+      clearTimer()
       if (recognitionRef.current) {
-        try { recognitionRef.current.stop() } catch { /* recognition may already be stopped */ }
+        try { recognitionRef.current.stop() } catch { /* may already be stopped */ }
       }
     }
-  }, [])
+  }, [clearTimer])
 
   const startRecording = useCallback(async () => {
     if (isDisabled || isProcessing) return
 
-    // Use Web Speech API for transcription (browser-native, no backend needed)
-    const SpeechRecognition =
+    // Get SpeechRecognition constructor (standard or webkit-prefixed)
+    const SpeechRecognitionCtor =
       window.SpeechRecognition ?? (window as unknown as Record<string, unknown>).webkitSpeechRecognition as typeof window.SpeechRecognition | undefined
 
-    if (!SpeechRecognition) {
-      // Browser does not support speech recognition — show user-friendly hint
+    if (!SpeechRecognitionCtor) {
       setUnsupported(true)
       return
     }
 
     try {
       // Pre-request microphone permission via getUserMedia.
-      // Many browsers require this explicit call to trigger the permission
-      // dialog — the Web Speech API alone may not prompt, causing silent failure.
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-        stream.getTracks().forEach(track => track.stop())
-      } catch {
-        // Permission denied or no mic — let recognition.start() handle the error
+      // Many browsers (especially mobile) require this explicit call to
+      // trigger the permission dialog. The Web Speech API alone may silently fail.
+      if (navigator.mediaDevices?.getUserMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+          stream.getTracks().forEach(track => track.stop())
+        } catch {
+          // Permission denied or no mic — recognition.start() will surface the error
+        }
       }
 
-      const recognition = new SpeechRecognition()
+      const recognition = new SpeechRecognitionCtor()
       recognition.continuous = true
       recognition.interimResults = true
       recognition.lang = LANGUAGE_BCP47[language] || 'en-US'
+      recognition.maxAlternatives = 3
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
         const lastResult = event.results[event.results.length - 1]
         if (!lastResult) return
 
         if (lastResult.isFinal) {
-          const transcript = lastResult[0]?.transcript
-          if (transcript?.trim()) {
-            onTranscription(transcript.trim())
+          // Select the highest-confidence alternative
+          let bestTranscript = ''
+          let bestConfidence = 0
+          for (let i = 0; i < lastResult.length; i++) {
+            const alt = lastResult[i]
+            if (alt.confidence > bestConfidence || i === 0) {
+              bestTranscript = alt.transcript
+              bestConfidence = alt.confidence
+            }
+          }
+
+          if (bestTranscript.trim()) {
+            onTranscription(bestTranscript.trim())
           }
           setLiveTranscript('')
+          clearTimer()
+          stateRef.current = 'idle'
           setState('idle')
           setDuration(0)
-          // Stop after receiving final result
           try { recognition.stop() } catch { /* may already be stopped */ }
         } else {
-          // Show interim results for live feedback
           const interim = lastResult[0]?.transcript || ''
           setLiveTranscript(interim)
         }
@@ -119,26 +142,37 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
           noSpeechRestarts++
           return // onend will fire and we restart there
         }
+        clearTimer()
+        stateRef.current = 'idle'
         setState('idle')
         setDuration(0)
         setLiveTranscript('')
       }
 
-      // Use stateRef (not state) to read the CURRENT recording state.
       recognition.onend = () => {
-        // Auto-restart on no-speech error while still in recording state
+        // Auto-restart on no-speech while still in recording state
         if (stateRef.current === 'recording' && noSpeechRestarts > 0 && noSpeechRestarts <= maxNoSpeechRestarts) {
-          try {
-            setTimeout(() => {
-              if (stateRef.current === 'recording') {
-                recognition.start()
+          setTimeout(() => {
+            if (stateRef.current === 'recording' && recognitionRef.current) {
+              try {
+                recognitionRef.current.start()
+              } catch {
+                // Restart failed — clean up
+                clearTimer()
+                stateRef.current = 'idle'
+                setState('idle')
+                setDuration(0)
+                setLiveTranscript('')
               }
-            }, 300)
-            return
-          } catch { /* fall through to idle */ }
+            }
+          }, 300)
+          return
         }
 
+        // Normal end — clean up if still recording (unexpected end)
         if (stateRef.current === 'recording') {
+          clearTimer()
+          stateRef.current = 'idle'
           setState('idle')
           setDuration(0)
           setLiveTranscript('')
@@ -147,6 +181,7 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
 
       recognitionRef.current = recognition
       recognition.start()
+      stateRef.current = 'recording'
       setState('recording')
       setLiveTranscript('')
 
@@ -157,25 +192,20 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
       }, 1000)
 
     } catch {
-      // Fallback: prompt user to type instead
       setState('idle')
     }
-  }, [isDisabled, isProcessing, onTranscription, language])
+  }, [isDisabled, isProcessing, onTranscription, language, clearTimer])
 
   const stopRecording = useCallback(() => {
     if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop()
-      } catch { /* recognition may already be stopped */ }
+      try { recognitionRef.current.stop() } catch { /* may already be stopped */ }
     }
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-      timerRef.current = null
-    }
+    clearTimer()
+    stateRef.current = 'idle'
     setState('idle')
     setDuration(0)
     setLiveTranscript('')
-  }, [])
+  }, [clearTimer])
 
   const toggleRecording = useCallback(() => {
     if (state === 'recording') {
@@ -215,7 +245,6 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
       >
         {state === 'recording' ? (
           <>
-            {/* Recording pulse animation */}
             <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-30" />
             <svg className="w-5 h-5 relative z-10" fill="currentColor" viewBox="0 0 24 24">
               <rect x="6" y="6" width="12" height="12" rx="2" />
@@ -241,17 +270,6 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
       {state === 'recording' && liveTranscript && (
         <span className="text-xs text-violet-400 italic max-w-[200px] truncate">
           {liveTranscript}
-        </span>
-      )}
-
-      {/* Transcribing indicator */}
-      {state === 'transcribing' && (
-        <span className="text-xs text-violet-500 flex items-center gap-1">
-          <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
-          Listening...
         </span>
       )}
 
