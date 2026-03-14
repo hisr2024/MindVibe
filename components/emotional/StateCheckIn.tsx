@@ -6,7 +6,7 @@ import { MoodParticles } from './MoodParticles'
 import { AnimatedIntensitySlider } from './AnimatedIntensitySlider'
 import { StateGlowEffect } from './StateGlowEffect'
 import { useHapticFeedback } from '@/hooks'
-import { useVoiceToText } from '@/hooks/useVoiceToText'
+import { useVoiceInput } from '@/hooks/useVoiceInput'
 import { useLanguage } from '@/hooks/useLanguage'
 
 /**
@@ -139,7 +139,7 @@ export function StateCheckIn({ onStateSelect, className = '', enableVoice = true
     error: voiceError,
     startListening: voiceStart,
     stopListening: voiceStop,
-  } = useVoiceToText({
+  } = useVoiceInput({
     language,
     module: 'emotional-compass',
     onTranscript: handleVoiceTranscript,
