@@ -11,7 +11,6 @@ export interface AuthUser {
   subscriptionTier?: string
   subscriptionStatus?: string
   isDeveloper?: boolean
-  twoFactorRequired?: boolean
 }
 
 export interface SignupResult {
@@ -25,7 +24,7 @@ interface UseAuthResult {
   loading: boolean
   error: string | null
   isAuthenticated: boolean
-  login: (email: string, password: string, twoFactorCode?: string) => Promise<AuthUser>
+  login: (email: string, password: string) => Promise<AuthUser>
   signup: (email: string, password: string, name?: string) => Promise<SignupResult>
   logout: () => Promise<void>
   refreshSession: () => Promise<void>
@@ -130,7 +129,6 @@ export function useAuth(): UseAuthResult {
               subscriptionTier: data.subscription_tier || storedUser?.subscriptionTier || 'free',
               subscriptionStatus: data.subscription_status || storedUser?.subscriptionStatus || 'active',
               isDeveloper: data.is_developer === true,
-              twoFactorRequired: data.two_factor_enabled === false,
             }
             storeUserProfile(verifiedUser)
             setUser(verifiedUser)
@@ -196,7 +194,7 @@ export function useAuth(): UseAuthResult {
     }
   }, [])
 
-  const login = useCallback(async (email: string, password: string, twoFactorCode?: string): Promise<AuthUser> => {
+  const login = useCallback(async (email: string, password: string): Promise<AuthUser> => {
     setLoading(true)
     setError(null)
 
@@ -212,7 +210,6 @@ export function useAuth(): UseAuthResult {
           body: JSON.stringify({
             email: email.toLowerCase(),
             password,
-            two_factor_code: twoFactorCode || null,
           }),
         })
       } catch {
@@ -239,9 +236,6 @@ export function useAuth(): UseAuthResult {
 
       const data = await response.json()
 
-      // Check if 2FA is required but not yet set up
-      const twoFactorRequired = data.two_factor_required === true
-
       // Backend sets httpOnly cookies automatically - we only store profile info
       const authUser: AuthUser = {
         id: data.user_id,
@@ -251,7 +245,6 @@ export function useAuth(): UseAuthResult {
         subscriptionTier: data.subscription_tier || 'free',
         subscriptionStatus: data.subscription_status || 'active',
         isDeveloper: data.is_developer || false,
-        twoFactorRequired,
       }
 
       storeUserProfile(authUser)

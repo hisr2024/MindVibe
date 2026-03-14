@@ -59,7 +59,7 @@ class TestDataExportCompliance:
 
         # Exported data should not include password
         exportable_fields = ["email", "created_at"]
-        non_exportable_fields = ["hashed_password", "two_factor_secret"]
+        non_exportable_fields = ["hashed_password"]
 
         for field in exportable_fields:
             assert hasattr(user, field)

@@ -7,7 +7,6 @@ interface User {
   email: string | null
   authUid: string
   locale: string
-  twoFactorEnabled: boolean
   isSuspended: boolean
   createdAt: string
 }
@@ -29,7 +28,6 @@ export default function AdminUsersPage() {
           email: 'user1@example.com',
           authUid: 'auth-123',
           locale: 'en',
-          twoFactorEnabled: true,
           isSuspended: false,
           createdAt: new Date().toISOString(),
         },
@@ -38,7 +36,6 @@ export default function AdminUsersPage() {
           email: 'user2@example.com',
           authUid: 'auth-456',
           locale: 'en',
-          twoFactorEnabled: false,
           isSuspended: false,
           createdAt: new Date().toISOString(),
         },
@@ -47,7 +44,6 @@ export default function AdminUsersPage() {
           email: 'suspended@example.com',
           authUid: 'auth-789',
           locale: 'en',
-          twoFactorEnabled: false,
           isSuspended: true,
           createdAt: new Date().toISOString(),
         },
@@ -116,9 +112,6 @@ export default function AdminUsersPage() {
                 Status
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
-                2FA
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
                 Created
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
@@ -129,13 +122,13 @@ export default function AdminUsersPage() {
           <tbody className="divide-y divide-slate-700">
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-slate-400">
+                <td colSpan={4} className="px-4 py-8 text-center text-slate-400">
                   Loading users...
                 </td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-slate-400">
+                <td colSpan={4} className="px-4 py-8 text-center text-slate-400">
                   No users found
                 </td>
               </tr>
@@ -157,11 +150,6 @@ export default function AdminUsersPage() {
                       }`}
                     >
                       {user.isSuspended ? 'Suspended' : 'Active'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={user.twoFactorEnabled ? 'text-green-400' : 'text-slate-400'}>
-                      {user.twoFactorEnabled ? '✓ Enabled' : '✗ Disabled'}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-400">

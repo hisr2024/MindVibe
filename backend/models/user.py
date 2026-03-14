@@ -6,7 +6,6 @@ import datetime
 import uuid
 
 from sqlalchemy import (
-    JSON,
     TIMESTAMP,
     Boolean,
     ForeignKey,
@@ -31,11 +30,6 @@ class User(SoftDeleteMixin, Base):
     )
     hashed_password: Mapped[str] = mapped_column(String(256), nullable=True)
     locale: Mapped[str] = mapped_column(String(8), default="en")
-    two_factor_secret: Mapped[str | None] = mapped_column(
-        String(64), nullable=True, default=None
-    )
-    two_factor_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
-    mfa_backup_codes: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     # Email verification
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     email_verified_at: Mapped[datetime.datetime | None] = mapped_column(
