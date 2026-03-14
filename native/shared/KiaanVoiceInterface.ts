@@ -174,6 +174,43 @@ export const KIAAN_VOICE_EVENTS = {
 } as const
 
 // ============================================================================
+// Engine Orchestrator Types
+// ============================================================================
+
+export type KiaanPowerMode = 'ultra-low' | 'balanced' | 'performance'
+
+export interface KiaanEngineResult {
+  friendResponse: string
+  detectedMood: string
+  moodIntensity: number
+  verseRef: string | null
+  wisdomText: string | null
+  intent: string
+  toolSuggestion: string | null
+  localResponse: string
+  needsEnhancement: boolean
+  processingTimeMs: number
+  powerMode: KiaanPowerMode
+}
+
+export interface KiaanPowerConfig {
+  mode: KiaanPowerMode
+  /** Battery level 0-1 */
+  batteryLevel: number
+  isCharging: boolean
+  thermalState: 'nominal' | 'fair' | 'serious' | 'critical'
+}
+
+// Engine-specific events emitted by native orchestrators
+export const KIAAN_ENGINE_EVENTS = {
+  LOCAL_RESPONSE: 'KiaanEngineLocalResponse',
+  ENHANCED_RESPONSE: 'KiaanEngineEnhancedResponse',
+  POWER_MODE_CHANGED: 'KiaanEnginePowerModeChanged',
+  MOOD_DETECTED: 'KiaanEngineMoodDetected',
+  VERSE_MATCHED: 'KiaanEngineVerseMatched',
+} as const
+
+// ============================================================================
 // Performance Metrics
 // ============================================================================
 

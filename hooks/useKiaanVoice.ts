@@ -2,13 +2,20 @@
  * useKiaanVoice - Universal Voice Integration Hook
  *
  * Provides voice interaction capabilities to any component in the app.
- * Combines voice input (STT), voice output (TTS via backend + browser fallback),
- * and wake word awareness into a single easy-to-use hook.
+ * Combines voice input (STT), voice output (TTS), and power management.
+ *
+ * TTS Strategy:
+ * - speakInstant(): Browser SpeechSynthesis for immediate local responses (~200ms)
+ * - speak(): Backend premium TTS for enhanced responses (higher quality)
+ *
+ * Power Management:
+ * - Pauses mic/TTS when tab is hidden (visibilitychange)
+ * - Resumes when tab becomes visible
  *
  * Usage:
- *   const { speak, listen, isListening, isSpeaking } = useKiaanVoice()
- *   speak('Namaste! How can I help you today?')
- *   listen((transcript) => handleUserSpeech(transcript))
+ *   const { speak, speakInstant, startListening, stopListening } = useKiaanVoice()
+ *   speakInstant('I understand how you feel...') // instant browser voice
+ *   speak('Here is deeper wisdom...')            // premium backend voice
  */
 
 'use client'
@@ -21,47 +28,35 @@ import { apiFetch } from '@/lib/api'
 import { stopAllAudio } from '@/utils/audio/universalAudioStop'
 
 export interface UseKiaanVoiceOptions {
-  /** Language override (defaults to user's saved preference) */
   language?: string
-  /** Voice ID override (defaults to user's saved voice) */
   voiceId?: string
-  /** Mood for emotion-adaptive voice (defaults to 'neutral') */
   mood?: string
-  /** Whether to prefer divine voice mode */
   preferDivine?: boolean
-  /** Called when KIAAN finishes speaking */
   onSpeakEnd?: () => void
-  /** Called when voice input produces a final transcript */
   onTranscript?: (text: string) => void
-  /** Called on any voice error */
   onError?: (error: string) => void
 }
 
 export interface UseKiaanVoiceReturn {
-  /** Speak text using KIAAN's voice (backend TTS → browser fallback) */
+  /** Speak with premium backend TTS (enhanced quality, 100-500ms latency) */
   speak: (text: string, mood?: string) => Promise<void>
-  /** Start listening for voice input */
+  /** Speak instantly with browser TTS (lower quality, ~0ms latency) */
+  speakInstant: (text: string) => void
   startListening: () => void
-  /** Stop listening for voice input */
   stopListening: () => void
-  /** Stop all audio (speaking + listening) */
   stopAll: () => void
-  /** Whether KIAAN is currently speaking */
   isSpeaking: boolean
-  /** Whether mic is actively listening */
   isListening: boolean
-  /** Whether voice features are supported */
   isSupported: boolean
-  /** Current voice transcript (interim or final) */
   transcript: string
-  /** Current interim transcript */
   interimTranscript: string
-  /** Any error message */
   error: string | null
-  /** The user's selected voice ID */
   activeVoiceId: string
-  /** The user's selected language */
   activeLanguage: string
+  /** Current STT provider: 'moonshine' | 'whisper' | 'web-speech-api' */
+  sttProvider: string
+  /** Device capability tier: 'high' | 'mid' | 'low' */
+  deviceTier: string
 }
 
 export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoiceReturn {
@@ -78,8 +73,9 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const wasListeningRef = useRef(false)
 
-  // Browser TTS fallback
+  // Browser TTS (instant, for local responses)
   const {
     speak: speakBrowser,
     cancel: cancelBrowserSpeech,
@@ -94,7 +90,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
     },
   })
 
-  // Voice input (STT)
+  // Voice input (STT with tiered on-device fallback)
   const {
     isListening,
     transcript,
@@ -103,6 +99,8 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
     startListening: startSTT,
     stopListening: stopSTT,
     resetTranscript,
+    sttProvider,
+    deviceTier,
   } = useVoiceInput({
     language,
     onTranscript: useCallback((text: string, isFinal: boolean) => {
@@ -118,7 +116,33 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
     }, [onError]),
   })
 
-  // Cleanup audio element on unmount
+  // ─── Page Visibility Power Management ──────────────────────────
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        // Pause everything when tab is hidden
+        if (isListening) {
+          wasListeningRef.current = true
+          stopSTT()
+        }
+        cancelBrowserSpeech()
+        if (audioRef.current) {
+          audioRef.current.pause()
+        }
+      } else if (document.visibilityState === 'visible') {
+        // Resume listening if it was active before hiding
+        if (wasListeningRef.current) {
+          wasListeningRef.current = false
+          startSTT()
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [isListening, stopSTT, startSTT, cancelBrowserSpeech])
+
+  // Cleanup audio on unmount
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -129,13 +153,25 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
   }, [])
 
   /**
-   * Speak text using KIAAN's voice.
-   * Tries backend premium TTS first, falls back to browser SpeechSynthesis.
+   * Speak instantly using browser's native SpeechSynthesis.
+   * ~0ms network latency. Use for local engine responses.
+   */
+  const speakInstant = useCallback((text: string) => {
+    if (!text.trim()) return
+    cancelBrowserSpeech()
+    setIsSpeaking(true)
+    setError(null)
+    speakBrowser(text)
+  }, [speakBrowser, cancelBrowserSpeech])
+
+  /**
+   * Speak using premium backend TTS (EdgeTTS / Sarvam).
+   * Higher quality voice, 100-500ms network latency.
+   * Falls back to browser TTS if backend unavailable.
    */
   const speak = useCallback(async (text: string, speakMood?: string) => {
     if (!text.trim()) return
 
-    // Stop any currently playing audio
     stopAllAudio()
     cancelBrowserSpeech()
     if (audioRef.current) {
@@ -146,7 +182,6 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
     setIsSpeaking(true)
     setError(null)
 
-    // Try backend premium voice synthesis
     try {
       const response = await apiFetch('/api/companion/voice/synthesize', {
         method: 'POST',
@@ -215,6 +250,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
 
   return {
     speak,
+    speakInstant,
     startListening,
     stopListening,
     stopAll,
@@ -226,5 +262,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
     error,
     activeVoiceId: voiceId,
     activeLanguage: language,
+    sttProvider,
+    deviceTier,
   }
 }
