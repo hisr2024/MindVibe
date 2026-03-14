@@ -592,7 +592,7 @@ export default function VoiceCompanionPage() {
                   <p className="text-xs text-white/60 leading-relaxed">{dailyWisdom.daily_practice}</p>
                 </div>
                 <div className="flex flex-wrap gap-1 mt-3">
-                  {dailyWisdom.applies_to.map(tag => (
+                  {(dailyWisdom.applies_to || []).map(tag => (
                     <span key={tag} className="px-2 py-0.5 text-[10px] rounded-full bg-white/5 text-white/70">{tag}</span>
                   ))}
                 </div>
@@ -901,7 +901,7 @@ export default function VoiceCompanionPage() {
                       <p className="text-xs text-white/60 leading-relaxed">{chapterGuide.daily_practice}</p>
                     </div>
                     <div className="flex flex-wrap gap-1 mt-3">
-                      {chapterGuide.applies_to.map(tag => (
+                      {(chapterGuide.applies_to || []).map(tag => (
                         <span key={tag} className="px-2 py-0.5 text-[10px] rounded-full bg-white/5 text-white/70">{tag}</span>
                       ))}
                     </div>

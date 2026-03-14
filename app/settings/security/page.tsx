@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -88,17 +88,29 @@ function SecuritySettingsContent() {
         setSetupData(data)
         setSetupStep('scanning')
       } else {
-        const errorData = await res.json()
-        setError(errorData.detail || 'Failed to start 2FA setup')
+        const errorData = await res.json().catch(() => ({}))
+        const detail = errorData.detail || ''
+
+        // If 2FA is already enabled (400 or 409), refresh status silently
+        if (detail.toLowerCase().includes('already enabled') || res.status === 409) {
+          await fetchStatus()
+          return
+        }
+
+        setError(detail || 'Failed to start 2FA setup')
       }
     } catch {
       setError('Network error. Please try again.')
     }
   }
 
+  // Prevent auto-start from firing multiple times (React strict mode double-fire)
+  const autoStarted = useRef(false)
+
   // Auto-start 2FA setup when redirected for mandatory setup
   useEffect(() => {
-    if (isMandatory2FASetup && !loading && twoFactorStatus && !twoFactorStatus.enabled && setupStep === 'initial') {
+    if (isMandatory2FASetup && !loading && twoFactorStatus && !twoFactorStatus.enabled && setupStep === 'initial' && !autoStarted.current) {
+      autoStarted.current = true
       startSetup()
     }
     // Only run when status is first loaded for mandatory setup
@@ -548,7 +560,7 @@ function SecuritySettingsContent() {
               </p>
             </div>
 
-            {setupData?.qr_code && (
+            {setupData?.qr_code ? (
               <div className="flex justify-center">
                 <div className="p-4 bg-white rounded-xl">
                   <Image
@@ -561,7 +573,16 @@ function SecuritySettingsContent() {
                   />
                 </div>
               </div>
-            )}
+            ) : setupData?.uri ? (
+              <div className="flex justify-center">
+                <div className="p-4 bg-amber-500/10 rounded-xl border border-amber-500/30 max-w-sm text-center">
+                  <p className="text-sm text-amber-200 mb-2">QR code unavailable. Copy this link into your authenticator app:</p>
+                  <code className="block px-3 py-2 bg-black/30 rounded-lg text-[#e8b54a] font-mono text-xs break-all">
+                    {setupData.uri}
+                  </code>
+                </div>
+              </div>
+            ) : null}
 
             <div className="text-center">
               <p className="text-xs text-[#f5f0e8]/70 mb-2">
