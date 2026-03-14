@@ -373,9 +373,10 @@ export default function VoiceCompanionPage() {
   }
 
   // ── Voice Input Handler ──────────────────────────────────────────
+  const sendMessageRef = useRef(sendMessage)
+  sendMessageRef.current = sendMessage
   const handleVoiceTranscription = useCallback((text: string) => {
-    sendMessage(text)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    sendMessageRef.current(text)
   }, [])
 
   // ═══════════════════════════════════════════════════════════════════

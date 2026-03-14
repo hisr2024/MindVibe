@@ -92,7 +92,7 @@ export class OnDeviceSTT {
     this.callbacks = callbacks
 
     // Detect tier if not already done
-    if (this.deviceTier === 'low' && !this.provider) {
+    if (this.deviceTier === 'low' && this.provider === 'none') {
       await this.detectCapabilities()
     }
 
@@ -233,8 +233,11 @@ export class OnDeviceSTT {
         },
       })
 
-      // Create AudioContext
+      // Create AudioContext and resume (browsers suspend by default)
       this.audioContext = new AudioContext({ sampleRate: 16000 })
+      if (this.audioContext.state === 'suspended') {
+        await this.audioContext.resume()
+      }
 
       // Register AudioWorklet processor
       if (!this.isWorkletRegistered) {
