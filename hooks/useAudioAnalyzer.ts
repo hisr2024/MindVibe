@@ -154,6 +154,17 @@ export function useAudioAnalyzer(): AudioAnalyzerData {
     }
   }, [])
 
+  // Pause when tab hidden (fix power leak — stops 60fps RAF + mic in background)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden' && isActive) {
+        stop()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [isActive, stop])
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {

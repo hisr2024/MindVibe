@@ -31,6 +31,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { apiFetch } from '@/lib/api'
 import type { VoiceLanguage } from '@/utils/voice/voiceCatalog'
+import { orchestrate, type OrchestratorResult } from '@/lib/kiaan-engine-orchestrator'
 
 // Dynamic imports - loaded on demand
 const VoiceCompanionSelector = dynamic(() => import('@/components/voice/VoiceCompanionSelector'), {
@@ -193,6 +194,7 @@ export default function VoiceCompanionPage() {
   const chatEndRef = useRef<HTMLDivElement>(null)
   const currentAudioRef = useRef<HTMLAudioElement | null>(null)
   const chatInputRef = useRef<HTMLInputElement>(null)
+  const enhanceAbortRef = useRef<AbortController | null>(null)
 
   const totalVerses = CHAPTERS.reduce((sum, ch) => sum + ch.verseCount, 0)
   const selectedVoiceId = voiceConfig.speakerId?.split('_').pop() || 'sarvam-aura'
@@ -253,6 +255,12 @@ export default function VoiceCompanionPage() {
     if (!msg || isChatLoading) return
     if (!directText) setChatInput('')
 
+    // Cancel any pending background enhancement from previous message
+    if (enhanceAbortRef.current) {
+      enhanceAbortRef.current.abort()
+      enhanceAbortRef.current = null
+    }
+
     const userMsg: ChatMessage = {
       id: `user_${Date.now()}`,
       role: 'user',
@@ -262,63 +270,105 @@ export default function VoiceCompanionPage() {
     setChatMessages(prev => [...prev, userMsg])
     setIsChatLoading(true)
 
+    // ── Step 1: Instant local response via three-engine orchestrator (<100ms) ──
+    const kiaanMsgId = `kiaan_${Date.now()}`
+    let localResult: OrchestratorResult | null = null
+
     try {
-      const history = chatMessages.slice(-8).map(m => ({
-        role: m.role === 'kiaan' ? 'assistant' : 'user',
-        content: m.content,
-      }))
+      localResult = await orchestrate(msg, voiceConfig.language)
+      const detectedMoodValue = localResult.friendResponse.mood
+      setDetectedMood(detectedMoodValue)
 
-      const res = await apiFetch('/api/kiaan/friend/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: msg,
-          language: voiceConfig.language,
-          force_mode: null,
-          conversation_history: history,
-          friendship_level: chatMessages.length > 20 ? 'close' : chatMessages.length > 6 ? 'familiar' : 'new',
-        }),
-      })
+      const kiaanMsg: ChatMessage = {
+        id: kiaanMsgId,
+        role: 'kiaan',
+        content: localResult.localResponse,
+        mood: detectedMoodValue,
+        timestamp: Date.now(),
+        mode: localResult.wisdomText ? 'gita_guide' : 'best_friend',
+      }
+      setChatMessages(prev => [...prev, kiaanMsg])
+      setIsChatLoading(false)
 
-      if (res.ok) {
-        const data = await res.json()
-        setDetectedMood(data.mood)
-
-        const kiaanMsg: ChatMessage = {
-          id: `kiaan_${Date.now()}`,
-          role: 'kiaan',
-          content: data.response,
-          mood: data.mood,
-          timestamp: Date.now(),
-          mode: data.mode,
-          gitaInsight: data.gita_insight,
-        }
-        setChatMessages(prev => [...prev, kiaanMsg])
-
-        // If guide mode was triggered, suggest switching
-        if (data.mode === 'gita_guide' && data.suggested_chapter) {
-          setSelectedChapter(null)
-        }
-      } else {
-        // Fallback response
-        setChatMessages(prev => [...prev, {
-          id: `kiaan_${Date.now()}`,
-          role: 'kiaan',
-          content: "I hear you. Tell me more - I'm listening.",
-          timestamp: Date.now(),
-          mode: 'best_friend',
-        }])
+      // Speak instant local response via browser TTS
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        const utterance = new SpeechSynthesisUtterance(localResult.localResponse)
+        utterance.rate = 0.95
+        utterance.lang = voiceConfig.language === 'hi' ? 'hi-IN' : 'en-US'
+        window.speechSynthesis.speak(utterance)
       }
     } catch {
-      setChatMessages(prev => [...prev, {
-        id: `kiaan_${Date.now()}`,
-        role: 'kiaan',
-        content: "I'm right here with you. Sometimes just talking helps, even when the words feel hard to find.",
-        timestamp: Date.now(),
-        mode: 'best_friend',
-      }])
-    } finally {
+      // Orchestrator failed — fall through to backend-only path
       setIsChatLoading(false)
+    }
+
+    // ── Step 2: Background enhancement via backend (1-3s, non-blocking) ──
+    if (!localResult || localResult.needsEnhancement) {
+      const abortController = new AbortController()
+      enhanceAbortRef.current = abortController
+
+      try {
+        const history = chatMessages.slice(-8).map(m => ({
+          role: m.role === 'kiaan' ? 'assistant' : 'user',
+          content: m.content,
+        }))
+
+        const res = await apiFetch('/api/kiaan/friend/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: msg,
+            language: voiceConfig.language,
+            force_mode: null,
+            conversation_history: history,
+            friendship_level: chatMessages.length > 20 ? 'close' : chatMessages.length > 6 ? 'familiar' : 'new',
+          }),
+          signal: abortController.signal,
+        })
+
+        if (res.ok && !abortController.signal.aborted) {
+          const data = await res.json()
+          setDetectedMood(data.mood)
+
+          if (localResult) {
+            // Update existing local message with enhanced response
+            setChatMessages(prev => prev.map(m =>
+              m.id === kiaanMsgId
+                ? { ...m, content: data.response, mood: data.mood, mode: data.mode, gitaInsight: data.gita_insight }
+                : m
+            ))
+          } else {
+            // No local result was shown — add backend response as new message
+            setChatMessages(prev => [...prev, {
+              id: kiaanMsgId,
+              role: 'kiaan' as const,
+              content: data.response,
+              mood: data.mood,
+              timestamp: Date.now(),
+              mode: data.mode,
+              gitaInsight: data.gita_insight,
+            }])
+          }
+
+          if (data.mode === 'gita_guide' && data.suggested_chapter) {
+            setSelectedChapter(null)
+          }
+        }
+      } catch (err: unknown) {
+        // Aborted or network error — local response already shown if available
+        const isAbort = err instanceof DOMException && err.name === 'AbortError'
+        if (!isAbort && !localResult) {
+          setChatMessages(prev => [...prev, {
+            id: kiaanMsgId,
+            role: 'kiaan' as const,
+            content: "I'm right here with you. Sometimes just talking helps, even when the words feel hard to find.",
+            timestamp: Date.now(),
+            mode: 'best_friend',
+          }])
+        }
+      } finally {
+        enhanceAbortRef.current = null
+      }
     }
   }
 

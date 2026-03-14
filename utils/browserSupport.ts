@@ -143,6 +143,69 @@ export function getBrowserName(): string {
   return 'Unknown';
 }
 
+// ─── Device Capability Detection ──────────────────────────────────────────
+
+export type DeviceTier = 'high' | 'mid' | 'low'
+
+/**
+ * Check if WebGPU is available for ML model acceleration
+ */
+export async function isWebGPUSupported(): Promise<boolean> {
+  if (typeof navigator === 'undefined') return false
+  try {
+    if (!('gpu' in navigator)) return false
+    const adapter = await (navigator as unknown as { gpu: { requestAdapter: () => Promise<unknown | null> } }).gpu.requestAdapter()
+    return adapter !== null
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Get device memory in GB (returns 0 if not available)
+ * Uses navigator.deviceMemory (Chrome/Edge only, rounded to nearest power of 2)
+ */
+export function getDeviceMemory(): number {
+  if (typeof navigator === 'undefined') return 0
+  return (navigator as unknown as { deviceMemory?: number }).deviceMemory || 0
+}
+
+/**
+ * Get number of logical CPU cores
+ */
+export function getCPUCores(): number {
+  if (typeof navigator === 'undefined') return 1
+  return navigator.hardwareConcurrency || 1
+}
+
+/**
+ * Detect device tier for on-device ML capabilities
+ *
+ * TIER 1 (HIGH): 8GB+ RAM, WebGPU — can run Moonshine + Whisper
+ * TIER 2 (MID):  4-7GB RAM — can run Moonshine Tiny only
+ * TIER 3 (LOW):  <4GB or no WebGPU — Web Speech API only (0 extra RAM)
+ */
+export async function getDeviceTier(): Promise<DeviceTier> {
+  const memory = getDeviceMemory()
+  const cores = getCPUCores()
+  const webgpu = await isWebGPUSupported()
+
+  // No WebGPU or very low memory → Tier 3
+  if (!webgpu || memory > 0 && memory < 4) return 'low'
+
+  // 8GB+ with WebGPU → Tier 1
+  if (memory >= 8 && cores >= 4) return 'high'
+
+  // 4-7GB with WebGPU → Tier 2
+  if (memory >= 4) return 'mid'
+
+  // deviceMemory not available (Firefox, Safari): infer from cores
+  if (cores >= 8) return 'high'
+  if (cores >= 4) return 'mid'
+
+  return 'low'
+}
+
 /**
  * Check if all required features for voice input are available
  */

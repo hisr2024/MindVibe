@@ -59,6 +59,7 @@
     "three": "^0.183.2",
     "typescript": "^5.9.3",
     "web-vitals": "^4.2.4",
+    "@huggingface/transformers": "^3.4.0",
     "zustand": "^5.0.11"
   },
   "devDependencies": {

@@ -1,5 +1,11 @@
 /**
  * Hook for managing voice input (Speech-to-Text)
+ *
+ * Tiered fallback chain:
+ * 1. On-device STT (Moonshine/Whisper) for Tier 1/2 devices
+ * 2. Web Speech API for Tier 3 devices or fallback
+ *
+ * Tier 3 (budget phones): zero extra RAM, uses browser-native STT only.
  */
 
 'use client'
@@ -8,6 +14,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { SpeechRecognitionService } from '@/utils/speech/recognition'
 import { isSpeechRecognitionSupported } from '@/utils/speech/languageMapping'
 import { canUseVoiceInput, isSecureContext, getBrowserName } from '@/utils/browserSupport'
+import { useOnDeviceSTT } from '@/hooks/useOnDeviceSTT'
 
 export interface UseVoiceInputOptions {
   language?: string
@@ -25,22 +32,48 @@ export interface UseVoiceInputReturn {
   startListening: () => void
   stopListening: () => void
   resetTranscript: () => void
+  /** Which STT provider is active */
+  sttProvider: string
+  /** Device capability tier */
+  deviceTier: string
 }
 
 export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInputReturn {
+  const { language = 'en', onTranscript, onError } = options
+
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [interimTranscript, setInterimTranscript] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [isSupported] = useState(() => isSpeechRecognitionSupported())
-  
-  const recognitionRef = useRef<SpeechRecognitionService | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { language = 'en', onTranscript, onError, autoSend = false } = options
+  const [isWebSpeechSupported] = useState(() => isSpeechRecognitionSupported())
 
-  // Initialize recognition service
+  const recognitionRef = useRef<SpeechRecognitionService | null>(null)
+  const usingOnDeviceRef = useRef(false)
+
+  // On-device STT (Tier 1/2 — zero overhead for Tier 3)
+  const onDeviceSTT = useOnDeviceSTT({
+    language,
+    onTranscript: useCallback((text: string, isFinal: boolean) => {
+      if (!usingOnDeviceRef.current) return
+      if (isFinal) {
+        setTranscript(text)
+        setInterimTranscript('')
+        onTranscript?.(text, true)
+      } else {
+        setInterimTranscript(text)
+        onTranscript?.(text, false)
+      }
+    }, [onTranscript]),
+    onError: useCallback((err: string) => {
+      // On-device failed → fall back to Web Speech API silently
+      usingOnDeviceRef.current = false
+      onError?.(err)
+    }, [onError]),
+  })
+
+  // Web Speech API fallback (initialize only if needed)
   useEffect(() => {
-    if (!isSupported) return
+    if (!isWebSpeechSupported) return
 
     recognitionRef.current = new SpeechRecognitionService({
       language,
@@ -54,9 +87,8 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
         recognitionRef.current = null
       }
     }
-  }, [isSupported, language])
+  }, [isWebSpeechSupported, language])
 
-  // Update language when it changes
   useEffect(() => {
     if (recognitionRef.current) {
       recognitionRef.current.setLanguage(language)
@@ -64,26 +96,16 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   }, [language])
 
   const startListening = useCallback(() => {
-    // Enhanced browser support checks
     const voiceCheck = canUseVoiceInput()
-    if (!voiceCheck.available) {
+    if (!voiceCheck.available && !onDeviceSTT.canHandleSTT) {
       const errorMsg = voiceCheck.reason || 'Voice input not available'
       setError(errorMsg)
       onError?.(errorMsg)
       return
     }
 
-    if (!recognitionRef.current || !isSupported) {
-      const browserName = getBrowserName()
-      const errorMsg = `Speech recognition not supported in ${browserName}. Please use Chrome, Edge, or Safari.`
-      setError(errorMsg)
-      onError?.(errorMsg)
-      return
-    }
-
-    // Check if secure context (HTTPS or localhost)
     if (!isSecureContext()) {
-      const errorMsg = 'Voice features require HTTPS or localhost. Please access this site securely.'
+      const errorMsg = 'Voice features require HTTPS or localhost.'
       setError(errorMsg)
       onError?.(errorMsg)
       return
@@ -93,10 +115,26 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     setTranscript('')
     setInterimTranscript('')
 
+    // Try on-device first (Tier 1/2), fall back to Web Speech API (Tier 3)
+    if (onDeviceSTT.canHandleSTT) {
+      usingOnDeviceRef.current = true
+      onDeviceSTT.startListening()
+      setIsListening(true)
+      return
+    }
+
+    // Web Speech API fallback
+    usingOnDeviceRef.current = false
+    if (!recognitionRef.current || !isWebSpeechSupported) {
+      const browserName = getBrowserName()
+      const errorMsg = `Speech recognition not supported in ${browserName}. Please use Chrome, Edge, or Safari.`
+      setError(errorMsg)
+      onError?.(errorMsg)
+      return
+    }
+
     recognitionRef.current.start({
-      onStart: () => {
-        setIsListening(true)
-      },
+      onStart: () => setIsListening(true),
       onResult: (text, isFinal) => {
         if (isFinal) {
           setTranscript(text)
@@ -112,9 +150,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
         setInterimTranscript('')
       },
       onError: (err) => {
-        // Enhance error messages with more helpful guidance
         let enhancedError = err
-        
         if (err.includes('not-allowed') || err.includes('permission denied')) {
           enhancedError = 'Microphone access denied. Please allow microphone permissions in your browser settings.'
         } else if (err.includes('no-speech')) {
@@ -124,37 +160,42 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
         } else if (err.includes('audio-capture')) {
           enhancedError = 'Microphone not found. Please check your microphone connection.'
         }
-        
         setError(enhancedError)
         setIsListening(false)
         setInterimTranscript('')
         onError?.(enhancedError)
       },
     })
-  }, [isSupported, onTranscript, onError])
+  }, [isWebSpeechSupported, onTranscript, onError, onDeviceSTT])
 
   const stopListening = useCallback(() => {
+    if (usingOnDeviceRef.current) {
+      onDeviceSTT.stopListening()
+    }
     if (recognitionRef.current) {
       recognitionRef.current.stop()
     }
     setIsListening(false)
     setInterimTranscript('')
-  }, [])
+  }, [onDeviceSTT])
 
   const resetTranscript = useCallback(() => {
     setTranscript('')
     setInterimTranscript('')
     setError(null)
-  }, [])
+    onDeviceSTT.resetTranscript()
+  }, [onDeviceSTT])
 
   return {
-    isListening,
+    isListening: isListening || onDeviceSTT.isListening,
     transcript,
     interimTranscript,
-    isSupported,
+    isSupported: isWebSpeechSupported || onDeviceSTT.canHandleSTT,
     error,
     startListening,
     stopListening,
     resetTranscript,
+    sttProvider: onDeviceSTT.sttProvider,
+    deviceTier: onDeviceSTT.deviceTier,
   }
 }

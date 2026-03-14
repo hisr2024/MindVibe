@@ -15,6 +15,7 @@
  */
 
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { ShankhaIcon } from '@/components/icons/ShankhaIcon'
 
 // BCP-47 language tags for Web Speech API multilingual STT
 const LANGUAGE_BCP47: Record<string, string> = {
@@ -246,16 +247,10 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
         {state === 'recording' ? (
           <>
             <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-30" />
-            <svg className="w-5 h-5 relative z-10" fill="currentColor" viewBox="0 0 24 24">
-              <rect x="6" y="6" width="12" height="12" rx="2" />
-            </svg>
+            <ShankhaIcon size={20} filled className="relative z-10" />
           </>
         ) : (
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-            />
-          </svg>
+          <ShankhaIcon size={20} />
         )}
       </button>
 
