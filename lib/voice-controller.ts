@@ -304,16 +304,19 @@ function resolveToolByName(spoken: string): EcosystemTool | null {
   }
 
   // Partial match: tool name contains spoken text or vice versa
-  for (const tool of ECOSYSTEM_TOOLS) {
-    const toolId = tool.id.toLowerCase().replace(/-/g, ' ')
-    const toolName = tool.name.toLowerCase()
-    if (
-      toolName.includes(normalized) ||
-      normalized.includes(toolName) ||
-      toolId.includes(normalized) ||
-      normalized.includes(toolId)
-    ) {
-      return tool
+  // Require at least 3 characters to avoid false positives (e.g. "me" matching "emotional-reset")
+  if (normalized.length >= 3) {
+    for (const tool of ECOSYSTEM_TOOLS) {
+      const toolId = tool.id.toLowerCase().replace(/-/g, ' ')
+      const toolName = tool.name.toLowerCase()
+      if (
+        toolName.includes(normalized) ||
+        normalized.includes(toolName) ||
+        toolId.includes(normalized) ||
+        normalized.includes(toolId)
+      ) {
+        return tool
+      }
     }
   }
 
