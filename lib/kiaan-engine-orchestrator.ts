@@ -62,7 +62,7 @@ const context: ConversationContext = {
  */
 export async function orchestrate(
   userInput: string,
-  language: string = 'en',
+  _language: string = 'en',
 ): Promise<OrchestratorResult> {
   const startTime = performance.now()
   const powerMode = getPowerMode()
