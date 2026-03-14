@@ -773,7 +773,7 @@ function UnauthenticatedAccountView() {
 
             <div className="mt-6 flex items-center gap-2 rounded-2xl border border-[#d4a44c]/15 bg-[#d4a44c]/10 p-1 text-sm font-semibold text-[#f5f0e8]">
               <button
-                onClick={() => { setMode('create'); setNeedsTwoFactor(false); resetStatus(); }}
+                onClick={() => { setMode('create'); resetStatus(); }}
                 className={`flex-1 rounded-xl px-3 py-2 transition ${mode === 'create' ? 'bg-[#d4a44c] text-slate-950 shadow-md shadow-[#d4a44c]/30' : 'hover:bg-[#d4a44c]/20'}`}
               >
                 Create Account
