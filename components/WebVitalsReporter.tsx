@@ -16,6 +16,8 @@ export function WebVitalsReporter() {
       onINP(reportWebVitals)
       onTTFB(reportWebVitals)
       onFCP(reportWebVitals)
+    }).catch(() => {
+      // Non-critical: web vitals reporting unavailable
     })
   }, [])
 

@@ -33,6 +33,8 @@ const eslintConfig = [
       // Downgrade setState-in-effect to warning: most instances are legitimate
       // patterns (localStorage hydration, route change responses, etc.)
       'react-hooks/set-state-in-effect': 'warn',
+      // App Router uses layout.tsx <head> for fonts, not pages/_document.js
+      '@next/next/no-page-custom-font': 'off',
     },
   },
 
