@@ -279,7 +279,7 @@ export default function SessionsPage() {
           <div>
             <p className="text-sm font-medium text-blue-200">Security Tip</p>
             <p className="text-xs text-blue-200/70 mt-1">
-              If you see any sessions you don&apos;t recognize, revoke them immediately and consider changing your password. Enable 2FA for additional protection.
+              If you see any sessions you don&apos;t recognize, revoke them immediately and consider changing your password.
             </p>
           </div>
         </div>

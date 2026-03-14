@@ -3,7 +3,6 @@ import secrets
 import uuid
 from datetime import UTC, datetime, timedelta
 
-import pyotp
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import select, update
@@ -20,7 +19,6 @@ from backend.security.password_policy import policy
 from backend.services.email_service import (
     send_email_verification,
     send_password_reset_email,
-    send_two_factor_code_email,
 )
 from backend.services.refresh_service import (
     create_refresh_token,
@@ -70,9 +68,6 @@ class SignupOut(BaseModel):
 class LoginIn(BaseModel):
     email: EmailStr
     password: str
-    two_factor_code: str | None = None
-
-
 class LoginOut(BaseModel):
     access_token: str
     token_type: str
@@ -84,21 +79,6 @@ class LoginOut(BaseModel):
     subscription_tier: str = "free"
     subscription_status: str = "active"
     is_developer: bool = False
-    two_factor_required: bool = False
-
-
-class TwoFactorSetupOut(BaseModel):
-    secret: str
-    otpauth_url: str
-
-
-class TwoFactorVerifyIn(BaseModel):
-    code: str
-
-
-class TwoFactorStatusOut(BaseModel):
-    enabled: bool
-    configured: bool
 
 
 class MeOut(BaseModel):
@@ -113,7 +93,6 @@ class MeOut(BaseModel):
     subscription_tier: str = "free"
     subscription_status: str = "active"
     is_developer: bool = False
-    two_factor_enabled: bool = False
 
 
 class LogoutOut(BaseModel):
@@ -346,29 +325,6 @@ async def login(
             await db.rollback()
             logger.error(f"Database commit failed during login attempt reset: {e}", exc_info=True)
 
-    if user.two_factor_enabled:
-        if not payload.two_factor_code:
-            # Use a specific error code so frontend can show 2FA input
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="additional_verification_required",
-            )
-
-        code = payload.two_factor_code.strip().replace(" ", "")
-        if not user.two_factor_secret:
-            # Internal misconfiguration - don't reveal details
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid credentials",
-            )
-
-        totp = pyotp.TOTP(user.two_factor_secret)
-        if not totp.verify(code, valid_window=1):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid credentials",
-            )
-
     # Bind session to client IP and User-Agent for security auditing
     client_ip = request.client.host if request.client else None
     user_agent = request.headers.get("User-Agent")
@@ -421,9 +377,6 @@ async def login(
     except Exception:
         pass
 
-    # Flag if 2FA is not yet configured — frontend must enforce setup
-    two_factor_required = not user.two_factor_enabled
-
     return LoginOut(
         access_token=access_token,
         token_type="bearer",  # nosec B106
@@ -435,204 +388,7 @@ async def login(
         subscription_tier="siddha" if is_dev else sub_tier,
         subscription_status=sub_status,
         is_developer=is_dev,
-        two_factor_required=two_factor_required,
     )
-
-
-# ----------------------
-# Two Factor Authentication (rate limited to prevent brute force)
-# ----------------------
-@router.get("/2fa/status", response_model=TwoFactorStatusOut)
-@limiter.limit(AUTH_RATE_LIMIT)
-async def two_factor_status(request: Request, db: AsyncSession = Depends(get_db)):
-    _, user, session_row, _ = await _get_user_and_active_session(request, db)
-    await touch_session(db, session_row)
-    return TwoFactorStatusOut(
-        enabled=bool(user.two_factor_enabled),
-        configured=bool(user.two_factor_secret),
-    )
-
-
-@router.post("/2fa/setup", response_model=TwoFactorSetupOut)
-@limiter.limit(AUTH_RATE_LIMIT)
-async def initiate_two_factor(request: Request, db: AsyncSession = Depends(get_db)):
-    _, user, session_row, _ = await _get_user_and_active_session(request, db)
-
-    if user.two_factor_enabled:
-        raise HTTPException(status_code=409, detail="Two-factor already enabled")
-
-    secret = user.two_factor_secret or pyotp.random_base32()
-    await db.execute(
-        update(User).where(User.id == user.id).values(two_factor_secret=secret)
-    )
-    try:
-        await db.commit()
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"Database commit failed during 2FA setup: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
-
-    await touch_session(db, session_row)
-    totp = pyotp.TOTP(secret)
-    account_name = user.email or user.auth_uid
-    otpauth_url = totp.provisioning_uri(name=account_name, issuer_name="MindVibe")
-
-    return TwoFactorSetupOut(secret=secret, otpauth_url=otpauth_url)
-
-
-@router.post("/2fa/verify", response_model=TwoFactorStatusOut)
-@limiter.limit(AUTH_RATE_LIMIT)
-async def verify_two_factor(
-    payload: TwoFactorVerifyIn,
-    request: Request,
-    db: AsyncSession = Depends(get_db),
-):
-    _, user, session_row, _ = await _get_user_and_active_session(request, db)
-
-    if not user.two_factor_secret:
-        raise HTTPException(status_code=400, detail="Two-factor setup not initiated")
-
-    code = payload.code.strip().replace(" ", "")
-    totp = pyotp.TOTP(user.two_factor_secret)
-    if not totp.verify(code, valid_window=1):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid two-factor code",
-        )
-
-    await db.execute(
-        update(User)
-        .where(User.id == user.id)
-        .values(two_factor_enabled=True)
-    )
-    try:
-        await db.commit()
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"Database commit failed during 2FA verification: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
-
-    await touch_session(db, session_row)
-
-    return TwoFactorStatusOut(enabled=True, configured=True)
-
-
-# Alias: /2fa/enable maps to /2fa/verify for frontend compatibility
-@router.post("/2fa/enable", response_model=TwoFactorStatusOut)
-@limiter.limit(AUTH_RATE_LIMIT)
-async def enable_two_factor(
-    payload: TwoFactorVerifyIn,
-    request: Request,
-    db: AsyncSession = Depends(get_db),
-):
-    """Enable 2FA by verifying the setup code. Alias for /2fa/verify."""
-    return await verify_two_factor(payload, request, db)
-
-
-class TwoFactorDisableIn(BaseModel):
-    code: str
-    password: str
-
-
-@router.post("/2fa/disable", response_model=TwoFactorStatusOut)
-@limiter.limit(AUTH_RATE_LIMIT)
-async def disable_two_factor(
-    payload: TwoFactorDisableIn,
-    request: Request,
-    db: AsyncSession = Depends(get_db),
-):
-    """Disable 2FA. Requires current TOTP code and password for security."""
-    _, user, session_row, _ = await _get_user_and_active_session(request, db)
-
-    if not user.two_factor_enabled:
-        raise HTTPException(status_code=400, detail="Two-factor not enabled")
-
-    # Verify password (field is hashed_password on the User model)
-    if not user.hashed_password or not verify_password(payload.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid password",
-        )
-
-    # Verify TOTP code
-    code = payload.code.strip().replace(" ", "")
-    totp = pyotp.TOTP(user.two_factor_secret)
-    if not totp.verify(code, valid_window=1):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid two-factor code",
-        )
-
-    # Disable 2FA
-    await db.execute(
-        update(User)
-        .where(User.id == user.id)
-        .values(two_factor_enabled=False, two_factor_secret=None, mfa_backup_codes=None)
-    )
-    try:
-        await db.commit()
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"Database commit failed during 2FA disable: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
-
-    await touch_session(db, session_row)
-
-    return TwoFactorStatusOut(enabled=False, configured=False)
-
-
-class BackupCodesOut(BaseModel):
-    backup_codes: list[str]
-
-
-@router.post("/2fa/regenerate-backup-codes", response_model=BackupCodesOut)
-@limiter.limit(AUTH_RATE_LIMIT)
-async def regenerate_backup_codes(
-    payload: TwoFactorVerifyIn,
-    request: Request,
-    db: AsyncSession = Depends(get_db),
-):
-    """Regenerate backup codes. Requires current TOTP code for security."""
-    import secrets
-
-    _, user, session_row, _ = await _get_user_and_active_session(request, db)
-
-    if not user.two_factor_enabled:
-        raise HTTPException(status_code=400, detail="Two-factor not enabled")
-
-    # Verify TOTP code
-    code = payload.code.strip().replace(" ", "")
-    totp = pyotp.TOTP(user.two_factor_secret)
-    if not totp.verify(code, valid_window=1):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid two-factor code",
-        )
-
-    # Generate new backup codes (8 codes, each 8 characters)
-    backup_codes = [secrets.token_hex(4).upper() for _ in range(8)]
-
-    # Store bcrypt-hashed versions of backup codes for security
-    # If DB is compromised, plaintext codes won't be exposed
-    from backend.security.password_hash import hash_password
-    hashed_codes = [hash_password(code) for code in backup_codes]
-
-    await db.execute(
-        update(User)
-        .where(User.id == user.id)
-        .values(mfa_backup_codes=hashed_codes)
-    )
-    try:
-        await db.commit()
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"Database commit failed during backup code regeneration: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
-
-    await touch_session(db, session_row)
-
-    # Return plaintext codes to user (this is the only time they'll see them)
-    return BackupCodesOut(backup_codes=backup_codes)
 
 
 # ----------------------
@@ -685,7 +441,6 @@ async def me(request: Request, db: AsyncSession = Depends(get_db)):
         subscription_tier="siddha" if is_dev else sub_tier,
         subscription_status=sub_status,
         is_developer=is_dev,
-        two_factor_enabled=bool(user.two_factor_enabled),
     )
 
 
@@ -1189,238 +944,6 @@ async def resend_verification(
 
     logger.info("Verification email resent for user %s", user.id)
     return generic_response
-
-
-# ----------------------
-# Email-based 2FA (OTP via email)
-# ----------------------
-EMAIL_2FA_CODE_LENGTH = 6
-EMAIL_2FA_EXPIRE_MINUTES = 10
-
-
-class Email2FARequestIn(BaseModel):
-    email: EmailStr
-    password: str
-
-
-class Email2FARequestOut(BaseModel):
-    message: str
-    code_sent: bool
-
-
-class Email2FAVerifyIn(BaseModel):
-    email: EmailStr
-    password: str
-    code: str
-
-
-@router.post("/2fa/email/send", response_model=Email2FARequestOut)
-@limiter.limit("5/minute")
-async def send_email_2fa_code(
-    request: Request, payload: Email2FARequestIn, db: AsyncSession = Depends(get_db)
-):
-    """Send a 2FA verification code via email during login.
-
-    This endpoint is called when a user has email-based 2FA enabled
-    and needs a code to complete their login. It validates credentials
-    first, then sends the code.
-    """
-    email_norm = payload.email.lower()
-    stmt = select(User).where(User.email == email_norm)
-    user = (await db.execute(stmt)).scalars().first()
-
-    # Use generic error to prevent account enumeration
-    generic_error = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid credentials",
-    )
-
-    if not user or not verify_password(payload.password, user.hashed_password):
-        raise generic_error
-
-    if not user.email_verified:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="email_not_verified",
-        )
-
-    # Generate 6-digit code
-    code = "".join([str(secrets.randbelow(10)) for _ in range(EMAIL_2FA_CODE_LENGTH)])
-
-    # Store code as a TOTP-compatible hash (reuse EmailVerificationToken table
-    # with a short expiry to avoid creating another table)
-    code_hash = hash_password(code)
-    token_row = EmailVerificationToken(
-        id=f"2fa-{uuid.uuid4()}",
-        user_id=user.id,
-        token_hash=code_hash,
-        expires_at=datetime.now(UTC) + timedelta(minutes=EMAIL_2FA_EXPIRE_MINUTES),
-        ip_address=request.client.host if request.client else None,
-    )
-
-    # Invalidate previous unused email 2FA codes for this user
-    await db.execute(
-        update(EmailVerificationToken)
-        .where(
-            EmailVerificationToken.user_id == user.id,
-            EmailVerificationToken.id.like("2fa-%"),
-            EmailVerificationToken.used_at.is_(None),
-        )
-        .values(used_at=datetime.now(UTC))
-    )
-
-    db.add(token_row)
-    try:
-        await db.commit()
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"Database commit failed during email 2FA code creation: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
-
-    sent = await send_two_factor_code_email(user.email, code)
-    if not sent:
-        logger.warning("Failed to send 2FA code email to user %s", user.id)
-
-    return Email2FARequestOut(
-        message="Verification code sent to your email.",
-        code_sent=sent,
-    )
-
-
-@router.post("/2fa/email/verify", response_model=LoginOut)
-@limiter.limit(AUTH_RATE_LIMIT)
-async def verify_email_2fa_code(
-    request: Request,
-    payload: Email2FAVerifyIn,
-    response: Response,
-    db: AsyncSession = Depends(get_db),
-):
-    """Verify email 2FA code and complete login.
-
-    This combines code verification with session creation, so the user
-    doesn't need to call login again after verifying the code.
-    """
-    email_norm = payload.email.lower()
-    stmt = select(User).where(User.email == email_norm)
-    user = (await db.execute(stmt)).scalars().first()
-
-    generic_error = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid credentials",
-    )
-
-    if not user or not verify_password(payload.password, user.hashed_password):
-        raise generic_error
-
-    if not user.email_verified:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="email_not_verified",
-        )
-
-    # Find valid 2FA code tokens for this user
-    code_clean = payload.code.strip().replace(" ", "")
-    stmt = select(EmailVerificationToken).where(
-        EmailVerificationToken.user_id == user.id,
-        EmailVerificationToken.id.like("2fa-%"),
-        EmailVerificationToken.used_at.is_(None),
-        EmailVerificationToken.expires_at > datetime.now(UTC),
-    )
-    candidates = (await db.execute(stmt)).scalars().all()
-
-    matched_code = None
-    for candidate in candidates:
-        if verify_password(code_clean, candidate.token_hash):
-            matched_code = candidate
-            break
-
-    if not matched_code:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired verification code.",
-        )
-
-    # Mark code as used
-    matched_code.used_at = datetime.now(UTC)
-
-    # Reset failed attempts
-    if user.failed_login_attempts and user.failed_login_attempts > 0:
-        await db.execute(
-            update(User).where(User.id == user.id).values(
-                failed_login_attempts=0,
-                locked_until=None,
-            )
-        )
-
-    # Create session and tokens (same as login flow)
-    client_ip = request.client.host if request.client else None
-    user_agent = request.headers.get("User-Agent")
-    session = await create_session(db, user_id=user.id, ip=client_ip, ua=user_agent)
-    access_token = create_access_token(user_id=user.id, session_id=session.id)
-    expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
-
-    _, raw_refresh = await create_refresh_token(
-        db, user_id=user.id, session_id=session.id
-    )
-    response.set_cookie(
-        key="refresh_token",
-        value=raw_refresh,
-        httponly=True,
-        secure=settings.SECURE_COOKIE,
-        samesite="strict",
-        path="/api/auth",
-        max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
-    )
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=True,
-        secure=settings.SECURE_COOKIE,
-        samesite="lax",
-        path="/",
-        max_age=expires_in_seconds,
-    )
-
-    try:
-        await db.commit()
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"Database commit failed during email 2FA verification: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
-
-    # Fetch subscription info
-    sub_tier = "free"
-    sub_status = "active"
-    try:
-        subscription = await get_or_create_free_subscription(db, user.id)
-        if subscription and subscription.plan:
-            sub_tier = subscription.plan.tier.value if hasattr(subscription.plan.tier, 'value') else str(subscription.plan.tier)
-            sub_status = subscription.status.value if hasattr(subscription.status, 'value') else str(subscription.status)
-    except Exception as sub_err:
-        logger.warning(f"Failed to fetch subscription for user {user.id}: {sub_err}")
-
-    from backend.middleware.feature_access import is_developer as check_is_developer
-    is_dev = False
-    try:
-        is_dev = await check_is_developer(db, user.id)
-    except Exception:
-        pass
-
-    two_factor_required = not user.two_factor_enabled
-
-    return LoginOut(
-        access_token=access_token,
-        token_type="bearer",
-        session_id=str(session.id),
-        expires_in=expires_in_seconds,
-        user_id=user.id,
-        email=user.email,
-        email_verified=True,
-        subscription_tier="siddha" if is_dev else sub_tier,
-        subscription_status=sub_status,
-        is_developer=is_dev,
-        two_factor_required=two_factor_required,
-    )
 
 
 # ----------------------

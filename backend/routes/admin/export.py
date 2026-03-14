@@ -98,7 +98,6 @@ async def export_users(
             "email": user.email,
             "auth_uid": user.auth_uid,
             "locale": user.locale,
-            "two_factor_enabled": user.two_factor_enabled,
             "created_at": user.created_at.isoformat() if user.created_at else None,
         }
         

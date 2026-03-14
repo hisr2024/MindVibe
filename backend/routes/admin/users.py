@@ -38,7 +38,6 @@ class UserSummary(BaseModel):
     email: Optional[str]
     auth_uid: str
     locale: str
-    two_factor_enabled: bool
     is_suspended: bool
     created_at: datetime
 
@@ -49,7 +48,6 @@ class UserDetail(BaseModel):
     email: Optional[str]
     auth_uid: str
     locale: str
-    two_factor_enabled: bool
     is_suspended: bool
     created_at: datetime
     # Profile
@@ -172,7 +170,6 @@ async def list_users(
             email=u.email,
             auth_uid=u.auth_uid,
             locale=u.locale,
-            two_factor_enabled=u.two_factor_enabled,
             is_suspended=u.deleted_at is not None,
             created_at=u.created_at,
         )
@@ -248,7 +245,6 @@ async def get_user(
         email=user.email,
         auth_uid=user.auth_uid,
         locale=user.locale,
-        two_factor_enabled=user.two_factor_enabled,
         is_suspended=user.deleted_at is not None,
         created_at=user.created_at,
         full_name=profile.full_name if profile else None,

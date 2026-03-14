@@ -512,10 +512,8 @@ function UnauthenticatedAccountView() {
   const [loginForm, setLoginForm] = useState({
     email: '',
     password: '',
-    twoFactorCode: '',
   })
 
-  const [needsTwoFactor, setNeedsTwoFactor] = useState(false)
   const [emailNotVerified, setEmailNotVerified] = useState(false)
   const [unverifiedEmail, setUnverifiedEmail] = useState('')
   const [isResendingVerification, setIsResendingVerification] = useState(false)
@@ -600,7 +598,7 @@ function UnauthenticatedAccountView() {
           : 'Account created! Please check your email for a verification link to complete registration.',
       })
       setCreateForm({ name: '', email: '', password: '', confirmPassword: '' })
-      setLoginForm({ email: result.email, password: '', twoFactorCode: '' })
+      setLoginForm({ email: result.email, password: '' })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create account. Please try again.'
       const msgLower = message.toLowerCase()
@@ -633,19 +631,13 @@ function UnauthenticatedAccountView() {
     setIsSubmitting(true)
 
     try {
-      const authUser = await login(loginForm.email.trim(), loginForm.password, loginForm.twoFactorCode || undefined)
+      await login(loginForm.email.trim(), loginForm.password)
 
       setStatus({ type: 'success', message: 'Signed in successfully! Your journey awaits.' })
-      setLoginForm({ email: '', password: '', twoFactorCode: '' })
-      setNeedsTwoFactor(false)
+      setLoginForm({ email: '', password: '' })
       setEmailNotVerified(false)
 
-      // Redirect: mandatory 2FA setup if not configured, otherwise dashboard
-      if (authUser.twoFactorRequired) {
-        router.push('/settings/security?setup2fa=true')
-      } else {
-        router.push('/dashboard')
-      }
+      router.push('/dashboard')
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed. Please try again.'
       const errCode = (err as Error & { code?: string })?.code
@@ -658,18 +650,8 @@ function UnauthenticatedAccountView() {
           message: 'Your email address has not been verified yet. Please check your inbox for the verification link, or resend it below.',
         })
       } else {
-        const msgLower = message.toLowerCase()
-        if (
-          msgLower.includes('two-factor') ||
-          msgLower.includes('2fa') ||
-          msgLower.includes('additional_verification_required')
-        ) {
-          setNeedsTwoFactor(true)
-          setStatus({ type: 'info', message: 'Enter your two-factor authentication code.' })
-        } else {
-          setEmailNotVerified(false)
-          setStatus({ type: 'error', message })
-        }
+        setEmailNotVerified(false)
+        setStatus({ type: 'error', message })
       }
     } finally {
       setIsSubmitting(false)
@@ -965,7 +947,7 @@ function UnauthenticatedAccountView() {
                 >
                   {isSubmitting ? 'Creating account...' : 'Create secure account'}
                 </button>
-                <p className="text-center text-xs text-[#f5f0e8]/70">Secured with bcrypt encryption + email verification + 2FA</p>
+                <p className="text-center text-xs text-[#f5f0e8]/70">Secured with bcrypt encryption + email verification</p>
               </form>
             ) : (
               <form className="mt-6 space-y-4" onSubmit={handleLogin} autoComplete="on">
@@ -997,23 +979,6 @@ function UnauthenticatedAccountView() {
                     placeholder="Enter your password"
                   />
                 </div>
-                {needsTwoFactor && (
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-[#f5f0e8]" htmlFor="two-factor">Two-Factor Code</label>
-                    <input
-                      id="two-factor"
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      value={loginForm.twoFactorCode}
-                      onChange={event => setLoginForm({ ...loginForm, twoFactorCode: event.target.value.replace(/\D/g, '').slice(0, 6) })}
-                      disabled={isSubmitting}
-                      className="w-full rounded-xl border border-cyan-500/30 bg-slate-900/70 px-3 py-3 text-sm text-[#f5f0e8] outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/40 disabled:opacity-50"
-                      placeholder="6-digit code"
-                      maxLength={6}
-                    />
-                  </div>
-                )}
                 <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[#f5f0e8]/75">
                   <button
                     type="button"
@@ -1055,15 +1020,9 @@ export default function AccountPageClient() {
   const searchParams = useSearchParams()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // After login, enforce 2FA setup if not configured, then redirect
+  // After login, handle redirect if specified
   useEffect(() => {
     if (isAuthenticated && !authLoading && user) {
-      // Mandatory 2FA: redirect to security settings if 2FA is not set up
-      if (user.twoFactorRequired) {
-        router.push('/settings/security?setup2fa=true')
-        return
-      }
-
       const redirect = searchParams.get('redirect')
       if (redirect && redirect.startsWith('/')) {
         router.push(redirect)
@@ -1095,18 +1054,6 @@ export default function AccountPageClient() {
   }
 
   if (isAuthenticated && user) {
-    // Don't render the full dashboard if 2FA setup is pending — redirect is in progress
-    if (user.twoFactorRequired) {
-      return (
-        <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
-          <div className="text-center py-12">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-[#d4a44c]/30 border-t-[#d4a44c]" />
-            <p className="mt-4 text-sm text-[#f5f0e8]/75">Setting up account security...</p>
-          </div>
-        </main>
-      )
-    }
-
     return (
       <AuthenticatedAccountView
         user={user}

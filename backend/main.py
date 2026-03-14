@@ -509,10 +509,6 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Auth router: {e}")
 
-# NOTE: 2FA endpoints are included in auth.py router (no separate import needed)
-# The two_factor_auth.py module exists for reference but endpoints are in auth.py
-startup_logger.info("\n[2FA] 2FA endpoints included in Auth router")
-
 # Load WebAuthn (biometric authentication) router
 startup_logger.info("\n[WebAuthn] Attempting to import WebAuthn router...")
 try:
