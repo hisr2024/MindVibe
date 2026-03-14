@@ -10,9 +10,6 @@ export { ShankhaIcon } from '@/components/icons/ShankhaIcon'
 export { VoiceInputButton, type VoiceInputButtonProps } from './VoiceInputButton'
 export { VoiceResponseButton, type VoiceResponseButtonProps } from './VoiceResponseButton'
 export { VoiceOutputButton, type VoiceOutputButtonProps } from './VoiceOutputButton'
-export { UniversalVoiceInput, type UniversalVoiceInputProps } from './UniversalVoiceInput'
-export { ChatVoiceInput, type ChatVoiceInputProps } from './ChatVoiceInput'
-export { VoiceToTextSettings, type VoiceToTextSettingsProps } from './VoiceToTextSettings'
 export { KiaanVoiceNav } from './KiaanVoiceNav'
 
 // Voice Enhancements UI (used by Quantum Dive and other KIAAN tools)
