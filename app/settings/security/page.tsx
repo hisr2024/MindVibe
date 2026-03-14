@@ -560,7 +560,7 @@ function SecuritySettingsContent() {
               </p>
             </div>
 
-            {setupData?.qr_code && (
+            {setupData?.qr_code ? (
               <div className="flex justify-center">
                 <div className="p-4 bg-white rounded-xl">
                   <Image
@@ -573,7 +573,16 @@ function SecuritySettingsContent() {
                   />
                 </div>
               </div>
-            )}
+            ) : setupData?.uri ? (
+              <div className="flex justify-center">
+                <div className="p-4 bg-amber-500/10 rounded-xl border border-amber-500/30 max-w-sm text-center">
+                  <p className="text-sm text-amber-200 mb-2">QR code unavailable. Copy this link into your authenticator app:</p>
+                  <code className="block px-3 py-2 bg-black/30 rounded-lg text-[#e8b54a] font-mono text-xs break-all">
+                    {setupData.uri}
+                  </code>
+                </div>
+              </div>
+            ) : null}
 
             <div className="text-center">
               <p className="text-xs text-[#f5f0e8]/70 mb-2">
