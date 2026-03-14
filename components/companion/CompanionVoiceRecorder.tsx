@@ -54,6 +54,11 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
   // Track recording state via ref so event handlers avoid stale closures.
   const stateRef = useRef<RecordingState>(state)
   useEffect(() => { stateRef.current = state }, [state])
+  // Accumulate all final transcript segments until user taps stop
+  const accumulatedRef = useRef<string>('')
+  // Safety cap: max consecutive onend restarts without any result
+  const restartCountRef = useRef(0)
+  const maxConsecutiveRestarts = 10
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -74,6 +79,10 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
 
   const startRecording = useCallback(async () => {
     if (isDisabled || isProcessing) return
+
+    // Reset accumulated transcript for new recording session
+    accumulatedRef.current = ''
+    restartCountRef.current = 0
 
     // Get SpeechRecognition constructor (standard or webkit-prefixed)
     const SpeechRecognitionCtor =
@@ -107,6 +116,9 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
         const lastResult = event.results[event.results.length - 1]
         if (!lastResult) return
 
+        // Reset restart counter — we got a result, recognition is healthy
+        restartCountRef.current = 0
+
         if (lastResult.isFinal) {
           // Select the highest-confidence alternative
           let bestTranscript = ''
@@ -119,31 +131,28 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
             }
           }
 
+          // Accumulate final segments — don't stop yet, user may keep speaking
           if (bestTranscript.trim()) {
-            onTranscription(bestTranscript.trim())
+            const separator = accumulatedRef.current ? ' ' : ''
+            accumulatedRef.current += separator + bestTranscript.trim()
           }
-          setLiveTranscript('')
-          clearTimer()
-          stateRef.current = 'idle'
-          setState('idle')
-          setDuration(0)
-          try { recognition.stop() } catch { /* may already be stopped */ }
+          setLiveTranscript(accumulatedRef.current)
         } else {
           const interim = lastResult[0]?.transcript || ''
-          setLiveTranscript(interim)
+          setLiveTranscript(accumulatedRef.current + (accumulatedRef.current ? ' ' : '') + interim)
         }
       }
 
-      let noSpeechRestarts = 0
-      const maxNoSpeechRestarts = 3
-
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        // Auto-restart on no-speech instead of giving up immediately
-        if (event.error === 'no-speech' && noSpeechRestarts < maxNoSpeechRestarts) {
-          noSpeechRestarts++
-          return // onend will fire and we restart there
-        }
+        // no-speech is normal — onend will fire and auto-restart
+        if (event.error === 'no-speech') return
+
+        // Fatal errors: not-allowed, audio-capture, aborted — stop recording
         clearTimer()
+        if (accumulatedRef.current.trim()) {
+          onTranscription(accumulatedRef.current.trim())
+          accumulatedRef.current = ''
+        }
         stateRef.current = 'idle'
         setState('idle')
         setDuration(0)
@@ -151,15 +160,34 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
       }
 
       recognition.onend = () => {
-        // Auto-restart on no-speech while still in recording state
-        if (stateRef.current === 'recording' && noSpeechRestarts > 0 && noSpeechRestarts <= maxNoSpeechRestarts) {
+        // If user hasn't tapped stop, auto-restart recognition
+        // (browsers end recognition after ~60s or on pauses)
+        if (stateRef.current === 'recording' && recognitionRef.current) {
+          restartCountRef.current++
+          if (restartCountRef.current > maxConsecutiveRestarts) {
+            // Too many restarts without results — give up
+            clearTimer()
+            if (accumulatedRef.current.trim()) {
+              onTranscription(accumulatedRef.current.trim())
+              accumulatedRef.current = ''
+            }
+            stateRef.current = 'idle'
+            setState('idle')
+            setDuration(0)
+            setLiveTranscript('')
+            return
+          }
           setTimeout(() => {
             if (stateRef.current === 'recording' && recognitionRef.current) {
               try {
                 recognitionRef.current.start()
               } catch {
-                // Restart failed — clean up
+                // Restart failed — submit what we have and clean up
                 clearTimer()
+                if (accumulatedRef.current.trim()) {
+                  onTranscription(accumulatedRef.current.trim())
+                  accumulatedRef.current = ''
+                }
                 stateRef.current = 'idle'
                 setState('idle')
                 setDuration(0)
@@ -168,15 +196,6 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
             }
           }, 300)
           return
-        }
-
-        // Normal end — clean up if still recording (unexpected end)
-        if (stateRef.current === 'recording') {
-          clearTimer()
-          stateRef.current = 'idle'
-          setState('idle')
-          setDuration(0)
-          setLiveTranscript('')
         }
       }
 
@@ -202,11 +221,17 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
       try { recognitionRef.current.stop() } catch { /* may already be stopped */ }
     }
     clearTimer()
+    // Submit accumulated transcript before resetting
+    if (accumulatedRef.current.trim()) {
+      onTranscription(accumulatedRef.current.trim())
+      accumulatedRef.current = ''
+    }
     stateRef.current = 'idle'
     setState('idle')
     setDuration(0)
     setLiveTranscript('')
-  }, [clearTimer])
+    restartCountRef.current = 0
+  }, [clearTimer, onTranscription])
 
   const toggleRecording = useCallback(() => {
     if (state === 'recording') {

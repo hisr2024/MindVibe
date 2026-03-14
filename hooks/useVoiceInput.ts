@@ -95,7 +95,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     }
   }, [language])
 
-  const startListening = useCallback(() => {
+  const startListening = useCallback(async () => {
     const voiceCheck = canUseVoiceInput()
     if (!voiceCheck.available && !onDeviceSTT.canHandleSTT) {
       const errorMsg = voiceCheck.reason || 'Voice input not available'
@@ -118,9 +118,16 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     // Try on-device first (Tier 1/2), fall back to Web Speech API (Tier 3)
     if (onDeviceSTT.canHandleSTT) {
       usingOnDeviceRef.current = true
-      onDeviceSTT.startListening()
-      setIsListening(true)
-      return
+      try {
+        await onDeviceSTT.startListening()
+        setIsListening(true)
+      } catch (err) {
+        // On-device failed — fall through to Web Speech API
+        usingOnDeviceRef.current = false
+        const msg = err instanceof Error ? err.message : String(err)
+        onError?.(msg)
+      }
+      if (usingOnDeviceRef.current) return
     }
 
     // Web Speech API fallback

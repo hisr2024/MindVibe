@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { apiFetch } from '@/lib/api'
 
@@ -26,6 +26,14 @@ export default function DeleteAccountModal({
   } | null>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
+
+  const handleClose = useCallback(() => {
+    setStep('warning')
+    setReason('')
+    setConfirmText('')
+    setErrorMessage('')
+    onClose()
+  }, [onClose])
 
   // Focus management: focus first element on open, restore on close
   useEffect(() => {
@@ -66,7 +74,7 @@ export default function DeleteAccountModal({
     }
     window.addEventListener('keydown', handleTabKey)
     return () => window.removeEventListener('keydown', handleTabKey)
-  }, [isOpen])
+  }, [isOpen, handleClose])
 
   const handleSubmit = async () => {
     if (confirmText !== 'DELETE MY ACCOUNT') {
@@ -133,14 +141,6 @@ export default function DeleteAccountModal({
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const handleClose = () => {
-    setStep('warning')
-    setReason('')
-    setConfirmText('')
-    setErrorMessage('')
-    onClose()
   }
 
   if (!isOpen) return null

@@ -109,12 +109,19 @@ export function useOnDeviceSTT(options: UseOnDeviceSTTOptions = {}): UseOnDevice
     })
   }, [language])
 
-  const startListening = useCallback(() => {
+  const startListening = useCallback(async () => {
     if (!sttRef.current) return
     setError(null)
     setTranscript('')
     setInterimTranscript('')
-    sttRef.current.startListening()
+    try {
+      await sttRef.current.startListening()
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      setError(msg)
+      setIsListening(false)
+      onErrorRef.current?.(msg)
+    }
   }, [])
 
   const stopListening = useCallback(() => {
