@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -14,7 +14,7 @@ import { apiFetch } from '@/lib/api'
 import { loadRazorpayScript, openRazorpayCheckout, type RazorpayPaymentResponse } from '@/lib/razorpay'
 
 const DivineCelestialBackground = dynamic(
-  () => import('@/components/divine/DivineCelestialBackground'),
+  () => import('@/components/divine/DivineCelestialBackground').then(mod => mod.DivineCelestialBackground),
   { ssr: false }
 )
 
