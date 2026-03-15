@@ -66,6 +66,8 @@ export function useOnDeviceSTT(options: UseOnDeviceSTTOptions = {}): UseOnDevice
     stt.detectCapabilities().then(({ tier, recommendedProvider }) => {
       setDeviceTier(tier)
       setSttProvider(recommendedProvider)
+    }).catch(() => {
+      // Detection failed — stay on defaults (low tier, web-speech-api)
     })
 
     return () => {
@@ -106,6 +108,9 @@ export function useOnDeviceSTT(options: UseOnDeviceSTTOptions = {}): UseOnDevice
       },
     }).then(provider => {
       setSttProvider(provider)
+    }).catch((err) => {
+      setError(err instanceof Error ? err.message : String(err))
+      onErrorRef.current?.(err instanceof Error ? err.message : String(err))
     })
   }, [language])
 
