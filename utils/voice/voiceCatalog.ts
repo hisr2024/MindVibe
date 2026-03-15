@@ -540,10 +540,14 @@ export function getSarvamVoices(): VoiceSpeaker[] {
 /** Get the saved voice selection, or default */
 export function getSavedVoice(): VoiceSpeaker {
   if (typeof window === 'undefined') return VOICE_SPEAKERS[0]
-  const savedId = localStorage.getItem(STORAGE_KEY)
-  if (savedId) {
-    const found = getVoiceById(savedId)
-    if (found) return found
+  try {
+    const savedId = localStorage.getItem(STORAGE_KEY)
+    if (savedId) {
+      const found = getVoiceById(savedId)
+      if (found) return found
+    }
+  } catch {
+    // localStorage unavailable (private browsing, SecurityError)
   }
   return VOICE_SPEAKERS[0]
 }
@@ -551,19 +555,31 @@ export function getSavedVoice(): VoiceSpeaker {
 /** Save voice selection to localStorage */
 export function saveVoiceSelection(voiceId: string): void {
   if (typeof window === 'undefined') return
-  localStorage.setItem(STORAGE_KEY, voiceId)
+  try {
+    localStorage.setItem(STORAGE_KEY, voiceId)
+  } catch {
+    // localStorage unavailable (private browsing, QuotaExceeded)
+  }
 }
 
 /** Get the saved language preference */
 export function getSavedLanguage(): VoiceLanguage {
   if (typeof window === 'undefined') return 'en'
-  return (localStorage.getItem(LANGUAGE_KEY) as VoiceLanguage) || 'en'
+  try {
+    return (localStorage.getItem(LANGUAGE_KEY) as VoiceLanguage) || 'en'
+  } catch {
+    return 'en'
+  }
 }
 
 /** Save language preference */
 export function saveLanguagePreference(lang: VoiceLanguage): void {
   if (typeof window === 'undefined') return
-  localStorage.setItem(LANGUAGE_KEY, lang)
+  try {
+    localStorage.setItem(LANGUAGE_KEY, lang)
+  } catch {
+    // localStorage unavailable (private browsing, QuotaExceeded)
+  }
 }
 
 /** Map a voice to the backend language code for TTS.
