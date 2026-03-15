@@ -66,6 +66,9 @@ class GitaValidator:
                 "watching", "observing", "notice the worry", "underneath",
                 "the person observing", "awareness", "still here",
                 "doesn't change", "who you are beyond", "core self",
+                "the watcher", "narrating a story", "screen", "movie",
+                "instrument", "untouched", "step behind", "roles shift",
+                "noticing", "character", "the mind doubts",
             ],
         },
         "phala_tyaga": {
@@ -79,6 +82,9 @@ class GitaValidator:
                 "contribution", "not a strategy for winning", "action is complete",
                 "no bargaining", "silent hope", "subtle craving",
                 "done your part", "not entitled",
+                "grip", "invisible demand", "expectation",
+                "transaction", "rehearsal", "clinging",
+                "afraid of losing", "craving", "demand",
             ],
         },
         "samatvam": {
@@ -91,7 +97,10 @@ class GitaValidator:
                 "both outcomes", "success and failure", "either way",
                 "remain steady", "equally", "whether it works or not",
                 "praise or blame", "positive or negative",
-                "undisturbed", "composure",
+                "undisturbed", "composure", "quiet composure",
+                "inner stability", "calm nod", "visitors",
+                "riverbed", "open hand", "survived",
+                "praise and criticism", "weathered",
             ],
         },
         "ahamkara": {
@@ -105,6 +114,9 @@ class GitaValidator:
                 "ego", "identity at stake", "about you",
                 "says about you", "performer", "person from the performance",
                 "not about your competence", "separate",
+                "the mind claims", "ego speaking", "doership",
+                "role", "label", "cage the mind builds",
+                "collapsed", "single word",
             ],
         },
         "ishvara_arpana": {
@@ -118,6 +130,9 @@ class GitaValidator:
                 "release to something larger", "done your part",
                 "let it go", "unfold as it will", "trust the process",
                 "many factors", "not one person's to control",
+                "unclench", "gift", "no longer yours",
+                "walk away clean", "zero ownership", "weight lifts",
+                "letter", "offering", "dedicate",
             ],
         },
     }

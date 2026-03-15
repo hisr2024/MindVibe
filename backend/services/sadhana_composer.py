@@ -28,9 +28,10 @@ from backend.services.kiaan_friendship_engine import get_daily_wisdom
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# OpenAI client (uses OPENAI_API_KEY from environment automatically)
+# OpenAI client — guarded initialisation (matches openai_optimizer pattern)
 # ---------------------------------------------------------------------------
-client = openai.AsyncOpenAI()
+_api_key = os.getenv("OPENAI_API_KEY", "").strip()
+client = openai.AsyncOpenAI(api_key=_api_key) if _api_key else None
 
 # Model selection - prefer a fast, cost-effective model for latency
 OPENAI_MODEL = os.getenv("SADHANA_OPENAI_MODEL", "gpt-4o-mini")
@@ -225,6 +226,9 @@ async def compose_daily_sadhana(
     dharma_intention = FALLBACK_DHARMA_INTENTION.copy()
 
     try:
+        if client is None:
+            raise RuntimeError("OpenAI client not configured")
+
         system_msg, user_msg = _build_personalisation_prompt(
             verse_insight=wisdom.get("insight", ""),
             verse_id=wisdom.get("verse_id", ""),
