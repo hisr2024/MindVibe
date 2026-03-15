@@ -67,8 +67,8 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
     onError,
   } = options
 
-  const language = options.language || (typeof window !== 'undefined' ? getSavedLanguage() : 'en')
-  const voiceId = options.voiceId || (typeof window !== 'undefined' ? getSavedVoice().id : 'sarvam-aura')
+  const language = options.language || (typeof window !== 'undefined' ? (getSavedLanguage() || 'en') : 'en')
+  const voiceId = options.voiceId || (typeof window !== 'undefined' ? (getSavedVoice()?.id || 'sarvam-aura') : 'sarvam-aura')
 
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [error, setError] = useState<string | null>(null)

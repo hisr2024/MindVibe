@@ -279,6 +279,11 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
       setStatus('listening')
       return true
     } catch {
+      // Release mic if getUserMedia succeeded but something else failed
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach(t => t.stop())
+        mediaStreamRef.current = null
+      }
       return false
     }
   }, [language, punctuationAssist, onTranscript, onError, status])

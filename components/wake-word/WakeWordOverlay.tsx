@@ -16,8 +16,6 @@
  * Design: Dark immersive backdrop with glowing KIAAN orb, glass-morphism cards.
  */
 
-'use client'
-
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
@@ -61,9 +59,10 @@ export function WakeWordOverlay() {
   const [kiaanResponse, setKiaanResponse] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  // Read user's saved voice preferences
-  const savedVoiceId = typeof window !== 'undefined' ? getSavedVoice().id : 'sarvam-aura'
-  const savedLanguage = typeof window !== 'undefined' ? getSavedLanguage() : 'en'
+  // Read user's saved voice preferences (null-safe — getSavedVoice always
+  // returns a speaker, but guard against edge cases where localStorage is corrupted)
+  const savedVoiceId = typeof window !== 'undefined' ? (getSavedVoice()?.id || 'sarvam-aura') : 'sarvam-aura'
+  const savedLanguage = typeof window !== 'undefined' ? (getSavedLanguage() || 'en') : 'en'
 
   const friendEngineRef = useRef(new KiaanFriendEngine())
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -252,6 +251,10 @@ export function WakeWordOverlay() {
   useEffect(() => {
     if (!isActivated) return
 
+    // Track nested timers so cleanup can cancel them all
+    let fallbackTimer: ReturnType<typeof setTimeout> | null = null
+    let cancelled = false
+
     // Pause wake word detection during conversation
     pauseWakeWord()
 
@@ -262,9 +265,9 @@ export function WakeWordOverlay() {
     }
 
     // Show divine greeting first, then start listening
-    // setState calls are inside a setTimeout to avoid synchronous setState in effect
     const greeting = getRandomGreeting()
     const greetTimer = setTimeout(async () => {
+      if (cancelled) return
       setKiaanResponse(greeting)
       setPhase('greeting')
       try {
@@ -280,10 +283,13 @@ export function WakeWordOverlay() {
           }),
         })
 
+        if (cancelled) return
+
         if (res.ok) {
           const contentType = res.headers.get('content-type')
           if (contentType?.includes('audio')) {
             const blob = await res.blob()
+            if (cancelled) return
             const url = URL.createObjectURL(blob)
             const audio = new Audio(url)
             audioRef.current = audio
@@ -291,17 +297,20 @@ export function WakeWordOverlay() {
             audio.onended = () => {
               URL.revokeObjectURL(url)
               audioRef.current = null
-              setKiaanResponse('')
-              setPhase('listening')
-              startListening()
+              if (!cancelled) {
+                setKiaanResponse('')
+                setPhase('listening')
+                startListening()
+              }
             }
             audio.onerror = () => {
               URL.revokeObjectURL(url)
               audioRef.current = null
-              // Fallback: skip greeting audio, go to listening
-              setKiaanResponse('')
-              setPhase('listening')
-              startListening()
+              if (!cancelled) {
+                setKiaanResponse('')
+                setPhase('listening')
+                startListening()
+              }
             }
 
             await audio.play()
@@ -312,18 +321,30 @@ export function WakeWordOverlay() {
         // Backend unavailable
       }
 
+      if (cancelled) return
+
       // Fallback: show greeting briefly then listen
-      setTimeout(() => {
-        setKiaanResponse('')
-        setPhase('listening')
-        startListening()
+      fallbackTimer = setTimeout(() => {
+        if (!cancelled) {
+          setKiaanResponse('')
+          setPhase('listening')
+          startListening()
+        }
       }, 1500)
     }, 300)
 
     return () => {
+      cancelled = true
       clearTimeout(greetTimer)
+      if (fallbackTimer) clearTimeout(fallbackTimer)
       if (dismissTimerRef.current) {
         clearTimeout(dismissTimerRef.current)
+        dismissTimerRef.current = null
+      }
+      // Stop greeting audio if still playing during cleanup
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
       }
     }
   }, [isActivated, pauseWakeWord, startListening, savedVoiceId, savedLanguage])

@@ -25,16 +25,31 @@ export async function POST(request: NextRequest) {
 
       if (contentType.includes('audio')) {
         // Forward audio bytes directly
-        const audioBuffer = await backendResponse.arrayBuffer()
-        const audioResponse = new NextResponse(audioBuffer, {
-          status: 200,
-          headers: {
-            'Content-Type': contentType,
-            'x-voice-provider': backendResponse.headers.get('x-voice-provider') || 'premium',
-            'x-voice-persona': backendResponse.headers.get('x-voice-persona') || 'unknown',
-          },
-        })
-        return forwardCookies(backendResponse, audioResponse)
+        try {
+          const audioBuffer = await backendResponse.arrayBuffer()
+          if (audioBuffer.byteLength === 0) {
+            // Empty audio — fall through to browser fallback
+            return NextResponse.json({
+              fallback_to_browser: true,
+              browser_config: { rate: 0.93, pitch: 0 },
+            })
+          }
+          const audioResponse = new NextResponse(audioBuffer, {
+            status: 200,
+            headers: {
+              'Content-Type': contentType,
+              'x-voice-provider': backendResponse.headers.get('x-voice-provider') || 'premium',
+              'x-voice-persona': backendResponse.headers.get('x-voice-persona') || 'unknown',
+            },
+          })
+          return forwardCookies(backendResponse, audioResponse)
+        } catch {
+          // arrayBuffer read failed — fall through to browser fallback
+          return NextResponse.json({
+            fallback_to_browser: true,
+            browser_config: { rate: 0.93, pitch: 0 },
+          })
+        }
       }
 
       // Forward JSON (browser fallback config)

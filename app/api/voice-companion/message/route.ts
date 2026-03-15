@@ -232,6 +232,13 @@ export async function POST(request: NextRequest) {
           if (data && typeof data.response === 'string' && data.mood && data.phase) {
             return forwardCookies(companionResponse, NextResponse.json({ ...data, ai_tier: 'backend' }))
           }
+          // Backend returned 200 but with unexpected shape — log and fall through
+          console.warn('[Voice Companion] Backend returned incomplete data, falling back. Keys:', data ? Object.keys(data) : 'null')
+        } else {
+          // Backend returned non-200 — log status and error body for debugging
+          let errorBody = ''
+          try { errorBody = await companionResponse.text() } catch { /* ignore */ }
+          console.warn(`[Voice Companion] Backend returned ${companionResponse.status}: ${errorBody.slice(0, 200)}`)
         }
       } catch (backendErr) {
         console.error('[Voice Companion] Backend proxy failed:', backendErr instanceof Error ? backendErr.message : backendErr)
