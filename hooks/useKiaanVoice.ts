@@ -73,6 +73,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const blobUrlRef = useRef<string | null>(null)
   const wasListeningRef = useRef(false)
 
   // Browser TTS (instant, for local responses)
@@ -142,12 +143,16 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
     return () => document.removeEventListener('visibilitychange', handleVisibility)
   }, [isListening, stopSTT, startSTT, cancelBrowserSpeech])
 
-  // Cleanup audio on unmount
+  // Cleanup audio and blob URLs on unmount
   useEffect(() => {
     return () => {
       if (audioRef.current) {
         audioRef.current.pause()
         audioRef.current = null
+      }
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current)
+        blobUrlRef.current = null
       }
     }
   }, [])
@@ -203,18 +208,25 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
             speakBrowser(text)
             return
           }
+          // Revoke any previous blob URL before creating a new one
+          if (blobUrlRef.current) {
+            URL.revokeObjectURL(blobUrlRef.current)
+          }
           const url = URL.createObjectURL(blob)
+          blobUrlRef.current = url
           const audio = new Audio(url)
           audioRef.current = audio
 
           audio.onended = () => {
             URL.revokeObjectURL(url)
+            blobUrlRef.current = null
             audioRef.current = null
             setIsSpeaking(false)
             onSpeakEnd?.()
           }
           audio.onerror = () => {
             URL.revokeObjectURL(url)
+            blobUrlRef.current = null
             audioRef.current = null
             // Fall back to browser TTS — isSpeaking stays true
             // until browser TTS fires onEnd callback
@@ -223,6 +235,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
 
           audio.onabort = () => {
             URL.revokeObjectURL(url)
+            blobUrlRef.current = null
             audioRef.current = null
             setIsSpeaking(false)
           }
@@ -256,6 +269,10 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current = null
+    }
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current)
+      blobUrlRef.current = null
     }
     setIsSpeaking(false)
   }, [stopSTT, cancelBrowserSpeech])

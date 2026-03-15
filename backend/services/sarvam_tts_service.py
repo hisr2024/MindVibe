@@ -436,15 +436,22 @@ async def synthesize_sarvam_tts(
     # Verify speaker supports the target language
     if sarvam_lang not in speaker["languages"]:
         # Fallback to a speaker that supports this language
+        found_fallback = False
         for sid, sinfo in SARVAM_SPEAKERS.items():
             if sarvam_lang in sinfo["languages"]:
                 speaker_id = sid
                 speaker = sinfo
+                found_fallback = True
                 logger.info(
                     f"Sarvam TTS: Speaker fallback {voice_id}→{speaker_id} "
                     f"for language {sarvam_lang}"
                 )
                 break
+        if not found_fallback:
+            logger.warning(
+                f"Sarvam TTS: No speaker supports language {sarvam_lang}, skipping"
+            )
+            return None
 
     # Get emotion-adaptive prosody
     emotion_profile = get_sarvam_emotion_profile(mood)
