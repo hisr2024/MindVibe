@@ -133,6 +133,11 @@ export function WakeWordOverlay() {
         const contentType = response.headers.get('content-type')
         if (contentType?.includes('audio')) {
           const blob = await response.blob()
+          if (blob.size === 0) {
+            // Empty audio — fall through to browser TTS
+            speakBrowser(text)
+            return
+          }
           const url = URL.createObjectURL(blob)
           const audio = new Audio(url)
           audioRef.current = audio
@@ -290,6 +295,10 @@ export function WakeWordOverlay() {
           if (contentType?.includes('audio')) {
             const blob = await res.blob()
             if (cancelled) return
+            if (blob.size === 0) {
+              // Empty audio — fall through to fallback greeting
+              throw new Error('Empty audio blob')
+            }
             const url = URL.createObjectURL(blob)
             const audio = new Audio(url)
             audioRef.current = audio

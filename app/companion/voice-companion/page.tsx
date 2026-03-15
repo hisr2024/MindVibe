@@ -460,6 +460,16 @@ export default function VoiceCompanionPage() {
       setIsPlaying(null)
       return
     }
+    // Stop any currently playing verse before starting new one
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause()
+      currentAudioRef.current.src = ''
+      currentAudioRef.current = null
+    }
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel()
+    }
+
     setIsPlaying(verseKey)
     try {
       const res = await apiFetch('/api/companion/voice/synthesize', {
