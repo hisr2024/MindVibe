@@ -1183,25 +1183,10 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Content router: {e}")
 
-# Load Voice Companion (Best Friend) router
-startup_logger.info("\n[Companion] Attempting to import Voice Companion router...")
-try:
-    from backend.routes.voice_companion import router as voice_companion_router
-    app.include_router(voice_companion_router)
-    startup_logger.info("✅ [SUCCESS] Voice Companion router loaded")
-    startup_logger.info("   • POST   /api/companion/session/start - Start companion session")
-    startup_logger.info("   • POST   /api/companion/message - Send message to KIAAN friend")
-    startup_logger.info("   • POST   /api/companion/session/end - End companion session")
-    startup_logger.info("   • GET    /api/companion/history - Conversation history")
-    startup_logger.info("   • GET    /api/companion/profile - Companion profile")
-    startup_logger.info("   • PATCH  /api/companion/profile - Update preferences")
-    startup_logger.info("   • GET    /api/companion/memories - User memories")
-    startup_logger.info("   • DELETE /api/companion/memories/{id} - Delete memory")
-    startup_logger.info("   • GET    /api/companion/health - Health check")
-except Exception as e:
-    startup_logger.info(f"❌ [ERROR] Failed to load Voice Companion router: {e}")
-
 # Load KIAAN Unified Voice Companion (3-Engine: Guidance + Friend + Voice Guide)
+# NOTE: The legacy voice_companion.py router was removed. All endpoints
+# (session, message, profile, memories, insights, voices, health) are now
+# served exclusively by kiaan_voice_companion.py under /api/voice-companion/.
 startup_logger.info("\n[Voice Companion] Attempting to import KIAAN Unified Voice Companion router...")
 try:
     from backend.routes.kiaan_voice_companion import router as kiaan_voice_companion_router
@@ -1220,6 +1205,13 @@ try:
     startup_logger.info("   • GET    /api/voice-companion/voice-guide/tools - Available ecosystem tools")
     startup_logger.info("   • GET    /api/voice-companion/voice-guide/status - Engine status")
     startup_logger.info("   • POST   /api/voice-companion/voice-guide/input - Inject input to tool")
+    startup_logger.info("   • GET    /api/voice-companion/profile - Companion profile")
+    startup_logger.info("   • PATCH  /api/voice-companion/profile - Update preferences")
+    startup_logger.info("   • GET    /api/voice-companion/memories - User memories")
+    startup_logger.info("   • DELETE /api/voice-companion/memories/{id} - Delete memory")
+    startup_logger.info("   • GET    /api/voice-companion/voices - Available voices")
+    startup_logger.info("   • GET    /api/voice-companion/insights/mood-trends - Mood analytics")
+    startup_logger.info("   • GET    /api/voice-companion/insights/milestones - Friendship milestones")
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load KIAAN Unified Voice Companion router: {e}")
 

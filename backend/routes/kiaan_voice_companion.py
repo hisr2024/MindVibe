@@ -1878,3 +1878,290 @@ async def voice_guide_input_to_tool(
         "source": body.source,
         "message": f"Input ready for {desc.split(' - ')[0]}. Navigate to the tool to complete the action.",
     }
+
+
+# ─── Profile, Memory & Insight Endpoints ─────────────────────────────────
+# Migrated from the legacy voice_companion.py so that ALL companion
+# endpoints live under the unified /api/voice-companion/ prefix.
+
+
+class CompanionProfileResponse(BaseModel):
+    total_sessions: int
+    total_messages: int
+    streak_days: int
+    longest_streak: int
+    preferred_tone: str
+    preferred_name: str | None = None
+    address_style: str
+    friendship_level: str
+    common_moods: dict | None = None
+
+
+class UpdateProfileRequest(BaseModel):
+    preferred_name: str | None = Field(None, max_length=64)
+    preferred_tone: str | None = Field(None, pattern=r"^(warm|playful|gentle|direct)$")
+    address_style: str | None = Field(None, pattern=r"^(friend|dear|buddy|name)$")
+    prefers_tough_love: bool | None = None
+    humor_level: float | None = Field(None, ge=0.0, le=1.0)
+
+
+@router.get("/profile", response_model=CompanionProfileResponse)
+@limiter.limit("20/minute")
+async def get_companion_profile(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Get the user's companion profile and friendship stats."""
+    profile = await _get_or_create_profile(db, current_user)
+    await db.commit()
+
+    return CompanionProfileResponse(
+        total_sessions=profile.total_sessions,
+        total_messages=profile.total_messages,
+        streak_days=profile.streak_days,
+        longest_streak=profile.longest_streak,
+        preferred_tone=profile.preferred_tone,
+        preferred_name=profile.preferred_name,
+        address_style=profile.address_style,
+        friendship_level=_get_friendship_level(profile.total_sessions),
+        common_moods=profile.common_moods,
+    )
+
+
+@router.patch("/profile")
+@limiter.limit("10/minute")
+async def update_companion_profile(
+    request: Request,
+    body: UpdateProfileRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Update companion profile preferences."""
+    profile = await _get_or_create_profile(db, current_user)
+
+    if body.preferred_name is not None:
+        profile.preferred_name = body.preferred_name
+    if body.preferred_tone is not None:
+        profile.preferred_tone = body.preferred_tone
+    if body.address_style is not None:
+        profile.address_style = body.address_style
+    if body.prefers_tough_love is not None:
+        profile.prefers_tough_love = body.prefers_tough_love
+    if body.humor_level is not None:
+        profile.humor_level = body.humor_level
+
+    await db.commit()
+
+    return {"status": "updated", "message": "Your preferences have been saved, friend."}
+
+
+@router.get("/memories")
+@limiter.limit("10/minute")
+async def get_companion_memories(
+    request: Request,
+    limit: int = 20,
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Get what KIAAN remembers about the user (for transparency)."""
+    result = await db.execute(
+        select(CompanionMemory)
+        .where(
+            CompanionMemory.user_id == current_user,
+            CompanionMemory.deleted_at.is_(None),
+        )
+        .order_by(desc(CompanionMemory.importance))
+        .limit(min(limit, 50))
+    )
+    memories = result.scalars().all()
+
+    return {
+        "memories": [
+            {
+                "id": m.id,
+                "type": m.memory_type,
+                "key": m.key,
+                "created_at": m.created_at.isoformat() if m.created_at else None,
+                "importance": m.importance,
+            }
+            for m in memories
+        ],
+        "total": len(memories),
+    }
+
+
+@router.delete("/memories/{memory_id}")
+@limiter.limit("10/minute")
+async def delete_companion_memory(
+    request: Request,
+    memory_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Delete a specific memory (user controls what KIAAN remembers)."""
+    result = await db.execute(
+        select(CompanionMemory).where(
+            CompanionMemory.id == memory_id,
+            CompanionMemory.user_id == current_user,
+        )
+    )
+    memory = result.scalar_one_or_none()
+
+    if not memory:
+        raise HTTPException(status_code=404, detail="Memory not found.")
+
+    memory.soft_delete()
+    await db.commit()
+
+    return {"status": "deleted", "message": "Memory removed. I'll forget that, friend."}
+
+
+@router.get("/voices")
+async def get_companion_voices():
+    """Get available companion voice personas."""
+    from backend.services.companion_voice_service import get_available_voices
+
+    return {"voices": get_available_voices()}
+
+
+@router.get("/insights/mood-trends")
+@limiter.limit("20/minute")
+async def get_mood_trends(
+    request: Request,
+    days: int = 30,
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Get mood trend data for the Self-Awareness Mirror.
+
+    Returns mood frequencies, emotional arc over time, and pattern insights.
+    """
+    from collections import Counter
+
+    from backend.services.companion_friend_engine import get_companion_engine
+
+    since = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=days)
+
+    result = await db.execute(
+        select(
+            CompanionMessage.detected_mood,
+            CompanionMessage.mood_intensity,
+            CompanionMessage.created_at,
+            CompanionMessage.session_id,
+        )
+        .where(
+            CompanionMessage.user_id == current_user,
+            CompanionMessage.role == "user",
+            CompanionMessage.detected_mood.isnot(None),
+            CompanionMessage.created_at >= since,
+            CompanionMessage.deleted_at.is_(None),
+        )
+        .order_by(CompanionMessage.created_at)
+    )
+    rows = result.all()
+
+    mood_history = [
+        {
+            "mood": row.detected_mood,
+            "intensity": row.mood_intensity or 0.5,
+            "timestamp": row.created_at.isoformat() if row.created_at else None,
+            "session_id": row.session_id,
+        }
+        for row in rows
+    ]
+
+    engine = get_companion_engine()
+    patterns = await engine.analyze_emotional_patterns(mood_history)
+
+    daily_moods: dict[str, list[str]] = {}
+    for entry in mood_history:
+        if entry.get("timestamp"):
+            day = entry["timestamp"][:10]
+            daily_moods.setdefault(day, []).append(entry["mood"])
+
+    timeline = []
+    for day, moods in sorted(daily_moods.items()):
+        most_common = Counter(moods).most_common(1)[0][0] if moods else "neutral"
+        timeline.append({
+            "date": day,
+            "primary_mood": most_common,
+            "mood_count": len(moods),
+        })
+
+    return {
+        **patterns,
+        "timeline": timeline,
+        "period_days": days,
+    }
+
+
+@router.get("/insights/milestones")
+@limiter.limit("20/minute")
+async def get_friendship_milestones(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Get friendship milestones and achievements."""
+    profile = await _get_or_create_profile(db, current_user)
+
+    improved_count = await db.scalar(
+        select(func.count(CompanionSession.id))
+        .where(
+            CompanionSession.user_id == current_user,
+            CompanionSession.mood_improved.is_(True),
+        )
+    ) or 0
+
+    days_result = await db.execute(
+        select(func.date_trunc("day", CompanionSession.started_at))
+        .where(CompanionSession.user_id == current_user)
+        .distinct()
+    )
+    total_days = len(days_result.all())
+
+    milestones = []
+    milestone_defs = [
+        (1, "First Conversation", "Started your journey with KIAAN", "new_friend"),
+        (5, "Getting Closer", "5 conversations deep", "familiar"),
+        (10, "True Friend", "10 heartfelt conversations", "close"),
+        (25, "Soul Connection", "25 sessions of growth together", "deep"),
+        (50, "Divine Bond", "50 sessions — a Sakha bond", "divine"),
+        (100, "Eternal Companion", "100 sessions — friends for life", "eternal"),
+    ]
+
+    for threshold, title, description, level in milestone_defs:
+        milestones.append({
+            "threshold": threshold,
+            "title": title,
+            "description": description,
+            "level": level,
+            "achieved": profile.total_sessions >= threshold,
+        })
+
+    streak_milestones = [
+        (3, "3-Day Streak", "Showed up 3 days in a row"),
+        (7, "Week Warrior", "7 consecutive days of self-care"),
+        (14, "Fortnight of Growth", "14 days of consistent inner work"),
+        (30, "Monthly Master", "30-day streak — incredible discipline"),
+    ]
+    for threshold, title, description in streak_milestones:
+        milestones.append({
+            "threshold": threshold,
+            "title": title,
+            "description": description,
+            "level": "streak",
+            "achieved": profile.longest_streak >= threshold,
+        })
+
+    return {
+        "total_sessions": profile.total_sessions,
+        "total_messages": profile.total_messages,
+        "current_streak": profile.streak_days,
+        "longest_streak": profile.longest_streak,
+        "sessions_with_improvement": improved_count,
+        "total_days_active": total_days,
+        "friendship_level": _get_friendship_level(profile.total_sessions),
+        "milestones": milestones,
+    }
