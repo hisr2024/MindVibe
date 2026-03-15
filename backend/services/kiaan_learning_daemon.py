@@ -78,6 +78,12 @@ class DaemonConfig:
     ENABLE_AUDIO = os.getenv("KIAAN_ENABLE_AUDIO", "true").lower() == "true"
     ENABLE_WEB = os.getenv("KIAAN_ENABLE_WEB", "true").lower() == "true"
 
+    # YouTube transcript extraction settings
+    ENABLE_TRANSCRIPT_EXTRACTION = os.getenv("YOUTUBE_TRANSCRIPT_ENABLED", "true").lower() == "true"
+    TRANSCRIPT_LANGUAGES = os.getenv("YOUTUBE_TRANSCRIPT_LANGUAGES", "en,hi,sa").split(",")
+    MAX_TRANSCRIPT_LENGTH = int(os.getenv("YOUTUBE_MAX_TRANSCRIPT_LENGTH", "50000"))
+    MAX_VIDEOS_PER_CYCLE = int(os.getenv("YOUTUBE_MAX_VIDEOS_PER_CYCLE", "5"))
+
     # Daemon mode
     DAEMON_ENABLED = os.getenv("KIAAN_DAEMON_ENABLED", "true").lower() == "true"
 
@@ -613,8 +619,13 @@ class ContentAcquisitionWorker:
             from backend.services.kiaan_learning_engine import LearnedWisdom
             import uuid
 
-            # Extract content for validation
-            content = f"{item.get('title', '')} {item.get('description', '')}"
+            # Extract content for validation - prefer transcript-derived wisdom
+            if item.get("transcript_wisdom"):
+                content = item["transcript_wisdom"]
+            elif item.get("transcript_text"):
+                content = f"{item.get('title', '')} {item.get('transcript_text', '')[:2000]}"
+            else:
+                content = f"{item.get('title', '')} {item.get('description', '')}"
 
             # Validate
             validation = engine.validator.validate_content(
@@ -629,12 +640,15 @@ class ContentAcquisitionWorker:
             source_name = item.get('source', item.get('channel', 'Unknown'))
             source_url = item.get('url', '')
             language = item.get('language', 'en')
-            chapter_refs = validation["chapter_refs"]
-            verse_refs = validation["verse_refs"]
-            themes = validation["keywords_found"]
-            shad_ripu_tags = validation.get("shad_ripu_tags", [])
-            keywords = validation["keywords_found"]
-            quality_score = validation["confidence"]
+
+            # Use pre-extracted data from AI transcript processing if available,
+            # otherwise fall back to validator results
+            chapter_refs = item.get("extracted_chapter_refs") or validation["chapter_refs"]
+            verse_refs = item.get("extracted_verse_refs") or validation["verse_refs"]
+            themes = item.get("extracted_themes") or validation["keywords_found"]
+            shad_ripu_tags = item.get("extracted_shad_ripu_tags") or validation.get("shad_ripu_tags", [])
+            keywords = item.get("extracted_keywords") or validation["keywords_found"]
+            quality_score = item.get("extracted_quality_score") or validation["confidence"]
 
             # Create wisdom object for JSON storage
             wisdom = LearnedWisdom(

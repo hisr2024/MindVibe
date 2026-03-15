@@ -48,6 +48,22 @@ class AddWisdomRequest(BaseModel):
     language: str = Field("en", max_length=8)
 
 
+class ProcessYouTubeVideoRequest(BaseModel):
+    """Request to process a YouTube video for Gita wisdom extraction."""
+    video_url: str = Field(
+        ..., min_length=10, max_length=200,
+        description="YouTube video URL or 11-character video ID"
+    )
+    languages: list[str] = Field(
+        default=["en", "hi", "sa"],
+        description="Preferred transcript languages"
+    )
+    force: bool = Field(
+        False,
+        description="Force reprocessing even if video was already processed"
+    )
+
+
 # =============================================================================
 # Learning Engine Instance
 # =============================================================================
@@ -470,4 +486,131 @@ async def resume_daemon() -> dict[str, Any]:
         return {
             "status": "error",
             "error": str(e),
+        }
+
+
+# =============================================================================
+# YouTube Transcript Processing Endpoints
+# =============================================================================
+
+@router.post("/youtube/process-video")
+@limiter.limit("10/hour")
+async def process_youtube_video(
+    request: Request,
+    body: ProcessYouTubeVideoRequest,
+) -> dict[str, Any]:
+    """
+    Process a YouTube video to extract Gita wisdom from its transcript.
+
+    Fetches the video transcript, extracts wisdom nuggets using AI,
+    validates for Gita compliance, and stores validated wisdom.
+
+    Rate limited to 10 requests per hour.
+    """
+    try:
+        from backend.services.youtube_transcript_service import YouTubeTranscriptService
+    except ImportError:
+        raise HTTPException(
+            status_code=503,
+            detail="YouTube transcript service not available. Install youtube-transcript-api."
+        )
+
+    service = YouTubeTranscriptService()
+
+    # Extract video ID
+    video_id = service.extract_video_id(body.video_url)
+    if not video_id:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Could not extract video ID from: {body.video_url}"
+        )
+
+    # Fetch transcript
+    transcript = service.fetch_transcript(video_id, languages=body.languages)
+    if not transcript:
+        return {
+            "status": "no_transcript",
+            "video_id": video_id,
+            "message": "No transcript available for this video. "
+                       "The video may have captions disabled or be unavailable.",
+        }
+
+    # Extract wisdom nuggets
+    nuggets = service.extract_wisdom_nuggets(
+        transcript=transcript,
+        video_title=f"Video {video_id}",
+        channel_name="Manual Processing",
+    )
+
+    # Process through learning engine validation and storage
+    engine = get_learning_engine()
+    stored_count = 0
+    rejected_count = 0
+    results = []
+
+    for nugget in nuggets:
+        content = nugget.get("content", "")
+        if not content:
+            continue
+
+        validation = engine.validator.validate_content(
+            content,
+            f"https://youtube.com/watch?v={video_id}"
+        )
+
+        results.append({
+            "content_preview": content[:200] + "..." if len(content) > 200 else content,
+            "is_valid": validation["is_valid"],
+            "confidence": validation["confidence"],
+            "chapter_refs": nugget.get("chapter_refs", []),
+            "themes": nugget.get("themes", []),
+            "quality_score": nugget.get("quality_score", 0.0),
+        })
+
+        if validation["is_valid"]:
+            stored_count += 1
+        else:
+            rejected_count += 1
+
+    return {
+        "status": "success",
+        "video_id": video_id,
+        "transcript_length": len(transcript),
+        "nuggets_extracted": len(nuggets),
+        "stored": stored_count,
+        "rejected": rejected_count,
+        "results": results,
+    }
+
+
+@router.get("/youtube/quota")
+async def get_youtube_quota() -> dict[str, Any]:
+    """
+    Get current YouTube Data API quota usage and remaining quota.
+
+    The YouTube Data API v3 grants 10,000 units per day.
+    Each search.list call costs 100 units (~100 searches/day).
+    Transcript fetching does NOT consume API quota.
+    """
+    try:
+        from backend.services.youtube_transcript_service import YouTubeTranscriptService
+        service = YouTubeTranscriptService()
+        tracker = service.quota_tracker
+        return {
+            "status": "success",
+            "daily_quota": tracker.DAILY_QUOTA,
+            "used": tracker.usage,
+            "remaining": tracker.remaining_quota,
+            "search_cost": tracker.SEARCH_COST,
+            "max_searches_remaining": tracker.remaining_quota // tracker.SEARCH_COST,
+            "transcript_api_available": service._transcript_api_available,
+            "openai_available": service._openai_available,
+        }
+    except ImportError:
+        return {
+            "status": "unavailable",
+            "message": "YouTube transcript service not installed",
+            "daily_quota": 10000,
+            "used": 0,
+            "remaining": 10000,
         }

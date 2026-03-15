@@ -60,6 +60,9 @@ sentry-sdk[fastapi]>=2.0.0,<3.0.0
 # HuggingFace Hub for model downloads
 huggingface-hub>=0.21.0,<2.0.0
 
+# YouTube transcript extraction
+youtube-transcript-api>=0.6.1,<1.0.0
+
 # Audio processing
 soundfile>=0.12.0,<0.14.0
 pydub>=0.25.1,<0.26.0

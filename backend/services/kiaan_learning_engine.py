@@ -367,6 +367,18 @@ class ContentFetcher:
         self.spotify_client_id = os.getenv("SPOTIFY_CLIENT_ID")
         self.spotify_client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
 
+        # YouTube transcript extraction service
+        self.transcript_service = None
+        if os.getenv("YOUTUBE_TRANSCRIPT_ENABLED", "true").lower() == "true":
+            try:
+                from backend.services.youtube_transcript_service import YouTubeTranscriptService
+                self.transcript_service = YouTubeTranscriptService()
+                logger.info("YouTube transcript extraction enabled")
+            except ImportError:
+                logger.warning(
+                    "youtube-transcript-api not installed, transcript extraction disabled"
+                )
+
         # Curated Gita RSS feeds
         self.gita_rss_feeds = [
             "https://feeds.feedburner.com/gitadaily",
@@ -456,7 +468,47 @@ class ContentFetcher:
         except Exception as e:
             logger.error(f"Error fetching YouTube content: {e}")
 
+        # Enrich results with transcript-extracted wisdom if service available
+        if self.transcript_service and results:
+            max_videos = int(os.getenv("YOUTUBE_MAX_VIDEOS_PER_CYCLE", "5"))
+            enriched_results = []
+            for item in results[:max_videos]:
+                video_id = self._extract_video_id(item.get("url", ""))
+                if video_id:
+                    try:
+                        nuggets = await self.transcript_service.process_video(
+                            video_id=video_id,
+                            video_metadata=item
+                        )
+                        if nuggets:
+                            enriched_results.extend(nuggets)
+                        else:
+                            # Keep original metadata-only item as fallback
+                            enriched_results.append(item)
+                    except Exception as e:
+                        logger.warning(
+                            f"Transcript processing failed for {video_id}: {e}"
+                        )
+                        enriched_results.append(item)
+                else:
+                    enriched_results.append(item)
+            # Add remaining items that weren't processed for transcripts
+            enriched_results.extend(results[max_videos:])
+            results = enriched_results
+
         return results
+
+    @staticmethod
+    def _extract_video_id(url: str) -> str | None:
+        """Extract YouTube video ID from a URL or bare ID string."""
+        if not url:
+            return None
+        if re.match(r'^[a-zA-Z0-9_-]{11}$', url.strip()):
+            return url.strip()
+        match = re.search(
+            r'(?:v=|youtu\.be/|embed/|shorts/)([a-zA-Z0-9_-]{11})', url
+        )
+        return match.group(1) if match else None
 
     async def fetch_audio_platform_content(
         self,
