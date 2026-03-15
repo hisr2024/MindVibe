@@ -967,7 +967,7 @@ async def _try_edge_tts(
             return None
 
         if not is_edge_supported_language(language):
-            logger.debug(f"Edge TTS: Language '{language}' not supported")
+            logger.debug("Edge TTS: Requested language not supported")
             return None
 
         audio = await synthesize_edge_tts(
