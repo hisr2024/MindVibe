@@ -264,11 +264,15 @@ export class SpeechRecognitionService {
   }
 
   /**
-   * Start listening for voice input
+   * Start listening for voice input.
+   * Returns a promise that resolves once the browser's SpeechRecognition
+   * has actually started (mic permission granted + .start() called).
+   * Callers should await this before showing "listening" UI.
+   *
    * Handles edge cases like starting while stopping, or rapid start/stop.
    * Robust against "already started" errors for always-on wake word listening.
    */
-  start(callbacks: RecognitionCallbacks = {}): void {
+  async start(callbacks: RecognitionCallbacks = {}): Promise<void> {
     if (!this.recognition) {
       callbacks.onError?.('Speech recognition not supported')
       return
@@ -276,19 +280,16 @@ export class SpeechRecognitionService {
 
     // If currently stopping, wait and retry
     if (this.isStopping) {
-      setTimeout(() => {
-        if (this.startAttempts < this.maxStartAttempts) {
-          this.startAttempts++
-          this.start(callbacks)
-        } else {
-          this.startAttempts = 0
-          // Force-reset state and try one more time
-          this.isListening = false
-          this.isStopping = false
-          this.start(callbacks)
-        }
-      }, 150)
-      return
+      await new Promise<void>(resolve => setTimeout(resolve, 150))
+      if (this.startAttempts < this.maxStartAttempts) {
+        this.startAttempts++
+        return this.start(callbacks)
+      }
+      // Force-reset state and try one more time
+      this.startAttempts = 0
+      this.isListening = false
+      this.isStopping = false
+      return this.start(callbacks)
     }
 
     if (this.isListening) {
@@ -306,34 +307,33 @@ export class SpeechRecognitionService {
     // Request microphone permission first, then start recognition.
     // This is critical: on many browsers the Web Speech API does NOT trigger
     // the mic permission dialog on its own, causing silent failure.
-    this.ensureMicrophonePermission().then((granted) => {
-      if (!granted) {
-        this.callbacks.onError?.('not-allowed: Microphone permission denied.')
-        return
-      }
+    const granted = await this.ensureMicrophonePermission()
+    if (!granted) {
+      this.callbacks.onError?.('not-allowed: Microphone permission denied.')
+      return
+    }
 
-      try {
-        this.recognition?.start()
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Failed to start recognition'
+    try {
+      this.recognition?.start()
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to start recognition'
 
-        // Handle "already started" error by aborting and retrying
-        if (errorMsg.includes('already started')) {
-          if (this.startAttempts < this.maxStartAttempts) {
-            this.startAttempts++
-            this.abort()
-            setTimeout(() => this.start(callbacks), 200 + this.startAttempts * 50)
-            return
-          }
-          // Last resort: force state reset
-          this.isListening = false
-          this.isStopping = false
-          this.startAttempts = 0
+      // Handle "already started" error by aborting and retrying
+      if (errorMsg.includes('already started')) {
+        if (this.startAttempts < this.maxStartAttempts) {
+          this.startAttempts++
+          this.abort()
+          await new Promise<void>(resolve => setTimeout(resolve, 200 + this.startAttempts * 50))
+          return this.start(callbacks)
         }
-
-        this.callbacks.onError?.(errorMsg)
+        // Last resort: force state reset
+        this.isListening = false
+        this.isStopping = false
+        this.startAttempts = 0
       }
-    })
+
+      this.callbacks.onError?.(errorMsg)
+    }
   }
 
   /**
