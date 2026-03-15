@@ -32,7 +32,6 @@ import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { apiFetch } from '@/lib/api'
 import { orchestrate, type OrchestratorResult } from '@/lib/kiaan-engine-orchestrator'
-import { KiaanFriendEngine } from '@/lib/kiaan-friend-engine'
 import { getPowerMode, onPowerModeChange, initPowerManager, type PowerMode } from '@/lib/kiaan-power-manager'
 import { engineSyncBus } from '@/lib/kiaan-engine-sync'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
@@ -41,20 +40,16 @@ import type { VoiceLanguage } from '@/utils/voice/voiceCatalog'
 
 // ─── Dynamic imports for heavy components (code-split) ──────────────────────
 const KiaanVoiceOrb = dynamic(
-  () => import('@/components/voice/KiaanVoiceOrb').then(m => ({ default: m.default })),
+  () => import('@/components/voice/KiaanVoiceOrb'),
   { ssr: false }
 )
 const VoiceWaveform = dynamic(
-  () => import('@/components/voice/VoiceWaveform').then(m => ({ default: m.default })),
+  () => import('@/components/voice/VoiceWaveform'),
   { ssr: false }
 )
 const VoiceCompanionSelector = dynamic(
   () => import('@/components/voice/VoiceCompanionSelector'),
   { ssr: false, loading: () => <div className="h-32 animate-pulse rounded-xl bg-white/5" /> }
-)
-const _CompanionVoiceRecorder = dynamic(
-  () => import('@/components/companion/CompanionVoiceRecorder'),
-  { ssr: false }
 )
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -175,7 +170,6 @@ export default function KiaanVoiceCompanionPage() {
   // ── Refs ───────────────────────────────────────────────────────────
   const chatEndRef = useRef<HTMLDivElement>(null)
   const enhanceAbortRef = useRef<AbortController | null>(null)
-  const _friendEngineRef = useRef(new KiaanFriendEngine())
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const isSpeakingRef = useRef(false)
 
@@ -189,12 +183,10 @@ export default function KiaanVoiceCompanionPage() {
     stopListening,
     resetTranscript,
     sttProvider,
-    status: _sttStatus,
   } = useVoiceInput({ language: voiceConfig.language })
 
-  // ── Wake Word Detection ────────────────────────────────────────────
-  const {
-  } = useWakeWord({
+  // ── Wake Word Detection (side-effect only — callbacks handle activation) ──
+  useWakeWord({
     sensitivity: 'high',
     enabled: true,
     onWakeWordDetected: () => {
