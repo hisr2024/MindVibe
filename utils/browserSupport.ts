@@ -87,8 +87,7 @@ export async function requestMicrophonePermission(): Promise<boolean> {
     // Stop the stream immediately as we only needed permission
     stream.getTracks().forEach(track => track.stop());
     return true;
-  } catch (error) {
-    console.error('Microphone permission denied or not available:', error);
+  } catch {
     return false;
   }
 }
@@ -186,12 +185,19 @@ export function getCPUCores(): number {
  * TIER 3 (LOW):  <4GB or no WebGPU — Web Speech API only (0 extra RAM)
  */
 export async function getDeviceTier(): Promise<DeviceTier> {
+  // Mobile devices should never attempt on-device ML models — they lack
+  // sufficient RAM/GPU and the model load causes start/stop loops.
+  if (isMobileDevice()) return 'low'
+
   const memory = getDeviceMemory()
   const cores = getCPUCores()
   const webgpu = await isWebGPUSupported()
 
-  // No WebGPU or very low memory → Tier 3
-  if (!webgpu || memory > 0 && memory < 4) return 'low'
+  // No WebGPU → Tier 3 (on-device ML requires WebGPU)
+  if (!webgpu) return 'low'
+
+  // Low memory (known) → Tier 3
+  if (memory > 0 && memory < 4) return 'low'
 
   // 8GB+ with WebGPU → Tier 1
   if (memory >= 8 && cores >= 4) return 'high'
@@ -199,11 +205,23 @@ export async function getDeviceTier(): Promise<DeviceTier> {
   // 4-7GB with WebGPU → Tier 2
   if (memory >= 4) return 'mid'
 
-  // deviceMemory not available (Firefox, Safari): infer from cores
+  // deviceMemory not available (Firefox, Safari desktop): infer from cores
   if (cores >= 8) return 'high'
   if (cores >= 4) return 'mid'
 
   return 'low'
+}
+
+/**
+ * Detect if the current device is a mobile phone or tablet.
+ * Used to skip on-device ML models which cause instability on mobile.
+ */
+export function isMobileDevice(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)
+    || (typeof navigator !== 'undefined' && 'maxTouchPoints' in navigator && navigator.maxTouchPoints > 1
+        && /Macintosh/.test(ua)) // iPad pretending to be Mac
 }
 
 /**

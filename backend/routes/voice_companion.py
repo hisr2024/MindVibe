@@ -30,7 +30,6 @@ from backend.models.companion import (
     CompanionProfile,
     CompanionSession,
 )
-from backend.models.user import User
 
 
 logger = logging.getLogger(__name__)
@@ -267,7 +266,7 @@ async def start_companion_session(
     request: Request,
     body: StartSessionRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Start a new companion conversation session.
 
@@ -277,13 +276,13 @@ async def start_companion_session(
     from backend.services.companion_friend_engine import get_companion_engine
 
     engine = get_companion_engine()
-    profile = await _get_or_create_profile(db, current_user.id)
+    profile = await _get_or_create_profile(db, current_user)
 
     # Close any existing active sessions
     await db.execute(
         update(CompanionSession)
         .where(
-            CompanionSession.user_id == current_user.id,
+            CompanionSession.user_id == current_user,
             CompanionSession.is_active.is_(True),
         )
         .values(
@@ -294,7 +293,7 @@ async def start_companion_session(
 
     # Create new session
     session = CompanionSession(
-        user_id=current_user.id,
+        user_id=current_user,
         language=body.language,
     )
     db.add(session)
@@ -313,7 +312,7 @@ async def start_companion_session(
     # Save greeting as first message
     greeting_msg = CompanionMessage(
         session_id=session.id,
-        user_id=current_user.id,
+        user_id=current_user,
         role="companion",
         content=greeting,
         phase="connect",
@@ -338,7 +337,7 @@ async def send_companion_message(
     request: Request,
     body: SendMessageRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Send a message to KIAAN and get a best-friend response.
 
@@ -357,7 +356,7 @@ async def send_companion_message(
     result = await db.execute(
         select(CompanionSession).where(
             CompanionSession.id == body.session_id,
-            CompanionSession.user_id == current_user.id,
+            CompanionSession.user_id == current_user,
             CompanionSession.is_active.is_(True),
         )
     )
@@ -386,9 +385,9 @@ async def send_companion_message(
     ]
 
     # Get user memories and cross-session context
-    profile = await _get_or_create_profile(db, current_user.id)
-    memories = await _get_user_memories(db, current_user.id)
-    session_summaries = await _get_recent_session_summaries(db, current_user.id)
+    profile = await _get_or_create_profile(db, current_user)
+    memories = await _get_user_memories(db, current_user)
+    session_summaries = await _get_recent_session_summaries(db, current_user)
 
     # Calculate turn count (user messages only)
     user_turn_count = sum(1 for m in history_messages if m.role == "user") + 1
@@ -397,7 +396,7 @@ async def send_companion_message(
     mood, mood_intensity = detect_mood(body.message)
     user_msg = CompanionMessage(
         session_id=session.id,
-        user_id=current_user.id,
+        user_id=current_user,
         role="user",
         content=body.message,
         content_type=body.content_type,
@@ -477,7 +476,7 @@ async def send_companion_message(
     response_time_ms = (time.monotonic() - start_time) * 1000
     companion_msg = CompanionMessage(
         session_id=session.id,
-        user_id=current_user.id,
+        user_id=current_user,
         role="companion",
         content=response_data["response"],
         detected_mood=response_data["mood"],
@@ -510,7 +509,7 @@ async def send_companion_message(
         memory_entries = extract_memories_from_message(body.message, mood)
 
     if memory_entries:
-        await _save_memories(db, current_user.id, session.id, memory_entries)
+        await _save_memories(db, current_user, session.id, memory_entries)
 
     # Update mood profile (Phase 1: populate common_moods)
     await _update_mood_profile(profile, mood)
@@ -518,7 +517,7 @@ async def send_companion_message(
     await db.commit()
 
     logger.info(
-        f"Companion response for user {current_user.id}: "
+        f"Companion response for user {current_user}: "
         f"mood={mood}, phase={response_data['phase']}, "
         f"latency={response_time_ms:.0f}ms"
     )
@@ -549,13 +548,13 @@ async def end_companion_session(
     request: Request,
     body: EndSessionRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """End a companion session with a warm farewell and session summary."""
     result = await db.execute(
         select(CompanionSession).where(
             CompanionSession.id == body.session_id,
-            CompanionSession.user_id == current_user.id,
+            CompanionSession.user_id == current_user,
             CompanionSession.is_active.is_(True),
         )
     )
@@ -625,7 +624,7 @@ async def end_companion_session(
     # Save farewell message
     farewell_msg = CompanionMessage(
         session_id=session.id,
-        user_id=current_user.id,
+        user_id=current_user,
         role="companion",
         content=farewell,
         phase="empower",
@@ -656,7 +655,7 @@ async def get_conversation_history(
     session_id: str | None = None,
     limit: int = 10,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Get conversation history for the user.
 
@@ -669,7 +668,7 @@ async def get_conversation_history(
             select(CompanionSession)
             .where(
                 CompanionSession.id == session_id,
-                CompanionSession.user_id == current_user.id,
+                CompanionSession.user_id == current_user,
             )
             .options(selectinload(CompanionSession.messages))
         )
@@ -702,7 +701,7 @@ async def get_conversation_history(
     # Return recent sessions
     result = await db.execute(
         select(CompanionSession)
-        .where(CompanionSession.user_id == current_user.id)
+        .where(CompanionSession.user_id == current_user)
         .order_by(desc(CompanionSession.started_at))
         .limit(min(limit, 50))
     )
@@ -731,10 +730,10 @@ async def get_conversation_history(
 async def get_companion_profile(
     request: Request,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Get the user's companion profile and friendship stats."""
-    profile = await _get_or_create_profile(db, current_user.id)
+    profile = await _get_or_create_profile(db, current_user)
     await db.commit()
 
     return CompanionProfileResponse(
@@ -756,10 +755,10 @@ async def update_companion_profile(
     request: Request,
     body: UpdateProfileRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Update companion profile preferences."""
-    profile = await _get_or_create_profile(db, current_user.id)
+    profile = await _get_or_create_profile(db, current_user)
 
     if body.preferred_name is not None:
         profile.preferred_name = body.preferred_name
@@ -783,13 +782,13 @@ async def get_companion_memories(
     request: Request,
     limit: int = 20,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Get what KIAAN remembers about the user (for transparency)."""
     result = await db.execute(
         select(CompanionMemory)
         .where(
-            CompanionMemory.user_id == current_user.id,
+            CompanionMemory.user_id == current_user,
             CompanionMemory.deleted_at.is_(None),
         )
         .order_by(desc(CompanionMemory.importance))
@@ -818,13 +817,13 @@ async def delete_companion_memory(
     request: Request,
     memory_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Delete a specific memory (user controls what KIAAN remembers)."""
     result = await db.execute(
         select(CompanionMemory).where(
             CompanionMemory.id == memory_id,
-            CompanionMemory.user_id == current_user.id,
+            CompanionMemory.user_id == current_user,
         )
     )
     memory = result.scalar_one_or_none()
@@ -843,7 +842,7 @@ async def delete_companion_memory(
 async def synthesize_companion_voice(
     request: Request,
     body: SynthesizeVoiceRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Synthesize speech for a companion message with emotion-adaptive voice.
 
@@ -937,7 +936,7 @@ async def get_mood_trends(
     request: Request,
     days: int = 30,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Get mood trend data for the Self-Awareness Mirror.
 
@@ -956,7 +955,7 @@ async def get_mood_trends(
             CompanionMessage.session_id,
         )
         .where(
-            CompanionMessage.user_id == current_user.id,
+            CompanionMessage.user_id == current_user,
             CompanionMessage.role == "user",
             CompanionMessage.detected_mood.isnot(None),
             CompanionMessage.created_at >= since,
@@ -1010,19 +1009,19 @@ async def get_mood_trends(
 async def get_friendship_milestones(
     request: Request,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Get friendship milestones and achievements.
 
     Tracks the user's journey with KIAAN: sessions, streaks, growth.
     """
-    profile = await _get_or_create_profile(db, current_user.id)
+    profile = await _get_or_create_profile(db, current_user)
 
     # Count sessions with mood improvement
     improved_count = await db.scalar(
         select(func.count(CompanionSession.id))
         .where(
-            CompanionSession.user_id == current_user.id,
+            CompanionSession.user_id == current_user,
             CompanionSession.mood_improved.is_(True),
         )
     ) or 0
@@ -1030,7 +1029,7 @@ async def get_friendship_milestones(
     # Count total unique days of conversation
     days_result = await db.execute(
         select(func.date_trunc("day", CompanionSession.started_at))
-        .where(CompanionSession.user_id == current_user.id)
+        .where(CompanionSession.user_id == current_user)
         .distinct()
     )
     total_days = len(days_result.all())

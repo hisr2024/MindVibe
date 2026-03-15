@@ -50,7 +50,6 @@ from backend.models.companion import (
     CompanionProfile,
     CompanionSession,
 )
-from backend.models.user import User
 
 logger = logging.getLogger(__name__)
 
@@ -731,7 +730,7 @@ async def start_voice_companion_session(
     request: Request,
     body: VoiceCompanionStartRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Start a new Voice Companion session with KIAAN as Divine Friend.
 
@@ -739,11 +738,11 @@ async def start_voice_companion_session(
     """
     # Voice Companion requires Premium+ subscription
     try:
-        await get_or_create_free_subscription(db, current_user.id)
-        if not await is_developer(db, current_user.id):
-            has_access = await check_feature_access(db, current_user.id, "kiaan_voice_companion")
+        await get_or_create_free_subscription(db, current_user)
+        if not await is_developer(db, current_user):
+            has_access = await check_feature_access(db, current_user, "kiaan_voice_companion")
             if not has_access:
-                tier = await get_user_tier(db, current_user.id)
+                tier = await get_user_tier(db, current_user)
                 raise HTTPException(
                     status_code=403,
                     detail={
@@ -760,20 +759,20 @@ async def start_voice_companion_session(
     except Exception as e:
         logger.warning(f"Subscription check failed for voice-companion session start: {e}")
 
-    profile = await _get_or_create_profile(db, current_user.id)
+    profile = await _get_or_create_profile(db, current_user)
 
     # Close any existing active sessions
     await db.execute(
         update(CompanionSession)
         .where(
-            CompanionSession.user_id == current_user.id,
+            CompanionSession.user_id == current_user,
             CompanionSession.is_active.is_(True),
         )
         .values(is_active=False, ended_at=func.now())
     )
 
     session = CompanionSession(
-        user_id=current_user.id,
+        user_id=current_user,
         language=body.language,
     )
     db.add(session)
@@ -791,7 +790,7 @@ async def start_voice_companion_session(
 
     greeting_msg = CompanionMessage(
         session_id=session.id,
-        user_id=current_user.id,
+        user_id=current_user,
         role="companion",
         content=greeting,
         phase="connect",
@@ -818,7 +817,7 @@ async def send_voice_companion_message(
     request: Request,
     body: VoiceCompanionMessageRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Send a message to KIAAN Divine Friend and get a voice-ready response.
 
@@ -831,11 +830,11 @@ async def send_voice_companion_message(
     """
     # Enforce KIAAN quota for voice companion messages (makes AI calls)
     try:
-        if not await is_developer(db, current_user.id):
+        if not await is_developer(db, current_user):
             # Check feature access (Premium+ only)
-            has_access = await check_feature_access(db, current_user.id, "kiaan_voice_companion")
+            has_access = await check_feature_access(db, current_user, "kiaan_voice_companion")
             if not has_access:
-                tier = await get_user_tier(db, current_user.id)
+                tier = await get_user_tier(db, current_user)
                 raise HTTPException(
                     status_code=403,
                     detail={
@@ -848,7 +847,7 @@ async def send_voice_companion_message(
                     },
                 )
             # Check KIAAN quota
-            has_quota, usage_count, usage_limit = await check_kiaan_quota(db, current_user.id)
+            has_quota, usage_count, usage_limit = await check_kiaan_quota(db, current_user)
             if not has_quota:
                 raise HTTPException(
                     status_code=429,
@@ -878,7 +877,7 @@ async def send_voice_companion_message(
     result = await db.execute(
         select(CompanionSession).where(
             CompanionSession.id == body.session_id,
-            CompanionSession.user_id == current_user.id,
+            CompanionSession.user_id == current_user,
             CompanionSession.is_active.is_(True),
         )
     )
@@ -903,9 +902,9 @@ async def send_voice_companion_message(
         .order_by(CompanionMessage.created_at)
         .limit(20)
     )
-    profile = await _get_or_create_profile(db, current_user.id)
-    memories = await _get_user_memories(db, current_user.id)
-    session_summaries = await _get_recent_session_summaries(db, current_user.id)
+    profile = await _get_or_create_profile(db, current_user)
+    memories = await _get_user_memories(db, current_user)
+    session_summaries = await _get_recent_session_summaries(db, current_user)
 
     history_messages = history_result.scalars().all()
     conversation_history = [
@@ -921,7 +920,7 @@ async def send_voice_companion_message(
     # Save user message
     user_msg = CompanionMessage(
         session_id=session.id,
-        user_id=current_user.id,
+        user_id=current_user,
         role="user",
         content=body.message,
         content_type=body.content_type,
@@ -962,7 +961,7 @@ async def send_voice_companion_message(
         dynamic_corpus = get_dynamic_wisdom_corpus()
         await dynamic_corpus.record_wisdom_outcome(
             db=db,
-            user_id=current_user.id,
+            user_id=current_user,
             session_id=session.id,
             mood_after=mood,
             user_response=body.message,
@@ -1013,7 +1012,7 @@ async def send_voice_companion_message(
                 mood=mood,
                 user_message=body.message,
                 phase=phase,
-                user_id=current_user.id,
+                user_id=current_user,
                 mood_intensity=mood_intensity,
             )
             if dynamic_verse:
@@ -1078,7 +1077,7 @@ async def send_voice_companion_message(
         ai_tier = "openai_direct"
         if wisdom_text and wisdom_verse_ref:
             wisdom_used = {"principle": wisdom_text[:100], "verse_ref": wisdom_verse_ref}
-        logger.info(f"VoiceCompanion: TIER 1 (openai_direct) succeeded for user {current_user.id}")
+        logger.info(f"VoiceCompanion: TIER 1 (openai_direct) succeeded for user {current_user}")
 
     # ══════════════════════════════════════════════════════════════════════
     # TIER 2: CompanionFriendEngine with its own AsyncOpenAI client
@@ -1107,7 +1106,7 @@ async def send_voice_companion_message(
                     session_summaries=session_summaries,
                     db_wisdom_verse=db_wisdom_verse,
                     db_session=db,
-                    user_id=current_user.id,
+                    user_id=current_user,
                 )
                 response_text = engine_result.get("response", "")
                 phase = engine_result.get("phase", phase)
@@ -1152,7 +1151,7 @@ async def send_voice_companion_message(
     response_time_ms = (time.monotonic() - start_time) * 1000
     companion_msg = CompanionMessage(
         session_id=session.id,
-        user_id=current_user.id,
+        user_id=current_user,
         role="companion",
         content=response_text,
         detected_mood=mood,
@@ -1170,7 +1169,7 @@ async def send_voice_companion_message(
             dynamic_corpus = get_dynamic_wisdom_corpus()
             await dynamic_corpus.record_wisdom_delivery(
                 db=db,
-                user_id=current_user.id,
+                user_id=current_user,
                 session_id=session.id,
                 verse_ref=wisdom_used["verse_ref"],
                 principle=wisdom_used.get("principle"),
@@ -1196,7 +1195,7 @@ async def send_voice_companion_message(
     # AI-based memory extraction is deferred to avoid adding latency
     memory_entries = extract_memories_from_message(body.message, mood)
     if memory_entries:
-        await _save_memories(db, current_user.id, session.id, memory_entries)
+        await _save_memories(db, current_user, session.id, memory_entries)
 
     moods = profile.common_moods or {}
     moods[mood] = moods.get(mood, 0) + 1
@@ -1204,7 +1203,7 @@ async def send_voice_companion_message(
 
     # Increment KIAAN usage after successful AI response
     try:
-        await increment_kiaan_usage(db, current_user.id)
+        await increment_kiaan_usage(db, current_user)
     except Exception as usage_err:
         logger.warning(f"Failed to increment KIAAN usage for voice-companion: {usage_err}")
 
@@ -1213,7 +1212,7 @@ async def send_voice_companion_message(
     # Schedule AI-powered memory extraction in background (does not block response)
     # IMPORTANT: Use a new DB session for the background task since the request-scoped
     # session will be closed after the response is sent.
-    _bg_user_id = current_user.id
+    _bg_user_id = current_user
     _bg_session_id = session.id
     _bg_message = body.message
     _bg_response = response_text
@@ -1241,7 +1240,7 @@ async def send_voice_companion_message(
     asyncio.create_task(_extract_memories_background())
 
     logger.info(
-        f"VoiceCompanion response: user={current_user.id}, "
+        f"VoiceCompanion response: user={current_user}, "
         f"mood={mood}, phase={phase}, tier={ai_tier}, "
         f"latency={response_time_ms:.0f}ms"
     )
@@ -1267,7 +1266,7 @@ async def quick_voice_response(
     request: Request,
     body: VoiceCompanionQuickResponseRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Session-less quick response for wake word activation.
 
@@ -1293,9 +1292,9 @@ async def quick_voice_response(
         mood_intensity = 0.5
 
     # Get user profile for personalization
-    profile = await _get_or_create_profile(db, current_user.id)
+    profile = await _get_or_create_profile(db, current_user)
     user_name = profile.preferred_name
-    memories = await _get_user_memories(db, current_user.id)
+    memories = await _get_user_memories(db, current_user)
 
     ai_tier = "template"
     response_text = ""
@@ -1362,7 +1361,7 @@ async def quick_voice_response(
 
     elapsed_ms = int((time.monotonic() - start_time) * 1000)
     logger.info(
-        f"Quick voice response for user {current_user.id}: "
+        f"Quick voice response for user {current_user}: "
         f"ai_tier={ai_tier}, mood={mood}, latency={elapsed_ms}ms"
     )
 
@@ -1379,13 +1378,13 @@ async def end_voice_companion_session(
     request: Request,
     body: VoiceCompanionEndRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """End a voice companion session with a warm voice farewell."""
     result = await db.execute(
         select(CompanionSession).where(
             CompanionSession.id == body.session_id,
-            CompanionSession.user_id == current_user.id,
+            CompanionSession.user_id == current_user,
             CompanionSession.is_active.is_(True),
         )
     )
@@ -1452,7 +1451,7 @@ async def end_voice_companion_session(
 
     farewell_msg = CompanionMessage(
         session_id=session.id,
-        user_id=current_user.id,
+        user_id=current_user,
         role="companion",
         content=farewell,
         phase="empower",
@@ -1466,7 +1465,7 @@ async def end_voice_companion_session(
             dynamic_corpus = get_dynamic_wisdom_corpus()
             await dynamic_corpus.record_wisdom_outcome(
                 db=db,
-                user_id=current_user.id,
+                user_id=current_user,
                 session_id=session.id,
                 mood_after=session.final_mood,
                 user_response=None,
@@ -1497,7 +1496,7 @@ async def end_voice_companion_session(
 async def synthesize_voice_companion_audio(
     request: Request,
     body: VoiceCompanionSynthesizeRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Synthesize speech for a Voice Companion message."""
     try:
@@ -1614,14 +1613,14 @@ async def get_voice_companion_history(
     session_id: str | None = None,
     limit: int = 10,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Get voice companion conversation history."""
     if session_id:
         result = await db.execute(
             select(CompanionSession).where(
                 CompanionSession.id == session_id,
-                CompanionSession.user_id == current_user.id,
+                CompanionSession.user_id == current_user,
             )
         )
         session = result.scalar_one_or_none()
@@ -1658,7 +1657,7 @@ async def get_voice_companion_history(
 
     result = await db.execute(
         select(CompanionSession)
-        .where(CompanionSession.user_id == current_user.id)
+        .where(CompanionSession.user_id == current_user)
         .order_by(desc(CompanionSession.started_at))
         .limit(min(limit, 50))
     )
@@ -1865,7 +1864,7 @@ async def voice_guide_input_to_tool(
 
     logger.info(
         "Voice Guide input: user=%s tool=%s content_length=%d",
-        current_user.id,
+        current_user,
         body.target_tool,
         len(body.content),
     )

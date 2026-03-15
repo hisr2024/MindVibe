@@ -49,6 +49,9 @@ export class SpeechRecognitionService {
   private maxAutoRestarts: number = 3
   private autoRestartCount: number = 0
   private micPermissionGranted: boolean = false
+  private isMobile: boolean = false
+  /** When true, auto-restart onend even after successful results (non-continuous mobile mode) */
+  private keepListeningOnMobile: boolean = false
 
   constructor(config: RecognitionConfig = {}) {
     const SpeechRecognitionConstructor = getSpeechRecognition()
@@ -65,7 +68,16 @@ export class SpeechRecognitionService {
 
     this.recognition = new SpeechRecognitionConstructor()
     this.recognition.lang = getSpeechLanguage(config.language || 'en')
-    this.recognition.continuous = config.continuous ?? true  // Default to continuous for better UX
+    // Mobile Safari doesn't support continuous mode properly — it fires onend
+    // after each result regardless, causing wobbly start/stop loops.
+    // Use non-continuous mode on mobile and rely on auto-restart instead.
+    this.isMobile = typeof navigator !== 'undefined'
+      && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+    // Mobile Safari doesn't support continuous mode properly — it fires onend
+    // after each result regardless, causing wobbly start/stop loops.
+    // Use non-continuous mode on mobile and rely on auto-restart instead.
+    this.recognition.continuous = this.isMobile ? false : (config.continuous ?? true)
+    this.keepListeningOnMobile = this.isMobile && (config.continuous ?? true)
     this.recognition.interimResults = config.interimResults ?? true
     // Request multiple alternatives for better accuracy
     this.recognition.maxAlternatives = config.maxAlternatives ?? 3
@@ -176,17 +188,25 @@ export class SpeechRecognitionService {
     this.recognition.onend = () => {
       this.resetSilenceTimer()
 
+      // On mobile, we use non-continuous mode but still want to keep
+      // listening. Auto-restart after each result until user taps stop.
+      const shouldRestartMobile = this.keepListeningOnMobile
+        && !this.isStopping
+        && this.recognition
+
       // Auto-restart if we still have restarts remaining (no-speech recovery).
       // The browser fires onend after a no-speech error even in continuous mode,
       // so we need to explicitly restart to keep listening.
-      if (
-        this.autoRestartOnNoSpeech &&
-        this.autoRestartCount > 0 &&
-        this.autoRestartCount <= this.maxAutoRestarts &&
-        !this.isStopping &&
-        this.recognition
-      ) {
-        // Small delay to avoid rapid restart loops
+      const shouldRestartNoSpeech = this.autoRestartOnNoSpeech
+        && this.autoRestartCount > 0
+        && this.autoRestartCount <= this.maxAutoRestarts
+        && !this.isStopping
+        && this.recognition
+
+      if (shouldRestartMobile || shouldRestartNoSpeech) {
+        // Longer delay on mobile to prevent wobbly start/stop loops.
+        // Mobile browsers (especially Safari) need more time between sessions.
+        const restartDelay = this.isMobile ? 600 : 300
         setTimeout(() => {
           if (this.recognition && !this.isStopping) {
             try {
@@ -197,10 +217,11 @@ export class SpeechRecognitionService {
               this.isListening = false
               this.isStopping = false
               this.autoRestartCount = 0
+              this.keepListeningOnMobile = false
               this.callbacks.onEnd?.()
             }
           }
-        }, 300)
+        }, restartDelay)
         return
       }
 
@@ -279,6 +300,8 @@ export class SpeechRecognitionService {
     this.callbacks = callbacks
     this.startAttempts = 0
     this.autoRestartCount = 0
+    // Re-enable mobile keep-listening if in non-continuous mobile mode
+    this.keepListeningOnMobile = this.isMobile && !this.recognition.continuous
 
     // Request microphone permission first, then start recognition.
     // This is critical: on many browsers the Web Speech API does NOT trigger
@@ -325,6 +348,7 @@ export class SpeechRecognitionService {
 
     this.isStopping = true
     this.autoRestartCount = 0
+    this.keepListeningOnMobile = false
     this.resetSilenceTimer()
 
     try {
@@ -343,6 +367,7 @@ export class SpeechRecognitionService {
 
     this.isStopping = true
     this.autoRestartCount = 0
+    this.keepListeningOnMobile = false
     this.resetSilenceTimer()
 
     try {
