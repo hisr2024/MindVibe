@@ -1,10 +1,20 @@
-"""Voice Companion API Routes - KIAAN Best Friend
+"""Voice Companion API Routes - KIAAN Best Friend  [LEGACY]
 
-Endpoints for the voice companion chat experience where KIAAN acts as
-the user's best friend. Handles conversation sessions, message exchange,
-emotional tracking, memory persistence, and companion profile management.
+DEPRECATED: Core conversation endpoints (session/start, message, session/end,
+health, synthesize) are now served by kiaan_voice_companion.py at
+/api/voice-companion/. Frontend proxy routes have been redirected there.
 
-All wisdom is delivered in modern, secular language - no religious references.
+THIS FILE IS STILL NEEDED for profile, memory, insight, and voice-list
+endpoints that have NOT been migrated to kiaan_voice_companion.py:
+  - GET  /profile
+  - PATCH /profile
+  - GET  /memories
+  - DELETE /memories/{memory_id}
+  - GET  /voices
+  - GET  /insights/mood-trends
+  - GET  /insights/milestones
+
+Once those endpoints are migrated, this file can be removed entirely.
 """
 
 import datetime

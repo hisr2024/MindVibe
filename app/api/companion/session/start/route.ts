@@ -11,7 +11,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    const backendResponse = await fetch(`${BACKEND_URL}/api/companion/session/start`, {
+    // Route to the unified voice-companion backend (has 3-tier AI, subscription
+    // enforcement, and dynamic wisdom corpus — the old /api/companion backend is legacy)
+    const backendResponse = await fetch(`${BACKEND_URL}/api/voice-companion/session/start`, {
       method: 'POST',
       headers: proxyHeaders(request, 'POST'),
       body: JSON.stringify(body),

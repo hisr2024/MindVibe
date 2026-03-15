@@ -10,7 +10,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    const backendResponse = await fetch(`${BACKEND_URL}/api/companion/session/end`, {
+    // Route to the unified voice-companion backend (3-tier AI, dynamic wisdom corpus)
+    const backendResponse = await fetch(`${BACKEND_URL}/api/voice-companion/session/end`, {
       method: 'POST',
       headers: proxyHeaders(request, 'POST'),
       body: JSON.stringify(body),
