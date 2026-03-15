@@ -1475,7 +1475,7 @@ COMPLEX SITUATIONS: Hold all layers gently. Consider their dharma, attachments d
             errors.append(f"Response too short: {word_count} words")
 
         # Check for wisdom-related terms (Gita-rooted secular vocabulary)
-        wellness_terms = ["dharma", "karma", "yoga", "peace", "wisdom", "balance", "equanimity", "calm", "mindful", "resilience", "breathe", "gentle", "compassion", "stillness", "strength", "detachment", "self-mastery"]
+        wellness_terms = ["dharma", "karma", "yoga", "peace", "wisdom", "balance", "equanimity", "calm", "mindful", "resilience", "breathe", "gentle", "compassion", "stillness", "strength", "detachment", "self-mastery", "awareness", "witness", "observer", "surrender", "offering", "steady", "composure", "sattva", "presence", "grounded", "svadharma", "vairagya", "inner"]
         terms_found = [term for term in wellness_terms if term.lower() in response.lower()]
 
         # Fail if response cites Gita/Krishna/Arjuna directly (secular output requirement)
@@ -1506,7 +1506,9 @@ COMPLEX SITUATIONS: Hold all layers gently. Consider their dharma, attachments d
             "dharma", "karma", "yoga", "peace", "calm", "balance", "equanimity",
             "mindful", "resilience", "compassion", "self-compassion", "stillness",
             "breathe", "gentle", "strength", "grounded", "wisdom", "awareness",
-            "detachment", "self-mastery", "sattva", "inner"
+            "detachment", "self-mastery", "sattva", "inner", "witness", "observer",
+            "surrender", "offering", "steady", "composure", "presence",
+            "svadharma", "vairagya", "nishkama", "buddhi", "samatvam",
         ]
         terms_found = [term for term in wellness_terms if term.lower() in response.lower()]
         if len(terms_found) < 1:
