@@ -1,5 +1,11 @@
 """Divine Voice Orchestrator - Premium TTS System for KIAAN
 
+NOTE: This service has ~85% code overlap with companion_voice_service.py.
+Both implement the same Sarvam AI → Bhashini AI → ElevenLabs → Browser
+fallback chain. Future consolidation should merge this into
+companion_voice_service.py and adapt the callers (routes/voice.py,
+routes/kiaan_divine.py) to use that API instead.
+
 Orchestrates Sarvam AI, Bhashini AI, and ElevenLabs TTS providers
 to deliver world-class voice quality for KIAAN, with special handling
 for Sanskrit pronunciation and Indian languages.
