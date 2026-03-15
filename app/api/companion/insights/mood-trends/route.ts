@@ -1,23 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { BACKEND_URL, proxyHeaders, forwardCookies } from '@/lib/proxy-utils'
+/**
+ * Companion Mood Trends - Re-export
+ *
+ * Proxies to the unified kiaan_voice_companion.py backend at
+ * /api/voice-companion/insights/mood-trends.
+ */
 
-export async function GET(request: NextRequest) {
-  try {
-    const url = new URL(request.url)
-    const queryString = url.search
+import { createProxyHandler } from '@/lib/proxy-utils'
 
-    const backendResponse = await fetch(`${BACKEND_URL}/api/companion/insights/mood-trends${queryString}`, {
-      method: 'GET',
-      headers: proxyHeaders(request, 'GET'),
-      signal: AbortSignal.timeout(8000),
-    })
-
-    const data = await backendResponse.json().catch(() => ({}))
-    return forwardCookies(
-      backendResponse,
-      NextResponse.json(data, { status: backendResponse.status })
-    )
-  } catch {
-    return NextResponse.json({ detail: 'Service unavailable' }, { status: 503 })
-  }
-}
+export const GET = createProxyHandler('/api/voice-companion/insights/mood-trends', 'GET')

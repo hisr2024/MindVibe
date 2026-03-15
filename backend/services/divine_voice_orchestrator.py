@@ -4,6 +4,13 @@ Orchestrates Sarvam AI, Bhashini AI, and ElevenLabs TTS providers
 to deliver world-class voice quality for KIAAN, with special handling
 for Sanskrit pronunciation and Indian languages.
 
+All provider API calls are delegated to the shared dedicated service
+modules (sarvam_tts_service, elevenlabs_tts_service, bhashini_tts_service)
+to eliminate code duplication with companion_voice_service.py. This file
+provides the VoiceConfig/SynthesisResult API surface, caching, stop
+functionality, and style-based voice selection used by routes/voice.py
+and routes/kiaan_divine.py.
+
 PROVIDERS:
 1. Sarvam AI Bulbul - India's best for Sanskrit/Hindi (11 Indian languages)
 2. Bhashini AI - Government of India platform (22 scheduled languages)
@@ -32,7 +39,6 @@ import logging
 from typing import Optional, Dict, List, Tuple, Any
 from dataclasses import dataclass
 from enum import Enum
-import base64
 import hashlib
 from datetime import datetime, timedelta
 
@@ -123,7 +129,7 @@ SARVAM_VOICES = {
     ),
     "calm_female": VoiceConfig(
         provider=VoiceProvider.SARVAM_AI,
-        voice_id="vidya",
+        voice_id="meera",
         language="hi-IN",
         gender=VoiceGender.FEMALE,
         style=VoiceStyle.CALM,
@@ -145,7 +151,7 @@ SARVAM_VOICES = {
     ),
     "soothing_female": VoiceConfig(
         provider=VoiceProvider.SARVAM_AI,
-        voice_id="vidya",
+        voice_id="meera",
         language="hi-IN",
         gender=VoiceGender.FEMALE,
         style=VoiceStyle.SOOTHING,
@@ -530,12 +536,14 @@ class DivineVoiceOrchestrator:
         voice_config: VoiceConfig,
         use_ssml: bool = False
     ) -> SynthesisResult:
-        """Synthesize using Sarvam AI Bulbul API"""
+        """Synthesize using Sarvam AI Bulbul via the dedicated sarvam_tts_service."""
         try:
-            import httpx
+            from backend.services.sarvam_tts_service import (
+                synthesize_sarvam_tts,
+                is_sarvam_available,
+            )
 
-            api_key = os.getenv("SARVAM_API_KEY", "").strip()
-            if not api_key:
+            if not is_sarvam_available():
                 return SynthesisResult(
                     success=False, audio_data=None, audio_format="",
                     provider_used=VoiceProvider.SARVAM_AI,
@@ -543,49 +551,31 @@ class DivineVoiceOrchestrator:
                     error="Sarvam API key not configured"
                 )
 
-            payload = {
-                "input": text,
-                "model": "bulbul:v2",
-                "voice": voice_config.voice_id,
-                "language_code": voice_config.language,
-                "pitch": voice_config.pitch,
-                "pace": voice_config.speed,
-                "loudness": 1.0,
-                "speech_sample_rate": 24000,
-                "enable_preprocessing": True,
-            }
+            lang = voice_config.language.split("-")[0]
+            audio_bytes = await synthesize_sarvam_tts(
+                text=text,
+                language=lang,
+                voice_id=voice_config.voice_id,
+                mood="neutral",
+                speaker_override=voice_config.voice_id,
+            )
 
-            async with httpx.AsyncClient(timeout=20.0) as client:
-                response = await client.post(
-                    "https://api.sarvam.ai/v1/tts",
-                    headers={
-                        "Authorization": f"Bearer {api_key}",
-                        "Content-Type": "application/json",
-                    },
-                    json=payload,
+            if audio_bytes and len(audio_bytes) > 100:
+                return SynthesisResult(
+                    success=True,
+                    audio_data=audio_bytes,
+                    audio_format="wav",
+                    provider_used=VoiceProvider.SARVAM_AI,
+                    quality_score=voice_config.quality_score,
+                    latency_ms=0
                 )
-
-                if response.status_code == 200:
-                    data = response.json()
-                    audio_base64 = data.get("audio_content", "")
-                    audio_data = base64.b64decode(audio_base64)
-
-                    return SynthesisResult(
-                        success=True,
-                        audio_data=audio_data,
-                        audio_format="wav",
-                        provider_used=VoiceProvider.SARVAM_AI,
-                        quality_score=voice_config.quality_score,
-                        latency_ms=0
-                    )
-                else:
-                    logger.error(f"Sarvam API error: status={response.status_code}")
-                    return SynthesisResult(
-                        success=False, audio_data=None, audio_format="",
-                        provider_used=VoiceProvider.SARVAM_AI,
-                        quality_score=0, latency_ms=0,
-                        error=f"Sarvam API error: {response.status_code}"
-                    )
+            else:
+                return SynthesisResult(
+                    success=False, audio_data=None, audio_format="",
+                    provider_used=VoiceProvider.SARVAM_AI,
+                    quality_score=0, latency_ms=0,
+                    error="Sarvam returned empty audio"
+                )
 
         except Exception as e:
             logger.error(f"Sarvam synthesis error: {e}")
@@ -658,12 +648,14 @@ class DivineVoiceOrchestrator:
         text: str,
         voice_config: VoiceConfig,
     ) -> SynthesisResult:
-        """Synthesize using ElevenLabs API"""
+        """Synthesize using ElevenLabs via the dedicated elevenlabs_tts_service."""
         try:
-            import httpx
+            from backend.services.elevenlabs_tts_service import (
+                synthesize_elevenlabs_tts,
+                is_elevenlabs_available,
+            )
 
-            api_key = os.getenv("ELEVENLABS_API_KEY", "").strip()
-            if not api_key:
+            if not is_elevenlabs_available():
                 return SynthesisResult(
                     success=False, audio_data=None, audio_format="",
                     provider_used=VoiceProvider.ELEVENLABS,
@@ -671,48 +663,29 @@ class DivineVoiceOrchestrator:
                     error="ElevenLabs API key not configured"
                 )
 
-            url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_config.voice_id}"
+            lang = voice_config.language.split("-")[0]
+            audio_bytes = await synthesize_elevenlabs_tts(
+                text=text,
+                language=lang,
+                voice_id=voice_config.voice_id,
+                mood="neutral",
+            )
 
-            payload = {
-                "text": text,
-                "model_id": "eleven_multilingual_v2",
-                "voice_settings": {
-                    "stability": 0.7,
-                    "similarity_boost": 0.8,
-                    "style": 0.5,
-                    "use_speaker_boost": True,
-                },
-            }
-
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(
-                    url,
-                    headers={
-                        "xi-api-key": api_key,
-                        "Content-Type": "application/json",
-                        "Accept": "audio/mpeg",
-                    },
-                    json=payload,
+            if audio_bytes and len(audio_bytes) > 100:
+                return SynthesisResult(
+                    success=True,
+                    audio_data=audio_bytes,
+                    audio_format="mp3",
+                    provider_used=VoiceProvider.ELEVENLABS,
+                    quality_score=voice_config.quality_score,
+                    latency_ms=0
                 )
-
-                if response.status_code == 200:
-                    audio_data = response.content
-                    if len(audio_data) > 100:
-                        return SynthesisResult(
-                            success=True,
-                            audio_data=audio_data,
-                            audio_format="mp3",
-                            provider_used=VoiceProvider.ELEVENLABS,
-                            quality_score=voice_config.quality_score,
-                            latency_ms=0
-                        )
-
-                logger.error(f"ElevenLabs API error: status={response.status_code}")
+            else:
                 return SynthesisResult(
                     success=False, audio_data=None, audio_format="",
                     provider_used=VoiceProvider.ELEVENLABS,
                     quality_score=0, latency_ms=0,
-                    error=f"ElevenLabs API error: {response.status_code}"
+                    error="ElevenLabs returned empty audio"
                 )
 
         except Exception as e:

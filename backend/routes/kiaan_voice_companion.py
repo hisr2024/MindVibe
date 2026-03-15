@@ -50,7 +50,6 @@ from backend.models.companion import (
     CompanionProfile,
     CompanionSession,
 )
-from backend.models.user import User
 
 logger = logging.getLogger(__name__)
 
@@ -731,7 +730,7 @@ async def start_voice_companion_session(
     request: Request,
     body: VoiceCompanionStartRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Start a new Voice Companion session with KIAAN as Divine Friend.
 
@@ -739,11 +738,11 @@ async def start_voice_companion_session(
     """
     # Voice Companion requires Premium+ subscription
     try:
-        await get_or_create_free_subscription(db, current_user.id)
-        if not await is_developer(db, current_user.id):
-            has_access = await check_feature_access(db, current_user.id, "kiaan_voice_companion")
+        await get_or_create_free_subscription(db, current_user)
+        if not await is_developer(db, current_user):
+            has_access = await check_feature_access(db, current_user, "kiaan_voice_companion")
             if not has_access:
-                tier = await get_user_tier(db, current_user.id)
+                tier = await get_user_tier(db, current_user)
                 raise HTTPException(
                     status_code=403,
                     detail={
@@ -760,20 +759,20 @@ async def start_voice_companion_session(
     except Exception as e:
         logger.warning(f"Subscription check failed for voice-companion session start: {e}")
 
-    profile = await _get_or_create_profile(db, current_user.id)
+    profile = await _get_or_create_profile(db, current_user)
 
     # Close any existing active sessions
     await db.execute(
         update(CompanionSession)
         .where(
-            CompanionSession.user_id == current_user.id,
+            CompanionSession.user_id == current_user,
             CompanionSession.is_active.is_(True),
         )
         .values(is_active=False, ended_at=func.now())
     )
 
     session = CompanionSession(
-        user_id=current_user.id,
+        user_id=current_user,
         language=body.language,
     )
     db.add(session)
@@ -791,7 +790,7 @@ async def start_voice_companion_session(
 
     greeting_msg = CompanionMessage(
         session_id=session.id,
-        user_id=current_user.id,
+        user_id=current_user,
         role="companion",
         content=greeting,
         phase="connect",
@@ -818,7 +817,7 @@ async def send_voice_companion_message(
     request: Request,
     body: VoiceCompanionMessageRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Send a message to KIAAN Divine Friend and get a voice-ready response.
 
@@ -831,11 +830,11 @@ async def send_voice_companion_message(
     """
     # Enforce KIAAN quota for voice companion messages (makes AI calls)
     try:
-        if not await is_developer(db, current_user.id):
+        if not await is_developer(db, current_user):
             # Check feature access (Premium+ only)
-            has_access = await check_feature_access(db, current_user.id, "kiaan_voice_companion")
+            has_access = await check_feature_access(db, current_user, "kiaan_voice_companion")
             if not has_access:
-                tier = await get_user_tier(db, current_user.id)
+                tier = await get_user_tier(db, current_user)
                 raise HTTPException(
                     status_code=403,
                     detail={
@@ -848,7 +847,7 @@ async def send_voice_companion_message(
                     },
                 )
             # Check KIAAN quota
-            has_quota, usage_count, usage_limit = await check_kiaan_quota(db, current_user.id)
+            has_quota, usage_count, usage_limit = await check_kiaan_quota(db, current_user)
             if not has_quota:
                 raise HTTPException(
                     status_code=429,
@@ -878,7 +877,7 @@ async def send_voice_companion_message(
     result = await db.execute(
         select(CompanionSession).where(
             CompanionSession.id == body.session_id,
-            CompanionSession.user_id == current_user.id,
+            CompanionSession.user_id == current_user,
             CompanionSession.is_active.is_(True),
         )
     )
@@ -903,9 +902,9 @@ async def send_voice_companion_message(
         .order_by(CompanionMessage.created_at)
         .limit(20)
     )
-    profile = await _get_or_create_profile(db, current_user.id)
-    memories = await _get_user_memories(db, current_user.id)
-    session_summaries = await _get_recent_session_summaries(db, current_user.id)
+    profile = await _get_or_create_profile(db, current_user)
+    memories = await _get_user_memories(db, current_user)
+    session_summaries = await _get_recent_session_summaries(db, current_user)
 
     history_messages = history_result.scalars().all()
     conversation_history = [
@@ -921,7 +920,7 @@ async def send_voice_companion_message(
     # Save user message
     user_msg = CompanionMessage(
         session_id=session.id,
-        user_id=current_user.id,
+        user_id=current_user,
         role="user",
         content=body.message,
         content_type=body.content_type,
@@ -962,7 +961,7 @@ async def send_voice_companion_message(
         dynamic_corpus = get_dynamic_wisdom_corpus()
         await dynamic_corpus.record_wisdom_outcome(
             db=db,
-            user_id=current_user.id,
+            user_id=current_user,
             session_id=session.id,
             mood_after=mood,
             user_response=body.message,
@@ -1013,7 +1012,7 @@ async def send_voice_companion_message(
                 mood=mood,
                 user_message=body.message,
                 phase=phase,
-                user_id=current_user.id,
+                user_id=current_user,
                 mood_intensity=mood_intensity,
             )
             if dynamic_verse:
@@ -1078,7 +1077,7 @@ async def send_voice_companion_message(
         ai_tier = "openai_direct"
         if wisdom_text and wisdom_verse_ref:
             wisdom_used = {"principle": wisdom_text[:100], "verse_ref": wisdom_verse_ref}
-        logger.info(f"VoiceCompanion: TIER 1 (openai_direct) succeeded for user {current_user.id}")
+        logger.info(f"VoiceCompanion: TIER 1 (openai_direct) succeeded for user {current_user}")
 
     # ══════════════════════════════════════════════════════════════════════
     # TIER 2: CompanionFriendEngine with its own AsyncOpenAI client
@@ -1107,7 +1106,7 @@ async def send_voice_companion_message(
                     session_summaries=session_summaries,
                     db_wisdom_verse=db_wisdom_verse,
                     db_session=db,
-                    user_id=current_user.id,
+                    user_id=current_user,
                 )
                 response_text = engine_result.get("response", "")
                 phase = engine_result.get("phase", phase)
@@ -1152,7 +1151,7 @@ async def send_voice_companion_message(
     response_time_ms = (time.monotonic() - start_time) * 1000
     companion_msg = CompanionMessage(
         session_id=session.id,
-        user_id=current_user.id,
+        user_id=current_user,
         role="companion",
         content=response_text,
         detected_mood=mood,
@@ -1170,7 +1169,7 @@ async def send_voice_companion_message(
             dynamic_corpus = get_dynamic_wisdom_corpus()
             await dynamic_corpus.record_wisdom_delivery(
                 db=db,
-                user_id=current_user.id,
+                user_id=current_user,
                 session_id=session.id,
                 verse_ref=wisdom_used["verse_ref"],
                 principle=wisdom_used.get("principle"),
@@ -1196,7 +1195,7 @@ async def send_voice_companion_message(
     # AI-based memory extraction is deferred to avoid adding latency
     memory_entries = extract_memories_from_message(body.message, mood)
     if memory_entries:
-        await _save_memories(db, current_user.id, session.id, memory_entries)
+        await _save_memories(db, current_user, session.id, memory_entries)
 
     moods = profile.common_moods or {}
     moods[mood] = moods.get(mood, 0) + 1
@@ -1204,7 +1203,7 @@ async def send_voice_companion_message(
 
     # Increment KIAAN usage after successful AI response
     try:
-        await increment_kiaan_usage(db, current_user.id)
+        await increment_kiaan_usage(db, current_user)
     except Exception as usage_err:
         logger.warning(f"Failed to increment KIAAN usage for voice-companion: {usage_err}")
 
@@ -1213,7 +1212,7 @@ async def send_voice_companion_message(
     # Schedule AI-powered memory extraction in background (does not block response)
     # IMPORTANT: Use a new DB session for the background task since the request-scoped
     # session will be closed after the response is sent.
-    _bg_user_id = current_user.id
+    _bg_user_id = current_user
     _bg_session_id = session.id
     _bg_message = body.message
     _bg_response = response_text
@@ -1241,7 +1240,7 @@ async def send_voice_companion_message(
     asyncio.create_task(_extract_memories_background())
 
     logger.info(
-        f"VoiceCompanion response: user={current_user.id}, "
+        f"VoiceCompanion response: user={current_user}, "
         f"mood={mood}, phase={phase}, tier={ai_tier}, "
         f"latency={response_time_ms:.0f}ms"
     )
@@ -1267,7 +1266,7 @@ async def quick_voice_response(
     request: Request,
     body: VoiceCompanionQuickResponseRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Session-less quick response for wake word activation.
 
@@ -1293,9 +1292,9 @@ async def quick_voice_response(
         mood_intensity = 0.5
 
     # Get user profile for personalization
-    profile = await _get_or_create_profile(db, current_user.id)
+    profile = await _get_or_create_profile(db, current_user)
     user_name = profile.preferred_name
-    memories = await _get_user_memories(db, current_user.id)
+    memories = await _get_user_memories(db, current_user)
 
     ai_tier = "template"
     response_text = ""
@@ -1362,7 +1361,7 @@ async def quick_voice_response(
 
     elapsed_ms = int((time.monotonic() - start_time) * 1000)
     logger.info(
-        f"Quick voice response for user {current_user.id}: "
+        f"Quick voice response for user {current_user}: "
         f"ai_tier={ai_tier}, mood={mood}, latency={elapsed_ms}ms"
     )
 
@@ -1379,13 +1378,13 @@ async def end_voice_companion_session(
     request: Request,
     body: VoiceCompanionEndRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """End a voice companion session with a warm voice farewell."""
     result = await db.execute(
         select(CompanionSession).where(
             CompanionSession.id == body.session_id,
-            CompanionSession.user_id == current_user.id,
+            CompanionSession.user_id == current_user,
             CompanionSession.is_active.is_(True),
         )
     )
@@ -1452,7 +1451,7 @@ async def end_voice_companion_session(
 
     farewell_msg = CompanionMessage(
         session_id=session.id,
-        user_id=current_user.id,
+        user_id=current_user,
         role="companion",
         content=farewell,
         phase="empower",
@@ -1466,7 +1465,7 @@ async def end_voice_companion_session(
             dynamic_corpus = get_dynamic_wisdom_corpus()
             await dynamic_corpus.record_wisdom_outcome(
                 db=db,
-                user_id=current_user.id,
+                user_id=current_user,
                 session_id=session.id,
                 mood_after=session.final_mood,
                 user_response=None,
@@ -1497,7 +1496,7 @@ async def end_voice_companion_session(
 async def synthesize_voice_companion_audio(
     request: Request,
     body: VoiceCompanionSynthesizeRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Synthesize speech for a Voice Companion message."""
     try:
@@ -1614,14 +1613,14 @@ async def get_voice_companion_history(
     session_id: str | None = None,
     limit: int = 10,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),
 ):
     """Get voice companion conversation history."""
     if session_id:
         result = await db.execute(
             select(CompanionSession).where(
                 CompanionSession.id == session_id,
-                CompanionSession.user_id == current_user.id,
+                CompanionSession.user_id == current_user,
             )
         )
         session = result.scalar_one_or_none()
@@ -1658,7 +1657,7 @@ async def get_voice_companion_history(
 
     result = await db.execute(
         select(CompanionSession)
-        .where(CompanionSession.user_id == current_user.id)
+        .where(CompanionSession.user_id == current_user)
         .order_by(desc(CompanionSession.started_at))
         .limit(min(limit, 50))
     )
@@ -1865,7 +1864,7 @@ async def voice_guide_input_to_tool(
 
     logger.info(
         "Voice Guide input: user=%s tool=%s content_length=%d",
-        current_user.id,
+        current_user,
         body.target_tool,
         len(body.content),
     )
@@ -1878,4 +1877,291 @@ async def voice_guide_input_to_tool(
         "content": body.content,
         "source": body.source,
         "message": f"Input ready for {desc.split(' - ')[0]}. Navigate to the tool to complete the action.",
+    }
+
+
+# ─── Profile, Memory & Insight Endpoints ─────────────────────────────────
+# Migrated from the legacy voice_companion.py so that ALL companion
+# endpoints live under the unified /api/voice-companion/ prefix.
+
+
+class CompanionProfileResponse(BaseModel):
+    total_sessions: int
+    total_messages: int
+    streak_days: int
+    longest_streak: int
+    preferred_tone: str
+    preferred_name: str | None = None
+    address_style: str
+    friendship_level: str
+    common_moods: dict | None = None
+
+
+class UpdateProfileRequest(BaseModel):
+    preferred_name: str | None = Field(None, max_length=64)
+    preferred_tone: str | None = Field(None, pattern=r"^(warm|playful|gentle|direct)$")
+    address_style: str | None = Field(None, pattern=r"^(friend|dear|buddy|name)$")
+    prefers_tough_love: bool | None = None
+    humor_level: float | None = Field(None, ge=0.0, le=1.0)
+
+
+@router.get("/profile", response_model=CompanionProfileResponse)
+@limiter.limit("20/minute")
+async def get_companion_profile(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Get the user's companion profile and friendship stats."""
+    profile = await _get_or_create_profile(db, current_user)
+    await db.commit()
+
+    return CompanionProfileResponse(
+        total_sessions=profile.total_sessions,
+        total_messages=profile.total_messages,
+        streak_days=profile.streak_days,
+        longest_streak=profile.longest_streak,
+        preferred_tone=profile.preferred_tone,
+        preferred_name=profile.preferred_name,
+        address_style=profile.address_style,
+        friendship_level=_get_friendship_level(profile.total_sessions),
+        common_moods=profile.common_moods,
+    )
+
+
+@router.patch("/profile")
+@limiter.limit("10/minute")
+async def update_companion_profile(
+    request: Request,
+    body: UpdateProfileRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Update companion profile preferences."""
+    profile = await _get_or_create_profile(db, current_user)
+
+    if body.preferred_name is not None:
+        profile.preferred_name = body.preferred_name
+    if body.preferred_tone is not None:
+        profile.preferred_tone = body.preferred_tone
+    if body.address_style is not None:
+        profile.address_style = body.address_style
+    if body.prefers_tough_love is not None:
+        profile.prefers_tough_love = body.prefers_tough_love
+    if body.humor_level is not None:
+        profile.humor_level = body.humor_level
+
+    await db.commit()
+
+    return {"status": "updated", "message": "Your preferences have been saved, friend."}
+
+
+@router.get("/memories")
+@limiter.limit("10/minute")
+async def get_companion_memories(
+    request: Request,
+    limit: int = 20,
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Get what KIAAN remembers about the user (for transparency)."""
+    result = await db.execute(
+        select(CompanionMemory)
+        .where(
+            CompanionMemory.user_id == current_user,
+            CompanionMemory.deleted_at.is_(None),
+        )
+        .order_by(desc(CompanionMemory.importance))
+        .limit(min(limit, 50))
+    )
+    memories = result.scalars().all()
+
+    return {
+        "memories": [
+            {
+                "id": m.id,
+                "type": m.memory_type,
+                "key": m.key,
+                "created_at": m.created_at.isoformat() if m.created_at else None,
+                "importance": m.importance,
+            }
+            for m in memories
+        ],
+        "total": len(memories),
+    }
+
+
+@router.delete("/memories/{memory_id}")
+@limiter.limit("10/minute")
+async def delete_companion_memory(
+    request: Request,
+    memory_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Delete a specific memory (user controls what KIAAN remembers)."""
+    result = await db.execute(
+        select(CompanionMemory).where(
+            CompanionMemory.id == memory_id,
+            CompanionMemory.user_id == current_user,
+        )
+    )
+    memory = result.scalar_one_or_none()
+
+    if not memory:
+        raise HTTPException(status_code=404, detail="Memory not found.")
+
+    memory.soft_delete()
+    await db.commit()
+
+    return {"status": "deleted", "message": "Memory removed. I'll forget that, friend."}
+
+
+@router.get("/voices")
+async def get_companion_voices():
+    """Get available companion voice personas."""
+    from backend.services.companion_voice_service import get_available_voices
+
+    return {"voices": get_available_voices()}
+
+
+@router.get("/insights/mood-trends")
+@limiter.limit("20/minute")
+async def get_mood_trends(
+    request: Request,
+    days: int = 30,
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Get mood trend data for the Self-Awareness Mirror.
+
+    Returns mood frequencies, emotional arc over time, and pattern insights.
+    """
+    from collections import Counter
+
+    from backend.services.companion_friend_engine import get_companion_engine
+
+    since = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=days)
+
+    result = await db.execute(
+        select(
+            CompanionMessage.detected_mood,
+            CompanionMessage.mood_intensity,
+            CompanionMessage.created_at,
+            CompanionMessage.session_id,
+        )
+        .where(
+            CompanionMessage.user_id == current_user,
+            CompanionMessage.role == "user",
+            CompanionMessage.detected_mood.isnot(None),
+            CompanionMessage.created_at >= since,
+            CompanionMessage.deleted_at.is_(None),
+        )
+        .order_by(CompanionMessage.created_at)
+    )
+    rows = result.all()
+
+    mood_history = [
+        {
+            "mood": row.detected_mood,
+            "intensity": row.mood_intensity or 0.5,
+            "timestamp": row.created_at.isoformat() if row.created_at else None,
+            "session_id": row.session_id,
+        }
+        for row in rows
+    ]
+
+    engine = get_companion_engine()
+    patterns = await engine.analyze_emotional_patterns(mood_history)
+
+    daily_moods: dict[str, list[str]] = {}
+    for entry in mood_history:
+        if entry.get("timestamp"):
+            day = entry["timestamp"][:10]
+            daily_moods.setdefault(day, []).append(entry["mood"])
+
+    timeline = []
+    for day, moods in sorted(daily_moods.items()):
+        most_common = Counter(moods).most_common(1)[0][0] if moods else "neutral"
+        timeline.append({
+            "date": day,
+            "primary_mood": most_common,
+            "mood_count": len(moods),
+        })
+
+    return {
+        **patterns,
+        "timeline": timeline,
+        "period_days": days,
+    }
+
+
+@router.get("/insights/milestones")
+@limiter.limit("20/minute")
+async def get_friendship_milestones(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Get friendship milestones and achievements."""
+    profile = await _get_or_create_profile(db, current_user)
+
+    improved_count = await db.scalar(
+        select(func.count(CompanionSession.id))
+        .where(
+            CompanionSession.user_id == current_user,
+            CompanionSession.mood_improved.is_(True),
+        )
+    ) or 0
+
+    days_result = await db.execute(
+        select(func.date_trunc("day", CompanionSession.started_at))
+        .where(CompanionSession.user_id == current_user)
+        .distinct()
+    )
+    total_days = len(days_result.all())
+
+    milestones = []
+    milestone_defs = [
+        (1, "First Conversation", "Started your journey with KIAAN", "new_friend"),
+        (5, "Getting Closer", "5 conversations deep", "familiar"),
+        (10, "True Friend", "10 heartfelt conversations", "close"),
+        (25, "Soul Connection", "25 sessions of growth together", "deep"),
+        (50, "Divine Bond", "50 sessions — a Sakha bond", "divine"),
+        (100, "Eternal Companion", "100 sessions — friends for life", "eternal"),
+    ]
+
+    for threshold, title, description, level in milestone_defs:
+        milestones.append({
+            "threshold": threshold,
+            "title": title,
+            "description": description,
+            "level": level,
+            "achieved": profile.total_sessions >= threshold,
+        })
+
+    streak_milestones = [
+        (3, "3-Day Streak", "Showed up 3 days in a row"),
+        (7, "Week Warrior", "7 consecutive days of self-care"),
+        (14, "Fortnight of Growth", "14 days of consistent inner work"),
+        (30, "Monthly Master", "30-day streak — incredible discipline"),
+    ]
+    for threshold, title, description in streak_milestones:
+        milestones.append({
+            "threshold": threshold,
+            "title": title,
+            "description": description,
+            "level": "streak",
+            "achieved": profile.longest_streak >= threshold,
+        })
+
+    return {
+        "total_sessions": profile.total_sessions,
+        "total_messages": profile.total_messages,
+        "current_streak": profile.streak_days,
+        "longest_streak": profile.longest_streak,
+        "sessions_with_improvement": improved_count,
+        "total_days_active": total_days,
+        "friendship_level": _get_friendship_level(profile.total_sessions),
+        "milestones": milestones,
     }

@@ -334,7 +334,9 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     // ── Tier 2: Web Speech API ──
     usingOnDeviceRef.current = false
     if (recognitionRef.current && isWebSpeechSupported) {
-      recognitionRef.current.start({
+      // Await mic permission + recognition.start() so the UI only shows
+      // "listening" after the microphone is actually capturing audio.
+      await recognitionRef.current.start({
         onStart: () => {
           setIsListening(true)
           setStatus('listening')

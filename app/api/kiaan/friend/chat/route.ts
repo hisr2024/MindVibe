@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
 
     // ── Tier 1: Proxy to Python backend ──────────────────────────────
     try {
-      const backendRes = await fetch(`${BACKEND_URL}/api/companion/message`, {
+      const backendRes = await fetch(`${BACKEND_URL}/api/voice-companion/message`, {
         method: 'POST',
         headers: proxyHeaders(request, 'POST'),
         body: JSON.stringify({
