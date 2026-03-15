@@ -267,7 +267,8 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
         }
 
         setIsListening(false)
-        if (status !== 'error') setStatus('idle')
+        // Use functional setter to avoid stale closure over `status`
+        setStatus(prev => prev === 'error' ? 'error' : 'idle')
       }
 
       mediaRecorderRef.current = recorder
@@ -286,7 +287,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
       }
       return false
     }
-  }, [language, punctuationAssist, onTranscript, onError, status])
+  }, [language, punctuationAssist, onTranscript, onError])
 
   const startListening = useCallback(async () => {
     // Pre-flight: check basic availability
@@ -412,11 +413,22 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     onDeviceSTT.resetTranscript()
   }, [onDeviceSTT])
 
-  // Cleanup media resources on unmount
+  // Cleanup all voice resources on unmount
   useEffect(() => {
     return () => {
+      // Stop MediaRecorder if active
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        try { mediaRecorderRef.current.stop() } catch { /* already stopped */ }
+      }
+      // Release microphone
       if (mediaStreamRef.current) {
         mediaStreamRef.current.getTracks().forEach(t => t.stop())
+        mediaStreamRef.current = null
+      }
+      // Stop Web Speech API recognition
+      if (recognitionRef.current) {
+        recognitionRef.current.destroy()
+        recognitionRef.current = null
       }
     }
   }, [])

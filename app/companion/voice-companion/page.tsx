@@ -292,6 +292,8 @@ export default function VoiceCompanionPage() {
 
       // Speak instant local response via browser TTS
       if (typeof window !== 'undefined' && window.speechSynthesis) {
+        // Cancel any in-progress speech before starting new utterance
+        window.speechSynthesis.cancel()
         const utterance = new SpeechSynthesisUtterance(localResult.localResponse)
         utterance.rate = 0.95
         utterance.lang = voiceConfig.language === 'hi' ? 'hi-IN' : 'en-US'
@@ -447,7 +449,14 @@ export default function VoiceCompanionPage() {
   const playVerse = async (verse: GitaVerse) => {
     const verseKey = `${verse.chapter}.${verse.verse}`
     if (isPlaying === verseKey) {
-      if (currentAudioRef.current) { currentAudioRef.current.pause(); currentAudioRef.current = null }
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause()
+        currentAudioRef.current.src = ''
+        currentAudioRef.current = null
+      }
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel()
+      }
       setIsPlaying(null)
       return
     }
@@ -464,13 +473,28 @@ export default function VoiceCompanionPage() {
         }),
       })
       if (res.ok) {
-        const blob = await res.blob()
-        const url = URL.createObjectURL(blob)
-        const audio = new Audio(url)
-        currentAudioRef.current = audio
-        audio.onended = () => { setIsPlaying(null); URL.revokeObjectURL(url) }
-        audio.onerror = () => { setIsPlaying(null); URL.revokeObjectURL(url) }
-        await audio.play()
+        const contentType = res.headers.get('content-type') || ''
+        if (contentType.includes('audio')) {
+          const blob = await res.blob()
+          if (blob.size === 0) { setIsPlaying(null); return }
+          const url = URL.createObjectURL(blob)
+          const audio = new Audio(url)
+          currentAudioRef.current = audio
+          audio.onended = () => { setIsPlaying(null); URL.revokeObjectURL(url); currentAudioRef.current = null }
+          audio.onerror = () => { setIsPlaying(null); URL.revokeObjectURL(url); currentAudioRef.current = null }
+          await audio.play()
+        } else {
+          // Backend returned JSON fallback config — use browser TTS
+          setIsPlaying(null)
+          if (typeof window !== 'undefined' && window.speechSynthesis) {
+            const utterance = new SpeechSynthesisUtterance(verse.sanskrit + '. ' + verse.translation)
+            utterance.rate = voiceConfig.speed || 0.95
+            utterance.lang = voiceConfig.language === 'hi' ? 'hi-IN' : 'en-US'
+            utterance.onend = () => setIsPlaying(null)
+            window.speechSynthesis.speak(utterance)
+            setIsPlaying(verseKey)
+          }
+        }
       } else { setIsPlaying(null) }
     } catch { setIsPlaying(null) }
   }
@@ -717,9 +741,10 @@ export default function VoiceCompanionPage() {
                     if (e.key === 'Enter') {
                       const value = (e.target as HTMLInputElement).value
                       if (value.trim()) {
-                        setChatInput(value)
                         setShowMoodCheckin(false)
-                        setTimeout(() => sendMessage(), 0)
+                        // Pass value directly — setChatInput is async and sendMessage
+                        // would read stale chatInput from the closure via setTimeout
+                        sendMessage(value)
                       }
                     }
                   }}
