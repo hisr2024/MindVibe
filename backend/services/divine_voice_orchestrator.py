@@ -50,6 +50,7 @@ class VoiceProvider(Enum):
     SARVAM_AI = "sarvam_ai"           # India's best for Sanskrit/Hindi
     BHASHINI_AI = "bhashini_ai"       # Government of India 22 languages
     ELEVENLABS = "elevenlabs"         # Studio-grade international voices
+    EDGE_TTS = "edge_tts"            # Free Microsoft Neural voices
     BROWSER_TTS = "browser_tts"       # Browser fallback
 
 
@@ -305,12 +306,20 @@ class DivineVoiceOrchestrator:
         )
         self._elevenlabs_available = bool(os.getenv("ELEVENLABS_API_KEY", "").strip())
 
+        # Edge TTS is always available if the package is installed (no API key needed)
+        try:
+            from backend.services.edge_tts_service import is_edge_tts_available
+            self._edge_available = is_edge_tts_available()
+        except ImportError:
+            self._edge_available = False
+
         # Active synthesis tracking for stop functionality
         self._active_synthesis: Dict[str, bool] = {}
 
         logger.info(
             f"Divine Voice Orchestrator initialized. "
             f"Sarvam: {self._sarvam_available}, "
+            f"Edge: {self._edge_available}, "
             f"Bhashini: {self._bhashini_available}, "
             f"ElevenLabs: {self._elevenlabs_available}"
         )
@@ -519,6 +528,8 @@ class DivineVoiceOrchestrator:
             return await self._synthesize_bhashini(text, voice_config)
         elif voice_config.provider == VoiceProvider.ELEVENLABS:
             return await self._synthesize_elevenlabs(text, voice_config)
+        elif voice_config.provider == VoiceProvider.EDGE_TTS:
+            return await self._synthesize_edge(text, voice_config)
         else:
             return SynthesisResult(
                 success=False,
@@ -697,6 +708,60 @@ class DivineVoiceOrchestrator:
                 error=str(e)
             )
 
+    async def _synthesize_edge(
+        self,
+        text: str,
+        voice_config: VoiceConfig,
+    ) -> SynthesisResult:
+        """Synthesize using Microsoft Edge TTS (free, no API key)."""
+        try:
+            from backend.services.edge_tts_service import (
+                synthesize_edge_tts,
+                is_edge_tts_available,
+            )
+
+            if not is_edge_tts_available():
+                return SynthesisResult(
+                    success=False, audio_data=None, audio_format="",
+                    provider_used=VoiceProvider.EDGE_TTS,
+                    quality_score=0, latency_ms=0,
+                    error="edge-tts package not installed"
+                )
+
+            lang = voice_config.language.split("-")[0]
+            audio_bytes = await synthesize_edge_tts(
+                text=text,
+                language=lang,
+                voice_id=voice_config.voice_id,
+                mood="neutral",
+            )
+
+            if audio_bytes and len(audio_bytes) > 100:
+                return SynthesisResult(
+                    success=True,
+                    audio_data=audio_bytes,
+                    audio_format="mp3",
+                    provider_used=VoiceProvider.EDGE_TTS,
+                    quality_score=8.8,
+                    latency_ms=0
+                )
+            else:
+                return SynthesisResult(
+                    success=False, audio_data=None, audio_format="",
+                    provider_used=VoiceProvider.EDGE_TTS,
+                    quality_score=0, latency_ms=0,
+                    error="Edge TTS returned empty audio"
+                )
+
+        except Exception as e:
+            logger.error(f"Edge TTS synthesis error: {e}")
+            return SynthesisResult(
+                success=False, audio_data=None, audio_format="",
+                provider_used=VoiceProvider.EDGE_TTS,
+                quality_score=0, latency_ms=0,
+                error=str(e)
+            )
+
     def _get_fallback_chain(
         self,
         primary_config: VoiceConfig,
@@ -711,8 +776,21 @@ class DivineVoiceOrchestrator:
         }
         is_indian = language in indian_languages or language.startswith("hi") or language.startswith("sa")
 
+        # Edge TTS fallback config (free, always available if package installed)
+        edge_fallback = VoiceConfig(
+            provider=VoiceProvider.EDGE_TTS,
+            voice_id="en-IN-NeerjaNeural" if is_indian else "en-US-JennyNeural",
+            language="en-IN" if is_indian else "en-US",
+            gender=VoiceGender.FEMALE,
+            style=VoiceStyle.FRIENDLY,
+            quality_score=8.8,
+            description="Free Microsoft Neural voice fallback",
+        )
+
         if primary_config.provider == VoiceProvider.SARVAM_AI:
-            # Sarvam failed → try Bhashini → ElevenLabs
+            # Sarvam failed → try Edge → Bhashini → ElevenLabs
+            if self._edge_available:
+                fallbacks.append(edge_fallback)
             if self._bhashini_available:
                 fallbacks.append(BHASHINI_VOICES.get(
                     "divine_female_hi",
@@ -725,7 +803,7 @@ class DivineVoiceOrchestrator:
                 ))
 
         elif primary_config.provider == VoiceProvider.BHASHINI_AI:
-            # Bhashini failed → try Sarvam → ElevenLabs
+            # Bhashini failed → try Sarvam → Edge → ElevenLabs
             if self._sarvam_available:
                 for voice in SARVAM_VOICES.values():
                     if voice.style == primary_config.style:
@@ -733,6 +811,8 @@ class DivineVoiceOrchestrator:
                         break
                 if not fallbacks:
                     fallbacks.append(SARVAM_VOICES["divine_female"])
+            if self._edge_available:
+                fallbacks.append(edge_fallback)
             if self._elevenlabs_available:
                 fallbacks.append(ELEVENLABS_VOICES.get(
                     "friendly_female_en",
@@ -740,7 +820,9 @@ class DivineVoiceOrchestrator:
                 ))
 
         elif primary_config.provider == VoiceProvider.ELEVENLABS:
-            # ElevenLabs failed → try Sarvam (for Indian) → Bhashini
+            # ElevenLabs failed → try Edge → Sarvam → Bhashini
+            if self._edge_available:
+                fallbacks.append(edge_fallback)
             if is_indian:
                 if self._sarvam_available:
                     fallbacks.append(SARVAM_VOICES["divine_female"])
@@ -749,6 +831,18 @@ class DivineVoiceOrchestrator:
             else:
                 if self._sarvam_available:
                     fallbacks.append(SARVAM_VOICES["divine_female"])
+
+        elif primary_config.provider == VoiceProvider.EDGE_TTS:
+            # Edge failed → try Sarvam → Bhashini → ElevenLabs
+            if self._sarvam_available:
+                fallbacks.append(SARVAM_VOICES["divine_female"])
+            if self._bhashini_available:
+                fallbacks.append(BHASHINI_VOICES["divine_female_hi"])
+            if self._elevenlabs_available:
+                fallbacks.append(ELEVENLABS_VOICES.get(
+                    "friendly_female_en",
+                    list(ELEVENLABS_VOICES.values())[0]
+                ))
 
         return fallbacks
 

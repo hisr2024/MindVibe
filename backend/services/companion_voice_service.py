@@ -85,7 +85,7 @@ def get_provider_health_status() -> dict[str, Any]:
     """Return health status of all TTS providers for monitoring/dashboards."""
     now = time.monotonic()
     providers = {}
-    for name in ("elevenlabs", "sarvam", "bhashini"):
+    for name in ("elevenlabs", "sarvam", "edge", "bhashini"):
         disabled_until = _PROVIDER_DISABLED_UNTIL.get(name, 0)
         failures = _PROVIDER_FAILURE_COUNTS.get(name, 0)
         last_success = _PROVIDER_LAST_SUCCESS.get(name)
@@ -788,6 +788,7 @@ async def synthesize_companion_voice(
     _provider_meta = {
         "elevenlabs": {"content_type": "audio/mpeg", "provider_name": "elevenlabs", "quality_score": 10.0},
         "sarvam": {"content_type": "audio/wav", "provider_name": "sarvam_ai_bulbul", "quality_score": 9.7},
+        "edge": {"content_type": "audio/mpeg", "provider_name": "edge_tts", "quality_score": 8.8},
         "bhashini": {"content_type": "audio/wav", "provider_name": "bhashini_ai", "quality_score": 9.0},
     }
 
@@ -827,6 +828,9 @@ async def synthesize_companion_voice(
 
         elif _provider == "sarvam":
             audio = await _try_sarvam_tts(plain_text, ssml_data, mood, voice_id)
+
+        elif _provider == "edge":
+            audio = await _try_edge_tts(plain_text, ssml_data, mood, voice_id)
 
         elif _provider == "bhashini":
             audio = await _try_bhashini_tts(plain_text, ssml_data, mood, voice_id)
@@ -978,6 +982,52 @@ async def _try_sarvam_tts(
         logger.debug("Sarvam TTS: sarvam_tts_service not available")
     except Exception as e:
         logger.warning(f"Sarvam TTS failed: {e}")
+
+    return None
+
+
+async def _try_edge_tts(
+    text: str, ssml_data: dict, mood: str, voice_id: str
+) -> bytes | None:
+    """Attempt synthesis via Microsoft Edge TTS - free, no API key needed.
+
+    Uses Microsoft's Neural voice service with high-quality Indian language
+    voices. Quality ~8.5-9/10. Completely free, no subscription required.
+    """
+    language = ssml_data.get("language", "en")
+
+    try:
+        from backend.services.edge_tts_service import (
+            is_edge_tts_available,
+            is_edge_supported_language,
+            synthesize_edge_tts,
+        )
+
+        if not is_edge_tts_available():
+            return None
+
+        if not is_edge_supported_language(language):
+            logger.debug(f"Edge TTS: Language '{language}' not supported")
+            return None
+
+        audio = await synthesize_edge_tts(
+            text=text,
+            language=language,
+            voice_id=voice_id,
+            mood=mood,
+        )
+
+        if audio and len(audio) > 100:
+            logger.info(
+                f"Edge TTS success: lang={language}, persona={ssml_data['voice_persona']}, "
+                f"size={len(audio)} bytes"
+            )
+            return audio
+
+    except ImportError:
+        logger.debug("Edge TTS: edge_tts_service not available")
+    except Exception as e:
+        logger.warning(f"Edge TTS failed: {e}")
 
     return None
 
@@ -1162,36 +1212,36 @@ def get_all_voice_providers_status() -> dict[str, Any]:
 # Language-to-provider priority mapping (best provider first per language).
 # Based on comprehensive voice quality evaluation across all providers.
 LANGUAGE_PROVIDER_PRIORITY: dict[str, list[str]] = {
-    # Indian languages: Sarvam AI v2 is best, Bhashini is excellent fallback
-    "hi": ["sarvam", "bhashini", "elevenlabs"],
-    "ta": ["sarvam", "bhashini", "elevenlabs"],
-    "te": ["sarvam", "bhashini", "elevenlabs"],
-    "bn": ["sarvam", "bhashini", "elevenlabs"],
-    "kn": ["sarvam", "bhashini", "elevenlabs"],
-    "ml": ["sarvam", "bhashini", "elevenlabs"],
-    "mr": ["sarvam", "bhashini", "elevenlabs"],
-    "gu": ["sarvam", "bhashini", "elevenlabs"],
-    "pa": ["sarvam", "bhashini", "elevenlabs"],
-    "sa": ["sarvam", "bhashini", "elevenlabs"],
-    "en-IN": ["sarvam", "elevenlabs", "bhashini"],
-    # International: ElevenLabs is best
-    "en": ["elevenlabs", "sarvam", "bhashini"],
-    "es": ["elevenlabs", "sarvam"],
-    "fr": ["elevenlabs", "sarvam"],
-    "de": ["elevenlabs", "sarvam"],
-    "pt": ["elevenlabs", "sarvam"],
-    "ja": ["elevenlabs"],
-    "zh": ["elevenlabs"],
-    "ar": ["elevenlabs"],
+    # Indian languages: Sarvam AI v2 is best, Edge TTS is free high-quality fallback
+    "hi": ["sarvam", "edge", "bhashini", "elevenlabs"],
+    "ta": ["sarvam", "edge", "bhashini", "elevenlabs"],
+    "te": ["sarvam", "edge", "bhashini", "elevenlabs"],
+    "bn": ["sarvam", "edge", "bhashini", "elevenlabs"],
+    "kn": ["sarvam", "edge", "bhashini", "elevenlabs"],
+    "ml": ["sarvam", "edge", "bhashini", "elevenlabs"],
+    "mr": ["sarvam", "edge", "bhashini", "elevenlabs"],
+    "gu": ["sarvam", "edge", "bhashini", "elevenlabs"],
+    "pa": ["sarvam", "edge", "bhashini", "elevenlabs"],
+    "sa": ["sarvam", "edge", "bhashini", "elevenlabs"],
+    "en-IN": ["sarvam", "edge", "elevenlabs", "bhashini"],
+    # International: ElevenLabs is best, Edge TTS is free fallback
+    "en": ["elevenlabs", "edge", "sarvam", "bhashini"],
+    "es": ["elevenlabs", "edge", "sarvam"],
+    "fr": ["elevenlabs", "edge", "sarvam"],
+    "de": ["elevenlabs", "edge", "sarvam"],
+    "pt": ["elevenlabs", "edge", "sarvam"],
+    "ja": ["elevenlabs", "edge"],
+    "zh": ["elevenlabs", "edge"],
+    "ar": ["elevenlabs", "edge"],
     # Bhashini-only languages (Government of India scheduled languages)
-    "od": ["bhashini", "sarvam"],
-    "as": ["bhashini"],
-    "ne": ["bhashini"],
-    "ur": ["bhashini", "sarvam"],
-    "sd": ["bhashini"],
-    "doi": ["bhashini"],
-    "mai": ["bhashini"],
-    "kok": ["bhashini"],
+    "od": ["bhashini", "edge", "sarvam"],
+    "as": ["bhashini", "edge"],
+    "ne": ["bhashini", "edge"],
+    "ur": ["bhashini", "edge", "sarvam"],
+    "sd": ["bhashini", "edge"],
+    "doi": ["bhashini", "edge"],
+    "mai": ["bhashini", "edge"],
+    "kok": ["bhashini", "edge"],
 }
 
 
@@ -1203,7 +1253,7 @@ def _get_optimal_provider_order(language: str) -> list[str]:
     """
     static_order = LANGUAGE_PROVIDER_PRIORITY.get(
         language,
-        ["elevenlabs", "sarvam", "bhashini"],
+        ["elevenlabs", "edge", "sarvam", "bhashini"],
     )
 
     if QUALITY_EVALUATOR_AVAILABLE:
