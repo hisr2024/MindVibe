@@ -13,13 +13,15 @@ All content is validated for strict Bhagavad Gita compliance.
 """
 
 import logging
-from typing import Any
+import re
+from typing import Any, ClassVar
+from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_db
+from backend.deps import get_current_user, get_db
 from backend.middleware.rate_limiter import limiter
 
 logger = logging.getLogger(__name__)
@@ -56,12 +58,48 @@ class ProcessYouTubeVideoRequest(BaseModel):
     )
     languages: list[str] = Field(
         default=["en", "hi", "sa"],
-        description="Preferred transcript languages"
+        description="Preferred transcript languages",
+        max_length=5,
     )
     force: bool = Field(
         False,
         description="Force reprocessing even if video was already processed"
     )
+
+    # SSRF protection: Only allow YouTube domains or bare video IDs
+    ALLOWED_YOUTUBE_HOSTS: ClassVar[set[str]] = {
+        "youtube.com", "www.youtube.com", "youtu.be", "m.youtube.com",
+    }
+    # Restrict languages to known codes to prevent injection
+    ALLOWED_LANGUAGES: ClassVar[set[str]] = {
+        "en", "hi", "sa", "ta", "te", "kn", "ml", "mr", "gu", "bn", "pa",
+    }
+
+    @field_validator("video_url")
+    @classmethod
+    def validate_youtube_url(cls, v: str) -> str:
+        """Only allow YouTube URLs or bare 11-char video IDs — prevents SSRF."""
+        v = v.strip()
+        # Allow bare 11-char video ID
+        if re.match(r"^[a-zA-Z0-9_-]{11}$", v):
+            return v
+        parsed = urlparse(v)
+        if parsed.scheme not in ("http", "https"):
+            raise ValueError("URL must use http or https")
+        if parsed.hostname not in cls.ALLOWED_YOUTUBE_HOSTS:
+            raise ValueError(
+                f"URL must be a YouTube URL, got host: {parsed.hostname}"
+            )
+        return v
+
+    @field_validator("languages")
+    @classmethod
+    def validate_language_codes(cls, v: list[str]) -> list[str]:
+        """Restrict to known language codes — prevents injection."""
+        for lang in v:
+            if lang not in cls.ALLOWED_LANGUAGES:
+                raise ValueError(f"Unsupported language code: {lang}")
+        return v
 
 
 # =============================================================================
@@ -498,14 +536,16 @@ async def resume_daemon() -> dict[str, Any]:
 async def process_youtube_video(
     request: Request,
     body: ProcessYouTubeVideoRequest,
+    user_id: str = Depends(get_current_user),
 ) -> dict[str, Any]:
     """
     Process a YouTube video to extract Gita wisdom from its transcript.
 
     Fetches the video transcript, extracts wisdom nuggets using AI,
-    validates for Gita compliance, and stores validated wisdom.
+    validates for Gita compliance (structural + Five Pillar), and stores
+    validated wisdom.
 
-    Rate limited to 10 requests per hour.
+    Requires authentication. Rate limited to 10 requests per hour.
     """
     try:
         from backend.services.youtube_transcript_service import YouTubeTranscriptService
@@ -522,8 +562,17 @@ async def process_youtube_video(
     if not video_id:
         raise HTTPException(
             status_code=400,
-            detail=f"Could not extract video ID from: {body.video_url}"
+            detail="Could not extract a valid YouTube video ID from the provided URL."
         )
+
+    # Check cooldown — prevent abuse by reprocessing same video rapidly
+    if not body.force and not service.check_cooldown(video_id):
+        return {
+            "status": "cooldown",
+            "video_id": video_id,
+            "message": "This video was recently processed. "
+                       "Wait 5 minutes or use force=true to reprocess.",
+        }
 
     # Fetch transcript
     transcript = service.fetch_transcript(video_id, languages=body.languages)
@@ -543,7 +592,16 @@ async def process_youtube_video(
     )
 
     # Process through learning engine validation and storage
+    # Uses BOTH structural validation AND Five Pillar deep Gita compliance
     engine = get_learning_engine()
+
+    try:
+        from backend.services.gita_validator import GitaValidator as FivePillarValidator
+        five_pillar = FivePillarValidator()
+    except ImportError:
+        five_pillar = None
+        logger.warning("Five Pillar validator not available, using structural only")
+
     stored_count = 0
     rejected_count = 0
     results = []
@@ -553,24 +611,45 @@ async def process_youtube_video(
         if not content:
             continue
 
-        validation = engine.validator.validate_content(
+        # Structural validation (chapter/verse refs, Gita keywords, non-Gita rejection)
+        structural = engine.validator.validate_content(
             content,
             f"https://youtube.com/watch?v={video_id}"
         )
 
+        # Five Pillar deep compliance check
+        pillar_result = {}
+        if five_pillar:
+            pillar_result = five_pillar.score_five_pillar_compliance(
+                content, secular_mode=False
+            )
+
+        # Require structural validation to pass; Five Pillar score is informational
+        is_valid = structural["is_valid"]
+        if is_valid and structural["confidence"] < 0.3:
+            is_valid = False
+
         results.append({
             "content_preview": content[:200] + "..." if len(content) > 200 else content,
-            "is_valid": validation["is_valid"],
-            "confidence": validation["confidence"],
+            "is_valid": is_valid,
+            "structural_confidence": structural["confidence"],
+            "five_pillar_score": pillar_result.get("overall_score", 0.0),
+            "five_pillar_level": pillar_result.get("compliance_level", "N/A"),
             "chapter_refs": nugget.get("chapter_refs", []),
             "themes": nugget.get("themes", []),
             "quality_score": nugget.get("quality_score", 0.0),
         })
 
-        if validation["is_valid"]:
+        if is_valid:
             stored_count += 1
         else:
             rejected_count += 1
+
+    logger.info(
+        f"YouTube video processed by user {user_id}: "
+        f"video={video_id}, nuggets={len(nuggets)}, "
+        f"stored={stored_count}, rejected={rejected_count}"
+    )
 
     return {
         "status": "success",
@@ -584,13 +663,17 @@ async def process_youtube_video(
 
 
 @router.get("/youtube/quota")
-async def get_youtube_quota() -> dict[str, Any]:
+async def get_youtube_quota(
+    user_id: str = Depends(get_current_user),
+) -> dict[str, Any]:
     """
     Get current YouTube Data API quota usage and remaining quota.
 
     The YouTube Data API v3 grants 10,000 units per day.
     Each search.list call costs 100 units (~100 searches/day).
     Transcript fetching does NOT consume API quota.
+
+    Requires authentication.
     """
     try:
         from backend.services.youtube_transcript_service import YouTubeTranscriptService

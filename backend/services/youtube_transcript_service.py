@@ -19,6 +19,7 @@ import json
 import logging
 import os
 import re
+import time
 from datetime import datetime, date
 from typing import Any, Optional
 
@@ -173,12 +174,41 @@ Return ONLY valid JSON, no markdown fences or extra text."""
         # Quota tracker
         self.quota_tracker = YouTubeQuotaTracker()
 
+        # Per-video cooldown to prevent rapid reprocessing
+        self._processed_videos: dict[str, float] = {}
+
         logger.info(
             f"YouTubeTranscriptService initialized: "
             f"transcript_api={'available' if self._transcript_api_available else 'missing'}, "
             f"openai={'available' if self._openai_available else 'missing'}, "
             f"languages={self._languages}"
         )
+
+    def check_cooldown(self, video_id: str, cooldown_seconds: int = 300) -> bool:
+        """Check if a video can be processed (not on cooldown).
+
+        Returns True if the video can be processed, False if it was
+        recently processed and should wait.
+        """
+        now = time.time()
+        last = self._processed_videos.get(video_id, 0)
+        if now - last < cooldown_seconds:
+            return False
+        self._processed_videos[video_id] = now
+        # Evict old entries to prevent memory growth
+        if len(self._processed_videos) > 1000:
+            sorted_items = sorted(
+                self._processed_videos.items(), key=lambda x: x[1]
+            )
+            self._processed_videos = dict(sorted_items[-500:])
+        return True
+
+    @staticmethod
+    def _sanitize_for_prompt(text: str, max_length: int = 200) -> str:
+        """Strip control characters and limit length to prevent prompt injection."""
+        cleaned = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', text)
+        cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+        return cleaned[:max_length]
 
     @staticmethod
     def extract_video_id(url: str) -> Optional[str]:
@@ -338,9 +368,10 @@ Return ONLY valid JSON, no markdown fences or extra text."""
         channel_name: str
     ) -> list[dict[str, Any]]:
         """Extract wisdom using OpenAI GPT-4o-mini."""
+        # Sanitize title/channel to prevent prompt injection
         prompt = self.WISDOM_EXTRACTION_PROMPT.format(
-            title=video_title,
-            channel=channel_name,
+            title=self._sanitize_for_prompt(video_title),
+            channel=self._sanitize_for_prompt(channel_name),
             transcript_text=transcript[:30000],  # Limit input tokens
         )
 
