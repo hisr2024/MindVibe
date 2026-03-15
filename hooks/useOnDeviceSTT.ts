@@ -59,11 +59,13 @@ export function useOnDeviceSTT(options: UseOnDeviceSTTOptions = {}): UseOnDevice
 
   // Initialize on mount
   useEffect(() => {
+    let cancelled = false
     const stt = new OnDeviceSTT()
     sttRef.current = stt
 
-    // Detect capabilities
+    // Detect capabilities — guard against cleanup race
     stt.detectCapabilities().then(({ tier, recommendedProvider }) => {
+      if (cancelled) return
       setDeviceTier(tier)
       setSttProvider(recommendedProvider)
     }).catch(() => {
@@ -71,6 +73,7 @@ export function useOnDeviceSTT(options: UseOnDeviceSTTOptions = {}): UseOnDevice
     })
 
     return () => {
+      cancelled = true
       stt.destroy()
       sttRef.current = null
     }
@@ -79,9 +82,11 @@ export function useOnDeviceSTT(options: UseOnDeviceSTTOptions = {}): UseOnDevice
   // Initialize for language when it changes
   useEffect(() => {
     if (!sttRef.current) return
+    let cancelled = false
 
     sttRef.current.initialize(language, {
       onTranscript: (text, isFinal) => {
+        if (cancelled) return
         if (isFinal) {
           setTranscript(text)
           setInterimTranscript('')
@@ -92,26 +97,33 @@ export function useOnDeviceSTT(options: UseOnDeviceSTTOptions = {}): UseOnDevice
         }
       },
       onStateChange: (state: STTState) => {
+        if (cancelled) return
         setIsListening(state === 'listening')
         setIsModelLoaded(state === 'ready' || state === 'listening')
       },
       onProviderChange: (provider) => {
+        if (cancelled) return
         setSttProvider(provider)
       },
       onLoadProgress: (progress) => {
+        if (cancelled) return
         setModelLoadProgress(progress)
       },
       onError: (err) => {
+        if (cancelled) return
         setError(err)
         setIsListening(false)
         onErrorRef.current?.(err)
       },
     }).then(provider => {
-      setSttProvider(provider)
+      if (!cancelled) setSttProvider(provider)
     }).catch((err) => {
+      if (cancelled) return
       setError(err instanceof Error ? err.message : String(err))
       onErrorRef.current?.(err instanceof Error ? err.message : String(err))
     })
+
+    return () => { cancelled = true }
   }, [language])
 
   const startListening = useCallback(async () => {

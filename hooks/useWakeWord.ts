@@ -67,7 +67,7 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
     onWakeWordDetectedRef.current = options.onWakeWordDetected
     onErrorRef.current = options.onError
     onStateChangeRef.current = options.onStateChange
-  })
+  }, [options.onWakeWordDetected, options.onError, options.onStateChange])
 
   // Initialize wake word detector
   useEffect(() => {

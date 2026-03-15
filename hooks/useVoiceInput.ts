@@ -125,6 +125,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const mediaStreamRef = useRef<MediaStream | null>(null)
+  const mountedRef = useRef(true)
 
   // Track online/offline status
   useEffect(() => {
@@ -221,6 +222,9 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
           mediaStreamRef.current = null
         }
 
+        // Guard: component may have unmounted while recording
+        if (!mountedRef.current) return
+
         if (audioChunksRef.current.length === 0) {
           setIsListening(false)
           setStatus('idle')
@@ -244,6 +248,8 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
             signal: AbortSignal.timeout(30000),
           })
 
+          if (!mountedRef.current) return
+
           if (response.ok) {
             const data = await response.json()
             const text = data.transcript || ''
@@ -261,13 +267,14 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
             onError?.(msg)
           }
         } catch {
+          if (!mountedRef.current) return
           setError('Server transcription unavailable. Please type your message.')
           setStatus('error')
           onError?.('Server transcription unavailable.')
         }
 
+        if (!mountedRef.current) return
         setIsListening(false)
-        // Use functional setter to avoid stale closure over `status`
         setStatus(prev => prev === 'error' ? 'error' : 'idle')
       }
 
@@ -418,6 +425,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   // Cleanup all voice resources on unmount
   useEffect(() => {
     return () => {
+      mountedRef.current = false
       // Stop MediaRecorder if active
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         try { mediaRecorderRef.current.stop() } catch { /* already stopped */ }

@@ -75,6 +75,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const blobUrlRef = useRef<string | null>(null)
   const wasListeningRef = useRef(false)
+  const mountedRef = useRef(true)
 
   // Browser TTS (instant, for local responses)
   const {
@@ -146,6 +147,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
   // Cleanup audio and blob URLs on unmount
   useEffect(() => {
     return () => {
+      mountedRef.current = false
       if (audioRef.current) {
         audioRef.current.pause()
         audioRef.current = null
@@ -221,6 +223,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
             URL.revokeObjectURL(url)
             blobUrlRef.current = null
             audioRef.current = null
+            if (!mountedRef.current) return
             setIsSpeaking(false)
             onSpeakEnd?.()
           }
@@ -228,6 +231,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
             URL.revokeObjectURL(url)
             blobUrlRef.current = null
             audioRef.current = null
+            if (!mountedRef.current) return
             // Fall back to browser TTS — isSpeaking stays true
             // until browser TTS fires onEnd callback
             speakBrowser(text)
@@ -237,6 +241,7 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
             URL.revokeObjectURL(url)
             blobUrlRef.current = null
             audioRef.current = null
+            if (!mountedRef.current) return
             setIsSpeaking(false)
           }
 
