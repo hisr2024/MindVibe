@@ -429,8 +429,8 @@ export default function VoiceCompanionPage() {
             })))
           }
         }
-      }).catch((err) => {
-        console.warn('Failed to load Gita verses for chapter', chapterNum, err)
+      }).catch(() => {
+        // Gita verses API unavailable — using cached sample verses
       })
 
     const guidePromise = apiFetch(`/api/kiaan/friend/gita-guide/${chapterNum}`)
@@ -439,8 +439,8 @@ export default function VoiceCompanionPage() {
           const data = await res.json()
           if (data?.chapter_guide) setChapterGuide(data.chapter_guide)
         }
-      }).catch((err) => {
-        console.warn('Failed to load chapter guide for chapter', chapterNum, err)
+      }).catch(() => {
+        // Chapter guide API unavailable — display without modern interpretation
       })
 
     await Promise.all([versesPromise, guidePromise])

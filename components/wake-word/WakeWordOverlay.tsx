@@ -222,11 +222,8 @@ export function WakeWordOverlay() {
           return
         }
       }
-    } catch (err) {
-      // Backend unavailable - fall through to local engine
-      if (typeof console !== 'undefined') {
-        console.warn('Wake word quick-response API unavailable, using local fallback:', err)
-      }
+    } catch {
+      // Backend unavailable — fall through to local engine
     }
 
     // Fallback to local KIAAN Friend Engine
@@ -235,10 +232,8 @@ export function WakeWordOverlay() {
       setKiaanResponse(localResponse.response)
       setPhase('responding')
       speak(localResponse.response)
-    } catch (err) {
-      if (typeof console !== 'undefined') {
-        console.warn('Local KIAAN engine fallback failed:', err)
-      }
+    } catch {
+      // Local engine fallback failed — use template response
       const fallbackMsg = "I heard you. Let me open our conversation space so we can talk properly."
       setKiaanResponse(fallbackMsg)
       setPhase('responding')
