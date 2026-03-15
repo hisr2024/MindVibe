@@ -22,7 +22,7 @@ export interface RecognitionConfig {
   silenceTimeoutMs?: number
   /** Auto-restart on no-speech error instead of stopping (default: true) */
   autoRestartOnNoSpeech?: boolean
-  /** Max consecutive auto-restarts before giving up (default: 3) */
+  /** Max consecutive auto-restarts before giving up (default: 8, ~40s of silence tolerance) */
   maxAutoRestarts?: number
 }
 
@@ -46,7 +46,7 @@ export class SpeechRecognitionService {
   private confidenceThreshold: number = 0
   private silenceTimeoutMs: number = 1500
   private autoRestartOnNoSpeech: boolean = true
-  private maxAutoRestarts: number = 3
+  private maxAutoRestarts: number = 8
   private autoRestartCount: number = 0
   private micPermissionGranted: boolean = false
   private isMobile: boolean = false
@@ -64,7 +64,7 @@ export class SpeechRecognitionService {
     this.confidenceThreshold = config.confidenceThreshold ?? 0.0 // Accept all results by default
     this.silenceTimeoutMs = config.silenceTimeoutMs ?? 1500
     this.autoRestartOnNoSpeech = config.autoRestartOnNoSpeech ?? true
-    this.maxAutoRestarts = config.maxAutoRestarts ?? 3
+    this.maxAutoRestarts = config.maxAutoRestarts ?? 8
 
     this.recognition = new SpeechRecognitionConstructor()
     this.recognition.lang = getSpeechLanguage(config.language || 'en')
@@ -152,7 +152,11 @@ export class SpeechRecognitionService {
           // Recognition will fire onend after this error — we restart there
           return
         }
-        // Exhausted auto-restarts, fall through to report error
+        // Exhausted auto-restarts — reset counter and disable mobile keep-listening
+        // so that the onend handler does NOT restart recognition again.
+        // Without this, onend sees (count <= max) as true → infinite restart loop.
+        this.autoRestartCount = 0
+        this.keepListeningOnMobile = false
       }
 
       let errorMessage = 'Speech recognition error'
