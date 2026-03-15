@@ -1825,7 +1825,7 @@ async def get_divine_voice_providers() -> dict:
     Get information about available divine voice providers.
 
     Returns status and quality ranking of each provider.
-    Providers: Sarvam AI, Bhashini AI, ElevenLabs.
+    Providers: ElevenLabs, Sarvam AI, Edge TTS.
     """
     providers = get_available_tts_providers()
 
@@ -1837,12 +1837,6 @@ async def get_divine_voice_providers() -> dict:
                 "best_for": ["Sanskrit", "Hindi", "Indian languages"],
                 "voices": ["sarvam-aura", "sarvam-rishi"] if providers.get("sarvam_ai_bulbul") else [],
             },
-            "bhashini_ai": {
-                "available": providers.get("bhashini_ai", False),
-                "quality_score": 9.0,
-                "best_for": ["Hindi", "Tamil", "Telugu", "Bengali", "22 Indian languages"],
-                "voices": ["bhashini-devi", "bhashini-arya"] if providers.get("bhashini_ai") else [],
-            },
             "elevenlabs": {
                 "available": providers.get("elevenlabs", False),
                 "quality_score": 10.0,
@@ -1851,14 +1845,14 @@ async def get_divine_voice_providers() -> dict:
             },
         },
         "recommendation": {
-            "sanskrit": "sarvam_ai" if providers.get("sarvam_ai_bulbul") else "bhashini_ai",
-            "hindi": "sarvam_ai" if providers.get("sarvam_ai_bulbul") else "bhashini_ai",
+            "sanskrit": "sarvam_ai" if providers.get("sarvam_ai_bulbul") else "elevenlabs",
+            "hindi": "sarvam_ai" if providers.get("sarvam_ai_bulbul") else "elevenlabs",
             "english": "elevenlabs" if providers.get("elevenlabs") else "sarvam_ai",
-            "tamil": "sarvam_ai" if providers.get("sarvam_ai_bulbul") else "bhashini_ai",
+            "tamil": "sarvam_ai" if providers.get("sarvam_ai_bulbul") else "elevenlabs",
             "international": "elevenlabs" if providers.get("elevenlabs") else "sarvam_ai",
         },
         "fallback_chain": {
-            "indian_languages": "Sarvam AI -> Bhashini AI -> ElevenLabs",
-            "international_languages": "ElevenLabs -> Sarvam AI",
+            "indian_languages": "Sarvam AI -> ElevenLabs -> Edge TTS",
+            "international_languages": "ElevenLabs -> Sarvam AI -> Edge TTS",
         },
     }

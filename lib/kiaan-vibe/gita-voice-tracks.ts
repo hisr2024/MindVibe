@@ -9,8 +9,8 @@
  *   Verse Selection → TTS API synthesis → Audio Blob URL → Track object → Player Queue
  *
  * Language Priority for TTS:
- *   Sanskrit: Sarvam AI (9.5/10) → Bhashini AI → Google Neural2 (hi-IN fallback)
- *   Hindi:    Sarvam AI → Bhashini AI → Google Neural2
+ *   Sanskrit: Sarvam AI (9.7/10) → ElevenLabs → Edge TTS (hi-IN fallback)
+ *   Hindi:    Sarvam AI → ElevenLabs → Edge TTS
  *   English:  ElevenLabs (10/10) → Google Neural2 → Browser TTS
  *   Others:   Sarvam AI → Google Neural2 → Browser TTS
  */

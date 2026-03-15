@@ -70,10 +70,9 @@ class TestProviderBaselineScores:
     """Tests for provider baseline quality data."""
 
     def test_all_providers_have_baselines(self):
-        """All three providers must have baseline scores."""
+        """All providers must have baseline scores."""
         assert "elevenlabs" in PROVIDER_BASELINE_SCORES
         assert "sarvam_ai" in PROVIDER_BASELINE_SCORES
-        assert "bhashini_ai" in PROVIDER_BASELINE_SCORES
 
     def test_all_providers_have_default(self):
         """Every provider must have a _default fallback."""
@@ -90,10 +89,6 @@ class TestProviderBaselineScores:
         sarvam_hi = PROVIDER_BASELINE_SCORES["sarvam_ai"]["hi"]
         assert sarvam_hi["naturalness"] >= 9.5
         assert sarvam_hi["pronunciation_accuracy"] >= 9.5
-
-    def test_bhashini_has_hindi(self):
-        """Bhashini must support Hindi."""
-        assert "hi" in PROVIDER_BASELINE_SCORES["bhashini_ai"]
 
     def test_all_scores_in_range(self):
         """All quality scores should be between 0 and 10."""
@@ -143,7 +138,7 @@ class TestVoiceQualityEvaluator:
         evaluator = VoiceQualityEvaluator()
         best = evaluator.get_best_provider_for_language(
             "hi",
-            available_providers=["elevenlabs", "sarvam_ai", "bhashini_ai"],
+            available_providers=["elevenlabs", "sarvam_ai"],
         )
         assert best == "sarvam_ai"
 
@@ -152,7 +147,7 @@ class TestVoiceQualityEvaluator:
         evaluator = VoiceQualityEvaluator()
         best = evaluator.get_best_provider_for_language(
             "en",
-            available_providers=["elevenlabs", "sarvam_ai", "bhashini_ai"],
+            available_providers=["elevenlabs", "sarvam_ai"],
         )
         assert best == "elevenlabs"
 
@@ -161,7 +156,7 @@ class TestVoiceQualityEvaluator:
         evaluator = VoiceQualityEvaluator()
         best = evaluator.get_best_provider_for_language(
             "ta",
-            available_providers=["elevenlabs", "sarvam_ai", "bhashini_ai"],
+            available_providers=["elevenlabs", "sarvam_ai"],
         )
         assert best == "sarvam_ai"
 

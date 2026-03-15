@@ -3,7 +3,7 @@
  *
  * Proxies voice synthesis requests to the KIAAN voice companion backend.
  * Returns audio bytes from premium TTS providers (ElevenLabs, Sarvam AI,
- * Bhashini AI) or a browser fallback config when premium audio is unavailable.
+ * Edge TTS) or a browser fallback config when premium audio is unavailable.
  */
 
 import { NextRequest, NextResponse } from 'next/server'

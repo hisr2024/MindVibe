@@ -11,9 +11,9 @@ Voice Provider Chain (highest quality first):
 │  2. Sarvam AI Bulbul v2 (9.7/10) - Best Indian language voices│
 │     → Uses SARVAM_API_KEY, activated for Indian languages    │
 │     → Hindi, Tamil, Telugu, Bengali, Kannada, Malayalam, etc. │
-│  3. Bhashini AI (9/10) - Government of India, 22 languages   │
-│     → Uses BHASHINI_USER_ID and BHASHINI_API_KEY             │
-│     → Native pronunciation for all scheduled Indian langs    │
+│  3. Edge TTS (8.8/10) - Free Microsoft Neural voices         │
+│     → No API key required                                    │
+│     → Wide language coverage                                 │
 │  4. Browser SpeechSynthesis (5/10) - ultimate fallback       │
 │                                                              │
 │  Pronunciation Engine:                                       │
@@ -85,7 +85,7 @@ def get_provider_health_status() -> dict[str, Any]:
     """Return health status of all TTS providers for monitoring/dashboards."""
     now = time.monotonic()
     providers = {}
-    for name in ("elevenlabs", "sarvam", "bhashini"):
+    for name in ("elevenlabs", "sarvam", "edge"):
         disabled_until = _PROVIDER_DISABLED_UNTIL.get(name, 0)
         failures = _PROVIDER_FAILURE_COUNTS.get(name, 0)
         last_success = _PROVIDER_LAST_SUCCESS.get(name)
@@ -131,18 +131,6 @@ except ImportError:
     ELEVENLABS_SERVICE_AVAILABLE = False
     logger.debug("ElevenLabs dedicated service not available (optional)")
 
-# Import Bhashini AI service for Indian language voice synthesis
-try:
-    from backend.services.bhashini_tts_service import (
-        is_bhashini_available as _bh_available,
-        synthesize_bhashini_tts,
-        get_bhashini_health_status,
-        is_bhashini_supported_language,
-    )
-    BHASHINI_SERVICE_AVAILABLE = True
-except ImportError:
-    BHASHINI_SERVICE_AVAILABLE = False
-    logger.debug("Bhashini AI service not available (optional)")
 
 
 # ─── Emotion-to-Prosody Mapping ──────────────────────────────────────────
@@ -434,30 +422,6 @@ COMPANION_VOICES: dict[str, dict[str, Any]] = {
         "default_speed": 0.92,
         "default_pitch": -1.0,
         "warmth_boost": 0.08,
-    },
-    "bhashini-devi": {
-        "name": "Devi",
-        "gender": "female",
-        "style": "warm",
-        "elevenlabs_voice_id": None,
-        "elevenlabs_model": None,
-        "sarvam_speaker": None,
-        "description": "Warm, nurturing voice from India's Bhashini AI platform. Authentic pronunciation across 22 Indian languages.",
-        "default_speed": 0.93,
-        "default_pitch": 0.3,
-        "warmth_boost": 0.1,
-    },
-    "bhashini-arya": {
-        "name": "Arya",
-        "gender": "male",
-        "style": "deep",
-        "elevenlabs_voice_id": None,
-        "elevenlabs_model": None,
-        "sarvam_speaker": None,
-        "description": "Deep, resonant male voice from Bhashini AI. Authority and wisdom with authentic Indian intonation.",
-        "default_speed": 0.88,
-        "default_pitch": -0.8,
-        "warmth_boost": 0.06,
     },
     # ─── Divine Voice Personas ──────────────────────────────────────
     # Sacred voices tuned for maximum divine resonance
@@ -755,7 +719,7 @@ async def synthesize_companion_voice(
     Provider chain (tries in order, falls through on failure):
     1. ElevenLabs (dedicated service) - Most human-like voices
     2. Sarvam AI Bulbul - Best Indian language voices
-    3. Bhashini AI - Government of India, 22 Indian languages
+    3. Edge TTS - Free Microsoft Neural voices
     4. Browser fallback - Returns config for frontend SpeechSynthesis
 
     Pronunciation Pipeline:
@@ -788,7 +752,7 @@ async def synthesize_companion_voice(
     _provider_meta = {
         "elevenlabs": {"content_type": "audio/mpeg", "provider_name": "elevenlabs", "quality_score": 10.0},
         "sarvam": {"content_type": "audio/wav", "provider_name": "sarvam_ai_bulbul", "quality_score": 9.7},
-        "bhashini": {"content_type": "audio/wav", "provider_name": "bhashini_ai", "quality_score": 9.0},
+        "edge": {"content_type": "audio/mpeg", "provider_name": "edge_tts", "quality_score": 8.8},
     }
 
     # Try providers in optimal order determined by language + quality data
@@ -828,8 +792,8 @@ async def synthesize_companion_voice(
         elif _provider == "sarvam":
             audio = await _try_sarvam_tts(plain_text, ssml_data, mood, voice_id)
 
-        elif _provider == "bhashini":
-            audio = await _try_bhashini_tts(plain_text, ssml_data, mood, voice_id)
+        elif _provider == "edge":
+            audio = await _try_edge_tts(plain_text, ssml_data, mood, voice_id)
 
         if audio:
             _record_provider_success(_provider)
@@ -982,28 +946,31 @@ async def _try_sarvam_tts(
     return None
 
 
-async def _try_bhashini_tts(
+async def _try_edge_tts(
     text: str, ssml_data: dict, mood: str, voice_id: str
 ) -> bytes | None:
-    """Attempt synthesis via Bhashini AI - Government of India platform.
+    """Attempt synthesis via Microsoft Edge TTS - free, no API key needed.
 
-    Bhashini provides high-quality TTS for all 22 scheduled Indian languages
-    with authentic native pronunciation. Free and open API.
+    Uses Microsoft's Neural voice service with high-quality Indian language
+    voices. Quality ~8.5-9/10. Completely free, no subscription required.
     """
-    if not BHASHINI_SERVICE_AVAILABLE:
-        return None
-
     language = ssml_data.get("language", "en")
 
     try:
-        if not _bh_available():
+        from backend.services.edge_tts_service import (
+            is_edge_tts_available,
+            is_edge_supported_language,
+            synthesize_edge_tts,
+        )
+
+        if not is_edge_tts_available():
             return None
 
-        if not is_bhashini_supported_language(language):
-            logger.debug(f"Bhashini TTS: Skipping for unsupported language '{language}'")
+        if not is_edge_supported_language(language):
+            logger.debug("Edge TTS: Requested language not supported")
             return None
 
-        audio = await synthesize_bhashini_tts(
+        audio = await synthesize_edge_tts(
             text=text,
             language=language,
             voice_id=voice_id,
@@ -1012,14 +979,15 @@ async def _try_bhashini_tts(
 
         if audio and len(audio) > 100:
             logger.info(
-                f"Bhashini TTS success: lang={language}, "
-                f"persona={ssml_data['voice_persona']}, "
+                f"Edge TTS success: lang={language}, persona={ssml_data['voice_persona']}, "
                 f"size={len(audio)} bytes"
             )
             return audio
 
+    except ImportError:
+        logger.debug("Edge TTS: edge_tts_service not available")
     except Exception as e:
-        logger.warning(f"Bhashini TTS failed: {e}")
+        logger.warning(f"Edge TTS failed: {e}")
 
     return None
 
@@ -1124,22 +1092,11 @@ def get_elevenlabs_voice_status() -> dict[str, Any]:
     return {"provider": "elevenlabs", "available": False}
 
 
-def get_bhashini_voice_status() -> dict[str, Any]:
-    """Get Bhashini AI TTS integration status for health checks."""
-    if BHASHINI_SERVICE_AVAILABLE:
-        try:
-            return get_bhashini_health_status()
-        except Exception:
-            logger.warning("Companion voice service: Bhashini health check failed", exc_info=True)
-    return {"provider": "bhashini_ai", "available": False}
-
-
 def get_all_voice_providers_status() -> dict[str, Any]:
     """Get combined health status for all voice providers."""
     status = {
         "elevenlabs": get_elevenlabs_voice_status(),
         "sarvam_ai": get_sarvam_voice_status(),
-        "bhashini_ai": get_bhashini_voice_status(),
         "circuit_breaker": get_provider_health_status(),
         "pronunciation_engine": {
             "available": PRONUNCIATION_ENGINE_AVAILABLE,
@@ -1162,36 +1119,36 @@ def get_all_voice_providers_status() -> dict[str, Any]:
 # Language-to-provider priority mapping (best provider first per language).
 # Based on comprehensive voice quality evaluation across all providers.
 LANGUAGE_PROVIDER_PRIORITY: dict[str, list[str]] = {
-    # Indian languages: Sarvam AI v2 is best, Bhashini is excellent fallback
-    "hi": ["sarvam", "bhashini", "elevenlabs"],
-    "ta": ["sarvam", "bhashini", "elevenlabs"],
-    "te": ["sarvam", "bhashini", "elevenlabs"],
-    "bn": ["sarvam", "bhashini", "elevenlabs"],
-    "kn": ["sarvam", "bhashini", "elevenlabs"],
-    "ml": ["sarvam", "bhashini", "elevenlabs"],
-    "mr": ["sarvam", "bhashini", "elevenlabs"],
-    "gu": ["sarvam", "bhashini", "elevenlabs"],
-    "pa": ["sarvam", "bhashini", "elevenlabs"],
-    "sa": ["sarvam", "bhashini", "elevenlabs"],
-    "en-IN": ["sarvam", "elevenlabs", "bhashini"],
-    # International: ElevenLabs is best
-    "en": ["elevenlabs", "sarvam", "bhashini"],
-    "es": ["elevenlabs", "sarvam"],
-    "fr": ["elevenlabs", "sarvam"],
-    "de": ["elevenlabs", "sarvam"],
-    "pt": ["elevenlabs", "sarvam"],
-    "ja": ["elevenlabs"],
-    "zh": ["elevenlabs"],
-    "ar": ["elevenlabs"],
-    # Bhashini-only languages (Government of India scheduled languages)
-    "od": ["bhashini", "sarvam"],
-    "as": ["bhashini"],
-    "ne": ["bhashini"],
-    "ur": ["bhashini", "sarvam"],
-    "sd": ["bhashini"],
-    "doi": ["bhashini"],
-    "mai": ["bhashini"],
-    "kok": ["bhashini"],
+    # Indian languages: Sarvam AI v2 is best, Edge TTS is free high-quality fallback
+    "hi": ["sarvam", "edge", "elevenlabs"],
+    "ta": ["sarvam", "edge", "elevenlabs"],
+    "te": ["sarvam", "edge", "elevenlabs"],
+    "bn": ["sarvam", "edge", "elevenlabs"],
+    "kn": ["sarvam", "edge", "elevenlabs"],
+    "ml": ["sarvam", "edge", "elevenlabs"],
+    "mr": ["sarvam", "edge", "elevenlabs"],
+    "gu": ["sarvam", "edge", "elevenlabs"],
+    "pa": ["sarvam", "edge", "elevenlabs"],
+    "sa": ["sarvam", "edge", "elevenlabs"],
+    "en-IN": ["sarvam", "edge", "elevenlabs"],
+    # International: ElevenLabs is best, Edge TTS is free fallback
+    "en": ["elevenlabs", "edge", "sarvam"],
+    "es": ["elevenlabs", "edge", "sarvam"],
+    "fr": ["elevenlabs", "edge", "sarvam"],
+    "de": ["elevenlabs", "edge", "sarvam"],
+    "pt": ["elevenlabs", "edge", "sarvam"],
+    "ja": ["elevenlabs", "edge"],
+    "zh": ["elevenlabs", "edge"],
+    "ar": ["elevenlabs", "edge"],
+    # Additional Indian languages (Edge TTS fallback)
+    "od": ["edge", "sarvam"],
+    "as": ["edge"],
+    "ne": ["edge"],
+    "ur": ["edge", "sarvam"],
+    "sd": ["edge"],
+    "doi": ["edge"],
+    "mai": ["edge"],
+    "kok": ["edge"],
 }
 
 
@@ -1203,7 +1160,7 @@ def _get_optimal_provider_order(language: str) -> list[str]:
     """
     static_order = LANGUAGE_PROVIDER_PRIORITY.get(
         language,
-        ["elevenlabs", "sarvam", "bhashini"],
+        ["elevenlabs", "edge", "sarvam"],
     )
 
     if QUALITY_EVALUATOR_AVAILABLE:
@@ -1211,12 +1168,12 @@ def _get_optimal_provider_order(language: str) -> list[str]:
         best = evaluator.get_best_provider_for_language(
             language,
             available_providers=[
-                p.replace("sarvam", "sarvam_ai").replace("bhashini", "bhashini_ai")
+                p.replace("sarvam", "sarvam_ai")
                 for p in static_order
             ],
         )
         # Promote the quality-evaluated best provider to front
-        normalized_best = best.replace("sarvam_ai", "sarvam").replace("bhashini_ai", "bhashini")
+        normalized_best = best.replace("sarvam_ai", "sarvam")
         if normalized_best in static_order and static_order[0] != normalized_best:
             reordered = [normalized_best] + [p for p in static_order if p != normalized_best]
             return reordered

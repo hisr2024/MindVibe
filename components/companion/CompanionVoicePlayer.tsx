@@ -4,7 +4,7 @@
  * CompanionVoicePlayer - Premium voice playback for KIAAN messages.
  *
  * ElevenLabs-inspired voice player that:
- * - Fetches premium audio from backend (ElevenLabs / Sarvam AI / Bhashini AI)
+ * - Fetches premium audio from backend (ElevenLabs / Sarvam AI / Edge TTS)
  * - Falls back to browser Speech Synthesis with emotion-adapted params
  * - Shows voice waveform visualization during playback
  * - Supports play/pause/stop controls
@@ -473,7 +473,7 @@ export default function CompanionVoicePlayer({
           <p className="text-[8px] text-gray-400">
             {provider === 'elevenlabs' ? 'ElevenLabs HD' :
              provider === 'sarvam_ai_bulbul' ? 'Sarvam AI' :
-             provider === 'bhashini_ai' ? 'Bhashini AI' :
+             provider === 'edge_tts' ? 'Edge TTS' :
              provider === 'browser_fallback' ? 'Local' : 'HD'}
           </p>
         )}

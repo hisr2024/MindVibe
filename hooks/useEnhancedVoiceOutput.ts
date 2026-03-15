@@ -21,7 +21,7 @@ export interface UseEnhancedVoiceOutputOptions {
   voiceType?: 'friendly' | 'calm' | 'wisdom'
   /** Preferred voice gender: female, male, or auto */
   voiceGender?: VoiceGender
-  /** Specific voice ID for provider routing (e.g. 'sarvam-aura', 'bhashini-devi') */
+  /** Specific voice ID for provider routing (e.g. 'sarvam-aura', 'edge-female') */
   voiceId?: string
   useBackendTts?: boolean  // Try backend TTS first
   onStart?: () => void

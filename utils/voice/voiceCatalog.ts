@@ -8,11 +8,11 @@
  * Provider Quality Chain:
  * 1. ElevenLabs (10/10) - Most human-like international voices
  * 2. Sarvam AI Bulbul v2 (9.7/10) - Best Indian language voices
- * 3. Bhashini AI (9/10) - Government of India, 22 scheduled languages
+ * 3. Edge TTS (8.8/10) - Free Microsoft Neural voices
  *
  * Fallback:
- * Indian Languages: Sarvam AI -> Bhashini AI -> ElevenLabs
- * International: ElevenLabs -> Sarvam AI
+ * Indian Languages: Sarvam AI -> ElevenLabs -> Edge TTS
+ * International: ElevenLabs -> Sarvam AI -> Edge TTS
  */
 
 import type { VoiceGender } from '@/utils/speech/synthesis'
@@ -32,7 +32,7 @@ export type VoiceLanguage =
 export type VoiceCategory = 'conversational' | 'meditation' | 'narration' | 'sacred' | 'energetic'
 
 /** TTS provider that powers this voice */
-export type VoiceProvider = 'elevenlabs' | 'sarvam' | 'bhashini'
+export type VoiceProvider = 'elevenlabs' | 'sarvam' | 'edge_tts'
 
 export interface VoiceSpeaker {
   id: string
@@ -221,50 +221,6 @@ export const VOICE_SPEAKERS: VoiceSpeaker[] = [
     warmth: 0.84,
     clarity: 0.97,
     poweredBy: 'elevenlabs',
-  },
-  {
-    id: 'bhashini-devi',
-    name: 'Devi',
-    description: 'Warm, nurturing voice from India\'s national Bhashini AI platform. Authentic pronunciation across all 22 scheduled Indian languages.',
-    gender: 'female',
-    languages: ['hi', 'ta', 'te', 'bn', 'kn', 'ml', 'mr', 'gu', 'pa', 'sa', 'en-IN', 'en'],
-    primaryLanguage: 'hi',
-    category: 'conversational',
-    tags: ['natural', 'warm', 'indian', 'bhashini', 'government'],
-    previewText: 'Aap akele nahin hain. Main yahan hoon, aapke saath. Ek gehri saans lein aur shaanti mehsoos karein.',
-    backendConfig: { voiceType: 'friendly', speed: 0.93, language: 'hi', voiceId: 'bhashini-devi' },
-    browserConfig: {
-      voicePatterns: [/Neerja/i, /Heera/i, /Google.*Hindi/i, /Jenny/i],
-      rate: 0.93,
-      pitch: 1.02,
-    },
-    premium: false,
-    accent: 'Indian',
-    warmth: 0.95,
-    clarity: 0.90,
-    poweredBy: 'bhashini',
-  },
-  {
-    id: 'bhashini-arya',
-    name: 'Arya',
-    description: 'Deep, resonant male voice from Bhashini AI. Carries authority and wisdom with authentic Indian intonation for sacred texts.',
-    gender: 'male',
-    languages: ['hi', 'ta', 'te', 'bn', 'kn', 'ml', 'mr', 'gu', 'pa', 'sa', 'en-IN', 'en'],
-    primaryLanguage: 'hi',
-    category: 'sacred',
-    tags: ['natural', 'deep', 'indian', 'bhashini', 'wisdom'],
-    previewText: 'Karmanye vadhikaraste, Ma phaleshu kadachana. You have the right to action alone, never to its fruits.',
-    backendConfig: { voiceType: 'wisdom', speed: 0.88, language: 'hi', voiceId: 'bhashini-arya' },
-    browserConfig: {
-      voicePatterns: [/Prabhat/i, /Ravi/i, /Google.*Hindi/i, /Daniel/i],
-      rate: 0.88,
-      pitch: 0.85,
-    },
-    premium: false,
-    accent: 'Indian',
-    warmth: 0.88,
-    clarity: 0.93,
-    poweredBy: 'bhashini',
   },
   // ─── Divine Voice Personas ────────────────────────────────────────
   // Sacred voices tuned for maximum divine resonance and spiritual depth
@@ -637,20 +593,6 @@ export function getElevenLabsVoices(): VoiceSpeaker[] {
   return VOICE_SPEAKERS.filter(v => v.poweredBy === 'elevenlabs')
 }
 
-/** Get voices powered by Bhashini AI for Indian language support */
-export function getBhashiniVoices(): VoiceSpeaker[] {
-  return VOICE_SPEAKERS.filter(v => v.poweredBy === 'bhashini')
-}
-
-/** Bhashini AI priority languages (Government of India platform) */
-export const BHASHINI_PRIORITY_LANGUAGES: VoiceLanguage[] = [
-  'hi', 'ta', 'te', 'bn', 'kn', 'ml', 'mr', 'gu', 'pa', 'sa',
-]
-
-export function isBhashiniPriorityLanguage(lang: VoiceLanguage): boolean {
-  return BHASHINI_PRIORITY_LANGUAGES.includes(lang)
-}
-
 /** ElevenLabs priority languages (best quality from ElevenLabs) */
 export const ELEVENLABS_PRIORITY_LANGUAGES: VoiceLanguage[] = [
   'en', 'es', 'fr', 'de', 'pt', 'it', 'nl', 'pl', 'sv', 'ru',
@@ -667,12 +609,10 @@ export function getBestVoiceForLanguage(lang: VoiceLanguage): VoiceSpeaker {
 
   if (voicesForLang.length === 0) return VOICE_SPEAKERS[0]
 
-  // For Sarvam priority languages (Indian), prefer Sarvam -> Bhashini -> ElevenLabs
+  // For Sarvam priority languages (Indian), prefer Sarvam -> ElevenLabs -> Edge TTS
   if (isSarvamPriorityLanguage(lang)) {
     const sarvamVoice = voicesForLang.find(v => v.poweredBy === 'sarvam')
     if (sarvamVoice) return sarvamVoice
-    const bhashiniVoice = voicesForLang.find(v => v.poweredBy === 'bhashini')
-    if (bhashiniVoice) return bhashiniVoice
   }
 
   // For ElevenLabs priority languages (international), prefer ElevenLabs
@@ -705,8 +645,8 @@ export function getProviderDisplayInfo(provider?: VoiceProvider): {
       return { label: 'ElevenLabs HD', color: 'text-amber-400', quality: '10/10' }
     case 'sarvam':
       return { label: 'Sarvam AI v2', color: 'text-emerald-400', quality: '9.7/10' }
-    case 'bhashini':
-      return { label: 'Bhashini AI', color: 'text-sky-400', quality: '9/10' }
+    case 'edge_tts':
+      return { label: 'Edge TTS', color: 'text-sky-400', quality: '8.8/10' }
     default:
       return { label: 'Voice', color: 'text-white/70', quality: '' }
   }

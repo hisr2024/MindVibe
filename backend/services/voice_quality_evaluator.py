@@ -1,7 +1,7 @@
 """Voice Quality Evaluation Framework - Production-Grade Voice Assessment
 
 Provides objective and subjective quality metrics for evaluating TTS providers
-(ElevenLabs, Sarvam AI, Bhashini AI) to ensure KIAAN Voice Companion always
+(ElevenLabs, Sarvam AI, Edge TTS) to ensure KIAAN Voice Companion always
 uses the best available voice for each language and context.
 
 Evaluation Dimensions:
@@ -17,10 +17,10 @@ Evaluation Dimensions:
 └──────────────────────────────────────────────────────────────────┘
 
 Decision Matrix:
-  Indian Languages: Sarvam AI (v2) > Bhashini AI > ElevenLabs
-  International:    ElevenLabs > Sarvam AI (en-IN)
-  Sanskrit:         Sarvam AI (v2) > Bhashini AI (native sa) > ElevenLabs
-  Low Latency:      ElevenLabs Flash > Sarvam AI > Bhashini AI
+  Indian Languages: Sarvam AI (v2) > ElevenLabs > Edge TTS
+  International:    ElevenLabs > Sarvam AI (en-IN) > Edge TTS
+  Sanskrit:         Sarvam AI (v2) > ElevenLabs > Edge TTS
+  Low Latency:      ElevenLabs Flash > Sarvam AI > Edge TTS
 """
 
 import logging
@@ -224,36 +224,6 @@ PROVIDER_BASELINE_SCORES: dict[str, dict[str, dict[str, float]]] = {
             "prosody_quality": 9.0,
         },
     },
-    "bhashini_ai": {
-        "hi": {
-            "naturalness": 9.0,
-            "intelligibility": 9.3,
-            "expressiveness": 8.2,
-            "pronunciation_accuracy": 9.5,
-            "prosody_quality": 8.8,
-        },
-        "sa": {
-            "naturalness": 8.8,
-            "intelligibility": 9.0,
-            "expressiveness": 8.0,
-            "pronunciation_accuracy": 9.3,
-            "prosody_quality": 8.5,
-        },
-        "ta": {
-            "naturalness": 8.8,
-            "intelligibility": 9.2,
-            "expressiveness": 8.0,
-            "pronunciation_accuracy": 9.4,
-            "prosody_quality": 8.6,
-        },
-        "_default": {
-            "naturalness": 8.5,
-            "intelligibility": 9.0,
-            "expressiveness": 7.8,
-            "pronunciation_accuracy": 9.0,
-            "prosody_quality": 8.3,
-        },
-    },
 }
 
 
@@ -323,10 +293,10 @@ class VoiceQualityEvaluator:
         Uses a combination of baseline scores and real-time measurements.
 
         Returns:
-            Provider name string (e.g., "elevenlabs", "sarvam_ai", "bhashini_ai")
+            Provider name string (e.g., "elevenlabs", "sarvam_ai")
         """
         if available_providers is None:
-            available_providers = ["elevenlabs", "sarvam_ai", "bhashini_ai"]
+            available_providers = ["elevenlabs", "sarvam_ai"]
 
         best_provider = available_providers[0]
         best_score = 0.0

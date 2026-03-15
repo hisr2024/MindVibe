@@ -1563,8 +1563,6 @@ async def voice_companion_health():
         logger.warning("Voice companion health check: wisdom corpus check failed", exc_info=True)
 
     voice_providers = ["browser_fallback"]
-    if os.getenv("BHASHINI_API_KEY", "").strip():
-        voice_providers.insert(0, "bhashini_ai")
     if os.getenv("SARVAM_API_KEY", "").strip():
         voice_providers.insert(0, "sarvam_ai_bulbul")
     if os.getenv("ELEVENLABS_API_KEY", "").strip():

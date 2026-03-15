@@ -34,7 +34,7 @@ class TestProviderCircuitBreaker:
         from backend.services.companion_voice_service import _provider_is_healthy
         assert _provider_is_healthy("elevenlabs") is True
         assert _provider_is_healthy("sarvam") is True
-        assert _provider_is_healthy("bhashini") is True
+        assert _provider_is_healthy("edge") is True
 
     def test_single_failure_does_not_trip_breaker(self):
         """A single failure should not disable the provider."""
@@ -67,13 +67,13 @@ class TestProviderCircuitBreaker:
         )
         # Record failures just below threshold
         for _ in range(_PROVIDER_FAILURE_THRESHOLD - 1):
-            _record_provider_failure("bhashini")
-        assert _PROVIDER_FAILURE_COUNTS["bhashini"] == _PROVIDER_FAILURE_THRESHOLD - 1
+            _record_provider_failure("edge")
+        assert _PROVIDER_FAILURE_COUNTS["edge"] == _PROVIDER_FAILURE_THRESHOLD - 1
 
         # Success resets
-        _record_provider_success("bhashini")
-        assert _PROVIDER_FAILURE_COUNTS["bhashini"] == 0
-        assert _provider_is_healthy("bhashini") is True
+        _record_provider_success("edge")
+        assert _PROVIDER_FAILURE_COUNTS["edge"] == 0
+        assert _provider_is_healthy("edge") is True
 
     def test_breaker_recovers_after_cooldown(self):
         """Provider should become healthy again after cooldown expires."""
@@ -97,7 +97,7 @@ class TestProviderCircuitBreaker:
         status = get_provider_health_status()
         assert "elevenlabs" in status
         assert "sarvam" in status
-        assert "bhashini" in status
+        assert "edge" in status
         for provider_status in status.values():
             assert "healthy" in provider_status
             assert "consecutive_failures" in provider_status

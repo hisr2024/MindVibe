@@ -44,9 +44,12 @@ SARVAM_TTS_MODEL_FALLBACK = "bulbul:v1"
 # Inspired by ElevenLabs' approach: every voice has a personality, not just a name.
 
 SARVAM_SPEAKERS: dict[str, dict[str, Any]] = {
+    # Internal persona names (inspired by) → actual Sarvam API speaker IDs.
+    # Valid Sarvam API speakers: anushka, abhilash, manisha, vidya, arya,
+    # karun, hitesh, aditya, ritu, priya, neha, rahul, pooja, rohan
     "meera": {
         "name": "Meera",
-        "speaker_id": "meera",
+        "speaker_id": "manisha",  # Warm female → Sarvam's manisha
         "gender": "female",
         "style": "warm",
         "languages": ["hi-IN", "en-IN", "bn-IN", "mr-IN", "gu-IN", "pa-IN"],
@@ -60,7 +63,7 @@ SARVAM_SPEAKERS: dict[str, dict[str, Any]] = {
     },
     "pavithra": {
         "name": "Pavithra",
-        "speaker_id": "pavithra",
+        "speaker_id": "vidya",  # Clear multilingual female → Sarvam's vidya
         "gender": "female",
         "style": "clear",
         "languages": ["hi-IN", "en-IN", "ta-IN", "te-IN", "kn-IN", "ml-IN"],
@@ -74,7 +77,7 @@ SARVAM_SPEAKERS: dict[str, dict[str, Any]] = {
     },
     "maitreyi": {
         "name": "Maitreyi",
-        "speaker_id": "maitreyi",
+        "speaker_id": "ritu",  # Soft ethereal female → Sarvam's ritu
         "gender": "female",
         "style": "soft",
         "languages": ["hi-IN", "en-IN", "bn-IN", "ta-IN", "te-IN", "kn-IN", "ml-IN"],
@@ -88,7 +91,7 @@ SARVAM_SPEAKERS: dict[str, dict[str, Any]] = {
     },
     "arvind": {
         "name": "Arvind",
-        "speaker_id": "arvind",
+        "speaker_id": "karun",  # Deep resonant male → Sarvam's karun
         "gender": "male",
         "style": "deep",
         "languages": ["hi-IN", "en-IN", "bn-IN", "mr-IN", "ta-IN", "te-IN"],
@@ -102,7 +105,7 @@ SARVAM_SPEAKERS: dict[str, dict[str, Any]] = {
     },
     "karthik": {
         "name": "Karthik",
-        "speaker_id": "karthik",
+        "speaker_id": "rohan",  # Conversational male → Sarvam's rohan
         "gender": "male",
         "style": "conversational",
         "languages": ["hi-IN", "en-IN", "ta-IN", "te-IN", "kn-IN", "ml-IN"],
@@ -116,7 +119,7 @@ SARVAM_SPEAKERS: dict[str, dict[str, Any]] = {
     },
     "anushka": {
         "name": "Anushka",
-        "speaker_id": "anushka",
+        "speaker_id": "anushka",  # Direct match in Sarvam API
         "gender": "female",
         "style": "expressive",
         "languages": ["hi-IN", "en-IN", "bn-IN", "mr-IN", "gu-IN", "pa-IN", "ta-IN", "te-IN"],
@@ -130,7 +133,7 @@ SARVAM_SPEAKERS: dict[str, dict[str, Any]] = {
     },
     "abhilash": {
         "name": "Abhilash",
-        "speaker_id": "abhilash",
+        "speaker_id": "abhilash",  # Direct match in Sarvam API
         "gender": "male",
         "style": "authoritative",
         "languages": ["hi-IN", "en-IN", "bn-IN", "mr-IN", "ta-IN", "te-IN", "kn-IN"],

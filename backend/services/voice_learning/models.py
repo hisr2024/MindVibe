@@ -59,8 +59,8 @@ class EmotionCategoryEnum(str, Enum):
 class VoiceProviderEnum(str, Enum):
     """Voice provider types."""
     SARVAM = "sarvam"
-    BHASHINI = "bhashini"
     ELEVENLABS = "elevenlabs"
+    EDGE_TTS = "edge_tts"
 
 
 class ExperimentStatusEnum(str, Enum):
