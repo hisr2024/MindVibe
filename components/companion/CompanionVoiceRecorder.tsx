@@ -119,6 +119,17 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
     },
   }), [isListening, isDisabled, isProcessing, startRecording])
 
+  // When the hook stops listening (e.g. due to exhausted no-speech retries),
+  // clean up the timer so the UI doesn't show a running timer next to an error.
+  const prevListeningRef = useRef(false)
+  useEffect(() => {
+    // Only clear on transition from listening → not-listening (not on mount)
+    if (prevListeningRef.current && !isListening) {
+      clearTimer()
+    }
+    prevListeningRef.current = isListening
+  }, [isListening, clearTimer])
+
   // Cleanup on unmount
   useEffect(() => {
     return () => { clearTimer() }

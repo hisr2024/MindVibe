@@ -82,6 +82,7 @@ export function useEnhancedVoiceOutput(
   const synthesisRef = useRef<SpeechSynthesisService | null>(null)
   const currentUrlRef = useRef<string | null>(null)
   const rateRef = useRef(rate)
+  const mountedRef = useRef(true)
 
   // Initialize browser synthesis as fallback
   useEffect(() => {
@@ -106,6 +107,7 @@ export function useEnhancedVoiceOutput(
   // Cleanup audio on unmount
   useEffect(() => {
     return () => {
+      mountedRef.current = false
       if (audioRef.current) {
         audioRef.current.pause()
         audioRef.current = null
@@ -139,8 +141,6 @@ export function useEnhancedVoiceOutput(
         }),
       })
 
-      clearTimeout(timeout)
-
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
           backendTtsDisabled = true
@@ -169,6 +169,7 @@ export function useEnhancedVoiceOutput(
         audio.playbackRate = rateRef.current
 
         audio.onplay = () => {
+          if (!mountedRef.current) return
           setIsSpeaking(true)
           setIsPaused(false)
           setIsLoading(false)
@@ -176,12 +177,14 @@ export function useEnhancedVoiceOutput(
         }
 
         audio.onended = () => {
+          if (!mountedRef.current) return
           setIsSpeaking(false)
           setIsPaused(false)
           onEnd?.()
         }
 
         audio.onerror = () => {
+          if (!mountedRef.current) return
           setError('Audio playback failed')
           setIsSpeaking(false)
           setIsPaused(false)
@@ -207,8 +210,9 @@ export function useEnhancedVoiceOutput(
 
       return false
     } catch {
-      clearTimeout(timeout)
       return false // Timeout or network error - fall back to browser TTS
+    } finally {
+      clearTimeout(timeout)
     }
   }, [language, voiceType, voiceId, useBackendTts, onStart, onEnd])
 

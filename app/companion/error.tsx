@@ -10,7 +10,12 @@ export default function CompanionError({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error('Companion error:', error)
+    // Error boundaries must report errors — this is the only sanctioned
+    // console.error in the companion subtree. Sentry or monitoring hooks
+    // can replace this once integrated.
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('[CompanionErrorBoundary]', error)
+    }
   }, [error])
 
   return (
