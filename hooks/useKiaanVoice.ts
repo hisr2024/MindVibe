@@ -67,8 +67,8 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
     onError,
   } = options
 
-  const language = options.language || (typeof window !== 'undefined' ? getSavedLanguage() : 'en')
-  const voiceId = options.voiceId || (typeof window !== 'undefined' ? getSavedVoice().id : 'sarvam-aura')
+  const language = options.language || (typeof window !== 'undefined' ? (getSavedLanguage() || 'en') : 'en')
+  const voiceId = options.voiceId || (typeof window !== 'undefined' ? (getSavedVoice()?.id || 'sarvam-aura') : 'sarvam-aura')
 
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -198,6 +198,11 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
         const contentType = response.headers.get('content-type')
         if (contentType?.includes('audio')) {
           const blob = await response.blob()
+          if (blob.size === 0) {
+            // Empty audio — fall through to browser TTS
+            speakBrowser(text)
+            return
+          }
           const url = URL.createObjectURL(blob)
           const audio = new Audio(url)
           audioRef.current = audio
@@ -211,8 +216,15 @@ export function useKiaanVoice(options: UseKiaanVoiceOptions = {}): UseKiaanVoice
           audio.onerror = () => {
             URL.revokeObjectURL(url)
             audioRef.current = null
-            // Fall back to browser TTS
+            // Fall back to browser TTS — isSpeaking stays true
+            // until browser TTS fires onEnd callback
             speakBrowser(text)
+          }
+
+          audio.onabort = () => {
+            URL.revokeObjectURL(url)
+            audioRef.current = null
+            setIsSpeaking(false)
           }
 
           await audio.play()
