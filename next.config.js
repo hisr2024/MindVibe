@@ -73,7 +73,7 @@ const nextConfig = {
                 "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
                 "font-src 'self' https://fonts.gstatic.com",
                 "img-src 'self' data: https://kiaanverse.com https://*.kiaanverse.com https://fonts.gstatic.com",
-                `connect-src 'self' ${apiUrl} https://kiaanverse.com https://www.kiaanverse.com https://mindvibe-api.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com https://*.ingest.sentry.io https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co`,
+                `connect-src 'self' ${apiUrl} https://kiaanverse.com https://www.kiaanverse.com https://mindvibe-api.onrender.com https://*.firebaseio.com https://*.googleapis.com https://cdn.pixabay.com https://*.freesound.org https://*.ingest.sentry.io https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co https://cdn-lfs-us-1.hf.co`,
                 "media-src 'self' blob: data:",
                 "worker-src 'self' blob:",
                 "frame-ancestors 'none'",

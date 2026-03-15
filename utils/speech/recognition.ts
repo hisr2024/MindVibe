@@ -82,6 +82,7 @@ export class SpeechRecognitionService {
     }
 
     this.recognition.onresult = (event: SpeechRecognitionEvent) => {
+      if (!event.results || event.results.length === 0) return
       const result = event.results[event.results.length - 1]
       const isFinal = result.isFinal
 

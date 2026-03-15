@@ -143,7 +143,7 @@ export function proxy(request: NextRequest) {
     "font-src 'self' data: https://fonts.gstatic.com",
     "media-src 'self' https: blob:",
     "worker-src 'self' blob:",
-    `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'} https://kiaanverse.com https://www.kiaanverse.com https://*.firebaseio.com https://*.googleapis.com https://cdn.pixabay.com https://*.freesound.org`,
+    `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || 'https://mindvibe-api.onrender.com'} https://mindvibe-api.onrender.com https://kiaanverse.com https://www.kiaanverse.com https://*.firebaseio.com https://*.googleapis.com https://cdn.pixabay.com https://*.freesound.org https://*.ingest.sentry.io https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co https://cdn-lfs-us-1.hf.co`,
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",

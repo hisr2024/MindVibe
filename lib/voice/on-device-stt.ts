@@ -139,8 +139,8 @@ export class OnDeviceSTT {
         this.handleWorkerMessage(event.data)
       }
 
-      this.worker.onerror = (err) => {
-        this.handleError(`Worker error: ${err.message}`)
+      this.worker.onerror = (err: ErrorEvent) => {
+        this.handleError(`Worker error: ${err?.message || 'Unknown worker error'}`)
       }
 
       // Load model with device preference
@@ -256,7 +256,7 @@ export class OnDeviceSTT {
 
       // Route audio chunks from worklet to ML worker
       this.workletNode.port.onmessage = (event: MessageEvent) => {
-        if (event.data.type === 'audio-chunk' && this.worker) {
+        if (event.data.type === 'audio-chunk' && this.worker && event.data.samples?.buffer) {
           this.worker.postMessage(
             { type: 'transcribe', samples: event.data.samples },
             [event.data.samples.buffer]
