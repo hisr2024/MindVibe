@@ -350,7 +350,7 @@ export default function CompanionVoicePlayer({
       const timer = setTimeout(() => playAudio(), 300)
       return () => clearTimeout(timer)
     }
-  }, [autoPlay, text]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [autoPlay, text, state, playAudio])
 
   if (compact) {
     return (

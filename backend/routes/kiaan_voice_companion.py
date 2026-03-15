@@ -776,6 +776,7 @@ async def start_voice_companion_session(
         language=body.language,
     )
     db.add(session)
+    await db.flush()  # Generate session.id before referencing it
 
     profile.total_sessions += 1
     _update_streak(profile)
