@@ -52,7 +52,7 @@ const VoiceCompanionSelector = dynamic(
   () => import('@/components/voice/VoiceCompanionSelector'),
   { ssr: false, loading: () => <div className="h-32 animate-pulse rounded-xl bg-white/5" /> }
 )
-const CompanionVoiceRecorder = dynamic(
+const _CompanionVoiceRecorder = dynamic(
   () => import('@/components/companion/CompanionVoiceRecorder'),
   { ssr: false }
 )
@@ -175,7 +175,7 @@ export default function KiaanVoiceCompanionPage() {
   // ── Refs ───────────────────────────────────────────────────────────
   const chatEndRef = useRef<HTMLDivElement>(null)
   const enhanceAbortRef = useRef<AbortController | null>(null)
-  const friendEngineRef = useRef(new KiaanFriendEngine())
+  const _friendEngineRef = useRef(new KiaanFriendEngine())
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const isSpeakingRef = useRef(false)
 
@@ -189,7 +189,7 @@ export default function KiaanVoiceCompanionPage() {
     stopListening,
     resetTranscript,
     sttProvider,
-    status: sttStatus,
+    status: _sttStatus,
   } = useVoiceInput({ language: voiceConfig.language })
 
   // ── Wake Word Detection ────────────────────────────────────────────
