@@ -16,7 +16,7 @@ Supports 400+ voices across 100+ languages including:
 - English US (en-US): JennyNeural, AriaNeural, GuyNeural, etc.
 
 Provider Priority in MindVibe:
-  ElevenLabs → Sarvam AI → Edge TTS → Bhashini AI → Browser
+  ElevenLabs → Sarvam AI → Edge TTS → Browser
 """
 
 import io

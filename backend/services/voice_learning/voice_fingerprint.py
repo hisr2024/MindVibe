@@ -26,8 +26,8 @@ logger = logging.getLogger(__name__)
 class VoiceProvider(str, Enum):
     """Available TTS providers."""
     SARVAM = "sarvam"
-    BHASHINI = "bhashini"
     ELEVENLABS = "elevenlabs"
+    EDGE_TTS = "edge_tts"
 
 
 @dataclass
@@ -197,36 +197,36 @@ class VoiceFingerprintService:
             "female": {
                 "provider": VoiceProvider.ELEVENLABS,
                 "voice_name": "EXAVITQu4vr4xnSDxMaL",
-                "fallbacks": ["anushka", "bhashini-devi"]
+                "fallbacks": ["anushka", "edge-female"]
             },
             "male": {
                 "provider": VoiceProvider.ELEVENLABS,
                 "voice_name": "onwK4e9ZLuTAKqWW03F9",
-                "fallbacks": ["abhilash", "bhashini-arya"]
+                "fallbacks": ["abhilash", "edge-male"]
             }
         },
         "hi": {
             "female": {
                 "provider": VoiceProvider.SARVAM,
                 "voice_name": "anushka",
-                "fallbacks": ["bhashini-devi"]
+                "fallbacks": ["edge-female"]
             },
             "male": {
                 "provider": VoiceProvider.SARVAM,
                 "voice_name": "abhilash",
-                "fallbacks": ["bhashini-arya"]
+                "fallbacks": ["edge-male"]
             }
         },
         "ta": {
             "female": {
                 "provider": VoiceProvider.SARVAM,
                 "voice_name": "anushka",
-                "fallbacks": ["bhashini-devi"]
+                "fallbacks": ["edge-female"]
             },
             "male": {
                 "provider": VoiceProvider.SARVAM,
                 "voice_name": "abhilash",
-                "fallbacks": ["bhashini-arya"]
+                "fallbacks": ["edge-male"]
             }
         },
     }

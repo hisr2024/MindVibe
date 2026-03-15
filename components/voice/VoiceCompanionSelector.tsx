@@ -60,7 +60,7 @@ interface Props {
 const LANGUAGE_GROUPS = [
   {
     label: 'Indian Languages',
-    description: 'Powered by Sarvam AI + Bhashini AI with native pronunciation',
+    description: 'Powered by Sarvam AI with native pronunciation',
     provider: 'sarvam' as VoiceProvider,
     languages: ['hi', 'sa', 'ta', 'te', 'bn', 'mr', 'gu', 'kn', 'ml', 'pa', 'en-IN'] as VoiceLanguage[],
   },
@@ -271,7 +271,7 @@ export default function VoiceCompanionSelector({
                 ? 'border-[#d4a44c]/20 bg-[#d4a44c]/10 text-[#d4a44c]'
                 : selectedVoice.poweredBy === 'sarvam'
                 ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
-                : selectedVoice.poweredBy === 'bhashini'
+                : selectedVoice.poweredBy === 'edge_tts'
                 ? 'border-sky-500/20 bg-sky-500/10 text-sky-400'
                 : 'border-white/10 bg-white/5 text-white/70'
             }`}>
@@ -334,7 +334,7 @@ export default function VoiceCompanionSelector({
                       ? 'border-emerald-500/20 text-emerald-400/60 bg-emerald-500/5'
                       : 'border-[#d4a44c]/20 text-[#d4a44c]/60 bg-[#d4a44c]/5'
                   }`}>
-                    {group.provider === 'sarvam' ? 'Sarvam + Bhashini' : 'ElevenLabs'}
+                    {group.provider === 'sarvam' ? 'Sarvam AI' : 'ElevenLabs'}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
@@ -493,7 +493,7 @@ export default function VoiceCompanionSelector({
                               ? 'border-[#d4a44c]/15 text-[#d4a44c]/50 bg-[#d4a44c]/5'
                               : voice.poweredBy === 'sarvam'
                               ? 'border-emerald-500/15 text-emerald-400/50 bg-emerald-500/5'
-                              : voice.poweredBy === 'bhashini'
+                              : voice.poweredBy === 'edge_tts'
                               ? 'border-sky-500/15 text-sky-400/50 bg-sky-500/5'
                               : 'border-white/[0.06] text-white/25 bg-white/[0.02]'
                           }`}>
@@ -649,8 +649,8 @@ export default function VoiceCompanionSelector({
               <div className="space-y-1.5">
                 {[
                   { name: 'ElevenLabs', quality: '10/10', desc: 'Most natural human-like voices', color: 'text-[#d4a44c]' },
-                  { name: 'Sarvam AI', quality: '9.5/10', desc: 'Best Indian language pronunciation', color: 'text-emerald-400' },
-                  { name: 'Bhashini AI', quality: '9/10', desc: 'Government of India, 22 Indian languages', color: 'text-sky-400' },
+                  { name: 'Sarvam AI', quality: '9.7/10', desc: 'Best Indian language pronunciation', color: 'text-emerald-400' },
+                  { name: 'Edge TTS', quality: '8.8/10', desc: 'Free Microsoft Neural voices', color: 'text-sky-400' },
                 ].map(p => (
                   <div key={p.name} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -663,7 +663,7 @@ export default function VoiceCompanionSelector({
               </div>
               <p className="text-[8px] text-white/15 mt-2">
                 KIAAN automatically selects the best available provider for your language.
-                Indian languages: Sarvam AI &rarr; Bhashini AI &rarr; ElevenLabs.
+                Indian languages: Sarvam AI &rarr; ElevenLabs &rarr; Edge TTS.
               </p>
             </div>
           </div>
@@ -679,7 +679,7 @@ export default function VoiceCompanionSelector({
                 ? 'bg-[#d4a44c]/20 text-[#d4a44c]'
                 : selectedVoice.poweredBy === 'sarvam'
                 ? 'bg-emerald-500/20 text-emerald-400'
-                : selectedVoice.poweredBy === 'bhashini'
+                : selectedVoice.poweredBy === 'edge_tts'
                 ? 'bg-sky-500/20 text-sky-400'
                 : 'bg-white/10 text-white/70'
             }`}>

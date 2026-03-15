@@ -5,13 +5,13 @@ Provides multilingual voice synthesis for Gita verses, KIAAN responses,
 and meditation guidance across 17+ languages using premium voice providers.
 
 Provider Fallback Chain:
-  Indian Languages: Sarvam AI Bulbul -> Bhashini AI -> ElevenLabs
+  Indian Languages: Sarvam AI Bulbul -> ElevenLabs -> Edge TTS
   International Languages: ElevenLabs -> Sarvam AI (for Hindi/Indian English)
 
 Features:
-- Sarvam AI Bulbul for native Indian language pronunciation
-- Bhashini AI (Government of India) for 22 scheduled Indian languages
 - ElevenLabs for studio-grade international voices
+- Sarvam AI Bulbul for native Indian language pronunciation
+- Edge TTS for free Microsoft Neural voices
 - Emotion-adaptive voice modulation
 - Multi-layer caching (Redis + Memory + Disk)
 - Intelligent provider routing by language
@@ -156,7 +156,7 @@ LANGUAGE_NATURALNESS_PROFILES: Dict[str, Dict[str, float]] = {
 # Inspired by Siri (40+), Alexa (20+), Google Assistant (30+)
 # KIAAN supports 29 languages with premium natural voices
 SUPPORTED_LANGUAGES = [
-    # Indian languages (Sarvam AI + Bhashini AI)
+    # Indian languages (Sarvam AI)
     "en", "hi", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "sa",
     # European languages (ElevenLabs)
     "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
@@ -168,7 +168,7 @@ SUPPORTED_LANGUAGES = [
     "sw",
 ]
 
-# Indian languages where Sarvam AI / Bhashini excel
+# Indian languages where Sarvam AI excels
 INDIAN_LANGUAGES = {
     "hi", "ta", "te", "bn", "kn", "ml", "mr", "gu", "pa", "sa", "en-IN",
 }
@@ -271,10 +271,10 @@ def get_offline_audio_cache() -> OfflineAudioCache:
 
 class TTSService:
     """
-    Text-to-Speech service using Sarvam AI, Bhashini AI, and ElevenLabs.
+    Text-to-Speech service using ElevenLabs, Sarvam AI, and Edge TTS.
 
     Provider Fallback Chain:
-    - Indian Languages: Sarvam AI -> Bhashini AI -> ElevenLabs
+    - Indian Languages: Sarvam AI -> ElevenLabs -> Edge TTS
     - International Languages: ElevenLabs -> Sarvam AI (if applicable)
     - All providers support emotion-adaptive synthesis
     """
@@ -293,18 +293,11 @@ class TTSService:
 
         # Check provider availability
         self._sarvam_available = False
-        self._bhashini_available = False
         self._elevenlabs_available = False
 
         try:
             from backend.services.sarvam_tts_service import is_sarvam_available
             self._sarvam_available = is_sarvam_available()
-        except ImportError:
-            pass
-
-        try:
-            from backend.services.bhashini_tts_service import is_bhashini_available
-            self._bhashini_available = is_bhashini_available()
         except ImportError:
             pass
 
@@ -316,7 +309,6 @@ class TTSService:
 
         logger.info(
             f"TTS Providers: Sarvam={self._sarvam_available}, "
-            f"Bhashini={self._bhashini_available}, "
             f"ElevenLabs={self._elevenlabs_available}"
         )
 
@@ -395,34 +387,6 @@ class TTSService:
             logger.warning(f"Sarvam synthesis failed: {e}")
             return None
 
-    async def _synthesize_with_bhashini(
-        self,
-        text: str,
-        language: str,
-        voice_id: str = "bhashini-devi",
-        mood: str = "neutral",
-    ) -> Optional[bytes]:
-        """Synthesize using Bhashini AI."""
-        try:
-            from backend.services.bhashini_tts_service import (
-                synthesize_bhashini_tts,
-                is_bhashini_available,
-            )
-            if not is_bhashini_available():
-                return None
-
-            return await synthesize_bhashini_tts(
-                text=text,
-                language=language,
-                voice_id=voice_id,
-                mood=mood,
-            )
-        except ImportError:
-            return None
-        except Exception as e:
-            logger.warning(f"Bhashini synthesis failed: {e}")
-            return None
-
     async def _synthesize_with_elevenlabs(
         self,
         text: str,
@@ -462,7 +426,7 @@ class TTSService:
         """
         Synthesize using the provider fallback chain.
 
-        Indian Languages: Sarvam AI -> Bhashini AI -> ElevenLabs
+        Indian Languages: Sarvam AI -> ElevenLabs -> Edge TTS
         International Languages: ElevenLabs -> Sarvam AI (if applicable)
         """
         # Map voice_type to voice_id if not provided
@@ -478,15 +442,10 @@ class TTSService:
             }.get(voice_type, "sarvam-aura")
 
         if self._is_indian_language(language):
-            # Indian language chain: Sarvam -> Bhashini -> ElevenLabs
+            # Indian language chain: Sarvam -> ElevenLabs -> Edge TTS
             audio = await self._synthesize_with_sarvam(text, language, voice_type, mood, voice_id)
             if audio:
                 logger.info(f"Sarvam AI synthesis success for {language}")
-                return audio
-
-            audio = await self._synthesize_with_bhashini(text, language, voice_id, mood)
-            if audio:
-                logger.info(f"Bhashini AI synthesis success for {language}")
                 return audio
 
             audio = await self._synthesize_with_elevenlabs(text, language, voice_id, mood)
@@ -524,7 +483,7 @@ class TTSService:
         Synthesize text to speech using premium providers.
 
         Fallback chain:
-        - Indian: Sarvam AI -> Bhashini AI -> ElevenLabs
+        - Indian: Sarvam AI -> ElevenLabs -> Edge TTS
         - International: ElevenLabs -> Sarvam AI
 
         Args:
@@ -968,18 +927,11 @@ def get_tts_service(redis_client=None) -> TTSService:
 def get_available_tts_providers() -> Dict[str, bool]:
     """Get status of all TTS providers."""
     sarvam_available = False
-    bhashini_available = False
     elevenlabs_available = False
 
     try:
         from backend.services.sarvam_tts_service import is_sarvam_available
         sarvam_available = is_sarvam_available()
-    except ImportError:
-        pass
-
-    try:
-        from backend.services.bhashini_tts_service import is_bhashini_available
-        bhashini_available = is_bhashini_available()
     except ImportError:
         pass
 
@@ -991,7 +943,6 @@ def get_available_tts_providers() -> Dict[str, bool]:
 
     return {
         "sarvam_ai_bulbul": sarvam_available,
-        "bhashini_ai": bhashini_available,
         "elevenlabs": elevenlabs_available,
     }
 
@@ -1026,22 +977,6 @@ PROVIDER_QUALITY_TIERS = {
             "hi", "ta", "te", "bn", "kn", "ml", "mr", "gu", "pa", "od", "sa", "en-IN",
         ],
     },
-    "bhashini_ai": {
-        "tier": "premium",
-        "quality_score": 90,
-        "naturalness": "native-indian",
-        "features": [
-            "Government of India AI platform",
-            "22 scheduled Indian languages",
-            "Native pronunciation quality",
-            "Free and open API",
-            "Sanskrit support",
-        ],
-        "latency_ms": 300,
-        "priority_languages": [
-            "hi", "ta", "te", "bn", "kn", "ml", "mr", "gu", "pa", "sa",
-        ],
-    },
 }
 
 
@@ -1054,13 +989,9 @@ def get_tts_provider_quality_info() -> Dict[str, any]:
         active_provider = "elevenlabs"
     elif providers.get("sarvam_ai_bulbul"):
         active_provider = "sarvam_ai_bulbul"
-    elif providers.get("bhashini_ai"):
-        active_provider = "bhashini_ai"
-
     return {
         "active_provider": active_provider,
         "sarvam_ai_available": providers.get("sarvam_ai_bulbul", False),
-        "bhashini_ai_available": providers.get("bhashini_ai", False),
         "elevenlabs_available": providers.get("elevenlabs", False),
         "providers": {
             name: {
@@ -1116,9 +1047,6 @@ def get_tts_health_status() -> Dict[str, any]:
     elif providers.get("sarvam_ai_bulbul") or providers.get("elevenlabs"):
         health = "healthy"
         status_message = "Premium voice quality available"
-    elif providers.get("bhashini_ai"):
-        health = "healthy"
-        status_message = "Voice quality available via Bhashini AI"
     else:
         health = "unavailable"
         status_message = "Voice synthesis providers not configured"
@@ -1132,7 +1060,6 @@ def get_tts_health_status() -> Dict[str, any]:
             "emotion_detection": True,
             "multi_language": True,
             "sarvam_indian_voices": providers.get("sarvam_ai_bulbul", False),
-            "bhashini_indian_voices": providers.get("bhashini_ai", False),
             "elevenlabs_premium": providers.get("elevenlabs", False),
         },
     }

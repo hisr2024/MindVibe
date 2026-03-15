@@ -13,7 +13,7 @@ Provides a comprehensive voice synthesis engine with:
 Provider Priority Chain:
 1. ElevenLabs (premium, multilingual, studio-grade) - when API key present
 2. Sarvam AI Bulbul (Sanskrit/Hindi specialist, 11 Indian languages)
-3. Bhashini AI (Government of India, 22 scheduled Indian languages)
+3. Edge TTS (Free Microsoft Neural voices)
 4. Browser TTS (always available fallback)
 """
 
@@ -80,7 +80,7 @@ class SpeakerProfile:
     # Provider-specific voice IDs
     elevenlabs_voice_id: Optional[str] = None
     sarvam_voice_id: Optional[str] = None
-    bhashini_voice_id: Optional[str] = None
+    edge_tts_voice_id: Optional[str] = None
     # Prosody defaults
     default_speed: float = 0.95
     default_pitch: float = 0.0
@@ -674,8 +674,8 @@ class MultilingualVoiceEngine:
         if speaker.sarvam_voice_id and speaker.language in ("hi", "sa"):
             return ("sarvam", speaker.sarvam_voice_id)
 
-        if speaker.bhashini_voice_id:
-            return ("bhashini", speaker.bhashini_voice_id)
+        if speaker.edge_tts_voice_id:
+            return ("edge_tts", speaker.edge_tts_voice_id)
 
         # Ultimate fallback
         return ("sarvam", "anushka")

@@ -266,12 +266,12 @@ class Settings(BaseSettings):
     )
 
     # --- TTS (Text-to-Speech) Settings ---
-    # Provider chain: Sarvam AI → Bhashini AI → ElevenLabs (browser fallback always available)
+    # Provider chain: ElevenLabs → Sarvam AI → Edge TTS (browser fallback always available)
     LOCAL_TTS_ENABLED: bool = parse_bool_strict(
         os.getenv("LOCAL_TTS_ENABLED", "true"), "LOCAL_TTS_ENABLED"
     )
-    TTS_PROVIDER: str = os.getenv("TTS_PROVIDER", "auto")  # auto, sarvam, bhashini, elevenlabs
-    TTS_FALLBACK_CHAIN: str = os.getenv("TTS_FALLBACK_CHAIN", "sarvam,bhashini,elevenlabs")
+    TTS_PROVIDER: str = os.getenv("TTS_PROVIDER", "auto")  # auto, sarvam, elevenlabs, edge
+    TTS_FALLBACK_CHAIN: str = os.getenv("TTS_FALLBACK_CHAIN", "elevenlabs,sarvam,edge")
     LOCAL_TTS_QUALITY: str = os.getenv("LOCAL_TTS_QUALITY", "medium")  # low, medium, high
     TTS_CACHE_DIR: str = os.getenv("TTS_CACHE_DIR", str(DEFAULT_AUDIO_CACHE_PATH))
     TTS_CACHE_MAX_SIZE_MB: int = int(os.getenv("TTS_CACHE_MAX_SIZE_MB", "500"))

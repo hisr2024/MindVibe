@@ -3,7 +3,6 @@
 Validates:
 - Sarvam AI Bulbul v2 upgrade with v1 fallback
 - ElevenLabs Flash v2.5 model selection
-- Bhashini AI pipeline config caching
 - Intelligent language-aware provider routing
 - New voice personas and speaker mappings
 - Provider health status integration
@@ -145,38 +144,6 @@ class TestElevenLabsFlashMode:
         assert len(ELEVENLABS_VOICES) >= 12
 
 
-class TestBhashiniPipelineCaching:
-    """Tests for Bhashini AI pipeline config caching."""
-
-    def test_cache_module_level_dict_exists(self):
-        """Pipeline cache dict should exist at module level."""
-        from backend.services.bhashini_tts_service import _PIPELINE_CACHE
-        assert isinstance(_PIPELINE_CACHE, dict)
-
-    def test_cache_ttl_is_reasonable(self):
-        """Cache TTL should be 30 minutes (1800 seconds)."""
-        from backend.services.bhashini_tts_service import _PIPELINE_CACHE_TTL_SECONDS
-        assert _PIPELINE_CACHE_TTL_SECONDS == 1800
-
-    def test_clear_cache_function_exists(self):
-        """clear_bhashini_pipeline_cache function should exist."""
-        from backend.services.bhashini_tts_service import clear_bhashini_pipeline_cache
-        # Should not raise
-        clear_bhashini_pipeline_cache()
-
-    def test_supported_languages_includes_sanskrit(self):
-        """Bhashini should support Sanskrit natively."""
-        from backend.services.bhashini_tts_service import BHASHINI_SUPPORTED_LANGUAGES
-        assert "sa" in BHASHINI_SUPPORTED_LANGUAGES
-
-    def test_all_22_languages_in_mapping(self):
-        """Bhashini should have mappings for major Indian languages."""
-        from backend.services.bhashini_tts_service import MINDVIBE_TO_BHASHINI_LANG
-        expected = ["hi", "ta", "te", "bn", "kn", "ml", "mr", "gu", "pa", "sa"]
-        for lang in expected:
-            assert lang in MINDVIBE_TO_BHASHINI_LANG, f"Missing Bhashini mapping for {lang}"
-
-
 class TestIntelligentProviderRouting:
     """Tests for language-aware provider routing."""
 
@@ -200,10 +167,10 @@ class TestIntelligentProviderRouting:
         from backend.services.companion_voice_service import LANGUAGE_PROVIDER_PRIORITY
         assert LANGUAGE_PROVIDER_PRIORITY["sa"][0] == "sarvam"
 
-    def test_odia_routes_to_bhashini_first(self):
-        """Odia should prefer Bhashini (Government platform with best Odia support)."""
+    def test_odia_routes_to_edge_first(self):
+        """Odia should prefer Edge TTS (free with wide language support)."""
         from backend.services.companion_voice_service import LANGUAGE_PROVIDER_PRIORITY
-        assert LANGUAGE_PROVIDER_PRIORITY["od"][0] == "bhashini"
+        assert LANGUAGE_PROVIDER_PRIORITY["od"][0] == "edge"
 
     def test_spanish_routes_to_elevenlabs(self):
         """Spanish should prefer ElevenLabs."""
@@ -215,14 +182,14 @@ class TestIntelligentProviderRouting:
         from backend.services.companion_voice_service import LANGUAGE_PROVIDER_PRIORITY
         assert LANGUAGE_PROVIDER_PRIORITY["en-IN"][0] == "sarvam"
 
-    def test_all_indian_languages_have_sarvam_or_bhashini_first(self):
-        """All Indian languages should prefer Indian providers."""
+    def test_all_indian_languages_have_sarvam_first(self):
+        """All Indian languages should prefer Sarvam AI."""
         from backend.services.companion_voice_service import LANGUAGE_PROVIDER_PRIORITY
         indian_langs = ["hi", "ta", "te", "bn", "kn", "ml", "mr", "gu", "pa", "sa"]
         for lang in indian_langs:
             first = LANGUAGE_PROVIDER_PRIORITY[lang][0]
-            assert first in ("sarvam", "bhashini"), (
-                f"{lang} routes to {first} instead of sarvam/bhashini"
+            assert first == "sarvam", (
+                f"{lang} routes to {first} instead of sarvam"
             )
 
     def test_get_optimal_provider_order_returns_list(self):
@@ -291,14 +258,14 @@ class TestCircuitBreakerHealth:
         status = get_provider_health_status()
         assert "elevenlabs" in status
         assert "sarvam" in status
-        assert "bhashini" in status
+        assert "edge" in status
 
     def test_healthy_provider_returns_true(self):
         """A fresh provider should be healthy."""
         from backend.services.companion_voice_service import _provider_is_healthy
         assert _provider_is_healthy("elevenlabs") is True
         assert _provider_is_healthy("sarvam") is True
-        assert _provider_is_healthy("bhashini") is True
+        assert _provider_is_healthy("edge") is True
 
     def test_record_success_resets_failures(self):
         """Recording a success should reset the failure counter."""
@@ -322,7 +289,7 @@ class TestVoiceCatalogFrontend:
         # This is a structural test - we verify the catalog is importable
         # and has the expected divine voices
         from backend.services.companion_voice_service import COMPANION_VOICES
-        assert len(COMPANION_VOICES) >= 12  # 6 regular + 6 divine
+        assert len(COMPANION_VOICES) >= 10  # 4 regular + 6 divine
 
     def test_all_companion_voices_have_sarvam_speaker(self):
         """Every companion voice should have a sarvam_speaker field."""

@@ -101,7 +101,6 @@ class SpeechModuleOrchestrator:
         VoiceQuality.PREMIUM: [
             SpeechProvider.ELEVENLABS,
             SpeechProvider.SARVAM,
-            SpeechProvider.BHASHINI,
             SpeechProvider.SILERO,
             SpeechProvider.COQUI_TTS,
         ],

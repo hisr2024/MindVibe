@@ -43,7 +43,6 @@ class SpeechProvider(Enum):
 
     # Indian Language Specialists
     SARVAM = "sarvam"                  # Sarvam AI Bulbul
-    BHASHINI = "bhashini"              # Government of India Bhashini AI
     VAKYANSH = "vakyansh"              # Indian TTS
     AI4BHARAT = "ai4bharat"            # Indic language models
 
@@ -400,7 +399,7 @@ DIVINE_FEMALE_VOICES = {
             "elevenlabs": "EXAVITQu4vr4xnSDxMaL",      # Warm, natural female
             "coqui_xtts": "female_serene",
             "silero": "en_0",                    # Calm female
-            "bhashini": "bhashini-devi",  # Natural female
+            "edge_tts": "en-IN-NeerjaNeural",  # Natural female
         },
         default_prosody=EmotionalProsody(
             emotion=EmotionCategory.SERENE,
@@ -436,7 +435,7 @@ DIVINE_FEMALE_VOICES = {
             "elevenlabs": "jBpfAIEiAUkR2KqPSoCY",    # Clear, articulate
             "coqui_xtts": "female_wise",
             "silero": "en_1",
-            "bhashini": "bhashini-devi",
+            "edge_tts": "en-IN-NeerjaNeural",
         },
         default_prosody=EmotionalProsody(
             emotion=EmotionCategory.WISE,
