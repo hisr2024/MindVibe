@@ -1,8 +1,7 @@
 /**
- * Companion Voices - Re-export
+ * Companion Voices - Next.js API Route
  *
- * Proxies to the unified kiaan_voice_companion.py backend at
- * /api/voice-companion/voices.
+ * Proxies to the backend at /api/voice-companion/voices.
  */
 
 import { createProxyHandler } from '@/lib/proxy-utils'

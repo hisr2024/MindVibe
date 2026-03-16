@@ -41,17 +41,12 @@ import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 
 /**
- * KiaanFooter (OM button) and KiaanVoiceFAB (Mic button) are loaded dynamically
- * because they are client-only interactive widgets that depend on browser APIs
- * (haptics, speech recognition). Lazy-loading prevents SSR issues and keeps
- * initial mobile JS bundle small.
+ * KiaanFooter (OM button) is loaded dynamically because it is a client-only
+ * interactive widget that depends on browser APIs (haptics). Lazy-loading
+ * prevents SSR issues and keeps initial mobile JS bundle small.
  */
 const KiaanFooter = dynamic(
   () => import('@/components/layout/KiaanFooter').then(mod => mod.KiaanFooter),
-  { ssr: false }
-)
-const KiaanVoiceFAB = dynamic(
-  () => import('@/components/voice/KiaanVoiceFAB'),
   { ssr: false }
 )
 
@@ -410,9 +405,6 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
             KIAAN Chat, and Relationship Compass tools from any mobile page */}
         <KiaanFooter />
 
-        {/* Voice Companion Mic FAB (golden theme) — tap to talk to KIAAN
-            from any mobile page, with speech recognition and voice response */}
-        <KiaanVoiceFAB />
 
         {/* Tools overlay — slides up from bottom with spiritual wellness tools */}
         <MobileToolsOverlay

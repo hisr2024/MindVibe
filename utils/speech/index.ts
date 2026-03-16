@@ -6,4 +6,3 @@
 export * from './languageMapping'
 export * from './recognition'
 export * from './synthesis'
-export * from './wakeWord'

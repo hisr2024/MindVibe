@@ -162,7 +162,7 @@ const GROWTH_TOOLS: Tool[] = [
     label: 'Voice Companion',
     description: 'Speak with KIAAN',
     icon: Volume2,
-    href: '/companion/voice-companion',
+    href: '/companion',
     gradient: 'from-sky-500/15 to-cyan-500/15',
     iconColor: 'text-sky-400',
     premium: true,

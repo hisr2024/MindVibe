@@ -1,16 +1,14 @@
 /**
  * Voice components index
- * Exports all active voice-related components for KIAAN ecosystem
- *
- * Core Voice Companion v4 components (KiaanVoiceOrb, VoiceWaveform, ConversationInsights)
- * are imported directly by the voice-companion page.
+ * Exports active voice-related components for KIAAN ecosystem
  */
 
 export { ShankhaIcon } from '@/components/icons/ShankhaIcon'
-export { VoiceInputButton, type VoiceInputButtonProps } from './VoiceInputButton'
-export { VoiceResponseButton, type VoiceResponseButtonProps } from './VoiceResponseButton'
-export { VoiceOutputButton, type VoiceOutputButtonProps } from './VoiceOutputButton'
-export { KiaanVoiceNav } from './KiaanVoiceNav'
+
+// Inline voice UI buttons (used across KIAAN ecosystem tools)
+export { VoiceInputButton } from './VoiceInputButton'
+export { VoiceResponseButton } from './VoiceResponseButton'
+export { VoiceOutputButton } from './VoiceOutputButton'
 
 // Voice Enhancements UI (used by Quantum Dive and other KIAAN tools)
 export {
