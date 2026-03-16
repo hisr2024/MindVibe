@@ -882,21 +882,6 @@ export class WakeWordDetector {
   }
 
   /**
-   * Restart the wake word detector
-   */
-  private restart(): void {
-    if (!this.recognition) return
-
-    this.clearRestartTimeout()
-    this.recognition.stop()
-    this.restartTimeout = setTimeout(() => {
-      if (this.isActive && this.recognition) {
-        this.recognition.start(this.getCallbacks())
-      }
-    }, 200)
-  }
-
-  /**
    * Update sensitivity level at runtime
    */
   setSensitivity(level: WakeWordSensitivity): void {
@@ -921,7 +906,7 @@ export class WakeWordDetector {
     this.recognition.setLanguage(language)
 
     if (this.isActive) {
-      this.restart()
+      this.forceRestart()
     }
   }
 

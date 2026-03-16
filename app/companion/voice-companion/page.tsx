@@ -247,8 +247,11 @@ export default function KiaanVoiceCompanionPage() {
   // ── Process transcript when listening stops ───────────────────────
   useEffect(() => {
     if (!isListening && transcript && phase === 'listening') {
-      handleUserMessage(transcript)
+      // Capture transcript value before resetting to prevent race condition
+      // where resetTranscript clears the text while handleUserMessage is processing
+      const capturedTranscript = transcript
       resetTranscript()
+      handleUserMessage(capturedTranscript)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isListening, transcript])
@@ -295,7 +298,11 @@ export default function KiaanVoiceCompanionPage() {
       onEnd?.()
       return
     }
+    // Cancel any current speech. Reset isSpeakingRef immediately so stale
+    // onstart/onend from the cancelled utterance don't corrupt state.
     window.speechSynthesis.cancel()
+    isSpeakingRef.current = false
+
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.rate = voiceConfig.speed
     utterance.lang = voiceConfig.language === 'hi' ? 'hi-IN' : voiceConfig.language === 'sa' ? 'sa-IN' : 'en-US'
@@ -430,8 +437,9 @@ export default function KiaanVoiceCompanionPage() {
         }, 2500)
       }
     } catch {
-      // Orchestrator failed — fall through to backend
+      // Orchestrator failed — fall through to backend enhancement
       setIsLoading(false)
+      // Keep phase as 'processing' only if backend enhancement will run
     }
 
     // ── STEP 2: Background Enhancement via Backend (1-3s, non-blocking) ──
@@ -494,12 +502,17 @@ export default function KiaanVoiceCompanionPage() {
           }
         }
       } catch (err: unknown) {
-        if (err instanceof DOMException && err.name === 'AbortError') return
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          // Aborted — still reset phase before returning
+          setPhase('idle')
+          return
+        }
         // Backend enhancement failed — local response still shown
       }
     }
 
     setPhase('idle')
+    setIsLoading(false)
   }, [messages, voiceConfig.language, speakText, router])
 
   // ─── Voice Mic Toggle ─────────────────────────────────────────────

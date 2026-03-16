@@ -126,6 +126,11 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   const audioChunksRef = useRef<Blob[]>([])
   const mediaStreamRef = useRef<MediaStream | null>(null)
   const mountedRef = useRef(true)
+  // Stable refs for parent callbacks to avoid stale closures in async handlers
+  const onTranscriptRef = useRef(onTranscript)
+  const onErrorRef = useRef(onError)
+  onTranscriptRef.current = onTranscript
+  onErrorRef.current = onError
 
   // Track online/offline status
   useEffect(() => {
@@ -146,23 +151,22 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   const onDeviceSTT = useOnDeviceSTT({
     language,
     onTranscript: useCallback((text: string, isFinal: boolean) => {
-      if (!usingOnDeviceRef.current) return
+      if (!usingOnDeviceRef.current || !mountedRef.current) return
       if (isFinal) {
         const finalText = punctuationAssist ? applyPunctuationAssist(text) : text
         setTranscript(finalText)
         setInterimTranscript('')
         setStatus('processing')
-        onTranscript?.(finalText, true)
+        onTranscriptRef.current?.(finalText, true)
       } else {
         setInterimTranscript(text)
-        onTranscript?.(text, false)
+        onTranscriptRef.current?.(text, false)
       }
-    }, [onTranscript, punctuationAssist]),
+    }, [punctuationAssist]),
     onError: useCallback((err: string) => {
-      // On-device failed → caller will fall back to Web Speech API
       usingOnDeviceRef.current = false
-      onError?.(err)
-    }, [onError]),
+      onErrorRef.current?.(err)
+    }, []),
   })
 
   // Web Speech API (Tier 2) — initialize only if supported
@@ -252,25 +256,27 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
 
           if (response.ok) {
             const data = await response.json()
+            if (!mountedRef.current) return
             const text = data.transcript || ''
             if (text.trim()) {
               const finalText = punctuationAssist ? applyPunctuationAssist(text) : text
               setTranscript(finalText)
               setConfidence(data.confidence ?? 0)
-              onTranscript?.(finalText, true)
+              onTranscriptRef.current?.(finalText, true)
             }
           } else {
             const data = await response.json().catch(() => ({}))
+            if (!mountedRef.current) return
             const msg = data.error || 'Server transcription failed'
             setError(msg)
             setStatus('error')
-            onError?.(msg)
+            onErrorRef.current?.(msg)
           }
         } catch {
           if (!mountedRef.current) return
           setError('Server transcription unavailable. Please type your message.')
           setStatus('error')
-          onError?.('Server transcription unavailable.')
+          onErrorRef.current?.('Server transcription unavailable.')
         }
 
         if (!mountedRef.current) return
@@ -294,7 +300,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
       }
       return false
     }
-  }, [language, punctuationAssist, onTranscript, onError])
+  }, [language, punctuationAssist])
 
   const startListening = useCallback(async () => {
     // Pre-flight: check basic availability
@@ -305,7 +311,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
       const errorMsg = 'Voice input requires an internet connection. Please type your message.'
       setError(errorMsg)
       setStatus('offline')
-      onError?.(errorMsg)
+      onErrorRef.current?.(errorMsg)
       return
     }
 
@@ -313,7 +319,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
       const errorMsg = 'Voice features require HTTPS or localhost.'
       setError(errorMsg)
       setStatus('error')
-      onError?.(errorMsg)
+      onErrorRef.current?.(errorMsg)
       return
     }
 
@@ -352,34 +358,38 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
       // "listening" after the microphone is actually capturing audio.
       await recognitionRef.current.start({
         onStart: () => {
+          if (!mountedRef.current) return
           setIsListening(true)
           setStatus('listening')
         },
         onResult: (text, isFinal, resultConfidence) => {
+          if (!mountedRef.current) return
           if (isFinal) {
             const finalText = punctuationAssist ? applyPunctuationAssist(text) : text
             setTranscript(finalText)
             setInterimTranscript('')
             setConfidence(resultConfidence ?? 0)
             setStatus('processing')
-            onTranscript?.(finalText, true)
+            onTranscriptRef.current?.(finalText, true)
           } else {
             setInterimTranscript(text)
-            onTranscript?.(text, false)
+            onTranscriptRef.current?.(text, false)
           }
         },
         onEnd: () => {
+          if (!mountedRef.current) return
           setIsListening(false)
           setInterimTranscript('')
           setStatus('idle')
         },
         onError: (err) => {
+          if (!mountedRef.current) return
           const compassionateMsg = getCompassionateError(err)
           setError(compassionateMsg)
           setIsListening(false)
           setInterimTranscript('')
           setStatus('error')
-          onError?.(compassionateMsg)
+          onErrorRef.current?.(compassionateMsg)
         },
       })
       return
@@ -396,8 +406,8 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     const errorMsg = `Speech recognition not available in ${browserName}. Please type your message instead.`
     setError(errorMsg)
     setStatus('error')
-    onError?.(errorMsg)
-  }, [isWebSpeechSupported, isOnline, punctuationAssist, onTranscript, onError, onDeviceSTT, startServerTranscription])
+    onErrorRef.current?.(errorMsg)
+  }, [isWebSpeechSupported, isOnline, punctuationAssist, onDeviceSTT, startServerTranscription])
 
   const stopListening = useCallback(() => {
     if (usingOnDeviceRef.current) {
@@ -459,7 +469,13 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     startListening,
     stopListening,
     resetTranscript,
-    sttProvider: usingServer ? 'server' : (isListening && !usingOnDeviceRef.current ? 'web-speech-api' : onDeviceSTT.sttProvider),
+    sttProvider: usingServer
+      ? 'server'
+      : usingOnDeviceRef.current
+        ? onDeviceSTT.sttProvider
+        : isListening
+          ? 'web-speech-api'
+          : onDeviceSTT.sttProvider,
     deviceTier: onDeviceSTT.deviceTier,
     status,
     isOnline,

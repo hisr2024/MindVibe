@@ -47,7 +47,9 @@ export function useVoiceOutput(options: UseVoiceOutputOptions = {}): UseVoiceOut
     onError,
   } = options
 
-  // Initialize synthesis service
+  // Initialize synthesis service — only recreate on language change.
+  // Rate/pitch/volume are updated in-place via updateConfig to avoid
+  // destroying the service (and cancelling speech) on every slider drag.
   useEffect(() => {
     if (!isSupported) return
 
@@ -64,7 +66,15 @@ export function useVoiceOutput(options: UseVoiceOutputOptions = {}): UseVoiceOut
         synthesisRef.current = null
       }
     }
-  }, [isSupported, language, rate, pitch, volume])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSupported, language])
+
+  // Update rate/pitch/volume without recreating the service
+  useEffect(() => {
+    if (synthesisRef.current) {
+      synthesisRef.current.updateConfig({ rate, pitch, volume })
+    }
+  }, [rate, pitch, volume])
 
   const speak = useCallback((text: string) => {
     if (!synthesisRef.current || !isSupported) {

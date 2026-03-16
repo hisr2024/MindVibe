@@ -81,6 +81,8 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
   // Start recording: reset accumulated text, start timer, start listening
   const startRecording = useCallback(async () => {
     if (isDisabled || isProcessing) return
+    // Clear any leftover timer from a previous recording session
+    clearTimer()
     accumulatedRef.current = ''
     setAccumulatedText('')
     resetTranscript()
@@ -93,7 +95,7 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
     timerRef.current = setInterval(() => {
       setDuration(Math.floor((Date.now() - startTime) / 1000))
     }, 1000)
-  }, [isDisabled, isProcessing, startListening, resetTranscript])
+  }, [isDisabled, isProcessing, startListening, resetTranscript, clearTimer])
 
   // Stop recording: submit accumulated transcript
   const stopRecording = useCallback(() => {
@@ -102,8 +104,10 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
 
     if (accumulatedRef.current.trim()) {
       onTranscription(accumulatedRef.current.trim())
-      accumulatedRef.current = ''
     }
+    // Reset both ref and state to prevent stale text on next recording
+    accumulatedRef.current = ''
+    setAccumulatedText('')
     setDuration(0)
   }, [hookStopListening, clearTimer, onTranscription])
 

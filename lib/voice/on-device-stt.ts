@@ -51,6 +51,10 @@ export class OnDeviceSTT {
   private callbacks: OnDeviceSTTCallbacks | null = null
   private idleTimer: ReturnType<typeof setTimeout> | null = null
   private isWorkletRegistered = false
+  /** Guard against concurrent startListening calls */
+  private isStartingListening = false
+  /** Pending model-load timeout to clear on resolve/destroy */
+  private modelLoadTimeout: ReturnType<typeof setTimeout> | null = null
 
   /**
    * Detect device capabilities and determine optimal STT strategy
@@ -196,42 +200,62 @@ export class OnDeviceSTT {
       throw new Error('On-device STT not available — use Web Speech API')
     }
 
-    // Model must be fully loaded before we can transcribe
     if (this.state === 'error') {
       throw new Error('On-device STT model failed to load')
     }
 
-    if (this.state === 'loading') {
-      // Model is still loading — wait for ready with a timeout
-      if (!this.worker) {
-        throw new Error('On-device STT worker not initialized')
-      }
-      await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => reject(new Error('Model load timeout (30s)')), 30000)
-        const originalHandler = this.worker?.onmessage
-        if (this.worker) {
-          this.worker.onmessage = (event: MessageEvent) => {
-            if (this.worker) originalHandler?.call(this.worker, event)
-            if (event.data.type === 'ready') {
-              clearTimeout(timeout)
-              resolve()
-            } else if (event.data.type === 'error') {
-              clearTimeout(timeout)
-              reject(new Error(event.data.message))
-            }
-          }
-        }
-      })
+    // Prevent concurrent startListening calls from opening multiple mic streams
+    if (this.isStartingListening) {
+      return
     }
-
-    if (this.state !== 'ready') {
-      throw new Error(`On-device STT not ready (state: ${this.state})`)
-    }
-
-    this.clearIdleTimer()
-    this.setState('listening')
+    this.isStartingListening = true
 
     try {
+      if (this.state === 'loading') {
+        if (!this.worker) {
+          throw new Error('On-device STT worker not initialized')
+        }
+        // Wait for model to finish loading. Use a single-shot listener pattern
+        // to avoid replacing the worker's onmessage handler.
+        await new Promise<void>((resolve, reject) => {
+          let settled = false
+          const timeout = setTimeout(() => {
+            if (!settled) {
+              settled = true
+              reject(new Error('Model load timeout (30s)'))
+            }
+          }, 30000)
+          this.modelLoadTimeout = timeout
+
+          const originalHandler = this.worker?.onmessage
+          if (this.worker) {
+            this.worker.onmessage = (event: MessageEvent) => {
+              // Always forward to the original handler first
+              if (this.worker) originalHandler?.call(this.worker, event)
+              if (settled) return
+              if (event.data.type === 'ready') {
+                settled = true
+                clearTimeout(timeout)
+                this.modelLoadTimeout = null
+                resolve()
+              } else if (event.data.type === 'error') {
+                settled = true
+                clearTimeout(timeout)
+                this.modelLoadTimeout = null
+                reject(new Error(event.data.message))
+              }
+            }
+          }
+        })
+      }
+
+      if (this.state !== 'ready') {
+        throw new Error(`On-device STT not ready (state: ${this.state})`)
+      }
+
+      this.clearIdleTimer()
+      this.setState('listening')
+
       // Get microphone access
       this.mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -257,7 +281,6 @@ export class OnDeviceSTT {
       // Create worklet node
       this.workletNode = new AudioWorkletNode(this.audioContext, 'audio-capture-processor')
 
-      // Configure for moonshine or whisper mode
       this.workletNode.port.postMessage({
         type: 'configure',
         mode: this.provider === 'whisper' ? 'whisper' : 'moonshine',
@@ -278,7 +301,15 @@ export class OnDeviceSTT {
       source.connect(this.workletNode)
 
     } catch (err) {
+      // Clean up AudioContext if mic access or worklet registration failed
+      if (this.audioContext && this.state !== 'listening') {
+        this.audioContext.close().catch(() => {})
+        this.audioContext = null
+        this.isWorkletRegistered = false
+      }
       this.handleError(`Mic access failed: ${err instanceof Error ? err.message : String(err)}`)
+    } finally {
+      this.isStartingListening = false
     }
   }
 
@@ -318,11 +349,15 @@ export class OnDeviceSTT {
    * Change language (may require switching model)
    */
   async setLanguage(language: string): Promise<STTProvider> {
+    // If currently listening, stop first to avoid race with startListening
+    if (this.state === 'listening') {
+      this.stopListening()
+    }
+
     const newProvider = this.selectProvider(language)
     this.language = language
 
     if (newProvider !== this.provider) {
-      // Need to switch models
       this.unloadModel()
       this.provider = newProvider
       this.callbacks?.onProviderChange?.(this.provider)
@@ -331,7 +366,6 @@ export class OnDeviceSTT {
         await this.loadModel()
       }
     } else if (this.provider === 'whisper' && this.worker) {
-      // Same model, just change language
       this.worker.postMessage({ type: 'set-language', language })
     }
 
@@ -342,6 +376,11 @@ export class OnDeviceSTT {
    * Fully clean up all resources
    */
   destroy(): void {
+    // Clear any pending model-load timeout to prevent dangling reject
+    if (this.modelLoadTimeout) {
+      clearTimeout(this.modelLoadTimeout)
+      this.modelLoadTimeout = null
+    }
     this.stopListening()
     this.unloadModel()
     this.callbacks = null

@@ -69,13 +69,23 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
     onStateChangeRef.current = options.onStateChange
   }, [options.onWakeWordDetected, options.onError, options.onStateChange])
 
-  // Initialize wake word detector
+  // Stabilize wakeWords: only change reference when the actual values change.
+  // This prevents the detector from being destroyed+recreated every render
+  // when the parent passes an inline array literal like wakeWords={['kiaan']}.
+  const wakeWordsKey = wakeWords ? wakeWords.join('\0') : ''
+  const stableWakeWordsRef = useRef(wakeWords)
+  useEffect(() => {
+    stableWakeWordsRef.current = wakeWords
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wakeWordsKey])
+
+  // Initialize wake word detector — only recreate when actual config values change
   useEffect(() => {
     if (!isSupported) return
 
     detectorRef.current = new WakeWordDetector({
       language,
-      wakeWords,
+      wakeWords: stableWakeWordsRef.current,
       sensitivity,
       onWakeWordDetected: (event: WakeWordDetectionEvent) => {
         setLastDetection(event)
@@ -83,8 +93,6 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
       },
       onError: (err: string) => {
         setError(err)
-        // Only mark inactive for fatal errors (permission denied, not supported).
-        // Recoverable errors are handled internally by the detector with auto-retry.
         if (err.includes('permission') || err.includes('not supported') || err.includes('not found')) {
           setIsActive(false)
         }
@@ -103,7 +111,8 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
         detectorRef.current = null
       }
     }
-  }, [isSupported, language, wakeWords, sensitivity])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSupported, language, wakeWordsKey, sensitivity])
 
   // Update language when it changes
   useEffect(() => {
