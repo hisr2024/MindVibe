@@ -357,7 +357,7 @@ main (production)
 | Screen | Web Route | Mobile Screen | Priority |
 |--------|-----------|---------------|----------|
 | KIAAN Chat | `/kiaan` | `SakhaScreen` | P0 |
-| KIAAN Voice | `/kiaan-voice-companion` | `VoiceCompanionScreen` | P1 |
+| KIAAN Voice | `/companion` | `VoiceCompanionScreen` | P1 |
 | Gita Explorer | `/gita-explorer` (component) | `GitaScreen` | P0 |
 | Verse Detail | Component-level | `VerseDetailScreen` | P0 |
 
@@ -468,7 +468,7 @@ main (production)
 | `/auth` | `AuthScreen` | Auth Stack | MVP |
 | `/onboarding` | `OnboardingScreen` | Auth Stack | MVP |
 | `/kiaan` | `SakhaScreen` | Sakha | MVP |
-| `/kiaan-voice-companion` | `VoiceCompanionScreen` | Sakha | MVP |
+| `/companion` | `VoiceCompanionScreen` | Sakha | MVP |
 | `/kiaan-vibe` | `VibeScreen` | Vibe | Phase 2 |
 | `/journeys` | `JourneysScreen` | Journeys | MVP |
 | `/journey-engine` | `JourneyStepScreen` | Journeys | MVP |

@@ -10,7 +10,7 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Mic, MicOff, ArrowLeft, Volume2, VolumeX } from 'lucide-react'
+import { Mic, MicOff, ArrowLeft, Volume2, VolumeX, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
@@ -36,6 +36,7 @@ export default function MobileCompanionPage() {
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [isMuted, setIsMuted] = useState(false)
   const [connectionError, setConnectionError] = useState(false)
+  const [feedbackGiven, setFeedbackGiven] = useState<Record<string, 'positive' | 'negative'>>({})
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const handleVoiceMessageRef = useRef<(text: string) => void>(() => {})
 
@@ -166,6 +167,20 @@ export default function MobileCompanionPage() {
     }
   }, [isListening, startListening, stopListening, resetTranscript, triggerHaptic])
 
+  const handleFeedback = useCallback(async (messageId: string, rating: 'positive' | 'negative') => {
+    setFeedbackGiven((prev) => ({ ...prev, [messageId]: rating }))
+    triggerHaptic('selection')
+    try {
+      await apiFetch('/api/companion/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message_id: messageId, rating, session_id: sessionId }),
+      })
+    } catch {
+      // Feedback is best-effort — don't disrupt the conversation
+    }
+  }, [sessionId, triggerHaptic])
+
   return (
     <MobileAppShell
       title="Voice Companion"
@@ -206,7 +221,7 @@ export default function MobileCompanionPage() {
                 key={msg.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
               >
                 <div
                   className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
@@ -217,6 +232,30 @@ export default function MobileCompanionPage() {
                 >
                   {msg.text}
                 </div>
+                {msg.role === 'assistant' && msg.id !== 'greeting' && msg.id !== 'fallback-greeting' && (
+                  <div className="flex items-center gap-1 mt-1 ml-1">
+                    {feedbackGiven[msg.id] ? (
+                      <span className="text-[10px] text-white/30">Thanks!</span>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handleFeedback(msg.id, 'positive')}
+                          className="p-1 rounded-full text-white/20 hover:text-green-400 hover:bg-green-400/10 transition-colors"
+                          aria-label="Good response"
+                        >
+                          <ThumbsUp className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => handleFeedback(msg.id, 'negative')}
+                          className="p-1 rounded-full text-white/20 hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                          aria-label="Poor response"
+                        >
+                          <ThumbsDown className="w-3 h-3" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
               </motion.div>
             ))}
           </AnimatePresence>

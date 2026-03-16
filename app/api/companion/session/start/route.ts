@@ -7,7 +7,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
+function logMetrics(data: Record<string, unknown>) {
+  console.warn('[Companion:Metrics]', JSON.stringify({ ts: new Date().toISOString(), ...data }))
+}
+
+function withTierHeader(response: NextResponse, tier: string): NextResponse {
+  response.headers.set('X-AI-Tier', tier)
+  return response
+}
+
+function buildLocalGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour >= 5 && hour < 12) {
+    return "Good morning! I'm KIAAN, your personal friend. What's on your mind today?"
+  } else if (hour >= 17 && hour < 21) {
+    return "Good evening, friend! How was your day? I'm here to listen."
+  } else if (hour >= 21 || hour < 5) {
+    return "Hey there, night owl. Can't sleep, or just need a friend? I'm right here."
+  }
+  return "Hey friend! I'm KIAAN. I'm always here when you need someone to talk to. What's up?"
+}
+
 export async function POST(request: NextRequest) {
+  const start = Date.now()
+
   try {
     const body = await request.json()
 
@@ -20,38 +43,29 @@ export async function POST(request: NextRequest) {
 
     if (backendResponse.ok) {
       const data = await backendResponse.json()
-      return forwardCookies(backendResponse, NextResponse.json(data))
+      logMetrics({ event: 'session_start', tier: 'backend', latency_ms: Date.now() - start })
+      return withTierHeader(
+        forwardCookies(backendResponse, NextResponse.json(data)),
+        'backend',
+      )
     }
 
-    // Fallback greeting for when backend is unavailable
-    const hour = new Date().getHours()
-    let greeting: string
-    if (hour >= 5 && hour < 12) {
-      greeting = "Good morning! I'm KIAAN, your personal friend. What's on your mind today?"
-    } else if (hour >= 17 && hour < 21) {
-      greeting = "Good evening, friend! How was your day? I'm here to listen."
-    } else if (hour >= 21 || hour < 5) {
-      greeting = "Hey there, night owl. Can't sleep, or just need a friend? I'm right here."
-    } else {
-      greeting = "Hey friend! I'm KIAAN. I'm always here when you need someone to talk to. What's up?"
-    }
-
-    return NextResponse.json({
+    logMetrics({ event: 'session_start', tier: 'local', latency_ms: Date.now() - start, reason: `http_${backendResponse.status}` })
+    return withTierHeader(NextResponse.json({
       session_id: `local_${Date.now()}`,
-      greeting,
+      greeting: buildLocalGreeting(),
       phase: 'connect',
       friendship_level: 'new',
       user_name: null,
-    })
-  } catch {
-    return NextResponse.json(
-      {
-        session_id: `local_${Date.now()}`,
-        greeting: "Hey! I'm KIAAN, your best friend. Whatever's on your mind, I'm here. Talk to me.",
-        phase: 'connect',
-        friendship_level: 'new',
-        user_name: null,
-      },
-    )
+    }), 'local')
+  } catch (err) {
+    logMetrics({ event: 'session_start', tier: 'local', latency_ms: Date.now() - start, reason: err instanceof Error ? err.message : 'unknown' })
+    return withTierHeader(NextResponse.json({
+      session_id: `local_${Date.now()}`,
+      greeting: "Hey! I'm KIAAN, your best friend. Whatever's on your mind, I'm here. Talk to me.",
+      phase: 'connect',
+      friendship_level: 'new',
+      user_name: null,
+    }), 'local')
   }
 }

@@ -61,6 +61,7 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
     sttProvider,
     confidence,
     serverProgressMessage,
+    nearingLimit,
   } = useVoiceInput({
     language,
     onTranscript: useCallback((text: string, isFinal: boolean) => {
@@ -202,8 +203,15 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
 
       {/* Recording duration */}
       {isListening && (
-        <span className="text-xs text-red-500 font-mono animate-pulse" aria-live="off" aria-label={`Recording duration: ${formatDuration(duration)}`}>
+        <span className={`text-xs font-mono animate-pulse ${nearingLimit ? 'text-amber-400' : 'text-red-500'}`} aria-live="off" aria-label={`Recording duration: ${formatDuration(duration)}`}>
           {formatDuration(duration)}
+        </span>
+      )}
+
+      {/* Nearing recording limit warning */}
+      {isListening && nearingLimit && (
+        <span className="text-[9px] text-amber-400 bg-amber-400/10 rounded-full px-1.5 py-0.5" role="status">
+          Wrapping up in 15s...
         </span>
       )}
 
