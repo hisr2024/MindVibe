@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
       if (!audioFile) {
         return NextResponse.json(
-          { error: 'Audio file is required', transcript: null },
+          { transcript: '', confidence: null, language, error: 'Audio file is required' },
           { status: 400 },
         )
       }
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       // Validate file size
       if (audioFile.size > MAX_AUDIO_SIZE) {
         return NextResponse.json(
-          { error: 'Audio file too large. Maximum 10MB allowed.', transcript: null },
+          { transcript: '', confidence: null, language, error: 'Audio file too large. Maximum 10MB allowed.' },
           { status: 413 },
         )
       }
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       const mimeType = audioFile.type
       if (mimeType && !SUPPORTED_TYPES.some((t) => mimeType.startsWith(t))) {
         return NextResponse.json(
-          { error: `Unsupported audio format: ${mimeType}`, transcript: null },
+          { transcript: '', confidence: null, language, error: `Unsupported audio format: ${mimeType}` },
           { status: 415 },
         )
       }
@@ -96,8 +96,10 @@ export async function POST(request: NextRequest) {
         const errorData = await response.json().catch(() => ({}))
         return NextResponse.json(
           {
+            transcript: '',
+            confidence: null,
+            language,
             error: errorData.detail || 'Transcription service unavailable',
-            transcript: null,
           },
           { status: response.status },
         )
@@ -105,8 +107,11 @@ export async function POST(request: NextRequest) {
         // Backend unreachable — return graceful fallback
         return NextResponse.json(
           {
-            error: 'Transcription service is temporarily unavailable. Please use the browser\'s built-in voice input or type your message.',
-            transcript: null,
+            transcript: '',
+            confidence: null,
+            language,
+            error:
+              "Transcription service is temporarily unavailable. Please use the browser's built-in voice input or type your message.",
             fallback: 'browser',
           },
           { status: 503 },
@@ -122,7 +127,12 @@ export async function POST(request: NextRequest) {
 
       if (!audioPayload || typeof audioPayload !== 'string') {
         return NextResponse.json(
-          { error: 'audio or audio_base64 field is required', transcript: null },
+          {
+            transcript: '',
+            confidence: null,
+            language,
+            error: 'audio or audio_base64 field is required',
+          },
           { status: 400 },
         )
       }
@@ -130,7 +140,12 @@ export async function POST(request: NextRequest) {
       // Size check on base64 (roughly 4/3 of original)
       if (audioPayload.length > MAX_AUDIO_SIZE * 1.4) {
         return NextResponse.json(
-          { error: 'Audio data too large', transcript: null },
+          {
+            transcript: '',
+            confidence: null,
+            language,
+            error: 'Audio data too large',
+          },
           { status: 413 },
         )
       }
@@ -155,16 +170,20 @@ export async function POST(request: NextRequest) {
         const errorData = await response.json().catch(() => ({}))
         return NextResponse.json(
           {
+            transcript: '',
+            confidence: null,
+            language,
             error: errorData.detail || 'Transcription failed',
-            transcript: null,
           },
           { status: response.status },
         )
       } catch {
         return NextResponse.json(
           {
+            transcript: '',
+            confidence: null,
+            language,
             error: 'Transcription service temporarily unavailable.',
-            transcript: null,
             fallback: 'browser',
           },
           { status: 503 },
@@ -173,13 +192,13 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Unsupported content type. Send multipart/form-data or application/json.' },
+      { transcript: '', confidence: null, language: 'en', error: 'Unsupported content type. Send multipart/form-data or application/json.' },
       { status: 415 },
     )
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Internal server error'
     return NextResponse.json(
-      { error: message, transcript: null },
+      { transcript: '', confidence: null, language: 'en', error: message },
       { status: 500 },
     )
   }
