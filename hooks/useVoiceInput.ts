@@ -45,7 +45,12 @@ export interface UseVoiceInputReturn {
   isListening: boolean
   transcript: string
   interimTranscript: string
+  /** True when at least one STT path is viable (browser or server). */
   isSupported: boolean
+  /** True when browser-native Web Speech API is available. */
+  hasBrowserSTT: boolean
+  /** True when server transcription fallback is reachable (online + mediaDevices). */
+  hasServerFallback: boolean
   error: string | null
   startListening: () => void
   stopListening: () => void
@@ -475,6 +480,8 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     transcript,
     interimTranscript,
     isSupported: voiceSupported,
+    hasBrowserSTT: webSpeechSupported,
+    hasServerFallback,
     error,
     startListening,
     stopListening,
