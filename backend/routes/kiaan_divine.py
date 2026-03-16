@@ -8,7 +8,7 @@ This module provides the API endpoints for KIAAN's divine capabilities:
 4. Soul Reading - Deep emotional/spiritual analysis
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -359,24 +359,30 @@ async def synthesize_voice(
 # VOICE TRANSCRIPTION ENDPOINT
 # ============================================
 
-@router.post("/transcribe", response_model=TranscribeResponse)
-async def transcribe_voice(request: TranscribeRequest):
-    """
-    Transcribe audio using Whisper.
+# Maximum upload size: 10 MB
+MAX_TRANSCRIBE_UPLOAD_BYTES = 10 * 1024 * 1024
 
-    Supports multiple audio formats and languages.
+
+@router.post("/transcribe/upload", response_model=TranscribeResponse)
+async def transcribe_voice_upload(
+    audio: UploadFile = File(..., description="Audio file (webm, ogg, wav, mp4, mpeg)"),
+    language: str = Form(default="auto"),
+):
+    """Transcribe audio from a multipart file upload.
+
+    Accepts audio files directly (webm, ogg, wav, mp4, mpeg) up to 10 MB.
+    This endpoint is used by the Next.js proxy when forwarding browser recordings.
     """
     try:
         from backend.services.whisper_transcription import transcribe_audio
 
-        # Decode base64 audio
-        try:
-            audio_data = base64.b64decode(request.audio)
-        except Exception:
-            raise HTTPException(status_code=400, detail="Invalid base64 audio data")
+        audio_data = await audio.read()
+        if len(audio_data) > MAX_TRANSCRIBE_UPLOAD_BYTES:
+            raise HTTPException(status_code=413, detail="Audio file too large. Maximum 10 MB allowed.")
+        if len(audio_data) == 0:
+            raise HTTPException(status_code=400, detail="Audio file is empty")
 
-        # Transcribe
-        result = await transcribe_audio(audio_data, request.language)
+        result = await transcribe_audio(audio_data, language)
 
         return TranscribeResponse(
             text=result.get("text", ""),
@@ -384,15 +390,74 @@ async def transcribe_voice(request: TranscribeRequest):
             confidence=result.get("confidence", 0.0),
             duration=result.get("duration", 0.0),
             is_sanskrit=result.get("is_sanskrit", False),
-            voice_features=result.get("voice_features", {})
+            voice_features=result.get("voice_features", {}),
         )
 
     except ImportError:
         logger.warning("Whisper service not available")
-        raise HTTPException(
-            status_code=503,
-            detail="Speech recognition service not available"
+        raise HTTPException(status_code=503, detail="Speech recognition service not available")
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error(f"Transcription upload error: {e}")
+        raise HTTPException(status_code=500, detail="An error occurred processing your request. Please try again.")
+
+
+@router.post("/transcribe", response_model=TranscribeResponse)
+async def transcribe_voice(request: Request):
+    """Transcribe audio using Whisper.
+
+    Accepts either:
+    - multipart/form-data with an 'audio' file field and optional 'language' field
+    - application/json with base64 'audio' (or 'audio_base64') string and optional 'language'
+    """
+    try:
+        from backend.services.whisper_transcription import transcribe_audio
+
+        content_type = request.headers.get("content-type", "")
+
+        if "multipart/form-data" in content_type:
+            form = await request.form()
+            audio_file = form.get("audio")
+            language = str(form.get("language", "auto"))
+
+            if audio_file is None:
+                raise HTTPException(status_code=400, detail="Audio file is required")
+
+            audio_data = await audio_file.read()
+            if len(audio_data) > MAX_TRANSCRIBE_UPLOAD_BYTES:
+                raise HTTPException(status_code=413, detail="Audio file too large. Maximum 10 MB allowed.")
+            if len(audio_data) == 0:
+                raise HTTPException(status_code=400, detail="Audio file is empty")
+        else:
+            body = await request.json()
+            raw_audio = body.get("audio") or body.get("audio_base64")
+            language = body.get("language", "auto")
+
+            if not raw_audio or not isinstance(raw_audio, str):
+                raise HTTPException(status_code=400, detail="Base64 audio field ('audio' or 'audio_base64') is required")
+
+            try:
+                audio_data = base64.b64decode(raw_audio)
+            except Exception:
+                raise HTTPException(status_code=400, detail="Invalid base64 audio data")
+
+        result = await transcribe_audio(audio_data, language)
+
+        return TranscribeResponse(
+            text=result.get("text", ""),
+            language=result.get("language", "en"),
+            confidence=result.get("confidence", 0.0),
+            duration=result.get("duration", 0.0),
+            is_sanskrit=result.get("is_sanskrit", False),
+            voice_features=result.get("voice_features", {}),
         )
+
+    except ImportError:
+        logger.warning("Whisper service not available")
+        raise HTTPException(status_code=503, detail="Speech recognition service not available")
 
     except HTTPException:
         raise

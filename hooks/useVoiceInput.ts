@@ -94,6 +94,21 @@ function friendlyError(raw: string): string {
   return raw
 }
 
+/**
+ * Detect device capability tier based on hardware concurrency and memory.
+ * Returns 'low', 'mid', or 'high'.
+ */
+function detectDeviceTier(): 'low' | 'mid' | 'high' {
+  if (typeof navigator === 'undefined') return 'mid'
+
+  const cores = navigator.hardwareConcurrency || 2
+  const memory = (navigator as { deviceMemory?: number }).deviceMemory || 4
+
+  if (cores >= 8 && memory >= 8) return 'high'
+  if (cores >= 4 && memory >= 4) return 'mid'
+  return 'low'
+}
+
 export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInputReturn {
   const {
     language = 'en',
@@ -432,17 +447,22 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     }
   }, [])
 
+  // Voice input is supported if browser STT is available OR if we can reach
+  // the server fallback (online + mediaDevices API available for recording).
+  const hasServerFallback = isOnline && typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia
+  const voiceSupported = webSpeechSupported || hasServerFallback
+
   return {
     isListening,
     transcript,
     interimTranscript,
-    isSupported: webSpeechSupported || isOnline,
+    isSupported: voiceSupported,
     error,
     startListening,
     stopListening,
     resetTranscript,
     sttProvider: currentProvider,
-    deviceTier: 'low',
+    deviceTier: detectDeviceTier(),
     status,
     isOnline,
     confidence,

@@ -9,7 +9,8 @@
  * - Volume control
  * - Layer-specific configurations
  *
- * NOW CONNECTED TO ACTUAL AUDIO ENGINE!
+ * Audio engine integration is behind the BINAURAL_BEATS_ENABLED feature flag.
+ * When disabled, the UI renders in a "coming soon" preview state.
  */
 
 import { useState, useEffect, useCallback } from 'react'
@@ -28,10 +29,14 @@ import {
 } from 'lucide-react'
 import type { ConsciousnessLayer } from '@/services/voice/elite/QuantumDiveEngine'
 
-// Stub type for backward compatibility (binaural features removed from old player)
+/**
+ * Feature flag: set to true once the binaural audio engine is production-ready.
+ * While false, the UI renders in a preview/coming-soon state with no audio output.
+ */
+const BINAURAL_BEATS_ENABLED = false
+
 type AudioBrainwavePreset = 'focus' | 'meditation' | 'deep_sleep' | 'creativity' | 'healing'
 
-// Stub hook for binaural audio (feature to be reimplemented in new player)
 function useAudioStub() {
   return {
     state: { binauralActive: false, binauralPreset: null, binauralVolume: 0.5 },
@@ -159,7 +164,6 @@ export function BinauraBeatsControl({
   compact = false,
   className = ''
 }: BinauraBeatsControlProps) {
-  // Connect to audio context (stubbed - feature to be reimplemented in new player)
   const { startBinaural, stopBinaural, state: audioState } = useAudioStub()
   const setBinauralVolume = useCallback((_v: number) => {}, [])
   const playSound = useCallback((_s: string) => {}, [])
@@ -196,10 +200,11 @@ export function BinauraBeatsControl({
   }, [audioState.binauralActive])
 
   const handleToggle = useCallback(async () => {
+    if (!BINAURAL_BEATS_ENABLED) return
+
     const newState = !playing
     setPlaying(newState)
 
-    // ACTUALLY PLAY/STOP BINAURAL BEATS
     if (newState) {
       playSound('click')
       await startBinaural(PRESET_TO_AUDIO[selectedPreset])
@@ -282,7 +287,12 @@ export function BinauraBeatsControl({
               <Brain className={`w-5 h-5 ${currentPreset.color}`} />
             </div>
             <div>
-              <h3 className="font-semibold text-white">Binaural Beats</h3>
+              <h3 className="font-semibold text-white">
+                Binaural Beats
+                {!BINAURAL_BEATS_ENABLED && (
+                  <span className="ml-2 text-[10px] font-normal text-amber-400/80 bg-amber-400/10 px-1.5 py-0.5 rounded-full align-middle">Coming Soon</span>
+                )}
+              </h3>
               <p className="text-xs text-white/70">Brainwave Entrainment</p>
             </div>
           </div>

@@ -490,3 +490,142 @@ class TestSupportedLanguagesAPI:
             assert "en" in language_codes
             assert "hi" in language_codes
             assert "ta" in language_codes
+
+
+class TestTranscribeAPIContract:
+    """Tests for the /api/kiaan/transcribe endpoint contract.
+
+    Verifies that the endpoint accepts both multipart/form-data (audio file)
+    and application/json (base64-encoded audio) payloads.
+    """
+
+    @pytest.mark.asyncio
+    async def test_transcribe_json_base64_audio_field(self, mock_auth_header, mock_user_id):
+        """JSON body with 'audio' field (base64) should be accepted."""
+        import base64
+        from backend.main import app
+        from backend.deps import get_current_user
+
+        app.dependency_overrides[get_current_user] = lambda: mock_user_id
+        try:
+            fake_audio_b64 = base64.b64encode(b"\x00" * 100).decode()
+            with patch("backend.services.whisper_transcription.transcribe_audio", new_callable=AsyncMock) as mock_transcribe:
+                mock_transcribe.return_value = {
+                    "text": "Hello world",
+                    "language": "en",
+                    "confidence": 0.95,
+                    "duration": 1.5,
+                }
+                transport = ASGITransport(app=app)
+                async with AsyncClient(transport=transport, base_url="http://test") as client:
+                    resp = await client.post(
+                        "/api/kiaan/transcribe",
+                        json={"audio": fake_audio_b64, "language": "en"},
+                        headers=mock_auth_header,
+                    )
+                assert resp.status_code == 200
+                data = resp.json()
+                assert data["text"] == "Hello world"
+                assert data["confidence"] == 0.95
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+    @pytest.mark.asyncio
+    async def test_transcribe_json_audio_base64_field(self, mock_auth_header, mock_user_id):
+        """JSON body with 'audio_base64' field should also be accepted."""
+        import base64
+        from backend.main import app
+        from backend.deps import get_current_user
+
+        app.dependency_overrides[get_current_user] = lambda: mock_user_id
+        try:
+            fake_audio_b64 = base64.b64encode(b"\x00" * 100).decode()
+            with patch("backend.services.whisper_transcription.transcribe_audio", new_callable=AsyncMock) as mock_transcribe:
+                mock_transcribe.return_value = {
+                    "text": "Namaste",
+                    "language": "hi",
+                    "confidence": 0.88,
+                    "duration": 2.0,
+                }
+                transport = ASGITransport(app=app)
+                async with AsyncClient(transport=transport, base_url="http://test") as client:
+                    resp = await client.post(
+                        "/api/kiaan/transcribe",
+                        json={"audio_base64": fake_audio_b64, "language": "hi"},
+                        headers=mock_auth_header,
+                    )
+                assert resp.status_code == 200
+                data = resp.json()
+                assert data["text"] == "Namaste"
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+    @pytest.mark.asyncio
+    async def test_transcribe_multipart_upload(self, mock_auth_header, mock_user_id):
+        """Multipart form-data with audio file should be accepted."""
+        from backend.main import app
+        from backend.deps import get_current_user
+
+        app.dependency_overrides[get_current_user] = lambda: mock_user_id
+        try:
+            with patch("backend.services.whisper_transcription.transcribe_audio", new_callable=AsyncMock) as mock_transcribe:
+                mock_transcribe.return_value = {
+                    "text": "Om shanti",
+                    "language": "sa",
+                    "confidence": 0.75,
+                    "duration": 3.0,
+                    "is_sanskrit": True,
+                }
+                transport = ASGITransport(app=app)
+                async with AsyncClient(transport=transport, base_url="http://test") as client:
+                    resp = await client.post(
+                        "/api/kiaan/transcribe",
+                        files={"audio": ("test.webm", b"\x00" * 200, "audio/webm")},
+                        data={"language": "sa"},
+                        headers=mock_auth_header,
+                    )
+                assert resp.status_code == 200
+                data = resp.json()
+                assert data["text"] == "Om shanti"
+                assert data["is_sanskrit"] is True
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+    @pytest.mark.asyncio
+    async def test_transcribe_json_missing_audio_returns_400(self, mock_auth_header, mock_user_id):
+        """JSON body without audio field should return 400."""
+        from backend.main import app
+        from backend.deps import get_current_user
+
+        app.dependency_overrides[get_current_user] = lambda: mock_user_id
+        try:
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post(
+                    "/api/kiaan/transcribe",
+                    json={"language": "en"},
+                    headers=mock_auth_header,
+                )
+            assert resp.status_code == 400
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+    @pytest.mark.asyncio
+    async def test_transcribe_multipart_empty_file_returns_400(self, mock_auth_header, mock_user_id):
+        """Multipart upload with empty audio file should return 400."""
+        from backend.main import app
+        from backend.deps import get_current_user
+
+        app.dependency_overrides[get_current_user] = lambda: mock_user_id
+        try:
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post(
+                    "/api/kiaan/transcribe",
+                    files={"audio": ("empty.webm", b"", "audio/webm")},
+                    data={"language": "en"},
+                    headers=mock_auth_header,
+                )
+            assert resp.status_code == 400
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
