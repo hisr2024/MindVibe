@@ -217,6 +217,7 @@ export function BinauraBeatsControl({
   }, [playing, selectedPreset, startBinaural, stopBinaural, playSound, onToggle])
 
   const handlePresetSelect = useCallback(async (preset: BrainwavePreset) => {
+    if (!BINAURAL_BEATS_ENABLED) return
     setSelectedPreset(preset)
     setShowCustom(preset === 'custom')
     playSound('select')
@@ -230,6 +231,7 @@ export function BinauraBeatsControl({
   }, [playing, startBinaural, playSound, onPresetChange])
 
   const handleVolumeChange = useCallback((newVolume: number) => {
+    if (!BINAURAL_BEATS_ENABLED) return
     setVolume(newVolume)
     setMuted(newVolume === 0)
 
@@ -360,7 +362,7 @@ export function BinauraBeatsControl({
       </AnimatePresence>
 
       {/* Preset Selection */}
-      <div className="p-4">
+      <div className={`p-4 ${!BINAURAL_BEATS_ENABLED ? 'opacity-50 pointer-events-none' : ''}`}>
         <p className="text-xs font-medium text-white/70 mb-3">Select Brainwave State</p>
         <div className="grid grid-cols-3 gap-2">
           {(Object.keys(PRESETS) as BrainwavePreset[]).filter(p => p !== 'custom').map((preset) => {
