@@ -187,36 +187,45 @@ export class OnDeviceSTT {
   }
 
   /**
-   * Start listening for voice input
+   * Start listening for voice input.
+   * Throws if on-device STT is not available or model is not ready,
+   * so the caller can fall back to Web Speech API.
    */
   async startListening(): Promise<void> {
     if (this.provider === 'web-speech-api' || this.provider === 'none') {
-      // Caller should use Web Speech API directly
-      return
+      throw new Error('On-device STT not available — use Web Speech API')
     }
 
-    if (this.state !== 'ready' && this.state !== 'idle') {
-      // Model not loaded yet — load first
+    // Model must be fully loaded before we can transcribe
+    if (this.state === 'error') {
+      throw new Error('On-device STT model failed to load')
+    }
+
+    if (this.state === 'loading') {
+      // Model is still loading — wait for ready with a timeout
       if (!this.worker) {
-        await this.loadModel()
-        // Wait for ready
-        await new Promise<void>((resolve, reject) => {
-          const timeout = setTimeout(() => reject(new Error('Model load timeout')), 30000)
-          const originalHandler = this.worker?.onmessage
-          if (this.worker) {
-            this.worker.onmessage = (event: MessageEvent) => {
-              if (this.worker) originalHandler?.call(this.worker, event)
-              if (event.data.type === 'ready') {
-                clearTimeout(timeout)
-                resolve()
-              } else if (event.data.type === 'error') {
-                clearTimeout(timeout)
-                reject(new Error(event.data.message))
-              }
+        throw new Error('On-device STT worker not initialized')
+      }
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error('Model load timeout (30s)')), 30000)
+        const originalHandler = this.worker?.onmessage
+        if (this.worker) {
+          this.worker.onmessage = (event: MessageEvent) => {
+            if (this.worker) originalHandler?.call(this.worker, event)
+            if (event.data.type === 'ready') {
+              clearTimeout(timeout)
+              resolve()
+            } else if (event.data.type === 'error') {
+              clearTimeout(timeout)
+              reject(new Error(event.data.message))
             }
           }
-        })
-      }
+        }
+      })
+    }
+
+    if (this.state !== 'ready') {
+      throw new Error(`On-device STT not ready (state: ${this.state})`)
     }
 
     this.clearIdleTimer()

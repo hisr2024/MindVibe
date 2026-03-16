@@ -56,6 +56,7 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
     stopListening: hookStopListening,
     resetTranscript,
     status,
+    sttProvider,
   } = useVoiceInput({
     language,
     onTranscript: useCallback((text: string, isFinal: boolean) => {
@@ -65,6 +66,10 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
         accumulatedRef.current += separator + text.trim()
         setAccumulatedText(accumulatedRef.current)
       }
+    }, []),
+    onError: useCallback(() => {
+      // Auto-stop timer when STT reports an error
+      // (the hook's isListening transition will also trigger cleanup via the effect below)
     }, []),
   })
 
@@ -168,6 +173,13 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
       {isListening && (
         <span className="text-xs text-red-500 font-mono animate-pulse">
           {formatDuration(duration)}
+        </span>
+      )}
+
+      {/* STT provider badge */}
+      {isListening && sttProvider && (
+        <span className="text-[9px] text-white/25 bg-white/5 rounded-full px-1.5 py-0.5">
+          {sttProvider === 'web-speech-api' ? 'Browser' : sttProvider === 'server' ? 'Cloud' : sttProvider}
         </span>
       )}
 

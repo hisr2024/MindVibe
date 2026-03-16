@@ -245,11 +245,23 @@ export class SpeechRecognitionService {
 
   /**
    * Ensure microphone permission is granted before starting recognition.
-   * Many browsers (especially mobile) require an explicit getUserMedia call
-   * to trigger the permission dialog. The Web Speech API alone may not prompt.
+   *
+   * On DESKTOP browsers, an explicit getUserMedia call is needed to trigger
+   * the permission dialog — Web Speech API alone may not prompt.
+   *
+   * On MOBILE, skip this: calling getUserMedia then immediately stopping
+   * the stream can interfere with SpeechRecognition's own mic access
+   * (especially iOS Safari where the mic "lock" prevents recognition.start()).
+   * The Web Speech API on mobile handles its own permission dialog.
    */
   private async ensureMicrophonePermission(): Promise<boolean> {
     if (this.micPermissionGranted) return true
+
+    // On mobile, let SpeechRecognition handle its own permission dialog
+    if (this.isMobile) {
+      this.micPermissionGranted = true
+      return true
+    }
 
     if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
       // Can't check — assume permission will be handled by recognition.start()

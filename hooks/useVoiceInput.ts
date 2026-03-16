@@ -325,12 +325,19 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     setUsingServer(false)
 
     // ── Tier 1: On-device STT (Moonshine/Whisper) ──
-    if (onDeviceSTT.canHandleSTT) {
+    // Only attempt if model is fully loaded and provider is on-device.
+    // On-device STT throws if not ready, triggering fallback to Tier 2.
+    if (onDeviceSTT.canHandleSTT && onDeviceSTT.isModelLoaded) {
       usingOnDeviceRef.current = true
       try {
         await onDeviceSTT.startListening()
-        setIsListening(true)
-        setStatus('listening')
+        // Verify it actually started — the model may have silently degraded
+        if (onDeviceSTT.isListening) {
+          setIsListening(true)
+          setStatus('listening')
+        } else {
+          usingOnDeviceRef.current = false
+        }
       } catch {
         // On-device failed — fall through to Tier 2
         usingOnDeviceRef.current = false
@@ -452,7 +459,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     startListening,
     stopListening,
     resetTranscript,
-    sttProvider: usingServer ? 'server' : onDeviceSTT.sttProvider,
+    sttProvider: usingServer ? 'server' : (isListening && !usingOnDeviceRef.current ? 'web-speech-api' : onDeviceSTT.sttProvider),
     deviceTier: onDeviceSTT.deviceTier,
     status,
     isOnline,
