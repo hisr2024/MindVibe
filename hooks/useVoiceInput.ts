@@ -1,21 +1,16 @@
 /**
- * useVoiceInput — Unified Speech-to-Text Hook (Never-Fail STT)
+ * useVoiceInput — Speech-to-Text Hook
  *
- * Bulletproof 4-tier fallback chain:
- *   Tier 1: On-device STT (Moonshine for English, Whisper for Indian languages)
- *   Tier 2: Browser Web Speech API (Chrome/Edge/Safari native)
- *   Tier 3: Server-side transcription via /api/voice/transcribe (Whisper backend)
- *   Tier 4: Graceful error with "please type instead" message
+ * Simple 3-tier fallback:
+ *   Tier 1: Browser Web Speech API (Chrome/Edge/Safari — 95%+ of users)
+ *   Tier 2: Server-side transcription via /api/voice/transcribe (Firefox, others)
+ *   Tier 3: Graceful error with "please type instead" message
  *
- * Features absorbed from the deleted useVoiceToText hook:
+ * Features:
  *   - Punctuation post-processing for languages lacking native punctuation
  *   - Confidence score pass-through
  *   - Online/offline awareness
  *   - Status tracking (idle | listening | processing | error | offline)
- *
- * Tier 3 (budget phones): zero extra RAM — uses browser-native STT only.
- * If the browser doesn't support Web Speech API and on-device fails,
- * falls back to server-side transcription via MediaRecorder.
  */
 
 'use client'
@@ -24,12 +19,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { SpeechRecognitionService } from '@/utils/speech/recognition'
 import { isSpeechRecognitionSupported } from '@/utils/speech/languageMapping'
 import { canUseVoiceInput, isSecureContext, getBrowserName } from '@/utils/browserSupport'
-import { useOnDeviceSTT } from '@/hooks/useOnDeviceSTT'
 
 export type VTTStatus = 'idle' | 'listening' | 'processing' | 'error' | 'offline'
-
-/** Active STT tier — only one tier should be active at a time */
-type ActiveTier = 'none' | 'on-device' | 'web-speech' | 'server'
 
 /** Maximum recording duration in milliseconds for server transcription */
 const MAX_RECORDING_DURATION_MS = 120_000 // 2 minutes
@@ -57,9 +48,9 @@ export interface UseVoiceInputReturn {
   startListening: () => void
   stopListening: () => void
   resetTranscript: () => void
-  /** Which STT provider is active: 'moonshine' | 'whisper' | 'web-speech-api' | 'server' | 'none' */
+  /** Which STT provider is active: 'web-speech-api' | 'server' | 'none' */
   sttProvider: string
-  /** Device capability tier: 'high' | 'mid' | 'low' */
+  /** Device capability tier (always 'low' — on-device ML removed) */
   deviceTier: string
   /** Current status of the STT system */
   status: VTTStatus
@@ -67,7 +58,7 @@ export interface UseVoiceInputReturn {
   isOnline: boolean
   /** Confidence of last final result (0-1) */
   confidence: number
-  /** Server transcription progress message (shown during Tier 3 processing) */
+  /** Server transcription progress message (shown during Tier 2 processing) */
   serverProgressMessage: string
 }
 
@@ -132,8 +123,8 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
 
   const recognitionRef = useRef<SpeechRecognitionService | null>(null)
   const [usingServer, setUsingServer] = useState(false)
-  /** Single source of truth for which tier is active — prevents dual-tier activation */
-  const activeTierRef = useRef<ActiveTier>('none')
+  /** Which tier is active — 'web-speech' or 'server' */
+  const activeTierRef = useRef<'none' | 'web-speech' | 'server'>('none')
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const mediaStreamRef = useRef<MediaStream | null>(null)
@@ -161,31 +152,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     }
   }, [])
 
-  // On-device STT (Tier 1 — zero overhead for Tier 3 devices)
-  const onDeviceSTT = useOnDeviceSTT({
-    language,
-    onTranscript: useCallback((text: string, isFinal: boolean) => {
-      if (activeTierRef.current !== 'on-device' || !mountedRef.current) return
-      if (isFinal) {
-        const finalText = punctuationAssist ? applyPunctuationAssist(text) : text
-        setTranscript(finalText)
-        setInterimTranscript('')
-        setStatus('processing')
-        onTranscriptRef.current?.(finalText, true)
-      } else {
-        setInterimTranscript(text)
-        onTranscriptRef.current?.(text, false)
-      }
-    }, [punctuationAssist]),
-    onError: useCallback((err: string) => {
-      if (activeTierRef.current === 'on-device') {
-        activeTierRef.current = 'none'
-      }
-      onErrorRef.current?.(err)
-    }, []),
-  })
-
-  // Web Speech API (Tier 2) — initialize only if supported
+  // Web Speech API (Tier 1) — initialize only if supported
   useEffect(() => {
     if (!isWebSpeechSupported) return
 
@@ -218,8 +185,8 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   }, [])
 
   /**
-   * Tier 3: Server-side transcription via MediaRecorder → /api/voice/transcribe
-   * Used when both on-device and Web Speech API are unavailable.
+   * Tier 2: Server-side transcription via MediaRecorder → /api/voice/transcribe
+   * Used when Web Speech API is unavailable (Firefox, etc.).
    */
   const startServerTranscription = useCallback(async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
@@ -374,9 +341,8 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   const startListening = useCallback(async () => {
     // Pre-flight: check basic availability
     const voiceCheck = canUseVoiceInput()
-    const hasAnySTT = voiceCheck.available || onDeviceSTT.canHandleSTT || isWebSpeechSupported
 
-    if (!hasAnySTT && !isOnline) {
+    if (!voiceCheck.available && !isOnline) {
       const errorMsg = 'Voice input requires an internet connection. Please type your message.'
       setError(errorMsg)
       setStatus('offline')
@@ -399,33 +365,9 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     activeTierRef.current = 'none'
     setUsingServer(false)
 
-    // ── Tier 1: On-device STT (Moonshine/Whisper) ──
-    // Only attempt if model is fully loaded and provider is on-device.
-    // On-device STT throws if not ready, triggering fallback to Tier 2.
-    if (onDeviceSTT.canHandleSTT && onDeviceSTT.isModelLoaded) {
-      activeTierRef.current = 'on-device'
-      try {
-        await onDeviceSTT.startListening()
-        // Verify it actually started — the model may have silently degraded
-        if (onDeviceSTT.isListening) {
-          setIsListening(true)
-          setStatus('listening')
-        } else {
-          activeTierRef.current = 'none'
-        }
-      } catch {
-        // On-device failed — fall through to Tier 2
-        activeTierRef.current = 'none'
-      }
-      if (activeTierRef.current === 'on-device') return
-    }
-
-    // ── Tier 2: Web Speech API ──
-    activeTierRef.current = 'none'
+    // ── Tier 1: Web Speech API (Chrome, Edge, Safari) ──
     if (recognitionRef.current && isWebSpeechSupported) {
       activeTierRef.current = 'web-speech'
-      // Await mic permission + recognition.start() so the UI only shows
-      // "listening" after the microphone is actually capturing audio.
       await recognitionRef.current.start({
         onStart: () => {
           if (!mountedRef.current || activeTierRef.current !== 'web-speech') return
@@ -467,27 +409,22 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
       return
     }
 
-    // ── Tier 3: Server-side transcription via MediaRecorder ──
+    // ── Tier 2: Server-side transcription via MediaRecorder ──
     if (isOnline) {
       const started = await startServerTranscription()
       if (started) return
     }
 
-    // ── Tier 4: Nothing works — graceful message ──
+    // ── Tier 3: Nothing works — graceful message ──
     const browserName = getBrowserName()
     const errorMsg = `Speech recognition not available in ${browserName}. Please type your message instead.`
     setError(errorMsg)
     setStatus('error')
     onErrorRef.current?.(errorMsg)
-  }, [isWebSpeechSupported, isOnline, punctuationAssist, onDeviceSTT, startServerTranscription])
+  }, [isWebSpeechSupported, isOnline, punctuationAssist, startServerTranscription])
 
   const stopListening = useCallback(() => {
     const tier = activeTierRef.current
-
-    if (tier === 'on-device') {
-      onDeviceSTT.stopListening()
-      activeTierRef.current = 'none'
-    }
 
     if (tier === 'server' && mediaRecorderRef.current) {
       clearMaxDurationTimer()
@@ -507,7 +444,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     setIsListening(false)
     setInterimTranscript('')
     setStatus('idle')
-  }, [onDeviceSTT, clearMaxDurationTimer])
+  }, [clearMaxDurationTimer])
 
   const resetTranscript = useCallback(() => {
     setTranscript('')
@@ -515,8 +452,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     setError(null)
     setConfidence(0)
     setStatus('idle')
-    onDeviceSTT.resetTranscript()
-  }, [onDeviceSTT])
+  }, [])
 
   // Cleanup all voice resources on unmount
   useEffect(() => {
@@ -548,22 +484,20 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   }, [])
 
   return {
-    isListening: isListening || onDeviceSTT.isListening,
+    isListening,
     transcript,
     interimTranscript,
-    isSupported: isWebSpeechSupported || onDeviceSTT.canHandleSTT || isOnline,
+    isSupported: isWebSpeechSupported || isOnline,
     error,
     startListening,
     stopListening,
     resetTranscript,
     sttProvider: activeTierRef.current === 'server'
       ? 'server'
-      : activeTierRef.current === 'on-device'
-        ? onDeviceSTT.sttProvider
-        : activeTierRef.current === 'web-speech'
-          ? 'web-speech-api'
-          : onDeviceSTT.sttProvider,
-    deviceTier: onDeviceSTT.deviceTier,
+      : activeTierRef.current === 'web-speech'
+        ? 'web-speech-api'
+        : 'none',
+    deviceTier: 'low',
     status,
     isOnline,
     confidence,
