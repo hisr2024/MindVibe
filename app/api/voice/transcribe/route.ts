@@ -117,17 +117,18 @@ export async function POST(request: NextRequest) {
     // JSON body fallback (for pre-recorded base64 audio)
     if (contentType.includes('application/json')) {
       const body = await request.json()
-      const { audio_base64, language = 'en', format = 'webm' } = body
+      const { audio_base64, audio, language = 'en', format = 'webm' } = body
+      const audioPayload = audio_base64 || audio
 
-      if (!audio_base64 || typeof audio_base64 !== 'string') {
+      if (!audioPayload || typeof audioPayload !== 'string') {
         return NextResponse.json(
-          { error: 'audio_base64 field is required', transcript: null },
+          { error: 'audio or audio_base64 field is required', transcript: null },
           { status: 400 },
         )
       }
 
       // Size check on base64 (roughly 4/3 of original)
-      if (audio_base64.length > MAX_AUDIO_SIZE * 1.4) {
+      if (audioPayload.length > MAX_AUDIO_SIZE * 1.4) {
         return NextResponse.json(
           { error: 'Audio data too large', transcript: null },
           { status: 413 },
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
         const response = await fetch(`${BACKEND_URL}/api/kiaan/transcribe`, {
           method: 'POST',
           headers: proxyHeaders(request, 'POST'),
-          body: JSON.stringify({ audio_base64, language, format }),
+          body: JSON.stringify({ audio: audioPayload, language, format }),
           signal: AbortSignal.timeout(60000),
         })
 

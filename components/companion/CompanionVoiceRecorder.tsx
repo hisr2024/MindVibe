@@ -3,11 +3,10 @@
 /**
  * CompanionVoiceRecorder — Voice input for the KIAAN companion chat.
  *
- * Uses the unified useVoiceInput hook which provides the 4-tier STT fallback:
- *   Tier 1: On-device (Moonshine/Whisper)
- *   Tier 2: Web Speech API
- *   Tier 3: Server-side transcription
- *   Tier 4: Graceful "please type" message
+ * Uses the unified useVoiceInput hook which provides a 3-tier STT fallback:
+ *   Tier 1: Browser Web Speech API (Chrome/Edge/Safari)
+ *   Tier 2: Server-side transcription via /api/voice/transcribe (Firefox, others)
+ *   Tier 3: Graceful "please type instead" message
  *
  * The hook handles microphone permissions, continuous mode, auto-restart,
  * and all edge cases. This component just provides the UI.

@@ -9,7 +9,8 @@
  * - Preset soundscapes
  * - Volume control for each layer
  *
- * NOW CONNECTED TO ACTUAL AUDIO ENGINE!
+ * Audio engine integration is behind the AMBIENT_SOUNDSCAPE_ENABLED feature flag.
+ * When disabled, the UI renders in a "coming soon" preview state.
  */
 
 import { useState, useCallback } from 'react'
@@ -32,7 +33,12 @@ import {
   Plus,
   X
 } from 'lucide-react'
-// Stub hook for ambient audio (feature to be reimplemented in new player)
+/**
+ * Feature flag: set to true once the ambient audio engine is production-ready.
+ * While false, the UI renders in a preview/coming-soon state with no audio output.
+ */
+const AMBIENT_SOUNDSCAPE_ENABLED = false
+
 function useAudioStub() {
   return {
     state: { ambientActive: false, ambientSoundscape: null, ambientVolume: 0.5 },
@@ -255,7 +261,6 @@ export function AmbientSoundscapeControl({
   compact = false,
   className = ''
 }: AmbientSoundscapeControlProps) {
-  // Connect to audio context (stubbed - feature to be reimplemented in new player)
   const { startAmbient, stopAmbient, state: audioState, playSound } = useAudioStub()
 
   const [playing, setPlaying] = useState(isActive)
@@ -270,13 +275,13 @@ export function AmbientSoundscapeControl({
   }
 
   const handleToggle = useCallback(async () => {
+    if (!AMBIENT_SOUNDSCAPE_ENABLED) return
+
     const newState = !playing
     setPlaying(newState)
     playSound('click')
 
-    // ACTUALLY PLAY/STOP AMBIENT SOUNDS
     if (newState) {
-      // Start with a default soundscape based on preset or nature
       const soundscape = currentPreset ? PRESET_TO_AMBIENT[currentPreset] || 'nature' : 'nature'
       await startAmbient(soundscape)
     } else {
@@ -370,7 +375,12 @@ export function AmbientSoundscapeControl({
               <Music className="w-5 h-5 text-[#d4a44c]" />
             </div>
             <div>
-              <h3 className="font-semibold text-white">Ambient Soundscapes</h3>
+              <h3 className="font-semibold text-white">
+                Ambient Soundscapes
+                {!AMBIENT_SOUNDSCAPE_ENABLED && (
+                  <span className="ml-2 text-[10px] font-normal text-amber-400/80 bg-amber-400/10 px-1.5 py-0.5 rounded-full align-middle">Coming Soon</span>
+                )}
+              </h3>
               <p className="text-xs text-white/70">Layered Audio Environments</p>
             </div>
           </div>
