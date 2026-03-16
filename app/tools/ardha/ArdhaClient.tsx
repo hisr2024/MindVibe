@@ -267,7 +267,7 @@ export default function ArdhaClient() {
           id="thought-input"
           value={thought}
           onChange={(e) => setThought(e.target.value)}
-          placeholder="Speak or type a thought that troubles you... ARDHA will see through the distortion to the truth beneath."
+          placeholder="Tap the Shankha to speak, or type a thought that troubles you... ARDHA will see through the distortion to the truth beneath."
           className="w-full min-h-[140px] rounded-xl bg-black/40 border border-[#d4a44c]/10 text-[#f5f0e8]/90 placeholder:text-[#d4a44c]/20 p-4 text-sm leading-relaxed focus:ring-1 focus:ring-[#d4a44c]/30 focus:border-[#d4a44c]/20 outline-none transition-all resize-none"
           aria-describedby="thought-hint"
         />

@@ -173,7 +173,7 @@ export default function RelationshipCompassClient() {
             id="conflict-input"
             value={conflict}
             onChange={e => setConflict(e.target.value)}
-            placeholder="Share what is happening in this relationship... the Compass will illuminate both perspectives with Gita wisdom. You can also tap the mic to speak."
+            placeholder="Share what is happening in this relationship... the Compass will illuminate both perspectives with Gita wisdom. You can also tap the Shankha to speak."
             className="w-full min-h-[140px] rounded-xl bg-black/40 border border-[#d4a44c]/10 text-[#f5f0e8]/90 placeholder:text-[#d4a44c]/20 p-4 pr-14 text-sm leading-relaxed focus:ring-1 focus:ring-[#d4a44c]/30 focus:border-[#d4a44c]/20 outline-none transition-all resize-none"
             aria-describedby="conflict-hint"
           />
@@ -186,7 +186,7 @@ export default function RelationshipCompassClient() {
             />
           </div>
         </div>
-        <p id="conflict-hint" className="sr-only">Describe the relationship conflict you need guidance with. You can type or use the microphone button to speak.</p>
+        <p id="conflict-hint" className="sr-only">Describe the relationship conflict you need guidance with. You can type or use the Shankha button to speak.</p>
 
         <div className="flex flex-wrap items-center gap-3 mt-4">
           <button
@@ -204,7 +204,7 @@ export default function RelationshipCompassClient() {
             Talk to KIAAN
           </Link>
           <span className="text-[10px] text-[#d4a44c]/30 hidden sm:inline">
-            Tap the mic to speak your concern
+            Tap the Shankha to speak your concern
           </span>
         </div>
 

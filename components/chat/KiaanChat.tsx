@@ -293,7 +293,7 @@ export function KiaanChat({
           />
           <VoiceInputButton
             language={language}
-            onTranscript={(text) => setInputText(text)}
+            onTranscript={(text) => setInputText(prev => prev ? `${prev} ${text}` : text)}
             disabled={isLoading}
           />
           <button

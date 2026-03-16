@@ -1,15 +1,19 @@
 /**
  * useVoiceInput — Speech-to-Text Hook
  *
- * Simple 3-tier fallback:
+ * Clean, minimal hook for voice input across the MindVibe platform.
+ * Built from scratch as a standalone voice-to-text entity.
+ *
+ * Strategy:
  *   Tier 1: Browser Web Speech API (Chrome/Edge/Safari — 95%+ of users)
  *   Tier 2: Server-side transcription via /api/voice/transcribe (Firefox, others)
  *   Tier 3: Graceful error with "please type instead" message
  *
  * Features:
- *   - Punctuation post-processing for languages lacking native punctuation
- *   - Confidence score pass-through
+ *   - Clean start/stop lifecycle
+ *   - Interim + final transcript delivery
  *   - Online/offline awareness
+ *   - Compassionate error messages
  *   - Status tracking (idle | listening | processing | error | offline)
  */
 
@@ -22,20 +26,18 @@ import { canUseVoiceInput, isSecureContext, getBrowserName } from '@/utils/brows
 
 export type VTTStatus = 'idle' | 'listening' | 'processing' | 'error' | 'offline'
 
-/** Maximum recording duration in milliseconds for server transcription */
-const MAX_RECORDING_DURATION_MS = 120_000 // 2 minutes
+/** Max server recording duration (2 minutes) */
+const MAX_RECORDING_MS = 120_000
 
-/** Minimum audio blob size to send to server (bytes) — filter out click/noise */
-const MIN_AUDIO_BLOB_SIZE = 1000 // ~1KB
+/** Min audio blob size to submit — filters mic-activation noise */
+const MIN_AUDIO_BYTES = 1000
 
 export interface UseVoiceInputOptions {
   language?: string
   onTranscript?: (text: string, isFinal: boolean) => void
   onError?: (error: string) => void
   autoSend?: boolean
-  /** Apply basic punctuation post-processing (default: false) */
   punctuationAssist?: boolean
-  /** Module name for analytics context (ignored by hook, available for callers) */
   module?: string
 }
 
@@ -48,57 +50,48 @@ export interface UseVoiceInputReturn {
   startListening: () => void
   stopListening: () => void
   resetTranscript: () => void
-  /** Which STT provider is active: 'web-speech-api' | 'server' | 'none' */
   sttProvider: string
-  /** Device capability tier (always 'low' — on-device ML removed) */
   deviceTier: string
-  /** Current status of the STT system */
   status: VTTStatus
-  /** Whether the device is online */
   isOnline: boolean
-  /** Confidence of last final result (0-1) */
   confidence: number
-  /** Server transcription progress message (shown during Tier 2 processing) */
   serverProgressMessage: string
 }
 
 /**
- * Capitalize first letter and add trailing period if missing.
- * Designed for languages where Web Speech API omits punctuation.
+ * Capitalize first letter, add trailing period if missing.
  */
-function applyPunctuationAssist(text: string): string {
+function addPunctuation(text: string): string {
   if (!text.trim()) return text
-  let processed = text.trim()
-  processed = processed.charAt(0).toUpperCase() + processed.slice(1)
-  if (!/[.!?।॥]$/.test(processed)) {
-    processed += '.'
-  }
-  return processed
+  let s = text.trim()
+  s = s.charAt(0).toUpperCase() + s.slice(1)
+  if (!/[.!?।॥]$/.test(s)) s += '.'
+  return s
 }
 
 /**
- * Map raw error codes to compassionate guidance messages.
+ * Map raw error codes to user-friendly messages.
  */
-function getCompassionateError(rawError: string): string {
-  if (rawError.includes('not-allowed') || rawError.includes('permission denied') || rawError.includes('permission')) {
+function friendlyError(raw: string): string {
+  if (raw.includes('not-allowed') || raw.includes('permission')) {
     return 'Microphone access denied. Please allow microphone permissions in your browser settings.'
   }
-  if (rawError.includes('no-speech')) {
+  if (raw.includes('no-speech')) {
     return 'No speech detected. Please speak clearly and try again.'
   }
-  if (rawError.includes('network')) {
+  if (raw.includes('network')) {
     return 'Network error. Please check your internet connection.'
   }
-  if (rawError.includes('audio-capture')) {
+  if (raw.includes('audio-capture')) {
     return 'Microphone not found. Please check your microphone connection.'
   }
-  if (rawError.includes('service-not-allowed')) {
+  if (raw.includes('service-not-allowed')) {
     return 'Speech recognition service is unavailable. Please try again later.'
   }
-  if (rawError.includes('aborted')) {
+  if (raw.includes('aborted')) {
     return 'Voice input was interrupted. You can try again when ready.'
   }
-  return rawError
+  return raw
 }
 
 export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInputReturn {
@@ -119,42 +112,47 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     typeof navigator !== 'undefined' ? navigator.onLine : true
   )
   const [serverProgressMessage, setServerProgressMessage] = useState('')
-  const [isWebSpeechSupported] = useState(() => isSpeechRecognitionSupported())
+  const [webSpeechSupported] = useState(() => isSpeechRecognitionSupported())
+  const [currentProvider, setCurrentProvider] = useState<'none' | 'web-speech-api' | 'server'>('none')
 
   const recognitionRef = useRef<SpeechRecognitionService | null>(null)
-  const [usingServer, setUsingServer] = useState(false)
-  /** Which tier is active — 'web-speech' or 'server' */
-  const activeTierRef = useRef<'none' | 'web-speech' | 'server'>('none')
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const audioChunksRef = useRef<Blob[]>([])
-  const mediaStreamRef = useRef<MediaStream | null>(null)
+  const activeTier = useRef<'none' | 'web-speech' | 'server'>('none')
+  const recorderRef = useRef<MediaRecorder | null>(null)
+  const chunksRef = useRef<Blob[]>([])
+  const streamRef = useRef<MediaStream | null>(null)
   const mountedRef = useRef(true)
-  /** Auto-stop timer for server recording max duration */
-  const maxDurationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  // Stable refs for parent callbacks to avoid stale closures in async handlers
+  const maxTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  /** Set both ref and state for the active tier */
+  const setActiveTier = useCallback((tier: 'none' | 'web-speech' | 'server') => {
+    activeTier.current = tier
+    const providerMap = { 'none': 'none', 'web-speech': 'web-speech-api', 'server': 'server' } as const
+    setCurrentProvider(providerMap[tier])
+  }, [])
+
+  // Stable refs for callbacks to avoid stale closures
   const onTranscriptRef = useRef(onTranscript)
   const onErrorRef = useRef(onError)
-  onTranscriptRef.current = onTranscript
-  onErrorRef.current = onError
-
-  // Track online/offline status
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true)
-    const handleOffline = () => {
-      setIsOnline(false)
-      setStatus('offline')
-    }
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
+    onTranscriptRef.current = onTranscript
+    onErrorRef.current = onError
+  })
+
+  // ── Online/offline tracking ──
+  useEffect(() => {
+    const goOnline = () => setIsOnline(true)
+    const goOffline = () => { setIsOnline(false); setStatus('offline') }
+    window.addEventListener('online', goOnline)
+    window.addEventListener('offline', goOffline)
     return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
+      window.removeEventListener('online', goOnline)
+      window.removeEventListener('offline', goOffline)
     }
   }, [])
 
-  // Web Speech API (Tier 1) — initialize only if supported
+  // ── Initialize Web Speech API recognition (Tier 1) ──
   useEffect(() => {
-    if (!isWebSpeechSupported) return
+    if (!webSpeechSupported) return
 
     recognitionRef.current = new SpeechRecognitionService({
       language,
@@ -163,141 +161,112 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     })
 
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.destroy()
-        recognitionRef.current = null
-      }
+      recognitionRef.current?.destroy()
+      recognitionRef.current = null
     }
-  }, [isWebSpeechSupported, language])
+  }, [webSpeechSupported, language])
 
+  // Update language on existing recognition instance
   useEffect(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.setLanguage(language)
-    }
+    recognitionRef.current?.setLanguage(language)
   }, [language])
 
-  /** Clear the max-duration safety timer for server recording */
-  const clearMaxDurationTimer = useCallback(() => {
-    if (maxDurationTimerRef.current) {
-      clearTimeout(maxDurationTimerRef.current)
-      maxDurationTimerRef.current = null
+  // ── Clear max-duration timer ──
+  const clearMaxTimer = useCallback(() => {
+    if (maxTimerRef.current) {
+      clearTimeout(maxTimerRef.current)
+      maxTimerRef.current = null
     }
   }, [])
 
-  /**
-   * Tier 2: Server-side transcription via MediaRecorder → /api/voice/transcribe
-   * Used when Web Speech API is unavailable (Firefox, etc.).
-   */
+  // ── Tier 2: Server transcription via MediaRecorder ──
   const startServerTranscription = useCallback(async () => {
-    if (!navigator.mediaDevices?.getUserMedia) {
-      return false
-    }
+    if (!navigator.mediaDevices?.getUserMedia) return false
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-
-      // Validate we actually got audio tracks
       if (!stream.getAudioTracks().length) {
         stream.getTracks().forEach(t => t.stop())
         return false
       }
 
-      mediaStreamRef.current = stream
-      audioChunksRef.current = []
+      streamRef.current = stream
+      chunksRef.current = []
 
-      const recorder = new MediaRecorder(stream, {
-        mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-          ? 'audio/webm;codecs=opus'
-          : 'audio/webm',
-      })
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : 'audio/webm'
+      const recorder = new MediaRecorder(stream, { mimeType })
 
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data)
-        }
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data)
       }
 
       recorder.onstop = async () => {
-        clearMaxDurationTimer()
+        clearMaxTimer()
 
         // Release mic
-        if (mediaStreamRef.current) {
-          mediaStreamRef.current.getTracks().forEach(t => t.stop())
-          mediaStreamRef.current = null
+        streamRef.current?.getTracks().forEach(t => t.stop())
+        streamRef.current = null
+        setActiveTier('none')
+
+        if (!mountedRef.current) { chunksRef.current = []; return }
+        if (chunksRef.current.length === 0) {
+          setIsListening(false); setStatus('idle'); return
         }
 
-        activeTierRef.current = 'none'
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
+        chunksRef.current = []
 
-        // Guard: component may have unmounted while recording
-        if (!mountedRef.current) {
-          audioChunksRef.current = []
-          return
-        }
-
-        if (audioChunksRef.current.length === 0) {
-          setIsListening(false)
-          setStatus('idle')
-          return
-        }
-
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
-        audioChunksRef.current = []
-
-        // Skip upload if audio is too small (likely just mic activation noise)
-        if (audioBlob.size < MIN_AUDIO_BLOB_SIZE) {
-          setIsListening(false)
-          setStatus('idle')
-          return
+        if (blob.size < MIN_AUDIO_BYTES) {
+          setIsListening(false); setStatus('idle'); return
         }
 
         setStatus('processing')
         setInterimTranscript('')
         setServerProgressMessage('Uploading audio...')
 
-        // Use AbortController so we can cancel the fetch on unmount
-        const abortController = new AbortController()
-        const timeoutId = setTimeout(() => abortController.abort(), 60000)
+        const abort = new AbortController()
+        const timeout = setTimeout(() => abort.abort(), 60000)
 
         try {
-          const formData = new FormData()
-          formData.append('audio', audioBlob, 'recording.webm')
-          formData.append('language', language)
+          const form = new FormData()
+          form.append('audio', blob, 'recording.webm')
+          form.append('language', language)
 
           setServerProgressMessage('Transcribing...')
-          const response = await fetch('/api/voice/transcribe', {
+          const res = await fetch('/api/voice/transcribe', {
             method: 'POST',
-            body: formData,
-            signal: abortController.signal,
+            body: form,
+            signal: abort.signal,
           })
 
-          clearTimeout(timeoutId)
+          clearTimeout(timeout)
           if (!mountedRef.current) return
 
-          if (response.ok) {
-            const data = await response.json()
+          if (res.ok) {
+            const data = await res.json()
             if (!mountedRef.current) return
             const text = data.transcript || ''
             setServerProgressMessage('')
             if (text.trim()) {
-              const finalText = punctuationAssist ? applyPunctuationAssist(text) : text
-              setTranscript(finalText)
+              const final = punctuationAssist ? addPunctuation(text) : text
+              setTranscript(final)
               setConfidence(data.confidence ?? 0)
-              onTranscriptRef.current?.(finalText, true)
+              onTranscriptRef.current?.(final, true)
             }
           } else {
-            const data = await response.json().catch(() => ({}))
+            const data = await res.json().catch(() => ({}))
             if (!mountedRef.current) return
             setServerProgressMessage('')
             const msg = data.error || 'Server transcription failed'
-            setError(msg)
-            setStatus('error')
+            setError(msg); setStatus('error')
             onErrorRef.current?.(msg)
           }
         } catch (err) {
-          clearTimeout(timeoutId)
+          clearTimeout(timeout)
           if (!mountedRef.current) return
           setServerProgressMessage('')
-          // Don't show error for intentional aborts
           if (err instanceof DOMException && err.name === 'AbortError') {
             setStatus('idle')
           } else {
@@ -312,77 +281,70 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
         setStatus(prev => prev === 'error' ? 'error' : 'idle')
       }
 
-      mediaRecorderRef.current = recorder
-      // Collect data every 1 second for progressive feedback
+      recorderRef.current = recorder
       recorder.start(1000)
-      activeTierRef.current = 'server'
-      setUsingServer(true)
+      setActiveTier('server')
       setIsListening(true)
       setStatus('listening')
 
-      // Safety: auto-stop after max duration to prevent memory bloat
-      maxDurationTimerRef.current = setTimeout(() => {
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-          mediaRecorderRef.current.stop()
+      // Safety auto-stop
+      maxTimerRef.current = setTimeout(() => {
+        if (recorderRef.current?.state !== 'inactive') {
+          recorderRef.current?.stop()
         }
-      }, MAX_RECORDING_DURATION_MS)
+      }, MAX_RECORDING_MS)
 
       return true
     } catch {
-      // Release mic if getUserMedia succeeded but something else failed
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach(t => t.stop())
-        mediaStreamRef.current = null
-      }
+      streamRef.current?.getTracks().forEach(t => t.stop())
+      streamRef.current = null
       return false
     }
-  }, [language, punctuationAssist, clearMaxDurationTimer])
+  }, [language, punctuationAssist, clearMaxTimer, setActiveTier])
 
+  // ── Start listening (main entry) ──
   const startListening = useCallback(async () => {
-    // Pre-flight: check basic availability
     const voiceCheck = canUseVoiceInput()
 
     if (!voiceCheck.available && !isOnline) {
-      const errorMsg = 'Voice input requires an internet connection. Please type your message.'
-      setError(errorMsg)
-      setStatus('offline')
-      onErrorRef.current?.(errorMsg)
+      const msg = 'Voice input requires an internet connection. Please type your message.'
+      setError(msg); setStatus('offline')
+      onErrorRef.current?.(msg)
       return
     }
 
     if (!isSecureContext()) {
-      const errorMsg = 'Voice features require HTTPS or localhost.'
-      setError(errorMsg)
-      setStatus('error')
-      onErrorRef.current?.(errorMsg)
+      const msg = 'Voice features require HTTPS or localhost.'
+      setError(msg); setStatus('error')
+      onErrorRef.current?.(msg)
       return
     }
 
+    // Reset state
     setError(null)
     setTranscript('')
     setInterimTranscript('')
     setConfidence(0)
-    activeTierRef.current = 'none'
-    setUsingServer(false)
+    setActiveTier('none')
 
-    // ── Tier 1: Web Speech API (Chrome, Edge, Safari) ──
-    if (recognitionRef.current && isWebSpeechSupported) {
-      activeTierRef.current = 'web-speech'
+    // ── Tier 1: Web Speech API ──
+    if (recognitionRef.current && webSpeechSupported) {
+      setActiveTier('web-speech')
       await recognitionRef.current.start({
         onStart: () => {
-          if (!mountedRef.current || activeTierRef.current !== 'web-speech') return
+          if (!mountedRef.current || activeTier.current !== 'web-speech') return
           setIsListening(true)
           setStatus('listening')
         },
-        onResult: (text, isFinal, resultConfidence) => {
-          if (!mountedRef.current || activeTierRef.current !== 'web-speech') return
+        onResult: (text, isFinal, resultConf) => {
+          if (!mountedRef.current || activeTier.current !== 'web-speech') return
           if (isFinal) {
-            const finalText = punctuationAssist ? applyPunctuationAssist(text) : text
-            setTranscript(finalText)
+            const final = punctuationAssist ? addPunctuation(text) : text
+            setTranscript(final)
             setInterimTranscript('')
-            setConfidence(resultConfidence ?? 0)
+            setConfidence(resultConf ?? 0)
             setStatus('processing')
-            onTranscriptRef.current?.(finalText, true)
+            onTranscriptRef.current?.(final, true)
           } else {
             setInterimTranscript(text)
             onTranscriptRef.current?.(text, false)
@@ -390,62 +352,61 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
         },
         onEnd: () => {
           if (!mountedRef.current) return
-          activeTierRef.current = 'none'
+          setActiveTier('none')
           setIsListening(false)
           setInterimTranscript('')
           setStatus('idle')
         },
         onError: (err) => {
           if (!mountedRef.current) return
-          activeTierRef.current = 'none'
-          const compassionateMsg = getCompassionateError(err)
-          setError(compassionateMsg)
+          setActiveTier('none')
+          const msg = friendlyError(err)
+          setError(msg)
           setIsListening(false)
           setInterimTranscript('')
           setStatus('error')
-          onErrorRef.current?.(compassionateMsg)
+          onErrorRef.current?.(msg)
         },
       })
       return
     }
 
-    // ── Tier 2: Server-side transcription via MediaRecorder ──
+    // ── Tier 2: Server transcription ──
     if (isOnline) {
       const started = await startServerTranscription()
       if (started) return
     }
 
-    // ── Tier 3: Nothing works — graceful message ──
-    const browserName = getBrowserName()
-    const errorMsg = `Speech recognition not available in ${browserName}. Please type your message instead.`
-    setError(errorMsg)
-    setStatus('error')
-    onErrorRef.current?.(errorMsg)
-  }, [isWebSpeechSupported, isOnline, punctuationAssist, startServerTranscription])
+    // ── Tier 3: Nothing available ──
+    const browser = getBrowserName()
+    const msg = `Speech recognition not available in ${browser}. Please type your message instead.`
+    setError(msg); setStatus('error')
+    onErrorRef.current?.(msg)
+  }, [webSpeechSupported, isOnline, punctuationAssist, startServerTranscription, setActiveTier])
 
+  // ── Stop listening ──
   const stopListening = useCallback(() => {
-    const tier = activeTierRef.current
+    const tier = activeTier.current
 
-    if (tier === 'server' && mediaRecorderRef.current) {
-      clearMaxDurationTimer()
-      // Stopping the recorder triggers onstop → sends to server
-      if (mediaRecorderRef.current.state !== 'inactive') {
-        mediaRecorderRef.current.stop()
+    if (tier === 'server' && recorderRef.current) {
+      clearMaxTimer()
+      if (recorderRef.current.state !== 'inactive') {
+        recorderRef.current.stop()
       }
-      setUsingServer(false)
-      return // Don't reset status yet — onstop handler will do transcription
+      return // onstop handler handles the rest
     }
 
     if (tier === 'web-speech' && recognitionRef.current) {
       recognitionRef.current.stop()
-      activeTierRef.current = 'none'
+      setActiveTier('none')
     }
 
     setIsListening(false)
     setInterimTranscript('')
     setStatus('idle')
-  }, [clearMaxDurationTimer])
+  }, [clearMaxTimer, setActiveTier])
 
+  // ── Reset transcript ──
   const resetTranscript = useCallback(() => {
     setTranscript('')
     setInterimTranscript('')
@@ -454,32 +415,20 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     setStatus('idle')
   }, [])
 
-  // Cleanup all voice resources on unmount
+  // ── Cleanup on unmount ──
   useEffect(() => {
     return () => {
       mountedRef.current = false
-      activeTierRef.current = 'none'
-      // Clear max-duration safety timer
-      if (maxDurationTimerRef.current) {
-        clearTimeout(maxDurationTimerRef.current)
-        maxDurationTimerRef.current = null
+      activeTier.current = 'none'
+      if (maxTimerRef.current) clearTimeout(maxTimerRef.current)
+      if (recorderRef.current?.state !== 'inactive') {
+        try { recorderRef.current?.stop() } catch { /* ok */ }
       }
-      // Stop MediaRecorder if active
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-        try { mediaRecorderRef.current.stop() } catch { /* already stopped */ }
-      }
-      // Release microphone
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach(t => t.stop())
-        mediaStreamRef.current = null
-      }
-      // Clear buffered audio to free memory
-      audioChunksRef.current = []
-      // Stop Web Speech API recognition
-      if (recognitionRef.current) {
-        recognitionRef.current.destroy()
-        recognitionRef.current = null
-      }
+      streamRef.current?.getTracks().forEach(t => t.stop())
+      streamRef.current = null
+      chunksRef.current = []
+      recognitionRef.current?.destroy()
+      recognitionRef.current = null
     }
   }, [])
 
@@ -487,16 +436,12 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     isListening,
     transcript,
     interimTranscript,
-    isSupported: isWebSpeechSupported || isOnline,
+    isSupported: webSpeechSupported || isOnline,
     error,
     startListening,
     stopListening,
     resetTranscript,
-    sttProvider: activeTierRef.current === 'server'
-      ? 'server'
-      : activeTierRef.current === 'web-speech'
-        ? 'web-speech-api'
-        : 'none',
+    sttProvider: currentProvider,
     deviceTier: 'low',
     status,
     isOnline,

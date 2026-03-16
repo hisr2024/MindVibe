@@ -56,7 +56,6 @@ describe('SpeechRecognitionService', () => {
         language: 'es',
         continuous: true,
         interimResults: true,
-        maxAlternatives: 3,
       })
       expect(service).toBeDefined()
     })
