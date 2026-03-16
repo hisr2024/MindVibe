@@ -175,7 +175,7 @@ export function VoiceInputButton({
                 settings. Look for the lock or camera icon in your address bar.
               </p>
               <p className="text-[10px] text-[#f5f0e8]/50">
-                Audio may be sent to secure transcription services when browser-native recognition is unavailable. Audio is never stored.
+                Audio is processed by your browser when possible. When browser recognition is unavailable, audio is sent securely to our transcription service and is not retained after processing.
               </p>
             </div>
           </div>
@@ -211,7 +211,7 @@ export function VoiceInputButton({
       {!isListening && !error && !isDenied && permission !== 'granted' && (
         <div className="absolute right-0 top-full mt-2 z-20 min-w-[200px] max-w-[280px] rounded-lg bg-slate-900/95 px-3 py-2 text-xs text-[#f5f0e8]/70 shadow-lg border border-[#d4a44c]/30 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
           Click the Shankha to speak. Your browser will ask for microphone
-          permission. Audio is processed locally when possible; otherwise sent securely for transcription.
+          permission. Audio is processed locally when possible; when browser recognition is unavailable, audio is sent securely to our server for transcription and is not retained.
         </div>
       )}
     </div>

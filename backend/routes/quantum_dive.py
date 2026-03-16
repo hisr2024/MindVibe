@@ -328,7 +328,14 @@ async def perform_quantum_dive(
     except HTTPException:
         raise
     except Exception as e:
-        logger.warning(f"Subscription check failed for quantum-dive, allowing request: {e}")
+        logger.error(
+            "Subscription check unavailable for quantum-dive endpoint, "
+            "denying request (fail-closed): %s", e
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="Unable to verify your subscription. Please try again shortly.",
+        )
 
     logger.info(f"Initiating quantum dive for user {user_id}")
 
@@ -424,7 +431,14 @@ async def deep_dive_layer(
     except HTTPException:
         raise
     except Exception as e:
-        logger.warning(f"Subscription check failed for layer deep-dive, allowing request: {e}")
+        logger.error(
+            "Subscription check unavailable for layer deep-dive endpoint, "
+            "denying request (fail-closed): %s", e
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="Unable to verify your subscription. Please try again shortly.",
+        )
 
     logger.info(f"Layer deep dive for user {user_id}: {layer}")
 

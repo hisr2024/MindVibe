@@ -13,7 +13,7 @@
  * When disabled, the UI renders in a "coming soon" preview state.
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Music,
@@ -269,10 +269,10 @@ export function AmbientSoundscapeControl({
   const [masterVolume, setMasterVolume] = useState(0.7)
   const [currentPreset, _setCurrentPreset] = useState<string | null>(null)
 
-  // Sync with audio state during render
-  if (playing !== audioState.ambientActive) {
+  // Sync with audio state via effect (not during render to avoid re-render loops)
+  useEffect(() => {
     setPlaying(audioState.ambientActive)
-  }
+  }, [audioState.ambientActive])
 
   const handleToggle = useCallback(async () => {
     if (!AMBIENT_SOUNDSCAPE_ENABLED) return
@@ -292,6 +292,7 @@ export function AmbientSoundscapeControl({
   }, [playing, currentPreset, startAmbient, stopAmbient, playSound, onToggle])
 
   const handleSoundToggle = useCallback((soundType: SoundType) => {
+    if (!AMBIENT_SOUNDSCAPE_ENABLED) return
     setActiveSounds(prev => {
       const existing = prev.find(s => s.type === soundType)
       let newSounds: ActiveSound[]
@@ -318,6 +319,7 @@ export function AmbientSoundscapeControl({
   }, [onSoundsChange])
 
   const applyPreset = useCallback((presetIndex: number) => {
+    if (!AMBIENT_SOUNDSCAPE_ENABLED) return
     const preset = PRESETS[presetIndex]
     setActiveSounds(preset.sounds)
     onSoundsChange?.(preset.sounds)
@@ -399,7 +401,7 @@ export function AmbientSoundscapeControl({
       </div>
 
       {/* Quick Presets */}
-      <div className="p-4 border-b border-white/5">
+      <div className={`p-4 border-b border-white/5 ${!AMBIENT_SOUNDSCAPE_ENABLED ? 'opacity-50 pointer-events-none' : ''}`}>
         <p className="text-xs font-medium text-white/70 mb-3">Quick Presets</p>
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
           {PRESETS.map((preset, idx) => {
@@ -420,7 +422,7 @@ export function AmbientSoundscapeControl({
       </div>
 
       {/* Category Tabs */}
-      <div className="px-4 pt-4">
+      <div className={`px-4 pt-4 ${!AMBIENT_SOUNDSCAPE_ENABLED ? 'opacity-50 pointer-events-none' : ''}`}>
         <div className="flex gap-1 p-1 rounded-xl bg-white/5">
           {(['nature', 'spiritual', 'ambient', 'music'] as SoundCategory[]).map((cat) => (
             <button
@@ -439,7 +441,7 @@ export function AmbientSoundscapeControl({
       </div>
 
       {/* Sound Mixer */}
-      <div className="p-4">
+      <div className={`p-4 ${!AMBIENT_SOUNDSCAPE_ENABLED ? 'opacity-50 pointer-events-none' : ''}`}>
         <div className="grid grid-cols-2 gap-2">
           {categorySounds.map((soundType) => (
             <SoundMixerItem
