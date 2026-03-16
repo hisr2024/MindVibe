@@ -35,7 +35,8 @@ export class SpeechRecognitionService {
   private isMobile = false
   private shouldKeepListening = false
   private noSpeechRestarts = 0
-  private readonly maxNoSpeechRestarts = 5
+  private readonly maxNoSpeechRestarts = 8
+  private micPermissionGranted = false
 
   constructor(config: RecognitionConfig = {}) {
     const SpeechRecognitionCtor = getSpeechRecognition()
@@ -91,7 +92,10 @@ export class SpeechRecognitionService {
           // onend will fire after this, restart happens there
           return
         }
-        // Exhausted restarts
+        // Exhausted restarts — MUST reset counter to 0 so onend handler
+        // does NOT restart recognition (it checks noSpeechRestarts > 0).
+        // Without this reset → infinite restart loop → mic never captures audio.
+        this.noSpeechRestarts = 0
         this.shouldKeepListening = false
       }
 
@@ -115,7 +119,7 @@ export class SpeechRecognitionService {
         && (this.shouldKeepListening || this.noSpeechRestarts > 0)
 
       if (shouldRestart) {
-        const delay = this.isMobile ? 500 : 250
+        const delay = this.isMobile ? 600 : 300
         setTimeout(() => {
           if (!this.recognition || this.isStopping) {
             this.finalize()
@@ -162,15 +166,46 @@ export class SpeechRecognitionService {
   }
 
   /**
-   * Ensure microphone permission on desktop (mobile handles via recognition.start)
+   * Ensure microphone permission on desktop (mobile handles via recognition.start).
+   *
+   * On DESKTOP: first check via Permissions API (no mic acquisition).
+   * If permission is 'prompt', use getUserMedia ONCE to trigger the dialog,
+   * then cache the result so subsequent calls skip mic acquisition entirely.
+   * This avoids the race condition where releasing a getUserMedia stream
+   * starves the SpeechRecognition engine of audio data.
+   *
+   * On MOBILE: skip entirely — SpeechRecognition handles its own dialog,
+   * and calling getUserMedia then stop() can lock the mic on iOS Safari.
    */
   private async ensureMicPermission(): Promise<boolean> {
-    if (this.isMobile) return true
-    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) return true
+    if (this.micPermissionGranted) return true
+    if (this.isMobile) {
+      this.micPermissionGranted = true
+      return true
+    }
+    if (typeof navigator === 'undefined') return true
 
+    // Try Permissions API first (no mic acquisition needed)
+    if (navigator.permissions) {
+      try {
+        const status = await navigator.permissions.query({ name: 'microphone' as PermissionName })
+        if (status.state === 'granted') {
+          this.micPermissionGranted = true
+          return true
+        }
+        if (status.state === 'denied') return false
+        // state === 'prompt': fall through to getUserMedia to trigger dialog
+      } catch {
+        // Permissions API not supported — fall through
+      }
+    }
+
+    // Trigger permission dialog via getUserMedia (only once)
+    if (!navigator.mediaDevices?.getUserMedia) return true
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       stream.getTracks().forEach(t => t.stop())
+      this.micPermissionGranted = true
       return true
     } catch {
       return false
