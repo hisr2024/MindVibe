@@ -160,8 +160,14 @@ async def divine_chat(
     except HTTPException:
         raise
     except Exception as e:
-        # Graceful degradation - allow anonymous or failed-auth users through
-        logger.warning(f"Subscription check failed for divine-chat, allowing request: {e}")
+        logger.error(
+            "Subscription check unavailable for divine-chat endpoint, "
+            "denying request (fail-closed): %s", e
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="Unable to verify your subscription. Please try again shortly.",
+        )
 
     try:
         from backend.services.divine_conversation_engine import conversation_engine
@@ -255,7 +261,14 @@ async def synthesize_voice(
     except HTTPException:
         raise
     except Exception as e:
-        logger.warning(f"Subscription check failed for synthesize, allowing request: {e}")
+        logger.error(
+            "Subscription check unavailable for synthesize endpoint, "
+            "denying request (fail-closed): %s", e
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="Unable to verify your subscription. Please try again shortly.",
+        )
 
     try:
         # Try advanced voice engine first
@@ -506,7 +519,14 @@ async def get_soul_reading(
     except HTTPException:
         raise
     except Exception as e:
-        logger.warning(f"Subscription check failed for soul-reading: {e}")
+        logger.error(
+            "Subscription check unavailable for soul-reading endpoint, "
+            "denying request (fail-closed): %s", e
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="Unable to verify your subscription. Please try again shortly.",
+        )
 
     try:
         from backend.services.kiaan_divine_intelligence import kiaan_intelligence

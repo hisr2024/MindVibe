@@ -528,7 +528,20 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
                 "is_unlimited": usage_limit == -1,
             }
         except Exception as quota_err:
-            logger.warning(f"Quota check failed for streaming, allowing request: {quota_err}")
+            logger.error(
+                "Subscription check unavailable for streaming endpoint, "
+                "denying request (fail-closed): %s", quota_err
+            )
+            import json
+            async def service_unavailable_stream() -> AsyncGenerator[str, None]:
+                yield f"data: {json.dumps({'error': 'service_unavailable', 'message': 'Unable to verify your subscription. Please try again shortly.'})}\n\n"
+                yield "data: [DONE]\n\n"
+            return StreamingResponse(
+                service_unavailable_stream(),
+                media_type="text/event-stream",
+                status_code=503,
+                headers={"Cache-Control": "no-cache", "Connection": "keep-alive"},
+            )
 
     async def generate_stream() -> AsyncGenerator[str, None]:
         try:
@@ -672,8 +685,14 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
                     "is_unlimited": usage_limit == -1,
                 }
             except Exception as quota_error:
-                # Log but don't block - graceful degradation
-                logger.warning(f"Quota check failed, allowing request: {quota_error}")
+                logger.error(
+                    "Subscription check unavailable for chat endpoint, "
+                    "denying request (fail-closed): %s", quota_error
+                )
+                raise HTTPException(
+                    status_code=503,
+                    detail="Unable to verify your subscription. Please try again shortly.",
+                )
 
         # Message is already sanitized by the ChatMessage validator
         # Get language preference from the request body or Accept-Language header

@@ -128,7 +128,14 @@ async def friend_chat(
     except HTTPException:
         raise
     except Exception as e:
-        logger.warning(f"Subscription check failed for friend-chat, allowing request: {e}")
+        logger.error(
+            "Subscription check unavailable for friend-chat endpoint, "
+            "denying request (fail-closed): %s", e
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="Unable to verify your subscription. Please try again shortly.",
+        )
 
     engine = get_friendship_engine()
 
@@ -378,7 +385,14 @@ async def get_verse_insight(
         except HTTPException:
             raise
         except Exception as e:
-            logger.warning(f"Subscription check failed for verse-insight: {e}")
+            logger.error(
+                "Subscription check unavailable for verse-insight endpoint, "
+                "denying request (fail-closed): %s", e
+            )
+            raise HTTPException(
+                status_code=503,
+                detail="Unable to verify your subscription. Please try again shortly.",
+            )
 
     engine = get_friendship_engine()
     insight = engine.get_verse_insight(body.chapter, body.verse, body.user_context)
