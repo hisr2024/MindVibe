@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
             ),
           },
           body: backendFormData,
-          signal: AbortSignal.timeout(30000),
+          signal: AbortSignal.timeout(60000),
         })
 
         if (response.ok) {
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
           method: 'POST',
           headers: proxyHeaders(request, 'POST'),
           body: JSON.stringify({ audio_base64, language, format }),
-          signal: AbortSignal.timeout(30000),
+          signal: AbortSignal.timeout(60000),
         })
 
         if (response.ok) {
