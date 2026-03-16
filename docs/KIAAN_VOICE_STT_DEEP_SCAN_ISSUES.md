@@ -9,6 +9,7 @@ Scope: `/companion`, shared STT hooks/services, voice APIs, mobile entry points,
    - Frontend proxy posts `multipart/form-data` with `audio` file to `POST /api/kiaan/transcribe`.
    - Backend `POST /transcribe` model expected JSON with base64 field `audio: str` (no multipart upload schema).
    - **Fix**: Backend now accepts both multipart/form-data and JSON (base64) on `/api/kiaan/transcribe`. Added dedicated `/api/kiaan/transcribe/upload` endpoint for multipart. Proxy JSON path field name normalized (`audio` and `audio_base64` both accepted).
+   - **Additional fix (0354360)**: Normalized all error response paths to include full contract shape `{ transcript, confidence, language, error?, fallback? }` instead of partial `{ error, transcript: null }`.
 
 2. **Mobile routes point to `/m/companion`, but no mobile companion page exists** — RESOLVED
    - Mobile dashboard and mobile KIAAN chat both navigate to `/m/companion`.
@@ -23,6 +24,7 @@ Scope: `/companion`, shared STT hooks/services, voice APIs, mobile entry points,
    - `BinauraBeatsControl` and `AmbientSoundscapeControl` now gated behind `BINAURAL_BEATS_ENABLED` and `AMBIENT_SOUNDSCAPE_ENABLED` feature flags.
    - Play/toggle actions are no-ops when flags are false.
    - "Coming Soon" badge shown in UI headers when disabled.
+   - **Additional fix (020b62c)**: All interactive elements (preset selection, sound mixing, volume) now visually disabled with `opacity-50 pointer-events-none` and early-return guards when feature flags are off.
 
 5. **Companion recorder docs/comments overstate current STT pipeline** — RESOLVED
    - `CompanionVoiceRecorder` header updated to accurately describe 3-tier stack (Web Speech API → Server transcription → Graceful fallback).
@@ -30,10 +32,12 @@ Scope: `/companion`, shared STT hooks/services, voice APIs, mobile entry points,
 6. **Privacy copy says audio is processed locally, but code includes server transcription fallback** — RESOLVED
    - `VoiceInputButton` privacy copy updated to: "Audio may be sent to secure transcription services when browser-native recognition is unavailable. Audio is never stored."
    - Hover hint also updated to mention server fallback possibility.
+   - **Additional fix (527c8d5)**: Changed "never stored" to "not retained after processing" for more defensible wording. Both permission-denied hint and hover tooltip now accurately describe browser-local + server fallback data flow.
 
 7. **`isSupported` semantics can mislead UI gating** — RESOLVED
    - `useVoiceInput` now returns `isSupported: webSpeechSupported || (isOnline && hasMediaDevicesAPI)`.
    - This ensures support is only claimed when a viable STT path actually exists.
+   - **Additional fix (5a2a84c)**: Added `hasBrowserSTT` and `hasServerFallback` return fields so UI consumers can distinguish between browser-native STT, server fallback, and offline constraints.
 
 8. **`deviceTier` is hardcoded to `'low'`** — RESOLVED
    - Replaced with `detectDeviceTier()` that uses `navigator.hardwareConcurrency` and `navigator.deviceMemory` to return `'low'`, `'mid'`, or `'high'`.
@@ -59,6 +63,18 @@ Scope: `/companion`, shared STT hooks/services, voice APIs, mobile entry points,
     - Proxies to backend `/api/voice-companion/feedback` if available; falls back to structured `[Companion:Metrics]` logging.
     - Mobile companion page (`app/(mobile)/m/companion/page.tsx`) now shows thumbs-up/thumbs-down buttons after each assistant message.
     - Feedback is best-effort (fire-and-forget); UI shows "Thanks!" after submission.
+
+## Security Issues (Cross-cutting)
+
+13. **Fail-open quota/subscription behavior allows monetization bypass** — RESOLVED (eab488d)
+    - All backend routes (chat, friend-chat, divine-chat, quantum-dive, synthesize, soul-reading, verse-insight) had `except Exception` blocks that silently allowed requests when the subscription service was unavailable.
+    - **Fix**: Changed all affected routes to fail-closed with HTTP 503 ("Unable to verify your subscription. Please try again shortly.") when subscription/quota checks raise unexpected exceptions.
+    - Known quota-exceeded still returns 429. Feature-locked still returns 403.
+    - Structured error logs include route + reason without PII.
+
+14. **Render-time state mutation in AmbientSoundscapeControl** — RESOLVED (8fdbc98)
+    - `setPlaying(audioState.ambientActive)` was called during render, causing React re-render loops.
+    - **Fix**: Moved to `useEffect` with `[audioState.ambientActive]` dependency.
 
 ---
 
