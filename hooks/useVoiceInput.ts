@@ -56,6 +56,7 @@ export interface UseVoiceInputReturn {
   isOnline: boolean
   confidence: number
   serverProgressMessage: string
+  nearingLimit: boolean
 }
 
 /**
@@ -135,8 +136,10 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   const recorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const streamRef = useRef<MediaStream | null>(null)
+  const [nearingLimit, setNearingLimit] = useState(false)
   const mountedRef = useRef(true)
   const maxTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const warnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   /** Set both ref and state for the active tier */
   const setActiveTier = useCallback((tier: 'none' | 'web-speech' | 'server') => {
@@ -186,12 +189,17 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     recognitionRef.current?.setLanguage(language)
   }, [language])
 
-  // ── Clear max-duration timer ──
+  // ── Clear max-duration timer and warning timer ──
   const clearMaxTimer = useCallback(() => {
     if (maxTimerRef.current) {
       clearTimeout(maxTimerRef.current)
       maxTimerRef.current = null
     }
+    if (warnTimerRef.current) {
+      clearTimeout(warnTimerRef.current)
+      warnTimerRef.current = null
+    }
+    setNearingLimit(false)
   }, [])
 
   // ── Tier 2: Server transcription via MediaRecorder ──
@@ -302,8 +310,17 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
       setIsListening(true)
       setStatus('listening')
 
+      // Warning at 15s before limit
+      warnTimerRef.current = setTimeout(() => {
+        if (mountedRef.current) {
+          setNearingLimit(true)
+          setServerProgressMessage('Recording limit reached soon. Wrapping up...')
+        }
+      }, MAX_RECORDING_MS - 15_000)
+
       // Safety auto-stop
       maxTimerRef.current = setTimeout(() => {
+        setServerProgressMessage('Recording limit reached. Processing...')
         if (recorderRef.current?.state !== 'inactive') {
           recorderRef.current?.stop()
         }
@@ -436,6 +453,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
       mountedRef.current = false
       activeTier.current = 'none'
       if (maxTimerRef.current) clearTimeout(maxTimerRef.current)
+      if (warnTimerRef.current) clearTimeout(warnTimerRef.current)
       if (recorderRef.current?.state !== 'inactive') {
         try { recorderRef.current?.stop() } catch { /* ok */ }
       }
@@ -467,5 +485,6 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     isOnline,
     confidence,
     serverProgressMessage,
+    nearingLimit,
   }
 }

@@ -188,8 +188,20 @@ async function generateWithOpenAI(
   }
 }
 
+// ─── Structured Metrics Logger ──────────────────────────────────────────
+function logMetrics(data: Record<string, unknown>) {
+  console.warn('[Companion:Metrics]', JSON.stringify({ ts: new Date().toISOString(), ...data }))
+}
+
+function withTierHeader(response: NextResponse, tier: string): NextResponse {
+  response.headers.set('X-AI-Tier', tier)
+  return response
+}
+
 // ─── Main Handler ────────────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
+  const requestStart = Date.now()
+
   try {
     const body = await request.json()
 
@@ -205,8 +217,11 @@ export async function POST(request: NextRequest) {
     // Skip backend proxy for local_ sessions (backend doesn't know them)
     const isLocalSession = typeof body.session_id === 'string' && body.session_id.startsWith('local_')
 
+    let tier1Reason = ''
+
     // ── Tier 1: Proxy to Python backend (full pipeline) ──────────────
     if (!isLocalSession) {
+      const t1Start = Date.now()
       try {
         const companionResponse = await fetch(`${BACKEND_URL}/api/voice-companion/message`, {
           method: 'POST',
@@ -224,26 +239,36 @@ export async function POST(request: NextRequest) {
         if (companionResponse.ok) {
           const data = await companionResponse.json()
           if (data && typeof data.response === 'string' && data.mood && data.phase) {
-            return forwardCookies(companionResponse, NextResponse.json({ ...data, ai_tier: 'backend' }))
+            logMetrics({ event: 'message', tier: 'backend', latency_ms: Date.now() - t1Start, status: 'ok' })
+            return withTierHeader(
+              forwardCookies(companionResponse, NextResponse.json({ ...data, ai_tier: 'backend' })),
+              'backend',
+            )
           }
+          tier1Reason = `incomplete_data:${data ? Object.keys(data).join(',') : 'null'}`
           console.warn('[Companion] Backend returned incomplete data, falling back. Keys:', data ? Object.keys(data) : 'null')
         } else {
           let errorBody = ''
           try { errorBody = await companionResponse.text() } catch { /* ignore */ }
+          tier1Reason = `http_${companionResponse.status}`
           console.warn(`[Companion] Backend returned ${companionResponse.status}: ${errorBody.slice(0, 200)}`)
         }
       } catch (backendErr) {
-        console.error('[Companion] Backend proxy failed:', backendErr instanceof Error ? backendErr.message : backendErr)
+        tier1Reason = backendErr instanceof Error ? backendErr.message : 'unknown'
+        console.error('[Companion] Backend proxy failed:', tier1Reason)
       }
+      logMetrics({ event: 'message', tier: 'backend', latency_ms: Date.now() - t1Start, status: 'failed', reason: tier1Reason })
     }
 
     // ── Tier 2: Direct OpenAI from Next.js (KIAAN + Gita wisdom) ─────
     const { mood, intensity } = detectMood(sanitizedMessage)
     const language = body.language || 'en'
 
+    const t2Start = Date.now()
     const aiResult = await generateWithOpenAI(sanitizedMessage, mood, intensity, language)
     if (aiResult) {
-      return NextResponse.json({
+      logMetrics({ event: 'message', tier: 'nextjs_openai', latency_ms: Date.now() - t2Start, status: 'ok', fallback_from: isLocalSession ? 'local_session' : 'backend', reason: tier1Reason })
+      const res = NextResponse.json({
         message_id: `msg_${Date.now()}`,
         response: aiResult.response,
         mood,
@@ -252,11 +277,13 @@ export async function POST(request: NextRequest) {
         wisdom_used: aiResult.wisdom_used,
         ai_tier: 'nextjs_openai',
       })
+      return withTierHeader(res, 'nextjs_openai')
     }
 
     // ── Tier 3: Local Friend Engine (intelligent local response) ─────
+    logMetrics({ event: 'message', tier: 'local_engine', latency_ms: Date.now() - requestStart, status: 'ok', fallback_from: 'nextjs_openai', reason: 'openai_unavailable' })
     const engineResult = generateLocalResponse(sanitizedMessage)
-    return NextResponse.json({
+    const res = NextResponse.json({
       message_id: `msg_${Date.now()}`,
       response: engineResult.response,
       mood: engineResult.mood,
@@ -265,7 +292,9 @@ export async function POST(request: NextRequest) {
       wisdom_used: engineResult.wisdom_used,
       ai_tier: 'local_engine',
     })
+    return withTierHeader(res, 'local_engine')
   } catch (error) {
+    logMetrics({ event: 'message', tier: 'error', latency_ms: Date.now() - requestStart, status: 'error', reason: error instanceof Error ? error.message : 'unknown' })
     console.error('[Companion Message] Unexpected error:', error)
     return NextResponse.json(
       { error: 'Failed to process message' },
