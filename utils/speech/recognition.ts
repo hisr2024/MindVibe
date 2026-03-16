@@ -73,9 +73,6 @@ export class SpeechRecognitionService {
     // Use non-continuous mode on mobile and rely on auto-restart instead.
     this.isMobile = typeof navigator !== 'undefined'
       && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-    // Mobile Safari doesn't support continuous mode properly — it fires onend
-    // after each result regardless, causing wobbly start/stop loops.
-    // Use non-continuous mode on mobile and rely on auto-restart instead.
     this.recognition.continuous = this.isMobile ? false : (config.continuous ?? true)
     this.keepListeningOnMobile = this.isMobile && (config.continuous ?? true)
     this.recognition.interimResults = config.interimResults ?? true
@@ -245,11 +242,23 @@ export class SpeechRecognitionService {
 
   /**
    * Ensure microphone permission is granted before starting recognition.
-   * Many browsers (especially mobile) require an explicit getUserMedia call
-   * to trigger the permission dialog. The Web Speech API alone may not prompt.
+   *
+   * On DESKTOP browsers, an explicit getUserMedia call is needed to trigger
+   * the permission dialog — Web Speech API alone may not prompt.
+   *
+   * On MOBILE, skip this: calling getUserMedia then immediately stopping
+   * the stream can interfere with SpeechRecognition's own mic access
+   * (especially iOS Safari where the mic "lock" prevents recognition.start()).
+   * The Web Speech API on mobile handles its own permission dialog.
    */
   private async ensureMicrophonePermission(): Promise<boolean> {
     if (this.micPermissionGranted) return true
+
+    // On mobile, let SpeechRecognition handle its own permission dialog
+    if (this.isMobile) {
+      this.micPermissionGranted = true
+      return true
+    }
 
     if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
       // Can't check — assume permission will be handled by recognition.start()
@@ -282,22 +291,26 @@ export class SpeechRecognitionService {
       return
     }
 
-    // If currently stopping, wait and retry
+    // If currently stopping, wait briefly then retry with a bounded counter.
+    // Guard against infinite recursion: if we exhaust retries, force-reset and
+    // attempt exactly once more (not recursively).
     if (this.isStopping) {
-      await new Promise<void>(resolve => setTimeout(resolve, 150))
       if (this.startAttempts < this.maxStartAttempts) {
         this.startAttempts++
+        await new Promise<void>(resolve => setTimeout(resolve, 150))
+        // Re-check: stop may have completed during the wait
+        if (!this.isStopping) {
+          return this.start(callbacks)
+        }
         return this.start(callbacks)
       }
-      // Force-reset state and try one more time
+      // Force-reset state — do NOT recurse, fall through to start below
       this.startAttempts = 0
       this.isListening = false
       this.isStopping = false
-      return this.start(callbacks)
     }
 
     if (this.isListening) {
-      // Still set callbacks so the existing session uses new callbacks
       this.callbacks = callbacks
       return
     }
@@ -305,12 +318,8 @@ export class SpeechRecognitionService {
     this.callbacks = callbacks
     this.startAttempts = 0
     this.autoRestartCount = 0
-    // Re-enable mobile keep-listening if in non-continuous mobile mode
     this.keepListeningOnMobile = this.isMobile && !this.recognition.continuous
 
-    // Request microphone permission first, then start recognition.
-    // This is critical: on many browsers the Web Speech API does NOT trigger
-    // the mic permission dialog on its own, causing silent failure.
     const granted = await this.ensureMicrophonePermission()
     if (!granted) {
       this.callbacks.onError?.('not-allowed: Microphone permission denied.')
@@ -322,15 +331,15 @@ export class SpeechRecognitionService {
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to start recognition'
 
-      // Handle "already started" error by aborting and retrying
+      // Handle "already started" error by aborting and retrying with backoff
       if (errorMsg.includes('already started')) {
         if (this.startAttempts < this.maxStartAttempts) {
           this.startAttempts++
           this.abort()
-          await new Promise<void>(resolve => setTimeout(resolve, 200 + this.startAttempts * 50))
+          await new Promise<void>(resolve => setTimeout(resolve, 200 + this.startAttempts * 100))
           return this.start(callbacks)
         }
-        // Last resort: force state reset
+        // Exhausted retries: force state reset, report error
         this.isListening = false
         this.isStopping = false
         this.startAttempts = 0
