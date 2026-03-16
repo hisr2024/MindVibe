@@ -37,6 +37,7 @@ export function useVoiceOutput(options: UseVoiceOutputOptions = {}): UseVoiceOut
   const [isSupported] = useState(() => isSpeechSynthesisSupported())
   
   const synthesisRef = useRef<SpeechSynthesisService | null>(null)
+  const isSpeakingRef = useRef(false)
   const {
     language = 'en',
     rate = 1.0,
@@ -46,6 +47,14 @@ export function useVoiceOutput(options: UseVoiceOutputOptions = {}): UseVoiceOut
     onEnd,
     onError,
   } = options
+
+  // Stable refs for callbacks to prevent stale closures
+  const onStartRef = useRef(onStart)
+  const onEndRef = useRef(onEnd)
+  const onErrorRef = useRef(onError)
+  onStartRef.current = onStart
+  onEndRef.current = onEnd
+  onErrorRef.current = onError
 
   // Initialize synthesis service — only recreate on language change.
   // Rate/pitch/volume are updated in-place via updateConfig to avoid
@@ -80,22 +89,27 @@ export function useVoiceOutput(options: UseVoiceOutputOptions = {}): UseVoiceOut
     if (!synthesisRef.current || !isSupported) {
       const errorMsg = 'Speech synthesis not supported in this browser'
       setError(errorMsg)
-      onError?.(errorMsg)
+      onErrorRef.current?.(errorMsg)
       return
     }
 
+    // Reset speaking state before cancel to prevent isSpeakingRef corruption
+    // from rapid speakText() calls overlapping
+    isSpeakingRef.current = false
     setError(null)
 
     synthesisRef.current.speak(text, {
       onStart: () => {
+        isSpeakingRef.current = true
         setIsSpeaking(true)
         setIsPaused(false)
-        onStart?.()
+        onStartRef.current?.()
       },
       onEnd: () => {
+        isSpeakingRef.current = false
         setIsSpeaking(false)
         setIsPaused(false)
-        onEnd?.()
+        onEndRef.current?.()
       },
       onPause: () => {
         setIsPaused(true)
@@ -104,13 +118,14 @@ export function useVoiceOutput(options: UseVoiceOutputOptions = {}): UseVoiceOut
         setIsPaused(false)
       },
       onError: (err) => {
+        isSpeakingRef.current = false
         setError(err)
         setIsSpeaking(false)
         setIsPaused(false)
-        onError?.(err)
+        onErrorRef.current?.(err)
       },
     })
-  }, [isSupported, onStart, onEnd, onError])
+  }, [isSupported])
 
   const pause = useCallback(() => {
     if (synthesisRef.current) {

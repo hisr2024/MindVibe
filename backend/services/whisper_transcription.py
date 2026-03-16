@@ -104,6 +104,9 @@ class WhisperService:
         self.model_size = model_size
         self.loaded = False
         self.device = self._detect_device()
+        # Lock to prevent concurrent model loading (race condition where two
+        # requests both see self.loaded=False and load the model simultaneously)
+        self._load_lock = asyncio.Lock()
 
         # Sanskrit vocabulary for improved recognition
         self.sanskrit_vocab = [
@@ -135,46 +138,51 @@ class WhisperService:
         return "cpu"
 
     async def load_model(self) -> bool:
-        """Load Whisper model (lazy loading)"""
+        """Load Whisper model (lazy loading, thread-safe via async lock)"""
         if self.loaded:
             return True
 
-        try:
-            # Try faster-whisper first (optimized)
-            from faster_whisper import WhisperModel
+        async with self._load_lock:
+            # Double-check after acquiring lock (another request may have loaded it)
+            if self.loaded:
+                return True
 
-            logger.info(f"Loading Whisper model ({self.model_size}) on {self.device}...")
-
-            compute_type = "float16" if self.device == "cuda" else "int8"
-
-            self.model = WhisperModel(
-                self.model_size,
-                device=self.device,
-                compute_type=compute_type
-            )
-
-            self.loaded = True
-            logger.info("Whisper model loaded successfully")
-            return True
-
-        except ImportError:
-            # Fall back to standard whisper
             try:
-                import whisper
+                # Try faster-whisper first (optimized)
+                from faster_whisper import WhisperModel
 
-                logger.info("faster-whisper not found, using standard whisper")
-                self.model = whisper.load_model(self.model_size)
+                logger.info(f"Loading Whisper model ({self.model_size}) on {self.device}...")
+
+                compute_type = "float16" if self.device == "cuda" else "int8"
+
+                self.model = WhisperModel(
+                    self.model_size,
+                    device=self.device,
+                    compute_type=compute_type
+                )
+
                 self.loaded = True
-                self.use_standard = True
+                logger.info("Whisper model loaded successfully")
                 return True
 
             except ImportError:
-                logger.error("Neither faster-whisper nor whisper installed")
-                return False
+                # Fall back to standard whisper
+                try:
+                    import whisper
 
-        except Exception as e:
-            logger.error(f"Failed to load Whisper: {e}")
-            return False
+                    logger.info("faster-whisper not found, using standard whisper")
+                    self.model = whisper.load_model(self.model_size)
+                    self.loaded = True
+                    self.use_standard = True
+                    return True
+
+                except ImportError:
+                    logger.error("Neither faster-whisper nor whisper installed")
+                    return False
+
+            except Exception as e:
+                logger.error(f"Failed to load Whisper: {e}")
+                return False
 
     def _get_initial_prompt(self, language: str) -> str:
         """Get context prompt to improve recognition"""
@@ -216,11 +224,16 @@ class WhisperService:
                 voice_features={},
             )
 
+        temp_path = None
         try:
             # Save audio to temp file (Whisper needs file path)
             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
                 temp_path = f.name
                 f.write(audio_data)
+
+            # Validate temp file is not empty
+            if os.path.getsize(temp_path) == 0:
+                raise ValueError("Audio data is empty")
 
             # Build transcription options
             language = None if config.language == TranscriptionLanguage.AUTO else config.language.value
@@ -229,14 +242,18 @@ class WhisperService:
                 language or "en"
             )
 
-            # Transcribe
+            # Transcribe with timeout to prevent hanging on corrupted audio
             if hasattr(self, 'use_standard') and self.use_standard:
                 # Standard whisper
-                result = self.model.transcribe(
-                    temp_path,
-                    language=language,
-                    initial_prompt=initial_prompt,
-                    word_timestamps=config.word_timestamps
+                result = await asyncio.wait_for(
+                    asyncio.to_thread(
+                        self.model.transcribe,
+                        temp_path,
+                        language=language,
+                        initial_prompt=initial_prompt,
+                        word_timestamps=config.word_timestamps,
+                    ),
+                    timeout=60,
                 )
                 segments = result["segments"]
                 text = result["text"]
@@ -244,21 +261,24 @@ class WhisperService:
 
             else:
                 # faster-whisper
-                segments_gen, info = self.model.transcribe(
-                    temp_path,
-                    language=language,
-                    task=config.task,
-                    initial_prompt=initial_prompt,
-                    word_timestamps=config.word_timestamps,
-                    vad_filter=config.vad_filter
+                def _transcribe():
+                    return self.model.transcribe(
+                        temp_path,
+                        language=language,
+                        task=config.task,
+                        initial_prompt=initial_prompt,
+                        word_timestamps=config.word_timestamps,
+                        vad_filter=config.vad_filter,
+                    )
+
+                segments_gen, info = await asyncio.wait_for(
+                    asyncio.to_thread(_transcribe),
+                    timeout=60,
                 )
 
                 segments = list(segments_gen)
                 text = " ".join(seg.text for seg in segments)
                 detected_language = info.language
-
-            # Clean up temp file
-            os.unlink(temp_path)
 
             # Process segments
             processed_segments = []
@@ -308,6 +328,17 @@ class WhisperService:
                 is_sanskrit=is_sanskrit
             )
 
+        except asyncio.TimeoutError:
+            logger.error("Transcription timed out (60s limit)")
+            return TranscriptionResult(
+                text="",
+                language="en",
+                confidence=0.0,
+                duration_seconds=0.0,
+                words=[],
+                segments=[],
+                voice_features={},
+            )
         except Exception as e:
             logger.error(f"Transcription error: {e}")
             return TranscriptionResult(
@@ -317,8 +348,15 @@ class WhisperService:
                 duration_seconds=0.0,
                 words=[],
                 segments=[],
-                voice_features={}
+                voice_features={},
             )
+        finally:
+            # Always clean up temp file to prevent /tmp from filling up
+            if temp_path and os.path.exists(temp_path):
+                try:
+                    os.unlink(temp_path)
+                except OSError:
+                    pass
 
     async def _extract_voice_features(self, audio_data: bytes) -> Dict[str, float]:
         """
@@ -460,15 +498,21 @@ class WhisperService:
 
     def _detect_sanskrit(self, text: str) -> bool:
         """Detect if text contains Sanskrit content"""
-        text_lower = text.lower()
-
-        # Check for Sanskrit words
-        sanskrit_count = sum(1 for word in self.sanskrit_vocab if word in text_lower)
-
-        # Check for Devanagari characters
+        # Check for Devanagari characters (fast path)
         has_devanagari = any('\u0900' <= char <= '\u097F' for char in text)
+        if has_devanagari:
+            return True
 
-        return sanskrit_count >= 2 or has_devanagari
+        # Use word-boundary matching to prevent false positives from substrings
+        # (e.g., "adharma" should match "dharma", but "pharmacy" should not)
+        import re
+        text_lower = text.lower()
+        sanskrit_count = sum(
+            1 for word in self.sanskrit_vocab
+            if re.search(r'\b' + re.escape(word) + r'\b', text_lower)
+        )
+
+        return sanskrit_count >= 2
 
 
 # ============================================

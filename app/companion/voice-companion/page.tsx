@@ -438,8 +438,7 @@ export default function KiaanVoiceCompanionPage() {
       }
     } catch {
       // Orchestrator failed — fall through to backend enhancement
-      setIsLoading(false)
-      // Keep phase as 'processing' only if backend enhancement will run
+      // Keep isLoading true if backend enhancement will run (localResult is null)
     }
 
     // ── STEP 2: Background Enhancement via Backend (1-3s, non-blocking) ──
@@ -503,8 +502,9 @@ export default function KiaanVoiceCompanionPage() {
         }
       } catch (err: unknown) {
         if (err instanceof DOMException && err.name === 'AbortError') {
-          // Aborted — still reset phase before returning
+          // Aborted — reset both phase and loading before returning
           setPhase('idle')
+          setIsLoading(false)
           return
         }
         // Backend enhancement failed — local response still shown

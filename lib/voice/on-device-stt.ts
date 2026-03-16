@@ -55,6 +55,12 @@ export class OnDeviceSTT {
   private isStartingListening = false
   /** Pending model-load timeout to clear on resolve/destroy */
   private modelLoadTimeout: ReturnType<typeof setTimeout> | null = null
+  /** Guard against concurrent setLanguage calls racing with model loading */
+  private isChangingLanguage = false
+  /** Whether this instance has been destroyed */
+  private destroyed = false
+  /** Promise that resolves when model is fully loaded (for atomic loading) */
+  private modelLoadPromise: Promise<void> | null = null
 
   /**
    * Detect device capabilities and determine optimal STT strategy
@@ -114,50 +120,62 @@ export class OnDeviceSTT {
   }
 
   /**
-   * Load the appropriate ML model via Web Worker
+   * Load the appropriate ML model via Web Worker.
+   *
+   * Returns a promise that resolves when the worker signals 'ready'.
+   * Uses a shared modelLoadPromise so concurrent callers await the same load.
    */
   private async loadModel(): Promise<void> {
+    // If already loading, return the existing promise (atomic load)
+    if (this.modelLoadPromise) return this.modelLoadPromise
+
     this.setState('loading')
     this.clearIdleTimer()
 
-    try {
-      // Create the appropriate worker
-      if (this.provider === 'moonshine') {
-        this.worker = new Worker(
-          new URL('./moonshine-worker.ts', import.meta.url),
-          { type: 'module' }
-        )
-      } else if (this.provider === 'whisper') {
-        this.worker = new Worker(
-          new URL('./whisper-worker.ts', import.meta.url),
-          { type: 'module' }
-        )
-      }
+    this.modelLoadPromise = (async () => {
+      try {
+        // Create the appropriate worker
+        if (this.provider === 'moonshine') {
+          this.worker = new Worker(
+            new URL('./moonshine-worker.ts', import.meta.url),
+            { type: 'module' }
+          )
+        } else if (this.provider === 'whisper') {
+          this.worker = new Worker(
+            new URL('./whisper-worker.ts', import.meta.url),
+            { type: 'module' }
+          )
+        }
 
-      if (!this.worker) {
-        throw new Error('Failed to create worker')
-      }
+        if (!this.worker) {
+          throw new Error('Failed to create worker')
+        }
 
-      // Set up worker message handling
-      this.worker.onmessage = (event: MessageEvent) => {
-        this.handleWorkerMessage(event.data)
-      }
+        // Set up worker message handling
+        this.worker.onmessage = (event: MessageEvent) => {
+          this.handleWorkerMessage(event.data)
+        }
 
-      this.worker.onerror = (err: ErrorEvent) => {
-        this.handleError(`Worker error: ${err?.message || 'Unknown worker error'}`)
-      }
+        this.worker.onerror = (err: ErrorEvent) => {
+          this.handleError(`Worker error: ${err?.message || 'Unknown worker error'}`)
+        }
 
-      // Load model with device preference
-      const device = this.deviceTier === 'high' ? 'webgpu' : 'wasm'
+        // Wait for worker script to be ready before sending init message.
+        // Post the load command and wait for 'ready' in startListening.
+        const device = this.deviceTier === 'high' ? 'webgpu' : 'wasm'
 
-      if (this.provider === 'whisper') {
-        this.worker.postMessage({ type: 'load', device, language: this.language })
-      } else {
-        this.worker.postMessage({ type: 'load', device })
+        if (this.provider === 'whisper') {
+          this.worker.postMessage({ type: 'load', device, language: this.language })
+        } else {
+          this.worker.postMessage({ type: 'load', device })
+        }
+      } catch (err) {
+        this.modelLoadPromise = null
+        this.handleError(`Model load failed: ${err instanceof Error ? err.message : String(err)}`)
       }
-    } catch (err) {
-      this.handleError(`Model load failed: ${err instanceof Error ? err.message : String(err)}`)
-    }
+    })()
+
+    return this.modelLoadPromise
   }
 
   /**
@@ -196,6 +214,10 @@ export class OnDeviceSTT {
    * so the caller can fall back to Web Speech API.
    */
   async startListening(): Promise<void> {
+    if (this.destroyed) {
+      throw new Error('On-device STT instance has been destroyed')
+    }
+
     if (this.provider === 'web-speech-api' || this.provider === 'none') {
       throw new Error('On-device STT not available — use Web Speech API')
     }
@@ -249,6 +271,9 @@ export class OnDeviceSTT {
         })
       }
 
+      // Bail out if destroyed while waiting for model load
+      if (this.destroyed) return
+
       if (this.state !== 'ready') {
         throw new Error(`On-device STT not ready (state: ${this.state})`)
       }
@@ -266,16 +291,29 @@ export class OnDeviceSTT {
         },
       })
 
+      // Validate the stream actually has audio tracks
+      if (!this.mediaStream.getAudioTracks().length) {
+        throw new Error('No audio tracks in media stream')
+      }
+
       // Create AudioContext and resume (browsers suspend by default)
       this.audioContext = new AudioContext({ sampleRate: 16000 })
       if (this.audioContext.state === 'suspended') {
-        await this.audioContext.resume()
+        try {
+          await this.audioContext.resume()
+        } catch {
+          throw new Error('AudioContext could not be resumed — user gesture may be required')
+        }
       }
 
-      // Register AudioWorklet processor
+      // Register AudioWorklet processor (with retry on 404)
       if (!this.isWorkletRegistered) {
-        await this.audioContext.audioWorklet.addModule('/workers/audio-capture-processor.js')
-        this.isWorkletRegistered = true
+        try {
+          await this.audioContext.audioWorklet.addModule('/workers/audio-capture-processor.js')
+          this.isWorkletRegistered = true
+        } catch (workletErr) {
+          throw new Error(`AudioWorklet registration failed: ${workletErr instanceof Error ? workletErr.message : String(workletErr)}`)
+        }
       }
 
       // Create worklet node
@@ -301,13 +339,26 @@ export class OnDeviceSTT {
       source.connect(this.workletNode)
 
     } catch (err) {
-      // Clean up AudioContext if mic access or worklet registration failed
-      if (this.audioContext && this.state !== 'listening') {
+      // Clean up ALL resources on any failure during startup
+      if (this.mediaStream) {
+        this.mediaStream.getTracks().forEach(t => t.stop())
+        this.mediaStream = null
+      }
+      if (this.workletNode) {
+        this.workletNode.disconnect()
+        this.workletNode = null
+      }
+      if (this.audioContext) {
         this.audioContext.close().catch(() => {})
         this.audioContext = null
         this.isWorkletRegistered = false
       }
-      this.handleError(`Mic access failed: ${err instanceof Error ? err.message : String(err)}`)
+      // Reset state to ready (model is still loaded) rather than error
+      // so the caller can retry or fall back to another tier
+      if (this.state === 'listening') {
+        this.setState('ready')
+      }
+      throw err // Re-throw so caller can handle fallback
     } finally {
       this.isStartingListening = false
     }
@@ -346,41 +397,54 @@ export class OnDeviceSTT {
   }
 
   /**
-   * Change language (may require switching model)
+   * Change language (may require switching model).
+   * Serialized: concurrent calls are ignored while one is in progress.
    */
   async setLanguage(language: string): Promise<STTProvider> {
-    // If currently listening, stop first to avoid race with startListening
-    if (this.state === 'listening') {
-      this.stopListening()
-    }
+    if (this.destroyed) return this.provider
 
-    const newProvider = this.selectProvider(language)
-    this.language = language
+    // Prevent concurrent language changes from racing
+    if (this.isChangingLanguage) return this.provider
+    this.isChangingLanguage = true
 
-    if (newProvider !== this.provider) {
-      this.unloadModel()
-      this.provider = newProvider
-      this.callbacks?.onProviderChange?.(this.provider)
-
-      if (this.provider !== 'web-speech-api' && this.provider !== 'none') {
-        await this.loadModel()
+    try {
+      // If currently listening, stop first to avoid race with startListening
+      if (this.state === 'listening') {
+        this.stopListening()
       }
-    } else if (this.provider === 'whisper' && this.worker) {
-      this.worker.postMessage({ type: 'set-language', language })
-    }
 
-    return this.provider
+      const newProvider = this.selectProvider(language)
+      this.language = language
+
+      if (newProvider !== this.provider) {
+        this.unloadModel()
+        this.provider = newProvider
+        this.callbacks?.onProviderChange?.(this.provider)
+
+        if (this.provider !== 'web-speech-api' && this.provider !== 'none') {
+          await this.loadModel()
+        }
+      } else if (this.provider === 'whisper' && this.worker) {
+        this.worker.postMessage({ type: 'set-language', language })
+      }
+
+      return this.provider
+    } finally {
+      this.isChangingLanguage = false
+    }
   }
 
   /**
    * Fully clean up all resources
    */
   destroy(): void {
+    this.destroyed = true
     // Clear any pending model-load timeout to prevent dangling reject
     if (this.modelLoadTimeout) {
       clearTimeout(this.modelLoadTimeout)
       this.modelLoadTimeout = null
     }
+    this.modelLoadPromise = null
     this.stopListening()
     this.unloadModel()
     this.callbacks = null
@@ -410,6 +474,7 @@ export class OnDeviceSTT {
 
   private unloadModel() {
     this.clearIdleTimer()
+    this.modelLoadPromise = null
     if (this.worker) {
       this.worker.postMessage({ type: 'unload' })
       this.worker.terminate()
@@ -419,9 +484,11 @@ export class OnDeviceSTT {
 
   private startIdleTimer() {
     this.clearIdleTimer()
+    // 120 seconds: long enough for user to read AI response and respond back
+    // without triggering a costly model reload
     this.idleTimer = setTimeout(() => {
       this.unloadModel()
-    }, 60_000) // 60 seconds
+    }, 120_000)
   }
 
   private clearIdleTimer() {
