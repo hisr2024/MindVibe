@@ -58,7 +58,7 @@
     "simplebar-react": "^2.4.3",
     "three": "^0.183.2",
     "typescript": "^5.9.3",
-    "web-vitals": "^4.2.4",
+    "web-vitals": "^5.1.0",
     "@huggingface/transformers": "^3.4.0",
     "zustand": "^5.0.12"
   },
