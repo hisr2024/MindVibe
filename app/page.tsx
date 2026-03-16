@@ -19,9 +19,6 @@ import dynamic from 'next/dynamic';
 import { useLanguage } from '@/hooks/useLanguage';
 import { springConfigs } from '@/lib/animations/spring-configs';
 
-// Preserved non-animated component
-import { PathwayMap } from '@/components/navigation/PathwayMap';
-
 // Dynamic imports for framer-motion components to reduce initial bundle size
 const DivineCelestialBackground = dynamic(() => import('@/components/divine/DivineCelestialBackground').then(mod => mod.DivineCelestialBackground), { ssr: false });
 const DivineKrishnaPresence = dynamic(() => import('@/components/divine/DivineKrishnaPresence').then(mod => mod.DivineKrishnaPresence), { ssr: false });
@@ -147,8 +144,6 @@ export default function Home() {
         {/* === SACRED ACTIONS: Quick access to KIAAN tools === */}
         <DivineSacredActions />
 
-        {/* === PATHWAY MAP: Healing journey steps === */}
-        <PathwayMap />
 
         {/* === CLOSING VERSE: Daily reminder === */}
         <motion.section

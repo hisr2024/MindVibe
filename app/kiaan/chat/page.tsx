@@ -15,10 +15,6 @@ import { useKiaanQuota } from '@/hooks/useKiaanQuota';
 import { useSubscription } from '@/hooks/useSubscription';
 
 // Dynamic imports for secondary UI components
-const PathwayMap = dynamic(
-  () => import('@/components/navigation/PathwayMap').then(mod => ({ default: mod.PathwayMap })),
-  { loading: () => <div className="h-32 animate-pulse rounded-xl bg-slate-800/30" /> }
-);
 const NextStepLink = dynamic(
   () => import('@/components/suggestions/NextStepLink').then(mod => ({ default: mod.NextStepLink })),
   { loading: () => <div className="h-10 animate-pulse rounded-lg bg-slate-800/30" /> }
@@ -238,7 +234,6 @@ function KiaanChatPageInner() {
   return (
     <main className="mx-auto max-w-5xl space-y-4 sm:space-y-6 p-3 sm:p-4 pb-28 sm:pb-24 md:p-8">
       {/* Pathway Map */}
-      <PathwayMap />
 
       {/* Header */}
       <div className="kiaan-cosmic-card relative z-10 space-y-3 sm:space-y-4 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-[0_30px_120px_rgba(212,164,76,0.08)] md:p-8">
@@ -255,15 +250,6 @@ function KiaanChatPageInner() {
             </p>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-            {/* KIAAN Companion - Conversation Mode */}
-            <Link
-              href="/companion"
-              className="flex items-center gap-1.5 sm:gap-2 rounded-xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 px-3 sm:px-4 py-2 text-sm font-semibold text-[#e8dcc8] transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/10"
-              title="KIAAN Companion - Talk with KIAAN"
-            >
-              <span className="text-lg">🗣️</span>
-              <span className="hidden sm:inline">{t('kiaan.voice.companion', 'KIAAN Companion')}</span>
-            </Link>
             {/* Voice Mode Toggle */}
             <Link
               href="/companion"
