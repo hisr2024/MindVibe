@@ -67,6 +67,8 @@ export interface UseVoiceInputReturn {
   isOnline: boolean
   /** Confidence of last final result (0-1) */
   confidence: number
+  /** Server transcription progress message (shown during Tier 3 processing) */
+  serverProgressMessage: string
 }
 
 /**
@@ -125,6 +127,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   const [isOnline, setIsOnline] = useState(
     typeof navigator !== 'undefined' ? navigator.onLine : true
   )
+  const [serverProgressMessage, setServerProgressMessage] = useState('')
   const [isWebSpeechSupported] = useState(() => isSpeechRecognitionSupported())
 
   const recognitionRef = useRef<SpeechRecognitionService | null>(null)
@@ -282,16 +285,18 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
 
         setStatus('processing')
         setInterimTranscript('')
+        setServerProgressMessage('Uploading audio...')
 
         // Use AbortController so we can cancel the fetch on unmount
         const abortController = new AbortController()
-        const timeoutId = setTimeout(() => abortController.abort(), 30000)
+        const timeoutId = setTimeout(() => abortController.abort(), 60000)
 
         try {
           const formData = new FormData()
           formData.append('audio', audioBlob, 'recording.webm')
           formData.append('language', language)
 
+          setServerProgressMessage('Transcribing...')
           const response = await fetch('/api/voice/transcribe', {
             method: 'POST',
             body: formData,
@@ -305,6 +310,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
             const data = await response.json()
             if (!mountedRef.current) return
             const text = data.transcript || ''
+            setServerProgressMessage('')
             if (text.trim()) {
               const finalText = punctuationAssist ? applyPunctuationAssist(text) : text
               setTranscript(finalText)
@@ -314,6 +320,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
           } else {
             const data = await response.json().catch(() => ({}))
             if (!mountedRef.current) return
+            setServerProgressMessage('')
             const msg = data.error || 'Server transcription failed'
             setError(msg)
             setStatus('error')
@@ -322,6 +329,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
         } catch (err) {
           clearTimeout(timeoutId)
           if (!mountedRef.current) return
+          setServerProgressMessage('')
           // Don't show error for intentional aborts
           if (err instanceof DOMException && err.name === 'AbortError') {
             setStatus('idle')
@@ -559,5 +567,6 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     status,
     isOnline,
     confidence,
+    serverProgressMessage,
   }
 }

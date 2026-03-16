@@ -39,6 +39,9 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   // Accumulate all final transcript segments until user taps stop (ref for callbacks)
   const accumulatedRef = useRef<string>('')
+  // Rate limiting: prevent rapid toggle spam
+  const lastToggleRef = useRef(0)
+  const TOGGLE_COOLDOWN_MS = 500
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -57,6 +60,8 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
     resetTranscript,
     status,
     sttProvider,
+    confidence,
+    serverProgressMessage,
   } = useVoiceInput({
     language,
     onTranscript: useCallback((text: string, isFinal: boolean) => {
@@ -112,6 +117,11 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
   }, [hookStopListening, clearTimer, onTranscription])
 
   const toggleRecording = useCallback(() => {
+    // Rate limit: ignore rapid toggles within cooldown period
+    const now = Date.now()
+    if (now - lastToggleRef.current < TOGGLE_COOLDOWN_MS) return
+    lastToggleRef.current = now
+
     if (isListening) {
       stopRecording()
     } else {
@@ -139,6 +149,23 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
     prevListeningRef.current = isListening
   }, [isListening, clearTimer])
 
+  // Keyboard shortcuts: Escape to cancel active recording
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept when user is typing in an input/textarea
+      const tag = (e.target as HTMLElement)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable) return
+
+      if (e.key === 'Escape' && isListening) {
+        e.preventDefault()
+        stopRecording()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isListening, stopRecording])
+
   // Cleanup on unmount
   useEffect(() => {
     return () => { clearTimer() }
@@ -162,7 +189,7 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
         } ${isDisabled || isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         aria-label={isListening ? 'Stop recording' : 'Start voice recording'}
         aria-pressed={isListening}
-        title={isListening ? 'Tap to stop' : 'Tap to speak'}
+        title={isListening ? 'Tap to stop (Esc)' : 'Tap to speak'}
       >
         {isListening ? (
           <>
@@ -195,10 +222,25 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
         </span>
       )}
 
-      {/* Server transcription processing indicator */}
+      {/* Server transcription processing indicator with progress */}
       {status === 'processing' && (
         <span className="text-xs text-violet-400 animate-pulse" role="status">
-          Transcribing...
+          {serverProgressMessage || 'Transcribing...'}
+        </span>
+      )}
+
+      {/* Confidence badge — shown after a final result when confidence is available */}
+      {!isListening && confidence > 0 && confidence < 0.6 && (
+        <span className="text-[9px] text-amber-400 bg-amber-400/10 rounded-full px-1.5 py-0.5" role="status" aria-label={`Low confidence: ${Math.round(confidence * 100)}%`}>
+          Low confidence ({Math.round(confidence * 100)}%)
+          <button
+            onClick={startRecording}
+            disabled={isDisabled || isProcessing}
+            className="ml-1 underline hover:text-amber-300 focus:outline-none focus:ring-1 focus:ring-amber-400 rounded"
+            aria-label="Retry voice recording for better accuracy"
+          >
+            Retry
+          </button>
         </span>
       )}
 
