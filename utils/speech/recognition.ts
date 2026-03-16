@@ -93,7 +93,11 @@ export class SpeechRecognitionService {
     this.recognition.onresult = (event: SpeechRecognitionEvent) => {
       if (!event.results || event.results.length === 0) return
       const result = event.results[event.results.length - 1]
+      if (!result || result.length === 0) return
       const isFinal = result.isFinal
+
+      // Reset silence timer on any speech activity
+      this.resetSilenceTimer()
 
       // Multi-alternative processing: select the best transcript
       let bestTranscript = ''
@@ -156,6 +160,13 @@ export class SpeechRecognitionService {
         this.keepListeningOnMobile = false
       }
 
+      // AbortError from rapid stop/start — not a real user error
+      if (event.error === 'aborted' && this.isStopping) {
+        this.isListening = false
+        this.isStopping = false
+        return
+      }
+
       let errorMessage = 'Speech recognition error'
 
       switch (event.error) {
@@ -166,6 +177,8 @@ export class SpeechRecognitionService {
           errorMessage = 'audio-capture: Microphone not found or accessible.'
           break
         case 'not-allowed':
+          // Reset permission cache so next attempt re-prompts
+          this.micPermissionGranted = false
           errorMessage = 'not-allowed: Microphone permission denied.'
           break
         case 'network':
@@ -291,23 +304,20 @@ export class SpeechRecognitionService {
       return
     }
 
-    // If currently stopping, wait briefly then retry with a bounded counter.
-    // Guard against infinite recursion: if we exhaust retries, force-reset and
-    // attempt exactly once more (not recursively).
+    // If currently stopping, wait briefly with bounded retries (no recursion).
     if (this.isStopping) {
-      if (this.startAttempts < this.maxStartAttempts) {
-        this.startAttempts++
+      let waited = false
+      for (let attempt = 0; attempt < this.maxStartAttempts && this.isStopping; attempt++) {
         await new Promise<void>(resolve => setTimeout(resolve, 150))
-        // Re-check: stop may have completed during the wait
-        if (!this.isStopping) {
-          return this.start(callbacks)
-        }
-        return this.start(callbacks)
+        waited = true
       }
-      // Force-reset state — do NOT recurse, fall through to start below
-      this.startAttempts = 0
-      this.isListening = false
-      this.isStopping = false
+      if (this.isStopping) {
+        // Force-reset state after exhausting waits
+        this.isListening = false
+        this.isStopping = false
+      }
+      // If stop completed during waits, fall through to start below
+      if (waited) { /* state should now be clean */ }
     }
 
     if (this.isListening) {
@@ -326,26 +336,27 @@ export class SpeechRecognitionService {
       return
     }
 
-    try {
-      this.recognition?.start()
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Failed to start recognition'
+    // Attempt to start, with bounded retries on "already started" (no recursion)
+    for (let attempt = 0; attempt <= this.maxStartAttempts; attempt++) {
+      try {
+        this.recognition?.start()
+        return // Success
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Failed to start recognition'
 
-      // Handle "already started" error by aborting and retrying with backoff
-      if (errorMsg.includes('already started')) {
-        if (this.startAttempts < this.maxStartAttempts) {
-          this.startAttempts++
+        if (errorMsg.includes('already started') && attempt < this.maxStartAttempts) {
           this.abort()
-          await new Promise<void>(resolve => setTimeout(resolve, 200 + this.startAttempts * 100))
-          return this.start(callbacks)
+          await new Promise<void>(resolve => setTimeout(resolve, 200 + attempt * 100))
+          continue
         }
-        // Exhausted retries: force state reset, report error
+
+        // Final attempt failed or non-retryable error
         this.isListening = false
         this.isStopping = false
         this.startAttempts = 0
+        this.callbacks.onError?.(errorMsg)
+        return
       }
-
-      this.callbacks.onError?.(errorMsg)
     }
   }
 
@@ -390,10 +401,12 @@ export class SpeechRecognitionService {
     }
 
     this.isListening = false
-    // Clear stopping flag quickly to allow rapid restart for wake word
-    setTimeout(() => {
+    // Clear stopping flag on next microtask to allow the browser's onend
+    // event to see isStopping=true (prevents auto-restart) while still
+    // resetting quickly enough for rapid restart (wake word, etc.)
+    queueMicrotask(() => {
       this.isStopping = false
-    }, 150)
+    })
   }
 
   /**

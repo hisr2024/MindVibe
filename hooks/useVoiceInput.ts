@@ -28,6 +28,15 @@ import { useOnDeviceSTT } from '@/hooks/useOnDeviceSTT'
 
 export type VTTStatus = 'idle' | 'listening' | 'processing' | 'error' | 'offline'
 
+/** Active STT tier — only one tier should be active at a time */
+type ActiveTier = 'none' | 'on-device' | 'web-speech' | 'server'
+
+/** Maximum recording duration in milliseconds for server transcription */
+const MAX_RECORDING_DURATION_MS = 120_000 // 2 minutes
+
+/** Minimum audio blob size to send to server (bytes) — filter out click/noise */
+const MIN_AUDIO_BLOB_SIZE = 1000 // ~1KB
+
 export interface UseVoiceInputOptions {
   language?: string
   onTranscript?: (text: string, isFinal: boolean) => void
@@ -120,12 +129,14 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
 
   const recognitionRef = useRef<SpeechRecognitionService | null>(null)
   const [usingServer, setUsingServer] = useState(false)
-  const usingOnDeviceRef = useRef(false)
-  const usingServerRef = useRef(false)
+  /** Single source of truth for which tier is active — prevents dual-tier activation */
+  const activeTierRef = useRef<ActiveTier>('none')
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const mediaStreamRef = useRef<MediaStream | null>(null)
   const mountedRef = useRef(true)
+  /** Auto-stop timer for server recording max duration */
+  const maxDurationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Stable refs for parent callbacks to avoid stale closures in async handlers
   const onTranscriptRef = useRef(onTranscript)
   const onErrorRef = useRef(onError)
@@ -151,7 +162,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   const onDeviceSTT = useOnDeviceSTT({
     language,
     onTranscript: useCallback((text: string, isFinal: boolean) => {
-      if (!usingOnDeviceRef.current || !mountedRef.current) return
+      if (activeTierRef.current !== 'on-device' || !mountedRef.current) return
       if (isFinal) {
         const finalText = punctuationAssist ? applyPunctuationAssist(text) : text
         setTranscript(finalText)
@@ -164,7 +175,9 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
       }
     }, [punctuationAssist]),
     onError: useCallback((err: string) => {
-      usingOnDeviceRef.current = false
+      if (activeTierRef.current === 'on-device') {
+        activeTierRef.current = 'none'
+      }
       onErrorRef.current?.(err)
     }, []),
   })
@@ -193,6 +206,14 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     }
   }, [language])
 
+  /** Clear the max-duration safety timer for server recording */
+  const clearMaxDurationTimer = useCallback(() => {
+    if (maxDurationTimerRef.current) {
+      clearTimeout(maxDurationTimerRef.current)
+      maxDurationTimerRef.current = null
+    }
+  }, [])
+
   /**
    * Tier 3: Server-side transcription via MediaRecorder → /api/voice/transcribe
    * Used when both on-device and Web Speech API are unavailable.
@@ -204,6 +225,13 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+
+      // Validate we actually got audio tracks
+      if (!stream.getAudioTracks().length) {
+        stream.getTracks().forEach(t => t.stop())
+        return false
+      }
+
       mediaStreamRef.current = stream
       audioChunksRef.current = []
 
@@ -220,16 +248,33 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
       }
 
       recorder.onstop = async () => {
+        clearMaxDurationTimer()
+
         // Release mic
         if (mediaStreamRef.current) {
           mediaStreamRef.current.getTracks().forEach(t => t.stop())
           mediaStreamRef.current = null
         }
 
+        activeTierRef.current = 'none'
+
         // Guard: component may have unmounted while recording
-        if (!mountedRef.current) return
+        if (!mountedRef.current) {
+          audioChunksRef.current = []
+          return
+        }
 
         if (audioChunksRef.current.length === 0) {
+          setIsListening(false)
+          setStatus('idle')
+          return
+        }
+
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+        audioChunksRef.current = []
+
+        // Skip upload if audio is too small (likely just mic activation noise)
+        if (audioBlob.size < MIN_AUDIO_BLOB_SIZE) {
           setIsListening(false)
           setStatus('idle')
           return
@@ -238,8 +283,9 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
         setStatus('processing')
         setInterimTranscript('')
 
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
-        audioChunksRef.current = []
+        // Use AbortController so we can cancel the fetch on unmount
+        const abortController = new AbortController()
+        const timeoutId = setTimeout(() => abortController.abort(), 30000)
 
         try {
           const formData = new FormData()
@@ -249,9 +295,10 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
           const response = await fetch('/api/voice/transcribe', {
             method: 'POST',
             body: formData,
-            signal: AbortSignal.timeout(30000),
+            signal: abortController.signal,
           })
 
+          clearTimeout(timeoutId)
           if (!mountedRef.current) return
 
           if (response.ok) {
@@ -272,11 +319,17 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
             setStatus('error')
             onErrorRef.current?.(msg)
           }
-        } catch {
+        } catch (err) {
+          clearTimeout(timeoutId)
           if (!mountedRef.current) return
-          setError('Server transcription unavailable. Please type your message.')
-          setStatus('error')
-          onErrorRef.current?.('Server transcription unavailable.')
+          // Don't show error for intentional aborts
+          if (err instanceof DOMException && err.name === 'AbortError') {
+            setStatus('idle')
+          } else {
+            setError('Server transcription unavailable. Please type your message.')
+            setStatus('error')
+            onErrorRef.current?.('Server transcription unavailable.')
+          }
         }
 
         if (!mountedRef.current) return
@@ -287,10 +340,18 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
       mediaRecorderRef.current = recorder
       // Collect data every 1 second for progressive feedback
       recorder.start(1000)
-      usingServerRef.current = true
+      activeTierRef.current = 'server'
       setUsingServer(true)
       setIsListening(true)
       setStatus('listening')
+
+      // Safety: auto-stop after max duration to prevent memory bloat
+      maxDurationTimerRef.current = setTimeout(() => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+          mediaRecorderRef.current.stop()
+        }
+      }, MAX_RECORDING_DURATION_MS)
+
       return true
     } catch {
       // Release mic if getUserMedia succeeded but something else failed
@@ -300,7 +361,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
       }
       return false
     }
-  }, [language, punctuationAssist])
+  }, [language, punctuationAssist, clearMaxDurationTimer])
 
   const startListening = useCallback(async () => {
     // Pre-flight: check basic availability
@@ -327,14 +388,14 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     setTranscript('')
     setInterimTranscript('')
     setConfidence(0)
-    usingServerRef.current = false
+    activeTierRef.current = 'none'
     setUsingServer(false)
 
     // ── Tier 1: On-device STT (Moonshine/Whisper) ──
     // Only attempt if model is fully loaded and provider is on-device.
     // On-device STT throws if not ready, triggering fallback to Tier 2.
     if (onDeviceSTT.canHandleSTT && onDeviceSTT.isModelLoaded) {
-      usingOnDeviceRef.current = true
+      activeTierRef.current = 'on-device'
       try {
         await onDeviceSTT.startListening()
         // Verify it actually started — the model may have silently degraded
@@ -342,28 +403,29 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
           setIsListening(true)
           setStatus('listening')
         } else {
-          usingOnDeviceRef.current = false
+          activeTierRef.current = 'none'
         }
       } catch {
         // On-device failed — fall through to Tier 2
-        usingOnDeviceRef.current = false
+        activeTierRef.current = 'none'
       }
-      if (usingOnDeviceRef.current) return
+      if (activeTierRef.current === 'on-device') return
     }
 
     // ── Tier 2: Web Speech API ──
-    usingOnDeviceRef.current = false
+    activeTierRef.current = 'none'
     if (recognitionRef.current && isWebSpeechSupported) {
+      activeTierRef.current = 'web-speech'
       // Await mic permission + recognition.start() so the UI only shows
       // "listening" after the microphone is actually capturing audio.
       await recognitionRef.current.start({
         onStart: () => {
-          if (!mountedRef.current) return
+          if (!mountedRef.current || activeTierRef.current !== 'web-speech') return
           setIsListening(true)
           setStatus('listening')
         },
         onResult: (text, isFinal, resultConfidence) => {
-          if (!mountedRef.current) return
+          if (!mountedRef.current || activeTierRef.current !== 'web-speech') return
           if (isFinal) {
             const finalText = punctuationAssist ? applyPunctuationAssist(text) : text
             setTranscript(finalText)
@@ -378,12 +440,14 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
         },
         onEnd: () => {
           if (!mountedRef.current) return
+          activeTierRef.current = 'none'
           setIsListening(false)
           setInterimTranscript('')
           setStatus('idle')
         },
         onError: (err) => {
           if (!mountedRef.current) return
+          activeTierRef.current = 'none'
           const compassionateMsg = getCompassionateError(err)
           setError(compassionateMsg)
           setIsListening(false)
@@ -410,25 +474,32 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   }, [isWebSpeechSupported, isOnline, punctuationAssist, onDeviceSTT, startServerTranscription])
 
   const stopListening = useCallback(() => {
-    if (usingOnDeviceRef.current) {
+    const tier = activeTierRef.current
+
+    if (tier === 'on-device') {
       onDeviceSTT.stopListening()
+      activeTierRef.current = 'none'
     }
-    if (usingServerRef.current && mediaRecorderRef.current) {
+
+    if (tier === 'server' && mediaRecorderRef.current) {
+      clearMaxDurationTimer()
       // Stopping the recorder triggers onstop → sends to server
       if (mediaRecorderRef.current.state !== 'inactive') {
         mediaRecorderRef.current.stop()
       }
-      usingServerRef.current = false
       setUsingServer(false)
       return // Don't reset status yet — onstop handler will do transcription
     }
-    if (recognitionRef.current) {
+
+    if (tier === 'web-speech' && recognitionRef.current) {
       recognitionRef.current.stop()
+      activeTierRef.current = 'none'
     }
+
     setIsListening(false)
     setInterimTranscript('')
     setStatus('idle')
-  }, [onDeviceSTT])
+  }, [onDeviceSTT, clearMaxDurationTimer])
 
   const resetTranscript = useCallback(() => {
     setTranscript('')
@@ -443,6 +514,12 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
   useEffect(() => {
     return () => {
       mountedRef.current = false
+      activeTierRef.current = 'none'
+      // Clear max-duration safety timer
+      if (maxDurationTimerRef.current) {
+        clearTimeout(maxDurationTimerRef.current)
+        maxDurationTimerRef.current = null
+      }
       // Stop MediaRecorder if active
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         try { mediaRecorderRef.current.stop() } catch { /* already stopped */ }
@@ -452,6 +529,8 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
         mediaStreamRef.current.getTracks().forEach(t => t.stop())
         mediaStreamRef.current = null
       }
+      // Clear buffered audio to free memory
+      audioChunksRef.current = []
       // Stop Web Speech API recognition
       if (recognitionRef.current) {
         recognitionRef.current.destroy()
@@ -469,11 +548,11 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     startListening,
     stopListening,
     resetTranscript,
-    sttProvider: usingServer
+    sttProvider: activeTierRef.current === 'server'
       ? 'server'
-      : usingOnDeviceRef.current
+      : activeTierRef.current === 'on-device'
         ? onDeviceSTT.sttProvider
-        : isListening
+        : activeTierRef.current === 'web-speech'
           ? 'web-speech-api'
           : onDeviceSTT.sttProvider,
     deviceTier: onDeviceSTT.deviceTier,

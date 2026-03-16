@@ -50,12 +50,12 @@ export function useOnDeviceSTT(options: UseOnDeviceSTTOptions = {}): UseOnDevice
   const [error, setError] = useState<string | null>(null)
 
   const sttRef = useRef<OnDeviceSTT | null>(null)
+  // Synchronous ref updates — no useEffect delay, so callbacks always
+  // have the latest reference when they fire (fixes stale closure issue)
   const onTranscriptRef = useRef(onTranscript)
   const onErrorRef = useRef(onError)
-
-  // Keep callback refs current
-  useEffect(() => { onTranscriptRef.current = onTranscript }, [onTranscript])
-  useEffect(() => { onErrorRef.current = onError }, [onError])
+  onTranscriptRef.current = onTranscript
+  onErrorRef.current = onError
 
   // Initialize on mount
   useEffect(() => {

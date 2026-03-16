@@ -151,21 +151,22 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2" role="group" aria-label="Voice recording controls">
       <button
         onClick={toggleRecording}
         disabled={isDisabled || isProcessing}
-        className={`relative p-3 rounded-full transition-all duration-300 ${
+        className={`relative p-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${
           isListening
             ? 'bg-red-500 text-white shadow-lg shadow-red-500/30 scale-110'
             : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-600'
         } ${isDisabled || isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         aria-label={isListening ? 'Stop recording' : 'Start voice recording'}
+        aria-pressed={isListening}
         title={isListening ? 'Tap to stop' : 'Tap to speak'}
       >
         {isListening ? (
           <>
-            <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-30" />
+            <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-30" aria-hidden="true" />
             <ShankhaIcon size={20} filled className="relative z-10" />
           </>
         ) : (
@@ -175,43 +176,53 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
 
       {/* Recording duration */}
       {isListening && (
-        <span className="text-xs text-red-500 font-mono animate-pulse">
+        <span className="text-xs text-red-500 font-mono animate-pulse" aria-live="off" aria-label={`Recording duration: ${formatDuration(duration)}`}>
           {formatDuration(duration)}
         </span>
       )}
 
       {/* STT provider badge */}
       {isListening && sttProvider && (
-        <span className="text-[9px] text-white/25 bg-white/5 rounded-full px-1.5 py-0.5">
+        <span className="text-[9px] text-white/25 bg-white/5 rounded-full px-1.5 py-0.5" aria-label={`Using ${sttProvider === 'web-speech-api' ? 'browser' : sttProvider === 'server' ? 'cloud' : sttProvider} speech recognition`}>
           {sttProvider === 'web-speech-api' ? 'Browser' : sttProvider === 'server' ? 'Cloud' : sttProvider}
         </span>
       )}
 
       {/* Live transcription feedback */}
       {isListening && liveTranscript && (
-        <span className="text-xs text-violet-400 italic max-w-[200px] truncate">
+        <span className="text-xs text-violet-400 italic max-w-[200px] truncate" aria-live="polite">
           {liveTranscript}
         </span>
       )}
 
       {/* Server transcription processing indicator */}
       {status === 'processing' && (
-        <span className="text-xs text-violet-400 animate-pulse">
+        <span className="text-xs text-violet-400 animate-pulse" role="status">
           Transcribing...
         </span>
       )}
 
       {/* Browser does not support any speech recognition */}
       {!isSupported && !voiceError && (
-        <span className="text-xs text-amber-500">
+        <span className="text-xs text-amber-500" role="alert">
           Voice input not supported in this browser. Please type your message.
         </span>
       )}
 
-      {/* Error display */}
+      {/* Error display with retry */}
       {voiceError && (
-        <span className="text-xs text-amber-500">
+        <span className="text-xs text-amber-500 flex items-center gap-1.5" role="alert">
           {voiceError}
+          {!isListening && (
+            <button
+              onClick={startRecording}
+              disabled={isDisabled || isProcessing}
+              className="underline text-violet-400 hover:text-violet-300 focus:outline-none focus:ring-1 focus:ring-violet-400 rounded"
+              aria-label="Retry voice recording"
+            >
+              Retry
+            </button>
+          )}
         </span>
       )}
     </div>
