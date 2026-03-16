@@ -60,7 +60,7 @@
     "typescript": "^5.9.3",
     "web-vitals": "^4.2.4",
     "@huggingface/transformers": "^3.4.0",
-    "zustand": "^5.0.11"
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.1.6",
