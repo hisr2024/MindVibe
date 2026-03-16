@@ -8,7 +8,7 @@
  * with touch-optimized controls and mobile navigation.
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Mic, MicOff, ArrowLeft, Volume2, VolumeX } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -37,6 +37,13 @@ export default function MobileCompanionPage() {
   const [isMuted, setIsMuted] = useState(false)
   const [connectionError, setConnectionError] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const handleVoiceMessageRef = useRef<(text: string) => void>(() => {})
+
+  const onTranscriptCb = useMemo(() => (text: string, isFinal: boolean) => {
+    if (isFinal && text.trim()) {
+      handleVoiceMessageRef.current(text.trim())
+    }
+  }, [])
 
   const {
     isListening,
@@ -50,11 +57,7 @@ export default function MobileCompanionPage() {
     status,
   } = useVoiceInput({
     language: 'en',
-    onTranscript: useCallback((text: string, isFinal: boolean) => {
-      if (isFinal && text.trim()) {
-        handleVoiceMessage(text.trim())
-      }
-    }, []),
+    onTranscript: onTranscriptCb,
   })
 
   // Initialize companion session
@@ -149,6 +152,9 @@ export default function MobileCompanionPage() {
       setIsProcessing(false)
     }
   }, [sessionId, triggerHaptic])
+
+  // Keep ref in sync so the onTranscript callback always calls the latest version
+  handleVoiceMessageRef.current = handleVoiceMessage
 
   const toggleRecording = useCallback(() => {
     triggerHaptic('selection')
