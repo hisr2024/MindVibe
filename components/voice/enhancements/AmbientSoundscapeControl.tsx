@@ -13,7 +13,7 @@
  * When disabled, the UI renders in a "coming soon" preview state.
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Music,
@@ -269,10 +269,10 @@ export function AmbientSoundscapeControl({
   const [masterVolume, setMasterVolume] = useState(0.7)
   const [currentPreset, _setCurrentPreset] = useState<string | null>(null)
 
-  // Sync with audio state during render
-  if (playing !== audioState.ambientActive) {
+  // Sync with audio state via effect (not during render to avoid re-render loops)
+  useEffect(() => {
     setPlaying(audioState.ambientActive)
-  }
+  }, [audioState.ambientActive])
 
   const handleToggle = useCallback(async () => {
     if (!AMBIENT_SOUNDSCAPE_ENABLED) return
