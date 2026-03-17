@@ -42,7 +42,8 @@ export async function POST(request: NextRequest) {
     })
 
     if (backendResponse.ok) {
-      const data = await backendResponse.json()
+      const data = await backendResponse.json().catch(() => null)
+      if (!data) throw new Error('Backend returned invalid JSON')
       logMetrics({ event: 'session_start', tier: 'backend', latency_ms: Date.now() - start })
       return withTierHeader(
         forwardCookies(backendResponse, NextResponse.json(data)),

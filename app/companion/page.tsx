@@ -346,38 +346,42 @@ export default function CompanionPage() {
       let buffer = ''
       let accumulated = ''
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
 
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || ''
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() || ''
 
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-          try {
-            const event = JSON.parse(line.slice(6))
-            if (event.type === 'token' && event.text) {
-              accumulated += event.text
-              onToken(accumulated)
-            } else if (event.type === 'done') {
-              onComplete(accumulated)
-              return true
-            } else if (event.type === 'error') {
-              return false
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue
+            try {
+              const event = JSON.parse(line.slice(6))
+              if (event.type === 'token' && event.text) {
+                accumulated += event.text
+                onToken(accumulated)
+              } else if (event.type === 'done') {
+                onComplete(accumulated)
+                return true
+              } else if (event.type === 'error') {
+                return false
+              }
+            } catch {
+              // Skip malformed SSE events
             }
-          } catch {
-            // Skip malformed SSE events
           }
         }
-      }
 
-      if (accumulated) {
-        onComplete(accumulated)
-        return true
+        if (accumulated) {
+          onComplete(accumulated)
+          return true
+        }
+        return false
+      } finally {
+        reader.releaseLock()
       }
-      return false
     } catch {
       return false
     }
@@ -844,7 +848,7 @@ export default function CompanionPage() {
                   <CompanionVoicePlayer
                     text={msg.content}
                     mood={msg.mood || currentMood}
-                    voiceId={voiceConfig.speakerId.split('_').pop() || 'sarvam-aura'}
+                    voiceId={voiceConfig.speakerId?.split('_').pop() || 'sarvam-aura'}
                     language={voiceConfig.language}
                     compact
                     autoPlay={voiceConfig.autoPlay && i === messages.length - 1}

@@ -162,7 +162,7 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
   const onInterimRef = useRef(onInterimTranscript)
   useEffect(() => {
     onInterimRef.current = onInterimTranscript
-  })
+  }, [onInterimTranscript])
 
   // Build live transcript display
   const liveText = transcript

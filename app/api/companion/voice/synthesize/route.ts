@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      const data = await backendResponse.json()
-      return forwardCookies(backendResponse, NextResponse.json(data))
+      const data = await backendResponse.json().catch(() => null)
+      if (data) return forwardCookies(backendResponse, NextResponse.json(data))
     }
 
     return NextResponse.json({

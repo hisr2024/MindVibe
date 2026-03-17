@@ -22,7 +22,7 @@
  *   streamResponse('How am I doing today?')
  */
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -94,6 +94,11 @@ export function useStreamingResponse(options: UseStreamingResponseOptions = {}):
 
   const abortControllerRef = useRef<AbortController | null>(null)
   const mountedRef = useRef(true)
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => { mountedRef.current = false }
+  }, [])
 
   // Stable callback refs
   const onTTSChunkRef = useRef(onTTSChunk)

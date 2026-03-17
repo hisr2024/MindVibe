@@ -55,8 +55,6 @@ export async function POST(request: NextRequest) {
       error.name === 'TimeoutError' || error.name === 'AbortError'
     )
 
-    console.error('[Companion:Stream] Proxy error:', error instanceof Error ? error.message : 'Unknown')
-
     return NextResponse.json(
       {
         error: isTimeout

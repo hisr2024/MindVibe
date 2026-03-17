@@ -74,8 +74,8 @@ async def _get_cached_profile(
     Cache is invalidated after 5 minutes or when the profile is modified.
     """
     cached = _profile_cache.get(user_id)
-    now = time.monotonic() if "time" in dir() else 0
-    if cached and (time.monotonic() - cached[1]) < _PROFILE_CACHE_TTL:
+    now = time.monotonic()
+    if cached and (now - cached[1]) < _PROFILE_CACHE_TTL:
         return cached[0]  # type: ignore[return-value]
     profile = await _get_or_create_profile(db, user_id)
     _profile_cache[user_id] = (profile, time.monotonic())
@@ -1061,8 +1061,8 @@ async def send_voice_companion_message(
             user_response=body.message,
             session_continued=True,
         )
-    except Exception:
-        pass  # Non-critical — learning loop is best-effort
+    except Exception as e:
+        logger.debug("Non-critical learning loop error: %s", e)
 
     # ── Wisdom lookup ──
     # Skip wisdom for brief messages (greetings, acknowledgments) — saves ~150ms
@@ -1139,8 +1139,8 @@ async def send_voice_companion_message(
                         wisdom_text = verse.get("wisdom", "")
                         wisdom_verse_ref = verse.get("verse_ref", "")
                         wisdom_theme = verse.get("theme")
-            except Exception:
-                logger.warning("Voice companion Sakha wisdom lookup failed", exc_info=True)
+            except Exception as e:
+                logger.warning("Voice companion Sakha wisdom lookup failed: %s", e, exc_info=True)
 
     # ══════════════════════════════════════════════════════════════════════
     # RESPONSE CACHE: Check before calling OpenAI (~1-3s saved on hit)
@@ -1744,8 +1744,8 @@ async def voice_companion_health():
         from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
         dynamic_corpus = get_dynamic_wisdom_corpus()
         dynamic_wisdom_cache_entries = len(dynamic_corpus._effectiveness_cache)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("Dynamic wisdom cache status unavailable: %s", e)
 
     return {
         "status": "healthy",
@@ -2126,6 +2126,7 @@ async def get_companion_memories(
     current_user: str = Depends(get_current_user),
 ):
     """Get what KIAAN remembers about the user (for transparency)."""
+    limit = max(1, min(limit, 100))
     result = await db.execute(
         select(CompanionMemory)
         .where(
@@ -2202,6 +2203,7 @@ async def get_mood_trends(
 
     from backend.services.companion_friend_engine import get_companion_engine
 
+    days = max(1, min(days, 365))
     since = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=days)
 
     result = await db.execute(
@@ -2352,14 +2354,15 @@ async def stream_voice_response(
     """
     import json as _json
 
-    text = payload.get("text", "").strip()
+    raw_text = payload.get("text", "")
+    if not isinstance(raw_text, str):
+        raise HTTPException(status_code=400, detail="Text must be a string")
+    text = raw_text.strip()[:MAX_MESSAGE_LENGTH]
     voice_emotion = payload.get("voice_emotion")  # From frontend prosody analyzer
     language = payload.get("language", "en")
 
     if not text:
         raise HTTPException(status_code=400, detail="Text is required")
-    if len(text) > MAX_MESSAGE_LENGTH:
-        raise HTTPException(status_code=413, detail=f"Message too long (max {MAX_MESSAGE_LENGTH} chars)")
 
     async def event_generator():
         try:
