@@ -109,6 +109,30 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
   }, [])
 
   // ---------------------------------------------------------------------------
+  // Web Speech API STT (via existing useVoiceInput)
+  // Must be declared before callbacks that reference voiceInput methods.
+  // ---------------------------------------------------------------------------
+  const voiceInput = useVoiceInput({
+    language,
+    punctuationAssist: true,
+    module: 'hands-free',
+  })
+
+  // Track the latest transcript via ref so the VAD onSpeechEnd callback
+  // can read it without stale closure issues
+  const transcriptRef = useRef('')
+  useEffect(() => {
+    const text = voiceInput.transcript || voiceInput.interimTranscript
+    transcriptRef.current = text
+  }, [voiceInput.transcript, voiceInput.interimTranscript])
+
+  // Ref for conversational option
+  const conversationalRef = useRef(conversational)
+  useEffect(() => {
+    conversationalRef.current = conversational
+  }, [conversational])
+
+  // ---------------------------------------------------------------------------
   // Idle timer — auto-deactivate after 5 minutes of no speech
   // ---------------------------------------------------------------------------
   const clearIdleTimer = useCallback(() => {
@@ -138,7 +162,6 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
   const {
     startVAD,
     stopVAD,
-    isVADActive,
     vadSupported,
   } = useVoiceActivityDetection({
     onSpeechStart: () => {
@@ -195,29 +218,6 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
       resetIdleTimer()
     },
   })
-
-  // ---------------------------------------------------------------------------
-  // Web Speech API STT (via existing useVoiceInput)
-  // ---------------------------------------------------------------------------
-  const voiceInput = useVoiceInput({
-    language,
-    punctuationAssist: true,
-    module: 'hands-free',
-  })
-
-  // Track the latest transcript via ref so the VAD onSpeechEnd callback
-  // can read it without stale closure issues
-  const transcriptRef = useRef('')
-  useEffect(() => {
-    const text = voiceInput.transcript || voiceInput.interimTranscript
-    transcriptRef.current = text
-  }, [voiceInput.transcript, voiceInput.interimTranscript])
-
-  // Ref for conversational option
-  const conversationalRef = useRef(conversational)
-  useEffect(() => {
-    conversationalRef.current = conversational
-  }, [conversational])
 
   // ---------------------------------------------------------------------------
   // Start both VAD and STT simultaneously

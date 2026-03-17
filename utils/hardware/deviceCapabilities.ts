@@ -112,6 +112,8 @@ async function detectBattery(): Promise<{
 
   try {
     // The Battery Status API is non-standard but widely available on Chrome/Edge.
+    // Battery Status API is non-standard — no TypeScript type exists
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const battery = await (navigator as any).getBattery?.();
     if (battery) {
       return {
@@ -135,6 +137,8 @@ function detectNetworkType(): DeviceCapabilities['networkType'] {
 
   if (!navigator.onLine) return 'offline';
 
+  // Network Information API is non-standard — no TypeScript type exists
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const connection = (navigator as any).connection;
   if (!connection) return 'unknown';
 
@@ -203,7 +207,10 @@ export async function detectDeviceCapabilities(): Promise<DeviceCapabilities> {
 
   return {
     cpuCores: isBrowser ? navigator.hardwareConcurrency ?? 1 : 1,
+    // deviceMemory and gpu are non-standard Navigator properties
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     memoryGb: isBrowser ? (navigator as any).deviceMemory ?? 2 : 2,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     supportsWebGPU: isBrowser ? !!(navigator as any).gpu : false,
     supportsWebNN: isBrowser ? 'ml' in navigator : false,
     gpuTier: isBrowser ? detectGpuTier() : 'none',

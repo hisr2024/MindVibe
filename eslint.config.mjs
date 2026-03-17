@@ -55,6 +55,7 @@ const eslintConfig = [
       '*.config.js',
       '*.config.mjs',
       'vendor/**',
+      'public/vad/**',
       'scripts/**',
       'mobile/react-native/**',
       'native/**',

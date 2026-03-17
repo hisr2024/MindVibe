@@ -237,6 +237,8 @@ export class ProsodyAnalyzer {
     // Clean up any prior session
     this.destroy();
 
+    // webkitAudioContext is a non-standard vendor prefix — no TypeScript type exists
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const AudioCtx = window.AudioContext ?? (window as any).webkitAudioContext;
     if (!AudioCtx) {
       throw new Error('Web Audio API is not supported in this browser');
