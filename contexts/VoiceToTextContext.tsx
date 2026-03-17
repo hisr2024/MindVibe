@@ -35,6 +35,10 @@ export interface VoiceToTextSettings {
   autoSend: boolean
   /** Whether to add punctuation post-processing for languages that need it */
   punctuationAssist: boolean
+  /** Whether hands-free mode is active (VAD + auto-detect speech start/end) */
+  handsFreeMode: boolean
+  /** Whether wake word detection is enabled ("Hey KIAAN") */
+  wakeWordEnabled: boolean
 }
 
 interface VoiceToTextContextValue {
@@ -53,6 +57,10 @@ interface VoiceToTextContextValue {
   setAutoSend: (auto: boolean) => void
   /** Toggle punctuation assist */
   setPunctuationAssist: (enabled: boolean) => void
+  /** Toggle hands-free mode (VAD + auto-detect speech) */
+  setHandsFreeMode: (enabled: boolean) => void
+  /** Toggle wake word detection ("Hey KIAAN") */
+  setWakeWordEnabled: (enabled: boolean) => void
   /** Update multiple settings at once */
   updateSettings: (partial: Partial<VoiceToTextSettings>) => void
 }
@@ -66,6 +74,8 @@ const DEFAULT_SETTINGS: VoiceToTextSettings = {
   showLiveTranscription: true,
   autoSend: false,
   punctuationAssist: true,
+  handsFreeMode: false,
+  wakeWordEnabled: false,
 }
 
 const VoiceToTextContext = createContext<VoiceToTextContextValue | null>(null)
@@ -133,6 +143,14 @@ export function VoiceToTextProvider({ children }: { children: ReactNode }) {
     setSettings((prev) => ({ ...prev, punctuationAssist }))
   }, [])
 
+  const setHandsFreeMode = useCallback((handsFreeMode: boolean) => {
+    setSettings((prev) => ({ ...prev, handsFreeMode }))
+  }, [])
+
+  const setWakeWordEnabled = useCallback((wakeWordEnabled: boolean) => {
+    setSettings((prev) => ({ ...prev, wakeWordEnabled }))
+  }, [])
+
   const updateSettings = useCallback((partial: Partial<VoiceToTextSettings>) => {
     setSettings((prev) => ({ ...prev, ...partial }))
   }, [])
@@ -148,6 +166,8 @@ export function VoiceToTextProvider({ children }: { children: ReactNode }) {
         setShowLiveTranscription,
         setAutoSend,
         setPunctuationAssist,
+        setHandsFreeMode,
+        setWakeWordEnabled,
         updateSettings,
       }}
     >
