@@ -39,6 +39,8 @@ export interface UseVoiceInputOptions {
   autoSend?: boolean
   punctuationAssist?: boolean
   module?: string
+  /** Enable auto-stop after silence following speech (for hands-free mode). */
+  autoStopOnSilence?: boolean
 }
 
 export interface UseVoiceInputReturn {
@@ -121,6 +123,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     onTranscript,
     onError,
     punctuationAssist = false,
+    autoStopOnSilence = false,
   } = options
 
   const [status, setStatus] = useState<VTTStatus>('idle')
@@ -181,13 +184,15 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
       language,
       continuous: true,
       interimResults: true,
+      autoStopOnSilence,
+      silenceTimeoutMs: 1500,
     })
 
     return () => {
       recognitionRef.current?.destroy()
       recognitionRef.current = null
     }
-  }, [webSpeechSupported, language])
+  }, [webSpeechSupported, language, autoStopOnSilence])
 
   // Update language on existing recognition instance
   useEffect(() => {

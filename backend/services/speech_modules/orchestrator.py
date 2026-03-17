@@ -50,6 +50,15 @@ from .providers.base import (
 logger = logging.getLogger(__name__)
 
 
+def _get_compute_policy():
+    """Lazy import to avoid circular dependencies."""
+    try:
+        from backend.services.voice_compute_policy import get_voice_compute_policy
+        return get_voice_compute_policy()
+    except ImportError:
+        return None
+
+
 @dataclass
 class ProviderScore:
     """Scoring data for provider selection."""
@@ -150,6 +159,7 @@ class SpeechModuleOrchestrator:
     def __init__(self):
         self._registry = get_provider_registry()
         self._initialized = False
+        self._compute_policy = _get_compute_policy()
 
         # Caching
         self._audio_cache: Dict[str, bytes] = {}
@@ -223,21 +233,81 @@ class SpeechModuleOrchestrator:
     # SYNTHESIS - Text to Speech
     # =========================================================================
 
+    def apply_compute_policy(
+        self,
+        request: SpeechSynthesisRequest,
+        device_info: Optional[Any] = None,
+        user_tier: str = "free",
+    ) -> SpeechSynthesisRequest:
+        """
+        Apply VoiceComputePolicy to adjust provider selection on a request.
+
+        When device_info is provided, the policy overrides the default provider
+        selection to optimize for device health, network quality, and user tier.
+        If no policy is available or device_info is None, the request is returned unchanged.
+        """
+        if not self._compute_policy or device_info is None:
+            return request
+
+        try:
+            from backend.services.voice_compute_policy import UserTier
+            tier = UserTier(user_tier) if user_tier in [t.value for t in UserTier] else UserTier.FREE
+            policy = self._compute_policy.select(device_info, tier)
+
+            logger.info(f"Compute policy applied: {policy.tts_provider} (TTS), {policy.stt_provider} (STT) — {policy.reason}")
+
+            # Map policy TTS provider to SpeechProvider enum if possible
+            provider_map = {
+                "elevenlabs": SpeechProvider.ELEVENLABS if hasattr(SpeechProvider, 'ELEVENLABS') else None,
+                "sarvam": SpeechProvider.SARVAM if hasattr(SpeechProvider, 'SARVAM') else None,
+                "silero": SpeechProvider.SILERO if hasattr(SpeechProvider, 'SILERO') else None,
+                "piper": SpeechProvider.PIPER if hasattr(SpeechProvider, 'PIPER') else None,
+                "browser": None,  # Browser TTS is frontend-only
+                "edge_tts": None,
+            }
+
+            mapped_provider = provider_map.get(policy.tts_provider)
+            if mapped_provider is not None:
+                request.preferred_provider = mapped_provider
+
+            # Map quality tier
+            quality_map = {
+                "divine": VoiceQuality.DIVINE,
+                "premium": VoiceQuality.PREMIUM,
+                "standard": VoiceQuality.STANDARD,
+                "fast": VoiceQuality.FAST,
+                "offline": VoiceQuality.OFFLINE,
+            }
+            mapped_quality = quality_map.get(policy.tts_quality.value)
+            if mapped_quality is not None:
+                request.quality_tier = mapped_quality
+
+        except Exception as e:
+            logger.warning(f"Failed to apply compute policy: {e}")
+
+        return request
+
     async def synthesize(
         self,
-        request: SpeechSynthesisRequest
+        request: SpeechSynthesisRequest,
+        device_info: Optional[Any] = None,
+        user_tier: str = "free",
     ) -> SpeechSynthesisResult:
         """
         Synthesize speech using the best available provider.
 
         This method:
-        1. Checks cache for existing audio
-        2. Selects optimal provider(s) based on requirements
-        3. Attempts synthesis with fallback chain
-        4. Records performance data for future optimization
-        5. Caches successful results
+        1. Applies compute policy based on device info (if provided)
+        2. Checks cache for existing audio
+        3. Selects optimal provider(s) based on requirements
+        4. Attempts synthesis with fallback chain
+        5. Records performance data for future optimization
+        6. Caches successful results
         """
         start_time = time.time()
+
+        # Apply compute policy if device info is available
+        request = self.apply_compute_policy(request, device_info, user_tier)
 
         # Check cache
         cache_key = self._generate_cache_key(request)
@@ -492,11 +562,35 @@ class SpeechModuleOrchestrator:
 
     async def recognize(
         self,
-        request: SpeechRecognitionRequest
+        request: SpeechRecognitionRequest,
+        device_info: Optional[Any] = None,
+        user_tier: str = "free",
     ) -> SpeechRecognitionResult:
         """
         Recognize speech using the best available provider.
+
+        When device_info is provided, the compute policy may override
+        the preferred STT provider for optimal device performance.
         """
+        # Apply compute policy for STT provider selection
+        if self._compute_policy and device_info is not None:
+            try:
+                from backend.services.voice_compute_policy import UserTier
+                tier = UserTier(user_tier) if user_tier in [t.value for t in UserTier] else UserTier.FREE
+                policy = self._compute_policy.select(device_info, tier)
+
+                stt_map = {
+                    "whisper": SpeechRecognizer.WHISPER if hasattr(SpeechRecognizer, 'WHISPER') else None,
+                    "vosk": SpeechRecognizer.VOSK if hasattr(SpeechRecognizer, 'VOSK') else None,
+                    "browser": None,  # Browser STT is frontend-only
+                }
+                mapped_stt = stt_map.get(policy.stt_provider)
+                if mapped_stt is not None:
+                    request.preferred_provider = mapped_stt
+                    logger.info(f"Compute policy STT override: {policy.stt_provider} — {policy.reason}")
+            except Exception as e:
+                logger.warning(f"Failed to apply STT compute policy: {e}")
+
         # Get optimal provider chain
         provider_chain = self._select_stt_providers(request)
 

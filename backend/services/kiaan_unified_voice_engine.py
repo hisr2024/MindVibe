@@ -1,11 +1,11 @@
-"""KIAAN Unified Voice Engine - Three-Engine Architecture
+"""KIAAN Unified Voice Engine - Four-Engine Architecture
 
-Merges the Voice Companion (Guidance + Friend engines) with the Voice Guide
+Merges the Voice Companion engines with the Voice Guide and Assistant
 into a single unified system. KIAAN is now an always-awake voice assistant
 (like Siri, Alexa, Bixby) that can independently guide users anywhere in the
-KIAAN Ecosystem and provide voice input to any tool.
+KIAAN Ecosystem, execute tasks, and provide voice input to any tool.
 
-THREE ENGINES:
+FOUR ENGINES:
     Engine 1 - GUIDANCE ENGINE:
         Bhagavad Gita wisdom delivery through modern, secular lens.
         Behavioral science framework (CBT, MI, Polyvagal, ACT).
@@ -17,17 +17,23 @@ THREE ENGINES:
         Mood detection and trend analytics.
         Crisis detection with helpline support.
 
-    Engine 3 - VOICE GUIDE ENGINE (NEW):
+    Engine 3 - VOICE GUIDE ENGINE:
         Always-awake voice assistant capabilities.
         Ecosystem-wide navigation via voice commands.
         Voice input injection into any KIAAN tool.
-        Intent classification and routing.
         Context-aware tool switching.
-        Proactive guidance based on user state.
 
-The three engines work in concert: the Voice Guide is the 'ears and hands'
-that routes and directs, the Guidance Engine is the 'wisdom', and the
-Friend Engine is the 'heart'.
+    Engine 4 - ASSISTANT ENGINE:
+        Task execution, reminders, scheduling.
+        Ecosystem tool orchestration with return handling.
+        Concise action summaries and next-step options.
+
+The four engines work in concert: Voice Guide is the 'ears and hands',
+Guidance Engine is the 'wisdom', Friend Engine is the 'heart', and
+Assistant Engine is the 'executor'.
+
+Routing is handled by the EngineRouter (kiaan_engine_router.py) which
+classifies intent, detects crisis, and selects primary/secondary engines.
 """
 
 from __future__ import annotations
@@ -48,6 +54,7 @@ class KiaanEngineMode(str, Enum):
     GUIDANCE = "guidance"
     FRIEND = "friend"
     VOICE_GUIDE = "voice_guide"
+    ASSISTANT = "assistant"
 
 
 class VoiceGuideAction(str, Enum):
@@ -277,7 +284,9 @@ class KiaanUnifiedVoiceEngine:
         self._friendship_engine = None
         self._companion_engine = None
         self._guidance_engine = None
-        logger.info("KIAAN Unified Voice Engine initialized with 3 engines: Guidance + Friend + Voice Guide")
+        self._assistant_engine = None
+        self._engine_router = None
+        logger.info("KIAAN Unified Voice Engine initialized with 4 engines: Guidance + Friend + Voice Guide + Assistant")
 
     def _get_friendship_engine(self):
         """Lazy-load the friendship engine to avoid circular imports."""
@@ -298,6 +307,26 @@ class KiaanUnifiedVoiceEngine:
             except ImportError:
                 logger.warning("Companion friend engine not available")
         return self._companion_engine
+
+    def _get_assistant_engine(self):
+        """Lazy-load the assistant engine for tasks, reminders, and ecosystem control."""
+        if self._assistant_engine is None:
+            try:
+                from backend.services.kiaan_assistant_engine import get_assistant_engine
+                self._assistant_engine = get_assistant_engine()
+            except ImportError:
+                logger.warning("Assistant engine not available")
+        return self._assistant_engine
+
+    def _get_engine_router(self):
+        """Lazy-load the engine router for intent classification."""
+        if self._engine_router is None:
+            try:
+                from backend.services.kiaan_engine_router import get_engine_router
+                self._engine_router = get_engine_router()
+            except ImportError:
+                logger.warning("Engine router not available — using built-in routing")
+        return self._engine_router
 
     # ─── Engine 3: Voice Guide ─────────────────────────────────────────
 
@@ -469,12 +498,33 @@ class KiaanUnifiedVoiceEngine:
         """
         Detect which engine should handle this interaction.
 
+        Uses the EngineRouter for formal 4-engine classification when available,
+        falling back to built-in pattern matching.
+
         Priority:
         1. Voice Guide: navigation, control, tool input commands
-        2. Guidance: explicit wisdom/Gita requests, crisis situations
-        3. Friend: casual chat, venting, sharing, general conversation
+        2. Assistant: tasks, reminders, scheduling, tool execution
+        3. Guidance: explicit wisdom/Gita requests, crisis situations
+        4. Friend: casual chat, venting, sharing, general conversation
         """
         lower = transcript.lower().strip()
+
+        # Try formal EngineRouter first
+        router = self._get_engine_router()
+        if router:
+            decision = router.route(transcript)
+            logger.info(f"EngineRouter decision: {decision.primary_engine.value} "
+                       f"(conf={decision.confidence:.2f}) — {decision.reasoning}")
+            # Map EngineRouter types to KiaanEngineMode
+            mode_map = {
+                "guidance": KiaanEngineMode.GUIDANCE,
+                "friend": KiaanEngineMode.FRIEND,
+                "assistant": KiaanEngineMode.ASSISTANT,
+                "voice_guide": KiaanEngineMode.VOICE_GUIDE,
+            }
+            return mode_map.get(decision.primary_engine.value, KiaanEngineMode.FRIEND)
+
+        # Fallback: built-in pattern matching
 
         # Voice Guide triggers
         for pattern in NAVIGATION_PATTERNS:
@@ -489,6 +539,16 @@ class KiaanUnifiedVoiceEngine:
         for pattern in VERSE_PATTERNS:
             if pattern.search(lower):
                 return KiaanEngineMode.VOICE_GUIDE
+
+        # Assistant triggers
+        assistant_keywords = [
+            "remind", "reminder", "alarm", "timer", "schedule",
+            "set a reminder", "wake me up", "don't forget",
+            "what time", "calendar", "calculate",
+        ]
+        for keyword in assistant_keywords:
+            if keyword in lower:
+                return KiaanEngineMode.ASSISTANT
 
         # Guidance triggers
         guidance_keywords = [
@@ -574,8 +634,11 @@ class KiaanUnifiedVoiceEngine:
                 guidance_data={"type": "daily_wisdom", "topic": voice_result.context.get("topic")},
             )
 
-        # Step 4: Route to Friend or Guidance engine for conversation
+        # Step 4: Route to the appropriate engine for conversation
         engine_mode = self.detect_engine_mode(transcript, conversation_history)
+
+        if engine_mode == KiaanEngineMode.ASSISTANT:
+            return await self._process_assistant(transcript, user_name)
 
         if engine_mode == KiaanEngineMode.GUIDANCE:
             return await self._process_guidance(
@@ -669,6 +732,56 @@ class KiaanUnifiedVoiceEngine:
             engine=KiaanEngineMode.FRIEND,
             response="I'm here for you, friend. Tell me what's on your mind, and we'll figure it out together.",
             mood=user_mood,
+        )
+
+    async def _process_assistant(
+        self,
+        transcript: str,
+        user_name: Optional[str],
+    ) -> UnifiedEngineResult:
+        """Process through the Assistant engine (tasks, reminders, ecosystem control)."""
+        engine = self._get_assistant_engine()
+        if engine:
+            try:
+                intent = engine.detect_task_intent(transcript)
+                if intent:
+                    if intent["type"] == "reminder":
+                        reminder = await engine.set_reminder(
+                            user_id=user_name or "anonymous",
+                            text=intent["text"],
+                            remind_at=intent.get("remind_at"),
+                            recurring=intent.get("recurring"),
+                        )
+                        time_str = reminder.remind_at.strftime('%I:%M %p')
+                        response = f"Done! I've set a reminder for {time_str}: '{reminder.text}'"
+                        if reminder.recurring:
+                            response += f" (recurring: {reminder.recurring})"
+                        return UnifiedEngineResult(
+                            engine=KiaanEngineMode.ASSISTANT,
+                            response=response,
+                            follow_up="Anything else you need help with?",
+                        )
+                    elif intent["type"] in ("navigate", "execute"):
+                        result = await engine.execute_tool(
+                            user_id=user_name or "anonymous",
+                            tool_name=intent.get("tool", ""),
+                        )
+                        return UnifiedEngineResult(
+                            engine=KiaanEngineMode.ASSISTANT,
+                            response=result.summary,
+                            voice_guide_result=VoiceGuideResult(
+                                action=VoiceGuideAction.NAVIGATE,
+                                route=intent.get("path"),
+                                response=result.summary,
+                                confidence=0.85,
+                            ),
+                        )
+            except Exception as e:
+                logger.warning("Assistant engine error: %s", e)
+
+        return UnifiedEngineResult(
+            engine=KiaanEngineMode.ASSISTANT,
+            response="I'd be happy to help with that. Could you be a bit more specific about what you need?",
         )
 
     async def _get_daily_wisdom(
@@ -796,7 +909,7 @@ class KiaanUnifiedVoiceEngine:
         ]
 
     def get_engine_status(self) -> Dict[str, Any]:
-        """Return health status of all three engines."""
+        """Return health status of all four engines."""
         return {
             "unified_engine": "active",
             "engines": {
@@ -812,6 +925,14 @@ class KiaanUnifiedVoiceEngine:
                     "status": "active",
                     "description": "Always-awake voice navigation + ecosystem input + tool routing",
                 },
+                "assistant": {
+                    "status": "active" if self._get_assistant_engine() else "unavailable",
+                    "description": "Task execution, reminders, scheduling, ecosystem control",
+                },
+            },
+            "router": {
+                "status": "active" if self._get_engine_router() else "fallback",
+                "description": "4-engine intent classification + routing policy",
             },
             "total_tools": len(EcosystemTool),
             "always_awake": True,

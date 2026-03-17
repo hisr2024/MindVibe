@@ -1236,6 +1236,19 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Emotional Pattern Extraction router: {e}")
 
+# Load KIAAN Assistant Engine router (reminders, task execution)
+startup_logger.info("\n[KIAAN Assistant] Attempting to import KIAAN Assistant router...")
+try:
+    from backend.routes.kiaan_assistant import router as kiaan_assistant_router
+    app.include_router(kiaan_assistant_router)
+    startup_logger.info("✅ [SUCCESS] KIAAN Assistant router loaded")
+    startup_logger.info("   • POST   /api/kiaan/assistant/reminder - Create reminder")
+    startup_logger.info("   • GET    /api/kiaan/assistant/reminders - List reminders")
+    startup_logger.info("   • DELETE /api/kiaan/assistant/reminder/{id} - Cancel reminder")
+    startup_logger.info("   • POST   /api/kiaan/assistant/execute - Execute ecosystem tool")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load KIAAN Assistant router: {e}")
+
 startup_logger.info("="*80)
 startup_logger.info(f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}")
 startup_logger.info("="*80 + "\n")

@@ -18,6 +18,10 @@ export interface RecognitionConfig {
   language?: string
   continuous?: boolean
   interimResults?: boolean
+  /** Auto-stop recognition after silence following speech. Fallback for browsers without VAD. */
+  autoStopOnSilence?: boolean
+  /** Silence duration in ms before auto-stopping (default: 1500). Only used when autoStopOnSilence is true. */
+  silenceTimeoutMs?: number
 }
 
 export interface RecognitionCallbacks {
@@ -37,6 +41,10 @@ export class SpeechRecognitionService {
   private noSpeechRestarts = 0
   private readonly maxNoSpeechRestarts = 8
   private micPermissionGranted = false
+  private autoStopOnSilence = false
+  private silenceTimeoutMs = 1500
+  private silenceTimer: ReturnType<typeof setTimeout> | null = null
+  private hasReceivedSpeech = false
 
   constructor(config: RecognitionConfig = {}) {
     const SpeechRecognitionCtor = getSpeechRecognition()
@@ -51,6 +59,8 @@ export class SpeechRecognitionService {
     this.recognition.continuous = this.isMobile ? false : (config.continuous ?? true)
     this.recognition.interimResults = config.interimResults ?? true
     this.recognition.maxAlternatives = 3
+    this.autoStopOnSilence = config.autoStopOnSilence ?? false
+    this.silenceTimeoutMs = config.silenceTimeoutMs ?? 1500
 
     this.bindEvents()
   }
@@ -81,7 +91,13 @@ export class SpeechRecognitionService {
 
       // Reset no-speech counter on real speech
       this.noSpeechRestarts = 0
+      this.hasReceivedSpeech = true
       this.callbacks.onResult?.(bestText, result.isFinal, bestConf)
+
+      // Auto-stop on silence: restart timer after each result
+      if (this.autoStopOnSilence && result.isFinal) {
+        this.resetSilenceTimer()
+      }
     }
 
     this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -138,11 +154,30 @@ export class SpeechRecognitionService {
     }
   }
 
+  private resetSilenceTimer(): void {
+    this.clearSilenceTimer()
+    if (!this.autoStopOnSilence || !this.hasReceivedSpeech) return
+    this.silenceTimer = setTimeout(() => {
+      if (this.isActive && !this.isStopping && this.hasReceivedSpeech) {
+        this.stop()
+      }
+    }, this.silenceTimeoutMs)
+  }
+
+  private clearSilenceTimer(): void {
+    if (this.silenceTimer) {
+      clearTimeout(this.silenceTimer)
+      this.silenceTimer = null
+    }
+  }
+
   private finalize(): void {
     this.isActive = false
     this.isStopping = false
     this.noSpeechRestarts = 0
     this.shouldKeepListening = false
+    this.hasReceivedSpeech = false
+    this.clearSilenceTimer()
     this.callbacks.onEnd?.()
   }
 
@@ -314,6 +349,7 @@ export class SpeechRecognitionService {
    */
   destroy(): void {
     this.abort()
+    this.clearSilenceTimer()
     this.callbacks = {}
     if (this.recognition) {
       this.recognition.onstart = null

@@ -1,20 +1,25 @@
 'use client'
 
 /**
- * CompanionVoiceRecorder — Voice input for the KIAAN companion chat.
+ * CompanionVoiceRecorder — Siri/Alexa-like Voice Input for KIAAN Companion
  *
- * Uses the unified useVoiceInput hook which provides a 3-tier STT fallback:
- *   Tier 1: Browser Web Speech API (Chrome/Edge/Safari)
- *   Tier 2: Server-side transcription via /api/voice/transcribe (Firefox, others)
- *   Tier 3: Graceful "please type instead" message
+ * Replaced the old tap-to-record model with real-time streaming speech recognition:
+ * - VAD (Voice Activity Detection) auto-detects speech start/end
+ * - Web Speech API streams interim transcripts as user speaks (words appear live)
+ * - Auto-submits after 1.5s of silence (no manual stop needed)
+ * - Wake word detection ("Hey KIAAN") for hands-free activation
+ * - Single tap activates/deactivates listening mode
  *
- * The hook handles microphone permissions, continuous mode, auto-restart,
- * and all edge cases. This component just provides the UI.
+ * How it works (like Siri):
+ *   Tap Shankha → VAD + STT start simultaneously → user speaks →
+ *   words appear in real-time → user stops → 1.5s silence → auto-submit →
+ *   KIAAN responds → resume listening (conversational mode)
  */
 
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 'react'
 import { ShankhaIcon } from '@/components/icons/ShankhaIcon'
-import { useVoiceInput } from '@/hooks/useVoiceInput'
+import { useHandsFreeMode } from '@/hooks/useHandsFreeMode'
+import { useWakeWord } from '@/hooks/useWakeWord'
 
 interface VoiceRecorderProps {
   onTranscription: (text: string) => void
@@ -33,167 +38,143 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
   isProcessing = false,
   language = 'en',
 }, ref) {
-  const [duration, setDuration] = useState(0)
-  const [accumulatedText, setAccumulatedText] = useState('')
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
-  // Accumulate all final transcript segments until user taps stop (ref for callbacks)
-  const accumulatedRef = useRef<string>('')
-  // Rate limiting: prevent rapid toggle spam
-  const lastToggleRef = useRef(0)
-  const TOGGLE_COOLDOWN_MS = 500
 
-  const clearTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-      timerRef.current = null
-    }
-  }, [])
+  const mountedRef = useRef(true)
 
+  // Hands-free mode: VAD + real-time streaming STT
   const {
-    isListening,
+    isActive,
+    state,
+    activate,
+    deactivate,
+    transcript,
     interimTranscript,
-    isSupported,
-    error: voiceError,
-    startListening,
-    stopListening: hookStopListening,
-    resetTranscript,
-    status,
-    sttProvider,
     confidence,
-    serverProgressMessage,
-    nearingLimit,
-  } = useVoiceInput({
+    sttProvider,
+    error: handsFreeError,
+    vadSupported,
+  } = useHandsFreeMode({
     language,
-    onTranscript: useCallback((text: string, isFinal: boolean) => {
-      if (isFinal && text.trim()) {
-        // Accumulate final segments — user may keep speaking
-        const separator = accumulatedRef.current ? ' ' : ''
-        accumulatedRef.current += separator + text.trim()
-        setAccumulatedText(accumulatedRef.current)
+    onTranscript: useCallback((text: string) => {
+      if (mountedRef.current && text.trim()) {
+        onTranscription(text.trim())
       }
-    }, []),
-    onError: useCallback(() => {
-      // Auto-stop timer when STT reports an error
-      // (the hook's isListening transition will also trigger cleanup via the effect below)
-    }, []),
+    }, [onTranscription]),
+    conversational: true,
+    isProcessing,
   })
 
-  // Build display text: accumulated finals + current interim
-  const liveTranscript = accumulatedText
-    + (accumulatedText && interimTranscript ? ' ' : '')
-    + interimTranscript
+  // Wake word detection: "Hey KIAAN"
+  const {
+    isListening: isWakeWordListening,
+    startWakeWordListening,
+    stopWakeWordListening,
+    wakeWordSupported,
+    lastDetected: lastWakeWord,
+  } = useWakeWord({
+    language,
+    onWakeWordDetected: useCallback(() => {
+      if (!isActive && !isDisabled && !isProcessing) {
+        activate()
+      }
+    }, [isActive, isDisabled, isProcessing, activate]),
+  })
 
-  // Start recording: reset accumulated text, start timer, start listening
-  const startRecording = useCallback(async () => {
+  // Toggle hands-free mode
+  const toggleHandsFree = useCallback(() => {
     if (isDisabled || isProcessing) return
-    // Clear any leftover timer from a previous recording session
-    clearTimer()
-    accumulatedRef.current = ''
-    setAccumulatedText('')
-    resetTranscript()
-    setDuration(0)
-
-    await startListening()
-
-    // Duration timer
-    const startTime = Date.now()
-    timerRef.current = setInterval(() => {
-      setDuration(Math.floor((Date.now() - startTime) / 1000))
-    }, 1000)
-  }, [isDisabled, isProcessing, startListening, resetTranscript, clearTimer])
-
-  // Stop recording: submit accumulated transcript
-  const stopRecording = useCallback(() => {
-    hookStopListening()
-    clearTimer()
-
-    if (accumulatedRef.current.trim()) {
-      onTranscription(accumulatedRef.current.trim())
-    }
-    // Reset both ref and state to prevent stale text on next recording
-    accumulatedRef.current = ''
-    setAccumulatedText('')
-    setDuration(0)
-  }, [hookStopListening, clearTimer, onTranscription])
-
-  const toggleRecording = useCallback(() => {
-    // Rate limit: ignore rapid toggles within cooldown period
-    const now = Date.now()
-    if (now - lastToggleRef.current < TOGGLE_COOLDOWN_MS) return
-    lastToggleRef.current = now
-
-    if (isListening) {
-      stopRecording()
+    if (isActive) {
+      deactivate()
     } else {
-      startRecording()
+      // Stop wake word before activating (avoid two SpeechRecognition instances)
+      if (isWakeWordListening) {
+        stopWakeWordListening()
+      }
+      activate()
     }
-  }, [isListening, startRecording, stopRecording])
+  }, [isActive, isDisabled, isProcessing, activate, deactivate, isWakeWordListening, stopWakeWordListening])
 
-  // Expose triggerRecord for wake word integration
+  // Toggle wake word listening
+  const toggleWakeWord = useCallback(() => {
+    if (isWakeWordListening) {
+      stopWakeWordListening()
+    } else if (!isActive) {
+      startWakeWordListening()
+    }
+  }, [isWakeWordListening, isActive, startWakeWordListening, stopWakeWordListening])
+
+  // Expose triggerRecord for programmatic activation
   useImperativeHandle(ref, () => ({
     triggerRecord: () => {
-      if (!isListening && !isDisabled && !isProcessing) {
-        startRecording()
+      if (!isActive && !isDisabled && !isProcessing) {
+        activate()
       }
     },
-  }), [isListening, isDisabled, isProcessing, startRecording])
+  }), [isActive, isDisabled, isProcessing, activate])
 
-  // When the hook stops listening (e.g. due to exhausted no-speech retries),
-  // clean up the timer so the UI doesn't show a running timer next to an error.
-  const prevListeningRef = useRef(false)
+  // Resume wake word listening after hands-free deactivates
   useEffect(() => {
-    // Only clear on transition from listening → not-listening (not on mount)
-    if (prevListeningRef.current && !isListening) {
-      clearTimer()
+    if (!isActive && wakeWordSupported && !isWakeWordListening) {
+      // Could auto-resume wake word here if user had it enabled
     }
-    prevListeningRef.current = isListening
-  }, [isListening, clearTimer])
+  }, [isActive, wakeWordSupported, isWakeWordListening])
 
-  // Keyboard shortcuts: Escape to cancel active recording
+  // Keyboard: Escape to deactivate
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't intercept when user is typing in an input/textarea
       const tag = (e.target as HTMLElement)?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable) return
-
-      if (e.key === 'Escape' && isListening) {
+      if (e.key === 'Escape' && isActive) {
         e.preventDefault()
-        stopRecording()
+        deactivate()
       }
     }
-
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isListening, stopRecording])
+  }, [isActive, deactivate])
 
   // Cleanup on unmount
   useEffect(() => {
-    return () => { clearTimer() }
-  }, [clearTimer])
+    return () => { mountedRef.current = false }
+  }, [])
 
-  const formatDuration = (seconds: number) => {
-    const m = Math.floor(seconds / 60)
-    const s = seconds % 60
-    return `${m}:${s.toString().padStart(2, '0')}`
-  }
+  // Build live transcript display
+  const liveText = transcript
+    + (transcript && interimTranscript ? ' ' : '')
+    + interimTranscript
+
+  // Determine visual state
+  const isHearing = state === 'hearing'
+  const isWaiting = state === 'waiting'
+  const isSubmitting = state === 'submitting'
 
   return (
-    <div className="flex items-center gap-2" role="group" aria-label="Voice recording controls">
+    <div className="flex items-center gap-2" role="group" aria-label="Voice input controls">
+      {/* Main Shankha button — activates/deactivates hands-free mode */}
       <button
-        onClick={toggleRecording}
+        onClick={toggleHandsFree}
         disabled={isDisabled || isProcessing}
         className={`relative p-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${
-          isListening
+          isHearing
             ? 'bg-red-500 text-white shadow-lg shadow-red-500/30 scale-110'
+            : isWaiting
+            ? 'bg-violet-600/80 text-white shadow-lg shadow-violet-500/20 scale-105'
+            : isSubmitting
+            ? 'bg-green-500 text-white shadow-lg shadow-green-500/30 scale-105'
             : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-600'
         } ${isDisabled || isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-        aria-label={isListening ? 'Stop recording' : 'Start voice recording'}
-        aria-pressed={isListening}
-        title={isListening ? 'Tap to stop (Esc)' : 'Tap to speak'}
+        aria-label={isActive ? 'Stop listening' : 'Start voice input'}
+        aria-pressed={isActive}
+        title={isActive ? 'Tap to stop listening (Esc)' : 'Tap to start listening'}
       >
-        {isListening ? (
+        {isHearing ? (
           <>
             <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-30" aria-hidden="true" />
+            <ShankhaIcon size={20} filled className="relative z-10" />
+          </>
+        ) : isWaiting ? (
+          <>
+            <span className="absolute inset-0 rounded-full bg-violet-500 animate-pulse opacity-20" aria-hidden="true" />
             <ShankhaIcon size={20} filled className="relative z-10" />
           </>
         ) : (
@@ -201,73 +182,89 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
         )}
       </button>
 
-      {/* Recording duration */}
-      {isListening && (
-        <span className={`text-xs font-mono animate-pulse ${nearingLimit ? 'text-amber-400' : 'text-red-500'}`} aria-live="off" aria-label={`Recording duration: ${formatDuration(duration)}`}>
-          {formatDuration(duration)}
+      {/* Listening state indicator */}
+      {isWaiting && !liveText && (
+        <span className="text-xs text-violet-400 animate-pulse" role="status">
+          Listening...
         </span>
       )}
 
-      {/* Nearing recording limit warning */}
-      {isListening && nearingLimit && (
-        <span className="text-[9px] text-amber-400 bg-amber-400/10 rounded-full px-1.5 py-0.5" role="status">
-          Wrapping up in 15s...
+      {/* Live transcript — words appearing in real-time like Siri */}
+      {isActive && liveText && (
+        <span className="text-xs text-violet-400 italic max-w-[250px] truncate" aria-live="polite">
+          {liveText}
+        </span>
+      )}
+
+      {/* Submitting indicator */}
+      {isSubmitting && (
+        <span className="text-xs text-green-400" role="status">
+          Sending...
         </span>
       )}
 
       {/* STT provider badge */}
-      {isListening && sttProvider && (
+      {isActive && sttProvider && sttProvider !== 'none' && (
         <span className="text-[9px] text-white/25 bg-white/5 rounded-full px-1.5 py-0.5" aria-label={`Using ${sttProvider === 'web-speech-api' ? 'browser' : sttProvider === 'server' ? 'cloud' : sttProvider} speech recognition`}>
           {sttProvider === 'web-speech-api' ? 'Browser' : sttProvider === 'server' ? 'Cloud' : sttProvider}
         </span>
       )}
 
-      {/* Live transcription feedback */}
-      {isListening && liveTranscript && (
-        <span className="text-xs text-violet-400 italic max-w-[200px] truncate" aria-live="polite">
-          {liveTranscript}
+      {/* Wake word toggle */}
+      {wakeWordSupported && !isActive && (
+        <button
+          onClick={toggleWakeWord}
+          className={`text-[10px] rounded-full px-2 py-0.5 transition-all focus:outline-none focus:ring-1 focus:ring-violet-400 ${
+            isWakeWordListening
+              ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
+              : 'bg-white/5 text-white/30 hover:text-white/50 border border-white/10'
+          }`}
+          aria-label={isWakeWordListening ? 'Disable Hey KIAAN' : 'Enable Hey KIAAN'}
+          title={isWakeWordListening ? 'Wake word active — say "Hey KIAAN"' : 'Enable wake word detection'}
+        >
+          {isWakeWordListening ? '🎙 Hey KIAAN' : 'Hey KIAAN'}
+        </button>
+      )}
+
+      {/* Wake word detected indicator */}
+      {lastWakeWord && (
+        <span className="text-[9px] text-violet-400 animate-pulse">
+          Heard: &quot;{lastWakeWord}&quot;
         </span>
       )}
 
-      {/* Server transcription processing indicator with progress */}
-      {status === 'processing' && (
-        <span className="text-xs text-violet-400 animate-pulse" role="status">
-          {serverProgressMessage || 'Transcribing...'}
-        </span>
-      )}
-
-      {/* Confidence badge — shown after a final result when confidence is available */}
-      {!isListening && confidence > 0 && confidence < 0.6 && (
+      {/* Confidence badge — shown after a result when confidence is low */}
+      {!isActive && confidence > 0 && confidence < 0.6 && (
         <span className="text-[9px] text-amber-400 bg-amber-400/10 rounded-full px-1.5 py-0.5" role="status" aria-label={`Low confidence: ${Math.round(confidence * 100)}%`}>
           Low confidence ({Math.round(confidence * 100)}%)
           <button
-            onClick={startRecording}
+            onClick={toggleHandsFree}
             disabled={isDisabled || isProcessing}
             className="ml-1 underline hover:text-amber-300 focus:outline-none focus:ring-1 focus:ring-amber-400 rounded"
-            aria-label="Retry voice recording for better accuracy"
+            aria-label="Retry voice input"
           >
             Retry
           </button>
         </span>
       )}
 
-      {/* Browser does not support any speech recognition */}
-      {!isSupported && !voiceError && (
-        <span className="text-xs text-amber-500" role="alert">
-          Voice input not supported in this browser. Please type your message.
+      {/* VAD not supported message */}
+      {!vadSupported && !isActive && (
+        <span className="text-[9px] text-amber-500/60" role="status">
+          Voice detection limited in this browser
         </span>
       )}
 
-      {/* Error display with retry */}
-      {voiceError && (
+      {/* Error display */}
+      {handsFreeError && (
         <span className="text-xs text-amber-500 flex items-center gap-1.5" role="alert">
-          {voiceError}
-          {!isListening && (
+          {handsFreeError}
+          {!isActive && (
             <button
-              onClick={startRecording}
+              onClick={toggleHandsFree}
               disabled={isDisabled || isProcessing}
               className="underline text-violet-400 hover:text-violet-300 focus:outline-none focus:ring-1 focus:ring-violet-400 rounded"
-              aria-label="Retry voice recording"
+              aria-label="Retry voice input"
             >
               Retry
             </button>
