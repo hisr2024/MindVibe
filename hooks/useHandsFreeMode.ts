@@ -35,6 +35,9 @@ interface UseHandsFreeModeOptions {
   onTranscript: (text: string) => void
   conversational?: boolean
   isProcessing?: boolean
+  /** Called when user speaks while KIAAN is responding (barge-in).
+   *  Frontend should stop audio playback and abort pending TTS requests. */
+  onBargeIn?: () => void
 }
 
 interface UseHandsFreeModeReturn {
@@ -48,6 +51,12 @@ interface UseHandsFreeModeReturn {
   sttProvider: string
   error: string | null
   vadSupported: boolean
+  /** True when KIAAN is speaking and VAD is listening for barge-in */
+  isSpeaking: boolean
+  /** Call this when KIAAN starts speaking a response */
+  markSpeaking: () => void
+  /** Call this when KIAAN finishes speaking */
+  markDoneSpeaking: () => void
 }
 
 // ---------------------------------------------------------------------------
@@ -67,20 +76,25 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     onTranscript,
     conversational = true,
     isProcessing = false,
+    onBargeIn,
   } = options
 
   const [isActive, setIsActive] = useState(false)
   const [state, setState] = useState<HandsFreeState>('inactive')
+  const [isSpeaking, setIsSpeaking] = useState(false)
+  const isSpeakingRef = useRef(false)
 
   const mountedRef = useRef(true)
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isActiveRef = useRef(false)
   const stateRef = useRef<HandsFreeState>('inactive')
 
-  // Stable callback ref
+  // Stable callback refs
   const onTranscriptRef = useRef(onTranscript)
+  const onBargeInRef = useRef(onBargeIn)
   useEffect(() => {
     onTranscriptRef.current = onTranscript
+    onBargeInRef.current = onBargeIn
   })
 
   // Keep refs in sync with state
@@ -130,6 +144,14 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     onSpeechStart: () => {
       if (!mountedRef.current || !isActiveRef.current) return
       clearIdleTimer()
+
+      // Barge-in detection: user started speaking while KIAAN is responding
+      if (isSpeakingRef.current) {
+        isSpeakingRef.current = false
+        setIsSpeaking(false)
+        onBargeInRef.current?.()
+      }
+
       setHandsFreeState('hearing')
     },
 
@@ -259,6 +281,17 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     }
   }, [])
 
+  // Mark KIAAN as speaking (keeps VAD active for barge-in detection)
+  const markSpeaking = useCallback(() => {
+    isSpeakingRef.current = true
+    setIsSpeaking(true)
+  }, [])
+
+  const markDoneSpeaking = useCallback(() => {
+    isSpeakingRef.current = false
+    setIsSpeaking(false)
+  }, [])
+
   return {
     isActive,
     state,
@@ -270,6 +303,9 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     sttProvider: voiceInput.sttProvider,
     error: voiceInput.error,
     vadSupported,
+    isSpeaking,
+    markSpeaking,
+    markDoneSpeaking,
   }
 }
 

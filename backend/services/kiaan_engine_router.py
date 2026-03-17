@@ -16,6 +16,23 @@ from enum import Enum
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict
 
+# Optional: transformer-based sentiment for richer emotion detection
+try:
+    from backend.services.voice_learning.sentiment_analysis import SentimentAnalyzer
+    _sentiment_analyzer: Optional["SentimentAnalyzer"] = None
+
+    def _get_sentiment_analyzer() -> Optional["SentimentAnalyzer"]:
+        global _sentiment_analyzer
+        if _sentiment_analyzer is None:
+            try:
+                _sentiment_analyzer = SentimentAnalyzer()
+            except Exception:
+                pass
+        return _sentiment_analyzer
+except ImportError:
+    def _get_sentiment_analyzer():  # type: ignore[misc]
+        return None
+
 logger = logging.getLogger(__name__)
 
 
@@ -202,7 +219,28 @@ class EngineRouter:
         return min(matches * 0.3, 1.0)
 
     def _detect_emotion(self, query_lower: str) -> Optional[str]:
-        """Detect the dominant emotion in a query."""
+        """Detect the dominant emotion in a query.
+
+        Uses transformer-based SentimentAnalyzer when available for 13-category
+        emotion detection with intensity scoring. Falls back to keyword matching
+        when the analyzer is not loaded (cold start, import failure, etc.).
+        """
+        # Try transformer-based detection first (13 emotion categories vs 8 keywords)
+        analyzer = _get_sentiment_analyzer()
+        if analyzer is not None:
+            try:
+                result = analyzer.analyze(query_lower)
+                if result and hasattr(result, "primary_emotion") and result.primary_emotion:
+                    # Map analyzer emotion names to our engine emotion taxonomy
+                    emotion = result.primary_emotion.lower()
+                    intensity = getattr(result, "intensity", 0.5)
+                    # Only trust the analyzer if intensity is meaningful
+                    if intensity > 0.3 and emotion != "neutral":
+                        return emotion
+            except Exception:
+                pass  # Fall through to keyword-based detection
+
+        # Fallback: keyword-based emotion detection
         best_emotion = None
         best_count = 0
         for emotion, keywords in self.FRIEND_EMOTION_KEYWORDS.items():

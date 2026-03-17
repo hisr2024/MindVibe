@@ -63,6 +63,11 @@ class DeviceInfo:
     is_thermal_throttled: bool = False
     supports_webgpu: bool = False
     supports_wasm: bool = True
+    # GPU/NPU/AI acceleration capabilities
+    supports_webnn: bool = False            # Web Neural Network API (NPU access)
+    gpu_tier: str = "none"                  # "none" | "integrated" | "discrete"
+    has_npu: bool = False                   # Apple Neural Engine, Qualcomm Hexagon, etc.
+    onnx_runtime_available: bool = False    # ONNX Runtime Web available in browser
 
 
 @dataclass
@@ -134,6 +139,17 @@ class VoiceComputePolicy:
         if device_info.is_thermal_throttled:
             return self._thermal_policy(device_info, user_tier)
 
+        # On-device AI acceleration — use local inference for ultra-low latency
+        # when device has GPU/NPU and network is not excellent
+        if (
+            device_info.has_npu
+            or device_info.supports_webnn
+            or (device_info.supports_webgpu and device_info.gpu_tier == "discrete")
+        ):
+            # Only prefer edge if network isn't great or user wants low latency
+            if device_info.network not in (NetworkQuality.EXCELLENT,):
+                return self._edge_ai_policy(device_info, user_tier)
+
         # Normal operation — based on tier + network quality
         if user_tier in (UserTier.DIVINE, UserTier.SIDDHA):
             return self._premium_policy(device_info)
@@ -141,6 +157,41 @@ class VoiceComputePolicy:
             return self._standard_policy(device_info)
         else:
             return self._free_policy(device_info)
+
+    def _edge_ai_policy(self, device: DeviceInfo, tier: UserTier) -> ComputePolicy:
+        """Devices with GPU/NPU can run local inference for ultra-low latency (<500ms).
+
+        This policy is selected when the device has hardware acceleration AND the
+        network isn't excellent. On excellent networks, cloud providers still win
+        on quality for premium users.
+        """
+        if device.has_npu or device.supports_webnn:
+            return ComputePolicy(
+                tts_provider="piper",
+                tts_quality=QualityTier.PREMIUM,
+                stt_provider="whisper_local",
+                use_local_inference=True,
+                reason="NPU/Neural Engine detected — on-device inference for <500ms latency",
+                enable_streaming=True,
+            )
+        elif device.supports_webgpu and device.gpu_tier == "discrete":
+            return ComputePolicy(
+                tts_provider="silero",
+                tts_quality=QualityTier.PREMIUM,
+                stt_provider="whisper_local",
+                use_local_inference=True,
+                reason="Discrete GPU + WebGPU — GPU-accelerated local inference",
+                enable_streaming=True,
+            )
+        # Fallback: integrated GPU — use lighter local models
+        return ComputePolicy(
+            tts_provider="silero",
+            tts_quality=QualityTier.STANDARD,
+            stt_provider="browser",
+            use_local_inference=False,
+            reason="Integrated GPU — local TTS only, cloud STT for accuracy",
+            enable_streaming=True,
+        )
 
     def _premium_policy(self, device: DeviceInfo) -> ComputePolicy:
         """Premium users get the best quality available for their network."""

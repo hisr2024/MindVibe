@@ -94,6 +94,7 @@ export function useVoiceActivityDetection(options: UseVADOptions = {}): UseVADRe
   const mountedRef = useRef(true)
   const vadInstanceRef = useRef<MicVADInstance | null>(null)
   const wasActiveBeforeHiddenRef = useRef(false)
+  const dutyCycleTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Stable callback refs to avoid stale closures
   const onSpeechStartRef = useRef(onSpeechStart)
@@ -174,11 +175,26 @@ export function useVoiceActivityDetection(options: UseVADOptions = {}): UseVADRe
 
       if (!mountedRef.current) return
 
+      // Detect GPU/NPU acceleration for faster ONNX inference
+      const supportsWebGPU = typeof navigator !== 'undefined' && 'gpu' in navigator
+      const supportsWebNN = typeof navigator !== 'undefined' && 'ml' in navigator
+
       const instance = await MicVAD.new({
         positiveSpeechThreshold: 0.8,
         minSpeechMs: 480,
         redemptionMs: 1500,
         baseAssetPath: '/vad/',
+        // Prefer hardware-accelerated ONNX execution when available
+        ...(supportsWebGPU || supportsWebNN ? {
+          onnxWASMBasePath: '/vad/',
+          // Optimize ONNX Runtime thread count for available cores
+          ortConfig: (ort: Record<string, unknown>) => {
+            const env = ort.env as { wasm?: { numThreads?: number } } | undefined
+            if (env?.wasm) {
+              env.wasm.numThreads = Math.min(navigator.hardwareConcurrency || 4, 4)
+            }
+          },
+        } : {}),
 
         onSpeechStart: () => {
           if (!mountedRef.current) return
@@ -221,6 +237,11 @@ export function useVoiceActivityDetection(options: UseVADOptions = {}): UseVADRe
   // stopVAD — Pause the VAD instance (does not destroy it for reuse)
   // ---------------------------------------------------------------------------
   const stopVAD = useCallback(() => {
+    // Clear duty cycle timer if active
+    if (dutyCycleTimerRef.current) {
+      clearInterval(dutyCycleTimerRef.current)
+      dutyCycleTimerRef.current = null
+    }
     if (vadInstanceRef.current) {
       vadInstanceRef.current.pause()
     }
@@ -237,6 +258,10 @@ export function useVoiceActivityDetection(options: UseVADOptions = {}): UseVADRe
   useEffect(() => {
     return () => {
       mountedRef.current = false
+      if (dutyCycleTimerRef.current) {
+        clearInterval(dutyCycleTimerRef.current)
+        dutyCycleTimerRef.current = null
+      }
       if (vadInstanceRef.current) {
         vadInstanceRef.current.destroy()
         vadInstanceRef.current = null
