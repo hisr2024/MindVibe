@@ -114,12 +114,30 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
     },
   }), [isActive, isDisabled, isProcessing, activate])
 
-  // Resume wake word listening after hands-free deactivates
+  // Resume wake word listening after hands-free deactivates.
+  // Track whether wake word was active before hands-free took over,
+  // so we only resume for users who had it enabled.
+  const wakeWordWasActiveRef = useRef(false)
+
   useEffect(() => {
-    if (!isActive && wakeWordSupported && !isWakeWordListening) {
-      // Could auto-resume wake word here if user had it enabled
+    if (isActive && isWakeWordListening) {
+      // Hands-free is activating — remember that wake word was on
+      wakeWordWasActiveRef.current = true
     }
-  }, [isActive, wakeWordSupported, isWakeWordListening])
+  }, [isActive, isWakeWordListening])
+
+  useEffect(() => {
+    if (!isActive && wakeWordSupported && !isWakeWordListening && wakeWordWasActiveRef.current) {
+      wakeWordWasActiveRef.current = false
+      // Delay to let main STT fully release the SpeechRecognition slot
+      const timer = setTimeout(() => {
+        if (mountedRef.current) {
+          startWakeWordListening()
+        }
+      }, 400)
+      return () => clearTimeout(timer)
+    }
+  }, [isActive, wakeWordSupported, isWakeWordListening, startWakeWordListening])
 
   // Keyboard: Escape to deactivate
   useEffect(() => {

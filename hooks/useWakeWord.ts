@@ -171,10 +171,11 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
     isListeningRef.current = true
     if (mountedRef.current) setIsListening(true)
 
-    recognition.start({
+    // Stable callback set reused across restarts so wake word detection
+    // keeps recovering every time the Web Speech API ends on its own.
+    const wakeWordCallbacks = {
       onStart: () => {
-        if (!mountedRef.current) return
-        setIsListening(true)
+        if (mountedRef.current) setIsListening(true)
       },
 
       onResult: (transcript: string, isFinal: boolean) => {
@@ -192,20 +193,8 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
             if (!mountedRef.current || !isListeningRef.current) return
             if (!recognitionRef.current) return
 
-            recognitionRef.current.start({
-              onStart: () => {
-                if (mountedRef.current) setIsListening(true)
-              },
-              onResult: (transcript: string, isFinal: boolean) => {
-                handleResult(transcript, isFinal)
-              },
-              onEnd: () => {
-                // Recursion handled by the same restart logic in the service
-              },
-              onError: () => {
-                // Silent — wake word detection is best-effort
-              },
-            })
+            // Reuse the same callbacks so onEnd keeps restarting indefinitely
+            recognitionRef.current.start(wakeWordCallbacks)
           }, 500)
         } else {
           setIsListening(false)
@@ -216,7 +205,9 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
         // Silent failure — wake word detection is best-effort.
         // The main app remains fully functional without it.
       },
-    })
+    }
+
+    recognition.start(wakeWordCallbacks)
   }, [wakeWordSupported, createRecognition, handleResult])
 
   // ---------------------------------------------------------------------------
