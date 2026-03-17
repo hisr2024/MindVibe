@@ -183,7 +183,7 @@ async function generateWithOpenAI(
       wisdom_used: { principle: wisdom.principle, verse_ref: wisdom.verse_ref },
     }
   } catch (error) {
-    console.error('[Companion] OpenAI direct call failed:', error)
+    logMetrics({ event: 'openai_call', status: 'error', reason: error instanceof Error ? error.message : 'unknown' })
     return null
   }
 }
@@ -237,7 +237,7 @@ export async function POST(request: NextRequest) {
         })
 
         if (companionResponse.ok) {
-          const data = await companionResponse.json()
+          const data = await companionResponse.json().catch(() => null)
           if (data && typeof data.response === 'string' && data.mood && data.phase) {
             logMetrics({ event: 'message', tier: 'backend', latency_ms: Date.now() - t1Start, status: 'ok' })
             return withTierHeader(
@@ -246,16 +246,13 @@ export async function POST(request: NextRequest) {
             )
           }
           tier1Reason = `incomplete_data:${data ? Object.keys(data).join(',') : 'null'}`
-          console.warn('[Companion] Backend returned incomplete data, falling back. Keys:', data ? Object.keys(data) : 'null')
         } else {
           let errorBody = ''
           try { errorBody = await companionResponse.text() } catch { /* ignore */ }
-          tier1Reason = `http_${companionResponse.status}`
-          console.warn(`[Companion] Backend returned ${companionResponse.status}: ${errorBody.slice(0, 200)}`)
+          tier1Reason = `http_${companionResponse.status}:${errorBody.slice(0, 100)}`
         }
       } catch (backendErr) {
         tier1Reason = backendErr instanceof Error ? backendErr.message : 'unknown'
-        console.error('[Companion] Backend proxy failed:', tier1Reason)
       }
       logMetrics({ event: 'message', tier: 'backend', latency_ms: Date.now() - t1Start, status: 'failed', reason: tier1Reason })
     }
@@ -274,7 +271,9 @@ export async function POST(request: NextRequest) {
         mood,
         mood_intensity: intensity,
         phase: 'connect',
+        wisdom_principle: aiResult.wisdom_used?.principle || null,
         wisdom_used: aiResult.wisdom_used,
+        voice_auto_play: true,
         ai_tier: 'nextjs_openai',
       })
       return withTierHeader(res, 'nextjs_openai')
@@ -289,13 +288,14 @@ export async function POST(request: NextRequest) {
       mood: engineResult.mood,
       mood_intensity: engineResult.mood_intensity,
       phase: engineResult.phase,
+      wisdom_principle: engineResult.wisdom_used?.principle || null,
       wisdom_used: engineResult.wisdom_used,
+      voice_auto_play: true,
       ai_tier: 'local_engine',
     })
     return withTierHeader(res, 'local_engine')
   } catch (error) {
     logMetrics({ event: 'message', tier: 'error', latency_ms: Date.now() - requestStart, status: 'error', reason: error instanceof Error ? error.message : 'unknown' })
-    console.error('[Companion Message] Unexpected error:', error)
     return NextResponse.json(
       { error: 'Failed to process message' },
       { status: 500 },

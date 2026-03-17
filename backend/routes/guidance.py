@@ -33,6 +33,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.deps import get_db
 from backend.middleware.rate_limiter import limiter
 from backend.services.gita_service import GitaService
+from backend.services.wisdom_core import WisdomResult, get_wisdom_core
 from backend.services.wisdom_kb import WisdomKnowledgeBase
 
 logger = logging.getLogger(__name__)
@@ -276,6 +277,41 @@ Examples:
 EngineResult = dict[str, Any]
 
 
+async def _generate_response_streaming(
+    *,
+    system_prompt: str,
+    user_payload: dict[str, Any],
+    temperature: float = 0.4,
+    max_tokens: int = 1200,
+):
+    """Yield LLM tokens as they arrive via OpenAI streaming.
+
+    Used by the SSE voice companion endpoint to send tokens to the frontend
+    in real time, enabling sentence-level TTS pipelining.
+    """
+    if not client:
+        logger.error("Guidance engines unavailable: missing OpenAI API key")
+        return
+
+    try:
+        completion = client.chat.completions.create(
+            model=model_name,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},
+            ],
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stream=True,
+        )
+        for chunk in completion:
+            if chunk.choices and chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
+    except Exception as e:
+        logger.error(f"Streaming generation failed: {e}")
+        yield ""
+
+
 async def _generate_response(
     *,
     system_prompt: str,
@@ -326,16 +362,136 @@ async def _generate_response(
     return parsed, raw_text
 
 
+# ─── WisdomCore Enrichment ───────────────────────────────────────────────────
+
+# Map user-reported moods to WisdomCore wellness domains
+_MOOD_TO_DOMAIN: dict[str, str] = {
+    "anxious": "anxiety",
+    "worried": "anxiety",
+    "nervous": "anxiety",
+    "sad": "depression",
+    "depressed": "depression",
+    "down": "depression",
+    "angry": "anger",
+    "frustrated": "anger",
+    "irritated": "anger",
+    "guilty": "guilt",
+    "ashamed": "guilt",
+    "confused": "confusion",
+    "lost": "confusion",
+    "lonely": "loneliness",
+    "alone": "loneliness",
+    "overwhelmed": "stress",
+    "stressed": "stress",
+    "fearful": "anxiety",
+    "hopeful": "hope",
+    "grateful": "gratitude",
+    "peaceful": "peace",
+}
+
+# Map moods to Shad Ripu (inner enemies) for deeper wisdom retrieval
+_MOOD_TO_ENEMY: dict[str, str] = {
+    "angry": "krodha",
+    "frustrated": "krodha",
+    "greedy": "lobha",
+    "jealous": "matsarya",
+    "envious": "matsarya",
+    "prideful": "mada",
+    "deluded": "moha",
+    "confused": "moha",
+    "craving": "kama",
+    "lustful": "kama",
+}
+
+
+async def _get_enriched_wisdom(
+    db: AsyncSession,
+    query: str,
+    theme: str | None = None,
+    domain: str | None = None,
+    enemy: str | None = None,
+    limit: int = 5,
+) -> tuple[list[WisdomResult], str]:
+    """Fetch wisdom from WisdomCore (static Gita + dynamic learned + patterns).
+
+    Returns a tuple of (results list, formatted context string for LLM injection).
+    Uses domain/enemy-specific search when available, falls back to general search.
+    """
+    wisdom = get_wisdom_core()
+    results: list[WisdomResult] = []
+
+    try:
+        # Primary: enemy-based or domain-based search for targeted wisdom
+        if enemy:
+            results = await wisdom.get_for_enemy(db, enemy, limit=limit)
+        elif domain:
+            results = await wisdom.get_by_domain(db, domain, limit=limit)
+
+        # Supplement with general search if we need more results
+        if len(results) < limit:
+            search_results = await wisdom.search(db, query, limit=limit - len(results))
+            # Deduplicate by id
+            existing_ids = {r.id for r in results}
+            results.extend(r for r in search_results if r.id not in existing_ids)
+    except Exception as e:
+        logger.warning(f"WisdomCore search failed, falling back to empty context: {e}")
+        return [], ""
+
+    # Build context string for LLM prompt injection
+    context_parts: list[str] = []
+    for r in results[:limit]:
+        ref = r.verse_ref or r.id
+        part = f"{ref}:\n{r.content}"
+        if r.theme:
+            part += f"\nTheme: {r.theme}"
+        if r.principle:
+            part += f"\nPrinciple: {r.principle}"
+        context_parts.append(part)
+
+    return results, "\n\n".join(context_parts)
+
+
+def _extract_mood_domain(payload: dict[str, Any]) -> tuple[str | None, str | None]:
+    """Extract wellness domain and Shad Ripu enemy from payload mood keywords."""
+    mood = (
+        payload.get("dominant_mood", "")
+        or payload.get("mood", "")
+        or payload.get("emotional_tone", "")
+    ).lower().strip()
+
+    domain = _MOOD_TO_DOMAIN.get(mood)
+    enemy = _MOOD_TO_ENEMY.get(mood)
+    return domain, enemy
+
+
 @router.post("/kiaan/weekly-guidance")
 @limiter.limit(GUIDANCE_RATE_LIMIT)
-async def generate_weekly_guidance(request: Request, payload: dict[str, Any]) -> EngineResult:
-    """Generate weekly guidance with rate limiting."""
-    # Validate payload size to prevent abuse
+async def generate_weekly_guidance(
+    request: Request,
+    payload: dict[str, Any],
+    db: AsyncSession = Depends(get_db),
+) -> EngineResult:
+    """Generate weekly guidance enriched with WisdomCore wisdom."""
     json_str = json.dumps(payload)
-    if len(json_str.encode("utf-8")) > 50000:  # 50KB limit
+    if len(json_str.encode("utf-8")) > 50000:
         raise HTTPException(status_code=413, detail="Payload too large (max 50KB)")
+
+    # Enrich with WisdomCore based on user's emotional state
+    domain, enemy = _extract_mood_domain(payload)
+    mood_query = payload.get("dominant_mood", "") or payload.get("mood", "peace")
+    wisdom_results, gita_context = await _get_enriched_wisdom(
+        db, query=str(mood_query), domain=domain, enemy=enemy, limit=3,
+    )
+
+    enriched_prompt = KIAAN_WEEKLY_PROMPT
+    if gita_context:
+        enriched_prompt += (
+            "\n\nWISDOM CONTEXT (weave naturally into your guidance, "
+            "do NOT cite verse numbers directly):\n" + gita_context
+        )
+
     parsed, raw_text = await _generate_response(
-        system_prompt=KIAAN_WEEKLY_PROMPT,
+        system_prompt=enriched_prompt,
         user_payload=payload,
         expect_json=False,
         temperature=0.5,
@@ -345,6 +501,7 @@ async def generate_weekly_guidance(request: Request, payload: dict[str, Any]) ->
     return EngineResult(
         status="success" if raw_text else "partial_success",
         guidance=raw_text,
+        wisdom_sources_used=len(wisdom_results),
         model=model_name,
         provider="openai",
     )
@@ -352,14 +509,32 @@ async def generate_weekly_guidance(request: Request, payload: dict[str, Any]) ->
 
 @router.post("/journal/reflect")
 @limiter.limit(GUIDANCE_RATE_LIMIT)
-async def reflect_journal_entry(request: Request, payload: dict[str, Any]) -> EngineResult:
-    """Reflect on journal entry with rate limiting."""
-    # Validate payload size to prevent abuse
+async def reflect_journal_entry(
+    request: Request,
+    payload: dict[str, Any],
+    db: AsyncSession = Depends(get_db),
+) -> EngineResult:
+    """Reflect on journal entry enriched with WisdomCore wisdom."""
     json_str = json.dumps(payload)
-    if len(json_str.encode("utf-8")) > 50000:  # 50KB limit
+    if len(json_str.encode("utf-8")) > 50000:
         raise HTTPException(status_code=413, detail="Payload too large (max 50KB)")
+
+    # Enrich with WisdomCore based on journal emotional content
+    domain, enemy = _extract_mood_domain(payload)
+    journal_text = payload.get("entry", "") or payload.get("content", "") or ""
+    wisdom_results, gita_context = await _get_enriched_wisdom(
+        db, query=str(journal_text)[:200], domain=domain, enemy=enemy, limit=2,
+    )
+
+    enriched_prompt = JOURNAL_REFLECTION_PROMPT
+    if gita_context:
+        enriched_prompt += (
+            "\n\nWISDOM CONTEXT (weave naturally into reflection, "
+            "do NOT cite verse numbers):\n" + gita_context
+        )
+
     parsed, raw_text = await _generate_response(
-        system_prompt=JOURNAL_REFLECTION_PROMPT,
+        system_prompt=enriched_prompt,
         user_payload=payload,
         expect_json=True,
         temperature=0.35,
@@ -491,15 +666,43 @@ async def get_karma_reset_verses(db: AsyncSession, repair_type: str, what_happen
         except Exception as e:
             logger.debug(f"Could not fetch verse {chapter}.{verse_num}: {e}")
 
-    # Theme search using module-level mapping
+    # Theme search using WisdomCore (static Gita + dynamic learned wisdom)
     theme = KARMA_RESET_THEME_MAPPING.get(repair_type, "compassion")
 
-    theme_search_results = []
+    # Map repair types to Shad Ripu enemies for deeper wisdom
+    repair_enemy_map = {"apology": "krodha", "clarification": "moha", "calm_followup": None}
+    enemy = repair_enemy_map.get(repair_type)
+
+    theme_search_results: list[dict[str, Any]] = []
     try:
         search_query = f"{what_happened} {theme} forgiveness understanding balance"
-        theme_search_results = await kb.search_relevant_verses_full_db(db=db, query=search_query, theme=theme, limit=3)
+        wisdom_results, _ = await _get_enriched_wisdom(
+            db, query=search_query, domain="anger" if repair_type == "apology" else None,
+            enemy=enemy, limit=3,
+        )
+        # Convert WisdomResult to the dict format expected by the rest of the function
+        for wr in wisdom_results:
+            theme_search_results.append({
+                "verse": type("_V", (), {
+                    "english": wr.content,
+                    "chapter": wr.chapter,
+                    "verse_number": wr.verse,
+                    "principle": wr.principle,
+                    "context": wr.theme or "",
+                })(),
+                "score": wr.score / 10.0,  # WisdomCore uses 0-10, normalize to 0-1
+                "sanitized_text": kb.sanitize_text(wr.content),
+            })
     except Exception as e:
-        logger.debug(f"Theme search failed: {e}")
+        logger.debug(f"WisdomCore theme search failed, falling back to legacy: {e}")
+        # Fallback to legacy WisdomKnowledgeBase search
+        try:
+            search_query = f"{what_happened} {theme} forgiveness understanding balance"
+            theme_search_results = await kb.search_relevant_verses_full_db(
+                db=db, query=search_query, theme=theme, limit=3,
+            )
+        except Exception as e2:
+            logger.debug(f"Legacy theme search also failed: {e2}")
 
     # Combine and deduplicate
     all_results = key_verse_results[:6] + theme_search_results

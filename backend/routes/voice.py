@@ -1087,6 +1087,76 @@ async def log_wake_word_event(
     }
 
 
+# ===== Compute Policy Endpoint =====
+
+
+class DeviceCapabilitiesRequest(BaseModel):
+    """Device capabilities sent from frontend for optimal provider selection."""
+    cpu_cores: int = 4
+    memory_gb: float = 4.0
+    supports_webgpu: bool = False
+    supports_webnn: bool = False
+    gpu_tier: str = "none"
+    has_npu: bool = False
+    onnx_runtime_available: bool = False
+    battery_level: float | None = None
+    is_charging: bool | None = None
+    is_thermal_throttled: bool = False
+    network_type: str = "unknown"
+
+
+@router.post("/compute-policy")
+async def get_compute_policy(
+    payload: DeviceCapabilitiesRequest,
+    user_id: str = Depends(get_current_user_flexible),
+) -> dict:
+    """Return optimal voice compute policy based on current device state.
+
+    Called by the frontend AdaptiveComputeManager on startup and whenever
+    device conditions change (battery, network, thermal state).
+    """
+    from backend.services.voice_compute_policy import (
+        DeviceInfo,
+        DeviceType,
+        NetworkQuality,
+        get_voice_compute_policy,
+    )
+    from backend.services.subscription_service import get_user_tier as _get_tier
+
+    # Map network type string to enum
+    network_map = {
+        "offline": NetworkQuality.OFFLINE,
+        "2g": NetworkQuality.POOR,
+        "3g": NetworkQuality.MODERATE,
+        "4g": NetworkQuality.GOOD,
+        "5g": NetworkQuality.EXCELLENT,
+        "wifi": NetworkQuality.EXCELLENT,
+    }
+    network = network_map.get(payload.network_type, NetworkQuality.GOOD)
+
+    device_info = DeviceInfo(
+        cpu_cores=payload.cpu_cores,
+        memory_gb=payload.memory_gb,
+        supports_webgpu=payload.supports_webgpu,
+        supports_webnn=payload.supports_webnn,
+        gpu_tier=payload.gpu_tier,
+        has_npu=payload.has_npu,
+        onnx_runtime_available=payload.onnx_runtime_available,
+        battery_level=payload.battery_level,
+        is_charging=payload.is_charging,
+        is_thermal_throttled=payload.is_thermal_throttled,
+        network=network,
+    )
+
+    policy = get_voice_compute_policy()
+    # Default to free tier if user_tier lookup fails
+    from backend.services.voice_compute_policy import UserTier
+    user_tier = UserTier.FREE
+    computed = policy.select(device_info, user_tier)
+
+    return computed.to_dict()
+
+
 # ===== Enhanced Voice Query with Logging =====
 
 class EnhancedVoiceQueryRequest(BaseModel):

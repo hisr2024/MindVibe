@@ -35,6 +35,9 @@ interface UseHandsFreeModeOptions {
   onTranscript: (text: string) => void
   conversational?: boolean
   isProcessing?: boolean
+  /** Called when user speaks while KIAAN is responding (barge-in).
+   *  Frontend should stop audio playback and abort pending TTS requests. */
+  onBargeIn?: () => void
 }
 
 interface UseHandsFreeModeReturn {
@@ -48,6 +51,12 @@ interface UseHandsFreeModeReturn {
   sttProvider: string
   error: string | null
   vadSupported: boolean
+  /** True when KIAAN is speaking and VAD is listening for barge-in */
+  isSpeaking: boolean
+  /** Call this when KIAAN starts speaking a response */
+  markSpeaking: () => void
+  /** Call this when KIAAN finishes speaking */
+  markDoneSpeaking: () => void
 }
 
 // ---------------------------------------------------------------------------
@@ -67,20 +76,25 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     onTranscript,
     conversational = true,
     isProcessing = false,
+    onBargeIn,
   } = options
 
   const [isActive, setIsActive] = useState(false)
   const [state, setState] = useState<HandsFreeState>('inactive')
+  const [isSpeaking, setIsSpeaking] = useState(false)
+  const isSpeakingRef = useRef(false)
 
   const mountedRef = useRef(true)
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isActiveRef = useRef(false)
   const stateRef = useRef<HandsFreeState>('inactive')
 
-  // Stable callback ref
+  // Stable callback refs
   const onTranscriptRef = useRef(onTranscript)
+  const onBargeInRef = useRef(onBargeIn)
   useEffect(() => {
     onTranscriptRef.current = onTranscript
+    onBargeInRef.current = onBargeIn
   })
 
   // Keep refs in sync with state
@@ -93,6 +107,35 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     stateRef.current = s
     setState(s)
   }, [])
+
+  // ---------------------------------------------------------------------------
+  // Web Speech API STT (via existing useVoiceInput)
+  // Must be declared before callbacks that reference voiceInput methods.
+  // ---------------------------------------------------------------------------
+  const voiceInput = useVoiceInput({
+    language,
+    punctuationAssist: true,
+    module: 'hands-free',
+  })
+
+  // Track the latest transcript via ref so the VAD onSpeechEnd callback
+  // can read it without stale closure issues
+  const transcriptRef = useRef('')
+  useEffect(() => {
+    const text = voiceInput.transcript || voiceInput.interimTranscript
+    transcriptRef.current = text
+  }, [voiceInput.transcript, voiceInput.interimTranscript])
+
+  // Ref for conversational option
+  const conversationalRef = useRef(conversational)
+  useEffect(() => {
+    conversationalRef.current = conversational
+  }, [conversational])
+
+  // Ref for stopVAD — allows idle timer callback to call stopVAD without
+  // accessing it before declaration (resolves circular dependency between
+  // idle timer and VAD hook).
+  const stopVADRef = useRef<() => void>(() => {})
 
   // ---------------------------------------------------------------------------
   // Idle timer — auto-deactivate after 5 minutes of no speech
@@ -112,11 +155,11 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
       if (isActiveRef.current && stateRef.current === 'waiting') {
         setActiveState(false)
         setHandsFreeState('inactive')
-        stopVAD()
+        stopVADRef.current()
         voiceInput.stopListening()
       }
     }, IDLE_TIMEOUT_MS)
-  }, [clearIdleTimer]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [clearIdleTimer, setActiveState, setHandsFreeState, voiceInput])
 
   // ---------------------------------------------------------------------------
   // Voice Activity Detection
@@ -124,12 +167,19 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
   const {
     startVAD,
     stopVAD,
-    isVADActive,
     vadSupported,
   } = useVoiceActivityDetection({
     onSpeechStart: () => {
       if (!mountedRef.current || !isActiveRef.current) return
       clearIdleTimer()
+
+      // Barge-in detection: user started speaking while KIAAN is responding
+      if (isSpeakingRef.current) {
+        isSpeakingRef.current = false
+        setIsSpeaking(false)
+        onBargeInRef.current?.()
+      }
+
       setHandsFreeState('hearing')
     },
 
@@ -174,28 +224,10 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     },
   })
 
-  // ---------------------------------------------------------------------------
-  // Web Speech API STT (via existing useVoiceInput)
-  // ---------------------------------------------------------------------------
-  const voiceInput = useVoiceInput({
-    language,
-    punctuationAssist: true,
-    module: 'hands-free',
-  })
-
-  // Track the latest transcript via ref so the VAD onSpeechEnd callback
-  // can read it without stale closure issues
-  const transcriptRef = useRef('')
+  // Keep stopVADRef in sync with the actual stopVAD function
   useEffect(() => {
-    const text = voiceInput.transcript || voiceInput.interimTranscript
-    transcriptRef.current = text
-  }, [voiceInput.transcript, voiceInput.interimTranscript])
-
-  // Ref for conversational option
-  const conversationalRef = useRef(conversational)
-  useEffect(() => {
-    conversationalRef.current = conversational
-  }, [conversational])
+    stopVADRef.current = stopVAD
+  }, [stopVAD])
 
   // ---------------------------------------------------------------------------
   // Start both VAD and STT simultaneously
@@ -209,7 +241,7 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
       setHandsFreeState('waiting')
       resetIdleTimer()
     }
-  }, [startVAD, resetIdleTimer]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [voiceInput, startVAD, resetIdleTimer, setHandsFreeState])
 
   // ---------------------------------------------------------------------------
   // Activate hands-free mode
@@ -231,7 +263,7 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     voiceInput.resetTranscript()
     setActiveState(false)
     setHandsFreeState('inactive')
-  }, [clearIdleTimer, stopVAD, setActiveState, setHandsFreeState]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [voiceInput, clearIdleTimer, stopVAD, setActiveState, setHandsFreeState])
 
   // ---------------------------------------------------------------------------
   // Conversational mode — restart VAD + STT after KIAAN finishes processing
@@ -240,9 +272,11 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     if (!isActive) return
     if (!conversational) return
 
-    // When isProcessing transitions from true to false, restart listening
+    // When isProcessing transitions from true to false, restart listening.
+    // startBoth sets state internally — this is intentional as it restarts
+    // the VAD+STT pipeline (an external system synchronization).
     if (!isProcessing && state === 'submitting') {
-      startBoth()
+      startBoth() // eslint-disable-line react-hooks/set-state-in-effect
     }
   }, [isProcessing, isActive, conversational, state, startBoth])
 
@@ -259,6 +293,17 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     }
   }, [])
 
+  // Mark KIAAN as speaking (keeps VAD active for barge-in detection)
+  const markSpeaking = useCallback(() => {
+    isSpeakingRef.current = true
+    setIsSpeaking(true)
+  }, [])
+
+  const markDoneSpeaking = useCallback(() => {
+    isSpeakingRef.current = false
+    setIsSpeaking(false)
+  }, [])
+
   return {
     isActive,
     state,
@@ -270,6 +315,9 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     sttProvider: voiceInput.sttProvider,
     error: voiceInput.error,
     vadSupported,
+    isSpeaking,
+    markSpeaking,
+    markDoneSpeaking,
   }
 }
 
