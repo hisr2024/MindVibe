@@ -1492,6 +1492,53 @@ async def end_voice_companion_session(
     )
 
 
+# ─── Feedback ────────────────────────────────────────────────────────────
+
+
+class VoiceCompanionFeedbackRequest(BaseModel):
+    message_id: str = Field(..., min_length=1, max_length=128)
+    rating: str = Field(..., pattern=r"^(positive|negative)$")
+    session_id: str | None = Field(None, max_length=64)
+
+
+class VoiceCompanionFeedbackResponse(BaseModel):
+    success: bool
+
+
+@router.post("/feedback", response_model=VoiceCompanionFeedbackResponse)
+@limiter.limit("30/minute")
+async def submit_voice_companion_feedback(
+    request: Request,
+    body: VoiceCompanionFeedbackRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Record user feedback (thumbs-up/down) on a KIAAN voice response."""
+    # Update the message with the feedback rating
+    result = await db.execute(
+        select(CompanionMessage).where(
+            CompanionMessage.id == body.message_id,
+            CompanionMessage.user_id == current_user,
+            CompanionMessage.deleted_at.is_(None),
+        )
+    )
+    message = result.scalar_one_or_none()
+
+    if message:
+        # Store feedback as metadata on the message
+        message.feedback_rating = body.rating
+        await db.commit()
+        logger.info(f"VoiceCompanion: Feedback '{body.rating}' recorded for message {body.message_id}")
+    else:
+        # Message may be from a local session — log the feedback anyway
+        logger.info(
+            f"VoiceCompanion: Feedback '{body.rating}' for message {body.message_id} "
+            f"(message not found in DB, may be local session)"
+        )
+
+    return VoiceCompanionFeedbackResponse(success=True)
+
+
 @router.post("/synthesize")
 @limiter.limit("15/minute")
 async def synthesize_voice_companion_audio(

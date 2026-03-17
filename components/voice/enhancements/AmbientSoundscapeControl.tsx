@@ -13,7 +13,7 @@
  * When disabled, the UI renders in a "coming soon" preview state.
  */
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
   Music,
@@ -269,9 +269,15 @@ export function AmbientSoundscapeControl({
   const [masterVolume, setMasterVolume] = useState(0.7)
   const [currentPreset, _setCurrentPreset] = useState<string | null>(null)
 
-  // Sync with audio state via effect (not during render to avoid re-render loops)
+  // Sync local playing state with external audio state. We maintain local
+  // state for optimistic UI updates in handleToggle, but need to reconcile
+  // when the external audio state changes (e.g. from another control).
+  const prevAmbientRef = useRef(audioState.ambientActive)
   useEffect(() => {
-    setPlaying(audioState.ambientActive)
+    if (prevAmbientRef.current !== audioState.ambientActive) {
+      prevAmbientRef.current = audioState.ambientActive
+      setPlaying(audioState.ambientActive) // eslint-disable-line react-hooks/set-state-in-effect
+    }
   }, [audioState.ambientActive])
 
   const handleToggle = useCallback(async () => {

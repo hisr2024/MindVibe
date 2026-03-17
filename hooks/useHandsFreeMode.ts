@@ -132,6 +132,11 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     conversationalRef.current = conversational
   }, [conversational])
 
+  // Ref for stopVAD — allows idle timer callback to call stopVAD without
+  // accessing it before declaration (resolves circular dependency between
+  // idle timer and VAD hook).
+  const stopVADRef = useRef<() => void>(() => {})
+
   // ---------------------------------------------------------------------------
   // Idle timer — auto-deactivate after 5 minutes of no speech
   // ---------------------------------------------------------------------------
@@ -150,11 +155,11 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
       if (isActiveRef.current && stateRef.current === 'waiting') {
         setActiveState(false)
         setHandsFreeState('inactive')
-        stopVAD()
+        stopVADRef.current()
         voiceInput.stopListening()
       }
     }, IDLE_TIMEOUT_MS)
-  }, [clearIdleTimer]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [clearIdleTimer, setActiveState, setHandsFreeState, voiceInput])
 
   // ---------------------------------------------------------------------------
   // Voice Activity Detection
@@ -219,6 +224,11 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     },
   })
 
+  // Keep stopVADRef in sync with the actual stopVAD function
+  useEffect(() => {
+    stopVADRef.current = stopVAD
+  }, [stopVAD])
+
   // ---------------------------------------------------------------------------
   // Start both VAD and STT simultaneously
   // ---------------------------------------------------------------------------
@@ -231,7 +241,7 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
       setHandsFreeState('waiting')
       resetIdleTimer()
     }
-  }, [startVAD, resetIdleTimer]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [voiceInput, startVAD, resetIdleTimer, setHandsFreeState])
 
   // ---------------------------------------------------------------------------
   // Activate hands-free mode
@@ -253,7 +263,7 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     voiceInput.resetTranscript()
     setActiveState(false)
     setHandsFreeState('inactive')
-  }, [clearIdleTimer, stopVAD, setActiveState, setHandsFreeState]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [voiceInput, clearIdleTimer, stopVAD, setActiveState, setHandsFreeState])
 
   // ---------------------------------------------------------------------------
   // Conversational mode — restart VAD + STT after KIAAN finishes processing
@@ -262,9 +272,11 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     if (!isActive) return
     if (!conversational) return
 
-    // When isProcessing transitions from true to false, restart listening
+    // When isProcessing transitions from true to false, restart listening.
+    // startBoth sets state internally — this is intentional as it restarts
+    // the VAD+STT pipeline (an external system synchronization).
     if (!isProcessing && state === 'submitting') {
-      startBoth()
+      startBoth() // eslint-disable-line react-hooks/set-state-in-effect
     }
   }, [isProcessing, isActive, conversational, state, startBoth])
 

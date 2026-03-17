@@ -274,7 +274,9 @@ export async function POST(request: NextRequest) {
         mood,
         mood_intensity: intensity,
         phase: 'connect',
+        wisdom_principle: aiResult.wisdom_used?.principle || null,
         wisdom_used: aiResult.wisdom_used,
+        voice_auto_play: true,
         ai_tier: 'nextjs_openai',
       })
       return withTierHeader(res, 'nextjs_openai')
@@ -289,7 +291,9 @@ export async function POST(request: NextRequest) {
       mood: engineResult.mood,
       mood_intensity: engineResult.mood_intensity,
       phase: engineResult.phase,
+      wisdom_principle: engineResult.wisdom_used?.principle || null,
       wisdom_used: engineResult.wisdom_used,
+      voice_auto_play: true,
       ai_tier: 'local_engine',
     })
     return withTierHeader(res, 'local_engine')
