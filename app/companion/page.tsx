@@ -317,6 +317,72 @@ export default function CompanionPage() {
     ])
   }, [])
 
+  // ─── Streaming SSE helper ──────────────────────────────────────────────
+  // Tries the streaming endpoint first for sentence-level TTS pipelining.
+  // Falls back to the regular /message endpoint if streaming fails.
+  const tryStreamingResponse = useCallback(async (
+    text: string,
+    onToken: (accumulated: string) => void,
+    onComplete: (fullText: string) => void,
+  ): Promise<boolean> => {
+    // Only stream for real backend sessions (local sessions use local engine)
+    if (session.sessionId?.startsWith('local_')) return false
+
+    try {
+      const response = await fetch('/api/companion/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          language: voiceConfig.language,
+        }),
+        signal: AbortSignal.timeout(25000),
+      })
+
+      if (!response.ok || !response.body) return false
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      let accumulated = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue
+          try {
+            const event = JSON.parse(line.slice(6))
+            if (event.type === 'token' && event.text) {
+              accumulated += event.text
+              onToken(accumulated)
+            } else if (event.type === 'done') {
+              onComplete(accumulated)
+              return true
+            } else if (event.type === 'error') {
+              return false
+            }
+          } catch {
+            // Skip malformed SSE events
+          }
+        }
+      }
+
+      if (accumulated) {
+        onComplete(accumulated)
+        return true
+      }
+      return false
+    } catch {
+      return false
+    }
+  }, [session.sessionId, voiceConfig.language])
+
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading || !session.sessionId) return
 
@@ -333,8 +399,48 @@ export default function CompanionPage() {
     setShowSuggestions(false)
     setError(null)
 
+    // Try streaming first for lower perceived latency
+    const streamingMessageId = `companion-${Date.now()}`
+    let usedStreaming = false
+
+    const streamSuccess = await tryStreamingResponse(
+      text.trim(),
+      // onToken: Update companion message as tokens arrive
+      (accumulated) => {
+        setMessages(prev => {
+          const existing = prev.find(m => m.id === streamingMessageId)
+          if (existing) {
+            return prev.map(m => m.id === streamingMessageId ? { ...m, content: accumulated } : m)
+          }
+          return [...prev, {
+            id: streamingMessageId,
+            role: 'companion' as const,
+            content: accumulated,
+            mood: null,
+            phase: null,
+            timestamp: new Date(),
+          }]
+        })
+      },
+      // onComplete: Finalize the streamed message
+      (fullText) => {
+        usedStreaming = true
+        setMessages(prev =>
+          prev.map(m => m.id === streamingMessageId ? { ...m, content: fullText } : m)
+        )
+        setAiStatus('connected')
+        setIsLoading(false)
+        setShowSuggestions(true)
+      },
+    )
+
+    if (streamSuccess && usedStreaming) return
+
+    // Remove any partial streaming message before falling back
+    setMessages(prev => prev.filter(m => m.id !== streamingMessageId))
+
     try {
-      // Always route through Next.js API (handles local_ and real sessions)
+      // Fall back to regular message endpoint
       const response = await apiFetch('/api/companion/message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -390,7 +496,7 @@ export default function CompanionPage() {
       setIsLoading(false)
       setShowSuggestions(true)
     }
-  }, [isLoading, session.sessionId, voiceConfig.language, addLocalFallbackResponse, voiceConfig.speakerId])
+  }, [isLoading, session.sessionId, voiceConfig.language, addLocalFallbackResponse, voiceConfig.speakerId, tryStreamingResponse])
 
   // ─── End Session ────────────────────────────────────────────────────
 

@@ -168,7 +168,8 @@ class Settings(BaseSettings):
 
     # Redis Configuration
     REDIS_ENABLED: bool = parse_bool_strict(
-        os.getenv("REDIS_ENABLED", "false"), "REDIS_ENABLED"
+        os.getenv("REDIS_ENABLED", "true" if os.getenv("REDIS_URL") else "false"),
+        "REDIS_ENABLED",
     )
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
 
@@ -192,7 +193,9 @@ class Settings(BaseSettings):
                 UserWarning,
             )
         return v
-    CACHE_KIAAN_RESPONSES: bool = False
+    CACHE_KIAAN_RESPONSES: bool = parse_bool_strict(
+        os.getenv("CACHE_KIAAN_RESPONSES", "true"), "CACHE_KIAAN_RESPONSES"
+    )
     
     # Rate Limiting
     RATE_LIMIT_ENABLED: bool = True
