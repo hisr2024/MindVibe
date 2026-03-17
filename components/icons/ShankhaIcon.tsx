@@ -40,7 +40,7 @@ export function ShankhaIcon({
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill={filled ? color : 'none'}
+      fill="none"
       stroke={color}
       strokeWidth={strokeWidth}
       strokeLinecap="round"
@@ -48,34 +48,33 @@ export function ShankhaIcon({
       className={className}
       aria-hidden="true"
     >
-      {/* Conch shell body - spiral form */}
+      {/* Conch shell outer body — wide opening tapering to a spiral tip */}
       <path
-        d="M12 2C8.5 2 5 5 5 9c0 2.5 1 4.5 2.5 6 1 1 1.5 2.5 1.5 4v1h6v-1c0-1.5.5-3 1.5-4C18 13.5 19 11.5 19 9c0-4-3.5-7-7-7z"
+        d="M6 8c0-3 2.5-5.5 6-5.5S18 5 18 8c0 4-2 7-4 9.5-.6.8-1 1.5-1 2.5v1h-2v-1c0-1-.4-1.7-1-2.5C8 15 6 12 6 8z"
+        fill={filled ? color : 'none'}
         fillOpacity={filled ? 0.15 : 0}
       />
-      {/* Inner spiral - the sacred geometry of the conch */}
+      {/* Inner spiral — three concentric curves forming the sacred spiral */}
       <path
-        d="M12 5c-2 0-4 1.8-4 4.5 0 1.5.7 2.8 1.8 3.7"
+        d="M12 5.5c-2.2 0-3.8 1.8-3.8 3.8 0 1.5.8 2.7 2 3.5"
         fill="none"
       />
       <path
-        d="M12 5c1.5 0 3 1.2 3 3 0 1.2-.8 2.2-1.8 2.7"
-        fill="none"
-      />
-      {/* Sound wave emanation lines */}
-      <path
-        d="M9 19h6"
+        d="M12 5.5c1.8 0 3 1.4 3 3 0 1.2-.7 2.2-1.7 2.8"
         fill="none"
       />
       <path
-        d="M10 22h4"
+        d="M12 7.5c-.8 0-1.5.7-1.5 1.5s.5 1.3 1 1.5"
         fill="none"
       />
-      {/* Sacred resonance dot at center */}
+      {/* Ridged lines on the conch body */}
+      <path d="M9.5 15.5c.8.6 1.5.8 2.5.8s1.7-.2 2.5-.8" fill="none" />
+      <path d="M10 17.5c.6.4 1.2.5 2 .5s1.4-.1 2-.5" fill="none" />
+      {/* Pointed tip / spire at the top */}
       <circle
         cx="12"
         cy="9"
-        r="1"
+        r="0.8"
         fill={color}
         stroke="none"
       />

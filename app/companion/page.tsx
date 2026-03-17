@@ -431,8 +431,13 @@ export default function CompanionPage() {
   // ─── Voice Input ────────────────────────────────────────────────────
 
   const handleVoiceTranscription = useCallback((text: string) => {
+    setInputText('')
     sendMessage(text)
   }, [sendMessage])
+
+  const handleVoiceInterim = useCallback((text: string) => {
+    setInputText(text)
+  }, [])
 
   // ─── Keyboard Handling ──────────────────────────────────────────────
 
@@ -807,6 +812,7 @@ export default function CompanionPage() {
               <div className="dark">
                 <CompanionVoiceRecorder
                   onTranscription={handleVoiceTranscription}
+                  onInterimTranscript={handleVoiceInterim}
                   isDisabled={!session.isActive}
                   isProcessing={isLoading}
                   language={voiceConfig.language}
