@@ -23,6 +23,7 @@ import { useWakeWord } from '@/hooks/useWakeWord'
 
 interface VoiceRecorderProps {
   onTranscription: (text: string) => void
+  onInterimTranscript?: (text: string) => void
   isDisabled?: boolean
   isProcessing?: boolean
   language?: string
@@ -34,6 +35,7 @@ export interface CompanionVoiceRecorderHandle {
 
 const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRecorderProps>(function CompanionVoiceRecorder({
   onTranscription,
+  onInterimTranscript,
   isDisabled = false,
   isProcessing = false,
   language = 'en',
@@ -138,10 +140,25 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
     return () => { mountedRef.current = false }
   }, [])
 
+  // Stable ref for interim callback
+  const onInterimRef = useRef(onInterimTranscript)
+  useEffect(() => {
+    onInterimRef.current = onInterimTranscript
+  })
+
   // Build live transcript display
   const liveText = transcript
     + (transcript && interimTranscript ? ' ' : '')
     + interimTranscript
+
+  // Push live transcript into parent's input box
+  const prevLiveTextRef = useRef('')
+  useEffect(() => {
+    if (prevLiveTextRef.current !== liveText) {
+      prevLiveTextRef.current = liveText
+      onInterimRef.current?.(liveText)
+    }
+  }, [liveText])
 
   // Determine visual state
   const isHearing = state === 'hearing'
@@ -189,8 +206,9 @@ const CompanionVoiceRecorder = forwardRef<CompanionVoiceRecorderHandle, VoiceRec
         </span>
       )}
 
-      {/* Live transcript — words appearing in real-time like Siri */}
-      {isActive && liveText && (
+      {/* Live transcript now routes to the parent's input box via onInterimTranscript.
+         Only show inline if no onInterimTranscript handler is wired. */}
+      {isActive && liveText && !onInterimTranscript && (
         <span className="text-xs text-violet-400 italic max-w-[250px] truncate" aria-live="polite">
           {liveText}
         </span>
