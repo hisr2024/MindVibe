@@ -843,12 +843,17 @@ The user is greeting you. Welcome them with warmth and presence. Gently invite t
         # Check connectivity status (v3.0)
         is_offline = force_offline or self.is_offline()
 
-        # If offline or OpenAI not ready, use offline response
-        if is_offline or not self.ready:
+        # Check if ANY AI provider is available (ProviderManager or legacy optimizer)
+        has_ai_providers = self.ready  # Legacy optimizer ready
+        if not has_ai_providers and self.provider_manager:
+            has_ai_providers = bool(self.provider_manager.list_providers())
+
+        # If offline or no AI providers available at all, use offline response
+        if is_offline or not has_ai_providers:
             if is_offline:
                 logger.info("KIAAN Core: Operating in OFFLINE mode")
             else:
-                logger.warning("KIAAN Core: OpenAI not ready, using offline fallback")
+                logger.warning("KIAAN Core: No AI providers available, using offline fallback")
 
             try:
                 offline_response = await self.get_offline_response(message, context, language)
@@ -1133,7 +1138,13 @@ The user is greeting you. Welcome them with warmth and presence. Gently invite t
         Yields:
             Response chunks as they arrive
         """
-        if not self.ready:
+        # Check if ANY AI provider is available (ProviderManager or legacy optimizer)
+        has_ai_providers = self.ready  # Legacy optimizer ready
+        if not has_ai_providers and self.provider_manager:
+            has_ai_providers = bool(self.provider_manager.list_providers())
+
+        if not has_ai_providers:
+            logger.warning("KIAAN Core: No AI providers available for streaming, using fallback")
             yield self.optimizer.get_fallback_response(context)
             return
 
@@ -1144,18 +1155,39 @@ The user is greeting you. Welcome them with warmth and presence. Gently invite t
             # For conversational messages, use a simpler prompt and shorter response
             system_prompt = self._get_conversational_prompt(conv_type, language)
             try:
-                async for chunk in self.optimizer.create_streaming_completion(
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": message}
-                    ],
-                    model="gpt-4o-mini",
-                    temperature=0.8,
-                    max_tokens=80  # Very short for conversational
-                ):
-                    yield chunk
-                return
+                if self.ready:
+                    async for chunk in self.optimizer.create_streaming_completion(
+                        messages=[
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": message}
+                        ],
+                        model="gpt-4o-mini",
+                        temperature=0.8,
+                        max_tokens=80  # Very short for conversational
+                    ):
+                        yield chunk
+                    return
+                else:
+                    raise ValueError("Legacy optimizer not ready, using ProviderManager")
             except Exception as e:
+                # Try ProviderManager for conversational responses
+                if self.provider_manager:
+                    try:
+                        logger.info(f"KIAAN Core: Conversational streaming fallback to ProviderManager: {e}")
+                        provider_response = await self.provider_manager.chat(
+                            messages=[
+                                {"role": "system", "content": system_prompt},
+                                {"role": "user", "content": message}
+                            ],
+                            temperature=0.8,
+                            max_tokens=80,
+                        )
+                        if provider_response and provider_response.content:
+                            yield provider_response.content
+                            return
+                    except Exception as pm_error:
+                        logger.error(f"KIAAN Core: ProviderManager conversational fallback failed: {pm_error}")
+
                 logger.error(f"KIAAN Core: Conversational streaming error: {e}")
                 fallbacks = {
                     "gratitude": "You're welcome! I'm here for you. 💙",
@@ -1176,22 +1208,45 @@ The user is greeting you. Welcome them with warmth and presence. Gently invite t
         wisdom_context = self._build_verse_context_fast(verses)
         system_prompt = self._build_system_prompt_fast(wisdom_context, context, language)
 
-        try:
-            # Stream response with reduced tokens for faster output
-            async for chunk in self.optimizer.create_streaming_completion(
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": message}
-                ],
-                model="gpt-4o-mini",
-                temperature=0.7,
-                max_tokens=200  # Reduced from 400 for faster streaming
-            ):
-                yield chunk
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": message}
+        ]
 
-        except Exception as e:
-            logger.error(f"KIAAN Core: Streaming error: {e}")
-            yield self.optimizer.get_fallback_response(context)
+        # Try legacy optimizer streaming first (if ready)
+        if self.ready:
+            try:
+                # Stream response with reduced tokens for faster output
+                async for chunk in self.optimizer.create_streaming_completion(
+                    messages=messages,
+                    model="gpt-4o-mini",
+                    temperature=0.7,
+                    max_tokens=200  # Reduced from 400 for faster streaming
+                ):
+                    yield chunk
+                return  # Successfully streamed via optimizer
+            except Exception as e:
+                logger.warning(f"KIAAN Core: Optimizer streaming failed: {e}, trying ProviderManager")
+
+        # Fallback: Use ProviderManager for non-streaming response (yield as single chunk)
+        if self.provider_manager:
+            try:
+                logger.info("KIAAN Core: Using ProviderManager for streaming fallback (non-streaming response)")
+                provider_response = await self.provider_manager.chat(
+                    messages=messages,
+                    temperature=0.7,
+                    max_tokens=600,
+                )
+                if provider_response and provider_response.content:
+                    logger.info(f"KIAAN Core: ProviderManager streaming fallback success via {provider_response.provider}/{provider_response.model}")
+                    yield provider_response.content
+                    return
+            except (AIProviderError, Exception) as pm_error:
+                logger.error(f"KIAAN Core: ProviderManager streaming fallback failed: {pm_error}")
+
+        # Ultimate fallback: hardcoded Gita-grounded response
+        logger.error("KIAAN Core: All streaming providers failed, using hardcoded fallback")
+        yield self.optimizer.get_fallback_response(context)
 
     async def _get_relevant_verses(
         self,
