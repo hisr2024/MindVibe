@@ -12,7 +12,7 @@ import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 export async function POST(request: NextRequest) {
   try {
     // Try backend session creation
-    const backendResponse = await fetch(`${BACKEND_URL}/api/chat/session/start`, {
+    const backendResponse = await fetch(`${BACKEND_URL}/api/chat/start`, {
       method: 'POST',
       headers: proxyHeaders(request, 'POST'),
       signal: AbortSignal.timeout(5000),

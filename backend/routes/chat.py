@@ -16,7 +16,7 @@ import os
 import uuid
 from typing import Any, AsyncGenerator
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -684,7 +684,16 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
                     "usage_limit": usage_limit,
                     "is_unlimited": usage_limit == -1,
                 }
+            except HTTPException as auth_error:
+                if auth_error.status_code == 401:
+                    # Anonymous user (no auth token) — allow access without quota tracking.
+                    # Chat supports anonymous sessions (see /start endpoint).
+                    logger.debug("Anonymous chat access — skipping quota tracking")
+                else:
+                    raise
             except Exception as quota_error:
+                # Infrastructure failure (DB down, etc.) for authenticated users — fail-closed
+                # to prevent monetization bypass.
                 logger.error(
                     "Subscription check unavailable for chat endpoint, "
                     "denying request (fail-closed): %s", quota_error
@@ -857,6 +866,8 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             await db.rollback()
 
         return result
+    except HTTPException:
+        raise  # Let FastAPI handle HTTP exceptions (subscription errors, etc.)
     except Exception as e:
         logger.error(f"Error in send_message: {type(e).__name__}: {e}")
 
@@ -885,6 +896,7 @@ async def send_message(request: Request, chat: ChatMessage, db: AsyncSession = D
             "response": fallback_responses.get(mood, fallback_responses["general"]),
             "bot": "KIAAN",
             "version": "15.0",
+            "model": "offline-template",
             "gita_powered": True,
             "offline": True,
         }
