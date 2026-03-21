@@ -65,6 +65,7 @@ from backend.services.journey_engine.journey_engine_service import (
     TemplateNotFoundError,
     JourneyAlreadyCompletedError,
     StepNotAvailableError,
+    StepTimeGatedError,
     MaxActiveJourneysError,
     ENEMY_LABELS,
 )
@@ -186,6 +187,8 @@ class StepResponse(BaseModel):
     safety_note: str | None
     is_completed: bool
     completed_at: str | None
+    available_to_complete: bool = True
+    next_available_at: str | None = None
 
 
 class EnemyInfo(BaseModel):
@@ -681,6 +684,8 @@ async def get_current_step(
             safety_note=step.safety_note,
             is_completed=step.is_completed,
             completed_at=step.completed_at.isoformat() if step.completed_at else None,
+            available_to_complete=step.available_to_complete,
+            next_available_at=step.next_available_at.isoformat() if step.next_available_at else None,
         )
     except JourneyNotFoundError as e:
         logger.warning(f"Journey not found for current step: {e}")
@@ -726,6 +731,8 @@ async def get_step(
             safety_note=step.safety_note,
             is_completed=step.is_completed,
             completed_at=step.completed_at.isoformat() if step.completed_at else None,
+            available_to_complete=step.available_to_complete,
+            next_available_at=step.next_available_at.isoformat() if step.next_available_at else None,
         )
     except JourneyNotFoundError as e:
         logger.warning(f"Journey not found for step: {e}")
@@ -772,6 +779,16 @@ async def complete_step(
     except JourneyNotFoundError as e:
         logger.warning(f"Journey not found for step completion: {e}")
         raise HTTPException(status_code=404, detail={"error": "JOURNEY_NOT_FOUND", "message": "Journey not found."})
+    except StepTimeGatedError as e:
+        logger.info(f"Step time-gated for journey {journey_id}: next available {e.next_available_at}")
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "error": "STEP_TIME_GATED",
+                "message": "Come back tomorrow to continue your journey.",
+                "next_available_at": e.next_available_at.isoformat() if e.next_available_at else None,
+            },
+        )
     except StepNotAvailableError as e:
         logger.warning(f"Step not available for completion: {e}")
         raise HTTPException(status_code=400, detail={"error": "STEP_NOT_AVAILABLE", "message": "This step is not available."})
@@ -875,6 +892,8 @@ async def get_dashboard(
                 safety_note=s.safety_note,
                 is_completed=s.is_completed,
                 completed_at=s.completed_at.isoformat() if s.completed_at else None,
+                available_to_complete=s.available_to_complete,
+                next_available_at=s.next_available_at.isoformat() if s.next_available_at else None,
             )
             for s in dashboard.today_steps
         ],
