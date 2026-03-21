@@ -1,25 +1,30 @@
 /**
  * Root Layout — Kiaanverse
  *
- * Wraps the entire app in providers and implements the auth gate.
- * - ThemeProvider: dark/light/system theme
- * - I18nProvider: localization
- * - QueryClientProvider: TanStack Query for server state
- * - Auth gate: redirects to (auth) or onboarding based on auth status
+ * Provider hierarchy and auth gate. Explicit Stack-based routing ensures
+ * Expo Router knows about all route groups at mount time, preventing
+ * "Attempted to navigate before mounting Root Layout" race conditions.
+ *
+ * Provider stack (outer → inner):
+ *   GestureHandlerRootView → QueryClientProvider → ThemeProvider → I18nProvider
+ *
+ * Auth gate:
+ *   idle/loading → splash screen held
+ *   unauthenticated → /(auth)/login
+ *   authenticated + !onboarded → /onboarding
+ *   authenticated + onboarded → /(tabs)/home
  */
 
 import React, { useEffect, useCallback } from 'react';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
-import { Slot, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider, useTheme, colors } from '@kiaanverse/ui';
 import { I18nProvider } from '@kiaanverse/i18n';
-import { useAuthStore } from '@kiaanverse/store';
-import { useThemeStore } from '@kiaanverse/store';
-import { useUserPreferencesStore } from '@kiaanverse/store';
+import { useAuthStore, useThemeStore, useUserPreferencesStore } from '@kiaanverse/store';
 
 // Prevent splash screen from hiding until we're ready
 void SplashScreen.preventAutoHideAsync();
@@ -27,11 +32,15 @@ void SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: 1000 * 60 * 5,
       retry: 2,
     },
   },
 });
+
+// ---------------------------------------------------------------------------
+// Auth Gate — redirects based on auth + onboarding state
+// ---------------------------------------------------------------------------
 
 function AuthGate({ children }: { children: React.ReactNode }): React.JSX.Element {
   const { status, isOnboarded } = useAuthStore();
@@ -55,6 +64,10 @@ function AuthGate({ children }: { children: React.ReactNode }): React.JSX.Elemen
 
   return <>{children}</>;
 }
+
+// ---------------------------------------------------------------------------
+// App Content — splash screen + status bar + auth gate
+// ---------------------------------------------------------------------------
 
 function AppContent(): React.JSX.Element {
   const { theme } = useTheme();
@@ -82,11 +95,20 @@ function AppContent(): React.JSX.Element {
     <View style={styles.container} onLayout={onLayoutReady}>
       <StatusBar style={theme.colors.statusBarStyle === 'light-content' ? 'light' : 'dark'} />
       <AuthGate>
-        <Slot />
+        <Stack screenOptions={{ headerShown: false, animation: 'none' }}>
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="onboarding" />
+          <Stack.Screen name="chat" />
+        </Stack>
       </AuthGate>
     </View>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Root Layout — provider hierarchy
+// ---------------------------------------------------------------------------
 
 export default function RootLayout(): React.JSX.Element {
   const { mode, setMode } = useThemeStore();

@@ -71,6 +71,12 @@ export default function LoginScreen(): React.JSX.Element {
             loading={status === 'loading'}
             disabled={!email.trim() || !password.trim()}
           />
+
+          <Link href="/(auth)/forgot-password" style={styles.forgotLink}>
+            <Text variant="caption" color={colors.primary[300]}>
+              Forgot password?
+            </Text>
+          </Link>
         </View>
 
         <Divider />
@@ -102,6 +108,9 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: spacing.lg,
+  },
+  forgotLink: {
+    alignSelf: 'flex-end',
   },
   footer: {
     alignItems: 'center',
