@@ -7,6 +7,7 @@
  * - Biometric unlock button (when device supports + user enabled)
  * - LoadingMandala during authentication
  * - Developer mode bypass in __DEV__
+ * - Handles 403 email_not_verified from backend
  *
  * Security: No credentials logged. Tokens handled by authStore + SecureStore.
  */
@@ -17,7 +18,6 @@ import { Link } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod/v3';
-import { Fingerprint } from 'lucide-react-native';
 import {
   Screen,
   Text,
@@ -59,13 +59,12 @@ export default function LoginScreen(): React.JSX.Element {
     error,
     clearError,
     status,
+    isLoading,
     biometricAvailable,
     biometricEnabled,
     authenticateWithBiometric,
     devLogin,
   } = useAuthStore();
-
-  const isLoading = status === 'loading';
 
   const {
     control,
@@ -157,7 +156,7 @@ export default function LoginScreen(): React.JSX.Element {
             )}
           />
 
-          {/* Server-side error (e.g. invalid credentials) */}
+          {/* Server-side error (e.g. invalid credentials, email not verified) */}
           {error ? (
             <Text variant="caption" color={colors.semantic.error}>
               {error}
@@ -167,7 +166,7 @@ export default function LoginScreen(): React.JSX.Element {
           <GoldenButton
             title={t('login')}
             onPress={handleSubmit(onSubmit)}
-            disabled={!isValid}
+            disabled={!isValid || isLoading}
             testID="login-button"
           />
 
@@ -177,6 +176,7 @@ export default function LoginScreen(): React.JSX.Element {
               title="Sign in with biometrics"
               variant="secondary"
               onPress={handleBiometric}
+              disabled={isLoading}
               testID="biometric-button"
             />
           ) : null}

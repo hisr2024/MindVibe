@@ -2,23 +2,28 @@
  * Authentication State Store
  *
  * Manages the full auth lifecycle for Kiaanverse mobile:
- * - Token pair storage via expo-secure-store (never AsyncStorage)
+ * - Token storage via expo-secure-store (never AsyncStorage)
  * - Login / signup / logout flows via authService
  * - Biometric authentication via expo-local-authentication
  * - Persistent login across app restarts (Zustand persist + SecureStore adapter)
  * - Auto-logout when refresh token expires (onAuthFailure callback)
  * - Developer mode bypass in __DEV__ with mock user
  *
- * Security: Tokens are stored in SecureStore (OS keychain / keystore).
- * Only non-sensitive derived state (user profile, prefs) is persisted
- * via the Zustand persist middleware.
+ * Backend contract awareness:
+ * - Login returns access_token in body; refresh_token in httpOnly cookie
+ * - Signup returns NO tokens (email verification required first)
+ * - /api/auth/me returns user_id (not id), no name/locale/created_at
+ * - Refresh accepts refresh_token from cookie OR body
+ *
+ * Security: Tokens stored in SecureStore (OS keychain / keystore).
+ * Only non-sensitive derived state persisted via Zustand persist middleware.
  */
 
 import { create } from 'zustand';
 import { persist, createJSONStorage, type StateStorage } from 'zustand/middleware';
 import * as SecureStore from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
-import { setTokenManager, authService } from '@kiaanverse/api';
+import { setTokenManager, authService, AuthError } from '@kiaanverse/api';
 import type { User, SubscriptionTier } from '@kiaanverse/api';
 
 // React Native/Expo global — always defined at runtime
@@ -38,6 +43,11 @@ interface AuthState {
   error: string | null;
   biometricEnabled: boolean;
   biometricAvailable: boolean;
+  /**
+   * Set after successful signup. The register screen checks this to show
+   * a "verify your email" message instead of navigating to tabs.
+   */
+  signupPendingVerification: boolean;
 }
 
 interface AuthActions {
@@ -45,7 +55,7 @@ interface AuthActions {
   initialize: () => Promise<void>;
   /** Authenticate with email + password. */
   login: (email: string, password: string) => Promise<boolean>;
-  /** Create a new account. */
+  /** Create a new account. Does NOT authenticate — email verification required. */
   signup: (email: string, password: string, name: string) => Promise<boolean>;
   /** Sign out and clear all stored credentials. */
   logout: () => Promise<void>;
@@ -55,6 +65,8 @@ interface AuthActions {
   completeOnboarding: () => void;
   /** Clear the current error message. */
   clearError: () => void;
+  /** Reset the signup pending verification flag. */
+  clearSignupPending: () => void;
   /** Check whether the device supports biometric authentication. */
   checkBiometricAvailability: () => Promise<void>;
   /** Prompt biometric and re-authenticate using stored refresh token. */
@@ -80,7 +92,13 @@ const REFRESH_TOKEN_KEY = 'kiaanverse_refresh_token';
 
 async function storeTokens(access: string, refresh: string): Promise<void> {
   await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, access);
-  await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refresh);
+  if (refresh) {
+    await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refresh);
+  }
+}
+
+async function storeAccessToken(access: string): Promise<void> {
+  await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, access);
 }
 
 async function getAccessToken(): Promise<string | null> {
@@ -124,6 +142,7 @@ const initialState: AuthState = {
   error: null,
   biometricEnabled: false,
   biometricAvailable: false,
+  signupPendingVerification: false,
 };
 
 // ---------------------------------------------------------------------------
@@ -144,11 +163,12 @@ const DEV_MOCK_USER: User = {
 // ---------------------------------------------------------------------------
 
 function extractErrorMessage(err: unknown): string {
-  // AuthError from authService
-  if (err && typeof err === 'object' && 'code' in err && 'message' in err) {
-    return (err as { message: string }).message;
-  }
+  if (err instanceof AuthError) return err.message;
   if (err instanceof Error) return err.message;
+  if (err && typeof err === 'object' && 'message' in err) {
+    const msg = (err as { message: unknown }).message;
+    if (typeof msg === 'string') return msg;
+  }
   return 'Something went wrong. Please try again.';
 }
 
@@ -171,6 +191,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             return;
           }
 
+          // Verify the token is still valid by fetching the user
           const user = await authService.getCurrentUser();
           set({
             status: 'authenticated',
@@ -189,10 +210,19 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         set({ status: 'loading', isLoading: true, error: null });
 
         try {
-          const tokens = await authService.login(email, password);
-          await storeTokens(tokens.access_token, tokens.refresh_token);
+          const result = await authService.login(email, password);
 
-          const user = await authService.getCurrentUser();
+          // Store access token in SecureStore
+          await storeAccessToken(result.accessToken);
+
+          // Store refresh token if we could extract it from Set-Cookie
+          if (result.refreshToken) {
+            await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, result.refreshToken);
+          }
+
+          // Build user from the login response (avoid extra /me call)
+          const user = authService.mapLoginResponseToUser(result.loginResponse);
+
           set({
             status: 'authenticated',
             user,
@@ -211,39 +241,23 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       signup: async (email, password, name) => {
-        set({ status: 'loading', isLoading: true, error: null });
+        set({ status: 'loading', isLoading: true, error: null, signupPendingVerification: false });
 
         try {
-          const tokens = await authService.register({
+          // Backend signup returns NO tokens — just a confirmation.
+          // User must verify email before they can log in.
+          const response = await authService.register({
             name,
             email,
             password,
             confirmPassword: password,
           });
-          await storeTokens(tokens.access_token, tokens.refresh_token);
 
-          // Build user from known registration data
-          // The tokens response may include user_id — extract via unknown cast
-          const tokensRaw = tokens as unknown as Record<string, unknown>;
-          const userId =
-            (typeof tokensRaw['user_id'] === 'string' ? tokensRaw['user_id'] : undefined) ??
-            (typeof tokensRaw['id'] === 'string' ? tokensRaw['id'] : undefined) ??
-            '';
-
-          const user: User = {
-            id: userId,
-            email,
-            name,
-            locale: 'en',
-            subscriptionTier: 'FREE',
-            createdAt: new Date().toISOString(),
-          };
-
+          // Signup succeeded — user must verify email before login
           set({
-            status: 'authenticated',
-            user,
-            isOnboarded: false,
+            status: 'unauthenticated',
             isLoading: false,
+            signupPendingVerification: response.email_verification_sent,
           });
           return true;
         } catch (err: unknown) {
@@ -265,6 +279,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       setUser: (user) => set({ user }),
       completeOnboarding: () => set({ isOnboarded: true }),
       clearError: () => set({ error: null }),
+      clearSignupPending: () => set({ signupPendingVerification: false }),
 
       // -----------------------------------------------------------------------
       // Biometric
@@ -281,8 +296,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       authenticateWithBiometric: async () => {
-        const { biometricEnabled, biometricAvailable } = get();
-        if (!biometricEnabled || !biometricAvailable) return false;
+        const { biometricEnabled, biometricAvailable, isLoading: alreadyLoading } = get();
+        if (!biometricEnabled || !biometricAvailable || alreadyLoading) return false;
 
         set({ status: 'loading', isLoading: true, error: null });
 
@@ -300,17 +315,15 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
           // Biometric passed — use stored refresh token to get fresh access token
           const refreshToken = await getRefreshToken();
-          if (!refreshToken) {
-            set({
-              status: 'unauthenticated',
-              isLoading: false,
-              error: 'Session expired. Please sign in again.',
-            });
-            return false;
-          }
 
+          // Attempt refresh — either via stored token in body or via httpOnly cookie
           const tokens = await authService.refreshTokens(refreshToken);
-          await storeTokens(tokens.access_token, tokens.refresh_token);
+          await storeAccessToken(tokens.accessToken);
+
+          // Store new refresh token if available
+          if (tokens.newRefreshToken) {
+            await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, tokens.newRefreshToken);
+          }
 
           const user = await authService.getCurrentUser();
           set({

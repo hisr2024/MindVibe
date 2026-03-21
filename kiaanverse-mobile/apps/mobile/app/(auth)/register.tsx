@@ -6,13 +6,15 @@
  * - react-hook-form for form state + inline field errors
  * - Password match validation via zod .refine()
  * - LoadingMandala during registration
+ * - Email verification message after successful signup
  *
- * Security: confirmPassword validated client-side before any API call.
+ * Backend contract: Signup returns NO tokens. The user must verify their
+ * email address before they can log in (backend returns 403 on unverified).
  */
 
 import React, { useCallback } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod/v3';
@@ -62,9 +64,16 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterScreen(): React.JSX.Element {
   const { t } = useTranslation('auth');
-  const { signup, error, clearError, status } = useAuthStore();
-
-  const isLoading = status === 'loading';
+  const router = useRouter();
+  const {
+    signup,
+    error,
+    clearError,
+    status,
+    isLoading,
+    signupPendingVerification,
+    clearSignupPending,
+  } = useAuthStore();
 
   const {
     control,
@@ -84,6 +93,11 @@ export default function RegisterScreen(): React.JSX.Element {
     [signup, clearError],
   );
 
+  const handleGoToLogin = useCallback(() => {
+    clearSignupPending();
+    router.replace('/(auth)/login');
+  }, [clearSignupPending, router]);
+
   // Show mandala while registering
   if (isLoading) {
     return (
@@ -93,6 +107,32 @@ export default function RegisterScreen(): React.JSX.Element {
           <Text variant="bodySmall" color={colors.text.muted} align="center">
             Creating your account...
           </Text>
+        </View>
+      </Screen>
+    );
+  }
+
+  // After successful signup — show email verification message
+  if (signupPendingVerification) {
+    return (
+      <Screen>
+        <View style={styles.verificationContainer}>
+          <Text variant="h2" align="center">
+            Check your email
+          </Text>
+          <Text
+            variant="body"
+            color={colors.text.muted}
+            align="center"
+          >
+            We sent a verification link to your email address. Please verify
+            your email before signing in.
+          </Text>
+          <GoldenButton
+            title="Go to Sign In"
+            onPress={handleGoToLogin}
+            testID="go-to-login-button"
+          />
         </View>
       </Screen>
     );
@@ -187,7 +227,7 @@ export default function RegisterScreen(): React.JSX.Element {
             )}
           />
 
-          {/* Server-side error (e.g. email already taken) */}
+          {/* Server-side error (e.g. email already taken, password policy) */}
           {error ? (
             <Text variant="caption" color={colors.semantic.error}>
               {error}
@@ -197,7 +237,7 @@ export default function RegisterScreen(): React.JSX.Element {
           <GoldenButton
             title={t('register')}
             onPress={handleSubmit(onSubmit)}
-            disabled={!isValid}
+            disabled={!isValid || isLoading}
             testID="register-button"
           />
         </View>
@@ -234,6 +274,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.lg,
+  },
+  verificationContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xl,
+    paddingHorizontal: spacing.xl,
   },
   header: {
     gap: spacing.sm,

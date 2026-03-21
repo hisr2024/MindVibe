@@ -80,9 +80,14 @@ function AppContent(): React.JSX.Element {
   }, [status]);
 
   useEffect(() => {
-    void initialize();
-    void checkBiometricAvailability();
-  }, [initialize, checkBiometricAvailability]);
+    const setup = async () => {
+      await initialize();
+      await checkBiometricAvailability();
+    };
+    void setup();
+    // Run once on mount — Zustand actions are stable references
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (status === 'idle' || status === 'loading') {
     return (
