@@ -210,9 +210,15 @@ export default function SacredReflectionsPage() {
       const data: ApiEntry[] = await response.json()
       const decrypted: JournalEntry[] = []
       for (const entry of data) {
-        const raw = await decryptText(entry.encrypted_content, passphrase)
-        const parsed = JSON.parse(raw) as JournalEntry
-        decrypted.push(parsed)
+        try {
+          const raw = await decryptText(entry.encrypted_content, passphrase)
+          const parsed = JSON.parse(raw) as JournalEntry
+          decrypted.push(parsed)
+        } catch {
+          // Skip entries that fail to decrypt (corrupted ciphertext, wrong key, etc.)
+          // rather than losing all entries due to a single bad one
+          console.warn(`Skipped journal entry ${entry.id} — decryption failed`)
+        }
       }
       setEntries(prev => {
         const merged = [...decrypted, ...prev]
@@ -275,16 +281,15 @@ export default function SacredReflectionsPage() {
     try {
       const sanitizedBody = sanitizeForApi(entry.body)
       // Use local Next.js API route which handles backend proxying
-      const response = await fetch('/api/chat/message', {
+      const response = await apiFetch('/api/chat/message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ message: `Please offer a supportive Ancient Wisdom-inspired reflection on this private journal entry: ${sanitizedBody}` })
       })
 
       if (response.ok) {
         const data = await response.json()
-        setGuidance(prev => ({ ...prev, [entry.id]: data.response }))
+        setGuidance(prev => ({ ...prev, [entry.id]: data?.response ?? 'No guidance available at this time.' }))
       } else {
         setGuidance(prev => ({ ...prev, [entry.id]: 'KIAAN could not respond right now. Please try again shortly.' }))
       }
@@ -416,7 +421,8 @@ export default function SacredReflectionsPage() {
       const response = await apiFetch('/api/kiaan/weekly-assessment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ responses: assessmentResponses })
+        body: JSON.stringify({ responses: assessmentResponses }),
+        signal: AbortSignal.timeout(20000),
       })
       if (response.ok) {
         const data = await response.json()
@@ -660,11 +666,11 @@ export default function SacredReflectionsPage() {
                       </div>
                       <div className="text-xs text-[#f5f0e8]/70">out of 100</div>
                     </div>
-                    {assessmentResult.recommended_focus_areas.length > 0 && (
+                    {(assessmentResult.recommended_focus_areas?.length ?? 0) > 0 && (
                       <div>
                         <p className="text-xs font-semibold text-[#f5f0e8]/80 mb-1">Focus areas:</p>
                         <ul className="space-y-1">
-                          {assessmentResult.recommended_focus_areas.map((area, i) => (
+                          {(assessmentResult.recommended_focus_areas ?? []).map((area, i) => (
                             <li key={i} className="text-xs text-[#f5f0e8]/70 flex items-start gap-2">
                               <span className="text-[#d4a44c]">•</span>
                               <span>{area}</span>
@@ -673,11 +679,11 @@ export default function SacredReflectionsPage() {
                         </ul>
                       </div>
                     )}
-                    {assessmentResult.personalized_verses.length > 0 && (
+                    {(assessmentResult.personalized_verses?.length ?? 0) > 0 && (
                       <div>
                         <p className="text-xs font-semibold text-[#f5f0e8]/80 mb-1">Recommended verses:</p>
                         <ul className="space-y-1">
-                          {assessmentResult.personalized_verses.map((v, i) => (
+                          {(assessmentResult.personalized_verses ?? []).map((v, i) => (
                             <li key={i} className="text-xs text-[#e8b54a]/80">
                               Ch.{v.chapter} V.{v.verse}{v.theme ? ` — ${v.theme}` : ''}
                             </li>

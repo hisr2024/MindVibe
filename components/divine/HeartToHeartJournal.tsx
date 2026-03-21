@@ -128,7 +128,7 @@ export function HeartToHeartJournal({
   // Generate Krishna's response
   const generateKrishnaResponse = useCallback((userContent: string): string => {
     const theme = detectTheme(userContent);
-    const responses = KRISHNA_RESPONSES[theme];
+    const responses = KRISHNA_RESPONSES[theme] ?? KRISHNA_RESPONSES['default'];
     return responses[Math.floor(Math.random() * responses.length)];
   }, []);
 

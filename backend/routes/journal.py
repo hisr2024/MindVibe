@@ -173,7 +173,10 @@ async def upload_blob(
     row = res.first()
     await db.commit()
     if not row:
-        raise Exception("Failed to create blob")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create blob",
+        )
     return {
         "id": row.id,
         "created_at": row.created_at.isoformat(),
@@ -205,7 +208,7 @@ async def _record_version(
     )
     next_version = 1 if latest_version is None else latest_version + 1
     encrypted_content = (
-        payload.content.dict()
+        payload.content.model_dump()
         if hasattr(payload, "content") and payload.content
         else entry.encrypted_content
     )
@@ -237,9 +240,9 @@ async def create_entry(
     entry = JournalEntry(
         id=entry_id,
         user_id=user_id,
-        encrypted_title=payload.title.dict() if payload.title else None,
-        encrypted_content=payload.content.dict(),
-        encryption_meta=payload.content.dict(),
+        encrypted_title=payload.title.model_dump() if payload.title else None,
+        encrypted_content=payload.content.model_dump(),
+        encryption_meta=payload.content.model_dump(),
         mood_labels=payload.moods,
         tag_labels=payload.tags,
         client_updated_at=payload.client_updated_at,
@@ -318,10 +321,10 @@ async def update_entry(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={"error": "CONFLICT_STALE_UPDATE", "message": "Client update is older than server copy."})
 
     if payload.title:
-        entry.encrypted_title = payload.title.dict()
+        entry.encrypted_title = payload.title.model_dump()
     if payload.content:
-        entry.encrypted_content = payload.content.dict()
-        entry.encryption_meta = payload.content.dict()
+        entry.encrypted_content = payload.content.model_dump()
+        entry.encryption_meta = payload.content.model_dump()
     if payload.moods is not None:
         entry.mood_labels = payload.moods
     if payload.tags is not None:
