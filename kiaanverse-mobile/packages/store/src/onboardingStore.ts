@@ -8,9 +8,9 @@
 import { create } from 'zustand';
 
 interface OnboardingAnswers {
-  locale?: string;
-  interests?: string[];
-  notificationsEnabled?: boolean;
+  locale?: string | undefined;
+  interests?: string[] | undefined;
+  notificationsEnabled?: boolean | undefined;
 }
 
 interface OnboardingState {
