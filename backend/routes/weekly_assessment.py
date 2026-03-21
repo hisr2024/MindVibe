@@ -17,15 +17,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.deps import get_current_user_optional, get_db
 from backend.models import UserAssessment
 from backend.services.gita_service import GitaService
-from backend.services.kiaan_core import KIAANCore
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/api/kiaan/weekly-assessment", tags=["kiaan", "weekly-assessment"]
 )
-
-kiaan_core = KIAANCore()
 
 
 # Assessment questions for spiritual wellness evaluation
@@ -145,6 +142,14 @@ async def submit_assessment(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid question IDs in responses",
+        )
+
+    # Require all scale questions to be answered
+    scale_question_ids = {q["id"] for q in ASSESSMENT_QUESTIONS if q["type"] == "scale"}
+    if not scale_question_ids.issubset(provided_responses):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="All scale questions must be answered",
         )
 
     # Calculate scores
@@ -439,5 +444,11 @@ async def _fetch_verse_details(
                         "theme": verse.theme,
                         "principle": verse.principle,
                     }
+                )
+            else:
+                logger.warning(
+                    "Verse %d:%d not found in database",
+                    verse_ref["chapter"],
+                    verse_ref["verse"],
                 )
     return verse_details
