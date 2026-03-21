@@ -126,9 +126,13 @@ describe('useLanguage Hook', () => {
     });
 
     it('should have correct text direction for all languages', () => {
-      // All current languages use LTR
+      // Most languages use LTR, Arabic uses RTL
       Object.values(LANGUAGES).forEach(lang => {
-        expect(lang.dir).toBe('ltr');
+        if (lang.code === 'ar') {
+          expect(lang.dir).toBe('rtl');
+        } else {
+          expect(lang.dir).toBe('ltr');
+        }
       });
     });
 

@@ -3,7 +3,9 @@
     "title": "メンタルウェルネスのためのAIコンパニオン",
     "subtitle": "古代バガヴァッド・ギーターの知恵に基づくKIAANとチャット",
     "ctaPrimary": "無料チャットを開始",
-    "ctaSecondary": "ツールを探索"
+    "ctaSecondary": "ツールを探索",
+    "privacy": "Conversations remain private • a warm, confidential refuge",
+    "tagline": "Your calm, privacy-first spiritual companion powered by ancient wisdom"
   },
   "languageShowcase": {
     "title": "あなたの言語で利用可能",
@@ -18,7 +20,23 @@
   },
   "features": {
     "title": "メンタルウェルネスに必要なすべて",
-    "description": "内なる平和への旅のための包括的なツール"
+    "description": "内なる平和への旅のための包括的なツール",
+    "offline": {
+      "cta": "Start Journaling",
+      "description": "Access your journal, moods, and reflections anytime, even without internet.",
+      "title": "Offline Ready"
+    },
+    "reset": {
+      "cta": "Try Reset",
+      "description": "Quick exercises to reset your emotional state and find instant calm.",
+      "title": "Emotional Reset"
+    },
+    "subtitle": "Privacy-first tools designed for your spiritual wellness journey",
+    "voice": {
+      "cta": "Talk to KIAAN",
+      "description": "Talk naturally with KIAAN using voice input. Always awake, guiding you anywhere in the ecosystem.",
+      "title": "KIAAN Voice"
+    }
   },
   "introduction": {
     "heroTitle": "神聖なる存在へようこそ",
@@ -41,5 +59,72 @@
     "detach": "離執",
     "footerVerse": "「私はすべての存在の心に座す自己である。私は始まりであり、中間であり、終わりである。」",
     "footerVerseRef": "— バガヴァッド・ギーター 10.20"
+  },
+  "disclaimer": {
+    "text": "KIAAN shares supportive reflections inspired by wisdom traditions. These conversations and exercises are not medical advice. If you are facing serious concerns or feel unsafe, please contact your country's emergency medical services or a licensed professional right away.",
+    "title": "Disclaimer"
+  },
+  "ecosystem": {
+    "footer": "Each pillar works together to create a balanced, sustainable approach to spiritual wellness",
+    "pillars": {
+      "innerPeace": {
+        "description": "Find stillness through breath-focused exercises and gentle grounding techniques.",
+        "title": "Inner Peace"
+      },
+      "mindControl": {
+        "description": "Develop focused clarity through structured mindfulness practices.",
+        "title": "Mind Control"
+      },
+      "selfKindness": {
+        "description": "Cultivate compassion for yourself through warm, supportive exercises.",
+        "title": "Self Kindness"
+      }
+    },
+    "subtitle": "A holistic approach to spiritual wellness, rooted in ancient wisdom and modern practices",
+    "title": "The MindVibe Ecosystem"
+  },
+  "moodCheckIn": {
+    "helper": "Tap a stone to log your mood • Private & local only",
+    "helperText": "Tap a stone to log your mood • Takes you to KIAAN Chat for support",
+    "moods": {
+      "anxious": "Anxious",
+      "happy": "Happy",
+      "heavy": "Heavy",
+      "neutral": "Neutral",
+      "peaceful": "Peaceful",
+      "tired": "Tired"
+    },
+    "openingChat": "Opening KIAAN Chat...",
+    "responses": {
+      "anxious": "Take a breath. I'm with you. 🌊",
+      "happy": "Let that warmth stay with you. ✨",
+      "heavy": "You're not alone. I'm here. 💙",
+      "neutral": "Steady is good. You're showing up. 🌿",
+      "peaceful": "Beautiful calm. Stay with it. 💙",
+      "tired": "Rest is not weakness. 💙"
+    },
+    "selectMood": "Select",
+    "subtitle": "Quick Check-In",
+    "title": "How are you feeling?"
+  },
+  "quickAccess": {
+    "dashboard": {
+      "cta": "View Dashboard",
+      "description": "View insights from your mood check-ins and journal entries",
+      "subtitle": "Dashboard",
+      "title": "Progress Tracking"
+    },
+    "emotionalReset": {
+      "cta": "Try Reset",
+      "description": "Guided exercises to reset your emotional state instantly",
+      "subtitle": "Emotional Reset",
+      "title": "Quick Reset"
+    },
+    "kiaan": {
+      "cta": "Open Chat",
+      "description": "Jump into a focused conversation for spiritual wellness support",
+      "subtitle": "Instant guidance",
+      "title": "Talk to KIAAN"
+    }
   }
 }

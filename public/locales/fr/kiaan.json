@@ -32,7 +32,12 @@
     "defaultResponse": "Je suis la. Dites-moi ce qui se passe et nous trouverons une solution ensemble.",
     "summary": "Resume",
     "fullView": "Vue complete",
-    "divineFriend": "Votre Ami Divin"
+    "divineFriend": "Votre Ami Divin",
+    "featureLocked": "This feature requires a higher plan. [View plans](/pricing) to unlock it.",
+    "fullViewTitle": "Full detailed response",
+    "quotaExceeded": "Your monthly quota has been reached. [Upgrade your plan](/pricing) to continue chatting.",
+    "saveToJournalTitle": "Save to Journal",
+    "shareTitle": "Share response"
   },
   "guidanceModes": {
     "title": "Guidance modes",

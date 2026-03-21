@@ -32,7 +32,12 @@
     "defaultResponse": "ਮੈਂ ਇੱਥੇ ਹਾਂ। ਦੱਸੋ ਕੀ ਹੋ ਰਿਹਾ ਹੈ, ਅਸੀਂ ਮਿਲ ਕੇ ਹੱਲ ਕਰਾਂਗੇ।",
     "summary": "ਸਾਰ",
     "fullView": "ਪੂਰਾ ਦ੍ਰਿਸ਼",
-    "divineFriend": "ਤੁਹਾਡਾ ਦੈਵੀ ਮਿੱਤਰ"
+    "divineFriend": "ਤੁਹਾਡਾ ਦੈਵੀ ਮਿੱਤਰ",
+    "featureLocked": "This feature requires a higher plan. [View plans](/pricing) to unlock it.",
+    "fullViewTitle": "Full detailed response",
+    "quotaExceeded": "Your monthly quota has been reached. [Upgrade your plan](/pricing) to continue chatting.",
+    "saveToJournalTitle": "Save to Journal",
+    "shareTitle": "Share response"
   },
   "guidanceModes": {
     "title": "Guidance modes",

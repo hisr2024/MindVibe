@@ -43,5 +43,78 @@
     "kiaan": "സഹചാരി മോഡ്",
     "relationship-compass": "ബന്ധ മോഡ്",
     "journey": "പരിശീലന മോഡ്"
-  }
+  },
+  "allTools": "All tools in one place",
+  "badges": {
+    "beta": "beta",
+    "new": "new",
+    "premium": "premium"
+  },
+  "categories": {
+    "core": "Core Tools",
+    "guidance": "Guidance Engines",
+    "karma": "Karma Tools",
+    "quick": "Quick Access"
+  },
+  "returnHome": "Return to home",
+  "subtitle": "MindVibe tools",
+  "tools": {
+    "analytics": {
+      "description": "Track your progress",
+      "title": "Analytics"
+    },
+    "ardha": {
+      "description": "Situational guidance",
+      "title": "Ardha"
+    },
+    "deep": {
+      "description": "Advanced analytics",
+      "title": "Deep Insights"
+    },
+    "emotional-reset": {
+      "description": "Quick emotional balance",
+      "title": "Emotional Reset"
+    },
+    "insights": {
+      "description": "Emotional patterns",
+      "title": "Mood Insights"
+    },
+    "journal": {
+      "description": "Encrypted journaling",
+      "title": "Private Journal"
+    },
+    "karma-footprint": {
+      "description": "Track your actions",
+      "title": "Karma Footprint"
+    },
+    "karma-reset": {
+      "description": "Start fresh",
+      "title": "Karma Reset"
+    },
+    "karmic-tree": {
+      "description": "Visualize your journey",
+      "title": "Karmic Tree"
+    },
+    "kiaan": {
+      "description": "AI spiritual companion",
+      "title": "KIAAN Chat"
+    },
+    "reflections": {
+      "description": "Daily journaling",
+      "title": "Sacred Reflections"
+    },
+    "relationship-compass": {
+      "description": "Relationship guidance",
+      "title": "Relationship Compass"
+    },
+    "viyog": {
+      "description": "Outcome anxiety reducer",
+      "title": "Viyoga"
+    },
+    "wisdom": {
+      "description": "Ancient wisdom",
+      "title": "Wisdom Rooms"
+    }
+  },
+  "toolsCount": "tools"
 }

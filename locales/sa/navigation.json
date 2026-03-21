@@ -22,7 +22,9 @@
     "karmicTree": "कार्मिक वृक्षः",
     "emotionalReset": "भावात्मक पुनः",
     "deepInsights": "गभीर अन्तर्दृष्टयः",
-    "wisdomRooms": "प्रज्ञा कक्षाः"
+    "wisdomRooms": "प्रज्ञा कक्षाः",
+    "companion": "Companion",
+    "wisdomJourneys": "Journeys"
   },
   "actions": {
     "openChat": "संवादं खोलयतु",

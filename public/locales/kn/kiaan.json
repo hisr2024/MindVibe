@@ -32,7 +32,12 @@
     "defaultResponse": "ನಾನು ಇಲ್ಲಿದ್ದೇನೆ. ಏನಾಗುತ್ತಿದೆ ಹೇಳಿ, ನಾವು ಒಟ್ಟಾಗಿ ಪರಿಹರಿಸೋಣ.",
     "summary": "ಸಾರಾಂಶ",
     "fullView": "ಪೂರ್ಣ ನೋಟ",
-    "divineFriend": "ನಿಮ್ಮ ದೈವಿಕ ಗೆಳೆಯ"
+    "divineFriend": "ನಿಮ್ಮ ದೈವಿಕ ಗೆಳೆಯ",
+    "featureLocked": "This feature requires a higher plan. [View plans](/pricing) to unlock it.",
+    "fullViewTitle": "Full detailed response",
+    "quotaExceeded": "Your monthly quota has been reached. [Upgrade your plan](/pricing) to continue chatting.",
+    "saveToJournalTitle": "Save to Journal",
+    "shareTitle": "Share response"
   },
   "guidanceModes": {
     "title": "Guidance modes",

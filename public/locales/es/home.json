@@ -64,7 +64,10 @@
       "tired": "El descanso no es debilidad. 💙",
       "anxious": "Respira hondo. Estoy contigo. 🌊",
       "heavy": "No estás solo. Estoy aquí. 💙"
-    }
+    },
+    "helperText": "Tap a stone to log your mood • Takes you to KIAAN Chat for support",
+    "openingChat": "Opening KIAAN Chat...",
+    "selectMood": "Select"
   },
   "quickAccess": {
     "kiaan": {

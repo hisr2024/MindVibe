@@ -32,7 +32,12 @@
     "defaultResponse": "Ich bin hier. Erzaehlen Sie mir, was los ist, und wir werden es gemeinsam loesen.",
     "summary": "Zusammenfassung",
     "fullView": "Vollansicht",
-    "divineFriend": "Ihr Goettlicher Freund"
+    "divineFriend": "Ihr Goettlicher Freund",
+    "featureLocked": "This feature requires a higher plan. [View plans](/pricing) to unlock it.",
+    "fullViewTitle": "Full detailed response",
+    "quotaExceeded": "Your monthly quota has been reached. [Upgrade your plan](/pricing) to continue chatting.",
+    "saveToJournalTitle": "Save to Journal",
+    "shareTitle": "Share response"
   },
   "guidanceModes": {
     "title": "Führungsmodi",

@@ -32,7 +32,12 @@
     "defaultResponse": "ഞാന്‍ ഇവിടെ ഉണ്ട്. എന്താണ് സംഭവിക്കുന്നതെന്ന് പറയൂ, നമ്മള്‍ ഒരുമിച്ച് പരിഹരിക്കാം.",
     "summary": "സംഗ്രഹം",
     "fullView": "പൂര്‍ണ്ണ കാഴ്ച",
-    "divineFriend": "നിങ്ങളുടെ ദിവ്യ സുഹൃത്ത്"
+    "divineFriend": "നിങ്ങളുടെ ദിവ്യ സുഹൃത്ത്",
+    "featureLocked": "This feature requires a higher plan. [View plans](/pricing) to unlock it.",
+    "fullViewTitle": "Full detailed response",
+    "quotaExceeded": "Your monthly quota has been reached. [Upgrade your plan](/pricing) to continue chatting.",
+    "saveToJournalTitle": "Save to Journal",
+    "shareTitle": "Share response"
   },
   "guidanceModes": {
     "title": "Guidance modes",

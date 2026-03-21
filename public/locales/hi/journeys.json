@@ -36,13 +36,21 @@
       "title": "यात्रा पूरी हुई!",
       "message": "{{title}} पूरा करने पर बधाई! आपने आंतरिक शांति की ओर एक महत्वपूर्ण कदम उठाया है।",
       "startAnother": "एक और यात्रा शुरू करें"
+    },
+    "day14": {
+      "body": "The 14 days are a beginning, not an end. Carry what you have practised into everyday moments — the work deepens from here.",
+      "linkPractice": "Daily micro-practice",
+      "linkTrigger": "Handle today's trigger",
+      "title": "Practice continues"
     }
   },
   "sections": {
     "teaching": "आज की शिक्षा",
     "reflection": "मार्गदर्शित चिंतन",
     "practice": "अभ्यास",
-    "commitment": "आज की लघु प्रतिबद्धता"
+    "commitment": "आज की लघु प्रतिबद्धता",
+    "markPracticed": "Mark practiced",
+    "microPractice": "Today's micro-practice"
   },
   "checkIn": {
     "label": "आपका चिंतन (वैकल्पिक)",
@@ -70,5 +78,6 @@
     "startFailed": "यात्रा शुरू करने में विफल। कृपया पुनः प्रयास करें।",
     "completeFailed": "चरण पूरा करने में विफल। कृपया पुनः प्रयास करें।",
     "networkError": "नेटवर्क त्रुटि। कृपया अपना कनेक्शन जांचें।"
-  }
+  },
+  "_template_variables_note": "This file uses i18next template variables: {{current}}, {{total}}, {{day}}, {{title}}. Any rename or removal of these variables will break the UI. Ensure all referenced variables are passed by the consuming components (JourneyCard, JourneyStep, JourneyComplete)."
 }

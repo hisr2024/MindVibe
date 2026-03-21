@@ -22,7 +22,9 @@
     "karmicTree": "业力树",
     "emotionalReset": "情绪重置",
     "deepInsights": "深入洞察",
-    "wisdomRooms": "智慧之室"
+    "wisdomRooms": "智慧之室",
+    "companion": "Companion",
+    "wisdomJourneys": "Journeys"
   },
   "actions": {
     "openChat": "打开聊天",

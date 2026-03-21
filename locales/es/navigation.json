@@ -22,7 +22,9 @@
     "karmicTree": "Árbol kármico",
     "emotionalReset": "Reinicio emocional",
     "deepInsights": "Perspectivas profundas",
-    "wisdomRooms": "Salas de sabiduría"
+    "wisdomRooms": "Salas de sabiduría",
+    "companion": "Companion",
+    "wisdomJourneys": "Journeys"
   },
   "actions": {
     "openChat": "Abrir chat",

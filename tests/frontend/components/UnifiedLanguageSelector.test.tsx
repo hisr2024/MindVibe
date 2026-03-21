@@ -3,7 +3,7 @@
  *
  * Covers:
  * - Rendering (trigger button, dropdown, bottom sheet)
- * - Language selection across all 17 languages
+ * - Language selection across all 29 languages
  * - Search / filtering
  * - Keyboard interaction (Escape to close)
  * - Accessibility (ARIA attributes, roles)
@@ -131,12 +131,12 @@ describe('LanguageSelector (unified)', () => {
       expect(screen.getByRole('listbox', { name: /select language/i })).toBeInTheDocument()
     })
 
-    it('displays all 17 languages in dropdown', async () => {
+    it('displays all 29 languages in dropdown', async () => {
       renderWithProvider(<LanguageSelector variant="dropdown" />)
       await userEvent.click(screen.getByRole('button', { name: /current language/i }))
       await waitFor(() => {
         const options = screen.getAllByRole('option')
-        expect(options).toHaveLength(17)
+        expect(options).toHaveLength(29)
         // Check a representative sample of native names are present
         expect(screen.getByText('हिन्दी')).toBeInTheDocument()
         expect(screen.getByText('தமிழ்')).toBeInTheDocument()
@@ -286,7 +286,9 @@ describe('LanguageSelector (unified)', () => {
       await waitFor(() => {
         expect(screen.getByText('Indian Languages')).toBeInTheDocument()
         expect(screen.getByText('European Languages')).toBeInTheDocument()
-        expect(screen.getByText('East Asian Languages')).toBeInTheDocument()
+        expect(screen.getByText('Asian Languages')).toBeInTheDocument()
+        expect(screen.getByText('Middle Eastern Languages')).toBeInTheDocument()
+        expect(screen.getByText('African Languages')).toBeInTheDocument()
       })
     })
 
@@ -345,7 +347,7 @@ describe('LanguageSelector (unified)', () => {
       renderWithProvider(<LanguageSelector variant="dropdown" />)
       await userEvent.click(screen.getByRole('button', { name: /current language/i }))
       const options = screen.getAllByRole('option')
-      expect(options.length).toBe(17)
+      expect(options.length).toBe(29)
     })
 
     it('search input has role="searchbox" and aria-label', async () => {
@@ -424,7 +426,7 @@ describe('LanguageSelector (unified)', () => {
     it('footer shows correct language count', async () => {
       renderWithProvider(<LanguageSelector variant="dropdown" />)
       await userEvent.click(screen.getByRole('button', { name: /current language/i }))
-      expect(screen.getByText('17 languages available')).toBeInTheDocument()
+      expect(screen.getByText('29 languages available')).toBeInTheDocument()
     })
   })
 })
