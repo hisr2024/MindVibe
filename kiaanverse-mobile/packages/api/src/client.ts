@@ -122,6 +122,7 @@ function createApiClient(): AxiosInstance {
           const refreshToken = await tokenManager.getRefreshToken();
           if (!refreshToken) {
             await tokenManager.clearTokens();
+            tokenManager.onAuthFailure?.();
             return Promise.reject(error);
           }
 
@@ -143,6 +144,7 @@ function createApiClient(): AxiosInstance {
           return client(originalRequest);
         } catch {
           await tokenManager.clearTokens();
+          tokenManager.onAuthFailure?.();
           return Promise.reject(error);
         } finally {
           isRefreshing = false;

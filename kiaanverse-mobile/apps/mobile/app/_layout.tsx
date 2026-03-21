@@ -16,13 +16,13 @@
  */
 
 import React, { useEffect, useCallback } from 'react';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { ThemeProvider, useTheme, colors } from '@kiaanverse/ui';
+import { ThemeProvider, useTheme, colors, LoadingMandala } from '@kiaanverse/ui';
 import { I18nProvider } from '@kiaanverse/i18n';
 import { useAuthStore, useThemeStore, useUserPreferencesStore } from '@kiaanverse/store';
 
@@ -71,7 +71,7 @@ function AuthGate({ children }: { children: React.ReactNode }): React.JSX.Elemen
 
 function AppContent(): React.JSX.Element {
   const { theme } = useTheme();
-  const { status, initialize } = useAuthStore();
+  const { status, initialize, checkBiometricAvailability } = useAuthStore();
 
   const onLayoutReady = useCallback(async () => {
     if (status !== 'idle' && status !== 'loading') {
@@ -81,12 +81,13 @@ function AppContent(): React.JSX.Element {
 
   useEffect(() => {
     void initialize();
-  }, [initialize]);
+    void checkBiometricAvailability();
+  }, [initialize, checkBiometricAvailability]);
 
   if (status === 'idle' || status === 'loading') {
     return (
       <View style={[styles.loading, { backgroundColor: colors.background.dark }]}>
-        <ActivityIndicator size="large" color={colors.primary[500]} />
+        <LoadingMandala size={120} />
       </View>
     );
   }

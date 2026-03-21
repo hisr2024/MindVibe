@@ -5,6 +5,8 @@
 export { apiClient, setTokenManager } from './client';
 export { api } from './endpoints';
 export { API_CONFIG } from './config';
+export { authService, AuthError } from './auth/authService';
+export type { AuthErrorCode, RegisterData } from './auth/authService';
 
 // Types
 export type {

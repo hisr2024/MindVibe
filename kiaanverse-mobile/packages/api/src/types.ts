@@ -150,4 +150,6 @@ export interface TokenManager {
   getRefreshToken: () => Promise<string | null>;
   setTokens: (access: string, refresh: string) => Promise<void>;
   clearTokens: () => Promise<void>;
+  /** Called when token refresh fails — signals the store to force logout. */
+  onAuthFailure?: () => void;
 }
