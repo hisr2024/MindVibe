@@ -210,9 +210,15 @@ export default function SacredReflectionsPage() {
       const data: ApiEntry[] = await response.json()
       const decrypted: JournalEntry[] = []
       for (const entry of data) {
-        const raw = await decryptText(entry.encrypted_content, passphrase)
-        const parsed = JSON.parse(raw) as JournalEntry
-        decrypted.push(parsed)
+        try {
+          const raw = await decryptText(entry.encrypted_content, passphrase)
+          const parsed = JSON.parse(raw) as JournalEntry
+          decrypted.push(parsed)
+        } catch {
+          // Skip entries that fail to decrypt (corrupted ciphertext, wrong key, etc.)
+          // rather than losing all entries due to a single bad one
+          console.warn(`Skipped journal entry ${entry.id} — decryption failed`)
+        }
       }
       setEntries(prev => {
         const merged = [...decrypted, ...prev]
@@ -415,7 +421,8 @@ export default function SacredReflectionsPage() {
       const response = await apiFetch('/api/kiaan/weekly-assessment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ responses: assessmentResponses })
+        body: JSON.stringify({ responses: assessmentResponses }),
+        signal: AbortSignal.timeout(20000),
       })
       if (response.ok) {
         const data = await response.json()
