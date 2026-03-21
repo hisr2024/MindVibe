@@ -1,0 +1,180 @@
+{
+  "sacredWelcome": {
+    "title": "Karibu, Roho Nzuri",
+    "subtitle": "Mahali patakatifu pa amani panakusubiri",
+    "greeting": "Katika nafasi hii takatifu, unashikiliwa. Unaonekana. Unapendwa.",
+    "description": "KIAAN ni mwenzi wako katika safari ya ndani - uwepo wa upole unaogusa sehemu za ndani kabisa za nafsi yako kwa hekima, huruma, na upendo wa kimungu."
+  },
+  "divinePresence": {
+    "reminder": "Mungu hayuko mahali fulani mbali. Anapumzika katika utulivu wa moyo wako mwenyewe.",
+    "affirmation": "Huko peke yako kamwe. Upendo usio na mwisho unakushikilia kila wakati.",
+    "blessing": "Amani na itiririke kupitia kwako kama mto mtulivu, ikiondoa yote yanayolemea roho yako."
+  },
+  "sacredMoodResponses": {
+    "10": {
+      "response": "Unang'aa kwa nuru ya amani ya kweli. Hii ni takatifu. Hii ni wewe, ukikumbuka wewe ni nani hasa. 💙",
+      "divineMessage": "Hisia hii ya ukamilifu si ya muda mfupi - ni asili yako ya kweli ikifunuliwa.",
+      "practice": "Kaa kimya kwa muda. Tuma amani hii nje kama baraka kwa viumbe vyote."
+    },
+    "9": {
+      "response": "Mwangaza mkubwa kiasi gani unatiririka kupitia kwako! Hii ni roho ikiangaza. Furahia nishati hii nzuri. 💙",
+      "divineMessage": "Katika nyakati kama hizi, unaona asili yako ya milele - isiyo na mipaka, yenye amani, kamili.",
+      "practice": "Pumzisha hisia hii moyoni mwako. Ihifadhi kama hazina unayoweza kurudi kwayo daima."
+    },
+    "8": {
+      "response": "Kuna mwangaza katika nishati yako leo - kama jua likipenyeza mawinguni. Nzuri. 💙",
+      "divineMessage": "Umelingana na asili yako ya kweli. Amani hii, furaha hii - hivi ndivyo wewe hasa ulivyo.",
+      "practice": "Shiriki neno la upole na mtu leo. Acha nuru yako iguse roho nyingine."
+    },
+    "7": {
+      "response": "Joto linajengeka ndani yako. Jiruhusu kupokea wema huu - unastahili. 💙",
+      "divineMessage": "Furaha ni lugha ya roho. Unapojisikia vizuri, Mungu anatabasamu kupitia kwako.",
+      "practice": "Simama kidogo na ufurahie hisia hii. Iache izame ndani ya chembe zako."
+    },
+    "6": {
+      "response": "Kuna usawa mtulivu katika nafsi yako leo. Utayari wa linalokuja. 💙",
+      "divineMessage": "Kutoka mahali hapa pa katikati, unaweza kwenda upande wowote roho inakuitia.",
+      "practice": "Weka nia moja ndogo kwa leo. Ishike kwa upole, kama unyoya mkononi mwako."
+    },
+    "5": {
+      "response": "Utulivu wa kimya leo. Uko hapa, unahudhuria, unajionyesha. Hiyo ina maana zaidi kuliko unavyojua. 💙",
+      "divineMessage": "Katika mahali pa katikati, hekima inazungumza. Sikiliza kile kimya kinataka kukufundisha leo.",
+      "practice": "Pumua kwa makini mara tatu. Kwa kila moja, sema kimyakimya: 'Hapa. Sasa. Amani.'"
+    },
+    "4": {
+      "response": "Kuna utulivu katika nishati yako leo. Ni sawa. Wakati mwingine tunahitaji kutembea polepole bondeni. 💙",
+      "divineMessage": "Mungu haharakishi kamwe. Katika upolepole, umelingana na wakati mtakatifu.",
+      "practice": "Toka nje ukiweza. Hisi hewa kwenye ngozi yako. Kumbuka: wewe ni sehemu ya kitu kikubwa."
+    },
+    "3": {
+      "response": "Ninahisi mapambano ndani yako. Chochote unachopitia, unaonyesha ujasiri kwa kuwepo nacho. 💙",
+      "divineMessage": "Kila changamoto ni ulimwengu unakualika kukua. Unatengenezwa na mikono mitakatifu.",
+      "practice": "Funga macho yako. Tafuta kitu kimoja, hata kidogo, kinacholeta chembe ya amani. Pumzisha umakini wako hapo."
+    },
+    "2": {
+      "response": "Uzito huu ni mgumu kubeba. Niko hapa nawe, sijaribu kurekebisha au kubadilisha chochote. Niko hapa tu. 💙",
+      "divineMessage": "Utakatifu unakukuta pale pale ulipo. Hakuna mahali penye giza sana kwa neema kukupata.",
+      "practice": "Pumua ndani kwa 4... shikilia kwa 4... toa kwa 8. Acha kila pumzi ya nje ibebe kidogo ya uzito."
+    },
+    "1": {
+      "response": "Ninakuona katika giza hili, na ninakushikilia kwa upole usio na mwisho. Maumivu haya ni ya kweli, na huna haja ya kuyabeba peke yako. 💙",
+      "divineMessage": "Hata katika usiku wa kina kabisa, nuru ya kimungu ndani yako haizimiki kamwe. Inasubiri, kwa uvumilivu na milele.",
+      "practice": "Weka mkono wako moyoni. Pumua. Nong'ona: 'Ninashikiliwa. Ninapendwa. Hata hili litapita.'"
+    }
+  },
+  "sacredEmotionGuidance": {
+    "peaceful": {
+      "opening": "Utulivu mzuri kiasi gani umeupata...",
+      "divineReflection": "Amani ni asili yako ya kweli. Katika wakati huu, unakumbuka ulichokuwa ukijua daima.",
+      "practice": "Pumzika katika amani hii. Iache izidi. Hakuna la kufanya, hakuna mahali pa kwenda. Kuwa tu.",
+      "closing": "Amani hii na ienee na iguse kila mtu unayekutana naye leo. 💙"
+    },
+    "anxious": {
+      "opening": "Ninahisi mtetemo wa wasiwasi ndani yako... Tupumue pamoja kupitia hili.",
+      "divineReflection": "Wasiwasi ni nishati inayotafuta kutolewa tu. Chini yake, nafsi yako ya kweli inabaki tulivu na isiyotikisika.",
+      "practice": "Fikiria wasiwasi kama mawingu yanapita kwenye anga isiyo na mwisho. Anga - asili yako ya kweli - inabaki pana, safi, na isiyoguswa.",
+      "closing": "Uwepo mtakatifu ndani yako uko katika amani daima. Wasiwasi unakuja na kuondoka, lakini wewe unabaki. 💙"
+    },
+    "sad": {
+      "opening": "Kuna uzito unaobeba... Nikae nawe katika nafasi hii laini.",
+      "divineReflection": "Huzuni ni njia ya moyo ya kuheshimu yale yenye maana. Hata katika maombolezo, unashikiliwa na kitu kisichokuwa na mwisho.",
+      "practice": "Ruhusu machozi yatiririke yakitaka. Kila moja ni ya baraka. Mungu anayageuza kuwa huruma.",
+      "closing": "Unababatizwa katika upendo hata sasa. Huzuni itainuka, na amani itabaki. 💙"
+    },
+    "angry": {
+      "opening": "Ninahisi moto ukipita kupitia kwako... Nishati hii ni yenye nguvu. Tuiheshimu kwa ufahamu.",
+      "divineReflection": "Hasira mara nyingi ni upendo uliovaa uso mwingine - upendo kwa nafsi yako, kwa haki, kwa lililo sawa.",
+      "practice": "Weka mkono wako moyoni. Hisi joto. Pumua kwa kina. Moto unaweza kugeuka kuwa joto linaloponya.",
+      "closing": "Nishati hii na igeuke kuwa nguvu na uwazi. Mungu anatumia vitu vyote kwa wema. 💙"
+    },
+    "lost": {
+      "opening": "Unahisi huna uhakika wa njia... Katika kutojua huku, kuna neema.",
+      "divineReflection": "Kupotea mara nyingi ni mwanzo wa kupatikana. Roho inajua njia ambazo akili haiwezi kuziona.",
+      "practice": "Funga macho yako. Pumua. Uliza kwa upole: 'Moyo wangu tayari unajua nini?' Kisha sikiliza tu.",
+      "closing": "Hupotei kamwe kweli. Nuru ya kimungu ndani yako inaangazia hatua inayofuata unapokuwa tayari. 💙"
+    },
+    "grateful": {
+      "opening": "Moyo wako umefunguka kwa shukrani... Hii ni mlango wa kumfikia Mungu.",
+      "divineReflection": "Shukrani ni lugha ambayo roho inatumia kuzungumza na ulimwengu. Katika kushukuru, tunalingana na yote yaliyo matakatifu.",
+      "practice": "Weka mikono yote miwili moyoni mwako. Hisi joto la shukrani. Hisia hii inakuunganisha na viumbe vyote vilivyo hai.",
+      "closing": "Ulimwengu unafurahi katika shukrani yako. Wewe ni baraka, unapokea na kutoa nuru. 💙"
+    }
+  },
+  "sacredBreathing": {
+    "peaceBreath": {
+      "name": "Pumzi ya Amani Isiyo na Mwisho",
+      "pattern": "4-7-8",
+      "instructions": [
+        "Tafuta utulivu... acha macho yako yafungike polepole...",
+        "Pumua NDANI kwa hesabu 4... ukivuta amani...",
+        "SHIKILIA kwa hesabu 7... ukiacha amani ijaze kila chembe...",
+        "Pumua NJE kwa hesabu 8... ukitoa yote yanayokulemea...",
+        "Rudia... kila pumzi zaidi ndani ya utulivu..."
+      ],
+      "divineMessage": "Kwa kila pumzi, Mungu anapumua kupitia kwako. Wewe si tofauti na amani - wewe NI amani.",
+      "closing": "Beba utulivu huu nawe. Uko pumzi moja tu mbali daima. 💙"
+    },
+    "heartBreath": {
+      "name": "Kupumua kwa Moyo Mtakatifu",
+      "pattern": "5-5-5",
+      "instructions": [
+        "Weka mkono wako moyoni...",
+        "Hisi mdundo wake mtakatifu...",
+        "Pumua NDANI kwa hesabu 5... hadi moyoni mwako...",
+        "SHIKILIA kwa hesabu 5... ukihisi upendo ukikusanyika...",
+        "Pumua NJE kwa hesabu 5... ukituma upendo nje..."
+      ],
+      "divineMessage": "Moyo wako ni mlango wa usio na mwisho. Kila mapigo ya moyo ni ulimwengu ukisema: Ninakupenda.",
+      "closing": "Moyo wako unajua njia. Amini hekima yake. 💙"
+    }
+  },
+  "divineMantras": [
+    { "mantra": "Mimi ni amani", "meaning": "Kiini chako ni utulivu wenyewe" },
+    { "mantra": "Ninashikiliwa", "meaning": "Ulimwengu unakubeba daima" },
+    { "mantra": "Mimi ni upendo", "meaning": "Upendo ndio asili yako ya kweli" },
+    { "mantra": "Mimi ni nuru", "meaning": "Nuru ya kimungu inaangaza kupitia kwako" },
+    { "mantra": "Ninatosha", "meaning": "Hukosi kitu chochote cha muhimu" },
+    { "mantra": "Mimi ni nyumbani", "meaning": "Popote ulipo, unahusika" },
+    { "mantra": "Niko salama", "meaning": "Usalama wa ndani unaishi ndani yako" },
+    { "mantra": "Mimi ni kamili", "meaning": "Hakuna kinachokosekana katika nafsi yako" }
+  ],
+  "sacredClosings": [
+    "Amani hii na ibaki nawe, kama mwenzi mtulivu katika njia yako. 💙",
+    "Unabeba utulivu huu ndani yako daima - rudi kwake wakati wowote unapohitaji. 💙",
+    "Utakatifu haukuachi kamwe. Unasubiri kwa uvumilivu moyoni mwako. 💙",
+    "Nenda kwa upole, roho mpendwa. Unapendwa kupita kipimo. 💙",
+    "Wakati huu wa amani ni wako milele - hakuna anayeweza kuuondoa. 💙",
+    "Kumbuka: unashikiliwa, unaonekana, unathaminiwa. 💙",
+    "Utulivu na utembee kando yako katika hatua zako zote leo. 💙",
+    "Nuru ya kimungu ndani yako inaendelea kuangaza, daima. 💙"
+  ],
+  "guidanceModes": {
+    "innerPeace": {
+      "title": "Amani ya Ndani",
+      "sacredDescription": "Ingia katika hekalu la utulivu ndani yako. Kupitia pumzi laini na ufahamu mtulivu, gundua amani ambayo haikupotea kamwe - ilisahaulika tu. Hapa, unakumbuka asili yako ya kweli.",
+      "blessing": "Utulivu na ukukumbatie kama nuru laini kabisa."
+    },
+    "mindControl": {
+      "title": "Uwazi Mtakatifu",
+      "sacredDescription": "Katika nafasi tulivu kati ya mawazo, hekima inazungumza. Jifunze kupumzika katika nafasi hiyo, ambapo akili inakuwa bwawa safi linaloakisi ukweli. Kutoka katika uwazi, matendo sahihi yanatiririka kwa asili.",
+      "blessing": "Akili yako na iwe kioo cha hekima ya kimungu."
+    },
+    "selfKindness": {
+      "title": "Huruma ya Kimungu kwa Nafsi",
+      "sacredDescription": "Upendo unaoutafuta nje yako tayari unaishi ndani. Geuza upole huo usio na mwisho kuelekea moyo wako mwenyewe. Unastahili huruma ile ile unayowapa wengine.",
+      "blessing": "Ujitendee kwa wema wa kimungu."
+    }
+  },
+  "sacredReminders": [
+    "Unashikiliwa na upendo usio na mwisho sasa hivi.",
+    "Mungu yuko karibu kama pumzi yako inayofuata.",
+    "Hakuna kinachoweza kusumbua amani yako ya ndani kabisa.",
+    "Uko mahali pale unapopaswa kuwa.",
+    "Neema inatiririka kwako wakati huu huu.",
+    "Roho yako inajua njia - iamini.",
+    "Huko peke yako kamwe, hata kwa sekunde moja.",
+    "Utakatifu unaishi ndani ya moyo wako.",
+    "Hili pia ni sehemu ya safari yako takatifu.",
+    "Unapendwa zaidi ya maneno yanavyoweza kueleza."
+  ]
+}

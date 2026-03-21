@@ -1,0 +1,118 @@
+{
+  "hero": {
+    "title": "Il tuo compagno IA per il benessere spirituale",
+    "subtitle": "Chatta con KIAAN, guidato dalla saggezza antica",
+    "tagline": "Il tuo compagno spirituale sereno e rispettoso della privacy, alimentato dalla saggezza antica",
+    "ctaPrimary": "Parla con KIAAN",
+    "ctaSecondary": "Riflessioni sacre",
+    "privacy": "Le conversazioni restano private • un rifugio caldo e confidenziale"
+  },
+  "ecosystem": {
+    "title": "L'ecosistema MindVibe",
+    "subtitle": "Un approccio olistico al benessere spirituale, radicato nella saggezza antica e nelle pratiche moderne",
+    "pillars": {
+      "innerPeace": {
+        "title": "Pace interiore",
+        "description": "Trova la quiete attraverso esercizi di respirazione e tecniche dolci di radicamento."
+      },
+      "mindControl": {
+        "title": "Controllo della mente",
+        "description": "Sviluppa una chiarezza concentrata attraverso pratiche strutturate di mindfulness."
+      },
+      "selfKindness": {
+        "title": "Gentilezza verso sé stessi",
+        "description": "Coltiva la compassione verso te stesso attraverso esercizi calorosi e di supporto."
+      }
+    },
+    "footer": "Ogni pilastro lavora insieme per creare un approccio equilibrato e sostenibile al benessere spirituale"
+  },
+  "features": {
+    "title": "Funzionalità principali",
+    "subtitle": "Strumenti con priorità alla privacy progettati per il tuo percorso di benessere spirituale",
+    "voice": {
+      "title": "Voce KIAAN",
+      "description": "Parla naturalmente con KIAAN usando l'input vocale. Sempre attivo, ti guida ovunque nell'ecosistema.",
+      "cta": "Parla con KIAAN"
+    },
+    "offline": {
+      "title": "Disponibile offline",
+      "description": "Accedi al tuo diario, stati d'animo e riflessioni in qualsiasi momento, anche senza internet.",
+      "cta": "Inizia a scrivere"
+    },
+    "reset": {
+      "title": "Reset emotivo",
+      "description": "Esercizi rapidi per resettare il tuo stato emotivo e trovare calma istantanea.",
+      "cta": "Prova il reset"
+    }
+  },
+  "moodCheckIn": {
+    "title": "Come ti senti?",
+    "subtitle": "Check-in rapido",
+    "helper": "Tocca una pietra per registrare il tuo umore • Privato e solo locale",
+    "helperText": "Tocca una pietra per registrare il tuo umore • Ti porta alla chat KIAAN per supporto",
+    "openingChat": "Apertura chat KIAAN...",
+    "selectMood": "Seleziona",
+    "moods": {
+      "peaceful": "Sereno",
+      "happy": "Felice",
+      "neutral": "Neutrale",
+      "tired": "Stanco",
+      "anxious": "Ansioso",
+      "heavy": "Appesantito"
+    },
+    "responses": {
+      "peaceful": "Bella calma. Resta così. 💙",
+      "happy": "Lascia che quel calore resti con te. ✨",
+      "neutral": "La stabilità è buona. Stai facendo la tua parte. 🌿",
+      "tired": "Il riposo non è debolezza. 💙",
+      "anxious": "Fai un respiro. Sono con te. 🌊",
+      "heavy": "Non sei solo. Sono qui. 💙"
+    }
+  },
+  "quickAccess": {
+    "kiaan": {
+      "title": "Parla con KIAAN",
+      "subtitle": "Guida istantanea",
+      "description": "Entra in una conversazione mirata per il supporto al benessere spirituale",
+      "cta": "Apri chat"
+    },
+    "dashboard": {
+      "title": "Monitoraggio progressi",
+      "subtitle": "Dashboard",
+      "description": "Visualizza approfondimenti dai tuoi check-in dell'umore e voci del diario",
+      "cta": "Vai alla dashboard"
+    },
+    "emotionalReset": {
+      "title": "Reset rapido",
+      "subtitle": "Reset emotivo",
+      "description": "Esercizi guidati per resettare il tuo stato emotivo istantaneamente",
+      "cta": "Prova il reset"
+    }
+  },
+  "disclaimer": {
+    "title": "Avvertenza",
+    "text": "KIAAN condivide riflessioni di supporto ispirate alle tradizioni di saggezza. Queste conversazioni ed esercizi non costituiscono consiglio medico. Se stai affrontando problemi seri o ti senti in pericolo, contatta i servizi di emergenza del tuo paese o un professionista autorizzato immediatamente."
+  },
+  "introduction": {
+    "heroTitle": "Benvenuto nella presenza divina",
+    "heroSubtitle": "Vivi la guida amorevole di Krishna. Non sei mai solo in questo percorso.",
+    "receiveDarshan": "Ricevi il Darshan di Krishna",
+    "talkToKiaan": "Parla con KIAAN",
+    "divineWisdom": "Saggezza e guida divina",
+    "protectionShield": "Scudo di protezione divina",
+    "activateProtection": "Attiva la protezione di Krishna",
+    "heartToHeart": "Da cuore a cuore con Krishna",
+    "writeLetter": "Scrivi una lettera al Divino",
+    "howIsHeart": "Come sta il tuo cuore?",
+    "shareFeelings": "Condividi i tuoi sentimenti con Krishna",
+    "goToDashboard": "Vai alla dashboard",
+    "accessTools": "Accedi a tutti gli strumenti e funzionalità",
+    "quickAccess": "Accesso divino rapido",
+    "journeys": "Percorsi",
+    "journal": "Diario",
+    "reframe": "Riformula",
+    "detach": "Distaccati",
+    "footerVerse": "\"Io sono il Sé che dimora nel cuore di tutti gli esseri. Sono l'inizio, il mezzo e la fine.\"",
+    "footerVerseRef": "— Bhagavad Gita 10.20"
+  }
+}

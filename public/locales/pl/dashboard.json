@@ -1,0 +1,120 @@
+{
+  "title": "Panel",
+  "welcome": "Witaj ponownie",
+  "subtitle": "Narzędzia MindVibe",
+  "allTools": "Wszystkie narzędzia w jednym miejscu",
+  "returnHome": "Powrót do strony głównej",
+  "toolsCount": "narzędzia",
+  "categories": {
+    "core": "Podstawowe Narzędzia",
+    "guidance": "Silniki Wskazówek",
+    "karma": "Narzędzia Karma",
+    "quick": "Szybki Dostęp"
+  },
+  "tools": {
+    "kiaan": {
+      "title": "KIAAN Czat",
+      "description": "Duchowy towarzysz AI"
+    },
+    "journal": {
+      "title": "Prywatny Dziennik",
+      "description": "Zaszyfrowane dziennikowanie"
+    },
+    "wisdom": {
+      "title": "Pokoje Mądrości",
+      "description": "Starożytna mądrość"
+    },
+    "insights": {
+      "title": "Wgląd w Nastrój",
+      "description": "Wzorce emocjonalne"
+    },
+    "viyog": {
+      "title": "Viyoga",
+      "description": "Reduktor lęku przed wynikiem"
+    },
+    "ardha": {
+      "title": "Ardha",
+      "description": "Wskazówki sytuacyjne"
+    },
+    "relationship-compass": {
+      "title": "Kompas Relacji",
+      "description": "Wskazówki relacyjne"
+    },
+    "emotional-reset": {
+      "title": "Reset Emocjonalny",
+      "description": "Szybka równowaga emocjonalna"
+    },
+    "karma-footprint": {
+      "title": "Ślad Karma",
+      "description": "Śledź swoje działania"
+    },
+    "karmic-tree": {
+      "title": "Drzewo Karmiczne",
+      "description": "Wizualizuj swoją podróż"
+    },
+    "karma-reset": {
+      "title": "Reset Karma",
+      "description": "Zacznij od nowa"
+    },
+    "reflections": {
+      "title": "Święte Refleksje",
+      "description": "Codzienne dziennikowanie"
+    },
+    "deep": {
+      "title": "Głębokie Wglądy",
+      "description": "Zaawansowana analityka"
+    },
+    "analytics": {
+      "title": "Analityka",
+      "description": "Śledź swoje postępy"
+    }
+  },
+  "badges": {
+    "new": "nowe",
+    "premium": "premium",
+    "beta": "beta"
+  },
+  "analytics": {
+    "title": "Analityka",
+    "overview": "Przegląd",
+    "insights": "Wglądy",
+    "trends": "Trendy",
+    "weeklyProgress": "Postęp Tygodniowy",
+    "monthlyProgress": "Postęp Miesięczny"
+  },
+  "profile": {
+    "title": "Profil",
+    "settings": "Ustawienia",
+    "editProfile": "Edytuj Profil",
+    "updateProfile": "Zaktualizuj Profil",
+    "accountInfo": "Informacje o Koncie"
+  },
+  "subscription": {
+    "title": "Subskrypcja",
+    "plan": "Obecny Plan",
+    "upgrade": "Ulepsz",
+    "manage": "Zarządzaj Subskrypcją",
+    "billing": "Rozliczenia"
+  },
+  "stats": {
+    "journalEntries": "Wpisy w Dzienniku",
+    "chatSessions": "Sesje Czatu",
+    "moodCheckins": "Zameldowania Nastroju",
+    "streakDays": "Seria Dni"
+  },
+  "tool_desc": {
+    "viyog": "Uspokój natychmiastową reakcję",
+    "ardha": "Przeramuj postrzeganie",
+    "kiaan": "Porozmawiaj o tym",
+    "relationship-compass": "Nawiguj jasność relacji",
+    "journey": "Trenuj długoterminową wewnętrzną stabilność"
+  },
+  "mode_label": {
+    "prefix": "Jesteś w:",
+    "viyog": "Tryb Pauzy",
+    "ardha": "Tryb Jasności",
+    "kiaan": "Tryb Towarzysza",
+    "relationship-compass": "Tryb Relacji",
+    "journey": "Tryb Treningu"
+  }
+}

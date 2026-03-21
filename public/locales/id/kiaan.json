@@ -1,0 +1,141 @@
+{
+  "welcome": {
+    "title": "Selamat Datang di KIAAN",
+    "subtitle": "Pendamping spiritual Anda yang tenang dan modern — selalu hadir, selalu mendukung.",
+    "description": "Pendamping spiritual yang tenang dan mengutamakan privasi dengan jurnal, obrolan terpandu, dan dasbor."
+  },
+  "chat": {
+    "title": "Bicara dengan KIAAN",
+    "subtitle": "Bimbingan lembut dengan cahaya bara",
+    "placeholder": "Ketik pesan Anda...",
+    "send": "Kirim",
+    "thinking": "KIAAN sedang merenung...",
+    "connectionStatus": "Koneksi pribadi dan stabil",
+    "connectionDesc": "Pertanyaan Anda muncul dengan fokus—jawaban tetap tidak berubah.",
+    "emptyState": {
+      "emoji": "✨",
+      "title": "Bagaimana saya bisa membimbing Anda hari ini?",
+      "subtitle": "Bagikan apa yang ada di pikiran Anda"
+    },
+    "disclaimer": "KIAAN adalah pendamping spiritual Anda, berbagi refleksi dari Bhagavad Gita dan kebijaksanaan kuno. Ini adalah ruang suci untuk kedamaian batin dan penemuan diri. Untuk hal-hal di luar jalur spiritual, selalu cari bimbingan dari profesional yang berkualifikasi.",
+    "saveToJournal": "Simpan ke Jurnal",
+    "copy": "Salin",
+    "copied": "Tersalin!",
+    "copyFailed": "Gagal",
+    "share": "Bagikan",
+    "shareVia": "Bagikan melalui",
+    "privacyNotice": "Pemberitahuan Privasi",
+    "shareWarning": "Anda akan membagikan informasi kesejahteraan spiritual. Pastikan Anda nyaman membagikan konten ini secara publik.",
+    "anonymize": "Anonimkan konten (hapus pengenal pribadi)",
+    "anonymized": "✓ Konten dianonimkan",
+    "sharingOriginal": "Membagikan konten asli",
+    "defaultResponse": "Saya di sini. Ceritakan apa yang sedang terjadi dan kita akan mengatasinya bersama.",
+    "quotaExceeded": "Kuota bulanan Anda telah tercapai. [Tingkatkan paket Anda](/pricing) untuk melanjutkan obrolan.",
+    "featureLocked": "Fitur ini memerlukan paket yang lebih tinggi. [Lihat paket](/pricing) untuk membukanya.",
+    "summary": "Ringkasan",
+    "fullView": "Tampilan Lengkap",
+    "fullViewTitle": "Respons detail lengkap",
+    "shareTitle": "Bagikan respons",
+    "saveToJournalTitle": "Simpan ke Jurnal",
+    "divineFriend": "Sahabat Ilahi Anda"
+  },
+  "guidanceModes": {
+    "title": "Mode panduan",
+    "subtitle": "Segitiga Energi Mengalir",
+    "selectPrompt": "Ketuk mode untuk menjelajahi bagaimana KIAAN membimbing kondisi Anda.",
+    "innerPeace": {
+      "title": "Kedamaian Batin",
+      "description": "Temukan ketenangan melalui latihan pernapasan dan teknik grounding yang lembut. Sempurna untuk saat-saat ketika Anda perlu menenangkan pikiran dan terhubung kembali dengan ketentraman.",
+      "note": "Napas lembut dan fokus halus"
+    },
+    "mindControl": {
+      "title": "Pengendalian Pikiran",
+      "description": "Kembangkan kejernihan fokus melalui praktik mindfulness yang terstruktur. Ideal untuk pengambilan keputusan, konsentrasi, dan menjaga disiplin batin.",
+      "note": "Langkah mantap, satu pikiran pada satu waktu"
+    },
+    "selfKindness": {
+      "title": "Kebaikan pada Diri Sendiri",
+      "description": "Tanamkan belas kasih untuk diri sendiri melalui latihan yang hangat dan mendukung. Penting untuk penyembuhan, penerimaan diri, dan memelihara kesejahteraan emosional Anda.",
+      "note": "Anda disambut di sini"
+    }
+  },
+  "clarityPause": {
+    "title": "Jeda Kejernihan",
+    "subtitle": "Ciptakan ruang sebelum Anda bertindak.",
+    "description": "Tanpa nasihat. Hanya ruang untuk memutuskan dari kejernihan.",
+    "note": "KIAAN tetap tak tersentuh—tolak untuk melewati secara instan.",
+    "closeOverlay": "Tutup overlay",
+    "sendNow": "Kirim sekarang (lewati jeda)",
+    "startPause": "Jeda selama 60 detik",
+    "deliverToKiaan": "Kirim ke KIAAN sekarang",
+    "keepGrounding": "Pertahankan grounding 60 detik",
+    "question": "Apakah Anda bertindak dari kejernihan atau dari emosi saat ini?",
+    "countdown": "{seconds} detik tersisa",
+    "ready": "Siap saat Anda siap"
+  },
+  "moodCheck": {
+    "title": "Bagaimana perasaan Anda?",
+    "subtitle": "Check-in kondisi",
+    "logged": "Tercatat: {mood}",
+    "responses": {
+      "peaceful": "Saya senang Anda merasa tenang — nikmati kelembutan itu sejenak. 💙",
+      "happy": "Indah melihat Anda merasa cerah. Biarkan kehangatan itu menemani Anda. ✨",
+      "neutral": "Stabil itu baik. Anda hadir, dan itu penting. 🌿",
+      "charged": "Energi itu kuat — salurkan dengan bijak. ⚡",
+      "open": "Menjadi terbuka membutuhkan keberanian. Saya di sini untuk mendukung Anda. 🌤️",
+      "grateful": "Rasa syukur adalah hadiah untuk diri sendiri. Simpan perasaan ini. 🙏",
+      "reflective": "Refleksi membawa kejernihan. Luangkan waktu Anda dengan apa yang Anda rasakan. 🪞",
+      "determined": "Api dalam diri Anda kuat. Maju dengan tujuan. 🔥",
+      "tender": "Kelembutan adalah kekuatan. Bersikap lembutlah pada diri sendiri saat ini. 💙",
+      "tired": "Istirahat bukan kelemahan. Tubuh Anda sedang mengatakan sesuatu yang penting. 😴",
+      "anxious": "Perasaan cemas itu berat — tarik napas, saya di sini bersama Anda. 🌊",
+      "heavy": "Maaf Anda merasa berat… Anda tidak sendirian. Saya di sini bersama Anda. 🌧️",
+      "angry": "Tidak apa-apa — kemarahan berarti ada sesuatu penting yang perlu perhatian. Saya di sini mendampingi Anda. 🔥",
+      "worried": "Kekhawatiran bisa terasa membebani. Mari hadapi ini selangkah demi selangkah bersama. 💭",
+      "sad": "Kesedihan itu berat, tapi Anda tidak sendirian saat ini. Saya di sini bersama Anda. 💙",
+      "lonely": "Kesepian itu berat, tapi Anda tidak sendirian saat ini. Saya di sini bersama Anda. 🤝",
+      "depressed": "Beban ini nyata, dan berat. Tolong jangkau bantuan — Anda tidak harus menanggung ini sendiri. 💙"
+    }
+  },
+  "quickPrompts": {
+    "title": "Respons Cepat",
+    "subtitle": "Prompt halus yang mengisi KIAAN secara otomatis untuk Anda",
+    "scenarios": {
+      "anxiety": {
+        "label": "Kecemasan tinggi",
+        "prompt": "Pandu saya melalui latihan grounding untuk menenangkan pikiran cemas."
+      },
+      "heavy": {
+        "label": "Merasa berat",
+        "prompt": "Saya butuh kata-kata lembut untuk mengangkat suasana hati dan mengingatkan kekuatan saya."
+      },
+      "anger": {
+        "label": "Mengelola kemarahan",
+        "prompt": "Bantu saya meredakan kemarahan dan merespons dengan lebih sabar."
+      },
+      "clarity": {
+        "label": "Butuh kejernihan",
+        "prompt": "Bisakah Anda membantu saya melihat pro dan kontra sebelum saya memutuskan sesuatu yang penting?"
+      },
+      "work": {
+        "label": "Keseimbangan kerja",
+        "prompt": "Pekerjaan terasa membebani—pandu saya melalui reset cepat untuk mendapatkan fokus kembali."
+      },
+      "relationships": {
+        "label": "Stres hubungan",
+        "prompt": "Bagaimana saya bisa menangani percakapan sulit dengan perhatian dan kejujuran?"
+      },
+      "purpose": {
+        "label": "Merasa terjebak",
+        "prompt": "Saya ingin refleksi singkat untuk terhubung kembali dengan tujuan dan arah saya."
+      },
+      "peace": {
+        "label": "Perlu mengatur diri",
+        "prompt": "Pimpin saya dalam momen mindful singkat agar saya bisa merasa damai kembali."
+      },
+      "balance": {
+        "label": "Kewalahan"
+      }
+    }
+  }
+}

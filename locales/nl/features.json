@@ -1,0 +1,96 @@
+{
+  "ardha": {
+    "title": "Ardha: Cognitieve Herkadering",
+    "subtitle": "Gita-afgestemde cognitieve herkadering",
+    "description": "Detecteer verstoringen, kalibreer verhaal vs feit, lever gefundeerde helderheid.",
+    "placeholder": "Voorbeeld: Ik maak steeds fouten op het werk, misschien ben ik hier gewoon niet geschikt voor.",
+    "button": "Herkaderen",
+    "buttonLoading": "Reflecteren...",
+    "label": "Deel de gedachte om te herkaderen",
+    "response": "Ardha's reactie",
+    "error": "Ardha heeft momenteel verbindingsproblemen. Probeer het over een ogenblik opnieuw.",
+    "badge": "Alleen lokaal"
+  },
+  "viyog": {
+    "title": "Viyoga: Onthechtingscoach",
+    "subtitle": "Resultaatangst verminderen",
+    "description": "Leidt zorgen om naar uitvoerbare stappen.",
+    "placeholder": "Voorbeeld: Ik ben bang dat de presentatie mislukt en iedereen denkt dat ik onbekwaam ben.",
+    "button": "Verschuiven",
+    "buttonLoading": "Centreren...",
+    "label": "Deel de resultaatzorg",
+    "response": "Viyoga's reactie",
+    "error": "Viyoga heeft momenteel verbindingsproblemen. Probeer het over een ogenblik opnieuw.",
+    "badge": "Alleen lokaal"
+  },
+  "relationshipCompass": {
+    "title": "Relatiekompas",
+    "subtitle": "Dharma Kompas voor Relaties",
+    "description": "Rustige, seculiere conflictbegeleiding die KIAAN intact houdt — juist handelen, ego-onthechting, heldere bewoording.",
+    "placeholder": "Voorbeeld: Mijn partner vindt dat ik niet luister, en ik word steeds defensief als ze het ter sprake brengen.",
+    "button": "Begeleid me met Relatiekompas",
+    "buttonLoading": "Begeleiding in balans brengen...",
+    "sendToKiaan": "Stuur context naar KIAAN",
+    "label": "Beschrijf het conflict",
+    "response": "Relatiekompas reactie",
+    "error": "Relatiekompas is momenteel niet beschikbaar. Probeer het kort opnieuw.",
+    "badges": {
+      "neutral": "Neutraal en gefundeerd",
+      "intact": "Houdt KIAAN intact"
+    },
+    "outputFormat": "Uitvoerformaat: erken, scheid ego, benoem waarden, juist handelen, onthecht, voeg compassie toe, stel formulering voor, dan één volgende stap."
+  },
+  "sacredReflections": {
+    "title": "Heilige Reflecties",
+    "subtitle": "Dagboek",
+    "description": "Vermeldingen blijven op je apparaat en vernieuwen de wekelijkse begeleiding automatisch.",
+    "openJournal": "Open Dagboek",
+    "goToJournal": "Ga naar Dagboek",
+    "keepInOnePlace": "Bewaar reflecties op één rustige plek",
+    "openSacredReflections": "Open Heilige Reflecties om te schrijven, terug te lezen of je praktijk voort te zetten.",
+    "writePrompt": "Schrijf vrij. Alleen jij kunt dit zien.",
+    "titlePlaceholder": "Titel (optioneel)",
+    "addReflection": "Reflectie Toevoegen",
+    "recentEntries": "Recente vermeldingen",
+    "noEntries": "Nog geen vermeldingen. Je reflecties verschijnen hier.",
+    "weeklyEntries": "Wekelijkse vermeldingen: {count}",
+    "weeklyAssessment": "Wekelijkse Beoordeling",
+    "mostPresentMood": "Meest aanwezige stemming: {mood}",
+    "positiveMoments": "Positieve momenten geregistreerd",
+    "challengingDays": "Tedere/Uitdagende dagen",
+    "kiaanGuidance": "KIAAN's zachte begeleiding",
+    "getKiaanOpinion": "Vraag KIAAN's mening",
+    "kiaanReading": "KIAAN leest...",
+    "todaysTone": "Toon van vandaag",
+    "security": {
+      "encrypted": "Volledig versleuteld op je apparaat",
+      "description": "Vermeldingen worden lokaal verzegeld met AES-GCM voor het opslaan. Alleen deze browser kan ze ontsleutelen.",
+      "status": {
+        "ready": "AES-GCM lokaal beveiligd",
+        "preparing": "Versleutelingsslot voorbereiden",
+        "offline": "Offlinemodus: opgeslagen op dit apparaat",
+        "online": "Offline-klaar: slaat op op apparaat"
+      }
+    }
+  },
+  "karmaFootprint": {
+    "title": "Karma Voetafdruk",
+    "description": "Volg je positieve acties en hun rimpeleffecten"
+  },
+  "karmicTree": {
+    "title": "Karmische Boom",
+    "description": "Visualiseer je groei en spirituele reis"
+  },
+  "emotionalReset": {
+    "title": "Emotionele Reset",
+    "description": "Snelle oefeningen om je emotionele toestand te resetten"
+  },
+  "deepInsights": {
+    "title": "Diepe Inzichten",
+    "description": "Krijg diepgaand begrip van je patronen"
+  },
+  "wisdomRooms": {
+    "title": "Wijsheidskamers",
+    "description": "Verken oude wijsheid in een moderne context"
+  }
+}

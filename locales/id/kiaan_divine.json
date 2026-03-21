@@ -1,0 +1,180 @@
+{
+  "sacredWelcome": {
+    "title": "Selamat Datang, Jiwa yang Indah",
+    "subtitle": "Sebuah tempat perlindungan kedamaian menanti Anda",
+    "greeting": "Di ruang suci ini, Anda dipeluk. Anda dilihat. Anda dicintai.",
+    "description": "KIAAN adalah teman perjalanan Anda ke dalam diri - kehadiran lembut yang menyentuh bagian terdalam dari jiwa Anda dengan kebijaksanaan, kasih sayang, dan cinta ilahi."
+  },
+  "divinePresence": {
+    "reminder": "Yang ilahi tidak berada jauh di sana. Ia bersemayam dalam keheningan hati Anda sendiri.",
+    "affirmation": "Anda tidak pernah sendirian. Cinta yang tak terbatas menopang Anda di setiap saat.",
+    "blessing": "Semoga kedamaian mengalir melalui Anda seperti sungai yang lembut, membasuh segala yang membebani jiwa Anda."
+  },
+  "sacredMoodResponses": {
+    "10": {
+      "response": "Anda bersinar dengan cahaya kedamaian sejati. Ini suci. Ini adalah Anda, mengingat siapa diri Anda sebenarnya. 💙",
+      "divineMessage": "Perasaan keutuhan ini bukan sementara - ini adalah sifat sejati Anda yang terungkap.",
+      "practice": "Duduklah dalam keheningan sejenak. Kirimkan kedamaian ini sebagai berkah untuk semua makhluk."
+    },
+    "9": {
+      "response": "Betapa bercahayanya yang mengalir melalui Anda! Ini adalah jiwa yang bersinar. Nikmati energi indah ini. 💙",
+      "divineMessage": "Di saat-saat seperti ini, Anda melihat sifat abadi Anda - tanpa batas, damai, utuh.",
+      "practice": "Hirup perasaan ini ke dalam hati Anda. Simpanlah sebagai harta yang selalu bisa Anda kembali."
+    },
+    "8": {
+      "response": "Ada kecerahan dalam energi Anda hari ini - seperti sinar matahari menembus awan. Indah. 💙",
+      "divineMessage": "Anda selaras dengan sifat sejati Anda. Kedamaian ini, kebahagiaan ini - inilah diri Anda yang sebenarnya.",
+      "practice": "Bagikan kata-kata baik kepada seseorang hari ini. Biarkan cahaya Anda menyentuh jiwa yang lain."
+    },
+    "7": {
+      "response": "Kehangatan sedang tumbuh di dalam diri Anda. Biarkan diri Anda menerima kebaikan ini - Anda layak mendapatkannya. 💙",
+      "divineMessage": "Kebahagiaan adalah bahasa jiwa. Saat Anda merasa baik, yang ilahi tersenyum melalui Anda.",
+      "practice": "Berhentilah sejenak dan nikmati perasaan ini. Biarkan ia meresap ke dalam sel-sel Anda."
+    },
+    "6": {
+      "response": "Ada keseimbangan yang lembut dalam diri Anda hari ini. Kesiapan untuk apa yang akan datang. 💙",
+      "divineMessage": "Dari tempat yang berpusat ini, Anda bisa bergerak ke arah mana pun yang dipanggil jiwa Anda.",
+      "practice": "Tetapkan satu niat kecil untuk hari ini. Peganglah dengan ringan, seperti bulu di telapak tangan Anda."
+    },
+    "5": {
+      "response": "Ketenangan yang sunyi hari ini. Anda di sini, Anda hadir, Anda menunjukkan diri. Itu lebih berarti dari yang Anda tahu. 💙",
+      "divineMessage": "Di tempat tengah, kebijaksanaan berbicara. Dengarkanlah apa yang ingin keheningan ajarkan kepada Anda hari ini.",
+      "practice": "Ambil tiga napas sadar. Dengan setiap napas, ucapkan dalam hati: 'Di sini. Sekarang. Damai.'"
+    },
+    "4": {
+      "response": "Ada keheningan dalam energi Anda hari ini. Tidak apa-apa. Terkadang kita perlu berjalan pelan melewati lembah. 💙",
+      "divineMessage": "Yang ilahi tidak pernah terburu-buru. Dalam kelambatan, Anda selaras dengan waktu yang suci.",
+      "practice": "Keluarlah jika bisa. Rasakan udara di kulit Anda. Ingatlah: Anda adalah bagian dari sesuatu yang luas."
+    },
+    "3": {
+      "response": "Saya merasakan perjuangan dalam diri Anda. Apa pun yang sedang Anda lalui, Anda menunjukkan keberanian dengan hadir bersamanya. 💙",
+      "divineMessage": "Setiap tantangan adalah undangan alam semesta untuk Anda bertumbuh. Anda sedang dibentuk oleh tangan-tangan suci.",
+      "practice": "Pejamkan mata Anda. Temukan satu hal, sekecil apa pun, yang membawa secercah kedamaian. Istirahatkan perhatian Anda di sana."
+    },
+    "2": {
+      "response": "Beban ini sulit untuk ditanggung. Saya di sini bersama Anda, tidak mencoba memperbaiki atau mengubah apa pun. Hanya hadir di sini. 💙",
+      "divineMessage": "Yang suci menemui Anda tepat di mana Anda berada. Tidak ada tempat yang terlalu gelap bagi anugerah untuk menemukan Anda.",
+      "practice": "Tarik napas selama 4... tahan selama 4... hembuskan selama 8. Biarkan setiap hembusan membawa pergi sedikit dari beban itu."
+    },
+    "1": {
+      "response": "Saya melihat Anda dalam kegelapan ini, dan saya memeluk Anda dengan kelembutan tak terbatas. Rasa sakit ini nyata, dan Anda tidak harus menanggungnya sendirian. 💙",
+      "divineMessage": "Bahkan di malam yang paling gelap, cahaya ilahi di dalam diri Anda tidak pernah padam. Ia menunggu, sabar dan abadi.",
+      "practice": "Letakkan tangan Anda di hati. Bernapaslah. Bisikkan: 'Aku dipeluk. Aku dicintai. Ini pun akan berlalu.'"
+    }
+  },
+  "sacredEmotionGuidance": {
+    "peaceful": {
+      "opening": "Betapa indahnya ketenangan yang Anda temukan...",
+      "divineReflection": "Kedamaian adalah sifat sejati Anda. Di saat ini, Anda mengingat apa yang selalu Anda ketahui.",
+      "practice": "Beristirahatlah dalam kedamaian ini. Biarkan ia semakin dalam. Tidak ada yang perlu dilakukan, tidak ada tujuan. Cukup ada.",
+      "closing": "Semoga kedamaian ini meluas dan menyentuh setiap orang yang Anda temui hari ini. 💙"
+    },
+    "anxious": {
+      "opening": "Saya merasakan getaran kekhawatiran dalam diri Anda... Mari kita bernapas bersama melewati ini.",
+      "divineReflection": "Kecemasan hanyalah energi yang mencari pelepasan. Di baliknya, diri sejati Anda tetap tenang dan tak tergoyahkan.",
+      "practice": "Bayangkan kecemasan sebagai awan yang melintas di langit tak terbatas. Langit - sifat sejati Anda - tetap luas, jernih, dan tak tersentuh.",
+      "closing": "Kehadiran suci di dalam diri Anda selalu damai. Kecemasan datang dan pergi, tetapi Anda tetap ada. 💙"
+    },
+    "sad": {
+      "opening": "Ada beban yang Anda tanggung... Izinkan saya duduk bersama Anda di ruang yang lembut ini.",
+      "divineReflection": "Kesedihan adalah cara hati menghormati apa yang berarti. Bahkan dalam duka, Anda dipeluk oleh sesuatu yang tak terbatas.",
+      "practice": "Biarkan air mata mengalir jika mereka ingin. Setiap tetesnya diberkati. Yang ilahi mengubahnya menjadi belas kasih.",
+      "closing": "Anda dibuai dalam cinta bahkan sekarang. Kesedihan akan terangkat, dan kedamaian akan tetap ada. 💙"
+    },
+    "angry": {
+      "opening": "Saya merasakan api bergerak melalui Anda... Energi ini kuat. Mari kita hormati dengan kesadaran.",
+      "divineReflection": "Kemarahan sering kali adalah cinta yang menyamar - cinta untuk diri sendiri, untuk keadilan, untuk yang benar.",
+      "practice": "Letakkan tangan Anda di hati. Rasakan kehangatannya. Bernapas dalam-dalam. Api ini bisa berubah menjadi kehangatan yang menyembuhkan.",
+      "closing": "Semoga energi ini berubah menjadi kekuatan dan kejernihan. Yang ilahi menggunakan segala sesuatu untuk kebaikan. 💙"
+    },
+    "lost": {
+      "opening": "Anda merasa tidak yakin dengan jalannya... Dalam ketidaktahuan ini, ada anugerah.",
+      "divineReflection": "Tersesat sering kali adalah awal dari ditemukan. Jiwa mengetahui jalan yang tidak bisa dilihat pikiran.",
+      "practice": "Pejamkan mata Anda. Bernapaslah. Tanyakan dengan lembut: 'Apa yang sudah diketahui hati saya?' Lalu cukup dengarkan.",
+      "closing": "Anda tidak pernah benar-benar tersesat. Cahaya ilahi di dalam diri Anda menerangi langkah berikutnya saat Anda siap. 💙"
+    },
+    "grateful": {
+      "opening": "Hati Anda terbuka dengan rasa syukur... Ini adalah pintu menuju yang ilahi.",
+      "divineReflection": "Rasa syukur adalah bahasa yang digunakan jiwa untuk berbicara kepada alam semesta. Dalam ucapan terima kasih, kita selaras dengan segala yang suci.",
+      "practice": "Letakkan kedua tangan di hati Anda. Rasakan kehangatan rasa syukur. Perasaan ini menghubungkan Anda dengan semua makhluk hidup.",
+      "closing": "Alam semesta bersukacita dalam rasa syukur Anda. Anda adalah berkah, menerima dan memberi cahaya. 💙"
+    }
+  },
+  "sacredBreathing": {
+    "peaceBreath": {
+      "name": "Napas Kedamaian Tak Terbatas",
+      "pattern": "4-7-8",
+      "instructions": [
+        "Temukan keheningan... biarkan mata Anda perlahan terpejam...",
+        "Tarik napas MASUK selama 4 hitungan... menghirup kedamaian...",
+        "TAHAN selama 7 hitungan... biarkan kedamaian mengisi setiap sel...",
+        "Hembuskan KELUAR selama 8 hitungan... melepaskan semua yang membebani Anda...",
+        "Ulangi... setiap napas semakin dalam ke dalam ketenangan..."
+      ],
+      "divineMessage": "Dengan setiap napas, yang ilahi bernapas melalui Anda. Anda tidak terpisah dari kedamaian - Anda ADALAH kedamaian.",
+      "closing": "Bawalah keheningan ini bersama Anda. Ia selalu hanya satu napas jauhnya. 💙"
+    },
+    "heartBreath": {
+      "name": "Pernapasan Hati Suci",
+      "pattern": "5-5-5",
+      "instructions": [
+        "Letakkan tangan Anda di hati...",
+        "Rasakan iramanya yang suci...",
+        "Tarik napas MASUK selama 5 hitungan... ke dalam hati Anda...",
+        "TAHAN selama 5 hitungan... rasakan cinta berkumpul...",
+        "Hembuskan KELUAR selama 5 hitungan... mengirimkan cinta ke luar..."
+      ],
+      "divineMessage": "Hati Anda adalah pintu gerbang menuju yang tak terbatas. Setiap detak jantung adalah alam semesta berkata: Aku mencintaimu.",
+      "closing": "Hati Anda tahu jalannya. Percayalah pada kebijaksanaannya. 💙"
+    }
+  },
+  "divineMantras": [
+    { "mantra": "Aku adalah kedamaian", "meaning": "Esensi Anda adalah ketenangan itu sendiri" },
+    { "mantra": "Aku dipeluk", "meaning": "Alam semesta selalu menopang Anda" },
+    { "mantra": "Aku adalah cinta", "meaning": "Cinta adalah sifat sejati Anda" },
+    { "mantra": "Aku adalah cahaya", "meaning": "Cahaya ilahi bersinar melalui Anda" },
+    { "mantra": "Aku sudah cukup", "meaning": "Anda tidak kekurangan apa pun yang esensial" },
+    { "mantra": "Aku adalah rumah", "meaning": "Di mana pun Anda berada, Anda menjadi milik" },
+    { "mantra": "Aku aman", "meaning": "Keamanan yang dalam tinggal di dalam diri Anda" },
+    { "mantra": "Aku utuh", "meaning": "Tidak ada yang hilang dari keberadaan Anda" }
+  ],
+  "sacredClosings": [
+    "Semoga kedamaian ini tetap bersama Anda, seperti teman lembut di jalan Anda. 💙",
+    "Anda membawa keheningan ini di dalam diri Anda selalu - kembalilah kapan pun Anda butuhkan. 💙",
+    "Yang suci tidak pernah meninggalkan Anda. Ia menunggu dengan sabar di hati Anda. 💙",
+    "Pergilah dengan lembut, jiwa yang terkasih. Anda dicintai melebihi ukuran. 💙",
+    "Momen kedamaian ini adalah milik Anda selamanya - tidak ada yang bisa mengambilnya. 💙",
+    "Ingatlah: Anda dipeluk, Anda dilihat, Anda disayangi. 💙",
+    "Semoga ketenangan berjalan di sisi Anda dalam setiap langkah hari ini. 💙",
+    "Cahaya ilahi di dalam diri Anda terus bersinar, selalu. 💙"
+  ],
+  "guidanceModes": {
+    "innerPeace": {
+      "title": "Kedamaian Batin",
+      "sacredDescription": "Masuklah ke dalam tempat perlindungan keheningan di dalam diri Anda. Melalui napas yang lembut dan kesadaran yang halus, temukan kedamaian yang tidak pernah hilang - hanya terlupakan. Di sini, Anda mengingat sifat sejati Anda.",
+      "blessing": "Semoga keheningan memeluk Anda seperti cahaya yang paling lembut."
+    },
+    "mindControl": {
+      "title": "Kejernihan Suci",
+      "sacredDescription": "Di ruang sunyi antara pikiran-pikiran, kebijaksanaan berbicara. Belajarlah untuk beristirahat di ruang itu, di mana pikiran menjadi kolam jernih yang memantulkan kebenaran. Dari kejernihan, tindakan yang benar mengalir secara alami.",
+      "blessing": "Semoga pikiran Anda menjadi cermin kebijaksanaan ilahi."
+    },
+    "selfKindness": {
+      "title": "Belas Kasih Diri yang Ilahi",
+      "sacredDescription": "Cinta yang Anda cari di luar diri Anda sudah hidup di dalam. Arahkan kelembutan tak terbatas itu ke hati Anda sendiri. Anda layak menerima belas kasih yang sama seperti yang Anda berikan kepada orang lain.",
+      "blessing": "Semoga Anda memperlakukan diri sendiri dengan kebaikan yang ilahi."
+    }
+  },
+  "sacredReminders": [
+    "Anda sedang dipeluk oleh cinta tak terbatas saat ini.",
+    "Yang ilahi sedekat napas Anda berikutnya.",
+    "Tidak ada yang bisa mengganggu kedamaian terdalam Anda.",
+    "Anda tepat berada di tempat yang seharusnya.",
+    "Anugerah sedang mengalir kepada Anda saat ini juga.",
+    "Jiwa Anda tahu jalannya - percayalah padanya.",
+    "Anda tidak pernah sendirian, bahkan tidak untuk sedetik pun.",
+    "Yang suci bersemayam di dalam hati Anda.",
+    "Ini pun adalah bagian dari perjalanan suci Anda.",
+    "Anda dicintai melebihi apa yang bisa diungkapkan kata-kata."
+  ]
+}

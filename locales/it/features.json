@@ -1,0 +1,96 @@
+{
+  "ardha": {
+    "title": "Ardha: Ristrutturazione cognitiva",
+    "subtitle": "Ristrutturazione cognitiva allineata alla Gita",
+    "description": "Rileva le distorsioni, calibra storia vs fatto, offri chiarezza radicata.",
+    "placeholder": "Esempio: Continuo a sbagliare al lavoro, forse non sono fatto per questo.",
+    "button": "Riformula",
+    "buttonLoading": "Riflettendo...",
+    "label": "Condividi il pensiero da riformulare",
+    "response": "Risposta di Ardha",
+    "error": "Ardha ha difficoltà a connettersi in questo momento. Riprova tra un momento.",
+    "badge": "Solo locale"
+  },
+  "viyog": {
+    "title": "Viyoga: Coach del distacco",
+    "subtitle": "Riduttore dell'ansia da risultato",
+    "description": "Reindirizza le preoccupazioni verso passi concreti.",
+    "placeholder": "Esempio: Ho paura che la presentazione sarà un disastro e tutti penseranno che sono incompetente.",
+    "button": "Trasforma",
+    "buttonLoading": "Centrando...",
+    "label": "Condividi la preoccupazione per il risultato",
+    "response": "Risposta di Viyoga",
+    "error": "Viyoga ha difficoltà a connettersi in questo momento. Riprova tra un momento.",
+    "badge": "Solo locale"
+  },
+  "relationshipCompass": {
+    "title": "Bussola delle relazioni",
+    "subtitle": "Bussola Dharma per le relazioni",
+    "description": "Guida calma e laica per i conflitti che mantiene KIAAN intatto — azione retta, distacco dall'ego, comunicazione chiara.",
+    "placeholder": "Esempio: Il mio partner sente che non lo ascolto, e io continuo a mettermi sulla difensiva quando ne parla.",
+    "button": "Guidami con la bussola delle relazioni",
+    "buttonLoading": "Bilanciando la guida...",
+    "sendToKiaan": "Invia contesto a KIAAN",
+    "label": "Descrivi il conflitto",
+    "response": "Risposta della bussola delle relazioni",
+    "error": "La bussola delle relazioni non è disponibile in questo momento. Riprova tra poco.",
+    "badges": {
+      "neutral": "Neutrale e radicato",
+      "intact": "Mantiene KIAAN intatto"
+    },
+    "outputFormat": "Formato di output: riconosci, separa l'ego, nomina i valori, azione retta, distaccati, aggiungi compassione, suggerisci formulazione, poi un passo successivo."
+  },
+  "sacredReflections": {
+    "title": "Riflessioni sacre",
+    "subtitle": "Diario",
+    "description": "Le voci restano sul tuo dispositivo e aggiornano automaticamente la guida settimanale.",
+    "openJournal": "Apri il diario",
+    "goToJournal": "Vai al diario",
+    "keepInOnePlace": "Tieni le riflessioni in un unico posto sereno",
+    "openSacredReflections": "Apri le riflessioni sacre per scrivere, rivisitare o continuare la tua pratica.",
+    "writePrompt": "Scrivi liberamente. Solo tu puoi vedere questo.",
+    "titlePlaceholder": "Titolo (facoltativo)",
+    "addReflection": "Aggiungi riflessione",
+    "recentEntries": "Voci recenti",
+    "noEntries": "Nessuna voce ancora. Le tue riflessioni appariranno qui.",
+    "weeklyEntries": "Voci settimanali: {{count}}",
+    "weeklyAssessment": "Valutazione settimanale",
+    "mostPresentMood": "Umore più presente: {{mood}}",
+    "positiveMoments": "Momenti positivi registrati",
+    "challengingDays": "Giorni delicati/impegnativi",
+    "kiaanGuidance": "La guida gentile di KIAAN",
+    "getKiaanOpinion": "Chiedi l'opinione di KIAAN",
+    "kiaanReading": "KIAAN sta leggendo...",
+    "todaysTone": "Il tono di oggi",
+    "security": {
+      "encrypted": "Completamente crittografato sul tuo dispositivo",
+      "description": "Le voci vengono sigillate localmente con AES-GCM prima del salvataggio. Solo questo browser può decifrarle.",
+      "status": {
+        "ready": "Protetto localmente con AES-GCM",
+        "preparing": "Preparazione del blocco crittografico",
+        "offline": "Modalità offline: salvato su questo dispositivo",
+        "online": "Pronto offline: salva sul dispositivo"
+      }
+    }
+  },
+  "karmaFootprint": {
+    "title": "Karma Footprint",
+    "description": "Traccia le tue azioni positive e i loro effetti a catena"
+  },
+  "karmicTree": {
+    "title": "Albero karmico",
+    "description": "Visualizza la tua crescita e il tuo percorso spirituale"
+  },
+  "emotionalReset": {
+    "title": "Reset emotivo",
+    "description": "Esercizi rapidi per resettare il tuo stato emotivo"
+  },
+  "deepInsights": {
+    "title": "Approfondimenti profondi",
+    "description": "Ottieni una comprensione profonda dei tuoi schemi"
+  },
+  "wisdomRooms": {
+    "title": "Stanze della saggezza",
+    "description": "Esplora la saggezza antica nel contesto moderno"
+  }
+}

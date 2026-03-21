@@ -1,0 +1,96 @@
+{
+  "ardha": {
+    "title": "Ardha: Przeramowanie Poznawcze",
+    "subtitle": "Przeramowanie poznawcze zgodne z Gita",
+    "description": "Wykrywaj zniekształcenia, kalibruj historię vs fakty, dostarczaj ugruntowaną jasność.",
+    "placeholder": "Przykład: Ciągle robię błędy w pracy, może po prostu się do tego nie nadaję.",
+    "button": "Przeramuj",
+    "buttonLoading": "Refleksja...",
+    "label": "Podziel się myślą do przeramowania",
+    "response": "Odpowiedź Ardha",
+    "error": "Ardha ma teraz problemy z połączeniem. Spróbuj ponownie za chwilę.",
+    "badge": "Tylko lokalnie"
+  },
+  "viyog": {
+    "title": "Viyoga: Trener Oderwania",
+    "subtitle": "Reduktor lęku przed wynikiem",
+    "description": "Przekierowuje obawy na wykonalne kroki.",
+    "placeholder": "Przykład: Boję się, że prezentacja się nie uda i wszyscy pomyślą, że jestem niekompetentny.",
+    "button": "Przesuń",
+    "buttonLoading": "Centrowanie...",
+    "label": "Podziel się obawą o wynik",
+    "response": "Odpowiedź Viyoga",
+    "error": "Viyoga ma teraz problemy z połączeniem. Spróbuj ponownie za chwilę.",
+    "badge": "Tylko lokalnie"
+  },
+  "relationshipCompass": {
+    "title": "Kompas Relacji",
+    "subtitle": "Kompas Dharma dla Relacji",
+    "description": "Spokojne, świeckie wskazówki konfliktowe, które utrzymują KIAAN nienaruszoną — właściwe działanie, oderwanie od ego, jasne sformułowania.",
+    "placeholder": "Przykład: Mój partner uważa, że nie słucham, a ja ciągle reaguję defensywnie, gdy o tym mówi.",
+    "button": "Poprowadź mnie z Kompasem Relacji",
+    "buttonLoading": "Równoważenie wskazówek...",
+    "sendToKiaan": "Wyślij kontekst do KIAAN",
+    "label": "Opisz konflikt",
+    "response": "Odpowiedź Kompasu Relacji",
+    "error": "Kompas Relacji jest teraz niedostępny. Spróbuj ponownie za chwilę.",
+    "badges": {
+      "neutral": "Neutralne i ugruntowane",
+      "intact": "Utrzymuje KIAAN nienaruszoną"
+    },
+    "outputFormat": "Format wyjścia: uznaj, oddziel ego, nazwij wartości, właściwe działanie, oderwanie, dodaj współczucie, zasugeruj sformułowanie, potem jeden następny krok."
+  },
+  "sacredReflections": {
+    "title": "Święte Refleksje",
+    "subtitle": "Dziennik",
+    "description": "Wpisy pozostają na twoim urządzeniu i automatycznie odświeżają tygodniowe wskazówki.",
+    "openJournal": "Otwórz Dziennik",
+    "goToJournal": "Przejdź do Dziennika",
+    "keepInOnePlace": "Trzymaj refleksje w jednym spokojnym miejscu",
+    "openSacredReflections": "Otwórz Święte Refleksje, aby pisać, przeglądać lub kontynuować praktykę.",
+    "writePrompt": "Pisz swobodnie. Tylko ty to widzisz.",
+    "titlePlaceholder": "Tytuł (opcjonalnie)",
+    "addReflection": "Dodaj Refleksję",
+    "recentEntries": "Ostatnie wpisy",
+    "noEntries": "Brak wpisów. Twoje refleksje pojawią się tutaj.",
+    "weeklyEntries": "Wpisy tygodniowe: {count}",
+    "weeklyAssessment": "Ocena Tygodniowa",
+    "mostPresentMood": "Najczęstszy nastrój: {mood}",
+    "positiveMoments": "Pozytywne momenty zarejestrowane",
+    "challengingDays": "Delikatne/Wymagające dni",
+    "kiaanGuidance": "Delikatne wskazówki KIAAN",
+    "getKiaanOpinion": "Zapytaj o opinię KIAAN",
+    "kiaanReading": "KIAAN czyta...",
+    "todaysTone": "Dzisiejszy ton",
+    "security": {
+      "encrypted": "W pełni zaszyfrowane na twoim urządzeniu",
+      "description": "Wpisy są lokalnie zabezpieczone za pomocą AES-GCM przed zapisaniem. Tylko ta przeglądarka może je odszyfrować.",
+      "status": {
+        "ready": "AES-GCM zabezpieczone lokalnie",
+        "preparing": "Przygotowywanie blokady szyfrowania",
+        "offline": "Tryb offline: zapisane na tym urządzeniu",
+        "online": "Gotowe offline: zapisuje na urządzeniu"
+      }
+    }
+  },
+  "karmaFootprint": {
+    "title": "Ślad Karma",
+    "description": "Śledź swoje pozytywne działania i ich efekt fali"
+  },
+  "karmicTree": {
+    "title": "Drzewo Karmiczne",
+    "description": "Wizualizuj swój wzrost i duchową podróż"
+  },
+  "emotionalReset": {
+    "title": "Reset Emocjonalny",
+    "description": "Szybkie ćwiczenia do resetu stanu emocjonalnego"
+  },
+  "deepInsights": {
+    "title": "Głębokie Wglądy",
+    "description": "Zyskaj głębokie zrozumienie swoich wzorców"
+  },
+  "wisdomRooms": {
+    "title": "Pokoje Mądrości",
+    "description": "Odkrywaj starożytną mądrość w nowoczesnym kontekście"
+  }
+}

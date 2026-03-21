@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Sakha",
+    "name": "MindVibe",
     "tagline": "तव आध्यात्मिकः सहचरः दिव्यश्च सखा"
   },
   "buttons": {
@@ -18,7 +18,10 @@
     "learnMore": "अधिकं जानातु",
     "getStarted": "आरभ्यताम्",
     "tryNow": "इदानीं प्रयतताम्",
-    "tools": "उपकरणाणि"
+    "tools": "उपकरणाणि",
+    "translate": "अनुवादयतु",
+    "original": "मूलम्",
+    "showOriginal": "मूलं दर्शयतु"
   },
   "status": {
     "loading": "आवरणम्...",
@@ -26,7 +29,9 @@
     "saved": "रक्षितम्",
     "error": "दोषः",
     "success": "सफलता",
-    "processing": "संस्करणम्..."
+    "processing": "संस्करणम्...",
+    "translating": "अनुवादः क्रियते...",
+    "alreadyInLanguage": "पूर्वमेव अस्यां भाषायाम् अस्ति"
   },
   "common": {
     "hello": "नमस्ते",

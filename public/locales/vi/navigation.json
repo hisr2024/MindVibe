@@ -1,0 +1,78 @@
+{
+  "mainNav": {
+    "home": "Trang chủ",
+    "dashboard": "Bảng điều khiển",
+    "features": "Tính năng",
+    "about": "Giới thiệu",
+    "contact": "Liên hệ",
+    "pricing": "Gói đăng ký",
+    "profile": "Hồ sơ",
+    "settings": "Cài đặt",
+    "account": "Truy cập tài khoản",
+    "theme": "Giao diện",
+    "introduction": "Giới thiệu"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "La bàn Mối quan hệ",
+    "sacredReflections": "Suy ngẫm Thiêng liêng",
+    "karmaFootprint": "Karma Footprint",
+    "karmicTree": "Cây Karma",
+    "emotionalReset": "Thiết lập lại Cảm xúc",
+    "deepInsights": "Hiểu biết Sâu sắc",
+    "wisdomRooms": "Phòng Trí tuệ",
+    "wisdomJourneys": "Hành trình",
+    "companion": "Bạn đồng hành"
+  },
+  "actions": {
+    "openChat": "Mở trò chuyện",
+    "startCheckin": "Bắt đầu kiểm tra",
+    "instantGuidance": "Hướng dẫn tức thì",
+    "spotYourState": "Nhận biết trạng thái của bạn",
+    "menu": "Menu",
+    "toggleMenu": "Bật/tắt menu điều hướng"
+  },
+  "mobileNav": {
+    "chat": "Trò chuyện",
+    "pause": "Tạm dừng",
+    "journal": "Suy ngẫm Thiêng liêng"
+  },
+  "footer": {
+    "allRightsReserved": "Bảo lưu mọi quyền",
+    "privacy": "Chính sách Bảo mật",
+    "terms": "Điều khoản Dịch vụ",
+    "support": "Hỗ trợ",
+    "explore": "Khám phá",
+    "safety": "An toàn",
+    "description": "Được thiết kế cho sự bình yên, hỗ trợ sức khỏe tâm linh ưu tiên quyền riêng tư. Xây dựng tập trung vào khả năng truy cập WCAG, mã hóa và trải nghiệm nhẹ nhàng.",
+    "emailUs": "Gửi email cho chúng tôi",
+    "encryptedJournals": "Nhật ký được mã hóa",
+    "noTracking": "Không có quảng cáo theo dõi"
+  },
+  "pathway": {
+    "pause": "Tạm dừng",
+    "understand": "Hiểu",
+    "converse": "Trò chuyện",
+    "apply": "Áp dụng",
+    "train": "Luyện tập",
+    "you_are_here": "Bạn đang ở đây",
+    "nav_label": "Con đường chữa lành"
+  },
+  "next_step": {
+    "explore_ardha": "Khám phá trong Ardha →",
+    "continue_kiaan": "Tiếp tục với KIAAN →",
+    "stabilize_viyoga": "Ổn định với Viyoga →",
+    "enter_journey": "Bắt đầu Hành trình →",
+    "helper": "Dựa trên cuộc trò chuyện của bạn, điều này có thể hữu ích"
+  },
+  "tools": {
+    "releaseAttachment": "Buông bỏ bám víu",
+    "reframeThoughts": "Đổi góc nhìn suy nghĩ",
+    "kiaanChat": "KIAAN Chat",
+    "talkItThrough": "Nói chuyện để hiểu rõ",
+    "relationalClarity": "Sáng tỏ mối quan hệ",
+    "quickAccess": "Truy cập nhanh"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "Teman Spiritual & Sahabat Ilahi Anda"
+  },
+  "buttons": {
+    "submit": "Kirim",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "delete": "Hapus",
+    "edit": "Edit",
+    "close": "Tutup",
+    "next": "Berikutnya",
+    "previous": "Sebelumnya",
+    "confirm": "Konfirmasi",
+    "back": "Kembali",
+    "continue": "Lanjutkan",
+    "learnMore": "Pelajari Lebih Lanjut",
+    "getStarted": "Mulai Sekarang",
+    "tryNow": "Coba Sekarang",
+    "tools": "Alat",
+    "translate": "Terjemahkan",
+    "original": "Asli",
+    "showOriginal": "Tampilkan asli"
+  },
+  "status": {
+    "loading": "Memuat...",
+    "saving": "Menyimpan...",
+    "saved": "Tersimpan",
+    "error": "Kesalahan",
+    "success": "Berhasil",
+    "processing": "Memproses...",
+    "translating": "Menerjemahkan...",
+    "alreadyInLanguage": "Sudah dalam bahasa ini"
+  },
+  "common": {
+    "hello": "Halo",
+    "welcome": "Selamat Datang",
+    "goodbye": "Selamat Tinggal",
+    "thankyou": "Terima kasih",
+    "yes": "Ya",
+    "no": "Tidak",
+    "or": "atau",
+    "and": "dan",
+    "optional": "Opsional",
+    "required": "Wajib"
+  },
+  "privacy": {
+    "encrypted": "Terenkripsi",
+    "private": "Privasi secara desain",
+    "secure": "Aman",
+    "localOnly": "Hanya lokal",
+    "offlineReady": "Siap offline"
+  }
+}

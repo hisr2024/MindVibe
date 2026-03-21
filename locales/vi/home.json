@@ -1,0 +1,118 @@
+{
+  "hero": {
+    "title": "Bạn đồng hành AI cho Sức khỏe Tâm linh",
+    "subtitle": "Trò chuyện với KIAAN, được hỗ trợ bởi Trí tuệ Cổ xưa",
+    "tagline": "Bạn đồng hành tâm linh bình yên, ưu tiên quyền riêng tư, được hỗ trợ bởi trí tuệ cổ xưa",
+    "ctaPrimary": "Nói chuyện với KIAAN",
+    "ctaSecondary": "Suy ngẫm Thiêng liêng",
+    "privacy": "Cuộc trò chuyện luôn riêng tư • nơi trú ẩn ấm áp, bảo mật"
+  },
+  "ecosystem": {
+    "title": "Hệ sinh thái MindVibe",
+    "subtitle": "Phương pháp toàn diện cho sức khỏe tâm linh, bắt nguồn từ trí tuệ cổ xưa và thực hành hiện đại",
+    "pillars": {
+      "innerPeace": {
+        "title": "Bình yên Nội tâm",
+        "description": "Tìm sự tĩnh lặng qua các bài tập thở và kỹ thuật tiếp đất nhẹ nhàng."
+      },
+      "mindControl": {
+        "title": "Kiểm soát Tâm trí",
+        "description": "Phát triển sự tập trung rõ ràng qua các phương pháp chánh niệm có cấu trúc."
+      },
+      "selfKindness": {
+        "title": "Tử tế với Bản thân",
+        "description": "Nuôi dưỡng lòng từ bi cho bản thân qua các bài tập ấm áp và hỗ trợ."
+      }
+    },
+    "footer": "Mỗi trụ cột phối hợp cùng nhau tạo nên phương pháp cân bằng, bền vững cho sức khỏe tâm linh"
+  },
+  "features": {
+    "title": "Tính năng Chính",
+    "subtitle": "Công cụ ưu tiên quyền riêng tư được thiết kế cho hành trình tâm linh của bạn",
+    "voice": {
+      "title": "Giọng nói KIAAN",
+      "description": "Nói chuyện tự nhiên với KIAAN bằng đầu vào giọng nói. Luôn sẵn sàng, hướng dẫn bạn mọi nơi trong hệ sinh thái.",
+      "cta": "Nói chuyện với KIAAN"
+    },
+    "offline": {
+      "title": "Sẵn sàng Ngoại tuyến",
+      "description": "Truy cập nhật ký, tâm trạng và suy ngẫm của bạn bất cứ lúc nào, ngay cả khi không có internet.",
+      "cta": "Bắt đầu Viết nhật ký"
+    },
+    "reset": {
+      "title": "Thiết lập lại Cảm xúc",
+      "description": "Bài tập nhanh để thiết lập lại trạng thái cảm xúc và tìm sự bình yên tức thì.",
+      "cta": "Thử Thiết lập lại"
+    }
+  },
+  "moodCheckIn": {
+    "title": "Bạn đang cảm thấy thế nào?",
+    "subtitle": "Kiểm tra Nhanh",
+    "helper": "Chạm vào viên đá để ghi lại tâm trạng • Riêng tư & chỉ trên máy",
+    "helperText": "Chạm vào viên đá để ghi lại tâm trạng • Đưa bạn đến KIAAN Chat để được hỗ trợ",
+    "openingChat": "Đang mở KIAAN Chat...",
+    "selectMood": "Chọn",
+    "moods": {
+      "peaceful": "Bình yên",
+      "happy": "Vui vẻ",
+      "neutral": "Bình thường",
+      "tired": "Mệt mỏi",
+      "anxious": "Lo lắng",
+      "heavy": "Nặng nề"
+    },
+    "responses": {
+      "peaceful": "Sự bình yên tuyệt đẹp. Hãy ở lại với nó. 💙",
+      "happy": "Hãy để sự ấm áp đó ở bên bạn. ✨",
+      "neutral": "Ổn định là tốt. Bạn đang hiện diện. 🌿",
+      "tired": "Nghỉ ngơi không phải là yếu đuối. 💙",
+      "anxious": "Hít thở sâu. Tôi ở đây với bạn. 🌊",
+      "heavy": "Bạn không đơn độc. Tôi ở đây. 💙"
+    }
+  },
+  "quickAccess": {
+    "kiaan": {
+      "title": "Nói chuyện với KIAAN",
+      "subtitle": "Hướng dẫn tức thì",
+      "description": "Bắt đầu cuộc trò chuyện tập trung để được hỗ trợ sức khỏe tâm linh",
+      "cta": "Mở Chat"
+    },
+    "dashboard": {
+      "title": "Theo dõi Tiến trình",
+      "subtitle": "Bảng điều khiển",
+      "description": "Xem thông tin chi tiết từ kiểm tra tâm trạng và bài viết nhật ký",
+      "cta": "Xem Bảng điều khiển"
+    },
+    "emotionalReset": {
+      "title": "Thiết lập lại Nhanh",
+      "subtitle": "Thiết lập lại Cảm xúc",
+      "description": "Bài tập hướng dẫn để thiết lập lại trạng thái cảm xúc tức thì",
+      "cta": "Thử Thiết lập lại"
+    }
+  },
+  "disclaimer": {
+    "title": "Tuyên bố miễn trừ",
+    "text": "KIAAN chia sẻ những suy ngẫm hỗ trợ lấy cảm hứng từ các truyền thống trí tuệ. Những cuộc trò chuyện và bài tập này không phải là lời khuyên y tế. Nếu bạn đang đối mặt với vấn đề nghiêm trọng hoặc cảm thấy không an toàn, vui lòng liên hệ dịch vụ y tế khẩn cấp hoặc chuyên gia có giấy phép tại quốc gia của bạn ngay lập tức."
+  },
+  "introduction": {
+    "heroTitle": "Chào mừng đến với Sự Hiện diện Thiêng liêng",
+    "heroSubtitle": "Trải nghiệm sự hướng dẫn yêu thương của Krishna. Bạn không bao giờ đơn độc trên hành trình này.",
+    "receiveDarshan": "Nhận Darshan của Krishna",
+    "talkToKiaan": "Nói chuyện với KIAAN",
+    "divineWisdom": "Trí tuệ & hướng dẫn thiêng liêng",
+    "protectionShield": "Lá chắn Bảo vệ Thiêng liêng",
+    "activateProtection": "Kích hoạt sự bảo vệ của Krishna",
+    "heartToHeart": "Tâm sự với Krishna",
+    "writeLetter": "Viết thư cho Đấng Thiêng liêng",
+    "howIsHeart": "Trái tim bạn thế nào?",
+    "shareFeelings": "Chia sẻ cảm xúc của bạn với Krishna",
+    "goToDashboard": "Đi đến Bảng điều khiển",
+    "accessTools": "Truy cập tất cả công cụ & tính năng",
+    "quickAccess": "Truy cập Thiêng liêng Nhanh",
+    "journeys": "Hành trình",
+    "journal": "Nhật ký",
+    "reframe": "Đổi góc nhìn",
+    "detach": "Buông bỏ",
+    "footerVerse": "\"Ta là Bản ngã ngự trong trái tim mọi chúng sinh. Ta là khởi đầu, là giữa, và cũng là kết thúc.\"",
+    "footerVerseRef": "— Bhagavad Gita 10.20"
+  }
+}

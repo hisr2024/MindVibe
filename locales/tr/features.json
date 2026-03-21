@@ -1,0 +1,96 @@
+{
+  "ardha": {
+    "title": "Ardha: Bilişsel Yeniden Çerçeveleme",
+    "subtitle": "Gita uyumlu bilişsel yeniden çerçeveleme",
+    "description": "Çarpıtmaları tespit edin, hikaye ile gerçeği kalibre edin, sağlam netlik sunun.",
+    "placeholder": "Örnek: İşte sürekli hata yapıyorum, belki de bu iş için uygun değilim.",
+    "button": "Yeniden Çerçevele",
+    "buttonLoading": "Düşünüyor...",
+    "label": "Yeniden çerçevelemek istediğiniz düşünceyi paylaşın",
+    "response": "Ardha'nın yanıtı",
+    "error": "Ardha şu anda bağlantı sorunu yaşıyor. Lütfen biraz sonra tekrar deneyin.",
+    "badge": "Yalnızca yerel"
+  },
+  "viyog": {
+    "title": "Viyoga: Bağımsızlık Koçu",
+    "subtitle": "Sonuç kaygısını azaltıcı",
+    "description": "Endişeleri uygulanabilir adımlara yönlendirir.",
+    "placeholder": "Örnek: Sunumun başarısız olacağından ve herkesin beni yetersiz göreceğinden korkuyorum.",
+    "button": "Dönüştür",
+    "buttonLoading": "Merkezleniyor...",
+    "label": "Sonuç endişenizi paylaşın",
+    "response": "Viyoga'nın yanıtı",
+    "error": "Viyoga şu anda bağlantı sorunu yaşıyor. Lütfen biraz sonra tekrar deneyin.",
+    "badge": "Yalnızca yerel"
+  },
+  "relationshipCompass": {
+    "title": "İlişki Pusulası",
+    "subtitle": "İlişkiler İçin Dharma Pusulası",
+    "description": "KIAAN'ı koruyan sakin, laik çatışma rehberliği—doğru eylem, ego bırakma, net ifade.",
+    "placeholder": "Örnek: Partnerim beni dinlemediğimi düşünüyor ve konuyu açtığında savunmacı oluyorum.",
+    "button": "İlişki Pusulası ile rehberlik et",
+    "buttonLoading": "Rehberlik dengeleniyor...",
+    "sendToKiaan": "Bağlamı KIAAN'a gönder",
+    "label": "Çatışmayı tanımlayın",
+    "response": "İlişki Pusulası yanıtı",
+    "error": "İlişki Pusulası şu anda kullanılamıyor. Lütfen kısa süre sonra tekrar deneyin.",
+    "badges": {
+      "neutral": "Tarafsız ve sağlam",
+      "intact": "KIAAN'ı korur"
+    },
+    "outputFormat": "Çıktı formatı: kabul et, egoyu ayır, değerleri belirle, doğru eylem, bağımsızlaş, merhamet ekle, ifade öner, sonra bir sonraki adım."
+  },
+  "sacredReflections": {
+    "title": "Kutsal Düşünceler",
+    "subtitle": "Günlük",
+    "description": "Girişler cihazınızda kalır ve haftalık rehberliği otomatik olarak yeniler.",
+    "openJournal": "Günlüğü Aç",
+    "goToJournal": "Günlüğe Git",
+    "keepInOnePlace": "Düşünceleri huzurlu bir yerde saklayın",
+    "openSacredReflections": "Yazmak, gözden geçirmek veya pratiğinize devam etmek için Kutsal Düşünceleri açın.",
+    "writePrompt": "Özgürce yazın. Sadece siz görebilirsiniz.",
+    "titlePlaceholder": "Başlık (isteğe bağlı)",
+    "addReflection": "Düşünce Ekle",
+    "recentEntries": "Son girişler",
+    "noEntries": "Henüz giriş yok. Düşünceleriniz burada görünecek.",
+    "weeklyEntries": "Haftalık girişler: {count}",
+    "weeklyAssessment": "Haftalık Değerlendirme",
+    "mostPresentMood": "En yaygın ruh hali: {mood}",
+    "positiveMoments": "Kaydedilen olumlu anlar",
+    "challengingDays": "Hassas/Zorlu günler",
+    "kiaanGuidance": "KIAAN'ın nazik rehberliği",
+    "getKiaanOpinion": "KIAAN'ın görüşünü al",
+    "kiaanReading": "KIAAN okuyor...",
+    "todaysTone": "Bugünün tonu",
+    "security": {
+      "encrypted": "Cihazınızda tamamen şifrelenmiş",
+      "description": "Girişler kaydedilmeden önce AES-GCM ile yerel olarak mühürlenir. Yalnızca bu tarayıcı şifresini çözebilir.",
+      "status": {
+        "ready": "AES-GCM ile yerel olarak güvenli",
+        "preparing": "Şifreleme kilidi hazırlanıyor",
+        "offline": "Çevrimdışı mod: bu cihazda saklanır",
+        "online": "Çevrimdışı hazır: cihaza kaydeder"
+      }
+    }
+  },
+  "karmaFootprint": {
+    "title": "Karma Footprint",
+    "description": "Olumlu eylemlerinizi ve dalga etkilerini takip edin"
+  },
+  "karmicTree": {
+    "title": "Karma Ağacı",
+    "description": "Büyümenizi ve ruhani yolculuğunuzu görselleştirin"
+  },
+  "emotionalReset": {
+    "title": "Duygusal Sıfırlama",
+    "description": "Duygusal durumunuzu sıfırlamak için hızlı egzersizler"
+  },
+  "deepInsights": {
+    "title": "Derin İçgörüler",
+    "description": "Kalıplarınız hakkında derin anlayış kazanın"
+  },
+  "wisdomRooms": {
+    "title": "Bilgelik Odaları",
+    "description": "Kadim bilgeliği modern bağlamda keşfedin"
+  }
+}

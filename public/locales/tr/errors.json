@@ -1,0 +1,39 @@
+{
+  "errors": {
+    "general": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
+    "network": "Ağ hatası. Lütfen bağlantınızı kontrol edin.",
+    "notFound": "Sayfa bulunamadı",
+    "unauthorized": "Bu sayfaya erişim yetkiniz yok.",
+    "serverError": "Sunucu hatası. Lütfen daha sonra tekrar deneyin.",
+    "validation": {
+      "required": "Bu alan zorunludur",
+      "email": "Lütfen geçerli bir e-posta adresi girin",
+      "minLength": "Minimum uzunluk {min} karakterdir",
+      "maxLength": "Maksimum uzunluk {max} karakterdir"
+    }
+  },
+  "notifications": {
+    "success": {
+      "saved": "Başarıyla kaydedildi",
+      "updated": "Başarıyla güncellendi",
+      "deleted": "Başarıyla silindi",
+      "sent": "Başarıyla gönderildi"
+    },
+    "info": {
+      "processing": "İsteğiniz işleniyor...",
+      "loading": "Yükleniyor...",
+      "syncing": "Eşitleniyor..."
+    },
+    "warning": {
+      "unsavedChanges": "Kaydedilmemiş değişiklikleriniz var",
+      "confirmDelete": "Bunu silmek istediğinizden emin misiniz?",
+      "confirmAction": "Devam etmek istediğinizden emin misiniz?"
+    }
+  },
+  "connection": {
+    "offline": "Şu anda çevrimdışısınız",
+    "reconnecting": "Yeniden bağlanılıyor...",
+    "connected": "Bağlantı yeniden sağlandı",
+    "failed": "Bağlantı başarısız. Lütfen tekrar deneyin."
+  }
+}

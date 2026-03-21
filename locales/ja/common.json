@@ -18,7 +18,10 @@
     "learnMore": "もっと詳しく",
     "getStarted": "始める",
     "tryNow": "今すぐ試す",
-    "tools": "ツール"
+    "tools": "ツール",
+    "translate": "翻訳",
+    "original": "原文",
+    "showOriginal": "原文を表示"
   },
   "status": {
     "loading": "読み込み中...",
@@ -26,7 +29,9 @@
     "saved": "保存しました",
     "error": "エラー",
     "success": "成功",
-    "processing": "処理中..."
+    "processing": "処理中...",
+    "translating": "翻訳中...",
+    "alreadyInLanguage": "すでにこの言語です"
   },
   "common": {
     "hello": "こんにちは",

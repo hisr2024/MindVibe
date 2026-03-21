@@ -1,0 +1,78 @@
+{
+  "mainNav": {
+    "home": "Главная",
+    "dashboard": "Панель управления",
+    "features": "Возможности",
+    "about": "О нас",
+    "contact": "Контакты",
+    "pricing": "Подписки",
+    "profile": "Профиль",
+    "settings": "Настройки",
+    "account": "Доступ к аккаунту",
+    "theme": "Тема",
+    "introduction": "Введение"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "Компас отношений",
+    "sacredReflections": "Священные размышления",
+    "karmaFootprint": "Karma Footprint",
+    "karmicTree": "Кармическое древо",
+    "emotionalReset": "Эмоциональная перезагрузка",
+    "deepInsights": "Глубокие озарения",
+    "wisdomRooms": "Комнаты мудрости",
+    "wisdomJourneys": "Путешествия",
+    "companion": "Спутник"
+  },
+  "actions": {
+    "openChat": "Открыть чат",
+    "startCheckin": "Начать проверку",
+    "instantGuidance": "Мгновенное руководство",
+    "spotYourState": "Определите своё состояние",
+    "menu": "Меню",
+    "toggleMenu": "Переключить меню навигации"
+  },
+  "mobileNav": {
+    "chat": "Чат",
+    "pause": "Пауза",
+    "journal": "Священные размышления"
+  },
+  "footer": {
+    "allRightsReserved": "Все права защищены",
+    "privacy": "Политика конфиденциальности",
+    "terms": "Условия использования",
+    "support": "Поддержка",
+    "explore": "Исследовать",
+    "safety": "Безопасность",
+    "description": "Создано для спокойствия, духовного благополучия с приоритетом конфиденциальности. Разработано с фокусом на доступность WCAG, шифрование и бережный опыт.",
+    "emailUs": "Напишите нам",
+    "encryptedJournals": "Зашифрованные дневники",
+    "noTracking": "Без рекламного отслеживания"
+  },
+  "pathway": {
+    "pause": "Пауза",
+    "understand": "Понять",
+    "converse": "Беседовать",
+    "apply": "Применить",
+    "train": "Тренировать",
+    "you_are_here": "Вы здесь",
+    "nav_label": "Путь исцеления"
+  },
+  "next_step": {
+    "explore_ardha": "Исследовать в Ardha →",
+    "continue_kiaan": "Продолжить с KIAAN →",
+    "stabilize_viyoga": "Стабилизировать с Viyoga →",
+    "enter_journey": "Начать путешествие →",
+    "helper": "Исходя из вашей беседы, вам может быть полезно это"
+  },
+  "tools": {
+    "releaseAttachment": "Отпустить привязанность",
+    "reframeThoughts": "Переосмыслить мысли",
+    "kiaanChat": "Чат с KIAAN",
+    "talkItThrough": "Обсудить это",
+    "relationalClarity": "Ясность в отношениях",
+    "quickAccess": "Быстрый доступ"
+  }
+}

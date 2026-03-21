@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Sakha",
+    "name": "MindVibe",
     "tagline": "Dein spiritueller Begleiter und göttlicher Freund"
   },
   "buttons": {
@@ -18,7 +18,10 @@
     "learnMore": "Mehr erfahren",
     "getStarted": "Beginnen",
     "tryNow": "Jetzt versuchen",
-    "tools": "Werkzeuge"
+    "tools": "Werkzeuge",
+    "translate": "Übersetzen",
+    "original": "Original",
+    "showOriginal": "Original anzeigen"
   },
   "status": {
     "loading": "Wird geladen...",
@@ -26,7 +29,9 @@
     "saved": "Gespeichert",
     "error": "Fehler",
     "success": "Erfolg",
-    "processing": "Wird verarbeitet..."
+    "processing": "Wird verarbeitet...",
+    "translating": "Wird übersetzt...",
+    "alreadyInLanguage": "Bereits in dieser Sprache"
   },
   "common": {
     "hello": "Hallo",

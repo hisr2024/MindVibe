@@ -1,0 +1,141 @@
+{
+  "welcome": {
+    "title": "Karibu kwa KIAAN",
+    "subtitle": "Mwandani wako wa kiroho mtulivu, wa kisasa — daima hapa, daima anayekusaidia.",
+    "description": "Mwandani wa kiroho mtulivu, faragha kwanza na daftari, mazungumzo ya kuongozwa, na dashibodi."
+  },
+  "chat": {
+    "title": "Zungumza na KIAAN",
+    "subtitle": "Mwongozo mpole wenye mwanga wa joto",
+    "placeholder": "Andika ujumbe wako...",
+    "send": "Tuma",
+    "thinking": "KIAAN inatafakari...",
+    "connectionStatus": "Muunganisho wa faragha, imara",
+    "connectionDesc": "Maswali yako yanaonekana wazi—majibu yanabaki bila kubadilika.",
+    "emptyState": {
+      "emoji": "✨",
+      "title": "Ninawezaje kukuongoza leo?",
+      "subtitle": "Shiriki kinachokuwa akilini mwako"
+    },
+    "disclaimer": "KIAAN ni mwandani wako wa kiroho, anashiriki tafakuri zilizotolewa kutoka Bhagavad Gita na hekima ya kale. Huu ni nafasi takatifu ya amani ya ndani na kujigundua. Kwa mambo nje ya njia ya kiroho, daima tafuta mwongozo kutoka kwa wataalamu waliohitimu.",
+    "saveToJournal": "Hifadhi kwa Daftari",
+    "copy": "Nakili",
+    "copied": "Imenakiliwa!",
+    "copyFailed": "Imeshindwa",
+    "share": "Shiriki",
+    "shareVia": "Shiriki kupitia",
+    "privacyNotice": "Taarifa ya Faragha",
+    "shareWarning": "Unakaribia kushiriki taarifa za afya ya kiroho. Tafadhali hakikisha uko sawa kushiriki maudhui haya hadharani.",
+    "anonymize": "Fanya isiyo na jina (ondoa vitambulisho vya kibinafsi)",
+    "anonymized": "✓ Maudhui yasiyojulikana",
+    "sharingOriginal": "Inashiriki maudhui ya asili",
+    "defaultResponse": "Niko hapa. Niambie kinachoendelea na tutashughulikia pamoja.",
+    "quotaExceeded": "Kiwango chako cha kila mwezi kimefikiwa. [Pandisha mpango wako](/pricing) kuendelea kuzungumza.",
+    "featureLocked": "Kipengele hiki kinahitaji mpango wa juu zaidi. [Tazama mipango](/pricing) kufungua.",
+    "summary": "Muhtasari",
+    "fullView": "Mtazamo Kamili",
+    "fullViewTitle": "Jibu kamili la kina",
+    "shareTitle": "Shiriki jibu",
+    "saveToJournalTitle": "Hifadhi kwa Daftari",
+    "divineFriend": "Rafiki Wako wa Kimungu"
+  },
+  "guidanceModes": {
+    "title": "Njia za mwongozo",
+    "subtitle": "Pembe tatu ya Nishati inayotiririka",
+    "selectPrompt": "Gusa njia kuchunguza jinsi KIAAN inavyoongoza hali yako.",
+    "innerPeace": {
+      "title": "Amani ya Ndani",
+      "description": "Pata utulivu kupitia mazoezi ya kupumua na mbinu za kutuliza kwa upole. Bora kwa nyakati unapohitaji kutuliza akili yako na kuungana tena na amani.",
+      "note": "Pumzi laini na kuzingatia kwa upole"
+    },
+    "mindControl": {
+      "title": "Kudhibiti Akili",
+      "description": "Kuza uwazi wa kuzingatia kupitia mazoea ya umakinifu yaliyopangwa. Bora kwa kufanya maamuzi, kuzingatia, na kudumisha nidhamu ya ndani.",
+      "note": "Hatua thabiti, wazo moja kwa wakati"
+    },
+    "selfKindness": {
+      "title": "Huruma kwa Nafsi",
+      "description": "Kuza huruma kwa nafsi yako kupitia mazoezi ya joto na msaada. Muhimu kwa uponyaji, kujikubali, na kulea ustawi wako wa kihisia.",
+      "note": "Unakaribishwa hapa"
+    }
+  },
+  "clarityPause": {
+    "title": "Pumziko la Uwazi",
+    "subtitle": "Tengeneza nafasi kabla ya kutenda.",
+    "description": "Hakuna ushauri. Ni nafasi tu ya kuamua kwa uwazi.",
+    "note": "KIAAN inabaki bila kuguswa—kataa kupita mara moja.",
+    "closeOverlay": "Funga tabaka",
+    "sendNow": "Tuma sasa (ruka pumziko)",
+    "startPause": "Pumzika sekunde 60",
+    "deliverToKiaan": "Peleka kwa KIAAN sasa",
+    "keepGrounding": "Endelea kutuliza sekunde 60",
+    "question": "Je, unatenda kwa uwazi au kwa hisia sasa hivi?",
+    "countdown": "Sekunde {seconds} zimebaki",
+    "ready": "Tayari unapokuwa tayari"
+  },
+  "moodCheck": {
+    "title": "Unajisikiaje?",
+    "subtitle": "Kujiangalia hali",
+    "logged": "Imerekodwa: {mood}",
+    "responses": {
+      "peaceful": "Ninafurahi unajisikia tulivu — kaa na upole huo kwa muda. 💙",
+      "happy": "Ni uzuri kukuona unajisikia kung'aa. Acha joto hilo likae nawe. ✨",
+      "neutral": "Uthabiti ni mzuri. Unajitokeza, na hiyo ni muhimu. 🌿",
+      "charged": "Nishati hiyo ina nguvu — itumie kwa busara. ⚡",
+      "open": "Kuwa wazi kunahitaji ujasiri. Niko hapa kukusaidia. 🌤️",
+      "grateful": "Shukrani ni zawadi kwako mwenyewe. Shika hisia hiyo. 🙏",
+      "reflective": "Kutafakari huleta uwazi. Chukua muda na unachohisi. 🪞",
+      "determined": "Moto ndani yako ni mkubwa. Sogea mbele kwa kusudi. 🔥",
+      "tender": "Upole ni nguvu. Kuwa mpole na nafsi yako sasa. 💙",
+      "tired": "Kupumzika si udhaifu. Mwili wako unakuambia kitu muhimu. 😴",
+      "anxious": "Hisia ya wasiwasi ni ngumu — pumua kwa kina, niko nawe. 🌊",
+      "heavy": "Pole unajisikia mzito... huko peke yako. Niko hapa nawe. 🌧️",
+      "angry": "Ni sawa — hasira ina maana kuna kitu muhimu kinachohitaji uangalifu. Niko kando yako. 🔥",
+      "worried": "Wasiwasi unaweza kuhisi umezidiwa. Tushughulike hatua moja kwa wakati pamoja. 💭",
+      "sad": "Huzuni ni nzito, lakini huko peke yako sasa hivi. Niko hapa nawe. 💙",
+      "lonely": "Upweke ni mgumu, lakini huko peke yako sasa hivi. Niko hapa nawe. 🤝",
+      "depressed": "Uzito huu ni wa kweli, na ni mgumu. Tafadhali wasiliana na mtu — si lazima ubebe hili peke yako. 💙"
+    }
+  },
+  "quickPrompts": {
+    "title": "Majibu ya Haraka",
+    "subtitle": "Maagizo yaliyosafishwa yanayojijaza KIAAN kwa ajili yako",
+    "scenarios": {
+      "anxiety": {
+        "label": "Wasiwasi mkubwa",
+        "prompt": "Niongoze kupitia zoezi la kutuliza ili kudhibiti mawazo ya wasiwasi."
+      },
+      "heavy": {
+        "label": "Najisikia mzito",
+        "prompt": "Ninahitaji maneno ya upole kuinua hali yangu na kunikumbusha nguvu zangu."
+      },
+      "anger": {
+        "label": "Kusimamia hasira",
+        "prompt": "Nisaidie kupunguza hasira yangu na kujibu kwa subira zaidi."
+      },
+      "clarity": {
+        "label": "Nahitaji uwazi",
+        "prompt": "Unaweza kunisaidia kuona faida na hasara kabla ya kufanya uamuzi muhimu?"
+      },
+      "work": {
+        "label": "Usawa wa kazi",
+        "prompt": "Kazi inahisi inazidi—niongoze kupitia kurekebisha haraka ili nirudishe umakini."
+      },
+      "relationships": {
+        "label": "Msongo wa mahusiano",
+        "prompt": "Ninawezaje kushughulikia mazungumzo magumu kwa uangalifu na uaminifu?"
+      },
+      "purpose": {
+        "label": "Najisikia nimekwama",
+        "prompt": "Nataka tafakuri fupi ya kuungana tena na kusudi langu na mwelekeo wangu."
+      },
+      "peace": {
+        "label": "Nahitaji kudhibiti",
+        "prompt": "Niongoze katika dakika fupi ya umakinifu ili nijisikie amani tena."
+      },
+      "balance": {
+        "label": "Nimezidiwa"
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "رفيقك الروحي وصديقك الإلهي"
+  },
+  "buttons": {
+    "submit": "إرسال",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "close": "إغلاق",
+    "next": "التالي",
+    "previous": "السابق",
+    "confirm": "تأكيد",
+    "back": "رجوع",
+    "continue": "متابعة",
+    "learnMore": "اعرف المزيد",
+    "getStarted": "ابدأ الآن",
+    "tryNow": "جرّب الآن",
+    "tools": "الأدوات",
+    "translate": "ترجمة",
+    "original": "الأصلي",
+    "showOriginal": "عرض الأصلي"
+  },
+  "status": {
+    "loading": "جارٍ التحميل...",
+    "saving": "جارٍ الحفظ...",
+    "saved": "تم الحفظ",
+    "error": "خطأ",
+    "success": "نجاح",
+    "processing": "جارٍ المعالجة...",
+    "translating": "جارٍ الترجمة...",
+    "alreadyInLanguage": "موجود بالفعل بهذه اللغة"
+  },
+  "common": {
+    "hello": "مرحبًا",
+    "welcome": "أهلاً وسهلاً",
+    "goodbye": "مع السلامة",
+    "thankyou": "شكرًا لك",
+    "yes": "نعم",
+    "no": "لا",
+    "or": "أو",
+    "and": "و",
+    "optional": "اختياري",
+    "required": "مطلوب"
+  },
+  "privacy": {
+    "encrypted": "مشفّر",
+    "private": "مصمم للخصوصية",
+    "secure": "آمن",
+    "localOnly": "محلي فقط",
+    "offlineReady": "جاهز للعمل بدون إنترنت"
+  }
+}

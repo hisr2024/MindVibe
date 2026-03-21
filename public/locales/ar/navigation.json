@@ -1,0 +1,78 @@
+{
+  "mainNav": {
+    "home": "الرئيسية",
+    "dashboard": "لوحة التحكم",
+    "features": "الميزات",
+    "about": "حول",
+    "contact": "اتصل بنا",
+    "pricing": "الاشتراكات",
+    "profile": "الملف الشخصي",
+    "settings": "الإعدادات",
+    "account": "الوصول للحساب",
+    "theme": "المظهر",
+    "introduction": "مقدمة"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "بوصلة العلاقات",
+    "sacredReflections": "تأملات مقدسة",
+    "karmaFootprint": "Karma Footprint",
+    "karmicTree": "شجرة Karma",
+    "emotionalReset": "إعادة ضبط المشاعر",
+    "deepInsights": "رؤى عميقة",
+    "wisdomRooms": "غرف الحكمة",
+    "wisdomJourneys": "الرحلات",
+    "companion": "الرفيق"
+  },
+  "actions": {
+    "openChat": "فتح المحادثة",
+    "startCheckin": "بدء تسجيل الحالة",
+    "instantGuidance": "إرشاد فوري",
+    "spotYourState": "تعرّف على حالتك",
+    "menu": "القائمة",
+    "toggleMenu": "تبديل قائمة التنقل"
+  },
+  "mobileNav": {
+    "chat": "محادثة",
+    "pause": "توقف",
+    "journal": "تأملات مقدسة"
+  },
+  "footer": {
+    "allRightsReserved": "جميع الحقوق محفوظة",
+    "privacy": "سياسة الخصوصية",
+    "terms": "شروط الخدمة",
+    "support": "الدعم",
+    "explore": "استكشاف",
+    "safety": "الأمان",
+    "description": "مصمم للهدوء، دعم العافية الروحية مع الخصوصية أولاً. مبني مع التركيز على إمكانية الوصول WCAG والتشفير وتجربة لطيفة.",
+    "emailUs": "أرسل لنا بريدًا إلكترونيًا",
+    "encryptedJournals": "مذكرات مشفرة",
+    "noTracking": "بدون إعلانات تتبع"
+  },
+  "pathway": {
+    "pause": "توقف",
+    "understand": "افهم",
+    "converse": "تحاور",
+    "apply": "طبّق",
+    "train": "تدرّب",
+    "you_are_here": "أنت هنا",
+    "nav_label": "مسار الشفاء"
+  },
+  "next_step": {
+    "explore_ardha": "استكشف في Ardha →",
+    "continue_kiaan": "تابع مع KIAAN →",
+    "stabilize_viyoga": "استقرّ مع Viyoga →",
+    "enter_journey": "ادخل رحلة →",
+    "helper": "بناءً على محادثتك، قد تجد هذا مفيدًا"
+  },
+  "tools": {
+    "releaseAttachment": "تحرر من التعلق",
+    "reframeThoughts": "أعد صياغة الأفكار",
+    "kiaanChat": "محادثة KIAAN",
+    "talkItThrough": "تحدث عن الأمر",
+    "relationalClarity": "وضوح العلاقات",
+    "quickAccess": "وصول سريع"
+  }
+}

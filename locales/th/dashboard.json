@@ -1,0 +1,120 @@
+{
+  "title": "แดชบอร์ด",
+  "welcome": "ยินดีต้อนรับกลับมา",
+  "subtitle": "เครื่องมือ MindVibe",
+  "allTools": "เครื่องมือทั้งหมดในที่เดียว",
+  "returnHome": "กลับหน้าแรก",
+  "toolsCount": "เครื่องมือ",
+  "categories": {
+    "core": "เครื่องมือหลัก",
+    "guidance": "เครื่องยนต์แนะนำ",
+    "karma": "เครื่องมือ Karma",
+    "quick": "เข้าถึงด่วน"
+  },
+  "tools": {
+    "kiaan": {
+      "title": "KIAAN แชท",
+      "description": "เพื่อนร่วมทางจิตวิญญาณ AI"
+    },
+    "journal": {
+      "title": "บันทึกส่วนตัว",
+      "description": "การเขียนบันทึกที่เข้ารหัส"
+    },
+    "wisdom": {
+      "title": "ห้องแห่งปัญญา",
+      "description": "ภูมิปัญญาโบราณ"
+    },
+    "insights": {
+      "title": "ข้อมูลเชิงลึกอารมณ์",
+      "description": "รูปแบบทางอารมณ์"
+    },
+    "viyog": {
+      "title": "Viyoga",
+      "description": "ลดความวิตกกังวลต่อผลลัพธ์"
+    },
+    "ardha": {
+      "title": "Ardha",
+      "description": "คำแนะนำตามสถานการณ์"
+    },
+    "relationship-compass": {
+      "title": "เข็มทิศความสัมพันธ์",
+      "description": "คำแนะนำด้านความสัมพันธ์"
+    },
+    "emotional-reset": {
+      "title": "รีเซ็ตอารมณ์",
+      "description": "สมดุลอารมณ์อย่างรวดเร็ว"
+    },
+    "karma-footprint": {
+      "title": "Karma Footprint",
+      "description": "ติดตามการกระทำของคุณ"
+    },
+    "karmic-tree": {
+      "title": "ต้นไม้แห่ง Karma",
+      "description": "แสดงภาพการเดินทางของคุณ"
+    },
+    "karma-reset": {
+      "title": "รีเซ็ต Karma",
+      "description": "เริ่มต้นใหม่"
+    },
+    "reflections": {
+      "title": "การสะท้อนอันศักดิ์สิทธิ์",
+      "description": "การเขียนบันทึกประจำวัน"
+    },
+    "deep": {
+      "title": "ข้อมูลเชิงลึก",
+      "description": "การวิเคราะห์ขั้นสูง"
+    },
+    "analytics": {
+      "title": "การวิเคราะห์",
+      "description": "ติดตามความก้าวหน้าของคุณ"
+    }
+  },
+  "badges": {
+    "new": "ใหม่",
+    "premium": "พรีเมียม",
+    "beta": "เบต้า"
+  },
+  "analytics": {
+    "title": "การวิเคราะห์",
+    "overview": "ภาพรวม",
+    "insights": "ข้อมูลเชิงลึก",
+    "trends": "แนวโน้ม",
+    "weeklyProgress": "ความก้าวหน้ารายสัปดาห์",
+    "monthlyProgress": "ความก้าวหน้ารายเดือน"
+  },
+  "profile": {
+    "title": "โปรไฟล์",
+    "settings": "การตั้งค่า",
+    "editProfile": "แก้ไขโปรไฟล์",
+    "updateProfile": "อัปเดตโปรไฟล์",
+    "accountInfo": "ข้อมูลบัญชี"
+  },
+  "subscription": {
+    "title": "การสมัครสมาชิก",
+    "plan": "แผนปัจจุบัน",
+    "upgrade": "อัปเกรด",
+    "manage": "จัดการการสมัครสมาชิก",
+    "billing": "การเรียกเก็บเงิน"
+  },
+  "stats": {
+    "journalEntries": "รายการบันทึก",
+    "chatSessions": "เซสชันแชท",
+    "moodCheckins": "การเช็คอินอารมณ์",
+    "streakDays": "วันต่อเนื่อง"
+  },
+  "tool_desc": {
+    "viyog": "สงบปฏิกิริยาเฉียบพลัน",
+    "ardha": "ปรับเปลี่ยนมุมมอง",
+    "kiaan": "พูดคุยให้กระจ่าง",
+    "relationship-compass": "นำทางความชัดเจนในความสัมพันธ์",
+    "journey": "ฝึกฝนความมั่นคงภายในระยะยาว"
+  },
+  "mode_label": {
+    "prefix": "คุณอยู่ใน:",
+    "viyog": "โหมดหยุดพัก",
+    "ardha": "โหมดชัดเจน",
+    "kiaan": "โหมดเพื่อนร่วมทาง",
+    "relationship-compass": "โหมดความสัมพันธ์",
+    "journey": "โหมดฝึกฝน"
+  }
+}

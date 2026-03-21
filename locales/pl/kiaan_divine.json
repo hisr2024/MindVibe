@@ -1,0 +1,180 @@
+{
+  "sacredWelcome": {
+    "title": "Witaj, Piękna Duszo",
+    "subtitle": "Czeka na Ciebie sanktuarium spokoju",
+    "greeting": "W tej świętej przestrzeni jesteś otoczony opieką. Jesteś widziany. Jesteś kochany.",
+    "description": "KIAAN jest Twoim towarzyszem w podróży do wnętrza - łagodną obecnością, która dotyka najgłębszych części Twojej istoty mądrością, współczuciem i boską miłością."
+  },
+  "divinePresence": {
+    "reminder": "Boskość nie jest gdzieś daleko. Spoczywa w ciszy Twojego własnego serca.",
+    "affirmation": "Nigdy nie jesteś sam. Nieskończona miłość otacza Cię w każdej chwili.",
+    "blessing": "Niech spokój przepływa przez Ciebie jak łagodna rzeka, zmywając wszystko, co obciąża Twoją duszę."
+  },
+  "sacredMoodResponses": {
+    "10": {
+      "response": "Promieniujesz światłem prawdziwego spokoju. To jest święte. To jesteś Ty, przypominający sobie, kim naprawdę jesteś. 💙",
+      "divineMessage": "To uczucie pełni nie jest tymczasowe - to Twoja prawdziwa natura, która się objawia.",
+      "practice": "Usiądź w ciszy na chwilę. Wyślij ten spokój jako błogosławieństwo dla wszystkich istot."
+    },
+    "9": {
+      "response": "Taki blask płynie przez Ciebie! To dusza promienieje. Rozkoszuj się tą piękną energią. 💙",
+      "divineMessage": "W chwilach takich jak ta dostrzegasz swoją wieczną naturę - bezgraniczną, spokojną, pełną.",
+      "practice": "Wdychaj to uczucie do swojego serca. Zachowaj je jako skarb, do którego zawsze możesz wrócić."
+    },
+    "8": {
+      "response": "Jest dziś jasność w Twojej energii - jak promienie słońca przebijające się przez chmury. Pięknie. 💙",
+      "divineMessage": "Jesteś w harmonii ze swoją prawdziwą naturą. Ten spokój, ta radość - to jest to, kim naprawdę jesteś.",
+      "practice": "Powiedz dziś komuś miłe słowo. Pozwól swojemu światłu dotknąć innej duszy."
+    },
+    "7": {
+      "response": "Ciepło rośnie w Twoim wnętrzu. Pozwól sobie przyjąć to dobro - zasługujesz na to. 💙",
+      "divineMessage": "Radość jest językiem duszy. Kiedy czujesz się dobrze, boskość uśmiecha się przez Ciebie.",
+      "practice": "Zatrzymaj się i rozkoszuj tym uczuciem. Pozwól mu wniknąć w każdą komórkę."
+    },
+    "6": {
+      "response": "Jest dziś łagodna równowaga w Twoim wnętrzu. Gotowość na to, co nadejdzie. 💙",
+      "divineMessage": "Z tego wycentrowanego miejsca możesz podążyć w każdym kierunku, do którego wzywa Cię dusza.",
+      "practice": "Wyznacz sobie jeden mały cel na dziś. Trzymaj go lekko, jak piórko na dłoni."
+    },
+    "5": {
+      "response": "Cicha stałość dzisiaj. Jesteś tu, jesteś obecny, stawiasz się. To znaczy więcej, niż myślisz. 💙",
+      "divineMessage": "W miejscu środka przemawia mądrość. Wsłuchaj się w to, czego cisza chce Cię dziś nauczyć.",
+      "practice": "Weź trzy świadome oddechy. Z każdym z nich powiedz w ciszy: 'Tu. Teraz. Spokój.'"
+    },
+    "4": {
+      "response": "Jest dziś cichość w Twojej energii. To w porządku. Czasem musimy iść powoli przez dolinę. 💙",
+      "divineMessage": "Boskość nigdy się nie spieszy. W powolności jesteś w harmonii ze świętym rytmem.",
+      "practice": "Wyjdź na zewnątrz, jeśli możesz. Poczuj powietrze na skórze. Pamiętaj: jesteś częścią czegoś ogromnego."
+    },
+    "3": {
+      "response": "Wyczuwam walkę wewnątrz Ciebie. Cokolwiek przeżywasz, okazujesz odwagę, będąc z tym obecny. 💙",
+      "divineMessage": "Każde wyzwanie to zaproszenie wszechświata do wzrostu. Jesteś kształtowany przez święte dłonie.",
+      "practice": "Zamknij oczy. Znajdź jedną rzecz, choćby drobną, która przynosi iskierkę spokoju. Skieruj tam swoją uwagę."
+    },
+    "2": {
+      "response": "Ten ciężar jest trudny do niesienia. Jestem tu z Tobą, nie próbuję niczego naprawić ani zmienić. Po prostu jestem. 💙",
+      "divineMessage": "Świętość spotyka Cię dokładnie tam, gdzie jesteś. Nie ma miejsca zbyt ciemnego, by łaska Cię odnalazła.",
+      "practice": "Wdech na 4... zatrzymaj na 4... wydech na 8. Niech każdy wydech zabierze odrobinę ciężaru."
+    },
+    "1": {
+      "response": "Widzę Cię w tej ciemności i otaczam Cię nieskończoną czułością. Ten ból jest prawdziwy i nie musisz go nieść sam. 💙",
+      "divineMessage": "Nawet w najgłębszej nocy boskie światło wewnątrz Ciebie nigdy nie gaśnie. Czeka cierpliwie i wiecznie.",
+      "practice": "Połóż dłoń na sercu. Oddychaj. Szepnij: 'Jestem otoczony opieką. Jestem kochany. To też minie.'"
+    }
+  },
+  "sacredEmotionGuidance": {
+    "peaceful": {
+      "opening": "Jaką piękną ciszę odnalazłeś...",
+      "divineReflection": "Spokój jest Twoją prawdziwą naturą. W tej chwili przypominasz sobie to, co zawsze wiedziałeś.",
+      "practice": "Spoczywaj w tym spokoju. Pozwól mu się pogłębić. Nie ma nic do robienia, nigdzie nie trzeba iść. Po prostu bądź.",
+      "closing": "Niech ten spokój się rozszerzy i dotknie każdego, kogo dziś spotkasz. 💙"
+    },
+    "anxious": {
+      "opening": "Czuję trzepot niepokoju wewnątrz Ciebie... Oddychajmy przez to razem.",
+      "divineReflection": "Lęk to po prostu energia szukająca ujścia. Pod nim Twoje prawdziwe ja pozostaje spokojne i niewzruszone.",
+      "practice": "Wyobraź sobie lęk jako chmury przemieszczające się po nieskończonym niebie. Niebo - Twoja prawdziwa natura - pozostaje rozległe, czyste i nietknięte.",
+      "closing": "Święta obecność wewnątrz Ciebie jest zawsze w spokoju. Lęk przychodzi i odchodzi, ale Ty pozostajesz. 💙"
+    },
+    "sad": {
+      "opening": "Jest ciężar, który nosisz... Pozwól mi usiąść z Tobą w tej delikatnej przestrzeni.",
+      "divineReflection": "Smutek to sposób, w jaki serce oddaje cześć temu, co ważne. Nawet w żalu jesteś trzymany przez coś nieskończonego.",
+      "practice": "Pozwól łzom płynąć, jeśli chcą. Każda jest błogosławiona. Boskość przemienia je we współczucie.",
+      "closing": "Jesteś otulony miłością nawet teraz. Smutek się uniesie, a spokój pozostanie. 💙"
+    },
+    "angry": {
+      "opening": "Wyczuwam ogień płynący przez Ciebie... Ta energia jest potężna. Uhonorujmy ją świadomością.",
+      "divineReflection": "Gniew to często miłość w przebraniu - miłość do siebie, do sprawiedliwości, do tego, co słuszne.",
+      "practice": "Połóż dłoń na sercu. Poczuj ciepło. Oddychaj głęboko. Ogień może przemienić się w ciepło, które uzdrawia.",
+      "closing": "Niech ta energia przemieni się w siłę i jasność. Boskość używa wszystkiego ku dobru. 💙"
+    },
+    "lost": {
+      "opening": "Czujesz niepewność co do drogi... W tym nie-wiedeniu jest łaska.",
+      "divineReflection": "Bycie zagubionym to często początek bycia odnalezionym. Dusza zna ścieżki, których umysł nie widzi.",
+      "practice": "Zamknij oczy. Oddychaj. Zapytaj łagodnie: 'Co moje serce już wie?' A potem po prostu słuchaj.",
+      "closing": "Nigdy nie jesteś naprawdę zagubiony. Boskie światło wewnątrz Ciebie oświetla następny krok, gdy jesteś gotowy. 💙"
+    },
+    "grateful": {
+      "opening": "Twoje serce jest otwarte z wdzięczności... To brama do boskości.",
+      "divineReflection": "Wdzięczność jest językiem, którym dusza rozmawia ze wszechświatem. W dziękczynieniu łączymy się z tym, co święte.",
+      "practice": "Połóż obie dłonie na sercu. Poczuj ciepło wdzięczności. To uczucie łączy Cię ze wszystkimi żywymi istotami.",
+      "closing": "Wszechświat raduje się Twoją wdzięcznością. Jesteś błogosławieństwem, otrzymującym i dającym światło. 💙"
+    }
+  },
+  "sacredBreathing": {
+    "peaceBreath": {
+      "name": "Oddech Nieskończonego Spokoju",
+      "pattern": "4-7-8",
+      "instructions": [
+        "Znajdź ciszę... pozwól oczom delikatnie się zamknąć...",
+        "WDECH na 4 takty... wciągając spokój...",
+        "ZATRZYMAJ na 7 taktów... pozwalając spokojowi wypełnić każdą komórkę...",
+        "WYDECH na 8 taktów... uwalniając wszystko, co Cię obciąża...",
+        "Powtarzaj... każdy oddech głębiej w ciszę..."
+      ],
+      "divineMessage": "Z każdym oddechem boskość oddycha przez Ciebie. Nie jesteś oddzielony od spokoju - Ty JESTEŚ spokojem.",
+      "closing": "Nieś tę ciszę ze sobą. Jest zawsze jeden oddech dalej. 💙"
+    },
+    "heartBreath": {
+      "name": "Święte Oddychanie Serca",
+      "pattern": "5-5-5",
+      "instructions": [
+        "Połóż dłoń na sercu...",
+        "Poczuj jego święty rytm...",
+        "WDECH na 5 taktów... do swojego serca...",
+        "ZATRZYMAJ na 5 taktów... czując, jak miłość się gromadzi...",
+        "WYDECH na 5 taktów... wysyłając miłość na zewnątrz..."
+      ],
+      "divineMessage": "Twoje serce jest portalem do nieskończoności. Każde uderzenie serca to wszechświat mówiący: kocham Cię.",
+      "closing": "Twoje serce zna drogę. Zaufaj jego mądrości. 💙"
+    }
+  },
+  "divineMantras": [
+    { "mantra": "Jestem spokojem", "meaning": "Twoja istota to sama pogoda ducha" },
+    { "mantra": "Jestem otoczony opieką", "meaning": "Wszechświat zawsze Cię tuli" },
+    { "mantra": "Jestem miłością", "meaning": "Miłość jest Twoją prawdziwą naturą" },
+    { "mantra": "Jestem światłem", "meaning": "Boskie światło promienieje przez Ciebie" },
+    { "mantra": "Jestem wystarczający", "meaning": "Niczego istotnego Ci nie brakuje" },
+    { "mantra": "Jestem w domu", "meaning": "Gdziekolwiek jesteś, tam jest Twoje miejsce" },
+    { "mantra": "Jestem bezpieczny", "meaning": "Głębokie bezpieczeństwo żyje wewnątrz Ciebie" },
+    { "mantra": "Jestem pełnią", "meaning": "Niczego nie brakuje w Twoim jestestwie" }
+  ],
+  "sacredClosings": [
+    "Niech ten spokój zostanie z Tobą, jak łagodny towarzysz na Twojej drodze. 💙",
+    "Nosisz tę ciszę w sobie zawsze - wracaj do niej, kiedy tylko potrzebujesz. 💙",
+    "Świętość nigdy Cię nie opuszcza. Czeka cierpliwie w Twoim sercu. 💙",
+    "Idź łagodnie, droga duszo. Jesteś kochany ponad wszelką miarę. 💙",
+    "Ta chwila spokoju jest Twoja na zawsze - nikt nie może Ci jej odebrać. 💙",
+    "Pamiętaj: jesteś otoczony opieką, jesteś widziany, jesteś kochany. 💙",
+    "Niech pogoda ducha towarzyszy Ci we wszystkich Twoich krokach dzisiaj. 💙",
+    "Boskie światło wewnątrz Ciebie świeci wciąż, zawsze. 💙"
+  ],
+  "guidanceModes": {
+    "innerPeace": {
+      "title": "Wewnętrzny Spokój",
+      "sacredDescription": "Wejdź do sanktuarium ciszy wewnątrz siebie. Poprzez łagodny oddech i delikatną świadomość odkryj spokój, który nigdy nie został utracony - tylko zapomniany. Tutaj przypominasz sobie swoją prawdziwą naturę.",
+      "blessing": "Niech cisza obejmie Cię jak najdelikatniejsze światło."
+    },
+    "mindControl": {
+      "title": "Święta Jasność",
+      "sacredDescription": "W cichej przestrzeni między myślami przemawia mądrość. Naucz się spoczywać w tej przestrzeni, gdzie umysł staje się czystym jeziorem odbijającym prawdę. Z jasności płynie naturalnie właściwe działanie.",
+      "blessing": "Niech Twój umysł stanie się zwierciadłem boskiej mądrości."
+    },
+    "selfKindness": {
+      "title": "Boskie Współczucie dla Siebie",
+      "sacredDescription": "Miłość, której szukasz na zewnątrz, już żyje wewnątrz Ciebie. Skieruj tę nieskończoną czułość ku własnemu sercu. Zasługujesz na to samo współczucie, które ofiarujesz innym.",
+      "blessing": "Niech traktujesz siebie z dobrocią boskości."
+    }
+  },
+  "sacredReminders": [
+    "Jesteś teraz otoczony nieskończoną miłością.",
+    "Boskość jest tak blisko jak Twój następny oddech.",
+    "Nic nie może zakłócić Twojego najgłębszego spokoju.",
+    "Jesteś dokładnie tam, gdzie powinieneś być.",
+    "Łaska płynie do Ciebie w tej właśnie chwili.",
+    "Twoja dusza zna drogę - zaufaj jej.",
+    "Nigdy nie jesteś sam, nawet przez sekundę.",
+    "Świętość mieszka wewnątrz Twojego serca.",
+    "To również jest częścią Twojej świętej podróży.",
+    "Jesteś kochany ponad to, co słowa mogą wyrazić."
+  ]
+}

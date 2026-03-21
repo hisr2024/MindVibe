@@ -1,0 +1,39 @@
+{
+  "errors": {
+    "general": "Coś poszło nie tak. Spróbuj ponownie.",
+    "network": "Błąd sieci. Sprawdź połączenie.",
+    "notFound": "Strona nie znaleziona",
+    "unauthorized": "Nie masz uprawnień do tej strony.",
+    "serverError": "Błąd serwera. Spróbuj ponownie później.",
+    "validation": {
+      "required": "To pole jest wymagane",
+      "email": "Podaj prawidłowy adres e-mail",
+      "minLength": "Minimalna długość to {min} znaków",
+      "maxLength": "Maksymalna długość to {max} znaków"
+    }
+  },
+  "notifications": {
+    "success": {
+      "saved": "Zapisano pomyślnie",
+      "updated": "Zaktualizowano pomyślnie",
+      "deleted": "Usunięto pomyślnie",
+      "sent": "Wysłano pomyślnie"
+    },
+    "info": {
+      "processing": "Przetwarzanie żądania...",
+      "loading": "Ładowanie...",
+      "syncing": "Synchronizacja..."
+    },
+    "warning": {
+      "unsavedChanges": "Masz niezapisane zmiany",
+      "confirmDelete": "Czy na pewno chcesz to usunąć?",
+      "confirmAction": "Czy na pewno chcesz kontynuować?"
+    }
+  },
+  "connection": {
+    "offline": "Jesteś obecnie offline",
+    "reconnecting": "Ponowne łączenie...",
+    "connected": "Połączenie przywrócone",
+    "failed": "Połączenie nie powiodło się. Spróbuj ponownie."
+  }
+}

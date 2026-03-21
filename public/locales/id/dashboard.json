@@ -1,0 +1,120 @@
+{
+  "title": "Dasbor",
+  "welcome": "Selamat datang kembali",
+  "subtitle": "Alat MindVibe",
+  "allTools": "Semua alat dalam satu tempat",
+  "returnHome": "Kembali ke beranda",
+  "toolsCount": "alat",
+  "categories": {
+    "core": "Alat Utama",
+    "guidance": "Mesin Panduan",
+    "karma": "Alat Karma",
+    "quick": "Akses Cepat"
+  },
+  "tools": {
+    "kiaan": {
+      "title": "Obrolan KIAAN",
+      "description": "Pendamping spiritual AI"
+    },
+    "journal": {
+      "title": "Jurnal Pribadi",
+      "description": "Jurnal terenkripsi"
+    },
+    "wisdom": {
+      "title": "Ruang Kebijaksanaan",
+      "description": "Kebijaksanaan kuno"
+    },
+    "insights": {
+      "title": "Wawasan Suasana Hati",
+      "description": "Pola emosional"
+    },
+    "viyog": {
+      "title": "Viyoga",
+      "description": "Pereda kecemasan hasil"
+    },
+    "ardha": {
+      "title": "Ardha",
+      "description": "Panduan situasional"
+    },
+    "relationship-compass": {
+      "title": "Kompas Hubungan",
+      "description": "Panduan hubungan"
+    },
+    "emotional-reset": {
+      "title": "Reset Emosi",
+      "description": "Keseimbangan emosi cepat"
+    },
+    "karma-footprint": {
+      "title": "Karma Footprint",
+      "description": "Lacak tindakan Anda"
+    },
+    "karmic-tree": {
+      "title": "Pohon Karma",
+      "description": "Visualisasikan perjalanan Anda"
+    },
+    "karma-reset": {
+      "title": "Reset Karma",
+      "description": "Mulai dari awal"
+    },
+    "reflections": {
+      "title": "Refleksi Suci",
+      "description": "Jurnal harian"
+    },
+    "deep": {
+      "title": "Wawasan Mendalam",
+      "description": "Analitik lanjutan"
+    },
+    "analytics": {
+      "title": "Analitik",
+      "description": "Lacak kemajuan Anda"
+    }
+  },
+  "badges": {
+    "new": "baru",
+    "premium": "premium",
+    "beta": "beta"
+  },
+  "analytics": {
+    "title": "Analitik",
+    "overview": "Ringkasan",
+    "insights": "Wawasan",
+    "trends": "Tren",
+    "weeklyProgress": "Kemajuan Mingguan",
+    "monthlyProgress": "Kemajuan Bulanan"
+  },
+  "profile": {
+    "title": "Profil",
+    "settings": "Pengaturan",
+    "editProfile": "Edit Profil",
+    "updateProfile": "Perbarui Profil",
+    "accountInfo": "Informasi Akun"
+  },
+  "subscription": {
+    "title": "Langganan",
+    "plan": "Paket Saat Ini",
+    "upgrade": "Tingkatkan",
+    "manage": "Kelola Langganan",
+    "billing": "Penagihan"
+  },
+  "stats": {
+    "journalEntries": "Entri Jurnal",
+    "chatSessions": "Sesi Obrolan",
+    "moodCheckins": "Check-in Suasana Hati",
+    "streakDays": "Hari Berturut-turut"
+  },
+  "tool_desc": {
+    "viyog": "Tenangkan reaksi langsung",
+    "ardha": "Ubah kerangka persepsi",
+    "kiaan": "Bicarakan bersama",
+    "relationship-compass": "Navigasi kejelasan relasional",
+    "journey": "Latih keteguhan batin jangka panjang"
+  },
+  "mode_label": {
+    "prefix": "Anda dalam:",
+    "viyog": "Mode Jeda",
+    "ardha": "Mode Kejernihan",
+    "kiaan": "Mode Pendamping",
+    "relationship-compass": "Mode Hubungan",
+    "journey": "Mode Latihan"
+  }
+}

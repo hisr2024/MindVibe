@@ -18,7 +18,10 @@
     "learnMore": "अधिक जाणून घ्या",
     "getStarted": "सुरुवात करा",
     "tryNow": "आता प्रयत्न करा",
-    "tools": "साधने"
+    "tools": "साधने",
+    "translate": "भाषांतर करा",
+    "original": "मूळ",
+    "showOriginal": "मूळ दाखवा"
   },
   "status": {
     "loading": "लोड करत आहे...",
@@ -26,7 +29,9 @@
     "saved": "जतन केले",
     "error": "त्रुटी",
     "success": "यश",
-    "processing": "प्रक्रिया करत आहे..."
+    "processing": "प्रक्रिया करत आहे...",
+    "translating": "भाषांतर करत आहे...",
+    "alreadyInLanguage": "आधीच या भाषेत आहे"
   },
   "common": {
     "hello": "नमस्कार",

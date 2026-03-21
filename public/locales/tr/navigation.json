@@ -1,0 +1,78 @@
+{
+  "mainNav": {
+    "home": "Ana Sayfa",
+    "dashboard": "Kontrol Paneli",
+    "features": "Özellikler",
+    "about": "Hakkında",
+    "contact": "İletişim",
+    "pricing": "Abonelikler",
+    "profile": "Profil",
+    "settings": "Ayarlar",
+    "account": "Hesap Erişimi",
+    "theme": "Tema",
+    "introduction": "Tanıtım"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "İlişki Pusulası",
+    "sacredReflections": "Kutsal Düşünceler",
+    "karmaFootprint": "Karma Footprint",
+    "karmicTree": "Karma Ağacı",
+    "emotionalReset": "Duygusal Sıfırlama",
+    "deepInsights": "Derin İçgörüler",
+    "wisdomRooms": "Bilgelik Odaları",
+    "wisdomJourneys": "Yolculuklar",
+    "companion": "Yol Arkadaşı"
+  },
+  "actions": {
+    "openChat": "Sohbeti Aç",
+    "startCheckin": "Check-in başlat",
+    "instantGuidance": "Anında rehberlik",
+    "spotYourState": "Durumunuzu fark edin",
+    "menu": "Menü",
+    "toggleMenu": "Gezinme menüsünü aç/kapat"
+  },
+  "mobileNav": {
+    "chat": "Sohbet",
+    "pause": "Duraklat",
+    "journal": "Kutsal Düşünceler"
+  },
+  "footer": {
+    "allRightsReserved": "Tüm hakları saklıdır",
+    "privacy": "Gizlilik Politikası",
+    "terms": "Hizmet Şartları",
+    "support": "Destek",
+    "explore": "Keşfet",
+    "safety": "Güvenlik",
+    "description": "Sakinlik için tasarlanmış, gizlilik öncelikli ruhani sağlık desteği. WCAG erişilebilirliği, şifreleme ve nazik bir deneyim odaklı olarak geliştirilmiştir.",
+    "emailUs": "Bize e-posta gönderin",
+    "encryptedJournals": "Şifrelenmiş günlükler",
+    "noTracking": "Takip reklamı yok"
+  },
+  "pathway": {
+    "pause": "Duraklat",
+    "understand": "Anla",
+    "converse": "Konuş",
+    "apply": "Uygula",
+    "train": "Eğit",
+    "you_are_here": "Buradasınız",
+    "nav_label": "İyileşme yolu"
+  },
+  "next_step": {
+    "explore_ardha": "Ardha'da keşfet →",
+    "continue_kiaan": "KIAAN ile devam et →",
+    "stabilize_viyoga": "Viyoga ile dengelenmek →",
+    "enter_journey": "Bir Yolculuğa Başla →",
+    "helper": "Konuşmanıza göre bu faydalı olabilir"
+  },
+  "tools": {
+    "releaseAttachment": "Bağımlılığı bırak",
+    "reframeThoughts": "Düşünceleri yeniden çerçevele",
+    "kiaanChat": "KIAAN Sohbet",
+    "talkItThrough": "Konuşarak çöz",
+    "relationalClarity": "İlişkisel netlik",
+    "quickAccess": "Hızlı erişim"
+  }
+}

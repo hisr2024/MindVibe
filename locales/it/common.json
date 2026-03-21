@@ -1,0 +1,55 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "Il tuo compagno spirituale e amico divino"
+  },
+  "buttons": {
+    "submit": "Invia",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "close": "Chiudi",
+    "next": "Avanti",
+    "previous": "Indietro",
+    "confirm": "Conferma",
+    "back": "Indietro",
+    "continue": "Continua",
+    "learnMore": "Scopri di più",
+    "getStarted": "Inizia ora",
+    "tryNow": "Prova ora",
+    "tools": "Strumenti",
+    "translate": "Traduci",
+    "original": "Originale",
+    "showOriginal": "Mostra originale"
+  },
+  "status": {
+    "loading": "Caricamento...",
+    "saving": "Salvataggio...",
+    "saved": "Salvato",
+    "error": "Errore",
+    "success": "Successo",
+    "processing": "Elaborazione...",
+    "translating": "Traduzione in corso...",
+    "alreadyInLanguage": "Già in questa lingua"
+  },
+  "common": {
+    "hello": "Ciao",
+    "welcome": "Benvenuto",
+    "goodbye": "Arrivederci",
+    "thankyou": "Grazie",
+    "yes": "Sì",
+    "no": "No",
+    "or": "o",
+    "and": "e",
+    "optional": "Facoltativo",
+    "required": "Obbligatorio"
+  },
+  "privacy": {
+    "encrypted": "Crittografato",
+    "private": "Privato per design",
+    "secure": "Sicuro",
+    "localOnly": "Solo locale",
+    "offlineReady": "Disponibile offline"
+  }
+}

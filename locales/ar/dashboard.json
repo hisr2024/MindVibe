@@ -1,0 +1,120 @@
+{
+  "title": "لوحة التحكم",
+  "welcome": "مرحبًا بعودتك",
+  "subtitle": "أدوات MindVibe",
+  "allTools": "جميع الأدوات في مكان واحد",
+  "returnHome": "العودة للرئيسية",
+  "toolsCount": "أدوات",
+  "categories": {
+    "core": "الأدوات الأساسية",
+    "guidance": "محركات الإرشاد",
+    "karma": "أدوات Karma",
+    "quick": "وصول سريع"
+  },
+  "tools": {
+    "kiaan": {
+      "title": "محادثة KIAAN",
+      "description": "رفيق روحي بالذكاء الاصطناعي"
+    },
+    "journal": {
+      "title": "مذكرة خاصة",
+      "description": "كتابة يومية مشفرة"
+    },
+    "wisdom": {
+      "title": "غرف الحكمة",
+      "description": "حكمة قديمة"
+    },
+    "insights": {
+      "title": "رؤى المزاج",
+      "description": "أنماط عاطفية"
+    },
+    "viyog": {
+      "title": "Viyoga",
+      "description": "تقليل قلق النتائج"
+    },
+    "ardha": {
+      "title": "Ardha",
+      "description": "إرشاد حسب الموقف"
+    },
+    "relationship-compass": {
+      "title": "بوصلة العلاقات",
+      "description": "إرشاد العلاقات"
+    },
+    "emotional-reset": {
+      "title": "إعادة ضبط المشاعر",
+      "description": "توازن عاطفي سريع"
+    },
+    "karma-footprint": {
+      "title": "Karma Footprint",
+      "description": "تتبع أفعالك"
+    },
+    "karmic-tree": {
+      "title": "شجرة Karma",
+      "description": "تصور رحلتك"
+    },
+    "karma-reset": {
+      "title": "إعادة ضبط Karma",
+      "description": "ابدأ من جديد"
+    },
+    "reflections": {
+      "title": "تأملات مقدسة",
+      "description": "كتابة يومية"
+    },
+    "deep": {
+      "title": "رؤى عميقة",
+      "description": "تحليلات متقدمة"
+    },
+    "analytics": {
+      "title": "التحليلات",
+      "description": "تتبع تقدمك"
+    }
+  },
+  "badges": {
+    "new": "جديد",
+    "premium": "مميز",
+    "beta": "تجريبي"
+  },
+  "analytics": {
+    "title": "التحليلات",
+    "overview": "نظرة عامة",
+    "insights": "الرؤى",
+    "trends": "الاتجاهات",
+    "weeklyProgress": "التقدم الأسبوعي",
+    "monthlyProgress": "التقدم الشهري"
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "settings": "الإعدادات",
+    "editProfile": "تعديل الملف الشخصي",
+    "updateProfile": "تحديث الملف الشخصي",
+    "accountInfo": "معلومات الحساب"
+  },
+  "subscription": {
+    "title": "الاشتراك",
+    "plan": "الخطة الحالية",
+    "upgrade": "ترقية",
+    "manage": "إدارة الاشتراك",
+    "billing": "الفواتير"
+  },
+  "stats": {
+    "journalEntries": "مدخلات المذكرة",
+    "chatSessions": "جلسات المحادثة",
+    "moodCheckins": "تسجيلات المزاج",
+    "streakDays": "أيام متتالية"
+  },
+  "tool_desc": {
+    "viyog": "تهدئة ردة الفعل الفورية",
+    "ardha": "إعادة صياغة الإدراك",
+    "kiaan": "تحدث عن الأمر",
+    "relationship-compass": "تنقل في وضوح العلاقات",
+    "journey": "تدريب على الثبات الداخلي طويل المدى"
+  },
+  "mode_label": {
+    "prefix": "أنت في:",
+    "viyog": "وضع التوقف",
+    "ardha": "وضع الوضوح",
+    "kiaan": "وضع الرفيق",
+    "relationship-compass": "وضع العلاقات",
+    "journey": "وضع التدريب"
+  }
+}

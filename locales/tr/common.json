@@ -1,0 +1,55 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "Ruhani Yol Arkadaşınız ve İlahi Dostunuz"
+  },
+  "buttons": {
+    "submit": "Gönder",
+    "cancel": "İptal",
+    "save": "Kaydet",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "close": "Kapat",
+    "next": "İleri",
+    "previous": "Önceki",
+    "confirm": "Onayla",
+    "back": "Geri",
+    "continue": "Devam Et",
+    "learnMore": "Daha Fazla Bilgi",
+    "getStarted": "Başlayın",
+    "tryNow": "Şimdi Deneyin",
+    "tools": "Araçlar",
+    "translate": "Çevir",
+    "original": "Orijinal",
+    "showOriginal": "Orijinali göster"
+  },
+  "status": {
+    "loading": "Yükleniyor...",
+    "saving": "Kaydediliyor...",
+    "saved": "Kaydedildi",
+    "error": "Hata",
+    "success": "Başarılı",
+    "processing": "İşleniyor...",
+    "translating": "Çevriliyor...",
+    "alreadyInLanguage": "Zaten bu dilde"
+  },
+  "common": {
+    "hello": "Merhaba",
+    "welcome": "Hoş geldiniz",
+    "goodbye": "Hoşça kalın",
+    "thankyou": "Teşekkürler",
+    "yes": "Evet",
+    "no": "Hayır",
+    "or": "veya",
+    "and": "ve",
+    "optional": "İsteğe bağlı",
+    "required": "Zorunlu"
+  },
+  "privacy": {
+    "encrypted": "Şifrelenmiş",
+    "private": "Gizlilik odaklı tasarım",
+    "secure": "Güvenli",
+    "localOnly": "Yalnızca yerel",
+    "offlineReady": "Çevrimdışı kullanıma hazır"
+  }
+}

@@ -18,7 +18,10 @@
     "learnMore": "ਹੋਰ ਜਾਣੋ",
     "getStarted": "ਸ਼ੁਰੂ ਕਰੋ",
     "tryNow": "ਹੁਣ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
-    "tools": "ਸਾਧਨ"
+    "tools": "ਸਾਧਨ",
+    "translate": "ਅਨੁਵਾਦ ਕਰੋ",
+    "original": "ਮੂਲ",
+    "showOriginal": "ਮੂਲ ਦਿਖਾਓ"
   },
   "status": {
     "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...",
@@ -26,7 +29,9 @@
     "saved": "ਸੇਵ ਕੀਤਾ",
     "error": "ਗਲਤੀ",
     "success": "ਸਫਲਤਾ",
-    "processing": "ਪ੍ਰਕ੍ਰਿਆ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ..."
+    "processing": "ਪ੍ਰਕ੍ਰਿਆ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ...",
+    "translating": "ਅਨੁਵਾਦ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ...",
+    "alreadyInLanguage": "ਪਹਿਲਾਂ ਤੋਂ ਇਸ ਭਾਸ਼ਾ ਵਿੱਚ ਹੈ"
   },
   "common": {
     "hello": "ਸਤ ਸ੍ਰੀ ਅਕਾਲ",

@@ -1,0 +1,120 @@
+{
+  "title": "Översikt",
+  "welcome": "Välkommen tillbaka",
+  "subtitle": "MindVibe verktyg",
+  "allTools": "Alla verktyg på ett ställe",
+  "returnHome": "Tillbaka till hem",
+  "toolsCount": "verktyg",
+  "categories": {
+    "core": "Kärnverktyg",
+    "guidance": "Vägledningsmotorer",
+    "karma": "Karma Verktyg",
+    "quick": "Snabbåtkomst"
+  },
+  "tools": {
+    "kiaan": {
+      "title": "KIAAN Chatt",
+      "description": "Andlig AI-följeslagare"
+    },
+    "journal": {
+      "title": "Privat Dagbok",
+      "description": "Krypterad dagbok"
+    },
+    "wisdom": {
+      "title": "Visdomsrum",
+      "description": "Uråldrig visdom"
+    },
+    "insights": {
+      "title": "Humörinsikter",
+      "description": "Emotionella mönster"
+    },
+    "viyog": {
+      "title": "Viyoga",
+      "description": "Resultatångestreducerare"
+    },
+    "ardha": {
+      "title": "Ardha",
+      "description": "Situationsanpassad vägledning"
+    },
+    "relationship-compass": {
+      "title": "Relationskompass",
+      "description": "Relationsvägledning"
+    },
+    "emotional-reset": {
+      "title": "Emotionell Återställning",
+      "description": "Snabb emotionell balans"
+    },
+    "karma-footprint": {
+      "title": "Karma Fotavtryck",
+      "description": "Spåra dina handlingar"
+    },
+    "karmic-tree": {
+      "title": "Karmiskt Träd",
+      "description": "Visualisera din resa"
+    },
+    "karma-reset": {
+      "title": "Karma Återställning",
+      "description": "Börja om"
+    },
+    "reflections": {
+      "title": "Heliga Reflektioner",
+      "description": "Dagligt dagboksskrivande"
+    },
+    "deep": {
+      "title": "Djupa Insikter",
+      "description": "Avancerad analys"
+    },
+    "analytics": {
+      "title": "Analys",
+      "description": "Spåra dina framsteg"
+    }
+  },
+  "badges": {
+    "new": "nytt",
+    "premium": "premium",
+    "beta": "beta"
+  },
+  "analytics": {
+    "title": "Analys",
+    "overview": "Översikt",
+    "insights": "Insikter",
+    "trends": "Trender",
+    "weeklyProgress": "Veckoframsteg",
+    "monthlyProgress": "Månadsframsteg"
+  },
+  "profile": {
+    "title": "Profil",
+    "settings": "Inställningar",
+    "editProfile": "Redigera Profil",
+    "updateProfile": "Uppdatera Profil",
+    "accountInfo": "Kontoinformation"
+  },
+  "subscription": {
+    "title": "Prenumeration",
+    "plan": "Nuvarande Plan",
+    "upgrade": "Uppgradera",
+    "manage": "Hantera Prenumeration",
+    "billing": "Fakturering"
+  },
+  "stats": {
+    "journalEntries": "Dagboksinlägg",
+    "chatSessions": "Chattsessioner",
+    "moodCheckins": "Humörincheckningar",
+    "streakDays": "Dagars Svit"
+  },
+  "tool_desc": {
+    "viyog": "Lugna den omedelbara reaktionen",
+    "ardha": "Omforma uppfattningen",
+    "kiaan": "Prata igenom det",
+    "relationship-compass": "Navigera relationsklarhet",
+    "journey": "Träna långsiktig inre stabilitet"
+  },
+  "mode_label": {
+    "prefix": "Du är i:",
+    "viyog": "Pausläge",
+    "ardha": "Klarhetsläge",
+    "kiaan": "Följeslagarläge",
+    "relationship-compass": "Relationsläge",
+    "journey": "Träningsläge"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "Jouw Spirituele Metgezel & Goddelijke Vriend"
+  },
+  "buttons": {
+    "submit": "Verzenden",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "close": "Sluiten",
+    "next": "Volgende",
+    "previous": "Vorige",
+    "confirm": "Bevestigen",
+    "back": "Terug",
+    "continue": "Doorgaan",
+    "learnMore": "Meer informatie",
+    "getStarted": "Aan de slag",
+    "tryNow": "Probeer nu",
+    "tools": "Hulpmiddelen",
+    "translate": "Vertalen",
+    "original": "Origineel",
+    "showOriginal": "Toon origineel"
+  },
+  "status": {
+    "loading": "Laden...",
+    "saving": "Opslaan...",
+    "saved": "Opgeslagen",
+    "error": "Fout",
+    "success": "Gelukt",
+    "processing": "Verwerken...",
+    "translating": "Vertalen...",
+    "alreadyInLanguage": "Al in deze taal"
+  },
+  "common": {
+    "hello": "Hallo",
+    "welcome": "Welkom",
+    "goodbye": "Tot ziens",
+    "thankyou": "Dank je",
+    "yes": "Ja",
+    "no": "Nee",
+    "or": "of",
+    "and": "en",
+    "optional": "Optioneel",
+    "required": "Verplicht"
+  },
+  "privacy": {
+    "encrypted": "Versleuteld",
+    "private": "Privé door ontwerp",
+    "secure": "Beveiligd",
+    "localOnly": "Alleen lokaal",
+    "offlineReady": "Offline-klaar"
+  }
+}

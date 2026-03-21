@@ -1,0 +1,55 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "Din Andliga Följeslagare & Gudomliga Vän"
+  },
+  "buttons": {
+    "submit": "Skicka",
+    "cancel": "Avbryt",
+    "save": "Spara",
+    "delete": "Radera",
+    "edit": "Redigera",
+    "close": "Stäng",
+    "next": "Nästa",
+    "previous": "Föregående",
+    "confirm": "Bekräfta",
+    "back": "Tillbaka",
+    "continue": "Fortsätt",
+    "learnMore": "Läs mer",
+    "getStarted": "Kom igång",
+    "tryNow": "Prova nu",
+    "tools": "Verktyg",
+    "translate": "Översätt",
+    "original": "Original",
+    "showOriginal": "Visa original"
+  },
+  "status": {
+    "loading": "Laddar...",
+    "saving": "Sparar...",
+    "saved": "Sparat",
+    "error": "Fel",
+    "success": "Lyckades",
+    "processing": "Bearbetar...",
+    "translating": "Översätter...",
+    "alreadyInLanguage": "Redan på detta språk"
+  },
+  "common": {
+    "hello": "Hej",
+    "welcome": "Välkommen",
+    "goodbye": "Hej då",
+    "thankyou": "Tack",
+    "yes": "Ja",
+    "no": "Nej",
+    "or": "eller",
+    "and": "och",
+    "optional": "Valfritt",
+    "required": "Obligatoriskt"
+  },
+  "privacy": {
+    "encrypted": "Krypterad",
+    "private": "Privat genom design",
+    "secure": "Säker",
+    "localOnly": "Endast lokalt",
+    "offlineReady": "Offline-redo"
+  }
+}

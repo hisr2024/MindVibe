@@ -1,0 +1,55 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "Mwandani Wako wa Kiroho na Rafiki wa Kimungu"
+  },
+  "buttons": {
+    "submit": "Wasilisha",
+    "cancel": "Ghairi",
+    "save": "Hifadhi",
+    "delete": "Futa",
+    "edit": "Hariri",
+    "close": "Funga",
+    "next": "Inayofuata",
+    "previous": "Iliyotangulia",
+    "confirm": "Thibitisha",
+    "back": "Rudi",
+    "continue": "Endelea",
+    "learnMore": "Jifunze Zaidi",
+    "getStarted": "Anza Sasa",
+    "tryNow": "Jaribu Sasa",
+    "tools": "Zana",
+    "translate": "Tafsiri",
+    "original": "Asili",
+    "showOriginal": "Onyesha asili"
+  },
+  "status": {
+    "loading": "Inapakia...",
+    "saving": "Inahifadhi...",
+    "saved": "Imehifadhiwa",
+    "error": "Hitilafu",
+    "success": "Imefanikiwa",
+    "processing": "Inashughulikia...",
+    "translating": "Inatafsiri...",
+    "alreadyInLanguage": "Tayari iko katika lugha hii"
+  },
+  "common": {
+    "hello": "Habari",
+    "welcome": "Karibu",
+    "goodbye": "Kwaheri",
+    "thankyou": "Asante",
+    "yes": "Ndiyo",
+    "no": "Hapana",
+    "or": "au",
+    "and": "na",
+    "optional": "Si lazima",
+    "required": "Lazima"
+  },
+  "privacy": {
+    "encrypted": "Imesimbwa",
+    "private": "Imeundwa kwa faragha",
+    "secure": "Salama",
+    "localOnly": "Kifaa tu",
+    "offlineReady": "Iko tayari bila mtandao"
+  }
+}

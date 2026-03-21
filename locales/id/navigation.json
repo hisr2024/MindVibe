@@ -1,0 +1,78 @@
+{
+  "mainNav": {
+    "home": "Beranda",
+    "dashboard": "Dasbor",
+    "features": "Fitur",
+    "about": "Tentang",
+    "contact": "Kontak",
+    "pricing": "Langganan",
+    "profile": "Profil",
+    "settings": "Pengaturan",
+    "account": "Akses Akun",
+    "theme": "Tema",
+    "introduction": "Pengantar"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "Kompas Hubungan",
+    "sacredReflections": "Refleksi Suci",
+    "karmaFootprint": "Karma Footprint",
+    "karmicTree": "Pohon Karma",
+    "emotionalReset": "Reset Emosi",
+    "deepInsights": "Wawasan Mendalam",
+    "wisdomRooms": "Ruang Kebijaksanaan",
+    "wisdomJourneys": "Perjalanan",
+    "companion": "Pendamping"
+  },
+  "actions": {
+    "openChat": "Buka Obrolan",
+    "startCheckin": "Mulai check-in",
+    "instantGuidance": "Panduan instan",
+    "spotYourState": "Kenali kondisi Anda",
+    "menu": "Menu",
+    "toggleMenu": "Buka/tutup menu navigasi"
+  },
+  "mobileNav": {
+    "chat": "Obrolan",
+    "pause": "Jeda",
+    "journal": "Refleksi Suci"
+  },
+  "footer": {
+    "allRightsReserved": "Hak cipta dilindungi",
+    "privacy": "Kebijakan Privasi",
+    "terms": "Ketentuan Layanan",
+    "support": "Dukungan",
+    "explore": "Jelajahi",
+    "safety": "Keamanan",
+    "description": "Dirancang untuk ketenangan, dukungan kesejahteraan spiritual yang mengutamakan privasi. Dibangun dengan fokus pada aksesibilitas WCAG, enkripsi, dan pengalaman yang lembut.",
+    "emailUs": "Email kami",
+    "encryptedJournals": "Jurnal terenkripsi",
+    "noTracking": "Tanpa iklan pelacakan"
+  },
+  "pathway": {
+    "pause": "Jeda",
+    "understand": "Pahami",
+    "converse": "Berdialog",
+    "apply": "Terapkan",
+    "train": "Latih",
+    "you_are_here": "Anda di sini",
+    "nav_label": "Jalur penyembuhan"
+  },
+  "next_step": {
+    "explore_ardha": "Jelajahi di Ardha →",
+    "continue_kiaan": "Lanjutkan dengan KIAAN →",
+    "stabilize_viyoga": "Stabilkan dengan Viyoga →",
+    "enter_journey": "Mulai Perjalanan →",
+    "helper": "Berdasarkan percakapan Anda, ini mungkin berguna"
+  },
+  "tools": {
+    "releaseAttachment": "Lepaskan keterikatan",
+    "reframeThoughts": "Ubah kerangka pikiran",
+    "kiaanChat": "Obrolan KIAAN",
+    "talkItThrough": "Bicarakan bersama",
+    "relationalClarity": "Kejelasan relasional",
+    "quickAccess": "Akses cepat"
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "title": "Kontrol Paneli",
+  "welcome": "Tekrar hoş geldiniz",
+  "subtitle": "MindVibe araçları",
+  "allTools": "Tüm araçlar tek yerde",
+  "returnHome": "Ana sayfaya dön",
+  "toolsCount": "araçlar",
+  "categories": {
+    "core": "Temel Araçlar",
+    "guidance": "Rehberlik Motorları",
+    "karma": "Karma Araçları",
+    "quick": "Hızlı Erişim"
+  },
+  "tools": {
+    "kiaan": {
+      "title": "KIAAN Sohbet",
+      "description": "AI ruhani yol arkadaşı"
+    },
+    "journal": {
+      "title": "Özel Günlük",
+      "description": "Şifrelenmiş günlük yazma"
+    },
+    "wisdom": {
+      "title": "Bilgelik Odaları",
+      "description": "Kadim bilgelik"
+    },
+    "insights": {
+      "title": "Ruh Hali Görüşleri",
+      "description": "Duygusal kalıplar"
+    },
+    "viyog": {
+      "title": "Viyoga",
+      "description": "Sonuç kaygısını azaltıcı"
+    },
+    "ardha": {
+      "title": "Ardha",
+      "description": "Duruma göre rehberlik"
+    },
+    "relationship-compass": {
+      "title": "İlişki Pusulası",
+      "description": "İlişki rehberliği"
+    },
+    "emotional-reset": {
+      "title": "Duygusal Sıfırlama",
+      "description": "Hızlı duygusal denge"
+    },
+    "karma-footprint": {
+      "title": "Karma Footprint",
+      "description": "Eylemlerinizi takip edin"
+    },
+    "karmic-tree": {
+      "title": "Karma Ağacı",
+      "description": "Yolculuğunuzu görselleştirin"
+    },
+    "karma-reset": {
+      "title": "Karma Sıfırlama",
+      "description": "Yeniden başla"
+    },
+    "reflections": {
+      "title": "Kutsal Düşünceler",
+      "description": "Günlük yazma"
+    },
+    "deep": {
+      "title": "Derin İçgörüler",
+      "description": "Gelişmiş analitik"
+    },
+    "analytics": {
+      "title": "Analitik",
+      "description": "İlerlemenizi takip edin"
+    }
+  },
+  "badges": {
+    "new": "yeni",
+    "premium": "premium",
+    "beta": "beta"
+  },
+  "analytics": {
+    "title": "Analitik",
+    "overview": "Genel Bakış",
+    "insights": "İçgörüler",
+    "trends": "Trendler",
+    "weeklyProgress": "Haftalık İlerleme",
+    "monthlyProgress": "Aylık İlerleme"
+  },
+  "profile": {
+    "title": "Profil",
+    "settings": "Ayarlar",
+    "editProfile": "Profili Düzenle",
+    "updateProfile": "Profili Güncelle",
+    "accountInfo": "Hesap Bilgileri"
+  },
+  "subscription": {
+    "title": "Abonelik",
+    "plan": "Mevcut Plan",
+    "upgrade": "Yükselt",
+    "manage": "Aboneliği Yönet",
+    "billing": "Faturalandırma"
+  },
+  "stats": {
+    "journalEntries": "Günlük Girişleri",
+    "chatSessions": "Sohbet Oturumları",
+    "moodCheckins": "Ruh Hali Kayıtları",
+    "streakDays": "Gün Serisi"
+  },
+  "tool_desc": {
+    "viyog": "Anlık tepkiyi yatıştır",
+    "ardha": "Algıyı yeniden çerçevele",
+    "kiaan": "Konuşarak çöz",
+    "relationship-compass": "İlişkisel netlikte yol al",
+    "journey": "Uzun vadeli iç sükûneti eğit"
+  },
+  "mode_label": {
+    "prefix": "Şu anki modunuz:",
+    "viyog": "Duraklama Modu",
+    "ardha": "Netlik Modu",
+    "kiaan": "Yol Arkadaşı Modu",
+    "relationship-compass": "İlişki Modu",
+    "journey": "Eğitim Modu"
+  }
+}

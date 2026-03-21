@@ -1,0 +1,83 @@
+{
+  "_template_variables_note": "This file uses i18next template variables: {{current}}, {{total}}, {{day}}, {{title}}. Any rename or removal of these variables will break the UI. Ensure all referenced variables are passed by the consuming components (JourneyCard, JourneyStep, JourneyComplete).",
+  "title": "Percorsi di saggezza",
+  "subtitle": "Trasforma il tuo mondo interiore allentando la presa delle sei tendenze interiori (Sad-Ripu). Seleziona uno o più percorsi per iniziare il tuo cammino verso la pace interiore.",
+  "featured": "Percorsi in evidenza",
+  "all": "Tutti i percorsi",
+  "active": "I tuoi percorsi attivi",
+  "empty": {
+    "title": "Nessun percorso disponibile",
+    "description": "Torna presto per nuovi percorsi di saggezza."
+  },
+  "trial": {
+    "title": "Accesso gratuito",
+    "description": "Prova 1 percorso per 3 giorni gratis! Vivi la trasformazione.",
+    "upgrade": "Aggiorna per l'accesso completo"
+  },
+  "card": {
+    "start": "Inizia il percorso",
+    "continue": "Continua il percorso",
+    "locked": "Completa o metti in pausa un percorso attivo per iniziare questo",
+    "free": "Gratuito",
+    "featured": "In evidenza",
+    "inProgress": "In corso",
+    "day": "Giorno {{current}} di {{total}}"
+  },
+  "step": {
+    "title": "Il passo di oggi nel percorso",
+    "backToJourneys": "Torna ai percorsi",
+    "complete": "Completa il giorno {{day}}",
+    "completing": "Completamento...",
+    "completed": {
+      "title": "Giorno {{day}} completato!",
+      "message": "Ottimo lavoro! Torna domani per il prossimo passo.",
+      "viewAll": "Vedi tutti i percorsi"
+    },
+    "journeyComplete": {
+      "title": "Percorso completato!",
+      "message": "Congratulazioni per aver completato {{title}}! Hai fatto un passo significativo verso la pace interiore.",
+      "startAnother": "Inizia un altro percorso"
+    },
+    "day14": {
+      "title": "La pratica continua",
+      "body": "I 14 giorni sono un inizio, non una fine. Porta ciò che hai praticato nei momenti quotidiani — il lavoro si approfondisce da qui.",
+      "linkTrigger": "Affronta il trigger di oggi",
+      "linkPractice": "Micro-pratica quotidiana"
+    }
+  },
+  "sections": {
+    "teaching": "Insegnamento di oggi",
+    "reflection": "Riflessione guidata",
+    "practice": "Pratica",
+    "commitment": "Micro impegno di oggi",
+    "microPractice": "Micro-pratica di oggi",
+    "markPracticed": "Segna come praticato"
+  },
+  "checkIn": {
+    "label": "La tua riflessione (facoltativa)",
+    "placeholder": "Scrivi i tuoi pensieri, intuizioni o sentimenti..."
+  },
+  "difficulty": {
+    "1": "Principiante",
+    "2": "Facile",
+    "3": "Moderato",
+    "4": "Impegnativo",
+    "5": "Avanzato"
+  },
+  "enemies": {
+    "kama": "Desiderio (Kama)",
+    "krodha": "Rabbia (Krodha)",
+    "lobha": "Avidità (Lobha)",
+    "moha": "Attaccamento (Moha)",
+    "mada": "Ego (Mada)",
+    "matsarya": "Invidia (Matsarya)",
+    "mixed": "Percorso combinato",
+    "general": "Saggezza generale"
+  },
+  "errors": {
+    "loadFailed": "Impossibile caricare i percorsi. Riprova.",
+    "startFailed": "Impossibile iniziare il percorso. Riprova.",
+    "completeFailed": "Impossibile completare il passo. Riprova.",
+    "networkError": "Errore di rete. Controlla la tua connessione."
+  }
+}

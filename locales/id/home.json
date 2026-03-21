@@ -1,0 +1,118 @@
+{
+  "hero": {
+    "title": "Pendamping AI untuk Kesejahteraan Spiritual Anda",
+    "subtitle": "Berbincang dengan KIAAN, Dipandu oleh Kebijaksanaan Kuno",
+    "tagline": "Pendamping spiritual yang tenang dan mengutamakan privasi, diperkuat oleh kebijaksanaan kuno",
+    "ctaPrimary": "Bicara dengan KIAAN",
+    "ctaSecondary": "Refleksi Suci",
+    "privacy": "Percakapan tetap pribadi • tempat perlindungan yang hangat dan rahasia"
+  },
+  "ecosystem": {
+    "title": "Ekosistem MindVibe",
+    "subtitle": "Pendekatan holistik untuk kesejahteraan spiritual, berakar pada kebijaksanaan kuno dan praktik modern",
+    "pillars": {
+      "innerPeace": {
+        "title": "Kedamaian Batin",
+        "description": "Temukan ketenangan melalui latihan pernapasan dan teknik grounding yang lembut."
+      },
+      "mindControl": {
+        "title": "Pengendalian Pikiran",
+        "description": "Kembangkan kejernihan fokus melalui praktik mindfulness yang terstruktur."
+      },
+      "selfKindness": {
+        "title": "Kebaikan pada Diri Sendiri",
+        "description": "Tanamkan belas kasih untuk diri sendiri melalui latihan yang hangat dan mendukung."
+      }
+    },
+    "footer": "Setiap pilar bekerja bersama untuk menciptakan pendekatan yang seimbang dan berkelanjutan terhadap kesejahteraan spiritual"
+  },
+  "features": {
+    "title": "Fitur Utama",
+    "subtitle": "Alat yang mengutamakan privasi, dirancang untuk perjalanan kesejahteraan spiritual Anda",
+    "voice": {
+      "title": "Suara KIAAN",
+      "description": "Berbicara secara alami dengan KIAAN menggunakan input suara. Selalu siap, membimbing Anda di mana saja dalam ekosistem.",
+      "cta": "Bicara dengan KIAAN"
+    },
+    "offline": {
+      "title": "Siap Offline",
+      "description": "Akses jurnal, suasana hati, dan refleksi Anda kapan saja, bahkan tanpa internet.",
+      "cta": "Mulai Menulis Jurnal"
+    },
+    "reset": {
+      "title": "Reset Emosi",
+      "description": "Latihan cepat untuk mereset kondisi emosi Anda dan menemukan ketenangan instan.",
+      "cta": "Coba Reset"
+    }
+  },
+  "moodCheckIn": {
+    "title": "Bagaimana perasaan Anda?",
+    "subtitle": "Check-In Cepat",
+    "helper": "Ketuk batu untuk mencatat suasana hati • Pribadi & hanya lokal",
+    "helperText": "Ketuk batu untuk mencatat suasana hati • Mengarahkan Anda ke Obrolan KIAAN untuk dukungan",
+    "openingChat": "Membuka Obrolan KIAAN...",
+    "selectMood": "Pilih",
+    "moods": {
+      "peaceful": "Damai",
+      "happy": "Bahagia",
+      "neutral": "Netral",
+      "tired": "Lelah",
+      "anxious": "Cemas",
+      "heavy": "Berat"
+    },
+    "responses": {
+      "peaceful": "Ketenangan yang indah. Pertahankan. 💙",
+      "happy": "Biarkan kehangatan itu menemani Anda. ✨",
+      "neutral": "Stabil itu baik. Anda hadir. 🌿",
+      "tired": "Istirahat bukan kelemahan. 💙",
+      "anxious": "Tarik napas. Saya di sini bersama Anda. 🌊",
+      "heavy": "Anda tidak sendirian. Saya di sini. 💙"
+    }
+  },
+  "quickAccess": {
+    "kiaan": {
+      "title": "Bicara dengan KIAAN",
+      "subtitle": "Panduan instan",
+      "description": "Mulai percakapan terfokus untuk dukungan kesejahteraan spiritual",
+      "cta": "Buka Obrolan"
+    },
+    "dashboard": {
+      "title": "Pelacakan Kemajuan",
+      "subtitle": "Dasbor",
+      "description": "Lihat wawasan dari check-in suasana hati dan entri jurnal Anda",
+      "cta": "Lihat Dasbor"
+    },
+    "emotionalReset": {
+      "title": "Reset Cepat",
+      "subtitle": "Reset Emosi",
+      "description": "Latihan terpandu untuk mereset kondisi emosi Anda secara instan",
+      "cta": "Coba Reset"
+    }
+  },
+  "disclaimer": {
+    "title": "Penyangkalan",
+    "text": "KIAAN berbagi refleksi suportif yang terinspirasi oleh tradisi kebijaksanaan. Percakapan dan latihan ini bukan nasihat medis. Jika Anda menghadapi masalah serius atau merasa tidak aman, silakan hubungi layanan darurat medis di negara Anda atau profesional berlisensi segera."
+  },
+  "introduction": {
+    "heroTitle": "Selamat Datang di Kehadiran Ilahi",
+    "heroSubtitle": "Rasakan bimbingan penuh kasih dari Krishna. Anda tidak pernah sendirian dalam perjalanan ini.",
+    "receiveDarshan": "Terima Darshan Krishna",
+    "talkToKiaan": "Bicara dengan KIAAN",
+    "divineWisdom": "Kebijaksanaan & bimbingan ilahi",
+    "protectionShield": "Perisai Perlindungan Ilahi",
+    "activateProtection": "Aktifkan perlindungan Krishna",
+    "heartToHeart": "Hati ke Hati dengan Krishna",
+    "writeLetter": "Tulis surat kepada Yang Ilahi",
+    "howIsHeart": "Bagaimana perasaan hati Anda?",
+    "shareFeelings": "Bagikan perasaan Anda dengan Krishna",
+    "goToDashboard": "Ke Dasbor",
+    "accessTools": "Akses semua alat & fitur",
+    "quickAccess": "Akses Ilahi Cepat",
+    "journeys": "Perjalanan",
+    "journal": "Jurnal",
+    "reframe": "Ubah Kerangka",
+    "detach": "Lepaskan",
+    "footerVerse": "\"Akulah Sang Diri yang bersemayam di hati semua makhluk. Akulah awal, tengah, dan akhir.\"",
+    "footerVerseRef": "— Bhagavad Gita 10.20"
+  }
+}

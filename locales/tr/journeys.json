@@ -1,0 +1,83 @@
+{
+  "_template_variables_note": "This file uses i18next template variables: {{current}}, {{total}}, {{day}}, {{title}}. Any rename or removal of these variables will break the UI. Ensure all referenced variables are passed by the consuming components (JourneyCard, JourneyStep, JourneyComplete).",
+  "title": "Bilgelik Yolculukları",
+  "subtitle": "Altı iç eğilimin (Sad-Ripu) kavrayışını gevşeterek iç dünyanızı dönüştürün. İç huzura giden yolunuzu başlatmak için bir veya daha fazla yolculuk seçin.",
+  "featured": "Öne Çıkan Yolculuklar",
+  "all": "Tüm Yolculuklar",
+  "active": "Aktif Yolculuklarınız",
+  "empty": {
+    "title": "Yolculuk Bulunamadı",
+    "description": "Yeni bilgelik yolculukları için yakında tekrar kontrol edin."
+  },
+  "trial": {
+    "title": "Ücretsiz Erişim",
+    "description": "3 gün boyunca 1 yolculuğu ücretsiz deneyin! Dönüşümü deneyimleyin.",
+    "upgrade": "Tam Erişim İçin Yükseltin"
+  },
+  "card": {
+    "start": "Yolculuğu Başlat",
+    "continue": "Yolculuğa Devam Et",
+    "locked": "Bu yolculuğu başlatmak için aktif bir yolculuğu tamamlayın veya duraklatın",
+    "free": "Ücretsiz",
+    "featured": "Öne Çıkan",
+    "inProgress": "Devam Ediyor",
+    "day": "Gün {{current}} / {{total}}"
+  },
+  "step": {
+    "title": "Bugünün Yolculuk Adımı",
+    "backToJourneys": "Yolculuklara Dön",
+    "complete": "Gün {{day}} Tamamla",
+    "completing": "Tamamlanıyor...",
+    "completed": {
+      "title": "Gün {{day}} Tamamlandı!",
+      "message": "Harika iş! Bir sonraki adımınız için yarın gelin.",
+      "viewAll": "Tüm Yolculukları Gör"
+    },
+    "journeyComplete": {
+      "title": "Yolculuk Tamamlandı!",
+      "message": "{{title}} yolculuğunu tamamladığınız için tebrikler! İç huzura doğru anlamlı bir adım attınız.",
+      "startAnother": "Başka Bir Yolculuk Başlat"
+    },
+    "day14": {
+      "title": "Pratik devam ediyor",
+      "body": "14 gün bir başlangıçtır, son değil. Pratik yaptıklarınızı günlük anlara taşıyın — çalışma buradan derinleşir.",
+      "linkTrigger": "Bugünün tetikleyicisini yönet",
+      "linkPractice": "Günlük mikro-pratik"
+    }
+  },
+  "sections": {
+    "teaching": "Bugünün Öğretisi",
+    "reflection": "Rehberli Düşünce",
+    "practice": "Pratik",
+    "commitment": "Bugünün Mikro Taahhüdü",
+    "microPractice": "Bugünün mikro-pratiği",
+    "markPracticed": "Pratik yapıldı olarak işaretle"
+  },
+  "checkIn": {
+    "label": "Düşünceniz (isteğe bağlı)",
+    "placeholder": "Düşüncelerinizi, içgörülerinizi veya hislerinizi yazın..."
+  },
+  "difficulty": {
+    "1": "Başlangıç",
+    "2": "Kolay",
+    "3": "Orta",
+    "4": "Zorlu",
+    "5": "İleri"
+  },
+  "enemies": {
+    "kama": "Arzu (Kama)",
+    "krodha": "Öfke (Krodha)",
+    "lobha": "Açgözlülük (Lobha)",
+    "moha": "Bağımlılık (Moha)",
+    "mada": "Ego (Mada)",
+    "matsarya": "Kıskançlık (Matsarya)",
+    "mixed": "Birleşik Yolculuk",
+    "general": "Genel Bilgelik"
+  },
+  "errors": {
+    "loadFailed": "Yolculuklar yüklenemedi. Lütfen tekrar deneyin.",
+    "startFailed": "Yolculuk başlatılamadı. Lütfen tekrar deneyin.",
+    "completeFailed": "Adım tamamlanamadı. Lütfen tekrar deneyin.",
+    "networkError": "Ağ hatası. Lütfen bağlantınızı kontrol edin."
+  }
+}

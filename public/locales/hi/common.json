@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Sakha",
+    "name": "माइंडवाइब",
     "tagline": "आपका आध्यात्मिक साथी और दिव्य मित्र"
   },
   "buttons": {
@@ -18,7 +18,10 @@
     "learnMore": "और जानें",
     "getStarted": "शुरू करें",
     "tryNow": "अभी आज़माएं",
-    "tools": "उपकरण"
+    "tools": "उपकरण",
+    "translate": "अनुवाद करें",
+    "original": "मूल",
+    "showOriginal": "मूल दिखाएं"
   },
   "status": {
     "loading": "लोड हो रहा है...",
@@ -26,7 +29,9 @@
     "saved": "सहेजा गया",
     "error": "त्रुटि",
     "success": "सफलता",
-    "processing": "प्रसंस्करण..."
+    "processing": "प्रसंस्करण...",
+    "translating": "अनुवाद हो रहा है...",
+    "alreadyInLanguage": "पहले से इस भाषा में है"
   },
   "common": {
     "hello": "नमस्ते",

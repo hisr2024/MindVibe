@@ -11,7 +11,7 @@ interface TranslateButtonProps {
 }
 
 export function TranslateButton({ text, onTranslate, className = '' }: TranslateButtonProps) {
-  const { language, config } = useLanguage()
+  const { language, config, t } = useLanguage()
   const [isTranslating, setIsTranslating] = useState(false)
   const [isTranslated, setIsTranslated] = useState(false)
   const [, setTranslatedText] = useState<string | null>(null)
@@ -67,8 +67,8 @@ export function TranslateButton({ text, onTranslate, className = '' }: Translate
       onClick={handleTranslate}
       disabled={isTranslating}
       className={`group relative flex items-center gap-1.5 rounded-lg border border-[#d4a44c]/25 bg-[#d4a44c]/10 px-2.5 py-1.5 text-xs font-medium text-[#e8b54a] transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
-      aria-label={isTranslated ? `Show original (English)` : `Translate to ${config.name}`}
-      title={isTranslated ? 'Show original' : `Translate to ${config.name}`}
+      aria-label={isTranslated ? t('common.buttons.showOriginal', 'Show original') : `${t('common.buttons.translate', 'Translate')} → ${config.name}`}
+      title={isTranslated ? t('common.buttons.showOriginal', 'Show original') : `${t('common.buttons.translate', 'Translate')} → ${config.name}`}
     >
       {/* Translate Icon */}
       {!error && (
@@ -125,18 +125,18 @@ export function TranslateButton({ text, onTranslate, className = '' }: Translate
 
       <span>
         {isTranslating
-          ? 'Translating...'
+          ? t('common.status.translating', 'Translating...')
           : error
-            ? 'Already in EN'
+            ? t('common.status.alreadyInLanguage', 'Already in this language')
             : isTranslated
-              ? 'Original'
-              : 'Translate'}
+              ? t('common.buttons.original', 'Original')
+              : t('common.buttons.translate', 'Translate')}
       </span>
 
       {/* Tooltip showing target language */}
       {!isTranslating && !error && language !== 'en' && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[#d4a44c]/90 px-2 py-1 text-[10px] font-semibold text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-          {isTranslated ? 'Show English' : `Translate to ${config.nativeName}`}
+          {isTranslated ? t('common.buttons.showOriginal', 'Show original') : `${t('common.buttons.translate', 'Translate')} → ${config.nativeName}`}
         </div>
       )}
     </button>

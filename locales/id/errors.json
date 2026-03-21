@@ -1,0 +1,39 @@
+{
+  "errors": {
+    "general": "Terjadi kesalahan. Silakan coba lagi.",
+    "network": "Kesalahan jaringan. Silakan periksa koneksi Anda.",
+    "notFound": "Halaman tidak ditemukan",
+    "unauthorized": "Anda tidak berwenang mengakses halaman ini.",
+    "serverError": "Kesalahan server. Silakan coba lagi nanti.",
+    "validation": {
+      "required": "Kolom ini wajib diisi",
+      "email": "Silakan masukkan alamat email yang valid",
+      "minLength": "Panjang minimum adalah {{min}} karakter",
+      "maxLength": "Panjang maksimum adalah {{max}} karakter"
+    }
+  },
+  "notifications": {
+    "success": {
+      "saved": "Berhasil disimpan",
+      "updated": "Berhasil diperbarui",
+      "deleted": "Berhasil dihapus",
+      "sent": "Berhasil dikirim"
+    },
+    "info": {
+      "processing": "Memproses permintaan Anda...",
+      "loading": "Memuat...",
+      "syncing": "Menyinkronkan..."
+    },
+    "warning": {
+      "unsavedChanges": "Anda memiliki perubahan yang belum disimpan",
+      "confirmDelete": "Apakah Anda yakin ingin menghapus ini?",
+      "confirmAction": "Apakah Anda yakin ingin melanjutkan?"
+    }
+  },
+  "connection": {
+    "offline": "Anda sedang offline",
+    "reconnecting": "Menghubungkan kembali...",
+    "connected": "Koneksi dipulihkan",
+    "failed": "Koneksi gagal. Silakan coba lagi."
+  }
+}

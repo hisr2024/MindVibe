@@ -1,0 +1,78 @@
+{
+  "mainNav": {
+    "home": "홈",
+    "dashboard": "대시보드",
+    "features": "기능",
+    "about": "소개",
+    "contact": "연락처",
+    "pricing": "구독",
+    "profile": "프로필",
+    "settings": "설정",
+    "account": "계정 접근",
+    "theme": "테마",
+    "introduction": "소개"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "관계 나침반",
+    "sacredReflections": "신성한 성찰",
+    "karmaFootprint": "Karma 발자국",
+    "karmicTree": "Karma의 나무",
+    "emotionalReset": "감정 리셋",
+    "deepInsights": "깊은 통찰",
+    "wisdomRooms": "지혜의 방",
+    "wisdomJourneys": "여정",
+    "companion": "동반자"
+  },
+  "actions": {
+    "openChat": "채팅 열기",
+    "startCheckin": "체크인 시작",
+    "instantGuidance": "즉각적인 안내",
+    "spotYourState": "내 상태 확인",
+    "menu": "메뉴",
+    "toggleMenu": "탐색 메뉴 전환"
+  },
+  "mobileNav": {
+    "chat": "채팅",
+    "pause": "멈춤",
+    "journal": "신성한 성찰"
+  },
+  "footer": {
+    "allRightsReserved": "모든 권리 보유",
+    "privacy": "개인정보처리방침",
+    "terms": "이용약관",
+    "support": "지원",
+    "explore": "탐색",
+    "safety": "안전",
+    "description": "평온함을 위해 설계된, 프라이버시 우선 영적 웰빙 지원. WCAG 접근성, 암호화, 부드러운 경험에 초점을 맞춰 구축되었습니다.",
+    "emailUs": "이메일 보내기",
+    "encryptedJournals": "암호화된 일기",
+    "noTracking": "추적 광고 없음"
+  },
+  "pathway": {
+    "pause": "멈춤",
+    "understand": "이해",
+    "converse": "대화",
+    "apply": "적용",
+    "train": "훈련",
+    "you_are_here": "현재 위치",
+    "nav_label": "치유의 여정"
+  },
+  "next_step": {
+    "explore_ardha": "Ardha에서 탐색 →",
+    "continue_kiaan": "KIAAN과 계속 →",
+    "stabilize_viyoga": "Viyoga로 안정화 →",
+    "enter_journey": "여정 시작 →",
+    "helper": "대화를 바탕으로, 이것이 도움이 될 수 있습니다"
+  },
+  "tools": {
+    "releaseAttachment": "집착 놓기",
+    "reframeThoughts": "생각 재구성",
+    "kiaanChat": "KIAAN 채팅",
+    "talkItThrough": "대화로 풀기",
+    "relationalClarity": "관계의 명확함",
+    "quickAccess": "빠른 접근"
+  }
+}

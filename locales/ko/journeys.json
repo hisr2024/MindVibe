@@ -1,0 +1,83 @@
+{
+  "_template_variables_note": "This file uses i18next template variables: {{current}}, {{total}}, {{day}}, {{title}}. Any rename or removal of these variables will break the UI. Ensure all referenced variables are passed by the consuming components (JourneyCard, JourneyStep, JourneyComplete).",
+  "title": "지혜의 여정",
+  "subtitle": "여섯 가지 내면의 성향(Sad-Ripu)의 지배를 느슨하게 하여 내면 세계를 변화시키세요. 내면의 평화로 가는 길을 시작하기 위해 하나 이상의 여정을 선택하세요.",
+  "featured": "추천 여정",
+  "all": "모든 여정",
+  "active": "활성 여정",
+  "empty": {
+    "title": "이용 가능한 여정 없음",
+    "description": "곧 새로운 지혜의 여정이 올라올 예정입니다."
+  },
+  "trial": {
+    "title": "무료 체험",
+    "description": "1개의 여정을 3일간 무료로 체험하세요! 변화를 경험하세요.",
+    "upgrade": "전체 접근을 위해 업그레이드"
+  },
+  "card": {
+    "start": "여정 시작",
+    "continue": "여정 계속",
+    "locked": "이 여정을 시작하려면 활성 여정을 완료하거나 일시 중지하세요",
+    "free": "무료",
+    "featured": "추천",
+    "inProgress": "진행 중",
+    "day": "{{total}}일 중 {{current}}일차"
+  },
+  "step": {
+    "title": "오늘의 여정 단계",
+    "backToJourneys": "여정으로 돌아가기",
+    "complete": "{{day}}일차 완료",
+    "completing": "완료 중...",
+    "completed": {
+      "title": "{{day}}일차 완료!",
+      "message": "잘 하셨습니다! 내일 다음 단계로 돌아오세요.",
+      "viewAll": "모든 여정 보기"
+    },
+    "journeyComplete": {
+      "title": "여정 완료!",
+      "message": "{{title}} 완료를 축하합니다! 내면의 평화를 향한 의미 있는 한 걸음을 내딛었습니다.",
+      "startAnother": "다른 여정 시작"
+    },
+    "day14": {
+      "title": "수련은 계속됩니다",
+      "body": "14일은 시작이지 끝이 아닙니다. 수련한 것을 일상의 순간에 가져가세요 — 여기서부터 더 깊어집니다.",
+      "linkTrigger": "오늘의 트리거 다루기",
+      "linkPractice": "일일 마이크로 수련"
+    }
+  },
+  "sections": {
+    "teaching": "오늘의 가르침",
+    "reflection": "가이드 성찰",
+    "practice": "수련",
+    "commitment": "오늘의 마이크로 다짐",
+    "microPractice": "오늘의 마이크로 수련",
+    "markPracticed": "수련 완료 표시"
+  },
+  "checkIn": {
+    "label": "나의 성찰 (선택 사항)",
+    "placeholder": "생각, 통찰, 또는 감정을 적어보세요..."
+  },
+  "difficulty": {
+    "1": "입문",
+    "2": "쉬움",
+    "3": "보통",
+    "4": "도전적",
+    "5": "고급"
+  },
+  "enemies": {
+    "kama": "욕망 (Kama)",
+    "krodha": "분노 (Krodha)",
+    "lobha": "탐욕 (Lobha)",
+    "moha": "집착 (Moha)",
+    "mada": "에고 (Mada)",
+    "matsarya": "질투 (Matsarya)",
+    "mixed": "통합 여정",
+    "general": "일반 지혜"
+  },
+  "errors": {
+    "loadFailed": "여정을 불러오지 못했습니다. 다시 시도해 주세요.",
+    "startFailed": "여정을 시작하지 못했습니다. 다시 시도해 주세요.",
+    "completeFailed": "단계를 완료하지 못했습니다. 다시 시도해 주세요.",
+    "networkError": "네트워크 오류입니다. 연결을 확인해 주세요."
+  }
+}

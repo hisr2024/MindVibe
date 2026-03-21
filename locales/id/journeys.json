@@ -1,0 +1,83 @@
+{
+  "_template_variables_note": "This file uses i18next template variables: {{current}}, {{total}}, {{day}}, {{title}}. Any rename or removal of these variables will break the UI. Ensure all referenced variables are passed by the consuming components (JourneyCard, JourneyStep, JourneyComplete).",
+  "title": "Perjalanan Kebijaksanaan",
+  "subtitle": "Ubah dunia batin Anda dengan melonggarkan cengkeraman enam kecenderungan batin (Sad-Ripu). Pilih satu atau lebih perjalanan untuk memulai jalan menuju kedamaian batin.",
+  "featured": "Perjalanan Unggulan",
+  "all": "Semua Perjalanan",
+  "active": "Perjalanan Aktif Anda",
+  "empty": {
+    "title": "Tidak Ada Perjalanan Tersedia",
+    "description": "Periksa kembali segera untuk perjalanan kebijaksanaan baru."
+  },
+  "trial": {
+    "title": "Akses Gratis",
+    "description": "Coba 1 perjalanan selama 3 hari gratis! Rasakan transformasinya.",
+    "upgrade": "Tingkatkan untuk Akses Penuh"
+  },
+  "card": {
+    "start": "Mulai Perjalanan",
+    "continue": "Lanjutkan Perjalanan",
+    "locked": "Selesaikan atau jeda perjalanan aktif untuk memulai yang ini",
+    "free": "Gratis",
+    "featured": "Unggulan",
+    "inProgress": "Sedang Berlangsung",
+    "day": "Hari {{current}} dari {{total}}"
+  },
+  "step": {
+    "title": "Langkah Perjalanan Hari Ini",
+    "backToJourneys": "Kembali ke Perjalanan",
+    "complete": "Selesaikan Hari {{day}}",
+    "completing": "Menyelesaikan...",
+    "completed": {
+      "title": "Hari {{day}} Selesai!",
+      "message": "Kerja bagus! Kembali besok untuk langkah berikutnya.",
+      "viewAll": "Lihat Semua Perjalanan"
+    },
+    "journeyComplete": {
+      "title": "Perjalanan Selesai!",
+      "message": "Selamat telah menyelesaikan {{title}}! Anda telah mengambil langkah bermakna menuju kedamaian batin.",
+      "startAnother": "Mulai Perjalanan Lain"
+    },
+    "day14": {
+      "title": "Praktik berlanjut",
+      "body": "14 hari ini adalah awal, bukan akhir. Bawa apa yang telah Anda praktikkan ke dalam momen sehari-hari — pekerjaan ini semakin dalam dari sini.",
+      "linkTrigger": "Tangani pemicu hari ini",
+      "linkPractice": "Mikro-praktik harian"
+    }
+  },
+  "sections": {
+    "teaching": "Ajaran Hari Ini",
+    "reflection": "Refleksi Terpandu",
+    "practice": "Praktik",
+    "commitment": "Komitmen Mikro Hari Ini",
+    "microPractice": "Mikro-praktik hari ini",
+    "markPracticed": "Tandai sudah dipraktikkan"
+  },
+  "checkIn": {
+    "label": "Refleksi Anda (opsional)",
+    "placeholder": "Tulis pikiran, wawasan, atau perasaan Anda..."
+  },
+  "difficulty": {
+    "1": "Pemula",
+    "2": "Mudah",
+    "3": "Sedang",
+    "4": "Menantang",
+    "5": "Lanjutan"
+  },
+  "enemies": {
+    "kama": "Nafsu (Kama)",
+    "krodha": "Kemarahan (Krodha)",
+    "lobha": "Keserakahan (Lobha)",
+    "moha": "Keterikatan (Moha)",
+    "mada": "Ego (Mada)",
+    "matsarya": "Iri Hati (Matsarya)",
+    "mixed": "Perjalanan Gabungan",
+    "general": "Kebijaksanaan Umum"
+  },
+  "errors": {
+    "loadFailed": "Gagal memuat perjalanan. Silakan coba lagi.",
+    "startFailed": "Gagal memulai perjalanan. Silakan coba lagi.",
+    "completeFailed": "Gagal menyelesaikan langkah. Silakan coba lagi.",
+    "networkError": "Kesalahan jaringan. Silakan periksa koneksi Anda."
+  }
+}

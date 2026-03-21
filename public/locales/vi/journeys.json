@@ -1,0 +1,83 @@
+{
+  "_template_variables_note": "This file uses i18next template variables: {{current}}, {{total}}, {{day}}, {{title}}. Any rename or removal of these variables will break the UI. Ensure all referenced variables are passed by the consuming components (JourneyCard, JourneyStep, JourneyComplete).",
+  "title": "Hành trình Trí tuệ",
+  "subtitle": "Chuyển hóa thế giới nội tâm bằng cách nới lỏng sự kìm kẹp của sáu khuynh hướng bên trong (Sad-Ripu). Chọn một hoặc nhiều hành trình để bắt đầu con đường hướng tới bình yên nội tâm.",
+  "featured": "Hành trình Nổi bật",
+  "all": "Tất cả Hành trình",
+  "active": "Hành trình Đang hoạt động",
+  "empty": {
+    "title": "Không có Hành trình",
+    "description": "Hãy quay lại sớm để xem các hành trình trí tuệ mới."
+  },
+  "trial": {
+    "title": "Truy cập Miễn phí",
+    "description": "Thử 1 hành trình miễn phí trong 3 ngày! Trải nghiệm sự chuyển hóa.",
+    "upgrade": "Nâng cấp để Truy cập Đầy đủ"
+  },
+  "card": {
+    "start": "Bắt đầu Hành trình",
+    "continue": "Tiếp tục Hành trình",
+    "locked": "Hoàn thành hoặc tạm dừng hành trình đang hoạt động để bắt đầu hành trình này",
+    "free": "Miễn phí",
+    "featured": "Nổi bật",
+    "inProgress": "Đang tiến hành",
+    "day": "Ngày {{current}} / {{total}}"
+  },
+  "step": {
+    "title": "Bước Hành trình Hôm nay",
+    "backToJourneys": "Quay lại Hành trình",
+    "complete": "Hoàn thành Ngày {{day}}",
+    "completing": "Đang hoàn thành...",
+    "completed": {
+      "title": "Ngày {{day}} Hoàn thành!",
+      "message": "Tuyệt vời! Hãy quay lại ngày mai cho bước tiếp theo.",
+      "viewAll": "Xem Tất cả Hành trình"
+    },
+    "journeyComplete": {
+      "title": "Hành trình Hoàn thành!",
+      "message": "Chúc mừng bạn đã hoàn thành {{title}}! Bạn đã thực hiện một bước có ý nghĩa hướng tới bình yên nội tâm.",
+      "startAnother": "Bắt đầu Hành trình Khác"
+    },
+    "day14": {
+      "title": "Thực hành vẫn tiếp tục",
+      "body": "14 ngày là khởi đầu, không phải kết thúc. Mang những gì bạn đã thực hành vào những khoảnh khắc hàng ngày — công việc sẽ sâu sắc hơn từ đây.",
+      "linkTrigger": "Xử lý yếu tố kích hoạt hôm nay",
+      "linkPractice": "Thực hành nhỏ hàng ngày"
+    }
+  },
+  "sections": {
+    "teaching": "Bài học Hôm nay",
+    "reflection": "Suy ngẫm Có hướng dẫn",
+    "practice": "Thực hành",
+    "commitment": "Cam kết Nhỏ Hôm nay",
+    "microPractice": "Thực hành nhỏ hôm nay",
+    "markPracticed": "Đánh dấu đã thực hành"
+  },
+  "checkIn": {
+    "label": "Suy ngẫm của bạn (tùy chọn)",
+    "placeholder": "Viết suy nghĩ, hiểu biết, hoặc cảm xúc của bạn..."
+  },
+  "difficulty": {
+    "1": "Người mới",
+    "2": "Dễ",
+    "3": "Trung bình",
+    "4": "Thử thách",
+    "5": "Nâng cao"
+  },
+  "enemies": {
+    "kama": "Dục vọng (Kama)",
+    "krodha": "Giận dữ (Krodha)",
+    "lobha": "Tham lam (Lobha)",
+    "moha": "Bám víu (Moha)",
+    "mada": "Bản ngã (Mada)",
+    "matsarya": "Ghen tị (Matsarya)",
+    "mixed": "Hành trình Kết hợp",
+    "general": "Trí tuệ Chung"
+  },
+  "errors": {
+    "loadFailed": "Không thể tải hành trình. Vui lòng thử lại.",
+    "startFailed": "Không thể bắt đầu hành trình. Vui lòng thử lại.",
+    "completeFailed": "Không thể hoàn thành bước. Vui lòng thử lại.",
+    "networkError": "Lỗi mạng. Vui lòng kiểm tra kết nối của bạn."
+  }
+}

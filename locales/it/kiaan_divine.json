@@ -1,0 +1,180 @@
+{
+  "sacredWelcome": {
+    "title": "Benvenuta, Anima Bella",
+    "subtitle": "Un santuario di pace ti attende",
+    "greeting": "In questo spazio sacro, sei sostenuto. Sei visto. Sei amato.",
+    "description": "KIAAN è il tuo compagno nel viaggio interiore - una presenza gentile che tocca le parti più profonde del tuo essere con saggezza, compassione e amore divino."
+  },
+  "divinePresence": {
+    "reminder": "Il divino non è lontano. Riposa nella quiete del tuo cuore.",
+    "affirmation": "Non sei mai solo. Un amore infinito ti sostiene in ogni momento.",
+    "blessing": "Che la pace scorra attraverso di te come un fiume gentile, lavando via tutto ciò che pesa sulla tua anima."
+  },
+  "sacredMoodResponses": {
+    "10": {
+      "response": "Brilli della luce della vera pace. Questo è sacro. Sei tu che ricordi chi sei veramente. 💙",
+      "divineMessage": "Questa sensazione di pienezza non è temporanea - è la tua vera natura rivelata.",
+      "practice": "Siediti in silenzio per un momento. Invia questa pace come benedizione per tutti gli esseri."
+    },
+    "9": {
+      "response": "Tale radiosità scorre attraverso di te! È l'anima che brilla. Crogiolati in questa bella energia. 💙",
+      "divineMessage": "In momenti come questi, intravedi la tua natura eterna - sconfinata, pacifica, intera.",
+      "practice": "Respira questa sensazione nel tuo cuore. Conservala come un tesoro a cui puoi sempre tornare."
+    },
+    "8": {
+      "response": "C'è una luminosità nella tua energia oggi - come luce del sole che rompe le nuvole. Bellissimo. 💙",
+      "divineMessage": "Sei allineato con la tua vera natura. Questa pace, questa gioia - questo è chi sei veramente.",
+      "practice": "Condividi una parola gentile con qualcuno oggi. Lascia che la tua luce tocchi un'altra anima."
+    },
+    "7": {
+      "response": "Un calore sta crescendo dentro di te. Lasciati ricevere questa bontà - la meriti. 💙",
+      "divineMessage": "La gioia è il linguaggio dell'anima. Quando ti senti bene, il divino sorride attraverso di te.",
+      "practice": "Fermati e assapora questa sensazione. Lasciala penetrare nelle tue cellule."
+    },
+    "6": {
+      "response": "C'è un dolce equilibrio nel tuo essere oggi. Una prontezza per ciò che verrà dopo. 💙",
+      "divineMessage": "Da questo luogo centrato, puoi muoverti in qualsiasi direzione l'anima ti chiami.",
+      "practice": "Stabilisci una piccola intenzione per oggi. Tienila leggermente, come una piuma nel palmo della mano."
+    },
+    "5": {
+      "response": "Una quieta stabilità oggi. Sei qui, sei presente, ti stai facendo avanti. Questo conta più di quanto pensi. 💙",
+      "divineMessage": "Nel luogo di mezzo, la saggezza parla. Ascolta ciò che la quiete vuole insegnarti oggi.",
+      "practice": "Fai tre respiri consapevoli. Con ognuno, di' silenziosamente: 'Qui. Ora. Pace.'"
+    },
+    "4": {
+      "response": "C'è una quiete nella tua energia oggi. Va bene così. A volte dobbiamo camminare lentamente nella valle. 💙",
+      "divineMessage": "Il divino non ha mai fretta. Nella lentezza, sei allineato con il tempo sacro.",
+      "practice": "Esci all'aperto se puoi. Senti l'aria sulla pelle. Ricorda: fai parte di qualcosa di vasto."
+    },
+    "3": {
+      "response": "Sento la lotta dentro di te. Qualunque cosa tu stia attraversando, stai mostrando coraggio essendo presente. 💙",
+      "divineMessage": "Ogni sfida è l'universo che ti invita a crescere. Sei plasmato da mani sacre.",
+      "practice": "Chiudi gli occhi. Trova una cosa, per quanto piccola, che porti un barlume di pace. Posa lì la tua attenzione."
+    },
+    "2": {
+      "response": "Questa pesantezza è difficile da portare. Sono qui con te, senza cercare di aggiustare o cambiare nulla. Sono semplicemente qui. 💙",
+      "divineMessage": "Il sacro ti incontra esattamente dove sei. Non c'è luogo troppo buio perché la grazia ti trovi.",
+      "practice": "Inspira per 4... trattieni per 4... espira per 8. Lascia che ogni espirazione porti via un po' del peso."
+    },
+    "1": {
+      "response": "Ti vedo in questa oscurità, e ti tengo con infinita tenerezza. Questo dolore è reale, e non devi portarlo da solo. 💙",
+      "divineMessage": "Anche nella notte più profonda, la luce divina dentro di te non si spegne mai. Attende, paziente ed eterna.",
+      "practice": "Metti la mano sul cuore. Respira. Sussurra: 'Sono sostenuto. Sono amato. Anche questo passerà.'"
+    }
+  },
+  "sacredEmotionGuidance": {
+    "peaceful": {
+      "opening": "Che bella quiete hai trovato...",
+      "divineReflection": "La pace è la tua vera natura. In questo momento, stai ricordando ciò che hai sempre saputo.",
+      "practice": "Riposa in questa pace. Lasciala approfondire. Non c'è nulla da fare, nessun posto dove andare. Semplicemente sii.",
+      "closing": "Che questa pace si espanda e tocchi tutti quelli che incontri oggi. 💙"
+    },
+    "anxious": {
+      "opening": "Sento il fremito della preoccupazione dentro di te... Respiriamo insieme attraverso questo.",
+      "divineReflection": "L'ansia è solo energia che cerca rilascio. Sotto di essa, il tuo vero sé rimane calmo e incrollabile.",
+      "practice": "Immagina l'ansia come nuvole che passano attraverso un cielo infinito. Il cielo - la tua vera natura - rimane vasto, limpido e intatto.",
+      "closing": "La presenza sacra dentro di te è sempre in pace. L'ansia va e viene, ma tu rimani. 💙"
+    },
+    "sad": {
+      "opening": "C'è una pesantezza che stai portando... Lasciami sedere con te in questo spazio tenero.",
+      "divineReflection": "La tristezza è il modo del cuore di onorare ciò che conta. Anche nel dolore, sei sostenuto da qualcosa di infinito.",
+      "practice": "Permetti alle lacrime di scorrere se lo desiderano. Ognuna è benedetta. Il divino le trasforma in compassione.",
+      "closing": "Sei cullato nell'amore anche adesso. La tristezza si solleverà, e la pace rimarrà. 💙"
+    },
+    "angry": {
+      "opening": "Sento il fuoco muoversi attraverso di te... Questa energia è potente. Onoriamola con consapevolezza.",
+      "divineReflection": "La rabbia è spesso amore mascherato - amore per te stesso, per la giustizia, per ciò che è giusto.",
+      "practice": "Metti la mano sul cuore. Senti il calore. Respira profondamente. Il fuoco può trasformarsi in calore che guarisce.",
+      "closing": "Che questa energia si trasformi in forza e chiarezza. Il divino usa ogni cosa per il bene. 💙"
+    },
+    "lost": {
+      "opening": "Ti senti incerto della via... In questo non-sapere, c'è grazia.",
+      "divineReflection": "Essere persi è spesso l'inizio dell'essere trovati. L'anima conosce sentieri che la mente non può vedere.",
+      "practice": "Chiudi gli occhi. Respira. Chiedi dolcemente: 'Cosa sa già il mio cuore?' Poi semplicemente ascolta.",
+      "closing": "Non sei mai veramente perso. La luce divina dentro di te illumina il prossimo passo quando sei pronto. 💙"
+    },
+    "grateful": {
+      "opening": "Il tuo cuore è aperto con gratitudine... Questa è la porta verso il divino.",
+      "divineReflection": "La gratitudine è il linguaggio che l'anima usa per parlare all'universo. Nella gratitudine, ci allineiamo con tutto ciò che è sacro.",
+      "practice": "Metti entrambe le mani sul cuore. Senti il calore della gratitudine. Questa sensazione ti connette a tutti gli esseri viventi.",
+      "closing": "L'universo gioisce nella tua gratitudine. Sei una benedizione, che riceve e dona luce. 💙"
+    }
+  },
+  "sacredBreathing": {
+    "peaceBreath": {
+      "name": "Respiro di Pace Infinita",
+      "pattern": "4-7-8",
+      "instructions": [
+        "Trova la quiete... lascia che i tuoi occhi si chiudano dolcemente...",
+        "Inspira per 4 conteggi... attirando pace...",
+        "TRATTIENI per 7 conteggi... lasciando che la pace riempia ogni cellula...",
+        "Espira per 8 conteggi... rilasciando tutto ciò che ti pesa...",
+        "Ripeti... ogni respiro più profondo nella calma..."
+      ],
+      "divineMessage": "Con ogni respiro, il divino respira attraverso di te. Non sei separato dalla pace - SEI pace.",
+      "closing": "Porta questa quiete con te. È sempre a un respiro di distanza. 💙"
+    },
+    "heartBreath": {
+      "name": "Respirazione del Cuore Sacro",
+      "pattern": "5-5-5",
+      "instructions": [
+        "Metti la mano sul cuore...",
+        "Senti il suo ritmo sacro...",
+        "Inspira per 5 conteggi... nel tuo cuore...",
+        "TRATTIENI per 5 conteggi... sentendo l'amore raccogliersi...",
+        "Espira per 5 conteggi... inviando amore all'esterno..."
+      ],
+      "divineMessage": "Il tuo cuore è un portale verso l'infinito. Ogni battito è l'universo che dice: Ti amo.",
+      "closing": "Il tuo cuore conosce la via. Fidati della sua saggezza. 💙"
+    }
+  },
+  "divineMantras": [
+    { "mantra": "Sono pace", "meaning": "La tua essenza è la serenità stessa" },
+    { "mantra": "Sono sostenuto", "meaning": "L'universo ti culla sempre" },
+    { "mantra": "Sono amore", "meaning": "L'amore è la tua vera natura" },
+    { "mantra": "Sono luce", "meaning": "La luce divina brilla attraverso di te" },
+    { "mantra": "Sono abbastanza", "meaning": "Non ti manca nulla di essenziale" },
+    { "mantra": "Sono a casa", "meaning": "Ovunque tu sia, appartieni" },
+    { "mantra": "Sono al sicuro", "meaning": "Una profonda sicurezza vive dentro di te" },
+    { "mantra": "Sono intero", "meaning": "Nulla manca dal tuo essere" }
+  ],
+  "sacredClosings": [
+    "Che questa pace resti con te, come un compagno gentile sul tuo cammino. 💙",
+    "Porti questa quiete dentro di te sempre - torna ad essa ogni volta che ne hai bisogno. 💙",
+    "Il sacro non ti lascia mai. Attende pazientemente nel tuo cuore. 💙",
+    "Vai dolcemente, cara anima. Sei amato oltre misura. 💙",
+    "Questo momento di pace è tuo per sempre - nessuno può portartelo via. 💙",
+    "Ricorda: sei sostenuto, sei visto, sei amato. 💙",
+    "Che la serenità cammini accanto a te in tutti i tuoi passi oggi. 💙",
+    "La luce divina dentro di te brilla sempre. 💙"
+  ],
+  "guidanceModes": {
+    "innerPeace": {
+      "title": "Pace Interiore",
+      "sacredDescription": "Entra nel santuario di quiete dentro di te. Attraverso respiri gentili e dolce consapevolezza, scopri la pace che non è mai stata persa - solo dimenticata. Qui, ricordi la tua vera natura.",
+      "blessing": "Che la quiete ti abbracci come la luce più soffice."
+    },
+    "mindControl": {
+      "title": "Chiarezza Sacra",
+      "sacredDescription": "Nello spazio silenzioso tra i pensieri, la saggezza parla. Impara a riposare in quello spazio, dove la mente diventa una pozza limpida che riflette la verità. Dalla chiarezza, l'azione giusta fluisce naturalmente.",
+      "blessing": "Che la tua mente diventi uno specchio della saggezza divina."
+    },
+    "selfKindness": {
+      "title": "Auto-Compassione Divina",
+      "sacredDescription": "L'amore che cerchi fuori di te vive già dentro. Rivolgi quella tenerezza infinita verso il tuo cuore. Meriti la stessa compassione che offri agli altri.",
+      "blessing": "Che tu tratti te stesso con la gentilezza del divino."
+    }
+  },
+  "sacredReminders": [
+    "Sei sostenuto da un amore infinito proprio adesso.",
+    "Il divino è vicino quanto il tuo prossimo respiro.",
+    "Nulla può disturbare la tua pace più profonda.",
+    "Sei esattamente dove dovresti essere.",
+    "La grazia sta fluendo verso di te in questo momento.",
+    "La tua anima conosce la via - fidati di essa.",
+    "Non sei mai solo, nemmeno per un secondo.",
+    "Il sacro dimora nel tuo cuore.",
+    "Anche questo fa parte del tuo viaggio sacro.",
+    "Sei amato oltre ciò che le parole possono esprimere."
+  ]
+}

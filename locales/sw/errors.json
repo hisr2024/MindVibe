@@ -1,0 +1,39 @@
+{
+  "errors": {
+    "general": "Kitu kimeenda vibaya. Tafadhali jaribu tena.",
+    "network": "Hitilafu ya mtandao. Tafadhali angalia muunganisho wako.",
+    "notFound": "Ukurasa haujapatikana",
+    "unauthorized": "Huna ruhusa ya kufikia ukurasa huu.",
+    "serverError": "Hitilafu ya seva. Tafadhali jaribu tena baadaye.",
+    "validation": {
+      "required": "Sehemu hii inahitajika",
+      "email": "Tafadhali weka anwani sahihi ya barua pepe",
+      "minLength": "Urefu wa chini ni herufi {min}",
+      "maxLength": "Urefu wa juu ni herufi {max}"
+    }
+  },
+  "notifications": {
+    "success": {
+      "saved": "Imehifadhiwa kwa mafanikio",
+      "updated": "Imesasishwa kwa mafanikio",
+      "deleted": "Imefutwa kwa mafanikio",
+      "sent": "Imetumwa kwa mafanikio"
+    },
+    "info": {
+      "processing": "Inashughulikia ombi lako...",
+      "loading": "Inapakia...",
+      "syncing": "Inasawazisha..."
+    },
+    "warning": {
+      "unsavedChanges": "Una mabadiliko ambayo hayajahifadhiwa",
+      "confirmDelete": "Una uhakika unataka kufuta hii?",
+      "confirmAction": "Una uhakika unataka kuendelea?"
+    }
+  },
+  "connection": {
+    "offline": "Huna muunganisho kwa sasa",
+    "reconnecting": "Inaunganisha tena...",
+    "connected": "Muunganisho umerejeshwa",
+    "failed": "Muunganisho umeshindwa. Tafadhali jaribu tena."
+  }
+}
