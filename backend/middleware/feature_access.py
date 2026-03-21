@@ -49,18 +49,26 @@ DEFAULT_DEVELOPER_EMAILS: set[str] = {
 
 # Additional developer emails from environment variable
 # Format: comma-separated list of emails (e.g., DEVELOPER_EMAILS=dev1@example.com,dev2@example.com)
+_raw_env_emails = os.getenv("DEVELOPER_EMAILS", "")
 _env_developer_emails = {
     email.strip().lower()
-    for email in os.getenv("DEVELOPER_EMAILS", "").split(",")
+    for email in _raw_env_emails.split(",")
     if email.strip()
 }
 
 # Combined developer emails (hardcoded + environment variable)
 DEVELOPER_EMAILS = DEFAULT_DEVELOPER_EMAILS | _env_developer_emails
 
-# Log count of configured developer emails at startup (never log the emails themselves)
-if DEVELOPER_EMAILS:
-    logger.info(f"[Developer Access] {len(DEVELOPER_EMAILS)} developer email(s) configured")
+# Log developer email configuration at startup for diagnostics
+# Never log the actual email addresses — only counts and sources
+if _env_developer_emails:
+    logger.info(
+        f"[Developer Access] {len(_env_developer_emails)} email(s) loaded from DEVELOPER_EMAILS env var"
+    )
+logger.info(
+    f"[Developer Access] Total: {len(DEVELOPER_EMAILS)} developer email(s) configured "
+    f"({len(DEFAULT_DEVELOPER_EMAILS)} hardcoded + {len(_env_developer_emails)} from env)"
+)
 
 
 async def is_developer(db: AsyncSession, user_id: str) -> bool:
