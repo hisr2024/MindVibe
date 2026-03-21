@@ -519,7 +519,11 @@ async def synthesize_sarvam_tts(
 
                         logger.warning(f"Sarvam TTS: Empty audio from model {model}")
                     elif response.status_code == 429:
-                        logger.warning("Sarvam TTS: Rate limited, falling through to next provider")
+                        retry_after = response.headers.get("Retry-After")
+                        logger.warning(
+                            "Sarvam TTS rate limited (429), backing off"
+                            + (f" (Retry-After: {retry_after}s)" if retry_after else "")
+                        )
                         return None
                     elif response.status_code in (401, 403):
                         logger.error("Sarvam TTS: Authentication failed, check SARVAM_API_KEY")

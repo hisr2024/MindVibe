@@ -13,14 +13,7 @@ import OpenAI from 'openai'
 import { generateLocalResponse } from '@/lib/kiaan-friend-engine'
 import { buildVerseContext } from '@/lib/wisdom-core'
 import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
-
-// ─── Language Names (for multilingual Tier 2 responses) ─────────────────
-const LANGUAGE_NAMES: Record<string, string> = {
-  en: 'English', hi: 'Hindi', ta: 'Tamil', te: 'Telugu', bn: 'Bengali',
-  mr: 'Marathi', gu: 'Gujarati', kn: 'Kannada', ml: 'Malayalam', pa: 'Punjabi',
-  sa: 'Sanskrit', es: 'Spanish', fr: 'French', de: 'German', pt: 'Portuguese',
-  ja: 'Japanese', 'zh-CN': 'Chinese (Simplified)',
-}
+import { LANGUAGE_NAMES } from '@/lib/constants/languages'
 
 // ─── Mood Detection ──────────────────────────────────────────────────────
 const MOOD_KEYWORDS: Record<string, string[]> = {

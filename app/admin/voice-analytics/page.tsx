@@ -70,26 +70,9 @@ interface EnhancementStats {
   completion_rate: number
 }
 
+import { LANGUAGE_NAMES } from '@/lib/constants/languages'
+
 const COLORS = ['#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6']
-const LANGUAGE_NAMES: Record<string, string> = {
-  en: 'English',
-  hi: 'Hindi',
-  ta: 'Tamil',
-  te: 'Telugu',
-  bn: 'Bengali',
-  mr: 'Marathi',
-  gu: 'Gujarati',
-  kn: 'Kannada',
-  ml: 'Malayalam',
-  pa: 'Punjabi',
-  sa: 'Sanskrit',
-  es: 'Spanish',
-  fr: 'French',
-  de: 'German',
-  pt: 'Portuguese',
-  ja: 'Japanese',
-  zh: 'Chinese',
-}
 
 export default function AdminVoiceAnalyticsPage() {
   const [overview, setOverview] = useState<VoiceOverview | null>(null)

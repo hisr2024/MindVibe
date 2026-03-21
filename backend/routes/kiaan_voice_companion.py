@@ -20,13 +20,14 @@ All existing ecosystem routes/services remain untouched.
 
 import asyncio
 import datetime
+import hashlib
 import html
 import logging
 import os
 import random
 import re
+import threading
 import time
-import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import Response, StreamingResponse
@@ -37,6 +38,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.deps import get_current_user, get_db
 from backend.middleware.rate_limiter import limiter
 from backend.middleware.feature_access import is_developer
+from backend.services.language_registry import get_language_name
 from backend.services.subscription_service import (
     check_feature_access,
     check_kiaan_quota,
@@ -88,27 +90,32 @@ def _invalidate_profile_cache(user_id: str) -> None:
 
 
 # ─── In-Memory Text Response Cache (pattern-based, not exact match) ───────
-import hashlib
 
 _response_cache: dict[str, tuple[str, float]] = {}
 _RESPONSE_CACHE_TTL = 3600  # 1 hour
 _RESPONSE_CACHE_MAX_SIZE = 500
+_response_cache_lock = threading.Lock()
 
 
-def _response_cache_key(mood: str, phase: str, message: str) -> str:
-    """Cache key = hash of (mood, phase, normalized message).
+def _response_cache_key(
+    mood: str, phase: str, message: str, language: str = "en",
+) -> str:
+    """Cache key = hash of (mood, phase, language, normalized message).
 
     We normalize the message to lowercase and strip whitespace so that
     "I feel anxious" and "i feel anxious " hit the same entry.
+    Language is included to prevent cross-language cache collisions.
     """
     normalized = message.strip().lower()
-    raw = f"{mood}:{phase}:{normalized}"
+    raw = f"{mood}:{phase}:{language}:{normalized}"
     return hashlib.sha256(raw.encode()).hexdigest()[:32]
 
 
-def _get_cached_response(mood: str, phase: str, message: str) -> str | None:
+def _get_cached_response(
+    mood: str, phase: str, message: str, language: str = "en",
+) -> str | None:
     """Check for a cached text response. Returns None on miss."""
-    key = _response_cache_key(mood, phase, message)
+    key = _response_cache_key(mood, phase, message, language)
     cached = _response_cache.get(key)
     if cached and (time.monotonic() - cached[1]) < _RESPONSE_CACHE_TTL:
         logger.debug("VoiceCompanion: Response cache HIT for key=%s", key[:8])
@@ -119,18 +126,20 @@ def _get_cached_response(mood: str, phase: str, message: str) -> str | None:
 
 
 def _set_cached_response(
-    mood: str, phase: str, message: str, response: str, memories: list[str]
+    mood: str, phase: str, message: str, response: str,
+    memories: list[str], language: str = "en",
 ) -> None:
     """Store a response in cache. Skip if user has personalized memories."""
     if memories:
         return  # Don't cache personalized responses
-    if len(_response_cache) >= _RESPONSE_CACHE_MAX_SIZE:
-        # Evict oldest 20% when full
-        entries = sorted(_response_cache.items(), key=lambda x: x[1][1])
-        for k, _ in entries[: _RESPONSE_CACHE_MAX_SIZE // 5]:
-            _response_cache.pop(k, None)
-    key = _response_cache_key(mood, phase, message)
-    _response_cache[key] = (response, time.monotonic())
+    with _response_cache_lock:
+        if len(_response_cache) >= _RESPONSE_CACHE_MAX_SIZE:
+            # Evict oldest 20% when full
+            entries = sorted(_response_cache.items(), key=lambda x: x[1][1])
+            for k, _ in entries[: _RESPONSE_CACHE_MAX_SIZE // 5]:
+                _response_cache.pop(k, None)
+        key = _response_cache_key(mood, phase, message, language)
+        _response_cache[key] = (response, time.monotonic())
 
 
 # ─── Divine Friend System Prompt ──────────────────────────────────────────
@@ -197,7 +206,7 @@ THEIR PREFERENCES:
 
     # Wisdom injection based on phase
     wisdom_block = ""
-    if wisdom_text:
+    if wisdom_text and str(wisdom_text).strip():
         if phase in ("guide", "empower"):
             wisdom_block = f"""
 WISDOM TO WEAVE IN (deliver as YOUR life experience, NEVER as teaching):
@@ -239,7 +248,14 @@ Don't state this directly. Let it shape HOW you reflect what they're feeling."""
 
     lang_instruction = ""
     if language and language != "en":
-        lang_instruction = f"\nLANGUAGE: Respond in {language}. Keep the same warmth and conversational tone."
+        lang_name = get_language_name(language, include_native=True)
+        lang_instruction = (
+            f"\nLANGUAGE: You MUST respond ENTIRELY in {lang_name}. "
+            f"Every word of your response must be in {lang_name}. "
+            f"Use natural {lang_name} expressions and idioms. "
+            f"Do NOT mix in English unless the user uses English words. "
+            f"Keep the same warmth and conversational tone."
+        )
 
     return f"""You are KIAAN — the user's DIVINE FRIEND. Not a chatbot, not a therapist, not an assistant.
 
@@ -1053,14 +1069,19 @@ async def send_voice_companion_message(
     try:
         from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
         dynamic_corpus = get_dynamic_wisdom_corpus()
-        await dynamic_corpus.record_wisdom_outcome(
-            db=db,
-            user_id=current_user,
-            session_id=session.id,
-            mood_after=mood,
-            user_response=body.message,
-            session_continued=True,
+        await asyncio.wait_for(
+            dynamic_corpus.record_wisdom_outcome(
+                db=db,
+                user_id=current_user,
+                session_id=session.id,
+                mood_after=mood,
+                user_response=body.message,
+                session_continued=True,
+            ),
+            timeout=5.0,
         )
+    except asyncio.TimeoutError:
+        logger.warning("VoiceCompanion: Wisdom outcome recording timed out (5s)")
     except Exception as e:
         logger.debug("Non-critical learning loop error: %s", e)
 
@@ -1105,13 +1126,16 @@ async def send_voice_companion_message(
             try:
                 from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
                 dynamic_corpus = get_dynamic_wisdom_corpus()
-                dynamic_verse = await dynamic_corpus.get_effectiveness_weighted_verse(
-                    db=db,
-                    mood=mood,
-                    user_message=body.message,
-                    phase=phase,
-                    user_id=current_user,
-                    mood_intensity=mood_intensity,
+                dynamic_verse = await asyncio.wait_for(
+                    dynamic_corpus.get_effectiveness_weighted_verse(
+                        db=db,
+                        mood=mood,
+                        user_message=body.message,
+                        phase=phase,
+                        user_id=current_user,
+                        mood_intensity=mood_intensity,
+                    ),
+                    timeout=5.0,
                 )
                 if dynamic_verse:
                     wisdom_text = dynamic_verse.get("wisdom", "")
@@ -1122,6 +1146,8 @@ async def send_voice_companion_message(
                         f"(effectiveness={dynamic_verse.get('effectiveness_score', 0):.2f}) "
                         f"for mood={mood}"
                     )
+            except asyncio.TimeoutError:
+                logger.warning("VoiceCompanion: Dynamic wisdom lookup timed out (5s)")
             except Exception as e:
                 logger.debug(f"VoiceCompanion: Dynamic wisdom lookup skipped: {e}")
 
@@ -1146,7 +1172,7 @@ async def send_voice_companion_message(
     # RESPONSE CACHE: Check before calling OpenAI (~1-3s saved on hit)
     # Only cache non-personalized responses (no memories).
     # ══════════════════════════════════════════════════════════════════════
-    _cached = _get_cached_response(mood, phase, body.message)
+    _cached = _get_cached_response(mood, phase, body.message, body.language)
     if _cached:
         response_text = _cached
         ai_tier = "cache"
@@ -1195,7 +1221,7 @@ async def send_voice_companion_message(
             wisdom_used = {"principle": wisdom_text[:100], "verse_ref": wisdom_verse_ref}
         logger.info(f"VoiceCompanion: TIER 1 (openai_direct) succeeded for user {current_user}")
         # Store in cache for future similar requests
-        _set_cached_response(mood, phase, body.message, response_text, memories)
+        _set_cached_response(mood, phase, body.message, response_text, memories, body.language)
 
     # ══════════════════════════════════════════════════════════════════════
     # TIER 2: CompanionFriendEngine with its own AsyncOpenAI client
@@ -1285,17 +1311,22 @@ async def send_voice_companion_message(
         try:
             from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
             dynamic_corpus = get_dynamic_wisdom_corpus()
-            await dynamic_corpus.record_wisdom_delivery(
-                db=db,
-                user_id=current_user,
-                session_id=session.id,
-                verse_ref=wisdom_used["verse_ref"],
-                principle=wisdom_used.get("principle"),
-                mood=mood,
-                mood_intensity=mood_intensity,
-                phase=phase,
-                theme=wisdom_theme,
+            await asyncio.wait_for(
+                dynamic_corpus.record_wisdom_delivery(
+                    db=db,
+                    user_id=current_user,
+                    session_id=session.id,
+                    verse_ref=wisdom_used["verse_ref"],
+                    principle=wisdom_used.get("principle"),
+                    mood=mood,
+                    mood_intensity=mood_intensity,
+                    phase=phase,
+                    theme=wisdom_theme,
+                ),
+                timeout=5.0,
             )
+        except asyncio.TimeoutError:
+            logger.warning("VoiceCompanion: Wisdom delivery recording timed out (5s)")
         except Exception as e:
             logger.debug(f"VoiceCompanion: Wisdom delivery recording skipped: {e}")
 
@@ -1543,12 +1574,17 @@ async def end_voice_companion_session(
             for msg in history_msgs
         ]
 
-        session_summary = await engine.summarize_session(
-            conversation_history=conversation_history,
-            initial_mood=session.initial_mood,
-            final_mood=session.final_mood,
+        session_summary = await asyncio.wait_for(
+            engine.summarize_session(
+                conversation_history=conversation_history,
+                initial_mood=session.initial_mood,
+                final_mood=session.final_mood,
+            ),
+            timeout=10.0,
         )
         session.topics_discussed = session_summary
+    except asyncio.TimeoutError:
+        logger.warning("VoiceCompanion: Session summary timed out (10s)")
     except Exception as e:
         logger.warning(f"VoiceCompanion: Session summary failed: {e}")
     finally:
@@ -1579,14 +1615,19 @@ async def end_voice_companion_session(
         try:
             from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
             dynamic_corpus = get_dynamic_wisdom_corpus()
-            await dynamic_corpus.record_wisdom_outcome(
-                db=db,
-                user_id=current_user,
-                session_id=session.id,
-                mood_after=session.final_mood,
-                user_response=None,
-                session_continued=False,
+            await asyncio.wait_for(
+                dynamic_corpus.record_wisdom_outcome(
+                    db=db,
+                    user_id=current_user,
+                    session_id=session.id,
+                    mood_after=session.final_mood,
+                    user_response=None,
+                    session_continued=False,
+                ),
+                timeout=5.0,
             )
+        except asyncio.TimeoutError:
+            logger.warning("VoiceCompanion: Final wisdom outcome recording timed out (5s)")
         except Exception as e:
             logger.debug(f"VoiceCompanion: Final wisdom outcome recording skipped: {e}")
 

@@ -424,7 +424,7 @@ export async function synthesizeVerseAudio(
 
     return null
   } catch (error) {
-    console.error('[GitaVoice] Audio synthesis failed:', error)
+    console.warn('[GitaVoice] Audio synthesis failed:', error)
     return null
   }
 }
@@ -462,7 +462,7 @@ export async function synthesizeSanskritShloka(
 
     return null
   } catch (error) {
-    console.error('[GitaVoice] Shloka synthesis failed:', error)
+    console.warn('[GitaVoice] Shloka synthesis failed:', error)
     return null
   }
 }

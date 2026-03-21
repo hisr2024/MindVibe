@@ -137,7 +137,7 @@ export function GitaVoicePlayer({
       setQueue([track], 0)
       await play(track)
     } catch (error) {
-      console.error('[GitaVoicePlayer] Play verse failed:', error)
+      console.warn('[GitaVoicePlayer] Play verse failed:', error)
     } finally {
       setIsLoadingTrack(false)
     }
@@ -159,7 +159,7 @@ export function GitaVoicePlayer({
       setQueue([track], 0)
       await play(track)
     } catch (error) {
-      console.error('[GitaVoicePlayer] Bilingual play failed:', error)
+      console.warn('[GitaVoicePlayer] Bilingual play failed:', error)
     } finally {
       setIsLoadingTrack(false)
     }
@@ -191,7 +191,7 @@ export function GitaVoicePlayer({
         await play(tracks[Math.max(0, startIndex)])
       }
     } catch (error) {
-      console.error('[GitaVoicePlayer] Play chapter failed:', error)
+      console.warn('[GitaVoicePlayer] Play chapter failed:', error)
     } finally {
       setIsLoadingChapter(false)
     }
@@ -444,7 +444,7 @@ export function DivineCollectionPlayer({ collectionKey }: DivineCollectionPlayer
         await play(tracks[0])
       }
     } catch (error) {
-      console.error('[DivineCollectionPlayer] Play failed:', error)
+      console.warn('[DivineCollectionPlayer] Play failed:', error)
     } finally {
       setIsLoading(false)
     }

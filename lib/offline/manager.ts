@@ -155,7 +155,7 @@ class OfflineManager {
       const operations = await indexedDBManager.getAll<QueuedOperation>(STORES.OPERATION_QUEUE)
       this.state.queuedOperations = operations
     } catch (error) {
-      console.error('Failed to load operation queue:', error)
+      console.warn('Failed to load operation queue:', error)
     }
   }
 
@@ -172,7 +172,7 @@ class OfflineManager {
         await indexedDBManager.put(STORES.OPERATION_QUEUE, operation)
       }
     } catch (error) {
-      console.error('Failed to save operation queue:', error)
+      console.warn('Failed to save operation queue:', error)
     }
   }
 
@@ -199,14 +199,14 @@ class OfflineManager {
         await this.executeOperation(operation)
         successfulOps.push(operation.id)
       } catch (error) {
-        console.error('Failed to sync operation:', operation, error)
+        console.warn('Failed to sync operation:', operation, error)
         
         // Increment retry count
         operation.retryCount++
         
         // Remove if max retries exceeded
         if (operation.retryCount >= this.maxRetries) {
-          console.error('Max retries exceeded for operation:', operation)
+          console.warn('Max retries exceeded for operation:', operation)
           successfulOps.push(operation.id) // Remove from queue
         }
       }
@@ -273,7 +273,7 @@ class OfflineManager {
       
       return null
     } catch (error) {
-      console.error('Failed to get offline fallback:', error)
+      console.warn('Failed to get offline fallback:', error)
       return null
     }
   }
@@ -291,7 +291,7 @@ class OfflineManager {
         ttl,
       })
     } catch (error) {
-      console.error('Failed to cache response:', error)
+      console.warn('Failed to cache response:', error)
     }
   }
 
@@ -303,7 +303,7 @@ class OfflineManager {
       await indexedDBManager.cleanupExpired(STORES.CACHED_RESPONSES)
       await indexedDBManager.cleanupExpired(STORES.WISDOM_CACHE)
     } catch (error) {
-      console.error('Failed to cleanup cache:', error)
+      console.warn('Failed to cleanup cache:', error)
     }
   }
 

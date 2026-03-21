@@ -116,13 +116,7 @@ function buildSummaryFromResponse(response: string): string | null {
 
 // ─── Direct OpenAI Fallback ─────────────────────────────────────────────
 
-// Language name lookup for prompt instructions
-const LANGUAGE_NAMES: Record<string, string> = {
-  en: 'English', hi: 'Hindi', ta: 'Tamil', te: 'Telugu', bn: 'Bengali',
-  mr: 'Marathi', gu: 'Gujarati', kn: 'Kannada', ml: 'Malayalam', pa: 'Punjabi',
-  sa: 'Sanskrit', es: 'Spanish', fr: 'French', de: 'German', pt: 'Portuguese',
-  ja: 'Japanese', 'zh-CN': 'Chinese (Simplified)',
-}
+import { LANGUAGE_NAMES } from '@/lib/constants/languages'
 
 async function tryDirectOpenAI(
   message: string,

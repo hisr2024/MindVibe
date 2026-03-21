@@ -27,6 +27,8 @@ from pathlib import Path
 import os
 import json
 
+from backend.services.language_registry import normalize_language_code
+
 logger = logging.getLogger(__name__)
 
 VoiceType = Literal["calm", "wisdom", "friendly", "energetic", "soothing", "storytelling", "chanting"]
@@ -157,7 +159,7 @@ LANGUAGE_NATURALNESS_PROFILES: Dict[str, Dict[str, float]] = {
 # KIAAN supports 29 languages with premium natural voices
 SUPPORTED_LANGUAGES = [
     # Indian languages (Sarvam AI)
-    "en", "hi", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "sa",
+    "en", "hi", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "sa", "od",
     # European languages (ElevenLabs)
     "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
     # Asian languages (ElevenLabs)
@@ -501,6 +503,9 @@ class TTSService:
         if not text or not text.strip():
             logger.warning("Empty text provided for TTS")
             return None
+
+        # Normalize language code (zh-CN → zh, en-IN → en)
+        language = normalize_language_code(language)
 
         voice_settings = VOICE_TYPE_SETTINGS.get(voice_type, VOICE_TYPE_SETTINGS["friendly"])
         actual_speed = speed if speed is not None else voice_settings["speed"]

@@ -34,6 +34,7 @@ Voice Provider Chain (highest quality first):
 import logging
 import os
 import re
+import threading
 import time
 from typing import Any
 
@@ -50,35 +51,55 @@ _PROVIDER_DISABLED_UNTIL: dict[str, float] = {}
 _PROVIDER_FAILURE_THRESHOLD = 3          # failures before tripping the breaker
 _PROVIDER_COOLDOWN_SECONDS = 120         # 2 minutes before retrying a tripped provider
 _PROVIDER_LAST_SUCCESS: dict[str, float] = {}
+_circuit_breaker_lock = threading.Lock()
 
 
-def _provider_is_healthy(provider: str) -> bool:
-    """Check if a TTS provider circuit breaker allows requests."""
-    disabled_until = _PROVIDER_DISABLED_UNTIL.get(provider, 0)
-    if time.monotonic() >= disabled_until:
-        # Cooldown expired — reset and allow
-        if provider in _PROVIDER_FAILURE_COUNTS:
-            _PROVIDER_FAILURE_COUNTS[provider] = 0
+def _is_valid_audio(data: bytes) -> bool:
+    """Validate that audio data has a recognizable format header."""
+    if not data or len(data) < 256:
+        return False
+    # MP3 sync word or ID3 tag
+    if data[:2] in (b'\xff\xfb', b'\xff\xfa', b'\xff\xf3') or data[:3] == b'ID3':
+        return True
+    # WAV format
+    if data[:4] == b'RIFF':
+        return True
+    # OGG format
+    if data[:4] == b'OggS':
         return True
     return False
 
 
+def _provider_is_healthy(provider: str) -> bool:
+    """Check if a TTS provider circuit breaker allows requests."""
+    with _circuit_breaker_lock:
+        disabled_until = _PROVIDER_DISABLED_UNTIL.get(provider, 0)
+        if time.monotonic() >= disabled_until:
+            # Cooldown expired — reset and allow
+            if provider in _PROVIDER_FAILURE_COUNTS:
+                _PROVIDER_FAILURE_COUNTS[provider] = 0
+            return True
+        return False
+
+
 def _record_provider_success(provider: str) -> None:
     """Record a successful TTS call — resets the failure counter."""
-    _PROVIDER_FAILURE_COUNTS[provider] = 0
-    _PROVIDER_LAST_SUCCESS[provider] = time.monotonic()
+    with _circuit_breaker_lock:
+        _PROVIDER_FAILURE_COUNTS[provider] = 0
+        _PROVIDER_LAST_SUCCESS[provider] = time.monotonic()
 
 
 def _record_provider_failure(provider: str) -> None:
     """Record a failed TTS call — trips the breaker after threshold."""
-    count = _PROVIDER_FAILURE_COUNTS.get(provider, 0) + 1
-    _PROVIDER_FAILURE_COUNTS[provider] = count
-    if count >= _PROVIDER_FAILURE_THRESHOLD:
-        _PROVIDER_DISABLED_UNTIL[provider] = time.monotonic() + _PROVIDER_COOLDOWN_SECONDS
-        logger.warning(
-            f"TTS circuit breaker OPEN for {provider}: "
-            f"{count} consecutive failures, disabled for {_PROVIDER_COOLDOWN_SECONDS}s"
-        )
+    with _circuit_breaker_lock:
+        count = _PROVIDER_FAILURE_COUNTS.get(provider, 0) + 1
+        _PROVIDER_FAILURE_COUNTS[provider] = count
+        if count >= _PROVIDER_FAILURE_THRESHOLD:
+            _PROVIDER_DISABLED_UNTIL[provider] = time.monotonic() + _PROVIDER_COOLDOWN_SECONDS
+            logger.warning(
+                f"TTS circuit breaker OPEN for {provider}: "
+                f"{count} consecutive failures, disabled for {_PROVIDER_COOLDOWN_SECONDS}s"
+            )
 
 
 def get_provider_health_status() -> dict[str, Any]:
@@ -795,7 +816,7 @@ async def synthesize_companion_voice(
         elif _provider == "edge":
             audio = await _try_edge_tts(plain_text, ssml_data, mood, voice_id)
 
-        if audio:
+        if audio and _is_valid_audio(audio):
             _record_provider_success(_provider)
             _record_quality_metric(_provider, language, voice_id, _synth_start, len(audio))
             return {
@@ -930,7 +951,7 @@ async def _try_sarvam_tts(
             speaker_override=sarvam_speaker,
         )
 
-        if audio and len(audio) > 100:
+        if audio and _is_valid_audio(audio):
             logger.info(
                 f"Sarvam TTS success: speaker={sarvam_speaker}, "
                 f"lang={language}, persona={ssml_data['voice_persona']}, "
@@ -977,7 +998,7 @@ async def _try_edge_tts(
             mood=mood,
         )
 
-        if audio and len(audio) > 100:
+        if audio and _is_valid_audio(audio):
             logger.info(
                 f"Edge TTS success: lang={language}, persona={ssml_data['voice_persona']}, "
                 f"size={len(audio)} bytes"
@@ -1109,8 +1130,11 @@ def get_all_voice_providers_status() -> dict[str, Any]:
         },
     }
     if QUALITY_EVALUATOR_AVAILABLE:
-        evaluator = get_voice_quality_evaluator()
-        status["quality_report"] = evaluator.get_provider_report()
+        try:
+            evaluator = get_voice_quality_evaluator()
+            status["quality_report"] = evaluator.get_provider_report()
+        except Exception as e:
+            logger.warning(f"Voice quality evaluator failed: {e}")
     return status
 
 
@@ -1164,19 +1188,22 @@ def _get_optimal_provider_order(language: str) -> list[str]:
     )
 
     if QUALITY_EVALUATOR_AVAILABLE:
-        evaluator = get_voice_quality_evaluator()
-        best = evaluator.get_best_provider_for_language(
-            language,
-            available_providers=[
-                p.replace("sarvam", "sarvam_ai")
-                for p in static_order
-            ],
-        )
-        # Promote the quality-evaluated best provider to front
-        normalized_best = best.replace("sarvam_ai", "sarvam")
-        if normalized_best in static_order and static_order[0] != normalized_best:
-            reordered = [normalized_best] + [p for p in static_order if p != normalized_best]
-            return reordered
+        try:
+            evaluator = get_voice_quality_evaluator()
+            best = evaluator.get_best_provider_for_language(
+                language,
+                available_providers=[
+                    p.replace("sarvam", "sarvam_ai")
+                    for p in static_order
+                ],
+            )
+            # Promote the quality-evaluated best provider to front
+            normalized_best = best.replace("sarvam_ai", "sarvam")
+            if normalized_best in static_order and static_order[0] != normalized_best:
+                reordered = [normalized_best] + [p for p in static_order if p != normalized_best]
+                return reordered
+        except Exception as e:
+            logger.warning(f"Voice quality evaluator failed: {e}")
 
     return static_order
 
