@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
       verse: fallback.verse,
       gita_wisdom: true,
       _offline: true,
-      _offline_language: language,
+      _offline_language: 'en',
     })
   }
 }
