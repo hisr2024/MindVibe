@@ -44,3 +44,13 @@ export { Divider } from './components/Divider';
 export { Avatar } from './components/Avatar';
 export { Badge } from './components/Badge';
 export { IconButton } from './components/IconButton';
+
+// Animated components
+export { GoldenButton, type GoldenButtonProps, type GoldenButtonVariant } from './components/GoldenButton';
+export { SakhaAvatar, type SakhaAvatarProps, type SakhaState } from './components/SakhaAvatar';
+export { VerseCard, type VerseCardProps, type VerseData } from './components/VerseCard';
+export { ChatBubble, type ChatBubbleProps, type ChatRole } from './components/ChatBubble';
+export { MoodRing, type MoodRingProps, type Mood } from './components/MoodRing';
+export { KarmaTree, type KarmaTreeProps, type KarmaNode } from './components/KarmaTree';
+export { GoldenHeader, type GoldenHeaderProps } from './components/GoldenHeader';
+export { LoadingMandala, type LoadingMandalaProps } from './components/LoadingMandala';
