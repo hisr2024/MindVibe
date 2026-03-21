@@ -58,7 +58,7 @@ WORKDIR /app
 COPY --from=frontend-deps /app/node_modules ./node_modules
 
 COPY package.json next.config.js tsconfig.json postcss.config.js tailwind.config.ts ./
-COPY middleware.ts ./
+
 COPY vendor/ ./vendor/
 COPY app/ ./app/
 COPY lib/ ./lib/
