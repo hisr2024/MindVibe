@@ -72,7 +72,7 @@ export default function ProfileScreen(): React.JSX.Element {
   return (
     <Screen scroll>
       <View style={styles.profileSection}>
-        <Avatar name={user?.name} size={72} />
+        <Avatar name={user?.name ?? 'Seeker'} size={72} />
         <Text variant="h2">{user?.name ?? 'Seeker'}</Text>
         <Text variant="bodySmall" color={colors.text.muted}>
           {user?.email ?? ''}

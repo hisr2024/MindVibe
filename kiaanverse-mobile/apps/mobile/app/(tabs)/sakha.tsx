@@ -58,7 +58,7 @@ export default function SakhaScreen(): React.JSX.Element {
     setInput('');
 
     try {
-      const result = await sendMessage.mutateAsync({ message: text, sessionId });
+      const result = await sendMessage.mutateAsync({ message: text, ...(sessionId ? { sessionId } : {}) });
       const response = result as { response: string; session_id: string };
 
       if (!sessionId) {

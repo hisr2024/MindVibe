@@ -20,7 +20,7 @@ import Animated, {
   interpolate,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Home, Sparkles, Compass, BookOpen, User } from 'lucide-react-native';
+import { Home, Sparkles, Compass, BookOpen, User, type LucideIcon } from 'lucide-react-native';
 import { useTheme, colors, spacing } from '@kiaanverse/ui';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
@@ -28,7 +28,7 @@ const ICON_SIZE = 22;
 const DOT_SIZE = 4;
 
 /** Map tab route name → lucide icon component. */
-const TAB_ICONS: Record<string, React.ComponentType<{ size: number; color: string }>> = {
+const TAB_ICONS: Record<string, LucideIcon> = {
   home: Home,
   sakha: Sparkles,
   journey: Compass,
