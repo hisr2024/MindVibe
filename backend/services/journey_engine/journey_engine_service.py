@@ -163,6 +163,8 @@ class DailyStep:
     safety_note: str | None
     is_completed: bool
     completed_at: datetime | None
+    available_to_complete: bool = True
+    next_available_at: datetime | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -180,6 +182,8 @@ class DailyStep:
             "safety_note": self.safety_note,
             "is_completed": self.is_completed,
             "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "available_to_complete": self.available_to_complete,
+            "next_available_at": self.next_available_at.isoformat() if self.next_available_at else None,
         }
 
 
@@ -251,6 +255,13 @@ class JourneyAlreadyCompletedError(JourneyEngineError):
 class StepNotAvailableError(JourneyEngineError):
     """Step not available (not yet unlocked or already completed)."""
     pass
+
+
+class StepTimeGatedError(StepNotAvailableError):
+    """Step is time-gated - user must wait for the next calendar day."""
+    def __init__(self, message: str, next_available_at: datetime):
+        super().__init__(message)
+        self.next_available_at = next_available_at
 
 
 class MaxActiveJourneysError(JourneyEngineError):
@@ -595,6 +606,14 @@ class JourneyEngineService:
         if step_state.completed_at is not None:
             raise StepNotAvailableError(f"Day {day_index} is already completed")
 
+        # Time-gate check: ensure pace interval has elapsed since last completion
+        is_available, next_available_at = await self._check_time_gate(journey)
+        if not is_available:
+            raise StepTimeGatedError(
+                "Come back tomorrow to continue your journey.",
+                next_available_at=next_available_at,
+            )
+
         # Update step state
         step_state.completed_at = datetime.utcnow()
 
@@ -889,6 +908,72 @@ class JourneyEngineService:
 
         return step_state
 
+    def _get_pace_interval_days(self, journey: UserJourney) -> int:
+        """Map journey pace setting to number of calendar days between steps."""
+        pace = (journey.personalization or {}).get("pace", "daily")
+        pace_map = {
+            "daily": 1,
+            "every_other_day": 2,
+            "weekly": 7,
+        }
+        return pace_map.get(pace, 1)
+
+    async def _get_last_completed_step(
+        self,
+        journey: UserJourney,
+    ) -> UserJourneyStepState | None:
+        """Get the most recently completed step for a journey."""
+        query = (
+            select(UserJourneyStepState)
+            .where(
+                UserJourneyStepState.user_journey_id == journey.id,
+                UserJourneyStepState.completed_at.isnot(None),
+            )
+            .order_by(UserJourneyStepState.completed_at.desc())
+            .limit(1)
+        )
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none()
+
+    async def _check_time_gate(
+        self,
+        journey: UserJourney,
+    ) -> tuple[bool, datetime | None]:
+        """
+        Check if the current step is available based on pace time-gating.
+
+        Uses UTC calendar day boundaries: a step completed at 11:55 PM UTC
+        allows the next step at 12:00 AM UTC (start of next calendar day).
+
+        Returns:
+            (is_available, next_available_at):
+            - is_available: True if the user can complete the current step now
+            - next_available_at: UTC datetime when step becomes available (None if now)
+        """
+        last_completed = await self._get_last_completed_step(journey)
+
+        # First step or no prior completions - always available
+        if last_completed is None:
+            return (True, None)
+
+        pace_days = self._get_pace_interval_days(journey)
+
+        # Compute next available at: start of the UTC day that is pace_days after
+        # the day the last step was completed.
+        completed_date = last_completed.completed_at.date()
+        next_available_date = completed_date + timedelta(days=pace_days)
+        next_available_at = datetime(
+            next_available_date.year,
+            next_available_date.month,
+            next_available_date.day,
+        )
+
+        now = datetime.utcnow()
+        if now >= next_available_at:
+            return (True, None)
+
+        return (False, next_available_at)
+
     async def _generate_step_content(
         self,
         template: JourneyTemplate,
@@ -965,6 +1050,15 @@ class JourneyEngineService:
                 if verse:
                     verses.append(verse)
 
+        is_completed = step_state.completed_at is not None
+
+        # Determine time-gate availability for incomplete steps
+        if is_completed:
+            available_to_complete = False
+            next_available_at = None
+        else:
+            available_to_complete, next_available_at = await self._check_time_gate(journey)
+
         return DailyStep(
             step_id=step_state.id,
             journey_id=journey.id,
@@ -978,8 +1072,10 @@ class JourneyEngineService:
             micro_commitment=kiaan_json.get("micro_commitment"),
             check_in_prompt=kiaan_json.get("check_in_prompt"),
             safety_note=kiaan_json.get("safety_note"),
-            is_completed=step_state.completed_at is not None,
+            is_completed=is_completed,
             completed_at=step_state.completed_at,
+            available_to_complete=available_to_complete,
+            next_available_at=next_available_at,
         )
 
     async def _get_verse(self, chapter: int, verse: int) -> dict[str, Any] | None:

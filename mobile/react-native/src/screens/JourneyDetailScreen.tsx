@@ -93,7 +93,7 @@ export function JourneyDetailScreen() {
   });
 
   const handleCompleteStep = useCallback(() => {
-    if (!currentStep) return;
+    if (!currentStep || !currentStep.available_to_complete) return;
     const dayIndex = currentStep.day_index ?? currentStep.dayIndex;
     if (dayIndex == null) return;
 
@@ -261,7 +261,7 @@ export function JourneyDetailScreen() {
           )}
 
           {/* Complete Button */}
-          {!currentStep.is_completed && (
+          {!currentStep.is_completed && currentStep.available_to_complete && (
             <TouchableOpacity
               style={[styles.completeButton, { backgroundColor: theme.accent }]}
               onPress={handleCompleteStep}
@@ -277,6 +277,18 @@ export function JourneyDetailScreen() {
                 </Text>
               )}
             </TouchableOpacity>
+          )}
+
+          {/* Time-gated - Come back tomorrow */}
+          {!currentStep.is_completed && !currentStep.available_to_complete && (
+            <View style={[styles.commitmentCard, { backgroundColor: colors.alpha.goldLight }]}>
+              <Text style={[styles.commitmentLabel, { color: theme.accent }]}>
+                🌅 Come back tomorrow
+              </Text>
+              <Text style={[styles.commitmentText, { color: theme.textSecondary }]}>
+                Take time to reflect on today's teaching. Your next step will be waiting for you.
+              </Text>
+            </View>
           )}
         </View>
       )}

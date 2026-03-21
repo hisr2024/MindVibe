@@ -89,7 +89,7 @@ export default function JourneyDetailPage() {
 
   // Complete current step
   const handleCompleteStep = async () => {
-    if (!currentStep || currentStep.is_completed) return
+    if (!currentStep || currentStep.is_completed || !currentStep.available_to_complete) return
 
     setIsSubmitting(true)
     setError(null)
@@ -125,6 +125,10 @@ export default function JourneyDetailPage() {
         }, 2000)
       }
     } catch (err) {
+      if (err instanceof JourneyEngineError && (err.statusCode === 429 || err.statusCode === 400)) {
+        loadData()
+        return
+      }
       if (err instanceof JourneyEngineError) {
         setError(err.message)
       }
@@ -365,7 +369,7 @@ export default function JourneyDetailPage() {
             )}
 
             {/* Complete Button */}
-            {!currentStep.is_completed && journey.status === 'active' && (
+            {!currentStep.is_completed && currentStep.available_to_complete && journey.status === 'active' && (
               <div className="pt-4">
                 <button
                   onClick={handleCompleteStep}
@@ -376,6 +380,24 @@ export default function JourneyDetailPage() {
                 >
                   {isSubmitting ? 'Completing...' : 'Complete Today\'s Step'}
                 </button>
+              </div>
+            )}
+
+            {/* Time-gated - Come back tomorrow */}
+            {!currentStep.is_completed && !currentStep.available_to_complete && journey.status === 'active' && (
+              <div className="text-center p-6 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                <div className="text-4xl mb-2">🌅</div>
+                <p className="text-amber-400 font-semibold">Come back tomorrow to continue your journey</p>
+                {currentStep.next_available_at && (
+                  <p className="text-amber-300/60 text-sm mt-1">
+                    Available {new Date(currentStep.next_available_at).toLocaleDateString('en-US', {
+                      weekday: 'long', month: 'long', day: 'numeric',
+                    })}
+                  </p>
+                )}
+                <p className="text-white/50 text-sm mt-3">
+                  Take time to reflect on today&apos;s teaching.
+                </p>
               </div>
             )}
 

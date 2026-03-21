@@ -187,6 +187,8 @@ export interface StepResponse {
   safety_note: string | null;
   is_completed: boolean;
   completed_at: string | null;
+  available_to_complete: boolean;
+  next_available_at: string | null;
 }
 
 // Alias for backwards compatibility

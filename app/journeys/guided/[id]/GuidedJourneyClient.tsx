@@ -303,7 +303,7 @@ function StepContent({ step, onComplete, isCompleting }: StepContentProps) {
       )}
 
       {/* Completion Section - Premium CTA */}
-      {!step.is_completed && (
+      {!step.is_completed && step.available_to_complete && (
         <section className="space-y-4 pt-4 border-t border-white/10">
           {/* Reflection toggle */}
           <button
@@ -352,6 +352,31 @@ function StepContent({ step, onComplete, isCompleting }: StepContentProps) {
               'Complete Today\'s Step'
             )}
           </button>
+        </section>
+      )}
+
+      {/* Time-gated - Come back tomorrow */}
+      {!step.is_completed && !step.available_to_complete && (
+        <section className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-950/30 to-amber-900/10 p-8 text-center">
+          <div className="w-16 h-16 rounded-full bg-amber-500/20 border-2 border-amber-500/50 flex items-center justify-center mx-auto mb-4">
+            <span className="text-3xl">🌅</span>
+          </div>
+          <p className="text-amber-400 font-semibold text-lg">
+            Come back tomorrow to continue your journey
+          </p>
+          {step.next_available_at && (
+            <p className="text-sm text-white/60 mt-2">
+              Available {new Date(step.next_available_at).toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </p>
+          )}
+          <p className="text-sm text-white/50 mt-4 max-w-sm mx-auto">
+            Take time to reflect on today&apos;s teaching.
+            Your next step will be waiting for you.
+          </p>
         </section>
       )}
 
@@ -521,7 +546,7 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
   // Guards against stale state (multi-tab, cached responses, race conditions)
   // by verifying frontend state matches backend expectations before sending.
   const handleCompleteStep = async (reflection?: string) => {
-    if (!step || !journey || step.is_completed || isCompletingRef.current) return
+    if (!step || !journey || step.is_completed || !step.available_to_complete || isCompletingRef.current) return
 
     // Set completing flag immediately to prevent double-tap race condition.
     // Must happen before any async work (including pre-flight validation).
@@ -564,9 +589,9 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
         return
       }
 
-      // On 400 (step not available / day mismatch / already completed),
+      // On 429 (time-gated) or 400 (step not available / day mismatch / already completed),
       // the frontend state is stale — auto-refresh to sync with backend.
-      if (err instanceof JourneyEngineError && err.statusCode === 400) {
+      if (err instanceof JourneyEngineError && (err.statusCode === 429 || err.statusCode === 400)) {
         await loadJourney()
         return
       }

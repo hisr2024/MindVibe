@@ -124,7 +124,7 @@ export default function MobileJourneyDetailPage() {
   }
 
   const handleCompleteStep = async () => {
-    if (!step || !journey || step.is_completed || isCompletingRef.current) return
+    if (!step || !journey || step.is_completed || !step.available_to_complete || isCompletingRef.current) return
 
     // Set completing flag immediately to prevent double-tap race condition.
     isCompletingRef.current = true
@@ -158,7 +158,7 @@ export default function MobileJourneyDetailPage() {
         router.push('/onboarding')
         return
       }
-      if (err instanceof JourneyEngineError && err.statusCode === 400) {
+      if (err instanceof JourneyEngineError && (err.statusCode === 429 || err.statusCode === 400)) {
         await loadJourney()
         return
       }
@@ -528,7 +528,7 @@ export default function MobileJourneyDetailPage() {
             )}
 
             {/* Completion area */}
-            {!step.is_completed && (
+            {!step.is_completed && step.available_to_complete && (
               <div className="space-y-3 pt-2">
                 <button
                   onClick={() => setShowReflection(!showReflection)}
@@ -571,6 +571,29 @@ export default function MobileJourneyDetailPage() {
                     "Complete Today's Step"
                   )}
                 </motion.button>
+              </div>
+            )}
+
+            {/* Time-gated - Come back tomorrow */}
+            {!step.is_completed && !step.available_to_complete && (
+              <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-950/30 to-amber-900/10 p-6 text-center">
+                <div className="w-12 h-12 rounded-full bg-amber-500/20 border-2 border-amber-500/50 flex items-center justify-center mx-auto mb-3">
+                  <span className="text-2xl">🌅</span>
+                </div>
+                <p className="text-amber-400 font-semibold">
+                  Come back tomorrow
+                </p>
+                {step.next_available_at && (
+                  <p className="text-xs text-white/60 mt-1">
+                    Available {new Date(step.next_available_at).toLocaleDateString('en-US', {
+                      weekday: 'long', month: 'long', day: 'numeric',
+                    })}
+                  </p>
+                )}
+                <p className="text-xs text-white/50 mt-3 max-w-xs mx-auto">
+                  Take time to reflect on today&apos;s teaching.
+                  Your next step will be waiting for you.
+                </p>
               </div>
             )}
 
