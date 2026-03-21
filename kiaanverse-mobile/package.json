@@ -1,0 +1,21 @@
+{
+  "name": "kiaanverse-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter kiaanverse-mobile-app start",
+    "android": "pnpm --filter kiaanverse-mobile-app android",
+    "ios": "pnpm --filter kiaanverse-mobile-app ios",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "clean": "pnpm -r clean"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "pnpm@9.1.0",
+  "devDependencies": {
+    "typescript": "~5.3.3",
+    "prettier": "^3.2.0"
+  }
+}
