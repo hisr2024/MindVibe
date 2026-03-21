@@ -42,8 +42,20 @@ SUPPORTED_LANGUAGES = {
     'fr': 'French',
     'de': 'German',
     'pt': 'Portuguese',
+    'it': 'Italian',
+    'nl': 'Dutch',
+    'pl': 'Polish',
+    'sv': 'Swedish',
+    'ru': 'Russian',
     'ja': 'Japanese',
-    'zh-CN': 'Chinese (Simplified)',
+    'zh': 'Chinese (Simplified)',
+    'ko': 'Korean',
+    'th': 'Thai',
+    'vi': 'Vietnamese',
+    'id': 'Indonesian',
+    'ar': 'Arabic',
+    'tr': 'Turkish',
+    'sw': 'Swahili',
 }
 
 

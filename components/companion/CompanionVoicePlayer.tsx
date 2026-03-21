@@ -229,78 +229,83 @@ export default function CompanionVoicePlayer({
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 15000)
-      const response = await apiFetch('/api/companion/voice/synthesize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text,
-          mood,
-          voice_id: effectiveVoiceId,
-          language,
-        }),
-        signal: controller.signal,
-      })
-      clearTimeout(timeoutId)
+      try {
+        const response = await apiFetch('/api/companion/voice/synthesize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text,
+            mood,
+            voice_id: effectiveVoiceId,
+            language,
+          }),
+          signal: controller.signal,
+        })
 
-      if (response.ok) {
-        const contentType = response.headers.get('content-type')
+        if (response.ok) {
+          const contentType = response.headers.get('content-type')
 
-        if (contentType?.includes('audio')) {
-          // Got premium audio back
-          const blob = await response.blob()
-          if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current)
-          const url = URL.createObjectURL(blob)
-          blobUrlRef.current = url
+          if (contentType?.includes('audio')) {
+            // Got premium audio back
+            const blob = await response.blob()
+            if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current)
+            const url = URL.createObjectURL(blob)
+            blobUrlRef.current = url
 
-          const audio = new Audio(url)
-          audioRef.current = audio
+            const audio = new Audio(url)
+            audioRef.current = audio
 
-          // Try to create AudioContext for waveform
-          try {
-            if (!audioContextRef.current) {
-              audioContextRef.current = new AudioContext()
+            // Try to create AudioContext for waveform
+            try {
+              if (!audioContextRef.current) {
+                audioContextRef.current = new AudioContext()
+              }
+              const source = audioContextRef.current.createMediaElementSource(audio)
+              const analyzer = audioContextRef.current.createAnalyser()
+              analyzer.fftSize = 64
+              source.connect(analyzer)
+              analyzer.connect(audioContextRef.current.destination)
+              analyzerRef.current = analyzer
+            } catch {
+              // AudioContext not available - use simulated waveform
             }
-            const source = audioContextRef.current.createMediaElementSource(audio)
-            const analyzer = audioContextRef.current.createAnalyser()
-            analyzer.fftSize = 64
-            source.connect(analyzer)
-            analyzer.connect(audioContextRef.current.destination)
-            analyzerRef.current = analyzer
-          } catch {
-            // AudioContext not available - use simulated waveform
+
+            audio.onplay = () => {
+              setState('playing')
+              setProvider(response.headers.get('x-voice-provider') || 'premium')
+              onStart?.()
+            }
+            audio.onended = () => {
+              setState('idle')
+              onEnd?.()
+            }
+            audio.onerror = () => {
+              const mediaError = audio.error
+              console.warn(`Audio playback failed: code=${mediaError?.code}, message=${mediaError?.message}`)
+              setState('idle')
+              fallbackToBrowserTTS()
+            }
+
+            try {
+              await audio.play()
+            } catch {
+              // Browser blocked autoplay (NotAllowedError) — fall back to
+              // browser TTS which is more permissive about autoplay policies
+              setState('idle')
+              fallbackToBrowserTTS()
+            }
+            return
           }
 
-          audio.onplay = () => {
-            setState('playing')
-            setProvider(response.headers.get('x-voice-provider') || 'premium')
-            onStart?.()
+          // Backend returned browser fallback config
+          const data = await response.json()
+          if (data.fallback_to_browser) {
+            fallbackToBrowserTTS(data.browser_config)
+            return
           }
-          audio.onended = () => {
-            setState('idle')
-            onEnd?.()
-          }
-          audio.onerror = () => {
-            setState('idle')
-            fallbackToBrowserTTS()
-          }
-
-          try {
-            await audio.play()
-          } catch {
-            // Browser blocked autoplay (NotAllowedError) — fall back to
-            // browser TTS which is more permissive about autoplay policies
-            setState('idle')
-            fallbackToBrowserTTS()
-          }
-          return
         }
-
-        // Backend returned browser fallback config
-        const data = await response.json()
-        if (data.fallback_to_browser) {
-          fallbackToBrowserTTS(data.browser_config)
-          return
-        }
+      } finally {
+        clearTimeout(timeoutId)
       }
     } catch {
       // Backend unavailable

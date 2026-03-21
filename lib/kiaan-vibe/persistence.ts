@@ -99,7 +99,7 @@ export async function getPersistedState(): Promise<PersistedPlayerState | null> 
       request.onerror = () => reject(request.error)
     })
   } catch (error) {
-    console.error('[Persistence] Failed to get state:', error)
+    console.warn('[Persistence] Failed to get state:', error)
     return null
   }
 }
@@ -119,7 +119,7 @@ export async function persistState(state: PersistedPlayerState): Promise<void> {
       request.onerror = () => reject(request.error)
     })
   } catch (error) {
-    console.error('[Persistence] Failed to persist state:', error)
+    console.warn('[Persistence] Failed to persist state:', error)
   }
 }
 
@@ -140,7 +140,7 @@ export async function getAllUploadedTracks(): Promise<UploadedTrackMeta[]> {
       request.onerror = () => reject(request.error)
     })
   } catch (error) {
-    console.error('[Persistence] Failed to get tracks:', error)
+    console.warn('[Persistence] Failed to get tracks:', error)
     return []
   }
 }
@@ -160,7 +160,7 @@ export async function getTrackMeta(id: string): Promise<UploadedTrackMeta | null
       request.onerror = () => reject(request.error)
     })
   } catch (error) {
-    console.error('[Persistence] Failed to get track:', error)
+    console.warn('[Persistence] Failed to get track:', error)
     return null
   }
 }
@@ -180,7 +180,7 @@ export async function saveTrackMeta(meta: UploadedTrackMeta): Promise<void> {
       request.onerror = () => reject(request.error)
     })
   } catch (error) {
-    console.error('[Persistence] Failed to save track:', error)
+    console.warn('[Persistence] Failed to save track:', error)
   }
 }
 
@@ -199,7 +199,7 @@ export async function deleteTrackMeta(id: string): Promise<void> {
       request.onerror = () => reject(request.error)
     })
   } catch (error) {
-    console.error('[Persistence] Failed to delete track:', error)
+    console.warn('[Persistence] Failed to delete track:', error)
   }
 }
 
@@ -220,7 +220,7 @@ export async function saveAudioBlob(id: string, blob: Blob): Promise<void> {
       request.onerror = () => reject(request.error)
     })
   } catch (error) {
-    console.error('[Persistence] Failed to save audio blob:', error)
+    console.warn('[Persistence] Failed to save audio blob:', error)
   }
 }
 
@@ -239,7 +239,7 @@ export async function getAudioBlob(id: string): Promise<Blob | null> {
       request.onerror = () => reject(request.error)
     })
   } catch (error) {
-    console.error('[Persistence] Failed to get audio blob:', error)
+    console.warn('[Persistence] Failed to get audio blob:', error)
     return null
   }
 }
@@ -268,7 +268,7 @@ export async function deleteAudioBlob(id: string): Promise<void> {
       request.onerror = () => reject(request.error)
     })
   } catch (error) {
-    console.error('[Persistence] Failed to delete audio blob:', error)
+    console.warn('[Persistence] Failed to delete audio blob:', error)
   }
 }
 
@@ -289,7 +289,7 @@ export async function getAllPlaylists(): Promise<Playlist[]> {
       request.onerror = () => reject(request.error)
     })
   } catch (error) {
-    console.error('[Persistence] Failed to get playlists:', error)
+    console.warn('[Persistence] Failed to get playlists:', error)
     return []
   }
 }
@@ -309,7 +309,7 @@ export async function getPlaylist(id: string): Promise<Playlist | null> {
       request.onerror = () => reject(request.error)
     })
   } catch (error) {
-    console.error('[Persistence] Failed to get playlist:', error)
+    console.warn('[Persistence] Failed to get playlist:', error)
     return null
   }
 }
@@ -329,7 +329,7 @@ export async function savePlaylist(playlist: Playlist): Promise<void> {
       request.onerror = () => reject(request.error)
     })
   } catch (error) {
-    console.error('[Persistence] Failed to save playlist:', error)
+    console.warn('[Persistence] Failed to save playlist:', error)
   }
 }
 
@@ -348,7 +348,7 @@ export async function deletePlaylist(id: string): Promise<void> {
       request.onerror = () => reject(request.error)
     })
   } catch (error) {
-    console.error('[Persistence] Failed to delete playlist:', error)
+    console.warn('[Persistence] Failed to delete playlist:', error)
   }
 }
 
@@ -415,7 +415,7 @@ export async function uploadTrack(file: File): Promise<Track | null> {
 
     return track
   } catch (error) {
-    console.error('[Persistence] Failed to upload track:', error)
+    console.warn('[Persistence] Failed to upload track:', error)
     return null
   }
 }

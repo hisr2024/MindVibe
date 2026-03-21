@@ -11,14 +11,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { generateLocalResponse } from '@/lib/kiaan-friend-engine'
 import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
-
-// ─── Language Names (for multilingual Tier 2 responses) ─────────────────
-const LANGUAGE_NAMES: Record<string, string> = {
-  en: 'English', hi: 'Hindi', ta: 'Tamil', te: 'Telugu', bn: 'Bengali',
-  mr: 'Marathi', gu: 'Gujarati', kn: 'Kannada', ml: 'Malayalam', pa: 'Punjabi',
-  sa: 'Sanskrit', es: 'Spanish', fr: 'French', de: 'German', pt: 'Portuguese',
-  ja: 'Japanese', 'zh-CN': 'Chinese (Simplified)',
-}
+import { LANGUAGE_NAMES } from '@/lib/constants/languages'
 
 // ─── Static Gita Wisdom (mirrors backend WISDOM_CORE) ────────────────────
 const GITA_WISDOM: Record<string, { principle: string; wisdom: string; verse_ref: string }[]> = {

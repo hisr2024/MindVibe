@@ -305,7 +305,7 @@ class IndexedDBManager {
         quota: estimate.quota || 0,
       }
     } catch (error) {
-      console.error('Failed to get storage estimate:', error)
+      console.warn('Failed to get storage estimate:', error)
       return null
     }
   }

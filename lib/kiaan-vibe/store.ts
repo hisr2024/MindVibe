@@ -290,7 +290,7 @@ export const usePlayerStore = create<PlayerStore>()(
           } catch (error) {
             // AbortError is benign - another play() call interrupted this one
             if (error instanceof DOMException && error.name === 'AbortError') return
-            console.error('[PlayerStore] Play error:', error)
+            console.warn('[PlayerStore] Play error:', error)
             // If audio blob play fails, try browser TTS
             cleanupBlobUrl()
             const ttsStarted = playViaBrowserTTS(targetTrack, () => {
@@ -345,7 +345,7 @@ export const usePlayerStore = create<PlayerStore>()(
       } catch (error) {
         // AbortError is benign - another play() call interrupted this one
         if (error instanceof DOMException && error.name === 'AbortError') return
-        console.error('[PlayerStore] Play error:', error)
+        console.warn('[PlayerStore] Play error:', error)
         set({ isPlaying: false, isLoading: false })
       }
     },
@@ -586,7 +586,7 @@ export const usePlayerStore = create<PlayerStore>()(
           audio.playbackRate = persisted.playbackRate
         }
       } catch (error) {
-        console.error('[PlayerStore] Failed to load persisted state:', error)
+        console.warn('[PlayerStore] Failed to load persisted state:', error)
       }
     },
   }))

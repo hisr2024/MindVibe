@@ -7,14 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
-
-// ─── Language Names (for multilingual Tier 2 responses) ─────────────────
-const LANGUAGE_NAMES: Record<string, string> = {
-  en: 'English', hi: 'Hindi', ta: 'Tamil', te: 'Telugu', bn: 'Bengali',
-  mr: 'Marathi', gu: 'Gujarati', kn: 'Kannada', ml: 'Malayalam', pa: 'Punjabi',
-  sa: 'Sanskrit', es: 'Spanish', fr: 'French', de: 'German', pt: 'Portuguese',
-  ja: 'Japanese', 'zh-CN': 'Chinese (Simplified)',
-}
+import { LANGUAGE_NAMES } from '@/lib/constants/languages'
 
 // Fallback wisdom responses when backend is unavailable
 const FALLBACK_RESPONSES = [
@@ -156,9 +149,10 @@ export async function POST(request: NextRequest) {
       verse: fallback.verse,
       gita_wisdom: true,
       _offline: true,
+      _offline_language: language,
     })
   } catch (error) {
-    console.error('[Voice Query] Error:', error)
+    console.warn('[Voice Query] Error:', error)
 
     // Always return a helpful response
     const fallback = FALLBACK_RESPONSES[0]
@@ -168,6 +162,7 @@ export async function POST(request: NextRequest) {
       verse: fallback.verse,
       gita_wisdom: true,
       _offline: true,
+      _offline_language: language,
     })
   }
 }

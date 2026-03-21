@@ -53,10 +53,39 @@ class WhisperModel(Enum):
 
 
 class TranscriptionLanguage(Enum):
-    """Supported languages"""
+    """Supported languages for transcription.
+    Whisper supports 100+ languages natively. These are the 29 languages
+    supported by the MindVibe platform.
+    """
     ENGLISH = "en"
     HINDI = "hi"
+    TAMIL = "ta"
+    TELUGU = "te"
+    BENGALI = "bn"
+    MARATHI = "mr"
+    GUJARATI = "gu"
+    KANNADA = "kn"
+    MALAYALAM = "ml"
+    PUNJABI = "pa"
     SANSKRIT = "sa"
+    SPANISH = "es"
+    FRENCH = "fr"
+    GERMAN = "de"
+    PORTUGUESE = "pt"
+    ITALIAN = "it"
+    DUTCH = "nl"
+    POLISH = "pl"
+    SWEDISH = "sv"
+    RUSSIAN = "ru"
+    JAPANESE = "ja"
+    CHINESE = "zh"
+    KOREAN = "ko"
+    THAI = "th"
+    VIETNAMESE = "vi"
+    INDONESIAN = "id"
+    ARABIC = "ar"
+    TURKISH = "tr"
+    SWAHILI = "sw"
     AUTO = "auto"  # Auto-detect
 
 

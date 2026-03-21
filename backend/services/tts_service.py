@@ -27,6 +27,8 @@ from pathlib import Path
 import os
 import json
 
+from backend.services.language_registry import normalize_language_code
+
 logger = logging.getLogger(__name__)
 
 VoiceType = Literal["calm", "wisdom", "friendly", "energetic", "soothing", "storytelling", "chanting"]
@@ -157,7 +159,7 @@ LANGUAGE_NATURALNESS_PROFILES: Dict[str, Dict[str, float]] = {
 # KIAAN supports 29 languages with premium natural voices
 SUPPORTED_LANGUAGES = [
     # Indian languages (Sarvam AI)
-    "en", "hi", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "sa",
+    "en", "hi", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "sa", "od",
     # European languages (ElevenLabs)
     "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
     # Asian languages (ElevenLabs)
@@ -190,26 +192,35 @@ class OfflineAudioCache:
         self.cache_dir = Path(cache_dir or Path.home() / ".mindvibe" / "audio_cache")
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self._index: Dict[str, str] = {}
+        self._lock = threading.Lock()
         self._load_index()
 
     def _load_index(self) -> None:
         """Load cache index from disk."""
-        index_file = self.cache_dir / "index.json"
-        if index_file.exists():
-            try:
-                with open(index_file, "r") as f:
-                    self._index = json.load(f)
-            except Exception as e:
-                logger.warning(f"Failed to load audio cache index: {e}")
+        with self._lock:
+            index_file = self.cache_dir / "index.json"
+            if index_file.exists():
+                try:
+                    with open(index_file, "r") as f:
+                        self._index = json.load(f)
+                except Exception as e:
+                    logger.warning(f"Failed to load audio cache index: {e}")
 
     def _save_index(self) -> None:
-        """Save cache index to disk."""
-        index_file = self.cache_dir / "index.json"
-        try:
-            with open(index_file, "w") as f:
-                json.dump(self._index, f, indent=2)
-        except Exception as e:
-            logger.warning(f"Failed to save audio cache index: {e}")
+        """Save cache index to disk using atomic write."""
+        with self._lock:
+            index_file = self.cache_dir / "index.json"
+            tmp_path = str(index_file) + ".tmp"
+            try:
+                with open(tmp_path, "w") as f:
+                    json.dump(self._index, f, indent=2)
+                os.replace(tmp_path, index_file)
+            except Exception as e:
+                logger.warning(f"Failed to save cache index: {e}")
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
 
     def _generate_key(self, text: str, language: str, voice_type: str) -> str:
         """Generate cache key using SHA-256."""
@@ -501,6 +512,9 @@ class TTSService:
         if not text or not text.strip():
             logger.warning("Empty text provided for TTS")
             return None
+
+        # Normalize language code (zh-CN → zh, en-IN → en)
+        language = normalize_language_code(language)
 
         voice_settings = VOICE_TYPE_SETTINGS.get(voice_type, VOICE_TYPE_SETTINGS["friendly"])
         actual_speed = speed if speed is not None else voice_settings["speed"]

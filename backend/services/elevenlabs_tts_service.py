@@ -723,8 +723,10 @@ async def synthesize_elevenlabs_tts(
                 return response.content
 
             if response.status_code == 429:
+                retry_after = response.headers.get("Retry-After")
                 logger.warning(
-                    "ElevenLabs TTS: Rate limited, falling through to next provider"
+                    "ElevenLabs TTS rate limited (429), backing off"
+                    + (f" (Retry-After: {retry_after}s)" if retry_after else "")
                 )
             elif response.status_code in (401, 403):
                 logger.error(

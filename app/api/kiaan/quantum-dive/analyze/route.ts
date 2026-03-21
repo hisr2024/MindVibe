@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const data = await backendRes.json()
     return forwardCookies(backendRes, NextResponse.json(data))
   } catch (error) {
-    console.error('[Quantum Dive] Analyze error:', error instanceof Error ? error.message : error)
+    console.warn('[Quantum Dive] Analyze error:', error instanceof Error ? error.message : error)
     return NextResponse.json(
       { error: 'Failed to perform quantum dive analysis' },
       { status: 502 }

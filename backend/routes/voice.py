@@ -56,6 +56,19 @@ def _sanitize_filename(value: str) -> str:
     return value[:100]
 
 
+def _detect_audio_content_type(data: bytes) -> str:
+    """Detect audio format from magic bytes."""
+    if not data or len(data) < 4:
+        return "audio/mpeg"
+    if data[:3] == b"ID3" or data[:2] in (b"\xff\xfb", b"\xff\xfa", b"\xff\xf3"):
+        return "audio/mpeg"
+    if data[:4] == b"RIFF":
+        return "audio/wav"
+    if data[:4] == b"OggS":
+        return "audio/ogg"
+    return "audio/mpeg"
+
+
 # ===== Pydantic Models =====
 
 class SynthesizeRequest(BaseModel):
@@ -171,10 +184,10 @@ async def synthesize_speech(
             detail="Failed to generate audio. TTS service unavailable."
         )
 
-    # Return audio as MP3
+    # Return audio with detected content type
     return Response(
         content=audio_bytes,
-        media_type="audio/mpeg",
+        media_type=_detect_audio_content_type(audio_bytes),
         headers={
             "Content-Disposition": "inline; filename=speech.mp3",
             "Cache-Control": "public, max-age=604800"  # Cache for 1 week
@@ -242,7 +255,7 @@ async def synthesize_verse(
     safe_language = _sanitize_filename(language)
     return Response(
         content=audio_bytes,
-        media_type="audio/mpeg",
+        media_type=_detect_audio_content_type(audio_bytes),
         headers={
             "Content-Disposition": f"inline; filename={safe_verse_id}_{safe_language}.mp3",
             "Cache-Control": "public, max-age=2592000"  # Cache for 30 days (verses don't change)
@@ -277,7 +290,7 @@ async def synthesize_message(
 
     return Response(
         content=audio_bytes,
-        media_type="audio/mpeg",
+        media_type=_detect_audio_content_type(audio_bytes),
         headers={
             "Content-Disposition": "inline; filename=kiaan_message.mp3",
             "Cache-Control": "public, max-age=3600"  # Cache for 1 hour
@@ -312,7 +325,7 @@ async def synthesize_meditation(
 
     return Response(
         content=audio_bytes,
-        media_type="audio/mpeg",
+        media_type=_detect_audio_content_type(audio_bytes),
         headers={
             "Content-Disposition": "inline; filename=meditation.mp3",
             "Cache-Control": "public, max-age=86400"  # Cache for 1 day
