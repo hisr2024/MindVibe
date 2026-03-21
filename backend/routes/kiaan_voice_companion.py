@@ -1021,9 +1021,15 @@ async def send_voice_companion_message(
     try:
         from backend.services.voice_learning.sentiment_analysis import SentimentAnalyzer
         _analyzer = SentimentAnalyzer()
-        _sentiment = await _analyzer.analyze(body.message, user_id=current_user)
+        _sentiment = await asyncio.wait_for(
+            _analyzer.analyze(body.message, user_id=current_user),
+            timeout=5.0,
+        )
         mood = _sentiment.primary_emotion.value
         mood_intensity = _sentiment.confidence
+    except asyncio.TimeoutError:
+        logger.warning("Sentiment analysis timed out, using keyword detection")
+        mood, mood_intensity = detect_mood(body.message)
     except Exception:
         mood, mood_intensity = detect_mood(body.message)
 
@@ -1105,8 +1111,11 @@ async def send_voice_companion_message(
                 "hurt": "acceptance", "jealous": "contentment",
             }
             theme_hint = mood_theme_hints.get(mood)
-            verse_results = await kb.search_relevant_verses_full_db(
-                db=db, query=search_query, theme=theme_hint, limit=3,
+            verse_results = await asyncio.wait_for(
+                kb.search_relevant_verses_full_db(
+                    db=db, query=search_query, theme=theme_hint, limit=3,
+                ),
+                timeout=5.0,
             )
             if verse_results and verse_results[0].get("score", 0) > 0.1:
                 top = verse_results[0]
@@ -1118,6 +1127,8 @@ async def send_voice_companion_message(
                     f"VoiceCompanion: Wisdom verse {wisdom_verse_ref} "
                     f"(score={top['score']:.2f}) for mood={mood}"
                 )
+        except asyncio.TimeoutError:
+            logger.warning("Wisdom KB search timed out")
         except Exception as e:
             logger.debug(f"VoiceCompanion: Wisdom lookup skipped: {e}")
 
@@ -1370,15 +1381,21 @@ async def send_voice_companion_message(
             from backend.deps import SessionLocal
             async with SessionLocal() as bg_db:
                 try:
-                    engine = get_companion_engine()
-                    ai_memories = await engine.extract_memories_with_ai(
-                        user_message=_bg_message,
-                        companion_response=_bg_response,
-                        mood=_bg_mood,
-                    )
-                    if ai_memories:
-                        await _save_memories(bg_db, _bg_user_id, _bg_session_id, ai_memories)
-                        await bg_db.commit()
+                    async def _do_extraction_work():
+                        engine = get_companion_engine()
+                        ai_memories = await engine.extract_memories_with_ai(
+                            user_message=_bg_message,
+                            companion_response=_bg_response,
+                            mood=_bg_mood,
+                        )
+                        if ai_memories:
+                            await _save_memories(bg_db, _bg_user_id, _bg_session_id, ai_memories)
+                            await bg_db.commit()
+
+                    try:
+                        await asyncio.wait_for(_do_extraction_work(), timeout=30.0)
+                    except asyncio.TimeoutError:
+                        logger.warning("Background memory extraction timed out after 30s")
                 finally:
                     await bg_db.close()
         except Exception as e:
