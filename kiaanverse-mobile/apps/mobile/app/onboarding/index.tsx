@@ -1,182 +1,291 @@
 /**
- * Onboarding Flow
+ * Onboarding Flow — 5-step swipeable experience
  *
- * Multi-step onboarding:
- * 1. Language selection
- * 2. Interests / spiritual goals
- * 3. Notification permission
+ * Steps:
+ * 1. Welcome — meet Sakha (animated avatar intro)
+ * 2. Purpose — multi-select spiritual goals
+ * 3. Gita Familiarity — slider (never read → scholar)
+ * 4. Daily Practice — time picker for daily reminder
+ * 5. Ready — golden CTA + notification permission
+ *
+ * Features:
+ * - Animated horizontal slide transitions (Reanimated)
+ * - PanGestureHandler for swipe navigation
+ * - Progress dots at top
+ * - Back = previous step (not router back)
+ * - Skip option on steps 2–4
+ * - Persists answers to Zustand + POST /user/preferences
  */
 
 import React, { useCallback } from 'react';
-import { View, StyleSheet, Pressable, FlatList } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Screen, Text, Button, Divider, colors, spacing, radii } from '@kiaanverse/ui';
-import { useOnboardingStore, useAuthStore, useUserPreferencesStore } from '@kiaanverse/store';
-import { locales, type Locale } from '@kiaanverse/i18n';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  runOnJS,
+} from 'react-native-reanimated';
+import {
+  GestureDetector,
+  Gesture,
+} from 'react-native-gesture-handler';
+import { Screen, colors, spacing } from '@kiaanverse/ui';
+import {
+  useOnboardingStore,
+  useAuthStore,
+  useUserPreferencesStore,
+} from '@kiaanverse/store';
+import { api } from '@kiaanverse/api';
 
-const INTERESTS = [
-  { id: 'meditation', label: 'Meditation', emoji: '🧘' },
-  { id: 'gita-study', label: 'Gita Study', emoji: '📖' },
-  { id: 'emotional-wellness', label: 'Emotional Wellness', emoji: '💛' },
-  { id: 'mindfulness', label: 'Mindfulness', emoji: '🌿' },
-  { id: 'anger-management', label: 'Anger Management', emoji: '🔥' },
-  { id: 'self-discipline', label: 'Self-Discipline', emoji: '⚡' },
-  { id: 'relationships', label: 'Relationships', emoji: '🤝' },
-  { id: 'inner-peace', label: 'Inner Peace', emoji: '🕊️' },
-] as const;
+import { WelcomeStep } from './steps/WelcomeStep';
+import { PurposeStep } from './steps/PurposeStep';
+import { GitaFamiliarityStep } from './steps/GitaFamiliarityStep';
+import { DailyPracticeStep } from './steps/DailyPracticeStep';
+import { ReadyStep } from './steps/ReadyStep';
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const TOTAL_STEPS = 5;
+const SWIPE_THRESHOLD = 50;
+
+// ---------------------------------------------------------------------------
+// Progress Dots
+// ---------------------------------------------------------------------------
+
+function ProgressDots({ current, total }: { current: number; total: number }): React.JSX.Element {
+  return (
+    <View style={styles.dotsRow}>
+      {Array.from({ length: total }, (_, i) => (
+        <View
+          key={i}
+          style={[
+            styles.dot,
+            i === current && styles.dotActive,
+            i < current && styles.dotCompleted,
+          ]}
+          accessibilityLabel={`Step ${i + 1} of ${total}${i === current ? ', current' : ''}`}
+        />
+      ))}
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main Screen
+// ---------------------------------------------------------------------------
 
 export default function OnboardingScreen(): React.JSX.Element {
+  const { width: screenWidth } = useWindowDimensions();
   const router = useRouter();
-  const { currentStep, answers, setAnswer, nextStep, prevStep, complete } = useOnboardingStore();
+
+  const {
+    currentStep,
+    answers,
+    setAnswer,
+    nextStep,
+    prevStep,
+    complete,
+  } = useOnboardingStore();
   const { completeOnboarding } = useAuthStore();
-  const { setLocale } = useUserPreferencesStore();
+  const { setNotifications } = useUserPreferencesStore();
 
-  const handleComplete = useCallback(() => {
-    if (answers.locale) {
-      setLocale(answers.locale);
+  // Slide animation offset
+  const translateX = useSharedValue(0);
+
+  // -----------------------------------------------------------------------
+  // Navigation helpers
+  // -----------------------------------------------------------------------
+
+  const goNext = useCallback(() => {
+    if (currentStep >= TOTAL_STEPS - 1) return;
+    // Slide out left, then snap to next step
+    translateX.value = withSpring(0, { damping: 20, stiffness: 200 });
+    nextStep();
+  }, [currentStep, nextStep, translateX]);
+
+  const goPrev = useCallback(() => {
+    if (currentStep <= 0) return;
+    translateX.value = withSpring(0, { damping: 20, stiffness: 200 });
+    prevStep();
+  }, [currentStep, prevStep, translateX]);
+
+  // -----------------------------------------------------------------------
+  // Swipe gesture
+  // -----------------------------------------------------------------------
+
+  const panGesture = Gesture.Pan()
+    .activeOffsetX([-20, 20])
+    .onUpdate((event) => {
+      // Clamp: don't let user swipe right past first step or left past last
+      if (currentStep === 0 && event.translationX > 0) {
+        translateX.value = event.translationX * 0.3; // rubber-band
+      } else if (currentStep === TOTAL_STEPS - 1 && event.translationX < 0) {
+        translateX.value = event.translationX * 0.3;
+      } else {
+        translateX.value = event.translationX;
+      }
+    })
+    .onEnd((event) => {
+      if (event.translationX < -SWIPE_THRESHOLD && currentStep < TOTAL_STEPS - 1) {
+        // Swipe left → next step
+        runOnJS(goNext)();
+      } else if (event.translationX > SWIPE_THRESHOLD && currentStep > 0) {
+        // Swipe right → previous step
+        runOnJS(goPrev)();
+      } else {
+        // Snap back
+        translateX.value = withSpring(0, { damping: 20, stiffness: 200 });
+      }
+    });
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
+
+  // -----------------------------------------------------------------------
+  // Step-specific callbacks
+  // -----------------------------------------------------------------------
+
+  const handlePurposeToggle = useCallback(
+    (id: string) => {
+      const current = answers.purposes ?? [];
+      const updated = current.includes(id)
+        ? current.filter((p) => p !== id)
+        : [...current, id];
+      setAnswer('purposes', updated);
+    },
+    [answers.purposes, setAnswer],
+  );
+
+  const handleGitaChange = useCallback(
+    (value: number) => {
+      setAnswer('gitaFamiliarity', value);
+    },
+    [setAnswer],
+  );
+
+  const handlePracticeTimeChange = useCallback(
+    (time: string) => {
+      setAnswer('dailyPracticeTime', time);
+    },
+    [setAnswer],
+  );
+
+  const handleComplete = useCallback(
+    (notificationsEnabled: boolean) => {
+      setAnswer('notificationsEnabled', notificationsEnabled);
+
+      // Update user preferences store
+      if (answers.dailyPracticeTime) {
+        setNotifications({
+          dailyReminder: true,
+          reminderTime: answers.dailyPracticeTime,
+        });
+      }
+      if (notificationsEnabled) {
+        setNotifications({ dailyReminder: true });
+      }
+
+      // Best-effort POST to backend
+      void api.profile.update({
+        purposes: answers.purposes,
+        gita_familiarity: answers.gitaFamiliarity,
+        daily_practice_time: answers.dailyPracticeTime,
+        notifications_enabled: notificationsEnabled,
+      }).catch(() => {
+        // Non-blocking — preferences saved locally even if API fails
+      });
+
+      complete();
+      completeOnboarding();
+      router.replace('/(tabs)/home');
+    },
+    [
+      answers.dailyPracticeTime,
+      answers.gitaFamiliarity,
+      answers.purposes,
+      complete,
+      completeOnboarding,
+      router,
+      setAnswer,
+      setNotifications,
+    ],
+  );
+
+  // -----------------------------------------------------------------------
+  // Render current step
+  // -----------------------------------------------------------------------
+
+  function renderStep(): React.JSX.Element {
+    switch (currentStep) {
+      case 0:
+        return <WelcomeStep onNext={goNext} />;
+      case 1:
+        return (
+          <PurposeStep
+            selected={answers.purposes ?? []}
+            onToggle={handlePurposeToggle}
+            onNext={goNext}
+            onSkip={goNext}
+          />
+        );
+      case 2:
+        return (
+          <GitaFamiliarityStep
+            value={answers.gitaFamiliarity ?? 0}
+            onChange={handleGitaChange}
+            onNext={goNext}
+            onSkip={goNext}
+          />
+        );
+      case 3:
+        return (
+          <DailyPracticeStep
+            value={answers.dailyPracticeTime ?? '08:00'}
+            onChange={handlePracticeTimeChange}
+            onNext={goNext}
+            onSkip={goNext}
+          />
+        );
+      case 4:
+        return <ReadyStep onComplete={handleComplete} />;
+      default:
+        return <WelcomeStep onNext={goNext} />;
     }
-    complete();
-    completeOnboarding();
-    router.replace('/(tabs)/home');
-  }, [answers.locale, complete, completeOnboarding, setLocale, router]);
-
-  const handleLocaleSelect = useCallback((code: string) => {
-    setAnswer('locale', code);
-  }, [setAnswer]);
-
-  const handleInterestToggle = useCallback((interestId: string) => {
-    const current = answers.interests ?? [];
-    const updated = current.includes(interestId)
-      ? current.filter((i) => i !== interestId)
-      : [...current, interestId];
-    setAnswer('interests', updated);
-  }, [answers.interests, setAnswer]);
+  }
 
   return (
-    <Screen scroll>
+    <Screen>
       <View style={styles.container}>
-        {/* Progress dots */}
-        <View style={styles.progressDots}>
-          {[0, 1, 2].map((step) => (
-            <View
-              key={step}
-              style={[
-                styles.dot,
-                step === currentStep && styles.dotActive,
-                step < currentStep && styles.dotCompleted,
-              ]}
-            />
-          ))}
-        </View>
+        <ProgressDots current={currentStep} total={TOTAL_STEPS} />
 
-        {currentStep === 0 ? (
-          <View style={styles.stepContainer}>
-            <Text variant="h1" align="center">Choose Your Language</Text>
-            <Text variant="bodySmall" color={colors.text.muted} align="center">
-              You can change this later in settings
-            </Text>
-            <FlatList
-              data={locales.slice(0, 12)}
-              keyExtractor={(item) => item.code}
-              numColumns={2}
-              scrollEnabled={false}
-              contentContainerStyle={styles.localeGrid}
-              columnWrapperStyle={styles.localeRow}
-              renderItem={({ item }) => (
-                <Pressable
-                  onPress={() => handleLocaleSelect(item.code)}
-                  style={[
-                    styles.localeOption,
-                    answers.locale === item.code && styles.localeSelected,
-                  ]}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected: answers.locale === item.code }}
-                >
-                  <Text variant="label">{item.nativeName}</Text>
-                  <Text variant="caption" color={colors.text.muted}>{item.name}</Text>
-                </Pressable>
-              )}
-            />
-            <Button title="Next" onPress={nextStep} />
-          </View>
-        ) : currentStep === 1 ? (
-          <View style={styles.stepContainer}>
-            <Text variant="h1" align="center">What Interests You?</Text>
-            <Text variant="bodySmall" color={colors.text.muted} align="center">
-              Select all that resonate with you
-            </Text>
-            <View style={styles.interestGrid}>
-              {INTERESTS.map((interest) => {
-                const selected = (answers.interests ?? []).includes(interest.id);
-                return (
-                  <Pressable
-                    key={interest.id}
-                    onPress={() => handleInterestToggle(interest.id)}
-                    style={[
-                      styles.interestOption,
-                      selected && styles.interestSelected,
-                    ]}
-                    accessibilityRole="checkbox"
-                    accessibilityState={{ checked: selected }}
-                  >
-                    <Text variant="h3" align="center">{interest.emoji}</Text>
-                    <Text variant="caption" align="center">{interest.label}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-            <View style={styles.buttonRow}>
-              <Button title="Back" variant="ghost" onPress={prevStep} />
-              <Button title="Next" onPress={nextStep} />
-            </View>
-          </View>
-        ) : (
-          <View style={styles.stepContainer}>
-            <Text variant="h1" align="center">Stay Connected</Text>
-            <Text variant="body" color={colors.text.muted} align="center">
-              Get daily spiritual reminders, journey updates, and wisdom from the Gita.
-            </Text>
-            <View style={styles.notificationPreview}>
-              <Text variant="sacred" color={colors.primary[300]} align="center">
-                "The soul is neither born, nor does it ever die."
-              </Text>
-              <Text variant="caption" color={colors.text.muted} align="center">
-                — Bhagavad Gita 2.20
-              </Text>
-            </View>
-            <Button
-              title="Enable Notifications"
-              onPress={() => {
-                setAnswer('notificationsEnabled', true);
-                handleComplete();
-              }}
-            />
-            <Button
-              title="Maybe Later"
-              variant="ghost"
-              onPress={() => {
-                setAnswer('notificationsEnabled', false);
-                handleComplete();
-              }}
-            />
-            <Button title="Back" variant="ghost" onPress={prevStep} />
-          </View>
-        )}
+        <GestureDetector gesture={panGesture}>
+          <Animated.View style={[styles.stepContainer, animatedStyle]}>
+            {renderStep()}
+          </Animated.View>
+        </GestureDetector>
       </View>
     </Screen>
   );
 }
 
+// ---------------------------------------------------------------------------
+// Styles
+// ---------------------------------------------------------------------------
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: spacing.xxl,
-    gap: spacing.xl,
+    paddingTop: spacing.xl,
   },
-  progressDots: {
+  dotsRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: spacing.sm,
+    paddingBottom: spacing.lg,
   },
   dot: {
     width: 8,
@@ -187,56 +296,12 @@ const styles = StyleSheet.create({
   dotActive: {
     width: 24,
     backgroundColor: colors.primary[500],
+    borderRadius: 4,
   },
   dotCompleted: {
     backgroundColor: colors.primary[700],
   },
   stepContainer: {
-    gap: spacing.xl,
-  },
-  localeGrid: {
-    gap: spacing.md,
-  },
-  localeRow: {
-    gap: spacing.md,
-  },
-  localeOption: {
     flex: 1,
-    padding: spacing.md,
-    borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.alpha.whiteLight,
-    gap: 2,
-  },
-  localeSelected: {
-    borderColor: colors.primary[500],
-    backgroundColor: colors.alpha.goldLight,
-  },
-  interestGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.md,
-  },
-  interestOption: {
-    width: '47%',
-    padding: spacing.md,
-    borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.alpha.whiteLight,
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  interestSelected: {
-    borderColor: colors.primary[500],
-    backgroundColor: colors.alpha.goldLight,
-  },
-  notificationPreview: {
-    padding: spacing.lg,
-    gap: spacing.sm,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    justifyContent: 'center',
   },
 });
