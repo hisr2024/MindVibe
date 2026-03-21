@@ -6,7 +6,7 @@
  * Skip option available.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { View, StyleSheet, Pressable, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -42,6 +42,12 @@ export function GitaFamiliarityStep({
   const segmentWidth = trackWidth / (LEVELS.length - 1);
 
   const thumbX = useSharedValue(value * segmentWidth);
+
+  // Sync thumb position when value or screen dimensions change
+  // (e.g. navigating back to this step, or screen rotation)
+  useEffect(() => {
+    thumbX.value = withSpring(value * segmentWidth, { damping: 20, stiffness: 200 });
+  }, [value, segmentWidth, thumbX]);
 
   const thumbStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: thumbX.value }],

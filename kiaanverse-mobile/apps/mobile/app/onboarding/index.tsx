@@ -36,7 +36,6 @@ import {
   useAuthStore,
   useUserPreferencesStore,
 } from '@kiaanverse/store';
-import { api } from '@kiaanverse/api';
 
 import { WelcomeStep } from './steps/WelcomeStep';
 import { PurposeStep } from './steps/PurposeStep';
@@ -189,15 +188,10 @@ export default function OnboardingScreen(): React.JSX.Element {
         setNotifications({ dailyReminder: true });
       }
 
-      // Best-effort POST to backend
-      void api.profile.update({
-        purposes: answers.purposes,
-        gita_familiarity: answers.gitaFamiliarity,
-        daily_practice_time: answers.dailyPracticeTime,
-        notifications_enabled: notificationsEnabled,
-      }).catch(() => {
-        // Non-blocking — preferences saved locally even if API fails
-      });
+      // Onboarding preferences are persisted locally via Zustand stores.
+      // The backend /api/profile only accepts {full_name, base_experience}
+      // and has no /user/preferences endpoint yet, so we skip the API call.
+      // Preferences will sync when a dedicated endpoint is available.
 
       complete();
       completeOnboarding();
