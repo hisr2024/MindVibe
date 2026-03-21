@@ -26,7 +26,6 @@ export default function TabsLayout(): React.JSX.Element {
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        animation: 'fade',
         freezeOnBlur: true,
       }}
     >

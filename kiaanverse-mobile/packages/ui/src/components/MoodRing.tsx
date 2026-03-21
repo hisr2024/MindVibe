@@ -147,10 +147,9 @@ function MoodRingInner({
             />
             <SvgText
               x={mood.x}
-              y={mood.y + 1}
+              y={mood.y + 7}
               fontSize={20}
               textAnchor="middle"
-              dominantBaseline="central"
             >
               {mood.emoji}
             </SvgText>

@@ -47,7 +47,7 @@ export default function VerseDetailScreen(): React.JSX.Element {
       transliteration: v.transliteration ?? '',
       translation: v.translation ?? '',
       speaker: v.speaker ?? 'Lord Krishna',
-      commentary: v.commentary,
+      commentary: v.commentary ?? '',
     };
   })();
 
