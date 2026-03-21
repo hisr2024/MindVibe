@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       message: 'Use browser Speech Synthesis API',
     })
   } catch (error) {
-    console.error('[Voice API] Synthesis error:', error)
+    console.warn('[Voice API] Synthesis error:', error)
     return NextResponse.json(
       { error: 'Failed to synthesize speech', fallback: true },
       { status: 500 }

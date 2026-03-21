@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[Chat Stream] Error:', error)
+    console.warn('[Chat Stream] Error:', error)
 
     // Return error as SSE
     const errorStream = new ReadableStream({

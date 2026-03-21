@@ -345,7 +345,7 @@ export const usePlayerStore = create<PlayerStore>()(
       } catch (error) {
         // AbortError is benign - another play() call interrupted this one
         if (error instanceof DOMException && error.name === 'AbortError') return
-        console.error('[PlayerStore] Play error:', error)
+        console.warn('[PlayerStore] Play error:', error)
         set({ isPlaying: false, isLoading: false })
       }
     },

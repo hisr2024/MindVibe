@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
           })
         }
       } catch (error) {
-        console.error('[KIAAN Chat] OpenAI failed:', error)
+        console.warn('[KIAAN Chat] OpenAI failed:', error)
       }
     }
 

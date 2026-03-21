@@ -90,7 +90,7 @@ class OfflineSyncService {
         this.conflicts = JSON.parse(conflictsData)
       }
     } catch (error) {
-      console.error('[SyncService] Failed to load from storage:', error)
+      console.warn('[SyncService] Failed to load from storage:', error)
       this.syncQueue = []
       this.conflicts = []
     }
@@ -104,7 +104,7 @@ class OfflineSyncService {
       localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(this.syncQueue))
       localStorage.setItem(SYNC_CONFLICTS_KEY, JSON.stringify(this.conflicts))
     } catch (error) {
-      console.error('[SyncService] Failed to save to storage:', error)
+      console.warn('[SyncService] Failed to save to storage:', error)
     }
   }
 

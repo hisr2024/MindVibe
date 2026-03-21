@@ -285,7 +285,7 @@ export async function POST(request: NextRequest) {
         console.warn(`[Chat API] Backend returned error state: status=${data.status}, response="${String(data.response || '').slice(0, 50)}"`)
       } else {
         const errorText = await response.text().catch(() => 'Unknown error')
-        console.error(`[Chat API] Backend returned ${response.status}: ${errorText}`)
+        console.warn(`[Chat API] Backend returned ${response.status}: ${errorText}`)
 
         // Access control errors must NEVER fall through to Layer 2/3.
         // Only genuine infrastructure failures (5xx, timeouts) should trigger fallbacks.

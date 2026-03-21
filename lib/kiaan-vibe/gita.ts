@@ -150,7 +150,7 @@ export async function loadGitaLanguage(languageCode: string): Promise<GitaLangua
 
     // Validate required fields before caching
     if (!validateGitaData(parsed)) {
-      console.error(`[Gita] Invalid data structure for language: ${languageCode}. Missing required fields (languageCode, languageName, chapters with chapterNumber/nameSanskrit/nameEnglish/verseCount/verses, or verses missing verseNumber/translation).`)
+      console.warn(`[Gita] Invalid data structure for language: ${languageCode}. Missing required fields.`)
       return null
     }
 

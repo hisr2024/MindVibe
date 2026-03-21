@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
       _offline_language: language,
     })
   } catch (error) {
-    console.error('[Voice Query] Error:', error)
+    console.warn('[Voice Query] Error:', error)
 
     // Always return a helpful response
     const fallback = FALLBACK_RESPONSES[0]

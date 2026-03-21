@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
     return createFallbackResponse(sanitizedText, ttsLanguage)
 
   } catch (error) {
-    console.error('[GitaVoice API] Synthesis error:', error)
+    console.warn('[GitaVoice API] Synthesis error:', error)
     return createFallbackResponse(sanitizedText, ttsLanguage)
   }
 }
@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
     return createFallbackResponse(sanitizedShloka, 'hi')
 
   } catch (error) {
-    console.error('[GitaVoice API] POST error:', error)
+    console.warn('[GitaVoice API] POST error:', error)
     return createFallbackResponse('', 'hi')
   }
 }
