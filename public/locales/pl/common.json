@@ -1,0 +1,55 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "Twój Duchowy Towarzysz i Boski Przyjaciel"
+  },
+  "buttons": {
+    "submit": "Wyślij",
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "close": "Zamknij",
+    "next": "Dalej",
+    "previous": "Wstecz",
+    "confirm": "Potwierdź",
+    "back": "Cofnij",
+    "continue": "Kontynuuj",
+    "learnMore": "Dowiedz się więcej",
+    "getStarted": "Rozpocznij",
+    "tryNow": "Wypróbuj teraz",
+    "tools": "Narzędzia",
+    "translate": "Tłumacz",
+    "original": "Oryginał",
+    "showOriginal": "Pokaż oryginał"
+  },
+  "status": {
+    "loading": "Ładowanie...",
+    "saving": "Zapisywanie...",
+    "saved": "Zapisano",
+    "error": "Błąd",
+    "success": "Sukces",
+    "processing": "Przetwarzanie...",
+    "translating": "Tłumaczenie...",
+    "alreadyInLanguage": "Już w tym języku"
+  },
+  "common": {
+    "hello": "Cześć",
+    "welcome": "Witaj",
+    "goodbye": "Do widzenia",
+    "thankyou": "Dziękuję",
+    "yes": "Tak",
+    "no": "Nie",
+    "or": "lub",
+    "and": "i",
+    "optional": "Opcjonalnie",
+    "required": "Wymagane"
+  },
+  "privacy": {
+    "encrypted": "Zaszyfrowane",
+    "private": "Prywatność w projekcie",
+    "secure": "Bezpieczne",
+    "localOnly": "Tylko lokalnie",
+    "offlineReady": "Gotowe offline"
+  }
+}

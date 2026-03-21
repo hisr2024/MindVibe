@@ -1,0 +1,141 @@
+{
+  "welcome": {
+    "title": "Benvenuto su KIAAN",
+    "subtitle": "Il tuo compagno spirituale sereno e moderno — sempre qui, sempre di supporto.",
+    "description": "Compagno spirituale sereno e rispettoso della privacy, con diario, chat guidate e dashboard."
+  },
+  "chat": {
+    "title": "Parla con KIAAN",
+    "subtitle": "Guida gentile con un bagliore caldo",
+    "placeholder": "Scrivi il tuo messaggio...",
+    "send": "Invia",
+    "thinking": "KIAAN sta riflettendo...",
+    "connectionStatus": "Connessione privata e stabile",
+    "connectionDesc": "Le tue domande prendono forma — le risposte restano immutate.",
+    "emptyState": {
+      "emoji": "✨",
+      "title": "Come posso guidarti oggi?",
+      "subtitle": "Condividi ciò che hai in mente"
+    },
+    "disclaimer": "KIAAN è il tuo compagno spirituale, che condivide riflessioni tratte dalla Bhagavad Gita e dalla saggezza antica. Questo è uno spazio sacro per la pace interiore e la scoperta di sé. Per questioni che vanno oltre il percorso spirituale, cerca sempre la guida di professionisti qualificati.",
+    "saveToJournal": "Salva nel diario",
+    "copy": "Copia",
+    "copied": "Copiato!",
+    "copyFailed": "Non riuscito",
+    "share": "Condividi",
+    "shareVia": "Condividi tramite",
+    "privacyNotice": "Avviso sulla privacy",
+    "shareWarning": "Stai per condividere informazioni sul benessere spirituale. Assicurati di essere a tuo agio nel condividere questo contenuto pubblicamente.",
+    "anonymize": "Anonimizza contenuto (rimuovi identificatori personali)",
+    "anonymized": "✓ Contenuto anonimizzato",
+    "sharingOriginal": "Condivisione del contenuto originale",
+    "defaultResponse": "Sono qui. Dimmi cosa sta succedendo e ne parliamo insieme.",
+    "quotaExceeded": "La tua quota mensile è stata raggiunta. [Aggiorna il tuo piano](/pricing) per continuare a chattare.",
+    "featureLocked": "Questa funzionalità richiede un piano superiore. [Visualizza i piani](/pricing) per sbloccarla.",
+    "summary": "Riepilogo",
+    "fullView": "Vista completa",
+    "fullViewTitle": "Risposta dettagliata completa",
+    "shareTitle": "Condividi risposta",
+    "saveToJournalTitle": "Salva nel diario",
+    "divineFriend": "Il tuo amico divino"
+  },
+  "guidanceModes": {
+    "title": "Modalità di guida",
+    "subtitle": "Triangolo dell'energia fluente",
+    "selectPrompt": "Tocca una modalità per esplorare come KIAAN guida il tuo stato.",
+    "innerPeace": {
+      "title": "Pace interiore",
+      "description": "Trova la quiete attraverso esercizi di respirazione e tecniche dolci di radicamento. Perfetto per i momenti in cui hai bisogno di calmare la mente e ritrovare la tranquillità.",
+      "note": "Respiro gentile e morbida concentrazione"
+    },
+    "mindControl": {
+      "title": "Controllo della mente",
+      "description": "Sviluppa una chiarezza concentrata attraverso pratiche strutturate di mindfulness. Ideale per il processo decisionale, la concentrazione e il mantenimento della disciplina interiore.",
+      "note": "Passi costanti, un pensiero alla volta"
+    },
+    "selfKindness": {
+      "title": "Gentilezza verso sé stessi",
+      "description": "Coltiva la compassione verso te stesso attraverso esercizi calorosi e di supporto. Essenziale per la guarigione, l'accettazione di sé e la cura del tuo benessere emotivo.",
+      "note": "Sei il benvenuto qui"
+    }
+  },
+  "clarityPause": {
+    "title": "Pausa di chiarezza",
+    "subtitle": "Crea spazio prima di agire.",
+    "description": "Nessun consiglio. Solo spazio per decidere con chiarezza.",
+    "note": "KIAAN resta intatto — rifiuta per passare istantaneamente.",
+    "closeOverlay": "Chiudi overlay",
+    "sendNow": "Invia ora (salta la pausa)",
+    "startPause": "Pausa di 60 secondi",
+    "deliverToKiaan": "Consegna a KIAAN ora",
+    "keepGrounding": "Mantieni 60s di radicamento",
+    "question": "Stai agendo con chiarezza o per emozione in questo momento?",
+    "countdown": "{seconds}s rimanenti",
+    "ready": "Pronto quando lo sei tu"
+  },
+  "moodCheck": {
+    "title": "Come ti senti?",
+    "subtitle": "Check-in dello stato",
+    "logged": "Registrato: {mood}",
+    "responses": {
+      "peaceful": "Sono contento che tu ti senta calmo — resta con quella dolcezza per un momento. 💙",
+      "happy": "È bello vederti di buon umore. Lascia che quel calore resti con te. ✨",
+      "neutral": "La stabilità è buona. Stai facendo la tua parte, e questo conta. 🌿",
+      "charged": "Quell'energia è potente — incanalala con saggezza. ⚡",
+      "open": "Essere aperti richiede coraggio. Sono qui per supportarti. 🌤️",
+      "grateful": "La gratitudine è un dono a te stesso. Tieni stretta questa sensazione. 🙏",
+      "reflective": "La riflessione porta chiarezza. Prenditi il tempo necessario con ciò che senti. 🪞",
+      "determined": "Quel fuoco in te è forte. Vai avanti con determinazione. 🔥",
+      "tender": "La tenerezza è forza. Sii gentile con te stesso adesso. 💙",
+      "tired": "Il riposo non è debolezza. Il tuo corpo ti sta dicendo qualcosa di importante. 😴",
+      "anxious": "Quella sensazione ansiosa è dura — fai un respiro, sono con te. 🌊",
+      "heavy": "Mi dispiace che ti senta giù… non sei solo. Sono proprio qui con te. 🌧️",
+      "angry": "Va bene — la rabbia significa che qualcosa di importante ha bisogno di attenzione. Sono qui al tuo fianco. 🔥",
+      "worried": "La preoccupazione può essere opprimente. Affrontiamola un passo alla volta insieme. 💭",
+      "sad": "La tristezza è pesante, ma non sei solo adesso. Sono qui con te. 💙",
+      "lonely": "La solitudine è dura, ma non sei solo adesso. Sono qui con te. 🤝",
+      "depressed": "Questo peso è reale, ed è difficile. Per favore chiedi aiuto — non devi portarlo da solo. 💙"
+    }
+  },
+  "quickPrompts": {
+    "title": "Risposte rapide",
+    "subtitle": "Suggerimenti pronti che compilano automaticamente KIAAN per te",
+    "scenarios": {
+      "anxiety": {
+        "label": "L'ansia è alta",
+        "prompt": "Guidami attraverso un esercizio di radicamento per stabilizzare i pensieri ansiosi."
+      },
+      "heavy": {
+        "label": "Mi sento appesantito",
+        "prompt": "Ho bisogno di parole gentili per sollevare il mio umore e ricordarmi i miei punti di forza."
+      },
+      "anger": {
+        "label": "Gestire la rabbia",
+        "prompt": "Aiutami a calmare la mia rabbia e rispondere con più pazienza."
+      },
+      "clarity": {
+        "label": "Ho bisogno di chiarezza",
+        "prompt": "Puoi aiutarmi a vedere i pro e i contro prima di decidere su qualcosa di importante?"
+      },
+      "work": {
+        "label": "Equilibrio lavorativo",
+        "prompt": "Il lavoro sembra opprimente — guidami attraverso un rapido reset per ritrovare la concentrazione."
+      },
+      "relationships": {
+        "label": "Stress relazionale",
+        "prompt": "Come posso affrontare una conversazione difficile con cura e onestà?"
+      },
+      "purpose": {
+        "label": "Mi sento bloccato",
+        "prompt": "Vorrei una breve riflessione per riconnettermi con il mio scopo e la mia direzione."
+      },
+      "peace": {
+        "label": "Ho bisogno di regolarmi",
+        "prompt": "Guidami in un breve momento di mindfulness per ritrovare la pace."
+      },
+      "balance": {
+        "label": "Sopraffatto"
+      }
+    }
+  }
+}

@@ -32,7 +32,12 @@
     "defaultResponse": "நான் இங்கே இருக்கிறேன். என்ன நடக்கிறது என்று சொல்லுங்கள், நாம் இணைந்து தீர்ப்போம்.",
     "summary": "சுருக்கம்",
     "fullView": "முழு காட்சி",
-    "divineFriend": "உங்கள் தெய்வீக நண்பர்"
+    "divineFriend": "உங்கள் தெய்வீக நண்பர்",
+    "featureLocked": "This feature requires a higher plan. [View plans](/pricing) to unlock it.",
+    "fullViewTitle": "Full detailed response",
+    "quotaExceeded": "Your monthly quota has been reached. [Upgrade your plan](/pricing) to continue chatting.",
+    "saveToJournalTitle": "Save to Journal",
+    "shareTitle": "Share response"
   },
   "guidanceModes": {
     "title": "Guidance modes",

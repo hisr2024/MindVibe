@@ -32,7 +32,12 @@
     "defaultResponse": "अहम् अत्र अस्मि। किम् भवति तत् वदतु, वयं सहैव समाधानं कुर्मः।",
     "summary": "सारांशः",
     "fullView": "पूर्णदृश्यम्",
-    "divineFriend": "भवतः दिव्यमित्रम्"
+    "divineFriend": "भवतः दिव्यमित्रम्",
+    "featureLocked": "This feature requires a higher plan. [View plans](/pricing) to unlock it.",
+    "fullViewTitle": "Full detailed response",
+    "quotaExceeded": "Your monthly quota has been reached. [Upgrade your plan](/pricing) to continue chatting.",
+    "saveToJournalTitle": "Save to Journal",
+    "shareTitle": "Share response"
   },
   "guidanceModes": {
     "title": "Guidance modes",

@@ -2,8 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef, createContext, useContext, type ReactNode } from 'react'
 
-// Align with all 17 languages from i18n.ts
-export type Language = 'en' | 'hi' | 'ta' | 'te' | 'bn' | 'mr' | 'gu' | 'kn' | 'ml' | 'pa' | 'sa' | 'es' | 'fr' | 'de' | 'pt' | 'ja' | 'zh-CN'
+// Align with all 29 languages from i18n.ts
+export type Language =
+  | 'en' | 'hi' | 'ta' | 'te' | 'bn' | 'mr' | 'gu' | 'kn' | 'ml' | 'pa' | 'sa'
+  | 'es' | 'fr' | 'de' | 'pt' | 'it' | 'nl' | 'pl' | 'sv' | 'ru'
+  | 'ja' | 'zh-CN' | 'ko' | 'th' | 'vi' | 'id'
+  | 'ar' | 'tr'
+  | 'sw'
 
 export interface LanguageConfig {
   code: Language
@@ -13,6 +18,7 @@ export interface LanguageConfig {
 }
 
 export const LANGUAGES: Record<Language, LanguageConfig> = {
+  // Indian languages
   en: { code: 'en', name: 'English', nativeName: 'English', dir: 'ltr' },
   hi: { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', dir: 'ltr' },
   ta: { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்', dir: 'ltr' },
@@ -24,12 +30,28 @@ export const LANGUAGES: Record<Language, LanguageConfig> = {
   ml: { code: 'ml', name: 'Malayalam', nativeName: 'മലയാളം', dir: 'ltr' },
   pa: { code: 'pa', name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ', dir: 'ltr' },
   sa: { code: 'sa', name: 'Sanskrit', nativeName: 'संस्कृत', dir: 'ltr' },
+  // European languages
   es: { code: 'es', name: 'Spanish', nativeName: 'Español', dir: 'ltr' },
   fr: { code: 'fr', name: 'French', nativeName: 'Français', dir: 'ltr' },
   de: { code: 'de', name: 'German', nativeName: 'Deutsch', dir: 'ltr' },
   pt: { code: 'pt', name: 'Portuguese', nativeName: 'Português', dir: 'ltr' },
+  it: { code: 'it', name: 'Italian', nativeName: 'Italiano', dir: 'ltr' },
+  nl: { code: 'nl', name: 'Dutch', nativeName: 'Nederlands', dir: 'ltr' },
+  pl: { code: 'pl', name: 'Polish', nativeName: 'Polski', dir: 'ltr' },
+  sv: { code: 'sv', name: 'Swedish', nativeName: 'Svenska', dir: 'ltr' },
+  ru: { code: 'ru', name: 'Russian', nativeName: 'Русский', dir: 'ltr' },
+  // Asian languages
   ja: { code: 'ja', name: 'Japanese', nativeName: '日本語', dir: 'ltr' },
   'zh-CN': { code: 'zh-CN', name: 'Chinese (Simplified)', nativeName: '简体中文', dir: 'ltr' },
+  ko: { code: 'ko', name: 'Korean', nativeName: '한국어', dir: 'ltr' },
+  th: { code: 'th', name: 'Thai', nativeName: 'ภาษาไทย', dir: 'ltr' },
+  vi: { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', dir: 'ltr' },
+  id: { code: 'id', name: 'Indonesian', nativeName: 'Bahasa Indonesia', dir: 'ltr' },
+  // Middle Eastern languages
+  ar: { code: 'ar', name: 'Arabic', nativeName: 'العربية', dir: 'rtl' },
+  tr: { code: 'tr', name: 'Turkish', nativeName: 'Türkçe', dir: 'ltr' },
+  // African languages
+  sw: { code: 'sw', name: 'Swahili', nativeName: 'Kiswahili', dir: 'ltr' },
 }
 
 // Use same storage key as MinimalLanguageSelector for consistency
@@ -67,28 +89,25 @@ const translationCache: Map<Language, TranslationObject> = new Map()
 
 function detectLanguageFromLocale(): Language {
   if (typeof window === 'undefined') return 'en'
-  
+
   const locale = navigator.language || ''
   const langCode = locale.split('-')[0]
-  
-  // Direct matches
+
+  // Direct matches for compound locale codes
   if (locale === 'zh-CN' || locale === 'zh-Hans') return 'zh-CN'
-  if (langCode === 'hi') return 'hi'
-  if (langCode === 'ta') return 'ta'
-  if (langCode === 'te') return 'te'
-  if (langCode === 'bn') return 'bn'
-  if (langCode === 'mr') return 'mr'
-  if (langCode === 'gu') return 'gu'
-  if (langCode === 'kn') return 'kn'
-  if (langCode === 'ml') return 'ml'
-  if (langCode === 'pa') return 'pa'
-  if (langCode === 'sa') return 'sa'
-  if (langCode === 'es') return 'es'
-  if (langCode === 'fr') return 'fr'
-  if (langCode === 'de') return 'de'
-  if (langCode === 'pt') return 'pt'
-  if (langCode === 'ja') return 'ja'
-  
+
+  // Map browser language codes to supported languages
+  const langMap: Record<string, Language> = {
+    hi: 'hi', ta: 'ta', te: 'te', bn: 'bn', mr: 'mr',
+    gu: 'gu', kn: 'kn', ml: 'ml', pa: 'pa', sa: 'sa',
+    es: 'es', fr: 'fr', de: 'de', pt: 'pt', it: 'it',
+    nl: 'nl', pl: 'pl', sv: 'sv', ru: 'ru',
+    ja: 'ja', ko: 'ko', th: 'th', vi: 'vi', id: 'id',
+    ar: 'ar', tr: 'tr', sw: 'sw',
+  }
+
+  if (langCode in langMap) return langMap[langCode]
+
   return 'en'
 }
 
@@ -154,7 +173,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
     try {
       // Load all translation files and merge them
-      const files = ['common', 'home', 'kiaan', 'navigation', 'dashboard', 'features', 'errors', 'divine']
+      const files = ['common', 'home', 'kiaan', 'navigation', 'dashboard', 'features', 'errors', 'divine', 'journeys', 'kiaan_divine']
       const results = await Promise.allSettled(
         files.map(file => fetch(`/locales/${lang}/${file}.json`).then(r => {
           if (!r.ok) {

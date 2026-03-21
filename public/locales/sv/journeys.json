@@ -1,0 +1,83 @@
+{
+  "_template_variables_note": "This file uses i18next template variables: {{current}}, {{total}}, {{day}}, {{title}}. Any rename or removal of these variables will break the UI. Ensure all referenced variables are passed by the consuming components (JourneyCard, JourneyStep, JourneyComplete).",
+  "title": "Visdomsresor",
+  "subtitle": "Förvandla din inre värld genom att lossa greppet om de sex inre tendenserna (Sad-Ripu). Välj en eller flera resor för att påbörja din väg till inre frid.",
+  "featured": "Utvalda Resor",
+  "all": "Alla Resor",
+  "active": "Dina Aktiva Resor",
+  "empty": {
+    "title": "Inga Resor Tillgängliga",
+    "description": "Kom tillbaka snart för nya visdomsresor."
+  },
+  "trial": {
+    "title": "Gratis Tillgång",
+    "description": "Prova 1 resa i 3 dagar gratis! Upplev förvandlingen.",
+    "upgrade": "Uppgradera för Full Tillgång"
+  },
+  "card": {
+    "start": "Starta Resa",
+    "continue": "Fortsätt Resa",
+    "locked": "Slutför eller pausa en aktiv resa för att starta denna",
+    "free": "Gratis",
+    "featured": "Utvald",
+    "inProgress": "Pågående",
+    "day": "Dag {{current}} av {{total}}"
+  },
+  "step": {
+    "title": "Dagens Resesteg",
+    "backToJourneys": "Tillbaka till Resor",
+    "complete": "Slutför Dag {{day}}",
+    "completing": "Slutför...",
+    "completed": {
+      "title": "Dag {{day}} Slutförd!",
+      "message": "Bra jobbat! Kom tillbaka imorgon för ditt nästa steg.",
+      "viewAll": "Visa Alla Resor"
+    },
+    "journeyComplete": {
+      "title": "Resa Slutförd!",
+      "message": "Grattis till att ha slutfört {{title}}! Du har tagit ett meningsfullt steg mot inre frid.",
+      "startAnother": "Starta en Annan Resa"
+    },
+    "day14": {
+      "title": "Övningen fortsätter",
+      "body": "De 14 dagarna är en början, inte ett slut. Bär det du har övat med dig i vardagliga ögonblick — arbetet fördjupas härifrån.",
+      "linkTrigger": "Hantera dagens utlösare",
+      "linkPractice": "Daglig mikroövning"
+    }
+  },
+  "sections": {
+    "teaching": "Dagens Undervisning",
+    "reflection": "Guidad Reflektion",
+    "practice": "Övning",
+    "commitment": "Dagens Mikroåtagande",
+    "microPractice": "Dagens mikroövning",
+    "markPracticed": "Markera som övad"
+  },
+  "checkIn": {
+    "label": "Din Reflektion (valfritt)",
+    "placeholder": "Skriv dina tankar, insikter eller känslor..."
+  },
+  "difficulty": {
+    "1": "Nybörjare",
+    "2": "Lätt",
+    "3": "Måttlig",
+    "4": "Utmanande",
+    "5": "Avancerad"
+  },
+  "enemies": {
+    "kama": "Begär (Kama)",
+    "krodha": "Vrede (Krodha)",
+    "lobha": "Girighet (Lobha)",
+    "moha": "Fästande (Moha)",
+    "mada": "Ego (Mada)",
+    "matsarya": "Avund (Matsarya)",
+    "mixed": "Kombinerad Resa",
+    "general": "Allmän Visdom"
+  },
+  "errors": {
+    "loadFailed": "Kunde inte ladda resor. Försök igen.",
+    "startFailed": "Kunde inte starta resa. Försök igen.",
+    "completeFailed": "Kunde inte slutföra steg. Försök igen.",
+    "networkError": "Nätverksfel. Kontrollera din anslutning."
+  }
+}

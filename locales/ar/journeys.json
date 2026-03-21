@@ -1,0 +1,83 @@
+{
+  "_template_variables_note": "This file uses i18next template variables: {{current}}, {{total}}, {{day}}, {{title}}. Any rename or removal of these variables will break the UI. Ensure all referenced variables are passed by the consuming components (JourneyCard, JourneyStep, JourneyComplete).",
+  "title": "رحلات الحكمة",
+  "subtitle": "حوّل عالمك الداخلي بتحرير قبضة الميول الداخلية الستة (Sad-Ripu). اختر رحلة واحدة أو أكثر لبدء طريقك نحو السلام الداخلي.",
+  "featured": "الرحلات المميزة",
+  "all": "جميع الرحلات",
+  "active": "رحلاتك النشطة",
+  "empty": {
+    "title": "لا توجد رحلات متاحة",
+    "description": "تحقق مرة أخرى قريبًا لرحلات حكمة جديدة."
+  },
+  "trial": {
+    "title": "وصول مجاني",
+    "description": "جرّب رحلة واحدة لمدة 3 أيام مجانًا! اختبر التحول.",
+    "upgrade": "ترقية للوصول الكامل"
+  },
+  "card": {
+    "start": "ابدأ الرحلة",
+    "continue": "تابع الرحلة",
+    "locked": "أكمل أو أوقف رحلة نشطة لبدء هذه الرحلة",
+    "free": "مجاني",
+    "featured": "مميز",
+    "inProgress": "قيد التنفيذ",
+    "day": "اليوم {{current}} من {{total}}"
+  },
+  "step": {
+    "title": "خطوة رحلة اليوم",
+    "backToJourneys": "العودة إلى الرحلات",
+    "complete": "أكمل اليوم {{day}}",
+    "completing": "جارٍ الإكمال...",
+    "completed": {
+      "title": "اليوم {{day}} مكتمل!",
+      "message": "عمل رائع! عُد غدًا لخطوتك التالية.",
+      "viewAll": "عرض جميع الرحلات"
+    },
+    "journeyComplete": {
+      "title": "الرحلة مكتملة!",
+      "message": "تهانينا على إكمال {{title}}! لقد اتخذت خطوة ذات معنى نحو السلام الداخلي.",
+      "startAnother": "ابدأ رحلة أخرى"
+    },
+    "day14": {
+      "title": "الممارسة مستمرة",
+      "body": "الأيام الـ 14 هي بداية وليست نهاية. انقل ما تدربت عليه إلى لحظات الحياة اليومية — العمل يتعمق من هنا.",
+      "linkTrigger": "تعامل مع محفز اليوم",
+      "linkPractice": "ممارسة يومية صغيرة"
+    }
+  },
+  "sections": {
+    "teaching": "درس اليوم",
+    "reflection": "تأمل موجّه",
+    "practice": "الممارسة",
+    "commitment": "التزام صغير لليوم",
+    "microPractice": "ممارسة صغيرة لليوم",
+    "markPracticed": "وضع علامة تم التدريب"
+  },
+  "checkIn": {
+    "label": "تأملك (اختياري)",
+    "placeholder": "اكتب أفكارك أو رؤاك أو مشاعرك..."
+  },
+  "difficulty": {
+    "1": "مبتدئ",
+    "2": "سهل",
+    "3": "متوسط",
+    "4": "صعب",
+    "5": "متقدم"
+  },
+  "enemies": {
+    "kama": "الرغبة (Kama)",
+    "krodha": "الغضب (Krodha)",
+    "lobha": "الطمع (Lobha)",
+    "moha": "التعلق (Moha)",
+    "mada": "الأنا (Mada)",
+    "matsarya": "الحسد (Matsarya)",
+    "mixed": "رحلة مشتركة",
+    "general": "حكمة عامة"
+  },
+  "errors": {
+    "loadFailed": "فشل تحميل الرحلات. يرجى المحاولة مرة أخرى.",
+    "startFailed": "فشل بدء الرحلة. يرجى المحاولة مرة أخرى.",
+    "completeFailed": "فشل إكمال الخطوة. يرجى المحاولة مرة أخرى.",
+    "networkError": "خطأ في الشبكة. يرجى التحقق من اتصالك."
+  }
+}

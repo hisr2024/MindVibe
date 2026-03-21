@@ -1,7 +1,7 @@
 {
   "app": {
-    "name": "Sakha",
-    "tagline": "The Spiritual Companion & Your Divine Friend"
+    "name": "MindVibe",
+    "tagline": "Your Spiritual Companion & Divine Friend"
   },
   "buttons": {
     "submit": "Submit",
@@ -18,7 +18,10 @@
     "learnMore": "Learn More",
     "getStarted": "Get Started",
     "tryNow": "Try Now",
-    "tools": "Tools"
+    "tools": "Tools",
+    "translate": "Translate",
+    "original": "Original",
+    "showOriginal": "Show original"
   },
   "status": {
     "loading": "Loading...",
@@ -26,7 +29,9 @@
     "saved": "Saved",
     "error": "Error",
     "success": "Success",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "translating": "Translating...",
+    "alreadyInLanguage": "Already in this language"
   },
   "common": {
     "hello": "Hello",

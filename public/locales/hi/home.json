@@ -8,7 +8,7 @@
     "privacy": "बातचीत निजी रहती है • एक गर्म, गोपनीय आश्रय"
   },
   "ecosystem": {
-    "title": "Sakha पारिस्थितिकी तंत्र",
+    "title": "MindVibe पारिस्थितिकी तंत्र",
     "subtitle": "प्राचीन ज्ञान और आधुनिक प्रथाओं में निहित मानसिक स्वास्थ्य के लिए एक समग्र दृष्टिकोण",
     "pillars": {
       "innerPeace": {
@@ -64,7 +64,10 @@
       "tired": "आराम कमजोरी नहीं है। 💙",
       "anxious": "एक सांस लें। मैं आपके साथ हूं। 🌊",
       "heavy": "आप अकेले नहीं हैं। मैं यहाँ हूँ। 💙"
-    }
+    },
+    "helperText": "Tap a stone to log your mood • Takes you to KIAAN Chat for support",
+    "openingChat": "Opening KIAAN Chat...",
+    "selectMood": "Select"
   },
   "quickAccess": {
     "kiaan": {

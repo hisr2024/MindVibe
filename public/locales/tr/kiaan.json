@@ -1,0 +1,141 @@
+{
+  "welcome": {
+    "title": "KIAAN'a Hoş Geldiniz",
+    "subtitle": "Sakin, modern ruhani yol arkadaşınız — her zaman burada, her zaman destekleyici.",
+    "description": "Sakin, gizlilik öncelikli ruhani yol arkadaşı, günlük tutma, rehberli sohbetler ve kontrol panelleriyle."
+  },
+  "chat": {
+    "title": "KIAAN ile Konuş",
+    "subtitle": "Sıcak bir parıltıyla nazik rehberlik",
+    "placeholder": "Mesajınızı yazın...",
+    "send": "Gönder",
+    "thinking": "KIAAN düşünüyor...",
+    "connectionStatus": "Özel, sabit bağlantı",
+    "connectionDesc": "Sorularınız odağa girer—yanıtlar değişmez.",
+    "emptyState": {
+      "emoji": "✨",
+      "title": "Bugün size nasıl rehberlik edebilirim?",
+      "subtitle": "Aklınızdakini paylaşın"
+    },
+    "disclaimer": "KIAAN, Bhagavad Gita ve kadim bilgelikten alınan düşünceler paylaşan ruhani yol arkadaşınızdır. Burası iç huzur ve kendini keşfetme için kutsal bir alandır. Ruhani yolun ötesindeki konularda her zaman nitelikli profesyonellerden rehberlik alın.",
+    "saveToJournal": "Günlüğe Kaydet",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı!",
+    "copyFailed": "Başarısız",
+    "share": "Paylaş",
+    "shareVia": "Şununla paylaş",
+    "privacyNotice": "Gizlilik Bildirimi",
+    "shareWarning": "Ruhani sağlık bilgilerini paylaşmak üzeresiniz. Lütfen bu içeriği kamuya açık paylaşmaktan rahat olduğunuzdan emin olun.",
+    "anonymize": "İçeriği anonimleştir (kişisel tanımlayıcıları kaldır)",
+    "anonymized": "✓ Anonimleştirilmiş içerik",
+    "sharingOriginal": "Orijinal içerik paylaşılıyor",
+    "defaultResponse": "Buradayım. Neler olduğunu anlat, birlikte çözelim.",
+    "quotaExceeded": "Aylık kotanız doldu. Sohbete devam etmek için [planınızı yükseltin](/pricing).",
+    "featureLocked": "Bu özellik daha yüksek bir plan gerektirir. Kilidi açmak için [planları görüntüleyin](/pricing).",
+    "summary": "Özet",
+    "fullView": "Tam Görünüm",
+    "fullViewTitle": "Tam detaylı yanıt",
+    "shareTitle": "Yanıtı paylaş",
+    "saveToJournalTitle": "Günlüğe Kaydet",
+    "divineFriend": "İlahi Dostunuz"
+  },
+  "guidanceModes": {
+    "title": "Rehberlik modları",
+    "subtitle": "Akan Enerji Üçgeni",
+    "selectPrompt": "KIAAN'ın durumunuzu nasıl yönlendirdiğini keşfetmek için bir moda dokunun.",
+    "innerPeace": {
+      "title": "İç Huzur",
+      "description": "Nefes odaklı egzersizler ve nazik topraklama teknikleriyle dinginliği bulun. Zihninizi sakinleştirmeniz ve huzurla yeniden bağlanmanız gereken anlar için mükemmel.",
+      "note": "Nazik nefes ve yumuşak odak"
+    },
+    "mindControl": {
+      "title": "Zihin Kontrolü",
+      "description": "Yapılandırılmış farkındalık uygulamaları ile odaklanmış netlik geliştirin. Karar verme, konsantrasyon ve iç disiplini korumak için ideal.",
+      "note": "Sabit adımlar, her seferinde bir düşünce"
+    },
+    "selfKindness": {
+      "title": "Öz Şefkat",
+      "description": "Sıcak, destekleyici egzersizlerle kendinize karşı merhameti büyütün. İyileşme, kendini kabul etme ve duygusal sağlığınızı beslemek için gerekli.",
+      "note": "Burada hoş karşılanıyorsunuz"
+    }
+  },
+  "clarityPause": {
+    "title": "Netlik Duraklaması",
+    "subtitle": "Harekete geçmeden önce alan yaratın.",
+    "description": "Tavsiye yok. Sadece netlikten karar vermek için alan.",
+    "note": "KIAAN dokunulmadan kalır—anında geçmek için reddedin.",
+    "closeOverlay": "Katmanı kapat",
+    "sendNow": "Şimdi gönder (duraklamayı atla)",
+    "startPause": "60 saniye duraklat",
+    "deliverToKiaan": "Şimdi KIAAN'a ilet",
+    "keepGrounding": "60 saniye topraklama tut",
+    "question": "Şu anda netlikten mi yoksa duygulardan mı hareket ediyorsunuz?",
+    "countdown": "{seconds} saniye kaldı",
+    "ready": "Hazır olduğunuzda"
+  },
+  "moodCheck": {
+    "title": "Nasıl hissediyorsunuz?",
+    "subtitle": "Durum kontrolü",
+    "logged": "Kaydedildi: {mood}",
+    "responses": {
+      "peaceful": "Sakin hissetmenize sevindim — o yumuşaklıkla bir an kalın. 💙",
+      "happy": "Parlak hissettiğinizi görmek güzel. Bu sıcaklığın sizinle kalmasına izin verin. ✨",
+      "neutral": "Kararlılık iyidir. Buradasınız, bu önemli. 🌿",
+      "charged": "Bu enerji güçlü — onu akıllıca yönlendirin. ⚡",
+      "open": "Açık olmak cesaret gerektirir. Sizi desteklemek için buradayım. 🌤️",
+      "grateful": "Şükran kendinize bir hediyedir. Bu duyguyu koruyun. 🙏",
+      "reflective": "Düşünce netlik getirir. Hissettiğiniz şeyle zaman ayırın. 🪞",
+      "determined": "İçinizdeki ateş güçlü. Amaçla ileri gidin. 🔥",
+      "tender": "Hassasiyet güçtür. Şu an kendinize nazik olun. 💙",
+      "tired": "Dinlenmek zayıflık değildir. Vücudunuz size önemli bir şey söylüyor. 😴",
+      "anxious": "Kaygılı hissetmek zordur — bir nefes alın, sizinleyim. 🌊",
+      "heavy": "Ağır hissettiğiniz için üzgünüm... yalnız değilsiniz. Tam buradayım. 🌧️",
+      "angry": "Sorun değil — öfke, önemli bir şeyin dikkat gerektirdiği anlamına gelir. Yanınızdayım. 🔥",
+      "worried": "Endişe bunaltıcı olabilir. Bunu birlikte adım adım ele alalım. 💭",
+      "sad": "Üzüntü ağırdır, ama şu anda yalnız değilsiniz. Sizinleyim. 💙",
+      "lonely": "Yalnızlık zordur, ama şu anda yalnız değilsiniz. Sizinleyim. 🤝",
+      "depressed": "Bu ağırlık gerçek ve zor. Lütfen yardım isteyin — bunu tek başınıza taşımak zorunda değilsiniz. 💙"
+    }
+  },
+  "quickPrompts": {
+    "title": "Hızlı Yanıtlar",
+    "subtitle": "KIAAN'ı otomatik dolduran hazır istemler",
+    "scenarios": {
+      "anxiety": {
+        "label": "Kaygı yüksek",
+        "prompt": "Kaygılı düşünceleri sabitlemek için beni bir topraklama egzersizinde yönlendir."
+      },
+      "heavy": {
+        "label": "Ağır hissediyorum",
+        "prompt": "Ruh halimi yükseltmek ve güçlü yanlarımı hatırlatmak için nazik sözlere ihtiyacım var."
+      },
+      "anger": {
+        "label": "Öfke yönetimi",
+        "prompt": "Öfkemi yatıştırmama ve daha sabırlı yanıt vermeme yardım et."
+      },
+      "clarity": {
+        "label": "Netliğe ihtiyacım var",
+        "prompt": "Önemli bir karar vermeden önce artıları ve eksileri görmeme yardımcı olabilir misin?"
+      },
+      "work": {
+        "label": "İş dengesi",
+        "prompt": "İş bunaltıcı hissettiriyor—odağımı yeniden kazanmak için hızlı bir sıfırlama yap."
+      },
+      "relationships": {
+        "label": "İlişki stresi",
+        "prompt": "Zor bir konuşmayı özenle ve dürüstlükle nasıl yönetebilirim?"
+      },
+      "purpose": {
+        "label": "Sıkışmış hissediyorum",
+        "prompt": "Amacım ve yönümle yeniden bağlanmak için kısa bir düşünce istiyorum."
+      },
+      "peace": {
+        "label": "Düzenlemeye ihtiyacım var",
+        "prompt": "Tekrar huzurlu hissetmem için kısa bir farkındalık anında beni yönlendir."
+      },
+      "balance": {
+        "label": "Bunalmış"
+      }
+    }
+  }
+}

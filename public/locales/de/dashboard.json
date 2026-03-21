@@ -1,7 +1,7 @@
 {
   "title": "Dashboard",
   "allTools": "Alle Werkzeuge an einem Ort",
-  "subtitle": "Sakha Werkzeuge",
+  "subtitle": "MindVibe Werkzeuge",
   "returnHome": "Zur Startseite",
   "toolsCount": "Werkzeuge",
   "welcome": "Willkommen zurück",
@@ -61,7 +61,7 @@
       "description": "Deinen Plan verwalten"
     },
     "about": {
-      "title": "Über Sakha",
+      "title": "Über MindVibe",
       "description": "Plattform-Informationen"
     },
     "analytics": {
@@ -75,6 +75,46 @@
     "moodInsights": {
       "title": "Stimmungseinblicke",
       "description": "Emotionale Muster"
+    },
+    "deep": {
+      "description": "Advanced analytics",
+      "title": "Deep Insights"
+    },
+    "emotional-reset": {
+      "description": "Quick emotional balance",
+      "title": "Emotional Reset"
+    },
+    "insights": {
+      "description": "Emotional patterns",
+      "title": "Mood Insights"
+    },
+    "karma-footprint": {
+      "description": "Track your actions",
+      "title": "Karma Footprint"
+    },
+    "karma-reset": {
+      "description": "Start fresh",
+      "title": "Karma Reset"
+    },
+    "karmic-tree": {
+      "description": "Visualize your journey",
+      "title": "Karmic Tree"
+    },
+    "reflections": {
+      "description": "Daily journaling",
+      "title": "Sacred Reflections"
+    },
+    "relationship-compass": {
+      "description": "Relationship guidance",
+      "title": "Relationship Compass"
+    },
+    "viyog": {
+      "description": "Outcome anxiety reducer",
+      "title": "Viyoga"
+    },
+    "wisdom": {
+      "description": "Ancient wisdom",
+      "title": "Wisdom Rooms"
     }
   },
   "badges": {

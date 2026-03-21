@@ -1,0 +1,120 @@
+{
+  "title": "Bảng điều khiển",
+  "welcome": "Chào mừng trở lại",
+  "subtitle": "Công cụ MindVibe",
+  "allTools": "Tất cả công cụ tại một nơi",
+  "returnHome": "Trở về trang chủ",
+  "toolsCount": "công cụ",
+  "categories": {
+    "core": "Công cụ Cốt lõi",
+    "guidance": "Công cụ Hướng dẫn",
+    "karma": "Công cụ Karma",
+    "quick": "Truy cập Nhanh"
+  },
+  "tools": {
+    "kiaan": {
+      "title": "KIAAN Chat",
+      "description": "Bạn đồng hành tâm linh AI"
+    },
+    "journal": {
+      "title": "Nhật ký Riêng tư",
+      "description": "Viết nhật ký được mã hóa"
+    },
+    "wisdom": {
+      "title": "Phòng Trí tuệ",
+      "description": "Trí tuệ cổ xưa"
+    },
+    "insights": {
+      "title": "Hiểu biết Cảm xúc",
+      "description": "Mẫu cảm xúc"
+    },
+    "viyog": {
+      "title": "Viyoga",
+      "description": "Giảm lo lắng về kết quả"
+    },
+    "ardha": {
+      "title": "Ardha",
+      "description": "Hướng dẫn theo tình huống"
+    },
+    "relationship-compass": {
+      "title": "La bàn Mối quan hệ",
+      "description": "Hướng dẫn mối quan hệ"
+    },
+    "emotional-reset": {
+      "title": "Thiết lập lại Cảm xúc",
+      "description": "Cân bằng cảm xúc nhanh"
+    },
+    "karma-footprint": {
+      "title": "Karma Footprint",
+      "description": "Theo dõi hành động của bạn"
+    },
+    "karmic-tree": {
+      "title": "Cây Karma",
+      "description": "Hình dung hành trình của bạn"
+    },
+    "karma-reset": {
+      "title": "Đặt lại Karma",
+      "description": "Bắt đầu lại"
+    },
+    "reflections": {
+      "title": "Suy ngẫm Thiêng liêng",
+      "description": "Viết nhật ký hàng ngày"
+    },
+    "deep": {
+      "title": "Hiểu biết Sâu sắc",
+      "description": "Phân tích nâng cao"
+    },
+    "analytics": {
+      "title": "Phân tích",
+      "description": "Theo dõi tiến trình của bạn"
+    }
+  },
+  "badges": {
+    "new": "mới",
+    "premium": "cao cấp",
+    "beta": "beta"
+  },
+  "analytics": {
+    "title": "Phân tích",
+    "overview": "Tổng quan",
+    "insights": "Hiểu biết",
+    "trends": "Xu hướng",
+    "weeklyProgress": "Tiến trình Hàng tuần",
+    "monthlyProgress": "Tiến trình Hàng tháng"
+  },
+  "profile": {
+    "title": "Hồ sơ",
+    "settings": "Cài đặt",
+    "editProfile": "Chỉnh sửa Hồ sơ",
+    "updateProfile": "Cập nhật Hồ sơ",
+    "accountInfo": "Thông tin Tài khoản"
+  },
+  "subscription": {
+    "title": "Đăng ký",
+    "plan": "Gói hiện tại",
+    "upgrade": "Nâng cấp",
+    "manage": "Quản lý Đăng ký",
+    "billing": "Thanh toán"
+  },
+  "stats": {
+    "journalEntries": "Bài viết Nhật ký",
+    "chatSessions": "Phiên Trò chuyện",
+    "moodCheckins": "Kiểm tra Tâm trạng",
+    "streakDays": "Ngày Liên tục"
+  },
+  "tool_desc": {
+    "viyog": "Làm dịu phản ứng tức thì",
+    "ardha": "Đổi góc nhìn nhận thức",
+    "kiaan": "Nói chuyện để hiểu rõ",
+    "relationship-compass": "Tìm sự sáng tỏ trong mối quan hệ",
+    "journey": "Rèn luyện sự vững vàng nội tâm lâu dài"
+  },
+  "mode_label": {
+    "prefix": "Bạn đang ở:",
+    "viyog": "Chế độ Tạm dừng",
+    "ardha": "Chế độ Sáng tỏ",
+    "kiaan": "Chế độ Bạn đồng hành",
+    "relationship-compass": "Chế độ Mối quan hệ",
+    "journey": "Chế độ Luyện tập"
+  }
+}

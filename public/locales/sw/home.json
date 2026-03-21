@@ -1,0 +1,118 @@
+{
+  "hero": {
+    "title": "Mwandani Wako wa AI kwa Afya ya Kiroho",
+    "subtitle": "Zungumza na KIAAN, Inayoendeshwa na Hekima ya Kale",
+    "tagline": "Mwandani wako wa kiroho mtulivu, faragha kwanza, anayeendeshwa na hekima ya kale",
+    "ctaPrimary": "Zungumza na KIAAN",
+    "ctaSecondary": "Tafakuri Takatifu",
+    "privacy": "Mazungumzo yanabaki ya faragha • kimbilio la joto na siri"
+  },
+  "ecosystem": {
+    "title": "Mfumo wa MindVibe",
+    "subtitle": "Njia kamili ya afya ya kiroho, iliyojikita katika hekima ya kale na mazoea ya kisasa",
+    "pillars": {
+      "innerPeace": {
+        "title": "Amani ya Ndani",
+        "description": "Pata utulivu kupitia mazoezi ya kupumua na mbinu za kutuliza kwa upole."
+      },
+      "mindControl": {
+        "title": "Kudhibiti Akili",
+        "description": "Kuza uwazi wa kuzingatia kupitia mazoea ya umakinifu yaliyopangwa."
+      },
+      "selfKindness": {
+        "title": "Huruma kwa Nafsi",
+        "description": "Kuza huruma kwa nafsi yako kupitia mazoezi ya joto na msaada."
+      }
+    },
+    "footer": "Kila nguzo inafanya kazi pamoja kuunda njia yenye usawa na endelevu ya afya ya kiroho"
+  },
+  "features": {
+    "title": "Vipengele Vikuu",
+    "subtitle": "Zana za faragha kwanza zilizoundwa kwa safari yako ya kiroho",
+    "voice": {
+      "title": "Sauti ya KIAAN",
+      "description": "Zungumza kwa kawaida na KIAAN kwa kutumia kuingiza sauti. Daima macho, inakuongoza popote katika mfumo.",
+      "cta": "Zungumza na KIAAN"
+    },
+    "offline": {
+      "title": "Tayari bila Mtandao",
+      "description": "Fikia daftari lako, hisia, na tafakuri wakati wowote, hata bila mtandao.",
+      "cta": "Anza Kuandika Daftari"
+    },
+    "reset": {
+      "title": "Kurekebisha Hisia",
+      "description": "Mazoezi ya haraka ya kurekebisha hali yako ya kihisia na kupata utulivu mara moja.",
+      "cta": "Jaribu Kurekebisha"
+    }
+  },
+  "moodCheckIn": {
+    "title": "Unajisikiaje?",
+    "subtitle": "Kujiangalia kwa Haraka",
+    "helper": "Gusa jiwe kurekodi hisia zako • Ya faragha na kifaa tu",
+    "helperText": "Gusa jiwe kurekodi hisia zako • Inakupeleka kwa KIAAN Mazungumzo kwa msaada",
+    "openingChat": "Inafungua KIAAN Mazungumzo...",
+    "selectMood": "Chagua",
+    "moods": {
+      "peaceful": "Amani",
+      "happy": "Furaha",
+      "neutral": "Wastani",
+      "tired": "Uchovu",
+      "anxious": "Wasiwasi",
+      "heavy": "Uzito"
+    },
+    "responses": {
+      "peaceful": "Utulivu mzuri. Kaa nao. 💙",
+      "happy": "Acha joto hilo likae nawe. ✨",
+      "neutral": "Uthabiti ni mzuri. Unajitokeza. 🌿",
+      "tired": "Kupumzika si udhaifu. 💙",
+      "anxious": "Pumua kwa kina. Niko nawe. 🌊",
+      "heavy": "Huko peke yako. Niko hapa. 💙"
+    }
+  },
+  "quickAccess": {
+    "kiaan": {
+      "title": "Zungumza na KIAAN",
+      "subtitle": "Mwongozo wa papo hapo",
+      "description": "Ingia katika mazungumzo yaliyolengwa kwa msaada wa afya ya kiroho",
+      "cta": "Fungua Mazungumzo"
+    },
+    "dashboard": {
+      "title": "Fuatilia Maendeleo",
+      "subtitle": "Dashibodi",
+      "description": "Angalia maarifa kutoka kwa ukaguzi wako wa hisia na maingizo ya daftari",
+      "cta": "Tazama Dashibodi"
+    },
+    "emotionalReset": {
+      "title": "Kurekebisha kwa Haraka",
+      "subtitle": "Kurekebisha Hisia",
+      "description": "Mazoezi ya kuongoza ili kurekebisha hali yako ya kihisia mara moja",
+      "cta": "Jaribu Kurekebisha"
+    }
+  },
+  "disclaimer": {
+    "title": "Kanusho",
+    "text": "KIAAN anashiriki tafakuri za msaada zilizochochewa na mila za hekima. Mazungumzo haya na mazoezi si ushauri wa kimatibabu. Ikiwa unakabiliwa na wasiwasi mkubwa au hujisikii salama, tafadhali wasiliana na huduma za dharura za kimatibabu au mtaalamu aliye na leseni katika nchi yako mara moja."
+  },
+  "introduction": {
+    "heroTitle": "Karibu kwa Uwepo wa Kimungu",
+    "heroSubtitle": "Pata mwongozo wa upendo wa Krishna. Huko peke yako kamwe katika safari hii.",
+    "receiveDarshan": "Pokea Darshan ya Krishna",
+    "talkToKiaan": "Zungumza na KIAAN",
+    "divineWisdom": "Hekima na mwongozo wa kimungu",
+    "protectionShield": "Ngao ya Ulinzi wa Kimungu",
+    "activateProtection": "Washa ulinzi wa Krishna",
+    "heartToHeart": "Moyo kwa Moyo na Krishna",
+    "writeLetter": "Andika barua kwa Mungu",
+    "howIsHeart": "Moyo wako ukoje?",
+    "shareFeelings": "Shiriki hisia zako na Krishna",
+    "goToDashboard": "Nenda kwa Dashibodi",
+    "accessTools": "Fikia zana na vipengele vyote",
+    "quickAccess": "Ufikiaji wa Haraka wa Kimungu",
+    "journeys": "Safari",
+    "journal": "Daftari",
+    "reframe": "Badilisha Mtazamo",
+    "detach": "Jitenge",
+    "footerVerse": "\"Mimi ni Nafsi iliyoketi mioyoni mwa viumbe vyote. Mimi ni mwanzo, katikati, na mwisho.\"",
+    "footerVerseRef": "— Bhagavad Gita 10.20"
+  }
+}

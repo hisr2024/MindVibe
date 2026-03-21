@@ -1,0 +1,39 @@
+{
+  "errors": {
+    "general": "Något gick fel. Försök igen.",
+    "network": "Nätverksfel. Kontrollera din anslutning.",
+    "notFound": "Sidan hittades inte",
+    "unauthorized": "Du har inte behörighet att komma åt denna sida.",
+    "serverError": "Serverfel. Försök igen senare.",
+    "validation": {
+      "required": "Detta fält är obligatoriskt",
+      "email": "Ange en giltig e-postadress",
+      "minLength": "Minsta längd är {min} tecken",
+      "maxLength": "Maximal längd är {max} tecken"
+    }
+  },
+  "notifications": {
+    "success": {
+      "saved": "Sparades framgångsrikt",
+      "updated": "Uppdaterades framgångsrikt",
+      "deleted": "Raderades framgångsrikt",
+      "sent": "Skickades framgångsrikt"
+    },
+    "info": {
+      "processing": "Bearbetar din begäran...",
+      "loading": "Laddar...",
+      "syncing": "Synkroniserar..."
+    },
+    "warning": {
+      "unsavedChanges": "Du har osparade ändringar",
+      "confirmDelete": "Är du säker på att du vill radera detta?",
+      "confirmAction": "Är du säker på att du vill fortsätta?"
+    }
+  },
+  "connection": {
+    "offline": "Du är för närvarande offline",
+    "reconnecting": "Återansluter...",
+    "connected": "Anslutningen återställd",
+    "failed": "Anslutningen misslyckades. Försök igen."
+  }
+}

@@ -66,7 +66,11 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
         "description": "Warm, soft, and naturally expressive. Perfect for "
                        "emotional support and nurturing conversations.",
         "best_for": ["emotional_support", "nurturing", "daily_wisdom"],
-        "languages": ["en", "hi", "es", "fr", "de", "pt", "ja", "zh", "ar"],
+        "languages": [
+            "en", "hi", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "sa",
+            "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
+            "ja", "zh", "ko", "th", "vi", "id", "ar", "tr", "sw",
+        ],
         "quality_score": 9.8,
         "default_stability": 0.50,
         "default_similarity": 0.78,
@@ -82,7 +86,11 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
         "description": "Calm, composed, and articulate. Ideal for guided "
                        "meditation and thoughtful reflections.",
         "best_for": ["meditation", "reflection", "verse_recitation"],
-        "languages": ["en", "hi", "es", "fr", "de", "pt", "ja"],
+        "languages": [
+            "en", "hi", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "sa",
+            "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
+            "ja", "zh", "ko", "th", "vi", "id", "ar", "tr", "sw",
+        ],
         "quality_score": 9.7,
         "default_stability": 0.55,
         "default_similarity": 0.80,
@@ -98,7 +106,10 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
         "description": "Soft-spoken with a gentle British cadence. Ethereal "
                        "quality perfect for breathing exercises and sleep.",
         "best_for": ["breathing", "sleep", "affirmation", "meditation"],
-        "languages": ["en", "fr", "de"],
+        "languages": [
+            "en", "hi", "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
+            "ja", "zh", "ko", "th", "vi", "id", "ar", "tr", "sw",
+        ],
         "quality_score": 9.6,
         "default_stability": 0.60,
         "default_similarity": 0.82,
@@ -114,7 +125,10 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
         "description": "Bright, friendly, and approachable. The kind voice "
                        "that makes you feel instantly comfortable.",
         "best_for": ["conversation", "daily_checkin", "encouragement"],
-        "languages": ["en", "es", "fr", "pt"],
+        "languages": [
+            "en", "hi", "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
+            "ja", "zh", "ko", "th", "vi", "id", "ar", "tr", "sw",
+        ],
         "quality_score": 9.5,
         "default_stability": 0.45,
         "default_similarity": 0.76,
@@ -130,7 +144,10 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
         "description": "Youthful and energetic. Vibrant voice that brings "
                        "positivity and motivation.",
         "best_for": ["motivation", "encouragement", "energetic_guidance"],
-        "languages": ["en", "es", "fr"],
+        "languages": [
+            "en", "hi", "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
+            "ja", "zh", "ko", "th", "vi", "id", "ar", "tr", "sw",
+        ],
         "quality_score": 9.4,
         "default_stability": 0.40,
         "default_similarity": 0.75,
@@ -147,7 +164,11 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
         "description": "Deep, resonant, and authoritative. Carries wisdom "
                        "with natural gravitas and warmth.",
         "best_for": ["verse_recitation", "narration", "sacred_chanting", "wisdom"],
-        "languages": ["en", "hi", "es", "fr", "de", "pt", "ar"],
+        "languages": [
+            "en", "hi", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "sa",
+            "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
+            "ja", "zh", "ko", "th", "vi", "id", "ar", "tr", "sw",
+        ],
         "quality_score": 9.7,
         "default_stability": 0.55,
         "default_similarity": 0.80,
@@ -163,7 +184,10 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
         "description": "Warm and conversational. A trustworthy friend you "
                        "can talk to about anything.",
         "best_for": ["conversation", "emotional_support", "daily_wisdom"],
-        "languages": ["en", "es", "fr", "de", "pt"],
+        "languages": [
+            "en", "hi", "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
+            "ja", "zh", "ko", "th", "vi", "id", "ar", "tr", "sw",
+        ],
         "quality_score": 9.6,
         "default_stability": 0.48,
         "default_similarity": 0.78,
@@ -179,7 +203,10 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
         "description": "Strong and commanding. Inspiring voice for when you "
                        "need a push to keep going.",
         "best_for": ["motivation", "empowerment", "courage"],
-        "languages": ["en", "es", "de"],
+        "languages": [
+            "en", "hi", "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
+            "ja", "zh", "ko", "th", "vi", "id", "ar", "tr", "sw",
+        ],
         "quality_score": 9.4,
         "default_stability": 0.50,
         "default_similarity": 0.80,
@@ -195,7 +222,10 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
         "description": "Relaxed and natural. Like talking to your most "
                        "chill friend who happens to be wise.",
         "best_for": ["casual_conversation", "daily_checkin", "friendly_guidance"],
-        "languages": ["en", "es", "fr", "pt"],
+        "languages": [
+            "en", "hi", "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
+            "ja", "zh", "ko", "th", "vi", "id", "ar", "tr", "sw",
+        ],
         "quality_score": 9.5,
         "default_stability": 0.42,
         "default_similarity": 0.76,
@@ -211,7 +241,10 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
         "description": "Rich storytelling voice with gravitas. Perfect for "
                        "narrating ancient wisdom and parables.",
         "best_for": ["narration", "storytelling", "sacred_texts", "verse_recitation"],
-        "languages": ["en", "es", "fr", "de"],
+        "languages": [
+            "en", "hi", "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
+            "ja", "zh", "ko", "th", "vi", "id", "ar", "tr", "sw",
+        ],
         "quality_score": 9.5,
         "default_stability": 0.58,
         "default_similarity": 0.82,
@@ -227,7 +260,11 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
         "description": "Soothing, measured voice with crystal-clear enunciation. "
                        "Excellent for guided meditation, breathing exercises, and healing.",
         "best_for": ["meditation", "breathing", "healing", "sleep", "affirmation"],
-        "languages": ["en", "hi", "es", "fr", "de", "pt", "ja", "zh"],
+        "languages": [
+            "en", "hi", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "sa",
+            "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
+            "ja", "zh", "ko", "th", "vi", "id", "ar", "tr", "sw",
+        ],
         "quality_score": 9.7,
         "default_stability": 0.62,
         "default_similarity": 0.84,
@@ -243,7 +280,11 @@ ELEVENLABS_VOICES: dict[str, dict[str, Any]] = {
         "description": "Measured, wise British voice with natural gravitas. "
                        "Ideal for philosophical teachings and Gita commentary.",
         "best_for": ["wisdom", "teaching", "narration", "verse_recitation"],
-        "languages": ["en", "hi", "fr", "de"],
+        "languages": [
+            "en", "hi", "ta", "te", "bn", "mr", "gu", "kn", "ml", "pa", "sa",
+            "es", "fr", "de", "pt", "it", "nl", "pl", "sv", "ru",
+            "ja", "zh", "ko", "th", "vi", "id", "ar", "tr", "sw",
+        ],
         "quality_score": 9.6,
         "default_stability": 0.58,
         "default_similarity": 0.82,

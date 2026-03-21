@@ -1,0 +1,141 @@
+{
+  "welcome": {
+    "title": "Chào mừng đến với KIAAN",
+    "subtitle": "Bạn đồng hành tâm linh bình yên, hiện đại — luôn ở đây, luôn hỗ trợ.",
+    "description": "Bạn đồng hành tâm linh bình yên, ưu tiên quyền riêng tư, với nhật ký, trò chuyện có hướng dẫn và bảng điều khiển."
+  },
+  "chat": {
+    "title": "Nói chuyện với KIAAN",
+    "subtitle": "Hướng dẫn nhẹ nhàng với ánh sáng ấm",
+    "placeholder": "Nhập tin nhắn của bạn...",
+    "send": "Gửi",
+    "thinking": "KIAAN đang suy ngẫm...",
+    "connectionStatus": "Kết nối riêng tư, ổn định",
+    "connectionDesc": "Câu hỏi của bạn sẽ hiện ra rõ ràng—câu trả lời không thay đổi.",
+    "emptyState": {
+      "emoji": "✨",
+      "title": "Tôi có thể hướng dẫn bạn thế nào hôm nay?",
+      "subtitle": "Chia sẻ những gì đang trong tâm trí bạn"
+    },
+    "disclaimer": "KIAAN là bạn đồng hành tâm linh của bạn, chia sẻ suy ngẫm từ Bhagavad Gita và trí tuệ cổ xưa. Đây là không gian thiêng liêng cho bình yên nội tâm và tự khám phá. Đối với những vấn đề ngoài con đường tâm linh, hãy luôn tìm kiếm sự hướng dẫn từ các chuyên gia có trình độ.",
+    "saveToJournal": "Lưu vào Nhật ký",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép!",
+    "copyFailed": "Thất bại",
+    "share": "Chia sẻ",
+    "shareVia": "Chia sẻ qua",
+    "privacyNotice": "Thông báo Bảo mật",
+    "shareWarning": "Bạn sắp chia sẻ thông tin về sức khỏe tâm linh. Hãy đảm bảo bạn thoải mái khi chia sẻ nội dung này công khai.",
+    "anonymize": "Ẩn danh nội dung (xóa thông tin nhận dạng cá nhân)",
+    "anonymized": "✓ Nội dung đã ẩn danh",
+    "sharingOriginal": "Đang chia sẻ nội dung gốc",
+    "defaultResponse": "Tôi ở đây. Hãy cho tôi biết chuyện gì đang xảy ra và chúng ta sẽ cùng giải quyết.",
+    "quotaExceeded": "Hạn mức hàng tháng của bạn đã hết. [Nâng cấp gói](/pricing) để tiếp tục trò chuyện.",
+    "featureLocked": "Tính năng này cần gói cao hơn. [Xem các gói](/pricing) để mở khóa.",
+    "summary": "Tóm tắt",
+    "fullView": "Xem đầy đủ",
+    "fullViewTitle": "Phản hồi chi tiết đầy đủ",
+    "shareTitle": "Chia sẻ phản hồi",
+    "saveToJournalTitle": "Lưu vào Nhật ký",
+    "divineFriend": "Người bạn Thiêng liêng của bạn"
+  },
+  "guidanceModes": {
+    "title": "Chế độ hướng dẫn",
+    "subtitle": "Tam giác Năng lượng Tuần hoàn",
+    "selectPrompt": "Chạm vào một chế độ để khám phá cách KIAAN hướng dẫn trạng thái của bạn.",
+    "innerPeace": {
+      "title": "Bình yên Nội tâm",
+      "description": "Tìm sự tĩnh lặng qua các bài tập thở và kỹ thuật tiếp đất nhẹ nhàng. Hoàn hảo cho những lúc bạn cần làm dịu tâm trí và kết nối lại với sự bình yên.",
+      "note": "Hơi thở nhẹ nhàng và tập trung mềm mại"
+    },
+    "mindControl": {
+      "title": "Kiểm soát Tâm trí",
+      "description": "Phát triển sự tập trung rõ ràng qua các phương pháp chánh niệm có cấu trúc. Lý tưởng cho việc ra quyết định, tập trung và duy trì kỷ luật nội tâm.",
+      "note": "Bước vững chắc, từng suy nghĩ một"
+    },
+    "selfKindness": {
+      "title": "Tử tế với Bản thân",
+      "description": "Nuôi dưỡng lòng từ bi cho bản thân qua các bài tập ấm áp và hỗ trợ. Thiết yếu cho việc chữa lành, chấp nhận bản thân và nuôi dưỡng sức khỏe cảm xúc.",
+      "note": "Bạn được chào đón ở đây"
+    }
+  },
+  "clarityPause": {
+    "title": "Dừng lại để Sáng tỏ",
+    "subtitle": "Tạo không gian trước khi bạn hành động.",
+    "description": "Không lời khuyên. Chỉ không gian để quyết định từ sự sáng tỏ.",
+    "note": "KIAAN giữ nguyên—từ chối để đi qua ngay lập tức.",
+    "closeOverlay": "Đóng lớp phủ",
+    "sendNow": "Gửi ngay (bỏ qua tạm dừng)",
+    "startPause": "Tạm dừng 60 giây",
+    "deliverToKiaan": "Gửi cho KIAAN ngay",
+    "keepGrounding": "Giữ tiếp đất 60 giây",
+    "question": "Bạn đang hành động từ sự sáng tỏ hay từ cảm xúc ngay bây giờ?",
+    "countdown": "Còn {seconds} giây",
+    "ready": "Sẵn sàng khi bạn sẵn sàng"
+  },
+  "moodCheck": {
+    "title": "Bạn đang cảm thấy thế nào?",
+    "subtitle": "Kiểm tra trạng thái",
+    "logged": "Đã ghi: {mood}",
+    "responses": {
+      "peaceful": "Tôi vui vì bạn đang cảm thấy bình yên — hãy ở lại với sự dịu dàng đó một lát. 💙",
+      "happy": "Thật đẹp khi thấy bạn cảm thấy tươi sáng. Hãy để sự ấm áp đó ở bên bạn. ✨",
+      "neutral": "Ổn định là tốt. Bạn đang hiện diện, và điều đó quan trọng. 🌿",
+      "charged": "Năng lượng đó mạnh mẽ — hãy sử dụng nó một cách khôn ngoan. ⚡",
+      "open": "Mở lòng cần sự can đảm. Tôi ở đây để hỗ trợ bạn. 🌤️",
+      "grateful": "Lòng biết ơn là món quà cho chính bạn. Hãy giữ lấy cảm giác này. 🙏",
+      "reflective": "Suy ngẫm mang lại sự sáng tỏ. Hãy dành thời gian với những gì bạn đang cảm thấy. 🪞",
+      "determined": "Ngọn lửa trong bạn rất mạnh. Hãy tiến về phía trước với mục đích. 🔥",
+      "tender": "Sự dịu dàng là sức mạnh. Hãy nhẹ nhàng với bản thân ngay bây giờ. 💙",
+      "tired": "Nghỉ ngơi không phải là yếu đuối. Cơ thể bạn đang nói điều gì đó quan trọng. 😴",
+      "anxious": "Cảm giác lo lắng thật khó chịu — hít thở sâu, tôi ở đây với bạn. 🌊",
+      "heavy": "Tôi xin lỗi vì bạn đang cảm thấy nặng nề... bạn không đơn độc. Tôi ở ngay đây với bạn. 🌧️",
+      "angry": "Không sao cả — giận dữ có nghĩa là có điều quan trọng cần được chú ý. Tôi ở bên cạnh bạn. 🔥",
+      "worried": "Lo lắng có thể cảm thấy choáng ngợp. Hãy cùng giải quyết từng bước một. 💭",
+      "sad": "Nỗi buồn nặng nề, nhưng bạn không đơn độc ngay lúc này. Tôi ở đây với bạn. 💙",
+      "lonely": "Cô đơn thật khó khăn, nhưng bạn không một mình ngay lúc này. Tôi ở đây với bạn. 🤝",
+      "depressed": "Gánh nặng này là thật, và nó thật khó khăn. Hãy tìm kiếm sự giúp đỡ — bạn không phải gánh chịu một mình. 💙"
+    }
+  },
+  "quickPrompts": {
+    "title": "Phản hồi Nhanh",
+    "subtitle": "Câu gợi ý sẵn tự động điền cho KIAAN",
+    "scenarios": {
+      "anxiety": {
+        "label": "Lo lắng cao",
+        "prompt": "Hướng dẫn tôi qua một bài tập tiếp đất để ổn định những suy nghĩ lo lắng."
+      },
+      "heavy": {
+        "label": "Cảm thấy nặng nề",
+        "prompt": "Tôi cần những lời nhẹ nhàng để nâng cao tâm trạng và nhắc nhở tôi về sức mạnh của mình."
+      },
+      "anger": {
+        "label": "Quản lý giận dữ",
+        "prompt": "Giúp tôi hạ nhiệt cơn giận và phản ứng với nhiều kiên nhẫn hơn."
+      },
+      "clarity": {
+        "label": "Cần sáng tỏ",
+        "prompt": "Bạn có thể giúp tôi thấy được ưu và nhược điểm trước khi quyết định điều quan trọng không?"
+      },
+      "work": {
+        "label": "Cân bằng công việc",
+        "prompt": "Công việc quá tải—hãy hướng dẫn tôi qua một bước thiết lập lại nhanh để lấy lại sự tập trung."
+      },
+      "relationships": {
+        "label": "Căng thẳng mối quan hệ",
+        "prompt": "Làm sao tôi có thể xử lý một cuộc trò chuyện khó khăn với sự quan tâm và trung thực?"
+      },
+      "purpose": {
+        "label": "Cảm thấy bế tắc",
+        "prompt": "Tôi muốn một suy ngẫm ngắn để kết nối lại với mục đích và hướng đi của mình."
+      },
+      "peace": {
+        "label": "Cần điều chỉnh",
+        "prompt": "Hãy dẫn tôi qua một khoảnh khắc chánh niệm ngắn để tôi cảm thấy bình yên trở lại."
+      },
+      "balance": {
+        "label": "Quá tải"
+      }
+    }
+  }
+}

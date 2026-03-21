@@ -1,0 +1,55 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "당신의 영적 동반자 & 신성한 친구"
+  },
+  "buttons": {
+    "submit": "제출",
+    "cancel": "취소",
+    "save": "저장",
+    "delete": "삭제",
+    "edit": "편집",
+    "close": "닫기",
+    "next": "다음",
+    "previous": "이전",
+    "confirm": "확인",
+    "back": "뒤로",
+    "continue": "계속",
+    "learnMore": "자세히 알아보기",
+    "getStarted": "시작하기",
+    "tryNow": "지금 시도",
+    "tools": "도구",
+    "translate": "번역",
+    "original": "원문",
+    "showOriginal": "원문 보기"
+  },
+  "status": {
+    "loading": "로딩 중...",
+    "saving": "저장 중...",
+    "saved": "저장됨",
+    "error": "오류",
+    "success": "성공",
+    "processing": "처리 중...",
+    "translating": "번역 중...",
+    "alreadyInLanguage": "이미 이 언어입니다"
+  },
+  "common": {
+    "hello": "안녕하세요",
+    "welcome": "환영합니다",
+    "goodbye": "안녕히 가세요",
+    "thankyou": "감사합니다",
+    "yes": "예",
+    "no": "아니오",
+    "or": "또는",
+    "and": "그리고",
+    "optional": "선택 사항",
+    "required": "필수"
+  },
+  "privacy": {
+    "encrypted": "암호화됨",
+    "private": "설계에 의한 프라이버시",
+    "secure": "안전함",
+    "localOnly": "로컬 전용",
+    "offlineReady": "오프라인 지원"
+  }
+}

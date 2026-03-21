@@ -1,0 +1,141 @@
+{
+  "welcome": {
+    "title": "Witaj w KIAAN",
+    "subtitle": "Twój spokojny, nowoczesny duchowy towarzysz — zawsze tu, zawsze wspierający.",
+    "description": "Spokojny, prywatny duchowy towarzysz z dziennikiem, prowadzonymi rozmowami i panelami."
+  },
+  "chat": {
+    "title": "Porozmawiaj z KIAAN",
+    "subtitle": "Delikatne wskazówki z ciepłym blaskiem",
+    "placeholder": "Wpisz wiadomość...",
+    "send": "Wyślij",
+    "thinking": "KIAAN się zastanawia...",
+    "connectionStatus": "Prywatne, stabilne połączenie",
+    "connectionDesc": "Twoje pytania ożywają — odpowiedzi pozostają niezmienione.",
+    "emptyState": {
+      "emoji": "✨",
+      "title": "Jak mogę cię dzisiaj poprowadzić?",
+      "subtitle": "Podziel się tym, co masz na myśli"
+    },
+    "disclaimer": "KIAAN jest twoim duchowym towarzyszem, dzielącym refleksje z Bhagavad Gita i starożytnej mądrości. To święta przestrzeń wewnętrznego spokoju i samopoznania. W sprawach wykraczających poza duchową ścieżkę zawsze szukaj wskazówek u wykwalifikowanych specjalistów.",
+    "saveToJournal": "Zapisz w Dzienniku",
+    "copy": "Kopiuj",
+    "copied": "Skopiowano!",
+    "copyFailed": "Nie udało się",
+    "share": "Udostępnij",
+    "shareVia": "Udostępnij przez",
+    "privacyNotice": "Informacja o Prywatności",
+    "shareWarning": "Zamierzasz udostępnić informacje o duchowym dobrostanie. Upewnij się, że chcesz publicznie udostępnić te treści.",
+    "anonymize": "Anonimizuj treść (usuń identyfikatory osobiste)",
+    "anonymized": "✓ Zanonimizowana treść",
+    "sharingOriginal": "Udostępnianie oryginalnej treści",
+    "defaultResponse": "Jestem tutaj. Powiedz mi, co się dzieje, a razem to przepracujemy.",
+    "quotaExceeded": "Twój miesięczny limit został osiągnięty. [Ulepsz swój plan](/pricing), aby kontynuować czatowanie.",
+    "featureLocked": "Ta funkcja wymaga wyższego planu. [Zobacz plany](/pricing), aby ją odblokować.",
+    "summary": "Podsumowanie",
+    "fullView": "Pełny Widok",
+    "fullViewTitle": "Pełna szczegółowa odpowiedź",
+    "shareTitle": "Udostępnij odpowiedź",
+    "saveToJournalTitle": "Zapisz w Dzienniku",
+    "divineFriend": "Twój Boski Przyjaciel"
+  },
+  "guidanceModes": {
+    "title": "Tryby wskazówek",
+    "subtitle": "Trójkąt Płynącej Energii",
+    "selectPrompt": "Dotknij trybu, aby odkryć, jak KIAAN prowadzi twój stan.",
+    "innerPeace": {
+      "title": "Wewnętrzny Spokój",
+      "description": "Znajdź ciszę poprzez ćwiczenia oddechowe i delikatne techniki uziemienia. Idealne na chwile, gdy potrzebujesz uspokoić umysł i odnaleźć spokój.",
+      "note": "Delikatny oddech i miękka uwaga"
+    },
+    "mindControl": {
+      "title": "Kontrola Umysłu",
+      "description": "Rozwijaj skupioną jasność poprzez ustrukturyzowane praktyki uważności. Idealne do podejmowania decyzji, koncentracji i utrzymania wewnętrznej dyscypliny.",
+      "note": "Pewne kroki, jedna myśl na raz"
+    },
+    "selfKindness": {
+      "title": "Życzliwość dla Siebie",
+      "description": "Pielęgnuj współczucie dla siebie poprzez ciepłe, wspierające ćwiczenia. Niezbędne do uzdrowienia, samoakceptacji i dbania o dobrostan emocjonalny.",
+      "note": "Jesteś tu mile widziany"
+    }
+  },
+  "clarityPause": {
+    "title": "Pauza Jasności",
+    "subtitle": "Stwórz przestrzeń zanim zadziałasz.",
+    "description": "Żadnych rad. Tylko przestrzeń do decyzji z jasności.",
+    "note": "KIAAN pozostaje nienaruszona — odmów, aby przejść natychmiast.",
+    "closeOverlay": "Zamknij nakładkę",
+    "sendNow": "Wyślij teraz (pomiń pauzę)",
+    "startPause": "Pauza na 60 sekund",
+    "deliverToKiaan": "Dostarcz teraz do KIAAN",
+    "keepGrounding": "Zachowaj 60s uziemienia",
+    "question": "Czy działasz teraz z jasności czy z emocji?",
+    "countdown": "{seconds}s pozostało",
+    "ready": "Gotowe, gdy będziesz"
+  },
+  "moodCheck": {
+    "title": "Jak się czujesz?",
+    "subtitle": "Zameldowanie stanu",
+    "logged": "Zarejestrowano: {mood}",
+    "responses": {
+      "peaceful": "Cieszę się, że czujesz spokój — zostań chwilę z tą łagodnością. 💙",
+      "happy": "Pięknie widzieć cię w tak jasnym nastroju. Niech to ciepło zostanie z tobą. ✨",
+      "neutral": "Stabilność to dobrze. Jesteś tu, i to się liczy. 🌿",
+      "charged": "Ta energia jest potężna — wykorzystaj ją mądrze. ⚡",
+      "open": "Bycie otwartym wymaga odwagi. Jestem tu, aby cię wspierać. 🌤️",
+      "grateful": "Wdzięczność to dar dla siebie. Trzymaj się tego uczucia. 🙏",
+      "reflective": "Refleksja przynosi jasność. Daj sobie czas na to, co czujesz. 🪞",
+      "determined": "Ten ogień w tobie jest silny. Idź naprzód z determinacją. 🔥",
+      "tender": "Czułość to siła. Bądź teraz delikatny dla siebie. 💙",
+      "tired": "Odpoczynek to nie słabość. Twoje ciało mówi ci coś ważnego. 😴",
+      "anxious": "To uczucie niepokoju jest trudne — weź oddech, jestem z tobą. 🌊",
+      "heavy": "Przykro mi, że tak się czujesz… nie jesteś sam. Jestem tu przy tobie. 🌧️",
+      "angry": "To w porządku — złość oznacza, że coś ważnego wymaga uwagi. Jestem tu obok ciebie. 🔥",
+      "worried": "Zmartwienie może być przytłaczające. Weźmy to krok po kroku razem. 💭",
+      "sad": "Smutek jest ciężki, ale teraz nie jesteś sam. Jestem tu z tobą. 💙",
+      "lonely": "Samotność jest trudna, ale teraz nie jesteś sam. Jestem tu z tobą. 🤝",
+      "depressed": "Ten ciężar jest prawdziwy i jest trudny. Proszę, sięgnij po pomoc — nie musisz tego nosić sam. 💙"
+    }
+  },
+  "quickPrompts": {
+    "title": "Szybkie Odpowiedzi",
+    "subtitle": "Dopracowane podpowiedzi, które automatycznie wypełniają KIAAN",
+    "scenarios": {
+      "anxiety": {
+        "label": "Wysoki poziom lęku",
+        "prompt": "Poprowadź mnie przez ćwiczenie uziemienia, aby uspokoić niespokojne myśli."
+      },
+      "heavy": {
+        "label": "Ciężko na duszy",
+        "prompt": "Potrzebuję delikatnych słów, aby podnieść mój nastrój i przypomnieć mi o moich mocnych stronach."
+      },
+      "anger": {
+        "label": "Radzenie sobie ze złością",
+        "prompt": "Pomóż mi ochłodzić złość i reagować z większą cierpliwością."
+      },
+      "clarity": {
+        "label": "Potrzebuję jasności",
+        "prompt": "Czy możesz pomóc mi zobaczyć za i przeciw przed podjęciem ważnej decyzji?"
+      },
+      "work": {
+        "label": "Równowaga w pracy",
+        "prompt": "Praca mnie przytłacza — poprowadź mnie przez szybki reset, aby odzyskać skupienie."
+      },
+      "relationships": {
+        "label": "Stres relacyjny",
+        "prompt": "Jak mogę prowadzić trudną rozmowę z troską i uczciwością?"
+      },
+      "purpose": {
+        "label": "Uczucie utknięcia",
+        "prompt": "Chcę krótką refleksję, aby odnaleźć kontakt z moim celem i kierunkiem."
+      },
+      "peace": {
+        "label": "Potrzebuję regulacji",
+        "prompt": "Poprowadź mnie w krótkim momencie uważności, abym mógł znów poczuć spokój."
+      },
+      "balance": {
+        "label": "Przytłoczony"
+      }
+    }
+  }
+}

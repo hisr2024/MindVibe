@@ -1,0 +1,141 @@
+{
+  "welcome": {
+    "title": "Välkommen till KIAAN",
+    "subtitle": "Din lugna, moderna andliga följeslagare — alltid här, alltid stödjande.",
+    "description": "Lugn, integritetsfokuserad andlig följeslagare med dagbok, guidade chattar och översikter."
+  },
+  "chat": {
+    "title": "Prata med KIAAN",
+    "subtitle": "Mild vägledning med ett varmt sken",
+    "placeholder": "Skriv ditt meddelande...",
+    "send": "Skicka",
+    "thinking": "KIAAN reflekterar...",
+    "connectionStatus": "Privat, stabil anslutning",
+    "connectionDesc": "Dina frågor kommer i fokus — svaren förblir oförändrade.",
+    "emptyState": {
+      "emoji": "✨",
+      "title": "Hur kan jag vägleda dig idag?",
+      "subtitle": "Dela vad du har på hjärtat"
+    },
+    "disclaimer": "KIAAN är din andliga följeslagare som delar reflektioner från Bhagavad Gita och uråldrig visdom. Detta är ett heligt rum för inre frid och självupptäckt. För frågor utanför den andliga vägen, sök alltid vägledning från kvalificerade yrkesutövare.",
+    "saveToJournal": "Spara i Dagbok",
+    "copy": "Kopiera",
+    "copied": "Kopierat!",
+    "copyFailed": "Misslyckades",
+    "share": "Dela",
+    "shareVia": "Dela via",
+    "privacyNotice": "Integritetsmeddelande",
+    "shareWarning": "Du är på väg att dela andligt välbefinnandeinformation. Se till att du är bekväm med att dela detta innehåll offentligt.",
+    "anonymize": "Anonymisera innehåll (ta bort personliga identifierare)",
+    "anonymized": "✓ Anonymiserat innehåll",
+    "sharingOriginal": "Delar originalinnehåll",
+    "defaultResponse": "Jag är här. Berätta vad som pågår så arbetar vi igenom det tillsammans.",
+    "quotaExceeded": "Din månatliga kvot har nåtts. [Uppgradera din plan](/pricing) för att fortsätta chatta.",
+    "featureLocked": "Denna funktion kräver en högre plan. [Visa planer](/pricing) för att låsa upp den.",
+    "summary": "Sammanfattning",
+    "fullView": "Fullständig Vy",
+    "fullViewTitle": "Fullständigt detaljerat svar",
+    "shareTitle": "Dela svar",
+    "saveToJournalTitle": "Spara i Dagbok",
+    "divineFriend": "Din Gudomliga Vän"
+  },
+  "guidanceModes": {
+    "title": "Vägledningslägen",
+    "subtitle": "Triangel av Flödande Energi",
+    "selectPrompt": "Tryck på ett läge för att utforska hur KIAAN vägleder ditt tillstånd.",
+    "innerPeace": {
+      "title": "Inre Frid",
+      "description": "Hitta stillhet genom andningsfokuserade övningar och mjuka jordningstekniker. Perfekt för stunder när du behöver lugna sinnet och återknyta till lugnet.",
+      "note": "Mjuk andning och mjukt fokus"
+    },
+    "mindControl": {
+      "title": "Sinnesstyrning",
+      "description": "Utveckla fokuserad klarhet genom strukturerade mindfulness-övningar. Idealiskt för beslutsfattande, koncentration och att upprätthålla inre disciplin.",
+      "note": "Stadiga steg, en tanke i taget"
+    },
+    "selfKindness": {
+      "title": "Självvänlighet",
+      "description": "Odla medkänsla för dig själv genom varma, stödjande övningar. Väsentligt för läkning, självacceptans och att vårda ditt emotionella välbefinnande.",
+      "note": "Du är välkommen här"
+    }
+  },
+  "clarityPause": {
+    "title": "Klarhetspaus",
+    "subtitle": "Skapa utrymme innan du agerar.",
+    "description": "Inga råd. Bara utrymme att besluta från klarhet.",
+    "note": "KIAAN förblir orörd — avböj för att passera igenom direkt.",
+    "closeOverlay": "Stäng överlagring",
+    "sendNow": "Skicka nu (hoppa över paus)",
+    "startPause": "Pausa i 60 sekunder",
+    "deliverToKiaan": "Leverera till KIAAN nu",
+    "keepGrounding": "Behåll 60s jordning",
+    "question": "Agerar du just nu från klarhet eller från känsla?",
+    "countdown": "{seconds}s kvar",
+    "ready": "Redo när du är"
+  },
+  "moodCheck": {
+    "title": "Hur mår du?",
+    "subtitle": "Tillståndsincheckning",
+    "logged": "Loggat: {mood}",
+    "responses": {
+      "peaceful": "Jag är glad att du känner lugn — stanna kvar i den mjukheten en stund. 💙",
+      "happy": "Det är vackert att se dig stråla. Låt den värmen stanna kvar. ✨",
+      "neutral": "Stadigt är bra. Du visar dig, och det betyder något. 🌿",
+      "charged": "Den energin är kraftfull — kanalisera den klokt. ⚡",
+      "open": "Att vara öppen kräver mod. Jag är här för att stötta dig. 🌤️",
+      "grateful": "Tacksamhet är en gåva till dig själv. Håll fast vid den känslan. 🙏",
+      "reflective": "Reflektion ger klarhet. Ta din tid med det du känner. 🪞",
+      "determined": "Den elden inom dig är stark. Gå framåt med beslutsamhet. 🔥",
+      "tender": "Ömhet är styrka. Var mild med dig själv just nu. 💙",
+      "tired": "Vila är inte svaghet. Din kropp säger dig något viktigt. 😴",
+      "anxious": "Den oroliga känslan är tuff — ta ett andetag, jag är med dig. 🌊",
+      "heavy": "Jag beklagar att du mår dåligt... du är inte ensam. Jag är här med dig. 🌧️",
+      "angry": "Det är okej — ilska betyder att något viktigt behöver uppmärksamhet. Jag är här bredvid dig. 🔥",
+      "worried": "Oro kan kännas överväldigande. Låt oss ta det steg för steg tillsammans. 💭",
+      "sad": "Sorg är tungt, men du är inte ensam just nu. Jag är här med dig. 💙",
+      "lonely": "Ensamhet är tufft, men du är inte ensam just nu. Jag är här med dig. 🤝",
+      "depressed": "Denna tyngd är verklig, och den är svår. Sök hjälp — du behöver inte bära detta ensam. 💙"
+    }
+  },
+  "quickPrompts": {
+    "title": "Snabbsvar",
+    "subtitle": "Polerade prompter som automatiskt fyller i KIAAN åt dig",
+    "scenarios": {
+      "anxiety": {
+        "label": "Hög ångest",
+        "prompt": "Vägled mig genom en jordningsövning för att lugna oroliga tankar."
+      },
+      "heavy": {
+        "label": "Känner mig tung",
+        "prompt": "Jag behöver milda ord för att lyfta mitt humör och påminna mig om mina styrkor."
+      },
+      "anger": {
+        "label": "Hantera ilska",
+        "prompt": "Hjälp mig att kyla ner min ilska och svara med mer tålamod."
+      },
+      "clarity": {
+        "label": "Behöver klarhet",
+        "prompt": "Kan du hjälpa mig se för- och nackdelar innan jag beslutar om något viktigt?"
+      },
+      "work": {
+        "label": "Arbetsbalans",
+        "prompt": "Arbetet känns överväldigande — vägled mig genom en snabb återställning för att återfå fokus."
+      },
+      "relationships": {
+        "label": "Relationsstress",
+        "prompt": "Hur kan jag hantera ett svårt samtal med omsorg och ärlighet?"
+      },
+      "purpose": {
+        "label": "Känner mig fast",
+        "prompt": "Jag vill ha en kort reflektion för att återknyta till mitt syfte och min riktning."
+      },
+      "peace": {
+        "label": "Behöver reglering",
+        "prompt": "Led mig i ett kort mindfulnessögonblick så jag kan känna frid igen."
+      },
+      "balance": {
+        "label": "Överväldigad"
+      }
+    }
+  }
+}

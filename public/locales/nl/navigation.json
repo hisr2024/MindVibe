@@ -1,0 +1,78 @@
+{
+  "mainNav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "features": "Functies",
+    "about": "Over ons",
+    "contact": "Contact",
+    "pricing": "Abonnementen",
+    "profile": "Profiel",
+    "settings": "Instellingen",
+    "account": "Accounttoegang",
+    "theme": "Thema",
+    "introduction": "Introductie"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "Relatiekompas",
+    "sacredReflections": "Heilige Reflecties",
+    "karmaFootprint": "Karma Voetafdruk",
+    "karmicTree": "Karmische Boom",
+    "emotionalReset": "Emotionele Reset",
+    "deepInsights": "Diepe Inzichten",
+    "wisdomRooms": "Wijsheidskamers",
+    "wisdomJourneys": "Reizen",
+    "companion": "Metgezel"
+  },
+  "actions": {
+    "openChat": "Open Chat",
+    "startCheckin": "Start check-in",
+    "instantGuidance": "Directe begeleiding",
+    "spotYourState": "Herken je toestand",
+    "menu": "Menu",
+    "toggleMenu": "Navigatiemenu omschakelen"
+  },
+  "mobileNav": {
+    "chat": "Chat",
+    "pause": "Pauze",
+    "journal": "Heilige Reflecties"
+  },
+  "footer": {
+    "allRightsReserved": "Alle rechten voorbehouden",
+    "privacy": "Privacybeleid",
+    "terms": "Servicevoorwaarden",
+    "support": "Ondersteuning",
+    "explore": "Ontdek",
+    "safety": "Veiligheid",
+    "description": "Ontworpen voor rust, privacygerichte spirituele welzijnsondersteuning. Gebouwd met focus op WCAG-toegankelijkheid, versleuteling en een zachte ervaring.",
+    "emailUs": "E-mail ons",
+    "encryptedJournals": "Versleutelde dagboeken",
+    "noTracking": "Geen tracking-advertenties"
+  },
+  "pathway": {
+    "pause": "Pauze",
+    "understand": "Begrijp",
+    "converse": "Praat",
+    "apply": "Pas toe",
+    "train": "Oefen",
+    "you_are_here": "Je bent hier",
+    "nav_label": "Helingspad"
+  },
+  "next_step": {
+    "explore_ardha": "Ontdek in Ardha →",
+    "continue_kiaan": "Verder met KIAAN →",
+    "stabilize_viyoga": "Stabiliseer met Viyoga →",
+    "enter_journey": "Begin een Reis →",
+    "helper": "Op basis van je gesprek vind je dit misschien nuttig"
+  },
+  "tools": {
+    "releaseAttachment": "Gehechtheid loslaten",
+    "reframeThoughts": "Gedachten herkaderen",
+    "kiaanChat": "KIAAN Chat",
+    "talkItThrough": "Praat het door",
+    "relationalClarity": "Relationele helderheid",
+    "quickAccess": "Snelle toegang"
+  }
+}

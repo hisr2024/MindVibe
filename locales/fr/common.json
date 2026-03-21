@@ -18,7 +18,10 @@
     "learnMore": "En savoir plus",
     "getStarted": "Commencer",
     "tryNow": "Essayer maintenant",
-    "tools": "Outils"
+    "tools": "Outils",
+    "translate": "Traduire",
+    "original": "Original",
+    "showOriginal": "Afficher l'original"
   },
   "status": {
     "loading": "Chargement...",
@@ -26,7 +29,9 @@
     "saved": "Enregistré",
     "error": "Erreur",
     "success": "Succès",
-    "processing": "Traitement..."
+    "processing": "Traitement...",
+    "translating": "Traduction en cours...",
+    "alreadyInLanguage": "Déjà dans cette langue"
   },
   "common": {
     "hello": "Bonjour",

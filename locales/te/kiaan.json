@@ -32,7 +32,12 @@
     "defaultResponse": "నేను ఇక్కడ ఉన్నాను. ఏం జరుగుతోందో చెప్పండి, మనం కలిసి పరిష్కరిద్దాం.",
     "summary": "సారాంశం",
     "fullView": "పూర్తి వీక్షణ",
-    "divineFriend": "మీ దివ్య మిత్రుడు"
+    "divineFriend": "మీ దివ్య మిత్రుడు",
+    "featureLocked": "This feature requires a higher plan. [View plans](/pricing) to unlock it.",
+    "fullViewTitle": "Full detailed response",
+    "quotaExceeded": "Your monthly quota has been reached. [Upgrade your plan](/pricing) to continue chatting.",
+    "saveToJournalTitle": "Save to Journal",
+    "shareTitle": "Share response"
   },
   "guidanceModes": {
     "title": "Guidance modes",

@@ -1,0 +1,96 @@
+{
+  "ardha": {
+    "title": "Ardha: Reframing Kognitif",
+    "subtitle": "Reframing kognitif selaras Gita",
+    "description": "Deteksi distorsi, kalibrasi cerita vs fakta, berikan kejernihan yang membumi.",
+    "placeholder": "Contoh: Saya terus membuat kesalahan di tempat kerja, mungkin saya memang tidak cocok untuk ini.",
+    "button": "Ubah Kerangka",
+    "buttonLoading": "Merenung...",
+    "label": "Bagikan pikiran yang ingin diubah kerangkanya",
+    "response": "Respons Ardha",
+    "error": "Ardha sedang mengalami masalah koneksi saat ini. Silakan coba lagi sebentar lagi.",
+    "badge": "Hanya lokal"
+  },
+  "viyog": {
+    "title": "Viyoga: Pelatih Pelepasan",
+    "subtitle": "Pereda kecemasan hasil",
+    "description": "Mengalihkan kekhawatiran menjadi langkah-langkah yang bisa ditindaklanjuti.",
+    "placeholder": "Contoh: Saya takut presentasi akan gagal dan semua orang akan menganggap saya tidak kompeten.",
+    "button": "Alihkan",
+    "buttonLoading": "Menenangkan...",
+    "label": "Bagikan kekhawatiran tentang hasil",
+    "response": "Respons Viyoga",
+    "error": "Viyoga sedang mengalami masalah koneksi saat ini. Silakan coba lagi sebentar lagi.",
+    "badge": "Hanya lokal"
+  },
+  "relationshipCompass": {
+    "title": "Kompas Hubungan",
+    "subtitle": "Kompas Dharma untuk Hubungan",
+    "description": "Panduan konflik yang tenang dan sekuler yang menjaga KIAAN tetap utuh—tindakan benar, pelepasan ego, kata-kata yang jelas.",
+    "placeholder": "Contoh: Pasangan saya merasa saya tidak mendengarkan, dan saya terus bersikap defensif ketika mereka mengangkat masalah itu.",
+    "button": "Pandu saya dengan Kompas Hubungan",
+    "buttonLoading": "Menyeimbangkan panduan...",
+    "sendToKiaan": "Kirim konteks ke KIAAN",
+    "label": "Jelaskan konfliknya",
+    "response": "Respons Kompas Hubungan",
+    "error": "Kompas Hubungan tidak tersedia saat ini. Silakan coba lagi sebentar lagi.",
+    "badges": {
+      "neutral": "Netral dan membumi",
+      "intact": "Menjaga Kiaan tetap utuh"
+    },
+    "outputFormat": "Format output: akui, pisahkan ego, sebutkan nilai, tindakan benar, lepaskan, tambahkan belas kasih, sarankan kata-kata, lalu satu langkah berikutnya."
+  },
+  "sacredReflections": {
+    "title": "Refleksi Suci",
+    "subtitle": "Jurnal",
+    "description": "Entri tetap di perangkat Anda dan memperbarui panduan mingguan secara otomatis.",
+    "openJournal": "Buka Jurnal",
+    "goToJournal": "Ke Jurnal",
+    "keepInOnePlace": "Simpan refleksi di satu tempat yang tenang",
+    "openSacredReflections": "Buka Refleksi Suci untuk menulis, meninjau kembali, atau melanjutkan praktik Anda.",
+    "writePrompt": "Tulis dengan bebas. Hanya Anda yang bisa melihat ini.",
+    "titlePlaceholder": "Judul (opsional)",
+    "addReflection": "Tambah Refleksi",
+    "recentEntries": "Entri terbaru",
+    "noEntries": "Belum ada entri. Refleksi Anda akan muncul di sini.",
+    "weeklyEntries": "Entri mingguan: {{count}}",
+    "weeklyAssessment": "Penilaian Mingguan",
+    "mostPresentMood": "Suasana hati paling hadir: {{mood}}",
+    "positiveMoments": "Momen positif tercatat",
+    "challengingDays": "Hari yang lembut/menantang",
+    "kiaanGuidance": "Panduan lembut KIAAN",
+    "getKiaanOpinion": "Dapatkan pendapat KIAAN",
+    "kiaanReading": "KIAAN sedang membaca...",
+    "todaysTone": "Nada hari ini",
+    "security": {
+      "encrypted": "Terenkripsi sepenuhnya di perangkat Anda",
+      "description": "Entri disegel secara lokal dengan AES-GCM sebelum disimpan. Hanya browser ini yang bisa mendekripsinya.",
+      "status": {
+        "ready": "Diamankan dengan AES-GCM secara lokal",
+        "preparing": "Menyiapkan kunci enkripsi",
+        "offline": "Mode offline: disimpan di perangkat ini",
+        "online": "Siap offline: disimpan di perangkat"
+      }
+    }
+  },
+  "karmaFootprint": {
+    "title": "Karma Footprint",
+    "description": "Lacak tindakan positif Anda dan efek riak mereka"
+  },
+  "karmicTree": {
+    "title": "Pohon Karma",
+    "description": "Visualisasikan pertumbuhan dan perjalanan spiritual Anda"
+  },
+  "emotionalReset": {
+    "title": "Reset Emosi",
+    "description": "Latihan cepat untuk mereset kondisi emosi Anda"
+  },
+  "deepInsights": {
+    "title": "Wawasan Mendalam",
+    "description": "Dapatkan pemahaman mendalam tentang pola Anda"
+  },
+  "wisdomRooms": {
+    "title": "Ruang Kebijaksanaan",
+    "description": "Jelajahi kebijaksanaan kuno dalam konteks modern"
+  }
+}

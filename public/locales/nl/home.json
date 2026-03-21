@@ -1,0 +1,118 @@
+{
+  "hero": {
+    "title": "Jouw AI Metgezel voor Spiritueel Welzijn",
+    "subtitle": "Chat met KIAAN, aangedreven door Oude Wijsheid",
+    "tagline": "Jouw rustige, privacygerichte spirituele metgezel aangedreven door oude wijsheid",
+    "ctaPrimary": "Praat met KIAAN",
+    "ctaSecondary": "Heilige Reflecties",
+    "privacy": "Gesprekken blijven privé • een warm, vertrouwelijk toevluchtsoord"
+  },
+  "ecosystem": {
+    "title": "Het MindVibe Ecosysteem",
+    "subtitle": "Een holistische benadering van spiritueel welzijn, geworteld in oude wijsheid en moderne praktijken",
+    "pillars": {
+      "innerPeace": {
+        "title": "Innerlijke Vrede",
+        "description": "Vind stilte door ademgerichte oefeningen en zachte aardingstechnieken."
+      },
+      "mindControl": {
+        "title": "Geestesbeheersing",
+        "description": "Ontwikkel gerichte helderheid door gestructureerde mindfulness-praktijken."
+      },
+      "selfKindness": {
+        "title": "Zelfvriendelijkheid",
+        "description": "Cultiveer compassie voor jezelf door warme, ondersteunende oefeningen."
+      }
+    },
+    "footer": "Elke pijler werkt samen om een evenwichtige, duurzame benadering van spiritueel welzijn te creëren"
+  },
+  "features": {
+    "title": "Belangrijkste Functies",
+    "subtitle": "Privacygerichte hulpmiddelen ontworpen voor jouw spirituele welzijnsreis",
+    "voice": {
+      "title": "KIAAN Stem",
+      "description": "Praat op natuurlijke wijze met KIAAN via spraakinvoer. Altijd wakker, begeleidt je overal in het ecosysteem.",
+      "cta": "Praat met KIAAN"
+    },
+    "offline": {
+      "title": "Offline Klaar",
+      "description": "Toegang tot je dagboek, stemmingen en reflecties altijd, zelfs zonder internet.",
+      "cta": "Begin met Dagboek"
+    },
+    "reset": {
+      "title": "Emotionele Reset",
+      "description": "Snelle oefeningen om je emotionele toestand te resetten en direct rust te vinden.",
+      "cta": "Probeer Reset"
+    }
+  },
+  "moodCheckIn": {
+    "title": "Hoe voel je je?",
+    "subtitle": "Snelle Check-In",
+    "helper": "Tik op een steen om je stemming te registreren • Privé & alleen lokaal",
+    "helperText": "Tik op een steen om je stemming te registreren • Brengt je naar KIAAN Chat voor ondersteuning",
+    "openingChat": "KIAAN Chat openen...",
+    "selectMood": "Selecteer",
+    "moods": {
+      "peaceful": "Vredig",
+      "happy": "Blij",
+      "neutral": "Neutraal",
+      "tired": "Moe",
+      "anxious": "Angstig",
+      "heavy": "Zwaar"
+    },
+    "responses": {
+      "peaceful": "Mooie kalmte. Blijf erbij. 💙",
+      "happy": "Laat die warmte bij je blijven. ✨",
+      "neutral": "Standvastig is goed. Je bent er. 🌿",
+      "tired": "Rust is geen zwakte. 💙",
+      "anxious": "Haal adem. Ik ben bij je. 🌊",
+      "heavy": "Je bent niet alleen. Ik ben hier. 💙"
+    }
+  },
+  "quickAccess": {
+    "kiaan": {
+      "title": "Praat met KIAAN",
+      "subtitle": "Directe begeleiding",
+      "description": "Spring in een gericht gesprek voor spirituele welzijnsondersteuning",
+      "cta": "Open Chat"
+    },
+    "dashboard": {
+      "title": "Voortgang Bijhouden",
+      "subtitle": "Dashboard",
+      "description": "Bekijk inzichten van je stemmingscheck-ins en dagboekvermeldingen",
+      "cta": "Bekijk Dashboard"
+    },
+    "emotionalReset": {
+      "title": "Snelle Reset",
+      "subtitle": "Emotionele Reset",
+      "description": "Begeleide oefeningen om je emotionele toestand direct te resetten",
+      "cta": "Probeer Reset"
+    }
+  },
+  "disclaimer": {
+    "title": "Disclaimer",
+    "text": "KIAAN deelt ondersteunende reflecties geïnspireerd door wijsheidstradities. Deze gesprekken en oefeningen zijn geen medisch advies. Als je met ernstige zorgen kampt of je onveilig voelt, neem dan onmiddellijk contact op met de medische hulpdiensten van je land of een erkende professional."
+  },
+  "introduction": {
+    "heroTitle": "Welkom bij Goddelijke Aanwezigheid",
+    "heroSubtitle": "Ervaar de liefdevolle begeleiding van Krishna. Je bent nooit alleen op deze reis.",
+    "receiveDarshan": "Ontvang Krishna's Darshan",
+    "talkToKiaan": "Praat met KIAAN",
+    "divineWisdom": "Goddelijke wijsheid & begeleiding",
+    "protectionShield": "Goddelijk Beschermingsschild",
+    "activateProtection": "Activeer Krishna's bescherming",
+    "heartToHeart": "Hart-tot-Hart met Krishna",
+    "writeLetter": "Schrijf een brief aan het Goddelijke",
+    "howIsHeart": "Hoe is je hart?",
+    "shareFeelings": "Deel je gevoelens met Krishna",
+    "goToDashboard": "Ga naar Dashboard",
+    "accessTools": "Toegang tot alle hulpmiddelen & functies",
+    "quickAccess": "Snelle Goddelijke Toegang",
+    "journeys": "Reizen",
+    "journal": "Dagboek",
+    "reframe": "Herkaderen",
+    "detach": "Loslaten",
+    "footerVerse": "\"Ik ben het Zelf, gezeteld in de harten van alle wezens. Ik ben het begin, het midden en het einde.\"",
+    "footerVerseRef": "— Bhagavad Gita 10.20"
+  }
+}

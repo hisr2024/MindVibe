@@ -1,0 +1,120 @@
+{
+  "title": "Dashibodi",
+  "welcome": "Karibu tena",
+  "subtitle": "Zana za MindVibe",
+  "allTools": "Zana zote mahali pamoja",
+  "returnHome": "Rudi nyumbani",
+  "toolsCount": "zana",
+  "categories": {
+    "core": "Zana Kuu",
+    "guidance": "Injini za Mwongozo",
+    "karma": "Zana za Karma",
+    "quick": "Ufikiaji wa Haraka"
+  },
+  "tools": {
+    "kiaan": {
+      "title": "KIAAN Mazungumzo",
+      "description": "Mwandani wa kiroho wa AI"
+    },
+    "journal": {
+      "title": "Daftari la Faragha",
+      "description": "Uandishi wa daftari uliosimbwa"
+    },
+    "wisdom": {
+      "title": "Vyumba vya Hekima",
+      "description": "Hekima ya kale"
+    },
+    "insights": {
+      "title": "Maarifa ya Hisia",
+      "description": "Mifumo ya kihisia"
+    },
+    "viyog": {
+      "title": "Viyoga",
+      "description": "Kupunguza wasiwasi wa matokeo"
+    },
+    "ardha": {
+      "title": "Ardha",
+      "description": "Mwongozo wa hali"
+    },
+    "relationship-compass": {
+      "title": "Dira ya Mahusiano",
+      "description": "Mwongozo wa mahusiano"
+    },
+    "emotional-reset": {
+      "title": "Kurekebisha Hisia",
+      "description": "Usawa wa kihisia haraka"
+    },
+    "karma-footprint": {
+      "title": "Karma Footprint",
+      "description": "Fuatilia matendo yako"
+    },
+    "karmic-tree": {
+      "title": "Mti wa Karma",
+      "description": "Onesha safari yako"
+    },
+    "karma-reset": {
+      "title": "Kuanza upya Karma",
+      "description": "Anza upya"
+    },
+    "reflections": {
+      "title": "Tafakuri Takatifu",
+      "description": "Uandishi wa kila siku"
+    },
+    "deep": {
+      "title": "Maarifa ya Kina",
+      "description": "Uchambuzi wa juu"
+    },
+    "analytics": {
+      "title": "Uchambuzi",
+      "description": "Fuatilia maendeleo yako"
+    }
+  },
+  "badges": {
+    "new": "mpya",
+    "premium": "bora",
+    "beta": "beta"
+  },
+  "analytics": {
+    "title": "Uchambuzi",
+    "overview": "Muhtasari",
+    "insights": "Maarifa",
+    "trends": "Mitindo",
+    "weeklyProgress": "Maendeleo ya Wiki",
+    "monthlyProgress": "Maendeleo ya Mwezi"
+  },
+  "profile": {
+    "title": "Wasifu",
+    "settings": "Mipangilio",
+    "editProfile": "Hariri Wasifu",
+    "updateProfile": "Sasisha Wasifu",
+    "accountInfo": "Taarifa za Akaunti"
+  },
+  "subscription": {
+    "title": "Usajili",
+    "plan": "Mpango wa Sasa",
+    "upgrade": "Pandisha",
+    "manage": "Simamia Usajili",
+    "billing": "Malipo"
+  },
+  "stats": {
+    "journalEntries": "Maingizo ya Daftari",
+    "chatSessions": "Vipindi vya Mazungumzo",
+    "moodCheckins": "Ukaguzi wa Hisia",
+    "streakDays": "Siku Mfululizo"
+  },
+  "tool_desc": {
+    "viyog": "Tuliza mwitikio wa papo hapo",
+    "ardha": "Badilisha mtazamo",
+    "kiaan": "Zungumza kuhusu jambo",
+    "relationship-compass": "Tembea katika uwazi wa mahusiano",
+    "journey": "Jizoeze utulivu wa ndani wa muda mrefu"
+  },
+  "mode_label": {
+    "prefix": "Uko katika:",
+    "viyog": "Hali ya Kupumzika",
+    "ardha": "Hali ya Uwazi",
+    "kiaan": "Hali ya Mwandani",
+    "relationship-compass": "Hali ya Mahusiano",
+    "journey": "Hali ya Mazoezi"
+  }
+}

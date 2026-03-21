@@ -1,0 +1,39 @@
+{
+  "errors": {
+    "general": "Er is iets misgegaan. Probeer het opnieuw.",
+    "network": "Netwerkfout. Controleer je verbinding.",
+    "notFound": "Pagina niet gevonden",
+    "unauthorized": "Je hebt geen toegang tot deze pagina.",
+    "serverError": "Serverfout. Probeer het later opnieuw.",
+    "validation": {
+      "required": "Dit veld is verplicht",
+      "email": "Voer een geldig e-mailadres in",
+      "minLength": "Minimale lengte is {min} tekens",
+      "maxLength": "Maximale lengte is {max} tekens"
+    }
+  },
+  "notifications": {
+    "success": {
+      "saved": "Succesvol opgeslagen",
+      "updated": "Succesvol bijgewerkt",
+      "deleted": "Succesvol verwijderd",
+      "sent": "Succesvol verzonden"
+    },
+    "info": {
+      "processing": "Je verzoek wordt verwerkt...",
+      "loading": "Laden...",
+      "syncing": "Synchroniseren..."
+    },
+    "warning": {
+      "unsavedChanges": "Je hebt niet-opgeslagen wijzigingen",
+      "confirmDelete": "Weet je zeker dat je dit wilt verwijderen?",
+      "confirmAction": "Weet je zeker dat je wilt doorgaan?"
+    }
+  },
+  "connection": {
+    "offline": "Je bent momenteel offline",
+    "reconnecting": "Opnieuw verbinden...",
+    "connected": "Verbinding hersteld",
+    "failed": "Verbinding mislukt. Probeer het opnieuw."
+  }
+}

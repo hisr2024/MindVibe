@@ -1,0 +1,78 @@
+{
+  "mainNav": {
+    "home": "หน้าแรก",
+    "dashboard": "แดชบอร์ด",
+    "features": "คุณสมบัติ",
+    "about": "เกี่ยวกับ",
+    "contact": "ติดต่อ",
+    "pricing": "แผนสมาชิก",
+    "profile": "โปรไฟล์",
+    "settings": "การตั้งค่า",
+    "account": "เข้าถึงบัญชี",
+    "theme": "ธีม",
+    "introduction": "แนะนำ"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "เข็มทิศความสัมพันธ์",
+    "sacredReflections": "การสะท้อนอันศักดิ์สิทธิ์",
+    "karmaFootprint": "Karma Footprint",
+    "karmicTree": "ต้นไม้แห่ง Karma",
+    "emotionalReset": "รีเซ็ตอารมณ์",
+    "deepInsights": "ข้อมูลเชิงลึก",
+    "wisdomRooms": "ห้องแห่งปัญญา",
+    "wisdomJourneys": "การเดินทาง",
+    "companion": "เพื่อนร่วมทาง"
+  },
+  "actions": {
+    "openChat": "เปิดแชท",
+    "startCheckin": "เริ่มเช็คอิน",
+    "instantGuidance": "คำแนะนำทันที",
+    "spotYourState": "สังเกตสภาวะของคุณ",
+    "menu": "เมนู",
+    "toggleMenu": "สลับเมนูนำทาง"
+  },
+  "mobileNav": {
+    "chat": "แชท",
+    "pause": "หยุดพัก",
+    "journal": "การสะท้อนอันศักดิ์สิทธิ์"
+  },
+  "footer": {
+    "allRightsReserved": "สงวนลิขสิทธิ์",
+    "privacy": "นโยบายความเป็นส่วนตัว",
+    "terms": "ข้อกำหนดการใช้บริการ",
+    "support": "สนับสนุน",
+    "explore": "สำรวจ",
+    "safety": "ความปลอดภัย",
+    "description": "ออกแบบมาเพื่อความสงบ สนับสนุนสุขภาวะทางจิตวิญญาณที่ให้ความสำคัญกับความเป็นส่วนตัว สร้างขึ้นโดยเน้นการเข้าถึง WCAG การเข้ารหัส และประสบการณ์ที่อ่อนโยน",
+    "emailUs": "ส่งอีเมลถึงเรา",
+    "encryptedJournals": "บันทึกที่เข้ารหัส",
+    "noTracking": "ไม่มีโฆษณาติดตาม"
+  },
+  "pathway": {
+    "pause": "หยุดพัก",
+    "understand": "เข้าใจ",
+    "converse": "สนทนา",
+    "apply": "นำไปใช้",
+    "train": "ฝึกฝน",
+    "you_are_here": "คุณอยู่ที่นี่",
+    "nav_label": "เส้นทางการเยียวยา"
+  },
+  "next_step": {
+    "explore_ardha": "สำรวจใน Ardha →",
+    "continue_kiaan": "ดำเนินต่อกับ KIAAN →",
+    "stabilize_viyoga": "สร้างเสถียรภาพด้วย Viyoga →",
+    "enter_journey": "เริ่มต้นการเดินทาง →",
+    "helper": "จากการสนทนาของคุณ สิ่งนี้อาจเป็นประโยชน์"
+  },
+  "tools": {
+    "releaseAttachment": "ปล่อยวางการยึดติด",
+    "reframeThoughts": "ปรับเปลี่ยนความคิด",
+    "kiaanChat": "KIAAN แชท",
+    "talkItThrough": "พูดคุยให้กระจ่าง",
+    "relationalClarity": "ความชัดเจนในความสัมพันธ์",
+    "quickAccess": "เข้าถึงด่วน"
+  }
+}

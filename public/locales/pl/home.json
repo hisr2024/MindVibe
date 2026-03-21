@@ -1,0 +1,118 @@
+{
+  "hero": {
+    "title": "Twój Towarzysz AI dla Duchowego Dobrostanu",
+    "subtitle": "Rozmawiaj z KIAAN, napędzanym Starożytną Mądrością",
+    "tagline": "Twój spokojny, prywatny duchowy towarzysz napędzany starożytną mądrością",
+    "ctaPrimary": "Porozmawiaj z KIAAN",
+    "ctaSecondary": "Święte Refleksje",
+    "privacy": "Rozmowy pozostają prywatne • ciepłe, poufne schronienie"
+  },
+  "ecosystem": {
+    "title": "Ekosystem MindVibe",
+    "subtitle": "Holistyczne podejście do duchowego dobrostanu, zakorzenione w starożytnej mądrości i nowoczesnych praktykach",
+    "pillars": {
+      "innerPeace": {
+        "title": "Wewnętrzny Spokój",
+        "description": "Znajdź ciszę poprzez ćwiczenia oddechowe i delikatne techniki uziemienia."
+      },
+      "mindControl": {
+        "title": "Kontrola Umysłu",
+        "description": "Rozwijaj skupioną jasność poprzez ustrukturyzowane praktyki uważności."
+      },
+      "selfKindness": {
+        "title": "Życzliwość dla Siebie",
+        "description": "Pielęgnuj współczucie dla siebie poprzez ciepłe, wspierające ćwiczenia."
+      }
+    },
+    "footer": "Każdy filar współpracuje, tworząc zrównoważone, trwałe podejście do duchowego dobrostanu"
+  },
+  "features": {
+    "title": "Kluczowe Funkcje",
+    "subtitle": "Narzędzia z priorytetem prywatności zaprojektowane dla twojej duchowej podróży",
+    "voice": {
+      "title": "Głos KIAAN",
+      "description": "Rozmawiaj naturalnie z KIAAN za pomocą głosu. Zawsze aktywny, prowadzi cię po całym ekosystemie.",
+      "cta": "Porozmawiaj z KIAAN"
+    },
+    "offline": {
+      "title": "Gotowe Offline",
+      "description": "Dostęp do dziennika, nastrojów i refleksji w każdej chwili, nawet bez internetu.",
+      "cta": "Zacznij Dziennik"
+    },
+    "reset": {
+      "title": "Reset Emocjonalny",
+      "description": "Szybkie ćwiczenia do resetowania stanu emocjonalnego i natychmiastowego spokoju.",
+      "cta": "Wypróbuj Reset"
+    }
+  },
+  "moodCheckIn": {
+    "title": "Jak się czujesz?",
+    "subtitle": "Szybkie Zameldowanie",
+    "helper": "Dotknij kamienia, aby zalogować nastrój • Prywatne i tylko lokalne",
+    "helperText": "Dotknij kamienia, aby zalogować nastrój • Przeniesie cię do KIAAN Czatu po wsparcie",
+    "openingChat": "Otwieranie KIAAN Czatu...",
+    "selectMood": "Wybierz",
+    "moods": {
+      "peaceful": "Spokojny",
+      "happy": "Szczęśliwy",
+      "neutral": "Neutralny",
+      "tired": "Zmęczony",
+      "anxious": "Niespokojny",
+      "heavy": "Ciężko"
+    },
+    "responses": {
+      "peaceful": "Piękny spokój. Pozostań z nim. 💙",
+      "happy": "Niech to ciepło zostanie z tobą. ✨",
+      "neutral": "Stabilność to dobrze. Jesteś tu. 🌿",
+      "tired": "Odpoczynek to nie słabość. 💙",
+      "anxious": "Weź oddech. Jestem z tobą. 🌊",
+      "heavy": "Nie jesteś sam. Jestem tutaj. 💙"
+    }
+  },
+  "quickAccess": {
+    "kiaan": {
+      "title": "Porozmawiaj z KIAAN",
+      "subtitle": "Natychmiastowe wskazówki",
+      "description": "Rozpocznij ukierunkowaną rozmowę o duchowym dobrostanie",
+      "cta": "Otwórz Czat"
+    },
+    "dashboard": {
+      "title": "Śledzenie Postępów",
+      "subtitle": "Panel",
+      "description": "Zobacz wglądy z zameldowań nastroju i wpisów dziennika",
+      "cta": "Zobacz Panel"
+    },
+    "emotionalReset": {
+      "title": "Szybki Reset",
+      "subtitle": "Reset Emocjonalny",
+      "description": "Prowadzone ćwiczenia do natychmiastowego resetu stanu emocjonalnego",
+      "cta": "Wypróbuj Reset"
+    }
+  },
+  "disclaimer": {
+    "title": "Zastrzeżenie",
+    "text": "KIAAN dzieli się wspierającymi refleksjami inspirowanymi tradycjami mądrości. Te rozmowy i ćwiczenia nie stanowią porady medycznej. Jeśli zmagasz się z poważnymi problemami lub czujesz się zagrożony, skontaktuj się natychmiast z pogotowiem ratunkowym lub licencjonowanym specjalistą."
+  },
+  "introduction": {
+    "heroTitle": "Witaj w Boskiej Obecności",
+    "heroSubtitle": "Doświadcz kochającego przewodnictwa Krishna. Nigdy nie jesteś sam na tej drodze.",
+    "receiveDarshan": "Przyjmij Darshan Krishna",
+    "talkToKiaan": "Porozmawiaj z KIAAN",
+    "divineWisdom": "Boska mądrość i przewodnictwo",
+    "protectionShield": "Boski Tarcza Ochronna",
+    "activateProtection": "Aktywuj ochronę Krishna",
+    "heartToHeart": "Od Serca do Serca z Krishna",
+    "writeLetter": "Napisz list do Boskości",
+    "howIsHeart": "Jak czuje się twoje serce?",
+    "shareFeelings": "Podziel się uczuciami z Krishna",
+    "goToDashboard": "Przejdź do Panelu",
+    "accessTools": "Dostęp do wszystkich narzędzi i funkcji",
+    "quickAccess": "Szybki Boski Dostęp",
+    "journeys": "Podróże",
+    "journal": "Dziennik",
+    "reframe": "Przeramuj",
+    "detach": "Odłącz",
+    "footerVerse": "\"Jestem Jaźnią zasiadającą w sercach wszystkich istot. Jestem początkiem, środkiem i końcem.\"",
+    "footerVerseRef": "— Bhagavad Gita 10.20"
+  }
+}

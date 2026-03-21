@@ -1,0 +1,55 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "Người bạn đồng hành tâm linh & Bạn thiêng liêng của bạn"
+  },
+  "buttons": {
+    "submit": "Gửi",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "edit": "Chỉnh sửa",
+    "close": "Đóng",
+    "next": "Tiếp theo",
+    "previous": "Trước đó",
+    "confirm": "Xác nhận",
+    "back": "Quay lại",
+    "continue": "Tiếp tục",
+    "learnMore": "Tìm hiểu thêm",
+    "getStarted": "Bắt đầu",
+    "tryNow": "Thử ngay",
+    "tools": "Công cụ",
+    "translate": "Dịch",
+    "original": "Bản gốc",
+    "showOriginal": "Hiển thị bản gốc"
+  },
+  "status": {
+    "loading": "Đang tải...",
+    "saving": "Đang lưu...",
+    "saved": "Đã lưu",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "processing": "Đang xử lý...",
+    "translating": "Đang dịch...",
+    "alreadyInLanguage": "Đã ở ngôn ngữ này"
+  },
+  "common": {
+    "hello": "Xin chào",
+    "welcome": "Chào mừng",
+    "goodbye": "Tạm biệt",
+    "thankyou": "Cảm ơn",
+    "yes": "Có",
+    "no": "Không",
+    "or": "hoặc",
+    "and": "và",
+    "optional": "Tùy chọn",
+    "required": "Bắt buộc"
+  },
+  "privacy": {
+    "encrypted": "Đã mã hóa",
+    "private": "Thiết kế riêng tư",
+    "secure": "Bảo mật",
+    "localOnly": "Chỉ lưu trên máy",
+    "offlineReady": "Sẵn sàng ngoại tuyến"
+  }
+}

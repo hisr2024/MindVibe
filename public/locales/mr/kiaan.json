@@ -32,7 +32,12 @@
     "defaultResponse": "मी इथे आहे. काय होतंय ते सांगा, आपण एकत्र सोडवू.",
     "summary": "सारांश",
     "fullView": "पूर्ण दृश्य",
-    "divineFriend": "तुमचा दिव्य मित्र"
+    "divineFriend": "तुमचा दिव्य मित्र",
+    "featureLocked": "This feature requires a higher plan. [View plans](/pricing) to unlock it.",
+    "fullViewTitle": "Full detailed response",
+    "quotaExceeded": "Your monthly quota has been reached. [Upgrade your plan](/pricing) to continue chatting.",
+    "saveToJournalTitle": "Save to Journal",
+    "shareTitle": "Share response"
   },
   "guidanceModes": {
     "title": "Guidance modes",

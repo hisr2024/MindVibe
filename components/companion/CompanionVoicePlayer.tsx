@@ -51,12 +51,15 @@ const MOOD_VOICE_MAP: Record<string, string> = {
   neutral: 'elevenlabs-nova',
 }
 
-// Map language code to BCP-47 for browser SpeechSynthesis
+// Map language code to BCP-47 for browser SpeechSynthesis (all 29 languages)
 const LANG_TO_BCP47: Record<string, string> = {
   en: 'en-IN', hi: 'hi-IN', sa: 'hi-IN', ta: 'ta-IN', te: 'te-IN',
   bn: 'bn-IN', mr: 'mr-IN', gu: 'gu-IN', kn: 'kn-IN', ml: 'ml-IN',
   pa: 'pa-IN', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', pt: 'pt-BR',
-  ja: 'ja-JP', zh: 'zh-CN', ar: 'ar-SA',
+  it: 'it-IT', nl: 'nl-NL', pl: 'pl-PL', sv: 'sv-SE', ru: 'ru-RU',
+  ja: 'ja-JP', zh: 'zh-CN', 'zh-CN': 'zh-CN', ko: 'ko-KR',
+  th: 'th-TH', vi: 'vi-VN', id: 'id-ID',
+  ar: 'ar-SA', tr: 'tr-TR', sw: 'sw-KE',
 }
 
 export default function CompanionVoicePlayer({

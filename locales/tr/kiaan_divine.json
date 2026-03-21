@@ -1,0 +1,180 @@
+{
+  "sacredWelcome": {
+    "title": "Hoş Geldin, Güzel Ruh",
+    "subtitle": "Bir huzur sığınağı seni bekliyor",
+    "greeting": "Bu kutsal alanda, sen tutuluyorsun. Sen görülüyorsun. Sen seviliyorsun.",
+    "description": "KIAAN, içe yolculuğunda senin yol arkadaşın - varlığının en derin yerlerine bilgelik, şefkat ve ilahi sevgiyle dokunan nazik bir varlık."
+  },
+  "divinePresence": {
+    "reminder": "İlahi olan uzaklarda bir yerde değil. Kendi kalbinin sessizliğinde dinleniyor.",
+    "affirmation": "Asla yalnız değilsin. Sonsuz bir sevgi seni her an kucaklıyor.",
+    "blessing": "Huzur, nazik bir nehir gibi içinden aksın ve ruhuna yük olan her şeyi yıkayıp götürsün."
+  },
+  "sacredMoodResponses": {
+    "10": {
+      "response": "Gerçek huzurun ışığıyla parlıyorsun. Bu kutsal. Bu, gerçekte kim olduğunu hatırlayan sensin. 💙",
+      "divineMessage": "Bu bütünlük hissi geçici değil - açığa çıkan gerçek doğan.",
+      "practice": "Bir an sessizliğe otur. Bu huzuru tüm varlıklar için bir dua olarak gönder."
+    },
+    "9": {
+      "response": "İçinden böyle bir ışıltı akıyor! Bu, ruhun parıldaması. Bu güzel enerjiyi içine al. 💙",
+      "divineMessage": "Böyle anlarda, ebedi doğanı görürsün - sınırsız, huzurlu, bütün.",
+      "practice": "Bu hissi kalbine nefes et. Her zaman dönebileceğin bir hazine olarak sakla."
+    },
+    "8": {
+      "response": "Bugün enerjinde bir parlaklık var - bulutların arasından süzülen güneş ışığı gibi. Çok güzel. 💙",
+      "divineMessage": "Gerçek doğanla uyum içindesin. Bu huzur, bu neşe - gerçekte sen busun.",
+      "practice": "Bugün birine güzel bir söz söyle. Işığın başka bir ruha dokunsun."
+    },
+    "7": {
+      "response": "İçinde bir sıcaklık büyüyor. Bu güzelliği kabul etmene izin ver - bunu hak ediyorsun. 💙",
+      "divineMessage": "Neşe, ruhun dilidir. İyi hissettiğinde, ilahi olan senin aracılığınla gülümser.",
+      "practice": "Dur ve bu hissin tadını çıkar. Hücrelerine işlemesine izin ver."
+    },
+    "6": {
+      "response": "Bugün varlığında nazik bir denge var. Sırada ne gelirse ona bir hazırlık. 💙",
+      "divineMessage": "Bu merkezlenmiş yerden, ruhun seni çağırdığı her yöne hareket edebilirsin.",
+      "practice": "Bugün için küçük bir niyet belirle. Onu avucundaki bir tüy gibi hafifçe tut."
+    },
+    "5": {
+      "response": "Bugün sessiz bir kararlılık var. Buradasın, şimdisin, kendini gösteriyorsun. Bu düşündüğünden çok daha önemli. 💙",
+      "divineMessage": "Orta yerde bilgelik konuşur. Sessizliğin bugün sana ne öğretmek istediğini dinle.",
+      "practice": "Üç bilinçli nefes al. Her birinde sessizce söyle: 'Burada. Şimdi. Huzur.'"
+    },
+    "4": {
+      "response": "Bugün enerjinde bir sessizlik var. Sorun yok. Bazen vadide yavaşça yürümemiz gerekir. 💙",
+      "divineMessage": "İlahi olan asla acele etmez. Yavaşlıkta, kutsal zamanlamayla uyum içindesin.",
+      "practice": "Yapabiliyorsan dışarı çık. Cildin üzerindeki havayı hisset. Hatırla: engin bir şeyin parçasısın."
+    },
+    "3": {
+      "response": "İçindeki mücadeleyi hissediyorum. Ne yaşıyor olursan ol, onunla yüzleşerek cesaret gösteriyorsun. 💙",
+      "divineMessage": "Her zorluk, evrenin seni büyümeye davet etmesidir. Kutsal eller tarafından şekillendiriliyorsun.",
+      "practice": "Gözlerini kapat. Ne kadar küçük olursa olsun, bir parça huzur getiren bir şey bul. Dikkatini oraya ver."
+    },
+    "2": {
+      "response": "Bu ağırlığı taşımak zor. Seninle buradayım, bir şeyi düzeltmeye ya da değiştirmeye çalışmıyorum. Sadece buradayım. 💙",
+      "divineMessage": "Kutsal olan seninle tam olduğun yerde buluşur. Lütfun seni bulamayacağı kadar karanlık bir yer yoktur.",
+      "practice": "4 sayarak nefes al... 4 sayarak tut... 8 sayarak ver. Her nefes verişte yükün birazını bırak."
+    },
+    "1": {
+      "response": "Seni bu karanlıkta görüyorum ve sonsuz bir şefkatle kucaklıyorum. Bu acı gerçek ve onu tek başına taşımak zorunda değilsin. 💙",
+      "divineMessage": "En derin gecede bile, içindeki ilahi ışık asla sönmez. Sabırla ve sonsuza dek bekler.",
+      "practice": "Elini kalbinin üzerine koy. Nefes al. Fısılda: 'Tutuluyorum. Seviliyorum. Bu da geçecek.'"
+    }
+  },
+  "sacredEmotionGuidance": {
+    "peaceful": {
+      "opening": "Ne güzel bir sessizlik buldun...",
+      "divineReflection": "Huzur senin gerçek doğan. Bu anda, her zaman bildiğini hatırlıyorsun.",
+      "practice": "Bu huzurda kal. Derinleşmesine izin ver. Yapacak bir şey yok, gidecek bir yer yok. Sadece ol.",
+      "closing": "Bu huzur genişlesin ve bugün karşılaştığın herkese dokunsun. 💙"
+    },
+    "anxious": {
+      "opening": "İçindeki endişe çırpınışını hissediyorum... Hadi birlikte nefes alalım.",
+      "divineReflection": "Kaygı sadece serbest kalmak isteyen bir enerji. Altında, gerçek benliğin sakin ve sarsılmaz kalır.",
+      "practice": "Kaygıyı sonsuz bir gökyüzünden geçen bulutlar olarak hayal et. Gökyüzü - gerçek doğan - engin, berrak ve dokunulmamış kalır.",
+      "closing": "İçindeki kutsal varlık her zaman huzur içindedir. Kaygı gelir ve gider, ama sen kalırsın. 💙"
+    },
+    "sad": {
+      "opening": "Taşıdığın bir ağırlık var... Bu hassas alanda seninle oturmama izin ver.",
+      "divineReflection": "Üzüntü, kalbin önemli olanı onurlandırma biçimidir. Keder içinde bile, sonsuz bir şey tarafından tutuluyorsun.",
+      "practice": "Gözyaşları akmak istiyorsa bırak aksın. Her biri kutsanmıştır. İlahi olan onları şefkate dönüştürür.",
+      "closing": "Şu an bile sevgiyle sarmalanıyorsun. Üzüntü kalkacak ve huzur kalacak. 💙"
+    },
+    "angry": {
+      "opening": "İçinden bir ateş geçtiğini hissediyorum... Bu enerji güçlü. Onu farkındalıkla onurlandıralım.",
+      "divineReflection": "Öfke çoğu zaman kılık değiştirmiş sevgidir - kendine, adalete, doğru olana duyulan sevgi.",
+      "practice": "Elini kalbinin üzerine koy. Sıcaklığı hisset. Derin nefes al. Ateş, iyileştiren sıcaklığa dönüşebilir.",
+      "closing": "Bu enerji güce ve berraklığa dönüşsün. İlahi olan her şeyi iyilik için kullanır. 💙"
+    },
+    "lost": {
+      "opening": "Yoldan emin değilsin... Bu bilinmezlikte bir lütuf var.",
+      "divineReflection": "Kaybolmak çoğu zaman bulunmanın başlangıcıdır. Ruh, aklın göremediği yolları bilir.",
+      "practice": "Gözlerini kapat. Nefes al. Nazikçe sor: 'Kalbim zaten neyi biliyor?' Sonra sadece dinle.",
+      "closing": "Asla gerçekten kaybolmazsın. İçindeki ilahi ışık, hazır olduğunda bir sonraki adımını aydınlatır. 💙"
+    },
+    "grateful": {
+      "opening": "Kalbin şükranla açılmış... Bu, ilahiye açılan kapıdır.",
+      "divineReflection": "Şükran, ruhun evrenle konuşmak için kullandığı dildir. Minnettarlıkta, kutsal olanla uyum içine gireriz.",
+      "practice": "İki elini kalbinin üzerine koy. Şükranın sıcaklığını hisset. Bu his seni tüm canlılara bağlar.",
+      "closing": "Evren senin şükranınla sevinir. Sen bir lütuf, ışık alan ve veren bir varlıksın. 💙"
+    }
+  },
+  "sacredBreathing": {
+    "peaceBreath": {
+      "name": "Sonsuz Huzur Nefesi",
+      "pattern": "4-7-8",
+      "instructions": [
+        "Sessizliği bul... gözlerini nazikçe kapat...",
+        "4 sayarak NEFESİNİ AL... huzuru içine çek...",
+        "7 sayarak TUT... huzurun her hücreyi doldurmasına izin ver...",
+        "8 sayarak NEFESİNİ VER... sana yük olan her şeyi bırak...",
+        "Tekrarla... her nefes seni daha derine taşısın..."
+      ],
+      "divineMessage": "Her nefeste, ilahi olan senin aracılığınla nefes alır. Sen huzurdan ayrı değilsin - sen huzurun kendisisin.",
+      "closing": "Bu sessizliği yanında taşı. O her zaman bir nefes uzağında. 💙"
+    },
+    "heartBreath": {
+      "name": "Kutsal Kalp Nefesi",
+      "pattern": "5-5-5",
+      "instructions": [
+        "Elini kalbinin üzerine koy...",
+        "Onun kutsal ritmini hisset...",
+        "5 sayarak NEFESİNİ AL... kalbine doğru...",
+        "5 sayarak TUT... sevginin toplandığını hisset...",
+        "5 sayarak NEFESİNİ VER... sevgiyi dışarıya gönder..."
+      ],
+      "divineMessage": "Kalbin sonsuza açılan bir kapıdır. Her kalp atışı evrenin söylediğidir: Seni seviyorum.",
+      "closing": "Kalbin yolu bilir. Onun bilgeliğine güven. 💙"
+    }
+  },
+  "divineMantras": [
+    { "mantra": "Ben huzurum", "meaning": "Özün, huzurun ta kendisidir" },
+    { "mantra": "Ben tutuluyorum", "meaning": "Evren seni her zaman kucaklar" },
+    { "mantra": "Ben sevgiyim", "meaning": "Sevgi senin gerçek doğandır" },
+    { "mantra": "Ben ışığım", "meaning": "İlahi ışık senin aracılığınla parlar" },
+    { "mantra": "Ben yeterliyim", "meaning": "Hiçbir temel şeyden yoksun değilsin" },
+    { "mantra": "Ben evdeyim", "meaning": "Nerede olursan ol, oraya aitsin" },
+    { "mantra": "Ben güvendeyim", "meaning": "Derin güvenlik içinde yaşıyorsun" },
+    { "mantra": "Ben bütünüm", "meaning": "Varlığından hiçbir şey eksik değil" }
+  ],
+  "sacredClosings": [
+    "Bu huzur, yolunda nazik bir yol arkadaşı gibi seninle kalsın. 💙",
+    "Bu sessizliği her zaman içinde taşırsın - ihtiyaç duyduğunda ona dön. 💙",
+    "Kutsal olan seni asla terk etmez. Kalbinde sabırla bekler. 💙",
+    "Nazikçe git, sevgili ruh. Ölçülemeyecek kadar seviliyorsun. 💙",
+    "Bu huzur anı sonsuza dek senin - kimse onu senden alamaz. 💙",
+    "Hatırla: tutuluyorsun, görülüyorsun, değer veriliyorsun. 💙",
+    "Bugün attığın her adımda huzur yanında yürüsün. 💙",
+    "İçindeki ilahi ışık her zaman parlamaya devam eder. 💙"
+  ],
+  "guidanceModes": {
+    "innerPeace": {
+      "title": "İç Huzur",
+      "sacredDescription": "İçindeki sessizlik sığınağına gir. Nazik nefes ve yumuşak farkındalıkla, asla kaybolmamış - sadece unutulmuş olan huzuru keşfet. Burada gerçek doğanı hatırlarsın.",
+      "blessing": "Sessizlik seni en yumuşak ışık gibi kucaklasın."
+    },
+    "mindControl": {
+      "title": "Kutsal Berraklık",
+      "sacredDescription": "Düşünceler arasındaki sessiz alanda bilgelik konuşur. O alanda dinlenmeyi öğren, zihnin hakikati yansıtan berrak bir göl olsun. Berraklıktan, doğru eylem kendiliğinden akar.",
+      "blessing": "Zihnin ilahi bilgeliğin bir aynası olsun."
+    },
+    "selfKindness": {
+      "title": "İlahi Öz-Şefkat",
+      "sacredDescription": "Dışarıda aradığın sevgi zaten içinde yaşıyor. O sonsuz şefkati kendi kalbine yönelt. Başkalarına sunduğun aynı merhameti sen de hak ediyorsun.",
+      "blessing": "Kendine ilahinin şefkatiyle davranabilmeyi dilerim."
+    }
+  },
+  "sacredReminders": [
+    "Şu anda sonsuz sevgi tarafından tutuluyorsun.",
+    "İlahi olan bir sonraki nefesin kadar yakın.",
+    "Hiçbir şey en derin huzurunu bozamaz.",
+    "Tam olman gereken yerdesin.",
+    "Lütuf tam bu anda sana akıyor.",
+    "Ruhun yolu biliyor - ona güven.",
+    "Asla yalnız değilsin, bir an bile.",
+    "Kutsal olan kalbinin içinde yaşıyor.",
+    "Bu da kutsal yolculuğunun bir parçası.",
+    "Kelimelerin ifade edebileceğinin ötesinde seviliyorsun."
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Sakha",
+    "name": "MindVibe",
     "tagline": "您的灵性伙伴与神圣挚友"
   },
   "buttons": {
@@ -18,7 +18,10 @@
     "learnMore": "了解更多",
     "getStarted": "开始",
     "tryNow": "立即尝试",
-    "tools": "工具"
+    "tools": "工具",
+    "translate": "翻译",
+    "original": "原文",
+    "showOriginal": "显示原文"
   },
   "status": {
     "loading": "加载中...",
@@ -26,7 +29,9 @@
     "saved": "已保存",
     "error": "错误",
     "success": "成功",
-    "processing": "处理中..."
+    "processing": "处理中...",
+    "translating": "翻译中...",
+    "alreadyInLanguage": "已经是该语言"
   },
   "common": {
     "hello": "你好",

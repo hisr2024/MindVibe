@@ -22,7 +22,9 @@
     "karmicTree": "カルマの木",
     "emotionalReset": "感情的リセット",
     "deepInsights": "深い洞察",
-    "wisdomRooms": "知恵の部屋"
+    "wisdomRooms": "知恵の部屋",
+    "companion": "Companion",
+    "wisdomJourneys": "Journeys"
   },
   "actions": {
     "openChat": "チャットを開く",

@@ -1,0 +1,120 @@
+{
+  "title": "Панель управления",
+  "welcome": "С возвращением",
+  "subtitle": "Инструменты MindVibe",
+  "allTools": "Все инструменты в одном месте",
+  "returnHome": "Вернуться на главную",
+  "toolsCount": "инструментов",
+  "categories": {
+    "core": "Основные инструменты",
+    "guidance": "Движки руководства",
+    "karma": "Инструменты кармы",
+    "quick": "Быстрый доступ"
+  },
+  "tools": {
+    "kiaan": {
+      "title": "Чат KIAAN",
+      "description": "ИИ-духовный спутник"
+    },
+    "journal": {
+      "title": "Личный дневник",
+      "description": "Зашифрованный дневник"
+    },
+    "wisdom": {
+      "title": "Комнаты мудрости",
+      "description": "Древняя мудрость"
+    },
+    "insights": {
+      "title": "Анализ настроения",
+      "description": "Эмоциональные паттерны"
+    },
+    "viyog": {
+      "title": "Viyoga",
+      "description": "Снижение тревоги от ожиданий"
+    },
+    "ardha": {
+      "title": "Ardha",
+      "description": "Ситуационное руководство"
+    },
+    "relationship-compass": {
+      "title": "Компас отношений",
+      "description": "Руководство в отношениях"
+    },
+    "emotional-reset": {
+      "title": "Эмоциональная перезагрузка",
+      "description": "Быстрый эмоциональный баланс"
+    },
+    "karma-footprint": {
+      "title": "Karma Footprint",
+      "description": "Отслеживайте свои действия"
+    },
+    "karmic-tree": {
+      "title": "Кармическое древо",
+      "description": "Визуализируйте своё путешествие"
+    },
+    "karma-reset": {
+      "title": "Сброс кармы",
+      "description": "Начните заново"
+    },
+    "reflections": {
+      "title": "Священные размышления",
+      "description": "Ежедневный дневник"
+    },
+    "deep": {
+      "title": "Глубокие озарения",
+      "description": "Продвинутая аналитика"
+    },
+    "analytics": {
+      "title": "Аналитика",
+      "description": "Отслеживайте свой прогресс"
+    }
+  },
+  "badges": {
+    "new": "новое",
+    "premium": "премиум",
+    "beta": "бета"
+  },
+  "analytics": {
+    "title": "Аналитика",
+    "overview": "Обзор",
+    "insights": "Озарения",
+    "trends": "Тенденции",
+    "weeklyProgress": "Еженедельный прогресс",
+    "monthlyProgress": "Ежемесячный прогресс"
+  },
+  "profile": {
+    "title": "Профиль",
+    "settings": "Настройки",
+    "editProfile": "Редактировать профиль",
+    "updateProfile": "Обновить профиль",
+    "accountInfo": "Информация об аккаунте"
+  },
+  "subscription": {
+    "title": "Подписка",
+    "plan": "Текущий план",
+    "upgrade": "Улучшить",
+    "manage": "Управление подпиской",
+    "billing": "Оплата"
+  },
+  "stats": {
+    "journalEntries": "Записи в дневнике",
+    "chatSessions": "Сессии чата",
+    "moodCheckins": "Проверки настроения",
+    "streakDays": "Дней подряд"
+  },
+  "tool_desc": {
+    "viyog": "Успокоить немедленную реакцию",
+    "ardha": "Переосмыслить восприятие",
+    "kiaan": "Обсудить это",
+    "relationship-compass": "Найти ясность в отношениях",
+    "journey": "Тренировать долгосрочную внутреннюю устойчивость"
+  },
+  "mode_label": {
+    "prefix": "Вы находитесь в:",
+    "viyog": "Режим паузы",
+    "ardha": "Режим ясности",
+    "kiaan": "Режим спутника",
+    "relationship-compass": "Режим отношений",
+    "journey": "Режим тренировки"
+  }
+}

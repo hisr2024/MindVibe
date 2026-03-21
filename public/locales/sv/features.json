@@ -1,0 +1,96 @@
+{
+  "ardha": {
+    "title": "Ardha: Kognitiv Omformning",
+    "subtitle": "Gita-anpassad kognitiv omformning",
+    "description": "Upptäck förvrängningar, kalibrera berättelse vs fakta, leverera grundad klarhet.",
+    "placeholder": "Exempel: Jag gör hela tiden fel på jobbet, kanske passar jag bara inte för det här.",
+    "button": "Omforma",
+    "buttonLoading": "Reflekterar...",
+    "label": "Dela tanken att omforma",
+    "response": "Ardhas svar",
+    "error": "Ardha har anslutningsproblem just nu. Försök igen om en stund.",
+    "badge": "Endast lokalt"
+  },
+  "viyog": {
+    "title": "Viyoga: Lösläppningscoach",
+    "subtitle": "Resultatångestreducerare",
+    "description": "Omdirigerar bekymmer till handlingsbara steg.",
+    "placeholder": "Exempel: Jag är rädd att presentationen misslyckas och alla tycker jag är inkompetent.",
+    "button": "Skifta",
+    "buttonLoading": "Centrerar...",
+    "label": "Dela resultatoron",
+    "response": "Viyogas svar",
+    "error": "Viyoga har anslutningsproblem just nu. Försök igen om en stund.",
+    "badge": "Endast lokalt"
+  },
+  "relationshipCompass": {
+    "title": "Relationskompass",
+    "subtitle": "Dharma Kompass för Relationer",
+    "description": "Lugn, sekulär konfliktvägledning som håller KIAAN intakt — rätt handling, ego-lösläppning, tydlig formulering.",
+    "placeholder": "Exempel: Min partner tycker att jag inte lyssnar, och jag blir alltid defensiv när de tar upp det.",
+    "button": "Vägled mig med Relationskompass",
+    "buttonLoading": "Balanserar vägledning...",
+    "sendToKiaan": "Skicka kontext till KIAAN",
+    "label": "Beskriv konflikten",
+    "response": "Relationskompassens svar",
+    "error": "Relationskompass är inte tillgänglig just nu. Försök igen snart.",
+    "badges": {
+      "neutral": "Neutral och grundad",
+      "intact": "Håller KIAAN intakt"
+    },
+    "outputFormat": "Utdataformat: erkänn, separera ego, namnge värden, rätt handling, lösläpp, lägg till medkänsla, föreslå formulering, sedan ett nästa steg."
+  },
+  "sacredReflections": {
+    "title": "Heliga Reflektioner",
+    "subtitle": "Dagbok",
+    "description": "Inlägg stannar på din enhet och uppdaterar veckans vägledning automatiskt.",
+    "openJournal": "Öppna Dagbok",
+    "goToJournal": "Gå till Dagbok",
+    "keepInOnePlace": "Håll reflektioner på en lugn plats",
+    "openSacredReflections": "Öppna Heliga Reflektioner för att skriva, återbesöka eller fortsätta din praktik.",
+    "writePrompt": "Skriv fritt. Bara du kan se detta.",
+    "titlePlaceholder": "Titel (valfritt)",
+    "addReflection": "Lägg till Reflektion",
+    "recentEntries": "Senaste inlägg",
+    "noEntries": "Inga inlägg ännu. Dina reflektioner visas här.",
+    "weeklyEntries": "Veckoinlägg: {count}",
+    "weeklyAssessment": "Veckobedömning",
+    "mostPresentMood": "Mest närvarande humör: {mood}",
+    "positiveMoments": "Positiva ögonblick loggade",
+    "challengingDays": "Ömma/Utmanande dagar",
+    "kiaanGuidance": "KIAANs milda vägledning",
+    "getKiaanOpinion": "Få KIAANs åsikt",
+    "kiaanReading": "KIAAN läser...",
+    "todaysTone": "Dagens ton",
+    "security": {
+      "encrypted": "Helt krypterad på din enhet",
+      "description": "Inlägg förseglas lokalt med AES-GCM innan de sparas. Bara denna webbläsare kan dekryptera dem.",
+      "status": {
+        "ready": "AES-GCM säkrad lokalt",
+        "preparing": "Förbereder krypteringslås",
+        "offline": "Offlineläge: lagrad på denna enhet",
+        "online": "Offline-redo: sparar på enhet"
+      }
+    }
+  },
+  "karmaFootprint": {
+    "title": "Karma Fotavtryck",
+    "description": "Spåra dina positiva handlingar och deras rippeleffekter"
+  },
+  "karmicTree": {
+    "title": "Karmiskt Träd",
+    "description": "Visualisera din tillväxt och andliga resa"
+  },
+  "emotionalReset": {
+    "title": "Emotionell Återställning",
+    "description": "Snabba övningar för att återställa ditt emotionella tillstånd"
+  },
+  "deepInsights": {
+    "title": "Djupa Insikter",
+    "description": "Få djup förståelse för dina mönster"
+  },
+  "wisdomRooms": {
+    "title": "Visdomsrum",
+    "description": "Utforska uråldrig visdom i modern kontext"
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "mainNav": {
+    "home": "Strona główna",
+    "dashboard": "Panel",
+    "features": "Funkcje",
+    "about": "O nas",
+    "contact": "Kontakt",
+    "pricing": "Subskrypcje",
+    "profile": "Profil",
+    "settings": "Ustawienia",
+    "account": "Dostęp do konta",
+    "theme": "Motyw",
+    "introduction": "Wprowadzenie"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "Kompas Relacji",
+    "sacredReflections": "Święte Refleksje",
+    "karmaFootprint": "Ślad Karma",
+    "karmicTree": "Drzewo Karmiczne",
+    "emotionalReset": "Reset Emocjonalny",
+    "deepInsights": "Głębokie Wglądy",
+    "wisdomRooms": "Pokoje Mądrości",
+    "wisdomJourneys": "Podróże",
+    "companion": "Towarzysz"
+  },
+  "actions": {
+    "openChat": "Otwórz czat",
+    "startCheckin": "Rozpocznij zameldowanie",
+    "instantGuidance": "Natychmiastowe wskazówki",
+    "spotYourState": "Rozpoznaj swój stan",
+    "menu": "Menu",
+    "toggleMenu": "Przełącz menu nawigacji"
+  },
+  "mobileNav": {
+    "chat": "Czat",
+    "pause": "Pauza",
+    "journal": "Święte Refleksje"
+  },
+  "footer": {
+    "allRightsReserved": "Wszelkie prawa zastrzeżone",
+    "privacy": "Polityka prywatności",
+    "terms": "Warunki korzystania",
+    "support": "Wsparcie",
+    "explore": "Odkrywaj",
+    "safety": "Bezpieczeństwo",
+    "description": "Zaprojektowane dla spokoju, z priorytetem prywatności w wsparciu duchowego dobrostanu. Zbudowane z naciskiem na dostępność WCAG, szyfrowanie i łagodne doświadczenie.",
+    "emailUs": "Napisz do nas",
+    "encryptedJournals": "Zaszyfrowane dzienniki",
+    "noTracking": "Bez reklam śledzących"
+  },
+  "pathway": {
+    "pause": "Pauza",
+    "understand": "Zrozum",
+    "converse": "Rozmawiaj",
+    "apply": "Zastosuj",
+    "train": "Ćwicz",
+    "you_are_here": "Jesteś tutaj",
+    "nav_label": "Ścieżka uzdrawiania"
+  },
+  "next_step": {
+    "explore_ardha": "Odkryj w Ardha →",
+    "continue_kiaan": "Kontynuuj z KIAAN →",
+    "stabilize_viyoga": "Stabilizuj z Viyoga →",
+    "enter_journey": "Rozpocznij Podróż →",
+    "helper": "Na podstawie twojej rozmowy może ci się to przydać"
+  },
+  "tools": {
+    "releaseAttachment": "Uwolnij przywiązanie",
+    "reframeThoughts": "Przeramuj myśli",
+    "kiaanChat": "KIAAN Czat",
+    "talkItThrough": "Porozmawiaj o tym",
+    "relationalClarity": "Jasność relacji",
+    "quickAccess": "Szybki dostęp"
+  }
+}

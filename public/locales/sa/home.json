@@ -8,7 +8,7 @@
     "privacy": "Conversations remain private • a warm, confidential refuge"
   },
   "ecosystem": {
-    "title": "The Sakha Ecosystem",
+    "title": "The MindVibe Ecosystem",
     "subtitle": "A holistic approach to spiritual wellness, rooted in ancient wisdom and modern practices",
     "pillars": {
       "innerPeace": {
@@ -64,7 +64,10 @@
       "tired": "Rest is not weakness. 💙",
       "anxious": "Take a breath. I'm with you. 🌊",
       "heavy": "You're not alone. I'm here. 💙"
-    }
+    },
+    "helperText": "Tap a stone to log your mood • Takes you to KIAAN Chat for support",
+    "openingChat": "Opening KIAAN Chat...",
+    "selectMood": "Select"
   },
   "quickAccess": {
     "kiaan": {

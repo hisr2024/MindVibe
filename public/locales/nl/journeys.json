@@ -1,0 +1,83 @@
+{
+  "_template_variables_note": "This file uses i18next template variables: {{current}}, {{total}}, {{day}}, {{title}}. Any rename or removal of these variables will break the UI. Ensure all referenced variables are passed by the consuming components (JourneyCard, JourneyStep, JourneyComplete).",
+  "title": "Wijsheidsreizen",
+  "subtitle": "Transformeer je innerlijke wereld door de greep van de zes innerlijke neigingen (Sad-Ripu) te versoepelen. Kies een of meer reizen om je pad naar innerlijke vrede te beginnen.",
+  "featured": "Uitgelichte Reizen",
+  "all": "Alle Reizen",
+  "active": "Jouw Actieve Reizen",
+  "empty": {
+    "title": "Geen Reizen Beschikbaar",
+    "description": "Kom binnenkort terug voor nieuwe wijsheidsreizen."
+  },
+  "trial": {
+    "title": "Gratis Toegang",
+    "description": "Probeer 1 reis 3 dagen gratis! Ervaar de transformatie.",
+    "upgrade": "Upgrade voor Volledige Toegang"
+  },
+  "card": {
+    "start": "Reis Beginnen",
+    "continue": "Reis Voortzetten",
+    "locked": "Voltooi of pauzeer een actieve reis om deze te starten",
+    "free": "Gratis",
+    "featured": "Uitgelicht",
+    "inProgress": "Bezig",
+    "day": "Dag {{current}} van {{total}}"
+  },
+  "step": {
+    "title": "Reistap van Vandaag",
+    "backToJourneys": "Terug naar Reizen",
+    "complete": "Dag {{day}} Voltooien",
+    "completing": "Voltooien...",
+    "completed": {
+      "title": "Dag {{day}} Voltooid!",
+      "message": "Goed gedaan! Kom morgen terug voor je volgende stap.",
+      "viewAll": "Bekijk Alle Reizen"
+    },
+    "journeyComplete": {
+      "title": "Reis Voltooid!",
+      "message": "Gefeliciteerd met het voltooien van {{title}}! Je hebt een betekenisvolle stap naar innerlijke vrede gezet.",
+      "startAnother": "Begin een Andere Reis"
+    },
+    "day14": {
+      "title": "De praktijk gaat verder",
+      "body": "De 14 dagen zijn een begin, geen einde. Draag wat je hebt geoefend mee in alledaagse momenten — het werk verdiept zich vanaf hier.",
+      "linkTrigger": "Behandel de trigger van vandaag",
+      "linkPractice": "Dagelijkse micro-oefening"
+    }
+  },
+  "sections": {
+    "teaching": "Les van Vandaag",
+    "reflection": "Geleide Reflectie",
+    "practice": "Oefening",
+    "commitment": "Micro-Belofte van Vandaag",
+    "microPractice": "Micro-oefening van vandaag",
+    "markPracticed": "Markeer als geoefend"
+  },
+  "checkIn": {
+    "label": "Jouw Reflectie (optioneel)",
+    "placeholder": "Schrijf je gedachten, inzichten of gevoelens..."
+  },
+  "difficulty": {
+    "1": "Beginner",
+    "2": "Makkelijk",
+    "3": "Gemiddeld",
+    "4": "Uitdagend",
+    "5": "Gevorderd"
+  },
+  "enemies": {
+    "kama": "Verlangen (Kama)",
+    "krodha": "Woede (Krodha)",
+    "lobha": "Hebzucht (Lobha)",
+    "moha": "Gehechtheid (Moha)",
+    "mada": "Ego (Mada)",
+    "matsarya": "Jaloezie (Matsarya)",
+    "mixed": "Gecombineerde Reis",
+    "general": "Algemene Wijsheid"
+  },
+  "errors": {
+    "loadFailed": "Kan reizen niet laden. Probeer het opnieuw.",
+    "startFailed": "Kan reis niet starten. Probeer het opnieuw.",
+    "completeFailed": "Kan stap niet voltooien. Probeer het opnieuw.",
+    "networkError": "Netwerkfout. Controleer je verbinding."
+  }
+}

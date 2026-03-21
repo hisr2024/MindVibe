@@ -1,0 +1,96 @@
+{
+  "ardha": {
+    "title": "Ardha: Kubadilisha Mtazamo wa Kiakili",
+    "subtitle": "Kubadilisha mtazamo wa kiakili kulingana na Gita",
+    "description": "Gundua upotoshaji, sawazisha hadithi na ukweli, toa uwazi imara.",
+    "placeholder": "Mfano: Ninaendelea kufanya makosa kazini, labda si mtu anayefaa kwa hili.",
+    "button": "Badilisha Mtazamo",
+    "buttonLoading": "Inatafakari...",
+    "label": "Shiriki wazo unalotaka kubadilisha mtazamo wake",
+    "response": "Jibu la Ardha",
+    "error": "Ardha ina shida ya muunganisho sasa hivi. Tafadhali jaribu tena baada ya muda mfupi.",
+    "badge": "Kifaa tu"
+  },
+  "viyog": {
+    "title": "Viyoga: Kocha wa Kujitenga",
+    "subtitle": "Kupunguza wasiwasi wa matokeo",
+    "description": "Inaelekeza wasiwasi kwa hatua zinazoweza kufanywa.",
+    "placeholder": "Mfano: Ninaogopa wasilisho litashindwa na kila mtu atafikiri sina uwezo.",
+    "button": "Badilisha",
+    "buttonLoading": "Inajikita...",
+    "label": "Shiriki wasiwasi wa matokeo",
+    "response": "Jibu la Viyoga",
+    "error": "Viyoga ina shida ya muunganisho sasa hivi. Tafadhali jaribu tena baada ya muda mfupi.",
+    "badge": "Kifaa tu"
+  },
+  "relationshipCompass": {
+    "title": "Dira ya Mahusiano",
+    "subtitle": "Dira ya Dharma kwa Mahusiano",
+    "description": "Mwongozo wa utulivu wa migogoro ambao unahifadhi KIAAN—hatua sahihi, kuacha ubinafsi, maneno wazi.",
+    "placeholder": "Mfano: Mpenzi wangu anahisi simsikii, na mimi huwa najitetea anapoliibua.",
+    "button": "Niongoze na Dira ya Mahusiano",
+    "buttonLoading": "Inasawazisha mwongozo...",
+    "sendToKiaan": "Tuma muktadha kwa KIAAN",
+    "label": "Eleza mgogoro",
+    "response": "Jibu la Dira ya Mahusiano",
+    "error": "Dira ya Mahusiano haipatikani kwa sasa. Tafadhali jaribu tena baadaye.",
+    "badges": {
+      "neutral": "Isiyo na upendeleo na imara",
+      "intact": "Inahifadhi KIAAN"
+    },
+    "outputFormat": "Muundo wa matokeo: kubali, tenganisha ubinafsi, taja maadili, hatua sahihi, jitenge, ongeza huruma, pendekeza maneno, kisha hatua moja inayofuata."
+  },
+  "sacredReflections": {
+    "title": "Tafakuri Takatifu",
+    "subtitle": "Daftari",
+    "description": "Maingizo yanabaki kwenye kifaa chako na kusasisha mwongozo wa wiki moja kwa moja.",
+    "openJournal": "Fungua Daftari",
+    "goToJournal": "Nenda kwa Daftari",
+    "keepInOnePlace": "Weka tafakuri mahali pamoja pa utulivu",
+    "openSacredReflections": "Fungua Tafakuri Takatifu kuandika, kurejea, au kuendelea na mazoezi yako.",
+    "writePrompt": "Andika kwa uhuru. Wewe peke yako unaweza kuona hili.",
+    "titlePlaceholder": "Kichwa (si lazima)",
+    "addReflection": "Ongeza Tafakuri",
+    "recentEntries": "Maingizo ya hivi karibuni",
+    "noEntries": "Bado hakuna maingizo. Tafakuri zako zitaonekana hapa.",
+    "weeklyEntries": "Maingizo ya wiki: {count}",
+    "weeklyAssessment": "Tathmini ya Wiki",
+    "mostPresentMood": "Hisia inayoonekana zaidi: {mood}",
+    "positiveMoments": "Wakati chanya uliorekodiwa",
+    "challengingDays": "Siku nyeti/zenye changamoto",
+    "kiaanGuidance": "Mwongozo mpole wa KIAAN",
+    "getKiaanOpinion": "Pata maoni ya KIAAN",
+    "kiaanReading": "KIAAN inasoma...",
+    "todaysTone": "Toni ya leo",
+    "security": {
+      "encrypted": "Imesimbwa kikamilifu kwenye kifaa chako",
+      "description": "Maingizo yanafungwa kwa siri kwa AES-GCM kabla ya kuhifadhi. Kivinjari hiki peke yake kinaweza kufungua siri.",
+      "status": {
+        "ready": "Imelindwa kwa AES-GCM ndani ya kifaa",
+        "preparing": "Inaandaa kufuli ya usimbaji",
+        "offline": "Hali ya nje ya mtandao: imehifadhiwa kwenye kifaa hiki",
+        "online": "Tayari nje ya mtandao: inahifadhi kwenye kifaa"
+      }
+    }
+  },
+  "karmaFootprint": {
+    "title": "Karma Footprint",
+    "description": "Fuatilia matendo yako mazuri na athari zake za mawimbi"
+  },
+  "karmicTree": {
+    "title": "Mti wa Karma",
+    "description": "Onesha ukuaji wako na safari yako ya kiroho"
+  },
+  "emotionalReset": {
+    "title": "Kurekebisha Hisia",
+    "description": "Mazoezi ya haraka ya kurekebisha hali yako ya kihisia"
+  },
+  "deepInsights": {
+    "title": "Maarifa ya Kina",
+    "description": "Pata uelewa wa kina wa mifumo yako"
+  },
+  "wisdomRooms": {
+    "title": "Vyumba vya Hekima",
+    "description": "Chunguza hekima ya kale katika muktadha wa kisasa"
+  }
+}

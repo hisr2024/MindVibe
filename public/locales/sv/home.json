@@ -1,0 +1,118 @@
+{
+  "hero": {
+    "title": "Din AI-Följeslagare för Andligt Välbefinnande",
+    "subtitle": "Chatta med KIAAN, driven av Uråldrig Visdom",
+    "tagline": "Din lugna, integritetsfokuserade andliga följeslagare driven av uråldrig visdom",
+    "ctaPrimary": "Prata med KIAAN",
+    "ctaSecondary": "Heliga Reflektioner",
+    "privacy": "Samtal förblir privata • en varm, konfidentiell fristad"
+  },
+  "ecosystem": {
+    "title": "MindVibe Ekosystemet",
+    "subtitle": "Ett holistiskt tillvägagångssätt för andligt välbefinnande, rotat i uråldrig visdom och moderna metoder",
+    "pillars": {
+      "innerPeace": {
+        "title": "Inre Frid",
+        "description": "Hitta stillhet genom andningsfokuserade övningar och mjuka jordningstekniker."
+      },
+      "mindControl": {
+        "title": "Sinnesstyrning",
+        "description": "Utveckla fokuserad klarhet genom strukturerade mindfulness-övningar."
+      },
+      "selfKindness": {
+        "title": "Självvänlighet",
+        "description": "Odla medkänsla för dig själv genom varma, stödjande övningar."
+      }
+    },
+    "footer": "Varje pelare samverkar för att skapa ett balanserat, hållbart tillvägagångssätt för andligt välbefinnande"
+  },
+  "features": {
+    "title": "Nyckelfunktioner",
+    "subtitle": "Integritetsfokuserade verktyg designade för din andliga välbefinnanderesa",
+    "voice": {
+      "title": "KIAAN Röst",
+      "description": "Prata naturligt med KIAAN via röstinmatning. Alltid vaken, guidar dig överallt i ekosystemet.",
+      "cta": "Prata med KIAAN"
+    },
+    "offline": {
+      "title": "Offline-redo",
+      "description": "Tillgång till din dagbok, humör och reflektioner när som helst, även utan internet.",
+      "cta": "Börja Skriva Dagbok"
+    },
+    "reset": {
+      "title": "Emotionell Återställning",
+      "description": "Snabba övningar för att återställa ditt emotionella tillstånd och hitta omedelbart lugn.",
+      "cta": "Prova Återställning"
+    }
+  },
+  "moodCheckIn": {
+    "title": "Hur mår du?",
+    "subtitle": "Snabb Incheckning",
+    "helper": "Tryck på en sten för att logga ditt humör • Privat & endast lokalt",
+    "helperText": "Tryck på en sten för att logga ditt humör • Tar dig till KIAAN Chatt för stöd",
+    "openingChat": "Öppnar KIAAN Chatt...",
+    "selectMood": "Välj",
+    "moods": {
+      "peaceful": "Fridfull",
+      "happy": "Glad",
+      "neutral": "Neutral",
+      "tired": "Trött",
+      "anxious": "Orolig",
+      "heavy": "Tung"
+    },
+    "responses": {
+      "peaceful": "Vackert lugn. Stanna i det. 💙",
+      "happy": "Låt den värmen stanna kvar. ✨",
+      "neutral": "Stadigt är bra. Du visar dig. 🌿",
+      "tired": "Vila är inte svaghet. 💙",
+      "anxious": "Ta ett andetag. Jag är med dig. 🌊",
+      "heavy": "Du är inte ensam. Jag är här. 💙"
+    }
+  },
+  "quickAccess": {
+    "kiaan": {
+      "title": "Prata med KIAAN",
+      "subtitle": "Omedelbar vägledning",
+      "description": "Hoppa in i ett fokuserat samtal för andligt välbefinnandestöd",
+      "cta": "Öppna Chatt"
+    },
+    "dashboard": {
+      "title": "Framstegsspårning",
+      "subtitle": "Översikt",
+      "description": "Se insikter från dina humörincheckningar och dagboksinlägg",
+      "cta": "Visa Översikt"
+    },
+    "emotionalReset": {
+      "title": "Snabb Återställning",
+      "subtitle": "Emotionell Återställning",
+      "description": "Guidade övningar för att omedelbart återställa ditt emotionella tillstånd",
+      "cta": "Prova Återställning"
+    }
+  },
+  "disclaimer": {
+    "title": "Ansvarsfriskrivning",
+    "text": "KIAAN delar stödjande reflektioner inspirerade av visdomstraditioner. Dessa samtal och övningar är inte medicinsk rådgivning. Om du har allvarliga bekymmer eller känner dig otrygg, kontakta ditt lands akuttjänster eller en legitimerad yrkesutövare omedelbart."
+  },
+  "introduction": {
+    "heroTitle": "Välkommen till Gudomlig Närvaro",
+    "heroSubtitle": "Upplev Krishnas kärleksfulla vägledning. Du är aldrig ensam på denna resa.",
+    "receiveDarshan": "Ta emot Krishnas Darshan",
+    "talkToKiaan": "Prata med KIAAN",
+    "divineWisdom": "Gudomlig visdom & vägledning",
+    "protectionShield": "Gudomlig Skyddssköld",
+    "activateProtection": "Aktivera Krishnas skydd",
+    "heartToHeart": "Hjärta-till-Hjärta med Krishna",
+    "writeLetter": "Skriv ett brev till det Gudomliga",
+    "howIsHeart": "Hur mår ditt hjärta?",
+    "shareFeelings": "Dela dina känslor med Krishna",
+    "goToDashboard": "Gå till Översikt",
+    "accessTools": "Tillgång till alla verktyg & funktioner",
+    "quickAccess": "Snabb Gudomlig Tillgång",
+    "journeys": "Resor",
+    "journal": "Dagbok",
+    "reframe": "Omforma",
+    "detach": "Frigör",
+    "footerVerse": "\"Jag är Självet som bor i alla varelsers hjärtan. Jag är början, mitten och slutet.\"",
+    "footerVerseRef": "— Bhagavad Gita 10.20"
+  }
+}

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Sakha",
+    "name": "MindVibe",
     "tagline": "আপনার আধ্যাত্মিক সঙ্গী ও দিব্য বন্ধু"
   },
   "buttons": {
@@ -18,7 +18,10 @@
     "learnMore": "আরও জানুন",
     "getStarted": "শুরু করুন",
     "tryNow": "এখনই চেষ্টা করুন",
-    "tools": "সরঞ্জাম"
+    "tools": "সরঞ্জাম",
+    "translate": "অনুবাদ করুন",
+    "original": "মূল",
+    "showOriginal": "মূল দেখান"
   },
   "status": {
     "loading": "লোড হচ্ছে...",
@@ -26,7 +29,9 @@
     "saved": "সংরক্ষিত",
     "error": "ত্রুটি",
     "success": "সফলতা",
-    "processing": "প্রক্রিয়াকরণ..."
+    "processing": "প্রক্রিয়াকরণ...",
+    "translating": "অনুবাদ করা হচ্ছে...",
+    "alreadyInLanguage": "ইতিমধ্যে এই ভাষায় আছে"
   },
   "common": {
     "hello": "হ্যালো",

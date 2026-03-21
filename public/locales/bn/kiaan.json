@@ -32,7 +32,12 @@
     "defaultResponse": "আমি এখানে আছি। কী হচ্ছে বলুন, আমরা একসাথে সমাধান করব।",
     "summary": "সারসংক্ষেপ",
     "fullView": "পূর্ণ দৃশ্য",
-    "divineFriend": "আপনার দিব্য বন্ধু"
+    "divineFriend": "আপনার দিব্য বন্ধু",
+    "featureLocked": "This feature requires a higher plan. [View plans](/pricing) to unlock it.",
+    "fullViewTitle": "Full detailed response",
+    "quotaExceeded": "Your monthly quota has been reached. [Upgrade your plan](/pricing) to continue chatting.",
+    "saveToJournalTitle": "Save to Journal",
+    "shareTitle": "Share response"
   },
   "guidanceModes": {
     "title": "Guidance modes",

@@ -1,0 +1,55 @@
+{
+  "app": {
+    "name": "MindVibe",
+    "tagline": "เพื่อนร่วมทางจิตวิญญาณและมิตรสวรรค์ของคุณ"
+  },
+  "buttons": {
+    "submit": "ส่ง",
+    "cancel": "ยกเลิก",
+    "save": "บันทึก",
+    "delete": "ลบ",
+    "edit": "แก้ไข",
+    "close": "ปิด",
+    "next": "ถัดไป",
+    "previous": "ก่อนหน้า",
+    "confirm": "ยืนยัน",
+    "back": "กลับ",
+    "continue": "ดำเนินต่อ",
+    "learnMore": "เรียนรู้เพิ่มเติม",
+    "getStarted": "เริ่มต้นใช้งาน",
+    "tryNow": "ลองเลย",
+    "tools": "เครื่องมือ",
+    "translate": "แปล",
+    "original": "ต้นฉบับ",
+    "showOriginal": "แสดงต้นฉบับ"
+  },
+  "status": {
+    "loading": "กำลังโหลด...",
+    "saving": "กำลังบันทึก...",
+    "saved": "บันทึกแล้ว",
+    "error": "ข้อผิดพลาด",
+    "success": "สำเร็จ",
+    "processing": "กำลังประมวลผล...",
+    "translating": "กำลังแปล...",
+    "alreadyInLanguage": "อยู่ในภาษานี้แล้ว"
+  },
+  "common": {
+    "hello": "สวัสดี",
+    "welcome": "ยินดีต้อนรับ",
+    "goodbye": "ลาก่อน",
+    "thankyou": "ขอบคุณ",
+    "yes": "ใช่",
+    "no": "ไม่",
+    "or": "หรือ",
+    "and": "และ",
+    "optional": "ไม่บังคับ",
+    "required": "จำเป็น"
+  },
+  "privacy": {
+    "encrypted": "เข้ารหัสแล้ว",
+    "private": "ออกแบบเพื่อความเป็นส่วนตัว",
+    "secure": "ปลอดภัย",
+    "localOnly": "เฉพาะในเครื่อง",
+    "offlineReady": "ใช้งานออฟไลน์ได้"
+  }
+}

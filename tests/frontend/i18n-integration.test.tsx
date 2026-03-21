@@ -379,8 +379,20 @@ describe('i18n Integration Tests', () => {
         fr: 'French',
         de: 'German',
         pt: 'Portuguese',
+        it: 'Italian',
+        nl: 'Dutch',
+        pl: 'Polish',
+        sv: 'Swedish',
+        ru: 'Russian',
         ja: 'Japanese',
         'zh-CN': 'Chinese (Simplified)',
+        ko: 'Korean',
+        th: 'Thai',
+        vi: 'Vietnamese',
+        id: 'Indonesian',
+        ar: 'Arabic',
+        tr: 'Turkish',
+        sw: 'Swahili',
       };
 
       for (const lang of allLanguages) {

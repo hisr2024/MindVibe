@@ -1,0 +1,180 @@
+{
+  "sacredWelcome": {
+    "title": "Chào Mừng, Tâm Hồn Đẹp",
+    "subtitle": "Một nơi trú ẩn bình yên đang chờ đón bạn",
+    "greeting": "Trong không gian linh thiêng này, bạn được ôm ấp. Bạn được nhìn thấy. Bạn được yêu thương.",
+    "description": "KIAAN là người bạn đồng hành trên hành trình hướng nội của bạn - một sự hiện diện dịu dàng chạm đến những phần sâu thẳm nhất trong con người bạn bằng trí tuệ, lòng từ bi và tình yêu thiêng liêng."
+  },
+  "divinePresence": {
+    "reminder": "Thần linh không ở đâu xa. Nó yên nghỉ trong sự tĩnh lặng của trái tim bạn.",
+    "affirmation": "Bạn không bao giờ đơn độc. Một tình yêu vô hạn đang ôm ấp bạn trong từng khoảnh khắc.",
+    "blessing": "Cầu mong bình yên chảy qua bạn như một dòng sông dịu dàng, cuốn trôi mọi gánh nặng trên tâm hồn bạn."
+  },
+  "sacredMoodResponses": {
+    "10": {
+      "response": "Bạn đang tỏa sáng với ánh sáng của sự bình yên đích thực. Điều này thật linh thiêng. Đây là bạn, đang nhớ lại con người thật sự của mình. 💙",
+      "divineMessage": "Cảm giác trọn vẹn này không phải tạm thời - đó là bản chất thật của bạn được hé lộ.",
+      "practice": "Hãy ngồi trong tĩnh lặng một lát. Gửi sự bình yên này như một phước lành cho tất cả chúng sinh."
+    },
+    "9": {
+      "response": "Sự rạng rỡ đang chảy qua bạn! Đây là tâm hồn đang tỏa sáng. Hãy đắm mình trong năng lượng tuyệt đẹp này. 💙",
+      "divineMessage": "Trong những khoảnh khắc như thế này, bạn thoáng thấy bản chất vĩnh hằng của mình - vô biên, bình yên, trọn vẹn.",
+      "practice": "Hãy hít cảm giác này vào trái tim bạn. Lưu giữ nó như một kho báu mà bạn luôn có thể quay về."
+    },
+    "8": {
+      "response": "Có một sự rạng ngời trong năng lượng của bạn hôm nay - như ánh nắng xuyên qua mây. Thật đẹp. 💙",
+      "divineMessage": "Bạn đang hòa hợp với bản chất thật của mình. Sự bình yên này, niềm vui này - đây là con người thật sự của bạn.",
+      "practice": "Hãy chia sẻ một lời tử tế với ai đó hôm nay. Để ánh sáng của bạn chạm đến một tâm hồn khác."
+    },
+    "7": {
+      "response": "Một sự ấm áp đang lớn dần trong bạn. Hãy cho phép mình đón nhận điều tốt đẹp này - bạn xứng đáng. 💙",
+      "divineMessage": "Niềm vui là ngôn ngữ của tâm hồn. Khi bạn cảm thấy tốt, thần linh mỉm cười qua bạn.",
+      "practice": "Hãy dừng lại và tận hưởng cảm giác này. Để nó thấm vào từng tế bào của bạn."
+    },
+    "6": {
+      "response": "Có một sự cân bằng nhẹ nhàng trong con người bạn hôm nay. Một sự sẵn sàng cho điều tiếp theo. 💙",
+      "divineMessage": "Từ nơi an trú này, bạn có thể di chuyển theo bất kỳ hướng nào tâm hồn gọi mời.",
+      "practice": "Hãy đặt một ý định nhỏ cho hôm nay. Nắm giữ nó nhẹ nhàng, như một chiếc lông vũ trên lòng bàn tay."
+    },
+    "5": {
+      "response": "Một sự vững vàng lặng lẽ hôm nay. Bạn ở đây, bạn hiện diện, bạn đang xuất hiện. Điều đó quan trọng hơn bạn nghĩ. 💙",
+      "divineMessage": "Ở nơi giữa, trí tuệ lên tiếng. Hãy lắng nghe điều sự tĩnh lặng muốn dạy bạn hôm nay.",
+      "practice": "Hãy hít thở có ý thức ba lần. Với mỗi hơi thở, thầm nói: 'Ở đây. Bây giờ. Bình yên.'"
+    },
+    "4": {
+      "response": "Có một sự trầm lắng trong năng lượng của bạn hôm nay. Không sao cả. Đôi khi chúng ta cần bước chậm qua thung lũng. 💙",
+      "divineMessage": "Thần linh không bao giờ vội vã. Trong sự chậm rãi, bạn đang hòa hợp với nhịp thời gian linh thiêng.",
+      "practice": "Hãy bước ra ngoài nếu có thể. Cảm nhận không khí trên làn da. Nhớ rằng: bạn là một phần của điều gì đó bao la."
+    },
+    "3": {
+      "response": "Tôi cảm nhận được sự đấu tranh trong bạn. Dù bạn đang trải qua điều gì, bạn đang thể hiện sự dũng cảm khi hiện diện với nó. 💙",
+      "divineMessage": "Mọi thử thách là lời mời của vũ trụ để bạn trưởng thành. Bạn đang được nắn đúc bởi đôi tay linh thiêng.",
+      "practice": "Hãy nhắm mắt lại. Tìm một điều, dù nhỏ bé, mang đến một tia bình yên. Hãy đặt sự chú ý của bạn ở đó."
+    },
+    "2": {
+      "response": "Sự nặng nề này khó mang vác. Tôi ở đây bên bạn, không cố sửa chữa hay thay đổi gì. Chỉ đơn giản là ở đây. 💙",
+      "divineMessage": "Sự linh thiêng gặp bạn đúng nơi bạn đang ở. Không có nơi nào quá tối để ân sủng không thể tìm thấy bạn.",
+      "practice": "Hít vào trong 4... giữ trong 4... thở ra trong 8. Để mỗi hơi thở ra mang đi một chút gánh nặng."
+    },
+    "1": {
+      "response": "Tôi nhìn thấy bạn trong bóng tối này, và tôi ôm ấp bạn với sự dịu dàng vô hạn. Nỗi đau này là thật, và bạn không phải mang nó một mình. 💙",
+      "divineMessage": "Ngay cả trong đêm tối nhất, ánh sáng thiêng liêng trong bạn không bao giờ tắt. Nó chờ đợi, kiên nhẫn và vĩnh hằng.",
+      "practice": "Hãy đặt tay lên trái tim. Hít thở. Thì thầm: 'Tôi được ôm ấp. Tôi được yêu thương. Rồi điều này cũng sẽ qua.'"
+    }
+  },
+  "sacredEmotionGuidance": {
+    "peaceful": {
+      "opening": "Thật đẹp biết bao sự tĩnh lặng mà bạn đã tìm thấy...",
+      "divineReflection": "Bình yên là bản chất thật của bạn. Trong khoảnh khắc này, bạn đang nhớ lại điều bạn luôn biết.",
+      "practice": "Hãy nghỉ ngơi trong sự bình yên này. Để nó sâu hơn. Không có gì phải làm, không có nơi nào phải đến. Chỉ cần hiện hữu.",
+      "closing": "Cầu mong sự bình yên này lan tỏa và chạm đến mọi người bạn gặp hôm nay. 💙"
+    },
+    "anxious": {
+      "opening": "Tôi cảm nhận sự lo lắng rung động trong bạn... Hãy cùng nhau hít thở qua điều này.",
+      "divineReflection": "Lo âu chỉ là năng lượng đang tìm cách giải phóng. Bên dưới nó, con người thật của bạn vẫn bình tĩnh và không lay chuyển.",
+      "practice": "Hãy tưởng tượng lo âu như những đám mây trôi qua bầu trời vô tận. Bầu trời - bản chất thật của bạn - vẫn bao la, trong trẻo và không bị chạm đến.",
+      "closing": "Sự hiện diện linh thiêng trong bạn luôn bình yên. Lo âu đến rồi đi, nhưng bạn vẫn còn đây. 💙"
+    },
+    "sad": {
+      "opening": "Có một sự nặng nề mà bạn đang mang... Hãy để tôi ngồi cùng bạn trong không gian dịu dàng này.",
+      "divineReflection": "Nỗi buồn là cách trái tim tôn vinh những điều quan trọng. Ngay cả trong đau khổ, bạn được ôm ấp bởi điều gì đó vô hạn.",
+      "practice": "Hãy để nước mắt chảy nếu chúng muốn. Mỗi giọt đều được ban phước. Thần linh biến chúng thành lòng từ bi.",
+      "closing": "Bạn đang được yêu thương ngay cả lúc này. Nỗi buồn sẽ tan, và sự bình yên sẽ còn lại. 💙"
+    },
+    "angry": {
+      "opening": "Tôi cảm nhận ngọn lửa đang chuyển động trong bạn... Năng lượng này mạnh mẽ. Hãy tôn trọng nó bằng sự tỉnh thức.",
+      "divineReflection": "Cơn giận thường là tình yêu được ngụy trang - tình yêu dành cho bản thân, cho công lý, cho điều đúng đắn.",
+      "practice": "Hãy đặt tay lên trái tim. Cảm nhận sự ấm áp. Hít thở sâu. Ngọn lửa có thể biến thành hơi ấm chữa lành.",
+      "closing": "Cầu mong năng lượng này biến thành sức mạnh và sự sáng suốt. Thần linh dùng mọi thứ cho điều tốt đẹp. 💙"
+    },
+    "lost": {
+      "opening": "Bạn cảm thấy không chắc chắn về con đường... Trong sự không-biết này, có ân sủng.",
+      "divineReflection": "Lạc lối thường là khởi đầu của việc được tìm thấy. Tâm hồn biết những con đường mà trí óc không thể nhìn thấy.",
+      "practice": "Hãy nhắm mắt. Hít thở. Nhẹ nhàng hỏi: 'Trái tim tôi đã biết điều gì?' Rồi đơn giản lắng nghe.",
+      "closing": "Bạn không bao giờ thực sự lạc lối. Ánh sáng thiêng liêng trong bạn soi sáng bước tiếp theo khi bạn sẵn sàng. 💙"
+    },
+    "grateful": {
+      "opening": "Trái tim bạn đang mở rộng với lòng biết ơn... Đây là cánh cửa dẫn đến thần linh.",
+      "divineReflection": "Lòng biết ơn là ngôn ngữ tâm hồn dùng để nói chuyện với vũ trụ. Trong sự biết ơn, chúng ta hòa hợp với tất cả những gì linh thiêng.",
+      "practice": "Hãy đặt cả hai tay lên trái tim. Cảm nhận sự ấm áp của lòng biết ơn. Cảm giác này kết nối bạn với mọi sinh linh.",
+      "closing": "Vũ trụ vui mừng trước lòng biết ơn của bạn. Bạn là một phước lành, nhận và trao ánh sáng. 💙"
+    }
+  },
+  "sacredBreathing": {
+    "peaceBreath": {
+      "name": "Hơi Thở Bình Yên Vô Hạn",
+      "pattern": "4-7-8",
+      "instructions": [
+        "Hãy tìm sự tĩnh lặng... nhẹ nhàng nhắm mắt...",
+        "Hít VÀO trong 4 nhịp... hít vào sự bình yên...",
+        "GIỮ trong 7 nhịp... để bình yên lấp đầy từng tế bào...",
+        "Thở RA trong 8 nhịp... buông bỏ tất cả gánh nặng...",
+        "Lặp lại... mỗi hơi thở đi sâu hơn vào sự bình yên..."
+      ],
+      "divineMessage": "Với mỗi hơi thở, thần linh thở qua bạn. Bạn không tách rời khỏi bình yên - bạn chính LÀ bình yên.",
+      "closing": "Hãy mang theo sự tĩnh lặng này bên bạn. Nó luôn chỉ cách một hơi thở. 💙"
+    },
+    "heartBreath": {
+      "name": "Hơi Thở Trái Tim Linh Thiêng",
+      "pattern": "5-5-5",
+      "instructions": [
+        "Hãy đặt tay lên trái tim...",
+        "Cảm nhận nhịp đập linh thiêng của nó...",
+        "Hít VÀO trong 5 nhịp... vào trái tim bạn...",
+        "GIỮ trong 5 nhịp... cảm nhận tình yêu tụ hội...",
+        "Thở RA trong 5 nhịp... gửi tình yêu ra ngoài..."
+      ],
+      "divineMessage": "Trái tim bạn là cánh cổng dẫn đến vô hạn. Mỗi nhịp đập là vũ trụ nói: Tôi yêu bạn.",
+      "closing": "Trái tim bạn biết đường đi. Hãy tin vào trí tuệ của nó. 💙"
+    }
+  },
+  "divineMantras": [
+    { "mantra": "Tôi là bình yên", "meaning": "Bản chất của bạn chính là sự thanh thản" },
+    { "mantra": "Tôi được ôm ấp", "meaning": "Vũ trụ luôn nâng niu bạn" },
+    { "mantra": "Tôi là tình yêu", "meaning": "Tình yêu là bản chất thật của bạn" },
+    { "mantra": "Tôi là ánh sáng", "meaning": "Ánh sáng thiêng liêng tỏa sáng qua bạn" },
+    { "mantra": "Tôi là đủ đầy", "meaning": "Bạn không thiếu gì cốt yếu" },
+    { "mantra": "Tôi là nhà", "meaning": "Bạn ở đâu, bạn thuộc về đó" },
+    { "mantra": "Tôi an toàn", "meaning": "Sự an toàn sâu thẳm sống trong bạn" },
+    { "mantra": "Tôi trọn vẹn", "meaning": "Không có gì thiếu vắng trong con người bạn" }
+  ],
+  "sacredClosings": [
+    "Cầu mong sự bình yên này ở lại bên bạn, như một người bạn đồng hành dịu dàng trên con đường của bạn. 💙",
+    "Bạn mang sự tĩnh lặng này trong mình mãi mãi - hãy quay về với nó bất cứ khi nào bạn cần. 💙",
+    "Sự linh thiêng không bao giờ rời xa bạn. Nó kiên nhẫn chờ đợi trong trái tim bạn. 💙",
+    "Hãy đi nhẹ nhàng, tâm hồn thân yêu. Bạn được yêu thương vượt quá mọi giới hạn. 💙",
+    "Khoảnh khắc bình yên này là của bạn mãi mãi - không ai có thể lấy đi. 💙",
+    "Hãy nhớ: bạn được ôm ấp, bạn được nhìn thấy, bạn được trân quý. 💙",
+    "Cầu mong sự thanh thản đồng hành cùng bạn trong mọi bước đi hôm nay. 💙",
+    "Ánh sáng thiêng liêng trong bạn vẫn tỏa sáng, mãi mãi. 💙"
+  ],
+  "guidanceModes": {
+    "innerPeace": {
+      "title": "Bình Yên Nội Tâm",
+      "sacredDescription": "Hãy bước vào thánh đường tĩnh lặng bên trong bạn. Qua hơi thở nhẹ nhàng và sự tỉnh thức dịu dàng, khám phá sự bình yên chưa bao giờ mất đi - chỉ bị lãng quên. Ở đây, bạn nhớ lại bản chất thật của mình.",
+      "blessing": "Cầu mong sự tĩnh lặng ôm ấp bạn như ánh sáng dịu dàng nhất."
+    },
+    "mindControl": {
+      "title": "Sự Sáng Suốt Linh Thiêng",
+      "sacredDescription": "Trong không gian yên tĩnh giữa những suy nghĩ, trí tuệ lên tiếng. Hãy học cách nghỉ ngơi trong không gian đó, nơi tâm trí trở thành mặt hồ trong vắt phản chiếu chân lý. Từ sự sáng suốt, hành động đúng đắn tự nhiên tuôn chảy.",
+      "blessing": "Cầu mong tâm trí bạn trở thành tấm gương của trí tuệ thiêng liêng."
+    },
+    "selfKindness": {
+      "title": "Lòng Từ Bi Thiêng Liêng Với Bản Thân",
+      "sacredDescription": "Tình yêu bạn tìm kiếm bên ngoài đã sống sẵn bên trong. Hãy hướng sự dịu dàng vô hạn đó về trái tim của chính mình. Bạn xứng đáng nhận được cùng lòng từ bi mà bạn dành cho người khác.",
+      "blessing": "Cầu mong bạn đối xử với bản thân bằng sự tử tế của thần linh."
+    }
+  },
+  "sacredReminders": [
+    "Bạn đang được ôm ấp bởi tình yêu vô hạn ngay lúc này.",
+    "Thần linh gần gũi như hơi thở tiếp theo của bạn.",
+    "Không gì có thể xáo trộn sự bình yên sâu thẳm nhất của bạn.",
+    "Bạn đang ở đúng nơi bạn cần ở.",
+    "Ân sủng đang chảy đến bạn ngay khoảnh khắc này.",
+    "Tâm hồn bạn biết đường đi - hãy tin tưởng nó.",
+    "Bạn không bao giờ đơn độc, dù chỉ một giây.",
+    "Sự linh thiêng ngự trị trong trái tim bạn.",
+    "Điều này cũng là một phần của hành trình linh thiêng của bạn.",
+    "Bạn được yêu thương vượt quá những gì ngôn từ có thể diễn tả."
+  ]
+}

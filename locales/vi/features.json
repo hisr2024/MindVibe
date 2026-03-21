@@ -1,0 +1,96 @@
+{
+  "ardha": {
+    "title": "Ardha: Tái cấu trúc Nhận thức",
+    "subtitle": "Tái cấu trúc nhận thức theo Gita",
+    "description": "Phát hiện méo mó, hiệu chỉnh câu chuyện với sự thật, mang lại sự sáng tỏ vững chắc.",
+    "placeholder": "Ví dụ: Tôi cứ mắc lỗi ở nơi làm, có lẽ tôi không phù hợp với công việc này.",
+    "button": "Đổi góc nhìn",
+    "buttonLoading": "Đang suy ngẫm...",
+    "label": "Chia sẻ suy nghĩ cần đổi góc nhìn",
+    "response": "Phản hồi của Ardha",
+    "error": "Ardha đang gặp sự cố kết nối. Vui lòng thử lại sau giây lát.",
+    "badge": "Chỉ trên máy"
+  },
+  "viyog": {
+    "title": "Viyoga: Huấn luyện viên Buông bỏ",
+    "subtitle": "Giảm lo lắng về kết quả",
+    "description": "Chuyển hướng lo lắng thành các bước hành động cụ thể.",
+    "placeholder": "Ví dụ: Tôi sợ bài thuyết trình sẽ thất bại và mọi người sẽ nghĩ tôi bất tài.",
+    "button": "Chuyển đổi",
+    "buttonLoading": "Đang cân bằng...",
+    "label": "Chia sẻ nỗi lo về kết quả",
+    "response": "Phản hồi của Viyoga",
+    "error": "Viyoga đang gặp sự cố kết nối. Vui lòng thử lại sau giây lát.",
+    "badge": "Chỉ trên máy"
+  },
+  "relationshipCompass": {
+    "title": "La bàn Mối quan hệ",
+    "subtitle": "La bàn Dharma cho Mối quan hệ",
+    "description": "Hướng dẫn giải quyết xung đột bình tĩnh, trung lập, giữ nguyên KIAAN—hành động đúng đắn, buông bỏ bản ngã, lời nói rõ ràng.",
+    "placeholder": "Ví dụ: Đối tác cảm thấy tôi không lắng nghe, và tôi cứ phòng thủ khi họ đề cập đến.",
+    "button": "Hướng dẫn tôi với La bàn Mối quan hệ",
+    "buttonLoading": "Đang cân bằng hướng dẫn...",
+    "sendToKiaan": "Gửi ngữ cảnh cho KIAAN",
+    "label": "Mô tả xung đột",
+    "response": "Phản hồi La bàn Mối quan hệ",
+    "error": "La bàn Mối quan hệ hiện không khả dụng. Vui lòng thử lại sau.",
+    "badges": {
+      "neutral": "Trung lập và vững vàng",
+      "intact": "Giữ nguyên KIAAN"
+    },
+    "outputFormat": "Định dạng đầu ra: thừa nhận, tách bản ngã, xác định giá trị, hành động đúng, buông bỏ, thêm lòng từ bi, gợi ý cách diễn đạt, rồi một bước tiếp theo."
+  },
+  "sacredReflections": {
+    "title": "Suy ngẫm Thiêng liêng",
+    "subtitle": "Nhật ký",
+    "description": "Các bài viết được lưu trên thiết bị của bạn và tự động làm mới hướng dẫn hàng tuần.",
+    "openJournal": "Mở Nhật ký",
+    "goToJournal": "Đi đến Nhật ký",
+    "keepInOnePlace": "Giữ suy ngẫm ở một nơi yên bình",
+    "openSacredReflections": "Mở Suy ngẫm Thiêng liêng để viết, xem lại, hoặc tiếp tục thực hành.",
+    "writePrompt": "Viết tự do. Chỉ bạn mới thấy được.",
+    "titlePlaceholder": "Tiêu đề (tùy chọn)",
+    "addReflection": "Thêm Suy ngẫm",
+    "recentEntries": "Bài viết gần đây",
+    "noEntries": "Chưa có bài viết nào. Suy ngẫm của bạn sẽ xuất hiện ở đây.",
+    "weeklyEntries": "Bài viết hàng tuần: {count}",
+    "weeklyAssessment": "Đánh giá Hàng tuần",
+    "mostPresentMood": "Tâm trạng phổ biến nhất: {mood}",
+    "positiveMoments": "Khoảnh khắc tích cực đã ghi",
+    "challengingDays": "Ngày nhạy cảm/thử thách",
+    "kiaanGuidance": "Hướng dẫn nhẹ nhàng của KIAAN",
+    "getKiaanOpinion": "Nhận ý kiến của KIAAN",
+    "kiaanReading": "KIAAN đang đọc...",
+    "todaysTone": "Tông giọng hôm nay",
+    "security": {
+      "encrypted": "Được mã hóa hoàn toàn trên thiết bị của bạn",
+      "description": "Các bài viết được niêm phong cục bộ bằng AES-GCM trước khi lưu. Chỉ trình duyệt này mới giải mã được.",
+      "status": {
+        "ready": "Được bảo mật AES-GCM cục bộ",
+        "preparing": "Đang chuẩn bị khóa mã hóa",
+        "offline": "Chế độ ngoại tuyến: lưu trên thiết bị này",
+        "online": "Sẵn sàng ngoại tuyến: lưu trên thiết bị"
+      }
+    }
+  },
+  "karmaFootprint": {
+    "title": "Karma Footprint",
+    "description": "Theo dõi hành động tích cực và hiệu ứng lan tỏa của bạn"
+  },
+  "karmicTree": {
+    "title": "Cây Karma",
+    "description": "Hình dung sự phát triển và hành trình tâm linh của bạn"
+  },
+  "emotionalReset": {
+    "title": "Thiết lập lại Cảm xúc",
+    "description": "Bài tập nhanh để thiết lập lại trạng thái cảm xúc"
+  },
+  "deepInsights": {
+    "title": "Hiểu biết Sâu sắc",
+    "description": "Đạt được hiểu biết sâu sắc về các mẫu hình của bạn"
+  },
+  "wisdomRooms": {
+    "title": "Phòng Trí tuệ",
+    "description": "Khám phá trí tuệ cổ xưa trong bối cảnh hiện đại"
+  }
+}

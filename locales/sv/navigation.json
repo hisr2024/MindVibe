@@ -1,0 +1,78 @@
+{
+  "mainNav": {
+    "home": "Hem",
+    "dashboard": "Översikt",
+    "features": "Funktioner",
+    "about": "Om oss",
+    "contact": "Kontakt",
+    "pricing": "Prenumerationer",
+    "profile": "Profil",
+    "settings": "Inställningar",
+    "account": "Kontoåtkomst",
+    "theme": "Tema",
+    "introduction": "Introduktion"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "Relationskompass",
+    "sacredReflections": "Heliga Reflektioner",
+    "karmaFootprint": "Karma Fotavtryck",
+    "karmicTree": "Karmiskt Träd",
+    "emotionalReset": "Emotionell Återställning",
+    "deepInsights": "Djupa Insikter",
+    "wisdomRooms": "Visdomsrum",
+    "wisdomJourneys": "Resor",
+    "companion": "Följeslagare"
+  },
+  "actions": {
+    "openChat": "Öppna chatt",
+    "startCheckin": "Starta incheckning",
+    "instantGuidance": "Omedelbar vägledning",
+    "spotYourState": "Identifiera ditt tillstånd",
+    "menu": "Meny",
+    "toggleMenu": "Växla navigeringsmeny"
+  },
+  "mobileNav": {
+    "chat": "Chatt",
+    "pause": "Paus",
+    "journal": "Heliga Reflektioner"
+  },
+  "footer": {
+    "allRightsReserved": "Alla rättigheter förbehållna",
+    "privacy": "Integritetspolicy",
+    "terms": "Användarvillkor",
+    "support": "Support",
+    "explore": "Utforska",
+    "safety": "Säkerhet",
+    "description": "Designad för lugn, integritetsfokuserat andligt välbefinnande. Byggd med fokus på WCAG-tillgänglighet, kryptering och en mild upplevelse.",
+    "emailUs": "Mejla oss",
+    "encryptedJournals": "Krypterade dagböcker",
+    "noTracking": "Ingen spårningsreklam"
+  },
+  "pathway": {
+    "pause": "Paus",
+    "understand": "Förstå",
+    "converse": "Samtala",
+    "apply": "Tillämpa",
+    "train": "Träna",
+    "you_are_here": "Du är här",
+    "nav_label": "Läkningsvägen"
+  },
+  "next_step": {
+    "explore_ardha": "Utforska i Ardha →",
+    "continue_kiaan": "Fortsätt med KIAAN →",
+    "stabilize_viyoga": "Stabilisera med Viyoga →",
+    "enter_journey": "Påbörja en resa →",
+    "helper": "Baserat på ditt samtal kan du ha nytta av detta"
+  },
+  "tools": {
+    "releaseAttachment": "Släpp anknytning",
+    "reframeThoughts": "Omforma tankar",
+    "kiaanChat": "KIAAN Chatt",
+    "talkItThrough": "Prata igenom det",
+    "relationalClarity": "Relationsklarhet",
+    "quickAccess": "Snabbåtkomst"
+  }
+}

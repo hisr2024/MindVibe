@@ -1,0 +1,78 @@
+{
+  "mainNav": {
+    "home": "Nyumbani",
+    "dashboard": "Dashibodi",
+    "features": "Vipengele",
+    "about": "Kuhusu",
+    "contact": "Wasiliana",
+    "pricing": "Usajili",
+    "profile": "Wasifu",
+    "settings": "Mipangilio",
+    "account": "Ufikiaji wa Akaunti",
+    "theme": "Mandhari",
+    "introduction": "Utangulizi"
+  },
+  "features": {
+    "kiaan": "KIAAN",
+    "ardha": "Ardha",
+    "viyog": "Viyoga",
+    "relationshipCompass": "Dira ya Mahusiano",
+    "sacredReflections": "Tafakuri Takatifu",
+    "karmaFootprint": "Karma Footprint",
+    "karmicTree": "Mti wa Karma",
+    "emotionalReset": "Kurekebisha Hisia",
+    "deepInsights": "Maarifa ya Kina",
+    "wisdomRooms": "Vyumba vya Hekima",
+    "wisdomJourneys": "Safari",
+    "companion": "Mwandani"
+  },
+  "actions": {
+    "openChat": "Fungua Mazungumzo",
+    "startCheckin": "Anza kujiangalia",
+    "instantGuidance": "Mwongozo wa papo hapo",
+    "spotYourState": "Tambua hali yako",
+    "menu": "Menyu",
+    "toggleMenu": "Badilisha menyu ya urambazaji"
+  },
+  "mobileNav": {
+    "chat": "Mazungumzo",
+    "pause": "Pumzika",
+    "journal": "Tafakuri Takatifu"
+  },
+  "footer": {
+    "allRightsReserved": "Haki zote zimehifadhiwa",
+    "privacy": "Sera ya Faragha",
+    "terms": "Masharti ya Huduma",
+    "support": "Msaada",
+    "explore": "Chunguza",
+    "safety": "Usalama",
+    "description": "Imeundwa kwa utulivu, msaada wa afya ya kiroho unaoweka faragha kwanza. Imejengwa kwa kuzingatia upatikanaji wa WCAG, usimbaji fiche, na uzoefu wa upole.",
+    "emailUs": "Tutumie barua pepe",
+    "encryptedJournals": "Daftari zilizosimbwa",
+    "noTracking": "Hakuna matangazo ya ufuatiliaji"
+  },
+  "pathway": {
+    "pause": "Pumzika",
+    "understand": "Elewa",
+    "converse": "Zungumza",
+    "apply": "Tumia",
+    "train": "Jizoeze",
+    "you_are_here": "Uko hapa",
+    "nav_label": "Njia ya uponyaji"
+  },
+  "next_step": {
+    "explore_ardha": "Chunguza katika Ardha →",
+    "continue_kiaan": "Endelea na KIAAN →",
+    "stabilize_viyoga": "Tulia na Viyoga →",
+    "enter_journey": "Ingia Safari →",
+    "helper": "Kulingana na mazungumzo yako, hii inaweza kusaidia"
+  },
+  "tools": {
+    "releaseAttachment": "Achilia kushikamana",
+    "reframeThoughts": "Badilisha mtazamo wa mawazo",
+    "kiaanChat": "KIAAN Mazungumzo",
+    "talkItThrough": "Zungumza kuhusu jambo",
+    "relationalClarity": "Uwazi wa mahusiano",
+    "quickAccess": "Ufikiaji wa haraka"
+  }
+}

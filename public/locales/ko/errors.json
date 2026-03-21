@@ -1,0 +1,39 @@
+{
+  "errors": {
+    "general": "문제가 발생했습니다. 다시 시도해 주세요.",
+    "network": "네트워크 오류입니다. 연결을 확인해 주세요.",
+    "notFound": "페이지를 찾을 수 없습니다",
+    "unauthorized": "이 페이지에 접근할 권한이 없습니다.",
+    "serverError": "서버 오류입니다. 나중에 다시 시도해 주세요.",
+    "validation": {
+      "required": "이 항목은 필수입니다",
+      "email": "유효한 이메일 주소를 입력해 주세요",
+      "minLength": "최소 {min}자 이상이어야 합니다",
+      "maxLength": "최대 {max}자까지 입력 가능합니다"
+    }
+  },
+  "notifications": {
+    "success": {
+      "saved": "저장되었습니다",
+      "updated": "업데이트되었습니다",
+      "deleted": "삭제되었습니다",
+      "sent": "전송되었습니다"
+    },
+    "info": {
+      "processing": "요청을 처리 중입니다...",
+      "loading": "로딩 중...",
+      "syncing": "동기화 중..."
+    },
+    "warning": {
+      "unsavedChanges": "저장하지 않은 변경사항이 있습니다",
+      "confirmDelete": "정말 삭제하시겠습니까?",
+      "confirmAction": "정말 진행하시겠습니까?"
+    }
+  },
+  "connection": {
+    "offline": "현재 오프라인 상태입니다",
+    "reconnecting": "재연결 중...",
+    "connected": "연결이 복원되었습니다",
+    "failed": "연결에 실패했습니다. 다시 시도해 주세요."
+  }
+}

@@ -32,7 +32,12 @@
     "defaultResponse": "私はここにいます。何が起きているか話してください。一緒に解決しましょう。",
     "summary": "要約",
     "fullView": "全文表示",
-    "divineFriend": "あなたの神聖な友"
+    "divineFriend": "あなたの神聖な友",
+    "featureLocked": "This feature requires a higher plan. [View plans](/pricing) to unlock it.",
+    "fullViewTitle": "Full detailed response",
+    "quotaExceeded": "Your monthly quota has been reached. [Upgrade your plan](/pricing) to continue chatting.",
+    "saveToJournalTitle": "Save to Journal",
+    "shareTitle": "Share response"
   },
   "guidanceModes": {
     "title": "Guidance modes",

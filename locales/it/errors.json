@@ -1,0 +1,39 @@
+{
+  "errors": {
+    "general": "Qualcosa è andato storto. Riprova.",
+    "network": "Errore di rete. Controlla la tua connessione.",
+    "notFound": "Pagina non trovata",
+    "unauthorized": "Non sei autorizzato ad accedere a questa pagina.",
+    "serverError": "Errore del server. Riprova più tardi.",
+    "validation": {
+      "required": "Questo campo è obbligatorio",
+      "email": "Inserisci un indirizzo email valido",
+      "minLength": "La lunghezza minima è di {{min}} caratteri",
+      "maxLength": "La lunghezza massima è di {{max}} caratteri"
+    }
+  },
+  "notifications": {
+    "success": {
+      "saved": "Salvato con successo",
+      "updated": "Aggiornato con successo",
+      "deleted": "Eliminato con successo",
+      "sent": "Inviato con successo"
+    },
+    "info": {
+      "processing": "Elaborazione della tua richiesta...",
+      "loading": "Caricamento...",
+      "syncing": "Sincronizzazione..."
+    },
+    "warning": {
+      "unsavedChanges": "Hai modifiche non salvate",
+      "confirmDelete": "Sei sicuro di voler eliminare questo?",
+      "confirmAction": "Sei sicuro di voler procedere?"
+    }
+  },
+  "connection": {
+    "offline": "Sei attualmente offline",
+    "reconnecting": "Riconnessione...",
+    "connected": "Connessione ripristinata",
+    "failed": "Connessione fallita. Riprova."
+  }
+}

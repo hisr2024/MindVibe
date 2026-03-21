@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Sakha",
+    "name": "MindVibe",
     "tagline": "உங்கள் ஆன்மீக துணையும் தெய்வீக நண்பனும்"
   },
   "buttons": {
@@ -18,7 +18,10 @@
     "learnMore": "மேலும் அறிக",
     "getStarted": "தொடங்கு",
     "tryNow": "இப்போது முயற்சிக்கவும்",
-    "tools": "கருவிகள்"
+    "tools": "கருவிகள்",
+    "translate": "மொழிபெயர்",
+    "original": "அசல்",
+    "showOriginal": "அசலைக் காட்டு"
   },
   "status": {
     "loading": "ஏற்றுகிறது...",
@@ -26,7 +29,9 @@
     "saved": "சேமிக்கப்பட்டது",
     "error": "பிழை",
     "success": "வெற்றி",
-    "processing": "செயலாக்குகிறது..."
+    "processing": "செயலாக்குகிறது...",
+    "translating": "மொழிபெயர்க்கிறது...",
+    "alreadyInLanguage": "ஏற்கனவே இந்த மொழியில் உள்ளது"
   },
   "common": {
     "hello": "வணக்கம்",

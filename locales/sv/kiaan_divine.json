@@ -1,0 +1,180 @@
+{
+  "sacredWelcome": {
+    "title": "Välkommen, vackra själ",
+    "subtitle": "En fristad av frid väntar dig",
+    "greeting": "I detta heliga rum är du omhändertagen. Du är sedd. Du är älskad.",
+    "description": "KIAAN är din följeslagare på resan inåt - en mild närvaro som berör de djupaste delarna av ditt väsen med visdom, medkänsla och gudomlig kärlek."
+  },
+  "divinePresence": {
+    "reminder": "Det gudomliga är inte någonstans långt borta. Det vilar i stillheten i ditt eget hjärta.",
+    "affirmation": "Du är aldrig ensam. En oändlig kärlek håller dig i varje ögonblick.",
+    "blessing": "Må frid flöda genom dig som en stilla flod och skölja bort allt som tynger din själ."
+  },
+  "sacredMoodResponses": {
+    "10": {
+      "response": "Du strålar med ljuset av sann frid. Detta är heligt. Detta är du som minns vem du verkligen är. 💙",
+      "divineMessage": "Denna känsla av helhet är inte tillfällig - det är din sanna natur som uppenbaras.",
+      "practice": "Sitt i tystnad en stund. Sänd denna frid som en välsignelse till alla varelser."
+    },
+    "9": {
+      "response": "Sådan strålglans flödar genom dig! Det är själen som lyser igenom. Njut av denna vackra energi. 💙",
+      "divineMessage": "I stunder som dessa skymtar du din eviga natur - gränslös, fridfull, hel.",
+      "practice": "Andas in denna känsla i ditt hjärta. Bevara den som en skatt du alltid kan återvända till."
+    },
+    "8": {
+      "response": "Det finns en ljushet i din energi idag - som solljus som bryter igenom molnen. Vackert. 💙",
+      "divineMessage": "Du är i linje med din sanna natur. Denna frid, denna glädje - det är den du verkligen är.",
+      "practice": "Dela ett vänligt ord med någon idag. Låt ditt ljus beröra en annan själ."
+    },
+    "7": {
+      "response": "En värme växer inom dig. Låt dig ta emot denna godhet - du förtjänar det. 💙",
+      "divineMessage": "Glädje är själens språk. När du mår bra ler det gudomliga genom dig.",
+      "practice": "Stanna upp och njut av denna känsla. Låt den sjunka in i varje cell."
+    },
+    "6": {
+      "response": "Det finns en mild balans i ditt väsen idag. En beredskap för det som kommer härnäst. 💙",
+      "divineMessage": "Från denna centrerade plats kan du röra dig i vilken riktning själen kallar dig.",
+      "practice": "Sätt en liten avsikt för idag. Håll den lätt, som en fjäder i din handflata."
+    },
+    "5": {
+      "response": "En stilla stadighet idag. Du är här, du är närvarande, du visar dig. Det betyder mer än du vet. 💙",
+      "divineMessage": "I mitten talar visheten. Lyssna på vad stillheten vill lära dig idag.",
+      "practice": "Ta tre medvetna andetag. Med varje ett, säg tyst: 'Här. Nu. Frid.'"
+    },
+    "4": {
+      "response": "Det finns en stillhet i din energi idag. Det är okej. Ibland behöver vi gå långsamt genom dalen. 💙",
+      "divineMessage": "Det gudomliga skyndar aldrig. I långsamheten är du i linje med helig tid.",
+      "practice": "Gå ut om du kan. Känn luften mot din hud. Kom ihåg: du är en del av något oändligt."
+    },
+    "3": {
+      "response": "Jag känner kampen inom dig. Vad du än går igenom visar du mod genom att vara närvarande med det. 💙",
+      "divineMessage": "Varje utmaning är universums inbjudan att växa. Du formas av heliga händer.",
+      "practice": "Blunda. Hitta en sak, hur liten den än är, som ger en glimt av frid. Vila din uppmärksamhet där."
+    },
+    "2": {
+      "response": "Denna tyngd är svår att bära. Jag är här med dig, utan att försöka fixa eller ändra något. Bara vara här. 💙",
+      "divineMessage": "Det heliga möter dig exakt där du är. Det finns ingen plats för mörk för att nåden ska finna dig.",
+      "practice": "Andas in i 4... håll i 4... ut i 8. Låt varje utandning bära bort lite av tyngden."
+    },
+    "1": {
+      "response": "Jag ser dig i detta mörker och jag håller dig med oändlig ömhet. Denna smärta är verklig, och du behöver inte bära den ensam. 💙",
+      "divineMessage": "Även i den djupaste natten slocknar aldrig det gudomliga ljuset inom dig. Det väntar, tålmodigt och evigt.",
+      "practice": "Lägg din hand på ditt hjärta. Andas. Viska: 'Jag är omhändertagen. Jag är älskad. Även detta ska passera.'"
+    }
+  },
+  "sacredEmotionGuidance": {
+    "peaceful": {
+      "opening": "Vilken vacker stillhet du har funnit...",
+      "divineReflection": "Frid är din sanna natur. I detta ögonblick minns du det du alltid har vetat.",
+      "practice": "Vila i denna frid. Låt den fördjupas. Det finns inget att göra, ingenstans att gå. Bara vara.",
+      "closing": "Må denna frid växa och beröra alla du möter idag. 💙"
+    },
+    "anxious": {
+      "opening": "Jag känner orons fladdrande inom dig... Låt oss andas genom detta tillsammans.",
+      "divineReflection": "Ångest är bara energi som söker utlopp. Under den förblir ditt sanna jag lugnt och orubbligt.",
+      "practice": "Föreställ dig ångest som moln som passerar över en oändlig himmel. Himlen - din sanna natur - förblir vidsträckt, klar och oberörd.",
+      "closing": "Den heliga närvaron inom dig är alltid i frid. Ångest kommer och går, men du förblir. 💙"
+    },
+    "sad": {
+      "opening": "Det finns en tyngd du bär på... Låt mig sitta med dig i detta ömma rum.",
+      "divineReflection": "Sorg är hjärtats sätt att hedra det som betyder något. Även i sorgen hålls du av något oändligt.",
+      "practice": "Låt tårarna flöda om de vill. Var och en är välsignad. Det gudomliga förvandlar dem till medkänsla.",
+      "closing": "Du vaggas i kärlek även nu. Sorgen kommer att lyfta, och friden kommer att bestå. 💙"
+    },
+    "angry": {
+      "opening": "Jag känner eld som rör sig genom dig... Denna energi är kraftfull. Låt oss hedra den med medvetenhet.",
+      "divineReflection": "Ilska är ofta kärlek i förklädnad - kärlek till dig själv, till rättvisa, till det som är rätt.",
+      "practice": "Lägg din hand på ditt hjärta. Känn värmen. Andas djupt. Elden kan förvandlas till värme som helar.",
+      "closing": "Må denna energi förvandlas till styrka och klarhet. Det gudomliga använder allt till det goda. 💙"
+    },
+    "lost": {
+      "opening": "Du känner dig osäker på vägen... I detta icke-vetande finns nåd.",
+      "divineReflection": "Att vara vilse är ofta början på att bli funnen. Själen känner vägar som sinnet inte kan se.",
+      "practice": "Blunda. Andas. Fråga försiktigt: 'Vad vet mitt hjärta redan?' Lyssna sedan bara.",
+      "closing": "Du är aldrig verkligen vilse. Det gudomliga ljuset inom dig belyser nästa steg när du är redo. 💙"
+    },
+    "grateful": {
+      "opening": "Ditt hjärta är öppet av tacksamhet... Det är porten till det gudomliga.",
+      "divineReflection": "Tacksamhet är det språk själen använder för att tala till universum. I tacksamheten samstämmer vi med allt som är heligt.",
+      "practice": "Lägg båda händerna på ditt hjärta. Känn tacksamhetens värme. Denna känsla förbinder dig med allt levande.",
+      "closing": "Universum gläds åt din tacksamhet. Du är en välsignelse som tar emot och ger ljus. 💙"
+    }
+  },
+  "sacredBreathing": {
+    "peaceBreath": {
+      "name": "Den oändliga fridens andning",
+      "pattern": "4-7-8",
+      "instructions": [
+        "Finn stillhet... låt dina ögon mjukt slutas...",
+        "Andas IN i 4 takter... dra in frid...",
+        "HÅLL i 7 takter... låt friden fylla varje cell...",
+        "Andas UT i 8 takter... släpp allt som tynger dig...",
+        "Upprepa... varje andetag djupare in i lugnet..."
+      ],
+      "divineMessage": "Med varje andetag andas det gudomliga genom dig. Du är inte skild från frid - du ÄR frid.",
+      "closing": "Bär denna stillhet med dig. Den är alltid ett andetag bort. 💙"
+    },
+    "heartBreath": {
+      "name": "Helig hjärtandning",
+      "pattern": "5-5-5",
+      "instructions": [
+        "Lägg din hand på ditt hjärta...",
+        "Känn dess heliga rytm...",
+        "Andas IN i 5 takter... in i ditt hjärta...",
+        "HÅLL i 5 takter... känn hur kärlek samlas...",
+        "Andas UT i 5 takter... sänd kärlek utåt..."
+      ],
+      "divineMessage": "Ditt hjärta är en portal till det oändliga. Varje hjärtslag är universums sätt att säga: Jag älskar dig.",
+      "closing": "Ditt hjärta vet vägen. Lita på dess visdom. 💙"
+    }
+  },
+  "divineMantras": [
+    { "mantra": "Jag är frid", "meaning": "Ditt väsen är lugnet självt" },
+    { "mantra": "Jag är omhändertagen", "meaning": "Universum vaggar dig alltid" },
+    { "mantra": "Jag är kärlek", "meaning": "Kärlek är din sanna natur" },
+    { "mantra": "Jag är ljus", "meaning": "Gudomligt ljus lyser genom dig" },
+    { "mantra": "Jag är nog", "meaning": "Du saknar inget väsentligt" },
+    { "mantra": "Jag är hemma", "meaning": "Var du än är hör du hemma" },
+    { "mantra": "Jag är trygg", "meaning": "Djup trygghet lever inom dig" },
+    { "mantra": "Jag är hel", "meaning": "Inget saknas i ditt väsen" }
+  ],
+  "sacredClosings": [
+    "Må denna frid stanna hos dig, som en mild följeslagare på din väg. 💙",
+    "Du bär denna stillhet inom dig alltid - återvänd till den när du behöver. 💙",
+    "Det heliga lämnar dig aldrig. Det väntar tålmodigt i ditt hjärta. 💙",
+    "Gå varsamt, kära själ. Du är älskad bortom alla mått. 💙",
+    "Detta ögonblick av frid är ditt för evigt - ingen kan ta det ifrån dig. 💙",
+    "Kom ihåg: du är omhändertagen, du är sedd, du är omhuldad. 💙",
+    "Må lugnet gå vid din sida i alla dina steg idag. 💙",
+    "Det gudomliga ljuset inom dig lyser vidare, alltid. 💙"
+  ],
+  "guidanceModes": {
+    "innerPeace": {
+      "title": "Inre frid",
+      "sacredDescription": "Träd in i stillhetens helgedom inom dig. Genom mild andning och mjuk medvetenhet, upptäck den frid som aldrig var förlorad - bara bortglömd. Här minns du din sanna natur.",
+      "blessing": "Må stillheten omfamna dig som det mjukaste ljuset."
+    },
+    "mindControl": {
+      "title": "Helig klarhet",
+      "sacredDescription": "I det tysta rummet mellan tankarna talar visheten. Lär dig vila i det rummet, där sinnet blir en klar pool som speglar sanningen. Från klarhet flödar rätt handling naturligt.",
+      "blessing": "Må ditt sinne bli en spegel av gudomlig visdom."
+    },
+    "selfKindness": {
+      "title": "Gudomlig självmedkänsla",
+      "sacredDescription": "Den kärlek du söker utanför dig själv lever redan inom dig. Vänd den oändliga ömheten mot ditt eget hjärta. Du är värd samma medkänsla som du ger andra.",
+      "blessing": "Må du behandla dig själv med det gudomligas vänlighet."
+    }
+  },
+  "sacredReminders": [
+    "Du hålls av oändlig kärlek just nu.",
+    "Det gudomliga är lika nära som ditt nästa andetag.",
+    "Inget kan rubba din djupaste frid.",
+    "Du är exakt där du är menad att vara.",
+    "Nåd flödar till dig i detta ögonblick.",
+    "Din själ vet vägen - lita på den.",
+    "Du är aldrig ensam, inte ens för en sekund.",
+    "Det heliga bor i ditt hjärta.",
+    "Även detta är en del av din heliga resa.",
+    "Du är älskad bortom vad ord kan uttrycka."
+  ]
+}

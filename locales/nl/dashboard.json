@@ -1,0 +1,120 @@
+{
+  "title": "Dashboard",
+  "welcome": "Welkom terug",
+  "subtitle": "MindVibe hulpmiddelen",
+  "allTools": "Alle hulpmiddelen op één plek",
+  "returnHome": "Terug naar home",
+  "toolsCount": "hulpmiddelen",
+  "categories": {
+    "core": "Kernhulpmiddelen",
+    "guidance": "Begeleidingsengines",
+    "karma": "Karma Hulpmiddelen",
+    "quick": "Snelle Toegang"
+  },
+  "tools": {
+    "kiaan": {
+      "title": "KIAAN Chat",
+      "description": "AI spirituele metgezel"
+    },
+    "journal": {
+      "title": "Privé Dagboek",
+      "description": "Versleuteld dagboek"
+    },
+    "wisdom": {
+      "title": "Wijsheidskamers",
+      "description": "Oude wijsheid"
+    },
+    "insights": {
+      "title": "Stemmingsinzichten",
+      "description": "Emotionele patronen"
+    },
+    "viyog": {
+      "title": "Viyoga",
+      "description": "Resultaatangst verminderen"
+    },
+    "ardha": {
+      "title": "Ardha",
+      "description": "Situationele begeleiding"
+    },
+    "relationship-compass": {
+      "title": "Relatiekompas",
+      "description": "Relatiebegeleiding"
+    },
+    "emotional-reset": {
+      "title": "Emotionele Reset",
+      "description": "Snel emotioneel evenwicht"
+    },
+    "karma-footprint": {
+      "title": "Karma Voetafdruk",
+      "description": "Volg je acties"
+    },
+    "karmic-tree": {
+      "title": "Karmische Boom",
+      "description": "Visualiseer je reis"
+    },
+    "karma-reset": {
+      "title": "Karma Reset",
+      "description": "Opnieuw beginnen"
+    },
+    "reflections": {
+      "title": "Heilige Reflecties",
+      "description": "Dagelijks dagboek"
+    },
+    "deep": {
+      "title": "Diepe Inzichten",
+      "description": "Geavanceerde analyses"
+    },
+    "analytics": {
+      "title": "Analyses",
+      "description": "Volg je voortgang"
+    }
+  },
+  "badges": {
+    "new": "nieuw",
+    "premium": "premium",
+    "beta": "bèta"
+  },
+  "analytics": {
+    "title": "Analyses",
+    "overview": "Overzicht",
+    "insights": "Inzichten",
+    "trends": "Trends",
+    "weeklyProgress": "Wekelijkse Voortgang",
+    "monthlyProgress": "Maandelijkse Voortgang"
+  },
+  "profile": {
+    "title": "Profiel",
+    "settings": "Instellingen",
+    "editProfile": "Profiel bewerken",
+    "updateProfile": "Profiel bijwerken",
+    "accountInfo": "Accountinformatie"
+  },
+  "subscription": {
+    "title": "Abonnement",
+    "plan": "Huidig Abonnement",
+    "upgrade": "Upgraden",
+    "manage": "Abonnement beheren",
+    "billing": "Facturering"
+  },
+  "stats": {
+    "journalEntries": "Dagboekvermeldingen",
+    "chatSessions": "Chatsessies",
+    "moodCheckins": "Stemmingscheck-ins",
+    "streakDays": "Dagen Reeks"
+  },
+  "tool_desc": {
+    "viyog": "Kalmeer de onmiddellijke reactie",
+    "ardha": "Herformuleer de perceptie",
+    "kiaan": "Praat het door",
+    "relationship-compass": "Navigeer relationele helderheid",
+    "journey": "Train langdurige innerlijke stabiliteit"
+  },
+  "mode_label": {
+    "prefix": "Je bent in:",
+    "viyog": "Pauzemodus",
+    "ardha": "Helderheidsmodus",
+    "kiaan": "Metgezelmodus",
+    "relationship-compass": "Relatiemodus",
+    "journey": "Trainingsmodus"
+  }
+}

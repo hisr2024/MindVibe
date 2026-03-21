@@ -78,5 +78,6 @@
     "startFailed": "Failed to start journey. Please try again.",
     "completeFailed": "Failed to complete step. Please try again.",
     "networkError": "Network error. Please check your connection."
-  }
+  },
+  "_template_variables_note": "This file uses i18next template variables: {{current}}, {{total}}, {{day}}, {{title}}. Any rename or removal of these variables will break the UI. Ensure all referenced variables are passed by the consuming components (JourneyCard, JourneyStep, JourneyComplete)."
 }

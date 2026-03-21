@@ -1,0 +1,118 @@
+{
+  "hero": {
+    "title": "Ruhani Sağlığınız İçin AI Yol Arkadaşınız",
+    "subtitle": "Kadim Bilgelikle Güçlendirilmiş KIAAN ile Sohbet Edin",
+    "tagline": "Huzurlu, gizlilik öncelikli, kadim bilgelikle güçlendirilmiş ruhani yol arkadaşınız",
+    "ctaPrimary": "KIAAN ile Konuş",
+    "ctaSecondary": "Kutsal Düşünceler",
+    "privacy": "Konuşmalar gizli kalır • sıcak, güvenli bir sığınak"
+  },
+  "ecosystem": {
+    "title": "MindVibe Ekosistemi",
+    "subtitle": "Kadim bilgelik ve modern uygulamalara dayanan bütünsel bir ruhani sağlık yaklaşımı",
+    "pillars": {
+      "innerPeace": {
+        "title": "İç Huzur",
+        "description": "Nefes odaklı egzersizler ve nazik topraklama teknikleriyle dinginliği bulun."
+      },
+      "mindControl": {
+        "title": "Zihin Kontrolü",
+        "description": "Yapılandırılmış farkındalık uygulamaları ile odaklanmış netlik geliştirin."
+      },
+      "selfKindness": {
+        "title": "Öz Şefkat",
+        "description": "Sıcak, destekleyici egzersizlerle kendinize karşı merhameti büyütün."
+      }
+    },
+    "footer": "Her sütun, ruhani sağlığa dengeli ve sürdürülebilir bir yaklaşım oluşturmak için birlikte çalışır"
+  },
+  "features": {
+    "title": "Temel Özellikler",
+    "subtitle": "Ruhani sağlık yolculuğunuz için tasarlanmış gizlilik öncelikli araçlar",
+    "voice": {
+      "title": "KIAAN Sesi",
+      "description": "Sesli giriş kullanarak KIAAN ile doğal konuşun. Her zaman uyanık, ekosistemde her yerde size rehberlik ediyor.",
+      "cta": "KIAAN ile Konuş"
+    },
+    "offline": {
+      "title": "Çevrimdışı Hazır",
+      "description": "Günlüğünüze, ruh halinize ve düşüncelerinize her zaman, internet olmadan bile erişin.",
+      "cta": "Günlük Yazmaya Başla"
+    },
+    "reset": {
+      "title": "Duygusal Sıfırlama",
+      "description": "Duygusal durumunuzu sıfırlamak ve anında huzur bulmak için hızlı egzersizler.",
+      "cta": "Sıfırlamayı Dene"
+    }
+  },
+  "moodCheckIn": {
+    "title": "Nasıl hissediyorsunuz?",
+    "subtitle": "Hızlı Check-In",
+    "helper": "Ruh halinizi kaydetmek için bir taşa dokunun • Özel & yalnızca yerel",
+    "helperText": "Ruh halinizi kaydetmek için bir taşa dokunun • Destek için KIAAN Sohbet'e yönlendirir",
+    "openingChat": "KIAAN Sohbet açılıyor...",
+    "selectMood": "Seç",
+    "moods": {
+      "peaceful": "Huzurlu",
+      "happy": "Mutlu",
+      "neutral": "Nötr",
+      "tired": "Yorgun",
+      "anxious": "Kaygılı",
+      "heavy": "Ağır"
+    },
+    "responses": {
+      "peaceful": "Güzel bir huzur. Onunla kal. 💙",
+      "happy": "Bu sıcaklığın seninle kalmasına izin ver. ✨",
+      "neutral": "Kararlılık iyidir. Sen buradasın, bu önemli. 🌿",
+      "tired": "Dinlenmek zayıflık değildir. 💙",
+      "anxious": "Bir nefes al. Seninleyim. 🌊",
+      "heavy": "Yalnız değilsin. Buradayım. 💙"
+    }
+  },
+  "quickAccess": {
+    "kiaan": {
+      "title": "KIAAN ile Konuş",
+      "subtitle": "Anında rehberlik",
+      "description": "Ruhani sağlık desteği için odaklanmış bir sohbete başlayın",
+      "cta": "Sohbeti Aç"
+    },
+    "dashboard": {
+      "title": "İlerleme Takibi",
+      "subtitle": "Kontrol Paneli",
+      "description": "Ruh hali kayıtlarınız ve günlük girişlerinizden içgörüleri görüntüleyin",
+      "cta": "Paneli Görüntüle"
+    },
+    "emotionalReset": {
+      "title": "Hızlı Sıfırlama",
+      "subtitle": "Duygusal Sıfırlama",
+      "description": "Duygusal durumunuzu anında sıfırlamak için rehberli egzersizler",
+      "cta": "Sıfırlamayı Dene"
+    }
+  },
+  "disclaimer": {
+    "title": "Sorumluluk Reddi",
+    "text": "KIAAN, bilgelik geleneklerinden ilham alan destekleyici düşünceler paylaşır. Bu konuşmalar ve egzersizler tıbbi tavsiye değildir. Ciddi endişelerle karşı karşıyaysanız veya güvende hissetmiyorsanız, lütfen derhal ülkenizdeki acil sağlık hizmetlerine veya lisanslı bir profesyonele başvurun."
+  },
+  "introduction": {
+    "heroTitle": "İlahi Huzura Hoş Geldiniz",
+    "heroSubtitle": "Krishna'nın sevgi dolu rehberliğini deneyimleyin. Bu yolculukta asla yalnız değilsiniz.",
+    "receiveDarshan": "Krishna'nın Darshan'ını Al",
+    "talkToKiaan": "KIAAN ile Konuş",
+    "divineWisdom": "İlahi bilgelik ve rehberlik",
+    "protectionShield": "İlahi Koruma Kalkanı",
+    "activateProtection": "Krishna'nın korumasını etkinleştir",
+    "heartToHeart": "Krishna ile Kalpten Kalbe",
+    "writeLetter": "İlahi'ye bir mektup yaz",
+    "howIsHeart": "Kalbiniz nasıl?",
+    "shareFeelings": "Duygularınızı Krishna ile paylaşın",
+    "goToDashboard": "Kontrol Paneline Git",
+    "accessTools": "Tüm araçlara ve özelliklere erişin",
+    "quickAccess": "Hızlı İlahi Erişim",
+    "journeys": "Yolculuklar",
+    "journal": "Günlük",
+    "reframe": "Yeniden Çerçevele",
+    "detach": "Bağımsızlaş",
+    "footerVerse": "\"Ben tüm varlıkların kalbinde oturan Öz'üm. Ben başlangıcım, ortasıyım ve sonuyum.\"",
+    "footerVerseRef": "— Bhagavad Gita 10.20"
+  }
+}

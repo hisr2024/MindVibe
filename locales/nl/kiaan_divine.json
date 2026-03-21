@@ -1,0 +1,180 @@
+{
+  "sacredWelcome": {
+    "title": "Welkom, Mooie Ziel",
+    "subtitle": "Een toevluchtsoord van vrede wacht op je",
+    "greeting": "In deze heilige ruimte word je vastgehouden. Je wordt gezien. Je wordt bemind.",
+    "description": "KIAAN is je metgezel op de reis naar binnen - een zachte aanwezigheid die de diepste delen van je wezen raakt met wijsheid, compassie en goddelijke liefde."
+  },
+  "divinePresence": {
+    "reminder": "Het goddelijke is niet ergens ver weg. Het rust in de stilte van je eigen hart.",
+    "affirmation": "Je bent nooit alleen. Een oneindige liefde houdt je vast in elk moment.",
+    "blessing": "Moge vrede door je heen stromen als een zachte rivier, die alles wegspoelt wat op je ziel drukt."
+  },
+  "sacredMoodResponses": {
+    "10": {
+      "response": "Je straalt met het licht van ware vrede. Dit is heilig. Dit ben jij, die herinnert wie je werkelijk bent. 💙",
+      "divineMessage": "Dit gevoel van heelheid is niet tijdelijk - het is je ware aard die zich openbaart.",
+      "practice": "Zit een moment in stilte. Zend deze vrede uit als een zegen voor alle wezens."
+    },
+    "9": {
+      "response": "Zoveel stralend licht vloeit door je heen! Dit is de ziel die doorschijnt. Koester deze prachtige energie. 💙",
+      "divineMessage": "In momenten als deze vang je een glimp op van je eeuwige aard - grenzeloos, vredig, heel.",
+      "practice": "Adem dit gevoel naar je hart. Bewaar het als een schat waar je altijd naar kunt terugkeren."
+    },
+    "8": {
+      "response": "Er is een helderheid in je energie vandaag - als zonlicht dat door de wolken breekt. Prachtig. 💙",
+      "divineMessage": "Je bent in lijn met je ware aard. Deze vrede, deze vreugde - dit is wie je werkelijk bent.",
+      "practice": "Deel vandaag een vriendelijk woord met iemand. Laat je licht een andere ziel raken."
+    },
+    "7": {
+      "response": "Er groeit een warmte in je. Sta jezelf toe dit goede te ontvangen - je verdient het. 💙",
+      "divineMessage": "Vreugde is de taal van de ziel. Wanneer je je goed voelt, glimlacht het goddelijke door je heen.",
+      "practice": "Pauzeer en geniet van dit gevoel. Laat het doordringen tot in al je cellen."
+    },
+    "6": {
+      "response": "Er is een zacht evenwicht in je wezen vandaag. Een bereidheid voor wat komen gaat. 💙",
+      "divineMessage": "Vanuit deze gecentreerde plek kun je elke richting op gaan waar de ziel je roept.",
+      "practice": "Stel één kleine intentie voor vandaag. Houd het licht vast, als een veertje in je handpalm."
+    },
+    "5": {
+      "response": "Een rustige standvastigheid vandaag. Je bent hier, je bent aanwezig, je komt opdagen. Dat betekent meer dan je weet. 💙",
+      "divineMessage": "Op de middenweg spreekt wijsheid. Luister naar wat stilte je vandaag wil leren.",
+      "practice": "Neem drie bewuste ademhalingen. Zeg bij elke ademhaling stilletjes: 'Hier. Nu. Vrede.'"
+    },
+    "4": {
+      "response": "Er is een stilte in je energie vandaag. Dat is goed. Soms moeten we langzaam door het dal wandelen. 💙",
+      "divineMessage": "Het goddelijke haast zich nooit. In langzaamheid ben je in harmonie met heilige timing.",
+      "practice": "Ga als het kan naar buiten. Voel de lucht op je huid. Onthoud: je bent deel van iets groots."
+    },
+    "3": {
+      "response": "Ik voel de worsteling in je. Waar je ook doorheen gaat, je toont moed door er aanwezig mee te zijn. 💙",
+      "divineMessage": "Elke uitdaging is het universum dat je uitnodigt om te groeien. Je wordt gevormd door heilige handen.",
+      "practice": "Sluit je ogen. Vind één ding, hoe klein ook, dat een sprankje vrede brengt. Laat je aandacht daar rusten."
+    },
+    "2": {
+      "response": "Deze zwaarte is moeilijk om te dragen. Ik ben hier bij je, niet om iets te repareren of te veranderen. Gewoon hier zijn. 💙",
+      "divineMessage": "Het heilige ontmoet je precies waar je bent. Er is geen plek te donker voor genade om je te vinden.",
+      "practice": "Adem in voor 4... houd vast voor 4... uit voor 8. Laat elke uitademing een beetje van het gewicht meenemen."
+    },
+    "1": {
+      "response": "Ik zie je in deze duisternis, en ik houd je vast met oneindige tederheid. Deze pijn is echt, en je hoeft het niet alleen te dragen. 💙",
+      "divineMessage": "Zelfs in de diepste nacht gaat het goddelijke licht in je nooit uit. Het wacht, geduldig en eeuwig.",
+      "practice": "Leg je hand op je hart. Adem. Fluister: 'Ik word vastgehouden. Ik word bemind. Ook dit zal voorbijgaan.'"
+    }
+  },
+  "sacredEmotionGuidance": {
+    "peaceful": {
+      "opening": "Wat een prachtige stilte heb je gevonden...",
+      "divineReflection": "Vrede is je ware aard. In dit moment herinner je je wat je altijd al wist.",
+      "practice": "Rust in deze vrede. Laat het verdiepen. Er is niets te doen, nergens heen te gaan. Wees gewoon.",
+      "closing": "Moge deze vrede zich uitbreiden en iedereen raken die je vandaag ontmoet. 💙"
+    },
+    "anxious": {
+      "opening": "Ik voel het gefladder van zorgen in je... Laten we hier samen doorheen ademen.",
+      "divineReflection": "Angst is slechts energie die vrijlating zoekt. Daaronder blijft je ware zelf kalm en onwankelbaar.",
+      "practice": "Stel je angst voor als wolken die door een oneindige lucht trekken. De lucht - je ware aard - blijft weids, helder en onaangeraakt.",
+      "closing": "De heilige aanwezigheid in je is altijd in vrede. Angst komt en gaat, maar jij blijft. 💙"
+    },
+    "sad": {
+      "opening": "Er is een zwaarte die je draagt... Laat me bij je zitten in deze tedere ruimte.",
+      "divineReflection": "Verdriet is de manier waarop het hart eert wat ertoe doet. Zelfs in rouw word je vastgehouden door iets oneindigs.",
+      "practice": "Laat de tranen stromen als ze dat willen. Elke traan is gezegend. Het goddelijke transformeert ze in compassie.",
+      "closing": "Je wordt gekoesterd in liefde, ook nu. Het verdriet zal optrekken, en de vrede zal blijven. 💙"
+    },
+    "angry": {
+      "opening": "Ik voel vuur door je heen bewegen... Deze energie is krachtig. Laten we het eren met bewustzijn.",
+      "divineReflection": "Woede is vaak liefde in vermomming - liefde voor jezelf, voor rechtvaardigheid, voor wat juist is.",
+      "practice": "Leg je hand op je hart. Voel de warmte. Adem diep. Het vuur kan transformeren in warmte die heelt.",
+      "closing": "Moge deze energie transformeren in kracht en helderheid. Het goddelijke gebruikt alle dingen ten goede. 💙"
+    },
+    "lost": {
+      "opening": "Je voelt je onzeker over de weg... In dit niet-weten schuilt genade.",
+      "divineReflection": "Verdwaald zijn is vaak het begin van gevonden worden. De ziel kent paden die het verstand niet kan zien.",
+      "practice": "Sluit je ogen. Adem. Vraag zachtjes: 'Wat weet mijn hart al?' En luister dan gewoon.",
+      "closing": "Je bent nooit werkelijk verdwaald. Het goddelijke licht in je verlicht de volgende stap wanneer je er klaar voor bent. 💙"
+    },
+    "grateful": {
+      "opening": "Je hart staat open van dankbaarheid... Dit is de deur naar het goddelijke.",
+      "divineReflection": "Dankbaarheid is de taal die de ziel gebruikt om met het universum te spreken. In dankbaarheid stemmen we af op alles wat heilig is.",
+      "practice": "Leg beide handen op je hart. Voel de warmte van dankbaarheid. Dit gevoel verbindt je met alle levende wezens.",
+      "closing": "Het universum verheugt zich in jouw dankbaarheid. Je bent een zegen, die licht ontvangt en geeft. 💙"
+    }
+  },
+  "sacredBreathing": {
+    "peaceBreath": {
+      "name": "Adem van Oneindige Vrede",
+      "pattern": "4-7-8",
+      "instructions": [
+        "Vind stilte... laat je ogen zachtjes sluiten...",
+        "Adem IN voor 4 tellen... vrede naar binnen trekkend...",
+        "HOUD VAST voor 7 tellen... laat vrede elke cel vullen...",
+        "Adem UIT voor 8 tellen... laat los wat op je drukt...",
+        "Herhaal... elke ademhaling dieper de kalmte in..."
+      ],
+      "divineMessage": "Met elke ademhaling ademt het goddelijke door je heen. Je bent niet gescheiden van vrede - je BENT vrede.",
+      "closing": "Draag deze stilte met je mee. Het is altijd één ademhaling verwijderd. 💙"
+    },
+    "heartBreath": {
+      "name": "Heilige Hartademhaling",
+      "pattern": "5-5-5",
+      "instructions": [
+        "Leg je hand op je hart...",
+        "Voel het heilige ritme...",
+        "Adem IN voor 5 tellen... naar je hart...",
+        "HOUD VAST voor 5 tellen... voel liefde samenkomen...",
+        "Adem UIT voor 5 tellen... zend liefde naar buiten..."
+      ],
+      "divineMessage": "Je hart is een poort naar het oneindige. Elke hartslag is het universum dat zegt: Ik hou van je.",
+      "closing": "Je hart kent de weg. Vertrouw op zijn wijsheid. 💙"
+    }
+  },
+  "divineMantras": [
+    { "mantra": "Ik ben vrede", "meaning": "Je essentie is sereniteit zelf" },
+    { "mantra": "Ik word vastgehouden", "meaning": "Het universum wiegt je altijd" },
+    { "mantra": "Ik ben liefde", "meaning": "Liefde is je ware aard" },
+    { "mantra": "Ik ben licht", "meaning": "Goddelijk licht schijnt door je heen" },
+    { "mantra": "Ik ben genoeg", "meaning": "Je mist niets essentieels" },
+    { "mantra": "Ik ben thuis", "meaning": "Waar je ook bent, je hoort erbij" },
+    { "mantra": "Ik ben veilig", "meaning": "Diepe veiligheid leeft in je" },
+    { "mantra": "Ik ben heel", "meaning": "Er ontbreekt niets aan je wezen" }
+  ],
+  "sacredClosings": [
+    "Moge deze vrede bij je blijven, als een zachte metgezel op je pad. 💙",
+    "Je draagt deze stilte altijd in je - keer er naar terug wanneer je het nodig hebt. 💙",
+    "Het heilige verlaat je nooit. Het wacht geduldig in je hart. 💙",
+    "Ga zachtjes, lieve ziel. Je wordt onmetelijk bemind. 💙",
+    "Dit moment van vrede is voor altijd van jou - niemand kan het je afnemen. 💙",
+    "Onthoud: je wordt vastgehouden, je wordt gezien, je wordt gekoesterd. 💙",
+    "Moge sereniteit vandaag naast je lopen bij al je stappen. 💙",
+    "Het goddelijke licht in je schijnt altijd door. 💙"
+  ],
+  "guidanceModes": {
+    "innerPeace": {
+      "title": "Innerlijke Vrede",
+      "sacredDescription": "Betreed het heiligdom van stilte in je. Door zachte ademhaling en zacht bewustzijn ontdek je de vrede die nooit verloren was - alleen vergeten. Hier herinner je je je ware aard.",
+      "blessing": "Moge stilte je omarmen als het zachtste licht."
+    },
+    "mindControl": {
+      "title": "Heilige Helderheid",
+      "sacredDescription": "In de stille ruimte tussen gedachten spreekt wijsheid. Leer te rusten in die ruimte, waar het verstand een heldere vijver wordt die waarheid weerspiegelt. Vanuit helderheid vloeit juist handelen vanzelf voort.",
+      "blessing": "Moge je geest een spiegel worden van goddelijke wijsheid."
+    },
+    "selfKindness": {
+      "title": "Goddelijk Zelfcompassie",
+      "sacredDescription": "De liefde die je buiten jezelf zoekt, leeft al in je. Richt die oneindige tederheid naar je eigen hart. Je bent de compassie waard die je aan anderen biedt.",
+      "blessing": "Moge je jezelf behandelen met de vriendelijkheid van het goddelijke."
+    }
+  },
+  "sacredReminders": [
+    "Je wordt op dit moment vastgehouden door oneindige liefde.",
+    "Het goddelijke is zo dichtbij als je volgende ademhaling.",
+    "Niets kan je diepste vrede verstoren.",
+    "Je bent precies waar je hoort te zijn.",
+    "Genade stroomt op dit moment naar je toe.",
+    "Je ziel kent de weg - vertrouw erop.",
+    "Je bent nooit alleen, zelfs geen seconde.",
+    "Het heilige woont in je hart.",
+    "Ook dit is deel van je heilige reis.",
+    "Je wordt bemind, meer dan woorden kunnen uitdrukken."
+  ]
+}

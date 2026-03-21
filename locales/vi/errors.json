@@ -1,0 +1,39 @@
+{
+  "errors": {
+    "general": "Đã xảy ra lỗi. Vui lòng thử lại.",
+    "network": "Lỗi mạng. Vui lòng kiểm tra kết nối của bạn.",
+    "notFound": "Không tìm thấy trang",
+    "unauthorized": "Bạn không có quyền truy cập trang này.",
+    "serverError": "Lỗi máy chủ. Vui lòng thử lại sau.",
+    "validation": {
+      "required": "Trường này là bắt buộc",
+      "email": "Vui lòng nhập địa chỉ email hợp lệ",
+      "minLength": "Độ dài tối thiểu là {min} ký tự",
+      "maxLength": "Độ dài tối đa là {max} ký tự"
+    }
+  },
+  "notifications": {
+    "success": {
+      "saved": "Đã lưu thành công",
+      "updated": "Đã cập nhật thành công",
+      "deleted": "Đã xóa thành công",
+      "sent": "Đã gửi thành công"
+    },
+    "info": {
+      "processing": "Đang xử lý yêu cầu của bạn...",
+      "loading": "Đang tải...",
+      "syncing": "Đang đồng bộ..."
+    },
+    "warning": {
+      "unsavedChanges": "Bạn có thay đổi chưa được lưu",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa mục này?",
+      "confirmAction": "Bạn có chắc chắn muốn tiếp tục?"
+    }
+  },
+  "connection": {
+    "offline": "Bạn hiện đang ngoại tuyến",
+    "reconnecting": "Đang kết nối lại...",
+    "connected": "Đã khôi phục kết nối",
+    "failed": "Kết nối thất bại. Vui lòng thử lại."
+  }
+}

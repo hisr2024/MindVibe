@@ -1,0 +1,120 @@
+{
+  "title": "대시보드",
+  "welcome": "다시 오신 것을 환영합니다",
+  "subtitle": "MindVibe 도구",
+  "allTools": "모든 도구를 한곳에서",
+  "returnHome": "홈으로 돌아가기",
+  "toolsCount": "도구",
+  "categories": {
+    "core": "핵심 도구",
+    "guidance": "안내 엔진",
+    "karma": "Karma 도구",
+    "quick": "빠른 접근"
+  },
+  "tools": {
+    "kiaan": {
+      "title": "KIAAN 채팅",
+      "description": "AI 영적 동반자"
+    },
+    "journal": {
+      "title": "개인 일기",
+      "description": "암호화된 일기"
+    },
+    "wisdom": {
+      "title": "지혜의 방",
+      "description": "고대의 지혜"
+    },
+    "insights": {
+      "title": "기분 통찰",
+      "description": "감정 패턴"
+    },
+    "viyog": {
+      "title": "Viyoga",
+      "description": "결과 불안 감소"
+    },
+    "ardha": {
+      "title": "Ardha",
+      "description": "상황별 안내"
+    },
+    "relationship-compass": {
+      "title": "관계 나침반",
+      "description": "관계 안내"
+    },
+    "emotional-reset": {
+      "title": "감정 리셋",
+      "description": "빠른 감정 균형"
+    },
+    "karma-footprint": {
+      "title": "Karma 발자국",
+      "description": "행동 추적"
+    },
+    "karmic-tree": {
+      "title": "Karma의 나무",
+      "description": "여정 시각화"
+    },
+    "karma-reset": {
+      "title": "Karma 리셋",
+      "description": "새로 시작"
+    },
+    "reflections": {
+      "title": "신성한 성찰",
+      "description": "매일 일기쓰기"
+    },
+    "deep": {
+      "title": "깊은 통찰",
+      "description": "고급 분석"
+    },
+    "analytics": {
+      "title": "분석",
+      "description": "진행 상황 추적"
+    }
+  },
+  "badges": {
+    "new": "신규",
+    "premium": "프리미엄",
+    "beta": "베타"
+  },
+  "analytics": {
+    "title": "분석",
+    "overview": "개요",
+    "insights": "통찰",
+    "trends": "트렌드",
+    "weeklyProgress": "주간 진행 상황",
+    "monthlyProgress": "월간 진행 상황"
+  },
+  "profile": {
+    "title": "프로필",
+    "settings": "설정",
+    "editProfile": "프로필 편집",
+    "updateProfile": "프로필 업데이트",
+    "accountInfo": "계정 정보"
+  },
+  "subscription": {
+    "title": "구독",
+    "plan": "현재 플랜",
+    "upgrade": "업그레이드",
+    "manage": "구독 관리",
+    "billing": "결제"
+  },
+  "stats": {
+    "journalEntries": "일기 항목",
+    "chatSessions": "채팅 세션",
+    "moodCheckins": "기분 체크인",
+    "streakDays": "연속 일수"
+  },
+  "tool_desc": {
+    "viyog": "즉각적인 반응을 진정시키기",
+    "ardha": "인식을 재구성하기",
+    "kiaan": "대화로 풀기",
+    "relationship-compass": "관계의 명확함 탐색",
+    "journey": "장기적인 내면의 안정 훈련"
+  },
+  "mode_label": {
+    "prefix": "현재 모드:",
+    "viyog": "멈춤 모드",
+    "ardha": "명확함 모드",
+    "kiaan": "동반자 모드",
+    "relationship-compass": "관계 모드",
+    "journey": "훈련 모드"
+  }
+}

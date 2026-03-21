@@ -22,7 +22,9 @@
     "karmicTree": "কর্ম বৃক্ষ",
     "emotionalReset": "আবেগজনিত রিসেট",
     "deepInsights": "গভীর অন্তর্দৃষ্টি",
-    "wisdomRooms": "জ্ঞান কক্ষ"
+    "wisdomRooms": "জ্ঞান কক্ষ",
+    "companion": "Companion",
+    "wisdomJourneys": "Journeys"
   },
   "actions": {
     "openChat": "চ্যাট খুলুন",

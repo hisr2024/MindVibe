@@ -1,0 +1,83 @@
+{
+  "_template_variables_note": "This file uses i18next template variables: {{current}}, {{total}}, {{day}}, {{title}}. Any rename or removal of these variables will break the UI. Ensure all referenced variables are passed by the consuming components (JourneyCard, JourneyStep, JourneyComplete).",
+  "title": "Podróże Mądrości",
+  "subtitle": "Przekształć swój wewnętrzny świat, rozluźniając uchwyt sześciu wewnętrznych tendencji (Sad-Ripu). Wybierz jedną lub więcej podróży, aby rozpocząć drogę do wewnętrznego spokoju.",
+  "featured": "Wyróżnione Podróże",
+  "all": "Wszystkie Podróże",
+  "active": "Twoje Aktywne Podróże",
+  "empty": {
+    "title": "Brak Dostępnych Podróży",
+    "description": "Sprawdź wkrótce, czy pojawiły się nowe podróże mądrości."
+  },
+  "trial": {
+    "title": "Bezpłatny Dostęp",
+    "description": "Wypróbuj 1 podróż przez 3 dni za darmo! Doświadcz transformacji.",
+    "upgrade": "Ulepsz dla Pełnego Dostępu"
+  },
+  "card": {
+    "start": "Rozpocznij Podróż",
+    "continue": "Kontynuuj Podróż",
+    "locked": "Ukończ lub wstrzymaj aktywną podróż, aby rozpocząć tę",
+    "free": "Bezpłatnie",
+    "featured": "Wyróżnione",
+    "inProgress": "W Trakcie",
+    "day": "Dzień {{current}} z {{total}}"
+  },
+  "step": {
+    "title": "Dzisiejszy Krok Podróży",
+    "backToJourneys": "Powrót do Podróży",
+    "complete": "Ukończ Dzień {{day}}",
+    "completing": "Kończenie...",
+    "completed": {
+      "title": "Dzień {{day}} Ukończony!",
+      "message": "Świetna robota! Wróć jutro po kolejny krok.",
+      "viewAll": "Zobacz Wszystkie Podróże"
+    },
+    "journeyComplete": {
+      "title": "Podróż Ukończona!",
+      "message": "Gratulacje z ukończenia {{title}}! Zrobiłeś znaczący krok w kierunku wewnętrznego spokoju.",
+      "startAnother": "Rozpocznij Kolejną Podróż"
+    },
+    "day14": {
+      "title": "Praktyka trwa dalej",
+      "body": "14 dni to początek, nie koniec. Przenieś to, co ćwiczyłeś, do codziennych momentów — praca pogłębia się od tego miejsca.",
+      "linkTrigger": "Zajmij się dzisiejszym wyzwalaczem",
+      "linkPractice": "Codzienna mikro-praktyka"
+    }
+  },
+  "sections": {
+    "teaching": "Dzisiejsze Nauczanie",
+    "reflection": "Kierowana Refleksja",
+    "practice": "Praktyka",
+    "commitment": "Dzisiejsze Mikro Zobowiązanie",
+    "microPractice": "Dzisiejsza mikro-praktyka",
+    "markPracticed": "Oznacz jako ćwiczone"
+  },
+  "checkIn": {
+    "label": "Twoja Refleksja (opcjonalnie)",
+    "placeholder": "Napisz swoje myśli, spostrzeżenia lub uczucia..."
+  },
+  "difficulty": {
+    "1": "Początkujący",
+    "2": "Łatwy",
+    "3": "Umiarkowany",
+    "4": "Wymagający",
+    "5": "Zaawansowany"
+  },
+  "enemies": {
+    "kama": "Pragnienie (Kama)",
+    "krodha": "Gniew (Krodha)",
+    "lobha": "Chciwość (Lobha)",
+    "moha": "Przywiązanie (Moha)",
+    "mada": "Ego (Mada)",
+    "matsarya": "Zawiść (Matsarya)",
+    "mixed": "Podróż Łączona",
+    "general": "Ogólna Mądrość"
+  },
+  "errors": {
+    "loadFailed": "Nie udało się załadować podróży. Spróbuj ponownie.",
+    "startFailed": "Nie udało się rozpocząć podróży. Spróbuj ponownie.",
+    "completeFailed": "Nie udało się ukończyć kroku. Spróbuj ponownie.",
+    "networkError": "Błąd sieci. Sprawdź połączenie."
+  }
+}

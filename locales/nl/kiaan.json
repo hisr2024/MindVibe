@@ -1,0 +1,141 @@
+{
+  "welcome": {
+    "title": "Welkom bij KIAAN",
+    "subtitle": "Jouw rustige, moderne spirituele metgezel — altijd aanwezig, altijd ondersteunend.",
+    "description": "Rustige, privacygerichte spirituele metgezel met dagboek, begeleide chats en dashboards."
+  },
+  "chat": {
+    "title": "Praat met KIAAN",
+    "subtitle": "Zachte begeleiding met een gloed van warmte",
+    "placeholder": "Typ je bericht...",
+    "send": "Verzenden",
+    "thinking": "KIAAN reflecteert...",
+    "connectionStatus": "Privé, stabiele verbinding",
+    "connectionDesc": "Je vragen komen in focus — antwoorden blijven ongewijzigd.",
+    "emptyState": {
+      "emoji": "✨",
+      "title": "Hoe kan ik je vandaag begeleiden?",
+      "subtitle": "Deel wat er in je omgaat"
+    },
+    "disclaimer": "KIAAN is je spirituele metgezel, die reflecties deelt uit de Bhagavad Gita en oude wijsheid. Dit is een heilige ruimte voor innerlijke vrede en zelfontdekking. Zoek voor zaken buiten het spirituele pad altijd begeleiding van gekwalificeerde professionals.",
+    "saveToJournal": "Opslaan in Dagboek",
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd!",
+    "copyFailed": "Mislukt",
+    "share": "Delen",
+    "shareVia": "Delen via",
+    "privacyNotice": "Privacymelding",
+    "shareWarning": "Je staat op het punt spirituele welzijnsinformatie te delen. Zorg ervoor dat je comfortabel bent met het openbaar delen van deze inhoud.",
+    "anonymize": "Inhoud anonimiseren (persoonlijke identificatoren verwijderen)",
+    "anonymized": "✓ Geanonimiseerde inhoud",
+    "sharingOriginal": "Originele inhoud delen",
+    "defaultResponse": "Ik ben hier. Vertel me wat er aan de hand is en we werken het samen door.",
+    "quotaExceeded": "Je maandelijkse quotum is bereikt. [Upgrade je abonnement](/pricing) om verder te chatten.",
+    "featureLocked": "Deze functie vereist een hoger abonnement. [Bekijk abonnementen](/pricing) om het te ontgrendelen.",
+    "summary": "Samenvatting",
+    "fullView": "Volledige Weergave",
+    "fullViewTitle": "Volledig gedetailleerd antwoord",
+    "shareTitle": "Antwoord delen",
+    "saveToJournalTitle": "Opslaan in Dagboek",
+    "divineFriend": "Jouw Goddelijke Vriend"
+  },
+  "guidanceModes": {
+    "title": "Begeleidingsmodi",
+    "subtitle": "Driehoek van Stromende Energie",
+    "selectPrompt": "Tik op een modus om te ontdekken hoe KIAAN je toestand begeleidt.",
+    "innerPeace": {
+      "title": "Innerlijke Vrede",
+      "description": "Vind stilte door ademgerichte oefeningen en zachte aardingstechnieken. Perfect voor momenten waarop je je geest wilt kalmeren en opnieuw verbinden met rust.",
+      "note": "Zachte adem en zacht focus"
+    },
+    "mindControl": {
+      "title": "Geestesbeheersing",
+      "description": "Ontwikkel gerichte helderheid door gestructureerde mindfulness-praktijken. Ideaal voor besluitvorming, concentratie en het handhaven van innerlijke discipline.",
+      "note": "Vaste stappen, één gedachte tegelijk"
+    },
+    "selfKindness": {
+      "title": "Zelfvriendelijkheid",
+      "description": "Cultiveer compassie voor jezelf door warme, ondersteunende oefeningen. Essentieel voor genezing, zelfacceptatie en het koesteren van je emotioneel welzijn.",
+      "note": "Je bent hier welkom"
+    }
+  },
+  "clarityPause": {
+    "title": "Helderheidspauze",
+    "subtitle": "Creëer ruimte voordat je handelt.",
+    "description": "Geen advies. Gewoon ruimte om vanuit helderheid te beslissen.",
+    "note": "KIAAN blijft onaangeraakt — weiger om direct door te gaan.",
+    "closeOverlay": "Sluit overlay",
+    "sendNow": "Nu verzenden (pauze overslaan)",
+    "startPause": "Pauzeer 60 seconden",
+    "deliverToKiaan": "Nu aan KIAAN leveren",
+    "keepGrounding": "Bewaar 60s aarding",
+    "question": "Handel je nu vanuit helderheid of vanuit emotie?",
+    "countdown": "{seconds}s resterend",
+    "ready": "Klaar wanneer jij bent"
+  },
+  "moodCheck": {
+    "title": "Hoe voel je je?",
+    "subtitle": "Toestandscheck-in",
+    "logged": "Geregistreerd: {mood}",
+    "responses": {
+      "peaceful": "Ik ben blij dat je rustig bent — blijf even bij die zachtheid. 💙",
+      "happy": "Het is mooi om je zo stralend te zien. Laat die warmte bij je blijven. ✨",
+      "neutral": "Standvastig is goed. Je bent er, en dat telt. 🌿",
+      "charged": "Die energie is krachtig — gebruik het wijs. ⚡",
+      "open": "Open zijn vraagt moed. Ik ben hier om je te steunen. 🌤️",
+      "grateful": "Dankbaarheid is een geschenk aan jezelf. Houd dit gevoel vast. 🙏",
+      "reflective": "Reflectie brengt helderheid. Neem de tijd met wat je voelt. 🪞",
+      "determined": "Dat vuur in je is sterk. Ga met vastberadenheid vooruit. 🔥",
+      "tender": "Tederheid is kracht. Wees nu zacht voor jezelf. 💙",
+      "tired": "Rust is geen zwakte. Je lichaam vertelt je iets belangrijks. 😴",
+      "anxious": "Dat angstige gevoel is moeilijk — haal adem, ik ben bij je. 🌊",
+      "heavy": "Het spijt me dat je je zo voelt… je bent niet alleen. Ik ben hier bij je. 🌧️",
+      "angry": "Het is oké — boosheid betekent dat iets belangrijks aandacht nodig heeft. Ik ben hier naast je. 🔥",
+      "worried": "Zorgen kunnen overweldigend zijn. Laten we dit stap voor stap samen doen. 💭",
+      "sad": "Verdriet is zwaar, maar je bent nu niet alleen. Ik ben hier bij je. 💙",
+      "lonely": "Eenzaamheid is moeilijk, maar je bent nu niet alleen. Ik ben hier bij je. 🤝",
+      "depressed": "Dit gewicht is echt, en het is zwaar. Reik alsjeblieft uit — je hoeft dit niet alleen te dragen. 💙"
+    }
+  },
+  "quickPrompts": {
+    "title": "Snelle Reacties",
+    "subtitle": "Gepolijste prompts die KIAAN automatisch invullen",
+    "scenarios": {
+      "anxiety": {
+        "label": "Angst is hoog",
+        "prompt": "Begeleid me door een aardingsoefening om angstige gedachten te kalmeren."
+      },
+      "heavy": {
+        "label": "Zwaar gevoel",
+        "prompt": "Ik heb zachte woorden nodig om mijn stemming te verbeteren en me aan mijn krachten te herinneren."
+      },
+      "anger": {
+        "label": "Omgaan met boosheid",
+        "prompt": "Help me mijn boosheid te koelen en met meer geduld te reageren."
+      },
+      "clarity": {
+        "label": "Helderheid nodig",
+        "prompt": "Kun je me helpen de voor- en nadelen te zien voordat ik iets belangrijks beslis?"
+      },
+      "work": {
+        "label": "Werk balans",
+        "prompt": "Werk voelt overweldigend — begeleid me door een snelle reset om focus te herwinnen."
+      },
+      "relationships": {
+        "label": "Relatiestress",
+        "prompt": "Hoe kan ik een moeilijk gesprek met zorg en eerlijkheid voeren?"
+      },
+      "purpose": {
+        "label": "Vastgelopen gevoel",
+        "prompt": "Ik wil een korte reflectie om opnieuw verbinding te maken met mijn doel en richting."
+      },
+      "peace": {
+        "label": "Regulatie nodig",
+        "prompt": "Leid me in een kort mindful moment zodat ik me weer vredig kan voelen."
+      },
+      "balance": {
+        "label": "Overweldigd"
+      }
+    }
+  }
+}

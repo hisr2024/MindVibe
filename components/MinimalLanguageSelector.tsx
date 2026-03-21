@@ -22,8 +22,20 @@ const flagEmojis: Record<Locale, string> = {
   fr: '🇫🇷',
   de: '🇩🇪',
   pt: '🇵🇹',
+  it: '🇮🇹',
+  nl: '🇳🇱',
+  pl: '🇵🇱',
+  sv: '🇸🇪',
+  ru: '🇷🇺',
   ja: '🇯🇵',
   'zh-CN': '🇨🇳',
+  ko: '🇰🇷',
+  th: '🇹🇭',
+  vi: '🇻🇳',
+  id: '🇮🇩',
+  ar: '🇸🇦',
+  tr: '🇹🇷',
+  sw: '🇰🇪',
 };
 
 export function MinimalLanguageSelector() {

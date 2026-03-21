@@ -1,0 +1,83 @@
+{
+  "_template_variables_note": "This file uses i18next template variables: {{current}}, {{total}}, {{day}}, {{title}}. Any rename or removal of these variables will break the UI. Ensure all referenced variables are passed by the consuming components (JourneyCard, JourneyStep, JourneyComplete).",
+  "title": "Safari za Hekima",
+  "subtitle": "Badilisha ulimwengu wako wa ndani kwa kulegeza nguvu za mielekeo sita ya ndani (Sad-Ripu). Chagua safari moja au zaidi kuanza njia yako ya amani ya ndani.",
+  "featured": "Safari Zilizoangaziwa",
+  "all": "Safari Zote",
+  "active": "Safari Zako Zinazoendelea",
+  "empty": {
+    "title": "Hakuna Safari Zinazopatikana",
+    "description": "Rudi hivi karibuni kwa safari mpya za hekima."
+  },
+  "trial": {
+    "title": "Ufikiaji Bure",
+    "description": "Jaribu safari 1 bure kwa siku 3! Pata uzoefu wa mabadiliko.",
+    "upgrade": "Pandisha kwa Ufikiaji Kamili"
+  },
+  "card": {
+    "start": "Anza Safari",
+    "continue": "Endelea Safari",
+    "locked": "Kamilisha au simamisha safari inayoendelea ili kuanza hii",
+    "free": "Bure",
+    "featured": "Iliyoangaziwa",
+    "inProgress": "Inaendelea",
+    "day": "Siku {{current}} ya {{total}}"
+  },
+  "step": {
+    "title": "Hatua ya Safari ya Leo",
+    "backToJourneys": "Rudi kwa Safari",
+    "complete": "Kamilisha Siku {{day}}",
+    "completing": "Inakamilisha...",
+    "completed": {
+      "title": "Siku {{day}} Imekamilika!",
+      "message": "Kazi nzuri! Rudi kesho kwa hatua yako inayofuata.",
+      "viewAll": "Tazama Safari Zote"
+    },
+    "journeyComplete": {
+      "title": "Safari Imekamilika!",
+      "message": "Hongera kwa kukamilisha {{title}}! Umechukua hatua yenye maana kuelekea amani ya ndani.",
+      "startAnother": "Anza Safari Nyingine"
+    },
+    "day14": {
+      "title": "Mazoezi yanaendelea",
+      "body": "Siku 14 ni mwanzo, si mwisho. Beba uliyoyafanya kwa mazoezi katika wakati wa kila siku — kazi inakuwa ya kina zaidi kutoka hapa.",
+      "linkTrigger": "Shughulikia kichocheo cha leo",
+      "linkPractice": "Zoezi dogo la kila siku"
+    }
+  },
+  "sections": {
+    "teaching": "Mafundisho ya Leo",
+    "reflection": "Tafakuri ya Kuongozwa",
+    "practice": "Mazoezi",
+    "commitment": "Ahadi Ndogo ya Leo",
+    "microPractice": "Zoezi dogo la leo",
+    "markPracticed": "Weka alama imefanywa"
+  },
+  "checkIn": {
+    "label": "Tafakuri Yako (si lazima)",
+    "placeholder": "Andika mawazo yako, maarifa, au hisia..."
+  },
+  "difficulty": {
+    "1": "Mwanzo",
+    "2": "Rahisi",
+    "3": "Wastani",
+    "4": "Changamoto",
+    "5": "Juu"
+  },
+  "enemies": {
+    "kama": "Tamaa (Kama)",
+    "krodha": "Hasira (Krodha)",
+    "lobha": "Uchoyo (Lobha)",
+    "moha": "Kushikamana (Moha)",
+    "mada": "Kiburi (Mada)",
+    "matsarya": "Wivu (Matsarya)",
+    "mixed": "Safari ya Mchanganyiko",
+    "general": "Hekima ya Jumla"
+  },
+  "errors": {
+    "loadFailed": "Imeshindwa kupakia safari. Tafadhali jaribu tena.",
+    "startFailed": "Imeshindwa kuanza safari. Tafadhali jaribu tena.",
+    "completeFailed": "Imeshindwa kukamilisha hatua. Tafadhali jaribu tena.",
+    "networkError": "Hitilafu ya mtandao. Tafadhali angalia muunganisho wako."
+  }
+}
