@@ -18,11 +18,11 @@ export default function TabsLayout(): React.JSX.Element {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.accent,
-        tabBarInactiveTintColor: theme.textTertiary,
+        tabBarActiveTintColor: theme.colors.accent,
+        tabBarInactiveTintColor: theme.colors.textTertiary,
         tabBarStyle: {
-          backgroundColor: theme.tabBarBackground,
-          borderTopColor: theme.tabBarBorder,
+          backgroundColor: theme.colors.tabBarBackground,
+          borderTopColor: theme.colors.tabBarBorder,
           borderTopWidth: 1,
           height: spacing.navHeight,
           paddingBottom: 28,

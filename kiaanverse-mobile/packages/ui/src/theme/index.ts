@@ -1,3 +1,13 @@
-export { ThemeProvider, ThemeContext, type ThemeMode } from './ThemeProvider';
+/**
+ * @kiaanverse/ui — Theme system public API
+ */
+
+export { ThemeProvider, ThemeContext } from './ThemeProvider';
 export { useTheme } from './useTheme';
-export { darkTheme, lightTheme, type ThemeColors } from './themes';
+export { darkTheme, lightTheme } from './themes';
+export type {
+  Theme,
+  ThemeColors,
+  ThemeContextValue,
+  ThemeMode,
+} from './types';

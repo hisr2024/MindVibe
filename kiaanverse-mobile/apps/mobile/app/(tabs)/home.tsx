@@ -39,7 +39,7 @@ export default function HomeScreen(): React.JSX.Element {
         <Text variant="h2">
           {greeting}, {user?.name?.split(' ')[0] ?? t('greeting')}
         </Text>
-        <Text variant="bodySmall" color={colors.divine.muted}>
+        <Text variant="bodySmall" color={colors.text.muted}>
           {new Date().toLocaleDateString('en-US', {
             weekday: 'long',
             month: 'long',
@@ -63,14 +63,14 @@ export default function HomeScreen(): React.JSX.Element {
               accessibilityRole="button"
             >
               <Text variant="h2" align="center">{option.emoji}</Text>
-              <Text variant="caption" color={colors.divine.muted} align="center">
+              <Text variant="caption" color={colors.text.muted} align="center">
                 {option.label}
               </Text>
             </Pressable>
           ))}
         </View>
         {createMood.data ? (
-          <Text variant="bodySmall" color={colors.gold[400]} style={styles.moodResponse}>
+          <Text variant="bodySmall" color={colors.primary[300]} style={styles.moodResponse}>
             {(createMood.data as { kiaanResponse?: string }).kiaanResponse ?? 'Mood recorded'}
           </Text>
         ) : null}
@@ -84,7 +84,7 @@ export default function HomeScreen(): React.JSX.Element {
           dashboard.activeJourneys.map((journey) => (
             <Card key={journey.id} style={styles.journeyCard}>
               <Text variant="label">{journey.title}</Text>
-              <Text variant="caption" color={colors.divine.muted}>
+              <Text variant="caption" color={colors.text.muted}>
                 Day {journey.currentDay} of {journey.durationDays}
               </Text>
               <View style={styles.progressBar}>
@@ -101,7 +101,7 @@ export default function HomeScreen(): React.JSX.Element {
           ))
         ) : (
           <Card>
-            <Text variant="body" color={colors.divine.muted}>
+            <Text variant="body" color={colors.text.muted}>
               {t('noJourneys')}
             </Text>
           </Card>
@@ -111,18 +111,18 @@ export default function HomeScreen(): React.JSX.Element {
       {dashboard ? (
         <View style={styles.statsRow}>
           <Card style={styles.statCard}>
-            <Text variant="h2" align="center" color={colors.gold[400]}>
+            <Text variant="h2" align="center" color={colors.primary[300]}>
               {dashboard.streakDays}
             </Text>
-            <Text variant="caption" color={colors.divine.muted} align="center">
+            <Text variant="caption" color={colors.text.muted} align="center">
               Day Streak
             </Text>
           </Card>
           <Card style={styles.statCard}>
-            <Text variant="h2" align="center" color={colors.gold[400]}>
+            <Text variant="h2" align="center" color={colors.primary[300]}>
               {dashboard.completedCount}
             </Text>
-            <Text variant="caption" color={colors.divine.muted} align="center">
+            <Text variant="caption" color={colors.text.muted} align="center">
               Completed
             </Text>
           </Card>
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: colors.gold[500],
+    backgroundColor: colors.primary[500],
     borderRadius: 2,
   },
   statsRow: {

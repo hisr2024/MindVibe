@@ -39,7 +39,7 @@ function MenuItem({ icon, label, onPress }: MenuItemProps): React.JSX.Element {
     >
       {icon}
       <Text variant="body" style={styles.menuLabel}>{label}</Text>
-      <ChevronRight size={18} color={theme.textTertiary} />
+      <ChevronRight size={18} color={theme.colors.textTertiary} />
     </Pressable>
   );
 }
@@ -74,11 +74,11 @@ export default function ProfileScreen(): React.JSX.Element {
       <View style={styles.profileSection}>
         <Avatar name={user?.name} size={72} />
         <Text variant="h2">{user?.name ?? 'Seeker'}</Text>
-        <Text variant="bodySmall" color={colors.divine.muted}>
+        <Text variant="bodySmall" color={colors.text.muted}>
           {user?.email ?? ''}
         </Text>
         <View style={styles.tierBadge}>
-          <Text variant="caption" color={colors.gold[400]}>
+          <Text variant="caption" color={colors.primary[300]}>
             {user?.subscriptionTier ?? 'FREE'} Plan
           </Text>
         </View>
@@ -88,27 +88,27 @@ export default function ProfileScreen(): React.JSX.Element {
 
       <Card style={styles.menuCard}>
         <MenuItem
-          icon={<BookOpen size={20} color={theme.accent} />}
+          icon={<BookOpen size={20} color={theme.colors.accent} />}
           label="Sacred Journal"
           onPress={() => {}}
         />
         <Divider />
         <MenuItem
-          icon={<BarChart3 size={20} color={theme.accent} />}
+          icon={<BarChart3 size={20} color={theme.colors.accent} />}
           label="Analytics"
           onPress={() => {}}
         />
         <Divider />
         <MenuItem
-          icon={<Settings size={20} color={theme.accent} />}
+          icon={<Settings size={20} color={theme.colors.accent} />}
           label="Settings"
           onPress={() => {}}
         />
         <Divider />
         <MenuItem
           icon={isDark
-            ? <Sun size={20} color={theme.accent} />
-            : <Moon size={20} color={theme.accent} />
+            ? <Sun size={20} color={theme.colors.accent} />
+            : <Moon size={20} color={theme.colors.accent} />
           }
           label={isDark ? 'Light Mode' : 'Dark Mode'}
           onPress={handleToggleTheme}
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   profileSection: {
     alignItems: 'center',
     gap: spacing.sm,
-    paddingTop: spacing['3xl'],
+    paddingTop: spacing.xl,
     paddingBottom: spacing.xl,
   },
   tierBadge: {
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   logoutSection: {
-    marginTop: spacing['3xl'],
+    marginTop: spacing.xl,
     alignItems: 'center',
   },
 });

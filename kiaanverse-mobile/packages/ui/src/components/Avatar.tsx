@@ -59,7 +59,7 @@ export function Avatar({ uri, name = '', size = 40 }: AvatarProps): React.JSX.El
           styles.initials,
           {
             fontSize: size * 0.4,
-            color: theme.accent,
+            color: theme.colors.accent,
           },
         ]}
       >

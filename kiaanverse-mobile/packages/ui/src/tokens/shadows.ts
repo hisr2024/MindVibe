@@ -30,14 +30,14 @@ export const shadows = {
     elevation: 8,
   },
   glow: {
-    shadowColor: colors.gold[500],
+    shadowColor: colors.primary[500],
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 20,
     elevation: 8,
   },
   glowStrong: {
-    shadowColor: colors.gold[500],
+    shadowColor: colors.primary[500],
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 24,

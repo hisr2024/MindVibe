@@ -72,15 +72,15 @@ function AppContent(): React.JSX.Element {
 
   if (status === 'idle' || status === 'loading') {
     return (
-      <View style={[styles.loading, { backgroundColor: colors.divine.black }]}>
-        <ActivityIndicator size="large" color={colors.gold[500]} />
+      <View style={[styles.loading, { backgroundColor: colors.background.dark }]}>
+        <ActivityIndicator size="large" color={colors.primary[500]} />
       </View>
     );
   }
 
   return (
     <View style={styles.container} onLayout={onLayoutReady}>
-      <StatusBar style={theme.statusBarStyle === 'light-content' ? 'light' : 'dark'} />
+      <StatusBar style={theme.colors.statusBarStyle === 'light-content' ? 'light' : 'dark'} />
       <AuthGate>
         <Slot />
       </AuthGate>

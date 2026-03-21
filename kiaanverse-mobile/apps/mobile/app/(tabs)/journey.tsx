@@ -29,14 +29,14 @@ export default function JourneyScreen(): React.JSX.Element {
   const renderTemplate = ({ item }: { item: JourneyTemplate }) => (
     <Card style={styles.templateCard}>
       <Text variant="label">{item.title}</Text>
-      <Text variant="bodySmall" color={colors.divine.muted} numberOfLines={2}>
+      <Text variant="bodySmall" color={colors.text.muted} numberOfLines={2}>
         {item.description}
       </Text>
       <View style={styles.templateMeta}>
-        <Text variant="caption" color={colors.gold[400]}>
+        <Text variant="caption" color={colors.primary[300]}>
           {item.durationDays} {t('day')}s
         </Text>
-        <Text variant="caption" color={colors.divine.muted}>
+        <Text variant="caption" color={colors.text.muted}>
           {item.category}
         </Text>
       </View>
@@ -53,7 +53,7 @@ export default function JourneyScreen(): React.JSX.Element {
     <Card style={styles.journeyCard}>
       <View style={styles.journeyHeader}>
         <Text variant="label">{item.title}</Text>
-        <Text variant="caption" color={colors.gold[400]}>
+        <Text variant="caption" color={colors.primary[300]}>
           {t('day')} {item.currentDay}/{item.durationDays}
         </Text>
       </View>
@@ -65,7 +65,7 @@ export default function JourneyScreen(): React.JSX.Element {
           ]}
         />
       </View>
-      <Text variant="caption" color={colors.divine.muted}>
+      <Text variant="caption" color={colors.text.muted}>
         {t('progress')}: {Math.round((item.completedSteps / item.durationDays) * 100)}%
       </Text>
     </Card>
@@ -91,7 +91,7 @@ export default function JourneyScreen(): React.JSX.Element {
           >
             <Text
               variant="label"
-              color={activeTab === tab.key ? colors.gold[400] : colors.divine.muted}
+              color={activeTab === tab.key ? colors.primary[300] : colors.text.muted}
             >
               {tab.label}
             </Text>
@@ -115,7 +115,7 @@ export default function JourneyScreen(): React.JSX.Element {
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <Text variant="body" color={colors.divine.muted} align="center">
+            <Text variant="body" color={colors.text.muted} align="center">
               No active journeys
             </Text>
           }
@@ -128,7 +128,7 @@ export default function JourneyScreen(): React.JSX.Element {
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <Text variant="body" color={colors.divine.muted} align="center">
+            <Text variant="body" color={colors.text.muted} align="center">
               No completed journeys yet
             </Text>
           }
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: spacing.lg,
     gap: spacing.md,
-    paddingBottom: spacing['3xl'],
+    paddingBottom: spacing.xl,
   },
   templateCard: {
     gap: spacing.sm,
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: colors.gold[500],
+    backgroundColor: colors.primary[500],
     borderRadius: 2,
   },
 });

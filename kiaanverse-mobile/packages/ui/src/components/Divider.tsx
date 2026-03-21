@@ -16,7 +16,7 @@ export function Divider({ style }: DividerProps): React.JSX.Element {
 
   return (
     <View
-      style={[styles.divider, { backgroundColor: theme.divider }, style]}
+      style={[styles.divider, { backgroundColor: theme.colors.divider }, style]}
     />
   );
 }

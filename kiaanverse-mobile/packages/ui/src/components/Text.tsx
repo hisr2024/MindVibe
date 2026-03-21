@@ -1,14 +1,14 @@
 /**
- * Themed Text component with typography variant support.
+ * Themed Text component with typography preset support.
  */
 
 import React from 'react';
-import { Text as RNText, type TextProps as RNTextProps, StyleSheet } from 'react-native';
+import { Text as RNText, type TextProps as RNTextProps } from 'react-native';
 import { useTheme } from '../theme/useTheme';
-import { typography, type TypographyVariant } from '../tokens/typography';
+import { textPresets, type TextPreset } from '../tokens/typography';
 
 interface TextProps extends RNTextProps {
-  variant?: TypographyVariant;
+  variant?: TextPreset;
   color?: string;
   align?: 'left' | 'center' | 'right';
 }
@@ -22,13 +22,12 @@ export function Text({
   ...props
 }: TextProps): React.JSX.Element {
   const { theme } = useTheme();
-  const variantStyle = typography[variant];
 
   return (
     <RNText
       style={[
-        variantStyle,
-        { color: color ?? theme.textPrimary },
+        textPresets[variant],
+        { color: color ?? theme.colors.textPrimary },
         align && { textAlign: align },
         style,
       ]}
