@@ -72,7 +72,7 @@ export default function OnboardingScreen(): React.JSX.Element {
         {currentStep === 0 ? (
           <View style={styles.stepContainer}>
             <Text variant="h1" align="center">Choose Your Language</Text>
-            <Text variant="bodySmall" color={colors.divine.muted} align="center">
+            <Text variant="bodySmall" color={colors.text.muted} align="center">
               You can change this later in settings
             </Text>
             <FlatList
@@ -93,7 +93,7 @@ export default function OnboardingScreen(): React.JSX.Element {
                   accessibilityState={{ selected: answers.locale === item.code }}
                 >
                   <Text variant="label">{item.nativeName}</Text>
-                  <Text variant="caption" color={colors.divine.muted}>{item.name}</Text>
+                  <Text variant="caption" color={colors.text.muted}>{item.name}</Text>
                 </Pressable>
               )}
             />
@@ -102,7 +102,7 @@ export default function OnboardingScreen(): React.JSX.Element {
         ) : currentStep === 1 ? (
           <View style={styles.stepContainer}>
             <Text variant="h1" align="center">What Interests You?</Text>
-            <Text variant="bodySmall" color={colors.divine.muted} align="center">
+            <Text variant="bodySmall" color={colors.text.muted} align="center">
               Select all that resonate with you
             </Text>
             <View style={styles.interestGrid}>
@@ -133,14 +133,14 @@ export default function OnboardingScreen(): React.JSX.Element {
         ) : (
           <View style={styles.stepContainer}>
             <Text variant="h1" align="center">Stay Connected</Text>
-            <Text variant="body" color={colors.divine.muted} align="center">
+            <Text variant="body" color={colors.text.muted} align="center">
               Get daily spiritual reminders, journey updates, and wisdom from the Gita.
             </Text>
             <View style={styles.notificationPreview}>
-              <Text variant="sacred" color={colors.gold[400]} align="center">
+              <Text variant="sacred" color={colors.primary[300]} align="center">
                 "The soul is neither born, nor does it ever die."
               </Text>
-              <Text variant="caption" color={colors.divine.muted} align="center">
+              <Text variant="caption" color={colors.text.muted} align="center">
                 — Bhagavad Gita 2.20
               </Text>
             </View>
@@ -170,7 +170,7 @@ export default function OnboardingScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: spacing['4xl'],
+    paddingTop: spacing.xxl,
     gap: spacing.xl,
   },
   progressDots: {
@@ -186,10 +186,10 @@ const styles = StyleSheet.create({
   },
   dotActive: {
     width: 24,
-    backgroundColor: colors.gold[500],
+    backgroundColor: colors.primary[500],
   },
   dotCompleted: {
-    backgroundColor: colors.gold[700],
+    backgroundColor: colors.primary[700],
   },
   stepContainer: {
     gap: spacing.xl,
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   localeSelected: {
-    borderColor: colors.gold[500],
+    borderColor: colors.primary[500],
     backgroundColor: colors.alpha.goldLight,
   },
   interestGrid: {
@@ -227,11 +227,11 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   interestSelected: {
-    borderColor: colors.gold[500],
+    borderColor: colors.primary[500],
     backgroundColor: colors.alpha.goldLight,
   },
   notificationPreview: {
-    padding: spacing['2xl'],
+    padding: spacing.lg,
     gap: spacing.sm,
   },
   buttonRow: {

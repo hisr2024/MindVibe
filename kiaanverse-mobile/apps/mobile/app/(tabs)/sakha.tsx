@@ -92,19 +92,19 @@ export default function SakhaScreen(): React.JSX.Element {
         {
           backgroundColor: item.role === 'user'
             ? colors.alpha.goldMedium
-            : theme.surfaceElevated,
+            : theme.colors.surfaceElevated,
         },
       ]}
     >
       <Text variant="body">{item.content}</Text>
     </View>
-  ), [theme.surfaceElevated]);
+  ), [theme.colors.surfaceElevated]);
 
   return (
     <Screen edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Text variant="h2">Sakha</Text>
-        <Text variant="caption" color={colors.divine.muted}>
+        <Text variant="caption" color={colors.text.muted}>
           Your spiritual companion
         </Text>
       </View>
@@ -125,20 +125,20 @@ export default function SakhaScreen(): React.JSX.Element {
 
         {sendMessage.isPending ? (
           <View style={styles.typingIndicator}>
-            <Text variant="caption" color={colors.gold[400]}>
+            <Text variant="caption" color={colors.primary[300]}>
               {t('thinking')}
             </Text>
           </View>
         ) : null}
 
-        <View style={[styles.inputRow, { backgroundColor: theme.surfaceElevated }]}>
+        <View style={[styles.inputRow, { backgroundColor: theme.colors.surfaceElevated }]}>
           <TextInput
             style={[
               styles.textInput,
-              { color: theme.textPrimary, backgroundColor: theme.inputBackground },
+              { color: theme.colors.textPrimary, backgroundColor: theme.colors.inputBackground },
             ]}
             placeholder={t('placeholder')}
-            placeholderTextColor={theme.textTertiary}
+            placeholderTextColor={theme.colors.textTertiary}
             value={input}
             onChangeText={setInput}
             multiline
@@ -156,7 +156,7 @@ export default function SakhaScreen(): React.JSX.Element {
             accessibilityLabel="Send message"
             accessibilityRole="button"
           >
-            <Send size={20} color={colors.gold[500]} />
+            <Send size={20} color={colors.primary[500]} />
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -186,11 +186,11 @@ const styles = StyleSheet.create({
   },
   userBubble: {
     alignSelf: 'flex-end',
-    borderBottomRightRadius: radii.xs,
+    borderBottomRightRadius: radii.sm,
   },
   assistantBubble: {
     alignSelf: 'flex-start',
-    borderBottomLeftRadius: radii.xs,
+    borderBottomLeftRadius: radii.sm,
   },
   typingIndicator: {
     paddingHorizontal: spacing.lg,

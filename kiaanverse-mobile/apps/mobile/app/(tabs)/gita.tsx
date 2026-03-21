@@ -23,24 +23,24 @@ export default function GitaScreen(): React.JSX.Element {
     <Card style={styles.chapterCard}>
       <View style={styles.chapterHeader}>
         <View style={styles.chapterNumber}>
-          <Text variant="label" color={colors.gold[400]}>
+          <Text variant="label" color={colors.primary[300]}>
             {item.id}
           </Text>
         </View>
         <View style={styles.chapterInfo}>
           <Text variant="label">{item.title}</Text>
           {item.titleSanskrit ? (
-            <Text variant="sacredSmall" color={colors.divine.muted}>
+            <Text variant="sacredSmall" color={colors.text.muted}>
               {item.titleSanskrit}
             </Text>
           ) : null}
-          <Text variant="caption" color={colors.divine.muted}>
+          <Text variant="caption" color={colors.text.muted}>
             {item.versesCount} verses
           </Text>
         </View>
       </View>
       {item.summary ? (
-        <Text variant="bodySmall" color={colors.divine.muted} numberOfLines={2}>
+        <Text variant="bodySmall" color={colors.text.muted} numberOfLines={2}>
           {item.summary}
         </Text>
       ) : null}
@@ -49,13 +49,13 @@ export default function GitaScreen(): React.JSX.Element {
 
   const renderVerse = ({ item }: { item: GitaVerse }) => (
     <Card style={styles.verseCard}>
-      <Text variant="caption" color={colors.gold[400]}>
+      <Text variant="caption" color={colors.primary[300]}>
         Chapter {item.chapter}, Verse {item.verse}
       </Text>
-      <Text variant="sacred" color={colors.gold[100]}>
+      <Text variant="sacred" color={colors.primary[100]}>
         {item.sanskrit}
       </Text>
-      <Text variant="bodySmall" color={colors.divine.muted}>
+      <Text variant="bodySmall" color={colors.text.muted}>
         {item.transliteration}
       </Text>
       <Divider />
@@ -85,7 +85,7 @@ export default function GitaScreen(): React.JSX.Element {
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <Text variant="body" color={colors.divine.muted} align="center">
+            <Text variant="body" color={colors.text.muted} align="center">
               No verses found
             </Text>
           }
@@ -99,7 +99,7 @@ export default function GitaScreen(): React.JSX.Element {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             chaptersLoading ? (
-              <Text variant="body" color={colors.divine.muted} align="center">
+              <Text variant="body" color={colors.text.muted} align="center">
                 Loading chapters...
               </Text>
             ) : null
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: spacing.lg,
     gap: spacing.md,
-    paddingBottom: spacing['3xl'],
+    paddingBottom: spacing.xl,
   },
   chapterCard: {
     gap: spacing.sm,

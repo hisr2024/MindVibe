@@ -32,7 +32,7 @@ export default function LoginScreen(): React.JSX.Element {
       >
         <View style={styles.header}>
           <Text variant="h1" align="center">Kiaanverse</Text>
-          <Text variant="bodySmall" color={colors.divine.muted} align="center">
+          <Text variant="bodySmall" color={colors.text.muted} align="center">
             Your spiritual companion
           </Text>
         </View>
@@ -71,16 +71,22 @@ export default function LoginScreen(): React.JSX.Element {
             loading={status === 'loading'}
             disabled={!email.trim() || !password.trim()}
           />
+
+          <Link href="/(auth)/forgot-password" style={styles.forgotLink}>
+            <Text variant="caption" color={colors.primary[300]}>
+              Forgot password?
+            </Text>
+          </Link>
         </View>
 
         <Divider />
 
         <View style={styles.footer}>
-          <Text variant="bodySmall" color={colors.divine.muted} align="center">
+          <Text variant="bodySmall" color={colors.text.muted} align="center">
             {t('noAccount')}{' '}
           </Text>
           <Link href="/(auth)/register">
-            <Text variant="label" color={colors.gold[400]}>
+            <Text variant="label" color={colors.primary[300]}>
               {t('register')}
             </Text>
           </Link>
@@ -94,14 +100,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    paddingVertical: spacing['5xl'],
+    paddingVertical: spacing.xxl,
   },
   header: {
     gap: spacing.sm,
-    marginBottom: spacing['4xl'],
+    marginBottom: spacing.xxl,
   },
   form: {
     gap: spacing.lg,
+  },
+  forgotLink: {
+    alignSelf: 'flex-end',
   },
   footer: {
     alignItems: 'center',

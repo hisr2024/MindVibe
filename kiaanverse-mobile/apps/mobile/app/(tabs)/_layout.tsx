@@ -1,73 +1,60 @@
 /**
- * Tabs Layout — 5-tab bottom navigation
+ * Tabs Layout — 5-tab bottom navigation with custom golden tab bar.
  *
- * Home | Sakha | Journey | Gita | Profile
+ * Home | Sakha (✦) | Journeys | Gita | Profile
+ *
+ * Features:
+ * - Custom tab bar with golden active dot + haptic feedback
+ * - Fade transitions between tabs
+ * - freezeOnBlur preserves tab state (scroll position, form data, chat context)
+ *
+ * Deep link routes (hidden from tab bar):
+ * - verse/[chapter]/[verse] → kiaanverse://verse/:chapter/:verse
+ * - journey/[id] → kiaanverse://journey/:id (nested inside journey tab)
  */
 
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Home, MessageCircle, Compass, BookOpen, User } from 'lucide-react-native';
-import { useTheme, spacing } from '@kiaanverse/ui';
 import { useTranslation } from '@kiaanverse/i18n';
+import { CustomTabBar } from '../../components/CustomTabBar';
 
 export default function TabsLayout(): React.JSX.Element {
-  const { theme } = useTheme();
   const { t } = useTranslation('navigation');
 
   return (
     <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.accent,
-        tabBarInactiveTintColor: theme.textTertiary,
-        tabBarStyle: {
-          backgroundColor: theme.tabBarBackground,
-          borderTopColor: theme.tabBarBorder,
-          borderTopWidth: 1,
-          height: spacing.navHeight,
-          paddingBottom: 28,
-          paddingTop: 8,
-        },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '500',
-        },
+        animation: 'fade',
+        freezeOnBlur: true,
       }}
     >
       <Tabs.Screen
         name="home"
-        options={{
-          title: t('home'),
-          tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
-        }}
+        options={{ title: t('home') }}
       />
       <Tabs.Screen
         name="sakha"
-        options={{
-          title: t('sakha'),
-          tabBarIcon: ({ color, size }) => <MessageCircle size={size} color={color} />,
-        }}
+        options={{ title: t('sakha') }}
       />
       <Tabs.Screen
         name="journey"
-        options={{
-          title: t('journey'),
-          tabBarIcon: ({ color, size }) => <Compass size={size} color={color} />,
-        }}
+        options={{ title: t('journey') }}
       />
       <Tabs.Screen
         name="gita"
-        options={{
-          title: t('gita'),
-          tabBarIcon: ({ color, size }) => <BookOpen size={size} color={color} />,
-        }}
+        options={{ title: t('gita') }}
       />
       <Tabs.Screen
         name="profile"
-        options={{
-          title: t('profile'),
-          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
-        }}
+        options={{ title: t('profile') }}
+      />
+
+      {/* Deep link screen — hidden from tab bar */}
+      <Tabs.Screen
+        name="verse/[chapter]/[verse]"
+        options={{ href: null }}
       />
     </Tabs>
   );

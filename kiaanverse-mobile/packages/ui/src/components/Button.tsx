@@ -14,9 +14,10 @@ import {
   type TextStyle,
 } from 'react-native';
 import { useTheme } from '../theme/useTheme';
+import type { ThemeColors } from '../theme/types';
 import { spacing } from '../tokens/spacing';
 import { radii } from '../tokens/radii';
-import { typography } from '../tokens/typography';
+import { textPresets } from '../tokens/typography';
 import { accessibility } from '../tokens/motion';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost';
@@ -40,9 +41,10 @@ export function Button({
 }: ButtonProps): React.JSX.Element {
   const { theme } = useTheme();
   const isDisabled = disabled || loading;
+  const c = theme.colors;
 
-  const containerStyle = getContainerStyle(variant, theme, isDisabled);
-  const textStyle = getTextStyle(variant, theme);
+  const containerStyle = getContainerStyle(variant, c, isDisabled);
+  const labelStyle = getTextStyle(variant, c);
 
   return (
     <Pressable
@@ -60,10 +62,10 @@ export function Button({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === 'primary' ? '#050507' : theme.accent}
+          color={variant === 'primary' ? theme.palette.background.dark : c.accent}
         />
       ) : (
-        <Text style={[styles.text, textStyle]}>{title}</Text>
+        <Text style={[styles.text, labelStyle]}>{title}</Text>
       )}
     </Pressable>
   );
@@ -71,19 +73,19 @@ export function Button({
 
 function getContainerStyle(
   variant: ButtonVariant,
-  theme: { accent: string; inputBackground: string; inputBorder: string },
+  c: ThemeColors,
   disabled: boolean,
 ): ViewStyle {
   const opacity = disabled ? 0.5 : 1;
 
   switch (variant) {
     case 'primary':
-      return { backgroundColor: theme.accent, opacity };
+      return { backgroundColor: c.accent, opacity };
     case 'secondary':
       return {
-        backgroundColor: theme.inputBackground,
+        backgroundColor: c.inputBackground,
         borderWidth: 1,
-        borderColor: theme.inputBorder,
+        borderColor: c.inputBorder,
         opacity,
       };
     case 'ghost':
@@ -93,15 +95,15 @@ function getContainerStyle(
 
 function getTextStyle(
   variant: ButtonVariant,
-  theme: { accent: string; textPrimary: string },
+  c: ThemeColors,
 ): TextStyle {
   switch (variant) {
     case 'primary':
-      return { color: '#050507' };
+      return { color: c.background };
     case 'secondary':
-      return { color: theme.textPrimary };
+      return { color: c.textPrimary };
     case 'ghost':
-      return { color: theme.accent };
+      return { color: c.accent };
   }
 }
 
@@ -118,7 +120,7 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   text: {
-    ...typography.label,
+    ...textPresets.label,
     fontWeight: '600',
   },
 });

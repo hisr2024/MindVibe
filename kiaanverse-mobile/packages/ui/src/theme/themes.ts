@@ -1,71 +1,99 @@
 /**
  * Kiaanverse Theme Definitions
  *
- * Dark (Golden Black) is the default spiritual theme.
- * Light (Warm Cream) is the alternative daytime theme.
+ * Dark (Cosmic Navy + Gold) is the default — temple sanctity at midnight.
+ * Light (Warm Cream + Brass) is the daytime alternative — morning puja warmth.
+ *
+ * Both themes share the same token structure (spacing, typography, radii, motion)
+ * and only differ in color resolution.
  */
 
 import { colors } from '../tokens/colors';
+import { fontFamily, fontSize, lineHeight, letterSpacing, textPresets } from '../tokens/typography';
+import { spacing } from '../tokens/spacing';
+import { radii } from '../tokens/radii';
+import { duration, spring } from '../tokens/motion';
+import type { Theme, ThemeColors } from './types';
 
-export interface ThemeColors {
-  readonly background: string;
-  readonly surface: string;
-  readonly surfaceElevated: string;
-  readonly card: string;
-  readonly cardBorder: string;
-  readonly textPrimary: string;
-  readonly textSecondary: string;
-  readonly textTertiary: string;
-  readonly accent: string;
-  readonly accentLight: string;
-  readonly tabBarBackground: string;
-  readonly tabBarBorder: string;
-  readonly miniPlayerBackground: string;
-  readonly inputBackground: string;
-  readonly inputBorder: string;
-  readonly divider: string;
-  readonly overlay: string;
-  readonly statusBarStyle: 'light-content' | 'dark-content';
-}
+// ---------------------------------------------------------------------------
+// Dark mode colors — deep navy backgrounds, gold accents
+// ---------------------------------------------------------------------------
 
-export const darkTheme: ThemeColors = {
-  background: colors.divine.black,
-  surface: colors.divine.void,
-  surfaceElevated: colors.divine.surface,
-  card: '#12121e',
-  cardBorder: 'rgba(212, 164, 76, 0.08)',
-  textPrimary: colors.gold[100],
-  textSecondary: colors.divine.muted,
-  textTertiary: 'rgba(168, 158, 142, 0.6)',
-  accent: colors.gold[500],
-  accentLight: colors.gold[400],
-  tabBarBackground: 'rgba(5, 5, 7, 0.95)',
-  tabBarBorder: 'rgba(212, 164, 76, 0.06)',
-  miniPlayerBackground: 'rgba(15, 15, 24, 0.98)',
-  inputBackground: 'rgba(255, 255, 255, 0.05)',
-  inputBorder: 'rgba(255, 255, 255, 0.08)',
-  divider: 'rgba(255, 255, 255, 0.06)',
-  overlay: 'rgba(0, 0, 0, 0.7)',
+const darkColors: ThemeColors = {
+  background: colors.background.dark,
+  surface: colors.background.card,
+  surfaceElevated: colors.background.surface,
+  card: colors.background.card,
+  cardBorder: colors.alpha.goldLight,
+  textPrimary: colors.text.primary,
+  textSecondary: colors.text.secondary,
+  textTertiary: colors.text.muted,
+  accent: colors.primary[500],
+  accentLight: colors.primary[300],
+  accentMuted: colors.primary[700],
+  tabBarBackground: 'rgba(8, 11, 26, 0.95)',
+  tabBarBorder: colors.alpha.goldLight,
+  miniPlayerBackground: 'rgba(13, 18, 41, 0.98)',
+  inputBackground: colors.alpha.whiteLight,
+  inputBorder: colors.alpha.whiteMedium,
+  divider: colors.alpha.whiteLight,
+  overlay: colors.alpha.blackHeavy,
   statusBarStyle: 'light-content',
 };
 
-export const lightTheme: ThemeColors = {
-  background: '#faf7f2',
-  surface: colors.divine.cream,
-  surfaceElevated: '#ffffff',
-  card: '#ffffff',
-  cardBorder: 'rgba(212, 164, 76, 0.12)',
-  textPrimary: '#1a1714',
-  textSecondary: '#6b6358',
-  textTertiary: '#9e9589',
-  accent: colors.gold[600],
-  accentLight: colors.gold[500],
+// ---------------------------------------------------------------------------
+// Light mode colors — warm cream backgrounds, brass accents
+// ---------------------------------------------------------------------------
+
+const lightColors: ThemeColors = {
+  background: '#FAF7F2',
+  surface: colors.primary[100],
+  surfaceElevated: colors.raw.white,
+  card: colors.raw.white,
+  cardBorder: colors.alpha.goldMedium,
+  textPrimary: '#1A1714',
+  textSecondary: '#6B6358',
+  textTertiary: '#9E9589',
+  accent: colors.primary[700],
+  accentLight: colors.primary[500],
+  accentMuted: colors.primary[900],
   tabBarBackground: 'rgba(250, 247, 242, 0.95)',
-  tabBarBorder: 'rgba(212, 164, 76, 0.1)',
+  tabBarBorder: colors.alpha.goldLight,
   miniPlayerBackground: 'rgba(255, 255, 255, 0.98)',
   inputBackground: 'rgba(0, 0, 0, 0.03)',
   inputBorder: 'rgba(0, 0, 0, 0.08)',
   divider: 'rgba(0, 0, 0, 0.06)',
-  overlay: 'rgba(0, 0, 0, 0.4)',
+  overlay: colors.alpha.blackMedium,
   statusBarStyle: 'dark-content',
+};
+
+// ---------------------------------------------------------------------------
+// Shared static tokens (identical across modes)
+// ---------------------------------------------------------------------------
+
+const sharedTokens = {
+  palette: colors,
+  fontFamily,
+  fontSize,
+  lineHeight,
+  letterSpacing,
+  textPresets,
+  spacing,
+  radii,
+  duration,
+  spring,
+} as const;
+
+// ---------------------------------------------------------------------------
+// Composed theme objects
+// ---------------------------------------------------------------------------
+
+export const darkTheme: Theme = {
+  colors: darkColors,
+  ...sharedTokens,
+};
+
+export const lightTheme: Theme = {
+  colors: lightColors,
+  ...sharedTokens,
 };

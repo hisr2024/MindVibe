@@ -2,20 +2,39 @@
  * @kiaanverse/ui — Shared UI components and design tokens
  */
 
-// Tokens
-export { colors } from './tokens/colors';
-export { typography, type TypographyVariant } from './tokens/typography';
-export { spacing } from './tokens/spacing';
+// ---------------------------------------------------------------------------
+// Tokens (raw primitives)
+// ---------------------------------------------------------------------------
+export { colors, type Colors } from './tokens/colors';
+export {
+  fontFamily,
+  fontSize,
+  lineHeight,
+  letterSpacing,
+  textPresets,
+  type TextPreset,
+} from './tokens/typography';
+export { spacing, type SpacingKey } from './tokens/spacing';
 export { radii } from './tokens/radii';
 export { shadows } from './tokens/shadows';
-export { motion, accessibility } from './tokens/motion';
+export { duration, spring, accessibility } from './tokens/motion';
 
-// Theme
-export { ThemeProvider, ThemeContext, type ThemeMode } from './theme/ThemeProvider';
+// ---------------------------------------------------------------------------
+// Theme (composed token system with dark/light mode)
+// ---------------------------------------------------------------------------
+export { ThemeProvider, ThemeContext } from './theme/ThemeProvider';
 export { useTheme } from './theme/useTheme';
-export { darkTheme, lightTheme, type ThemeColors } from './theme/themes';
+export { darkTheme, lightTheme } from './theme/themes';
+export type {
+  Theme,
+  ThemeColors,
+  ThemeContextValue,
+  ThemeMode,
+} from './theme/types';
 
+// ---------------------------------------------------------------------------
 // Components
+// ---------------------------------------------------------------------------
 export { Text } from './components/Text';
 export { Button } from './components/Button';
 export { Card } from './components/Card';
@@ -25,3 +44,13 @@ export { Divider } from './components/Divider';
 export { Avatar } from './components/Avatar';
 export { Badge } from './components/Badge';
 export { IconButton } from './components/IconButton';
+
+// Animated components
+export { GoldenButton, type GoldenButtonProps, type GoldenButtonVariant } from './components/GoldenButton';
+export { SakhaAvatar, type SakhaAvatarProps, type SakhaState } from './components/SakhaAvatar';
+export { VerseCard, type VerseCardProps, type VerseData } from './components/VerseCard';
+export { ChatBubble, type ChatBubbleProps, type ChatRole } from './components/ChatBubble';
+export { MoodRing, type MoodRingProps, type Mood } from './components/MoodRing';
+export { KarmaTree, type KarmaTreeProps, type KarmaNode } from './components/KarmaTree';
+export { GoldenHeader, type GoldenHeaderProps } from './components/GoldenHeader';
+export { LoadingMandala, type LoadingMandalaProps } from './components/LoadingMandala';

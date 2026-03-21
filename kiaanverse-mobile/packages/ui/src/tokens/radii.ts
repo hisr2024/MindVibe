@@ -1,14 +1,16 @@
 /**
  * Kiaanverse Border Radius Tokens
+ *
+ * From sharp containers to fully circular avatars.
  */
 
 export const radii = {
-  xs: 4,
-  sm: 8,
-  md: 12,
+  none: 0,
+  sm: 4,
+  md: 8,
   lg: 16,
-  xl: 20,
-  '2xl': 24,
-  sheet: 28,
+  xl: 24,
   full: 9999,
 } as const;
+
+export type Radii = typeof radii;

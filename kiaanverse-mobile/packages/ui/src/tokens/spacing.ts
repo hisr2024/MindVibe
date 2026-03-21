@@ -1,28 +1,34 @@
 /**
  * Kiaanverse Spacing Scale
  *
- * Base unit: 4px. All spacing values are multiples of 4
- * for consistent visual rhythm.
+ * 4px base grid. Every spatial value in the UI is a multiple of 4
+ * for consistent visual rhythm and alignment.
  */
 
 export const spacing = {
-  xxs: 2,
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  '2xl': 24,
-  '3xl': 32,
-  '4xl': 40,
-  '5xl': 48,
-  '6xl': 64,
-  /** Height of the bottom tab bar */
+  /** 4px — hairline gaps, icon padding */
+  xxs: 4,
+  /** 8px — tight element spacing */
+  xs: 8,
+  /** 12px — compact group padding */
+  sm: 12,
+  /** 16px — standard content padding */
+  md: 16,
+  /** 24px — section spacing */
+  lg: 24,
+  /** 32px — card padding, large gaps */
+  xl: 32,
+  /** 48px — section dividers */
+  xxl: 48,
+  /** 64px — page-level spacing */
+  xxxl: 64,
+
+  /** Layout constants */
   navHeight: 88,
-  /** Height of the mini vibe player */
   miniPlayerHeight: 64,
-  /** Combined height of nav + mini player */
   bottomInset: 152,
-  /** Header height */
   headerHeight: 56,
 } as const;
+
+export type Spacing = typeof spacing;
+export type SpacingKey = keyof typeof spacing;

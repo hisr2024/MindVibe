@@ -44,7 +44,7 @@ export function Screen({
   return (
     <SafeAreaView
       edges={edges}
-      style={[styles.container, { backgroundColor: theme.background }, style]}
+      style={[styles.container, { backgroundColor: theme.colors.background }, style]}
     >
       {content}
     </SafeAreaView>
@@ -61,6 +61,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing['3xl'],
+    paddingBottom: spacing.xl,
   },
 });

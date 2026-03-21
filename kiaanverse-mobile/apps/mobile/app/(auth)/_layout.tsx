@@ -1,8 +1,8 @@
 /**
  * Auth Group Layout
  *
- * Stack navigator for login and register screens.
- * No header, dark background.
+ * Stack navigator for login, register, and forgot-password screens.
+ * No header, dark background, slide transitions.
  */
 
 import React from 'react';
@@ -16,9 +16,13 @@ export default function AuthLayout(): React.JSX.Element {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: theme.background },
+        contentStyle: { backgroundColor: theme.colors.background },
         animation: 'slide_from_right',
       }}
-    />
+    >
+      <Stack.Screen name="login" />
+      <Stack.Screen name="register" />
+      <Stack.Screen name="forgot-password" />
+    </Stack>
   );
 }

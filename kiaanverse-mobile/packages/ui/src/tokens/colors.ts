@@ -1,74 +1,73 @@
 /**
  * Kiaanverse Color Tokens
  *
- * Ported from MindVibe mobile design system (mobile/react-native/src/theme/tokens.ts).
- * Single source of truth for all color values in the Kiaanverse app.
+ * Cosmic dark theme with golden accents. Every hex value in the entire
+ * design system lives here — components must NEVER use hardcoded colors.
+ *
+ * Palette philosophy: Deep navy backgrounds ground the user in stillness,
+ * gold accents invoke the divine, semantic colors guide without alarming.
  */
 
 export const colors = {
-  /** MindVibe brand palette */
-  mv: {
-    sunrise: '#d4a44c',
-    sunriseHighlight: '#f0c96d',
-    ocean: '#17b1a7',
-    oceanSky: '#6dd7f2',
-    aurora: '#ff8fb4',
-    auroraLilac: '#c2a5ff',
+  /** Primary gold scale — brand accent, CTAs, highlights */
+  primary: {
+    900: '#3D2B00',
+    700: '#8B6914',
+    500: '#D4A017',
+    300: '#F0C040',
+    100: '#FFF8DC',
   },
 
-  /** KIAAN brand colors */
-  kiaan: {
-    deep: '#0a0a12',
-    glow: '#e8b54a',
+  /** Background layers — darkest to lightest elevation */
+  background: {
+    dark: '#080B1A',
+    card: '#0D1229',
+    surface: '#131A3D',
   },
 
-  /** Spiritual mode accents */
-  modes: {
-    innerPeace: '#1fb8c0',
-    mindControl: '#1e3a8a',
-    selfKindness: '#e57ac5',
+  /** Text hierarchy — primary down to accent callouts */
+  text: {
+    primary: '#F5F0E8',
+    secondary: '#C8BFA8',
+    muted: '#7A7060',
+    accent: '#D4A017',
   },
 
-  /** Gold scale (primary accent) */
-  gold: {
-    50: '#fdf8ef',
-    100: '#f5e6c8',
-    200: '#f0d9a8',
-    300: '#e8c380',
-    400: '#e8b54a',
-    500: '#d4a44c',
-    600: '#c8943a',
-    700: '#a67a2e',
-    800: '#7a5a22',
-    900: '#4e3a16',
-  },
-
-  /** Divine palette (dark theme foundation) */
-  divine: {
-    black: '#050507',
-    void: '#0a0a12',
-    surface: '#0f0f18',
-    cream: '#f5f0e8',
-    muted: '#a89e8e',
-  },
-
-  /** Semantic colors */
+  /** Feedback colors — accessible on dark backgrounds */
   semantic: {
-    success: '#22c55e',
-    warning: '#f59e0b',
-    error: '#ef4444',
-    info: '#3b82f6',
+    success: '#3D8B5E',
+    error: '#C0392B',
+    warning: '#E67E22',
+    info: '#2980B9',
   },
 
-  /** Transparency utilities */
+  /** Sacred palette — ceremonial, celebration, spiritual states */
+  divine: {
+    aura: '#FFD700',
+    lotus: '#FF6B6B',
+    peacock: '#0F5E8C',
+    saffron: '#FF6600',
+  },
+
+  /** Transparency utilities for overlays, borders, glows */
   alpha: {
-    goldLight: 'rgba(212, 164, 76, 0.12)',
-    goldMedium: 'rgba(212, 164, 76, 0.25)',
-    goldStrong: 'rgba(212, 164, 76, 0.4)',
+    goldLight: 'rgba(212, 160, 23, 0.08)',
+    goldMedium: 'rgba(212, 160, 23, 0.16)',
+    goldStrong: 'rgba(212, 160, 23, 0.32)',
     blackLight: 'rgba(0, 0, 0, 0.2)',
-    blackMedium: 'rgba(0, 0, 0, 0.35)',
-    blackHeavy: 'rgba(0, 0, 0, 0.6)',
+    blackMedium: 'rgba(0, 0, 0, 0.4)',
+    blackHeavy: 'rgba(0, 0, 0, 0.7)',
     whiteLight: 'rgba(255, 255, 255, 0.05)',
-    whiteMedium: 'rgba(255, 255, 255, 0.12)',
+    whiteMedium: 'rgba(255, 255, 255, 0.10)',
+    whiteStrong: 'rgba(255, 255, 255, 0.20)',
+  },
+
+  /** Raw values — use only in theme definitions, not components */
+  raw: {
+    white: '#FFFFFF',
+    black: '#000000',
+    transparent: 'transparent',
   },
 } as const;
+
+export type Colors = typeof colors;

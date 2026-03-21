@@ -1,22 +1,15 @@
 /**
  * Kiaanverse Theme Provider
  *
- * Provides theme colors and mode to the component tree via React context.
- * Respects system color scheme when mode is 'system'.
+ * Wraps the app in a React context carrying the full typed theme object.
+ * Resolves 'system' mode via the Appearance API and memoises the theme
+ * to prevent unnecessary re-renders in the component tree.
  */
 
 import React, { createContext, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
-import { darkTheme, lightTheme, type ThemeColors } from './themes';
-
-export type ThemeMode = 'dark' | 'light' | 'system';
-
-interface ThemeContextValue {
-  theme: ThemeColors;
-  isDark: boolean;
-  mode: ThemeMode;
-  setMode: (mode: ThemeMode) => void;
-}
+import { darkTheme, lightTheme } from './themes';
+import type { ThemeContextValue, ThemeMode } from './types';
 
 export const ThemeContext = createContext<ThemeContextValue>({
   theme: darkTheme,
@@ -31,13 +24,16 @@ interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-export function ThemeProvider({ mode, onModeChange, children }: ThemeProviderProps): React.JSX.Element {
+export function ThemeProvider({
+  mode,
+  onModeChange,
+  children,
+}: ThemeProviderProps): React.JSX.Element {
   const systemScheme = useColorScheme();
 
   const value = useMemo<ThemeContextValue>(() => {
-    const resolvedDark = mode === 'system'
-      ? systemScheme !== 'light'
-      : mode === 'dark';
+    const resolvedDark =
+      mode === 'system' ? systemScheme !== 'light' : mode === 'dark';
 
     return {
       theme: resolvedDark ? darkTheme : lightTheme,
@@ -48,8 +44,6 @@ export function ThemeProvider({ mode, onModeChange, children }: ThemeProviderPro
   }, [mode, systemScheme, onModeChange]);
 
   return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 }

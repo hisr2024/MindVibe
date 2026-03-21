@@ -14,7 +14,7 @@ import {
 import { useTheme } from '../theme/useTheme';
 import { spacing } from '../tokens/spacing';
 import { radii } from '../tokens/radii';
-import { typography } from '../tokens/typography';
+import { textPresets } from '../tokens/typography';
 import { colors } from '../tokens/colors';
 
 interface InputProps extends Omit<TextInputProps, 'style'> {
@@ -30,11 +30,12 @@ export function Input({
   ...props
 }: InputProps): React.JSX.Element {
   const { theme } = useTheme();
+  const c = theme.colors;
 
   return (
     <View style={[styles.container, style]}>
       {label ? (
-        <Text style={[styles.label, { color: theme.textSecondary }]}>
+        <Text style={[styles.label, { color: c.textSecondary }]}>
           {label}
         </Text>
       ) : null}
@@ -42,13 +43,13 @@ export function Input({
         style={[
           styles.input,
           {
-            backgroundColor: theme.inputBackground,
-            borderColor: error ? colors.semantic.error : theme.inputBorder,
-            color: theme.textPrimary,
+            backgroundColor: c.inputBackground,
+            borderColor: error ? colors.semantic.error : c.inputBorder,
+            color: c.textPrimary,
           },
         ]}
-        placeholderTextColor={theme.textTertiary}
-        selectionColor={theme.accent}
+        placeholderTextColor={c.textTertiary}
+        selectionColor={c.accent}
         {...props}
       />
       {error ? (
@@ -63,10 +64,10 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   label: {
-    ...typography.label,
+    ...textPresets.label,
   },
   input: {
-    ...typography.body,
+    ...textPresets.body,
     borderWidth: 1,
     borderRadius: radii.md,
     paddingHorizontal: spacing.lg,
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   error: {
-    ...typography.caption,
+    ...textPresets.caption,
     color: colors.semantic.error,
   },
 });

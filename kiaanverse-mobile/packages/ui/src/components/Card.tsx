@@ -23,8 +23,8 @@ export function Card({ children, style }: CardProps): React.JSX.Element {
         styles.container,
         shadows.sm,
         {
-          backgroundColor: theme.card,
-          borderColor: theme.cardBorder,
+          backgroundColor: theme.colors.card,
+          borderColor: theme.colors.cardBorder,
         },
         style,
       ]}
