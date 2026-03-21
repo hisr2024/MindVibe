@@ -29,7 +29,7 @@ export function Text({
       style={[
         variantStyle,
         { color: color ?? theme.textPrimary },
-        align ? { textAlign: align } : undefined,
+        align && { textAlign: align },
         style,
       ]}
       {...props}

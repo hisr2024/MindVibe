@@ -51,7 +51,7 @@ export function Button({
       style={({ pressed }) => [
         styles.base,
         containerStyle,
-        pressed && !isDisabled ? styles.pressed : undefined,
+        pressed && !isDisabled && styles.pressed,
         style,
       ]}
       accessibilityRole="button"

@@ -64,7 +64,7 @@ export const api = {
       apiClient.get(`/api/journey-engine/templates/${templateId}`),
     list: (status?: string) =>
       apiClient.get('/api/journey-engine/journeys', {
-        params: status ? { status } : undefined,
+        ...(status !== undefined ? { params: { status } } : {}),
       }),
     get: (journeyId: string) =>
       apiClient.get(`/api/journey-engine/journeys/${journeyId}`),

@@ -3,6 +3,8 @@
     "strict": true,
     "noImplicitAny": true,
     "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",

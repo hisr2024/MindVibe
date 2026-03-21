@@ -28,8 +28,8 @@ export function IconButton({
       disabled={disabled}
       style={({ pressed }) => [
         styles.base,
-        pressed && !disabled ? styles.pressed : undefined,
-        disabled ? styles.disabled : undefined,
+        pressed && !disabled && styles.pressed,
+        disabled && styles.disabled,
         style,
       ]}
       accessibilityRole="button"
