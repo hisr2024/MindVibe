@@ -12,10 +12,11 @@
     "clean": "rm -rf .expo dist node_modules/.cache"
   },
   "dependencies": {
-    "@kiaanverse/ui": "workspace:*",
+    "@hookform/resolvers": "^5.2.2",
     "@kiaanverse/api": "workspace:*",
-    "@kiaanverse/store": "workspace:*",
     "@kiaanverse/i18n": "workspace:*",
+    "@kiaanverse/store": "workspace:*",
+    "@kiaanverse/ui": "workspace:*",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@tanstack/react-query": "^5.60.0",
     "axios": "^1.7.9",
@@ -35,6 +36,7 @@
     "lucide-react-native": "^0.468.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-hook-form": "^7.71.2",
     "react-native": "0.74.5",
     "react-native-gesture-handler": "~2.16.0",
     "react-native-reanimated": "~3.10.0",
@@ -42,6 +44,7 @@
     "react-native-screens": "3.31.1",
     "react-native-svg": "15.2.0",
     "react-native-web": "~0.19.10",
+    "zod": "^4.3.6",
     "zustand": "^5.0.11"
   },
   "devDependencies": {

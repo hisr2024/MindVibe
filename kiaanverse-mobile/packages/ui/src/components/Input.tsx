@@ -18,9 +18,9 @@ import { textPresets } from '../tokens/typography';
 import { colors } from '../tokens/colors';
 
 interface InputProps extends Omit<TextInputProps, 'style'> {
-  label?: string;
-  error?: string;
-  style?: ViewStyle;
+  label?: string | undefined;
+  error?: string | undefined;
+  style?: ViewStyle | undefined;
 }
 
 export function Input({

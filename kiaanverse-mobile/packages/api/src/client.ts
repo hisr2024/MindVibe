@@ -2,11 +2,16 @@
  * API Client Factory for Kiaanverse
  *
  * Axios-based client with:
- * - JWT auto-attach via request interceptor
+ * - JWT auto-attach via request interceptor (Authorization: Bearer header)
+ * - withCredentials: true for automatic cookie management (refresh_token)
  * - 401 refresh token rotation with concurrent request deduplication
  * - Exponential backoff retry for transient failures (408, 429, 502, 503, 504)
+ * - Auto-logout via onAuthFailure callback when refresh permanently fails
  *
- * Mirrors the pattern from mobile/react-native/src/services/apiClient.ts.
+ * Backend contract:
+ * - Access token: stored in SecureStore, sent via Authorization header
+ * - Refresh token: managed as httpOnly cookie by the native HTTP stack,
+ *   also stored in SecureStore as fallback (sent in request body to /api/auth/refresh)
  */
 
 import axios, {
@@ -15,7 +20,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios';
 import { API_CONFIG } from './config';
-import type { TokenManager } from './types';
+import type { TokenManager, RefreshResponse } from './types';
 
 // ---------------------------------------------------------------------------
 // Token Manager (pluggable — set by the app on startup)
@@ -30,6 +35,26 @@ let tokenManager: TokenManager = {
 
 export function setTokenManager(manager: TokenManager): void {
   tokenManager = manager;
+}
+
+// ---------------------------------------------------------------------------
+// Cookie Extraction Helper
+// ---------------------------------------------------------------------------
+
+/**
+ * Extract refresh_token from Set-Cookie header (best-effort).
+ * React Native may or may not expose this header depending on platform.
+ */
+function extractRefreshTokenFromHeaders(headers: Record<string, unknown>): string | null {
+  const setCookie = headers['set-cookie'];
+  if (!setCookie) return null;
+
+  const cookies = Array.isArray(setCookie) ? setCookie : [String(setCookie)];
+  for (const cookie of cookies) {
+    const match = /refresh_token=([^;]+)/.exec(String(cookie));
+    if (match?.[1]) return match[1];
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -58,13 +83,16 @@ function sleep(ms: number): Promise<void> {
 // ---------------------------------------------------------------------------
 
 interface RequestConfigWithRetry extends InternalAxiosRequestConfig {
-  _retryCount?: number;
+  _retryCount?: number | undefined;
+  _isRefreshRequest?: boolean | undefined;
 }
 
 function createApiClient(): AxiosInstance {
   const client = axios.create({
     baseURL: API_CONFIG.baseURL,
     timeout: API_CONFIG.timeout,
+    // Enable cookies so the native HTTP stack sends httpOnly refresh_token
+    withCredentials: true,
     headers: {
       'Content-Type': 'application/json',
       'X-Client': 'kiaanverse-mobile',
@@ -72,7 +100,7 @@ function createApiClient(): AxiosInstance {
     },
   });
 
-  // Request interceptor: attach JWT
+  // Request interceptor: attach JWT from SecureStore
   client.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
       const token = await tokenManager.getAccessToken();
@@ -103,6 +131,11 @@ function createApiClient(): AxiosInstance {
       const originalRequest = error.config as RequestConfigWithRetry | undefined;
       if (!originalRequest) return Promise.reject(error);
 
+      // Don't retry 401 on the refresh endpoint itself to avoid infinite loops
+      if (originalRequest._isRefreshRequest) {
+        return Promise.reject(error);
+      }
+
       // Handle 401 — token refresh
       if (error.response?.status === 401) {
         if (isRefreshing) {
@@ -119,30 +152,37 @@ function createApiClient(): AxiosInstance {
         isRefreshing = true;
 
         try {
-          const refreshToken = await tokenManager.getRefreshToken();
-          if (!refreshToken) {
-            await tokenManager.clearTokens();
-            return Promise.reject(error);
-          }
+          // Try to get refresh token from SecureStore (to send in body)
+          const storedRefreshToken = await tokenManager.getRefreshToken();
 
-          const refreshResponse = await axios.post<{
-            access_token: string;
-            refresh_token: string;
-          }>(
+          // Send refresh request — the httpOnly cookie is also sent automatically
+          // via withCredentials. We send the stored token in the body as a fallback.
+          const refreshResponse = await axios.post<RefreshResponse>(
             `${API_CONFIG.baseURL}/api/auth/refresh`,
-            { refresh_token: refreshToken },
+            storedRefreshToken ? { refresh_token: storedRefreshToken } : {},
+            { withCredentials: true },
           );
 
-          const { access_token, refresh_token: newRefresh } = refreshResponse.data;
-          await tokenManager.setTokens(access_token, newRefresh);
-          onRefreshed(access_token);
+          const newAccessToken = refreshResponse.data.access_token;
+
+          // Extract new refresh token: prefer body (if enabled), then Set-Cookie header
+          const newRefreshToken =
+            refreshResponse.data.refresh_token ??
+            extractRefreshTokenFromHeaders(refreshResponse.headers as Record<string, unknown>) ??
+            storedRefreshToken ?? // Keep existing if we can't extract the new one
+            '';
+
+          await tokenManager.setTokens(newAccessToken, newRefreshToken);
+          onRefreshed(newAccessToken);
 
           if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${access_token}`;
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           }
           return client(originalRequest);
         } catch {
+          // Refresh failed permanently — auto-logout
           await tokenManager.clearTokens();
+          tokenManager.onAuthFailure?.();
           return Promise.reject(error);
         } finally {
           isRefreshing = false;

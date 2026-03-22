@@ -5,6 +5,8 @@
 export { apiClient, setTokenManager } from './client';
 export { api } from './endpoints';
 export { API_CONFIG } from './config';
+export { authService, AuthError } from './auth/authService';
+export type { AuthErrorCode, RegisterData, LoginResult } from './auth/authService';
 
 // Types
 export type {
@@ -13,6 +15,10 @@ export type {
   AuthTokens,
   AuthResponse,
   ProfileResponse,
+  LoginResponse,
+  SignupResponse,
+  MeResponse,
+  RefreshResponse,
   GitaVerse,
   GitaChapter,
   MoodEntry,

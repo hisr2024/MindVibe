@@ -15,7 +15,8 @@
   "peerDependencies": {
     "react": "18.2.0",
     "@kiaanverse/api": "workspace:*",
-    "expo-secure-store": "~13.0.0"
+    "expo-secure-store": "~13.0.0",
+    "expo-local-authentication": "~14.0.0"
   },
   "devDependencies": {
     "@types/react": "~18.2.0",
