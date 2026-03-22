@@ -54,3 +54,11 @@ export { MoodRing, type MoodRingProps, type Mood } from './components/MoodRing';
 export { KarmaTree, type KarmaTreeProps, type KarmaNode } from './components/KarmaTree';
 export { GoldenHeader, type GoldenHeaderProps } from './components/GoldenHeader';
 export { LoadingMandala, type LoadingMandalaProps } from './components/LoadingMandala';
+export { VoiceWaveform, type VoiceWaveformProps } from './components/VoiceWaveform';
+
+// ---------------------------------------------------------------------------
+// Hooks (audio / voice)
+// ---------------------------------------------------------------------------
+export { useAudioPlayer } from './hooks/useAudioPlayer';
+export { useSpeechOutput } from './hooks/useSpeechOutput';
+export { useVoiceRecorder, type TranscribeFn, type TranscriptionResult } from './hooks/useVoiceRecorder';

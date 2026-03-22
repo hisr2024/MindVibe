@@ -100,6 +100,16 @@ export const api = {
       ),
   },
 
+  /** Voice input / transcription */
+  voice: {
+    transcribe: (formData: FormData) =>
+      apiClient.post<{ transcript: string; confidence: number }>(
+        '/api/voice/transcribe',
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } },
+      ),
+  },
+
   /** User profile */
   profile: {
     me: () => apiClient.get('/api/auth/me'),
