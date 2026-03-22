@@ -79,21 +79,8 @@ elif _is_production:
         "https://api-staging.kiaanverse.com",
     ]
 else:
-    ALLOWED_ORIGINS = [
-        "https://mind-vibe-universal.vercel.app",
-        "https://www.kiaanverse.com",
-        "https://kiaanverse.com",
-        # Web development
-        "http://localhost:3000",
-        "http://localhost:3001",
-        # Mobile API domains
-        "https://api.kiaanverse.com",
-        "https://api-staging.kiaanverse.com",
-        # Expo development (React Native)
-        "http://localhost:8081",
-        "http://localhost:19006",
-        "exp://localhost:8081",
-    ]
+    # Development: allow all origins for mobile emulators & web dev servers
+    ALLOWED_ORIGINS = ["*"]
 
 startup_logger.info(f"CORS allowed origins: {ALLOWED_ORIGINS}")
 
@@ -106,6 +93,7 @@ ALLOWED_HEADERS = [
     "user-agent",
     "x-requested-with",
     "x-csrf-token",
+    "x-request-id",
     "cache-control",
     "x-client",
     "x-client-version",
@@ -183,6 +171,44 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
+# Standardized error handler for Pydantic validation errors
+from fastapi.exceptions import RequestValidationError
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Return { detail, code, field? } for validation errors."""
+    errors = exc.errors()
+    first = errors[0] if errors else {}
+    field = ".".join(str(loc) for loc in first.get("loc", [])) if first.get("loc") else None
+    return JSONResponse(
+        status_code=422,
+        content={
+            "detail": first.get("msg", "Validation error"),
+            "code": "VALIDATION_ERROR",
+            **({"field": field} if field else {}),
+        },
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Normalize all HTTPException responses to { detail, code, field? }."""
+    detail_raw = exc.detail
+
+    # Already in the standard format (dict with 'code')
+    if isinstance(detail_raw, dict) and "code" in detail_raw:
+        return JSONResponse(status_code=exc.status_code, content=detail_raw)
+
+    # Plain string detail — wrap it
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "detail": str(detail_raw) if detail_raw else "An error occurred",
+            "code": "UNKNOWN",
+        },
+    )
+
+
 # Global exception handler to prevent unhandled 500 errors
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
@@ -214,13 +240,12 @@ async def global_exception_handler(request: Request, exc: Exception):
         "Access-Control-Allow-Headers": ", ".join(ALLOWED_HEADERS),
     }
 
-    # Return 500 for unhandled server errors (not 503 which implies temporary unavailability)
-    # 503 is reserved for migration failures and intentional maintenance modes
+    # Standardized error shape: { detail, code, field? }
     return JSONResponse(
         status_code=500,
         content={
-            "error": "internal_server_error",
             "detail": "An unexpected error occurred. Please try again.",
+            "code": "INTERNAL_ERROR",
         },
         headers=cors_headers,
     )
@@ -229,9 +254,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=ALLOWED_HEADERS,
-    # Explicitly list headers instead of wildcard (required with credentials)
     expose_headers=[
         "content-type",
         "content-length",
@@ -540,6 +564,15 @@ try:
     startup_logger.info("✅ [SUCCESS] Profile router loaded")
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Profile router: {e}")
+
+# Load User Mobile router (push token)
+startup_logger.info("\n[User Mobile] Attempting to import User Mobile router...")
+try:
+    from backend.routes.user_mobile import router as user_mobile_router
+    app.include_router(user_mobile_router)
+    startup_logger.info("✅ [SUCCESS] User Mobile router loaded")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load User Mobile router: {e}")
 
 # Load Karma Footprint router
 startup_logger.info("\n[Karma Footprint] Attempting to import Karma Footprint router...")

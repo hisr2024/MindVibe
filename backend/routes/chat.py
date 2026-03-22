@@ -590,6 +590,11 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
             # Use KIAAN core streaming service
             from backend.services.kiaan_core import kiaan_core
 
+            import json as _json
+
+            # Collect verse references from KIAAN core for final chunk
+            collected_verse_refs: list[str] = []
+
             async for chunk in kiaan_core.get_kiaan_response_streaming(
                 message=stream_clean_message,
                 user_id=stream_user_id,
@@ -600,9 +605,17 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
                 # Restore any PII placeholders in the chunk
                 if stream_pii_mapping:
                     chunk = pii_redactor.restore(chunk, stream_pii_mapping)
-                # Escape newlines for SSE format
-                escaped_chunk = chunk.replace('\n', '\\n')
-                yield f"data: {escaped_chunk}\n\n"
+
+                # Extract verse references (BG X.Y pattern) from chunks
+                import re
+                refs = re.findall(r'BG\s*\d+\.\d+', chunk)
+                for ref in refs:
+                    normalized = ref.replace(" ", "")
+                    if normalized not in collected_verse_refs:
+                        collected_verse_refs.append(normalized)
+
+                # Emit structured JSON chunk for mobile clients
+                yield f"data: {_json.dumps({'word': chunk, 'done': False})}\n\n"
 
             # Increment KIAAN usage after successful streaming response
             if SUBSCRIPTION_ENABLED and stream_user_id:
@@ -611,12 +624,14 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
                 except Exception as usage_err:
                     logger.warning(f"Failed to increment usage for streaming: {usage_err}")
 
-            yield "data: [DONE]\n\n"
+            # Final chunk with verse references
+            yield f"data: {_json.dumps({'done': True, 'verseRefs': collected_verse_refs})}\n\n"
 
         except Exception as e:
             logger.error(f"Streaming error: {e}")
-            yield "data: I'm here for you. Let's try again. 💙\n\n"
-            yield "data: [DONE]\n\n"
+            import json as _json_err
+            yield f"data: {_json_err.dumps({'word': 'I am here for you. Let us try again.', 'done': False})}\n\n"
+            yield f"data: {_json_err.dumps({'done': True, 'verseRefs': []})}\n\n"
 
     return StreamingResponse(
         generate_stream(),
