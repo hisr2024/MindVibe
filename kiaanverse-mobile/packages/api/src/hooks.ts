@@ -76,7 +76,14 @@ export function useGitaChapters(): UseQueryResult<GitaChapter[]> {
     queryKey: queryKeys.gitaChapters,
     queryFn: async () => {
       const { data } = await api.gita.chapters();
-      return data as GitaChapter[];
+      // Backend returns {chapter, name, summary, verse_count} — transform to frontend GitaChapter shape
+      const raw = data as Array<{ chapter: number; name: string; summary: string; verse_count: number }>;
+      return raw.map((ch): GitaChapter => ({
+        id: ch.chapter,
+        title: ch.name,
+        versesCount: ch.verse_count,
+        summary: ch.summary,
+      }));
     },
     staleTime: 1000 * 60 * 60, // Chapters rarely change — cache 1 hour
   });
@@ -87,7 +94,15 @@ export function useGitaChapter(chapterId: number): UseQueryResult<ChapterDetail>
     queryKey: queryKeys.gitaChapter(chapterId),
     queryFn: async () => {
       const { data } = await api.gita.chapter(chapterId);
-      return data as ChapterDetail;
+      // Backend returns snake_case — transform to match frontend ChapterDetail shape
+      const raw = data as { chapter: number; name: string; summary: string; verse_count: number; verses: GitaVerse[]; themes: string[] };
+      return {
+        id: raw.chapter,
+        title: raw.name,
+        versesCount: raw.verse_count,
+        summary: raw.summary,
+        verses: raw.verses ?? [],
+      } as ChapterDetail;
     },
     staleTime: 1000 * 60 * 60,
   });
@@ -98,7 +113,17 @@ export function useGitaVerse(chapter: number, verse: number): UseQueryResult<Git
     queryKey: queryKeys.gitaVerse(chapter, verse),
     queryFn: async () => {
       const { data } = await api.gita.verse(chapter, verse);
-      return data as GitaVerse;
+      // Backend returns VerseResponse { verse: VerseDetail, related_verses: [...] } — extract and transform
+      const raw = data as { verse: { chapter: number; verse: number; verse_id: string; sanskrit: string; english: string; hindi: string; theme: string } };
+      const v = raw.verse;
+      return {
+        id: v.verse_id,
+        chapter: v.chapter,
+        verse: v.verse,
+        sanskrit: v.sanskrit,
+        transliteration: '',
+        translation: v.english,
+      } as GitaVerse;
     },
     staleTime: 1000 * 60 * 60,
   });
@@ -109,7 +134,17 @@ export function useGitaSearch(query: string): UseQueryResult<GitaVerse[]> {
     queryKey: queryKeys.gitaSearch(query),
     queryFn: async () => {
       const { data } = await api.gita.search(query);
-      return data as GitaVerse[];
+      // Backend returns SearchResponse { results: SearchResult[] } — extract and transform
+      const raw = data as { results?: Array<{ verse: { chapter: number; verse: number; verse_id: string; sanskrit: string; english: string; hindi: string; theme: string } }> };
+      if (!raw.results) return [];
+      return raw.results.map((r): GitaVerse => ({
+        id: r.verse.verse_id,
+        chapter: r.verse.chapter,
+        verse: r.verse.verse,
+        sanskrit: r.verse.sanskrit,
+        transliteration: '',
+        translation: r.verse.english,
+      }));
     },
     enabled: query.length >= 2,
   });

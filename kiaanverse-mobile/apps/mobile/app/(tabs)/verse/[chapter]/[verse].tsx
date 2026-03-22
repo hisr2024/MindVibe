@@ -5,7 +5,7 @@
  * - Tabs: Translation | Word-by-Word | Commentary
  * - Large Sanskrit text with golden accent
  * - Audio pronunciation via expo-speech
- * - Share via expo-sharing
+ * - Share via React Native Share API
  * - "Ask Sakha" navigation to chat with verse context
  * - Bookmark/favorite via Zustand gitaStore
  * - Prev/next verse navigation (cross-chapter)
@@ -16,11 +16,10 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, ScrollView, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, ScrollView, StyleSheet, Pressable, Share } from 'react-native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Speech from 'expo-speech';
-import * as Sharing from 'expo-sharing';
 import {
   Heart,
   Volume2,
@@ -34,7 +33,6 @@ import {
   Text,
   GoldenHeader,
   LoadingMandala,
-  IconButton,
   colors,
   spacing,
   radii,
@@ -130,7 +128,7 @@ function ActionBar({
   const { theme } = useTheme();
   const c = theme.colors;
   const router = useRouter();
-  const isBookmarked = useGitaStore((s) => s.isBookmarked(verseId));
+  const isBookmarked = useGitaStore((s) => s.bookmarkedVerseIds.includes(verseId));
   const toggleBookmark = useGitaStore((s) => s.toggleBookmark);
 
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -169,13 +167,13 @@ function ActionBar({
       '— From Kiaanverse',
     ].join('\n');
 
-    const canShare = await Sharing.isAvailableAsync();
-    if (canShare) {
-      // expo-sharing shares files; for text, use RN Share instead
-      // Fall back to clipboard or alert
-      Alert.alert('Share Verse', shareText);
-    } else {
-      Alert.alert('Share Verse', shareText);
+    try {
+      await Share.share({
+        message: shareText,
+        title: `Bhagavad Gita ${chapter}.${verse}`,
+      });
+    } catch {
+      // User cancelled or share failed — no action needed
     }
   }, [sanskrit, english, chapter, verse]);
 
@@ -385,7 +383,7 @@ export default function VerseDetailScreen(): React.JSX.Element {
   const { data: translations } = useGitaTranslations(verseId);
 
   // Bookmark state for header
-  const isBookmarked = useGitaStore((s) => s.isBookmarked(verseId));
+  const isBookmarked = useGitaStore((s) => s.bookmarkedVerseIds.includes(verseId));
   const toggleBookmark = useGitaStore((s) => s.toggleBookmark);
 
   // Bookmark icon for header right action

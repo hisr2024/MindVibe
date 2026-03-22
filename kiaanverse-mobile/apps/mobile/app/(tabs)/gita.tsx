@@ -8,7 +8,7 @@
  * - Loading, error, and empty states
  */
 
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { View, FlatList, StyleSheet, Pressable } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Search, BookOpen, Sparkles } from 'lucide-react-native';
@@ -16,10 +16,8 @@ import { useRouter } from 'expo-router';
 import {
   Screen,
   Text,
-  Card,
   Input,
   GoldenHeader,
-  VerseCard,
   LoadingMandala,
   colors,
   spacing,
@@ -51,7 +49,18 @@ function VerseOfTheDay(): React.JSX.Element | null {
   const { theme } = useTheme();
   const c = theme.colors;
 
-  const { chapter, verse } = useGitaStore((s) => s.getVerseOfTheDay)();
+  // Refresh verse-of-the-day in useEffect (not during render) to avoid set() side effects
+  const refreshVerseOfTheDay = useGitaStore((s) => s.refreshVerseOfTheDay);
+  useEffect(() => { refreshVerseOfTheDay(); }, [refreshVerseOfTheDay]);
+
+  // Read the cached verse-of-the-day from state (pure selector, no side effects)
+  const vodChapter = useGitaStore((s) => s.vodChapter);
+  const vodVerse = useGitaStore((s) => s.vodVerse);
+
+  // Fallback to chapter 2, verse 47 (iconic verse) before first refresh
+  const chapter = vodChapter ?? 2;
+  const verse = vodVerse ?? 47;
+
   const { data, isLoading } = useGitaVerseDetail(chapter, verse);
 
   if (isLoading) {

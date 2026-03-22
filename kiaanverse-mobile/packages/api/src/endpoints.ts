@@ -37,7 +37,7 @@ export const api = {
     verse: (chapter: number, verse: number) =>
       apiClient.get(`/api/gita/verses/${chapter}/${verse}`),
     search: (query: string) =>
-      apiClient.get('/api/gita/search', { params: { q: query } }),
+      apiClient.get('/api/gita/search', { params: { keyword: query } }),
     /** Full search with pagination and filters */
     searchFull: (keyword: string, page?: number, pageSize?: number) =>
       apiClient.get('/api/gita/search', {

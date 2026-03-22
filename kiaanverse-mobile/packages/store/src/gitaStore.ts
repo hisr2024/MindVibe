@@ -29,12 +29,8 @@ interface GitaState {
 interface GitaActions {
   /** Toggle a verse bookmark on/off */
   toggleBookmark: (verseId: string) => void;
-  /** Check if a verse is bookmarked */
-  isBookmarked: (verseId: string) => boolean;
-  /** Get all bookmarked verse IDs */
-  getBookmarks: () => string[];
-  /** Get or generate verse-of-the-day. Returns { chapter, verse }. */
-  getVerseOfTheDay: () => { chapter: number; verse: number };
+  /** Initialize verse-of-the-day if stale. Call from useEffect, not during render. */
+  refreshVerseOfTheDay: () => void;
   /** Clear all bookmarks */
   clearBookmarks: () => void;
 }
@@ -79,27 +75,13 @@ export const useGitaStore = create<GitaState & GitaActions>()(
         });
       },
 
-      isBookmarked: (verseId: string) => {
-        return get().bookmarkedVerseIds.includes(verseId);
-      },
-
-      getBookmarks: () => {
-        return get().bookmarkedVerseIds;
-      },
-
-      getVerseOfTheDay: () => {
-        const { vodChapter, vodVerse, vodDate } = get();
+      refreshVerseOfTheDay: () => {
+        const { vodDate } = get();
         const today = todayString();
+        if (vodDate === today) return; // Already fresh
 
-        // Return cached if same day
-        if (vodDate === today && vodChapter !== null && vodVerse !== null) {
-          return { chapter: vodChapter, verse: vodVerse };
-        }
-
-        // Generate new verse-of-the-day
         const { chapter, verse } = pickRandomVerse();
         set({ vodChapter: chapter, vodVerse: verse, vodDate: today });
-        return { chapter, verse };
       },
 
       clearBookmarks: () => set({ bookmarkedVerseIds: [] }),
