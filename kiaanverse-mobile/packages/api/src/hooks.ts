@@ -5,9 +5,20 @@
  * caching, refetching, and background updates automatically.
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type UseQueryResult, type UseMutationResult } from '@tanstack/react-query';
 import { api } from './endpoints';
 import type { GitaChapter, GitaVerse, Journey, JourneyTemplate, MoodCreatePayload } from './types';
+
+// ---------------------------------------------------------------------------
+// Shared return types for declaration emit compatibility
+// ---------------------------------------------------------------------------
+
+type ProfileData = { id: string; email: string; name?: string; locale?: string; subscription_tier?: string; created_at: string };
+type ChapterDetail = GitaChapter & { verses: GitaVerse[] };
+type DashboardData = { activeJourneys: Journey[]; completedCount: number; streakDays: number };
+type StepResult = { success: boolean; progress: number };
+type MoodResult = { id: number; kiaanResponse?: string };
+type ChatResult = { response: string; session_id: string };
 
 // ---------------------------------------------------------------------------
 // Query Keys
@@ -33,12 +44,12 @@ export const queryKeys = {
 // Profile
 // ---------------------------------------------------------------------------
 
-export function useProfile() {
+export function useProfile(): UseQueryResult<ProfileData> {
   return useQuery({
     queryKey: queryKeys.profile,
     queryFn: async () => {
       const { data } = await api.profile.me();
-      return data as { id: string; email: string; name?: string; locale?: string; subscription_tier?: string; created_at: string };
+      return data as ProfileData;
     },
   });
 }
@@ -47,7 +58,7 @@ export function useProfile() {
 // Gita
 // ---------------------------------------------------------------------------
 
-export function useGitaChapters() {
+export function useGitaChapters(): UseQueryResult<GitaChapter[]> {
   return useQuery({
     queryKey: queryKeys.gitaChapters,
     queryFn: async () => {
@@ -58,18 +69,18 @@ export function useGitaChapters() {
   });
 }
 
-export function useGitaChapter(chapterId: number) {
+export function useGitaChapter(chapterId: number): UseQueryResult<ChapterDetail> {
   return useQuery({
     queryKey: queryKeys.gitaChapter(chapterId),
     queryFn: async () => {
       const { data } = await api.gita.chapter(chapterId);
-      return data as GitaChapter & { verses: GitaVerse[] };
+      return data as ChapterDetail;
     },
     staleTime: 1000 * 60 * 60,
   });
 }
 
-export function useGitaVerse(chapter: number, verse: number) {
+export function useGitaVerse(chapter: number, verse: number): UseQueryResult<GitaVerse> {
   return useQuery({
     queryKey: queryKeys.gitaVerse(chapter, verse),
     queryFn: async () => {
@@ -80,7 +91,7 @@ export function useGitaVerse(chapter: number, verse: number) {
   });
 }
 
-export function useGitaSearch(query: string) {
+export function useGitaSearch(query: string): UseQueryResult<GitaVerse[]> {
   return useQuery({
     queryKey: queryKeys.gitaSearch(query),
     queryFn: async () => {
@@ -95,7 +106,7 @@ export function useGitaSearch(query: string) {
 // Journeys
 // ---------------------------------------------------------------------------
 
-export function useJourneyTemplates() {
+export function useJourneyTemplates(): UseQueryResult<JourneyTemplate[]> {
   return useQuery({
     queryKey: queryKeys.journeyTemplates,
     queryFn: async () => {
@@ -106,7 +117,7 @@ export function useJourneyTemplates() {
   });
 }
 
-export function useJourneys(status?: string) {
+export function useJourneys(status?: string): UseQueryResult<Journey[]> {
   return useQuery({
     queryKey: queryKeys.journeys(status),
     queryFn: async () => {
@@ -116,7 +127,7 @@ export function useJourneys(status?: string) {
   });
 }
 
-export function useJourney(journeyId: string) {
+export function useJourney(journeyId: string): UseQueryResult<Journey> {
   return useQuery({
     queryKey: queryKeys.journey(journeyId),
     queryFn: async () => {
@@ -127,12 +138,12 @@ export function useJourney(journeyId: string) {
   });
 }
 
-export function useJourneyDashboard() {
+export function useJourneyDashboard(): UseQueryResult<DashboardData> {
   return useQuery({
     queryKey: queryKeys.journeyDashboard,
     queryFn: async () => {
       const { data } = await api.journeys.dashboard();
-      return data as { activeJourneys: Journey[]; completedCount: number; streakDays: number };
+      return data as DashboardData;
     },
   });
 }
@@ -141,7 +152,7 @@ export function useJourneyDashboard() {
 // Mutations
 // ---------------------------------------------------------------------------
 
-export function useStartJourney() {
+export function useStartJourney(): UseMutationResult<Journey, Error, string> {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (templateId: string) => {
@@ -154,12 +165,12 @@ export function useStartJourney() {
   });
 }
 
-export function useCompleteStep() {
+export function useCompleteStep(): UseMutationResult<StepResult, Error, { journeyId: string; dayIndex: number }> {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ journeyId, dayIndex }: { journeyId: string; dayIndex: number }) => {
       const { data } = await api.journeys.completeStep(journeyId, dayIndex);
-      return data as { success: boolean; progress: number };
+      return data as StepResult;
     },
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.journey(variables.journeyId) });
@@ -168,21 +179,21 @@ export function useCompleteStep() {
   });
 }
 
-export function useCreateMood() {
+export function useCreateMood(): UseMutationResult<MoodResult, Error, MoodCreatePayload> {
   return useMutation({
     mutationFn: async (mood: MoodCreatePayload) => {
       const { data } = await api.moods.create(mood);
-      return data as { id: number; kiaanResponse?: string };
+      return data as MoodResult;
     },
   });
 }
 
-export function useSendChatMessage() {
+export function useSendChatMessage(): UseMutationResult<ChatResult, Error, { message: string; sessionId?: string }> {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ message, sessionId }: { message: string; sessionId?: string }) => {
       const { data } = await api.chat.send(message, sessionId);
-      return data as { response: string; session_id: string };
+      return data as ChatResult;
     },
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.chatHistory(variables.sessionId) });
