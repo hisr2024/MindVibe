@@ -144,9 +144,13 @@ describe('MicroPractice', () => {
     })
   })
 
-  it('renders nothing for an out-of-range day', () => {
+  it('renders nothing for an out-of-range day', async () => {
     const { container } = render(<MicroPractice journeyId="j1" day={99} />)
-    expect(container.innerHTML).toBe('')
+    // Wait for the async useEffect (getPracticeState) to settle so React
+    // doesn't warn about state updates on an unmounted component.
+    await waitFor(() => {
+      expect(container.innerHTML).toBe('')
+    })
   })
 
   it('shows different practice text for day 14', async () => {
