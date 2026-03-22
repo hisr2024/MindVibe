@@ -32,12 +32,17 @@ import {
 } from '@/services/journeyService';
 
 describe('JourneyService', () => {
+  let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
     vi.clearAllMocks();
     localStorageMock.getItem.mockReturnValue('test-user-id');
+    // Suppress expected console.warn noise from CSRF token checks and retry logging
+    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterEach(() => {
+    consoleWarnSpy.mockRestore();
     vi.resetAllMocks();
   });
 
