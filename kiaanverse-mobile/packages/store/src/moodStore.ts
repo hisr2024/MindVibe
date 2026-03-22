@@ -6,7 +6,12 @@
  */
 
 import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 import type { SpiritualMood } from '@kiaanverse/api';
+
+// React Native/Expo global — always defined at runtime
+declare const __DEV__: boolean;
 
 /** 8 spiritual mood states with metadata. */
 export const MOOD_STATES: ReadonlyArray<{
@@ -117,17 +122,40 @@ const initialState: MoodStoreState = {
   lastLogDate: null,
 };
 
-export const useMoodStore = create<MoodStoreState & MoodStoreActions>((set, _get) => ({
-  ...initialState,
+export const useMoodStore = create<MoodStoreState & MoodStoreActions>()(
+  devtools(
+    immer((set) => ({
+      ...initialState,
 
-  selectMood: (mood) => set({ selectedMood: mood }),
+      selectMood: (mood: SpiritualMood) => {
+        set((state) => {
+          state.selectedMood = mood;
+        });
+      },
 
-  setNote: (note) => set({ note }),
+      setNote: (note: string) => {
+        set((state) => {
+          state.note = note;
+        });
+      },
 
-  markLogged: () => {
-    const today = new Date().toISOString().slice(0, 10);
-    set({ loggedToday: true, lastLogDate: today, selectedMood: null, note: '' });
-  },
+      markLogged: () => {
+        const today = new Date().toISOString().slice(0, 10);
+        set((state) => {
+          state.loggedToday = true;
+          state.lastLogDate = today;
+          state.selectedMood = null;
+          state.note = '';
+        });
+      },
 
-  reset: () => set(initialState),
-}));
+      reset: () => {
+        set(() => ({ ...initialState }));
+      },
+    })),
+    {
+      name: 'MoodStore',
+      enabled: typeof __DEV__ !== 'undefined' && __DEV__,
+    },
+  ),
+);

@@ -12,6 +12,11 @@
  */
 
 import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
+
+// React Native/Expo global — always defined at runtime
+declare const __DEV__: boolean;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -60,33 +65,56 @@ const initialState: OnboardingState = {
   isComplete: false,
 };
 
-export const useOnboardingStore = create<OnboardingState & OnboardingActions>((set, get) => ({
-  ...initialState,
+export const useOnboardingStore = create<OnboardingState & OnboardingActions>()(
+  devtools(
+    immer((set, get) => ({
+      ...initialState,
 
-  setAnswer: (key, value) =>
-    set({ answers: { ...get().answers, [key]: value } }),
+      setAnswer: (key, value) => {
+        set((state) => {
+          (state.answers as Record<string, unknown>)[key] = value;
+        });
+      },
 
-  nextStep: () => {
-    const { currentStep } = get();
-    if (currentStep < TOTAL_STEPS - 1) {
-      set({ currentStep: currentStep + 1 });
-    }
-  },
+      nextStep: () => {
+        const { currentStep } = get();
+        if (currentStep < TOTAL_STEPS - 1) {
+          set((state) => {
+            state.currentStep = currentStep + 1;
+          });
+        }
+      },
 
-  prevStep: () => {
-    const { currentStep } = get();
-    if (currentStep > 0) {
-      set({ currentStep: currentStep - 1 });
-    }
-  },
+      prevStep: () => {
+        const { currentStep } = get();
+        if (currentStep > 0) {
+          set((state) => {
+            state.currentStep = currentStep - 1;
+          });
+        }
+      },
 
-  goToStep: (step) => {
-    if (step >= 0 && step < TOTAL_STEPS) {
-      set({ currentStep: step });
-    }
-  },
+      goToStep: (step: number) => {
+        if (step >= 0 && step < TOTAL_STEPS) {
+          set((state) => {
+            state.currentStep = step;
+          });
+        }
+      },
 
-  complete: () => set({ isComplete: true }),
+      complete: () => {
+        set((state) => {
+          state.isComplete = true;
+        });
+      },
 
-  reset: () => set(initialState),
-}));
+      reset: () => {
+        set(() => ({ ...initialState }));
+      },
+    })),
+    {
+      name: 'OnboardingStore',
+      enabled: typeof __DEV__ !== 'undefined' && __DEV__,
+    },
+  ),
+);
