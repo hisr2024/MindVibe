@@ -216,7 +216,7 @@ export function JourneysScreen() {
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SectionList
         sections={sections}
-        keyExtractor={(item, index) => (item.id ?? item.journey_id ?? String(index)) as string}
+        keyExtractor={(item) => (item.id ?? item.journey_id ?? item.title) as string}
         renderItem={({ item, section }) =>
           section.type === 'active'
             ? renderActiveJourney(item as Record<string, unknown>)

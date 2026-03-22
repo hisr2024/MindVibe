@@ -18,11 +18,11 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  FlatList,
   ActivityIndicator,
   Modal,
   ScrollView,
 } from 'react-native';
+import { OptimizedList } from '@components/common/OptimizedList';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 
@@ -215,9 +215,9 @@ export function GitaBrowserScreen() {
 
       {/* Search Results */}
       {searchQuery.length >= 3 ? (
-        <FlatList
+        <OptimizedList<Verse>
           data={searchResults?.results ?? searchResults ?? []}
-          keyExtractor={(item: Verse, i) => `search-${item.chapter}-${item.verse}-${i}`}
+          keyExtractor={(item: Verse) => `search-${item.chapter}-${item.verse}`}
           renderItem={({ item }: { item: Verse }) => (
             <TouchableOpacity
               style={[styles.searchResultCard, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}
@@ -244,7 +244,7 @@ export function GitaBrowserScreen() {
         />
       ) : (
         /* Chapter List */
-        <FlatList
+        <OptimizedList<Chapter>
           data={chapters}
           keyExtractor={(item) => String(item.chapter_number ?? item.id)}
           renderItem={renderChapter}

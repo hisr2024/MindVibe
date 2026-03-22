@@ -12,7 +12,7 @@
  * The KIAAN AI Ecosystem is consumed read-only for insights.
  */
 
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -60,7 +60,7 @@ const QUICK_MOODS: QuickMoodOption[] = [
 // Screen Component
 // ---------------------------------------------------------------------------
 
-export function HomeScreen() {
+export const HomeScreen = memo(function HomeScreen() {
   const insets = useSafeAreaInsets();
   const theme = darkTheme;
   const greeting = getGreeting();
@@ -196,7 +196,7 @@ export function HomeScreen() {
       <View style={{ height: spacing.bottomInset + spacing['3xl'] }} />
     </ScrollView>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
 // Styles

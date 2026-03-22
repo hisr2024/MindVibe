@@ -16,46 +16,53 @@
     "bundle:ios": "react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/main.jsbundle"
   },
   "dependencies": {
-    "react": "18.3.1",
-    "react-native": "0.76.0",
-    "@react-navigation/native": "^7.0.0",
-    "@react-navigation/bottom-tabs": "^7.0.0",
-    "@react-navigation/native-stack": "^7.0.0",
-    "react-native-screens": "^4.0.0",
-    "react-native-safe-area-context": "^4.12.0",
-    "react-native-gesture-handler": "^2.20.0",
-    "react-native-reanimated": "^3.16.0",
-    "react-native-track-player": "^4.1.0",
     "@nozbe/watermelondb": "^0.27.0",
-    "react-native-keychain": "^9.2.0",
-    "react-native-mmkv": "^3.1.0",
     "@react-native-firebase/app": "^21.0.0",
     "@react-native-firebase/messaging": "^21.0.0",
+    "@react-navigation/bottom-tabs": "^7.0.0",
+    "@react-navigation/native": "^7.0.0",
+    "@react-navigation/native-stack": "^7.0.0",
+    "@shopify/flash-list": "^2.3.0",
     "@tanstack/react-query": "^5.60.0",
-    "zustand": "^5.0.11",
     "axios": "^1.7.9",
-    "moti": "^0.29.0",
-    "lucide-react-native": "^0.468.0",
     "date-fns": "^2.30.0",
-    "react-native-svg": "^15.8.0"
+    "expo-image": "^55.0.6",
+    "lucide-react-native": "^0.468.0",
+    "react": "18.3.1",
+    "react-native": "0.76.0",
+    "react-native-gesture-handler": "^2.20.0",
+    "react-native-keychain": "^9.2.0",
+    "react-native-mmkv": "^3.1.0",
+    "react-native-reanimated": "^3.16.0",
+    "react-native-safe-area-context": "^4.12.0",
+    "react-native-screens": "^4.0.0",
+    "react-native-svg": "^15.8.0",
+    "react-native-track-player": "^4.1.0",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@types/react": "^18.3.28",
-    "typescript": "^5.9.3",
-    "jest": "^29.7.0",
-    "@testing-library/react-native": "^12.8.0",
-    "react-test-renderer": "18.3.1",
     "@babel/core": "^7.24.0",
     "@babel/runtime": "^7.24.0",
+    "@testing-library/react-native": "^12.8.0",
+    "@types/react": "^18.3.28",
     "babel-plugin-module-resolver": "^5.0.0",
     "eslint": "^9.0.0",
-    "prettier": "^3.6.2"
+    "jest": "^29.7.0",
+    "prettier": "^3.6.2",
+    "react-test-renderer": "18.3.1",
+    "typescript": "^5.9.3"
   },
   "jest": {
     "preset": "react-native",
-    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json"],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ],
     "transformIgnorePatterns": [
-      "node_modules/(?!(react-native|@react-native|@react-navigation|moti|lucide-react-native)/)"
+      "node_modules/(?!(react-native|@react-native|@react-navigation|@shopify\\/flash-list|lucide-react-native)/)"
     ]
   }
 }

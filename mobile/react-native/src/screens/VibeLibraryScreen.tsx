@@ -16,10 +16,10 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  FlatList,
   TextInput,
   ScrollView,
 } from 'react-native';
+import { OptimizedList } from '@components/common/OptimizedList';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useVibePlayerStore } from '@state/stores/vibePlayerStore';
@@ -212,7 +212,7 @@ export function VibeLibraryScreen() {
   // Library home
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <FlatList
+      <OptimizedList<Playlist>
         data={PLAYLISTS}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{
@@ -275,6 +275,8 @@ export function VibeLibraryScreen() {
     </View>
   );
 }
+
+export default VibeLibraryScreen;
 
 // ---------------------------------------------------------------------------
 // Styles

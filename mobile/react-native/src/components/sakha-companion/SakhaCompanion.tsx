@@ -16,18 +16,18 @@
  * It never modifies the KIAAN backend services directly.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TextInput,
   Pressable,
-  FlatList,
   KeyboardAvoidingView,
   Platform,
   AccessibilityInfo,
 } from 'react-native';
+import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -114,7 +114,7 @@ interface ChatBubbleProps {
   onSaveToJournal?: (message: SakhaMessage) => void;
 }
 
-function ChatBubble({
+const ChatBubble = memo(function ChatBubble({
   message,
   theme,
   onPlayVerse,
@@ -198,7 +198,7 @@ function ChatBubble({
       </View>
     </Animated.View>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
 // Thinking Indicator (animated dots)
@@ -218,7 +218,7 @@ function ThinkingIndicator({ theme }: { theme: ThemeColors }) {
       -1,
     );
     // Stagger the other dots
-    setTimeout(() => {
+    const timer2 = setTimeout(() => {
       opacity2.value = withRepeat(
         withSequence(
           withTiming(1, { duration: 400 }),
@@ -227,7 +227,7 @@ function ThinkingIndicator({ theme }: { theme: ThemeColors }) {
         -1,
       );
     }, 150);
-    setTimeout(() => {
+    const timer3 = setTimeout(() => {
       opacity3.value = withRepeat(
         withSequence(
           withTiming(1, { duration: 400 }),
@@ -236,6 +236,11 @@ function ThinkingIndicator({ theme }: { theme: ThemeColors }) {
         -1,
       );
     }, 300);
+
+    return () => {
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+    };
   }, [opacity1, opacity2, opacity3]);
 
   const dot1Style = useAnimatedStyle(() => ({ opacity: opacity1.value }));
@@ -345,7 +350,8 @@ export function SakhaCompanion({
   onToggleLocalOnly,
 }: SakhaCompanionProps) {
   const [inputText, setInputText] = useState('');
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef = useRef<FlashListRef<SakhaMessage>>(null);
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const greeting = getTimeAwareGreeting();
 
   const handleSend = useCallback(() => {
@@ -359,10 +365,19 @@ export function SakhaCompanion({
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (messages.length > 0) {
-      setTimeout(() => {
+      if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+      scrollTimerRef.current = setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
+        scrollTimerRef.current = null;
       }, 100);
     }
+
+    return () => {
+      if (scrollTimerRef.current) {
+        clearTimeout(scrollTimerRef.current);
+        scrollTimerRef.current = null;
+      }
+    };
   }, [messages.length]);
 
   const renderMessage = useCallback(
@@ -404,12 +419,12 @@ export function SakhaCompanion({
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       {/* Message list */}
-      <FlatList
+      <FlashList<SakhaMessage>
         ref={flatListRef}
         data={messages}
         renderItem={renderMessage}
         keyExtractor={(item) => item.id}
-        ListHeaderComponent={messages.length === 0 ? ListHeader : undefined}
+        ListHeaderComponent={messages.length === 0 ? <ListHeader /> : undefined}
         contentContainerStyle={styles.messageList}
         showsVerticalScrollIndicator={false}
         ListFooterComponent={
