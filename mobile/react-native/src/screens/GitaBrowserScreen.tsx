@@ -18,11 +18,11 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  FlatList,
   ActivityIndicator,
   Modal,
   ScrollView,
 } from 'react-native';
+import { OptimizedList } from '@components/common/OptimizedList';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 
@@ -164,6 +164,7 @@ export function GitaBrowserScreen() {
                   onPress={() => setSelectedVerse(verse)}
                   accessibilityRole="button"
                   accessibilityLabel={`Verse ${verse.chapter}.${verse.verse}`}
+                  accessibilityHint="Opens verse detail with Sanskrit and translation"
                 >
                   <Text style={[styles.verseNum, { color: theme.accent }]}>
                     {verse.chapter}.{verse.verse}
@@ -210,18 +211,22 @@ export function GitaBrowserScreen() {
           placeholderTextColor={theme.textTertiary}
           autoCorrect={false}
           accessibilityLabel="Search Gita verses"
+          accessibilityHint="Type at least 3 characters to search verses"
         />
       </View>
 
       {/* Search Results */}
       {searchQuery.length >= 3 ? (
-        <FlatList
+        <OptimizedList<Verse>
           data={searchResults?.results ?? searchResults ?? []}
-          keyExtractor={(item: Verse, i) => `search-${item.chapter}-${item.verse}-${i}`}
+          keyExtractor={(item: Verse) => `search-${item.chapter}-${item.verse}`}
           renderItem={({ item }: { item: Verse }) => (
             <TouchableOpacity
               style={[styles.searchResultCard, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}
               onPress={() => setSelectedVerse(item)}
+              accessibilityRole="button"
+              accessibilityLabel={`Verse ${item.chapter}.${item.verse}`}
+              accessibilityHint="Opens verse detail"
             >
               <Text style={[styles.verseNum, { color: theme.accent }]}>
                 {item.chapter}.{item.verse}
@@ -244,7 +249,7 @@ export function GitaBrowserScreen() {
         />
       ) : (
         /* Chapter List */
-        <FlatList
+        <OptimizedList<Chapter>
           data={chapters}
           keyExtractor={(item) => String(item.chapter_number ?? item.id)}
           renderItem={renderChapter}

@@ -211,6 +211,7 @@ export function LoginScreen({ navigation }: Props) {
           onPress={() => Alert.alert('Reset Password', 'A password reset link will be sent to your email.')}
           accessibilityRole="button"
           accessibilityLabel="Forgot password"
+          accessibilityHint="Opens password reset dialog"
         >
           <Text style={[styles.forgotText, { color: theme.accent }]}>
             Forgot password?
@@ -227,6 +228,7 @@ export function LoginScreen({ navigation }: Props) {
           disabled={isLoading}
           accessibilityRole="button"
           accessibilityLabel="Sign in"
+          accessibilityHint="Signs into your MindVibe account"
           accessibilityState={{ disabled: isLoading, busy: isLoading }}
         >
           {isLoading ? (

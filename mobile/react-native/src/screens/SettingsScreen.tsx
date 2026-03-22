@@ -141,6 +141,7 @@ export function SettingsScreen() {
             ]}
             onPress={() => handleThemeChange(mode)}
             accessibilityRole="radio"
+            accessibilityLabel={`${mode.charAt(0).toUpperCase() + mode.slice(1)} theme`}
             accessibilityState={{ selected: prefs.themeMode === mode }}
           >
             <Text style={styles.themeEmoji}>
@@ -159,6 +160,7 @@ export function SettingsScreen() {
         onPress={handleLanguageChange}
         accessibilityRole="button"
         accessibilityLabel={`Language: ${currentLang}`}
+        accessibilityHint="Opens language selection"
       >
         <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>Language</Text>
         <Text style={[styles.settingValue, { color: theme.textSecondary }]}>{currentLang} ›</Text>
@@ -234,6 +236,8 @@ export function SettingsScreen() {
         style={[styles.settingRow, { borderColor: theme.divider }]}
         onPress={handleClearCache}
         accessibilityRole="button"
+        accessibilityLabel="Clear cache"
+        accessibilityHint="Removes cached data. Data re-downloads when online."
       >
         <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>Clear Cache</Text>
         <Text style={[styles.settingValue, { color: theme.textSecondary }]}>›</Text>

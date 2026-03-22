@@ -150,6 +150,12 @@ export function SignupScreen({ navigation }: Props) {
         onSubmitEditing={() => opts.nextRef?.current?.focus() ?? handleSignup()}
         editable={!isLoading}
         accessibilityLabel={label}
+        accessibilityHint={
+          label === 'Name' ? 'Enter your full name' :
+          label === 'Email' ? 'Enter a valid email address' :
+          label === 'Password' ? 'At least 8 characters with mixed case and numbers' :
+          label === 'Confirm' ? 'Re-enter your password to confirm' : undefined
+        }
       />
       {fieldError && <Text style={styles.fieldError}>{fieldError}</Text>}
     </View>
@@ -222,7 +228,7 @@ export function SignupScreen({ navigation }: Props) {
 
         {/* Password Strength Indicator */}
         {password.length > 0 && (
-          <View style={styles.strengthRow}>
+          <View style={styles.strengthRow} accessibilityLabel={`Password strength: ${strength.label}`}>
             <View style={[styles.strengthBar, { backgroundColor: theme.inputBorder }]}>
               <View
                 style={[
@@ -253,6 +259,7 @@ export function SignupScreen({ navigation }: Props) {
           disabled={isLoading}
           accessibilityRole="button"
           accessibilityLabel="Create account"
+          accessibilityHint="Creates your MindVibe account"
           accessibilityState={{ disabled: isLoading, busy: isLoading }}
         >
           {isLoading ? (
@@ -270,6 +277,7 @@ export function SignupScreen({ navigation }: Props) {
           <TouchableOpacity
             onPress={() => navigation.navigate('Login')}
             accessibilityRole="button"
+            accessibilityLabel="Sign in to existing account"
           >
             <Text style={[styles.loginLink, { color: theme.accent }]}>
               Sign In

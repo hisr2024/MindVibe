@@ -16,18 +16,18 @@
  * It never modifies the KIAAN backend services directly.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TextInput,
   Pressable,
-  FlatList,
   KeyboardAvoidingView,
   Platform,
   AccessibilityInfo,
 } from 'react-native';
+import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -38,6 +38,7 @@ import Animated, {
   withSequence,
 } from 'react-native-reanimated';
 import { colors, darkTheme, spacing, typography, radii, shadows, type ThemeColors } from '@theme/tokens';
+import { useAccessibility } from '@hooks/useAccessibility';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -112,20 +113,22 @@ interface ChatBubbleProps {
   theme: ThemeColors;
   onPlayVerse?: (verseRef: string) => void;
   onSaveToJournal?: (message: SakhaMessage) => void;
+  reduceMotion?: boolean;
 }
 
-function ChatBubble({
+const ChatBubble = memo(function ChatBubble({
   message,
   theme,
   onPlayVerse,
   onSaveToJournal,
+  reduceMotion,
 }: ChatBubbleProps) {
   const isUser = message.role === 'user';
   const isSakha = message.role === 'sakha';
 
   return (
     <Animated.View
-      entering={isUser ? FadeInUp.duration(250) : FadeInDown.duration(300)}
+      entering={reduceMotion ? undefined : (isUser ? FadeInUp.duration(250) : FadeInDown.duration(300))}
       style={[
         styles.bubbleContainer,
         isUser ? styles.bubbleContainerUser : styles.bubbleContainerSakha,
@@ -198,7 +201,7 @@ function ChatBubble({
       </View>
     </Animated.View>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
 // Thinking Indicator (animated dots)
@@ -218,7 +221,7 @@ function ThinkingIndicator({ theme }: { theme: ThemeColors }) {
       -1,
     );
     // Stagger the other dots
-    setTimeout(() => {
+    const timer2 = setTimeout(() => {
       opacity2.value = withRepeat(
         withSequence(
           withTiming(1, { duration: 400 }),
@@ -227,7 +230,7 @@ function ThinkingIndicator({ theme }: { theme: ThemeColors }) {
         -1,
       );
     }, 150);
-    setTimeout(() => {
+    const timer3 = setTimeout(() => {
       opacity3.value = withRepeat(
         withSequence(
           withTiming(1, { duration: 400 }),
@@ -236,6 +239,11 @@ function ThinkingIndicator({ theme }: { theme: ThemeColors }) {
         -1,
       );
     }, 300);
+
+    return () => {
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+    };
   }, [opacity1, opacity2, opacity3]);
 
   const dot1Style = useAnimatedStyle(() => ({ opacity: opacity1.value }));
@@ -345,8 +353,10 @@ export function SakhaCompanion({
   onToggleLocalOnly,
 }: SakhaCompanionProps) {
   const [inputText, setInputText] = useState('');
-  const flatListRef = useRef<FlatList>(null);
-  const greeting = getTimeAwareGreeting();
+  const flatListRef = useRef<FlashListRef<SakhaMessage>>(null);
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const greeting = useMemo(() => getTimeAwareGreeting(), []);
+  const { isReduceMotionEnabled } = useAccessibility();
 
   const handleSend = useCallback(() => {
     const trimmed = inputText.trim();
@@ -359,9 +369,28 @@ export function SakhaCompanion({
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (messages.length > 0) {
-      setTimeout(() => {
+      if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+      scrollTimerRef.current = setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
+        scrollTimerRef.current = null;
       }, 100);
+    }
+
+    return () => {
+      if (scrollTimerRef.current) {
+        clearTimeout(scrollTimerRef.current);
+        scrollTimerRef.current = null;
+      }
+    };
+  }, [messages.length]);
+
+  // Announce new Sakha messages to screen readers
+  useEffect(() => {
+    if (messages.length > 0) {
+      const last = messages[messages.length - 1];
+      if (last.role === 'sakha') {
+        AccessibilityInfo.announceForAccessibility('Sakha responded');
+      }
     }
   }, [messages.length]);
 
@@ -372,9 +401,10 @@ export function SakhaCompanion({
         theme={theme}
         onPlayVerse={onPlayVerse}
         onSaveToJournal={onSaveToJournal}
+        reduceMotion={isReduceMotionEnabled}
       />
     ),
-    [theme, onPlayVerse, onSaveToJournal],
+    [theme, onPlayVerse, onSaveToJournal, isReduceMotionEnabled],
   );
 
   const ListHeader = useCallback(
@@ -404,12 +434,12 @@ export function SakhaCompanion({
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       {/* Message list */}
-      <FlatList
+      <FlashList<SakhaMessage>
         ref={flatListRef}
         data={messages}
         renderItem={renderMessage}
         keyExtractor={(item) => item.id}
-        ListHeaderComponent={messages.length === 0 ? ListHeader : undefined}
+        ListHeaderComponent={messages.length === 0 ? <ListHeader /> : undefined}
         contentContainerStyle={styles.messageList}
         showsVerticalScrollIndicator={false}
         ListFooterComponent={

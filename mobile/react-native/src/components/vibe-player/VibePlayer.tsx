@@ -15,7 +15,7 @@
  * All audio content is fetched via API or served from local cache.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -42,6 +42,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { colors, darkTheme, spacing, typography, radii, shadows, motion, type ThemeColors } from '@theme/tokens';
+import { useAccessibility } from '@hooks/useAccessibility';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -187,7 +188,7 @@ interface WaveformProps {
   progress: number;
 }
 
-function Waveform({ barCount = 40, isPlaying, progress }: WaveformProps) {
+const Waveform = memo(function Waveform({ barCount = 40, isPlaying, progress }: WaveformProps) {
   const bars = useMemo(() => {
     return Array.from({ length: barCount }, (_, i) => {
       // Generate a pseudo-random but deterministic height for each bar
@@ -222,7 +223,7 @@ function Waveform({ barCount = 40, isPlaying, progress }: WaveformProps) {
       })}
     </View>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
 // Mini Player Component (collapsed — docked above tab bar)
@@ -233,7 +234,7 @@ interface MiniPlayerProps {
   theme: ThemeColors;
 }
 
-function MiniPlayer({ onExpand, theme }: MiniPlayerProps) {
+const MiniPlayer = memo(function MiniPlayer({ onExpand, theme }: MiniPlayerProps) {
   const playbackState = usePlaybackState();
   const { position, duration } = useProgress();
   const isPlaying = playbackState.state === State.Playing;
@@ -338,7 +339,7 @@ function MiniPlayer({ onExpand, theme }: MiniPlayerProps) {
       </View>
     </Pressable>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
 // Full Player Component (expanded — full screen)
@@ -349,7 +350,7 @@ interface FullPlayerProps {
   theme: ThemeColors;
 }
 
-function FullPlayer({ onCollapse, theme }: FullPlayerProps) {
+const FullPlayer = memo(function FullPlayer({ onCollapse, theme }: FullPlayerProps) {
   const playbackState = usePlaybackState();
   const { position, duration } = useProgress(200);
   const isPlaying = playbackState.state === State.Playing;
@@ -541,7 +542,7 @@ function FullPlayer({ onCollapse, theme }: FullPlayerProps) {
       )}
     </View>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
 // Main Vibe Player Container (orchestrates mini ↔ full transition)
@@ -553,10 +554,13 @@ export function VibePlayer({
   theme = darkTheme,
 }: VibePlayerProps) {
   const expandProgress = useSharedValue(isExpanded ? 1 : 0);
+  const { isReduceMotionEnabled } = useAccessibility();
 
   useEffect(() => {
-    expandProgress.value = withSpring(isExpanded ? 1 : 0, motion.sheetSpring);
-  }, [isExpanded, expandProgress]);
+    expandProgress.value = isReduceMotionEnabled
+      ? (isExpanded ? 1 : 0)
+      : withSpring(isExpanded ? 1 : 0, motion.sheetSpring);
+  }, [isExpanded, expandProgress, isReduceMotionEnabled]);
 
   // Swipe gesture: up to expand, down to collapse
   const swipeGesture = Gesture.Pan()

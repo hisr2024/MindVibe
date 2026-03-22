@@ -152,7 +152,12 @@ export function JourneyDetailScreen() {
         </Text>
 
         {/* Progress Circle (simplified as bar) */}
-        <View style={styles.progressSection}>
+        <View
+          style={styles.progressSection}
+          accessibilityRole="progressbar"
+          accessibilityLabel={`Journey progress: ${Math.round(progress)} percent, day ${currentDay} of ${totalDays}`}
+          accessibilityValue={{ min: 0, max: 100, now: Math.round(progress) }}
+        >
           <View style={[styles.progressTrack, { backgroundColor: theme.inputBackground }]}>
             <View
               style={[styles.progressFill, { width: `${Math.min(progress, 100)}%`, backgroundColor: theme.accent }]}
@@ -184,6 +189,7 @@ export function JourneyDetailScreen() {
           disabled={togglePause.isPending}
           accessibilityRole="button"
           accessibilityLabel={isPaused ? 'Resume journey' : 'Pause journey'}
+          accessibilityHint={isPaused ? 'Resumes your daily journey steps' : 'Pauses journey progress temporarily'}
         >
           <Text style={[styles.actionButtonText, { color: theme.textSecondary }]}>
             {isPaused ? '▶️ Resume Journey' : '⏸️ Pause Journey'}
@@ -268,6 +274,7 @@ export function JourneyDetailScreen() {
               disabled={completeStep.isPending}
               accessibilityRole="button"
               accessibilityLabel="Mark today's step as complete"
+              accessibilityHint="Confirms completion of today's step"
             >
               {completeStep.isPending ? (
                 <ActivityIndicator color={colors.divine.black} />

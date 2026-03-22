@@ -12,7 +12,7 @@
  * The KIAAN AI Ecosystem is consumed read-only for insights.
  */
 
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -24,6 +24,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { colors, darkTheme, spacing, typography, radii, shadows } from '@theme/tokens';
+import { useAccessibility } from '@hooks/useAccessibility';
 
 // ---------------------------------------------------------------------------
 // Time-Aware Greeting
@@ -60,10 +61,14 @@ const QUICK_MOODS: QuickMoodOption[] = [
 // Screen Component
 // ---------------------------------------------------------------------------
 
-export function HomeScreen() {
+export const HomeScreen = memo(function HomeScreen() {
   const insets = useSafeAreaInsets();
   const theme = darkTheme;
   const greeting = getGreeting();
+  const { isReduceMotionEnabled } = useAccessibility();
+
+  const fade = (delay: number) =>
+    isReduceMotionEnabled ? undefined : FadeInDown.delay(delay).duration(400);
 
   const handleMoodSelect = useCallback((_score: number) => {
     // In production: navigate to mood detail or quick-log via API
@@ -91,19 +96,20 @@ export function HomeScreen() {
       }
     >
       {/* Greeting */}
-      <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+      <Animated.View entering={fade(100)}>
         <Text style={[styles.greeting, { color: theme.textPrimary }]}>
           {greeting.emoji} {greeting.text}
         </Text>
       </Animated.View>
 
       {/* Daily Verse Card */}
-      <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+      <Animated.View entering={fade(200)}>
         <Pressable
           style={[styles.verseCard, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}
           onPress={handleVersePlay}
           accessibilityRole="button"
-          accessibilityLabel="Today's verse: Bhagavad Gita 2.47 — Karma Yoga. Tap to play."
+          accessibilityLabel="Today's verse: Bhagavad Gita 2.47 — Karma Yoga"
+          accessibilityHint="Plays today's verse in the Vibe Player"
         >
           <Text style={[styles.verseLabel, { color: colors.gold[400] }]}>
             TODAY'S VERSE
@@ -131,7 +137,7 @@ export function HomeScreen() {
       </Animated.View>
 
       {/* Quick Mood Entry */}
-      <Animated.View entering={FadeInDown.delay(300).duration(400)}>
+      <Animated.View entering={fade(300)}>
         <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
           How are you feeling?
         </Text>
@@ -154,7 +160,7 @@ export function HomeScreen() {
       </Animated.View>
 
       {/* Journey Progress Card */}
-      <Animated.View entering={FadeInDown.delay(400).duration(400)}>
+      <Animated.View entering={fade(400)}>
         <Pressable
           style={[styles.journeyCard, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}
           accessibilityRole="button"
@@ -173,7 +179,7 @@ export function HomeScreen() {
       </Animated.View>
 
       {/* Sakha's Insight */}
-      <Animated.View entering={FadeInDown.delay(500).duration(400)}>
+      <Animated.View entering={fade(500)}>
         <View
           style={[styles.insightCard, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}
           accessibilityRole="text"
@@ -196,7 +202,7 @@ export function HomeScreen() {
       <View style={{ height: spacing.bottomInset + spacing['3xl'] }} />
     </ScrollView>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
 // Styles
