@@ -111,6 +111,8 @@ ALLOWED_HEADERS = [
     "x-requested-with",
     "x-csrf-token",
     "cache-control",
+    "x-client",
+    "x-client-version",
 ]
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
