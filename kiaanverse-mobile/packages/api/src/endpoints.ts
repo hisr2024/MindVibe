@@ -37,11 +37,11 @@ export const api = {
     verse: (chapter: number, verse: number) =>
       apiClient.get(`/api/gita/verses/${chapter}/${verse}`),
     search: (query: string) =>
-      apiClient.get('/api/gita/search', { params: { keyword: query } }),
+      apiClient.get('/api/gita/search', { params: { q: query } }),
     /** Full search with pagination and filters */
     searchFull: (keyword: string, page?: number, pageSize?: number) =>
       apiClient.get('/api/gita/search', {
-        params: { keyword, page: page ?? 1, page_size: pageSize ?? 10 },
+        params: { q: keyword, page: page ?? 1, page_size: pageSize ?? 10 },
       }),
     /** All translations for a specific verse */
     translations: (verseId: string) =>
@@ -52,10 +52,6 @@ export const api = {
   moods: {
     create: (mood: { score: number; state?: string; tags?: string[]; note?: string; date?: string }) =>
       apiClient.post('/api/moods', mood),
-    history: (days?: number) =>
-      apiClient.get('/api/moods/history', { params: { days: days ?? 30 } }),
-    insights: () =>
-      apiClient.get('/api/moods/insights'),
     microResponse: (score: number) =>
       apiClient.get('/api/moods/micro-response', { params: { score } }),
   },
@@ -107,9 +103,6 @@ export const api = {
     /** Full journey detail with steps */
     detail: (journeyId: string) =>
       apiClient.get(`/api/journey-engine/journeys/${journeyId}`),
-    /** Complete a specific step by day index */
-    completeStepByDay: (journeyId: string, dayIndex: number) =>
-      apiClient.post(`/api/journey-engine/journeys/${journeyId}/steps/${dayIndex}/complete`),
     dashboard: () => apiClient.get('/api/journey-engine/dashboard'),
     enemies: () => apiClient.get('/api/journey-engine/enemies'),
     enemyProgress: (enemy: string) =>
@@ -155,10 +148,10 @@ export const api = {
 
   /** Analytics */
   analytics: {
-    dashboard: () => apiClient.get('/analytics/dashboard'),
-    moodTrends: () => apiClient.get('/analytics/mood-trends'),
-    weeklyInsights: () => apiClient.get('/analytics/weekly-summary'),
-    achievements: () => apiClient.get('/analytics/achievements'),
+    dashboard: () => apiClient.get('/api/analytics/dashboard'),
+    moodTrends: () => apiClient.get('/api/analytics/mood-trends'),
+    weeklyInsights: () => apiClient.get('/api/analytics/weekly-summary'),
+    achievements: () => apiClient.get('/api/analytics/achievements'),
   },
 
   /** Subscriptions */
@@ -171,20 +164,20 @@ export const api = {
   /** Sync (offline batch) */
   sync: {
     batch: (operations: Record<string, unknown>[]) =>
-      apiClient.post('/sync/batch', { operations }),
+      apiClient.post('/api/sync/batch', { operations }),
     pull: (lastSyncTimestamp?: number) =>
-      apiClient.post('/sync/pull', { since: lastSyncTimestamp }),
-    status: () => apiClient.get('/sync/status'),
+      apiClient.post('/api/sync/pull', { since: lastSyncTimestamp }),
+    status: () => apiClient.get('/api/sync/status'),
   },
 
   /** Divine Consciousness */
   divine: {
-    greeting: () => apiClient.get('/divine/greeting'),
-    affirmation: () => apiClient.get('/divine/affirmation'),
+    greeting: () => apiClient.get('/api/divine/greeting'),
+    affirmation: () => apiClient.get('/api/divine/affirmation'),
     breathingExercise: (pattern: string) =>
-      apiClient.get(`/divine/breathing/${pattern}`),
+      apiClient.get(`/api/divine/breathing/${pattern}`),
     moodResponse: (mood: string) =>
-      apiClient.post('/divine/mood-response', { mood }),
+      apiClient.post('/api/divine/mood-response', { mood }),
   },
   /** Push notifications */
   notifications: {

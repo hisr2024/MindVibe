@@ -24,8 +24,6 @@ import type {
   JourneyTemplate,
   KarmaTreeResponse,
   MoodCreatePayload,
-  MoodHistoryResponse,
-  MoodInsightsResponse,
   StepCompletionResult,
   UserJourneyProgress,
   WisdomJourneyDetail,
@@ -64,8 +62,6 @@ export const queryKeys = {
   chatSessions: ['chat', 'sessions'] as const,
   chatHistory: (sessionId?: string) => ['chat', 'history', sessionId] as const,
   analytics: ['analytics', 'dashboard'] as const,
-  moodHistory: (days: number) => ['mood', 'history', days] as const,
-  moodInsights: ['mood', 'insights'] as const,
   karmaTree: ['karma', 'tree'] as const,
   subscriptionCurrent: ['subscription', 'current'] as const,
 } as const;
@@ -354,7 +350,7 @@ export function useCompleteWisdomStep(): UseMutationResult<StepCompletionResult,
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ journeyId, dayIndex }: { journeyId: string; dayIndex: number }) => {
-      const { data } = await api.journeys.completeStepByDay(journeyId, dayIndex);
+      const { data } = await api.journeys.completeStep(journeyId, dayIndex);
       return data as StepCompletionResult;
     },
     onSuccess: (_data, variables) => {
@@ -379,29 +375,6 @@ export function useCreateMood(): UseMutationResult<MoodResult, Error, MoodCreate
   });
 }
 
-/** Mood history for the last N days. */
-export function useMoodHistory(days: number = 30): UseQueryResult<MoodHistoryResponse> {
-  return useQuery({
-    queryKey: queryKeys.moodHistory(days),
-    queryFn: async () => {
-      const { data } = await api.moods.history(days);
-      return data as MoodHistoryResponse;
-    },
-    staleTime: 1000 * 60 * 5,
-  });
-}
-
-/** AI-generated mood pattern insights. */
-export function useMoodInsights(): UseQueryResult<MoodInsightsResponse> {
-  return useQuery({
-    queryKey: queryKeys.moodInsights,
-    queryFn: async () => {
-      const { data } = await api.moods.insights();
-      return data as MoodInsightsResponse;
-    },
-    staleTime: 1000 * 60 * 30,
-  });
-}
 
 /** Karma tree with all nodes. */
 export function useKarmaTree(): UseQueryResult<KarmaTreeResponse> {
