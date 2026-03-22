@@ -219,12 +219,21 @@ export interface GitaTranslationSet {
 // Mood
 // ---------------------------------------------------------------------------
 
+/** Spiritual mood state identifiers used throughout the app. */
+export type SpiritualMood =
+  | 'peaceful' | 'joyful' | 'confused' | 'anxious'
+  | 'sad' | 'grateful' | 'angry' | 'hopeful';
+
 export interface MoodEntry {
   id: number;
   /** Mood score on a -2 to 2 scale */
   score: number;
+  /** Spiritual mood state */
+  state?: SpiritualMood;
   tags?: string[];
   note?: string;
+  /** ISO date string (YYYY-MM-DD) */
+  date?: string;
   /** ISO timestamp */
   at: string;
   /** KIAAN empathetic micro-response */
@@ -233,8 +242,62 @@ export interface MoodEntry {
 
 export interface MoodCreatePayload {
   score: number;
+  state?: SpiritualMood;
   tags?: string[];
   note?: string;
+  date?: string;
+}
+
+/** Response from GET /api/mood/history */
+export interface MoodHistoryResponse {
+  entries: MoodEntry[];
+  total: number;
+}
+
+/** AI-generated mood pattern insight */
+export interface MoodInsight {
+  pattern: string;
+  suggestion: string;
+  linkedVerses?: string[];
+}
+
+/** Response from GET /api/mood/insights */
+export interface MoodInsightsResponse {
+  insights: MoodInsight[];
+  dominantMood?: SpiritualMood;
+  averageScore?: number;
+}
+
+// ---------------------------------------------------------------------------
+// Karma
+// ---------------------------------------------------------------------------
+
+/** A single node in the karma tree */
+export interface KarmaNodeData {
+  id: string;
+  label: string;
+  action: string;
+  points: number;
+  completed: boolean;
+  /** Linked wisdom or verse reference */
+  linkedWisdom?: string;
+  completedAt?: string;
+}
+
+/** Karma tree level based on total points */
+export type KarmaTreeLevel = 'seed' | 'sapling' | 'young_tree' | 'mighty_tree' | 'sacred_tree';
+
+/** Response from GET /api/karma/tree */
+export interface KarmaTreeResponse {
+  nodes: KarmaNodeData[];
+  totalPoints: number;
+  level: KarmaTreeLevel;
+}
+
+/** Payload for POST /api/karma/award */
+export interface KarmaAwardPayload {
+  action: string;
+  points: number;
 }
 
 // ---------------------------------------------------------------------------

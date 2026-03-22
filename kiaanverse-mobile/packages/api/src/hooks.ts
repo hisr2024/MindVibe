@@ -16,7 +16,11 @@ import type {
   GitaVerseResponse,
   Journey,
   JourneyTemplate,
+  KarmaAwardPayload,
+  KarmaTreeResponse,
   MoodCreatePayload,
+  MoodHistoryResponse,
+  MoodInsightsResponse,
 } from './types';
 
 // ---------------------------------------------------------------------------
@@ -50,6 +54,9 @@ export const queryKeys = {
   chatSessions: ['chat', 'sessions'] as const,
   chatHistory: (sessionId?: string) => ['chat', 'history', sessionId] as const,
   analytics: ['analytics', 'dashboard'] as const,
+  moodHistory: (days: number) => ['mood', 'history', days] as const,
+  moodInsights: ['mood', 'insights'] as const,
+  karmaTree: ['karma', 'tree'] as const,
   subscriptionCurrent: ['subscription', 'current'] as const,
 } as const;
 
@@ -280,10 +287,64 @@ export function useCompleteStep(): UseMutationResult<StepResult, Error, { journe
 }
 
 export function useCreateMood(): UseMutationResult<MoodResult, Error, MoodCreatePayload> {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (mood: MoodCreatePayload) => {
       const { data } = await api.moods.create(mood);
       return data as MoodResult;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['mood'] });
+    },
+  });
+}
+
+/** Mood history for the last N days. */
+export function useMoodHistory(days: number = 30): UseQueryResult<MoodHistoryResponse> {
+  return useQuery({
+    queryKey: queryKeys.moodHistory(days),
+    queryFn: async () => {
+      const { data } = await api.moods.history(days);
+      return data as MoodHistoryResponse;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+/** AI-generated mood pattern insights. */
+export function useMoodInsights(): UseQueryResult<MoodInsightsResponse> {
+  return useQuery({
+    queryKey: queryKeys.moodInsights,
+    queryFn: async () => {
+      const { data } = await api.moods.insights();
+      return data as MoodInsightsResponse;
+    },
+    staleTime: 1000 * 60 * 30,
+  });
+}
+
+/** Karma tree with all nodes. */
+export function useKarmaTree(): UseQueryResult<KarmaTreeResponse> {
+  return useQuery({
+    queryKey: queryKeys.karmaTree,
+    queryFn: async () => {
+      const { data } = await api.karma.tree();
+      return data as KarmaTreeResponse;
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+}
+
+/** Award karma points for an action. */
+export function useAwardKarma(): UseMutationResult<KarmaTreeResponse, Error, KarmaAwardPayload> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ action, points }: KarmaAwardPayload) => {
+      const { data } = await api.karma.award(action, points);
+      return data as KarmaTreeResponse;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.karmaTree });
     },
   });
 }

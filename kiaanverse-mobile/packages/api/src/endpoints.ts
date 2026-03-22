@@ -50,10 +50,21 @@ export const api = {
 
   /** Mood tracking */
   moods: {
-    create: (mood: { score: number; tags?: string[]; note?: string }) =>
+    create: (mood: { score: number; state?: string; tags?: string[]; note?: string; date?: string }) =>
       apiClient.post('/api/moods', mood),
+    history: (days?: number) =>
+      apiClient.get('/api/moods/history', { params: { days: days ?? 30 } }),
+    insights: () =>
+      apiClient.get('/api/moods/insights'),
     microResponse: (score: number) =>
       apiClient.get('/api/moods/micro-response', { params: { score } }),
+  },
+
+  /** Karma tree */
+  karma: {
+    tree: () => apiClient.get('/api/karma/tree'),
+    award: (action: string, points: number) =>
+      apiClient.post('/api/karma/award', { action, points }),
   },
 
   /** Encrypted journal */
