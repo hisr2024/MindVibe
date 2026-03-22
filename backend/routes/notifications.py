@@ -29,6 +29,7 @@ from backend.models.notification import (
     NotificationStatus,
     PushSubscription,
 )
+from backend.services.notification_dispatcher import dispatch_notification
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +54,8 @@ class PushSubscriptionIn(BaseModel):
     endpoint: str = Field(default="", max_length=2048)
     keys: dict | None = None
     device_name: str | None = Field(None, max_length=128)
+    # Platform identifier: "ios", "android", or "web"
+    platform: str | None = Field(None, max_length=10)
     # Frontend sends { subscription: { endpoint, keys, ... } }
     subscription: dict | None = None
 
@@ -177,6 +180,7 @@ async def subscribe_push(
         endpoint=endpoint,
         keys=keys,
         device_name=payload.device_name,
+        platform=payload.platform,
         user_agent=request.headers.get("User-Agent"),
     )
     db.add(sub)
@@ -418,3 +422,61 @@ async def update_preferences(
         quiet_hours_start=pref.quiet_hours_start,
         quiet_hours_end=pref.quiet_hours_end,
     )
+
+
+# ---------------------------------------------------------------------------
+# POST /push/send — send a push notification to a user (internal/admin)
+# ---------------------------------------------------------------------------
+
+class PushSendRequest(BaseModel):
+    """Request to send a push notification to a specific user."""
+
+    user_id: str = Field(..., min_length=1, max_length=255)
+    title: str = Field(..., min_length=1, max_length=256)
+    body: str = Field(..., min_length=1, max_length=1000)
+    notification_type: str = Field(
+        default="sakha",
+        description="Notification type: daily_verse, journey_reminder, streak, sakha, milestone",
+    )
+    data: dict | None = None
+
+
+class PushSendResponse(BaseModel):
+    """Response from the push send endpoint."""
+
+    status: str
+    message: str
+
+
+@router.post("/push/send", response_model=PushSendResponse)
+@limiter.limit("10/minute")
+async def send_push_notification(
+    request: Request,
+    payload: PushSendRequest,
+    db: AsyncSession = Depends(get_db),
+    _current_user: str = Depends(get_current_user),
+):
+    """Send a push notification to a specific user.
+
+    Respects user preferences and quiet hours.
+    Creates a notification record in the inbox.
+    Requires authentication.
+
+    In production, this should be restricted to admin/service accounts.
+    """
+    try:
+        await dispatch_notification(
+            db=db,
+            user_id=payload.user_id,
+            notification_type=payload.notification_type,
+            title=payload.title,
+            body=payload.body,
+            data=payload.data,
+        )
+        return PushSendResponse(status="sent", message="Notification dispatched successfully")
+    except Exception as e:
+        logger.error("Failed to send push notification: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to dispatch notification",
+        )

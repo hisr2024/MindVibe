@@ -35,7 +35,12 @@ import { I18nProvider } from '@kiaanverse/i18n';
 import { api, type SyncQueueItem } from '@kiaanverse/api';
 import { useAuthStore, useThemeStore, useUserPreferencesStore, useSyncQueueStore, startSyncOnForeground } from '@kiaanverse/store';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
+import { useNotifications } from '../hooks/useNotifications';
 import { OfflineBanner } from '../components/common/OfflineBanner';
+import { NotificationToast } from '../components/common/NotificationToast';
+
+// Register background tasks at module level (required by expo-task-manager)
+import '../services/backgroundTasks';
 
 // Prevent splash screen from hiding until we're ready
 void SplashScreen.preventAutoHideAsync();
@@ -146,6 +151,9 @@ function AppContent(): React.JSX.Element {
     return cleanup;
   }, []);
 
+  // Initialize notification system (channels, handlers, scheduling)
+  useNotifications();
+
   // Auto-sync when connectivity restored
   useEffect(() => {
     if (!isOnline) {
@@ -174,6 +182,7 @@ function AppContent(): React.JSX.Element {
     <View style={styles.container} onLayout={onLayoutReady}>
       <StatusBar style={theme.colors.statusBarStyle === 'light-content' ? 'light' : 'dark'} />
       <OfflineBanner isOffline={!isOnline} pendingCount={pendingCount} />
+      <NotificationToast />
       <AuthGate>
         <Stack screenOptions={{ headerShown: false, animation: 'none' }}>
           <Stack.Screen name="(auth)" />

@@ -17,6 +17,9 @@ interface NotificationPreferences {
   reminderTime: string;
   journeyUpdates: boolean;
   weeklyInsights: boolean;
+  streakAlerts: boolean;
+  sakhaMessages: boolean;
+  milestones: boolean;
 }
 
 interface VoicePreferences {
@@ -48,6 +51,9 @@ const defaultNotifications: NotificationPreferences = {
   reminderTime: '08:00',
   journeyUpdates: true,
   weeklyInsights: true,
+  streakAlerts: true,
+  sakhaMessages: true,
+  milestones: true,
 };
 
 const defaultVoice: VoicePreferences = {
