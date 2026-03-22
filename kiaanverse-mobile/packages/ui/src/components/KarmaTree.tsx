@@ -179,10 +179,9 @@ function KarmaTreeInner({
             />
             <SvgText
               x={item.x}
-              y={item.y + 1}
+              y={item.y + 4}
               fontSize={10}
               textAnchor="middle"
-              dominantBaseline="central"
               fill={item.node.completed ? c.background : c.textTertiary}
               fontWeight="600"
             >
