@@ -7,7 +7,7 @@
  * that the user can tap to send immediately. Staggered fade-in animation.
  */
 
-import { motion } from 'framer-motion'
+import { motion, type Variants } from 'framer-motion'
 import { hapticPulse } from '@/utils/voice/hapticFeedback'
 
 interface SuggestedPromptsProps {
@@ -25,7 +25,7 @@ const PROMPTS = [
   'Guide me through grief',
 ] as const
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -36,12 +36,12 @@ const containerVariants = {
   },
 }
 
-const chipVariants = {
+const chipVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.35, ease: 'easeOut' as const },
+    transition: { duration: 0.35, ease: 'easeOut' },
   },
 }
 

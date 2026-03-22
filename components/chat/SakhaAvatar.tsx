@@ -12,7 +12,7 @@
  * Respects prefers-reduced-motion for accessibility.
  */
 
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion, type Variants } from 'framer-motion'
 
 type AvatarState = 'idle' | 'thinking' | 'speaking'
 type AvatarSize = 'sm' | 'md' | 'lg'
@@ -38,12 +38,12 @@ const FONT_SIZE_MAP: Record<AvatarSize, number> = {
  * Animation variants keyed by avatar state.
  * Each variant defines scale, opacity, boxShadow, and transition.
  */
-const stateVariants = {
+const stateVariants: Variants = {
   idle: {
     scale: 1,
     opacity: 1,
     boxShadow: '0 0 8px rgba(228,181,74,0.3)',
-    transition: { duration: 0.4, ease: 'easeOut' as const },
+    transition: { duration: 0.4, ease: 'easeOut' },
   },
   thinking: {
     scale: [0.95, 1.05, 0.95],
@@ -56,7 +56,7 @@ const stateVariants = {
     transition: {
       duration: 2,
       repeat: Infinity,
-      ease: 'easeInOut' as const,
+      ease: 'easeInOut',
     },
   },
   speaking: {
@@ -70,13 +70,13 @@ const stateVariants = {
     transition: {
       duration: 0.8,
       repeat: Infinity,
-      ease: 'easeInOut' as const,
+      ease: 'easeInOut',
     },
   },
 }
 
 /** Static variant used when user prefers reduced motion. */
-const reducedMotionVariant = {
+const reducedMotionVariant: Variants = {
   idle: { scale: 1, opacity: 1, boxShadow: '0 0 8px rgba(228,181,74,0.3)' },
   thinking: { scale: 1, opacity: 0.7, boxShadow: '0 0 20px rgba(228,181,74,0.5)' },
   speaking: { scale: 1, opacity: 1, boxShadow: '0 0 24px rgba(228,181,74,0.8)' },
@@ -87,14 +87,14 @@ export function SakhaAvatar({ state, size = 'md' }: SakhaAvatarProps) {
   const px = SIZE_MAP[size]
   const fontSize = FONT_SIZE_MAP[size]
 
-  const variants = prefersReducedMotion ? reducedMotionVariant : stateVariants
-  const currentVariant = variants[state]
+  const activeVariants = prefersReducedMotion ? reducedMotionVariant : stateVariants
 
   return (
     <motion.div
       aria-label={`Sakha is ${state}`}
       role="img"
-      animate={currentVariant}
+      variants={activeVariants}
+      animate={state}
       style={{
         width: px,
         height: px,
