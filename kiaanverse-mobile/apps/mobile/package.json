@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@sentry/react-native": "~5.33.0",
     "@kiaanverse/api": "workspace:*",
     "@kiaanverse/i18n": "workspace:*",
     "@kiaanverse/store": "workspace:*",

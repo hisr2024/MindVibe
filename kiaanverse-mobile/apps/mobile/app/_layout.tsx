@@ -38,9 +38,15 @@ import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useNotifications } from '../hooks/useNotifications';
 import { OfflineBanner } from '../components/common/OfflineBanner';
 import { NotificationToast } from '../components/common/NotificationToast';
+import { ErrorBoundary } from '../components/common/ErrorBoundary';
+import { ToastContainer } from '../components/common/Toast';
+import { initErrorTracking } from '../services/errorTracking';
 
 // Register background tasks at module level (required by expo-task-manager)
 import '../services/backgroundTasks';
+
+// Initialize error tracking before any providers mount
+initErrorTracking();
 
 // Prevent splash screen from hiding until we're ready
 void SplashScreen.preventAutoHideAsync();
@@ -183,6 +189,7 @@ function AppContent(): React.JSX.Element {
       <StatusBar style={theme.colors.statusBarStyle === 'light-content' ? 'light' : 'dark'} />
       <OfflineBanner isOffline={!isOnline} pendingCount={pendingCount} />
       <NotificationToast />
+      <ToastContainer />
       <AuthGate>
         <Stack screenOptions={{ headerShown: false, animation: 'none' }}>
           <Stack.Screen name="(auth)" />
@@ -216,7 +223,9 @@ export default function RootLayout(): React.JSX.Element {
             initialLocale={locale as 'en'}
             namespaces={['common', 'navigation', 'errors', 'auth', 'home', 'kiaan', 'journeys']}
           >
-            <AppContent />
+            <ErrorBoundary>
+              <AppContent />
+            </ErrorBoundary>
           </I18nProvider>
         </ThemeProvider>
       </PersistQueryClientProvider>
