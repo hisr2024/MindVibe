@@ -8,7 +8,7 @@
     "ios": "pnpm --filter kiaanverse-mobile-app ios",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
-    "test": "pnpm --filter kiaanverse-mobile-app test",
+    "test": "pnpm -r test",
     "format:check": "pnpm --filter kiaanverse-mobile-app format:check",
     "clean": "pnpm -r clean"
   },

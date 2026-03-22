@@ -1,0 +1,33 @@
+# Login Flow — Maestro E2E
+#
+# Verifies: app launch → enter credentials → submit → home tab visible
+#
+# Prerequisites: App built and installed on simulator/emulator.
+# Run: maestro test maestro/login.yaml
+
+appId: com.kiaanverse.mobile
+---
+
+# Launch the app fresh
+- launchApp:
+    clearState: true
+
+# Wait for the login screen to appear
+- assertVisible: "Sign In"
+
+# Enter email
+- tapOn: "you@example.com"
+- inputText: "test@kiaanverse.app"
+
+# Enter password
+- tapOn: "Enter your password"
+- inputText: "TestPassword123!"
+
+# Submit login form
+- tapOn:
+    id: "login-button"
+
+# Wait for navigation to complete and home tab to be visible
+- assertVisible:
+    text: "Home"
+    timeout: 10000

@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@sentry/react-native": "~5.33.0",
     "@kiaanverse/api": "workspace:*",
     "@kiaanverse/i18n": "workspace:*",
     "@kiaanverse/store": "workspace:*",
@@ -57,6 +58,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
+    "@testing-library/jest-native": "^5.4.0",
+    "@testing-library/react-native": "^12.9.0",
     "@types/jest": "^29.5.0",
     "@types/react": "~18.2.0",
     "@types/react-test-renderer": "~18.2.0",
