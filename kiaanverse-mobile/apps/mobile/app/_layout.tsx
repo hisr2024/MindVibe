@@ -8,6 +8,11 @@
  * Provider stack (outer → inner):
  *   GestureHandlerRootView → QueryClientProvider → ThemeProvider → I18nProvider
  *
+ * Offline-first:
+ *   - OfflineBanner shows when device is offline
+ *   - SyncQueue processes pending mutations on reconnect + app foreground
+ *   - React Query cache persisted to AsyncStorage (24h maxAge)
+ *
  * Auth gate:
  *   idle/loading → splash screen held
  *   unauthenticated → /(auth)/login
@@ -15,7 +20,7 @@
  *   authenticated + onboarded → /(tabs)/home
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -27,7 +32,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider, useTheme, colors, LoadingMandala } from '@kiaanverse/ui';
 import { I18nProvider } from '@kiaanverse/i18n';
-import { useAuthStore, useThemeStore, useUserPreferencesStore } from '@kiaanverse/store';
+import { api, type SyncQueueItem } from '@kiaanverse/api';
+import { useAuthStore, useThemeStore, useUserPreferencesStore, useSyncQueueStore, startSyncOnForeground } from '@kiaanverse/store';
+import { useNetworkStatus } from '../hooks/useNetworkStatus';
+import { OfflineBanner } from '../components/common/OfflineBanner';
 
 // Prevent splash screen from hiding until we're ready
 void SplashScreen.preventAutoHideAsync();
@@ -47,6 +55,35 @@ const queryPersister = createAsyncStoragePersister({
   storage: AsyncStorage,
   key: 'kiaanverse-query-cache',
 });
+
+// ---------------------------------------------------------------------------
+// Sync Queue Executor — routes queued mutations to the correct API endpoint
+// ---------------------------------------------------------------------------
+
+async function executeSyncItem(item: SyncQueueItem): Promise<void> {
+  switch (item.type) {
+    case 'mood':
+      await api.moods.create(item.payload as { score: number; tags?: string[]; note?: string });
+      break;
+    case 'journey_step': {
+      const { journeyId, dayIndex } = item.payload as { journeyId: string; dayIndex: number };
+      await api.journeys.completeStep(journeyId, dayIndex);
+      break;
+    }
+    case 'chat_message': {
+      const { message, sessionId } = item.payload as { message: string; sessionId?: string };
+      await api.chat.send(message, sessionId);
+      break;
+    }
+    case 'journal': {
+      await api.journal.create(item.payload as { content_encrypted: string; tags?: string[] });
+      break;
+    }
+    default:
+      // Unknown type — skip, will be dropped after max retries
+      break;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Auth Gate — redirects based on auth + onboarding state
@@ -76,12 +113,16 @@ function AuthGate({ children }: { children: React.ReactNode }): React.JSX.Elemen
 }
 
 // ---------------------------------------------------------------------------
-// App Content — splash screen + status bar + auth gate
+// App Content — splash screen + status bar + auth gate + offline banner
 // ---------------------------------------------------------------------------
 
 function AppContent(): React.JSX.Element {
   const { theme } = useTheme();
   const { status, initialize, checkBiometricAvailability } = useAuthStore();
+  const { isOnline } = useNetworkStatus();
+  const pendingCount = useSyncQueueStore((s) => s.queue.length);
+  const processQueue = useSyncQueueStore((s) => s.processQueue);
+  const wasOffline = useRef(false);
 
   const onLayoutReady = useCallback(async () => {
     if (status !== 'idle' && status !== 'loading') {
@@ -99,6 +140,28 @@ function AppContent(): React.JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Start app-foreground sync listener
+  useEffect(() => {
+    const cleanup = startSyncOnForeground(executeSyncItem);
+    return cleanup;
+  }, []);
+
+  // Auto-sync when connectivity restored
+  useEffect(() => {
+    if (!isOnline) {
+      wasOffline.current = true;
+      return;
+    }
+
+    if (wasOffline.current) {
+      wasOffline.current = false;
+      // Process any queued mutations
+      void processQueue(executeSyncItem);
+      // Refetch stale queries now that we're back online
+      void queryClient.invalidateQueries();
+    }
+  }, [isOnline, processQueue]);
+
   if (status === 'idle' || status === 'loading') {
     return (
       <View style={[styles.loading, { backgroundColor: colors.background.dark }]}>
@@ -110,6 +173,7 @@ function AppContent(): React.JSX.Element {
   return (
     <View style={styles.container} onLayout={onLayoutReady}>
       <StatusBar style={theme.colors.statusBarStyle === 'light-content' ? 'light' : 'dark'} />
+      <OfflineBanner isOffline={!isOnline} pendingCount={pendingCount} />
       <AuthGate>
         <Stack screenOptions={{ headerShown: false, animation: 'none' }}>
           <Stack.Screen name="(auth)" />

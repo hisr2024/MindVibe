@@ -5,8 +5,11 @@
  * - JWT auto-attach via request interceptor (Authorization: Bearer header)
  * - withCredentials: true for automatic cookie management (refresh_token)
  * - 401 refresh token rotation with concurrent request deduplication
+ * - 403 → dispatch logout via onAuthFailure callback
+ * - 500 → log to Sentry (optional dependency)
+ * - Network error → throw OfflineError
  * - Exponential backoff retry for transient failures (408, 429, 502, 503, 504)
- * - Auto-logout via onAuthFailure callback when refresh permanently fails
+ * - __DEV__ request/response logging
  *
  * Backend contract:
  * - Access token: stored in SecureStore, sent via Authorization header
@@ -17,10 +20,36 @@
 import axios, {
   type AxiosInstance,
   type AxiosError,
+  type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from 'axios';
 import { API_CONFIG } from './config';
+import { ApiError, AuthError, OfflineError } from './errors';
 import type { TokenManager, RefreshResponse } from './types';
+
+// React Native/Expo global — always defined at runtime
+declare const __DEV__: boolean;
+
+// ---------------------------------------------------------------------------
+// Sentry (optional — soft dependency)
+// ---------------------------------------------------------------------------
+
+interface SentryLike {
+  captureException(error: unknown, hint?: { extra?: Record<string, unknown> }): void;
+}
+
+let _sentry: SentryLike | null | undefined;
+
+function getSentry(): SentryLike | null {
+  if (_sentry !== undefined) return _sentry;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    _sentry = require('@sentry/react-native') as SentryLike;
+  } catch {
+    _sentry = null;
+  }
+  return _sentry;
+}
 
 // ---------------------------------------------------------------------------
 // Token Manager (pluggable — set by the app on startup)
@@ -79,12 +108,51 @@ function sleep(ms: number): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Error Wrapping
+// ---------------------------------------------------------------------------
+
+/**
+ * Parse a FastAPI error response into a structured ApiError.
+ * FastAPI shape: { detail: string | { error, message, ... }, code?, field? }
+ */
+function wrapAxiosError(error: AxiosError): ApiError | OfflineError {
+  if (!error.response) {
+    return new OfflineError();
+  }
+
+  const status = error.response.status;
+  const data = error.response.data as Record<string, unknown> | undefined;
+
+  let message = 'An unexpected error occurred.';
+  let code = 'UNKNOWN';
+  let field: string | undefined;
+
+  if (data) {
+    // Extract message from FastAPI detail field
+    if (typeof data.detail === 'string') {
+      message = data.detail;
+    } else if (typeof data.detail === 'object' && data.detail !== null) {
+      const detailObj = data.detail as Record<string, unknown>;
+      if (typeof detailObj.message === 'string') message = detailObj.message;
+      if (typeof detailObj.error === 'string') code = detailObj.error;
+    }
+
+    // Extract code and field
+    if (typeof data.code === 'string') code = data.code;
+    if (typeof data.field === 'string') field = data.field;
+  }
+
+  return new ApiError(message, status, code, field);
+}
+
+// ---------------------------------------------------------------------------
 // Client Factory
 // ---------------------------------------------------------------------------
 
-interface RequestConfigWithRetry extends InternalAxiosRequestConfig {
+interface RequestConfigWithMeta extends InternalAxiosRequestConfig {
   _retryCount?: number | undefined;
   _isRefreshRequest?: boolean | undefined;
+  _startTime?: number | undefined;
 }
 
 function createApiClient(): AxiosInstance {
@@ -100,19 +168,45 @@ function createApiClient(): AxiosInstance {
     },
   });
 
-  // Request interceptor: attach JWT from SecureStore
+  // -----------------------------------------------------------------------
+  // Request interceptor: attach JWT + __DEV__ logging
+  // -----------------------------------------------------------------------
   client.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
       const token = await tokenManager.getAccessToken();
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+
+      if (typeof __DEV__ !== 'undefined' && __DEV__) {
+        (config as RequestConfigWithMeta)._startTime = Date.now();
+        // eslint-disable-next-line no-console
+        console.log(`→ ${config.method?.toUpperCase()} ${config.url}`);
+      }
+
       return config;
     },
     (error) => Promise.reject(error),
   );
 
-  // Response interceptor: handle 401 refresh + transient retry
+  // -----------------------------------------------------------------------
+  // Response interceptor: __DEV__ logging for successful responses
+  // -----------------------------------------------------------------------
+  client.interceptors.response.use(
+    (response: AxiosResponse) => {
+      if (typeof __DEV__ !== 'undefined' && __DEV__) {
+        const meta = response.config as RequestConfigWithMeta;
+        const duration = meta._startTime ? Date.now() - meta._startTime : 0;
+        // eslint-disable-next-line no-console
+        console.log(`← ${response.status} ${response.config.url} (${duration}ms)`);
+      }
+      return response;
+    },
+  );
+
+  // -----------------------------------------------------------------------
+  // Response interceptor: error handling
+  // -----------------------------------------------------------------------
   let isRefreshing = false;
   let refreshSubscribers: Array<(token: string) => void> = [];
 
@@ -126,18 +220,33 @@ function createApiClient(): AxiosInstance {
   }
 
   client.interceptors.response.use(
-    (response) => response,
+    undefined,
     async (error: AxiosError) => {
-      const originalRequest = error.config as RequestConfigWithRetry | undefined;
-      if (!originalRequest) return Promise.reject(error);
+      const originalRequest = error.config as RequestConfigWithMeta | undefined;
+      if (!originalRequest) return Promise.reject(wrapAxiosError(error));
 
-      // Don't retry 401 on the refresh endpoint itself to avoid infinite loops
-      if (originalRequest._isRefreshRequest) {
-        return Promise.reject(error);
+      // __DEV__ error logging
+      if (typeof __DEV__ !== 'undefined' && __DEV__) {
+        const duration = originalRequest._startTime ? Date.now() - originalRequest._startTime : 0;
+        const status = error.response?.status ?? 'NETWORK';
+        // eslint-disable-next-line no-console
+        console.log(`← ${status} ${originalRequest.url} (${duration}ms) ERROR`);
       }
 
-      // Handle 401 — token refresh
-      if (error.response?.status === 401) {
+      // Don't process errors on the refresh endpoint itself to avoid infinite loops
+      if (originalRequest._isRefreshRequest) {
+        return Promise.reject(wrapAxiosError(error));
+      }
+
+      // --- Network error → OfflineError ---
+      if (!error.response) {
+        return Promise.reject(new OfflineError());
+      }
+
+      const status = error.response.status;
+
+      // --- 401 → token refresh (max 1 retry) ---
+      if (status === 401) {
         if (isRefreshing) {
           return new Promise((resolve) => {
             subscribeTokenRefresh((newToken: string) => {
@@ -152,11 +261,8 @@ function createApiClient(): AxiosInstance {
         isRefreshing = true;
 
         try {
-          // Try to get refresh token from SecureStore (to send in body)
           const storedRefreshToken = await tokenManager.getRefreshToken();
 
-          // Send refresh request — the httpOnly cookie is also sent automatically
-          // via withCredentials. We send the stored token in the body as a fallback.
           const refreshResponse = await axios.post<RefreshResponse>(
             `${API_CONFIG.baseURL}/api/auth/refresh`,
             storedRefreshToken ? { refresh_token: storedRefreshToken } : {},
@@ -165,11 +271,10 @@ function createApiClient(): AxiosInstance {
 
           const newAccessToken = refreshResponse.data.access_token;
 
-          // Extract new refresh token: prefer body (if enabled), then Set-Cookie header
           const newRefreshToken =
             refreshResponse.data.refresh_token ??
             extractRefreshTokenFromHeaders(refreshResponse.headers as Record<string, unknown>) ??
-            storedRefreshToken ?? // Keep existing if we can't extract the new one
+            storedRefreshToken ??
             '';
 
           await tokenManager.setTokens(newAccessToken, newRefreshToken);
@@ -180,16 +285,49 @@ function createApiClient(): AxiosInstance {
           }
           return client(originalRequest);
         } catch {
-          // Refresh failed permanently — auto-logout
           await tokenManager.clearTokens();
           tokenManager.onAuthFailure?.();
-          return Promise.reject(error);
+          return Promise.reject(
+            new AuthError('Session expired. Please sign in again.', 401, 'TOKEN_EXPIRED'),
+          );
         } finally {
           isRefreshing = false;
         }
       }
 
-      // Handle transient errors — retry with backoff
+      // --- 403 → check reason before forcing logout ---
+      if (status === 403) {
+        const data403 = error.response.data as Record<string, unknown> | undefined;
+        const detail403 = typeof data403?.detail === 'string' ? data403.detail : '';
+
+        // Email not verified is NOT an authorization failure — let the caller handle it
+        if (detail403 === 'email_not_verified') {
+          return Promise.reject(wrapAxiosError(error));
+        }
+
+        // True authorization failure — force logout
+        await tokenManager.clearTokens();
+        tokenManager.onAuthFailure?.();
+        return Promise.reject(
+          new AuthError('Access denied. Please sign in again.', 403, 'UNKNOWN'),
+        );
+      }
+
+      // --- 500 → log to Sentry ---
+      if (status >= 500) {
+        const sentry = getSentry();
+        if (sentry) {
+          sentry.captureException(error, {
+            extra: {
+              url: originalRequest.url,
+              method: originalRequest.method,
+              status,
+            },
+          });
+        }
+      }
+
+      // --- Transient errors → retry with backoff ---
       if (isTransientError(error)) {
         const retryCount = originalRequest._retryCount ?? 0;
 
@@ -201,7 +339,8 @@ function createApiClient(): AxiosInstance {
         }
       }
 
-      return Promise.reject(error);
+      // --- All other errors → wrap in ApiError ---
+      return Promise.reject(wrapAxiosError(error));
     },
   );
 

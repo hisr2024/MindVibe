@@ -9,4 +9,5 @@ export { useOnboardingStore, type OnboardingAnswers } from './onboardingStore';
 export { useUserPreferencesStore, type VoiceGender } from './userPreferencesStore';
 export { useSadhanaStore, type SadhanaPhase } from './sadhanaStore';
 export { useGitaStore } from './gitaStore';
+export { useSyncQueueStore, startSyncOnForeground, type MutationType } from './syncQueue';
 export { useMoodStore, MOOD_STATES } from './moodStore';

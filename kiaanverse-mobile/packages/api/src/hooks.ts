@@ -3,10 +3,16 @@
  *
  * Each hook returns typed { data, isLoading, error } and handles
  * caching, refetching, and background updates automatically.
+ *
+ * Offline-first:
+ * - Gita verse queries use gitaCache (AsyncStorage, 7-day TTL, LRU 50 entries)
+ *   as a fallback when the network request fails. On success, the cache is updated.
+ * - React Query's own AsyncStorage persister handles general query caching (24h).
  */
 
 import { useQuery, useMutation, useQueryClient, type UseQueryResult, type UseMutationResult } from '@tanstack/react-query';
 import { api } from './endpoints';
+import { gitaCache } from './cache/gitaCache';
 import type {
   GitaChapter,
   GitaChapterDetail,
@@ -66,6 +72,32 @@ export const queryKeys = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// Gita Cache Helpers — fetch from API with AsyncStorage fallback
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch data from API, cache on success, fall back to cache on failure.
+ * This gives offline-first behavior for Gita content.
+ */
+async function fetchWithGitaCache<T>(
+  cacheKey: string,
+  fetcher: () => Promise<T>,
+): Promise<T> {
+  try {
+    const result = await fetcher();
+    // Cache the fresh result for offline access
+    void gitaCache.setVerse(cacheKey, result);
+    return result;
+  } catch (error) {
+    // Network failed — try the offline cache
+    const cached = await gitaCache.getVerse<T>(cacheKey);
+    if (cached !== null) return cached;
+    // No cache available — re-throw the original error
+    throw error;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Profile
 // ---------------------------------------------------------------------------
 
@@ -80,23 +112,23 @@ export function useProfile(): UseQueryResult<ProfileData> {
 }
 
 // ---------------------------------------------------------------------------
-// Gita
+// Gita (offline-first with gitaCache fallback)
 // ---------------------------------------------------------------------------
 
 export function useGitaChapters(): UseQueryResult<GitaChapter[]> {
   return useQuery({
     queryKey: queryKeys.gitaChapters,
-    queryFn: async () => {
-      const { data } = await api.gita.chapters();
-      // Backend returns {chapter, name, summary, verse_count} — transform to frontend GitaChapter shape
-      const raw = data as Array<{ chapter: number; name: string; summary: string; verse_count: number }>;
-      return raw.map((ch): GitaChapter => ({
-        id: ch.chapter,
-        title: ch.name,
-        versesCount: ch.verse_count,
-        summary: ch.summary,
-      }));
-    },
+    queryFn: () =>
+      fetchWithGitaCache('chapters:all', async () => {
+        const { data } = await api.gita.chapters();
+        const raw = data as Array<{ chapter: number; name: string; summary: string; verse_count: number }>;
+        return raw.map((ch): GitaChapter => ({
+          id: ch.chapter,
+          title: ch.name,
+          versesCount: ch.verse_count,
+          summary: ch.summary,
+        }));
+      }),
     staleTime: 1000 * 60 * 60, // Chapters rarely change — cache 1 hour
   });
 }
@@ -104,18 +136,18 @@ export function useGitaChapters(): UseQueryResult<GitaChapter[]> {
 export function useGitaChapter(chapterId: number): UseQueryResult<ChapterDetail> {
   return useQuery({
     queryKey: queryKeys.gitaChapter(chapterId),
-    queryFn: async () => {
-      const { data } = await api.gita.chapter(chapterId);
-      // Backend returns snake_case — transform to match frontend ChapterDetail shape
-      const raw = data as { chapter: number; name: string; summary: string; verse_count: number; verses: GitaVerse[]; themes: string[] };
-      return {
-        id: raw.chapter,
-        title: raw.name,
-        versesCount: raw.verse_count,
-        summary: raw.summary,
-        verses: raw.verses ?? [],
-      } as ChapterDetail;
-    },
+    queryFn: () =>
+      fetchWithGitaCache(`chapter:${chapterId}`, async () => {
+        const { data } = await api.gita.chapter(chapterId);
+        const raw = data as { chapter: number; name: string; summary: string; verse_count: number; verses: GitaVerse[]; themes: string[] };
+        return {
+          id: raw.chapter,
+          title: raw.name,
+          versesCount: raw.verse_count,
+          summary: raw.summary,
+          verses: raw.verses ?? [],
+        } as ChapterDetail;
+      }),
     staleTime: 1000 * 60 * 60,
   });
 }
@@ -123,20 +155,20 @@ export function useGitaChapter(chapterId: number): UseQueryResult<ChapterDetail>
 export function useGitaVerse(chapter: number, verse: number): UseQueryResult<GitaVerse> {
   return useQuery({
     queryKey: queryKeys.gitaVerse(chapter, verse),
-    queryFn: async () => {
-      const { data } = await api.gita.verse(chapter, verse);
-      // Backend returns VerseResponse { verse: VerseDetail, related_verses: [...] } — extract and transform
-      const raw = data as { verse: { chapter: number; verse: number; verse_id: string; sanskrit: string; english: string; hindi: string; theme: string } };
-      const v = raw.verse;
-      return {
-        id: v.verse_id,
-        chapter: v.chapter,
-        verse: v.verse,
-        sanskrit: v.sanskrit,
-        transliteration: '',
-        translation: v.english,
-      } as GitaVerse;
-    },
+    queryFn: () =>
+      fetchWithGitaCache(`verse:${chapter}:${verse}`, async () => {
+        const { data } = await api.gita.verse(chapter, verse);
+        const raw = data as { verse: { chapter: number; verse: number; verse_id: string; sanskrit: string; english: string; hindi: string; theme: string } };
+        const v = raw.verse;
+        return {
+          id: v.verse_id,
+          chapter: v.chapter,
+          verse: v.verse,
+          sanskrit: v.sanskrit,
+          transliteration: '',
+          translation: v.english,
+        } as GitaVerse;
+      }),
     staleTime: 1000 * 60 * 60,
   });
 }
@@ -146,7 +178,6 @@ export function useGitaSearch(query: string): UseQueryResult<GitaVerse[]> {
     queryKey: queryKeys.gitaSearch(query),
     queryFn: async () => {
       const { data } = await api.gita.search(query);
-      // Backend returns SearchResponse { results: SearchResult[] } — extract and transform
       const raw = data as { results?: Array<{ verse: { chapter: number; verse: number; verse_id: string; sanskrit: string; english: string; hindi: string; theme: string } }> };
       if (!raw.results) return [];
       return raw.results.map((r): GitaVerse => ({
@@ -179,10 +210,11 @@ export function useGitaSearchFull(keyword: string): UseQueryResult<GitaSearchRes
 export function useGitaVerseDetail(chapter: number, verse: number): UseQueryResult<GitaVerseResponse> {
   return useQuery({
     queryKey: queryKeys.gitaVerseDetail(chapter, verse),
-    queryFn: async () => {
-      const { data } = await api.gita.verse(chapter, verse);
-      return data as GitaVerseResponse;
-    },
+    queryFn: () =>
+      fetchWithGitaCache(`verseDetail:${chapter}:${verse}`, async () => {
+        const { data } = await api.gita.verse(chapter, verse);
+        return data as GitaVerseResponse;
+      }),
     staleTime: 1000 * 60 * 60 * 24, // 24 hours — verses are immutable
     enabled: chapter > 0 && verse > 0,
   });
@@ -192,10 +224,11 @@ export function useGitaVerseDetail(chapter: number, verse: number): UseQueryResu
 export function useGitaTranslations(verseId: string): UseQueryResult<GitaTranslationSet> {
   return useQuery({
     queryKey: queryKeys.gitaTranslations(verseId),
-    queryFn: async () => {
-      const { data } = await api.gita.translations(verseId);
-      return data as GitaTranslationSet;
-    },
+    queryFn: () =>
+      fetchWithGitaCache(`translations:${verseId}`, async () => {
+        const { data } = await api.gita.translations(verseId);
+        return data as GitaTranslationSet;
+      }),
     staleTime: 1000 * 60 * 60 * 24,
     enabled: verseId.length > 0,
   });
@@ -205,10 +238,11 @@ export function useGitaTranslations(verseId: string): UseQueryResult<GitaTransla
 export function useGitaChapterDetail(chapterId: number): UseQueryResult<GitaChapterDetail> {
   return useQuery({
     queryKey: queryKeys.gitaChapter(chapterId),
-    queryFn: async () => {
-      const { data } = await api.gita.chapter(chapterId);
-      return data as GitaChapterDetail;
-    },
+    queryFn: () =>
+      fetchWithGitaCache(`chapterDetail:${chapterId}`, async () => {
+        const { data } = await api.gita.chapter(chapterId);
+        return data as GitaChapterDetail;
+      }),
     staleTime: 1000 * 60 * 60 * 24,
     enabled: chapterId > 0 && chapterId <= 18,
   });

@@ -15,6 +15,8 @@
 
 import { AxiosError, type AxiosResponse } from 'axios';
 import { apiClient } from '../client';
+import { AuthError } from '../errors';
+import type { AuthErrorCode } from '../errors';
 import type {
   User,
   LoginResponse,
@@ -22,36 +24,6 @@ import type {
   MeResponse,
   RefreshResponse,
 } from '../types';
-
-// ---------------------------------------------------------------------------
-// Error Codes
-// ---------------------------------------------------------------------------
-
-export type AuthErrorCode =
-  | 'INVALID_CREDENTIALS'
-  | 'EMAIL_NOT_VERIFIED'
-  | 'EMAIL_TAKEN'
-  | 'TOKEN_EXPIRED'
-  | 'NETWORK_ERROR'
-  | 'VALIDATION_ERROR'
-  | 'ACCOUNT_LOCKED'
-  | 'UNKNOWN';
-
-// ---------------------------------------------------------------------------
-// AuthError
-// ---------------------------------------------------------------------------
-
-export class AuthError extends Error {
-  readonly statusCode: number;
-  readonly code: AuthErrorCode;
-
-  constructor(message: string, statusCode: number, code: AuthErrorCode) {
-    super(message);
-    this.name = 'AuthError';
-    this.statusCode = statusCode;
-    this.code = code;
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Registration Payload

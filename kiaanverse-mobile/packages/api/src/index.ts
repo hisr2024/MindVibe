@@ -1,12 +1,34 @@
 /**
- * @kiaanverse/api — API client and typed endpoints
+ * @kiaanverse/api — API client, typed endpoints, error classes, and query client
  */
 
+// Client
 export { apiClient, setTokenManager } from './client';
 export { api } from './endpoints';
 export { API_CONFIG } from './config';
-export { authService, AuthError } from './auth/authService';
-export type { AuthErrorCode, RegisterData, LoginResult } from './auth/authService';
+
+// Error classes and type guards
+export {
+  ApiError,
+  AuthError,
+  OfflineError,
+  ValidationError,
+  isApiError,
+  isAuthError,
+  isOfflineError,
+  isValidationError,
+} from './errors';
+export type { AuthErrorCode } from './errors';
+
+// Auth service
+export { authService } from './auth/authService';
+export type { RegisterData, LoginResult } from './auth/authService';
+
+// Query client
+export { createAppQueryClient, createAppPersister } from './queryClient';
+
+// Gita verse cache (offline-first)
+export { gitaCache } from './cache/gitaCache';
 
 // Types
 export type {
