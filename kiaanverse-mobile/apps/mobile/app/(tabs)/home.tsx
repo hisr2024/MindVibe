@@ -6,7 +6,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
-import { Screen, Text, Card, Button, Divider, colors, spacing } from '@kiaanverse/ui';
+import { Screen, Text, Card, Divider, colors, spacing } from '@kiaanverse/ui';
 import { useAuthStore } from '@kiaanverse/store';
 import { useJourneyDashboard, useCreateMood } from '@kiaanverse/api';
 import { useTranslation } from '@kiaanverse/i18n';

@@ -16,7 +16,6 @@ import time
 import logging
 from collections import defaultdict, deque
 from typing import Awaitable, Callable, Dict, Set, Tuple
-from datetime import datetime, timedelta
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request

@@ -540,8 +540,8 @@ class MultiPassGitaAuthenticator:
         ]
         if len(found_terms) < 1:
             issues.append(
-                f"P2-Read1: No Gita terminology found in entry. "
-                f"At least 1 Gita-related term is required."
+                "P2-Read1: No Gita terminology found in entry. "
+                "At least 1 Gita-related term is required."
             )
 
         # --- SECOND READ: Non-Gita content detection ---

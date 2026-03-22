@@ -13,17 +13,15 @@ KIAAN Impact: POSITIVE - Enhanced security without affecting legitimate KIAAN in
 """
 
 import re
-import hashlib
 import logging
-import time
 from typing import Awaitable, Callable, Dict, List, Set, Optional, Tuple
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response, JSONResponse
-from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
+from starlette.status import HTTP_403_FORBIDDEN
 
 logger = logging.getLogger(__name__)
 

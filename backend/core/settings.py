@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from typing import Optional, Literal
+from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
 

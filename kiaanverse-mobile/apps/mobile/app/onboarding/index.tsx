@@ -84,7 +84,7 @@ function ProgressDots({ current, total }: { current: number; total: number }): R
 // ---------------------------------------------------------------------------
 
 export default function OnboardingScreen(): React.JSX.Element {
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: _screenWidth } = useWindowDimensions();
   const router = useRouter();
 
   const {
@@ -229,8 +229,6 @@ export default function OnboardingScreen(): React.JSX.Element {
     },
     [
       answers.dailyPracticeTime,
-      answers.gitaFamiliarity,
-      answers.purposes,
       complete,
       completeOnboarding,
       router,

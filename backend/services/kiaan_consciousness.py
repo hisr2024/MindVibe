@@ -36,19 +36,13 @@ Quantum-Level Verification:
     - Identity evolution is bounded (cannot exceed defined personality space)
 """
 
-import asyncio
-import json
 import logging
-import math
-import os
-import time
 import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum
-from pathlib import Path
-from typing import Any, Deque, Dict, List, Optional, Set, Tuple
+from typing import Any, Deque, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

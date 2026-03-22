@@ -6,9 +6,8 @@ import json
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,9 +21,7 @@ from backend.models import (
     AdminAuditAction,
     AdminPermission,
     Payment,
-    SubscriptionPlan,
     User,
-    UserProfile,
     UserSubscription,
 )
 from backend.services.admin_auth_service import create_audit_log

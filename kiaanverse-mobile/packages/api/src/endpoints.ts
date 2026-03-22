@@ -62,9 +62,10 @@ export const api = {
 
   /** Karma tree */
   karma: {
-    tree: () => apiClient.get('/api/karma/tree'),
-    award: (action: string, points: number) =>
-      apiClient.post('/api/karma/award', { action, points }),
+    tree: () => apiClient.get('/api/karmic-tree/progress'),
+    achievements: () => apiClient.get('/api/karmic-tree/achievements'),
+    unlock: (achievementId: string) =>
+      apiClient.post('/api/karmic-tree/unlock', { achievement_id: achievementId }),
   },
 
   /** Encrypted journal */
@@ -105,12 +106,10 @@ export const api = {
       apiClient.post(`/api/journey-engine/journeys/${journeyId}/resume`),
     /** Full journey detail with steps */
     detail: (journeyId: string) =>
-      apiClient.get(`/api/journeys/${journeyId}`),
-    /** Complete a specific step */
-    completeStepById: (journeyId: string, stepId: string) =>
-      apiClient.post(`/api/journeys/${journeyId}/steps/${stepId}/complete`),
-    /** User progress across all journeys */
-    progress: () => apiClient.get('/api/journeys/progress'),
+      apiClient.get(`/api/journey-engine/journeys/${journeyId}`),
+    /** Complete a specific step by day index */
+    completeStepByDay: (journeyId: string, dayIndex: number) =>
+      apiClient.post(`/api/journey-engine/journeys/${journeyId}/steps/${dayIndex}/complete`),
     dashboard: () => apiClient.get('/api/journey-engine/dashboard'),
     enemies: () => apiClient.get('/api/journey-engine/enemies'),
     enemyProgress: (enemy: string) =>
@@ -131,7 +130,7 @@ export const api = {
   voice: {
     transcribe: (formData: FormData) =>
       apiClient.post<{ transcript: string; confidence: number }>(
-        '/api/voice/transcribe',
+        '/api/kiaan/transcribe',
         formData,
       ),
   },

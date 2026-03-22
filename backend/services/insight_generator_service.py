@@ -6,8 +6,7 @@ Generates personalized, actionable insights using GPT-4o-mini based on user anal
 Quantum Enhancement #6: Advanced Analytics Dashboard
 """
 
-from typing import List, Dict, Optional
-from datetime import datetime
+from typing import List, Dict
 import logging
 import statistics
 import os

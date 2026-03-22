@@ -16,7 +16,7 @@ License: MIT
 import logging
 from typing import Optional
 from .base import BaseTTSProvider, ProviderCapabilities, ProviderStatus
-from ..models import SpeechSynthesisRequest, SpeechSynthesisResult, SpeechProvider, VoiceQuality
+from ..models import SpeechSynthesisRequest, SpeechSynthesisResult, VoiceQuality
 
 logger = logging.getLogger(__name__)
 

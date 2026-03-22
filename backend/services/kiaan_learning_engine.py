@@ -36,7 +36,7 @@ import re
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 from dataclasses import dataclass, field
 from enum import Enum
 

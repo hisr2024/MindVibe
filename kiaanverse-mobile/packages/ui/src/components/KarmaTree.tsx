@@ -93,6 +93,7 @@ function AnimatedLeaf({
   const scale = useSharedValue(0);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     scale.value = withDelay(index * 100, withSpring(1, spring.bouncy));
   }, [scale, index]);
 

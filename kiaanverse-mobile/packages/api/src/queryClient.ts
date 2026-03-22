@@ -31,7 +31,6 @@ let _sentry: SentryLike | null | undefined;
 function getSentry(): SentryLike | null {
   if (_sentry !== undefined) return _sentry;
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     _sentry = require('@sentry/react-native') as SentryLike;
   } catch {
     _sentry = null;
@@ -45,7 +44,6 @@ function getSentry(): SentryLike | null {
 
 function handleGlobalError(error: unknown): void {
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
-    // eslint-disable-next-line no-console
     console.error('[QueryClient] Error:', error);
   }
 

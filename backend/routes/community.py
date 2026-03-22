@@ -25,8 +25,7 @@ from backend.services.anonymization_service import (
 from backend.services.moderation_service import (
     get_moderation_service,
     ModerationService,
-    ModerationResult,
-    ModerationReport
+    ModerationResult
 )
 
 router = APIRouter(prefix="/api/community", tags=["Community Wisdom Circles"])

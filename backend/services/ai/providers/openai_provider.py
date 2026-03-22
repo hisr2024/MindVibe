@@ -9,14 +9,12 @@ import asyncio
 import logging
 import os
 import time
-from datetime import datetime
 
 from .base import (
     AIProvider,
     AIProviderError,
     AuthenticationError,
     HealthCheckResult,
-    InvalidResponseError,
     ProviderResponse,
     ProviderStatus,
     RateLimitError,

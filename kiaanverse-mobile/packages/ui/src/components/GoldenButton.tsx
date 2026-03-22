@@ -79,6 +79,7 @@ function GoldenButtonInner({
   }));
 
   const handlePressIn = useCallback(() => {
+    // eslint-disable-next-line react-hooks/immutability
     scale.value = withSpring(0.96, spring.default);
     if (!isDisabled) {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -86,6 +87,7 @@ function GoldenButtonInner({
   }, [scale, isDisabled]);
 
   const handlePressOut = useCallback(() => {
+    // eslint-disable-next-line react-hooks/immutability
     scale.value = withSpring(1, spring.default);
   }, [scale]);
 
@@ -94,6 +96,7 @@ function GoldenButtonInner({
 
   useEffect(() => {
     if (variant === 'divine') {
+      // eslint-disable-next-line react-hooks/immutability
       glowOpacity.value = withRepeat(
         withSequence(
           withTiming(0.8, { duration: duration.sacred, easing: Easing.inOut(Easing.ease) }),
@@ -103,6 +106,7 @@ function GoldenButtonInner({
         false,
       );
     } else {
+       
       glowOpacity.value = 0;
     }
   }, [variant, glowOpacity]);

@@ -217,7 +217,7 @@ def build_gita_context(verses: list[dict[str, Any]], tool: str = "general") -> t
         Tuple of (context_string, source_references)
     """
     lines = ["[GITA_CORE_WISDOM_CONTEXT]"]
-    lines.append(f"Source: Bhagavad Gita 701-verse repository (static core wisdom)")
+    lines.append("Source: Bhagavad Gita 701-verse repository (static core wisdom)")
     lines.append(f"Retrieved {len(verses)} relevant verses:\n")
     sources: list[dict[str, str]] = []
 
@@ -329,7 +329,7 @@ def generate_viyoga_fallback(
 
         "one_eternal_truth": f"({primary['ref']}): '{primary['text'][:150]}...' You are not your outcomes. You are the consciousness that acts, witnesses, and learns - regardless of what unfolds.",
 
-        "one_sacred_action": f"Today, practice this: Before taking any action related to this concern, pause. Place your hand on your heart. Take three slow breaths. Then say: 'I offer my best effort as an act of devotion. The result belongs to the universe.' Then act with complete presence, as if the action itself is the sacred offering.",
+        "one_sacred_action": "Today, practice this: Before taking any action related to this concern, pause. Place your hand on your heart. Take three slow breaths. Then say: 'I offer my best effort as an act of devotion. The result belongs to the universe.' Then act with complete presence, as if the action itself is the sacred offering.",
 
         "one_releasing_question": "If you knew - truly knew in your bones - that your worth and peace could never depend on this outcome, how would you act differently right now?",
     }
@@ -413,7 +413,7 @@ def generate_relationship_compass_fallback(
 
         "inner_conflict_mirror": f"The Gita reveals: all outer conflicts mirror inner ones. The teaching of svadhyaya (self-study) invites us to look within first. What do you truly need beneath this conflict with {rel_context}? To be seen? Understood? Respected? The verse ({teachings[1]['ref'] if len(teachings) > 1 else primary['ref']}) illuminates: '{teachings[1]['text'][:150] if len(teachings) > 1 else primary['text'][:150]}...'",
 
-        "gita_teachings_used": f"These verses from the Bhagavad Gita illuminate your path:\n\n" + "\n".join([
+        "gita_teachings_used": "These verses from the Bhagavad Gita illuminate your path:\n\n" + "\n".join([
             f"- ({t['ref']}): \"{t['text'][:120]}...\" [{t.get('principle', 'Dharma')}]"
             for t in teachings[:4]
         ]),

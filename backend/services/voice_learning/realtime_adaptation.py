@@ -12,14 +12,11 @@ This enables KIAAN to sound natural with emotion shifts, like Siri/Alexa.
 
 import logging
 import re
-from dataclasses import dataclass, field
-from datetime import datetime
-from typing import Optional, Dict, List, Tuple, Any
-import asyncio
+from dataclasses import dataclass
+from typing import Optional, Dict, List, Any
 
 from backend.services.voice_learning.sentiment_analysis import (
     SentimentAnalysisService,
-    SentimentResult,
     EmotionCategory,
     get_sentiment_service,
 )

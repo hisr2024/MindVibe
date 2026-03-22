@@ -20,9 +20,6 @@ from ..models import (
     SpeechRecognitionResult,
     VoiceCloneRequest,
     VoiceProfile,
-    SpeechQualityMetrics,
-    SpeechProvider,
-    SpeechRecognizer,
     VoiceQuality,
 )
 

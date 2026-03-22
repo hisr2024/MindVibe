@@ -17,33 +17,27 @@ KIAAN always has a voice.
 """
 
 import logging
-import asyncio
 import time
 import hashlib
-from typing import Optional, List, Dict, Any, Tuple
+from typing import Optional, List, Dict, Any
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from collections import defaultdict
-import json
 
 from .models import (
     SpeechSynthesisRequest,
     SpeechSynthesisResult,
     SpeechRecognitionRequest,
     SpeechRecognitionResult,
-    VoiceProfile,
     SpeechProvider,
     SpeechRecognizer,
     VoiceQuality,
-    EmotionalProsody,
     DIVINE_VOICE_PROFILES,
     DIVINE_EMOTION_PROSODY,
 )
 
 from .providers.base import (
     BaseTTSProvider,
-    BaseSTTProvider,
-    ProviderRegistry,
     get_provider_registry,
 )
 
@@ -312,7 +306,7 @@ class SpeechModuleOrchestrator:
         # Check cache
         cache_key = self._generate_cache_key(request)
         if request.use_cache and cache_key in self._audio_cache:
-            logger.debug(f"Cache hit for synthesis request")
+            logger.debug("Cache hit for synthesis request")
             return SpeechSynthesisResult(
                 success=True,
                 audio_data=self._audio_cache[cache_key],

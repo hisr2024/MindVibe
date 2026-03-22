@@ -119,7 +119,6 @@ export async function registerBackgroundTasks(): Promise<void> {
   } catch (error) {
     // Background fetch may not be available on all devices (e.g., emulators)
     if (__DEV__) {
-      // eslint-disable-next-line no-console
       console.warn('Background task registration failed (may not be available):', error);
     }
   }

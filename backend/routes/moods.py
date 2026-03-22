@@ -3,7 +3,6 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional
 from pydantic import BaseModel
 
 from backend.deps import get_db, get_current_user

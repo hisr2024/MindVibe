@@ -24,7 +24,6 @@ import json
 import logging
 import os
 import re
-import shutil
 import subprocess
 import tempfile
 import sqlite3
@@ -33,10 +32,9 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 import aiohttp
-from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
@@ -249,7 +247,7 @@ class WebSearchTool(BaseTool):
     async def _search_stackoverflow(self, session: aiohttp.ClientSession, query: str, max_results: int) -> list[dict]:
         """Search Stack Overflow questions."""
         try:
-            url = f"https://api.stackexchange.com/2.3/search/advanced"
+            url = "https://api.stackexchange.com/2.3/search/advanced"
             params = {
                 "site": "stackoverflow",
                 "q": query,

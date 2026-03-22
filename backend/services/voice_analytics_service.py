@@ -9,15 +9,13 @@ This service implements real-time analytics collection and daily aggregation
 for the admin dashboard, replacing mock data with production metrics.
 """
 
-import asyncio
 import logging
 import uuid
 from datetime import datetime, date, timedelta
-from decimal import Decimal
 from typing import Optional, Dict, List, Any
 from collections import defaultdict
 
-from sqlalchemy import select, func, and_, or_, case
+from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import (
@@ -27,8 +25,6 @@ from backend.models import (
     VoiceWakeWordEvent,
     VoiceEnhancementSession,
     VoiceDailyCheckin,
-    UserVoicePreferences,
-    User,
 )
 
 logger = logging.getLogger(__name__)

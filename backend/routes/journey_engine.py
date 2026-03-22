@@ -45,8 +45,7 @@ Usage:
 from __future__ import annotations
 
 import logging
-from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
@@ -55,7 +54,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.deps import get_current_user, get_db
 from backend.services.journey_engine import (
     JourneyEngineService,
-    MultiJourneyManager,
     EnemyProgressTracker,
     ModernExamplesDB,
 )

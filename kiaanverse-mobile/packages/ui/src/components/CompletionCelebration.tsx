@@ -15,8 +15,6 @@ import Animated, {
   withDelay,
   withTiming,
   withSequence,
-  Easing,
-  runOnJS,
 } from 'react-native-reanimated';
 import { useTheme } from '../theme/useTheme';
 import { spacing } from '../tokens/spacing';
@@ -55,10 +53,12 @@ function Particle({ index, visible }: { index: number; visible: boolean }): Reac
 
   useEffect(() => {
     if (visible) {
+      // eslint-disable-next-line react-hooks/immutability
       progress.value = withDelay(
         index * 40,
         withSpring(1, { damping: 8, stiffness: 120 }),
       );
+      // eslint-disable-next-line react-hooks/immutability
       opacity.value = withDelay(
         index * 40,
         withSequence(
@@ -67,7 +67,9 @@ function Particle({ index, visible }: { index: number; visible: boolean }): Reac
         ),
       );
     } else {
+       
       progress.value = 0;
+       
       opacity.value = 0;
     }
   }, [visible, index, progress, opacity]);
@@ -114,8 +116,11 @@ function CompletionCelebrationInner({
 
   useEffect(() => {
     if (visible) {
+      // eslint-disable-next-line react-hooks/immutability
       containerScale.value = withSpring(1, { damping: 12, stiffness: 150 });
+      // eslint-disable-next-line react-hooks/immutability
       xpScale.value = withDelay(400, withSpring(1, { damping: 10, stiffness: 200 }));
+      // eslint-disable-next-line react-hooks/immutability
       karmaScale.value = withDelay(600, withSpring(1, { damping: 10, stiffness: 200 }));
 
       if (onDismiss) {
@@ -123,8 +128,11 @@ function CompletionCelebrationInner({
         return () => clearTimeout(timer);
       }
     } else {
+       
       containerScale.value = 0;
+       
       xpScale.value = 0;
+       
       karmaScale.value = 0;
     }
     return undefined;

@@ -8,7 +8,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint app/",
+    "lint": "eslint app/ components/ hooks/ services/ utils/",
+    "test": "jest --passWithNoTests",
+    "format:check": "prettier --check \"app/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\" \"hooks/**/*.{ts,tsx}\" \"services/**/*.{ts,tsx}\" \"utils/**/*.{ts,tsx}\"",
     "clean": "rm -rf .expo dist node_modules/.cache"
   },
   "dependencies": {
@@ -55,7 +57,15 @@
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
+    "@types/jest": "^29.5.0",
     "@types/react": "~18.2.0",
+    "@types/react-test-renderer": "~18.2.0",
+    "eslint": "^8.57.0",
+    "eslint-config-expo": "~7.1.0",
+    "eslint-config-prettier": "^9.1.0",
+    "jest": "^29.7.0",
+    "jest-expo": "~51.0.0",
+    "react-test-renderer": "18.2.0",
     "typescript": "~5.3.3"
   }
 }

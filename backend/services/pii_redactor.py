@@ -10,7 +10,6 @@ sensitive personal context that should not be sent to third-party providers.
 
 import logging
 import re
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 

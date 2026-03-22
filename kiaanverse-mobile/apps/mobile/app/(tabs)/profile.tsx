@@ -12,7 +12,6 @@ import {
   Settings,
   Moon,
   Sun,
-  LogOut,
   ChevronRight,
 } from 'lucide-react-native';
 import { Screen, Text, Card, Avatar, Divider, Button, colors, spacing, radii } from '@kiaanverse/ui';
@@ -48,7 +47,7 @@ export default function ProfileScreen(): React.JSX.Element {
   const { t } = useTranslation('common');
   const { theme, isDark } = useTheme();
   const { user, logout } = useAuthStore();
-  const { mode, setMode } = useThemeStore();
+  const { mode: _mode, setMode } = useThemeStore();
 
   const handleToggleTheme = useCallback(() => {
     setMode(isDark ? 'light' : 'dark');

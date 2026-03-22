@@ -9,7 +9,6 @@ accessible through sound vibrations that resonate with all beings.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 from typing import Optional, List, Literal
@@ -1130,11 +1129,9 @@ async def get_compute_policy(
     """
     from backend.services.voice_compute_policy import (
         DeviceInfo,
-        DeviceType,
         NetworkQuality,
         get_voice_compute_policy,
     )
-    from backend.services.subscription_service import get_user_tier as _get_tier
 
     # Map network type string to enum
     network_map = {

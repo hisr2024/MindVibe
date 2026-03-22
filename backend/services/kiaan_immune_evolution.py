@@ -37,20 +37,17 @@ Quantum-Level Verification:
     - Evolution metrics are monotonically tracked (no data loss)
 """
 
-import asyncio
 import hashlib
 import json
 import logging
 import math
-import os
 import time
 import uuid
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from enum import Enum
-from pathlib import Path
-from typing import Any, Callable, Deque, Dict, List, Optional, Set, Tuple
+from typing import Any, Callable, Deque, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -250,7 +247,7 @@ class AnomalyDetector:
                 threats.append(ThreatDetection(
                     type=ThreatType.ABUSE,
                     severity=ThreatSeverity.MEDIUM,
-                    description=f"Abusive language detected",
+                    description="Abusive language detected",
                     source_input=input_text[:200],
                     confidence=confidence,
                 ))

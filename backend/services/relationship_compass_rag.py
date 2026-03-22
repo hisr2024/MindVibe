@@ -633,7 +633,7 @@ async def call_ai_provider(messages: list[dict[str, str]]) -> str | None:
     """Call AI provider with multi-provider fallback support (like KIAAN Chat)."""
     # Try multi-provider manager first
     try:
-        from backend.services.ai.providers.provider_manager import get_provider_manager, AIProviderError
+        from backend.services.ai.providers.provider_manager import get_provider_manager
         provider_manager = get_provider_manager()
         if provider_manager:
             logger.info("Using ProviderManager for Relationship Compass")
@@ -915,13 +915,13 @@ def generate_secular_response(chunks: list[GitaChunk], relationship_type: str, u
     # I Hear You - Validation (derived from Gita's Karuna/Daya)
     sections.append("# I Hear You")
     if is_anger:
-        sections.append(f"What you're feeling makes complete sense. When someone we care about does something that feels unfair, that fire inside is your mind's way of saying \"this matters deeply to me.\" The ancient wisdom teaches that strong emotions aren't the enemy - it's what we do with them that matters. Don't judge yourself for feeling this way.")
+        sections.append("What you're feeling makes complete sense. When someone we care about does something that feels unfair, that fire inside is your mind's way of saying \"this matters deeply to me.\" The ancient wisdom teaches that strong emotions aren't the enemy - it's what we do with them that matters. Don't judge yourself for feeling this way.")
     elif is_hurt:
-        sections.append(f"I can hear how much this is affecting you. When someone close to us causes pain, it can shake our whole sense of safety. Your feelings are completely valid - this kind of hurt runs deep precisely because this relationship matters to you.")
+        sections.append("I can hear how much this is affecting you. When someone close to us causes pain, it can shake our whole sense of safety. Your feelings are completely valid - this kind of hurt runs deep precisely because this relationship matters to you.")
     elif is_fear:
-        sections.append(f"It sounds like there's a lot of uncertainty here. That unsettled feeling often comes from caring deeply about something and feeling like it's not in your control. What you're feeling is a very human response to an uncertain situation.")
+        sections.append("It sounds like there's a lot of uncertainty here. That unsettled feeling often comes from caring deeply about something and feeling like it's not in your control. What you're feeling is a very human response to an uncertain situation.")
     else:
-        sections.append(f"I hear you. What you're going through is genuinely difficult. The fact that you're taking time to reflect rather than just react says something important about you - it shows real self-awareness and courage.")
+        sections.append("I hear you. What you're going through is genuinely difficult. The fact that you're taking time to reflect rather than just react says something important about you - it shows real self-awareness and courage.")
     sections.append("")
 
     # What Might Be Happening - Insight (derived from Gita's Raga-Dvesha + Krodha chain)
@@ -931,19 +931,19 @@ def generate_secular_response(chunks: list[GitaChunk], relationship_type: str, u
 
     if is_anger:
         # Derived from BG 2.62-63 Krodha chain + BG 16.21 three gates
-        sections.append(f"- **The replay trap**: When we keep mentally replaying what upset us, frustration grows into full anger, and anger clouds our thinking. Notice if you're stuck in a mental loop.")
-        sections.append(f"- **Unmet needs beneath the anger**: Strong frustration almost always signals something important to us isn't being acknowledged. What do you really need here - respect? Fairness? To be heard?")
+        sections.append("- **The replay trap**: When we keep mentally replaying what upset us, frustration grows into full anger, and anger clouds our thinking. Notice if you're stuck in a mental loop.")
+        sections.append("- **Unmet needs beneath the anger**: Strong frustration almost always signals something important to us isn't being acknowledged. What do you really need here - respect? Fairness? To be heard?")
         sections.append(f"- **The desire-frustration cycle**: We wanted something specific from {rel_name} - when that expectation wasn't met, frustration naturally followed. The key isn't to stop wanting - it's to hold expectations more loosely.")
     elif is_hurt:
         # Derived from BG 2.14 Titiksha + BG 2.55-56 Sthitaprajna
-        sections.append(f"- **The gap between expectation and reality**: We carry deep (often unspoken) expectations about how people should treat us. When reality doesn't match, the gap itself is what hurts.")
+        sections.append("- **The gap between expectation and reality**: We carry deep (often unspoken) expectations about how people should treat us. When reality doesn't match, the gap itself is what hurts.")
         sections.append(f"- **Seeking worth from outside**: Part of the pain may come from looking to {rel_name} for a sense of validation or worth that ultimately can only come from within.")
-        sections.append(f"- **Temporary vs. permanent**: This pain feels enormous right now, but like all experiences, it will shift. Hard times come and go - your core self remains steady underneath.")
+        sections.append("- **Temporary vs. permanent**: This pain feels enormous right now, but like all experiences, it will shift. Hard times come and go - your core self remains steady underneath.")
     else:
         # Derived from BG 3.27-28 on beings acting from conditioning + BG 6.32 equal vision
         sections.append(f"- **Different inner worlds**: You and {rel_name} are experiencing this situation through completely different lenses, shaped by different experiences and fears. Neither view is the whole picture.")
-        sections.append(f"- **Surface vs. depth**: What this conflict seems to be about on the surface is rarely the full story. Underneath, there's usually a deeper need - for safety, connection, respect, or understanding.")
-        sections.append(f"- **Everyone acts from their conditioning**: People behave based on their accumulated experiences, habits, and fears. Understanding this doesn't excuse harm, but it helps you see the full picture.")
+        sections.append("- **Surface vs. depth**: What this conflict seems to be about on the surface is rarely the full story. Underneath, there's usually a deeper need - for safety, connection, respect, or understanding.")
+        sections.append("- **Everyone acts from their conditioning**: People behave based on their accumulated experiences, habits, and fears. Understanding this doesn't excuse harm, but it helps you see the full picture.")
     sections.append("")
 
     # The Other Side - Perspective (derived from BG 6.32 Sama-darshana + BG 3.27-28)
@@ -953,7 +953,7 @@ def generate_secular_response(chunks: list[GitaChunk], relationship_type: str, u
     sections.append("Consider:")
     sections.append(f"- What might {pronoun} be struggling with internally that you can't see?")
     sections.append(f"- Is there a possibility {pronoun}'re unaware of how their actions are landing?")
-    sections.append(f"- What would it look like to see their struggles with the same compassion you'd want for yourself?")
+    sections.append("- What would it look like to see their struggles with the same compassion you'd want for yourself?")
     sections.append("")
     sections.append("Understanding isn't the same as excusing. It's about seeing the full picture so you can respond more wisely.")
     sections.append("")
@@ -965,23 +965,23 @@ def generate_secular_response(chunks: list[GitaChunk], relationship_type: str, u
 
     if is_anger:
         # Derived from BG 2.47 Nishkama Karma + BG 6.19 Sakshi Bhava + BG 17.15 Vak-tapas
-        sections.append(f"1. **Observe before you act** (the witness practice): When anger rises, pause. Instead of becoming the anger, try watching it: \"I notice I'm feeling angry right now.\" This tiny shift from being angry to noticing anger creates space for wisdom.")
+        sections.append("1. **Observe before you act** (the witness practice): When anger rises, pause. Instead of becoming the anger, try watching it: \"I notice I'm feeling angry right now.\" This tiny shift from being angry to noticing anger creates space for wisdom.")
         sections.append("")
         sections.append(f"2. **Focus on your actions, not their response**: You can't control how {rel_name} behaves. But you can control how you show up. Ask: \"What would the most centered version of me do right now?\"")
         sections.append("")
-        sections.append(f"3. **Speak truth with kindness**: When you do talk, apply the fourfold test: Is it true? Is it kind? Is it helpful? Is it the right time? If any answer is no, wait.")
+        sections.append("3. **Speak truth with kindness**: When you do talk, apply the fourfold test: Is it true? Is it kind? Is it helpful? Is it the right time? If any answer is no, wait.")
     elif is_forgiveness:
         # Derived from BG 16.2 Kshama + BG 12.13-14 Adveshta + BG 6.5-6 Atma-seva
-        sections.append(f"1. **Forgiveness as self-liberation**: Holding resentment is like carrying a heavy stone hoping someone else gets tired. Forgiveness isn't saying it was okay - it's putting down the weight for YOUR peace.")
+        sections.append("1. **Forgiveness as self-liberation**: Holding resentment is like carrying a heavy stone hoping someone else gets tired. Forgiveness isn't saying it was okay - it's putting down the weight for YOUR peace.")
         sections.append("")
-        sections.append(f"2. **Be your own best friend**: Treat yourself with the same kindness you'd give to a close friend in your situation. You can be your greatest ally or your harshest critic - choose wisely.")
+        sections.append("2. **Be your own best friend**: Treat yourself with the same kindness you'd give to a close friend in your situation. You can be your greatest ally or your harshest critic - choose wisely.")
         sections.append("")
-        sections.append(f"3. **Protect your peace with clear limits**: You can release resentment AND maintain firm boundaries. Understanding someone's behavior doesn't require tolerating it.")
+        sections.append("3. **Protect your peace with clear limits**: You can release resentment AND maintain firm boundaries. Understanding someone's behavior doesn't require tolerating it.")
     else:
         # Derived from BG 2.47 Nishkama Karma + BG 17.15 Vak-tapas + BG 6.32 Sama-darshana
-        sections.append(f"1. **Name your actual need**: Get specific. \"I need to feel respected when we disagree\" is clearer and more actionable than \"I want things to be better.\"")
+        sections.append("1. **Name your actual need**: Get specific. \"I need to feel respected when we disagree\" is clearer and more actionable than \"I want things to be better.\"")
         sections.append("")
-        sections.append(f"2. **Choose the right moment**: Timing matters. A conversation when both people are calm and present is worth ten conversations in the heat of the moment.")
+        sections.append("2. **Choose the right moment**: Timing matters. A conversation when both people are calm and present is worth ten conversations in the heat of the moment.")
         sections.append("")
         sections.append(f"3. **Listen to truly understand**: When {pronoun} speak, listen as if you're genuinely trying to learn something new about them. People can feel the difference between real listening and waiting for your turn to talk.")
     sections.append("")
@@ -990,7 +990,7 @@ def generate_secular_response(chunks: list[GitaChunk], relationship_type: str, u
     sections.append("# A Way to Say It")
     sections.append("When you're ready, here's a way to open the conversation:")
     sections.append("")
-    sections.append(f"*\"I've been thinking about us, and I want to share something honestly but kindly. When [specific situation], I felt [your emotion]. I think it's because I really need [underlying need]. I'm not looking for a debate - I just want us to understand each other better. Can you help me understand what was going on for you?\"*")
+    sections.append("*\"I've been thinking about us, and I want to share something honestly but kindly. When [specific situation], I felt [your emotion]. I think it's because I really need [underlying need]. I'm not looking for a debate - I just want us to understand each other better. Can you help me understand what was going on for you?\"*")
     sections.append("")
     sections.append("The key principles: truthful but kind, helpful not harmful, and spoken at the right time. Start gently - the first few minutes set the tone for the entire conversation.")
     sections.append("")
@@ -1005,13 +1005,13 @@ def generate_secular_response(chunks: list[GitaChunk], relationship_type: str, u
         verse_ref = wisdom["verse_ref"] or "2:62-63"
         sections.append(f"**{verse_ref}** - There's a powerful insight here: when we keep replaying what upset us, attachment to the situation grows. From that attachment comes stronger desire for things to be different. When that desire is frustrated, anger erupts - and anger clouds our ability to think clearly.")
         sections.append("")
-        sections.append(f"What this means for you: Your anger is valid, but notice if you're caught in a replay loop. The path to peace isn't suppressing the anger - it's choosing not to feed it with endless mental reruns. You can honor the hurt without letting it run the show.")
+        sections.append("What this means for you: Your anger is valid, but notice if you're caught in a replay loop. The path to peace isn't suppressing the anger - it's choosing not to feed it with endless mental reruns. You can honor the hurt without letting it run the show.")
     elif is_hurt and teachings:
         wisdom = teachings[0]
         verse_ref = wisdom["verse_ref"] or "2:14"
         sections.append(f"**{verse_ref}** - An ancient truth that still holds: joy and pain come and go like seasons. They are real experiences, but they are visitors - not permanent residents. The wise person learns to hold both without being swept away.")
         sections.append("")
-        sections.append(f"What this means for you: This pain is real and it matters. But it won't define you forever. You've weathered storms before. Underneath the hurt, there's a steady, unshakeable part of you that no one can touch.")
+        sections.append("What this means for you: This pain is real and it matters. But it won't define you forever. You've weathered storms before. Underneath the hurt, there's a steady, unshakeable part of you that no one can touch.")
     elif is_forgiveness and teachings:
         wisdom = teachings[0]
         verse_ref = wisdom["verse_ref"] or "12:13-14"
@@ -1023,7 +1023,7 @@ def generate_secular_response(chunks: list[GitaChunk], relationship_type: str, u
         verse_ref = wisdom["verse_ref"] or "2:20"
         sections.append(f"**{verse_ref}** - At the deepest level, your true essence cannot be harmed, diminished, or taken away by any circumstance. Who you really are is beyond any situation.")
         sections.append("")
-        sections.append(f"What this means for you: Whatever you're afraid of losing, your fundamental worth remains intact. You are not this situation. The fear is natural, but at your core, there's something steady and whole that persists regardless of how this unfolds.")
+        sections.append("What this means for you: Whatever you're afraid of losing, your fundamental worth remains intact. You are not this situation. The fear is natural, but at your core, there's something steady and whole that persists regardless of how this unfolds.")
     else:
         verse_ref = "2:47"
         if teachings and teachings[0]["verse_ref"]:
@@ -1045,10 +1045,10 @@ def generate_secular_response(chunks: list[GitaChunk], relationship_type: str, u
     sections.append("# One Small Step")
     if is_anger:
         # Derived from Sakshi Bhava (witness consciousness) BG 6.19
-        sections.append(f"For today: When you feel the anger rising, try this - instead of diving into it, step back and observe it. Say to yourself: \"I notice anger is here.\" That small act of witnessing rather than becoming the emotion is one of the most powerful things you can practice. It creates just enough space for wisdom.")
+        sections.append("For today: When you feel the anger rising, try this - instead of diving into it, step back and observe it. Say to yourself: \"I notice anger is here.\" That small act of witnessing rather than becoming the emotion is one of the most powerful things you can practice. It creates just enough space for wisdom.")
     elif is_hurt:
         # Derived from Svadhyaya (self-study) BG 4.38
-        sections.append(f"For today: Write down what you're really feeling - not what you think you \"should\" feel, but what's actually there. Sometimes getting it out of your head and onto paper reveals what you truly need. This honest self-reflection is one of the oldest paths to clarity.")
+        sections.append("For today: Write down what you're really feeling - not what you think you \"should\" feel, but what's actually there. Sometimes getting it out of your head and onto paper reveals what you truly need. This honest self-reflection is one of the oldest paths to clarity.")
     elif is_forgiveness:
         # Derived from Sama-darshana (equal vision) BG 6.32
         sections.append(f"For today: See if you can hold both truths at once - \"what {pronoun} did hurt me\" AND \"{pronoun}'re a human being struggling with their own fears and limitations.\" You don't have to choose between these. Both are true simultaneously.")

@@ -489,7 +489,7 @@ def generate_shloka_ssml(
     ssml_parts = []
 
     # Opening sacred pause
-    ssml_parts.append(f'<break time="500ms"/>')
+    ssml_parts.append('<break time="500ms"/>')
 
     # Main shloka with proper prosody
     ssml_parts.append(f'<prosody rate="{int(rate * 100)}%" pitch="{pitch_adjust}">')
@@ -514,7 +514,7 @@ def generate_shloka_ssml(
     # Optional meaning
     if include_meaning:
         ssml_parts.append('<break time="800ms"/>')
-        ssml_parts.append(f'<prosody rate="95%" pitch="+0st">')
+        ssml_parts.append('<prosody rate="95%" pitch="+0st">')
         ssml_parts.append(f'This means: {shloka.meaning}')
         ssml_parts.append('</prosody>')
 
@@ -1186,7 +1186,7 @@ def add_natural_disfluencies(text: str, frequency: float = 0.1) -> str:
 
     for word in important_words:
         pattern = rf'\b({word})\b'
-        replacement = f'<break time="200ms"/>\\1'
+        replacement = '<break time="200ms"/>\\1'
         text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
 
     return text
@@ -1303,7 +1303,7 @@ def generate_vedic_chant_ssml(
             ssml_parts.append(f'<break time="{chandas_info["pause_after_full_ms"]}ms"/>')
 
     # Closing sacred pause
-    ssml_parts.append(f'<break time="1500ms"/>')
+    ssml_parts.append('<break time="1500ms"/>')
 
     # Optional meaning
     if include_meaning:

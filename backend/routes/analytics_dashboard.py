@@ -6,8 +6,8 @@ These are READ-ONLY tracking endpoints that do not modify KIAAN's core functiona
 
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import APIRouter, HTTPException, Depends, Query
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Query
+from pydantic import BaseModel
 from enum import Enum
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])

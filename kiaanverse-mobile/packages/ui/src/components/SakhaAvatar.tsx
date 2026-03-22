@@ -71,11 +71,14 @@ function SakhaAvatarInner({
 
   useEffect(() => {
     // Reset
+    // eslint-disable-next-line react-hooks/immutability
     ringRotation.value = 0;
+    // eslint-disable-next-line react-hooks/immutability
     ringScale.value = 1;
 
     switch (state) {
       case 'idle': {
+        // eslint-disable-next-line react-hooks/immutability
         ringOpacity.value = withRepeat(
           withSequence(
             withTiming(0.7, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
@@ -87,6 +90,7 @@ function SakhaAvatarInner({
         break;
       }
       case 'speaking': {
+         
         ringScale.value = withRepeat(
           withSequence(
             withTiming(1.08, { duration: 400, easing: Easing.inOut(Easing.ease) }),
@@ -95,6 +99,7 @@ function SakhaAvatarInner({
           -1,
           false,
         );
+         
         ringOpacity.value = withRepeat(
           withSequence(
             withTiming(0.9, { duration: 600, easing: Easing.inOut(Easing.ease) }),
@@ -106,11 +111,13 @@ function SakhaAvatarInner({
         break;
       }
       case 'thinking': {
+         
         ringRotation.value = withRepeat(
           withTiming(360, { duration: 4000, easing: Easing.linear }),
           -1,
           false,
         );
+         
         ringOpacity.value = withRepeat(
           withSequence(
             withTiming(0.6, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
@@ -158,6 +165,7 @@ function SakhaAvatarInner({
 
       {/* Inner avatar */}
       {imageSource ? (
+        // eslint-disable-next-line jsx-a11y/alt-text -- React Native Image uses accessibilityLabel, not alt
         <Image
           source={imageSource}
           style={[
