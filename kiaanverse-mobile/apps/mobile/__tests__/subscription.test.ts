@@ -1,11 +1,18 @@
 /**
  * Tests for the subscription store feature gating logic.
  *
+ * 4-tier model (March 2026):
+ * - free (Seeker): 5 KIAAN questions/month, 1 journey
+ * - bhakta: 50 questions/month, encrypted journal, 3 journeys
+ * - sadhak: 300 questions/month, all features, 10 journeys
+ * - siddha: Unlimited everything, dedicated support
+ *
  * Covers:
- * - Free tier limits (5 Sakha messages/day, 2 journeys)
- * - Sacred tier unlocks (unlimited Sakha, voice, all journeys)
- * - Divine tier unlocks (early access, personalized wisdom)
- * - Daily quota reset
+ * - Free tier limits (5 KIAAN questions/month, 1 journey)
+ * - Bhakta tier unlocks (50 questions, journal, 3 journeys)
+ * - Sadhak tier unlocks (300 questions, voice, agent, 10 journeys)
+ * - Siddha tier unlocks (unlimited everything, dedicated support)
+ * - Monthly quota reset
  * - Expired subscription downgrade
  */
 
@@ -18,24 +25,23 @@ beforeEach(() => {
     expiresAt: null,
     purchaseStatus: 'idle',
     error: null,
-    dailySakhaCount: 0,
-    sakhaCountDate: new Date().toISOString().split('T')[0],
+    monthlyKiaanCount: 0,
+    kiaanCountMonth: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`,
     isHydrated: true,
   });
 });
 
 describe('Subscription Store - Feature Gating', () => {
-  describe('Free Tier', () => {
-    it('allows sending messages under daily limit', () => {
+  describe('Free Tier (Seeker)', () => {
+    it('allows sending messages under monthly limit', () => {
       const { canSendMessage } = useSubscriptionStore.getState();
       expect(canSendMessage()).toBe(true);
     });
 
-    it('blocks messages after daily limit reached', () => {
+    it('blocks messages after monthly limit of 5 reached', () => {
       const store = useSubscriptionStore.getState();
-      // Simulate 5 messages sent
       for (let i = 0; i < 5; i++) {
-        store.incrementSakhaCount();
+        store.incrementKiaanCount();
       }
       expect(store.canSendMessage()).toBe(false);
     });
@@ -45,37 +51,97 @@ describe('Subscription Store - Feature Gating', () => {
       expect(canUseVoice()).toBe(false);
     });
 
-    it('allows starting journeys under limit', () => {
+    it('allows starting 1 journey', () => {
       const { canStartJourney } = useSubscriptionStore.getState();
       expect(canStartJourney(0)).toBe(true);
-      expect(canStartJourney(1)).toBe(true);
     });
 
-    it('blocks starting journeys at limit', () => {
+    it('blocks starting journeys at limit of 1', () => {
       const { canStartJourney } = useSubscriptionStore.getState();
-      expect(canStartJourney(2)).toBe(false);
+      expect(canStartJourney(1)).toBe(false);
       expect(canStartJourney(5)).toBe(false);
     });
 
-    it('blocks early access features', () => {
+    it('blocks Sadhak+ features', () => {
       const { hasFeature } = useSubscriptionStore.getState();
-      expect(hasFeature('earlyAccess')).toBe(false);
-      expect(hasFeature('personalizedWisdom')).toBe(false);
+      expect(hasFeature('kiaanVoiceCompanion')).toBe(false);
+      expect(hasFeature('kiaanAgent')).toBe(false);
+      expect(hasFeature('arthaReframing')).toBe(false);
+      expect(hasFeature('advancedAnalytics')).toBe(false);
+    });
+
+    it('blocks Bhakta+ features', () => {
+      const { hasFeature } = useSubscriptionStore.getState();
+      expect(hasFeature('encryptedJournal')).toBe(false);
+    });
+
+    it('allows free-tier features', () => {
+      const { hasFeature } = useSubscriptionStore.getState();
+      expect(hasFeature('kiaanDivineChat')).toBe(true);
+      expect(hasFeature('kiaanFriendMode')).toBe(true);
+      expect(hasFeature('moodTracking')).toBe(true);
+      expect(hasFeature('dailyWisdom')).toBe(true);
     });
   });
 
-  describe('Sacred Tier', () => {
+  describe('Bhakta Tier', () => {
     beforeEach(() => {
-      useSubscriptionStore.getState().setTier('sacred', '2026-04-22T00:00:00Z');
+      useSubscriptionStore.getState().setTier('bhakta', '2026-04-22T00:00:00Z');
     });
 
-    it('allows unlimited Sakha messages', () => {
+    it('allows 50 KIAAN questions per month', () => {
       const store = useSubscriptionStore.getState();
-      // Send many messages
-      for (let i = 0; i < 100; i++) {
-        store.incrementSakhaCount();
+      for (let i = 0; i < 50; i++) {
+        store.incrementKiaanCount();
+      }
+      // At limit — should block
+      expect(store.canSendMessage()).toBe(false);
+    });
+
+    it('allows 49 questions (under limit)', () => {
+      const store = useSubscriptionStore.getState();
+      for (let i = 0; i < 49; i++) {
+        store.incrementKiaanCount();
       }
       expect(store.canSendMessage()).toBe(true);
+    });
+
+    it('blocks voice mode (Sadhak+ only)', () => {
+      const { canUseVoice } = useSubscriptionStore.getState();
+      expect(canUseVoice()).toBe(false);
+    });
+
+    it('allows up to 3 journeys', () => {
+      const { canStartJourney } = useSubscriptionStore.getState();
+      expect(canStartJourney(0)).toBe(true);
+      expect(canStartJourney(2)).toBe(true);
+      expect(canStartJourney(3)).toBe(false);
+    });
+
+    it('allows encrypted journal', () => {
+      const { hasFeature } = useSubscriptionStore.getState();
+      expect(hasFeature('encryptedJournal')).toBe(true);
+    });
+
+    it('blocks Sadhak+ features', () => {
+      const { hasFeature } = useSubscriptionStore.getState();
+      expect(hasFeature('kiaanVoiceCompanion')).toBe(false);
+      expect(hasFeature('kiaanAgent')).toBe(false);
+      expect(hasFeature('arthaReframing')).toBe(false);
+    });
+  });
+
+  describe('Sadhak Tier', () => {
+    beforeEach(() => {
+      useSubscriptionStore.getState().setTier('sadhak', '2026-04-22T00:00:00Z');
+    });
+
+    it('allows 300 KIAAN questions per month', () => {
+      const store = useSubscriptionStore.getState();
+      for (let i = 0; i < 300; i++) {
+        store.incrementKiaanCount();
+      }
+      expect(store.canSendMessage()).toBe(false);
     });
 
     it('allows voice mode', () => {
@@ -83,63 +149,87 @@ describe('Subscription Store - Feature Gating', () => {
       expect(canUseVoice()).toBe(true);
     });
 
-    it('allows unlimited journeys', () => {
+    it('allows up to 10 journeys', () => {
       const { canStartJourney } = useSubscriptionStore.getState();
-      expect(canStartJourney(100)).toBe(true);
+      expect(canStartJourney(9)).toBe(true);
+      expect(canStartJourney(10)).toBe(false);
     });
 
-    it('allows full Gita and offline access', () => {
+    it('allows all Sadhak features', () => {
       const { hasFeature } = useSubscriptionStore.getState();
-      expect(hasFeature('fullGita')).toBe(true);
+      expect(hasFeature('kiaanVoiceCompanion')).toBe(true);
+      expect(hasFeature('kiaanAgent')).toBe(true);
+      expect(hasFeature('kiaanSoulReading')).toBe(true);
+      expect(hasFeature('kiaanQuantumDive')).toBe(true);
+      expect(hasFeature('arthaReframing')).toBe(true);
+      expect(hasFeature('viyogaDetachment')).toBe(true);
+      expect(hasFeature('relationshipCompass')).toBe(true);
+      expect(hasFeature('emotionalResetGuide')).toBe(true);
+      expect(hasFeature('encryptedJournal')).toBe(true);
+      expect(hasFeature('advancedAnalytics')).toBe(true);
       expect(hasFeature('offlineAccess')).toBe(true);
+      expect(hasFeature('prioritySupport')).toBe(true);
     });
 
-    it('blocks Divine-only features', () => {
+    it('blocks Siddha-only features', () => {
       const { hasFeature } = useSubscriptionStore.getState();
-      expect(hasFeature('earlyAccess')).toBe(false);
-      expect(hasFeature('personalizedWisdom')).toBe(false);
+      expect(hasFeature('dedicatedSupport')).toBe(false);
+      expect(hasFeature('teamFeatures')).toBe(false);
     });
   });
 
-  describe('Divine Tier', () => {
+  describe('Siddha Tier', () => {
     beforeEach(() => {
-      useSubscriptionStore.getState().setTier('divine', '2026-04-22T00:00:00Z');
+      useSubscriptionStore.getState().setTier('siddha', '2026-04-22T00:00:00Z');
     });
 
-    it('allows all Sacred features', () => {
+    it('allows unlimited KIAAN questions', () => {
+      const store = useSubscriptionStore.getState();
+      for (let i = 0; i < 1000; i++) {
+        store.incrementKiaanCount();
+      }
+      expect(store.canSendMessage()).toBe(true);
+    });
+
+    it('allows all Sadhak features', () => {
       const store = useSubscriptionStore.getState();
       expect(store.canSendMessage()).toBe(true);
       expect(store.canUseVoice()).toBe(true);
       expect(store.canStartJourney(100)).toBe(true);
     });
 
-    it('allows early access and personalized wisdom', () => {
+    it('allows dedicated support and team features', () => {
       const { hasFeature } = useSubscriptionStore.getState();
-      expect(hasFeature('earlyAccess')).toBe(true);
-      expect(hasFeature('personalizedWisdom')).toBe(true);
-      expect(hasFeature('prioritySupport')).toBe(true);
+      expect(hasFeature('dedicatedSupport')).toBe(true);
+      expect(hasFeature('teamFeatures')).toBe(true);
+      expect(hasFeature('priorityVoiceProcessing')).toBe(true);
+    });
+
+    it('allows unlimited journeys', () => {
+      const { canStartJourney } = useSubscriptionStore.getState();
+      expect(canStartJourney(1000)).toBe(true);
     });
   });
 
   describe('Tier Transitions', () => {
     it('downgrade to free clears expiry', () => {
       const store = useSubscriptionStore.getState();
-      store.setTier('sacred', '2026-04-22T00:00:00Z');
-      expect(store.tier).toBe('sacred');
+      store.setTier('sadhak', '2026-04-22T00:00:00Z');
+      expect(store.tier).toBe('sadhak');
 
       store.downgradeToFree();
       expect(useSubscriptionStore.getState().tier).toBe('free');
       expect(useSubscriptionStore.getState().expiresAt).toBeNull();
     });
 
-    it('upgrade preserves daily count', () => {
+    it('upgrade preserves monthly count', () => {
       const store = useSubscriptionStore.getState();
-      store.incrementSakhaCount();
-      store.incrementSakhaCount();
+      store.incrementKiaanCount();
+      store.incrementKiaanCount();
 
-      store.setTier('sacred');
-      expect(useSubscriptionStore.getState().dailySakhaCount).toBe(2);
-      // But now unlimited, so can still send
+      store.setTier('bhakta');
+      expect(useSubscriptionStore.getState().monthlyKiaanCount).toBe(2);
+      // Bhakta allows 50, so 2 used is fine
       expect(useSubscriptionStore.getState().canSendMessage()).toBe(true);
     });
   });

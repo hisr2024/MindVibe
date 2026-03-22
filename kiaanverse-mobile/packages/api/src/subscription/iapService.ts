@@ -1,9 +1,9 @@
 /**
- * In-App Purchase Service for Kiaanverse
+ * In-App Purchase Service for Kiaanverse — 4-Tier Model (March 2026)
  *
  * Wraps expo-in-app-purchases to provide a clean interface for
- * purchasing Sacred and Divine subscription tiers via App Store
- * and Google Play billing.
+ * purchasing Bhakta, Sadhak, and Siddha subscription tiers via
+ * App Store and Google Play billing, with monthly and yearly options.
  *
  * Handles:
  * - IAP initialization and product fetching
@@ -20,7 +20,8 @@ import {
   ALL_PRODUCT_IDS,
   IAP_PRODUCT_IDS,
   TIER_CONFIGS,
-  type VibePlayerTier,
+  type SubscriptionTier,
+  type BillingPeriod,
 } from './constants';
 
 // ---------------------------------------------------------------------------
@@ -34,12 +35,13 @@ export interface IAPProduct {
   price: string;
   priceAmountMicros: number;
   priceCurrencyCode: string;
-  tier: VibePlayerTier;
+  tier: SubscriptionTier;
+  billingPeriod: BillingPeriod;
 }
 
 export interface PurchaseResult {
   success: boolean;
-  tier: VibePlayerTier;
+  tier: SubscriptionTier;
   expiresAt?: string;
   error?: string;
 }
@@ -62,7 +64,6 @@ export interface ReceiptVerificationResponse {
 // ---------------------------------------------------------------------------
 
 let isInitialized = false;
-let purchaseListener: InAppPurchases.IAPItemDetails[] | null = null;
 
 // Callback for when a purchase completes (set by the store)
 let onPurchaseComplete: ((result: PurchaseResult) => void) | null = null;
@@ -118,27 +119,37 @@ export async function getProducts(): Promise<IAPProduct[]> {
   await ensureInitialized();
 
   const platform = Platform.OS === 'ios' ? 'ios' : 'android';
-  const productIds = [
-    IAP_PRODUCT_IDS.SACRED_MONTHLY[platform],
-    IAP_PRODUCT_IDS.DIVINE_MONTHLY[platform],
-  ];
+  const productIds = ALL_PRODUCT_IDS.filter((id) => {
+    // Filter to current platform's product IDs
+    return Object.values(IAP_PRODUCT_IDS).some(
+      (entry) =>
+        entry[platform as 'ios' | 'android'] === id,
+    );
+  });
+
+  // Deduplicate
+  const uniqueIds = [...new Set(productIds)];
 
   try {
-    const { results } = await InAppPurchases.getProductsAsync(productIds);
+    const { results } = await InAppPurchases.getProductsAsync(uniqueIds);
 
     if (!results || results.length === 0) {
       return getDefaultProducts();
     }
 
-    return results.map((product) => ({
-      productId: product.productId,
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      priceAmountMicros: product.priceAmountMicros ?? 0,
-      priceCurrencyCode: product.priceCurrencyCode ?? 'USD',
-      tier: productIdToTier(product.productId),
-    }));
+    return results.map((product) => {
+      const { tier, billingPeriod } = productIdToTierAndPeriod(product.productId);
+      return {
+        productId: product.productId,
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        priceAmountMicros: product.priceAmountMicros ?? 0,
+        priceCurrencyCode: product.priceCurrencyCode ?? 'USD',
+        tier,
+        billingPeriod,
+      };
+    });
   } catch (error) {
     console.warn('Failed to fetch IAP products, using defaults:', error);
     return getDefaultProducts();
@@ -150,7 +161,7 @@ export async function getProducts(): Promise<IAPProduct[]> {
 // ---------------------------------------------------------------------------
 
 /**
- * Initiate a subscription purchase for the given tier.
+ * Initiate a subscription purchase for the given tier and billing period.
  *
  * The purchase flow is asynchronous:
  * 1. This function opens the store payment sheet
@@ -159,7 +170,8 @@ export async function getProducts(): Promise<IAPProduct[]> {
  * 4. The subscription store is updated with the new tier
  */
 export async function purchaseSubscription(
-  tier: VibePlayerTier,
+  tier: SubscriptionTier,
+  billingPeriod: BillingPeriod = 'monthly',
   callbacks?: {
     onComplete?: (result: PurchaseResult) => void;
     onError?: (error: string) => void;
@@ -176,7 +188,7 @@ export async function purchaseSubscription(
   onPurchaseError = callbacks?.onError ?? null;
 
   const platform = Platform.OS === 'ios' ? 'ios' : 'android';
-  const productId = TIER_CONFIGS[tier].productIds[platform];
+  const productId = TIER_CONFIGS[tier].productIds[billingPeriod][platform];
 
   if (!productId) {
     throw new IAPError('Product not available for this platform.', 'PRODUCT_NOT_FOUND');
@@ -240,7 +252,7 @@ export async function restorePurchases(): Promise<PurchaseResult> {
       if (verificationResult.valid) {
         return {
           success: true,
-          tier: verificationResult.tier as VibePlayerTier,
+          tier: verificationResult.tier as SubscriptionTier,
           expiresAt: verificationResult.expires_at ?? undefined,
         };
       }
@@ -342,7 +354,7 @@ async function handlePurchaseUpdate(
 
       onPurchaseComplete?.({
         success: true,
-        tier: verification.tier as VibePlayerTier,
+        tier: verification.tier as SubscriptionTier,
         expiresAt: verification.expires_at ?? undefined,
       });
     } else {
@@ -380,41 +392,93 @@ function extractReceipt(purchase: InAppPurchases.InAppPurchase): string | null {
   return purchase.purchaseToken ?? purchase.transactionReceipt ?? null;
 }
 
-function productIdToTier(productId: string): VibePlayerTier {
+/**
+ * Map a product ID to its tier and billing period.
+ */
+function productIdToTierAndPeriod(productId: string): { tier: SubscriptionTier; billingPeriod: BillingPeriod } {
   const platform = Platform.OS === 'ios' ? 'ios' : 'android';
 
-  if (productId === IAP_PRODUCT_IDS.SACRED_MONTHLY[platform]) {
-    return 'sacred';
+  // Check each tier and period combination
+  for (const [key, ids] of Object.entries(IAP_PRODUCT_IDS)) {
+    if (ids[platform as 'ios' | 'android'] === productId) {
+      // Key format: BHAKTA_MONTHLY, SADHAK_YEARLY, etc.
+      const parts = key.split('_');
+      const tierName = parts[0].toLowerCase() as SubscriptionTier;
+      const period = parts[1].toLowerCase() as BillingPeriod;
+      return { tier: tierName, billingPeriod: period };
+    }
   }
-  if (productId === IAP_PRODUCT_IDS.DIVINE_MONTHLY[platform]) {
-    return 'divine';
-  }
-  return 'free';
+
+  return { tier: 'free', billingPeriod: 'monthly' };
 }
 
 /**
  * Return default products when store products can't be fetched.
- * Uses hardcoded pricing as a fallback.
+ * Uses hardcoded pricing as a fallback — aligned with web pricing.
  */
 function getDefaultProducts(): IAPProduct[] {
+  const platform = Platform.OS === 'ios' ? 'ios' : 'android';
+
   return [
     {
-      productId: IAP_PRODUCT_IDS.SACRED_MONTHLY[Platform.OS === 'ios' ? 'ios' : 'android'],
-      title: TIER_CONFIGS.sacred.name,
-      description: TIER_CONFIGS.sacred.description,
-      price: '$4.99',
-      priceAmountMicros: 4990000,
+      productId: IAP_PRODUCT_IDS.BHAKTA_MONTHLY[platform],
+      title: TIER_CONFIGS.bhakta.name,
+      description: TIER_CONFIGS.bhakta.description,
+      price: '$6.99',
+      priceAmountMicros: 6990000,
       priceCurrencyCode: 'USD',
-      tier: 'sacred',
+      tier: 'bhakta',
+      billingPeriod: 'monthly',
     },
     {
-      productId: IAP_PRODUCT_IDS.DIVINE_MONTHLY[Platform.OS === 'ios' ? 'ios' : 'android'],
-      title: TIER_CONFIGS.divine.name,
-      description: TIER_CONFIGS.divine.description,
-      price: '$14.99',
-      priceAmountMicros: 14990000,
+      productId: IAP_PRODUCT_IDS.BHAKTA_YEARLY[platform],
+      title: TIER_CONFIGS.bhakta.name,
+      description: TIER_CONFIGS.bhakta.description,
+      price: '$47.99',
+      priceAmountMicros: 47990000,
       priceCurrencyCode: 'USD',
-      tier: 'divine',
+      tier: 'bhakta',
+      billingPeriod: 'yearly',
+    },
+    {
+      productId: IAP_PRODUCT_IDS.SADHAK_MONTHLY[platform],
+      title: TIER_CONFIGS.sadhak.name,
+      description: TIER_CONFIGS.sadhak.description,
+      price: '$12.99',
+      priceAmountMicros: 12990000,
+      priceCurrencyCode: 'USD',
+      tier: 'sadhak',
+      billingPeriod: 'monthly',
+    },
+    {
+      productId: IAP_PRODUCT_IDS.SADHAK_YEARLY[platform],
+      title: TIER_CONFIGS.sadhak.name,
+      description: TIER_CONFIGS.sadhak.description,
+      price: '$89.99',
+      priceAmountMicros: 89990000,
+      priceCurrencyCode: 'USD',
+      tier: 'sadhak',
+      billingPeriod: 'yearly',
+    },
+    {
+      productId: IAP_PRODUCT_IDS.SIDDHA_MONTHLY[platform],
+      title: TIER_CONFIGS.siddha.name,
+      description: TIER_CONFIGS.siddha.description,
+      price: '$22.99',
+      priceAmountMicros: 22990000,
+      priceCurrencyCode: 'USD',
+      tier: 'siddha',
+      billingPeriod: 'monthly',
+    },
+    {
+      productId: IAP_PRODUCT_IDS.SIDDHA_YEARLY[platform],
+      title: TIER_CONFIGS.siddha.name,
+      description: TIER_CONFIGS.siddha.description,
+      price: '$169.99',
+      priceAmountMicros: 169990000,
+      priceCurrencyCode: 'USD',
+      tier: 'siddha',
+      billingPeriod: 'yearly',
     },
   ];
 }

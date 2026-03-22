@@ -9,6 +9,12 @@ Receipt validation flow:
 3. On success, upserts UserSubscription with the correct tier
 4. Returns { valid, tier, expires_at }
 
+4-tier model (March 2026):
+- free (Seeker): No IAP purchase
+- bhakta: com.kiaanverse.bhakta.{monthly,yearly}
+- sadhak: com.kiaanverse.sadhak.{monthly,yearly}
+- siddha: com.kiaanverse.siddha.{monthly,yearly}
+
 Edge cases:
 - Invalid receipt → { valid: false }, tier stays free
 - Network error reaching Apple/Google → 503 with retry hint
@@ -17,8 +23,6 @@ Edge cases:
 """
 
 import datetime
-import hashlib
-import hmac
 import json
 import logging
 from typing import Any
@@ -64,22 +68,27 @@ class ReceiptVerifyResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Product ID → Tier Mapping
+# Product ID → Tier Mapping (aligned with mobile constants.ts)
 # ---------------------------------------------------------------------------
 
 PRODUCT_TIER_MAP: dict[str, SubscriptionTier] = {
-    # Sacred tier — maps to SADHAK on the backend
-    "com.kiaanverse.sacred.monthly": SubscriptionTier.SADHAK,
-    # Divine tier — maps to SIDDHA on the backend
-    "com.kiaanverse.divine.monthly": SubscriptionTier.SIDDHA,
+    # Bhakta tier
+    "com.kiaanverse.bhakta.monthly": SubscriptionTier.BHAKTA,
+    "com.kiaanverse.bhakta.yearly": SubscriptionTier.BHAKTA,
+    # Sadhak tier
+    "com.kiaanverse.sadhak.monthly": SubscriptionTier.SADHAK,
+    "com.kiaanverse.sadhak.yearly": SubscriptionTier.SADHAK,
+    # Siddha tier
+    "com.kiaanverse.siddha.monthly": SubscriptionTier.SIDDHA,
+    "com.kiaanverse.siddha.yearly": SubscriptionTier.SIDDHA,
 }
 
-# Reverse: backend tier → mobile tier name
+# Backend tier → mobile tier name (1:1 mapping, no collapsing)
 BACKEND_TO_MOBILE_TIER: dict[SubscriptionTier, str] = {
     SubscriptionTier.FREE: "free",
-    SubscriptionTier.BHAKTA: "sacred",
-    SubscriptionTier.SADHAK: "sacred",
-    SubscriptionTier.SIDDHA: "divine",
+    SubscriptionTier.BHAKTA: "bhakta",
+    SubscriptionTier.SADHAK: "sadhak",
+    SubscriptionTier.SIDDHA: "siddha",
 }
 
 

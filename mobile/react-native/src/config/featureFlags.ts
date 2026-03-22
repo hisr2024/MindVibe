@@ -149,8 +149,9 @@ export const DEFAULT_FLAGS: Record<string, FeatureFlag> = {
 
 const TIER_LEVELS: Record<SubscriptionTier, number> = {
   FREE: 0,
-  SADHAK: 1,
-  SIDDHA: 2,
+  BHAKTA: 1,
+  SADHAK: 2,
+  SIDDHA: 3,
 };
 
 function isTierSufficient(

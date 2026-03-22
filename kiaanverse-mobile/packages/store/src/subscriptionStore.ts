@@ -1,9 +1,15 @@
 /**
- * Subscription Store — Zustand state for KIAAN Vibe Player subscriptions
+ * Subscription Store — Zustand state for KIAAN subscription management
  *
  * Manages the user's subscription tier, purchase state, and feature gating.
  * Persists tier to AsyncStorage for offline access. Source of truth is the
  * backend; the store caches the last-known tier for instant UI rendering.
+ *
+ * 4-tier model aligned with backend (March 2026):
+ * - free (Seeker): 5 KIAAN questions/month, 1 journey
+ * - bhakta: 50 questions/month, encrypted journal, 3 journeys
+ * - sadhak: 300 questions/month, all features, 10 journeys
+ * - siddha: Unlimited everything, dedicated support
  *
  * Feature gating pattern:
  *   const { canUseVoice, canSendMessage, tier } = useSubscription()
@@ -17,7 +23,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Types
 // ---------------------------------------------------------------------------
 
-export type VibePlayerTier = 'free' | 'sacred' | 'divine';
+export type SubscriptionTier = 'free' | 'bhakta' | 'sadhak' | 'siddha';
 
 export type PurchaseStatus =
   | 'idle'
@@ -30,31 +36,31 @@ export type PurchaseStatus =
 
 export interface SubscriptionState {
   /** Current subscription tier */
-  tier: VibePlayerTier;
+  tier: SubscriptionTier;
   /** When the subscription expires (ISO string) */
   expiresAt: string | null;
   /** Purchase flow status */
   purchaseStatus: PurchaseStatus;
   /** Error message from last failed operation */
   error: string | null;
-  /** Daily Sakha message count (resets at midnight) */
-  dailySakhaCount: number;
-  /** Date string for tracking daily reset */
-  sakhaCountDate: string;
+  /** Monthly KIAAN question count (resets at billing period start) */
+  monthlyKiaanCount: number;
+  /** Month string for tracking monthly reset (YYYY-MM) */
+  kiaanCountMonth: string;
   /** Whether the store has been hydrated from persistence */
   isHydrated: boolean;
 }
 
 export interface SubscriptionActions {
   /** Set tier after successful purchase or restore */
-  setTier: (tier: VibePlayerTier, expiresAt?: string | null) => void;
+  setTier: (tier: SubscriptionTier, expiresAt?: string | null) => void;
   /** Set purchase flow status */
   setPurchaseStatus: (status: PurchaseStatus, error?: string | null) => void;
-  /** Increment daily Sakha message count */
-  incrementSakhaCount: () => void;
-  /** Check if user can send a Sakha message (respects daily quota) */
+  /** Increment monthly KIAAN question count */
+  incrementKiaanCount: () => void;
+  /** Check if user can send a KIAAN question (respects monthly quota) */
   canSendMessage: () => boolean;
-  /** Check if user can use voice mode */
+  /** Check if user can use voice mode (Sadhak+) */
   canUseVoice: () => boolean;
   /** Check if user can start a new journey (respects journey limit) */
   canStartJourney: (currentJourneyCount: number) => boolean;
@@ -74,46 +80,67 @@ export interface SubscriptionActions {
 
 const STORAGE_KEY = 'kiaanverse_subscription';
 
-const TIER_RANK: Record<VibePlayerTier, number> = {
+const TIER_RANK: Record<SubscriptionTier, number> = {
   free: 0,
-  sacred: 1,
-  divine: 2,
+  bhakta: 1,
+  sadhak: 2,
+  siddha: 3,
 };
 
-const DAILY_SAKHA_LIMITS: Record<VibePlayerTier, number> = {
+/** Monthly KIAAN question limits per tier (-1 = unlimited) */
+const MONTHLY_KIAAN_LIMITS: Record<SubscriptionTier, number> = {
   free: 5,
-  sacred: -1, // unlimited
-  divine: -1, // unlimited
+  bhakta: 50,
+  sadhak: 300,
+  siddha: -1,
 };
 
-const JOURNEY_LIMITS: Record<VibePlayerTier, number> = {
-  free: 2,
-  sacred: -1, // unlimited
-  divine: -1, // unlimited
+/** Maximum active wisdom journeys per tier (-1 = unlimited) */
+const JOURNEY_LIMITS: Record<SubscriptionTier, number> = {
+  free: 1,
+  bhakta: 3,
+  sadhak: 10,
+  siddha: -1,
 };
 
-/** Features available per tier — feature name → minimum tier */
-const FEATURE_GATES: Record<string, VibePlayerTier> = {
-  basicGita: 'free',
-  fullGita: 'sacred',
-  voiceMode: 'sacred',
-  allJourneys: 'sacred',
-  unlimitedSakha: 'sacred',
-  earlyAccess: 'divine',
-  personalizedWisdom: 'divine',
-  offlineAccess: 'sacred',
-  prioritySupport: 'divine',
+/** Features gated by minimum tier — aligned with backend feature_config.py */
+const FEATURE_GATES: Record<string, SubscriptionTier> = {
+  // KIAAN Ecosystem
+  kiaanDivineChat: 'free',
+  kiaanFriendMode: 'free',
+  kiaanVoiceCompanion: 'sadhak',
+  kiaanVoiceSynthesis: 'sadhak',
+  kiaanSoulReading: 'sadhak',
+  kiaanQuantumDive: 'sadhak',
+  kiaanAgent: 'sadhak',
+  // Assistants
+  arthaReframing: 'sadhak',
+  viyogaDetachment: 'sadhak',
+  relationshipCompass: 'sadhak',
+  emotionalResetGuide: 'sadhak',
+  // Features
+  encryptedJournal: 'bhakta',
+  moodTracking: 'free',
+  dailyWisdom: 'free',
+  advancedAnalytics: 'sadhak',
+  offlineAccess: 'sadhak',
+  // Support
+  prioritySupport: 'sadhak',
+  dedicatedSupport: 'siddha',
+  teamFeatures: 'siddha',
+  priorityVoiceProcessing: 'siddha',
 };
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-function getTodayString(): string {
-  return new Date().toISOString().split('T')[0];
+function getCurrentMonth(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 }
 
-async function persistState(state: Pick<SubscriptionState, 'tier' | 'expiresAt' | 'dailySakhaCount' | 'sakhaCountDate'>): Promise<void> {
+async function persistState(state: Pick<SubscriptionState, 'tier' | 'expiresAt' | 'monthlyKiaanCount' | 'kiaanCountMonth'>): Promise<void> {
   try {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
@@ -132,54 +159,54 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
     expiresAt: null,
     purchaseStatus: 'idle',
     error: null,
-    dailySakhaCount: 0,
-    sakhaCountDate: getTodayString(),
+    monthlyKiaanCount: 0,
+    kiaanCountMonth: getCurrentMonth(),
     isHydrated: false,
 
     // Actions
     setTier: (tier, expiresAt = null) => {
       set({ tier, expiresAt, purchaseStatus: 'success', error: null });
-      void persistState({ tier, expiresAt, dailySakhaCount: get().dailySakhaCount, sakhaCountDate: get().sakhaCountDate });
+      void persistState({ tier, expiresAt, monthlyKiaanCount: get().monthlyKiaanCount, kiaanCountMonth: get().kiaanCountMonth });
     },
 
     setPurchaseStatus: (status, error = null) => {
       set({ purchaseStatus: status, error });
     },
 
-    incrementSakhaCount: () => {
+    incrementKiaanCount: () => {
       const state = get();
-      const today = getTodayString();
+      const currentMonth = getCurrentMonth();
 
-      // Reset count if it's a new day
-      const newCount = state.sakhaCountDate === today
-        ? state.dailySakhaCount + 1
+      // Reset count if it's a new month
+      const newCount = state.kiaanCountMonth === currentMonth
+        ? state.monthlyKiaanCount + 1
         : 1;
 
-      set({ dailySakhaCount: newCount, sakhaCountDate: today });
+      set({ monthlyKiaanCount: newCount, kiaanCountMonth: currentMonth });
       void persistState({
         tier: state.tier,
         expiresAt: state.expiresAt,
-        dailySakhaCount: newCount,
-        sakhaCountDate: today,
+        monthlyKiaanCount: newCount,
+        kiaanCountMonth: currentMonth,
       });
     },
 
     canSendMessage: () => {
-      const { tier, dailySakhaCount, sakhaCountDate } = get();
-      const limit = DAILY_SAKHA_LIMITS[tier];
+      const { tier, monthlyKiaanCount, kiaanCountMonth } = get();
+      const limit = MONTHLY_KIAAN_LIMITS[tier];
 
       // Unlimited
       if (limit === -1) return true;
 
-      // New day — count resets
-      if (sakhaCountDate !== getTodayString()) return true;
+      // New month — count resets
+      if (kiaanCountMonth !== getCurrentMonth()) return true;
 
-      return dailySakhaCount < limit;
+      return monthlyKiaanCount < limit;
     },
 
     canUseVoice: () => {
       const { tier } = get();
-      return TIER_RANK[tier] >= TIER_RANK.sacred;
+      return TIER_RANK[tier] >= TIER_RANK.sadhak;
     },
 
     canStartJourney: (currentJourneyCount: number) => {
@@ -206,8 +233,8 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
       void persistState({
         tier: 'free',
         expiresAt: null,
-        dailySakhaCount: get().dailySakhaCount,
-        sakhaCountDate: get().sakhaCountDate,
+        monthlyKiaanCount: get().monthlyKiaanCount,
+        kiaanCountMonth: get().kiaanCountMonth,
       });
     },
 
@@ -228,21 +255,21 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
         // Check if subscription has expired
         if (data.expiresAt && new Date(data.expiresAt) < new Date()) {
           set({ tier: 'free', expiresAt: null, isHydrated: true });
-          void persistState({ tier: 'free', expiresAt: null, dailySakhaCount: 0, sakhaCountDate: getTodayString() });
+          void persistState({ tier: 'free', expiresAt: null, monthlyKiaanCount: 0, kiaanCountMonth: getCurrentMonth() });
           return;
         }
 
-        // Reset daily count if it's a new day
-        const today = getTodayString();
-        const dailySakhaCount = data.sakhaCountDate === today
-          ? (data.dailySakhaCount ?? 0)
+        // Reset monthly count if it's a new month
+        const currentMonth = getCurrentMonth();
+        const monthlyKiaanCount = data.kiaanCountMonth === currentMonth
+          ? (data.monthlyKiaanCount ?? 0)
           : 0;
 
         set({
           tier: data.tier ?? 'free',
           expiresAt: data.expiresAt ?? null,
-          dailySakhaCount,
-          sakhaCountDate: today,
+          monthlyKiaanCount,
+          kiaanCountMonth: currentMonth,
           isHydrated: true,
         });
       } catch {

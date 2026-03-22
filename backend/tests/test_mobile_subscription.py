@@ -1,5 +1,8 @@
 """Tests for the mobile in-app purchase receipt verification endpoint.
 
+4-tier model (March 2026): free / bhakta / sadhak / siddha
+Product IDs: com.kiaanverse.{bhakta,sadhak,siddha}.{monthly,yearly}
+
 Covers:
 - Valid receipt → tier activated
 - Invalid product ID → rejected
@@ -9,7 +12,6 @@ Covers:
 """
 
 import pytest
-from unittest.mock import AsyncMock, patch
 
 from backend.routes.mobile_subscription import (
     PRODUCT_TIER_MAP,
@@ -21,32 +23,52 @@ from backend.models.base import SubscriptionTier
 
 
 class TestProductTierMapping:
-    """Verify product ID → tier mapping is correct."""
+    """Verify product ID → tier mapping is correct (4-tier model)."""
 
-    def test_sacred_monthly_maps_to_sadhak(self):
-        assert PRODUCT_TIER_MAP["com.kiaanverse.sacred.monthly"] == SubscriptionTier.SADHAK
+    def test_bhakta_monthly_maps_to_bhakta(self):
+        assert PRODUCT_TIER_MAP["com.kiaanverse.bhakta.monthly"] == SubscriptionTier.BHAKTA
 
-    def test_divine_monthly_maps_to_siddha(self):
-        assert PRODUCT_TIER_MAP["com.kiaanverse.divine.monthly"] == SubscriptionTier.SIDDHA
+    def test_bhakta_yearly_maps_to_bhakta(self):
+        assert PRODUCT_TIER_MAP["com.kiaanverse.bhakta.yearly"] == SubscriptionTier.BHAKTA
+
+    def test_sadhak_monthly_maps_to_sadhak(self):
+        assert PRODUCT_TIER_MAP["com.kiaanverse.sadhak.monthly"] == SubscriptionTier.SADHAK
+
+    def test_sadhak_yearly_maps_to_sadhak(self):
+        assert PRODUCT_TIER_MAP["com.kiaanverse.sadhak.yearly"] == SubscriptionTier.SADHAK
+
+    def test_siddha_monthly_maps_to_siddha(self):
+        assert PRODUCT_TIER_MAP["com.kiaanverse.siddha.monthly"] == SubscriptionTier.SIDDHA
+
+    def test_siddha_yearly_maps_to_siddha(self):
+        assert PRODUCT_TIER_MAP["com.kiaanverse.siddha.yearly"] == SubscriptionTier.SIDDHA
 
     def test_unknown_product_not_in_map(self):
         assert "com.unknown.product" not in PRODUCT_TIER_MAP
 
+    def test_old_sacred_divine_products_not_in_map(self):
+        assert "com.kiaanverse.sacred.monthly" not in PRODUCT_TIER_MAP
+        assert "com.kiaanverse.divine.monthly" not in PRODUCT_TIER_MAP
+
 
 class TestBackendToMobileTierMapping:
-    """Verify backend tier → mobile tier name mapping."""
+    """Verify backend tier → mobile tier name mapping (1:1, no collapsing)."""
 
     def test_free_maps_to_free(self):
         assert BACKEND_TO_MOBILE_TIER[SubscriptionTier.FREE] == "free"
 
-    def test_sadhak_maps_to_sacred(self):
-        assert BACKEND_TO_MOBILE_TIER[SubscriptionTier.SADHAK] == "sacred"
+    def test_bhakta_maps_to_bhakta(self):
+        assert BACKEND_TO_MOBILE_TIER[SubscriptionTier.BHAKTA] == "bhakta"
 
-    def test_siddha_maps_to_divine(self):
-        assert BACKEND_TO_MOBILE_TIER[SubscriptionTier.SIDDHA] == "divine"
+    def test_sadhak_maps_to_sadhak(self):
+        assert BACKEND_TO_MOBILE_TIER[SubscriptionTier.SADHAK] == "sadhak"
 
-    def test_bhakta_maps_to_sacred(self):
-        assert BACKEND_TO_MOBILE_TIER[SubscriptionTier.BHAKTA] == "sacred"
+    def test_siddha_maps_to_siddha(self):
+        assert BACKEND_TO_MOBILE_TIER[SubscriptionTier.SIDDHA] == "siddha"
+
+    def test_all_tiers_mapped(self):
+        for tier in SubscriptionTier:
+            assert tier in BACKEND_TO_MOBILE_TIER
 
 
 class TestReceiptVerifyRequest:
@@ -56,16 +78,16 @@ class TestReceiptVerifyRequest:
         req = ReceiptVerifyRequest(
             receipt="base64-encoded-receipt-data",
             platform="ios",
-            product_id="com.kiaanverse.sacred.monthly",
+            product_id="com.kiaanverse.sadhak.monthly",
         )
         assert req.platform == "ios"
-        assert req.product_id == "com.kiaanverse.sacred.monthly"
+        assert req.product_id == "com.kiaanverse.sadhak.monthly"
 
     def test_valid_android_request(self):
         req = ReceiptVerifyRequest(
             receipt="purchase-token-string",
             platform="android",
-            product_id="com.kiaanverse.divine.monthly",
+            product_id="com.kiaanverse.siddha.yearly",
         )
         assert req.platform == "android"
 
@@ -74,7 +96,7 @@ class TestReceiptVerifyRequest:
             ReceiptVerifyRequest(
                 receipt="test",
                 platform="windows",
-                product_id="com.kiaanverse.sacred.monthly",
+                product_id="com.kiaanverse.sadhak.monthly",
             )
 
     def test_empty_receipt_rejected(self):
@@ -82,7 +104,7 @@ class TestReceiptVerifyRequest:
             ReceiptVerifyRequest(
                 receipt="",
                 platform="ios",
-                product_id="com.kiaanverse.sacred.monthly",
+                product_id="com.kiaanverse.bhakta.monthly",
             )
 
 
@@ -92,11 +114,11 @@ class TestReceiptVerifyResponse:
     def test_valid_response(self):
         resp = ReceiptVerifyResponse(
             valid=True,
-            tier="sacred",
+            tier="sadhak",
             expires_at="2026-04-22T00:00:00Z",
         )
         assert resp.valid is True
-        assert resp.tier == "sacred"
+        assert resp.tier == "sadhak"
 
     def test_invalid_response_with_error(self):
         resp = ReceiptVerifyResponse(
@@ -109,6 +131,6 @@ class TestReceiptVerifyResponse:
         assert resp.error is not None
 
     def test_response_defaults(self):
-        resp = ReceiptVerifyResponse(valid=True, tier="divine")
+        resp = ReceiptVerifyResponse(valid=True, tier="siddha")
         assert resp.expires_at is None
         assert resp.error is None

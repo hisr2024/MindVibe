@@ -1,17 +1,18 @@
 /**
  * Subscription module — IAP service, constants, and types for Kiaanverse.
+ * 4-tier model: Seeker (Free) / Bhakta / Sadhak / Siddha (March 2026)
  */
 
 export {
-  type VibePlayerTier,
+  type SubscriptionTier,
+  type BillingPeriod,
   type TierConfig,
   TIER_CONFIGS,
   TIER_RANK,
   IAP_PRODUCT_IDS,
   ALL_PRODUCT_IDS,
-  BACKEND_TIER_MAP,
-  VIBE_TO_BACKEND_TIER,
-  DAILY_SAKHA_QUOTA,
+  KIAAN_MONTHLY_QUOTA,
+  WISDOM_JOURNEY_LIMITS,
 } from './constants';
 
 export {
