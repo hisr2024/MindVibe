@@ -78,9 +78,9 @@ export function ProfileScreen() {
 
   const tierColors: Record<string, string> = {
     FREE: colors.divine.muted,
-    BASIC: colors.gold[400],
-    PREMIUM: colors.mv.aurora,
-    ENTERPRISE: colors.mv.auroraLilac,
+    BHAKTA: colors.gold[400],
+    SADHAK: colors.mv.aurora,
+    SIDDHA: colors.mv.auroraLilac,
   };
 
   const tierLabel = user?.subscriptionTier ?? 'FREE';

@@ -30,6 +30,29 @@ export { createAppQueryClient, createAppPersister } from './queryClient';
 // Gita verse cache (offline-first)
 export { gitaCache } from './cache/gitaCache';
 
+// Subscription (4-tier: free/bhakta/sadhak/siddha)
+export {
+  type SubscriptionTier as VibePlayerTier,
+  type SubscriptionTier,
+  type BillingPeriod,
+  type TierConfig,
+  TIER_CONFIGS,
+  TIER_RANK,
+  IAP_PRODUCT_IDS,
+  ALL_PRODUCT_IDS,
+  KIAAN_MONTHLY_QUOTA,
+  WISDOM_JOURNEY_LIMITS,
+  initializeIAP,
+  disconnectIAP,
+  getProducts,
+  purchaseSubscription,
+  restorePurchases,
+  verifyReceipt,
+  IAPError,
+  type IAPProduct,
+  type PurchaseResult,
+} from './subscription';
+
 // Types
 export type {
   User,

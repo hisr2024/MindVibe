@@ -611,6 +611,15 @@ try:
 except Exception as e:
     startup_logger.info(f"❌ [ERROR] Failed to load Subscriptions router: {e}")
 
+# Load Mobile Subscription (IAP receipt verification) router
+startup_logger.info("\n[Mobile Subscription] Attempting to import Mobile Subscription router...")
+try:
+    from backend.routes.mobile_subscription import router as mobile_subscription_router
+    app.include_router(mobile_subscription_router)
+    startup_logger.info("✅ [SUCCESS] Mobile Subscription router loaded")
+except Exception as e:
+    startup_logger.info(f"❌ [ERROR] Failed to load Mobile Subscription router: {e}")
+
 # Load Wisdom Guide router
 startup_logger.info("\n[Wisdom Guide] Attempting to import Wisdom Guide router...")
 try:

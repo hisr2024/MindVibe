@@ -33,7 +33,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider, useTheme, colors, LoadingMandala } from '@kiaanverse/ui';
 import { I18nProvider } from '@kiaanverse/i18n';
 import { api, type SyncQueueItem } from '@kiaanverse/api';
-import { useAuthStore, useThemeStore, useUserPreferencesStore, useSyncQueueStore, startSyncOnForeground } from '@kiaanverse/store';
+import { useAuthStore, useThemeStore, useUserPreferencesStore, useSyncQueueStore, startSyncOnForeground, useSubscriptionStore } from '@kiaanverse/store';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useNotifications } from '../hooks/useNotifications';
 import { OfflineBanner } from '../components/common/OfflineBanner';
@@ -130,6 +130,7 @@ function AuthGate({ children }: { children: React.ReactNode }): React.JSX.Elemen
 function AppContent(): React.JSX.Element {
   const { theme } = useTheme();
   const { status, initialize, checkBiometricAvailability } = useAuthStore();
+  const hydrateSubscription = useSubscriptionStore((s) => s.hydrate);
   const { isOnline } = useNetworkStatus();
   const pendingCount = useSyncQueueStore((s) => s.queue.length);
   const processQueue = useSyncQueueStore((s) => s.processQueue);
@@ -145,6 +146,7 @@ function AppContent(): React.JSX.Element {
     const setup = async () => {
       await initialize();
       await checkBiometricAvailability();
+      await hydrateSubscription();
     };
     void setup();
     // Run once on mount — Zustand actions are stable references
@@ -198,6 +200,7 @@ function AppContent(): React.JSX.Element {
           <Stack.Screen name="gita" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="wellness" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="chat" />
+          <Stack.Screen name="subscription" options={{ animation: 'slide_from_bottom', presentation: 'modal' }} />
         </Stack>
       </AuthGate>
     </View>

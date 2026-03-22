@@ -47,8 +47,8 @@ const mockSadhakTier: PricingTier = {
   id: 'sadhak',
   name: 'Sadhak',
   description: 'Full access to all features with 300 KIAAN questions',
-  monthlyPrice: 14.99,
-  yearlyPrice: 107.99,
+  monthlyPrice: 12.99,
+  yearlyPrice: 89.99,
   features: [
     '300 KIAAN questions/month',
     'Advanced analytics',

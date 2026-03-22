@@ -61,8 +61,8 @@ interface LinkListResponse {
 
 const PLAN_TIERS = [
   { value: 'bhakta', label: 'Bhakta', price: '$6.99/mo' },
-  { value: 'sadhak', label: 'Sadhak', price: '$14.99/mo' },
-  { value: 'siddha', label: 'Siddha', price: '$24.99/mo' },
+  { value: 'sadhak', label: 'Sadhak', price: '$12.99/mo' },
+  { value: 'siddha', label: 'Siddha', price: '$22.99/mo' },
 ]
 
 const STEPS = ['Plan Details', 'Add Ons', 'Link Details', 'Review']

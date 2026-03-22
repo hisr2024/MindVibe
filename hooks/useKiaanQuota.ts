@@ -29,8 +29,10 @@ interface UseKiaanQuotaResult {
 const tierQuotas: Record<string, number> = {
   free: 5,
   bhakta: 50,
+  sacred: 300,  // Mobile tier — matches sadhak
   sadhak: 300,
-  siddha: -1, // unlimited
+  siddha: -1,   // unlimited
+  divine: -1,   // Mobile tier — matches siddha
 }
 
 export function useKiaanQuota(tier: string = 'free'): UseKiaanQuotaResult {

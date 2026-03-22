@@ -18,7 +18,7 @@ export interface User {
   createdAt: string;
 }
 
-export type SubscriptionTier = 'FREE' | 'SADHAK' | 'SIDDHA';
+export type SubscriptionTier = 'FREE' | 'BHAKTA' | 'SADHAK' | 'SIDDHA';
 
 /**
  * POST /api/auth/login response (LoginOut).
