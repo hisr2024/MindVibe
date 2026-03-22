@@ -27,14 +27,22 @@ export type SubscriptionTier = 'FREE' | 'SADHAK' | 'SIDDHA';
  * httpOnly cookie by the backend. Mobile clients must extract it from
  * the Set-Cookie header or rely on native cookie storage.
  */
+export interface LoginResponseUser {
+  id: string;
+  email: string;
+  name: string | null;
+  avatar_url: string | null;
+  is_onboarded: boolean;
+}
+
 export interface LoginResponse {
   access_token: string;
+  refresh_token: string | null;
   token_type: string;
-  session_id: string;
   expires_in: number;
-  user_id: string;
-  email: string;
-  email_verified: boolean;
+  user: LoginResponseUser;
+  // Legacy flat fields kept for backward compatibility
+  session_id?: string;
   subscription_tier: string;
   subscription_status: string;
   is_developer: boolean;

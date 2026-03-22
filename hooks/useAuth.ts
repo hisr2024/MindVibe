@@ -222,9 +222,11 @@ export function useAuth(): UseAuthResult {
         }
         const errorData = await response.json().catch(() => ({}))
         const detail = errorData.detail || ''
+        const errorCode = errorData.code || ''
 
         // Handle email not verified — throw specific error for UI to catch
-        if (detail === 'email_not_verified') {
+        // Support both new standardized format (code field) and legacy format
+        if (errorCode === 'EMAIL_NOT_VERIFIED' || detail === 'email_not_verified') {
           const err = new Error('email_not_verified')
           ;(err as Error & { code: string }).code = 'EMAIL_NOT_VERIFIED'
           throw err
@@ -237,10 +239,12 @@ export function useAuth(): UseAuthResult {
       const data = await response.json()
 
       // Backend sets httpOnly cookies automatically - we only store profile info
+      // Support both new nested user object and legacy flat fields
+      const userObj = data.user || {}
       const authUser: AuthUser = {
-        id: data.user_id,
-        email: data.email,
-        name: data.email.split('@')[0],
+        id: userObj.id || data.user_id,
+        email: userObj.email || data.email,
+        name: userObj.name || (userObj.email || data.email || '').split('@')[0],
         sessionId: data.session_id,
         subscriptionTier: data.subscription_tier || 'free',
         subscriptionStatus: data.subscription_status || 'active',
