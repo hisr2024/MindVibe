@@ -70,6 +70,7 @@ from backend.services.journey_engine.journey_engine_service import (
     ENEMY_LABELS,
 )
 from backend.services.journey_engine.template_generator import ENEMY_METADATA, EnemyType
+from backend.services.notification_dispatcher import dispatch_notification
 
 logger = logging.getLogger(__name__)
 
@@ -768,6 +769,21 @@ async def complete_step(
         )
 
         await db.commit()
+
+        # Dispatch milestone notification if journey is now complete
+        if result["journey_complete"]:
+            await dispatch_notification(
+                db=db,
+                user_id=user_id,
+                notification_type="milestone",
+                title="Journey Complete! 🎉",
+                body="You've completed your journey. Your karma tree grows stronger with your dedication.",
+                data={
+                    "type": "milestone",
+                    "journeyId": journey_id,
+                    "milestoneType": "journey_complete",
+                },
+            )
 
         return CompletionResponse(
             success=result["success"],

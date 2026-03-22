@@ -37,6 +37,13 @@ import {
   useUserPreferencesStore,
 } from '@kiaanverse/store';
 
+import { api } from '@kiaanverse/api';
+import {
+  registerPushToken,
+  scheduleDailyVerse,
+  scheduleStreakAlert,
+} from '../../services/notificationService';
+
 import { WelcomeStep } from './steps/WelcomeStep';
 import { PurposeStep } from './steps/PurposeStep';
 import { GitaFamiliarityStep } from './steps/GitaFamiliarityStep';
@@ -188,13 +195,36 @@ export default function OnboardingScreen(): React.JSX.Element {
         setNotifications({ dailyReminder: true });
       }
 
-      // Onboarding preferences are persisted locally via Zustand stores.
-      // The backend /api/profile only accepts {full_name, base_experience}
-      // and has no /user/preferences endpoint yet, so we skip the API call.
-      // Preferences will sync when a dedicated endpoint is available.
-
       complete();
       completeOnboarding();
+
+      // Register push token and schedule initial notifications (fire-and-forget)
+      if (notificationsEnabled) {
+        void (async () => {
+          try {
+            await registerPushToken();
+
+            const timeStr = answers.dailyPracticeTime ?? '08:00';
+            const [hourStr, minuteStr] = timeStr.split(':');
+            const hour = parseInt(hourStr ?? '8', 10);
+            const minute = parseInt(minuteStr ?? '0', 10);
+            await scheduleDailyVerse(hour, minute);
+            await scheduleStreakAlert();
+
+            // Sync notification preferences to backend
+            await api.notifications.updatePreferences({
+              push_enabled: true,
+              daily_checkin_reminder: true,
+              journey_step_reminder: true,
+              streak_encouragement: true,
+              weekly_reflection: true,
+            });
+          } catch {
+            // Non-critical — notifications will be retried on next app launch
+          }
+        })();
+      }
+
       router.replace('/(tabs)/home');
     },
     [

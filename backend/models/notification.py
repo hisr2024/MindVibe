@@ -66,6 +66,8 @@ class PushSubscription(Base):
     # Device identification for managing multiple subscriptions
     device_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
     user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    # Platform identifier (ios, android, web)
+    platform: Mapped[str | None] = mapped_column(String(10), nullable=True)
     # Active flag — set to False when endpoint becomes invalid
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime.datetime] = mapped_column(

@@ -187,4 +187,32 @@ export const api = {
     moodResponse: (mood: string) =>
       apiClient.post('/divine/mood-response', { mood }),
   },
+  /** Push notifications */
+  notifications: {
+    subscribe: (token: string, deviceName?: string) =>
+      apiClient.post('/api/notifications/subscribe', {
+        endpoint: token,
+        device_name: deviceName,
+      }),
+    unsubscribe: (token: string) =>
+      apiClient.post('/api/notifications/unsubscribe', { endpoint: token }),
+    inbox: (limit?: number, offset?: number) =>
+      apiClient.get('/api/notifications/inbox', { params: { limit, offset } }),
+    markRead: (notificationId: string) =>
+      apiClient.post(`/api/notifications/${notificationId}/read`),
+    getPreferences: () =>
+      apiClient.get('/api/notifications/preferences'),
+    updatePreferences: (prefs: {
+      push_enabled?: boolean;
+      email_enabled?: boolean;
+      daily_checkin_reminder?: boolean;
+      journey_step_reminder?: boolean;
+      streak_encouragement?: boolean;
+      weekly_reflection?: boolean;
+      community_activity?: boolean;
+      quiet_hours_start?: number | null;
+      quiet_hours_end?: number | null;
+    }) =>
+      apiClient.put('/api/notifications/preferences', prefs),
+  },
 } as const;
