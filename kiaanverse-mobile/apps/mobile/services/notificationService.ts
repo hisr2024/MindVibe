@@ -93,7 +93,7 @@ async function setupNotificationChannels(): Promise<void> {
     await Promise.all([
       Notifications.setNotificationChannelAsync(CHANNELS.DAILY_VERSE, {
         name: 'Daily Verse',
-        importance: Notifications.AndroidImportance.MAX,
+        importance: Notifications.AndroidImportance.HIGH,
         sound: 'default',
         vibrationPattern: [0, 250, 250, 250],
         description: 'Morning verse of the day from Bhagavad Gita',
@@ -257,8 +257,8 @@ export async function registerPushToken(): Promise<void> {
     if (storedToken === token) return;
 
     // Register with backend — matches PushSubscriptionIn schema:
-    // { endpoint: string, device_name?: string }
-    await api.notifications.subscribe(token, `Kiaanverse ${Platform.OS}`);
+    // { endpoint: string, device_name?: string, platform?: string }
+    await api.notifications.subscribe(token, `Kiaanverse ${Platform.OS}`, Platform.OS);
 
     // Store token to avoid duplicate registrations
     await SecureStore.setItemAsync(PUSH_TOKEN_KEY, token);

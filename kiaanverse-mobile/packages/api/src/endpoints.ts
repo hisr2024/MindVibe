@@ -189,10 +189,11 @@ export const api = {
   },
   /** Push notifications */
   notifications: {
-    subscribe: (token: string, deviceName?: string) =>
+    subscribe: (token: string, deviceName?: string, platform?: string) =>
       apiClient.post('/api/notifications/subscribe', {
         endpoint: token,
         device_name: deviceName,
+        ...(platform !== undefined && { platform }),
       }),
     unsubscribe: (token: string) =>
       apiClient.post('/api/notifications/unsubscribe', { endpoint: token }),
