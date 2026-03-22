@@ -35,7 +35,7 @@ declare const __DEV__: boolean;
 // ---------------------------------------------------------------------------
 
 interface SentryLike {
-  captureException(error: unknown, context?: Record<string, unknown>): void;
+  captureException(error: unknown, hint?: { extra?: Record<string, unknown> }): void;
 }
 
 let _sentry: SentryLike | null | undefined;
@@ -295,12 +295,21 @@ function createApiClient(): AxiosInstance {
         }
       }
 
-      // --- 403 → dispatch logout ---
+      // --- 403 → check reason before forcing logout ---
       if (status === 403) {
+        const data403 = error.response.data as Record<string, unknown> | undefined;
+        const detail403 = typeof data403?.detail === 'string' ? data403.detail : '';
+
+        // Email not verified is NOT an authorization failure — let the caller handle it
+        if (detail403 === 'email_not_verified') {
+          return Promise.reject(wrapAxiosError(error));
+        }
+
+        // True authorization failure — force logout
         await tokenManager.clearTokens();
         tokenManager.onAuthFailure?.();
         return Promise.reject(
-          new AuthError('Access denied. Please sign in again.', 403, 'INVALID_CREDENTIALS'),
+          new AuthError('Access denied. Please sign in again.', 403, 'UNKNOWN'),
         );
       }
 
@@ -314,7 +323,7 @@ function createApiClient(): AxiosInstance {
               method: originalRequest.method,
               status,
             },
-          } as Record<string, unknown>);
+          });
         }
       }
 

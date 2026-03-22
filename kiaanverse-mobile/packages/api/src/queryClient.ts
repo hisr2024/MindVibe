@@ -23,7 +23,7 @@ declare const __DEV__: boolean;
 // ---------------------------------------------------------------------------
 
 interface SentryLike {
-  captureException(error: unknown, context?: Record<string, unknown>): void;
+  captureException(error: unknown, hint?: { extra?: Record<string, unknown> }): void;
 }
 
 let _sentry: SentryLike | null | undefined;
@@ -55,7 +55,7 @@ function handleGlobalError(error: unknown): void {
     if (sentry) {
       sentry.captureException(error, {
         extra: { statusCode: error.statusCode, code: error.code },
-      } as Record<string, unknown>);
+      });
     }
   }
 }
