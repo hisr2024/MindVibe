@@ -9,6 +9,7 @@
     "ios": "expo start --ios",
     "typecheck": "tsc --noEmit",
     "lint": "eslint app/",
+    "test": "jest --passWithNoTests",
     "clean": "rm -rf .expo dist node_modules/.cache"
   },
   "dependencies": {
@@ -55,7 +56,12 @@
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
+    "@testing-library/jest-native": "^5.4.0",
+    "@testing-library/react-native": "^12.9.0",
+    "@types/jest": "^29.5.0",
     "@types/react": "~18.2.0",
+    "jest-expo": "~51.0.0",
+    "react-test-renderer": "18.2.0",
     "typescript": "~5.3.3"
   }
 }

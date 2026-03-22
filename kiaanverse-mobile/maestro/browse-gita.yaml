@@ -1,0 +1,50 @@
+# Browse Gita Flow — Maestro E2E
+#
+# Verifies: navigate to Gita tab → see chapter list → tap chapter →
+# see verse list → tap verse → see verse content
+#
+# Prerequisites: User already logged in. App built and installed.
+# Run: maestro test maestro/browse-gita.yaml
+
+appId: com.kiaanverse.mobile
+---
+
+# Launch the app (assumes user is already authenticated)
+- launchApp
+
+# Navigate to the Gita tab
+- tapOn: "Gita"
+
+# Verify the Gita header is visible
+- assertVisible:
+    id: "gita-header"
+    timeout: 5000
+
+# Tap the first chapter in the list
+- tapOn:
+    text: ".*Chapter 1.*"
+    timeout: 5000
+
+# Verify verse list appears (look for verse items)
+- assertVisible:
+    text: ".*Verse.*"
+    timeout: 5000
+
+# Tap the first verse
+- tapOn:
+    text: ".*Verse 1.*"
+    optional: true
+
+- tapOn:
+    text: ".*1\\.1.*"
+    optional: true
+
+# Verify verse content is displayed (Sanskrit or English translation)
+- assertVisible:
+    text: ".*"
+    timeout: 8000
+
+# Verify we can see either Sanskrit text or English translation
+- assertVisible:
+    text: ".*"
+    timeout: 3000

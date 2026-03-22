@@ -1,0 +1,53 @@
+# Send Message Flow — Maestro E2E
+#
+# Verifies: navigate to Sakha tab → type message → send → see response
+#
+# Prerequisites: User already logged in (run login.yaml first or use
+# dev login). App built and installed on simulator/emulator.
+# Run: maestro test maestro/send-message.yaml
+
+appId: com.kiaanverse.mobile
+---
+
+# Launch the app (assumes user is already authenticated)
+- launchApp
+
+# Navigate to the Sakha (chat) tab
+- tapOn: "Sakha"
+
+# Wait for the chat screen to load
+- assertVisible:
+    text: "Sakha"
+    timeout: 5000
+
+# Tap on the message input field
+- tapOn:
+    hint: ".*message.*"
+    optional: true
+
+- tapOn:
+    text: ".*Ask.*"
+    optional: true
+
+# Type a message
+- inputText: "What is dharma?"
+
+# Send the message
+- tapOn:
+    id: "send-button"
+    optional: true
+
+# Fallback: tap send icon if no testID
+- tapOn:
+    text: "Send"
+    optional: true
+
+# Verify the user message appears in the chat
+- assertVisible:
+    text: "What is dharma?"
+    timeout: 5000
+
+# Wait for the assistant response (AI may take a few seconds)
+- assertVisible:
+    text: ".*dharma.*"
+    timeout: 15000

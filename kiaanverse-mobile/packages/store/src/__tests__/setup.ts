@@ -5,6 +5,9 @@
  * without actual native module dependencies.
  */
 
+// Define __DEV__ global (React Native/Expo runtime global)
+(globalThis as Record<string, unknown>).__DEV__ = true;
+
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () => {
   const store: Record<string, string> = {};
