@@ -78,14 +78,25 @@ elif _is_production:
         "https://mind-vibe-universal.vercel.app",
         "https://www.kiaanverse.com",
         "https://kiaanverse.com",
+        # Mobile API domains
+        "https://api.kiaanverse.com",
+        "https://api-staging.kiaanverse.com",
     ]
 else:
     ALLOWED_ORIGINS = [
         "https://mind-vibe-universal.vercel.app",
         "https://www.kiaanverse.com",
         "https://kiaanverse.com",
+        # Web development
         "http://localhost:3000",
         "http://localhost:3001",
+        # Mobile API domains
+        "https://api.kiaanverse.com",
+        "https://api-staging.kiaanverse.com",
+        # Expo development (React Native)
+        "http://localhost:8081",
+        "http://localhost:19006",
+        "exp://localhost:8081",
     ]
 
 startup_logger.info(f"CORS allowed origins: {ALLOWED_ORIGINS}")
