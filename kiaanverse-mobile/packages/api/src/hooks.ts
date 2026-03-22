@@ -21,6 +21,9 @@ import type {
   MoodCreatePayload,
   MoodHistoryResponse,
   MoodInsightsResponse,
+  StepCompletionResult,
+  UserJourneyProgress,
+  WisdomJourneyDetail,
 } from './types';
 
 // ---------------------------------------------------------------------------
@@ -50,6 +53,8 @@ export const queryKeys = {
   journeyTemplates: ['journeys', 'templates'] as const,
   journeys: (status?: string) => ['journeys', 'list', status] as const,
   journey: (id: string) => ['journeys', 'detail', id] as const,
+  journeyDetail: (id: string) => ['journeys', 'detail', id] as const,
+  journeyProgress: ['journeys', 'progress'] as const,
   journeyDashboard: ['journeys', 'dashboard'] as const,
   chatSessions: ['chat', 'sessions'] as const,
   chatHistory: (sessionId?: string) => ['chat', 'history', sessionId] as const,
@@ -255,6 +260,31 @@ export function useJourneyDashboard(): UseQueryResult<DashboardData> {
   });
 }
 
+/** Full wisdom journey detail with all steps. */
+export function useWisdomJourneyDetail(journeyId: string): UseQueryResult<WisdomJourneyDetail> {
+  return useQuery({
+    queryKey: queryKeys.journeyDetail(journeyId),
+    queryFn: async () => {
+      const { data } = await api.journeys.detail(journeyId);
+      return data as WisdomJourneyDetail;
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: journeyId.length > 0,
+  });
+}
+
+/** User progress across all journeys. */
+export function useJourneyProgress(): UseQueryResult<UserJourneyProgress[]> {
+  return useQuery({
+    queryKey: queryKeys.journeyProgress,
+    queryFn: async () => {
+      const { data } = await api.journeys.progress();
+      return data as UserJourneyProgress[];
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Mutations
 // ---------------------------------------------------------------------------
@@ -282,6 +312,23 @@ export function useCompleteStep(): UseMutationResult<StepResult, Error, { journe
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.journey(variables.journeyId) });
       void queryClient.invalidateQueries({ queryKey: queryKeys.journeyDashboard });
+    },
+  });
+}
+
+/** Complete a wisdom journey step (returns XP + karma). */
+export function useCompleteWisdomStep(): UseMutationResult<StepCompletionResult, Error, { journeyId: string; stepId: string }> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ journeyId, stepId }: { journeyId: string; stepId: string }) => {
+      const { data } = await api.journeys.completeStepById(journeyId, stepId);
+      return data as StepCompletionResult;
+    },
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.journeyDetail(variables.journeyId) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.journeyProgress });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.journeyDashboard });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.karmaTree });
     },
   });
 }

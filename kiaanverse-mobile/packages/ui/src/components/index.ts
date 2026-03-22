@@ -17,3 +17,5 @@ export { MoodRing, type MoodRingProps, type Mood } from './MoodRing';
 export { KarmaTree, type KarmaTreeProps, type KarmaNode } from './KarmaTree';
 export { GoldenHeader, type GoldenHeaderProps } from './GoldenHeader';
 export { LoadingMandala, type LoadingMandalaProps } from './LoadingMandala';
+export { CompletionCelebration, type CompletionCelebrationProps } from './CompletionCelebration';
+export { GoldenProgressBar, type GoldenProgressBarProps } from './GoldenProgressBar';

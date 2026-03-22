@@ -103,6 +103,14 @@ export const api = {
       apiClient.post(`/api/journey-engine/journeys/${journeyId}/pause`),
     resume: (journeyId: string) =>
       apiClient.post(`/api/journey-engine/journeys/${journeyId}/resume`),
+    /** Full journey detail with steps */
+    detail: (journeyId: string) =>
+      apiClient.get(`/api/journeys/${journeyId}`),
+    /** Complete a specific step */
+    completeStepById: (journeyId: string, stepId: string) =>
+      apiClient.post(`/api/journeys/${journeyId}/steps/${stepId}/complete`),
+    /** User progress across all journeys */
+    progress: () => apiClient.get('/api/journeys/progress'),
     dashboard: () => apiClient.get('/api/journey-engine/dashboard'),
     enemies: () => apiClient.get('/api/journey-engine/enemies'),
     enemyProgress: (enemy: string) =>

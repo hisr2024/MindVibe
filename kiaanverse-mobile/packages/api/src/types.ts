@@ -337,6 +337,73 @@ export interface JourneyTemplate {
 }
 
 // ---------------------------------------------------------------------------
+// Wisdom Journey (structured learning paths)
+// ---------------------------------------------------------------------------
+
+/** Step type in a wisdom journey */
+export type JourneyStepType = 'lesson' | 'practice' | 'reflection' | 'quiz';
+
+/** Difficulty level for journey templates */
+export type JourneyDifficulty = 'beginner' | 'intermediate' | 'advanced';
+
+/** Category for wisdom journey paths */
+export type JourneyCategory = 'beginner_paths' | 'deep_dives' | '21_day_challenges';
+
+/** A step within a wisdom journey with type-specific content */
+export interface WisdomJourneyStep {
+  id: string;
+  dayIndex: number;
+  title: string;
+  type: JourneyStepType;
+  content: string;
+  verseRef?: string;
+  reflection?: string;
+  isCompleted: boolean;
+  /** XP earned for completing this step */
+  xpReward: number;
+  /** Karma points earned for completing this step */
+  karmaReward: number;
+}
+
+/** Detailed journey with all steps and progress */
+export interface WisdomJourneyDetail {
+  id: string;
+  title: string;
+  description: string;
+  durationDays: number;
+  status: JourneyStatus;
+  currentDay: number;
+  completedSteps: number;
+  category: JourneyCategory;
+  difficulty: JourneyDifficulty;
+  thumbnailUrl?: string;
+  steps: WisdomJourneyStep[];
+  totalXp: number;
+  earnedXp: number;
+}
+
+/** Response from POST /api/journeys/:id/steps/:stepId/complete */
+export interface StepCompletionResult {
+  success: boolean;
+  xp: number;
+  karmaPoints: number;
+  progress: number;
+  journeyCompleted: boolean;
+}
+
+/** User progress across all journeys */
+export interface UserJourneyProgress {
+  journeyId: string;
+  title: string;
+  category: JourneyCategory;
+  completedSteps: number;
+  totalSteps: number;
+  earnedXp: number;
+  totalXp: number;
+  status: JourneyStatus;
+}
+
+// ---------------------------------------------------------------------------
 // Sync
 // ---------------------------------------------------------------------------
 
