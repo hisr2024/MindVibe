@@ -34,7 +34,6 @@ from dataclasses import dataclass, field
 from backend.services.ai.providers.provider_manager import (
     get_provider_manager,
     AIProviderError,
-    ProviderResponse,
 )
 from backend.services.redis_cache_enhanced import redis_cache
 

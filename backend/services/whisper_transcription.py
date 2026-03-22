@@ -28,13 +28,10 @@ import asyncio
 import logging
 import tempfile
 import wave
-import struct
 from typing import Optional, Dict, List, Any, Tuple
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
 import io
-import hashlib
 
 logger = logging.getLogger(__name__)
 

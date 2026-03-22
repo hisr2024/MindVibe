@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { Pressable, StyleSheet, type ViewStyle } from 'react-native';
-import { useTheme } from '../theme/useTheme';
+
 import { accessibility } from '../tokens/motion';
 
 interface IconButtonProps {

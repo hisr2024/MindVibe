@@ -42,7 +42,6 @@ from backend.services.wisdom_kb import WisdomKnowledgeBase
 from backend.services.ai.providers.provider_manager import get_provider_manager, AIProviderError
 
 # Integration service for response enhancement
-from backend.services.kiaan_divine_integration import kiaan_divine, get_divine_system_prompt
 
 # Indian Gita Sources - Authentic teachings from Bhagavad Gita
 from backend.services.indian_data_sources import indian_gita_sources
@@ -53,7 +52,6 @@ from backend.services.kiaan_model_provider import (
     connectivity_checker,
     local_model_registry,
     Message,
-    ModelProvider,
     ConnectionStatus,
     LLAMA_CPP_AVAILABLE,
 )

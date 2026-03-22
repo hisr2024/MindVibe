@@ -16,7 +16,6 @@
 import { AxiosError, type AxiosResponse } from 'axios';
 import { apiClient } from '../client';
 import { AuthError } from '../errors';
-import type { AuthErrorCode } from '../errors';
 import type {
   User,
   LoginResponse,

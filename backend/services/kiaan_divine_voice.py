@@ -611,7 +611,7 @@ class KIAANDivineVoice:
             pattern = re.compile(rf'\b({word})\b', re.IGNORECASE)
             # Elongate by slowing rate slightly
             result = pattern.sub(
-                rf'<prosody rate="90%">\1</prosody>',
+                r'<prosody rate="90%">\1</prosody>',
                 result
             )
 
@@ -619,7 +619,7 @@ class KIAANDivineVoice:
         for word in SMILE_WORDS:
             pattern = re.compile(rf'\b({word})\b', re.IGNORECASE)
             result = pattern.sub(
-                rf'<prosody pitch="+0.5st" rate="95%">\1</prosody>',
+                r'<prosody pitch="+0.5st" rate="95%">\1</prosody>',
                 result
             )
 
@@ -687,13 +687,13 @@ class KIAANDivineVoice:
             if info["emphasis"] == "strong":
                 # Strong emphasis - slower, deeper, with pause
                 result = pattern.sub(
-                    rf'<break time="150ms"/><prosody rate="85%" pitch="-0.5st"><emphasis level="strong">\1</emphasis></prosody>',
+                    r'<break time="150ms"/><prosody rate="85%" pitch="-0.5st"><emphasis level="strong">\1</emphasis></prosody>',
                     result
                 )
             else:
                 # Moderate emphasis
                 result = pattern.sub(
-                    rf'<prosody rate="90%"><emphasis level="moderate">\1</emphasis></prosody>',
+                    r'<prosody rate="90%"><emphasis level="moderate">\1</emphasis></prosody>',
                     result
                 )
 
@@ -1299,7 +1299,7 @@ class KIAANDivineVoice:
             pattern = re.compile(rf'\b({term})\b', re.IGNORECASE)
             # Use soft prosody shift for warmth
             ssml_text = pattern.sub(
-                rf'<prosody pitch="-0.3st" rate="95%">\1</prosody>',
+                r'<prosody pitch="-0.3st" rate="95%">\1</prosody>',
                 ssml_text
             )
 
@@ -1409,7 +1409,6 @@ class KIAANDivineVoice:
         context: ConversationContext
     ) -> str:
         """Generate a sacred opening for the response based on phase."""
-        import random
 
         openings = SACRED_OPENINGS.get(phase, SACRED_OPENINGS[ConversationPhase.GREETING])
 

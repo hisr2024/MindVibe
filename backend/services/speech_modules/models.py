@@ -9,7 +9,7 @@ enabling seamless integration of diverse speech technologies.
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Literal, TYPE_CHECKING
+from typing import Dict, List, Optional, Any, Literal
 from enum import Enum
 
 # Optional numpy import for voice embeddings

@@ -92,6 +92,7 @@ function WaveBar({
 
   // Sync JS active prop → shared value so the worklet reacts
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     isActive.value = withTiming(active ? 1 : 0, {
       duration: motionDuration.fast,
     });
@@ -100,10 +101,12 @@ function WaveBar({
   useEffect(() => {
     if (active) {
       // Reset to phase offset start position
+      // eslint-disable-next-line react-hooks/immutability
       progress.value = phase;
 
       // Animate 0→1 repeatedly (represents one sine cycle).
       // Each bar has a different starting phase for the wave effect.
+       
       progress.value = withDelay(
         index * 80, // Stagger start by 80ms per bar
         withRepeat(
@@ -118,6 +121,7 @@ function WaveBar({
     } else {
       cancelAnimation(progress);
       // Animate back to rest position
+       
       progress.value = withTiming(0, {
         duration: motionDuration.normal,
         easing: Easing.out(Easing.cubic),

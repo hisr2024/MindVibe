@@ -65,7 +65,12 @@ export function I18nProvider({
   }, [namespaces]);
 
   useEffect(() => {
-    void loadAllNamespaces(locale);
+    let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState is needed to load translations asynchronously
+    loadAllNamespaces(locale).then(() => {
+      if (cancelled) return;
+    });
+    return () => { cancelled = true; };
   }, [locale, loadAllNamespaces]);
 
   const setLocale = useCallback((newLocale: Locale) => {

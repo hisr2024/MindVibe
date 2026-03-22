@@ -21,9 +21,8 @@ import hashlib
 import json
 import logging
 import os
-import sqlite3
 import aiosqlite
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from pathlib import Path

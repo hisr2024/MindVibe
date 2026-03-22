@@ -13,7 +13,7 @@ legitimate KIAAN interactions.
 import html
 import logging
 import re
-from typing import Awaitable, Callable, Any, Union, overload
+from typing import Awaitable, Callable, Any, Union
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request

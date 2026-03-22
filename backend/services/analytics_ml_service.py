@@ -9,7 +9,6 @@ Quantum Enhancement #6: Advanced Analytics Dashboard
 
 from datetime import datetime, timedelta
 from typing import List, Dict, Tuple, Optional
-import numpy as np
 from collections import defaultdict
 import statistics
 

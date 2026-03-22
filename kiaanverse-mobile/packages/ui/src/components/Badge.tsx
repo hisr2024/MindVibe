@@ -5,7 +5,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '../tokens/colors';
-import { textPresets } from '../tokens/typography';
 
 interface BadgeProps {
   count?: number;

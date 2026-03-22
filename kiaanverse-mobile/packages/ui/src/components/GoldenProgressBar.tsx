@@ -44,6 +44,7 @@ function GoldenProgressBarInner({
   const widthValue = useSharedValue(0);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     widthValue.value = withSpring(clampedProgress, spring.default);
   }, [clampedProgress, widthValue]);
 

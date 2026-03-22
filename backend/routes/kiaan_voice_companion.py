@@ -956,7 +956,6 @@ async def send_voice_companion_message(
 
     from backend.services.companion_friend_engine import (
         detect_mood,
-        extract_memories_from_message,
         get_companion_engine,
     )
 
@@ -1268,7 +1267,7 @@ async def send_voice_companion_message(
                 mood = engine_result.get("mood", mood)
                 wisdom_used = engine_result.get("wisdom_used")
                 ai_tier = "engine_ai"
-                logger.info(f"VoiceCompanion: TIER 2 (engine AI) succeeded")
+                logger.info("VoiceCompanion: TIER 2 (engine AI) succeeded")
         except Exception as e:
             logger.warning(f"VoiceCompanion: TIER 2 failed: {e}")
 
@@ -2066,7 +2065,6 @@ async def voice_guide_input_to_tool(
         EcosystemTool,
         TOOL_ROUTES,
         TOOL_DESCRIPTIONS,
-        get_unified_voice_engine,
     )
 
     # Validate target tool exists

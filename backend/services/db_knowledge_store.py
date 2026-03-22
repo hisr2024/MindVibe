@@ -164,7 +164,7 @@ class DatabaseKnowledgeStore:
             return wisdom
         except IntegrityError:
             await db.rollback()
-            logger.warning(f"Integrity error adding wisdom (likely duplicate)")
+            logger.warning("Integrity error adding wisdom (likely duplicate)")
             return None
 
     async def get_wisdom_by_id(

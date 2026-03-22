@@ -63,6 +63,7 @@ export function useSpeechOutput(
   const isMountedRef = useRef(true);
   const mergedOptions = useMemo(
     () => ({ ...DEFAULT_OPTIONS, ...options }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [options.rate, options.pitch, options.language, options.volume],
   );
 

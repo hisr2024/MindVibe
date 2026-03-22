@@ -1604,7 +1604,7 @@ class KIAANModelProvider:
             logger.info(f"Using best available model: {model}")
 
         if not config:
-            raise ValueError(f"No model available")
+            raise ValueError("No model available")
 
         client = self.clients.get(config.provider)
         if not client:

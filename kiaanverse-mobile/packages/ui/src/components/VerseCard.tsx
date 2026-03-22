@@ -14,7 +14,7 @@ import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withTiming, Eas
 import { useTheme } from '../theme/useTheme';
 import { spacing } from '../tokens/spacing';
 import { radii } from '../tokens/radii';
-import { textPresets, fontFamily } from '../tokens/typography';
+import { textPresets } from '../tokens/typography';
 import { duration } from '../tokens/motion';
 import { shadows } from '../tokens/shadows';
 import { Text } from './Text';
@@ -71,10 +71,12 @@ function VerseCardInner({
     if (hasCommentary) {
       const toExpanded = !expanded;
       setExpanded(toExpanded);
+      // eslint-disable-next-line react-hooks/immutability
       commentaryHeight.value = withTiming(toExpanded ? 1 : 0, {
         duration: duration.normal,
         easing: Easing.inOut(Easing.ease),
       });
+      // eslint-disable-next-line react-hooks/immutability
       commentaryOpacity.value = withTiming(toExpanded ? 1 : 0, {
         duration: duration.normal,
         easing: Easing.inOut(Easing.ease),

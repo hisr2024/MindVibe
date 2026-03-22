@@ -30,7 +30,6 @@ from backend.services.gita_validator import GitaValidator
 from backend.services.gita_karma_wisdom import (
     KARMIC_PATHS,
     SEVEN_PHASES,
-    KARMA_RESET_CORE_VERSES,
     GUNA_ANALYSIS,
     get_karmic_path,
     get_karmic_path_by_legacy_type,

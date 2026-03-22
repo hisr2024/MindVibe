@@ -14,7 +14,6 @@ Endpoints:
 import os
 import logging
 from datetime import UTC, datetime
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field

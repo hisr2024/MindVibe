@@ -4,9 +4,7 @@ import logging
 import os
 import sys
 import traceback
-import ssl
 from typing import Any, Dict
-from urllib.parse import parse_qs, urlparse
 
 # Configure logging early
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -53,8 +51,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy import text
 
 from backend.core import migrations as migrations_module
 from backend.core.migrations import apply_sql_migrations, get_migration_status
@@ -334,15 +330,15 @@ async def startup():
             import asyncio
             asyncio.create_task(daemon.start())
 
-            startup_logger.info(f"✅ KIAAN 24/7 Learning Daemon starting")
-            startup_logger.info(f"   • Mode: CONTINUOUS (24/7)")
-            startup_logger.info(f"   • YouTube fetch interval: 30 minutes")
-            startup_logger.info(f"   • Audio fetch interval: 1 hour")
-            startup_logger.info(f"   • Web fetch interval: 1 hour")
-            startup_logger.info(f"   • Auto-recovery: Enabled (exponential backoff)")
-            startup_logger.info(f"   • Health monitoring: Enabled")
-            startup_logger.info(f"   • Sources: YouTube, Audio Platforms, Web")
-            startup_logger.info(f"   • Compliance: Strict Bhagavad Gita only")
+            startup_logger.info("✅ KIAAN 24/7 Learning Daemon starting")
+            startup_logger.info("   • Mode: CONTINUOUS (24/7)")
+            startup_logger.info("   • YouTube fetch interval: 30 minutes")
+            startup_logger.info("   • Audio fetch interval: 1 hour")
+            startup_logger.info("   • Web fetch interval: 1 hour")
+            startup_logger.info("   • Auto-recovery: Enabled (exponential backoff)")
+            startup_logger.info("   • Health monitoring: Enabled")
+            startup_logger.info("   • Sources: YouTube, Audio Platforms, Web")
+            startup_logger.info("   • Compliance: Strict Bhagavad Gita only")
         except Exception as daemon_error:
             startup_logger.info(f"⚠️ KIAAN Learning Daemon initialization had issues: {daemon_error}")
             # Fallback to legacy scheduler
@@ -350,7 +346,7 @@ async def startup():
                 from backend.services.kiaan_learning_engine import get_kiaan_learning_engine
                 learning_engine = get_kiaan_learning_engine()
                 learning_engine.start_scheduler()
-                startup_logger.info(f"✅ Fallback: KIAAN Learning Scheduler started (every 6 hours)")
+                startup_logger.info("✅ Fallback: KIAAN Learning Scheduler started (every 6 hours)")
             except Exception as fallback_error:
                 startup_logger.info(f"⚠️ KIAAN Learning System fallback failed: {fallback_error}")
             # Don't fail startup - learning is supplementary
@@ -457,12 +453,12 @@ try:
     startup_logger.info("   • GET    /api/chat/about - KIAAN information")
 
 except ImportError as e:
-    startup_logger.info(f"❌ [IMPORT ERROR] Failed to import chat router:")
+    startup_logger.info("❌ [IMPORT ERROR] Failed to import chat router:")
     startup_logger.info(f"   Error: {e}")
     traceback.print_exc(file=sys.stdout)
     
 except Exception as e:
-    startup_logger.info(f"❌ [ERROR] Unexpected error loading chat router:")
+    startup_logger.info("❌ [ERROR] Unexpected error loading chat router:")
     startup_logger.info(f"   Error Type: {type(e).__name__}")
     startup_logger.info(f"   Error Message: {e}")
     traceback.print_exc(file=sys.stdout)

@@ -53,7 +53,6 @@ from backend.services.wellness_model import (
     WellnessModel,
     WellnessTool,
     get_wellness_model,
-    PsychologicalFramework,
 )
 from backend.services.relationship_compass_prompt import (
     RELATIONSHIP_COMPASS_GITA_SYSTEM_PROMPT,
@@ -69,7 +68,6 @@ from backend.services.relationship_compass_rag import (
     build_context_block,
     build_insufficient_response,
     build_secular_insufficient_response,
-    call_openai,
     call_ai_provider,
     generate_gita_based_response,
     generate_secular_response,
@@ -95,16 +93,13 @@ from backend.services.gita_wisdom_retrieval import (
 from backend.services.relationship_compass_analysis import (
     analyze_conflict_with_ai_async,
     build_enhanced_search_query,
-    analysis_to_dict,
     ConflictAnalysis,
 )
-from backend.services.wisdom_core import get_wisdom_core, WisdomResult
+from backend.services.wisdom_core import get_wisdom_core
 from backend.services.relationship_wisdom_core import get_relationship_wisdom_core
 from backend.services.relationship_compass_synthesizer import get_wisdom_synthesizer
 from backend.services.relationship_compass_engine import (
-    EngineAnalysis,
     ai_analysis as engine_ai_analysis,
-    extract_response_sections as engine_extract_sections,
 )
 
 logger = logging.getLogger(__name__)
@@ -496,7 +491,7 @@ async def get_relationship_guidance(
             analysis=ai_analysis,
             relationship_type=relationship_type.value,
         )
-        logger.info(f"RelationshipCompass: Using AI-enhanced search query")
+        logger.info("RelationshipCompass: Using AI-enhanced search query")
     else:
         # Fallback to basic search query
         search_query = f"{conflict} {primary_emotion or ''} {relationship_type.value}"
@@ -1091,9 +1086,9 @@ def _get_fallback_response(
     sections = {
         "sacred_witnessing": f"""Dear friend, I bow to the tender heart that brought you here seeking clarity. This situation - '{conflict_snippet}' - touches one of the deepest sources of human experience: our connections with others. That this relationship difficulty weighs on you reveals not weakness, but the depth of your capacity to love and be affected by others. The very fact that you seek understanding rather than simply reacting shows profound courage. Every awakened soul throughout time has faced moments exactly like this one. You are not alone in this struggle.""",
 
-        "mirror_of_relationship": f"""Ancient wisdom teaches: 'Yatha drishti, tatha srishti' - as you see, so you create. All outer conflicts are mirrors of inner ones. Let us gently explore what this situation reveals about your inner landscape. What do you truly NEED beneath the surface of this conflict? To be seen? Respected? Understood? Safe? Valued? And what fear might be awakened here? The fear of abandonment? Of unworthiness? Of being unseen? The Gita teaches svadhyaya - sacred self-study - as the first step toward clarity. Understanding yourself is the first dharmic step.""",
+        "mirror_of_relationship": """Ancient wisdom teaches: 'Yatha drishti, tatha srishti' - as you see, so you create. All outer conflicts are mirrors of inner ones. Let us gently explore what this situation reveals about your inner landscape. What do you truly NEED beneath the surface of this conflict? To be seen? Respected? Understood? Safe? Valued? And what fear might be awakened here? The fear of abandonment? Of unworthiness? Of being unseen? The Gita teaches svadhyaya - sacred self-study - as the first step toward clarity. Understanding yourself is the first dharmic step.""",
 
-        "others_inner_world": f"""Now, with daya (compassion) - not excuse-making - let us consider the other person's inner world. They too are a soul navigating their own fears, wounds, and conditioning. What unmet need might drive their behavior? What fear might they be acting from? The profound teaching is 'dukha dukhi jiva' - all beings suffer. 'Hurt people hurt people' is not excuse-making but understanding that their actions reflect their suffering, not your worth. The Gita teaches sama-darshana - equal vision - seeing the same consciousness struggling in all beings.""",
+        "others_inner_world": """Now, with daya (compassion) - not excuse-making - let us consider the other person's inner world. They too are a soul navigating their own fears, wounds, and conditioning. What unmet need might drive their behavior? What fear might they be acting from? The profound teaching is 'dukha dukhi jiva' - all beings suffer. 'Hurt people hurt people' is not excuse-making but understanding that their actions reflect their suffering, not your worth. The Gita teaches sama-darshana - equal vision - seeing the same consciousness struggling in all beings.""",
 
         "dharmic_path": f"""Dharma in relationships is NOT about winning - it is right action aligned with your highest self. The Gita teaches: 'Satyam bruyat priyam bruyat' - speak truth that is pleasant and beneficial. Truth without cruelty, honesty without weaponizing. Ask yourself: 'What would my wisest self do here - not my wounded self, not my ego, not my fear?' The goal is not to be RIGHT - it is to be at PEACE. Victory over another is hollow and temporary. Victory over your own reactive patterns is eternal liberation. {teachings.get('key_teaching', '')}""",
 
@@ -1103,7 +1098,7 @@ def _get_fallback_response(
 
         "forgiveness_teaching": """If forgiveness is relevant here, know this sacred truth: Kshama (forgiveness) is NOT saying the harm was acceptable, NOT pretending it didn't hurt, NOT allowing it to continue. Kshama IS releasing the poison YOU drink hoping THEY suffer - putting down the hot coal you've been carrying - freeing YOURSELF from the prison of resentment. 'Kshama vira bhushanam' - Forgiveness is the ornament of the brave. It is a gift to yourself, not to them. The bravest act is forgiving while holding healthy boundaries. Forgiveness unfolds when you're ready - it cannot be forced.""",
 
-        "eternal_anchor": f"""Carry this eternal truth: 'Atma-tripti' - you are ALREADY complete within yourself. Your peace does NOT depend on another person's behavior. Another person cannot give you your worth (you already have it), cannot take away your worth (they never had that power), cannot complete you (you were never incomplete). 'Purnatva' - fullness: You are whole, even in heartbreak. You came into this life whole. You will leave this life whole. No relationship conflict - no matter how painful - changes what you truly are. Beneath the pain, the eternal witness remains untouched, unharmed, complete. 💙""",
+        "eternal_anchor": """Carry this eternal truth: 'Atma-tripti' - you are ALREADY complete within yourself. Your peace does NOT depend on another person's behavior. Another person cannot give you your worth (you already have it), cannot take away your worth (they never had that power), cannot complete you (you were never incomplete). 'Purnatva' - fullness: You are whole, even in heartbreak. You came into this life whole. You will leave this life whole. No relationship conflict - no matter how painful - changes what you truly are. Beneath the pain, the eternal witness remains untouched, unharmed, complete. 💙""",
     }
 
     # Build full response
@@ -1444,4 +1439,3 @@ async def unified_health() -> dict[str, Any]:
 
 
 # Import for the health endpoint
-from backend.services.relationship_wisdom_core import RELATIONSHIP_PRINCIPLES

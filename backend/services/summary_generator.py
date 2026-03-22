@@ -14,7 +14,7 @@ Features:
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from backend.services.openai_optimizer import openai_optimizer
 from backend.services.redis_cache_enhanced import redis_cache

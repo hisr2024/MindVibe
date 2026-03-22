@@ -22,9 +22,6 @@ from backend.deps import get_db, get_current_user_flexible
 from backend.services.journey_service import (
     JourneyService,
     JourneyServiceError,
-    JourneyNotFoundError,
-    JourneyValidationError,
-    JourneyAuthorizationError,
 )
 
 logger = logging.getLogger(__name__)

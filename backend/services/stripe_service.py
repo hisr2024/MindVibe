@@ -12,7 +12,6 @@ SECURITY: Never store credit card data directly. All payment data is handled by 
 
 import logging
 import os
-from datetime import datetime, UTC
 from decimal import Decimal
 from typing import Any, Optional
 
@@ -20,7 +19,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import (
     User,
-    SubscriptionPlan,
     UserSubscription,
     Payment,
     SubscriptionTier,

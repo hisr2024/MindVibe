@@ -8,7 +8,6 @@ Provides endpoints for the personalised daily practice feature:
 
 import logging
 import os
-from datetime import datetime, timezone
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status

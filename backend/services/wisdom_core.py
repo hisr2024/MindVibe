@@ -72,11 +72,9 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models import (
-    ContentSourceType,
     GitaChapter,
     GitaVerse,
     LearnedWisdom,
-    UserQueryPattern,
     ValidationStatus,
 )
 from backend.services.db_knowledge_store import DatabaseKnowledgeStore

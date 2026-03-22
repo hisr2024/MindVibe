@@ -14,7 +14,7 @@ Endpoints:
 - POST /api/gita-sources/kiaan-wisdom - Get wisdom formatted for KIAAN
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Query
 from pydantic import BaseModel, Field
 from typing import Any
 

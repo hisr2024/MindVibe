@@ -13,7 +13,7 @@ import { Screen, Text, Input, GoldenButton, colors, spacing } from '@kiaanverse/
 import { useTranslation } from '@kiaanverse/i18n';
 
 export default function ForgotPasswordScreen(): React.JSX.Element {
-  const { t } = useTranslation('auth');
+  const { t: _t } = useTranslation('auth');
 
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -42,7 +42,7 @@ export default function ForgotPasswordScreen(): React.JSX.Element {
         <View style={styles.header}>
           <Text variant="h1" align="center">Reset Password</Text>
           <Text variant="bodySmall" color={colors.text.muted} align="center">
-            Enter your email and we'll send you a link to reset your password.
+            Enter your email and we{"'"}ll send you a link to reset your password.
           </Text>
         </View>
 
@@ -52,7 +52,7 @@ export default function ForgotPasswordScreen(): React.JSX.Element {
               Check your inbox
             </Text>
             <Text variant="body" color={colors.text.secondary} align="center">
-              If an account exists for {email}, you'll receive a password reset
+              If an account exists for {email}, you{"'"}ll receive a password reset
               link shortly.
             </Text>
             <View style={styles.backLink}>

@@ -58,7 +58,7 @@ export default function LoginScreen(): React.JSX.Element {
     login,
     error,
     clearError,
-    status,
+    status: _status,
     isLoading,
     biometricAvailable,
     biometricEnabled,

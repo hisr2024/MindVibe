@@ -14,7 +14,6 @@ import hashlib
 import hmac
 import logging
 import os
-from datetime import datetime, UTC
 from decimal import Decimal
 from typing import Any
 
@@ -26,7 +25,6 @@ from backend.models import (
     UserSubscription,
     Payment,
     SubscriptionTier,
-    SubscriptionStatus,
     PaymentStatus,
     SubscriptionLink,
     SubscriptionLinkStatus,

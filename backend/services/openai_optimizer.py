@@ -23,7 +23,7 @@ Use `create_gita_filtered_completion` to ensure responses are grounded in Bhagav
 import logging
 import os
 import time
-from typing import Any, AsyncGenerator, Optional
+from typing import Any, AsyncGenerator
 
 import tiktoken
 from openai import (

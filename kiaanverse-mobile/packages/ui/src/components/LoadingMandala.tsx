@@ -9,7 +9,7 @@
 
 import React, { useEffect } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
-import Svg, { Circle, Line, G } from 'react-native-svg';
+import Svg, { Circle, Line } from 'react-native-svg';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -46,6 +46,7 @@ function LoadingMandalaComponent({
   const rotation = useSharedValue(0);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     rotation.value = withRepeat(
       withTiming(360, { duration: 8000, easing: Easing.linear }),
       -1,

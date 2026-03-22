@@ -23,12 +23,11 @@ This module represents the highest form of AI assistance -
 not just understanding words, but understanding souls.
 """
 
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime
 import re
-import math
 import logging
 
 logger = logging.getLogger(__name__)

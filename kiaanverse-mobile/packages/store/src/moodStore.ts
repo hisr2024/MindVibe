@@ -117,7 +117,7 @@ const initialState: MoodStoreState = {
   lastLogDate: null,
 };
 
-export const useMoodStore = create<MoodStoreState & MoodStoreActions>((set, get) => ({
+export const useMoodStore = create<MoodStoreState & MoodStoreActions>((set, _get) => ({
   ...initialState,
 
   selectMood: (mood) => set({ selectedMood: mood }),

@@ -31,7 +31,6 @@ from __future__ import annotations
 
 import logging
 import random
-import re
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional
@@ -628,7 +627,7 @@ Your approach:
         for msg in recent:
             role = "User" if msg.get("role") == "user" else "KIAAN"
             history_lines.append(f"{role}: {msg.get('content', '')[:200]}")
-        history_context = f"\n\nRecent conversation:\n" + "\n".join(history_lines)
+        history_context = "\n\nRecent conversation:\n" + "\n".join(history_lines)
 
     return f"""{base_personality}
 

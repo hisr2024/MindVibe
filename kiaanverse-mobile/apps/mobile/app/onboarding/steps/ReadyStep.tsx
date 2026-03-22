@@ -50,8 +50,8 @@ export function ReadyStep({ onComplete }: ReadyStepProps): React.JSX.Element {
     <View style={styles.container}>
       <Animated.View entering={FadeInDown.duration(800).delay(200)} style={styles.content}>
         <Text variant="sacred" color={colors.divine.aura} align="center">
-          "You have the right to perform your prescribed duties, but you are not
-          entitled to the fruits of your actions."
+          {'"'}You have the right to perform your prescribed duties, but you are not
+          entitled to the fruits of your actions.{'"'}
         </Text>
         <Text variant="caption" color={colors.text.muted} align="center">
           — Bhagavad Gita 2.47
@@ -60,7 +60,7 @@ export function ReadyStep({ onComplete }: ReadyStepProps): React.JSX.Element {
 
       <Animated.View entering={FadeInDown.duration(600).delay(600)} style={styles.textWrap}>
         <Text variant="h1" align="center">
-          You're Ready
+          You{"'"}re Ready
         </Text>
         <Text variant="body" color={colors.text.secondary} align="center">
           Enable daily reminders to stay on your spiritual path, or begin

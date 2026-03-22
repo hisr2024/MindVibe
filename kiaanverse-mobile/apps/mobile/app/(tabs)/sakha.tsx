@@ -15,7 +15,7 @@ import {
   Platform,
 } from 'react-native';
 import { Send } from 'lucide-react-native';
-import { Screen, Text, Card, colors, spacing, radii } from '@kiaanverse/ui';
+import { Screen, Text, colors, spacing, radii } from '@kiaanverse/ui';
 import { useSendChatMessage } from '@kiaanverse/api';
 import { useTranslation } from '@kiaanverse/i18n';
 import { useTheme } from '@kiaanverse/ui';
@@ -27,6 +27,9 @@ interface ChatMessage {
   timestamp: number;
 }
 
+// Stable timestamp for the initial welcome message (set once at module load).
+const WELCOME_TIMESTAMP = Date.now();
+
 export default function SakhaScreen(): React.JSX.Element {
   const { t } = useTranslation('kiaan');
   const { theme } = useTheme();
@@ -37,7 +40,7 @@ export default function SakhaScreen(): React.JSX.Element {
       id: 'welcome',
       role: 'assistant',
       content: t('welcome'),
-      timestamp: Date.now(),
+      timestamp: WELCOME_TIMESTAMP,
     },
   ]);
   const [sessionId, setSessionId] = useState<string | undefined>();

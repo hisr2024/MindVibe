@@ -142,7 +142,6 @@ export const useSyncQueueStore = create<SyncQueueState & SyncQueueActions>()(
             if (newRetryCount >= MAX_RETRIES) {
               // Drop permanently failed items
               if (typeof __DEV__ !== 'undefined' && __DEV__) {
-                // eslint-disable-next-line no-console
                 console.warn(`[SyncQueue] Dropping ${item.id} after ${MAX_RETRIES} retries: ${errorMessage}`);
               }
               get().dequeue(item.id);

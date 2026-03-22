@@ -22,7 +22,7 @@ export function useTranslation(defaultNamespace?: TranslationNamespace) {
       }
       return context.t(key, params);
     },
-    [context.t, defaultNamespace],
+    [context, defaultNamespace],
   );
 
   return {

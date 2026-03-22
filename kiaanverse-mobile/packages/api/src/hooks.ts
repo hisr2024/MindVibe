@@ -22,7 +22,6 @@ import type {
   GitaVerseResponse,
   Journey,
   JourneyTemplate,
-  KarmaAwardPayload,
   KarmaTreeResponse,
   MoodCreatePayload,
   MoodHistoryResponse,
@@ -307,12 +306,12 @@ export function useWisdomJourneyDetail(journeyId: string): UseQueryResult<Wisdom
   });
 }
 
-/** User progress across all journeys. */
+/** User progress across all journeys (via dashboard). */
 export function useJourneyProgress(): UseQueryResult<UserJourneyProgress[]> {
   return useQuery({
     queryKey: queryKeys.journeyProgress,
     queryFn: async () => {
-      const { data } = await api.journeys.progress();
+      const { data } = await api.journeys.dashboard();
       return data as UserJourneyProgress[];
     },
     staleTime: 1000 * 60 * 5,
@@ -350,12 +349,12 @@ export function useCompleteStep(): UseMutationResult<StepResult, Error, { journe
   });
 }
 
-/** Complete a wisdom journey step (returns XP + karma). */
-export function useCompleteWisdomStep(): UseMutationResult<StepCompletionResult, Error, { journeyId: string; stepId: string }> {
+/** Complete a wisdom journey step by day index (returns XP + karma). */
+export function useCompleteWisdomStep(): UseMutationResult<StepCompletionResult, Error, { journeyId: string; dayIndex: number }> {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ journeyId, stepId }: { journeyId: string; stepId: string }) => {
-      const { data } = await api.journeys.completeStepById(journeyId, stepId);
+    mutationFn: async ({ journeyId, dayIndex }: { journeyId: string; dayIndex: number }) => {
+      const { data } = await api.journeys.completeStepByDay(journeyId, dayIndex);
       return data as StepCompletionResult;
     },
     onSuccess: (_data, variables) => {
@@ -416,12 +415,12 @@ export function useKarmaTree(): UseQueryResult<KarmaTreeResponse> {
   });
 }
 
-/** Award karma points for an action. */
-export function useAwardKarma(): UseMutationResult<KarmaTreeResponse, Error, KarmaAwardPayload> {
+/** Unlock a karma achievement. */
+export function useUnlockKarma(): UseMutationResult<KarmaTreeResponse, Error, { achievementId: string }> {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ action, points }: KarmaAwardPayload) => {
-      const { data } = await api.karma.award(action, points);
+    mutationFn: async ({ achievementId }: { achievementId: string }) => {
+      const { data } = await api.karma.unlock(achievementId);
       return data as KarmaTreeResponse;
     },
     onSuccess: () => {

@@ -13,7 +13,6 @@ the app refuses to start without a key.
 
 import logging
 import os
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 

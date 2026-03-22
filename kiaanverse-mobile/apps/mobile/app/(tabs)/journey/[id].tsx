@@ -249,11 +249,13 @@ export default function JourneyDetailScreen(): React.JSX.Element {
   const handleComplete = useCallback(() => {
     if (!activeStepId) return;
 
+    const step = data?.steps.find((s) => s.id === activeStepId);
+    const dayIndex = step?.dayIndex ?? data?.steps.indexOf(step!) ?? 0;
+
     completeStep.mutate(
-      { journeyId, stepId: activeStepId },
+      { journeyId, dayIndex },
       {
         onSuccess: (result) => {
-          const step = data?.steps.find((s) => s.id === activeStepId);
           setCelebration({
             xp: result.xp,
             karmaPoints: result.karmaPoints,

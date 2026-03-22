@@ -14,11 +14,10 @@ Gita Principles Applied:
 - Prayaschitta (atonement/repair)
 """
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import Column, String, Integer, Boolean, DateTime, text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import text
 from datetime import datetime
 from typing import Optional
 import os
@@ -238,7 +237,6 @@ Example format:
 
         if gita_filter:
             try:
-                import asyncio
 
                 # Filter each text field through Gita wisdom
                 for key in ["breathingLine", "rippleSummary", "repairAction", "forwardIntention"]:

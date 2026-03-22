@@ -16,13 +16,13 @@ These models enable KIAAN to learn and improve continuously like Siri/Alexa.
 
 import uuid
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict
 from enum import Enum
 
 from sqlalchemy import (
-    Column, String, Integer, Float, Boolean, Text, DateTime,
+    String, Integer, Boolean, Text, DateTime,
     ForeignKey, JSON, Enum as SQLEnum, Index, UniqueConstraint,
-    Numeric, BigInteger, CheckConstraint, LargeBinary
+    Numeric, BigInteger, CheckConstraint
 )
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.sql import func

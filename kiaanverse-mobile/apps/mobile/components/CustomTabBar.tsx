@@ -21,7 +21,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Home, Sparkles, Compass, BookOpen, User, type LucideIcon } from 'lucide-react-native';
-import { useTheme, colors, spacing } from '@kiaanverse/ui';
+import { useTheme, colors } from '@kiaanverse/ui';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 const ICON_SIZE = 22;
@@ -68,6 +68,7 @@ function TabItem({
 
   // Drive scale when focus changes
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     scale.value = withSpring(isFocused ? 1 : 0, {
       damping: 15,
       stiffness: 200,

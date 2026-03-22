@@ -17,8 +17,7 @@ License: MIT
 import logging
 import asyncio
 import time
-from typing import Optional, List, Dict, Any
-import io
+from typing import Optional, List, Dict
 import tempfile
 
 from .base import (

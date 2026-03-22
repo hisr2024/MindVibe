@@ -12,13 +12,12 @@ REST API endpoints for the divine consciousness system:
 """
 
 import logging
-from typing import Any, Optional
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from backend.services.divine_consciousness_service import divine_consciousness
-from backend.services.calming_mood_analytics import calming_mood_analytics
 from backend.services.divine_micro_moments import divine_micro_moments
 from backend.services.serenity_atmosphere_engine import serenity_engine
 from backend.services.kiaan_divine_integration import kiaan_divine

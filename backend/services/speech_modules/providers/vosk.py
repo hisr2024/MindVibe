@@ -16,7 +16,7 @@ License: Apache 2.0
 import logging
 from typing import Optional
 from .base import BaseSTTProvider, ProviderCapabilities, ProviderStatus
-from ..models import SpeechRecognitionRequest, SpeechRecognitionResult, SpeechRecognizer, VoiceQuality
+from ..models import SpeechRecognitionRequest, SpeechRecognitionResult, VoiceQuality
 
 logger = logging.getLogger(__name__)
 

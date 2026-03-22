@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, date
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, Query, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from sqlalchemy import select, func, and_, Integer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,9 +23,7 @@ from backend.middleware.rbac import (
 from backend.models import (
     AdminPermission,
     VoiceAnalytics,
-    VoiceConversation,
     VoiceEnhancementSession,
-    VoiceQualityMetrics,
     UserVoicePreferences,
 )
 

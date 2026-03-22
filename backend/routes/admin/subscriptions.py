@@ -2,7 +2,6 @@
 
 import logging
 from datetime import datetime
-from decimal import Decimal
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
@@ -266,7 +265,6 @@ async def get_subscription_analytics(
         status_counts[status_enum.value] = count_result.scalar() or 0
     
     # New subscriptions this month (simplified)
-    from datetime import timedelta
     month_start = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     new_stmt = select(func.count(UserSubscription.id)).where(
         UserSubscription.created_at >= month_start,

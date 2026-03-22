@@ -17,15 +17,12 @@ Research foundations:
 - Plutchik, R. (2001). The nature of emotions.
 """
 
-import datetime
 import logging
 import math
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
