@@ -166,7 +166,7 @@ class TestCheckoutSessionCreation:
         plan = SubscriptionPlan(
             tier=SubscriptionTier.SADHAK,
             name="Sadhak",
-            price_monthly=Decimal("14.99"),
+            price_monthly=Decimal("12.99"),
             kiaan_questions_monthly=300,
             encrypted_journal=True,
             data_retention_days=-1,
@@ -313,7 +313,7 @@ class TestCheckoutSessionCreation:
         plan = SubscriptionPlan(
             tier=SubscriptionTier.SADHAK,
             name="Sadhak",
-            price_monthly=Decimal("14.99"),
+            price_monthly=Decimal("12.99"),
             kiaan_questions_monthly=300,
             encrypted_journal=True,
             data_retention_days=-1,
