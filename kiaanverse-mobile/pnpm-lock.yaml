@@ -35,9 +35,15 @@ importers:
       '@react-native-async-storage/async-storage':
         specifier: 1.23.1
         version: 1.23.1(react-native@0.74.5(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(@types/react@18.2.79)(react@18.2.0))
+      '@tanstack/query-async-storage-persister':
+        specifier: ^5.60.0
+        version: 5.94.5
       '@tanstack/react-query':
         specifier: ^5.60.0
         version: 5.94.5(react@18.2.0)
+      '@tanstack/react-query-persist-client':
+        specifier: ^5.60.0
+        version: 5.94.5(@tanstack/react-query@5.94.5(react@18.2.0))(react@18.2.0)
       axios:
         specifier: ^1.7.9
         version: 1.13.6
@@ -74,6 +80,9 @@ importers:
       expo-secure-store:
         specifier: ~13.0.0
         version: 13.0.2(expo@51.0.39(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(react-native@0.74.5(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0))
+      expo-speech:
+        specifier: ~13.0.0
+        version: 13.0.1(expo@51.0.39(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(react-native@0.74.5(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0))
       expo-splash-screen:
         specifier: ~0.27.0
         version: 0.27.7(expo-modules-autolinking@1.11.3)(expo@51.0.39(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(react-native@0.74.5(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0))
@@ -189,7 +198,13 @@ importers:
 
   packages/ui:
     dependencies:
+      expo-av:
+        specifier: '>=14.0.0'
+        version: 14.0.7(expo@51.0.39(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(react-native@0.74.5(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0))
       expo-haptics:
+        specifier: '>=13.0.0'
+        version: 13.0.1(expo@51.0.39(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(react-native@0.74.5(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0))
+      expo-speech:
         specifier: '>=13.0.0'
         version: 13.0.1(expo@51.0.39(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(react-native@0.74.5(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0))
       lucide-react-native:
@@ -1362,8 +1377,20 @@ packages:
   '@standard-schema/utils@0.3.0':
     resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
 
+  '@tanstack/query-async-storage-persister@5.94.5':
+    resolution: {integrity: sha512-IBOfnj/iH7/9x6YskQJ5G1G2z5Ubx3gw4RRKEnmPCpFREDmz5tqAflSTNZn9x3J9ayI0Y/ciuVgrsdLCCCU9QA==}
+
   '@tanstack/query-core@5.94.5':
     resolution: {integrity: sha512-Vx1JJiBURW/wdNGP45afjrqn0LfxYwL7K/bSrQvNRtyLGF1bxQPgUXCpzscG29e+UeFOh9hz1KOVala0N+bZiA==}
+
+  '@tanstack/query-persist-client-core@5.94.5':
+    resolution: {integrity: sha512-ZOohchCU4bLgTS1PtOMEpUHECrNBisBYPnKBbfrMqKYAhMGH7C0v4W7SKt8oQBx5O2pX7mwvzmHrkJhhF4S+aA==}
+
+  '@tanstack/react-query-persist-client@5.94.5':
+    resolution: {integrity: sha512-EcxrI4EOPOoZnm6KUmYoKNhFuc4EpEonsNVBwkYlPFX5YoffwpCuzDYEzAl6uoKh1Cd6KSE5ugVxypfcEtFI4Q==}
+    peerDependencies:
+      '@tanstack/react-query': ^5.94.5
+      react: ^18 || ^19
 
   '@tanstack/react-query@5.94.5':
     resolution: {integrity: sha512-1wmrxKFkor+q8l+ygdHmv0Sq5g84Q3p4xvuJ7AdSIAhQQ7udOt+ZSZ19g1Jea3mHqtlTslLGJsmC4vHFgP0P3A==}
@@ -2272,6 +2299,11 @@ packages:
 
   expo-secure-store@13.0.2:
     resolution: {integrity: sha512-3QYgoneo8p8yeeBPBiAfokNNc2xq6+n8+Ob4fAlErEcf4H7Y72LH+K/dx0nQyWau2ZKZUXBxyyfuHFyVKrEVLg==}
+    peerDependencies:
+      expo: '*'
+
+  expo-speech@13.0.1:
+    resolution: {integrity: sha512-J7tvFzORsFpIKihMnayeY5lCPc15giDrlN+ws2uUNo0MvLv1HCYEu/5p3+aMmZXXsY5I1QlconD4CwRWw3JFig==}
     peerDependencies:
       expo: '*'
 
@@ -6412,7 +6444,22 @@ snapshots:
 
   '@standard-schema/utils@0.3.0': {}
 
+  '@tanstack/query-async-storage-persister@5.94.5':
+    dependencies:
+      '@tanstack/query-core': 5.94.5
+      '@tanstack/query-persist-client-core': 5.94.5
+
   '@tanstack/query-core@5.94.5': {}
+
+  '@tanstack/query-persist-client-core@5.94.5':
+    dependencies:
+      '@tanstack/query-core': 5.94.5
+
+  '@tanstack/react-query-persist-client@5.94.5(@tanstack/react-query@5.94.5(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      '@tanstack/query-persist-client-core': 5.94.5
+      '@tanstack/react-query': 5.94.5(react@18.2.0)
+      react: 18.2.0
 
   '@tanstack/react-query@5.94.5(react@18.2.0)':
     dependencies:
@@ -7427,6 +7474,10 @@ snapshots:
       - typescript
 
   expo-secure-store@13.0.2(expo@51.0.39(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(react-native@0.74.5(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)):
+    dependencies:
+      expo: 51.0.39(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(react-native@0.74.5(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
+
+  expo-speech@13.0.1(expo@51.0.39(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(react-native@0.74.5(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)):
     dependencies:
       expo: 51.0.39(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(react-native@0.74.5(@babel/core@7.29.0)(@babel/preset-env@7.29.2(@babel/core@7.29.0))(@types/react@18.2.79)(react@18.2.0))(react@18.2.0)
 
