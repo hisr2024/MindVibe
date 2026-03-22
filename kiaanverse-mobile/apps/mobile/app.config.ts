@@ -80,6 +80,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         microphonePermission: 'Kiaanverse needs microphone access for voice features.',
       },
     ],
+    'expo-speech',
     [
       'expo-camera',
       {

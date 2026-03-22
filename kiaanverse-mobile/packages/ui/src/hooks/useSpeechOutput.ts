@@ -14,7 +14,7 @@
  *   - Respects device speech availability
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import * as Speech from 'expo-speech';
 
 // ---------------------------------------------------------------------------
@@ -61,7 +61,10 @@ export function useSpeechOutput(
 ): UseSpeechOutputReturn {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const isMountedRef = useRef(true);
-  const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
+  const mergedOptions = useMemo(
+    () => ({ ...DEFAULT_OPTIONS, ...options }),
+    [options.rate, options.pitch, options.language, options.volume],
+  );
 
   const speak = useCallback(
     (text: string, overrides: Partial<SpeechOutputOptions> = {}) => {
@@ -91,7 +94,7 @@ export function useSpeechOutput(
         },
       });
     },
-    [mergedOptions.rate, mergedOptions.pitch, mergedOptions.language, mergedOptions.volume],
+    [mergedOptions],
   );
 
   const stop = useCallback(() => {

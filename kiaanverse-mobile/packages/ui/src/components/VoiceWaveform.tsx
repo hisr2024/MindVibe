@@ -85,9 +85,17 @@ function WaveBar({
   inactiveColor,
 }: WaveBarProps): React.JSX.Element {
   const progress = useSharedValue(0);
+  const isActive = useSharedValue(active ? 1 : 0);
   const minH = containerHeight * MIN_HEIGHT_FRACTION;
   const maxH = containerHeight * (AMPLITUDE_MULTIPLIERS[index] ?? 0.7);
   const phase = PHASE_OFFSETS[index] ?? 0;
+
+  // Sync JS active prop → shared value so the worklet reacts
+  useEffect(() => {
+    isActive.value = withTiming(active ? 1 : 0, {
+      duration: motionDuration.fast,
+    });
+  }, [active, isActive]);
 
   useEffect(() => {
     if (active) {
@@ -118,18 +126,19 @@ function WaveBar({
   }, [active, progress, index, phase]);
 
   const animatedStyle = useAnimatedStyle(() => {
+    const isOn = isActive.value > 0.5;
     // Use sine wave to drive height: sin(progress * 2π) maps to 0–1
     const sineValue = Math.sin(progress.value * Math.PI * 2);
     // Map sine (-1 to 1) → (0 to 1)
     const normalized = (sineValue + 1) / 2;
     // Map to height range
-    const barHeight = active
+    const barHeight = isOn
       ? minH + normalized * (maxH - minH)
       : minH;
 
     return {
       height: barHeight,
-      backgroundColor: active ? color : inactiveColor,
+      backgroundColor: isOn ? color : inactiveColor,
     };
   });
 
