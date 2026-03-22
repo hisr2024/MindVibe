@@ -138,6 +138,83 @@ export interface GitaChapter {
   summary?: string;
 }
 
+/** Detailed verse from GET /api/gita/verses/:chapter/:verse */
+export interface GitaVerseDetail {
+  chapter: number;
+  verse: number;
+  verse_id: string;
+  sanskrit: string;
+  english: string;
+  hindi: string;
+  theme: string;
+  principle: string | null;
+}
+
+/** Related verse reference returned alongside verse detail */
+export interface GitaVerseReference {
+  chapter: number;
+  verse: number;
+  verse_id: string;
+  text: string;
+  translation: string | null;
+  sanskrit: string | null;
+  theme: string;
+}
+
+/** Response from GET /api/gita/verses/:chapter/:verse */
+export interface GitaVerseResponse {
+  verse: GitaVerseDetail;
+  related_verses: GitaVerseReference[];
+}
+
+/** Verse summary in chapter listings */
+export interface GitaVerseSummary {
+  chapter: number;
+  verse: number;
+  verse_id: string;
+  theme: string;
+  preview: string;
+  sanskrit?: string;
+  transliteration?: string;
+}
+
+/** Response from GET /api/gita/chapters/:id */
+export interface GitaChapterDetail {
+  chapter: number;
+  name: string;
+  summary: string;
+  verse_count: number;
+  verses: GitaVerseSummary[];
+  themes: string[];
+}
+
+/** Single search result with relevance */
+export interface GitaSearchResult {
+  verse: GitaVerseDetail;
+  relevance_score: number;
+  match_context: string | null;
+}
+
+/** Response from GET /api/gita/search */
+export interface GitaSearchResponse {
+  query: string;
+  results: GitaSearchResult[];
+  total_results: number;
+  page: number;
+  page_size: number;
+  has_more: boolean;
+}
+
+/** Response from GET /api/gita/translations/:verse_id */
+export interface GitaTranslationSet {
+  verse_id: string;
+  chapter: number;
+  verse: number;
+  translations: Record<string, string>;
+  theme: string;
+  principle: string | null;
+}
+
 // ---------------------------------------------------------------------------
 // Mood
 // ---------------------------------------------------------------------------

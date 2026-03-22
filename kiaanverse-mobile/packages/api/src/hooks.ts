@@ -7,7 +7,17 @@
 
 import { useQuery, useMutation, useQueryClient, type UseQueryResult, type UseMutationResult } from '@tanstack/react-query';
 import { api } from './endpoints';
-import type { GitaChapter, GitaVerse, Journey, JourneyTemplate, MoodCreatePayload } from './types';
+import type {
+  GitaChapter,
+  GitaChapterDetail,
+  GitaSearchResponse,
+  GitaTranslationSet,
+  GitaVerse,
+  GitaVerseResponse,
+  Journey,
+  JourneyTemplate,
+  MoodCreatePayload,
+} from './types';
 
 // ---------------------------------------------------------------------------
 // Shared return types for declaration emit compatibility
@@ -30,6 +40,9 @@ export const queryKeys = {
   gitaChapter: (id: number) => ['gita', 'chapter', id] as const,
   gitaVerse: (chapter: number, verse: number) => ['gita', 'verse', chapter, verse] as const,
   gitaSearch: (query: string) => ['gita', 'search', query] as const,
+  gitaSearchFull: (keyword: string) => ['gita', 'searchFull', keyword] as const,
+  gitaVerseDetail: (chapter: number, verse: number) => ['gita', 'verseDetail', chapter, verse] as const,
+  gitaTranslations: (verseId: string) => ['gita', 'translations', verseId] as const,
   journeyTemplates: ['journeys', 'templates'] as const,
   journeys: (status?: string) => ['journeys', 'list', status] as const,
   journey: (id: string) => ['journeys', 'detail', id] as const,
@@ -99,6 +112,58 @@ export function useGitaSearch(query: string): UseQueryResult<GitaVerse[]> {
       return data as GitaVerse[];
     },
     enabled: query.length >= 2,
+  });
+}
+
+/** Full search with pagination — enabled only when keyword >= 3 chars. */
+export function useGitaSearchFull(keyword: string): UseQueryResult<GitaSearchResponse> {
+  return useQuery({
+    queryKey: queryKeys.gitaSearchFull(keyword),
+    queryFn: async () => {
+      const { data } = await api.gita.searchFull(keyword);
+      return data as GitaSearchResponse;
+    },
+    enabled: keyword.length >= 3,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+/** Detailed verse with related verses from backend. */
+export function useGitaVerseDetail(chapter: number, verse: number): UseQueryResult<GitaVerseResponse> {
+  return useQuery({
+    queryKey: queryKeys.gitaVerseDetail(chapter, verse),
+    queryFn: async () => {
+      const { data } = await api.gita.verse(chapter, verse);
+      return data as GitaVerseResponse;
+    },
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours — verses are immutable
+    enabled: chapter > 0 && verse > 0,
+  });
+}
+
+/** All translations for a verse. */
+export function useGitaTranslations(verseId: string): UseQueryResult<GitaTranslationSet> {
+  return useQuery({
+    queryKey: queryKeys.gitaTranslations(verseId),
+    queryFn: async () => {
+      const { data } = await api.gita.translations(verseId);
+      return data as GitaTranslationSet;
+    },
+    staleTime: 1000 * 60 * 60 * 24,
+    enabled: verseId.length > 0,
+  });
+}
+
+/** Chapter detail with verse listing — uses the existing useGitaChapter with proper typing. */
+export function useGitaChapterDetail(chapterId: number): UseQueryResult<GitaChapterDetail> {
+  return useQuery({
+    queryKey: queryKeys.gitaChapter(chapterId),
+    queryFn: async () => {
+      const { data } = await api.gita.chapter(chapterId);
+      return data as GitaChapterDetail;
+    },
+    staleTime: 1000 * 60 * 60 * 24,
+    enabled: chapterId > 0 && chapterId <= 18,
   });
 }
 

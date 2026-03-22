@@ -38,6 +38,14 @@ export const api = {
       apiClient.get(`/api/gita/verses/${chapter}/${verse}`),
     search: (query: string) =>
       apiClient.get('/api/gita/search', { params: { q: query } }),
+    /** Full search with pagination and filters */
+    searchFull: (keyword: string, page?: number, pageSize?: number) =>
+      apiClient.get('/api/gita/search', {
+        params: { keyword, page: page ?? 1, page_size: pageSize ?? 10 },
+      }),
+    /** All translations for a specific verse */
+    translations: (verseId: string) =>
+      apiClient.get(`/api/gita/translations/${verseId}`),
   },
 
   /** Mood tracking */
