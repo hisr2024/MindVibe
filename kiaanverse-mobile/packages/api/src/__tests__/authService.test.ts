@@ -57,12 +57,17 @@ describe('authService', () => {
     it('should return LoginResult with accessToken on success', async () => {
       const loginData = {
         access_token: 'mock-access-token',
+        refresh_token: null,
         token_type: 'bearer',
         session_id: 'session-mock-1',
         expires_in: 3600,
-        user_id: 'user-mock-1',
-        email: 'test@kiaanverse.app',
-        email_verified: true,
+        user: {
+          id: 'user-mock-1',
+          email: 'test@kiaanverse.app',
+          name: null,
+          avatar_url: null,
+          is_onboarded: false,
+        },
         subscription_tier: 'FREE',
         subscription_status: 'active',
         is_developer: false,
@@ -73,8 +78,8 @@ describe('authService', () => {
       const result = await authService.login('test@kiaanverse.app', 'password123');
 
       expect(result.accessToken).toBe('mock-access-token');
-      expect(result.loginResponse.user_id).toBe('user-mock-1');
-      expect(result.loginResponse.email).toBe('test@kiaanverse.app');
+      expect(result.loginResponse.user.id).toBe('user-mock-1');
+      expect(result.loginResponse.user.email).toBe('test@kiaanverse.app');
       expect(result.loginResponse.token_type).toBe('bearer');
 
       expect(mockPost).toHaveBeenCalledWith('/api/auth/login', {
@@ -86,12 +91,11 @@ describe('authService', () => {
     it('should extract refresh token from Set-Cookie header', async () => {
       const loginData = {
         access_token: 'tok',
+        refresh_token: null,
         token_type: 'bearer',
         session_id: 'sess',
         expires_in: 3600,
-        user_id: 'u1',
-        email: 'e@e.com',
-        email_verified: true,
+        user: { id: 'u1', email: 'e@e.com', name: null, avatar_url: null, is_onboarded: false },
         subscription_tier: 'FREE',
         subscription_status: 'active',
         is_developer: false,
@@ -322,12 +326,11 @@ describe('authService', () => {
     it('should map LoginResponse fields to User', () => {
       const loginResponse = {
         access_token: 'tok',
+        refresh_token: null,
         token_type: 'bearer',
         session_id: 'sess',
         expires_in: 3600,
-        user_id: 'user-42',
-        email: 'mapped@kiaanverse.app',
-        email_verified: true,
+        user: { id: 'user-42', email: 'mapped@kiaanverse.app', name: 'Test', avatar_url: null, is_onboarded: true },
         subscription_tier: 'SIDDHA',
         subscription_status: 'active',
         is_developer: false,
@@ -337,6 +340,7 @@ describe('authService', () => {
 
       expect(user.id).toBe('user-42');
       expect(user.email).toBe('mapped@kiaanverse.app');
+      expect(user.name).toBe('Test');
       expect(user.subscriptionTier).toBe('SIDDHA');
     });
   });

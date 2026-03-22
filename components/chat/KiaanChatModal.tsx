@@ -104,12 +104,22 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
 
           for (const line of lines) {
             if (line.startsWith('data: ')) {
-              const data = line.slice(6)
-              if (data === '[DONE]') break
+              const raw = line.slice(6)
 
-              // Unescape newlines from SSE format
-              const text = data.replace(/\\n/g, '\n')
-              streamedText += text
+              // Parse JSON SSE chunks: {"word":"...","done":false} or {"done":true,"verseRefs":[...]}
+              // Fallback to legacy plain-text format for backward compatibility
+              try {
+                const event = JSON.parse(raw)
+                if (event.done) break
+                if (event.word) {
+                  streamedText += event.word
+                }
+              } catch {
+                // Legacy plain-text format
+                if (raw === '[DONE]') break
+                const text = raw.replace(/\\n/g, '\n')
+                streamedText += text
+              }
 
               // Update the message in place for live streaming effect
               addMessage({

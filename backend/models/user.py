@@ -35,6 +35,11 @@ class User(SoftDeleteMixin, Base):
     email_verified_at: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True, default=None
     )
+    # Mobile client fields
+    avatar_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    is_onboarded: Mapped[bool] = mapped_column(Boolean, default=False)
+    push_token: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    push_platform: Mapped[str | None] = mapped_column(String(10), nullable=True)
     # Account lockout fields for brute force protection
     failed_login_attempts: Mapped[int] = mapped_column(Integer, default=0)
     locked_until: Mapped[datetime.datetime | None] = mapped_column(

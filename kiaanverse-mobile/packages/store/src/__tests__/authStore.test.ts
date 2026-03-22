@@ -43,12 +43,11 @@ const mockUser = {
 
 const mockLoginResponse = {
   access_token: 'access-123',
+  refresh_token: null,
   token_type: 'bearer',
   session_id: 'session-1',
   expires_in: 3600,
-  user_id: 'user-abc',
-  email: 'test@kiaanverse.app',
-  email_verified: true,
+  user: { id: 'user-abc', email: 'test@kiaanverse.app', name: null, avatar_url: null, is_onboarded: false },
   subscription_tier: 'FREE',
   subscription_status: 'active',
   is_developer: false,

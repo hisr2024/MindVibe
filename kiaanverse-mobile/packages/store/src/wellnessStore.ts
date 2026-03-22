@@ -163,17 +163,16 @@ export const useWellnessStore = create<WellnessState & WellnessActions>()(
         },
 
         updateStreak: () => {
-          const { lastActiveDate, streak } = get();
-          const today = todayString();
-
-          // Already active today — no change needed
-          if (lastActiveDate === today) return;
-
           set((state) => {
-            if (lastActiveDate === yesterdayString()) {
+            const today = todayString();
+
+            // Already active today — no change needed
+            if (state.lastActiveDate === today) return;
+
+            if (state.lastActiveDate === yesterdayString()) {
               // Consecutive day — increment streak
-              state.streak = streak + 1;
-            } else if (lastActiveDate !== today) {
+              state.streak += 1;
+            } else {
               // Streak broken — reset to 1 (today counts)
               state.streak = 1;
             }

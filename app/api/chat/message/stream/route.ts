@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     if (!message || typeof message !== 'string') {
       return new Response(
-        encoder.encode('data: Error: Message is required\n\ndata: [DONE]\n\n'),
+        encoder.encode(`data: ${JSON.stringify({ word: 'Error: Message is required', done: false })}\n\ndata: ${JSON.stringify({ done: true, verseRefs: [] })}\n\n`),
         {
           status: 400,
           headers: {
@@ -76,10 +76,11 @@ export async function POST(request: NextRequest) {
           403: 'Access denied. Please try again or contact support.',
           429: 'Too many requests. Please wait a moment and try again.',
         }
+        const msg = messages[response.status] || errorText
         const errorStream = new ReadableStream({
           start(controller) {
-            controller.enqueue(encoder.encode(`data: ${messages[response.status] || errorText}\n\n`))
-            controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ word: msg, done: false })}\n\n`))
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, verseRefs: [] })}\n\n`))
             controller.close()
           },
         })
@@ -116,10 +117,11 @@ export async function POST(request: NextRequest) {
           403: 'Access denied. Please try again or contact support.',
           429: 'Too many requests. Please wait a moment and try again.',
         }
+        const msg = messages[response.status]
         const errorStream = new ReadableStream({
           start(controller) {
-            controller.enqueue(encoder.encode(`data: ${messages[response.status]}\n\n`))
-            controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ word: msg, done: false })}\n\n`))
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, verseRefs: [] })}\n\n`))
             controller.close()
           },
         })
@@ -137,20 +139,18 @@ export async function POST(request: NextRequest) {
         const data = await response.json()
         const text = data.response || data.message || ''
 
-        // Simulate streaming by sending the response in chunks
+        // Simulate streaming by sending the response in JSON chunks
         const stream = new ReadableStream({
           async start(controller) {
-            // Send response in small chunks for streaming effect
             const words = text.split(' ')
             for (let i = 0; i < words.length; i++) {
               const chunk = words[i] + (i < words.length - 1 ? ' ' : '')
-              // Escape newlines for SSE format
-              const escapedChunk = chunk.replace(/\n/g, '\\n')
-              controller.enqueue(encoder.encode(`data: ${escapedChunk}\n\n`))
-              // Small delay between chunks for natural effect
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ word: chunk, done: false })}\n\n`))
               await new Promise(resolve => setTimeout(resolve, 30))
             }
-            controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+            // Extract verse references (BG X.Y) from the text
+            const verseRefs = (text.match(/BG\s*\d+\.\d+/g) || []).map((r: string) => r.replace(/\s/g, ''))
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, verseRefs })}\n\n`))
             controller.close()
           },
         })
@@ -176,11 +176,10 @@ export async function POST(request: NextRequest) {
         const words = fallbackText.split(' ')
         for (let i = 0; i < words.length; i++) {
           const chunk = words[i] + (i < words.length - 1 ? ' ' : '')
-          const escapedChunk = chunk.replace(/\n/g, '\\n')
-          controller.enqueue(encoder.encode(`data: ${escapedChunk}\n\n`))
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ word: chunk, done: false })}\n\n`))
           await new Promise(resolve => setTimeout(resolve, 30))
         }
-        controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, verseRefs: [] })}\n\n`))
         controller.close()
       },
     })
@@ -195,11 +194,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.warn('[Chat Stream] Error:', error)
 
-    // Return error as SSE
+    // Return error as SSE (JSON format)
     const errorStream = new ReadableStream({
       start(controller) {
-        controller.enqueue(encoder.encode('data: I apologize, but I encountered an issue. Please try again.\\n\\nI am KIAAN, and I am still here with you.\n\n'))
-        controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ word: 'I apologize, but I encountered an issue. Please try again.\n\nI am KIAAN, and I am still here with you.', done: false })}\n\n`))
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, verseRefs: [] })}\n\n`))
         controller.close()
       },
     })

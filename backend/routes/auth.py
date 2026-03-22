@@ -68,14 +68,23 @@ class SignupOut(BaseModel):
 class LoginIn(BaseModel):
     email: EmailStr
     password: str
+class AuthUser(BaseModel):
+    """Nested user object in auth responses — standardized for mobile clients."""
+    id: str
+    email: str
+    name: str | None = None
+    avatar_url: str | None = None
+    is_onboarded: bool = False
+
+
 class LoginOut(BaseModel):
     access_token: str
-    token_type: str
-    session_id: str
-    expires_in: int
-    user_id: str
-    email: EmailStr
-    email_verified: bool = False
+    refresh_token: str | None = None
+    token_type: str = "bearer"
+    expires_in: int = 900
+    user: AuthUser
+    # Legacy flat fields kept for backward compatibility
+    session_id: str | None = None
     subscription_tier: str = "free"
     subscription_status: str = "active"
     is_developer: bool = False
@@ -203,13 +212,18 @@ async def _get_user_and_active_session(
 async def signup(request: Request, payload: SignupIn, db: AsyncSession = Depends(get_db)):
     result = policy.validate(payload.password)
     if not result.ok:
-        raise HTTPException(status_code=422, detail=result.errors)
+        raise HTTPException(
+            status_code=422,
+            detail={"detail": "; ".join(result.errors), "code": "VALIDATION_ERROR", "field": "password"},
+        )
 
     stmt = select(User).where(User.email == payload.email.lower())
     existing = (await db.execute(stmt)).scalars().first()
     if existing:
-        # Use generic message to prevent account enumeration
-        raise HTTPException(status_code=409, detail="Unable to create account with this email")
+        raise HTTPException(
+            status_code=409,
+            detail={"detail": "Unable to create account with this email", "code": "EMAIL_EXISTS", "field": "email"},
+        )
 
     # Generate a unique auth_uid
     auth_uid = secrets.token_urlsafe(16)
@@ -279,7 +293,7 @@ async def login(
     if user and user.locked_until and user.locked_until > datetime.now(UTC):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
+            detail={"detail": "Invalid credentials", "code": "INVALID_CREDENTIALS"},
         )
 
     # Validate credentials
@@ -302,13 +316,16 @@ async def login(
                 await db.rollback()
                 logger.error(f"Database commit failed during login attempt tracking: {e}", exc_info=True)
 
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        raise HTTPException(
+            status_code=401,
+            detail={"detail": "Invalid credentials", "code": "INVALID_CREDENTIALS"},
+        )
 
     # Block login if email is not verified
     if not user.email_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="email_not_verified",
+            detail={"detail": "Please verify your email before logging in", "code": "EMAIL_NOT_VERIFIED", "field": "email"},
         )
 
     # Reset failed attempts on successful login
@@ -377,14 +394,33 @@ async def login(
     except Exception:
         pass
 
+    # Fetch user profile for name
+    profile_name: str | None = None
+    try:
+        from backend.models.user import UserProfile
+        profile_stmt = select(UserProfile).where(UserProfile.user_id == user.id)
+        profile = (await db.execute(profile_stmt)).scalars().first()
+        if profile:
+            profile_name = profile.full_name
+    except Exception:
+        pass
+
+    # Return refresh token in body for mobile clients (cookie is also set above)
+    refresh_body = raw_refresh if settings.REFRESH_TOKEN_ENABLE_BODY_RETURN else None
+
     return LoginOut(
         access_token=access_token,
+        refresh_token=refresh_body,
         token_type="bearer",  # nosec B106
-        session_id=str(session.id),
         expires_in=expires_in_seconds,
-        user_id=user.id,
-        email=user.email,
-        email_verified=bool(user.email_verified),
+        user=AuthUser(
+            id=user.id,
+            email=user.email,
+            name=profile_name,
+            avatar_url=getattr(user, "avatar_url", None),
+            is_onboarded=getattr(user, "is_onboarded", False),
+        ),
+        session_id=str(session.id),
         subscription_tier="siddha" if is_dev else sub_tier,
         subscription_status=sub_status,
         is_developer=is_dev,

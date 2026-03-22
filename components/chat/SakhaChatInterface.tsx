@@ -198,15 +198,22 @@ export function SakhaChatInterface() {
           sseBuffer = remaining
 
           for (const line of lines) {
-            if (line === '[DONE]') {
-              // Stream complete
-              break
+            // Parse JSON SSE chunks: {"word":"...","done":false} or {"done":true,"verseRefs":[...]}
+            // Fallback to legacy plain-text format for backward compatibility
+            try {
+              const event = JSON.parse(line)
+              if (event.done) break
+              if (event.word) {
+                fullText += event.word
+              }
+            } catch {
+              // Legacy plain-text format
+              if (line === '[DONE]') break
+              if (fullText.length > 0 && !line.startsWith(' ')) {
+                fullText += ' '
+              }
+              fullText += line
             }
-            // Accumulate text — each line is a word or text fragment
-            if (fullText.length > 0 && !line.startsWith(' ')) {
-              fullText += ' '
-            }
-            fullText += line
           }
 
           // Update assistant message with accumulated text

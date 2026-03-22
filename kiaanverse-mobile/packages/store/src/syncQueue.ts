@@ -117,14 +117,19 @@ export const useSyncQueueStore = create<SyncQueueState & SyncQueueActions>()(
         },
 
         processQueue: async (executor) => {
-          const { queue, isProcessing } = get();
-
-          if (isProcessing || queue.length === 0) return;
-
+          // Atomic check-and-set to prevent concurrent processing
+          let shouldProcess = false;
           set((state) => {
-            state.isProcessing = true;
-            state.syncStatus = 'syncing';
+            if (!state.isProcessing && state.queue.length > 0) {
+              state.isProcessing = true;
+              state.syncStatus = 'syncing';
+              shouldProcess = true;
+            }
           });
+
+          if (!shouldProcess) return;
+
+          const { queue } = get();
 
           if (typeof __DEV__ !== 'undefined' && __DEV__) {
             // eslint-disable-next-line no-console
@@ -142,12 +147,15 @@ export const useSyncQueueStore = create<SyncQueueState & SyncQueueActions>()(
               successCount += 1;
             } catch (err) {
               const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-              const newRetryCount = item.retryCount + 1;
 
-              if (newRetryCount >= MAX_RETRIES) {
+              // Read current retry count from store (not stale snapshot)
+              const current = get().queue.find((i) => i.id === item.id);
+              const currentRetryCount = current ? current.retryCount : item.retryCount;
+
+              if (currentRetryCount + 1 >= MAX_RETRIES) {
                 // Drop permanently failed items
                 if (typeof __DEV__ !== 'undefined' && __DEV__) {
-                   
+                  // eslint-disable-next-line no-console
                   console.warn(`[SyncQueue] Dropping ${item.id} after ${MAX_RETRIES} retries: ${errorMessage}`);
                 }
                 get().dequeue(item.id);

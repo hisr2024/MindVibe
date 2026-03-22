@@ -581,6 +581,140 @@ async def clear_voice_cache(
     }
 
 
+# ---------------------------------------------------------------------------
+# Speech-to-Text: Transcribe uploaded audio
+# ---------------------------------------------------------------------------
+
+class TranscribeOut(BaseModel):
+    """Response from audio transcription."""
+    transcript: str
+    confidence: float
+
+
+@router.post("/transcribe", response_model=TranscribeOut)
+@limiter.limit(VOICE_RATE_LIMIT)
+async def transcribe_audio(
+    request: Request,
+    user_id: str = Depends(get_current_user_flexible),
+    db: AsyncSession = Depends(get_db),
+) -> TranscribeOut:
+    """
+    Transcribe uploaded audio (m4a or wav) to text using Whisper.
+
+    Accepts multipart/form-data with an `audio` file field.
+    Returns the transcript and a confidence score (0.0–1.0).
+    """
+    from fastapi import UploadFile
+    import tempfile
+    import os
+
+    # Parse multipart manually — the audio field comes as raw form data
+    form = await request.form()
+    audio_field = form.get("audio")
+    if audio_field is None:
+        raise HTTPException(
+            status_code=422,
+            detail={"detail": "Missing 'audio' field in form data", "code": "VALIDATION_ERROR", "field": "audio"},
+        )
+
+    # Read audio bytes (UploadFile or raw)
+    if hasattr(audio_field, "read"):
+        audio_bytes = await audio_field.read()
+        filename = getattr(audio_field, "filename", "audio.wav") or "audio.wav"
+    else:
+        raise HTTPException(
+            status_code=422,
+            detail={"detail": "'audio' must be a file upload", "code": "VALIDATION_ERROR", "field": "audio"},
+        )
+
+    if not audio_bytes or len(audio_bytes) < 100:
+        raise HTTPException(
+            status_code=422,
+            detail={"detail": "Audio file is too small or empty", "code": "VALIDATION_ERROR", "field": "audio"},
+        )
+
+    # Limit to 25 MB
+    if len(audio_bytes) > 25 * 1024 * 1024:
+        raise HTTPException(
+            status_code=413,
+            detail={"detail": "Audio file exceeds 25 MB limit", "code": "VALIDATION_ERROR", "field": "audio"},
+        )
+
+    # Determine extension from filename
+    ext = os.path.splitext(filename)[1].lower() if filename else ".wav"
+    if ext not in (".m4a", ".wav", ".mp3", ".ogg", ".webm", ".flac"):
+        ext = ".wav"
+
+    # Write to a temp file for Whisper / OpenAI transcription
+    transcript = ""
+    confidence = 0.0
+    tmp_path = None
+
+    try:
+        with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
+            tmp.write(audio_bytes)
+            tmp_path = tmp.name
+
+        # Try OpenAI Whisper API first (production), fall back to local whisper
+        openai_key = os.getenv("OPENAI_API_KEY", "").strip()
+
+        if openai_key:
+            import openai
+            client = openai.OpenAI(api_key=openai_key)
+            with open(tmp_path, "rb") as audio_file:
+                result = client.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=audio_file,
+                    response_format="verbose_json",
+                )
+            transcript = result.text or ""
+            # OpenAI verbose_json provides segment-level confidence
+            if hasattr(result, "segments") and result.segments:
+                avg = sum(
+                    seg.get("avg_logprob", -1.0) if isinstance(seg, dict) else getattr(seg, "avg_logprob", -1.0)
+                    for seg in result.segments
+                ) / len(result.segments)
+                # Convert log-prob to a 0–1 confidence (rough heuristic)
+                import math
+                confidence = round(min(1.0, max(0.0, math.exp(avg))), 3)
+            else:
+                confidence = 0.9 if transcript else 0.0
+        else:
+            # Fallback: local faster-whisper if available
+            try:
+                from faster_whisper import WhisperModel
+                from backend.core.settings import settings
+                model = WhisperModel(
+                    settings.WHISPER_MODEL_SIZE,
+                    compute_type=settings.WHISPER_COMPUTE_TYPE,
+                )
+                segments, info = model.transcribe(tmp_path)
+                parts = []
+                total_prob = 0.0
+                count = 0
+                for seg in segments:
+                    parts.append(seg.text)
+                    total_prob += seg.avg_logprob
+                    count += 1
+                transcript = " ".join(parts).strip()
+                if count > 0:
+                    import math
+                    confidence = round(min(1.0, max(0.0, math.exp(total_prob / count))), 3)
+            except ImportError:
+                raise HTTPException(
+                    status_code=503,
+                    detail={"detail": "Transcription service unavailable — no API key or local model", "code": "SERVICE_UNAVAILABLE"},
+                )
+
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+
+    logger.info(f"Transcribed audio for user {user_id}: {len(transcript)} chars, confidence={confidence}")
+
+    return TranscribeOut(transcript=transcript, confidence=confidence)
+
+
 @router.get("/health")
 async def get_voice_health() -> dict:
     """

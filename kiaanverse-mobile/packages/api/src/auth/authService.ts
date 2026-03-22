@@ -61,8 +61,10 @@ function mapAxiosError(err: unknown): AuthError {
     const status = err.response?.status ?? 0;
     const data = err.response?.data as Record<string, unknown> | undefined;
 
-    // Backend error format: {detail: "message"} or {detail: {error: "...", message: "..."}}
+    // Backend error format: {detail: string, code: string, field?: string}
     let detail = '';
+    const errorCode = typeof data?.code === 'string' ? data.code : '';
+
     if (data?.detail !== undefined) {
       if (typeof data.detail === 'string') {
         detail = data.detail;
@@ -70,7 +72,6 @@ function mapAxiosError(err: unknown): AuthError {
         const detailObj = data.detail as Record<string, unknown>;
         detail = typeof detailObj.message === 'string' ? detailObj.message : JSON.stringify(data.detail);
       } else if (Array.isArray(data.detail)) {
-        // Validation errors come as an array
         detail = 'Please check your input.';
       }
     } else if (data?.message !== undefined && typeof data.message === 'string') {
@@ -93,7 +94,7 @@ function mapAxiosError(err: unknown): AuthError {
       );
     }
 
-    if (status === 403 && detail === 'email_not_verified') {
+    if (status === 403 && (errorCode === 'EMAIL_NOT_VERIFIED' || detail === 'email_not_verified')) {
       return new AuthError(
         'Please verify your email before signing in. Check your inbox.',
         403,
@@ -170,12 +171,12 @@ function mapMeResponseToUser(me: MeResponse): User {
  */
 function mapLoginResponseToUser(res: LoginResponse): User {
   return {
-    id: res.user_id,
-    email: res.email,
-    name: '', // Not available from login response
+    id: res.user?.id ?? '',
+    email: res.user?.email ?? '',
+    name: res.user?.name ?? '',
     locale: 'en',
     subscriptionTier: (res.subscription_tier?.toUpperCase() ?? 'FREE') as User['subscriptionTier'],
-    createdAt: '', // Not available from login response
+    createdAt: '',
   };
 }
 

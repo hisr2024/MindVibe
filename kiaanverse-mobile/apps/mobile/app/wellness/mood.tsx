@@ -21,7 +21,6 @@ import {
   Text,
   GoldenHeader,
   MoodRing,
-  LoadingMandala,
   colors,
   spacing,
   radii,
@@ -30,12 +29,10 @@ import { useTheme } from '@kiaanverse/ui';
 import type { Mood } from '@kiaanverse/ui';
 import {
   useCreateMood,
-  useMoodHistory,
-  useMoodInsights,
   type SpiritualMood,
   type MoodEntry,
 } from '@kiaanverse/api';
-import { useMoodStore, MOOD_STATES } from '@kiaanverse/store';
+import { useMoodStore, MOOD_STATES, useWellnessStore } from '@kiaanverse/store';
 
 // ---------------------------------------------------------------------------
 // Map MoodRing moods to SpiritualMood
@@ -216,10 +213,19 @@ function MoodChart({ entries }: { entries: MoodEntry[] }): React.JSX.Element {
 function InsightsSection(): React.JSX.Element | null {
   const { theme } = useTheme();
   const c = theme.colors;
-  const { data, isLoading } = useMoodInsights();
+  const moodHistory = useWellnessStore((s) => s.moodHistory);
+  const streak = useWellnessStore((s) => s.streak);
 
-  if (isLoading) return null;
-  if (!data?.insights || data.insights.length === 0) return null;
+  if (moodHistory.length < 3) return null;
+
+  // Derive a simple dominant-mood insight from cached history
+  const moodCounts: Record<string, number> = {};
+  for (const entry of moodHistory.slice(0, 30)) {
+    const key = entry.state ?? 'unknown';
+    moodCounts[key] = (moodCounts[key] ?? 0) + 1;
+  }
+  const dominant = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0];
+  if (!dominant) return null;
 
   return (
     <Animated.View entering={FadeInDown.delay(300).duration(400)}>
@@ -228,15 +234,16 @@ function InsightsSection(): React.JSX.Element | null {
           <TrendingUp size={16} color={colors.primary[300]} />
           <Text variant="label" color={c.textSecondary}>Mood Insights</Text>
         </View>
-        {data.insights.map((insight, i) => (
-          <View
-            key={i}
-            style={[styles.insightCard, { backgroundColor: c.card, borderColor: c.cardBorder }]}
-          >
-            <Text variant="bodySmall" color={c.textPrimary}>{insight.pattern}</Text>
-            <Text variant="caption" color={c.textSecondary}>{insight.suggestion}</Text>
-          </View>
-        ))}
+        <View style={[styles.insightCard, { backgroundColor: c.card, borderColor: c.cardBorder }]}>
+          <Text variant="bodySmall" color={c.textPrimary}>
+            Your dominant mood recently: {dominant[0]} ({dominant[1]} entries)
+          </Text>
+          {streak > 1 ? (
+            <Text variant="caption" color={c.textSecondary}>
+              {streak}-day tracking streak — keep going!
+            </Text>
+          ) : null}
+        </View>
       </View>
     </Animated.View>
   );
@@ -253,7 +260,8 @@ export default function MoodTrackingScreen(): React.JSX.Element {
 
   const { selectedMood, note, selectMood, setNote, markLogged } = useMoodStore();
   const createMood = useCreateMood();
-  const { data: history, isLoading: historyLoading } = useMoodHistory(30);
+  const moodHistory = useWellnessStore((s) => s.moodHistory);
+  const addMoodEntry = useWellnessStore((s) => s.addMoodEntry);
 
   const [ringMood, setRingMood] = useState<Mood | undefined>(
     selectedMood ? SPIRITUAL_TO_RING[selectedMood] : undefined,
@@ -282,9 +290,19 @@ export default function MoodTrackingScreen(): React.JSX.Element {
     createMood.mutate(
       payload,
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           markLogged();
           setRingMood(undefined);
+          // Sync to wellness store for offline chart display
+          addMoodEntry({
+            id: typeof data.id === 'number' ? data.id : 0,
+            score: payload.score,
+            state: payload.state,
+            tags: payload.tags,
+            note: payload.note,
+            date: payload.date,
+            at: new Date().toISOString(),
+          });
         },
       },
     );
@@ -365,13 +383,9 @@ export default function MoodTrackingScreen(): React.JSX.Element {
         ) : null}
 
         {/* 30-day chart */}
-        {historyLoading ? (
-          <View style={styles.chartLoading}>
-            <LoadingMandala size={48} />
-          </View>
-        ) : history?.entries && history.entries.length > 0 ? (
+        {moodHistory.length > 0 ? (
           <Animated.View entering={FadeInDown.delay(200).duration(400)}>
-            <MoodChart entries={history.entries} />
+            <MoodChart entries={moodHistory} />
           </Animated.View>
         ) : (
           <View style={styles.emptyChart}>
@@ -467,10 +481,6 @@ const styles = StyleSheet.create({
   chartLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
-  chartLoading: {
-    alignItems: 'center',
-    paddingVertical: spacing.lg,
   },
   emptyChart: {
     paddingVertical: spacing.lg,
