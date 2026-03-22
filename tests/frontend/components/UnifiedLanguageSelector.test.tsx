@@ -409,8 +409,10 @@ describe('LanguageSelector (unified)', () => {
 
     it('passes custom className to trigger', async () => {
       renderWithProvider(<LanguageSelector variant="dropdown" className="my-custom-class" />)
-      const btn = screen.getByRole('button', { name: /current language/i })
-      expect(btn.className).toContain('my-custom-class')
+      await waitFor(() => {
+        const btn = screen.getByRole('button', { name: /current language/i })
+        expect(btn.className).toContain('my-custom-class')
+      })
     })
 
     it('updates document.lang attribute on selection', async () => {
