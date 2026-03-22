@@ -6,6 +6,11 @@
  */
 
 import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
+
+// React Native/Expo global — always defined at runtime
+declare const __DEV__: boolean;
 
 export type SadhanaPhase =
   | 'greeting'
@@ -49,18 +54,50 @@ const initialState: SadhanaState = {
   intention: '',
 };
 
-export const useSadhanaStore = create<SadhanaState & SadhanaActions>((set, get) => ({
-  ...initialState,
+export const useSadhanaStore = create<SadhanaState & SadhanaActions>()(
+  devtools(
+    immer((set, get) => ({
+      ...initialState,
 
-  nextPhase: () => {
-    const currentIndex = phaseOrder.indexOf(get().phase);
-    const nextIndex = Math.min(currentIndex + 1, phaseOrder.length - 1);
-    set({ phase: phaseOrder[nextIndex] as SadhanaPhase });
-  },
+      nextPhase: () => {
+        const currentIndex = phaseOrder.indexOf(get().phase);
+        const nextIndex = Math.min(currentIndex + 1, phaseOrder.length - 1);
+        set((state) => {
+          state.phase = phaseOrder[nextIndex] as SadhanaPhase;
+        });
+      },
 
-  setMoodScore: (score) => set({ moodScore: score }),
-  setVerseId: (verseId) => set({ verseId }),
-  setReflection: (text) => set({ reflection: text }),
-  setIntention: (text) => set({ intention: text }),
-  reset: () => set(initialState),
-}));
+      setMoodScore: (score: number) => {
+        set((state) => {
+          state.moodScore = score;
+        });
+      },
+
+      setVerseId: (verseId: string) => {
+        set((state) => {
+          state.verseId = verseId;
+        });
+      },
+
+      setReflection: (text: string) => {
+        set((state) => {
+          state.reflection = text;
+        });
+      },
+
+      setIntention: (text: string) => {
+        set((state) => {
+          state.intention = text;
+        });
+      },
+
+      reset: () => {
+        set(() => ({ ...initialState }));
+      },
+    })),
+    {
+      name: 'SadhanaStore',
+      enabled: typeof __DEV__ !== 'undefined' && __DEV__,
+    },
+  ),
+);

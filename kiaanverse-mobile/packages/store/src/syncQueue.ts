@@ -15,6 +15,8 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState, type AppStateStatus } from 'react-native';
 import type { SyncQueueItem, SyncStatus } from '@kiaanverse/api';
@@ -74,122 +76,136 @@ function generateId(): string {
 const MAX_RETRIES = 5;
 
 export const useSyncQueueStore = create<SyncQueueState & SyncQueueActions>()(
-  persist(
-    (set, get) => ({
-      queue: [],
-      syncStatus: 'synced',
-      lastSyncAt: null,
-      isProcessing: false,
+  devtools(
+    persist(
+      immer((set, get) => ({
+        queue: [],
+        syncStatus: 'synced' as SyncStatus,
+        lastSyncAt: null,
+        isProcessing: false,
 
-      enqueue: (type, payload) => {
-        const id = generateId();
-        const item: SyncQueueItem = {
-          id,
-          type,
-          payload,
-          createdAt: new Date().toISOString(),
-          retryCount: 0,
-        };
-
-        set((state) => ({
-          queue: [...state.queue, item],
-          syncStatus: 'pending',
-        }));
-
-        if (typeof __DEV__ !== 'undefined' && __DEV__) {
-          // eslint-disable-next-line no-console
-          console.log(`[SyncQueue] Enqueued ${type}: ${id}`);
-        }
-
-        return id;
-      },
-
-      dequeue: (id) => {
-        set((state) => {
-          const newQueue = state.queue.filter((item) => item.id !== id);
-          return {
-            queue: newQueue,
-            syncStatus: newQueue.length === 0 ? 'synced' : state.syncStatus,
+        enqueue: (type, payload) => {
+          const id = generateId();
+          const item: SyncQueueItem = {
+            id,
+            type,
+            payload,
+            createdAt: new Date().toISOString(),
+            retryCount: 0,
           };
-        });
-      },
 
-      processQueue: async (executor) => {
-        const { queue, isProcessing } = get();
+          set((state) => {
+            state.queue.push(item);
+            state.syncStatus = 'pending';
+          });
 
-        if (isProcessing || queue.length === 0) return;
+          if (typeof __DEV__ !== 'undefined' && __DEV__) {
+            // eslint-disable-next-line no-console
+            console.log(`[SyncQueue] Enqueued ${type}: ${id}`);
+          }
 
-        set({ isProcessing: true, syncStatus: 'syncing' });
+          return id;
+        },
 
-        if (typeof __DEV__ !== 'undefined' && __DEV__) {
-          // eslint-disable-next-line no-console
-          console.log(`[SyncQueue] Processing ${queue.length} items`);
-        }
+        dequeue: (id) => {
+          set((state) => {
+            state.queue = state.queue.filter((item) => item.id !== id);
+            if (state.queue.length === 0) {
+              state.syncStatus = 'synced';
+            }
+          });
+        },
 
-        // Process in order (FIFO) — oldest first
-        const itemsToProcess = [...queue];
-        let successCount = 0;
+        processQueue: async (executor) => {
+          const { queue, isProcessing } = get();
 
-        for (const item of itemsToProcess) {
-          try {
-            await executor(item);
-            get().dequeue(item.id);
-            successCount += 1;
-          } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-            const newRetryCount = item.retryCount + 1;
+          if (isProcessing || queue.length === 0) return;
 
-            if (newRetryCount >= MAX_RETRIES) {
-              // Drop permanently failed items
-              if (typeof __DEV__ !== 'undefined' && __DEV__) {
-                // eslint-disable-next-line no-console
-                console.warn(`[SyncQueue] Dropping ${item.id} after ${MAX_RETRIES} retries: ${errorMessage}`);
-              }
+          set((state) => {
+            state.isProcessing = true;
+            state.syncStatus = 'syncing';
+          });
+
+          if (typeof __DEV__ !== 'undefined' && __DEV__) {
+            // eslint-disable-next-line no-console
+            console.log(`[SyncQueue] Processing ${queue.length} items`);
+          }
+
+          // Process in order (FIFO) — oldest first
+          const itemsToProcess = [...queue];
+          let successCount = 0;
+
+          for (const item of itemsToProcess) {
+            try {
+              await executor(item);
               get().dequeue(item.id);
-            } else {
-              get().markFailed(item.id, errorMessage);
+              successCount += 1;
+            } catch (err) {
+              const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+              const newRetryCount = item.retryCount + 1;
+
+              if (newRetryCount >= MAX_RETRIES) {
+                // Drop permanently failed items
+                if (typeof __DEV__ !== 'undefined' && __DEV__) {
+                  // eslint-disable-next-line no-console
+                  console.warn(`[SyncQueue] Dropping ${item.id} after ${MAX_RETRIES} retries: ${errorMessage}`);
+                }
+                get().dequeue(item.id);
+              } else {
+                get().markFailed(item.id, errorMessage);
+              }
             }
           }
-        }
 
-        const remaining = get().queue;
-        set({
-          isProcessing: false,
-          syncStatus: remaining.length === 0 ? 'synced' : 'error',
-          lastSyncAt: successCount > 0 ? new Date().toISOString() : get().lastSyncAt,
-        });
+          const remaining = get().queue;
+          set((state) => {
+            state.isProcessing = false;
+            state.syncStatus = remaining.length === 0 ? 'synced' : 'error';
+            if (successCount > 0) {
+              state.lastSyncAt = new Date().toISOString();
+            }
+          });
 
-        if (typeof __DEV__ !== 'undefined' && __DEV__) {
-          // eslint-disable-next-line no-console
-          console.log(`[SyncQueue] Done: ${successCount} synced, ${remaining.length} remaining`);
-        }
+          if (typeof __DEV__ !== 'undefined' && __DEV__) {
+            // eslint-disable-next-line no-console
+            console.log(`[SyncQueue] Done: ${successCount} synced, ${remaining.length} remaining`);
+          }
+        },
+
+        markFailed: (id, error) => {
+          set((state) => {
+            const item = state.queue.find((i) => i.id === id);
+            if (item) {
+              item.retryCount += 1;
+              item.lastError = error;
+            }
+            state.syncStatus = 'error';
+          });
+        },
+
+        clearQueue: () => {
+          set((state) => {
+            state.queue = [];
+            state.syncStatus = 'synced';
+            state.isProcessing = false;
+          });
+        },
+
+        pendingCount: () => get().queue.length,
+      })),
+      {
+        name: 'kiaanverse-sync-queue',
+        storage: createJSONStorage(() => AsyncStorage),
+        // Only persist the queue and lastSyncAt — not transient processing state
+        partialize: (state) => ({
+          queue: state.queue,
+          lastSyncAt: state.lastSyncAt,
+        }),
       },
-
-      markFailed: (id, error) => {
-        set((state) => ({
-          queue: state.queue.map((item) =>
-            item.id === id
-              ? { ...item, retryCount: item.retryCount + 1, lastError: error }
-              : item,
-          ),
-          syncStatus: 'error',
-        }));
-      },
-
-      clearQueue: () => {
-        set({ queue: [], syncStatus: 'synced', isProcessing: false });
-      },
-
-      pendingCount: () => get().queue.length,
-    }),
+    ),
     {
-      name: 'kiaanverse-sync-queue',
-      storage: createJSONStorage(() => AsyncStorage),
-      // Only persist the queue and lastSyncAt — not transient processing state
-      partialize: (state) => ({
-        queue: state.queue,
-        lastSyncAt: state.lastSyncAt,
-      }),
+      name: 'SyncQueueStore',
+      enabled: typeof __DEV__ !== 'undefined' && __DEV__,
     },
   ),
 );

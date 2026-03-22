@@ -2,12 +2,17 @@
  * Theme Store
  *
  * Persists the user's theme preference (dark/light/system)
- * using a simple JSON storage adapter.
+ * using AsyncStorage via zustand/persist.
  */
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// React Native/Expo global — always defined at runtime
+declare const __DEV__: boolean;
 
 export type ThemeMode = 'dark' | 'light' | 'system';
 
@@ -20,14 +25,25 @@ interface ThemeActions {
 }
 
 export const useThemeStore = create<ThemeState & ThemeActions>()(
-  persist(
-    (set) => ({
-      mode: 'dark',
-      setMode: (mode) => set({ mode }),
-    }),
+  devtools(
+    persist(
+      immer((set) => ({
+        mode: 'dark' as ThemeMode,
+
+        setMode: (mode: ThemeMode) => {
+          set((state) => {
+            state.mode = mode;
+          });
+        },
+      })),
+      {
+        name: 'kiaanverse-theme',
+        storage: createJSONStorage(() => AsyncStorage),
+      },
+    ),
     {
-      name: 'kiaanverse-theme',
-      storage: createJSONStorage(() => AsyncStorage),
+      name: 'ThemeStore',
+      enabled: typeof __DEV__ !== 'undefined' && __DEV__,
     },
   ),
 );

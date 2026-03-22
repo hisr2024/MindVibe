@@ -20,11 +20,14 @@
  */
 
 import { create } from 'zustand';
-import { persist, createJSONStorage, type StateStorage } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 import * as SecureStore from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
-import { setTokenManager, authService, AuthError } from '@kiaanverse/api';
+import { setTokenManager, authService } from '@kiaanverse/api';
 import type { User, SubscriptionTier } from '@kiaanverse/api';
+import { secureStoreAdapter } from './persistence';
 
 // React Native/Expo global — always defined at runtime
 declare const __DEV__: boolean;
@@ -115,22 +118,6 @@ async function clearTokens(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// SecureStore adapter for Zustand persist middleware
-// ---------------------------------------------------------------------------
-
-const secureStoreAdapter: StateStorage = {
-  getItem: async (name: string): Promise<string | null> => {
-    return SecureStore.getItemAsync(name);
-  },
-  setItem: async (name: string, value: string): Promise<void> => {
-    await SecureStore.setItemAsync(name, value);
-  },
-  removeItem: async (name: string): Promise<void> => {
-    await SecureStore.deleteItemAsync(name);
-  },
-};
-
-// ---------------------------------------------------------------------------
 // Initial State
 // ---------------------------------------------------------------------------
 
@@ -163,9 +150,8 @@ const DEV_MOCK_USER: User = {
 // ---------------------------------------------------------------------------
 
 function extractErrorMessage(err: unknown): string {
-  if (err instanceof AuthError) return err.message;
   if (err instanceof Error) return err.message;
-  if (err && typeof err === 'object' && 'message' in err) {
+  if (err != null && typeof err === 'object' && 'message' in err) {
     const msg = (err as { message: unknown }).message;
     if (typeof msg === 'string') return msg;
   }
@@ -177,199 +163,263 @@ function extractErrorMessage(err: unknown): string {
 // ---------------------------------------------------------------------------
 
 export const useAuthStore = create<AuthState & AuthActions>()(
-  persist(
-    (set, get) => ({
-      ...initialState,
+  devtools(
+    persist(
+      immer((set, get) => ({
+        ...initialState,
 
-      initialize: async () => {
-        set({ status: 'loading', isLoading: true, error: null });
+        initialize: async () => {
+          set((state) => {
+            state.status = 'loading';
+            state.isLoading = true;
+            state.error = null;
+          });
 
-        try {
-          const token = await getAccessToken();
-          if (!token) {
-            set({ status: 'unauthenticated', isLoading: false });
-            return;
+          try {
+            const token = await getAccessToken();
+            if (!token) {
+              set((state) => {
+                state.status = 'unauthenticated';
+                state.isLoading = false;
+              });
+              return;
+            }
+
+            // Verify the token is still valid by fetching the user
+            const user = await authService.getCurrentUser();
+            set((state) => {
+              state.status = 'authenticated';
+              state.user = user;
+              state.isOnboarded = true;
+              state.isLoading = false;
+            });
+          } catch {
+            // Token invalid or network error — clear and require re-login
+            await clearTokens();
+            set((state) => {
+              state.status = 'unauthenticated';
+              state.isLoading = false;
+            });
           }
+        },
 
-          // Verify the token is still valid by fetching the user
-          const user = await authService.getCurrentUser();
-          set({
-            status: 'authenticated',
-            user,
-            isOnboarded: true,
-            isLoading: false,
-          });
-        } catch {
-          // Token invalid or network error — clear and require re-login
-          await clearTokens();
-          set({ status: 'unauthenticated', isLoading: false });
-        }
-      },
-
-      login: async (email, password) => {
-        set({ status: 'loading', isLoading: true, error: null });
-
-        try {
-          const result = await authService.login(email, password);
-
-          // Store access token in SecureStore
-          await storeAccessToken(result.accessToken);
-
-          // Store refresh token if we could extract it from Set-Cookie
-          if (result.refreshToken) {
-            await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, result.refreshToken);
-          }
-
-          // Build user from the login response (avoid extra /me call)
-          const user = authService.mapLoginResponseToUser(result.loginResponse);
-
-          set({
-            status: 'authenticated',
-            user,
-            isOnboarded: true,
-            isLoading: false,
-          });
-          return true;
-        } catch (err: unknown) {
-          set({
-            status: 'unauthenticated',
-            isLoading: false,
-            error: extractErrorMessage(err),
-          });
-          return false;
-        }
-      },
-
-      signup: async (email, password, name) => {
-        set({ status: 'loading', isLoading: true, error: null, signupPendingVerification: false });
-
-        try {
-          // Backend signup returns NO tokens — just a confirmation.
-          // User must verify email before they can log in.
-          const response = await authService.register({
-            name,
-            email,
-            password,
-            confirmPassword: password,
+        login: async (email, password) => {
+          set((state) => {
+            state.status = 'loading';
+            state.isLoading = true;
+            state.error = null;
           });
 
-          // Signup succeeded — user must verify email before login
-          set({
-            status: 'unauthenticated',
-            isLoading: false,
-            signupPendingVerification: response.email_verification_sent,
-          });
-          return true;
-        } catch (err: unknown) {
-          set({
-            status: 'unauthenticated',
-            isLoading: false,
-            error: extractErrorMessage(err),
-          });
-          return false;
-        }
-      },
+          try {
+            const result = await authService.login(email, password);
 
-      logout: async () => {
-        await authService.logout();
-        await clearTokens();
-        set({ ...initialState, status: 'unauthenticated' });
-      },
+            // Store access token in SecureStore
+            await storeAccessToken(result.accessToken);
 
-      setUser: (user) => set({ user }),
-      completeOnboarding: () => set({ isOnboarded: true }),
-      clearError: () => set({ error: null }),
-      clearSignupPending: () => set({ signupPendingVerification: false }),
+            // Store refresh token if we could extract it from Set-Cookie
+            if (result.refreshToken) {
+              await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, result.refreshToken);
+            }
 
-      // -----------------------------------------------------------------------
-      // Biometric
-      // -----------------------------------------------------------------------
+            // Build user from the login response (avoid extra /me call)
+            const user = authService.mapLoginResponseToUser(result.loginResponse);
 
-      checkBiometricAvailability: async () => {
-        try {
-          const hasHardware = await LocalAuthentication.hasHardwareAsync();
-          const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-          set({ biometricAvailable: hasHardware && isEnrolled });
-        } catch {
-          set({ biometricAvailable: false });
-        }
-      },
-
-      authenticateWithBiometric: async () => {
-        const { biometricEnabled, biometricAvailable, isLoading: alreadyLoading } = get();
-        if (!biometricEnabled || !biometricAvailable || alreadyLoading) return false;
-
-        set({ status: 'loading', isLoading: true, error: null });
-
-        try {
-          const result = await LocalAuthentication.authenticateAsync({
-            promptMessage: 'Authenticate to continue',
-            fallbackLabel: 'Use password',
-            disableDeviceFallback: false,
-          });
-
-          if (!result.success) {
-            set({ status: 'unauthenticated', isLoading: false });
+            set((state) => {
+              state.status = 'authenticated';
+              state.user = user;
+              state.isOnboarded = true;
+              state.isLoading = false;
+            });
+            return true;
+          } catch (err: unknown) {
+            set((state) => {
+              state.status = 'unauthenticated';
+              state.isLoading = false;
+              state.error = extractErrorMessage(err);
+            });
             return false;
           }
+        },
 
-          // Biometric passed — use stored refresh token to get fresh access token
-          const refreshToken = await getRefreshToken();
+        signup: async (email, password, name) => {
+          set((state) => {
+            state.status = 'loading';
+            state.isLoading = true;
+            state.error = null;
+            state.signupPendingVerification = false;
+          });
 
-          // Attempt refresh — either via stored token in body or via httpOnly cookie
-          const tokens = await authService.refreshTokens(refreshToken);
-          await storeAccessToken(tokens.accessToken);
+          try {
+            // Backend signup returns NO tokens — just a confirmation.
+            // User must verify email before they can log in.
+            const response = await authService.register({
+              name,
+              email,
+              password,
+              confirmPassword: password,
+            });
 
-          // Store new refresh token if available
-          if (tokens.newRefreshToken) {
-            await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, tokens.newRefreshToken);
+            // Signup succeeded — user must verify email before login
+            set((state) => {
+              state.status = 'unauthenticated';
+              state.isLoading = false;
+              state.signupPendingVerification = response.email_verification_sent;
+            });
+            return true;
+          } catch (err: unknown) {
+            set((state) => {
+              state.status = 'unauthenticated';
+              state.isLoading = false;
+              state.error = extractErrorMessage(err);
+            });
+            return false;
           }
+        },
 
-          const user = await authService.getCurrentUser();
-          set({
-            status: 'authenticated',
-            user,
-            isOnboarded: true,
-            isLoading: false,
+        logout: async () => {
+          await authService.logout();
+          await clearTokens();
+          set(() => ({ ...initialState, status: 'unauthenticated' as const }));
+        },
+
+        setUser: (user) => {
+          set((state) => {
+            state.user = user;
           });
-          return true;
-        } catch (err: unknown) {
-          set({
-            status: 'unauthenticated',
-            isLoading: false,
-            error: extractErrorMessage(err),
+        },
+
+        completeOnboarding: () => {
+          set((state) => {
+            state.isOnboarded = true;
           });
-          return false;
-        }
+        },
+
+        clearError: () => {
+          set((state) => {
+            state.error = null;
+          });
+        },
+
+        clearSignupPending: () => {
+          set((state) => {
+            state.signupPendingVerification = false;
+          });
+        },
+
+        // -----------------------------------------------------------------------
+        // Biometric
+        // -----------------------------------------------------------------------
+
+        checkBiometricAvailability: async () => {
+          try {
+            const hasHardware = await LocalAuthentication.hasHardwareAsync();
+            const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+            set((state) => {
+              state.biometricAvailable = hasHardware && isEnrolled;
+            });
+          } catch {
+            set((state) => {
+              state.biometricAvailable = false;
+            });
+          }
+        },
+
+        authenticateWithBiometric: async () => {
+          const { biometricEnabled, biometricAvailable, isLoading: alreadyLoading } = get();
+          if (!biometricEnabled || !biometricAvailable || alreadyLoading) return false;
+
+          set((state) => {
+            state.status = 'loading';
+            state.isLoading = true;
+            state.error = null;
+          });
+
+          try {
+            const result = await LocalAuthentication.authenticateAsync({
+              promptMessage: 'Authenticate to continue',
+              fallbackLabel: 'Use password',
+              disableDeviceFallback: false,
+            });
+
+            if (!result.success) {
+              set((state) => {
+                state.status = 'unauthenticated';
+                state.isLoading = false;
+              });
+              return false;
+            }
+
+            // Biometric passed — use stored refresh token to get fresh access token
+            const refreshToken = await getRefreshToken();
+
+            // Attempt refresh — either via stored token in body or via httpOnly cookie
+            const tokens = await authService.refreshTokens(refreshToken);
+            await storeAccessToken(tokens.accessToken);
+
+            // Store new refresh token if available
+            if (tokens.newRefreshToken) {
+              await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, tokens.newRefreshToken);
+            }
+
+            const user = await authService.getCurrentUser();
+            set((state) => {
+              state.status = 'authenticated';
+              state.user = user;
+              state.isOnboarded = true;
+              state.isLoading = false;
+            });
+            return true;
+          } catch (err: unknown) {
+            set((state) => {
+              state.status = 'unauthenticated';
+              state.isLoading = false;
+              state.error = extractErrorMessage(err);
+            });
+            return false;
+          }
+        },
+
+        enableBiometric: () => {
+          set((state) => {
+            state.biometricEnabled = true;
+          });
+        },
+
+        disableBiometric: () => {
+          set((state) => {
+            state.biometricEnabled = false;
+          });
+        },
+
+        // -----------------------------------------------------------------------
+        // Developer Mode
+        // -----------------------------------------------------------------------
+
+        devLogin: () => {
+          if (!__DEV__) return;
+          set((state) => {
+            state.status = 'authenticated';
+            state.user = DEV_MOCK_USER;
+            state.isOnboarded = true;
+            state.isLoading = false;
+            state.error = null;
+          });
+        },
+      })),
+      {
+        name: 'kiaanverse-auth-state',
+        storage: createJSONStorage(() => secureStoreAdapter),
+        // Only persist non-sensitive derived state — NOT raw tokens
+        partialize: (state) => ({
+          user: state.user,
+          isOnboarded: state.isOnboarded,
+          biometricEnabled: state.biometricEnabled,
+        }),
       },
-
-      enableBiometric: () => set({ biometricEnabled: true }),
-      disableBiometric: () => set({ biometricEnabled: false }),
-
-      // -----------------------------------------------------------------------
-      // Developer Mode
-      // -----------------------------------------------------------------------
-
-      devLogin: () => {
-        if (!__DEV__) return;
-        set({
-          status: 'authenticated',
-          user: DEV_MOCK_USER,
-          isOnboarded: true,
-          isLoading: false,
-          error: null,
-        });
-      },
-    }),
+    ),
     {
-      name: 'kiaanverse-auth-state',
-      storage: createJSONStorage(() => secureStoreAdapter),
-      // Only persist non-sensitive derived state — NOT raw tokens
-      partialize: (state) => ({
-        user: state.user,
-        isOnboarded: state.isOnboarded,
-        biometricEnabled: state.biometricEnabled,
-      }),
+      name: 'AuthStore',
+      enabled: typeof __DEV__ !== 'undefined' && __DEV__,
     },
   ),
 );

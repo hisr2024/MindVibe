@@ -2,13 +2,18 @@
  * User Preferences Store
  *
  * Persists user preferences using AsyncStorage.
- * Mirrors the pattern from the existing userPreferencesStore.ts
- * but uses expo-compatible AsyncStorage instead of MMKV.
+ * Covers locale, notification settings, voice preferences,
+ * haptics toggle, and analytics opt-in.
  */
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// React Native/Expo global — always defined at runtime
+declare const __DEV__: boolean;
 
 export type VoiceGender = 'male' | 'female' | 'neutral';
 
@@ -72,27 +77,53 @@ const initialState: UserPreferencesState = {
 };
 
 export const useUserPreferencesStore = create<UserPreferencesState & UserPreferencesActions>()(
-  persist(
-    (set, get) => ({
-      ...initialState,
+  devtools(
+    persist(
+      immer((set) => ({
+        ...initialState,
 
-      setLocale: (locale) => set({ locale }),
+        setLocale: (locale: string) => {
+          set((state) => {
+            state.locale = locale;
+          });
+        },
 
-      setNotifications: (prefs) =>
-        set({ notifications: { ...get().notifications, ...prefs } }),
+        setNotifications: (prefs: Partial<NotificationPreferences>) => {
+          set((state) => {
+            Object.assign(state.notifications, prefs);
+          });
+        },
 
-      setVoice: (prefs) =>
-        set({ voice: { ...get().voice, ...prefs } }),
+        setVoice: (prefs: Partial<VoicePreferences>) => {
+          set((state) => {
+            Object.assign(state.voice, prefs);
+          });
+        },
 
-      setHapticsEnabled: (enabled) => set({ hapticsEnabled: enabled }),
+        setHapticsEnabled: (enabled: boolean) => {
+          set((state) => {
+            state.hapticsEnabled = enabled;
+          });
+        },
 
-      setAnalyticsEnabled: (enabled) => set({ analyticsEnabled: enabled }),
+        setAnalyticsEnabled: (enabled: boolean) => {
+          set((state) => {
+            state.analyticsEnabled = enabled;
+          });
+        },
 
-      reset: () => set(initialState),
-    }),
+        reset: () => {
+          set(() => ({ ...initialState }));
+        },
+      })),
+      {
+        name: 'kiaanverse-preferences',
+        storage: createJSONStorage(() => AsyncStorage),
+      },
+    ),
     {
-      name: 'kiaanverse-preferences',
-      storage: createJSONStorage(() => AsyncStorage),
+      name: 'UserPreferencesStore',
+      enabled: typeof __DEV__ !== 'undefined' && __DEV__,
     },
   ),
 );
