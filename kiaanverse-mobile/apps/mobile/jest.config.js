@@ -1,7 +1,7 @@
 /** @type {import('jest').Config} */
 module.exports = {
   preset: 'jest-expo',
-  setupFilesAfterSetup: ['./jest-setup.ts'],
+  setupFilesAfterEnv: ['./jest-setup.ts'],
   moduleNameMapper: {
     '^@kiaanverse/api$': '<rootDir>/../../packages/api/src',
     '^@kiaanverse/store$': '<rootDir>/../../packages/store/src',
