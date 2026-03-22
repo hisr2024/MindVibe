@@ -331,7 +331,7 @@ export function SakhaChatInterface() {
       {hasNewMessage && (
         <button
           type="button"
-          onClick={() => scrollToBottom(true)}
+          onClick={() => scrollToBottom()}
           className="absolute bottom-24 left-1/2 z-10 -translate-x-1/2 rounded-full border border-[#d4a44c]/40 bg-[#0f0f18]/90 px-4 py-1.5 text-xs text-[#e8b54a] shadow-lg backdrop-blur-sm transition-colors hover:bg-[#d4a44c]/20"
         >
           New messages below

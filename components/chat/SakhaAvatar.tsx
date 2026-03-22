@@ -43,7 +43,7 @@ const stateVariants = {
     scale: 1,
     opacity: 1,
     boxShadow: '0 0 8px rgba(228,181,74,0.3)',
-    transition: { duration: 0.4, ease: 'easeOut' },
+    transition: { duration: 0.4, ease: 'easeOut' as const },
   },
   thinking: {
     scale: [0.95, 1.05, 0.95],
@@ -56,7 +56,7 @@ const stateVariants = {
     transition: {
       duration: 2,
       repeat: Infinity,
-      ease: 'easeInOut',
+      ease: 'easeInOut' as const,
     },
   },
   speaking: {
@@ -70,7 +70,7 @@ const stateVariants = {
     transition: {
       duration: 0.8,
       repeat: Infinity,
-      ease: 'easeInOut',
+      ease: 'easeInOut' as const,
     },
   },
 }
