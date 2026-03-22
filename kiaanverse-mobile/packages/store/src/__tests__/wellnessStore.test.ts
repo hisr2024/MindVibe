@@ -5,7 +5,7 @@
  */
 
 import { useWellnessStore } from '../wellnessStore';
-import type { MoodEntry, KarmaNodeData, KarmaTreeLevel } from '@kiaanverse/api';
+import type { MoodEntry, KarmaNodeData } from '@kiaanverse/api';
 
 function resetStore() {
   useWellnessStore.setState({

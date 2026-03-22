@@ -4,7 +4,7 @@
  * Tests for journey tracking, progress, and completion.
  */
 
-import { useJourneyStore, type JourneyProgress } from '../journeyStore';
+import { useJourneyStore } from '../journeyStore';
 import type { Journey } from '@kiaanverse/api';
 
 function resetStore() {

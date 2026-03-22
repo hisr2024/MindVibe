@@ -4,7 +4,7 @@
  * Tests for modals, toasts, theme, and launch state.
  */
 
-import { useUiStore, type ModalType, type Toast } from '../uiStore';
+import { useUiStore } from '../uiStore';
 
 function resetStore() {
   useUiStore.setState({

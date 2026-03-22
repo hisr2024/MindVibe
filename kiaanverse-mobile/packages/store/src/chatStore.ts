@@ -127,7 +127,7 @@ export const useChatStore = create<ChatState & ChatActions>()(
         },
 
         finishStreaming: () => {
-          const { streamingMessageId, currentStreamText, messages } = get();
+          const { streamingMessageId, currentStreamText } = get();
           if (!streamingMessageId) return;
 
           set((state) => {
