@@ -120,7 +120,7 @@ export function useVoiceRecorder({ transcribe }: UseVoiceRecorderOptions): UseVo
         if (isMountedRef.current) setError('Microphone permission denied');
       }
       return granted;
-    } catch (err) {
+    } catch {
       if (isMountedRef.current) {
         setError('Failed to request microphone permission');
       }
@@ -182,7 +182,7 @@ export function useVoiceRecorder({ transcribe }: UseVoiceRecorderOptions): UseVo
           setDurationSeconds(Math.floor((Date.now() - startTime) / 1000));
         }
       }, 500);
-    } catch (err) {
+    } catch {
       if (isMountedRef.current) {
         setStatus('idle');
         setError('Failed to start recording');
@@ -238,7 +238,7 @@ export function useVoiceRecorder({ transcribe }: UseVoiceRecorderOptions): UseVo
       }
 
       return result;
-    } catch (err) {
+    } catch {
       if (isMountedRef.current) {
         setStatus('idle');
         setError('Transcription failed. Please try again.');

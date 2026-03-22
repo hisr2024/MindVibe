@@ -5,17 +5,17 @@ computed live (with a lightweight cache layer via feedback_summary_cache).
 """
 
 import logging
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select, case
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_current_user_optional, get_db
 from backend.middleware.rate_limiter import limiter
-from backend.models.feedback import FeedbackRating, FeedbackSummaryCache
+from backend.models.feedback import FeedbackRating
 
 logger = logging.getLogger(__name__)
 

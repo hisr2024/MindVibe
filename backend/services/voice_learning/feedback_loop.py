@@ -11,11 +11,10 @@ This enables KIAAN to continuously improve like Siri/Alexa through user feedback
 """
 
 import logging
-import json
 import hashlib
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Optional, Dict, List, Any, Tuple
+from typing import Optional, Dict, List, Any
 from enum import Enum
 from collections import defaultdict
 

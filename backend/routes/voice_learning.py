@@ -12,14 +12,12 @@ Provides endpoints for the voice learning system:
 These endpoints enable KIAAN to learn and improve like Siri/Alexa.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 import logging
 
-from backend.deps import get_db, get_current_user_flexible
-from backend.middleware.rate_limiter import limiter
+from backend.deps import get_current_user_flexible
 from backend.services.voice_learning import (
     get_voice_learning,
     get_sentiment_service,

@@ -164,7 +164,7 @@ class TestMultiLanguageSupport:
             assert hasattr(IndianLanguage, lang), f"Missing language: {lang}"
 
         assert len(IndianLanguage) == 10, f"Expected 10 languages, got {len(IndianLanguage)}"
-        print(f"✅ All 10 Indian languages defined")
+        print("✅ All 10 Indian languages defined")
 
     def test_language_configs_complete(self):
         """Verify each language has complete configuration."""
@@ -183,7 +183,7 @@ class TestMultiLanguageSupport:
             assert config.greeting, f"Missing greeting for: {lang.value}"
             print(f"   ✓ {config.name} ({config.native_name}): {config.script}")
 
-        print(f"✅ All language configurations complete")
+        print("✅ All language configurations complete")
 
     def test_language_greetings(self):
         """Test native greetings for each language."""
@@ -239,7 +239,7 @@ class TestRegionalAccents:
             assert hasattr(RegionalAccent, accent), f"Missing accent: {accent}"
 
         assert len(RegionalAccent) == 12, f"Expected 12 accents, got {len(RegionalAccent)}"
-        print(f"✅ All 12 regional accents defined")
+        print("✅ All 12 regional accents defined")
 
     def test_accent_profiles_complete(self):
         """Verify each accent has complete profile."""
@@ -257,7 +257,7 @@ class TestRegionalAccents:
             assert profile.speaking_rate > 0, f"Invalid rate for: {accent.value}"
             print(f"   ✓ {profile.name} ({profile.region})")
 
-        print(f"✅ All accent profiles complete")
+        print("✅ All accent profiles complete")
 
     def test_accent_application(self):
         """Test accent application to text."""

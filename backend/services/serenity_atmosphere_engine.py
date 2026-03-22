@@ -14,7 +14,6 @@ This engine creates the atmosphere that:
 import logging
 import random
 from datetime import datetime
-from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -274,7 +273,7 @@ class SerenityAtmosphereEngine:
         Returns:
             Prompt instructions for creating divine atmosphere
         """
-        return f"""
+        return """
 SACRED ATMOSPHERE REQUIREMENTS:
 
 Your responses must create an atmosphere of:

@@ -9,6 +9,7 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
+    "format:check": "pnpm --filter kiaanverse-mobile-app format:check",
     "clean": "pnpm -r clean"
   },
   "engines": {
@@ -16,7 +17,11 @@
   },
   "packageManager": "pnpm@9.1.0",
   "devDependencies": {
-    "typescript": "~5.3.3",
-    "prettier": "^3.2.0"
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.0",
+    "typescript": "~5.3.3"
   }
 }

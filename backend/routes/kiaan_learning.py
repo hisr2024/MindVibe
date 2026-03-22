@@ -19,9 +19,8 @@ from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field, field_validator
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_current_user, get_db
+from backend.deps import get_current_user
 from backend.middleware.rate_limiter import limiter
 
 logger = logging.getLogger(__name__)

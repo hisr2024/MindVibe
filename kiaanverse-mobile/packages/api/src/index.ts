@@ -60,7 +60,6 @@ export type {
   KarmaNodeData,
   KarmaTreeLevel,
   KarmaTreeResponse,
-  KarmaAwardPayload,
   JourneyStepType,
   JourneyDifficulty,
   JourneyCategory,
@@ -102,6 +101,6 @@ export {
   useMoodHistory,
   useMoodInsights,
   useKarmaTree,
-  useAwardKarma,
+  useUnlockKarma,
   useSendChatMessage,
 } from './hooks';

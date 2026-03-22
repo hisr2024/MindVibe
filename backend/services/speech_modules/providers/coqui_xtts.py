@@ -17,7 +17,7 @@ License: CPML (Coqui Public Model License)
 import logging
 import asyncio
 import time
-from typing import Optional, List, Dict, Any
+from typing import Optional, Dict, Any
 from pathlib import Path
 import io
 
@@ -25,7 +25,6 @@ from .base import (
     BaseTTSProvider,
     ProviderCapabilities,
     ProviderStatus,
-    ProviderHealth,
 )
 from ..models import (
     SpeechSynthesisRequest,

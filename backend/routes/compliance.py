@@ -10,7 +10,7 @@ KIAAN Impact: ✅ POSITIVE - Compliance features that don't affect KIAAN core fu
 import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, Query, Request
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession

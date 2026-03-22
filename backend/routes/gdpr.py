@@ -10,26 +10,21 @@ KIAAN Impact: ✅ POSITIVE - Provides compliance features without affecting KIAA
 """
 
 import datetime
-import json
 import secrets
-import uuid
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel
-from sqlalchemy import select, delete
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db, get_current_user
 from backend.models import (
-    User,
     UserProfile,
     Mood,
     EncryptedBlob,
     UserSubscription,
-    UsageTracking,
     UserConsent,
-    CookiePreference,
     DataExportRequest,
     DeletionRequest,
     ComplianceAuditLog,

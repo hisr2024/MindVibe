@@ -23,7 +23,6 @@ from backend.models import User, SubscriptionTier
 from backend.middleware.feature_access import (
     get_current_user_id,
     is_developer,
-    require_subscription,
 )
 from backend.schemas.subscription import (
     SubscriptionPlanOut,
@@ -132,7 +131,7 @@ async def get_current_subscription(
 
     # Build plan output — developers see SIDDHA-level features
     if user_is_developer:
-        from backend.config.feature_config import get_tier_features, get_kiaan_quota
+        from backend.config.feature_config import get_tier_features
         premier_features = get_tier_features(SubscriptionTier.SIDDHA)
         plan_out = SubscriptionPlanOut(
             id=subscription.plan.id,
@@ -609,7 +608,7 @@ async def get_current_usage(
 
     # Developers get unlimited usage
     if await is_developer(db, user_id):
-        from datetime import datetime, timedelta, UTC
+        from datetime import datetime, UTC
         now = datetime.now(UTC)
         period_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         if now.month == 12:

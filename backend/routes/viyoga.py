@@ -35,11 +35,8 @@ from backend.services.wellness_model import (
     WellnessModel,
     WellnessTool,
     get_wellness_model,
-    PsychologicalFramework,
 )
 from backend.services.viyoga_prompts import (
-    VIYOGA_SYSTEM_PROMPT,
-    VIYOGA_SECULAR_PROMPT,
     VIYOGA_CORE_GITA_WISDOM,
     ATTACHMENT_TO_GITA,
     ATTACHMENT_TO_SECULAR,
@@ -56,14 +53,12 @@ from backend.services.gita_wisdom_retrieval import (
 )
 from backend.services.gita_ai_analyzer import (
     get_gita_ai_analyzer,
-    AttachmentAnalysis,
 )
 from backend.services.viyoga_analysis import (
     analyze_concern_with_ai_async,
     build_enhanced_search_query,
     build_analysis_context_for_prompt,
     analysis_to_dict,
-    ConcernAnalysis,
 )
 from backend.services.openai_optimizer import openai_optimizer
 
@@ -409,7 +404,7 @@ def _get_secular_fallback(
 
     # Build secular response sections (v5.0 - deeper identity-level insight)
     sections = {
-        "i_get_it": f"I can hear the weight in what you're sharing. This matters to you — and the anxiety makes sense because some part of you feels that YOU are at stake here, not just the outcome. That's worth looking at.",
+        "i_get_it": "I can hear the weight in what you're sharing. This matters to you — and the anxiety makes sense because some part of you feels that YOU are at stake here, not just the outcome. That's worth looking at.",
         "whats_really_going_on": secular_info["insight"] + " But here's the deeper pattern: the worry isn't really about the outcome itself. It's about what you think the outcome says about YOU — your worth, your competence, your identity. The outcome and the person watching the outcome are two entirely different things.",
         "a_different_way_to_see_this": secular_info["shift"] + " Consider this: the person who did the work, who showed up, who gave their best — that person doesn't change regardless of the result. The outcome belongs to circumstances, timing, and factors you don't control. But the person observing all of this? That person remains the same whether it goes perfectly or falls apart.",
         "try_this_right_now": "Pause for 30 seconds. Notice the worry as something you are WATCHING — not something you ARE. You are the one aware of the anxiety; you are not the anxiety itself. Now imagine both outcomes: success and failure. Can you sit with both equally? The person who remains steady in either case — that is who you actually are.",

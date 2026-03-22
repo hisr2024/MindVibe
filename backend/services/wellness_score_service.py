@@ -7,7 +7,7 @@ Quantum Enhancement #6: Advanced Analytics Dashboard
 """
 
 from datetime import datetime, timedelta
-from typing import List, Dict, Optional
+from typing import List, Dict
 import statistics
 
 

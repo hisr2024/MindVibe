@@ -119,7 +119,6 @@ export async function hydrateAll(): Promise<void> {
         await store.rehydrate();
       } catch (err) {
         if (typeof __DEV__ !== 'undefined' && __DEV__) {
-          // eslint-disable-next-line no-console
           console.warn(`[hydrateAll] Failed to rehydrate ${store.name}:`, err);
         }
       }
@@ -129,7 +128,6 @@ export async function hydrateAll(): Promise<void> {
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
     const failed = results.filter((r) => r.status === 'rejected');
     if (failed.length > 0) {
-      // eslint-disable-next-line no-console
       console.warn(`[hydrateAll] ${failed.length}/${stores.length} stores failed to rehydrate`);
     }
   }

@@ -7,10 +7,9 @@ import pyotp
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.core.settings import settings
 from backend.models import AdminUser, AdminSession, AdminAuditLog, AdminAuditAction
 from backend.security.password_hash import hash_password, verify_password
-from backend.security.jwt import create_access_token, decode_access_token
+from backend.security.jwt import create_access_token
 
 
 # Admin session expiration (1 hour as per requirements)

@@ -9,21 +9,16 @@ This module provides the API endpoints for KIAAN's divine capabilities:
 """
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
-from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, List, Dict, Any
 import logging
 import base64
-import io
 
 from backend.deps import get_db, get_current_user
 from backend.middleware.feature_access import (
     get_current_user_id,
-    require_subscription,
-    require_kiaan_quota,
     is_developer,
-    require_feature,
 )
 from backend.services.subscription_service import (
     check_kiaan_quota,

@@ -12,10 +12,9 @@ This enables KIAAN to personalize like Siri/Alexa without explicit configuration
 
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional, Dict, List, Any, Tuple
 from enum import Enum
-import json
 
 logger = logging.getLogger(__name__)
 

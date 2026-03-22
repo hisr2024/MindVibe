@@ -69,7 +69,7 @@ export default function RegisterScreen(): React.JSX.Element {
     signup,
     error,
     clearError,
-    status,
+    status: _status,
     isLoading,
     signupPendingVerification,
     clearSignupPending,

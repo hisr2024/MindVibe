@@ -22,7 +22,6 @@ import logging
 import random
 import re
 import time
-from collections import defaultdict
 from typing import Any
 
 from sqlalchemy import func as sa_func

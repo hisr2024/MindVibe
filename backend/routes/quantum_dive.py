@@ -15,13 +15,13 @@ from enum import Enum
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_current_user_optional, get_db
 from backend.models import UserDailyAnalysis, UserWeeklyReflection
 from backend.services.kiaan_core import KIAANCore
-from backend.middleware.feature_access import get_current_user_id, is_developer
+from backend.middleware.feature_access import is_developer
 from backend.services.subscription_service import (
     check_feature_access,
     get_or_create_free_subscription,

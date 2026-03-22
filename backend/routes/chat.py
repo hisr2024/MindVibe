@@ -12,7 +12,6 @@ Spontaneous Response Enhancements (v15.0):
 
 import html
 import logging
-import os
 import uuid
 from typing import Any, AsyncGenerator
 
@@ -23,7 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_db, get_current_user
 from backend.middleware.rate_limiter import CHAT_RATE_LIMIT, limiter
-from backend.models import KiaanChatMessage, KiaanChatSession
+from backend.models import KiaanChatMessage
 
 # Security services
 from backend.services.pii_redactor import pii_redactor
@@ -547,7 +546,7 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
         try:
             message = chat.message.strip()
             if not message:
-                yield f"data: What's on your mind? 💙\n\n"
+                yield "data: What's on your mind? 💙\n\n"
                 yield "data: [DONE]\n\n"
                 return
 
@@ -555,7 +554,7 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
             injection_check = detect_prompt_injection(message)
             if injection_check.should_block:
                 logger.warning(f"Stream prompt injection blocked: {injection_check.threats}")
-                yield f"data: I noticed something unusual in your message. Could you rephrase that? I'm here to help. 💙\n\n"
+                yield "data: I noticed something unusual in your message. Could you rephrase that? I'm here to help. 💙\n\n"
                 yield "data: [DONE]\n\n"
                 return
 
@@ -578,7 +577,7 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
                     )
                 except Exception as audit_error:
                     logger.warning(f"Failed to log crisis event in stream: {audit_error}")
-                yield f"data: 🆘 Please reach out for help RIGHT NOW\\n\\n📞 988 - Suicide & Crisis Lifeline (24/7)\\n💬 Crisis Text: Text HOME to 741741\\n🌍 findahelpline.com\\n\\nYou matter. Help is real. 💙\n\n"
+                yield "data: 🆘 Please reach out for help RIGHT NOW\\n\\n📞 988 - Suicide & Crisis Lifeline (24/7)\\n💬 Crisis Text: Text HOME to 741741\\n🌍 findahelpline.com\\n\\nYou matter. Help is real. 💙\n\n"
                 yield "data: [DONE]\n\n"
                 return
 
@@ -616,7 +615,7 @@ async def send_message_stream(request: Request, chat: ChatMessage, db: AsyncSess
 
         except Exception as e:
             logger.error(f"Streaming error: {e}")
-            yield f"data: I'm here for you. Let's try again. 💙\n\n"
+            yield "data: I'm here for you. Let's try again. 💙\n\n"
             yield "data: [DONE]\n\n"
 
     return StreamingResponse(
@@ -1106,7 +1105,7 @@ async def submit_message_feedback(
         rating: Optional rating 1-5
         was_helpful: Optional helpful flag
     """
-    from sqlalchemy import select, update
+    from sqlalchemy import update
 
     try:
         user_id: str | None = None
@@ -1160,7 +1159,7 @@ async def delete_chat_message(
     Args:
         message_id: ID of the message to delete
     """
-    from sqlalchemy import select, update
+    from sqlalchemy import update
     import datetime
 
     try:

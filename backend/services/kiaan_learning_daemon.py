@@ -34,13 +34,12 @@ import asyncio
 import logging
 import os
 import signal
-import sys
 import threading
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Optional
+from typing import Optional
 
 from backend.deps import get_db as get_async_session
 from backend.models import ContentSourceType as DBContentSourceType
@@ -478,8 +477,7 @@ class ContentAcquisitionWorker:
         1. JSON file (legacy, for fast local access)
         2. PostgreSQL database (for KIAAN Wisdom Core integration)
         """
-        from backend.services.kiaan_learning_engine import ContentType, LearnedWisdom
-        import uuid
+        from backend.services.kiaan_learning_engine import ContentType
 
         stats = {"fetched": 0, "validated": 0, "stored": 0, "rejected": 0, "db_stored": 0}
 

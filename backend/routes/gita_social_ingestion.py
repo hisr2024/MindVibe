@@ -8,9 +8,8 @@ All content passes through strict Gita compliance validation.
 """
 
 import logging
-from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, Query, Depends
 from pydantic import BaseModel, Field
 
 from backend.deps import get_current_user_flexible

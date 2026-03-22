@@ -34,8 +34,6 @@ from backend.services.karma_reset_service import KarmaResetService
 from backend.services.gita_karma_wisdom import (
     KARMIC_PATHS,
     SEVEN_PHASES,
-    KARMA_RESET_CORE_VERSES,
-    GUNA_ANALYSIS,
 )
 
 # Configure logging

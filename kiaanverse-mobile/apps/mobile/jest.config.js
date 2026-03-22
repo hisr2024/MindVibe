@@ -1,29 +1,17 @@
-/** @type {import('jest').Config} */
+/**
+ * Jest configuration for the Kiaanverse Expo mobile app.
+ * Uses jest-expo preset for React Native + Expo compatibility.
+ */
 module.exports = {
   preset: 'jest-expo',
   setupFilesAfterEnv: ['./jest-setup.ts'],
   moduleNameMapper: {
-    '^@kiaanverse/api$': '<rootDir>/../../packages/api/src',
-    '^@kiaanverse/store$': '<rootDir>/../../packages/store/src',
-    '^@kiaanverse/ui$': '<rootDir>/../../packages/ui/src',
-    '^@kiaanverse/i18n$': '<rootDir>/../../packages/i18n/src',
+    '^@/(.*)$': '<rootDir>/app/$1',
+    '^@kiaanverse/(.*)$': '<rootDir>/../../packages/$1/src',
+    '^@kiaan/(.*)$': '<rootDir>/../../packages/$1/src',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(' +
-      'react-native|' +
-      '@react-native|' +
-      'expo|' +
-      '@expo|' +
-      'expo-.*|' +
-      '@react-native-async-storage/async-storage|' +
-      '@react-native-community/netinfo|' +
-      'react-native-reanimated|' +
-      'react-native-gesture-handler|' +
-      'react-native-screens|' +
-      'react-native-safe-area-context|' +
-      'react-native-svg|' +
-      'lucide-react-native' +
-    ')/)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|react-native-reanimated|react-native-gesture-handler|react-native-screens|react-native-safe-area-context|lucide-react-native|@tanstack/.*|zustand|zod|axios)',
   ],
   coverageThreshold: {
     global: {

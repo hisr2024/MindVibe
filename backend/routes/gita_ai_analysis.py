@@ -31,10 +31,6 @@ from pydantic import BaseModel, Field, field_validator
 
 from backend.services.gita_ai_analyzer import (
     get_gita_ai_analyzer,
-    AttachmentAnalysis,
-    EmotionAnalysis,
-    RelationshipAnalysis,
-    CommunicationAnalysis,
     GitaWisdomCore,
 )
 

@@ -57,6 +57,7 @@ function BouncingDot({ delay, color }: { delay: number; color: string }): React.
   const translateY = useSharedValue(0);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     translateY.value = withDelay(
       delay,
       withRepeat(
@@ -111,6 +112,7 @@ function AnimatedWord({
   const opacity = useSharedValue(0);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     opacity.value = withDelay(
       index * 40,
       withTiming(1, { duration: duration.fast, easing: Easing.out(Easing.ease) }),

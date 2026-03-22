@@ -93,6 +93,7 @@ function MoodRingInner({
   const handleSelect = useCallback(
     (mood: Mood, index: number) => {
       const angle = (index / MOOD_CONFIG.length) * Math.PI * 2 - Math.PI / 2;
+      // eslint-disable-next-line react-hooks/immutability
       highlightAngle.value = withSpring(angle, spring.default);
       onMoodSelect(mood);
     },

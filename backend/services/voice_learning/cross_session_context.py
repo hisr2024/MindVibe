@@ -14,7 +14,7 @@ import logging
 import json
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Optional, Dict, List, Any, Tuple
+from typing import Optional, Dict, List, Any
 from enum import Enum
 
 logger = logging.getLogger(__name__)

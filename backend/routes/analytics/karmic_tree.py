@@ -4,9 +4,9 @@ Provides growth analytics data for the Karmic Tree visualization.
 READ-ONLY tracking endpoints that do not modify KIAAN's core functionality.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 

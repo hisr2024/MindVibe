@@ -14,7 +14,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Text, GoldenButton, colors, spacing, radii } from '@kiaanverse/ui';
+import { Text, GoldenButton, colors, spacing } from '@kiaanverse/ui';
 
 const LEVELS = [
   { value: 0, label: 'Never read' },
@@ -46,6 +46,7 @@ export function GitaFamiliarityStep({
   // Sync thumb position when value or screen dimensions change
   // (e.g. navigating back to this step, or screen rotation)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     thumbX.value = withSpring(value * segmentWidth, { damping: 20, stiffness: 200 });
   }, [value, segmentWidth, thumbX]);
 
@@ -60,6 +61,7 @@ export function GitaFamiliarityStep({
   const handleSelect = useCallback(
     (level: number) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      // eslint-disable-next-line react-hooks/immutability
       thumbX.value = withSpring(level * segmentWidth, { damping: 20, stiffness: 200 });
       onChange(level);
     },

@@ -14,7 +14,6 @@ Provides API endpoints for advanced KIAAN Voice learning features:
 from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Any
-from datetime import datetime
 import logging
 
 from backend.deps import get_current_user_flexible
@@ -26,7 +25,6 @@ from backend.services.voice_learning.analytics_dashboard import (
 )
 from backend.services.voice_learning.proactive_engagement import (
     get_proactive_engagement_service,
-    EngagementTrigger,
 )
 from backend.services.voice_learning.offline_sync import (
     get_offline_sync_service,

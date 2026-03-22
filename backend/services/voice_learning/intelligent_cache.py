@@ -13,12 +13,10 @@ This enables instant voice responses for common queries, like Siri/Alexa.
 import logging
 import hashlib
 import json
-import heapq
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Optional, Dict, List, Any, Set
+from typing import Optional, Dict, List, Any
 from pathlib import Path
-import asyncio
 
 logger = logging.getLogger(__name__)
 

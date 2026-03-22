@@ -11,8 +11,7 @@ This service provides advanced semantic search capabilities using:
 
 import logging
 import os
-from typing import Any, List, Optional
-import numpy as np
+from typing import Any, List
 from openai import OpenAI
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession

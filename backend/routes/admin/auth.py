@@ -7,7 +7,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.core.settings import settings
 from backend.deps import get_db
 from backend.middleware.rate_limiter import limiter
 from backend.middleware.rbac import get_current_admin, AdminContext

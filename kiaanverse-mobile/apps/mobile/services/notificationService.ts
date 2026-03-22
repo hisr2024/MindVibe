@@ -127,7 +127,6 @@ async function setupNotificationChannels(): Promise<void> {
     // Channel setup failure is non-critical — notifications still work
     // with default channel on older Android versions
     if (__DEV__) {
-      // eslint-disable-next-line no-console
       console.warn('Failed to set up notification channels:', error);
     }
   }
@@ -185,7 +184,6 @@ async function setupNotificationCategories(): Promise<void> {
     ]);
   } catch (error) {
     if (__DEV__) {
-      // eslint-disable-next-line no-console
       console.warn('Failed to set up notification categories:', error);
     }
   }
@@ -220,7 +218,6 @@ export async function getExpoPushToken(): Promise<string | null> {
     const projectId = Constants.default.expoConfig?.extra?.eas?.projectId;
     if (!projectId) {
       if (__DEV__) {
-        // eslint-disable-next-line no-console
         console.warn(
           'Cannot get push token: EAS_PROJECT_ID not configured in app.config.ts extra.eas.projectId',
         );
@@ -235,7 +232,6 @@ export async function getExpoPushToken(): Promise<string | null> {
     return tokenResponse.data;
   } catch (error) {
     if (__DEV__) {
-      // eslint-disable-next-line no-console
       console.warn('Failed to get Expo push token:', error);
     }
     return null;
@@ -264,7 +260,6 @@ export async function registerPushToken(): Promise<void> {
     await SecureStore.setItemAsync(PUSH_TOKEN_KEY, token);
   } catch (error) {
     if (__DEV__) {
-      // eslint-disable-next-line no-console
       console.warn('Failed to register push token:', error);
     }
   }
@@ -327,7 +322,6 @@ export async function scheduleDailyVerse(
     return identifier;
   } catch (error) {
     if (__DEV__) {
-      // eslint-disable-next-line no-console
       console.warn('Failed to schedule daily verse:', error);
     }
     return null;
@@ -376,7 +370,6 @@ export async function scheduleJourneyReminder(
     return identifier;
   } catch (error) {
     if (__DEV__) {
-      // eslint-disable-next-line no-console
       console.warn('Failed to schedule journey reminder:', error);
     }
     return null;
@@ -418,7 +411,6 @@ export async function scheduleStreakAlert(): Promise<string | null> {
     return identifier;
   } catch (error) {
     if (__DEV__) {
-      // eslint-disable-next-line no-console
       console.warn('Failed to schedule streak alert:', error);
     }
     return null;
@@ -476,7 +468,6 @@ export async function rescheduleAll(): Promise<void> {
     // we'd need the list of active journey IDs from the server.
   } catch (error) {
     if (__DEV__) {
-      // eslint-disable-next-line no-console
       console.warn('Failed to reschedule notifications:', error);
     }
   }
@@ -521,7 +512,6 @@ function navigateToNotification(router: AppRouter, data: NotificationData | unde
     }
   } catch (error) {
     if (__DEV__) {
-      // eslint-disable-next-line no-console
       console.warn('Navigation from notification failed:', error);
     }
   }
