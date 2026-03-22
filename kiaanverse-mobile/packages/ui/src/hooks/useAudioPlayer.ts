@@ -14,7 +14,7 @@
  * All Sound objects are unloaded on unmount to prevent memory leaks.
  */
 
-import { useRef, useCallback, useEffect } from 'react';
+import { useRef, useCallback, useEffect, useState } from 'react';
 import { Audio, type AVPlaybackStatus } from 'expo-av';
 import { AppState, type AppStateStatus } from 'react-native';
 
@@ -59,7 +59,7 @@ const AUDIO_ASSETS = {
 
 export function useAudioPlayer(): UseAudioPlayerReturn {
   const ambientRef = useRef<Audio.Sound | null>(null);
-  const isAmbientPlayingRef = useRef(false);
+  const [isAmbientPlaying, setIsAmbientPlaying] = useState(false);
   const isMountedRef = useRef(true);
   const isConfiguredRef = useRef(false);
 
@@ -119,7 +119,7 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
 
   // ─── Ambient: looping devotional drone ──────────────────────────────
   const playAmbient = useCallback(async () => {
-    if (isAmbientPlayingRef.current || !isMountedRef.current) return;
+    if (!isMountedRef.current) return;
     await configureAudioSession();
 
     try {
@@ -146,10 +146,10 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
       }
 
       ambientRef.current = sound;
-      isAmbientPlayingRef.current = true;
+      if (isMountedRef.current) setIsAmbientPlaying(true);
     } catch {
       // Asset not found or playback failed
-      isAmbientPlayingRef.current = false;
+      if (isMountedRef.current) setIsAmbientPlaying(false);
     }
   }, [configureAudioSession]);
 
@@ -163,7 +163,7 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
       }
       ambientRef.current = null;
     }
-    isAmbientPlayingRef.current = false;
+    if (isMountedRef.current) setIsAmbientPlaying(false);
   }, []);
 
   // ─── One-shot sounds ────────────────────────────────────────────────
@@ -213,7 +213,6 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
       // Fire-and-forget cleanup for ambient sound
       ambientRef.current?.unloadAsync().catch(() => {});
       ambientRef.current = null;
-      isAmbientPlayingRef.current = false;
     };
   }, []);
 
@@ -222,6 +221,6 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
     stopAmbient,
     playChime,
     playWhoosh,
-    isAmbientPlaying: isAmbientPlayingRef.current,
+    isAmbientPlaying,
   };
 }

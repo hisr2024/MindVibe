@@ -92,10 +92,10 @@ export const api = {
 
   /** Audio / TTS */
   audio: {
-    synthesize: (text: string, voice?: string, language?: string) =>
+    synthesize: (text: string, voiceType?: string, language?: string) =>
       apiClient.post(
         '/api/voice/synthesize',
-        { text, voice, language },
+        { text, voice_type: voiceType, language },
         { responseType: 'arraybuffer' },
       ),
   },
@@ -106,7 +106,6 @@ export const api = {
       apiClient.post<{ transcript: string; confidence: number }>(
         '/api/voice/transcribe',
         formData,
-        { headers: { 'Content-Type': 'multipart/form-data' } },
       ),
   },
 
