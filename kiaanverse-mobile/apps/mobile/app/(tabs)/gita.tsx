@@ -341,7 +341,7 @@ export default function GitaScreen(): React.JSX.Element {
             <View style={styles.centerState}>
               <Search size={40} color={c.textTertiary} />
               <Text variant="body" color={c.textSecondary} style={styles.stateText}>
-                No verses found for "{debouncedKeyword}"
+                No verses found for &ldquo;{debouncedKeyword}&rdquo;
               </Text>
               <Text variant="bodySmall" color={c.textTertiary}>
                 Try different keywords or browse chapters below
