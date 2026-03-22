@@ -20,7 +20,10 @@ import { View, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider, useTheme, colors, LoadingMandala } from '@kiaanverse/ui';
 import { I18nProvider } from '@kiaanverse/i18n';
@@ -34,8 +37,15 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 1000 * 60 * 5,
       retry: 2,
+      gcTime: 1000 * 60 * 60 * 24, // 24h — keep cache for offline access
     },
   },
+});
+
+/** AsyncStorage persister for React Query offline cache. */
+const queryPersister = createAsyncStoragePersister({
+  storage: AsyncStorage,
+  key: 'kiaanverse-query-cache',
 });
 
 // ---------------------------------------------------------------------------
@@ -105,6 +115,7 @@ function AppContent(): React.JSX.Element {
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="onboarding" />
+          <Stack.Screen name="gita" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="chat" />
         </Stack>
       </AuthGate>
@@ -122,7 +133,10 @@ export default function RootLayout(): React.JSX.Element {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{ persister: queryPersister, maxAge: 1000 * 60 * 60 * 24 }}
+      >
         <ThemeProvider mode={mode} onModeChange={setMode}>
           <I18nProvider
             initialLocale={locale as 'en'}
@@ -131,7 +145,7 @@ export default function RootLayout(): React.JSX.Element {
             <AppContent />
           </I18nProvider>
         </ThemeProvider>
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
     </GestureHandlerRootView>
   );
 }
