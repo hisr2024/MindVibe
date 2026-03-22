@@ -83,9 +83,10 @@ interface TabItemProps {
   onPress: () => void;
   onLongPress: () => void;
   theme: ThemeColors;
+  reduceMotion: boolean;
 }
 
-function TabItem({ routeName, isFocused, onPress, onLongPress, theme }: TabItemProps) {
+function TabItem({ routeName, isFocused, onPress, onLongPress, theme, reduceMotion }: TabItemProps) {
   const config = TAB_CONFIG[routeName] ?? {
     label: routeName,
     icon: '📱',
@@ -94,17 +95,16 @@ function TabItem({ routeName, isFocused, onPress, onLongPress, theme }: TabItemP
   };
 
   const scale = useSharedValue(1);
-  const { isReduceMotionEnabled } = useAccessibility();
 
   const handlePress = useCallback(() => {
-    if (!isReduceMotionEnabled) {
+    if (!reduceMotion) {
       scale.value = withSpring(0.9, { damping: 15, stiffness: 300 });
       setTimeout(() => {
         scale.value = withSpring(1, motion.spring);
       }, 100);
     }
     onPress();
-  }, [onPress, scale, isReduceMotionEnabled]);
+  }, [onPress, scale, reduceMotion]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -154,6 +154,7 @@ export function BottomTabBar({
 }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const theme = darkTheme; // In production, consume from ThemeProvider
+  const { isReduceMotionEnabled } = useAccessibility();
 
   return (
     <View
@@ -197,6 +198,7 @@ export function BottomTabBar({
             onPress={onPress}
             onLongPress={onLongPress}
             theme={theme}
+            reduceMotion={isReduceMotionEnabled}
           />
         );
       })}

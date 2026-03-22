@@ -16,7 +16,7 @@
  * It never modifies the KIAAN backend services directly.
  */
 
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -355,7 +355,7 @@ export function SakhaCompanion({
   const [inputText, setInputText] = useState('');
   const flatListRef = useRef<FlashListRef<SakhaMessage>>(null);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const greeting = getTimeAwareGreeting();
+  const greeting = useMemo(() => getTimeAwareGreeting(), []);
   const { isReduceMotionEnabled } = useAccessibility();
 
   const handleSend = useCallback(() => {
