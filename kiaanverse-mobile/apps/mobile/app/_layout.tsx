@@ -116,6 +116,7 @@ function AppContent(): React.JSX.Element {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="onboarding" />
           <Stack.Screen name="gita" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="wellness" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="chat" />
         </Stack>
       </AuthGate>
