@@ -27,6 +27,9 @@ export type { RegisterData, LoginResult } from './auth/authService';
 // Query client
 export { createAppQueryClient, createAppPersister } from './queryClient';
 
+// Gita verse cache (offline-first)
+export { gitaCache } from './cache/gitaCache';
+
 // Types
 export type {
   User,
