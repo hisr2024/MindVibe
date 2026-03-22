@@ -27,6 +27,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { apiClient } from '@services/apiClient';
 import { darkTheme, typography, spacing, radii, colors } from '@theme/tokens';
+import { useAccessibility } from '@hooks/useAccessibility';
 
 // ---------------------------------------------------------------------------
 // Emotion Options
@@ -57,6 +58,9 @@ export function EmotionalResetScreen() {
   const [sessionData, setSessionData] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [breathCount, setBreathCount] = useState(0);
+  const { isReduceMotionEnabled } = useAccessibility();
+
+  const fade = isReduceMotionEnabled ? undefined : FadeInDown.duration(400);
 
   const handleEmotionSelect = useCallback(async (emotionId: string) => {
     setSelectedEmotion(emotionId);
@@ -95,7 +99,7 @@ export function EmotionalResetScreen() {
     switch (phase) {
       case 'select':
         return (
-          <Animated.View entering={FadeInDown.duration(400)} style={styles.phaseContainer}>
+          <Animated.View entering={fade} style={styles.phaseContainer}>
             <Text style={[styles.phaseTitle, { color: theme.textPrimary }]}>
               How are you feeling?
             </Text>
@@ -118,6 +122,7 @@ export function EmotionalResetScreen() {
                   disabled={isLoading}
                   accessibilityRole="button"
                   accessibilityLabel={emotion.label}
+                  accessibilityHint="Selects this emotion for guided reset"
                 >
                   <Text style={styles.emotionEmoji}>{emotion.emoji}</Text>
                   <Text style={[styles.emotionLabel, { color: theme.textPrimary }]}>
@@ -132,7 +137,7 @@ export function EmotionalResetScreen() {
 
       case 'breathing':
         return (
-          <Animated.View entering={FadeInDown.duration(400)} style={styles.phaseContainer}>
+          <Animated.View entering={fade} style={styles.phaseContainer}>
             <Text style={[styles.breathEmoji]}>🌬️</Text>
             <Text style={[styles.phaseTitle, { color: theme.textPrimary }]}>
               Breathe Deeply
@@ -147,7 +152,8 @@ export function EmotionalResetScreen() {
               style={[styles.breathButton, { backgroundColor: theme.accent }]}
               onPress={handleBreathComplete}
               accessibilityRole="button"
-              accessibilityLabel="Complete breath"
+              accessibilityLabel={breathCount < 3 ? 'Next breath' : 'Continue to wisdom'}
+              accessibilityHint={`Breath ${breathCount + 1} of 4`}
             >
               <Text style={styles.breathButtonText}>
                 {breathCount < 3 ? 'Next Breath' : 'Continue'}
@@ -158,7 +164,7 @@ export function EmotionalResetScreen() {
 
       case 'wisdom':
         return (
-          <Animated.View entering={FadeInDown.duration(400)} style={styles.phaseContainer}>
+          <Animated.View entering={fade} style={styles.phaseContainer}>
             <Text style={[styles.phaseTitle, { color: theme.textPrimary }]}>
               Gita Wisdom
             </Text>
@@ -177,6 +183,8 @@ export function EmotionalResetScreen() {
               style={[styles.nextButton, { backgroundColor: theme.accent }]}
               onPress={() => setPhase('guidance')}
               accessibilityRole="button"
+              accessibilityLabel="Receive guidance"
+              accessibilityHint="Moves to personalized KIAAN guidance"
             >
               <Text style={styles.nextButtonText}>Receive Guidance</Text>
             </TouchableOpacity>
@@ -185,7 +193,7 @@ export function EmotionalResetScreen() {
 
       case 'guidance':
         return (
-          <Animated.View entering={FadeInDown.duration(400)} style={styles.phaseContainer}>
+          <Animated.View entering={fade} style={styles.phaseContainer}>
             <Text style={[styles.phaseTitle, { color: theme.textPrimary }]}>
               KIAAN's Guidance
             </Text>
@@ -196,6 +204,8 @@ export function EmotionalResetScreen() {
               style={[styles.nextButton, { backgroundColor: theme.accent }]}
               onPress={() => setPhase('commitment')}
               accessibilityRole="button"
+              accessibilityLabel="Set intention"
+              accessibilityHint="Moves to commitment phase"
             >
               <Text style={styles.nextButtonText}>Set Intention</Text>
             </TouchableOpacity>
@@ -204,7 +214,7 @@ export function EmotionalResetScreen() {
 
       case 'commitment':
         return (
-          <Animated.View entering={FadeInDown.duration(400)} style={styles.phaseContainer}>
+          <Animated.View entering={fade} style={styles.phaseContainer}>
             <Text style={styles.completeEmoji}>🕉️</Text>
             <Text style={[styles.phaseTitle, { color: theme.textPrimary }]}>
               Reset Complete
@@ -216,6 +226,8 @@ export function EmotionalResetScreen() {
               style={[styles.nextButton, { backgroundColor: theme.accent }]}
               onPress={() => navigation.goBack()}
               accessibilityRole="button"
+              accessibilityLabel="Return home"
+              accessibilityHint="Completes reset and returns to home screen"
             >
               <Text style={styles.nextButtonText}>Return Home</Text>
             </TouchableOpacity>

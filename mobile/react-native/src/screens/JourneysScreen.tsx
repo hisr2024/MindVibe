@@ -139,7 +139,8 @@ export function JourneysScreen() {
         style={[styles.activeCard, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}
         onPress={() => navigation.navigate('JourneyDetail', { journeyId: item.journey_id as string ?? item.id as string })}
         accessibilityRole="button"
-        accessibilityLabel={`${item.title}, day ${currentDay} of ${totalDays}`}
+        accessibilityLabel={`${item.title}, day ${currentDay} of ${totalDays}, ${Math.round(progress)}% complete`}
+        accessibilityHint="Opens journey details"
       >
         <View style={styles.activeCardHeader}>
           <Text style={styles.enemyEmoji}>{enemyTheme.emoji}</Text>
@@ -186,6 +187,7 @@ export function JourneysScreen() {
         disabled={isStarting}
         accessibilityRole="button"
         accessibilityLabel={`Start ${item.title} journey, ${item.duration_days ?? 14} days`}
+        accessibilityHint="Starts this spiritual journey"
       >
         <View style={styles.templateHeader}>
           <Text style={styles.templateEmoji}>{enemyTheme.emoji}</Text>

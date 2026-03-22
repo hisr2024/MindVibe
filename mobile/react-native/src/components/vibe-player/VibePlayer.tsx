@@ -42,6 +42,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { colors, darkTheme, spacing, typography, radii, shadows, motion, type ThemeColors } from '@theme/tokens';
+import { useAccessibility } from '@hooks/useAccessibility';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -553,10 +554,13 @@ export function VibePlayer({
   theme = darkTheme,
 }: VibePlayerProps) {
   const expandProgress = useSharedValue(isExpanded ? 1 : 0);
+  const { isReduceMotionEnabled } = useAccessibility();
 
   useEffect(() => {
-    expandProgress.value = withSpring(isExpanded ? 1 : 0, motion.sheetSpring);
-  }, [isExpanded, expandProgress]);
+    expandProgress.value = isReduceMotionEnabled
+      ? (isExpanded ? 1 : 0)
+      : withSpring(isExpanded ? 1 : 0, motion.sheetSpring);
+  }, [isExpanded, expandProgress, isReduceMotionEnabled]);
 
   // Swipe gesture: up to expand, down to collapse
   const swipeGesture = Gesture.Pan()

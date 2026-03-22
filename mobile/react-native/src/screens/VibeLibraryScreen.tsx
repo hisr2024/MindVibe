@@ -156,6 +156,7 @@ export function VibeLibraryScreen() {
             style={styles.backButton}
             onPress={() => setSelectedPlaylist(null)}
             accessibilityRole="button"
+            accessibilityLabel="Go back to playlists"
           >
             <Text style={{ color: theme.accent, fontSize: 18 }}>← Back</Text>
           </TouchableOpacity>

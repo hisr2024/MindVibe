@@ -17,6 +17,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { darkTheme, typography, spacing, radii, colors } from '@theme/tokens';
+import { useAccessibility } from '@hooks/useAccessibility';
 import type { AuthStackParamList } from '@app-types/index';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Welcome'>;
@@ -24,6 +25,10 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Welcome'>;
 export function WelcomeScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const theme = darkTheme;
+  const { isReduceMotionEnabled } = useAccessibility();
+
+  const fade = (delay: number) =>
+    isReduceMotionEnabled ? undefined : FadeInDown.delay(delay).duration(600);
 
   return (
     <View
@@ -37,7 +42,7 @@ export function WelcomeScreen({ navigation }: Props) {
       ]}
     >
       {/* Brand */}
-      <Animated.View entering={FadeInDown.delay(100).duration(600)} style={styles.brandSection}>
+      <Animated.View entering={fade(100)} style={styles.brandSection}>
         <Text style={[styles.logoEmoji]}>🕉️</Text>
         <Text style={[styles.logoText, { color: theme.accent }]}>MindVibe</Text>
         <Text style={[styles.tagline, { color: theme.textSecondary }]}>
@@ -46,7 +51,7 @@ export function WelcomeScreen({ navigation }: Props) {
       </Animated.View>
 
       {/* Features */}
-      <Animated.View entering={FadeInDown.delay(300).duration(600)} style={styles.features}>
+      <Animated.View entering={fade(300)} style={styles.features}>
         {[
           { emoji: '🧘', text: 'Guided spiritual journeys' },
           { emoji: '📖', text: '700 verses of Gita wisdom' },
@@ -61,12 +66,13 @@ export function WelcomeScreen({ navigation }: Props) {
       </Animated.View>
 
       {/* Actions */}
-      <Animated.View entering={FadeInDown.delay(500).duration(600)} style={styles.actions}>
+      <Animated.View entering={fade(500)} style={styles.actions}>
         <TouchableOpacity
           style={[styles.primaryButton, { backgroundColor: theme.accent }]}
           onPress={() => navigation.navigate('Signup')}
           accessibilityRole="button"
           accessibilityLabel="Get started with a new account"
+          accessibilityHint="Creates a new MindVibe account"
         >
           <Text style={styles.primaryButtonText}>Get Started</Text>
         </TouchableOpacity>
@@ -76,6 +82,7 @@ export function WelcomeScreen({ navigation }: Props) {
           onPress={() => navigation.navigate('Login')}
           accessibilityRole="button"
           accessibilityLabel="Sign in to existing account"
+          accessibilityHint="Sign into your existing account"
         >
           <Text style={[styles.secondaryButtonText, { color: theme.accent }]}>
             I have an account

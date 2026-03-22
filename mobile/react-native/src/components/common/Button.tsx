@@ -22,6 +22,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { colors, spacing, typography, radii, shadows, motion } from '@theme/tokens';
+import { useAccessibility } from '@hooks/useAccessibility';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -72,7 +73,7 @@ const VARIANT_STYLES: Record<ButtonVariant, { container: ViewStyle; text: TextSt
 
 const SIZE_STYLES: Record<ButtonSize, { container: ViewStyle; text: TextStyle }> = {
   sm: {
-    container: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, minHeight: 36 },
+    container: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, minHeight: 44 },
     text: { fontSize: 13 },
   },
   md: {
@@ -103,14 +104,15 @@ export function Button({
   accessibilityHint,
 }: ButtonProps) {
   const scale = useSharedValue(1);
+  const { isReduceMotionEnabled } = useAccessibility();
 
   const handlePressIn = useCallback(() => {
-    scale.value = withSpring(0.96, { damping: 15, stiffness: 300 });
-  }, [scale]);
+    scale.value = isReduceMotionEnabled ? 0.96 : withSpring(0.96, { damping: 15, stiffness: 300 });
+  }, [scale, isReduceMotionEnabled]);
 
   const handlePressOut = useCallback(() => {
-    scale.value = withSpring(1, motion.spring);
-  }, [scale]);
+    scale.value = isReduceMotionEnabled ? 1 : withSpring(1, motion.spring);
+  }, [scale, isReduceMotionEnabled]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

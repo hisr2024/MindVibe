@@ -146,6 +146,7 @@ export function JournalScreen() {
             multiline
             autoFocus
             accessibilityLabel="Journal entry text"
+            accessibilityHint="Write your personal reflection. Entries are encrypted."
           />
 
           {/* Tags */}
@@ -166,6 +167,7 @@ export function JournalScreen() {
                 ]}
                 onPress={() => toggleTag(tag.id)}
                 accessibilityRole="checkbox"
+                accessibilityLabel={tag.label}
                 accessibilityState={{ checked: selectedTags.includes(tag.id) }}
               >
                 <Text style={styles.tagEmoji}>{tag.emoji}</Text>
@@ -190,6 +192,7 @@ export function JournalScreen() {
             disabled={!content.trim() || createEntry.isPending}
             accessibilityRole="button"
             accessibilityLabel="Save journal entry"
+            accessibilityHint="Saves and encrypts your journal entry"
           >
             {createEntry.isPending ? (
               <ActivityIndicator color={colors.divine.black} />
@@ -203,7 +206,7 @@ export function JournalScreen() {
       {/* Entries List */}
       <FlatList
         data={entries}
-        keyExtractor={(item, i) => item.id ?? String(i)}
+        keyExtractor={(item) => item.id ?? item.created_at ?? ''}
         renderItem={({ item }) => (
           <View style={[styles.entryCard, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
             <Text style={[styles.entryDate, { color: theme.textTertiary }]}>

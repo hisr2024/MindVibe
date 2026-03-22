@@ -66,6 +66,7 @@ function OptimizedImageInner({
       placeholder={{ blurhash }}
       transition={transition}
       accessibilityLabel={accessibilityLabel}
+      accessibilityRole="image"
     />
   );
 }

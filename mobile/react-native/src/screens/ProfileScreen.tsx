@@ -96,7 +96,10 @@ export function ProfileScreen() {
       }}
     >
       {/* User Header */}
-      <View style={[styles.userCard, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
+      <View
+        style={[styles.userCard, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}
+        accessibilityLabel={`Profile for ${user?.name ?? 'Seeker'}, ${tierLabel} tier`}
+      >
         <View style={[styles.avatar, { backgroundColor: colors.alpha.goldMedium }]}>
           <Text style={styles.avatarText}>
             {user?.name?.charAt(0).toUpperCase() ?? '🕉️'}
@@ -142,6 +145,7 @@ export function ProfileScreen() {
           <View
             key={stat.label}
             style={[styles.statCard, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}
+            accessibilityLabel={`${stat.label}: ${stat.value}`}
           >
             <Text style={styles.statEmoji}>{stat.emoji}</Text>
             <Text style={[styles.statValue, { color: theme.textPrimary }]}>{stat.value}</Text>
@@ -164,6 +168,7 @@ export function ProfileScreen() {
             onPress={() => navigation.navigate(item.screen)}
             accessibilityRole="button"
             accessibilityLabel={item.label}
+            accessibilityHint={`Opens ${item.label.toLowerCase()}`}
           >
             <Text style={styles.menuEmoji}>{item.emoji}</Text>
             <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>
@@ -180,6 +185,7 @@ export function ProfileScreen() {
         onPress={handleLogout}
         accessibilityRole="button"
         accessibilityLabel="Sign out"
+        accessibilityHint="Signs out of your account"
       >
         <Text style={[styles.logoutText, { color: colors.semantic.error }]}>
           Sign Out

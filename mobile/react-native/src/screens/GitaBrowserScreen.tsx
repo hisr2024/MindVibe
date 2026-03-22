@@ -164,6 +164,7 @@ export function GitaBrowserScreen() {
                   onPress={() => setSelectedVerse(verse)}
                   accessibilityRole="button"
                   accessibilityLabel={`Verse ${verse.chapter}.${verse.verse}`}
+                  accessibilityHint="Opens verse detail with Sanskrit and translation"
                 >
                   <Text style={[styles.verseNum, { color: theme.accent }]}>
                     {verse.chapter}.{verse.verse}
@@ -210,6 +211,7 @@ export function GitaBrowserScreen() {
           placeholderTextColor={theme.textTertiary}
           autoCorrect={false}
           accessibilityLabel="Search Gita verses"
+          accessibilityHint="Type at least 3 characters to search verses"
         />
       </View>
 
@@ -222,6 +224,9 @@ export function GitaBrowserScreen() {
             <TouchableOpacity
               style={[styles.searchResultCard, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}
               onPress={() => setSelectedVerse(item)}
+              accessibilityRole="button"
+              accessibilityLabel={`Verse ${item.chapter}.${item.verse}`}
+              accessibilityHint="Opens verse detail"
             >
               <Text style={[styles.verseNum, { color: theme.accent }]}>
                 {item.chapter}.{item.verse}

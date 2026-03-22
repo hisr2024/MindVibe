@@ -26,6 +26,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useAuthStore } from '@state/stores/authStore';
 import { useUserPreferencesStore } from '@state/stores/userPreferencesStore';
 import { darkTheme, typography, spacing, radii, colors } from '@theme/tokens';
+import { useAccessibility } from '@hooks/useAccessibility';
 
 // ---------------------------------------------------------------------------
 // Slide Data
@@ -83,6 +84,7 @@ export function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
 
+  const { isReduceMotionEnabled } = useAccessibility();
   const { completeOnboarding } = useAuthStore();
   const { setHasCompletedOnboarding } = useUserPreferencesStore();
 
@@ -117,7 +119,7 @@ export function OnboardingScreen() {
 
   const renderSlide = ({ item }: { item: OnboardingSlide }) => (
     <View style={[styles.slide, { width: SCREEN_WIDTH }]}>
-      <Animated.View entering={FadeIn.duration(400)} style={styles.slideContent}>
+      <Animated.View entering={isReduceMotionEnabled ? undefined : FadeIn.duration(400)} style={styles.slideContent}>
         <Text style={styles.slideEmoji}>{item.emoji}</Text>
         <Text style={[styles.slideTitle, { color: theme.textPrimary }]}>
           {item.title}
@@ -127,7 +129,7 @@ export function OnboardingScreen() {
         </Text>
         {item.highlight && (
           <Animated.Text
-            entering={FadeInDown.delay(200)}
+            entering={isReduceMotionEnabled ? undefined : FadeInDown.delay(200)}
             style={[styles.slideHighlight, { color: theme.accent }]}
           >
             {item.highlight}
@@ -155,6 +157,7 @@ export function OnboardingScreen() {
           onPress={handleSkip}
           accessibilityRole="button"
           accessibilityLabel="Skip onboarding"
+          accessibilityHint="Skips remaining slides and goes to home"
         >
           <Text style={[styles.skipText, { color: theme.textSecondary }]}>
             Skip
@@ -206,6 +209,7 @@ export function OnboardingScreen() {
           onPress={handleNext}
           accessibilityRole="button"
           accessibilityLabel={isLastSlide ? 'Start using MindVibe' : 'Next slide'}
+          accessibilityHint={isLastSlide ? 'Begins your MindVibe experience' : 'Advances to the next onboarding slide'}
         >
           <Text style={styles.actionButtonText}>
             {isLastSlide ? 'Start My Journey' : 'Next'}

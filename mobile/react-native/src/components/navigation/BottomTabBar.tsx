@@ -27,6 +27,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { colors, darkTheme, spacing, typography, shadows, motion, type ThemeColors } from '@theme/tokens';
+import { useAccessibility } from '@hooks/useAccessibility';
 
 // ---------------------------------------------------------------------------
 // Tab Configuration
@@ -93,15 +94,17 @@ function TabItem({ routeName, isFocused, onPress, onLongPress, theme }: TabItemP
   };
 
   const scale = useSharedValue(1);
+  const { isReduceMotionEnabled } = useAccessibility();
 
   const handlePress = useCallback(() => {
-    // Haptic feedback (would use react-native-haptic-feedback in production)
-    scale.value = withSpring(0.9, { damping: 15, stiffness: 300 });
-    setTimeout(() => {
-      scale.value = withSpring(1, motion.spring);
-    }, 100);
+    if (!isReduceMotionEnabled) {
+      scale.value = withSpring(0.9, { damping: 15, stiffness: 300 });
+      setTimeout(() => {
+        scale.value = withSpring(1, motion.spring);
+      }, 100);
+    }
     onPress();
-  }, [onPress, scale]);
+  }, [onPress, scale, isReduceMotionEnabled]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

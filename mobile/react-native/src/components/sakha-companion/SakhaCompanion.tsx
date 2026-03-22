@@ -38,6 +38,7 @@ import Animated, {
   withSequence,
 } from 'react-native-reanimated';
 import { colors, darkTheme, spacing, typography, radii, shadows, type ThemeColors } from '@theme/tokens';
+import { useAccessibility } from '@hooks/useAccessibility';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -112,6 +113,7 @@ interface ChatBubbleProps {
   theme: ThemeColors;
   onPlayVerse?: (verseRef: string) => void;
   onSaveToJournal?: (message: SakhaMessage) => void;
+  reduceMotion?: boolean;
 }
 
 const ChatBubble = memo(function ChatBubble({
@@ -119,13 +121,14 @@ const ChatBubble = memo(function ChatBubble({
   theme,
   onPlayVerse,
   onSaveToJournal,
+  reduceMotion,
 }: ChatBubbleProps) {
   const isUser = message.role === 'user';
   const isSakha = message.role === 'sakha';
 
   return (
     <Animated.View
-      entering={isUser ? FadeInUp.duration(250) : FadeInDown.duration(300)}
+      entering={reduceMotion ? undefined : (isUser ? FadeInUp.duration(250) : FadeInDown.duration(300))}
       style={[
         styles.bubbleContainer,
         isUser ? styles.bubbleContainerUser : styles.bubbleContainerSakha,
@@ -353,6 +356,7 @@ export function SakhaCompanion({
   const flatListRef = useRef<FlashListRef<SakhaMessage>>(null);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const greeting = getTimeAwareGreeting();
+  const { isReduceMotionEnabled } = useAccessibility();
 
   const handleSend = useCallback(() => {
     const trimmed = inputText.trim();
@@ -380,6 +384,16 @@ export function SakhaCompanion({
     };
   }, [messages.length]);
 
+  // Announce new Sakha messages to screen readers
+  useEffect(() => {
+    if (messages.length > 0) {
+      const last = messages[messages.length - 1];
+      if (last.role === 'sakha') {
+        AccessibilityInfo.announceForAccessibility('Sakha responded');
+      }
+    }
+  }, [messages.length]);
+
   const renderMessage = useCallback(
     ({ item }: { item: SakhaMessage }) => (
       <ChatBubble
@@ -387,9 +401,10 @@ export function SakhaCompanion({
         theme={theme}
         onPlayVerse={onPlayVerse}
         onSaveToJournal={onSaveToJournal}
+        reduceMotion={isReduceMotionEnabled}
       />
     ),
-    [theme, onPlayVerse, onSaveToJournal],
+    [theme, onPlayVerse, onSaveToJournal, isReduceMotionEnabled],
   );
 
   const ListHeader = useCallback(
