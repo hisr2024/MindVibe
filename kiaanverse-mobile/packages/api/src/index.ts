@@ -30,6 +30,28 @@ export { createAppQueryClient, createAppPersister } from './queryClient';
 // Gita verse cache (offline-first)
 export { gitaCache } from './cache/gitaCache';
 
+// Subscription (KIAAN Vibe Player IAP)
+export {
+  type VibePlayerTier,
+  type TierConfig,
+  TIER_CONFIGS,
+  TIER_RANK,
+  IAP_PRODUCT_IDS,
+  ALL_PRODUCT_IDS,
+  BACKEND_TIER_MAP,
+  VIBE_TO_BACKEND_TIER,
+  DAILY_SAKHA_QUOTA,
+  initializeIAP,
+  disconnectIAP,
+  getProducts,
+  purchaseSubscription,
+  restorePurchases,
+  verifyReceipt,
+  IAPError,
+  type IAPProduct,
+  type PurchaseResult,
+} from './subscription';
+
 // Types
 export type {
   User,

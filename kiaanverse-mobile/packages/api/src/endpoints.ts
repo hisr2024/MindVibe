@@ -159,6 +159,18 @@ export const api = {
     tiers: () => apiClient.get('/api/subscriptions/tiers'),
     current: () => apiClient.get('/api/subscriptions/current'),
     usage: () => apiClient.get('/api/subscriptions/usage'),
+    /** Verify mobile IAP receipt and activate subscription */
+    verify: (receipt: string, platform: 'ios' | 'android', productId: string) =>
+      apiClient.post<{
+        valid: boolean;
+        tier: string;
+        expires_at: string | null;
+        error?: string;
+      }>('/api/subscription/verify', {
+        receipt,
+        platform,
+        product_id: productId,
+      }),
   },
 
   /** Sync (offline batch) */

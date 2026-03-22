@@ -38,6 +38,9 @@ export { useChatStore, type ChatMessage } from './chatStore';
 // Wellness (Mood + Karma + Streak)
 export { useWellnessStore } from './wellnessStore';
 
+// Subscription (KIAAN Vibe Player)
+export { useSubscriptionStore, type VibePlayerTier, type PurchaseStatus } from './subscriptionStore';
+
 // UI (Modals, Toasts, Theme, First Launch)
 export { useUiStore, type ModalType, type Toast } from './uiStore';
 

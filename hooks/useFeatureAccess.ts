@@ -10,13 +10,15 @@ import { useSubscription } from './useSubscription'
  * Tiers are ordered: free < bhakta < sadhak < siddha (4-tier structure, March 2026)
  */
 
-type TierId = 'free' | 'bhakta' | 'sadhak' | 'siddha'
+type TierId = 'free' | 'bhakta' | 'sadhak' | 'siddha' | 'sacred' | 'divine'
 
 const TIER_RANK: Record<TierId, number> = {
   free: 0,
   bhakta: 1,
+  sacred: 2,   // Mobile tier — maps to sadhak level
   sadhak: 2,
   siddha: 3,
+  divine: 3,   // Mobile tier — maps to siddha level
 }
 
 interface FeatureDef {
@@ -49,16 +51,20 @@ const FEATURE_MAP: Record<string, FeatureDef> = {
 const TIER_QUOTAS: Record<TierId, number> = {
   free: 5,
   bhakta: 50,
+  sacred: 300,     // Mobile tier — matches sadhak
   sadhak: 300,
   siddha: -1,      // Unlimited
+  divine: -1,      // Mobile tier — matches siddha
 }
 
 /** Wisdom Journey limits by tier (-1 = unlimited) */
 const JOURNEY_LIMITS: Record<TierId, number> = {
   free: 1,
   bhakta: 3,
+  sacred: 10,      // Mobile tier — matches sadhak
   sadhak: 10,
   siddha: -1,      // Unlimited
+  divine: -1,      // Mobile tier — matches siddha
 }
 
 export interface FeatureAccessResult {
