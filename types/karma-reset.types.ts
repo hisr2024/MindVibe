@@ -121,6 +121,7 @@ export interface DeepKarmaResetApiResponse {
     deep_reset_version: string
     phases_count: number
     karmic_paths_available: number
+    engine_version?: string
   }
 }
 
