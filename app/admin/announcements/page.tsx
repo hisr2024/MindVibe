@@ -57,7 +57,7 @@ export default function AdminAnnouncementsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Announcements</h1>
+          <h1 className="text-2xl font-bold">Announcements</h1>
           <p className="text-sm text-slate-400">
             Create and manage system announcements
           </p>
@@ -84,7 +84,7 @@ export default function AdminAnnouncementsPage() {
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{typeIcons[announcement.type]}</span>
                     <div>
-                      <h3 className="font-semibold text-slate-100">{announcement.title}</h3>
+                      <h3 className="font-semibold">{announcement.title}</h3>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="rounded bg-slate-600 px-2 py-0.5 text-xs capitalize text-slate-200">
                           {announcement.type}
@@ -103,7 +103,7 @@ export default function AdminAnnouncementsPage() {
                   </div>
                   <p className="mt-3 text-sm text-slate-300">{announcement.content}</p>
                   {(announcement.startsAt || announcement.endsAt) && (
-                    <div className="mt-2 text-xs text-slate-500">
+                    <div className="mt-2 text-caption text-[var(--mv-text-muted)]">
                       {announcement.startsAt && `Starts: ${new Date(announcement.startsAt).toLocaleString()}`}
                       {announcement.startsAt && announcement.endsAt && ' • '}
                       {announcement.endsAt && `Ends: ${new Date(announcement.endsAt).toLocaleString()}`}

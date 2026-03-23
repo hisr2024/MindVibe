@@ -19,7 +19,7 @@ export function UsageCard({ items, className = '' }: UsageCardProps) {
   return (
     <Card className={className}>
       <CardContent>
-        <h3 className="font-semibold text-orange-50 mb-4">Feature Usage</h3>
+        <h3 className="font-semibold mb-4">Feature Usage</h3>
         <div className="space-y-4">
           {items.map((item) => (
             <div key={item.name}>

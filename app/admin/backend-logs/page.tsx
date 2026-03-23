@@ -152,7 +152,7 @@ export default function BackendLogsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Backend Logs</h1>
+          <h1 className="text-2xl font-bold">Backend Logs</h1>
           <p className="text-sm text-slate-400">
             Live application logs from the FastAPI backend
           </p>

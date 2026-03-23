@@ -172,7 +172,7 @@ export default function FeedbackPageClient() {
   const steps = ['Category', 'Rating', 'Details', 'Done']
 
   return (
-    <main className="mx-auto max-w-3xl space-y-6 px-4 pb-20 pt-2">
+    <main className="mx-auto max-w-3xl space-y-6 px-page-x pb-20 pt-2">
       {/* Header */}
       <section className="rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#050507]/80 to-[#0f0a08]/90 p-8 shadow-[0_20px_80px_rgba(212,164,76,0.12)]">
         <div className="flex items-center gap-3">
@@ -183,7 +183,7 @@ export default function FeedbackPageClient() {
             <p className="text-xs uppercase tracking-[0.22em] text-[#f5f0e8]/50">
               Your Voice Matters
             </p>
-            <h1 className="text-2xl font-bold text-[#f5f0e8]">
+            <h1 className="text-2xl font-bold">
               Share Your Feedback
             </h1>
           </div>
@@ -289,7 +289,7 @@ export default function FeedbackPageClient() {
               </div>
             )}
 
-            <h2 className="text-lg font-semibold text-[#f5f0e8]">
+            <h2 className="text-lg font-semibold">
               How would you rate your experience?
             </h2>
             <p className="mt-1 text-sm text-[#f5f0e8]/50">
@@ -587,7 +587,7 @@ export default function FeedbackPageClient() {
               <CheckCircle2 className="h-8 w-8 text-[#d4a44c]" />
             </motion.div>
 
-            <h2 className="text-xl font-bold text-[#f5f0e8]">
+            <h2 className="text-xl font-bold">
               Thank You for Your Voice
             </h2>
             <p className="mt-2 max-w-md text-sm leading-relaxed text-[#f5f0e8]/60">

@@ -185,7 +185,7 @@ export default function AdminTeamsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Team Management</h1>
+          <h1 className="text-2xl font-bold">Team Management</h1>
           <p className="mt-1 text-sm text-gray-500">
             Manage all teams, members, and access across the platform
           </p>
@@ -198,7 +198,7 @@ export default function AdminTeamsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Team List */}
         <div className="lg:col-span-1 space-y-3">
-          <h2 className="text-lg font-semibold text-gray-800">All Teams</h2>
+          <h2 className="text-lg font-semibold">All Teams</h2>
           {loading ? (
             <div className="text-center py-8 text-gray-500">Loading teams...</div>
           ) : teams.length === 0 ? (
@@ -274,7 +274,7 @@ export default function AdminTeamsPage() {
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">{selectedTeam.name}</h2>
+                    <h2 className="text-xl font-bold">{selectedTeam.name}</h2>
                     <p className="text-sm text-gray-500 mt-1">
                       Slug: <code className="bg-gray-100 px-1 rounded">{selectedTeam.slug}</code>
                     </p>
@@ -348,7 +348,7 @@ export default function AdminTeamsPage() {
 
               {/* Members */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                <h3 className="text-lg font-semibold mb-4">
                   Members ({selectedMembers.length})
                 </h3>
                 {selectedMembers.length === 0 ? (
@@ -410,7 +410,7 @@ export default function AdminTeamsPage() {
 
               {/* Invitations */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                <h3 className="text-lg font-semibold mb-4">
                   Invitations ({selectedInvitations.length})
                 </h3>
                 {selectedInvitations.length === 0 ? (

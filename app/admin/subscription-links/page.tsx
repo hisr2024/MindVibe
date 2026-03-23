@@ -382,7 +382,7 @@ export default function SubscriptionLinksPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-slate-100">Add Ons</h3>
+          <h3 className="text-lg font-semibold">Add Ons</h3>
           <p className="text-sm text-slate-400">
             Add extra items to the subscription (e.g., setup fee, extra features)
           </p>
@@ -460,7 +460,7 @@ export default function SubscriptionLinksPage() {
   const renderLinkDetails = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-slate-100">Link Details</h3>
+        <h3 className="text-lg font-semibold">Link Details</h3>
         <p className="text-sm text-slate-400">
           Customer info and link configuration
         </p>
@@ -571,7 +571,7 @@ export default function SubscriptionLinksPage() {
   const renderReview = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-slate-100">Review Subscription Link</h3>
+        <h3 className="text-lg font-semibold">Review Subscription Link</h3>
         <p className="text-sm text-slate-400">Confirm the details before creating</p>
       </div>
 
@@ -698,7 +698,7 @@ export default function SubscriptionLinksPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 className="text-2xl font-bold text-slate-100">Subscription Link Created</h1>
+          <h1 className="text-2xl font-bold">Subscription Link Created</h1>
         </div>
 
         <div className="rounded-xl border border-green-700 bg-green-900/20 p-6">
@@ -754,7 +754,7 @@ export default function SubscriptionLinksPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Subscription Links</h1>
+          <h1 className="text-2xl font-bold">Subscription Links</h1>
           <p className="text-sm text-slate-400">
             Create and manage Razorpay subscription payment links
           </p>
@@ -868,7 +868,7 @@ export default function SubscriptionLinksPage() {
       {/* Existing Links Table */}
       <div className="rounded-xl border border-slate-700 bg-slate-800/30">
         <div className="border-b border-slate-700 px-6 py-4">
-          <h2 className="text-lg font-semibold text-slate-100">
+          <h2 className="text-lg font-semibold">
             Existing Links
             {linksTotal > 0 && (
               <span className="ml-2 text-sm font-normal text-slate-400">({linksTotal})</span>

@@ -100,7 +100,7 @@ export default function AdminAuditLogsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Audit Logs</h1>
+          <h1 className="text-2xl font-bold">Audit Logs</h1>
           <p className="text-sm text-slate-400">
             All admin actions are logged for security and compliance
           </p>

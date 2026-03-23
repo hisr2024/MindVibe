@@ -49,7 +49,7 @@ export default function AdminExportPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-100">Data Export</h1>
+        <h1 className="text-2xl font-bold">Data Export</h1>
         <p className="text-sm text-slate-400">
           Export data in various formats for analysis and reporting
         </p>
@@ -65,7 +65,7 @@ export default function AdminExportPage() {
             <div className="flex items-start gap-4">
               <span className="text-3xl">{option.icon}</span>
               <div className="flex-1">
-                <h3 className="font-semibold text-slate-100">{option.title}</h3>
+                <h3 className="font-semibold">{option.title}</h3>
                 <p className="mt-1 text-sm text-slate-400">{option.description}</p>
                 <div className="mt-4 flex gap-2">
                   {option.formats.map((format) => (
@@ -117,7 +117,7 @@ export default function AdminExportPage() {
 
       {/* Recent Exports */}
       <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
-        <h3 className="mb-4 font-semibold text-slate-100">Recent Exports</h3>
+        <h3 className="mb-4 font-semibold">Recent Exports</h3>
         <div className="space-y-3">
           {[
             { type: 'users', format: 'csv', admin: 'admin@kiaanverse.com', date: new Date('2026-02-14') },

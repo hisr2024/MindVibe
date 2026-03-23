@@ -63,7 +63,7 @@ export class MobileErrorBoundary extends Component<Props, State> {
             <span className="text-4xl">🙏</span>
           </div>
 
-          <h2 className="text-xl font-semibold text-white mb-2">
+          <h2 className="text-xl font-semibold mb-2">
             {this.props.fallbackTitle || 'A moment of pause'}
           </h2>
           <p className="text-sm text-slate-400 mb-8 max-w-xs leading-relaxed">

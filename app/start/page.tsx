@@ -529,7 +529,7 @@ export default function StartPage() {
             transition={{ duration: 0.5 }}
             className="mb-12 text-center"
           >
-            <h2 className="mb-4 text-3xl font-bold text-[#f5f0e8]">
+            <h2 className="mb-4 text-3xl font-bold">
               Everything You Need for Spiritual Wellness
             </h2>
             <p className="mx-auto max-w-2xl text-[#f5f0e8]/60">
@@ -550,7 +550,7 @@ export default function StartPage() {
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#d4a44c]/10 text-[#d4a44c]">
                   {benefit.icon}
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-[#f5f0e8]">{benefit.title}</h3>
+                <h3 className="mb-2 text-lg font-semibold">{benefit.title}</h3>
                 <p className="text-sm leading-relaxed text-[#f5f0e8]/60">{benefit.description}</p>
               </motion.div>
             ))}
@@ -600,7 +600,7 @@ export default function StartPage() {
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#d4a44c] to-[#e8b54a] text-lg font-bold text-slate-900">
                   {item.step}
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-[#f5f0e8]">{item.title}</h3>
+                <h3 className="mb-2 text-lg font-semibold">{item.title}</h3>
                 <p className="text-sm text-[#f5f0e8]/60">{item.desc}</p>
               </motion.div>
             ))}
@@ -647,7 +647,7 @@ export default function StartPage() {
             transition={{ duration: 0.5 }}
             className="mb-12 text-center"
           >
-            <h2 className="mb-4 text-3xl font-bold text-[#f5f0e8]">
+            <h2 className="mb-4 text-3xl font-bold">
               Choose Your Path
             </h2>
             <p className="mx-auto mb-8 max-w-2xl text-[#f5f0e8]/60">
@@ -700,7 +700,7 @@ export default function StartPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-[#f5f0e8] mb-2">The KIAAN Promise</h3>
+                  <h3 className="text-xl font-semibold mb-2">The KIAAN Promise</h3>
                   <p className="text-sm text-[#f5f0e8]/70 mb-4">
                     Every user receives the same quality of guidance from KIAAN — the only difference is how many questions you can ask each month. We believe spiritual wellness should be accessible to everyone.
                   </p>

@@ -16,7 +16,7 @@ export default function SubscriptionCancelPage() {
             </svg>
           </div>
 
-          <h1 className="text-2xl font-bold text-[#f5f0e8] mb-2">
+          <h1 className="text-2xl font-bold mb-2">
             Checkout Canceled
           </h1>
           <p className="text-sm text-[#f5f0e8]/70 mb-6">

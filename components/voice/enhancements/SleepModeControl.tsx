@@ -309,7 +309,7 @@ export function SleepModeControl({
               <Moon className="w-5 h-5 text-indigo-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-white">Sleep Mode</h3>
+              <h3 className="font-semibold">Sleep Mode</h3>
               <p className="text-xs text-white/70">Gradual Rest Induction</p>
             </div>
           </div>

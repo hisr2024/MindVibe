@@ -57,7 +57,7 @@ interface SettingSectionProps {
 function SettingSection({ title, children }: SettingSectionProps) {
   return (
     <div className="mb-6">
-      <h2 className="text-xs font-medium text-slate-500 uppercase tracking-wider px-4 mb-2">
+      <h2 className="text-xs font-medium text-[var(--mv-text-muted)] uppercase tracking-wider px-4 mb-2">
         {title}
       </h2>
       <div className="bg-white/[0.02] rounded-2xl border border-white/[0.06] overflow-hidden">
@@ -111,7 +111,7 @@ function SettingRow({
           {label}
         </p>
         {description && (
-          <p className="text-xs text-slate-500 mt-0.5">{description}</p>
+          <p className="text-caption text-[var(--mv-text-muted)] mt-0.5">{description}</p>
         )}
       </div>
       {rightElement || (
@@ -298,7 +298,7 @@ export default function MobileSettingsPage() {
       onBack={() => router.back()}
       showTabBar={false}
     >
-      <div className="px-4 py-4 pb-safe-bottom">
+      <div className="px-page-x py-4 pb-safe-bottom">
         {/* Profile Section */}
         <SettingSection title="Account">
           <SettingRow
@@ -489,8 +489,8 @@ export default function MobileSettingsPage() {
                 <div className="w-12 h-12 rounded-full bg-[#d4a44c]/10 flex items-center justify-center mx-auto mb-3">
                   <LogOut className="w-6 h-6 text-[#d4a44c]" />
                 </div>
-                <h3 className="text-lg font-semibold text-white">Log Out?</h3>
-                <p className="text-sm text-slate-400 mt-1">
+                <h3 className="text-lg font-semibold">Log Out?</h3>
+                <p className="text-body text-[var(--mv-text-secondary)] mt-1">
                   You&apos;ll need to sign in again to access your account.
                 </p>
               </div>
@@ -536,8 +536,8 @@ export default function MobileSettingsPage() {
                 <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-3">
                   <AlertTriangle className="w-6 h-6 text-red-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-white">Delete Account?</h3>
-                <p className="text-sm text-slate-400 mt-1">
+                <h3 className="text-lg font-semibold">Delete Account?</h3>
+                <p className="text-body text-[var(--mv-text-secondary)] mt-1">
                   This action cannot be undone. All your data, including journals,
                   journey progress, and insights will be permanently deleted.
                 </p>

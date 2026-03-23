@@ -92,7 +92,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Admin Dashboard</h1>
+          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
           <p className="text-sm text-slate-400">
             Welcome to Sakha Enterprise Admin
           </p>
@@ -128,7 +128,7 @@ export default function AdminDashboard() {
 
       {/* Recent Activity */}
       <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
-        <h2 className="mb-4 text-lg font-semibold text-slate-100">Recent Activity</h2>
+        <h2 className="mb-4 text-lg font-semibold">Recent Activity</h2>
         <div className="space-y-3">
           {recentActivity.map((activity) => (
             <div
@@ -147,7 +147,7 @@ export default function AdminDashboard() {
                   <p className="text-sm font-medium text-slate-200">
                     {activity.action.replace(/_/g, ' ')}
                   </p>
-                  <p className="text-xs text-slate-400">by {activity.adminEmail}</p>
+                  <p className="text-caption text-[var(--mv-text-muted)]">by {activity.adminEmail}</p>
                 </div>
               </div>
               <p className="text-xs text-slate-500">
@@ -181,7 +181,7 @@ export default function AdminDashboard() {
           <span className="text-2xl">👥</span>
           <div>
             <p className="font-medium text-slate-200">Manage Users</p>
-            <p className="text-xs text-slate-400">Search, filter, suspend</p>
+            <p className="text-caption text-[var(--mv-text-muted)]">Search, filter, suspend</p>
           </div>
         </a>
         <a
@@ -191,7 +191,7 @@ export default function AdminDashboard() {
           <span className="text-2xl">🛡️</span>
           <div>
             <p className="font-medium text-slate-200">Content Moderation</p>
-            <p className="text-xs text-slate-400">{stats.pendingModeration} pending</p>
+            <p className="text-caption text-[var(--mv-text-muted)]">{stats.pendingModeration} pending</p>
           </div>
         </a>
         <a
@@ -201,7 +201,7 @@ export default function AdminDashboard() {
           <span className="text-2xl">🚩</span>
           <div>
             <p className="font-medium text-slate-200">Feature Flags</p>
-            <p className="text-xs text-slate-400">{stats.activeFeatureFlags} active</p>
+            <p className="text-caption text-[var(--mv-text-muted)]">{stats.activeFeatureFlags} active</p>
           </div>
         </a>
         <a
@@ -211,7 +211,7 @@ export default function AdminDashboard() {
           <span className="text-2xl">📤</span>
           <div>
             <p className="font-medium text-slate-200">Export Data</p>
-            <p className="text-xs text-slate-400">CSV, JSON formats</p>
+            <p className="text-caption text-[var(--mv-text-muted)]">CSV, JSON formats</p>
           </div>
         </a>
       </div>

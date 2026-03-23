@@ -97,7 +97,7 @@ export function LanguageSettings({ onClose, className = '' }: LanguageSettingsPr
     <div className={`bg-gradient-to-br from-orange-900/30 to-orange-800/20 border border-orange-500/30 rounded-2xl p-6 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-orange-50 flex items-center gap-2">
+        <h2 className="text-xl font-semibold flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"

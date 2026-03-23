@@ -605,7 +605,7 @@ export default function PricingPage() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-12">
+    <main className="mx-auto max-w-6xl px-page-x py-12">
       {/* Checkout Error Banner */}
       {checkoutError && (
         <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
@@ -637,7 +637,7 @@ export default function PricingPage() {
 
       {/* Header */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-[#f5f0e8] mb-4">
+        <h1 className="text-4xl font-bold mb-4">
           Choose Your Path to Inner Peace
         </h1>
         <p className="text-lg text-[#f5f0e8]/70 max-w-2xl mx-auto mb-8">
@@ -710,7 +710,7 @@ export default function PricingPage() {
               </svg>
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-[#f5f0e8] mb-2">The KIAAN Promise</h2>
+              <h2 className="text-xl font-semibold mb-2">The KIAAN Promise</h2>
               <p className="text-sm text-[#f5f0e8]/70 mb-4">
                 Every user receives the same quality of guidance from KIAAN—the only difference is how many questions you can ask each month. We believe spiritual wellness should be accessible to everyone.
               </p>
@@ -736,7 +736,7 @@ export default function PricingPage() {
 
       {/* Feature Comparison */}
       <div className="mb-16">
-        <h2 className="text-2xl font-semibold text-[#f5f0e8] text-center mb-8">
+        <h2 className="text-2xl font-semibold text-center mb-8">
           Compare Plans
         </h2>
         <Card>
@@ -748,7 +748,7 @@ export default function PricingPage() {
 
       {/* FAQ */}
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-2xl font-semibold text-[#f5f0e8] text-center mb-8">
+        <h2 className="text-2xl font-semibold text-center mb-8">
           Frequently Asked Questions
         </h2>
         <div className="space-y-4">
@@ -768,7 +768,7 @@ export default function PricingPage() {
           ].map((faq, i) => (
             <Card key={i} variant="bordered">
               <CardContent>
-                <h3 className="font-semibold text-[#f5f0e8] mb-2">{faq.q}</h3>
+                <h3 className="font-semibold mb-2">{faq.q}</h3>
                 <p className="text-sm text-[#f5f0e8]/70">{faq.a}</p>
               </CardContent>
             </Card>

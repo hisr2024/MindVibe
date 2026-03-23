@@ -76,7 +76,7 @@ function SuccessContent() {
             </svg>
           </div>
 
-          <h1 className="text-2xl font-bold text-[#f5f0e8] mb-2">
+          <h1 className="text-2xl font-bold mb-2">
             Welcome to {tierNames[tier] || 'Bhakta'}!
           </h1>
           <p className="text-sm text-[#f5f0e8]/70 mb-6">
@@ -84,7 +84,7 @@ function SuccessContent() {
           </p>
 
           <div className="rounded-xl bg-[#d4a44c]/10 border border-[#d4a44c]/20 p-4 mb-6 text-left">
-            <h2 className="font-semibold text-[#f5f0e8] mb-2">What&apos;s next?</h2>
+            <h2 className="font-semibold mb-2">What&apos;s next?</h2>
             <ul className="space-y-2 text-sm text-[#f5f0e8]/80">
               <li className="flex items-start gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400 mt-0.5 shrink-0">

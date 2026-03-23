@@ -109,7 +109,7 @@ export default function DeepInsightsPage() {
               <div className="relative space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
-                    <h2 className="text-xl font-semibold text-white">{tool.title}</h2>
+                    <h2 className="text-xl font-semibold">{tool.title}</h2>
                     <p className="text-xs text-white/70 truncate">
                       {t(`dashboard.tool_desc.${tool.purposeDescKey}`, '')}
                     </p>

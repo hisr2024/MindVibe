@@ -382,7 +382,7 @@ export function LanguageSelector({
             >
               {/* Header */}
               <div className="border-b border-white/[0.06] px-4 py-3 bg-gradient-to-r from-[#d4a44c]/[0.06] to-transparent">
-                <h3 className="text-sm font-semibold text-white/90">Select Language</h3>
+                <h3 className="text-sm font-semibold">Select Language</h3>
                 <p className="text-xs text-white/70 mt-0.5">Choose your preferred language</p>
               </div>
 
@@ -503,7 +503,7 @@ export function LanguageSelector({
 
             return (
               <div key={region}>
-                <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/70 px-2 mb-2">
+                <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] px-2 mb-2">
                   {region}
                 </h3>
                 <div className="space-y-1">

@@ -345,7 +345,7 @@ export const MobileBottomSheet = forwardRef<HTMLDivElement, MobileBottomSheetPro
                       {title && (
                         <h2
                           id="bottom-sheet-title"
-                          className="text-lg font-semibold text-white"
+                          className="text-lg font-semibold"
                         >
                           {title}
                         </h2>
@@ -436,7 +436,7 @@ export function ConfirmationSheet({
       height="auto"
     >
       <div className="text-center pb-2">
-        <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
+        <h3 className="text-xl font-semibold mb-2">{title}</h3>
         <p className="text-slate-300 mb-6">{message}</p>
 
         <div className="flex flex-col gap-3">

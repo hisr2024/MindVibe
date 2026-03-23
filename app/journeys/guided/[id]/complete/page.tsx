@@ -153,10 +153,10 @@ export default function JourneyCompletePage() {
           className="text-center mb-8"
         >
           <div className="text-7xl mb-4">🎉</div>
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-3xl font-bold mb-2">
             Journey Complete!
           </h1>
-          <p className="text-white/60">
+          <p className="text-body text-[var(--mv-text-secondary)]">
             You have completed your journey of transformation
           </p>
         </motion.div>
@@ -183,7 +183,7 @@ export default function JourneyCompletePage() {
               </div>
             )}
 
-            <h2 className="text-xl font-bold text-white text-center mb-6">
+            <h2 className="text-xl font-bold text-center mb-6">
               {journey.title}
             </h2>
 
@@ -193,19 +193,19 @@ export default function JourneyCompletePage() {
                 <div className="text-3xl font-bold text-amber-400">
                   {journey.total_days}
                 </div>
-                <div className="text-xs text-white/70">Days Completed</div>
+                <div className="text-caption text-[var(--mv-text-muted)]">Days Completed</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-green-400">
                   100%
                 </div>
-                <div className="text-xs text-white/70">Progress</div>
+                <div className="text-caption text-[var(--mv-text-muted)]">Progress</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-purple-400">
                   {journey.streak_days}
                 </div>
-                <div className="text-xs text-white/70">Day Streak</div>
+                <div className="text-caption text-[var(--mv-text-muted)]">Day Streak</div>
               </div>
             </div>
           </motion.div>
@@ -224,7 +224,7 @@ export default function JourneyCompletePage() {
           <p className="text-sm text-amber-400/70">
             — Bhagavad Gita 2.47
           </p>
-          <p className="mt-4 text-white/70 text-sm">
+          <p className="mt-4 text-body text-[var(--mv-text-secondary)]">
             Your dedication to inner transformation is itself the victory.
             The journey continues...
           </p>
@@ -248,7 +248,7 @@ export default function JourneyCompletePage() {
           {/* Recommendations */}
           {recommendations.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium text-white/70 mb-3 text-center">
+              <h3 className="text-sm font-medium mb-3 text-center">
                 Recommended Next Journeys
               </h3>
               <div className="space-y-2">
@@ -273,7 +273,7 @@ export default function JourneyCompletePage() {
                           <div className="text-sm font-medium text-white truncate">
                             {template.title}
                           </div>
-                          <div className="text-xs text-white/70">
+                          <div className="text-caption text-[var(--mv-text-muted)]">
                             {template.duration_days} days
                           </div>
                         </div>

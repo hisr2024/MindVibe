@@ -49,6 +49,11 @@
   padding-right: env(safe-area-inset-right, 0px);
 }
 
+/* ─── Fluid Section Spacing ─── */
+.section-tight { padding-block: var(--section-gap-sm); }
+.section-normal { padding-block: var(--section-gap-md); }
+.section-spacious { padding-block: var(--section-gap-lg); }
+
 /* ─── Fluid Typography ─── */
 .fluid-text-sm { font-size: clamp(0.75rem, 2vw + 0.5rem, 0.875rem); }
 .fluid-text-base { font-size: clamp(0.875rem, 2vw + 0.5rem, 1rem); }

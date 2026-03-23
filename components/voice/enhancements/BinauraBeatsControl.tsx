@@ -289,7 +289,7 @@ export function BinauraBeatsControl({
               <Brain className={`w-5 h-5 ${currentPreset.color}`} />
             </div>
             <div>
-              <h3 className="font-semibold text-white">
+              <h3 className="font-semibold">
                 Binaural Beats
                 {!BINAURAL_BEATS_ENABLED && (
                   <span className="ml-2 text-[10px] font-normal text-amber-400/80 bg-amber-400/10 px-1.5 py-0.5 rounded-full align-middle">Coming Soon</span>

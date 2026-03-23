@@ -245,7 +245,7 @@ export function DivineMoment({
               </motion.div>
 
               {/* Title */}
-              <h3 className="text-xl font-light text-white/90 text-center mb-6">
+              <h3 className="text-xl font-light text-center mb-6">
                 {content.title}
               </h3>
 

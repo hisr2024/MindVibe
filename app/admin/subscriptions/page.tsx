@@ -81,7 +81,7 @@ export default function AdminSubscriptionsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-100">Subscription Management</h1>
+        <h1 className="text-2xl font-bold">Subscription Management</h1>
         <p className="text-sm text-slate-400">
           Monitor subscriptions, revenue, and churn analytics
         </p>
@@ -119,7 +119,7 @@ export default function AdminSubscriptionsPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Revenue Trend */}
         <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
-          <h2 className="mb-4 text-lg font-semibold text-slate-100">Revenue Trend</h2>
+          <h2 className="mb-4 text-lg font-semibold">Revenue Trend</h2>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -142,7 +142,7 @@ export default function AdminSubscriptionsPage() {
 
         {/* Tier Distribution */}
         <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
-          <h2 className="mb-4 text-lg font-semibold text-slate-100">Plan Distribution</h2>
+          <h2 className="mb-4 text-lg font-semibold">Plan Distribution</h2>
           <div className="flex items-center justify-center">
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
@@ -182,7 +182,7 @@ export default function AdminSubscriptionsPage() {
 
       {/* Status Breakdown */}
       <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
-        <h2 className="mb-4 text-lg font-semibold text-slate-100">Status Breakdown</h2>
+        <h2 className="mb-4 text-lg font-semibold">Status Breakdown</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {analytics &&
             Object.entries(analytics.totalByStatus).map(([status, count]) => (

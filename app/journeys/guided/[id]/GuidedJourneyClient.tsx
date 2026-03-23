@@ -175,7 +175,7 @@ function StepContent({ step, onComplete, isCompleting }: StepContentProps) {
           <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
           <span className="text-xs font-medium text-amber-400">Day {step.day_index}</span>
         </div>
-        <h2 className="text-2xl font-bold text-white tracking-tight">{step.step_title}</h2>
+        <h2 className="text-2xl font-bold tracking-tight">{step.step_title}</h2>
       </div>
 
       {/* Today's Teaching - Card Style */}
@@ -200,8 +200,8 @@ function StepContent({ step, onComplete, isCompleting }: StepContentProps) {
               <span className="text-xl">🙏</span>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-white">Wisdom from the Gita</h3>
-              <p className="text-xs text-white/70">Sacred verse for today&apos;s practice</p>
+              <h3 className="text-lg font-semibold">Wisdom from the Gita</h3>
+              <p className="text-caption text-[var(--mv-text-muted)]">Sacred verse for today&apos;s practice</p>
             </div>
           </div>
           <div className="space-y-5">
@@ -256,7 +256,7 @@ function StepContent({ step, onComplete, isCompleting }: StepContentProps) {
               )}
             </div>
             {typeof step.practice.name === 'string' && (
-              <p className="font-semibold text-white text-lg mb-4">{step.practice.name}</p>
+              <p className="font-semibold text-lg mb-4">{step.practice.name}</p>
             )}
             {Array.isArray(step.practice.instructions) && (
               <ol className="space-y-3">
@@ -330,7 +330,7 @@ function StepContent({ step, onComplete, isCompleting }: StepContentProps) {
                   rows={5}
                   maxLength={5000}
                 />
-                <p className="mt-2 text-xs text-white/70 text-right">
+                <p className="mt-2 text-caption text-[var(--mv-text-muted)] text-right">
                   {reflection.length}/5000 characters
                 </p>
               </motion.div>
@@ -658,7 +658,7 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
         <FadeIn>
           <div className="rounded-xl border border-red-500/30 bg-red-900/20 p-8 text-center">
             <div className="text-4xl mb-4">😔</div>
-            <h2 className="text-lg font-medium text-white mb-2">Error</h2>
+            <h2 className="text-lg font-medium mb-2">Error</h2>
             <p className="text-red-400 mb-6">{error}</p>
             <Link
               href="/journeys"
@@ -701,7 +701,7 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
                 </div>
               )}
 
-              <h1 className="text-xl font-bold text-white">{journey.title}</h1>
+              <h1 className="text-xl font-bold">{journey.title}</h1>
             </div>
 
             <div className="flex items-center gap-2">
@@ -775,7 +775,7 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
 
         {/* Day selector */}
         <div className="mb-6">
-          <h3 className="text-sm font-medium text-white/70 mb-2">Jump to Day</h3>
+          <h3 className="text-sm font-medium text-[var(--mv-text-muted)] mb-2">Jump to Day</h3>
           <DaySelector
             totalDays={journey.total_days}
             currentDay={journey.current_day}
@@ -815,8 +815,8 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
         ) : journey.status === 'paused' ? (
           <div className="rounded-xl border border-amber-500/30 bg-amber-900/10 p-8 text-center">
             <div className="text-4xl mb-4">⏸️</div>
-            <h2 className="text-lg font-medium text-white mb-2">Journey Paused</h2>
-            <p className="text-white/60 mb-6">
+            <h2 className="text-lg font-medium mb-2">Journey Paused</h2>
+            <p className="text-body text-[var(--mv-text-secondary)] mb-6">
               Resume your journey to continue your transformation.
             </p>
             <button
@@ -832,7 +832,7 @@ export default function GuidedJourneyClient({ journeyId }: Props) {
         ) : (
           <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-amber-500 border-t-transparent mx-auto" />
-            <p className="mt-4 text-white/60">Loading step content...</p>
+            <p className="mt-4 text-body text-[var(--mv-text-secondary)]">Loading step content...</p>
           </div>
         )}
       </FadeIn>

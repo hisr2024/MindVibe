@@ -206,10 +206,10 @@ export default function JourneyFormClient({ mode, journeyId }: JourneyFormClient
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-2xl font-bold text-white md:text-3xl">
+          <h1 className="text-2xl font-bold md:text-3xl">
             {mode === 'create' ? 'Create New Journey' : 'Edit Journey'}
           </h1>
-          <p className="mt-2 text-white/60">
+          <p className="mt-2 text-body text-[var(--mv-text-secondary)]">
             {mode === 'create'
               ? 'Set up a new journey to track your goals and progress.'
               : 'Update your journey details.'}
@@ -284,7 +284,7 @@ export default function JourneyFormClient({ mode, journeyId }: JourneyFormClient
             {fieldErrors.description && (
               <p id="description-error" className="mt-1 text-sm text-red-400">{fieldErrors.description}</p>
             )}
-            <p className="mt-1 text-right text-xs text-white/70">
+            <p className="mt-1 text-right text-caption text-[var(--mv-text-muted)]">
               {form.description.length}/5000
             </p>
           </div>
@@ -383,7 +383,7 @@ export default function JourneyFormClient({ mode, journeyId }: JourneyFormClient
             {fieldErrors.tags && (
               <p id="tags-error" className="mt-1 text-sm text-red-400">{fieldErrors.tags}</p>
             )}
-            <p className="mt-2 text-xs text-white/70">
+            <p className="mt-2 text-caption text-[var(--mv-text-muted)]">
               {form.tags.length}/10 tags
             </p>
           </div>

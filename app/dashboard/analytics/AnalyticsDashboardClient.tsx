@@ -48,8 +48,8 @@ export function AnalyticsDashboardClient() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-orange-50">Your Analytics</h1>
-          <p className="text-sm text-orange-100/60 mt-1">
+          <h1 className="text-2xl font-bold">Your Analytics</h1>
+          <p className="text-sm text-[var(--mv-text-muted)] mt-1">
             Insights into your spiritual wellness journey
           </p>
         </div>

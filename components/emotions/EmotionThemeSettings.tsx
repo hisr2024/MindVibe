@@ -98,7 +98,7 @@ export function EmotionThemeSettings({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Settings className="h-5 w-5 text-orange-400" />
-          <h3 className="text-lg font-semibold text-orange-50">
+          <h3 className="text-lg font-semibold">
             Emotion Theme Settings
           </h3>
         </div>
@@ -115,7 +115,7 @@ export function EmotionThemeSettings({
       {/* Enable/Disable Toggle */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h4 className="text-sm font-medium text-orange-50">
+          <h4 className="text-sm font-medium">
             Enable Emotion Themes
           </h4>
           <p className="text-xs text-orange-100/70">
@@ -142,7 +142,7 @@ export function EmotionThemeSettings({
         <>
           {/* Current Emotion */}
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-orange-50">
+            <h4 className="text-sm font-medium">
               Current Emotion
             </h4>
             <div className="rounded-2xl border border-orange-500/25 bg-orange-500/5 p-4">
@@ -165,7 +165,7 @@ export function EmotionThemeSettings({
           {/* Manual Override */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium text-orange-50">
+              <h4 className="text-sm font-medium">
                 Manual Override
               </h4>
               {settings.manualOverride && (
@@ -207,7 +207,7 @@ export function EmotionThemeSettings({
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-orange-400" />
-              <h4 className="text-sm font-medium text-orange-50">
+              <h4 className="text-sm font-medium">
                 Transition Speed
               </h4>
             </div>
@@ -230,7 +230,7 @@ export function EmotionThemeSettings({
 
           {/* Accessibility Options */}
           <div className="space-y-3 rounded-2xl border border-indigo-400/30 bg-indigo-950/20 p-4">
-            <h4 className="flex items-center gap-2 text-sm font-medium text-orange-50">
+            <h4 className="flex items-center gap-2 text-sm font-medium">
               <Eye className="h-4 w-4 text-indigo-400" />
               Accessibility
             </h4>

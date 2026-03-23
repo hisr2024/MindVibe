@@ -5,7 +5,7 @@ export default function NotFound() {
     <main className="flex min-h-screen items-center justify-center bg-slate-950 p-6" aria-labelledby="not-found-heading">
       <div className="max-w-md text-center">
         <div className="mb-6 text-6xl" aria-hidden="true">&#x1F549;&#xFE0F;</div>
-        <h1 id="not-found-heading" className="mb-3 text-2xl font-semibold text-slate-100">
+        <h1 id="not-found-heading" className="mb-3 text-2xl font-semibold">
           Page Not Found
         </h1>
         <p className="mb-6 text-sm text-slate-400">

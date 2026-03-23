@@ -39,7 +39,7 @@ export function IntentionPhase({ intention, value, onChange, onComplete }: Inten
         transition={{ delay: 0.3 }}
         className="text-center mb-10"
       >
-        <h2 className="text-2xl font-light text-[#FFF8DC] mb-2">
+        <h2 className="text-2xl font-light mb-2">
           Dharma Intention
         </h2>
         <p className="text-sm text-[#d4a44c]/60">

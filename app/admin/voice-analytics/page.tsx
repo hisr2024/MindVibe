@@ -221,7 +221,7 @@ export default function AdminVoiceAnalyticsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">
+          <h1 className="text-2xl font-bold">
             <span className="mr-2">🎙️</span>
             KIAAN Voice Analytics
           </h1>
@@ -253,7 +253,7 @@ export default function AdminVoiceAnalyticsPage() {
           <p className="mt-1 text-2xl font-bold text-slate-100">
             {formatNumber(overview?.total_queries_today || 0)}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-caption text-[var(--mv-text-muted)]">
             {formatNumber(overview?.unique_users_today || 0)} unique users
           </p>
         </div>
@@ -262,7 +262,7 @@ export default function AdminVoiceAnalyticsPage() {
           <p className="mt-1 text-2xl font-bold text-green-400">
             {formatMs(overview?.avg_latency_ms || null)}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-caption text-[var(--mv-text-muted)]">
             P95: {formatMs(overview?.p95_latency_ms || null)}
           </p>
         </div>
@@ -271,7 +271,7 @@ export default function AdminVoiceAnalyticsPage() {
           <p className="mt-1 text-2xl font-bold text-yellow-400">
             {overview?.avg_rating ? `${overview.avg_rating}/5.0` : '-'}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-caption text-[var(--mv-text-muted)]">
             Cache hit: {overview?.cache_hit_rate?.toFixed(1)}%
           </p>
         </div>
@@ -280,7 +280,7 @@ export default function AdminVoiceAnalyticsPage() {
           <p className="mt-1 text-2xl font-bold text-[#d4a44c]">
             {formatCost(overview?.estimated_cost_usd || 0)}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-caption text-[var(--mv-text-muted)]">
             {formatNumber(overview?.total_queries_month || 0)} queries
           </p>
         </div>
@@ -316,7 +316,7 @@ export default function AdminVoiceAnalyticsPage() {
 
       {/* Usage Trend Chart */}
       <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
-        <h2 className="mb-4 text-lg font-semibold text-slate-100">Voice Usage Trend</h2>
+        <h2 className="mb-4 text-lg font-semibold">Voice Usage Trend</h2>
         <ResponsiveContainer width="100%" height={280}>
           <AreaChart data={trends?.daily_stats || []}>
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -354,7 +354,7 @@ export default function AdminVoiceAnalyticsPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Language Distribution */}
         <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
-          <h2 className="mb-4 text-lg font-semibold text-slate-100">Language Distribution</h2>
+          <h2 className="mb-4 text-lg font-semibold">Language Distribution</h2>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie
@@ -390,7 +390,7 @@ export default function AdminVoiceAnalyticsPage() {
 
         {/* Emotion Detection */}
         <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
-          <h2 className="mb-4 text-lg font-semibold text-slate-100">Detected Emotions</h2>
+          <h2 className="mb-4 text-lg font-semibold">Detected Emotions</h2>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={emotionData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -407,8 +407,8 @@ export default function AdminVoiceAnalyticsPage() {
 
       {/* Concern Distribution */}
       <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
-        <h2 className="mb-4 text-lg font-semibold text-slate-100">User Concerns (Aggregated)</h2>
-        <p className="mb-4 text-xs text-slate-500">
+        <h2 className="mb-4 text-lg font-semibold">User Concerns (Aggregated)</h2>
+        <p className="mb-4 text-caption text-[var(--mv-text-muted)]">
           * Topics are aggregated and anonymized. No individual conversation data exposed.
         </p>
         <div className="space-y-3">
@@ -433,7 +433,7 @@ export default function AdminVoiceAnalyticsPage() {
 
       {/* Enhancement Sessions */}
       <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
-        <h2 className="mb-4 text-lg font-semibold text-slate-100">Voice Enhancement Sessions</h2>
+        <h2 className="mb-4 text-lg font-semibold">Voice Enhancement Sessions</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-lg border border-slate-600 bg-slate-700/30 p-4 text-center">
             <p className="text-2xl font-bold text-purple-400">
@@ -482,7 +482,7 @@ export default function AdminVoiceAnalyticsPage() {
 
       {/* Voice Type Distribution */}
       <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
-        <h2 className="mb-4 text-lg font-semibold text-slate-100">Voice Type Preferences</h2>
+        <h2 className="mb-4 text-lg font-semibold">Voice Type Preferences</h2>
         <div className="flex gap-6 flex-wrap">
           {trends &&
             Object.entries(trends.voice_type_distribution).map(([type, count]) => (

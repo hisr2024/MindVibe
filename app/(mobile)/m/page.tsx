@@ -148,7 +148,7 @@ const FALLBACK_WISDOM: DailyWisdom = {
 /** Loading skeleton for the home page */
 function HomeSkeleton() {
   return (
-    <div className="px-4 pt-2 pb-8 space-y-6 animate-pulse">
+    <div className="px-page-x pt-2 pb-8 space-y-6 animate-pulse">
       {/* Greeting skeleton */}
       <div className="pt-safe-top">
         <div className="h-4 w-28 bg-white/[0.06] rounded-lg" />
@@ -333,15 +333,15 @@ export default function MobileHomePage() {
       enablePullToRefresh
       onRefresh={handleRefresh}
     >
-      <div className="px-4 pt-2 pb-8 space-y-6">
+      <div className="px-page-x pt-2 pb-8 space-y-6">
         {/* Header with greeting */}
         <motion.header
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="pt-safe-top"
         >
-          <p className="text-sm text-slate-400">{getGreeting()}</p>
-          <h1 className="text-2xl font-bold text-white mt-1">
+          <p className="text-caption text-[var(--mv-text-muted)]">{getGreeting()}</p>
+          <h1 className="text-2xl font-bold mt-1">
             {userName}{' '}
             <motion.span
               className="inline-block"
@@ -369,7 +369,7 @@ export default function MobileHomePage() {
         >
           <div className="p-4 rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/[0.08]">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-medium text-slate-300">How are you feeling?</h2>
+              <h2 className="text-sm font-medium">How are you feeling?</h2>
               <AnimatePresence mode="wait">
                 {moodSaved ? (
                   <motion.span
@@ -448,7 +448,7 @@ export default function MobileHomePage() {
                 {dashboardData.streak}
               </span>
             </div>
-            <p className="text-[10px] text-slate-400">Day Streak</p>
+            <p className="text-caption text-[var(--mv-text-muted)]">Day Streak</p>
           </motion.div>
 
           <motion.div
@@ -461,7 +461,7 @@ export default function MobileHomePage() {
                 {dashboardData.journalEntries}
               </span>
             </div>
-            <p className="text-[10px] text-slate-400">Reflections</p>
+            <p className="text-caption text-[var(--mv-text-muted)]">Reflections</p>
           </motion.div>
 
           <motion.div
@@ -474,7 +474,7 @@ export default function MobileHomePage() {
                 {dashboardData.insightsCount}
               </span>
             </div>
-            <p className="text-[10px] text-slate-400">Insights</p>
+            <p className="text-caption text-[var(--mv-text-muted)]">Insights</p>
           </motion.div>
         </motion.section>
 
@@ -499,7 +499,7 @@ export default function MobileHomePage() {
                   <p className="text-xs text-cyan-400 font-medium mb-1">
                     Active Journey
                   </p>
-                  <h3 className="text-base font-semibold text-white">
+                  <h3 className="text-base font-semibold">
                     {dashboardData.activeJourney.title}
                   </h3>
                 </div>
@@ -519,7 +519,7 @@ export default function MobileHomePage() {
                   />
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-slate-400">
+                  <span className="text-[var(--mv-text-muted)]">
                     Day {dashboardData.activeJourney.currentDay} of{' '}
                     {dashboardData.activeJourney.totalDays}
                   </span>
@@ -543,10 +543,10 @@ export default function MobileHomePage() {
                   <p className="text-xs text-cyan-400 font-medium mb-0.5">
                     Wisdom Journeys
                   </p>
-                  <h3 className="text-base font-semibold text-white">
+                  <h3 className="text-base font-semibold">
                     Start Your Transformation
                   </h3>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-caption text-[var(--mv-text-muted)] mt-0.5">
                     14-day guided paths to conquer inner enemies with Gita wisdom
                   </p>
                 </div>
@@ -562,7 +562,7 @@ export default function MobileHomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
         >
-          <h2 className="text-sm font-medium text-slate-400 mb-3">
+          <h2 className="text-sm font-medium text-[var(--mv-text-muted)] mb-3">
             Quick Actions
           </h2>
           <div className="grid grid-cols-2 gap-3">
@@ -577,10 +577,10 @@ export default function MobileHomePage() {
                 className={`p-4 rounded-2xl text-left bg-gradient-to-br ${action.gradient} border border-white/[0.06] active:border-white/[0.12]`}
               >
                 <action.icon className={`w-6 h-6 ${action.iconColor} mb-2`} />
-                <h3 className="text-sm font-semibold text-white">
+                <h3 className="text-sm font-semibold">
                   {action.label}
                 </h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="text-caption text-[var(--mv-text-muted)] mt-0.5">
                   {action.description}
                 </p>
               </motion.button>
@@ -607,10 +607,10 @@ export default function MobileHomePage() {
                 <p className="text-xs text-teal-400 font-medium">
                   Daily Wisdom
                 </p>
-                <p className="text-sm text-white mt-0.5 line-clamp-2">
+                <p className="text-body text-[var(--mv-text-secondary)] mt-0.5 line-clamp-2">
                   &ldquo;{dailyWisdom.translation}&rdquo;
                 </p>
-                <p className="text-[10px] text-slate-500 mt-1">
+                <p className="text-caption text-[var(--mv-text-muted)] mt-1">
                   — Bhagavad Gita {dailyWisdom.chapter}.{dailyWisdom.verse}
                 </p>
               </div>

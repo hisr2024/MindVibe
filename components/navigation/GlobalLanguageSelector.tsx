@@ -131,7 +131,7 @@ export function GlobalLanguageSelector({ className = '' }: GlobalLanguageSelecto
           >
             {/* Header */}
             <div className="border-b border-white/10 bg-gradient-to-r from-[#d4a44c]/10 to-purple-500/10 px-4 py-3">
-              <h3 className="text-sm font-semibold text-white/90">Select Language</h3>
+              <h3 className="text-sm font-semibold">Select Language</h3>
               <p className="text-xs text-white/70 mt-0.5">Choose your preferred language</p>
             </div>
 

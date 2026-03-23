@@ -367,7 +367,7 @@ export function BreathingSyncControl({
               <Wind className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-white">Breathing Guide</h3>
+              <h3 className="font-semibold">Breathing Guide</h3>
               <p className="text-xs text-white/70">Voice-Synced Breathwork</p>
             </div>
           </div>

@@ -195,7 +195,7 @@ export default function WisdomRoomsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] text-white p-4 md:p-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] px-page-x py-4 md:py-8">
       <div className="max-w-5xl mx-auto space-y-6">
         <header className="rounded-3xl border border-[#d4a44c]/15 bg-[#0d0d10]/85 p-6 md:p-8 shadow-[0_20px_80px_rgba(212,164,76,0.12)]">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -266,7 +266,7 @@ export default function WisdomRoomsPage() {
                 <div key={msg.id} className={`flex ${msg.user_id === currentUserId ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[85%] md:max-w-[70%] px-4 py-3 rounded-2xl text-sm shadow-lg ${
                     msg.user_id === currentUserId
-                      ? 'bg-gradient-to-r from-[#d4a44c]/80 via-[#ff9933]/80 to-[#d4a44c]/80 text-white'
+                      ? 'bg-gradient-to-r from-[#d4a44c]/80 via-[#ff9933]/80 to-[#d4a44c]/80 text-[#f5f0e8]'
                       : 'bg-white/5 border border-[#e8b54a]/10 text-[#f5f0e8] backdrop-blur'
                   }`}>
                     <p className="font-semibold mb-1">{msg.user_id === currentUserId ? 'You' : 'Participant'}</p>

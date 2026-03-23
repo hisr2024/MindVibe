@@ -173,7 +173,7 @@ export default function MobileWisdomPage() {
       enablePullToRefresh
       onRefresh={handleRefresh}
     >
-      <div className="px-4 pb-safe-bottom space-y-6">
+      <div className="px-page-x pb-safe-bottom space-y-section-lg">
         {/* Daily Verse Card */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
@@ -208,7 +208,7 @@ export default function MobileWisdomPage() {
 
             {/* Commentary */}
             {dailyVerse.commentary && (
-              <p className="text-sm text-slate-400 leading-relaxed mb-4">
+              <p className="text-body text-[var(--mv-text-secondary)] leading-relaxed mb-4">
                 {dailyVerse.commentary}
               </p>
             )}
@@ -284,7 +284,7 @@ export default function MobileWisdomPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <h2 className="text-sm font-medium text-slate-400 mb-3">Explore by Theme</h2>
+          <h2 className="text-sm font-medium text-[var(--mv-text-muted)] mb-3">Explore by Theme</h2>
           <div className="grid grid-cols-2 gap-3">
             {WISDOM_THEMES.map((theme, index) => (
               <motion.button
@@ -297,7 +297,7 @@ export default function MobileWisdomPage() {
                 className={`p-4 rounded-2xl text-left bg-gradient-to-br ${theme.gradient} border ${theme.border}`}
               >
                 <span className="text-2xl mb-2 block">{theme.emoji}</span>
-                <p className="text-sm font-medium text-white">{theme.label}</p>
+                <p className="text-sm font-medium">{theme.label}</p>
               </motion.button>
             ))}
           </div>
@@ -322,8 +322,8 @@ export default function MobileWisdomPage() {
                 <Sparkles className="w-5 h-5 text-purple-400" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-white">Ask KIAAN</p>
-                <p className="text-xs text-slate-400 mt-0.5">Get personalized wisdom for your situation</p>
+                <p className="text-sm font-semibold">Ask KIAAN</p>
+                <p className="text-caption text-[var(--mv-text-muted)] mt-0.5">Get personalized wisdom for your situation</p>
               </div>
               <ChevronRight className="w-5 h-5 text-slate-500" />
             </div>
@@ -349,8 +349,8 @@ export default function MobileWisdomPage() {
                 <Users className="w-5 h-5 text-[#d4a44c]" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-white">Wisdom Chat Rooms</p>
-                <p className="text-xs text-slate-400 mt-0.5">Join live community conversations</p>
+                <p className="text-sm font-semibold">Wisdom Chat Rooms</p>
+                <p className="text-caption text-[var(--mv-text-muted)] mt-0.5">Join live community conversations</p>
               </div>
               <ChevronRight className="w-5 h-5 text-slate-500" />
             </div>
@@ -373,8 +373,8 @@ export default function MobileWisdomPage() {
                 <BookOpen className="w-5 h-5 text-teal-400" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-white">Explore the Bhagavad Gita</p>
-                <p className="text-xs text-slate-400 mt-0.5">700+ verses across 18 chapters</p>
+                <p className="text-sm font-semibold">Explore the Bhagavad Gita</p>
+                <p className="text-caption text-[var(--mv-text-muted)] mt-0.5">700+ verses across 18 chapters</p>
               </div>
               <ChevronRight className="w-5 h-5 text-slate-500" />
             </div>

@@ -285,7 +285,7 @@ export function SpatialAudioControl({
               <Headphones className="w-5 h-5 text-blue-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-white">3D Spatial Audio</h3>
+              <h3 className="font-semibold">3D Spatial Audio</h3>
               <p className="text-xs text-white/70">Immersive Sound Positioning</p>
             </div>
           </div>

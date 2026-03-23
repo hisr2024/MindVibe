@@ -358,7 +358,7 @@ export default function MobileJourneysPage() {
         {/* Active Journeys */}
         {activeJourneys.length > 0 && (
           <div className="px-4 mb-6">
-            <h2 className="text-sm font-medium text-slate-400 mb-3">Continue Your Journey</h2>
+            <h2 className="text-sm font-medium text-[var(--mv-text-muted)] mb-3">Continue Your Journey</h2>
             <div className="space-y-3">
               {activeJourneys.map((journey) => (
                 <motion.button
@@ -372,10 +372,10 @@ export default function MobileJourneysPage() {
                       <Compass className="w-6 h-6 text-[#d4a44c]" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-semibold text-white truncate">
+                      <h3 className="text-base font-semibold truncate">
                         {journey.title}
                       </h3>
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p className="text-caption text-[var(--mv-text-muted)] mt-0.5">
                         Day {journey.current_day} of {journey.duration_days}
                       </p>
 
@@ -402,7 +402,7 @@ export default function MobileJourneysPage() {
 
         {/* Available Templates */}
         <div className="px-4">
-          <h2 className="text-sm font-medium text-slate-400 mb-3">
+          <h2 className="text-sm font-medium text-[var(--mv-text-muted)] mb-3">
             {selectedCategory === 'all' ? 'Explore Journeys' : `${CATEGORIES.find(c => c.id === selectedCategory)?.label} Journeys`}
           </h2>
 
@@ -418,9 +418,9 @@ export default function MobileJourneysPage() {
           ) : filteredTemplates.length === 0 ? (
             <div className="text-center py-12">
               <Compass className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <p className="text-slate-400">No journeys found</p>
+              <p className="text-body text-[var(--mv-text-secondary)]">No journeys found</p>
               {searchQuery && (
-                <p className="text-sm text-slate-500 mt-1">
+                <p className="text-caption text-[var(--mv-text-muted)] mt-1">
                   Try a different search term
                 </p>
               )}
@@ -448,14 +448,14 @@ export default function MobileJourneysPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-base font-semibold text-white truncate">
+                        <h3 className="text-base font-semibold truncate">
                           {template.title}
                         </h3>
                         {template.is_premium && (
                           <Sparkles className="w-4 h-4 text-[#d4a44c] flex-shrink-0" />
                         )}
                       </div>
-                      <p className="text-xs text-slate-400 line-clamp-2">
+                      <p className="text-caption text-[var(--mv-text-muted)] line-clamp-2">
                         {template.description}
                       </p>
 

@@ -5,10 +5,10 @@ export const metadata = {
 
 export default function PrivacyPage() {
   return (
-    <main className="mx-auto max-w-5xl space-y-8 px-4 pb-16">
+    <main className="mx-auto max-w-5xl space-y-8 px-page-x pb-16">
       <section className="rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#050507]/80 to-[#0f0a08]/90 p-8 shadow-[0_20px_80px_rgba(212,164,76,0.12)]">
         <p className="text-xs uppercase tracking-[0.22em] text-[#f5f0e8]/70">Privacy</p>
-        <h1 className="text-3xl font-bold text-[#f5f0e8]">Confidential by default</h1>
+        <h1 className="text-3xl font-bold">Confidential by default</h1>
         <p className="mt-4 text-[#f5f0e8]/80">
           Journals encrypt locally with your passphrase; we do not store or transmit them. Chat requests travel over HTTPS to the
           configured backend and never enter ad networks.
@@ -17,16 +17,16 @@ export default function PrivacyPage() {
 
       <section className="rounded-3xl border border-[#d4a44c]/15 bg-black/40 p-6 space-y-3">
         <div>
-          <h2 className="text-lg font-semibold text-[#f5f0e8]">What we store</h2>
-          <p className="text-sm text-[#f5f0e8]/80">Minimal local storage for preferences and encrypted entries. No analytics pixels.</p>
+          <h2 className="text-lg font-semibold">What we store</h2>
+          <p className="text-body text-[var(--mv-text-secondary)]">Minimal local storage for preferences and encrypted entries. No analytics pixels.</p>
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-[#f5f0e8]">Your control</h2>
-          <p className="text-sm text-[#f5f0e8]/80">Export or delete your sacred reflections at any time. Your spiritual journey remains fully in your hands.</p>
+          <h2 className="text-lg font-semibold">Your control</h2>
+          <p className="text-body text-[var(--mv-text-secondary)]">Export or delete your sacred reflections at any time. Your spiritual journey remains fully in your hands.</p>
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-[#f5f0e8]">Built with reverence</h2>
-          <p className="text-sm text-[#f5f0e8]/80">
+          <h2 className="text-lg font-semibold">Built with reverence</h2>
+          <p className="text-body text-[var(--mv-text-secondary)]">
             Your trust is sacred. Sakha is built with the highest standards of data protection — encrypted storage, consent-first design, and complete transparency. A spiritual companion you can rely on.
           </p>
         </div>

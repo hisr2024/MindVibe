@@ -93,7 +93,7 @@ export default function AdminABTestsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">A/B Tests</h1>
+          <h1 className="text-2xl font-bold">A/B Tests</h1>
           <p className="text-sm text-slate-400">
             Create and manage experiments
           </p>
@@ -116,7 +116,7 @@ export default function AdminABTestsPage() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
-                    <h3 className="font-semibold text-slate-100">{test.name}</h3>
+                    <h3 className="font-semibold">{test.name}</h3>
                     <span className={`rounded px-2 py-0.5 text-xs ${getStatusColor(test.status)}`}>
                       {test.status}
                     </span>
@@ -134,7 +134,7 @@ export default function AdminABTestsPage() {
                       </span>
                     ))}
                   </div>
-                  <div className="mt-2 text-xs text-slate-500">
+                  <div className="mt-2 text-caption text-[var(--mv-text-muted)]">
                     Traffic: {test.trafficPercentage}% • Created: {new Date(test.createdAt).toLocaleDateString()}
                   </div>
                 </div>
@@ -156,7 +156,7 @@ export default function AdminABTestsPage() {
               {/* Results Preview for Running Tests */}
               {test.status === 'running' && test.id === 1 && (
                 <div className="mt-6 rounded-lg bg-slate-700/30 p-4">
-                  <h4 className="mb-3 text-sm font-medium text-slate-200">Current Results</h4>
+                  <h4 className="mb-3 text-sm font-medium">Current Results</h4>
                   <ResponsiveContainer width="100%" height={150}>
                     <BarChart data={mockResults}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#334155" />

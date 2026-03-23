@@ -60,7 +60,7 @@ export function ArrivalPhase({ greeting, isComposing, onMoodSelect }: ArrivalPha
         transition={{ duration: 0.8, delay: 0.3 }}
         className="text-center mb-12 relative z-10"
       >
-        <h1 className="text-3xl md:text-4xl font-light text-[#FFF8DC] mb-2">
+        <h1 className="text-3xl md:text-4xl font-light mb-2">
           {timeGreeting}
         </h1>
         <p className="text-lg text-[#d4a44c]/70">

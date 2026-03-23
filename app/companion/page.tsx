@@ -809,7 +809,7 @@ export default function CompanionPage() {
             intensity={isLoading ? 0.8 : 0.5}
           />
 
-          <h2 className="mt-6 text-lg font-semibold text-white/90 tracking-wide">KIAAN</h2>
+          <h2 className="mt-6 text-lg font-semibold tracking-wide">KIAAN</h2>
           <p className="text-xs text-white/70 mt-0.5">
             {isLoading ? 'Thinking...' : session.isActive ? 'Your best friend' : 'Session ended'}
           </p>

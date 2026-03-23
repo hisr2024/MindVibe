@@ -24,7 +24,7 @@ export function SessionSummary({
         <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-amber-300 shadow-lg shadow-orange-500/30">
           <span className="text-3xl">🌟</span>
         </div>
-        <h3 className="text-xl font-semibold text-orange-50">
+        <h3 className="text-xl font-semibold">
           Session Complete
         </h3>
         <p className="text-sm text-orange-100/70">
@@ -34,7 +34,7 @@ export function SessionSummary({
 
       {/* Summary */}
       <div className="rounded-2xl border border-orange-500/20 bg-gradient-to-br from-orange-500/10 to-amber-300/10 p-5 space-y-3">
-        <h4 className="text-sm font-semibold uppercase tracking-wide text-orange-100/80">
+        <h4 className="text-sm font-semibold uppercase tracking-wide">
           Session Summary
         </h4>
         <p className="leading-relaxed text-orange-50">
@@ -70,7 +70,7 @@ export function SessionSummary({
 
       {/* Next Steps */}
       <div className="rounded-2xl border border-orange-500/15 bg-black/40 p-5 space-y-3">
-        <h4 className="text-sm font-semibold uppercase tracking-wide text-orange-100/80">
+        <h4 className="text-sm font-semibold uppercase tracking-wide">
           Next Steps
         </h4>
         <ul className="space-y-2">

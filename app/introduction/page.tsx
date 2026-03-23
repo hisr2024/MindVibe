@@ -129,7 +129,7 @@ export default function IntroductionPage() {
 
         {/* Main Container - Responsive padding with CSS containment to prevent layout thrashing */}
         <main
-          className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-28 sm:pb-20 md:pb-10"
+          className="mx-auto max-w-6xl px-page-x lg:px-8 pb-28 sm:pb-20 md:pb-10"
           style={{ contain: 'layout style', touchAction: 'manipulation' }}
         >
           {/* ==================== HERO SECTION ==================== */}
@@ -296,7 +296,7 @@ export default function IntroductionPage() {
               <div className="flex items-center justify-center gap-3 mb-4 sm:mb-5">
                 <Heart className="w-6 h-6 sm:w-7 sm:h-7 text-[#d4a44c]/70" />
                 <div className="text-center">
-                  <h3 className="text-white/85 font-medium text-base sm:text-lg">{t('home.introduction.howIsHeart', 'How is your heart?')}</h3>
+                  <h3 className="font-medium text-base sm:text-lg">{t('home.introduction.howIsHeart', 'How is your heart?')}</h3>
                   <p className="text-white/70 text-xs sm:text-sm">{t('home.introduction.shareFeelings', 'Share your feelings with Krishna')}</p>
                 </div>
               </div>
@@ -354,7 +354,7 @@ export default function IntroductionPage() {
                       <Home className="w-6 h-6 sm:w-7 sm:h-7 text-[#d4a44c]/70" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-white/85 font-semibold text-base sm:text-lg">{t('home.introduction.goToDashboard', 'Go to Dashboard')}</h3>
+                      <h3 className="font-semibold text-base sm:text-lg">{t('home.introduction.goToDashboard', 'Go to Dashboard')}</h3>
                       <p className="text-white/70 text-xs sm:text-sm">{t('home.introduction.accessTools', 'Access all tools & features')}</p>
                     </div>
                     <div className="text-[#d4a44c]/40 group-hover:text-[#d4a44c]/70 transition-colors flex-shrink-0">
@@ -372,7 +372,7 @@ export default function IntroductionPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.65 }}
                 >
-                  <h3 className="text-white/80 font-medium text-sm sm:text-base mb-3 sm:mb-4">{t('home.introduction.quickAccess', 'Quick Divine Access')}</h3>
+                  <h3 className="font-medium text-sm sm:text-base mb-3 sm:mb-4">{t('home.introduction.quickAccess', 'Quick Divine Access')}</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                     <Link
                       href="/journeys"

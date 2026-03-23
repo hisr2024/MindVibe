@@ -220,7 +220,7 @@ export default function MobileWisdomRoomsPage() {
             </button>
 
             <div className="text-center">
-              <h1 className="text-sm font-semibold text-white">Wisdom Rooms</h1>
+              <h1 className="text-sm font-semibold">Wisdom Rooms</h1>
               <div className="flex items-center justify-center gap-1.5 mt-0.5">
                 <span className={`w-1.5 h-1.5 rounded-full ${
                   status === 'connected' ? 'bg-green-400 animate-pulse' : status === 'connecting' ? 'bg-[#d4a44c]' : 'bg-white/30'
@@ -323,8 +323,8 @@ export default function MobileWisdomRoomsPage() {
           {activeMessages.length === 0 && (
             <div className="text-center py-12">
               <MessageCircle className="w-10 h-10 text-white/10 mx-auto mb-3" />
-              <p className="text-sm text-white/70">No messages yet.</p>
-              <p className="text-xs text-white/20 mt-1">Say hello to open the conversation.</p>
+              <p className="text-body text-[var(--mv-text-secondary)]">No messages yet.</p>
+              <p className="text-caption text-[var(--mv-text-muted)] mt-1">Say hello to open the conversation.</p>
             </div>
           )}
 

@@ -76,7 +76,7 @@ export default function AdminFeatureFlagsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Feature Flags</h1>
+          <h1 className="text-2xl font-bold">Feature Flags</h1>
           <p className="text-sm text-slate-400">
             Manage feature toggles and gradual rollouts
           </p>
@@ -104,7 +104,7 @@ export default function AdminFeatureFlagsPage() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
-                    <h3 className="font-semibold text-slate-100">{flag.name}</h3>
+                    <h3 className="font-semibold">{flag.name}</h3>
                     <code className="rounded bg-slate-700 px-2 py-0.5 text-xs text-slate-300">
                       {flag.key}
                     </code>
@@ -165,7 +165,7 @@ export default function AdminFeatureFlagsPage() {
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md rounded-xl bg-slate-800 p-6">
-            <h2 className="text-lg font-semibold text-slate-100">Create Feature Flag</h2>
+            <h2 className="text-lg font-semibold">Create Feature Flag</h2>
             <form className="mt-4 space-y-4">
               <div>
                 <label htmlFor="flag-key" className="block text-sm text-slate-400">Key</label>

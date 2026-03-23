@@ -59,7 +59,7 @@ export default function AdminModerationPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Content Moderation</h1>
+          <h1 className="text-2xl font-bold">Content Moderation</h1>
           <p className="text-sm text-slate-400">
             Review and moderate flagged content
           </p>
@@ -120,11 +120,11 @@ export default function AdminModerationPage() {
                         {item.status}
                       </span>
                     </div>
-                    <h3 className="mt-2 font-medium text-slate-100">{item.reason}</h3>
+                    <h3 className="mt-2 font-medium">{item.reason}</h3>
                     {item.details && (
                       <p className="mt-1 text-sm text-slate-400">{item.details}</p>
                     )}
-                    <div className="mt-2 text-xs text-slate-500">
+                    <div className="mt-2 text-caption text-[var(--mv-text-muted)]">
                       User: {item.userId} • Flagged: {new Date(item.flaggedAt).toLocaleString()}
                     </div>
                   </div>

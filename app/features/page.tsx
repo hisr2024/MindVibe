@@ -68,14 +68,14 @@ const howItWorks = [
 
 export default function FeaturesPage() {
   return (
-    <main className="mx-auto max-w-6xl space-y-10 px-4 pb-16 mobile-safe-padding">
+    <main className="mx-auto max-w-6xl space-y-10 px-page-x pb-16 mobile-safe-padding">
       {/* Hero Section */}
       <FadeIn>
         <section className="rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#050507]/80 to-[#0f0a08]/90 p-8 shadow-[0_20px_80px_rgba(212,164,76,0.12)]">
           <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div className="space-y-3 text-center md:text-left">
               <p className="text-xs uppercase tracking-[0.22em] text-[#f5f0e8]/70">Features & Flows</p>
-              <h1 className="text-3xl font-bold text-[#f5f0e8] md:text-4xl">Your Personal Wellness Companion</h1>
+              <h1 className="text-3xl font-bold md:text-4xl">Your Personal Wellness Companion</h1>
               <p className="max-w-2xl text-[#f5f0e8]/80 text-sm">Everything you need for your spiritual wellness journey—empathetic, mobile-ready, and built with care.</p>
             </div>
             <div className="flex items-center justify-center gap-2 text-sm text-[#f5f0e8]/80 md:justify-start">
@@ -89,7 +89,7 @@ export default function FeaturesPage() {
       {/* How It Works - Simple 3-step flow */}
       <FadeIn delay={0.1}>
         <section className="rounded-3xl border border-[#d4a44c]/15 bg-black/40 p-6">
-          <h2 className="text-lg font-semibold text-[#f5f0e8] mb-6 text-center">How It Works</h2>
+          <h2 className="text-lg font-semibold mb-6 text-center">How It Works</h2>
           <div className="grid gap-6 md:grid-cols-3">
             {howItWorks.map(({ step, title, description, icon }) => (
               <div key={step} className="text-center">
@@ -97,8 +97,8 @@ export default function FeaturesPage() {
                   {icon}
                 </div>
                 <div className="text-xs text-[#f5f0e8]/75 mb-1">Step {step}</div>
-                <h3 className="text-base font-semibold text-[#f5f0e8] mb-1">{title}</h3>
-                <p className="text-sm text-[#f5f0e8]/70">{description}</p>
+                <h3 className="text-base font-semibold mb-1">{title}</h3>
+                <p className="text-body text-[var(--mv-text-secondary)]">{description}</p>
               </div>
             ))}
           </div>
@@ -108,7 +108,7 @@ export default function FeaturesPage() {
       {/* Feature Cards with Visual Demos (4 cards) */}
       <FadeIn delay={0.2}>
         <section>
-          <h2 className="text-lg font-semibold text-[#f5f0e8] mb-4 text-center">Core Features</h2>
+          <h2 className="text-lg font-semibold mb-4 text-center">Core Features</h2>
           <StaggerContainer className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {featureCards.map(card => (
               <StaggerItem key={card.title}>
@@ -121,8 +121,8 @@ export default function FeaturesPage() {
                           {card.videoPlaceholder}
                         </div>
                         <span className="text-2xl mb-2">{card.icon}</span>
-                        <h2 className="text-lg font-semibold text-[#f5f0e8]">{card.title}</h2>
-                        <p className="mt-1 text-sm text-[#f5f0e8]/70">{card.summary}</p>
+                        <h2 className="text-lg font-semibold">{card.title}</h2>
+                        <p className="mt-1 text-body text-[var(--mv-text-secondary)]">{card.summary}</p>
                       </div>
                     </AnimatedCard>
                   }
@@ -141,7 +141,7 @@ export default function FeaturesPage() {
         <section className="rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-emerald-950/30 to-[#1a0f00]/30 p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h3 className="text-lg font-semibold text-[#f5f0e8] flex items-center gap-2">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
                 <span>🌳</span> Watch Your Growth
               </h3>
               <p className="text-sm text-[#f5f0e8]/70 mt-1">
@@ -162,7 +162,7 @@ export default function FeaturesPage() {
       <FadeIn delay={0.4}>
         <section className="rounded-3xl border border-[#d4a44c]/15 bg-black/40 p-6">
           <div className="flex items-center gap-2 mb-3">
-            <h3 className="text-lg font-semibold text-[#f5f0e8]">Built for performance</h3>
+            <h3 className="text-lg font-semibold">Built for performance</h3>
             <HelpIcon content="Optimized imagery, lazy loading, and mobile-first design" />
           </div>
           <div className="flex flex-wrap gap-2">

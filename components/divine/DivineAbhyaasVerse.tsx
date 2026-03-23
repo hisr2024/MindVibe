@@ -127,7 +127,7 @@ export function DivineAbhyaasVerse() {
           viewport={{ once: true }}
           transition={{ delay: 0.8, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         >
-          <h3 className="text-lg font-semibold tracking-wide text-slate-100/90 sm:text-xl">
+          <h3 className="text-lg font-semibold tracking-wide sm:text-xl">
             {t('home.abhyaas.title', 'The Power of Abhyaas (Practice)')}
           </h3>
           <p className="mx-auto max-w-2xl text-sm leading-relaxed text-slate-300/70 sm:text-base">

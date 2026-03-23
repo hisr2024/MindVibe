@@ -19,7 +19,7 @@ export default function EmotionalResetClient() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] text-white p-4 md:p-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] px-page-x py-4 md:py-8">
       {/* Subtle sacred background gradients */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute -left-20 top-20 h-72 w-72 rounded-full bg-gradient-to-br from-[#d4a44c]/15 via-[#e8b54a]/8 to-transparent blur-[100px]" />

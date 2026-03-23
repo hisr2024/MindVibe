@@ -194,7 +194,7 @@ export const MobileHeader = forwardRef<HTMLElement, MobileHeaderProps>(
             {/* Title (small, centered) */}
             {!largeTitle && title && (
               <div className="flex-1 flex flex-col items-center justify-center min-w-0">
-                <h1 className="text-base font-semibold text-white truncate">
+                <h1 className="text-base font-semibold truncate">
                   {title}
                 </h1>
                 {subtitle && (
@@ -209,7 +209,7 @@ export const MobileHeader = forwardRef<HTMLElement, MobileHeaderProps>(
                 className="flex-1 flex items-center justify-center"
                 style={{ opacity: smallTitleOpacity }}
               >
-                <h1 className="text-base font-semibold text-white truncate">
+                <h1 className="text-base font-semibold truncate">
                   {title}
                 </h1>
               </motion.div>
@@ -231,7 +231,7 @@ export const MobileHeader = forwardRef<HTMLElement, MobileHeaderProps>(
                 transformOrigin: 'left center',
               }}
             >
-              <h1 className="text-2xl font-bold text-white">{title}</h1>
+              <h1 className="text-2xl font-bold">{title}</h1>
               {subtitle && (
                 <p className="text-sm text-slate-400 mt-0.5">{subtitle}</p>
               )}

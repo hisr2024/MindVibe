@@ -166,7 +166,7 @@ export function ToolCard({
 
       {/* Title and description */}
       <div className="mt-3">
-        <h3 className="text-sm font-semibold text-[#f5f0e8] transition-colors duration-200 group-hover:text-white">
+        <h3 className="text-sm font-semibold text-[#f5f0e8] transition-colors duration-200 group-hover:text-[#f5f0e8]">
           {title}
         </h3>
         <p className="mt-1 text-xs text-[#f5f0e8]/75 line-clamp-2 leading-relaxed">

@@ -74,7 +74,7 @@ export default function AdminLogin() {
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#d4a44c] to-[#e8b54a]">
               <span className="text-2xl font-bold text-slate-900">MV</span>
             </div>
-            <h1 className="text-2xl font-bold text-slate-100">Admin Login</h1>
+            <h1 className="text-2xl font-bold">Admin Login</h1>
             <p className="mt-2 text-sm text-slate-400">
               {mfaRequired
                 ? 'Enter your MFA code to continue'
@@ -158,7 +158,7 @@ export default function AdminLogin() {
                   placeholder="000000"
                   autoFocus
                 />
-                <p className="mt-2 text-xs text-slate-400">
+                <p className="mt-2 text-caption text-[var(--mv-text-muted)]">
                   Enter the code from your authenticator app
                 </p>
               </div>

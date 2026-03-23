@@ -211,7 +211,7 @@ export function PWAInstallPrompt({
               <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#d4a44c] to-[#d4a44c] flex items-center justify-center">
                 <Smartphone className="w-8 h-8 text-slate-950" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">
+              <h3 className="text-xl font-bold mb-2">
                 Install {appName}
               </h3>
               <p className="text-slate-400 text-sm">
@@ -347,7 +347,7 @@ export function PWAInstallPrompt({
 
             {/* Content */}
             <div className="flex-1 min-w-0 pr-6">
-              <h3 className="text-white font-semibold mb-1">
+              <h3 className="font-semibold mb-1">
                 Install {appName}
               </h3>
               <p className="text-slate-400 text-sm line-clamp-2">
