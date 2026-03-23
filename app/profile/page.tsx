@@ -179,8 +179,9 @@ export default function ProfilePage() {
     } finally {
       setLoading(false)
     }
-    // Use user?.id (stable string) instead of user object to prevent infinite re-fetch
-  }, [isAuthenticated, user?.id])
+    // Only depend on isAuthenticated (boolean, stable) — access user via userRef
+    // to prevent infinite re-fetch from user object reference changes
+  }, [isAuthenticated])
 
   useEffect(() => {
     if (!authLoading) {

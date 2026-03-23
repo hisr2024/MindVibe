@@ -32,6 +32,7 @@ function OfflineBannerContent({
 
   const formattedLastSync = useMemo(() => {
     if (!lastSyncTime) return t('divine.sacred.system.offline.never', 'Never')
+    // eslint-disable-next-line react-hooks/purity
     const now = Date.now()
     const diff = now - lastSyncTime
     const minutes = Math.floor(diff / 60000)
