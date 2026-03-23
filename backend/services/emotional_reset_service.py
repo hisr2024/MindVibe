@@ -59,6 +59,45 @@ def _get_gita_filter():
             _gita_filter = False
     return _gita_filter if _gita_filter else None
 
+
+# Dynamic Wisdom Corpus - lazy import for effectiveness-learned verse selection
+_dynamic_corpus_instance = None
+
+
+def _get_dynamic_corpus():
+    """Lazy import of Dynamic Wisdom Corpus for effectiveness-learned verse selection."""
+    global _dynamic_corpus_instance
+    if _dynamic_corpus_instance is None:
+        try:
+            from backend.services.dynamic_wisdom_corpus import get_dynamic_wisdom_corpus
+            _dynamic_corpus_instance = get_dynamic_wisdom_corpus()
+            logger.info("EmotionalResetService: Dynamic Wisdom Corpus integrated")
+        except Exception as e:
+            logger.warning(f"EmotionalResetService: Dynamic Wisdom Corpus unavailable: {e}")
+            _dynamic_corpus_instance = False
+    return _dynamic_corpus_instance if _dynamic_corpus_instance else None
+
+
+# Sakha Wisdom Engine - lazy import for semantic JSON corpus search
+_sakha_engine_instance = None
+
+
+def _get_sakha_engine():
+    """Lazy import of Sakha Wisdom Engine for semantic verse matching."""
+    global _sakha_engine_instance
+    if _sakha_engine_instance is None:
+        try:
+            from backend.services.sakha_wisdom_engine import get_sakha_wisdom_engine
+            _sakha_engine_instance = get_sakha_wisdom_engine()
+            if _sakha_engine_instance:
+                logger.info("EmotionalResetService: Sakha Wisdom Engine integrated")
+            else:
+                _sakha_engine_instance = False
+        except Exception as e:
+            logger.warning(f"EmotionalResetService: Sakha Wisdom Engine unavailable: {e}")
+            _sakha_engine_instance = False
+    return _sakha_engine_instance if _sakha_engine_instance else None
+
 # Rate limiting constants
 MAX_SESSIONS_PER_DAY = int(os.getenv("EMOTIONAL_RESET_RATE_LIMIT", "10"))
 SESSION_TIMEOUT_SECONDS = int(os.getenv("EMOTIONAL_RESET_SESSION_TIMEOUT", "1800"))
@@ -90,6 +129,38 @@ def get_verse_identifier(verse) -> str:
     if chapter and verse_num:
         return f"{chapter}.{verse_num}"
     return ""
+
+
+class _DynamicVerseAdapter:
+    """Adapts dict-based verse results (from DynamicWisdomCorpus/SakhaWisdomEngine)
+    to the attribute-access interface expected by verse processing methods."""
+
+    def __init__(self, verse_dict: dict[str, Any]) -> None:
+        self._data = verse_dict
+
+    def __getattr__(self, name: str) -> Any:
+        if name.startswith("_"):
+            raise AttributeError(name)
+        # Map verse_number to verse for get_verse_identifier compatibility
+        if name == "verse_number":
+            ref = self._data.get("verse_ref", "")
+            if "." in ref:
+                try:
+                    return int(ref.split(".")[1])
+                except (ValueError, IndexError):
+                    pass
+            return self._data.get("verse", None)
+        if name == "chapter":
+            ref = self._data.get("verse_ref", "")
+            if "." in ref:
+                try:
+                    return int(ref.split(".")[0])
+                except (ValueError, IndexError):
+                    pass
+            return self._data.get("chapter", None)
+        if name == "english":
+            return self._data.get("wisdom", self._data.get("english", ""))
+        return self._data.get(name, None)
 
 
 class EmotionalResetService:
@@ -520,83 +591,287 @@ One by one, place your worries on these leaves. Watch as the current lifts them,
 With each leaf that floats away, feel yourself becoming lighter. The stream continues to flow, endlessly patient, endlessly renewing. 💙"""
 
     async def generate_wisdom_insights(
-        self, db: AsyncSession, assessment: dict[str, Any]
+        self, db: AsyncSession, assessment: dict[str, Any],
+        emotions_input: str = "", user_id: str = ""
     ) -> list[dict[str, str]]:
         """
         Generate wisdom insights based on assessment (Step 5).
-        Enhanced to use 5 verses and return top 3 insights.
+
+        Uses a 3-tier Wisdom Cascade (matching companion_friend_engine pattern):
+          Tier 1: Static (EMOTION_VERSE_MAPPING + WisdomKnowledgeBase search)
+          Tier 2: Dynamic (DynamicWisdomCorpus - effectiveness-learned selection)
+          Tier 3: Sakha (SakhaWisdomEngine - semantic JSON corpus matching)
 
         Args:
             db: Database session
             assessment: Assessment data from Step 2
+            emotions_input: User's original description of their situation
+            user_id: User identifier for dynamic wisdom tracking
 
         Returns:
             List of top 3 wisdom insights (no citations)
         """
         themes = assessment.get("themes", [])
         emotions = assessment.get("emotions", [])
-
-        # Get specialized verses first using module-level mapping
-        key_verse_results = []
         primary_emotion = emotions[0] if emotions else None
 
+        seen_ids: set[str] = set()
+        unique_verses: list[dict[str, Any]] = []
+
+        # ── Tier 1: Static wisdom (EMOTION_VERSE_MAPPING + WisdomKB search) ──
         if primary_emotion and primary_emotion in EMOTION_VERSE_MAPPING:
             for chapter, verse_num in EMOTION_VERSE_MAPPING[primary_emotion][:3]:
                 try:
                     verse = await GitaService.get_verse_by_reference(db, chapter=chapter, verse=verse_num)
                     if verse:
-                        key_verse_results.append({"verse": verse, "score": 0.9})
+                        verse_id = get_verse_identifier(verse)
+                        if verse_id and verse_id not in seen_ids:
+                            seen_ids.add(verse_id)
+                            unique_verses.append({"verse": verse, "score": 0.9, "source": "static"})
                 except Exception as e:
                     logger.debug(f"Could not fetch verse {chapter}.{verse_num}: {e}")
 
-        # Search for additional verses (increased from 3 to 5)
-        search_query = " ".join(themes + emotions)
+        # Use user's actual words for better verse search relevance
+        label_query = " ".join(themes + emotions)
+        search_query = f"{emotions_input} {label_query}" if emotions_input else label_query
         verse_results = await self.wisdom_kb.search_relevant_verses(db=db, query=search_query, limit=5)
 
-        # Combine and deduplicate
-        all_verse_results = key_verse_results + verse_results
-        seen_ids = set()
-        unique_verses = []
-        for result in all_verse_results:
+        for result in verse_results:
             verse = result["verse"]
             verse_id = get_verse_identifier(verse)
             if verse_id and verse_id not in seen_ids:
                 seen_ids.add(verse_id)
-                unique_verses.append(result)
+                unique_verses.append({**result, "source": "wisdom_kb"})
 
+        # ── Tier 2: Dynamic wisdom (effectiveness-learned selection) ──
+        if len(unique_verses) < 3 and primary_emotion and user_id:
+            dynamic_corpus = _get_dynamic_corpus()
+            if dynamic_corpus:
+                try:
+                    dynamic_verse = await dynamic_corpus.get_effectiveness_weighted_verse(
+                        db=db,
+                        mood=primary_emotion,
+                        user_message=emotions_input or primary_emotion,
+                        phase="guide",
+                        user_id=user_id,
+                        verse_history=list(seen_ids),
+                    )
+                    if dynamic_verse and dynamic_verse.get("wisdom"):
+                        d_ref = dynamic_verse.get("verse_ref", "")
+                        if d_ref and d_ref not in seen_ids:
+                            seen_ids.add(d_ref)
+                            unique_verses.append({
+                                "verse": _DynamicVerseAdapter(dynamic_verse),
+                                "score": dynamic_verse.get("effectiveness_score", 0.8),
+                                "source": "dynamic",
+                            })
+                            logger.info(f"Wisdom[Dynamic]: Added verse {d_ref} (eff={dynamic_verse.get('effectiveness_score', 0):.2f})")
+                except Exception as e:
+                    logger.debug(f"Dynamic wisdom lookup failed (non-critical): {e}")
+
+        # ── Tier 3: Sakha wisdom (semantic JSON corpus matching) ──
+        if len(unique_verses) < 3 and primary_emotion:
+            sakha = _get_sakha_engine()
+            if sakha:
+                try:
+                    sakha_verse = sakha.get_contextual_verse(
+                        mood=primary_emotion,
+                        user_message=emotions_input or primary_emotion,
+                        phase="guide",
+                        verse_history=list(seen_ids),
+                    )
+                    if sakha_verse and sakha_verse.get("wisdom"):
+                        s_ref = sakha_verse.get("verse_ref", "")
+                        if s_ref and s_ref not in seen_ids:
+                            seen_ids.add(s_ref)
+                            unique_verses.append({
+                                "verse": _DynamicVerseAdapter(sakha_verse),
+                                "score": sakha_verse.get("relevance_score", 0.7),
+                                "source": "sakha",
+                            })
+                            logger.info(f"Wisdom[Sakha]: Added verse {s_ref}")
+                except Exception as e:
+                    logger.debug(f"Sakha wisdom lookup failed (non-critical): {e}")
+
+        # ── Build insights from top 3 unique verses ──
         insights = []
-        if unique_verses:
-            # Return top 3 insights (increased from 2)
-            for result in unique_verses[:3]:
-                verse = result["verse"]
-                sanitized = self.wisdom_kb.sanitize_text(verse.english)
-                if sanitized:
-                    insights.append({
-                        "wisdom": sanitized,
-                        "application": self._create_application(verse, emotions),
-                    })
+        for result in unique_verses[:3]:
+            verse = result["verse"]
+            english = getattr(verse, 'english', '')
+            sanitized = self.wisdom_kb.sanitize_text(english) if english else None
+            if sanitized:
+                application = await self._create_application(verse, emotions, emotions_input)
+                insights.append({
+                    "wisdom": sanitized,
+                    "application": application,
+                })
+
+        # Record wisdom deliveries for dynamic learning (non-blocking)
+        if insights and user_id and user_id != "anonymous":
+            dynamic_corpus = _get_dynamic_corpus()
+            if dynamic_corpus:
+                for result in unique_verses[:len(insights)]:
+                    verse = result["verse"]
+                    verse_ref = get_verse_identifier(verse)
+                    if not verse_ref:
+                        verse_ref = getattr(verse, 'verse_ref', '')
+                    if verse_ref:
+                        try:
+                            await dynamic_corpus.record_wisdom_delivery(
+                                db=db,
+                                user_id=user_id,
+                                session_id="emotional_reset",
+                                verse_ref=verse_ref,
+                                principle=getattr(verse, 'principle', None) or getattr(verse, 'theme', None),
+                                mood=primary_emotion or "uncertain",
+                                mood_intensity=0.6,
+                                phase="guide",
+                                theme=getattr(verse, 'theme', None),
+                            )
+                        except Exception as e:
+                            logger.debug(f"Wisdom delivery recording failed (non-critical): {e}")
 
         # Fallback if no verses found
         if not insights:
-            insights = self._get_fallback_wisdom(emotions)
+            insights = self._get_fallback_wisdom(emotions, themes)
 
         return insights
 
-    def _create_application(self, _verse: WisdomVerse, emotions: list[str]) -> str:
-        """Create practical application of wisdom for the user."""
+    async def _create_application(self, verse: WisdomVerse, emotions: list[str], emotions_input: str = "") -> str:
+        """Create practical application of wisdom connecting the verse to the user's specific situation."""
+        # When we have the user's actual words and OpenAI is ready, generate a situation-specific application
+        if emotions_input and self.optimizer.ready:
+            try:
+                verse_text = self.wisdom_kb.sanitize_text(getattr(verse, 'english', ''))
+                if verse_text:
+                    prompt = f"""A user shared: "{emotions_input}"
+
+This wisdom speaks to their situation: "{verse_text}"
+
+Write 1-2 sentences connecting this wisdom directly to their specific situation.
+Be concrete — reference their actual circumstances. No generic advice.
+Secular language. Warm and grounded. Under 40 words."""
+
+                    response = await self.optimizer.create_completion_with_retry(
+                        messages=[
+                            {"role": "system", "content": "You create brief, situation-specific applications of wisdom. Connect ancient insight to the person's real life."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        model="gpt-4o-mini",
+                        temperature=0.7,
+                        max_tokens=80,
+                    )
+
+                    content = ""
+                    if response and response.choices and len(response.choices) > 0:
+                        response_msg = response.choices[0].message
+                        if response_msg and response_msg.content:
+                            content = response_msg.content.strip()
+
+                    if content and len(content) > 15:
+                        content = await self._apply_gita_filter(content, emotions_input)
+                        return content
+            except Exception as e:
+                logger.debug(f"AI application generation failed (using fallback): {e}")
+
+        # Fallback: static applications keyed by emotion
+        return self._get_fallback_application(emotions)
+
+    def _get_fallback_application(self, emotions: list[str]) -> str:
+        """Static fallback applications keyed by primary emotion."""
         applications = {
             "anxious": "When anxiety arises, remember that you can only control your actions, not outcomes.",
             "stressed": "In moments of pressure, find peace by focusing on the present task, not future worries.",
             "sad": "Sadness reminds us of what we value. Honor it, then gently return to the present.",
             "angry": "Channel your energy into constructive action rather than dwelling on what caused the upset.",
             "overwhelmed": "Break down your challenges into small, manageable steps. One breath at a time.",
+            "hopeless": "Even in darkness, one small act of intention can restart the flow of meaning.",
+            "confused": "When clarity eludes you, step back from thinking and let stillness reveal what matters.",
         }
 
         primary_emotion = emotions[0] if emotions else "overwhelmed"
         return applications.get(primary_emotion, applications["overwhelmed"])
 
-    def _get_fallback_wisdom(self, _emotions: list[str]) -> list[dict[str, str]]:
-        """Generate fallback wisdom when verses not found."""
+    def _get_fallback_wisdom(self, emotions: list[str], themes: list[str] | None = None) -> list[dict[str, str]]:
+        """Generate emotion-specific fallback wisdom when verses not found."""
+        emotion_wisdom = {
+            "anxious": [
+                {
+                    "wisdom": "The mind, when untrained, amplifies uncertainty into catastrophe. But within you lives an observer who watches the storm without being swept away.",
+                    "application": "When anxiety tightens your chest, pause and name three things you can actually control right now. Release the rest.",
+                },
+                {
+                    "wisdom": "Your dharma lies in the effort, not the outcome. When you pour yourself into right action and release your grip on results, the weight of worry lifts.",
+                    "application": "Choose one action today that aligns with your values, and offer it without attachment to how it turns out.",
+                },
+            ],
+            "stressed": [
+                {
+                    "wisdom": "Pressure is not the enemy — your relationship with it is. The steady mind treats urgency and calm with the same composure.",
+                    "application": "Before your next task, take three conscious breaths. Work from steadiness, not from the frenzy of the clock.",
+                },
+                {
+                    "wisdom": "No burden was meant to be carried all at once. True strength is knowing when to set something down and return to it refreshed.",
+                    "application": "Identify one expectation you can soften today. Give yourself permission to do enough, not everything.",
+                },
+            ],
+            "sad": [
+                {
+                    "wisdom": "Sadness is the heart's way of honoring what mattered. It is not weakness — it is the depth of your capacity to care.",
+                    "application": "Allow yourself to feel this fully without rushing to fix it. Grief and love are made of the same substance.",
+                },
+                {
+                    "wisdom": "Just as seasons turn without asking permission, emotional states move through you. This heaviness is not permanent, even when it feels absolute.",
+                    "application": "Treat yourself today as you would treat someone you love who is hurting. Gentleness is medicine.",
+                },
+            ],
+            "angry": [
+                {
+                    "wisdom": "Anger carries information about your boundaries, your values, about what you will and will not accept. It deserves your attention, not your obedience.",
+                    "application": "Ask yourself: what need is this anger protecting? Redirect its energy toward that need constructively.",
+                },
+                {
+                    "wisdom": "Reactivity chains you to the thing that provoked you. Equanimity frees you to respond with clarity rather than combustion.",
+                    "application": "Before you act on the anger, pause for 90 seconds. The chemical surge subsides, and wisdom has space to enter.",
+                },
+            ],
+            "overwhelmed": [
+                {
+                    "wisdom": "The mind drowns when it tries to hold the ocean all at once. You are not failing — you are simply holding too much simultaneously.",
+                    "application": "Write down everything on your mind, then circle only the one thing that matters most today. Start there.",
+                },
+                {
+                    "wisdom": "You were never meant to solve everything at once. Dharma asks for your full presence in one task, not your fractured attention across twenty.",
+                    "application": "Give yourself permission to do one thing at a time. Depth of attention replaces the anxiety of breadth.",
+                },
+            ],
+            "hopeless": [
+                {
+                    "wisdom": "Even the darkest night cannot prevent the sunrise. Hopelessness is an emotional state, not a factual assessment of your future.",
+                    "application": "Think of one time in the past when things felt impossible but eventually shifted. That same capacity lives in you now.",
+                },
+                {
+                    "wisdom": "When you cannot see the path forward, it does not mean no path exists. Sometimes the next step is simply being willing to take one more breath.",
+                    "application": "Today, commit to nothing more than staying present for the next hour. Then the next. That is enough.",
+                },
+            ],
+            "confused": [
+                {
+                    "wisdom": "Confusion is the mind's way of saying: I am processing something larger than my current understanding. It is not failure — it is the threshold of growth.",
+                    "application": "Stop trying to think your way to clarity. Instead, sit with the not-knowing. Answers often surface when you stop chasing them.",
+                },
+                {
+                    "wisdom": "Discernment comes not from more information but from inner stillness. When the waters of the mind settle, you can see the bottom clearly.",
+                    "application": "Step away from the decision for one hour. Return with fresh eyes and notice what feels true in your body, not just your mind.",
+                },
+            ],
+        }
+
+        primary_emotion = emotions[0] if emotions else None
+        if primary_emotion and primary_emotion in emotion_wisdom:
+            return emotion_wisdom[primary_emotion]
+
+        # Default fallback for unrecognized emotions
         return [
             {
                 "wisdom": "True peace comes not from external circumstances, but from within. When you cultivate inner stability, no storm can shake your core.",
@@ -609,7 +884,7 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
         ]
 
     async def create_affirmations(
-        self, emotions: list[str], themes: list[str]
+        self, emotions: list[str], themes: list[str], emotions_input: str = ""
     ) -> list[str]:
         """
         Generate personalized affirmations (Step 6) with quantum coherence.
@@ -619,20 +894,24 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
         Args:
             emotions: List of identified emotions
             themes: List of identified themes
+            emotions_input: User's original description of their situation
 
         Returns:
             List of 3-5 personalized affirmations grounded in Gita wisdom
         """
         if not self.optimizer.ready:
-            return self._get_fallback_affirmations(emotions)
+            return self._get_fallback_affirmations(emotions, themes)
 
         try:
             emotion_text = ", ".join(emotions) if emotions else "general wellbeing"
             theme_text = ", ".join(themes) if themes else "life challenges"
 
-            # Enhanced prompt with Gita wisdom context
+            # Include user's actual situation for personalized affirmations
+            situation_context = f'\nTheir specific situation: "{emotions_input}"' if emotions_input else ""
+
+            # Enhanced prompt with Gita wisdom context and user's actual words
             prompt = f"""Create 4 personalized affirmations for someone experiencing: {emotion_text}
-Related to: {theme_text}
+Related to: {theme_text}{situation_context}
 
 Drawing from timeless wisdom:
 - Equanimity in success and failure (samatva)
@@ -642,6 +921,7 @@ Drawing from timeless wisdom:
 
 Make them:
 - Present tense ("I am" or "I choose")
+- Reference their specific situation where possible
 - Empowering but realistic
 - Warm and compassionate
 - 10-20 words each
@@ -675,13 +955,13 @@ Return only the 4 affirmations, each on a new line."""
                 if line.strip() and len(line.strip()) > 5
             ]
 
-            return affirmations[:5] if affirmations else self._get_fallback_affirmations(emotions)
+            return affirmations[:5] if affirmations else self._get_fallback_affirmations(emotions, themes)
 
         except Exception as e:
             logger.error(f"OpenAI affirmations error: {type(e).__name__}: {e}")
-            return self._get_fallback_affirmations(emotions)
+            return self._get_fallback_affirmations(emotions, themes)
 
-    def _get_fallback_affirmations(self, emotions: list[str]) -> list[str]:
+    def _get_fallback_affirmations(self, emotions: list[str], themes: list[str] | None = None) -> list[str]:
         """Generate fallback affirmations when AI is unavailable."""
         base_affirmations = [
             "I am capable of navigating life's challenges with grace.",
@@ -696,49 +976,201 @@ Return only the 4 affirmations, each on a new line."""
             "stressed": "I choose to take one step at a time, knowing that's enough.",
             "sad": "I honor my sadness as a sign of my capacity to love and care deeply.",
             "angry": "I channel my energy into positive action and let go of what I cannot control.",
+            "overwhelmed": "I give myself permission to set down what is not mine to carry right now.",
+            "hopeless": "I trust that even when I cannot see the way forward, a path still exists.",
+            "confused": "I allow clarity to arrive in its own time instead of forcing answers.",
         }
 
+        theme_specific = {
+            "relationships": "I bring my full, honest self to my relationships and trust that it is enough.",
+            "work": "I do my work with dedication and release the need for constant external validation.",
+            "health": "I honor my body's wisdom and give it the rest and care it deserves.",
+            "purpose": "My path unfolds one step at a time, and where I am right now is part of the journey.",
+            "change": "I welcome change as a teacher, knowing that growth and discomfort walk together.",
+            "self_worth": "My worth is inherent and does not depend on what I achieve or what others think.",
+        }
+
+        affirmations = []
+
+        # Add emotion-specific affirmation
         primary_emotion = emotions[0] if emotions else None
         if primary_emotion and primary_emotion in emotion_specific:
-            affirmations = [emotion_specific[primary_emotion]] + base_affirmations[:3]
-        else:
-            affirmations = base_affirmations[:4]
+            affirmations.append(emotion_specific[primary_emotion])
+
+        # Add theme-specific affirmation
+        if themes:
+            for theme in themes:
+                if theme in theme_specific and len(affirmations) < 2:
+                    affirmations.append(theme_specific[theme])
+
+        # Fill remaining slots with base affirmations
+        for base in base_affirmations:
+            if len(affirmations) >= 4:
+                break
+            if base not in affirmations:
+                affirmations.append(base)
 
         return affirmations
 
-    def generate_session_summary(
+    async def generate_session_summary(
         self,
-        _emotions_input: str,
+        emotions_input: str,
         assessment: dict[str, Any],
         affirmations: list[str],
     ) -> dict[str, Any]:
         """
-        Generate completion summary (Step 7).
+        Generate personalized completion summary (Step 7).
+
+        When OpenAI is available and the user shared their situation, generates
+        a situation-specific summary, key insight, and next steps.
 
         Args:
-            _emotions_input: User's initial input (kept for future use)
-            assessment: Assessment data
+            emotions_input: User's initial input describing their situation
+            assessment: Assessment data with emotions and themes
             affirmations: Generated affirmations
 
         Returns:
             Summary data for completion
         """
         emotions = assessment.get("emotions", ["your emotions"])
+        themes = assessment.get("themes", [])
         primary_emotion = emotions[0] if emotions else "your feelings"
-
         primary_affirmation = affirmations[0] if affirmations else "I am at peace."
+
+        # Try AI-powered personalized summary when user shared their situation
+        if emotions_input and self.optimizer.ready:
+            try:
+                emotion_text = ", ".join(emotions)
+                theme_text = ", ".join(themes) if themes else "life"
+
+                prompt = f"""A user completed an emotional reset session.
+They shared: "{emotions_input}"
+They were feeling: {emotion_text}
+Life area: {theme_text}
+
+Generate a personalized completion with these exact sections:
+SUMMARY: 1-2 sentences acknowledging their specific journey (reference their actual situation, not just the emotion label)
+INSIGHT: One powerful, specific insight relevant to what they shared (grounded in wisdom about equanimity, dharma, or self-mastery)
+STEP1: A concrete next step tailored to their situation
+STEP2: A second concrete next step
+STEP3: A third concrete next step
+
+Keep each section under 25 words. Warm, compassionate. Secular language. No scripture references."""
+
+                response = await self.optimizer.create_completion_with_retry(
+                    messages=[
+                        {"role": "system", "content": "You create personalized session summaries that acknowledge the user's specific situation and offer grounded next steps."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    model="gpt-4o-mini",
+                    temperature=0.7,
+                    max_tokens=200,
+                )
+
+                content = ""
+                if response and response.choices and len(response.choices) > 0:
+                    response_msg = response.choices[0].message
+                    if response_msg and response_msg.content:
+                        content = response_msg.content.strip()
+
+                if content:
+                    # Parse the structured response
+                    summary_text = self._extract_section(content, "SUMMARY")
+                    insight_text = self._extract_section(content, "INSIGHT")
+                    step1 = self._extract_section(content, "STEP1")
+                    step2 = self._extract_section(content, "STEP2")
+                    step3 = self._extract_section(content, "STEP3")
+
+                    # Apply Gita filter to the insight
+                    if insight_text:
+                        insight_text = await self._apply_gita_filter(insight_text, emotions_input)
+
+                    # Only use AI result if we got meaningful content
+                    if summary_text and insight_text:
+                        next_steps = [s for s in [step1, step2, step3] if s]
+                        if not next_steps:
+                            next_steps = self._get_fallback_next_steps(primary_emotion)
+
+                        return {
+                            "summary": summary_text,
+                            "key_insight": insight_text,
+                            "affirmation_to_remember": primary_affirmation,
+                            "next_steps": next_steps,
+                            "closing_message": "You've completed your emotional reset. Be gentle with yourself today. 💙",
+                        }
+
+            except Exception as e:
+                logger.debug(f"AI session summary generation failed (using fallback): {e}")
+
+        # Fallback: static summary with emotion-specific key insight
+        return self._get_fallback_summary(primary_emotion, primary_affirmation)
+
+    def _extract_section(self, content: str, section_name: str) -> str:
+        """Extract a named section from structured AI response."""
+        for line in content.split("\n"):
+            line = line.strip()
+            # Match patterns like "SUMMARY: text" or "**SUMMARY:** text"
+            prefix_variants = [
+                f"{section_name}:",
+                f"**{section_name}:**",
+                f"**{section_name}**:",
+                f"{section_name} -",
+            ]
+            for prefix in prefix_variants:
+                if line.upper().startswith(prefix.upper()):
+                    return line[len(prefix):].strip().strip('"')
+        return ""
+
+    def _get_fallback_summary(self, primary_emotion: str, primary_affirmation: str) -> dict[str, Any]:
+        """Static fallback summary with emotion-specific insights."""
+        emotion_insights = {
+            "anxious": "Anxiety loosens its grip when you return to what is actually in front of you, rather than what your mind imagines ahead.",
+            "stressed": "Pressure transforms when you shift from carrying everything at once to offering your full presence to one thing at a time.",
+            "sad": "Sadness honored becomes a doorway. What you grieve reveals what you value — and that capacity to care is your strength.",
+            "angry": "Anger clarifies boundaries. The wisdom is not in suppressing it but in choosing what to do with the information it carries.",
+            "overwhelmed": "You do not need to solve everything today. Dharma asks only for your honest effort in this one moment.",
+            "hopeless": "Even when hope feels distant, the fact that you showed up here today proves that something in you still reaches toward the light.",
+            "confused": "Clarity rarely arrives through more thinking. It surfaces when you create enough stillness for the answer to find you.",
+        }
 
         return {
             "summary": f"Today you courageously explored {primary_emotion}. You've taken meaningful steps toward emotional balance.",
-            "key_insight": "Remember: your emotions are messengers, not masters. You have the power to acknowledge them and choose your response.",
+            "key_insight": emotion_insights.get(primary_emotion, "Your emotions are messengers, not masters. You have the power to acknowledge them and choose your response."),
             "affirmation_to_remember": primary_affirmation,
-            "next_steps": [
-                "Practice the breathing exercise whenever you feel unsettled",
-                "Revisit your affirmations each morning",
-                "Come back whenever you need a reset",
-            ],
+            "next_steps": self._get_fallback_next_steps(primary_emotion),
             "closing_message": "You've completed your emotional reset. Be gentle with yourself today. 💙",
         }
+
+    def _get_fallback_next_steps(self, primary_emotion: str) -> list[str]:
+        """Get emotion-specific next steps for fallback summaries."""
+        emotion_steps = {
+            "anxious": [
+                "Practice the 4-4-4-4 breathing whenever anxiety surfaces today",
+                "Write down one thing you are grateful for before bed tonight",
+                "Return here whenever you need a reset — this space is always available",
+            ],
+            "stressed": [
+                "Take a 5-minute pause between tasks today to reset your nervous system",
+                "Choose one item from your to-do list and give it your full attention",
+                "End your day with the breathing exercise to release accumulated tension",
+            ],
+            "sad": [
+                "Allow yourself to feel without rushing to fix — sadness needs witnessing, not solving",
+                "Reach out to one person who makes you feel seen and valued",
+                "Revisit your affirmations gently each morning this week",
+            ],
+            "angry": [
+                "When frustration rises today, pause for 90 seconds before responding",
+                "Channel one burst of energy into physical movement — a walk, stretching, anything",
+                "Reflect tonight on what boundary the anger was trying to protect",
+            ],
+        }
+
+        return emotion_steps.get(primary_emotion, [
+            "Practice the breathing exercise whenever you feel unsettled",
+            "Revisit your affirmations each morning",
+            "Come back whenever you need a reset",
+        ])
 
     async def process_step(
         self,
@@ -839,7 +1271,11 @@ Return only the 4 affirmations, each on a new line."""
         elif current_step == 4:
             next_step = 5
             assessment = session.assessment_data or {}
-            wisdom = await self.generate_wisdom_insights(db, assessment)
+            wisdom = await self.generate_wisdom_insights(
+                db, assessment,
+                emotions_input=session.emotions_input or "",
+                user_id=user_id or "",
+            )
             session.wisdom_verses = wisdom
             response_data["wisdom"] = wisdom
 
@@ -847,13 +1283,16 @@ Return only the 4 affirmations, each on a new line."""
             next_step = 6
             emotions = session.assessment_data.get("emotions", []) if session.assessment_data else []
             themes = session.assessment_data.get("themes", []) if session.assessment_data else []
-            affirmations = await self.create_affirmations(emotions, themes)
+            affirmations = await self.create_affirmations(
+                emotions, themes,
+                emotions_input=session.emotions_input or "",
+            )
             session.affirmations = affirmations
             response_data["affirmations"] = affirmations
 
         elif current_step == 6:
             next_step = 7
-            summary = self.generate_session_summary(
+            summary = await self.generate_session_summary(
                 session.emotions_input or "",
                 session.assessment_data or {},
                 session.affirmations or [],
@@ -939,7 +1378,7 @@ Return only the 4 affirmations, each on a new line."""
         await db.commit()
 
         # Generate final summary
-        summary = self.generate_session_summary(
+        summary = await self.generate_session_summary(
             session.emotions_input or "",
             session.assessment_data or {},
             session.affirmations or [],

@@ -249,10 +249,11 @@ class TestAffirmations:
 class TestSessionSummary:
     """Test session summary generation."""
 
-    def test_generate_session_summary(self, emotional_reset_service):
+    @pytest.mark.asyncio
+    async def test_generate_session_summary(self, emotional_reset_service):
         """Test session summary structure."""
-        summary = emotional_reset_service.generate_session_summary(
-            "I'm feeling anxious about work",  # positional: _emotions_input
+        summary = await emotional_reset_service.generate_session_summary(
+            "I'm feeling anxious about work",  # positional: emotions_input
             {"emotions": ["anxious"], "themes": ["work"]},  # positional: assessment
             ["I am capable of handling challenges"],  # positional: affirmations
         )
