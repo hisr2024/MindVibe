@@ -54,6 +54,7 @@ export interface KarmaResetResult {
   karmic_path: KarmicPathKey
   selfReinforcingMessage: string
   gitaVerse: GitaVerse
+  modelUsed?: string
   nextAction: {
     label: string
     route: string

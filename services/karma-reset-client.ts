@@ -145,6 +145,7 @@ export async function generateGuidance(context: KarmaResetContext): Promise<Karm
     karmic_path: karmicPath,
     selfReinforcingMessage,
     gitaVerse: data.deep_guidance.core_verse,
+    modelUsed: data.meta.model_used,
     nextAction: {
       label: `Continue on the path of ${data.karmic_path.name}`,
       route: '/tools/karma-reset',
