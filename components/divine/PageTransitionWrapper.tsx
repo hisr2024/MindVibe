@@ -51,18 +51,15 @@ export function PageTransitionWrapper({ children }: { children: React.ReactNode 
     )
   }, [])
 
-  // Animate on route change without remounting
+  // Single effect for both initial entrance and route change animations.
+  // The previous implementation had two separate effects that could both fire,
+  // causing double animations on mount.
   useEffect(() => {
     if (prevPathname.current !== pathname) {
       prevPathname.current = pathname
-      animate()
     }
-  }, [pathname, animate])
-
-  // Initial entrance animation
-  useEffect(() => {
     animate()
-  }, [animate])
+  }, [pathname, animate])
 
   return (
     <div

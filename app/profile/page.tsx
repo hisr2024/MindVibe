@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { ProfileHeader } from '@/components/profile/ProfileHeader'
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
 import { AvatarUpload } from '@/components/profile/AvatarUpload'
@@ -55,6 +55,10 @@ export default function ProfilePage() {
     dayStreak: 0,
   })
 
+  // Ref for current user to avoid object dependency in useCallback
+  const userRef = useRef(user)
+  userRef.current = user
+
   const kiaanTools = useMemo(() => getKiaanTools(), [])
 
   const fetchStats = useCallback(async () => {
@@ -76,19 +80,21 @@ export default function ProfilePage() {
   }, [isAuthenticated])
 
   const fetchProfile = useCallback(async () => {
+    // Access user from ref to avoid object dependency that causes infinite loops
+    const currentUser = userRef.current
     setLoading(true)
     setError(null)
 
     try {
-      if (isAuthenticated && user) {
+      if (isAuthenticated && currentUser) {
         try {
           const response = await apiFetch('/api/profile', { method: 'GET' })
 
           if (response.ok) {
             const backendProfile: BackendProfile = await response.json()
             const profileData: ProfileData = {
-              name: backendProfile.full_name || user.name || user.email.split('@')[0],
-              email: user.email,
+              name: backendProfile.full_name || currentUser.name || currentUser.email.split('@')[0],
+              email: currentUser.email,
               bio: '',
               baseExperience: backendProfile.base_experience,
               createdAt: backendProfile.created_at,
@@ -113,7 +119,7 @@ export default function ProfilePage() {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                full_name: user.name || user.email.split('@')[0],
+                full_name: currentUser.name || currentUser.email.split('@')[0],
                 base_experience: 'new_user',
               }),
             })
@@ -121,8 +127,8 @@ export default function ProfilePage() {
             if (createResponse.ok) {
               const newProfile: BackendProfile = await createResponse.json()
               const profileData: ProfileData = {
-                name: newProfile.full_name || user.email.split('@')[0],
-                email: user.email,
+                name: newProfile.full_name || currentUser.email.split('@')[0],
+                email: currentUser.email,
                 bio: '',
                 createdAt: newProfile.created_at,
                 baseExperience: newProfile.base_experience,
@@ -143,15 +149,15 @@ export default function ProfilePage() {
       const stored = localStorage.getItem(PROFILE_STORAGE_KEY)
       if (stored) {
         const parsed = JSON.parse(stored)
-        if (user) {
-          parsed.email = user.email
-          parsed.name = parsed.name || user.name || user.email.split('@')[0]
+        if (currentUser) {
+          parsed.email = currentUser.email
+          parsed.name = parsed.name || currentUser.name || currentUser.email.split('@')[0]
         }
         setProfile(parsed)
       } else {
         const defaultProfile: ProfileData = {
-          name: user?.name || user?.email?.split('@')[0] || 'Sakha User',
-          email: user?.email || 'user@kiaanverse.com',
+          name: currentUser?.name || currentUser?.email?.split('@')[0] || 'Sakha User',
+          email: currentUser?.email || 'user@kiaanverse.com',
           bio: '',
           createdAt: new Date().toISOString(),
         }
@@ -162,9 +168,10 @@ export default function ProfilePage() {
       console.error('Error loading profile:', err)
       setError('Failed to load profile')
 
+      const currentUserFallback = userRef.current
       const fallbackProfile: ProfileData = {
-        name: user?.name || user?.email?.split('@')[0] || 'Sakha User',
-        email: user?.email || 'user@kiaanverse.com',
+        name: currentUserFallback?.name || currentUserFallback?.email?.split('@')[0] || 'Sakha User',
+        email: currentUserFallback?.email || 'user@kiaanverse.com',
         bio: '',
         createdAt: new Date().toISOString(),
       }
@@ -172,7 +179,9 @@ export default function ProfilePage() {
     } finally {
       setLoading(false)
     }
-  }, [isAuthenticated, user])
+    // Only depend on isAuthenticated (boolean, stable) — access user via userRef
+    // to prevent infinite re-fetch from user object reference changes
+  }, [isAuthenticated])
 
   useEffect(() => {
     if (!authLoading) {

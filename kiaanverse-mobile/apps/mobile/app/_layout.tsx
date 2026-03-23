@@ -101,12 +101,16 @@ async function executeSyncItem(item: SyncQueueItem): Promise<void> {
 // ---------------------------------------------------------------------------
 
 function AuthGate({ children }: { children: React.ReactNode }): React.JSX.Element {
-  const { status, isOnboarded } = useAuthStore();
+  const { status, isOnboarded, hasHydrated } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
     if (status === 'idle' || status === 'loading') return;
+    // Wait for Zustand persist to finish rehydrating isOnboarded from storage.
+    // Without this, isOnboarded is stale (false) for a few frames after
+    // initialize() resolves, causing a flash redirect to /onboarding.
+    if (!hasHydrated) return;
 
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboarding = segments[0] === 'onboarding';
@@ -118,7 +122,7 @@ function AuthGate({ children }: { children: React.ReactNode }): React.JSX.Elemen
     } else if (status === 'authenticated' && isOnboarded && (inAuthGroup || inOnboarding)) {
       router.replace('/(tabs)/home');
     }
-  }, [status, isOnboarded, segments, router]);
+  }, [status, isOnboarded, hasHydrated, segments, router]);
 
   return <>{children}</>;
 }

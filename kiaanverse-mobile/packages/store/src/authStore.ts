@@ -51,6 +51,12 @@ interface AuthState {
    * a "verify your email" message instead of navigating to tabs.
    */
   signupPendingVerification: boolean;
+  /**
+   * True once Zustand persist middleware has rehydrated state from storage.
+   * AuthGate must wait for this before redirecting, otherwise isOnboarded
+   * may be stale (false) causing a flash redirect to onboarding.
+   */
+  hasHydrated: boolean;
 }
 
 interface AuthActions {
@@ -130,6 +136,7 @@ const initialState: AuthState = {
   biometricEnabled: false,
   biometricAvailable: false,
   signupPendingVerification: false,
+  hasHydrated: false,
 };
 
 // ---------------------------------------------------------------------------
@@ -279,7 +286,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         logout: async () => {
           await authService.logout();
           await clearTokens();
-          set(() => ({ ...initialState, status: 'unauthenticated' as const }));
+          set(() => ({ ...initialState, status: 'unauthenticated' as const, hasHydrated: true }));
         },
 
         setUser: (user) => {
@@ -415,6 +422,12 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           isOnboarded: state.isOnboarded,
           biometricEnabled: state.biometricEnabled,
         }),
+        // Mark hydration complete so AuthGate can wait for persisted isOnboarded
+        onRehydrateStorage: () => (state) => {
+          if (state) {
+            state.hasHydrated = true;
+          }
+        },
       },
     ),
     {
@@ -438,6 +451,7 @@ setTokenManager({
     useAuthStore.setState({
       ...initialState,
       status: 'unauthenticated',
+      hasHydrated: true,
     });
   },
 });

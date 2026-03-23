@@ -95,10 +95,20 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
       const decoder = new TextDecoder()
 
       if (reader) {
+        // Inactivity timeout: abort stream if no data for 60s
+        const streamAbort = new AbortController()
+        let inactivityTimer = setTimeout(() => streamAbort.abort(), 60_000)
+        const resetTimer = () => {
+          clearTimeout(inactivityTimer)
+          inactivityTimer = setTimeout(() => streamAbort.abort(), 60_000)
+        }
+
+        try {
         while (true) {
           const { done, value } = await reader.read()
           if (done) break
 
+          resetTimer()
           const chunk = decoder.decode(value)
           const lines = chunk.split('\n')
 
@@ -130,6 +140,9 @@ export function KiaanChatModal({ isOpen, onClose }: KiaanChatModalProps) {
               })
             }
           }
+        }
+        } finally {
+          clearTimeout(inactivityTimer)
         }
       }
 

@@ -294,13 +294,19 @@ function createApiClient(): AxiosInstance {
         }
       }
 
-      // --- 403 → check reason before forcing logout ---
+      // --- 403 → only force-logout for actual auth failures ---
       if (status === 403) {
         const data403 = error.response.data as Record<string, unknown> | undefined;
         const detail403 = typeof data403?.detail === 'string' ? data403.detail : '';
+        const code403 = typeof data403?.code === 'string' ? data403.code : '';
 
-        // Email not verified is NOT an authorization failure — let the caller handle it
-        if (detail403 === 'email_not_verified') {
+        // Codes that indicate a true auth/session failure (warrant logout)
+        const AUTH_FAILURE_DETAILS = ['token_revoked', 'account_disabled', 'session_invalid'];
+        const isAuthFailure = AUTH_FAILURE_DETAILS.includes(detail403) || code403 === 'AUTH_FAILURE';
+
+        // Feature-gated 403s, rate-limit 403s, CSRF 403s, and email_not_verified
+        // should NOT force logout — let the calling code handle them.
+        if (!isAuthFailure) {
           return Promise.reject(wrapAxiosError(error));
         }
 
@@ -308,7 +314,7 @@ function createApiClient(): AxiosInstance {
         await tokenManager.clearTokens();
         tokenManager.onAuthFailure?.();
         return Promise.reject(
-          new AuthError('Access denied. Please sign in again.', 403, 'UNKNOWN'),
+          new AuthError('Access denied. Please sign in again.', 403, code403 || 'UNKNOWN'),
         );
       }
 

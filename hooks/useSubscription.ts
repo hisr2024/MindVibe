@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { apiFetch } from '@/lib/api'
 
 export interface Subscription {
@@ -59,6 +59,23 @@ function getDefaultSubscription(): Subscription {
 function persistSubscription(subscription: Subscription) {
   if (typeof window === 'undefined') return
   try { localStorage.setItem(SUBSCRIPTION_STORAGE_KEY, JSON.stringify(subscription)) } catch { /* Private browsing */ }
+}
+
+/**
+ * Shallow equality check for Subscription objects.
+ * Prevents unnecessary re-renders when subscription data hasn't changed.
+ */
+function isSubscriptionEqual(a: Subscription | null, b: Subscription | null): boolean {
+  if (a === b) return true
+  if (!a || !b) return false
+  return a.id === b.id
+    && a.tierId === b.tierId
+    && a.tierName === b.tierName
+    && a.status === b.status
+    && a.currentPeriodEnd === b.currentPeriodEnd
+    && a.cancelAtPeriodEnd === b.cancelAtPeriodEnd
+    && a.isYearly === b.isYearly
+    && a.isDeveloper === b.isDeveloper
 }
 
 function getCachedSubscription(): Subscription {
@@ -155,6 +172,12 @@ export function useSubscription(): UseSubscriptionResult {
   const [subscription, setSubscription] = useState<Subscription | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const mountedRef = useRef(true)
+  const subscriptionRef = useRef(subscription)
+  subscriptionRef.current = subscription
+
+  // Debounce ref to coalesce rapid event-driven fetches
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
 
   const fetchSubscription = useCallback(async () => {
     setLoading(true)
@@ -162,49 +185,67 @@ export function useSubscription(): UseSubscriptionResult {
 
     // Skip API call for unauthenticated users — avoids 401 console errors
     if (!isUserLikelyAuthenticated()) {
-      setSubscription(getDefaultSubscription())
-      setLoading(false)
+      const defaultSub = getDefaultSubscription()
+      if (mountedRef.current && !isSubscriptionEqual(subscriptionRef.current, defaultSub)) {
+        setSubscription(defaultSub)
+      }
+      if (mountedRef.current) setLoading(false)
       return
     }
 
     try {
       const latest = await fetchSubscriptionFromApi()
-      setSubscription(latest)
+      // Only update state if subscription data actually changed
+      if (mountedRef.current && !isSubscriptionEqual(subscriptionRef.current, latest)) {
+        setSubscription(latest)
+      }
     } catch (err) {
+      if (!mountedRef.current) return
       console.warn('Falling back to cached subscription', err)
       const cached = getCachedSubscription()
       // Never trust developer status from cache — it must come from the server.
       // A stale isDeveloper:true would grant full access to non-developer users.
       cached.isDeveloper = false
-      setSubscription(cached)
+      if (!isSubscriptionEqual(subscriptionRef.current, cached)) {
+        setSubscription(cached)
+      }
       setError(err instanceof Error ? err.message : 'Failed to load subscription')
     } finally {
-      setLoading(false)
+      if (mountedRef.current) setLoading(false)
     }
   }, [])
 
   useEffect(() => {
+    mountedRef.current = true
     fetchSubscription()
+    return () => { mountedRef.current = false }
   }, [fetchSubscription])
 
   useEffect(() => {
-    const handleUpdate = () => fetchSubscription()
+    // Debounced fetch — coalesces rapid events (auth-changed + storage + subscription-updated)
+    // into a single API call after 300ms of quiet.
+    const debouncedFetch = () => {
+      clearTimeout(debounceRef.current)
+      debounceRef.current = setTimeout(() => {
+        if (mountedRef.current) fetchSubscription()
+      }, 300)
+    }
+
     const handleStorage = (event: StorageEvent) => {
       if (event.key === SUBSCRIPTION_STORAGE_KEY || event.key === AUTH_USER_KEY) {
-        fetchSubscription()
+        debouncedFetch()
       }
     }
-    // Refetch when auth state changes (login/logout)
-    const handleAuthChanged = () => fetchSubscription()
 
-    window.addEventListener('subscription-updated', handleUpdate)
+    window.addEventListener('subscription-updated', debouncedFetch)
     window.addEventListener('storage', handleStorage)
-    window.addEventListener('auth-changed', handleAuthChanged)
+    window.addEventListener('auth-changed', debouncedFetch)
 
     return () => {
-      window.removeEventListener('subscription-updated', handleUpdate)
+      clearTimeout(debounceRef.current)
+      window.removeEventListener('subscription-updated', debouncedFetch)
       window.removeEventListener('storage', handleStorage)
-      window.removeEventListener('auth-changed', handleAuthChanged)
+      window.removeEventListener('auth-changed', debouncedFetch)
     }
   }, [fetchSubscription])
 
