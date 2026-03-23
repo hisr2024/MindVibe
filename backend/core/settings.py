@@ -56,6 +56,16 @@ class Settings(BaseSettings):
     SECURE_COOKIE: bool = os.getenv("ENVIRONMENT", "development") == "production"
     SECRET_KEY: str = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
 
+    # Email verification enforcement: True in production, False in dev/test.
+    # Overridable via REQUIRE_EMAIL_VERIFICATION env var.
+    REQUIRE_EMAIL_VERIFICATION: bool = parse_bool_strict(
+        os.getenv(
+            "REQUIRE_EMAIL_VERIFICATION",
+            "true" if os.getenv("ENVIRONMENT", "development") == "production" else "false",
+        ),
+        "REQUIRE_EMAIL_VERIFICATION",
+    )
+
     @field_validator("SECRET_KEY")
     @classmethod
     def validate_secret_key(cls, v: str) -> str:

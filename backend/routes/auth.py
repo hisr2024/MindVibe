@@ -291,38 +291,47 @@ async def login(
 
     # Check if account is locked - use generic message to prevent account enumeration
     if user and user.locked_until and user.locked_until > datetime.now(UTC):
+        logger.warning("Login blocked: account locked user_id=%s until=%s", user.id, user.locked_until.isoformat())
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"detail": "Invalid credentials", "code": "INVALID_CREDENTIALS"},
         )
 
-    # Validate credentials
-    if not user or not verify_password(payload.password, user.hashed_password):
-        # Track failed attempts if user exists
-        if user:
-            new_attempts = (user.failed_login_attempts or 0) + 1
-            update_values = {"failed_login_attempts": new_attempts}
-
-            # Lock account after max failed attempts
-            if new_attempts >= MAX_FAILED_LOGIN_ATTEMPTS:
-                update_values["locked_until"] = datetime.now(UTC) + timedelta(minutes=LOCKOUT_DURATION_MINUTES)
-
-            await db.execute(
-                update(User).where(User.id == user.id).values(**update_values)
-            )
-            try:
-                await db.commit()
-            except Exception as e:
-                await db.rollback()
-                logger.error(f"Database commit failed during login attempt tracking: {e}", exc_info=True)
-
+    # Validate credentials - split checks for targeted server-side logging
+    if not user:
+        logger.info("Login failed: no account found for email=%s", email_norm)
         raise HTTPException(
             status_code=401,
             detail={"detail": "Invalid credentials", "code": "INVALID_CREDENTIALS"},
         )
 
-    # Block login if email is not verified
-    if not user.email_verified:
+    if not verify_password(payload.password, user.hashed_password):
+        # Track failed attempts
+        new_attempts = (user.failed_login_attempts or 0) + 1
+        update_values: dict = {"failed_login_attempts": new_attempts}
+
+        # Lock account after max failed attempts
+        if new_attempts >= MAX_FAILED_LOGIN_ATTEMPTS:
+            update_values["locked_until"] = datetime.now(UTC) + timedelta(minutes=LOCKOUT_DURATION_MINUTES)
+
+        await db.execute(
+            update(User).where(User.id == user.id).values(**update_values)
+        )
+        try:
+            await db.commit()
+        except Exception as e:
+            await db.rollback()
+            logger.error(f"Database commit failed during login attempt tracking: {e}", exc_info=True)
+
+        logger.info("Login failed: wrong password user_id=%s attempts=%d", user.id, new_attempts)
+        raise HTTPException(
+            status_code=401,
+            detail={"detail": "Invalid credentials", "code": "INVALID_CREDENTIALS"},
+        )
+
+    # Block login if email is not verified (only when enforcement is enabled)
+    if settings.REQUIRE_EMAIL_VERIFICATION and not user.email_verified:
+        logger.warning("Login blocked: email not verified user_id=%s email=%s", user.id, email_norm)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"detail": "Please verify your email before logging in", "code": "EMAIL_NOT_VERIFIED", "field": "email"},
@@ -407,6 +416,8 @@ async def login(
 
     # Return refresh token in body for mobile clients (cookie is also set above)
     refresh_body = raw_refresh if settings.REFRESH_TOKEN_ENABLE_BODY_RETURN else None
+
+    logger.info("Login successful: user_id=%s session_id=%s", user.id, session.id)
 
     return LoginOut(
         access_token=access_token,

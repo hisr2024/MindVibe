@@ -95,9 +95,14 @@ class TestLogin:
         assert data["token_type"] == "bearer"
         assert "session_id" in data
         assert "expires_in" in data
-        assert data["user_id"] == test_user.id
-        assert data["email"] == test_user.email
-        
+
+        # LoginOut returns a nested user object (AuthUser)
+        assert "user" in data
+        assert data["user"]["id"] == test_user.id
+        assert data["user"]["email"] == test_user.email
+        assert "name" in data["user"]
+        assert "is_onboarded" in data["user"]
+
         # Check that refresh token cookie was set
         assert "refresh_token" in response.cookies
 
