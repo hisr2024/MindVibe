@@ -314,13 +314,16 @@ async def login(
         if new_attempts >= MAX_FAILED_LOGIN_ATTEMPTS:
             update_values["locked_until"] = datetime.now(UTC) + timedelta(minutes=LOCKOUT_DURATION_MINUTES)
 
-        await db.execute(
-            update(User).where(User.id == user.id).values(**update_values)
-        )
         try:
+            await db.execute(
+                update(User).where(User.id == user.id).values(**update_values)
+            )
             await db.commit()
         except Exception as e:
-            await db.rollback()
+            try:
+                await db.rollback()
+            except Exception:
+                pass
             logger.error(f"Database commit failed during login attempt tracking: {e}", exc_info=True)
 
         logger.info("Login failed: wrong password user_id=%s attempts=%d", user.id, new_attempts)
@@ -339,29 +342,68 @@ async def login(
 
     # Reset failed attempts on successful login
     if user.failed_login_attempts and user.failed_login_attempts > 0:
-        await db.execute(
-            update(User).where(User.id == user.id).values(
-                failed_login_attempts=0,
-                locked_until=None,
-            )
-        )
         try:
+            await db.execute(
+                update(User).where(User.id == user.id).values(
+                    failed_login_attempts=0,
+                    locked_until=None,
+                )
+            )
             await db.commit()
         except Exception as e:
-            await db.rollback()
+            try:
+                await db.rollback()
+            except Exception:
+                pass
             logger.error(f"Database commit failed during login attempt reset: {e}", exc_info=True)
+
+    # Capture user fields before any DB operations that might invalidate the session.
+    # After commit/rollback cycles the ORM object may become detached; reading
+    # attributes here guarantees we have the values for the response.
+    user_id = user.id
+    user_email = user.email
+    user_avatar = getattr(user, "avatar_url", None)
+    user_onboarded = getattr(user, "is_onboarded", False)
 
     # Bind session to client IP and User-Agent for security auditing
     client_ip = request.client.host if request.client else None
     user_agent = request.headers.get("User-Agent")
-    session = await create_session(db, user_id=user.id, ip=client_ip, ua=user_agent)
-    access_token = create_access_token(user_id=user.id, session_id=session.id)
+    # Truncate user-agent to prevent DB column overflow (VARCHAR 512)
+    if user_agent and len(user_agent) > 512:
+        user_agent = user_agent[:512]
+
+    try:
+        session = await create_session(db, user_id=user_id, ip=client_ip, ua=user_agent)
+    except Exception as e:
+        logger.error("Session creation failed for user_id=%s: %s", user_id, e, exc_info=True)
+        try:
+            await db.rollback()
+        except Exception:
+            pass
+        raise HTTPException(
+            status_code=500,
+            detail={"detail": "Login failed due to a server error. Please try again.", "code": "SESSION_ERROR"},
+        )
+
+    access_token = create_access_token(user_id=user_id, session_id=session.id)
     expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
     # Create refresh token + set cookie
-    _, raw_refresh = await create_refresh_token(
-        db, user_id=user.id, session_id=session.id
-    )
+    try:
+        _, raw_refresh = await create_refresh_token(
+            db, user_id=user_id, session_id=session.id
+        )
+    except Exception as e:
+        logger.error("Refresh token creation failed for user_id=%s: %s", user_id, e, exc_info=True)
+        try:
+            await db.rollback()
+        except Exception:
+            pass
+        raise HTTPException(
+            status_code=500,
+            detail={"detail": "Login failed due to a server error. Please try again.", "code": "TOKEN_ERROR"},
+        )
+
     response.set_cookie(
         key="refresh_token",
         value=raw_refresh,
@@ -388,18 +430,23 @@ async def login(
     sub_tier = "free"
     sub_status = "active"
     try:
-        subscription = await get_or_create_free_subscription(db, user.id)
+        subscription = await get_or_create_free_subscription(db, user_id)
         if subscription and subscription.plan:
             sub_tier = subscription.plan.tier.value if hasattr(subscription.plan.tier, 'value') else str(subscription.plan.tier)
             sub_status = subscription.status.value if hasattr(subscription.status, 'value') else str(subscription.status)
     except Exception as sub_err:
-        logger.warning(f"Failed to fetch subscription for user {user.id}: {sub_err}")
+        logger.warning(f"Failed to fetch subscription for user {user_id}: {sub_err}")
+        # Ensure DB session is usable for subsequent queries
+        try:
+            await db.rollback()
+        except Exception:
+            pass
 
     # Check developer status
     from backend.middleware.feature_access import is_developer as check_is_developer
     is_dev = False
     try:
-        is_dev = await check_is_developer(db, user.id)
+        is_dev = await check_is_developer(db, user_id)
     except Exception:
         pass
 
@@ -407,7 +454,7 @@ async def login(
     profile_name: str | None = None
     try:
         from backend.models.user import UserProfile
-        profile_stmt = select(UserProfile).where(UserProfile.user_id == user.id)
+        profile_stmt = select(UserProfile).where(UserProfile.user_id == user_id)
         profile = (await db.execute(profile_stmt)).scalars().first()
         if profile:
             profile_name = profile.full_name
@@ -417,7 +464,7 @@ async def login(
     # Return refresh token in body for mobile clients (cookie is also set above)
     refresh_body = raw_refresh if settings.REFRESH_TOKEN_ENABLE_BODY_RETURN else None
 
-    logger.info("Login successful: user_id=%s session_id=%s", user.id, session.id)
+    logger.info("Login successful: user_id=%s session_id=%s", user_id, session.id)
 
     return LoginOut(
         access_token=access_token,
@@ -425,11 +472,11 @@ async def login(
         token_type="bearer",  # nosec B106
         expires_in=expires_in_seconds,
         user=AuthUser(
-            id=user.id,
-            email=user.email,
+            id=user_id,
+            email=user_email,
             name=profile_name,
-            avatar_url=getattr(user, "avatar_url", None),
-            is_onboarded=getattr(user, "is_onboarded", False),
+            avatar_url=user_avatar,
+            is_onboarded=user_onboarded,
         ),
         session_id=str(session.id),
         subscription_tier="siddha" if is_dev else sub_tier,
