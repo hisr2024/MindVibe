@@ -1,71 +1,87 @@
 /**
  * Service Worker Registration Component
- * Registers the service worker on client side
+ * Registers the service worker on client side.
+ *
+ * Reload guard: after a SW-triggered reload, a 60-second cooldown prevents
+ * further reloads (sessionStorage). This stops infinite reload loops when the
+ * SW update check finds a new version on every cycle.
  */
 
 'use client'
 
 import { useEffect } from 'react'
 
+// Module-level flag — survives React re-renders within the same page load
+let hasReloadedForSW = false
+
+const SW_RELOAD_COOLDOWN_MS = 60_000
+const SW_RELOAD_TS_KEY = 'sw_reload_ts'
+
 export function ServiceWorkerRegistration() {
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      let intervalId: ReturnType<typeof setInterval> | undefined
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
 
-      // Register service worker
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((registration) => {
-          // Check for updates periodically
-          intervalId = setInterval(() => {
-            registration.update().catch(() => {
-              // Network error during update check - will retry next interval
-            })
-          }, 60000) // Check every minute
+    let intervalId: ReturnType<typeof setInterval> | undefined
 
-          // Listen for updates and auto-activate new service worker
-          registration.addEventListener('updatefound', () => {
-            const newWorker = registration.installing
-            if (newWorker) {
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // Activate the new service worker immediately to clear stale caches
-                  newWorker.postMessage({ type: 'SKIP_WAITING' })
-                }
-              })
-            }
+    // Register service worker
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((registration) => {
+        // Check for updates periodically
+        intervalId = setInterval(() => {
+          registration.update().catch(() => {
+            // Network error during update check - will retry next interval
           })
+        }, 60000) // Check every minute
+
+        // Listen for updates and auto-activate new service worker
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // Activate the new service worker immediately to clear stale caches
+                newWorker.postMessage({ type: 'SKIP_WAITING' })
+              }
+            })
+          }
         })
-        .catch((error) => {
-          console.error('Service Worker registration failed:', error)
-        })
+      })
+      .catch((error) => {
+        console.error('Service Worker registration failed:', error)
+      })
 
-      // Reload page when a new service worker takes control (clears stale caches)
-      let refreshing = false
-      const handleControllerChange = () => {
-        if (!refreshing) {
-          refreshing = true
-          window.location.reload()
-        }
+    // Reload page when a new service worker takes control (clears stale caches).
+    // Guarded by module-level flag + sessionStorage cooldown to prevent loops.
+    const handleControllerChange = () => {
+      if (hasReloadedForSW) return
+      try {
+        const lastReload = sessionStorage.getItem(SW_RELOAD_TS_KEY)
+        if (lastReload && Date.now() - Number(lastReload) < SW_RELOAD_COOLDOWN_MS) return
+        sessionStorage.setItem(SW_RELOAD_TS_KEY, String(Date.now()))
+      } catch {
+        // sessionStorage unavailable (private browsing) — still allow one reload
       }
+      hasReloadedForSW = true
+      window.location.reload()
+    }
 
-      // Listen for messages from service worker
-      const handleMessage = (event: MessageEvent) => {
-        if (event.data && event.data.type === 'SYNC_QUEUE') {
-          // The offline manager will handle sync automatically
-        }
+    // Listen for messages from service worker
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'SYNC_QUEUE') {
+        // The offline manager will handle sync automatically
       }
+    }
 
-      navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange)
-      navigator.serviceWorker.addEventListener('message', handleMessage)
+    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange)
+    navigator.serviceWorker.addEventListener('message', handleMessage)
 
-      return () => {
-        if (intervalId !== undefined) {
-          clearInterval(intervalId)
-        }
-        navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange)
-        navigator.serviceWorker.removeEventListener('message', handleMessage)
+    return () => {
+      if (intervalId !== undefined) {
+        clearInterval(intervalId)
       }
+      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange)
+      navigator.serviceWorker.removeEventListener('message', handleMessage)
     }
   }, [])
 

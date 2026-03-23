@@ -161,10 +161,21 @@ export function useStreamingResponse(options: UseStreamingResponseOptions = {}):
       let buffer = ''
       let accumulated = ''
 
+      // Inactivity timeout: abort the stream if no data received for 60 seconds.
+      // Prevents the UI from being stuck in "loading" forever if the server hangs.
+      const STREAM_INACTIVITY_TIMEOUT_MS = 60_000
+      let inactivityTimer = setTimeout(() => controller.abort(), STREAM_INACTIVITY_TIMEOUT_MS)
+      const resetInactivityTimer = () => {
+        clearTimeout(inactivityTimer)
+        inactivityTimer = setTimeout(() => controller.abort(), STREAM_INACTIVITY_TIMEOUT_MS)
+      }
+
+      try {
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
 
+        resetInactivityTimer()
         buffer += decoder.decode(value, { stream: true })
 
         // Parse SSE events from buffer
@@ -230,6 +241,9 @@ export function useStreamingResponse(options: UseStreamingResponseOptions = {}):
       if (mountedRef.current && isStreaming) {
         setIsStreaming(false)
         onCompleteRef.current?.(accumulated)
+      }
+      } finally {
+        clearTimeout(inactivityTimer)
       }
     } catch (err) {
       if ((err as Error).name === 'AbortError') return // Intentional abort

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { apiFetch } from '@/lib/api'
 
 export interface AuthUser {
@@ -55,6 +55,22 @@ function storeUserProfile(user: AuthUser) {
   localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user))
 }
 
+/**
+ * Shallow equality check for AuthUser objects.
+ * Prevents unnecessary re-renders when the verified user data hasn't actually changed.
+ */
+function isUserEqual(a: AuthUser | null, b: AuthUser | null): boolean {
+  if (a === b) return true
+  if (!a || !b) return false
+  return a.id === b.id
+    && a.email === b.email
+    && a.name === b.name
+    && a.sessionId === b.sessionId
+    && a.subscriptionTier === b.subscriptionTier
+    && a.subscriptionStatus === b.subscriptionStatus
+    && a.isDeveloper === b.isDeveloper
+}
+
 function clearAuthData() {
   if (typeof window === 'undefined') return
   localStorage.removeItem(AUTH_USER_KEY)
@@ -72,6 +88,17 @@ export function useAuth(): UseAuthResult {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [backendReady, setBackendReady] = useState(false)
+
+  // Ref to access current user without adding it as a dependency
+  const userRef = useRef(user)
+  userRef.current = user
+
+  // Stable setUser that skips no-op updates to prevent cascading re-renders
+  const setUserIfChanged = useCallback((newUser: AuthUser | null) => {
+    if (!isUserEqual(userRef.current, newUser)) {
+      setUser(newUser)
+    }
+  }, [])
 
   // Warm up the backend on mount (Render free tier cold starts take 30-60s).
   // This is non-blocking: the user can sign in at any time.  The proxy layer
@@ -112,7 +139,7 @@ export function useAuth(): UseAuthResult {
   useEffect(() => {
     const storedUser = getStoredUser()
     if (storedUser) {
-      setUser(storedUser)
+      setUserIfChanged(storedUser)
 
       // Only verify session if there's a stored user profile.
       // If no user ever logged in, there's no httpOnly session cookie
@@ -130,8 +157,11 @@ export function useAuth(): UseAuthResult {
               subscriptionStatus: data.subscription_status || storedUser?.subscriptionStatus || 'active',
               isDeveloper: data.is_developer === true,
             }
-            storeUserProfile(verifiedUser)
-            setUser(verifiedUser)
+            // Only update state if user data actually changed — prevents cascading re-renders
+            if (!isUserEqual(userRef.current, verifiedUser)) {
+              storeUserProfile(verifiedUser)
+              setUser(verifiedUser)
+            }
           } else {
             // Session invalid - clear stored data
             clearAuthData()
@@ -148,6 +178,7 @@ export function useAuth(): UseAuthResult {
       // No stored user = not logged in, skip server verification
       setLoading(false)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -325,8 +356,8 @@ export function useAuth(): UseAuthResult {
     const handleStorage = (event: StorageEvent) => {
       if (event.key === AUTH_USER_KEY) {
         try {
-          const newUser = event.newValue ? JSON.parse(event.newValue) : null
-          setUser(newUser)
+          const newUser = event.newValue ? JSON.parse(event.newValue) as AuthUser : null
+          setUserIfChanged(newUser)
         } catch {
           setUser(null)
         }
@@ -335,7 +366,7 @@ export function useAuth(): UseAuthResult {
 
     window.addEventListener('storage', handleStorage)
     return () => window.removeEventListener('storage', handleStorage)
-  }, [])
+  }, [setUserIfChanged])
 
   return {
     user,
