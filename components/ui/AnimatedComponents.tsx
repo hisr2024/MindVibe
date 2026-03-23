@@ -11,10 +11,10 @@ interface AnimatedButtonProps extends Omit<HTMLMotionProps<'button'>, 'ref'> {
 }
 
 const variants = {
-  primary: 'bg-gradient-to-r from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] text-slate-900 shadow-lg shadow-[#d4a44c]/25',
-  secondary: 'bg-[#d4a44c]/15 text-[#f5f0e8] border border-[#d4a44c]/30',
-  outline: 'bg-transparent text-[#f5f0e8] border border-[#d4a44c]/30 hover:bg-[#d4a44c]/10',
-  ghost: 'bg-transparent text-[#f5f0e8] hover:bg-[#d4a44c]/10',
+  primary: 'bg-gradient-to-r from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] text-divine-black shadow-lg shadow-[#d4a44c]/25',
+  secondary: 'bg-[#d4a44c]/15 text-divine-cream border border-[#d4a44c]/30',
+  outline: 'bg-transparent text-divine-cream border border-[#d4a44c]/30 hover:bg-[#d4a44c]/10',
+  ghost: 'bg-transparent text-divine-cream hover:bg-[#d4a44c]/10',
 }
 
 const sizes = {

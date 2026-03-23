@@ -280,7 +280,7 @@ function ActiveJourneyCard({ journey }: { journey: JourneyResponse }) {
             </div>
           )}
 
-          <h3 className="mb-2 pr-16 text-sm font-semibold text-white line-clamp-1">
+          <h3 className="mb-2 pr-16 text-sm font-semibold line-clamp-1">
             {journey.title}
           </h3>
 
@@ -377,7 +377,7 @@ function TemplateCard({
         </div>
 
         {/* Title + description */}
-        <h3 className="mb-1.5 text-sm font-semibold text-white line-clamp-2">
+        <h3 className="mb-1.5 text-sm font-semibold line-clamp-2">
           {template.title}
         </h3>
         <p className="mb-4 text-xs text-white/70 line-clamp-2">
@@ -628,17 +628,17 @@ export default function JourneysPageClient() {
           <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-[#d4a44c]/[0.03] rounded-full blur-[100px]" />
         </div>
 
-        <main className="relative z-10 mx-auto max-w-6xl space-y-8 px-4 sm:px-6 lg:px-8 pb-28 sm:pb-20 md:pb-10 pt-6">
+        <main className="relative z-10 mx-auto max-w-6xl space-y-section-lg px-page-x lg:px-8 pb-28 sm:pb-20 md:pb-10 pt-6">
           <FadeIn>
             {/* Header */}
             <div className="text-center mb-2">
-              <h1 className="text-3xl sm:text-4xl font-bold text-white">
+              <h1 className="text-3xl sm:text-4xl font-bold">
                 The Six Enemies{' '}
                 <span style={{ background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 50%, #f0c96d 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                   (Shadripu)
                 </span>
               </h1>
-              <p className="mt-3 text-white/70 max-w-xl mx-auto text-sm leading-relaxed">
+              <p className="mt-3 text-body text-[var(--mv-text-secondary)] max-w-xl mx-auto leading-relaxed">
                 According to the Bhagavad Gita, these six inner enemies prevent us from attaining peace.
                 Master them through guided journeys of wisdom and practice.
               </p>
@@ -652,8 +652,8 @@ export default function JourneysPageClient() {
               className="rounded-2xl border border-[#d4a44c]/20 bg-white/[0.03] backdrop-blur-sm p-8 text-center"
             >
               <div className="text-5xl mb-4">{'\uD83D\uDE4F'}</div>
-              <h3 className="text-lg font-semibold text-white mb-2">Sign In to Begin Your Journey</h3>
-              <p className="text-white/70 mb-6 max-w-md mx-auto text-sm">
+              <h3 className="text-lg font-semibold mb-2">Sign In to Begin Your Journey</h3>
+              <p className="text-body text-[var(--mv-text-secondary)] mb-6 max-w-md mx-auto">
                 Discover guided journeys to strengthen your inner steadiness.
                 Track progress, build streaks, and transform from within.
               </p>
@@ -668,7 +668,7 @@ export default function JourneysPageClient() {
 
             {/* Enemy preview grid */}
             <div className="mt-8">
-              <h2 className="text-base font-semibold text-white/70 mb-4 text-center">The Six Inner Enemies</h2>
+              <h2 className="text-base font-semibold mb-4 text-center">The Six Inner Enemies</h2>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
                 {ENEMY_ORDER.map((enemy, i) => {
                   const info = ENEMY_INFO[enemy]
@@ -697,7 +697,7 @@ export default function JourneysPageClient() {
             {/* Show templates even when not authed */}
             {templates.length > 0 && (
               <div className="mt-8">
-                <h2 className="text-base font-semibold text-white/70 mb-4">Available Journeys</h2>
+                <h2 className="text-base font-semibold mb-4">Available Journeys</h2>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {templates.slice(0, 6).map((template) => (
                     <TemplateCard
@@ -724,10 +724,10 @@ export default function JourneysPageClient() {
     return (
       <div className="min-h-screen relative">
         <div className="fixed inset-0 bg-[#050507] pointer-events-none" />
-        <main className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-8">
+        <main className="relative z-10 mx-auto max-w-6xl px-page-x lg:px-8 pt-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white">Strengthen Steadiness Within</h1>
-            <p className="mt-2 text-white/70 text-sm">Loading your journey...</p>
+            <h1 className="text-3xl font-bold">Strengthen Steadiness Within</h1>
+            <p className="mt-2 text-body text-[var(--mv-text-secondary)]">Loading your journey...</p>
           </div>
           <div className="flex items-center justify-center py-20">
             <div className="relative">
@@ -755,7 +755,7 @@ export default function JourneysPageClient() {
         <div className="absolute top-[60%] left-[50%] w-[300px] h-[300px] bg-[#d4a44c]/[0.02] rounded-full blur-[80px] animate-pulse" style={{ animationDuration: '10s' }} />
       </div>
 
-      <main className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pb-28 sm:pb-20 md:pb-10 pt-4 sm:pt-6">
+      <main className="relative z-10 mx-auto max-w-6xl px-page-x lg:px-8 pb-28 sm:pb-20 md:pb-10 pt-4 sm:pt-6">
         <FadeIn>
           {/* ============================================================= */}
           {/* HERO HEADER                                                    */}
@@ -765,14 +765,14 @@ export default function JourneysPageClient() {
               <motion.h1
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white"
+                className="text-2xl sm:text-3xl lg:text-4xl font-bold"
               >
                 The Six Enemies{' '}
                 <span style={{ background: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 50%, #f0c96d 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                   (Shadripu)
                 </span>
               </motion.h1>
-              <p className="mt-1.5 text-white/70 text-sm max-w-lg">
+              <p className="mt-1.5 text-body text-[var(--mv-text-secondary)] max-w-lg">
                 Master the inner enemies through guided journeys of Gita wisdom and daily practice.
               </p>
               <p className="mt-1 text-[11px] tracking-wide text-[#d4a44c]/35" data-testid="mode-label">
@@ -806,7 +806,7 @@ export default function JourneysPageClient() {
             <p className="font-sacred text-base sm:text-lg leading-relaxed tracking-wide text-[#f0c96d]/80" lang="sa">
               {'\u0905\u092D\u094D\u092F\u093E\u0938\u0947\u0928 \u0924\u0941 \u0915\u094C\u0928\u094D\u0924\u0947\u092F \u0935\u0948\u0930\u093E\u0917\u094D\u092F\u0947\u0923 \u091A \u0917\u0943\u0939\u094D\u092F\u0924\u0947'}
             </p>
-            <p className="mt-2 text-sm italic text-slate-300/60">
+            <p className="mt-2 text-sm italic text-[var(--mv-text-secondary)]">
               {t(
                 'journeys.abhyaas.translation',
                 '"Through practice and detachment, the restless mind can be mastered."'
@@ -943,7 +943,7 @@ export default function JourneysPageClient() {
                 transition={{ delay: 0.1 }}
                 className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4 backdrop-blur-sm"
               >
-                <h3 className="text-sm font-semibold text-white/70 mb-3 text-center">
+                <h3 className="text-sm font-semibold mb-3 text-center">
                   Enemy Mastery Radar
                 </h3>
                 <div className="hidden sm:block lg:hidden">
@@ -980,8 +980,8 @@ export default function JourneysPageClient() {
               {dashboard && dashboard.active_journeys.length > 0 && (
                 <section>
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-base font-semibold text-white">Your Active Journeys</h2>
-                    <span className="text-xs text-white/35">{activeJourneyCount}/5 slots</span>
+                    <h2 className="text-base font-semibold">Your Active Journeys</h2>
+                    <span className="text-caption text-[var(--mv-text-muted)]">{activeJourneyCount}/5 slots</span>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {dashboard.active_journeys.map((journey) => (
@@ -1003,7 +1003,7 @@ export default function JourneysPageClient() {
               {/* Available Templates */}
               <section>
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-base font-semibold text-white">
+                  <h2 className="text-base font-semibold">
                     {selectedEnemy
                       ? `${ENEMY_INFO[selectedEnemy].name} Journeys`
                       : 'Available Journeys'}
@@ -1052,8 +1052,8 @@ export default function JourneysPageClient() {
                 ) : (
                   <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-8 text-center">
                     <div className="text-3xl mb-3">{'\uD83D\uDCDA'}</div>
-                    <h3 className="text-base font-medium text-white mb-1">No Templates Available</h3>
-                    <p className="text-sm text-white/70">
+                    <h3 className="text-base font-medium mb-1">No Templates Available</h3>
+                    <p className="text-body text-[var(--mv-text-secondary)]">
                       {selectedEnemy
                         ? `No journeys found for ${ENEMY_INFO[selectedEnemy].name}. Try a different enemy.`
                         : 'Journey templates are being prepared. Please check back soon.'}

@@ -33,7 +33,7 @@ export function CurrentPlanCard({ subscription, onManage, onUpgrade, className =
         <div className="flex items-start justify-between mb-4">
           <div>
             <p className="text-xs uppercase tracking-wider text-orange-100/60 mb-1">Current Plan</p>
-            <h3 className="text-2xl font-bold text-orange-50">{subscription.tierName}</h3>
+            <h3 className="text-2xl font-bold">{subscription.tierName}</h3>
           </div>
           <div className="flex items-center gap-2">
             {subscription.isDeveloper && (

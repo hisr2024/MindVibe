@@ -245,7 +245,7 @@ export function DailyCheckInWidget({
               <TimeIcon className={`w-5 h-5 ${checkInConfig.color}`} />
             </div>
             <div>
-              <h3 className="font-semibold text-white">Daily Check-In</h3>
+              <h3 className="font-semibold">Daily Check-In</h3>
               <p className="text-xs text-white/70">{checkInConfig.nameHindi}</p>
             </div>
           </div>
@@ -402,7 +402,7 @@ export function DailyCheckInWidget({
                 >
                   <ThumbsUp className="w-8 h-8 text-emerald-400" />
                 </motion.div>
-                <h4 className="text-lg font-semibold text-white mb-1">Check-In Complete!</h4>
+                <h4 className="text-lg font-semibold mb-1">Check-In Complete!</h4>
                 <p className="text-sm text-white/70">Thank you for taking time to reflect</p>
               </motion.div>
             )}

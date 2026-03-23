@@ -43,9 +43,19 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
-        heading: ['var(--font-inter)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
-        sacred: ['var(--font-sacred)', 'Crimson Text', 'Georgia', 'serif'],
+        sans: ['var(--font-inter)', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        heading: ['var(--font-inter)', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        sacred: ['var(--font-sacred)', 'Crimson Text', 'Georgia', 'Times New Roman', 'serif'],
+      },
+      fontSize: {
+        'display': ['var(--text-h1)', { lineHeight: '1.2', letterSpacing: '-0.025em', fontWeight: '700' }],
+        'title': ['var(--text-h2)', { lineHeight: '1.25', letterSpacing: '-0.02em', fontWeight: '700' }],
+        'subtitle': ['var(--text-h3)', { lineHeight: '1.3', letterSpacing: '-0.015em', fontWeight: '600' }],
+        'subheading': ['var(--text-h4)', { lineHeight: '1.35', letterSpacing: '-0.01em', fontWeight: '600' }],
+        'body-lg': ['var(--text-body-lg)', { lineHeight: '1.6', letterSpacing: '-0.01em' }],
+        'body': ['var(--text-body)', { lineHeight: '1.6', letterSpacing: '-0.01em' }],
+        'caption': ['var(--text-caption)', { lineHeight: '1.35' }],
+        'label': ['var(--text-label)', { lineHeight: '1.4', letterSpacing: '0.01em' }],
       },
       backgroundImage: {
         mvGradientSunrise: 'linear-gradient(135deg, #c8943a 0%, #e8b54a 50%, #f0c96d 100%)',
@@ -91,6 +101,11 @@ const config: Config = {
         // Mobile nav height
         'mobile-nav': '88px',
         'mobile-header': '64px',
+        // Semantic section spacing
+        'section-sm': 'var(--section-gap-sm)',
+        'section-md': 'var(--section-gap-md)',
+        'section-lg': 'var(--section-gap-lg)',
+        'page-x': 'var(--page-px)',
       },
       animation: {
         // Mobile-optimized animations

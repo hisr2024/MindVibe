@@ -496,7 +496,7 @@ export default function SacredReflectionsPage() {
           {/* Left: Journal Entry Form */}
           <form onSubmit={e => e.preventDefault()} className="rounded-2xl sm:rounded-3xl border border-[#d4a44c]/15 bg-[#0d0d10]/85 p-4 sm:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-4 sm:space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-[#f5f0e8]">New Reflection</h2>
+              <h2 className="text-lg font-semibold">New Reflection</h2>
               <p className="text-xs text-[#f5f0e8]/70 mt-1">KIAAN holds space for your thoughts with warmth and privacy.</p>
             </div>
 
@@ -583,7 +583,7 @@ export default function SacredReflectionsPage() {
           {/* Right: Weekly Assessment */}
           <section className="rounded-2xl sm:rounded-3xl border border-[#d4a44c]/15 bg-[#0d0d10]/85 p-4 sm:p-6 shadow-[0_20px_80px_rgba(255,115,39,0.12)] space-y-4 sm:space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-[#f5f0e8]">Weekly Assessment</h2>
+              <h2 className="text-lg font-semibold">Weekly Assessment</h2>
               <span className="text-xs text-[#f5f0e8]/75">Auto-updates</span>
             </div>
 
@@ -631,7 +631,7 @@ export default function SacredReflectionsPage() {
                 </div>
 
                 <div className="rounded-2xl bg-gradient-to-br from-[#d4a44c]/10 to-transparent border border-[#d4a44c]/20 p-4">
-                  <h3 className="text-sm font-semibold text-[#f5f0e8] mb-2">KIAAN&apos;s gentle guidance</h3>
+                  <h3 className="text-sm font-semibold mb-2">KIAAN&apos;s gentle guidance</h3>
                   <p className="text-sm text-[#f5f0e8]/80 leading-relaxed">{moodAssessment.headline}</p>
                   <ul className="mt-3 space-y-2 text-xs text-[#f5f0e8]/70">
                     {moodAssessment.guidance.map((tip, i) => (
@@ -655,7 +655,7 @@ export default function SacredReflectionsPage() {
                 {assessmentResult && (
                   <div className="rounded-2xl bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-400/20 p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-[#f5f0e8]">Latest Wellness Score</h3>
+                      <h3 className="text-sm font-semibold">Latest Wellness Score</h3>
                       <span className="text-xs text-[#f5f0e8]/60">
                         {new Date(assessmentResult.assessment_date).toLocaleDateString()}
                       </span>
@@ -783,7 +783,7 @@ export default function SacredReflectionsPage() {
         {/* Recent Entries */}
         <section className="rounded-2xl sm:rounded-3xl border border-[#d4a44c]/15 bg-[#0c0c10]/85 p-4 sm:p-6 shadow-[0_15px_60px_rgba(255,115,39,0.12)]">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-[#f5f0e8]">Recent Reflections</h2>
+            <h2 className="text-lg font-semibold">Recent Reflections</h2>
             <span className="text-xs text-[#f5f0e8]/75">Stored locally • Newest first</span>
           </div>
 
@@ -802,7 +802,7 @@ export default function SacredReflectionsPage() {
                     </span>
                   </div>
                   {entry.title && (
-                    <h3 className="font-semibold text-[#f5f0e8] mb-1">{entry.title}</h3>
+                    <h3 className="font-semibold mb-1">{entry.title}</h3>
                   )}
                   <p className="text-sm text-[#f5f0e8] whitespace-pre-wrap leading-relaxed">{entry.body}</p>
 

@@ -177,7 +177,7 @@ function EnhancementSection({
             <Icon className={`w-4 h-4 ${enhancement.color}`} />
           </div>
           <div>
-            <h4 className="text-sm font-medium text-white">{enhancement.name}</h4>
+            <h4 className="text-sm font-medium">{enhancement.name}</h4>
             <p className="text-[10px] text-white/70">{enhancement.nameHindi}</p>
           </div>
         </div>
@@ -338,7 +338,7 @@ export function VoiceEnhancementsPanel({
                 <Sparkles className="w-5 h-5 text-[#d4a44c]" />
               </div>
               <div>
-                <h3 className="font-semibold text-white">Voice Enhancements</h3>
+                <h3 className="font-semibold">Voice Enhancements</h3>
                 <p className="text-xs text-white/70">
                   {activeCount} active
                 </p>
@@ -397,7 +397,7 @@ export function VoiceEnhancementsPanel({
               <Sparkles className="w-6 h-6 text-[#d4a44c]" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white">Voice Enhancements</h2>
+              <h2 className="text-lg font-semibold">Voice Enhancements</h2>
               <p className="text-sm text-white/70">
                 {activeCount} enhancement{activeCount !== 1 ? 's' : ''} active
               </p>

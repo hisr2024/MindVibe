@@ -120,7 +120,7 @@ export function ProgressResetTool() {
   return (
     <div className="rounded-xl border border-slate-700 bg-slate-800/50 p-6">
       <div className="mb-4">
-        <h3 className="text-xl font-semibold text-slate-100 flex items-center gap-2">
+        <h3 className="text-xl font-semibold flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-6 w-6 text-[#d4a44c]"
@@ -225,7 +225,7 @@ export function ProgressResetTool() {
               className="w-full max-w-lg rounded-xl border border-slate-600 bg-slate-800 p-6 shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 id="progress-reset-title" className="text-xl font-bold text-slate-100 mb-4 flex items-center gap-2">
+              <h3 id="progress-reset-title" className="text-xl font-bold mb-4 flex items-center gap-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6 text-[#d4a44c]"

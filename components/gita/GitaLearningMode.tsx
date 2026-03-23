@@ -128,7 +128,7 @@ export function GitaLearningMode({
               <GraduationCap className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Learning Mode</h2>
+              <h2 className="text-xl font-bold">Learning Mode</h2>
               <p className="text-sm text-white/70">
                 Chapter {chapter}: {chapterInfo?.nameEnglish}
               </p>
@@ -286,7 +286,7 @@ export function GitaLearningMode({
             exit={{ opacity: 0, y: 20 }}
             className="mt-4 p-4 rounded-2xl bg-white/5 border border-white/10"
           >
-            <h4 className="text-sm font-semibold text-white mb-4">Learning Settings</h4>
+            <h4 className="text-sm font-semibold mb-4">Learning Settings</h4>
 
             <div className="space-y-4">
               {/* Display options */}

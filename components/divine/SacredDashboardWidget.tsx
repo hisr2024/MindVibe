@@ -101,7 +101,7 @@ export function SacredDashboardWidget({
             <span className="text-xl">🙏</span>
           </motion.div>
           <div>
-            <h3 className="text-white/90 font-medium">{t('divine.sacred.dashboard.sacredSpace', 'Sacred Space')}</h3>
+            <h3 className="font-medium">{t('divine.sacred.dashboard.sacredSpace', 'Sacred Space')}</h3>
             <p className="text-white/70 text-xs">{t('divine.sacred.dashboard.findPeace', 'Find peace in any moment')}</p>
           </div>
         </div>

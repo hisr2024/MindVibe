@@ -457,7 +457,7 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
                 "
               >
                 <div className="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-4">Add Tags</h3>
+                <h3 className="text-lg font-semibold mb-4">Add Tags</h3>
 
                 {/* Custom tag input */}
                 <div className="flex gap-2 mb-4">
@@ -554,7 +554,7 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
                 "
               >
                 <div className="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-4">How are you feeling?</h3>
+                <h3 className="text-lg font-semibold mb-4">How are you feeling?</h3>
 
                 <div className="grid grid-cols-3 gap-3">
                   {MOOD_OPTIONS.map((option) => {

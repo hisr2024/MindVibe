@@ -203,21 +203,21 @@ export default function MobileNotificationsPage() {
     >
       <div className="pb-safe-bottom">
         {isLoading ? (
-          <div className="px-4 space-y-3 pt-2">
+          <div className="px-page-x space-y-3 pt-2">
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-20 rounded-2xl bg-white/[0.04] animate-pulse" />
             ))}
           </div>
         ) : notifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 px-4">
+          <div className="flex flex-col items-center justify-center py-20 px-page-x">
             <BellOff className="w-12 h-12 text-slate-600 mb-3" />
-            <p className="text-slate-400 text-center">No notifications yet</p>
-            <p className="text-sm text-slate-500 text-center mt-1">
+            <p className="text-body text-[var(--mv-text-secondary)] text-center">No notifications yet</p>
+            <p className="text-caption text-[var(--mv-text-muted)] text-center mt-1">
               Wisdom reminders and journey updates will appear here
             </p>
           </div>
         ) : (
-          <div className="px-4 space-y-6 pt-2">
+          <div className="px-page-x space-y-section-lg pt-2">
             {/* Unread count badge */}
             {unreadCount > 0 && (
               <motion.div
@@ -235,7 +235,7 @@ export default function MobileNotificationsPage() {
             {/* Grouped notifications */}
             {Object.entries(groupedNotifications).map(([group, items]) => (
               <div key={group}>
-                <h2 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">
+                <h2 className="text-xs font-medium text-[var(--mv-text-muted)] uppercase tracking-wider mb-2">
                   {group}
                 </h2>
                 <div className="space-y-2">
@@ -276,7 +276,7 @@ export default function MobileNotificationsPage() {
                                   <div className="w-2 h-2 rounded-full bg-[#d4a44c] flex-shrink-0" />
                                 )}
                               </div>
-                              <p className="text-xs text-slate-400 line-clamp-2">
+                              <p className="text-caption text-[var(--mv-text-muted)] line-clamp-2">
                                 {notification.body}
                               </p>
                               <p className="text-[10px] text-slate-600 mt-1">

@@ -95,7 +95,7 @@ export function GitaVerseDisplay({
               <BookOpen className="w-5 h-5 text-orange-400" />
             </div>
             <div>
-              <h3 className="font-medium text-white">
+              <h3 className="font-medium">
                 Chapter {verse.chapter}, Verse {verse.verse}
               </h3>
               <p className="text-xs text-white/70">
@@ -252,7 +252,7 @@ export function GitaVerseDisplay({
 
       {/* Translation */}
       <div className="p-6 border-b border-white/5 bg-white/[0.02]">
-        <h4 className="text-xs font-medium text-white/70 uppercase tracking-wider mb-3">
+        <h4 className="text-xs font-medium uppercase tracking-wider mb-3">
           Translation
         </h4>
         <p className="text-base text-white/80 leading-relaxed">

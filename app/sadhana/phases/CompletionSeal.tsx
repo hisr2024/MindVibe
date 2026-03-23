@@ -81,7 +81,7 @@ export function CompletionSeal({ xpAwarded, streakCount, message, verseId }: Com
         transition={{ delay: 0.8 }}
         className="text-center mb-8"
       >
-        <h2 className="text-3xl font-light text-[#FFF8DC] mb-3">
+        <h2 className="text-3xl font-light mb-3">
           Sadhana Sealed
         </h2>
         <p className="text-[#d4a44c]/70 font-light max-w-md leading-relaxed">

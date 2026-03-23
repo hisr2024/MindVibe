@@ -100,7 +100,7 @@ export function DivineSacredActions() {
                 {path.symbol}
               </span>
 
-              <h3 className="text-base font-semibold text-slate-100/90 sm:text-lg">
+              <h3 className="text-base font-semibold sm:text-lg">
                 {t(path.titleKey, path.titleFallback)}
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-slate-300/60">

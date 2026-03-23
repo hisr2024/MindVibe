@@ -54,7 +54,7 @@ function AccountSection({
           {icon}
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-[#f5f0e8]">{title}</h2>
+          <h2 className="text-lg font-semibold">{title}</h2>
           {subtitle && <p className="text-xs text-[#f5f0e8]/70">{subtitle}</p>}
         </div>
       </div>
@@ -201,7 +201,7 @@ function AuthenticatedAccountView({
     <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
       {/* Page Header */}
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#f5f0e8] mb-1">Account</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-1">Account</h1>
         <p className="text-sm text-[#f5f0e8]/75">Manage your account settings, security, and data</p>
       </div>
 
@@ -388,7 +388,7 @@ function AuthenticatedAccountView({
               <line x1="12" y1="17" x2="12.01" y2="17" />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-red-400">Danger Zone</h2>
+          <h2 className="text-lg font-semibold !text-red-400">Danger Zone</h2>
         </div>
         <div className="space-y-1">
           <button
@@ -438,7 +438,7 @@ function AuthenticatedAccountView({
                   <line x1="12" y1="17" x2="12.01" y2="17" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-white">Delete Account?</h3>
+              <h3 className="text-lg font-semibold">Delete Account?</h3>
               <p className="text-sm text-slate-400 mt-1">
                 This action cannot be undone. All your data, including journals, journey progress, and insights will be permanently deleted.
               </p>
@@ -674,12 +674,12 @@ function UnauthenticatedAccountView() {
   const kiaanTools = useMemo(() => getKiaanTools(), [])
 
   return (
-    <main className="mx-auto max-w-6xl space-y-8 px-4 pb-16 pt-6 sm:pt-8 md:pt-12">
+    <main className="mx-auto max-w-6xl space-y-8 px-page-x pb-16 pt-6 sm:pt-8 md:pt-12">
       {/* Hero Section */}
       <section className="rounded-3xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#0f0a08] via-[#0b0b0f] to-[#0c0f19] p-8 shadow-[0_24px_100px_rgba(255,115,39,0.18)]">
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.26em] text-[#f5f0e8]/75">Account Access</p>
-          <h1 className="text-3xl font-bold text-[#f5f0e8]">Welcome to Sakha</h1>
+          <h1 className="text-3xl font-bold">Welcome to Sakha</h1>
           <p className="text-sm text-[#f5f0e8]/75">Create an account or sign in to sync your spiritual journey across devices</p>
         </div>
       </section>

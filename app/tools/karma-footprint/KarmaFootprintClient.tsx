@@ -96,7 +96,7 @@ export default function KarmaFootprintClient() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] text-white p-4 md:p-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] px-page-x py-4 md:py-8">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <FadeIn>
@@ -192,7 +192,7 @@ export default function KarmaFootprintClient() {
 
                   {/* Positive Actions */}
                   <div className="rounded-2xl border border-green-400/30 bg-green-500/5 p-5">
-                    <h4 className="text-sm font-semibold text-green-50 mb-3 flex items-center gap-2">
+                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-green-400" aria-hidden="true" />
                       Positive Actions
                     </h4>
@@ -208,7 +208,7 @@ export default function KarmaFootprintClient() {
 
                   {/* Areas for Growth */}
                   <div className="rounded-2xl border border-amber-400/30 bg-amber-500/5 p-5">
-                    <h4 className="text-sm font-semibold text-amber-50 mb-3 flex items-center gap-2">
+                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-amber-400" aria-hidden="true" />
                       Areas for Growth
                     </h4>

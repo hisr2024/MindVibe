@@ -7,12 +7,12 @@ import { SettingsSection } from '@/components/settings'
 
 function SecuritySettingsContent() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
+    <main className="mx-auto max-w-3xl px-page-x py-12">
       <div className="mb-8">
         <Link href="/settings" className="text-[#d4a44c] hover:text-[#e8b54a] text-sm mb-4 inline-block">
           &larr; Back to Settings
         </Link>
-        <h1 className="text-3xl font-bold text-[#f5f0e8] mb-2">Security Settings</h1>
+        <h1 className="text-3xl font-bold mb-2">Security Settings</h1>
         <p className="text-[#f5f0e8]/70">Manage your account security</p>
       </div>
 
@@ -99,7 +99,7 @@ export default function SecuritySettingsPage() {
   return (
     <Suspense
       fallback={
-        <main className="mx-auto max-w-3xl px-4 py-12">
+        <main className="mx-auto max-w-3xl px-page-x py-12">
           <div className="animate-pulse">
             <div className="h-8 bg-[#d4a44c]/20 rounded w-48 mb-4" />
             <div className="h-4 bg-[#d4a44c]/10 rounded w-64 mb-8" />

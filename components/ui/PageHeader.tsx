@@ -58,7 +58,7 @@ export function PageHeader({
             <button
               type="button"
               onClick={handleBack}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-800/70 bg-white/5 text-slate-100 transition hover:border-white/30 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 focus:ring-offset-slate-950"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--mv-border)] bg-white/5 text-[var(--mv-text-primary)] transition hover:border-[var(--mv-border-strong)] hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50 focus:ring-offset-2 focus:ring-offset-[#050507]"
               aria-label="Go back"
             >
               <svg
@@ -80,11 +80,11 @@ export function PageHeader({
           )}
 
           <div className="flex flex-col gap-1">
-            <h1 className="text-balance text-left font-semibold text-slate-50">
+            <h1 className="text-balance text-left">
               {title}
             </h1>
             {subtitle && (
-              <p className="text-pretty text-sm leading-relaxed text-slate-300 sm:text-base">
+              <p className="text-pretty text-body leading-relaxed text-[var(--mv-text-secondary)]">
                 {subtitle}
               </p>
             )}

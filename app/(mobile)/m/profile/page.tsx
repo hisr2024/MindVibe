@@ -113,7 +113,7 @@ export default function MobileProfilePage() {
   if (authLoading) {
     return (
       <MobileAppShell title="Profile" showHeader={false} showTabBar={true}>
-        <div className="px-4 pt-6 pb-8 space-y-6 animate-pulse">
+        <div className="px-page-x pt-6 pb-8 space-y-6 animate-pulse">
           <div className="flex flex-col items-center pt-4">
             <div className="w-20 h-20 rounded-full bg-white/[0.06]" />
             <div className="h-5 w-32 rounded bg-white/[0.06] mt-3" />
@@ -133,7 +133,7 @@ export default function MobileProfilePage() {
       showHeader={false}
       showTabBar={true}
     >
-      <div className="px-4 pt-2 pb-8 space-y-6">
+      <div className="px-page-x pt-2 pb-8 space-y-6">
         {/* Profile Header */}
         <motion.section
           initial={{ opacity: 0, y: -10 }}
@@ -143,12 +143,12 @@ export default function MobileProfilePage() {
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#d4a44c] to-[#d4a44c] flex items-center justify-center mb-3 shadow-lg shadow-[#d4a44c]/20">
             <span className="text-3xl font-bold text-white">{userInitial}</span>
           </div>
-          <h1 className="text-xl font-bold text-white">{userName}</h1>
+          <h1 className="text-xl font-bold">{userName}</h1>
           {user?.email && (
-            <p className="text-sm text-slate-400 mt-0.5">{user.email}</p>
+            <p className="text-body text-[var(--mv-text-secondary)] mt-0.5">{user.email}</p>
           )}
           {stats.memberSince && (
-            <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-500">
+            <div className="flex items-center gap-1.5 mt-2 text-caption text-[var(--mv-text-muted)]">
               <Calendar className="w-3 h-3" />
               <span>Member since {new Date(stats.memberSince).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
             </div>
@@ -171,7 +171,7 @@ export default function MobileProfilePage() {
               <p className={`text-lg font-bold ${stat.color}`}>
                 {isLoading ? '-' : stat.value}
               </p>
-              <p className="text-[9px] text-slate-500 uppercase tracking-wider">{stat.label}</p>
+              <p className="text-caption text-[var(--mv-text-muted)] uppercase tracking-wider">{stat.label}</p>
             </div>
           ))}
         </motion.section>
@@ -192,8 +192,8 @@ export default function MobileProfilePage() {
                 <Crown className="w-5 h-5 text-[#d4a44c]" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-white">Upgrade to Premium</p>
-                <p className="text-xs text-slate-400 mt-0.5">Unlock all journeys and unlimited KIAAN insights</p>
+                <p className="text-sm font-semibold">Upgrade to Premium</p>
+                <p className="text-caption text-[var(--mv-text-muted)] mt-0.5">Unlock all journeys and unlimited KIAAN insights</p>
               </div>
               <ChevronRight className="w-5 h-5 text-slate-500" />
             </div>
@@ -220,8 +220,8 @@ export default function MobileProfilePage() {
                 <item.icon className="w-4 h-4 text-slate-400" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-white">{item.label}</p>
-                <p className="text-xs text-slate-500">{item.description}</p>
+                <p className="text-sm font-medium">{item.label}</p>
+                <p className="text-caption text-[var(--mv-text-muted)]">{item.description}</p>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-500" />
             </motion.button>
@@ -273,8 +273,8 @@ export default function MobileProfilePage() {
               <div className="w-12 h-12 rounded-full bg-[#d4a44c]/10 flex items-center justify-center mx-auto mb-3">
                 <LogOut className="w-6 h-6 text-[#d4a44c]" />
               </div>
-              <h3 className="text-lg font-semibold text-white">Log Out?</h3>
-              <p className="text-sm text-slate-400 mt-1">
+              <h3 className="text-lg font-semibold">Log Out?</h3>
+              <p className="text-body text-[var(--mv-text-secondary)] mt-1">
                 You&apos;ll need to sign in again to access your account.
               </p>
             </div>

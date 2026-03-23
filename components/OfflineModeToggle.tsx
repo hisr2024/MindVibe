@@ -26,7 +26,7 @@ export function OfflineModeToggle() {
         <div className="flex items-center gap-3">
           <div className={`h-3 w-3 rounded-full ${isOnline ? 'bg-green-500' : 'bg-amber-500'} animate-pulse`} />
           <div>
-            <h3 className="text-sm font-medium text-slate-200">
+            <h3 className="text-sm font-medium">
               {isOnline ? 'Online' : 'Offline Mode'}
             </h3>
             <p className="text-xs text-slate-400">

@@ -39,7 +39,7 @@ export function BreathworkPhase({ pattern, onComplete }: BreathworkPhaseProps) {
         transition={{ delay: 0.3 }}
         className="text-center mb-8"
       >
-        <h2 className="text-2xl font-light text-[#FFF8DC] mb-1">
+        <h2 className="text-2xl font-light mb-1">
           Pranayama
         </h2>
         <p className="text-sm text-[#d4a44c]/60">

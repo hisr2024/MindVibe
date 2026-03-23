@@ -158,7 +158,7 @@ export function GitaChapterCard({
           </div>
 
           {/* Title */}
-          <h3 className="text-2xl font-bold text-white mb-1">
+          <h3 className="text-2xl font-bold mb-1">
             {chapter.nameSanskrit}
           </h3>
           <p className="text-sm text-white/70 mb-1">{chapter.nameEnglish}</p>
@@ -238,7 +238,7 @@ export function GitaChapterCard({
 
           {/* Title */}
           <div className="flex-1 min-w-0">
-            <h4 className="font-medium text-white text-sm truncate">
+            <h4 className="font-medium text-sm truncate">
               {chapter.nameSanskrit}
             </h4>
             <p className="text-xs text-white/70 truncate">{chapter.nameEnglish}</p>

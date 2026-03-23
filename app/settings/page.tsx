@@ -79,8 +79,8 @@ export default function SettingsPage() {
   return (
     <main className="mx-auto max-w-3xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-orange-50 mb-2">Settings</h1>
-        <p className="text-orange-100/70">Customize your Sakha experience</p>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Settings</h1>
+        <p className="text-body text-[var(--mv-text-secondary)]">Customize your Sakha experience</p>
       </div>
 
       {saved && (
@@ -211,8 +211,8 @@ export default function SettingsPage() {
           <Card variant="bordered">
             <CardContent className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-orange-50">Export All Data</p>
-                <p className="text-xs text-orange-100/50">Download your journal entries, settings, and chat history</p>
+                <p className="font-medium">Export All Data</p>
+                <p className="text-caption text-[var(--mv-text-muted)]">Download your journal entries, settings, and chat history</p>
               </div>
               <Button variant="outline" size="sm">Export</Button>
             </CardContent>
@@ -221,7 +221,7 @@ export default function SettingsPage() {
             <CardContent className="flex items-center justify-between">
               <div>
                 <p className="font-medium text-red-400">Delete All Data</p>
-                <p className="text-xs text-orange-100/50">Permanently remove all your data from this device</p>
+                <p className="text-caption text-[var(--mv-text-muted)]">Permanently remove all your data from this device</p>
               </div>
               <Button variant="danger" size="sm">Delete</Button>
             </CardContent>
@@ -230,12 +230,12 @@ export default function SettingsPage() {
       </SettingsSection>
 
       {/* Links */}
-      <div className="text-center text-sm text-orange-100/50 flex flex-wrap justify-center gap-2 sm:gap-4">
-        <Link href="/privacy" className="hover:text-orange-100">Privacy Policy</Link>
+      <div className="text-center text-sm text-[var(--mv-text-muted)] flex flex-wrap justify-center gap-2 sm:gap-4">
+        <Link href="/privacy" className="hover:text-[var(--mv-text-primary)]">Privacy Policy</Link>
         <span>•</span>
-        <Link href="/terms" className="hover:text-orange-100">Terms of Service</Link>
+        <Link href="/terms" className="hover:text-[var(--mv-text-primary)]">Terms of Service</Link>
         <span>•</span>
-        <Link href="/contact" className="hover:text-orange-100">Contact Support</Link>
+        <Link href="/contact" className="hover:text-[var(--mv-text-primary)]">Contact Support</Link>
       </div>
     </main>
   )

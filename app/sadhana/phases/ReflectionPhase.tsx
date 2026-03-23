@@ -34,7 +34,7 @@ export function ReflectionPhase({ prompt, value, onChange, onComplete }: Reflect
         transition={{ delay: 0.3 }}
         className="text-center mb-8 max-w-lg"
       >
-        <h2 className="text-2xl font-light text-[#FFF8DC] mb-3">
+        <h2 className="text-2xl font-light mb-3">
           Sacred Reflection
         </h2>
         <p className="text-[#d4a44c]/70 leading-relaxed">

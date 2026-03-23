@@ -186,7 +186,7 @@ export function DivineKrishnaPresence() {
             animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
-            <h1 className="font-sacred text-2xl font-light tracking-wide text-slate-100/95 sm:text-3xl md:text-4xl">
+            <h1 className="font-sacred text-2xl font-light tracking-wide sm:text-3xl md:text-4xl">
               {t('home.divine.welcome', 'Welcome, Dear Friend')}
             </h1>
             <p className="mx-auto max-w-xl text-sm leading-relaxed text-slate-300/70 sm:text-base">

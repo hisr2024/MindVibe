@@ -192,7 +192,7 @@ export function AffirmationsWidget({
               <Sparkles className="w-5 h-5 text-purple-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-white">Affirmations</h3>
+              <h3 className="font-semibold">Affirmations</h3>
               <p className="text-xs text-white/70">Positive KIAAN Voice</p>
             </div>
           </div>

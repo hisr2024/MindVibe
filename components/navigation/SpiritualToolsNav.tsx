@@ -98,7 +98,7 @@ export function SpiritualToolsNav({
     <div
       className={`rounded-2xl border border-orange-500/20 bg-[#0b0c0f]/90 p-5 shadow-[0_15px_60px_rgba(255,115,39,0.12)] ${className}`}
     >
-      <h3 className="text-sm font-semibold text-orange-50 mb-1">
+      <h3 className="text-sm font-semibold mb-1">
         {t('navigation.spiritual_tools.title', 'Spiritual Toolkit')}
       </h3>
       <p className="text-[10px] text-orange-100/70 mb-4">

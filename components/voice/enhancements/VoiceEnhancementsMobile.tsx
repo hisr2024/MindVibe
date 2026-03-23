@@ -187,7 +187,7 @@ function EnhancementsBottomSheet({
                   <Sparkles className="w-5 h-5 text-[#d4a44c]" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">Voice Enhancements</h3>
+                  <h3 className="font-semibold">Voice Enhancements</h3>
                   <p className="text-xs text-white/70">{activeEnhancements.size} active</p>
                 </div>
               </div>

@@ -45,7 +45,7 @@ export default function AnalyticsPageClient() {
   }
 
   return (
-    <main className="min-h-screen px-4 py-8 md:px-8 lg:px-12">
+    <main className="min-h-screen px-page-x py-8 lg:px-12">
       <div className="max-w-7xl mx-auto">
         <SubscriptionBanner
           feature="advanced_analytics"
@@ -56,7 +56,7 @@ export default function AnalyticsPageClient() {
         {/* Back link */}
         <button
           onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-2 text-sm text-orange-100/60 hover:text-orange-50 transition mb-6"
+          className="flex items-center gap-2 text-sm text-[var(--mv-text-muted)] hover:text-[var(--mv-text-primary)] transition mb-6"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

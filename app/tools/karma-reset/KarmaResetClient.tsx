@@ -282,7 +282,7 @@ export default function KarmaResetClient() {
   const isLastPhase = currentPhase >= totalPhases - 1
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] text-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907]">
       {/* Background gradients */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute -left-20 top-10 h-80 w-80 rounded-full bg-gradient-to-br from-[#d4a44c]/25 via-[#ff9933]/14 to-transparent blur-3xl" />
@@ -290,7 +290,7 @@ export default function KarmaResetClient() {
         <div className="absolute left-1/4 top-1/3 h-56 w-56 animate-pulse rounded-full bg-gradient-to-br from-[#1f2937]/70 via-[#ff9933]/10 to-transparent blur-[90px]" />
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl relative">
+      <div className="container mx-auto px-page-x py-8 max-w-7xl relative">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main content area */}
           <div className="lg:col-span-3">

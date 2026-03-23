@@ -74,7 +74,7 @@ export default function AdminUsersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">User Management</h1>
+          <h1 className="text-2xl font-bold">User Management</h1>
           <p className="text-sm text-slate-400">
             Search, view, and manage user accounts
           </p>
@@ -138,7 +138,7 @@ export default function AdminUsersPage() {
                   <td className="px-4 py-3">
                     <div>
                       <p className="font-medium text-slate-200">{user.email}</p>
-                      <p className="text-xs text-slate-400">{user.id}</p>
+                      <p className="text-caption text-[var(--mv-text-muted)]">{user.id}</p>
                     </div>
                   </td>
                   <td className="px-4 py-3">

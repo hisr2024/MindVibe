@@ -35,7 +35,7 @@ export function ToolGrid({
     >
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-xl font-semibold text-orange-50">{title}</h2>
+          <h2 className="text-xl font-semibold">{title}</h2>
           {description && <HelpIcon content={description} />}
         </div>
       </div>

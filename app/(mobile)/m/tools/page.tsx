@@ -179,7 +179,7 @@ interface ToolsSectionProps {
 function ToolsSection({ title, tools, onToolPress, baseDelay }: ToolsSectionProps) {
   return (
     <div>
-      <h2 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">{title}</h2>
+      <h2 className="text-xs font-medium text-[var(--mv-text-muted)] uppercase tracking-wider mb-3">{title}</h2>
       <div className="grid grid-cols-2 gap-3">
         {tools.map((tool, index) => (
           <motion.button
@@ -197,8 +197,8 @@ function ToolsSection({ title, tools, onToolPress, baseDelay }: ToolsSectionProp
               </div>
             )}
             <tool.icon className={`w-6 h-6 ${tool.iconColor} mb-2`} />
-            <p className="text-sm font-semibold text-white">{tool.label}</p>
-            <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">{tool.description}</p>
+            <p className="text-sm font-semibold">{tool.label}</p>
+            <p className="text-caption text-[var(--mv-text-muted)] mt-0.5 line-clamp-1">{tool.description}</p>
           </motion.button>
         ))}
       </div>
@@ -223,7 +223,7 @@ export default function MobileToolsPage() {
       onBack={() => router.back()}
       showTabBar={false}
     >
-      <div className="px-4 pb-safe-bottom space-y-6">
+      <div className="px-page-x pb-safe-bottom space-y-section-lg">
         <ToolsSection title="Core" tools={CORE_TOOLS} onToolPress={handleToolPress} baseDelay={0.05} />
         <ToolsSection title="Emotional Wellness" tools={EMOTIONAL_TOOLS} onToolPress={handleToolPress} baseDelay={0.2} />
         <ToolsSection title="Growth & Discovery" tools={GROWTH_TOOLS} onToolPress={handleToolPress} baseDelay={0.35} />

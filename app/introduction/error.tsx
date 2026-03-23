@@ -17,7 +17,7 @@ export default function IntroductionError({
     <div role="alert" className="flex min-h-screen items-center justify-center bg-slate-950 p-6">
       <div className="max-w-md text-center">
         <div className="mb-6 text-6xl" aria-hidden="true">&#x1F64F;</div>
-        <h2 className="mb-3 text-xl font-semibold text-slate-100">
+        <h2 className="mb-3 text-xl font-semibold">
           A moment of pause
         </h2>
         <p className="mb-6 text-sm text-slate-400">

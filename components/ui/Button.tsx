@@ -15,10 +15,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-gradient-to-r from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] text-slate-900 shadow-lg shadow-[#d4a44c]/25 hover:scale-[1.02]',
-  secondary: 'bg-white/10 border border-[#d4a44c]/30 text-[#f5f0e8] hover:bg-[#d4a44c]/20 hover:border-[#d4a44c]',
-  outline: 'border border-[#d4a44c]/30 text-[#f5f0e8] hover:bg-[#d4a44c]/10',
-  ghost: 'text-[#f5f0e8] hover:bg-[#d4a44c]/10',
+  primary: 'bg-gradient-to-r from-[#d4a44c] via-[#d4a44c] to-[#e8b54a] text-divine-black shadow-lg shadow-[#d4a44c]/25 hover:scale-[1.02]',
+  secondary: 'bg-white/10 border border-[#d4a44c]/30 text-divine-cream hover:bg-[#d4a44c]/20 hover:border-[#d4a44c]',
+  outline: 'border border-[#d4a44c]/30 text-divine-cream hover:bg-[#d4a44c]/10',
+  ghost: 'text-divine-cream hover:bg-[#d4a44c]/10',
   danger: 'bg-red-500/80 text-white hover:bg-red-500 shadow-lg shadow-red-500/20',
 }
 

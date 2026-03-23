@@ -37,7 +37,7 @@ export function KiaanQuotaCard({
               </svg>
             </div>
             <div>
-              <h3 className="font-semibold text-orange-50">KIAAN Questions</h3>
+              <h3 className="font-semibold">KIAAN Questions</h3>
               <p className="text-xs text-orange-100/60">Monthly quota</p>
             </div>
           </div>

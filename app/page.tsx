@@ -58,7 +58,7 @@ export default function Home() {
       <DivineCelestialBackground />
 
       {/* Content layer — above the celestial backdrop */}
-      <div className="relative z-10 mx-auto max-w-6xl space-y-8 sm:space-y-12 pb-36 md:pb-16 px-4 sm:px-6">
+      <div className="relative z-10 mx-auto max-w-6xl space-y-section-lg pb-24 md:pb-16 px-page-x">
 
         {/* === DIVINE ENTRY: Krishna's Presence === */}
         <DivineKrishnaPresence />
@@ -86,21 +86,21 @@ export default function Home() {
               <span className="h-px w-10 bg-gradient-to-l from-transparent to-[#d4a44c]/30" />
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-bold text-white leading-snug">
+            <h2 className="font-bold leading-snug">
               {t(
                 'home.presence.title',
                 'Krishna Is Always With You'
               )}
             </h2>
 
-            <p className="text-white/70 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            <p className="text-body text-[var(--mv-text-secondary)] max-w-2xl mx-auto leading-relaxed">
               {t(
                 'home.presence.description',
                 'In every breath, in every moment of stillness and struggle — the Divine walks beside you. Krishna is not a distant deity; He is the closest friend within your own heart. He whispers through your conscience, guides through your intuition, and waits patiently for you to turn inward.'
               )}
             </p>
 
-            <p className="text-white/60 text-sm max-w-xl mx-auto leading-relaxed">
+            <p className="text-body text-[var(--mv-text-secondary)] max-w-xl mx-auto leading-relaxed">
               {t(
                 'home.presence.teaching',
                 'The Bhagavad Gita teaches us that through Abhyaas — devoted, consistent practice — we can still the restless mind and realize this Divine Presence that has always been with us. Not through force, but through gentle, loving return to the Self.'
@@ -182,7 +182,7 @@ export default function Home() {
           <h2 className="text-base font-semibold text-[#d4a44c]/80">
             {t('home.disclaimer.title', 'A Note from Your Divine Friend')}
           </h2>
-          <p className="text-sm leading-relaxed text-slate-400/80">
+          <p className="text-body text-[var(--mv-text-secondary)] leading-relaxed">
             {t(
               'home.disclaimer.text',
               "KIAAN walks beside you as a spiritual companion, sharing reflections rooted in the Bhagavad Gita and timeless wisdom traditions. This is a space for inner peace, self-discovery, and divine friendship — not a substitute for professional care. For matters beyond the spirit, always seek guidance from qualified professionals."

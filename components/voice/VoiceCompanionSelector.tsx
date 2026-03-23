@@ -257,7 +257,7 @@ export default function VoiceCompanionSelector({
       {/* Header */}
       <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
         <div>
-          <h3 className="text-base font-semibold text-white/90">Voice & Language</h3>
+          <h3 className="text-base font-semibold">Voice & Language</h3>
           <p className="text-[11px] text-white/70 mt-0.5">
             {selectedVoice
               ? `${selectedVoice.name} \u00B7 ${selectedLangInfo?.nativeName || selectedLang}`
@@ -324,7 +324,7 @@ export default function VoiceCompanionSelector({
               <div key={group.label}>
                 <div className="flex items-center justify-between mb-2.5">
                   <div>
-                    <h4 className="text-[11px] font-semibold text-white/45 uppercase tracking-wider">
+                    <h4 className="text-[11px] font-semibold uppercase tracking-wider">
                       {group.label}
                     </h4>
                     <p className="text-[9px] text-white/25 mt-0.5">{group.description}</p>

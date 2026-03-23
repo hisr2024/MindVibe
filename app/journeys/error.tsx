@@ -17,7 +17,7 @@ export default function JourneysError({
     <div className="flex min-h-screen items-center justify-center bg-slate-950 p-6">
       <div className="max-w-md text-center">
         <div className="mb-6 text-6xl">&#x1F6A3;</div>
-        <h2 className="mb-3 text-xl font-semibold text-slate-100">
+        <h2 className="mb-3 text-xl font-semibold">
           A brief pause on the path
         </h2>
         <p className="mb-6 text-sm text-slate-400">

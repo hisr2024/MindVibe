@@ -175,7 +175,7 @@ export function GitaSoundscapeCard({
           </div>
 
           {/* Title */}
-          <h3 className="text-xl font-bold text-white mb-1">{soundscape.name}</h3>
+          <h3 className="text-xl font-bold mb-1">{soundscape.name}</h3>
           <p className="text-sm text-white/60 mb-1">{soundscape.nameHindi}</p>
           <p className="text-sm text-white/70 mb-4 line-clamp-2">{soundscape.description}</p>
 
@@ -257,7 +257,7 @@ export function GitaSoundscapeCard({
 
           {/* Title */}
           <div className="flex-1 min-w-0">
-            <h4 className="font-medium text-white text-sm truncate">
+            <h4 className="font-medium text-sm truncate">
               {soundscape.name}
             </h4>
             <p className="text-xs text-white/70 truncate">{soundscape.nameHindi}</p>

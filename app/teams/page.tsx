@@ -251,7 +251,7 @@ export default function TeamsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Teams</h1>
+            <h1 className="text-3xl font-bold">My Teams</h1>
             <p className="text-gray-500 mt-1">Collaborate with your team on shared journeys and insights</p>
           </div>
           <button
@@ -265,7 +265,7 @@ export default function TeamsPage() {
         {/* Pending Invitations */}
         {pendingInvitations.length > 0 && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <h2 className="text-lg font-semibold text-amber-800 mb-3">
+            <h2 className="text-lg font-semibold mb-3">
               Pending Invitations ({pendingInvitations.length})
             </h2>
             <div className="space-y-2">
@@ -307,7 +307,7 @@ export default function TeamsPage() {
         {showCreateForm && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Create New Team</h2>
+              <h2 className="text-xl font-bold mb-4">Create New Team</h2>
               <div className="space-y-4">
                 <div>
                   <label htmlFor="team-name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -359,7 +359,7 @@ export default function TeamsPage() {
         {showInviteForm && selectedTeam && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl font-bold mb-4">
                 Invite to {selectedTeam.name}
               </h2>
               <div className="space-y-4">
@@ -427,7 +427,7 @@ export default function TeamsPage() {
         {teams.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
             <div className="text-4xl mb-4">&#x1F465;</div>
-            <h3 className="text-lg font-semibold text-gray-900">No teams yet</h3>
+            <h3 className="text-lg font-semibold">No teams yet</h3>
             <p className="text-gray-500 mt-1">Create your first team to start collaborating</p>
           </div>
         ) : (
@@ -446,7 +446,7 @@ export default function TeamsPage() {
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{team.name}</h3>
+                      <h3 className="text-lg font-semibold">{team.name}</h3>
                       {team.description && (
                         <p className="text-sm text-gray-500 mt-1 line-clamp-2">{team.description}</p>
                       )}
@@ -492,7 +492,7 @@ export default function TeamsPage() {
                 {/* Permissions & Actions */}
                 <div className="bg-white rounded-xl border border-gray-200 p-5">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Team Details</h3>
+                    <h3 className="text-lg font-semibold">Team Details</h3>
                     <div className="flex space-x-2">
                       {canInvite && (
                         <button
@@ -533,7 +533,7 @@ export default function TeamsPage() {
 
                 {/* Members List */}
                 <div className="bg-white rounded-xl border border-gray-200 p-5">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h3 className="text-lg font-semibold mb-4">
                     Members ({members.length})
                   </h3>
                   <div className="space-y-2">

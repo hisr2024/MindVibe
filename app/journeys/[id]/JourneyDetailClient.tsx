@@ -116,10 +116,10 @@ export default function JourneyDetailClient({ journeyId }: JourneyDetailClientPr
             className="py-20 text-center"
           >
             <div className="text-5xl mb-4">😕</div>
-            <h2 className="text-xl font-semibold text-white mb-2">
+            <h2 className="text-xl font-semibold mb-2">
               {error || 'Journey not found'}
             </h2>
-            <p className="text-white/60 mb-6">
+            <p className="text-body text-[var(--mv-text-secondary)] mb-6">
               We couldn&apos;t load this journey.
             </p>
             <div className="flex justify-center gap-3">
@@ -199,7 +199,7 @@ export default function JourneyDetailClient({ journeyId }: JourneyDetailClientPr
           {/* Title and status */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-white md:text-3xl">
+              <h1 className="text-2xl font-bold md:text-3xl">
                 {journey.title}
               </h1>
               <span className={`mt-2 inline-block rounded-full border px-3 py-1 text-sm ${getStatusColor(journey.status)}`}>
@@ -238,7 +238,7 @@ export default function JourneyDetailClient({ journeyId }: JourneyDetailClientPr
         >
           {/* Description */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-            <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-white/70">
+            <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-[var(--mv-text-muted)]">
               Description
             </h2>
             <p className="whitespace-pre-wrap text-white/80">
@@ -249,7 +249,7 @@ export default function JourneyDetailClient({ journeyId }: JourneyDetailClientPr
           {/* Tags */}
           {journey.tags.length > 0 && (
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-white/70">
+              <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-[var(--mv-text-muted)]">
                 Tags
               </h2>
               <div className="flex flex-wrap gap-2">
@@ -267,24 +267,24 @@ export default function JourneyDetailClient({ journeyId }: JourneyDetailClientPr
 
           {/* Metadata */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-white/70">
+            <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-[var(--mv-text-muted)]">
               Details
             </h2>
             <dl className="grid gap-4 sm:grid-cols-2">
               <div>
-                <dt className="text-sm text-white/70">Created</dt>
+                <dt className="text-caption text-[var(--mv-text-muted)]">Created</dt>
                 <dd className="mt-1 text-white/80">{formatDate(journey.created_at)}</dd>
               </div>
               <div>
-                <dt className="text-sm text-white/70">Last Updated</dt>
+                <dt className="text-caption text-[var(--mv-text-muted)]">Last Updated</dt>
                 <dd className="mt-1 text-white/80">{formatDate(journey.updated_at)}</dd>
               </div>
               <div>
-                <dt className="text-sm text-white/70">Journey ID</dt>
+                <dt className="text-caption text-[var(--mv-text-muted)]">Journey ID</dt>
                 <dd className="mt-1 font-mono text-sm text-white/60">{journey.id}</dd>
               </div>
               <div>
-                <dt className="text-sm text-white/70">Owner ID</dt>
+                <dt className="text-caption text-[var(--mv-text-muted)]">Owner ID</dt>
                 <dd className="mt-1 font-mono text-sm text-white/60">{journey.owner_id}</dd>
               </div>
             </dl>
@@ -308,8 +308,8 @@ export default function JourneyDetailClient({ journeyId }: JourneyDetailClientPr
                 className="w-full max-w-sm rounded-2xl border border-white/10 bg-slate-900 p-6"
                 onClick={(e) => e.stopPropagation()}
               >
-                <h3 className="mb-2 text-lg font-semibold text-white">Delete Journey?</h3>
-                <p className="mb-6 text-sm text-white/60">
+                <h3 className="mb-2 text-lg font-semibold">Delete Journey?</h3>
+                <p className="mb-6 text-body text-[var(--mv-text-secondary)]">
                   Are you sure you want to delete &quot;{journey.title}&quot;? This action cannot be undone.
                 </p>
                 <div className="flex gap-3">

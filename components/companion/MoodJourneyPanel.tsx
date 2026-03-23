@@ -100,7 +100,7 @@ export default function MoodJourneyPanel({ onClose }: MoodJourneyPanelProps) {
     <div className="rounded-2xl bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/10 backdrop-blur-xl overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-        <h3 className="text-sm font-semibold text-white/80">Your Journey</h3>
+        <h3 className="text-sm font-semibold">Your Journey</h3>
         <div className="flex items-center gap-2">
           {/* Tab switcher */}
           <div className="flex bg-white/5 rounded-lg p-0.5">

@@ -78,7 +78,7 @@ export function FeatureHighlights() {
               </svg>
             </div>
           </div>
-          <h3 className="mb-2 text-lg font-semibold text-orange-50">{t('divine.sacred.system.features.emotionalReset', 'Emotional Reset')}</h3>
+          <h3 className="mb-2 text-lg font-semibold">{t('divine.sacred.system.features.emotionalReset', 'Emotional Reset')}</h3>
           <p className="mb-4 text-sm text-orange-100/70">
             {t('divine.sacred.system.features.emotionalResetDesc', '7-step guided process to transform emotional overwhelm into calm clarity.')}
           </p>

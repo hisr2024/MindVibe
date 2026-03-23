@@ -157,7 +157,7 @@ export default function JourneyDetailPage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <div className="text-6xl mb-4">🙏</div>
-          <h2 className="text-2xl font-bold text-white mb-2">Journey Not Found</h2>
+          <h2 className="text-2xl font-bold mb-2">Journey Not Found</h2>
           <p className="text-white/60 mb-6">{error || 'This journey may have been completed or removed.'}</p>
           <Link
             href="/journeys"
@@ -185,7 +185,7 @@ export default function JourneyDetailPage() {
             &larr; All Journeys
           </Link>
           <div className="text-center">
-            <h1 className="text-lg font-semibold text-white">{journey.title}</h1>
+            <h1 className="text-lg font-semibold">{journey.title}</h1>
             <p className="text-xs text-white/70">
               Day {journey.current_day} of {journey.total_days} | {journey.progress_percentage}% complete
             </p>
@@ -218,7 +218,7 @@ export default function JourneyDetailPage() {
           >
             <div className="bg-gray-900 border border-white/20 rounded-2xl p-8 max-w-md mx-4 text-center">
               <div className="text-6xl mb-4" aria-hidden="true">🎉</div>
-              <h2 id="success-title" className="text-2xl font-bold text-white mb-2">Step Complete!</h2>
+              <h2 id="success-title" className="text-2xl font-bold mb-2">Step Complete!</h2>
               <p className="text-white/60">
                 Beautiful work on today&apos;s practice. Your reflection has been saved.
               </p>
@@ -282,7 +282,7 @@ export default function JourneyDetailPage() {
             {/* Step Title */}
             <div className="text-center">
               <div className="text-sm text-purple-400 mb-1">Day {currentStep.day_index}</div>
-              <h2 className="text-2xl font-bold text-white">{currentStep.step_title}</h2>
+              <h2 className="text-2xl font-bold">{currentStep.step_title}</h2>
             </div>
 
             {/* Teaching */}
@@ -439,7 +439,7 @@ export default function JourneyDetailPage() {
         ) : (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🎉</div>
-            <h2 className="text-2xl font-bold text-white mb-2">Journey Complete!</h2>
+            <h2 className="text-2xl font-bold mb-2">Journey Complete!</h2>
             <p className="text-white/60 mb-6">
               You&apos;ve completed all steps in this journey. Congratulations on your progress!
             </p>

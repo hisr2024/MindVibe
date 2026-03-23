@@ -259,7 +259,7 @@ export const MobileMoodTracker = forwardRef<HTMLDivElement, MobileMoodTrackerPro
         {/* Main mood selector */}
         <div className="px-4 py-6">
           <div className="text-center mb-6">
-            <h2 className="text-xl font-semibold text-white mb-1">
+            <h2 className="text-xl font-semibold mb-1">
               How are you feeling?
             </h2>
             <p className="text-sm text-slate-400">
@@ -359,7 +359,7 @@ export const MobileMoodTracker = forwardRef<HTMLDivElement, MobileMoodTrackerPro
                       >
                         <Check className="w-8 h-8 text-green-400" />
                       </motion.div>
-                      <h3 className="text-lg font-semibold text-white">
+                      <h3 className="text-lg font-semibold">
                         Check-in saved!
                       </h3>
                       <p className="text-sm text-slate-400 mt-1">
@@ -384,7 +384,7 @@ export const MobileMoodTracker = forwardRef<HTMLDivElement, MobileMoodTrackerPro
                           <span className="text-3xl">{getMoodData(selectedMood).emoji}</span>
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-white">
+                          <h3 className="text-lg font-semibold">
                             {getMoodData(selectedMood).label}
                           </h3>
                           <p className="text-sm text-slate-400">

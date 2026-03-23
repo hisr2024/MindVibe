@@ -303,7 +303,7 @@ export function DivineMoodCheckIn({
               {greeting}
             </motion.p>
 
-            <h3 className="text-xl font-light text-white/90 mb-6">
+            <h3 className="text-xl font-light mb-6">
               {t('divine.sacred.moodCheckin.title', 'How does your heart feel right now?')}
             </h3>
 
@@ -340,7 +340,7 @@ export function DivineMoodCheckIn({
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="text-center"
           >
-            <h3 className="text-lg sm:text-xl font-light text-white/90 mb-2">
+            <h3 className="text-lg sm:text-xl font-light mb-2">
               {t('divine.sacred.moodCheckin.whatDescribes', 'What best describes this feeling?')}
             </h3>
             <p className="text-white/70 text-xs sm:text-sm mb-5 sm:mb-6">

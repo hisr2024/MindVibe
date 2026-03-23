@@ -105,7 +105,7 @@ export default function SessionsPage() {
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-12">
+      <main className="mx-auto max-w-3xl px-page-x py-12">
         <div className="animate-pulse">
           <div className="h-8 bg-[#d4a44c]/20 rounded w-48 mb-4"></div>
           <div className="h-4 bg-[#d4a44c]/10 rounded w-64 mb-8"></div>
@@ -123,12 +123,12 @@ export default function SessionsPage() {
   const inactiveSessions = sessions.filter((s) => !s.active || s.revoked_at)
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
+    <main className="mx-auto max-w-3xl px-page-x py-12">
       <div className="mb-8">
         <Link href="/settings/security" className="text-[#d4a44c] hover:text-[#e8b54a] text-sm mb-4 inline-block">
           &larr; Back to Security
         </Link>
-        <h1 className="text-3xl font-bold text-[#f5f0e8] mb-2">Active Sessions</h1>
+        <h1 className="text-3xl font-bold mb-2">Active Sessions</h1>
         <p className="text-[#f5f0e8]/70">
           Manage devices and sessions logged into your account
         </p>
@@ -155,7 +155,7 @@ export default function SessionsPage() {
 
       {/* Active Sessions */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold text-[#f5f0e8] mb-4">
+        <h2 className="text-lg font-semibold mb-4">
           Active Sessions ({activeSessions.length})
         </h2>
         <div className="space-y-3">
@@ -233,7 +233,7 @@ export default function SessionsPage() {
       {/* Inactive Sessions */}
       {inactiveSessions.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-[#f5f0e8]/70 mb-4">
+          <h2 className="text-lg font-semibold text-[var(--mv-text-muted)] mb-4">
             Inactive Sessions ({inactiveSessions.length})
           </h2>
           <div className="space-y-3 opacity-60">

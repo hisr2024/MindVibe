@@ -199,8 +199,8 @@ export default function MobileCompanionPage() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="text-center">
-            <h1 className="text-sm font-semibold text-white">KIAAN Voice</h1>
-            <p className="text-[10px] text-white/50">
+            <h1 className="text-sm font-semibold">KIAAN Voice</h1>
+            <p className="text-caption text-[var(--mv-text-muted)]">
               {isListening ? 'Listening...' : isProcessing ? 'Thinking...' : 'Tap mic to speak'}
             </p>
           </div>
@@ -317,7 +317,7 @@ export default function MobileCompanionPage() {
         {/* Voice control area */}
         <div className="px-4 py-6 pb-safe-bottom border-t border-white/5 flex flex-col items-center gap-3">
           {/* Status text */}
-          <p className="text-xs text-white/50">
+          <p className="text-caption text-[var(--mv-text-muted)]">
             {isListening
               ? 'Listening... tap to stop'
               : status === 'processing'

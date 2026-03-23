@@ -159,13 +159,13 @@ export default function DashboardClient() {
   }, [triggerHaptic])
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-section-lg">
       <FadeIn>
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="space-y-6 sm:space-y-8"
+          className="space-y-section-lg"
         >
           {/* ─── Sacred Greeting ─── */}
           <motion.div
@@ -173,7 +173,7 @@ export default function DashboardClient() {
             className="pt-4 sm:pt-6 text-center"
           >
             <motion.p
-              className="font-sacred text-lg sm:text-xl text-white/70 tracking-wide"
+              className="font-sacred text-lg sm:text-xl text-[var(--mv-text-secondary)] tracking-wide"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4, ease: 'easeOut' }}
@@ -336,7 +336,7 @@ export default function DashboardClient() {
                   <AnimatePresence mode="wait">
                     <motion.h2
                       key={questionIndex}
-                      className="absolute inset-x-0 font-sacred text-xl sm:text-2xl text-white/90"
+                      className="absolute inset-x-0 font-sacred"
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -12 }}
@@ -347,7 +347,7 @@ export default function DashboardClient() {
                   </AnimatePresence>
                 </div>
 
-                <p className="mt-3 text-sm text-violet-200/60">
+                <p className="mt-3 text-caption text-[var(--mv-text-muted)]">
                   Tap to share how you feel
                 </p>
               </motion.div>
@@ -383,7 +383,7 @@ export default function DashboardClient() {
                     <span className="text-lg font-bold text-slate-900">K</span>
                   </motion.div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-semibold text-white/80">
+                    <h3 className="font-semibold">
                       Your Divine Friend is here
                     </h3>
                     <p className="mt-0.5 text-xs text-[#e8b54a]/60">
@@ -454,7 +454,7 @@ export default function DashboardClient() {
                   <span className="text-base select-none">{'\u{1F549}\uFE0F'}</span>
                 </motion.div>
                 <div>
-                  <h2 className="text-base font-semibold text-[#f5e6c8]">
+                  <h2 className="font-semibold">
                     Your Sacred Instruments
                   </h2>
                   <p className="text-[10px] text-[#d4a44c]/40 font-sacred italic">
@@ -516,7 +516,7 @@ export default function DashboardClient() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <span className="text-sm">{tool.symbol}</span>
-                              <h3 className="text-sm sm:text-[15px] font-semibold text-[#f5e6c8] group-hover:text-white transition-colors">
+                              <h3 className="font-semibold group-hover:text-[#f5f0e8] transition-colors">
                                 {tool.title}
                               </h3>
                               <span className="text-[8px] text-[#d4a44c]/30 font-mono tracking-widest uppercase">
@@ -666,13 +666,13 @@ export default function DashboardClient() {
                   </motion.div>
 
                   <div className="flex-1 min-w-0">
-                    <h2 className="flex flex-wrap items-center gap-2.5 text-lg font-semibold text-[#f5e6c8] sm:text-xl md:text-[22px]">
+                    <h2 className="flex flex-wrap items-center gap-2.5 font-semibold">
                       Divine Presence
                       <span className="inline-flex rounded-full border border-[#d4a843]/30 bg-[#d4a843]/15 px-2.5 py-0.5 text-[10px] font-medium text-[#d4a843] tracking-wide uppercase">
                         Sacred
                       </span>
                     </h2>
-                    <p className="mt-1.5 text-sm text-[#d4a843]/70 line-clamp-2 sm:text-[15px]">
+                    <p className="mt-1.5 text-body text-[#d4a843]/70 line-clamp-2">
                       Enter the divine presence — experience Krishna&apos;s loving guidance and sacred wisdom
                     </p>
                   </div>

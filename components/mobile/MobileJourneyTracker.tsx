@@ -222,7 +222,7 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
           <div className="flex items-center justify-between mb-2">
             <div>
               <p className="text-xs text-[#d4a44c] font-medium">{journey.category}</p>
-              <h1 className="text-lg font-semibold text-white">{journey.title}</h1>
+              <h1 className="text-lg font-semibold">{journey.title}</h1>
             </div>
             <div className="text-right">
               <p className="text-2xl font-bold text-[#d4a44c]">{journey.progress}%</p>
@@ -328,7 +328,7 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
                       bg-gradient-to-br from-white/[0.06] to-white/[0.02]
                       border border-white/[0.08]
                     ">
-                      <h2 className="text-lg font-semibold text-white mb-2">
+                      <h2 className="text-lg font-semibold mb-2">
                         {currentStep.title}
                       </h2>
                       <p className="text-sm text-slate-300 leading-relaxed">

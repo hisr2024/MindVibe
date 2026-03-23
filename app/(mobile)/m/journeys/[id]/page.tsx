@@ -207,8 +207,8 @@ export default function MobileJourneyDetailPage() {
       <MobileAppShell title="Journey" showBack showTabBar={false}>
         <div className="px-4 py-12 text-center">
           <AlertTriangle className="w-12 h-12 text-[#d4a44c] mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-white mb-2">Something went wrong</h2>
-          <p className="text-sm text-white/60 mb-6">{error}</p>
+          <h2 className="text-lg font-semibold mb-2">Something went wrong</h2>
+          <p className="text-body text-[var(--mv-text-secondary)] mb-6">{error}</p>
           <button
             onClick={loadJourney}
             className="px-6 py-2.5 rounded-xl bg-white/10 text-white text-sm font-medium"
@@ -251,7 +251,7 @@ export default function MobileJourneyDetailPage() {
                 </span>
               </div>
             )}
-            <h1 className="text-sm font-semibold text-white truncate">{journey.title}</h1>
+            <h1 className="text-sm font-semibold truncate">{journey.title}</h1>
           </div>
 
           <button
@@ -388,7 +388,7 @@ export default function MobileJourneyDetailPage() {
       </AnimatePresence>
 
       {/* Step content */}
-      <div className="px-4 py-4 pb-8 space-y-5">
+      <div className="px-page-x py-4 pb-8 space-y-5">
         {step ? (
           <>
             {/* Step title */}
@@ -397,7 +397,7 @@ export default function MobileJourneyDetailPage() {
                 <span className="w-1.5 h-1.5 rounded-full bg-[#d4a44c] animate-pulse" />
                 <span className="text-xs font-medium text-[#d4a44c]">Day {step.day_index}</span>
               </div>
-              <h2 className="text-xl font-bold text-white">{step.step_title}</h2>
+              <h2 className="text-xl font-bold">{step.step_title}</h2>
             </div>
 
             {/* Teaching */}
@@ -417,7 +417,7 @@ export default function MobileJourneyDetailPage() {
               <section className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-[#d4a44c]" />
-                  <span className="text-sm font-semibold text-white">Wisdom from the Gita</span>
+                  <span className="text-sm font-semibold">Wisdom from the Gita</span>
                 </div>
                 {step.verses.map((verse, idx) => (
                   <div
@@ -443,7 +443,7 @@ export default function MobileJourneyDetailPage() {
                     </div>
                     {verse.hindi && (
                       <div className="px-4 py-2 border-t border-[#d4a44c]/10">
-                        <p className="text-white/60 text-xs leading-relaxed">{verse.hindi}</p>
+                        <p className="text-caption text-[var(--mv-text-muted)] leading-relaxed">{verse.hindi}</p>
                       </div>
                     )}
                   </div>
@@ -584,13 +584,13 @@ export default function MobileJourneyDetailPage() {
                   Come back tomorrow
                 </p>
                 {step.next_available_at && (
-                  <p className="text-xs text-white/60 mt-1">
+                  <p className="text-caption text-[var(--mv-text-muted)] mt-1">
                     Available {new Date(step.next_available_at).toLocaleDateString('en-US', {
                       weekday: 'long', month: 'long', day: 'numeric',
                     })}
                   </p>
                 )}
-                <p className="text-xs text-white/50 mt-3 max-w-xs mx-auto">
+                <p className="text-caption text-[var(--mv-text-muted)] mt-3 max-w-xs mx-auto">
                   Take time to reflect on today&apos;s teaching.
                   Your next step will be waiting for you.
                 </p>
@@ -603,7 +603,7 @@ export default function MobileJourneyDetailPage() {
                 <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto mb-3" />
                 <p className="text-green-400 font-semibold">Step Completed</p>
                 {step.completed_at && (
-                  <p className="text-xs text-white/70 mt-1">
+                  <p className="text-caption text-[var(--mv-text-muted)] mt-1">
                     {new Date(step.completed_at).toLocaleDateString('en-US', {
                       weekday: 'long', month: 'long', day: 'numeric'
                     })}
@@ -615,8 +615,8 @@ export default function MobileJourneyDetailPage() {
         ) : journey.status === 'paused' ? (
           <div className="text-center py-12">
             <Pause className="w-12 h-12 text-[#d4a44c] mx-auto mb-4" />
-            <h2 className="text-lg font-semibold text-white mb-2">Journey Paused</h2>
-            <p className="text-sm text-white/60 mb-6">Resume to continue your transformation.</p>
+            <h2 className="text-lg font-semibold mb-2">Journey Paused</h2>
+            <p className="text-body text-[var(--mv-text-secondary)] mb-6">Resume to continue your transformation.</p>
             <button
               onClick={() => handleAction('resume')}
               disabled={actionLoading !== null}
@@ -628,8 +628,8 @@ export default function MobileJourneyDetailPage() {
         ) : journey.status === 'completed' ? (
           <div className="text-center py-12">
             <div className="text-5xl mb-4">🙏</div>
-            <h2 className="text-xl font-bold text-white mb-2">Journey Complete</h2>
-            <p className="text-sm text-white/60 mb-6">
+            <h2 className="text-xl font-bold mb-2">Journey Complete</h2>
+            <p className="text-body text-[var(--mv-text-secondary)] mb-6">
               You have completed all {journey.total_days} days. Your dedication to inner transformation is inspiring.
             </p>
             <button

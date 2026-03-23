@@ -288,7 +288,7 @@ export default function ProfilePage() {
                   <circle cx="12" cy="7" r="4" />
                 </svg>
               </div>
-              <h2 className="text-xl font-semibold text-[#f5f0e8] mb-2">Sign in to view your profile</h2>
+              <h2 className="text-xl font-semibold mb-2">Sign in to view your profile</h2>
               <p className="text-sm text-[#f5f0e8]/70 mb-6">
                 Create an account or sign in to manage your profile, track your progress, and access all features.
               </p>
@@ -316,7 +316,7 @@ export default function ProfilePage() {
     <main className="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-8 md:py-12 pb-28 sm:pb-8">
       {/* Page Header */}
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#f5f0e8] mb-1">My Profile</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-1">My Profile</h1>
         <p className="text-sm text-[#f5f0e8]/75">Your personal space on Sakha</p>
       </div>
 
@@ -369,7 +369,7 @@ export default function ProfilePage() {
           {/* Avatar Upload */}
           <Card className="mb-6">
             <CardContent>
-              <h2 className="text-lg font-semibold text-[#f5f0e8] mb-4">Profile Picture</h2>
+              <h2 className="text-lg font-semibold mb-4">Profile Picture</h2>
               <AvatarUpload
                 currentAvatar={profile.avatarUrl}
                 onUpload={handleAvatarUpload}
@@ -382,7 +382,7 @@ export default function ProfilePage() {
           <Card className="mb-6">
             <CardContent>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-[#f5f0e8]">About</h2>
+                <h2 className="text-lg font-semibold">About</h2>
                 <Button onClick={() => setIsEditing(true)} variant="ghost" size="sm">
                   Edit
                 </Button>
@@ -401,7 +401,7 @@ export default function ProfilePage() {
           <Card className="mb-6">
             <CardContent>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-[#f5f0e8]">Subscription</h2>
+                <h2 className="text-lg font-semibold">Subscription</h2>
                 <Badge variant={tier === 'free' ? 'default' : 'premium'}>
                   {isDeveloper ? 'Developer' : tierDisplayName}
                 </Badge>
@@ -464,7 +464,7 @@ export default function ProfilePage() {
               <div className="flex items-center gap-3 mb-4">
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#d4a44c]/10 text-sm font-black text-[#d4a44c]">K</span>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#f5f0e8]">KIAAN AI Ecosystem</h2>
+                  <h2 className="text-lg font-semibold">KIAAN AI Ecosystem</h2>
                   <p className="text-xs text-[#f5f0e8]/70">{kiaanTools.length} wisdom-powered tools</p>
                 </div>
               </div>
@@ -486,7 +486,7 @@ export default function ProfilePage() {
           {/* Quick Links */}
           <Card>
             <CardContent>
-              <h2 className="text-lg font-semibold text-[#f5f0e8] mb-4">Quick Links</h2>
+              <h2 className="text-lg font-semibold mb-4">Quick Links</h2>
               <div className="space-y-3">
                 <Link href="/account" className="flex items-center justify-between py-2 group">
                   <div>
