@@ -46,7 +46,7 @@
     "date-fns": "^2.30.0",
     "framer-motion": "^12.23.25",
     "idb": "^8.0.3",
-    "jspdf": "^4.2.0",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.577.0",
     "next": "16.1.6",
     "next-intl": "^4.5.8",
