@@ -29,15 +29,10 @@ from backend.services.subscription_service import (
 
 logger = logging.getLogger(__name__)
 
-# Default developer emails with full access (for app owners)
-# These are the app owner emails that always have developer access
-DEFAULT_DEVELOPER_EMAILS: set[str] = {
-    "hisr2024@gmail.com",
-}
-# Additional developer emails can be configured via DEVELOPER_EMAILS environment variable
+# Developer emails are configured EXCLUSIVELY via the DEVELOPER_EMAILS environment variable
 # on the Render backend environment (Settings → Environment → DEVELOPER_EMAILS).
 # Format: comma-separated list of emails
-# Example: DEVELOPER_EMAILS=dev1@example.com,dev2@example.com,tester@example.com
+# Example: DEVELOPER_EMAILS=owner@example.com,dev2@example.com,tester@example.com
 #
 # Any email listed here gets FULL developer access to ALL premium features:
 #   - Unlimited KIAAN questions (no quota)
@@ -46,64 +41,54 @@ DEFAULT_DEVELOPER_EMAILS: set[str] = {
 #   - All premium features (Voice Companion, Relationship Compass, Ardha, Viyoga, etc.)
 #   - No subscription required
 #   - Effective tier shown as SIDDHA (highest tier)
+#
+# IMPORTANT: No hardcoded emails — all developer access is controlled via env var.
 
-# Additional developer emails from environment variable
-# Format: comma-separated list of emails (e.g., DEVELOPER_EMAILS=dev1@example.com,dev2@example.com)
 _raw_env_emails = os.getenv("DEVELOPER_EMAILS", "")
-_env_developer_emails = {
+DEVELOPER_EMAILS: set[str] = {
     email.strip().lower()
     for email in _raw_env_emails.split(",")
     if email.strip()
 }
 
-# Combined developer emails (hardcoded + environment variable)
-DEVELOPER_EMAILS = DEFAULT_DEVELOPER_EMAILS | _env_developer_emails
-
 # Log developer email configuration at startup for diagnostics
 # Never log the actual email addresses — only counts and sources
-if _env_developer_emails:
-    logger.info(
-        f"[Developer Access] {len(_env_developer_emails)} email(s) loaded from DEVELOPER_EMAILS env var"
-    )
 logger.info(
-    f"[Developer Access] Total: {len(DEVELOPER_EMAILS)} developer email(s) configured "
-    f"({len(DEFAULT_DEVELOPER_EMAILS)} hardcoded + {len(_env_developer_emails)} from env)"
+    f"[Developer Access] {len(DEVELOPER_EMAILS)} developer email(s) configured from DEVELOPER_EMAILS env var"
 )
 
 
 async def is_developer(db: AsyncSession, user_id: str) -> bool:
     """Check if user is a developer with full access.
 
-    Developers are identified by email in DEVELOPER_EMAILS
-    (hardcoded defaults + environment variable).
-
-    This function checks both User.id and User.auth_uid to handle
-    different authentication sources (JWT uses id, X-Auth-UID might use auth_uid).
+    Developers are identified by email in DEVELOPER_EMAILS (environment variable only).
+    Returns False immediately if no developer emails are configured.
 
     Returns:
         bool: True if user has developer access.
     """
-    from sqlalchemy import or_
+    # Fast path: if no developer emails configured, nobody is a developer
+    if not DEVELOPER_EMAILS:
+        return False
 
     try:
-        # Query by both id and auth_uid to handle different auth sources
+        # Query by user ID only (JWT always uses User.id).
+        # Filter out soft-deleted users to prevent stale matches.
         result = await db.execute(
             select(User).where(
-                or_(User.id == user_id, User.auth_uid == user_id)
+                User.id == user_id,
+                User.deleted_at.is_(None),
             )
         )
         user = result.scalar_one_or_none()
 
         if not user:
-            logger.warning(f"[is_developer] User not found for id/auth_uid: {user_id}")
             return False
 
         # Check if email is in developer list (case-insensitive)
-        if user.email:
-            email_lower = user.email.lower()
-            if email_lower in DEVELOPER_EMAILS:
-                logger.info(f"[is_developer] Developer access granted for user {user_id}")
-                return True
+        if user.email and user.email.lower() in DEVELOPER_EMAILS:
+            logger.info(f"[is_developer] Developer access granted for user {user_id}")
+            return True
 
         return False
 
