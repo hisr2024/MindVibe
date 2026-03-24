@@ -204,8 +204,14 @@ export function useAuth(): UseAuthResult {
           throw new Error('The server is still starting up. Please wait a moment and try again.')
         }
         const errorData = await signupResponse.json().catch(() => ({}))
-        const message = errorData.detail || errorData.message || 'We\'re having trouble creating your account. Please try again.'
-        throw new Error(typeof message === 'string' ? message : JSON.stringify(message))
+        // Handle FastAPI nested detail: {detail: {detail: "msg", code: "CODE"}}
+        const rawSignupDetail = errorData.detail
+        const signupDetailObj = typeof rawSignupDetail === 'object' && rawSignupDetail !== null ? rawSignupDetail as Record<string, unknown> : null
+        const message = (typeof signupDetailObj?.detail === 'string' ? signupDetailObj.detail : null)
+          ?? (typeof rawSignupDetail === 'string' ? rawSignupDetail : null)
+          ?? (typeof errorData.message === 'string' ? errorData.message : null)
+          ?? 'We\'re having trouble creating your account. Please try again.'
+        throw new Error(message)
       }
 
       const signupData = await signupResponse.json()
@@ -252,11 +258,18 @@ export function useAuth(): UseAuthResult {
           throw new Error('The server is still starting up. Please wait a moment and try again.')
         }
         const errorData = await response.json().catch(() => ({}))
-        const detail = errorData.detail || ''
-        const errorCode = errorData.code || ''
+
+        // FastAPI wraps HTTPException detail into {detail: <value>}.
+        // When backend passes an object: {detail: {detail: "msg", code: "CODE"}}
+        // When backend passes a string: {detail: "msg"}
+        const rawDetail = errorData.detail
+        const detailObj = typeof rawDetail === 'object' && rawDetail !== null ? rawDetail as Record<string, unknown> : null
+        const detail: string = (typeof detailObj?.detail === 'string' ? detailObj.detail : null)
+          ?? (typeof rawDetail === 'string' ? rawDetail : '')
+        const errorCode: string = (typeof detailObj?.code === 'string' ? detailObj.code : null)
+          ?? (typeof errorData.code === 'string' ? errorData.code : '')
 
         // Handle email not verified — throw specific error for UI to catch
-        // Support both new standardized format (code field) and legacy format
         if (errorCode === 'EMAIL_NOT_VERIFIED' || detail === 'email_not_verified') {
           const err = new Error('email_not_verified')
           ;(err as Error & { code: string }).code = 'EMAIL_NOT_VERIFIED'
