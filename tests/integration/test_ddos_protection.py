@@ -270,15 +270,15 @@ def test_cleanup_removes_old_data(middleware):
     """Test that cleanup removes old tracking data."""
     # Add some old data
     old_time = time.time() - 200
-    middleware.request_history["old_ip"].append(old_time)
-    middleware.blocked_ips["old_ip"] = old_time
+    middleware._request_history["old_ip"].append(old_time)
+    middleware._blocked_ips["old_ip"] = old_time
 
     # Force cleanup to run by setting last_cleanup to old time
-    middleware.last_cleanup = time.time() - 400
+    middleware._last_cleanup = time.time() - 400
 
     # Run cleanup
     middleware._cleanup_old_data()
 
     # Old data should be removed
-    assert "old_ip" not in middleware.blocked_ips
-    assert len(middleware.request_history.get("old_ip", [])) == 0
+    assert "old_ip" not in middleware._blocked_ips
+    assert len(middleware._request_history.get("old_ip", [])) == 0
