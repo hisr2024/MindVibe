@@ -643,8 +643,9 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
             from backend.services.gita_emotional_wisdom import (
                 get_emotional_wisdom,
                 EMOTION_DOMAIN_MAP,
+                EMOTION_SHAD_RIPU_MAP,
             )
-            if primary_emotion and primary_emotion in EMOTION_DOMAIN_MAP:
+            if primary_emotion and (primary_emotion in EMOTION_DOMAIN_MAP or primary_emotion in EMOTION_SHAD_RIPU_MAP):
                 tier0_results = await get_emotional_wisdom(db, primary_emotion, limit=5)
                 for wr in tier0_results:
                     ref = wr.verse_ref or (
@@ -791,7 +792,7 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
         # When we have the user's actual words and OpenAI is ready, generate a situation-specific application
         if emotions_input and self.optimizer.ready:
             try:
-                verse_text = self.wisdom_kb.sanitize_text(getattr(verse, 'english', ''))
+                verse_text = self.wisdom_kb.sanitize_text(getattr(verse, 'english', '') or getattr(verse, 'content', ''))
                 if verse_text:
                     prompt = f"""A user shared: "{emotions_input}"
 
