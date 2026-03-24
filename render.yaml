@@ -37,35 +37,42 @@ services:
         value: "true"
       - key: RATE_LIMIT_ENABLED
         value: "true"
-      # Redis caching
+      # Redis caching (REQUIRED for multi-instance distributed state)
       - key: REDIS_ENABLED
+        value: "true"
+      - key: REDIS_REQUIRED
         value: "true"
       - key: REDIS_URL
         fromService:
           type: redis
           name: mindvibe-redis
           property: connectionString
+      # Multi-instance scaling — reduced pool sizes for PgBouncer compatibility
+      - key: DB_POOL_SIZE
+        value: "10"
+      - key: DB_MAX_OVERFLOW
+        value: "5"
       # Sentry error tracking (set DSN in Render Dashboard)
       - key: SENTRY_DSN
         value: ""
       # Encryption key for data at rest (generated securely)
       - key: ENCRYPTION_KEY
         generateValue: true
-    healthCheckPath: /health
+    healthCheckPath: /api/monitoring/health
     healthCheckProtocol: http
     healthCheckTimeout: 30
     maxConnections: 20
-    # Autoscaling settings
+    # Autoscaling settings — scale to 10 instances for up to 1,000 concurrent users
     scaling:
-      minInstances: 1
-      maxInstances: 3
-      targetMemoryPercent: 80
-      targetCPUPercent: 80
+      minInstances: 2
+      maxInstances: 10
+      targetMemoryPercent: 75
+      targetCPUPercent: 70
 
-  # Redis Cache Service
+  # Redis Cache Service — upgraded to standard plan for distributed state
   - type: redis
     name: mindvibe-redis
-    plan: starter
+    plan: standard
     region: oregon
     maxmemoryPolicy: allkeys-lru
     ipAllowList: []  # Only allow internal connections

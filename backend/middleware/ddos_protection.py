@@ -1,5 +1,5 @@
 """
-Advanced DDoS Protection Middleware
+Advanced DDoS Protection Middleware — Redis-backed for multi-instance deployments.
 
 This module provides comprehensive DDoS protection including:
 - Connection-based rate limiting
@@ -9,13 +9,18 @@ This module provides comprehensive DDoS protection including:
 - Exponential backoff for repeated violations
 - IP blocking/allowlisting
 - Search engine bot whitelisting (Googlebot, Bingbot, etc.)
+
+Multi-Instance Support:
+When Redis is available, all tracking state (request history, active connections,
+violations, blocked IPs) is stored in Redis so that enforcement is consistent
+across all API instances. Falls back to in-memory dicts when Redis is unavailable.
 """
 
 import re
 import time
 import logging
 from collections import defaultdict, deque
-from typing import Awaitable, Callable, Dict, Set, Tuple
+from typing import Any, Awaitable, Callable, Dict, Set, Tuple
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -89,7 +94,7 @@ VIOLATION_MULTIPLIERS = {
 class DDoSProtectionMiddleware(BaseHTTPMiddleware):
     """
     Middleware to protect against DDoS attacks.
-    
+
     Features:
     - Per-IP rate limiting with sliding window
     - Connection tracking and limiting
@@ -97,10 +102,11 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
     - Automatic IP blocking for repeated violations
     - Exponential backoff for persistent attackers
     - Allowlist/blocklist support
+    - Redis-backed state for multi-instance consistency
     """
 
     def __init__(
-        self, 
+        self,
         app,
         enabled: bool = True,
         max_requests: int = MAX_REQUESTS_PER_WINDOW,
@@ -112,7 +118,7 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
     ):
         """
         Initialize DDoS protection middleware.
-        
+
         Args:
             app: ASGI application
             enabled: Whether protection is enabled
@@ -132,145 +138,183 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
         self.allowlist = allowlist or set()
         self.blocklist = blocklist or set()
 
-        # Request tracking - IP -> deque of timestamps
-        self.request_history: Dict[str, deque] = defaultdict(lambda: deque(maxlen=max_requests * 2))
-        
-        # Connection tracking - IP -> count
-        self.active_connections: Dict[str, int] = defaultdict(int)
-        
-        # Violation tracking - IP -> violation count
-        self.violations: Dict[str, int] = defaultdict(int)
-        
-        # Blocked IPs - IP -> block expiry timestamp
-        self.blocked_ips: Dict[str, float] = {}
-        
-        # Last cleanup time
-        self.last_cleanup = time.time()
+        # In-memory fallback (used when Redis is unavailable)
+        self._request_history: Dict[str, deque] = defaultdict(lambda: deque(maxlen=max_requests * 2))
+        self._active_connections: Dict[str, int] = defaultdict(int)
+        self._violations: Dict[str, int] = defaultdict(int)
+        self._blocked_ips: Dict[str, float] = {}
+        self._last_cleanup = time.time()
+
+        # Redis cache reference (lazy-loaded)
+        self._redis: Any = None
+        self._redis_checked = False
+
+    async def _get_redis(self) -> Any:
+        """Lazy-load the Redis cache. Returns None if unavailable."""
+        if not self._redis_checked:
+            self._redis_checked = True
+            try:
+                from backend.cache.redis_cache import get_redis_cache
+                cache = await get_redis_cache()
+                if cache.is_connected:
+                    self._redis = cache
+                    logger.info("[DDoS Protection] Using Redis for distributed state")
+                else:
+                    logger.info("[DDoS Protection] Redis unavailable, using in-memory state")
+            except Exception:
+                logger.info("[DDoS Protection] Redis unavailable, using in-memory state")
+        return self._redis
+
+    @property
+    def _use_redis(self) -> bool:
+        return self._redis is not None and self._redis.is_connected
 
     def _get_client_ip(self, request: Request) -> str:
         """Extract client IP from request, considering proxies."""
-        # Check X-Forwarded-For header (from reverse proxies)
         forwarded = request.headers.get("X-Forwarded-For")
         if forwarded:
-            # Take the first IP in the chain (original client)
             return forwarded.split(",")[0].strip()
-        
-        # Check X-Real-IP header
         real_ip = request.headers.get("X-Real-IP")
         if real_ip:
             return real_ip.strip()
-        
-        # Fallback to direct connection IP
         return request.client.host if request.client else "unknown"
 
+    # --- In-memory fallback methods (unchanged from original) ---
+
     def _cleanup_old_data(self):
-        """Periodically cleanup old tracking data to prevent memory leaks."""
+        """Periodically cleanup old in-memory tracking data."""
         current_time = time.time()
-        
-        # Only cleanup every 5 minutes
-        if current_time - self.last_cleanup < 300:
+        if current_time - self._last_cleanup < 300:
             return
-        
-        self.last_cleanup = current_time
-        
-        # Remove expired blocks
+        self._last_cleanup = current_time
+
         expired_blocks = [
-            ip for ip, expiry in self.blocked_ips.items()
+            ip for ip, expiry in self._blocked_ips.items()
             if expiry < current_time
         ]
         for ip in expired_blocks:
-            del self.blocked_ips[ip]
-            # Reset violation count when block expires
-            self.violations[ip] = max(0, self.violations[ip] - 1)
-        
-        # Cleanup old request history (older than 2x time window)
+            del self._blocked_ips[ip]
+            self._violations[ip] = max(0, self._violations[ip] - 1)
+
         cutoff_time = current_time - (self.time_window * 2)
-        for ip, history in list(self.request_history.items()):
-            # Remove old timestamps
+        for ip, history in list(self._request_history.items()):
             while history and history[0] < cutoff_time:
                 history.popleft()
-            
-            # Remove empty histories
             if not history:
-                del self.request_history[ip]
-        
-        # Cleanup violations for IPs with no recent activity
-        active_ips = set(self.request_history.keys()) | set(self.blocked_ips.keys())
-        inactive_ips = set(self.violations.keys()) - active_ips
-        for ip in inactive_ips:
-            del self.violations[ip]
+                del self._request_history[ip]
 
-    def _is_rate_limited(self, ip: str) -> Tuple[bool, int]:
-        """
-        Check if IP is rate limited.
-        
-        Returns:
-            (is_limited, requests_in_window)
-        """
+        active_ips = set(self._request_history.keys()) | set(self._blocked_ips.keys())
+        inactive_ips = set(self._violations.keys()) - active_ips
+        for ip in inactive_ips:
+            del self._violations[ip]
+
+    def _is_rate_limited_memory(self, ip: str) -> Tuple[bool, int]:
+        """Check rate limit using in-memory state."""
         current_time = time.time()
         cutoff_time = current_time - self.time_window
-        
-        # Get request history for this IP
-        history = self.request_history[ip]
-        
-        # Remove old requests outside the time window
+        history = self._request_history[ip]
         while history and history[0] < cutoff_time:
             history.popleft()
-        
-        # Count requests in current window
         requests_in_window = len(history)
-        
-        # Check if limit exceeded
-        is_limited = requests_in_window >= self.max_requests
-        
-        return is_limited, requests_in_window
+        return requests_in_window >= self.max_requests, requests_in_window
 
-    def _record_request(self, ip: str):
-        """Record a request timestamp for an IP."""
-        current_time = time.time()
-        self.request_history[ip].append(current_time)
+    def _record_request_memory(self, ip: str):
+        self._request_history[ip].append(time.time())
 
-    def _is_blocked(self, ip: str) -> Tuple[bool, float]:
-        """
-        Check if IP is blocked.
-        
-        Returns:
-            (is_blocked, time_until_unblock)
-        """
-        if ip not in self.blocked_ips:
+    def _is_blocked_memory(self, ip: str) -> Tuple[bool, float]:
+        if ip not in self._blocked_ips:
             return False, 0
-        
-        expiry = self.blocked_ips[ip]
+        expiry = self._blocked_ips[ip]
         current_time = time.time()
-        
         if expiry < current_time:
-            # Block expired
-            del self.blocked_ips[ip]
+            del self._blocked_ips[ip]
             return False, 0
-        
         return True, expiry - current_time
 
-    def _block_ip(self, ip: str):
-        """Block an IP address with exponential backoff."""
-        violation_count = self.violations[ip]
+    def _block_ip_memory(self, ip: str):
+        violation_count = self._violations[ip]
         multiplier = VIOLATION_MULTIPLIERS.get(violation_count, 60)
         block_duration = BLOCK_DURATION_SECONDS * multiplier
-        
-        self.blocked_ips[ip] = time.time() + block_duration
-        
+        self._blocked_ips[ip] = time.time() + block_duration
         logger.warning(
             f"[DDoS Protection] Blocked IP {ip} for {block_duration}s "
             f"(violation #{violation_count})"
         )
 
-    def _record_violation(self, ip: str):
-        """Record a violation and potentially block the IP."""
-        self.violations[ip] += 1
-        violation_count = self.violations[ip]
-        
-        # Block after 3 violations
-        if violation_count >= 3:
-            self._block_ip(ip)
+    def _record_violation_memory(self, ip: str):
+        self._violations[ip] += 1
+        if self._violations[ip] >= 3:
+            self._block_ip_memory(ip)
+
+    def _check_connections_memory(self, ip: str) -> bool:
+        return self._active_connections[ip] >= self.max_connections
+
+    # --- Redis-backed methods ---
+
+    async def _is_blocked_redis(self, ip: str) -> Tuple[bool, float]:
+        """Check if IP is blocked using Redis key with TTL."""
+        blocked_until = await self._redis.get(f"ddos:blocked:{ip}")
+        if blocked_until is None:
+            return False, 0
+        try:
+            expiry = float(blocked_until)
+            remaining = expiry - time.time()
+            if remaining <= 0:
+                await self._redis.delete(f"ddos:blocked:{ip}")
+                return False, 0
+            return True, remaining
+        except (ValueError, TypeError):
+            return False, 0
+
+    async def _block_ip_redis(self, ip: str):
+        """Block an IP in Redis with TTL-based expiry."""
+        violations_str = await self._redis.hget("ddos:violations", ip)
+        violation_count = int(violations_str) if violations_str else 1
+        multiplier = VIOLATION_MULTIPLIERS.get(min(violation_count, 5), 60)
+        block_duration = BLOCK_DURATION_SECONDS * multiplier
+        expiry = time.time() + block_duration
+
+        await self._redis.set(f"ddos:blocked:{ip}", str(expiry), expire_seconds=int(block_duration) + 10)
+        logger.warning(
+            f"[DDoS Protection] Blocked IP {ip} for {block_duration}s "
+            f"(violation #{violation_count}) [Redis]"
+        )
+
+    async def _record_violation_redis(self, ip: str):
+        """Record a violation in Redis and block if threshold reached."""
+        count = await self._redis.hincrby("ddos:violations", ip, 1)
+        if count is not None and count >= 3:
+            await self._block_ip_redis(ip)
+
+    async def _is_rate_limited_redis(self, ip: str) -> Tuple[bool, int]:
+        """Check rate limit using Redis sorted set with sliding window."""
+        now = time.time()
+        key = f"ddos:history:{ip}"
+        cutoff = now - self.time_window
+
+        # Remove old entries and count current window
+        await self._redis.zremrangebyscore(key, 0, cutoff)
+        count = await self._redis.zcount(key, cutoff, float("inf"))
+        return count >= self.max_requests, count
+
+    async def _record_request_redis(self, ip: str):
+        """Record a request timestamp in Redis sorted set."""
+        now = time.time()
+        key = f"ddos:history:{ip}"
+        # Use timestamp as both score and member (unique enough for our purposes)
+        await self._redis.zadd(key, {f"{now}": now}, expire_seconds=self.time_window * 2)
+
+    async def _check_connections_redis(self, ip: str) -> bool:
+        """Check concurrent connections using Redis hash."""
+        count_str = await self._redis.hget("ddos:connections", ip)
+        count = int(count_str) if count_str else 0
+        return count >= self.max_connections
+
+    async def _incr_connection_redis(self, ip: str):
+        await self._redis.hincrby("ddos:connections", ip, 1)
+
+    async def _decr_connection_redis(self, ip: str):
+        await self._redis.hincrby("ddos:connections", ip, -1)
 
     def _check_request_size(self, request: Request) -> bool:
         """Check if request size is within limits."""
@@ -280,50 +324,124 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
                 size = int(content_length)
                 return size <= self.max_request_size
             except ValueError:
-                return True  # Invalid header, let it through
+                return True
         return True
 
     async def dispatch(
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
         """Process request with DDoS protection."""
-        
-        # Skip if disabled
+
         if not self.enabled:
             return await call_next(request)
 
-        # Periodic cleanup
-        self._cleanup_old_data()
+        # Ensure Redis is checked (lazy init)
+        await self._get_redis()
 
-        # Get client IP
         client_ip = self._get_client_ip(request)
 
         # Check allowlist
         if client_ip in self.allowlist:
             return await call_next(request)
 
-        # Allow legitimate search engine bots and social media crawlers
-        # through without rate limiting — critical for SEO indexing
+        # Allow legitimate bots through without rate limiting
         user_agent = request.headers.get("User-Agent", "")
         if is_legitimate_bot(user_agent):
             logger.debug(
                 f"[DDoS Protection] Allowing legitimate bot: {user_agent[:80]} from {client_ip}"
             )
             return await call_next(request)
-        
+
         # Check blocklist
         if client_ip in self.blocklist:
             logger.warning(f"[DDoS Protection] Blocked request from blocklisted IP: {client_ip}")
             return JSONResponse(
                 status_code=HTTP_403_FORBIDDEN,
+                content={"error": "forbidden", "message": "Access denied"}
+            )
+
+        # --- Use Redis or in-memory depending on availability ---
+
+        if self._use_redis:
+            return await self._dispatch_redis(request, call_next, client_ip)
+        else:
+            return await self._dispatch_memory(request, call_next, client_ip)
+
+    async def _dispatch_redis(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]], client_ip: str
+    ) -> Response:
+        """DDoS dispatch using Redis-backed state."""
+
+        # Check if IP is blocked
+        is_blocked, time_until_unblock = await self._is_blocked_redis(client_ip)
+        if is_blocked:
+            logger.info(f"[DDoS Protection] Request from blocked IP {client_ip} rejected [Redis]")
+            return JSONResponse(
+                status_code=HTTP_403_FORBIDDEN,
                 content={
-                    "error": "forbidden",
-                    "message": "Access denied",
+                    "error": "blocked",
+                    "message": f"IP temporarily blocked. Try again in {int(time_until_unblock)} seconds.",
+                    "retry_after": int(time_until_unblock),
                 }
             )
-        
-        # Check if IP is currently blocked
-        is_blocked, time_until_unblock = self._is_blocked(client_ip)
+
+        # Check request size
+        if not self._check_request_size(request):
+            logger.warning(f"[DDoS Protection] Request too large from IP {client_ip}")
+            await self._record_violation_redis(client_ip)
+            return JSONResponse(
+                status_code=HTTP_429_TOO_MANY_REQUESTS,
+                content={
+                    "error": "payload_too_large",
+                    "message": f"Request size exceeds limit of {self.max_request_size} bytes",
+                }
+            )
+
+        # Check connection limit
+        if await self._check_connections_redis(client_ip):
+            logger.warning(f"[DDoS Protection] Too many connections from IP {client_ip} [Redis]")
+            await self._record_violation_redis(client_ip)
+            return JSONResponse(
+                status_code=HTTP_429_TOO_MANY_REQUESTS,
+                content={"error": "too_many_connections", "message": "Too many concurrent connections"}
+            )
+
+        # Check rate limit
+        is_limited, requests_in_window = await self._is_rate_limited_redis(client_ip)
+        if is_limited:
+            logger.info(
+                f"[DDoS Protection] Rate limit exceeded for IP {client_ip} "
+                f"({requests_in_window} requests in {self.time_window}s) [Redis]"
+            )
+            await self._record_violation_redis(client_ip)
+            return JSONResponse(
+                status_code=HTTP_429_TOO_MANY_REQUESTS,
+                content={
+                    "error": "rate_limit_exceeded",
+                    "message": f"Too many requests. Maximum {self.max_requests} requests per {self.time_window} seconds.",
+                    "retry_after": self.time_window,
+                }
+            )
+
+        # Record request and track connection
+        await self._record_request_redis(client_ip)
+        await self._incr_connection_redis(client_ip)
+
+        try:
+            response = await call_next(request)
+            return response
+        finally:
+            await self._decr_connection_redis(client_ip)
+
+    async def _dispatch_memory(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]], client_ip: str
+    ) -> Response:
+        """DDoS dispatch using in-memory state (single-instance fallback)."""
+
+        self._cleanup_old_data()
+
+        # Check if IP is blocked
+        is_blocked, time_until_unblock = self._is_blocked_memory(client_ip)
         if is_blocked:
             logger.info(f"[DDoS Protection] Request from blocked IP {client_ip} rejected")
             return JSONResponse(
@@ -334,11 +452,11 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
                     "retry_after": int(time_until_unblock),
                 }
             )
-        
+
         # Check request size
         if not self._check_request_size(request):
             logger.warning(f"[DDoS Protection] Request too large from IP {client_ip}")
-            self._record_violation(client_ip)
+            self._record_violation_memory(client_ip)
             return JSONResponse(
                 status_code=HTTP_429_TOO_MANY_REQUESTS,
                 content={
@@ -346,28 +464,24 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
                     "message": f"Request size exceeds limit of {self.max_request_size} bytes",
                 }
             )
-        
+
         # Check connection limit
-        if self.active_connections[client_ip] >= self.max_connections:
+        if self._check_connections_memory(client_ip):
             logger.warning(f"[DDoS Protection] Too many connections from IP {client_ip}")
-            self._record_violation(client_ip)
+            self._record_violation_memory(client_ip)
             return JSONResponse(
                 status_code=HTTP_429_TOO_MANY_REQUESTS,
-                content={
-                    "error": "too_many_connections",
-                    "message": "Too many concurrent connections",
-                }
+                content={"error": "too_many_connections", "message": "Too many concurrent connections"}
             )
-        
+
         # Check rate limit
-        is_limited, requests_in_window = self._is_rate_limited(client_ip)
+        is_limited, requests_in_window = self._is_rate_limited_memory(client_ip)
         if is_limited:
             logger.info(
                 f"[DDoS Protection] Rate limit exceeded for IP {client_ip} "
                 f"({requests_in_window} requests in {self.time_window}s)"
             )
-            self._record_violation(client_ip)
-            
+            self._record_violation_memory(client_ip)
             return JSONResponse(
                 status_code=HTTP_429_TOO_MANY_REQUESTS,
                 content={
@@ -376,19 +490,15 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
                     "retry_after": self.time_window,
                 }
             )
-        
-        # Record this request
-        self._record_request(client_ip)
-        
-        # Track connection
-        self.active_connections[client_ip] += 1
-        
+
+        # Record request and track connection
+        self._record_request_memory(client_ip)
+        self._active_connections[client_ip] += 1
+
         try:
-            # Process request
             response = await call_next(request)
             return response
         finally:
-            # Decrement connection count
-            self.active_connections[client_ip] -= 1
-            if self.active_connections[client_ip] <= 0:
-                del self.active_connections[client_ip]
+            self._active_connections[client_ip] -= 1
+            if self._active_connections[client_ip] <= 0:
+                del self._active_connections[client_ip]

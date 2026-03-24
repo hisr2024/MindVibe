@@ -271,6 +271,28 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     try:
+        # Step 0: Initialize instance identity and Redis (foundation for scaling)
+        import uuid as _uuid
+        from backend.core.settings import settings as _settings
+        if not _settings.INSTANCE_ID:
+            _settings.INSTANCE_ID = _uuid.uuid4().hex[:12]
+        startup_logger.info(f"\n🆔 Instance ID: {_settings.INSTANCE_ID}")
+
+        startup_logger.info("\n🔗 Initializing Redis...")
+        from backend.cache.redis_cache import get_redis_cache
+        _redis = await get_redis_cache()
+        if _redis.is_connected:
+            startup_logger.info("✅ Redis connected (distributed state enabled)")
+        else:
+            _is_prod = os.getenv("ENVIRONMENT", "development").lower() in ("production", "prod")
+            if _settings.REDIS_REQUIRED and _is_prod:
+                raise RuntimeError(
+                    "Redis is REQUIRED in production for distributed state "
+                    "(WebSocket Pub/Sub, rate limiting, DDoS tracking) but connection failed. "
+                    "Set REDIS_REQUIRED=false to allow single-instance fallback."
+                )
+            startup_logger.warning("⚠️ Redis not connected — falling back to in-memory (single-instance only)")
+
         # Step 1: Ensure ORM tables exist first (base tables like users, sessions
         # must exist before SQL migrations that reference them with REFERENCES)
         startup_logger.info("\n🔧 Ensuring ORM tables exist...")
@@ -375,7 +397,17 @@ async def startup():
                 startup_logger.info(f"⚠️ KIAAN Learning System fallback failed: {fallback_error}")
             # Don't fail startup - learning is supplementary
 
-        # Step 7: Initialize Gita Practical Wisdom Auto-Enricher
+        # Step 7: Start instance heartbeat for multi-instance visibility
+        startup_logger.info("\n💓 Starting instance heartbeat...")
+        try:
+            from backend.monitoring.health import start_instance_heartbeat
+            import asyncio
+            asyncio.create_task(start_instance_heartbeat())
+            startup_logger.info(f"✅ Instance heartbeat started (ID: {_settings.INSTANCE_ID})")
+        except Exception as heartbeat_error:
+            startup_logger.info(f"⚠️ Instance heartbeat had issues: {heartbeat_error}")
+
+        # Step 8: Initialize Gita Practical Wisdom Auto-Enricher
         startup_logger.info("\n📜 Initializing Gita Practical Wisdom Auto-Enricher...")
         try:
             from backend.services.gita_wisdom_auto_enricher import get_auto_enricher
@@ -445,13 +477,13 @@ async def shutdown():
     except Exception as e:
         startup_logger.info(f"⚠️ Error disposing database engine: {e}")
 
-    # Close Redis connections if available
+    # Close Redis connections and pool
     try:
         from backend.cache.redis_cache import get_redis_cache
         redis_cache = await get_redis_cache()
-        if redis_cache and hasattr(redis_cache, '_client') and redis_cache._client:
-            await redis_cache._client.close()
-            startup_logger.info("✅ Redis connection closed")
+        if redis_cache and redis_cache.is_connected:
+            await redis_cache.disconnect()
+            startup_logger.info("✅ Redis connection pool closed")
     except Exception as e:
         startup_logger.info(f"⚠️ Error closing Redis connection: {e}")
 

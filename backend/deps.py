@@ -95,11 +95,16 @@ def _get_ssl_connect_args(db_url: str) -> Dict[str, Any]:
 
 # ---------------------------------------------------------------------------
 # Connection pool tuning for concurrent users.
-# Defaults are safe for 50–200 simultaneous users.  Adjust via env vars
-# when scaling beyond that or running multiple API instances.
+# With PgBouncer handling connection multiplexing, each instance needs fewer
+# direct connections. 10 instances x 15 connections = 150 app-side connections,
+# all multiplexed through PgBouncer's 50 real database connections.
+#
+# Without PgBouncer (single instance): DB_POOL_SIZE=30, DB_MAX_OVERFLOW=10
+# With PgBouncer (multi-instance):     DB_POOL_SIZE=10, DB_MAX_OVERFLOW=5
 # ---------------------------------------------------------------------------
-_POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "30"))          # base connections
-_MAX_OVERFLOW = int(os.getenv("DB_MAX_OVERFLOW", "10"))     # burst connections
+_PGBOUNCER_ENABLED = os.getenv("PGBOUNCER_ENABLED", "false").lower() in ("true", "1")
+_POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "10" if _PGBOUNCER_ENABLED else "30"))
+_MAX_OVERFLOW = int(os.getenv("DB_MAX_OVERFLOW", "5" if _PGBOUNCER_ENABLED else "10"))
 _POOL_RECYCLE = int(os.getenv("DB_POOL_RECYCLE", "3600"))   # recycle after 1h
 _POOL_TIMEOUT = int(os.getenv("DB_POOL_TIMEOUT", "30"))     # wait for connection
 
@@ -117,11 +122,20 @@ if _is_sqlite:
         connect_args={"check_same_thread": False},
     )
 else:
+    _connect_args = _get_ssl_connect_args(DATABASE_URL)
+    # PgBouncer in transaction mode does not support prepared statements.
+    # asyncpg uses prepared statements by default which causes errors like
+    # "prepared statement already exists". Disable the cache when PgBouncer is enabled.
+    if _PGBOUNCER_ENABLED:
+        _connect_args["prepared_statement_cache_size"] = 0
+        _connect_args["statement_cache_size"] = 0
+        logger.info("PgBouncer mode: prepared statement cache disabled")
+
     engine = create_async_engine(
         DATABASE_URL,
         echo=False,
         future=True,
-        connect_args=_get_ssl_connect_args(DATABASE_URL),
+        connect_args=_connect_args,
         pool_size=_POOL_SIZE,
         max_overflow=_MAX_OVERFLOW,
         pool_pre_ping=True,

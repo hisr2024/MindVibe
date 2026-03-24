@@ -1,7 +1,7 @@
-"""Rate limiting middleware using slowapi — IP + user-based.
+"""Rate limiting middleware using slowapi — IP + user-based, Redis-backed for multi-instance.
 
 This module provides rate limiting for API endpoints to prevent abuse:
-- Auth endpoints: 5 requests/minute (strict - prevents brute force)
+- Auth endpoints: 15 requests/minute (strict - prevents brute force)
 - Chat endpoints: 30 requests/minute (moderate - allows conversation)
 - Wisdom API: 60 requests/minute (relaxed - read-heavy operations)
 
@@ -19,6 +19,10 @@ User-Based Limiting (v2.0):
 - Authenticated requests are keyed by user_id (from JWT/session)
 - Unauthenticated requests fall back to IP-based limiting
 - Prevents NAT-sharing issues where multiple users share one IP
+
+Multi-Instance Support (v3.0):
+- When REDIS_ENABLED=true, rate limits are stored in Redis so all instances
+  share a single counter per key. Falls back to in-memory if Redis is unavailable.
 """
 
 import logging
@@ -82,11 +86,32 @@ def _get_rate_limit_key(request: Request) -> str:
     return get_remote_address(request)
 
 
-# Initialize the rate limiter with user-aware key function
+def _get_storage_uri() -> str | None:
+    """Return Redis URL for distributed rate limiting, or None for in-memory.
+
+    When Redis is enabled, slowapi uses Redis as its storage backend so that
+    rate limit counters are shared across all API instances. This prevents
+    users from bypassing limits by hitting different instances.
+    """
+    if settings.REDIS_ENABLED:
+        try:
+            # Verify Redis URL is set and usable
+            redis_url = settings.REDIS_URL
+            if redis_url and redis_url.startswith("redis"):
+                logger.info("Rate limiter using Redis storage for distributed limiting")
+                return redis_url
+        except Exception as e:
+            logger.warning("Failed to configure Redis storage for rate limiter: %s", e)
+    logger.info("Rate limiter using in-memory storage (single-instance only)")
+    return None
+
+
+# Initialize the rate limiter with user-aware key function and Redis storage
 limiter = Limiter(
     key_func=_get_rate_limit_key,
     enabled=settings.RATE_LIMIT_ENABLED,
-    default_limits=["100/minute"],  # Default limit for unspecified endpoints
+    default_limits=["100/minute"],
+    storage_uri=_get_storage_uri(),
 )
 
 # Rate limit constants for different endpoint categories

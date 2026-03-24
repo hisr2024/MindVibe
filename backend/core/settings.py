@@ -182,6 +182,27 @@ class Settings(BaseSettings):
         "REDIS_ENABLED",
     )
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
+    # REDIS_REQUIRED: In production with multiple instances, Redis MUST be available
+    # for distributed state (WebSocket Pub/Sub, rate limiting, DDoS tracking).
+    REDIS_REQUIRED: bool = parse_bool_strict(
+        os.getenv("REDIS_REQUIRED", "true" if os.getenv("ENVIRONMENT", "development") == "production" else "false"),
+        "REDIS_REQUIRED",
+    )
+    REDIS_MAX_CONNECTIONS: int = int(os.getenv("REDIS_MAX_CONNECTIONS", "20"))
+    REDIS_SOCKET_TIMEOUT: int = int(os.getenv("REDIS_SOCKET_TIMEOUT", "5"))
+    REDIS_RETRY_ON_TIMEOUT: bool = parse_bool_strict(
+        os.getenv("REDIS_RETRY_ON_TIMEOUT", "true"), "REDIS_RETRY_ON_TIMEOUT"
+    )
+
+    # Multi-Instance Scaling
+    # Unique identifier for this instance — used for WebSocket Pub/Sub deduplication
+    # and instance-aware health checks. Auto-generated if not set.
+    INSTANCE_ID: str = os.getenv("INSTANCE_ID") or os.getenv("FLY_ALLOC_ID") or os.getenv("RENDER_INSTANCE_ID") or ""
+
+    # PgBouncer compatibility — disables prepared statements when True
+    PGBOUNCER_ENABLED: bool = parse_bool_strict(
+        os.getenv("PGBOUNCER_ENABLED", "false"), "PGBOUNCER_ENABLED"
+    )
 
     @field_validator("REDIS_URL")
     @classmethod

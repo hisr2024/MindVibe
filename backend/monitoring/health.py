@@ -1,5 +1,7 @@
-"""Enhanced health monitoring endpoints for MindVibe."""
+"""Enhanced health monitoring endpoints for MindVibe — instance-aware for multi-instance deployments."""
 
+import asyncio
+import json
 import logging
 import os
 import time
@@ -10,12 +12,58 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.core.settings import settings
 from backend.deps import get_db, get_current_user
 from backend.middleware.circuit_breaker import get_all_circuit_breakers
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/monitoring", tags=["monitoring"])
+
+# Heartbeat interval: each instance writes its status to Redis every 30 seconds
+_HEARTBEAT_INTERVAL_SECONDS = 30
+_HEARTBEAT_TTL_SECONDS = 60  # Key expires if instance stops heartbeating
+
+
+async def start_instance_heartbeat() -> None:
+    """Background task: periodically write this instance's heartbeat to Redis.
+
+    Each instance writes to a Redis key `instances:{INSTANCE_ID}` with a 60s TTL.
+    If an instance crashes or stops, its key expires automatically. Other instances
+    (or the /health/instances endpoint) can enumerate live instances.
+    """
+    try:
+        from backend.cache.redis_cache import get_redis_cache
+        redis = await get_redis_cache()
+        if not redis.is_connected:
+            logger.info("Instance heartbeat disabled (Redis not connected)")
+            return
+
+        instance_id = settings.INSTANCE_ID
+        logger.info("Starting instance heartbeat for %s", instance_id)
+
+        while True:
+            try:
+                heartbeat_data = json.dumps({
+                    "instance_id": instance_id,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "uptime_seconds": int(time.time() - psutil.boot_time()),
+                    "cpu_percent": psutil.cpu_percent(interval=0),
+                    "memory_percent": psutil.virtual_memory().percent,
+                })
+                await redis.set(
+                    f"instances:{instance_id}",
+                    heartbeat_data,
+                    expire_seconds=_HEARTBEAT_TTL_SECONDS,
+                )
+            except Exception as e:
+                logger.warning("Heartbeat write failed: %s", e)
+
+            await asyncio.sleep(_HEARTBEAT_INTERVAL_SECONDS)
+    except asyncio.CancelledError:
+        logger.info("Instance heartbeat stopped")
+    except Exception as e:
+        logger.warning("Instance heartbeat task exited: %s", e)
 
 
 @router.get("/health")
@@ -27,8 +75,9 @@ async def basic_health(
     Performs lightweight dependency checks (database ping, Redis ping if enabled)
     to confirm the service can handle requests. Returns degraded status if any
     dependency is unreachable, so load balancers can route traffic accordingly.
+    Includes instance_id so operators can identify which instance responded.
     """
-    status = "ok"
+    health_status = "ok"
     checks: dict = {}
 
     # Database ping — lightweight SELECT 1
@@ -37,26 +86,31 @@ async def basic_health(
         checks["database"] = "up"
     except Exception:
         checks["database"] = "down"
-        status = "degraded"
+        health_status = "degraded"
         logger.warning("Health check: database unreachable")
 
     # Redis ping — only if Redis is enabled
     redis_enabled = os.getenv("REDIS_ENABLED", "false").lower() in ("true", "1")
     if redis_enabled:
         try:
-            import redis.asyncio as aioredis
-
-            redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
-            r = aioredis.from_url(redis_url, socket_connect_timeout=2)
-            await r.ping()
-            await r.aclose()
-            checks["redis"] = "up"
+            from backend.cache.redis_cache import get_redis_cache
+            redis = await get_redis_cache()
+            if redis.is_connected:
+                checks["redis"] = "up"
+            else:
+                checks["redis"] = "down"
+                health_status = "degraded"
+                logger.warning("Health check: Redis unreachable")
         except Exception:
             checks["redis"] = "down"
-            status = "degraded"
+            health_status = "degraded"
             logger.warning("Health check: Redis unreachable")
 
-    return {"status": status, "checks": checks}
+    return {
+        "status": health_status,
+        "instance_id": settings.INSTANCE_ID,
+        "checks": checks,
+    }
 
 
 @router.get("/health/detailed")
@@ -68,6 +122,7 @@ async def detailed_health(
 
     health_data = {
         "status": "healthy",
+        "instance_id": settings.INSTANCE_ID,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "checks": {}
     }
@@ -89,6 +144,27 @@ async def detailed_health(
         }
         health_data["status"] = "degraded"
 
+    # Redis check with latency
+    try:
+        from backend.cache.redis_cache import get_redis_cache
+        redis = await get_redis_cache()
+        if redis.is_connected:
+            start_time = time.time()
+            client = redis.get_client()
+            if client:
+                await client.ping()
+            redis_latency = (time.time() - start_time) * 1000
+            health_data["checks"]["redis"] = {
+                "status": "up",
+                "latency_ms": round(redis_latency, 2)
+            }
+        else:
+            health_data["checks"]["redis"] = {"status": "down"}
+            health_data["status"] = "degraded"
+    except Exception:
+        health_data["checks"]["redis"] = {"status": "down"}
+        health_data["status"] = "degraded"
+
     # OpenAI API check - only report presence, never log key details
     health_data["checks"]["openai"] = {
         "status": "configured" if os.getenv("OPENAI_API_KEY") else "missing"
@@ -102,6 +178,47 @@ async def detailed_health(
     }
 
     return health_data
+
+
+@router.get("/health/instances")
+async def list_instances(
+    current_user: str = Depends(get_current_user),
+):
+    """List all live API instances via Redis heartbeat registry. Requires auth.
+
+    Each running instance writes a heartbeat key to Redis every 30 seconds with
+    a 60-second TTL. This endpoint enumerates all unexpired heartbeat keys to
+    show which instances are currently alive, their resource usage, and last
+    heartbeat time.
+    """
+    instances = []
+    try:
+        from backend.cache.redis_cache import get_redis_cache
+        redis = await get_redis_cache()
+        if redis.is_connected:
+            client = redis.get_client()
+            if client:
+                # Scan for all instance heartbeat keys
+                cursor = 0
+                while True:
+                    cursor, keys = await client.scan(cursor, match="instances:*", count=100)
+                    for key in keys:
+                        data = await client.get(key)
+                        if data:
+                            try:
+                                instances.append(json.loads(data))
+                            except (json.JSONDecodeError, TypeError):
+                                pass
+                    if cursor == 0:
+                        break
+    except Exception as e:
+        logger.warning("Failed to enumerate instances: %s", e)
+
+    return {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "total_instances": len(instances),
+        "instances": instances,
+    }
 
 
 @router.get("/metrics")
@@ -147,6 +264,7 @@ async def get_metrics(
 
     return {
         "timestamp": now.isoformat(),
+        "instance_id": settings.INSTANCE_ID,
         "users": {
             "total": total_users,
             "active_24h": active_users_24h
@@ -172,6 +290,7 @@ async def security_status(
 
     return {
         "timestamp": datetime.now(timezone.utc).isoformat(),
+        "instance_id": settings.INSTANCE_ID,
         "ddos_protection": {
             "enabled": True,
         },
