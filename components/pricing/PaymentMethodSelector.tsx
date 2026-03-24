@@ -31,7 +31,6 @@ const METHODS: MethodDef[] = [
     id: 'google_pay',
     label: 'Google Pay',
     description: 'Fast & secure',
-    hideForInr: true,
   },
   {
     id: 'paypal',
@@ -91,7 +90,7 @@ export function PaymentMethodSelector({
           Pay instantly with UPI — Google Pay, PhonePe, Paytm, and more.
         </p>
       )}
-      {selected === 'google_pay' && currency !== 'INR' && (
+      {selected === 'google_pay' && (
         <p className="mt-2 text-center text-xs text-[#f5f0e8]/60">
           Google Pay will appear on the secure checkout page. You can also use a card as a backup.
         </p>

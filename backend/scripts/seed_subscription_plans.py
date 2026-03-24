@@ -97,6 +97,8 @@ SUBSCRIPTION_PLANS = [
         "price_yearly": None,
         "stripe_price_id_monthly": None,
         "stripe_price_id_yearly": None,
+        "stripe_price_id_monthly_inr": None,
+        "stripe_price_id_yearly_inr": None,
         "features": {
             "kiaan_questions_monthly": 5,
             "encrypted_journal": False,
@@ -121,6 +123,8 @@ SUBSCRIPTION_PLANS = [
         "price_yearly": Decimal("47.99"),
         "stripe_price_id_monthly": os.getenv("STRIPE_BHAKTA_MONTHLY_PRICE_ID"),
         "stripe_price_id_yearly": os.getenv("STRIPE_BHAKTA_YEARLY_PRICE_ID"),
+        "stripe_price_id_monthly_inr": os.getenv("STRIPE_BHAKTA_MONTHLY_INR_PRICE_ID"),
+        "stripe_price_id_yearly_inr": os.getenv("STRIPE_BHAKTA_YEARLY_INR_PRICE_ID"),
         "features": {
             "kiaan_questions_monthly": 50,
             "encrypted_journal": True,
@@ -145,6 +149,8 @@ SUBSCRIPTION_PLANS = [
         "price_yearly": Decimal("89.99"),
         "stripe_price_id_monthly": os.getenv("STRIPE_SADHAK_MONTHLY_PRICE_ID"),
         "stripe_price_id_yearly": os.getenv("STRIPE_SADHAK_YEARLY_PRICE_ID"),
+        "stripe_price_id_monthly_inr": os.getenv("STRIPE_SADHAK_MONTHLY_INR_PRICE_ID"),
+        "stripe_price_id_yearly_inr": os.getenv("STRIPE_SADHAK_YEARLY_INR_PRICE_ID"),
         "features": {
             "kiaan_questions_monthly": 300,
             "encrypted_journal": True,
@@ -169,6 +175,8 @@ SUBSCRIPTION_PLANS = [
         "price_yearly": Decimal("169.99"),
         "stripe_price_id_monthly": os.getenv("STRIPE_SIDDHA_MONTHLY_PRICE_ID"),
         "stripe_price_id_yearly": os.getenv("STRIPE_SIDDHA_YEARLY_PRICE_ID"),
+        "stripe_price_id_monthly_inr": os.getenv("STRIPE_SIDDHA_MONTHLY_INR_PRICE_ID"),
+        "stripe_price_id_yearly_inr": os.getenv("STRIPE_SIDDHA_YEARLY_INR_PRICE_ID"),
         "features": {
             "kiaan_questions_monthly": -1,  # Unlimited
             "encrypted_journal": True,
@@ -247,6 +255,8 @@ async def seed_subscription_plans(
                 existing.price_yearly = plan_data["price_yearly"]
                 existing.stripe_price_id_monthly = plan_data["stripe_price_id_monthly"]
                 existing.stripe_price_id_yearly = plan_data["stripe_price_id_yearly"]
+                existing.stripe_price_id_monthly_inr = plan_data.get("stripe_price_id_monthly_inr")
+                existing.stripe_price_id_yearly_inr = plan_data.get("stripe_price_id_yearly_inr")
                 existing.features = plan_data["features"]
                 existing.kiaan_questions_monthly = plan_data["kiaan_questions_monthly"]
                 existing.encrypted_journal = plan_data["encrypted_journal"]
@@ -261,6 +271,8 @@ async def seed_subscription_plans(
                     price_yearly=plan_data["price_yearly"],
                     stripe_price_id_monthly=plan_data["stripe_price_id_monthly"],
                     stripe_price_id_yearly=plan_data["stripe_price_id_yearly"],
+                    stripe_price_id_monthly_inr=plan_data.get("stripe_price_id_monthly_inr"),
+                    stripe_price_id_yearly_inr=plan_data.get("stripe_price_id_yearly_inr"),
                     features=plan_data["features"],
                     kiaan_questions_monthly=plan_data["kiaan_questions_monthly"],
                     encrypted_journal=plan_data["encrypted_journal"],

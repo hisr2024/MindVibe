@@ -249,13 +249,13 @@ export default function PricingPage() {
 
   // Reset payment method when currency changes make it unavailable:
   // - UPI is only available for INR
-  // - PayPal and Google Pay are NOT available for INR (PayPal doesn't
-  //   support INR via Stripe; Google Pay INR goes through UPI/Razorpay)
+  // - PayPal is NOT available for INR (PayPal doesn't support INR via Stripe)
+  // - Google Pay works for all currencies including INR (via Stripe Payment Request API)
   useEffect(() => {
     if (currency !== 'INR' && paymentMethod === 'upi') {
       setPaymentMethod('card')
     }
-    if (currency === 'INR' && (paymentMethod === 'paypal' || paymentMethod === 'google_pay')) {
+    if (currency === 'INR' && paymentMethod === 'paypal') {
       setPaymentMethod('card')
     }
   }, [currency, paymentMethod])

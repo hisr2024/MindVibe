@@ -219,6 +219,24 @@ async def create_checkout(
 
     # Route to the appropriate payment provider
     if payload.payment_method == "upi":
+        # UPI requires INR currency
+        if payload.currency != "inr":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "error": "invalid_currency",
+                    "message": "UPI is only available with INR currency.",
+                },
+            )
+        # Try Stripe UPI first (preferred — avoids Razorpay KYC requirement).
+        # Falls back to Razorpay UPI if Stripe UPI is not enabled or INR
+        # Price IDs are not configured.
+        if is_stripe_configured():
+            try:
+                return await _create_stripe_checkout(db, user, payload)
+            except Exception as e:
+                logger.info(f"Stripe UPI unavailable, falling back to Razorpay: {e}")
+        # Fall back to Razorpay UPI
         return await _create_razorpay_checkout(db, user, payload)
 
     # PayPal through Stripe does not support INR
@@ -233,7 +251,7 @@ async def create_checkout(
 
     # card, paypal, and google_pay all route through Stripe.
     # Google Pay is surfaced automatically via Stripe's card payment type
-    # using the Payment Request API — no separate provider needed.
+    # using the Payment Request API — works for all currencies including INR.
     return await _create_stripe_checkout(db, user, payload)
 
 
@@ -264,6 +282,7 @@ async def _create_stripe_checkout(
             payload.success_url,
             payload.cancel_url,
             payment_method=payload.payment_method,
+            currency=payload.currency,
         )
 
         if not result:
