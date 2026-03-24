@@ -7,15 +7,23 @@ import logging
 import re
 import time
 from collections import defaultdict
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, WebSocket, WebSocketDisconnect, status
-from sqlalchemy import select, func, update
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+    status,
+)
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.settings import settings
 from backend.deps import SessionLocal, get_current_user, get_db
-from backend.middleware.rate_limiter import limiter, CHAT_RATE_LIMIT
+from backend.middleware.rate_limiter import CHAT_RATE_LIMIT, limiter
 from backend.models import ChatMessage, ChatRoom, RoomParticipant, User
 from backend.security.jwt import decode_access_token
 
@@ -24,11 +32,27 @@ ws_logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/rooms", tags=["rooms"])
 
 DEFAULT_ROOMS: list[dict[str, str]] = [
-    {"slug": "grounding", "name": "Calm Grounding", "theme": "Gentle check-ins and deep breaths"},
-    {"slug": "gratitude", "name": "Gratitude Garden", "theme": "Sharing what is going well today"},
-    {"slug": "courage", "name": "Courage Circle", "theme": "Encouragement for challenging moments"},
+    {
+        "slug": "grounding",
+        "name": "Calm Grounding",
+        "theme": "Gentle check-ins and deep breaths",
+    },
+    {
+        "slug": "gratitude",
+        "name": "Gratitude Garden",
+        "theme": "Sharing what is going well today",
+    },
+    {
+        "slug": "courage",
+        "name": "Courage Circle",
+        "theme": "Encouragement for challenging moments",
+    },
     {"slug": "clarity", "name": "Clarity Corner", "theme": "Finding mental stillness"},
-    {"slug": "compassion", "name": "Compassion Cave", "theme": "Self-kindness and acceptance"},
+    {
+        "slug": "compassion",
+        "name": "Compassion Cave",
+        "theme": "Self-kindness and acceptance",
+    },
 ]
 
 PROHIBITED_PATTERNS = [
@@ -66,6 +90,7 @@ class DistributedConnectionManager:
         """Lazy-load the Redis cache singleton."""
         try:
             from backend.cache.redis_cache import get_redis_cache
+
             cache = await get_redis_cache()
             return cache if cache.is_connected else None
         except Exception:
@@ -102,10 +127,12 @@ class DistributedConnectionManager:
         # Publish to Redis so other instances can relay
         redis = await self._get_redis()
         if redis:
-            envelope = json.dumps({
-                "instance_id": self._instance_id,
-                "payload": payload,
-            })
+            envelope = json.dumps(
+                {
+                    "instance_id": self._instance_id,
+                    "payload": payload,
+                }
+            )
             await redis.publish(f"chat:room:{room_id}", envelope)
 
     async def _send_to_local(self, room_id: str, payload: dict[str, Any]) -> None:
@@ -140,11 +167,15 @@ class DistributedConnectionManager:
                         continue
                     await self._send_to_local(room_id, envelope["payload"])
                 except (json.JSONDecodeError, KeyError):
-                    ws_logger.warning("Malformed Pub/Sub message on channel %s", channel)
+                    ws_logger.warning(
+                        "Malformed Pub/Sub message on channel %s", channel
+                    )
         except asyncio.CancelledError:
             pass
         except Exception as e:
-            ws_logger.warning("Redis Pub/Sub listener error for room %s: %s", room_id, e)
+            ws_logger.warning(
+                "Redis Pub/Sub listener error for room %s: %s", room_id, e
+            )
         finally:
             if pubsub:
                 try:
@@ -165,11 +196,15 @@ async def _ensure_rate_limit(user_id: str) -> None:
     # Try Redis-backed rate limiting for cross-instance consistency
     try:
         from backend.cache.redis_cache import get_redis_cache
+
         redis = await get_redis_cache()
         if redis.is_connected:
             count = await redis.incr(f"ws_rate:{user_id}", expire_seconds=window)
             if count is not None and count > limit:
-                raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Rate limit exceeded")
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Rate limit exceeded",
+                )
             if count is not None:
                 return  # Redis handled it
     except HTTPException:
@@ -179,9 +214,13 @@ async def _ensure_rate_limit(user_id: str) -> None:
 
     # In-memory fallback (single-instance only)
     now = time.time()
-    _user_message_timestamps[user_id] = [t for t in _user_message_timestamps[user_id] if now - t < window]
+    _user_message_timestamps[user_id] = [
+        t for t in _user_message_timestamps[user_id] if now - t < window
+    ]
     if len(_user_message_timestamps[user_id]) >= limit:
-        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Rate limit exceeded")
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Rate limit exceeded"
+        )
     _user_message_timestamps[user_id].append(now)
 
 
@@ -189,19 +228,19 @@ async def _ensure_rate_limit(user_id: str) -> None:
 _user_message_timestamps: dict[str, list[float]] = defaultdict(list)
 
 
-async def _get_user(db: AsyncSession, user_id: str) -> Optional[User]:
+async def _get_user(db: AsyncSession, user_id: str) -> User | None:
     stmt = select(User).where(User.id == user_id, User.deleted_at.is_(None))
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
 
 
-async def _get_room(db: AsyncSession, room_id: str) -> Optional[ChatRoom]:
+async def _get_room(db: AsyncSession, room_id: str) -> ChatRoom | None:
     stmt = select(ChatRoom).where(ChatRoom.id == room_id)
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
 
 
-async def _participants(db: AsyncSession, room_id: str) -> List[dict[str, str]]:
+async def _participants(db: AsyncSession, room_id: str) -> list[dict[str, str]]:
     stmt = (
         select(RoomParticipant.user_id, User.email)
         .join(User, User.id == RoomParticipant.user_id)
@@ -272,7 +311,7 @@ async def list_rooms(db: AsyncSession = Depends(get_db)) -> list[dict[str, Any]]
 @limiter.limit(CHAT_RATE_LIMIT)
 async def create_room(
     request: Request,
-    payload: Dict[str, str],
+    payload: dict[str, str],
     user_id: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
@@ -283,7 +322,9 @@ async def create_room(
     if not name or not theme:
         raise HTTPException(status_code=400, detail="Name and theme are required")
     if not slug:
-        slug = re.sub(r"[^a-z0-9-]", "", name.lower().replace(" ", "-")) or str(int(time.time()))
+        slug = re.sub(r"[^a-z0-9-]", "", name.lower().replace(" ", "-")) or str(
+            int(time.time())
+        )
 
     existing = await db.execute(select(ChatRoom).where(ChatRoom.slug == slug))
     if existing.scalar_one_or_none():
@@ -328,7 +369,7 @@ async def recent_messages(
     room_id: str,
     limit: int = 50,
     db: AsyncSession = Depends(get_db),
-    user_id: Optional[str] = Depends(get_current_user),
+    user_id: str | None = Depends(get_current_user),
 ) -> list[dict[str, Any]]:
     room = await _get_room(db, room_id)
     if not room:
@@ -366,6 +407,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str) -> None:
     Sec-WebSocket-Protocol: "access_token, <token_value>"
     """
     import logging
+
     ws_logger = logging.getLogger(__name__)
 
     token: str | None = None
@@ -410,8 +452,12 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str) -> None:
         await _persist_participant(db, room_id, user_id)
         await manager.connect(room_id, websocket, user_id)
         participants = await _participants(db, room_id)
-        await manager.broadcast(room_id, {"type": "participants", "participants": participants})
-        await websocket.send_json({"type": "participants", "participants": participants})
+        await manager.broadcast(
+            room_id, {"type": "participants", "participants": participants}
+        )
+        await websocket.send_json(
+            {"type": "participants", "participants": participants}
+        )
 
         history = await recent_messages(room_id, db=db, limit=50, user_id=user_id)
         await websocket.send_json({"type": "history", "messages": history})
@@ -421,10 +467,14 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str) -> None:
                 data = await websocket.receive_json()
                 content = sanitize_message(data.get("content", ""))
                 if not content:
-                    await websocket.send_json({"type": "error", "message": "Message cannot be empty"})
+                    await websocket.send_json(
+                        {"type": "error", "message": "Message cannot be empty"}
+                    )
                     continue
                 if any(pattern.search(content) for pattern in PROHIBITED_PATTERNS):
-                    await websocket.send_json({"type": "error", "message": "Message blocked for moderation"})
+                    await websocket.send_json(
+                        {"type": "error", "message": "Message blocked for moderation"}
+                    )
                     continue
 
                 await _ensure_rate_limit(user_id)
@@ -450,5 +500,8 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str) -> None:
             manager.disconnect(room_id, websocket)
             await manager.broadcast(
                 room_id,
-                {"type": "participants", "participants": await _participants(db, room_id)},
+                {
+                    "type": "participants",
+                    "participants": await _participants(db, room_id),
+                },
             )

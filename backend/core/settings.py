@@ -2,9 +2,9 @@
 
 import os
 from pathlib import Path
-from typing import Optional
-from pydantic_settings import BaseSettings, SettingsConfigDict
+
 from pydantic import field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 def parse_bool_strict(value: str, var_name: str = "unknown") -> bool:
@@ -61,7 +61,11 @@ class Settings(BaseSettings):
     REQUIRE_EMAIL_VERIFICATION: bool = parse_bool_strict(
         os.getenv(
             "REQUIRE_EMAIL_VERIFICATION",
-            "true" if os.getenv("ENVIRONMENT", "development") == "production" else "false",
+            (
+                "true"
+                if os.getenv("ENVIRONMENT", "development") == "production"
+                else "false"
+            ),
         ),
         "REQUIRE_EMAIL_VERIFICATION",
     )
@@ -78,8 +82,8 @@ class Settings(BaseSettings):
 
         Generate secure key with: python -c 'import secrets; print(secrets.token_urlsafe(64))'
         """
-        import warnings
         import logging
+        import warnings
 
         environment = os.getenv("ENVIRONMENT", "development").lower()
         is_production = environment in ("production", "prod")
@@ -112,18 +116,20 @@ class Settings(BaseSettings):
                 warnings.warn(
                     "SECRET_KEY appears weak (no mixed case or special characters). "
                     "Consider using a stronger key generated with secrets.token_urlsafe(64).",
-                    UserWarning
+                    UserWarning,
+                    stacklevel=2,
                 )
 
         elif v == "dev-secret-key-change-in-production":
             warnings.warn(
                 "Using default SECRET_KEY. This is only safe for development. "
                 "Set a secure SECRET_KEY for production.",
-                UserWarning
+                UserWarning,
+                stacklevel=2,
             )
 
         return v
-    
+
     # Spiritual Wellness Data Encryption (enforced by default)
     MINDVIBE_REQUIRE_ENCRYPTION: bool = parse_bool_strict(
         os.getenv("MINDVIBE_REQUIRE_ENCRYPTION", "true"), "MINDVIBE_REQUIRE_ENCRYPTION"
@@ -141,7 +147,8 @@ class Settings(BaseSettings):
 
         environment = os.getenv("ENVIRONMENT", "development").lower()
         require_encryption = parse_bool_strict(
-            os.getenv("MINDVIBE_REQUIRE_ENCRYPTION", "true"), "MINDVIBE_REQUIRE_ENCRYPTION"
+            os.getenv("MINDVIBE_REQUIRE_ENCRYPTION", "true"),
+            "MINDVIBE_REQUIRE_ENCRYPTION",
         )
 
         if require_encryption and not v:
@@ -185,7 +192,14 @@ class Settings(BaseSettings):
     # REDIS_REQUIRED: In production with multiple instances, Redis MUST be available
     # for distributed state (WebSocket Pub/Sub, rate limiting, DDoS tracking).
     REDIS_REQUIRED: bool = parse_bool_strict(
-        os.getenv("REDIS_REQUIRED", "true" if os.getenv("ENVIRONMENT", "development") == "production" else "false"),
+        os.getenv(
+            "REDIS_REQUIRED",
+            (
+                "true"
+                if os.getenv("ENVIRONMENT", "development") == "production"
+                else "false"
+            ),
+        ),
         "REDIS_REQUIRED",
     )
     REDIS_MAX_CONNECTIONS: int = int(os.getenv("REDIS_MAX_CONNECTIONS", "20"))
@@ -197,7 +211,12 @@ class Settings(BaseSettings):
     # Multi-Instance Scaling
     # Unique identifier for this instance — used for WebSocket Pub/Sub deduplication
     # and instance-aware health checks. Auto-generated if not set.
-    INSTANCE_ID: str = os.getenv("INSTANCE_ID") or os.getenv("FLY_ALLOC_ID") or os.getenv("RENDER_INSTANCE_ID") or ""
+    INSTANCE_ID: str = (
+        os.getenv("INSTANCE_ID")
+        or os.getenv("FLY_ALLOC_ID")
+        or os.getenv("RENDER_INSTANCE_ID")
+        or ""
+    )
 
     # PgBouncer compatibility — disables prepared statements when True
     PGBOUNCER_ENABLED: bool = parse_bool_strict(
@@ -222,15 +241,17 @@ class Settings(BaseSettings):
                 "REDIS_URL points to localhost in production. "
                 "Use a dedicated Redis instance for production deployments.",
                 UserWarning,
+                stacklevel=2,
             )
         return v
+
     CACHE_KIAAN_RESPONSES: bool = parse_bool_strict(
         os.getenv("CACHE_KIAAN_RESPONSES", "true"), "CACHE_KIAAN_RESPONSES"
     )
-    
+
     # Rate Limiting
     RATE_LIMIT_ENABLED: bool = True
-    
+
     # Stripe Configuration
     STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "")
     STRIPE_PUBLISHABLE_KEY: str = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
@@ -238,19 +259,23 @@ class Settings(BaseSettings):
 
     # Stripe Public Details (visible on customer statements, invoices, receipts)
     # Statement descriptor: 5-22 chars, appears on bank/credit card statements
-    STRIPE_STATEMENT_DESCRIPTOR: str = os.getenv("STRIPE_STATEMENT_DESCRIPTOR", "KIAANVERSE.COM")
+    STRIPE_STATEMENT_DESCRIPTOR: str = os.getenv(
+        "STRIPE_STATEMENT_DESCRIPTOR", "KIAANVERSE.COM"
+    )
     # Statement descriptor suffix: 2-10 chars, appended for individual products
-    STRIPE_STATEMENT_DESCRIPTOR_SUFFIX: str = os.getenv("STRIPE_STATEMENT_DESCRIPTOR_SUFFIX", "")
+    STRIPE_STATEMENT_DESCRIPTOR_SUFFIX: str = os.getenv(
+        "STRIPE_STATEMENT_DESCRIPTOR_SUFFIX", ""
+    )
     # Customer support phone number displayed on receipts and invoices
     STRIPE_SUPPORT_PHONE: str = os.getenv("STRIPE_SUPPORT_PHONE", "")
     # Customer support email displayed on receipts and invoices
     STRIPE_SUPPORT_EMAIL: str = os.getenv("STRIPE_SUPPORT_EMAIL", "")
     # Customer support URL displayed on receipts and invoices
     STRIPE_SUPPORT_URL: str = os.getenv("STRIPE_SUPPORT_URL", "")
-    
+
     # Frontend URLs
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
-    
+
     # Storage Configuration
     USE_S3_STORAGE: bool = parse_bool_strict(
         os.getenv("USE_S3_STORAGE", "false"), "USE_S3_STORAGE"
@@ -269,7 +294,9 @@ class Settings(BaseSettings):
         os.getenv("OFFLINE_FALLBACK_ENABLED", "true"), "OFFLINE_FALLBACK_ENABLED"
     )
     OFFLINE_MODEL_TIMEOUT: int = int(os.getenv("OFFLINE_MODEL_TIMEOUT", "120"))
-    OFFLINE_CACHE_MAX_AGE_HOURS: int = int(os.getenv("OFFLINE_CACHE_MAX_AGE_HOURS", "168"))  # 1 week
+    OFFLINE_CACHE_MAX_AGE_HOURS: int = int(
+        os.getenv("OFFLINE_CACHE_MAX_AGE_HOURS", "168")
+    )  # 1 week
     OFFLINE_QUEUE_ENABLED: bool = parse_bool_strict(
         os.getenv("OFFLINE_QUEUE_ENABLED", "true"), "OFFLINE_QUEUE_ENABLED"
     )
@@ -282,8 +309,12 @@ class Settings(BaseSettings):
         os.getenv("LOCAL_MODELS_ENABLED", "true"), "LOCAL_MODELS_ENABLED"
     )
     LOCAL_MODEL_PATH: str = os.getenv("LOCAL_MODEL_PATH", str(DEFAULT_MODELS_PATH))
-    PREFERRED_LOCAL_MODEL: str = os.getenv("PREFERRED_LOCAL_MODEL", "mistral-7b-instruct")
-    LOCAL_MODEL_QUANTIZATION: str = os.getenv("LOCAL_MODEL_QUANTIZATION", "q4_k_m")  # q4_k_m, q5_k_m, q8_0, fp16
+    PREFERRED_LOCAL_MODEL: str = os.getenv(
+        "PREFERRED_LOCAL_MODEL", "mistral-7b-instruct"
+    )
+    LOCAL_MODEL_QUANTIZATION: str = os.getenv(
+        "LOCAL_MODEL_QUANTIZATION", "q4_k_m"
+    )  # q4_k_m, q5_k_m, q8_0, fp16
     MIN_VRAM_MB: int = int(os.getenv("MIN_VRAM_MB", "4096"))
     MAX_LOCAL_MODEL_THREADS: int = int(os.getenv("MAX_LOCAL_MODEL_THREADS", "4"))
     LOCAL_MODEL_CONTEXT_SIZE: int = int(os.getenv("LOCAL_MODEL_CONTEXT_SIZE", "4096"))
@@ -304,9 +335,13 @@ class Settings(BaseSettings):
     LOCAL_TTS_ENABLED: bool = parse_bool_strict(
         os.getenv("LOCAL_TTS_ENABLED", "true"), "LOCAL_TTS_ENABLED"
     )
-    TTS_PROVIDER: str = os.getenv("TTS_PROVIDER", "auto")  # auto, sarvam, elevenlabs, edge
+    TTS_PROVIDER: str = os.getenv(
+        "TTS_PROVIDER", "auto"
+    )  # auto, sarvam, elevenlabs, edge
     TTS_FALLBACK_CHAIN: str = os.getenv("TTS_FALLBACK_CHAIN", "elevenlabs,sarvam,edge")
-    LOCAL_TTS_QUALITY: str = os.getenv("LOCAL_TTS_QUALITY", "medium")  # low, medium, high
+    LOCAL_TTS_QUALITY: str = os.getenv(
+        "LOCAL_TTS_QUALITY", "medium"
+    )  # low, medium, high
     TTS_CACHE_DIR: str = os.getenv("TTS_CACHE_DIR", str(DEFAULT_AUDIO_CACHE_PATH))
     TTS_CACHE_MAX_SIZE_MB: int = int(os.getenv("TTS_CACHE_MAX_SIZE_MB", "500"))
 
@@ -314,21 +349,33 @@ class Settings(BaseSettings):
     LOCAL_STT_ENABLED: bool = parse_bool_strict(
         os.getenv("LOCAL_STT_ENABLED", "true"), "LOCAL_STT_ENABLED"
     )
-    STT_PROVIDER: str = os.getenv("STT_PROVIDER", "auto")  # auto, openai_whisper, local_whisper, browser
-    WHISPER_MODEL_SIZE: str = os.getenv("WHISPER_MODEL_SIZE", "base")  # tiny, base, small, medium, large
-    WHISPER_MODEL_PATH: str = os.getenv("WHISPER_MODEL_PATH", str(DEFAULT_MODELS_PATH / "whisper"))
-    WHISPER_COMPUTE_TYPE: str = os.getenv("WHISPER_COMPUTE_TYPE", "int8")  # int8, float16, float32
+    STT_PROVIDER: str = os.getenv(
+        "STT_PROVIDER", "auto"
+    )  # auto, openai_whisper, local_whisper, browser
+    WHISPER_MODEL_SIZE: str = os.getenv(
+        "WHISPER_MODEL_SIZE", "base"
+    )  # tiny, base, small, medium, large
+    WHISPER_MODEL_PATH: str = os.getenv(
+        "WHISPER_MODEL_PATH", str(DEFAULT_MODELS_PATH / "whisper")
+    )
+    WHISPER_COMPUTE_TYPE: str = os.getenv(
+        "WHISPER_COMPUTE_TYPE", "int8"
+    )  # int8, float16, float32
     WHISPER_DEVICE: str = os.getenv("WHISPER_DEVICE", "auto")  # auto, cpu, cuda
-    WHISPER_LANGUAGE: Optional[str] = os.getenv("WHISPER_LANGUAGE")  # None for auto-detect
+    WHISPER_LANGUAGE: str | None = os.getenv("WHISPER_LANGUAGE")  # None for auto-detect
 
     # --- Local Memory/Persistence Settings ---
-    MEMORY_BACKEND: str = os.getenv("MEMORY_BACKEND", "auto")  # auto, redis, sqlite, memory
+    MEMORY_BACKEND: str = os.getenv(
+        "MEMORY_BACKEND", "auto"
+    )  # auto, redis, sqlite, memory
     SQLITE_DB_PATH: str = os.getenv("SQLITE_DB_PATH", str(DEFAULT_MEMORY_DB_PATH))
     LOCAL_MEMORY_MAX_SIZE_MB: int = int(os.getenv("LOCAL_MEMORY_MAX_SIZE_MB", "500"))
     MEMORY_BACKUP_ENABLED: bool = parse_bool_strict(
         os.getenv("MEMORY_BACKUP_ENABLED", "true"), "MEMORY_BACKUP_ENABLED"
     )
-    MEMORY_BACKUP_INTERVAL_HOURS: int = int(os.getenv("MEMORY_BACKUP_INTERVAL_HOURS", "24"))
+    MEMORY_BACKUP_INTERVAL_HOURS: int = int(
+        os.getenv("MEMORY_BACKUP_INTERVAL_HOURS", "24")
+    )
     MEMORY_ENCRYPTION_ENABLED: bool = parse_bool_strict(
         os.getenv("MEMORY_ENCRYPTION_ENABLED", "false"), "MEMORY_ENCRYPTION_ENABLED"
     )
@@ -345,15 +392,25 @@ class Settings(BaseSettings):
     DOCS_UPDATE_INTERVAL_DAYS: int = int(os.getenv("DOCS_UPDATE_INTERVAL_DAYS", "7"))
 
     # --- Connectivity Settings ---
-    CONNECTIVITY_CHECK_INTERVAL: int = int(os.getenv("CONNECTIVITY_CHECK_INTERVAL", "300"))  # 5 minutes
-    CONNECTIVITY_CHECK_URL: str = os.getenv("CONNECTIVITY_CHECK_URL", "https://api.openai.com")
+    CONNECTIVITY_CHECK_INTERVAL: int = int(
+        os.getenv("CONNECTIVITY_CHECK_INTERVAL", "300")
+    )  # 5 minutes
+    CONNECTIVITY_CHECK_URL: str = os.getenv(
+        "CONNECTIVITY_CHECK_URL", "https://api.openai.com"
+    )
     CONNECTIVITY_TIMEOUT: int = int(os.getenv("CONNECTIVITY_TIMEOUT", "5"))
 
     # --- Local Storage Root ---
     MINDVIBE_HOME: str = os.getenv("MINDVIBE_HOME", str(DEFAULT_MINDVIBE_HOME))
 
-    @field_validator("LOCAL_MODEL_PATH", "TTS_CACHE_DIR", "WHISPER_MODEL_PATH",
-                    "DOCS_CACHE_PATH", "MINDVIBE_HOME", mode="after")
+    @field_validator(
+        "LOCAL_MODEL_PATH",
+        "TTS_CACHE_DIR",
+        "WHISPER_MODEL_PATH",
+        "DOCS_CACHE_PATH",
+        "MINDVIBE_HOME",
+        mode="after",
+    )
     @classmethod
     def ensure_directory_exists(cls, v: str) -> str:
         """Ensure storage directories exist."""
@@ -362,6 +419,7 @@ class Settings(BaseSettings):
             path.mkdir(parents=True, exist_ok=True)
         except PermissionError:
             import logging
+
             logging.warning(f"Cannot create directory {v}, using default")
         return str(path)
 
@@ -374,6 +432,7 @@ class Settings(BaseSettings):
             path.parent.mkdir(parents=True, exist_ok=True)
         except PermissionError:
             import logging
+
             logging.warning(f"Cannot create directory for SQLite DB {v}")
         return str(path)
 

@@ -62,11 +62,16 @@ class RedisCache:
             # Test connection
             await self._client.ping()
             self._connected = True
-            logger.info("Successfully connected to Redis at %s (pool_size=%d)",
-                        settings.REDIS_URL, settings.REDIS_MAX_CONNECTIONS)
+            logger.info(
+                "Successfully connected to Redis at %s (pool_size=%d)",
+                settings.REDIS_URL,
+                settings.REDIS_MAX_CONNECTIONS,
+            )
             return True
         except ImportError:
-            logger.warning("Redis package not installed. Install with: pip install redis")
+            logger.warning(
+                "Redis package not installed. Install with: pip install redis"
+            )
             return False
         except Exception as e:
             logger.warning("Failed to connect to Redis: %s", e)
@@ -247,7 +252,9 @@ class RedisCache:
 
     # --- Sorted set methods for distributed DDoS tracking ---
 
-    async def zadd(self, key: str, mapping: dict[str, float], expire_seconds: int | None = None) -> int:
+    async def zadd(
+        self, key: str, mapping: dict[str, float], expire_seconds: int | None = None
+    ) -> int:
         """Add members with scores to a sorted set.
 
         Args:
@@ -288,7 +295,9 @@ class RedisCache:
             logger.warning("Redis ZCOUNT failed for key %s: %s", key, e)
             return 0
 
-    async def zremrangebyscore(self, key: str, min_score: float, max_score: float) -> int:
+    async def zremrangebyscore(
+        self, key: str, min_score: float, max_score: float
+    ) -> int:
         """Remove members from a sorted set by score range.
 
         Args:
@@ -323,7 +332,9 @@ class RedisCache:
         try:
             return await self._client.hincrby(key, field, amount)
         except Exception as e:
-            logger.warning("Redis HINCRBY failed for key %s field %s: %s", key, field, e)
+            logger.warning(
+                "Redis HINCRBY failed for key %s field %s: %s", key, field, e
+            )
             return None
 
     async def hget(self, key: str, field: str) -> str | None:

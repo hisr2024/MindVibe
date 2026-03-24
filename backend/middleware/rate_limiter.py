@@ -26,9 +26,10 @@ Multi-Instance Support (v3.0):
 """
 
 import logging
-from starlette.requests import Request
+
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+from starlette.requests import Request
 
 from backend.core.settings import settings
 
@@ -58,6 +59,7 @@ def _get_rate_limit_key(request: Request) -> str:
     auth_header = request.headers.get("authorization", "")
     if auth_header.startswith("Bearer "):
         import hashlib
+
         token = auth_header[7:]
         if token:
             token_hash = hashlib.sha256(token.encode()).hexdigest()[:32]
@@ -116,7 +118,7 @@ limiter = Limiter(
 
 # Rate limit constants for different endpoint categories
 # These limits are INDEPENDENT - a user can hit each endpoint up to its limit
-AUTH_RATE_LIMIT = "15/minute"     # Per-IP limit; generous enough for proxy scenarios
-                                  # while still preventing brute force (lockout at 5 failed attempts)
-CHAT_RATE_LIMIT = "30/minute"     # Moderate: allows active conversation
-WISDOM_RATE_LIMIT = "60/minute"   # Relaxed: read-heavy, low cost operations
+AUTH_RATE_LIMIT = "15/minute"  # Per-IP limit; generous enough for proxy scenarios
+# while still preventing brute force (lockout at 5 failed attempts)
+CHAT_RATE_LIMIT = "30/minute"  # Moderate: allows active conversation
+WISDOM_RATE_LIMIT = "60/minute"  # Relaxed: read-heavy, low cost operations

@@ -16,16 +16,17 @@ violations, blocked IPs) is stored in Redis so that enforcement is consistent
 across all API instances. Falls back to in-memory dicts when Redis is unavailable.
 """
 
+import logging
 import re
 import time
-import logging
 from collections import defaultdict, deque
-from typing import Any, Awaitable, Callable, Dict, Set, Tuple
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.responses import Response, JSONResponse
-from starlette.status import HTTP_429_TOO_MANY_REQUESTS, HTTP_403_FORBIDDEN
+from starlette.responses import JSONResponse, Response
+from starlette.status import HTTP_403_FORBIDDEN, HTTP_429_TOO_MANY_REQUESTS
 
 logger = logging.getLogger(__name__)
 
@@ -34,36 +35,36 @@ logger = logging.getLogger(__name__)
 # These bots MUST be allowed through for SEO indexing and discoverability.
 # ---------------------------------------------------------------------------
 LEGITIMATE_BOT_PATTERNS = re.compile(
-    r'(?i)(?:'
-    r'Googlebot|Google-InspectionTool|Storebot-Google|GoogleOther'
-    r'|bingbot|BingPreview|msnbot'
-    r'|Slurp|Yahoo'
-    r'|DuckDuckBot'
-    r'|Baiduspider'
-    r'|YandexBot|YandexImages'
-    r'|Sogou'
-    r'|Applebot'
-    r'|facebookexternalhit|Facebot'
-    r'|Twitterbot'
-    r'|LinkedInBot'
-    r'|WhatsApp'
-    r'|TelegramBot'
-    r'|Discordbot'
-    r'|PinterestBot'
-    r'|Slackbot'
-    r'|ia_archiver'
-    r'|archive\.org_bot'
-    r'|AhrefsBot|SemrushBot|MJ12bot'
-    r'|rogerbot|dotbot'
-    r'|PetalBot'
-    r'|GPTBot'
-    r'|anthropic-ai'
-    r'|Chrome-Lighthouse'
-    r'|Google-PageRenderer'
-    r'|APIs-Google'
-    r'|Mediapartners-Google'
-    r'|AdsBot-Google'
-    r')'
+    r"(?i)(?:"
+    r"Googlebot|Google-InspectionTool|Storebot-Google|GoogleOther"
+    r"|bingbot|BingPreview|msnbot"
+    r"|Slurp|Yahoo"
+    r"|DuckDuckBot"
+    r"|Baiduspider"
+    r"|YandexBot|YandexImages"
+    r"|Sogou"
+    r"|Applebot"
+    r"|facebookexternalhit|Facebot"
+    r"|Twitterbot"
+    r"|LinkedInBot"
+    r"|WhatsApp"
+    r"|TelegramBot"
+    r"|Discordbot"
+    r"|PinterestBot"
+    r"|Slackbot"
+    r"|ia_archiver"
+    r"|archive\.org_bot"
+    r"|AhrefsBot|SemrushBot|MJ12bot"
+    r"|rogerbot|dotbot"
+    r"|PetalBot"
+    r"|GPTBot"
+    r"|anthropic-ai"
+    r"|Chrome-Lighthouse"
+    r"|Google-PageRenderer"
+    r"|APIs-Google"
+    r"|Mediapartners-Google"
+    r"|AdsBot-Google"
+    r")"
 )
 
 
@@ -72,6 +73,7 @@ def is_legitimate_bot(user_agent: str) -> bool:
     if not user_agent:
         return False
     return bool(LEGITIMATE_BOT_PATTERNS.search(user_agent))
+
 
 # Configuration constants
 MAX_REQUESTS_PER_WINDOW = 100  # Maximum requests per time window
@@ -113,8 +115,8 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
         time_window: int = TIME_WINDOW_SECONDS,
         max_connections: int = MAX_CONNECTIONS_PER_IP,
         max_request_size: int = MAX_REQUEST_SIZE_BYTES,
-        allowlist: Set[str] = None,
-        blocklist: Set[str] = None,
+        allowlist: set[str] = None,
+        blocklist: set[str] = None,
     ):
         """
         Initialize DDoS protection middleware.
@@ -139,10 +141,12 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
         self.blocklist = blocklist or set()
 
         # In-memory fallback (used when Redis is unavailable)
-        self._request_history: Dict[str, deque] = defaultdict(lambda: deque(maxlen=max_requests * 2))
-        self._active_connections: Dict[str, int] = defaultdict(int)
-        self._violations: Dict[str, int] = defaultdict(int)
-        self._blocked_ips: Dict[str, float] = {}
+        self._request_history: dict[str, deque] = defaultdict(
+            lambda: deque(maxlen=max_requests * 2)
+        )
+        self._active_connections: dict[str, int] = defaultdict(int)
+        self._violations: dict[str, int] = defaultdict(int)
+        self._blocked_ips: dict[str, float] = {}
         self._last_cleanup = time.time()
 
         # Redis cache reference (lazy-loaded)
@@ -155,14 +159,19 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
             self._redis_checked = True
             try:
                 from backend.cache.redis_cache import get_redis_cache
+
                 cache = await get_redis_cache()
                 if cache.is_connected:
                     self._redis = cache
                     logger.info("[DDoS Protection] Using Redis for distributed state")
                 else:
-                    logger.info("[DDoS Protection] Redis unavailable, using in-memory state")
+                    logger.info(
+                        "[DDoS Protection] Redis unavailable, using in-memory state"
+                    )
             except Exception:
-                logger.info("[DDoS Protection] Redis unavailable, using in-memory state")
+                logger.info(
+                    "[DDoS Protection] Redis unavailable, using in-memory state"
+                )
         return self._redis
 
     @property
@@ -189,8 +198,7 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
         self._last_cleanup = current_time
 
         expired_blocks = [
-            ip for ip, expiry in self._blocked_ips.items()
-            if expiry < current_time
+            ip for ip, expiry in self._blocked_ips.items() if expiry < current_time
         ]
         for ip in expired_blocks:
             del self._blocked_ips[ip]
@@ -208,7 +216,7 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
         for ip in inactive_ips:
             del self._violations[ip]
 
-    def _is_rate_limited_memory(self, ip: str) -> Tuple[bool, int]:
+    def _is_rate_limited_memory(self, ip: str) -> tuple[bool, int]:
         """Check rate limit using in-memory state."""
         current_time = time.time()
         cutoff_time = current_time - self.time_window
@@ -221,7 +229,7 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
     def _record_request_memory(self, ip: str):
         self._request_history[ip].append(time.time())
 
-    def _is_blocked_memory(self, ip: str) -> Tuple[bool, float]:
+    def _is_blocked_memory(self, ip: str) -> tuple[bool, float]:
         if ip not in self._blocked_ips:
             return False, 0
         expiry = self._blocked_ips[ip]
@@ -251,7 +259,7 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
 
     # --- Redis-backed methods ---
 
-    async def _is_blocked_redis(self, ip: str) -> Tuple[bool, float]:
+    async def _is_blocked_redis(self, ip: str) -> tuple[bool, float]:
         """Check if IP is blocked using Redis key with TTL."""
         blocked_until = await self._redis.get(f"ddos:blocked:{ip}")
         if blocked_until is None:
@@ -274,7 +282,9 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
         block_duration = BLOCK_DURATION_SECONDS * multiplier
         expiry = time.time() + block_duration
 
-        await self._redis.set(f"ddos:blocked:{ip}", str(expiry), expire_seconds=int(block_duration) + 10)
+        await self._redis.set(
+            f"ddos:blocked:{ip}", str(expiry), expire_seconds=int(block_duration) + 10
+        )
         logger.warning(
             f"[DDoS Protection] Blocked IP {ip} for {block_duration}s "
             f"(violation #{violation_count}) [Redis]"
@@ -286,7 +296,7 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
         if count is not None and count >= 3:
             await self._block_ip_redis(ip)
 
-    async def _is_rate_limited_redis(self, ip: str) -> Tuple[bool, int]:
+    async def _is_rate_limited_redis(self, ip: str) -> tuple[bool, int]:
         """Check rate limit using Redis sorted set with sliding window."""
         now = time.time()
         key = f"ddos:history:{ip}"
@@ -302,7 +312,9 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
         now = time.time()
         key = f"ddos:history:{ip}"
         # Use timestamp as both score and member (unique enough for our purposes)
-        await self._redis.zadd(key, {f"{now}": now}, expire_seconds=self.time_window * 2)
+        await self._redis.zadd(
+            key, {f"{now}": now}, expire_seconds=self.time_window * 2
+        )
 
     async def _check_connections_redis(self, ip: str) -> bool:
         """Check concurrent connections using Redis hash."""
@@ -354,10 +366,12 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
 
         # Check blocklist
         if client_ip in self.blocklist:
-            logger.warning(f"[DDoS Protection] Blocked request from blocklisted IP: {client_ip}")
+            logger.warning(
+                f"[DDoS Protection] Blocked request from blocklisted IP: {client_ip}"
+            )
             return JSONResponse(
                 status_code=HTTP_403_FORBIDDEN,
-                content={"error": "forbidden", "message": "Access denied"}
+                content={"error": "forbidden", "message": "Access denied"},
             )
 
         # --- Use Redis or in-memory depending on availability ---
@@ -368,21 +382,26 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
             return await self._dispatch_memory(request, call_next, client_ip)
 
     async def _dispatch_redis(
-        self, request: Request, call_next: Callable[[Request], Awaitable[Response]], client_ip: str
+        self,
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]],
+        client_ip: str,
     ) -> Response:
         """DDoS dispatch using Redis-backed state."""
 
         # Check if IP is blocked
         is_blocked, time_until_unblock = await self._is_blocked_redis(client_ip)
         if is_blocked:
-            logger.info(f"[DDoS Protection] Request from blocked IP {client_ip} rejected [Redis]")
+            logger.info(
+                f"[DDoS Protection] Request from blocked IP {client_ip} rejected [Redis]"
+            )
             return JSONResponse(
                 status_code=HTTP_403_FORBIDDEN,
                 content={
                     "error": "blocked",
                     "message": f"IP temporarily blocked. Try again in {int(time_until_unblock)} seconds.",
                     "retry_after": int(time_until_unblock),
-                }
+                },
             )
 
         # Check request size
@@ -394,16 +413,21 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
                 content={
                     "error": "payload_too_large",
                     "message": f"Request size exceeds limit of {self.max_request_size} bytes",
-                }
+                },
             )
 
         # Check connection limit
         if await self._check_connections_redis(client_ip):
-            logger.warning(f"[DDoS Protection] Too many connections from IP {client_ip} [Redis]")
+            logger.warning(
+                f"[DDoS Protection] Too many connections from IP {client_ip} [Redis]"
+            )
             await self._record_violation_redis(client_ip)
             return JSONResponse(
                 status_code=HTTP_429_TOO_MANY_REQUESTS,
-                content={"error": "too_many_connections", "message": "Too many concurrent connections"}
+                content={
+                    "error": "too_many_connections",
+                    "message": "Too many concurrent connections",
+                },
             )
 
         # Check rate limit
@@ -420,7 +444,7 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
                     "error": "rate_limit_exceeded",
                     "message": f"Too many requests. Maximum {self.max_requests} requests per {self.time_window} seconds.",
                     "retry_after": self.time_window,
-                }
+                },
             )
 
         # Record request and track connection
@@ -434,7 +458,10 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
             await self._decr_connection_redis(client_ip)
 
     async def _dispatch_memory(
-        self, request: Request, call_next: Callable[[Request], Awaitable[Response]], client_ip: str
+        self,
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]],
+        client_ip: str,
     ) -> Response:
         """DDoS dispatch using in-memory state (single-instance fallback)."""
 
@@ -443,14 +470,16 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
         # Check if IP is blocked
         is_blocked, time_until_unblock = self._is_blocked_memory(client_ip)
         if is_blocked:
-            logger.info(f"[DDoS Protection] Request from blocked IP {client_ip} rejected")
+            logger.info(
+                f"[DDoS Protection] Request from blocked IP {client_ip} rejected"
+            )
             return JSONResponse(
                 status_code=HTTP_403_FORBIDDEN,
                 content={
                     "error": "blocked",
                     "message": f"IP temporarily blocked. Try again in {int(time_until_unblock)} seconds.",
                     "retry_after": int(time_until_unblock),
-                }
+                },
             )
 
         # Check request size
@@ -462,16 +491,21 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
                 content={
                     "error": "payload_too_large",
                     "message": f"Request size exceeds limit of {self.max_request_size} bytes",
-                }
+                },
             )
 
         # Check connection limit
         if self._check_connections_memory(client_ip):
-            logger.warning(f"[DDoS Protection] Too many connections from IP {client_ip}")
+            logger.warning(
+                f"[DDoS Protection] Too many connections from IP {client_ip}"
+            )
             self._record_violation_memory(client_ip)
             return JSONResponse(
                 status_code=HTTP_429_TOO_MANY_REQUESTS,
-                content={"error": "too_many_connections", "message": "Too many concurrent connections"}
+                content={
+                    "error": "too_many_connections",
+                    "message": "Too many concurrent connections",
+                },
             )
 
         # Check rate limit
@@ -488,7 +522,7 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
                     "error": "rate_limit_exceeded",
                     "message": f"Too many requests. Maximum {self.max_requests} requests per {self.time_window} seconds.",
                     "retry_after": self.time_window,
-                }
+                },
             )
 
         # Record request and track connection

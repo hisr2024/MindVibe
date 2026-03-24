@@ -1,11 +1,12 @@
 """Enhanced health monitoring endpoints for MindVibe — instance-aware for multi-instance deployments."""
 
 import asyncio
+import contextlib
 import json
 import logging
 import os
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import psutil
 from fastapi import APIRouter, Depends
@@ -13,7 +14,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.settings import settings
-from backend.deps import get_db, get_current_user
+from backend.deps import get_current_user, get_db
 from backend.middleware.circuit_breaker import get_all_circuit_breakers
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ async def start_instance_heartbeat() -> None:
     """
     try:
         from backend.cache.redis_cache import get_redis_cache
+
         redis = await get_redis_cache()
         if not redis.is_connected:
             logger.info("Instance heartbeat disabled (Redis not connected)")
@@ -44,13 +46,15 @@ async def start_instance_heartbeat() -> None:
 
         while True:
             try:
-                heartbeat_data = json.dumps({
-                    "instance_id": instance_id,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "uptime_seconds": int(time.time() - psutil.boot_time()),
-                    "cpu_percent": psutil.cpu_percent(interval=0),
-                    "memory_percent": psutil.virtual_memory().percent,
-                })
+                heartbeat_data = json.dumps(
+                    {
+                        "instance_id": instance_id,
+                        "timestamp": datetime.now(UTC).isoformat(),
+                        "uptime_seconds": int(time.time() - psutil.boot_time()),
+                        "cpu_percent": psutil.cpu_percent(interval=0),
+                        "memory_percent": psutil.virtual_memory().percent,
+                    }
+                )
                 await redis.set(
                     f"instances:{instance_id}",
                     heartbeat_data,
@@ -94,6 +98,7 @@ async def basic_health(
     if redis_enabled:
         try:
             from backend.cache.redis_cache import get_redis_cache
+
             redis = await get_redis_cache()
             if redis.is_connected:
                 checks["redis"] = "up"
@@ -123,8 +128,8 @@ async def detailed_health(
     health_data = {
         "status": "healthy",
         "instance_id": settings.INSTANCE_ID,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "checks": {}
+        "timestamp": datetime.now(UTC).isoformat(),
+        "checks": {},
     }
 
     # Database check
@@ -136,7 +141,7 @@ async def detailed_health(
 
         health_data["checks"]["database"] = {
             "status": "up",
-            "latency_ms": round(db_latency, 2)
+            "latency_ms": round(db_latency, 2),
         }
     except Exception:
         health_data["checks"]["database"] = {
@@ -147,6 +152,7 @@ async def detailed_health(
     # Redis check with latency
     try:
         from backend.cache.redis_cache import get_redis_cache
+
         redis = await get_redis_cache()
         if redis.is_connected:
             start_time = time.time()
@@ -156,7 +162,7 @@ async def detailed_health(
             redis_latency = (time.time() - start_time) * 1000
             health_data["checks"]["redis"] = {
                 "status": "up",
-                "latency_ms": round(redis_latency, 2)
+                "latency_ms": round(redis_latency, 2),
             }
         else:
             health_data["checks"]["redis"] = {"status": "down"}
@@ -174,7 +180,7 @@ async def detailed_health(
     health_data["checks"]["system"] = {
         "cpu_percent": psutil.cpu_percent(interval=0.1),
         "memory_percent": psutil.virtual_memory().percent,
-        "disk_percent": psutil.disk_usage('/').percent
+        "disk_percent": psutil.disk_usage("/").percent,
     }
 
     return health_data
@@ -194,6 +200,7 @@ async def list_instances(
     instances = []
     try:
         from backend.cache.redis_cache import get_redis_cache
+
         redis = await get_redis_cache()
         if redis.is_connected:
             client = redis.get_client()
@@ -201,21 +208,21 @@ async def list_instances(
                 # Scan for all instance heartbeat keys
                 cursor = 0
                 while True:
-                    cursor, keys = await client.scan(cursor, match="instances:*", count=100)
+                    cursor, keys = await client.scan(
+                        cursor, match="instances:*", count=100
+                    )
                     for key in keys:
                         data = await client.get(key)
                         if data:
-                            try:
+                            with contextlib.suppress(json.JSONDecodeError, TypeError):
                                 instances.append(json.loads(data))
-                            except (json.JSONDecodeError, TypeError):
-                                pass
                     if cursor == 0:
                         break
     except Exception as e:
         logger.warning("Failed to enumerate instances: %s", e)
 
     return {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "total_instances": len(instances),
         "instances": instances,
     }
@@ -228,7 +235,7 @@ async def get_metrics(
 ):
     """Application metrics for monitoring. Requires authentication."""
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     last_24h = now - timedelta(hours=24)
 
     # User metrics
@@ -237,22 +244,24 @@ async def get_metrics(
 
     # Active users in last 24h (based on chat messages)
     active_users_result = await db.execute(
-        text("SELECT COUNT(DISTINCT user_id) FROM chat_messages WHERE created_at > :since"),
-        {"since": last_24h}
+        text(
+            "SELECT COUNT(DISTINCT user_id) FROM chat_messages WHERE created_at > :since"
+        ),
+        {"since": last_24h},
     )
     active_users_24h = active_users_result.scalar()
 
     # Chat metrics
     total_messages_result = await db.execute(
         text("SELECT COUNT(*) FROM chat_messages WHERE created_at > :since"),
-        {"since": last_24h}
+        {"since": last_24h},
     )
     total_messages_24h = total_messages_result.scalar()
 
     # Mood metrics
     total_moods_result = await db.execute(
         text("SELECT COUNT(*) FROM moods WHERE created_at > :since"),
-        {"since": last_24h}
+        {"since": last_24h},
     )
     total_moods_24h = total_moods_result.scalar()
 
@@ -265,17 +274,9 @@ async def get_metrics(
     return {
         "timestamp": now.isoformat(),
         "instance_id": settings.INSTANCE_ID,
-        "users": {
-            "total": total_users,
-            "active_24h": active_users_24h
-        },
-        "messages": {
-            "total_24h": total_messages_24h,
-            "avg_per_user": avg_per_user
-        },
-        "moods": {
-            "total_24h": total_moods_24h
-        }
+        "users": {"total": total_users, "active_24h": active_users_24h},
+        "messages": {"total_24h": total_messages_24h, "avg_per_user": avg_per_user},
+        "moods": {"total_24h": total_moods_24h},
     }
 
 
@@ -289,7 +290,7 @@ async def security_status(
     circuit_breakers = get_all_circuit_breakers()
 
     return {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "instance_id": settings.INSTANCE_ID,
         "ddos_protection": {
             "enabled": True,
@@ -303,7 +304,7 @@ async def security_status(
             "csp": True,
             "xss_protection": True,
             "frame_options": True,
-        }
+        },
     }
 
 
@@ -311,4 +312,5 @@ async def security_status(
 async def sentry_test():
     """Send a test event to Sentry to verify the integration is working."""
     from backend.monitoring.error_tracking import trigger_test_error
+
     return trigger_test_error()

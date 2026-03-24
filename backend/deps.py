@@ -1,25 +1,29 @@
 """Dependency injection for FastAPI routes"""
 
+import logging
 import os
 import ssl as ssl_module
-from typing import AsyncGenerator, Optional, Any, Dict
+from collections.abc import AsyncGenerator
+from typing import Any
 from urllib.parse import parse_qs, urlparse
+
 from dotenv import load_dotenv
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy import select
 from fastapi import Depends, HTTPException, Request, status
-import logging
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 # Load .env BEFORE reading DATABASE_URL so env vars are available at import time
 load_dotenv()
 
-from backend.security.jwt import decode_access_token
 from backend.models import User
+from backend.security.jwt import decode_access_token
 
 logger = logging.getLogger(__name__)
 
 # Database setup
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://user:password@localhost:5432/mindvibe")
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", "postgresql+asyncpg://user:password@localhost:5432/mindvibe"
+)
 
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
@@ -27,7 +31,7 @@ elif DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 
-def _get_ssl_connect_args(db_url: str) -> Dict[str, Any]:
+def _get_ssl_connect_args(db_url: str) -> dict[str, Any]:
     """Build SSL connect args for asyncpg.
 
     Render PostgreSQL uses self-signed certificates, so we need to
@@ -40,9 +44,9 @@ def _get_ssl_connect_args(db_url: str) -> Dict[str, Any]:
     query_params = parse_qs(parsed.query)
 
     ssl_pref = (
-        os.getenv("DB_SSL_MODE") or
-        query_params.get("sslmode", [None])[0] or
-        query_params.get("ssl", [None])[0]
+        os.getenv("DB_SSL_MODE")
+        or query_params.get("sslmode", [None])[0]
+        or query_params.get("ssl", [None])[0]
     )
 
     # Auto-detect Render environment (Render sets RENDER=true)
@@ -51,7 +55,9 @@ def _get_ssl_connect_args(db_url: str) -> Dict[str, Any]:
     # CRITICAL: On Render, ALWAYS disable certificate verification
     # Render uses self-signed certificates that will fail verification
     if is_render:
-        logger.info("Render environment detected - forcing SSL without certificate verification")
+        logger.info(
+            "Render environment detected - forcing SSL without certificate verification"
+        )
         ssl_context = ssl_module.create_default_context()
         ssl_context.check_hostname = False
         ssl_context.verify_mode = ssl_module.CERT_NONE
@@ -62,7 +68,10 @@ def _get_ssl_connect_args(db_url: str) -> Dict[str, Any]:
         ssl_pref = "verify-full"
 
     ssl_pref = ssl_pref.lower()
-    is_production = os.getenv("ENVIRONMENT", "development").lower() in ("production", "prod")
+    is_production = os.getenv("ENVIRONMENT", "development").lower() in (
+        "production",
+        "prod",
+    )
 
     # Full verification (recommended for production)
     if ssl_pref in {"verify-ca", "verify-full"}:
@@ -105,8 +114,8 @@ def _get_ssl_connect_args(db_url: str) -> Dict[str, Any]:
 _PGBOUNCER_ENABLED = os.getenv("PGBOUNCER_ENABLED", "false").lower() in ("true", "1")
 _POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "10" if _PGBOUNCER_ENABLED else "30"))
 _MAX_OVERFLOW = int(os.getenv("DB_MAX_OVERFLOW", "5" if _PGBOUNCER_ENABLED else "10"))
-_POOL_RECYCLE = int(os.getenv("DB_POOL_RECYCLE", "3600"))   # recycle after 1h
-_POOL_TIMEOUT = int(os.getenv("DB_POOL_TIMEOUT", "30"))     # wait for connection
+_POOL_RECYCLE = int(os.getenv("DB_POOL_RECYCLE", "3600"))  # recycle after 1h
+_POOL_TIMEOUT = int(os.getenv("DB_POOL_TIMEOUT", "30"))  # wait for connection
 
 _is_sqlite = DATABASE_URL.startswith("sqlite")
 
@@ -144,6 +153,7 @@ else:
     )
 SessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
+
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Get database session"""
     async with SessionLocal() as session:
@@ -151,6 +161,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             yield session
         finally:
             await session.close()
+
 
 async def get_current_user(
     request: Request,
@@ -182,12 +193,12 @@ async def get_current_user(
 
     try:
         payload = decode_access_token(token)
-    except Exception:
+    except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from exc
 
     user_id = payload.get("sub")
 
@@ -214,7 +225,7 @@ async def get_current_user(
 async def get_current_user_optional(
     request: Request,
     db: AsyncSession = Depends(get_db),
-) -> Optional[str]:
+) -> str | None:
     """
     Get the current user if authenticated, or None if not.
 
@@ -224,7 +235,6 @@ async def get_current_user_optional(
         return await get_current_user(request, db)
     except HTTPException:
         return None
-
 
 
 async def get_current_user_flexible(
