@@ -280,15 +280,39 @@ async def startup():
 
         startup_logger.info("\n🔗 Initializing Redis...")
         from backend.cache.redis_cache import get_redis_cache
+        import asyncio as _asyncio
+
         _redis = await get_redis_cache()
+        _is_prod = os.getenv("ENVIRONMENT", "development").lower() in ("production", "prod")
+        _max_retries = 4
+
+        # Retry Redis connection with exponential backoff if not connected.
+        # On platforms like Render, the Redis service may still be starting
+        # when the API boots — a few retries usually resolve this.
+        if not _redis.is_connected and _settings.REDIS_ENABLED:
+            for _attempt in range(1, _max_retries + 1):
+                _wait = 2 ** _attempt  # 2s, 4s, 8s, 16s
+                startup_logger.warning(
+                    f"⚠️ Redis not connected (attempt {_attempt}/{_max_retries}), "
+                    f"retrying in {_wait}s..."
+                )
+                await _asyncio.sleep(_wait)
+                # Reset singleton so connect() is retried
+                import backend.cache.redis_cache as _rc
+                _rc._redis_cache = None
+                _redis = await get_redis_cache()
+                if _redis.is_connected:
+                    startup_logger.info(f"✅ Redis connected on retry {_attempt}")
+                    break
+
         if _redis.is_connected:
             startup_logger.info("✅ Redis connected (distributed state enabled)")
         else:
-            _is_prod = os.getenv("ENVIRONMENT", "development").lower() in ("production", "prod")
             if _settings.REDIS_REQUIRED and _is_prod:
                 raise RuntimeError(
                     "Redis is REQUIRED in production for distributed state "
-                    "(WebSocket Pub/Sub, rate limiting, DDoS tracking) but connection failed. "
+                    "(WebSocket Pub/Sub, rate limiting, DDoS tracking) but connection failed "
+                    f"after {_max_retries} retries. "
                     "Set REDIS_REQUIRED=false to allow single-instance fallback."
                 )
             startup_logger.warning("⚠️ Redis not connected — falling back to in-memory (single-instance only)")
