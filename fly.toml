@@ -29,7 +29,7 @@ primary_region = "fra"
   timeout = "5s"
   grace_period = "30s"
   method = "GET"
-  path = "/api/monitoring/health"
+  path = "/health"
 
 # WebSocket session affinity — ensures a client's WebSocket connection
 # stays pinned to the same instance for the duration of the session.
