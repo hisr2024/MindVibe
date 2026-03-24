@@ -144,6 +144,21 @@ describe('authService', () => {
         expect((err as AuthError).authCode).toBe('EMAIL_NOT_VERIFIED');
       }
     });
+
+    it('should throw AuthError with EMAIL_NOT_VERIFIED on 403 (structured format)', async () => {
+      // Matches actual backend response format after custom exception handler
+      mockPost.mockRejectedValue(
+        mockAxiosError(403, { detail: 'Please verify your email before logging in', code: 'EMAIL_NOT_VERIFIED' }),
+      );
+
+      try {
+        await authService.login('unverified@email.com', 'password');
+        expect(true).toBe(false);
+      } catch (err) {
+        expect(err).toBeInstanceOf(AuthError);
+        expect((err as AuthError).authCode).toBe('EMAIL_NOT_VERIFIED');
+      }
+    });
   });
 
   // -------------------------------------------------------------------------

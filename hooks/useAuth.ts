@@ -259,9 +259,8 @@ export function useAuth(): UseAuthResult {
         }
         const errorData = await response.json().catch(() => ({}))
 
-        // FastAPI wraps HTTPException detail into {detail: <value>}.
-        // When backend passes an object: {detail: {detail: "msg", code: "CODE"}}
-        // When backend passes a string: {detail: "msg"}
+        // Backend custom handler normalizes errors to flat: {detail: "msg", code: "CODE"}
+        // We also handle nested {detail: {detail: "msg", code: "CODE"}} for robustness.
         const rawDetail = errorData.detail
         const detailObj = typeof rawDetail === 'object' && rawDetail !== null ? rawDetail as Record<string, unknown> : null
         const detail: string = (typeof detailObj?.detail === 'string' ? detailObj.detail : null)
