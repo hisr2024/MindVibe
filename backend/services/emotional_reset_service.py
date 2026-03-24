@@ -98,6 +98,25 @@ def _get_sakha_engine():
             _sakha_engine_instance = False
     return _sakha_engine_instance if _sakha_engine_instance else None
 
+
+# WisdomCore singleton - lazy import for Tier 0 full-corpus wisdom retrieval
+_wisdom_core_instance = None
+
+
+def _get_wisdom_core():
+    """Lazy import of WisdomCore singleton for full Gita corpus access."""
+    global _wisdom_core_instance
+    if _wisdom_core_instance is None:
+        try:
+            from backend.services.wisdom_core import get_wisdom_core
+            _wisdom_core_instance = get_wisdom_core()
+            logger.info("EmotionalResetService: WisdomCore integrated (full corpus)")
+        except Exception as e:
+            logger.warning(f"EmotionalResetService: WisdomCore unavailable: {e}")
+            _wisdom_core_instance = False
+    return _wisdom_core_instance if _wisdom_core_instance else None
+
+
 # Rate limiting constants
 MAX_SESSIONS_PER_DAY = int(os.getenv("EMOTIONAL_RESET_RATE_LIMIT", "10"))
 SESSION_TIMEOUT_SECONDS = int(os.getenv("EMOTIONAL_RESET_SESSION_TIMEOUT", "1800"))
@@ -597,7 +616,8 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
         """
         Generate wisdom insights based on assessment (Step 5).
 
-        Uses a 3-tier Wisdom Cascade (matching companion_friend_engine pattern):
+        Uses a 4-tier Wisdom Cascade:
+          Tier 0: WisdomCore (full 700-verse Gita corpus + dynamic learned wisdom)
           Tier 1: Static (EMOTION_VERSE_MAPPING + WisdomKnowledgeBase search)
           Tier 2: Dynamic (DynamicWisdomCorpus - effectiveness-learned selection)
           Tier 3: Sakha (SakhaWisdomEngine - semantic JSON corpus matching)
@@ -617,6 +637,36 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
 
         seen_ids: set[str] = set()
         unique_verses: list[dict[str, Any]] = []
+
+        # ── Tier 0: Full Gita Corpus via WisdomCore (domain + shad ripu) ──
+        try:
+            from backend.services.gita_emotional_wisdom import (
+                get_emotional_wisdom,
+                EMOTION_DOMAIN_MAP,
+                EMOTION_SHAD_RIPU_MAP,
+            )
+            if primary_emotion and (primary_emotion in EMOTION_DOMAIN_MAP or primary_emotion in EMOTION_SHAD_RIPU_MAP):
+                tier0_results = await get_emotional_wisdom(db, primary_emotion, limit=5)
+                for wr in tier0_results:
+                    ref = wr.verse_ref or (
+                        f"{wr.chapter}.{wr.verse}" if wr.chapter and wr.verse else ""
+                    )
+                    if ref and ref not in seen_ids:
+                        seen_ids.add(ref)
+                        unique_verses.append({
+                            "verse": wr,
+                            "score": wr.score,
+                            "source": "wisdom_core",
+                        })
+                        if len(unique_verses) >= 3:
+                            break
+                if unique_verses:
+                    logger.info(
+                        f"Wisdom[Tier0]: Added {len(unique_verses)} verses from full corpus "
+                        f"for emotion '{primary_emotion}'"
+                    )
+        except Exception as e:
+            logger.debug(f"Tier 0 WisdomCore lookup failed (non-critical): {e}")
 
         # ── Tier 1: Static wisdom (EMOTION_VERSE_MAPPING + WisdomKB search) ──
         if primary_emotion and primary_emotion in EMOTION_VERSE_MAPPING:
@@ -697,7 +747,7 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
         insights = []
         for result in unique_verses[:3]:
             verse = result["verse"]
-            english = getattr(verse, 'english', '')
+            english = getattr(verse, 'english', '') or getattr(verse, 'content', '')
             sanitized = self.wisdom_kb.sanitize_text(english) if english else None
             if sanitized:
                 application = await self._create_application(verse, emotions, emotions_input)
@@ -742,7 +792,7 @@ With each leaf that floats away, feel yourself becoming lighter. The stream cont
         # When we have the user's actual words and OpenAI is ready, generate a situation-specific application
         if emotions_input and self.optimizer.ready:
             try:
-                verse_text = self.wisdom_kb.sanitize_text(getattr(verse, 'english', ''))
+                verse_text = self.wisdom_kb.sanitize_text(getattr(verse, 'english', '') or getattr(verse, 'content', ''))
                 if verse_text:
                     prompt = f"""A user shared: "{emotions_input}"
 
@@ -1261,6 +1311,16 @@ Keep each section under 25 words. Warm, compassionate. Secular language. No scri
         elif current_step == 2:
             next_step = 3
             response_data["breathing"] = self.generate_breathing_guidance()
+            # Enrich breathing step with BG 4.29 (pranayama verse) from full corpus
+            try:
+                from backend.services.gita_emotional_wisdom import BREATHING_VERSE
+                wisdom_core = _get_wisdom_core()
+                if wisdom_core:
+                    breathing_wisdom = await wisdom_core.get_verse(db, **BREATHING_VERSE)
+                    if breathing_wisdom:
+                        response_data["breathing"]["gita_verse"] = breathing_wisdom.to_dict()
+            except Exception as e:
+                logger.debug(f"Breathing verse enrichment skipped: {e}")
 
         elif current_step == 3:
             next_step = 4
