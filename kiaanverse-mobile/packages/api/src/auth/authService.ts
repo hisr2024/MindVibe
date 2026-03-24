@@ -61,16 +61,23 @@ function mapAxiosError(err: unknown): AuthError {
     const status = err.response?.status ?? 0;
     const data = err.response?.data as Record<string, unknown> | undefined;
 
-    // Backend error format: {detail: string, code: string, field?: string}
+    // Backend error format: {detail: {detail: "msg", code: "CODE", field?: "..."}}
+    // FastAPI wraps HTTPException detail, so code/message are nested inside detail.
     let detail = '';
-    const errorCode = typeof data?.code === 'string' ? data.code : '';
+    let errorCode = typeof data?.code === 'string' ? data.code : '';
 
     if (data?.detail !== undefined) {
       if (typeof data.detail === 'string') {
         detail = data.detail;
       } else if (typeof data.detail === 'object' && data.detail !== null) {
         const detailObj = data.detail as Record<string, unknown>;
-        detail = typeof detailObj.message === 'string' ? detailObj.message : JSON.stringify(data.detail);
+        detail = typeof detailObj.detail === 'string' ? detailObj.detail
+          : typeof detailObj.message === 'string' ? detailObj.message
+          : JSON.stringify(data.detail);
+        // Extract error code from nested detail if not at top level
+        if (!errorCode && typeof detailObj.code === 'string') {
+          errorCode = detailObj.code;
+        }
       } else if (Array.isArray(data.detail)) {
         detail = 'Please check your input.';
       }
