@@ -47,7 +47,11 @@ class PaymentProvider(str, enum.Enum):
 
     STRIPE_CARD = "stripe_card"
     STRIPE_PAYPAL = "stripe_paypal"
+    STRIPE_GOOGLE_PAY = "stripe_google_pay"
+    STRIPE_APPLE_PAY = "stripe_apple_pay"
+    STRIPE_UPI = "stripe_upi"
     RAZORPAY_UPI = "razorpay_upi"
+    PAYPAL_DIRECT = "paypal_direct"
     FREE = "free"
 
 
@@ -70,6 +74,12 @@ class SubscriptionPlan(Base):
         String(128), nullable=True
     )
     stripe_price_id_yearly: Mapped[str | None] = mapped_column(
+        String(128), nullable=True
+    )
+    stripe_price_id_monthly_inr: Mapped[str | None] = mapped_column(
+        String(128), nullable=True
+    )
+    stripe_price_id_yearly_inr: Mapped[str | None] = mapped_column(
         String(128), nullable=True
     )
     razorpay_plan_id_monthly: Mapped[str | None] = mapped_column(

@@ -80,7 +80,7 @@ class CheckoutSessionCreate(BaseModel):
     payment_method: str = Field(
         default="card",
         pattern="^(card|paypal|upi|google_pay)$",
-        description="Payment method: 'card' (Stripe), 'paypal' (Stripe), 'google_pay' (Stripe), or 'upi' (Razorpay)",
+        description="Payment method: 'card' (Stripe), 'paypal' (Stripe), 'google_pay' (Stripe), or 'upi' (Stripe primary, Razorpay fallback)",
     )
     currency: str = Field(
         default="usd",
@@ -117,6 +117,10 @@ class CheckoutSessionOut(BaseModel):
     description: str | None = None
     user_email: str | None = None
 
+    # PayPal direct fields (present when provider="paypal")
+    paypal_order_id: str | None = None
+    approve_url: str | None = None
+
     # Payment method fallback info (when requested method is unavailable)
     payment_method_fallback: str | None = None
     payment_method_message: str | None = None
@@ -130,6 +134,12 @@ class RazorpayPaymentVerification(BaseModel):
     razorpay_signature: str = Field(..., min_length=1, max_length=256)
     plan_tier: SubscriptionTier
     billing_period: str = Field(default="monthly", pattern="^(monthly|yearly)$")
+
+
+class PayPalOrderCapture(BaseModel):
+    """Input schema for capturing a PayPal order after buyer approval."""
+
+    paypal_order_id: str = Field(..., min_length=1, max_length=128)
 
 
 class PaymentOut(BaseModel):

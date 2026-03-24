@@ -31,6 +31,7 @@ from backend.schemas.subscription import (
     CheckoutSessionCreate,
     CheckoutSessionOut,
     RazorpayPaymentVerification,
+    PayPalOrderCapture,
     SubscriptionCancelRequest,
     PaymentOut,
     PaymentHistoryOut,
@@ -219,21 +220,33 @@ async def create_checkout(
 
     # Route to the appropriate payment provider
     if payload.payment_method == "upi":
+        # UPI requires INR currency
+        if payload.currency != "inr":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "error": "invalid_currency",
+                    "message": "UPI is only available with INR currency.",
+                },
+            )
+        # Try Stripe UPI first (preferred — avoids Razorpay KYC requirement).
+        # Falls back to Razorpay UPI if Stripe UPI is not enabled or INR
+        # Price IDs are not configured.
+        if is_stripe_configured():
+            try:
+                return await _create_stripe_checkout(db, user, payload)
+            except Exception as e:
+                logger.info(f"Stripe UPI unavailable, falling back to Razorpay: {e}")
+        # Fall back to Razorpay UPI
         return await _create_razorpay_checkout(db, user, payload)
 
-    # PayPal through Stripe does not support INR
+    # PayPal + INR: Route to direct PayPal integration (Stripe PayPal doesn't support INR)
     if payload.payment_method == "paypal" and payload.currency == "inr":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail={
-                "error": "paypal_currency_unsupported",
-                "message": "PayPal is not available for INR. Please use UPI or Card instead.",
-            },
-        )
+        return await _create_paypal_checkout(db, user, payload)
 
-    # card, paypal, and google_pay all route through Stripe.
+    # card, paypal (non-INR), and google_pay all route through Stripe.
     # Google Pay is surfaced automatically via Stripe's card payment type
-    # using the Payment Request API — no separate provider needed.
+    # using the Payment Request API — works for all currencies including INR.
     return await _create_stripe_checkout(db, user, payload)
 
 
@@ -264,6 +277,7 @@ async def _create_stripe_checkout(
             payload.success_url,
             payload.cancel_url,
             payment_method=payload.payment_method,
+            currency=payload.currency,
         )
 
         if not result:
@@ -379,6 +393,178 @@ async def _create_razorpay_checkout(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create UPI checkout session",
         )
+
+
+async def _create_paypal_checkout(
+    db: AsyncSession, user: User, payload: CheckoutSessionCreate,
+) -> CheckoutSessionOut:
+    """Create direct PayPal checkout for INR payments.
+
+    Stripe's PayPal integration does NOT support INR currency.
+    This routes to our direct PayPal Orders API v2 integration
+    which fully supports INR for Indian PayPal business accounts.
+    """
+    from backend.services.paypal_service import (
+        create_paypal_order,
+        is_paypal_configured,
+    )
+
+    if not is_paypal_configured():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error": "paypal_unavailable",
+                "message": "PayPal payments are not currently available. Please try Card or UPI instead.",
+            },
+        )
+
+    try:
+        result = await create_paypal_order(
+            db, user, payload.plan_tier, payload.billing_period,
+            return_url=payload.success_url,
+            cancel_url=payload.cancel_url,
+        )
+
+        return CheckoutSessionOut(
+            provider="paypal",
+            paypal_order_id=result["order_id"],
+            approve_url=result["approve_url"],
+        )
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": "paypal_validation_error",
+                "message": str(e),
+            },
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"PayPal checkout creation failed for user {user.id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "error": "paypal_checkout_failed",
+                "message": "Unable to create PayPal checkout. Please try again or use a different payment method.",
+            },
+        )
+
+
+@router.post("/capture-paypal-payment")
+async def capture_paypal_payment(
+    payload: PayPalOrderCapture,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Capture a PayPal payment after buyer approval.
+
+    Called by the frontend after the user completes PayPal checkout
+    and is redirected back. This finalizes the payment and activates
+    the subscription.
+
+    This endpoint is idempotent — the webhook also handles activation
+    as a fallback if the user closes the browser before this call completes.
+
+    Args:
+        payload: PayPal order ID to capture.
+
+    Returns:
+        dict: Capture result with subscription status.
+    """
+    from backend.services.paypal_service import capture_paypal_order
+
+    user_id = await get_current_user_id(request)
+
+    try:
+        result = await capture_paypal_order(db, payload.paypal_order_id, user_id)
+
+        if not result["success"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "error": "capture_failed",
+                    "message": f"PayPal payment capture status: {result['status']}. Please contact support if you were charged.",
+                },
+            )
+
+        return {
+            "success": True,
+            "message": "Payment captured and subscription activated successfully.",
+            "provider": "paypal",
+            "order_id": result["order_id"],
+        }
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": "capture_validation_error",
+                "message": str(e),
+            },
+        )
+    except RuntimeError as e:
+        logger.error(f"PayPal capture failed for user {user_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error": "paypal_service_error",
+                "message": "PayPal service is temporarily unavailable. Please try again.",
+            },
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"PayPal capture error for user {user_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "error": "capture_error",
+                "message": "Unable to complete payment. Please contact support if you were charged.",
+            },
+        )
+
+
+@router.post("/webhook/paypal")
+async def paypal_webhook(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
+    """Handle PayPal webhook events.
+
+    PayPal sends webhook events for order and payment status changes.
+    The signature is verified via PayPal's verification API to ensure
+    the request is authentic.
+
+    Returns:
+        dict: Acknowledgment of the webhook.
+    """
+    from backend.services.paypal_service import (
+        verify_paypal_webhook_async,
+        handle_paypal_webhook_event,
+    )
+
+    payload = await request.body()
+    headers = dict(request.headers)
+
+    is_valid = await verify_paypal_webhook_async(headers, payload)
+    if not is_valid:
+        logger.warning("PayPal webhook signature verification failed")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid webhook signature",
+        )
+
+    event = json.loads(payload)
+
+    try:
+        await handle_paypal_webhook_event(db, event)
+    except Exception as e:
+        logger.error(f"PayPal webhook handling failed: {e}")
+        # Return 200 to acknowledge and prevent infinite retries
+
+    return {"status": "received"}
 
 
 @router.post("/cancel")

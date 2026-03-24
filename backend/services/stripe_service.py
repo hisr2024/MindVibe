@@ -238,6 +238,7 @@ async def create_checkout_session(
     success_url: Optional[str] = None,
     cancel_url: Optional[str] = None,
     payment_method: Optional[str] = None,
+    currency: Optional[str] = None,
 ) -> Optional[dict[str, str]]:
     """Create a Stripe checkout session for subscription purchase.
     
@@ -261,14 +262,26 @@ async def create_checkout_session(
     if not plan:
         raise ValueError(f"Plan not found for tier: {plan_tier}")
     
-    # Get the appropriate price ID
-    price_id = (
-        plan.stripe_price_id_yearly if billing_period == "yearly"
-        else plan.stripe_price_id_monthly
-    )
-    
-    if not price_id:
-        raise ValueError(f"No Stripe price ID configured for {plan_tier} ({billing_period})")
+    # Get the appropriate price ID — use INR-specific IDs when currency is INR,
+    # falling back to the default (USD) IDs for other currencies or when INR
+    # IDs aren't configured.
+    if currency == "inr":
+        price_id = (
+            plan.stripe_price_id_yearly_inr if billing_period == "yearly"
+            else plan.stripe_price_id_monthly_inr
+        )
+        if not price_id:
+            raise ValueError(
+                f"No INR Stripe price ID configured for {plan_tier} ({billing_period}). "
+                f"Set STRIPE_{plan_tier.value.upper()}_{billing_period.upper()}_INR_PRICE_ID."
+            )
+    else:
+        price_id = (
+            plan.stripe_price_id_yearly if billing_period == "yearly"
+            else plan.stripe_price_id_monthly
+        )
+        if not price_id:
+            raise ValueError(f"No Stripe price ID configured for {plan_tier} ({billing_period})")
     
     try:
         _init_stripe()
@@ -309,6 +322,10 @@ async def create_checkout_session(
             # Google Pay surfaces via Payment Request API on the Stripe
             # Checkout page when "card" is included. No separate type needed.
             payment_method_types = ["card"]
+        elif requested_payment_method == "upi":
+            # Stripe UPI: supported for INR payments. The Stripe Checkout
+            # page shows a UPI QR code / collect flow for Indian customers.
+            payment_method_types = ["upi"]
         elif requested_payment_method == "card":
             payment_method_types = ["card"]
         else:
@@ -370,7 +387,15 @@ async def create_checkout_session(
         try:
             session = stripe.checkout.Session.create(**session_params)
         except stripe.error.InvalidRequestError as e:
-            if "paypal" in payment_method_types:
+            if "upi" in payment_method_types:
+                # Stripe UPI not enabled on this account — re-raise so the
+                # route layer can fall back to Razorpay UPI.
+                logger.warning(
+                    f"Stripe UPI checkout failed ({e}). "
+                    "Caller should fall back to Razorpay."
+                )
+                raise
+            elif "paypal" in payment_method_types:
                 logger.warning(
                     f"PayPal checkout failed ({e}). "
                     "Falling back to card-only checkout."
@@ -685,6 +710,8 @@ async def _handle_payment_succeeded(db: AsyncSession, data: dict) -> bool:
                 pm = stripe.PaymentMethod.retrieve(pi.payment_method)
                 if pm.type == "paypal":
                     detected_provider = "stripe_paypal"
+                elif pm.type == "upi":
+                    detected_provider = "stripe_upi"
                 elif pm.type == "card" and hasattr(pm.card, "wallet") and pm.card.wallet:
                     wallet_type = pm.card.wallet.type if hasattr(pm.card.wallet, "type") else None
                     if wallet_type == "google_pay":
