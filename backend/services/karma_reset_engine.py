@@ -118,6 +118,14 @@ _CATEGORY_GITA_CONTEXT: dict[str, str] = {
     "loss_grief": "The Gita's most comforting teaching was spoken for moments exactly like yours. BG 2.20: 'The soul is never born and never dies.' Your grief honors the love — and the Gita assures you that what you loved was never truly lost.",
     "betrayal_injustice": "When Arjuna faced betrayal by those he trusted, Krishna did not minimize his pain. Instead, He taught equanimity (BG 2.56): 'One who is undisturbed by suffering, free from attachment, fear and anger — such a sage is called sthitaprajna.' Your pain is valid; the Gita shows you how to carry it without being consumed.",
     "spiritual_crisis": "Arjuna's own spiritual crisis — his total collapse of purpose in Chapter 1 — IS the reason the Gita exists. Every word Krishna spoke was to a man who had lost all meaning. Your crisis is not a failure; it is the beginning of awakening.",
+    "addiction": "The Gita speaks directly to addiction in BG 2.62-63: contemplation of sense objects leads to attachment, from attachment springs desire, from desire arises anger, and from anger comes delusion. Your struggle with addiction is this chain — and the Gita provides the exact method to break it: vairagya (detachment) practiced with abhyasa (consistent effort, BG 6.35).",
+    "financial_stress": "The Gita teaches (BG 2.15) that the contacts of the senses with their objects give rise to feelings of cold and heat, pleasure and pain — they are transient. Your financial worry is real, but the Gita reminds you that your true wealth is the imperishable atman. BG 3.12 warns against enjoying resources without offering — balance duty with detachment, and act from dharma rather than fear.",
+    "loneliness": "The Gita reveals (BG 6.29) that one who sees the Self in all beings and all beings in the Self never feels alone. Your loneliness is the ego's illusion of separateness. Krishna promises (BG 9.29): 'I am equally present in all beings; no one is hateful or dear to Me.' The divine presence dwells in every being around you — you are never truly alone.",
+    "parenting": "Arjuna's own dilemma was about family — duty to elders, responsibility to the next generation. The Gita teaches (BG 3.21): whatever a great person does, others follow. Your parenting struggle is swadharma — your unique sacred duty — and the Gita affirms that performing one's own duty imperfectly is better than another's duty perfectly (BG 3.35).",
+    "academic_pressure": "The Gita's core teaching applies directly to your academic pressure: BG 2.47 — you have a right to study and effort, never to the results. Krishna tells Arjuna (BG 6.17): yoga of moderation — balanced in eating, sleeping, recreation, and work — is the path to freedom from suffering. Excellence comes from balance, not burnout.",
+    "social_anxiety": "The Gita describes the sthitaprajna (BG 2.56) — one undisturbed by suffering, free from attachment, fear, and anger. Social anxiety is the fear of judgment — and the Gita teaches (BG 12.15) that one who is not disturbed by others and who does not disturb others is dear to the divine. Your worth does not depend on others' opinions.",
+    "decision_paralysis": "Arjuna's entire crisis was decision paralysis — frozen between two duties on the battlefield. Krishna's answer spans 18 chapters but begins with BG 2.31-33: consider your swadharma first. The Gita's decision framework is clear: act according to your nature and duty, without attachment to outcome. BG 18.63 says: deliberate on this fully, then do as you wish.",
+    "chronic_illness": "The Gita's most compassionate teaching for chronic suffering is BG 2.14: sense contacts causing pleasure and pain are impermanent — endure them bravely, O Bharata. Your body is the kshetra (field) — you are the kshetrajna (knower of the field), untouched by its conditions (BG 13.1). The atman within you is beyond all physical suffering.",
 }
 
 # Breath context per shad-ripu for Phase 3 fallback
@@ -128,6 +136,7 @@ _BREATH_CONTEXT_TEMPLATE: dict[str, str] = {
     "lobha": "You came here with the grasping that drives {situation}. With each exhale, release the clenched fist. Let your hands and heart open. The clinging around {feeling} softens with each breath — trust that what is truly yours will remain.",
     "mada": "You came here weighed down by the ego and pride behind {situation}. With each exhale, release that weight. Let humility soften what has hardened. The wall between you and {feeling} dissolves breath by breath.",
     "matsarya": "You came here carrying the poison of comparison that fuels {situation}. With each exhale, release that poison. Let gratitude for your unique path fill each inhale. The envy that distances you from {feeling} has no power over the atman.",
+    "default": "You came here carrying the weight of {situation}. With each exhale, release that weight. Let each inhale bring fresh prana — life force — into the spaces where {feeling} has created tension. The Gita teaches (BG 4.29) that pranayama is a sacred offering. Cross the bridge between body and mind now, breath by breath.",
 }
 
 
@@ -220,7 +229,7 @@ def get_deep_fallback_guidance(
     })
 
     # Phase 3: Pranayama Shuddhi (Sacred Breath)
-    breath_template = _BREATH_CONTEXT_TEMPLATE.get(shad_ripu, "")
+    breath_template = _BREATH_CONTEXT_TEMPLATE.get(shad_ripu, _BREATH_CONTEXT_TEMPLATE.get("default", ""))
     if breath_template:
         breath_line = breath_template.format(situation=situation_short, feeling=feeling_text)
     else:
