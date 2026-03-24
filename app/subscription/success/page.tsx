@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, Suspense, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button, Card, CardContent } from '@/components/ui'
@@ -19,12 +19,59 @@ function SuccessContent() {
   const tier = searchParams.get('tier') || 'bhakta'
   const yearly = searchParams.get('yearly') === 'true'
   const sessionId = searchParams.get('session_id')
+  const provider = searchParams.get('provider')
+  const paypalToken = searchParams.get('token') // PayPal returns ?token=ORDER_ID
   const [validating, setValidating] = useState(true)
+  const [captureError, setCaptureError] = useState<string | null>(null)
+  const capturedRef = useRef(false)
 
   useEffect(() => {
+    async function handlePayPalCapture() {
+      // PayPal redirect flow: capture the payment first, then validate
+      if ((provider === 'paypal' || paypalToken) && !capturedRef.current) {
+        capturedRef.current = true
+        const orderId = paypalToken
+        if (!orderId) {
+          setCaptureError('Missing PayPal order token. Please contact support.')
+          setValidating(false)
+          return
+        }
+
+        try {
+          const captureResponse = await fetch('/api/subscriptions/capture-paypal-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ paypal_order_id: orderId }),
+          })
+
+          if (!captureResponse.ok) {
+            const error = await captureResponse.json().catch(() => ({}))
+            const detail = error.detail
+            const message =
+              typeof detail === 'object' && detail?.message
+                ? detail.message
+                : typeof detail === 'string'
+                  ? detail
+                  : 'Payment capture failed. Please contact support if you were charged.'
+            setCaptureError(message)
+            setValidating(false)
+            return
+          }
+        } catch (err) {
+          console.error('PayPal capture error:', err)
+          setCaptureError('Unable to finalize payment. Please contact support.')
+          setValidating(false)
+          return
+        }
+      }
+
+      // Validate subscription (works for all providers: Stripe, Razorpay, PayPal)
+      await validateSubscription()
+    }
+
     async function validateSubscription() {
       try {
-        // Fetch the real subscription from the server to validate the checkout
         const response = await fetch('/api/subscriptions/current', {
           credentials: 'include',
         })
@@ -52,16 +99,46 @@ function SuccessContent() {
       }
     }
 
-    validateSubscription()
-  }, [tier, yearly, sessionId])
+    handlePayPalCapture()
+  }, [tier, yearly, sessionId, provider, paypalToken])
 
   if (validating) {
     return (
       <main className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center space-y-4">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#d4a44c] border-t-transparent mx-auto" />
-          <p className="text-[#f5f0e8]">Confirming your subscription...</p>
+          <p className="text-[#f5f0e8]">
+            {paypalToken ? 'Finalizing PayPal payment...' : 'Confirming your subscription...'}
+          </p>
         </div>
+      </main>
+    )
+  }
+
+  if (captureError) {
+    return (
+      <main className="min-h-screen flex items-center justify-center px-4">
+        <Card variant="elevated" className="max-w-md w-full">
+          <CardContent className="text-center py-8">
+            <div className="mx-auto mb-6 h-20 w-20 rounded-full bg-red-500/20 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+                <line x1="9" y1="9" x2="15" y2="15" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold mb-2">Payment Issue</h1>
+            <p className="text-sm text-[#f5f0e8]/70 mb-6">{captureError}</p>
+            <div className="flex flex-col gap-3">
+              <Link href="/pricing">
+                <Button className="w-full">Try Again</Button>
+              </Link>
+              <Link href="/dashboard">
+                <Button variant="outline" className="w-full">Go to Dashboard</Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </main>
     )
   }

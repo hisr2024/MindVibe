@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { BillingToggle, PricingCard, FeatureComparison, PaymentMethodSelector, type PricingTier, type PaymentMethod } from '@/components/pricing'
 import { loadRazorpayScript, openRazorpayCheckout, type RazorpayPaymentResponse } from '@/lib/razorpay'
+import { redirectToPayPal } from '@/lib/paypal'
 import { Card, CardContent } from '@/components/ui'
 import { useSubscription } from '@/hooks/useSubscription'
 import { useCurrency, CURRENCIES, type Currency } from '@/hooks/useCurrency'
@@ -249,13 +250,10 @@ export default function PricingPage() {
 
   // Reset payment method when currency changes make it unavailable:
   // - UPI is only available for INR
-  // - PayPal is NOT available for INR (PayPal doesn't support INR via Stripe)
   // - Google Pay works for all currencies including INR (via Stripe Payment Request API)
+  // - PayPal works for all currencies: non-INR via Stripe, INR via direct PayPal API
   useEffect(() => {
     if (currency !== 'INR' && paymentMethod === 'upi') {
-      setPaymentMethod('card')
-    }
-    if (currency === 'INR' && paymentMethod === 'paypal') {
       setPaymentMethod('card')
     }
   }, [currency, paymentMethod])
@@ -564,6 +562,11 @@ export default function PricingPage() {
 
       if (data.provider === 'razorpay') {
         await handleRazorpayCheckout(data, tierId)
+      } else if (data.provider === 'paypal' && data.approve_url) {
+        // PayPal direct: redirect user to PayPal for approval.
+        // After approval, PayPal redirects to the success page with
+        // ?token=ORDER_ID&PayerID=PAYER_ID where capture happens.
+        redirectToPayPal(data.approve_url)
       } else if (data.checkout_url) {
         // If the requested payment method (e.g. PayPal) was unavailable,
         // Stripe fell back to card-only checkout. Show a brief notice

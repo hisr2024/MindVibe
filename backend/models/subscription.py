@@ -51,6 +51,7 @@ class PaymentProvider(str, enum.Enum):
     STRIPE_APPLE_PAY = "stripe_apple_pay"
     STRIPE_UPI = "stripe_upi"
     RAZORPAY_UPI = "razorpay_upi"
+    PAYPAL_DIRECT = "paypal_direct"
     FREE = "free"
 
 

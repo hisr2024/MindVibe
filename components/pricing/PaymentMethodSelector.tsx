@@ -17,8 +17,6 @@ interface MethodDef {
   description: string
   /** Only show when currency is INR */
   inrOnly?: boolean
-  /** Hide when currency is INR (e.g. PayPal doesn't support INR via Stripe) */
-  hideForInr?: boolean
 }
 
 const METHODS: MethodDef[] = [
@@ -36,7 +34,6 @@ const METHODS: MethodDef[] = [
     id: 'paypal',
     label: 'PayPal',
     description: 'Pay with PayPal',
-    hideForInr: true,
   },
   {
     id: 'upi',
@@ -54,7 +51,6 @@ export function PaymentMethodSelector({
 }: PaymentMethodSelectorProps) {
   const availableMethods = METHODS.filter((m) => {
     if (m.inrOnly && currency !== 'INR') return false
-    if (m.hideForInr && currency === 'INR') return false
     return true
   })
 
@@ -97,7 +93,8 @@ export function PaymentMethodSelector({
       )}
       {selected === 'paypal' && (
         <p className="mt-2 text-center text-xs text-[#f5f0e8]/60">
-          You&apos;ll be redirected to a secure checkout page where you can sign in with PayPal.
+          You&apos;ll be redirected to PayPal to securely complete your payment.
+          {currency === 'INR' && ' PayPal supports INR for Indian accounts.'}
         </p>
       )}
     </div>
