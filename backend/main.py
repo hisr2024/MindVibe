@@ -272,10 +272,33 @@ app.add_middleware(
 async def startup():
     try:
         # Step 1: Ensure ORM tables exist first (base tables like users, sessions
-        # must exist before SQL migrations that reference them with REFERENCES)
+        # must exist before SQL migrations that reference them with REFERENCES).
+        # Retry with exponential backoff to handle Render provisioning delays
+        # where the database role may not be ready immediately.
         startup_logger.info("\n🔧 Ensuring ORM tables exist...")
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+        import asyncio as _asyncio
+        from sqlalchemy.exc import DBAPIError, OperationalError
+        _db_max_retries = 4
+        for _attempt in range(1, _db_max_retries + 2):
+            try:
+                async with engine.begin() as conn:
+                    await conn.run_sync(Base.metadata.create_all)
+                break
+            except (OperationalError, DBAPIError, ConnectionError, OSError) as e:
+                if _attempt <= _db_max_retries:
+                    _delay = 2 ** _attempt
+                    startup_logger.warning(
+                        f"Database connection attempt {_attempt}/{_db_max_retries + 1} failed: {e}. "
+                        f"Retrying in {_delay}s..."
+                    )
+                    await _asyncio.sleep(_delay)
+                else:
+                    startup_logger.error(
+                        f"All {_db_max_retries + 1} database connection attempts failed. "
+                        f"Last error: {e}\n"
+                        f"Check: DATABASE_URL credentials, PostgreSQL role has LOGIN, server reachable"
+                    )
+                    raise
 
         startup_logger.info("✅ Base database schema ready")
 
@@ -342,6 +365,41 @@ async def startup():
                     startup_logger.info("ℹ️ No expired chat data to purge")
         except Exception as retention_error:
             startup_logger.info(f"⚠️ Data retention cleanup had issues: {retention_error}")
+
+        # Step 5.5: Initialize Redis connection with retry (optional, graceful fallback)
+        startup_logger.info("\n🔗 Initializing Redis connection...")
+        try:
+            import asyncio as _asyncio
+            from backend.cache.redis_cache import get_redis_cache
+            from backend.core.settings import settings as _settings
+
+            if _settings.REDIS_ENABLED:
+                redis_cache = await get_redis_cache()
+                if redis_cache.is_connected:
+                    startup_logger.info("✅ Redis connected successfully")
+                else:
+                    # Retry with exponential backoff (2s, 4s, 8s)
+                    for attempt in range(1, 4):
+                        delay = 2 ** attempt
+                        startup_logger.warning(
+                            f"Redis connection attempt {attempt}/3 failed. Retrying in {delay}s..."
+                        )
+                        await _asyncio.sleep(delay)
+                        connected = await redis_cache.connect()
+                        if connected:
+                            startup_logger.info(f"✅ Redis connected on retry {attempt}")
+                            break
+                    else:
+                        startup_logger.warning(
+                            "⚠️ Redis unavailable after 3 retries. "
+                            "App will use in-memory fallback for rate limiting and caching. "
+                            "This is safe for single-instance deployments."
+                        )
+            else:
+                startup_logger.info("ℹ️ Redis disabled via REDIS_ENABLED setting")
+        except Exception as redis_error:
+            startup_logger.warning(f"⚠️ Redis initialization failed (non-fatal): {redis_error}")
+            # Never fail startup due to Redis — it's optional
 
         # Step 6: Initialize KIAAN 24/7 Learning Daemon (Autonomous Gita Wisdom)
         startup_logger.info("\n🕉️ Initializing KIAAN 24/7 Learning Daemon...")
