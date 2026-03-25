@@ -268,9 +268,15 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
           form.append('language', language)
 
           setServerProgressMessage('Transcribing...')
+          const transcribeHeaders: Record<string, string> = {}
+          const csrfMatch = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/)
+          if (csrfMatch) transcribeHeaders['X-CSRF-Token'] = decodeURIComponent(csrfMatch[1])
+
           const res = await fetch('/api/voice/transcribe', {
             method: 'POST',
+            headers: transcribeHeaders,
             body: form,
+            credentials: 'include',
             signal: abort.signal,
           })
 

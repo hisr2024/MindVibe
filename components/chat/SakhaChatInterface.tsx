@@ -163,10 +163,15 @@ export function SakhaChatInterface() {
       abortRef.current = controller
 
       try {
+        const streamHeaders: Record<string, string> = { 'Content-Type': 'application/json' }
+        const csrfMatch = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/)
+        if (csrfMatch) streamHeaders['X-CSRF-Token'] = decodeURIComponent(csrfMatch[1])
+
         const response = await fetch('/api/chat/message/stream', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: streamHeaders,
           body: JSON.stringify({ message: trimmed, language }),
+          credentials: 'include',
           signal: controller.signal,
         })
 

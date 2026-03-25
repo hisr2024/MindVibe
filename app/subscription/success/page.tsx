@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button, Card, CardContent } from '@/components/ui'
 import { updateSubscription, type Subscription } from '@/hooks/useSubscription'
+import { apiFetch } from '@/lib/api'
 
 const tierNames: Record<string, string> = {
   free: 'Seeker',
@@ -25,9 +26,7 @@ function SuccessContent() {
     async function validateSubscription() {
       try {
         // Fetch the real subscription from the server to validate the checkout
-        const response = await fetch('/api/subscriptions/current', {
-          credentials: 'include',
-        })
+        const response = await apiFetch('/api/subscriptions/current')
 
         if (response.ok) {
           const data = await response.json()

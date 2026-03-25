@@ -329,13 +329,18 @@ export default function CompanionPage() {
     if (session.sessionId?.startsWith('local_')) return false
 
     try {
+      const streamHeaders: Record<string, string> = { 'Content-Type': 'application/json' }
+      const csrfMatch = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/)
+      if (csrfMatch) streamHeaders['X-CSRF-Token'] = decodeURIComponent(csrfMatch[1])
+
       const response = await fetch('/api/companion/stream', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: streamHeaders,
         body: JSON.stringify({
           text,
           language: voiceConfig.language,
         }),
+        credentials: 'include',
         signal: AbortSignal.timeout(25000),
       })
 
