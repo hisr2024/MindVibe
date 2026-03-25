@@ -41,9 +41,10 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, TypedDict
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import cast, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from sqlalchemy.types import Text as SAText
 
 from backend.models import (
     JourneyTemplate,
@@ -315,12 +316,13 @@ class JourneyEngineService:
 
         # Apply filters
         if enemy_filter:
-            # Filter by primary enemy tag (JSON array contains)
+            # Filter by primary enemy tag (JSON array contains value).
+            # Uses cast-to-text with LIKE as a portable fallback that works
+            # on both PostgreSQL JSONB and SQLite JSON columns.
+            # Example: '["krodha","moha"]' LIKE '%"krodha"%'
+            enemy_val = enemy_filter.lower().replace("'", "").replace('"', '').replace("%", "")
             query = query.where(
-                func.jsonb_exists(
-                    JourneyTemplate.primary_enemy_tags,
-                    enemy_filter.lower()
-                )
+                cast(JourneyTemplate.primary_enemy_tags, SAText).like(f'%"{enemy_val}"%')
             )
 
         if difficulty_max:
@@ -1147,22 +1149,24 @@ class JourneyEngineService:
         enemies = ["kama", "krodha", "lobha", "moha", "mada", "matsarya"]
         progress_list = []
 
-        for enemy in enemies:
-            # Get journeys targeting this enemy
-            # This is a simplified query - in production, use proper JSON containment
-            journeys_query = (
-                select(UserJourney)
-                .join(JourneyTemplate)
-                .where(
-                    UserJourney.user_id == user_id,
-                    UserJourney.deleted_at.is_(None),
-                )
+        # Fetch all user journeys with templates in one query (avoid N+1)
+        all_journeys_query = (
+            select(UserJourney)
+            .options(selectinload(UserJourney.template))
+            .where(
+                UserJourney.user_id == user_id,
+                UserJourney.deleted_at.is_(None),
+                UserJourney.journey_template_id.isnot(None),
             )
-            journeys_result = await self.db.execute(journeys_query)
-            all_journeys = journeys_result.scalars().all()
+        )
+        all_journeys_result = await self.db.execute(all_journeys_query)
+        all_user_journeys = all_journeys_result.scalars().all()
+
+        for enemy in enemies:
+            # Filter journeys targeting this enemy in Python
 
             enemy_journeys = [
-                j for j in all_journeys
+                j for j in all_user_journeys
                 if j.template and enemy in (j.template.primary_enemy_tags or [])
             ]
 
