@@ -61,6 +61,17 @@ services:
       # Encryption key for data at rest (generated securely)
       - key: ENCRYPTION_KEY
         generateValue: true
+      # Spiritual wellness data encryption key (must match MINDVIBE_REFLECTION_KEY)
+      - key: MINDVIBE_REFLECTION_KEY
+        generateValue: true
+      # Email provider: "console" logs emails (dev), "smtp" sends real emails.
+      # Set to "smtp" and configure SMTP_* vars in Render Dashboard to enable
+      # verification emails, password resets, etc.
+      - key: EMAIL_PROVIDER
+        value: "console"
+      # Auto-disabled when EMAIL_PROVIDER != smtp to prevent user lockout
+      - key: REQUIRE_EMAIL_VERIFICATION
+        value: "false"
     healthCheckPath: /health
     healthCheckProtocol: http
     healthCheckTimeout: 120
