@@ -29,14 +29,15 @@ startup_logger.info("=" * 80)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 if not OPENAI_API_KEY:
     if os.getenv("ENVIRONMENT", "").lower() == "production":
+        # CRITICAL but not fatal — the app must still start so users can
+        # log in, view content, etc. KIAAN AI features will be degraded.
+        # Previously this raised RuntimeError which crashed the ENTIRE app
+        # and prevented login, signup, health checks, and everything else.
         startup_logger.critical(
             "OPENAI_API_KEY is NOT configured. "
-            "KIAAN AI features require this key in production. "
-            "Refusing to start without it."
-        )
-        raise RuntimeError(
-            "OPENAI_API_KEY is required in production. "
-            "Set it in your environment variables to enable KIAAN AI features."
+            "KIAAN AI features will be UNAVAILABLE in production. "
+            "Set OPENAI_API_KEY in your Render Dashboard to enable AI capabilities. "
+            "The app will start in degraded mode (auth, journeys, etc. still work)."
         )
     else:
         startup_logger.warning(

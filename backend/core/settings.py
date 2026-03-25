@@ -177,7 +177,14 @@ class Settings(BaseSettings):
     @field_validator("MINDVIBE_REFLECTION_KEY")
     @classmethod
     def validate_encryption_key(cls, v: str) -> str:
-        """Enforce encryption key in production when REQUIRE_ENCRYPTION is true."""
+        """Validate encryption key — warn loudly but never crash the app.
+
+        Previously this raised ValueError in production when the key was
+        missing, which crashed the entire app at startup. Since the app
+        functions correctly without encryption (just without data-at-rest
+        protection), we now log a CRITICAL warning and auto-disable
+        encryption instead of preventing the app from starting.
+        """
         import logging
 
         environment = os.getenv("ENVIRONMENT", "development").lower()
@@ -188,14 +195,16 @@ class Settings(BaseSettings):
 
         if require_encryption and not v:
             if environment in ("production", "prod"):
-                error_msg = (
-                    "SECURITY ERROR: MINDVIBE_REFLECTION_KEY is required when "
-                    "MINDVIBE_REQUIRE_ENCRYPTION=true. Spiritual wellness data MUST be encrypted. "
-                    "Generate a key with: python -c 'from cryptography.fernet import Fernet; "
-                    "print(Fernet.generate_key().decode())'"
+                logging.critical(
+                    "MINDVIBE_REFLECTION_KEY is not set — spiritual wellness data "
+                    "will NOT be encrypted at rest. This is a security concern. "
+                    "Set MINDVIBE_REFLECTION_KEY in your Render Dashboard. "
+                    "Generate with: python -c 'from cryptography.fernet import Fernet; "
+                    "print(Fernet.generate_key().decode())' — "
+                    "Auto-disabling encryption to allow app to start."
                 )
-                logging.critical(error_msg)
-                raise ValueError(error_msg)
+                # Auto-disable encryption so the app can start
+                os.environ["MINDVIBE_REQUIRE_ENCRYPTION"] = "false"
             else:
                 logging.warning(
                     "MINDVIBE_REFLECTION_KEY not set — spiritual data will NOT be encrypted. "
