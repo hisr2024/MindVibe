@@ -8,10 +8,13 @@
  * The `ready` field in the JSON body indicates whether the backend is
  * actually reachable. This eliminates the flood of red 503 errors in
  * DevTools during Render cold starts (30-60s).
+ *
+ * Forwards Set-Cookie headers from the backend so CSRF tokens and session
+ * cookies are properly propagated during the warm-up phase.
  */
 
 import { NextResponse } from 'next/server'
-import { BACKEND_URL } from '@/lib/proxy-utils'
+import { forwardCookies, BACKEND_URL } from '@/lib/proxy-utils'
 
 export async function GET() {
   try {
@@ -23,13 +26,19 @@ export async function GET() {
     const data = await backendResponse.json().catch(() => ({ status: 'unknown' }))
 
     if (backendResponse.ok) {
-      return NextResponse.json({ ...data, ready: true }, { status: 200 })
+      return forwardCookies(
+        backendResponse,
+        NextResponse.json({ ...data, ready: true }, { status: 200 })
+      )
     }
 
     // Backend responded but with an error (e.g. migrations pending)
-    return NextResponse.json(
-      { ...data, ready: false, backendStatus: backendResponse.status },
-      { status: 200 }
+    return forwardCookies(
+      backendResponse,
+      NextResponse.json(
+        { ...data, ready: false, backendStatus: backendResponse.status },
+        { status: 200 }
+      )
     )
   } catch {
     // Backend unreachable (cold start, network error, timeout)
