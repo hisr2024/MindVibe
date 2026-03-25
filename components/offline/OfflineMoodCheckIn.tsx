@@ -125,6 +125,10 @@ export function OfflineMoodCheckIn({
             }
           )
 
+          if (!response.ok) {
+            throw new Error(`Server responded with ${response.status}`)
+          }
+
           const data = await response.json()
           setSaveStatus('success')
 

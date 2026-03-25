@@ -9,13 +9,13 @@ import os
 
 logger = logging.getLogger(__name__)
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy import distinct, func, or_, select
+from sqlalchemy import delete, distinct, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_db
-from backend.models import GitaVerse
+from backend.deps import get_db, get_current_user
+from backend.models import GitaVerse, GitaFavorite
 from backend.models.wisdom import GitaPracticalWisdom
 
 router = APIRouter(prefix="/api/gita", tags=["gita"])
@@ -1006,4 +1006,82 @@ async def get_practical_wisdom_coverage(
         coverage_percent=round((unique_verses / total_verses) * 100, 1) if total_verses else 0,
         domains_distribution=domains_dist,
         enrichment_source_distribution=source_dist,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Gita Favorites Endpoints
+# ---------------------------------------------------------------------------
+
+
+class FavoriteRequest(BaseModel):
+    """Request to toggle a verse favorite."""
+    chapter: int = Field(..., ge=1, le=18)
+    verse: int = Field(..., ge=1, le=78)
+
+
+class FavoriteResponse(BaseModel):
+    """Response for a favorite toggle."""
+    success: bool
+    favorited: bool
+    chapter: int
+    verse: int
+
+
+class FavoriteListResponse(BaseModel):
+    """Response listing all user favorites."""
+    favorites: list[dict]
+
+
+@router.post("/favorites", response_model=FavoriteResponse)
+async def toggle_favorite(
+    body: FavoriteRequest,
+    user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Toggle a Gita verse as favorite. If already favorited, removes it."""
+    import uuid
+
+    existing = await db.execute(
+        select(GitaFavorite).where(
+            GitaFavorite.user_id == user_id,
+            GitaFavorite.chapter == body.chapter,
+            GitaFavorite.verse == body.verse,
+        )
+    )
+    fav = existing.scalar_one_or_none()
+
+    if fav:
+        await db.delete(fav)
+        await db.commit()
+        return FavoriteResponse(success=True, favorited=False, chapter=body.chapter, verse=body.verse)
+
+    new_fav = GitaFavorite(
+        id=str(uuid.uuid4()),
+        user_id=user_id,
+        chapter=body.chapter,
+        verse=body.verse,
+    )
+    db.add(new_fav)
+    await db.commit()
+    return FavoriteResponse(success=True, favorited=True, chapter=body.chapter, verse=body.verse)
+
+
+@router.get("/favorites", response_model=FavoriteListResponse)
+async def get_favorites(
+    user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get all favorited Gita verses for the current user."""
+    result = await db.execute(
+        select(GitaFavorite)
+        .where(GitaFavorite.user_id == user_id)
+        .order_by(GitaFavorite.created_at.desc())
+    )
+    favs = result.scalars().all()
+    return FavoriteListResponse(
+        favorites=[
+            {"chapter": f.chapter, "verse": f.verse, "created_at": f.created_at.isoformat()}
+            for f in favs
+        ]
     )

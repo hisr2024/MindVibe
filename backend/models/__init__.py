@@ -73,6 +73,7 @@ from backend.models.wisdom import (
     GitaVerseKeyword,
     GitaVerseUsage,
     WisdomEffectiveness,
+    GitaFavorite,
 )
 
 # AI / KIAAN models

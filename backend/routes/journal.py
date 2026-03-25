@@ -100,6 +100,41 @@ async def _check_journal_permission(request: Request, db: AsyncSession, premium:
         )
 
 
+@router.post("", status_code=status.HTTP_201_CREATED)
+async def create_entry_root(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user_flexible),
+):
+    """Root POST handler for journal entries.
+
+    Accepts the offline journal format (encrypted_data + metadata) and
+    persists it as a journal entry. This endpoint exists because the
+    offline sync service and OfflineJournalEntry component POST to
+    /api/journal (without /entries suffix).
+    """
+    body = await request.json()
+
+    encrypted_data = body.get("encrypted_data", {})
+    metadata = body.get("metadata", {})
+
+    entry_id = str(uuid.uuid4())
+    entry = JournalEntry(
+        id=entry_id,
+        user_id=user_id,
+        encrypted_title={"v": "raw", "data": metadata.get("title", "")} if metadata.get("title") else None,
+        encrypted_content=encrypted_data if encrypted_data else {"v": "raw", "data": ""},
+        encryption_meta=encrypted_data if encrypted_data else {},
+        mood_labels=[],
+        tag_labels=metadata.get("tags", []),
+    )
+    db.add(entry)
+    await db.commit()
+    await db.refresh(entry)
+
+    return {"id": entry.id, "success": True}
+
+
 @router.post("/quick-save", response_model=QuickSaveOut)
 async def quick_save_to_journal(
     request: Request,

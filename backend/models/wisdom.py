@@ -16,7 +16,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.models.base import Base, SoftDeleteMixin
 
@@ -317,4 +317,23 @@ class WisdomEffectiveness(Base):
     )
     outcome_recorded_at: Mapped[datetime.datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), nullable=True
+    )
+
+
+class GitaFavorite(Base):
+    """User's favorite Gita verses."""
+
+    __tablename__ = "gita_favorites"
+    __table_args__ = (
+        UniqueConstraint("user_id", "chapter", "verse", name="uq_gita_favorite_user_verse"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    chapter: Mapped[int] = mapped_column(Integer, nullable=False)
+    verse: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
