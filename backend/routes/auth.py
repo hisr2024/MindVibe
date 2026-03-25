@@ -383,17 +383,22 @@ async def login(
                 },
             )
         else:
-            # Email provider not configured — auto-verify and allow login
+            # Email provider not configured — auto-verify and allow login.
+            # Use UPDATE statement instead of ORM attribute mutation to avoid
+            # corrupting the db session state for subsequent operations (session
+            # creation, token creation, subscription fetch all need a clean session).
             logger.warning(
                 "Email verification required but email delivery not configured — "
                 "auto-verifying user %s to prevent lockout",
                 user.id,
             )
             try:
-                user.email_verified = True
-                user.email_verified_at = datetime.now(UTC)
+                await db.execute(
+                    update(User)
+                    .where(User.id == user.id)
+                    .values(email_verified=True, email_verified_at=datetime.now(UTC))
+                )
                 await db.commit()
-                await db.refresh(user)
             except Exception as e:
                 logger.error("Failed to auto-verify user %s: %s", user.id, e)
                 try:
@@ -446,7 +451,14 @@ async def login(
             detail={"detail": "Login failed due to a server error. Please try again.", "code": "SESSION_ERROR"},
         )
 
-    access_token = create_access_token(user_id=user_id, session_id=session.id)
+    try:
+        access_token = create_access_token(user_id=user_id, session_id=session.id)
+    except Exception as e:
+        logger.error("Access token creation failed for user_id=%s: %s", user_id, e, exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={"detail": "Login failed due to a server error. Please try again.", "code": "TOKEN_ERROR"},
+        )
     expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
     # Create refresh token + set cookie
@@ -504,9 +516,9 @@ async def login(
             pass
 
     # Check developer status
-    from backend.middleware.feature_access import is_developer as check_is_developer
     is_dev = False
     try:
+        from backend.middleware.feature_access import is_developer as check_is_developer
         is_dev = await check_is_developer(db, user_id)
     except Exception:
         pass

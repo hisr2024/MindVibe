@@ -2122,35 +2122,43 @@ startup_logger.info(
 startup_logger.info("=" * 80 + "\n")
 
 
-async def _assert_migrations_healthy() -> dict[str, Any]:
-    """Ensure migrations are applied; raise HTTP 503 if not."""
+async def _get_migration_state() -> dict[str, Any]:
+    """Check migration status without throwing 503.
 
-    migration_status = await get_migration_status(engine)
+    Previously this raised HTTPException(503) when migrations were pending or
+    failed, which blocked ALL health checks and caused the frontend account
+    page to show "Service Unavailable". Health endpoints should always respond
+    so monitoring tools can see the actual state — the migration status is
+    included in the response body for operators to act on.
+    """
+    try:
+        migration_status = await get_migration_status(engine)
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Could not check migration status: {e}",
+            "run_on_startup": RUN_MIGRATIONS_ON_STARTUP,
+        }
+
     if migration_status.error:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={
-                "reason": "migration_failed",
-                "message": migration_status.error,
-                "failed_file": migration_status.failed_file,
-                "failed_statement": migration_status.failed_statement,
-                "current_revision": migration_status.current_revision,
-            },
-        )
+        return {
+            "status": "error",
+            "message": migration_status.error,
+            "failed_file": migration_status.failed_file,
+            "current_revision": migration_status.current_revision,
+            "run_on_startup": RUN_MIGRATIONS_ON_STARTUP,
+        }
 
     if migration_status.pending:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={
-                "reason": "migrations_pending",
-                "message": "Pending migrations detected; service unavailable until applied.",
-                "pending": migration_status.pending,
-                "current_revision": migration_status.current_revision,
-                "run_on_startup": RUN_MIGRATIONS_ON_STARTUP,
-            },
-        )
+        return {
+            "status": "pending",
+            "pending": migration_status.pending,
+            "current_revision": migration_status.current_revision,
+            "run_on_startup": RUN_MIGRATIONS_ON_STARTUP,
+        }
 
     return {
+        "status": "ok",
         "current_revision": migration_status.current_revision,
         "run_on_startup": RUN_MIGRATIONS_ON_STARTUP,
     }
@@ -2182,7 +2190,7 @@ async def root() -> dict[str, Any]:
 
 @app.get("/health")
 async def health() -> dict[str, Any]:
-    migration_state = await _assert_migrations_healthy()
+    migration_state = await _get_migration_state()
     _status = _compute_health_status()
     return {
         "status": _status,
@@ -2199,7 +2207,7 @@ async def health() -> dict[str, Any]:
 
 @app.get("/api/health")
 async def api_health() -> dict[str, Any]:
-    migration_state = await _assert_migrations_healthy()
+    migration_state = await _get_migration_state()
     _status = _compute_health_status()
     return {
         "status": _status,
