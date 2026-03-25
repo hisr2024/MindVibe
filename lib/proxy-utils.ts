@@ -152,10 +152,15 @@ export function createProxyHandler(
           )
         }
 
-        // Retry on 503 (backend cold-starting or migrations pending)
-        if (backendResponse.status === 503 && attempt < maxRetries) {
+        // Retry on transient backend errors (cold-starting, deploy in progress,
+        // or temporary failures). Without this, a single backend hiccup during
+        // deploy or cold start shows as a raw 500 to the user.
+        // 403 included because backend DDoS middleware may temporarily block
+        // the Vercel edge IP; retrying usually succeeds on the next attempt.
+        const isTransient = [403, 500, 502, 503, 504].includes(backendResponse.status)
+        if (isTransient && attempt < maxRetries) {
           const backoffMs = 2000 * Math.pow(2, attempt)
-          console.warn(`${label} Got 503, retrying in ${backoffMs}ms (attempt ${attempt + 1}/${maxRetries})...`)
+          console.warn(`${label} Got ${backendResponse.status}, retrying in ${backoffMs}ms (attempt ${attempt + 1}/${maxRetries})...`)
           await new Promise(resolve => setTimeout(resolve, backoffMs))
           continue
         }
