@@ -235,6 +235,11 @@ async def create_checkout(
         # PayPal or Card as alternatives instead of falling back to Razorpay.
         try:
             return await _create_stripe_checkout(db, user, payload)
+        except HTTPException:
+            # Re-raise config/validation errors (400, 503) from
+            # _create_stripe_checkout so the frontend gets the real message
+            # (e.g. "INR price not configured", "Stripe not available").
+            raise
         except Exception as e:
             logger.warning(f"Stripe UPI checkout failed for user {user.id}: {e}")
 
