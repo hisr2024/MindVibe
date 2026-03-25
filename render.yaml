@@ -47,6 +47,9 @@ services:
           type: redis
           name: mindvibe-redis
           property: connectionString
+      # Disable startup migrations — preDeployCommand already runs them
+      - key: RUN_MIGRATIONS_ON_STARTUP
+        value: "false"
       # Multi-instance scaling — reduced pool sizes for PgBouncer compatibility
       - key: DB_POOL_SIZE
         value: "10"
@@ -60,7 +63,7 @@ services:
         generateValue: true
     healthCheckPath: /health
     healthCheckProtocol: http
-    healthCheckTimeout: 30
+    healthCheckTimeout: 120
     maxConnections: 20
     # Autoscaling settings — scale to 10 instances for up to 1,000 concurrent users
     scaling:

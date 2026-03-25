@@ -312,9 +312,10 @@ async def startup():
         # Retry Redis connection with exponential backoff if not connected.
         # On platforms like Render, the Redis service may still be starting
         # when the API boots — a few retries usually resolve this.
+        # Delays: 1s, 2s, 4s, 8s = 15s total (must stay within health check timeout)
         if not _redis.is_connected and _settings.REDIS_ENABLED:
             for _attempt in range(1, _max_retries + 1):
-                _wait = 2**_attempt  # 2s, 4s, 8s, 16s
+                _wait = 2 ** (_attempt - 1)  # 1s, 2s, 4s, 8s
                 startup_logger.warning(
                     f"⚠️ Redis not connected (attempt {_attempt}/{_max_retries}), "
                     f"retrying in {_wait}s..."
