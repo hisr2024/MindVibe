@@ -248,25 +248,55 @@ async def signup(request: Request, payload: SignupIn, db: AsyncSession = Depends
     except Exception as sub_err:
         logger.warning(f"Failed to create free subscription for new user {user.id}: {sub_err}")
 
-    # Send email verification token
+    # Send email verification token.
+    # If email delivery is not configured, auto-verify the user so they
+    # are not locked out of their account.
     verification_sent = False
     try:
-        raw_token = secrets.token_urlsafe(32)
-        token_hash_val = hash_password(raw_token)
-        verification_row = EmailVerificationToken(
-            id=str(uuid.uuid4()),
-            user_id=user.id,
-            token_hash=token_hash_val,
-            expires_at=datetime.now(UTC) + timedelta(hours=24),
-            ip_address=request.client.host if request.client else None,
-        )
-        db.add(verification_row)
-        await db.commit()
-        verification_sent = await send_email_verification(user.email, raw_token)
-        if not verification_sent:
-            logger.warning(f"Failed to send verification email to user {user.id}")
+        from backend.services.email_service import can_send_email
+
+        if can_send_email():
+            raw_token = secrets.token_urlsafe(32)
+            token_hash_val = hash_password(raw_token)
+            verification_row = EmailVerificationToken(
+                id=str(uuid.uuid4()),
+                user_id=user.id,
+                token_hash=token_hash_val,
+                expires_at=datetime.now(UTC) + timedelta(hours=24),
+                ip_address=request.client.host if request.client else None,
+            )
+            db.add(verification_row)
+            await db.commit()
+            verification_sent = await send_email_verification(user.email, raw_token)
+            if not verification_sent:
+                logger.warning(
+                    "Verification email failed to send for user %s — "
+                    "auto-verifying to prevent lockout",
+                    user.id,
+                )
+                # Auto-verify so the user can still log in
+                user.email_verified = True
+                user.email_verified_at = datetime.now(UTC)
+                await db.commit()
+        else:
+            # Email provider not configured — auto-verify immediately
+            logger.info(
+                "Email delivery not configured (EMAIL_PROVIDER != smtp) — "
+                "auto-verifying user %s",
+                user.id,
+            )
+            user.email_verified = True
+            user.email_verified_at = datetime.now(UTC)
+            await db.commit()
     except Exception as ver_err:
         logger.warning(f"Failed to create verification token for user {user.id}: {ver_err}")
+        # On any error, auto-verify to prevent lockout
+        try:
+            user.email_verified = True
+            user.email_verified_at = datetime.now(UTC)
+            await db.commit()
+        except Exception:
+            await db.rollback()
 
     return SignupOut(
         user_id=user.id,
@@ -332,13 +362,44 @@ async def login(
             detail={"detail": "Invalid credentials", "code": "INVALID_CREDENTIALS"},
         )
 
-    # Block login if email is not verified (only when enforcement is enabled)
+    # Block login if email is not verified (only when enforcement is enabled
+    # AND email delivery is actually configured — otherwise users have no way
+    # to verify and would be permanently locked out)
     if settings.REQUIRE_EMAIL_VERIFICATION and not user.email_verified:
-        logger.warning("Login blocked: email not verified user_id=%s email=%s", user.id, email_norm)
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={"detail": "Please verify your email before logging in", "code": "EMAIL_NOT_VERIFIED", "field": "email"},
-        )
+        from backend.services.email_service import can_send_email
+
+        if can_send_email():
+            logger.warning("Login blocked: email not verified user_id=%s email=%s", user.id, email_norm)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "detail": (
+                        "Please verify your email before logging in. "
+                        "Check your inbox (and spam folder) for a verification link, "
+                        "or request a new one via the resend verification option."
+                    ),
+                    "code": "EMAIL_NOT_VERIFIED",
+                    "field": "email",
+                },
+            )
+        else:
+            # Email provider not configured — auto-verify and allow login
+            logger.warning(
+                "Email verification required but email delivery not configured — "
+                "auto-verifying user %s to prevent lockout",
+                user.id,
+            )
+            try:
+                user.email_verified = True
+                user.email_verified_at = datetime.now(UTC)
+                await db.commit()
+                await db.refresh(user)
+            except Exception as e:
+                logger.error("Failed to auto-verify user %s: %s", user.id, e)
+                try:
+                    await db.rollback()
+                except Exception:
+                    pass
 
     # Reset failed attempts on successful login
     if user.failed_login_attempts and user.failed_login_attempts > 0:
@@ -991,7 +1052,7 @@ async def resend_verification(
 
     generic_response = ResendVerificationOut(
         message="If an account with that email exists and is unverified, a verification link has been sent.",
-        sent=True,
+        sent=False,  # Updated after actual send attempt
     )
 
     stmt = select(User).where(User.email == email_norm, User.deleted_at.is_(None))
@@ -1033,10 +1094,12 @@ async def resend_verification(
         return generic_response
 
     sent = await send_email_verification(user.email, raw_token)
-    if not sent:
+    if sent:
+        logger.info("Verification email resent for user %s", user.id)
+        generic_response.sent = True
+    else:
         logger.warning("Failed to send verification email to user %s", user.id)
 
-    logger.info("Verification email resent for user %s", user.id)
     return generic_response
 
 

@@ -489,6 +489,45 @@ async def startup():
 
         startup_logger.info("✅ Database schema ready")
 
+        # Step 3b: Validate email configuration (surface misconfig early)
+        startup_logger.info("\n📧 Validating email configuration...")
+        try:
+            from backend.services.email_service import (
+                EMAIL_PROVIDER as _email_provider,
+                can_send_email,
+                validate_email_config,
+            )
+
+            _email_warnings = validate_email_config()
+            for _warn in _email_warnings:
+                if "CRITICAL" in _warn:
+                    startup_logger.critical(_warn)
+                else:
+                    startup_logger.warning(f"⚠️ {_warn}")
+
+            if can_send_email():
+                startup_logger.info(
+                    "✅ Email delivery configured (provider=%s)", _email_provider
+                )
+            else:
+                startup_logger.warning(
+                    "⚠️ Email delivery NOT configured (provider=%s) — "
+                    "verification emails will not be sent. "
+                    "Users will be auto-verified on signup.",
+                    _email_provider,
+                )
+
+            # Log effective REQUIRE_EMAIL_VERIFICATION state (may have been
+            # auto-disabled by settings validator if email is not configured)
+            startup_logger.info(
+                "   Email verification enforcement: %s",
+                "ENABLED" if _settings.REQUIRE_EMAIL_VERIFICATION else "DISABLED",
+            )
+        except Exception as email_check_err:
+            startup_logger.warning(
+                "⚠️ Email config validation failed: %s", email_check_err
+            )
+
         # Step 4: Seed subscription plans if they don't exist
         startup_logger.info("\n🔧 Ensuring subscription plans exist...")
         try:
