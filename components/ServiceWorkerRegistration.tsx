@@ -53,17 +53,12 @@ export function ServiceWorkerRegistration() {
 
     // Reload page when a new service worker takes control (clears stale caches).
     // Guarded by module-level flag + sessionStorage cooldown to prevent loops.
+    // When a new service worker takes control, the SKIP_WAITING message
+    // (line 44) already activates it. Subsequent fetches automatically use
+    // the new cache, so a hard page reload is unnecessary and causes visible
+    // flicker. Instead, just mark the flag to prevent any future reload attempts.
     const handleControllerChange = () => {
-      if (hasReloadedForSW) return
-      try {
-        const lastReload = sessionStorage.getItem(SW_RELOAD_TS_KEY)
-        if (lastReload && Date.now() - Number(lastReload) < SW_RELOAD_COOLDOWN_MS) return
-        sessionStorage.setItem(SW_RELOAD_TS_KEY, String(Date.now()))
-      } catch {
-        // sessionStorage unavailable (private browsing) — still allow one reload
-      }
       hasReloadedForSW = true
-      window.location.reload()
     }
 
     // Listen for messages from service worker

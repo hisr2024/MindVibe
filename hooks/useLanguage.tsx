@@ -155,10 +155,15 @@ function getInitialLanguage(): Language {
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  // Initialize with the correct language synchronously to avoid flash
+  // Initialize with the correct language synchronously to avoid flash.
+  // For English (default) or cached languages, mark as initialized immediately
+  // so consumers never see a loading spinner for the common case.
   const [language, setLanguageState] = useState<Language>(getInitialLanguage)
-  const [translations, setTranslations] = useState<TranslationObject>({})
-  const [isInitialized, setIsInitialized] = useState(false)
+  const [translations, setTranslations] = useState<TranslationObject>(() => translationCache.get(getInitialLanguage()) ?? {})
+  const [isInitialized, setIsInitialized] = useState(() => {
+    const lang = getInitialLanguage()
+    return lang === 'en' || translationCache.has(lang)
+  })
 
   // Use a ref for recursive calls to avoid self-reference before declaration
   const loadTranslationsRef = useRef<((lang: Language) => Promise<void>) | null>(null)

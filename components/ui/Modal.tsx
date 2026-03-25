@@ -41,6 +41,7 @@ export function Modal({
   // Handle visibility and body scroll lock
   useEffect(() => {
     if (open) {
+      setIsVisible(true)
       lockBodyScroll()
     } else {
       const timer = setTimeout(() => setIsVisible(false), 200)
@@ -51,11 +52,6 @@ export function Modal({
       unlockBodyScroll()
     }
   }, [open])
-
-  // Sync open -> isVisible during render (React recommended pattern for prop-to-state)
-  if (open && !isVisible) {
-    setIsVisible(true)
-  }
 
   // Store previously focused element for focus restoration
   const previousFocusRef = useRef<HTMLElement | null>(null)

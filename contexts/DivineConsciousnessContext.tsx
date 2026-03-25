@@ -13,7 +13,7 @@
  * "The divine is not somewhere far away - it rests in the stillness of your own heart."
  */
 
-import React, { createContext, useContext, useState, useCallback, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef, useMemo, ReactNode } from 'react';
 
 // Types
 export type EmotionalState =
@@ -511,7 +511,7 @@ export function DivineConsciousnessProvider({ children }: DivineConsciousnessPro
     };
   }, [state.currentEmotion, getDivineComfort, getSerenityMoment, getDivineAffirmation, getBreathingExercise]);
 
-  const actions: DivineConsciousnessActions = {
+  const actions = useMemo<DivineConsciousnessActions>(() => ({
     setAtmosphere,
     setEmotion,
     enterSacredMode,
@@ -532,7 +532,14 @@ export function DivineConsciousnessProvider({ children }: DivineConsciousnessPro
     getSacredAtmosphere,
     getBreathingExercise,
     getTimeAppropriateGreeting,
-  };
+  }), [
+    setAtmosphere, setEmotion, enterSacredMode, exitSacredMode,
+    activateDivinePresence, deactivateDivinePresence, setSerenityLevel,
+    startBreathing, stopBreathing, startMicroMeditation, stopMicroMeditation,
+    getSacredOpening, getSacredClosing, getDivineComfort, getSerenityMoment,
+    getDivineAffirmation, getDivineReminder, getSacredAtmosphere,
+    getBreathingExercise, getTimeAppropriateGreeting,
+  ]);
 
   return (
     <DivineConsciousnessContext.Provider value={{ state, actions }}>

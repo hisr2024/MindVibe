@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { apiFetch } from '@/lib/api'
 
@@ -38,6 +39,7 @@ interface ResetResponse {
 }
 
 export function ProgressResetTool() {
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [preview, setPreview] = useState<ResetPreview | null>(null)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -105,9 +107,9 @@ export function ProgressResetTool() {
       setResetResponse(data)
       setShowConfirmDialog(false)
       
-      // Reload page after 3 seconds to show updated state
+      // Soft refresh after 3 seconds to show updated state
       setTimeout(() => {
-        window.location.reload()
+        router.refresh()
       }, 3000)
     } catch (err) {
       if (process.env.NODE_ENV !== 'production') console.error('Reset error:', err)

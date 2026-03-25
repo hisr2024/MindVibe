@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
 /**
@@ -8,9 +9,10 @@ import { motion } from 'framer-motion';
  * Displayed when the user is offline and the requested page is not cached
  */
 export default function OfflinePage() {
+  const router = useRouter();
   const handleRetry = () => {
     if (typeof window !== 'undefined') {
-      window.location.reload();
+      router.refresh();
     }
   };
 
