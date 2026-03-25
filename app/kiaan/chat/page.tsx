@@ -162,7 +162,7 @@ function KiaanChatPageInner() {
     } catch (error) {
       console.error('Failed to save to journal:', error);
     }
-  }, []);
+  }, [router]);
 
   const handleCopyResponse = useCallback((text: string) => {
     if (typeof window === 'undefined') return;
