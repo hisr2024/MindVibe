@@ -80,7 +80,7 @@ class CheckoutSessionCreate(BaseModel):
     payment_method: str = Field(
         default="card",
         pattern="^(card|paypal|upi|google_pay)$",
-        description="Payment method: 'card' (Stripe), 'paypal' (Stripe), 'google_pay' (Stripe), or 'upi' (Stripe primary, Razorpay fallback)",
+        description="Payment method: 'card' (Stripe), 'paypal' (Stripe/Direct), 'google_pay' (Stripe), or 'upi' (Stripe, INR only)",
     )
     currency: str = Field(
         default="usd",
