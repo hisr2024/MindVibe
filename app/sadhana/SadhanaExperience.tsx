@@ -2,7 +2,8 @@
 
 /**
  * SadhanaExperience — Main orchestrator for the daily sacred practice.
- * Manages the phase state machine and renders the appropriate phase component.
+ * Manages the phase state machine with cinematic transitions,
+ * sacred progress path, and phase-reactive visual layers.
  */
 
 import { useCallback, useState } from 'react'
@@ -10,6 +11,8 @@ import { AnimatePresence } from 'framer-motion'
 import { useSadhana } from '@/hooks/useSadhana'
 import { SacredCanvas } from './visuals/SacredCanvas'
 import { GoldenParticles } from './visuals/GoldenParticles'
+import { SadhanaJourneyPath } from './components/SadhanaJourneyPath'
+import { PhaseTransition } from './components/PhaseTransition'
 import { ArrivalPhase } from './phases/ArrivalPhase'
 import { BreathworkPhase } from './phases/BreathworkPhase'
 import { VerseMeditationPhase } from './phases/VerseMeditationPhase'
@@ -40,77 +43,86 @@ export function SadhanaExperience() {
   }, [complete])
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0a0a14]">
-      {/* Background layers */}
+    <div className="relative min-h-screen overflow-hidden bg-[#050507]">
+      {/* Phase-reactive background */}
       <SacredCanvas phase={phase} />
-      <GoldenParticles count={phase === 'complete' ? 60 : 30} />
+      <GoldenParticles phase={phase} />
 
-      {/* Phase content */}
+      {/* Sacred progress path */}
+      <SadhanaJourneyPath currentPhase={phase} />
+
+      {/* Phase content with cinematic transitions */}
       <AnimatePresence mode="wait">
         {phase === 'arrival' && (
-          <ArrivalPhase
-            key="arrival"
-            greeting={composition?.greeting ?? null}
-            isComposing={isComposing}
-            onMoodSelect={selectMood}
-          />
+          <PhaseTransition key="arrival" phase="arrival">
+            <ArrivalPhase
+              greeting={composition?.greeting ?? null}
+              isComposing={isComposing}
+              onMoodSelect={selectMood}
+            />
+          </PhaseTransition>
         )}
 
         {phase === 'breathwork' && composition && (
-          <BreathworkPhase
-            key="breathwork"
-            pattern={composition.breathingPattern}
-            onComplete={nextPhase}
-          />
+          <PhaseTransition key="breathwork" phase="breathwork">
+            <BreathworkPhase
+              pattern={composition.breathingPattern}
+              onComplete={nextPhase}
+            />
+          </PhaseTransition>
         )}
 
         {phase === 'verse' && composition && (
-          <VerseMeditationPhase
-            key="verse"
-            verse={composition.verse}
-            onComplete={nextPhase}
-          />
+          <PhaseTransition key="verse" phase="verse">
+            <VerseMeditationPhase
+              verse={composition.verse}
+              onComplete={nextPhase}
+            />
+          </PhaseTransition>
         )}
 
         {phase === 'reflection' && composition && (
-          <ReflectionPhase
-            key="reflection"
-            prompt={composition.reflectionPrompt}
-            value={reflectionText}
-            onChange={setReflectionText}
-            onComplete={nextPhase}
-          />
+          <PhaseTransition key="reflection" phase="reflection">
+            <ReflectionPhase
+              prompt={composition.reflectionPrompt}
+              value={reflectionText}
+              onChange={setReflectionText}
+              onComplete={nextPhase}
+            />
+          </PhaseTransition>
         )}
 
         {phase === 'intention' && composition && (
-          <IntentionPhase
-            key="intention"
-            intention={composition.dharmaIntention}
-            value={intentionText}
-            onChange={setIntentionText}
-            onComplete={handleComplete}
-          />
+          <PhaseTransition key="intention" phase="intention">
+            <IntentionPhase
+              intention={composition.dharmaIntention}
+              value={intentionText}
+              onChange={setIntentionText}
+              onComplete={handleComplete}
+            />
+          </PhaseTransition>
         )}
 
         {phase === 'complete' && composition && (
-          <CompletionSeal
-            key="complete"
-            xpAwarded={completionResult?.xpAwarded ?? 25}
-            streakCount={completionResult?.streakCount ?? 1}
-            message={completionResult?.message ?? 'Your practice is sealed. Walk in dharma today.'}
-            verseId={composition.verse.verseId}
-          />
+          <PhaseTransition key="complete" phase="complete">
+            <CompletionSeal
+              xpAwarded={completionResult?.xpAwarded ?? 25}
+              streakCount={completionResult?.streakCount ?? 1}
+              message={completionResult?.message ?? 'Your practice is sealed. Walk in dharma today.'}
+              verseId={composition.verse.verseId}
+            />
+          </PhaseTransition>
         )}
       </AnimatePresence>
 
-      {/* Exit button (always visible) */}
+      {/* Exit button — styled subtly as "विराम" (pause) */}
       {phase !== 'complete' && (
         <a
           href="/dashboard"
-          className="fixed top-6 right-6 z-50 text-[#d4a44c]/30 hover:text-[#d4a44c]/60 transition-colors text-sm"
+          className="fixed top-5 right-5 z-50 text-[#d4a44c]/20 hover:text-[#d4a44c]/50 transition-colors text-xs font-light tracking-wider"
           aria-label="Exit Sadhana"
         >
-          Exit
+          विराम
         </a>
       )}
     </div>
