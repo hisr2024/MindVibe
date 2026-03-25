@@ -2190,7 +2190,16 @@ async def root() -> dict[str, Any]:
 
 @app.get("/health")
 async def health() -> dict[str, Any]:
-    migration_state = await _get_migration_state()
+    """Health check endpoint used by Render to determine service readiness.
+
+    MUST always return 200 with a JSON body so Render doesn't mark the
+    instance as unhealthy and return 503 to all client requests.
+    """
+    try:
+        migration_state = await _get_migration_state()
+    except Exception:
+        migration_state = {"status": "unknown"}
+
     _status = _compute_health_status()
     return {
         "status": _status,
@@ -2207,7 +2216,11 @@ async def health() -> dict[str, Any]:
 
 @app.get("/api/health")
 async def api_health() -> dict[str, Any]:
-    migration_state = await _get_migration_state()
+    try:
+        migration_state = await _get_migration_state()
+    except Exception:
+        migration_state = {"status": "unknown"}
+
     _status = _compute_health_status()
     return {
         "status": _status,

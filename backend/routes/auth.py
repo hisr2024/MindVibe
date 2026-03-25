@@ -315,9 +315,34 @@ async def signup(request: Request, payload: SignupIn, db: AsyncSession = Depends
 async def login(
     request: Request, payload: LoginIn, response: Response, db: AsyncSession = Depends(get_db)
 ):
+    try:
+        return await _login_impl(request, payload, response, db)
+    except HTTPException:
+        raise  # Let explicit HTTP errors pass through
+    except Exception as e:
+        logger.error("Unhandled login error: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={"detail": "Login failed due to a server error. Please try again.", "code": "INTERNAL_ERROR"},
+        )
+
+
+async def _login_impl(
+    request: Request, payload: LoginIn, response: Response, db: AsyncSession
+):
+    """Inner login implementation — separated so the outer handler can catch
+    ANY unhandled exception and return a proper JSON error instead of a raw 500.
+    """
     email_norm = payload.email.lower()
-    stmt = select(User).where(User.email == email_norm)
-    user = (await db.execute(stmt)).scalars().first()
+    try:
+        stmt = select(User).where(User.email == email_norm)
+        user = (await db.execute(stmt)).scalars().first()
+    except Exception as e:
+        logger.error("Database query failed during login: %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={"detail": "Login is temporarily unavailable. Please try again.", "code": "DATABASE_ERROR"},
+        )
 
     # Check if account is locked - use generic message to prevent account enumeration
     if user and user.locked_until and user.locked_until > datetime.now(UTC):
