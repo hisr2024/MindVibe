@@ -56,54 +56,12 @@ class Settings(BaseSettings):
     SECURE_COOKIE: bool = os.getenv("ENVIRONMENT", "development") == "production"
     SECRET_KEY: str = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
 
-    # Email verification enforcement: True in production, False in dev/test.
-    # Overridable via REQUIRE_EMAIL_VERIFICATION env var.
-    # IMPORTANT: If email delivery is not configured (EMAIL_PROVIDER != smtp),
-    # this is auto-disabled at startup to prevent users from being locked out.
+    # Email verification is always required by default.
+    # Set REQUIRE_EMAIL_VERIFICATION=false to explicitly disable.
     REQUIRE_EMAIL_VERIFICATION: bool = parse_bool_strict(
-        os.getenv(
-            "REQUIRE_EMAIL_VERIFICATION",
-            (
-                "true"
-                if os.getenv("ENVIRONMENT", "development") == "production"
-                else "false"
-            ),
-        ),
+        os.getenv("REQUIRE_EMAIL_VERIFICATION", "true"),
         "REQUIRE_EMAIL_VERIFICATION",
     )
-
-    @field_validator("REQUIRE_EMAIL_VERIFICATION")
-    @classmethod
-    def validate_email_verification_config(cls, v: bool) -> bool:
-        """Auto-disable email verification when email delivery is not configured.
-
-        Prevents the deadlock where REQUIRE_EMAIL_VERIFICATION=true but
-        EMAIL_PROVIDER=console, which means verification emails are never
-        delivered and users can never log in.
-        """
-        if not v:
-            return v
-
-        # Check if email provider can actually deliver emails
-        email_provider = os.getenv("EMAIL_PROVIDER", "console")
-        smtp_host = os.getenv("SMTP_HOST", "localhost")
-
-        if email_provider != "smtp" or not smtp_host or smtp_host == "localhost":
-            import logging
-
-            _logger = logging.getLogger("mindvibe.settings")
-            _logger.critical(
-                "REQUIRE_EMAIL_VERIFICATION=true but EMAIL_PROVIDER='%s' "
-                "(SMTP_HOST='%s') — emails cannot be delivered. "
-                "Auto-disabling email verification to prevent user lockout. "
-                "To fix: set EMAIL_PROVIDER=smtp with valid SMTP credentials, "
-                "or explicitly set REQUIRE_EMAIL_VERIFICATION=false.",
-                email_provider,
-                smtp_host,
-            )
-            return False
-
-        return v
 
     @field_validator("SECRET_KEY")
     @classmethod

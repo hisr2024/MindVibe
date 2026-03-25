@@ -249,8 +249,7 @@ async def signup(request: Request, payload: SignupIn, db: AsyncSession = Depends
         logger.warning(f"Failed to create free subscription for new user {user.id}: {sub_err}")
 
     # Send email verification token.
-    # If email delivery is not configured, auto-verify the user so they
-    # are not locked out of their account.
+    # If email delivery fails, user remains unverified — never auto-verify.
     verification_sent = False
     try:
         from backend.services.email_service import can_send_email
@@ -269,34 +268,26 @@ async def signup(request: Request, payload: SignupIn, db: AsyncSession = Depends
             await db.commit()
             verification_sent = await send_email_verification(user.email, raw_token)
             if not verification_sent:
-                logger.warning(
+                logger.error(
                     "Verification email failed to send for user %s — "
-                    "auto-verifying to prevent lockout",
+                    "user remains unverified. Check email provider configuration.",
                     user.id,
                 )
-                # Auto-verify so the user can still log in
-                user.email_verified = True
-                user.email_verified_at = datetime.now(UTC)
-                await db.commit()
         else:
-            # Email provider not configured — auto-verify immediately
-            logger.info(
+            logger.error(
                 "Email delivery not configured (EMAIL_PROVIDER != smtp) — "
-                "auto-verifying user %s",
+                "cannot send verification email for user %s. "
+                "User will remain unverified until email is configured "
+                "and they request a new verification link.",
                 user.id,
             )
-            user.email_verified = True
-            user.email_verified_at = datetime.now(UTC)
-            await db.commit()
     except Exception as ver_err:
-        logger.warning(f"Failed to create verification token for user {user.id}: {ver_err}")
-        # On any error, auto-verify to prevent lockout
-        try:
-            user.email_verified = True
-            user.email_verified_at = datetime.now(UTC)
-            await db.commit()
-        except Exception:
-            await db.rollback()
+        logger.error(
+            "Failed to create/send verification token for user %s: %s — "
+            "user remains unverified.",
+            user.id,
+            ver_err,
+        )
 
     return SignupOut(
         user_id=user.id,
@@ -387,49 +378,22 @@ async def _login_impl(
             detail={"detail": "Invalid credentials", "code": "INVALID_CREDENTIALS"},
         )
 
-    # Block login if email is not verified (only when enforcement is enabled
-    # AND email delivery is actually configured — otherwise users have no way
-    # to verify and would be permanently locked out)
+    # Block login if email is not verified (when enforcement is enabled).
+    # Never auto-verify — user must complete email verification flow.
     if settings.REQUIRE_EMAIL_VERIFICATION and not user.email_verified:
-        from backend.services.email_service import can_send_email
-
-        if can_send_email():
-            logger.warning("Login blocked: email not verified user_id=%s email=%s", user.id, email_norm)
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail={
-                    "detail": (
-                        "Please verify your email before logging in. "
-                        "Check your inbox (and spam folder) for a verification link, "
-                        "or request a new one via the resend verification option."
-                    ),
-                    "code": "EMAIL_NOT_VERIFIED",
-                    "field": "email",
-                },
-            )
-        else:
-            # Email provider not configured — auto-verify and allow login.
-            # Use UPDATE statement instead of ORM attribute mutation to avoid
-            # corrupting the db session state for subsequent operations (session
-            # creation, token creation, subscription fetch all need a clean session).
-            logger.warning(
-                "Email verification required but email delivery not configured — "
-                "auto-verifying user %s to prevent lockout",
-                user.id,
-            )
-            try:
-                await db.execute(
-                    update(User)
-                    .where(User.id == user.id)
-                    .values(email_verified=True, email_verified_at=datetime.now(UTC))
-                )
-                await db.commit()
-            except Exception as e:
-                logger.error("Failed to auto-verify user %s: %s", user.id, e)
-                try:
-                    await db.rollback()
-                except Exception:
-                    pass
+        logger.warning("Login blocked: email not verified user_id=%s email=%s", user.id, email_norm)
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "detail": (
+                    "Please verify your email before logging in. "
+                    "Check your inbox (and spam folder) for a verification link, "
+                    "or request a new one via the resend verification option."
+                ),
+                "code": "EMAIL_NOT_VERIFIED",
+                "field": "email",
+            },
+        )
 
     # Reset failed attempts on successful login
     if user.failed_login_attempts and user.failed_login_attempts > 0:
