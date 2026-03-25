@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 # Load .env BEFORE reading DATABASE_URL so env vars are available at import time
 load_dotenv()
 
+from backend.core.settings import settings
 from backend.models import User
 from backend.security.jwt import decode_access_token
 
@@ -217,6 +218,13 @@ async def get_current_user(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found or deleted",
+        )
+
+    # Defense-in-depth: block unverified users from protected routes
+    if settings.REQUIRE_EMAIL_VERIFICATION and not user.email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Email verification required. Please verify your email to access this resource.",
         )
 
     return user_id
