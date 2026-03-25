@@ -359,9 +359,7 @@ export async function getEnemyProgress(enemy: string): Promise<EnemyProgressResp
 
 /**
  * Get radar chart data for all enemies.
- * GET /api/journey-engine/enemies/{enemy}/radar
- * Note: Backend route is /enemies/{enemy}/radar - we call it for each enemy
- * and aggregate, OR we can call dashboard which includes enemy_progress
+ * Uses the dashboard endpoint which includes enemy_progress with mastery_level.
  */
 export async function getEnemyRadar(): Promise<EnemyRadarData> {
   // The dashboard endpoint includes enemy_progress with mastery_level

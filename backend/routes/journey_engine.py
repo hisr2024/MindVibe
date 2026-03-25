@@ -1077,7 +1077,7 @@ async def get_enemy_progress(
     )
 
 
-@router.get("/enemies/{enemy}/radar")
+@router.get("/enemies/radar")
 async def get_enemy_radar(
     service: JourneyEngineService = Depends(get_journey_service),
     current_user: str = Depends(get_current_user),
