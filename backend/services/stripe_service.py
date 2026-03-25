@@ -388,13 +388,18 @@ async def create_checkout_session(
             session = stripe.checkout.Session.create(**session_params)
         except stripe.error.InvalidRequestError as e:
             if "upi" in payment_method_types:
-                # Stripe UPI not enabled on this account — re-raise so the
-                # route layer can fall back to Razorpay UPI.
+                # Stripe UPI not enabled on this account — raise ValueError
+                # so _create_stripe_checkout returns a proper 400 error
+                # (not a generic 500) with a helpful message.
                 logger.warning(
                     f"Stripe UPI checkout failed ({e}). "
                     "No fallback provider — caller will suggest alternative payment methods."
                 )
-                raise
+                raise ValueError(
+                    "UPI payments are not enabled on the Stripe account. "
+                    "Please enable UPI in Stripe Dashboard > Settings > Payment Methods, "
+                    "or try PayPal or Card as an alternative."
+                ) from e
             elif "paypal" in payment_method_types:
                 logger.warning(
                     f"PayPal checkout failed ({e}). "
