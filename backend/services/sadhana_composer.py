@@ -16,16 +16,68 @@ Fallback behaviour:
     so the user's practice is never blocked by an API outage.
 """
 
+import json
 import logging
 import os
+import re
 from datetime import datetime
-from typing import Any, Dict
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import openai
 
 from backend.services.kiaan_friendship_engine import get_daily_wisdom
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Gita verse corpus — lazy-loaded for Sanskrit & transliteration enrichment
+# ---------------------------------------------------------------------------
+_gita_verses: Optional[List[Dict[str, Any]]] = None
+
+
+def _load_gita_corpus() -> List[Dict[str, Any]]:
+    """Load the Gita verse corpus from JSON (cached after first load)."""
+    global _gita_verses
+    if _gita_verses is not None:
+        return _gita_verses
+
+    corpus_path = Path(__file__).resolve().parent.parent.parent / "data" / "gita" / "gita_verses_complete.json"
+    try:
+        with open(corpus_path, "r", encoding="utf-8") as f:
+            _gita_verses = json.load(f)
+            logger.info("Gita verse corpus loaded: %d verses", len(_gita_verses))
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        logger.warning("Failed to load Gita corpus at %s: %s", corpus_path, e)
+        _gita_verses = []
+
+    return _gita_verses
+
+
+def _enrich_verse_with_sanskrit(chapter: int, verse: int) -> Dict[str, Any]:
+    """Look up a verse in the Gita corpus and return Sanskrit enrichment fields.
+
+    Returns a dict with 'sanskrit', 'transliteration', and 'chapter_name'
+    if the verse is found; empty dict otherwise.
+    """
+    corpus = _load_gita_corpus()
+    for entry in corpus:
+        if entry.get("chapter") == chapter and entry.get("verse") == verse:
+            # Clean up corpus text: remove verse number suffixes and extra whitespace
+            raw_sanskrit = entry.get("sanskrit", "")
+            raw_translit = entry.get("transliteration", "")
+
+            # Strip trailing verse numbers like "।।2.47।।" and excess whitespace
+            clean_sanskrit = re.sub(r"।।\d+\.\d+।।", "", raw_sanskrit).strip()
+            clean_sanskrit = re.sub(r"\n{2,}", " ", clean_sanskrit)
+            clean_translit = raw_translit.strip().replace("\n", " ")
+
+            return {
+                "sanskrit": clean_sanskrit,
+                "transliteration": clean_translit,
+                "chapter_name": entry.get("chapter_name", ""),
+            }
+    return {}
 
 # ---------------------------------------------------------------------------
 # OpenAI client — guarded initialisation (matches openai_optimizer pattern)
@@ -320,6 +372,10 @@ async def compose_daily_sadhana(
             "english": wisdom.get("insight", ""),
             "modern_insight": wisdom.get("daily_practice", wisdom.get("insight", "")),
             "personal_interpretation": personal_interpretation,
+            **_enrich_verse_with_sanskrit(
+                wisdom.get("chapter", 2),
+                wisdom.get("verse", 47),
+            ),
         },
         "reflection_prompt": reflection_prompt,
         "dharma_intention": dharma_intention,

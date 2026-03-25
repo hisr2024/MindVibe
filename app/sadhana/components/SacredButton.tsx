@@ -40,8 +40,8 @@ export function SacredButton({
       if (progress >= 1) {
         clearInterval(holdInterval.current!)
         holdInterval.current = null
-        /* Trigger haptic feedback if available */
-        if (navigator.vibrate) navigator.vibrate(50)
+        /* Trigger haptic feedback if available (SSR-safe) */
+        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(50)
         onClick?.()
       }
     }, 16)

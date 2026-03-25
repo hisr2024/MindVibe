@@ -92,6 +92,7 @@ function getFallbackComposition(mood: SadhanaMood) {
       chapter: 2,
       verse: 47,
       verseId: '2.47',
+      sanskrit: 'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन। मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि॥',
       english: 'You have the right to perform your actions, but you are not entitled to the fruits of the actions.',
       transliteration: 'karmaṇy evādhikāras te mā phaleṣu kadācana',
       modernInsight: 'Focus on what you can do, not what might happen.',
