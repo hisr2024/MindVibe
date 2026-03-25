@@ -35,10 +35,14 @@ export default function ForgotPasswordPage() {
         setEmail('')
       } else {
         const data = await response.json().catch(() => ({}))
-        setStatus({
-          type: 'error',
-          message: data.detail || 'Something went wrong. Please try again.',
-        })
+        const detail = data.detail
+        const message =
+          typeof detail === 'string'
+            ? detail
+            : typeof detail === 'object' && detail?.detail
+              ? detail.detail
+              : 'Something went wrong. Please try again.'
+        setStatus({ type: 'error', message })
       }
     } catch {
       setStatus({

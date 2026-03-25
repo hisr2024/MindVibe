@@ -78,11 +78,14 @@ function ResetPasswordForm() {
         setConfirmPassword('')
       } else {
         const data = await response.json().catch(() => ({}))
-        const detail = data.detail || 'Failed to reset password. The link may have expired.'
-        setStatus({
-          type: 'error',
-          message: typeof detail === 'string' ? detail : JSON.stringify(detail),
-        })
+        const raw = data.detail || 'Failed to reset password. The link may have expired.'
+        const message =
+          typeof raw === 'string'
+            ? raw
+            : typeof raw === 'object' && raw?.detail
+              ? raw.detail
+              : 'Failed to reset password. The link may have expired.'
+        setStatus({ type: 'error', message })
       }
     } catch {
       setStatus({

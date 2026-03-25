@@ -1,15 +1,19 @@
-"""Email service for transactional emails (password reset, etc).
+"""Email service for transactional emails (verification, password reset).
 
 Supports multiple providers via a clean abstraction:
-- SMTP (default, works with any email provider)
+- SMTP (production — sends real emails via any SMTP provider)
 - Console (development — prints to logs instead of sending)
 
 The provider is selected via the EMAIL_PROVIDER env var.
+When EMAIL_PROVIDER is not configured for real delivery, callers should
+check can_send_email() to decide whether email-dependent flows (like
+mandatory verification) should be enforced.
 """
 
 import logging
 import os
 import smtplib
+import time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -26,6 +30,59 @@ EMAIL_FROM_ADDRESS = os.getenv("EMAIL_FROM_ADDRESS", "noreply@kiaanverse.com")
 EMAIL_FROM_NAME = os.getenv("EMAIL_FROM_NAME", "Kiaanverse")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
+# Retry configuration for transient SMTP failures (network blips, greylisting)
+_SMTP_MAX_RETRIES = int(os.getenv("SMTP_MAX_RETRIES", "3"))
+_SMTP_RETRY_DELAY = float(os.getenv("SMTP_RETRY_DELAY", "2"))  # seconds
+
+
+def can_send_email() -> bool:
+    """Return True if the email provider is configured to actually deliver emails.
+
+    When this returns False, callers should not enforce email-dependent flows
+    (e.g. mandatory email verification before login) because the user will
+    never receive the email.
+    """
+    if EMAIL_PROVIDER != "smtp":
+        return False
+    if not SMTP_HOST or SMTP_HOST == "localhost":
+        return False
+    return True
+
+
+def validate_email_config() -> list[str]:
+    """Validate email configuration and return a list of warnings.
+
+    Called during startup to surface misconfiguration early instead of
+    failing silently when the first email is sent.
+    """
+    warnings: list[str] = []
+    _is_prod = os.getenv("ENVIRONMENT", "development").lower() == "production"
+
+    if EMAIL_PROVIDER == "console":
+        msg = (
+            "EMAIL_PROVIDER=console — emails will be logged, NOT sent. "
+            "Users will NOT receive verification or password reset emails."
+        )
+        if _is_prod:
+            warnings.append(f"CRITICAL: {msg} Set EMAIL_PROVIDER=smtp for production.")
+        else:
+            warnings.append(msg)
+    elif EMAIL_PROVIDER == "smtp":
+        if not SMTP_HOST or SMTP_HOST == "localhost":
+            warnings.append(
+                "SMTP_HOST is not configured (or set to localhost). "
+                "Emails will fail in production."
+            )
+        if not SMTP_USER or not SMTP_PASSWORD:
+            warnings.append(
+                "SMTP_USER or SMTP_PASSWORD is empty. "
+                "Most SMTP providers require authentication."
+            )
+    else:
+        warnings.append(f"Unknown EMAIL_PROVIDER '{EMAIL_PROVIDER}'. Use 'smtp' or 'console'.")
+
+    return warnings
+
 
 async def send_email(to: str, subject: str, html_body: str, text_body: str | None = None) -> bool:
     """Send an email using the configured provider.
@@ -38,45 +95,81 @@ async def send_email(to: str, subject: str, html_body: str, text_body: str | Non
     elif EMAIL_PROVIDER == "smtp":
         return _send_smtp(to, subject, html_body, text_body)
     else:
-        logger.error("Unknown EMAIL_PROVIDER: %s", EMAIL_PROVIDER)
+        logger.error("Unknown EMAIL_PROVIDER: %s — email to %s not sent", EMAIL_PROVIDER, to)
         return False
 
 
 def _send_console(to: str, subject: str, html_body: str, text_body: str | None) -> bool:
     """Development provider: logs the email instead of sending it."""
     logger.info(
-        "EMAIL [console mode] To: %s | Subject: %s | Body preview: %s",
+        "EMAIL [console mode — NOT delivered] To: %s | Subject: %s | Body preview: %s",
         to,
         subject,
         (text_body or html_body)[:200],
     )
-    return True
+    # Return False so callers know the email was NOT actually delivered.
+    # This prevents misleading "verification email sent" responses.
+    return False
 
 
 def _send_smtp(to: str, subject: str, html_body: str, text_body: str | None) -> bool:
-    """Production provider: sends via SMTP."""
-    try:
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = subject
-        msg["From"] = f"{EMAIL_FROM_NAME} <{EMAIL_FROM_ADDRESS}>"
-        msg["To"] = to
+    """Production provider: sends via SMTP with retry on transient failures."""
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = f"{EMAIL_FROM_NAME} <{EMAIL_FROM_ADDRESS}>"
+    msg["To"] = to
 
-        if text_body:
-            msg.attach(MIMEText(text_body, "plain"))
-        msg.attach(MIMEText(html_body, "html"))
+    if text_body:
+        msg.attach(MIMEText(text_body, "plain"))
+    msg.attach(MIMEText(html_body, "html"))
 
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-            if SMTP_USE_TLS:
-                server.starttls()
-            if SMTP_USER and SMTP_PASSWORD:
-                server.login(SMTP_USER, SMTP_PASSWORD)
-            server.sendmail(EMAIL_FROM_ADDRESS, to, msg.as_string())
+    last_error: Exception | None = None
+    for attempt in range(1, _SMTP_MAX_RETRIES + 1):
+        try:
+            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
+                if SMTP_USE_TLS:
+                    server.starttls()
+                if SMTP_USER and SMTP_PASSWORD:
+                    server.login(SMTP_USER, SMTP_PASSWORD)
+                server.sendmail(EMAIL_FROM_ADDRESS, to, msg.as_string())
 
-        logger.info("Email sent to %s: %s", to, subject)
-        return True
-    except Exception as e:
-        logger.error("Failed to send email to %s: %s", to, e)
-        return False
+            logger.info("Email sent to %s: %s", to, subject)
+            return True
+        except smtplib.SMTPServerDisconnected as e:
+            last_error = e
+            logger.warning(
+                "SMTP disconnected sending to %s (attempt %d/%d): %s",
+                to, attempt, _SMTP_MAX_RETRIES, e,
+            )
+        except smtplib.SMTPResponseException as e:
+            last_error = e
+            # Don't retry on permanent failures (4xx = transient, 5xx = permanent)
+            if 500 <= e.smtp_code < 600:
+                logger.error("SMTP permanent error sending to %s: %d %s", to, e.smtp_code, e.smtp_error)
+                return False
+            logger.warning(
+                "SMTP transient error sending to %s (attempt %d/%d): %d %s",
+                to, attempt, _SMTP_MAX_RETRIES, e.smtp_code, e.smtp_error,
+            )
+        except (OSError, smtplib.SMTPException) as e:
+            last_error = e
+            logger.warning(
+                "SMTP error sending to %s (attempt %d/%d): %s",
+                to, attempt, _SMTP_MAX_RETRIES, e,
+            )
+        except Exception as e:
+            logger.error("Unexpected error sending email to %s: %s", to, e)
+            return False
+
+        if attempt < _SMTP_MAX_RETRIES:
+            wait = _SMTP_RETRY_DELAY * (2 ** (attempt - 1))  # exponential backoff
+            time.sleep(wait)
+
+    logger.error(
+        "Failed to send email to %s after %d attempts. Last error: %s",
+        to, _SMTP_MAX_RETRIES, last_error,
+    )
+    return False
 
 
 async def send_password_reset_email(to: str, reset_token: str) -> bool:

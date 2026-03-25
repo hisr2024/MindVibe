@@ -248,25 +248,55 @@ async def signup(request: Request, payload: SignupIn, db: AsyncSession = Depends
     except Exception as sub_err:
         logger.warning(f"Failed to create free subscription for new user {user.id}: {sub_err}")
 
-    # Send email verification token
+    # Send email verification token.
+    # If email delivery is not configured, auto-verify the user so they
+    # are not locked out of their account.
     verification_sent = False
     try:
-        raw_token = secrets.token_urlsafe(32)
-        token_hash_val = hash_password(raw_token)
-        verification_row = EmailVerificationToken(
-            id=str(uuid.uuid4()),
-            user_id=user.id,
-            token_hash=token_hash_val,
-            expires_at=datetime.now(UTC) + timedelta(hours=24),
-            ip_address=request.client.host if request.client else None,
-        )
-        db.add(verification_row)
-        await db.commit()
-        verification_sent = await send_email_verification(user.email, raw_token)
-        if not verification_sent:
-            logger.warning(f"Failed to send verification email to user {user.id}")
+        from backend.services.email_service import can_send_email
+
+        if can_send_email():
+            raw_token = secrets.token_urlsafe(32)
+            token_hash_val = hash_password(raw_token)
+            verification_row = EmailVerificationToken(
+                id=str(uuid.uuid4()),
+                user_id=user.id,
+                token_hash=token_hash_val,
+                expires_at=datetime.now(UTC) + timedelta(hours=24),
+                ip_address=request.client.host if request.client else None,
+            )
+            db.add(verification_row)
+            await db.commit()
+            verification_sent = await send_email_verification(user.email, raw_token)
+            if not verification_sent:
+                logger.warning(
+                    "Verification email failed to send for user %s — "
+                    "auto-verifying to prevent lockout",
+                    user.id,
+                )
+                # Auto-verify so the user can still log in
+                user.email_verified = True
+                user.email_verified_at = datetime.now(UTC)
+                await db.commit()
+        else:
+            # Email provider not configured — auto-verify immediately
+            logger.info(
+                "Email delivery not configured (EMAIL_PROVIDER != smtp) — "
+                "auto-verifying user %s",
+                user.id,
+            )
+            user.email_verified = True
+            user.email_verified_at = datetime.now(UTC)
+            await db.commit()
     except Exception as ver_err:
         logger.warning(f"Failed to create verification token for user {user.id}: {ver_err}")
+        # On any error, auto-verify to prevent lockout
+        try:
+            user.email_verified = True
+            user.email_verified_at = datetime.now(UTC)
+            await db.commit()
+        except Exception:
+            await db.rollback()
 
     return SignupOut(
         user_id=user.id,
@@ -332,13 +362,49 @@ async def login(
             detail={"detail": "Invalid credentials", "code": "INVALID_CREDENTIALS"},
         )
 
-    # Block login if email is not verified (only when enforcement is enabled)
+    # Block login if email is not verified (only when enforcement is enabled
+    # AND email delivery is actually configured — otherwise users have no way
+    # to verify and would be permanently locked out)
     if settings.REQUIRE_EMAIL_VERIFICATION and not user.email_verified:
-        logger.warning("Login blocked: email not verified user_id=%s email=%s", user.id, email_norm)
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={"detail": "Please verify your email before logging in", "code": "EMAIL_NOT_VERIFIED", "field": "email"},
-        )
+        from backend.services.email_service import can_send_email
+
+        if can_send_email():
+            logger.warning("Login blocked: email not verified user_id=%s email=%s", user.id, email_norm)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "detail": (
+                        "Please verify your email before logging in. "
+                        "Check your inbox (and spam folder) for a verification link, "
+                        "or request a new one via the resend verification option."
+                    ),
+                    "code": "EMAIL_NOT_VERIFIED",
+                    "field": "email",
+                },
+            )
+        else:
+            # Email provider not configured — auto-verify and allow login.
+            # Use UPDATE statement instead of ORM attribute mutation to avoid
+            # corrupting the db session state for subsequent operations (session
+            # creation, token creation, subscription fetch all need a clean session).
+            logger.warning(
+                "Email verification required but email delivery not configured — "
+                "auto-verifying user %s to prevent lockout",
+                user.id,
+            )
+            try:
+                await db.execute(
+                    update(User)
+                    .where(User.id == user.id)
+                    .values(email_verified=True, email_verified_at=datetime.now(UTC))
+                )
+                await db.commit()
+            except Exception as e:
+                logger.error("Failed to auto-verify user %s: %s", user.id, e)
+                try:
+                    await db.rollback()
+                except Exception:
+                    pass
 
     # Reset failed attempts on successful login
     if user.failed_login_attempts and user.failed_login_attempts > 0:
@@ -385,7 +451,14 @@ async def login(
             detail={"detail": "Login failed due to a server error. Please try again.", "code": "SESSION_ERROR"},
         )
 
-    access_token = create_access_token(user_id=user_id, session_id=session.id)
+    try:
+        access_token = create_access_token(user_id=user_id, session_id=session.id)
+    except Exception as e:
+        logger.error("Access token creation failed for user_id=%s: %s", user_id, e, exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={"detail": "Login failed due to a server error. Please try again.", "code": "TOKEN_ERROR"},
+        )
     expires_in_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
     # Create refresh token + set cookie
@@ -443,9 +516,9 @@ async def login(
             pass
 
     # Check developer status
-    from backend.middleware.feature_access import is_developer as check_is_developer
     is_dev = False
     try:
+        from backend.middleware.feature_access import is_developer as check_is_developer
         is_dev = await check_is_developer(db, user_id)
     except Exception:
         pass
@@ -745,6 +818,7 @@ class ForgotPasswordIn(BaseModel):
 
 class ForgotPasswordOut(BaseModel):
     message: str
+    email_configured: bool = True
 
 
 class ResetPasswordIn(BaseModel):
@@ -768,9 +842,31 @@ async def forgot_password(
     """
     email_norm = payload.email.lower()
 
+    from backend.services.email_service import can_send_email
+
+    # If email delivery is not configured, return an actionable error instead
+    # of silently pretending the email was sent.
+    if not can_send_email():
+        logger.warning(
+            "Password reset requested but email delivery not configured "
+            "(EMAIL_PROVIDER != smtp)"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "detail": (
+                    "Password reset is temporarily unavailable because email "
+                    "delivery is not configured on this server. "
+                    "Please contact support for assistance."
+                ),
+                "code": "EMAIL_NOT_CONFIGURED",
+            },
+        )
+
     # Always return same response to prevent account enumeration
     generic_response = ForgotPasswordOut(
-        message="If an account with that email exists, a password reset link has been sent."
+        message="If an account with that email exists, a password reset link has been sent.",
+        email_configured=True,
     )
 
     stmt = select(User).where(User.email == email_norm, User.deleted_at.is_(None))
@@ -810,12 +906,22 @@ async def forgot_password(
         # Return generic response to prevent account enumeration
         return generic_response
 
-    # Send email (non-blocking — failure logged but doesn't break the flow)
+    # Send email with retry logic (email_service handles retries internally)
     sent = await send_password_reset_email(user.email, raw_token)
     if not sent:
-        logger.warning("Failed to send reset email to user %s", user.id)
+        logger.error("Failed to send reset email to user %s after retries", user.id)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail={
+                "detail": (
+                    "We couldn't send the password reset email right now. "
+                    "Please try again in a few minutes."
+                ),
+                "code": "EMAIL_SEND_FAILED",
+            },
+        )
 
-    logger.info("Password reset token created for user %s", user.id)
+    logger.info("Password reset email sent for user %s", user.id)
     return generic_response
 
 
@@ -987,11 +1093,22 @@ async def resend_verification(
     Always returns success to prevent account enumeration.
     Rate limited to 3 per minute to prevent abuse.
     """
+    from backend.services.email_service import can_send_email
+
+    if not can_send_email():
+        return ResendVerificationOut(
+            message=(
+                "Email delivery is not configured on this server. "
+                "Your account has been auto-verified — please try logging in directly."
+            ),
+            sent=False,
+        )
+
     email_norm = payload.email.lower()
 
     generic_response = ResendVerificationOut(
         message="If an account with that email exists and is unverified, a verification link has been sent.",
-        sent=True,
+        sent=False,  # Updated after actual send attempt
     )
 
     stmt = select(User).where(User.email == email_norm, User.deleted_at.is_(None))
@@ -1033,10 +1150,12 @@ async def resend_verification(
         return generic_response
 
     sent = await send_email_verification(user.email, raw_token)
-    if not sent:
+    if sent:
+        logger.info("Verification email resent for user %s", user.id)
+        generic_response.sent = True
+    else:
         logger.warning("Failed to send verification email to user %s", user.id)
 
-    logger.info("Verification email resent for user %s", user.id)
     return generic_response
 
 

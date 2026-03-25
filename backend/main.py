@@ -489,6 +489,45 @@ async def startup():
 
         startup_logger.info("✅ Database schema ready")
 
+        # Step 3b: Validate email configuration (surface misconfig early)
+        startup_logger.info("\n📧 Validating email configuration...")
+        try:
+            from backend.services.email_service import (
+                EMAIL_PROVIDER as _email_provider,
+                can_send_email,
+                validate_email_config,
+            )
+
+            _email_warnings = validate_email_config()
+            for _warn in _email_warnings:
+                if "CRITICAL" in _warn:
+                    startup_logger.critical(_warn)
+                else:
+                    startup_logger.warning(f"⚠️ {_warn}")
+
+            if can_send_email():
+                startup_logger.info(
+                    "✅ Email delivery configured (provider=%s)", _email_provider
+                )
+            else:
+                startup_logger.warning(
+                    "⚠️ Email delivery NOT configured (provider=%s) — "
+                    "verification emails will not be sent. "
+                    "Users will be auto-verified on signup.",
+                    _email_provider,
+                )
+
+            # Log effective REQUIRE_EMAIL_VERIFICATION state (may have been
+            # auto-disabled by settings validator if email is not configured)
+            startup_logger.info(
+                "   Email verification enforcement: %s",
+                "ENABLED" if _settings.REQUIRE_EMAIL_VERIFICATION else "DISABLED",
+            )
+        except Exception as email_check_err:
+            startup_logger.warning(
+                "⚠️ Email config validation failed: %s", email_check_err
+            )
+
         # Step 4: Seed subscription plans if they don't exist
         startup_logger.info("\n🔧 Ensuring subscription plans exist...")
         try:
@@ -2083,35 +2122,43 @@ startup_logger.info(
 startup_logger.info("=" * 80 + "\n")
 
 
-async def _assert_migrations_healthy() -> dict[str, Any]:
-    """Ensure migrations are applied; raise HTTP 503 if not."""
+async def _get_migration_state() -> dict[str, Any]:
+    """Check migration status without throwing 503.
 
-    migration_status = await get_migration_status(engine)
+    Previously this raised HTTPException(503) when migrations were pending or
+    failed, which blocked ALL health checks and caused the frontend account
+    page to show "Service Unavailable". Health endpoints should always respond
+    so monitoring tools can see the actual state — the migration status is
+    included in the response body for operators to act on.
+    """
+    try:
+        migration_status = await get_migration_status(engine)
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Could not check migration status: {e}",
+            "run_on_startup": RUN_MIGRATIONS_ON_STARTUP,
+        }
+
     if migration_status.error:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={
-                "reason": "migration_failed",
-                "message": migration_status.error,
-                "failed_file": migration_status.failed_file,
-                "failed_statement": migration_status.failed_statement,
-                "current_revision": migration_status.current_revision,
-            },
-        )
+        return {
+            "status": "error",
+            "message": migration_status.error,
+            "failed_file": migration_status.failed_file,
+            "current_revision": migration_status.current_revision,
+            "run_on_startup": RUN_MIGRATIONS_ON_STARTUP,
+        }
 
     if migration_status.pending:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={
-                "reason": "migrations_pending",
-                "message": "Pending migrations detected; service unavailable until applied.",
-                "pending": migration_status.pending,
-                "current_revision": migration_status.current_revision,
-                "run_on_startup": RUN_MIGRATIONS_ON_STARTUP,
-            },
-        )
+        return {
+            "status": "pending",
+            "pending": migration_status.pending,
+            "current_revision": migration_status.current_revision,
+            "run_on_startup": RUN_MIGRATIONS_ON_STARTUP,
+        }
 
     return {
+        "status": "ok",
         "current_revision": migration_status.current_revision,
         "run_on_startup": RUN_MIGRATIONS_ON_STARTUP,
     }
@@ -2143,7 +2190,7 @@ async def root() -> dict[str, Any]:
 
 @app.get("/health")
 async def health() -> dict[str, Any]:
-    migration_state = await _assert_migrations_healthy()
+    migration_state = await _get_migration_state()
     _status = _compute_health_status()
     return {
         "status": _status,
@@ -2160,7 +2207,7 @@ async def health() -> dict[str, Any]:
 
 @app.get("/api/health")
 async def api_health() -> dict[str, Any]:
-    migration_state = await _assert_migrations_healthy()
+    migration_state = await _get_migration_state()
     _status = _compute_health_status()
     return {
         "status": _status,
