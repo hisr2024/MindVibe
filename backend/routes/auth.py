@@ -806,6 +806,7 @@ class ForgotPasswordIn(BaseModel):
 
 class ForgotPasswordOut(BaseModel):
     message: str
+    email_configured: bool = True
 
 
 class ResetPasswordIn(BaseModel):
@@ -829,9 +830,31 @@ async def forgot_password(
     """
     email_norm = payload.email.lower()
 
+    from backend.services.email_service import can_send_email
+
+    # If email delivery is not configured, return an actionable error instead
+    # of silently pretending the email was sent.
+    if not can_send_email():
+        logger.warning(
+            "Password reset requested but email delivery not configured "
+            "(EMAIL_PROVIDER != smtp)"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "detail": (
+                    "Password reset is temporarily unavailable because email "
+                    "delivery is not configured on this server. "
+                    "Please contact support for assistance."
+                ),
+                "code": "EMAIL_NOT_CONFIGURED",
+            },
+        )
+
     # Always return same response to prevent account enumeration
     generic_response = ForgotPasswordOut(
-        message="If an account with that email exists, a password reset link has been sent."
+        message="If an account with that email exists, a password reset link has been sent.",
+        email_configured=True,
     )
 
     stmt = select(User).where(User.email == email_norm, User.deleted_at.is_(None))
@@ -871,12 +894,22 @@ async def forgot_password(
         # Return generic response to prevent account enumeration
         return generic_response
 
-    # Send email (non-blocking — failure logged but doesn't break the flow)
+    # Send email with retry logic (email_service handles retries internally)
     sent = await send_password_reset_email(user.email, raw_token)
     if not sent:
-        logger.warning("Failed to send reset email to user %s", user.id)
+        logger.error("Failed to send reset email to user %s after retries", user.id)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail={
+                "detail": (
+                    "We couldn't send the password reset email right now. "
+                    "Please try again in a few minutes."
+                ),
+                "code": "EMAIL_SEND_FAILED",
+            },
+        )
 
-    logger.info("Password reset token created for user %s", user.id)
+    logger.info("Password reset email sent for user %s", user.id)
     return generic_response
 
 
@@ -1048,6 +1081,17 @@ async def resend_verification(
     Always returns success to prevent account enumeration.
     Rate limited to 3 per minute to prevent abuse.
     """
+    from backend.services.email_service import can_send_email
+
+    if not can_send_email():
+        return ResendVerificationOut(
+            message=(
+                "Email delivery is not configured on this server. "
+                "Your account has been auto-verified — please try logging in directly."
+            ),
+            sent=False,
+        )
+
     email_norm = payload.email.lower()
 
     generic_response = ResendVerificationOut(
