@@ -947,9 +947,9 @@ class PracticalWisdomGenerator:
         "3.43": ["kama"], "5.22": ["kama"], "7.11": ["kama"],
         # Krodha (Anger) verses
         "2.56": ["krodha"], "2.63": ["krodha"], "5.26": ["krodha"],
-        "16.1": ["krodha"], "16.2": ["krodha"], "16.21": ["krodha"],
+        "16.1": ["krodha"], "16.2": ["krodha"], "16.21": ["krodha", "lobha"],
         # Lobha (Greed) verses
-        "14.17": ["lobha"], "16.12": ["lobha"], "16.21": ["lobha"],
+        "14.17": ["lobha"], "16.12": ["lobha"],
         "17.25": ["lobha"],
         # Moha (Delusion) verses
         "2.52": ["moha"], "5.15": ["moha"], "7.27": ["moha"],

@@ -99,7 +99,6 @@ ALLOWED_HEADERS = [
     "x-client-version",
 ]
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://navi:navi@db:5432/navi")
 # RUN_MIGRATIONS_ON_STARTUP controls whether SQL migrations execute during app
 # startup.  Default is "true".  Set to "false" in environments where migrations
 # are applied via a separate pre-deploy step (e.g. Render's preDeployCommand in
@@ -112,14 +111,8 @@ RUN_MIGRATIONS_ON_STARTUP = os.getenv("RUN_MIGRATIONS_ON_STARTUP", "true").lower
     "on",
 }
 
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
-elif DATABASE_URL.startswith("postgresql://"):
-    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
-
-
-# Import engine and SessionLocal from deps.py to ensure single database connection pool
-# This avoids duplicate engines with potentially different SSL configurations
+# Import engine and SessionLocal from deps.py to ensure single database connection pool.
+# DATABASE_URL is configured in deps.py — do not duplicate it here.
 from backend.deps import engine, SessionLocal
 
 app = FastAPI(

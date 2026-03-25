@@ -124,7 +124,7 @@ GITA_CORE_CONCEPTS = {
     "phala tyaga": "renunciation of fruits",
     "samatvam": "equanimity in all dualities",
     "ishvara arpana": "offering action to the divine",
-    "sthitaprajna": "one of steady wisdom",
+    "sthitaprajna_state": "one of steady wisdom",
     "purusha": "the conscious self",
     "kshetra": "the field (body-mind)",
     "kshetrajna": "the knower of the field",
