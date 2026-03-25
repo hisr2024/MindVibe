@@ -347,6 +347,14 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
         if not self.enabled:
             return await call_next(request)
 
+        # Always allow health check endpoints through without any rate limiting.
+        # Render's health checker hits /health every 30s with minimal headers
+        # (no User-Agent). If these get rate-limited or blocked, Render marks
+        # the instance as unhealthy and returns 503 to ALL client requests.
+        _path = request.url.path
+        if _path in ("/health", "/api/health", "/", "/api/monitoring/health/detailed"):
+            return await call_next(request)
+
         # Ensure Redis is checked (lazy init)
         await self._get_redis()
 

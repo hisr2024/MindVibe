@@ -57,7 +57,8 @@ async def create_refresh_token(
     )
     db.add(row)
     await db.commit()
-    await db.refresh(row)
+    # No db.refresh() — all fields (id, token_hash, expires_at, etc.) are set
+    # locally. Refresh risks crashing if DB connection drops after commit.
     return row, raw
 
 

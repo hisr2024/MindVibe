@@ -370,6 +370,12 @@ class ThreatDetectionMiddleware(BaseHTTPMiddleware):
         if not self.enabled:
             return await call_next(request)
 
+        # Skip threat detection for health check endpoints — these are called
+        # by Render's health checker with minimal headers and must always pass.
+        _path = request.url.path
+        if _path in ("/health", "/api/health", "/", "/api/monitoring/health/detailed"):
+            return await call_next(request)
+
         # Allow legitimate search engine bots through without threat scanning.
         # Bots like Googlebot, Bingbot, and social media crawlers must access
         # the site freely for SEO indexing and link preview generation.

@@ -123,7 +123,10 @@ async def get_or_create_free_subscription(
         )
         db.add(free_plan)
         await db.commit()
-        await db.refresh(free_plan)
+        try:
+            await db.refresh(free_plan)
+        except Exception:
+            pass  # Plan object still valid — fields set locally
         logger.info("Created FREE subscription plan on-the-fly")
     
     # Create subscription for the user (use actual_user_id in case we matched by auth_uid)
@@ -137,7 +140,10 @@ async def get_or_create_free_subscription(
     )
     db.add(subscription)
     await db.commit()
-    await db.refresh(subscription)
+    try:
+        await db.refresh(subscription)
+    except Exception:
+        pass  # Subscription object still valid — fields set locally
 
     logger.info(f"Created free tier subscription for user {actual_user_id}")
     return subscription
