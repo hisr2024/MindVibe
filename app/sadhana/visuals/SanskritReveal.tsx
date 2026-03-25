@@ -49,7 +49,7 @@ export function SanskritReveal({
       <p className="text-2xl md:text-3xl font-light leading-relaxed text-[#FFF8DC]">
         {text.split('').map((char, i) => (
           <motion.span
-            key={`${i}-${char}`}
+            key={i}
             initial={{ opacity: 0, filter: 'blur(4px)' }}
             animate={
               i < visibleCount

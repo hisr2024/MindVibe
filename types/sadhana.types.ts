@@ -52,6 +52,7 @@ export interface SadhanaVerse {
   english: string
   modernInsight: string
   personalInterpretation: string
+  chapterName?: string
 }
 
 /** Reflection prompt for journaling */
