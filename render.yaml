@@ -3,7 +3,6 @@ services:
   - type: web
     name: mindvibe-api
     env: python
-    runtime: python
     plan: standard
     region: oregon
     # The index build script is skipped if the index file already exists (idempotent).
@@ -73,9 +72,6 @@ services:
       - key: REQUIRE_EMAIL_VERIFICATION
         value: "false"
     healthCheckPath: /health
-    healthCheckProtocol: http
-    healthCheckTimeout: 120
-    maxConnections: 20
     # Autoscaling settings — scale to 10 instances for up to 1,000 concurrent users
     scaling:
       minInstances: 1
