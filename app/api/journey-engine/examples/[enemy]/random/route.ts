@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
+import { forwardCookies, proxyHeaders, BACKEND_URL, fetchWithRetry } from '@/lib/proxy-utils'
 
 export async function GET(
   request: NextRequest,
@@ -13,13 +13,18 @@ export async function GET(
 ) {
   const { enemy } = await params
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${BACKEND_URL}/api/journey-engine/examples/${encodeURIComponent(enemy)}/random`,
-      { method: 'GET', headers: proxyHeaders(request, 'GET'), signal: AbortSignal.timeout(10000) }
+      { method: 'GET', headers: proxyHeaders(request, 'GET') },
+      { maxRetries: 1, timeoutMs: 15000, label: '[Journey GET /examples/:enemy/random]' }
     )
     const data = await response.json().catch(() => ({}))
     return forwardCookies(response, NextResponse.json(data, { status: response.status }))
-  } catch {
-    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 })
+  } catch (error) {
+    const isTimeout = error instanceof Error && error.name === 'TimeoutError'
+    return NextResponse.json(
+      { error: isTimeout ? 'Server is waking up, please try again in a few seconds.' : 'Service temporarily unavailable' },
+      { status: 503 }
+    )
   }
 }

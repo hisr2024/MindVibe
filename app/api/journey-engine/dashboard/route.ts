@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
+import { forwardCookies, proxyHeaders, BACKEND_URL, fetchWithRetry } from '@/lib/proxy-utils'
 
 const FALLBACK_DASHBOARD = {
   active_journeys: [],
@@ -23,11 +23,14 @@ const FALLBACK_DASHBOARD = {
 
 export async function GET(request: NextRequest) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/journey-engine/dashboard`, {
-      method: 'GET',
-      headers: proxyHeaders(request, 'GET'),
-      signal: AbortSignal.timeout(8000),
-    })
+    const response = await fetchWithRetry(
+      `${BACKEND_URL}/api/journey-engine/dashboard`,
+      {
+        method: 'GET',
+        headers: proxyHeaders(request, 'GET'),
+      },
+      { maxRetries: 1, timeoutMs: 15000, label: '[Journey GET /dashboard]' }
+    )
 
     if (response.ok) {
       const data = await response.json()

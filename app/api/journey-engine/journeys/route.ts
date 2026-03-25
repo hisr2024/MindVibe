@@ -6,10 +6,13 @@
  *
  * Proxies to the backend journey-engine service. Returns an empty
  * fallback on GET if the backend is unreachable so the UI still renders.
+ *
+ * Both handlers use fetchWithRetry to survive Render cold starts (30-60s)
+ * and transient 502/503/504 errors during deploys.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
+import { forwardCookies, proxyHeaders, BACKEND_URL, fetchWithRetry } from '@/lib/proxy-utils'
 
 const FALLBACK_JOURNEYS = {
   journeys: [],
@@ -21,11 +24,14 @@ export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url)
 
-    const response = await fetch(`${BACKEND_URL}/api/journey-engine/journeys${url.search}`, {
-      method: 'GET',
-      headers: proxyHeaders(request, 'GET'),
-      signal: AbortSignal.timeout(8000),
-    })
+    const response = await fetchWithRetry(
+      `${BACKEND_URL}/api/journey-engine/journeys${url.search}`,
+      {
+        method: 'GET',
+        headers: proxyHeaders(request, 'GET'),
+      },
+      { maxRetries: 1, timeoutMs: 15000, label: '[Journey GET /journeys]' }
+    )
 
     if (response.ok) {
       const data = await response.json()
@@ -56,16 +62,19 @@ export async function POST(request: NextRequest) {
     const rawBody = await request.text().catch(() => '')
     const body = rawBody && rawBody.length > 0 ? rawBody : '{}'
 
-    const response = await fetch(`${BACKEND_URL}/api/journey-engine/journeys`, {
-      method: 'POST',
-      headers: proxyHeaders(request, 'POST'),
-      body,
-      signal: AbortSignal.timeout(10000),
-    })
+    const response = await fetchWithRetry(
+      `${BACKEND_URL}/api/journey-engine/journeys`,
+      {
+        method: 'POST',
+        headers: proxyHeaders(request, 'POST'),
+        body,
+      },
+      { maxRetries: 2, timeoutMs: 45000, label: '[Journey POST /journeys]' }
+    )
 
     if (response.ok) {
       const data = await response.json()
-      return forwardCookies(response, NextResponse.json(data))
+      return forwardCookies(response, NextResponse.json(data, { status: response.status }))
     }
 
     // Forward the backend's error status and message
@@ -76,9 +85,14 @@ export async function POST(request: NextRequest) {
       response,
       NextResponse.json({ error: detail, detail }, { status: response.status })
     )
-  } catch {
+  } catch (error) {
+    const isTimeout = error instanceof Error && error.name === 'TimeoutError'
     return NextResponse.json(
-      { error: 'Service temporarily unavailable. Please try again.' },
+      {
+        error: isTimeout
+          ? 'Server is waking up, please try again in a few seconds.'
+          : 'Service temporarily unavailable. Please try again.',
+      },
       { status: 503 }
     )
   }

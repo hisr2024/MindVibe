@@ -33,9 +33,11 @@ import { apiFetch } from '@/lib/api';
 const _API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 const JOURNEY_ENGINE_ENDPOINT = '/api/journey-engine';
 
-// Retry configuration
-const MAX_RETRIES = 3;
-const INITIAL_RETRY_DELAY_MS = 1000;
+// Retry configuration — proxy layer now handles transient retries with longer
+// timeouts (45s) and 2 retries. Frontend retries are reduced to avoid
+// compounding: proxy 2 retries * frontend 3 retries = 9 requests per action.
+const MAX_RETRIES = 1;
+const INITIAL_RETRY_DELAY_MS = 3000;
 const RETRYABLE_STATUS_CODES = [502, 503, 504];
 
 // =============================================================================

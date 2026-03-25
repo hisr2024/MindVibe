@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
+import { forwardCookies, proxyHeaders, BACKEND_URL, fetchWithRetry } from '@/lib/proxy-utils'
 
 export async function GET(
   request: NextRequest,
@@ -14,13 +14,13 @@ export async function GET(
 ) {
   const { id } = await params
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${BACKEND_URL}/api/journey-engine/journeys/${encodeURIComponent(id)}`,
       {
         method: 'GET',
         headers: proxyHeaders(request, 'GET'),
-        signal: AbortSignal.timeout(8000),
-      }
+      },
+      { maxRetries: 1, timeoutMs: 15000, label: '[Journey GET /journeys/:id]' }
     )
 
     const data = await response.json().catch(() => ({ error: 'Invalid response' }))
@@ -28,9 +28,10 @@ export async function GET(
       response,
       NextResponse.json(data, { status: response.status })
     )
-  } catch {
+  } catch (error) {
+    const isTimeout = error instanceof Error && error.name === 'TimeoutError'
     return NextResponse.json(
-      { error: 'Service temporarily unavailable. Please try again.' },
+      { error: isTimeout ? 'Server is waking up, please try again in a few seconds.' : 'Service temporarily unavailable. Please try again.' },
       { status: 503 }
     )
   }
@@ -42,13 +43,13 @@ export async function DELETE(
 ) {
   const { id } = await params
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${BACKEND_URL}/api/journey-engine/journeys/${encodeURIComponent(id)}`,
       {
         method: 'DELETE',
         headers: proxyHeaders(request, 'DELETE'),
-        signal: AbortSignal.timeout(10000),
-      }
+      },
+      { maxRetries: 2, timeoutMs: 45000, label: '[Journey DELETE /journeys/:id]' }
     )
 
     if (response.status === 204) {
@@ -60,9 +61,10 @@ export async function DELETE(
       response,
       NextResponse.json(data, { status: response.status })
     )
-  } catch {
+  } catch (error) {
+    const isTimeout = error instanceof Error && error.name === 'TimeoutError'
     return NextResponse.json(
-      { error: 'Service temporarily unavailable. Please try again.' },
+      { error: isTimeout ? 'Server is waking up, please try again in a few seconds.' : 'Service temporarily unavailable. Please try again.' },
       { status: 503 }
     )
   }
