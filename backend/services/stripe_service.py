@@ -392,7 +392,7 @@ async def create_checkout_session(
                 # route layer can fall back to Razorpay UPI.
                 logger.warning(
                     f"Stripe UPI checkout failed ({e}). "
-                    "Caller should fall back to Razorpay."
+                    "No fallback provider — caller will suggest alternative payment methods."
                 )
                 raise
             elif "paypal" in payment_method_types:

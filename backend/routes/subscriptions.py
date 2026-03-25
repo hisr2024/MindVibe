@@ -3,7 +3,7 @@
 Endpoints:
 - GET /api/subscriptions/tiers - List available plans
 - GET /api/subscriptions/current - Get user's current subscription
-- POST /api/subscriptions/checkout - Create checkout session (Stripe or Razorpay)
+- POST /api/subscriptions/checkout - Create checkout session (Stripe, PayPal, or Razorpay when enabled)
 - POST /api/subscriptions/cancel - Cancel subscription
 - POST /api/subscriptions/webhook - Stripe webhook handler
 - POST /api/subscriptions/webhook/razorpay - Razorpay webhook handler
@@ -183,7 +183,8 @@ async def create_checkout(
 ) -> CheckoutSessionOut:
     """Create a checkout session for purchasing a subscription.
 
-    Routes to Stripe (card/paypal) or Razorpay (UPI) based on payment_method.
+    Routes to Stripe (card/upi/google_pay), direct PayPal (INR), or
+    Razorpay (UPI fallback, when RAZORPAY_ENABLED=true) based on payment_method.
 
     Args:
         payload: The checkout session configuration including payment method.
@@ -229,16 +230,31 @@ async def create_checkout(
                     "message": "UPI is only available with INR currency.",
                 },
             )
-        # Try Stripe UPI first (preferred — avoids Razorpay KYC requirement).
-        # Falls back to Razorpay UPI if Stripe UPI is not enabled or INR
-        # Price IDs are not configured.
-        if is_stripe_configured():
-            try:
-                return await _create_stripe_checkout(db, user, payload)
-            except Exception as e:
-                logger.info(f"Stripe UPI unavailable, falling back to Razorpay: {e}")
-        # Fall back to Razorpay UPI
-        return await _create_razorpay_checkout(db, user, payload)
+        # Stripe UPI is the primary UPI provider (supports GPay, PhonePe,
+        # Paytm, and all other UPI apps).  If Stripe UPI fails, suggest
+        # PayPal or Card as alternatives instead of falling back to Razorpay.
+        try:
+            return await _create_stripe_checkout(db, user, payload)
+        except Exception as e:
+            logger.warning(f"Stripe UPI checkout failed for user {user.id}: {e}")
+
+            # If Razorpay is enabled and configured, try it as a last resort
+            from backend.services.razorpay_service import is_razorpay_configured
+            if is_razorpay_configured():
+                logger.info("Falling back to Razorpay UPI")
+                return await _create_razorpay_checkout(db, user, payload)
+
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={
+                    "error": "upi_unavailable",
+                    "message": (
+                        "UPI payments are temporarily unavailable. "
+                        "Please try PayPal or Card as an alternative payment method."
+                    ),
+                    "suggested_methods": ["paypal", "card"],
+                },
+            )
 
     # PayPal + INR: Route to direct PayPal integration (Stripe PayPal doesn't support INR)
     if payload.payment_method == "paypal" and payload.currency == "inr":

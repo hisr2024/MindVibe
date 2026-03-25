@@ -61,7 +61,15 @@ def _get_razorpay_keys() -> tuple[str, str, str]:
 
 
 def is_razorpay_configured() -> bool:
-    """Check if Razorpay is properly configured."""
+    """Check if Razorpay is properly configured and enabled.
+
+    Razorpay can be disabled via the RAZORPAY_ENABLED environment variable
+    (defaults to ``false``).  When disabled, all Razorpay payment paths
+    (checkout, webhooks, subscription links) are skipped.
+    """
+    enabled = os.getenv("RAZORPAY_ENABLED", "false").lower() in ("true", "1", "yes")
+    if not enabled:
+        return False
     key_id, key_secret, _ = _get_razorpay_keys()
     return RAZORPAY_AVAILABLE and bool(key_id) and bool(key_secret)
 

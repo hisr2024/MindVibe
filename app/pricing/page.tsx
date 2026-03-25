@@ -551,9 +551,15 @@ export default function PricingPage() {
             ? detail
             : error.message || 'Unable to create checkout session. Please try again or use a different payment method.'
 
-        // If payment method specific, suggest switching to Card
+        // If payment method specific, suggest alternatives based on backend hints
         if (response.status === 503 && paymentMethod !== 'card') {
-          throw new Error(`${errorMessage} Try selecting "Card" as your payment method.`)
+          const suggestions = typeof detail === 'object' && Array.isArray(detail?.suggested_methods)
+            ? detail.suggested_methods as string[]
+            : []
+          const suggestion = suggestions.includes('paypal') && currency === 'INR'
+            ? 'Try "PayPal" or "Card" as your payment method.'
+            : 'Try selecting "Card" as your payment method.'
+          throw new Error(`${errorMessage} ${suggestion}`)
         }
         throw new Error(errorMessage)
       }

@@ -38,14 +38,22 @@ interface PaymentHistoryResponse {
 const PROVIDER_LABELS: Record<string, string> = {
   stripe_card: 'Card',
   stripe_paypal: 'PayPal',
-  razorpay_upi: 'UPI',
+  stripe_upi: 'UPI',
+  stripe_google_pay: 'Google Pay',
+  stripe_apple_pay: 'Apple Pay',
+  razorpay_upi: 'UPI (Legacy)',
+  paypal_direct: 'PayPal',
   free: 'Free',
 }
 
 const PROVIDER_COLORS: Record<string, string> = {
   stripe_card: 'bg-indigo-500/15 border-indigo-500/30 text-indigo-200',
   stripe_paypal: 'bg-blue-500/15 border-blue-500/30 text-blue-200',
+  stripe_upi: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-200',
+  stripe_google_pay: 'bg-teal-500/15 border-teal-500/30 text-teal-200',
+  stripe_apple_pay: 'bg-gray-500/15 border-gray-500/30 text-gray-200',
   razorpay_upi: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-200',
+  paypal_direct: 'bg-blue-500/15 border-blue-500/30 text-blue-200',
   free: 'bg-[#d4a44c]/10 border-[#d4a44c]/30 text-[#f5f0e8]/70',
 }
 
