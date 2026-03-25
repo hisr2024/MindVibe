@@ -365,10 +365,8 @@ describe('JourneyService', () => {
 
   describe('Error Handling', () => {
     it('should handle network errors after retries', async () => {
-      // Mock 4 failed network errors (initial + 3 retries)
+      // Mock 2 failed network errors (initial + 1 retry, proxy now handles most retries)
       mockFetch
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockRejectedValueOnce(new Error('Network error'))
         .mockRejectedValueOnce(new Error('Network error'))
         .mockRejectedValueOnce(new Error('Network error'));
 
@@ -379,8 +377,8 @@ describe('JourneyService', () => {
         expect(error).toBeInstanceOf(JourneyServiceError);
         expect((error as JourneyServiceError).code).toBe('NETWORK_ERROR');
         expect((error as JourneyServiceError).statusCode).toBe(0);
-        // Verify it attempted retries
-        expect(mockFetch).toHaveBeenCalledTimes(4);
+        // Verify it attempted retries (1 original + 1 retry)
+        expect(mockFetch).toHaveBeenCalledTimes(2);
       }
     }, 20000); // Extended timeout for retries
 
@@ -495,15 +493,13 @@ describe('JourneyService', () => {
     });
 
     it('should handle 502 Bad Gateway error after retries', async () => {
-      // Mock 4 failed attempts (initial + 3 retries)
+      // Mock 2 failed attempts (initial + 1 retry, proxy now handles most retries)
       const errorResponse = {
         ok: false,
         status: 502,
         json: async () => ({ detail: 'Bad Gateway' }),
       };
       mockFetch
-        .mockResolvedValueOnce(errorResponse)
-        .mockResolvedValueOnce(errorResponse)
         .mockResolvedValueOnce(errorResponse)
         .mockResolvedValueOnce(errorResponse);
 
@@ -513,13 +509,13 @@ describe('JourneyService', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(JourneyServiceError);
         expect((error as JourneyServiceError).statusCode).toBe(502);
-        // Verify it attempted retries
-        expect(mockFetch).toHaveBeenCalledTimes(4);
+        // Verify it attempted retries (1 original + 1 retry)
+        expect(mockFetch).toHaveBeenCalledTimes(2);
       }
     }, 20000); // Extended timeout for retries
 
     it('should handle 503 Service Unavailable error after retries', async () => {
-      // Mock 4 failed attempts (initial + 3 retries)
+      // Mock 2 failed attempts (initial + 1 retry, proxy now handles most retries)
       const errorResponse = {
         ok: false,
         status: 503,
@@ -528,8 +524,6 @@ describe('JourneyService', () => {
         }),
       };
       mockFetch
-        .mockResolvedValueOnce(errorResponse)
-        .mockResolvedValueOnce(errorResponse)
         .mockResolvedValueOnce(errorResponse)
         .mockResolvedValueOnce(errorResponse);
 
@@ -540,13 +534,13 @@ describe('JourneyService', () => {
         expect(error).toBeInstanceOf(JourneyServiceError);
         expect((error as JourneyServiceError).code).toBe('SERVICE_UNAVAILABLE');
         expect((error as JourneyServiceError).statusCode).toBe(503);
-        // Verify it attempted retries
-        expect(mockFetch).toHaveBeenCalledTimes(4);
+        // Verify it attempted retries (1 original + 1 retry)
+        expect(mockFetch).toHaveBeenCalledTimes(2);
       }
     }, 20000); // Extended timeout for retries
 
     it('should recover from transient 503 errors on retry', async () => {
-      // First 2 calls fail with 503, third succeeds
+      // First call fails with 503, second succeeds (proxy handles deeper retries)
       const errorResponse = {
         ok: false,
         status: 503,
@@ -559,12 +553,11 @@ describe('JourneyService', () => {
       };
       mockFetch
         .mockResolvedValueOnce(errorResponse)
-        .mockResolvedValueOnce(errorResponse)
         .mockResolvedValueOnce(successResponse);
 
       const result = await listJourneys();
       expect(result.items).toEqual([]);
-      expect(mockFetch).toHaveBeenCalledTimes(3);
+      expect(mockFetch).toHaveBeenCalledTimes(2);
     }, 15000); // Extended timeout for retries
 
     it('should handle string error detail', async () => {
@@ -603,10 +596,8 @@ describe('JourneyService', () => {
     });
 
     it('should handle timeout errors after retries', async () => {
-      // Mock 4 failed network errors (initial + 3 retries)
+      // Mock 2 failed network errors (initial + 1 retry, proxy now handles most retries)
       mockFetch
-        .mockRejectedValueOnce(new Error('Timeout'))
-        .mockRejectedValueOnce(new Error('Timeout'))
         .mockRejectedValueOnce(new Error('Timeout'))
         .mockRejectedValueOnce(new Error('Timeout'));
 
@@ -616,8 +607,8 @@ describe('JourneyService', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(JourneyServiceError);
         expect((error as JourneyServiceError).code).toBe('NETWORK_ERROR');
-        // Verify it attempted retries
-        expect(mockFetch).toHaveBeenCalledTimes(4);
+        // Verify it attempted retries (1 original + 1 retry)
+        expect(mockFetch).toHaveBeenCalledTimes(2);
       }
     }, 20000); // Extended timeout for retries
 

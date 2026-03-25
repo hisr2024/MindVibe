@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
+import { forwardCookies, proxyHeaders, BACKEND_URL, fetchWithRetry } from '@/lib/proxy-utils'
 
 export async function POST(
   request: NextRequest,
@@ -13,13 +13,13 @@ export async function POST(
 ) {
   const { id } = await params
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${BACKEND_URL}/api/journey-engine/journeys/${encodeURIComponent(id)}/resume`,
       {
         method: 'POST',
         headers: proxyHeaders(request, 'POST'),
-        signal: AbortSignal.timeout(10000),
-      }
+      },
+      { maxRetries: 2, timeoutMs: 45000, label: '[Journey POST /resume]' }
     )
 
     const data = await response.json().catch(() => ({ error: 'Invalid response' }))
@@ -27,9 +27,10 @@ export async function POST(
       response,
       NextResponse.json(data, { status: response.status })
     )
-  } catch {
+  } catch (error) {
+    const isTimeout = error instanceof Error && error.name === 'TimeoutError'
     return NextResponse.json(
-      { error: 'Service temporarily unavailable. Please try again.' },
+      { error: isTimeout ? 'Server is waking up, please try again in a few seconds.' : 'Service temporarily unavailable. Please try again.' },
       { status: 503 }
     )
   }

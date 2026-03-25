@@ -22,9 +22,10 @@ import { apiFetch } from '@/lib/api';
 
 const JOURNEYS_ENDPOINT = '/api/journeys';
 
-// Retry configuration for transient failures
-const MAX_RETRIES = 3;
-const INITIAL_RETRY_DELAY_MS = 1000;
+// Retry configuration — proxy layer now handles transient retries with longer
+// timeouts (45s) and 2 retries. Frontend retries are reduced to avoid compounding.
+const MAX_RETRIES = 1;
+const INITIAL_RETRY_DELAY_MS = 3000;
 const RETRYABLE_STATUS_CODES = [502, 503, 504]; // Bad Gateway, Service Unavailable, Gateway Timeout
 
 // =============================================================================

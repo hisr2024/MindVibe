@@ -102,6 +102,76 @@ export const BACKEND_URL =
     ? 'https://mindvibe-api.onrender.com'
     : 'http://localhost:8000')
 
+// =============================================================================
+// TRANSIENT ERROR DETECTION
+// =============================================================================
+
+/** HTTP status codes that indicate a transient backend failure (cold start, deploy, etc.) */
+const TRANSIENT_STATUS_CODES = [502, 503, 504]
+
+/**
+ * Fetch with retry logic for transient backend failures.
+ *
+ * Render free-tier cold starts can take 30-60s. Without retries, the proxy
+ * returns 503 immediately, and the frontend retry loop compounds the problem
+ * (each frontend retry spawns a new proxy request that also fails).
+ *
+ * This helper retries at the proxy level so the backend has time to wake up
+ * before the frontend gives up entirely.
+ */
+export async function fetchWithRetry(
+  url: string,
+  init: RequestInit & { signal?: AbortSignal },
+  options: { maxRetries?: number; timeoutMs?: number; label?: string } = {}
+): Promise<Response> {
+  const { maxRetries = 2, timeoutMs = 45000, label = '[Proxy]' } = options
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, {
+        ...init,
+        signal: init.signal ?? AbortSignal.timeout(timeoutMs),
+      })
+
+      // Retry on transient errors (backend cold-starting or deploying)
+      if (TRANSIENT_STATUS_CODES.includes(response.status) && attempt < maxRetries) {
+        const backoffMs = 2000 * Math.pow(2, attempt)
+        console.warn(`${label} Got ${response.status}, retrying in ${backoffMs}ms (attempt ${attempt + 1}/${maxRetries})`)
+        await new Promise(resolve => setTimeout(resolve, backoffMs))
+        continue
+      }
+
+      return response
+    } catch (error) {
+      const isTimeout = error instanceof Error && (
+        error.name === 'TimeoutError' || error.name === 'AbortError'
+      )
+
+      if (attempt < maxRetries) {
+        const backoffMs = 2000 * Math.pow(2, attempt)
+        console.warn(`${label} ${isTimeout ? 'Timeout' : 'Error'} on attempt ${attempt + 1}, retrying in ${backoffMs}ms`)
+        await new Promise(resolve => setTimeout(resolve, backoffMs))
+        continue
+      }
+
+      // Final attempt failed — throw with context
+      if (isTimeout) {
+        const err = new Error('Backend timeout — server may be waking up')
+        err.name = 'TimeoutError'
+        throw err
+      }
+      throw error
+    }
+  }
+
+  // Unreachable, but TypeScript needs it
+  throw new Error('fetchWithRetry exhausted all attempts')
+}
+
+// =============================================================================
+// PROXY HANDLER FACTORY
+// =============================================================================
+
 /**
  * Create a proxy handler that forwards a request to the backend and returns
  * the response with Set-Cookie headers preserved.

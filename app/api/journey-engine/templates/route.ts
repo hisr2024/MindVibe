@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
+import { forwardCookies, proxyHeaders, BACKEND_URL, fetchWithRetry } from '@/lib/proxy-utils'
 
 const FALLBACK_TEMPLATES = {
   templates: [],
@@ -19,11 +19,14 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url)
     const queryString = url.search
 
-    const response = await fetch(`${BACKEND_URL}/api/journey-engine/templates${queryString}`, {
-      method: 'GET',
-      headers: proxyHeaders(request, 'GET'),
-      signal: AbortSignal.timeout(8000),
-    })
+    const response = await fetchWithRetry(
+      `${BACKEND_URL}/api/journey-engine/templates${queryString}`,
+      {
+        method: 'GET',
+        headers: proxyHeaders(request, 'GET'),
+      },
+      { maxRetries: 1, timeoutMs: 15000, label: '[Journey GET /templates]' }
+    )
 
     if (response.ok) {
       const data = await response.json()

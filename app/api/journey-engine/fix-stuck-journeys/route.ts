@@ -4,15 +4,18 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
+import { forwardCookies, proxyHeaders, BACKEND_URL, fetchWithRetry } from '@/lib/proxy-utils'
 
 export async function POST(request: NextRequest) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/journey-engine/fix-stuck-journeys`, {
-      method: 'POST',
-      headers: proxyHeaders(request, 'POST'),
-      signal: AbortSignal.timeout(15000),
-    })
+    const response = await fetchWithRetry(
+      `${BACKEND_URL}/api/journey-engine/fix-stuck-journeys`,
+      {
+        method: 'POST',
+        headers: proxyHeaders(request, 'POST'),
+      },
+      { maxRetries: 2, timeoutMs: 45000, label: '[Journey POST /fix-stuck-journeys]' }
+    )
 
     if (response.ok) {
       const data = await response.json()
@@ -37,9 +40,10 @@ export async function POST(request: NextRequest) {
         { status: response.status }
       )
     )
-  } catch {
+  } catch (error) {
+    const isTimeout = error instanceof Error && error.name === 'TimeoutError'
     return NextResponse.json(
-      { error: 'Service temporarily unavailable. Please try again.' },
+      { error: isTimeout ? 'Server is waking up, please try again in a few seconds.' : 'Service temporarily unavailable. Please try again.' },
       { status: 503 }
     )
   }
