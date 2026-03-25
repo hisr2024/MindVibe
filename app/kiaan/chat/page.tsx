@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useMemo, useRef, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { KiaanChat, type Message } from '@/components/chat/KiaanChat';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { apiCall, getErrorMessage, isQuotaExceeded, isFeatureLocked, getUpgradeUrl } from '@/lib/api-client';
@@ -31,6 +31,7 @@ const NextStepLink = dynamic(
 function KiaanChatPageInner() {
   const { t, language } = useLanguage();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<'detailed' | 'summary'>('summary');
@@ -157,11 +158,11 @@ function KiaanChatPageInner() {
         prefill: text,
         source: 'kiaan',
       });
-      window.location.href = `/sacred-reflections?${params.toString()}`;
+      router.push(`/sacred-reflections?${params.toString()}`);
     } catch (error) {
       console.error('Failed to save to journal:', error);
     }
-  }, []);
+  }, [router]);
 
   const handleCopyResponse = useCallback((text: string) => {
     if (typeof window === 'undefined') return;

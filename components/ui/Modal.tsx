@@ -1,6 +1,6 @@
 'use client'
 
-import { type ReactNode, useEffect, useRef, useState, useCallback } from 'react'
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
 import { Portal } from './Portal'
 import { lockBodyScroll, unlockBodyScroll } from '@/lib/mobile/bodyScrollLock'
 
@@ -38,7 +38,16 @@ export function Modal({
   const contentRef = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(open)
 
-  // Handle visibility and body scroll lock
+  // Sync visibility immediately when opening to prevent flicker.
+  // useLayoutEffect runs synchronously before paint.
+  useLayoutEffect(() => {
+    if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronous open detection; must run before paint to prevent content flash
+      setIsVisible(true)
+    }
+  }, [open])
+
+  // Handle body scroll lock and delayed close
   useEffect(() => {
     if (open) {
       lockBodyScroll()
@@ -51,11 +60,6 @@ export function Modal({
       unlockBodyScroll()
     }
   }, [open])
-
-  // Sync open -> isVisible during render (React recommended pattern for prop-to-state)
-  if (open && !isVisible) {
-    setIsVisible(true)
-  }
 
   // Store previously focused element for focus restoration
   const previousFocusRef = useRef<HTMLElement | null>(null)

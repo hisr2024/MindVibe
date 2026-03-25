@@ -12,6 +12,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDivineConsciousness } from '@/contexts/DivineConsciousnessContext';
 
@@ -84,6 +85,7 @@ export function DivineCompanion({
   showByDefault = true,
   className = '',
 }: DivineCompanionProps) {
+  const router = useRouter();
   const { actions, state: _state } = useDivineConsciousness();
   const [isVisible, _setIsVisible] = useState(showByDefault);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -293,7 +295,7 @@ export function DivineCompanion({
                 </motion.button>
                 <motion.button
                   onClick={() => {
-                    window.location.href = '/kiaan';
+                    router.push('/kiaan');
                   }}
                   className="flex-1 py-2 bg-gradient-to-r from-[#d4a44c]/20 to-[#d4a44c]/20 hover:from-[#d4a44c]/30 hover:to-[#d4a44c]/30 border border-[#d4a44c]/20 rounded-xl text-[#e8b54a]/80 text-xs transition-colors flex items-center justify-center gap-1"
                   whileHover={{ scale: 1.02 }}

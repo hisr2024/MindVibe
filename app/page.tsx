@@ -16,6 +16,7 @@
 
 import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { useLanguage } from '@/hooks/useLanguage';
 import { springConfigs } from '@/lib/animations/spring-configs';
 
@@ -28,29 +29,7 @@ const DivineKrishnaPresence = dynamic(() => import('@/components/divine/DivineKr
 const DivineSacredActions = dynamic(() => import('@/components/divine/DivineSacredActions').then(mod => mod.DivineSacredActions), { ssr: false });
 
 export default function Home() {
-  const { t, isInitialized } = useLanguage();
-
-  if (!isInitialized) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <motion.div
-          className="text-center space-y-4"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={springConfigs.smooth}
-        >
-          <motion.div
-            className="h-12 w-12 rounded-full border-4 border-[#d4a44c] border-t-transparent mx-auto"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          />
-          <p className="text-[#d4a44c]/80 text-sm tracking-wide">
-            {t('common.loading', 'Entering the sacred space...')}
-          </p>
-        </motion.div>
-      </div>
-    );
-  }
+  const { t } = useLanguage();
 
   return (
     <main className="relative min-h-screen overflow-hidden">
@@ -128,18 +107,18 @@ export default function Home() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center pt-4">
-              <a
+              <Link
                 href="/introduction"
                 className="divine-cta-primary inline-flex items-center gap-2 px-8 py-3 font-semibold rounded-full text-sm sm:text-base"
               >
                 {t('home.value.cta', 'Begin Your Journey')}
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/pricing"
                 className="inline-flex items-center gap-2 px-6 py-3 border border-[#d4a44c]/30 text-[#d4a44c]/90 rounded-full hover:border-[#d4a44c]/60 transition-all text-sm"
               >
                 {t('home.value.pricing', 'View Plans — Free to Start')}
-              </a>
+              </Link>
             </div>
           </div>
         </motion.section>

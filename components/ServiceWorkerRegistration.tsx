@@ -1,21 +1,11 @@
 /**
  * Service Worker Registration Component
- * Registers the service worker on client side.
- *
- * Reload guard: after a SW-triggered reload, a 60-second cooldown prevents
- * further reloads (sessionStorage). This stops infinite reload loops when the
- * SW update check finds a new version on every cycle.
+ * Registers the service worker on client side and auto-activates updates.
  */
 
 'use client'
 
 import { useEffect } from 'react'
-
-// Module-level flag — survives React re-renders within the same page load
-let hasReloadedForSW = false
-
-const SW_RELOAD_COOLDOWN_MS = 60_000
-const SW_RELOAD_TS_KEY = 'sw_reload_ts'
 
 export function ServiceWorkerRegistration() {
   useEffect(() => {
@@ -51,19 +41,11 @@ export function ServiceWorkerRegistration() {
         console.error('Service Worker registration failed:', error)
       })
 
-    // Reload page when a new service worker takes control (clears stale caches).
-    // Guarded by module-level flag + sessionStorage cooldown to prevent loops.
+    // When a new service worker takes control, the SKIP_WAITING message
+    // already activates it. Subsequent fetches automatically use the new
+    // cache, so a hard page reload is unnecessary and causes visible flicker.
     const handleControllerChange = () => {
-      if (hasReloadedForSW) return
-      try {
-        const lastReload = sessionStorage.getItem(SW_RELOAD_TS_KEY)
-        if (lastReload && Date.now() - Number(lastReload) < SW_RELOAD_COOLDOWN_MS) return
-        sessionStorage.setItem(SW_RELOAD_TS_KEY, String(Date.now()))
-      } catch {
-        // sessionStorage unavailable (private browsing) — still allow one reload
-      }
-      hasReloadedForSW = true
-      window.location.reload()
+      // No-op: new SW is already active, no reload needed
     }
 
     // Listen for messages from service worker
