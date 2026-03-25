@@ -334,15 +334,18 @@ async def startup():
             startup_logger.info("✅ Redis connected (distributed state enabled)")
         else:
             if _settings.REDIS_REQUIRED and _is_prod:
-                raise RuntimeError(
-                    "Redis is REQUIRED in production for distributed state "
+                startup_logger.critical(
+                    "⚠️ Redis is REQUIRED in production for distributed state "
                     "(WebSocket Pub/Sub, rate limiting, DDoS tracking) but connection failed "
                     f"after {_max_retries} retries. "
-                    "Set REDIS_REQUIRED=false to allow single-instance fallback."
+                    "Continuing with in-memory fallback (single-instance mode). "
+                    "Set REDIS_REQUIRED=false to suppress this warning, "
+                    "or fix your REDIS_URL to restore distributed features."
                 )
-            startup_logger.warning(
-                "⚠️ Redis not connected — falling back to in-memory (single-instance only)"
-            )
+            else:
+                startup_logger.warning(
+                    "⚠️ Redis not connected — falling back to in-memory (single-instance only)"
+                )
 
         # Step 1: Ensure ORM tables exist first (base tables like users, sessions
         # must exist before SQL migrations that reference them with REFERENCES)
