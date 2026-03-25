@@ -285,6 +285,27 @@ app.add_middleware(
 )
 
 
+import asyncio as _asyncio
+
+# Startup status tracking — reflects actual system health across all components.
+# Health endpoints use this to report true degradation state instead of just
+# checking kiaan_router_loaded.
+_startup_status: dict[str, Any] = {
+    "redis_connected": False,
+    "database_ready": False,
+    "migrations_applied": False,
+    "routers_loaded": 0,
+    "routers_failed": 0,
+    "background_tasks": [],
+    "started": False,
+}
+
+# Timeout for database operations during startup (seconds).
+# Prevents startup from hanging indefinitely if the database is slow or
+# unreachable, which would cause Render/Vercel to kill the container.
+_STARTUP_DB_TIMEOUT = int(os.getenv("STARTUP_DB_TIMEOUT", "60"))
+
+
 @app.on_event("startup")
 async def startup():
     try:
@@ -332,6 +353,29 @@ async def startup():
 
         if _redis.is_connected:
             startup_logger.info("✅ Redis connected (distributed state enabled)")
+            _startup_status["redis_connected"] = True
+
+            # Re-initialize rate limiter storage with Redis now that it's connected.
+            # The limiter is created at module-import time (before startup runs),
+            # so it falls back to in-memory storage if Redis wasn't ready yet.
+            # This ensures multi-instance deployments share rate limit buckets.
+            try:
+                from backend.middleware.rate_limiter import limiter as _limiter
+
+                _redis_url = _settings.REDIS_URL
+                if _redis_url and hasattr(_limiter, "_storage") and _limiter._storage:
+                    _current_uri = getattr(_limiter._storage, "uri", None)
+                    if not _current_uri or "memory" in str(type(_limiter._storage)).lower():
+                        from limits.storage import storage_from_string
+
+                        _limiter._storage = storage_from_string(_redis_url)
+                        startup_logger.info(
+                            "✅ Rate limiter storage upgraded to Redis (distributed)"
+                        )
+            except Exception as _rl_err:
+                startup_logger.warning(
+                    f"⚠️ Could not upgrade rate limiter to Redis storage: {_rl_err}"
+                )
         else:
             if _settings.REDIS_REQUIRED and _is_prod:
                 startup_logger.critical(
@@ -348,12 +392,27 @@ async def startup():
                 )
 
         # Step 1: Ensure ORM tables exist first (base tables like users, sessions
-        # must exist before SQL migrations that reference them with REFERENCES)
+        # must exist before SQL migrations that reference them with REFERENCES).
+        # Wrapped in asyncio.wait_for to prevent indefinite hangs if the database
+        # is slow/unreachable — Render kills containers after health check timeout.
         startup_logger.info("\n🔧 Ensuring ORM tables exist...")
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
-        startup_logger.info("✅ Base database schema ready")
+        try:
+            async with engine.begin() as conn:
+                await _asyncio.wait_for(
+                    conn.run_sync(Base.metadata.create_all),
+                    timeout=_STARTUP_DB_TIMEOUT,
+                )
+            startup_logger.info("✅ Base database schema ready")
+            _startup_status["database_ready"] = True
+        except _asyncio.TimeoutError:
+            startup_logger.error(
+                f"❌ Database schema creation timed out after {_STARTUP_DB_TIMEOUT}s. "
+                "The database may be overloaded or unreachable. "
+                "Set STARTUP_DB_TIMEOUT to increase the limit."
+            )
+            raise RuntimeError(
+                f"Database schema creation timed out after {_STARTUP_DB_TIMEOUT}s"
+            )
 
         # Step 2: Run SQL migrations (these may ALTER or CREATE tables that
         # reference base ORM tables, so they must run after Step 1)
@@ -362,29 +421,47 @@ async def startup():
         # non-fatal — the app works correctly with ORM-created tables.
         if RUN_MIGRATIONS_ON_STARTUP:
             try:
-                migration_result = await apply_sql_migrations(engine)
+                migration_result = await _asyncio.wait_for(
+                    apply_sql_migrations(engine),
+                    timeout=_STARTUP_DB_TIMEOUT,
+                )
                 if migration_result.applied:
                     startup_logger.info(
                         f"✅ Applied SQL migrations: {', '.join(migration_result.applied)}"
                     )
                 else:
                     startup_logger.info("ℹ️ No new SQL migrations to apply")
+                _startup_status["migrations_applied"] = True
+            except _asyncio.TimeoutError:
+                startup_logger.error(
+                    f"⚠️ SQL migrations timed out after {_STARTUP_DB_TIMEOUT}s — "
+                    "continuing with current schema"
+                )
             except Exception as migration_error:
                 startup_logger.warning(
                     f"⚠️ SQL migrations had issues (non-fatal on fresh DB): {migration_error}"
                 )
         else:
-            migration_result = await get_migration_status(engine)
-            if migration_result.pending:
-                startup_logger.info(
-                    "⚠️ RUN_MIGRATIONS_ON_STARTUP disabled; pending migrations detected"
+            try:
+                migration_result = await _asyncio.wait_for(
+                    get_migration_status(engine),
+                    timeout=_STARTUP_DB_TIMEOUT,
                 )
-                startup_logger.info(
-                    f"   Pending: {', '.join(migration_result.pending)}"
-                )
-            else:
-                startup_logger.info(
-                    "ℹ️ RUN_MIGRATIONS_ON_STARTUP disabled; no pending migrations"
+                if migration_result.pending:
+                    startup_logger.info(
+                        "⚠️ RUN_MIGRATIONS_ON_STARTUP disabled; pending migrations detected"
+                    )
+                    startup_logger.info(
+                        f"   Pending: {', '.join(migration_result.pending)}"
+                    )
+                else:
+                    startup_logger.info(
+                        "ℹ️ RUN_MIGRATIONS_ON_STARTUP disabled; no pending migrations"
+                    )
+                _startup_status["migrations_applied"] = True
+            except _asyncio.TimeoutError:
+                startup_logger.error(
+                    f"⚠️ Migration status check timed out after {_STARTUP_DB_TIMEOUT}s"
                 )
 
         # Step 3: Run manual Python migrations
@@ -392,12 +469,20 @@ async def startup():
         try:
             from backend.core.manual_migrations import run_manual_migrations
 
-            manual_results = await run_manual_migrations(engine)
+            manual_results = await _asyncio.wait_for(
+                run_manual_migrations(engine),
+                timeout=_STARTUP_DB_TIMEOUT,
+            )
             for migration_name, result in manual_results.items():
                 status_icon = "✅" if result["success"] else "⚠️"
                 startup_logger.info(
                     f"{status_icon} {migration_name}: {result['message']}"
                 )
+        except _asyncio.TimeoutError:
+            startup_logger.error(
+                f"⚠️ Manual migrations timed out after {_STARTUP_DB_TIMEOUT}s — "
+                "continuing with current schema"
+            )
         except Exception as manual_error:
             startup_logger.info(f"⚠️ Manual migrations had issues: {manual_error}")
             # Don't fail startup - manual migrations are supplementary
@@ -411,8 +496,15 @@ async def startup():
 
             # Pass the existing engine directly to avoid password-masking
             # issues with str(engine.url) which replaces the password with '***'
-            await seed_subscription_plans(existing_engine=engine)
+            await _asyncio.wait_for(
+                seed_subscription_plans(existing_engine=engine),
+                timeout=_STARTUP_DB_TIMEOUT,
+            )
             startup_logger.info("✅ Subscription plans ready")
+        except _asyncio.TimeoutError:
+            startup_logger.error(
+                f"⚠️ Subscription plan seeding timed out after {_STARTUP_DB_TIMEOUT}s"
+            )
         except Exception as seed_error:
             startup_logger.info(
                 f"⚠️ Subscription plan seeding had issues: {seed_error}"
@@ -425,7 +517,10 @@ async def startup():
             from backend.services.data_retention import purge_expired_chat_messages
 
             async with SessionLocal() as retention_db:
-                retention_result = await purge_expired_chat_messages(retention_db)
+                retention_result = await _asyncio.wait_for(
+                    purge_expired_chat_messages(retention_db),
+                    timeout=_STARTUP_DB_TIMEOUT,
+                )
                 purged = retention_result.get("purged_messages", 0)
                 if purged:
                     startup_logger.info(
@@ -433,6 +528,11 @@ async def startup():
                     )
                 else:
                     startup_logger.info("ℹ️ No expired chat data to purge")
+        except _asyncio.TimeoutError:
+            startup_logger.error(
+                f"⚠️ Data retention cleanup timed out after {_STARTUP_DB_TIMEOUT}s — "
+                "will retry on next startup"
+            )
         except Exception as retention_error:
             startup_logger.info(
                 f"⚠️ Data retention cleanup had issues: {retention_error}"
@@ -445,10 +545,9 @@ async def startup():
 
             daemon = get_learning_daemon()
 
-            # Start the 24/7 daemon
-            import asyncio
-
-            asyncio.create_task(daemon.start())
+            # Start the 24/7 daemon — store task reference for proper cleanup
+            _task = _asyncio.create_task(daemon.start(), name="kiaan_learning_daemon")
+            _startup_status["background_tasks"].append(_task)
 
             startup_logger.info("✅ KIAAN 24/7 Learning Daemon starting")
             startup_logger.info("   • Mode: CONTINUOUS (24/7)")
@@ -483,11 +582,12 @@ async def startup():
         # Step 7: Start instance heartbeat for multi-instance visibility
         startup_logger.info("\n💓 Starting instance heartbeat...")
         try:
-            import asyncio
-
             from backend.monitoring.health import start_instance_heartbeat
 
-            asyncio.create_task(start_instance_heartbeat())
+            _task = _asyncio.create_task(
+                start_instance_heartbeat(), name="instance_heartbeat"
+            )
+            _startup_status["background_tasks"].append(_task)
             startup_logger.info(
                 f"✅ Instance heartbeat started (ID: {_settings.INSTANCE_ID})"
             )
@@ -500,7 +600,10 @@ async def startup():
             from backend.services.gita_wisdom_auto_enricher import get_auto_enricher
 
             enricher = get_auto_enricher()
-            asyncio.create_task(enricher.start(SessionLocal))
+            _task = _asyncio.create_task(
+                enricher.start(SessionLocal), name="gita_auto_enricher"
+            )
+            _startup_status["background_tasks"].append(_task)
 
             startup_logger.info("✅ Gita Practical Wisdom Auto-Enricher starting")
             startup_logger.info("   • Mode: CONTINUOUS (auto-enrichment)")
@@ -524,6 +627,8 @@ async def startup():
             )
             # Don't fail startup - enrichment is supplementary
 
+        _startup_status["started"] = True
+
     except Exception as exc:
         failed_meta = migrations_module.LATEST_MIGRATION_RESULT
         if failed_meta and failed_meta.failed_file:
@@ -539,6 +644,16 @@ async def startup():
 async def shutdown():
     """Cleanup resources on application shutdown."""
     startup_logger.info("\n🛑 MINDVIBE - SHUTDOWN SEQUENCE")
+
+    # Cancel tracked background tasks gracefully
+    for _task in _startup_status.get("background_tasks", []):
+        if not _task.done():
+            _task.cancel()
+            try:
+                await _task
+            except (_asyncio.CancelledError, Exception):
+                pass
+    startup_logger.info("✅ Background tasks cancelled")
 
     # Stop KIAAN 24/7 Learning Daemon
     try:
@@ -626,8 +741,10 @@ try:
     from backend.routes.chat_rooms import router as chat_rooms_router
 
     app.include_router(chat_rooms_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Chat rooms router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load chat rooms router: {e}")
 
 # Load Monitoring router
@@ -636,12 +753,14 @@ try:
     from backend.monitoring.health import router as monitoring_router
 
     app.include_router(monitoring_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Monitoring router loaded")
     startup_logger.info(
         "   • GET    /api/monitoring/health/detailed - Detailed health check"
     )
     startup_logger.info("   • GET    /api/monitoring/metrics - Application metrics")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Monitoring router: {e}")
 
 # Load Gita API router
@@ -650,8 +769,10 @@ try:
     from backend.routes.gita_api import router as gita_router
 
     app.include_router(gita_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Gita API router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Gita API router: {e}")
 
 
@@ -663,6 +784,7 @@ try:
     from backend.routes.indian_gita_sources import router as indian_gita_sources_router
 
     app.include_router(indian_gita_sources_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Indian Gita Sources router loaded")
     startup_logger.info(
         "   • GET    /api/gita-sources/teachings - Gita teachings for spiritual wellness"
@@ -689,6 +811,7 @@ try:
         "   • POST   /api/gita-sources/kiaan-wisdom - KIAAN integration endpoint"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Indian Gita Sources router: {e}")
 
 # Load Auth router
@@ -697,8 +820,10 @@ try:
     from backend.routes.auth import router as auth_router
 
     app.include_router(auth_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Auth router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Auth router: {e}")
 
 # Load WebAuthn (biometric authentication) router
@@ -707,6 +832,7 @@ try:
     from backend.routes.webauthn import router as webauthn_router
 
     app.include_router(webauthn_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] WebAuthn router loaded (Biometric Authentication)"
     )
@@ -724,6 +850,7 @@ try:
     )
     startup_logger.info("   • POST   /api/auth/webauthn/unregister - Remove credential")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load WebAuthn router: {e}")
 
 # Load Profile router
@@ -732,8 +859,10 @@ try:
     from backend.routes.profile import router as profile_router
 
     app.include_router(profile_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Profile router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Profile router: {e}")
 
 # Load User Mobile router (push token)
@@ -742,8 +871,10 @@ try:
     from backend.routes.user_mobile import router as user_mobile_router
 
     app.include_router(user_mobile_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] User Mobile router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load User Mobile router: {e}")
 
 # Load Karma Footprint router
@@ -754,8 +885,10 @@ try:
     from backend.routes.karma_footprint import router as karma_router
 
     app.include_router(karma_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Karma Footprint router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Karma Footprint router: {e}")
 
 # Load Guidance Engines router
@@ -764,8 +897,10 @@ try:
     from backend.routes.guidance import router as guidance_router
 
     app.include_router(guidance_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Guidance router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Guidance router: {e}")
 
 # Load Karmic Tree gamification router
@@ -774,8 +909,10 @@ try:
     from backend.routes.karmic_tree import router as karmic_tree_router
 
     app.include_router(karmic_tree_router, prefix="/api")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Karmic Tree router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Karmic Tree router: {e}")
 
 # Load Subscriptions router
@@ -784,8 +921,10 @@ try:
     from backend.routes.subscriptions import router as subscriptions_router
 
     app.include_router(subscriptions_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Subscriptions router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Subscriptions router: {e}")
 
 # Load Mobile Subscription (IAP receipt verification) router
@@ -796,8 +935,10 @@ try:
     from backend.routes.mobile_subscription import router as mobile_subscription_router
 
     app.include_router(mobile_subscription_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Mobile Subscription router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Mobile Subscription router: {e}")
 
 # Load Wisdom Guide router
@@ -806,8 +947,10 @@ try:
     from backend.routes.wisdom_guide import router as wisdom_guide_router
 
     app.include_router(wisdom_guide_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Wisdom Guide router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Wisdom Guide router: {e}")
 
 # Load Emotional Reset router
@@ -818,8 +961,10 @@ try:
     from backend.routes.emotional_reset import router as emotional_reset_router
 
     app.include_router(emotional_reset_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Emotional Reset router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Emotional Reset router: {e}")
 
 # Load Karmic Tree Analytics router
@@ -832,8 +977,10 @@ try:
     )
 
     app.include_router(analytics_karmic_tree_router, prefix="/api/analytics")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Karmic Tree Analytics router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Karmic Tree Analytics router: {e}")
 
 # Load main Analytics router (overview, mood-trends, journal-stats, kiaan-insights, etc.)
@@ -842,6 +989,7 @@ try:
     from backend.routes.analytics_dashboard import router as analytics_router
 
     app.include_router(analytics_router, prefix="/api")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Analytics router loaded")
     startup_logger.info("   • GET    /api/analytics/overview - Overview metrics")
     startup_logger.info("   • GET    /api/analytics/mood-trends - Mood trend data")
@@ -851,6 +999,7 @@ try:
     startup_logger.info("   • GET    /api/analytics/achievements - Achievements")
     startup_logger.info("   • POST   /api/analytics/export - Export data")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Analytics router: {e}")
 
 # Load Admin routers
@@ -860,72 +1009,90 @@ try:
     from backend.routes.admin.auth import router as admin_auth_router
 
     app.include_router(admin_auth_router)
+    _startup_status["routers_loaded"] += 1
     admin_routers_loaded.append("auth")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Admin Auth router: {e}")
 
 try:
     from backend.routes.admin.users import router as admin_users_router
 
     app.include_router(admin_users_router)
+    _startup_status["routers_loaded"] += 1
     admin_routers_loaded.append("users")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Admin Users router: {e}")
 
 try:
     from backend.routes.admin.subscriptions import router as admin_subscriptions_router
 
     app.include_router(admin_subscriptions_router)
+    _startup_status["routers_loaded"] += 1
     admin_routers_loaded.append("subscriptions")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Admin Subscriptions router: {e}")
 
 try:
     from backend.routes.admin.moderation import router as admin_moderation_router
 
     app.include_router(admin_moderation_router)
+    _startup_status["routers_loaded"] += 1
     admin_routers_loaded.append("moderation")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Admin Moderation router: {e}")
 
 try:
     from backend.routes.admin.feature_flags import router as admin_feature_flags_router
 
     app.include_router(admin_feature_flags_router)
+    _startup_status["routers_loaded"] += 1
     admin_routers_loaded.append("feature_flags")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Admin Feature Flags router: {e}")
 
 try:
     from backend.routes.admin.announcements import router as admin_announcements_router
 
     app.include_router(admin_announcements_router)
+    _startup_status["routers_loaded"] += 1
     admin_routers_loaded.append("announcements")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Admin Announcements router: {e}")
 
 try:
     from backend.routes.admin.ab_tests import router as admin_ab_tests_router
 
     app.include_router(admin_ab_tests_router)
+    _startup_status["routers_loaded"] += 1
     admin_routers_loaded.append("ab_tests")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Admin A/B Tests router: {e}")
 
 try:
     from backend.routes.admin.audit_logs import router as admin_audit_logs_router
 
     app.include_router(admin_audit_logs_router)
+    _startup_status["routers_loaded"] += 1
     admin_routers_loaded.append("audit_logs")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Admin Audit Logs router: {e}")
 
 try:
     from backend.routes.admin.export import router as admin_export_router
 
     app.include_router(admin_export_router)
+    _startup_status["routers_loaded"] += 1
     admin_routers_loaded.append("export")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Admin Export router: {e}")
 
 try:
@@ -934,8 +1101,10 @@ try:
     )
 
     app.include_router(admin_kiaan_analytics_router)
+    _startup_status["routers_loaded"] += 1
     admin_routers_loaded.append("kiaan_analytics")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Admin KIAAN Analytics router: {e}")
 
 try:
@@ -944,6 +1113,7 @@ try:
     )
 
     app.include_router(admin_voice_analytics_router)
+    _startup_status["routers_loaded"] += 1
     admin_routers_loaded.append("voice_analytics")
     startup_logger.info(
         "   • GET    /api/admin/voice/overview - Voice analytics overview"
@@ -952,12 +1122,14 @@ try:
     startup_logger.info("   • GET    /api/admin/voice/quality - Voice quality metrics")
     startup_logger.info("   • GET    /api/admin/voice/enhancements - Enhancement stats")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Admin Voice Analytics router: {e}")
 
 try:
     from backend.routes.admin.backend_logs import router as admin_backend_logs_router
 
     app.include_router(admin_backend_logs_router)
+    _startup_status["routers_loaded"] += 1
     admin_routers_loaded.append("backend_logs")
     startup_logger.info(
         "   • GET    /api/admin/backend-logs - Backend application logs"
@@ -966,12 +1138,14 @@ try:
         "   • GET    /api/admin/backend-logs/stats - Log level statistics"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Admin Backend Logs router: {e}")
 
 try:
     from backend.routes.admin.teams import router as admin_teams_router
 
     app.include_router(admin_teams_router)
+    _startup_status["routers_loaded"] += 1
     admin_routers_loaded.append("teams")
     startup_logger.info("   • GET    /api/admin/teams - List all teams")
     startup_logger.info("   • GET    /api/admin/teams/{id} - Team details")
@@ -985,6 +1159,7 @@ try:
         "   • DELETE /api/admin/teams/{id}/members/{uid} - Remove member"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Admin Teams router: {e}")
 
 if admin_routers_loaded:
@@ -1000,6 +1175,7 @@ try:
     from backend.routes.teams import router as teams_router
 
     app.include_router(teams_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] Teams router loaded (Team access & collaboration)"
     )
@@ -1014,6 +1190,7 @@ try:
     startup_logger.info("   • GET    /api/teams/{id}/permissions - My permissions")
     startup_logger.info("   • GET    /api/teams/{id}/audit-logs - Team audit logs")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Teams router: {e}")
 
 # Load GDPR/Compliance routers
@@ -1023,16 +1200,20 @@ try:
     from backend.routes.gdpr import router as gdpr_router
 
     app.include_router(gdpr_router)
+    _startup_status["routers_loaded"] += 1
     compliance_routers_loaded.append("gdpr")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load GDPR router: {e}")
 
 try:
     from backend.routes.compliance import router as compliance_router
 
     app.include_router(compliance_router)
+    _startup_status["routers_loaded"] += 1
     compliance_routers_loaded.append("compliance")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Compliance router: {e}")
 
 if compliance_routers_loaded:
@@ -1048,8 +1229,10 @@ try:
     from backend.routes.karma_reset import router as karma_reset_router
 
     app.include_router(karma_reset_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Karma Reset router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Karma Reset router: {e}")
 
 # Load Karma Reset KIAAN Integration router (NEW - enhanced with KIAAN ecosystem)
@@ -1060,10 +1243,12 @@ try:
     from backend.routes.karma_reset_kiaan import router as karma_reset_kiaan_router
 
     app.include_router(karma_reset_kiaan_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] Karma Reset KIAAN router loaded (ecosystem enhanced)"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Karma Reset KIAAN router: {e}")
 
 # Load Karma Problem Analysis router (Problem-to-Karmic-Path resolution)
@@ -1074,8 +1259,10 @@ try:
     from backend.routes.karma_problems import router as karma_problems_router
 
     app.include_router(karma_problems_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Karma Problem Analysis router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Karma Problem Analysis router: {e}")
 
 # Load Progress Reset router (User data reset with comprehensive error handling)
@@ -1084,10 +1271,12 @@ try:
     from backend.routes.progress_reset import router as progress_reset_router
 
     app.include_router(progress_reset_router, prefix="/api")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] Progress Reset router loaded (with transaction rollback)"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Progress Reset router: {e}")
 
 # Load Ardha router
@@ -1096,8 +1285,10 @@ try:
     from backend.routes.ardha import router as ardha_router
 
     app.include_router(ardha_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Ardha router loaded with KIAAN integration")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Ardha router: {e}")
 
 # Load Viyoga router
@@ -1106,8 +1297,10 @@ try:
     from backend.routes.viyoga import router as viyoga_router
 
     app.include_router(viyoga_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Viyoga router loaded with KIAAN integration")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Viyoga router: {e}")
 
 # Load Gita AI Analysis router (OpenAI-powered pattern analysis)
@@ -1118,10 +1311,12 @@ try:
     from backend.routes.gita_ai_analysis import router as gita_ai_analysis_router
 
     app.include_router(gita_ai_analysis_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] Gita AI Analysis router loaded with OpenAI + Core Wisdom integration"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Gita AI Analysis router: {e}")
 
 # Load Relationship Compass router
@@ -1134,10 +1329,12 @@ try:
     )
 
     app.include_router(relationship_compass_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] Relationship Compass router loaded with KIAAN integration"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Relationship Compass router: {e}")
 
 # Load Relationship Compass Engine router
@@ -1150,8 +1347,10 @@ try:
     )
 
     app.include_router(relationship_compass_engine_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Relationship Compass Engine router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(
         f"❌ [ERROR] Failed to load Relationship Compass Engine router: {e}"
     )
@@ -1162,8 +1361,10 @@ try:
     from backend.routes.daily_analysis import router as daily_analysis_router
 
     app.include_router(daily_analysis_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Daily Analysis router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Daily Analysis router: {e}")
 
 # Load Sacred Reflections router
@@ -1174,8 +1375,10 @@ try:
     from backend.routes.sacred_reflections import router as sacred_reflections_router
 
     app.include_router(sacred_reflections_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Sacred Reflections router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Sacred Reflections router: {e}")
 
 # Load Quantum Dive router
@@ -1184,6 +1387,7 @@ try:
     from backend.routes.quantum_dive import router as quantum_dive_router
 
     app.include_router(quantum_dive_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] Quantum Dive router loaded (Multi-dimensional consciousness analysis)"
     )
@@ -1203,6 +1407,7 @@ try:
         "   • GET    /api/kiaan/quantum-dive/history - Analysis history"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Quantum Dive router: {e}")
 
 # Load KIAAN Learning router (Autonomous Gita Wisdom Acquisition v4.1)
@@ -1211,6 +1416,7 @@ try:
     from backend.routes.kiaan_learning import router as kiaan_learning_router
 
     app.include_router(kiaan_learning_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] KIAAN Learning router loaded (Autonomous Gita Wisdom Acquisition)"
     )
@@ -1234,6 +1440,7 @@ try:
     )
     startup_logger.info("   • GET    /api/kiaan/learning/health - Health check")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load KIAAN Learning router: {e}")
 
 # Load KIAAN Divine router (Voice & Intelligence APIs)
@@ -1242,6 +1449,7 @@ try:
     from backend.routes.kiaan_divine import router as kiaan_divine_router
 
     app.include_router(kiaan_divine_router, prefix="/api")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] KIAAN Divine router loaded (Voice & Intelligence)"
     )
@@ -1260,6 +1468,7 @@ try:
     startup_logger.info("   • POST   /api/kiaan/stop - Stop all voice synthesis")
     startup_logger.info("   • GET    /api/kiaan/health - Health check")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load KIAAN Divine router: {e}")
 
 # Load Gita Social Ingestion router (Social Media Data Pipeline)
@@ -1270,6 +1479,7 @@ try:
     from backend.routes.gita_social_ingestion import router as gita_ingestion_router
 
     app.include_router(gita_ingestion_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Gita Social Ingestion router loaded")
     startup_logger.info(
         "   • GET    /api/gita-ingestion/trusted-sources - List trusted sources"
@@ -1288,6 +1498,7 @@ try:
         "   • GET    /api/gita-ingestion/platforms - Get supported platforms"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Gita Social Ingestion router: {e}")
 
 # Load Weekly Assessment router
@@ -1298,8 +1509,10 @@ try:
     from backend.routes.weekly_assessment import router as weekly_assessment_router
 
     app.include_router(weekly_assessment_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Weekly Assessment router loaded")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Weekly Assessment router: {e}")
 
 # Load Translation router
@@ -1308,6 +1521,7 @@ try:
     from backend.routes.translation import router as translation_router
 
     app.include_router(translation_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Translation router loaded")
     startup_logger.info("   • POST   /api/translation/translate - Translate text")
     startup_logger.info(
@@ -1320,6 +1534,7 @@ try:
         "   • GET    /api/translation/languages - Get supported languages"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Translation router: {e}")
 
 # Load Journeys router (Production CRUD)
@@ -1328,6 +1543,7 @@ try:
     from backend.routes.journeys import router as journeys_router
 
     app.include_router(journeys_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Journeys router loaded")
     startup_logger.info("   • GET    /api/journeys - List journeys")
     startup_logger.info("   • POST   /api/journeys - Create journey")
@@ -1335,6 +1551,7 @@ try:
     startup_logger.info("   • PUT    /api/journeys/{id} - Update journey")
     startup_logger.info("   • DELETE /api/journeys/{id} - Delete journey")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Journeys router: {e}")
 
 # Load Journey Engine router (Guided Journeys - Six Enemies / Shadripu)
@@ -1343,6 +1560,7 @@ try:
     from backend.routes.journey_engine import router as journey_engine_router
 
     app.include_router(journey_engine_router, prefix="/api/journey-engine")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] Journey Engine router loaded (Six Enemies / Shadripu)"
     )
@@ -1365,6 +1583,7 @@ try:
         "   • GET    /api/journey-engine/enemies - List enemies with info"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Journey Engine router: {e}")
 
 # Load Sync router (Quantum Enhancement #2)
@@ -1373,6 +1592,7 @@ try:
     from backend.routes.sync import router as sync_router
 
     app.include_router(sync_router, prefix="/api")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] Sync router loaded (Quantum Enhancement #2 - Offline-First)"
     )
@@ -1380,6 +1600,7 @@ try:
     startup_logger.info("   • POST   /api/sync/pull - Pull server-side changes")
     startup_logger.info("   • GET    /api/sync/status - Sync status and health check")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Sync router: {e}")
 
 # Load Voice router (Quantum Enhancement #3)
@@ -1388,6 +1609,7 @@ try:
     from backend.routes.voice import router as voice_router
 
     app.include_router(voice_router, prefix="/api")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] Voice router loaded (Quantum Enhancement #3 - Multilingual Voice)"
     )
@@ -1404,6 +1626,7 @@ try:
         "   • GET    /api/voice/supported-languages - List supported languages"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Voice router: {e}")
 
 # Load Multilingual Voice router (ElevenLabs-inspired Voice System)
@@ -1414,6 +1637,7 @@ try:
     from backend.routes.multilingual_voice import router as multilingual_voice_router
 
     app.include_router(multilingual_voice_router, prefix="/api")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] Multilingual Voice router loaded (30+ speakers, 18 languages)"
     )
@@ -1439,6 +1663,7 @@ try:
         "   • GET    /api/voice/multilingual/recommend - Recommend speaker"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Multilingual Voice router: {e}")
 
 # Load Voice Learning router (KIAAN Self-Improvement System)
@@ -1447,6 +1672,7 @@ try:
     from backend.routes.voice_learning import router as voice_learning_router
 
     app.include_router(voice_learning_router, prefix="/api")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] Voice Learning router loaded (KIAAN Self-Improvement)"
     )
@@ -1471,6 +1697,7 @@ try:
         "   • GET    /api/voice-learning/experiments - List A/B experiments"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Voice Learning router: {e}")
 
 # Load Advanced Voice Learning router (Analytics, Proactive, Offline, Personalization)
@@ -1483,6 +1710,7 @@ try:
     )
 
     app.include_router(voice_learning_advanced_router, prefix="/api")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Advanced Voice Learning router loaded")
     startup_logger.info(
         "   • GET    /api/voice-learning/advanced/analytics/snapshot - Dashboard snapshot"
@@ -1500,6 +1728,7 @@ try:
         "   • GET    /api/voice-learning/advanced/patterns/analytics - Interaction patterns"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(
         f"❌ [ERROR] Failed to load Advanced Voice Learning router: {e}"
     )
@@ -1514,6 +1743,7 @@ try:
     )
 
     app.include_router(divine_consciousness_router, prefix="/api")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] Divine Consciousness router loaded (Sacred Atmosphere)"
     )
@@ -1535,6 +1765,7 @@ try:
     startup_logger.info("   • GET    /api/divine/sacred-pause - Get sacred pause")
     startup_logger.info("   • GET    /api/divine/check-in - Get divine check-in")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Divine Consciousness router: {e}")
 
 # Load Journal router
@@ -1543,11 +1774,13 @@ try:
     from backend.routes.journal import router as journal_router
 
     app.include_router(journal_router, prefix="/api")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Journal router loaded")
     startup_logger.info("   • GET    /api/journal/entries - List journal entries")
     startup_logger.info("   • POST   /api/journal/entries - Create journal entry")
     startup_logger.info("   • POST   /api/journal/quick-save - Quick save content")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Journal router: {e}")
 
 # Load Community router
@@ -1556,11 +1789,13 @@ try:
     from backend.routes.community import router as community_router
 
     app.include_router(community_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Community router loaded")
     startup_logger.info("   • GET    /api/community/circles - List wisdom circles")
     startup_logger.info("   • POST   /api/community/circles/{id}/join - Join circle")
     startup_logger.info("   • POST   /api/community/posts - Create post")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Community router: {e}")
 
 # NOTE: Analytics dashboard router already loaded above (from analytics_dashboard.py)
@@ -1571,10 +1806,12 @@ try:
     from backend.routes.moods import router as moods_router
 
     app.include_router(moods_router, prefix="/api")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Moods router loaded")
     startup_logger.info("   • POST   /api/moods - Submit mood entry")
     startup_logger.info("   • GET    /api/moods/micro-response - Get mood analysis")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Moods router: {e}")
 
 # Load Feedback router
@@ -1583,9 +1820,11 @@ try:
     from backend.routes.feedback import router as feedback_router
 
     app.include_router(feedback_router, prefix="/api")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Feedback router loaded")
     startup_logger.info("   • POST   /api/feedback - Submit feedback")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Feedback router: {e}")
 
 # Load Notifications router
@@ -1594,6 +1833,7 @@ try:
     from backend.routes.notifications import router as notifications_router
 
     app.include_router(notifications_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Notifications router loaded")
     startup_logger.info(
         "   • POST   /api/notifications/subscribe - Register push subscription"
@@ -1608,6 +1848,7 @@ try:
         "   • PUT    /api/notifications/preferences - Update preferences"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Notifications router: {e}")
 
 # Load Beginner Curriculum router
@@ -1616,10 +1857,12 @@ try:
     from backend.routes.beginner_curriculum import router as beginner_curriculum_router
 
     app.include_router(beginner_curriculum_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Beginner Curriculum router loaded")
     startup_logger.info("   • GET    /api/beginner/curriculum - Full 7-day curriculum")
     startup_logger.info("   • GET    /api/beginner/curriculum/day/{n} - Single day")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Beginner Curriculum router: {e}")
 
 # Load Guided Meditation router
@@ -1628,6 +1871,7 @@ try:
     from backend.routes.meditation import router as meditation_router
 
     app.include_router(meditation_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Guided Meditation router loaded")
     startup_logger.info("   • GET    /api/meditation/programs - List guided programs")
     startup_logger.info(
@@ -1639,6 +1883,7 @@ try:
         "   • POST   /api/meditation/sessions/{id}/complete - Complete session"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Guided Meditation router: {e}")
 
 # Load Nityam Sadhana router
@@ -1647,12 +1892,14 @@ try:
     from backend.routes.sadhana_api import router as sadhana_router
 
     app.include_router(sadhana_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Nityam Sadhana router loaded")
     startup_logger.info("   • POST   /api/sadhana/compose - Compose daily practice")
     startup_logger.info(
         "   • POST   /api/sadhana/complete - Record practice completion"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Nityam Sadhana router: {e}")
 
 # Load Content router
@@ -1661,9 +1908,11 @@ try:
     from backend.routes.content import router as content_router
 
     app.include_router(content_router, prefix="/api")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Content router loaded")
     startup_logger.info("   • GET    /api/content/{locale} - Get localized content")
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Content router: {e}")
 
 # Load KIAAN Unified Voice Companion (3-Engine: Guidance + Friend + Voice Guide)
@@ -1679,6 +1928,7 @@ try:
     )
 
     app.include_router(kiaan_voice_companion_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] KIAAN Unified Voice Companion router loaded (3-Engine System)"
     )
@@ -1733,6 +1983,7 @@ try:
         "   • GET    /api/voice-companion/insights/milestones - Friendship milestones"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(
         f"❌ [ERROR] Failed to load KIAAN Unified Voice Companion router: {e}"
     )
@@ -1745,6 +1996,7 @@ try:
     from backend.routes.kiaan_friend_mode import router as kiaan_friend_router
 
     app.include_router(kiaan_friend_router, prefix="/api")
+    _startup_status["routers_loaded"] += 1
     startup_logger.info(
         "✅ [SUCCESS] KIAAN Friend Mode router loaded (Best Friend + Gita Guide)"
     )
@@ -1767,6 +2019,7 @@ try:
         "   • POST   /api/kiaan/friend/verse-insight - Deep verse insight with modern lens"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load KIAAN Friend Mode router: {e}")
 
 # Load Emotional Pattern Extraction router
@@ -1777,11 +2030,13 @@ try:
     from backend.routes.emotional_patterns import router as emotional_patterns_router
 
     app.include_router(emotional_patterns_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] Emotional Pattern Extraction router loaded")
     startup_logger.info(
         "   • GET    /api/kiaan/emotional-patterns/extract - Extract emotional signals"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(
         f"❌ [ERROR] Failed to load Emotional Pattern Extraction router: {e}"
     )
@@ -1794,6 +2049,7 @@ try:
     from backend.routes.kiaan_assistant import router as kiaan_assistant_router
 
     app.include_router(kiaan_assistant_router)
+    _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] KIAAN Assistant router loaded")
     startup_logger.info("   • POST   /api/kiaan/assistant/reminder - Create reminder")
     startup_logger.info("   • GET    /api/kiaan/assistant/reminders - List reminders")
@@ -1804,11 +2060,25 @@ try:
         "   • POST   /api/kiaan/assistant/execute - Execute ecosystem tool"
     )
 except Exception as e:
+    _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load KIAAN Assistant router: {e}")
+
+# Count actual registered API routes to populate startup status.
+# This is more reliable than tracking each try/except individually since
+# it reflects the true state of what FastAPI has registered.
+_registered_routes = [
+    r for r in app.routes if hasattr(r, "methods") and hasattr(r, "path")
+]
+_startup_status["routers_loaded"] = len(_registered_routes)
 
 startup_logger.info("=" * 80)
 startup_logger.info(
     f"KIAAN Router Status: {'✅ LOADED' if kiaan_router_loaded else '❌ FAILED'}"
+)
+startup_logger.info(
+    f"Registered routes: {len(_registered_routes)} | "
+    f"Redis: {'✅' if _startup_status['redis_connected'] else '❌'} | "
+    f"Database: {'✅' if _startup_status['database_ready'] else '⏳ (pending startup)'}"
 )
 startup_logger.info("=" * 80 + "\n")
 
@@ -1847,12 +2117,26 @@ async def _assert_migrations_healthy() -> dict[str, Any]:
     }
 
 
+def _compute_health_status() -> str:
+    """Derive overall health status from startup state.
+
+    Returns 'healthy' when all systems are operational, 'degraded' when
+    non-critical components failed (Redis, some routers), or 'unhealthy'
+    when critical components (database, KIAAN chat) are down.
+    """
+    if not _startup_status["database_ready"] or not kiaan_router_loaded:
+        return "unhealthy"
+    if not _startup_status["redis_connected"] or _startup_status["routers_failed"] > 0:
+        return "degraded"
+    return "healthy"
+
+
 @app.get("/")
 async def root() -> dict[str, Any]:
     return {
         "message": "MindVibe API is running",
         "version": "1.0.0",
-        "status": "healthy",
+        "status": _compute_health_status(),
         "kiaan_loaded": kiaan_router_loaded,
     }
 
@@ -1860,11 +2144,16 @@ async def root() -> dict[str, Any]:
 @app.get("/health")
 async def health() -> dict[str, Any]:
     migration_state = await _assert_migrations_healthy()
+    _status = _compute_health_status()
     return {
-        "status": "healthy",
+        "status": _status,
         "service": "mindvibe-api",
         "version": "1.0.0",
         "kiaan_ready": kiaan_router_loaded,
+        "redis_connected": _startup_status["redis_connected"],
+        "database_ready": _startup_status["database_ready"],
+        "routers_loaded": _startup_status["routers_loaded"],
+        "routers_failed": _startup_status["routers_failed"],
         "migration": migration_state,
     }
 
@@ -1872,12 +2161,16 @@ async def health() -> dict[str, Any]:
 @app.get("/api/health")
 async def api_health() -> dict[str, Any]:
     migration_state = await _assert_migrations_healthy()
+    _status = _compute_health_status()
     return {
-        "status": "operational" if kiaan_router_loaded else "degraded",
+        "status": _status,
         "service": "MindVibe AI - KIAAN",
         "version": "1.0.0",
         "chat_ready": kiaan_router_loaded,
         "openai_key_present": bool(OPENAI_API_KEY),
+        "redis_connected": _startup_status["redis_connected"],
+        "routers_loaded": _startup_status["routers_loaded"],
+        "routers_failed": _startup_status["routers_failed"],
         "migration": migration_state,
     }
 
