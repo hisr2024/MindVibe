@@ -651,7 +651,14 @@ function UnauthenticatedAccountView() {
       })
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}))
-        throw new Error(errData.detail || 'Failed to resend verification email.')
+        const rawDetail = errData.detail
+        const detailMsg =
+          typeof rawDetail === 'string'
+            ? rawDetail
+            : typeof rawDetail === 'object' && rawDetail?.detail
+              ? rawDetail.detail
+              : 'Failed to resend verification email.'
+        throw new Error(detailMsg)
       }
       const data = await response.json().catch(() => ({}))
       setEmailNotVerified(false)
