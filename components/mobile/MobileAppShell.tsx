@@ -41,12 +41,13 @@ import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 
 /**
- * KiaanFooter (OM button) is loaded dynamically because it is a client-only
- * interactive widget that depends on browser APIs (haptics). Lazy-loading
- * prevents SSR issues and keeps initial mobile JS bundle small.
+ * KiaanVoiceCompanionFooter (Shankha button) is loaded dynamically because it
+ * is a client-only interactive widget that depends on browser APIs (haptics,
+ * Web Speech API, VAD). Lazy-loading prevents SSR issues and keeps initial
+ * mobile JS bundle small.
  */
-const KiaanFooter = dynamic(
-  () => import('@/components/layout/KiaanFooter').then(mod => mod.KiaanFooter),
+const KiaanVoiceCompanionFooter = dynamic(
+  () => import('@/components/layout/KiaanVoiceCompanionFooter').then(mod => mod.KiaanVoiceCompanionFooter),
   { ssr: false }
 )
 
@@ -401,9 +402,9 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
         {/* KIAAN Vibe floating player — visible across all mobile pages */}
         {showTabBar && <MobileVibePlayer />}
 
-        {/* OM floating action button (golden theme) — quick access to Viyoga, Ardha,
-            KIAAN Chat, and Relationship Compass tools from any mobile page */}
-        <KiaanFooter />
+        {/* Shankha Voice Companion — KIAAN's always-awake voice assistant with
+            wake word detection, Gita wisdom, and ecosystem navigation */}
+        <KiaanVoiceCompanionFooter />
 
 
         {/* Tools overlay — slides up from bottom with spiritual wellness tools */}

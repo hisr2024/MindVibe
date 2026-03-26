@@ -4,7 +4,7 @@
  * MobileRouteGuard
  *
  * Hides its children when the current route is under /m/* (the dedicated mobile interface).
- * This prevents the root layout's SiteNav, MobileNav, and KiaanFooter
+ * This prevents the root layout's SiteNav, MobileNav, and KiaanVoiceCompanionFooter
  * from rendering on top of the MobileAppShell's own navigation, avoiding duplicate
  * headers, tab bars, and floating elements.
  */
