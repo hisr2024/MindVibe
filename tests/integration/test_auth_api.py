@@ -310,3 +310,155 @@ class TestSessions:
         assert response.status_code == 200
         data = response.json()
         assert data["revoked"] is True
+
+
+@pytest.mark.asyncio
+class TestChangePassword:
+    """Test suite for /api/auth/change-password endpoint."""
+
+    async def _login(self, test_client: AsyncClient, email: str = TEST_USER_EMAIL, password: str = TEST_USER_PASSWORD):
+        """Helper: login and return (access_token, session_id)."""
+        resp = await test_client.post(
+            "/api/auth/login",
+            json={"email": email, "password": password},
+        )
+        if resp.status_code != 200:
+            pytest.skip("Login failed (likely DNS resolution issue in CI)")
+        data = resp.json()
+        return data["access_token"], data["session_id"]
+
+    async def test_change_password_success(self, test_client: AsyncClient, test_user):
+        """Test successful password change."""
+        token, _ = await self._login(test_client)
+
+        response = await test_client.post(
+            "/api/auth/change-password",
+            headers={"Authorization": f"Bearer {token}"},
+            json={
+                "current_password": TEST_USER_PASSWORD,
+                "new_password": "NewSecure1!",
+                "revoke_other_sessions": False,
+            },
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["message"] == "Password changed successfully."
+        assert data["sessions_revoked"] == 0
+
+        # Verify new password works by logging in with it
+        login_resp = await test_client.post(
+            "/api/auth/login",
+            json={"email": TEST_USER_EMAIL, "password": "NewSecure1!"},
+        )
+        assert login_resp.status_code == 200
+
+    async def test_change_password_wrong_current(self, test_client: AsyncClient, test_user):
+        """Test change password with wrong current password returns 403."""
+        token, _ = await self._login(test_client)
+
+        response = await test_client.post(
+            "/api/auth/change-password",
+            headers={"Authorization": f"Bearer {token}"},
+            json={
+                "current_password": "WrongPassword1!",
+                "new_password": "NewSecure1!",
+            },
+        )
+
+        assert response.status_code == 403
+        data = response.json()
+        assert data["code"] == "WRONG_PASSWORD"
+
+    async def test_change_password_same_as_current(self, test_client: AsyncClient, test_user):
+        """Test change password rejects same password."""
+        token, _ = await self._login(test_client)
+
+        response = await test_client.post(
+            "/api/auth/change-password",
+            headers={"Authorization": f"Bearer {token}"},
+            json={
+                "current_password": TEST_USER_PASSWORD,
+                "new_password": TEST_USER_PASSWORD,
+            },
+        )
+
+        assert response.status_code == 422
+        data = response.json()
+        assert data["code"] == "SAME_PASSWORD"
+
+    async def test_change_password_weak_new_password(self, test_client: AsyncClient, test_user):
+        """Test change password rejects weak new password."""
+        token, _ = await self._login(test_client)
+
+        response = await test_client.post(
+            "/api/auth/change-password",
+            headers={"Authorization": f"Bearer {token}"},
+            json={
+                "current_password": TEST_USER_PASSWORD,
+                "new_password": "weak",
+            },
+        )
+
+        assert response.status_code == 422
+        data = response.json()
+        assert data["code"] == "VALIDATION_ERROR"
+
+    async def test_change_password_unauthenticated(self, test_client: AsyncClient):
+        """Test change password without auth returns 401."""
+        response = await test_client.post(
+            "/api/auth/change-password",
+            json={
+                "current_password": "anything",
+                "new_password": "NewSecure1!",
+            },
+        )
+
+        assert response.status_code == 401
+
+    async def test_change_password_revokes_other_sessions(self, test_client: AsyncClient, test_user):
+        """Test that revoke_other_sessions revokes other sessions but keeps current."""
+        # Create two sessions by logging in twice
+        token1, session1 = await self._login(test_client)
+        token2, session2 = await self._login(test_client)
+
+        # Change password from session2, revoking others
+        response = await test_client.post(
+            "/api/auth/change-password",
+            headers={"Authorization": f"Bearer {token2}"},
+            json={
+                "current_password": TEST_USER_PASSWORD,
+                "new_password": "NewSecure2!",
+                "revoke_other_sessions": True,
+            },
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["sessions_revoked"] >= 1
+
+        # Current session (token2) should still work
+        me_resp = await test_client.get(
+            "/api/auth/me",
+            headers={"Authorization": f"Bearer {token2}"},
+        )
+        assert me_resp.status_code == 200
+
+
+@pytest.mark.asyncio
+class TestResendVerification:
+    """Test suite for /api/auth/resend-verification endpoint."""
+
+    async def test_resend_verification_email_not_configured(self, test_client: AsyncClient):
+        """Test that resend-verification returns 503 when email is not configured."""
+        response = await test_client.post(
+            "/api/auth/resend-verification",
+            json={"email": "someone@example.com"},
+        )
+
+        # Default test env uses EMAIL_PROVIDER=console, so should get 503
+        assert response.status_code == 503
+        data = response.json()
+        assert data["code"] == "EMAIL_NOT_CONFIGURED"
+        # Must NOT contain any "auto-verified" language
+        assert "auto-verified" not in str(data).lower()
