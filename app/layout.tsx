@@ -7,7 +7,7 @@ import Providers from './providers'
 import { MobileNav } from '@/components/navigation'
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
 import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
-import { KiaanFooter } from '@/components/layout/KiaanFooter'
+import { KiaanVoiceCompanionFooter } from '@/components/layout/KiaanVoiceCompanionFooter'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { ClientLayout } from './ClientLayout'
 import { OverlayRoot } from '@/components/ui/OverlayRoot'
@@ -214,7 +214,7 @@ export default async function RootLayout({
               <MobileNav />
               {/* OM floating chat widget */}
               <ErrorBoundary fallback={null}>
-                <KiaanFooter />
+                <KiaanVoiceCompanionFooter />
               </ErrorBoundary>
             </MobileRouteGuard>
             {/* BreadcrumbList structured data for SERP display */}
