@@ -986,6 +986,99 @@ async def reset_password(
 
 
 # ----------------------
+# Change Password (authenticated)
+# ----------------------
+class ChangePasswordIn(BaseModel):
+    current_password: str
+    new_password: str
+    revoke_other_sessions: bool = True
+
+
+class ChangePasswordOut(BaseModel):
+    message: str
+    sessions_revoked: int = 0
+
+
+@router.post("/change-password", response_model=ChangePasswordOut)
+@limiter.limit("5/minute")
+async def change_password(
+    request: Request, payload: ChangePasswordIn, db: AsyncSession = Depends(get_db)
+):
+    """Change password for an authenticated user.
+
+    Requires the current password for identity re-verification.
+    Optionally revokes all other sessions (default: True) while
+    keeping the current session alive.
+    """
+    # Authenticate: verify JWT + active session
+    _jwt_payload, user, session_row, _exp = await _get_user_and_active_session(request, db)
+
+    # Verify current password
+    if not verify_password(payload.current_password, user.hashed_password):
+        logger.warning("Password change failed: wrong current password user_id=%s", user.id)
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"detail": "Current password is incorrect.", "code": "WRONG_PASSWORD"},
+        )
+
+    # Reject if new password is the same as current
+    if verify_password(payload.new_password, user.hashed_password):
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "detail": "New password must be different from your current password.",
+                "code": "SAME_PASSWORD",
+            },
+        )
+
+    # Validate new password against policy
+    result = policy.validate(payload.new_password)
+    if not result.ok:
+        raise HTTPException(
+            status_code=422,
+            detail={"detail": "; ".join(result.errors), "code": "VALIDATION_ERROR", "field": "new_password"},
+        )
+
+    # Hash and update password
+    new_hashed = hash_password(payload.new_password)
+    await db.execute(
+        update(User).where(User.id == user.id).values(
+            hashed_password=new_hashed,
+            failed_login_attempts=0,
+            locked_until=None,
+        )
+    )
+
+    # Optionally revoke all other sessions (keep current session alive)
+    sessions_revoked = 0
+    if payload.revoke_other_sessions:
+        revoke_result = await db.execute(
+            update(Session)
+            .where(
+                Session.user_id == user.id,
+                Session.id != session_row.id,
+                Session.revoked_at.is_(None),
+            )
+            .values(revoked_at=datetime.now(UTC))
+        )
+        sessions_revoked = revoke_result.rowcount
+
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Database commit failed during password change: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail={"error": "DATABASE_ERROR", "message": "Operation failed. Please try again."})
+
+    logger.info("Password changed for user %s (sessions revoked: %d)", user.id, sessions_revoked)
+
+    return ChangePasswordOut(
+        message="Password changed successfully.",
+        sessions_revoked=sessions_revoked,
+    )
+
+
+# ----------------------
 # Email Verification
 # ----------------------
 VERIFICATION_TOKEN_EXPIRE_HOURS = 24
@@ -1085,12 +1178,20 @@ async def resend_verification(
     from backend.services.email_service import can_send_email
 
     if not can_send_email():
-        return ResendVerificationOut(
-            message=(
-                "Email delivery is not configured on this server. "
-                "Your account has been auto-verified — please try logging in directly."
-            ),
-            sent=False,
+        logger.warning(
+            "Verification email resend requested but email delivery not configured "
+            "(EMAIL_PROVIDER != smtp)"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "detail": (
+                    "Email verification is temporarily unavailable because email "
+                    "delivery is not configured on this server. "
+                    "Please contact support for assistance."
+                ),
+                "code": "EMAIL_NOT_CONFIGURED",
+            },
         )
 
     email_norm = payload.email.lower()
