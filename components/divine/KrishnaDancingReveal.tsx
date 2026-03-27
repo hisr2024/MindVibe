@@ -1,18 +1,25 @@
 'use client'
 
 /**
- * KrishnaDancingReveal — Click Krishna's dancing form to reveal His eternal presence
+ * KrishnaDancingReveal — Click Krishna's dancing form to reveal the Divine Presence banner
  *
  * A golden-outlined SVG of Krishna in a classic Natya (dance) pose with
- * pulsing shadow animation. Clicking reveals the "Krishna's Eternal Presence"
- * section as a smooth overlay on top of the figure.
+ * pulsing shadow animation. Clicking reveals the "Divine Presence" banner
+ * below the figure, linking to the /introduction page.
  */
 
 import { useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import { useLanguage } from '@/hooks/useLanguage'
-import { springConfigs } from '@/lib/animations/spring-configs'
+
+const DIVINE_PARTICLES = Array.from({ length: 8 }, (_, i) => ({
+  id: i,
+  left: `${10 + (i * 11) % 80}%`,
+  delay: i * 0.5,
+  duration: 3 + (i % 2) * 1.5,
+  size: i % 2 === 0 ? 2.5 : 2,
+}))
 
 export function KrishnaDancingReveal() {
   const [showPresence, setShowPresence] = useState(false)
@@ -21,8 +28,7 @@ export function KrishnaDancingReveal() {
 
   return (
     <section className="relative mx-auto max-w-3xl">
-      {/* Container with min-height so overlay has room */}
-      <div className="relative min-h-[420px] sm:min-h-[500px] flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center justify-center">
 
         {/* === Dancing Krishna SVG === */}
         <motion.div
@@ -38,7 +44,6 @@ export function KrishnaDancingReveal() {
               setShowPresence(prev => !prev)
             }
           }}
-          // Pulsing golden shadow
           animate={
             reduceMotion
               ? undefined
@@ -58,7 +63,6 @@ export function KrishnaDancingReveal() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.97 }}
         >
-          {/* Gentle swaying */}
           <motion.div
             animate={reduceMotion ? undefined : { rotate: [-1.5, 1.5, -1.5] }}
             transition={
@@ -88,65 +92,31 @@ export function KrishnaDancingReveal() {
                 strokeLinejoin="round"
                 fill="rgba(212,164,76,0.05)"
               >
-                {/* Head */}
                 <ellipse cx="200" cy="115" rx="32" ry="38" />
-
-                {/* Crown (Mukut) */}
                 <path d="M175 90 L185 55 L195 80 L200 45 L205 80 L215 55 L225 90" />
                 <ellipse cx="200" cy="90" rx="28" ry="6" />
-
-                {/* Peacock feather */}
                 <path d="M210 60 Q225 25 215 10 Q230 30 228 55" />
                 <ellipse cx="220" cy="22" rx="6" ry="10" opacity="0.7" />
-
-                {/* Face */}
                 <ellipse cx="200" cy="120" rx="26" ry="32" opacity="0.8" />
-
-                {/* Neck */}
                 <rect x="190" y="148" width="20" height="18" rx="8" />
-
-                {/* Shoulders — dynamic dance pose, torso tilted */}
                 <path d="M155 170 Q180 158 205 165 Q225 158 250 168 L255 188 Q235 182 205 190 Q175 182 150 188 Z" />
-
-                {/* Torso — curved for dance, weight shifted right */}
                 <path d="M158 188 Q168 248 182 305 Q195 318 210 315 Q225 318 232 305 Q242 248 248 188 Z" opacity="0.9" />
-
-                {/* Left arm — raised gracefully above head */}
                 <path d="M155 188 Q130 170 120 145 Q115 128 125 115 Q130 110 138 118 Q135 135 142 155 Q148 168 155 178" opacity="0.85" />
-                {/* Left hand — graceful mudra above head */}
                 <ellipse cx="126" cy="114" rx="7" ry="6" opacity="0.8" />
-
-                {/* Right arm — extended outward, holding flute */}
                 <path d="M248 188 Q268 200 285 218 Q295 228 298 235 Q300 242 294 244 L272 232 Q260 220 250 205" opacity="0.85" />
-                {/* Right hand */}
                 <ellipse cx="296" cy="240" rx="7" ry="6" opacity="0.8" />
-
-                {/* Flute (Bansuri) — angled from mouth area to right hand */}
                 <rect x="195" y="130" width="110" height="4" rx="2" transform="rotate(28 195 130)" opacity="0.7" />
-                {/* Flute holes */}
                 <circle cx="220" cy="142" r="1.5" opacity="0.5" />
                 <circle cx="238" cy="150" r="1.5" opacity="0.5" />
                 <circle cx="256" cy="158" r="1.5" opacity="0.5" />
-
-                {/* Necklace / Vaijayanti mala */}
                 <path d="M168 172 Q188 188 205 192 Q222 188 242 172" strokeWidth="2" fill="none" opacity="0.5" />
-
-                {/* Right leg — weight-bearing, slight bend, planted */}
                 <path d="M215 310 Q225 400 230 480 Q232 540 228 600 Q226 650 220 680" opacity="0.85" />
-                {/* Right foot */}
                 <ellipse cx="218" cy="685" rx="18" ry="6" opacity="0.7" />
-
-                {/* Left leg — raised and bent at knee (Natya dance pose) */}
                 <path d="M185 310 Q170 360 160 400 Q155 420 165 435 Q178 445 190 430 Q195 415 188 390 Q182 370 185 350" opacity="0.85" />
-                {/* Left foot — pointed, raised */}
                 <path d="M165 432 Q155 440 148 438 Q145 435 150 430 Q158 428 165 432" opacity="0.7" />
-
-                {/* Dhoti — flowing dramatically, wind-blown effect */}
                 <path d="M180 310 Q168 380 175 450 Q180 500 195 560 Q200 590 205 620 L215 620 Q220 590 225 560 Q238 500 240 450 Q248 380 232 310" opacity="0.7" />
-                {/* Dhoti drape detail — flowing fabric on raised-leg side */}
                 <path d="M170 340 Q155 380 148 420 Q145 440 150 455" strokeWidth="1.5" fill="none" opacity="0.4" />
                 <path d="M160 400 Q148 430 145 460 Q144 475 150 485" strokeWidth="1.5" fill="none" opacity="0.3" />
-                {/* Dhoti drape right side */}
                 <path d="M235 340 Q250 400 255 450 Q258 470 252 490" strokeWidth="1.5" fill="none" opacity="0.4" />
               </g>
             </svg>
@@ -168,101 +138,128 @@ export function KrishnaDancingReveal() {
           )}
         </AnimatePresence>
 
-        {/* === Overlay: Krishna's Eternal Presence === */}
+        {/* === Divine Presence Banner (revealed on click) === */}
         <AnimatePresence>
           {showPresence && (
             <motion.div
-              className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl overflow-hidden"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full mt-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              {/* Backdrop */}
-              <div
-                className="absolute inset-0 bg-[#0a0a12]/85 backdrop-blur-sm rounded-3xl"
-                onClick={() => setShowPresence(false)}
-              />
-
-              {/* Close button */}
-              <button
-                className="absolute top-4 right-4 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-[#d4a44c]/20 bg-[#d4a44c]/10 text-[#d4a44c]/70 transition-colors hover:bg-[#d4a44c]/20 hover:text-[#d4a44c]"
-                onClick={() => setShowPresence(false)}
-                aria-label="Close"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-
-              {/* Content */}
-              <div className="relative z-10 px-6 py-8 text-center space-y-5 max-w-2xl">
-                {/* Soft divine glow */}
-                <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(212,164,76,0.06)_0%,transparent_70%)]" />
-
-                {/* Ornamental line */}
-                <div className="flex items-center justify-center gap-3">
-                  <span className="h-px w-10 bg-gradient-to-r from-transparent to-[#d4a44c]/30" />
-                  <motion.span
-                    className="block h-1.5 w-1.5 rounded-full bg-[#d4a44c]/50"
-                    animate={reduceMotion ? undefined : { scale: [1, 1.4, 1], opacity: [0.4, 0.8, 0.4] }}
-                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                  <span className="h-px w-10 bg-gradient-to-l from-transparent to-[#d4a44c]/30" />
-                </div>
-
-                <h2 className="font-bold leading-snug text-[#f5e6c8]">
-                  {t('home.presence.title', 'Krishna Is Always With You')}
-                </h2>
-
-                <p className="text-body text-[var(--mv-text-secondary)] max-w-2xl mx-auto leading-relaxed text-sm sm:text-base">
-                  {t(
-                    'home.presence.description',
-                    'In every breath, in every moment of stillness and struggle — the Divine walks beside you. Krishna is not a distant deity; He is the closest friend within your own heart. He whispers through your conscience, guides through your intuition, and waits patiently for you to turn inward.'
-                  )}
-                </p>
-
-                <p className="text-body text-[var(--mv-text-secondary)] max-w-xl mx-auto leading-relaxed text-sm sm:text-base">
-                  {t(
-                    'home.presence.teaching',
-                    'The Bhagavad Gita teaches us that through Abhyaas — devoted, consistent practice — we can still the restless mind and realize this Divine Presence that has always been with us. Not through force, but through gentle, loving return to the Self.'
-                  )}
-                </p>
-
-                {/* Sacred verse */}
+              <Link href="/introduction" className="group block">
                 <motion.div
-                  className="mx-auto max-w-md pt-2"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3, duration: 0.6 }}
+                  className="relative overflow-hidden rounded-[24px] p-5 sm:p-6 md:p-7 shadow-[0_8px_40px_rgba(212,168,67,0.15)] transition-all duration-300 active:scale-[0.98]"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(212, 168, 67, 0.12) 0%, rgba(184, 134, 11, 0.08) 50%, rgba(212, 168, 67, 0.06) 100%)',
+                    border: '1px solid rgba(212, 168, 67, 0.2)',
+                  }}
+                  whileHover={{ scale: 1.02, boxShadow: '0 12px 50px rgba(212, 168, 67, 0.25)' }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <p className="font-sacred text-sm italic leading-relaxed text-[#d4a44c]/60 sm:text-base">
-                    {t(
-                      'home.presence.verse',
-                      '"I am seated in the hearts of all beings. From Me come memory, knowledge, and their loss."'
-                    )}
-                  </p>
-                  <p className="mt-1 text-xs text-[#d4a44c]/40">
-                    — {t('home.presence.verseRef', 'Bhagavad Gita 15.15')}
-                  </p>
-                </motion.div>
+                  {/* Inner pulsing glow */}
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none rounded-[24px]"
+                    animate={{
+                      boxShadow: [
+                        'inset 0 0 30px rgba(212, 168, 67, 0.05)',
+                        'inset 0 0 50px rgba(212, 168, 67, 0.12)',
+                        'inset 0 0 30px rgba(212, 168, 67, 0.05)',
+                      ],
+                    }}
+                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                  />
 
-                {/* CTAs */}
-                <div className="flex flex-col sm:flex-row gap-3 justify-center items-center pt-4">
-                  <Link
-                    href="/introduction"
-                    className="divine-cta-primary inline-flex items-center gap-2 px-8 py-3 font-semibold rounded-full text-sm sm:text-base"
-                  >
-                    {t('home.value.cta', 'Begin Your Journey')}
-                  </Link>
-                  <Link
-                    href="/pricing"
-                    className="inline-flex items-center gap-2 px-6 py-3 border border-[#d4a44c]/30 text-[#d4a44c]/90 rounded-full hover:border-[#d4a44c]/60 transition-all text-sm"
-                  >
-                    {t('home.value.pricing', 'View Plans — Free to Start')}
-                  </Link>
-                </div>
-              </div>
+                  {/* Floating golden particles */}
+                  {DIVINE_PARTICLES.map((particle) => (
+                    <motion.div
+                      key={particle.id}
+                      className="absolute rounded-full bg-[#d4a843]/70"
+                      style={{
+                        width: particle.size,
+                        height: particle.size,
+                        left: particle.left,
+                        bottom: 0,
+                      }}
+                      animate={{
+                        y: [0, -120],
+                        opacity: [0, 0.9, 0.7, 0],
+                        scale: [0.4, 1, 0.6, 0.2],
+                      }}
+                      transition={{
+                        duration: particle.duration,
+                        repeat: Infinity,
+                        delay: particle.delay,
+                        ease: 'easeOut',
+                      }}
+                    />
+                  ))}
+
+                  {/* Top radiance line */}
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4a843]/50 to-transparent" />
+
+                  <div className="relative flex items-center gap-4 sm:gap-5">
+                    {/* Golden OM circle with pulsing glow */}
+                    <motion.div
+                      className="relative flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full sm:h-18 sm:w-18 md:h-20 md:w-20"
+                      style={{
+                        background: 'linear-gradient(135deg, #d4a843 0%, #e8c56d 50%, #b8860b 100%)',
+                      }}
+                      animate={{
+                        scale: [1, 1.06, 1],
+                        boxShadow: [
+                          '0 0 25px rgba(212, 168, 67, 0.35), 0 0 50px rgba(212, 168, 67, 0.15)',
+                          '0 0 35px rgba(212, 168, 67, 0.5), 0 0 70px rgba(212, 168, 67, 0.25)',
+                          '0 0 25px rgba(212, 168, 67, 0.35), 0 0 50px rgba(212, 168, 67, 0.15)',
+                        ],
+                      }}
+                      transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+                    >
+                      <motion.div
+                        className="absolute inset-0 rounded-full"
+                        animate={{
+                          boxShadow: [
+                            'inset 0 0 12px rgba(255, 255, 255, 0.3)',
+                            'inset 0 0 18px rgba(255, 255, 255, 0.45)',
+                            'inset 0 0 12px rgba(255, 255, 255, 0.3)',
+                          ],
+                        }}
+                        transition={{ duration: 2.5, repeat: Infinity }}
+                      />
+                      <span className="text-3xl sm:text-4xl md:text-[42px] text-[#0a0a0f] drop-shadow-sm select-none" style={{ lineHeight: 1 }}>
+                        {'\u0950'}
+                      </span>
+                    </motion.div>
+
+                    <div className="flex-1 min-w-0">
+                      <h2 className="flex flex-wrap items-center gap-2.5 font-semibold">
+                        {t('home.divinePresence.title', 'Divine Presence')}
+                        <span className="inline-flex rounded-full border border-[#d4a843]/30 bg-[#d4a843]/15 px-2.5 py-0.5 text-[10px] font-medium text-[#d4a843] tracking-wide uppercase">
+                          {t('home.divinePresence.badge', 'Sacred')}
+                        </span>
+                      </h2>
+                      <p className="mt-1.5 text-body text-[#d4a843]/70 line-clamp-2">
+                        {t('home.divinePresence.description', "Enter the divine presence — experience Krishna's loving guidance and sacred wisdom")}
+                      </p>
+                    </div>
+
+                    {/* Animated arrow */}
+                    <motion.div
+                      className="flex-shrink-0 text-[#d4a843]/60 transition-colors duration-300 group-hover:text-[#d4a843]"
+                      animate={{ x: [0, 5, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                    >
+                      <svg className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </motion.div>
+                  </div>
+
+                  {/* Bottom radiance line */}
+                  <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#d4a843]/30 to-transparent" />
+                </motion.div>
+              </Link>
             </motion.div>
           )}
         </AnimatePresence>
