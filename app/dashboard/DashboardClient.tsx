@@ -1,10 +1,10 @@
 'use client'
 
 import { FadeIn } from '@/components/ui'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
-import { useCallback } from 'react'
+import { useCallback, useId } from 'react'
 import { SubscriptionBanner } from '@/components/subscription'
 
 // Animation variants for staggered entrance
@@ -125,6 +125,9 @@ function getGreeting(): string {
 
 export default function DashboardClient() {
   const { triggerHaptic } = useHapticFeedback()
+  const shouldReduceMotion = useReducedMotion()
+  const uid = useId()
+  const svgId = (name: string) => `${uid}-kb-${name}`
 
   const handleCardTap = useCallback(() => {
     triggerHaptic('light')
@@ -166,7 +169,7 @@ export default function DashboardClient() {
               className="group block"
             >
               <motion.div
-                className="relative overflow-hidden rounded-[24px] p-5 sm:p-6 md:p-7 shadow-[0_8px_40px_rgba(212,168,67,0.15)] transition-all duration-300 active:scale-[0.98]"
+                className="relative overflow-hidden rounded-[24px] px-5 py-5 sm:px-16 sm:py-6 md:px-24 md:py-7 min-h-[100px] sm:min-h-[110px] md:min-h-[130px] shadow-[0_8px_40px_rgba(212,168,67,0.15)] transition-all duration-300 active:scale-[0.98]"
                 style={{
                   background: 'linear-gradient(135deg, rgba(212, 168, 67, 0.12) 0%, rgba(184, 134, 11, 0.08) 50%, rgba(212, 168, 67, 0.06) 100%)',
                   border: '1px solid rgba(212, 168, 67, 0.2)',
@@ -188,6 +191,263 @@ export default function DashboardClient() {
                   }}
                   transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                 />
+
+                {/* ═══ Left Krishna Silhouette — Full body with peacock, tree & moon ═══ */}
+                <div className="absolute left-1 bottom-0 top-0 hidden sm:flex items-end pointer-events-none z-[1]" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 220 240"
+                    className="h-[100px] sm:h-[110px] md:h-[130px] w-auto"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <defs>
+                      <radialGradient id={svgId('lmg')} cx="50%" cy="40%" r="50%">
+                        <stop offset="0%" stopColor="rgba(200,215,235,0.85)" />
+                        <stop offset="60%" stopColor="rgba(160,180,210,0.3)" />
+                        <stop offset="100%" stopColor="rgba(140,160,190,0.05)" />
+                      </radialGradient>
+                      <radialGradient id={svgId('lmh')} cx="50%" cy="40%" r="50%">
+                        <stop offset="0%" stopColor="rgba(180,200,230,0.15)" />
+                        <stop offset="100%" stopColor="rgba(180,200,230,0)" />
+                      </radialGradient>
+                    </defs>
+
+                    {/* Moon glow halo */}
+                    <motion.circle
+                      cx="120" cy="75" r="70"
+                      fill={`url(#${svgId('lmh')})`}
+                      animate={shouldReduceMotion ? undefined : { opacity: [0.4, 0.7, 0.4], scale: [0.97, 1.04, 0.97] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                    />
+
+                    {/* Moon circle */}
+                    <motion.circle
+                      cx="120" cy="75" r="48"
+                      fill={`url(#${svgId('lmg')})`}
+                      animate={shouldReduceMotion ? undefined : { opacity: [0.7, 1, 0.7] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+                    />
+
+                    {/* Cloud wisps near moon */}
+                    <motion.path
+                      d="M60 85 Q75 80 90 83 Q100 86 95 90 Q80 88 65 92 Z"
+                      fill="rgba(200,215,235,0.12)"
+                      animate={shouldReduceMotion ? undefined : { opacity: [0.04, 0.14, 0.04], x: [0, 3, 0] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                    />
+                    <motion.path
+                      d="M145 65 Q160 60 175 64 Q182 68 175 70 Q162 67 148 72 Z"
+                      fill="rgba(200,215,235,0.1)"
+                      animate={shouldReduceMotion ? undefined : { opacity: [0.03, 0.12, 0.03], x: [0, -2, 0] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
+                    />
+
+                    {/* Tree branch from bottom-left */}
+                    <path
+                      d="M0 240 Q8 220 15 200 Q22 180 35 165 Q48 152 65 145 Q80 140 95 138 Q105 137 108 139 Q105 142 95 143 Q80 146 68 152 Q55 160 45 172 Q35 185 28 200 Q20 220 15 240 Z"
+                      fill="#080810"
+                    />
+                    {/* Smaller branch offshoot */}
+                    <path
+                      d="M55 160 Q62 148 72 142 Q78 140 80 142 Q75 145 68 150 Q60 158 58 165 Z"
+                      fill="#080810"
+                    />
+                    {/* Leaves on branch */}
+                    <path d="M90 135 Q95 128 100 130 Q97 136 92 138 Z" fill="#080810" />
+                    <path d="M80 138 Q84 131 89 133 Q87 138 82 140 Z" fill="#080810" />
+                    <path d="M100 134 Q106 128 110 131 Q107 136 102 137 Z" fill="#080810" />
+
+                    {/* Peacock perched on branch */}
+                    <g fill="#080810">
+                      {/* Body */}
+                      <ellipse cx="78" cy="138" rx="8" ry="5" />
+                      {/* Neck */}
+                      <path d="M74 136 Q72 130 73 125 Q74 122 76 124 Q75 128 76 134 Z" />
+                      {/* Head */}
+                      <circle cx="73" cy="122" r="4" />
+                      {/* Crest */}
+                      <path d="M72 119 Q70 112 73 110 Q74 113 75 118" />
+                      <path d="M73 118 Q74 111 76 110 Q75 114 74 118" />
+                      <circle cx="72" cy="110" r="1.2" />
+                      <circle cx="75" cy="109.5" r="1" />
+                      {/* Beak */}
+                      <path d="M70 122 L66 121 L70 120 Z" />
+                      {/* Tail feathers flowing down */}
+                      <path d="M86 138 Q95 145 100 160 Q102 170 98 178 Q95 172 93 160 Q90 148 85 140 Z" opacity="0.9" />
+                      <path d="M84 140 Q92 150 95 165 Q96 175 93 182 Q90 175 88 165 Q86 152 83 143 Z" opacity="0.85" />
+                      <path d="M82 141 Q88 152 90 168 Q90 178 87 185 Q85 178 84 168 Q83 155 81 144 Z" opacity="0.8" />
+                    </g>
+
+                    {/* Krishna figure — standing with flute, silhouetted against moon */}
+                    <motion.g
+                      fill="#080810"
+                      animate={shouldReduceMotion ? undefined : { rotate: [-0.5, 0.5, -0.5] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                      style={{ transformOrigin: '130px 240px' }}
+                    >
+                      {/* Head */}
+                      <ellipse cx="132" cy="68" rx="9" ry="11" />
+                      {/* Crown (Mukut) */}
+                      <path d="M125 62 L128 48 L131 58 L133 42 L135 58 L138 48 L141 62" />
+                      <ellipse cx="133" cy="62" rx="8" ry="2" />
+                      {/* Peacock feather on crown */}
+                      <path d="M137 53 Q142 40 140 32 Q145 42 143 52" />
+                      <ellipse cx="141" cy="36" rx="2" ry="3.5" opacity="0.8" />
+                      {/* Neck */}
+                      <rect x="129" y="78" width="6" height="6" rx="3" />
+                      {/* Shoulders & upper torso */}
+                      <path d="M118 86 Q125 82 133 84 Q141 82 148 86 L150 94 Q143 91 133 94 Q123 91 116 94 Z" />
+                      {/* Torso */}
+                      <path d="M119 94 Q122 120 126 148 Q130 152 133 151 Q136 152 140 148 Q144 120 147 94 Z" opacity="0.95" />
+                      {/* Left arm — holding flute up */}
+                      <path d="M118 86 Q108 96 102 104 Q99 108 101 110 L112 105 Q116 98 118 92" opacity="0.9" />
+                      <ellipse cx="101" cy="108" rx="3" ry="2" opacity="0.85" />
+                      {/* Right arm */}
+                      <path d="M148 86 Q156 98 160 108 Q162 112 160 114 L152 110 Q149 100 147 92" opacity="0.9" />
+                      <ellipse cx="161" cy="112" rx="2.5" ry="2" opacity="0.85" />
+                      {/* Flute (Bansuri) */}
+                      <rect x="96" y="106" width="66" height="2" rx="1" transform="rotate(-6 96 107)" opacity="0.9" />
+                      {/* Flute gold accent */}
+                      <rect x="96" y="106" width="66" height="2" rx="1" transform="rotate(-6 96 107)" stroke="#d4a843" strokeWidth="0.3" fill="none" opacity="0.2" />
+                      {/* Dhoti / lower garment */}
+                      <path d="M124 148 Q119 175 116 200 Q114 218 118 232 L133 236 L148 232 Q152 218 150 200 Q147 175 142 148 Z" opacity="0.9" />
+                      {/* Dhoti drape lines */}
+                      <path d="M126 152 Q123 175 127 200" stroke="#080810" strokeWidth="0.8" fill="none" opacity="0.4" />
+                      {/* Feet */}
+                      <ellipse cx="125" cy="235" rx="6" ry="2.5" opacity="0.8" />
+                      <ellipse cx="141" cy="235" rx="6" ry="2.5" opacity="0.8" />
+                    </motion.g>
+
+                    {/* Rock/hill under Krishna */}
+                    <ellipse cx="133" cy="238" rx="22" ry="5" fill="#080810" />
+
+                    {/* Firefly dots */}
+                    <motion.circle cx="90" cy="55" r="1" fill="rgba(200,215,235,0.5)"
+                      animate={shouldReduceMotion ? undefined : { opacity: [0, 0.7, 0], scale: [0.5, 1.2, 0.5] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 2.8, repeat: Infinity, ease: 'easeOut', delay: 0.3 }}
+                    />
+                    <motion.circle cx="155" cy="45" r="0.8" fill="rgba(200,215,235,0.5)"
+                      animate={shouldReduceMotion ? undefined : { opacity: [0, 0.6, 0], scale: [0.5, 1.3, 0.5] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 3.2, repeat: Infinity, ease: 'easeOut', delay: 1.2 }}
+                    />
+                    <motion.circle cx="70" cy="100" r="0.7" fill="rgba(212,168,67,0.4)"
+                      animate={shouldReduceMotion ? undefined : { opacity: [0, 0.5, 0] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 2.5, repeat: Infinity, ease: 'easeOut', delay: 2 }}
+                    />
+                  </svg>
+                </div>
+
+                {/* ═══ Right Krishna Silhouette — Bust playing flute with moon ═══ */}
+                <div className="absolute right-1 bottom-0 top-0 hidden sm:flex items-end pointer-events-none z-[1]" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 180 220"
+                    className="h-[100px] sm:h-[110px] md:h-[130px] w-auto"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <defs>
+                      <radialGradient id={svgId('rmg')} cx="50%" cy="38%" r="50%">
+                        <stop offset="0%" stopColor="rgba(200,215,235,0.85)" />
+                        <stop offset="60%" stopColor="rgba(160,180,210,0.3)" />
+                        <stop offset="100%" stopColor="rgba(140,160,190,0.05)" />
+                      </radialGradient>
+                      <radialGradient id={svgId('rmh')} cx="50%" cy="38%" r="50%">
+                        <stop offset="0%" stopColor="rgba(180,200,230,0.15)" />
+                        <stop offset="100%" stopColor="rgba(180,200,230,0)" />
+                      </radialGradient>
+                    </defs>
+
+                    {/* Moon glow halo */}
+                    <motion.circle
+                      cx="85" cy="75" r="75"
+                      fill={`url(#${svgId('rmh')})`}
+                      animate={shouldReduceMotion ? undefined : { opacity: [0.4, 0.7, 0.4], scale: [0.97, 1.04, 0.97] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 4.2, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+                    />
+
+                    {/* Moon circle */}
+                    <motion.circle
+                      cx="85" cy="75" r="52"
+                      fill={`url(#${svgId('rmg')})`}
+                      animate={shouldReduceMotion ? undefined : { opacity: [0.7, 1, 0.7] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 3.8, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+                    />
+
+                    {/* Cloud wisps */}
+                    <motion.path
+                      d="M130 60 Q145 55 158 58 Q165 62 158 64 Q147 60 133 66 Z"
+                      fill="rgba(200,215,235,0.1)"
+                      animate={shouldReduceMotion ? undefined : { opacity: [0.04, 0.13, 0.04], x: [0, -3, 0] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 6.5, repeat: Infinity, ease: 'easeInOut' }}
+                    />
+                    <motion.path
+                      d="M20 90 Q35 85 50 88 Q58 92 50 94 Q38 90 25 96 Z"
+                      fill="rgba(200,215,235,0.08)"
+                      animate={shouldReduceMotion ? undefined : { opacity: [0.03, 0.1, 0.03], x: [0, 2, 0] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+                    />
+
+                    {/* Krishna upper-body silhouette — playing flute, facing slightly left */}
+                    <motion.g
+                      fill="#080810"
+                      animate={shouldReduceMotion ? undefined : { rotate: [-0.5, 0.5, -0.5] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+                      style={{ transformOrigin: '85px 220px' }}
+                    >
+                      {/* Head */}
+                      <ellipse cx="88" cy="62" rx="11" ry="13" />
+                      {/* Crown (Mukut) — ornate */}
+                      <path d="M79 55 L83 38 L87 50 L89 30 L91 50 L95 38 L99 55" />
+                      <ellipse cx="89" cy="54" rx="10" ry="2.5" />
+                      {/* Peacock feather — prominent */}
+                      <path d="M94 46 Q102 28 99 16 Q107 32 104 46" />
+                      <ellipse cx="101" cy="22" rx="3" ry="5" opacity="0.85" />
+                      {/* Peacock feather eye — gold accent */}
+                      <ellipse cx="101" cy="22" rx="1.5" ry="2.5" fill="#d4a843" opacity="0.15" />
+                      {/* Neck */}
+                      <rect x="84" y="74" width="8" height="7" rx="4" />
+                      {/* Shoulders & upper body */}
+                      <path d="M68 84 Q78 78 89 81 Q100 78 110 84 L113 95 Q103 91 89 95 Q75 91 65 95 Z" />
+                      {/* Torso */}
+                      <path d="M70 95 Q74 125 78 155 Q83 162 89 160 Q95 162 100 155 Q104 125 108 95 Z" opacity="0.95" />
+                      {/* Left arm — raised holding flute */}
+                      <path d="M68 84 Q55 95 46 106 Q42 112 45 115 L56 109 Q60 100 66 92" opacity="0.9" />
+                      <ellipse cx="44" cy="113" rx="3.5" ry="2.5" opacity="0.85" />
+                      {/* Right arm — supporting flute */}
+                      <path d="M110 84 Q120 100 126 114 Q129 120 127 123 L118 118 Q114 106 110 94" opacity="0.9" />
+                      <ellipse cx="128" cy="120" rx="3" ry="2.5" opacity="0.85" />
+                      {/* Flute (Bansuri) — diagonal across */}
+                      <rect x="38" y="110" width="92" height="2.5" rx="1.25" transform="rotate(-7 38 111)" opacity="0.9" />
+                      {/* Flute gold accent */}
+                      <rect x="38" y="110" width="92" height="2.5" rx="1.25" transform="rotate(-7 38 111)" stroke="#d4a843" strokeWidth="0.4" fill="none" opacity="0.2" />
+                      {/* Flute holes */}
+                      <circle cx="60" cy="110" r="0.8" fill="#0d0d16" opacity="0.5" />
+                      <circle cx="72" cy="109" r="0.8" fill="#0d0d16" opacity="0.5" />
+                      <circle cx="84" cy="108" r="0.8" fill="#0d0d16" opacity="0.5" />
+                      <circle cx="96" cy="107" r="0.8" fill="#0d0d16" opacity="0.5" />
+                      {/* Necklace */}
+                      <path d="M74 84 Q82 92 89 94 Q96 92 104 84" stroke="#080810" strokeWidth="1.5" fill="none" opacity="0.6" />
+                      {/* Dhoti / lower garment — fades into bottom */}
+                      <path d="M76 155 Q72 178 70 200 Q69 212 72 220 L89 222 L106 220 Q109 212 108 200 Q106 178 102 155 Z" opacity="0.9" />
+                      {/* Dhoti drape */}
+                      <path d="M80 158 Q77 178 80 200" stroke="#080810" strokeWidth="0.8" fill="none" opacity="0.3" />
+                    </motion.g>
+
+                    {/* Firefly dots */}
+                    <motion.circle cx="40" cy="50" r="0.9" fill="rgba(200,215,235,0.5)"
+                      animate={shouldReduceMotion ? undefined : { opacity: [0, 0.7, 0], scale: [0.5, 1.2, 0.5] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 3, repeat: Infinity, ease: 'easeOut', delay: 0.8 }}
+                    />
+                    <motion.circle cx="140" cy="40" r="0.7" fill="rgba(200,215,235,0.45)"
+                      animate={shouldReduceMotion ? undefined : { opacity: [0, 0.6, 0], scale: [0.5, 1.3, 0.5] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 2.6, repeat: Infinity, ease: 'easeOut', delay: 1.8 }}
+                    />
+                    <motion.circle cx="55" cy="110" r="0.6" fill="rgba(212,168,67,0.35)"
+                      animate={shouldReduceMotion ? undefined : { opacity: [0, 0.5, 0] }}
+                      transition={shouldReduceMotion ? undefined : { duration: 2.8, repeat: Infinity, ease: 'easeOut', delay: 2.5 }}
+                    />
+                  </svg>
+                </div>
 
                 {/* Floating Divine Particles */}
                 {DIVINE_PARTICLES.map((particle) => (
@@ -217,7 +477,7 @@ export default function DashboardClient() {
                 {/* Top radiance line */}
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4a843]/50 to-transparent" />
 
-                <div className="relative flex items-center gap-4 sm:gap-5">
+                <div className="relative z-10 flex items-center gap-4 sm:gap-5">
                   {/* Golden Avatar Circle with Pulsing Glow */}
                   <motion.div
                     className="relative flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full sm:h-18 sm:w-18 md:h-20 md:w-20"

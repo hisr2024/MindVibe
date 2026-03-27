@@ -8,8 +8,7 @@
  *
  * Flow:
  * 1. DivineKrishnaPresence — Krishna's welcome (OM + "Welcome, Dear Friend")
- * 2. KrishnaDancingReveal — Click dancing Krishna to reveal divine presence
- * 3. Closing verse + Disclaimer
+ * 2. Closing verse + Disclaimer
  */
 
 import { motion } from 'framer-motion';
@@ -21,7 +20,6 @@ import { springConfigs } from '@/lib/animations/spring-configs';
 // Dynamic imports for framer-motion components to reduce initial bundle size
 const DivineCelestialBackground = dynamic(() => import('@/components/divine/DivineCelestialBackground').then(mod => mod.DivineCelestialBackground), { ssr: false });
 const DivineKrishnaPresence = dynamic(() => import('@/components/divine/DivineKrishnaPresence').then(mod => mod.DivineKrishnaPresence), { ssr: false });
-const KrishnaDancingReveal = dynamic(() => import('@/components/divine/KrishnaDancingReveal').then(mod => mod.KrishnaDancingReveal), { ssr: false });
 
 export default function Home() {
   const { t } = useLanguage();
@@ -36,9 +34,6 @@ export default function Home() {
 
         {/* === DIVINE ENTRY: Krishna's Presence === */}
         <DivineKrishnaPresence />
-
-        {/* === KRISHNA DANCING: Click to reveal divine presence === */}
-        <KrishnaDancingReveal />
 
         {/* === CLOSING VERSE: Daily reminder === */}
         <motion.section
