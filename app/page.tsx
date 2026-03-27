@@ -8,7 +8,7 @@
  *
  * Flow:
  * 1. DivineKrishnaPresence — Krishna's welcome (OM + "Welcome, Dear Friend")
- * 2. Krishna's Eternal Presence — He is always around us, guiding
+ * 2. KrishnaDancingReveal — Click dancing Krishna to reveal divine presence
  * 3. Closing verse + Disclaimer
  */
 
@@ -21,6 +21,7 @@ import { springConfigs } from '@/lib/animations/spring-configs';
 // Dynamic imports for framer-motion components to reduce initial bundle size
 const DivineCelestialBackground = dynamic(() => import('@/components/divine/DivineCelestialBackground').then(mod => mod.DivineCelestialBackground), { ssr: false });
 const DivineKrishnaPresence = dynamic(() => import('@/components/divine/DivineKrishnaPresence').then(mod => mod.DivineKrishnaPresence), { ssr: false });
+const KrishnaDancingReveal = dynamic(() => import('@/components/divine/KrishnaDancingReveal').then(mod => mod.KrishnaDancingReveal), { ssr: false });
 
 export default function Home() {
   const { t } = useLanguage();
@@ -36,86 +37,8 @@ export default function Home() {
         {/* === DIVINE ENTRY: Krishna's Presence === */}
         <DivineKrishnaPresence />
 
-        {/* === KRISHNA'S ETERNAL PRESENCE: He is always around us === */}
-        <motion.section
-          className="relative mx-auto max-w-3xl text-center"
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        >
-          {/* Soft divine glow behind this section */}
-          <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(212,164,76,0.06)_0%,transparent_70%)]" />
-
-          <div className="relative space-y-5 py-6">
-            {/* Ornamental line */}
-            <div className="flex items-center justify-center gap-3">
-              <span className="h-px w-10 bg-gradient-to-r from-transparent to-[#d4a44c]/30" />
-              <motion.span
-                className="block h-1.5 w-1.5 rounded-full bg-[#d4a44c]/50"
-                animate={{ scale: [1, 1.4, 1], opacity: [0.4, 0.8, 0.4] }}
-                transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-              />
-              <span className="h-px w-10 bg-gradient-to-l from-transparent to-[#d4a44c]/30" />
-            </div>
-
-            <h2 className="font-bold leading-snug">
-              {t(
-                'home.presence.title',
-                'Krishna Is Always With You'
-              )}
-            </h2>
-
-            <p className="text-body text-[var(--mv-text-secondary)] max-w-2xl mx-auto leading-relaxed">
-              {t(
-                'home.presence.description',
-                'In every breath, in every moment of stillness and struggle — the Divine walks beside you. Krishna is not a distant deity; He is the closest friend within your own heart. He whispers through your conscience, guides through your intuition, and waits patiently for you to turn inward.'
-              )}
-            </p>
-
-            <p className="text-body text-[var(--mv-text-secondary)] max-w-xl mx-auto leading-relaxed">
-              {t(
-                'home.presence.teaching',
-                'The Bhagavad Gita teaches us that through Abhyaas — devoted, consistent practice — we can still the restless mind and realize this Divine Presence that has always been with us. Not through force, but through gentle, loving return to the Self.'
-              )}
-            </p>
-
-            {/* Sacred verse about presence */}
-            <motion.div
-              className="mx-auto max-w-md pt-2"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-            >
-              <p className="font-sacred text-sm italic leading-relaxed text-[#d4a44c]/60 sm:text-base">
-                {t(
-                  'home.presence.verse',
-                  '"I am seated in the hearts of all beings. From Me come memory, knowledge, and their loss."'
-                )}
-              </p>
-              <p className="mt-1 text-xs text-[#d4a44c]/40">
-                — {t('home.presence.verseRef', 'Bhagavad Gita 15.15')}
-              </p>
-            </motion.div>
-
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center pt-4">
-              <Link
-                href="/introduction"
-                className="divine-cta-primary inline-flex items-center gap-2 px-8 py-3 font-semibold rounded-full text-sm sm:text-base"
-              >
-                {t('home.value.cta', 'Begin Your Journey')}
-              </Link>
-              <Link
-                href="/pricing"
-                className="inline-flex items-center gap-2 px-6 py-3 border border-[#d4a44c]/30 text-[#d4a44c]/90 rounded-full hover:border-[#d4a44c]/60 transition-all text-sm"
-              >
-                {t('home.value.pricing', 'View Plans — Free to Start')}
-              </Link>
-            </div>
-          </div>
-        </motion.section>
+        {/* === KRISHNA DANCING: Click to reveal divine presence === */}
+        <KrishnaDancingReveal />
 
         {/* === CLOSING VERSE: Daily reminder === */}
         <motion.section
