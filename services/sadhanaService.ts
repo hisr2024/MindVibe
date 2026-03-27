@@ -30,7 +30,10 @@ export async function composeSadhana(request: ComposeRequest): Promise<SadhanaCo
   const response = await apiFetch(COMPOSE_ENDPOINT, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(request),
+    body: JSON.stringify({
+      mood: request.mood,
+      time_of_day: request.timeOfDay,
+    }),
   })
 
   if (!response.ok) {

@@ -141,10 +141,12 @@ MOOD_BREATHING_MAP: Dict[str, str] = {
     "sad": "calming",
     "anxious": "calming",
     "stressed": "calming",
+    "peaceful": "calming",
     "radiant": "energizing",
     "grateful": "energizing",
     "joyful": "energizing",
     "excited": "energizing",
+    "seeking": "balanced",
 }
 
 # ---------------------------------------------------------------------------

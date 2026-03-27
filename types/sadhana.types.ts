@@ -81,7 +81,7 @@ export interface SadhanaComposition {
 /** Request to compose a practice */
 export interface ComposeRequest {
   mood: SadhanaMood
-  timeOfDay?: string
+  timeOfDay: string
 }
 
 /** Request to record completion */

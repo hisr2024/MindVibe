@@ -88,6 +88,7 @@ export async function POST(request: NextRequest) {
             response: data.response,
             sources: data.sources || [],
             depth,
+            fallback: data.fallback || false,
             ardha_analysis: data.ardha_analysis || null,
             compliance: data.compliance || null,
           })

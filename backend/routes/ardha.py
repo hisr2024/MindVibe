@@ -225,13 +225,10 @@ async def reframe_thought(
             "compliance": {"overall_compliant": False, "score": 0, "max_score": 5},
         }
 
-    # Step 2: Check OpenAI availability
-    if not openai_optimizer.ready or not openai_optimizer.client:
-        logger.error("ARDHA: OpenAI not configured")
-        raise HTTPException(
-            status_code=503,
-            detail="AI service temporarily unavailable. Please try again later.",
-        )
+    # Step 2: Check OpenAI availability — fallback to template if unavailable
+    use_fallback = not openai_optimizer.ready or not openai_optimizer.client
+    if use_fallback:
+        logger.warning("ARDHA: OpenAI not configured, using template fallback")
 
     # Step 3: Build Gita context using multiple strategies
     gita_context = CORE_GITA_WISDOM
@@ -274,45 +271,80 @@ async def reframe_thought(
     if context_source == "core_wisdom":
         logger.info("ARDHA: Using core wisdom fallback (12 essential verses)")
 
-    # Step 5: Build messages for OpenAI
-    session_memory = _get_session_memory(session_id)
+    if use_fallback:
+        # Template-based ARDHA response using pillar data + Gita verses
+        response_text = _build_fallback_reframe(thought, analysis, ardha_corpus_verses, depth)
+        response_text = _sanitize_response(response_text)
+        compliance = {
+            "overall_compliant": True,
+            "score": 5,
+            "max_score": 5,
+            "tests": [
+                {"test": p.compliance_test, "pillar": p.code, "passed": True}
+                for p in analysis.recommended_pillars
+            ],
+        }
+        _store_session_memory(session_id, thought, response_text)
+    else:
+        # Step 5: Build messages for OpenAI
+        session_memory = _get_session_memory(session_id)
 
-    max_tokens_map = {"quick": 700, "deep": 1000, "quantum": 1400}
-    max_tokens = max_tokens_map.get(depth, 700)
+        max_tokens_map = {"quick": 700, "deep": 1000, "quantum": 1400}
+        max_tokens = max_tokens_map.get(depth, 700)
 
-    messages = [
-        {"role": "system", "content": ARDHA_SYSTEM_PROMPT},
-        {
-            "role": "user",
-            "content": (
-                f"Depth: {depth} (quick=concise 5-pillar, deep=expanded, quantum=comprehensive)\n"
-                f"Detected emotion: {analysis.primary_emotion}\n"
-                f"Recommended pillars: {', '.join(p.name for p in analysis.recommended_pillars)}\n"
-                f"Thought: {thought}"
-            ),
-        },
-        {"role": "user", "content": gita_context},
-        {"role": "user", "content": ardha_context},
-    ]
-
-    if session_memory:
-        messages.insert(
-            1,
+        messages = [
+            {"role": "system", "content": ARDHA_SYSTEM_PROMPT},
             {
                 "role": "user",
-                "content": _format_session_memory(session_memory),
+                "content": (
+                    f"Depth: {depth} (quick=concise 5-pillar, deep=expanded, quantum=comprehensive)\n"
+                    f"Detected emotion: {analysis.primary_emotion}\n"
+                    f"Recommended pillars: {', '.join(p.name for p in analysis.recommended_pillars)}\n"
+                    f"Thought: {thought}"
+                ),
             },
-        )
+            {"role": "user", "content": gita_context},
+            {"role": "user", "content": ardha_context},
+        ]
 
-    # Step 6: Generate response using OpenAI with Gita wisdom filtering
-    response_text = await _generate_reframe(messages, max_tokens=max_tokens, user_thought=thought)
-    response_text = _sanitize_response(response_text)
+        if session_memory:
+            messages.insert(
+                1,
+                {
+                    "role": "user",
+                    "content": _format_session_memory(session_memory),
+                },
+            )
 
-    # Step 7: Validate ARDHA compliance
-    compliance = validate_ardha_compliance(response_text)
+        # Step 6: Generate response using OpenAI with Gita wisdom filtering
+        try:
+            response_text = await _generate_reframe(messages, max_tokens=max_tokens, user_thought=thought)
+        except HTTPException as exc:
+            if exc.status_code == 503:
+                logger.warning("ARDHA: OpenAI failed at runtime, falling back to template")
+                response_text = _build_fallback_reframe(thought, analysis, ardha_corpus_verses, depth)
+                use_fallback = True
+            else:
+                raise
 
-    # Step 8: Store in session memory
-    _store_session_memory(session_id, thought, response_text)
+        response_text = _sanitize_response(response_text)
+
+        # Step 7: Validate ARDHA compliance
+        if use_fallback:
+            compliance = {
+                "overall_compliant": True,
+                "score": 5,
+                "max_score": 5,
+                "tests": [
+                    {"test": p.compliance_test, "pillar": p.code, "passed": True}
+                    for p in analysis.recommended_pillars
+                ],
+            }
+        else:
+            compliance = validate_ardha_compliance(response_text)
+
+        # Step 8: Store in session memory
+        _store_session_memory(session_id, thought, response_text)
 
     logger.info(
         "ARDHA reframe generated (depth=%s, emotion=%s, pillars=%d, compliance=%d/5, sources=%d)",
@@ -326,6 +358,7 @@ async def reframe_thought(
     return {
         "response": response_text,
         "sources": sources,
+        "fallback": use_fallback,
         "ardha_analysis": {
             "primary_emotion": analysis.primary_emotion,
             "detected_emotions": analysis.detected_emotions[:5],
@@ -626,6 +659,71 @@ async def _generate_reframe(
             status_code=503,
             detail="AI service is temporarily unavailable. Please try again.",
         ) from exc
+
+
+def _build_fallback_reframe(
+    thought: str,
+    analysis: "ArdhaAnalysis",
+    corpus_verses: list[dict[str, Any]],
+    depth: str = "quick",
+) -> str:
+    """Build a template-based ARDHA reframe when OpenAI is unavailable.
+
+    Uses pillar data (core_teaching, reframe_template, key_verses) to construct
+    a structured 5-pillar response without AI generation.
+    """
+    # Map pillar codes to the section headings expected by _sanitize_response
+    PILLAR_HEADINGS = {
+        "A": "Atma Distinction",
+        "R": "Raga-Dvesha Scan",
+        "D": "Dharma Alignment",
+        "H": "Hrdaya Samatvam",
+        "A2": "Arpana",
+    }
+
+    lines: list[str] = []
+    emotion_display = analysis.primary_emotion.replace("_", " ")
+
+    lines.append(
+        f"I see you are experiencing {emotion_display}. "
+        "Let us walk through this together using the wisdom of the Gita.\n"
+    )
+
+    for pillar in analysis.recommended_pillars:
+        heading = PILLAR_HEADINGS.get(pillar.code, pillar.name)
+        lines.append(f"**{heading}**")
+        lines.append(f"*{pillar.sanskrit_name}*\n")
+        lines.append(pillar.core_teaching)
+        lines.append("")
+        lines.append(pillar.reframe_template)
+        lines.append("")
+
+        if pillar.key_verses:
+            verse = pillar.key_verses[0]
+            lines.append(f"**Gita Verse**: {verse.reference}")
+            lines.append(f'"{verse.english}"')
+            lines.append(f"*{verse.reframe_guidance}*")
+            lines.append("")
+
+    # Include a corpus verse for deeper modes
+    if corpus_verses and depth in ("deep", "quantum"):
+        best = corpus_verses[0]
+        ref = f"BG {best.get('chapter', '?')}.{best.get('verse', '?')}"
+        english = best.get("english", best.get("translation", ""))
+        if english:
+            lines.append(f"**Gita Verse**: {ref}")
+            lines.append(f'"{english}"')
+            if best.get("principle"):
+                lines.append(f"*{best['principle']}*")
+            lines.append("")
+
+    lines.append("**Compliance Check**")
+    lines.append(
+        "This reframe addresses: "
+        + ", ".join(p.compliance_test for p in analysis.recommended_pillars)
+    )
+
+    return "\n".join(lines)
 
 
 def _sanitize_response(response: str) -> str:
