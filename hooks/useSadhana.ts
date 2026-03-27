@@ -20,7 +20,7 @@ export function useSadhana() {
 
     try {
       const hour = new Date().getHours()
-      const timeOfDay = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening'
+      const timeOfDay = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : hour < 21 ? 'evening' : 'night'
 
       const composition = await composeSadhana({ mood, timeOfDay })
       store.setComposition(composition)

@@ -280,7 +280,7 @@ async def reframe_thought(
             "score": 5,
             "max_score": 5,
             "tests": [
-                {"test": p.compliance_test, "pillar": p.name, "passed": True}
+                {"test": p.compliance_test, "pillar": p.code, "passed": True}
                 for p in analysis.recommended_pillars
             ],
         }
@@ -336,7 +336,7 @@ async def reframe_thought(
                 "score": 5,
                 "max_score": 5,
                 "tests": [
-                    {"test": p.compliance_test, "pillar": p.name, "passed": True}
+                    {"test": p.compliance_test, "pillar": p.code, "passed": True}
                     for p in analysis.recommended_pillars
                 ],
             }
