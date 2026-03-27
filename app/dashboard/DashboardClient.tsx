@@ -158,6 +158,129 @@ export default function DashboardClient() {
             </motion.p>
           </motion.div>
 
+          {/* ─── Divine Presence Banner ─── */}
+          <motion.div variants={itemVariants}>
+            <Link
+              href="/introduction"
+              onClick={handleFeatureTap}
+              className="group block"
+            >
+              <motion.div
+                className="relative overflow-hidden rounded-[24px] p-5 sm:p-6 md:p-7 shadow-[0_8px_40px_rgba(212,168,67,0.15)] transition-all duration-300 active:scale-[0.98]"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(212, 168, 67, 0.12) 0%, rgba(184, 134, 11, 0.08) 50%, rgba(212, 168, 67, 0.06) 100%)',
+                  border: '1px solid rgba(212, 168, 67, 0.2)',
+                }}
+                variants={quickActionVariants}
+                initial="rest"
+                whileHover="hover"
+                whileTap="tap"
+              >
+                {/* Divine Presence Glow Overlay */}
+                <motion.div
+                  className="absolute inset-0 pointer-events-none rounded-[24px]"
+                  animate={{
+                    boxShadow: [
+                      'inset 0 0 30px rgba(212, 168, 67, 0.05)',
+                      'inset 0 0 50px rgba(212, 168, 67, 0.12)',
+                      'inset 0 0 30px rgba(212, 168, 67, 0.05)',
+                    ],
+                  }}
+                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                />
+
+                {/* Floating Divine Particles */}
+                {DIVINE_PARTICLES.map((particle) => (
+                  <motion.div
+                    key={particle.id}
+                    className="absolute rounded-full bg-[#d4a843]/70"
+                    style={{
+                      width: particle.size,
+                      height: particle.size,
+                      left: particle.left,
+                      bottom: 0,
+                    }}
+                    animate={{
+                      y: [0, -120],
+                      opacity: [0, 0.9, 0.7, 0],
+                      scale: [0.4, 1, 0.6, 0.2],
+                    }}
+                    transition={{
+                      duration: particle.duration,
+                      repeat: Infinity,
+                      delay: particle.delay,
+                      ease: 'easeOut',
+                    }}
+                  />
+                ))}
+
+                {/* Top radiance line */}
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4a843]/50 to-transparent" />
+
+                <div className="relative flex items-center gap-4 sm:gap-5">
+                  {/* Golden Avatar Circle with Pulsing Glow */}
+                  <motion.div
+                    className="relative flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full sm:h-18 sm:w-18 md:h-20 md:w-20"
+                    style={{
+                      background: 'linear-gradient(135deg, #d4a843 0%, #e8c56d 50%, #b8860b 100%)',
+                    }}
+                    animate={{
+                      scale: [1, 1.06, 1],
+                      boxShadow: [
+                        '0 0 25px rgba(212, 168, 67, 0.35), 0 0 50px rgba(212, 168, 67, 0.15)',
+                        '0 0 35px rgba(212, 168, 67, 0.5), 0 0 70px rgba(212, 168, 67, 0.25)',
+                        '0 0 25px rgba(212, 168, 67, 0.35), 0 0 50px rgba(212, 168, 67, 0.15)',
+                      ],
+                    }}
+                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    {/* Inner glow ring */}
+                    <motion.div
+                      className="absolute inset-0 rounded-full"
+                      animate={{
+                        boxShadow: [
+                          'inset 0 0 12px rgba(255, 255, 255, 0.3)',
+                          'inset 0 0 18px rgba(255, 255, 255, 0.45)',
+                          'inset 0 0 12px rgba(255, 255, 255, 0.3)',
+                        ],
+                      }}
+                      transition={{ duration: 2.5, repeat: Infinity }}
+                    />
+                    <span className="text-3xl sm:text-4xl md:text-[42px] text-[#0a0a0f] drop-shadow-sm select-none" style={{ lineHeight: 1 }}>
+                      {'\u0950'}
+                    </span>
+                  </motion.div>
+
+                  <div className="flex-1 min-w-0">
+                    <h2 className="flex flex-wrap items-center gap-2.5 font-semibold">
+                      Divine Presence
+                      <span className="inline-flex rounded-full border border-[#d4a843]/30 bg-[#d4a843]/15 px-2.5 py-0.5 text-[10px] font-medium text-[#d4a843] tracking-wide uppercase">
+                        Sacred
+                      </span>
+                    </h2>
+                    <p className="mt-1.5 text-body text-[#d4a843]/70 line-clamp-2">
+                      Enter the divine presence — experience Krishna&apos;s loving guidance and sacred wisdom
+                    </p>
+                  </div>
+
+                  {/* Animated Arrow */}
+                  <motion.div
+                    className="flex-shrink-0 text-[#d4a843]/60 transition-colors duration-300 group-hover:text-[#d4a843]"
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    <svg className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </motion.div>
+                </div>
+
+                {/* Bottom radiance line */}
+                <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#d4a843]/30 to-transparent" />
+              </motion.div>
+            </Link>
+          </motion.div>
+
           {/* ─── Subscription Upsell Banner (free users) ─── */}
           <motion.div variants={itemVariants}>
             <SubscriptionBanner
@@ -383,129 +506,6 @@ export default function DashboardClient() {
               {/* Bottom golden radiance line */}
               <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#d4a44c]/20 to-transparent" />
             </div>
-          </motion.div>
-
-          {/* ─── Divine Presence Banner ─── */}
-          <motion.div variants={itemVariants}>
-            <Link
-              href="/introduction"
-              onClick={handleFeatureTap}
-              className="group block"
-            >
-              <motion.div
-                className="relative overflow-hidden rounded-[24px] p-5 sm:p-6 md:p-7 shadow-[0_8px_40px_rgba(212,168,67,0.15)] transition-all duration-300 active:scale-[0.98]"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(212, 168, 67, 0.12) 0%, rgba(184, 134, 11, 0.08) 50%, rgba(212, 168, 67, 0.06) 100%)',
-                  border: '1px solid rgba(212, 168, 67, 0.2)',
-                }}
-                variants={quickActionVariants}
-                initial="rest"
-                whileHover="hover"
-                whileTap="tap"
-              >
-                {/* Divine Presence Glow Overlay */}
-                <motion.div
-                  className="absolute inset-0 pointer-events-none rounded-[24px]"
-                  animate={{
-                    boxShadow: [
-                      'inset 0 0 30px rgba(212, 168, 67, 0.05)',
-                      'inset 0 0 50px rgba(212, 168, 67, 0.12)',
-                      'inset 0 0 30px rgba(212, 168, 67, 0.05)',
-                    ],
-                  }}
-                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                />
-
-                {/* Floating Divine Particles */}
-                {DIVINE_PARTICLES.map((particle) => (
-                  <motion.div
-                    key={particle.id}
-                    className="absolute rounded-full bg-[#d4a843]/70"
-                    style={{
-                      width: particle.size,
-                      height: particle.size,
-                      left: particle.left,
-                      bottom: 0,
-                    }}
-                    animate={{
-                      y: [0, -120],
-                      opacity: [0, 0.9, 0.7, 0],
-                      scale: [0.4, 1, 0.6, 0.2],
-                    }}
-                    transition={{
-                      duration: particle.duration,
-                      repeat: Infinity,
-                      delay: particle.delay,
-                      ease: 'easeOut',
-                    }}
-                  />
-                ))}
-
-                {/* Top radiance line */}
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4a843]/50 to-transparent" />
-
-                <div className="relative flex items-center gap-4 sm:gap-5">
-                  {/* Golden Avatar Circle with Pulsing Glow */}
-                  <motion.div
-                    className="relative flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full sm:h-18 sm:w-18 md:h-20 md:w-20"
-                    style={{
-                      background: 'linear-gradient(135deg, #d4a843 0%, #e8c56d 50%, #b8860b 100%)',
-                    }}
-                    animate={{
-                      scale: [1, 1.06, 1],
-                      boxShadow: [
-                        '0 0 25px rgba(212, 168, 67, 0.35), 0 0 50px rgba(212, 168, 67, 0.15)',
-                        '0 0 35px rgba(212, 168, 67, 0.5), 0 0 70px rgba(212, 168, 67, 0.25)',
-                        '0 0 25px rgba(212, 168, 67, 0.35), 0 0 50px rgba(212, 168, 67, 0.15)',
-                      ],
-                    }}
-                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-                  >
-                    {/* Inner glow ring */}
-                    <motion.div
-                      className="absolute inset-0 rounded-full"
-                      animate={{
-                        boxShadow: [
-                          'inset 0 0 12px rgba(255, 255, 255, 0.3)',
-                          'inset 0 0 18px rgba(255, 255, 255, 0.45)',
-                          'inset 0 0 12px rgba(255, 255, 255, 0.3)',
-                        ],
-                      }}
-                      transition={{ duration: 2.5, repeat: Infinity }}
-                    />
-                    <span className="text-3xl sm:text-4xl md:text-[42px] text-[#0a0a0f] drop-shadow-sm select-none" style={{ lineHeight: 1 }}>
-                      {'\u0950'}
-                    </span>
-                  </motion.div>
-
-                  <div className="flex-1 min-w-0">
-                    <h2 className="flex flex-wrap items-center gap-2.5 font-semibold">
-                      Divine Presence
-                      <span className="inline-flex rounded-full border border-[#d4a843]/30 bg-[#d4a843]/15 px-2.5 py-0.5 text-[10px] font-medium text-[#d4a843] tracking-wide uppercase">
-                        Sacred
-                      </span>
-                    </h2>
-                    <p className="mt-1.5 text-body text-[#d4a843]/70 line-clamp-2">
-                      Enter the divine presence — experience Krishna&apos;s loving guidance and sacred wisdom
-                    </p>
-                  </div>
-
-                  {/* Animated Arrow */}
-                  <motion.div
-                    className="flex-shrink-0 text-[#d4a843]/60 transition-colors duration-300 group-hover:text-[#d4a843]"
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                  >
-                    <svg className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </motion.div>
-                </div>
-
-                {/* Bottom radiance line */}
-                <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#d4a843]/30 to-transparent" />
-              </motion.div>
-            </Link>
           </motion.div>
 
         </motion.div>

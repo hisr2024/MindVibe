@@ -54,6 +54,7 @@ export {
 export { DivineCelestialBackground } from './DivineCelestialBackground';
 export { DivineAbhyaasVerse } from './DivineAbhyaasVerse';
 export { DivineKrishnaPresence } from './DivineKrishnaPresence';
+export { KrishnaDancingReveal } from './KrishnaDancingReveal';
 export { DivineSacredActions } from './DivineSacredActions';
 
 // ========================================
