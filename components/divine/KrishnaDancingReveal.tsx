@@ -12,6 +12,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import { useLanguage } from '@/hooks/useLanguage'
+import { KrishnaAnimatedSilhouette } from './KrishnaAnimatedSilhouette'
 
 const DIVINE_PARTICLES = Array.from({ length: 8 }, (_, i) => ({
   id: i,
@@ -198,6 +199,10 @@ export function KrishnaDancingReveal() {
 
                   {/* Top radiance line */}
                   <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4a843]/50 to-transparent" />
+
+                  {/* Animated Krishna silhouettes flanking the banner */}
+                  <KrishnaAnimatedSilhouette position="left" />
+                  <KrishnaAnimatedSilhouette position="right" />
 
                   <div className="relative flex items-center gap-4 sm:gap-5">
                     {/* Golden OM circle with pulsing glow */}

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useCallback, useId } from 'react'
 import { SubscriptionBanner } from '@/components/subscription'
+import { KrishnaAnimatedSilhouette } from '@/components/divine/KrishnaAnimatedSilhouette'
 
 // Animation variants for staggered entrance
 const containerVariants = {
@@ -476,6 +477,10 @@ export default function DashboardClient() {
 
                 {/* Top radiance line */}
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4a843]/50 to-transparent" />
+
+                {/* Animated Krishna silhouettes flanking the banner */}
+                <KrishnaAnimatedSilhouette position="left" />
+                <KrishnaAnimatedSilhouette position="right" />
 
                 <div className="relative z-10 flex items-center gap-4 sm:gap-5">
                   {/* Golden Avatar Circle with Pulsing Glow */}
