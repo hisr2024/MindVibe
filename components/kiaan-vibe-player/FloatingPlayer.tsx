@@ -12,10 +12,11 @@
 
 import React, { useState, useCallback, useEffect } from 'react'
 import Image from 'next/image'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useDragControls, useMotionValue, animate as fmAnimate } from 'framer-motion'
 import {
   Play,
   Pause,
+  Square,
   SkipForward,
   SkipBack,
   Volume2,
@@ -30,6 +31,7 @@ import {
   Music2,
   AlertTriangle,
   RefreshCw,
+  GripHorizontal,
 } from 'lucide-react'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
 import { formatDuration } from '@/lib/kiaan-vibe/meditation-library'
@@ -39,6 +41,12 @@ import { formatDuration } from '@/lib/kiaan-vibe/meditation-library'
 export function FloatingPlayer() {
   const [isExpanded, setIsExpanded] = useState(false)
   const [showQueue, setShowQueue] = useState(false)
+
+  // Drag controls for movable player
+  const dragControls = useDragControls()
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const [dragBounds, setDragBounds] = useState({ top: 0, left: 0, right: 0, bottom: 0 })
 
   // Player state from Zustand store
   const {
@@ -56,6 +64,7 @@ export function FloatingPlayer() {
     muted,
     audioError,
     toggle,
+    stop,
     next,
     previous,
     seek,
@@ -101,6 +110,9 @@ export function FloatingPlayer() {
         case 'p':
           previous()
           break
+        case 's':
+          stop()
+          break
         case 'm':
           toggleMute()
           break
@@ -112,7 +124,7 @@ export function FloatingPlayer() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [toggle, seek, position, duration, next, previous, toggleMute, clearQueue])
+  }, [toggle, stop, seek, position, duration, next, previous, toggleMute, clearQueue])
 
   // Handle progress bar click/drag
   const handleProgressClick = useCallback(
@@ -140,6 +152,27 @@ export function FloatingPlayer() {
     setRepeatMode(modes[nextIndex])
   }, [repeatMode, setRepeatMode])
 
+  // Compute drag bounds from viewport dimensions
+  useEffect(() => {
+    const updateBounds = () => {
+      setDragBounds({
+        top: -(window.innerHeight - 150),
+        left: -(window.innerWidth - 100),
+        right: window.innerWidth - 100,
+        bottom: window.innerHeight - 150,
+      })
+    }
+    updateBounds()
+    window.addEventListener('resize', updateBounds)
+    return () => window.removeEventListener('resize', updateBounds)
+  }, [])
+
+  // Reset player position to default (double-click drag handle)
+  const resetPosition = useCallback(() => {
+    fmAnimate(x, 0, { type: 'spring', stiffness: 300, damping: 25 })
+    fmAnimate(y, 0, { type: 'spring', stiffness: 300, damping: 25 })
+  }, [x, y])
+
   // Don't render if no track
   if (!currentTrack) {
     return null
@@ -148,11 +181,18 @@ export function FloatingPlayer() {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 100, opacity: 0 }}
+        drag
+        dragControls={dragControls}
+        dragListener={false}
+        dragMomentum={false}
+        dragElastic={0}
+        dragConstraints={dragBounds}
+        style={{ x, y }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         className={`
-          fixed z-50 transition-all duration-300
+          fixed z-50
           ${isExpanded
             ? 'inset-x-4 bottom-4 md:left-auto md:right-4 md:w-96'
             : 'left-4 right-4 bottom-20 md:bottom-4 md:left-auto md:right-4 md:w-80'
@@ -170,10 +210,17 @@ export function FloatingPlayer() {
 
           {/* Mini Player (always visible) */}
           <div className="p-3">
-            {/* KIAAN Vibe Player branding label */}
-            <div className="flex items-center gap-1.5 mb-2">
-              <div className="h-1.5 w-1.5 rounded-full bg-[#d4a44c] shadow-sm shadow-[#d4a44c]/40" />
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-[#d4a44c]/80">KIAAN Vibe Player</span>
+            {/* KIAAN Vibe Player branding label + drag handle */}
+            <div
+              className="flex items-center justify-between mb-2 cursor-grab active:cursor-grabbing touch-none select-none"
+              onPointerDown={(e) => dragControls.start(e)}
+              onDoubleClick={resetPosition}
+            >
+              <div className="flex items-center gap-1.5">
+                <div className="h-1.5 w-1.5 rounded-full bg-[#d4a44c] shadow-sm shadow-[#d4a44c]/40" />
+                <span className="text-[10px] font-semibold tracking-wider uppercase text-[#d4a44c]/80">KIAAN Vibe Player</span>
+              </div>
+              <GripHorizontal className="w-4 h-4 text-white/30" />
             </div>
 
             <div className="flex items-center gap-3">
@@ -244,6 +291,18 @@ export function FloatingPlayer() {
                     <Play className="w-5 h-5 ml-0.5" />
                   )}
                 </button>
+
+                {/* Stop button - resets to beginning without clearing queue */}
+                {(isPlaying || position > 0) && (
+                  <button
+                    onClick={() => stop()}
+                    className="p-2 text-white/60 hover:text-white transition-colors"
+                    aria-label="Stop"
+                    title="Stop playback"
+                  >
+                    <Square className="w-3.5 h-3.5 fill-current" />
+                  </button>
+                )}
 
                 <button
                   onClick={() => next()}

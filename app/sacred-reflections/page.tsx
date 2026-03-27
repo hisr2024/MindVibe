@@ -17,6 +17,11 @@ const VoiceResponseButton = dynamic(
   { ssr: false }
 )
 
+const KarmalytixPathway = dynamic(
+  () => import('@/components/karmalytix/KarmalytixPathway'),
+  { ssr: false }
+)
+
 type EncryptedPayload = {
   ciphertext: string
   iv: string
@@ -115,6 +120,7 @@ export default function SacredReflectionsPage() {
   const [isOnline, setIsOnline] = useState(true)
   const [guidance, setGuidance] = useState<Record<string, string>>({})
   const [guidanceLoading, setGuidanceLoading] = useState<Record<string, boolean>>({})
+  const [karmalytixOpen, setKarmalytixOpen] = useState(false)
 
   // Voice integration
   const { language } = useLanguage()
@@ -486,6 +492,20 @@ export default function SacredReflectionsPage() {
             </span>
           </div>
 
+          {/* Karmalytix Button */}
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => setKarmalytixOpen(true)}
+              disabled={!encryptionReady}
+              className="group inline-flex items-center gap-2.5 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#d4a44c]/20 via-[#e8b54a]/15 to-[#d4a44c]/20 border border-[#d4a44c]/40 text-[#f5f0e8] font-semibold text-sm shadow-lg shadow-[#d4a44c]/10 hover:border-[#d4a44c]/70 hover:shadow-[#d4a44c]/20 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <span className="text-[#e8b54a] text-base">&#10022;</span>
+              Karmalytix
+              <span className="text-xs text-[#f5f0e8]/60 font-normal hidden sm:inline">&#8212; Your Divine Pathway</span>
+            </button>
+          </div>
+
           {encryptionMessage && (
             <p className="mt-3 text-xs text-[#e8b54a]">{encryptionMessage}</p>
           )}
@@ -834,6 +854,13 @@ export default function SacredReflectionsPage() {
           )}
         </section>
       </div>
+
+      <KarmalytixPathway
+        entries={entries}
+        encryptionReady={encryptionReady}
+        isOpen={karmalytixOpen}
+        onClose={() => setKarmalytixOpen(false)}
+      />
     </main>
     </SubscriptionGate>
   )
