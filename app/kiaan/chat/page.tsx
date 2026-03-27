@@ -15,10 +15,6 @@ import { useKiaanQuota } from '@/hooks/useKiaanQuota';
 import { useSubscription } from '@/hooks/useSubscription';
 
 // Dynamic imports for secondary UI components
-const PathwayMap = dynamic(
-  () => import('@/components/navigation/PathwayMap').then(mod => ({ default: mod.PathwayMap })),
-  { loading: () => <div className="h-32 animate-pulse rounded-xl bg-slate-800/30" /> }
-);
 const NextStepLink = dynamic(
   () => import('@/components/suggestions/NextStepLink').then(mod => ({ default: mod.NextStepLink })),
   { loading: () => <div className="h-10 animate-pulse rounded-lg bg-slate-800/30" /> }
@@ -238,9 +234,6 @@ function KiaanChatPageInner() {
 
   return (
     <main className="mx-auto max-w-5xl space-y-4 sm:space-y-6 p-3 sm:p-4 pb-28 sm:pb-24 md:p-8">
-      {/* Pathway Map */}
-      <PathwayMap />
-
       {/* Header */}
       <div className="kiaan-cosmic-card relative z-10 space-y-3 sm:space-y-4 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-[0_30px_120px_rgba(212,164,76,0.08)] md:p-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
@@ -264,15 +257,6 @@ function KiaanChatPageInner() {
             >
               <span className="text-lg">🗣️</span>
               <span className="hidden sm:inline">{t('kiaan.voice.companion', 'KIAAN Companion')}</span>
-            </Link>
-            {/* Voice Mode Toggle */}
-            <Link
-              href="/companion"
-              className="flex items-center gap-1.5 sm:gap-2 rounded-xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 px-3 sm:px-4 py-2 text-sm font-semibold text-[#e8dcc8] transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/10"
-              title="Switch to Voice Mode"
-            >
-              <span className="text-lg">🎙️</span>
-              <span className="hidden sm:inline">{t('kiaan.voice.switch', 'Voice Mode')}</span>
             </Link>
             {/* Language Selector */}
             <LanguageSelector compact />
@@ -408,7 +392,7 @@ function KiaanChatPageInner() {
       {messages.length === 0 && (
         <div className="kiaan-cosmic-card space-y-4 rounded-3xl p-6 shadow-[0_20px_80px_rgba(212,164,76,0.05)]">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-[#e8dcc8]">{t('kiaan.quickPrompts.title', 'Quick Responses')}</h2>
+            <h2 className="kiaan-text-golden text-lg font-semibold">{t('kiaan.quickPrompts.title', 'Quick Responses')}</h2>
             <button
               onClick={handleClarityPause}
               className="rounded-xl border border-[#d4a44c]/30 bg-[#d4a44c]/10 px-4 py-2 text-sm font-semibold text-[#d4a44c] shadow-lg shadow-[#d4a44c]/10 transition-all hover:bg-[#d4a44c]/20 hover:scale-105"
