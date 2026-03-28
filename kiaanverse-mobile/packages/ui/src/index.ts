@@ -29,6 +29,7 @@ export {
   type BreathingPattern,
   type ChakraColor,
 } from './tokens/sacred';
+export { gradients } from './tokens/gradients';
 
 // ---------------------------------------------------------------------------
 // Theme (composed token system with dark/light mode)
@@ -75,6 +76,11 @@ export { LotusProgress, type LotusProgressProps } from './components/LotusProgre
 export { DivineGradient, type DivineGradientProps, type DivineGradientVariant } from './components/DivineGradient';
 export { SacredTransition, type SacredTransitionProps } from './components/SacredTransition';
 export { WaveformVisualizer, type WaveformVisualizerProps } from './components/WaveformVisualizer';
+
+// Divine visual components
+export { DivineBackground, type DivineBackgroundProps, type DivineBackgroundVariant } from './components/DivineBackground';
+export { GlowCard, type GlowCardProps, type GlowCardVariant } from './components/GlowCard';
+export { SacredDivider, type SacredDividerProps } from './components/SacredDivider';
 
 // ---------------------------------------------------------------------------
 // Hooks (audio / voice)

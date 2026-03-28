@@ -3,6 +3,7 @@
  *
  * Daily greeting, verse of the day, mood check-in, sacred action chips,
  * active journey progress, Sakha presence, and daily divine insight.
+ * Features cosmic gradient background with breathing golden aura.
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
@@ -305,6 +306,9 @@ const styles = StyleSheet.create({
   },
   startJourneyBtn: {
     marginTop: spacing.sm,
+  },
+  progressBar: {
+    marginTop: spacing.xs,
   },
   statsRow: {
     flexDirection: 'row',

@@ -4,24 +4,27 @@
  * 3 categories: Beginner Paths, Deep Dives, 21-Day Challenges
  * Journey cards: title, description, difficulty badge, progress indicator.
  * Tabs: Catalog | Active | Completed
+ * Features cosmic gradient background and golden glow cards.
  */
 
 import React, { useState, useCallback } from 'react';
 import { View, FlatList, StyleSheet, Pressable, Image } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { BookOpen, Flame, Target, Star } from 'lucide-react-native';
 import {
   Screen,
   Text,
   Button,
+  GlowCard,
   GoldenProgressBar,
   LoadingMandala,
   colors,
   spacing,
   radii,
+  useTheme,
 } from '@kiaanverse/ui';
-import { useTheme } from '@kiaanverse/ui';
 import {
   useJourneyTemplates,
   useJourneys,
@@ -74,7 +77,7 @@ function TemplateCard({
   return (
     <Animated.View entering={FadeInDown.delay(index * 60).duration(400).springify()}>
       <View style={[styles.templateCard, { backgroundColor: c.card, borderColor: c.cardBorder }]}>
-        {/* Cover image placeholder */}
+        {/* Cover image or golden gradient placeholder */}
         {item.thumbnailUrl ? (
           <Image
             source={{ uri: item.thumbnailUrl }}
@@ -83,9 +86,14 @@ function TemplateCard({
             alt={item.title}
           />
         ) : (
-          <View style={[styles.coverPlaceholder, { backgroundColor: colors.alpha.goldLight }]}>
+          <LinearGradient
+            colors={[colors.alpha.goldLight, colors.alpha.goldMedium, colors.alpha.goldLight]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.coverPlaceholder}
+          >
             <BookOpen size={32} color={colors.primary[300]} />
-          </View>
+          </LinearGradient>
         )}
 
         <View style={styles.templateContent}>
@@ -138,7 +146,7 @@ function ActiveJourneyCard({
   return (
     <Animated.View entering={FadeInDown.delay(index * 50).duration(300)}>
       <Pressable onPress={onPress} accessibilityRole="button">
-        <View style={[styles.journeyCard, { backgroundColor: c.card, borderColor: c.cardBorder }]}>
+        <GlowCard variant={progress >= 75 ? 'golden' : 'default'} style={styles.journeyCard}>
           <View style={styles.journeyHeader}>
             <Text variant="label" color={c.textPrimary} numberOfLines={1} style={styles.journeyTitle}>
               {item.title}
@@ -160,7 +168,7 @@ function ActiveJourneyCard({
               </Text>
             </View>
           </View>
-        </View>
+        </GlowCard>
       </Pressable>
     </Animated.View>
   );
@@ -210,7 +218,7 @@ export default function JourneyScreen(): React.JSX.Element {
   );
 
   return (
-    <Screen>
+    <Screen gradient>
       <View style={styles.header}>
         <Text variant="h2">Wisdom Journeys</Text>
       </View>
@@ -432,9 +440,6 @@ const styles = StyleSheet.create({
 
   // Journey card
   journeyCard: {
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    padding: spacing.md,
     gap: spacing.sm,
   },
   journeyHeader: {

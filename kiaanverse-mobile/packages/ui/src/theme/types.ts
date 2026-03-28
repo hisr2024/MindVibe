@@ -54,6 +54,12 @@ export interface ThemeColors {
 
   /** Status bar appearance */
   readonly statusBarStyle: 'light-content' | 'dark-content';
+
+  /** Gradient color arrays — resolved per mode */
+  readonly gradientBackground: readonly string[];
+  readonly gradientAura: readonly string[];
+  readonly gradientCard: readonly string[];
+  readonly gradientTabBar: readonly string[];
 }
 
 // ---------------------------------------------------------------------------
