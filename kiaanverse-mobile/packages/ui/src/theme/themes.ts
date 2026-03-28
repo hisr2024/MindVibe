@@ -9,6 +9,7 @@
  */
 
 import { colors } from '../tokens/colors';
+import { gradients } from '../tokens/gradients';
 import { fontFamily, fontSize, lineHeight, letterSpacing, textPresets } from '../tokens/typography';
 import { spacing } from '../tokens/spacing';
 import { radii } from '../tokens/radii';
@@ -39,6 +40,10 @@ const darkColors: ThemeColors = {
   divider: colors.alpha.whiteLight,
   overlay: colors.alpha.blackHeavy,
   statusBarStyle: 'light-content',
+  gradientBackground: gradients.cosmicBackground.dark,
+  gradientAura: gradients.divineAura.dark,
+  gradientCard: gradients.sacredCard.dark,
+  gradientTabBar: gradients.tabBarFade.dark,
 };
 
 // ---------------------------------------------------------------------------
@@ -65,6 +70,10 @@ const lightColors: ThemeColors = {
   divider: 'rgba(0, 0, 0, 0.06)',
   overlay: colors.alpha.blackMedium,
   statusBarStyle: 'dark-content',
+  gradientBackground: gradients.cosmicBackground.light,
+  gradientAura: gradients.divineAura.light,
+  gradientCard: gradients.sacredCard.light,
+  gradientTabBar: gradients.tabBarFade.light,
 };
 
 // ---------------------------------------------------------------------------

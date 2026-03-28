@@ -2,15 +2,17 @@
  * Gita Tab — Bhagavad Gita Home
  *
  * Features:
- * - Verse of the Day (golden card, animated, cached 24h)
+ * - Verse of the Day (divine glow card, animated, cached 24h)
  * - Chapter list (animated cards with chapter #, name, verse count)
  * - Search bar (debounced 300ms, min 3 chars)
  * - Loading, error, and empty states
+ * - Cosmic gradient background with sacred aura
  */
 
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { View, FlatList, StyleSheet, Pressable } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Search, BookOpen, Sparkles } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import {
@@ -18,12 +20,13 @@ import {
   Text,
   Input,
   GoldenHeader,
+  GlowCard,
   LoadingMandala,
   colors,
   spacing,
   radii,
+  useTheme,
 } from '@kiaanverse/ui';
-import { useTheme } from '@kiaanverse/ui';
 import {
   useGitaChapters,
   useGitaSearchFull,
@@ -66,7 +69,7 @@ function VerseOfTheDay(): React.JSX.Element | null {
   if (isLoading) {
     return (
       <Animated.View entering={FadeInDown.duration(400)} style={styles.vodContainer}>
-        <View style={[styles.vodCard, { backgroundColor: c.card, borderColor: colors.alpha.goldMedium }]}>
+        <GlowCard variant="divine">
           <View style={styles.vodLoadingRow}>
             <Sparkles size={16} color={colors.primary[300]} />
             <Text variant="caption" color={colors.primary[300]}>
@@ -76,7 +79,7 @@ function VerseOfTheDay(): React.JSX.Element | null {
           <View style={styles.vodLoadingCenter}>
             <LoadingMandala size={48} />
           </View>
-        </View>
+        </GlowCard>
       </Animated.View>
     );
   }
@@ -92,9 +95,14 @@ function VerseOfTheDay(): React.JSX.Element | null {
         accessibilityRole="button"
         accessibilityLabel={`Verse of the day: Chapter ${v.chapter}, Verse ${v.verse}`}
       >
-        <View style={[styles.vodCard, { backgroundColor: c.card, borderColor: colors.primary[500] }]}>
-          {/* Golden top accent */}
-          <View style={[styles.vodTopBar, { backgroundColor: colors.primary[500] }]} />
+        <GlowCard variant="divine">
+          {/* Golden top accent bar */}
+          <LinearGradient
+            colors={[colors.primary[500], colors.primary[300], 'transparent']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.vodTopBar}
+          />
 
           <View style={styles.vodLabelRow}>
             <Sparkles size={14} color={colors.primary[300]} />
@@ -120,7 +128,7 @@ function VerseOfTheDay(): React.JSX.Element | null {
           <Text variant="caption" color={c.textTertiary} style={styles.vodRef}>
             — Bhagavad Gita {v.chapter}.{v.verse}
           </Text>
-        </View>
+        </GlowCard>
       </Pressable>
     </Animated.View>
   );
@@ -147,7 +155,7 @@ function ChapterCard({
       <Pressable onPress={onPress} accessibilityRole="button">
         <View style={[styles.chapterCard, { backgroundColor: c.card, borderColor: c.cardBorder }]}>
           <View style={styles.chapterRow}>
-            {/* Chapter number circle */}
+            {/* Chapter number circle with golden glow */}
             <View style={[styles.chapterCircle, { backgroundColor: colors.alpha.goldLight }]}>
               <Text variant="label" color={colors.primary[300]}>
                 {item.id}
@@ -291,7 +299,7 @@ export default function GitaScreen(): React.JSX.Element {
   // ---------------------------------------------------------------------------
 
   return (
-    <Screen>
+    <Screen gradient gradientVariant="sacred">
       <GoldenHeader title="Bhagavad Gita" testID="gita-header" />
 
       {/* Search bar */}
@@ -426,17 +434,13 @@ const styles = StyleSheet.create({
   vodContainer: {
     marginBottom: spacing.lg,
   },
-  vodCard: {
-    borderRadius: radii.lg,
-    borderWidth: 1.5,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.md,
-    overflow: 'hidden',
-  },
   vodTopBar: {
     height: 3,
     marginHorizontal: -spacing.lg,
+    marginTop: -spacing.lg,
     marginBottom: spacing.md,
+    borderTopLeftRadius: radii.lg,
+    borderTopRightRadius: radii.lg,
   },
   vodLabelRow: {
     flexDirection: 'row',
@@ -458,7 +462,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xxs,
-    marginTop: spacing.md,
   },
   vodLoadingCenter: {
     paddingVertical: spacing.lg,

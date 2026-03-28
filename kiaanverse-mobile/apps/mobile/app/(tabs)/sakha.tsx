@@ -2,6 +2,7 @@
  * Sakha Tab — KIAAN AI Companion Chat
  *
  * Real-time chat interface for spiritual guidance.
+ * Features cosmic gradient background and golden-accented chat bubbles.
  */
 
 import React, { useState, useCallback, useRef } from 'react';
@@ -14,11 +15,11 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Send } from 'lucide-react-native';
-import { Screen, Text, colors, spacing, radii } from '@kiaanverse/ui';
+import { Screen, Text, colors, spacing, radii, useTheme } from '@kiaanverse/ui';
 import { useSendChatMessage } from '@kiaanverse/api';
 import { useTranslation } from '@kiaanverse/i18n';
-import { useTheme } from '@kiaanverse/ui';
 
 interface ChatMessage {
   id: string;
@@ -33,6 +34,7 @@ const WELCOME_TIMESTAMP = Date.now();
 export default function SakhaScreen(): React.JSX.Element {
   const { t } = useTranslation('kiaan');
   const { theme } = useTheme();
+  const c = theme.colors;
   const sendMessage = useSendChatMessage();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -87,27 +89,45 @@ export default function SakhaScreen(): React.JSX.Element {
     }
   }, [input, sessionId, sendMessage, t]);
 
-  const renderMessage = useCallback(({ item }: { item: ChatMessage }) => (
-    <View
-      style={[
-        styles.messageBubble,
-        item.role === 'user' ? styles.userBubble : styles.assistantBubble,
-        {
-          backgroundColor: item.role === 'user'
-            ? colors.alpha.goldMedium
-            : theme.colors.surfaceElevated,
-        },
-      ]}
-    >
-      <Text variant="body">{item.content}</Text>
-    </View>
-  ), [theme.colors.surfaceElevated]);
+  const renderMessage = useCallback(({ item }: { item: ChatMessage }) => {
+    const isUser = item.role === 'user';
+
+    return (
+      <View
+        style={[
+          styles.messageBubble,
+          isUser ? styles.userBubble : styles.assistantBubble,
+        ]}
+      >
+        {isUser ? (
+          <LinearGradient
+            colors={[colors.alpha.goldMedium, colors.alpha.goldLight]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[StyleSheet.absoluteFill, { borderRadius: radii.lg, borderBottomRightRadius: radii.sm }]}
+          />
+        ) : (
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor: c.surfaceElevated,
+                borderRadius: radii.lg,
+                borderBottomLeftRadius: radii.sm,
+              },
+            ]}
+          />
+        )}
+        <Text variant="body">{item.content}</Text>
+      </View>
+    );
+  }, [c.surfaceElevated]);
 
   return (
-    <Screen edges={['top', 'left', 'right']}>
+    <Screen edges={['top', 'left', 'right']} gradient>
       <View style={styles.header}>
         <Text variant="h2">Sakha</Text>
-        <Text variant="caption" color={colors.text.muted}>
+        <Text variant="caption" color={c.textTertiary}>
           Your spiritual companion
         </Text>
       </View>
@@ -134,14 +154,14 @@ export default function SakhaScreen(): React.JSX.Element {
           </View>
         ) : null}
 
-        <View style={[styles.inputRow, { backgroundColor: theme.colors.surfaceElevated }]}>
+        <View style={[styles.inputRow, { backgroundColor: c.surfaceElevated, borderTopColor: c.divider }]}>
           <TextInput
             style={[
               styles.textInput,
-              { color: theme.colors.textPrimary, backgroundColor: theme.colors.inputBackground },
+              { color: c.textPrimary, backgroundColor: c.inputBackground },
             ]}
             placeholder={t('placeholder')}
-            placeholderTextColor={theme.colors.textTertiary}
+            placeholderTextColor={c.textTertiary}
             value={input}
             onChangeText={setInput}
             multiline
@@ -159,7 +179,7 @@ export default function SakhaScreen(): React.JSX.Element {
             accessibilityLabel="Send message"
             accessibilityRole="button"
           >
-            <Send size={20} color={colors.primary[500]} />
+            <Send size={20} color={c.accent} />
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -186,6 +206,7 @@ const styles = StyleSheet.create({
     maxWidth: '80%',
     padding: spacing.md,
     borderRadius: radii.lg,
+    overflow: 'hidden',
   },
   userBubble: {
     alignSelf: 'flex-end',
@@ -206,7 +227,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     gap: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.06)',
   },
   textInput: {
     flex: 1,

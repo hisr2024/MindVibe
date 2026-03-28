@@ -1,8 +1,9 @@
 /**
- * GoldenProgressBar — Animated golden progress indicator.
+ * GoldenProgressBar — Animated golden progress indicator with shimmer.
  *
  * Fills left to right with a spring animation when progress changes.
- * Uses theme accent color for the fill and surface color for the track.
+ * Features a subtle golden shimmer that sweeps across the filled area,
+ * evoking the sacred glow of temple gold leaf.
  */
 
 import React, { useEffect } from 'react';
@@ -11,10 +12,15 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withRepeat,
+  withTiming,
+  Easing,
 } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme/useTheme';
 import { radii } from '../tokens/radii';
-import { spring } from '../tokens/motion';
+import { spring, duration } from '../tokens/motion';
+import { gradients } from '../tokens/gradients';
 
 /** Props for the GoldenProgressBar component. */
 export interface GoldenProgressBarProps {
@@ -24,6 +30,8 @@ export interface GoldenProgressBarProps {
   readonly height?: number;
   /** Whether to show the percentage label. @default false */
   readonly showLabel?: boolean;
+  /** Enable shimmer animation. @default true */
+  readonly shimmer?: boolean;
   /** Optional container style. */
   readonly style?: ViewStyle;
   /** Test identifier. */
@@ -34,23 +42,43 @@ function GoldenProgressBarInner({
   progress,
   height = 6,
   showLabel = false,
+  shimmer = true,
   style,
   testID,
 }: GoldenProgressBarProps): React.JSX.Element {
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
   const c = theme.colors;
   const clampedProgress = Math.max(0, Math.min(100, progress));
 
   const widthValue = useSharedValue(0);
+  const shimmerX = useSharedValue(-1);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
     widthValue.value = withSpring(clampedProgress, spring.default);
   }, [clampedProgress, widthValue]);
 
+  useEffect(() => {
+    if (!shimmer || clampedProgress === 0) return;
+    // eslint-disable-next-line react-hooks/immutability
+    shimmerX.value = withRepeat(
+      withTiming(2, { duration: duration.sacred * 2, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      false,
+    );
+  }, [shimmer, clampedProgress, shimmerX]);
+
   const fillStyle = useAnimatedStyle(() => ({
     width: `${widthValue.value}%`,
   }));
+
+  const shimmerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: shimmerX.value * 100 }],
+    opacity: 0.5,
+  }));
+
+  const mode = isDark ? 'dark' : 'light';
+  const shimmerColors = gradients.progressShimmer[mode];
 
   return (
     <View style={style} testID={testID}>
@@ -65,7 +93,18 @@ function GoldenProgressBarInner({
             { height, backgroundColor: c.accent },
             fillStyle,
           ]}
-        />
+        >
+          {shimmer && clampedProgress > 0 && (
+            <Animated.View style={[StyleSheet.absoluteFill, shimmerStyle]}>
+              <LinearGradient
+                colors={shimmerColors as unknown as string[]}
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+                style={StyleSheet.absoluteFill}
+              />
+            </Animated.View>
+          )}
+        </Animated.View>
       </View>
       {showLabel ? (
         <Animated.Text style={[styles.label, { color: c.textTertiary }]}>
@@ -76,7 +115,7 @@ function GoldenProgressBarInner({
   );
 }
 
-/** Animated golden progress bar with spring fill animation. */
+/** Animated golden progress bar with spring fill and sacred shimmer. */
 export const GoldenProgressBar = React.memo(GoldenProgressBarInner);
 
 const styles = StyleSheet.create({
@@ -86,6 +125,7 @@ const styles = StyleSheet.create({
   },
   fill: {
     borderRadius: radii.full,
+    overflow: 'hidden',
   },
   label: {
     fontSize: 11,

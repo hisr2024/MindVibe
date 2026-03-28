@@ -2,11 +2,12 @@
  * Home Tab
  *
  * Daily greeting, verse of the day, mood check-in, active journey progress.
+ * Features cosmic gradient background with breathing golden aura.
  */
 
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
-import { Screen, Text, Card, Divider, colors, spacing } from '@kiaanverse/ui';
+import { Screen, Text, GlowCard, SacredDivider, GoldenProgressBar, colors, spacing, useTheme } from '@kiaanverse/ui';
 import { useAuthStore } from '@kiaanverse/store';
 import { useJourneyDashboard, useCreateMood } from '@kiaanverse/api';
 import { useTranslation } from '@kiaanverse/i18n';
@@ -21,6 +22,8 @@ const MOOD_OPTIONS = [
 
 export default function HomeScreen(): React.JSX.Element {
   const { t } = useTranslation('home');
+  const { theme } = useTheme();
+  const c = theme.colors;
   const { user } = useAuthStore();
   const { data: dashboard } = useJourneyDashboard();
   const createMood = useCreateMood();
@@ -34,12 +37,12 @@ export default function HomeScreen(): React.JSX.Element {
   const greeting = getGreeting();
 
   return (
-    <Screen scroll>
+    <Screen scroll gradient>
       <View style={styles.greetingSection}>
         <Text variant="h2">
           {greeting}, {user?.name?.split(' ')[0] ?? t('greeting')}
         </Text>
-        <Text variant="bodySmall" color={colors.text.muted}>
+        <Text variant="bodySmall" color={c.textTertiary}>
           {new Date().toLocaleDateString('en-US', {
             weekday: 'long',
             month: 'long',
@@ -48,7 +51,7 @@ export default function HomeScreen(): React.JSX.Element {
         </Text>
       </View>
 
-      <Card style={styles.moodCard}>
+      <GlowCard variant="golden" style={styles.moodCard}>
         <Text variant="label">{t('moodCheckIn')}</Text>
         <View style={styles.moodRow}>
           {MOOD_OPTIONS.map((option) => (
@@ -63,7 +66,7 @@ export default function HomeScreen(): React.JSX.Element {
               accessibilityRole="button"
             >
               <Text variant="h2" align="center">{option.emoji}</Text>
-              <Text variant="caption" color={colors.text.muted} align="center">
+              <Text variant="caption" color={c.textTertiary} align="center">
                 {option.label}
               </Text>
             </Pressable>
@@ -74,58 +77,53 @@ export default function HomeScreen(): React.JSX.Element {
             {(createMood.data as { kiaanResponse?: string }).kiaanResponse ?? 'Mood recorded'}
           </Text>
         ) : null}
-      </Card>
+      </GlowCard>
 
-      <Divider />
+      <SacredDivider />
 
       <View style={styles.section}>
         <Text variant="h3">{t('activeJourney')}</Text>
         {dashboard?.activeJourneys && dashboard.activeJourneys.length > 0 ? (
           dashboard.activeJourneys.map((journey) => (
-            <Card key={journey.id} style={styles.journeyCard}>
+            <GlowCard key={journey.id} style={styles.journeyCard}>
               <Text variant="label">{journey.title}</Text>
-              <Text variant="caption" color={colors.text.muted}>
+              <Text variant="caption" color={c.textTertiary}>
                 Day {journey.currentDay} of {journey.durationDays}
               </Text>
-              <View style={styles.progressBar}>
-                <View
-                  style={[
-                    styles.progressFill,
-                    {
-                      width: `${Math.round((journey.completedSteps / journey.durationDays) * 100)}%`,
-                    },
-                  ]}
-                />
-              </View>
-            </Card>
+              <GoldenProgressBar
+                progress={Math.round((journey.completedSteps / journey.durationDays) * 100)}
+                height={5}
+                style={styles.progressBar}
+              />
+            </GlowCard>
           ))
         ) : (
-          <Card>
-            <Text variant="body" color={colors.text.muted}>
+          <GlowCard>
+            <Text variant="body" color={c.textTertiary}>
               {t('noJourneys')}
             </Text>
-          </Card>
+          </GlowCard>
         )}
       </View>
 
       {dashboard ? (
         <View style={styles.statsRow}>
-          <Card style={styles.statCard}>
+          <GlowCard variant="golden" style={styles.statCard}>
             <Text variant="h2" align="center" color={colors.primary[300]}>
               {dashboard.streakDays}
             </Text>
-            <Text variant="caption" color={colors.text.muted} align="center">
+            <Text variant="caption" color={c.textTertiary} align="center">
               Day Streak
             </Text>
-          </Card>
-          <Card style={styles.statCard}>
+          </GlowCard>
+          <GlowCard variant="golden" style={styles.statCard}>
             <Text variant="h2" align="center" color={colors.primary[300]}>
               {dashboard.completedCount}
             </Text>
-            <Text variant="caption" color={colors.text.muted} align="center">
+            <Text variant="caption" color={c.textTertiary} align="center">
               Completed
             </Text>
-          </Card>
+          </GlowCard>
         </View>
       ) : null}
     </Screen>
@@ -171,16 +169,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   progressBar: {
-    height: 4,
-    backgroundColor: colors.alpha.whiteLight,
-    borderRadius: 2,
     marginTop: spacing.xs,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.primary[500],
-    borderRadius: 2,
   },
   statsRow: {
     flexDirection: 'row',

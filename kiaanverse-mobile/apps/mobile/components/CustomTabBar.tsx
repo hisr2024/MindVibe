@@ -1,17 +1,20 @@
 /**
- * CustomTabBar — Kiaanverse bottom tab bar.
+ * CustomTabBar — Kiaanverse bottom tab bar with gradient background.
  *
  * Replaces the default Expo Router tab bar with a dark-themed,
  * golden-accented navigation bar. Features:
+ * - Gradient background fade (transparent → opaque)
  * - Golden active indicator dot (not tint-based)
  * - Haptic feedback on tab switch
  * - Reanimated spring scale on active icon
+ * - Subtle golden glow behind active icon
  * - SafeArea bottom inset handling
  * - Sakha tab uses ✦ Sparkles icon
  */
 
 import React, { useCallback } from 'react';
 import { View, Pressable, StyleSheet, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useAnimatedStyle,
@@ -21,7 +24,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Home, Sparkles, Compass, BookOpen, User, type LucideIcon } from 'lucide-react-native';
-import { useTheme, colors } from '@kiaanverse/ui';
+import { useTheme, colors, gradients } from '@kiaanverse/ui';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 const ICON_SIZE = 22;
@@ -86,6 +89,12 @@ function TabItem({
     transform: [{ scale: scale.value }],
   }));
 
+  // Subtle golden glow behind active icon
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(scale.value, [0, 1], [0, 0.15]),
+    transform: [{ scale: interpolate(scale.value, [0, 1], [0.5, 1]) }],
+  }));
+
   return (
     <Pressable
       onPress={onPress}
@@ -96,6 +105,9 @@ function TabItem({
       accessibilityLabel={label}
       testID={`tab-${route.name}`}
     >
+      {/* Active glow background */}
+      <Animated.View style={[styles.activeGlow, { backgroundColor: colors.divine.aura }, glowStyle]} />
+
       <Animated.View style={iconAnimatedStyle}>
         <IconComponent size={ICON_SIZE} color={color} />
       </Animated.View>
@@ -131,9 +143,10 @@ export function CustomTabBar({
   descriptors,
   navigation,
 }: BottomTabBarProps): React.JSX.Element {
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const c = theme.colors;
+  const mode = isDark ? 'dark' : 'light';
 
   const handlePress = useCallback(
     (route: { key: string; name: string }, isFocused: boolean) => {
@@ -164,49 +177,55 @@ export function CustomTabBar({
   const bottomPadding = Math.max(insets.bottom, 12);
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: c.tabBarBackground,
-          borderTopColor: c.tabBarBorder,
-          paddingBottom: bottomPadding,
-        },
-      ]}
-      accessibilityRole="tablist"
-    >
-      {state.routes.map((route, index) => {
-        const { options } = descriptors[route.key] ?? {};
-        const label =
-          typeof options?.tabBarLabel === 'string'
-            ? options.tabBarLabel
-            : typeof options?.title === 'string'
-              ? options.title
-              : route.name;
-        const isFocused = state.index === index;
+    <View style={[styles.outerContainer, { paddingBottom: bottomPadding }]}>
+      {/* Gradient fade from transparent to opaque */}
+      <LinearGradient
+        colors={gradients.tabBarFade[mode] as unknown as string[]}
+        locations={[0, 0.3, 1]}
+        style={StyleSheet.absoluteFill}
+      />
 
-        return (
-          <TabItem
-            key={route.key}
-            route={route}
-            label={label}
-            isFocused={isFocused}
-            onPress={() => handlePress(route, isFocused)}
-            onLongPress={() => handleLongPress(route)}
-            activeColor={c.accent}
-            inactiveColor={c.textTertiary}
-            dotColor={colors.divine.aura}
-          />
-        );
-      })}
+      {/* Tab items */}
+      <View
+        style={[styles.container, { borderTopColor: c.tabBarBorder }]}
+        accessibilityRole="tablist"
+      >
+        {state.routes.map((route, index) => {
+          const { options } = descriptors[route.key] ?? {};
+          const label =
+            typeof options?.tabBarLabel === 'string'
+              ? options.tabBarLabel
+              : typeof options?.title === 'string'
+                ? options.title
+                : route.name;
+          const isFocused = state.index === index;
+
+          return (
+            <TabItem
+              key={route.key}
+              route={route}
+              label={label}
+              isFocused={isFocused}
+              onPress={() => handlePress(route, isFocused)}
+              onLongPress={() => handleLongPress(route)}
+              activeColor={c.accent}
+              inactiveColor={c.textTertiary}
+              dotColor={colors.divine.aura}
+            />
+          );
+        })}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    position: 'relative',
+  },
   container: {
     flexDirection: 'row',
-    borderTopWidth: 1,
+    borderTopWidth: StyleSheet.hairlineWidth,
     paddingTop: 8,
   },
   tabItem: {
@@ -215,6 +234,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 3,
     paddingVertical: 4,
+    position: 'relative',
+  },
+  activeGlow: {
+    position: 'absolute',
+    top: -4,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   label: {
     fontSize: 10,

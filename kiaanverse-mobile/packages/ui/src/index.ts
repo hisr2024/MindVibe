@@ -18,6 +18,7 @@ export { spacing, type SpacingKey } from './tokens/spacing';
 export { radii } from './tokens/radii';
 export { shadows } from './tokens/shadows';
 export { duration, spring, accessibility } from './tokens/motion';
+export { gradients } from './tokens/gradients';
 
 // ---------------------------------------------------------------------------
 // Theme (composed token system with dark/light mode)
@@ -57,6 +58,11 @@ export { LoadingMandala, type LoadingMandalaProps } from './components/LoadingMa
 export { CompletionCelebration, type CompletionCelebrationProps } from './components/CompletionCelebration';
 export { GoldenProgressBar, type GoldenProgressBarProps } from './components/GoldenProgressBar';
 export { VoiceWaveform, type VoiceWaveformProps } from './components/VoiceWaveform';
+
+// Divine visual components
+export { DivineBackground, type DivineBackgroundProps, type DivineBackgroundVariant } from './components/DivineBackground';
+export { GlowCard, type GlowCardProps, type GlowCardVariant } from './components/GlowCard';
+export { SacredDivider, type SacredDividerProps } from './components/SacredDivider';
 
 // ---------------------------------------------------------------------------
 // Hooks (audio / voice)
