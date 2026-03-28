@@ -1,5 +1,9 @@
 /**
- * LotusSpeechIcon — Overlapping lotus petals (Chat tab)
+ * LotusSpeechIcon — Sacred speech bubble with lotus accent (Chat tab)
+ *
+ * A clearly recognizable chat/conversation icon that reads well at 22px.
+ * Combines a rounded speech bubble silhouette with a small 3-petal lotus
+ * inside to maintain the sacred Kiaanverse aesthetic.
  */
 
 interface IconProps {
@@ -22,18 +26,17 @@ export function LotusSpeechIcon({ width = 24, height = 24, className = '' }: Ico
       className={className}
       aria-hidden="true"
     >
-      {/* Center petal */}
-      <path d="M12 4c-1.5 3-2 6-2 9s.5 5 2 7c1.5-2 2-4 2-7s-.5-6-2-9z" />
+      {/* Speech bubble outline */}
+      <path d="M21 12c0 4.418-4.03 8-9 8-1.4 0-2.73-.25-3.91-.7L3 21l1.3-3.9C3.48 15.65 3 14.37 3 13c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+      {/* Center lotus petal (upward) */}
+      <path d="M12 9c-.6 1.2-.8 2.5-.6 3.8.4-1.2 1-2.3 1.8-3.2-.4-.3-.8-.5-1.2-.6z" strokeWidth="1.2" />
+      <path d="M12 9c.6 1.2.8 2.5.6 3.8-.4-1.2-1-2.3-1.8-3.2.4-.3.8-.5 1.2-.6z" strokeWidth="1.2" />
       {/* Left petal */}
-      <path d="M7 7c0 4 1.5 7 3.5 9-1-1-3-1.5-5-1.5-2.5 0-3.5 1-3.5 1 0-3 1.5-6 5-8.5z" />
+      <path d="M9.5 11.5c.8.5 1.5 1.2 2 2-.3-.9-.3-1.9 0-2.8-.8.1-1.5.4-2 .8z" strokeWidth="1.2" />
       {/* Right petal */}
-      <path d="M17 7c-3.5 2.5-5 5.5-5 8.5 0 0-1-1-3.5-1 2 0 4-.5 5-1.5C15.5 14 17 11 17 7z" />
-      {/* Outer left petal */}
-      <path d="M4.5 10c-.5 3 0 5.5 1.5 7.5" />
-      {/* Outer right petal */}
-      <path d="M19.5 10c.5 3 0 5.5-1.5 7.5" />
-      {/* Speech tail */}
-      <path d="M8 20c-2 1.5-4 2-4 2 1.5-1 2-2.5 2-4" />
+      <path d="M14.5 11.5c-.8.5-1.5 1.2-2 2 .3-.9.3-1.9 0-2.8.8.1 1.5.4 2 .8z" strokeWidth="1.2" />
+      {/* Small dot center */}
+      <circle cx="12" cy="12.5" r="0.5" fill="currentColor" stroke="none" />
     </svg>
   )
 }

@@ -407,16 +407,15 @@
   transform: scale(0.92);
 }
 
-/* Sacred bottom nav */
+/* Sacred bottom nav — crisp, well-defined, golden accent */
 .sacred-bottom-nav {
-  background: rgba(5, 7, 20, 0.92);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-top: 1px solid transparent;
-  border-image: linear-gradient(90deg,
-    transparent 0%,
-    rgba(37, 99, 235, 0.3) 50%,
-    transparent 100%) 1;
+  background: rgba(5, 7, 20, 0.97);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border-top: 1px solid rgba(212, 160, 23, 0.2);
+  box-shadow:
+    0 -4px 20px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(212, 160, 23, 0.06);
 }
 
 /* Sacred typing indicator */
@@ -574,4 +573,48 @@
     animation: none !important;
     opacity: 1;
   }
+}
+
+/* ─── COLOR SCHEME VARIANTS ───
+   Applied via data attribute on <html> or body.
+   Default (golden-black) uses the base :root variables.
+   Each scheme overrides accent/highlight colors. */
+
+/* Krishna Blue — deeper blue tones with krishna glow accents */
+[data-sacred-scheme="krishna"] {
+  --sacred-cosmic-void: #050A1E;
+  --sacred-yamuna-deep: #081230;
+  --sacred-yamuna-mid: #0E1A42;
+  --sacred-yamuna-surface: #142252;
+  --sacred-divine-gold: #2563EB;
+  --sacred-divine-gold-bright: #3B82F6;
+  --sacred-divine-gold-glow: #93C5FD;
+  --sacred-krishna-blue: #1D4ED8;
+  --sacred-krishna-glow: #3B82F6;
+}
+
+/* Peacock Teal — teal-dominant cosmic atmosphere */
+[data-sacred-scheme="peacock"] {
+  --sacred-cosmic-void: #041210;
+  --sacred-yamuna-deep: #071E1A;
+  --sacred-yamuna-mid: #0B2A24;
+  --sacred-yamuna-surface: #103830;
+  --sacred-divine-gold: #06B6D4;
+  --sacred-divine-gold-bright: #22D3EE;
+  --sacred-divine-gold-glow: #A5F3FC;
+  --sacred-peacock-teal: #0891B2;
+  --sacred-peacock-iridescent: #06B6D4;
+}
+
+/* Saffron Dawn — warm dark tones with saffron fire */
+[data-sacred-scheme="saffron"] {
+  --sacred-cosmic-void: #0F0705;
+  --sacred-yamuna-deep: #1A0E08;
+  --sacred-yamuna-mid: #24150C;
+  --sacred-yamuna-surface: #301C10;
+  --sacred-divine-gold: #F97316;
+  --sacred-divine-gold-bright: #FB923C;
+  --sacred-divine-gold-glow: #FED7AA;
+  --sacred-saffron-core: #EA580C;
+  --sacred-saffron-warm: #F97316;
 }
