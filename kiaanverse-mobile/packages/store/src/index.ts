@@ -52,3 +52,24 @@ export {
   createSecureStorage,
   hydrateAll,
 } from './persistence';
+
+// Emotional Reset (7-step sacred healing flow)
+export { useEmotionalResetStore, type EmotionalResetStep } from './emotionalResetStore';
+
+// Karma Reset (4-phase sacred healing ritual)
+export { useKarmaResetStore, type KarmaResetPhase } from './karmaResetStore';
+
+// Journal (encrypted sacred reflections)
+export { useJournalStore, type JournalEntry } from './journalStore';
+
+// Community (circles, posts, social)
+export { useCommunityStore } from './communityStore';
+
+// Vibe Player (sacred meditation music playback)
+export { useVibePlayerStore, type RepeatMode, type VibeTrack } from './vibePlayerStore';
+
+// Deep Insights (analytics and emotional intelligence)
+export { useDeepInsightsStore, type DateRange } from './deepInsightsStore';
+
+// Relationship Compass (relationship guidance sessions)
+export { useRelationshipStore } from './relationshipStore';

@@ -18,6 +18,17 @@ export { spacing, type SpacingKey } from './tokens/spacing';
 export { radii } from './tokens/radii';
 export { shadows } from './tokens/shadows';
 export { duration, spring, accessibility } from './tokens/motion';
+export {
+  GOLDEN_RATIO,
+  mandala,
+  lotus,
+  breathingPatterns,
+  sacredGradients,
+  particles,
+  chakraColors,
+  type BreathingPattern,
+  type ChakraColor,
+} from './tokens/sacred';
 
 // ---------------------------------------------------------------------------
 // Theme (composed token system with dark/light mode)
@@ -57,6 +68,13 @@ export { LoadingMandala, type LoadingMandalaProps } from './components/LoadingMa
 export { CompletionCelebration, type CompletionCelebrationProps } from './components/CompletionCelebration';
 export { GoldenProgressBar, type GoldenProgressBarProps } from './components/GoldenProgressBar';
 export { VoiceWaveform, type VoiceWaveformProps } from './components/VoiceWaveform';
+export { MandalaSpin, type MandalaSpinProps } from './components/MandalaSpin';
+export { ConfettiCannon, type ConfettiCannonProps } from './components/ConfettiCannon';
+export { EmotionOrb, type EmotionOrbProps, type EmotionOrbMood } from './components/EmotionOrb';
+export { LotusProgress, type LotusProgressProps } from './components/LotusProgress';
+export { DivineGradient, type DivineGradientProps, type DivineGradientVariant } from './components/DivineGradient';
+export { SacredTransition, type SacredTransitionProps } from './components/SacredTransition';
+export { WaveformVisualizer, type WaveformVisualizerProps } from './components/WaveformVisualizer';
 
 // ---------------------------------------------------------------------------
 // Hooks (audio / voice)

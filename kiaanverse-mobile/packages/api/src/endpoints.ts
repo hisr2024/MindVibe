@@ -191,6 +191,97 @@ export const api = {
     moodResponse: (mood: string) =>
       apiClient.post('/api/divine/mood-response', { mood }),
   },
+  /** Community — Wisdom circles and social features */
+  community: {
+    circles: () => apiClient.get('/api/community/circles'),
+    circle: (circleId: string) => apiClient.get(`/api/community/circles/${circleId}`),
+    joinCircle: (circleId: string) => apiClient.post(`/api/community/circles/${circleId}/join`),
+    leaveCircle: (circleId: string) => apiClient.post(`/api/community/circles/${circleId}/leave`),
+    posts: (circleId?: string, limit?: number, offset?: number) =>
+      apiClient.get('/api/community/posts', { params: { circle_id: circleId, limit, offset } }),
+    createPost: (content: string, circleId?: string, tags?: string[]) =>
+      apiClient.post('/api/community/posts', { content, circle_id: circleId, tags }),
+    reactToPost: (postId: string, reaction: string) =>
+      apiClient.post(`/api/community/posts/${postId}/react`, { reaction }),
+  },
+
+  /** Wisdom Rooms — Guided group discussions */
+  wisdomRooms: {
+    list: () => apiClient.get('/api/wisdom/rooms'),
+    join: (roomId: string) => apiClient.post(`/api/wisdom/rooms/${roomId}/join`),
+    messages: (roomId: string, limit?: number, offset?: number) =>
+      apiClient.get(`/api/wisdom/rooms/${roomId}/messages`, { params: { limit, offset } }),
+    sendMessage: (roomId: string, content: string) =>
+      apiClient.post(`/api/wisdom/rooms/${roomId}/messages`, { content }),
+  },
+
+  /** Sadhana — Daily sacred practice */
+  sadhana: {
+    daily: () => apiClient.get('/api/sadhana/daily'),
+    complete: (data: { mood_score?: number; verse_id?: string; reflection?: string; intention?: string }) =>
+      apiClient.post('/api/sadhana/complete', data),
+    history: (limit?: number) =>
+      apiClient.get('/api/sadhana/history', { params: { limit } }),
+    streak: () => apiClient.get('/api/sadhana/streak'),
+  },
+
+  /** Relationship Compass — Dharma-guided relationship clarity */
+  relationship: {
+    guide: (question: string, context?: string) =>
+      apiClient.post('/api/relationship-compass/guide', { question, context }),
+  },
+
+  /** Karma Footprint — Track karmic ripples and impact */
+  karmaFootprint: {
+    analyze: () => apiClient.get('/api/karma-footprint/analyze'),
+    log: (action: string, impact: string) =>
+      apiClient.post('/api/karma-footprint/log', { action, impact }),
+  },
+
+  /** Karma Reset — 4-phase sacred healing ritual */
+  karmaReset: {
+    start: (pattern: string) =>
+      apiClient.post('/api/karma-reset/start', { pattern }),
+    step: (sessionId: string, phase: number, data: Record<string, unknown>) =>
+      apiClient.post('/api/karma-reset/step', { session_id: sessionId, phase, ...data }),
+    complete: (sessionId: string) =>
+      apiClient.post('/api/karma-reset/complete', { session_id: sessionId }),
+  },
+
+  /** Viyoga — Detachment and letting-go tool */
+  viyoga: {
+    chat: (message: string, sessionId?: string) =>
+      apiClient.post('/api/viyoga/chat', { message, session_id: sessionId }),
+  },
+
+  /** Ardha — Reframing and perspective tool */
+  ardha: {
+    reframe: (situation: string, perspective?: string) =>
+      apiClient.post('/api/ardha/reframe', { situation, perspective }),
+  },
+
+  /** Meditation tracks for Vibe Player */
+  meditation: {
+    tracks: (category?: string) =>
+      apiClient.get('/api/meditation/tracks', { params: { category } }),
+    track: (trackId: string) => apiClient.get(`/api/meditation/tracks/${trackId}`),
+  },
+
+  /** Deep Insights — Advanced analytics */
+  deepInsights: {
+    summary: () => apiClient.get('/api/analytics/deep-insights'),
+    gunaBalance: () => apiClient.get('/api/analytics/guna-balance'),
+    emotionalPatterns: (days?: number) =>
+      apiClient.get('/api/analytics/emotional-patterns', { params: { days } }),
+  },
+
+  /** User settings */
+  settings: {
+    get: () => apiClient.get('/api/profile/settings'),
+    update: (settings: Record<string, unknown>) =>
+      apiClient.put('/api/profile/settings', settings),
+  },
+
   /** Push notifications */
   notifications: {
     subscribe: (token: string, deviceName?: string, platform?: string) =>

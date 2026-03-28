@@ -19,3 +19,12 @@ export { GoldenHeader, type GoldenHeaderProps } from './GoldenHeader';
 export { LoadingMandala, type LoadingMandalaProps } from './LoadingMandala';
 export { CompletionCelebration, type CompletionCelebrationProps } from './CompletionCelebration';
 export { GoldenProgressBar, type GoldenProgressBarProps } from './GoldenProgressBar';
+
+// Sacred animated components
+export { MandalaSpin, type MandalaSpinProps } from './MandalaSpin';
+export { ConfettiCannon, type ConfettiCannonProps } from './ConfettiCannon';
+export { EmotionOrb, type EmotionOrbProps, type EmotionOrbMood } from './EmotionOrb';
+export { LotusProgress, type LotusProgressProps } from './LotusProgress';
+export { DivineGradient, type DivineGradientProps, type DivineGradientVariant } from './DivineGradient';
+export { SacredTransition, type SacredTransitionProps } from './SacredTransition';
+export { WaveformVisualizer, type WaveformVisualizerProps } from './WaveformVisualizer';

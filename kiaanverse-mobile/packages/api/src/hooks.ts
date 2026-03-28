@@ -14,19 +14,46 @@ import { useQuery, useMutation, useQueryClient, type UseQueryResult, type UseMut
 import { api } from './endpoints';
 import { gitaCache } from './cache/gitaCache';
 import type {
+  AnalyticsDashboard,
+  ArdhaResult,
+  ArdhaReframeResponse,
+  CommunityCircle,
+  CommunityPost,
+  DeepInsight,
+  DeepInsightsSummary,
+  EmotionalResetSession,
+  EmotionalPattern,
   GitaChapter,
   GitaChapterDetail,
   GitaSearchResponse,
   GitaTranslationSet,
   GitaVerse,
   GitaVerseResponse,
+  GunaBalance,
   Journey,
   JourneyTemplate,
+  JournalEntry,
+  JournalListResponse,
+  KarmaFootprintResult,
+  KarmaResetSession,
   KarmaTreeResponse,
+  MeditationTrack,
   MoodCreatePayload,
+  MoodTrend,
+  RelationshipCompassResult,
+  RelationshipGuidance,
+  SadhanaDaily,
+  SadhanaRecord,
+  SadhanaStreak,
   StepCompletionResult,
   UserJourneyProgress,
+  UserSettings,
+  ViyogaResult,
+  ViyogaResponse,
+  WeeklyInsight,
   WisdomJourneyDetail,
+  WisdomRoom,
+  WisdomRoomMessage,
 } from './types';
 
 // ---------------------------------------------------------------------------
@@ -64,6 +91,24 @@ export const queryKeys = {
   analytics: ['analytics', 'dashboard'] as const,
   karmaTree: ['karma', 'tree'] as const,
   subscriptionCurrent: ['subscription', 'current'] as const,
+  emotionalReset: (sessionId: string) => ['emotionalReset', sessionId] as const,
+  communityCircles: ['community', 'circles'] as const,
+  communityPosts: (circleId?: string) => ['community', 'posts', circleId] as const,
+  wisdomRooms: ['wisdomRooms'] as const,
+  wisdomRoomMessages: (roomId: string) => ['wisdomRooms', 'messages', roomId] as const,
+  sadhanaDaily: ['sadhana', 'daily'] as const,
+  sadhanaStreak: ['sadhana', 'streak'] as const,
+  sadhanaHistory: ['sadhana', 'history'] as const,
+  karmaFootprint: ['karmaFootprint'] as const,
+  meditationTracks: (category?: string) => ['meditation', 'tracks', category] as const,
+  deepInsights: ['deepInsights'] as const,
+  gunaBalance: ['gunaBalance'] as const,
+  emotionalPatterns: (days?: number) => ['emotionalPatterns', days] as const,
+  moodTrends: (days?: number) => ['analytics', 'moodTrends', days] as const,
+  weeklyInsights: ['analytics', 'weeklyInsights'] as const,
+  journalEntries: ['journal', 'entries'] as const,
+  journalEntry: (id: string) => ['journal', 'entry', id] as const,
+  settings: ['settings'] as const,
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -411,6 +456,430 @@ export function useSendChatMessage(): UseMutationResult<ChatResult, Error, { mes
     },
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.chatHistory(variables.sessionId) });
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Emotional Reset
+// ---------------------------------------------------------------------------
+
+export function useStartEmotionalReset(): UseMutationResult<EmotionalResetSession, Error, { emotion: string; intensity: number }> {
+  return useMutation({
+    mutationFn: async ({ emotion, intensity }) => {
+      const { data } = await api.emotionalReset.start(emotion, intensity);
+      return data as EmotionalResetSession;
+    },
+  });
+}
+
+export function useEmotionalResetStep(): UseMutationResult<EmotionalResetSession, Error, { sessionId: string; stepData: Record<string, unknown> }> {
+  return useMutation({
+    mutationFn: async ({ sessionId, stepData }) => {
+      const { data } = await api.emotionalReset.step(sessionId, stepData);
+      return data as EmotionalResetSession;
+    },
+  });
+}
+
+export function useCompleteEmotionalReset(): UseMutationResult<EmotionalResetSession, Error, string> {
+  return useMutation({
+    mutationFn: async (sessionId) => {
+      const { data } = await api.emotionalReset.complete(sessionId);
+      return data as EmotionalResetSession;
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Community
+// ---------------------------------------------------------------------------
+
+export function useCommunityCircles(): UseQueryResult<CommunityCircle[]> {
+  return useQuery({
+    queryKey: queryKeys.communityCircles,
+    queryFn: async () => {
+      const { data } = await api.community.circles();
+      return data as CommunityCircle[];
+    },
+  });
+}
+
+export function useCommunityPosts(circleId?: string): UseQueryResult<CommunityPost[]> {
+  return useQuery({
+    queryKey: queryKeys.communityPosts(circleId),
+    queryFn: async () => {
+      const { data } = await api.community.posts(circleId);
+      return data as CommunityPost[];
+    },
+  });
+}
+
+export function useJoinCircle(): UseMutationResult<void, Error, string> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (circleId: string) => {
+      await api.community.joinCircle(circleId);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.communityCircles });
+    },
+  });
+}
+
+export function useCreatePost(): UseMutationResult<CommunityPost, Error, { content: string; circle_id?: string; tags?: string[] }> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload) => {
+      const { data } = await api.community.createPost(payload.content, payload.circle_id, payload.tags);
+      return data as CommunityPost;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['community', 'posts'] });
+    },
+  });
+}
+
+export function useReactToPost(): UseMutationResult<void, Error, { postId: string; reaction: string }> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ postId, reaction }) => {
+      await api.community.reactToPost(postId, reaction);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['community', 'posts'] });
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Wisdom Rooms
+// ---------------------------------------------------------------------------
+
+export function useWisdomRooms(): UseQueryResult<WisdomRoom[]> {
+  return useQuery({
+    queryKey: queryKeys.wisdomRooms,
+    queryFn: async () => {
+      const { data } = await api.wisdomRooms.list();
+      return data as WisdomRoom[];
+    },
+  });
+}
+
+export function useWisdomRoomMessages(roomId: string): UseQueryResult<WisdomRoomMessage[]> {
+  return useQuery({
+    queryKey: queryKeys.wisdomRoomMessages(roomId),
+    queryFn: async () => {
+      const { data } = await api.wisdomRooms.messages(roomId);
+      return data as WisdomRoomMessage[];
+    },
+    enabled: roomId.length > 0,
+    refetchInterval: 5000,
+  });
+}
+
+export function useSendWisdomRoomMessage(): UseMutationResult<void, Error, { roomId: string; content: string }> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ roomId, content }) => {
+      await api.wisdomRooms.sendMessage(roomId, content);
+    },
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.wisdomRoomMessages(variables.roomId) });
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Sadhana
+// ---------------------------------------------------------------------------
+
+export function useSadhanaDaily(): UseQueryResult<SadhanaDaily> {
+  return useQuery({
+    queryKey: queryKeys.sadhanaDaily,
+    queryFn: async () => {
+      const { data } = await api.sadhana.daily();
+      return data as SadhanaDaily;
+    },
+  });
+}
+
+export function useSadhanaStreak(): UseQueryResult<SadhanaStreak> {
+  return useQuery({
+    queryKey: queryKeys.sadhanaStreak,
+    queryFn: async () => {
+      const { data } = await api.sadhana.streak();
+      return data as SadhanaStreak;
+    },
+  });
+}
+
+export function useCompleteSadhana(): UseMutationResult<SadhanaDaily, Error, { verse_id?: string; reflection?: string; intention?: string; mood_score?: number }> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload) => {
+      const { data } = await api.sadhana.complete(payload);
+      return data as SadhanaDaily;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.sadhanaDaily });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.sadhanaStreak });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.sadhanaHistory });
+    },
+  });
+}
+
+export function useSadhanaHistory(limit?: number): UseQueryResult<SadhanaRecord[]> {
+  return useQuery({
+    queryKey: queryKeys.sadhanaHistory,
+    queryFn: async () => {
+      const { data } = await api.sadhana.history(limit);
+      return data as SadhanaRecord[];
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Relationship Compass
+// ---------------------------------------------------------------------------
+
+export function useRelationshipCompass(): UseMutationResult<RelationshipCompassResult, Error, { question: string; context?: string }> {
+  return useMutation({
+    mutationFn: async ({ question, context }) => {
+      const { data } = await api.relationship.guide(question, context);
+      return data as RelationshipCompassResult;
+    },
+  });
+}
+
+/** Relationship guidance returning extended RelationshipGuidance type. */
+export function useRelationshipGuide(): UseMutationResult<RelationshipGuidance, Error, { question: string; context?: string }> {
+  return useMutation({
+    mutationFn: async ({ question, context }) => {
+      const { data } = await api.relationship.guide(question, context);
+      return data as RelationshipGuidance;
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Karma Footprint
+// ---------------------------------------------------------------------------
+
+export function useKarmaFootprint(): UseQueryResult<KarmaFootprintResult> {
+  return useQuery({
+    queryKey: queryKeys.karmaFootprint,
+    queryFn: async () => {
+      const { data } = await api.karmaFootprint.analyze();
+      return data as KarmaFootprintResult;
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Karma Reset
+// ---------------------------------------------------------------------------
+
+export function useStartKarmaReset(): UseMutationResult<KarmaResetSession, Error, string> {
+  return useMutation({
+    mutationFn: async (pattern: string) => {
+      const { data } = await api.karmaReset.start(pattern);
+      return data as KarmaResetSession;
+    },
+  });
+}
+
+export function useKarmaResetStep(): UseMutationResult<KarmaResetSession, Error, { sessionId: string; phase: number; data: Record<string, unknown> }> {
+  return useMutation({
+    mutationFn: async ({ sessionId, phase, data: stepData }) => {
+      const { data } = await api.karmaReset.step(sessionId, phase, stepData);
+      return data as KarmaResetSession;
+    },
+  });
+}
+
+export function useCompleteKarmaReset(): UseMutationResult<KarmaResetSession, Error, string> {
+  return useMutation({
+    mutationFn: async (sessionId: string) => {
+      const { data } = await api.karmaReset.complete(sessionId);
+      return data as KarmaResetSession;
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Viyoga & Ardha
+// ---------------------------------------------------------------------------
+
+export function useViyogaGuide(): UseMutationResult<ViyogaResult, Error, string> {
+  return useMutation({
+    mutationFn: async (message: string) => {
+      const { data } = await api.viyoga.chat(message);
+      return data as ViyogaResult;
+    },
+  });
+}
+
+/** Viyoga chat with session support. */
+export function useViyogaChat(): UseMutationResult<ViyogaResponse, Error, { message: string; sessionId?: string }> {
+  return useMutation({
+    mutationFn: async ({ message, sessionId }) => {
+      const { data } = await api.viyoga.chat(message, sessionId);
+      return data as ViyogaResponse;
+    },
+  });
+}
+
+export function useArdhaReframe(): UseMutationResult<ArdhaReframeResponse, Error, { situation: string; perspective?: string }> {
+  return useMutation({
+    mutationFn: async ({ situation, perspective }) => {
+      const { data } = await api.ardha.reframe(situation, perspective);
+      return data as ArdhaReframeResponse;
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Meditation / Vibe Player
+// ---------------------------------------------------------------------------
+
+export function useMeditationTracks(category?: string): UseQueryResult<MeditationTrack[]> {
+  return useQuery({
+    queryKey: queryKeys.meditationTracks(category),
+    queryFn: async () => {
+      const { data } = await api.meditation.tracks(category);
+      return data as MeditationTrack[];
+    },
+    staleTime: 1000 * 60 * 30,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Deep Insights & Analytics
+// ---------------------------------------------------------------------------
+
+export function useDeepInsights(): UseQueryResult<DeepInsightsSummary> {
+  return useQuery({
+    queryKey: queryKeys.deepInsights,
+    queryFn: async () => {
+      const { data } = await api.deepInsights.summary();
+      return data as DeepInsightsSummary;
+    },
+    staleTime: 1000 * 60 * 15,
+  });
+}
+
+export function useGunaBalance(): UseQueryResult<GunaBalance> {
+  return useQuery({
+    queryKey: queryKeys.gunaBalance,
+    queryFn: async () => {
+      const { data } = await api.deepInsights.gunaBalance();
+      return data as GunaBalance;
+    },
+    staleTime: 1000 * 60 * 15,
+  });
+}
+
+export function useEmotionalPatterns(days?: number): UseQueryResult<EmotionalPattern[]> {
+  return useQuery({
+    queryKey: queryKeys.emotionalPatterns(days),
+    queryFn: async () => {
+      const { data } = await api.deepInsights.emotionalPatterns(days);
+      return data as EmotionalPattern[];
+    },
+    staleTime: 1000 * 60 * 15,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Analytics (Mood Trends & Weekly Insights)
+// ---------------------------------------------------------------------------
+
+export function useMoodTrends(days?: number): UseQueryResult<MoodTrend[]> {
+  return useQuery({
+    queryKey: queryKeys.moodTrends(days),
+    queryFn: async () => {
+      const { data } = await api.analytics.moodTrends();
+      return data as MoodTrend[];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+}
+
+export function useWeeklyInsights(): UseQueryResult<WeeklyInsight> {
+  return useQuery({
+    queryKey: queryKeys.weeklyInsights,
+    queryFn: async () => {
+      const { data } = await api.analytics.weeklyInsights();
+      return data as WeeklyInsight;
+    },
+    staleTime: 1000 * 60 * 15,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Journal
+// ---------------------------------------------------------------------------
+
+export function useJournalEntries(): UseQueryResult<JournalListResponse> {
+  return useQuery({
+    queryKey: queryKeys.journalEntries,
+    queryFn: async () => {
+      const { data } = await api.journal.list();
+      return data as JournalListResponse;
+    },
+  });
+}
+
+export function useJournalEntry(id: string): UseQueryResult<JournalEntry> {
+  return useQuery({
+    queryKey: queryKeys.journalEntry(id),
+    queryFn: async () => {
+      const { data } = await api.journal.get(id);
+      return data as JournalEntry;
+    },
+    enabled: id.length > 0,
+  });
+}
+
+export function useCreateJournal(): UseMutationResult<JournalEntry, Error, { content_encrypted: string; tags?: string[] }> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (entry) => {
+      const { data } = await api.journal.create(entry);
+      return data as JournalEntry;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.journalEntries });
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Settings
+// ---------------------------------------------------------------------------
+
+export function useUserSettings(): UseQueryResult<UserSettings> {
+  return useQuery({
+    queryKey: queryKeys.settings,
+    queryFn: async () => {
+      const { data } = await api.settings.get();
+      return data as UserSettings;
+    },
+  });
+}
+
+export function useUpdateSettings(): UseMutationResult<UserSettings, Error, Record<string, unknown>> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (settings) => {
+      const { data } = await api.settings.update(settings);
+      return data as UserSettings;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.settings });
     },
   });
 }
