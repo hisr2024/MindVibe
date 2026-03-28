@@ -17,10 +17,9 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Send } from 'lucide-react-native';
-import { Screen, Text, colors, spacing, radii, gradients } from '@kiaanverse/ui';
+import { Screen, Text, colors, spacing, radii, useTheme } from '@kiaanverse/ui';
 import { useSendChatMessage } from '@kiaanverse/api';
 import { useTranslation } from '@kiaanverse/i18n';
-import { useTheme } from '@kiaanverse/ui';
 
 interface ChatMessage {
   id: string;
@@ -34,7 +33,7 @@ const WELCOME_TIMESTAMP = Date.now();
 
 export default function SakhaScreen(): React.JSX.Element {
   const { t } = useTranslation('kiaan');
-  const { theme, isDark } = useTheme();
+  const { theme } = useTheme();
   const c = theme.colors;
   const sendMessage = useSendChatMessage();
   const [input, setInput] = useState('');
@@ -89,8 +88,6 @@ export default function SakhaScreen(): React.JSX.Element {
       setMessages((prev) => [...prev, errorMessage]);
     }
   }, [input, sessionId, sendMessage, t]);
-
-  const mode = isDark ? 'dark' : 'light';
 
   const renderMessage = useCallback(({ item }: { item: ChatMessage }) => {
     const isUser = item.role === 'user';

@@ -26,18 +26,16 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import {
   Text,
   Screen,
   GlowCard,
-  SacredDivider,
   colors,
   spacing,
   radii,
+  useTheme,
 } from '@kiaanverse/ui';
-import { useTheme } from '@kiaanverse/ui';
 import { useSubscriptionStore, type SubscriptionTier } from '@kiaanverse/store';
 import {
   initializeIAP,
@@ -46,7 +44,7 @@ import {
   restorePurchases,
   type IAPProduct,
   TIER_CONFIGS,
-} from '@kiaanverse/api/src/subscription';
+} from '@kiaanverse/api';
 
 // ---------------------------------------------------------------------------
 // Types

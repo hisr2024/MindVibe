@@ -11,7 +11,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { StyleSheet, type ViewStyle } from 'react-native';
+import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -34,7 +34,7 @@ export interface GlowCardProps {
   /** Visual variant. @default 'default' */
   readonly variant?: GlowCardVariant;
   /** Optional style override. */
-  readonly style?: ViewStyle;
+  readonly style?: StyleProp<ViewStyle>;
   readonly testID?: string;
 }
 

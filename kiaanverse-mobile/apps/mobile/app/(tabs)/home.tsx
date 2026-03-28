@@ -7,8 +7,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
-import { Screen, Text, GlowCard, SacredDivider, GoldenProgressBar, colors, spacing } from '@kiaanverse/ui';
-import { useTheme } from '@kiaanverse/ui';
+import { Screen, Text, GlowCard, SacredDivider, GoldenProgressBar, colors, spacing, useTheme } from '@kiaanverse/ui';
 import { useAuthStore } from '@kiaanverse/store';
 import { useJourneyDashboard, useCreateMood } from '@kiaanverse/api';
 import { useTranslation } from '@kiaanverse/i18n';

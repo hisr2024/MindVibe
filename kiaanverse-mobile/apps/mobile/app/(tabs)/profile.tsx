@@ -15,8 +15,7 @@ import {
   Sun,
   ChevronRight,
 } from 'lucide-react-native';
-import { Screen, Text, Card, Avatar, SacredDivider, Button, GlowCard, colors, spacing, radii } from '@kiaanverse/ui';
-import { useTheme } from '@kiaanverse/ui';
+import { Screen, Text, Avatar, SacredDivider, Button, GlowCard, colors, spacing, radii, useTheme } from '@kiaanverse/ui';
 import { useAuthStore, useThemeStore } from '@kiaanverse/store';
 import { useTranslation } from '@kiaanverse/i18n';
 
