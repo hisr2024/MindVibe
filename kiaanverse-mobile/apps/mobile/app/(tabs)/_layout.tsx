@@ -50,7 +50,7 @@ export default function TabsLayout(): React.JSX.Element {
         options={{ title: t('profile') }}
       />
 
-      {/* Deep link screen — hidden from tab bar */}
+      {/* Deep link screens — hidden from tab bar */}
       <Tabs.Screen
         name="verse/[chapter]/[verse]"
         options={{ href: null }}

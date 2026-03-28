@@ -174,6 +174,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     'expo-secure-store',
     'expo-task-manager',
+    'expo-crypto',
+    '@shopify/react-native-skia',
   ],
 
   experiments: {

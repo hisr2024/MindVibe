@@ -90,6 +90,20 @@ async function executeSyncItem(item: SyncQueueItem): Promise<void> {
       await api.journal.create(item.payload as { content_encrypted: string; tags?: string[] });
       break;
     }
+    case 'sadhana': {
+      await api.sadhana.complete(item.payload as { mood_score?: number; verse_id?: string; reflection?: string; intention?: string });
+      break;
+    }
+    case 'community_post': {
+      const { content, circleId, tags } = item.payload as { content: string; circleId?: string; tags?: string[] };
+      await api.community.createPost(content, circleId, tags);
+      break;
+    }
+    case 'community_reaction': {
+      const { postId, reaction } = item.payload as { postId: string; reaction: string };
+      await api.community.reactToPost(postId, reaction);
+      break;
+    }
     default:
       // Unknown type — skip, will be dropped after max retries
       break;
@@ -205,6 +219,31 @@ function AppContent(): React.JSX.Element {
           <Stack.Screen name="wellness" options={{ animation: 'slide_from_right' }} />
           <Stack.Screen name="chat" />
           <Stack.Screen name="subscription" options={{ animation: 'slide_from_bottom', presentation: 'modal' }} />
+
+          {/* Sacred Tools — full-screen modal stacks */}
+          <Stack.Screen name="tools" options={{ animation: 'slide_from_right' }} />
+
+          {/* Sacred Journal */}
+          <Stack.Screen name="journal" options={{ animation: 'slide_from_right' }} />
+
+          {/* Daily Sadhana */}
+          <Stack.Screen name="sadhana" options={{ animation: 'slide_from_right' }} />
+
+          {/* Community & Wisdom Rooms */}
+          <Stack.Screen name="community" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="wisdom-rooms" options={{ animation: 'slide_from_right' }} />
+
+          {/* Karma Footprint */}
+          <Stack.Screen name="karma-footprint" options={{ animation: 'slide_from_right' }} />
+
+          {/* Analytics & Deep Insights */}
+          <Stack.Screen name="analytics" options={{ animation: 'slide_from_right' }} />
+
+          {/* KIAAN Vibe Player */}
+          <Stack.Screen name="vibe-player" options={{ animation: 'slide_from_bottom' }} />
+
+          {/* Settings */}
+          <Stack.Screen name="settings" options={{ animation: 'slide_from_right' }} />
         </Stack>
       </AuthGate>
     </View>
@@ -228,7 +267,7 @@ export default function RootLayout(): React.JSX.Element {
         <ThemeProvider mode={mode} onModeChange={setMode}>
           <I18nProvider
             initialLocale={locale as 'en'}
-            namespaces={['common', 'navigation', 'errors', 'auth', 'home', 'kiaan', 'journeys']}
+            namespaces={['common', 'navigation', 'errors', 'auth', 'home', 'kiaan', 'journeys', 'tools', 'emotional-reset', 'karma-reset', 'journal', 'sadhana', 'community', 'vibe-player', 'analytics', 'settings']}
           >
             <ErrorBoundary>
               <AppContent />
