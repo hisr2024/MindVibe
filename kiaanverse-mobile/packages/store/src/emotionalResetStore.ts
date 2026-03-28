@@ -49,6 +49,15 @@ interface StepResponse {
   completedAt: string;
 }
 
+/** Session object shape expected by screens */
+interface SessionData {
+  id: string;
+  emotion: string;
+  intensity: number;
+  startedAt: number;
+  steps: string[];
+}
+
 interface EmotionalResetState {
   /** Unique session identifier */
   sessionId: string | null;
@@ -66,6 +75,8 @@ interface EmotionalResetState {
   isActive: boolean;
   /** ISO timestamp when the session was completed */
   completedAt: string | null;
+  /** Session data for screen consumption */
+  session: SessionData | null;
 }
 
 interface EmotionalResetActions {
@@ -85,6 +96,10 @@ interface EmotionalResetActions {
   completeSession: () => void;
   /** Reset all state back to initial values */
   resetSession: () => void;
+  /** Set the full session object (called after API start) */
+  setSession: (session: SessionData) => void;
+  /** Clear the session object (called on completion/exit) */
+  clearSession: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -100,6 +115,7 @@ const initialState: EmotionalResetState = {
   stepResponses: [],
   isActive: false,
   completedAt: null,
+  session: null,
 };
 
 // ---------------------------------------------------------------------------
@@ -175,6 +191,24 @@ export const useEmotionalResetStore = create<EmotionalResetState & EmotionalRese
 
       resetSession: () => {
         set(() => ({ ...initialState }));
+      },
+
+      setSession: (session: SessionData) => {
+        set((state) => {
+          state.session = session;
+          state.sessionId = session.id;
+          state.emotion = session.emotion;
+          state.intensity = session.intensity;
+          state.isActive = true;
+        });
+      },
+
+      clearSession: () => {
+        set((state) => {
+          state.session = null;
+          state.isActive = false;
+          state.completedAt = new Date().toISOString();
+        });
       },
     })),
     {

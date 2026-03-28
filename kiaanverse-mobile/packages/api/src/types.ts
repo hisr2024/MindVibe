@@ -419,7 +419,7 @@ export type SyncStatus = 'synced' | 'pending' | 'syncing' | 'error';
 
 export interface SyncQueueItem {
   id: string;
-  type: 'mood' | 'journal' | 'journey_step' | 'chat_message';
+  type: 'mood' | 'journal' | 'journey_step' | 'chat_message' | 'sadhana' | 'community_post' | 'community_reaction';
   payload: Record<string, unknown>;
   createdAt: string;
   retryCount: number;

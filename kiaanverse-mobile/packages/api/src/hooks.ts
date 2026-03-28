@@ -482,9 +482,9 @@ export function useEmotionalResetStep(): UseMutationResult<EmotionalResetSession
   });
 }
 
-export function useCompleteEmotionalReset(): UseMutationResult<EmotionalResetSession, Error, string> {
+export function useCompleteEmotionalReset(): UseMutationResult<EmotionalResetSession, Error, { sessionId: string }> {
   return useMutation({
-    mutationFn: async (sessionId) => {
+    mutationFn: async ({ sessionId }) => {
       const { data } = await api.emotionalReset.complete(sessionId);
       return data as EmotionalResetSession;
     },
@@ -801,7 +801,7 @@ export function useMoodTrends(days?: number): UseQueryResult<MoodTrend[]> {
   return useQuery({
     queryKey: queryKeys.moodTrends(days),
     queryFn: async () => {
-      const { data } = await api.analytics.moodTrends();
+      const { data } = await api.analytics.moodTrends(days);
       return data as MoodTrend[];
     },
     staleTime: 1000 * 60 * 10,

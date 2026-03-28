@@ -53,7 +53,7 @@ export default function HomeScreen(): React.JSX.Element {
   }, [router]);
 
   const greeting = useMemo(() => getGreeting(), []);
-  const currentStreak = (streak as { current_streak?: number } | undefined)?.current_streak ?? 0;
+  const currentStreak = streak?.current ?? 0;
 
   return (
     <Screen>

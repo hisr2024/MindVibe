@@ -53,11 +53,11 @@ export default function EmotionalResetEntryScreen(): React.JSX.Element {
       {
         onSuccess: (data) => {
           setSession({
-            id: data.sessionId,
+            id: data.session_id,
             emotion: selectedEmotion,
             intensity,
             startedAt: Date.now(),
-            steps: data.steps,
+            steps: ['breathing', 'visualization', 'wisdom', 'affirmation', 'reflection', 'summary'],
           });
           router.push('/tools/emotional-reset/1');
         },

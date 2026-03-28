@@ -149,7 +149,7 @@ export const api = {
   /** Analytics */
   analytics: {
     dashboard: () => apiClient.get('/api/analytics/dashboard'),
-    moodTrends: () => apiClient.get('/api/analytics/mood-trends'),
+    moodTrends: (days?: number) => apiClient.get('/api/analytics/mood-trends', { params: { days } }),
     weeklyInsights: () => apiClient.get('/api/analytics/weekly-summary'),
     achievements: () => apiClient.get('/api/analytics/achievements'),
   },
