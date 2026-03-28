@@ -19,6 +19,7 @@
 @import '../styles/mobile.css';
 @import '../styles/overlays.css';
 @import '../styles/utilities.css';
+@import '../styles/sacred-mobile.css';
 
 /* Tailwind layers — must be in this file alongside @layer base */
 @tailwind base;
@@ -29,6 +30,9 @@
 @layer base {
   :root {
     --font-sacred: 'Crimson Text', Georgia, 'Times New Roman', serif;
+    --font-cormorant: 'Cormorant Garamond', Georgia, serif;
+    --font-playfair: 'Playfair Display', serif;
+    --font-outfit: 'Outfit', system-ui, sans-serif;
   }
 
   html {

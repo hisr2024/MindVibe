@@ -1,121 +1,45 @@
 'use client'
 
 /**
- * Mobile Home Page
+ * Sacred Mobile Home Page — "The Sacred Court"
  *
- * The main dashboard for the MindVibe mobile experience.
- * Touch-optimized with quick actions, mood check-in, journey progress,
- * and dynamic daily wisdom. Includes loading skeletons and graceful
- * error handling for offline-first support.
+ * The inner sanctum of Kiaanverse. The user arrives in the presence
+ * of the Divine. Features the SAKHA Presence Card, quick sacred actions,
+ * Today's Divine Insight, and recent conversations.
  */
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import {
-  Sparkles,
-  Compass,
-  PenLine,
-  Zap,
-  ChevronRight,
-  BookOpen,
-  Star,
-  Grid3X3,
-  RefreshCw,
-  Mic,
-  Users,
-  Music2,
-} from 'lucide-react'
+import { ChevronRight, RefreshCw } from 'lucide-react'
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { MobileToolsOverlay } from '@/components/mobile/MobileToolsOverlay'
+import { SakhaMandala } from '@/components/sacred/SakhaMandala'
+import { SacredCard } from '@/components/sacred/SacredCard'
+import { SacredDivider } from '@/components/sacred/SacredDivider'
+import { SacredOMLoader } from '@/components/sacred/SacredOMLoader'
+import { VerseRevelation } from '@/components/sacred/VerseRevelation'
+import { OmSymbol } from '@/components/sacred/icons/OmSymbol'
 import { useAuth } from '@/hooks/useAuth'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { apiFetch } from '@/lib/api'
 
-// Mood options with emojis and colors - score maps to backend (-2 to 2 scale)
-const MOOD_OPTIONS = [
-  { id: 'great', label: 'Great', emoji: '😊', color: 'from-green-500 to-emerald-400', score: 2 },
-  { id: 'good', label: 'Good', emoji: '🙂', color: 'from-yellow-500 to-[#d4a44c]', score: 1 },
-  { id: 'okay', label: 'Okay', emoji: '😐', color: 'from-blue-500 to-cyan-400', score: 0 },
-  { id: 'low', label: 'Low', emoji: '😔', color: 'from-purple-500 to-indigo-400', score: -1 },
-  { id: 'struggling', label: 'Struggling', emoji: '😢', color: 'from-red-500 to-pink-400', score: -2 },
+// Quick sacred action chips
+const SACRED_ACTIONS = [
+  { id: 'ask', label: 'Ask Sakha', href: '/m/kiaan' },
+  { id: 'shloka', label: "Today's Shloka", href: '/m/wisdom' },
+  { id: 'journey', label: 'My Journey', href: '/m/journeys' },
+  { id: 'library', label: 'Wisdom Library', href: '/m/shlokas' },
 ]
 
-// Quick action cards
-const QUICK_ACTIONS = [
-  {
-    id: 'kiaan',
-    label: 'Talk to KIAAN',
-    description: 'AI wisdom companion',
-    icon: Sparkles,
-    href: '/m/kiaan',
-    gradient: 'from-[#d4a44c]/20 to-[#d4a44c]/20',
-    iconColor: 'text-[#d4a44c]',
-  },
-  {
-    id: 'vibe-player',
-    label: 'Vibe Player',
-    description: 'Sacred sounds & verses',
-    icon: Music2,
-    href: '/kiaan-vibe',
-    gradient: 'from-[#d4a44c]/20 to-amber-500/20',
-    iconColor: 'text-[#d4a44c]',
-  },
-  {
-    id: 'journal',
-    label: 'Write in Journal',
-    description: 'Sacred reflections',
-    icon: PenLine,
-    href: '/m/journal',
-    gradient: 'from-purple-500/20 to-pink-500/20',
-    iconColor: 'text-purple-400',
-  },
-  {
-    id: 'journeys',
-    label: 'Continue Journey',
-    description: 'Transformational path',
-    icon: Compass,
-    href: '/m/journeys',
-    gradient: 'from-cyan-500/20 to-blue-500/20',
-    iconColor: 'text-cyan-400',
-  },
-  {
-    id: 'wisdom',
-    label: 'Daily Wisdom',
-    description: 'Ancient teachings',
-    icon: BookOpen,
-    href: '/m/wisdom',
-    gradient: 'from-teal-500/20 to-green-500/20',
-    iconColor: 'text-teal-400',
-  },
-  {
-    id: 'voice',
-    label: 'Voice Companion',
-    description: 'Talk with KIAAN',
-    icon: Mic,
-    href: '/m/companion',
-    gradient: 'from-orange-500/20 to-red-500/20',
-    iconColor: 'text-orange-400',
-  },
-  {
-    id: 'rooms',
-    label: 'Wisdom Rooms',
-    description: 'Community chat',
-    icon: Users,
-    href: '/m/wisdom-rooms',
-    gradient: 'from-[#d4a44c]/15 to-yellow-500/15',
-    iconColor: 'text-[#d4a44c]',
-  },
-  {
-    id: 'tools',
-    label: 'All Tools',
-    description: 'Spiritual toolkit',
-    icon: Grid3X3,
-    href: '/m/tools',
-    gradient: 'from-indigo-500/20 to-violet-500/20',
-    iconColor: 'text-indigo-400',
-  },
+// Mood options with sacred colors
+const MOOD_OPTIONS = [
+  { id: 'great', label: 'Great', emoji: '🙏', color: 'from-emerald-500/30 to-emerald-400/10', score: 2 },
+  { id: 'good', label: 'Good', emoji: '☀️', color: 'from-[#D4A017]/30 to-[#D4A017]/10', score: 1 },
+  { id: 'okay', label: 'Okay', emoji: '🕉️', color: 'from-[#1B4FBB]/30 to-[#1B4FBB]/10', score: 0 },
+  { id: 'low', label: 'Low', emoji: '🪷', color: 'from-purple-500/30 to-indigo-400/10', score: -1 },
+  { id: 'struggling', label: 'Seeking', emoji: '🙏', color: 'from-[#0E7490]/30 to-[#06B6D4]/10', score: -2 },
 ]
 
 interface DashboardData {
@@ -133,65 +57,22 @@ interface DashboardData {
 }
 
 interface DailyWisdom {
+  sanskrit?: string
+  transliteration?: string
   translation: string
   chapter: number
   verse: number
 }
 
-// Fallback wisdom for when API is unavailable
 const FALLBACK_WISDOM: DailyWisdom = {
+  sanskrit: 'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन',
+  transliteration: 'karmaṇy evādhikāras te mā phaleṣu kadācana',
   translation: 'You have the right to perform your actions, but you are not entitled to the fruits of the actions.',
   chapter: 2,
   verse: 47,
 }
 
-/** Loading skeleton for the home page */
-function HomeSkeleton() {
-  return (
-    <div className="px-page-x pt-2 pb-8 space-y-6 animate-pulse">
-      {/* Greeting skeleton */}
-      <div className="pt-safe-top">
-        <div className="h-4 w-28 bg-white/[0.06] rounded-lg" />
-        <div className="h-7 w-48 bg-white/[0.08] rounded-lg mt-2" />
-      </div>
-
-      {/* Mood card skeleton */}
-      <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-        <div className="h-4 w-36 bg-white/[0.06] rounded-lg mb-4" />
-        <div className="flex justify-between gap-2">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex-1 h-16 rounded-xl bg-white/[0.04]" />
-          ))}
-        </div>
-      </div>
-
-      {/* Stats skeleton */}
-      <div className="grid grid-cols-3 gap-3">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-            <div className="h-6 w-8 bg-white/[0.06] rounded mx-auto mb-1" />
-            <div className="h-3 w-14 bg-white/[0.04] rounded mx-auto" />
-          </div>
-        ))}
-      </div>
-
-      {/* Quick actions skeleton */}
-      <div>
-        <div className="h-4 w-24 bg-white/[0.06] rounded-lg mb-3" />
-        <div className="grid grid-cols-2 gap-3">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-24 rounded-2xl bg-white/[0.03] border border-white/[0.06]" />
-          ))}
-        </div>
-      </div>
-
-      {/* Wisdom skeleton */}
-      <div className="h-20 rounded-2xl bg-white/[0.03] border border-white/[0.06]" />
-    </div>
-  )
-}
-
-export default function MobileHomePage() {
+export default function SacredMobileHomePage() {
   const router = useRouter()
   const { user } = useAuth()
   const { triggerHaptic } = useHapticFeedback()
@@ -208,7 +89,6 @@ export default function MobileHomePage() {
   const [hasError, setHasError] = useState(false)
   const [isToolsOverlayOpen, setIsToolsOverlayOpen] = useState(false)
 
-  // Get greeting based on time of day
   const getGreeting = useCallback(() => {
     const hour = new Date().getHours()
     if (hour < 5) return 'Late night'
@@ -218,17 +98,14 @@ export default function MobileHomePage() {
     return 'Good night'
   }, [])
 
-  // Fetch dashboard data
   const fetchDashboardData = useCallback(async () => {
     try {
       setHasError(false)
-
       const [dashboardRes, wisdomRes] = await Promise.allSettled([
         apiFetch('/api/analytics/dashboard'),
         apiFetch('/api/kiaan/friend/daily-wisdom'),
       ])
 
-      // Process dashboard data
       if (dashboardRes.status === 'fulfilled' && dashboardRes.value.ok) {
         const data = await dashboardRes.value.json()
         setDashboardData({
@@ -246,24 +123,22 @@ export default function MobileHomePage() {
           insightsCount: data.insights_count || 0,
           journalEntries: data.journal_entries || 0,
         })
-        if (data.today_mood) {
-          setSelectedMood(data.today_mood)
-        }
+        if (data.today_mood) setSelectedMood(data.today_mood)
       }
 
-      // Process daily wisdom
       if (wisdomRes.status === 'fulfilled' && wisdomRes.value.ok) {
         const data = await wisdomRes.value.json()
         if (data.translation || data.insight) {
           setDailyWisdom({
+            sanskrit: data.sanskrit || data.sanskrit_text || undefined,
+            transliteration: data.transliteration || undefined,
             translation: data.translation || data.insight || FALLBACK_WISDOM.translation,
             chapter: data.chapter || 2,
             verse: data.verse_number || data.verse || 47,
           })
         }
       }
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error)
+    } catch {
       setHasError(true)
     } finally {
       setIsLoading(false)
@@ -271,20 +146,14 @@ export default function MobileHomePage() {
   }, [])
 
   useEffect(() => {
-    // Start loading after brief delay to prevent flash
-    const timer = setTimeout(() => {
-      fetchDashboardData()
-    }, 100)
+    const timer = setTimeout(() => fetchDashboardData(), 100)
     return () => clearTimeout(timer)
   }, [fetchDashboardData])
 
-  // Handle mood selection
   const handleMoodSelect = useCallback(async (moodId: string) => {
     triggerHaptic('success')
     setSelectedMood(moodId)
     setMoodSaved(true)
-
-    // Reset the "saved" indicator after 2s
     setTimeout(() => setMoodSaved(false), 2000)
 
     const moodOption = MOOD_OPTIONS.find(m => m.id === moodId)
@@ -301,13 +170,11 @@ export default function MobileHomePage() {
     }
   }, [triggerHaptic])
 
-  // Handle pull-to-refresh
   const handleRefresh = useCallback(async () => {
     await fetchDashboardData()
   }, [fetchDashboardData])
 
-  // Handle quick action tap — "All Tools" opens the overlay instead of navigating
-  const handleQuickAction = useCallback((href: string) => {
+  const handleNavigate = useCallback((href: string) => {
     triggerHaptic('selection')
     if (href === '/m/tools') {
       setIsToolsOverlayOpen(true)
@@ -321,80 +188,129 @@ export default function MobileHomePage() {
   if (isLoading) {
     return (
       <MobileAppShell title="Sakha" showHeader={false}>
-        <HomeSkeleton />
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <SacredOMLoader size={64} message="Entering the sacred court..." />
+        </div>
       </MobileAppShell>
     )
   }
 
   return (
-    <MobileAppShell
-      title="Sakha"
-      showHeader={false}
-      enablePullToRefresh
-      onRefresh={handleRefresh}
-    >
-      <div className="px-page-x pt-2 pb-8 space-y-6">
-        {/* Header with greeting */}
+    <MobileAppShell title="Sakha" showHeader={false} enablePullToRefresh onRefresh={handleRefresh}>
+      <div className="px-5 pt-2 pb-8 space-y-5">
+
+        {/* ── Divine Header ── */}
         <motion.header
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="pt-safe-top"
+          className="pt-safe-top flex items-center justify-between"
         >
-          <p className="text-caption text-[var(--mv-text-muted)]">{getGreeting()}</p>
-          <h1 className="text-2xl font-bold mt-1">
-            {userName}{' '}
-            <motion.span
-              className="inline-block"
-              style={{ transformOrigin: '70% 70%' }}
-              animate={{
-                rotate: [0, 14, -8, 14, -4, 0],
-              }}
-              transition={{
-                duration: 2.5,
-                ease: 'easeInOut',
-                repeat: Infinity,
-                repeatDelay: 1,
-              }}
-            >
-              👋
-            </motion.span>
-          </h1>
+          <div className="flex items-center gap-2">
+            <OmSymbol width={18} height={18} className="text-[var(--sacred-divine-gold)] opacity-70" />
+            <span className="sacred-text-divine text-lg tracking-wider text-[var(--sacred-text-secondary)]">
+              {getGreeting()}
+            </span>
+          </div>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => handleNavigate('/m/profile')}
+            className="w-9 h-9 rounded-full sacred-divine-breath border border-[var(--sacred-divine-gold)]/30 flex items-center justify-center"
+            aria-label="Profile"
+          >
+            <span className="text-sm sacred-text-divine text-[var(--sacred-divine-gold)]">
+              {userName.charAt(0).toUpperCase()}
+            </span>
+          </motion.button>
         </motion.header>
 
-        {/* Mood Check-in Card */}
+        {/* ── SAKHA Presence Card ── */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/[0.08]">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-medium">How are you feeling?</h2>
+          <SacredCard variant="divine" className="relative overflow-hidden py-8">
+            {/* Background aura */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: 'var(--sacred-gradient-krishna-aura)' }}
+            />
+
+            {/* Gold shimmer top border effect */}
+            <div
+              className="absolute top-0 left-0 right-0 h-[2px]"
+              style={{ background: 'var(--sacred-gradient-gold-shimmer)' }}
+            />
+
+            <div className="relative flex flex-col items-center gap-4">
+              <SakhaMandala size={100} animated glowIntensity="high" />
+
+              <div className="text-center">
+                <h2 className="sacred-text-divine text-2xl italic text-[var(--sacred-white)]">
+                  Sakha
+                </h2>
+                <p className="sacred-text-ui text-xs text-[var(--sacred-text-secondary)] mt-1">
+                  Your Divine Companion is Present
+                </p>
+              </div>
+
+              {/* Scrolling shloka fragment */}
+              <div className="w-full overflow-hidden">
+                <motion.p
+                  animate={{ x: [0, -300, 0] }}
+                  transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                  className="sacred-text-scripture text-xs text-[var(--sacred-text-muted)] whitespace-nowrap"
+                >
+                  ॐ सर्वे भवन्तु सुखिनः सर्वे सन्तु निरामयाः । सर्वे भद्राणि पश्यन्तु मा कश्चिद्दुःखभाग्भवेत् ॥
+                </motion.p>
+              </div>
+            </div>
+          </SacredCard>
+        </motion.section>
+
+        {/* ── Quick Sacred Actions ── */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+            {SACRED_ACTIONS.map((action) => (
+              <motion.button
+                key={action.id}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleNavigate(action.href)}
+                className="sacred-starter-chip whitespace-nowrap flex-shrink-0"
+              >
+                {action.label}
+              </motion.button>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* ── Mood Check-in ── */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <SacredCard className="!p-3">
+            <div className="flex items-center justify-between mb-2">
+              <p className="sacred-label">How are you feeling?</p>
               <AnimatePresence mode="wait">
-                {moodSaved ? (
+                {moodSaved && (
                   <motion.span
                     key="saved"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}
-                    className="text-xs text-green-400 font-medium"
+                    className="text-xs text-emerald-400 font-medium"
                   >
                     Saved
                   </motion.span>
-                ) : selectedMood ? (
-                  <motion.span
-                    key="checkin"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-xs text-slate-500"
-                  >
-                    Today&apos;s check-in
-                  </motion.span>
-                ) : null}
+                )}
               </AnimatePresence>
             </div>
-
-            {/* Mood selector */}
             <div className="flex justify-between gap-2">
               {MOOD_OPTIONS.map((mood) => {
                 const isSelected = selectedMood === mood.id
@@ -403,233 +319,130 @@ export default function MobileHomePage() {
                     key={mood.id}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleMoodSelect(mood.id)}
-                    className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-xl transition-all duration-200 ${
+                    className={`flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl transition-all duration-200 ${
                       isSelected
-                        ? `bg-gradient-to-br ${mood.color} shadow-lg`
-                        : 'bg-white/[0.04] active:bg-white/[0.08]'
+                        ? `bg-gradient-to-br ${mood.color} border border-[var(--sacred-divine-gold)]/30`
+                        : 'bg-white/[0.03] border border-transparent active:bg-white/[0.06]'
                     }`}
                     aria-label={`I feel ${mood.label}`}
                     aria-pressed={isSelected}
                   >
-                    <span className="text-2xl" role="img" aria-hidden="true">
-                      {mood.emoji}
-                    </span>
-                    <span
-                      className={`text-[10px] font-medium ${
-                        isSelected ? 'text-white' : 'text-slate-400'
-                      }`}
-                    >
+                    <span className="text-xl" role="img" aria-hidden="true">{mood.emoji}</span>
+                    <span className={`text-[9px] sacred-text-ui font-medium ${
+                      isSelected ? 'text-[var(--sacred-text-primary)]' : 'text-[var(--sacred-text-muted)]'
+                    }`}>
                       {mood.label}
                     </span>
                   </motion.button>
                 )
               })}
             </div>
-          </div>
+          </SacredCard>
         </motion.section>
 
-        {/* Stats row */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="grid grid-cols-3 gap-3"
-        >
-          <motion.div
-            whileTap={{ scale: 0.95 }}
-            className="p-3 rounded-xl text-center bg-gradient-to-br from-[#d4a44c]/10 to-[#d4a44c]/5 border border-[#d4a44c]/20 relative overflow-hidden"
-          >
-            {dashboardData.streak >= 7 && (
-              <div className="absolute inset-0 bg-gradient-to-t from-[#d4a44c]/5 to-transparent pointer-events-none" />
-            )}
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <Zap className="w-4 h-4 text-[#d4a44c]" />
-              <span className="text-xl font-bold text-[#d4a44c]">
-                {dashboardData.streak}
-              </span>
-            </div>
-            <p className="text-caption text-[var(--mv-text-muted)]">Day Streak</p>
-          </motion.div>
-
-          <motion.div
-            whileTap={{ scale: 0.95 }}
-            className="p-3 rounded-xl text-center bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20"
-          >
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <PenLine className="w-4 h-4 text-purple-400" />
-              <span className="text-xl font-bold text-purple-400">
-                {dashboardData.journalEntries}
-              </span>
-            </div>
-            <p className="text-caption text-[var(--mv-text-muted)]">Reflections</p>
-          </motion.div>
-
-          <motion.div
-            whileTap={{ scale: 0.95 }}
-            className="p-3 rounded-xl text-center bg-gradient-to-br from-cyan-500/10 to-blue-500/5 border border-cyan-500/20"
-          >
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <Sparkles className="w-4 h-4 text-cyan-400" />
-              <span className="text-xl font-bold text-cyan-400">
-                {dashboardData.insightsCount}
-              </span>
-            </div>
-            <p className="text-caption text-[var(--mv-text-muted)]">Insights</p>
-          </motion.div>
-        </motion.section>
-
-        {/* Active Journey Card — or Start Journey CTA when no active journey */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          {dashboardData.activeJourney ? (
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              onClick={() =>
-                handleQuickAction(
-                  `/m/journeys/${dashboardData.activeJourney?.id}`
-                )
-              }
-              className="w-full p-4 rounded-2xl text-left bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-cyan-500/20"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <p className="text-xs text-cyan-400 font-medium mb-1">
-                    Active Journey
-                  </p>
-                  <h3 className="text-base font-semibold">
-                    {dashboardData.activeJourney.title}
-                  </h3>
-                </div>
-                <ChevronRight className="w-5 h-5 text-slate-500" />
-              </div>
-
-              {/* Progress bar */}
-              <div className="space-y-2">
-                <div className="h-2 bg-white/[0.08] rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{
-                      width: `${dashboardData.activeJourney.progress}%`,
-                    }}
-                    transition={{ duration: 0.5, ease: 'easeOut' }}
-                    className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"
-                  />
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-[var(--mv-text-muted)]">
-                    Day {dashboardData.activeJourney.currentDay} of{' '}
-                    {dashboardData.activeJourney.totalDays}
-                  </span>
-                  <span className="text-cyan-400 font-medium">
-                    {dashboardData.activeJourney.progress}%
-                  </span>
-                </div>
-              </div>
-            </motion.button>
-          ) : (
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleQuickAction('/m/journeys')}
-              className="w-full p-4 rounded-2xl text-left bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-cyan-500/20"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-cyan-500/15 flex items-center justify-center flex-shrink-0">
-                  <Compass className="w-6 h-6 text-cyan-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-cyan-400 font-medium mb-0.5">
-                    Wisdom Journeys
-                  </p>
-                  <h3 className="text-base font-semibold">
-                    Start Your Transformation
-                  </h3>
-                  <p className="text-caption text-[var(--mv-text-muted)] mt-0.5">
-                    14-day guided paths to conquer inner enemies with Gita wisdom
-                  </p>
-                </div>
-                <ChevronRight className="w-5 h-5 text-slate-500 flex-shrink-0" />
-              </div>
-            </motion.button>
-          )}
-        </motion.section>
-
-        {/* Quick Actions Grid */}
+        {/* ── Sacred Stats ── */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
+          className="grid grid-cols-3 gap-2"
         >
-          <h2 className="text-sm font-medium text-[var(--mv-text-muted)] mb-3">
-            Quick Actions
-          </h2>
-          <div className="grid grid-cols-2 gap-3">
-            {QUICK_ACTIONS.map((action, index) => (
-              <motion.button
-                key={action.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3 + index * 0.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleQuickAction(action.href)}
-                className={`p-4 rounded-2xl text-left bg-gradient-to-br ${action.gradient} border border-white/[0.06] active:border-white/[0.12]`}
-              >
-                <action.icon className={`w-6 h-6 ${action.iconColor} mb-2`} />
-                <h3 className="text-sm font-semibold">
-                  {action.label}
-                </h3>
-                <p className="text-caption text-[var(--mv-text-muted)] mt-0.5">
-                  {action.description}
-                </p>
-              </motion.button>
-            ))}
-          </div>
+          {[
+            { label: 'Days of Dharma', value: dashboardData.streak, color: 'var(--sacred-divine-gold)' },
+            { label: 'Reflections', value: dashboardData.journalEntries, color: 'var(--sacred-peacock-iridescent)' },
+            { label: 'Insights', value: dashboardData.insightsCount, color: 'var(--sacred-peacock-shimmer)' },
+          ].map((stat) => (
+            <SacredCard key={stat.label} className="!p-3 text-center">
+              <p className="text-xl font-bold sacred-text-divine" style={{ color: stat.color }}>
+                {stat.value}
+              </p>
+              <p className="text-[9px] sacred-text-ui text-[var(--sacred-text-muted)] mt-0.5">
+                {stat.label}
+              </p>
+            </SacredCard>
+          ))}
         </motion.section>
 
-        {/* Daily Wisdom Preview */}
+        <SacredDivider />
+
+        {/* ── Today's Divine Insight ── */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
+          transition={{ delay: 0.3 }}
         >
+          <p className="sacred-label mb-3">Today&apos;s Shloka</p>
           <motion.button
             whileTap={{ scale: 0.98 }}
-            onClick={() => handleQuickAction('/m/wisdom')}
-            className="w-full p-4 rounded-2xl text-left bg-gradient-to-br from-teal-500/10 to-emerald-500/5 border border-teal-500/20"
+            onClick={() => handleNavigate('/m/wisdom')}
+            className="w-full text-left"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-teal-500/20 flex items-center justify-center flex-shrink-0">
-                <Star className="w-6 h-6 text-teal-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-teal-400 font-medium">
-                  Daily Wisdom
-                </p>
-                <p className="text-body text-[var(--mv-text-secondary)] mt-0.5 line-clamp-2">
-                  &ldquo;{dailyWisdom.translation}&rdquo;
-                </p>
-                <p className="text-caption text-[var(--mv-text-muted)] mt-1">
-                  — Bhagavad Gita {dailyWisdom.chapter}.{dailyWisdom.verse}
-                </p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-slate-500 flex-shrink-0" />
-            </div>
+            <VerseRevelation
+              sanskrit={dailyWisdom.sanskrit}
+              transliteration={dailyWisdom.transliteration}
+              meaning={dailyWisdom.translation}
+              reference={`${dailyWisdom.chapter}.${dailyWisdom.verse}`}
+            />
           </motion.button>
         </motion.section>
 
-        {/* Connection error hint */}
+        {/* ── Active Journey ── */}
+        {dashboardData.activeJourney && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+          >
+            <SacredCard
+              interactive
+              className="cursor-pointer"
+              onClick={() => handleNavigate(`/m/journeys/${dashboardData.activeJourney?.id}`)}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <p className="sacred-label mb-1">Active Journey</p>
+                  <h3 className="sacred-text-divine text-base text-[var(--sacred-text-primary)]">
+                    {dashboardData.activeJourney.title}
+                  </h3>
+                </div>
+                <ChevronRight className="w-5 h-5 text-[var(--sacred-text-muted)]" />
+              </div>
+              <div className="space-y-2">
+                <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${dashboardData.activeJourney.progress}%` }}
+                    transition={{ duration: 0.5, ease: 'easeOut' }}
+                    className="h-full rounded-full"
+                    style={{
+                      background: 'linear-gradient(90deg, var(--sacred-krishna-blue), var(--sacred-peacock-teal))',
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-xs sacred-text-ui text-[var(--sacred-text-muted)]">
+                    Day {dashboardData.activeJourney.currentDay} of {dashboardData.activeJourney.totalDays}
+                  </span>
+                  <span className="text-xs sacred-text-ui text-[var(--sacred-peacock-iridescent)]">
+                    {dashboardData.activeJourney.progress}%
+                  </span>
+                </div>
+              </div>
+            </SacredCard>
+          </motion.section>
+        )}
+
+        {/* ── Connection error hint ── */}
         <AnimatePresence>
           {hasError && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#d4a44c]/10 border border-[#d4a44c]/15"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--sacred-divine-gold)]/10 border border-[var(--sacred-divine-gold)]/15"
             >
-              <RefreshCw className="w-4 h-4 text-[#d4a44c] flex-shrink-0" />
-              <p className="text-xs text-[#e8b54a]">
+              <RefreshCw className="w-4 h-4 text-[var(--sacred-divine-gold)] flex-shrink-0" />
+              <p className="text-xs sacred-text-ui text-[var(--sacred-divine-gold-bright)]">
                 Some data may be outdated. Pull down to refresh.
               </p>
             </motion.div>
@@ -637,11 +450,7 @@ export default function MobileHomePage() {
         </AnimatePresence>
       </div>
 
-      {/* Spiritual Tools overlay — triggered by "All Tools" quick action */}
-      <MobileToolsOverlay
-        isOpen={isToolsOverlayOpen}
-        onClose={() => setIsToolsOverlayOpen(false)}
-      />
+      <MobileToolsOverlay isOpen={isToolsOverlayOpen} onClose={() => setIsToolsOverlayOpen(false)} />
     </MobileAppShell>
   )
 }

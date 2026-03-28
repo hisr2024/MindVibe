@@ -1,0 +1,577 @@
+/* =====================================================
+   SACRED MOBILE — Divine palette, gradients, animations
+   for the Kiaanverse mobile spiritual experience.
+
+   Colors derived from three cosmic sources:
+   1. Yamuna River at twilight — deep indigo, moonlit silver
+   2. Krishna's crown & peacock feather — iridescent teal-cyan, gold
+   3. Diya flame in darkness — amber, saffron, golden halo
+   ===================================================== */
+
+/* ─── THE DIVINE PALETTE ─── */
+:root {
+  /* Cosmic backgrounds */
+  --sacred-cosmic-void: #050714;
+  --sacred-yamuna-deep: #0B0E2A;
+  --sacred-yamuna-mid: #111435;
+  --sacred-yamuna-surface: #161A42;
+
+  /* Krishna presence */
+  --sacred-krishna-blue: #1B4FBB;
+  --sacred-krishna-glow: #2563EB;
+
+  /* Peacock feather spectrum */
+  --sacred-peacock-teal: #0E7490;
+  --sacred-peacock-iridescent: #06B6D4;
+  --sacred-peacock-shimmer: #67E8F9;
+
+  /* Divine gold — diya flame */
+  --sacred-divine-gold: #D4A017;
+  --sacred-divine-gold-bright: #F0C040;
+  --sacred-divine-gold-glow: #FDE68A;
+
+  /* Saffron warmth */
+  --sacred-saffron-core: #F97316;
+  --sacred-saffron-warm: #FB923C;
+
+  /* Sacred text hierarchy */
+  --sacred-white: #F8F6F0;
+  --sacred-text-primary: #EDE8DC;
+  --sacred-text-secondary: #B8AE98;
+  --sacred-text-muted: #6B6355;
+
+  /* ─── AURA GRADIENTS ─── */
+  --sacred-gradient-krishna-aura: radial-gradient(ellipse at 50% 100%,
+    rgba(27, 79, 187, 0.6) 0%,
+    rgba(14, 116, 144, 0.3) 35%,
+    transparent 70%);
+
+  --sacred-gradient-divine-presence: radial-gradient(ellipse at 50% 50%,
+    rgba(212, 160, 23, 0.15) 0%,
+    rgba(212, 160, 23, 0.05) 40%,
+    transparent 70%);
+
+  --sacred-gradient-peacock-sheen: linear-gradient(135deg,
+    rgba(6, 182, 212, 0.8) 0%,
+    rgba(27, 79, 187, 0.9) 50%,
+    rgba(103, 232, 249, 0.7) 100%);
+
+  --sacred-gradient-card: linear-gradient(145deg,
+    rgba(22, 26, 66, 0.95) 0%,
+    rgba(17, 20, 53, 0.98) 100%);
+
+  --sacred-gradient-gold-shimmer: linear-gradient(90deg,
+    transparent 0%,
+    rgba(212, 160, 23, 0.4) 30%,
+    rgba(240, 192, 64, 0.8) 50%,
+    rgba(212, 160, 23, 0.4) 70%,
+    transparent 100%);
+
+  /* ─── SACRED TYPOGRAPHY ─── */
+  --font-divine: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
+  --font-scripture: var(--font-sacred), 'Crimson Text', Georgia, serif;
+  --font-display: var(--font-playfair), 'Playfair Display', serif;
+  --font-ui: var(--font-outfit), 'Outfit', system-ui, sans-serif;
+
+  /* Sacred typography scale for mobile */
+  --sacred-text-xs: 11px;
+  --sacred-text-sm: 13px;
+  --sacred-text-base: 15px;
+  --sacred-text-lg: 17px;
+  --sacred-text-xl: 21px;
+  --sacred-text-2xl: 26px;
+  --sacred-text-3xl: 32px;
+  --sacred-text-4xl: 42px;
+  --sacred-text-5xl: 54px;
+
+  --sacred-line-height-scripture: 1.85;
+  --sacred-line-height-ui: 1.4;
+  --sacred-letter-spacing-divine: 0.04em;
+  --sacred-letter-spacing-caps: 0.12em;
+
+  /* ─── ANIMATION DURATIONS ─── */
+  --sacred-duration-instant: 80ms;
+  --sacred-duration-swift: 180ms;
+  --sacred-duration-natural: 320ms;
+  --sacred-duration-gentle: 500ms;
+  --sacred-duration-sacred: 800ms;
+  --sacred-duration-divine: 1400ms;
+  --sacred-duration-eternal: 3000ms;
+
+  /* ─── SACRED EASING CURVES ─── */
+  --sacred-ease-divine-in: cubic-bezier(0.25, 0.1, 0.0, 1.0);
+  --sacred-ease-divine-out: cubic-bezier(0.0, 0.0, 0.15, 1.0);
+  --sacred-ease-sacred-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --sacred-ease-lotus-bloom: cubic-bezier(0.0, 0.8, 0.2, 1.0);
+  --sacred-ease-flame: cubic-bezier(0.45, 0.05, 0.55, 0.95);
+}
+
+/* ═══════════════════════════════════════════════════════
+   SACRED ANIMATIONS — Motion as darshan
+   ═══════════════════════════════════════════════════════ */
+
+/* 1. DIVINE BREATH — Golden aura surrounding SAKHA avatar (4s cycle) */
+@keyframes sacred-divine-breath {
+  0%, 100% {
+    box-shadow:
+      0 0 20px rgba(212, 160, 23, 0.3),
+      0 0 40px rgba(212, 160, 23, 0.15),
+      0 0 80px rgba(212, 160, 23, 0.05);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow:
+      0 0 30px rgba(212, 160, 23, 0.5),
+      0 0 60px rgba(212, 160, 23, 0.25),
+      0 0 120px rgba(212, 160, 23, 0.1);
+    transform: scale(1.02);
+  }
+}
+
+.sacred-divine-breath {
+  animation: sacred-divine-breath 4s ease-in-out infinite;
+  will-change: box-shadow, transform;
+}
+
+/* 2. PEACOCK SHIMMER — Gold-teal sweep on interactive elements */
+@keyframes sacred-peacock-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.sacred-shimmer-on-tap {
+  position: relative;
+  overflow: hidden;
+}
+
+.sacred-shimmer-on-tap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(6, 182, 212, 0.3) 30%,
+    rgba(212, 160, 23, 0.5) 50%,
+    rgba(103, 232, 249, 0.3) 70%,
+    transparent 100%);
+  background-size: 400% 100%;
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+
+.sacred-shimmer-on-tap:active::after {
+  opacity: 1;
+  animation: sacred-peacock-shimmer 0.6s ease-out forwards;
+}
+
+/* 3. WORD-BY-WORD VERSE REVELATION */
+@keyframes sacred-word-arrival {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(2px);
+  }
+  60% {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.sacred-verse-word {
+  display: inline-block;
+  opacity: 0;
+  animation: sacred-word-arrival 0.4s var(--sacred-ease-divine-in) forwards;
+}
+
+/* Stagger delay applied via style prop: animation-delay: calc(var(--word-index) * 80ms) */
+
+/* 4. LOTUS BLOOM — Screen/modal entrance via clip-path circle */
+@keyframes sacred-lotus-bloom {
+  0% {
+    opacity: 0;
+    clip-path: circle(0% at 50% 50%);
+    filter: brightness(2);
+  }
+  40% {
+    opacity: 1;
+    clip-path: circle(30% at 50% 50%);
+    filter: brightness(1.3);
+  }
+  100% {
+    clip-path: circle(100% at 50% 50%);
+    filter: brightness(1);
+  }
+}
+
+.sacred-bloom-enter {
+  animation: sacred-lotus-bloom 600ms var(--sacred-ease-lotus-bloom) forwards;
+}
+
+/* 5. DIVINE RIPPLE — Golden ring expansion on tap */
+@keyframes sacred-divine-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.8;
+    border-color: rgba(212, 160, 23, 0.8);
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+    border-color: rgba(212, 160, 23, 0);
+  }
+}
+
+.sacred-ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+
+/* 6. KRISHNA BLUE AURA PULSE — Active state glow */
+@keyframes sacred-krishna-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+  50% { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15); }
+}
+
+.sacred-krishna-pulse {
+  animation: sacred-krishna-pulse 2s ease-in-out infinite;
+}
+
+/* 7. OM SYMBOL STROKE DRAW */
+@keyframes sacred-om-draw {
+  0% {
+    stroke-dashoffset: var(--om-path-length, 600);
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes sacred-om-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(212, 160, 23, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(212, 160, 23, 0.7));
+  }
+}
+
+.sacred-om-loader svg {
+  animation: sacred-om-draw 1.2s ease-in-out infinite alternate,
+             sacred-om-glow 2.4s ease-in-out infinite;
+}
+
+/* 8. SACRED PARTICLE RISE — Upward drift with sine wave */
+@keyframes sacred-particle-rise {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--particle-opacity, 0.4);
+  }
+  50% {
+    transform: translateY(calc(var(--particle-travel, -200px) * 0.5))
+               translateX(calc(sin(var(--particle-phase, 0)) * var(--particle-sway, 15px)));
+    opacity: var(--particle-opacity, 0.4);
+  }
+  90% {
+    opacity: var(--particle-opacity, 0.4);
+  }
+  100% {
+    transform: translateY(var(--particle-travel, -200px))
+               translateX(calc(sin(var(--particle-phase, 0)) * var(--particle-sway, 15px) * -1));
+    opacity: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SACRED UI UTILITY CLASSES
+   ═══════════════════════════════════════════════════════ */
+
+/* Sacred card base */
+.sacred-card {
+  background: var(--sacred-gradient-card);
+  border: 1px solid rgba(212, 160, 23, 0.12);
+  border-top: 2px solid transparent;
+  border-image: var(--sacred-gradient-gold-shimmer) 1;
+  border-image-slice: 1 1 0 1;
+  border-radius: 20px;
+  box-shadow:
+    0 8px 32px rgba(5, 7, 20, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+}
+
+/* Sacred card prestige variant */
+.sacred-card-divine {
+  background: var(--sacred-gradient-card);
+  border: 1px solid rgba(212, 160, 23, 0.12);
+  border-radius: 20px;
+  box-shadow:
+    0 20px 60px rgba(5, 7, 20, 0.8),
+    0 0 40px rgba(27, 79, 187, 0.1),
+    0 0 80px rgba(212, 160, 23, 0.05);
+}
+
+/* Sacred divider */
+.sacred-divider {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(212, 160, 23, 0.3) 20%,
+    rgba(212, 160, 23, 0.5) 50%,
+    rgba(212, 160, 23, 0.3) 80%,
+    transparent 100%);
+  margin: 20px 0;
+}
+
+/* Sacred input */
+.sacred-input {
+  background: rgba(22, 26, 66, 0.6);
+  border: 1px solid rgba(212, 160, 23, 0.2);
+  border-radius: 14px;
+  color: var(--sacred-text-primary);
+  font-family: var(--font-ui);
+  transition: border-color 300ms, box-shadow 300ms;
+}
+
+.sacred-input:focus {
+  border-color: rgba(212, 160, 23, 0.6);
+  box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.08);
+  outline: none;
+}
+
+/* Sacred button primary */
+.sacred-btn-divine {
+  height: 56px;
+  border-radius: 28px;
+  background: linear-gradient(135deg,
+    var(--sacred-krishna-blue) 0%,
+    var(--sacred-peacock-teal) 100%);
+  border: 1px solid rgba(212, 160, 23, 0.4);
+  color: var(--sacred-white);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.3s;
+}
+
+.sacred-btn-divine:active {
+  transform: scale(0.97);
+}
+
+/* Sacred button ghost */
+.sacred-btn-ghost {
+  height: 48px;
+  border-radius: 24px;
+  background: transparent;
+  border: 1px solid rgba(212, 160, 23, 0.35);
+  color: var(--sacred-divine-gold-bright);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  transition: transform 0.15s, border-color 0.3s;
+}
+
+.sacred-btn-ghost:active {
+  transform: scale(0.97);
+}
+
+/* Sacred button icon */
+.sacred-btn-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(22, 26, 66, 0.8);
+  border: 1px solid rgba(212, 160, 23, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s;
+}
+
+.sacred-btn-icon:active {
+  transform: scale(0.92);
+}
+
+/* Sacred bottom nav */
+.sacred-bottom-nav {
+  background: rgba(5, 7, 20, 0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(90deg,
+    transparent 0%,
+    rgba(37, 99, 235, 0.3) 50%,
+    transparent 100%) 1;
+}
+
+/* Sacred typing indicator */
+@keyframes sacred-typing-dot {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.sacred-typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sacred-peacock-iridescent);
+  animation: sacred-typing-dot 1.4s ease-in-out infinite;
+}
+
+.sacred-typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.sacred-typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* Sacred text styles */
+.sacred-text-divine {
+  font-family: var(--font-divine);
+  letter-spacing: var(--sacred-letter-spacing-divine);
+}
+
+.sacred-text-scripture {
+  font-family: var(--font-scripture);
+  line-height: var(--sacred-line-height-scripture);
+}
+
+.sacred-text-display {
+  font-family: var(--font-display);
+}
+
+.sacred-text-ui {
+  font-family: var(--font-ui);
+  line-height: var(--sacred-line-height-ui);
+}
+
+/* Sacred gold text gradient */
+.sacred-text-golden {
+  background: linear-gradient(135deg,
+    var(--sacred-divine-gold) 0%,
+    var(--sacred-divine-gold-bright) 50%,
+    var(--sacred-divine-gold) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Sacred label caps */
+.sacred-label {
+  font-family: var(--font-ui);
+  font-size: var(--sacred-text-xs);
+  letter-spacing: var(--sacred-letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--sacred-divine-gold);
+}
+
+/* Chat message styles */
+.sacred-msg-user {
+  background: linear-gradient(135deg,
+    var(--sacred-krishna-blue) 0%,
+    var(--sacred-peacock-teal) 100%);
+  border-radius: 20px 4px 20px 20px;
+  color: var(--sacred-white);
+}
+
+.sacred-msg-sakha {
+  background: var(--sacred-gradient-card);
+  border: 1px solid rgba(212, 160, 23, 0.15);
+  border-left: 2px solid var(--sacred-divine-gold);
+  border-radius: 4px 20px 20px 20px;
+}
+
+/* Shloka card within chat messages */
+.sacred-shloka-card {
+  background: linear-gradient(145deg,
+    rgba(22, 26, 66, 0.98) 0%,
+    rgba(17, 20, 53, 0.95) 100%);
+  border: 1px solid rgba(212, 160, 23, 0.25);
+  border-top: 2px solid var(--sacred-divine-gold);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/* Chat input area */
+.sacred-chat-input-area {
+  background: rgba(11, 14, 42, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(90deg,
+    transparent 0%,
+    rgba(212, 160, 23, 0.2) 50%,
+    transparent 100%) 1;
+}
+
+.sacred-chat-input {
+  background: rgba(22, 26, 66, 0.8);
+  border: 1px solid rgba(212, 160, 23, 0.2);
+  border-radius: 28px;
+  color: var(--sacred-text-primary);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  transition: border-color 300ms, box-shadow 300ms;
+}
+
+.sacred-chat-input:focus {
+  border-color: rgba(212, 160, 23, 0.6);
+  box-shadow: 0 0 12px rgba(212, 160, 23, 0.1);
+  outline: none;
+}
+
+/* Conversation starter chips */
+.sacred-starter-chip {
+  background: var(--sacred-gradient-card);
+  border: 1px solid rgba(212, 160, 23, 0.2);
+  border-radius: 20px;
+  padding: 10px 16px;
+  color: var(--sacred-text-secondary);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.sacred-starter-chip:active {
+  border-color: rgba(212, 160, 23, 0.5);
+  transform: scale(0.97);
+}
+
+/* ═══════════════════════════════════════════════════════
+   REDUCED MOTION — Respect user preferences
+   ═══════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .sacred-divine-breath,
+  .sacred-krishna-pulse,
+  .sacred-typing-dot,
+  .sacred-om-loader svg {
+    animation: none !important;
+  }
+
+  .sacred-bloom-enter {
+    animation: none !important;
+    clip-path: circle(100% at 50% 50%);
+    opacity: 1;
+  }
+
+  .sacred-shimmer-on-tap::after {
+    display: none;
+  }
+
+  .sacred-verse-word {
+    animation: none !important;
+    opacity: 1;
+  }
+}

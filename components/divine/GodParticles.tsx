@@ -35,15 +35,25 @@ function seeded(seed: number): number {
 }
 
 const PARTICLE_COLORS = [
-  // Gold mote
-  'radial-gradient(circle, rgba(212,164,76,0.9) 0%, rgba(212,164,76,0) 70%)',
-  // Warm white spark
-  'radial-gradient(circle, rgba(245,240,232,0.7) 0%, rgba(245,240,232,0) 70%)',
-  // Pale gold
-  'radial-gradient(circle, rgba(240,201,109,0.8) 0%, rgba(240,201,109,0) 70%)',
+  // Gold mote (70% distribution) — divine gold #D4A017
+  'radial-gradient(circle, rgba(212,160,23,0.9) 0%, rgba(212,160,23,0) 70%)',
+  // Peacock-blue spark (20% distribution) — #06B6D4
+  'radial-gradient(circle, rgba(6,182,212,0.7) 0%, rgba(6,182,212,0) 70%)',
+  // Sacred white glow (10% distribution) — #FDE68A
+  'radial-gradient(circle, rgba(253,230,138,0.8) 0%, rgba(253,230,138,0) 70%)',
 ]
 
-export function GodParticles({ count = 45 }: { count?: number }) {
+/**
+ * Color distribution: 70% gold, 20% peacock-blue, 10% white
+ * Maps a seeded value [0,1) to a color variant index.
+ */
+function getColorVariant(seedValue: number): number {
+  if (seedValue < 0.7) return 0  // Gold
+  if (seedValue < 0.9) return 1  // Peacock blue
+  return 2                        // White
+}
+
+export function GodParticles({ count = 108 }: { count?: number }) {
   const reduceMotion = useReducedMotion()
 
   const particles: GodParticle[] = useMemo(() => {
@@ -56,7 +66,7 @@ export function GodParticles({ count = 45 }: { count?: number }) {
       delay: seeded(i * 17 + 11) * 14,
       duration: seeded(i * 19 + 13) * 10 + 8,
       drift: (seeded(i * 23 + 17) - 0.5) * 30,
-      variant: Math.floor(seeded(i * 29 + 19) * 3),
+      variant: getColorVariant(seeded(i * 29 + 19)),
     }))
   }, [count])
 

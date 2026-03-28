@@ -101,21 +101,20 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
     // Find active tab index for indicator
     const activeIndex = tabs.findIndex((t) => t.id === activeTab)
 
-    // Variant styles
+    // Variant styles — sacred theme
     const containerStyles = {
       default: `
-        bg-[#050507]/95 backdrop-blur-xl
-        border-t border-white/[0.06]
+        sacred-bottom-nav
       `,
       floating: `
         mx-4 mb-4 rounded-2xl
-        bg-[#1a2133]/95 backdrop-blur-xl
+        sacred-bottom-nav
         border border-white/[0.08]
         shadow-2xl shadow-black/40
       `,
       pill: `
         mx-4 mb-4 rounded-full
-        bg-[#1a2133]/95 backdrop-blur-xl
+        sacred-bottom-nav
         border border-white/[0.08]
         shadow-xl shadow-black/30
       `,
@@ -149,13 +148,13 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
         role="tablist"
         aria-label="Main navigation"
       >
-        <div className="relative flex items-center justify-around h-16 px-2">
+        <div className="relative flex items-center justify-around h-[72px] px-2">
           {/* Active indicator (background pill) */}
           {variant !== 'pill' && (
             <motion.div
               className="
                 absolute h-10 rounded-xl
-                bg-[#d4a44c]/10
+                bg-[#D4A017]/10
                 pointer-events-none
               "
               layoutId="activeTabIndicator"
@@ -193,10 +192,19 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
                 tabIndex={isActive ? 0 : -1}
               >
                 {/* Icon */}
+                {/* Golden dot ABOVE active icon */}
+                {isActive && (
+                  <motion.div
+                    layoutId="sacredActiveDot"
+                    className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#D4A017]"
+                    transition={{ type: 'spring', stiffness: 500 }}
+                  />
+                )}
+
                 <motion.span
                   animate={{
                     scale: isActive ? 1.1 : 1,
-                    color: isActive ? '#d4a44c' : '#94a3b8',
+                    color: isActive ? '#D4A017' : 'rgba(184,174,152,0.4)',
                   }}
                   transition={{ type: 'spring', stiffness: 500 }}
                   className="relative"
@@ -229,10 +237,11 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
                 {showLabels && (
                   <motion.span
                     animate={{
-                      color: isActive ? '#d4a44c' : '#64748b',
-                      fontWeight: isActive ? 600 : 500,
+                      color: isActive ? '#D4A017' : 'rgba(184,174,152,0.4)',
+                      fontWeight: isActive ? 600 : 400,
                     }}
                     className="text-[10px] leading-tight"
+                    style={{ fontFamily: 'var(--font-outfit, var(--font-ui, system-ui))' }}
                   >
                     {tab.label}
                   </motion.span>
