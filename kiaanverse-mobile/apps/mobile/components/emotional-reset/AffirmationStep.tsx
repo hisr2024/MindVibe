@@ -8,10 +8,10 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, Pressable, Dimensions } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Text, GoldenButton, colors, spacing, radii } from '@kiaanverse/ui';
+import { Text, GoldenButton, GlowCard, DivineGradient, colors, spacing, radii } from '@kiaanverse/ui';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -36,8 +36,6 @@ const FALLBACK_AFFIRMATIONS: readonly string[] = [
   'I am grounded in the stillness beneath the storm.',
 ] as const;
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -59,13 +57,8 @@ export function AffirmationStep({ stepData, onNext }: AffirmationStepProps): Rea
   }, [currentIndex, total]);
 
   return (
+    <DivineGradient variant="renewal">
     <View style={styles.container}>
-      {/* Ambient golden layers behind the text */}
-      <View style={styles.ambientLayer}>
-        <View style={[styles.glowOrb, styles.orbTopRight]} />
-        <View style={[styles.glowOrb, styles.orbBottomLeft]} />
-      </View>
-
       {/* Header */}
       <Animated.View entering={FadeIn.duration(500)}>
         <Text variant="h2" color={colors.divine.aura} align="center">
@@ -91,14 +84,16 @@ export function AffirmationStep({ stepData, onNext }: AffirmationStepProps): Rea
           entering={FadeInUp.duration(700)}
           style={styles.affirmationWrap}
         >
-          <Text
-            variant="h2"
-            color={colors.primary[300]}
-            align="center"
-            style={styles.affirmationText}
-          >
-            "{affirmations[currentIndex]}"
-          </Text>
+          <GlowCard variant="golden">
+            <Text
+              variant="h2"
+              color={colors.primary[300]}
+              align="center"
+              style={styles.affirmationText}
+            >
+              "{affirmations[currentIndex]}"
+            </Text>
+          </GlowCard>
         </Animated.View>
 
         {!allRevealed ? (
@@ -120,6 +115,7 @@ export function AffirmationStep({ stepData, onNext }: AffirmationStepProps): Rea
         </Animated.View>
       ) : null}
     </View>
+    </DivineGradient>
   );
 }
 
@@ -132,26 +128,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     gap: spacing.lg,
-  },
-  ambientLayer: {
-    ...StyleSheet.absoluteFillObject,
-    overflow: 'hidden',
-  },
-  glowOrb: {
-    position: 'absolute',
-    width: SCREEN_WIDTH * 0.6,
-    height: SCREEN_WIDTH * 0.6,
-    borderRadius: SCREEN_WIDTH * 0.3,
-    backgroundColor: colors.primary[500],
-    opacity: 0.04,
-  },
-  orbTopRight: {
-    top: -SCREEN_WIDTH * 0.15,
-    right: -SCREEN_WIDTH * 0.2,
-  },
-  orbBottomLeft: {
-    bottom: -SCREEN_WIDTH * 0.1,
-    left: -SCREEN_WIDTH * 0.25,
   },
   counter: {
     marginTop: spacing.xs,

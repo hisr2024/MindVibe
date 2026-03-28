@@ -14,6 +14,11 @@ import {
   Screen,
   Text,
   GoldenButton,
+  DivineBackground,
+  GlowCard,
+  EmotionOrb,
+  SacredStepIndicator,
+  SacredTransition,
   colors,
   spacing,
   radii,
@@ -69,6 +74,7 @@ export default function EmotionalResetEntryScreen(): React.JSX.Element {
 
   return (
     <Screen>
+      <DivineBackground variant="cosmic">
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -88,12 +94,26 @@ export default function EmotionalResetEntryScreen(): React.JSX.Element {
           </Text>
         </Animated.View>
 
+        {/* Emotion Orb + Step Indicator */}
+        <SacredTransition isVisible={true}>
+          <View style={styles.orbCenter}>
+            <EmotionOrb
+              mood={mapEmotionToMood(selectedEmotion)}
+              size={80}
+              isAnimating={!!selectedEmotion}
+            />
+          </View>
+          <SacredStepIndicator totalSteps={7} currentStep={1} completedSteps={[]} />
+        </SacredTransition>
+
         {/* Emotion Grid */}
         <Animated.View entering={FadeInDown.delay(150).duration(500)}>
-          <EmotionSelector
-            selectedEmotion={selectedEmotion}
-            onSelect={setSelectedEmotion}
-          />
+          <GlowCard variant="divine">
+            <EmotionSelector
+              selectedEmotion={selectedEmotion}
+              onSelect={setSelectedEmotion}
+            />
+          </GlowCard>
         </Animated.View>
 
         {/* Intensity Slider */}
@@ -138,8 +158,36 @@ export default function EmotionalResetEntryScreen(): React.JSX.Element {
       {showCrisis ? (
         <CrisisDetector onDismiss={() => setShowCrisis(false)} />
       ) : null}
+      </DivineBackground>
     </Screen>
   );
+}
+
+/**
+ * Maps an emotion string to one of the 8 EmotionOrb mood values.
+ * Falls back to 'peaceful' when no emotion is selected.
+ */
+function mapEmotionToMood(
+  emotion: string | null,
+): 'peaceful' | 'joyful' | 'confused' | 'anxious' | 'sad' | 'grateful' | 'angry' | 'hopeful' {
+  if (!emotion) return 'peaceful';
+
+  const moodMap: Record<string, 'peaceful' | 'joyful' | 'confused' | 'anxious' | 'sad' | 'grateful' | 'angry' | 'hopeful'> = {
+    anger: 'angry',
+    anxiety: 'anxious',
+    sadness: 'sad',
+    grief: 'sad',
+    fear: 'anxious',
+    confusion: 'confused',
+    loneliness: 'sad',
+    shame: 'anxious',
+    frustration: 'angry',
+    jealousy: 'angry',
+    overwhelm: 'anxious',
+    restlessness: 'confused',
+  };
+
+  return moodMap[emotion] ?? 'peaceful';
 }
 
 /**
@@ -171,5 +219,9 @@ const styles = StyleSheet.create({
   },
   beginButton: {
     marginTop: spacing.md,
+  },
+  orbCenter: {
+    alignItems: 'center',
+    marginBottom: spacing.md,
   },
 });

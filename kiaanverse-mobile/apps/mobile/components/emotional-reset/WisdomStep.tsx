@@ -10,7 +10,7 @@
 import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { Text, GoldenButton, Card, colors, spacing, radii } from '@kiaanverse/ui';
+import { Text, GoldenButton, GlowCard, MandalaSpin, DivineGradient, colors, spacing, radii } from '@kiaanverse/ui';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -52,6 +52,7 @@ export function WisdomStep({ stepData, onNext }: WisdomStepProps): React.JSX.Ele
   const guidance = stepData?.guidance;
 
   return (
+    <DivineGradient variant="healing">
     <ScrollView
       style={styles.scroll}
       contentContainerStyle={styles.scrollContent}
@@ -66,20 +67,27 @@ export function WisdomStep({ stepData, onNext }: WisdomStepProps): React.JSX.Ele
         </Text>
       </Animated.View>
 
-      {/* Verse card with golden glow */}
-      <Animated.View entering={FadeInDown.delay(300).duration(600)} style={styles.verseCard}>
-        <Text
-          variant="body"
-          color={colors.primary[200]}
-          align="center"
-          style={styles.sanskritText}
-        >
-          {sanskrit}
-        </Text>
-        <View style={styles.divider} />
-        <Text variant="body" color={colors.text.secondary} align="center" style={styles.translation}>
-          {translation}
-        </Text>
+      {/* Verse card with mandala background and golden glow */}
+      <Animated.View entering={FadeInDown.delay(300).duration(600)}>
+        <View style={styles.verseCardContainer}>
+          <View style={styles.mandalaBackground}>
+            <MandalaSpin size={200} speed="slow" opacity={0.1} />
+          </View>
+          <GlowCard variant="divine">
+            <Text
+              variant="body"
+              color={colors.primary[200]}
+              align="center"
+              style={styles.sanskritText}
+            >
+              {sanskrit}
+            </Text>
+            <View style={styles.divider} />
+            <Text variant="body" color={colors.text.secondary} align="center" style={styles.translation}>
+              {translation}
+            </Text>
+          </GlowCard>
+        </View>
       </Animated.View>
 
       {/* Application section */}
@@ -110,6 +118,7 @@ export function WisdomStep({ stepData, onNext }: WisdomStepProps): React.JSX.Ele
         testID="wisdom-continue-btn"
       />
     </ScrollView>
+    </DivineGradient>
   );
 }
 
@@ -128,17 +137,14 @@ const styles = StyleSheet.create({
   verseRef: {
     marginTop: spacing.xs,
   },
-  verseCard: {
-    backgroundColor: colors.background.card,
-    borderRadius: radii.xl,
-    borderWidth: 1.5,
-    borderColor: colors.alpha.goldMedium,
-    padding: spacing.xl,
-    shadowColor: colors.divine.aura,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 6,
+  verseCardContainer: {
+    position: 'relative',
+  },
+  mandalaBackground: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 0,
   },
   sanskritText: {
     fontStyle: 'italic',

@@ -17,7 +17,18 @@ import {
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { Screen, Text, Input, GoldenHeader, colors, spacing } from '@kiaanverse/ui';
+import {
+  Screen,
+  Text,
+  Input,
+  GoldenHeader,
+  DivineBackground,
+  GlowCard,
+  SacredDivider,
+  SacredTransition,
+  colors,
+  spacing,
+} from '@kiaanverse/ui';
 import { useJournalEntries } from '@kiaanverse/api';
 import type { JournalEntry } from '@kiaanverse/api';
 import { JournalEntryCard } from '../../components/journal/JournalEntryCard';
@@ -80,7 +91,9 @@ export default function JournalListScreen(): React.JSX.Element {
 
   const renderEntry = useCallback(
     ({ item }: { item: JournalEntry }) => (
-      <JournalEntryCard entry={item} onPress={handleEntryPress} />
+      <GlowCard variant="golden">
+        <JournalEntryCard entry={item} onPress={handleEntryPress} />
+      </GlowCard>
     ),
     [handleEntryPress],
   );
@@ -104,76 +117,82 @@ export default function JournalListScreen(): React.JSX.Element {
 
   return (
     <Screen>
-      <GoldenHeader title="Sacred Reflections" />
+      <DivineBackground variant="sacred">
+        <GoldenHeader title="Sacred Reflections" />
 
-      {/* Search */}
-      <View style={styles.searchContainer}>
-        <Input
-          placeholder="Search reflections..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          returnKeyType="search"
-          autoCorrect={false}
-        />
-      </View>
-
-      {/* Tag Filter Chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.tagRow}
-        style={styles.tagScroll}
-      >
-        {TAG_FILTERS.map((tag) => (
-          <Pressable
-            key={tag}
-            onPress={() => handleTagPress(tag)}
-            style={[
-              styles.tagChip,
-              activeTag === tag && styles.tagChipActive,
-            ]}
-            accessibilityRole="button"
-            accessibilityState={{ selected: activeTag === tag }}
-          >
-            <Text
-              variant="caption"
-              color={activeTag === tag ? colors.background.dark : colors.text.secondary}
-            >
-              {tag}
-            </Text>
-          </Pressable>
-        ))}
-      </ScrollView>
-
-      {/* Entry List */}
-      <FlatList
-        data={filteredEntries}
-        renderItem={renderEntry}
-        keyExtractor={keyExtractor}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={renderEmpty}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={colors.primary[500]}
-            colors={[colors.primary[500]]}
+        {/* Search */}
+        <View style={styles.searchContainer}>
+          <Input
+            placeholder="Search reflections..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+            autoCorrect={false}
           />
-        }
-      />
+        </View>
 
-      {/* Floating Action Button */}
-      <Pressable
-        onPress={handleFabPress}
-        style={styles.fab}
-        accessibilityRole="button"
-        accessibilityLabel="Create new journal entry"
-      >
-        <Text variant="h2" color={colors.background.dark} align="center">
-          +
-        </Text>
-      </Pressable>
+        <SacredDivider />
+
+        {/* Tag Filter Chips */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tagRow}
+          style={styles.tagScroll}
+        >
+          {TAG_FILTERS.map((tag) => (
+            <Pressable
+              key={tag}
+              onPress={() => handleTagPress(tag)}
+              style={[
+                styles.tagChip,
+                activeTag === tag && styles.tagChipActive,
+              ]}
+              accessibilityRole="button"
+              accessibilityState={{ selected: activeTag === tag }}
+            >
+              <Text
+                variant="caption"
+                color={activeTag === tag ? colors.background.dark : colors.text.secondary}
+              >
+                {tag}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+
+        {/* Entry List */}
+        <SacredTransition isVisible={true}>
+          <FlatList
+            data={filteredEntries}
+            renderItem={renderEntry}
+            keyExtractor={keyExtractor}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={renderEmpty}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                tintColor={colors.primary[500]}
+                colors={[colors.primary[500]]}
+              />
+            }
+          />
+        </SacredTransition>
+
+        {/* Floating Action Button */}
+        <Pressable
+          onPress={handleFabPress}
+          style={styles.fab}
+          accessibilityRole="button"
+          accessibilityLabel="Create new journal entry"
+        >
+          <Text variant="h2" color={colors.background.dark} align="center">
+            +
+          </Text>
+        </Pressable>
+      </DivineBackground>
     </Screen>
   );
 }

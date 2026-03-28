@@ -81,6 +81,9 @@ export { WaveformVisualizer, type WaveformVisualizerProps } from './components/W
 export { DivineBackground, type DivineBackgroundProps, type DivineBackgroundVariant } from './components/DivineBackground';
 export { GlowCard, type GlowCardProps, type GlowCardVariant } from './components/GlowCard';
 export { SacredDivider, type SacredDividerProps } from './components/SacredDivider';
+export { BreathingOrb, type BreathingOrbProps } from './components/BreathingOrb';
+export { SacredBottomSheet, type SacredBottomSheetProps } from './components/SacredBottomSheet';
+export { SacredStepIndicator, type SacredStepIndicatorProps } from './components/SacredStepIndicator';
 
 // ---------------------------------------------------------------------------
 // Hooks (audio / voice)

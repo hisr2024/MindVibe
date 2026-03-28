@@ -28,3 +28,11 @@ export { LotusProgress, type LotusProgressProps } from './LotusProgress';
 export { DivineGradient, type DivineGradientProps, type DivineGradientVariant } from './DivineGradient';
 export { SacredTransition, type SacredTransitionProps } from './SacredTransition';
 export { WaveformVisualizer, type WaveformVisualizerProps } from './WaveformVisualizer';
+export { BreathingOrb, type BreathingOrbProps } from './BreathingOrb';
+export { SacredStepIndicator, type SacredStepIndicatorProps } from './SacredStepIndicator';
+export { SacredBottomSheet, type SacredBottomSheetProps } from './SacredBottomSheet';
+
+// Divine visual components
+export { DivineBackground, type DivineBackgroundProps, type DivineBackgroundVariant } from './DivineBackground';
+export { GlowCard, type GlowCardProps, type GlowCardVariant } from './GlowCard';
+export { SacredDivider, type SacredDividerProps } from './SacredDivider';

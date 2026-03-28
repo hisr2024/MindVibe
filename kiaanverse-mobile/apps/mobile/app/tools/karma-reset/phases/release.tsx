@@ -17,6 +17,8 @@ import {
   Text,
   GoldenButton,
   Divider,
+  DivineGradient,
+  MandalaSpin,
   colors,
   spacing,
 } from '@kiaanverse/ui';
@@ -105,6 +107,7 @@ export default function ReleasePhase(): React.JSX.Element {
 
   return (
     <Screen scroll>
+      <DivineGradient variant="release">
       <View style={styles.container}>
         {/* Phase tracker */}
         <Animated.View entering={FadeInDown.duration(500)}>
@@ -149,7 +152,8 @@ export default function ReleasePhase(): React.JSX.Element {
 
         {/* Visualization */}
         {hasStarted ? (
-          <Animated.View entering={FadeIn.duration(800)}>
+          <Animated.View entering={FadeIn.duration(800)} style={styles.visualizationWrapper}>
+            <MandalaSpin size={320} speed="slow" opacity={0.12} style={styles.mandalaBackground} />
             <ReleaseVisualization
               phase={breathPhase}
               cycleCount={cycleCount}
@@ -170,6 +174,7 @@ export default function ReleasePhase(): React.JSX.Element {
           </Animated.View>
         ) : null}
       </View>
+      </DivineGradient>
     </Screen>
   );
 }
@@ -194,6 +199,18 @@ const styles = StyleSheet.create({
   },
   instructionHint: {
     fontStyle: 'italic',
+  },
+  visualizationWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+  },
+  mandalaBackground: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -160,
+    marginLeft: -160,
+    zIndex: 0,
   },
   actions: {
     paddingHorizontal: spacing.lg,

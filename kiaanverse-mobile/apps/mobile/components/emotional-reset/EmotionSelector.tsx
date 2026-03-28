@@ -16,7 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { Text, colors, spacing, radii } from '@kiaanverse/ui';
+import { Text, EmotionOrb, GlowCard, SacredDivider, colors, spacing, radii } from '@kiaanverse/ui';
 
 // ---------------------------------------------------------------------------
 // Types & Data
@@ -98,16 +98,18 @@ function EmotionCard({
       accessibilityLabel={emotion.label}
       accessibilityState={{ selected: isSelected }}
     >
-      <Text variant="h2" align="center">
-        {emotion.emoji}
-      </Text>
-      <Text
-        variant="caption"
-        align="center"
-        color={isSelected ? colors.primary[300] : colors.text.secondary}
-      >
-        {emotion.label}
-      </Text>
+      <GlowCard variant={isSelected ? 'golden' : 'default'}>
+        <Text variant="h2" align="center">
+          {emotion.emoji}
+        </Text>
+        <Text
+          variant="caption"
+          align="center"
+          color={isSelected ? colors.primary[300] : colors.text.secondary}
+        >
+          {emotion.label}
+        </Text>
+      </GlowCard>
     </AnimatedPressable>
   );
 }
@@ -128,8 +130,15 @@ export function EmotionSelector({
     [onSelect],
   );
 
+  /** Map selected emotion to EmotionOrb mood. */
+  const selectedMood = mapEmotionToOrbMood(selectedEmotion);
+
   return (
     <View style={styles.grid}>
+      <View style={styles.orbCenter}>
+        <EmotionOrb mood={selectedMood} size={80} isAnimating={!!selectedEmotion} />
+      </View>
+      <SacredDivider style={styles.divider} />
       {EMOTIONS.map((emotion) => (
         <EmotionCard
           key={emotion.id}
@@ -146,12 +155,45 @@ export function EmotionSelector({
 // Styles
 // ---------------------------------------------------------------------------
 
+/**
+ * Maps an emotion ID to an EmotionOrb mood value.
+ */
+function mapEmotionToOrbMood(
+  emotion: string | null,
+): 'peaceful' | 'joyful' | 'confused' | 'anxious' | 'sad' | 'grateful' | 'angry' | 'hopeful' {
+  if (!emotion) return 'peaceful';
+  const map: Record<string, 'peaceful' | 'joyful' | 'confused' | 'anxious' | 'sad' | 'grateful' | 'angry' | 'hopeful'> = {
+    anger: 'angry',
+    anxiety: 'anxious',
+    sadness: 'sad',
+    grief: 'sad',
+    fear: 'anxious',
+    confusion: 'confused',
+    loneliness: 'sad',
+    shame: 'anxious',
+    frustration: 'angry',
+    jealousy: 'angry',
+    overwhelm: 'anxious',
+    restlessness: 'confused',
+  };
+  return map[emotion] ?? 'peaceful';
+}
+
 const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: CARD_GAP,
     justifyContent: 'center',
+  },
+  orbCenter: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  divider: {
+    width: '100%',
+    marginBottom: spacing.sm,
   },
   card: {
     width: CARD_WIDTH,
