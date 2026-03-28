@@ -6,7 +6,7 @@
  * in view mode, familiar input layout in edit mode.
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -119,10 +119,24 @@ export default function JournalDetailScreen(): React.JSX.Element {
   const [editContent, setEditContent] = useState('');
   const [editMood, setEditMood] = useState<string | null>(null);
   const [editTagsInput, setEditTagsInput] = useState('');
+  const [showActions, setShowActions] = useState(false);
+  const [decryptedContent, setDecryptedContent] = useState('');
 
-  const decryptedContent = useMemo(() => {
-    if (!entry) return '';
-    return decryptContent(entry.content_encrypted);
+  // Decrypt content asynchronously when entry changes
+  useEffect(() => {
+    if (!entry) {
+      setDecryptedContent('');
+      return;
+    }
+    let cancelled = false;
+    decryptContent(entry.content_encrypted)
+      .then((plaintext) => {
+        if (!cancelled) setDecryptedContent(plaintext);
+      })
+      .catch(() => {
+        if (!cancelled) setDecryptedContent(entry.content_encrypted);
+      });
+    return () => { cancelled = true; };
   }, [entry]);
 
   const handleStartEdit = useCallback(() => {
@@ -150,9 +164,8 @@ export default function JournalDetailScreen(): React.JSX.Element {
 
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-    const contentEncrypted = btoa(
-      unescape(encodeURIComponent(editContent.trim())),
-    );
+    // AES-256-GCM encryption — key stored in device SecureStore
+    const contentEncrypted = await encryptContent(editContent.trim());
 
     const tags: string[] = editTagsInput
       .split(',')
@@ -226,140 +239,193 @@ export default function JournalDetailScreen(): React.JSX.Element {
 
   return (
     <Screen>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={spacing.navHeight}
-      >
-        <GoldenHeader
-          title={isEditing ? 'Edit Reflection' : 'Reflection'}
-          onBack={() => router.back()}
-          rightAction={editButton}
-        />
-
-        <ScrollView
+      <DivineBackground variant="sacred">
+        <KeyboardAvoidingView
           style={styles.flex}
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={spacing.navHeight}
         >
-          {isEditing ? (
-            /* ---- EDIT MODE ---- */
-            <Animated.View entering={FadeIn.duration(300)} style={styles.editContainer}>
-              <Input
-                label="Title (optional)"
-                placeholder="Give your reflection a name..."
-                value={editTitle}
-                onChangeText={setEditTitle}
-                maxLength={120}
-                returnKeyType="next"
-              />
+          <GoldenHeader
+            title={isEditing ? 'Edit Reflection' : 'Reflection'}
+            onBack={() => router.back()}
+            rightAction={editButton}
+          />
 
-              <View style={styles.contentSection}>
-                <Text variant="label" color={colors.text.secondary}>Reflection</Text>
-                <TextInput
-                  style={styles.contentInput}
-                  placeholder="Pour your heart onto this sacred page..."
-                  placeholderTextColor={colors.text.muted}
-                  value={editContent}
-                  onChangeText={setEditContent}
-                  multiline
-                  textAlignVertical="top"
-                  scrollEnabled={false}
-                  selectionColor={colors.primary[500]}
-                />
-              </View>
-
-              <View style={styles.moodSection}>
-                <Text variant="label" color={colors.text.secondary}>Mood</Text>
-                <View style={styles.moodRow}>
-                  {MOOD_OPTIONS.map((option) => (
-                    <Pressable
-                      key={option.tag}
-                      onPress={() => handleMoodSelect(option.tag)}
-                      style={[
-                        styles.moodOption,
-                        editMood === option.tag && styles.moodSelected,
-                      ]}
-                      accessibilityLabel={option.label}
-                      accessibilityRole="button"
-                    >
-                      <Text variant="h2" align="center">{option.emoji}</Text>
-                      <Text variant="caption" color={colors.text.muted} align="center">
-                        {option.label}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-
-              <Input
-                label="Tags (comma-separated)"
-                placeholder="gratitude, morning, clarity..."
-                value={editTagsInput}
-                onChangeText={setEditTagsInput}
-                autoCapitalize="none"
-                returnKeyType="done"
-              />
-
-              <View style={styles.actionRow}>
-                <View style={styles.saveButtonContainer}>
-                  <GoldenButton
-                    title="Save Changes"
-                    onPress={handleSaveEdit}
-                    loading={createJournal.isPending}
-                    disabled={editContent.trim().length === 0}
-                    variant="divine"
+          <ScrollView
+            style={styles.flex}
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            {isEditing ? (
+              /* ---- EDIT MODE ---- */
+              <GlowCard variant="divine">
+                <Animated.View entering={FadeIn.duration(300)} style={styles.editContainer}>
+                  <Input
+                    label="Title (optional)"
+                    placeholder="Give your reflection a name..."
+                    value={editTitle}
+                    onChangeText={setEditTitle}
+                    maxLength={120}
+                    returnKeyType="next"
                   />
-                </View>
-              </View>
-            </Animated.View>
-          ) : (
-            /* ---- VIEW MODE ---- */
-            <Animated.View entering={FadeIn.duration(400)} style={styles.viewContainer}>
-              {/* Date */}
-              <Text variant="caption" color={colors.text.muted}>
-                {formatDate(entry.created_at)}
-              </Text>
 
-              {/* Title */}
-              {entry.title ? (
-                <Text variant="h1" color={colors.text.primary} style={styles.viewTitle}>
-                  {entry.title}
-                </Text>
-              ) : null}
+                  <SacredDivider />
 
-              {/* Mood + Tags */}
-              <View style={styles.tagRow}>
-                {moodEmoji ? (
-                  <View style={styles.moodBadge}>
-                    <Text variant="body">{moodEmoji}</Text>
-                    <Text variant="caption" color={colors.text.secondary}>
-                      {entry.mood_tag}
+                  <View style={styles.contentSection}>
+                    <Text variant="label" color={colors.text.secondary}>Reflection</Text>
+                    <TextInput
+                      style={styles.contentInput}
+                      placeholder="Pour your heart onto this sacred page..."
+                      placeholderTextColor={colors.text.muted}
+                      value={editContent}
+                      onChangeText={setEditContent}
+                      multiline
+                      textAlignVertical="top"
+                      scrollEnabled={false}
+                      selectionColor={colors.primary[500]}
+                    />
+                  </View>
+
+                  <SacredDivider />
+
+                  <View style={styles.moodSection}>
+                    <Text variant="label" color={colors.text.secondary}>Mood</Text>
+                    <View style={styles.moodRow}>
+                      {MOOD_OPTIONS.map((option) => (
+                        <Pressable
+                          key={option.tag}
+                          onPress={() => handleMoodSelect(option.tag)}
+                          style={[
+                            styles.moodOption,
+                            editMood === option.tag && styles.moodSelected,
+                          ]}
+                          accessibilityLabel={option.label}
+                          accessibilityRole="button"
+                        >
+                          <Text variant="h2" align="center">{option.emoji}</Text>
+                          <Text variant="caption" color={colors.text.muted} align="center">
+                            {option.label}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  </View>
+
+                  <SacredDivider />
+
+                  <Input
+                    label="Tags (comma-separated)"
+                    placeholder="gratitude, morning, clarity..."
+                    value={editTagsInput}
+                    onChangeText={setEditTagsInput}
+                    autoCapitalize="none"
+                    returnKeyType="done"
+                  />
+
+                  <View style={styles.actionRow}>
+                    <View style={styles.saveButtonContainer}>
+                      <GoldenButton
+                        title="Save Changes"
+                        onPress={handleSaveEdit}
+                        loading={createJournal.isPending}
+                        disabled={editContent.trim().length === 0}
+                        variant="divine"
+                      />
+                    </View>
+                  </View>
+                </Animated.View>
+              </GlowCard>
+            ) : (
+              /* ---- VIEW MODE ---- */
+              <GlowCard variant="divine">
+                <Animated.View entering={FadeIn.duration(400)} style={styles.viewContainer}>
+                  {/* Date */}
+                  <Text variant="caption" color={colors.text.muted}>
+                    {formatDate(entry.created_at)}
+                  </Text>
+
+                  {/* Title */}
+                  {entry.title ? (
+                    <Text variant="h1" color={colors.text.primary} style={styles.viewTitle}>
+                      {entry.title}
+                    </Text>
+                  ) : null}
+
+                  <SacredDivider />
+
+                  {/* Mood + Tags */}
+                  <View style={styles.tagRow}>
+                    {moodEmoji ? (
+                      <View style={styles.moodBadge}>
+                        <Text variant="body">{moodEmoji}</Text>
+                        <Text variant="caption" color={colors.text.secondary}>
+                          {entry.mood_tag}
+                        </Text>
+                      </View>
+                    ) : null}
+                    {nonMoodTags.map((tag) => (
+                      <Badge key={tag} label={tag} />
+                    ))}
+                  </View>
+
+                  {/* Encrypted indicator */}
+                  <View style={styles.encryptedRow}>
+                    <Text variant="caption" color={colors.text.muted}>
+                      {'🔒 Encrypted at rest'}
                     </Text>
                   </View>
-                ) : null}
-                {nonMoodTags.map((tag) => (
-                  <Badge key={tag} label={tag} />
-                ))}
-              </View>
 
-              {/* Encrypted indicator */}
-              <View style={styles.encryptedRow}>
-                <Text variant="caption" color={colors.text.muted}>
-                  {'🔒 Encrypted at rest'}
-                </Text>
-              </View>
+                  <SacredDivider />
 
-              {/* Content */}
-              <Text variant="body" color={colors.text.primary} style={styles.viewContent}>
-                {decryptedContent}
-              </Text>
+                  {/* Content */}
+                  <Text variant="body" color={colors.text.primary} style={styles.viewContent}>
+                    {decryptedContent}
+                  </Text>
 
-              {/* Delete button at the bottom */}
+                  {/* Actions button — opens SacredBottomSheet */}
+                  <Pressable
+                    onPress={() => setShowActions(true)}
+                    style={styles.actionsButton}
+                    accessibilityRole="button"
+                    accessibilityLabel="Show entry actions"
+                  >
+                    <Text variant="body" color={colors.primary[500]}>
+                      Actions
+                    </Text>
+                  </Pressable>
+                </Animated.View>
+              </GlowCard>
+            )}
+          </ScrollView>
+
+          {/* Actions Bottom Sheet (Edit / Delete) */}
+          <SacredBottomSheet
+            isVisible={showActions}
+            onClose={() => setShowActions(false)}
+            snapPoints={['25%']}
+          >
+            <View style={styles.bottomSheetContent}>
               <Pressable
-                onPress={handleDelete}
-                style={styles.deleteButton}
+                onPress={() => {
+                  setShowActions(false);
+                  handleStartEdit();
+                }}
+                style={styles.bottomSheetAction}
+                accessibilityRole="button"
+                accessibilityLabel="Edit entry"
+              >
+                <Text variant="body" color={colors.primary[500]}>
+                  Edit Reflection
+                </Text>
+              </Pressable>
+              <SacredDivider />
+              <Pressable
+                onPress={() => {
+                  setShowActions(false);
+                  handleDelete();
+                }}
+                style={styles.bottomSheetAction}
                 accessibilityRole="button"
                 accessibilityLabel="Delete this reflection"
               >
@@ -367,10 +433,10 @@ export default function JournalDetailScreen(): React.JSX.Element {
                   Delete Reflection
                 </Text>
               </Pressable>
-            </Animated.View>
-          )}
-        </ScrollView>
-      </KeyboardAvoidingView>
+            </View>
+          </SacredBottomSheet>
+        </KeyboardAvoidingView>
+      </DivineBackground>
     </Screen>
   );
 }
@@ -437,9 +503,18 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     paddingTop: spacing.sm,
   },
-  deleteButton: {
+  actionsButton: {
     alignItems: 'center',
     paddingVertical: spacing.lg,
     marginTop: spacing.xl,
+  },
+  bottomSheetContent: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    gap: spacing.xs,
+  },
+  bottomSheetAction: {
+    paddingVertical: spacing.md,
+    alignItems: 'center',
   },
 });

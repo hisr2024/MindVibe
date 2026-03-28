@@ -8,11 +8,13 @@
  *   - Session statistics (duration, breathing cycles)
  *   - Verse recommendation card
  *   - "Save to Journal" and "Return Home" action buttons
- *   - Simple golden particle celebration using View-based layers
+ *   - ConfettiCannon celebration from @kiaanverse/ui
+ *   - LotusProgress completion badge
+ *   - DivineGradient background wrapper
  */
 
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, StyleSheet, Dimensions } from 'react-native';
+import { View, ScrollView, StyleSheet } from 'react-native';
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -97,21 +99,13 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
     router.replace('/(tabs)');
   };
 
-  // Generate particle positions deterministically
-  const particles = Array.from({ length: 12 }, (_, i) => ({
-    key: i,
-    delay: i * 0.3,
-    left: (SCREEN_WIDTH / 13) * (i + 1),
-  }));
+  const [showCelebration] = useState(true);
 
   return (
+    <DivineGradient variant="divine">
     <View style={styles.root}>
-      {/* Celebration particles */}
-      <View style={styles.particleLayer} pointerEvents="none">
-        {particles.map((p) => (
-          <ConfettiParticle key={p.key} delay={p.delay} left={p.left} />
-        ))}
-      </View>
+      {/* Sacred confetti celebration */}
+      <ConfettiCannon isActive={showCelebration} particleCount={60} duration={3000} />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -122,6 +116,11 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
           <Text variant="h1" color={colors.divine.aura} align="center">
             Your Sacred Reset{'\n'}is Complete
           </Text>
+        </Animated.View>
+
+        {/* Lotus completion badge */}
+        <Animated.View entering={FadeIn.delay(200).duration(500)} style={styles.lotusCenter}>
+          <LotusProgress progress={1} size={80} />
         </Animated.View>
 
         {/* Emotion transformation */}
@@ -142,13 +141,15 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
         </Animated.View>
 
         {/* Key insight card */}
-        <Animated.View entering={FadeInDown.delay(500).duration(500)} style={styles.insightCard}>
-          <Text variant="caption" color={colors.primary[400]} style={styles.insightLabel}>
-            Key Insight
-          </Text>
-          <Text variant="body" color={colors.text.secondary} style={styles.insightText}>
-            {insight}
-          </Text>
+        <Animated.View entering={FadeInDown.delay(500).duration(500)}>
+          <GlowCard variant="sacred">
+            <Text variant="caption" color={colors.primary[400]} style={styles.insightLabel}>
+              Key Insight
+            </Text>
+            <Text variant="body" color={colors.text.secondary} style={styles.insightText}>
+              {insight}
+            </Text>
+          </GlowCard>
         </Animated.View>
 
         {/* Session stats */}
@@ -213,6 +214,7 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
         </Animated.View>
       </ScrollView>
     </View>
+    </DivineGradient>
   );
 }
 
@@ -224,21 +226,12 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
   },
-  particleLayer: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 1,
-  },
-  particle: {
-    position: 'absolute',
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.divine.aura,
-  },
   scrollContent: {
     paddingVertical: spacing.xl,
     gap: spacing.lg,
-    zIndex: 2,
+  },
+  lotusCenter: {
+    alignItems: 'center',
   },
   transformRow: {
     flexDirection: 'row',
@@ -256,18 +249,6 @@ const styles = StyleSheet.create({
   },
   transformedBadge: {
     borderColor: colors.alpha.goldMedium,
-  },
-  insightCard: {
-    backgroundColor: colors.background.card,
-    borderRadius: radii.xl,
-    borderWidth: 1.5,
-    borderColor: colors.alpha.goldMedium,
-    padding: spacing.lg,
-    shadowColor: colors.divine.aura,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 6,
   },
   insightLabel: {
     marginBottom: spacing.xs,
