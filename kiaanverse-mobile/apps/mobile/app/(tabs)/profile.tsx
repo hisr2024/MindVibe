@@ -2,6 +2,7 @@
  * Profile Tab
  *
  * User info, settings, journal, and analytics links.
+ * Features cosmic gradient background and golden aura ring on avatar.
  */
 
 import React, { useCallback } from 'react';
@@ -14,7 +15,7 @@ import {
   Sun,
   ChevronRight,
 } from 'lucide-react-native';
-import { Screen, Text, Card, Avatar, Divider, Button, colors, spacing, radii } from '@kiaanverse/ui';
+import { Screen, Text, Card, Avatar, SacredDivider, Button, GlowCard, colors, spacing, radii } from '@kiaanverse/ui';
 import { useTheme } from '@kiaanverse/ui';
 import { useAuthStore, useThemeStore } from '@kiaanverse/store';
 import { useTranslation } from '@kiaanverse/i18n';
@@ -46,6 +47,7 @@ function MenuItem({ icon, label, onPress }: MenuItemProps): React.JSX.Element {
 export default function ProfileScreen(): React.JSX.Element {
   const { t } = useTranslation('common');
   const { theme, isDark } = useTheme();
+  const c = theme.colors;
   const { user, logout } = useAuthStore();
   const { mode: _mode, setMode } = useThemeStore();
 
@@ -69,11 +71,16 @@ export default function ProfileScreen(): React.JSX.Element {
   }, [logout, t]);
 
   return (
-    <Screen scroll>
+    <Screen scroll gradient>
       <View style={styles.profileSection}>
-        <Avatar name={user?.name ?? 'Seeker'} size={72} />
+        {/* Avatar with golden aura ring */}
+        <View style={styles.avatarContainer}>
+          <View style={styles.auraRing}>
+            <Avatar name={user?.name ?? 'Seeker'} size={72} />
+          </View>
+        </View>
         <Text variant="h2">{user?.name ?? 'Seeker'}</Text>
-        <Text variant="bodySmall" color={colors.text.muted}>
+        <Text variant="bodySmall" color={c.textTertiary}>
           {user?.email ?? ''}
         </Text>
         <View style={styles.tierBadge}>
@@ -83,36 +90,36 @@ export default function ProfileScreen(): React.JSX.Element {
         </View>
       </View>
 
-      <Divider />
+      <SacredDivider />
 
-      <Card style={styles.menuCard}>
+      <GlowCard style={styles.menuCard}>
         <MenuItem
-          icon={<BookOpen size={20} color={theme.colors.accent} />}
+          icon={<BookOpen size={20} color={c.accent} />}
           label="Sacred Journal"
           onPress={() => {}}
         />
-        <Divider />
+        <View style={[styles.menuDivider, { backgroundColor: c.divider }]} />
         <MenuItem
-          icon={<BarChart3 size={20} color={theme.colors.accent} />}
+          icon={<BarChart3 size={20} color={c.accent} />}
           label="Analytics"
           onPress={() => {}}
         />
-        <Divider />
+        <View style={[styles.menuDivider, { backgroundColor: c.divider }]} />
         <MenuItem
-          icon={<Settings size={20} color={theme.colors.accent} />}
+          icon={<Settings size={20} color={c.accent} />}
           label="Settings"
           onPress={() => {}}
         />
-        <Divider />
+        <View style={[styles.menuDivider, { backgroundColor: c.divider }]} />
         <MenuItem
           icon={isDark
-            ? <Sun size={20} color={theme.colors.accent} />
-            : <Moon size={20} color={theme.colors.accent} />
+            ? <Sun size={20} color={c.accent} />
+            : <Moon size={20} color={c.accent} />
           }
           label={isDark ? 'Light Mode' : 'Dark Mode'}
           onPress={handleToggleTheme}
         />
-      </Card>
+      </GlowCard>
 
       <View style={styles.logoutSection}>
         <Button
@@ -131,6 +138,20 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingTop: spacing.xl,
     paddingBottom: spacing.xl,
+  },
+  avatarContainer: {
+    alignItems: 'center',
+  },
+  auraRing: {
+    padding: 4,
+    borderRadius: radii.full,
+    borderWidth: 2,
+    borderColor: colors.divine.aura,
+    shadowColor: colors.divine.aura,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
   tierBadge: {
     paddingHorizontal: spacing.md,
@@ -151,6 +172,10 @@ const styles = StyleSheet.create({
   },
   menuLabel: {
     flex: 1,
+  },
+  menuDivider: {
+    height: StyleSheet.hairlineWidth,
+    marginHorizontal: spacing.lg,
   },
   logoutSection: {
     marginTop: spacing.xl,
