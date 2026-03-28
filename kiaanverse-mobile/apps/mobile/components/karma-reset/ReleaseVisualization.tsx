@@ -12,12 +12,9 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  withRepeat,
   withSequence,
-  interpolateColor,
-  Easing,
 } from 'react-native-reanimated';
-import { Text, colors, spacing } from '@kiaanverse/ui';
+import { Text, BreathingOrb, SacredTransition, colors, spacing } from '@kiaanverse/ui';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -103,77 +100,14 @@ export function ReleaseVisualization({
   totalCycles,
   isComplete,
 }: ReleaseVisualizationProps): React.JSX.Element {
-  const circleScale = useSharedValue(1);
-  const colorProgress = useSharedValue(0);
-  const glowOpacity = useSharedValue(0.3);
-
-  // Progress from dark to gold based on cycles completed
-  const progressRatio = totalCycles > 0 ? cycleCount / totalCycles : 0;
-
-  useEffect(() => {
-    colorProgress.value = withTiming(progressRatio, { duration: 600 });
-  }, [progressRatio, colorProgress]);
-
-  // Scale based on breath phase
-  useEffect(() => {
-    if (isComplete) {
-      circleScale.value = withTiming(1.1, { duration: 800 });
-      glowOpacity.value = withRepeat(
-        withSequence(
-          withTiming(0.8, { duration: 600, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0.3, { duration: 600, easing: Easing.inOut(Easing.ease) }),
-        ),
-        -1,
-        true,
-      );
-      return;
-    }
-
-    switch (phase) {
-      case 'inhale':
-        circleScale.value = withTiming(1.2, { duration: 4000, easing: Easing.inOut(Easing.ease) });
-        break;
-      case 'holdIn':
-        // Hold at expanded size
-        break;
-      case 'exhale':
-        circleScale.value = withTiming(1.0, { duration: 4000, easing: Easing.inOut(Easing.ease) });
-        break;
-      case 'holdOut':
-        // Hold at contracted size
-        break;
-    }
-
-    // Pulsing glow
-    glowOpacity.value = withRepeat(
-      withSequence(
-        withTiming(0.6, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0.2, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
-      ),
-      -1,
-      true,
-    );
-  }, [phase, isComplete, circleScale, glowOpacity]);
-
-  const circleStyle = useAnimatedStyle(() => {
-    const bgColor = interpolateColor(
-      colorProgress.value,
-      [0, 1],
-      [DARK_COLOR, GOLD_COLOR],
-    );
-
-    return {
-      transform: [{ scale: circleScale.value }],
-      backgroundColor: bgColor,
-      shadowOpacity: glowOpacity.value,
-    };
-  });
+  const isBreathing = !isComplete;
 
   const particles = useMemo(() => Array.from({ length: 8 }, (_, i) => i), []);
 
   const displayText = isComplete ? COMPLETE_TEXT : PHASE_TEXT[phase];
 
   return (
+    <SacredTransition isVisible={true}>
     <View style={styles.container}>
       <View style={styles.circleWrapper}>
         {/* Particles (shown only on completion) */}
@@ -181,8 +115,12 @@ export function ReleaseVisualization({
           <Particle key={i} index={i} isVisible={isComplete} />
         ))}
 
-        {/* Main circle */}
-        <Animated.View style={[styles.circle, circleStyle]} />
+        {/* Sacred breathing orb replaces the manual animated circle */}
+        <BreathingOrb
+          pattern={{ inhale: 4, holdIn: 4, exhale: 4, holdOut: 4 }}
+          isActive={isBreathing}
+          size={180}
+        />
       </View>
 
       {/* Phase instruction */}
@@ -197,6 +135,7 @@ export function ReleaseVisualization({
         </Text>
       ) : null}
     </View>
+    </SacredTransition>
   );
 }
 

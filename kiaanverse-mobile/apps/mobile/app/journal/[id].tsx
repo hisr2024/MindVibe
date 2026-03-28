@@ -6,7 +6,7 @@
  * in view mode, familiar input layout in edit mode.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -20,6 +20,8 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import * as Crypto from 'expo-crypto';
+import * as SecureStore from 'expo-secure-store';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import {
   Screen,
@@ -28,6 +30,10 @@ import {
   Badge,
   GoldenButton,
   GoldenHeader,
+  DivineBackground,
+  GlowCard,
+  SacredDivider,
+  SacredBottomSheet,
   colors,
   spacing,
 } from '@kiaanverse/ui';
@@ -41,13 +47,50 @@ const MOOD_OPTIONS = [
   { emoji: '😊', label: 'Blissful', tag: 'blissful' },
 ] as const;
 
-/** Placeholder decryption — mirrors the btoa encoding from new.tsx */
-function decryptContent(encrypted: string): string {
-  try {
-    return decodeURIComponent(escape(atob(encrypted)));
-  } catch {
-    return encrypted;
+/** Alias for the SecureStore key that holds the AES-256-GCM encryption key */
+const ENCRYPTION_KEY_ALIAS = 'mindvibe_journal_key';
+
+/**
+ * Retrieve the AES-256-GCM encryption key from SecureStore, creating one
+ * on first use. The raw key material never leaves the secure enclave.
+ */
+async function getOrCreateEncryptionKey(): Promise<CryptoKey> {
+  let keyBase64 = await SecureStore.getItemAsync(ENCRYPTION_KEY_ALIAS);
+  if (!keyBase64) {
+    const keyBytes = await Crypto.getRandomBytesAsync(32);
+    keyBase64 = btoa(String.fromCharCode(...keyBytes));
+    await SecureStore.setItemAsync(ENCRYPTION_KEY_ALIAS, keyBase64);
   }
+  const keyBytes = Uint8Array.from(atob(keyBase64), (c) => c.charCodeAt(0));
+  return globalThis.crypto.subtle.importKey('raw', keyBytes, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+}
+
+/**
+ * Encrypt plaintext content using AES-256-GCM with a random 12-byte IV.
+ * Returns a base64 string containing [IV || ciphertext].
+ */
+async function encryptContent(content: string): Promise<string> {
+  const key = await getOrCreateEncryptionKey();
+  const iv = await Crypto.getRandomBytesAsync(12);
+  const encoded = new TextEncoder().encode(content);
+  const encrypted = await globalThis.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+  const combined = new Uint8Array(iv.length + new Uint8Array(encrypted).length);
+  combined.set(iv, 0);
+  combined.set(new Uint8Array(encrypted), iv.length);
+  return btoa(String.fromCharCode(...combined));
+}
+
+/**
+ * Decrypt AES-256-GCM ciphertext previously produced by encryptContent.
+ * Expects a base64 string containing [IV (12 bytes) || ciphertext].
+ */
+async function decryptContent(encryptedBase64: string): Promise<string> {
+  const key = await getOrCreateEncryptionKey();
+  const combined = Uint8Array.from(atob(encryptedBase64), (c) => c.charCodeAt(0));
+  const iv = combined.slice(0, 12);
+  const data = combined.slice(12);
+  const decrypted = await globalThis.crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+  return new TextDecoder().decode(decrypted);
 }
 
 function formatDate(iso: string): string {

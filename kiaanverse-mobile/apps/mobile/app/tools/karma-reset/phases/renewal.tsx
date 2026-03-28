@@ -16,7 +16,11 @@ import {
   Screen,
   Text,
   GoldenButton,
-  Divider,
+  DivineGradient,
+  GlowCard,
+  ConfettiCannon,
+  LotusProgress,
+  SacredDivider,
   colors,
   spacing,
 } from '@kiaanverse/ui';
@@ -124,6 +128,7 @@ export default function RenewalPhase(): React.JSX.Element {
   const [blessingData, setBlessingData] = useState<BlessingData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showBlessing, setShowBlessing] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
 
   // Fetch blessing from API (or use fallback)
   const fetchBlessing = useCallback(async () => {
@@ -148,6 +153,7 @@ export default function RenewalPhase(): React.JSX.Element {
   const handleReceiveBlessing = useCallback(() => {
     if (!intention.trim()) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsCompleted(true);
     fetchBlessing();
   }, [intention, fetchBlessing]);
 
@@ -159,7 +165,9 @@ export default function RenewalPhase(): React.JSX.Element {
 
   return (
     <Screen scroll>
+      <DivineGradient variant="renewal">
       <View style={styles.container}>
+        <ConfettiCannon isActive={isCompleted} particleCount={80} duration={4000} />
         {/* Phase tracker */}
         <Animated.View entering={FadeInDown.duration(500)}>
           <KarmaPhaseTracker currentPhase={4} completedPhases={[1, 2, 3]} />
@@ -175,7 +183,7 @@ export default function RenewalPhase(): React.JSX.Element {
           </Text>
         </Animated.View>
 
-        <Divider />
+        <SacredDivider />
 
         {/* Intention prompt */}
         {!showBlessing ? (
@@ -220,11 +228,17 @@ export default function RenewalPhase(): React.JSX.Element {
         {/* Blessing display */}
         {showBlessing && blessingData ? (
           <>
+            <GlowCard variant="sacred">
             <RenewalBlessing
               blessing={blessingData.blessing}
               verse={blessingData.verse}
               karmaPoints={blessingData.karmaPoints}
             />
+            </GlowCard>
+
+            <View style={styles.lotusCompletionBadge}>
+              <LotusProgress progress={1} size={100} />
+            </View>
 
             {/* Intention reminder */}
             <Animated.View entering={FadeIn.duration(600).delay(400)} style={styles.section}>
@@ -247,6 +261,7 @@ export default function RenewalPhase(): React.JSX.Element {
           </>
         ) : null}
       </View>
+      </DivineGradient>
     </Screen>
   );
 }
@@ -287,6 +302,10 @@ const styles = StyleSheet.create({
   intentionText: {
     fontStyle: 'italic',
     lineHeight: 24,
+  },
+  lotusCompletionBadge: {
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
   },
   actions: {
     paddingHorizontal: spacing.lg,

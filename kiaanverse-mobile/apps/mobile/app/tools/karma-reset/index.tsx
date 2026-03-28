@@ -9,7 +9,18 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
-import { Screen, Text, Card, GoldenButton, Divider, colors, spacing } from '@kiaanverse/ui';
+import {
+  Screen,
+  Text,
+  GoldenButton,
+  Divider,
+  DivineBackground,
+  GlowCard,
+  LotusProgress,
+  SacredStepIndicator,
+  colors,
+  spacing,
+} from '@kiaanverse/ui';
 
 const PHASES = [
   {
@@ -47,7 +58,14 @@ export default function KarmaResetIndex(): React.JSX.Element {
 
   return (
     <Screen scroll>
+      <DivineBackground variant="cosmic">
       <View style={styles.container}>
+        <View style={styles.lotusContainer}>
+          <LotusProgress progress={0} size={120} />
+        </View>
+
+        <SacredStepIndicator totalSteps={4} currentStep={0} completedSteps={0} />
+
         <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
           <Text variant="h1" align="center">
             Karma Reset
@@ -73,7 +91,7 @@ export default function KarmaResetIndex(): React.JSX.Element {
               key={phase.number}
               entering={FadeInDown.duration(500).delay(250 + index * 100)}
             >
-              <Card style={styles.phaseCard}>
+              <GlowCard variant="golden" style={styles.phaseCard}>
                 <View style={styles.phaseRow}>
                   <View style={styles.phaseIconContainer}>
                     <Text variant="h2">{phase.icon}</Text>
@@ -87,7 +105,7 @@ export default function KarmaResetIndex(): React.JSX.Element {
                     </Text>
                   </View>
                 </View>
-              </Card>
+              </GlowCard>
             </Animated.View>
           ))}
         </View>
@@ -100,6 +118,7 @@ export default function KarmaResetIndex(): React.JSX.Element {
           />
         </Animated.View>
       </View>
+      </DivineBackground>
     </Screen>
   );
 }
@@ -109,6 +128,10 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: spacing.xl,
     gap: spacing.lg,
+  },
+  lotusContainer: {
+    alignItems: 'center',
+    paddingTop: spacing.md,
   },
   header: {
     gap: spacing.sm,

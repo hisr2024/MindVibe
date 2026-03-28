@@ -19,6 +19,9 @@ import {
   Screen,
   Text,
   GoldenButton,
+  DivineGradient,
+  SacredTransition,
+  SacredStepIndicator as SacredStepIndicatorUI,
   colors,
   spacing,
   radii,
@@ -43,42 +46,15 @@ const STEP_LABELS: Record<number, string> = {
   6: 'Complete',
 };
 
-// ---------------------------------------------------------------------------
-// Sacred Step Indicator — golden dots showing progress
-// ---------------------------------------------------------------------------
-
-function SacredStepIndicator({ current }: { current: number }): React.JSX.Element {
-  const { theme } = useTheme();
-  const c = theme.colors;
-
-  return (
-    <View style={styles.indicatorRow}>
-      {Array.from({ length: TOTAL_STEPS }, (_, i) => {
-        const stepNum = i + 1;
-        const isActive = stepNum === current;
-        const isCompleted = stepNum < current;
-
-        return (
-          <View key={stepNum} style={styles.indicatorItem}>
-            <View
-              style={[
-                styles.dot,
-                isActive && styles.dotActive,
-                isCompleted && styles.dotCompleted,
-                !isActive && !isCompleted && { backgroundColor: c.cardBorder },
-              ]}
-            />
-            <Text
-              variant="caption"
-              color={isActive ? colors.divine.aura : c.textTertiary}
-            >
-              {STEP_LABELS[stepNum]}
-            </Text>
-          </View>
-        );
-      })}
-    </View>
-  );
+/**
+ * Maps step number to the appropriate DivineGradient variant.
+ * Steps 1-2: peace, Steps 3-4: healing, Steps 5-6: renewal.
+ */
+function getGradientVariant(step: number): 'peace' | 'healing' | 'renewal' | 'divine' {
+  if (step <= 2) return 'peace';
+  if (step <= 4) return 'healing';
+  if (step <= 6) return 'renewal';
+  return 'divine';
 }
 
 // ---------------------------------------------------------------------------
@@ -248,58 +224,36 @@ export default function StepScreen(): React.JSX.Element {
 
   return (
     <Screen>
-      {/* Progress indicator */}
-      <Animated.View entering={FadeIn.duration(300)}>
-        <SacredStepIndicator current={currentStep} />
-      </Animated.View>
+      <DivineGradient variant={getGradientVariant(currentStep)} animated>
+        {/* Progress indicator */}
+        <Animated.View entering={FadeIn.duration(300)}>
+          <SacredStepIndicatorUI totalSteps={TOTAL_STEPS} currentStep={currentStep} completedSteps={currentStep - 1} />
+        </Animated.View>
 
-      {/* Back button (except on summary) */}
-      {currentStep < TOTAL_STEPS ? (
-        <Pressable
-          onPress={navigateBack}
-          style={styles.backButton}
-          accessibilityLabel="Go back"
-          accessibilityRole="button"
-        >
-          <Text variant="bodySmall" color={c.textSecondary}>
-            ← Back
-          </Text>
-        </Pressable>
-      ) : null}
+        {/* Back button (except on summary) */}
+        {currentStep < TOTAL_STEPS ? (
+          <Pressable
+            onPress={navigateBack}
+            style={styles.backButton}
+            accessibilityLabel="Go back"
+            accessibilityRole="button"
+          >
+            <Text variant="bodySmall" color={c.textSecondary}>
+              ← Back
+            </Text>
+          </Pressable>
+        ) : null}
 
-      {/* Step content */}
-      <View style={styles.content}>{renderStep}</View>
+        {/* Step content */}
+        <SacredTransition isVisible={true}>
+          <View style={styles.content}>{renderStep}</View>
+        </SacredTransition>
+      </DivineGradient>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  indicatorRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.md,
-  },
-  indicatorItem: {
-    alignItems: 'center',
-    gap: spacing.xxs,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  dotActive: {
-    backgroundColor: colors.divine.aura,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-  },
-  dotCompleted: {
-    backgroundColor: colors.semantic.success,
-  },
   backButton: {
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.xs,

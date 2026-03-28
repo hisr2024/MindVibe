@@ -16,7 +16,7 @@ import Animated, {
   withSequence,
   Easing,
 } from 'react-native-reanimated';
-import { Text, colors, spacing } from '@kiaanverse/ui';
+import { Text, LotusProgress, colors, spacing } from '@kiaanverse/ui';
 
 const PHASE_LABELS = ['Acknowledge', 'Understand', 'Release', 'Renew'] as const;
 
@@ -119,33 +119,54 @@ export function KarmaPhaseTracker({
   currentPhase,
   completedPhases,
 }: KarmaPhaseTrackerProps): React.JSX.Element {
-  return (
-    <View style={styles.container}>
-      {PHASE_LABELS.map((_, index) => {
-        const phaseNum = index + 1;
-        const isCompleted = completedPhases.includes(phaseNum);
-        const isActive = currentPhase === phaseNum;
-        const showConnector = index < PHASE_LABELS.length - 1;
-        const isConnectorFilled = completedPhases.includes(phaseNum);
+  // Calculate lotus progress based on current phase
+  const PHASE_PROGRESS_MAP: Record<number, number> = {
+    1: 0.25,
+    2: 0.5,
+    3: 0.75,
+    4: 1.0,
+  };
+  const phaseProgress = PHASE_PROGRESS_MAP[currentPhase] ?? 0;
 
-        return (
-          <React.Fragment key={phaseNum}>
-            <PhaseCircle index={index} isCompleted={isCompleted} isActive={isActive} />
-            {showConnector && <ConnectorLine isFilled={isConnectorFilled} />}
-          </React.Fragment>
-        );
-      })}
+  return (
+    <View style={styles.outerContainer}>
+      <View style={styles.container}>
+        {PHASE_LABELS.map((_, index) => {
+          const phaseNum = index + 1;
+          const isCompleted = completedPhases.includes(phaseNum);
+          const isActive = currentPhase === phaseNum;
+          const showConnector = index < PHASE_LABELS.length - 1;
+          const isConnectorFilled = completedPhases.includes(phaseNum);
+
+          return (
+            <React.Fragment key={phaseNum}>
+              <PhaseCircle index={index} isCompleted={isCompleted} isActive={isActive} />
+              {showConnector && <ConnectorLine isFilled={isConnectorFilled} />}
+            </React.Fragment>
+          );
+        })}
+      </View>
+      <View style={styles.lotusContainer}>
+        <LotusProgress progress={phaseProgress} size={60} />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    alignItems: 'center',
+    gap: spacing.md,
+  },
   container: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'center',
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.sm,
+  },
+  lotusContainer: {
+    alignItems: 'center',
   },
   phaseItem: {
     alignItems: 'center',

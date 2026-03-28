@@ -15,17 +15,8 @@
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withSequence,
-  Easing,
-  interpolateColor,
-  runOnJS,
-} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Text, GoldenButton, colors, spacing, radii } from '@kiaanverse/ui';
+import { Text, GoldenButton, BreathingOrb, MandalaSpin, colors, spacing, radii } from '@kiaanverse/ui';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -48,22 +39,11 @@ type Phase = 'inhale' | 'hold' | 'exhale' | 'rest';
 // Constants
 // ---------------------------------------------------------------------------
 
-const CIRCLE_SIZE = Dimensions.get('window').width * 0.55;
-const MIN_SCALE = 0.5;
-const MAX_SCALE = 1.0;
-
 const PHASE_LABELS: Record<Phase, string> = {
   inhale: 'Breathe In...',
   hold: 'Hold...',
   exhale: 'Breathe Out...',
   rest: 'Rest...',
-};
-
-const PHASE_COLORS: Record<Phase, string> = {
-  inhale: '#D4A843',
-  hold: '#4ECDC4',
-  exhale: '#3B7DD8',
-  rest: '#2C3E50',
 };
 
 // ---------------------------------------------------------------------------
@@ -81,9 +61,8 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
   const [countdown, setCountdown] = useState(inhaleSec);
   const [cycle, setCycle] = useState(1);
   const [isComplete, setIsComplete] = useState(false);
+  const [isBreathing, setIsBreathing] = useState(true);
 
-  const scale = useSharedValue(MIN_SCALE);
-  const colorProgress = useSharedValue(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const phaseRef = useRef<Phase>('inhale');
   const countdownRef = useRef(inhaleSec);
@@ -96,7 +75,19 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
     };
   }, []);
 
-  /** Drive the breathing animation and countdown timer. */
+  /** Handle cycle completion from the BreathingOrb component. */
+  const handleCycleComplete = useCallback(() => {
+    if (cycleRef.current < totalCycles) {
+      cycleRef.current += 1;
+      setCycle(cycleRef.current);
+    } else {
+      setIsBreathing(false);
+      setIsComplete(true);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+  }, [totalCycles]);
+
+  /** Drive the countdown timer display and phase labels. */
   const startPhase = useCallback(
     (p: Phase) => {
       phaseRef.current = p;
@@ -112,25 +103,6 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
       const durationSec = durations[p];
       countdownRef.current = durationSec;
       setCountdown(durationSec);
-
-      // Animate circle scale based on phase
-      if (p === 'inhale') {
-        scale.value = withTiming(MAX_SCALE, {
-          duration: durationSec * 1000,
-          easing: Easing.inOut(Easing.ease),
-        });
-        colorProgress.value = withTiming(0, { duration: 300 });
-      } else if (p === 'hold') {
-        colorProgress.value = withTiming(1, { duration: 300 });
-      } else if (p === 'exhale') {
-        scale.value = withTiming(MIN_SCALE, {
-          duration: durationSec * 1000,
-          easing: Easing.inOut(Easing.ease),
-        });
-        colorProgress.value = withTiming(2, { duration: 300 });
-      } else {
-        colorProgress.value = withTiming(3, { duration: 300 });
-      }
 
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
@@ -159,12 +131,13 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
     if (nextIdx < order.length) {
       startPhase(order[nextIdx]);
     } else {
-      // End of cycle
+      // End of cycle — BreathingOrb handles the visual, we handle the label/countdown
       if (cycleRef.current < totalCycles) {
         cycleRef.current += 1;
         setCycle(cycleRef.current);
         startPhase('inhale');
       } else {
+        setIsBreathing(false);
         setIsComplete(true);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
@@ -179,15 +152,6 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
   }, []);
 
   // ---------------------------------------------------------------------------
-  // Animated styles
-  // ---------------------------------------------------------------------------
-
-  const circleAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    backgroundColor: PHASE_COLORS[phaseRef.current],
-  }));
-
-  // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
 
@@ -200,19 +164,22 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
         Cycle {cycle} of {totalCycles}
       </Text>
 
-      {/* Breathing circle */}
-      <View style={styles.circleWrap}>
-        <Animated.View
-          style={[
-            styles.circle,
-            { backgroundColor: PHASE_COLORS[phase] },
-            circleAnimatedStyle,
-          ]}
-        >
+      {/* Sacred breathing orb with mandala background */}
+      <View style={styles.orbContainer}>
+        <MandalaSpin size={300} speed="slow" color={colors.alpha.goldLight} opacity={0.15} />
+        <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
+          <BreathingOrb
+            pattern={{ inhale: inhaleSec, holdIn: holdSec, exhale: exhaleSec, holdOut: restSec }}
+            isActive={isBreathing}
+            size={200}
+            onCycleComplete={handleCycleComplete}
+          />
+        </View>
+        <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
           <Text variant="h1" color={colors.text.primary} align="center">
             {isComplete ? '\u2714' : countdown}
           </Text>
-        </Animated.View>
+        </View>
       </View>
 
       {/* Phase label */}
@@ -247,19 +214,11 @@ const styles = StyleSheet.create({
   cycleText: {
     marginBottom: spacing.lg,
   },
-  circleWrap: {
-    width: CIRCLE_SIZE,
-    height: CIRCLE_SIZE,
-    justifyContent: 'center',
+  orbContainer: {
+    width: 300,
+    height: 300,
     alignItems: 'center',
-  },
-  circle: {
-    width: CIRCLE_SIZE,
-    height: CIRCLE_SIZE,
-    borderRadius: CIRCLE_SIZE / 2,
     justifyContent: 'center',
-    alignItems: 'center',
-    opacity: 0.85,
   },
   phaseLabel: {
     marginTop: spacing.md,

@@ -11,21 +11,15 @@
  *   - Simple golden particle celebration using View-based layers
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet, Dimensions } from 'react-native';
 import Animated, {
   FadeIn,
   FadeInDown,
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withSequence,
-  withTiming,
-  Easing,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { Text, GoldenButton, colors, spacing, radii } from '@kiaanverse/ui';
+import { Text, GoldenButton, ConfettiCannon, GlowCard, LotusProgress, DivineGradient, colors, spacing, radii } from '@kiaanverse/ui';
 import { useEmotionalResetStore } from '@kiaanverse/store';
 import { useCompleteEmotionalReset } from '@kiaanverse/api';
 
@@ -62,55 +56,6 @@ const EMOTION_TRANSFORMS: Record<string, string> = {
   overwhelm: 'Centered Stillness',
   restlessness: 'Grounded Presence',
 };
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// ---------------------------------------------------------------------------
-// Confetti Particle — simple View-based golden dot
-// ---------------------------------------------------------------------------
-
-function ConfettiParticle({ delay, left }: { delay: number; left: number }): React.JSX.Element {
-  const translateY = useSharedValue(-20);
-  const opacity = useSharedValue(0);
-
-  useEffect(() => {
-    translateY.value = withRepeat(
-      withSequence(
-        withTiming(-20, { duration: 0 }),
-        withTiming(Dimensions.get('window').height * 0.4, {
-          duration: 2500 + Math.random() * 1500,
-          easing: Easing.out(Easing.quad),
-        }),
-      ),
-      -1,
-      false,
-    );
-    opacity.value = withRepeat(
-      withSequence(
-        withTiming(0, { duration: 0 }),
-        withTiming(0.8, { duration: 400 }),
-        withTiming(0, { duration: 2000 }),
-      ),
-      -1,
-      false,
-    );
-  }, [translateY, opacity]);
-
-  const style = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
-    opacity: opacity.value,
-  }));
-
-  return (
-    <Animated.View
-      style={[
-        styles.particle,
-        { left, top: delay * 30 },
-        style,
-      ]}
-    />
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Component
