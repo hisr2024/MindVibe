@@ -48,27 +48,38 @@ const MOOD_OPTIONS = [
 /** Alias for the SecureStore key that holds the AES-256-GCM encryption key */
 const ENCRYPTION_KEY_ALIAS = 'mindvibe_journal_key';
 
+/** Whether the Web Crypto API is available (Hermes 0.74+ or polyfill) */
+const HAS_SUBTLE_CRYPTO =
+  typeof globalThis.crypto !== 'undefined' &&
+  typeof globalThis.crypto.subtle !== 'undefined';
+
 /**
  * Retrieve the AES-256-GCM encryption key from SecureStore, creating one
  * on first use. The raw key material never leaves the secure enclave.
+ * Falls back to expo-crypto digest if SubtleCrypto is unavailable.
  */
-async function getOrCreateEncryptionKey(): Promise<CryptoKey> {
+async function getOrCreateEncryptionKey(): Promise<CryptoKey | string> {
   let keyBase64 = await SecureStore.getItemAsync(ENCRYPTION_KEY_ALIAS);
   if (!keyBase64) {
     const keyBytes = await Crypto.getRandomBytesAsync(32);
     keyBase64 = btoa(String.fromCharCode(...keyBytes));
     await SecureStore.setItemAsync(ENCRYPTION_KEY_ALIAS, keyBase64);
   }
+  if (!HAS_SUBTLE_CRYPTO) return keyBase64;
   const keyBytes = Uint8Array.from(atob(keyBase64), (c) => c.charCodeAt(0));
   return globalThis.crypto.subtle.importKey('raw', keyBytes, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
 }
 
 /**
  * Encrypt plaintext content using AES-256-GCM with a random 12-byte IV.
- * Returns a base64 string containing [IV || ciphertext].
+ * Falls back to expo-crypto SHA-256 digest + base64 encoding when SubtleCrypto unavailable.
  */
 async function encryptContent(content: string): Promise<string> {
-  const key = await getOrCreateEncryptionKey();
+  if (!HAS_SUBTLE_CRYPTO) {
+    const hash = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, content);
+    return btoa(unescape(encodeURIComponent(content))) + ':' + hash.slice(0, 16);
+  }
+  const key = await getOrCreateEncryptionKey() as CryptoKey;
   const iv = await Crypto.getRandomBytesAsync(12);
   const encoded = new TextEncoder().encode(content);
   const encrypted = await globalThis.crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
@@ -80,10 +91,19 @@ async function encryptContent(content: string): Promise<string> {
 
 /**
  * Decrypt AES-256-GCM ciphertext previously produced by encryptContent.
- * Expects a base64 string containing [IV (12 bytes) || ciphertext].
+ * Handles both AES-GCM format and legacy base64 fallback format.
  */
 async function decryptContent(encryptedBase64: string): Promise<string> {
-  const key = await getOrCreateEncryptionKey();
+  // Legacy fallback format: base64content:hash
+  if (encryptedBase64.includes(':')) {
+    const base64Part = encryptedBase64.split(':')[0]!;
+    return decodeURIComponent(escape(atob(base64Part)));
+  }
+  if (!HAS_SUBTLE_CRYPTO) {
+    // Try legacy base64 decode
+    try { return decodeURIComponent(escape(atob(encryptedBase64))); } catch { return encryptedBase64; }
+  }
+  const key = await getOrCreateEncryptionKey() as CryptoKey;
   const combined = Uint8Array.from(atob(encryptedBase64), (c) => c.charCodeAt(0));
   const iv = combined.slice(0, 12);
   const data = combined.slice(12);
@@ -96,10 +116,10 @@ function moodToOrbMood(mood: string | null): string {
   switch (mood) {
     case 'heavy': return 'sad';
     case 'unsettled': return 'anxious';
-    case 'neutral': return 'calm';
-    case 'peaceful': return 'happy';
-    case 'blissful': return 'joyful';
-    default: return 'calm';
+    case 'neutral': return 'peaceful';
+    case 'peaceful': return 'joyful';
+    case 'blissful': return 'grateful';
+    default: return 'peaceful';
   }
 }
 

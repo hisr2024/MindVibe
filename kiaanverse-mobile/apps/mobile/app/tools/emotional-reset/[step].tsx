@@ -227,7 +227,7 @@ export default function StepScreen(): React.JSX.Element {
       <DivineGradient variant={getGradientVariant(currentStep)} animated>
         {/* Progress indicator */}
         <Animated.View entering={FadeIn.duration(300)}>
-          <SacredStepIndicatorUI totalSteps={TOTAL_STEPS} currentStep={currentStep} completedSteps={currentStep - 1} />
+          <SacredStepIndicatorUI totalSteps={TOTAL_STEPS} currentStep={currentStep} completedSteps={Array.from({ length: currentStep }, (_, i) => i)} />
         </Animated.View>
 
         {/* Back button (except on summary) */}

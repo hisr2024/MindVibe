@@ -103,7 +103,7 @@ export default function EmotionalResetEntryScreen(): React.JSX.Element {
               isAnimating={!!selectedEmotion}
             />
           </View>
-          <SacredStepIndicator totalSteps={7} currentStep={1} completedSteps={0} />
+          <SacredStepIndicator totalSteps={7} currentStep={1} completedSteps={[]} />
         </SacredTransition>
 
         {/* Emotion Grid */}

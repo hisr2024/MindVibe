@@ -64,7 +64,7 @@ export default function KarmaResetIndex(): React.JSX.Element {
           <LotusProgress progress={0} size={120} />
         </View>
 
-        <SacredStepIndicator totalSteps={4} currentStep={0} completedSteps={0} />
+        <SacredStepIndicator totalSteps={4} currentStep={0} completedSteps={[]} />
 
         <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
           <Text variant="h1" align="center">
