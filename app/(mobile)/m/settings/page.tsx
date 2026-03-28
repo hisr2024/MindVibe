@@ -166,7 +166,7 @@ function ToggleSwitch({ enabled, onChange, disabled = false }: ToggleSwitchProps
         }
       }}
       disabled={disabled}
-      className={`relative w-12 h-7 rounded-full transition-colors ${enabled ? 'bg-[#d4a44c]' : 'bg-white/[0.1]'} ${disabled ? 'opacity-50' : ''}`}
+      className={`relative w-12 h-7 rounded-full transition-colors ${enabled ? 'bg-[var(--sacred-divine-gold)]' : 'bg-white/[0.1]'} ${disabled ? 'opacity-50' : ''}`}
     >
       <motion.div
         animate={{ x: enabled ? 22 : 2 }}
@@ -485,7 +485,7 @@ export default function MobileSettingsPage() {
               isOnline ? (
                 <Wifi className="w-4 h-4 text-green-400" />
               ) : (
-                <WifiOff className="w-4 h-4 text-[#d4a44c]" />
+                <WifiOff className="w-4 h-4 text-[var(--sacred-divine-gold)]" />
               )
             }
           />
@@ -538,7 +538,7 @@ export default function MobileSettingsPage() {
         {/* Danger Zone */}
         <SettingSection title="Danger Zone">
           <SettingRow
-            icon={<LogOut className="w-4 h-4 text-[#d4a44c]" />}
+            icon={<LogOut className="w-4 h-4 text-[var(--sacred-divine-gold)]" />}
             label="Log Out"
             onClick={() => setShowLogoutConfirm(true)}
           />
@@ -573,11 +573,11 @@ export default function MobileSettingsPage() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-sm p-6 rounded-2xl bg-[#1a1a1f] border border-white/[0.08]"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-sm p-6 rounded-2xl bg-[var(--sacred-yamuna-deep)] border border-white/[0.08]"
             >
               <div className="text-center mb-6">
-                <div className="w-12 h-12 rounded-full bg-[#d4a44c]/10 flex items-center justify-center mx-auto mb-3">
-                  <LogOut className="w-6 h-6 text-[#d4a44c]" />
+                <div className="w-12 h-12 rounded-full bg-[var(--sacred-divine-gold)]/10 flex items-center justify-center mx-auto mb-3">
+                  <LogOut className="w-6 h-6 text-[var(--sacred-divine-gold)]" />
                 </div>
                 <h3 className="text-lg font-semibold">Log Out?</h3>
                 <p className="text-body text-[var(--mv-text-secondary)] mt-1">
@@ -595,7 +595,7 @@ export default function MobileSettingsPage() {
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={handleLogout}
-                  className="flex-1 py-3 rounded-xl bg-[#d4a44c] text-white font-medium"
+                  className="flex-1 py-3 rounded-xl bg-[var(--sacred-divine-gold)] text-white font-medium"
                 >
                   Log Out
                 </motion.button>
@@ -620,7 +620,7 @@ export default function MobileSettingsPage() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-sm p-6 rounded-2xl bg-[#1a1a1f] border border-red-500/20"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-sm p-6 rounded-2xl bg-[var(--sacred-yamuna-deep)] border border-red-500/20"
             >
               <div className="text-center mb-6">
                 <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-3">
@@ -681,7 +681,7 @@ export default function MobileSettingsPage() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed bottom-0 left-0 right-0 z-50 max-h-[80vh] rounded-t-3xl bg-[#0B0E2A] border-t border-white/[0.08] flex flex-col"
+              className="fixed bottom-0 left-0 right-0 z-50 max-h-[80vh] rounded-t-3xl bg-[var(--sacred-yamuna-deep)] border-t border-white/[0.08] flex flex-col"
             >
               {/* Handle bar */}
               <div className="flex justify-center pt-3 pb-2">

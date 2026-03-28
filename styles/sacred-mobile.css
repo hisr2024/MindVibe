@@ -40,6 +40,21 @@
   --sacred-text-secondary: #B8AE98;
   --sacred-text-muted: #6B6355;
 
+  /* ─── RGB channel-only (for rgba() usage) ─── */
+  --sacred-divine-gold-rgb: 212, 160, 23;
+  --sacred-divine-gold-bright-rgb: 240, 192, 64;
+  --sacred-divine-gold-glow-rgb: 253, 230, 138;
+  --sacred-krishna-blue-rgb: 27, 79, 187;
+  --sacred-krishna-glow-rgb: 37, 99, 235;
+  --sacred-peacock-teal-rgb: 14, 116, 144;
+  --sacred-peacock-iridescent-rgb: 6, 182, 212;
+  --sacred-peacock-shimmer-rgb: 103, 232, 249;
+  --sacred-cosmic-void-rgb: 5, 7, 20;
+  --sacred-yamuna-deep-rgb: 11, 14, 42;
+  --sacred-yamuna-mid-rgb: 17, 20, 53;
+  --sacred-yamuna-surface-rgb: 22, 26, 66;
+  --sacred-saffron-core-rgb: 249, 115, 22;
+
   /* ─── AURA GRADIENTS ─── */
   --sacred-gradient-krishna-aura: radial-gradient(ellipse at 50% 100%,
     rgba(27, 79, 187, 0.6) 0%,
@@ -591,6 +606,14 @@
   --sacred-divine-gold-glow: #93C5FD;
   --sacred-krishna-blue: #1D4ED8;
   --sacred-krishna-glow: #3B82F6;
+  /* RGB overrides */
+  --sacred-divine-gold-rgb: 37, 99, 235;
+  --sacred-divine-gold-bright-rgb: 59, 130, 246;
+  --sacred-divine-gold-glow-rgb: 147, 197, 253;
+  --sacred-cosmic-void-rgb: 5, 10, 30;
+  --sacred-yamuna-deep-rgb: 8, 18, 48;
+  --sacred-yamuna-mid-rgb: 14, 26, 66;
+  --sacred-yamuna-surface-rgb: 20, 34, 82;
 }
 
 /* Peacock Teal — teal-dominant cosmic atmosphere */
@@ -604,6 +627,14 @@
   --sacred-divine-gold-glow: #A5F3FC;
   --sacred-peacock-teal: #0891B2;
   --sacred-peacock-iridescent: #06B6D4;
+  /* RGB overrides */
+  --sacred-divine-gold-rgb: 6, 182, 212;
+  --sacred-divine-gold-bright-rgb: 34, 211, 238;
+  --sacred-divine-gold-glow-rgb: 165, 243, 252;
+  --sacred-cosmic-void-rgb: 4, 18, 16;
+  --sacred-yamuna-deep-rgb: 7, 30, 26;
+  --sacred-yamuna-mid-rgb: 11, 42, 36;
+  --sacred-yamuna-surface-rgb: 16, 56, 48;
 }
 
 /* Saffron Dawn — warm dark tones with saffron fire */
@@ -617,4 +648,12 @@
   --sacred-divine-gold-glow: #FED7AA;
   --sacred-saffron-core: #EA580C;
   --sacred-saffron-warm: #F97316;
+  /* RGB overrides */
+  --sacred-divine-gold-rgb: 249, 115, 22;
+  --sacred-divine-gold-bright-rgb: 251, 146, 60;
+  --sacred-divine-gold-glow-rgb: 254, 215, 170;
+  --sacred-cosmic-void-rgb: 15, 7, 5;
+  --sacred-yamuna-deep-rgb: 26, 14, 8;
+  --sacred-yamuna-mid-rgb: 36, 21, 12;
+  --sacred-yamuna-surface-rgb: 48, 28, 16;
 }

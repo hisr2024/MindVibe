@@ -59,7 +59,7 @@ export function SakhaMandala({
             animation: 'chakraRotate 60s linear infinite',
           } : undefined}
         >
-          <circle cx="50" cy="50" r="46" stroke="#D4A017" strokeWidth="0.5" opacity="0.3" />
+          <circle cx="50" cy="50" r="46" style={{ stroke: 'var(--sacred-divine-gold)' }} strokeWidth="0.5" opacity="0.3" />
           {/* Sanskrit aksharas at cardinal points — simplified as dots */}
           {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => {
             const rad = (angle * Math.PI) / 180
@@ -71,7 +71,7 @@ export function SakhaMandala({
                 cx={x}
                 cy={y}
                 r="1"
-                fill={angle % 90 === 0 ? '#06B6D4' : '#D4A017'}
+                style={{ fill: angle % 90 === 0 ? 'var(--sacred-peacock-iridescent)' : 'var(--sacred-divine-gold)' }}
                 opacity="0.7"
               />
             )
@@ -79,53 +79,49 @@ export function SakhaMandala({
         </g>
 
         {/* Ring 4 */}
-        <circle cx="50" cy="50" r="38" stroke="#D4A017" strokeWidth="0.5" opacity="0.4" />
+        <circle cx="50" cy="50" r="38" style={{ stroke: 'var(--sacred-divine-gold)' }} strokeWidth="0.5" opacity="0.4" />
 
         {/* Ring 3 */}
-        <circle cx="50" cy="50" r="30" stroke="#F0C040" strokeWidth="0.5" opacity="0.5" />
+        <circle cx="50" cy="50" r="30" style={{ stroke: 'var(--sacred-divine-gold-bright)' }} strokeWidth="0.5" opacity="0.5" />
 
         {/* Ring 2 */}
-        <circle cx="50" cy="50" r="22" stroke="#D4A017" strokeWidth="0.5" opacity="0.6" />
+        <circle cx="50" cy="50" r="22" style={{ stroke: 'var(--sacred-divine-gold)' }} strokeWidth="0.5" opacity="0.6" />
 
         {/* Ring 1 (innermost) */}
-        <circle cx="50" cy="50" r="15" stroke="#F0C040" strokeWidth="0.75" opacity="0.7" />
+        <circle cx="50" cy="50" r="15" style={{ stroke: 'var(--sacred-divine-gold-bright)' }} strokeWidth="0.75" opacity="0.7" />
 
         {/* Inner Sri Yantra triangles (simplified) */}
         <polygon
           points="50,28 66,62 34,62"
-          stroke="#D4A017"
+          style={{ stroke: 'var(--sacred-divine-gold)' }}
           strokeWidth="0.75"
           fill="none"
           opacity="0.6"
         />
         <polygon
           points="50,72 34,38 66,38"
-          stroke="#06B6D4"
+          style={{ stroke: 'var(--sacred-peacock-iridescent)' }}
           strokeWidth="0.75"
           fill="none"
           opacity="0.5"
         />
 
         {/* Center bindu (golden point) */}
-        <circle cx="50" cy="50" r="4" fill="url(#bindu-gradient)" />
-        <circle cx="50" cy="50" r="2" fill="#FDE68A" opacity="0.9" />
+        <circle cx="50" cy="50" r="4" style={{ fill: 'var(--sacred-divine-gold-glow)' }} opacity="0.9" />
+        <circle cx="50" cy="50" r="2" style={{ fill: 'var(--sacred-divine-gold-glow)' }} opacity="0.9" />
 
         {/* Peacock teal accents at cardinal points */}
-        <circle cx="50" cy="4" r="2" fill="#06B6D4" opacity="0.6" />
-        <circle cx="96" cy="50" r="2" fill="#06B6D4" opacity="0.6" />
-        <circle cx="50" cy="96" r="2" fill="#06B6D4" opacity="0.6" />
-        <circle cx="4" cy="50" r="2" fill="#06B6D4" opacity="0.6" />
+        <circle cx="50" cy="4" r="2" style={{ fill: 'var(--sacred-peacock-iridescent)' }} opacity="0.6" />
+        <circle cx="96" cy="50" r="2" style={{ fill: 'var(--sacred-peacock-iridescent)' }} opacity="0.6" />
+        <circle cx="50" cy="96" r="2" style={{ fill: 'var(--sacred-peacock-iridescent)' }} opacity="0.6" />
+        <circle cx="4" cy="50" r="2" style={{ fill: 'var(--sacred-peacock-iridescent)' }} opacity="0.6" />
 
-        {/* Gradient definitions */}
+        {/* Background circle gradient — uses inline stops with CSS vars */}
         <defs>
           <radialGradient id="mandala-bg" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#1B4FBB" stopOpacity="0.3" />
-            <stop offset="60%" stopColor="#111435" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#050714" stopOpacity="0.95" />
-          </radialGradient>
-          <radialGradient id="bindu-gradient" cx="50%" cy="40%" r="50%">
-            <stop offset="0%" stopColor="#FDE68A" />
-            <stop offset="100%" stopColor="#D4A017" />
+            <stop offset="0%" style={{ stopColor: 'var(--sacred-krishna-blue)' }} stopOpacity="0.3" />
+            <stop offset="60%" style={{ stopColor: 'var(--sacred-yamuna-mid)' }} stopOpacity="0.8" />
+            <stop offset="100%" style={{ stopColor: 'var(--sacred-cosmic-void)' }} stopOpacity="0.95" />
           </radialGradient>
         </defs>
       </svg>
