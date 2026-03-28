@@ -20,7 +20,7 @@ export async function GET(
         method: 'GET',
         headers: proxyHeaders(request, 'GET'),
       },
-      { maxRetries: 1, timeoutMs: 15000, label: '[Journey GET /journeys/:id]' }
+      { maxRetries: 2, timeoutMs: 30000, label: '[Journey GET /journeys/:id]' }
     )
 
     const data = await response.json().catch(() => ({ error: 'Invalid response' }))
