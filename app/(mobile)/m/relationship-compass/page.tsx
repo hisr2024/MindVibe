@@ -98,8 +98,8 @@ export default function MobileRelationshipCompassPage() {
   }, [conflict, error])
 
   useEffect(() => {
-    if (!sessionId) {
-      setSessionId(crypto.randomUUID())
+    if (!sessionId && typeof window !== 'undefined') {
+      setSessionId(window.crypto.randomUUID())
     }
   }, [sessionId, setSessionId])
 

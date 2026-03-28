@@ -6,17 +6,15 @@
  * A mobile-native version of SacredPageShell that provides:
  * - Compact sacred header with Sanskrit symbol (pulsing golden glow)
  * - Floating golden god particles (8 particles for mobile perf)
- * - Back navigation with haptic feedback
  * - Single-column layout optimized for touch
  * - Sacred gradient background matching the Gold-Black divine theme
+ * - Collapsible cards with haptic feedback for sidebar content
  *
  * Used by: Viyoga, Ardha, Relationship Compass mobile pages
  */
 
 import { type ReactNode, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ChevronLeft } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { springConfigs, staggerContainer, animationVariants } from '@/lib/animations/spring-configs'
 
@@ -43,14 +41,6 @@ export function MobileSacredToolShell({
   verse,
   children,
 }: MobileSacredToolShellProps) {
-  const router = useRouter()
-  const { triggerHaptic } = useHapticFeedback()
-
-  const handleBack = () => {
-    triggerHaptic('light')
-    router.back()
-  }
-
   return (
     <div className="relative min-h-0">
       {/* Floating golden god particles — reduced to 8 for mobile perf */}
@@ -102,17 +92,6 @@ export function MobileSacredToolShell({
         >
           {/* Top golden radiance line */}
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4a44c]/40 to-transparent" />
-
-          {/* Back button */}
-          <motion.button
-            whileTap={{ scale: 0.92 }}
-            onClick={handleBack}
-            className="flex items-center gap-1 text-[11px] text-[#d4a44c]/40 active:text-[#d4a44c]/70 transition-colors mb-3 min-h-[44px] -ml-1 px-1"
-            aria-label="Go back"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            <span>Back</span>
-          </motion.button>
 
           <div className="flex items-start gap-3">
             {/* Sanskrit symbol with pulsing golden glow */}
