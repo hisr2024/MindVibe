@@ -19,7 +19,6 @@ import {
   MobileCollapsibleCard,
 } from '@/components/mobile/MobileSacredToolShell'
 import { MobileTextarea } from '@/components/mobile/MobileInput'
-import { MobileCard } from '@/components/mobile/MobileCard'
 import { VoiceInputButton } from '@/components/voice'
 import WisdomResponseCard, { WisdomLoadingState } from '@/components/tools/WisdomResponseCard'
 import { BreathingDot } from '@/components/animations/BreathingDot'
@@ -29,7 +28,6 @@ import { useLanguage } from '@/hooks/useLanguage'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useMicroPause } from '@/hooks/useMicroPause'
 import { apiFetch } from '@/lib/api'
-import { springConfigs } from '@/lib/animations/spring-configs'
 
 function sanitizeInput(input: string): string {
   return input.replace(/[<>]/g, '').replace(/\\/g, '').slice(0, 2000)

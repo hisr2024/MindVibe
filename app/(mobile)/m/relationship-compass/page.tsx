@@ -81,7 +81,7 @@ const GUIDANCE_PATHS = [
 
 export default function MobileRelationshipCompassPage() {
   const router = useRouter()
-  const { t, language } = useLanguage()
+  const { language } = useLanguage()
   const { triggerHaptic } = useHapticFeedback()
 
   const [conflict, setConflict] = useState('')
