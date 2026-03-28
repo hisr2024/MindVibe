@@ -118,9 +118,12 @@ async function apiRequest<T>(
       }
 
       if (!response.ok) {
-        const detail = (data && typeof data === 'object') ? (data as Record<string, unknown>).detail : undefined;
+        const dataObj = (data && typeof data === 'object') ? data as Record<string, unknown> : undefined;
+        const detail = dataObj?.detail;
         const message = typeof detail === 'string' ? detail : `Error ${response.status}`;
-        const code = response.status === 400 && message.includes('5 active')
+        const rawCode = dataObj?.code;
+        const code = rawCode === 'MAX_ACTIVE_JOURNEYS'
+          || (response.status === 400 && message.includes('5 active'))
           ? 'MAX_ACTIVE_JOURNEYS'
           : 'API_ERROR';
 

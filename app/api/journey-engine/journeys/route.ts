@@ -79,11 +79,14 @@ export async function POST(request: NextRequest) {
 
     // Forward the backend's error status and message
     const data = await response.json().catch(() => ({}))
-    const detail = typeof data?.detail === 'string' ? data.detail : 'Failed to create journey'
+    const detail = typeof data?.detail === 'string'
+      ? data.detail
+      : (data?.detail?.message || data?.detail?.error || 'Failed to create journey')
+    const code = data?.detail?.error || undefined
 
     return forwardCookies(
       response,
-      NextResponse.json({ error: detail, detail }, { status: response.status })
+      NextResponse.json({ error: detail, detail, code }, { status: response.status })
     )
   } catch (error) {
     const isTimeout = error instanceof Error && error.name === 'TimeoutError'

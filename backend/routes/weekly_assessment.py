@@ -209,10 +209,7 @@ async def get_latest_assessment(
     Returns None if no assessments exist.
     """
     if not user_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required for assessment",
-        )
+        return None
 
     result = await db.execute(
         select(UserAssessment)
