@@ -9,7 +9,7 @@ import time
 from datetime import UTC, datetime, timedelta
 
 import psutil
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -72,6 +72,7 @@ async def start_instance_heartbeat() -> None:
 
 @router.get("/health")
 async def basic_health(
+    response: Response,
     db: AsyncSession = Depends(get_db),
 ):
     """Basic health check for load balancers. No auth required.
@@ -110,6 +111,9 @@ async def basic_health(
             checks["redis"] = "down"
             health_status = "degraded"
             logger.warning("Health check: Redis unreachable")
+
+    if health_status == "degraded":
+        response.status_code = 503
 
     return {
         "status": health_status,

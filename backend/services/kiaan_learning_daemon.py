@@ -55,14 +55,14 @@ logger = logging.getLogger(__name__)
 class DaemonConfig:
     """Configuration for the 24/7 learning daemon."""
 
-    # Fetch intervals (in seconds)
-    YOUTUBE_FETCH_INTERVAL = int(os.getenv("KIAAN_YOUTUBE_INTERVAL", "1800"))  # 30 minutes
-    AUDIO_FETCH_INTERVAL = int(os.getenv("KIAAN_AUDIO_INTERVAL", "3600"))  # 1 hour
-    WEB_FETCH_INTERVAL = int(os.getenv("KIAAN_WEB_INTERVAL", "3600"))  # 1 hour
-    FULL_ACQUISITION_INTERVAL = int(os.getenv("KIAAN_FULL_INTERVAL", "7200"))  # 2 hours
+    # Fetch intervals (in seconds) — defaults tuned for Render standard plan memory limits
+    YOUTUBE_FETCH_INTERVAL = int(os.getenv("KIAAN_YOUTUBE_INTERVAL", "3600"))  # 1 hour
+    AUDIO_FETCH_INTERVAL = int(os.getenv("KIAAN_AUDIO_INTERVAL", "7200"))  # 2 hours
+    WEB_FETCH_INTERVAL = int(os.getenv("KIAAN_WEB_INTERVAL", "7200"))  # 2 hours
+    FULL_ACQUISITION_INTERVAL = int(os.getenv("KIAAN_FULL_INTERVAL", "14400"))  # 4 hours
 
     # Health check interval
-    HEALTH_CHECK_INTERVAL = int(os.getenv("KIAAN_HEALTH_INTERVAL", "60"))  # 1 minute
+    HEALTH_CHECK_INTERVAL = int(os.getenv("KIAAN_HEALTH_INTERVAL", "120"))  # 2 minutes
 
     # Retry configuration
     MAX_RETRIES = int(os.getenv("KIAAN_MAX_RETRIES", "5"))
@@ -85,6 +85,9 @@ class DaemonConfig:
 
     # Daemon mode
     DAEMON_ENABLED = os.getenv("KIAAN_DAEMON_ENABLED", "true").lower() == "true"
+
+    # Memory safety threshold — skip work when system memory exceeds this percentage
+    MEMORY_THRESHOLD_PERCENT = float(os.getenv("KIAAN_MEMORY_THRESHOLD", "80"))
 
 
 # =============================================================================
@@ -223,9 +226,24 @@ class HealthMonitor:
                         f"Daemon in recovery mode: retry {health.current_retry_count}/{DaemonConfig.MAX_RETRIES}"
                     )
 
-                # Check memory usage
-                if health.memory_usage_mb > 500:  # Alert if over 500MB
-                    logger.warning(f"High memory usage: {health.memory_usage_mb:.1f}MB")
+                # Check memory usage — pause workers if memory pressure is high
+                try:
+                    import psutil as _psutil
+                    _sys_mem_pct = _psutil.virtual_memory().percent
+                except Exception:
+                    _sys_mem_pct = 0.0
+
+                if health.memory_usage_mb > 500 or _sys_mem_pct > DaemonConfig.MEMORY_THRESHOLD_PERCENT:
+                    logger.warning(
+                        f"High memory: {health.memory_usage_mb:.1f}MB / "
+                        f"system {_sys_mem_pct:.1f}% — pausing workers for 60s"
+                    )
+                    for worker in self.daemon._workers:
+                        worker._paused = True
+                    await asyncio.sleep(60)
+                    for worker in self.daemon._workers:
+                        worker._paused = False
+                    logger.info("Workers resumed after memory cooldown")
 
             except asyncio.CancelledError:
                 break
@@ -324,6 +342,7 @@ class ContentAcquisitionWorker:
         self.daemon = daemon
         self.source = source
         self._running = False
+        self._paused = False
         self._task: Optional[asyncio.Task] = None
         self._last_fetch: Optional[datetime] = None
 
@@ -368,6 +387,16 @@ class ContentAcquisitionWorker:
 
         while self._running:
             try:
+                # Pause guard — HealthMonitor may pause workers during memory pressure
+                if self._paused:
+                    await asyncio.sleep(10)
+                    continue
+
+                # Memory pressure guard — skip cycle if system memory is high
+                if not self.daemon._is_memory_safe():
+                    await asyncio.sleep(120)
+                    continue
+
                 # Check if source should be skipped (circuit breaker)
                 if self.daemon.recovery.should_skip(self.source.value):
                     logger.warning(f"Skipping {self.source.value} (circuit open)")
@@ -795,6 +824,21 @@ class KIAANLearningDaemon:
 
         logger.info("KIAAN Learning Daemon initialized")
 
+    def _is_memory_safe(self) -> bool:
+        """Check if system memory usage is below the safety threshold."""
+        try:
+            import psutil
+            mem = psutil.virtual_memory()
+            if mem.percent >= DaemonConfig.MEMORY_THRESHOLD_PERCENT:
+                logger.warning(
+                    f"Memory at {mem.percent:.1f}% (threshold: "
+                    f"{DaemonConfig.MEMORY_THRESHOLD_PERCENT}%) — skipping work"
+                )
+                return False
+            return True
+        except Exception:
+            return True
+
     # -------------------------------------------------------------------------
     # Lifecycle Management
     # -------------------------------------------------------------------------
@@ -925,6 +969,10 @@ class KIAANLearningDaemon:
 
     async def _run_initial_acquisition(self):
         """Run initial content acquisition on startup."""
+        if not self._is_memory_safe():
+            logger.info("Skipping initial acquisition — memory pressure")
+            return
+
         logger.info("Running initial content acquisition...")
 
         try:
