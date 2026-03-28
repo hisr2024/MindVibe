@@ -154,7 +154,7 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
             <motion.div
               className="
                 absolute h-10 rounded-xl
-                bg-[#D4A017]/10
+                bg-[var(--sacred-divine-gold)]/10
                 pointer-events-none
               "
               layoutId="activeTabIndicator"
@@ -196,7 +196,8 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
                 {isActive && (
                   <motion.div
                     layoutId="sacredActiveDot"
-                    className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#D4A017]"
+                    className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+                      style={{ backgroundColor: 'var(--sacred-divine-gold)' }}
                     transition={{ type: 'spring', stiffness: 500 }}
                   />
                 )}
@@ -204,7 +205,7 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
                 <motion.span
                   animate={{
                     scale: isActive ? 1.1 : 1,
-                    color: isActive ? '#D4A017' : 'rgba(184,174,152,0.4)',
+                    color: isActive ? 'var(--sacred-divine-gold)' : 'rgba(184,174,152,0.4)',
                   }}
                   transition={{ type: 'spring', stiffness: 500 }}
                   className="relative"
@@ -237,7 +238,7 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
                 {showLabels && (
                   <motion.span
                     animate={{
-                      color: isActive ? '#D4A017' : 'rgba(184,174,152,0.4)',
+                      color: isActive ? 'var(--sacred-divine-gold)' : 'rgba(184,174,152,0.4)',
                       fontWeight: isActive ? 600 : 400,
                     }}
                     className="text-[10px] leading-tight"
@@ -254,7 +255,7 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
                     className="
                       absolute -bottom-0.5
                       w-1 h-1 rounded-full
-                      bg-[#d4a44c]
+                      bg-[var(--sacred-divine-gold)]
                     "
                   />
                 )}
@@ -268,7 +269,7 @@ export const MobileTabBar = forwardRef<HTMLElement, MobileTabBarProps>(
           <div className="
             absolute -top-8 left-1/2 -translate-x-1/2
             w-1/2 h-8
-            bg-gradient-to-t from-[#d4a44c]/10 to-transparent
+            bg-gradient-to-t from-[var(--sacred-divine-gold)]/10 to-transparent
             pointer-events-none rounded-t-full
           " />
         )}

@@ -263,7 +263,7 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
     return (
       <div
         ref={ref}
-        className={`mobile-app-root bg-[#050507] text-white min-h-[100dvh] flex flex-col ${className}`.trim()}
+        className={`mobile-app-root bg-[var(--sacred-cosmic-void,#050714)] text-white min-h-[100dvh] flex flex-col ${className}`.trim()}
       >
         {/* Offline Banner */}
         <AnimatePresence>
@@ -275,7 +275,7 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
               transition={{ duration: 0.2 }}
               className={`
                 fixed top-0 left-0 right-0 z-[100]
-                ${isOnline ? 'bg-green-500' : 'bg-[#d4a44c]'}
+                ${isOnline ? 'bg-green-500' : 'bg-[var(--sacred-divine-gold)]'}
               `}
               style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
             >
@@ -329,15 +329,15 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
               className="fixed left-1/2 -translate-x-1/2 z-30 pointer-events-none"
               style={{ top: showHeader ? (largeTitle ? 108 : 64) : 8 }}
             >
-              <div className="w-9 h-9 rounded-full bg-[#0f1624]/90 border border-[#d4a44c]/20 flex items-center justify-center shadow-lg shadow-black/20">
+              <div className="w-9 h-9 rounded-full bg-[var(--sacred-yamuna-mid)]/90 border border-[var(--sacred-divine-gold)]/20 flex items-center justify-center shadow-lg shadow-black/20">
                 {isRefreshing ? (
                   <motion.div
-                    className="w-5 h-5 border-2 border-[#d4a44c] border-t-transparent rounded-full"
+                    className="w-5 h-5 border-2 border-[var(--sacred-divine-gold)] border-t-transparent rounded-full"
                     animate={{ rotate: 360 }}
                     transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
                   />
                 ) : (
-                  <svg width="20" height="20" viewBox="0 0 20 20" className="text-[#d4a44c]">
+                  <svg width="20" height="20" viewBox="0 0 20 20" className="text-[var(--sacred-divine-gold)]">
                     <circle
                       cx="10"
                       cy="10"

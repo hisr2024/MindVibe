@@ -34,13 +34,17 @@ function seeded(seed: number): number {
   return x - Math.floor(x)
 }
 
+/**
+ * Particle colors use CSS custom properties so they respond to color scheme changes.
+ * Each gradient references --sacred-*-rgb channel variables for rgba() support.
+ */
 const PARTICLE_COLORS = [
-  // Gold mote (70% distribution) — divine gold #D4A017
-  'radial-gradient(circle, rgba(212,160,23,0.9) 0%, rgba(212,160,23,0) 70%)',
-  // Peacock-blue spark (20% distribution) — #06B6D4
-  'radial-gradient(circle, rgba(6,182,212,0.7) 0%, rgba(6,182,212,0) 70%)',
-  // Sacred white glow (10% distribution) — #FDE68A
-  'radial-gradient(circle, rgba(253,230,138,0.8) 0%, rgba(253,230,138,0) 70%)',
+  // Gold mote (70% distribution)
+  'radial-gradient(circle, rgba(var(--sacred-divine-gold-rgb,212,160,23),0.9) 0%, rgba(var(--sacred-divine-gold-rgb,212,160,23),0) 70%)',
+  // Peacock-blue spark (20% distribution)
+  'radial-gradient(circle, rgba(var(--sacred-peacock-iridescent-rgb,6,182,212),0.7) 0%, rgba(var(--sacred-peacock-iridescent-rgb,6,182,212),0) 70%)',
+  // Accent glow (10% distribution)
+  'radial-gradient(circle, rgba(var(--sacred-divine-gold-glow-rgb,253,230,138),0.8) 0%, rgba(var(--sacred-divine-gold-glow-rgb,253,230,138),0) 70%)',
 ]
 
 /**
@@ -94,7 +98,7 @@ export function GodParticles({ count = 108 }: { count?: number }) {
             background: PARTICLE_COLORS[p.variant],
             boxShadow:
               p.size > 2.5
-                ? '0 0 6px rgba(212,164,76,0.3), 0 0 14px rgba(212,164,76,0.1)'
+                ? '0 0 6px rgba(var(--sacred-divine-gold-rgb,212,160,23),0.3), 0 0 14px rgba(var(--sacred-divine-gold-rgb,212,160,23),0.1)'
                 : 'none',
             mixBlendMode: 'screen',
           }}

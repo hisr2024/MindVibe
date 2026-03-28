@@ -34,13 +34,24 @@ export const viewport: Viewport = {
   themeColor: '#050714',
 }
 
+/** Inline script to apply saved color scheme before React hydration (prevents flash) */
+const colorSchemeInitScript = `
+(function(){
+  try {
+    var s = localStorage.getItem('mindvibe_color_scheme');
+    if (s && s !== 'default') document.documentElement.setAttribute('data-sacred-scheme', s);
+  } catch(e) {}
+})();
+`
+
 export default function MobileLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <div className="mobile-layout min-h-screen bg-[#050714]">
+    <div className="mobile-layout min-h-screen bg-[var(--sacred-cosmic-void,#050714)]">
+      <script dangerouslySetInnerHTML={{ __html: colorSchemeInitScript }} />
       <MobileErrorBoundary>
         {children}
       </MobileErrorBoundary>

@@ -37,10 +37,10 @@ const SACRED_ACTIONS = [
 // Mood options with sacred colors
 const MOOD_OPTIONS = [
   { id: 'great', label: 'Great', emoji: '🙏', color: 'from-emerald-500/30 to-emerald-400/10', score: 2 },
-  { id: 'good', label: 'Good', emoji: '☀️', color: 'from-[#D4A017]/30 to-[#D4A017]/10', score: 1 },
-  { id: 'okay', label: 'Okay', emoji: '🕉️', color: 'from-[#1B4FBB]/30 to-[#1B4FBB]/10', score: 0 },
+  { id: 'good', label: 'Good', emoji: '☀️', color: 'from-[var(--sacred-divine-gold)]/30 to-[var(--sacred-divine-gold)]/10', score: 1 },
+  { id: 'okay', label: 'Okay', emoji: '🕉️', color: 'from-[var(--sacred-krishna-blue)]/30 to-[var(--sacred-krishna-blue)]/10', score: 0 },
   { id: 'low', label: 'Low', emoji: '🪷', color: 'from-purple-500/30 to-indigo-400/10', score: -1 },
-  { id: 'struggling', label: 'Seeking', emoji: '🙏', color: 'from-[#0E7490]/30 to-[#06B6D4]/10', score: -2 },
+  { id: 'struggling', label: 'Seeking', emoji: '🙏', color: 'from-[var(--sacred-peacock-teal)]/30 to-[var(--sacred-peacock-iridescent)]/10', score: -2 },
 ]
 
 interface DashboardData {
