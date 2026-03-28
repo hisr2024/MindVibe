@@ -49,7 +49,7 @@ else:
     startup_logger.info("OPENAI_API_KEY: configured")
     os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import FastAPI, HTTPException, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
@@ -305,6 +305,14 @@ _startup_status: dict[str, Any] = {
 # Prevents startup from hanging indefinitely if the database is slow or
 # unreachable, which would cause Render/Vercel to kill the container.
 _STARTUP_DB_TIMEOUT = int(os.getenv("STARTUP_DB_TIMEOUT", "60"))
+
+
+async def _delayed_start(coro, delay_seconds: int, name: str):
+    """Delay a background task start to let the instance stabilize and reduce startup memory pressure."""
+    startup_logger.info(f"Deferring {name} by {delay_seconds}s to reduce startup memory pressure")
+    await _asyncio.sleep(delay_seconds)
+    startup_logger.info(f"Starting deferred task: {name}")
+    await coro
 
 
 @app.on_event("startup")
@@ -585,8 +593,12 @@ async def startup():
 
             daemon = get_learning_daemon()
 
-            # Start the 24/7 daemon — store task reference for proper cleanup
-            _task = _asyncio.create_task(daemon.start(), name="kiaan_learning_daemon")
+            # Start the 24/7 daemon — deferred to reduce startup memory pressure
+            _kiaan_delay = int(os.getenv("KIAAN_STARTUP_DELAY", "90"))
+            _task = _asyncio.create_task(
+                _delayed_start(daemon.start(), _kiaan_delay, "KIAAN Learning Daemon"),
+                name="kiaan_learning_daemon",
+            )
             _startup_status["background_tasks"].append(_task)
 
             startup_logger.info("✅ KIAAN 24/7 Learning Daemon starting")
@@ -640,8 +652,10 @@ async def startup():
             from backend.services.gita_wisdom_auto_enricher import get_auto_enricher
 
             enricher = get_auto_enricher()
+            _enricher_delay = int(os.getenv("ENRICHER_STARTUP_DELAY", "120"))
             _task = _asyncio.create_task(
-                enricher.start(SessionLocal), name="gita_auto_enricher"
+                _delayed_start(enricher.start(SessionLocal), _enricher_delay, "Gita Enricher"),
+                name="gita_auto_enricher",
             )
             _startup_status["background_tasks"].append(_task)
 
@@ -2190,11 +2204,14 @@ async def root() -> dict[str, Any]:
 
 
 @app.get("/health")
-async def health() -> dict[str, Any]:
-    """Health check endpoint used by Render to determine service readiness.
+async def health(response: Response) -> dict[str, Any]:
+    """Health check endpoint for Render load balancer.
 
-    MUST always return 200 with a JSON body so Render doesn't mark the
-    instance as unhealthy and return 503 to all client requests.
+    Returns HTTP 503 when critical services are down (database unreachable
+    or KIAAN router failed to load), so Render can stop routing traffic
+    and restart the instance. Returns 200 for 'healthy' and 'degraded'
+    (degraded = Redis down or some non-critical routers failed, but app
+    can still serve requests).
     """
     try:
         migration_state = await _get_migration_state()
@@ -2202,6 +2219,8 @@ async def health() -> dict[str, Any]:
         migration_state = {"status": "unknown"}
 
     _status = _compute_health_status()
+    if _status == "unhealthy":
+        response.status_code = 503
     return {
         "status": _status,
         "service": "mindvibe-api",
@@ -2216,13 +2235,15 @@ async def health() -> dict[str, Any]:
 
 
 @app.get("/api/health")
-async def api_health() -> dict[str, Any]:
+async def api_health(response: Response) -> dict[str, Any]:
     try:
         migration_state = await _get_migration_state()
     except Exception:
         migration_state = {"status": "unknown"}
 
     _status = _compute_health_status()
+    if _status == "unhealthy":
+        response.status_code = 503
     return {
         "status": _status,
         "service": "MindVibe AI - KIAAN",

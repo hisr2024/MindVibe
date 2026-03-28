@@ -60,6 +60,8 @@ import re
 from datetime import datetime
 from typing import Optional
 
+import psutil
+
 from sqlalchemy import func as sql_func
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -1432,7 +1434,19 @@ class GitaWisdomAutoEnricher:
         # Initial delay to let the app fully start
         await asyncio.sleep(30)
 
+        _mem_threshold = float(os.getenv("ENRICHER_MEMORY_THRESHOLD", "80"))
+
         while self._running:
+            # Memory pressure guard — defer cycle if system memory is high
+            try:
+                mem = psutil.virtual_memory()
+                if mem.percent >= _mem_threshold:
+                    logger.warning(f"Memory at {mem.percent:.1f}% — deferring enrichment cycle")
+                    await asyncio.sleep(300)
+                    continue
+            except Exception:
+                pass
+
             try:
                 async with self._get_db_session() as db:
                     await self.run_enrichment_cycle(db)
