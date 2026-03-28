@@ -3,7 +3,7 @@
 import os
 from pathlib import Path
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -246,6 +246,17 @@ class Settings(BaseSettings):
                 stacklevel=2,
             )
         return v
+
+    @model_validator(mode="after")
+    def _reconcile_redis_settings(self) -> "Settings":
+        """Auto-enable Redis when REDIS_REQUIRED=true.
+
+        Prevents the contradictory state where REDIS_REQUIRED=true but
+        REDIS_ENABLED=false (e.g. production with no explicit REDIS_URL).
+        """
+        if self.REDIS_REQUIRED and not self.REDIS_ENABLED:
+            self.REDIS_ENABLED = True
+        return self
 
     CACHE_KIAAN_RESPONSES: bool = parse_bool_strict(
         os.getenv("CACHE_KIAAN_RESPONSES", "true"), "CACHE_KIAAN_RESPONSES"

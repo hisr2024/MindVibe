@@ -332,12 +332,19 @@ async def startup():
 
         from backend.cache.redis_cache import get_redis_cache
 
+        # Log if REDIS_REQUIRED auto-enabled REDIS_ENABLED
+        if _settings.REDIS_REQUIRED and not os.getenv("REDIS_ENABLED"):
+            startup_logger.info(
+                "ℹ️ Redis auto-enabled because REDIS_REQUIRED=true"
+            )
+
         _redis = await get_redis_cache()
         _is_prod = os.getenv("ENVIRONMENT", "development").lower() in (
             "production",
             "prod",
         )
         _max_retries = 4
+        _retries_attempted = 0
 
         # Retry Redis connection with exponential backoff if not connected.
         # On platforms like Render, the Redis service may still be starting
@@ -345,6 +352,7 @@ async def startup():
         # Delays: 1s, 2s, 4s, 8s = 15s total (must stay within health check timeout)
         if not _redis.is_connected and _settings.REDIS_ENABLED:
             for _attempt in range(1, _max_retries + 1):
+                _retries_attempted += 1
                 _wait = 2 ** (_attempt - 1)  # 1s, 2s, 4s, 8s
                 startup_logger.warning(
                     f"⚠️ Redis not connected (attempt {_attempt}/{_max_retries}), "
@@ -387,14 +395,22 @@ async def startup():
                 )
         else:
             if _settings.REDIS_REQUIRED and _is_prod:
-                startup_logger.critical(
-                    "⚠️ Redis is REQUIRED in production for distributed state "
-                    "(WebSocket Pub/Sub, rate limiting, DDoS tracking) but connection failed "
-                    f"after {_max_retries} retries. "
-                    "Continuing with in-memory fallback (single-instance mode). "
-                    "Set REDIS_REQUIRED=false to suppress this warning, "
-                    "or fix your REDIS_URL to restore distributed features."
-                )
+                if _retries_attempted > 0:
+                    startup_logger.critical(
+                        "⚠️ Redis is REQUIRED in production for distributed state "
+                        "(WebSocket Pub/Sub, rate limiting, DDoS tracking) but connection failed "
+                        f"after {_retries_attempted} retries. "
+                        "Continuing with in-memory fallback (single-instance mode). "
+                        "Set REDIS_REQUIRED=false to suppress this warning, "
+                        "or fix your REDIS_URL to restore distributed features."
+                    )
+                else:
+                    startup_logger.critical(
+                        "⚠️ Redis is REQUIRED in production for distributed state "
+                        "(WebSocket Pub/Sub, rate limiting, DDoS tracking) but Redis is disabled. "
+                        "Set REDIS_ENABLED=true and configure REDIS_URL, "
+                        "or set REDIS_REQUIRED=false to suppress this warning."
+                    )
             else:
                 startup_logger.warning(
                     "⚠️ Redis not connected — falling back to in-memory (single-instance only)"
