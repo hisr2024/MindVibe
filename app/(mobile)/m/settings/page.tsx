@@ -38,6 +38,10 @@ import {
   Mail,
   Key,
   RefreshCw,
+  Palette,
+  Search,
+  X,
+  Check,
 } from 'lucide-react'
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
@@ -45,8 +49,27 @@ import { useAuth } from '@/hooks/useAuth'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useBiometricAuth } from '@/hooks/useBiometricAuth'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
+import { useLanguage, LANGUAGES, type Language } from '@/hooks/useLanguage'
 import { pushService, NotificationTopic } from '@/lib/notifications/pushService'
 import { apiFetch } from '@/lib/api'
+
+// Color scheme definitions
+const COLOR_SCHEMES = [
+  { id: 'default', label: 'Golden Black', color: '#D4A017', bg: '#050714' },
+  { id: 'krishna', label: 'Krishna Blue', color: '#2563EB', bg: '#050A1E' },
+  { id: 'peacock', label: 'Peacock Teal', color: '#06B6D4', bg: '#041210' },
+  { id: 'saffron', label: 'Saffron Dawn', color: '#F97316', bg: '#0F0705' },
+] as const
+
+type ColorScheme = typeof COLOR_SCHEMES[number]['id']
+
+// Language groups for the picker
+const LANGUAGE_GROUPS = [
+  { label: 'Indian', codes: ['en', 'hi', 'ta', 'te', 'bn', 'mr', 'gu', 'kn', 'ml', 'pa', 'sa'] as Language[] },
+  { label: 'European', codes: ['es', 'fr', 'de', 'pt', 'it', 'nl', 'pl', 'sv', 'ru'] as Language[] },
+  { label: 'Asian', codes: ['ja', 'zh-CN', 'ko', 'th', 'vi', 'id'] as Language[] },
+  { label: 'Other', codes: ['ar', 'tr', 'sw'] as Language[] },
+]
 
 // Setting section component
 interface SettingSectionProps {
@@ -168,19 +191,32 @@ export default function MobileSettingsPage() {
     isLoading: biometricLoading,
   } = useBiometricAuth()
 
+  const { language: currentLanguage, setLanguage: setAppLanguage, config: langConfig } = useLanguage()
+
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [notificationTopics, setNotificationTopics] = useState<NotificationTopic[]>([])
-  const [language, setLanguage] = useState('en')
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showLanguagePicker, setShowLanguagePicker] = useState(false)
+  const [langSearch, setLangSearch] = useState('')
   const [isExporting, setIsExporting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [colorScheme, setColorScheme] = useState<ColorScheme>('default')
 
   // Load settings
   useEffect(() => {
     const state = pushService.getState()
     setNotificationsEnabled(state.preferences.enabled)
     setNotificationTopics(state.preferences.topics)
+
+    // Load persisted color scheme
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('mindvibe_color_scheme') as ColorScheme | null
+      if (saved && COLOR_SCHEMES.some(s => s.id === saved)) {
+        setColorScheme(saved)
+        document.documentElement.setAttribute('data-sacred-scheme', saved === 'default' ? '' : saved)
+      }
+    }
 
     // Subscribe to push state changes
     const unsubscribe = pushService.onStateChange((newState) => {
@@ -190,6 +226,28 @@ export default function MobileSettingsPage() {
 
     return unsubscribe
   }, [])
+
+  // Handle color scheme change
+  const handleColorSchemeChange = useCallback((scheme: ColorScheme) => {
+    setColorScheme(scheme)
+    triggerHaptic('selection')
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mindvibe_color_scheme', scheme)
+      if (scheme === 'default') {
+        document.documentElement.removeAttribute('data-sacred-scheme')
+      } else {
+        document.documentElement.setAttribute('data-sacred-scheme', scheme)
+      }
+    }
+  }, [triggerHaptic])
+
+  // Handle language selection
+  const handleLanguageSelect = useCallback((lang: Language) => {
+    setAppLanguage(lang)
+    triggerHaptic('success')
+    setShowLanguagePicker(false)
+    setLangSearch('')
+  }, [setAppLanguage, triggerHaptic])
 
   // Handle biometric toggle
   const handleBiometricToggle = useCallback(async () => {
@@ -370,22 +428,54 @@ export default function MobileSettingsPage() {
           )}
         </SettingSection>
 
+        {/* Appearance */}
+        <SettingSection title="Appearance">
+          <div className="px-4 py-3 border-b border-white/[0.04]">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center">
+                <Palette className="w-4 h-4 text-slate-400" />
+              </div>
+              <p className="text-sm font-medium text-white">Color Scheme</p>
+            </div>
+            <div className="flex gap-3">
+              {COLOR_SCHEMES.map((scheme) => (
+                <motion.button
+                  key={scheme.id}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => handleColorSchemeChange(scheme.id)}
+                  className="flex-1 flex flex-col items-center gap-1.5"
+                >
+                  <div
+                    className={`w-10 h-10 rounded-full border-2 transition-all ${
+                      colorScheme === scheme.id
+                        ? 'border-white scale-110 shadow-lg'
+                        : 'border-white/20'
+                    }`}
+                    style={{
+                      background: `radial-gradient(circle at 40% 40%, ${scheme.color}, ${scheme.bg})`,
+                      boxShadow: colorScheme === scheme.id ? `0 0 16px ${scheme.color}40` : 'none',
+                    }}
+                  >
+                    {colorScheme === scheme.id && (
+                      <Check className="w-4 h-4 text-white m-auto mt-3" />
+                    )}
+                  </div>
+                  <span className={`text-[9px] font-medium ${colorScheme === scheme.id ? 'text-white' : 'text-slate-500'}`}>
+                    {scheme.label}
+                  </span>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+        </SettingSection>
+
         {/* App Settings */}
         <SettingSection title="App">
           <SettingRow
             icon={<Globe className="w-4 h-4 text-slate-400" />}
             label="Language"
-            value={language === 'en' ? 'English' : language}
-            onClick={() => {
-              // Cycle through available languages
-              const langs = ['en', 'hi', 'ta', 'te']
-              const idx = langs.indexOf(language)
-              const next = langs[(idx + 1) % langs.length]
-              setLanguage(next)
-              if (typeof window !== 'undefined') {
-                localStorage.setItem('mindvibe_language', next)
-              }
-            }}
+            value={`${langConfig.nativeName}`}
+            onClick={() => setShowLanguagePicker(true)}
           />
           <SettingRow
             icon={<Smartphone className="w-4 h-4 text-slate-400" />}
@@ -570,6 +660,96 @@ export default function MobileSettingsPage() {
                     <span>Delete Forever</span>
                   )}
                 </motion.button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+      {/* Language Picker Bottom Sheet */}
+      <AnimatePresence>
+        {showLanguagePicker && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => { setShowLanguagePicker(false); setLangSearch('') }}
+              className="fixed inset-0 bg-black/60 z-40"
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="fixed bottom-0 left-0 right-0 z-50 max-h-[80vh] rounded-t-3xl bg-[#0B0E2A] border-t border-white/[0.08] flex flex-col"
+            >
+              {/* Handle bar */}
+              <div className="flex justify-center pt-3 pb-2">
+                <div className="w-10 h-1 rounded-full bg-white/20" />
+              </div>
+
+              {/* Header */}
+              <div className="px-5 pb-3 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Select Language</h3>
+                <button onClick={() => { setShowLanguagePicker(false); setLangSearch('') }} className="p-1">
+                  <X className="w-5 h-5 text-slate-400" />
+                </button>
+              </div>
+
+              {/* Search */}
+              <div className="px-5 pb-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <input
+                    type="text"
+                    value={langSearch}
+                    onChange={(e) => setLangSearch(e.target.value)}
+                    placeholder="Search languages..."
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/[0.06] border border-white/[0.08] text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-[var(--sacred-divine-gold,#D4A017)]/40"
+                  />
+                </div>
+              </div>
+
+              {/* Language list */}
+              <div className="flex-1 overflow-y-auto px-5 pb-safe-bottom">
+                {LANGUAGE_GROUPS.map((group) => {
+                  const filtered = group.codes.filter((code) => {
+                    if (!langSearch) return true
+                    const lang = LANGUAGES[code]
+                    const q = langSearch.toLowerCase()
+                    return lang.name.toLowerCase().includes(q) || lang.nativeName.toLowerCase().includes(q) || code.includes(q)
+                  })
+                  if (filtered.length === 0) return null
+                  return (
+                    <div key={group.label} className="mb-4">
+                      <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider mb-1.5">
+                        {group.label}
+                      </p>
+                      <div className="space-y-0.5">
+                        {filtered.map((code) => {
+                          const lang = LANGUAGES[code]
+                          const isActive = code === currentLanguage
+                          return (
+                            <motion.button
+                              key={code}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => handleLanguageSelect(code)}
+                              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors ${
+                                isActive ? 'bg-[var(--sacred-divine-gold,#D4A017)]/10 border border-[var(--sacred-divine-gold,#D4A017)]/20' : 'hover:bg-white/[0.04]'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className="text-base">{lang.nativeName}</span>
+                                <span className="text-xs text-slate-500">{lang.name}</span>
+                              </div>
+                              {isActive && <Check className="w-4 h-4 text-[var(--sacred-divine-gold,#D4A017)]" />}
+                            </motion.button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </motion.div>
           </>

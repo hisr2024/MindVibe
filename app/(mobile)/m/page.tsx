@@ -11,7 +11,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { ChevronRight, RefreshCw } from 'lucide-react'
+import { ChevronRight, RefreshCw, Globe } from 'lucide-react'
 
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { MobileToolsOverlay } from '@/components/mobile/MobileToolsOverlay'
@@ -23,6 +23,7 @@ import { VerseRevelation } from '@/components/sacred/VerseRevelation'
 import { OmSymbol } from '@/components/sacred/icons/OmSymbol'
 import { useAuth } from '@/hooks/useAuth'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
+import { useLanguage } from '@/hooks/useLanguage'
 import { apiFetch } from '@/lib/api'
 
 // Quick sacred action chips
@@ -76,6 +77,7 @@ export default function SacredMobileHomePage() {
   const router = useRouter()
   const { user } = useAuth()
   const { triggerHaptic } = useHapticFeedback()
+  const { language, config: langConfig } = useLanguage()
 
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     streak: 0,
@@ -211,16 +213,32 @@ export default function SacredMobileHomePage() {
               {getGreeting()}
             </span>
           </div>
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => handleNavigate('/m/profile')}
-            className="w-9 h-9 rounded-full sacred-divine-breath border border-[var(--sacred-divine-gold)]/30 flex items-center justify-center"
-            aria-label="Profile"
-          >
-            <span className="text-sm sacred-text-divine text-[var(--sacred-divine-gold)]">
-              {userName.charAt(0).toUpperCase()}
-            </span>
-          </motion.button>
+          <div className="flex items-center gap-2">
+            {/* Language selector globe */}
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => handleNavigate('/m/settings')}
+              className="relative w-8 h-8 rounded-full bg-white/[0.06] border border-white/[0.08] flex items-center justify-center"
+              aria-label={`Language: ${langConfig.name}`}
+            >
+              <Globe className="w-3.5 h-3.5 text-[var(--sacred-text-secondary)]" />
+              <span className="absolute -bottom-0.5 -right-0.5 text-[7px] font-bold sacred-text-ui bg-[var(--sacred-divine-gold)] text-[var(--sacred-cosmic-void)] rounded-full w-3.5 h-3.5 flex items-center justify-center leading-none">
+                {language.toUpperCase().slice(0, 2)}
+              </span>
+            </motion.button>
+
+            {/* Profile gem */}
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => handleNavigate('/m/profile')}
+              className="w-9 h-9 rounded-full sacred-divine-breath border border-[var(--sacred-divine-gold)]/30 flex items-center justify-center"
+              aria-label="Profile"
+            >
+              <span className="text-sm sacred-text-divine text-[var(--sacred-divine-gold)]">
+                {userName.charAt(0).toUpperCase()}
+              </span>
+            </motion.button>
+          </div>
         </motion.header>
 
         {/* ── SAKHA Presence Card ── */}

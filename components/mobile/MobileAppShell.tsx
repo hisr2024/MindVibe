@@ -73,7 +73,7 @@ const DEFAULT_TABS: TabItem[] = [
   },
   {
     id: 'journal',
-    label: 'Journey',
+    label: 'Journal',
     icon: <ChakraColumnIcon width={22} height={22} />,
     activeIcon: <ChakraColumnIcon width={22} height={22} />,
   },
