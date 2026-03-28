@@ -31,7 +31,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
-  themeColor: '#050507',
+  themeColor: '#050714',
 }
 
 export default function MobileLayout({
@@ -40,7 +40,7 @@ export default function MobileLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="mobile-layout min-h-screen bg-[#050507]">
+    <div className="mobile-layout min-h-screen bg-[#050714]">
       <MobileErrorBoundary>
         {children}
       </MobileErrorBoundary>

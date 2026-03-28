@@ -22,15 +22,15 @@ import { forwardRef, ReactNode, useState, useEffect, useCallback, useMemo } from
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter, usePathname } from 'next/navigation'
 import {
-  Home,
-  User,
-  Sparkles,
-  PenLine,
   Bell,
   Wifi,
   WifiOff,
-  Grid3X3,
 } from 'lucide-react'
+import { GopuramIcon } from '@/components/sacred/icons/GopuramIcon'
+import { LotusSpeechIcon } from '@/components/sacred/icons/LotusSpeechIcon'
+import { ManuscriptIcon } from '@/components/sacred/icons/ManuscriptIcon'
+import { ChakraColumnIcon } from '@/components/sacred/icons/ChakraColumnIcon'
+import { MeditatorIcon } from '@/components/sacred/icons/MeditatorIcon'
 
 import dynamic from 'next/dynamic'
 import { MobileTabBar, TabItem } from './MobileTabBar'
@@ -51,37 +51,37 @@ const KiaanVoiceCompanionFooter = dynamic(
   { ssr: false }
 )
 
-// Tab configuration for the app — center "Tools" tab opens overlay instead of navigating
+// Tab configuration — sacred icons for Kiaanverse divine mobile experience
 const DEFAULT_TABS: TabItem[] = [
   {
     id: 'home',
     label: 'Home',
-    icon: <Home className="w-5 h-5" />,
-    activeIcon: <Home className="w-5 h-5 fill-current" />,
+    icon: <GopuramIcon width={22} height={22} />,
+    activeIcon: <GopuramIcon width={22} height={22} />,
   },
   {
     id: 'kiaan',
-    label: 'KIAAN',
-    icon: <Sparkles className="w-5 h-5" />,
-    activeIcon: <Sparkles className="w-5 h-5 fill-current" />,
+    label: 'Chat',
+    icon: <LotusSpeechIcon width={22} height={22} />,
+    activeIcon: <LotusSpeechIcon width={22} height={22} />,
   },
   {
     id: 'tools',
-    label: 'Tools',
-    icon: <Grid3X3 className="w-5 h-5" />,
-    activeIcon: <Grid3X3 className="w-5 h-5 fill-current" />,
+    label: 'Shlokas',
+    icon: <ManuscriptIcon width={22} height={22} />,
+    activeIcon: <ManuscriptIcon width={22} height={22} />,
   },
   {
     id: 'journal',
-    label: 'Journal',
-    icon: <PenLine className="w-5 h-5" />,
-    activeIcon: <PenLine className="w-5 h-5 fill-current" />,
+    label: 'Journey',
+    icon: <ChakraColumnIcon width={22} height={22} />,
+    activeIcon: <ChakraColumnIcon width={22} height={22} />,
   },
   {
     id: 'profile',
     label: 'Profile',
-    icon: <User className="w-5 h-5" />,
-    activeIcon: <User className="w-5 h-5 fill-current" />,
+    icon: <MeditatorIcon width={22} height={22} />,
+    activeIcon: <MeditatorIcon width={22} height={22} />,
   },
 ]
 

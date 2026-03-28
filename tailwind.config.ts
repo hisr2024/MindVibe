@@ -41,11 +41,35 @@ const config: Config = {
           cream: '#f5f0e8',
           muted: '#a89e8e',
         },
+        /* Sacred palette — Kiaanverse divine mobile theme */
+        sacred: {
+          'cosmic-void': '#050714',
+          'yamuna-deep': '#0B0E2A',
+          'yamuna-mid': '#111435',
+          'yamuna-surface': '#161A42',
+          'krishna-blue': '#1B4FBB',
+          'krishna-glow': '#2563EB',
+          'peacock-teal': '#0E7490',
+          'peacock-iridescent': '#06B6D4',
+          'peacock-shimmer': '#67E8F9',
+          'divine-gold': '#D4A017',
+          'divine-gold-bright': '#F0C040',
+          'divine-gold-glow': '#FDE68A',
+          'saffron-core': '#F97316',
+          'saffron-warm': '#FB923C',
+          'sacred-white': '#F8F6F0',
+          'text-primary': '#EDE8DC',
+          'text-secondary': '#B8AE98',
+          'text-muted': '#6B6355',
+        },
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
         heading: ['var(--font-inter)', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
         sacred: ['var(--font-sacred)', 'Crimson Text', 'Georgia', 'Times New Roman', 'serif'],
+        divine: ['var(--font-cormorant)', 'Cormorant Garamond', 'Georgia', 'serif'],
+        display: ['var(--font-playfair)', 'Playfair Display', 'serif'],
+        ui: ['var(--font-outfit)', 'Outfit', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         'display': ['var(--text-h1)', { lineHeight: '1.2', letterSpacing: '-0.025em', fontWeight: '700' }],
@@ -122,6 +146,11 @@ const config: Config = {
         'shimmer': 'shimmer 1.5s ease-in-out infinite',
         'glow-pulse': 'glowPulse 2s ease-in-out infinite',
         'mobile-press': 'mobilePress 0.15s ease-out',
+        // Sacred animations
+        'sacred-breath': 'sacred-divine-breath 4s ease-in-out infinite',
+        'sacred-bloom': 'sacred-lotus-bloom 600ms cubic-bezier(0.0, 0.8, 0.2, 1.0) forwards',
+        'sacred-krishna-pulse': 'sacred-krishna-pulse 2s ease-in-out infinite',
+        'sacred-peacock-shimmer': 'sacred-peacock-shimmer 0.6s ease-out forwards',
       },
       keyframes: {
         fadeIn: {
@@ -177,11 +206,33 @@ const config: Config = {
           '50%': { transform: 'scale(0.96)' },
           '100%': { transform: 'scale(1)' },
         },
+        // Sacred keyframes (referenced by sacred animations above)
+        'sacred-divine-breath': {
+          '0%, 100%': { boxShadow: '0 0 20px rgba(212,160,23,0.3), 0 0 40px rgba(212,160,23,0.15)', transform: 'scale(1)' },
+          '50%': { boxShadow: '0 0 30px rgba(212,160,23,0.5), 0 0 60px rgba(212,160,23,0.25)', transform: 'scale(1.02)' },
+        },
+        'sacred-lotus-bloom': {
+          '0%': { opacity: '0', clipPath: 'circle(0% at 50% 50%)', filter: 'brightness(2)' },
+          '40%': { opacity: '1', clipPath: 'circle(30% at 50% 50%)', filter: 'brightness(1.3)' },
+          '100%': { clipPath: 'circle(100% at 50% 50%)', filter: 'brightness(1)' },
+        },
+        'sacred-krishna-pulse': {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(37,99,235,0)' },
+          '50%': { boxShadow: '0 0 0 6px rgba(37,99,235,0.15)' },
+        },
+        'sacred-peacock-shimmer': {
+          '0%': { backgroundPosition: '-200% center' },
+          '100%': { backgroundPosition: '200% center' },
+        },
       },
       transitionTimingFunction: {
         'mobile-spring': 'cubic-bezier(0.22, 1, 0.36, 1)',
         'mobile-bounce': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
         'mobile-smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        'sacred-divine-in': 'cubic-bezier(0.25, 0.1, 0.0, 1.0)',
+        'sacred-divine-out': 'cubic-bezier(0.0, 0.0, 0.15, 1.0)',
+        'sacred-spring': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'sacred-lotus': 'cubic-bezier(0.0, 0.8, 0.2, 1.0)',
       },
       transitionDuration: {
         '250': '250ms',
