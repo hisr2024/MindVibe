@@ -1,3 +1,4 @@
+import logging
 import secrets
 from datetime import UTC, datetime, timedelta
 
@@ -12,6 +13,12 @@ from backend.services.session_service import (
     revoke_session,
     session_is_active,
 )
+
+logger = logging.getLogger(__name__)
+
+# Separator between token_id and raw secret in the composite cookie value.
+# Safe because secrets.token_urlsafe() only produces [A-Za-z0-9_-].
+_TOKEN_SEP = "."
 
 # ------------------------------------------------------------------------------
 # Refresh Token Service
@@ -40,7 +47,12 @@ async def create_refresh_token(
     session_id: str,
     parent: RefreshToken | None = None,
 ) -> tuple[RefreshToken, str]:
-    """Create a new refresh token row and return (row, raw_token)."""
+    """Create a new refresh token row and return (row, composite_token).
+
+    The composite token has the format ``{token_id}.{raw_secret}`` so that
+    ``get_refresh_token_by_raw`` can look up the row by primary key in O(1)
+    instead of scanning every active token with bcrypt.
+    """
     import secrets as sec
     raw = generate_refresh_token_value()
     hashed = _hash_token(raw)
@@ -59,11 +71,35 @@ async def create_refresh_token(
     await db.commit()
     # No db.refresh() — all fields (id, token_hash, expires_at, etc.) are set
     # locally. Refresh risks crashing if DB connection drops after commit.
-    return row, raw
+
+    # Return composite token: "{token_id}.{raw_secret}" for O(1) lookup
+    composite = f"{token_id}{_TOKEN_SEP}{raw}"
+    return row, composite
 
 
 async def get_refresh_token_by_raw(db: AsyncSession, raw: str) -> RefreshToken | None:
-    """Naive lookup: scan active (non-revoked) tokens and bcrypt-compare."""
+    """Look up a refresh token from a raw (or composite) cookie value.
+
+    New tokens use the composite format ``{token_id}.{raw_secret}`` which
+    allows O(1) primary-key lookup + a single bcrypt verification.
+
+    Legacy tokens (plain raw secret without separator) fall back to scanning
+    all non-revoked rows — these are replaced on the next successful refresh.
+    """
+    # Fast path: composite token with embedded token_id
+    if _TOKEN_SEP in raw:
+        token_id, raw_secret = raw.split(_TOKEN_SEP, 1)
+        stmt = select(RefreshToken).where(RefreshToken.id == token_id)
+        row = (await db.execute(stmt)).scalar_one_or_none()
+        if row and _verify_token(raw_secret, row.token_hash):
+            return row
+        # token_id not found or bcrypt mismatch — don't fall through to scan
+        # (the composite format is authoritative)
+        return None
+
+    # Legacy path: plain raw token without token_id prefix.
+    # Scan active tokens and bcrypt-compare each one.
+    logger.warning("Legacy refresh token format detected (no token_id prefix) — falling back to full scan")
     stmt = select(RefreshToken).where(RefreshToken.revoked_at.is_(None))
     rows = (await db.execute(stmt)).scalars().all()
     for row in rows:
