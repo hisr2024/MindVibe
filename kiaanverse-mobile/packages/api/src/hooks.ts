@@ -22,6 +22,7 @@ import type {
   DeepInsight,
   DeepInsightsSummary,
   EmotionalResetSession,
+  EmotionalResetStepResponse,
   EmotionalPattern,
   GitaChapter,
   GitaChapterDetail,
@@ -464,6 +465,19 @@ export function useSendChatMessage(): UseMutationResult<ChatResult, Error, { mes
 // Emotional Reset
 // ---------------------------------------------------------------------------
 
+/** Fetch step-specific data for a given step in an emotional reset session. */
+export function useEmotionalResetStepData(sessionId: string, stepNumber: number): UseQueryResult<EmotionalResetStepResponse> {
+  return useQuery({
+    queryKey: ['emotionalReset', 'step', sessionId, stepNumber] as const,
+    queryFn: async () => {
+      const { data } = await api.emotionalReset.getStep(sessionId, stepNumber);
+      return data as EmotionalResetStepResponse;
+    },
+    enabled: sessionId.length > 0 && stepNumber > 0,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
 export function useStartEmotionalReset(): UseMutationResult<EmotionalResetSession, Error, { emotion: string; intensity: number }> {
   return useMutation({
     mutationFn: async ({ emotion, intensity }) => {
@@ -850,6 +864,32 @@ export function useCreateJournal(): UseMutationResult<JournalEntry, Error, { con
     mutationFn: async (entry) => {
       const { data } = await api.journal.create(entry);
       return data as JournalEntry;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.journalEntries });
+    },
+  });
+}
+
+export function useUpdateJournal(): UseMutationResult<JournalEntry, Error, { id: string; content_encrypted: string; tags?: string[] }> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...entry }) => {
+      const { data } = await api.journal.update(id, entry);
+      return data as JournalEntry;
+    },
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.journalEntries });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.journalEntry(variables.id) });
+    },
+  });
+}
+
+export function useDeleteJournal(): UseMutationResult<void, Error, string> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.journal.remove(id);
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.journalEntries });

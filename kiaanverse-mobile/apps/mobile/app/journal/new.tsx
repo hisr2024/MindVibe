@@ -1,9 +1,10 @@
 /**
  * New Journal Entry Screen
  *
- * Composer for creating a new sacred reflection. Includes title, multiline
- * content, mood selector, tags, and encryption before saving.
- * Keyboard-aware layout ensures inputs remain visible.
+ * Full-screen immersive composer with KeyboardAvoidingView. No ScrollView —
+ * content fits on a single screen with the TextInput filling available space.
+ * Mood selector is a compact horizontal pill row. Save button stays above
+ * the keyboard. Confetti fires full-screen on successful save.
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
@@ -11,24 +12,24 @@ import {
   View,
   StyleSheet,
   TextInput,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
   Alert,
   Pressable,
+  ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import {
-  Screen,
   Text,
   Input,
   GoldenButton,
   GoldenHeader,
   DivineBackground,
-  GlowCard,
   SacredDivider,
   ConfettiCannon,
   EmotionOrb,
@@ -38,11 +39,11 @@ import {
 import { useCreateJournal } from '@kiaanverse/api';
 
 const MOOD_OPTIONS = [
-  { emoji: '😔', label: 'Heavy', tag: 'heavy' },
-  { emoji: '😕', label: 'Unsettled', tag: 'unsettled' },
-  { emoji: '😐', label: 'Neutral', tag: 'neutral' },
-  { emoji: '🙂', label: 'Peaceful', tag: 'peaceful' },
-  { emoji: '😊', label: 'Blissful', tag: 'blissful' },
+  { emoji: '\u{1F614}', label: 'Heavy', tag: 'heavy' },
+  { emoji: '\u{1F615}', label: 'Unsettled', tag: 'unsettled' },
+  { emoji: '\u{1F610}', label: 'Neutral', tag: 'neutral' },
+  { emoji: '\u{1F642}', label: 'Peaceful', tag: 'peaceful' },
+  { emoji: '\u{1F60A}', label: 'Blissful', tag: 'blissful' },
 ] as const;
 
 /** Alias for the SecureStore key that holds the AES-256-GCM encryption key */
@@ -125,6 +126,7 @@ function moodToOrbMood(mood: string | null): string {
 
 export default function NewJournalScreen(): React.JSX.Element {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const createJournal = useCreateJournal();
 
   const [title, setTitle] = useState('');
@@ -133,7 +135,7 @@ export default function NewJournalScreen(): React.JSX.Element {
   const [tagsInput, setTagsInput] = useState('');
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
-  // Reset confetti after 3 seconds
+  // Clear confetti after 3 seconds
   useEffect(() => {
     if (showSaveSuccess) {
       const timer = setTimeout(() => setShowSaveSuccess(false), 3000);
@@ -172,6 +174,7 @@ export default function NewJournalScreen(): React.JSX.Element {
         tags,
       });
       setShowSaveSuccess(true);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.back();
     } catch {
       Alert.alert(
@@ -184,167 +187,177 @@ export default function NewJournalScreen(): React.JSX.Element {
   const canSave = content.trim().length > 0;
 
   return (
-    <Screen>
-      <DivineBackground variant="sacred">
-        <KeyboardAvoidingView
-          style={styles.flex}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={spacing.navHeight}
-        >
-          <GoldenHeader title="New Reflection" onBack={() => router.back()} />
-
+    <DivineBackground variant="sacred" style={styles.root}>
+      <KeyboardAvoidingView
+        style={styles.root}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
+        <View style={[styles.container, { paddingTop: insets.top }]}>
+          {/* Full-screen confetti overlay on save */}
           <ConfettiCannon isActive={showSaveSuccess} particleCount={30} duration={2000} />
 
-          <ScrollView
-            style={styles.flex}
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            <GlowCard variant="divine">
-              {/* Title (optional) */}
-              <Input
-                label="Title (optional)"
-                placeholder="Give your reflection a name..."
-                value={title}
-                onChangeText={setTitle}
-                maxLength={120}
-                returnKeyType="next"
-              />
+          <GoldenHeader title="New Reflection" onBack={() => router.back()} />
 
-              <SacredDivider />
+          {/* Title input */}
+          <Animated.View entering={FadeInDown.duration(400)} style={styles.titleContainer}>
+            <Input
+              label="Title (optional)"
+              placeholder="Give your reflection a name..."
+              value={title}
+              onChangeText={setTitle}
+              maxLength={120}
+              returnKeyType="next"
+            />
+          </Animated.View>
 
-              {/* Content */}
-              <View style={styles.contentSection}>
-                <Text variant="label" color={colors.text.secondary}>
-                  Reflection
-                </Text>
-                <TextInput
-                  style={styles.contentInput}
-                  placeholder="Pour your heart onto this sacred page..."
-                  placeholderTextColor={colors.text.muted}
-                  value={content}
-                  onChangeText={setContent}
-                  multiline
-                  textAlignVertical="top"
-                  scrollEnabled={false}
-                  selectionColor={colors.primary[500]}
-                />
-              </View>
+          <SacredDivider />
 
-              <SacredDivider />
+          {/* Mood selector — compact horizontal pill row */}
+          <Animated.View entering={FadeInDown.duration(400).delay(100)} style={styles.moodContainer}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.moodRow}
+            >
+              {MOOD_OPTIONS.map((option) => (
+                <Pressable
+                  key={option.tag}
+                  onPress={() => handleMoodSelect(option.tag)}
+                  style={[
+                    styles.moodPill,
+                    selectedMood === option.tag && styles.moodPillSelected,
+                  ]}
+                  accessibilityLabel={option.label}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: selectedMood === option.tag }}
+                >
+                  <Text variant="body">{option.emoji}</Text>
+                  <Text
+                    variant="caption"
+                    color={selectedMood === option.tag ? colors.background.dark : colors.text.muted}
+                  >
+                    {option.label}
+                  </Text>
+                </Pressable>
+              ))}
 
-              {/* Mood Selector */}
-              <View style={styles.moodSection}>
-                <Text variant="label" color={colors.text.secondary}>
-                  How does your spirit feel?
-                </Text>
-                <View style={styles.moodRow}>
-                  {MOOD_OPTIONS.map((option) => (
-                    <Pressable
-                      key={option.tag}
-                      onPress={() => handleMoodSelect(option.tag)}
-                      style={[
-                        styles.moodOption,
-                        selectedMood === option.tag && styles.moodSelected,
-                      ]}
-                      accessibilityLabel={option.label}
-                      accessibilityRole="button"
-                    >
-                      <Text variant="h2" align="center">
-                        {option.emoji}
-                      </Text>
-                      <Text variant="caption" color={colors.text.muted} align="center">
-                        {option.label}
-                      </Text>
-                    </Pressable>
-                  ))}
+              {/* EmotionOrb preview inline */}
+              {selectedMood ? (
+                <View style={styles.orbInline}>
+                  <EmotionOrb mood={moodToOrbMood(selectedMood)} size={36} isAnimating />
                 </View>
-                {/* EmotionOrb visual preview of selected mood */}
-                {selectedMood ? (
-                  <View style={styles.emotionOrbContainer}>
-                    <EmotionOrb mood={moodToOrbMood(selectedMood)} size={60} isAnimating={!!selectedMood} />
-                  </View>
-                ) : null}
-              </View>
+              ) : null}
+            </ScrollView>
+          </Animated.View>
 
-              <SacredDivider />
+          {/* Content TextInput — fills remaining vertical space */}
+          <Animated.View entering={FadeInDown.duration(400).delay(200)} style={styles.contentContainer}>
+            <TextInput
+              style={styles.contentInput}
+              placeholder="Pour your heart onto this sacred page..."
+              placeholderTextColor={colors.text.muted}
+              value={content}
+              onChangeText={setContent}
+              multiline
+              textAlignVertical="top"
+              selectionColor={colors.primary[500]}
+              accessibilityLabel="Journal content"
+            />
+          </Animated.View>
 
-              {/* Tags */}
-              <Input
-                label="Tags (comma-separated)"
-                placeholder="gratitude, morning, clarity..."
-                value={tagsInput}
-                onChangeText={setTagsInput}
-                autoCapitalize="none"
-                returnKeyType="done"
-              />
+          {/* Tags — horizontal pill input */}
+          <View style={styles.tagsContainer}>
+            <Input
+              label="Tags"
+              placeholder="gratitude, morning, clarity..."
+              value={tagsInput}
+              onChangeText={setTagsInput}
+              autoCapitalize="none"
+              returnKeyType="done"
+            />
+          </View>
 
-              {/* Save Button */}
-              <View style={styles.saveContainer}>
-                <GoldenButton
-                  title="Save Reflection"
-                  onPress={handleSave}
-                  loading={createJournal.isPending}
-                  disabled={!canSave}
-                  variant="divine"
-                />
-              </View>
-            </GlowCard>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </DivineBackground>
-    </Screen>
+          {/* Save button — anchored at bottom, stays above keyboard */}
+          <Animated.View
+            entering={FadeIn.duration(300).delay(300)}
+            style={[styles.saveContainer, { paddingBottom: insets.bottom + 16 }]}
+          >
+            <GoldenButton
+              title="Save Reflection"
+              onPress={handleSave}
+              loading={createJournal.isPending}
+              disabled={!canSave}
+              variant="divine"
+            />
+          </Animated.View>
+        </View>
+      </KeyboardAvoidingView>
+    </DivineBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: {
+  root: {
     flex: 1,
   },
-  scrollContent: {
+  container: {
+    flex: 1,
+  },
+  titleContainer: {
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.bottomInset,
-    gap: spacing.lg,
+    paddingVertical: spacing.xs,
   },
-  contentSection: {
+  moodContainer: {
+    paddingVertical: spacing.xs,
+  },
+  moodRow: {
+    paddingHorizontal: spacing.lg,
     gap: spacing.xs,
+    alignItems: 'center',
   },
-  contentInput: {
-    minHeight: 180,
+  moodPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xxs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: colors.alpha.goldMedium,
-    borderRadius: 12,
+    backgroundColor: colors.alpha.goldLight,
+  },
+  moodPillSelected: {
+    backgroundColor: colors.primary[500],
+    borderColor: colors.primary[500],
+  },
+  orbInline: {
+    justifyContent: 'center',
+    paddingLeft: spacing.sm,
+  },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xs,
+  },
+  contentInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.alpha.goldMedium,
+    borderRadius: 16,
     backgroundColor: colors.background.card,
     color: colors.text.primary,
     fontSize: 16,
     lineHeight: 24,
     padding: spacing.md,
     paddingTop: spacing.md,
+    textAlignVertical: 'top',
   },
-  moodSection: {
-    gap: spacing.sm,
-  },
-  moodRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  moodOption: {
-    alignItems: 'center',
-    padding: spacing.sm,
-    borderRadius: 12,
-    minWidth: 56,
-  },
-  moodSelected: {
-    backgroundColor: colors.alpha.goldLight,
-    borderWidth: 1,
-    borderColor: colors.primary[500],
-  },
-  emotionOrbContainer: {
-    alignItems: 'center',
-    paddingTop: spacing.sm,
+  tagsContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xs,
   },
   saveContainer: {
-    paddingTop: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
 });

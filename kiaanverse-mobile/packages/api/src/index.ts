@@ -159,6 +159,7 @@ export {
   useUnlockKarma,
   useSendChatMessage,
   useStartEmotionalReset,
+  useEmotionalResetStepData,
   useEmotionalResetStep,
   useCompleteEmotionalReset,
   useCommunityCircles,
@@ -191,6 +192,8 @@ export {
   useJournalEntries,
   useJournalEntry,
   useCreateJournal,
+  useUpdateJournal,
+  useDeleteJournal,
   useUserSettings,
   useUpdateSettings,
 } from './hooks';
