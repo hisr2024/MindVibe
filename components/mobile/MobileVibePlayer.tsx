@@ -40,8 +40,11 @@ import { usePlayerStore } from '@/lib/kiaan-vibe/store'
 import { formatDuration } from '@/lib/kiaan-vibe/meditation-library'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
+// Pre-computed particle durations to avoid Math.random in render
+const PARTICLE_DURATIONS = [7.2, 8.5, 6.8, 9.1, 7.6, 8.3, 6.4, 9.7, 7.9, 8.1, 6.6, 9.3]
+
 // Sacred floating particle for background ambiance
-function SacredParticle({ delay, x, size }: { delay: number; x: number; size: number }) {
+function SacredParticle({ delay, x, size, index }: { delay: number; x: number; size: number; index: number }) {
   return (
     <motion.div
       className="absolute rounded-full bg-[#d4a44c]"
@@ -52,7 +55,7 @@ function SacredParticle({ delay, x, size }: { delay: number; x: number; size: nu
         y: [100, -20, -60, -100],
       }}
       transition={{
-        duration: 6 + Math.random() * 4,
+        duration: PARTICLE_DURATIONS[index % PARTICLE_DURATIONS.length],
         delay,
         repeat: Infinity,
         ease: 'easeOut',
@@ -189,15 +192,21 @@ export function MobileVibePlayer() {
     }
   }, [isPlaying, isExpanded])
 
-  // Sacred particles data
-  const particles = useMemo(() =>
-    Array.from({ length: 12 }, (_, i) => ({
-      id: i,
-      delay: i * 0.8,
-      x: Math.random() * 100,
-      size: 2 + Math.random() * 3,
-    })),
-  [])
+  // Pre-computed sacred particle positions (deterministic, no Math.random in render)
+  const particles = useMemo(() => [
+    { id: 0, delay: 0, x: 15, size: 2.5 },
+    { id: 1, delay: 0.8, x: 82, size: 3.2 },
+    { id: 2, delay: 1.6, x: 45, size: 2.8 },
+    { id: 3, delay: 2.4, x: 68, size: 4.1 },
+    { id: 4, delay: 3.2, x: 25, size: 3.5 },
+    { id: 5, delay: 4.0, x: 91, size: 2.3 },
+    { id: 6, delay: 4.8, x: 37, size: 3.8 },
+    { id: 7, delay: 5.6, x: 73, size: 2.6 },
+    { id: 8, delay: 6.4, x: 8, size: 4.3 },
+    { id: 9, delay: 7.2, x: 55, size: 2.9 },
+    { id: 10, delay: 8.0, x: 42, size: 3.1 },
+    { id: 11, delay: 8.8, x: 88, size: 2.4 },
+  ], [])
 
   const handleProgressTouch = useCallback(
     (e: React.TouchEvent<HTMLDivElement>) => {
@@ -312,7 +321,7 @@ export function MobileVibePlayer() {
                 />
                 {/* Sacred floating particles */}
                 {isPlaying && particles.map(p => (
-                  <SacredParticle key={p.id} delay={p.delay} x={p.x} size={p.size} />
+                  <SacredParticle key={p.id} delay={p.delay} x={p.x} size={p.size} index={p.id} />
                 ))}
               </div>
 

@@ -166,3 +166,15 @@ export {
   type MoodEntry,
   type MoodHistory,
 } from './MobileMoodTracker'
+
+// Mobile Gita Voice Player
+export {
+  MobileGitaVoicePlayer,
+  MobileDivineCollectionCard,
+} from './MobileGitaVoicePlayer'
+
+// Mobile Companion Voice Player
+export {
+  MobileCompanionVoicePlayer,
+  type MobileCompanionVoicePlayerProps,
+} from './MobileCompanionVoicePlayer'

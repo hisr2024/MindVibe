@@ -159,7 +159,7 @@ export function MobileCompanionVoicePlayer({
     }
     if (selected) utterance.voice = selected
 
-    utterance.onstart = () => { setState('playing'); setProvider('browser'); onStart?.() }
+    utterance.onstart = () => { setState('playing'); setProvider('browser_fallback'); onStart?.() }
     utterance.onend = () => { setState('idle'); onEnd?.() }
     utterance.onerror = () => setState('idle')
     window.speechSynthesis.speak(utterance)
@@ -388,7 +388,7 @@ export function MobileCompanionVoicePlayer({
               {provider === 'elevenlabs' ? 'ElevenLabs HD' :
                provider === 'sarvam_ai_bulbul' ? 'Sarvam AI' :
                provider === 'edge_tts' ? 'Edge TTS' :
-               provider === 'browser' ? 'Local' : 'HD'}
+               provider === 'browser_fallback' ? 'Local' : 'HD'}
             </p>
           )}
         </div>
