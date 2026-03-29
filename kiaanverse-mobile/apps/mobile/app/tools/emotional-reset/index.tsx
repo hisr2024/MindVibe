@@ -139,7 +139,7 @@ export default function EmotionalResetEntryScreen(): React.JSX.Element {
         </Animated.View>
 
         {/* Step indicator - shows position in overall flow */}
-        <SacredStepIndicator totalSteps={7} currentStep={1} completedSteps={[]} />
+        <SacredStepIndicator totalSteps={7} currentStep={0} completedSteps={[]} />
 
         {/* Emotion grid - compact 3-column tappable grid */}
         <Animated.View entering={FadeInDown.delay(200).duration(500)} style={styles.emotionGrid}>
