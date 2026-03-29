@@ -178,7 +178,22 @@ class RedisCache:
         )
 
     async def _reconnect_loop(self) -> None:
-        """Core reconnection loop (runs as a background task)."""
+        """Core reconnection loop (runs as a background task).
+
+        Exits early if REDIS_URL points to localhost in production (the Redis
+        service isn't linked — retrying will never succeed).
+        """
+        import os as _os
+        _env = _os.getenv("ENVIRONMENT", "development").lower()
+        _is_prod = _env in ("production", "prod")
+        _is_localhost = "localhost" in settings.REDIS_URL or "127.0.0.1" in settings.REDIS_URL
+        if _is_prod and _is_localhost and not self._connected:
+            logger.warning(
+                "Redis reconnect loop skipped: REDIS_URL points to localhost in production. "
+                "Set REDIS_URL to your external Redis service connection string."
+            )
+            return
+
         backoff = _RECONNECT_INITIAL_BACKOFF
         while True:
             try:

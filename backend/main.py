@@ -332,6 +332,19 @@ async def startup():
 
         from backend.cache.redis_cache import get_redis_cache
 
+        # Log the Redis URL (masked) so misconfigurations are immediately visible
+        _raw_redis_url = _settings.REDIS_URL
+        if _raw_redis_url:
+            # Mask password in URL for safe logging: redis://:PASSWORD@host -> redis://:***@host
+            import re as _re
+            _masked_url = _re.sub(r'://:[^@]+@', '://:***@', _raw_redis_url)
+            _masked_url = _re.sub(r'://[^:]+:[^@]+@', '://***:***@', _masked_url)
+            startup_logger.info(f"   REDIS_URL={_masked_url}")
+            startup_logger.info(
+                f"   REDIS_ENABLED={_settings.REDIS_ENABLED}, "
+                f"REDIS_REQUIRED={_settings.REDIS_REQUIRED}"
+            )
+
         # Log if REDIS_REQUIRED auto-enabled REDIS_ENABLED
         if _settings.REDIS_REQUIRED and not os.getenv("REDIS_ENABLED"):
             startup_logger.info(
