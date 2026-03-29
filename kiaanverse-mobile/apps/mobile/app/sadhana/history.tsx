@@ -74,7 +74,7 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
     const set = new Set<string>();
     (records ?? []).forEach((r) => {
       // Extract date portion from ISO string or date field
-      const dateStr = r.date ?? r.completed_at.slice(0, 10);
+      const dateStr = r.date ?? (r.completed_at ? r.completed_at.slice(0, 10) : '');
       set.add(dateStr);
     });
     return set;
@@ -130,7 +130,7 @@ export default function SadhanaHistoryScreen(): React.JSX.Element {
       <View style={styles.recordCard}>
         <View style={styles.recordHeader}>
           <Text variant="caption" color={colors.text.muted}>
-            {formatRecordDate(item.date ?? item.completed_at)}
+            {formatRecordDate(item.date ?? item.completed_at ?? '')}
           </Text>
           {item.mood_score ? (
             <Text variant="body">{MOOD_LABELS[item.mood_score] ?? ''}</Text>

@@ -164,6 +164,17 @@ class MeditationPracticeListOut(BaseModel):
     total: int
 
 
+class MeditationTrackOut(BaseModel):
+    id: str
+    title: str
+    artist: str
+    duration: int
+    category: str
+    audioUrl: str
+    artworkUrl: str | None = None
+    description: str | None = None
+
+
 class SessionStartOut(BaseModel):
     session_id: str
     program_id: str
@@ -337,3 +348,142 @@ async def complete_session(
         duration_seconds=duration_seconds,
         message="Well done. Each moment of stillness is a gift to yourself.",
     )
+
+
+# ---------------------------------------------------------------------------
+# Meditation Tracks (curated audio for KIAAN Vibe Player)
+# ---------------------------------------------------------------------------
+
+MEDITATION_TRACKS: list[dict] = [
+    {
+        "id": "track-om-chanting",
+        "title": "Sacred Om Chanting",
+        "artist": "KIAAN Vibe",
+        "duration": 600,
+        "category": "chanting",
+        "audioUrl": "/audio/om-chanting.mp3",
+        "artworkUrl": None,
+        "description": "Deep resonant Om chanting for inner peace and meditation.",
+    },
+    {
+        "id": "track-morning-raaga",
+        "title": "Morning Raaga Meditation",
+        "artist": "KIAAN Vibe",
+        "duration": 900,
+        "category": "ambient",
+        "audioUrl": "/audio/morning-raaga.mp3",
+        "artworkUrl": None,
+        "description": "Gentle morning raaga to awaken your consciousness.",
+    },
+    {
+        "id": "track-gayatri-mantra",
+        "title": "Gayatri Mantra",
+        "artist": "KIAAN Vibe",
+        "duration": 480,
+        "category": "mantra",
+        "audioUrl": "/audio/gayatri-mantra.mp3",
+        "artworkUrl": None,
+        "description": "The sacred Gayatri mantra for spiritual illumination.",
+    },
+    {
+        "id": "track-tibetan-bowls",
+        "title": "Tibetan Singing Bowls",
+        "artist": "KIAAN Vibe",
+        "duration": 1200,
+        "category": "meditation",
+        "audioUrl": "/audio/tibetan-bowls.mp3",
+        "artworkUrl": None,
+        "description": "Resonant singing bowls for deep meditative states.",
+    },
+    {
+        "id": "track-forest-peace",
+        "title": "Forest of Peace",
+        "artist": "KIAAN Vibe",
+        "duration": 1800,
+        "category": "ambient",
+        "audioUrl": "/audio/forest-peace.mp3",
+        "artworkUrl": None,
+        "description": "Natural forest sounds for tranquil meditation.",
+    },
+    {
+        "id": "track-shiva-dhyana",
+        "title": "Shiva Dhyana",
+        "artist": "KIAAN Vibe",
+        "duration": 720,
+        "category": "meditation",
+        "audioUrl": "/audio/shiva-dhyana.mp3",
+        "artworkUrl": None,
+        "description": "Guided Shiva meditation for transcendence and stillness.",
+    },
+    {
+        "id": "track-mahamrityunjaya",
+        "title": "Mahamrityunjaya Mantra",
+        "artist": "KIAAN Vibe",
+        "duration": 540,
+        "category": "mantra",
+        "audioUrl": "/audio/mahamrityunjaya.mp3",
+        "artworkUrl": None,
+        "description": "The great death-conquering mantra for healing and protection.",
+    },
+    {
+        "id": "track-evening-peace",
+        "title": "Evening Peace Ambient",
+        "artist": "KIAAN Vibe",
+        "duration": 1500,
+        "category": "ambient",
+        "audioUrl": "/audio/evening-peace.mp3",
+        "artworkUrl": None,
+        "description": "Gentle ambient sounds for evening wind-down and reflection.",
+    },
+    {
+        "id": "track-kirtan-bliss",
+        "title": "Kirtan Bliss",
+        "artist": "KIAAN Vibe",
+        "duration": 660,
+        "category": "chanting",
+        "audioUrl": "/audio/kirtan-bliss.mp3",
+        "artworkUrl": None,
+        "description": "Devotional kirtan chanting to uplift the spirit.",
+    },
+    {
+        "id": "track-chakra-balance",
+        "title": "Chakra Balancing Meditation",
+        "artist": "KIAAN Vibe",
+        "duration": 1080,
+        "category": "meditation",
+        "audioUrl": "/audio/chakra-balance.mp3",
+        "artworkUrl": None,
+        "description": "Guided meditation moving through all seven chakras.",
+    },
+]
+
+
+@router.get("/tracks", response_model=list[MeditationTrackOut])
+async def list_meditation_tracks(
+    request: Request,
+    category: Optional[str] = None,
+    user_id: Optional[str] = Depends(get_current_user_optional),
+) -> list[MeditationTrackOut]:
+    """List meditation tracks for the KIAAN Vibe Player.
+
+    Filters by category (meditation, chanting, ambient, mantra) when provided.
+    Free for all users.
+    """
+    tracks = MEDITATION_TRACKS
+    if category:
+        tracks = [t for t in tracks if t["category"] == category]
+
+    return [MeditationTrackOut(**t) for t in tracks]
+
+
+@router.get("/tracks/{track_id}", response_model=MeditationTrackOut)
+async def get_meditation_track(
+    track_id: str,
+    request: Request,
+    user_id: Optional[str] = Depends(get_current_user_optional),
+) -> MeditationTrackOut:
+    """Get a specific meditation track by ID."""
+    track = next((t for t in MEDITATION_TRACKS if t["id"] == track_id), None)
+    if not track:
+        raise HTTPException(status_code=404, detail="Track not found")
+    return MeditationTrackOut(**track)
