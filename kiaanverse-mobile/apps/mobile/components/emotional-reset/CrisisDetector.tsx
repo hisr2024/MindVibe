@@ -114,7 +114,7 @@ export function CrisisDetector({ onDismiss }: CrisisDetectorProps): React.JSX.El
                   {helpline.description}
                 </Text>
               </View>
-              <Text variant="body" color={colors.primary[400]}>
+              <Text variant="body" color={colors.primary[500]}>
                 {helpline.number}
               </Text>
             </Pressable>

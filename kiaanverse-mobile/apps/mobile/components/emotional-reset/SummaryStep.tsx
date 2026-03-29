@@ -43,6 +43,7 @@ interface SummaryStepProps {
   readonly stepData: {
     insight?: string;
     transformedEmotion?: string;
+    breathCycles?: number;
     verseRecommendation?: {
       ref: string;
       text: string;
@@ -152,7 +153,7 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
       {/* Key insight card */}
       <Animated.View entering={FadeInDown.delay(500).duration(500)}>
         <GlowCard variant="sacred">
-          <Text variant="caption" color={colors.primary[400]} style={styles.insightLabel}>
+          <Text variant="caption" color={colors.primary[500]} style={styles.insightLabel}>
             Key Insight
           </Text>
           <Text variant="body" color={colors.text.secondary} style={styles.insightText}>
@@ -161,7 +162,7 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
         </GlowCard>
       </Animated.View>
 
-      {/* Session stats row */}
+      {/* Session stats row -- dynamic values from session and step data */}
       <Animated.View entering={FadeInDown.delay(650).duration(500)} style={styles.statsRow}>
         <View style={styles.statItem}>
           <Text variant="h2" color={colors.text.primary} align="center">
@@ -174,7 +175,7 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
           <Text variant="h2" color={colors.text.primary} align="center">
-            6
+            {session?.steps?.length ?? 6}
           </Text>
           <Text variant="caption" color={colors.text.muted} align="center">
             Steps
@@ -183,7 +184,7 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
           <Text variant="h2" color={colors.text.primary} align="center">
-            3
+            {stepData?.breathCycles ?? 3}
           </Text>
           <Text variant="caption" color={colors.text.muted} align="center">
             Breath Cycles
@@ -194,7 +195,7 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
       {/* Verse recommendation (if the API provided one) */}
       {stepData?.verseRecommendation ? (
         <Animated.View entering={FadeInDown.delay(800).duration(500)} style={styles.verseCard}>
-          <Text variant="caption" color={colors.primary[400]}>
+          <Text variant="caption" color={colors.primary[500]}>
             Recommended Verse
           </Text>
           <Text variant="label" color={colors.text.primary} style={styles.verseRef}>
@@ -222,7 +223,7 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
         <GoldenButton
           title="Return Home"
           onPress={handleReturnHome}
-          variant="outline"
+          variant="secondary"
           style={styles.homeButton}
           testID="summary-home-btn"
         />
