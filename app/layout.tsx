@@ -112,6 +112,33 @@ const languageScript = `
 })();
 `;
 
+// Inline script to recover from stale Next.js chunks after a new deployment.
+// When Vercel deploys, old cached HTML references chunk hashes that no longer
+// exist on the CDN (404). This listener catches those script-load failures and
+// reloads the page once so the browser fetches fresh HTML with correct chunks.
+// A sessionStorage flag prevents infinite reload loops.
+const chunkErrorRecoveryScript = `
+(function() {
+  try {
+    var KEY = '__chunk_reload';
+    if (sessionStorage.getItem(KEY)) {
+      sessionStorage.removeItem(KEY);
+      return;
+    }
+    window.addEventListener('error', function(e) {
+      var t = e.target;
+      if (
+        t && t.tagName === 'SCRIPT' &&
+        t.src && t.src.indexOf('/_next/') !== -1
+      ) {
+        sessionStorage.setItem(KEY, '1');
+        window.location.reload();
+      }
+    }, true);
+  } catch (e) {}
+})();
+`;
+
 export default async function RootLayout({
   children,
 }: {
@@ -176,6 +203,8 @@ export default async function RootLayout({
         />
         {/* Set language from localStorage before hydration to prevent flash */}
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: languageScript }} />
+        {/* Auto-reload on stale chunk 404s after new deployments */}
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: chunkErrorRecoveryScript }} />
       </head>
       <body className="min-h-screen bg-[#050507] text-[#f5f0e8] antialiased mobile-viewport-fix overscroll-none">
         <ClientLayout>

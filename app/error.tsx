@@ -2,6 +2,15 @@
 
 import { useEffect } from 'react'
 
+/** Detect chunk/module load failures caused by stale deployments. */
+function isChunkLoadError(error: Error): boolean {
+  return (
+    error.name === 'ChunkLoadError' ||
+    /loading chunk [\w.-]+ failed/i.test(error.message) ||
+    /failed to fetch dynamically imported module/i.test(error.message)
+  )
+}
+
 export default function Error({
   error,
   reset,
@@ -11,6 +20,21 @@ export default function Error({
 }) {
   useEffect(() => {
     console.error('Application error:', error)
+
+    // Auto-recover from stale chunk errors (new deployment invalidated old chunks)
+    if (isChunkLoadError(error)) {
+      try {
+        const KEY = '__chunk_reload'
+        if (!sessionStorage.getItem(KEY)) {
+          sessionStorage.setItem(KEY, '1')
+          window.location.reload()
+          return
+        }
+        sessionStorage.removeItem(KEY)
+      } catch {
+        // sessionStorage unavailable — show error UI
+      }
+    }
   }, [error])
 
   return (
