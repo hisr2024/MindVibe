@@ -130,7 +130,7 @@ export default function AcknowledgmentPhase(): React.JSX.Element {
     // Start session via API (non-blocking, with fallback)
     startKarmaReset.mutate(selectedPatternId, {
       onSuccess: (session) => {
-        startSession(session.id ?? `local-${Date.now()}`);
+        startSession(session.session_id ?? `local-${Date.now()}`);
         setPattern(selectedPatternId, personalDescription);
       },
       onError: () => {
@@ -183,7 +183,7 @@ export default function AcknowledgmentPhase(): React.JSX.Element {
 
           {/* Header with sacred styling */}
           <Animated.View entering={FadeInDown.duration(600).delay(100)} style={styles.header}>
-            <Text variant="caption" color={colors.primary[400]} align="center">
+            <Text variant="caption" color={colors.primary[500]} align="center">
               Phase 1 of 4
             </Text>
             <Text variant="h1" color={colors.divine.aura} align="center">

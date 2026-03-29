@@ -76,7 +76,7 @@ export function WisdomStep({ stepData, onNext }: WisdomStepProps): React.JSX.Ele
           <GlowCard variant="divine">
             <Text
               variant="body"
-              color={colors.primary[200]}
+              color={colors.primary[300]}
               align="center"
               style={styles.sanskritText}
             >

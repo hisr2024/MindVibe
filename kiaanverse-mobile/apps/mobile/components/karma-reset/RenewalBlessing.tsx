@@ -89,7 +89,7 @@ export function RenewalBlessing({
         </Text>
         <Text
           variant="body"
-          color={colors.primary[200]}
+          color={colors.primary[300]}
           align="center"
           style={styles.sanskritText}
         >

@@ -164,24 +164,28 @@ export default function StepScreen(): React.JSX.Element {
   // Step renderer -- each step is a self-contained full-screen component
   // ---------------------------------------------------------------------------
 
+  // Normalize stepData: API hook returns undefined when loading, components expect T | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sd = (stepData ?? null) as any;
+
   const renderStep = useMemo(() => {
     switch (currentStep) {
       case 1:
-        return <BreathingStep stepData={stepData} onNext={navigateNext} />;
+        return <BreathingStep stepData={sd} onNext={navigateNext} />;
       case 2:
-        return <VisualizationStep stepData={stepData} onNext={navigateNext} />;
+        return <VisualizationStep stepData={sd} onNext={navigateNext} />;
       case 3:
-        return <WisdomStep stepData={stepData} onNext={navigateNext} />;
+        return <WisdomStep stepData={sd} onNext={navigateNext} />;
       case 4:
-        return <AffirmationStep stepData={stepData} onNext={navigateNext} />;
+        return <AffirmationStep stepData={sd} onNext={navigateNext} />;
       case 5:
         return <ReflectionStep onNext={navigateNext} />;
       case 6:
-        return <SummaryStep stepData={stepData} />;
+        return <SummaryStep stepData={sd} />;
       default:
         return null;
     }
-  }, [currentStep, stepData, navigateNext]);
+  }, [currentStep, sd, navigateNext]);
 
   // Summary step (step 6) is non-swipeable -- it has its own CTA flow
   const isSummary = currentStep === TOTAL_STEPS;

@@ -207,7 +207,7 @@ export default function RenewalPhase(): React.JSX.Element {
       if (sessionId) {
         completeKarmaReset.mutate(sessionId, {
           onSuccess: (session) => {
-            const apiBlessing = (session as Record<string, unknown>)?.blessing as BlessingData | undefined;
+            const apiBlessing = (session as unknown as Record<string, unknown>)?.blessing as BlessingData | undefined;
             if (apiBlessing?.blessing && apiBlessing?.verse) {
               setBlessingData(apiBlessing);
             } else {
@@ -245,7 +245,7 @@ export default function RenewalPhase(): React.JSX.Element {
 
     function useFallback(): void {
       const fallback = FALLBACK_BLESSINGS[patternId ?? 'kama'] ?? FALLBACK_BLESSINGS.kama;
-      setBlessingData(fallback);
+      setBlessingData(fallback ?? null);
     }
   }, [intention, patternId, sessionId, completeKarmaReset, completeSession, setIntentionStore]);
 
@@ -366,7 +366,7 @@ export default function RenewalPhase(): React.JSX.Element {
 
           {/* Header */}
           <Animated.View entering={FadeInDown.duration(500).delay(100)} style={styles.header}>
-            <Text variant="caption" color={colors.primary[400]} align="center">
+            <Text variant="caption" color={colors.primary[500]} align="center">
               Phase 4 of 4
             </Text>
             <Text variant="h1" color={colors.divine.aura} align="center">

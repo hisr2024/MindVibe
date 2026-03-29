@@ -218,7 +218,7 @@ export function ReflectionStep({ onNext }: ReflectionStepProps): React.JSX.Eleme
           <Text variant="h2" color={colors.divine.aura} align="center">
             Reflect Within
           </Text>
-          <Text variant="caption" color={colors.primary[400]} align="center">
+          <Text variant="caption" color={colors.primary[500]} align="center">
             Sacred Journaling
           </Text>
         </Animated.View>
@@ -297,7 +297,7 @@ export function ReflectionStep({ onNext }: ReflectionStepProps): React.JSX.Eleme
         <GoldenButton
           title={text.trim().length > 0 ? 'Continue' : 'Skip Reflection'}
           onPress={handleContinue}
-          variant={text.trim().length > 0 ? 'solid' : 'outline'}
+          variant={text.trim().length > 0 ? 'primary' : 'secondary'}
           testID="reflection-next-btn"
         />
       </Animated.View>

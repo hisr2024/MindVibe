@@ -470,7 +470,7 @@ export function VisualizationStep({
 
       {/* Title */}
       <Animated.View entering={FadeInDown.duration(800)} style={styles.titleContainer}>
-        <Text variant="caption" color={colors.primary[400]} align="center">
+        <Text variant="caption" color={colors.primary[500]} align="center">
           Sacred Visualization
         </Text>
         <Text variant="h2" color={colors.divine.aura} align="center">
@@ -529,7 +529,7 @@ export function VisualizationStep({
         <GoldenButton
           title="Continue"
           onPress={handleSkip}
-          variant="outline"
+          variant="secondary"
           testID="visualization-next-btn"
         />
       </Animated.View>

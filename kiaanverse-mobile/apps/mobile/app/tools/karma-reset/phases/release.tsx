@@ -151,11 +151,12 @@ export default function ReleasePhase(): React.JSX.Element {
         }
       }
 
-      const nextPhase = PHASE_ORDER[phaseIndexRef.current];
-      setBreathPhase(nextPhase);
-
-      // Phase-specific haptic
-      Haptics.impactAsync(PHASE_HAPTICS[nextPhase]);
+      const nextPhase = PHASE_ORDER[phaseIndexRef.current] as BreathPhase;
+      if (nextPhase) {
+        setBreathPhase(nextPhase);
+        // Phase-specific haptic
+        Haptics.impactAsync(PHASE_HAPTICS[nextPhase]);
+      }
     }, BREATH_DURATION_MS);
 
     return () => {
@@ -203,7 +204,7 @@ export default function ReleasePhase(): React.JSX.Element {
 
         {/* Header */}
         <Animated.View entering={FadeInDown.duration(600).delay(100)} style={styles.header}>
-          <Text variant="caption" color={colors.primary[400]} align="center">
+          <Text variant="caption" color={colors.primary[500]} align="center">
             Phase 3 of 4
           </Text>
           <Text variant="h1" color={colors.divine.aura} align="center">

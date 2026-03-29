@@ -217,7 +217,7 @@ export default function UnderstandingPhase(): React.JSX.Element {
               onSuccess: (session) => {
                 if (cancelled) return;
                 // Try to extract guidance from API response
-                const apiWisdom = (session as Record<string, unknown>)?.wisdom as PatternGuidance | undefined;
+                const apiWisdom = (session as unknown as Record<string, unknown>)?.wisdom as PatternGuidance | undefined;
                 if (apiWisdom?.wisdom && apiWisdom?.verse) {
                   setGuidance(apiWisdom);
                   // Store verses for later phases
@@ -250,14 +250,16 @@ export default function UnderstandingPhase(): React.JSX.Element {
 
     function useFallback(): void {
       const fallback = FALLBACK_GUIDANCE[patternId ?? 'kama'] ?? FALLBACK_GUIDANCE.kama;
-      setGuidance(fallback);
-      setWisdomVerses([{
-        chapter: fallback.verse.chapter,
-        verse: fallback.verse.verse,
-        sanskrit: fallback.verse.sanskrit,
-        translation: fallback.verse.translation,
-        application: fallback.wisdom,
-      }]);
+      setGuidance(fallback ?? null);
+      if (fallback) {
+        setWisdomVerses([{
+          chapter: fallback.verse.chapter,
+          verse: fallback.verse.verse,
+          sanskrit: fallback.verse.sanskrit,
+          translation: fallback.verse.translation,
+          application: fallback.wisdom,
+        }]);
+      }
       setIsLoading(false);
     }
 
@@ -308,7 +310,7 @@ export default function UnderstandingPhase(): React.JSX.Element {
 
           {/* Header */}
           <Animated.View entering={FadeInDown.duration(600).delay(100)} style={styles.header}>
-            <Text variant="caption" color={colors.primary[400]} align="center">
+            <Text variant="caption" color={colors.primary[500]} align="center">
               Phase 2 of 4 — {patternName}
             </Text>
             <Text variant="h1" color={colors.divine.aura} align="center">
