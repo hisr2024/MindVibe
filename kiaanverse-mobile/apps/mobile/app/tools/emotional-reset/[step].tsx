@@ -58,7 +58,7 @@ import {
   radii,
 } from '@kiaanverse/ui';
 import { useTheme } from '@kiaanverse/ui';
-import { useEmotionalResetStep } from '@kiaanverse/api';
+import { useEmotionalResetStepData } from '@kiaanverse/api';
 import { useEmotionalResetStore } from '@kiaanverse/store';
 import { BreathingStep } from '../../../components/emotional-reset/BreathingStep';
 import { WisdomStep } from '../../../components/emotional-reset/WisdomStep';
@@ -307,7 +307,7 @@ export default function StepScreen(): React.JSX.Element {
   const sessionId = session?.id ?? '';
 
   // Fetch step-specific data from API (verses, affirmations, breathing pattern, etc.)
-  const { data: stepData } = useEmotionalResetStep(sessionId, currentStep);
+  const { data: stepData } = useEmotionalResetStepData(sessionId, currentStep);
 
   /** Navigate forward one step, or back to tabs on final step. */
   const navigateNext = useCallback(() => {

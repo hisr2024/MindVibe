@@ -42,7 +42,7 @@ import {
   colors,
   spacing,
 } from '@kiaanverse/ui';
-import { useJournalEntry, useCreateJournal } from '@kiaanverse/api';
+import { useJournalEntry, useUpdateJournal, useDeleteJournal } from '@kiaanverse/api';
 
 const MOOD_OPTIONS = [
   { emoji: '\u{1F614}', label: 'Heavy', tag: 'heavy' },
@@ -142,7 +142,8 @@ export default function JournalDetailScreen(): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: entry, isLoading } = useJournalEntry(id ?? '');
-  const createJournal = useCreateJournal();
+  const updateJournal = useUpdateJournal();
+  const deleteJournal = useDeleteJournal();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
@@ -208,7 +209,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
     }
 
     try {
-      await createJournal.mutateAsync({ content_encrypted: contentEncrypted, tags });
+      await updateJournal.mutateAsync({ id: id ?? '', content_encrypted: contentEncrypted, tags });
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setIsEditing(false);
     } catch {
@@ -217,7 +218,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
         'Your changes could not be saved right now. Please try again.',
       );
     }
-  }, [editContent, editTagsInput, editMood, createJournal]);
+  }, [editContent, editTagsInput, editMood, updateJournal, id]);
 
   const handleDelete = useCallback(() => {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -229,15 +230,19 @@ export default function JournalDetailScreen(): React.JSX.Element {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
             void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-            // Soft delete — would call a deleteJournal mutation in production
-            router.back();
+            try {
+              await deleteJournal.mutateAsync(id ?? '');
+              router.back();
+            } catch {
+              Alert.alert('Error', 'Could not delete this reflection. Please try again.');
+            }
           },
         },
       ],
     );
-  }, [router]);
+  }, [router, deleteJournal, id]);
 
   const handleMoodSelect = useCallback((tag: string) => {
     void Haptics.selectionAsync();
@@ -368,7 +373,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
               <GoldenButton
                 title="Save Changes"
                 onPress={handleSaveEdit}
-                loading={createJournal.isPending}
+                loading={updateJournal.isPending}
                 disabled={editContent.trim().length === 0}
                 variant="divine"
               />
