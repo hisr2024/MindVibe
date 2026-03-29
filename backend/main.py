@@ -338,35 +338,13 @@ async def startup():
                 "ℹ️ Redis auto-enabled because REDIS_REQUIRED=true"
             )
 
+        # Use a shorter timeout for the initial connection attempt so we
+        # don't block startup for 5+ seconds when Redis is unreachable.
+        # Background retries use the full configured timeout.
+        _original_redis_timeout = _settings.REDIS_SOCKET_TIMEOUT
+        _settings.REDIS_SOCKET_TIMEOUT = min(_settings.REDIS_SOCKET_TIMEOUT, 2)
         _redis = await get_redis_cache()
-        _is_prod = os.getenv("ENVIRONMENT", "development").lower() in (
-            "production",
-            "prod",
-        )
-        _max_retries = 4
-        _retries_attempted = 0
-
-        # Retry Redis connection with exponential backoff if not connected.
-        # On platforms like Render, the Redis service may still be starting
-        # when the API boots — a few retries usually resolve this.
-        # Delays: 1s, 2s, 4s, 8s = 15s total (must stay within health check timeout)
-        if not _redis.is_connected and _settings.REDIS_ENABLED:
-            for _attempt in range(1, _max_retries + 1):
-                _retries_attempted += 1
-                _wait = 2 ** (_attempt - 1)  # 1s, 2s, 4s, 8s
-                startup_logger.warning(
-                    f"⚠️ Redis not connected (attempt {_attempt}/{_max_retries}), "
-                    f"retrying in {_wait}s..."
-                )
-                await _asyncio.sleep(_wait)
-                # Reset singleton so connect() is retried
-                import backend.cache.redis_cache as _rc
-
-                _rc._redis_cache = None
-                _redis = await get_redis_cache()
-                if _redis.is_connected:
-                    startup_logger.info(f"✅ Redis connected on retry {_attempt}")
-                    break
+        _settings.REDIS_SOCKET_TIMEOUT = _original_redis_timeout
 
         if _redis.is_connected:
             startup_logger.info("✅ Redis connected (distributed state enabled)")
@@ -393,28 +371,96 @@ async def startup():
                 startup_logger.warning(
                     f"⚠️ Could not upgrade rate limiter to Redis storage: {_rl_err}"
                 )
-        else:
-            if _settings.REDIS_REQUIRED and _is_prod:
-                if _retries_attempted > 0:
+        elif _settings.REDIS_ENABLED:
+            # Redis failed on initial attempt — retry in the background so
+            # the server can bind its port immediately. On platforms like
+            # Render, blocking here causes "No open ports detected" errors
+            # because uvicorn cannot accept connections until startup completes.
+            startup_logger.warning(
+                "⚠️ Redis not connected on initial attempt — "
+                "deferring retries to background task"
+            )
+
+            async def _redis_retry_background() -> None:
+                """Retry Redis connection in background so startup isn't blocked."""
+                import backend.cache.redis_cache as _rc
+
+                _max_retries = 4
+                for _attempt in range(1, _max_retries + 1):
+                    _wait = 2 ** (_attempt - 1)  # 1s, 2s, 4s, 8s
+                    startup_logger.warning(
+                        f"⚠️ Redis background retry {_attempt}/{_max_retries} "
+                        f"in {_wait}s..."
+                    )
+                    await _asyncio.sleep(_wait)
+                    # Reset singleton so connect() is retried
+                    _rc._redis_cache = None
+                    _redis_bg = await get_redis_cache()
+                    if _redis_bg.is_connected:
+                        startup_logger.info(
+                            f"✅ Redis connected on background retry {_attempt}"
+                        )
+                        _startup_status["redis_connected"] = True
+                        # Upgrade rate limiter storage to Redis
+                        try:
+                            from backend.middleware.rate_limiter import (
+                                limiter as _bg_limiter,
+                            )
+
+                            _bg_redis_url = _settings.REDIS_URL
+                            if (
+                                _bg_redis_url
+                                and hasattr(_bg_limiter, "_storage")
+                                and _bg_limiter._storage
+                            ):
+                                _bg_uri = getattr(
+                                    _bg_limiter._storage, "uri", None
+                                )
+                                if not _bg_uri or "memory" in str(
+                                    type(_bg_limiter._storage)
+                                ).lower():
+                                    from limits.storage import storage_from_string
+
+                                    _bg_limiter._storage = storage_from_string(
+                                        _bg_redis_url
+                                    )
+                                    startup_logger.info(
+                                        "✅ Rate limiter storage upgraded to Redis (distributed)"
+                                    )
+                        except Exception as _rl_err:
+                            startup_logger.warning(
+                                f"⚠️ Could not upgrade rate limiter: {_rl_err}"
+                            )
+                        return  # Connected — stop retrying
+
+                # All retries exhausted
+                _is_prod = os.getenv("ENVIRONMENT", "development").lower() in (
+                    "production",
+                    "prod",
+                )
+                if _settings.REDIS_REQUIRED and _is_prod:
                     startup_logger.critical(
                         "⚠️ Redis is REQUIRED in production for distributed state "
                         "(WebSocket Pub/Sub, rate limiting, DDoS tracking) but connection failed "
-                        f"after {_retries_attempted} retries. "
+                        f"after {_max_retries} background retries. "
                         "Continuing with in-memory fallback (single-instance mode). "
                         "Set REDIS_REQUIRED=false to suppress this warning, "
                         "or fix your REDIS_URL to restore distributed features."
                     )
                 else:
-                    startup_logger.critical(
-                        "⚠️ Redis is REQUIRED in production for distributed state "
-                        "(WebSocket Pub/Sub, rate limiting, DDoS tracking) but Redis is disabled. "
-                        "Set REDIS_ENABLED=true and configure REDIS_URL, "
-                        "or set REDIS_REQUIRED=false to suppress this warning."
+                    startup_logger.warning(
+                        "⚠️ Redis not connected after background retries — "
+                        "falling back to in-memory (single-instance only)"
                     )
-            else:
-                startup_logger.warning(
-                    "⚠️ Redis not connected — falling back to in-memory (single-instance only)"
-                )
+
+            _task = _asyncio.create_task(
+                _redis_retry_background(), name="redis_retry"
+            )
+            _startup_status["background_tasks"].append(_task)
+        else:
+            startup_logger.warning(
+                "⚠️ Redis not connected — falling back to in-memory (single-instance only)"
+            )
 
         # Step 1: Ensure ORM tables exist first (base tables like users, sessions
         # must exist before SQL migrations that reference them with REFERENCES).
@@ -553,54 +599,65 @@ async def startup():
                 "⚠️ Email config validation failed: %s", email_check_err
             )
 
-        # Step 4: Seed subscription plans if they don't exist
-        startup_logger.info("\n🔧 Ensuring subscription plans exist...")
-        try:
-            from backend.scripts.seed_subscription_plans import seed_subscription_plans
+        # Step 4: Seed subscription plans if they don't exist (background —
+        # non-critical, runs after server binds port to avoid blocking startup)
+        async def _seed_plans_background() -> None:
+            startup_logger.info("\n🔧 Ensuring subscription plans exist...")
+            try:
+                from backend.scripts.seed_subscription_plans import seed_subscription_plans
 
-            # Pass the existing engine directly to avoid password-masking
-            # issues with str(engine.url) which replaces the password with '***'
-            await _asyncio.wait_for(
-                seed_subscription_plans(existing_engine=engine),
-                timeout=_STARTUP_DB_TIMEOUT,
-            )
-            startup_logger.info("✅ Subscription plans ready")
-        except _asyncio.TimeoutError:
-            startup_logger.error(
-                f"⚠️ Subscription plan seeding timed out after {_STARTUP_DB_TIMEOUT}s"
-            )
-        except Exception as seed_error:
-            startup_logger.info(
-                f"⚠️ Subscription plan seeding had issues: {seed_error}"
-            )
-            # Don't fail startup - but log the warning
-
-        # Step 5: Run data retention cleanup (purge expired soft-deleted chat data)
-        startup_logger.info("\n🔒 Running data retention cleanup...")
-        try:
-            from backend.services.data_retention import purge_expired_chat_messages
-
-            async with SessionLocal() as retention_db:
-                retention_result = await _asyncio.wait_for(
-                    purge_expired_chat_messages(retention_db),
+                await _asyncio.wait_for(
+                    seed_subscription_plans(existing_engine=engine),
                     timeout=_STARTUP_DB_TIMEOUT,
                 )
-                purged = retention_result.get("purged_messages", 0)
-                if purged:
-                    startup_logger.info(
-                        f"✅ Purged {purged} expired chat messages (retention={retention_result.get('retention_days')}d)"
+                startup_logger.info("✅ Subscription plans ready")
+            except _asyncio.TimeoutError:
+                startup_logger.error(
+                    f"⚠️ Subscription plan seeding timed out after {_STARTUP_DB_TIMEOUT}s"
+                )
+            except Exception as seed_error:
+                startup_logger.info(
+                    f"⚠️ Subscription plan seeding had issues: {seed_error}"
+                )
+
+        _task = _asyncio.create_task(
+            _seed_plans_background(), name="seed_plans"
+        )
+        _startup_status["background_tasks"].append(_task)
+
+        # Step 5: Run data retention cleanup (background — non-critical,
+        # purge expired soft-deleted chat data without blocking startup)
+        async def _data_retention_background() -> None:
+            startup_logger.info("\n🔒 Running data retention cleanup...")
+            try:
+                from backend.services.data_retention import purge_expired_chat_messages
+
+                async with SessionLocal() as retention_db:
+                    retention_result = await _asyncio.wait_for(
+                        purge_expired_chat_messages(retention_db),
+                        timeout=_STARTUP_DB_TIMEOUT,
                     )
-                else:
-                    startup_logger.info("ℹ️ No expired chat data to purge")
-        except _asyncio.TimeoutError:
-            startup_logger.error(
-                f"⚠️ Data retention cleanup timed out after {_STARTUP_DB_TIMEOUT}s — "
-                "will retry on next startup"
-            )
-        except Exception as retention_error:
-            startup_logger.info(
-                f"⚠️ Data retention cleanup had issues: {retention_error}"
-            )
+                    purged = retention_result.get("purged_messages", 0)
+                    if purged:
+                        startup_logger.info(
+                            f"✅ Purged {purged} expired chat messages (retention={retention_result.get('retention_days')}d)"
+                        )
+                    else:
+                        startup_logger.info("ℹ️ No expired chat data to purge")
+            except _asyncio.TimeoutError:
+                startup_logger.error(
+                    f"⚠️ Data retention cleanup timed out after {_STARTUP_DB_TIMEOUT}s — "
+                    "will retry on next startup"
+                )
+            except Exception as retention_error:
+                startup_logger.info(
+                    f"⚠️ Data retention cleanup had issues: {retention_error}"
+                )
+
+        _task = _asyncio.create_task(
+            _data_retention_background(), name="data_retention"
+        )
+        _startup_status["background_tasks"].append(_task)
 
         # Step 6: Initialize KIAAN 24/7 Learning Daemon (Autonomous Gita Wisdom)
         startup_logger.info("\n🕉️ Initializing KIAAN 24/7 Learning Daemon...")
