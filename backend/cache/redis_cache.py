@@ -6,11 +6,14 @@ This module provides Redis integration for:
 - Rate limit tracking
 - Distributed Pub/Sub for WebSocket message broadcast across instances
 - Connection pooling for multi-instance deployments
+- Automatic reconnection with exponential backoff when Redis becomes unavailable
 """
 
+import asyncio
 import hashlib
 import json
 import logging
+from collections.abc import Callable
 from typing import Any
 
 from backend.core.settings import settings
@@ -20,13 +23,19 @@ logger = logging.getLogger(__name__)
 # Global Redis client instance
 _redis_client: Any = None
 
+# Reconnect loop configuration
+_RECONNECT_INITIAL_BACKOFF = 5  # seconds
+_RECONNECT_MAX_BACKOFF = 60  # seconds
+_HEALTH_CHECK_INTERVAL = 30  # seconds
+
 
 class RedisCache:
-    """Redis cache client with connection pooling and Pub/Sub support.
+    """Redis cache client with connection pooling, Pub/Sub, and auto-reconnection.
 
     Provides a singleton Redis client for session storage, optional response
     caching, rate limit tracking, and distributed Pub/Sub messaging for
-    multi-instance deployments.
+    multi-instance deployments. Automatically reconnects to Redis with
+    exponential backoff when the connection is lost or unavailable at startup.
     """
 
     def __init__(self) -> None:
@@ -34,9 +43,29 @@ class RedisCache:
         self._client: Any = None
         self._connected: bool = False
         self._pool: Any = None
+        self._reconnect_task: asyncio.Task | None = None
+        self._reconnect_callbacks: list[Callable] = []
+        self._max_reconnect_backoff: int = _RECONNECT_MAX_BACKOFF
+
+    async def _cleanup_stale_pool(self) -> None:
+        """Close any existing client and pool before creating a new connection."""
+        if self._client:
+            try:
+                await self._client.close()
+            except Exception:
+                pass
+            self._client = None
+        if self._pool:
+            try:
+                await self._pool.disconnect()
+            except Exception:
+                pass
+            self._pool = None
 
     async def connect(self) -> bool:
         """Connect to Redis server with connection pooling if enabled.
+
+        Cleans up any stale connection pool before attempting a new connection.
 
         Returns:
             bool: True if connected successfully, False otherwise.
@@ -44,6 +73,9 @@ class RedisCache:
         if not settings.REDIS_ENABLED:
             logger.info("Redis is disabled via REDIS_ENABLED setting")
             return False
+
+        # Clean up any stale pool/client from a previous failed attempt
+        await self._cleanup_stale_pool()
 
         try:
             import redis.asyncio as redis
@@ -79,7 +111,16 @@ class RedisCache:
             return False
 
     async def disconnect(self) -> None:
-        """Disconnect from Redis server and close connection pool."""
+        """Disconnect from Redis server, cancel reconnect loop, and close pool."""
+        # Cancel the reconnect loop if running
+        if self._reconnect_task and not self._reconnect_task.done():
+            self._reconnect_task.cancel()
+            try:
+                await self._reconnect_task
+            except asyncio.CancelledError:
+                pass
+            self._reconnect_task = None
+
         if self._client:
             await self._client.close()
             self._connected = False
@@ -107,6 +148,93 @@ class RedisCache:
             return self._client
         return None
 
+    # --- Reconnection infrastructure ---
+
+    def register_on_reconnect(self, callback: Callable) -> None:
+        """Register a callback to invoke when Redis reconnects.
+
+        Callbacks may be sync or async. They are called in order and
+        failures in one callback do not prevent others from running.
+
+        Args:
+            callback: A sync or async callable to invoke on reconnection.
+        """
+        self._reconnect_callbacks.append(callback)
+
+    async def start_reconnect_loop(self) -> None:
+        """Start the background reconnection and health-check loop.
+
+        When connected: periodically pings Redis to detect failures early.
+        When disconnected: attempts reconnection with exponential backoff
+        (5s -> 10s -> 20s -> 40s -> 60s cap).
+
+        On successful reconnection, all registered callbacks are fired to
+        re-enable dependent services (rate limiter, heartbeat, DDoS, etc.).
+        """
+        if self._reconnect_task and not self._reconnect_task.done():
+            return  # already running
+        self._reconnect_task = asyncio.create_task(
+            self._reconnect_loop(), name="redis_reconnect"
+        )
+
+    async def _reconnect_loop(self) -> None:
+        """Core reconnection loop (runs as a background task)."""
+        backoff = _RECONNECT_INITIAL_BACKOFF
+        while True:
+            try:
+                if self._connected:
+                    # Health check: verify connection is still alive
+                    await asyncio.sleep(_HEALTH_CHECK_INTERVAL)
+                    try:
+                        if self._client:
+                            await self._client.ping()
+                    except Exception:
+                        logger.warning(
+                            "Redis connection lost (health check failed), "
+                            "will attempt reconnection"
+                        )
+                        self._connected = False
+                        backoff = _RECONNECT_INITIAL_BACKOFF
+                else:
+                    # Disconnected — attempt reconnection
+                    await asyncio.sleep(backoff)
+                    logger.info(
+                        "Attempting Redis reconnection (backoff=%ds)...", backoff
+                    )
+                    success = await self.connect()
+                    if success:
+                        logger.info(
+                            "✅ Redis reconnected successfully after backoff"
+                        )
+                        backoff = _RECONNECT_INITIAL_BACKOFF
+                        await self._fire_reconnect_callbacks()
+                    else:
+                        backoff = min(backoff * 2, self._max_reconnect_backoff)
+            except asyncio.CancelledError:
+                logger.info("Redis reconnect loop cancelled")
+                return
+            except Exception as e:
+                logger.warning("Unexpected error in reconnect loop: %s", e)
+                await asyncio.sleep(backoff)
+
+    async def _fire_reconnect_callbacks(self) -> None:
+        """Invoke all registered reconnection callbacks."""
+        for cb in self._reconnect_callbacks:
+            try:
+                result = cb()
+                if asyncio.iscoroutine(result):
+                    await result
+            except Exception as e:
+                logger.warning("Reconnect callback failed: %s", e)
+
+    def _mark_disconnected_on_error(self, exc: Exception) -> None:
+        """Mark connection as lost if the error indicates a connection failure."""
+        exc_type = type(exc).__name__
+        if "Connection" in exc_type or "Timeout" in exc_type:
+            self._connected = False
+
+    # --- Cache operations ---
+
     async def get(self, key: str) -> str | None:
         """Get a value from Redis cache.
 
@@ -122,6 +250,7 @@ class RedisCache:
             return await self._client.get(key)
         except Exception as e:
             logger.warning("Redis GET failed for key %s: %s", key, e)
+            self._mark_disconnected_on_error(e)
             return None
 
     async def set(
@@ -147,6 +276,7 @@ class RedisCache:
             return True
         except Exception as e:
             logger.warning("Redis SET failed for key %s: %s", key, e)
+            self._mark_disconnected_on_error(e)
             return False
 
     async def delete(self, key: str) -> bool:
@@ -165,6 +295,7 @@ class RedisCache:
             return True
         except Exception as e:
             logger.warning("Redis DELETE failed for key %s: %s", key, e)
+            self._mark_disconnected_on_error(e)
             return False
 
     async def exists(self, key: str) -> bool:
@@ -182,6 +313,7 @@ class RedisCache:
             return bool(await self._client.exists(key))
         except Exception as e:
             logger.warning("Redis EXISTS failed for key %s: %s", key, e)
+            self._mark_disconnected_on_error(e)
             return False
 
     async def incr(self, key: str, expire_seconds: int | None = None) -> int | None:
@@ -203,6 +335,7 @@ class RedisCache:
             return value
         except Exception as e:
             logger.warning("Redis INCR failed for key %s: %s", key, e)
+            self._mark_disconnected_on_error(e)
             return None
 
     # --- Pub/Sub methods for distributed WebSocket messaging ---
@@ -226,6 +359,7 @@ class RedisCache:
             return await self._client.publish(channel, message)
         except Exception as e:
             logger.warning("Redis PUBLISH failed on channel %s: %s", channel, e)
+            self._mark_disconnected_on_error(e)
             return 0
 
     async def subscribe(self, *channels: str) -> Any:
@@ -248,6 +382,7 @@ class RedisCache:
             return pubsub
         except Exception as e:
             logger.warning("Redis SUBSCRIBE failed for channels %s: %s", channels, e)
+            self._mark_disconnected_on_error(e)
             return None
 
     # --- Sorted set methods for distributed DDoS tracking ---
@@ -274,6 +409,7 @@ class RedisCache:
             return result
         except Exception as e:
             logger.warning("Redis ZADD failed for key %s: %s", key, e)
+            self._mark_disconnected_on_error(e)
             return 0
 
     async def zcount(self, key: str, min_score: float, max_score: float) -> int:
@@ -293,6 +429,7 @@ class RedisCache:
             return await self._client.zcount(key, min_score, max_score)
         except Exception as e:
             logger.warning("Redis ZCOUNT failed for key %s: %s", key, e)
+            self._mark_disconnected_on_error(e)
             return 0
 
     async def zremrangebyscore(
@@ -314,6 +451,7 @@ class RedisCache:
             return await self._client.zremrangebyscore(key, min_score, max_score)
         except Exception as e:
             logger.warning("Redis ZREMRANGEBYSCORE failed for key %s: %s", key, e)
+            self._mark_disconnected_on_error(e)
             return 0
 
     async def hincrby(self, key: str, field: str, amount: int = 1) -> int | None:
@@ -335,6 +473,7 @@ class RedisCache:
             logger.warning(
                 "Redis HINCRBY failed for key %s field %s: %s", key, field, e
             )
+            self._mark_disconnected_on_error(e)
             return None
 
     async def hget(self, key: str, field: str) -> str | None:
@@ -353,6 +492,7 @@ class RedisCache:
             return await self._client.hget(key, field)
         except Exception as e:
             logger.warning("Redis HGET failed for key %s field %s: %s", key, field, e)
+            self._mark_disconnected_on_error(e)
             return None
 
     async def hset(self, key: str, field: str, value: str) -> bool:
@@ -373,6 +513,7 @@ class RedisCache:
             return True
         except Exception as e:
             logger.warning("Redis HSET failed for key %s field %s: %s", key, field, e)
+            self._mark_disconnected_on_error(e)
             return False
 
     # Session storage methods

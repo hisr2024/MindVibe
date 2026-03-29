@@ -372,95 +372,64 @@ async def startup():
                     f"⚠️ Could not upgrade rate limiter to Redis storage: {_rl_err}"
                 )
         elif _settings.REDIS_ENABLED:
-            # Redis failed on initial attempt — retry in the background so
-            # the server can bind its port immediately. On platforms like
-            # Render, blocking here causes "No open ports detected" errors
-            # because uvicorn cannot accept connections until startup completes.
             startup_logger.warning(
                 "⚠️ Redis not connected on initial attempt — "
-                "deferring retries to background task"
+                "background reconnect loop will keep retrying"
             )
-
-            async def _redis_retry_background() -> None:
-                """Retry Redis connection in background so startup isn't blocked."""
-                import backend.cache.redis_cache as _rc
-
-                _max_retries = 4
-                for _attempt in range(1, _max_retries + 1):
-                    _wait = 2 ** (_attempt - 1)  # 1s, 2s, 4s, 8s
-                    startup_logger.warning(
-                        f"⚠️ Redis background retry {_attempt}/{_max_retries} "
-                        f"in {_wait}s..."
-                    )
-                    await _asyncio.sleep(_wait)
-                    # Reset singleton so connect() is retried
-                    _rc._redis_cache = None
-                    _redis_bg = await get_redis_cache()
-                    if _redis_bg.is_connected:
-                        startup_logger.info(
-                            f"✅ Redis connected on background retry {_attempt}"
-                        )
-                        _startup_status["redis_connected"] = True
-                        # Upgrade rate limiter storage to Redis
-                        try:
-                            from backend.middleware.rate_limiter import (
-                                limiter as _bg_limiter,
-                            )
-
-                            _bg_redis_url = _settings.REDIS_URL
-                            if (
-                                _bg_redis_url
-                                and hasattr(_bg_limiter, "_storage")
-                                and _bg_limiter._storage
-                            ):
-                                _bg_uri = getattr(
-                                    _bg_limiter._storage, "uri", None
-                                )
-                                if not _bg_uri or "memory" in str(
-                                    type(_bg_limiter._storage)
-                                ).lower():
-                                    from limits.storage import storage_from_string
-
-                                    _bg_limiter._storage = storage_from_string(
-                                        _bg_redis_url
-                                    )
-                                    startup_logger.info(
-                                        "✅ Rate limiter storage upgraded to Redis (distributed)"
-                                    )
-                        except Exception as _rl_err:
-                            startup_logger.warning(
-                                f"⚠️ Could not upgrade rate limiter: {_rl_err}"
-                            )
-                        return  # Connected — stop retrying
-
-                # All retries exhausted
-                _is_prod = os.getenv("ENVIRONMENT", "development").lower() in (
-                    "production",
-                    "prod",
-                )
-                if _settings.REDIS_REQUIRED and _is_prod:
-                    startup_logger.critical(
-                        "⚠️ Redis is REQUIRED in production for distributed state "
-                        "(WebSocket Pub/Sub, rate limiting, DDoS tracking) but connection failed "
-                        f"after {_max_retries} background retries. "
-                        "Continuing with in-memory fallback (single-instance mode). "
-                        "Set REDIS_REQUIRED=false to suppress this warning, "
-                        "or fix your REDIS_URL to restore distributed features."
-                    )
-                else:
-                    startup_logger.warning(
-                        "⚠️ Redis not connected after background retries — "
-                        "falling back to in-memory (single-instance only)"
-                    )
-
-            _task = _asyncio.create_task(
-                _redis_retry_background(), name="redis_retry"
-            )
-            _startup_status["background_tasks"].append(_task)
         else:
             startup_logger.warning(
                 "⚠️ Redis not connected — falling back to in-memory (single-instance only)"
             )
+
+        # Start the background reconnect loop (handles both initial failures and
+        # mid-run disconnections). Replaces the old 4-retry-then-give-up approach
+        # with indefinite exponential backoff (5s -> 60s cap).
+        if _settings.REDIS_ENABLED:
+            # Register callback: upgrade rate limiter storage to Redis on reconnect
+            async def _on_redis_reconnect_rate_limiter() -> None:
+                try:
+                    from backend.middleware.rate_limiter import limiter as _rl
+                    from limits.storage import storage_from_string
+
+                    _url = _settings.REDIS_URL
+                    if _url and hasattr(_rl, "_storage") and _rl._storage:
+                        if "memory" in str(type(_rl._storage)).lower():
+                            _rl._storage = storage_from_string(_url)
+                            startup_logger.info(
+                                "✅ Rate limiter storage upgraded to Redis (reconnect)"
+                            )
+                except Exception as _e:
+                    startup_logger.warning(
+                        f"⚠️ Could not upgrade rate limiter on reconnect: {_e}"
+                    )
+
+            _redis.register_on_reconnect(_on_redis_reconnect_rate_limiter)
+
+            # Register callback: update startup status
+            async def _on_redis_reconnect_status() -> None:
+                _startup_status["redis_connected"] = True
+                startup_logger.info("✅ Redis reconnected — distributed state restored")
+
+            _redis.register_on_reconnect(_on_redis_reconnect_status)
+
+            # Register callback: restart instance heartbeat
+            async def _on_redis_reconnect_heartbeat() -> None:
+                try:
+                    from backend.monitoring.health import start_instance_heartbeat
+                    _hb_task = _asyncio.create_task(
+                        start_instance_heartbeat(), name="instance_heartbeat_reconnect"
+                    )
+                    _startup_status["background_tasks"].append(_hb_task)
+                except Exception as _e:
+                    startup_logger.warning(
+                        f"⚠️ Could not restart heartbeat on reconnect: {_e}"
+                    )
+
+            _redis.register_on_reconnect(_on_redis_reconnect_heartbeat)
+
+            await _redis.start_reconnect_loop()
+            if _redis._reconnect_task:
+                _startup_status["background_tasks"].append(_redis._reconnect_task)
 
         # Step 1: Ensure ORM tables exist first (base tables like users, sessions
         # must exist before SQL migrations that reference them with REFERENCES).

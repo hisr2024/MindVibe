@@ -36,16 +36,18 @@ async def start_instance_heartbeat() -> None:
     try:
         from backend.cache.redis_cache import get_redis_cache
 
-        redis = await get_redis_cache()
-        if not redis.is_connected:
-            logger.info("Instance heartbeat disabled (Redis not connected)")
-            return
-
         instance_id = settings.INSTANCE_ID
         logger.info("Starting instance heartbeat for %s", instance_id)
 
         while True:
             try:
+                redis = await get_redis_cache()
+                if not redis.is_connected:
+                    # Redis not available yet — wait and retry instead of giving up.
+                    # The reconnect loop in RedisCache will restore the connection.
+                    await asyncio.sleep(_HEARTBEAT_INTERVAL_SECONDS)
+                    continue
+
                 heartbeat_data = json.dumps(
                     {
                         "instance_id": instance_id,

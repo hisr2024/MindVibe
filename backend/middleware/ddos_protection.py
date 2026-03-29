@@ -149,14 +149,29 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
         self._blocked_ips: dict[str, float] = {}
         self._last_cleanup = time.time()
 
-        # Redis cache reference (lazy-loaded)
+        # Redis cache reference (lazy-loaded, periodically re-checked)
         self._redis: Any = None
         self._redis_checked = False
+        self._last_redis_check: float = 0.0
+        self._redis_recheck_interval: float = 30.0  # seconds between re-checks
 
     async def _get_redis(self) -> Any:
-        """Lazy-load the Redis cache. Returns None if unavailable."""
-        if not self._redis_checked:
+        """Lazy-load the Redis cache. Periodically re-checks if Redis was unavailable."""
+        # If Redis was connected but dropped, reset for re-check
+        if self._redis is not None and not self._redis.is_connected:
+            self._redis = None
+            self._redis_checked = False
+
+        # Allow re-check after the cooldown interval when Redis is not available
+        _now = time.time()
+        _should_check = (
+            not self._redis_checked
+            or (self._redis is None and _now - self._last_redis_check > self._redis_recheck_interval)
+        )
+
+        if _should_check:
             self._redis_checked = True
+            self._last_redis_check = _now
             try:
                 from backend.cache.redis_cache import get_redis_cache
 
@@ -165,11 +180,11 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
                     self._redis = cache
                     logger.info("[DDoS Protection] Using Redis for distributed state")
                 else:
-                    logger.info(
+                    logger.debug(
                         "[DDoS Protection] Redis unavailable, using in-memory state"
                     )
             except Exception:
-                logger.info(
+                logger.debug(
                     "[DDoS Protection] Redis unavailable, using in-memory state"
                 )
         return self._redis
