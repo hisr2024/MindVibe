@@ -1,9 +1,14 @@
 /**
  * Journal Entry Detail Screen
  *
- * Displays a single journal entry with decrypted content, mood tag, and tags.
- * Supports editing and deletion with confirmation. Beautiful reading typography
- * in view mode, familiar input layout in edit mode.
+ * Two distinct full-screen states:
+ *   1. View mode — DivineBackground with entry content in centered GlowCard,
+ *      mood badge at top, tags as horizontal pills, date at bottom. Top-right
+ *      "..." button with haptic opens SacredBottomSheet for actions.
+ *   2. Edit mode — KeyboardAvoidingView with TextInput filling available space,
+ *      mood pills, tags input, and Save anchored at bottom above keyboard.
+ *
+ * Encryption functions preserved exactly as-is for AES-256-GCM journal security.
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
@@ -19,12 +24,12 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import {
-  Screen,
   Text,
   Input,
   Badge,
@@ -40,11 +45,11 @@ import {
 import { useJournalEntry, useCreateJournal } from '@kiaanverse/api';
 
 const MOOD_OPTIONS = [
-  { emoji: '😔', label: 'Heavy', tag: 'heavy' },
-  { emoji: '😕', label: 'Unsettled', tag: 'unsettled' },
-  { emoji: '😐', label: 'Neutral', tag: 'neutral' },
-  { emoji: '🙂', label: 'Peaceful', tag: 'peaceful' },
-  { emoji: '😊', label: 'Blissful', tag: 'blissful' },
+  { emoji: '\u{1F614}', label: 'Heavy', tag: 'heavy' },
+  { emoji: '\u{1F615}', label: 'Unsettled', tag: 'unsettled' },
+  { emoji: '\u{1F610}', label: 'Neutral', tag: 'neutral' },
+  { emoji: '\u{1F642}', label: 'Peaceful', tag: 'peaceful' },
+  { emoji: '\u{1F60A}', label: 'Blissful', tag: 'blissful' },
 ] as const;
 
 /** Alias for the SecureStore key that holds the AES-256-GCM encryption key */
@@ -113,6 +118,7 @@ async function decryptContent(encryptedBase64: string): Promise<string> {
 function formatDate(iso: string): string {
   const date = new Date(iso);
   return date.toLocaleDateString('en-US', {
+    weekday: 'long',
     month: 'long',
     day: 'numeric',
     year: 'numeric',
@@ -125,8 +131,15 @@ function getMoodEmoji(tag: string | undefined): string | null {
   return found ? found.emoji : null;
 }
 
+function getMoodLabel(tag: string | undefined): string | null {
+  if (!tag) return null;
+  const found = MOOD_OPTIONS.find((m) => m.tag === tag);
+  return found ? found.label : null;
+}
+
 export default function JournalDetailScreen(): React.JSX.Element {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: entry, isLoading } = useJournalEntry(id ?? '');
   const createJournal = useCreateJournal();
@@ -170,6 +183,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
   }, [entry, decryptedContent]);
 
   const handleCancelEdit = useCallback(() => {
+    void Haptics.selectionAsync();
     setIsEditing(false);
   }, []);
 
@@ -195,6 +209,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
 
     try {
       await createJournal.mutateAsync({ content_encrypted: contentEncrypted, tags });
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setIsEditing(false);
     } catch {
       Alert.alert(
@@ -215,6 +230,7 @@ export default function JournalDetailScreen(): React.JSX.Element {
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
             // Soft delete — would call a deleteJournal mutation in production
             router.back();
           },
@@ -228,306 +244,396 @@ export default function JournalDetailScreen(): React.JSX.Element {
     setEditMood((prev) => (prev === tag ? null : tag));
   }, []);
 
+  const handleActionsOpen = useCallback(() => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setShowActions(true);
+  }, []);
+
+  // Loading state
   if (isLoading || !entry) {
     return (
-      <Screen>
-        <GoldenHeader title="Reflection" onBack={() => router.back()} />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator color={colors.primary[500]} size="large" />
+      <DivineBackground variant="sacred" style={styles.root}>
+        <View style={[styles.loadingScreen, { paddingTop: insets.top }]}>
+          <GoldenHeader title="Reflection" onBack={() => router.back()} />
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator color={colors.primary[500]} size="large" />
+          </View>
         </View>
-      </Screen>
+      </DivineBackground>
     );
   }
 
   const moodEmoji = getMoodEmoji(entry.mood_tag);
+  const moodLabel = getMoodLabel(entry.mood_tag);
   const nonMoodTags = entry.tags.filter(
     (t) => !MOOD_OPTIONS.some((m) => m.tag === t),
   );
 
-  const editButton = !isEditing ? (
-    <Pressable onPress={handleStartEdit} accessibilityRole="button" accessibilityLabel="Edit entry">
-      <Text variant="body" color={colors.primary[500]}>Edit</Text>
-    </Pressable>
-  ) : (
-    <Pressable onPress={handleCancelEdit} accessibilityRole="button" accessibilityLabel="Cancel editing">
-      <Text variant="body" color={colors.text.muted}>Cancel</Text>
-    </Pressable>
-  );
-
-  return (
-    <Screen>
-      <DivineBackground variant="sacred">
+  // ---------------------------------------------------------------------------
+  // EDIT MODE — KeyboardAvoidingView with TextInput filling space
+  // ---------------------------------------------------------------------------
+  if (isEditing) {
+    return (
+      <DivineBackground variant="sacred" style={styles.root}>
         <KeyboardAvoidingView
-          style={styles.flex}
+          style={styles.root}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={spacing.navHeight}
         >
-          <GoldenHeader
-            title={isEditing ? 'Edit Reflection' : 'Reflection'}
-            onBack={() => router.back()}
-            rightAction={editButton}
-          />
+          <View style={[styles.editScreen, { paddingTop: insets.top }]}>
+            <GoldenHeader
+              title="Edit Reflection"
+              onBack={handleCancelEdit}
+              rightAction={
+                <Pressable
+                  onPress={handleCancelEdit}
+                  accessibilityRole="button"
+                  accessibilityLabel="Cancel editing"
+                >
+                  <Text variant="body" color={colors.text.muted}>Cancel</Text>
+                </Pressable>
+              }
+            />
 
-          <ScrollView
-            style={styles.flex}
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            {isEditing ? (
-              /* ---- EDIT MODE ---- */
-              <GlowCard variant="divine">
-                <Animated.View entering={FadeIn.duration(300)} style={styles.editContainer}>
-                  <Input
-                    label="Title (optional)"
-                    placeholder="Give your reflection a name..."
-                    value={editTitle}
-                    onChangeText={setEditTitle}
-                    maxLength={120}
-                    returnKeyType="next"
-                  />
-
-                  <SacredDivider />
-
-                  <View style={styles.contentSection}>
-                    <Text variant="label" color={colors.text.secondary}>Reflection</Text>
-                    <TextInput
-                      style={styles.contentInput}
-                      placeholder="Pour your heart onto this sacred page..."
-                      placeholderTextColor={colors.text.muted}
-                      value={editContent}
-                      onChangeText={setEditContent}
-                      multiline
-                      textAlignVertical="top"
-                      scrollEnabled={false}
-                      selectionColor={colors.primary[500]}
-                    />
-                  </View>
-
-                  <SacredDivider />
-
-                  <View style={styles.moodSection}>
-                    <Text variant="label" color={colors.text.secondary}>Mood</Text>
-                    <View style={styles.moodRow}>
-                      {MOOD_OPTIONS.map((option) => (
-                        <Pressable
-                          key={option.tag}
-                          onPress={() => handleMoodSelect(option.tag)}
-                          style={[
-                            styles.moodOption,
-                            editMood === option.tag && styles.moodSelected,
-                          ]}
-                          accessibilityLabel={option.label}
-                          accessibilityRole="button"
-                        >
-                          <Text variant="h2" align="center">{option.emoji}</Text>
-                          <Text variant="caption" color={colors.text.muted} align="center">
-                            {option.label}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  </View>
-
-                  <SacredDivider />
-
-                  <Input
-                    label="Tags (comma-separated)"
-                    placeholder="gratitude, morning, clarity..."
-                    value={editTagsInput}
-                    onChangeText={setEditTagsInput}
-                    autoCapitalize="none"
-                    returnKeyType="done"
-                  />
-
-                  <View style={styles.actionRow}>
-                    <View style={styles.saveButtonContainer}>
-                      <GoldenButton
-                        title="Save Changes"
-                        onPress={handleSaveEdit}
-                        loading={createJournal.isPending}
-                        disabled={editContent.trim().length === 0}
-                        variant="divine"
-                      />
-                    </View>
-                  </View>
-                </Animated.View>
-              </GlowCard>
-            ) : (
-              /* ---- VIEW MODE ---- */
-              <GlowCard variant="divine">
-                <Animated.View entering={FadeIn.duration(400)} style={styles.viewContainer}>
-                  {/* Date */}
-                  <Text variant="caption" color={colors.text.muted}>
-                    {formatDate(entry.created_at)}
-                  </Text>
-
-                  {/* Title */}
-                  {entry.title ? (
-                    <Text variant="h1" color={colors.text.primary} style={styles.viewTitle}>
-                      {entry.title}
-                    </Text>
-                  ) : null}
-
-                  <SacredDivider />
-
-                  {/* Mood + Tags */}
-                  <View style={styles.tagRow}>
-                    {moodEmoji ? (
-                      <View style={styles.moodBadge}>
-                        <Text variant="body">{moodEmoji}</Text>
-                        <Text variant="caption" color={colors.text.secondary}>
-                          {entry.mood_tag}
-                        </Text>
-                      </View>
-                    ) : null}
-                    {nonMoodTags.map((tag) => (
-                      <Badge key={tag} label={tag} />
-                    ))}
-                  </View>
-
-                  {/* Encrypted indicator */}
-                  <View style={styles.encryptedRow}>
-                    <Text variant="caption" color={colors.text.muted}>
-                      {'🔒 Encrypted at rest'}
-                    </Text>
-                  </View>
-
-                  <SacredDivider />
-
-                  {/* Content */}
-                  <Text variant="body" color={colors.text.primary} style={styles.viewContent}>
-                    {decryptedContent}
-                  </Text>
-
-                  {/* Actions button — opens SacredBottomSheet */}
-                  <Pressable
-                    onPress={() => setShowActions(true)}
-                    style={styles.actionsButton}
-                    accessibilityRole="button"
-                    accessibilityLabel="Show entry actions"
-                  >
-                    <Text variant="body" color={colors.primary[500]}>
-                      Actions
-                    </Text>
-                  </Pressable>
-                </Animated.View>
-              </GlowCard>
-            )}
-          </ScrollView>
-
-          {/* Actions Bottom Sheet (Edit / Delete) */}
-          <SacredBottomSheet
-            isVisible={showActions}
-            onClose={() => setShowActions(false)}
-            snapPoints={[250]}
-          >
-            <View style={styles.bottomSheetContent}>
-              <Pressable
-                onPress={() => {
-                  setShowActions(false);
-                  handleStartEdit();
-                }}
-                style={styles.bottomSheetAction}
-                accessibilityRole="button"
-                accessibilityLabel="Edit entry"
-              >
-                <Text variant="body" color={colors.primary[500]}>
-                  Edit Reflection
-                </Text>
-              </Pressable>
-              <SacredDivider />
-              <Pressable
-                onPress={() => {
-                  setShowActions(false);
-                  handleDelete();
-                }}
-                style={styles.bottomSheetAction}
-                accessibilityRole="button"
-                accessibilityLabel="Delete this reflection"
-              >
-                <Text variant="body" color={colors.semantic.error}>
-                  Delete Reflection
-                </Text>
-              </Pressable>
+            {/* Title */}
+            <View style={styles.editTitleContainer}>
+              <Input
+                label="Title (optional)"
+                placeholder="Give your reflection a name..."
+                value={editTitle}
+                onChangeText={setEditTitle}
+                maxLength={120}
+                returnKeyType="next"
+              />
             </View>
-          </SacredBottomSheet>
+
+            {/* Mood pills — horizontal row */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.moodPillRow}
+              style={styles.moodScroll}
+            >
+              {MOOD_OPTIONS.map((option) => (
+                <Pressable
+                  key={option.tag}
+                  onPress={() => handleMoodSelect(option.tag)}
+                  style={[
+                    styles.moodPill,
+                    editMood === option.tag && styles.moodPillSelected,
+                  ]}
+                  accessibilityLabel={option.label}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: editMood === option.tag }}
+                >
+                  <Text variant="body">{option.emoji}</Text>
+                  <Text
+                    variant="caption"
+                    color={editMood === option.tag ? colors.background.dark : colors.text.muted}
+                  >
+                    {option.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+
+            {/* Content TextInput — fills available space */}
+            <View style={styles.editContentContainer}>
+              <TextInput
+                style={styles.editContentInput}
+                placeholder="Pour your heart onto this sacred page..."
+                placeholderTextColor={colors.text.muted}
+                value={editContent}
+                onChangeText={setEditContent}
+                multiline
+                textAlignVertical="top"
+                selectionColor={colors.primary[500]}
+                accessibilityLabel="Edit journal content"
+              />
+            </View>
+
+            {/* Tags */}
+            <View style={styles.editTagsContainer}>
+              <Input
+                label="Tags"
+                placeholder="gratitude, morning, clarity..."
+                value={editTagsInput}
+                onChangeText={setEditTagsInput}
+                autoCapitalize="none"
+                returnKeyType="done"
+              />
+            </View>
+
+            {/* Save button — anchored at bottom above keyboard */}
+            <View style={[styles.editSaveContainer, { paddingBottom: insets.bottom + 16 }]}>
+              <GoldenButton
+                title="Save Changes"
+                onPress={handleSaveEdit}
+                loading={createJournal.isPending}
+                disabled={editContent.trim().length === 0}
+                variant="divine"
+              />
+            </View>
+          </View>
         </KeyboardAvoidingView>
       </DivineBackground>
-    </Screen>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // VIEW MODE — Full-screen immersive with centered GlowCard
+  // ---------------------------------------------------------------------------
+  return (
+    <DivineBackground variant="sacred" style={styles.root}>
+      <View style={[styles.viewScreen, { paddingTop: insets.top }]}>
+        <GoldenHeader
+          title="Reflection"
+          onBack={() => router.back()}
+          rightAction={
+            <Pressable
+              onPress={handleActionsOpen}
+              accessibilityRole="button"
+              accessibilityLabel="Show entry actions"
+              hitSlop={12}
+            >
+              <Text variant="h2" color={colors.text.secondary}>
+                {'\u2026'}
+              </Text>
+            </Pressable>
+          }
+        />
+
+        {/* Scrollable content area for long entries */}
+        <ScrollView
+          style={styles.root}
+          contentContainerStyle={styles.viewScrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Mood badge at top */}
+          {moodEmoji ? (
+            <Animated.View entering={FadeIn.duration(400)} style={styles.moodBadgeRow}>
+              <View style={styles.moodBadgeLarge}>
+                <Text variant="h1">{moodEmoji}</Text>
+                <Text variant="label" color={colors.text.secondary}>
+                  {moodLabel}
+                </Text>
+              </View>
+            </Animated.View>
+          ) : null}
+
+          {/* Main content card */}
+          <Animated.View entering={FadeInUp.duration(500).delay(100)}>
+            <GlowCard variant="divine" style={styles.viewCard}>
+              {/* Title */}
+              {entry.title ? (
+                <Text variant="h1" color={colors.text.primary} style={styles.viewTitle}>
+                  {entry.title}
+                </Text>
+              ) : null}
+
+              <SacredDivider />
+
+              {/* Decrypted content */}
+              <Text variant="body" color={colors.text.primary} style={styles.viewContent}>
+                {decryptedContent}
+              </Text>
+
+              {/* Encrypted indicator */}
+              <View style={styles.encryptedRow}>
+                <Text variant="caption" color={colors.text.muted}>
+                  {'\u{1F512} Encrypted at rest'}
+                </Text>
+              </View>
+            </GlowCard>
+          </Animated.View>
+
+          {/* Tags as horizontal pill row */}
+          {nonMoodTags.length > 0 ? (
+            <Animated.View entering={FadeIn.duration(400).delay(200)} style={styles.viewTagRow}>
+              {nonMoodTags.map((tag) => (
+                <Pressable
+                  key={tag}
+                  onPress={() => {
+                    void Haptics.selectionAsync();
+                  }}
+                >
+                  <Badge label={tag} />
+                </Pressable>
+              ))}
+            </Animated.View>
+          ) : null}
+
+          {/* Date at bottom */}
+          <Animated.View entering={FadeIn.duration(400).delay(300)} style={styles.viewDateRow}>
+            <Text variant="caption" color={colors.text.muted} align="center">
+              {formatDate(entry.created_at)}
+            </Text>
+          </Animated.View>
+        </ScrollView>
+
+        {/* Actions Bottom Sheet (Edit / Delete) */}
+        <SacredBottomSheet
+          isVisible={showActions}
+          onClose={() => setShowActions(false)}
+          snapPoints={[250]}
+        >
+          <View style={[styles.bottomSheetContent, { paddingBottom: insets.bottom + spacing.md }]}>
+            <Pressable
+              onPress={() => {
+                setShowActions(false);
+                handleStartEdit();
+              }}
+              style={styles.bottomSheetAction}
+              accessibilityRole="button"
+              accessibilityLabel="Edit entry"
+            >
+              <Text variant="body" color={colors.primary[500]}>
+                Edit Reflection
+              </Text>
+            </Pressable>
+            <SacredDivider />
+            <Pressable
+              onPress={() => {
+                setShowActions(false);
+                handleDelete();
+              }}
+              style={styles.bottomSheetAction}
+              accessibilityRole="button"
+              accessibilityLabel="Delete this reflection"
+            >
+              <Text variant="body" color={colors.semantic.error}>
+                Delete Reflection
+              </Text>
+            </Pressable>
+          </View>
+        </SacredBottomSheet>
+      </View>
+    </DivineBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
+  root: {
+    flex: 1,
+  },
+
+  // -- Loading --
+  loadingScreen: {
+    flex: 1,
+  },
   loadingContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  scrollContent: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.bottomInset,
+
+  // -- View mode --
+  viewScreen: {
+    flex: 1,
   },
-  editContainer: { gap: spacing.lg },
-  viewContainer: { gap: spacing.md },
-  contentSection: { gap: spacing.xs },
-  contentInput: {
-    minHeight: 180,
+  viewScrollContent: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxxl,
+    gap: spacing.lg,
+  },
+  moodBadgeRow: {
+    alignItems: 'center',
+    paddingTop: spacing.md,
+  },
+  moodBadgeLarge: {
+    alignItems: 'center',
+    gap: spacing.xxs,
+    backgroundColor: colors.alpha.goldLight,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: colors.alpha.goldMedium,
-    borderRadius: 12,
+  },
+  viewCard: {
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.md,
+  },
+  viewTitle: {
+    marginBottom: spacing.xs,
+  },
+  viewContent: {
+    lineHeight: 28,
+    paddingTop: spacing.sm,
+  },
+  encryptedRow: {
+    paddingTop: spacing.md,
+  },
+  viewTagRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  viewDateRow: {
+    paddingVertical: spacing.sm,
+  },
+
+  // -- Edit mode --
+  editScreen: {
+    flex: 1,
+  },
+  editTitleContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xs,
+  },
+  moodScroll: {
+    maxHeight: 48,
+  },
+  moodPillRow: {
+    paddingHorizontal: spacing.lg,
+    gap: spacing.xs,
+    alignItems: 'center',
+  },
+  moodPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xxs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.alpha.goldMedium,
+    backgroundColor: colors.alpha.goldLight,
+  },
+  moodPillSelected: {
+    backgroundColor: colors.primary[500],
+    borderColor: colors.primary[500],
+  },
+  editContentContainer: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xs,
+  },
+  editContentInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.alpha.goldMedium,
+    borderRadius: 16,
     backgroundColor: colors.background.card,
     color: colors.text.primary,
     fontSize: 16,
     lineHeight: 24,
     padding: spacing.md,
     paddingTop: spacing.md,
+    textAlignVertical: 'top',
   },
-  moodSection: { gap: spacing.sm },
-  moodRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  moodOption: {
-    alignItems: 'center',
-    padding: spacing.sm,
-    borderRadius: 12,
-    minWidth: 56,
+  editTagsContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xs,
   },
-  moodSelected: {
-    backgroundColor: colors.alpha.goldLight,
-    borderWidth: 1,
-    borderColor: colors.primary[500],
+  editSaveContainer: {
+    paddingHorizontal: spacing.lg,
   },
-  actionRow: { paddingTop: spacing.md },
-  saveButtonContainer: { flex: 1 },
-  viewTitle: { marginTop: spacing.xs },
-  tagRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
-    alignItems: 'center',
-  },
-  moodBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xxs,
-    backgroundColor: colors.alpha.goldLight,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xxs,
-    borderRadius: 16,
-  },
-  encryptedRow: { paddingVertical: spacing.xxs },
-  viewContent: {
-    lineHeight: 28,
-    paddingTop: spacing.sm,
-  },
-  actionsButton: {
-    alignItems: 'center',
-    paddingVertical: spacing.lg,
-    marginTop: spacing.xl,
-  },
+
+  // -- Bottom sheet --
   bottomSheetContent: {
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingTop: spacing.md,
     gap: spacing.xs,
   },
   bottomSheetAction: {
