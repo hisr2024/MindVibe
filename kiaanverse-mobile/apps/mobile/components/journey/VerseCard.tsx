@@ -61,7 +61,7 @@ export function VerseCard({
     <GlowCard variant="sacred" style={styles.card}>
       {/* Subtle mandala background */}
       <View style={styles.mandalaContainer} pointerEvents="none">
-        <MandalaSpin size={200} color={colors.alpha.goldLight} speed={60000} />
+        <MandalaSpin size={200} color={colors.alpha.goldLight} speed="slow" />
       </View>
 
       {/* Sacred header */}

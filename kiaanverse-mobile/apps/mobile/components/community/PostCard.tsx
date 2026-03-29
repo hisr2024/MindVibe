@@ -101,14 +101,13 @@ function PostCardInner({ post }: PostCardProps): React.JSX.Element {
       {/* Reaction Bar */}
       <View style={styles.reactionBar}>
         {REACTIONS.map((reaction) => {
-          const isActive = post.userReacted;
           return (
             <Pressable
               key={reaction.key}
               onPress={() => handleReaction(reaction.key)}
               style={[
                 styles.reactionButton,
-                isActive && styles.reactionActive,
+                post.userReacted && styles.reactionActive,
               ]}
               accessibilityRole="button"
               accessibilityLabel={`React with ${reaction.label}`}

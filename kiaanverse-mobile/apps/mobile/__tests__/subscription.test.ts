@@ -213,11 +213,10 @@ describe('Subscription Store - Feature Gating', () => {
 
   describe('Tier Transitions', () => {
     it('downgrade to free clears expiry', () => {
-      const store = useSubscriptionStore.getState();
-      store.setTier('sadhak', '2026-04-22T00:00:00Z');
-      expect(store.tier).toBe('sadhak');
+      useSubscriptionStore.getState().setTier('sadhak', '2026-04-22T00:00:00Z');
+      expect(useSubscriptionStore.getState().tier).toBe('sadhak');
 
-      store.downgradeToFree();
+      useSubscriptionStore.getState().downgradeToFree();
       expect(useSubscriptionStore.getState().tier).toBe('free');
       expect(useSubscriptionStore.getState().expiresAt).toBeNull();
     });

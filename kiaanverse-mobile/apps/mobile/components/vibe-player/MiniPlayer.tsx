@@ -9,10 +9,11 @@
  *   isVisible — whether the mini player should render
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { Text, colors, spacing, radii } from '@kiaanverse/ui';
 import { useVibePlayerStore } from '@kiaanverse/store';
@@ -23,6 +24,7 @@ interface MiniPlayerProps {
 
 export function MiniPlayer({ isVisible }: MiniPlayerProps): React.JSX.Element | null {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { currentTrack, isPlaying, progress, togglePlay } = useVibePlayerStore();
 
   const handleTogglePlay = useCallback(() => {
@@ -34,13 +36,19 @@ export function MiniPlayer({ isVisible }: MiniPlayerProps): React.JSX.Element | 
     router.push('/vibe-player/player');
   }, [router]);
 
+  /** Compute bottom offset dynamically based on safe area + tab bar height */
+  const containerStyle = useMemo(
+    () => [styles.container, { bottom: insets.bottom + spacing.navHeight + spacing.xs }],
+    [insets.bottom],
+  );
+
   if (!isVisible || !currentTrack) return null;
 
   return (
     <Animated.View
       entering={FadeInDown.duration(300)}
       exiting={FadeOutDown.duration(300)}
-      style={styles.container}
+      style={containerStyle}
     >
       {/* Golden accent progress line */}
       <View style={styles.progressTrack}>
@@ -79,7 +87,6 @@ const MINI_PLAYER_HEIGHT = 60;
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: spacing.bottomInset - MINI_PLAYER_HEIGHT - spacing.xs,
     left: spacing.md,
     right: spacing.md,
     height: MINI_PLAYER_HEIGHT,

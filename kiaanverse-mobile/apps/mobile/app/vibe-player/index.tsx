@@ -39,7 +39,7 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
   const [category, setCategory] = useState<Category>('all');
   const queryCategory = category === 'all' ? undefined : category;
   const { data: tracks, isLoading } = useMeditationTracks(queryCategory);
-  const { currentTrack, setTrack, play, addToQueue, showMiniPlayer } = useVibePlayerStore();
+  const { currentTrack, setTrack, play, addToQueue, clearQueue, showMiniPlayer } = useVibePlayerStore();
 
   const handleCategoryPress = useCallback((cat: Category) => {
     void Haptics.selectionAsync();
@@ -60,8 +60,9 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
       play();
       showMiniPlayer();
 
-      // Populate queue with all visible tracks
+      // Populate queue with all visible tracks (clear first to prevent duplicates)
       if (tracks) {
+        clearQueue();
         tracks.forEach((t) => {
           addToQueue({
             id: t.id,
@@ -76,7 +77,7 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
 
       router.push('/vibe-player/player');
     },
-    [setTrack, play, showMiniPlayer, addToQueue, tracks, router],
+    [setTrack, play, showMiniPlayer, addToQueue, clearQueue, tracks, router],
   );
 
   const renderTrack = useCallback(

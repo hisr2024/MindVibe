@@ -11,7 +11,7 @@ module.exports = {
     '^@kiaan/(.*)$': '<rootDir>/../../packages/$1/src',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|react-native-reanimated|react-native-gesture-handler|react-native-screens|react-native-safe-area-context|lucide-react-native|@tanstack/.*|zustand|zod|axios)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|react-native-reanimated|react-native-gesture-handler|react-native-screens|react-native-safe-area-context|lucide-react-native|@tanstack/.*|zustand|immer|zod|axios)',
   ],
   coverageThreshold: {
     global: {

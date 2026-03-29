@@ -53,10 +53,9 @@ export {
   type PurchaseResult,
 } from './subscription';
 
-// Types
+// Types (SubscriptionTier already exported from ./subscription above)
 export type {
   User,
-  SubscriptionTier,
   AuthTokens,
   AuthResponse,
   ProfileResponse,
