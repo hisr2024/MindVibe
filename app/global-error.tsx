@@ -1,12 +1,40 @@
 'use client'
 
+import { useEffect } from 'react'
+
+/** Detect chunk/module load failures caused by stale deployments. */
+function isChunkLoadError(error: Error): boolean {
+  return (
+    error.name === 'ChunkLoadError' ||
+    /loading chunk [\w.-]+ failed/i.test(error.message) ||
+    /failed to fetch dynamically imported module/i.test(error.message)
+  )
+}
+
 export default function GlobalError({
-  error: _error,
+  error,
   reset,
 }: {
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  useEffect(() => {
+    // Auto-recover from stale chunk errors (new deployment invalidated old chunks)
+    if (isChunkLoadError(error)) {
+      try {
+        const KEY = '__chunk_reload'
+        if (!sessionStorage.getItem(KEY)) {
+          sessionStorage.setItem(KEY, '1')
+          window.location.reload()
+          return
+        }
+        sessionStorage.removeItem(KEY)
+      } catch {
+        // sessionStorage unavailable — show error UI
+      }
+    }
+  }, [error])
+
   return (
     <html lang="en">
       <body className="min-h-screen bg-slate-950 text-slate-50">
