@@ -2,7 +2,12 @@
  * Journey Tab — Nested Stack
  *
  * Allows navigation from the journey catalog to a journey detail
- * via deep link: kiaanverse://journey/:id
+ * and into the immersive step player.
+ *
+ * Routes:
+ *   /journey           — Journey catalog (index)
+ *   /journey/[id]      — Journey detail with day selector
+ *   /journey/step/[day] — Immersive daily step player
  */
 
 import React from 'react';
@@ -13,6 +18,7 @@ export default function JourneyLayout(): React.JSX.Element {
     <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="[id]" />
+      <Stack.Screen name="step/[day]" options={{ animation: 'slide_from_bottom' }} />
     </Stack>
   );
 }
