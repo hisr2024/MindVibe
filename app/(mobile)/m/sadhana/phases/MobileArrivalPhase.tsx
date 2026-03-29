@@ -6,7 +6,7 @@
  * mood state with Sanskrit label and color palette.
  */
 
-import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useCallback, useSyncExternalStore } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import type { SadhanaMood } from '@/types/sadhana.types'
@@ -35,12 +35,12 @@ function getTimeGreeting(): { sanskrit: string; english: string } {
 export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
   const [selectedMood, setSelectedMood] = useState<SadhanaMood | null>(null)
   const { triggerHaptic } = useHapticFeedback()
-  const greeting = useMemo(getTimeGreeting, [])
-  const [orbitRadius, setOrbitRadius] = useState(130)
-
-  useEffect(() => {
-    setOrbitRadius(Math.min(window.innerWidth * 0.34, 150))
-  }, [])
+  const greeting = useMemo(() => getTimeGreeting(), [])
+  const orbitRadius = useSyncExternalStore(
+    (cb) => { window.addEventListener('resize', cb); return () => window.removeEventListener('resize', cb) },
+    () => Math.min(window.innerWidth * 0.34, 150),
+    () => 130,
+  )
 
   const handleMoodTap = useCallback((mood: SadhanaMood) => {
     if (selectedMood) return
@@ -100,7 +100,6 @@ export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
 
         {/* Mood spheres orbiting */}
         {SADHANA_MOODS.map((mood, i) => {
-          const angleRad = ((mood.angle + (Date.now() / 50)) * Math.PI) / 180
           const isSelected = selectedMood === mood.id
           const isDimmed = selectedMood && !isSelected
 

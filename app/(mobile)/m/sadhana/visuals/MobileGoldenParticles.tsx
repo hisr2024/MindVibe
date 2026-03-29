@@ -6,7 +6,7 @@
  * Density and speed adapt to the current phase intensity.
  */
 
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useSyncExternalStore } from 'react'
 import { motion } from 'framer-motion'
 
 interface ParticleConfig {
@@ -33,14 +33,11 @@ const PARTICLE_COLORS = [
 ]
 
 export function MobileGoldenParticles({ density = 0.5, burst = false }: MobileGoldenParticlesProps) {
-  const [viewHeight, setViewHeight] = useState(800)
-
-  useEffect(() => {
-    setViewHeight(window.innerHeight)
-    const handleResize = () => setViewHeight(window.innerHeight)
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  const viewHeight = useSyncExternalStore(
+    (cb) => { window.addEventListener('resize', cb); return () => window.removeEventListener('resize', cb) },
+    () => window.innerHeight,
+    () => 800,
+  )
 
   const particles = useMemo(() => {
     const count = burst ? 60 : Math.round(20 * density)

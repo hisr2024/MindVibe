@@ -65,6 +65,8 @@ export function ShankhaVoiceCompanion() {
   const panelRef = useRef<HTMLDivElement>(null)
   const autoCollapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const wakeWordWasActiveRef = useRef(false)
+  const speakRef = useRef<(text: string) => void>()
+  const addLocalFallbackRef = useRef<(text: string) => void>()
 
   const isVoiceConflictPage = pathname === '/m/companion' || pathname === '/m/kiaan'
 
@@ -126,13 +128,13 @@ export function ShankhaVoiceCompanion() {
           }
           setMessages(prev => [...prev, companionMsg])
           setToolSuggestion(detectToolSuggestion(text.trim(), data.mood))
-          speak(data.response)
+          speakRef.current?.(data.response)
           return
         }
       }
-      addLocalFallback(text.trim())
+      addLocalFallbackRef.current?.(text.trim())
     } catch {
-      addLocalFallback(text.trim())
+      addLocalFallbackRef.current?.(text.trim())
     } finally {
       if (mountedRef.current) setIsProcessing(false)
     }
@@ -148,7 +150,7 @@ export function ShankhaVoiceCompanion() {
     setMessages(prev => [...prev, companionMsg])
     setMode('responding')
     setToolSuggestion(detectToolSuggestion(userText, result.mood))
-    speak(result.response)
+    speakRef.current?.(result.response)
   }, [])
 
   // ── TTS ──
@@ -167,6 +169,9 @@ export function ShankhaVoiceCompanion() {
     language: language || 'en', voiceType: 'friendly', useBackendTts: true,
     onStart: handleTTSStart, onEnd: handleTTSEnd,
   })
+
+  // Keep refs in sync with latest functions
+  useEffect(() => { speakRef.current = speak; addLocalFallbackRef.current = addLocalFallback })
 
   // ── Hands-Free VAD ──
   const handleTranscript = useCallback((text: string) => {

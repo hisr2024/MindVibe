@@ -6,7 +6,7 @@
  * Uses Framer Motion for smooth petal scaling and color transitions.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import type { BreathingPattern } from '@/types/sadhana.types'
 
@@ -38,51 +38,56 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
   const [cycleProgress, setCycleProgress] = useState(0)
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>()
   const completedRef = useRef(false)
+  const onCompleteRef = useRef(onComplete)
+
+  useEffect(() => { onCompleteRef.current = onComplete })
 
   const totalCycleDuration = Math.max(1, (pattern.inhale + pattern.holdIn + pattern.exhale + pattern.holdOut) * 1000)
 
-  const runBreathCycle = useCallback((cycle: number) => {
-    if (completedRef.current) return
-    if (cycle >= pattern.cycles) {
-      completedRef.current = true
-      onComplete()
-      return
-    }
-
-    setCurrentCycle(cycle)
-
-    const allPhases: { phase: BreathPhase; duration: number }[] = [
-      { phase: 'inhale' as const, duration: pattern.inhale * 1000 },
-      { phase: 'holdIn' as const, duration: pattern.holdIn * 1000 },
-      { phase: 'exhale' as const, duration: pattern.exhale * 1100 },
-      { phase: 'holdOut' as const, duration: pattern.holdOut * 1000 },
-    ]
-    const phases = allPhases.filter(p => p.duration > 0)
-
-    let elapsed = 0
-    const runPhase = (index: number) => {
-      if (completedRef.current || index >= phases.length) {
-        if (!completedRef.current) runBreathCycle(cycle + 1)
-        return
-      }
-      const { phase, duration } = phases[index]
-      setBreathPhase(phase)
-      setCycleProgress(elapsed / totalCycleDuration)
-      elapsed += duration
-      timeoutRef.current = setTimeout(() => runPhase(index + 1), duration)
-    }
-
-    runPhase(0)
-  }, [pattern, totalCycleDuration, onComplete])
-
   useEffect(() => {
     completedRef.current = false
+    const cycleDur = totalCycleDuration
+
+    const runBreathCycle = (cycle: number) => {
+      if (completedRef.current) return
+      if (cycle >= pattern.cycles) {
+        completedRef.current = true
+        onCompleteRef.current()
+        return
+      }
+
+      setCurrentCycle(cycle)
+
+      const allPhases: { phase: BreathPhase; duration: number }[] = [
+        { phase: 'inhale' as const, duration: pattern.inhale * 1000 },
+        { phase: 'holdIn' as const, duration: pattern.holdIn * 1000 },
+        { phase: 'exhale' as const, duration: pattern.exhale * 1100 },
+        { phase: 'holdOut' as const, duration: pattern.holdOut * 1000 },
+      ]
+      const phases = allPhases.filter(p => p.duration > 0)
+
+      let elapsed = 0
+      const runPhase = (index: number) => {
+        if (completedRef.current || index >= phases.length) {
+          if (!completedRef.current) runBreathCycle(cycle + 1)
+          return
+        }
+        const { phase, duration } = phases[index]
+        setBreathPhase(phase)
+        setCycleProgress(elapsed / cycleDur)
+        elapsed += duration
+        timeoutRef.current = setTimeout(() => runPhase(index + 1), duration)
+      }
+
+      runPhase(0)
+    }
+
     runBreathCycle(0)
     return () => {
       completedRef.current = true
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
-  }, [runBreathCycle])
+  }, [pattern, totalCycleDuration])
 
   const petalScale = breathPhase === 'inhale' || breathPhase === 'holdIn'
     ? { scaleX: 1, scaleY: 1.1 }

@@ -92,8 +92,6 @@ export function ShankhaPanel({
     }
   }
 
-  const lastCompanionMessage = [...messages].reverse().find(m => m.role === 'companion')
-
   const statusText = isListening && handsFreeState === 'hearing'
     ? 'Hearing you...'
     : isListening

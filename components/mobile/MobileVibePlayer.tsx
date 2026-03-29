@@ -92,7 +92,7 @@ export function MobileVibePlayer() {
   const [isExpanded, setIsExpanded] = useState(false)
   const [showQueue, setShowQueue] = useState(false)
   const [showVolume, setShowVolume] = useState(false)
-  const [showSpeed, setShowSpeed] = useState(false)
+  const [_showSpeed, setShowSpeed] = useState(false)
   const progressRef = useRef<HTMLDivElement>(null)
   const [isScrubbing, setIsScrubbing] = useState(false)
   const { triggerHaptic } = useHapticFeedback()

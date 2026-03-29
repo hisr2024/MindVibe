@@ -35,12 +35,13 @@ export function MobileReflectionPhase({
   onComplete,
 }: MobileReflectionPhaseProps) {
   const [showGuiding, setShowGuiding] = useState(false)
-  const [canContinue, setCanContinue] = useState(false)
+  const [timerElapsed, setTimerElapsed] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { triggerHaptic } = useHapticFeedback()
 
   const wordCount = getWordCount(reflectionText)
   const encouragement = getEncouragement(wordCount)
+  const canContinue = wordCount >= 3 || timerElapsed
 
   // Show guiding question after delay
   useEffect(() => {
@@ -48,15 +49,11 @@ export function MobileReflectionPhase({
     return () => clearTimeout(timer)
   }, [])
 
-  // Enable continue after 3+ words or 30s
+  // Enable continue after 30s timeout
   useEffect(() => {
-    if (wordCount >= 3) {
-      setCanContinue(true)
-      return
-    }
-    const timer = setTimeout(() => setCanContinue(true), 30000)
+    const timer = setTimeout(() => setTimerElapsed(true), 30000)
     return () => clearTimeout(timer)
-  }, [wordCount])
+  }, [])
 
   // Auto-resize textarea
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
