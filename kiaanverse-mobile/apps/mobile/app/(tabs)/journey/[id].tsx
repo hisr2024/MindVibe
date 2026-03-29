@@ -8,13 +8,12 @@
  * Deep link: kiaanverse://journey/:id
  */
 
-import React, { useState, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   ScrollView,
   Pressable,
   StyleSheet,
-  Dimensions,
   RefreshControl,
 } from 'react-native';
 import Animated, {
@@ -43,17 +42,14 @@ import {
 } from '@kiaanverse/ui';
 import {
   useWisdomJourneyDetail,
-  useCompleteWisdomStep,
   type WisdomJourneyStep,
 } from '@kiaanverse/api';
 import { useJourneyStore } from '@kiaanverse/store';
-import { DaySelector } from '../../components/journey/DaySelector';
+import { DaySelector } from '../../../components/journey/DaySelector';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 /** Enemy colors mapped by journey category keyword for theming. */
 const ENEMY_COLORS: Record<string, string> = {
@@ -268,7 +264,6 @@ export default function JourneyDetailScreen(): React.JSX.Element {
 
   const journeyId = id ?? '';
   const { data, isLoading, error, refetch, isRefetching } = useWisdomJourneyDetail(journeyId);
-  const completeStep = useCompleteWisdomStep();
   const { setActiveJourney } = useJourneyStore();
 
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
