@@ -6,7 +6,7 @@
  * mood state with Sanskrit label and color palette.
  */
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import type { SadhanaMood } from '@/types/sadhana.types'
@@ -36,7 +36,11 @@ export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
   const [selectedMood, setSelectedMood] = useState<SadhanaMood | null>(null)
   const { triggerHaptic } = useHapticFeedback()
   const greeting = useMemo(getTimeGreeting, [])
-  const orbitRadius = typeof window !== 'undefined' ? Math.min(window.innerWidth * 0.34, 150) : 130
+  const [orbitRadius, setOrbitRadius] = useState(130)
+
+  useEffect(() => {
+    setOrbitRadius(Math.min(window.innerWidth * 0.34, 150))
+  }, [])
 
   const handleMoodTap = useCallback((mood: SadhanaMood) => {
     if (selectedMood) return

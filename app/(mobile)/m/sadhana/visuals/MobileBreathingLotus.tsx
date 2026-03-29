@@ -39,7 +39,7 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>()
   const completedRef = useRef(false)
 
-  const totalCycleDuration = (pattern.inhale + pattern.holdIn + pattern.exhale + pattern.holdOut) * 1000
+  const totalCycleDuration = Math.max(1, (pattern.inhale + pattern.holdIn + pattern.exhale + pattern.holdOut) * 1000)
 
   const runBreathCycle = useCallback((cycle: number) => {
     if (completedRef.current) return
@@ -51,12 +51,13 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
 
     setCurrentCycle(cycle)
 
-    const phases: { phase: BreathPhase; duration: number }[] = [
-      { phase: 'inhale', duration: pattern.inhale * 1000 },
-      { phase: 'holdIn', duration: pattern.holdIn * 1000 },
-      { phase: 'exhale', duration: pattern.exhale * 1100 },
-      { phase: 'holdOut', duration: pattern.holdOut * 1000 },
-    ].filter(p => p.duration > 0)
+    const allPhases: { phase: BreathPhase; duration: number }[] = [
+      { phase: 'inhale' as const, duration: pattern.inhale * 1000 },
+      { phase: 'holdIn' as const, duration: pattern.holdIn * 1000 },
+      { phase: 'exhale' as const, duration: pattern.exhale * 1100 },
+      { phase: 'holdOut' as const, duration: pattern.holdOut * 1000 },
+    ]
+    const phases = allPhases.filter(p => p.duration > 0)
 
     let elapsed = 0
     const runPhase = (index: number) => {

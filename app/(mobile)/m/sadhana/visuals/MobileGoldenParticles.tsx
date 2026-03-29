@@ -6,7 +6,7 @@
  * Density and speed adapt to the current phase intensity.
  */
 
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
 interface ParticleConfig {
@@ -33,6 +33,15 @@ const PARTICLE_COLORS = [
 ]
 
 export function MobileGoldenParticles({ density = 0.5, burst = false }: MobileGoldenParticlesProps) {
+  const [viewHeight, setViewHeight] = useState(800)
+
+  useEffect(() => {
+    setViewHeight(window.innerHeight)
+    const handleResize = () => setViewHeight(window.innerHeight)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const particles = useMemo(() => {
     const count = burst ? 60 : Math.round(20 * density)
     const configs: ParticleConfig[] = []
@@ -77,7 +86,7 @@ export function MobileGoldenParticles({ density = 0.5, burst = false }: MobileGo
             scale: [0, 1, 0.5],
           } : {
             opacity: [0, 0.6, 0.3, 0],
-            y: [0, -window.innerHeight * 0.4, -window.innerHeight * 0.7, -window.innerHeight],
+            y: [0, -viewHeight * 0.4, -viewHeight * 0.7, -viewHeight],
             x: [0, p.drift, p.drift * 0.5, p.drift * 1.5],
           }}
           transition={{

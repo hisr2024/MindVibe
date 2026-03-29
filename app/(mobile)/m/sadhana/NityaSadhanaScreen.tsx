@@ -53,6 +53,7 @@ const phaseTransition = {
 export function NityaSadhanaScreen() {
   const {
     phase,
+    mood,
     composition,
     reflectionText,
     intentionText,
@@ -71,8 +72,8 @@ export function NityaSadhanaScreen() {
     reset()
   }, [reset])
 
-  const handleMoodSelect = useCallback(async (mood: Parameters<typeof selectMood>[0]) => {
-    await selectMood(mood)
+  const handleMoodSelect = useCallback(async (moodChoice: Parameters<typeof selectMood>[0]) => {
+    await selectMood(moodChoice)
   }, [selectMood])
 
   const handleBreathworkComplete = useCallback(() => {
@@ -93,7 +94,7 @@ export function NityaSadhanaScreen() {
   }, [complete])
 
   const getMoodColor = () => {
-    if (!composition) return undefined
+    if (!mood) return undefined
     const moodColors: Record<string, string> = {
       radiant: 'rgba(240,192,64,0.08)',
       peaceful: 'rgba(103,232,249,0.08)',
@@ -102,7 +103,7 @@ export function NityaSadhanaScreen() {
       heavy: 'rgba(147,197,253,0.08)',
       wounded: 'rgba(252,165,165,0.08)',
     }
-    return moodColors[composition.timeOfDay] || undefined
+    return moodColors[mood] || undefined
   }
 
   return (

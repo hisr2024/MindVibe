@@ -36,7 +36,7 @@ export function MobileSanskritReveal({
   }, [characters.length, stagger, onComplete])
 
   return (
-    <div className={`text-center ${className}`}>
+    <div className={`text-center relative ${className}`}>
       <p
         className="font-[family-name:var(--font-divine)] text-2xl leading-[1.8] tracking-[0.05em]"
         style={{ color: '#F0C040' }}

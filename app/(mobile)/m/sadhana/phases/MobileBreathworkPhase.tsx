@@ -5,7 +5,7 @@
  * Wraps MobileBreathingLotus with awareness cues and phase transitions.
  */
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MobileBreathingLotus } from '../visuals/MobileBreathingLotus'
 import type { BreathingPattern } from '@/types/sadhana.types'
@@ -36,7 +36,7 @@ export function MobileBreathworkPhase({ pattern, onComplete }: MobileBreathworkP
   }, [onComplete])
 
   // Rotate awareness cues
-  useMemo(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       setCueIndex(prev => (prev + 1) % AWARENESS_CUES.length)
     }, 8000)
