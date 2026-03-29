@@ -71,6 +71,10 @@ export const api = {
       apiClient.post('/api/journal/entries', entry),
     get: (entryId: string) =>
       apiClient.get(`/api/journal/entries/${entryId}`),
+    update: (entryId: string, entry: { content_encrypted: string; tags?: string[] }) =>
+      apiClient.put(`/api/journal/entries/${entryId}`, entry),
+    remove: (entryId: string) =>
+      apiClient.delete(`/api/journal/entries/${entryId}`),
   },
 
   /** Journey engine */
@@ -140,6 +144,9 @@ export const api = {
   emotionalReset: {
     start: (emotion: string, intensity: number) =>
       apiClient.post('/api/emotional-reset/start', { emotion, intensity }),
+    /** Fetch step-specific data (verses, affirmations, breathing patterns) */
+    getStep: (sessionId: string, stepNumber: number) =>
+      apiClient.get(`/api/emotional-reset/step/${stepNumber}`, { params: { session_id: sessionId } }),
     step: (sessionId: string, stepData: Record<string, unknown>) =>
       apiClient.post('/api/emotional-reset/step', { session_id: sessionId, ...stepData }),
     complete: (sessionId: string) =>

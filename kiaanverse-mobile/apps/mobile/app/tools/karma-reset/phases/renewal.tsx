@@ -1,19 +1,30 @@
 /**
  * Phase 4: Renewal — Set a new intention and receive a sacred blessing.
  *
- * The final phase of the Karma Reset ritual. The user writes an intention
- * for what they will cultivate in place of the released pattern. An AI-
- * generated blessing and Gita verse honour their transformation. Karma
- * points are awarded on completion.
+ * The final phase of the Karma Reset ritual. Two distinct full-screen states:
+ *   1. Intention input — KeyboardAvoidingView with centered TextInput and
+ *      bottom-anchored "Receive Blessing" CTA.
+ *   2. Blessing reveal — Full-screen immersive display with confetti, large
+ *      LotusProgress, GlowCard blessing, and bottom-anchored completion CTA.
+ *
+ * Karma points are awarded on completion.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, TextInput, ActivityIndicator, StyleSheet } from 'react-native';
-import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import React, { useState, useCallback } from 'react';
+import {
+  View,
+  TextInput,
+  ActivityIndicator,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
+} from 'react-native';
+import Animated, { FadeInDown, FadeIn, FadeInUp } from 'react-native-reanimated';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import {
-  Screen,
   Text,
   GoldenButton,
   DivineGradient,
@@ -26,6 +37,8 @@ import {
 } from '@kiaanverse/ui';
 import { KarmaPhaseTracker } from '../../../../components/karma-reset/KarmaPhaseTracker';
 import { RenewalBlessing } from '../../../../components/karma-reset/RenewalBlessing';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // ---------------------------------------------------------------------------
 // Fallback blessings keyed by pattern id
@@ -118,6 +131,7 @@ const FALLBACK_BLESSINGS: Record<string, BlessingData> = {
 
 export default function RenewalPhase(): React.JSX.Element {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { patternId } = useLocalSearchParams<{
     patternId: string;
     description?: string;
@@ -128,7 +142,6 @@ export default function RenewalPhase(): React.JSX.Element {
   const [blessingData, setBlessingData] = useState<BlessingData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showBlessing, setShowBlessing] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
 
   // Fetch blessing from API (or use fallback)
   const fetchBlessing = useCallback(async () => {
@@ -140,6 +153,7 @@ export default function RenewalPhase(): React.JSX.Element {
       const fallback = FALLBACK_BLESSINGS[patternId ?? 'kama'] ?? FALLBACK_BLESSINGS.kama;
       setBlessingData(fallback);
       setShowBlessing(true);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {
       const fallback = FALLBACK_BLESSINGS[patternId ?? 'kama'] ?? FALLBACK_BLESSINGS.kama;
       setBlessingData(fallback);
@@ -149,51 +163,117 @@ export default function RenewalPhase(): React.JSX.Element {
     }
   }, [patternId]);
 
-  // Auto-fetch blessing once intention is submitted
+  // Submit intention and request blessing
   const handleReceiveBlessing = useCallback(() => {
     if (!intention.trim()) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setIsCompleted(true);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     fetchBlessing();
   }, [intention, fetchBlessing]);
 
   const handleComplete = useCallback(() => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    // Navigate back to tools root — celebration can be added as a follow-up
+    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.replace('/tools/karma-reset');
   }, [router]);
 
+  // -------------------------------------------------------------------------
+  // STATE 2: Full-screen blessing reveal
+  // -------------------------------------------------------------------------
+  if (showBlessing && blessingData) {
+    return (
+      <DivineGradient variant="divine" style={styles.root}>
+        {/* Confetti fills the entire screen */}
+        <ConfettiCannon isActive particleCount={80} duration={4000} />
+
+        <View style={[styles.blessingContainer, { paddingTop: insets.top + spacing.md }]}>
+          {/* Phase tracker at top */}
+          <Animated.View entering={FadeIn.duration(400)}>
+            <KarmaPhaseTracker currentPhase={4} completedPhases={[1, 2, 3, 4]} />
+          </Animated.View>
+
+          {/* Centered blessing content */}
+          <View style={styles.blessingContent}>
+            {/* Large Lotus — completion badge */}
+            <Animated.View entering={FadeIn.duration(800)} style={styles.lotusCenter}>
+              <LotusProgress progress={1} size={120} />
+            </Animated.View>
+
+            {/* Sacred blessing card */}
+            <Animated.View entering={FadeInUp.duration(600).delay(300)}>
+              <GlowCard variant="sacred" style={styles.blessingCard}>
+                <RenewalBlessing
+                  blessing={blessingData.blessing}
+                  verse={blessingData.verse}
+                  karmaPoints={blessingData.karmaPoints}
+                />
+              </GlowCard>
+            </Animated.View>
+
+            {/* User intention as quote */}
+            <Animated.View entering={FadeIn.duration(600).delay(500)}>
+              <Text
+                variant="body"
+                color={colors.primary[200]}
+                align="center"
+                style={styles.intentionQuote}
+              >
+                "{intention}"
+              </Text>
+            </Animated.View>
+          </View>
+
+          {/* Bottom-anchored CTA */}
+          <Animated.View
+            entering={FadeInDown.duration(400).delay(700)}
+            style={[styles.bottomCTA, { paddingBottom: insets.bottom + 16 }]}
+          >
+            <GoldenButton
+              title="Complete Sacred Ritual"
+              onPress={handleComplete}
+              testID="renewal-complete"
+            />
+          </Animated.View>
+        </View>
+      </DivineGradient>
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // STATE 1: Intention input with keyboard handling
+  // -------------------------------------------------------------------------
   return (
-    <Screen scroll>
-      <DivineGradient variant="renewal">
-      <View style={styles.container}>
-        <ConfettiCannon isActive={isCompleted} particleCount={80} duration={4000} />
-        {/* Phase tracker */}
-        <Animated.View entering={FadeInDown.duration(500)}>
-          <KarmaPhaseTracker currentPhase={4} completedPhases={[1, 2, 3]} />
-        </Animated.View>
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <DivineGradient variant="renewal" style={styles.root}>
+        <View style={[styles.inputContainer, { paddingTop: insets.top + spacing.md }]}>
+          {/* Phase tracker at top */}
+          <Animated.View entering={FadeInDown.duration(500)}>
+            <KarmaPhaseTracker currentPhase={4} completedPhases={[1, 2, 3]} />
+          </Animated.View>
 
-        {/* Header */}
-        <Animated.View entering={FadeInDown.duration(500).delay(100)} style={styles.header}>
-          <Text variant="h2" align="center">
-            ✨ Phase 4: Renewal
-          </Text>
-          <Text variant="bodySmall" color={colors.text.muted} align="center">
-            Step 4 of 4
-          </Text>
-        </Animated.View>
+          {/* Header */}
+          <Animated.View entering={FadeInDown.duration(500).delay(100)} style={styles.header}>
+            <Text variant="h2" align="center">
+              Phase 4: Renewal
+            </Text>
+            <Text variant="bodySmall" color={colors.text.muted} align="center">
+              Step 4 of 4
+            </Text>
+          </Animated.View>
 
-        <SacredDivider />
-
-        {/* Intention prompt */}
-        {!showBlessing ? (
-          <Animated.View entering={FadeInDown.duration(500).delay(200)} style={styles.section}>
-            <Text variant="label" color={colors.primary[300]}>
+          {/* Centered intention input — fills available vertical space */}
+          <Animated.View
+            entering={FadeInDown.duration(500).delay(200)}
+            style={styles.intentionSection}
+          >
+            <Text variant="label" color={colors.primary[300]} align="center">
               Set Your New Intention
             </Text>
-            <Text variant="body" color={colors.text.secondary}>
+            <Text variant="body" color={colors.text.secondary} align="center">
               What will you cultivate in place of the pattern you released?
             </Text>
+
             <TextInput
               style={styles.textInput}
               value={intention}
@@ -204,9 +284,16 @@ export default function RenewalPhase(): React.JSX.Element {
               numberOfLines={4}
               textAlignVertical="top"
               maxLength={500}
+              selectionColor={colors.primary[500]}
               accessibilityLabel="New intention"
             />
+          </Animated.View>
 
+          {/* Bottom-anchored CTA — stays above keyboard */}
+          <Animated.View
+            entering={FadeInDown.duration(400).delay(300)}
+            style={[styles.bottomCTA, { paddingBottom: insets.bottom + 16 }]}
+          >
             {isLoading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={colors.primary[500]} />
@@ -223,46 +310,9 @@ export default function RenewalPhase(): React.JSX.Element {
               />
             )}
           </Animated.View>
-        ) : null}
-
-        {/* Blessing display */}
-        {showBlessing && blessingData ? (
-          <>
-            <GlowCard variant="sacred">
-            <RenewalBlessing
-              blessing={blessingData.blessing}
-              verse={blessingData.verse}
-              karmaPoints={blessingData.karmaPoints}
-            />
-            </GlowCard>
-
-            <View style={styles.lotusCompletionBadge}>
-              <LotusProgress progress={1} size={100} />
-            </View>
-
-            {/* Intention reminder */}
-            <Animated.View entering={FadeIn.duration(600).delay(400)} style={styles.section}>
-              <Text variant="label" color={colors.text.secondary} align="center">
-                Your Intention
-              </Text>
-              <Text variant="body" color={colors.primary[200]} align="center" style={styles.intentionText}>
-                "{intention}"
-              </Text>
-            </Animated.View>
-
-            {/* Complete button */}
-            <Animated.View entering={FadeIn.duration(400).delay(600)} style={styles.actions}>
-              <GoldenButton
-                title="Complete Sacred Ritual"
-                onPress={handleComplete}
-                testID="renewal-complete"
-              />
-            </Animated.View>
-          </>
-        ) : null}
-      </View>
+        </View>
       </DivineGradient>
-    </Screen>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -271,45 +321,68 @@ export default function RenewalPhase(): React.JSX.Element {
 // ---------------------------------------------------------------------------
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    paddingVertical: spacing.xl,
-    gap: spacing.lg,
+  },
+
+  // -- State 1: Intention input --
+  inputContainer: {
+    flex: 1,
   },
   header: {
     gap: spacing.xs,
     paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
   },
-  section: {
+  intentionSection: {
+    flex: 1,
+    justifyContent: 'center',
     paddingHorizontal: spacing.lg,
     gap: spacing.md,
   },
   textInput: {
     borderWidth: 1,
     borderColor: colors.alpha.whiteLight,
-    borderRadius: 12,
+    borderRadius: 16,
     backgroundColor: colors.background.card,
     color: colors.text.primary,
     padding: spacing.md,
-    fontSize: 15,
-    minHeight: 100,
+    fontSize: 16,
+    lineHeight: 24,
+    minHeight: 120,
+    maxHeight: 200,
   },
   loadingContainer: {
     alignItems: 'center',
-    paddingVertical: spacing.lg,
+    paddingVertical: spacing.md,
     gap: spacing.sm,
   },
-  intentionText: {
+
+  // -- State 2: Blessing reveal --
+  blessingContainer: {
+    flex: 1,
+  },
+  blessingContent: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+    gap: spacing.lg,
+  },
+  lotusCenter: {
+    alignItems: 'center',
+  },
+  blessingCard: {
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.md,
+  },
+  intentionQuote: {
     fontStyle: 'italic',
     lineHeight: 24,
+    paddingHorizontal: spacing.md,
   },
-  lotusCompletionBadge: {
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-  },
-  actions: {
+
+  // -- Shared --
+  bottomCTA: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xl,
   },
 });

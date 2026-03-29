@@ -1,22 +1,36 @@
 /**
- * BreathingStep — Sacred breathing exercise (Step 1 of Emotional Reset).
+ * BreathingStep -- Sacred breathing exercise (Step 1 of Emotional Reset).
  *
- * Renders a large animated circle that expands on inhale and contracts on
- * exhale. The 4-7-8 pattern (inhale 4s, hold 7s, exhale 8s) is the default
- * but can be overridden by the API response. Color shifts convey each phase:
- *   - Gold on inhale (expansion, light entering)
- *   - Cyan on hold (stillness, clarity)
- *   - Blue on exhale (release, letting go)
- *   - Dim on rest (pause, grounding)
+ * Full-screen immersive layout with a large BreathingOrb (240px) at the absolute
+ * center of the viewport, backed by a slow-spinning MandalaSpin. The phase label
+ * ("Inhale...", "Hold...", etc.) floats above the orb and the countdown timer
+ * sits below it.
  *
- * After the configured number of cycles (default 3), a "Continue" button
- * appears to advance to the next step.
+ * Phase-specific haptics create a somatic rhythm:
+ *   - Inhale  = Light  (gentle expansion cue)
+ *   - Hold    = Medium (firm stillness cue)
+ *   - Exhale  = Heavy  (deep release cue)
+ *   - Rest    = Light  (soft grounding cue)
+ *
+ * After the configured number of cycles (default 3), a "Continue" button fades
+ * in at the bottom of the screen with proper safe-area padding.
+ *
+ * NO ScrollView -- everything fits within one viewport.
  */
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
+import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { Text, GoldenButton, BreathingOrb, MandalaSpin, colors, spacing, radii } from '@kiaanverse/ui';
+import {
+  Text,
+  GoldenButton,
+  BreathingOrb,
+  MandalaSpin,
+  colors,
+  spacing,
+} from '@kiaanverse/ui';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -39,6 +53,14 @@ type Phase = 'inhale' | 'hold' | 'exhale' | 'rest';
 // Constants
 // ---------------------------------------------------------------------------
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+/** Size of the BreathingOrb -- large enough to be the visual anchor. */
+const ORB_SIZE = 240;
+
+/** Size of the MandalaSpin behind the orb -- slightly larger for a halo effect. */
+const MANDALA_SIZE = 320;
+
 const PHASE_LABELS: Record<Phase, string> = {
   inhale: 'Breathe In...',
   hold: 'Hold...',
@@ -46,11 +68,24 @@ const PHASE_LABELS: Record<Phase, string> = {
   rest: 'Rest...',
 };
 
+/**
+ * Each breathing phase triggers a different haptic intensity so the user
+ * can feel the rhythm even with eyes closed.
+ */
+const PHASE_HAPTICS: Record<Phase, Haptics.ImpactFeedbackStyle> = {
+  inhale: Haptics.ImpactFeedbackStyle.Light,
+  hold: Haptics.ImpactFeedbackStyle.Medium,
+  exhale: Haptics.ImpactFeedbackStyle.Heavy,
+  rest: Haptics.ImpactFeedbackStyle.Light,
+};
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
 export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.JSX.Element {
+  const insets = useSafeAreaInsets();
+
   const inhaleSec = stepData?.inhaleDuration ?? 4;
   const holdSec = stepData?.holdDuration ?? 7;
   const exhaleSec = stepData?.exhaleDuration ?? 8;
@@ -68,14 +103,14 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
   const countdownRef = useRef(inhaleSec);
   const cycleRef = useRef(1);
 
-  /** Clear any running timer on unmount. */
+  /** Clean up timer on unmount to prevent memory leaks. */
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
 
-  /** Handle cycle completion from the BreathingOrb component. */
+  /** Handle cycle completion signalled by the BreathingOrb component. */
   const handleCycleComplete = useCallback(() => {
     if (cycleRef.current < totalCycles) {
       cycleRef.current += 1;
@@ -87,7 +122,10 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
     }
   }, [totalCycles]);
 
-  /** Drive the countdown timer display and phase labels. */
+  /**
+   * Start a breathing phase: set the label, reset the countdown,
+   * fire the phase-specific haptic, and begin the 1-second tick.
+   */
   const startPhase = useCallback(
     (p: Phase) => {
       phaseRef.current = p;
@@ -104,9 +142,9 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
       countdownRef.current = durationSec;
       setCountdown(durationSec);
 
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      // Phase-specific haptic for somatic feedback
+      Haptics.impactAsync(PHASE_HAPTICS[p]);
 
-      // Countdown tick
       if (timerRef.current) clearInterval(timerRef.current);
       timerRef.current = setInterval(() => {
         countdownRef.current -= 1;
@@ -122,7 +160,10 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
     [inhaleSec, holdSec, exhaleSec, restSec, totalCycles],
   );
 
-  /** Move to the next phase or cycle; mark complete after all cycles. */
+  /**
+   * Move to the next phase in the inhale->hold->exhale->rest cycle.
+   * After the rest phase, either start a new cycle or mark complete.
+   */
   const advancePhase = useCallback(() => {
     const order: Phase[] = ['inhale', 'hold', 'exhale', 'rest'];
     const currentIdx = order.indexOf(phaseRef.current);
@@ -131,7 +172,7 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
     if (nextIdx < order.length) {
       startPhase(order[nextIdx]);
     } else {
-      // End of cycle — BreathingOrb handles the visual, we handle the label/countdown
+      // End of one full cycle
       if (cycleRef.current < totalCycles) {
         cycleRef.current += 1;
         setCycle(cycleRef.current);
@@ -145,7 +186,7 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalCycles, startPhase]);
 
-  /** Kick off the first cycle on mount. */
+  /** Kick off the first breathing cycle on mount. */
   useEffect(() => {
     startPhase('inhale');
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -157,44 +198,77 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
 
   return (
     <View style={styles.container}>
-      <Text variant="h2" color={colors.divine.aura} align="center">
-        Sacred Breathing
-      </Text>
-      <Text variant="caption" color={colors.text.muted} align="center" style={styles.cycleText}>
-        Cycle {cycle} of {totalCycles}
-      </Text>
+      {/* Title + cycle counter at top */}
+      <View style={styles.header}>
+        <Text variant="h2" color={colors.divine.aura} align="center">
+          Sacred Breathing
+        </Text>
+        <Text
+          variant="caption"
+          color={colors.text.muted}
+          align="center"
+          style={styles.cycleText}
+        >
+          Cycle {cycle} of {totalCycles}
+        </Text>
+      </View>
 
-      {/* Sacred breathing orb with mandala background */}
+      {/* Phase label ABOVE the orb */}
+      <View style={styles.phaseLabelAbove}>
+        <Animated.View entering={FadeIn.duration(300)} key={phase}>
+          <Text variant="body" color={colors.text.secondary} align="center">
+            {isComplete ? 'Breathing complete' : PHASE_LABELS[phase]}
+          </Text>
+        </Animated.View>
+      </View>
+
+      {/* Center piece: MandalaSpin behind BreathingOrb, both vertically centered */}
       <View style={styles.orbContainer}>
-        <MandalaSpin size={300} speed="slow" color={colors.alpha.goldLight} opacity={0.15} />
-        <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
+        <MandalaSpin
+          size={MANDALA_SIZE}
+          speed="slow"
+          color={colors.alpha.goldLight}
+          opacity={0.15}
+        />
+        <View style={[StyleSheet.absoluteFill, styles.centered]}>
           <BreathingOrb
-            pattern={{ inhale: inhaleSec, holdIn: holdSec, exhale: exhaleSec, holdOut: restSec }}
+            pattern={{
+              inhale: inhaleSec,
+              holdIn: holdSec,
+              exhale: exhaleSec,
+              holdOut: restSec,
+            }}
             isActive={isBreathing}
-            size={200}
+            size={ORB_SIZE}
             onCycleComplete={handleCycleComplete}
           />
         </View>
-        <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
+        {/* Countdown number overlaid on the orb center */}
+        <View style={[StyleSheet.absoluteFill, styles.centered]}>
           <Text variant="h1" color={colors.text.primary} align="center">
             {isComplete ? '\u2714' : countdown}
           </Text>
         </View>
       </View>
 
-      {/* Phase label */}
-      <Text variant="body" color={colors.text.secondary} align="center" style={styles.phaseLabel}>
-        {isComplete ? 'Breathing complete' : PHASE_LABELS[phase]}
-      </Text>
+      {/* Spacer pushes button to bottom */}
+      <View style={styles.spacer} />
 
-      {/* Continue button — only after all cycles */}
+      {/* Continue button at bottom -- only after all cycles complete */}
       {isComplete ? (
-        <GoldenButton
-          title="Continue"
-          onPress={onNext}
-          style={styles.continueButton}
-          testID="breathing-continue-btn"
-        />
+        <Animated.View
+          entering={FadeInUp.duration(400)}
+          style={{ paddingBottom: insets.bottom + 16 }}
+        >
+          <GoldenButton
+            title="Continue"
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              onNext();
+            }}
+            testID="breathing-continue-btn"
+          />
+        </Animated.View>
       ) : null}
     </View>
   );
@@ -207,24 +281,32 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    gap: spacing.md,
   },
-  cycleText: {
-    marginBottom: spacing.lg,
-  },
-  orbContainer: {
-    width: 300,
-    height: 300,
+  header: {
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  phaseLabel: {
     marginTop: spacing.md,
   },
-  continueButton: {
-    marginTop: spacing.xl,
-    width: '80%',
+  cycleText: {
+    marginTop: spacing.xs,
+  },
+  phaseLabelAbove: {
+    marginTop: spacing.lg,
+    minHeight: 28,
+    justifyContent: 'center',
+  },
+  orbContainer: {
+    width: MANDALA_SIZE,
+    height: MANDALA_SIZE,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.md,
+  },
+  centered: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  spacer: {
+    flex: 1,
   },
 });

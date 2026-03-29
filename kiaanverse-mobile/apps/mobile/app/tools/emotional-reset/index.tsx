@@ -1,27 +1,33 @@
 /**
  * Emotional Reset Entry Screen
  *
- * User selects the emotion they are experiencing and its intensity,
- * then begins the sacred 7-step healing flow. A CrisisDetector overlay
- * appears when intensity is dangerously high (>= 9) to offer support.
+ * Full-screen immersive entry point where the user selects an emotion and
+ * intensity before beginning the 6-step sacred healing flow. The layout fills
+ * the entire viewport with no ScrollView -- content is vertically distributed
+ * using flex. A CrisisDetector overlay appears when intensity >= 9.
+ *
+ * Layout hierarchy (flat, no unnecessary nesting):
+ *   DivineBackground (fills screen) > paddedContent > header / orb / grid / slider / spacer / CTA
  */
 
 import React, { useState, useCallback } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import { View, StyleSheet, Dimensions } from 'react-native';
+import Animated, {
+  FadeInDown,
+  FadeInUp,
+  SlideInDown,
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import {
-  Screen,
   Text,
   GoldenButton,
   DivineBackground,
-  GlowCard,
   EmotionOrb,
   SacredStepIndicator,
-  SacredTransition,
   colors,
   spacing,
-  radii,
 } from '@kiaanverse/ui';
 import { useTheme } from '@kiaanverse/ui';
 import { useTranslation } from '@kiaanverse/i18n';
@@ -31,9 +37,18 @@ import { EmotionSelector } from '../../../components/emotional-reset/EmotionSele
 import { IntensitySlider } from '../../../components/emotional-reset/IntensitySlider';
 import { CrisisDetector } from '../../../components/emotional-reset/CrisisDetector';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+/**
+ * Orb size is 30% of screen width, clamped between 100-160px for usability.
+ * This keeps it prominent on small phones while not dominating tablets.
+ */
+const ORB_SIZE = Math.max(100, Math.min(160, SCREEN_WIDTH * 0.3));
+
 export default function EmotionalResetEntryScreen(): React.JSX.Element {
   const { theme } = useTheme();
   const c = theme.colors;
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { t } = useTranslation();
   const startReset = useStartEmotionalReset();
@@ -43,15 +58,27 @@ export default function EmotionalResetEntryScreen(): React.JSX.Element {
   const [intensity, setIntensity] = useState(5);
   const [showCrisis, setShowCrisis] = useState(false);
 
+  /** Select an emotion with medium haptic feedback. */
+  const handleEmotionSelect = useCallback((emotion: string) => {
+    setSelectedEmotion(emotion);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  }, []);
+
+  /** Update intensity with light haptic; trigger crisis overlay at >= 9. */
   const handleIntensityChange = useCallback((value: number) => {
     setIntensity(value);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (value >= 9) {
       setShowCrisis(true);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     }
   }, []);
 
+  /** Start the reset session via API, then navigate to step 1. */
   const handleBeginReset = useCallback(() => {
     if (!selectedEmotion) return;
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
     startReset.mutate(
       { emotion: selectedEmotion, intensity },
@@ -62,7 +89,14 @@ export default function EmotionalResetEntryScreen(): React.JSX.Element {
             emotion: selectedEmotion,
             intensity,
             startedAt: Date.now(),
-            steps: ['breathing', 'visualization', 'wisdom', 'affirmation', 'reflection', 'summary'],
+            steps: [
+              'breathing',
+              'visualization',
+              'wisdom',
+              'affirmation',
+              'reflection',
+              'summary',
+            ],
           });
           router.push('/tools/emotional-reset/1');
         },
@@ -73,13 +107,14 @@ export default function EmotionalResetEntryScreen(): React.JSX.Element {
   const intensityLabel = getIntensityLabel(intensity);
 
   return (
-    <Screen>
-      <DivineBackground variant="cosmic">
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+    <DivineBackground variant="cosmic" style={styles.root}>
+      <View
+        style={[
+          styles.screen,
+          { paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + 16 },
+        ]}
       >
-        {/* Header */}
+        {/* Header - compact title and subtitle */}
         <Animated.View entering={FadeInDown.duration(500)}>
           <Text variant="h1" color={colors.divine.aura} align="center">
             {t('emotionalReset.title', 'Sacred Emotional Reset')}
@@ -94,31 +129,29 @@ export default function EmotionalResetEntryScreen(): React.JSX.Element {
           </Text>
         </Animated.View>
 
-        {/* Emotion Orb + Step Indicator */}
-        <SacredTransition isVisible={true}>
-          <View style={styles.orbCenter}>
-            <EmotionOrb
-              mood={mapEmotionToMood(selectedEmotion)}
-              size={80}
-              isAnimating={!!selectedEmotion}
-            />
-          </View>
-          <SacredStepIndicator totalSteps={7} currentStep={1} completedSteps={[]} />
-        </SacredTransition>
-
-        {/* Emotion Grid */}
-        <Animated.View entering={FadeInDown.delay(150).duration(500)}>
-          <GlowCard variant="divine">
-            <EmotionSelector
-              selectedEmotion={selectedEmotion}
-              onSelect={setSelectedEmotion}
-            />
-          </GlowCard>
+        {/* Large EmotionOrb - prominent visual anchor */}
+        <Animated.View entering={FadeInDown.delay(100).duration(500)} style={styles.orbCenter}>
+          <EmotionOrb
+            mood={mapEmotionToMood(selectedEmotion)}
+            size={ORB_SIZE}
+            isAnimating={!!selectedEmotion}
+          />
         </Animated.View>
 
-        {/* Intensity Slider */}
+        {/* Step indicator - shows position in overall flow */}
+        <SacredStepIndicator totalSteps={7} currentStep={1} completedSteps={[]} />
+
+        {/* Emotion grid - compact 3-column tappable grid */}
+        <Animated.View entering={FadeInDown.delay(200).duration(500)} style={styles.emotionGrid}>
+          <EmotionSelector
+            selectedEmotion={selectedEmotion}
+            onSelect={handleEmotionSelect}
+          />
+        </Animated.View>
+
+        {/* Intensity slider - animated slide-in only after an emotion is selected */}
         {selectedEmotion ? (
-          <Animated.View entering={FadeInDown.duration(400)}>
+          <Animated.View entering={SlideInDown.duration(400).springify()}>
             <Text
               variant="label"
               color={c.textSecondary}
@@ -138,28 +171,29 @@ export default function EmotionalResetEntryScreen(): React.JSX.Element {
           </Animated.View>
         ) : null}
 
-        {/* Begin Button */}
+        {/* Flexible spacer pushes CTA to bottom edge */}
+        <View style={styles.spacer} />
+
+        {/* Bottom-anchored CTA -- safe area padding applied to parent */}
         {selectedEmotion ? (
-          <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+          <Animated.View entering={FadeInUp.delay(100).duration(400)}>
             <GoldenButton
               title={t('emotionalReset.begin', 'Begin Sacred Reset')}
               onPress={handleBeginReset}
               variant="divine"
               loading={startReset.isPending}
               disabled={!selectedEmotion}
-              style={styles.beginButton}
               testID="begin-reset-btn"
             />
           </Animated.View>
         ) : null}
-      </ScrollView>
+      </View>
 
-      {/* Crisis Overlay */}
+      {/* Crisis Overlay - fullscreen modal */}
       {showCrisis ? (
         <CrisisDetector onDismiss={() => setShowCrisis(false)} />
       ) : null}
-      </DivineBackground>
-    </Screen>
+    </DivineBackground>
   );
 }
 
@@ -172,7 +206,10 @@ function mapEmotionToMood(
 ): 'peaceful' | 'joyful' | 'confused' | 'anxious' | 'sad' | 'grateful' | 'angry' | 'hopeful' {
   if (!emotion) return 'peaceful';
 
-  const moodMap: Record<string, 'peaceful' | 'joyful' | 'confused' | 'anxious' | 'sad' | 'grateful' | 'angry' | 'hopeful'> = {
+  const moodMap: Record<
+    string,
+    'peaceful' | 'joyful' | 'confused' | 'anxious' | 'sad' | 'grateful' | 'angry' | 'hopeful'
+  > = {
     anger: 'angry',
     anxiety: 'anxious',
     sadness: 'sad',
@@ -202,26 +239,31 @@ function getIntensityLabel(value: number): string {
 }
 
 const styles = StyleSheet.create({
-  scrollContent: {
+  root: {
+    flex: 1,
+  },
+  screen: {
+    flex: 1,
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-    paddingTop: spacing.xl,
-    gap: spacing.lg,
   },
   subtitle: {
     marginTop: spacing.xs,
   },
+  orbCenter: {
+    alignItems: 'center',
+    marginVertical: spacing.lg,
+  },
+  emotionGrid: {
+    marginTop: spacing.md,
+  },
   sectionLabel: {
+    marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
   intensityLabel: {
     marginTop: spacing.sm,
   },
-  beginButton: {
-    marginTop: spacing.md,
-  },
-  orbCenter: {
-    alignItems: 'center',
-    marginBottom: spacing.md,
+  spacer: {
+    flex: 1,
   },
 });
