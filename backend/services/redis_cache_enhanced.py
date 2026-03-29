@@ -65,42 +65,62 @@ CACHE_TRANSLATION_TTL_SECONDS = int(os.getenv("CACHE_TRANSLATION_TTL_SECONDS", "
 
 
 class EnhancedRedisCache:
-    """Enhanced Redis cache with quantum coherence optimizations."""
+    """Enhanced Redis cache with automatic reconnection on failure."""
 
     def __init__(self):
         """Initialize Redis connection pool."""
         self.enabled = REDIS_ENABLED
         self.cache_responses = CACHE_KIAAN_RESPONSES
         self.redis_client: Optional[redis.Redis] = None
+        self._last_connect_attempt: float = 0.0
+        self._reconnect_interval: float = 30.0  # seconds between reconnect attempts
 
         if self.enabled:
-            try:
-                # Create connection pool for better performance
-                pool = redis.ConnectionPool.from_url(
-                    REDIS_URL,
-                    db=REDIS_DB,
-                    max_connections=REDIS_MAX_CONNECTIONS,
-                    socket_timeout=REDIS_SOCKET_TIMEOUT,
-                    socket_connect_timeout=REDIS_SOCKET_CONNECT_TIMEOUT,
-                    decode_responses=True
-                )
-
-                self.redis_client = redis.Redis(connection_pool=pool)
-
-                # Test connection
-                self.redis_client.ping()
-                logger.info(
-                    f"✅ Redis connected: {REDIS_URL} "
-                    f"(db={REDIS_DB}, max_conn={REDIS_MAX_CONNECTIONS}, "
-                    f"cache_responses={self.cache_responses})"
-                )
-
-            except Exception as e:
-                logger.error(f"❌ Redis connection failed: {e}")
-                self.redis_client = None
-                self.enabled = False
+            self._try_connect()
         else:
             logger.info("⚠️ Redis caching disabled (set REDIS_ENABLED=true to enable)")
+
+    def _try_connect(self) -> bool:
+        """Attempt to connect to Redis. Returns True on success."""
+        import time
+        self._last_connect_attempt = time.time()
+        try:
+            pool = redis.ConnectionPool.from_url(
+                REDIS_URL,
+                db=REDIS_DB,
+                max_connections=REDIS_MAX_CONNECTIONS,
+                socket_timeout=REDIS_SOCKET_TIMEOUT,
+                socket_connect_timeout=REDIS_SOCKET_CONNECT_TIMEOUT,
+                decode_responses=True
+            )
+
+            self.redis_client = redis.Redis(connection_pool=pool)
+            self.redis_client.ping()
+            logger.info(
+                f"✅ Redis connected: {REDIS_URL} "
+                f"(db={REDIS_DB}, max_conn={REDIS_MAX_CONNECTIONS}, "
+                f"cache_responses={self.cache_responses})"
+            )
+            return True
+        except Exception as e:
+            logger.warning(f"Redis connection failed (EnhancedRedisCache): {e}")
+            self.redis_client = None
+            return False
+
+    def _ensure_connected(self) -> bool:
+        """Check connection and attempt lazy reconnection if needed.
+
+        Respects a cooldown interval between reconnect attempts to avoid
+        hammering Redis when it's down.
+        """
+        if self.redis_client is not None:
+            return True
+        if not REDIS_ENABLED:
+            return False
+        import time
+        if time.time() - self._last_connect_attempt < self._reconnect_interval:
+            return False
+        return self._try_connect()
 
     def _generate_cache_key(self, cache_type: str, identifier: str) -> str:
         """
@@ -131,7 +151,7 @@ class EnhancedRedisCache:
         Returns:
             Cached value or None
         """
-        if not self.enabled or not self.redis_client:
+        if not self._ensure_connected():
             return None
 
         cache_key = self._generate_cache_key(cache_type, key)
@@ -152,6 +172,11 @@ class EnhancedRedisCache:
                 logger.debug(f"❌ Cache MISS: {cache_type}:{key[:50]}")
                 return None
 
+        except redis.ConnectionError:
+            logger.warning("Redis connection lost in EnhancedRedisCache.get()")
+            self.redis_client = None
+            cache_misses_total.labels(cache_type=cache_type).inc()
+            return None
         except Exception as e:
             logger.error(f"❌ Cache get error: {e}")
             cache_misses_total.labels(cache_type=cache_type).inc()
@@ -176,7 +201,7 @@ class EnhancedRedisCache:
         Returns:
             True if successful
         """
-        if not self.enabled or not self.redis_client:
+        if not self._ensure_connected():
             return False
 
         # Determine TTL based on cache type
@@ -203,6 +228,10 @@ class EnhancedRedisCache:
             logger.debug(f"✅ Cache SET: {cache_type}:{key[:50]} (TTL: {ttl}s)")
             return True
 
+        except redis.ConnectionError:
+            logger.warning("Redis connection lost in EnhancedRedisCache.set()")
+            self.redis_client = None
+            return False
         except Exception as e:
             logger.error(f"❌ Cache set error: {e}")
             return False
@@ -218,7 +247,7 @@ class EnhancedRedisCache:
         Returns:
             True if successful
         """
-        if not self.enabled or not self.redis_client:
+        if not self._ensure_connected():
             return False
 
         cache_key = self._generate_cache_key(cache_type, key)
@@ -228,6 +257,10 @@ class EnhancedRedisCache:
             logger.debug(f"✅ Cache DELETE: {cache_type}:{key[:50]}")
             return True
 
+        except redis.ConnectionError:
+            logger.warning("Redis connection lost in EnhancedRedisCache.delete()")
+            self.redis_client = None
+            return False
         except Exception as e:
             logger.error(f"❌ Cache delete error: {e}")
             return False
@@ -242,7 +275,7 @@ class EnhancedRedisCache:
         Returns:
             Number of keys deleted
         """
-        if not self.enabled or not self.redis_client:
+        if not self._ensure_connected():
             return 0
 
         try:
@@ -256,6 +289,10 @@ class EnhancedRedisCache:
 
             return 0
 
+        except redis.ConnectionError:
+            logger.warning("Redis connection lost in EnhancedRedisCache.clear_type()")
+            self.redis_client = None
+            return 0
         except Exception as e:
             logger.error(f"❌ Cache clear error: {e}")
             return 0
@@ -267,7 +304,7 @@ class EnhancedRedisCache:
         Returns:
             Dictionary with cache stats
         """
-        if not self.enabled or not self.redis_client:
+        if not self._ensure_connected():
             return {
                 "enabled": False,
                 "status": "disabled"
