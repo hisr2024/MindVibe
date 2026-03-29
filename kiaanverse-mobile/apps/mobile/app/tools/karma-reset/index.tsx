@@ -1,13 +1,22 @@
 /**
- * Karma Reset — Entry Screen (Immersive Native UX)
+ * Karma Reset — Entry Screen (Immersive Native Mobile UX)
  *
- * Full-screen immersive layout with horizontal pattern cards,
- * hero LotusProgress, haptic feedback, and bottom-anchored CTA.
- * No ScrollView — everything fits on a single viewport.
- * Horizontal FlatList with snap-to-card for pattern browsing.
+ * Full-screen immersive layout with sacred cosmic dark theme:
+ *   - DivineBackground (cosmic variant) as base layer
+ *   - MandalaSpin rotating backdrop for atmospheric depth
+ *   - Hero LotusProgress (140px) with sacred glow
+ *   - SacredStepIndicator showing 0/4 phases
+ *   - Horizontal FlatList carousel with snap-to-card phase previews
+ *   - Animated PhaseCard components with spring scale and golden glow
+ *   - Staggered reveal animations
+ *   - Bottom-anchored CTA with safe-area awareness
+ *   - Haptic feedback on card selection and navigation
+ *
+ * NO ScrollView — everything fits on a single viewport.
+ * Uses established sacred cosmic dark theme tokens exclusively.
  */
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -19,11 +28,14 @@ import {
 import Animated, {
   FadeInDown,
   FadeIn,
+  FadeInUp,
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   withSequence,
   withTiming,
+  withRepeat,
+  Easing,
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -35,6 +47,8 @@ import {
   GlowCard,
   LotusProgress,
   SacredStepIndicator,
+  MandalaSpin,
+  SacredDivider,
   colors,
   spacing,
 } from '@kiaanverse/ui';
@@ -49,31 +63,35 @@ const PHASES = [
     number: 1,
     title: 'Acknowledgment',
     icon: '\u{1FAB7}',
-    description: 'Recognize the karmic pattern you wish to release',
+    sanskrit: 'प्रतिज्ञा',
+    description: 'Recognize the karmic pattern you wish to release from your life',
   },
   {
     number: 2,
     title: 'Understanding',
     icon: '\u{1F4D6}',
-    description: 'Receive wisdom from the Bhagavad Gita for clarity',
+    sanskrit: 'ज्ञान',
+    description: 'Receive wisdom from the Bhagavad Gita to illuminate your path',
   },
   {
     number: 3,
     title: 'Release',
     icon: '\u{1F525}',
-    description: 'A guided breathing ritual to let go of the pattern',
+    sanskrit: 'मोक्ष',
+    description: 'A guided breathing ritual to dissolve the pattern and let go',
   },
   {
     number: 4,
     title: 'Renewal',
     icon: '\u2728',
-    description: 'Set a new intention and receive a sacred blessing',
+    sanskrit: 'नवीकरण',
+    description: 'Set a sacred intention and receive a divine blessing',
   },
 ] as const;
 
 /**
- * Animated pattern card with scale feedback on selection.
- * Press triggers haptic feedback and animated scale bounce.
+ * Animated phase card with scale feedback, golden glow on selection,
+ * and sacred bounce animation.
  */
 function PhaseCard({
   phase,
@@ -99,7 +117,7 @@ function PhaseCard({
   }, [scale]);
 
   const handlePress = useCallback(() => {
-    // Bounce animation on select
+    // Sacred bounce animation on select
     scale.value = withSequence(
       withTiming(0.92, { duration: 80 }),
       withSpring(1.03, { damping: 10, stiffness: 400 }),
@@ -122,16 +140,26 @@ function PhaseCard({
           variant={isSelected ? 'sacred' : 'golden'}
           style={[styles.phaseCard, isSelected && styles.phaseCardSelected]}
         >
-          <View style={styles.phaseIconContainer}>
+          {/* Phase icon with sacred circle */}
+          <View style={[
+            styles.phaseIconContainer,
+            isSelected && styles.phaseIconSelected,
+          ]}>
             <Text variant="h1">{phase.icon}</Text>
           </View>
-          <Text variant="label" color={isSelected ? colors.primary[200] : colors.primary[300]}>
-            Phase {phase.number}
+
+          {/* Phase number and Sanskrit */}
+          <Text variant="caption" color={isSelected ? colors.primary[300] : colors.text.muted}>
+            Phase {phase.number} · {phase.sanskrit}
           </Text>
+
+          {/* Title */}
           <Text variant="h2" color={colors.text.primary}>
             {phase.title}
           </Text>
-          <Text variant="bodySmall" color={colors.text.muted} align="center">
+
+          {/* Description */}
+          <Text variant="bodySmall" color={colors.text.secondary} align="center" style={styles.phaseDescription}>
             {phase.description}
           </Text>
         </GlowCard>
@@ -145,6 +173,24 @@ export default function KarmaResetIndex(): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const [selectedPhase, setSelectedPhase] = useState<number | null>(null);
   const flatListRef = useRef<FlatList>(null);
+
+  // Lotus glow pulse
+  const lotusGlow = useSharedValue(0.3);
+
+  useEffect(() => {
+    lotusGlow.value = withRepeat(
+      withSequence(
+        withTiming(0.7, { duration: 2500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.3, { duration: 2500, easing: Easing.inOut(Easing.ease) }),
+      ),
+      -1,
+      true,
+    );
+  }, [lotusGlow]);
+
+  const lotusGlowStyle = useAnimatedStyle(() => ({
+    shadowOpacity: lotusGlow.value,
+  }));
 
   // Track which card is most visible for auto-select on scroll stop
   const handleViewableItemsChanged = useCallback(
@@ -208,10 +254,22 @@ export default function KarmaResetIndex(): React.JSX.Element {
 
   return (
     <DivineBackground variant="cosmic" style={styles.root}>
+      {/* MandalaSpin backdrop */}
+      <View style={styles.mandalaBackdrop}>
+        <MandalaSpin
+          size={SCREEN_WIDTH * 0.85}
+          speed="slow"
+          color={colors.alpha.goldLight}
+          opacity={0.04}
+        />
+      </View>
+
       <View style={[styles.container, { paddingTop: insets.top + spacing.md }]}>
-        {/* Hero — Large LotusProgress centered */}
+        {/* Hero — Large LotusProgress with sacred glow */}
         <Animated.View entering={FadeIn.duration(800)} style={styles.lotusContainer}>
-          <LotusProgress progress={0} size={140} />
+          <Animated.View style={[styles.lotusGlow, lotusGlowStyle]}>
+            <LotusProgress progress={0} size={140} />
+          </Animated.View>
         </Animated.View>
 
         {/* Step indicator */}
@@ -219,10 +277,10 @@ export default function KarmaResetIndex(): React.JSX.Element {
 
         {/* Title and subtitle */}
         <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
-          <Text variant="h1" align="center">
+          <Text variant="h1" color={colors.divine.aura} align="center">
             Karma Reset
           </Text>
-          <Text variant="bodySmall" color={colors.text.muted} align="center">
+          <Text variant="body" color={colors.text.secondary} align="center" style={styles.subtitle}>
             Release what no longer serves your dharma
           </Text>
         </Animated.View>
@@ -248,7 +306,7 @@ export default function KarmaResetIndex(): React.JSX.Element {
 
         {/* Bottom-anchored CTA with safe area padding */}
         <Animated.View
-          entering={FadeInDown.duration(500).delay(400)}
+          entering={FadeInUp.duration(500).delay(400)}
           style={[styles.actions, { paddingBottom: insets.bottom + 16 }]}
         >
           <GoldenButton
@@ -266,17 +324,33 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
   },
+  mandalaBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 0,
+  },
   container: {
     flex: 1,
+    zIndex: 1,
   },
   lotusContainer: {
     alignItems: 'center',
     paddingVertical: spacing.md,
   },
+  lotusGlow: {
+    shadowColor: colors.divine.aura,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 20,
+    elevation: 0,
+  },
   header: {
     gap: spacing.xs,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
+  },
+  subtitle: {
+    lineHeight: 22,
   },
   carouselContainer: {
     flex: 1,
@@ -294,16 +368,30 @@ const styles = StyleSheet.create({
   },
   phaseCardSelected: {
     borderWidth: 1,
-    borderColor: colors.primary[400],
+    borderColor: colors.alpha.goldMedium,
   },
   phaseIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 68,
+    height: 68,
+    borderRadius: 34,
     backgroundColor: colors.alpha.goldLight,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.xs,
+    borderWidth: 1,
+    borderColor: colors.alpha.whiteLight,
+  },
+  phaseIconSelected: {
+    backgroundColor: colors.alpha.goldMedium,
+    borderColor: colors.alpha.goldStrong,
+    shadowColor: colors.divine.aura,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+  },
+  phaseDescription: {
+    lineHeight: 20,
+    marginTop: spacing.xxs,
   },
   actions: {
     paddingHorizontal: spacing.lg,

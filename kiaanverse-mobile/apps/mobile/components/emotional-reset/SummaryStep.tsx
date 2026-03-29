@@ -43,6 +43,7 @@ interface SummaryStepProps {
   readonly stepData: {
     insight?: string;
     transformedEmotion?: string;
+    breathCycles?: number;
     verseRecommendation?: {
       ref: string;
       text: string;
@@ -161,7 +162,7 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
         </GlowCard>
       </Animated.View>
 
-      {/* Session stats row */}
+      {/* Session stats row -- dynamic values from session and step data */}
       <Animated.View entering={FadeInDown.delay(650).duration(500)} style={styles.statsRow}>
         <View style={styles.statItem}>
           <Text variant="h2" color={colors.text.primary} align="center">
@@ -174,7 +175,7 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
           <Text variant="h2" color={colors.text.primary} align="center">
-            6
+            {session?.steps?.length ?? 6}
           </Text>
           <Text variant="caption" color={colors.text.muted} align="center">
             Steps
@@ -183,7 +184,7 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
           <Text variant="h2" color={colors.text.primary} align="center">
-            3
+            {stepData?.breathCycles ?? session?.steps?.[0]?.totalCycles ?? 3}
           </Text>
           <Text variant="caption" color={colors.text.muted} align="center">
             Breath Cycles

@@ -26,6 +26,7 @@ import {
   DivineBackground,
   EmotionOrb,
   SacredStepIndicator,
+  MandalaSpin,
   colors,
   spacing,
 } from '@kiaanverse/ui';
@@ -108,6 +109,16 @@ export default function EmotionalResetEntryScreen(): React.JSX.Element {
 
   return (
     <DivineBackground variant="cosmic" style={styles.root}>
+      {/* MandalaSpin backdrop for sacred atmosphere */}
+      <View style={styles.mandalaBackdrop}>
+        <MandalaSpin
+          size={SCREEN_WIDTH * 0.85}
+          speed="slow"
+          color={colors.alpha.goldLight}
+          opacity={0.04}
+        />
+      </View>
+
       <View
         style={[
           styles.screen,
@@ -241,6 +252,12 @@ function getIntensityLabel(value: number): string {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+  },
+  mandalaBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 0,
   },
   screen: {
     flex: 1,
