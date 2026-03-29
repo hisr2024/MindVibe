@@ -1,15 +1,19 @@
 'use client'
 
+/**
+ * Mobile Sadhana Page — Native mobile implementation replacing the
+ * desktop wrapper. Uses NityaSadhanaScreen with the divine design system.
+ */
+
 import dynamic from 'next/dynamic'
-import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { SacredOMLoader } from '@/components/sacred/SacredOMLoader'
 
-const SadhanaExperience = dynamic(
-  () => import('@/app/sadhana/SadhanaExperience').then(mod => mod.SadhanaExperience),
+const NityaSadhanaScreen = dynamic(
+  () => import('./NityaSadhanaScreen').then(mod => mod.NityaSadhanaScreen),
   {
     ssr: false,
     loading: () => (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex items-center justify-center min-h-[100dvh] bg-[#050714]">
         <SacredOMLoader size={48} />
       </div>
     ),
@@ -17,11 +21,5 @@ const SadhanaExperience = dynamic(
 )
 
 export default function MobileSadhanaPage() {
-  return (
-    <MobileAppShell title="Nityam Sadhana">
-      <div className="px-5 pb-8">
-        <SadhanaExperience />
-      </div>
-    </MobileAppShell>
-  )
+  return <NityaSadhanaScreen />
 }

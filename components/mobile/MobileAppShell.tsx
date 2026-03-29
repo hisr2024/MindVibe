@@ -41,13 +41,13 @@ import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 
 /**
- * KiaanVoiceCompanionFooter (Shankha button) is loaded dynamically because it
+ * ShankhaVoiceCompanion (Shankha FAB) is loaded dynamically because it
  * is a client-only interactive widget that depends on browser APIs (haptics,
  * Web Speech API, VAD). Lazy-loading prevents SSR issues and keeps initial
  * mobile JS bundle small.
  */
-const KiaanVoiceCompanionFooter = dynamic(
-  () => import('@/components/layout/KiaanVoiceCompanionFooter').then(mod => mod.KiaanVoiceCompanionFooter),
+const ShankhaVoiceCompanion = dynamic(
+  () => import('@/components/mobile/ShankhaVoiceCompanion').then(mod => mod.ShankhaVoiceCompanion),
   { ssr: false }
 )
 
@@ -404,7 +404,7 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
 
         {/* Shankha Voice Companion — KIAAN's always-awake voice assistant with
             wake word detection, Gita wisdom, and ecosystem navigation */}
-        <KiaanVoiceCompanionFooter />
+        <ShankhaVoiceCompanion />
 
 
         {/* Tools overlay — slides up from bottom with spiritual wellness tools */}
