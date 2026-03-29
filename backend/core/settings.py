@@ -251,9 +251,32 @@ class Settings(BaseSettings):
     def _reconcile_redis_settings(self) -> "Settings":
         """Auto-enable Redis when REDIS_REQUIRED=true.
 
-        Prevents the contradictory state where REDIS_REQUIRED=true but
-        REDIS_ENABLED=false (e.g. production with no explicit REDIS_URL).
+        Also auto-disables Redis in production when REDIS_URL still points to
+        localhost (meaning the external Redis service isn't linked/provisioned).
+        Prevents the app from endlessly retrying a connection that will never
+        succeed on platforms like Render where localhost has no Redis server.
         """
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        is_production = environment in ("production", "prod")
+
+        # In production, if REDIS_URL was never set (still localhost default)
+        # and there's no explicit REDIS_URL env var, auto-disable Redis
+        _redis_url_from_env = os.getenv("REDIS_URL")
+        _is_localhost = "localhost" in self.REDIS_URL or "127.0.0.1" in self.REDIS_URL
+
+        if is_production and _is_localhost and not _redis_url_from_env:
+            import logging
+            _logger = logging.getLogger("backend.core.settings")
+            _logger.critical(
+                "REDIS_URL not set in production (defaulting to localhost). "
+                "Redis auto-disabled to prevent futile reconnection attempts. "
+                "Set REDIS_URL to your Redis service connection string "
+                "(e.g. via Render Dashboard > Environment > REDIS_URL)."
+            )
+            self.REDIS_ENABLED = False
+            self.REDIS_REQUIRED = False
+            return self
+
         if self.REDIS_REQUIRED and not self.REDIS_ENABLED:
             self.REDIS_ENABLED = True
         return self
