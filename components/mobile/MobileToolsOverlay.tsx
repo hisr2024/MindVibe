@@ -27,6 +27,7 @@ import {
   ChevronRight,
   Music2,
   Compass,
+  Sun,
 } from 'lucide-react'
 
 import { MobileBottomSheet } from './MobileBottomSheet'
@@ -47,6 +48,16 @@ interface OverlayTool {
 /** Spiritual wellness tools shown in the overlay */
 const OVERLAY_TOOLS: OverlayTool[] = [
   {
+    id: 'sadhana',
+    label: 'Nitya Sadhana',
+    description: 'Daily sacred practice — breathwork, verse & reflection',
+    icon: Sun,
+    href: '/m/sadhana',
+    gradient: 'from-[#d4a44c]/20 to-orange-500/10',
+    iconColor: 'text-[#d4a44c]',
+    accentBorder: 'border-[#d4a44c]/25',
+  },
+  {
     id: 'journeys',
     label: 'Wisdom Journeys',
     description: '14-day guided transformation with Gita wisdom',
@@ -59,9 +70,9 @@ const OVERLAY_TOOLS: OverlayTool[] = [
   {
     id: 'kiaan-vibe',
     label: 'KIAAN Vibe Player',
-    description: 'Divine Gita verses & meditation audio',
+    description: 'Sacred sounds & meditation audio',
     icon: Music2,
-    href: '/kiaan-vibe',
+    href: '/m/kiaan-vibe',
     gradient: 'from-[#d4a44c]/15 to-amber-500/10',
     iconColor: 'text-[#d4a44c]',
     accentBorder: 'border-[#d4a44c]/20',
