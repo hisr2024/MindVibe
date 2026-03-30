@@ -15,7 +15,7 @@
  *  Krishna did not give him a form to fill. Krishna held space."
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
@@ -118,7 +118,10 @@ export default function MobileEmotionalResetPage() {
   // Arrival animation
   const [arrivalComplete, setArrivalComplete] = useState(false)
   const [showRipple, setShowRipple] = useState(false)
-  const [rippleOrigin] = useState({ x: window?.innerWidth ? window.innerWidth / 2 : 200, y: window?.innerHeight ? window.innerHeight / 2 : 400 })
+  const [rippleOrigin] = useState(() => ({
+    x: typeof window !== 'undefined' ? window.innerWidth / 2 : 200,
+    y: typeof window !== 'undefined' ? window.innerHeight / 2 : 400,
+  }))
 
   // Phase 0: Arrival sequence
   useEffect(() => {
@@ -245,6 +248,11 @@ export default function MobileEmotionalResetPage() {
     return `${Math.max(1, elapsed)} min`
   })()
 
+  // Scroll to top on phase change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+  }, [phase])
+
   // Determine if we should show tab bar
   const isImmersive = phase === 0 || phase === 3 || phase === 5
 
@@ -272,7 +280,7 @@ export default function MobileEmotionalResetPage() {
       <MobileSacredRipple origin={rippleOrigin} active={showRipple} />
 
       {/* ==================== PHASE 0: THE ARRIVAL ==================== */}
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="popLayout">
         {phase === 0 && (
           <motion.div
             key="arrival"
@@ -290,11 +298,11 @@ export default function MobileEmotionalResetPage() {
           <motion.div
             key="mandala"
             className="relative px-4 pt-2 pb-6"
-            style={{ zIndex: 2 }}
-            initial={{ opacity: 0, scale: 0.9 }}
+            style={{ zIndex: 2, willChange: 'transform, opacity', touchAction: 'manipulation' }}
+            initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, x: -30 }}
-            transition={springConfigs.smooth}
+            exit={{ opacity: 0, y: -12 }}
+            transition={springConfigs.gentle}
           >
             {/* Header */}
             <div className="text-center mb-4">
@@ -380,11 +388,11 @@ export default function MobileEmotionalResetPage() {
           <motion.div
             key="witness"
             className="relative px-5 pt-2 pb-8"
-            style={{ zIndex: 2 }}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
-            transition={springConfigs.smooth}
+            style={{ zIndex: 2, willChange: 'transform, opacity', touchAction: 'manipulation', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' as any }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={springConfigs.gentle}
           >
             {/* Sakha avatar receiving */}
             <div className="flex flex-col items-center mb-6">
@@ -450,7 +458,7 @@ export default function MobileEmotionalResetPage() {
                   <motion.div
                     initial={{ opacity: 0, y: 20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ delay: 1.5, ...springConfigs.gentle }}
+                    transition={{ delay: 0.4, ...springConfigs.gentle }}
                   >
                     <MobileCard variant="elevated" className="!p-5">
                       {/* Sacred top border */}
@@ -533,12 +541,12 @@ export default function MobileEmotionalResetPage() {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 3 }}
+                    transition={{ delay: 1 }}
                   >
                     <MobileSentenceReveal
                       text={aiResponse.reflection}
-                      delay={3200}
-                      speed={400}
+                      delay={1200}
+                      speed={300}
                       className="leading-[1.85]"
                     />
                   </motion.div>
@@ -549,13 +557,13 @@ export default function MobileEmotionalResetPage() {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 5 }}
+                    transition={{ delay: 1.8 }}
                     className="text-center py-4"
                   >
                     <motion.p
-                      initial={{ opacity: 0, scale: 0.9 }}
+                      initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 5.5, ...springConfigs.gentle }}
+                      transition={{ delay: 2, ...springConfigs.gentle }}
                       style={{
                         color: 'var(--sacred-divine-gold, #D4A017)',
                         fontSize: '20px',
@@ -573,9 +581,9 @@ export default function MobileEmotionalResetPage() {
 
                 {/* Continue to breathing CTA */}
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 7 }}
+                  transition={{ delay: 2.5 }}
                 >
                   <MobileButton
                     variant="primary"
@@ -599,6 +607,8 @@ export default function MobileEmotionalResetPage() {
             style={{
               zIndex: 10,
               background: 'radial-gradient(ellipse at 50% 50%, #0A0D28 0%, var(--sacred-cosmic-void, #050714) 80%)',
+              willChange: 'opacity',
+              touchAction: 'manipulation',
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -642,7 +652,7 @@ export default function MobileEmotionalResetPage() {
               <motion.button
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 10 }}
+                transition={{ delay: 5 }}
                 onClick={handleBreathComplete}
                 className="mt-6 text-xs"
                 style={{ color: 'var(--sacred-text-muted, #6B6355)' }}
@@ -657,12 +667,12 @@ export default function MobileEmotionalResetPage() {
         {phase === 4 && (
           <motion.div
             key="integration"
-            className="relative px-5 pt-2 pb-32"
-            style={{ zIndex: 2 }}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
+            className="relative px-5 pt-2 pb-40"
+            style={{ zIndex: 2, willChange: 'transform, opacity', touchAction: 'manipulation', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' as any }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            transition={springConfigs.smooth}
+            transition={springConfigs.gentle}
           >
             {/* Emotional journey summary */}
             <MobileCard variant="outlined" className="mb-4">
