@@ -5,13 +5,13 @@ import { reportWebVitals } from '@/lib/web-vitals'
 
 /**
  * Client component that reports Core Web Vitals.
- * Measures LCP, FID, CLS, INP, TTFB, and FCP.
+ * Measures LCP, CLS, INP, TTFB, and FCP.
+ * Note: FID was removed in web-vitals v5 — INP is the replacement metric.
  */
 export function WebVitalsReporter() {
   useEffect(() => {
-    import('web-vitals').then(({ onLCP, onFID, onCLS, onINP, onTTFB, onFCP }) => {
+    import('web-vitals').then(({ onLCP, onCLS, onINP, onTTFB, onFCP }) => {
       onLCP(reportWebVitals)
-      onFID(reportWebVitals)
       onCLS(reportWebVitals)
       onINP(reportWebVitals)
       onTTFB(reportWebVitals)
