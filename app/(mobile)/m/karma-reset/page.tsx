@@ -1,34 +1,37 @@
 'use client'
 
 /**
- * Mobile Karma Reset Page
+ * Mobile Karma Reset Page — दुःख-संयोग-वियोग
  *
- * Wraps the desktop KarmaResetClient in MobileAppShell
- * for the sacred mobile experience.
+ * Full-screen immersive 6-phase sacred ritual for examining
+ * actions through the light of the Bhagavad Gita.
+ * No MobileAppShell wrapper — phases own the full screen.
  */
 
 import dynamic from 'next/dynamic'
-import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { SacredOMLoader } from '@/components/sacred/SacredOMLoader'
 
-const KarmaResetClient = dynamic(
-  () => import('@/app/tools/karma-reset/KarmaResetClient'),
+const KarmaResetScreen = dynamic(
+  () => import('./KarmaResetScreen').then((mod) => ({ default: mod.KarmaResetScreen })),
   {
     ssr: false,
     loading: () => (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <SacredOMLoader size={48} message="Preparing karmic reset..." />
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#050714',
+        }}
+      >
+        <SacredOMLoader size={48} message="Entering sacred space..." />
       </div>
     ),
   }
 )
 
 export default function MobileKarmaResetPage() {
-  return (
-    <MobileAppShell title="Karma Reset">
-      <div className="px-5 pb-8">
-        <KarmaResetClient />
-      </div>
-    </MobileAppShell>
-  )
+  return <KarmaResetScreen />
 }
