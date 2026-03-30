@@ -296,7 +296,7 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     if ((prevStatus === 'listening' || prevStatus === 'processing') && voiceInput.status === 'idle') {
       const finalText = transcriptRef.current.trim()
       if (finalText) {
-        setHandsFreeState('submitting')
+        setHandsFreeState('submitting') // eslint-disable-line react-hooks/set-state-in-effect -- syncing with external STT system state
         onTranscriptRef.current(finalText)
       }
 

@@ -28,7 +28,6 @@ import { useHapticFeedback } from '@/hooks'
 import { ShankhaIcon } from '@/components/icons/ShankhaIcon'
 import { apiFetch } from '@/lib/api'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
-import { getBriefErrorMessage } from '@/lib/api-client'
 import { KiaanFriendEngine } from '@/lib/kiaan-friend-engine'
 import { detectToolSuggestion, type ToolSuggestion } from '@/utils/voice/ecosystemNavigator'
 
@@ -90,8 +89,8 @@ export function KiaanVoiceCompanionFooter() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [toolSuggestion, setToolSuggestion] = useState<ToolSuggestion | null>(null)
-  const [sessionId, setSessionId] = useState<string>(`local_${Date.now()}`)
-  const [currentMood, setCurrentMood] = useState('neutral')
+  const [sessionId] = useState<string>(`local_${Date.now()}`)
+  const [, setCurrentMood] = useState('neutral')
   const [mounted, setMounted] = useState(false)
 
   // ── Refs ──
@@ -139,22 +138,18 @@ export function KiaanVoiceCompanionFooter() {
   }, [])
 
   // ── Wake Word Detection ──
-  const handleWakeWordDetected = useCallback((phrase: string) => {
+  const handleWakeWordDetected = useCallback((_phrase: string) => {
     if (!mountedRef.current) return
     triggerHaptic('medium')
     setMode('listening')
     setError(null)
     // Hands-free mode will be activated by the mode change effect
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`[KIAAN] Wake word detected: "${phrase}"`)
-    }
   }, [triggerHaptic])
 
   const {
     isListening: isWakeWordListening,
     startWakeWordListening,
     stopWakeWordListening,
-    resumeListening: resumeWakeWord,
     wakeWordSupported,
   } = useWakeWord({
     onWakeWordDetected: handleWakeWordDetected,
