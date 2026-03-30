@@ -33,7 +33,6 @@ import { SacredOMLoader } from '@/components/sacred/SacredOMLoader'
 import { VoiceInputButton, VoiceResponseButton } from '@/components/voice'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useLanguage } from '@/hooks/useLanguage'
-import { apiFetch } from '@/lib/api'
 import {
   startEmotionalReset,
   processStep as apiProcessStep,
@@ -116,7 +115,6 @@ export default function MobileEmotionalResetPage() {
   const [startTime] = useState(() => Date.now())
 
   // Arrival animation
-  const [arrivalComplete, setArrivalComplete] = useState(false)
   const [showRipple, setShowRipple] = useState(false)
   const [rippleOrigin] = useState(() => ({
     x: typeof window !== 'undefined' ? window.innerWidth / 2 : 200,
@@ -128,7 +126,6 @@ export default function MobileEmotionalResetPage() {
     if (phase !== 0) return
 
     if (reduceMotion) {
-      setArrivalComplete(true)
       setPhase(1)
       return
     }
@@ -137,7 +134,6 @@ export default function MobileEmotionalResetPage() {
 
     const timers = [
       setTimeout(() => setShowRipple(false), 1200),
-      setTimeout(() => setArrivalComplete(true), 1400),
       setTimeout(() => setPhase(1), 1600),
     ]
 
