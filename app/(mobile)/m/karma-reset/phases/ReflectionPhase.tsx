@@ -32,7 +32,7 @@ interface ReflectionPhaseProps {
 export function ReflectionPhase({ context, onComplete }: ReflectionPhaseProps) {
   const { triggerHaptic } = useHapticFeedback()
   const { language } = useLanguage()
-  const { fetchReflectionQuestion, isLoadingQuestion } = useKarmaReset()
+  const { fetchReflectionQuestion, isLoadingQuestion, error } = useKarmaReset()
 
   const [questionIndex, setQuestionIndex] = useState(0)
   const [currentQuestion, setCurrentQuestion] = useState<KarmaReflectionQuestion | null>(null)
@@ -167,9 +167,27 @@ export function ReflectionPhase({ context, onComplete }: ReflectionPhaseProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            style={{ display: 'flex', justifyContent: 'center', padding: 40 }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, gap: 12 }}
           >
-            <SacredOMLoader size={32} message="Sakha is contemplating..." />
+            {error && !isLoadingQuestion ? (
+              <>
+                <p style={{ fontFamily: 'var(--font-scripture, Crimson Text, serif)', fontStyle: 'italic', fontSize: 14, color: '#F97316', textAlign: 'center' }}>
+                  {error}
+                </p>
+                <MobileButton
+                  variant="ghost"
+                  size="md"
+                  onClick={async () => {
+                    const q = await fetchReflectionQuestion(context, questionIndex as 0 | 1 | 2)
+                    if (q) setCurrentQuestion(q)
+                  }}
+                >
+                  Try Again
+                </MobileButton>
+              </>
+            ) : (
+              <SacredOMLoader size={32} message="Sakha is contemplating..." />
+            )}
           </motion.div>
         ) : (
           <motion.div
@@ -249,11 +267,8 @@ export function ReflectionPhase({ context, onComplete }: ReflectionPhaseProps) {
                       background: isSelected
                         ? `${categoryColor}1A`
                         : 'rgba(22,26,66,0.4)',
-                      borderLeft: `3px solid ${isSelected ? categoryColor : 'rgba(255,255,255,0.06)'}`,
                       border: 'none',
-                      borderLeftStyle: 'solid',
-                      borderLeftWidth: 3,
-                      borderLeftColor: isSelected ? categoryColor : 'rgba(255,255,255,0.06)',
+                      borderLeft: `3px solid ${isSelected ? categoryColor : 'rgba(255,255,255,0.06)'}`,
                       textAlign: 'left',
                       cursor: 'pointer',
                       WebkitTapHighlightColor: 'transparent',
@@ -301,11 +316,8 @@ export function ReflectionPhase({ context, onComplete }: ReflectionPhaseProps) {
                   minHeight: 48,
                   borderRadius: 14,
                   background: showFreeText ? `${categoryColor}1A` : 'transparent',
-                  borderLeft: `3px dashed ${showFreeText ? categoryColor : 'rgba(255,255,255,0.1)'}`,
                   border: 'none',
-                  borderLeftStyle: 'dashed',
-                  borderLeftWidth: 3,
-                  borderLeftColor: showFreeText ? categoryColor : 'rgba(255,255,255,0.1)',
+                  borderLeft: `3px dashed ${showFreeText ? categoryColor : 'rgba(255,255,255,0.1)'}`,
                   textAlign: 'left',
                   cursor: 'pointer',
                   WebkitTapHighlightColor: 'transparent',

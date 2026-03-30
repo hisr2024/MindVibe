@@ -32,9 +32,13 @@ export function ActionDharmaCards({ actions, onCommit }: ActionDharmaCardsProps)
       const next = new Set(prev)
       if (next.has(index)) next.delete(index)
       else next.add(index)
-      onCommit?.(actions.filter((_, i) => next.has(i)).map((a) => a.concept))
       return next
     })
+    // Compute committed list after state update
+    const next = new Set(committed)
+    if (next.has(index)) next.delete(index)
+    else next.add(index)
+    onCommit?.(actions.filter((_, i) => next.has(i)).map((a) => a.concept))
   }
 
   return (

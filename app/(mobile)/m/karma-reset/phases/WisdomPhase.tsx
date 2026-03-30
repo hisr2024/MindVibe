@@ -38,11 +38,10 @@ const LOADING_MESSAGES = [
 
 export function WisdomPhase({ context, reflections, onComplete }: WisdomPhaseProps) {
   const { triggerHaptic } = useHapticFeedback()
-  const { fetchWisdom, isLoadingWisdom } = useKarmaReset()
+  const { fetchWisdom, isLoadingWisdom, error } = useKarmaReset()
   const [wisdom, setWisdom] = useState<KarmaWisdomResponse | null>(null)
   const [loadingMsg, setLoadingMsg] = useState(0)
-  const [committedActions, setCommittedActions] = useState<string[]>([])
-  const wisdomRef = useRef<KarmaWisdomResponse | null>(null)
+  const [, setCommittedActions] = useState<string[]>([])
   const fetchedRef = useRef(false)
 
   const categoryColor = CATEGORY_COLORS[context.category]
@@ -55,7 +54,6 @@ export function WisdomPhase({ context, reflections, onComplete }: WisdomPhasePro
     const load = async () => {
       const result = await fetchWisdom(context, reflections)
       if (result) {
-        wisdomRef.current = result
         setWisdom(result)
         triggerHaptic('success')
       }
@@ -160,26 +158,60 @@ export function WisdomPhase({ context, reflections, onComplete }: WisdomPhasePro
               ))}
             </div>
 
-            {/* Cycling loading text */}
-            <motion.p
-              key={loadingMsg}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={{
-                fontFamily: 'var(--font-scripture, Crimson Text, serif)',
-                fontStyle: 'italic',
-                fontSize: 14,
-                color: 'var(--sacred-text-secondary, #B8AE98)',
-                textAlign: 'center',
-              }}
-            >
-              {LOADING_MESSAGES[loadingMsg]}
-            </motion.p>
+            {/* Error state */}
+            {error && !isLoadingWisdom && (
+              <div style={{ textAlign: 'center' }}>
+                <p
+                  style={{
+                    fontFamily: 'var(--font-scripture, Crimson Text, serif)',
+                    fontStyle: 'italic',
+                    fontSize: 14,
+                    color: '#F97316',
+                    marginBottom: 12,
+                  }}
+                >
+                  {error}
+                </p>
+                <MobileButton
+                  variant="ghost"
+                  size="md"
+                  onClick={async () => {
+                    const result = await fetchWisdom(context, reflections)
+                    if (result) {
+                      setWisdom(result)
+                      triggerHaptic('success')
+                    }
+                  }}
+                >
+                  Try Again
+                </MobileButton>
+              </div>
+            )}
 
-            <div style={{ marginTop: 16 }}>
-              <SacredOMLoader size={20} />
-            </div>
+            {/* Cycling loading text */}
+            {isLoadingWisdom && (
+              <>
+                <motion.p
+                  key={loadingMsg}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  style={{
+                    fontFamily: 'var(--font-scripture, Crimson Text, serif)',
+                    fontStyle: 'italic',
+                    fontSize: 14,
+                    color: 'var(--sacred-text-secondary, #B8AE98)',
+                    textAlign: 'center',
+                  }}
+                >
+                  {LOADING_MESSAGES[loadingMsg]}
+                </motion.p>
+
+                <div style={{ marginTop: 16 }}>
+                  <SacredOMLoader size={20} />
+                </div>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

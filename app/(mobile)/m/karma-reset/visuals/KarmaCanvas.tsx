@@ -44,12 +44,12 @@ export function KarmaCanvas({ phase }: KarmaCanvasProps) {
 
     let frame = 0
 
+    const dpr = window.devicePixelRatio || 1
     const resize = () => {
-      canvas.width = window.innerWidth * devicePixelRatio
-      canvas.height = window.innerHeight * devicePixelRatio
+      canvas.width = window.innerWidth * dpr
+      canvas.height = window.innerHeight * dpr
       canvas.style.width = `${window.innerWidth}px`
       canvas.style.height = `${window.innerHeight}px`
-      ctx.scale(devicePixelRatio, devicePixelRatio)
     }
     resize()
     window.addEventListener('resize', resize)
@@ -59,7 +59,7 @@ export function KarmaCanvas({ phase }: KarmaCanvasProps) {
       const h = window.innerHeight
       const config = configRef.current
 
-      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0)
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx.clearRect(0, 0, w, h)
 
       // Ember glow at bottom (karma's fire, always present)
