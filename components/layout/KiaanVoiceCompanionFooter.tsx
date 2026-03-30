@@ -27,7 +27,7 @@ import { useLanguage } from '@/hooks/useLanguage'
 import { useHapticFeedback } from '@/hooks'
 import { ShankhaIcon } from '@/components/icons/ShankhaIcon'
 import { apiFetch } from '@/lib/api'
-import { getBriefErrorMessage } from '@/lib/api-client'
+import { usePlayerStore } from '@/lib/kiaan-vibe/store'
 import { KiaanFriendEngine } from '@/lib/kiaan-friend-engine'
 import { detectToolSuggestion, type ToolSuggestion } from '@/utils/voice/ecosystemNavigator'
 
@@ -89,8 +89,8 @@ export function KiaanVoiceCompanionFooter() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [toolSuggestion, setToolSuggestion] = useState<ToolSuggestion | null>(null)
-  const [sessionId, setSessionId] = useState<string>(`local_${Date.now()}`)
-  const [currentMood, setCurrentMood] = useState('neutral')
+  const [sessionId] = useState<string>(`local_${Date.now()}`)
+  const [, setCurrentMood] = useState('neutral')
   const [mounted, setMounted] = useState(false)
 
   // ── Refs ──
@@ -101,9 +101,30 @@ export function KiaanVoiceCompanionFooter() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const autoCollapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const wakeWordWasActiveRef = useRef(false)
+  const vibePlayerWasPlayingRef = useRef(false)
 
   // Pages where wake word should not auto-start (they have their own voice)
   const isVoiceConflictPage = pathname === '/companion' || pathname === '/kiaan/chat'
+
+  // ── Vibe Player Coordination ──
+  // Pause Vibe Player when Voice Companion needs audio (listening or speaking)
+  const pauseVibePlayer = useCallback(() => {
+    const playerState = usePlayerStore.getState()
+    if (playerState.isPlaying) {
+      vibePlayerWasPlayingRef.current = true
+      playerState.pause()
+    }
+  }, [])
+
+  const resumeVibePlayer = useCallback(() => {
+    if (vibePlayerWasPlayingRef.current) {
+      vibePlayerWasPlayingRef.current = false
+      // Small delay to avoid audio glitch from rapid pause→play
+      setTimeout(() => {
+        usePlayerStore.getState().play()
+      }, 300)
+    }
+  }, [])
 
   // ── Mount / Unmount ──
   useEffect(() => {
@@ -117,22 +138,18 @@ export function KiaanVoiceCompanionFooter() {
   }, [])
 
   // ── Wake Word Detection ──
-  const handleWakeWordDetected = useCallback((phrase: string) => {
+  const handleWakeWordDetected = useCallback((_phrase: string) => {
     if (!mountedRef.current) return
     triggerHaptic('medium')
     setMode('listening')
     setError(null)
     // Hands-free mode will be activated by the mode change effect
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`[KIAAN] Wake word detected: "${phrase}"`)
-    }
   }, [triggerHaptic])
 
   const {
     isListening: isWakeWordListening,
     startWakeWordListening,
     stopWakeWordListening,
-    resumeListening: resumeWakeWord,
     wakeWordSupported,
   } = useWakeWord({
     onWakeWordDetected: handleWakeWordDetected,
@@ -203,20 +220,20 @@ export function KiaanVoiceCompanionFooter() {
           setToolSuggestion(suggestion)
 
           // Speak the response
-          speak(data.response)
+          speakRef.current(data.response)
           return
         }
       }
 
       // API failed or returned no response — use local fallback
-      addLocalFallback(text.trim())
+      addLocalFallbackRef.current(text.trim())
     } catch {
       // Network error or timeout — use local fallback
-      addLocalFallback(text.trim())
+      addLocalFallbackRef.current(text.trim())
     } finally {
       if (mountedRef.current) setIsProcessing(false)
     }
-  }, [isProcessing, sessionId, language]) // speak and addLocalFallback added below via refs
+  }, [isProcessing, sessionId, language]) // speak via speakRef, addLocalFallback via addLocalFallbackRef
 
   // ── Local Fallback (Friend Engine) ──
   const addLocalFallback = useCallback((userText: string) => {
@@ -238,8 +255,12 @@ export function KiaanVoiceCompanionFooter() {
     const suggestion = detectToolSuggestion(userText, result.mood)
     setToolSuggestion(suggestion)
 
-    speak(result.response)
-  }, []) // speak added below via ref pattern
+    speakRef.current(result.response)
+  }, [])
+
+  // Stable ref for addLocalFallback
+  const addLocalFallbackRef = useRef(addLocalFallback)
+  useEffect(() => { addLocalFallbackRef.current = addLocalFallback })
 
   // ── TTS Voice Output ──
   const handleTTSEnd = useCallback(() => {
@@ -258,7 +279,9 @@ export function KiaanVoiceCompanionFooter() {
       clearTimeout(autoCollapseTimerRef.current)
       autoCollapseTimerRef.current = null
     }
-  }, [])
+    // Ensure Vibe Player is paused during TTS playback
+    pauseVibePlayer()
+  }, [pauseVibePlayer])
 
   const {
     isSpeaking: isTTSSpeaking,
@@ -271,6 +294,11 @@ export function KiaanVoiceCompanionFooter() {
     onStart: handleTTSStart,
     onEnd: handleTTSEnd,
   })
+
+  // Stable ref for speak — breaks circular dependency between sendMessage,
+  // addLocalFallback, and useEnhancedVoiceOutput declaration order.
+  const speakRef = useRef(speak)
+  useEffect(() => { speakRef.current = speak })
 
   // ── Hands-Free Mode (VAD + STT) ──
   const handleTranscript = useCallback((text: string) => {
@@ -302,19 +330,22 @@ export function KiaanVoiceCompanionFooter() {
   // When mode becomes 'listening', stop wake word and activate hands-free
   useEffect(() => {
     if (mode === 'listening') {
+      // Pause Vibe Player so it doesn't interfere with speech recognition
+      pauseVibePlayer()
+
       if (isWakeWordListening) {
         wakeWordWasActiveRef.current = true
         stopWakeWordListening()
       }
       if (!isHandsFreeActive) {
-        // Small delay to let wake word fully release SpeechRecognition
+        // Delay to let wake word fully release SpeechRecognition
         const timer = setTimeout(() => {
           if (mountedRef.current) activateHandsFree()
-        }, 300)
+        }, 500)
         return () => clearTimeout(timer)
       }
     }
-  }, [mode, isWakeWordListening, isHandsFreeActive, stopWakeWordListening, activateHandsFree])
+  }, [mode, isWakeWordListening, isHandsFreeActive, stopWakeWordListening, activateHandsFree, pauseVibePlayer])
 
   // When mode becomes 'dormant', deactivate hands-free and resume wake word
   useEffect(() => {
@@ -322,6 +353,9 @@ export function KiaanVoiceCompanionFooter() {
       if (isHandsFreeActive) {
         deactivateHandsFree()
       }
+      // Resume Vibe Player if it was playing before Voice Companion activated
+      resumeVibePlayer()
+
       // Resume wake word after hands-free fully releases mic
       if (wakeWordWasActiveRef.current && wakeWordSupported && !isWakeWordListening && !isVoiceConflictPage) {
         wakeWordWasActiveRef.current = false
@@ -331,7 +365,7 @@ export function KiaanVoiceCompanionFooter() {
         return () => clearTimeout(timer)
       }
     }
-  }, [mode, isHandsFreeActive, deactivateHandsFree, wakeWordSupported, isWakeWordListening, isVoiceConflictPage, startWakeWordListening])
+  }, [mode, isHandsFreeActive, deactivateHandsFree, wakeWordSupported, isWakeWordListening, isVoiceConflictPage, startWakeWordListening, resumeVibePlayer])
 
   // ── User Actions ──
 
@@ -360,8 +394,10 @@ export function KiaanVoiceCompanionFooter() {
     }
     setMode('dormant')
     setToolSuggestion(null)
+    // Resume Vibe Player if it was playing before companion activated
+    resumeVibePlayer()
     triggerHaptic('light')
-  }, [cancelTTS, deactivateHandsFree, triggerHaptic])
+  }, [cancelTTS, deactivateHandsFree, triggerHaptic, resumeVibePlayer])
 
   const handleTextSubmit = useCallback(() => {
     if (!inputText.trim() || isProcessing) return
