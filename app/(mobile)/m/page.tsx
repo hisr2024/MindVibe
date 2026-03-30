@@ -28,6 +28,7 @@ import { apiFetch } from '@/lib/api'
 
 // Quick sacred action chips
 const SACRED_ACTIONS = [
+  { id: 'sadhana', label: 'Daily Sadhana', href: '/m/sadhana' },
   { id: 'ask', label: 'Ask Sakha', href: '/m/kiaan' },
   { id: 'shloka', label: "Today's Shloka", href: '/m/wisdom' },
   { id: 'journey', label: 'My Journey', href: '/m/journeys' },
