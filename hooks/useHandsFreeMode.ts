@@ -89,6 +89,17 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
   const isActiveRef = useRef(false)
   const stateRef = useRef<HandsFreeState>('inactive')
 
+  // Pre-compute whether VAD is likely supported so useVoiceInput can be
+  // configured with autoStopOnSilence as a fallback on low-end devices.
+  // Uses the same criteria as useVoiceActivityDetection (4+ cores, 4+ GB RAM,
+  // AudioWorkletNode available).
+  const [vadLikelySupported] = useState(() => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') return false
+    const cores = navigator.hardwareConcurrency || 2
+    const memory = (navigator as { deviceMemory?: number }).deviceMemory || 4
+    return cores >= 4 && memory >= 4 && typeof AudioWorkletNode !== 'undefined'
+  })
+
   // Stable callback refs
   const onTranscriptRef = useRef(onTranscript)
   const onBargeInRef = useRef(onBargeIn)
@@ -116,6 +127,9 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     language,
     punctuationAssist: true,
     module: 'hands-free',
+    // When VAD is not supported (low-end device), rely on STT's built-in
+    // silence detection to auto-finalize the transcript
+    autoStopOnSilence: !vadLikelySupported,
   })
 
   // Track the latest transcript via ref so the VAD onSpeechEnd callback
@@ -264,6 +278,36 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
     setActiveState(false)
     setHandsFreeState('inactive')
   }, [voiceInput, clearIdleTimer, stopVAD, setActiveState, setHandsFreeState])
+
+  // ---------------------------------------------------------------------------
+  // Non-VAD fallback — when VAD is not supported, detect STT completion
+  // via the voice input status transitioning to 'idle' with a transcript.
+  // ---------------------------------------------------------------------------
+  const prevStatusRef = useRef(voiceInput.status)
+  useEffect(() => {
+    const prevStatus = prevStatusRef.current
+    prevStatusRef.current = voiceInput.status
+
+    // Only handle non-VAD fallback path
+    if (vadSupported) return
+    if (!isActiveRef.current || !mountedRef.current) return
+
+    // STT transitioned from listening/processing to idle — speech ended
+    if ((prevStatus === 'listening' || prevStatus === 'processing') && voiceInput.status === 'idle') {
+      const finalText = transcriptRef.current.trim()
+      if (finalText) {
+        setHandsFreeState('submitting')
+        onTranscriptRef.current(finalText)
+      }
+
+      voiceInput.resetTranscript()
+
+      if (!conversationalRef.current) {
+        setActiveState(false)
+        setHandsFreeState('inactive')
+      }
+    }
+  }, [voiceInput.status, vadSupported, setHandsFreeState, setActiveState, voiceInput])
 
   // ---------------------------------------------------------------------------
   // Conversational mode — restart VAD + STT after KIAAN finishes processing
