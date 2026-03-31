@@ -61,7 +61,7 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
       const allPhases: { phase: BreathPhase; duration: number }[] = [
         { phase: 'inhale' as const, duration: pattern.inhale * 1000 },
         { phase: 'holdIn' as const, duration: pattern.holdIn * 1000 },
-        { phase: 'exhale' as const, duration: pattern.exhale * 1100 },
+        { phase: 'exhale' as const, duration: pattern.exhale * 1000 },
         { phase: 'holdOut' as const, duration: pattern.holdOut * 1000 },
       ]
       const phases = allPhases.filter(p => p.duration > 0)
@@ -90,8 +90,8 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
   }, [pattern, totalCycleDuration])
 
   const petalScale = breathPhase === 'inhale' || breathPhase === 'holdIn'
-    ? { scaleX: 1, scaleY: 1.1 }
-    : { scaleX: 0.5, scaleY: 0.55 }
+    ? { scaleX: 1, scaleY: 1.15 }
+    : { scaleX: 0.8, scaleY: 0.85 }
 
   const holdPulse = breathPhase === 'holdIn'
     ? { scale: [1, 1.03, 1] }
@@ -102,7 +102,7 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
     : breathPhase === 'holdIn'
     ? 0.5
     : breathPhase === 'exhale'
-    ? pattern.exhale * 1.1
+    ? pattern.exhale
     : pattern.holdOut
 
   const currentColor = PHASE_COLORS[breathPhase]
@@ -140,7 +140,7 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
       </svg>
 
       {/* Lotus container */}
-      <div className="relative w-[280px] h-[280px]">
+      <div className="relative w-[300px] h-[300px]">
         {/* Outer petals (8) */}
         {Array.from({ length: 8 }).map((_, i) => {
           const angle = (i * 360) / 8
@@ -149,10 +149,10 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
               key={`outer-${i}`}
               className="absolute left-1/2 top-1/2 origin-bottom"
               style={{
-                width: 36,
-                height: 100,
-                marginLeft: -18,
-                marginTop: -100,
+                width: 40,
+                height: 110,
+                marginLeft: -20,
+                marginTop: -110,
                 rotate: angle,
               }}
               animate={{
@@ -166,12 +166,11 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
               }}
             >
               <motion.div
-                className="w-full h-full rounded-full"
+                className="w-full h-full"
                 animate={{ backgroundColor: currentColor }}
                 transition={{ duration: 0.8 }}
                 style={{
-                  opacity: 0.6,
-                  filter: 'blur(1px)',
+                  opacity: 0.85,
                   borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
                 }}
               />
@@ -187,10 +186,10 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
               key={`inner-${i}`}
               className="absolute left-1/2 top-1/2 origin-bottom"
               style={{
-                width: 24,
-                height: 65,
-                marginLeft: -12,
-                marginTop: -65,
+                width: 28,
+                height: 72,
+                marginLeft: -14,
+                marginTop: -72,
                 rotate: angle,
               }}
               animate={{
@@ -205,12 +204,11 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
               }}
             >
               <motion.div
-                className="w-full h-full rounded-full"
+                className="w-full h-full"
                 animate={{ backgroundColor: currentColor }}
                 transition={{ duration: 0.8, delay: 0.1 }}
                 style={{
-                  opacity: 0.45,
-                  filter: 'blur(0.5px)',
+                  opacity: 0.65,
                   borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
                 }}
               />
@@ -220,7 +218,7 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
 
         {/* Center golden circle */}
         <motion.div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-[#D4A017]"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#D4A017]"
           animate={{
             boxShadow: [
               '0 0 8px rgba(212,160,23,0.4)',

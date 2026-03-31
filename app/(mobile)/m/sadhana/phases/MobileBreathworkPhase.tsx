@@ -47,15 +47,15 @@ export function MobileBreathworkPhase({ pattern, onComplete }: MobileBreathworkP
     <div className="relative min-h-[100vh] flex flex-col items-center justify-center">
       {/* Pattern name */}
       <motion.div
-        className="absolute top-8 left-0 right-0 text-center z-10"
+        className="absolute top-8 left-0 right-0 text-center z-10 px-6"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
-        <p className="text-[9px] font-[family-name:var(--font-ui)] text-[#D4A017] uppercase tracking-[0.15em] mb-1">
+        <p className="text-[11px] font-[family-name:var(--font-ui)] text-[#D4A017] uppercase tracking-[0.15em] mb-2">
           {pattern.name}
         </p>
-        <p className="text-xs font-[family-name:var(--font-scripture)] italic text-[#B8AE98]">
+        <p className="text-xs font-[family-name:var(--font-scripture)] italic text-[#B8AE98] leading-relaxed">
           {pattern.description}
         </p>
       </motion.div>

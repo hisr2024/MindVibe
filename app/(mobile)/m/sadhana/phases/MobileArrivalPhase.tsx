@@ -12,12 +12,12 @@ import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import type { SadhanaMood } from '@/types/sadhana.types'
 
 const SADHANA_MOODS = [
-  { id: 'radiant' as SadhanaMood, sanskrit: 'तेजस्वी', label: 'Radiant', description: 'Joyful, bright, golden', color: '#F0C040', glowColor: '#FDE68A', angle: 0 },
-  { id: 'peaceful' as SadhanaMood, sanskrit: 'शान्त', label: 'Peaceful', description: 'Calm, centered, sky blue', color: '#67E8F9', glowColor: '#06B6D4', angle: 60 },
-  { id: 'grateful' as SadhanaMood, sanskrit: 'कृतज्ञ', label: 'Grateful', description: 'Thankful, blessed, green', color: '#6EE7B7', glowColor: '#059669', angle: 120 },
-  { id: 'seeking' as SadhanaMood, sanskrit: 'जिज्ञासु', label: 'Seeking', description: 'Curious, searching, purple', color: '#C4B5FD', glowColor: '#7C3AED', angle: 180 },
-  { id: 'heavy' as SadhanaMood, sanskrit: 'भारग्रस्त', label: 'Heavy', description: 'Burdened, tired, silver-blue', color: '#93C5FD', glowColor: '#1D4ED8', angle: 240 },
-  { id: 'wounded' as SadhanaMood, sanskrit: 'आहत', label: 'Wounded', description: 'Hurting, grieving, crimson', color: '#FCA5A5', glowColor: '#B91C1C', angle: 300 },
+  { id: 'heavy' as SadhanaMood, sanskrit: 'भारग्रस्त', label: 'Heavy', description: 'Burdened, tired, silver-blue', color: '#93C5FD', glowColor: '#1D4ED8', angle: -150 },
+  { id: 'wounded' as SadhanaMood, sanskrit: 'आहत', label: 'Wounded', description: 'Hurting, grieving, crimson', color: '#FCA5A5', glowColor: '#B91C1C', angle: -30 },
+  { id: 'seeking' as SadhanaMood, sanskrit: 'जिज्ञासु', label: 'Seeking', description: 'Curious, searching, purple', color: '#C4B5FD', glowColor: '#7C3AED', angle: 150 },
+  { id: 'radiant' as SadhanaMood, sanskrit: 'तेजस्वी', label: 'Radiant', description: 'Joyful, bright, golden', color: '#F0C040', glowColor: '#FDE68A', angle: 30 },
+  { id: 'grateful' as SadhanaMood, sanskrit: 'कृतज्ञ', label: 'Grateful', description: 'Thankful, blessed, green', color: '#6EE7B7', glowColor: '#059669', angle: 90 },
+  { id: 'peaceful' as SadhanaMood, sanskrit: 'शान्त', label: 'Peaceful', description: 'Calm, centered, sky blue', color: '#67E8F9', glowColor: '#06B6D4', angle: -90 },
 ] as const
 
 interface MobileArrivalPhaseProps {
@@ -38,8 +38,8 @@ export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
   const greeting = useMemo(() => getTimeGreeting(), [])
   const orbitRadius = useSyncExternalStore(
     (cb) => { window.addEventListener('resize', cb); return () => window.removeEventListener('resize', cb) },
-    () => Math.min(window.innerWidth * 0.34, 150),
-    () => 130,
+    () => Math.min(window.innerWidth * 0.30, 130),
+    () => 120,
   )
 
   const handleMoodTap = useCallback((mood: SadhanaMood) => {
