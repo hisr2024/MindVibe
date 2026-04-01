@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { VoiceResponseButton } from '@/components/voice'
 
@@ -227,13 +227,15 @@ const ANALYSIS_MODE_DISPLAY: Record<AnalysisMode, { name: string; icon: string; 
   quantum: { name: 'Quantum Dive', icon: '🌌', color: 'from-purple-500/20 to-pink-400/20 border-purple-400/30 text-purple-300' },
 }
 
+// Pre-sorted at module level to avoid re-sorting on every call
+const SORTED_SANSKRIT_TERMS = Object.keys(SANSKRIT_TERMS).sort((a, b) => b.length - a.length)
+
 function highlightSanskrit(text: string): React.ReactNode[] {
   const parts: React.ReactNode[] = []
   let remaining = text
   let key = 0
 
-  // Sort terms by length (longest first) to avoid partial matches
-  const sortedTerms = Object.keys(SANSKRIT_TERMS).sort((a, b) => b.length - a.length)
+  const sortedTerms = SORTED_SANSKRIT_TERMS
 
   while (remaining.length > 0) {
     let found = false
@@ -327,41 +329,53 @@ export default function WisdomResponseCard({
   }
   const accentColorClass = accentColorMap[config.accentColor as keyof typeof accentColorMap] || accentColorMap.orange
 
-  // Parse sections into ordered array
-  const parsedSections: WisdomSection[] = Object.entries(sections)
-    .map(([key, content]) => {
-      const sectionMeta = config.sectionMeta as Record<string, SectionMeta>
-      const meta: SectionMeta = sectionMeta[key] || {
-        title: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-        icon: '📿',
-        order: 99,
-      }
-      return {
-        key,
-        title: meta.title,
-        content: content || '',
-        icon: meta.icon,
-        order: meta.order,
-      }
-    })
-    .filter(s => s.content && s.content.trim().length > 0)
-    .sort((a, b) => (a.order || 99) - (b.order || 99))
-
-  // Expand first 2 sections by default (or all if 3 or fewer)
-  const [expandedSections, setExpandedSections] = useState<string[]>(() => {
+  // Parse sections into ordered array (memoized to avoid re-computation)
+  const parsedSections: WisdomSection[] = useMemo(() => {
     const sectionMeta = config.sectionMeta as Record<string, SectionMeta>
-    const ordered = Object.entries(sections)
-      .map(([key, content]) => ({
-        key,
-        content: content || '',
-        order: sectionMeta[key]?.order ?? 99,
-      }))
-      .filter(s => s.content.trim().length > 0)
-      .sort((a, b) => a.order - b.order)
-    return ordered.length <= 3
-      ? ordered.map(s => s.key)
-      : ordered.slice(0, 2).map(s => s.key)
-  })
+    return Object.entries(sections)
+      .map(([key, content]) => {
+        const meta: SectionMeta = sectionMeta[key] || {
+          title: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          icon: '📿',
+          order: 99,
+        }
+        return {
+          key,
+          title: meta.title,
+          content: content || '',
+          icon: meta.icon,
+          order: meta.order,
+        }
+      })
+      .filter(s => s.content && s.content.trim().length > 0)
+      .sort((a, b) => (a.order || 99) - (b.order || 99))
+  }, [sections, config.sectionMeta])
+
+  // Expand first 2 sections by default (or all if 3 or fewer).
+  // Re-sync when sections change (e.g. new API response).
+  const [expandedSections, setExpandedSections] = useState<string[]>([])
+
+  useEffect(() => {
+    setExpandedSections(
+      parsedSections.length <= 3
+        ? parsedSections.map(s => s.key)
+        : parsedSections.slice(0, 2).map(s => s.key)
+    )
+  }, [parsedSections])
+
+  // Memoize expensive Sanskrit highlighting to avoid O(n*m) on every render
+  const highlightedFullResponse = useMemo(
+    () => secularMode ? fullResponse : highlightSanskrit(fullResponse),
+    [fullResponse, secularMode]
+  )
+
+  const highlightedSections = useMemo(
+    () => parsedSections.map(s => ({
+      ...s,
+      highlighted: secularMode ? s.content : highlightSanskrit(s.content),
+    })),
+    [parsedSections, secularMode]
+  )
 
   const expandAll = () => {
     setExpandedSections(parsedSections.map(s => s.key))
@@ -460,7 +474,7 @@ export default function WisdomResponseCard({
       {showFullText || parsedSections.length === 0 ? (
         /* Full Text View - also shown when no sections parsed */
         <div className={`whitespace-pre-wrap text-sm ${accentColorClass.text} leading-relaxed max-w-[65ch]`}>
-          {secularMode ? fullResponse : highlightSanskrit(fullResponse)}
+          {highlightedFullResponse}
         </div>
       ) : (
         /* Sectioned View — Radix Accordion for a11y */
@@ -470,7 +484,7 @@ export default function WisdomResponseCard({
           onValueChange={setExpandedSections}
           className="space-y-4"
         >
-          {parsedSections.map((section) => (
+          {highlightedSections.map((section) => (
             <AccordionPrimitive.Item
               key={section.key}
               value={section.key}
@@ -503,7 +517,7 @@ export default function WisdomResponseCard({
                 {/* Subtle separator between trigger and content */}
                 <div className={`mx-4 border-t ${accentColorClass.border}`} />
                 <div className={`px-4 pt-3 pb-4 text-sm ${accentColorClass.text} leading-[1.75] max-w-[65ch]`}>
-                  {secularMode ? section.content : highlightSanskrit(section.content)}
+                  {section.highlighted}
                 </div>
               </AccordionPrimitive.Content>
             </AccordionPrimitive.Item>

@@ -500,16 +500,16 @@ async def _generate_ai_response(
     except Exception as e:
         logger.warning(f"Provider manager failed for engine response: {e}")
 
-    # Fallback: direct OpenAI
+    # Fallback: direct OpenAI (async to avoid blocking the event loop)
     try:
         import os  # noqa: I001
-        from openai import OpenAI
+        from openai import AsyncOpenAI
 
         api_key = os.getenv("OPENAI_API_KEY", "").strip()
         if api_key:
             model = os.getenv("RELATIONSHIP_ENGINE_CHAT_MODEL", "gpt-4o-mini")
-            client = OpenAI(api_key=api_key)
-            response = client.chat.completions.create(
+            client = AsyncOpenAI(api_key=api_key)
+            response = await client.chat.completions.create(
                 model=model,
                 messages=messages,
                 temperature=0.3,

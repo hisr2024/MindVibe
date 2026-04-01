@@ -118,7 +118,8 @@ export async function POST(request: NextRequest) {
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'Unknown error')
         console.error(`[Relationship Compass Guide] Backend (${targetUrl}) returned ${response.status}: ${errorText}`)
-        return forwardCookies(response, NextResponse.json(FALLBACK_RESPONSE))
+        // Return fallback as valid 200 content (don't forward cookies from failed response)
+        return NextResponse.json(FALLBACK_RESPONSE)
       }
 
       const data = await response.json()
