@@ -6,9 +6,17 @@
  * Intl.Segmenter correctly identifies grapheme cluster boundaries.
  */
 
+// Intl.Segmenter is available in all modern browsers and Node 16+
+// but not in the ES2021 lib types — use a runtime check with type assertion.
+const SegmenterCtor = (Intl as Record<string, unknown>).Segmenter as
+  | (new (locale: string, opts: { granularity: string }) => {
+      segment(input: string): Iterable<{ segment: string }>
+    })
+  | undefined
+
 export function splitGraphemes(text: string): string[] {
-  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
-    const segmenter = new Intl.Segmenter('hi', { granularity: 'grapheme' })
+  if (SegmenterCtor) {
+    const segmenter = new SegmenterCtor('hi', { granularity: 'grapheme' })
     return Array.from(segmenter.segment(text), (s) => s.segment)
   }
   // Fallback for environments without Intl.Segmenter
