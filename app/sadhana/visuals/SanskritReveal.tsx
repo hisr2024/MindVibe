@@ -5,8 +5,9 @@
  * Reveals text progressively with each character glowing as it appears.
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { splitGraphemes } from '@/lib/splitGraphemes'
 
 interface SanskritRevealProps {
   /** Text to reveal. Pass a different key to the component when text changes to reset animation. */
@@ -24,11 +25,12 @@ export function SanskritReveal({
   className = '',
   onComplete,
 }: SanskritRevealProps) {
+  const graphemes = useMemo(() => splitGraphemes(text), [text])
   const [visibleCount, setVisibleCount] = useState(0)
   const [subtextVisible, setSubtextVisible] = useState(false)
 
   useEffect(() => {
-    if (visibleCount >= text.length) {
+    if (visibleCount >= graphemes.length) {
       const timer = setTimeout(() => {
         setSubtextVisible(true)
         onComplete?.()
@@ -47,7 +49,7 @@ export function SanskritReveal({
     <div className={`text-center ${className}`}>
       {/* Main revealed text */}
       <p className="text-2xl md:text-3xl font-light leading-relaxed text-[#FFF8DC]">
-        {text.split('').map((char, i) => (
+        {graphemes.map((char, i) => (
           <motion.span
             key={i}
             initial={{ opacity: 0, filter: 'blur(4px)' }}

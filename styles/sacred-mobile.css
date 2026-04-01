@@ -199,9 +199,10 @@
 }
 
 .sacred-verse-word {
-  display: inline-block;
+  display: inline;
   opacity: 0;
   animation: sacred-word-arrival 0.4s var(--sacred-ease-divine-in) forwards;
+  margin-right: 0.25em;
 }
 
 /* Stagger delay applied via style prop: animation-delay: calc(var(--word-index) * 80ms) */

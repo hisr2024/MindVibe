@@ -130,7 +130,8 @@ export default function SacredMobileHomePage() {
       }
 
       if (wisdomRes.status === 'fulfilled' && wisdomRes.value.ok) {
-        const data = await wisdomRes.value.json()
+        const raw = await wisdomRes.value.json()
+        const data = raw.wisdom || raw
         if (data.translation || data.insight) {
           setDailyWisdom({
             sanskrit: data.sanskrit || data.sanskrit_text || undefined,

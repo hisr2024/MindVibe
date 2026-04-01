@@ -17,7 +17,7 @@ interface AarohaMovementProps {
   onComplete: () => void
 }
 
-const SANSKRIT_LETTERS = 'वियोग'.split('')
+const SANSKRIT_LETTERS = ['वि', 'यो', 'ग']
 const AUTO_ADVANCE_MS = 2500
 
 export function AarohaMovement({ onComplete }: AarohaMovementProps) {

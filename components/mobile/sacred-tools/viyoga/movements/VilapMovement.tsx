@@ -13,6 +13,7 @@
  * All state is managed by the parent orchestrator via props.
  */
 
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { SacredCard } from '@/components/sacred/SacredCard'
@@ -60,8 +61,29 @@ export function VilapMovement({
 }: VilapMovementProps) {
   const { triggerHaptic } = useHapticFeedback()
 
+  // Use local state for text inputs to avoid re-rendering entire parent on every keystroke
+  const [localExpression, setLocalExpression] = useState(userExpression)
+  const [localName, setLocalName] = useState(separatedFromName)
+  const expressionRef = useRef(userExpression)
+  const nameRef = useRef(separatedFromName)
+
+  useEffect(() => { expressionRef.current = localExpression }, [localExpression])
+  useEffect(() => { nameRef.current = localName }, [localName])
+
+  const syncExpression = () => {
+    if (expressionRef.current !== userExpression) {
+      onExpressionChange(expressionRef.current)
+    }
+  }
+
+  const syncName = () => {
+    if (nameRef.current !== separatedFromName) {
+      onNameChange(nameRef.current)
+    }
+  }
+
   const hasType = separationType !== null
-  const hasNameOrSkipped = hasType && (separatedFromName.length > 0 || separationType.id === 'self')
+  const hasNameOrSkipped = hasType && (localName.length > 0 || separationType.id === 'self')
 
   return (
     <div className="flex flex-col gap-6 pb-8">
@@ -125,8 +147,9 @@ export function VilapMovement({
               Who or what are you separated from?
             </p>
             <SacredInput
-              value={separatedFromName}
-              onChange={(e) => onNameChange(e.target.value)}
+              value={localName}
+              onChange={(e) => setLocalName(e.target.value)}
+              onBlur={syncName}
               placeholder="A name, a place, a version of yourself..."
             />
           </motion.div>
@@ -206,8 +229,9 @@ export function VilapMovement({
               What do you wish you could say to them?
             </p>
             <textarea
-              value={userExpression}
-              onChange={(e) => onExpressionChange(e.target.value)}
+              value={localExpression}
+              onChange={(e) => setLocalExpression(e.target.value)}
+              onBlur={syncExpression}
               placeholder="Speak freely. This space holds everything..."
               className="sacred-input px-4 py-3 text-[15px] font-sacred italic
                 placeholder:italic placeholder:text-[var(--sacred-text-muted)]
@@ -234,6 +258,8 @@ export function VilapMovement({
               disabled={!separationType || loading}
               onClick={() => {
                 triggerHaptic('medium')
+                onNameChange(nameRef.current)
+                onExpressionChange(expressionRef.current)
                 onSubmit()
               }}
             >
