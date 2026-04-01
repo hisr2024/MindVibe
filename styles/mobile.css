@@ -62,35 +62,6 @@
   outline: none;
 }
 
-/* ─── Touch Ripple Effect ─── */
-.touch-ripple {
-  position: relative;
-  overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.touch-ripple::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(212, 164, 76, 0.35) 0%, transparent 70%);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  opacity: 0;
-  transition: width 0.4s ease-out, height 0.4s ease-out, opacity 0.4s ease-out;
-}
-
-.touch-ripple:active::after {
-  width: 200%;
-  height: 200%;
-  opacity: 1;
-  transition: width 0s, height 0s, opacity 0s;
-}
-
 /* ─── Glass Morphism ─── */
 .mobile-glass {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
@@ -104,28 +75,6 @@ html.light .mobile-glass {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-/* ─── Interactive Cards ─── */
-.mobile-card-interactive {
-  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
-              box-shadow 0.2s ease,
-              border-color 0.2s ease;
-  will-change: transform;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.mobile-card-interactive:active {
-  transform: scale(0.97);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-}
-
-@media (hover: hover) {
-  .mobile-card-interactive:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(212, 164, 76, 0.15);
-    border-color: rgba(212, 164, 76, 0.3);
-  }
 }
 
 /* ─── Buttons ─── */
@@ -264,114 +213,6 @@ html.light .skeleton {
   perspective: 1000px;
 }
 
-/* ─── Tab Bar ─── */
-.mobile-tab-glow {
-  position: relative;
-}
-
-.mobile-tab-glow::before {
-  content: '';
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  width: 60px;
-  height: 20px;
-  transform: translateX(-50%);
-  background: radial-gradient(ellipse at center, rgba(212, 164, 76, 0.4) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.mobile-tab-glow.active::before {
-  opacity: 1;
-}
-
-/* ─── Carousel ─── */
-.mobile-carousel {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-padding-left: 16px;
-  padding: 8px 16px 16px;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.mobile-carousel::-webkit-scrollbar { display: none; }
-.mobile-carousel > * { scroll-snap-align: start; flex-shrink: 0; }
-
-/* ─── FAB ─── */
-.mobile-fab {
-  position: fixed;
-  bottom: calc(88px + env(safe-area-inset-bottom, 0px) + 16px);
-  right: 16px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #c8943a 0%, #e8b54a 100%);
-  color: #050507;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 24px rgba(212, 164, 76, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-  z-index: 45;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.mobile-fab:active {
-  transform: scale(0.92);
-  box-shadow: 0 3px 16px rgba(212, 164, 76, 0.3), 0 1px 4px rgba(0, 0, 0, 0.15);
-}
-
-/* ─── Toast ─── */
-.mobile-toast {
-  position: fixed;
-  bottom: calc(100px + env(safe-area-inset-bottom, 0px));
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  padding: 14px 24px;
-  border-radius: 16px;
-  background: rgba(15, 22, 36, 0.95);
-  border: 1px solid rgba(212, 164, 76, 0.15);
-  color: #f5f0e8;
-  font-weight: 500;
-  font-size: 14px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(20px);
-  z-index: 9999;
-  opacity: 0;
-  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.mobile-toast.visible {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
-
-html.light .mobile-toast {
-  background: rgba(255, 255, 255, 0.95);
-  color: #0f172a;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-}
-
-/* ─── Mobile Loading State ─── */
-.mobile-loading {
-  position: relative;
-  overflow: hidden;
-}
-
-.mobile-loading::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
-  animation: mobile-loading-sweep 1.5s ease-in-out infinite;
-}
-
 /* ─── Haptic Feedback Visual ─── */
 .haptic-feedback {
   position: relative;
@@ -403,14 +244,6 @@ html.light .mobile-toast {
   background-size: 200% 100%;
   animation: offline-gradient 2s linear infinite;
   z-index: 9999;
-}
-
-/* ─── Keyboard Handling ─── */
-.keyboard-visible .mobile-nav,
-.keyboard-visible .mobile-fab {
-  transform: translateY(100%);
-  opacity: 0;
-  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 /* ─── Swipe Indicator ─── */
@@ -461,22 +294,18 @@ img { content-visibility: auto; }
 
 /* ─── GPU Acceleration ─── */
 .gpu-accelerated,
-.mobile-card-interactive,
 .mobile-btn-primary,
-.mobile-btn-secondary,
-.mobile-fab {
+.mobile-btn-secondary {
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
-.gpu-accelerated:active,
-.mobile-card-interactive:active {
+.gpu-accelerated:active {
   will-change: transform;
 }
 
 @media (hover: hover) {
-  .gpu-accelerated:hover,
-  .mobile-card-interactive:hover {
+  .gpu-accelerated:hover {
     will-change: transform;
   }
 }
@@ -686,7 +515,7 @@ body[style*="position: fixed"] { width: 100% !important; }
 
 /* ─── Print ─── */
 @media print {
-  .mobile-nav, .mobile-fab, .mobile-header { display: none !important; }
+  .mobile-nav, .mobile-header { display: none !important; }
   .mobile-content { padding-bottom: 0; }
 }
 
@@ -781,11 +610,6 @@ body[style*="position: fixed"] { width: 100% !important; }
 @keyframes skeleton-shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
-}
-
-@keyframes mobile-loading-sweep {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
 }
 
 @keyframes offline-gradient {

@@ -67,6 +67,7 @@ export function ShankhaVoiceCompanion() {
   const wakeWordWasActiveRef = useRef(false)
   const speakRef = useRef<(text: string) => void>()
   const addLocalFallbackRef = useRef<(text: string) => void>()
+  const modeRef = useRef<ShankhaMode>(mode)
 
   const isVoiceConflictPage = pathname === '/m/companion' || pathname === '/m/kiaan'
 
@@ -157,9 +158,9 @@ export function ShankhaVoiceCompanion() {
   const handleTTSEnd = useCallback(() => {
     if (!mountedRef.current) return
     autoCollapseTimerRef.current = setTimeout(() => {
-      if (mountedRef.current && mode === 'responding') setMode('dormant')
+      if (mountedRef.current && modeRef.current === 'responding') setMode('dormant')
     }, 3000)
-  }, [mode])
+  }, [])
 
   const handleTTSStart = useCallback(() => {
     if (autoCollapseTimerRef.current) { clearTimeout(autoCollapseTimerRef.current); autoCollapseTimerRef.current = null }
@@ -170,8 +171,8 @@ export function ShankhaVoiceCompanion() {
     onStart: handleTTSStart, onEnd: handleTTSEnd,
   })
 
-  // Keep refs in sync with latest functions
-  useEffect(() => { speakRef.current = speak; addLocalFallbackRef.current = addLocalFallback })
+  // Keep refs in sync with latest values
+  useEffect(() => { speakRef.current = speak; addLocalFallbackRef.current = addLocalFallback; modeRef.current = mode })
 
   // ── Hands-Free VAD ──
   const handleTranscript = useCallback((text: string) => {
@@ -193,7 +194,7 @@ export function ShankhaVoiceCompanion() {
     if (mode === 'listening') {
       if (isWakeWordListening) { wakeWordWasActiveRef.current = true; stopWakeWordListening() }
       if (!isHandsFreeActive) {
-        const timer = setTimeout(() => { if (mountedRef.current) activateHandsFree() }, 300)
+        const timer = setTimeout(() => { if (mountedRef.current) activateHandsFree() }, 500)
         return () => clearTimeout(timer)
       }
     }
@@ -240,14 +241,14 @@ export function ShankhaVoiceCompanion() {
     return () => document.removeEventListener('keydown', handler)
   }, [mode, handleClose])
 
-  // ── Close on click outside ──
+  // ── Close on tap/click outside ──
   useEffect(() => {
     if (mode === 'dormant') return
-    const handler = (e: MouseEvent) => {
+    const handler = (e: Event) => {
       if (panelRef.current && !panelRef.current.contains(e.target as Node)) handleClose()
     }
-    const timer = setTimeout(() => document.addEventListener('mousedown', handler), 10)
-    return () => { clearTimeout(timer); document.removeEventListener('mousedown', handler) }
+    const timer = setTimeout(() => document.addEventListener('pointerdown', handler), 10)
+    return () => { clearTimeout(timer); document.removeEventListener('pointerdown', handler) }
   }, [mode, handleClose])
 
   if (!mounted) return null
