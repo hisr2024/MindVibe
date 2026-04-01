@@ -58,13 +58,25 @@ def validate_email_config() -> list[str]:
     warnings: list[str] = []
     _is_prod = os.getenv("ENVIRONMENT", "development").lower() == "production"
 
+    _verification_required = os.getenv(
+        "REQUIRE_EMAIL_VERIFICATION", "true"
+    ).lower() in ("true", "1")
+
     if EMAIL_PROVIDER == "console":
         msg = (
             "EMAIL_PROVIDER=console — emails will be logged, NOT sent. "
             "Users will NOT receive verification or password reset emails."
         )
-        if _is_prod:
+        if _is_prod and _verification_required:
+            # Truly critical: verification required but emails can't be sent
             warnings.append(f"CRITICAL: {msg} Set EMAIL_PROVIDER=smtp for production.")
+        elif _is_prod:
+            # Important but not critical: verification is disabled, users auto-verified
+            warnings.append(
+                f"WARNING: {msg} "
+                "Email verification is disabled, so users can still sign up. "
+                "Set EMAIL_PROVIDER=smtp when ready to enable email delivery."
+            )
         else:
             warnings.append(msg)
     elif EMAIL_PROVIDER == "smtp":

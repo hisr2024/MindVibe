@@ -102,17 +102,6 @@ class Settings(BaseSettings):
                 logging.critical(error_msg)
                 raise ValueError(error_msg)
 
-            # Warn if key looks weak (no special characters, all same case, etc.)
-            has_mixed_case = any(c.isupper() for c in v) and any(c.islower() for c in v)
-            has_special = any(not c.isalnum() for c in v)
-            if not (has_mixed_case or has_special):
-                warnings.warn(
-                    "SECRET_KEY appears weak (no mixed case or special characters). "
-                    "Consider using a stronger key generated with secrets.token_urlsafe(64).",
-                    UserWarning,
-                    stacklevel=2,
-                )
-
         elif v == "dev-secret-key-change-in-production":
             warnings.warn(
                 "Using default SECRET_KEY. This is only safe for development. "
@@ -228,17 +217,23 @@ class Settings(BaseSettings):
     @field_validator("REDIS_URL")
     @classmethod
     def validate_redis_url(cls, v: str) -> str:
-        """Warn if REDIS_URL points to localhost in production.
+        """Warn if REDIS_URL explicitly points to localhost in production.
 
-        In production, Redis should be a dedicated instance (not localhost)
-        for reliability and security.
+        If REDIS_URL was never set (fell back to default), skip the warning
+        — the _reconcile_redis_settings model validator will handle that
+        case with a more informative message and auto-disable Redis.
         """
         import warnings
 
         environment = os.getenv("ENVIRONMENT", "development").lower()
         is_production = environment in ("production", "prod")
+        redis_url_from_env = os.getenv("REDIS_URL")
 
-        if is_production and ("localhost" in v or "127.0.0.1" in v):
+        if (
+            is_production
+            and redis_url_from_env  # Only warn if explicitly set
+            and ("localhost" in v or "127.0.0.1" in v)
+        ):
             warnings.warn(
                 "REDIS_URL points to localhost in production. "
                 "Use a dedicated Redis instance for production deployments.",
