@@ -11,31 +11,10 @@ import { getDailyWisdom } from '@/utils/voice/dailyWisdom'
 import { DailyWisdomCardMobile } from '../components/DailyWisdomCardMobile'
 import { WisdomCardSkeleton } from '../skeletons/WisdomCardSkeleton'
 
-/** Get daily wisdom for a specific day offset (0 = today, -1 = yesterday, etc.) */
-function getWisdomForOffset(offset: number) {
-  // getDailyWisdom() is deterministic based on dayOfYear.
-  // We temporarily manipulate the date to get past days' verses.
-  const date = new Date()
-  date.setDate(date.getDate() + offset)
-
-  const startOfYear = new Date(date.getFullYear(), 0, 0)
-  const diff = date.getTime() - startOfYear.getTime()
-  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24))
-
-  // We need to access the DAILY_VERSES array, but it's not exported.
-  // Instead, return null for past days and only use getDailyWisdom() for today.
-  return null
-}
-
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export function WisdomTab() {
   const todayVerse = useMemo(() => getDailyWisdom(), [])
-
-  // Build 7-day archive (today + 6 previous days)
-  // Since we can only access today's verse via getDailyWisdom(),
-  // show today's verse as the featured card and hint at the archive.
-  const todayDow = new Date().getDay()
 
   return (
     <div className="px-4 pb-6">

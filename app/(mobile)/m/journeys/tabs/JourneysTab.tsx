@@ -5,7 +5,6 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import type {
   DashboardResponse,

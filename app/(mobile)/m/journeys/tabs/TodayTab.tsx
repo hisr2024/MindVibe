@@ -40,8 +40,8 @@ function formatDate(): string {
 }
 
 export function TodayTab({ dashboard, isLoading }: TodayTabProps) {
-  const greeting = useMemo(getGreeting, [])
-  const dateStr = useMemo(formatDate, [])
+  const greeting = useMemo(() => getGreeting(), [])
+  const dateStr = useMemo(() => formatDate(), [])
 
   // Pick a micro practice based on day-of-week (1-7 mapped to day 1-7 of the 14-day meta)
   const todayDayMeta = useMemo(() => {
