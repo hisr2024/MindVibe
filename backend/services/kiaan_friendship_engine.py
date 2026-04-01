@@ -645,10 +645,6 @@ Remember: You are KIAAN. Be real. Be present. Be the friend everyone deserves.""
 
 def get_daily_wisdom(day_of_year: int, user_mood: Optional[str] = None) -> Dict[str, Any]:
     """Generate personalized daily wisdom based on day and mood."""
-    chapters = list(MODERN_CHAPTER_INSIGHTS.keys())
-    chapter_num = chapters[day_of_year % len(chapters)]
-    insight = MODERN_CHAPTER_INSIGHTS[chapter_num]
-
     # Key verses per chapter for daily rotation
     daily_verses = {
         1: [(1, 47, "When overwhelm hits, remember: feeling everything deeply is a sign of your humanity, not your weakness.")],
@@ -680,15 +676,139 @@ def get_daily_wisdom(day_of_year: int, user_mood: Optional[str] = None) -> Dict[
              (18, 78, "Where wisdom meets action, there is victory. Not maybe. Certainly.")],
     }
 
-    verse_options = daily_verses.get(chapter_num, [(chapter_num, 1, insight["modern_lesson"])])
-    verse = verse_options[day_of_year % len(verse_options)]
+    # Sanskrit text and transliteration for key verses
+    verse_texts: Dict[str, Dict[str, str]] = {
+        "1.47": {
+            "sanskrit": "एवमुक्त्वार्जुनः सङ्ख्ये रथोपस्थ उपाविशत्। विसृज्य सशरं चापं शोकसंविग्नमानसः॥",
+            "transliteration": "evam uktvārjunaḥ saṅkhye rathopastha upāviśat visṛjya sa-śaraṃ cāpaṃ śoka-saṃvigna-mānasaḥ",
+        },
+        "2.47": {
+            "sanskrit": "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन। मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि॥",
+            "transliteration": "karmaṇy evādhikāras te mā phaleṣu kadācana mā karma-phala-hetur bhūr mā te saṅgo 'stv akarmaṇi",
+        },
+        "2.14": {
+            "sanskrit": "मात्रास्पर्शास्तु कौन्तेय शीतोष्णसुखदुःखदाः। आगमापायिनोऽनित्यास्तांस्तितिक्षस्व भारत॥",
+            "transliteration": "mātrā-sparśās tu kaunteya śītoṣṇa-sukha-duḥkha-dāḥ āgamāpāyino 'nityās tāṃs titikṣasva bhārata",
+        },
+        "2.62": {
+            "sanskrit": "ध्यायतो विषयान्पुंसः सङ्गस्तेषूपजायते। सङ्गात्सञ्जायते कामः कामात्क्रोधोऽभिजायते॥",
+            "transliteration": "dhyāyato viṣayān puṃsaḥ saṅgas teṣūpajāyate saṅgāt sañjāyate kāmaḥ kāmāt krodho 'bhijāyate",
+        },
+        "3.19": {
+            "sanskrit": "तस्मादसक्तः सततं कार्यं कर्म समाचर। असक्तो ह्याचरन्कर्म परमाप्नोति पूरुषः॥",
+            "transliteration": "tasmād asaktaḥ satataṃ kāryaṃ karma samācara asakto hy ācaran karma param āpnoti pūruṣaḥ",
+        },
+        "3.35": {
+            "sanskrit": "श्रेयान्स्वधर्मो विगुणः परधर्मात्स्वनुष्ठितात्। स्वधर्मे निधनं श्रेयः परधर्मो भयावहः॥",
+            "transliteration": "śreyān sva-dharmo viguṇaḥ para-dharmāt sv-anuṣṭhitāt sva-dharme nidhanaṃ śreyaḥ para-dharmo bhayāvahaḥ",
+        },
+        "4.7": {
+            "sanskrit": "यदा यदा हि धर्मस्य ग्लानिर्भवति भारत। अभ्युत्थानमधर्मस्य तदात्मानं सृजाम्यहम्॥",
+            "transliteration": "yadā yadā hi dharmasya glānir bhavati bhārata abhyutthānam adharmasya tadātmānaṃ sṛjāmy aham",
+        },
+        "4.38": {
+            "sanskrit": "न हि ज्ञानेन सदृशं पवित्रमिह विद्यते। तत्स्वयं योगसंसिद्धः कालेनात्मनि विन्दति॥",
+            "transliteration": "na hi jñānena sadṛśaṃ pavitram iha vidyate tat svayaṃ yoga-saṃsiddhaḥ kālenātmani vindati",
+        },
+        "5.10": {
+            "sanskrit": "ब्रह्मण्याधाय कर्माणि सङ्गं त्यक्त्वा करोति यः। लिप्यते न स पापेन पद्मपत्रमिवाम्भसा॥",
+            "transliteration": "brahmaṇy ādhāya karmāṇi saṅgaṃ tyaktvā karoti yaḥ lipyate na sa pāpena padma-patram ivāmbhasā",
+        },
+        "6.5": {
+            "sanskrit": "उद्धरेदात्मनात्मानं नात्मानमवसादयेत्। आत्मैव ह्यात्मनो बन्धुरात्मैव रिपुरात्मनः॥",
+            "transliteration": "uddhared ātmanātmānaṃ nātmānam avasādayet ātmaiva hy ātmano bandhur ātmaiva ripur ātmanaḥ",
+        },
+        "6.17": {
+            "sanskrit": "युक्ताहारविहारस्य युक्तचेष्टस्य कर्मसु। युक्तस्वप्नावबोधस्य योगो भवति दुःखहा॥",
+            "transliteration": "yuktāhāra-vihārasya yukta-ceṣṭasya karmasu yukta-svapnāvabodhasya yogo bhavati duḥkha-hā",
+        },
+        "6.35": {
+            "sanskrit": "असंशयं महाबाहो मनो दुर्निग्रहं चलम्। अभ्यासेन तु कौन्तेय वैराग्येण च गृह्यते॥",
+            "transliteration": "asaṃśayaṃ mahā-bāho mano durnigrahaṃ calam abhyāsena tu kaunteya vairāgyeṇa ca gṛhyate",
+        },
+        "7.7": {
+            "sanskrit": "मत्तः परतरं नान्यत्किञ्चिदस्ति धनञ्जय। मयि सर्वमिदं प्रोतं सूत्रे मणिगणा इव॥",
+            "transliteration": "mattaḥ parataraṃ nānyat kiñcid asti dhanañjaya mayi sarvam idaṃ protaṃ sūtre maṇi-gaṇā iva",
+        },
+        "8.6": {
+            "sanskrit": "यं यं वापि स्मरन्भावं त्यजत्यन्ते कलेवरम्। तं तमेवैति कौन्तेय सदा तद्भावभावितः॥",
+            "transliteration": "yaṃ yaṃ vāpi smaran bhāvaṃ tyajaty ante kalevaram taṃ tam evaiti kaunteya sadā tad-bhāva-bhāvitaḥ",
+        },
+        "9.26": {
+            "sanskrit": "पत्रं पुष्पं फलं तोयं यो मे भक्त्या प्रयच्छति। तदहं भक्त्युपहृतमश्नामि प्रयतात्मनः॥",
+            "transliteration": "patraṃ puṣpaṃ phalaṃ toyaṃ yo me bhaktyā prayacchati tad ahaṃ bhakty-upahṛtam aśnāmi prayatātmanaḥ",
+        },
+        "9.30": {
+            "sanskrit": "अपि चेत्सुदुराचारो भजते मामनन्यभाक्। साधुरेव स मन्तव्यः सम्यग्व्यवसितो हि सः॥",
+            "transliteration": "api cet su-durācāro bhajate mām ananya-bhāk sādhur eva sa mantavyaḥ samyag vyavasito hi saḥ",
+        },
+        "10.20": {
+            "sanskrit": "अहमात्मा गुडाकेश सर्वभूताशयस्थितः। अहमादिश्च मध्यं च भूतानामन्त एव च॥",
+            "transliteration": "aham ātmā guḍākeśa sarva-bhūtāśaya-sthitaḥ aham ādiś ca madhyaṃ ca bhūtānām anta eva ca",
+        },
+        "11.33": {
+            "sanskrit": "तस्मात्त्वमुत्तिष्ठ यशो लभस्व जित्वा शत्रून्भुङ्क्ष्व राज्यं समृद्धम्। मयैवैते निहताः पूर्वमेव निमित्तमात्रं भव सव्यसाचिन्॥",
+            "transliteration": "tasmāt tvam uttiṣṭha yaśo labhasva jitvā śatrūn bhuṅkṣva rājyaṃ samṛddham mayaivaite nihatāḥ pūrvam eva nimitta-mātraṃ bhava savyasācin",
+        },
+        "12.13": {
+            "sanskrit": "अद्वेष्टा सर्वभूतानां मैत्रः करुण एव च। निर्ममो निरहङ्कारः समदुःखसुखः क्षमी॥",
+            "transliteration": "adveṣṭā sarva-bhūtānāṃ maitraḥ karuṇa eva ca nirmamo nirahaṅkāraḥ sama-duḥkha-sukhaḥ kṣamī",
+        },
+        "13.28": {
+            "sanskrit": "समं सर्वेषु भूतेषु तिष्ठन्तं परमेश्वरम्। विनश्यत्स्वविनश्यन्तं यः पश्यति स पश्यति॥",
+            "transliteration": "samaṃ sarveṣu bhūteṣu tiṣṭhantaṃ parameśvaram vinaśyatsv avinaśyantaṃ yaḥ paśyati sa paśyati",
+        },
+        "14.22": {
+            "sanskrit": "प्रकाशं च प्रवृत्तिं च मोहमेव च पाण्डव। न द्वेष्टि सम्प्रवृत्तानि न निवृत्तानि काङ्क्षति॥",
+            "transliteration": "prakāśaṃ ca pravṛttiṃ ca moham eva ca pāṇḍava na dveṣṭi sampravṛttāni na nivṛttāni kāṅkṣati",
+        },
+        "15.15": {
+            "sanskrit": "सर्वस्य चाहं हृदि सन्निविष्टो मत्तः स्मृतिर्ज्ञानमपोहनं च॥",
+            "transliteration": "sarvasya cāhaṃ hṛdi sanniviṣṭo mattaḥ smṛtir jñānam apohanaṃ ca",
+        },
+        "16.3": {
+            "sanskrit": "तेजः क्षमा धृतिः शौचमद्रोहो नातिमानिता। भवन्ति सम्पदं दैवीमभिजातस्य भारत॥",
+            "transliteration": "tejaḥ kṣamā dhṛtiḥ śaucam adroho nātimānitā bhavanti sampadaṃ daivīm abhijātasya bhārata",
+        },
+        "17.3": {
+            "sanskrit": "सत्त्वानुरूपा सर्वस्य श्रद्धा भवति भारत। श्रद्धामयोऽयं पुरुषो यो यच्छ्रद्धः स एव सः॥",
+            "transliteration": "sattvānurūpā sarvasya śraddhā bhavati bhārata śraddhā-mayo 'yaṃ puruṣo yo yac-chraddhaḥ sa eva saḥ",
+        },
+        "18.47": {
+            "sanskrit": "श्रेयान्स्वधर्मो विगुणः परधर्मात्स्वनुष्ठितात्। स्वभावनियतं कर्म कुर्वन्नाप्नोति किल्बिषम्॥",
+            "transliteration": "śreyān sva-dharmo viguṇaḥ para-dharmāt sv-anuṣṭhitāt svabhāva-niyataṃ karma kurvan nāpnoti kilbiṣam",
+        },
+        "18.66": {
+            "sanskrit": "सर्वधर्मान्परित्यज्य मामेकं शरणं व्रज। अहं त्वां सर्वपापेभ्यो मोक्षयिष्यामि मा शुचः॥",
+            "transliteration": "sarva-dharmān parityajya mām ekaṃ śaraṇaṃ vraja ahaṃ tvāṃ sarva-pāpebhyo mokṣayiṣyāmi mā śucaḥ",
+        },
+        "18.78": {
+            "sanskrit": "यत्र योगेश्वरः कृष्णो यत्र पार्थो धनुर्धरः। तत्र श्रीर्विजयो भूतिर्ध्रुवा नीतिर्मतिर्मम॥",
+            "transliteration": "yatra yogeśvaraḥ kṛṣṇo yatra pārtho dhanur-dharaḥ tatra śrīr vijayo bhūtir dhruvā nītir matir mama",
+        },
+    }
+
+    # Flatten all verses into a single list for better daily rotation
+    all_verses = []
+    for ch, verses in daily_verses.items():
+        for v in verses:
+            all_verses.append((ch, v))
+
+    selected_ch, verse = all_verses[day_of_year % len(all_verses)]
+    chapter_num = selected_ch
+    insight = MODERN_CHAPTER_INSIGHTS[chapter_num]
+
+    verse_key = f"{verse[0]}.{verse[1]}"
+    text_data = verse_texts.get(verse_key, {})
 
     return {
         "chapter": chapter_num,
         "verse": verse[1],
-        "verse_id": f"{verse[0]}.{verse[1]}",
+        "verse_id": verse_key,
         "modern_title": insight["modern_title"],
         "insight": verse[2],
+        "sanskrit": text_data.get("sanskrit", ""),
+        "transliteration": text_data.get("transliteration", ""),
         "secular_theme": insight["secular_theme"],
         "psychology": insight["psychology"],
         "daily_practice": insight["daily_practice"],

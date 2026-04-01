@@ -10,6 +10,7 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { VoiceResponseButton } from '@/components/voice'
 import { useLanguage } from '@/hooks/useLanguage'
+import { splitGraphemes } from '@/lib/splitGraphemes'
 import type { KarmaCategory } from '../types'
 import { CATEGORY_COLORS } from '../types'
 
@@ -86,7 +87,7 @@ export function ShlokaCard({
         }}
       >
         {revealed
-          ? sanskrit.split('').map((char, i) => (
+          ? splitGraphemes(sanskrit).map((char, i) => (
               <motion.span
                 key={i}
                 initial={{ opacity: 0, filter: 'blur(4px)' }}

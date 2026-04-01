@@ -37,7 +37,7 @@ export function EntryPhase({ onComplete }: EntryPhaseProps) {
     return () => timers.forEach(clearTimeout)
   }, [reduceMotion, onComplete])
 
-  const sanskritChars = 'कर्म'.split('')
+  const sanskritChars = ['क', 'र्म']
 
   return (
     <div
