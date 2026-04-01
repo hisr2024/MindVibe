@@ -11,7 +11,7 @@
  */
 
 import { type ReactNode } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 
 interface SacredMovementShellProps {
   children: ReactNode
@@ -40,14 +40,22 @@ export function SacredMovementShell({
           'linear-gradient(180deg, #050714 0%, #0B0E2A 40%, #111435 100%)',
       }}
     >
-      {/* Floating golden particles — slow ascent */}
+      {/* Floating golden particles — slow ascent (CSS animation for compositor-thread perf) */}
+      <style>{`
+        @keyframes sacred-particle-float {
+          0%   { transform: translateY(0) scale(0.3); opacity: 0; }
+          15%  { opacity: 0.55; }
+          50%  { transform: translateY(-200px) scale(1); opacity: 0.35; }
+          100% { transform: translateY(-400px) scale(0.1); opacity: 0; }
+        }
+      `}</style>
       <div
         className="pointer-events-none fixed inset-0 overflow-hidden"
         style={{ zIndex: 1 }}
         aria-hidden="true"
       >
         {PARTICLES.map((p) => (
-          <motion.div
+          <div
             key={p.id}
             className="absolute rounded-full"
             style={{
@@ -59,17 +67,8 @@ export function SacredMovementShell({
                 'radial-gradient(circle, rgba(212,160,23,0.85) 0%, rgba(212,160,23,0) 70%)',
               boxShadow:
                 p.size > 2 ? '0 0 8px rgba(212,160,23,0.25)' : 'none',
-            }}
-            animate={{
-              y: [0, -400],
-              opacity: [0, 0.55, 0.35, 0],
-              scale: [0.3, 1, 0.6, 0.1],
-            }}
-            transition={{
-              duration: p.duration,
-              repeat: Infinity,
-              delay: p.delay,
-              ease: 'easeOut',
+              animation: `sacred-particle-float ${p.duration}s ease-out ${p.delay}s infinite`,
+              willChange: 'transform, opacity',
             }}
           />
         ))}

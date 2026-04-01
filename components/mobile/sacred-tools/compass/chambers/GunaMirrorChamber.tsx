@@ -73,7 +73,7 @@ export function GunaMirrorChamber({
     const el = scrollRef.current
     if (!el) return
     const idx = Math.round(el.scrollLeft / el.clientWidth)
-    setActivePanel(idx)
+    setActivePanel(prev => prev === idx ? prev : idx)
   }, [])
 
   useEffect(() => {

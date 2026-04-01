@@ -432,13 +432,13 @@ async def ai_analysis(
     except Exception as e:
         logger.warning(f"AI provider manager failed for engine analysis: {e}")
 
-    # Fallback: try direct OpenAI
+    # Fallback: try direct OpenAI (async to avoid blocking the event loop)
     try:
-        from openai import OpenAI
+        from openai import AsyncOpenAI
         api_key = os.getenv("OPENAI_API_KEY", "").strip()
         if api_key:
-            client = OpenAI(api_key=api_key)
-            response = client.chat.completions.create(
+            client = AsyncOpenAI(api_key=api_key)
+            response = await client.chat.completions.create(
                 model=ANALYSIS_MODEL,
                 messages=[
                     {"role": "system", "content": RELATIONSHIP_ENGINE_ANALYSIS_PROMPT},

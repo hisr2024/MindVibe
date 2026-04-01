@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -66,15 +66,24 @@ export default function RelationshipCompassClient() {
   const [result, setResult] = useLocalState<RelationshipCompassResult | null>('relationship_compass', null)
   const [sessionId, setSessionId] = useLocalState<string>('relationship_compass_session', '')
 
+  // Clear error when user types new input (not when error itself changes)
   useEffect(() => {
     if (error) setError(null)
-  }, [conflict, error])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conflict])
+
+  const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
     if (!sessionId) {
       setSessionId(crypto.randomUUID())
     }
   }, [sessionId, setSessionId])
+
+  // Abort in-flight request on unmount
+  useEffect(() => {
+    return () => { abortRef.current?.abort() }
+  }, [])
 
   // Handle voice transcript — append spoken text to the conflict textarea
   const handleVoiceTranscript = useCallback((text: string) => {
@@ -89,6 +98,11 @@ export default function RelationshipCompassClient() {
     const trimmedConflict = sanitizeInput(conflict.trim())
     if (!trimmedConflict || !sessionId) return
 
+    // Cancel any in-flight request
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+
     setLoading(true)
     setError(null)
 
@@ -101,7 +115,8 @@ export default function RelationshipCompassClient() {
           sessionId,
           relationshipType: 'other',
           secularMode: false
-        })
+        }),
+        signal: controller.signal,
       })
 
       const data = await response.json().catch(() => ({}))
@@ -144,7 +159,8 @@ export default function RelationshipCompassClient() {
       } else {
         setError('Relationship Compass could not generate a response. Please try again.')
       }
-    } catch {
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return
       setError('Unable to reach Relationship Compass. Check your connection and retry.')
     } finally {
       setLoading(false)
@@ -213,7 +229,7 @@ export default function RelationshipCompassClient() {
         )}
       </div>
 
-      {loading && <WisdomLoadingState tool="relationship_compass" />}
+      {loading && <WisdomLoadingState tool="relationship_compass" secularMode={false} />}
 
       {result && !loading && (
         <WisdomResponseCard

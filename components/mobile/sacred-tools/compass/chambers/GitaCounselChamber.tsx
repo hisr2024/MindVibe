@@ -20,6 +20,7 @@ interface GitaCounselChamberProps {
   response: {
     response: string
     sections: Record<string, string>
+    requestedAt: string
     citations?: { source_file: string; reference_if_any?: string; chunk_id: string }[]
     gitaVerses?: number
     secularMode?: boolean
@@ -72,7 +73,7 @@ export function GitaCounselChamber({
           sections={response.sections}
           fullResponse={response.response}
           gitaVersesUsed={response.gitaVerses}
-          timestamp={new Date().toISOString()}
+          timestamp={response.requestedAt}
           language={language}
           citations={response.citations}
           secularMode={response.secularMode}

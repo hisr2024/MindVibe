@@ -59,9 +59,12 @@ export function VoiceInputButton({
   useEffect(() => {
     if (typeof navigator === 'undefined' || !navigator.permissions) return
 
+    let permissionStatus: PermissionStatus | null = null
+
     navigator.permissions
       .query({ name: 'microphone' as PermissionName })
       .then((status) => {
+        permissionStatus = status
         setPermission(status.state as PermissionState)
         status.onchange = () => {
           setPermission(status.state as PermissionState)
@@ -71,6 +74,10 @@ export function VoiceInputButton({
       .catch(() => {
         // Permissions API not supported — keep unknown
       })
+
+    return () => {
+      if (permissionStatus) permissionStatus.onchange = null
+    }
   }, [])
 
   // Detect permission denial from error string

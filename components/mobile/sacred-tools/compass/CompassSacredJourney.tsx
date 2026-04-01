@@ -14,7 +14,7 @@
  * The UI enriches the message with guna context before sending.
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import { SacredMovementShell } from '../shared/SacredMovementShell'
@@ -83,6 +83,8 @@ export default function CompassSacredJourney() {
   const gunaScores = useGunaCalculation(selectedPatterns)
   const dharmaValues = useDharmaMapData(selectedPatterns)
 
+  const abortRef = useRef<AbortController | null>(null)
+
   // Initialize session
   useEffect(() => {
     if (!sessionId && typeof window !== 'undefined') {
@@ -90,7 +92,19 @@ export default function CompassSacredJourney() {
     }
   }, [sessionId])
 
-  const currentChamberIndex = CHAMBER_ORDER.indexOf(chamber)
+  // Abort in-flight request on unmount
+  useEffect(() => {
+    return () => { abortRef.current?.abort() }
+  }, [])
+
+  // Auto-dismiss error toast after 5 seconds
+  useEffect(() => {
+    if (!error) return
+    const timer = setTimeout(() => setError(null), 5000)
+    return () => clearTimeout(timer)
+  }, [error])
+
+  const currentChamberIndex = useMemo(() => CHAMBER_ORDER.indexOf(chamber), [chamber])
 
   const advanceChamber = useCallback(() => {
     const nextIndex = currentChamberIndex + 1
@@ -123,13 +137,14 @@ export default function CompassSacredJourney() {
 
     const parts: string[] = []
     if (relationshipType) parts.push(`[Relationship: ${relationshipType.label} with ${partnerName || 'someone'}]`)
+    if (initialGunaReading && initialGunaReading !== 'balanced') parts.push(`[Initial guna reading: ${initialGunaReading}]`)
     parts.push(`[Dominant energy: ${gunaScores.dominant}]`)
     if (selectedPatterns.tamas.length > 0) parts.push(`[Tamas patterns: ${patternTexts('tamas')}]`)
     if (selectedPatterns.rajas.length > 0) parts.push(`[Rajas patterns: ${patternTexts('rajas')}]`)
     if (selectedPatterns.sattva.length > 0) parts.push(`[Sattva patterns: ${patternTexts('sattva')}]`)
 
     return parts.join(' ')
-  }, [selectedPatterns, relationshipType, partnerName, gunaScores.dominant])
+  }, [selectedPatterns, relationshipType, partnerName, initialGunaReading, gunaScores.dominant])
 
   // Submit to API (called at dharma_map → gita_counsel transition)
   const submitToAPI = useCallback(async () => {
@@ -137,6 +152,11 @@ export default function CompassSacredJourney() {
     const enrichedMessage = sanitizeInput(
       `${gunaContext} I need guidance on navigating this ${relationshipType?.label || 'relationship'} with wisdom.`
     )
+
+    // Cancel any in-flight request
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
 
     setLoading(true)
     setError(null)
@@ -155,6 +175,7 @@ export default function CompassSacredJourney() {
           relationshipType: relationshipType?.id || 'other',
           secularMode: false,
         }),
+        signal: controller.signal,
       })
 
       const data = await response.json().catch(() => ({}))
@@ -187,7 +208,8 @@ export default function CompassSacredJourney() {
       } else {
         setError('Compass could not generate a response. Try again.')
       }
-    } catch {
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return
       setError('Unable to reach Relationship Compass. Check your connection.')
     } finally {
       setLoading(false)
@@ -211,7 +233,7 @@ export default function CompassSacredJourney() {
         ) : undefined
       }
     >
-      <AnimatePresence mode="wait">
+      {/* Chamber transitions handled by SacredMovementShell's AnimatePresence */}
         {chamber === 'altar' && (
           <motion.div key="altar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <CompassAltarChamber
@@ -283,7 +305,6 @@ export default function CompassSacredJourney() {
             />
           </motion.div>
         )}
-      </AnimatePresence>
 
       <AnimatePresence>
         {error && (
