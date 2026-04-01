@@ -74,7 +74,7 @@ export function JourneysCanvas({ activeTab }: JourneysCanvasProps) {
   }, [config.count, config.colors, config.speed])
 
   return (
-    <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+    <div className="fixed inset-0 pointer-events-none -z-10">
       {/* Background ambient glow */}
       <div
         className="absolute top-1/4 left-1/3 w-[400px] h-[400px] rounded-full blur-[120px] transition-colors duration-1000"

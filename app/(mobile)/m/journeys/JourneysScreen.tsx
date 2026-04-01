@@ -90,7 +90,7 @@ export default function JourneysScreen() {
   // ==========================================================================
   if (isAuthError && !dashboard && !authLoading) {
     return (
-      <div className="fixed inset-0 bg-[#050714] flex flex-col items-center justify-center px-6">
+      <div className="relative min-h-[100dvh] bg-[#050714] flex flex-col items-center justify-center px-6">
         <JourneysCanvas activeTab="today" />
         <div className="relative z-10 text-center">
           <div className="text-5xl mb-4">{'\uD83D\uDE4F'}</div>
@@ -119,7 +119,7 @@ export default function JourneysScreen() {
   // MAIN LAYOUT
   // ==========================================================================
   return (
-    <div className="fixed inset-0 bg-[#050714] overflow-hidden">
+    <div className="relative min-h-[100dvh] bg-[#050714] overflow-hidden">
       <JourneysCanvas activeTab={activeTab} />
 
       {/* Header */}
@@ -148,16 +148,7 @@ export default function JourneysScreen() {
       )}
 
       {/* Tab content — scrollable area */}
-      <div
-        className="absolute z-5 overflow-y-auto"
-        style={{
-          top: 64,
-          bottom: 72,
-          left: 0,
-          right: 0,
-          WebkitOverflowScrolling: 'touch',
-        }}
-      >
+      <div className="relative z-10 pb-[80px]">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -196,7 +187,7 @@ export default function JourneysScreen() {
 
       {/* Sacred 4-tab navigation */}
       <div
-        className="absolute bottom-0 left-0 right-0 z-20 flex items-center backdrop-blur-xl"
+        className="fixed bottom-0 left-0 right-0 z-20 flex items-center backdrop-blur-xl"
         style={{
           height: 72,
           background: 'rgba(4,6,18,0.95)',
