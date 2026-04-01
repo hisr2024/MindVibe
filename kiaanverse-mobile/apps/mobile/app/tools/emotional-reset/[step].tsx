@@ -115,11 +115,13 @@ export default function StepScreen(): React.JSX.Element {
     }
   }, [currentStep, router]);
 
-  /** Navigate backward one step, or back to entry screen from step 1. */
+  /** Navigate backward one step, or back to entry screen from step 1.
+   *  Uses replace instead of back() since forward navigation also uses replace,
+   *  meaning there is no stack to pop. */
   const navigateBack = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (currentStep > 1) {
-      router.back();
+      router.replace(`/tools/emotional-reset/${currentStep - 1}`);
     } else {
       router.replace('/tools/emotional-reset');
     }
