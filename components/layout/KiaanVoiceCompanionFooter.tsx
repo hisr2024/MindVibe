@@ -102,6 +102,7 @@ export function KiaanVoiceCompanionFooter() {
   const autoCollapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const wakeWordWasActiveRef = useRef(false)
   const vibePlayerWasPlayingRef = useRef(false)
+  const modeRef = useRef<FooterMode>(mode)
 
   // Pages where wake word should not auto-start (they have their own voice)
   const isVoiceConflictPage = pathname === '/companion' || pathname === '/kiaan/chat'
@@ -267,11 +268,11 @@ export function KiaanVoiceCompanionFooter() {
     if (!mountedRef.current) return
     // After speech ends, schedule auto-collapse
     autoCollapseTimerRef.current = setTimeout(() => {
-      if (mountedRef.current && mode === 'responding') {
+      if (mountedRef.current && modeRef.current === 'responding') {
         setMode('dormant')
       }
     }, 3000)
-  }, [mode])
+  }, [])
 
   const handleTTSStart = useCallback(() => {
     // Cancel any pending auto-collapse when new speech starts
@@ -298,7 +299,7 @@ export function KiaanVoiceCompanionFooter() {
   // Stable ref for speak — breaks circular dependency between sendMessage,
   // addLocalFallback, and useEnhancedVoiceOutput declaration order.
   const speakRef = useRef(speak)
-  useEffect(() => { speakRef.current = speak })
+  useEffect(() => { speakRef.current = speak; modeRef.current = mode })
 
   // ── Hands-Free Mode (VAD + STT) ──
   const handleTranscript = useCallback((text: string) => {
@@ -420,18 +421,18 @@ export function KiaanVoiceCompanionFooter() {
     return () => document.removeEventListener('keydown', handler)
   }, [mode, handleClose])
 
-  // ── Close on click outside ──
+  // ── Close on tap/click outside ──
   useEffect(() => {
     if (mode === 'dormant') return
-    const handler = (e: MouseEvent) => {
+    const handler = (e: Event) => {
       if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
         handleClose()
       }
     }
-    const timer = setTimeout(() => document.addEventListener('mousedown', handler), 10)
+    const timer = setTimeout(() => document.addEventListener('pointerdown', handler), 10)
     return () => {
       clearTimeout(timer)
-      document.removeEventListener('mousedown', handler)
+      document.removeEventListener('pointerdown', handler)
     }
   }, [mode, handleClose])
 

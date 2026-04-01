@@ -84,6 +84,27 @@ export function useEnhancedVoiceOutput(
   const rateRef = useRef(rate)
   const mountedRef = useRef(true)
 
+  // Stable callback refs — avoids stale closures in async audio event handlers
+  const onStartRef = useRef(onStart)
+  const onEndRef = useRef(onEnd)
+  const onErrorRef = useRef(onError)
+  // Exactly-once guard: prevents double onEnd calls (e.g. cancel() + browser onended)
+  const endFiredRef = useRef(false)
+
+  useEffect(() => {
+    onStartRef.current = onStart
+    onEndRef.current = onEnd
+    onErrorRef.current = onError
+  })
+
+  /** Signal parent that TTS is done — guaranteed exactly once per speak() call */
+  const fireOnEnd = useCallback(() => {
+    if (!endFiredRef.current) {
+      endFiredRef.current = true
+      onEndRef.current?.()
+    }
+  }, [])
+
   // Initialize browser synthesis as fallback
   useEffect(() => {
     if (!isSupported) return
@@ -173,14 +194,14 @@ export function useEnhancedVoiceOutput(
           setIsSpeaking(true)
           setIsPaused(false)
           setIsLoading(false)
-          onStart?.()
+          onStartRef.current?.()
         }
 
         audio.onended = () => {
           if (!mountedRef.current) return
           setIsSpeaking(false)
           setIsPaused(false)
-          onEnd?.()
+          fireOnEnd()
         }
 
         audio.onerror = () => {
@@ -189,12 +210,16 @@ export function useEnhancedVoiceOutput(
           setIsSpeaking(false)
           setIsPaused(false)
           setIsLoading(false)
+          fireOnEnd()
         }
 
         try {
           await audio.play()
         } catch {
-          // Autoplay blocked or audio element error — fall through to browser TTS
+          // Autoplay blocked — clean up dangling handlers before falling through
+          audio.onended = null
+          audio.onerror = null
+          audioRef.current = null
           setIsSpeaking(false)
           setIsLoading(false)
           return false
@@ -214,7 +239,7 @@ export function useEnhancedVoiceOutput(
     } finally {
       clearTimeout(timeout)
     }
-  }, [language, voiceType, voiceId, useBackendTts, onStart, onEnd])
+  }, [language, voiceType, voiceId, useBackendTts, fireOnEnd])
 
   // Use browser synthesis as fallback
   const playBrowserSynthesis = useCallback((text: string) => {
@@ -222,7 +247,8 @@ export function useEnhancedVoiceOutput(
       const errorMsg = 'Speech synthesis not supported'
       setError(errorMsg)
       setIsLoading(false)
-      onError?.(errorMsg)
+      onErrorRef.current?.(errorMsg)
+      fireOnEnd()
       return
     }
 
@@ -231,12 +257,12 @@ export function useEnhancedVoiceOutput(
         setIsSpeaking(true)
         setIsPaused(false)
         setIsLoading(false)
-        onStart?.()
+        onStartRef.current?.()
       },
       onEnd: () => {
         setIsSpeaking(false)
         setIsPaused(false)
-        onEnd?.()
+        fireOnEnd()
       },
       onPause: () => {
         setIsPaused(true)
@@ -249,10 +275,11 @@ export function useEnhancedVoiceOutput(
         setIsSpeaking(false)
         setIsPaused(false)
         setIsLoading(false)
-        onError?.(err)
+        onErrorRef.current?.(err)
+        fireOnEnd()
       },
     })
-  }, [isSupported, onStart, onEnd, onError])
+  }, [isSupported, fireOnEnd])
 
   // Main speak function
   const speak = useCallback(async (text: string) => {
@@ -260,6 +287,7 @@ export function useEnhancedVoiceOutput(
 
     setError(null)
     setIsLoading(true)
+    endFiredRef.current = false
 
     // Cancel any ongoing speech
     if (audioRef.current) {
@@ -303,7 +331,10 @@ export function useEnhancedVoiceOutput(
 
   // Cancel - properly release audio resources to prevent memory leaks
   const cancel = useCallback(() => {
+    // Null out event handlers BEFORE pausing to prevent stale onended firing
     if (audioRef.current) {
+      audioRef.current.onended = null
+      audioRef.current.onerror = null
       audioRef.current.pause()
       audioRef.current.removeAttribute('src')
       audioRef.current = null
@@ -318,7 +349,8 @@ export function useEnhancedVoiceOutput(
     setIsSpeaking(false)
     setIsPaused(false)
     setIsLoading(false)
-  }, [])
+    fireOnEnd()
+  }, [fireOnEnd])
 
   // Update rate
   const updateRate = useCallback((newRate: number) => {

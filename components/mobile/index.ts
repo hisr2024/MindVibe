@@ -173,8 +173,3 @@ export {
   MobileDivineCollectionCard,
 } from './MobileGitaVoicePlayer'
 
-// Mobile Companion Voice Player
-export {
-  MobileCompanionVoicePlayer,
-  type MobileCompanionVoicePlayerProps,
-} from './MobileCompanionVoicePlayer'

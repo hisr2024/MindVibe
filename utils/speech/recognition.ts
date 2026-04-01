@@ -304,6 +304,7 @@ export class SpeechRecognitionService {
    */
   stop(): void {
     if (!this.recognition || this.isStopping || !this.isActive) return
+    this.clearSilenceTimer()
     this.isStopping = true
     this.noSpeechRestarts = 0
     this.shouldKeepListening = false
@@ -320,6 +321,7 @@ export class SpeechRecognitionService {
    */
   abort(): void {
     if (!this.recognition) return
+    this.clearSilenceTimer()
     this.isStopping = true
     this.noSpeechRestarts = 0
     this.shouldKeepListening = false
