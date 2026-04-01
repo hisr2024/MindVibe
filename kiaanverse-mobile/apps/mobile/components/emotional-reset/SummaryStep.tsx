@@ -119,7 +119,7 @@ export function SummaryStep({ stepData }: SummaryStepProps): React.JSX.Element {
   return (
     <View style={styles.root}>
       {/* Sacred confetti celebration -- fires immediately */}
-      <ConfettiCannon isActive={showCelebration} particleCount={60} duration={3000} />
+      <ConfettiCannon isActive={showCelebration} particleCount={30} duration={3000} />
 
       {/* Completion heading */}
       <Animated.View entering={FadeIn.duration(600)} style={styles.headingBlock}>

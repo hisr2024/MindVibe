@@ -2,19 +2,19 @@
  * VisualizationStep -- Sacred guided visualization (Step 2 of Emotional Reset).
  *
  * Full-screen immersive experience with:
- *   - Animated particle field that responds to breathing rhythm
+ *   - Animated particle field (6 lightweight particles, no shadows)
  *   - Progressive scene building with staggered text reveals
  *   - Emotion-specific color palette and imagery
  *   - Pulsing MandalaSpin backdrop with layered glow
- *   - Sacred countdown ring with progress arc
- *   - Haptic pulse synchronized with visual heartbeat
+ *   - Sacred countdown using Reanimated shared values (no JS re-renders)
+ *   - Haptic pulse on scene transitions only
  *
- * NO ScrollView -- fits within one viewport. The user is guided through
- * a 30-second visualization with auto-advance.
+ * Performance: Timer runs entirely on the UI thread via shared values.
+ * Scene changes trigger minimal JS-thread re-renders (max 4 over 30s).
  */
 
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, TextInput } from 'react-native';
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -22,10 +22,11 @@ import Animated, {
   FadeOut,
   useSharedValue,
   useAnimatedStyle,
+  useAnimatedProps,
+  useDerivedValue,
   withRepeat,
   withSequence,
   withTiming,
-  withSpring,
   withDelay,
   Easing,
   interpolate,
@@ -65,8 +66,8 @@ const VISUALIZATION_DURATION = 30; // seconds
 const ORB_SIZE = SCREEN_WIDTH * 0.55;
 const MANDALA_SIZE = SCREEN_WIDTH * 0.95;
 
-/** Number of sacred light particles floating around the visualization. */
-const PARTICLE_COUNT = 12;
+/** Reduced from 12 to 6 for performance — fewer animated views + no shadows. */
+const PARTICLE_COUNT = 6;
 
 /**
  * Emotion-specific visualization themes providing color, imagery,
@@ -225,10 +226,10 @@ const DEFAULT_THEME = {
 };
 
 // ---------------------------------------------------------------------------
-// Sacred Particle -- floating light mote
+// Sacred Particle -- lightweight floating light mote (no shadows)
 // ---------------------------------------------------------------------------
 
-function SacredParticle({
+const SacredParticle = React.memo(function SacredParticle({
   index,
   themeColor,
 }: {
@@ -247,7 +248,7 @@ function SacredParticle({
   useEffect(() => {
     const driftAmount = 15 + Math.random() * 20;
     const duration = 2500 + Math.random() * 2000;
-    const delay = index * 200;
+    const delay = index * 300;
 
     floatY.value = withDelay(
       delay,
@@ -290,16 +291,12 @@ function SacredParticle({
           height: size,
           borderRadius: size / 2,
           backgroundColor: themeColor,
-          shadowColor: themeColor,
-          shadowOffset: { width: 0, height: 0 },
-          shadowOpacity: 0.8,
-          shadowRadius: size * 2,
         },
         animatedStyle,
       ]}
     />
   );
-}
+});
 
 // ---------------------------------------------------------------------------
 // Component
@@ -317,10 +314,11 @@ export function VisualizationStep({
     [emotion],
   );
 
-  const [timer, setTimer] = useState(VISUALIZATION_DURATION);
+  // Timer as shared value — updates on UI thread, no JS re-renders
+  const timerShared = useSharedValue(VISUALIZATION_DURATION);
   const [sceneIndex, setSceneIndex] = useState(0);
+  const sceneIndexRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const hapticRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Pulsing glow behind mandala
   const glowPulse = useSharedValue(0.4);
@@ -343,63 +341,62 @@ export function VisualizationStep({
     mandalaScale.value = withTiming(1, { duration: 4000, easing: Easing.out(Easing.ease) });
   }, [glowPulse, mandalaScale]);
 
-  // Timer and scene progression
-  useEffect(() => {
-    const scenes = stepData?.description
-      ? [stepData.description, ...(stepData.guidance ? [stepData.guidance] : [])]
-      : theme.scenes;
-    const sceneInterval = Math.floor(VISUALIZATION_DURATION / scenes.length);
-
-    timerRef.current = setInterval(() => {
-      setTimer((prev) => {
-        if (prev <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          onNext();
-          return 0;
-        }
-
-        // Advance scene at intervals
-        const elapsed = VISUALIZATION_DURATION - (prev - 1);
-        const newSceneIndex = Math.min(
-          Math.floor(elapsed / sceneInterval),
-          scenes.length - 1,
-        );
-        if (newSceneIndex !== sceneIndex) {
-          setSceneIndex(newSceneIndex);
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        }
-
-        // Update progress
-        progress.value = withTiming(elapsed / VISUALIZATION_DURATION, { duration: 900 });
-
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onNext]);
-
-  // Gentle haptic heartbeat every 4 seconds for somatic grounding
-  useEffect(() => {
-    hapticRef.current = setInterval(() => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }, 4000);
-
-    return () => {
-      if (hapticRef.current) clearInterval(hapticRef.current);
-    };
-  }, []);
-
   const scenes = useMemo(() => {
     if (stepData?.description) {
       return [stepData.description, ...(stepData.guidance ? [stepData.guidance] : [])];
     }
     return theme.scenes;
   }, [stepData, theme.scenes]);
+
+  // Timer and scene progression — minimal JS re-renders
+  useEffect(() => {
+    const sceneInterval = Math.floor(VISUALIZATION_DURATION / scenes.length);
+    let elapsed = 0;
+
+    timerRef.current = setInterval(() => {
+      elapsed += 1;
+      const remaining = VISUALIZATION_DURATION - elapsed;
+
+      // Update shared value on UI thread — no re-render
+      timerShared.value = remaining;
+
+      // Update progress ring
+      progress.value = withTiming(elapsed / VISUALIZATION_DURATION, { duration: 900 });
+
+      // Only trigger JS re-render when scene actually changes (max 4 times)
+      const newSceneIndex = Math.min(
+        Math.floor(elapsed / sceneInterval),
+        scenes.length - 1,
+      );
+      if (newSceneIndex !== sceneIndexRef.current) {
+        sceneIndexRef.current = newSceneIndex;
+        setSceneIndex(newSceneIndex);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+
+      if (remaining <= 0) {
+        if (timerRef.current) clearInterval(timerRef.current);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        onNext();
+      }
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onNext, scenes.length]);
+
+  // Derive timer text from shared value — runs on UI thread
+  const timerText = useDerivedValue(() => {
+    const val = Math.round(timerShared.value);
+    return val > 0 ? `${val}` : '';
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Reanimated text prop works at runtime but isn't typed
+  const timerAnimatedProps = useAnimatedProps(() => ({
+    text: timerText.value,
+  } as any));
 
   const glowStyle = useAnimatedStyle(() => ({
     opacity: glowPulse.value,
@@ -424,14 +421,13 @@ export function VisualizationStep({
 
   const handleSkip = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
-    if (hapticRef.current) clearInterval(hapticRef.current);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onNext();
   }, [onNext]);
 
   return (
     <View style={styles.root}>
-      {/* Sacred particle field */}
+      {/* Sacred particle field — reduced to 6 lightweight particles */}
       {Array.from({ length: PARTICLE_COUNT }).map((_, i) => (
         <SacredParticle key={i} index={i} themeColor={theme.color} />
       ))}
@@ -442,7 +438,6 @@ export function VisualizationStep({
           styles.glowBackdrop,
           {
             backgroundColor: theme.glowColor,
-            shadowColor: theme.color,
           },
           glowStyle,
         ]}
@@ -463,7 +458,7 @@ export function VisualizationStep({
         <View
           style={[
             styles.progressDot,
-            { backgroundColor: theme.color, shadowColor: theme.color },
+            { backgroundColor: theme.color },
           ]}
         />
       </Animated.View>
@@ -508,9 +503,6 @@ export function VisualizationStep({
                 {
                   backgroundColor:
                     i <= sceneIndex ? theme.color : colors.alpha.whiteLight,
-                  shadowColor: i <= sceneIndex ? theme.color : 'transparent',
-                  shadowOpacity: i <= sceneIndex ? 0.6 : 0,
-                  shadowRadius: 4,
                 },
               ]}
             />
@@ -518,14 +510,16 @@ export function VisualizationStep({
         </View>
       </View>
 
-      {/* Timer + skip at bottom */}
+      {/* Timer + skip at bottom — timer uses animated text, no JS re-renders */}
       <Animated.View
         entering={FadeInUp.delay(600).duration(500)}
         style={[styles.bottomArea, { paddingBottom: insets.bottom + 16 }]}
       >
-        <Text variant="h1" color={colors.text.muted} align="center" style={styles.timerText}>
-          {timer > 0 ? `${timer}` : ''}
-        </Text>
+        <AnimatedTextInput
+          editable={false}
+          style={styles.timerText}
+          animatedProps={timerAnimatedProps}
+        />
         <GoldenButton
           title="Continue"
           onPress={handleSkip}
@@ -536,6 +530,12 @@ export function VisualizationStep({
     </View>
   );
 }
+
+/**
+ * Animated TextInput used to display the countdown timer on the UI thread.
+ * Using TextInput with animatedProps avoids JS-thread re-renders for text updates.
+ */
+const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
 // ---------------------------------------------------------------------------
 // Styles
@@ -556,9 +556,6 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH * 0.8,
     height: SCREEN_WIDTH * 0.8,
     borderRadius: SCREEN_WIDTH * 0.4,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 80,
     elevation: 0,
   },
   mandalaContainer: {
@@ -579,9 +576,6 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 6,
   },
   titleContainer: {
     marginTop: spacing.lg,
@@ -617,7 +611,6 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    shadowOffset: { width: 0, height: 0 },
   },
   bottomArea: {
     alignItems: 'center',
@@ -627,6 +620,9 @@ const styles = StyleSheet.create({
   },
   timerText: {
     fontSize: 28,
+    color: colors.text.muted,
     opacity: 0.4,
+    textAlign: 'center',
+    padding: 0,
   },
 });

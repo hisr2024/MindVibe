@@ -10,7 +10,7 @@
 import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { Text, GoldenButton, GlowCard, MandalaSpin, DivineGradient, colors, spacing, radii } from '@kiaanverse/ui';
+import { Text, GoldenButton, GlowCard, MandalaSpin, colors, spacing, radii } from '@kiaanverse/ui';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -52,7 +52,6 @@ export function WisdomStep({ stepData, onNext }: WisdomStepProps): React.JSX.Ele
   const guidance = stepData?.guidance;
 
   return (
-    <DivineGradient variant="healing">
     <ScrollView
       style={styles.scroll}
       contentContainerStyle={styles.scrollContent}
@@ -118,7 +117,6 @@ export function WisdomStep({ stepData, onNext }: WisdomStepProps): React.JSX.Ele
         testID="wisdom-continue-btn"
       />
     </ScrollView>
-    </DivineGradient>
   );
 }
 
