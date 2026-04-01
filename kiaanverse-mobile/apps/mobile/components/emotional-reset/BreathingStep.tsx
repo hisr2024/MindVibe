@@ -12,15 +12,22 @@
  *   - Exhale  = Heavy  (deep release cue)
  *   - Rest    = Light  (soft grounding cue)
  *
- * After the configured number of cycles (default 3), a "Continue" button fades
- * in at the bottom of the screen with proper safe-area padding.
+ * Performance: Countdown runs via Reanimated shared values on the UI thread.
+ * Only phase and cycle changes trigger JS re-renders (every few seconds, not
+ * every second).
  *
  * NO ScrollView -- everything fits within one viewport.
  */
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
-import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
+import { View, StyleSheet, Dimensions, TextInput } from 'react-native';
+import Animated, {
+  FadeIn,
+  FadeInUp,
+  useSharedValue,
+  useAnimatedProps,
+  useDerivedValue,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import {
@@ -79,6 +86,11 @@ const PHASE_HAPTICS: Record<Phase, Haptics.ImpactFeedbackStyle> = {
   rest: Haptics.ImpactFeedbackStyle.Light,
 };
 
+/**
+ * Animated TextInput used to display countdown on UI thread without JS re-renders.
+ */
+const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -93,10 +105,12 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
   const totalCycles = stepData?.totalCycles ?? 3;
 
   const [phase, setPhase] = useState<Phase>('inhale');
-  const [countdown, setCountdown] = useState(inhaleSec);
   const [cycle, setCycle] = useState(1);
   const [isComplete, setIsComplete] = useState(false);
   const [isBreathing, setIsBreathing] = useState(true);
+
+  // Countdown as shared value — updates on UI thread, no JS re-renders
+  const countdownShared = useSharedValue(inhaleSec);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const phaseRef = useRef<Phase>('inhale');
@@ -140,7 +154,8 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
 
       const durationSec = durations[p];
       countdownRef.current = durationSec;
-      setCountdown(durationSec);
+      // Update shared value on UI thread — no re-render
+      countdownShared.value = durationSec;
 
       // Phase-specific haptic for somatic feedback
       Haptics.impactAsync(PHASE_HAPTICS[p]);
@@ -148,7 +163,8 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
       if (timerRef.current) clearInterval(timerRef.current);
       timerRef.current = setInterval(() => {
         countdownRef.current -= 1;
-        setCountdown(countdownRef.current);
+        // Update shared value only — no setState, no re-render
+        countdownShared.value = Math.max(0, countdownRef.current);
 
         if (countdownRef.current <= 0) {
           if (timerRef.current) clearInterval(timerRef.current);
@@ -191,6 +207,17 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
     startPhase('inhale');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Derive countdown text from shared value — runs on UI thread
+  const countdownText = useDerivedValue(() => {
+    if (isComplete) return '\u2714';
+    const val = Math.round(countdownShared.value);
+    return `${val}`;
+  });
+
+  const countdownAnimatedProps = useAnimatedProps(() => ({
+    text: countdownText.value,
+  }));
 
   // ---------------------------------------------------------------------------
   // Render
@@ -243,11 +270,13 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
             onCycleComplete={handleCycleComplete}
           />
         </View>
-        {/* Countdown number overlaid on the orb center */}
+        {/* Countdown number overlaid on the orb center — UI-thread text updates */}
         <View style={[StyleSheet.absoluteFill, styles.centered]}>
-          <Text variant="h1" color={colors.text.primary} align="center">
-            {isComplete ? '\u2714' : countdown}
-          </Text>
+          <AnimatedTextInput
+            editable={false}
+            style={styles.countdownText}
+            animatedProps={countdownAnimatedProps}
+          />
         </View>
       </View>
 
@@ -305,6 +334,13 @@ const styles = StyleSheet.create({
   centered: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  countdownText: {
+    fontSize: 48,
+    fontWeight: '300',
+    color: colors.text.primary,
+    textAlign: 'center',
+    padding: 0,
   },
   spacer: {
     flex: 1,

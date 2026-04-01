@@ -64,14 +64,14 @@ interface EmotionSelectorProps {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-function EmotionCard({
+const EmotionCard = React.memo(function EmotionCard({
   emotion,
   isSelected,
   onPress,
 }: {
   emotion: Emotion;
   isSelected: boolean;
-  onPress: () => void;
+  onPress: (id: string) => void;
 }): React.JSX.Element {
   const scale = useSharedValue(1);
   const borderOpacity = useSharedValue(0);
@@ -92,7 +92,7 @@ function EmotionCard({
 
   return (
     <AnimatedPressable
-      onPress={onPress}
+      onPress={() => onPress(emotion.id)}
       style={[styles.card, animatedStyle]}
       accessibilityRole="button"
       accessibilityLabel={emotion.label}
@@ -112,7 +112,7 @@ function EmotionCard({
       </GlowCard>
     </AnimatedPressable>
   );
-}
+});
 
 // ---------------------------------------------------------------------------
 // Grid
@@ -144,7 +144,7 @@ export function EmotionSelector({
           key={emotion.id}
           emotion={emotion}
           isSelected={selectedEmotion === emotion.id}
-          onPress={() => handleSelect(emotion.id)}
+          onPress={handleSelect}
         />
       ))}
     </View>

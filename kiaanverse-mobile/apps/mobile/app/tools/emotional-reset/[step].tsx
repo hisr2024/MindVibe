@@ -109,7 +109,7 @@ export default function StepScreen(): React.JSX.Element {
   const navigateNext = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (currentStep < TOTAL_STEPS) {
-      router.push(`/tools/emotional-reset/${currentStep + 1}`);
+      router.replace(`/tools/emotional-reset/${currentStep + 1}`);
     } else {
       router.replace('/(tabs)');
     }

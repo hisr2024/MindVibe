@@ -11,7 +11,7 @@ import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Text, GoldenButton, GlowCard, DivineGradient, colors, spacing, radii } from '@kiaanverse/ui';
+import { Text, GoldenButton, GlowCard, colors, spacing, radii } from '@kiaanverse/ui';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -57,7 +57,6 @@ export function AffirmationStep({ stepData, onNext }: AffirmationStepProps): Rea
   }, [currentIndex, total]);
 
   return (
-    <DivineGradient variant="renewal">
     <View style={styles.container}>
       {/* Header */}
       <Animated.View entering={FadeIn.duration(500)}>
@@ -115,7 +114,6 @@ export function AffirmationStep({ stepData, onNext }: AffirmationStepProps): Rea
         </Animated.View>
       ) : null}
     </View>
-    </DivineGradient>
   );
 }
 
