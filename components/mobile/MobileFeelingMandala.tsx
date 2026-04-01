@@ -114,9 +114,8 @@ export function MobileFeelingMandala({ onSelect, className = '' }: MobileFeeling
   const handlePetalSelect = useCallback((emotion: EmotionalState) => {
     triggerHaptic('medium')
     setSelected(emotion)
-    setShowIntensity(false)
-    // Show intensity after bloom animation
-    setTimeout(() => setShowIntensity(true), 600)
+    // Show intensity immediately — no artificial delay
+    setShowIntensity(true)
   }, [triggerHaptic])
 
   const handleIntensitySelect = useCallback((value: number) => {
@@ -132,7 +131,7 @@ export function MobileFeelingMandala({ onSelect, className = '' }: MobileFeeling
   }, [selected, intensity, onSelect, triggerHaptic])
 
   return (
-    <div className={`flex flex-col items-center ${className}`}>
+    <div className={`flex flex-col items-center ${className}`} style={{ touchAction: 'manipulation' }}>
       {/* The Sacred Mandala */}
       <div className="relative" style={{ width: '85vw', maxWidth: 340, aspectRatio: '1' }}>
         <svg
@@ -165,13 +164,27 @@ export function MobileFeelingMandala({ onSelect, className = '' }: MobileFeeling
           {/* Center glow */}
           <circle cx="150" cy="150" r="35" fill="url(#center-glow)" />
 
-          {/* Emotion Petals */}
-          {EMOTIONAL_STATES.map((emotion, idx) => {
+          {/* Emotion Petals — no infinite animations, hit areas expanded */}
+          {EMOTIONAL_STATES.map((emotion) => {
             const isSelected = selected?.id === emotion.id
             const path = petalPath(emotion.angle, emotion.ring)
 
             return (
               <g key={emotion.id}>
+                {/* Invisible expanded hit area for reliable mobile tapping */}
+                <path
+                  d={path}
+                  fill="transparent"
+                  stroke="transparent"
+                  strokeWidth={20}
+                  style={{ cursor: 'pointer', touchAction: 'manipulation' }}
+                  onClick={() => handlePetalSelect(emotion)}
+                  role="button"
+                  aria-label={`${emotion.label} (${emotion.sanskrit})`}
+                  aria-pressed={isSelected}
+                  tabIndex={0}
+                />
+                {/* Visual petal — only the selected petal animates (bloom) */}
                 <motion.path
                   d={path}
                   fill={isSelected ? emotion.glowColor : emotion.color}
@@ -180,25 +193,16 @@ export function MobileFeelingMandala({ onSelect, className = '' }: MobileFeeling
                   strokeWidth={isSelected ? 1 : 0.5}
                   filter={isSelected ? 'url(#petal-glow)' : undefined}
                   animate={
-                    reduceMotion
-                      ? {}
-                      : isSelected
-                        ? { scale: 1.25, fillOpacity: 0.7 }
-                        : {
-                            scale: [0.95, 1.0, 0.95],
-                          }
+                    isSelected && !reduceMotion
+                      ? { scale: 1.25, fillOpacity: 0.7 }
+                      : {}
                   }
                   transition={
                     isSelected
-                      ? { type: 'spring', stiffness: 200, damping: 15, duration: 0.6 }
-                      : { duration: 3, repeat: Infinity, delay: idx * 0.25, ease: 'easeInOut' }
+                      ? { type: 'spring', stiffness: 200, damping: 15 }
+                      : { duration: 0.2 }
                   }
-                  style={{ transformOrigin: '150px 150px', cursor: 'pointer' }}
-                  onClick={() => handlePetalSelect(emotion)}
-                  role="button"
-                  aria-label={`${emotion.label} (${emotion.sanskrit})`}
-                  aria-pressed={isSelected}
-                  tabIndex={0}
+                  style={{ transformOrigin: '150px 150px', pointerEvents: 'none' }}
                 />
               </g>
             )
@@ -292,46 +296,53 @@ export function MobileFeelingMandala({ onSelect, className = '' }: MobileFeeling
               How intensely do you feel this?
             </p>
 
-            {/* Concentric ring selector */}
-            <div className="relative" style={{ width: 200, height: 200 }}>
-              <svg viewBox="0 0 200 200" className="w-full h-full">
+            {/* Concentric ring selector — wide hit areas, no infinite animations */}
+            <div className="relative" style={{ width: 220, height: 220 }}>
+              <svg viewBox="0 0 220 220" className="w-full h-full">
                 {INTENSITY_LEVELS.map((level, i) => {
-                  const radius = 20 + i * 20
+                  const radius = 22 + i * 22
                   const isActive = intensity >= level.value
                   const isCurrent = intensity === level.value
                   return (
                     <g key={level.value}>
-                      <motion.circle
-                        cx="100"
-                        cy="100"
+                      {/* Wide invisible hit area ring for reliable tapping */}
+                      <circle
+                        cx="110"
+                        cy="110"
                         r={radius}
                         fill="none"
-                        stroke={isActive ? (selected?.glowColor || '#D4A017') : 'rgba(255,255,255,0.08)'}
-                        strokeWidth={isCurrent ? 3 : 1.5}
-                        strokeOpacity={isActive ? (isCurrent ? 0.8 : 0.4) : 0.3}
-                        animate={
-                          isCurrent && !reduceMotion
-                            ? { strokeOpacity: [0.6, 1, 0.6] }
-                            : {}
-                        }
-                        transition={isCurrent ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : {}}
+                        stroke="transparent"
+                        strokeWidth={18}
                         onClick={() => handleIntensitySelect(level.value)}
-                        style={{ cursor: 'pointer' }}
+                        style={{ cursor: 'pointer', touchAction: 'manipulation' }}
                         role="button"
                         aria-label={`Intensity: ${level.label} (${level.sanskrit})`}
                         aria-pressed={isCurrent}
                         tabIndex={0}
                       />
+                      {/* Visible ring */}
+                      <circle
+                        cx="110"
+                        cy="110"
+                        r={radius}
+                        fill="none"
+                        stroke={isActive ? (selected?.glowColor || '#D4A017') : 'rgba(255,255,255,0.08)'}
+                        strokeWidth={isCurrent ? 3 : 1.5}
+                        strokeOpacity={isActive ? (isCurrent ? 0.9 : 0.4) : 0.3}
+                        className="pointer-events-none"
+                        style={{ transition: 'stroke 0.2s ease, stroke-width 0.2s ease, stroke-opacity 0.2s ease' }}
+                      />
                       {/* Label */}
                       <text
-                        x="100"
-                        y={100 - radius - 4}
+                        x="110"
+                        y={110 - radius - 5}
                         textAnchor="middle"
                         className="pointer-events-none"
                         style={{
-                          fontSize: '7px',
+                          fontSize: '8px',
                           fill: isCurrent ? (selected?.glowColor || '#D4A017') : 'var(--sacred-text-muted, #6B6355)',
                           fontFamily: 'var(--font-ui, Outfit, sans-serif)',
+                          transition: 'fill 0.2s ease',
                         }}
                       >
                         {level.label}
@@ -342,8 +353,8 @@ export function MobileFeelingMandala({ onSelect, className = '' }: MobileFeeling
 
                 {/* Center dot */}
                 <circle
-                  cx="100"
-                  cy="100"
+                  cx="110"
+                  cy="110"
                   r="6"
                   fill={selected?.glowColor || 'var(--sacred-divine-gold, #D4A017)'}
                   opacity={0.6}
