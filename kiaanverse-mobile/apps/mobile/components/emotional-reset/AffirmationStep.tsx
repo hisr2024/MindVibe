@@ -11,7 +11,7 @@ import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Text, GoldenButton, GlowCard, colors, spacing, radii } from '@kiaanverse/ui';
+import { Text, GoldenButton, GlowCard, colors, spacing } from '@kiaanverse/ui';
 
 // ---------------------------------------------------------------------------
 // Types

@@ -12,7 +12,6 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  Pressable as RNPressable,
 } from 'react-native-reanimated';
 import { Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';

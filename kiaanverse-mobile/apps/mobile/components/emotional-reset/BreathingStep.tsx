@@ -20,7 +20,7 @@
  */
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { View, StyleSheet, Dimensions, TextInput } from 'react-native';
+import { View, StyleSheet, TextInput } from 'react-native';
 import Animated, {
   FadeIn,
   FadeInUp,
@@ -59,8 +59,6 @@ type Phase = 'inhale' | 'hold' | 'exhale' | 'rest';
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 /** Size of the BreathingOrb -- large enough to be the visual anchor. */
 const ORB_SIZE = 240;
@@ -185,8 +183,9 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
     const currentIdx = order.indexOf(phaseRef.current);
     const nextIdx = currentIdx + 1;
 
-    if (nextIdx < order.length) {
-      startPhase(order[nextIdx]);
+    const nextPhase = order[nextIdx];
+    if (nextPhase !== undefined) {
+      startPhase(nextPhase);
     } else {
       // End of one full cycle
       if (cycleRef.current < totalCycles) {
@@ -215,9 +214,10 @@ export function BreathingStep({ stepData, onNext }: BreathingStepProps): React.J
     return `${val}`;
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Reanimated text prop works at runtime but isn't typed
   const countdownAnimatedProps = useAnimatedProps(() => ({
     text: countdownText.value,
-  }));
+  } as any));
 
   // ---------------------------------------------------------------------------
   // Render

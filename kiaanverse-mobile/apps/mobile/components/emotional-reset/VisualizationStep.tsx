@@ -14,7 +14,7 @@
  */
 
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, TextInput } from 'react-native';
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -27,12 +27,10 @@ import Animated, {
   withRepeat,
   withSequence,
   withTiming,
-  withSpring,
   withDelay,
   Easing,
   interpolate,
   Extrapolation,
-  runOnJS,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -395,10 +393,10 @@ export function VisualizationStep({
     return val > 0 ? `${val}` : '';
   });
 
-  // Animated props for the timer text — avoids JS re-renders
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Reanimated text prop works at runtime but isn't typed
   const timerAnimatedProps = useAnimatedProps(() => ({
     text: timerText.value,
-  }));
+  } as any));
 
   const glowStyle = useAnimatedStyle(() => ({
     opacity: glowPulse.value,
@@ -537,9 +535,7 @@ export function VisualizationStep({
  * Animated TextInput used to display the countdown timer on the UI thread.
  * Using TextInput with animatedProps avoids JS-thread re-renders for text updates.
  */
-const AnimatedTextInput = Animated.createAnimatedComponent(
-  require('react-native').TextInput,
-);
+const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
 // ---------------------------------------------------------------------------
 // Styles
