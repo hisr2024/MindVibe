@@ -3,6 +3,7 @@
 /**
  * MobileBreathworkPhase — Full-screen immersive breathing sanctuary.
  * Wraps MobileBreathingLotus with awareness cues and phase transitions.
+ * Uses flex sections (top/center/bottom) for true vertical centering.
  */
 
 import { useState, useCallback, useEffect } from 'react'
@@ -44,10 +45,10 @@ export function MobileBreathworkPhase({ pattern, onComplete }: MobileBreathworkP
   }, [])
 
   return (
-    <div className="relative min-h-[100dvh] flex flex-col items-center justify-center">
-      {/* Pattern name */}
+    <div className="relative min-h-[100dvh] flex flex-col items-center">
+      {/* Top section: Pattern name + description */}
       <motion.div
-        className="absolute top-8 left-0 right-0 text-center z-10 px-6"
+        className="pt-10 pb-2 text-center px-6 shrink-0"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
@@ -60,27 +61,20 @@ export function MobileBreathworkPhase({ pattern, onComplete }: MobileBreathworkP
         </p>
       </motion.div>
 
-      {/* Breathing Lotus */}
-      <MobileBreathingLotus
-        pattern={pattern}
-        onComplete={handleComplete}
-      />
+      {/* Center section: Lotus — fills remaining space, centered within */}
+      <div className="flex-1 flex flex-col items-center justify-center">
+        <MobileBreathingLotus
+          pattern={pattern}
+          onComplete={handleComplete}
+        />
+      </div>
 
-      {/* Skip button */}
-      <button
-        onClick={onComplete}
-        className="absolute bottom-8 right-6 text-[10px] text-[#6B6355] font-[family-name:var(--font-ui)] opacity-60 hover:opacity-100 transition-opacity z-10"
-        aria-label="Skip breathwork"
-      >
-        Skip
-      </button>
-
-      {/* Awareness cue */}
-      <div className="absolute bottom-24 left-0 right-0 px-10">
+      {/* Bottom section: Awareness cue + Skip */}
+      <div className="shrink-0 pb-8 px-6 w-full">
         <AnimatePresence mode="wait">
           <motion.p
             key={cueIndex}
-            className="text-center font-[family-name:var(--font-scripture)] italic text-sm text-[#B8AE98] leading-[1.7]"
+            className="text-center font-[family-name:var(--font-scripture)] italic text-sm text-[#B8AE98] leading-[1.7] mb-4"
             style={{ maxWidth: 280, margin: '0 auto' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -90,6 +84,15 @@ export function MobileBreathworkPhase({ pattern, onComplete }: MobileBreathworkP
             {AWARENESS_CUES[cueIndex]}
           </motion.p>
         </AnimatePresence>
+        <div className="flex justify-end pr-2">
+          <button
+            onClick={onComplete}
+            className="text-[10px] text-[#6B6355] font-[family-name:var(--font-ui)] opacity-60 hover:opacity-100 transition-opacity"
+            aria-label="Skip breathwork"
+          >
+            Skip
+          </button>
+        </div>
       </div>
 
       {/* Completion message */}
