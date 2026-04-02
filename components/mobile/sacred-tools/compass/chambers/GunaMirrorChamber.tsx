@@ -134,11 +134,12 @@ export function GunaMirrorChamber({
                     <SacredCard
                       key={pattern.id}
                       interactive
-                      className={`flex items-center justify-between cursor-pointer transition-all duration-200 !py-3 !px-4 ${
+                      className={`flex items-center justify-between cursor-pointer transition-all duration-200 !py-2 !px-3 ${
                         isSelected ? '' : 'opacity-70'
                       }`}
                       style={{
-                        minHeight: 60,
+                        borderRadius: 12,
+                        borderImage: 'none',
                         borderLeft: isSelected
                           ? `3px solid ${panel.color}`
                           : '2px solid transparent',
