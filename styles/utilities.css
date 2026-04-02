@@ -108,3 +108,9 @@
   background: rgba(212, 164, 76, 0.3);
   color: #fff;
 }
+
+/* ─── Font Scale Accessibility ─── */
+html[data-font-scale="small"]       { --font-scale: 0.875; font-size: 87.5%; }
+html[data-font-scale="default"]     { --font-scale: 1;     font-size: 100%; }
+html[data-font-scale="large"]       { --font-scale: 1.125; font-size: 112.5%; }
+html[data-font-scale="extra-large"] { --font-scale: 1.25;  font-size: 125%; }

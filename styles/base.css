@@ -22,7 +22,7 @@
   --text-caption: 0.875rem;
   --text-h4: clamp(1.125rem, 0.8vw + 0.9rem, 1.25rem);
   --text-body-lg: clamp(1rem, 0.5vw + 0.9rem, 1.125rem);
-  --text-label: 0.8125rem;
+  --text-label: 0.875rem;
   --line-snug: 1.35;
   --line-relaxed: 1.6;
 
