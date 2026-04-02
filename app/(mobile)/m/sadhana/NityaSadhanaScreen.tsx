@@ -107,7 +107,7 @@ export function NityaSadhanaScreen() {
   }
 
   return (
-    <div className="relative min-h-[100dvh] overflow-hidden">
+    <div className="relative min-h-[100dvh] overflow-x-hidden">
       {/* Sacred background canvas */}
       <MobileSacredCanvas phase={phase} moodColor={getMoodColor()} />
 
