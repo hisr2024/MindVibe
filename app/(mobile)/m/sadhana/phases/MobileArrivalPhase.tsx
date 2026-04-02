@@ -4,7 +4,8 @@
  * MobileArrivalPhase — Orbital mood spheres for touch-native mood selection.
  * 6 mood spheres orbit around a central golden OM, each representing a
  * mood state with Sanskrit label and color palette.
- * Uses flex sections (top greeting / center orbit) for true vertical centering.
+ * Greeting is absolute-positioned so the orbital container centers in the
+ * full viewport, not the remaining space after the greeting.
  */
 
 import { useState, useRef, useMemo, useCallback, useSyncExternalStore } from 'react'
@@ -13,12 +14,12 @@ import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import type { SadhanaMood } from '@/types/sadhana.types'
 
 const SADHANA_MOODS = [
-  { id: 'heavy' as SadhanaMood, sanskrit: 'भारग्रस्त', label: 'Heavy', description: 'Burdened, tired, silver-blue', color: '#93C5FD', glowColor: '#1D4ED8', angle: -150 },
-  { id: 'wounded' as SadhanaMood, sanskrit: 'आहत', label: 'Wounded', description: 'Hurting, grieving, crimson', color: '#FCA5A5', glowColor: '#B91C1C', angle: -30 },
-  { id: 'seeking' as SadhanaMood, sanskrit: 'जिज्ञासु', label: 'Seeking', description: 'Curious, searching, purple', color: '#C4B5FD', glowColor: '#7C3AED', angle: 150 },
-  { id: 'radiant' as SadhanaMood, sanskrit: 'तेजस्वी', label: 'Radiant', description: 'Joyful, bright, golden', color: '#F0C040', glowColor: '#FDE68A', angle: 30 },
-  { id: 'grateful' as SadhanaMood, sanskrit: 'कृतज्ञ', label: 'Grateful', description: 'Thankful, blessed, green', color: '#6EE7B7', glowColor: '#059669', angle: 90 },
-  { id: 'peaceful' as SadhanaMood, sanskrit: 'शान्त', label: 'Peaceful', description: 'Calm, centered, sky blue', color: '#67E8F9', glowColor: '#06B6D4', angle: -90 },
+  { id: 'heavy' as SadhanaMood, sanskrit: 'भारग्रस्त', label: 'Heavy', description: 'Burdened, tired, silver-blue', color: '#93C5FD', glowColor: '#1D4ED8', glowStyle: '0 0 22px #1D4ED8B0', angle: -150 },
+  { id: 'wounded' as SadhanaMood, sanskrit: 'आहत', label: 'Wounded', description: 'Hurting, grieving, crimson', color: '#FCA5A5', glowColor: '#B91C1C', glowStyle: '0 0 14px #B91C1C80', angle: -30 },
+  { id: 'seeking' as SadhanaMood, sanskrit: 'जिज्ञासु', label: 'Seeking', description: 'Curious, searching, purple', color: '#C4B5FD', glowColor: '#7C3AED', glowStyle: '0 0 20px #7C3AEDA0', angle: 150 },
+  { id: 'radiant' as SadhanaMood, sanskrit: 'तेजस्वी', label: 'Radiant', description: 'Joyful, bright, golden', color: '#F0C040', glowColor: '#FDE68A', glowStyle: '0 0 14px #FDE68A70', angle: 30 },
+  { id: 'grateful' as SadhanaMood, sanskrit: 'कृतज्ञ', label: 'Grateful', description: 'Thankful, blessed, green', color: '#6EE7B7', glowColor: '#059669', glowStyle: '0 0 18px #05966990', angle: 90 },
+  { id: 'peaceful' as SadhanaMood, sanskrit: 'शान्त', label: 'Peaceful', description: 'Calm, centered, sky blue', color: '#67E8F9', glowColor: '#06B6D4', glowStyle: '0 0 16px #06B6D480', angle: -90 },
 ] as const
 
 interface MobileArrivalPhaseProps {
@@ -55,22 +56,21 @@ export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
   const selectedMoodData = SADHANA_MOODS.find(m => m.id === selectedMood)
 
   return (
-    <div className="relative flex flex-col items-center min-h-[100dvh] px-4">
-      {/* Top section: Sanskrit invocation + greeting */}
+    <div className="relative min-h-[100dvh] px-4">
+      {/* Greeting — absolute so it doesn't push the orbit down */}
       <motion.div
-        className="pt-16 pb-2 text-center shrink-0"
+        className="absolute top-0 left-0 right-0 pt-10 text-center z-20 px-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
       >
         <p
-          className="font-[family-name:var(--font-divine)] text-xl text-[#D4A017] text-center mb-1 tracking-wide"
+          className="font-[family-name:var(--font-divine)] text-xl text-[#D4A017] mb-1 tracking-wide"
           style={{ fontWeight: 300 }}
         >
           OM saha nāvavatu
         </p>
         <motion.div
-          className="text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.4 }}
@@ -84,8 +84,8 @@ export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
         </motion.div>
       </motion.div>
 
-      {/* Center section: Orbital container — fills remaining space, centered within */}
-      <div className="flex-1 flex items-center justify-center">
+      {/* Orbital container — centers in full viewport height */}
+      <div className="min-h-[100dvh] flex items-center justify-center">
         <div className="relative" style={{ width: orbitRadius * 2 + 80, height: orbitRadius * 2 + 80 }}>
           {/* Central OM */}
           <motion.div
@@ -117,7 +117,7 @@ export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
                   width: 68,
                   height: 68,
                   background: `radial-gradient(circle, ${mood.color}, ${mood.glowColor})`,
-                  boxShadow: `0 0 16px ${mood.glowColor}80`,
+                  boxShadow: mood.glowStyle,
                 }}
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{
@@ -184,7 +184,6 @@ export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
             >
               Composing your sacred practice...
             </motion.p>
-            {/* OM loader */}
             <motion.span
               className="text-lg text-[#D4A017] mt-2"
               animate={{ opacity: [0.4, 1, 0.4] }}
