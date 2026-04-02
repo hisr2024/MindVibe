@@ -4,6 +4,7 @@
  * MobileArrivalPhase — Orbital mood spheres for touch-native mood selection.
  * 6 mood spheres orbit around a central golden OM, each representing a
  * mood state with Sanskrit label and color palette.
+ * Uses flex sections (top greeting / center orbit) for true vertical centering.
  */
 
 import { useState, useRef, useMemo, useCallback, useSyncExternalStore } from 'react'
@@ -54,93 +55,97 @@ export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
   const selectedMoodData = SADHANA_MOODS.find(m => m.id === selectedMood)
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-[100dvh] px-4">
-      {/* Sanskrit invocation */}
-      <motion.p
-        className="font-[family-name:var(--font-divine)] text-xl text-[#D4A017] text-center mb-1 tracking-wide"
-        style={{ fontWeight: 300 }}
+    <div className="relative flex flex-col items-center min-h-[100dvh] px-4">
+      {/* Top section: Sanskrit invocation + greeting */}
+      <motion.div
+        className="pt-16 pb-2 text-center shrink-0"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
       >
-        OM saha nāvavatu
-      </motion.p>
-
-      {/* Time greeting */}
-      <motion.div
-        className="text-center mb-6"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-      >
-        <p className="font-[family-name:var(--font-divine)] italic text-sm text-[#B8AE98]">
-          {greeting.sanskrit}
+        <p
+          className="font-[family-name:var(--font-divine)] text-xl text-[#D4A017] text-center mb-1 tracking-wide"
+          style={{ fontWeight: 300 }}
+        >
+          OM saha nāvavatu
         </p>
-        <p className="font-[family-name:var(--font-divine)] italic text-xs text-[#6B6355] mt-0.5">
-          {greeting.english}
-        </p>
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
+          <p className="font-[family-name:var(--font-divine)] italic text-sm text-[#B8AE98]">
+            {greeting.sanskrit}
+          </p>
+          <p className="font-[family-name:var(--font-divine)] italic text-xs text-[#6B6355] mt-0.5">
+            {greeting.english}
+          </p>
+        </motion.div>
       </motion.div>
 
-      {/* Orbital container */}
-      <div className="relative" style={{ width: orbitRadius * 2 + 80, height: orbitRadius * 2 + 80 }}>
-        {/* Central OM */}
-        <motion.div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
-          animate={{
-            textShadow: [
-              '0 0 8px rgba(212,160,23,0.4)',
-              '0 0 16px rgba(212,160,23,0.7)',
-              '0 0 8px rgba(212,160,23,0.4)',
-            ],
-          }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <span className="text-5xl font-[family-name:var(--font-divine)] text-[#D4A017] select-none">
-            ॐ
-          </span>
-        </motion.div>
+      {/* Center section: Orbital container — fills remaining space, centered within */}
+      <div className="flex-1 flex items-center justify-center">
+        <div className="relative" style={{ width: orbitRadius * 2 + 80, height: orbitRadius * 2 + 80 }}>
+          {/* Central OM */}
+          <motion.div
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+            animate={{
+              textShadow: [
+                '0 0 8px rgba(212,160,23,0.4)',
+                '0 0 16px rgba(212,160,23,0.7)',
+                '0 0 8px rgba(212,160,23,0.4)',
+              ],
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <span className="text-5xl font-[family-name:var(--font-divine)] text-[#D4A017] select-none">
+              ॐ
+            </span>
+          </motion.div>
 
-        {/* Mood spheres orbiting */}
-        {SADHANA_MOODS.map((mood, i) => {
-          const isSelected = selectedMood === mood.id
-          const isDimmed = selectedMood && !isSelected
+          {/* Mood spheres orbiting */}
+          {SADHANA_MOODS.map((mood, i) => {
+            const isSelected = selectedMood === mood.id
+            const isDimmed = selectedMood && !isSelected
 
-          return (
-            <motion.button
-              key={mood.id}
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center rounded-full border border-white/20 z-20"
-              style={{
-                width: 68,
-                height: 68,
-                background: `radial-gradient(circle, ${mood.color}, ${mood.glowColor})`,
-                boxShadow: `0 0 16px ${mood.glowColor}80`,
-              }}
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{
-                opacity: isDimmed ? 0.4 : 1,
-                scale: isSelected ? 1.3 : 1,
-                x: Math.cos(((mood.angle) * Math.PI) / 180) * orbitRadius,
-                y: Math.sin(((mood.angle) * Math.PI) / 180) * orbitRadius,
-              }}
-              transition={{
-                opacity: { duration: 0.3 },
-                scale: { type: 'spring', stiffness: 300, damping: 20 },
-                x: { duration: 0.6, delay: i * 0.1 },
-                y: { duration: 0.6, delay: i * 0.1 },
-              }}
-              onClick={() => handleMoodTap(mood.id)}
-              disabled={!!selectedMood}
-              aria-label={`Select mood: ${mood.label}`}
-            >
-              <span className="font-[family-name:var(--font-divine)] italic text-[11px] text-white leading-tight">
-                {mood.sanskrit}
-              </span>
-              <span className="font-[family-name:var(--font-ui)] text-[9px] text-white/70 mt-0.5">
-                {mood.label}
-              </span>
-            </motion.button>
-          )
-        })}
+            return (
+              <motion.button
+                key={mood.id}
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center rounded-full border border-white/20 z-20"
+                style={{
+                  width: 68,
+                  height: 68,
+                  background: `radial-gradient(circle, ${mood.color}, ${mood.glowColor})`,
+                  boxShadow: `0 0 16px ${mood.glowColor}80`,
+                }}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{
+                  opacity: isDimmed ? 0.4 : 1,
+                  scale: isSelected ? 1.3 : 1,
+                  x: Math.cos(((mood.angle) * Math.PI) / 180) * orbitRadius,
+                  y: Math.sin(((mood.angle) * Math.PI) / 180) * orbitRadius,
+                }}
+                transition={{
+                  opacity: { duration: 0.3 },
+                  scale: { type: 'spring', stiffness: 300, damping: 20 },
+                  x: { duration: 0.6, delay: i * 0.1 },
+                  y: { duration: 0.6, delay: i * 0.1 },
+                }}
+                onClick={() => handleMoodTap(mood.id)}
+                disabled={!!selectedMood}
+                aria-label={`Select mood: ${mood.label}`}
+              >
+                <span className="font-[family-name:var(--font-divine)] italic text-[11px] text-white leading-tight">
+                  {mood.sanskrit}
+                </span>
+                <span className="font-[family-name:var(--font-ui)] text-[9px] text-white/70 mt-0.5">
+                  {mood.label}
+                </span>
+              </motion.button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Selection greeting overlay */}
