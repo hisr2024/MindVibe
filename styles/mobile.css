@@ -493,6 +493,11 @@ body[style*="position: fixed"] { width: 100% !important; }
   .xs-text-sm { font-size: 0.875rem; }
   .xs-p-2 { padding: 0.5rem; }
   .xs-gap-2 { gap: 0.5rem; }
+
+  /* Prevent sacred labels from becoming unreadable on tiny screens */
+  .sacred-label {
+    font-size: max(var(--sacred-text-xs), 0.6875rem);
+  }
 }
 
 /* ─── Landscape Mobile ─── */

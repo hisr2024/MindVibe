@@ -63,6 +63,16 @@ const COLOR_SCHEMES = [
 
 type ColorScheme = typeof COLOR_SCHEMES[number]['id']
 
+// Font scale definitions for text size accessibility
+const FONT_SCALES = [
+  { id: 'small', label: 'Small', scale: 0.875 },
+  { id: 'default', label: 'Default', scale: 1 },
+  { id: 'large', label: 'Large', scale: 1.125 },
+  { id: 'extra-large', label: 'Extra Large', scale: 1.25 },
+] as const
+
+type FontScale = typeof FONT_SCALES[number]['id']
+
 // Language groups for the picker
 const LANGUAGE_GROUPS = [
   { label: 'Indian', codes: ['en', 'hi', 'ta', 'te', 'bn', 'mr', 'gu', 'kn', 'ml', 'pa', 'sa'] as Language[] },
@@ -202,6 +212,7 @@ export default function MobileSettingsPage() {
   const [isExporting, setIsExporting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [colorScheme, setColorScheme] = useState<ColorScheme>('default')
+  const [fontScale, setFontScale] = useState<FontScale>('default')
 
   // Load settings
   useEffect(() => {
@@ -215,6 +226,15 @@ export default function MobileSettingsPage() {
       if (saved && COLOR_SCHEMES.some(s => s.id === saved)) {
         setColorScheme(saved)
         document.documentElement.setAttribute('data-sacred-scheme', saved === 'default' ? '' : saved)
+      }
+
+      // Load persisted font scale
+      const savedScale = localStorage.getItem('mindvibe_font_scale')
+      if (savedScale) {
+        const match = FONT_SCALES.find(s => String(s.scale) === savedScale)
+        if (match) {
+          setFontScale(match.id)
+        }
       }
     }
 
@@ -238,6 +258,20 @@ export default function MobileSettingsPage() {
       } else {
         document.documentElement.setAttribute('data-sacred-scheme', scheme)
       }
+    }
+  }, [triggerHaptic])
+
+  // Handle font scale change for text size accessibility
+  const handleFontScaleChange = useCallback((scaleId: FontScale) => {
+    const config = FONT_SCALES.find(s => s.id === scaleId)
+    if (!config) return
+    setFontScale(scaleId)
+    triggerHaptic('selection')
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mindvibe_font_scale', String(config.scale))
+      document.documentElement.style.setProperty('--font-scale', String(config.scale))
+      document.documentElement.style.fontSize = `${config.scale * 100}%`
+      document.documentElement.setAttribute('data-font-scale', scaleId)
     }
   }, [triggerHaptic])
 
@@ -460,10 +494,56 @@ export default function MobileSettingsPage() {
                       <Check className="w-4 h-4 text-white m-auto mt-3" />
                     )}
                   </div>
-                  <span className={`text-[9px] font-medium ${colorScheme === scheme.id ? 'text-white' : 'text-slate-500'}`}>
+                  <span className={`text-[11px] font-medium ${colorScheme === scheme.id ? 'text-white' : 'text-slate-500'}`}>
                     {scheme.label}
                   </span>
                 </motion.button>
+              ))}
+            </div>
+          </div>
+
+          {/* Text Size */}
+          <div className="px-4 py-3">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center">
+                <span className="text-sm font-semibold text-slate-400" aria-hidden="true">Aa</span>
+              </div>
+              <p className="text-sm font-medium text-white">Text Size</p>
+            </div>
+
+            <div className="mb-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+              <p
+                className="text-[var(--mv-text-primary)] leading-relaxed"
+                style={{ fontSize: 'var(--text-body)' }}
+              >
+                Find inner peace through sacred wisdom and daily reflection.
+              </p>
+            </div>
+
+            <div className="flex gap-2" role="radiogroup" aria-label="Text size">
+              {FONT_SCALES.map((s) => (
+                <button
+                  key={s.id}
+                  role="radio"
+                  aria-checked={fontScale === s.id}
+                  onClick={() => handleFontScaleChange(s.id)}
+                  className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl transition-all ${
+                    fontScale === s.id
+                      ? 'bg-[var(--sacred-divine-gold)]/15 border border-[var(--sacred-divine-gold)]/30'
+                      : 'bg-white/[0.03] border border-transparent'
+                  }`}
+                >
+                  <span
+                    className="font-semibold text-[var(--mv-text-primary)]"
+                    style={{ fontSize: `${s.scale * 16}px` }}
+                    aria-hidden="true"
+                  >
+                    Aa
+                  </span>
+                  <span className={`text-[11px] ${fontScale === s.id ? 'text-[var(--sacred-divine-gold)]' : 'text-slate-500'}`}>
+                    {s.label}
+                  </span>
+                </button>
               ))}
             </div>
           </div>
@@ -722,7 +802,7 @@ export default function MobileSettingsPage() {
                   if (filtered.length === 0) return null
                   return (
                     <div key={group.label} className="mb-4">
-                      <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider mb-1.5">
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1.5">
                         {group.label}
                       </p>
                       <div className="space-y-0.5">

@@ -28,8 +28,8 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   minimumScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: 'cover',
   themeColor: '#050714',
 }
@@ -44,6 +44,22 @@ const colorSchemeInitScript = `
 })();
 `
 
+/** Inline script to apply saved font scale before React hydration (prevents flash of wrong size) */
+const fontScaleInitScript = `
+(function(){
+  try {
+    var s = localStorage.getItem('mindvibe_font_scale');
+    if (s) {
+      var v = parseFloat(s);
+      if (!isNaN(v) && v >= 0.875 && v <= 1.25) {
+        document.documentElement.style.setProperty('--font-scale', s);
+        document.documentElement.style.fontSize = (v * 100) + '%';
+      }
+    }
+  } catch(e) {}
+})();
+`
+
 export default function MobileLayout({
   children,
 }: {
@@ -52,6 +68,7 @@ export default function MobileLayout({
   return (
     <div className="mobile-layout min-h-screen bg-[var(--sacred-cosmic-void,#050714)]">
       <script dangerouslySetInnerHTML={{ __html: colorSchemeInitScript }} />
+      <script dangerouslySetInnerHTML={{ __html: fontScaleInitScript }} />
       <MobileErrorBoundary>
         {children}
       </MobileErrorBoundary>

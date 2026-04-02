@@ -88,16 +88,16 @@
   --font-display: var(--font-playfair), 'Playfair Display', serif;
   --font-ui: var(--font-outfit), 'Outfit', system-ui, sans-serif;
 
-  /* Sacred typography scale for mobile */
-  --sacred-text-xs: 11px;
-  --sacred-text-sm: 13px;
-  --sacred-text-base: 15px;
-  --sacred-text-lg: 17px;
-  --sacred-text-xl: 21px;
-  --sacred-text-2xl: 26px;
-  --sacred-text-3xl: 32px;
-  --sacred-text-4xl: 42px;
-  --sacred-text-5xl: 54px;
+  /* Sacred typography scale for mobile (rem-based for accessibility scaling) */
+  --sacred-text-xs: 0.6875rem;   /* 11px at default scale */
+  --sacred-text-sm: 0.8125rem;   /* 13px at default scale */
+  --sacred-text-base: 0.9375rem; /* 15px at default scale */
+  --sacred-text-lg: 1.0625rem;   /* 17px at default scale */
+  --sacred-text-xl: 1.3125rem;   /* 21px at default scale */
+  --sacred-text-2xl: 1.625rem;   /* 26px at default scale */
+  --sacred-text-3xl: 2rem;       /* 32px at default scale */
+  --sacred-text-4xl: 2.625rem;   /* 42px at default scale */
+  --sacred-text-5xl: 3.375rem;   /* 54px at default scale */
 
   --sacred-line-height-scripture: 1.85;
   --sacred-line-height-ui: 1.4;
@@ -377,7 +377,7 @@
   border: 1px solid rgba(212, 160, 23, 0.4);
   color: var(--sacred-white);
   font-family: var(--font-ui);
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
   letter-spacing: 0.04em;
   position: relative;
@@ -397,7 +397,7 @@
   border: 1px solid rgba(212, 160, 23, 0.35);
   color: var(--sacred-divine-gold-bright);
   font-family: var(--font-ui);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   transition: transform 0.15s, border-color 0.3s;
 }
@@ -536,7 +536,7 @@
   border-radius: 28px;
   color: var(--sacred-text-primary);
   font-family: var(--font-ui);
-  font-size: 15px;
+  font-size: 0.9375rem;
   transition: border-color 300ms, box-shadow 300ms;
 }
 
@@ -554,7 +554,7 @@
   padding: 10px 16px;
   color: var(--sacred-text-secondary);
   font-family: var(--font-ui);
-  font-size: 13px;
+  font-size: 0.8125rem;
   transition: border-color 0.2s, transform 0.15s;
 }
 

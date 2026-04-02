@@ -37,8 +37,9 @@
 
   html {
     font-family: var(--font-sans);
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
+    -webkit-text-size-adjust: auto;
+    text-size-adjust: auto;
+    font-size: calc(var(--font-scale, 1) * 100%);
   }
 
   body {
