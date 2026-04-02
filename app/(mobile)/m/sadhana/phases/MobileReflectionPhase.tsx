@@ -70,7 +70,7 @@ export function MobileReflectionPhase({
   }, [triggerHaptic, onComplete])
 
   return (
-    <div className="relative min-h-[75vh] flex flex-col px-5 pt-8 pb-20">
+    <div className="relative min-h-[100dvh] flex flex-col px-5 pt-8 pb-20">
       {/* KIAAN Insight label */}
       <motion.p
         className="text-[9px] text-[#D4A017] tracking-[0.15em] uppercase mb-3 font-[family-name:var(--font-ui)]"
@@ -110,9 +110,10 @@ export function MobileReflectionPhase({
       >
         <textarea
           ref={textareaRef}
-          value={reflectionText}
+          value={reflectionText ?? ''}
           onChange={handleChange}
           placeholder="What stirs in you after this verse?"
+          aria-label="Write your reflection"
           className="w-full rounded-[20px] px-[18px] py-4 text-base leading-[1.75] resize-none transition-all duration-300 font-[family-name:var(--font-scripture)]"
           style={{
             minHeight: 140,

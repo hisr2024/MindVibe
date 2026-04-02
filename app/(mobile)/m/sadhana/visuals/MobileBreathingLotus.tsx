@@ -6,7 +6,7 @@
  * Uses Framer Motion for smooth petal scaling and color transitions.
  */
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import type { BreathingPattern } from '@/types/sadhana.types'
 
@@ -19,6 +19,22 @@ const PHASE_COLORS: Record<BreathPhase, string> = {
   holdOut: '#1B4FBB',
 }
 
+/** Darker shades for gradient base (3D depth effect) */
+const PHASE_COLORS_DARK: Record<BreathPhase, string> = {
+  inhale:  '#065F73',
+  holdIn:  '#8B6914',
+  exhale:  '#C25E12',
+  holdOut: '#0E2F7A',
+}
+
+/** Warmer inner-petal tint (mixed toward gold) */
+const PHASE_COLORS_INNER: Record<BreathPhase, string> = {
+  inhale:  '#1A9FB5',
+  holdIn:  '#D4A017',
+  exhale:  '#E8943A',
+  holdOut: '#2A5FBB',
+}
+
 const PHASE_LABELS: Record<BreathPhase, { sanskrit: string; english: string }> = {
   inhale:  { sanskrit: 'श्वास लो', english: 'Breathe In' },
   holdIn:  { sanskrit: 'रोको', english: 'Hold' },
@@ -29,24 +45,40 @@ const PHASE_LABELS: Record<BreathPhase, { sanskrit: string; english: string }> =
 interface MobileBreathingLotusProps {
   pattern: BreathingPattern
   onComplete: () => void
-  onSkip?: () => void
 }
 
-export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBreathingLotusProps) {
+export function MobileBreathingLotus({ pattern, onComplete }: MobileBreathingLotusProps) {
   const [breathPhase, setBreathPhase] = useState<BreathPhase>('inhale')
   const [currentCycle, setCurrentCycle] = useState(0)
   const [cycleProgress, setCycleProgress] = useState(0)
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>()
   const completedRef = useRef(false)
   const onCompleteRef = useRef(onComplete)
+  const cycleStartRef = useRef(Date.now())
+  const rafRef = useRef<number>()
 
   useEffect(() => { onCompleteRef.current = onComplete })
 
   const totalCycleDuration = Math.max(1, (pattern.inhale + pattern.holdIn + pattern.exhale + pattern.holdOut) * 1000)
 
+  // Smooth progress arc via requestAnimationFrame
+  const updateProgress = useCallback(() => {
+    if (completedRef.current) return
+    const elapsed = Date.now() - cycleStartRef.current
+    const progress = Math.min(elapsed / totalCycleDuration, 1)
+    setCycleProgress(progress)
+    rafRef.current = requestAnimationFrame(updateProgress)
+  }, [totalCycleDuration])
+
+  useEffect(() => {
+    rafRef.current = requestAnimationFrame(updateProgress)
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [updateProgress])
+
   useEffect(() => {
     completedRef.current = false
-    const cycleDur = totalCycleDuration
 
     const runBreathCycle = (cycle: number) => {
       if (completedRef.current) return
@@ -57,6 +89,7 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
       }
 
       setCurrentCycle(cycle)
+      cycleStartRef.current = Date.now()
 
       const allPhases: { phase: BreathPhase; duration: number }[] = [
         { phase: 'inhale' as const, duration: pattern.inhale * 1000 },
@@ -66,7 +99,6 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
       ]
       const phases = allPhases.filter(p => p.duration > 0)
 
-      let elapsed = 0
       const runPhase = (index: number) => {
         if (completedRef.current || index >= phases.length) {
           if (!completedRef.current) runBreathCycle(cycle + 1)
@@ -74,8 +106,6 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
         }
         const { phase, duration } = phases[index]
         setBreathPhase(phase)
-        setCycleProgress(elapsed / cycleDur)
-        elapsed += duration
         timeoutRef.current = setTimeout(() => runPhase(index + 1), duration)
       }
 
@@ -100,16 +130,18 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
   const phaseDuration = breathPhase === 'inhale'
     ? pattern.inhale
     : breathPhase === 'holdIn'
-    ? 0.5
+    ? pattern.holdIn
     : breathPhase === 'exhale'
     ? pattern.exhale
     : pattern.holdOut
 
   const currentColor = PHASE_COLORS[breathPhase]
+  const currentColorDark = PHASE_COLORS_DARK[breathPhase]
+  const currentColorInner = PHASE_COLORS_INNER[breathPhase]
   const label = PHASE_LABELS[breathPhase]
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-[80vh]">
+    <div className="relative flex flex-col items-center justify-center">
       {/* Progress arc around lotus */}
       <svg
         className="absolute"
@@ -133,7 +165,7 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
           animate={{
             strokeDashoffset: 2 * Math.PI * 155 * (1 - cycleProgress),
           }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.05, ease: 'linear' }}
           style={{ transform: 'rotate(-90deg)', transformOrigin: '160px 160px' }}
           opacity={0.4}
         />
@@ -167,11 +199,15 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
             >
               <motion.div
                 className="w-full h-full"
-                animate={{ backgroundColor: currentColor }}
+                animate={{
+                  background: `linear-gradient(to top, ${currentColorDark}, ${currentColor})`,
+                }}
                 transition={{ duration: 0.8 }}
                 style={{
-                  opacity: 0.85,
+                  opacity: 0.88,
                   borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+                  background: `linear-gradient(to top, ${currentColorDark}, ${currentColor})`,
+                  boxShadow: `0 0 6px ${currentColor}30`,
                 }}
               />
             </motion.div>
@@ -205,11 +241,15 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
             >
               <motion.div
                 className="w-full h-full"
-                animate={{ backgroundColor: currentColor }}
+                animate={{
+                  background: `linear-gradient(to top, ${currentColorDark}, ${currentColorInner})`,
+                }}
                 transition={{ duration: 0.8, delay: 0.1 }}
                 style={{
-                  opacity: 0.65,
+                  opacity: 0.7,
                   borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+                  background: `linear-gradient(to top, ${currentColorDark}, ${currentColorInner})`,
+                  boxShadow: `0 0 4px ${currentColorInner}25`,
                 }}
               />
             </motion.div>
@@ -218,12 +258,12 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
 
         {/* Center golden circle */}
         <motion.div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#D4A017]"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#D4A017]"
           animate={{
             boxShadow: [
-              '0 0 8px rgba(212,160,23,0.4)',
-              '0 0 20px rgba(212,160,23,0.7)',
-              '0 0 8px rgba(212,160,23,0.4)',
+              '0 0 10px rgba(212,160,23,0.5), 0 0 20px rgba(212,160,23,0.2)',
+              '0 0 24px rgba(212,160,23,0.8), 0 0 40px rgba(212,160,23,0.3)',
+              '0 0 10px rgba(212,160,23,0.5), 0 0 20px rgba(212,160,23,0.2)',
             ],
           }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -260,16 +300,6 @@ export function MobileBreathingLotus({ pattern, onComplete, onSkip }: MobileBrea
           />
         ))}
       </div>
-
-      {/* Skip button */}
-      {onSkip && (
-        <button
-          onClick={onSkip}
-          className="absolute bottom-4 right-4 text-[10px] text-[#6B6355] font-[family-name:var(--font-ui)] opacity-60 hover:opacity-100 transition-opacity"
-        >
-          Skip
-        </button>
-      )}
     </div>
   )
 }

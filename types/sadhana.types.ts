@@ -75,7 +75,7 @@ export interface SadhanaComposition {
   reflectionPrompt: ReflectionPrompt
   dharmaIntention: DharmaIntention
   durationEstimateMinutes: number
-  timeOfDay: 'morning' | 'afternoon' | 'evening'
+  timeOfDay: 'morning' | 'afternoon' | 'evening' | 'night'
 }
 
 /** Request to compose a practice */

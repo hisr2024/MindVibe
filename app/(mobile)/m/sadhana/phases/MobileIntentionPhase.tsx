@@ -28,7 +28,7 @@ export function MobileIntentionPhase({
   const [showCeremony, setShowCeremony] = useState(false)
   const { triggerHaptic } = useHapticFeedback()
 
-  const displayText = intentionText || intention.suggestion
+  const displayText = intentionText || intention.suggestion || 'Hold your intention in your heart'
 
   const handleSeal = useCallback(() => {
     if (sealed) return
@@ -51,17 +51,7 @@ export function MobileIntentionPhase({
   const timeOfDay = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening'
 
   return (
-    <div className="relative min-h-[80vh] flex flex-col items-center px-5 pt-10 pb-20">
-      {/* Category badge */}
-      <motion.p
-        className="text-[9px] text-[#D4A017] tracking-[0.15em] uppercase mb-4 font-[family-name:var(--font-ui)]"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-      >
-        {intention.category}
-      </motion.p>
-
+    <div className="relative min-h-[100dvh] flex flex-col items-center px-5 pt-10 pb-20">
       {/* Intention card */}
       <motion.div
         className="w-full max-w-[340px] rounded-3xl p-6 relative"
@@ -81,6 +71,7 @@ export function MobileIntentionPhase({
         <button
           onClick={() => setIsEditing(!isEditing)}
           className="absolute top-4 right-4 text-[#6B6355] hover:text-[#D4A017] transition-colors"
+          aria-label="Edit intention"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -146,6 +137,7 @@ export function MobileIntentionPhase({
           onClick={handleSeal}
           disabled={sealed}
           className="w-20 h-20 rounded-full flex items-center justify-center relative"
+          aria-label="Seal your sankalpa"
           style={{
             background: 'radial-gradient(circle, #2563EB, #050714)',
             border: '2px solid rgba(212,160,23,0.6)',

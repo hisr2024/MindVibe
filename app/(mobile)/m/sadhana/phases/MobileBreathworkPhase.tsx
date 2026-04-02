@@ -44,7 +44,7 @@ export function MobileBreathworkPhase({ pattern, onComplete }: MobileBreathworkP
   }, [])
 
   return (
-    <div className="relative min-h-[100vh] flex flex-col items-center justify-center">
+    <div className="relative min-h-[100dvh] flex flex-col items-center justify-center">
       {/* Pattern name */}
       <motion.div
         className="absolute top-8 left-0 right-0 text-center z-10 px-6"
@@ -64,8 +64,16 @@ export function MobileBreathworkPhase({ pattern, onComplete }: MobileBreathworkP
       <MobileBreathingLotus
         pattern={pattern}
         onComplete={handleComplete}
-        onSkip={onComplete}
       />
+
+      {/* Skip button */}
+      <button
+        onClick={onComplete}
+        className="absolute bottom-8 right-6 text-[10px] text-[#6B6355] font-[family-name:var(--font-ui)] opacity-60 hover:opacity-100 transition-opacity z-10"
+        aria-label="Skip breathwork"
+      >
+        Skip
+      </button>
 
       {/* Awareness cue */}
       <div className="absolute bottom-24 left-0 right-0 px-10">
