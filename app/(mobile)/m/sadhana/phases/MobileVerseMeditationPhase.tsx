@@ -22,6 +22,11 @@ export function MobileVerseMeditationPhase({ verse, onComplete }: MobileVerseMed
   const [timerProgress, setTimerProgress] = useState(0)
   const { triggerHaptic } = useHapticFeedback()
   const timerRef = useRef<ReturnType<typeof setInterval>>()
+  const onCompleteRef = useRef(onComplete)
+  const triggerHapticRef = useRef(triggerHaptic)
+
+  useEffect(() => { onCompleteRef.current = onComplete }, [onComplete])
+  useEffect(() => { triggerHapticRef.current = triggerHaptic }, [triggerHaptic])
 
   const handleSanskritComplete = useCallback(() => {
     setTimeout(() => setShowCard(true), 400)
@@ -36,11 +41,11 @@ export function MobileVerseMeditationPhase({ verse, onComplete }: MobileVerseMed
       timerRef.current = setInterval(() => {
         progress += 100 / 600 // 60s = 600 ticks at 100ms
         setTimerProgress(Math.min(progress, 100))
-        if (progress >= 50 && progress < 50.5) triggerHaptic('light')
+        if (progress >= 50 && progress < 50.5) triggerHapticRef.current('light')
         if (progress >= 100) {
           clearInterval(timerRef.current)
-          triggerHaptic('medium')
-          setTimeout(onComplete, 500)
+          triggerHapticRef.current('medium')
+          setTimeout(() => onCompleteRef.current(), 500)
         }
       }, 100)
     }, 1000)
@@ -48,7 +53,7 @@ export function MobileVerseMeditationPhase({ verse, onComplete }: MobileVerseMed
       clearTimeout(delay)
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [showCard, onComplete, triggerHaptic])
+  }, [showCard])
 
   const handleSkip = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current)
@@ -56,11 +61,12 @@ export function MobileVerseMeditationPhase({ verse, onComplete }: MobileVerseMed
   }, [onComplete])
 
   return (
-    <div className="relative min-h-[85vh] flex flex-col items-center px-5 pt-8 pb-20">
+    <div className="relative min-h-[100dvh] flex flex-col items-center px-5 pt-8 pb-20">
       {/* Skip link */}
       <button
         onClick={handleSkip}
         className="absolute top-4 right-5 text-[10px] text-[#6B6355] font-[family-name:var(--font-ui)] z-10"
+        aria-label="Skip verse meditation"
       >
         Skip →
       </button>

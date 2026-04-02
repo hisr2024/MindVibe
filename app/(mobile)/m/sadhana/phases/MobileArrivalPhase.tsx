@@ -6,7 +6,7 @@
  * mood state with Sanskrit label and color palette.
  */
 
-import { useState, useMemo, useCallback, useSyncExternalStore } from 'react'
+import { useState, useRef, useMemo, useCallback, useSyncExternalStore } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import type { SadhanaMood } from '@/types/sadhana.types'
@@ -34,6 +34,7 @@ function getTimeGreeting(): { sanskrit: string; english: string } {
 
 export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
   const [selectedMood, setSelectedMood] = useState<SadhanaMood | null>(null)
+  const tappedRef = useRef(false)
   const { triggerHaptic } = useHapticFeedback()
   const greeting = useMemo(() => getTimeGreeting(), [])
   const orbitRadius = useSyncExternalStore(
@@ -43,16 +44,17 @@ export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
   )
 
   const handleMoodTap = useCallback((mood: SadhanaMood) => {
-    if (selectedMood) return
+    if (tappedRef.current) return
+    tappedRef.current = true
     triggerHaptic('medium')
     setSelectedMood(mood)
     onMoodSelect(mood)
-  }, [selectedMood, triggerHaptic, onMoodSelect])
+  }, [triggerHaptic, onMoodSelect])
 
   const selectedMoodData = SADHANA_MOODS.find(m => m.id === selectedMood)
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-[80vh] px-4">
+    <div className="relative flex flex-col items-center justify-center min-h-[100dvh] px-4">
       {/* Sanskrit invocation */}
       <motion.p
         className="font-[family-name:var(--font-divine)] text-xl text-[#D4A017] text-center mb-1 tracking-wide"
@@ -66,7 +68,7 @@ export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
 
       {/* Time greeting */}
       <motion.div
-        className="text-center mb-10"
+        className="text-center mb-6"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.4 }}
@@ -128,6 +130,7 @@ export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
               }}
               onClick={() => handleMoodTap(mood.id)}
               disabled={!!selectedMood}
+              aria-label={`Select mood: ${mood.label}`}
             >
               <span className="font-[family-name:var(--font-divine)] italic text-[11px] text-white leading-tight">
                 {mood.sanskrit}
