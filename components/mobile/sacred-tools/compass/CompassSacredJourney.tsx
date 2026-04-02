@@ -67,6 +67,9 @@ export default function CompassSacredJourney() {
     sattva: string[]
   }>({ tamas: [], rajas: [], sattva: [] })
 
+  // Custom query state
+  const [customQuery, setCustomQuery] = useState('')
+
   // Intention state
   const [selectedQuality, setSelectedQuality] = useState<DharmicQuality | null>(null)
   const [intentionText, setIntentionText] = useState('')
@@ -142,16 +145,18 @@ export default function CompassSacredJourney() {
     if (selectedPatterns.tamas.length > 0) parts.push(`[Tamas patterns: ${patternTexts('tamas')}]`)
     if (selectedPatterns.rajas.length > 0) parts.push(`[Rajas patterns: ${patternTexts('rajas')}]`)
     if (selectedPatterns.sattva.length > 0) parts.push(`[Sattva patterns: ${patternTexts('sattva')}]`)
+    if (customQuery.trim()) parts.push(`[User's own situation: ${customQuery.trim()}]`)
 
     return parts.join(' ')
-  }, [selectedPatterns, relationshipType, partnerName, initialGunaReading, gunaScores.dominant])
+  }, [selectedPatterns, relationshipType, partnerName, initialGunaReading, gunaScores.dominant, customQuery])
 
   // Submit to API (called at dharma_map → gita_counsel transition)
   const submitToAPI = useCallback(async () => {
     const gunaContext = buildGunaContext()
-    const enrichedMessage = sanitizeInput(
-      `${gunaContext} I need guidance on navigating this ${relationshipType?.label || 'relationship'} with wisdom.`
-    )
+    const userSituation = customQuery.trim()
+      ? customQuery.trim()
+      : `I need guidance on navigating this ${relationshipType?.label || 'relationship'} with wisdom.`
+    const enrichedMessage = sanitizeInput(`${gunaContext} ${userSituation}`)
 
     // Cancel any in-flight request
     abortRef.current?.abort()
@@ -214,7 +219,7 @@ export default function CompassSacredJourney() {
     } finally {
       setLoading(false)
     }
-  }, [buildGunaContext, relationshipType, sessionId])
+  }, [buildGunaContext, relationshipType, sessionId, customQuery])
 
   function formatGuidance(guidance: Record<string, string> | undefined): string {
     if (!guidance) return ''
@@ -255,6 +260,8 @@ export default function CompassSacredJourney() {
               onTogglePattern={togglePattern}
               gunaScores={gunaScores}
               onProceed={advanceChamber}
+              customQuery={customQuery}
+              onCustomQueryChange={setCustomQuery}
             />
           </motion.div>
         )}
