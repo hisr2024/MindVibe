@@ -99,7 +99,9 @@ export async function detectCapabilities(): Promise<WebEngineCapabilities> {
     sharedArrayBuffer: typeof SharedArrayBuffer !== 'undefined',
     wasmSimd: false,
     offscreenCanvas: typeof OffscreenCanvas !== 'undefined',
-    deviceMemoryGB: (navigator as any).deviceMemory ?? null,
+    // deviceMemory is a non-standard Navigator API (Memory API)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    deviceMemoryGB: ((navigator as any).deviceMemory as number) ?? null,
     hardwareConcurrency: navigator.hardwareConcurrency ?? 4,
     gpu: { vendor: 'unknown', renderer: 'unknown', tier: 'none' },
   }
@@ -107,6 +109,8 @@ export async function detectCapabilities(): Promise<WebEngineCapabilities> {
   // WebGPU detection
   if ('gpu' in navigator) {
     try {
+      // WebGPU API types not yet in standard lib — navigator.gpu is experimental
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const adapter = await (navigator as any).gpu.requestAdapter({
         powerPreference: 'high-performance',
       })
@@ -146,6 +150,8 @@ export async function detectCapabilities(): Promise<WebEngineCapabilities> {
   // WebNN detection
   if ('ml' in navigator) {
     try {
+      // WebNN API types not yet in standard lib — navigator.ml is experimental
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ctx = await (navigator as any).ml.createContext({
         deviceType: 'gpu',
         powerPreference: 'default',
