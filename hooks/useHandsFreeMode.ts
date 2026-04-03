@@ -151,6 +151,19 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
   // idle timer and VAD hook).
   const stopVADRef = useRef<() => void>(() => {})
 
+  // Silence-based submission fallback — used when VAD is unavailable at runtime.
+  // When VAD fails (e.g. ONNX model load error), STT runs in continuous mode
+  // with no mechanism to detect speech end. This timer monitors transcript
+  // changes and submits after 2s of silence as a fallback.
+  const silenceSubmitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearSilenceSubmitTimer = useCallback(() => {
+    if (silenceSubmitTimerRef.current) {
+      clearTimeout(silenceSubmitTimerRef.current)
+      silenceSubmitTimerRef.current = null
+    }
+  }, [])
+
   // ---------------------------------------------------------------------------
   // Idle timer — auto-deactivate after 5 minutes of no speech
   // ---------------------------------------------------------------------------
@@ -272,12 +285,13 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
   const deactivate = useCallback(() => {
     if (!mountedRef.current) return
     clearIdleTimer()
+    clearSilenceSubmitTimer()
     stopVAD()
     voiceInput.stopListening()
     voiceInput.resetTranscript()
     setActiveState(false)
     setHandsFreeState('inactive')
-  }, [voiceInput, clearIdleTimer, stopVAD, setActiveState, setHandsFreeState])
+  }, [voiceInput, clearIdleTimer, clearSilenceSubmitTimer, stopVAD, setActiveState, setHandsFreeState])
 
   // ---------------------------------------------------------------------------
   // Non-VAD fallback — when VAD is not supported, detect STT completion
@@ -310,6 +324,60 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
   }, [voiceInput.status, vadSupported, setHandsFreeState, setActiveState, voiceInput])
 
   // ---------------------------------------------------------------------------
+  // Non-VAD silence fallback — when VAD fails at runtime, detect speech end
+  // by monitoring transcript changes. Submit after 2s of no new input.
+  // This covers the case where vadLikelySupported was true (so
+  // autoStopOnSilence=false) but VAD actually failed to initialize at runtime.
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    // Only activate when VAD is NOT available and we're actively listening
+    if (vadSupported) return
+    if (!isActiveRef.current) return
+    if (stateRef.current === 'inactive' || stateRef.current === 'submitting') return
+
+    clearSilenceSubmitTimer()
+
+    const text = (voiceInput.transcript || voiceInput.interimTranscript || '').trim()
+    if (!text) return
+
+    // Start timer — if no new transcript in 2s, speech has ended
+    silenceSubmitTimerRef.current = setTimeout(() => {
+      if (!mountedRef.current || !isActiveRef.current) return
+      if (stateRef.current === 'submitting' || stateRef.current === 'inactive') return
+
+      const finalText = transcriptRef.current.trim()
+      if (!finalText) return
+
+      setHandsFreeState('submitting')
+      voiceInput.stopListening()
+      onTranscriptRef.current(finalText)
+      voiceInput.resetTranscript()
+
+      if (!conversationalRef.current) {
+        setActiveState(false)
+        setHandsFreeState('inactive')
+        stopVADRef.current()
+      }
+    }, 2000)
+  }, [vadSupported, voiceInput.transcript, voiceInput.interimTranscript,
+      clearSilenceSubmitTimer, voiceInput, setHandsFreeState, setActiveState])
+
+  // ---------------------------------------------------------------------------
+  // Update state to 'hearing' when speech is detected via STT (non-VAD path).
+  // Without this, the UI stays in 'waiting' because only VAD's onSpeechStart
+  // sets 'hearing'.
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (vadSupported) return
+    if (!isActiveRef.current) return
+    if (stateRef.current !== 'waiting') return
+
+    if (voiceInput.interimTranscript || voiceInput.transcript) {
+      setHandsFreeState('hearing') // eslint-disable-line react-hooks/set-state-in-effect -- syncing with external STT state
+    }
+  }, [vadSupported, voiceInput.interimTranscript, voiceInput.transcript, setHandsFreeState])
+
+  // ---------------------------------------------------------------------------
   // Conversational mode — restart VAD + STT after KIAAN finishes processing
   // ---------------------------------------------------------------------------
   useEffect(() => {
@@ -333,6 +401,10 @@ export function useHandsFreeMode(options: UseHandsFreeModeOptions): UseHandsFree
       if (idleTimerRef.current) {
         clearTimeout(idleTimerRef.current)
         idleTimerRef.current = null
+      }
+      if (silenceSubmitTimerRef.current) {
+        clearTimeout(silenceSubmitTimerRef.current)
+        silenceSubmitTimerRef.current = null
       }
     }
   }, [])
