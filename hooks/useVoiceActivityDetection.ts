@@ -236,7 +236,8 @@ export function useVoiceActivityDetection(options: UseVADOptions = {}): UseVADRe
   }, [])
 
   // ---------------------------------------------------------------------------
-  // stopVAD — Pause the VAD instance (does not destroy it for reuse)
+  // stopVAD — Destroy the VAD instance to fully release the microphone.
+  // A fresh instance is created on next startVAD() call.
   // ---------------------------------------------------------------------------
   const stopVAD = useCallback(() => {
     // Clear duty cycle timer if active
@@ -245,7 +246,8 @@ export function useVoiceActivityDetection(options: UseVADOptions = {}): UseVADRe
       dutyCycleTimerRef.current = null
     }
     if (vadInstanceRef.current) {
-      vadInstanceRef.current.pause()
+      vadInstanceRef.current.destroy()
+      vadInstanceRef.current = null
     }
     wasActiveBeforeHiddenRef.current = false
     if (mountedRef.current) {

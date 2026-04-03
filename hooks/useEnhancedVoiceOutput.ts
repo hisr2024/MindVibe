@@ -14,6 +14,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { SpeechSynthesisService, type VoiceGender } from '@/utils/speech/synthesis'
 import { isSpeechSynthesisSupported } from '@/utils/speech/languageMapping'
+import { apiFetch } from '@/lib/api'
 
 export interface UseEnhancedVoiceOutputOptions {
   language?: string
@@ -148,10 +149,9 @@ export function useEnhancedVoiceOutput(
     const timeout = setTimeout(() => controller.abort(), 10000) // 10s timeout
 
     try {
-      const response = await fetch('/api/voice/synthesize', {
+      const response = await apiFetch('/api/voice/synthesize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         signal: controller.signal,
         body: JSON.stringify({
           text,

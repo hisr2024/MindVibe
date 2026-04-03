@@ -184,10 +184,10 @@ export function KiaanVoiceCompanionFooter() {
     setError(null)
     setMode('responding')
 
-    try {
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 15000)
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 15000)
 
+    try {
       const response = await apiFetch('/api/companion/message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -199,8 +199,6 @@ export function KiaanVoiceCompanionFooter() {
         }),
         signal: controller.signal,
       })
-
-      clearTimeout(timeout)
 
       if (response.ok) {
         const data = await response.json()
@@ -232,6 +230,7 @@ export function KiaanVoiceCompanionFooter() {
       // Network error or timeout — use local fallback
       addLocalFallbackRef.current(text.trim())
     } finally {
+      clearTimeout(timeout)
       if (mountedRef.current) setIsProcessing(false)
     }
   }, [isProcessing, sessionId, language]) // speak via speakRef, addLocalFallback via addLocalFallbackRef
@@ -239,24 +238,37 @@ export function KiaanVoiceCompanionFooter() {
   // ── Local Fallback (Friend Engine) ──
   const addLocalFallback = useCallback((userText: string) => {
     if (!mountedRef.current) return
-    const result = friendEngineRef.current.processMessage(userText)
+    try {
+      const result = friendEngineRef.current.processMessage(userText)
 
-    const companionMsg: CompanionMessage = {
-      id: `companion-${Date.now()}`,
-      role: 'companion',
-      content: result.response,
-      mood: result.mood,
-      wisdomUsed: result.wisdom_used,
+      const companionMsg: CompanionMessage = {
+        id: `companion-${Date.now()}`,
+        role: 'companion',
+        content: result.response,
+        mood: result.mood,
+        wisdomUsed: result.wisdom_used,
+      }
+
+      setMessages(prev => [...prev, companionMsg])
+      setCurrentMood(result.mood)
+      setMode('responding')
+
+      const suggestion = detectToolSuggestion(userText, result.mood)
+      setToolSuggestion(suggestion)
+
+      speakRef.current(result.response)
+    } catch {
+      // Friend engine failed — show compassionate fallback
+      const fallbackMsg: CompanionMessage = {
+        id: `companion-${Date.now()}`,
+        role: 'companion',
+        content: 'I\'m here with you. Take a moment to breathe deeply.',
+        mood: 'neutral',
+        wisdomUsed: null,
+      }
+      setMessages(prev => [...prev, fallbackMsg])
+      setMode('responding')
     }
-
-    setMessages(prev => [...prev, companionMsg])
-    setCurrentMood(result.mood)
-    setMode('responding')
-
-    const suggestion = detectToolSuggestion(userText, result.mood)
-    setToolSuggestion(suggestion)
-
-    speakRef.current(result.response)
   }, [])
 
   // Stable ref for addLocalFallback
@@ -469,17 +481,19 @@ export function KiaanVoiceCompanionFooter() {
   return (
     <div
       ref={panelRef}
-      className="fixed bottom-[calc(88px+env(safe-area-inset-bottom,0px))] right-3 z-[60] md:bottom-8 md:right-8"
+      className="fixed bottom-[calc(88px+env(safe-area-inset-bottom,0px))] right-3 z-[70] md:bottom-8 md:right-8"
     >
       {/* ── Expanded Panel ── */}
       <AnimatePresence mode="wait">
         {isPanelOpen && (
           <motion.div
+            role="dialog"
+            aria-label="KIAAN Voice Companion"
             variants={panelVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
-            className="mb-3 w-[320px] max-h-[420px] overflow-hidden rounded-[20px] border border-[#d4a44c]/20 bg-gradient-to-b from-[#0c0a06]/[0.98] via-[#080808]/95 to-[#050507]/[0.98] shadow-2xl shadow-black/40 backdrop-blur-xl md:w-[360px] md:rounded-[24px]"
+            className="mb-3 w-[calc(100vw-24px)] max-w-[320px] max-h-[min(420px,calc(100dvh-160px))] overflow-hidden rounded-[20px] border border-[#d4a44c]/20 bg-gradient-to-b from-[#0c0a06]/[0.98] via-[#080808]/95 to-[#050507]/[0.98] shadow-2xl shadow-black/40 backdrop-blur-xl md:max-w-[360px] md:rounded-[24px]"
             onClick={cancelAutoCollapse}
           >
             {/* Top glow accent */}
@@ -498,7 +512,7 @@ export function KiaanVoiceCompanionFooter() {
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-[#f5f0e8]">KIAAN</h3>
-                  <p className="text-[10px] text-[#f5f0e8]/60">
+                  <p className="text-[10px] text-[#f5f0e8]/60" aria-live="polite">
                     {isListening && handsFreeState === 'hearing'
                       ? t('companion.hearing', 'Hearing you...')
                       : isListening
@@ -514,7 +528,7 @@ export function KiaanVoiceCompanionFooter() {
               </div>
               <motion.button
                 onClick={handleClose}
-                className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-[#f5f0e8]/75 hover:bg-white/10 hover:text-[#f5f0e8] transition-colors"
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 text-[#f5f0e8]/75 hover:bg-white/10 hover:text-[#f5f0e8] transition-colors"
                 aria-label={t('common.close', 'Close')}
                 whileTap={{ scale: 0.9 }}
               >
