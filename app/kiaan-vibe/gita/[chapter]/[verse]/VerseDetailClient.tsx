@@ -14,6 +14,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, Copy, Check, Play, Pause, ChevronLeft, ChevronRight, Share2, Volume2, Loader2 } from 'lucide-react'
 import { getVerse, getVerseMultiLang, GITA_CHAPTERS_META, SUPPORTED_LANGUAGES, getAvailableLanguages } from '@/lib/kiaan-vibe/gita'
 import type { GitaVerse } from '@/lib/kiaan-vibe/types'
+import { apiFetch } from '@/lib/api'
 import { GitaVoicePlayer } from '@/components/kiaan-vibe-player/GitaVoicePlayer'
 
 // Language code mapping for TTS (both API and browser fallback)
@@ -160,10 +161,9 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
 
     try {
       // Try backend TTS API for natural divine voice (Google Neural2/Sarvam AI)
-      const response = await fetch('/api/voice/synthesize', {
+      const response = await apiFetch('/api/voice/synthesize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({
           text,
           language: lang === 'sa' ? 'hi' : lang, // Sanskrit uses Hindi voice

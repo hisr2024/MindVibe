@@ -23,6 +23,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { SpeechRecognitionService } from '@/utils/speech/recognition'
 import { isSpeechRecognitionSupported } from '@/utils/speech/languageMapping'
 import { canUseVoiceInput, isSecureContext, getBrowserName } from '@/utils/browserSupport'
+import { apiFetch } from '@/lib/api'
 
 export type VTTStatus = 'idle' | 'listening' | 'processing' | 'error' | 'offline'
 
@@ -268,7 +269,7 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
           form.append('language', language)
 
           setServerProgressMessage('Transcribing...')
-          const res = await fetch('/api/voice/transcribe', {
+          const res = await apiFetch('/api/voice/transcribe', {
             method: 'POST',
             body: form,
             signal: abort.signal,

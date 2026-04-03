@@ -17,6 +17,7 @@
 
 import type { Track } from './types'
 import { GITA_CHAPTERS_META, SUPPORTED_LANGUAGES, loadGitaLanguage } from './gita'
+import { apiFetch } from '@/lib/api'
 
 // ============ Voice Configuration ============
 
@@ -402,10 +403,9 @@ export async function synthesizeVerseAudio(
   const ttsLanguage = TTS_LANGUAGE_CODES[language] || language
 
   try {
-    const response = await fetch('/api/voice/synthesize', {
+    const response = await apiFetch('/api/voice/synthesize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
       body: JSON.stringify({
         text,
         language: ttsLanguage,
@@ -439,10 +439,9 @@ export async function synthesizeSanskritShloka(
   meaningText?: string,
 ): Promise<string | null> {
   try {
-    const response = await fetch('/api/voice/gita', {
+    const response = await apiFetch('/api/voice/gita', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
       body: JSON.stringify({
         shloka,
         chandas: 'anushtubh',
