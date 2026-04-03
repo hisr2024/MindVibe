@@ -26,6 +26,7 @@ import { useLanguage } from '@/hooks/useLanguage'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useMicroPause } from '@/hooks/useMicroPause'
 import { apiFetch } from '@/lib/api'
+import { sanitizeInput } from '@/lib/utils/sanitizeInput'
 import { springConfigs } from '@/lib/animations/spring-configs'
 import {
   ARDHA_PILLARS,
@@ -34,10 +35,6 @@ import {
   type ArdhaResult,
   type DepthMode,
 } from '@/lib/ardha-knowledge'
-
-function sanitizeInput(input: string): string {
-  return input.replace(/[<>]/g, '').replace(/\\/g, '').slice(0, 2000)
-}
 
 function useLocalState<T>(key: string, initial: T): [T, (value: T) => void] {
   const [state, setState] = useState<T>(() => {
@@ -205,7 +202,7 @@ export default function ArdhaSacredPage() {
 
           <AnimatePresence>
             {error && (
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-sm text-[#e8b54a]/70" role="alert">
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-sm text-[#e8b54a]/70" role="alert" aria-live="assertive">
                 {error}
               </motion.p>
             )}

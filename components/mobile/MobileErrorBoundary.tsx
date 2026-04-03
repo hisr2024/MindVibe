@@ -23,6 +23,8 @@ interface State {
 }
 
 export class MobileErrorBoundary extends Component<Props, State> {
+  private errorContainerRef = React.createRef<HTMLDivElement>()
+
   constructor(props: Props) {
     super(props)
     this.state = { hasError: false, error: null }
@@ -34,6 +36,12 @@ export class MobileErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     console.error('MobileErrorBoundary caught error:', error, errorInfo)
+  }
+
+  componentDidUpdate(_prevProps: Props, prevState: State): void {
+    if (this.state.hasError && !prevState.hasError) {
+      this.errorContainerRef.current?.focus()
+    }
   }
 
   handleRetry = () => {
@@ -57,7 +65,12 @@ export class MobileErrorBoundary extends Component<Props, State> {
   render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-[#050507] flex flex-col items-center justify-center px-6 text-center">
+        <div
+          ref={this.errorContainerRef}
+          tabIndex={-1}
+          role="alert"
+          className="min-h-screen bg-[#050507] flex flex-col items-center justify-center px-6 text-center outline-none"
+        >
           {/* Calming animation */}
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#d4a44c]/20 to-amber-500/10 flex items-center justify-center mb-6 animate-pulse">
             <span className="text-4xl">🙏</span>
@@ -74,25 +87,28 @@ export class MobileErrorBoundary extends Component<Props, State> {
           <div className="flex flex-col gap-3 w-full max-w-xs">
             <button
               onClick={this.handleRetry}
+              aria-label="Try again — reload this page"
               className="w-full py-3 rounded-xl bg-[#d4a44c] text-white font-medium text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className="w-4 h-4" aria-hidden="true" />
               Try Again
             </button>
 
             <button
               onClick={this.handleGoBack}
+              aria-label="Go back to the previous page"
               className="w-full py-3 rounded-xl bg-white/[0.06] text-white font-medium text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4" aria-hidden="true" />
               Go Back
             </button>
 
             <button
               onClick={this.handleGoHome}
+              aria-label="Return to the home screen"
               className="w-full py-3 rounded-xl bg-white/[0.04] text-slate-400 font-medium text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
             >
-              <Home className="w-4 h-4" />
+              <Home className="w-4 h-4" aria-hidden="true" />
               Return Home
             </button>
           </div>

@@ -26,10 +26,7 @@ import VisarjanMovement from './movements/VisarjanMovement'
 import { type SeparationType } from './data/separationTypes'
 import { useLanguage } from '@/hooks/useLanguage'
 import { apiFetch } from '@/lib/api'
-
-function sanitizeInput(input: string): string {
-  return input.replace(/[<>]/g, '').replace(/\\/g, '').slice(0, 2000)
-}
+import { sanitizeInput } from '@/lib/utils/sanitizeInput'
 
 type ViyogaMovement = 'aaroha' | 'vilap' | 'darshan' | 'dhyan' | 'visarjan'
 
@@ -160,6 +157,7 @@ export default function ViyogaSacredJourney() {
         ) : undefined
       }
     >
+      <div aria-live="polite" aria-busy={loading}>
       <AnimatePresence mode="wait">
         {movement === 'aaroha' && (
           <motion.div key="aaroha" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -218,11 +216,14 @@ export default function ViyogaSacredJourney() {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
 
       {/* Error display */}
       <AnimatePresence>
         {error && (
           <motion.div
+            role="alert"
+            aria-live="assertive"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}

@@ -3,16 +3,28 @@
  * Provides haptic feedback for supported devices
  */
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
 type HapticType = 'light' | 'medium' | 'heavy' | 'selection' | 'success' | 'warning' | 'error';
 
+/** Minimum ms between vibrations to prevent jarring rapid-tap bursts */
+const DEBOUNCE_MS = 50;
+
 export function useHapticFeedback() {
+  const lastTriggerRef = useRef(0);
+
   const triggerHaptic = useCallback((type: HapticType = 'light') => {
     // Check if the Vibration API is supported
     if (typeof window === 'undefined' || !navigator.vibrate) {
       return;
     }
+
+    // Debounce rapid triggers
+    const now = Date.now();
+    if (now - lastTriggerRef.current < DEBOUNCE_MS) {
+      return;
+    }
+    lastTriggerRef.current = now;
 
     // Check if user prefers reduced motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
