@@ -86,18 +86,25 @@ export function PaymentForm({ currency, onPaymentMethodChange }: PaymentFormProp
           />
           {/* Save card checkbox */}
           <label className="flex items-center gap-2.5 cursor-pointer ml-1">
-            <div className="relative">
-              <input
-                type="checkbox"
-                checked={saveCard}
-                onChange={(e) => setSaveCard(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-4 h-4 rounded border border-[rgba(212,160,23,0.3)] bg-[rgba(22,26,66,0.55)] peer-checked:bg-[var(--sacred-krishna-blue)] peer-checked:border-[var(--sacred-divine-gold)] transition-all flex items-center justify-center">
-                <svg className="w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="2 6 5 9 10 3" />
-                </svg>
-              </div>
+            <input
+              type="checkbox"
+              checked={saveCard}
+              onChange={(e) => setSaveCard(e.target.checked)}
+              className="sr-only"
+            />
+            <div
+              className={`w-4 h-4 rounded border transition-all flex items-center justify-center flex-shrink-0 ${
+                saveCard
+                  ? 'bg-[var(--sacred-krishna-blue)] border-[var(--sacred-divine-gold)]'
+                  : 'bg-[rgba(22,26,66,0.55)] border-[rgba(212,160,23,0.3)]'
+              }`}
+            >
+              <svg
+                className={`w-2.5 h-2.5 text-white transition-opacity ${saveCard ? 'opacity-100' : 'opacity-0'}`}
+                viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              >
+                <polyline points="2 6 5 9 10 3" />
+              </svg>
             </div>
             <span className="sacred-text-ui text-xs text-[var(--sacred-text-secondary)]">
               Save card for future offerings

@@ -59,16 +59,11 @@ export function SignUpScreen({ onSwitchToLogin }: SignUpScreenProps) {
 
     setLoading(true)
     try {
+      // Backend SignupIn only accepts {email, password}
       const res = await apiFetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          first_name: firstName.trim(),
-          last_name: lastName.trim(),
-          email,
-          password,
-          updates_opt_in: updatesOptIn,
-        }),
+        body: JSON.stringify({ email, password }),
       })
 
       const data = await res.json()
@@ -77,15 +72,28 @@ export function SignUpScreen({ onSwitchToLogin }: SignUpScreenProps) {
         if (res.status === 409) {
           setError('This email is already registered. Please sign in instead.')
         } else {
-          setError(data.detail || data.error || 'Unable to create account. Please try again.')
+          // Backend returns {detail: {detail: "...", code: "..."}} for validation errors
+          const msg = typeof data.detail === 'string'
+            ? data.detail
+            : data.detail?.detail || data.error || 'Unable to create account. Please try again.'
+          setError(msg)
         }
         return
       }
 
-      // Store user profile
-      if (data.user) {
-        localStorage.setItem('mindvibe_auth_user', JSON.stringify(data.user))
-      }
+      // Store basic profile info locally for display (backend doesn't store name at signup)
+      localStorage.setItem('mindvibe_auth_user', JSON.stringify({
+        id: data.user_id,
+        email: data.email,
+        name: `${firstName.trim()} ${lastName.trim()}`,
+      }))
+
+      // Save profile name via profile endpoint (best-effort, don't block signup)
+      apiFetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name: `${firstName.trim()} ${lastName.trim()}` }),
+      }).catch(() => { /* non-blocking */ })
 
       // Redirect to email verification
       router.push(`/m/auth/verify?email=${encodeURIComponent(email)}`)
@@ -97,8 +105,9 @@ export function SignUpScreen({ onSwitchToLogin }: SignUpScreenProps) {
   }
 
   const handleSocialAuth = (provider: 'google' | 'apple') => {
+    // Social auth OAuth endpoints — redirect to backend OAuth flow
     setSocialLoading(true)
-    window.location.href = `/api/auth/${provider}`
+    window.location.href = `/api/auth/oauth/${provider}`
   }
 
   const isValid = firstName && lastName && email && password.length >= 8 && termsAccepted
@@ -202,21 +211,28 @@ export function SignUpScreen({ onSwitchToLogin }: SignUpScreenProps) {
 
       {/* Terms Checkbox */}
       <label className="flex items-start gap-3 mb-3 cursor-pointer">
-        <div className="relative mt-0.5">
-          <input
-            type="checkbox"
-            checked={termsAccepted}
-            onChange={(e) => {
-              setTermsAccepted(e.target.checked)
-              setFieldErrors(prev => ({ ...prev, terms: '' }))
-            }}
-            className="sr-only peer"
-          />
-          <div className="w-5 h-5 rounded-md border border-[rgba(212,160,23,0.3)] bg-[rgba(22,26,66,0.55)] peer-checked:bg-[var(--sacred-krishna-blue)] peer-checked:border-[var(--sacred-divine-gold)] transition-all flex items-center justify-center">
-            <svg className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="2 6 5 9 10 3" />
-            </svg>
-          </div>
+        <input
+          type="checkbox"
+          checked={termsAccepted}
+          onChange={(e) => {
+            setTermsAccepted(e.target.checked)
+            setFieldErrors(prev => ({ ...prev, terms: '' }))
+          }}
+          className="sr-only"
+        />
+        <div
+          className={`w-5 h-5 rounded-md border transition-all flex items-center justify-center flex-shrink-0 mt-0.5 ${
+            termsAccepted
+              ? 'bg-[var(--sacred-krishna-blue)] border-[var(--sacred-divine-gold)]'
+              : 'bg-[rgba(22,26,66,0.55)] border-[rgba(212,160,23,0.3)]'
+          }`}
+        >
+          <svg
+            className={`w-3 h-3 text-white transition-opacity ${termsAccepted ? 'opacity-100' : 'opacity-0'}`}
+            viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          >
+            <polyline points="2 6 5 9 10 3" />
+          </svg>
         </div>
         <span className="sacred-text-ui text-xs text-[var(--sacred-text-secondary)] leading-relaxed">
           I agree to the{' '}
@@ -231,18 +247,25 @@ export function SignUpScreen({ onSwitchToLogin }: SignUpScreenProps) {
 
       {/* Updates Checkbox */}
       <label className="flex items-start gap-3 mb-6 cursor-pointer">
-        <div className="relative mt-0.5">
-          <input
-            type="checkbox"
-            checked={updatesOptIn}
-            onChange={(e) => setUpdatesOptIn(e.target.checked)}
-            className="sr-only peer"
-          />
-          <div className="w-5 h-5 rounded-md border border-[rgba(212,160,23,0.3)] bg-[rgba(22,26,66,0.55)] peer-checked:bg-[var(--sacred-krishna-blue)] peer-checked:border-[var(--sacred-divine-gold)] transition-all flex items-center justify-center">
-            <svg className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="2 6 5 9 10 3" />
-            </svg>
-          </div>
+        <input
+          type="checkbox"
+          checked={updatesOptIn}
+          onChange={(e) => setUpdatesOptIn(e.target.checked)}
+          className="sr-only"
+        />
+        <div
+          className={`w-5 h-5 rounded-md border transition-all flex items-center justify-center flex-shrink-0 mt-0.5 ${
+            updatesOptIn
+              ? 'bg-[var(--sacred-krishna-blue)] border-[var(--sacred-divine-gold)]'
+              : 'bg-[rgba(22,26,66,0.55)] border-[rgba(212,160,23,0.3)]'
+          }`}
+        >
+          <svg
+            className={`w-3 h-3 text-white transition-opacity ${updatesOptIn ? 'opacity-100' : 'opacity-0'}`}
+            viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          >
+            <polyline points="2 6 5 9 10 3" />
+          </svg>
         </div>
         <span className="sacred-text-ui text-xs text-[var(--sacred-text-muted)] leading-relaxed">
           Send me spiritual insights and Kiaanverse updates

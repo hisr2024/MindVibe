@@ -59,7 +59,11 @@ export function LoginScreen({ onSwitchToSignUp }: LoginScreenProps) {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.detail || data.error || 'Unable to sign in. Please check your credentials.')
+        // Backend may return {detail: "string"} or {detail: {detail: "msg", code: "..."}}
+        const msg = typeof data.detail === 'string'
+          ? data.detail
+          : data.detail?.detail || data.error || 'Unable to sign in. Please check your credentials.'
+        setError(msg)
         return
       }
 
@@ -77,8 +81,9 @@ export function LoginScreen({ onSwitchToSignUp }: LoginScreenProps) {
   }
 
   const handleSocialAuth = (provider: 'google' | 'apple') => {
+    // Social auth OAuth endpoints — redirect to backend OAuth flow
     setSocialLoading(true)
-    window.location.href = `/api/auth/${provider}`
+    window.location.href = `/api/auth/oauth/${provider}`
   }
 
   const isValid = email && password
