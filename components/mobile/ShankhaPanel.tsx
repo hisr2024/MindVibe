@@ -104,11 +104,13 @@ export function ShankhaPanel({
 
   return (
     <motion.div
+      role="dialog"
+      aria-label="KIAAN Voice Companion"
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-      className="mb-3 w-[320px] max-h-[420px] overflow-hidden rounded-3xl border border-[#D4A017]/20"
+      className="mb-3 w-[calc(100vw-32px)] max-w-[320px] max-h-[min(420px,calc(100dvh-160px))] overflow-hidden rounded-3xl border border-[#D4A017]/20"
       style={{
         background: 'linear-gradient(to bottom, rgba(11,14,42,0.98), rgba(8,8,8,0.95), rgba(5,5,7,0.98))',
         boxShadow: '0 -8px 32px rgba(5,7,20,0.8), 0 0 0 1px rgba(212,160,23,0.05)',
@@ -131,12 +133,12 @@ export function ShankhaPanel({
           />
           <div>
             <h3 className="text-sm font-semibold text-[#EDE8DC] font-[family-name:var(--font-divine)]">KIAAN</h3>
-            <p className="text-[10px] text-[#B8AE98]">{statusText}</p>
+            <p className="text-[10px] text-[#B8AE98]" aria-live="polite">{statusText}</p>
           </div>
         </div>
         <motion.button
           onClick={onClose}
-          className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/5 text-[#B8AE98] hover:bg-white/10 transition-colors"
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-[#B8AE98] hover:bg-white/10 transition-colors"
           whileTap={{ scale: 0.9 }}
           aria-label="Close"
         >
@@ -215,7 +217,7 @@ export function ShankhaPanel({
       {toolSuggestion && isResponding && (
         <div className="border-t border-white/5 px-4 py-2">
           <Link
-            href={toolSuggestion.tool?.route || `/m/tools`}
+            href={toolSuggestion.tool?.route?.replace(/^\/tools\//, '/m/') || '/m/tools'}
             onClick={onClose}
             className="group flex items-center gap-2 rounded-xl border border-[#D4A017]/15 bg-gradient-to-r from-[#D4A017]/10 to-transparent px-3 py-2 transition-all hover:border-[#D4A017]/30"
           >

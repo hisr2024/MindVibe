@@ -65,8 +65,6 @@ export function ShankhaVoiceCompanion() {
   const panelRef = useRef<HTMLDivElement>(null)
   const autoCollapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const wakeWordWasActiveRef = useRef(false)
-  const speakRef = useRef<(text: string) => void>()
-  const addLocalFallbackRef = useRef<(text: string) => void>()
   const modeRef = useRef<ShankhaMode>(mode)
 
   const isVoiceConflictPage = pathname === '/m/companion' || pathname === '/m/kiaan'
@@ -109,16 +107,15 @@ export function ShankhaVoiceCompanion() {
     setError(null)
     setMode('responding')
 
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 15000)
     try {
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 15000)
       const response = await apiFetch('/api/companion/message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: sessionId, message: text.trim(), language: language || 'en', content_type: 'text' }),
         signal: controller.signal,
       })
-      clearTimeout(timeout)
 
       if (response.ok) {
         const data = await response.json()
@@ -137,21 +134,33 @@ export function ShankhaVoiceCompanion() {
     } catch {
       addLocalFallbackRef.current?.(text.trim())
     } finally {
+      clearTimeout(timeout)
       if (mountedRef.current) setIsProcessing(false)
     }
   }, [isProcessing, sessionId, language])
 
   const addLocalFallback = useCallback((userText: string) => {
     if (!mountedRef.current) return
-    const result = friendEngineRef.current.processMessage(userText)
-    const companionMsg: CompanionMessage = {
-      id: `companion-${Date.now()}`, role: 'companion',
-      content: result.response, mood: result.mood, wisdomUsed: result.wisdom_used,
+    try {
+      const result = friendEngineRef.current.processMessage(userText)
+      const companionMsg: CompanionMessage = {
+        id: `companion-${Date.now()}`, role: 'companion',
+        content: result.response, mood: result.mood, wisdomUsed: result.wisdom_used,
+      }
+      setMessages(prev => [...prev, companionMsg])
+      setMode('responding')
+      setToolSuggestion(detectToolSuggestion(userText, result.mood))
+      speakRef.current?.(result.response)
+    } catch {
+      // Friend engine failed — show compassionate fallback
+      const fallbackMsg: CompanionMessage = {
+        id: `companion-${Date.now()}`, role: 'companion',
+        content: 'I\'m here with you. Take a moment to breathe deeply.',
+        mood: 'neutral', wisdomUsed: null,
+      }
+      setMessages(prev => [...prev, fallbackMsg])
+      setMode('responding')
     }
-    setMessages(prev => [...prev, companionMsg])
-    setMode('responding')
-    setToolSuggestion(detectToolSuggestion(userText, result.mood))
-    speakRef.current?.(result.response)
   }, [])
 
   // ── TTS ──
@@ -171,7 +180,9 @@ export function ShankhaVoiceCompanion() {
     onStart: handleTTSStart, onEnd: handleTTSEnd,
   })
 
-  // Keep refs in sync with latest values
+  // Stable refs — initialized with actual values, kept in sync via effect
+  const speakRef = useRef(speak)
+  const addLocalFallbackRef = useRef(addLocalFallback)
   useEffect(() => { speakRef.current = speak; addLocalFallbackRef.current = addLocalFallback; modeRef.current = mode })
 
   // ── Hands-Free VAD ──
@@ -275,7 +286,7 @@ export function ShankhaVoiceCompanion() {
   return (
     <div
       ref={panelRef}
-      className="fixed z-[60]"
+      className="fixed z-[70]"
       style={{
         bottom: 'calc(72px + 12px + env(safe-area-inset-bottom, 0px))',
         right: 16,
