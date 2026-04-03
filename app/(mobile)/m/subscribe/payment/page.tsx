@@ -28,9 +28,17 @@ function PaymentContent() {
   const searchParams = useSearchParams()
   const { triggerHaptic } = useHapticFeedback()
 
-  const planId = (searchParams.get('plan') || 'pro') as PlanId
-  const billing = (searchParams.get('billing') || 'annual') as BillingCycle
-  const currency = (searchParams.get('currency') || 'INR') as CurrencyCode
+  const VALID_PLANS: PlanId[] = ['seeker', 'pro', 'circle']
+  const VALID_BILLING: BillingCycle[] = ['monthly', 'annual']
+  const VALID_CURRENCIES: CurrencyCode[] = ['INR', 'USD', 'EUR', 'GBP']
+
+  const rawPlan = searchParams.get('plan') || 'pro'
+  const rawBilling = searchParams.get('billing') || 'annual'
+  const rawCurrency = searchParams.get('currency') || 'INR'
+
+  const planId: PlanId = VALID_PLANS.includes(rawPlan as PlanId) ? rawPlan as PlanId : 'pro'
+  const billing: BillingCycle = VALID_BILLING.includes(rawBilling as BillingCycle) ? rawBilling as BillingCycle : 'annual'
+  const currency: CurrencyCode = VALID_CURRENCIES.includes(rawCurrency as CurrencyCode) ? rawCurrency as CurrencyCode : 'INR'
 
   const plan = getPlanById(planId)
   const [paymentState, setPaymentState] = useState<PaymentState>('idle')

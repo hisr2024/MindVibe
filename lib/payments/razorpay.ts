@@ -35,6 +35,11 @@ export async function initiateRazorpayPayment(params: {
 }): Promise<void> {
   const { planId, billing, planName, userName, userEmail, onSuccess, onFailure, onDismiss } = params
 
+  if (typeof window === 'undefined') {
+    onFailure('Payment processing requires a browser environment.')
+    return
+  }
+
   // Load Razorpay SDK
   const loaded = await loadRazorpayScript()
   if (!loaded) {

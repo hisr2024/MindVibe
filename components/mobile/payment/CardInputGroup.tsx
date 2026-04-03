@@ -8,7 +8,7 @@
  * detects card brand (Visa/MC/Amex/RuPay).
  */
 
-import { useState, type ChangeEvent } from 'react'
+import { useState } from 'react'
 
 interface CardData {
   number: string

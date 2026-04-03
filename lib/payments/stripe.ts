@@ -32,6 +32,11 @@ export async function initiateStripePayment(params: {
 }): Promise<void> {
   const { planId, billing, currency, onFailure } = params
 
+  if (typeof window === 'undefined') {
+    onFailure('Payment processing requires a browser environment.')
+    return
+  }
+
   try {
     const res = await apiFetch('/api/subscriptions/checkout', {
       method: 'POST',
