@@ -3,6 +3,7 @@
  * Client-side API integration for KIAAN Emotional Reset feature
  */
 
+import { sanitizeInput } from '@/lib/utils/sanitizeInput'
 import type {
   SessionResponse,
   StepResponse,
@@ -86,7 +87,7 @@ export async function processStep(
     body: JSON.stringify({
       session_id: sessionId,
       current_step: step,
-      user_input: step === 1 ? input : null,
+      user_input: step === 1 && input ? sanitizeInput(input) : null,
     }),
   })
 

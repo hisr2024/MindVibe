@@ -32,10 +32,7 @@ import { useGunaCalculation } from './hooks/useGunaCalculation'
 import { useDharmaMapData } from './hooks/useDharmaMapData'
 import { useLanguage } from '@/hooks/useLanguage'
 import { apiFetch } from '@/lib/api'
-
-function sanitizeInput(input: string): string {
-  return input.replace(/[<>]/g, '').replace(/\\/g, '').slice(0, 2000)
-}
+import { sanitizeInput } from '@/lib/utils/sanitizeInput'
 
 type CompassChamber = 'altar' | 'guna_mirror' | 'dharma_map' | 'gita_counsel' | 'intention' | 'seal'
 
@@ -238,7 +235,8 @@ export default function CompassSacredJourney() {
         ) : undefined
       }
     >
-      {/* Chamber transitions handled by SacredMovementShell's AnimatePresence */}
+      {/* Chamber content — aria-live for screen reader announcements */}
+      <div aria-live="polite" aria-busy={loading}>
         {chamber === 'altar' && (
           <motion.div key="altar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <CompassAltarChamber
@@ -312,10 +310,13 @@ export default function CompassSacredJourney() {
             />
           </motion.div>
         )}
+      </div>
 
       <AnimatePresence>
         {error && (
           <motion.div
+            role="alert"
+            aria-live="assertive"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}

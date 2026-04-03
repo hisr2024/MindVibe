@@ -3,6 +3,7 @@
  * All calls go through Next.js API routes which proxy to the backend.
  */
 
+import { sanitizeInput } from '@/lib/utils/sanitizeInput'
 import type {
   KarmaResetContext,
   KarmaReflectionQuestion,
@@ -10,11 +11,25 @@ import type {
   KarmaWisdomResponse,
 } from '../types'
 
+/** Recursively sanitize all string values in an object before sending to API */
+function sanitizeBody(obj: unknown): unknown {
+  if (typeof obj === 'string') return sanitizeInput(obj)
+  if (Array.isArray(obj)) return obj.map(sanitizeBody)
+  if (obj !== null && typeof obj === 'object') {
+    const result: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      result[key] = sanitizeBody(value)
+    }
+    return result
+  }
+  return obj
+}
+
 async function karmaFetch<T>(path: string, body: unknown): Promise<T> {
   const response = await fetch(path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: JSON.stringify(sanitizeBody(body)),
   })
 
   if (!response.ok) {
