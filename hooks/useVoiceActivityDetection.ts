@@ -225,10 +225,12 @@ export function useVoiceActivityDetection(options: UseVADOptions = {}): UseVADRe
       setIsVADActive(true)
       setVadError(null)
     } catch {
-      // ONNX load failure or any other initialization error — graceful fallback
+      // ONNX load failure or any other initialization error — graceful fallback.
+      // Mark unsupported so useHandsFreeMode activates its silence-based
+      // transcript submission timer as a fallback for speech-end detection.
       if (!mountedRef.current) return
       setVadSupported(false)
-      setVadError(null) // No error surfaced — just mark unsupported
+      setVadError('VAD initialization failed — using silence detection fallback')
       setIsVADActive(false)
     }
   }, [])
