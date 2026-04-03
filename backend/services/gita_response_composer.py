@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import logging
 import random
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
@@ -228,6 +229,13 @@ WITNESS_LINES: Dict[str, List[str]] = {
     ],
 }
 
+# Add aliases so both "anger"/"angry", "fear"/"fearful" etc. work
+WITNESS_LINES["angry"] = WITNESS_LINES["anger"]
+WITNESS_LINES["fear"] = WITNESS_LINES["fearful"]
+WITNESS_LINES["happy"] = WITNESS_LINES["peaceful"]
+WITNESS_LINES["stressed"] = WITNESS_LINES["overwhelmed"]
+WITNESS_LINES["lost"] = WITNESS_LINES["confused"]
+
 
 # =============================================================================
 # CONNECT TEMPLATES — Phase 1: Just Presence
@@ -245,6 +253,13 @@ CONNECT_TEMPLATES: Dict[str, str] = {
     "sad": "Dear {name}, your sadness is welcome here. You do not need to explain it yet. I am here.",
     "neutral": "Dear {name}, you have called and I have come. This moment is sacred. What is in your heart?",
 }
+
+# Aliases for emotion forms used by existing classifiers
+CONNECT_TEMPLATES["angry"] = CONNECT_TEMPLATES["anger"]
+CONNECT_TEMPLATES["fear"] = CONNECT_TEMPLATES["fearful"]
+CONNECT_TEMPLATES["happy"] = CONNECT_TEMPLATES.get("peaceful", CONNECT_TEMPLATES["neutral"])
+CONNECT_TEMPLATES["stressed"] = CONNECT_TEMPLATES["overwhelmed"]
+CONNECT_TEMPLATES["lost"] = CONNECT_TEMPLATES["confused"]
 
 
 # =============================================================================
@@ -324,6 +339,7 @@ class GitaResponseComposer:
     EMOTION_PERSONA_MAP: Dict[str, str] = {
         "grief": "nurturing-yashoda",
         "anger": "fierce-durga",
+        "angry": "fierce-durga",
         "anxious": "calm-shiva",
         "confused": "wise-vyasa",
         "lonely": "loving-hanuman",
