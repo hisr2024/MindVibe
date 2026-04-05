@@ -124,12 +124,18 @@ function ResetPasswordContent() {
         setStatus('success')
       } else {
         const data = await res.json().catch(() => ({}))
-        const raw = data.detail || 'Failed to reset password. The link may have expired.'
-        const msg = typeof raw === 'string'
-          ? raw
-          : typeof raw === 'object' && raw?.detail
-            ? raw.detail
-            : 'Failed to reset password. The link may have expired.'
+        const raw = data.detail
+        let msg: string
+        if (typeof raw === 'string') {
+          msg = raw
+        } else if (Array.isArray(raw)) {
+          // 422 validation errors: [{msg: "...", ...}, ...]
+          msg = raw.map((e: { msg?: string; detail?: string }) => e.msg || e.detail || '').filter(Boolean).join('. ') || 'Password does not meet requirements.'
+        } else if (raw && typeof raw === 'object' && raw.detail) {
+          msg = typeof raw.detail === 'string' ? raw.detail : 'Failed to reset password. The link may have expired.'
+        } else {
+          msg = 'Failed to reset password. The link may have expired.'
+        }
         setError(msg)
         setStatus('error')
       }

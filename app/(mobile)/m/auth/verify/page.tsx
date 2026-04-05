@@ -29,7 +29,8 @@ function VerifyContent() {
   const email = searchParams.get('email') || ''
   const emailWasSent = searchParams.get('sent') !== 'false'
 
-  const [status, setStatus] = useState<'loading' | 'waiting' | 'verified' | 'error'>('waiting')
+  // Start in 'loading' state when token is present (avoids setState in effect)
+  const [status, setStatus] = useState<'loading' | 'waiting' | 'verified' | 'error'>(token ? 'loading' : 'waiting')
   const [error, setError] = useState('')
   const [resendTimer, setResendTimer] = useState(0)
   const [resendSuccess, setResendSuccess] = useState(false)
@@ -38,7 +39,6 @@ function VerifyContent() {
   useEffect(() => {
     if (!token) return
 
-    setStatus('loading')
     apiFetch('/api/auth/verify-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

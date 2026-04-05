@@ -61,7 +61,8 @@ export function LoginScreen({ onSwitchToSignUp }: LoginScreenProps) {
 
       if (!res.ok) {
         // Backend may return {detail: "string"} or {detail: {detail: "msg", code: "..."}}
-        const code = typeof data.detail === 'object' ? data.detail?.code : ''
+        const code = (data.detail && typeof data.detail === 'object' && !Array.isArray(data.detail))
+          ? data.detail.code : ''
         const msg = typeof data.detail === 'string'
           ? data.detail
           : data.detail?.detail || data.error || 'Unable to sign in. Please check your credentials.'
