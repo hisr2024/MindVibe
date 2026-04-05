@@ -34,6 +34,9 @@ const initialState = {
   // Error state for user-friendly error handling
   audioError: null as string | null,
   hasAudioIssues: false,
+  // Gita-specific state
+  versePanelVisible: true,
+  selectedGitaVoice: 'divine-krishna',
 }
 
 // Audio element (singleton)
@@ -566,6 +569,16 @@ export const usePlayerStore = create<PlayerStore>()(
       } else if (state.queue.length > 0) {
         await get().play(state.queue[0])
       }
+    },
+
+    // ============ Gita Controls ============
+
+    setVersePanelVisible: (visible: boolean) => {
+      set({ versePanelVisible: visible })
+    },
+
+    setSelectedGitaVoice: (voiceId: string) => {
+      set({ selectedGitaVoice: voiceId })
     },
 
     // ============ Persistence ============
