@@ -21,7 +21,12 @@ interface SanskritRevealProps {
 
 function splitIntoAksharas(text: string): string[] {
   if (typeof Intl !== 'undefined' && 'Segmenter' in Intl) {
-    const segmenter = new Intl.Segmenter('hi', { granularity: 'grapheme' })
+    // Intl.Segmenter is available in all modern browsers but not in all TS libs
+    const SegmenterCtor = (Intl as Record<string, unknown>).Segmenter as new (
+      locale: string,
+      opts: { granularity: string }
+    ) => { segment: (text: string) => Iterable<{ segment: string }> }
+    const segmenter = new SegmenterCtor('hi', { granularity: 'grapheme' })
     return [...segmenter.segment(text)].map(s => s.segment)
   }
   // Fallback: spread handles most Unicode correctly

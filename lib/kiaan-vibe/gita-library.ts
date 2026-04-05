@@ -6,8 +6,7 @@
  * richer display requirements (accent colors, yoga types, themes, durations).
  */
 
-import { GITA_CHAPTERS_META } from './gita'
-import type { Track } from './types'
+// Chapter metadata and helpers for the mobile Gita experience
 
 // ── CHAPTER METADATA (mobile-enriched) ─────────────────────────────────
 

@@ -8,7 +8,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Play, Loader2 } from 'lucide-react'
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
@@ -22,7 +22,6 @@ import {
   type GitaVoiceStyle,
 } from '@/lib/kiaan-vibe/gita-voice-tracks'
 import {
-  GITA_MOBILE_CHAPTERS,
   DEVANAGARI_NUMERALS,
   YOGA_TYPE_LABELS,
   YOGA_TYPE_COLORS,
@@ -41,10 +40,9 @@ interface VerseDisplay {
 
 export default function ChapterDetailPage() {
   const params = useParams()
-  const router = useRouter()
   const chapterNum = Number(params.id)
   const { triggerHaptic } = useHapticFeedback()
-  const { currentTrack, isPlaying, play, setQueue, addToQueue } = usePlayerStore()
+  const { currentTrack, isPlaying, play, setQueue } = usePlayerStore()
 
   const [selectedVoice, setSelectedVoice] = useState('divine-krishna')
   const [verses, setVerses] = useState<VerseDisplay[]>([])

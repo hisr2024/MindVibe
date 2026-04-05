@@ -13,7 +13,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Play, Bookmark, Share2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
-import { SanskritReveal, WordByWordReveal } from '@/components/mobile/vibe/SanskritReveal'
+import { SanskritReveal } from '@/components/mobile/vibe/SanskritReveal'
 import { GitaVoiceSelector } from '@/components/mobile/vibe/GitaVoiceSelector'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
 import { loadGitaLanguage } from '@/lib/kiaan-vibe/gita'
@@ -72,9 +72,14 @@ export default function VerseReaderPage() {
         })
       }
     }
-    setTranslitVisible(false)
     load()
     return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chapterNum, verseNum])
+
+  // Reset transliteration visibility when verse changes
+  useEffect(() => {
+    setTranslitVisible(false)
   }, [chapterNum, verseNum])
 
   const handlePlay = useCallback(() => {

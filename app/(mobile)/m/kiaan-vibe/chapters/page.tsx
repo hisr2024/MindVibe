@@ -18,8 +18,6 @@ import { createChapterTracks } from '@/lib/kiaan-vibe/gita-voice-tracks'
 import {
   GITA_MOBILE_CHAPTERS,
   GITA_STATS,
-  YOGA_TYPE_LABELS,
-  type GitaYogaType,
 } from '@/lib/kiaan-vibe/gita-library'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 

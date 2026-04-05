@@ -15,7 +15,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Volume2, Bookmark, Share2 } from 'lucide-react'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
-import { GITA_MOBILE_CHAPTERS, getGitaMobileChapter } from '@/lib/kiaan-vibe/gita-library'
+// gita-library used for chapter metadata lookups when browsing
 import { SanskritReveal, WordByWordReveal } from './SanskritReveal'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
@@ -35,12 +35,13 @@ export function VerseDisplayPanel({ visible }: VerseDisplayPanelProps) {
   // The verse data from the currently playing track
   const gitaData = currentTrack?.gitaData
 
-  // Reset browse offset when track changes
+  // Reset state when track changes
+  const trackId = currentTrack?.id
   useEffect(() => {
     setBrowseOffset(0)
     setTranslitVisible(false)
     setSaved(false)
-  }, [currentTrack?.id])
+  }, [trackId])
 
   // Get the displayed verse (may differ from playing verse if browsing)
   const displayedVerse = useMemo(() => {
@@ -50,8 +51,6 @@ export function VerseDisplayPanel({ visible }: VerseDisplayPanelProps) {
     if (browseOffset === 0) return gitaData
     return gitaData
   }, [gitaData, browseOffset])
-
-  const chapter = displayedVerse ? getGitaMobileChapter(displayedVerse.chapter) : null
 
   const handleSanskritComplete = useCallback(() => {
     // Show transliteration after Sanskrit reveals
