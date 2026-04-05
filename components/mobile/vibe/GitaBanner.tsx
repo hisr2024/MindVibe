@@ -53,7 +53,7 @@ export function GitaBanner({ onPress }: GitaBannerProps) {
             animate={{ rotate: 360 }}
             transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
           >
-            \u2638\uFE0F
+            {'\u2638\uFE0F'}
           </motion.span>
           <span
             className="text-[9px] tracking-[0.15em] uppercase font-[family-name:var(--font-ui)]"
@@ -129,7 +129,7 @@ export function GitaBanner({ onPress }: GitaBannerProps) {
           className="text-[12px] text-right font-[family-name:var(--font-ui)]"
           style={{ color: '#D4A017' }}
         >
-          Browse All 18 Chapters \u2192
+          Browse All 18 Chapters {'\u2192'}
         </p>
       </div>
     </motion.button>
