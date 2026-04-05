@@ -125,7 +125,7 @@ export function JourneyTemplateCard({
             boxShadow: `0 2px 8px rgba(${rgb},0.25)`,
           }}
         >
-          {isStarting ? 'Starting...' : 'Begin \u2192'}
+          {isStarting ? 'Starting...' : 'View Journey \u2192'}
         </button>
       </div>
     </motion.div>
