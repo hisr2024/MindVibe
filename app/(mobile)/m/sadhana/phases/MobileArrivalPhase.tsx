@@ -4,14 +4,19 @@
  * MobileArrivalPhase — Orbital mood spheres for touch-native mood selection.
  * 6 mood spheres orbit around a central golden OM, each representing a
  * mood state with Sanskrit label and color palette.
- * Greeting is absolute-positioned so the orbital container centers in the
- * full viewport, not the remaining space after the greeting.
+ *
+ * Layout: 3-zone flex column (header → question → orbital arena).
+ * OM and spheres are positioned absolutely within a ResizeObserver-measured
+ * arena so the OM is always at the exact geometric center.
  */
 
-import { useState, useRef, useMemo, useCallback, useSyncExternalStore } from 'react'
+import { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import type { SadhanaMood } from '@/types/sadhana.types'
+
+const SPHERE_SIZE = 68
+const OM_SIZE = 80
 
 const SADHANA_MOODS = [
   { id: 'heavy' as SadhanaMood, sanskrit: 'भारग्रस्त', label: 'Heavy', description: 'Burdened, tired, silver-blue', color: '#93C5FD', glowColor: '#1D4ED8', glowStyle: '0 0 22px #1D4ED8B0', angle: -150 },
@@ -39,11 +44,26 @@ export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
   const tappedRef = useRef(false)
   const { triggerHaptic } = useHapticFeedback()
   const greeting = useMemo(() => getTimeGreeting(), [])
-  const orbitRadius = useSyncExternalStore(
-    (cb) => { window.addEventListener('resize', cb); return () => window.removeEventListener('resize', cb) },
-    () => Math.min(window.innerWidth * 0.30, 130),
-    () => 120,
-  )
+
+  // Measure the orbital arena for exact OM/sphere centering
+  const arenaRef = useRef<HTMLDivElement>(null)
+  const [arenaSize, setArenaSize] = useState({ width: 0, height: 0 })
+
+  useEffect(() => {
+    const el = arenaRef.current
+    if (!el) return
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect
+        setArenaSize({ width, height })
+      }
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  // Orbit radius derived from measured arena
+  const orbitRadius = Math.min(arenaSize.width, arenaSize.height) * 0.38
 
   const handleMoodTap = useCallback((mood: SadhanaMood) => {
     if (tappedRef.current) return
@@ -55,11 +75,34 @@ export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
 
   const selectedMoodData = SADHANA_MOODS.find(m => m.id === selectedMood)
 
+  // OM position — exact geometric center of the arena
+  const omLeft = arenaSize.width / 2 - OM_SIZE / 2
+  const omTop = arenaSize.height / 2 - OM_SIZE / 2
+
+  // Sphere position calculator
+  const getSpherePosition = (angleDeg: number) => {
+    const cx = arenaSize.width / 2
+    const cy = arenaSize.height / 2
+    const rad = (angleDeg * Math.PI) / 180
+    return {
+      left: cx + orbitRadius * Math.cos(rad) - SPHERE_SIZE / 2,
+      top: cy + orbitRadius * Math.sin(rad) - SPHERE_SIZE / 2,
+    }
+  }
+
+  const arenaReady = arenaSize.width > 0
+
   return (
-    <div className="relative min-h-[100dvh] px-4">
-      {/* Greeting — absolute so it doesn't push the orbit down */}
+    <div
+      className="absolute inset-0 flex flex-col items-center overflow-hidden"
+      style={{
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 88px)',
+      }}
+    >
+      {/* ── ZONE A: HEADER ──────────────────────────────────────────── */}
       <motion.div
-        className="absolute top-0 left-0 right-0 pt-10 text-center z-20 px-4"
+        className="shrink-0 text-center px-6 mb-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
@@ -84,68 +127,113 @@ export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
         </motion.div>
       </motion.div>
 
-      {/* Orbital container — centers in full viewport height */}
-      <div className="min-h-[100dvh] flex items-center justify-center">
-        <div className="relative" style={{ width: orbitRadius * 2 + 80, height: orbitRadius * 2 + 80 }}>
-          {/* Central OM */}
-          <motion.div
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
-            animate={{
-              textShadow: [
-                '0 0 8px rgba(212,160,23,0.4)',
-                '0 0 16px rgba(212,160,23,0.7)',
-                '0 0 8px rgba(212,160,23,0.4)',
-              ],
-            }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <span className="text-5xl font-[family-name:var(--font-divine)] text-[#D4A017] select-none">
-              ॐ
-            </span>
-          </motion.div>
+      {/* ── ZONE B: "HOW DO YOU FEEL?" ──────────────────────────────── */}
+      <motion.div
+        className="shrink-0 text-center px-6 mb-5"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+      >
+        <p
+          className="font-[family-name:var(--font-divine)] italic text-[22px] text-[#EDE8DC] mb-1.5"
+          style={{ fontWeight: 400, letterSpacing: '0.02em', lineHeight: 1.3 }}
+        >
+          How do you feel today?
+        </p>
+        <p
+          className="font-[family-name:var(--font-ui)] text-[11px] text-[#6B6355]"
+          style={{ letterSpacing: '0.06em' }}
+        >
+          Touch the sphere that speaks to you
+        </p>
+      </motion.div>
 
-          {/* Mood spheres orbiting */}
-          {SADHANA_MOODS.map((mood, i) => {
-            const isSelected = selectedMood === mood.id
-            const isDimmed = selectedMood && !isSelected
-
-            return (
-              <motion.button
-                key={mood.id}
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center rounded-full border border-white/20 z-20"
-                style={{
-                  width: 68,
-                  height: 68,
-                  background: `radial-gradient(circle, ${mood.color}, ${mood.glowColor})`,
-                  boxShadow: mood.glowStyle,
-                }}
-                initial={{ opacity: 0, scale: 0 }}
+      {/* ── ZONE C: ORBITAL ARENA ────────────────────────────────────── */}
+      <div
+        ref={arenaRef}
+        className="flex-1 w-full relative"
+      >
+        {arenaReady && (
+          <>
+            {/* Central OM — exact center via measured arena dimensions */}
+            <motion.div
+              className="absolute z-10 flex items-center justify-center rounded-full"
+              style={{
+                left: omLeft,
+                top: omTop,
+                width: OM_SIZE,
+                height: OM_SIZE,
+                background: 'radial-gradient(circle at 40% 35%, rgba(240,192,64,0.2), rgba(5,7,20,0.85))',
+                border: '1.5px solid rgba(212,160,23,0.45)',
+              }}
+              animate={{
+                boxShadow: [
+                  '0 0 14px rgba(212,160,23,0.3), 0 0 28px rgba(212,160,23,0.1)',
+                  '0 0 28px rgba(212,160,23,0.55), 0 0 56px rgba(212,160,23,0.2)',
+                  '0 0 14px rgba(212,160,23,0.3), 0 0 28px rgba(212,160,23,0.1)',
+                ],
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <motion.span
+                className="font-[family-name:var(--font-divine)] text-[#D4A017] select-none"
+                style={{ fontSize: 36, fontWeight: 300, lineHeight: 1 }}
                 animate={{
-                  opacity: isDimmed ? 0.4 : 1,
-                  scale: isSelected ? 1.3 : 1,
-                  x: Math.cos(((mood.angle) * Math.PI) / 180) * orbitRadius,
-                  y: Math.sin(((mood.angle) * Math.PI) / 180) * orbitRadius,
+                  textShadow: [
+                    '0 0 8px rgba(212,160,23,0.4)',
+                    '0 0 16px rgba(212,160,23,0.7)',
+                    '0 0 8px rgba(212,160,23,0.4)',
+                  ],
                 }}
-                transition={{
-                  opacity: { duration: 0.3 },
-                  scale: { type: 'spring', stiffness: 300, damping: 20 },
-                  x: { duration: 0.6, delay: i * 0.1 },
-                  y: { duration: 0.6, delay: i * 0.1 },
-                }}
-                onClick={() => handleMoodTap(mood.id)}
-                disabled={!!selectedMood}
-                aria-label={`Select mood: ${mood.label}`}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <span className="font-[family-name:var(--font-divine)] italic text-[11px] text-white leading-tight">
-                  {mood.sanskrit}
-                </span>
-                <span className="font-[family-name:var(--font-ui)] text-[9px] text-white/70 mt-0.5">
-                  {mood.label}
-                </span>
-              </motion.button>
-            )
-          })}
-        </div>
+                ॐ
+              </motion.span>
+            </motion.div>
+
+            {/* Mood spheres — positioned absolutely within the arena */}
+            {SADHANA_MOODS.map((mood, i) => {
+              const isSelected = selectedMood === mood.id
+              const isDimmed = selectedMood && !isSelected
+              const pos = getSpherePosition(mood.angle)
+
+              return (
+                <motion.button
+                  key={mood.id}
+                  className="absolute flex flex-col items-center justify-center rounded-full border border-white/20 z-20"
+                  style={{
+                    width: SPHERE_SIZE,
+                    height: SPHERE_SIZE,
+                    left: pos.left,
+                    top: pos.top,
+                    background: `radial-gradient(circle at 35% 35%, ${mood.color}, ${mood.glowColor}80)`,
+                    boxShadow: mood.glowStyle,
+                  }}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{
+                    opacity: isDimmed ? 0.4 : 1,
+                    scale: isSelected ? 1.3 : 1,
+                  }}
+                  transition={{
+                    opacity: { duration: 0.3 },
+                    scale: { type: 'spring', stiffness: 300, damping: 20 },
+                    default: { duration: 0.6, delay: i * 0.1 },
+                  }}
+                  onClick={() => handleMoodTap(mood.id)}
+                  disabled={!!selectedMood}
+                  aria-label={`Select mood: ${mood.label}`}
+                >
+                  <span className="font-[family-name:var(--font-divine)] italic text-[11px] text-white leading-tight">
+                    {mood.sanskrit}
+                  </span>
+                  <span className="font-[family-name:var(--font-ui)] text-[9px] text-white/70 mt-0.5">
+                    {mood.label}
+                  </span>
+                </motion.button>
+              )
+            })}
+          </>
+        )}
       </div>
 
       {/* Selection greeting overlay */}
