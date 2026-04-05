@@ -66,15 +66,15 @@ describe('Design Tokens', () => {
 
   describe('Typography', () => {
     it('exports font families', () => {
-      expect(typography.fonts.sans).toContain('--font-inter')
-      expect(typography.fonts.display).toContain('SF Pro Display')
+      expect(typography.fonts.sans).toContain('Outfit')
+      expect(typography.fonts.display).toContain('Cormorant Garamond')
     })
 
     it('exports typography scale', () => {
       expect(typography.pageHeadings.fontSize).toBe('28px')
       expect(typography.sectionHeadings.fontSize).toBe('20px')
       expect(typography.cardTitles.fontSize).toBe('16px')
-      expect(typography.body.fontSize).toBe('15px')
+      expect(typography.body.fontSize).toBe('16px')
       expect(typography.small.fontSize).toBe('13px')
       expect(typography.caption.fontSize).toBe('12px')
     })

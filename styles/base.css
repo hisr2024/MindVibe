@@ -11,22 +11,24 @@
   --color-surface: #0a0a12;
 
   /* ─── Typography ─── */
-  --font-sans: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  /* --font-sacred is set by next/font/google via the Crimson_Text variable class on <body>.
-     The fallback below applies only if the CSS variable is not injected (e.g. error pages). */
+  /* Font family fallbacks — actual font vars are injected by next/font on <html> */
+  --font-sans: var(--font-ui), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-sacred: Georgia, 'Times New Roman', serif;
+
+  /* Fluid heading sizes */
   --text-h1: clamp(2rem, 3vw + 1rem, 2.6rem);
   --text-h2: clamp(1.6rem, 2vw + 1rem, 2.1rem);
   --text-h3: clamp(1.3rem, 1vw + 1rem, 1.6rem);
-  --text-body: clamp(0.9375rem, 0.4vw + 0.9rem, 1rem);
-  --text-caption: 0.875rem;
   --text-h4: clamp(1.125rem, 0.8vw + 0.9rem, 1.25rem);
+  --text-body: clamp(0.9375rem, 0.4vw + 0.9rem, 1rem);
   --text-body-lg: clamp(1rem, 0.5vw + 0.9rem, 1.125rem);
+  --text-caption: 0.875rem;
   --text-label: 0.875rem;
   --line-snug: 1.35;
   --line-relaxed: 1.6;
 
   /* ─── Font weight tokens ─── */
+  --fw-light: 300;
   --fw-normal: 400;
   --fw-medium: 500;
   --fw-semibold: 600;
@@ -172,11 +174,13 @@ html.light body {
   color: #1a1408;
 }
 
-/* System font stack for Inter.
-   var(--font-inter) is injected by next/font on <body> and resolves to the
-   self-hosted Inter files, removing the need for an external Google Fonts link. */
+/* Primary UI font (Outfit) — var(--font-ui) is injected by next/font on <html> */
 body {
-  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-ui), var(--font-outfit), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
 }
 
 /* Prevent layout shift from scrollbar */

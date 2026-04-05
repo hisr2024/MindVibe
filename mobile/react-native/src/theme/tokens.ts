@@ -1,10 +1,15 @@
 /**
  * MindVibe Mobile Design System Tokens
  *
- * Mirrors the web design tokens from tailwind.config.ts and brand/theme/tokens.ts
- * adapted for React Native's StyleSheet system. These tokens are the single source
- * of truth for all visual properties in the mobile app.
+ * Mirrors the Kiaanverse Unified Typography System adapted for React Native.
+ * These tokens are the single source of truth for all visual properties
+ * in the mobile app.
+ *
+ * Fonts: Cormorant Garamond (divine), Crimson Text (scripture),
+ *        Playfair Display (display), Outfit (ui), Noto Sans Devanagari
  */
+
+import { Platform } from 'react-native';
 
 export const colors = {
   /** MindVibe brand palette */
@@ -139,63 +144,157 @@ export interface ThemeColors {
   readonly statusBarStyle: 'light-content' | 'dark-content';
 }
 
-/** Typography scale (sp units for React Native) */
+/** Font family definitions — platform-aware for iOS/Android */
+export const fontFamilies = {
+  divine: Platform.select({ ios: 'CormorantGaramond-Light', android: 'CormorantGaramond-Light', default: 'serif' }),
+  divineItalic: Platform.select({ ios: 'CormorantGaramond-LightItalic', android: 'CormorantGaramond-LightItalic', default: 'serif' }),
+  divineRegular: Platform.select({ ios: 'CormorantGaramond-Regular', android: 'CormorantGaramond-Regular', default: 'serif' }),
+  scripture: Platform.select({ ios: 'CrimsonText-Regular', android: 'CrimsonText-Regular', default: 'serif' }),
+  scriptureItalic: Platform.select({ ios: 'CrimsonText-Italic', android: 'CrimsonText-Italic', default: 'serif' }),
+  display: Platform.select({ ios: 'PlayfairDisplay-Regular', android: 'PlayfairDisplay-Regular', default: 'serif' }),
+  displayItalic: Platform.select({ ios: 'PlayfairDisplay-Italic', android: 'PlayfairDisplay-Italic', default: 'serif' }),
+  ui: Platform.select({ ios: 'Outfit-Regular', android: 'Outfit-Regular', default: 'sans-serif' }),
+  uiMedium: Platform.select({ ios: 'Outfit-Medium', android: 'Outfit-Medium', default: 'sans-serif-medium' }),
+  uiSemiBold: Platform.select({ ios: 'Outfit-SemiBold', android: 'Outfit-SemiBold', default: 'sans-serif-medium' }),
+  devanagari: Platform.select({ ios: 'NotoSansDevanagari', android: 'NotoSansDevanagari-Regular', default: 'sans-serif' }),
+} as const;
+
+/** Typography scale (sp units for React Native) — Unified Kiaanverse system */
 export const typography = {
+  // Display (Cormorant Garamond)
+  displayHero: {
+    fontSize: 40,
+    lineHeight: 44,
+    fontWeight: '300' as const,
+    letterSpacing: -0.8,
+    fontFamily: fontFamilies.divineItalic,
+  },
+  displayLarge: {
+    fontSize: 36,
+    lineHeight: 40,
+    fontWeight: '300' as const,
+    letterSpacing: -0.4,
+    fontFamily: fontFamilies.divine,
+  },
   h1: {
     fontSize: 28,
     lineHeight: 34,
-    fontWeight: '700' as const,
-    letterSpacing: -0.5,
+    fontWeight: '300' as const,
+    letterSpacing: -0.3,
+    fontFamily: fontFamilies.divine,
   },
   h2: {
-    fontSize: 22,
-    lineHeight: 28,
-    fontWeight: '600' as const,
-    letterSpacing: -0.3,
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '400' as const,
+    letterSpacing: 0,
+    fontFamily: fontFamilies.divineRegular,
   },
   h3: {
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: '400' as const,
+    letterSpacing: 0,
+    fontFamily: fontFamilies.divineRegular,
+  },
+
+  // Scripture (Crimson Text)
+  sacred: {
     fontSize: 18,
-    lineHeight: 24,
-    fontWeight: '600' as const,
-    letterSpacing: -0.2,
+    lineHeight: 33,
+    fontWeight: '400' as const,
+    letterSpacing: 0.4,
+    fontFamily: fontFamilies.scriptureItalic,
+  },
+  sacredSmall: {
+    fontSize: 15,
+    lineHeight: 26,
+    fontWeight: '400' as const,
+    letterSpacing: 0.3,
+    fontFamily: fontFamilies.scriptureItalic,
+  },
+  verse: {
+    fontSize: 17,
+    lineHeight: 30,
+    fontWeight: '400' as const,
+    letterSpacing: 0.2,
+    fontFamily: fontFamilies.scripture,
+  },
+
+  // Display hero (Playfair Display)
+  affirmation: {
+    fontSize: 24,
+    lineHeight: 32,
+    fontWeight: '400' as const,
+    letterSpacing: 0,
+    fontFamily: fontFamilies.displayItalic,
+  },
+
+  // Body (Outfit)
+  bodyLarge: {
+    fontSize: 17,
+    lineHeight: 26,
+    fontWeight: '400' as const,
+    letterSpacing: 0,
+    fontFamily: fontFamilies.ui,
   },
   body: {
     fontSize: 16,
     lineHeight: 24,
     fontWeight: '400' as const,
     letterSpacing: 0,
+    fontFamily: fontFamilies.ui,
   },
   bodySmall: {
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 22,
     fontWeight: '400' as const,
     letterSpacing: 0.1,
+    fontFamily: fontFamilies.ui,
+  },
+  label: {
+    fontSize: 13,
+    lineHeight: 20,
+    fontWeight: '500' as const,
+    letterSpacing: 1.4,
+    fontFamily: fontFamilies.uiMedium,
   },
   caption: {
-    fontSize: 13,
+    fontSize: 12,
     lineHeight: 18,
     fontWeight: '400' as const,
     letterSpacing: 0.2,
+    fontFamily: fontFamilies.ui,
   },
-  label: {
-    fontSize: 14,
-    lineHeight: 20,
+  micro: {
+    fontSize: 11,
+    lineHeight: 14,
     fontWeight: '500' as const,
-    letterSpacing: 0.1,
+    letterSpacing: 1.6,
+    fontFamily: fontFamilies.uiMedium,
   },
-  sacred: {
-    fontSize: 20,
-    lineHeight: 30,
+
+  // Devanagari (Sanskrit Unicode)
+  devanagariDisplay: {
+    fontSize: 36,
+    lineHeight: 52,
+    fontWeight: '400' as const,
+    letterSpacing: 0.6,
+    fontFamily: fontFamilies.devanagari,
+  },
+  devanagariVerse: {
+    fontSize: 18,
+    lineHeight: 36,
+    fontWeight: '400' as const,
+    letterSpacing: 0.4,
+    fontFamily: fontFamilies.devanagari,
+  },
+  devanagariSmall: {
+    fontSize: 15,
+    lineHeight: 28,
     fontWeight: '400' as const,
     letterSpacing: 0.3,
-    fontFamily: 'CrimsonText-Regular',
-  },
-  sacredSmall: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '400' as const,
-    letterSpacing: 0.2,
-    fontFamily: 'CrimsonText-Regular',
+    fontFamily: fontFamilies.devanagari,
   },
 } as const;
 
