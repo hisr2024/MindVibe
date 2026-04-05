@@ -79,7 +79,7 @@ export function ExpressCheckout({
           paymentRequest,
           style: {
             paymentRequestButton: {
-              type: 'subscribe',
+              type: 'default',
               theme: 'dark',
               height: '52px',
             },
