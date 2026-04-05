@@ -5,17 +5,21 @@
  *
  * Sign In / Create Account tabbed interface with sacred OM header.
  * Handles both authentication modes within a single scrollable screen.
+ * Supports ?tab=create query param for deep-linking to signup.
  */
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { AuthHeader } from '@/components/mobile/auth/AuthHeader'
 import { LoginScreen } from '@/components/mobile/auth/LoginScreen'
 import { SignUpScreen } from '@/components/mobile/auth/SignUpScreen'
 
 type AuthTab = 'signin' | 'create'
 
-export default function LoginPage() {
-  const [activeTab, setActiveTab] = useState<AuthTab>('signin')
+function LoginContent() {
+  const searchParams = useSearchParams()
+  const initialTab: AuthTab = searchParams.get('tab') === 'create' ? 'create' : 'signin'
+  const [activeTab, setActiveTab] = useState<AuthTab>(initialTab)
 
   return (
     <div className="min-h-screen bg-[var(--sacred-cosmic-void)] px-5 pb-10 overflow-y-auto">
@@ -53,5 +57,19 @@ export default function LoginPage() {
         <SignUpScreen onSwitchToLogin={() => setActiveTab('signin')} />
       )}
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[var(--sacred-cosmic-void)] flex items-center justify-center">
+        <div className="sacred-divine-breath w-16 h-16 rounded-full flex items-center justify-center bg-gradient-to-br from-[rgba(22,26,66,0.9)] to-[rgba(17,20,53,0.95)] border border-[rgba(212,160,23,0.4)]">
+          <span className="text-3xl text-[var(--sacred-divine-gold)] sacred-text-divine">ॐ</span>
+        </div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   )
 }

@@ -81,7 +81,7 @@ export function UPIPayment({ onSubmit, onAppSelect, loading }: UPIPaymentProps) 
       </div>
 
       {/* UPI App Grid */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         {UPI_APPS.map((app) => (
           <button
             key={app.id}
