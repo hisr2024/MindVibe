@@ -2172,6 +2172,28 @@ except Exception as e:
     _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load KIAAN Assistant router: {e}")
 
+# Load KarmaLytix router
+startup_logger.info(
+    "\n[KarmaLytix] Attempting to import KarmaLytix router..."
+)
+try:
+    from backend.routes.karmalytix import router as karmalytix_router
+
+    app.include_router(karmalytix_router)
+    _startup_status["routers_loaded"] += 1
+    startup_logger.info("✅ [SUCCESS] KarmaLytix router loaded")
+    startup_logger.info("   • GET    /api/karmalytix/dashboard - Get karma dashboard")
+    startup_logger.info("   • GET    /api/karmalytix/karma-score - Get karma score")
+    startup_logger.info("   • GET    /api/karmalytix/weekly-report - Get weekly report")
+    startup_logger.info("   • GET    /api/karmalytix/history - Get report history")
+    startup_logger.info(
+        "   • POST   /api/karmalytix/generate-insight - Generate KIAAN insight"
+    )
+    startup_logger.info("   • GET    /api/karmalytix/patterns - Get karma patterns")
+except Exception as e:
+    _startup_status["routers_failed"] += 1
+    startup_logger.info(f"❌ [ERROR] Failed to load KarmaLytix router: {e}")
+
 # Count actual registered API routes to populate startup status.
 # This is more reliable than tracking each try/except individually since
 # it reflects the true state of what FastAPI has registered.

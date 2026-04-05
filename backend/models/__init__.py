@@ -222,6 +222,13 @@ from backend.models.companion import (
     CompanionProfile,
 )
 
+# KarmaLytix models
+from backend.models.karmalytix import (
+    KarmaLytixReport,
+    KarmaPattern,
+    KarmaScore,
+)
+
 # Emotional & analysis models
 from backend.models.emotional import (
     EmotionalResetSession,
@@ -426,4 +433,8 @@ __all__ = [
     "TeamMember",
     "TeamInvitation",
     "TeamAuditLog",
+    # KarmaLytix models
+    "KarmaLytixReport",
+    "KarmaPattern",
+    "KarmaScore",
 ]

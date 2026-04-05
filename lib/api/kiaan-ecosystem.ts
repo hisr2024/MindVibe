@@ -114,6 +114,19 @@ export const KIAAN_TOOLS: KiaanTool[] = [
     usesValidation: false,
     color: '#84CC16',
     enabled: true
+  },
+  {
+    id: 'karmalytix',
+    name: 'KarmaLytix',
+    description: 'Sacred Reflections Analysis — karma scoring from journal metadata',
+    category: 'reflective',
+    endpoint: '/api/karmalytix/dashboard',
+    route: '/karmalytix',
+    icon: '🔮',
+    usesGitaVerses: true,
+    usesValidation: false,
+    color: '#D4A017',
+    enabled: true
   }
 ]
 
