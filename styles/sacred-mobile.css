@@ -82,27 +82,76 @@
     rgba(212, 160, 23, 0.4) 70%,
     transparent 100%);
 
-  /* ─── SACRED TYPOGRAPHY ─── */
+  /* ─── UNIFIED DIVINE TYPOGRAPHY ─── */
+  /* Font families */
   --font-divine: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
-  --font-scripture: var(--font-sacred), 'Crimson Text', Georgia, serif;
-  --font-display: var(--font-playfair), 'Playfair Display', serif;
-  --font-ui: var(--font-outfit), 'Outfit', system-ui, sans-serif;
+  --font-scripture: var(--font-sacred), 'Crimson Text', Georgia, 'Times New Roman', serif;
+  --font-display: var(--font-playfair), 'Playfair Display', Georgia, serif;
+  --font-ui: var(--font-outfit), 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-devanagari: 'Noto Sans Devanagari', 'Mangal', 'Arial Unicode MS', sans-serif;
 
-  /* Sacred typography scale for mobile (rem-based for accessibility scaling) */
-  --sacred-text-xs: 0.6875rem;   /* 11px at default scale */
-  --sacred-text-sm: 0.8125rem;   /* 13px at default scale */
-  --sacred-text-base: 0.9375rem; /* 15px at default scale */
-  --sacred-text-lg: 1.0625rem;   /* 17px at default scale */
-  --sacred-text-xl: 1.3125rem;   /* 21px at default scale */
-  --sacred-text-2xl: 1.625rem;   /* 26px at default scale */
-  --sacred-text-3xl: 2rem;       /* 32px at default scale */
-  --sacred-text-4xl: 2.625rem;   /* 42px at default scale */
-  --sacred-text-5xl: 3.375rem;   /* 54px at default scale */
+  /* Type scale — mobile-first (rem for accessibility scaling) */
+  --text-micro: 0.6875rem;   /* 11px */
+  --text-xs: 0.75rem;        /* 12px */
+  --text-sm: 0.8125rem;      /* 13px */
+  --text-base: 0.875rem;     /* 14px — mobile secondary UI */
+  --text-body: 1rem;          /* 16px — MINIMUM for paragraphs */
+  --text-lg: 1.0625rem;      /* 17px */
+  --text-xl: 1.25rem;        /* 20px */
+  --text-2xl: 1.5rem;        /* 24px */
+  --text-3xl: 1.75rem;       /* 28px */
+  --text-4xl: 2.25rem;       /* 36px */
+  --text-5xl: 2.5rem;        /* 40px */
+  --text-sacred: 1.125rem;   /* 18px — verse body */
+  --text-sacred-sm: 0.9375rem; /* 15px — verse secondary */
 
-  --sacred-line-height-scripture: 1.85;
-  --sacred-line-height-ui: 1.4;
-  --sacred-letter-spacing-divine: 0.04em;
-  --sacred-letter-spacing-caps: 0.12em;
+  /* Legacy aliases (backward compatibility) */
+  --sacred-text-xs: var(--text-micro);
+  --sacred-text-sm: var(--text-sm);
+  --sacred-text-base: var(--text-sacred-sm);
+  --sacred-text-lg: var(--text-lg);
+  --sacred-text-xl: var(--text-xl);
+  --sacred-text-2xl: 1.625rem;   /* 26px */
+  --sacred-text-3xl: var(--text-3xl);
+  --sacred-text-4xl: 2.625rem;   /* 42px */
+  --sacred-text-5xl: var(--text-5xl);
+
+  /* Line heights */
+  --lh-tight: 1.1;
+  --lh-snug: 1.25;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.65;
+  --lh-loose: 1.75;
+  --lh-scripture: 1.85;
+  --lh-devanagari: 2.0;
+  --lh-ui: 1.4;
+  --sacred-line-height-scripture: var(--lh-scripture);
+  --sacred-line-height-ui: var(--lh-ui);
+
+  /* Letter spacing */
+  --ls-tighter: -0.02em;
+  --ls-tight: -0.01em;
+  --ls-normal: 0;
+  --ls-wide: 0.02em;
+  --ls-wider: 0.04em;
+  --ls-widest: 0.12em;
+  --ls-sacred: 0.04em;
+  --sacred-letter-spacing-divine: var(--ls-wider);
+  --sacred-letter-spacing-caps: var(--ls-widest);
+
+  /* Font weights */
+  --fw-light: 300;
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* Fluid typography */
+  --text-fluid-hero: clamp(2.5rem, 5vw + 1rem, 4rem);
+  --text-fluid-h1: clamp(1.75rem, 3vw + 1rem, 3rem);
+  --text-fluid-h2: clamp(1.5rem, 2vw + 1rem, 2.25rem);
+  --text-fluid-h3: clamp(1.25rem, 1vw + 1rem, 1.75rem);
+  --text-fluid-body: clamp(1rem, 0.4vw + 0.9rem, 1.125rem);
 
   /* ─── ANIMATION DURATIONS ─── */
   --sacred-duration-instant: 80ms;
@@ -451,15 +500,15 @@
 .sacred-typing-dot:nth-child(2) { animation-delay: 0.15s; }
 .sacred-typing-dot:nth-child(3) { animation-delay: 0.3s; }
 
-/* Sacred text styles */
+/* ─── Sacred text styles (legacy) ─── */
 .sacred-text-divine {
   font-family: var(--font-divine);
-  letter-spacing: var(--sacred-letter-spacing-divine);
+  letter-spacing: var(--ls-wider);
 }
 
 .sacred-text-scripture {
   font-family: var(--font-scripture);
-  line-height: var(--sacred-line-height-scripture);
+  line-height: var(--lh-scripture);
 }
 
 .sacred-text-display {
@@ -468,7 +517,7 @@
 
 .sacred-text-ui {
   font-family: var(--font-ui);
-  line-height: var(--sacred-line-height-ui);
+  line-height: var(--lh-ui);
 }
 
 /* Sacred gold text gradient */
@@ -485,10 +534,142 @@
 /* Sacred label caps */
 .sacred-label {
   font-family: var(--font-ui);
-  font-size: var(--sacred-text-xs);
-  letter-spacing: var(--sacred-letter-spacing-caps);
+  font-size: var(--text-micro);
+  letter-spacing: var(--ls-widest);
   text-transform: uppercase;
   color: var(--sacred-divine-gold);
+}
+
+/* ─── Unified semantic typography classes ─── */
+
+/* Display — divine headers (Cormorant Garamond) */
+.text-divine-hero {
+  font-family: var(--font-divine);
+  font-size: var(--text-5xl);
+  font-weight: var(--fw-light);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tighter);
+  font-style: italic;
+}
+
+.text-divine-display {
+  font-family: var(--font-divine);
+  font-size: var(--text-4xl);
+  font-weight: var(--fw-light);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+}
+
+.text-divine-h1 {
+  font-family: var(--font-divine);
+  font-size: var(--text-3xl);
+  font-weight: var(--fw-normal);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-tight);
+}
+
+.text-divine-h2 {
+  font-family: var(--font-divine);
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-normal);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-normal);
+}
+
+/* Scripture — verse and sacred body (Crimson Text) */
+.text-scripture-verse {
+  font-family: var(--font-scripture);
+  font-size: var(--text-sacred);
+  font-weight: var(--fw-normal);
+  font-style: italic;
+  line-height: var(--lh-scripture);
+  letter-spacing: var(--ls-sacred);
+}
+
+.text-scripture-body {
+  font-family: var(--font-scripture);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-normal);
+  font-style: italic;
+  line-height: var(--lh-loose);
+  letter-spacing: var(--ls-normal);
+}
+
+.text-scripture-small {
+  font-family: var(--font-scripture);
+  font-size: var(--text-sacred-sm);
+  font-weight: var(--fw-normal);
+  font-style: italic;
+  line-height: var(--lh-loose);
+}
+
+/* Display hero — Playfair for affirmations and Sakha voice */
+.text-display-hero {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: var(--fw-normal);
+  font-style: italic;
+  line-height: var(--lh-snug);
+}
+
+.text-display-affirmation {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-normal);
+  font-style: italic;
+  line-height: var(--lh-relaxed);
+}
+
+/* UI — Outfit for all functional text */
+.text-ui-body {
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  font-weight: var(--fw-normal);
+  line-height: var(--lh-relaxed);
+  letter-spacing: var(--ls-normal);
+}
+
+.text-ui-label {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-widest);
+  text-transform: uppercase;
+}
+
+.text-ui-caption {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-normal);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-wide);
+}
+
+.text-ui-micro {
+  font-family: var(--font-ui);
+  font-size: var(--text-micro);
+  font-weight: var(--fw-medium);
+  line-height: 1.3;
+  letter-spacing: var(--ls-widest);
+  text-transform: uppercase;
+}
+
+/* Devanagari — Sanskrit Unicode rendering */
+.text-devanagari {
+  font-family: var(--font-devanagari);
+  font-size: var(--text-sacred);
+  font-weight: var(--fw-normal);
+  line-height: var(--lh-devanagari);
+  letter-spacing: var(--ls-sacred);
+}
+
+.text-devanagari-large {
+  font-family: var(--font-devanagari);
+  font-size: var(--text-4xl);
+  font-weight: var(--fw-normal);
+  line-height: var(--lh-ui);
+  letter-spacing: 0.06em;
 }
 
 /* Chat message styles */
@@ -561,6 +742,37 @@
 .sacred-starter-chip:active {
   border-color: rgba(212, 160, 23, 0.5);
   transform: scale(0.97);
+}
+
+/* ═══════════════════════════════════════════════════════
+   DESKTOP TYPOGRAPHY OVERRIDES
+   ═══════════════════════════════════════════════════════ */
+
+@media (min-width: 1024px) {
+  :root {
+    --text-micro: 0.6875rem;    /* 11px */
+    --text-xs: 0.75rem;         /* 12px */
+    --text-sm: 0.875rem;        /* 14px */
+    --text-base: 1rem;          /* 16px */
+    --text-body: 1rem;          /* 16px */
+    --text-lg: 1.125rem;        /* 18px */
+    --text-xl: 1.3125rem;       /* 21px */
+    --text-2xl: 1.625rem;       /* 26px */
+    --text-3xl: 2rem;           /* 32px */
+    --text-4xl: 2.625rem;       /* 42px */
+    --text-5xl: 3.375rem;       /* 54px */
+    --text-sacred: 1.25rem;     /* 20px */
+    --text-sacred-sm: 1rem;     /* 16px */
+  }
+}
+
+@media (min-width: 1440px) {
+  :root {
+    --text-3xl: 2.25rem;        /* 36px */
+    --text-4xl: 3rem;           /* 48px */
+    --text-5xl: 3.5rem;         /* 56px */
+    --text-sacred: 1.375rem;    /* 22px */
+  }
 }
 
 /* ═══════════════════════════════════════════════════════

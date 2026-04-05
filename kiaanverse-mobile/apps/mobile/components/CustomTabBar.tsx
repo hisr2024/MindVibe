@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 10,
     fontWeight: '500',
-    fontFamily: Platform.OS === 'ios' ? 'Lato-Regular' : 'Lato-Regular',
+    fontFamily: Platform.OS === 'ios' ? 'Outfit-Regular' : 'Outfit-Regular',
   },
   dot: {
     width: DOT_SIZE,

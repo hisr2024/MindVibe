@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   verseSanskrit: {
     fontSize: 18,
     lineHeight: 28,
-    fontFamily: 'CrimsonText-Regular',
+    fontFamily: 'CrimsonText-Italic',
     marginBottom: spacing.md,
   },
   verseTranslation: {

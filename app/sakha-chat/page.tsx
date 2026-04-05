@@ -48,7 +48,7 @@ export default function SakhaChatPage() {
         <div className="flex flex-col">
           <h1
             className="text-base font-semibold tracking-wide text-[#e8b54a]"
-            style={{ fontFamily: 'Cinzel, serif' }}
+            style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
           >
             Sakha
           </h1>

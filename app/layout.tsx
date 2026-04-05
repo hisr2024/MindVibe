@@ -16,12 +16,21 @@ import { WebVitalsReporter } from '@/components/WebVitalsReporter'
 import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema'
 
 /**
- * The CSS variable --font-sacred is set on <body> via globals.css and
- * consumed by Tailwind's `font-sacred` utility (see tailwind.config.ts).
- * Uses a system serif fallback stack (Georgia, Times New Roman) so the
- * build doesn't require fetching from Google Fonts at build time.
- * In production, Crimson Text can be loaded via CDN at runtime.
+ * Kiaanverse Unified Font Loading — Google Fonts CDN
+ *
+ * Five fonts loaded via CDN with display=swap for optimal LCP:
+ *   Cormorant Garamond (--font-divine): sacred display, Sanskrit headers
+ *   Crimson Text (--font-scripture): Gita verse body, reflective text
+ *   Playfair Display (--font-display): hero moments, affirmations
+ *   Outfit (--font-ui): all UI text, buttons, navigation
+ *   Noto Sans Devanagari (--font-devanagari): Sanskrit Unicode rendering
+ *
+ * CSS variables are defined in globals.css @layer base and consumed
+ * by Tailwind utilities (font-divine, font-scripture, font-display, font-ui).
  */
+
+/** Google Fonts CDN URL — all five unified fonts in a single request */
+const GOOGLE_FONTS_URL = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -150,7 +159,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Preload and load Crimson Text font with display swap for optimal LCP */}
+        {/* Preconnect + load unified Kiaanverse font system via Google Fonts CDN */}
         <link
           rel="preconnect"
           href="https://fonts.googleapis.com"
@@ -163,11 +172,11 @@ export default async function RootLayout({
         <link
           rel="preload"
           as="style"
-          href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600&display=swap"
+          href={GOOGLE_FONTS_URL}
         />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600&display=swap"
+          href={GOOGLE_FONTS_URL}
         />
         {/* JSON-LD structured data for search engine rich results */}
         <script
