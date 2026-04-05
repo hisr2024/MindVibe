@@ -5,7 +5,11 @@
  *
  * Order summary, trial banner, payment method selection,
  * feature highlights, secure badge, and the divine pay button.
- * Integrates with Razorpay (India) or Stripe (International).
+ *
+ * Payment architecture:
+ * - Non-INR (EUR/USD/GBP): Stripe Elements embedded checkout with
+ *   PaymentRequestButton (Apple/Google Pay) + PaymentElement (cards, SEPA, Link)
+ * - INR: Razorpay SDK for UPI + cards (primary), with Stripe fallback
  */
 
 import { useState, useEffect, Suspense } from 'react'
@@ -13,13 +17,12 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { PaymentSummary } from '@/components/mobile/payment/PaymentSummary'
 import { TrialBanner } from '@/components/mobile/payment/TrialBanner'
-import { PaymentForm } from '@/components/mobile/payment/PaymentForm'
 import { SecureBadge } from '@/components/mobile/payment/SecureBadge'
 import { SacredOMLoader } from '@/components/sacred/SacredOMLoader'
+import { StripePaymentWrapper } from '@/components/payment/StripePaymentForm'
 import { getPlanById, type PlanId, type BillingCycle } from '@/lib/payments/subscription'
 import { type CurrencyCode } from '@/lib/payments/currency'
 import { initiateRazorpayPayment, verifyRazorpayPayment } from '@/lib/payments/razorpay'
-import { initiateStripePayment } from '@/lib/payments/stripe'
 
 type PaymentState = 'idle' | 'processing' | 'success' | 'error'
 
@@ -41,20 +44,19 @@ function PaymentContent() {
   const currency: CurrencyCode = VALID_CURRENCIES.includes(rawCurrency as CurrencyCode) ? rawCurrency as CurrencyCode : 'INR'
 
   const plan = getPlanById(planId)
-  const [paymentState, setPaymentState] = useState<PaymentState>('idle')
-  const [errorMessage, setErrorMessage] = useState('')
+  const isRedirectSuccess = searchParams.get('success') === 'true'
+  const isRedirectCancelled = searchParams.get('cancelled') === 'true'
+  const [paymentState, setPaymentState] = useState<PaymentState>(isRedirectSuccess ? 'success' : 'idle')
+  const [errorMessage, setErrorMessage] = useState(isRedirectCancelled ? 'Payment was cancelled. You can try again when ready.' : '')
 
-  // Check for Stripe redirect success
+  // Handle Stripe redirect success — navigate home after delay
   useEffect(() => {
-    if (searchParams.get('success') === 'true') {
-      setPaymentState('success')
+    if (isRedirectSuccess) {
       triggerHaptic('success')
-      setTimeout(() => router.push('/m'), 2000)
+      const timer = setTimeout(() => router.push('/m'), 2000)
+      return () => clearTimeout(timer)
     }
-    if (searchParams.get('cancelled') === 'true') {
-      setErrorMessage('Payment was cancelled. You can try again when ready.')
-    }
-  }, [searchParams, router, triggerHaptic])
+  }, [isRedirectSuccess, router, triggerHaptic])
 
   if (!plan) {
     router.push('/m/subscribe')
@@ -66,49 +68,48 @@ function PaymentContent() {
   const isINR = currency === 'INR'
   const provider = isINR ? 'razorpay' : 'stripe'
 
-  const handlePayment = async () => {
+  const handleRazorpayPayment = async () => {
     setPaymentState('processing')
     setErrorMessage('')
     triggerHaptic('medium')
 
-    if (isINR) {
-      await initiateRazorpayPayment({
-        planId: plan.id,
-        billing,
-        planName: plan.name,
-        onSuccess: async (response) => {
-          const verified = await verifyRazorpayPayment(response)
-          if (verified) {
-            setPaymentState('success')
-            triggerHaptic('success')
-            setTimeout(() => router.push('/m'), 2000)
-          } else {
-            setPaymentState('error')
-            setErrorMessage('Payment verification failed. Please contact support.')
-            triggerHaptic('error')
-          }
-        },
-        onFailure: (error) => {
+    await initiateRazorpayPayment({
+      planId: plan.id,
+      billing,
+      planName: plan.name,
+      onSuccess: async (response) => {
+        const verified = await verifyRazorpayPayment(response)
+        if (verified) {
+          setPaymentState('success')
+          triggerHaptic('success')
+          setTimeout(() => router.push('/m'), 2000)
+        } else {
           setPaymentState('error')
-          setErrorMessage(error)
+          setErrorMessage('Payment verification failed. Please contact support.')
           triggerHaptic('error')
-        },
-        onDismiss: () => {
-          setPaymentState('idle')
-        },
-      })
-    } else {
-      await initiateStripePayment({
-        planId: plan.id,
-        billing,
-        currency,
-        onFailure: (error) => {
-          setPaymentState('error')
-          setErrorMessage(error)
-          triggerHaptic('error')
-        },
-      })
-    }
+        }
+      },
+      onFailure: (error) => {
+        setPaymentState('error')
+        setErrorMessage(error)
+        triggerHaptic('error')
+      },
+      onDismiss: () => {
+        setPaymentState('idle')
+      },
+    })
+  }
+
+  const handleStripeSuccess = () => {
+    setPaymentState('success')
+    triggerHaptic('success')
+    setTimeout(() => router.push('/m'), 2000)
+  }
+
+  const handleStripeError = (msg: string) => {
+    setPaymentState('error')
+    setErrorMessage(msg)
+    triggerHaptic('error')
   }
 
   const FEATURES_HIGHLIGHT = [
@@ -147,12 +148,79 @@ function PaymentContent() {
         </div>
       )}
 
-      {/* Payment Method */}
+      {/* Payment Section */}
       <div className="mt-6">
         <h3 className="sacred-text-divine text-base text-[var(--sacred-text-primary)] mb-3">
           Payment Method
         </h3>
-        <PaymentForm currency={currency} />
+
+        {paymentState === 'success' ? (
+          /* Success State */
+          <div className="h-[52px] rounded-[28px] bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center gap-2">
+            <span className="text-white text-sm">✦</span>
+            <span className="sacred-text-ui text-sm text-white font-medium">
+              Journey Begins — Welcome
+            </span>
+          </div>
+        ) : isINR ? (
+          /* INR: Razorpay SDK (UPI, cards, wallets) */
+          <>
+            <div className="p-4 rounded-[16px] bg-[var(--sacred-gradient-card)] border border-[rgba(212,160,23,0.12)]">
+              <p className="sacred-text-ui text-xs text-[var(--sacred-text-secondary)] mb-3">
+                Pay securely with UPI, cards, or wallets via Razorpay
+              </p>
+              <div className="flex items-center gap-2 mb-3">
+                {['GPay', 'PhonePe', 'Paytm', 'BHIM'].map((app) => (
+                  <span key={app} className="px-2 py-1 rounded-lg bg-[rgba(22,26,66,0.5)] border border-[rgba(255,255,255,0.08)] sacred-text-ui text-[10px] text-[var(--sacred-text-muted)]">
+                    {app}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {errorMessage && (
+              <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+                <p className="sacred-text-ui text-xs text-red-400 text-center">{errorMessage}</p>
+              </div>
+            )}
+
+            {/* Pay Button */}
+            <button
+              type="button"
+              onClick={handleRazorpayPayment}
+              disabled={paymentState === 'processing'}
+              className="sacred-btn-divine sacred-shimmer-on-tap w-full !h-[52px] flex items-center justify-center gap-2 mt-4 disabled:opacity-70"
+            >
+              {paymentState === 'processing' ? (
+                <SacredOMLoader size={24} />
+              ) : plan.trialDays ? (
+                'Start My Free Trial'
+              ) : (
+                'Complete Sacred Offering'
+              )}
+            </button>
+          </>
+        ) : (
+          /* Non-INR: Stripe Elements (Apple Pay, Google Pay, Cards, SEPA, Link) */
+          <>
+            <StripePaymentWrapper
+              planId={planId}
+              billing={billing}
+              currency={currency}
+              planLabel={`Kiaanverse ${plan.name}`}
+              onSuccess={handleStripeSuccess}
+              onError={handleStripeError}
+            />
+
+            {/* Error Message */}
+            {errorMessage && (
+              <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+                <p className="sacred-text-ui text-xs text-red-400 text-center">{errorMessage}</p>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Feature Highlights */}
@@ -169,40 +237,6 @@ function PaymentContent() {
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Error Message */}
-      {errorMessage && (
-        <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
-          <p className="sacred-text-ui text-xs text-red-400 text-center">{errorMessage}</p>
-        </div>
-      )}
-
-      {/* Pay Button */}
-      <div className="mt-6">
-        {paymentState === 'success' ? (
-          <div className="h-[52px] rounded-[28px] bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center gap-2">
-            <span className="text-white text-sm">✦</span>
-            <span className="sacred-text-ui text-sm text-white font-medium">
-              Journey Begins — Welcome
-            </span>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={handlePayment}
-            disabled={paymentState === 'processing'}
-            className="sacred-btn-divine sacred-shimmer-on-tap w-full !h-[52px] flex items-center justify-center gap-2 disabled:opacity-70"
-          >
-            {paymentState === 'processing' ? (
-              <SacredOMLoader size={24} />
-            ) : plan.trialDays ? (
-              'Start My Free Trial'
-            ) : (
-              'Complete Sacred Offering'
-            )}
-          </button>
-        )}
       </div>
 
       {/* Secure Badge */}

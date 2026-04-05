@@ -57,7 +57,7 @@ const nextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(self), payment=(), usb=()',
+            value: 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(self), payment=(self "https://js.stripe.com"), usb=()',
           },
           {
             key: 'Content-Security-Policy',
@@ -68,14 +68,15 @@ const nextConfig = {
                 .trim();
               return [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline'",
+                "script-src 'self' 'unsafe-inline' https://js.stripe.com https://maps.googleapis.com",
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                 "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
                 "font-src 'self' https://fonts.gstatic.com",
                 "img-src 'self' data: https://kiaanverse.com https://*.kiaanverse.com https://fonts.gstatic.com",
-                `connect-src 'self' ${apiUrl} https://kiaanverse.com https://www.kiaanverse.com https://mindvibe-api.onrender.com https://*.firebaseio.com https://*.googleapis.com https://cdn.pixabay.com https://*.freesound.org https://*.ingest.sentry.io https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co https://cdn-lfs-us-1.hf.co`,
+                `connect-src 'self' ${apiUrl} https://kiaanverse.com https://www.kiaanverse.com https://mindvibe-api.onrender.com https://*.firebaseio.com https://*.googleapis.com https://cdn.pixabay.com https://*.freesound.org https://*.ingest.sentry.io https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co https://cdn-lfs-us-1.hf.co https://js.stripe.com https://api.stripe.com`,
                 "media-src 'self' blob: data:",
                 "worker-src 'self' blob:",
+                "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
                 "frame-ancestors 'none'",
                 "base-uri 'self'",
                 "form-action 'self'",
@@ -84,6 +85,16 @@ const nextConfig = {
                 "report-to csp-endpoint",
               ].join('; ') + ';';
             })(),
+          },
+        ],
+      },
+      {
+        // Apple Pay domain verification file
+        source: '/.well-known/apple-developer-merchantid-domain-association',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/octet-stream',
           },
         ],
       },

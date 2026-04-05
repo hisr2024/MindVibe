@@ -1,0 +1,12 @@
+REPLACE_WITH_STRIPE_APPLE_PAY_VERIFICATION_FILE_CONTENT
+
+To set up Apple Pay:
+1. Go to Stripe Dashboard > Settings > Payment Methods > Apple Pay
+2. Click "Add domain" and enter your domain (e.g. kiaanverse.com)
+3. Download the verification file Stripe provides
+4. Replace this entire file content with the downloaded file content
+5. Deploy your site
+6. Click "Verify" in the Stripe Dashboard
+
+The file must be served at:
+https://yourdomain.com/.well-known/apple-developer-merchantid-domain-association

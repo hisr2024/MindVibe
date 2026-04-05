@@ -53,6 +53,7 @@ from backend.services.subscription_cost_calculator import (
 )
 from backend.services.stripe_service import (
     create_checkout_session,
+    create_embedded_checkout,
     cancel_subscription,
     verify_webhook_signature,
     handle_webhook_event,
@@ -269,6 +270,72 @@ async def create_checkout(
     # Google Pay is surfaced automatically via Stripe's card payment type
     # using the Payment Request API — works for all currencies including INR.
     return await _create_stripe_checkout(db, user, payload)
+
+
+@router.post("/embedded-checkout")
+async def create_embedded_checkout_endpoint(
+    payload: CheckoutSessionCreate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Create an embedded checkout session returning a client_secret.
+
+    Used by frontend Stripe Elements (PaymentElement + PaymentRequestButton)
+    for Apple Pay, Google Pay, UPI, SEPA, cards, and Link.
+
+    Returns:
+        dict with client_secret, subscription_id, payment_methods, currency.
+    """
+    user_id = await get_current_user_id(request)
+
+    from sqlalchemy import select
+    stmt = select(User).where(User.id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalars().first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    if payload.plan_tier == SubscriptionTier.FREE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": "invalid_plan",
+                "message": "Cannot purchase the free tier.",
+            },
+        )
+
+    if not is_stripe_configured():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error": "payment_unavailable",
+                "message": "Payment processing is not currently available.",
+            },
+        )
+
+    try:
+        result = await create_embedded_checkout(
+            db,
+            user,
+            payload.plan_tier,
+            payload.billing_period,
+            payload.currency,
+        )
+        return result
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except RuntimeError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(e),
+        )
 
 
 async def _create_stripe_checkout(
