@@ -94,7 +94,7 @@ export function JourneysTab({ dashboard, templates, isLoading, onRefresh }: Jour
         onRefresh()
       } catch (err) {
         triggerHaptic('error')
-        if (err instanceof JourneyEngineError && JourneyEngineError.isMaxJourneysError(err)) {
+        if (err instanceof JourneyEngineError && err.isMaxJourneysError()) {
           setShowMaxSheet(true)
         } else {
           setError(
