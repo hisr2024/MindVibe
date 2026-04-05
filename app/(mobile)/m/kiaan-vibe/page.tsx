@@ -256,7 +256,7 @@ export default function MobileKiaanVibePage() {
                 fontWeight: 500,
               }}
             >
-              Browse All 18 Chapters \u2192
+              Browse All 18 Chapters {'\u2192'}
             </button>
           </div>
         )}

@@ -72,7 +72,7 @@ export default function GitaChaptersPage() {
           className="text-[11px] text-center mb-4 font-[family-name:var(--font-scripture)] italic"
           style={{ color: '#6B6355' }}
         >
-          18 Chapters \u00B7 700 Verses \u00B7 The eternal teaching
+          18 Chapters {'\u00B7'} 700 Verses {'\u00B7'} The eternal teaching
         </p>
 
         {/* Yoga type filter */}

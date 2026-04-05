@@ -34,8 +34,8 @@ export function ChapterCard({ chapter, onPress }: ChapterCardProps) {
       <div className="flex flex-col justify-between h-full p-3.5">
         {/* Chapter number in Devanagari */}
         <span
-          className="font-[family-name:var(--font-divine)] text-[38px] leading-none"
-          style={{ color: chapter.color, fontWeight: 300 }}
+          className="text-[38px] leading-none"
+          style={{ color: chapter.color, fontWeight: 300, fontFamily: 'var(--font-devanagari), var(--font-divine), Cormorant Garamond, Georgia, serif' }}
         >
           {DEVANAGARI_NUMERALS[chapter.number]}
         </span>
@@ -43,8 +43,8 @@ export function ChapterCard({ chapter, onPress }: ChapterCardProps) {
         {/* Sanskrit + English names */}
         <div className="mt-auto">
           <p
-            className="font-[family-name:var(--font-scripture)] italic text-[14px] leading-tight line-clamp-2"
-            style={{ color: chapter.color }}
+            className="italic text-[14px] leading-tight line-clamp-2"
+            style={{ color: chapter.color, fontFamily: 'var(--font-devanagari), var(--font-scripture), Crimson Text, Georgia, serif' }}
           >
             {chapter.sanskrit}
           </p>

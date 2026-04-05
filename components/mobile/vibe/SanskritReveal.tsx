@@ -84,8 +84,8 @@ export function SanskritReveal({
                 }}
                 onAnimationComplete={isLast ? handleComplete : undefined}
                 style={{
-                  fontFamily: 'var(--font-divine), Cormorant Garamond, Georgia, serif',
-                  fontSize: 18,
+                  fontFamily: 'var(--font-devanagari), var(--font-divine), Cormorant Garamond, Georgia, serif',
+                  fontSize: 'inherit',
                   fontStyle: 'italic',
                   fontWeight: 300,
                   color: '#F0C040',
