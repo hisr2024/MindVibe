@@ -129,8 +129,11 @@ export default function JourneysScreen() {
             {'\u2190'}
           </Link>
           <div className="text-center">
-            <h1 className="font-divine text-lg italic text-[#EDE8DC]">
-              {'\u0937\u0921\u094D\u0930\u093F\u092A\u0941'} Journeys
+            <h1 className="text-lg italic text-[#EDE8DC]">
+              <span style={{ fontFamily: '"Noto Sans Devanagari", serif' }}>
+                {'\u0937\u0921\u094D\u0930\u093F\u092A\u0941'}
+              </span>
+              <span className="font-divine"> Journeys</span>
             </h1>
             <p className="text-[8px] text-[#6B6355] font-ui tracking-[0.12em] uppercase">
               The Inner Battlefield

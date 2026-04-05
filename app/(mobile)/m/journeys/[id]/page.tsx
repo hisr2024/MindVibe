@@ -432,9 +432,20 @@ export default function MobileJourneyDetailPage() {
                     </div>
                     {verse.sanskrit && (
                       <div className="px-4 py-3 bg-[#d4a44c]/[0.03]">
-                        <p className="text-[#d4a44c]/90 text-center leading-relaxed">{verse.sanskrit}</p>
+                        <p
+                          className="text-center leading-loose"
+                          style={{
+                            fontFamily: '"Noto Sans Devanagari", sans-serif',
+                            color: 'rgba(240,192,64,0.9)',
+                            fontSize: '18px',
+                            lineHeight: 2.0,
+                            textShadow: '0 0 8px rgba(212,160,23,0.15)',
+                          }}
+                        >
+                          {verse.sanskrit}
+                        </p>
                         {verse.transliteration && (
-                          <p className="text-xs text-[#d4a44c]/60 italic text-center mt-1">{verse.transliteration}</p>
+                          <p className="text-xs text-[#d4a44c]/60 font-sacred italic text-center mt-2">{verse.transliteration}</p>
                         )}
                       </div>
                     )}
@@ -530,9 +541,33 @@ export default function MobileJourneyDetailPage() {
             {/* Completion area */}
             {!step.is_completed && step.available_to_complete && (
               <div className="space-y-3 pt-2">
+                {/* Sakha asks reflection prompt */}
+                {step.check_in_prompt && typeof step.check_in_prompt.prompt === 'string' && (
+                  <div className="mb-2">
+                    <p className="text-[9px] uppercase tracking-[0.15em] font-ui mb-1"
+                      style={{ color: enemyInfo?.color ?? '#D4A017' }}>
+                      Sakha asks:
+                    </p>
+                    <p className="font-divine text-lg italic text-[#EDE8DC] leading-relaxed">
+                      {step.check_in_prompt.prompt}
+                    </p>
+                  </div>
+                )}
+
                 <button
                   onClick={() => setShowReflection(!showReflection)}
-                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-3 text-sm text-white/60"
+                  className="w-full rounded-xl border py-3 text-sm transition-all"
+                  style={{
+                    borderColor: showReflection
+                      ? `${enemyInfo?.color ?? '#D4A017'}40`
+                      : 'rgba(255,255,255,0.08)',
+                    backgroundColor: showReflection
+                      ? `${enemyInfo?.color ?? '#D4A017'}08`
+                      : 'rgba(255,255,255,0.03)',
+                    color: showReflection
+                      ? (enemyInfo?.color ?? '#D4A017')
+                      : 'rgba(255,255,255,0.6)',
+                  }}
                 >
                   {showReflection ? 'Hide Reflection' : 'Add Reflection (Optional)'}
                 </button>
@@ -544,14 +579,30 @@ export default function MobileJourneyDetailPage() {
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
                     >
-                      <textarea
-                        value={reflection}
-                        onChange={(e) => setReflection(e.target.value)}
-                        placeholder="What insights arose today?"
-                        className="w-full rounded-xl border border-white/[0.08] bg-[#0d0d12] p-4 text-white placeholder:text-white/30 focus:border-[#d4a44c]/40 outline-none resize-none text-sm"
-                        rows={4}
-                        maxLength={5000}
-                      />
+                      <div className="relative">
+                        <textarea
+                          value={reflection}
+                          onChange={(e) => setReflection(e.target.value)}
+                          placeholder="What stirs in you after this practice?"
+                          className="w-full rounded-xl bg-[rgba(22,26,66,0.5)] p-4 text-[#EDE8DC] font-sacred text-base leading-relaxed placeholder:text-white/25 outline-none resize-none transition-all"
+                          style={{
+                            border: `1px solid ${reflection.length > 0 ? (enemyInfo?.color ?? '#D4A017') + '40' : 'rgba(212,160,23,0.15)'}`,
+                            minHeight: 140,
+                            maxHeight: 300,
+                          }}
+                          rows={4}
+                          maxLength={5000}
+                        />
+                        {/* Word count */}
+                        <div className="flex items-center justify-between mt-1 px-1">
+                          <span className="text-[10px] text-[#D4A017]/40 font-ui">
+                            {'\u2726'} {reflection.trim().split(/\s+/).filter(Boolean).length} words offered
+                          </span>
+                          <span className="text-[9px] text-white/20 font-ui">
+                            {'\uD83D\uDD12'} Encrypted
+                          </span>
+                        </div>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -560,16 +611,25 @@ export default function MobileJourneyDetailPage() {
                   whileTap={{ scale: 0.97 }}
                   onClick={handleCompleteStep}
                   disabled={isCompleting}
-                  className="w-full rounded-2xl bg-gradient-to-r from-[#d4a44c] via-orange-500 to-[#d4a44c] py-4 text-base font-bold text-black disabled:opacity-50 shadow-lg shadow-[#d4a44c]/20"
+                  className="w-full rounded-2xl py-4 text-base font-bold text-[#050714] disabled:opacity-50"
+                  style={{
+                    background: enemyInfo
+                      ? `linear-gradient(135deg, ${enemyInfo.color}cc, ${enemyInfo.color})`
+                      : 'linear-gradient(135deg, #D4A017cc, #D4A017)',
+                    boxShadow: enemyInfo
+                      ? `0 4px 20px rgba(${enemyInfo.colorRGB},0.3)`
+                      : '0 4px 20px rgba(212,160,23,0.3)',
+                  }}
                 >
                   {isCompleting ? (
                     <span className="flex items-center justify-center gap-2">
                       <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                       Completing...
                     </span>
-                  ) : (
-                    "Complete Today's Step"
-                  )}
+                  ) : showReflection && reflection.trim()
+                    ? "Complete & Receive Sakha's Wisdom"
+                    : "Complete Today's Step"
+                  }
                 </motion.button>
               </div>
             )}

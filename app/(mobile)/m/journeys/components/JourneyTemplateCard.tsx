@@ -1,5 +1,6 @@
 /**
- * JourneyTemplateCard — Template card for starting new journeys.
+ * JourneyTemplateCard — Template card for browsing and starting new journeys.
+ * Shows enemy Devanagari, duration badge, difficulty, and sacred symbol.
  */
 
 'use client'
@@ -8,15 +9,7 @@ import { motion } from 'framer-motion'
 import type { JourneyTemplate, EnemyType } from '@/types/journeyEngine.types'
 import { ENEMY_INFO, getDifficultyLabel } from '@/types/journeyEngine.types'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
-
-const ICON_EMOJI: Record<string, string> = {
-  flame: '\uD83D\uDD25',
-  zap: '\u26A1',
-  coins: '\uD83D\uDCB0',
-  cloud: '\u2601\uFE0F',
-  crown: '\uD83D\uDC51',
-  eye: '\uD83D\uDC41\uFE0F',
-}
+import { EnemySacredSymbol } from '@/components/journey/EnemySacredSymbol'
 
 interface JourneyTemplateCardProps {
   template: JourneyTemplate
@@ -37,6 +30,7 @@ export function JourneyTemplateCard({
   const primaryEnemy = template.primary_enemy_tags[0] as EnemyType | undefined
   const info = primaryEnemy ? ENEMY_INFO[primaryEnemy] : null
   const accentColor = info?.color ?? '#D4A017'
+  const rgb = info?.colorRGB ?? '212,160,23'
 
   return (
     <motion.div
@@ -46,22 +40,37 @@ export function JourneyTemplateCard({
       whileTap={{ scale: 0.97 }}
       className="relative overflow-hidden rounded-2xl"
       style={{
-        border: `1px solid ${accentColor}20`,
-        background: `linear-gradient(160deg, ${accentColor}12, rgba(5,7,20,0.98))`,
+        border: `1px solid rgba(${rgb},0.15)`,
+        background: `linear-gradient(160deg, rgba(${rgb},0.1), rgba(5,7,20,0.98))`,
       }}
     >
-      <div className="p-3.5">
-        {/* Header: icon + free badge */}
+      {/* Sacred symbol watermark */}
+      {primaryEnemy && (
+        <div className="absolute top-2 right-2">
+          <EnemySacredSymbol enemy={primaryEnemy} size={40} opacity={0.08} />
+        </div>
+      )}
+
+      <div className="relative p-3.5">
+        {/* Header: Devanagari + badges */}
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2">
             {info && (
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-sm"
+                className="w-8 h-8 rounded-lg flex items-center justify-center"
                 style={{
-                  background: `linear-gradient(135deg, ${accentColor}40, ${accentColor}15)`,
+                  background: `linear-gradient(135deg, rgba(${rgb},0.3), rgba(${rgb},0.1))`,
                 }}
               >
-                {ICON_EMOJI[info.icon] || '\u2728'}
+                <span
+                  className="text-sm leading-none"
+                  style={{
+                    fontFamily: '"Noto Sans Devanagari", sans-serif',
+                    color: accentColor,
+                  }}
+                >
+                  {info.devanagari.charAt(0)}
+                </span>
               </div>
             )}
             <div>
@@ -69,7 +78,7 @@ export function JourneyTemplateCard({
                 className="text-[10px] font-ui font-medium"
                 style={{ color: accentColor }}
               >
-                {info?.sanskrit ?? 'Journey'}
+                {info?.devanagari ?? 'Journey'} {info?.name ?? ''}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="text-[9px] text-white/50 font-ui">
@@ -96,6 +105,13 @@ export function JourneyTemplateCard({
           {template.description || 'Begin your journey of inner transformation'}
         </p>
 
+        {/* Duration badge (top-right) */}
+        <div className="absolute top-3 right-3">
+          <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-[#D4A017]/15 text-[#D4A017] font-ui font-medium">
+            {template.duration_days}d
+          </span>
+        </div>
+
         {/* Start button */}
         <button
           onClick={() => {
@@ -106,7 +122,7 @@ export function JourneyTemplateCard({
           className="w-full rounded-lg py-2 text-[11px] font-ui font-semibold text-[#050714] transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed"
           style={{
             background: `linear-gradient(135deg, ${accentColor}cc, ${accentColor})`,
-            boxShadow: `0 2px 8px ${accentColor}30`,
+            boxShadow: `0 2px 8px rgba(${rgb},0.25)`,
           }}
         >
           {isStarting ? 'Starting...' : 'Begin \u2192'}

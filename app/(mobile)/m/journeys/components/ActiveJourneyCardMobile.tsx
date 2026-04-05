@@ -1,5 +1,6 @@
 /**
- * ActiveJourneyCardMobile — Full-width journey progress card with enemy gradient.
+ * ActiveJourneyCardMobile — Full-width journey progress card with enemy gradient,
+ * sacred symbol background, streak indicator, and pace badge.
  */
 
 'use client'
@@ -12,6 +13,7 @@ import {
   getJourneyStatusLabel,
 } from '@/types/journeyEngine.types'
 import { JourneyProgressRing } from './JourneyProgressRing'
+import { EnemySacredSymbol } from '@/components/journey/EnemySacredSymbol'
 
 interface ActiveJourneyCardMobileProps {
   journey: JourneyResponse
@@ -22,6 +24,7 @@ export function ActiveJourneyCardMobile({ journey, index = 0 }: ActiveJourneyCar
   const primaryEnemy = journey.primary_enemies[0] as EnemyType | undefined
   const info = primaryEnemy ? ENEMY_INFO[primaryEnemy] : null
   const accentColor = info?.color ?? '#D4A017'
+  const rgb = info?.colorRGB ?? '212,160,23'
 
   return (
     <motion.div
@@ -31,20 +34,36 @@ export function ActiveJourneyCardMobile({ journey, index = 0 }: ActiveJourneyCar
     >
       <Link href={`/m/journeys/${journey.journey_id}`}>
         <div
-          className="relative overflow-hidden rounded-2xl h-[160px]"
+          className="relative overflow-hidden rounded-2xl h-[170px]"
           style={{
-            background: `linear-gradient(135deg, ${accentColor}25, rgba(5,7,20,0.95))`,
-            border: `1px solid ${accentColor}30`,
+            background: `linear-gradient(135deg, rgba(${rgb},0.2), rgba(5,7,20,0.95))`,
+            border: `1px solid rgba(${rgb},0.2)`,
           }}
         >
+          {/* Sacred symbol watermark (right side) */}
+          {primaryEnemy && (
+            <div className="absolute top-4 right-4">
+              <EnemySacredSymbol enemy={primaryEnemy} size={64} opacity={0.1} />
+            </div>
+          )}
+
           <div className="relative p-4 flex flex-col justify-between h-full">
             {/* Top row */}
             <div className="flex items-start justify-between">
-              <div>
+              <div className="flex-1 min-w-0">
                 {info && (
                   <div className="flex items-center gap-1.5 mb-1">
-                    <span className="font-divine text-base italic" style={{ color: accentColor }}>
-                      {info.sanskrit}
+                    <span
+                      className="text-sm"
+                      style={{
+                        fontFamily: '"Noto Sans Devanagari", sans-serif',
+                        color: accentColor,
+                      }}
+                    >
+                      {info.devanagari}
+                    </span>
+                    <span className="text-[10px] font-ui" style={{ color: accentColor }}>
+                      {info.name}
                     </span>
                   </div>
                 )}
@@ -64,7 +83,9 @@ export function ActiveJourneyCardMobile({ journey, index = 0 }: ActiveJourneyCar
                 <div className="h-1 bg-white/10 rounded-full overflow-hidden mb-1.5">
                   <motion.div
                     className="h-full rounded-full"
-                    style={{ backgroundColor: accentColor }}
+                    style={{
+                      background: `linear-gradient(to right, ${accentColor}, #D4A017)`,
+                    }}
                     initial={{ width: 0 }}
                     animate={{ width: `${journey.progress_percentage}%` }}
                     transition={{ duration: 0.6, ease: 'easeOut' }}
