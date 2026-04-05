@@ -18,11 +18,12 @@ import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import {
   Play, Pause, Square, SkipForward, SkipBack, ChevronUp, ChevronDown,
   X, ListMusic, Music2, Repeat, Repeat1, Shuffle, AlertTriangle,
-  RefreshCw, Volume2, VolumeX,
+  RefreshCw, Volume2, VolumeX, BookOpen,
 } from 'lucide-react'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
 import { formatDuration } from '@/lib/kiaan-vibe/meditation-library'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
+import { VerseDisplayPanel } from '@/components/mobile/vibe/VerseDisplayPanel'
 
 // ─── Sacred Floating Particle ──────────────────────────────────────────────
 
@@ -103,9 +104,10 @@ export function MobileVibePlayer() {
   const {
     currentTrack, queue, queueIndex, isPlaying, isLoading, position, duration,
     volume, playbackRate, repeatMode, shuffle, muted, audioError,
+    versePanelVisible,
     toggle, stop, next, previous, seek, setVolume, setPlaybackRate,
     setRepeatMode, toggleShuffle, toggleMute, removeFromQueue, clearQueue,
-    clearAudioError, retryPlayback,
+    clearAudioError, retryPlayback, setVersePanelVisible,
   } = usePlayerStore()
 
   const progress = duration > 0 ? (position / duration) * 100 : 0
@@ -297,6 +299,11 @@ export function MobileVibePlayer() {
                   ))}
                 </div>
 
+                {/* Gita Verse Display Panel — auto-shows for Gita tracks */}
+                {currentTrack?.gitaData && (
+                  <VerseDisplayPanel visible={versePanelVisible} />
+                )}
+
                 {/* Progress bar */}
                 <div className="mb-2">
                   <div
@@ -371,6 +378,7 @@ export function MobileVibePlayer() {
                   {[
                     { icon: <Shuffle className="w-[18px] h-[18px]" />, active: shuffle, action: () => { toggleShuffle(); triggerHaptic('selection') }, label: 'Shuffle' },
                     { icon: repeatMode === 'one' ? <Repeat1 className="w-[18px] h-[18px]" /> : <Repeat className="w-[18px] h-[18px]" />, active: repeatMode !== 'off', action: cycleRepeatMode, label: `Repeat: ${repeatMode}` },
+                    ...(currentTrack?.gitaData ? [{ icon: <BookOpen className="w-[18px] h-[18px]" />, active: versePanelVisible, action: () => { setVersePanelVisible(!versePanelVisible); triggerHaptic('selection') }, label: 'Verse' }] : []),
                     { icon: muted || volume === 0 ? <VolumeX className="w-[18px] h-[18px]" /> : <Volume2 className="w-[18px] h-[18px]" />, active: showVolume, action: () => { setShowVolume(!showVolume); setShowQueue(false); setShowSpeed(false); triggerHaptic('selection') }, label: 'Volume' },
                     { icon: <ListMusic className="w-[18px] h-[18px]" />, active: showQueue, action: () => { setShowQueue(!showQueue); setShowVolume(false); setShowSpeed(false); triggerHaptic('selection') }, label: 'Queue' },
                   ].map((btn, i) => (

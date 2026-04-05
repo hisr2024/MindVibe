@@ -387,6 +387,93 @@ export function getCollectionMeta(key: DivineCollectionKey): {
   }
 }
 
+// ============ Mobile Track Generation (with gitaData) ============
+
+/**
+ * Generate a mobile-enriched Track for a single verse.
+ * Extends the standard createVerseTrack with gitaData for VerseDisplayPanel.
+ */
+export function createMobileVerseTrack(
+  chapter: number,
+  verseNumber: number,
+  sanskrit: string,
+  transliteration: string,
+  translation: string,
+  chapterEnglish: string,
+  chapterSanskrit: string,
+  yogaType: string,
+  language: string = 'sa',
+  voiceStyle: GitaVoiceStyle = 'divine',
+  speed?: number,
+  kiaanInsight?: string,
+): Track {
+  const track = createVerseTrack(
+    chapter,
+    verseNumber,
+    sanskrit,
+    transliteration,
+    translation,
+    language,
+    voiceStyle,
+    speed,
+  )
+
+  // Enrich with gitaData for the mobile VerseDisplayPanel
+  track.gitaData = {
+    chapter,
+    verse: verseNumber,
+    chapterName: chapterEnglish,
+    chapterSanskrit,
+    sanskrit,
+    transliteration,
+    translation,
+    kiaanInsight,
+    yogaType,
+  }
+
+  return track
+}
+
+/**
+ * Create mobile-enriched Track objects for all verses in a chapter.
+ * Returns tracks with gitaData populated for the VerseDisplayPanel.
+ */
+export async function createMobileChapterTracks(
+  chapterNumber: number,
+  chapterEnglish: string,
+  chapterSanskrit: string,
+  yogaType: string,
+  language: string = 'sa',
+  voiceStyle: GitaVoiceStyle = 'divine',
+): Promise<Track[]> {
+  const tracks = await createChapterTracks(chapterNumber, language, voiceStyle)
+
+  // Load verse data to enrich tracks
+  const sanskritData = await loadGitaLanguage('sa')
+  const enData = language !== 'en' ? await loadGitaLanguage('en') : null
+  const saChapter = sanskritData?.chapters.find(c => c.chapterNumber === chapterNumber)
+  const enChapter = enData?.chapters.find(c => c.chapterNumber === chapterNumber)
+
+  return tracks.map((track, idx) => {
+    const verseNum = idx + 1
+    const saVerse = saChapter?.verses.find(v => v.verseNumber === verseNum)
+    const enVerse = enChapter?.verses.find(v => v.verseNumber === verseNum)
+
+    track.gitaData = {
+      chapter: chapterNumber,
+      verse: verseNum,
+      chapterName: chapterEnglish,
+      chapterSanskrit,
+      sanskrit: saVerse?.sanskrit || '',
+      transliteration: saVerse?.transliteration || '',
+      translation: enVerse?.translation || saVerse?.translation || '',
+      yogaType,
+    }
+
+    return track
+  })
+}
+
 // ============ Audio Synthesis Helpers ============
 
 /**

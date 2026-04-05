@@ -30,6 +30,23 @@ export interface Track {
     rate?: number      // Speech rate (0.5-2.0)
     pitch?: number     // Speech pitch (0-2)
   }
+  /**
+   * Gita-specific verse data for the VerseDisplayPanel.
+   * Only present on Gita tracks — used by the mobile player to render
+   * Sanskrit text, transliteration, translation, and KIAAN insight.
+   */
+  gitaData?: {
+    chapter: number
+    verse: number
+    chapterName: string
+    chapterSanskrit: string
+    sanskrit: string
+    transliteration: string
+    translation: string
+    kiaanInsight?: string
+    yogaType: string
+    shadowuEnemy?: string
+  }
 }
 
 // ============ Playlist Types ============
@@ -134,6 +151,10 @@ export interface PlayerState {
   // Error state for user-friendly error handling
   audioError: string | null
   hasAudioIssues: boolean
+
+  // Gita-specific state
+  versePanelVisible: boolean
+  selectedGitaVoice: string
 }
 
 export interface PlayerActions {
@@ -165,6 +186,10 @@ export interface PlayerActions {
   // Error handling
   clearAudioError: () => void
   retryPlayback: () => Promise<void>
+
+  // Gita controls
+  setVersePanelVisible: (visible: boolean) => void
+  setSelectedGitaVoice: (voiceId: string) => void
 
   // State loading
   loadPersistedState: () => Promise<void>

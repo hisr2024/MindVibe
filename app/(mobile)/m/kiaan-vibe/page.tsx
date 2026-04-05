@@ -6,9 +6,11 @@
  */
 
 import { useState, useMemo, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Search, Music2 } from 'lucide-react'
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
+import { GitaBanner } from '@/components/mobile/vibe/GitaBanner'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
 import {
   getAllTracks,
@@ -20,14 +22,15 @@ import type { MeditationCategory, Track } from '@/lib/kiaan-vibe/types'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
 const CATEGORIES: { id: string; label: string; icon: string }[] = [
-  { id: 'all',       label: 'All',       icon: '✦' },
-  { id: 'mantra',    label: 'Mantra',    icon: '🕉' },
-  { id: 'ambient',   label: 'Ambient',   icon: '◎' },
-  { id: 'nature',    label: 'Nature',    icon: '⟡' },
-  { id: 'breath',    label: 'Breath',    icon: '☁' },
-  { id: 'focus',     label: 'Focus',     icon: '◈' },
-  { id: 'sleep',     label: 'Sleep',     icon: '☽' },
-  { id: 'spiritual', label: 'Spiritual', icon: '✧' },
+  { id: 'all',       label: 'All',       icon: '\u2726' },
+  { id: 'gita',      label: 'Gita',      icon: '\u2638\uFE0F' },
+  { id: 'mantra',    label: 'Mantra',    icon: '\uD83D\uDD49' },
+  { id: 'ambient',   label: 'Ambient',   icon: '\u25CE' },
+  { id: 'nature',    label: 'Nature',    icon: '\u27E1' },
+  { id: 'breath',    label: 'Breath',    icon: '\u2601' },
+  { id: 'focus',     label: 'Focus',     icon: '\u25C8' },
+  { id: 'sleep',     label: 'Sleep',     icon: '\u263D' },
+  { id: 'spiritual', label: 'Spiritual', icon: '\u2727' },
 ]
 
 function TrackCard({ track, isCurrentTrack, isPlaying, onPlay }: {
@@ -110,6 +113,7 @@ function TrackCard({ track, isCurrentTrack, isPlaying, onPlay }: {
 }
 
 export default function MobileKiaanVibePage() {
+  const router = useRouter()
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const { triggerHaptic } = useHapticFeedback()
@@ -181,6 +185,11 @@ export default function MobileKiaanVibePage() {
           ))}
         </div>
 
+        {/* Gita Banner (shown when 'all' or 'gita' selected, no search) */}
+        {(selectedCategory === 'all' || selectedCategory === 'gita') && !searchQuery && (
+          <GitaBanner onPress={() => router.push('/m/kiaan-vibe/chapters')} />
+        )}
+
         {/* Featured section (only when 'all' and no search) */}
         {selectedCategory === 'all' && !searchQuery && (
           <div className="mb-6">
@@ -216,21 +225,44 @@ export default function MobileKiaanVibePage() {
           </div>
         )}
 
-        {/* Track grid (2 columns) */}
-        <div className="grid grid-cols-2 gap-3">
-          {filteredTracks.map(track => (
-            <TrackCard
-              key={track.id}
-              track={track}
-              isCurrentTrack={currentTrack?.id === track.id}
-              isPlaying={isPlaying && currentTrack?.id === track.id}
-              onPlay={() => handlePlayTrack(track, filteredTracks)}
-            />
-          ))}
-        </div>
+        {/* Track grid (2 columns) — hidden when 'gita' category is selected */}
+        {selectedCategory !== 'gita' && (
+          <div className="grid grid-cols-2 gap-3">
+            {filteredTracks.map(track => (
+              <TrackCard
+                key={track.id}
+                track={track}
+                isCurrentTrack={currentTrack?.id === track.id}
+                isPlaying={isPlaying && currentTrack?.id === track.id}
+                onPlay={() => handlePlayTrack(track, filteredTracks)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Gita category: show browse CTA instead of track grid */}
+        {selectedCategory === 'gita' && !searchQuery && (
+          <div className="text-center py-8">
+            <p className="text-sm text-[#B8AE98] font-[family-name:var(--font-scripture)] italic mb-3">
+              Explore the complete Bhagavad Gita above
+            </p>
+            <button
+              onClick={() => router.push('/m/kiaan-vibe/chapters')}
+              className="px-6 py-2.5 rounded-full text-[13px] font-[family-name:var(--font-ui)]"
+              style={{
+                background: 'linear-gradient(135deg, rgba(212,160,23,0.2), rgba(212,160,23,0.1))',
+                border: '1px solid rgba(212,160,23,0.3)',
+                color: '#D4A017',
+                fontWeight: 500,
+              }}
+            >
+              Browse All 18 Chapters \u2192
+            </button>
+          </div>
+        )}
 
         {/* Empty state */}
-        {filteredTracks.length === 0 && (
+        {selectedCategory !== 'gita' && filteredTracks.length === 0 && (
           <div className="text-center py-16">
             <p className="text-lg text-[#6B6355] font-[family-name:var(--font-divine)]">No tracks found</p>
             <p className="text-xs text-[#6B6355]/60 mt-1 font-[family-name:var(--font-ui)]">
