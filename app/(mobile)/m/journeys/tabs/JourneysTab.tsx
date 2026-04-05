@@ -1,17 +1,20 @@
 /**
- * JourneysTab — Journey management: active journeys + template catalog.
+ * JourneysTab — Journey management: active journeys, template catalog,
+ * enemy filter pills, template detail modal with pace selector.
  */
 
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import type {
   DashboardResponse,
   JourneyTemplate,
   EnemyType,
+  PersonalizationSettings,
 } from '@/types/journeyEngine.types'
-import { ENEMY_INFO, ENEMY_ORDER } from '@/types/journeyEngine.types'
+import { ENEMY_INFO, ENEMY_ORDER, getDifficultyLabel } from '@/types/journeyEngine.types'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import {
   journeyEngineService,
@@ -20,15 +23,7 @@ import {
 import { ActiveJourneyCardMobile } from '../components/ActiveJourneyCardMobile'
 import { JourneyTemplateCard } from '../components/JourneyTemplateCard'
 import { JourneyCardSkeleton } from '../skeletons/JourneyCardSkeleton'
-
-const ICON_EMOJI: Record<string, string> = {
-  flame: '\uD83D\uDD25',
-  zap: '\u26A1',
-  coins: '\uD83D\uDCB0',
-  cloud: '\u2601\uFE0F',
-  crown: '\uD83D\uDC51',
-  eye: '\uD83D\uDC41\uFE0F',
-}
+import { MaxJourneysSheet } from '../components/MaxJourneysSheet'
 
 interface JourneysTabProps {
   dashboard: DashboardResponse | null
@@ -37,17 +32,37 @@ interface JourneysTabProps {
   onRefresh: () => void
 }
 
+type PaceOption = 'daily' | 'every_other_day' | 'weekly'
+
+const PACE_OPTIONS: { value: PaceOption; label: string; desc: string }[] = [
+  { value: 'daily', label: 'Daily', desc: 'Every day' },
+  { value: 'every_other_day', label: 'Every Other Day', desc: 'Gentle pace' },
+  { value: 'weekly', label: 'Weekly', desc: 'Once a week' },
+]
+
+function estimateCompletion(duration: number, pace: PaceOption): string {
+  const multiplier = pace === 'daily' ? 1 : pace === 'every_other_day' ? 2 : 7
+  const days = duration * multiplier
+  const date = new Date()
+  date.setDate(date.getDate() + days)
+  return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })
+}
+
 export function JourneysTab({ dashboard, templates, isLoading, onRefresh }: JourneysTabProps) {
   const router = useRouter()
   const { triggerHaptic } = useHapticFeedback()
   const [selectedEnemy, setSelectedEnemy] = useState<EnemyType | null>(null)
   const [startingId, setStartingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [showMaxSheet, setShowMaxSheet] = useState(false)
+
+  // Template detail modal state
+  const [detailTemplate, setDetailTemplate] = useState<JourneyTemplate | null>(null)
+  const [selectedPace, setSelectedPace] = useState<PaceOption>('daily')
 
   const activeCount = dashboard?.active_journeys.filter((j) => j.status === 'active').length ?? 0
   const canStart = activeCount < 5
 
-  // Filter templates by selected enemy
   const filteredTemplates = useMemo(() => {
     if (!selectedEnemy) return templates
     return templates.filter((t) =>
@@ -57,31 +72,56 @@ export function JourneysTab({ dashboard, templates, isLoading, onRefresh }: Jour
 
   const handleStart = useCallback(
     async (templateId: string) => {
-      if (startingId || !canStart) return
+      if (startingId) return
+      if (!canStart) {
+        setShowMaxSheet(true)
+        return
+      }
       setStartingId(templateId)
       setError(null)
       triggerHaptic('medium')
 
+      const personalization: PersonalizationSettings = { pace: selectedPace }
+
       try {
         const journey = await journeyEngineService.startJourney({
           template_id: templateId,
+          personalization,
         })
         triggerHaptic('success')
+        setDetailTemplate(null)
         router.push(`/m/journeys/${journey.journey_id}`)
         onRefresh()
       } catch (err) {
         triggerHaptic('error')
-        setError(
-          err instanceof JourneyEngineError
-            ? err.message
-            : 'Failed to start journey',
-        )
+        if (err instanceof JourneyEngineError && JourneyEngineError.isMaxJourneysError(err)) {
+          setShowMaxSheet(true)
+        } else {
+          setError(
+            err instanceof JourneyEngineError
+              ? err.message
+              : 'Failed to start journey',
+          )
+        }
       } finally {
         setStartingId(null)
       }
     },
-    [startingId, canStart, triggerHaptic, router, onRefresh],
+    [startingId, canStart, triggerHaptic, selectedPace, router, onRefresh],
   )
+
+  const handleTemplateCardTap = (template: JourneyTemplate) => {
+    if (!canStart) {
+      setShowMaxSheet(true)
+      return
+    }
+    triggerHaptic('light')
+    setDetailTemplate(template)
+    setSelectedPace('daily')
+  }
+
+  const detailEnemy = detailTemplate?.primary_enemy_tags[0] as EnemyType | undefined
+  const detailInfo = detailEnemy ? ENEMY_INFO[detailEnemy] : null
 
   return (
     <div className="px-4 pb-6 space-y-5">
@@ -118,11 +158,15 @@ export function JourneysTab({ dashboard, templates, isLoading, onRefresh }: Jour
                   ? info.color
                   : 'rgba(255,255,255,0.05)',
                 color: isActive ? '#050714' : info.color,
-                boxShadow: isActive ? `0 2px 8px ${info.color}40` : 'none',
+                boxShadow: isActive ? `0 2px 8px rgba(${info.colorRGB},0.3)` : 'none',
               }}
             >
-              <span className="text-xs">{ICON_EMOJI[info.icon] || '\u2728'}</span>
-              {info.sanskrit}
+              <span
+                className="text-[10px]"
+                style={{ fontFamily: '"Noto Sans Devanagari", sans-serif' }}
+              >
+                {info.devanagari}
+              </span>
             </button>
           )
         })}
@@ -168,7 +212,7 @@ export function JourneysTab({ dashboard, templates, isLoading, onRefresh }: Jour
         </div>
       )}
 
-      {/* Max warning */}
+      {/* Max warning (inline) */}
       {!canStart && (
         <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 px-4 py-2">
           <p className="text-[11px] text-amber-300/80 font-ui text-center">
@@ -190,7 +234,7 @@ export function JourneysTab({ dashboard, templates, isLoading, onRefresh }: Jour
               <JourneyTemplateCard
                 key={template.id}
                 template={template}
-                onStart={handleStart}
+                onStart={() => handleTemplateCardTap(template)}
                 isStarting={startingId === template.id}
                 disabled={!canStart}
                 index={i}
@@ -207,6 +251,163 @@ export function JourneysTab({ dashboard, templates, isLoading, onRefresh }: Jour
           </div>
         )}
       </section>
+
+      {/* Template Detail Modal */}
+      <AnimatePresence>
+        {detailTemplate && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end justify-center"
+            onClick={() => setDetailTemplate(null)}
+          >
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+
+            {/* Sheet */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="relative w-full max-h-[85vh] overflow-y-auto rounded-t-3xl"
+              style={{
+                background: detailInfo
+                  ? `linear-gradient(170deg, rgba(${detailInfo.colorRGB},0.1), rgba(5,7,20,0.99) 40%)`
+                  : 'rgba(5,7,20,0.99)',
+                borderTop: detailInfo ? `2px solid ${detailInfo.color}40` : '2px solid rgba(212,160,23,0.3)',
+                paddingBottom: 'env(safe-area-inset-bottom, 16px)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Handle */}
+              <div className="flex justify-center pt-3 pb-2">
+                <div className="w-10 h-1 rounded-full bg-white/20" />
+              </div>
+
+              <div className="px-5 pb-6">
+                {/* Enemy badge */}
+                {detailInfo && (
+                  <div className="flex items-center gap-2 mb-3">
+                    <span
+                      className="text-lg"
+                      style={{
+                        fontFamily: '"Noto Sans Devanagari", sans-serif',
+                        color: detailInfo.color,
+                      }}
+                    >
+                      {detailInfo.devanagari}
+                    </span>
+                    <span className="text-xs font-ui" style={{ color: detailInfo.color }}>
+                      {detailInfo.name}
+                    </span>
+                  </div>
+                )}
+
+                {/* Title */}
+                <h2 className="text-xl font-ui font-bold text-[#EDE8DC] mb-1">
+                  {detailTemplate.title}
+                </h2>
+                <p className="text-sm text-[#B8AE98] font-ui mb-4">
+                  {detailTemplate.description || 'Begin your journey of inner transformation'}
+                </p>
+
+                {/* Metadata pills */}
+                <div className="flex gap-2 mb-5">
+                  <span className="text-[10px] px-2.5 py-1 rounded-full bg-[#D4A017]/15 text-[#D4A017] font-ui">
+                    {detailTemplate.duration_days} Days
+                  </span>
+                  <span className="text-[10px] px-2.5 py-1 rounded-full bg-white/10 text-white/70 font-ui">
+                    {getDifficultyLabel(detailTemplate.difficulty)}
+                  </span>
+                  {detailTemplate.is_free && (
+                    <span className="text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 font-ui">
+                      Free
+                    </span>
+                  )}
+                </div>
+
+                {/* Gita verse reference */}
+                {detailInfo && (
+                  <div className="bg-white/[0.03] rounded-xl p-3 mb-5">
+                    <p className="text-[9px] text-[#D4A017]/50 font-ui uppercase tracking-wider mb-1">
+                      BG {detailInfo.keyVerse.chapter}.{detailInfo.keyVerse.verse}
+                    </p>
+                    <p className="text-xs text-[#B8AE98] font-sacred italic">
+                      {detailInfo.keyVerseText}
+                    </p>
+                  </div>
+                )}
+
+                {/* Pace selector */}
+                <div className="mb-5">
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-[#6B6355] font-ui mb-2">
+                    Choose Your Pace
+                  </p>
+                  <div className="flex gap-2">
+                    {PACE_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => {
+                          triggerHaptic('light')
+                          setSelectedPace(option.value)
+                        }}
+                        className="flex-1 rounded-xl py-2.5 text-center transition-all"
+                        style={{
+                          backgroundColor:
+                            selectedPace === option.value
+                              ? '#D4A017'
+                              : 'rgba(255,255,255,0.05)',
+                          color:
+                            selectedPace === option.value
+                              ? '#050714'
+                              : 'rgba(255,255,255,0.6)',
+                          boxShadow:
+                            selectedPace === option.value
+                              ? '0 2px 12px rgba(212,160,23,0.3)'
+                              : 'none',
+                        }}
+                      >
+                        <div className="text-[12px] font-ui font-semibold">{option.label}</div>
+                        <div className="text-[9px] font-ui opacity-70">{option.desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-[#6B6355] font-ui mt-1.5 text-center">
+                    Est. completion: {estimateCompletion(detailTemplate.duration_days, selectedPace)}
+                  </p>
+                </div>
+
+                {/* Start button */}
+                <button
+                  onClick={() => handleStart(detailTemplate.id)}
+                  disabled={!!startingId}
+                  className="w-full rounded-xl py-3.5 text-sm font-ui font-bold text-[#050714] active:scale-[0.97] transition-transform disabled:opacity-50"
+                  style={{
+                    background: detailInfo
+                      ? `linear-gradient(135deg, ${detailInfo.color}cc, ${detailInfo.color})`
+                      : 'linear-gradient(135deg, #D4A017cc, #D4A017)',
+                    boxShadow: detailInfo
+                      ? `0 4px 20px rgba(${detailInfo.colorRGB},0.35)`
+                      : '0 4px 20px rgba(212,160,23,0.35)',
+                  }}
+                >
+                  {startingId === detailTemplate.id
+                    ? 'Starting...'
+                    : `Begin ${detailTemplate.duration_days}-Day Journey`}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Max Journeys Sheet */}
+      <MaxJourneysSheet
+        isOpen={showMaxSheet}
+        onClose={() => setShowMaxSheet(false)}
+      />
     </div>
   )
 }

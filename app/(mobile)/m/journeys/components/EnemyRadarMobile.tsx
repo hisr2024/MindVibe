@@ -1,9 +1,8 @@
 /**
  * EnemyRadarMobile — Touch-interactive SVG hexagonal radar chart.
  *
- * Displays mastery levels for the 6 inner enemies in a radar visualization.
- * Each axis endpoint is tappable to select an enemy. Algorithm ported from
- * the desktop EnemyRadarChart in JourneysPageClient.tsx.
+ * Displays mastery levels for the 6 inner enemies with draw-in animation,
+ * tappable endpoint circles, and Devanagari axis labels.
  */
 
 'use client'
@@ -15,10 +14,8 @@ import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
 interface EnemyRadarMobileProps {
   data: EnemyProgressResponse[]
-  /** Which enemy is currently tapped/selected (if any) */
   selectedEnemy?: EnemyType | null
   onEnemyTap?: (enemy: EnemyType) => void
-  /** Diameter. Defaults to 280 */
   size?: number
 }
 
@@ -37,12 +34,12 @@ export function EnemyRadarMobile({
   data,
   selectedEnemy,
   onEnemyTap,
-  size = 280,
+  size = 300,
 }: EnemyRadarMobileProps) {
   const { triggerHaptic } = useHapticFeedback()
   const center = size / 2
-  const maxRadius = size * 0.36
-  const levels = 3 // concentric hexagons
+  const maxRadius = size * 0.34
+  const levels = 3
 
   const getMastery = (enemy: string): number =>
     data.find((p) => p.enemy === enemy)?.mastery_level ?? 0
@@ -50,6 +47,12 @@ export function EnemyRadarMobile({
   // Data polygon path
   const points = ENEMY_ORDER.map((enemy, i) => getPoint(i, getMastery(enemy), center, maxRadius))
   const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z'
+
+  // Calculate total path length for draw-in animation
+  const pathLength = points.reduce((sum, p, i) => {
+    const next = points[(i + 1) % points.length]
+    return sum + Math.sqrt((next.x - p.x) ** 2 + (next.y - p.y) ** 2)
+  }, 0)
 
   return (
     <div className="relative flex items-center justify-center">
@@ -86,23 +89,27 @@ export function EnemyRadarMobile({
           )
         })}
 
-        {/* Axis lines */}
-        {ENEMY_ORDER.map((_, i) => {
+        {/* Axis lines with draw-in */}
+        {ENEMY_ORDER.map((enemy, i) => {
           const a = (Math.PI * 2 * i) / 6 - Math.PI / 2
+          const info = ENEMY_INFO[enemy]
           return (
-            <line
+            <motion.line
               key={`axis-${i}`}
               x1={center}
               y1={center}
               x2={center + maxRadius * Math.cos(a)}
               y2={center + maxRadius * Math.sin(a)}
-              stroke="rgba(255,255,255,0.05)"
-              strokeWidth="1"
+              stroke={selectedEnemy === enemy ? `${info.color}40` : 'rgba(255,255,255,0.05)'}
+              strokeWidth={selectedEnemy === enemy ? 1.5 : 1}
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.3, delay: 0.1 + i * 0.05 }}
             />
           )
         })}
 
-        {/* Data polygon */}
+        {/* Data polygon with draw-in */}
         <motion.path
           d={pathD}
           fill="url(#mobileRadarFill)"
@@ -110,12 +117,19 @@ export function EnemyRadarMobile({
           strokeWidth="1.5"
           filter="url(#mobileRadarGlow)"
           initial={{ opacity: 0, scale: 0.3 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
+          animate={{
+            opacity: 1,
+            scale: [0.3, 1.02, 1],
+          }}
+          transition={{
+            duration: 0.8,
+            delay: 0.4,
+            ease: [0.25, 0.1, 0.0, 1.0],
+          }}
           style={{ transformOrigin: `${center}px ${center}px` }}
         />
 
-        {/* Data points (tappable) */}
+        {/* Data points (tappable) with pop-in animation */}
         {ENEMY_ORDER.map((enemy, i) => {
           const mastery = getMastery(enemy)
           const p = getPoint(i, mastery, center, maxRadius)
@@ -128,14 +142,21 @@ export function EnemyRadarMobile({
               key={enemy}
               cx={p.x}
               cy={p.y}
-              r={isSelected ? 8 : 5}
+              r={isSelected ? 9 : 5}
               fill={info.color}
-              stroke="white"
+              stroke={isSelected ? 'white' : `${info.color}80`}
               strokeWidth={isSelected ? 2.5 : 1.5}
               opacity={dimmed ? 0.3 : 1}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.5 + i * 0.08 }}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{
+                scale: isSelected ? [0, 1.2, 1] : [0, 1.1, 1],
+                opacity: dimmed ? 0.3 : 1,
+              }}
+              transition={{
+                duration: 0.4,
+                delay: 0.6 + i * 0.08,
+                ease: [0.34, 1.56, 0.64, 1],
+              }}
               style={{ cursor: 'pointer' }}
               onClick={() => {
                 triggerHaptic('light')
@@ -145,10 +166,10 @@ export function EnemyRadarMobile({
           )
         })}
 
-        {/* Axis labels */}
+        {/* Axis labels with Devanagari */}
         {ENEMY_ORDER.map((enemy, i) => {
           const a = (Math.PI * 2 * i) / 6 - Math.PI / 2
-          const lr = maxRadius + 28
+          const lr = maxRadius + 30
           const x = center + lr * Math.cos(a)
           const y = center + lr * Math.sin(a)
           const info = ENEMY_INFO[enemy]
@@ -158,7 +179,7 @@ export function EnemyRadarMobile({
             <g
               key={`label-${enemy}`}
               opacity={dimmed ? 0.3 : 1}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: 'pointer', transition: 'opacity 0.3s' }}
               onClick={() => {
                 triggerHaptic('light')
                 onEnemyTap?.(enemy)
@@ -166,13 +187,14 @@ export function EnemyRadarMobile({
             >
               <text
                 x={x}
-                y={y - 6}
+                y={y - 7}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                className="text-[10px] font-divine italic"
+                className="text-[11px]"
+                style={{ fontFamily: '"Noto Sans Devanagari", sans-serif' }}
                 fill={info.color}
               >
-                {info.sanskrit}
+                {info.devanagari}
               </text>
               <text
                 x={x}

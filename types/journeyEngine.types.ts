@@ -39,12 +39,26 @@ export interface EnemyDisplayInfo {
   type: EnemyType;
   name: string;
   sanskrit: string;
+  /** Devanagari script name */
+  devanagari: string;
   description: string;
   color: string;
+  /** RGB triplet for rgba() usage, e.g. '220,38,38' */
+  colorRGB: string;
   gradient: string;
   icon: string;
   keyVerse: { chapter: number; verse: number };
+  /** Sanskrit verse line for this enemy */
+  keyVerseText: string;
   antidote: string;
+  /** Which chakra this enemy is associated with */
+  chakra: string;
+  /** The virtue/practice that conquers this enemy */
+  conqueredBy: string;
+  /** Modern context examples */
+  modernContext: string;
+  /** Path to AI-generated hero image */
+  heroImage: string;
 }
 
 export const ENEMY_INFO: Record<EnemyType, EnemyDisplayInfo> = {
@@ -52,67 +66,109 @@ export const ENEMY_INFO: Record<EnemyType, EnemyDisplayInfo> = {
     type: 'kama',
     name: 'Desire',
     sanskrit: 'Kama',
-    description: 'Uncontrolled desires and cravings that disturb inner peace',
-    color: '#EF4444',
+    devanagari: '\u0915\u093E\u092E',
+    description: 'The wanting mind that is never satisfied',
+    color: '#DC2626',
+    colorRGB: '220,38,38',
     gradient: 'from-red-500 to-rose-600',
     icon: 'flame',
     keyVerse: { chapter: 3, verse: 37 },
+    keyVerseText: 'k\u0101ma e\u1E63a krodha e\u1E63a rajo-gu\u1E47a-samudbhava\u1E25',
     antidote: 'Contentment (Santosha)',
+    chakra: 'Muladhara (Root)',
+    conqueredBy: 'Nishkama Karma \u2014 desireless action',
+    modernContext: 'Endless scrolling, compulsive shopping, relationship obsession',
+    heroImage: '/images/journeys/enemies/kama.webp',
   },
   krodha: {
     type: 'krodha',
     name: 'Anger',
     sanskrit: 'Krodha',
-    description: 'Destructive anger that clouds judgment and harms relationships',
-    color: '#F97316',
+    devanagari: '\u0915\u094D\u0930\u094B\u0927',
+    description: 'The reactive fire that destroys wisdom',
+    color: '#B45309',
+    colorRGB: '180,83,9',
     gradient: 'from-orange-500 to-amber-600',
     icon: 'zap',
     keyVerse: { chapter: 2, verse: 63 },
+    keyVerseText: 'krodh\u0101d bhavati sammoha\u1E25',
     antidote: 'Patience (Kshama)',
+    chakra: 'Manipura (Solar Plexus)',
+    conqueredBy: 'Viveka \u2014 discrimination and pause before reaction',
+    modernContext: 'Road rage, social media outrage, reactive arguments',
+    heroImage: '/images/journeys/enemies/krodha.webp',
   },
   lobha: {
     type: 'lobha',
     name: 'Greed',
     sanskrit: 'Lobha',
-    description: 'Excessive attachment to possessions and accumulation',
-    color: '#22C55E',
+    devanagari: '\u0932\u094B\u092D',
+    description: 'The grasping hand that can never hold enough',
+    color: '#059669',
+    colorRGB: '5,150,105',
     gradient: 'from-green-500 to-emerald-600',
     icon: 'coins',
     keyVerse: { chapter: 14, verse: 17 },
+    keyVerseText: 'lobha\u1E25 prav\u1E5Btti\u1E25 \u0101rambha\u1E25 karma\u1E47\u0101m a\u015Bama\u1E25 sp\u1E5Bh\u0101',
     antidote: 'Generosity (Dana)',
+    chakra: 'Anahata (Heart)',
+    conqueredBy: 'Dana \u2014 generous giving without expectation',
+    modernContext: 'Hoarding, financial anxiety, never feeling "enough"',
+    heroImage: '/images/journeys/enemies/lobha.webp',
   },
   moha: {
     type: 'moha',
     name: 'Delusion',
     sanskrit: 'Moha',
-    description: 'Attachment and confusion that veils true understanding',
-    color: '#8B5CF6',
+    devanagari: '\u092E\u094B\u0939',
+    description: 'The fog of ego that mistakes the temporary for real',
+    color: '#6D28D9',
+    colorRGB: '109,40,217',
     gradient: 'from-violet-500 to-purple-600',
     icon: 'cloud',
     keyVerse: { chapter: 2, verse: 52 },
+    keyVerseText: 'yad\u0101 te moha-kalila\u1E41 buddhir vyatitari\u1E63yati',
     antidote: 'Wisdom (Viveka)',
+    chakra: 'Ajna (Third Eye)',
+    conqueredBy: 'Viveka-Vairagya \u2014 discrimination and detachment',
+    modernContext: 'Toxic relationships, identity attachment, fear of change',
+    heroImage: '/images/journeys/enemies/moha.webp',
   },
   mada: {
     type: 'mada',
     name: 'Pride',
     sanskrit: 'Mada',
-    description: 'Ego and arrogance that create separation from others',
-    color: '#06B6D4',
-    gradient: 'from-cyan-500 to-teal-600',
+    devanagari: '\u092E\u0926',
+    description: 'The inflated self that forgets its true nature',
+    color: '#1D4ED8',
+    colorRGB: '29,78,216',
+    gradient: 'from-blue-500 to-indigo-600',
     icon: 'crown',
     keyVerse: { chapter: 16, verse: 4 },
+    keyVerseText: 'darpo \'bhim\u0101nat\u0101 krodha\u1E25 p\u0101ru\u1E63yam eva ca',
     antidote: 'Humility (Vinaya)',
+    chakra: 'Vishuddha (Throat)',
+    conqueredBy: 'Namrata \u2014 genuine humility, seeing self in all',
+    modernContext: 'Arrogance, inability to accept feedback, need to be right',
+    heroImage: '/images/journeys/enemies/mada.webp',
   },
   matsarya: {
     type: 'matsarya',
     name: 'Envy',
     sanskrit: 'Matsarya',
-    description: 'Jealousy of others success and possessions',
-    color: '#EC4899',
+    devanagari: '\u092E\u093E\u0924\u094D\u0938\u0930\u094D\u092F',
+    description: 'The comparing mind that cannot celebrate others',
+    color: '#9D174D',
+    colorRGB: '157,23,77',
     gradient: 'from-pink-500 to-rose-600',
     icon: 'eye',
     keyVerse: { chapter: 12, verse: 13 },
+    keyVerseText: 'adve\u1E63\u1E6D\u0101 sarva-bh\u016Bt\u0101n\u0101\u1E41 maitra\u1E25 karu\u1E47a eva ca',
     antidote: 'Sympathetic Joy (Mudita)',
+    chakra: 'Sahasrara (Crown)',
+    conqueredBy: 'Mudita \u2014 sympathetic joy in others\' success',
+    modernContext: 'Social media comparison, jealousy of colleagues, resentment',
+    heroImage: '/images/journeys/enemies/matsarya.webp',
   },
 };
 

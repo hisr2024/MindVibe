@@ -1,12 +1,12 @@
 /**
  * WisdomTab — Daily Gita teaching: serene contemplation screen
- * with Sanskrit reveal, KIAAN reflection, and 7-day archive.
+ * with Sanskrit reveal, KIAAN reflection, 7-day archive, and actions.
  */
 
 'use client'
 
-import { useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { useMemo, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { getDailyWisdom } from '@/utils/voice/dailyWisdom'
 import { DailyWisdomCardMobile } from '../components/DailyWisdomCardMobile'
 import { WisdomCardSkeleton } from '../skeletons/WisdomCardSkeleton'
@@ -15,6 +15,7 @@ const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export function WisdomTab() {
   const todayVerse = useMemo(() => getDailyWisdom(), [])
+  const [expandedDay, setExpandedDay] = useState<number | null>(null)
 
   return (
     <div className="px-4 pb-6">
@@ -24,7 +25,10 @@ export function WisdomTab() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center pt-2 mb-5"
       >
-        <h1 className="font-divine text-[22px] italic text-[#D4A017]">
+        <h1
+          className="font-divine text-[22px] italic text-[#D4A017]"
+          style={{ textShadow: '0 0 16px rgba(212,160,23,0.2)' }}
+        >
           {'\u0906\u091C \u0915\u093E \u091C\u094D\u091E\u093E\u0928'}
         </h1>
         <p className="text-xs text-[#B8AE98] font-ui mt-1">
@@ -47,7 +51,7 @@ export function WisdomTab() {
         <WisdomCardSkeleton />
       )}
 
-      {/* 7-day archive hint */}
+      {/* 7-day archive */}
       <motion.section
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -64,15 +68,18 @@ export function WisdomTab() {
             date.setDate(date.getDate() + dayOffset)
             const dow = date.getDay()
             const isToday = dayOffset === 0
+            const isExpanded = expandedDay === i
 
             return (
-              <motion.div
+              <motion.button
                 key={i}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.7 + i * 0.05 }}
-                className="flex-shrink-0 w-[100px] h-[80px] rounded-xl flex flex-col items-center justify-center"
+                onClick={() => setExpandedDay(isExpanded ? null : i)}
+                className="flex-shrink-0 w-[100px] rounded-xl flex flex-col items-center justify-center transition-all"
                 style={{
+                  height: isExpanded ? 100 : 80,
                   border: isToday
                     ? '1.5px solid rgba(212,160,23,0.5)'
                     : '1px solid rgba(255,255,255,0.06)',
@@ -87,16 +94,16 @@ export function WisdomTab() {
                 <span className="text-[11px] text-[#B8AE98] font-ui mt-0.5">
                   {date.getDate()}
                 </span>
-                {isToday ? (
+                {isToday && todayVerse ? (
                   <span className="text-[9px] text-[#D4A017] font-ui mt-1">
                     BG {todayVerse.chapter}.{todayVerse.verse}
                   </span>
                 ) : (
                   <span className="text-[8px] text-[#6B6355]/60 font-ui mt-1 italic">
-                    Past
+                    {isToday ? 'Today' : 'Past'}
                   </span>
                 )}
-              </motion.div>
+              </motion.button>
             )
           })}
         </div>
@@ -109,7 +116,10 @@ export function WisdomTab() {
         transition={{ delay: 1 }}
         className="mt-6 text-center"
       >
-        <p className="text-[10px] text-[#D4A017]/30 font-divine italic">
+        <p
+          className="text-[10px] text-[#D4A017]/30 font-divine italic"
+          style={{ fontFamily: '"Noto Sans Devanagari", "Cormorant Garamond", serif' }}
+        >
           {'\u0905\u092D\u094D\u092F\u093E\u0938\u0947\u0928 \u0924\u0941 \u0915\u094C\u0928\u094D\u0924\u0947\u092F \u0935\u0948\u0930\u093E\u0917\u094D\u092F\u0947\u0923 \u091A \u0917\u0943\u0939\u094D\u092F\u0924\u0947'}
         </p>
         <p className="text-[9px] text-[#6B6355]/60 font-ui mt-1">

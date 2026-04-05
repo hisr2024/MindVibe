@@ -1,5 +1,6 @@
 /**
- * EnemyCard — Single enemy card with gradient for BattlegroundTab.
+ * EnemyCard — Single enemy card with gradient, sacred symbol, and mastery bar.
+ * Shows Devanagari name, mastery level, and current status.
  */
 
 'use client'
@@ -7,15 +8,7 @@
 import { motion } from 'framer-motion'
 import type { EnemyType } from '@/types/journeyEngine.types'
 import { ENEMY_INFO, getMasteryDescription } from '@/types/journeyEngine.types'
-
-const ICON_EMOJI: Record<string, string> = {
-  flame: '\uD83D\uDD25',
-  zap: '\u26A1',
-  coins: '\uD83D\uDCB0',
-  cloud: '\u2601\uFE0F',
-  crown: '\uD83D\uDC51',
-  eye: '\uD83D\uDC41\uFE0F',
-}
+import { EnemySacredSymbol } from '@/components/journey/EnemySacredSymbol'
 
 interface EnemyCardProps {
   enemy: EnemyType
@@ -40,22 +33,33 @@ export function EnemyCard({ enemy, mastery, isSelected, onTap, index = 0 }: Enem
         border: isSelected
           ? `2px solid ${info.color}`
           : '1px solid rgba(255,255,255,0.07)',
-        boxShadow: isSelected ? `0 0 20px ${info.color}40` : 'none',
+        boxShadow: isSelected ? `0 0 24px rgba(${info.colorRGB},0.35)` : 'none',
+        transform: isSelected ? 'scale(1.03)' : undefined,
       }}
     >
       {/* Background gradient */}
       <div
         className="absolute inset-0"
         style={{
-          background: `linear-gradient(135deg, ${info.color}30, rgba(5,7,20,0.95))`,
+          background: `linear-gradient(135deg, rgba(${info.colorRGB},0.2), rgba(5,7,20,0.95))`,
         }}
       />
 
+      {/* Sacred symbol (background, bottom-right) */}
+      <div className="absolute bottom-2 right-2">
+        <EnemySacredSymbol enemy={enemy} size={56} opacity={isSelected ? 0.25 : 0.12} />
+      </div>
+
       <div className="relative p-3 flex flex-col justify-between h-full">
         <div>
-          <span className="text-xl">{ICON_EMOJI[info.icon] || '\u2728'}</span>
-          <div className="mt-1 font-divine text-2xl italic text-white/90">
-            {info.sanskrit}
+          <div
+            className="text-[22px] leading-none mb-0.5"
+            style={{
+              fontFamily: '"Noto Sans Devanagari", sans-serif',
+              color: `rgba(${info.colorRGB},0.85)`,
+            }}
+          >
+            {info.devanagari}
           </div>
           <div className="text-[11px] font-ui text-[#EDE8DC]">
             {info.name}

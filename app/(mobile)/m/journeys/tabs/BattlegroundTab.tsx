@@ -1,6 +1,6 @@
 /**
  * BattlegroundTab — षड्रिपु Radar: visual enemy mastery with
- * interactive radar chart, enemy cards, and detail sheet.
+ * interactive radar chart, enemy cards with sacred symbols, and detail sheet.
  */
 
 'use client'
@@ -12,6 +12,7 @@ import type { DashboardResponse, EnemyType } from '@/types/journeyEngine.types'
 import { ENEMY_INFO, ENEMY_ORDER, getMasteryDescription } from '@/types/journeyEngine.types'
 import { EnemyRadarMobile } from '../components/EnemyRadarMobile'
 import { EnemyCard } from '../components/EnemyCard'
+import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
 interface BattlegroundTabProps {
   dashboard: DashboardResponse | null
@@ -20,8 +21,10 @@ interface BattlegroundTabProps {
 
 export function BattlegroundTab({ dashboard, isLoading }: BattlegroundTabProps) {
   const [selectedEnemy, setSelectedEnemy] = useState<EnemyType | null>(null)
+  const { triggerHaptic } = useHapticFeedback()
 
   const handleEnemyTap = (enemy: EnemyType) => {
+    triggerHaptic('light')
     setSelectedEnemy((prev) => (prev === enemy ? null : enemy))
   }
 
@@ -34,7 +37,6 @@ export function BattlegroundTab({ dashboard, isLoading }: BattlegroundTabProps) 
     : null
   const selectedMastery = selectedProgress?.mastery_level ?? 0
 
-  // Check if user has an active journey for the selected enemy
   const activeJourneyForEnemy = selectedEnemy
     ? dashboard?.active_journeys.find((j) =>
         j.primary_enemies.includes(selectedEnemy),
@@ -49,7 +51,10 @@ export function BattlegroundTab({ dashboard, isLoading }: BattlegroundTabProps) 
         animate={{ opacity: 1, y: 0 }}
         className="text-center pt-2 mb-4"
       >
-        <h1 className="font-divine text-4xl font-light text-[#D4A017]">
+        <h1
+          className="font-divine text-[34px] font-light text-[#D4A017]"
+          style={{ textShadow: '0 0 20px rgba(212,160,23,0.3)' }}
+        >
           {'\u0937\u0921\u094D\u0930\u093F\u092A\u0941'}
         </h1>
         <p className="text-[11px] text-[#6B6355] font-ui mt-1">
@@ -67,7 +72,7 @@ export function BattlegroundTab({ dashboard, isLoading }: BattlegroundTabProps) 
           data={dashboard?.enemy_progress ?? []}
           selectedEnemy={selectedEnemy}
           onEnemyTap={handleEnemyTap}
-          size={280}
+          size={300}
         />
       )}
 
@@ -89,14 +94,14 @@ export function BattlegroundTab({ dashboard, isLoading }: BattlegroundTabProps) 
       <AnimatePresence>
         {selectedEnemy && selectedInfo && (
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 60 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 40 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 200 }}
-            className="mt-5 rounded-2xl overflow-hidden backdrop-blur-sm"
+            exit={{ opacity: 0, y: 60 }}
+            transition={{ type: 'spring', damping: 22, stiffness: 200 }}
+            className="mt-5 rounded-2xl overflow-hidden backdrop-blur-lg"
             style={{
-              background: `linear-gradient(160deg, ${selectedInfo.color}20, rgba(11,14,42,0.98))`,
-              border: `1px solid ${selectedInfo.color}30`,
+              background: `linear-gradient(160deg, rgba(${selectedInfo.colorRGB},0.12), rgba(11,14,42,0.98))`,
+              border: `1px solid rgba(${selectedInfo.colorRGB},0.25)`,
             }}
           >
             {/* Handle bar */}
@@ -105,25 +110,34 @@ export function BattlegroundTab({ dashboard, isLoading }: BattlegroundTabProps) 
             </div>
 
             <div className="p-5">
-              {/* Hero row */}
+              {/* Hero row with Devanagari */}
               <div className="flex items-center gap-4 mb-4">
                 <div
-                  className="w-16 h-16 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: `${selectedInfo.color}20` }}
+                  className="w-[72px] h-[72px] rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: `rgba(${selectedInfo.colorRGB},0.15)` }}
                 >
-                  <span className="font-divine text-3xl italic" style={{ color: selectedInfo.color }}>
-                    {selectedInfo.sanskrit.charAt(0)}
+                  <span
+                    className="text-[28px] leading-none"
+                    style={{
+                      fontFamily: '"Noto Sans Devanagari", sans-serif',
+                      color: selectedInfo.color,
+                    }}
+                  >
+                    {selectedInfo.devanagari}
                   </span>
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <h2
                     className="font-divine text-2xl italic"
                     style={{ color: selectedInfo.color }}
                   >
                     {selectedInfo.sanskrit}
                   </h2>
-                  <p className="text-sm text-[#B8AE98] font-ui">
-                    {selectedInfo.name} — {selectedInfo.description}
+                  <p className="text-sm text-[#EDE8DC] font-ui">
+                    {selectedInfo.name}
+                  </p>
+                  <p className="text-xs text-[#B8AE98] font-ui mt-0.5">
+                    {selectedInfo.description}
                   </p>
                 </div>
               </div>
@@ -147,13 +161,46 @@ export function BattlegroundTab({ dashboard, isLoading }: BattlegroundTabProps) 
                 </div>
               </div>
 
+              {/* Stats row */}
+              {selectedProgress && (
+                <div className="flex gap-3 mb-4">
+                  {[
+                    { label: 'Started', value: selectedProgress.journeys_started },
+                    { label: 'Completed', value: selectedProgress.journeys_completed },
+                    { label: 'Days', value: selectedProgress.total_days_practiced },
+                    { label: 'Streak', value: selectedProgress.current_streak },
+                  ].map((stat) => (
+                    <div
+                      key={stat.label}
+                      className="flex-1 rounded-xl bg-white/[0.04] py-2 text-center"
+                    >
+                      <div className="text-sm font-divine text-[#F0C040]">{stat.value}</div>
+                      <div className="text-[8px] text-[#6B6355] font-ui">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* Key verse */}
               <div className="bg-white/[0.03] rounded-xl p-3 mb-4">
                 <p className="text-[9px] text-[#D4A017]/50 font-ui uppercase tracking-wider mb-1">
                   Key Verse — BG {selectedInfo.keyVerse.chapter}.{selectedInfo.keyVerse.verse}
                 </p>
-                <p className="text-xs text-[#B8AE98] font-sacred italic">
-                  Antidote: {selectedInfo.antidote}
+                <p className="text-xs text-[#B8AE98] font-sacred italic mb-1.5">
+                  {selectedInfo.keyVerseText}
+                </p>
+                <p className="text-[10px] text-[#6B6355] font-ui">
+                  Conquered by: {selectedInfo.conqueredBy}
+                </p>
+              </div>
+
+              {/* Modern context */}
+              <div className="mb-4">
+                <p className="text-[9px] text-[#6B6355] font-ui uppercase tracking-wider mb-1">
+                  In today&apos;s world
+                </p>
+                <p className="text-xs text-[#B8AE98] font-ui">
+                  {selectedInfo.modernContext}
                 </p>
               </div>
 
@@ -161,9 +208,10 @@ export function BattlegroundTab({ dashboard, isLoading }: BattlegroundTabProps) 
               {activeJourneyForEnemy ? (
                 <Link href={`/m/journeys/${activeJourneyForEnemy.journey_id}`}>
                   <button
-                    className="w-full rounded-xl py-3 text-sm font-ui font-semibold text-[#050714]"
+                    className="w-full rounded-xl py-3 text-sm font-ui font-semibold text-[#050714] active:scale-[0.97] transition-transform"
                     style={{
                       background: `linear-gradient(135deg, ${selectedInfo.color}cc, ${selectedInfo.color})`,
+                      boxShadow: `0 4px 16px rgba(${selectedInfo.colorRGB},0.3)`,
                     }}
                   >
                     Continue Day {activeJourneyForEnemy.current_day} {'\u2192'}
@@ -180,15 +228,17 @@ export function BattlegroundTab({ dashboard, isLoading }: BattlegroundTabProps) 
                   Journey Mastered {'\u2713'}
                 </button>
               ) : (
-                <button
-                  className="w-full rounded-xl py-3 text-sm font-ui font-semibold text-[#050714] active:scale-[0.97] transition-transform"
-                  style={{
-                    background: `linear-gradient(135deg, ${selectedInfo.color}cc, ${selectedInfo.color})`,
-                    boxShadow: `0 4px 16px ${selectedInfo.color}30`,
-                  }}
-                >
-                  Begin Journey {'\u2192'}
-                </button>
+                <Link href="/m/journeys">
+                  <button
+                    className="w-full rounded-xl py-3 text-sm font-ui font-semibold text-[#050714] active:scale-[0.97] transition-transform"
+                    style={{
+                      background: `linear-gradient(135deg, ${selectedInfo.color}cc, ${selectedInfo.color})`,
+                      boxShadow: `0 4px 16px rgba(${selectedInfo.colorRGB},0.3)`,
+                    }}
+                  >
+                    Begin Journey {'\u2192'}
+                  </button>
+                </Link>
               )}
             </div>
           </motion.div>
