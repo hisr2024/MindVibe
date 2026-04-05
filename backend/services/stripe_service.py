@@ -454,6 +454,139 @@ async def create_checkout_session(
 
 
 # =============================================================================
+# Embedded Checkout (returns client_secret for Stripe Elements)
+# =============================================================================
+
+async def create_embedded_checkout(
+    db: AsyncSession,
+    user: User,
+    plan_tier: SubscriptionTier,
+    billing_period: str = "monthly",
+    currency: Optional[str] = None,
+) -> dict[str, Any]:
+    """Create a Stripe subscription with incomplete payment for embedded checkout.
+
+    Instead of redirecting to Stripe's hosted checkout page, this returns a
+    client_secret that can be used with Stripe Elements (PaymentElement +
+    PaymentRequestButton) on the frontend.
+
+    Apple Pay and Google Pay are handled via the PaymentRequestButton component
+    on the frontend — they use the Payment Request API with the client_secret.
+
+    UPI, SEPA, Klarna, cards, and PayPal are handled via PaymentElement.
+
+    Args:
+        db: Database session.
+        user: The user purchasing the subscription.
+        plan_tier: The subscription tier to purchase.
+        billing_period: "monthly" or "yearly".
+        currency: Payment currency (inr, eur, usd).
+
+    Returns:
+        dict with client_secret, subscription_id, and payment_methods.
+    """
+    if not is_stripe_configured():
+        raise RuntimeError("Stripe is not configured")
+
+    plan = await get_plan_by_tier(db, plan_tier)
+    if not plan:
+        raise ValueError(f"Plan not found for tier: {plan_tier}")
+
+    # Get the appropriate price ID
+    effective_currency = (currency or "usd").lower()
+    if effective_currency == "inr":
+        price_id = (
+            plan.stripe_price_id_yearly_inr if billing_period == "yearly"
+            else plan.stripe_price_id_monthly_inr
+        )
+        if not price_id:
+            raise ValueError(
+                f"No INR Stripe price ID configured for {plan_tier} ({billing_period})"
+            )
+    else:
+        price_id = (
+            plan.stripe_price_id_yearly if billing_period == "yearly"
+            else plan.stripe_price_id_monthly
+        )
+        if not price_id:
+            raise ValueError(f"No Stripe price ID configured for {plan_tier} ({billing_period})")
+
+    try:
+        _init_stripe()
+
+        customer_id = await get_or_create_stripe_customer(db, user)
+
+        # Build payment method types based on currency.
+        # Apple Pay and Google Pay are handled by PaymentRequestButton on the
+        # frontend — they don't need entries here.
+        payment_method_types: list[str] = ["card", "link"]
+
+        if effective_currency == "inr":
+            payment_method_types.append("upi")
+
+        if effective_currency == "eur":
+            payment_method_types.extend(["sepa_debit"])
+
+        # Create subscription with incomplete payment — this generates a
+        # PaymentIntent with a client_secret that can be confirmed on the
+        # frontend using Stripe Elements.
+        subscription_params: dict[str, Any] = {
+            "customer": customer_id,
+            "items": [{"price": price_id}],
+            "payment_behavior": "default_incomplete",
+            "payment_settings": {
+                "save_default_payment_method": "on_subscription",
+                "payment_method_types": payment_method_types,
+            },
+            "expand": ["latest_invoice.payment_intent"],
+            "metadata": {
+                "user_id": str(user.id),
+                "plan_tier": plan_tier.value,
+                "billing_period": billing_period,
+                "currency": effective_currency,
+                "checkout_mode": "embedded",
+            },
+        }
+
+        # Add trial period (7 days for paid tiers)
+        if plan_tier != SubscriptionTier.FREE:
+            subscription_params["trial_period_days"] = 7
+
+        subscription = stripe.Subscription.create(**subscription_params)
+
+        # Extract the client_secret from the PaymentIntent
+        invoice = subscription.latest_invoice
+        payment_intent = invoice.payment_intent if invoice else None
+
+        if not payment_intent or not payment_intent.client_secret:
+            raise RuntimeError("Failed to create payment intent for subscription")
+
+        logger.info(
+            f"Created embedded checkout for user {user.id}, "
+            f"plan {plan_tier}, period {billing_period}, "
+            f"currency {effective_currency}, "
+            f"subscription {subscription.id}"
+        )
+
+        return {
+            "client_secret": payment_intent.client_secret,
+            "subscription_id": subscription.id,
+            "payment_methods": payment_method_types,
+            "currency": effective_currency,
+        }
+
+    except stripe.error.InvalidRequestError as e:
+        logger.error(f"Stripe invalid request for embedded checkout: {e}")
+        raise ValueError(f"Payment configuration error: {e.user_message or str(e)}")
+    except stripe.error.AuthenticationError:
+        logger.error("Stripe authentication failed — check STRIPE_SECRET_KEY")
+        raise RuntimeError("Payment service authentication failed")
+    except stripe.error.StripeError as e:
+        logger.error(f"Stripe error for embedded checkout: {e}")
+        raise ValueError(f"Payment error: {e.user_message or str(e)}")
+
+
+# =============================================================================
 # Subscription Management
 # =============================================================================
 

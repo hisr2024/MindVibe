@@ -95,8 +95,9 @@ export function SignUpScreen({ onSwitchToLogin }: SignUpScreenProps) {
         body: JSON.stringify({ full_name: `${firstName.trim()} ${lastName.trim()}` }),
       }).catch(() => { /* non-blocking */ })
 
-      // Redirect to email verification
-      router.push(`/m/auth/verify?email=${encodeURIComponent(email)}`)
+      // Redirect to email verification — pass sent=false if email wasn't delivered
+      const sentParam = data.email_verification_sent === false ? '&sent=false' : ''
+      router.push(`/m/auth/verify?email=${encodeURIComponent(email)}${sentParam}`)
     } catch {
       setError('Connection issue. Please try again in a moment.')
     } finally {

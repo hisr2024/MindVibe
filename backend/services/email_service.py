@@ -190,7 +190,7 @@ async def send_password_reset_email(to: str, reset_token: str) -> bool:
     The link points to the frontend reset page which will call the
     POST /api/auth/reset-password endpoint with the token.
     """
-    reset_url = f"{FRONTEND_URL}/auth/reset-password?token={reset_token}"
+    reset_url = f"{FRONTEND_URL}/m/auth/reset-password?token={reset_token}"
 
     subject = "Reset your MindVibe password"
 
@@ -253,7 +253,7 @@ async def send_email_verification(to: str, verification_token: str) -> bool:
     The link points to the frontend verification page which will call
     POST /api/auth/verify-email with the token.
     """
-    verify_url = f"{FRONTEND_URL}/auth/verify-email?token={verification_token}"
+    verify_url = f"{FRONTEND_URL}/m/auth/verify?token={verification_token}"
 
     subject = "Verify your MindVibe email address"
 

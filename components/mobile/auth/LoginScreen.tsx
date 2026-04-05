@@ -27,6 +27,7 @@ export function LoginScreen({ onSwitchToSignUp }: LoginScreenProps) {
   const [loading, setLoading] = useState(false)
   const [socialLoading, setSocialLoading] = useState(false)
   const [error, setError] = useState('')
+  const [errorCode, setErrorCode] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const validateForm = (): boolean => {
@@ -60,9 +61,12 @@ export function LoginScreen({ onSwitchToSignUp }: LoginScreenProps) {
 
       if (!res.ok) {
         // Backend may return {detail: "string"} or {detail: {detail: "msg", code: "..."}}
+        const code = (data.detail && typeof data.detail === 'object' && !Array.isArray(data.detail))
+          ? data.detail.code : ''
         const msg = typeof data.detail === 'string'
           ? data.detail
           : data.detail?.detail || data.error || 'Unable to sign in. Please check your credentials.'
+        setErrorCode(code || '')
         setError(msg)
         return
       }
@@ -110,6 +114,15 @@ export function LoginScreen({ onSwitchToSignUp }: LoginScreenProps) {
       {error && (
         <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
           <p className="sacred-text-ui text-xs text-red-400 text-center">{error}</p>
+          {errorCode === 'EMAIL_NOT_VERIFIED' && (
+            <button
+              type="button"
+              onClick={() => router.push(`/m/auth/verify?email=${encodeURIComponent(email)}`)}
+              className="block mx-auto mt-2 sacred-text-ui text-xs text-[var(--sacred-divine-gold)] hover:text-[var(--sacred-divine-gold-bright)] transition-colors"
+            >
+              Resend verification email
+            </button>
+          )}
         </div>
       )}
 
