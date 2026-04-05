@@ -1,13 +1,6 @@
 import './globals.css'
 import type { Viewport } from 'next'
 import { headers } from 'next/headers'
-import {
-  Cormorant_Garamond,
-  Crimson_Text,
-  Playfair_Display,
-  Outfit,
-  Noto_Sans_Devanagari,
-} from 'next/font/google'
 import SiteFooter from './components/SiteFooter'
 import SiteNav from './components/SiteNav'
 import Providers from './providers'
@@ -23,55 +16,21 @@ import { WebVitalsReporter } from '@/components/WebVitalsReporter'
 import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema'
 
 /**
- * Kiaanverse Unified Font Loading — next/font/google
+ * Kiaanverse Unified Font Loading — Google Fonts CDN
  *
- * All five fonts are loaded via next/font for automatic self-hosting,
- * optimal font-display, and CSS variable injection on <html>.
- * This replaces the previous Google Fonts CDN <link> approach.
+ * Five fonts loaded via CDN with display=swap for optimal LCP:
+ *   Cormorant Garamond (--font-divine): sacred display, Sanskrit headers
+ *   Crimson Text (--font-scripture): Gita verse body, reflective text
+ *   Playfair Display (--font-display): hero moments, affirmations
+ *   Outfit (--font-ui): all UI text, buttons, navigation
+ *   Noto Sans Devanagari (--font-devanagari): Sanskrit Unicode rendering
+ *
+ * CSS variables are defined in globals.css @layer base and consumed
+ * by Tailwind utilities (font-divine, font-scripture, font-display, font-ui).
  */
 
-const cormorantGaramond = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
-  style: ['normal', 'italic'],
-  variable: '--font-divine',
-  display: 'swap',
-  preload: true,
-})
-
-const crimsonText = Crimson_Text({
-  subsets: ['latin'],
-  weight: ['400', '600'],
-  style: ['normal', 'italic'],
-  variable: '--font-scripture',
-  display: 'swap',
-  preload: true,
-})
-
-const playfairDisplay = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  style: ['normal', 'italic'],
-  variable: '--font-display',
-  display: 'swap',
-  preload: false,
-})
-
-const outfit = Outfit({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
-  variable: '--font-ui',
-  display: 'swap',
-  preload: true,
-})
-
-const notoSansDevanagari = Noto_Sans_Devanagari({
-  subsets: ['devanagari'],
-  weight: ['400', '500', '600'],
-  variable: '--font-devanagari',
-  display: 'swap',
-  preload: false,
-})
+/** Google Fonts CDN URL — all five unified fonts in a single request */
+const GOOGLE_FONTS_URL = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -198,13 +157,9 @@ export default async function RootLayout({
   const nonce = headersList.get('x-nonce') ?? ''
 
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${cormorantGaramond.variable} ${crimsonText.variable} ${playfairDisplay.variable} ${outfit.variable} ${notoSansDevanagari.variable}`}
-    >
+    <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Preconnect fallback for Google Fonts (in case next/font self-hosting fails) */}
+        {/* Preconnect + load unified Kiaanverse font system via Google Fonts CDN */}
         <link
           rel="preconnect"
           href="https://fonts.googleapis.com"
@@ -213,6 +168,15 @@ export default async function RootLayout({
           rel="preconnect"
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          as="style"
+          href={GOOGLE_FONTS_URL}
+        />
+        <link
+          rel="stylesheet"
+          href={GOOGLE_FONTS_URL}
         />
         {/* JSON-LD structured data for search engine rich results */}
         <script
