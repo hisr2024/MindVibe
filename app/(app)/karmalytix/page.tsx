@@ -5,6 +5,14 @@ import { useKarmaLytixStore } from '@/stores/karmalytixStore'
 import { KarmaScoreRadar } from '@/components/karmalytix/KarmaScoreRadar'
 import { WeeklyInsightCard } from '@/components/karmalytix/WeeklyInsightCard'
 
+const PATTERN_COLORS = {
+  recurring_emotion: '#06B6D4',
+  growth_trajectory: '#10B981',
+  stagnation: '#F59E0B',
+  breakthrough: '#D4A017',
+  cycle: '#8B5CF6',
+} as const
+
 export default function KarmaLytixPage() {
   const { dashboard, isLoading, isRefreshing, error, loadDashboard, refreshInsight, clearError } =
     useKarmaLytixStore()
@@ -208,9 +216,9 @@ export default function KarmaLytixPage() {
 
           {/* Right: Insight + verses */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {dashboard.latestReport && (
+            {dashboard.latest_report && (
               <WeeklyInsightCard
-                report={dashboard.latestReport}
+                report={dashboard.latest_report}
                 onRefresh={refreshInsight}
                 isRefreshing={isRefreshing}
               />
@@ -239,7 +247,7 @@ export default function KarmaLytixPage() {
                   Active Patterns
                 </div>
                 {dashboard.patterns
-                  .filter((p) => p.isActive)
+                  .filter((p) => p.is_active)
                   .map((p) => (
                     <div
                       key={p.id}
@@ -257,12 +265,13 @@ export default function KarmaLytixPage() {
                           height: 8,
                           borderRadius: '50%',
                           background:
-                            PATTERNS[p.patternType as keyof typeof PATTERNS]?.color ?? '#D4A017',
+                            PATTERN_COLORS[p.pattern_type as keyof typeof PATTERN_COLORS] ??
+                            '#D4A017',
                           flexShrink: 0,
                         }}
                       />
                       <div style={{ fontSize: 13, color: '#EDE8DC', fontFamily: 'Outfit' }}>
-                        {p.patternName}
+                        {p.pattern_name}
                       </div>
                       <div
                         style={{
@@ -271,7 +280,7 @@ export default function KarmaLytixPage() {
                           color: '#6B6355',
                         }}
                       >
-                        {Math.round(p.confidenceScore * 100)}%
+                        {Math.round(p.confidence_score * 100)}%
                       </div>
                     </div>
                   ))}
@@ -283,11 +292,3 @@ export default function KarmaLytixPage() {
     </div>
   )
 }
-
-const PATTERNS = {
-  recurring_emotion: { color: '#06B6D4' },
-  growth_trajectory: { color: '#10B981' },
-  stagnation: { color: '#F59E0B' },
-  breakthrough: { color: '#D4A017' },
-  cycle: { color: '#8B5CF6' },
-} as const

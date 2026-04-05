@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
 from typing import Any, Optional
 
 from sqlalchemy import and_, desc, select
@@ -258,11 +258,11 @@ class KarmaLytixService:
         """Generate KIAAN sacred karma insight with fallback."""
         prompt = build_karma_insight_prompt(karma_data, patterns, comparison)
         try:
-            from backend.services.kiaan_sovereign_mind import KiaanSovereignMind
+            from backend.services.kiaan_sovereign_mind import get_sovereign_mind
 
-            mind = KiaanSovereignMind()
+            mind = await get_sovereign_mind()
             result = await asyncio.wait_for(
-                mind.generate(query=prompt, context={"type": "karma_analysis"}),
+                mind.think(query=prompt, context={"type": "karma_analysis"}),
                 timeout=10.0,
             )
             return result.get("response", self._fallback_insight(karma_data))
@@ -373,16 +373,22 @@ class KarmaLytixService:
 
     # ── DATA GATHERING ────────────────────────────────────────────────────
 
+    @staticmethod
+    def _to_dt_range(start: date, end: date) -> tuple[datetime, datetime]:
+        """Convert date range to datetime range for timestamp column queries."""
+        return datetime.combine(start, time.min), datetime.combine(end, time.max)
+
     async def _aggregate_journal_metadata(
         self, db: AsyncSession, user_id: str, start: date, end: date
     ) -> dict[str, Any]:
         """Aggregate journal metadata (mood_labels, tag_labels, timestamps) — never content."""
+        start_dt, end_dt = self._to_dt_range(start, end)
         result = await db.execute(
             select(JournalEntry).where(
                 and_(
                     JournalEntry.user_id == user_id,
-                    JournalEntry.created_at >= start,
-                    JournalEntry.created_at <= end,
+                    JournalEntry.created_at >= start_dt,
+                    JournalEntry.created_at <= end_dt,
                     JournalEntry.deleted_at.is_(None),
                 )
             )
@@ -418,13 +424,14 @@ class KarmaLytixService:
         self, db: AsyncSession, user_id: str, start: date, end: date
     ) -> dict[str, Any]:
         """Extract mood distribution and daily primary moods from journal metadata."""
+        start_dt, end_dt = self._to_dt_range(start, end)
         result = await db.execute(
             select(JournalEntry)
             .where(
                 and_(
                     JournalEntry.user_id == user_id,
-                    JournalEntry.created_at >= start,
-                    JournalEntry.created_at <= end,
+                    JournalEntry.created_at >= start_dt,
+                    JournalEntry.created_at <= end_dt,
                     JournalEntry.deleted_at.is_(None),
                 )
             )
@@ -455,12 +462,13 @@ class KarmaLytixService:
         self, db: AsyncSession, user_id: str, start: date, end: date
     ) -> list[Any]:
         """Get emotional check-in logs for the period."""
+        start_dt, end_dt = self._to_dt_range(start, end)
         result = await db.execute(
             select(UserEmotionalLog).where(
                 and_(
                     UserEmotionalLog.user_id == user_id,
-                    UserEmotionalLog.created_at >= start,
-                    UserEmotionalLog.created_at <= end,
+                    UserEmotionalLog.created_at >= start_dt,
+                    UserEmotionalLog.created_at <= end_dt,
                 )
             )
         )
@@ -470,12 +478,13 @@ class KarmaLytixService:
         self, db: AsyncSession, user_id: str, start: date, end: date
     ) -> int:
         """Count verse bookmarks created during the period."""
+        start_dt, end_dt = self._to_dt_range(start, end)
         result = await db.execute(
             select(UserVerseBookmark).where(
                 and_(
                     UserVerseBookmark.user_id == user_id,
-                    UserVerseBookmark.created_at >= start,
-                    UserVerseBookmark.created_at <= end,
+                    UserVerseBookmark.created_at >= start_dt,
+                    UserVerseBookmark.created_at <= end_dt,
                 )
             )
         )
@@ -485,12 +494,13 @@ class KarmaLytixService:
         self, db: AsyncSession, user_id: str, start: date, end: date
     ) -> dict[str, int]:
         """Get assessment completion count for the period."""
+        start_dt, end_dt = self._to_dt_range(start, end)
         result = await db.execute(
             select(UserAssessment).where(
                 and_(
                     UserAssessment.user_id == user_id,
-                    UserAssessment.created_at >= start,
-                    UserAssessment.created_at <= end,
+                    UserAssessment.created_at >= start_dt,
+                    UserAssessment.created_at <= end_dt,
                 )
             )
         )

@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion'
 import type { KarmaReport } from '@/types/karmalytix.types'
-import { PATTERNS } from '@/types/karmalytix.types'
 
 interface Props {
   report: KarmaReport
@@ -23,9 +22,8 @@ function deltaTextColor(delta: number): string {
 }
 
 export const WeeklyInsightCard: React.FC<Props> = ({ report, onRefresh, isRefreshing }) => {
-  const delta = report.comparisonToPrevious?.overallDelta ?? 0
-  const words = report.kiaanInsight?.split(' ') ?? []
-  const patterns = report.patternsDetected ?? {}
+  const delta = report.comparison_to_previous?.overall_delta ?? 0
+  const words = report.kiaan_insight?.split(' ') ?? []
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -49,7 +47,7 @@ export const WeeklyInsightCard: React.FC<Props> = ({ report, onRefresh, isRefres
             marginBottom: 12,
           }}
         >
-          {'\u2726'} KIAAN&apos;s Insight &middot; Week of {report.periodStart}
+          {'\u2726'} KIAAN&apos;s Insight &middot; Week of {report.period_start}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -159,7 +157,7 @@ export const WeeklyInsightCard: React.FC<Props> = ({ report, onRefresh, isRefres
       </div>
 
       {/* Recommended verses */}
-      {report.recommendedVerses.length > 0 && (
+      {report.recommended_verses.length > 0 && (
         <div
           style={{
             background:
@@ -181,7 +179,7 @@ export const WeeklyInsightCard: React.FC<Props> = ({ report, onRefresh, isRefres
           >
             Sacred Verses for You
           </div>
-          {report.recommendedVerses.map((v, i) => (
+          {report.recommended_verses.map((v, i) => (
             <div
               key={i}
               style={{
@@ -190,7 +188,7 @@ export const WeeklyInsightCard: React.FC<Props> = ({ report, onRefresh, isRefres
                 gap: 10,
                 padding: '8px 0',
                 borderBottom:
-                  i < report.recommendedVerses.length - 1
+                  i < report.recommended_verses.length - 1
                     ? '1px solid rgba(255,255,255,0.05)'
                     : 'none',
               }}

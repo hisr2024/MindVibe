@@ -52,8 +52,8 @@ export const MobileKarmaOverview: React.FC<{ dashboard: KarmaDashboard | null }>
 }) => {
   const [displayScore, setDisplayScore] = useState(0)
   const score = dashboard?.score
-  const overall = score?.overallScore ?? 0
-  const delta = dashboard?.latestReport?.comparisonToPrevious?.overallDelta ?? 0
+  const overall = score?.overall_score ?? 0
+  const delta = dashboard?.latest_report?.comparison_to_previous?.overall_delta ?? 0
 
   useEffect(() => {
     const dur = 1200
@@ -263,7 +263,7 @@ export const MobileKarmaOverview: React.FC<{ dashboard: KarmaDashboard | null }>
       </div>
 
       {/* Weekly metadata summary */}
-      {dashboard?.latestReport && (
+      {dashboard?.latest_report && (
         <div
           style={{
             background: 'linear-gradient(145deg, rgba(22,26,66,0.9), rgba(17,20,53,0.98))',
@@ -286,9 +286,9 @@ export const MobileKarmaOverview: React.FC<{ dashboard: KarmaDashboard | null }>
           <div style={{ display: 'flex', justifyContent: 'space-around' }}>
             {[
               { n: 5, l: 'Dimensions tracked' },
-              { n: dashboard.patterns.filter((p) => p.isActive).length, l: 'Active patterns' },
+              { n: dashboard.patterns.filter((p) => p.is_active).length, l: 'Active patterns' },
               {
-                n: dashboard.latestReport.recommendedVerses.length,
+                n: dashboard.latest_report.recommended_verses.length,
                 l: 'Verses for you',
               },
             ].map(({ n, l }) => (

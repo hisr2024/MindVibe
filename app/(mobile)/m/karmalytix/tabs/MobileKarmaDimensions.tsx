@@ -8,11 +8,11 @@ const DIMENSION_DETAILS: Record<
   DimensionKey,
   { description: string; gitaRef: string }
 > = {
-  emotionalBalance: {
+  emotional_balance: {
     description: 'How steady your inner state remains across different moods and experiences.',
     gitaRef: 'BG 2.70 \u2014 undisturbed like the ocean',
   },
-  spiritualGrowth: {
+  spiritual_growth: {
     description: 'Your trajectory of growth compared to previous periods of practice.',
     gitaRef: 'BG 6.35 \u2014 abhyasa + vairagya',
   },
@@ -20,21 +20,28 @@ const DIMENSION_DETAILS: Record<
     description: 'The regularity and depth of your journaling and spiritual practice.',
     gitaRef: 'BG 6.17 \u2014 regularity in all things',
   },
-  selfAwareness: {
+  self_awareness: {
     description: 'Your ability to identify, name, and explore your inner states.',
     gitaRef: 'BG 6.5 \u2014 be your own friend',
   },
-  wisdomIntegration: {
+  wisdom_integration: {
     description: 'How actively you engage with Gita wisdom through bookmarks and assessments.',
     gitaRef: 'BG 18.66 \u2014 surrender to wisdom',
   },
+}
+
+function hexToRgb(hex: string): string {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `${r},${g},${b}`
 }
 
 export const MobileKarmaDimensions: React.FC<{ dashboard: KarmaDashboard | null }> = ({
   dashboard,
 }) => {
   const score = dashboard?.score
-  const deltas = dashboard?.latestReport?.comparisonToPrevious?.dimensionDeltas ?? {}
+  const deltas = dashboard?.latest_report?.comparison_to_previous?.dimension_deltas ?? {}
 
   if (!score) {
     return (
@@ -162,11 +169,4 @@ export const MobileKarmaDimensions: React.FC<{ dashboard: KarmaDashboard | null 
       )}
     </div>
   )
-}
-
-function hexToRgb(hex: string): string {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return `${r},${g},${b}`
 }

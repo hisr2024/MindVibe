@@ -16,10 +16,10 @@ export const MobileKarmaInsight: React.FC<{ dashboard: KarmaDashboard | null }> 
   dashboard,
 }) => {
   const { isRefreshing, refreshInsight } = useKarmaLytixStore()
-  const insight = dashboard?.latestReport?.kiaanInsight
+  const insight = dashboard?.latest_report?.kiaan_insight
   const words = insight?.split(' ') ?? []
   const patterns = dashboard?.patterns ?? []
-  const verses = dashboard?.latestReport?.recommendedVerses ?? []
+  const verses = dashboard?.latest_report?.recommended_verses ?? []
 
   return (
     <div style={{ padding: '0 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -143,7 +143,7 @@ export const MobileKarmaInsight: React.FC<{ dashboard: KarmaDashboard | null }> 
       </div>
 
       {/* Patterns */}
-      {patterns.filter((p) => p.isActive).length > 0 && (
+      {patterns.filter((p) => p.is_active).length > 0 && (
         <div>
           <div
             style={{
@@ -158,10 +158,10 @@ export const MobileKarmaInsight: React.FC<{ dashboard: KarmaDashboard | null }> 
             Patterns in Your Practice
           </div>
           {patterns
-            .filter((p) => p.isActive)
+            .filter((p) => p.is_active)
             .map((p) => {
-              const meta = PATTERNS[p.patternType as keyof typeof PATTERNS] ?? {
-                label: p.patternType,
+              const meta = PATTERNS[p.pattern_type as keyof typeof PATTERNS] ?? {
+                label: p.pattern_type,
                 color: '#D4A017',
               }
               const rgb = hexToRgb(meta.color)
@@ -187,9 +187,14 @@ export const MobileKarmaInsight: React.FC<{ dashboard: KarmaDashboard | null }> 
                     }}
                   >
                     <div
-                      style={{ fontSize: 13, fontWeight: 500, color: '#EDE8DC', fontFamily: 'Outfit' }}
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 500,
+                        color: '#EDE8DC',
+                        fontFamily: 'Outfit',
+                      }}
                     >
-                      {p.patternName}
+                      {p.pattern_name}
                     </div>
                     <div
                       style={{
@@ -215,7 +220,7 @@ export const MobileKarmaInsight: React.FC<{ dashboard: KarmaDashboard | null }> 
                     <div
                       style={{
                         height: '100%',
-                        width: `${p.confidenceScore * 100}%`,
+                        width: `${p.confidence_score * 100}%`,
                         background: meta.color,
                         borderRadius: 2,
                       }}
@@ -232,10 +237,10 @@ export const MobileKarmaInsight: React.FC<{ dashboard: KarmaDashboard | null }> 
                   >
                     {p.description}
                   </div>
-                  {p.gitaVerseRef && (
+                  {p.gita_verse_ref && (
                     <div style={{ fontSize: 9, color: '#D4A017', marginTop: 6 }}>
-                      BG {p.gitaVerseRef.chapter}.{p.gitaVerseRef.verse} &middot;{' '}
-                      {p.gitaVerseRef.theme}
+                      BG {p.gita_verse_ref.chapter}.{p.gita_verse_ref.verse} &middot;{' '}
+                      {p.gita_verse_ref.theme}
                     </div>
                   )}
                 </div>

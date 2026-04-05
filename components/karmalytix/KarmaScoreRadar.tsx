@@ -17,11 +17,11 @@ interface Props {
 }
 
 const RADAR_DATA_KEYS: { dim: string; sa: string; key: DimensionKey }[] = [
-  { dim: 'Emotional Balance', sa: '\u092D\u093E\u0935\u0928\u093E', key: 'emotionalBalance' },
-  { dim: 'Spiritual Growth', sa: '\u0935\u093F\u0915\u093E\u0938', key: 'spiritualGrowth' },
+  { dim: 'Emotional Balance', sa: '\u092D\u093E\u0935\u0928\u093E', key: 'emotional_balance' },
+  { dim: 'Spiritual Growth', sa: '\u0935\u093F\u0915\u093E\u0938', key: 'spiritual_growth' },
   { dim: 'Consistency', sa: '\u0928\u093F\u092F\u092E', key: 'consistency' },
-  { dim: 'Self-Awareness', sa: '\u091C\u094D\u091E\u093E\u0928', key: 'selfAwareness' },
-  { dim: 'Wisdom', sa: '\u092C\u094B\u0927', key: 'wisdomIntegration' },
+  { dim: 'Self-Awareness', sa: '\u091C\u094D\u091E\u093E\u0928', key: 'self_awareness' },
+  { dim: 'Wisdom', sa: '\u092C\u094B\u0927', key: 'wisdom_integration' },
 ]
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -67,7 +67,7 @@ export const KarmaScoreRadar: React.FC<Props> = ({ score }) => {
             color: '#F0C040',
           }}
         >
-          {score.overallScore}
+          {score.overall_score}
         </div>
         <div
           style={{

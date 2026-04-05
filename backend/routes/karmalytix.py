@@ -33,7 +33,13 @@ async def get_dashboard(
     """Get complete KarmaLytix dashboard with score, patterns, and reports."""
     uid = _require_user(user_id)
     data = await karmalytix_service.get_dashboard_data(db, uid)
-    return KarmaDashboardResponse(**data)
+    return KarmaDashboardResponse(
+        score=KarmaScoreResponse.model_validate(data["score"]),
+        patterns=[KarmaPatternResponse.model_validate(p) for p in data["patterns"]],
+        latest_report=KarmaReportResponse.model_validate(data["latest_report"]) if data["latest_report"] else None,
+        history=[KarmaReportResponse.model_validate(r) for r in data["history"]],
+        privacy_note=data["privacy_note"],
+    )
 
 
 @router.get("/karma-score", response_model=KarmaScoreResponse)
