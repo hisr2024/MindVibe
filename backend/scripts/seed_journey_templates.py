@@ -11,12 +11,13 @@ Idempotent: safe to call repeatedly (UPSERT by slug).
 from __future__ import annotations
 
 import asyncio
+import uuid
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 
 from backend.models import Base
-from backend.models.journeys import JourneyTemplate
+from backend.models.journeys import JourneyTemplate, JourneyTemplateStep
 
 # IDs / slugs intentionally match the frontend FALLBACK_TEMPLATES in
 # app/(mobile)/m/journeys/hooks/useMobileJourneys.ts so a journey started
@@ -146,6 +147,11 @@ async def seed_journey_templates(existing_engine: AsyncEngine) -> None:
         print(
             f"✅ Journey templates seeded: created={created}, updated={updated}"
         )
+
+    # Seed step content (CE-1)
+    async with session_maker() as db:
+        step_count = await seed_journey_template_steps(db)
+        print(f"✅ Journey template steps seeded: {step_count} rows")
 
 
 if __name__ == "__main__":
