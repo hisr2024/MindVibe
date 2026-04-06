@@ -50,9 +50,11 @@ export default function JourneysScreen() {
   const { triggerHaptic } = useHapticFeedback()
   const [activeTab, setActiveTab] = useState<JourneyTab>('today')
   const [preselectedEnemy, setPreselectedEnemy] = useState<EnemyType | null>(null)
+  const [pendingAutoOpenEnemy, setPendingAutoOpenEnemy] = useState<EnemyType | null>(null)
 
   const handleNavigateFromBattleground = useCallback((enemy: EnemyType) => {
     setPreselectedEnemy(enemy)
+    setPendingAutoOpenEnemy(enemy)
     setActiveTab('journeys')
   }, [])
 
@@ -187,6 +189,8 @@ export default function JourneysScreen() {
                 onRefresh={handleRefresh}
                 initialEnemy={preselectedEnemy}
                 onEnemyConsumed={() => setPreselectedEnemy(null)}
+                autoOpenForEnemy={pendingAutoOpenEnemy}
+                onAutoOpenConsumed={() => setPendingAutoOpenEnemy(null)}
               />
             )}
             {activeTab === 'battleground' && (
