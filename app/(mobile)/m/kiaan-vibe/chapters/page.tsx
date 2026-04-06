@@ -65,7 +65,7 @@ export default function GitaChaptersPage() {
   }, [triggerHaptic, setQueue, play])
 
   return (
-    <MobileAppShell title="\u0936\u094D\u0930\u0940\u092E\u0926\u094D \u092D\u0917\u0935\u0926\u094D\u0917\u0940\u0924\u093E" subtitle="18 Chapters \u00B7 700 Verses" showBack>
+    <MobileAppShell title={'\u0936\u094D\u0930\u0940\u092E\u0926\u094D \u092D\u0917\u0935\u0926\u094D\u0917\u0940\u0924\u093E'} subtitle={'18 Chapters \u00B7 700 Verses'} showBack>
       <div className="px-4 pb-32">
         {/* Subtitle */}
         <p

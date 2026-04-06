@@ -65,7 +65,7 @@ export function GitaBanner({ onPress }: GitaBannerProps) {
 
         {/* Title */}
         <SanskritReveal
-          text="\u0936\u094D\u0930\u0940\u092E\u0926\u094D \u092D\u0917\u0935\u0926\u094D\u0917\u0940\u0924\u093E"
+          text={'\u0936\u094D\u0930\u0940\u092E\u0926\u094D \u092D\u0917\u0935\u0926\u094D\u0917\u0940\u0924\u093E'}
           staggerMs={60}
           style={{
             fontSize: 28,
