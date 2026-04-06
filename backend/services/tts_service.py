@@ -222,14 +222,14 @@ class OfflineAudioCache:
                 except OSError:
                     pass
 
-    def _generate_key(self, text: str, language: str, voice_type: str) -> str:
+    def _generate_key(self, text: str, language: str, voice_type: str, voice_id: Optional[str] = None) -> str:
         """Generate cache key using SHA-256."""
-        content = f"{text}:{language}:{voice_type}"
+        content = f"{text}:{language}:{voice_type}:{voice_id or ''}"
         return hashlib.sha256(content.encode()).hexdigest()
 
-    def get(self, text: str, language: str, voice_type: str) -> Optional[bytes]:
+    def get(self, text: str, language: str, voice_type: str, voice_id: Optional[str] = None) -> Optional[bytes]:
         """Get cached audio if available."""
-        key = self._generate_key(text, language, voice_type)
+        key = self._generate_key(text, language, voice_type, voice_id)
         if key not in self._index:
             return None
 
@@ -243,9 +243,9 @@ class OfflineAudioCache:
         except Exception:
             return None
 
-    def set(self, text: str, language: str, voice_type: str, audio: bytes) -> None:
+    def set(self, text: str, language: str, voice_type: str, audio: bytes, voice_id: Optional[str] = None) -> None:
         """Cache audio for future use."""
-        key = self._generate_key(text, language, voice_type)
+        key = self._generate_key(text, language, voice_type, voice_id)
         filename = f"{key}.mp3"
         audio_file = self.cache_dir / filename
 
@@ -328,10 +328,17 @@ class TTSService:
         text: str,
         language: str,
         voice_type: VoiceType,
-        speed: float = 0.9
+        speed: float = 0.9,
+        voice_id: Optional[str] = None,
     ) -> str:
-        """Generate unique cache key for audio."""
-        content = f"{text}:{language}:{voice_type}:{speed}"
+        """Generate unique cache key for audio.
+
+        voice_id is included so that different KIAAN voice personas (e.g.
+        divine-krishna vs divine-saraswati) get distinct cache entries —
+        otherwise all voices for the same verse would collapse to the same
+        cached audio and the player would only ever produce one voice.
+        """
+        content = f"{text}:{language}:{voice_type}:{speed}:{voice_id or ''}"
         return f"tts:{hashlib.sha256(content.encode()).hexdigest()}"
 
     def _get_cached_audio(self, cache_key: str) -> Optional[bytes]:
@@ -520,13 +527,13 @@ class TTSService:
         actual_speed = speed if speed is not None else voice_settings["speed"]
 
         # Check cache first
-        cache_key = self._generate_cache_key(text, language, voice_type, actual_speed)
+        cache_key = self._generate_cache_key(text, language, voice_type, actual_speed, voice_id)
         cached_audio = self._get_cached_audio(cache_key)
         if cached_audio:
             return cached_audio
 
         # Check offline disk cache
-        offline_cached = self.offline_cache.get(text, language, voice_type)
+        offline_cached = self.offline_cache.get(text, language, voice_type, voice_id)
         if offline_cached:
             logger.info("Using offline cached audio")
             return offline_cached
@@ -540,7 +547,7 @@ class TTSService:
 
         if audio:
             self._cache_audio(cache_key, audio)
-            self.offline_cache.set(text, language, voice_type, audio)
+            self.offline_cache.set(text, language, voice_type, audio, voice_id)
             return audio
 
         return None

@@ -29,6 +29,8 @@ export interface Track {
     language: string   // BCP-47 language code for Speech Synthesis
     rate?: number      // Speech rate (0.5-2.0)
     pitch?: number     // Speech pitch (0-2)
+    voiceId?: string   // KIAAN voice persona ID (e.g. divine-krishna) — used by browser TTS fallback to pick a distinctly different voice per persona
+    voiceGender?: 'male' | 'female' // Hint for browser TTS fallback voice picking
   }
   /**
    * Gita-specific verse data for the VerseDisplayPanel.

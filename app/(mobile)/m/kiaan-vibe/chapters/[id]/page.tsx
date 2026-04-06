@@ -27,6 +27,7 @@ import {
   YOGA_TYPE_COLORS,
   VOICE_TO_STYLE_MAP,
   VOICE_TO_SPEED_MAP,
+  getGitaVoiceConfig,
   getGitaMobileChapter,
 } from '@/lib/kiaan-vibe/gita-library'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
@@ -99,8 +100,20 @@ export default function ChapterDetailPage() {
     triggerHaptic('heavy')
     setPlayingChapter(true)
     try {
-      const voiceStyle = (VOICE_TO_STYLE_MAP[selectedVoice] || 'divine') as GitaVoiceStyle
+      const cfgChapter = getGitaVoiceConfig(selectedVoice)
+      const voiceStyle = cfgChapter.style as GitaVoiceStyle
       const tracks = await createChapterTracks(chapterNum, 'sa', voiceStyle)
+      // Inject voice_id into each generated track URL so each verse uses the
+      // selected divine voice persona end-to-end.
+      tracks.forEach(t => {
+        if (t.src && !t.src.includes('voice_id=')) {
+          t.src = t.src + `&voice_id=${encodeURIComponent(selectedVoice)}`
+        }
+        if (t.ttsMetadata) {
+          t.ttsMetadata.voiceId = selectedVoice
+          t.ttsMetadata.voiceGender = cfgChapter.gender
+        }
+      })
       if (tracks.length > 0) {
         // Enrich tracks with gitaData for the VerseDisplayPanel
         const enrichedTracks = tracks.map((track, idx) => {
@@ -132,8 +145,9 @@ export default function ChapterDetailPage() {
   const handlePlayVerse = useCallback(async (verse: VerseDisplay) => {
     if (!chapter) return
     triggerHaptic('medium')
-    const voiceStyle = (VOICE_TO_STYLE_MAP[selectedVoice] || 'divine') as GitaVoiceStyle
-    const speed = VOICE_TO_SPEED_MAP[selectedVoice]
+    const cfg = getGitaVoiceConfig(selectedVoice)
+    const voiceStyle = cfg.style as GitaVoiceStyle
+    const speed = cfg.speed
     const track = createVerseTrack(
       chapterNum,
       verse.verseNumber,
@@ -143,6 +157,8 @@ export default function ChapterDetailPage() {
       'sa',
       voiceStyle,
       speed,
+      selectedVoice,
+      cfg.gender,
     )
     // Enrich with gitaData
     track.gitaData = {

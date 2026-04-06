@@ -80,6 +80,11 @@ class SynthesizeRequest(BaseModel):
     # Using None as default so backend applies voice type-specific defaults
     speed: Optional[float] = Field(None, ge=0.5, le=2.0, description="Speaking rate (defaults to voice type optimal)")
     pitch: Optional[float] = Field(None, ge=-20.0, le=20.0, description="Voice pitch (defaults to voice type optimal)")
+    voice_id: Optional[str] = Field(
+        None,
+        max_length=64,
+        description="Specific KIAAN voice persona ID (e.g. divine-krishna, divine-saraswati, sarvam-rishi, elevenlabs-nova). When provided, routes to that exact provider voice instead of the language default.",
+    )
 
 
 class VerseSynthesizeRequest(BaseModel):
@@ -174,7 +179,8 @@ async def synthesize_speech(
         language=payload.language,
         voice_type=payload.voice_type,
         speed=payload.speed,
-        pitch=payload.pitch
+        pitch=payload.pitch,
+        voice_id=payload.voice_id,
     )
 
     if not audio_bytes:

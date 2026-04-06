@@ -121,3 +121,32 @@ export const VOICE_TO_SPEED_MAP: Record<string, number> = {
   'sarvam-rishi': 0.85,
   'elevenlabs-nova': 0.90,
 }
+
+// ── VOICE CONFIG: Full per-voice configuration for the Vibe Player ──────
+//
+// Each of the 4 divine voices is bound to:
+//   • A distinct backend voice persona (resolved by tts_service.py to a
+//     specific ElevenLabs / Sarvam speaker — see PERSONA_TO_ELEVENLABS and
+//     COMPANION_TO_SARVAM_SPEAKER on the backend).
+//   • A distinct prosody style (divine / calm / wisdom / chanting).
+//   • A distinct gender hint so the browser SpeechSynthesis fallback also
+//     produces audibly different voices when premium TTS is unavailable.
+//
+// This is what makes the 4 voice pills actually sound different.
+
+export interface GitaVoiceConfigEntry {
+  style: 'divine' | 'calm' | 'wisdom' | 'chanting'
+  speed: number
+  gender: 'male' | 'female'
+}
+
+export const GITA_VOICE_CONFIG: Record<string, GitaVoiceConfigEntry> = {
+  'divine-krishna':   { style: 'divine',   speed: 0.80, gender: 'male'   },
+  'divine-saraswati': { style: 'calm',     speed: 0.82, gender: 'female' },
+  'sarvam-rishi':     { style: 'wisdom',   speed: 0.85, gender: 'male'   },
+  'elevenlabs-nova':  { style: 'calm',     speed: 0.90, gender: 'female' },
+}
+
+export function getGitaVoiceConfig(voiceId: string): GitaVoiceConfigEntry {
+  return GITA_VOICE_CONFIG[voiceId] || GITA_VOICE_CONFIG['divine-krishna']
+}
