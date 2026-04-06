@@ -3,6 +3,8 @@
  *
  * Wraps journeyEngineService calls and manages loading / error states
  * so the JourneysScreen orchestrator stays lean.
+ *
+ * Fixed: silent template loading failures, dashboard fallback detection
  */
 
 'use client'
@@ -47,6 +49,16 @@ export function useMobileJourneys(isAuthenticated: boolean): UseMobileJourneysRe
     }
     try {
       const data = await journeyEngineService.getDashboard()
+
+      // FIX BUG 4: Detect fallback response from proxy (backend unreachable)
+      if (data && '_fallback' in data && (data as { _fallback?: boolean })._fallback) {
+        // Backend was unreachable — keep existing dashboard if we have one
+        if (!dashboard) {
+          setError('Server is waking up. Pull down to retry.')
+        }
+        return
+      }
+
       setDashboard(data)
       setIsAuthError(false)
       setError(null)
@@ -57,18 +69,34 @@ export function useMobileJourneys(isAuthenticated: boolean): UseMobileJourneysRe
         setError(err instanceof JourneyEngineError ? err.message : 'Failed to load dashboard')
       }
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, dashboard])
 
   const loadTemplates = useCallback(async () => {
     try {
       const result = await journeyEngineService.listTemplates({ limit: 50 })
+
+      // FIX BUG 3: Detect fallback response from proxy
+      if (result && '_fallback' in result && (result as { _fallback?: boolean })._fallback) {
+        if (templates.length === 0) {
+          console.warn('[Journeys] Templates endpoint returned fallback — backend may be down')
+        }
+        return
+      }
+
       if (result?.templates) {
         setTemplates(result.templates)
       }
-    } catch {
-      // Templates are non-critical — silent fail, keep existing
+    } catch (err) {
+      // FIX BUG 3: Surface template errors when we have no cached templates
+      console.warn(
+        '[Journeys] Failed to load templates:',
+        err instanceof Error ? err.message : err,
+      )
+      if (templates.length === 0) {
+        setError('Unable to load journey templates. Pull down to retry.')
+      }
     }
-  }, [])
+  }, [templates.length])
 
   const refreshData = useCallback(async () => {
     setIsLoading(true)

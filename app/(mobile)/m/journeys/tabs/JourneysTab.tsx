@@ -1,6 +1,8 @@
 /**
  * JourneysTab — Journey management: active journeys, template catalog,
  * enemy filter pills, template detail modal with pace selector.
+ *
+ * Fixed: modal error display, navigation race condition, error visibility
  */
 
 'use client'
@@ -59,6 +61,8 @@ export function JourneysTab({ dashboard, templates, isLoading, onRefresh }: Jour
   // Template detail modal state
   const [detailTemplate, setDetailTemplate] = useState<JourneyTemplate | null>(null)
   const [selectedPace, setSelectedPace] = useState<PaceOption>('daily')
+  // FIX BUG 1+5: Separate modal error state so errors show INSIDE the modal
+  const [modalError, setModalError] = useState<string | null>(null)
 
   const activeCount = dashboard?.active_journeys.filter((j) => j.status === 'active').length ?? 0
   const canStart = activeCount < 5
@@ -74,11 +78,12 @@ export function JourneysTab({ dashboard, templates, isLoading, onRefresh }: Jour
     async (templateId: string) => {
       if (startingId) return
       if (!canStart) {
+        setDetailTemplate(null)
         setShowMaxSheet(true)
         return
       }
       setStartingId(templateId)
-      setError(null)
+      setModalError(null)
       triggerHaptic('medium')
 
       const personalization: PersonalizationSettings = { pace: selectedPace }
@@ -89,18 +94,24 @@ export function JourneysTab({ dashboard, templates, isLoading, onRefresh }: Jour
           personalization,
         })
         triggerHaptic('success')
-        setDetailTemplate(null)
+        // FIX BUG 2: Navigate FIRST, then clean up modal.
+        // Page unmount will handle modal cleanup naturally.
         router.push(`/m/journeys/${journey.journey_id}`)
         onRefresh()
+        // Close modal after navigation has started (not before)
+        setDetailTemplate(null)
       } catch (err) {
         triggerHaptic('error')
         if (err instanceof JourneyEngineError && err.isMaxJourneysError()) {
+          // FIX BUG 1: Close modal before showing max-journeys sheet
+          setDetailTemplate(null)
           setShowMaxSheet(true)
         } else {
-          setError(
+          // FIX BUG 1+5: Show error INSIDE the modal (not behind it)
+          setModalError(
             err instanceof JourneyEngineError
               ? err.message
-              : 'Failed to start journey',
+              : 'Failed to start journey. Please try again.',
           )
         }
       } finally {
@@ -118,6 +129,7 @@ export function JourneysTab({ dashboard, templates, isLoading, onRefresh }: Jour
     triggerHaptic('light')
     setDetailTemplate(template)
     setSelectedPace('daily')
+    setModalError(null) // Clear any previous modal errors
   }
 
   const detailEnemy = detailTemplate?.primary_enemy_tags[0] as EnemyType | undefined
@@ -177,7 +189,7 @@ export function JourneysTab({ dashboard, templates, isLoading, onRefresh }: Jour
         </div>
       </div>
 
-      {/* Error banner */}
+      {/* Error banner (tab-level, for non-modal errors) */}
       {error && (
         <div className="rounded-xl border border-red-500/20 bg-red-900/15 px-4 py-2 text-center">
           <p className="text-xs text-red-300 font-ui">{error}</p>
@@ -352,6 +364,7 @@ export function JourneysTab({ dashboard, templates, isLoading, onRefresh }: Jour
                         onClick={() => {
                           triggerHaptic('light')
                           setSelectedPace(option.value)
+                          setModalError(null) // Clear error on pace change
                         }}
                         className="flex-1 rounded-xl py-2.5 text-center transition-all"
                         style={{
@@ -378,6 +391,19 @@ export function JourneysTab({ dashboard, templates, isLoading, onRefresh }: Jour
                     Est. completion: {estimateCompletion(detailTemplate.duration_days, selectedPace)}
                   </p>
                 </div>
+
+                {/* FIX BUG 5: Error message INSIDE the modal (visible above the button) */}
+                {modalError && (
+                  <div className="rounded-xl border border-red-500/20 bg-red-900/15 px-4 py-2.5 mb-3">
+                    <p className="text-xs text-red-300 font-ui text-center">{modalError}</p>
+                    <button
+                      onClick={() => setModalError(null)}
+                      className="text-[10px] text-red-400/60 font-ui underline mt-1 block mx-auto"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                )}
 
                 {/* Start button */}
                 <button
