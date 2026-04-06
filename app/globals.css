@@ -133,3 +133,47 @@
     text-decoration: none;
   }
 }
+
+/* ── Sacred Reflections journal animations ─────────────────────────── */
+
+@keyframes wordIn {
+  from { opacity: 0; transform: translateY(5px); filter: blur(2px); }
+  to   { opacity: 1; transform: translateY(0);   filter: blur(0);   }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1);   opacity: 1;   }
+  50%      { transform: scale(1.1); opacity: 0.8; }
+}
+
+@keyframes barFill {
+  from { width: 0; }
+  to   { width: var(--bar-width, 100%); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes divineBreath {
+  0%, 100% { box-shadow: 0 0 14px rgba(212,160,23,0.28), 0 0 28px rgba(212,160,23,0.1); }
+  50%      { box-shadow: 0 0 28px rgba(212,160,23,0.60),  0 0 56px rgba(212,160,23,0.2); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.sacred-textarea::placeholder {
+  color: #6B6355;
+  font-style: italic;
+}
+
+.scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.scroll-x::-webkit-scrollbar { display: none; }
