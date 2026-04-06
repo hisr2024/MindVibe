@@ -15,6 +15,7 @@ import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { ChapterCard } from '@/components/mobile/vibe/ChapterCard'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
 import { createChapterTracks } from '@/lib/kiaan-vibe/gita-voice-tracks'
+import { SUPPORTED_LANGUAGES } from '@/lib/kiaan-vibe/gita'
 import {
   GITA_MOBILE_CHAPTERS,
   GITA_STATS,
@@ -34,7 +35,7 @@ export default function GitaChaptersPage() {
   const [activeFilter, setActiveFilter] = useState('all')
   const [loadingAll, setLoadingAll] = useState(false)
   const { triggerHaptic } = useHapticFeedback()
-  const { setQueue, play } = usePlayerStore()
+  const { setQueue, play, gitaLang, setGitaLang } = usePlayerStore()
 
   const totalHours = Math.round(GITA_STATS.totalDurationMinutes / 60)
 
@@ -50,7 +51,7 @@ export default function GitaChaptersPage() {
       // Load all chapters sequentially to build the full queue
       const allTracks = []
       for (const chapter of GITA_MOBILE_CHAPTERS) {
-        const tracks = await createChapterTracks(chapter.number, 'sa', 'divine')
+        const tracks = await createChapterTracks(chapter.number, gitaLang, 'divine')
         allTracks.push(...tracks)
       }
       if (allTracks.length > 0) {
@@ -62,7 +63,7 @@ export default function GitaChaptersPage() {
     } finally {
       setLoadingAll(false)
     }
-  }, [triggerHaptic, setQueue, play])
+  }, [triggerHaptic, setQueue, play, gitaLang])
 
   return (
     <MobileAppShell title={'\u0936\u094D\u0930\u0940\u092E\u0926\u094D \u092D\u0917\u0935\u0926\u094D\u0917\u0940\u0924\u093E'} subtitle={'18 Chapters \u00B7 700 Verses'} showBack>
@@ -90,6 +91,35 @@ export default function GitaChaptersPage() {
               {filter.label}
             </button>
           ))}
+        </div>
+
+        {/* Language selector */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-2 -mx-4 px-4 scrollbar-none">
+          <span className="text-[9px] text-[#D4A017] tracking-[0.14em] uppercase flex-shrink-0 font-[family-name:var(--font-ui)]">
+            Listen in
+          </span>
+          {Object.values(SUPPORTED_LANGUAGES).map(lang => {
+            const isSelected = lang.code === gitaLang
+            return (
+              <button
+                key={lang.code}
+                type="button"
+                onClick={() => { setGitaLang(lang.code); triggerHaptic('selection') }}
+                aria-pressed={isSelected}
+                className="flex-shrink-0 h-7 px-3 rounded-full text-[11px] transition-all font-[family-name:var(--font-ui)]"
+                style={{
+                  color: isSelected ? '#D4A017' : '#B8AE98',
+                  backgroundColor: isSelected ? 'rgba(212,160,23,0.15)' : 'transparent',
+                  border: isSelected
+                    ? '1px solid rgba(212,160,23,0.5)'
+                    : '1px solid rgba(212,160,23,0.15)',
+                  fontWeight: isSelected ? 500 : 400,
+                }}
+              >
+                {lang.nativeName}
+              </button>
+            )
+          })}
         </div>
 
         {/* Total stats bar */}

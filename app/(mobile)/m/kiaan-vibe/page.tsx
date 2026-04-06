@@ -12,6 +12,7 @@ import { Search, Music2 } from 'lucide-react'
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { GitaBanner } from '@/components/mobile/vibe/GitaBanner'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
+import { SUPPORTED_LANGUAGES } from '@/lib/kiaan-vibe/gita'
 import {
   getAllTracks,
   getTracksByCategory,
@@ -117,7 +118,7 @@ export default function MobileKiaanVibePage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const { triggerHaptic } = useHapticFeedback()
-  const { currentTrack, isPlaying, play, setQueue } = usePlayerStore()
+  const { currentTrack, isPlaying, play, setQueue, gitaLang, setGitaLang } = usePlayerStore()
 
   const filteredTracks = useMemo(() => {
     if (searchQuery.trim()) {
@@ -187,7 +188,37 @@ export default function MobileKiaanVibePage() {
 
         {/* Gita Banner (shown when 'all' or 'gita' selected, no search) */}
         {(selectedCategory === 'all' || selectedCategory === 'gita') && !searchQuery && (
-          <GitaBanner onPress={() => router.push('/m/kiaan-vibe/chapters')} />
+          <>
+            <GitaBanner onPress={() => router.push('/m/kiaan-vibe/chapters')} />
+            {/* Gita language selector */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-2 -mx-4 px-4 scrollbar-none">
+              <span className="text-[9px] text-[#D4A017] tracking-[0.14em] uppercase flex-shrink-0 font-[family-name:var(--font-ui)]">
+                Gita Language
+              </span>
+              {Object.values(SUPPORTED_LANGUAGES).map(lang => {
+                const isSelected = lang.code === gitaLang
+                return (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => { setGitaLang(lang.code); triggerHaptic('selection') }}
+                    aria-pressed={isSelected}
+                    className="flex-shrink-0 h-7 px-3 rounded-full text-[11px] transition-all font-[family-name:var(--font-ui)]"
+                    style={{
+                      color: isSelected ? '#D4A017' : '#B8AE98',
+                      backgroundColor: isSelected ? 'rgba(212,160,23,0.15)' : 'transparent',
+                      border: isSelected
+                        ? '1px solid rgba(212,160,23,0.5)'
+                        : '1px solid rgba(212,160,23,0.15)',
+                      fontWeight: isSelected ? 500 : 400,
+                    }}
+                  >
+                    {lang.nativeName}
+                  </button>
+                )
+              })}
+            </div>
+          </>
         )}
 
         {/* Featured section (only when 'all' and no search) */}
