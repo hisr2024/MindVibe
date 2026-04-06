@@ -15,7 +15,7 @@ import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { VerseListItem } from '@/components/mobile/vibe/VerseListItem'
 import { GitaVoiceSelector } from '@/components/mobile/vibe/GitaVoiceSelector'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
-import { loadGitaLanguage } from '@/lib/kiaan-vibe/gita'
+import { loadGitaLanguage, SUPPORTED_LANGUAGES } from '@/lib/kiaan-vibe/gita'
 import {
   createVerseTrack,
   createChapterTracks,
@@ -43,7 +43,7 @@ export default function ChapterDetailPage() {
   const params = useParams()
   const chapterNum = Number(params.id)
   const { triggerHaptic } = useHapticFeedback()
-  const { currentTrack, isPlaying, play, setQueue } = usePlayerStore()
+  const { currentTrack, isPlaying, play, setQueue, stop, gitaLang, setGitaLang } = usePlayerStore()
 
   const [selectedVoice, setSelectedVoice] = useState('divine-krishna')
   const [verses, setVerses] = useState<VerseDisplay[]>([])
@@ -102,7 +102,7 @@ export default function ChapterDetailPage() {
     try {
       const cfgChapter = getGitaVoiceConfig(selectedVoice)
       const voiceStyle = cfgChapter.style as GitaVoiceStyle
-      const tracks = await createChapterTracks(chapterNum, 'sa', voiceStyle)
+      const tracks = await createChapterTracks(chapterNum, gitaLang, voiceStyle)
       // Inject voice_id into each generated track URL so each verse uses the
       // selected divine voice persona end-to-end.
       tracks.forEach(t => {
@@ -140,7 +140,7 @@ export default function ChapterDetailPage() {
     } finally {
       setPlayingChapter(false)
     }
-  }, [chapter, chapterNum, selectedVoice, verses, triggerHaptic, setQueue, play])
+  }, [chapter, chapterNum, selectedVoice, verses, triggerHaptic, setQueue, play, gitaLang])
 
   const handlePlayVerse = useCallback(async (verse: VerseDisplay) => {
     if (!chapter) return
@@ -154,7 +154,7 @@ export default function ChapterDetailPage() {
       verse.sanskrit,
       verse.transliteration,
       verse.translation,
-      'sa',
+      gitaLang,
       voiceStyle,
       speed,
       selectedVoice,
@@ -173,7 +173,7 @@ export default function ChapterDetailPage() {
     }
     setQueue([track], 0)
     play(track)
-  }, [chapter, chapterNum, selectedVoice, triggerHaptic, setQueue, play])
+  }, [chapter, chapterNum, selectedVoice, triggerHaptic, setQueue, play, gitaLang])
 
   if (!chapter) {
     return (
@@ -253,6 +253,37 @@ export default function ChapterDetailPage() {
           </div>
         </div>
 
+        {/* Language selector */}
+        <div className="px-4 mb-3">
+          <p className="text-[10px] text-[#6B6355] uppercase tracking-[0.1em] mb-2 font-[family-name:var(--font-ui)]">
+            Listen in
+          </p>
+          <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
+            {Object.values(SUPPORTED_LANGUAGES).map(lang => {
+              const isSelected = lang.code === gitaLang
+              return (
+                <button
+                  key={lang.code}
+                  type="button"
+                  onClick={() => { triggerHaptic('selection'); setGitaLang(lang.code) }}
+                  aria-pressed={isSelected}
+                  className="flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] transition-all font-[family-name:var(--font-ui)]"
+                  style={{
+                    color: isSelected ? '#D4A017' : '#B8AE98',
+                    backgroundColor: isSelected ? 'rgba(212,160,23,0.15)' : 'transparent',
+                    border: isSelected
+                      ? '1px solid rgba(212,160,23,0.5)'
+                      : '1px solid rgba(212,160,23,0.15)',
+                    fontWeight: isSelected ? 500 : 400,
+                  }}
+                >
+                  {lang.nativeName}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
         {/* Voice selector */}
         <div className="px-4 mb-4">
           <GitaVoiceSelector
@@ -299,8 +330,8 @@ export default function ChapterDetailPage() {
           ) : (
             <div className="divide-y divide-white/[0.04]">
               {verses.map(verse => {
-                const trackId = `gita-voice-${chapterNum}-${verse.verseNumber}-sa-divine`
-                const isCurrentVerse = currentTrack?.id === trackId ||
+                const isCurrentVerse =
+                  (currentTrack?.id?.startsWith(`gita-voice-${chapterNum}-${verse.verseNumber}-`) ?? false) ||
                   (currentTrack?.gitaData?.chapter === chapterNum && currentTrack?.gitaData?.verse === verse.verseNumber)
 
                 return (
@@ -313,6 +344,7 @@ export default function ChapterDetailPage() {
                     englishPreview={verse.translation.slice(0, 80)}
                     isPlaying={isCurrentVerse && isPlaying}
                     onPlay={() => handlePlayVerse(verse)}
+                    onStop={() => { triggerHaptic('selection'); stop() }}
                   />
                 )
               })}

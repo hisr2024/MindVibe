@@ -37,6 +37,7 @@ const initialState = {
   // Gita-specific state
   versePanelVisible: true,
   selectedGitaVoice: 'divine-krishna',
+  gitaLang: 'sa',
 }
 
 // Audio element (singleton)
@@ -614,6 +615,10 @@ export const usePlayerStore = create<PlayerStore>()(
 
     setSelectedGitaVoice: (voiceId: string) => {
       set({ selectedGitaVoice: voiceId })
+    },
+
+    setGitaLang: (lang: string) => {
+      set({ gitaLang: lang })
     },
 
     // ============ Persistence ============

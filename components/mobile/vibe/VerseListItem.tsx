@@ -18,6 +18,7 @@ interface VerseListItemProps {
   duration?: string
   isPlaying: boolean
   onPlay: () => void
+  onStop?: () => void
   onLongPress?: () => void
 }
 
@@ -48,11 +49,13 @@ export function VerseListItem({
   duration,
   isPlaying,
   onPlay,
+  onStop,
   onLongPress,
 }: VerseListItemProps) {
   return (
     <button
-      onClick={onPlay}
+      onClick={isPlaying && onStop ? onStop : onPlay}
+      aria-label={isPlaying ? 'Stop verse' : 'Play verse'}
       onContextMenu={e => { e.preventDefault(); onLongPress?.() }}
       className="flex items-center gap-3 w-full text-left px-4 py-3 transition-colors"
       style={isPlaying ? {

@@ -157,6 +157,7 @@ export interface PlayerState {
   // Gita-specific state
   versePanelVisible: boolean
   selectedGitaVoice: string
+  gitaLang: string
 }
 
 export interface PlayerActions {
@@ -192,6 +193,7 @@ export interface PlayerActions {
   // Gita controls
   setVersePanelVisible: (visible: boolean) => void
   setSelectedGitaVoice: (voiceId: string) => void
+  setGitaLang: (lang: string) => void
 
   // State loading
   loadPersistedState: () => Promise<void>

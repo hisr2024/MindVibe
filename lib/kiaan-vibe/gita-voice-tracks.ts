@@ -142,9 +142,13 @@ export function createVerseTrack(
   return {
     id: trackId,
     title: `${chapterMeta?.nameSanskrit || `Chapter ${chapter}`} - Verse ${verseNumber}`,
-    artist: language === 'sa'
-      ? 'Bhagavad Gita - Divine Sanskrit'
-      : `Bhagavad Gita - ${langInfo?.nativeName || language}`,
+    artist: (() => {
+      const styleLabel = voiceStyle.charAt(0).toUpperCase() + voiceStyle.slice(1)
+      const langLabel = language === 'sa'
+        ? 'Sanskrit'
+        : (langInfo?.nativeName || language)
+      return `Bhagavad Gita - ${styleLabel} ${langLabel}`
+    })(),
     sourceType: 'remote',
     src: apiUrl,
     tags: ['gita', 'divine-voice', `chapter-${chapter}`, language, voiceStyle],

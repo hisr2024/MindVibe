@@ -66,7 +66,7 @@ export function GitaVoiceSelector({
             {selectedVoice.description}
           </p>
           <p className="text-[10px] text-[#6B6355] mt-0.5 font-[family-name:var(--font-ui)]">
-            {selectedVoice.name}&apos;s voice is set to {selectedVoice.speed}\u00D7 for sacred reverence
+            {selectedVoice.name}&apos;s voice is set to {selectedVoice.speed}{'\u00D7'} for sacred reverence
           </p>
         </div>
       )}
