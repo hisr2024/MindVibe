@@ -196,6 +196,11 @@ class Dashboard:
     enemy_progress: list[EnemyProgress]
     recommended_templates: list[dict[str, Any]]
     today_steps: list[DailyStep]
+    # Authoritative active-journey count from the DB. Frontend must use this
+    # for the "N/5" indicator instead of len(active_journeys), so the
+    # dashboard count and the start-journey limit check can never disagree.
+    active_count: int = 0
+    max_active: int = 5
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -206,6 +211,8 @@ class Dashboard:
             "enemy_progress": [e.to_dict() for e in self.enemy_progress],
             "recommended_templates": self.recommended_templates,
             "today_steps": [s.to_dict() for s in self.today_steps],
+            "active_count": self.active_count,
+            "max_active": self.max_active,
         }
 
 
@@ -704,13 +711,57 @@ class JourneyEngineService:
     # -------------------------------------------------------------------------
 
     async def get_dashboard(self, user_id: str) -> Dashboard:
-        """Get user's complete journey dashboard."""
-        # Get active journeys
+        """Get user's complete journey dashboard.
+
+        SELF-HEALING: cleans up orphaned journeys (active rows whose
+        JourneyTemplate has been soft-deleted) before listing, so that
+        ``_count_active_journeys`` and ``list_user_journeys`` always agree.
+        Without this, users could see "0/5 active" on the dashboard while
+        the start-journey endpoint reports "5 active — maximum reached",
+        leaving them permanently trapped.
+        """
+        # STEP 1: Heal orphaned journeys before counting. Wrapped in
+        # try/except so the dashboard never fails on cleanup errors.
+        try:
+            await self.cleanup_orphaned_journeys(user_id)
+        except Exception as e:  # noqa: BLE001
+            logger.error(
+                f"[get_dashboard] cleanup_orphaned_journeys failed for user {user_id}: {e}"
+            )
+
+        # STEP 2: List active journeys (post-cleanup).
         active_journeys, _ = await self.list_user_journeys(
             user_id=user_id,
             status_filter="active",
             limit=self.MAX_ACTIVE_JOURNEYS,
         )
+
+        # STEP 3: Authoritative DB count.
+        active_count = await self._count_active_journeys(user_id)
+
+        # STEP 4: Phantom recovery — if count > list after cleanup, force
+        # clear so the user can never get permanently trapped.
+        if active_count > len(active_journeys):
+            logger.warning(
+                f"[get_dashboard] PHANTOM DETECTED user={user_id}: "
+                f"count={active_count} list_len={len(active_journeys)}. "
+                f"Force-clearing all journeys for self-recovery."
+            )
+            try:
+                await self.force_clear_all_journeys(user_id)
+                active_journeys, _ = await self.list_user_journeys(
+                    user_id=user_id,
+                    status_filter="active",
+                    limit=self.MAX_ACTIVE_JOURNEYS,
+                )
+                active_count = await self._count_active_journeys(user_id)
+            except Exception as e:  # noqa: BLE001
+                logger.error(
+                    f"[get_dashboard] Phantom recovery failed user={user_id}: {e}"
+                )
+                # Last resort: trust the visible list so the frontend
+                # never sees a divergent count.
+                active_count = len(active_journeys)
 
         # Count completed journeys
         completed_query = select(func.count()).where(
@@ -758,6 +809,8 @@ class JourneyEngineService:
             enemy_progress=enemy_progress,
             recommended_templates=recommendations,
             today_steps=today_steps,
+            active_count=active_count,
+            max_active=self.MAX_ACTIVE_JOURNEYS,
         )
 
     # -------------------------------------------------------------------------

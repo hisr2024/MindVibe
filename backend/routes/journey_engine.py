@@ -278,6 +278,11 @@ class DashboardResponse(BaseModel):
     enemy_progress: list[EnemyProgressResponse]
     recommended_templates: list[dict[str, Any]]
     today_steps: list[StepResponse]
+    # Authoritative active-journey count from the DB. Frontend must use
+    # this for the "N/5" indicator instead of len(active_journeys), so the
+    # dashboard count and the start-journey limit check can never disagree.
+    active_count: int = 0
+    max_active: int = 5
 
 
 class ExampleResponse(BaseModel):
@@ -906,6 +911,8 @@ async def get_dashboard(
             enemy_progress=[],
             recommended_templates=[],
             today_steps=[],
+            active_count=0,
+            max_active=5,
         )
 
     return DashboardResponse(
@@ -976,6 +983,8 @@ async def get_dashboard(
             )
             for s in dashboard.today_steps
         ],
+        active_count=dashboard.active_count,
+        max_active=dashboard.max_active,
     )
 
 

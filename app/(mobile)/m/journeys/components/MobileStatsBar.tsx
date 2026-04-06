@@ -27,8 +27,12 @@ export function MobileStatsBar({ dashboard, isLoading }: MobileStatsBarProps) {
   const stats: StatDef[] = [
     {
       label: 'Active',
-      value: dashboard.active_journeys.length,
-      suffix: '/5',
+      // Trust the backend-authoritative count so the stats bar can never
+      // disagree with the start-journey limit check (which would otherwise
+      // strand the user with "0/5 active" + a "5 active — max reached"
+      // blocker). Falls back to .length for backwards compat.
+      value: dashboard.active_count ?? dashboard.active_journeys.length,
+      suffix: `/${dashboard.max_active ?? 5}`,
       icon: '\u2694\uFE0F',
       gradient: 'from-violet-500/20 to-indigo-500/10',
     },
