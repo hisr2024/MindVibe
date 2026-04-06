@@ -5,8 +5,23 @@
  */
 function getCsrfToken(): string | null {
   if (typeof document === 'undefined') return null
-  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/)
-  return match ? decodeURIComponent(match[1]) : null
+  // Loop-based parser: iOS Safari URL-encodes cookie values containing special
+  // characters (=, +, /), and the previous regex truncated base64-like values
+  // at the first '='. We split on ';' and use indexOf('=') (first occurrence
+  // only) so the full value survives intact, then decode once.
+  for (const part of document.cookie.split(';')) {
+    const trimmed = part.trim()
+    const eqIdx = trimmed.indexOf('=')
+    if (eqIdx === -1) continue
+    if (trimmed.slice(0, eqIdx).trim() !== 'csrf_token') continue
+    const raw = trimmed.slice(eqIdx + 1)
+    try {
+      return decodeURIComponent(raw)
+    } catch {
+      return raw
+    }
+  }
+  return null
 }
 
 // Shared refresh promise so concurrent 401s only trigger one refresh request.

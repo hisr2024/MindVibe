@@ -76,13 +76,26 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+interface ApiRequestOptions {
+  signal?: AbortSignal;
+  idempotencyKey?: string;
+}
+
 async function apiRequest<T>(
   method: string,
   endpoint: string,
-  body?: unknown
+  body?: unknown,
+  options: ApiRequestOptions = {},
 ): Promise<T> {
   const upperMethod = method.toUpperCase();
   const hasBody = ['POST', 'PUT', 'PATCH'].includes(upperMethod);
+  // BUG-15: only retry safe methods (GET/HEAD/OPTIONS) OR requests carrying an
+  // Idempotency-Key header. Retrying a plain POST on 502/503 can double-create
+  // resources (e.g. duplicate journeys) when the first attempt actually
+  // succeeded server-side before the proxy returned the error.
+  const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
+  const safeToRetry =
+    SAFE_METHODS.includes(upperMethod) || !!options.idempotencyKey;
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
@@ -92,11 +105,15 @@ async function apiRequest<T>(
       if (hasBody) {
         headers['Content-Type'] = 'application/json';
       }
+      if (options.idempotencyKey) {
+        headers['Idempotency-Key'] = options.idempotencyKey;
+      }
 
       const response = await apiFetch(endpoint, {
         method,
         headers,
         body: hasBody && body ? JSON.stringify(body) : undefined,
+        signal: options.signal,
       });
 
       if (response.status === 204) {
@@ -127,9 +144,24 @@ async function apiRequest<T>(
           ? 'MAX_ACTIVE_JOURNEYS'
           : 'API_ERROR';
 
-        if (RETRYABLE_STATUS_CODES.includes(response.status) && attempt < MAX_RETRIES) {
+        if (
+          RETRYABLE_STATUS_CODES.includes(response.status) &&
+          safeToRetry &&
+          attempt < MAX_RETRIES
+        ) {
           await sleep(INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt));
           continue;
+        }
+
+        // BUG-16: surface 401 as a typed AUTH_REQUIRED error so the caller
+        // can show "Session expired, please log in" instead of a generic
+        // failure message.
+        if (response.status === 401) {
+          throw new JourneyEngineError(
+            'Session expired. Please log in and try again.',
+            'AUTH_REQUIRED',
+            401,
+          );
         }
 
         throw new JourneyEngineError(message, code, response.status);
@@ -141,7 +173,13 @@ async function apiRequest<T>(
         throw error;
       }
 
-      if (attempt < MAX_RETRIES) {
+      // Propagate AbortError immediately — it's a deliberate cancellation
+      // (e.g. the 15s timeout in handleStart), never a retryable network blip.
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw error;
+      }
+
+      if (safeToRetry && attempt < MAX_RETRIES) {
         await sleep(INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt));
         continue;
       }
@@ -241,9 +279,35 @@ export async function getJourney(journeyId: string): Promise<JourneyResponse> {
 /**
  * Start a new journey from a template.
  * POST /api/journey-engine/journeys
+ *
+ * Accepts an optional AbortSignal (for the 15s client timeout) and an
+ * Idempotency-Key so concurrent/retried requests for the same template
+ * don't create duplicate journeys on the server.
  */
-export async function startJourney(request: StartJourneyRequest): Promise<JourneyResponse> {
-  return apiRequest<JourneyResponse>('POST', `${JOURNEY_ENGINE_ENDPOINT}/journeys`, request);
+export async function startJourney(
+  request: StartJourneyRequest,
+  options: { signal?: AbortSignal; idempotencyKey?: string } = {},
+): Promise<JourneyResponse> {
+  const response = await apiRequest<JourneyResponse>(
+    'POST',
+    `${JOURNEY_ENGINE_ENDPOINT}/journeys`,
+    request,
+    options,
+  );
+
+  // Runtime guard: backend contract requires journey_id. If it's missing
+  // we cannot navigate, so fail loudly instead of silently routing to undefined.
+  const journeyId = (response as { journey_id?: string; id?: string } | null)?.journey_id
+    ?? (response as { journey_id?: string; id?: string } | null)?.id;
+  if (!journeyId) {
+    throw new JourneyEngineError(
+      'Journey was created but the server response was malformed. Please refresh and try again.',
+      'MALFORMED_RESPONSE',
+      500,
+    );
+  }
+
+  return response;
 }
 
 /**

@@ -128,7 +128,13 @@ export default function JourneysScreen() {
   // MAIN LAYOUT
   // ==========================================================================
   return (
-    <div className="relative min-h-[100dvh] bg-[#050714] overflow-hidden">
+    // BUG-11: no overflow-hidden on the root. It was clipping the
+    // Template Detail modal sheet (rendered inside a child component) on
+    // some Android WebViews where `overflow-hidden` on a positioned ancestor
+    // also clips fixed/absolute descendants in the same stacking context.
+    // The tab content below has its own overflow-x-hidden for horizontal
+    // safety without affecting modal layering.
+    <div className="relative min-h-[100dvh] bg-[#050714]">
       <JourneysCanvas activeTab={activeTab} />
 
       {/* Header */}
@@ -159,8 +165,9 @@ export default function JourneysScreen() {
         </div>
       )}
 
-      {/* Tab content — scrollable area */}
-      <div className="relative z-10 pb-[80px]">
+      {/* Tab content — scrollable area (overflow-x-hidden only: vertical
+          must stay default so the detail modal is not clipped). */}
+      <div className="relative z-10 pb-[80px] overflow-x-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}

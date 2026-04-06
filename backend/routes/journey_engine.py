@@ -45,9 +45,10 @@ Usage:
 from __future__ import annotations
 
 import logging
+import time
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -73,6 +74,55 @@ from backend.services.notification_dispatcher import dispatch_notification
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Journey Engine"])
+
+
+# =============================================================================
+# START-JOURNEY IDEMPOTENCY (in-memory, 60s TTL)
+# =============================================================================
+# The mobile client can retry a start-journey POST if the initial response
+# is delayed or the user double-taps before the UI disables the button.
+# Without dedup, each retry would create a fresh UserJourney row, quickly
+# tripping MaxActiveJourneysError and surfacing as "journey won't start"
+# from the user's point of view.
+#
+# We cache successful (user_id, template_id, idempotency_key) -> JourneyResponse
+# for 60 seconds. Any retry with the same key in that window returns the
+# original response instead of creating a new journey. The cache is process-
+# local (single worker safe), which matches the retry window comfortably —
+# longer-term dedup belongs in a schema column, but that requires Alembic
+# which this project does not use. Deliberately minimal surface area.
+
+_IDEMPOTENCY_TTL_SECONDS = 60
+_idempotency_cache: dict[tuple[str, str, str], tuple[float, Any]] = {}
+
+
+def _idempotency_lookup(
+    user_id: str, template_id: str, key: str
+) -> Any | None:
+    entry = _idempotency_cache.get((user_id, template_id, key))
+    if entry is None:
+        return None
+    ts, value = entry
+    if time.time() - ts > _IDEMPOTENCY_TTL_SECONDS:
+        _idempotency_cache.pop((user_id, template_id, key), None)
+        return None
+    return value
+
+
+def _idempotency_store(
+    user_id: str, template_id: str, key: str, value: Any
+) -> None:
+    # Opportunistic GC so the dict doesn't grow unbounded on a healthy server.
+    if len(_idempotency_cache) > 512:
+        now = time.time()
+        stale = [
+            k
+            for k, (ts, _) in _idempotency_cache.items()
+            if now - ts > _IDEMPOTENCY_TTL_SECONDS
+        ]
+        for k in stale:
+            _idempotency_cache.pop(k, None)
+    _idempotency_cache[(user_id, template_id, key)] = (time.time(), value)
 
 
 # =============================================================================
@@ -436,6 +486,7 @@ async def list_journeys(
 @router.post("/journeys", response_model=JourneyResponse, status_code=status.HTTP_201_CREATED)
 async def start_journey(
     request: StartJourneyRequest,
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
     service: JourneyEngineService = Depends(get_journey_service),
     current_user: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -443,9 +494,18 @@ async def start_journey(
     """
     Start a new journey.
 
-    Users can have up to 5 active journeys simultaneously.
+    Users can have up to 5 active journeys simultaneously. If the same
+    Idempotency-Key is replayed within 60 seconds for the same user and
+    template, the original JourneyResponse is returned without creating a
+    duplicate — this protects against mobile double-taps and proxy retries.
     """
     user_id = current_user
+
+    # Short-circuit on replay
+    if idempotency_key:
+        cached = _idempotency_lookup(user_id, request.template_id, idempotency_key)
+        if cached is not None:
+            return cached
 
     try:
         personalization = None
@@ -463,7 +523,7 @@ async def start_journey(
         # Get stats for response
         stats = await service.get_journey(user_id, journey.id)
 
-        return JourneyResponse(
+        response = JourneyResponse(
             journey_id=stats.journey_id,
             template_slug=stats.template_slug,
             title=stats.title,
@@ -477,6 +537,11 @@ async def start_journey(
             primary_enemies=stats.primary_enemies,
             streak_days=stats.streak_days,
         )
+
+        if idempotency_key:
+            _idempotency_store(user_id, request.template_id, idempotency_key, response)
+
+        return response
 
     except MaxActiveJourneysError as e:
         raise HTTPException(status_code=400, detail={"error": "MAX_ACTIVE_JOURNEYS", "message": str(e)})

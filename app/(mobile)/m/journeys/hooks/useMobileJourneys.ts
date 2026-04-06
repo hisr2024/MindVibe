@@ -79,21 +79,28 @@ export function useMobileJourneys(isAuthenticated: boolean): UseMobileJourneysRe
       if (result && '_fallback' in result && (result as { _fallback?: boolean })._fallback) {
         if (templates.length === 0) {
           console.warn('[Journeys] Templates endpoint returned fallback — backend may be down')
+          setError(
+            'Journey catalog is temporarily unavailable. Pull down to retry.',
+          )
         }
         return
       }
 
       if (result?.templates) {
         setTemplates(result.templates)
+        setError(null)
       }
     } catch (err) {
-      // FIX BUG 3: Surface template errors when we have no cached templates
+      // BUG-07: Surface template errors when we have no cached templates so
+      // the user sees an actionable message instead of an empty list.
       console.warn(
         '[Journeys] Failed to load templates:',
         err instanceof Error ? err.message : err,
       )
       if (templates.length === 0) {
-        setError('Unable to load journey templates. Pull down to retry.')
+        setError(
+          'Unable to load journey templates. Pull down to retry or check your connection.',
+        )
       }
     }
   }, [templates.length])

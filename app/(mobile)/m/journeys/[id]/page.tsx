@@ -629,11 +629,16 @@ export default function MobileJourneyDetailPage() {
                 </AnimatePresence>
 
                 <motion.button
+                  type="button"
                   whileTap={{ scale: 0.97 }}
                   onClick={handleCompleteStep}
                   disabled={isCompleting}
                   className="w-full rounded-2xl py-4 text-base font-bold text-[#050714] disabled:opacity-50"
                   style={{
+                    // BUG-14 parity with Begin button: explicit touch target
+                    // and no tap delay on older Android WebView.
+                    minHeight: 48,
+                    touchAction: 'manipulation',
                     background: enemyInfo
                       ? `linear-gradient(135deg, ${enemyInfo.color}cc, ${enemyInfo.color})`
                       : 'linear-gradient(135deg, #D4A017cc, #D4A017)',
