@@ -17,9 +17,10 @@ import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 interface BattlegroundTabProps {
   dashboard: DashboardResponse | null
   isLoading: boolean
+  onNavigateToJourneys?: (enemy: EnemyType) => void
 }
 
-export function BattlegroundTab({ dashboard, isLoading }: BattlegroundTabProps) {
+export function BattlegroundTab({ dashboard, isLoading, onNavigateToJourneys }: BattlegroundTabProps) {
   const [selectedEnemy, setSelectedEnemy] = useState<EnemyType | null>(null)
   const { triggerHaptic } = useHapticFeedback()
 
@@ -228,17 +229,21 @@ export function BattlegroundTab({ dashboard, isLoading }: BattlegroundTabProps) 
                   Journey Mastered {'\u2713'}
                 </button>
               ) : (
-                <Link href="/m/journeys">
-                  <button
-                    className="w-full rounded-xl py-3 text-sm font-ui font-semibold text-[#050714] active:scale-[0.97] transition-transform"
-                    style={{
-                      background: `linear-gradient(135deg, ${selectedInfo.color}cc, ${selectedInfo.color})`,
-                      boxShadow: `0 4px 16px rgba(${selectedInfo.colorRGB},0.3)`,
-                    }}
-                  >
-                    Begin Journey {'\u2192'}
-                  </button>
-                </Link>
+                <button
+                  onClick={() => {
+                    triggerHaptic('medium')
+                    if (onNavigateToJourneys && selectedEnemy) {
+                      onNavigateToJourneys(selectedEnemy)
+                    }
+                  }}
+                  className="w-full rounded-xl py-3 text-sm font-ui font-semibold text-[#050714] active:scale-[0.97] transition-transform"
+                  style={{
+                    background: `linear-gradient(135deg, ${selectedInfo.color}cc, ${selectedInfo.color})`,
+                    boxShadow: `0 4px 16px rgba(${selectedInfo.colorRGB},0.3)`,
+                  }}
+                >
+                  Begin Journey {'\u2192'}
+                </button>
               )}
             </div>
           </motion.div>
