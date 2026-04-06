@@ -36,6 +36,10 @@ interface JourneysTabProps {
   initialEnemy?: EnemyType | null
   /** Called once the initialEnemy has been applied so parent can clear it */
   onEnemyConsumed?: () => void
+  /** When set, auto-open the matching template detail (single-match case) */
+  autoOpenForEnemy?: EnemyType | null
+  /** Called after auto-open has been processed */
+  onAutoOpenConsumed?: () => void
 }
 
 type PaceOption = 'daily' | 'every_other_day' | 'weekly'
@@ -61,6 +65,8 @@ export function JourneysTab({
   onRefresh,
   initialEnemy = null,
   onEnemyConsumed,
+  autoOpenForEnemy = null,
+  onAutoOpenConsumed,
 }: JourneysTabProps) {
   const router = useRouter()
   const { triggerHaptic } = useHapticFeedback()
@@ -75,6 +81,27 @@ export function JourneysTab({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialEnemy])
+
+  // Auto-open template detail after Battleground "Begin Journey" tap.
+  // Single-match → open the detail sheet so the button feels responsive.
+  // Multi-match → leave the filtered list visible.
+  useEffect(() => {
+    if (!autoOpenForEnemy || !templates || templates.length === 0) return
+    const matches = templates.filter((t) =>
+      t.primary_enemy_tags.includes(autoOpenForEnemy),
+    )
+    if (matches.length === 1) {
+      const timer = setTimeout(() => {
+        setDetailTemplate(matches[0])
+        setSelectedPace('daily')
+        setModalError(null)
+        onAutoOpenConsumed?.()
+      }, 180)
+      return () => clearTimeout(timer)
+    }
+    onAutoOpenConsumed?.()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpenForEnemy, templates])
   const [startingId, setStartingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [showMaxSheet, setShowMaxSheet] = useState(false)
@@ -109,26 +136,57 @@ export function JourneysTab({
 
       const personalization: PersonalizationSettings = { pace: selectedPace }
 
+      // 15s timeout guard so a hung request can never spin forever.
+      let timedOut = false
+      const timeoutHandle = setTimeout(() => {
+        timedOut = true
+      }, 15_000)
+
       try {
-        const journey = await journeyEngineService.startJourney({
-          template_id: templateId,
-          personalization,
-        })
+        const journey = await Promise.race([
+          journeyEngineService.startJourney({
+            template_id: templateId,
+            personalization,
+          }),
+          new Promise<never>((_, reject) =>
+            setTimeout(
+              () => reject(new Error('REQUEST_TIMEOUT')),
+              15_000,
+            ),
+          ),
+        ])
+        clearTimeout(timeoutHandle)
         triggerHaptic('success')
-        // FIX BUG 2: Navigate FIRST, then clean up modal.
-        // Page unmount will handle modal cleanup naturally.
-        router.push(`/m/journeys/${journey.journey_id}`)
-        onRefresh()
-        // Close modal after navigation has started (not before)
+
+        // Close modal FIRST so the heavy sheet stops painting over the
+        // navigating page, then prefetch + navigate on the next frame so
+        // the exit animation actually starts before the route change.
+        const destination = `/m/journeys/${journey.journey_id}`
+        router.prefetch(destination)
         setDetailTemplate(null)
+        requestAnimationFrame(() => {
+          router.push(destination)
+        })
+        onRefresh()
       } catch (err) {
+        clearTimeout(timeoutHandle)
         triggerHaptic('error')
         if (err instanceof JourneyEngineError && err.isMaxJourneysError()) {
-          // FIX BUG 1: Close modal before showing max-journeys sheet
           setDetailTemplate(null)
           setShowMaxSheet(true)
+        } else if (
+          timedOut ||
+          (err instanceof Error && err.message === 'REQUEST_TIMEOUT')
+        ) {
+          setModalError(
+            'Request timed out. Check your connection and try again.',
+          )
+        } else if (
+          typeof navigator !== 'undefined' &&
+          !navigator.onLine
+        ) {
+          setModalError('No internet connection. Please reconnect and try again.')
         } else {
-          // FIX BUG 1+5: Show error INSIDE the modal (not behind it)
           setModalError(
             err instanceof JourneyEngineError
               ? err.message
@@ -295,15 +353,15 @@ export function JourneysTab({
             className="fixed inset-0 z-50 flex items-end justify-center"
             onClick={() => setDetailTemplate(null)}
           >
-            {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+            {/* Backdrop — solid, no backdrop-blur (kills mobile fps) */}
+            <div className="absolute inset-0 bg-black/70" />
 
-            {/* Sheet */}
+            {/* Sheet — critically-damped tween, GPU-composited */}
             <motion.div
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              transition={{ type: 'tween', duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
               className="relative w-full max-h-[85vh] overflow-y-auto rounded-t-3xl"
               style={{
                 background: detailInfo
@@ -311,9 +369,34 @@ export function JourneysTab({
                   : 'rgba(5,7,20,0.99)',
                 borderTop: detailInfo ? `2px solid ${detailInfo.color}40` : '2px solid rgba(212,160,23,0.3)',
                 paddingBottom: 'env(safe-area-inset-bottom, 16px)',
+                willChange: 'transform',
+                transform: 'translate3d(0, 0, 0)',
+                WebkitOverflowScrolling: 'touch',
+                overscrollBehavior: 'contain',
               }}
               onClick={(e) => e.stopPropagation()}
             >
+              {/* Full-sheet "starting" overlay — confirms tap immediately */}
+              {startingId === detailTemplate.id && (
+                <div
+                  className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3"
+                  style={{ background: 'rgba(5,7,20,0.94)' }}
+                >
+                  <div
+                    className="text-4xl"
+                    style={{
+                      color: '#F0C040',
+                      fontFamily: '"Noto Sans Devanagari", sans-serif',
+                      animation: 'spin 2s linear infinite',
+                    }}
+                  >
+                    {'\u0950'}
+                  </div>
+                  <p className="text-xs text-[#B8AE98] font-ui">
+                    Beginning your journey...
+                  </p>
+                </div>
+              )}
               {/* Handle */}
               <div className="flex justify-center pt-3 pb-2">
                 <div className="w-10 h-1 rounded-full bg-white/20" />

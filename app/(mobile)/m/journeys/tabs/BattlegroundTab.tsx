@@ -232,9 +232,14 @@ export function BattlegroundTab({ dashboard, isLoading, onNavigateToJourneys }: 
                 <button
                   onClick={() => {
                     triggerHaptic('medium')
-                    if (onNavigateToJourneys && selectedEnemy) {
-                      onNavigateToJourneys(selectedEnemy)
-                    }
+                    if (!onNavigateToJourneys || !selectedEnemy) return
+                    // Close enemy sheet FIRST so the tab switch is visible,
+                    // then navigate on the next frame.
+                    const enemyId = selectedEnemy
+                    setSelectedEnemy(null)
+                    requestAnimationFrame(() => {
+                      onNavigateToJourneys(enemyId)
+                    })
                   }}
                   className="w-full rounded-xl py-3 text-sm font-ui font-semibold text-[#050714] active:scale-[0.97] transition-transform"
                   style={{

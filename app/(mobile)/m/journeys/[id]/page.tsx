@@ -195,8 +195,29 @@ export default function MobileJourneyDetailPage() {
   if (loading) {
     return (
       <MobileAppShell title="Journey" showBack showTabBar={false}>
-        <div className="flex items-center justify-center py-20">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#d4a44c] border-t-transparent" />
+        <div className="px-4 pt-4 pb-10 space-y-4 animate-pulse">
+          {/* Header strip */}
+          <div className="flex items-center justify-between">
+            <div className="h-4 w-24 rounded bg-white/[0.08]" />
+            <div className="h-4 w-16 rounded bg-white/[0.08]" />
+          </div>
+          {/* Progress bar */}
+          <div className="h-1.5 w-full rounded-full bg-white/[0.06] overflow-hidden">
+            <div className="h-full w-1/4 rounded-full bg-[#d4a44c]/40" />
+          </div>
+          {/* Title */}
+          <div className="space-y-2 pt-2">
+            <div className="h-6 w-3/4 rounded bg-white/[0.08]" />
+            <div className="h-4 w-1/2 rounded bg-white/[0.06]" />
+          </div>
+          {/* Teaching card */}
+          <div className="h-36 rounded-2xl border border-white/[0.06] bg-white/[0.03]" />
+          {/* Practice card */}
+          <div className="h-24 rounded-2xl border border-white/[0.06] bg-white/[0.03]" />
+          {/* Reflection card */}
+          <div className="h-40 rounded-2xl border border-white/[0.06] bg-white/[0.03]" />
+          {/* Button */}
+          <div className="h-14 rounded-2xl bg-[#d4a44c]/20" />
         </div>
       </MobileAppShell>
     )
