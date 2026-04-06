@@ -13,7 +13,8 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, BookOpen, ChevronRight, Play, Volume2, Loader2, ListMusic } from 'lucide-react'
 import { getChapter, GITA_CHAPTERS_META, SUPPORTED_LANGUAGES } from '@/lib/kiaan-vibe/gita'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
-import { createChapterTracks } from '@/lib/kiaan-vibe/gita-voice-tracks'
+import { createChapterTracks, type GitaVoiceStyle } from '@/lib/kiaan-vibe/gita-voice-tracks'
+import { GitaVoiceControls } from '@/components/kiaan-vibe-player/GitaVoiceControls'
 import type { GitaChapter } from '@/lib/kiaan-vibe/types'
 
 interface PageProps {
@@ -24,12 +25,19 @@ export default function ChapterVersesPage({ params }: PageProps) {
   const resolvedParams = use(params)
   const searchParams = useSearchParams()
   const chapterNumber = parseInt(resolvedParams.chapter, 10)
-  const languageCode = searchParams.get('lang') || 'en'
+  const initialLang = searchParams.get('lang') || 'en'
 
   const [chapter, setChapter] = useState<GitaChapter | null>(null)
   const [loading, setLoading] = useState(true)
   const [_copiedVerse, setCopiedVerse] = useState<number | null>(null)
   const [isLoadingChapter, setIsLoadingChapter] = useState(false)
+
+  // User-selectable playback voice config for the Bhagavad Gita Vibe Player
+  const [selectedLang, setSelectedLang] = useState<string>(initialLang)
+  const [selectedStyle, setSelectedStyle] = useState<GitaVoiceStyle>('divine')
+
+  // Keep the chapter display language in sync with the selected playback language
+  const languageCode = selectedLang
 
   const { play, setQueue, currentTrack, isPlaying: playerIsPlaying } = usePlayerStore()
 
@@ -41,7 +49,7 @@ export default function ChapterVersesPage({ params }: PageProps) {
   const handlePlayChapter = async () => {
     setIsLoadingChapter(true)
     try {
-      const tracks = await createChapterTracks(chapterNumber, languageCode, 'divine')
+      const tracks = await createChapterTracks(chapterNumber, selectedLang, selectedStyle)
       if (tracks.length > 0) {
         setQueue(tracks, 0)
         await play(tracks[0])
@@ -114,6 +122,16 @@ export default function ChapterVersesPage({ params }: PageProps) {
         <p className="text-white/60">
           {chapterMeta?.name} • {chapterMeta?.verseCount} verses
         </p>
+      </div>
+
+      {/* Language + Voice Style selector for KIAAN Vibe Player */}
+      <div className="p-4 rounded-2xl bg-gradient-to-br from-[#d4a44c]/5 to-[#d4a44c]/5 border border-[#d4a44c]/20">
+        <GitaVoiceControls
+          selectedLang={selectedLang}
+          onLangChange={setSelectedLang}
+          selectedStyle={selectedStyle}
+          onStyleChange={setSelectedStyle}
+        />
       </div>
 
       {/* Play Chapter & Divine Voice Controls */}

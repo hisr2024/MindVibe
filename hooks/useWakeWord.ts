@@ -22,6 +22,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { SpeechRecognitionService } from '@/utils/speech/recognition'
 import { isSpeechRecognitionSupported } from '@/utils/speech/languageMapping'
+import { usePlayerStore } from '@/lib/kiaan-vibe/store'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -188,10 +189,27 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
         // If we're still supposed to be listening (wasn't stopped intentionally),
         // restart recognition. Web Speech API can end on its own after silence.
         if (isListeningRef.current) {
+          // Belt-and-braces: do not restart the mic if the KIAAN Vibe Player
+          // is actively playing audio. The footer effect is the primary gate,
+          // but this prevents a pending restart from re-arming the mic in the
+          // small window between onEnd firing and the footer effect re-running.
+          if (usePlayerStore.getState().isPlaying) {
+            isListeningRef.current = false
+            setIsListening(false)
+            return
+          }
+
           // Small delay before restart to avoid rapid restart loops
           setTimeout(() => {
             if (!mountedRef.current || !isListeningRef.current) return
             if (!recognitionRef.current) return
+
+            // Re-check at timer fire — playback may have started during the delay
+            if (usePlayerStore.getState().isPlaying) {
+              isListeningRef.current = false
+              setIsListening(false)
+              return
+            }
 
             // Reuse the same callbacks so onEnd keeps restarting indefinitely
             recognitionRef.current.start(wakeWordCallbacks)
