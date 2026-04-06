@@ -16,7 +16,7 @@ import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { SanskritReveal } from '@/components/mobile/vibe/SanskritReveal'
 import { GitaVoiceSelector } from '@/components/mobile/vibe/GitaVoiceSelector'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
-import { loadGitaLanguage } from '@/lib/kiaan-vibe/gita'
+import { loadGitaLanguage, SUPPORTED_LANGUAGES } from '@/lib/kiaan-vibe/gita'
 import { createVerseTrack, type GitaVoiceStyle } from '@/lib/kiaan-vibe/gita-voice-tracks'
 import {
   getGitaMobileChapter,
@@ -56,36 +56,39 @@ export default function VerseReaderPage() {
   const chapter = useMemo(() => getGitaMobileChapter(chapterNum), [chapterNum])
   const [verse, setVerse] = useState<VerseData | null>(null)
   const [selectedVoice, setSelectedVoice] = useState('divine-krishna')
+  const [selectedLang, setSelectedLang] = useState<string>('sa')
   const [translitVisible, setTranslitVisible] = useState(false)
   const [saved, setSaved] = useState(false)
 
-  // Load verse data
+  // Load verse data — Sanskrit text is always loaded for the shloka, plus
+  // the user-selected translation language (defaults to English).
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const [saData, enData] = await Promise.all([
+      const translationLang = selectedLang === 'sa' ? 'en' : selectedLang
+      const [saData, langData] = await Promise.all([
         loadGitaLanguage('sa'),
-        loadGitaLanguage('en'),
+        loadGitaLanguage(translationLang),
       ])
       if (cancelled) return
 
       const saChapter = saData?.chapters.find(c => c.chapterNumber === chapterNum)
-      const enChapter = enData?.chapters.find(c => c.chapterNumber === chapterNum)
+      const langChapter = langData?.chapters.find(c => c.chapterNumber === chapterNum)
       const saVerse = saChapter?.verses.find(v => v.verseNumber === verseNum)
-      const enVerse = enChapter?.verses.find(v => v.verseNumber === verseNum)
+      const langVerse = langChapter?.verses.find(v => v.verseNumber === verseNum)
 
-      if (saVerse || enVerse) {
+      if (saVerse || langVerse) {
         setVerse({
           sanskrit: saVerse?.sanskrit || '',
           transliteration: saVerse?.transliteration || '',
-          translation: enVerse?.translation || saVerse?.translation || '',
+          translation: langVerse?.translation || saVerse?.translation || '',
         })
       }
     }
     load()
     return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chapterNum, verseNum])
+  }, [chapterNum, verseNum, selectedLang])
 
   // Reset transliteration visibility when verse changes
   useEffect(() => {
@@ -103,6 +106,12 @@ export default function VerseReaderPage() {
   // the next tap on Listen synthesizes with the newly chosen voice.
   const handleSelectVoice = useCallback((voiceId: string) => {
     setSelectedVoice(voiceId)
+    if (isThisVerseActive) stop()
+    triggerHaptic('selection')
+  }, [isThisVerseActive, stop, triggerHaptic])
+
+  const handleSelectLanguage = useCallback((langCode: string) => {
+    setSelectedLang(langCode)
     if (isThisVerseActive) stop()
     triggerHaptic('selection')
   }, [isThisVerseActive, stop, triggerHaptic])
@@ -129,7 +138,7 @@ export default function VerseReaderPage() {
       verse.sanskrit,
       verse.transliteration,
       verse.translation,
-      'sa',
+      selectedLang,
       voiceStyle,
       speed,
       selectedVoice,
@@ -147,7 +156,7 @@ export default function VerseReaderPage() {
     }
     setQueue([track], 0)
     play(track)
-  }, [verse, chapter, chapterNum, verseNum, selectedVoice, isThisVersePlaying, isThisVerseActive, isPlaying, triggerHaptic, setQueue, play, pause])
+  }, [verse, chapter, chapterNum, verseNum, selectedVoice, selectedLang, isThisVersePlaying, isThisVerseActive, isPlaying, triggerHaptic, setQueue, play, pause])
 
   const handleSave = useCallback(() => {
     triggerHaptic('medium')
@@ -296,6 +305,37 @@ export default function VerseReaderPage() {
             {verse.translation}
           </p>
         )}
+
+        {/* Language selector */}
+        <div className="mb-4">
+          <p className="text-[10px] text-[#6B6355] uppercase tracking-[0.1em] mb-2 font-[family-name:var(--font-ui)]">
+            Listening language
+          </p>
+          <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
+            {Object.entries(SUPPORTED_LANGUAGES).map(([code, info]) => {
+              const isSelected = code === selectedLang
+              return (
+                <motion.button
+                  key={code}
+                  onClick={() => handleSelectLanguage(code)}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] flex items-center gap-1.5 font-[family-name:var(--font-ui)]"
+                  style={{
+                    color: isSelected ? '#D4A017' : '#B8AE98',
+                    backgroundColor: isSelected ? 'rgba(212,160,23,0.12)' : 'transparent',
+                    border: isSelected
+                      ? '1px solid rgba(212,160,23,0.5)'
+                      : '1px solid rgba(212,160,23,0.15)',
+                    fontWeight: isSelected ? 500 : 400,
+                  }}
+                >
+                  <span>{info.flag}</span>
+                  <span>{info.nativeName}</span>
+                </motion.button>
+              )
+            })}
+          </div>
+        </div>
 
         {/* Voice selector */}
         <div className="mb-5">
