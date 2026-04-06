@@ -10,9 +10,10 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Play, Pause, Bookmark, Share2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Play, Pause, Bookmark, Share2, ChevronLeft, ChevronRight, Globe, Check } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
+import { MobileBottomSheet } from '@/components/mobile/MobileBottomSheet'
 import { SanskritReveal } from '@/components/mobile/vibe/SanskritReveal'
 import { GitaVoiceSelector } from '@/components/mobile/vibe/GitaVoiceSelector'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
@@ -57,6 +58,7 @@ export default function VerseReaderPage() {
   const [verse, setVerse] = useState<VerseData | null>(null)
   const [selectedVoice, setSelectedVoice] = useState('divine-krishna')
   const [selectedLang, setSelectedLang] = useState<string>('sa')
+  const [showLangSheet, setShowLangSheet] = useState(false)
   const [translitVisible, setTranslitVisible] = useState(false)
   const [saved, setSaved] = useState(false)
 
@@ -306,35 +308,29 @@ export default function VerseReaderPage() {
           </p>
         )}
 
-        {/* Language selector */}
+        {/* Language selector — touch target opens a bottom sheet */}
         <div className="mb-4">
           <p className="text-[10px] text-[#6B6355] uppercase tracking-[0.1em] mb-2 font-[family-name:var(--font-ui)]">
             Listening language
           </p>
-          <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
-            {Object.entries(SUPPORTED_LANGUAGES).map(([code, info]) => {
-              const isSelected = code === selectedLang
-              return (
-                <motion.button
-                  key={code}
-                  onClick={() => handleSelectLanguage(code)}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] flex items-center gap-1.5 font-[family-name:var(--font-ui)]"
-                  style={{
-                    color: isSelected ? '#D4A017' : '#B8AE98',
-                    backgroundColor: isSelected ? 'rgba(212,160,23,0.12)' : 'transparent',
-                    border: isSelected
-                      ? '1px solid rgba(212,160,23,0.5)'
-                      : '1px solid rgba(212,160,23,0.15)',
-                    fontWeight: isSelected ? 500 : 400,
-                  }}
-                >
-                  <span>{info.flag}</span>
-                  <span>{info.nativeName}</span>
-                </motion.button>
-              )
-            })}
-          </div>
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={() => { setShowLangSheet(true); triggerHaptic('light') }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-[family-name:var(--font-ui)]"
+            style={{
+              background: 'rgba(22,26,66,0.5)',
+              border: '1px solid rgba(212,160,23,0.2)',
+            }}
+          >
+            <Globe size={16} color="#D4A017" />
+            <span className="text-lg leading-none">
+              {SUPPORTED_LANGUAGES[selectedLang]?.flag || '🌐'}
+            </span>
+            <span className="text-[13px] text-[#EDE8DC] flex-1 text-left">
+              {SUPPORTED_LANGUAGES[selectedLang]?.nativeName || 'Select language'}
+            </span>
+            <span className="text-[10px] text-[#6B6355] uppercase tracking-wider">Change</span>
+          </motion.button>
         </div>
 
         {/* Voice selector */}
@@ -391,6 +387,60 @@ export default function VerseReaderPage() {
           </motion.button>
         </div>
       </div>
+
+      {/* Language bottom sheet — full-width, touch-friendly list */}
+      <MobileBottomSheet
+        isOpen={showLangSheet}
+        onClose={() => setShowLangSheet(false)}
+        title="Listening language"
+        subtitle="Choose the language for the divine voice"
+        height="half"
+        showHandle
+        dismissible
+      >
+        <div className="px-1 pb-4 space-y-1">
+          {Object.entries(SUPPORTED_LANGUAGES).map(([code, info]) => {
+            const isSelected = code === selectedLang
+            return (
+              <motion.button
+                key={code}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  handleSelectLanguage(code)
+                  setShowLangSheet(false)
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl"
+                style={{
+                  background: isSelected ? 'rgba(212,160,23,0.12)' : 'rgba(255,255,255,0.02)',
+                  border: isSelected ? '1px solid rgba(212,160,23,0.4)' : '1px solid transparent',
+                }}
+              >
+                <span className="text-xl leading-none">{info.flag}</span>
+                <div className="flex-1 text-left">
+                  <p
+                    className="text-[14px] font-[family-name:var(--font-ui)]"
+                    style={{
+                      color: isSelected ? '#D4A017' : '#EDE8DC',
+                      fontWeight: isSelected ? 600 : 400,
+                    }}
+                  >
+                    {info.nativeName}
+                  </p>
+                  <p className="text-[10px] text-[#6B6355]">{info.name}</p>
+                </div>
+                {isSelected && (
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center"
+                    style={{ background: '#D4A017' }}
+                  >
+                    <Check size={12} color="#0B1037" />
+                  </div>
+                )}
+              </motion.button>
+            )
+          })}
+        </div>
+      </MobileBottomSheet>
     </MobileAppShell>
   )
 }
