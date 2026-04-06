@@ -69,9 +69,10 @@ const VERSE_BY_MOOD: Record<
   },
 }
 
-interface BlobEntry {
-  mood?: string
+interface RawJournalEntry {
+  moods?: string[] | null
   updated_at?: string
+  client_updated_at?: string
 }
 
 async function fetchRecentMoodCounts(request: NextRequest): Promise<{
@@ -79,34 +80,25 @@ async function fetchRecentMoodCounts(request: NextRequest): Promise<{
   moodCounts: Record<string, number>
 }> {
   try {
-    const url = new URL('/api/journal/entries?limit=50&offset=0', request.url)
-    const res = await fetch(url, { headers: { cookie: request.headers.get('cookie') ?? '' } })
+    const url = new URL('/api/journal/entries?limit=50', request.url)
+    const res = await fetch(url, {
+      headers: { cookie: request.headers.get('cookie') ?? '' },
+    })
     if (!res.ok) return { entryCount: 0, moodCounts: {} }
     const data = await res.json()
-    const list: unknown[] = Array.isArray(data)
-      ? data
-      : Array.isArray(data?.entries)
-        ? data.entries
-        : Array.isArray(data?.items)
-          ? data.items
-          : []
+    const list: RawJournalEntry[] = Array.isArray(data)
+      ? (data as RawJournalEntry[])
+      : Array.isArray((data as { entries?: unknown })?.entries)
+        ? ((data as { entries: RawJournalEntry[] }).entries)
+        : []
     const now = Date.now()
     const weekAgo = now - 7 * 24 * 60 * 60 * 1000
     const counts: Record<string, number> = {}
     let total = 0
-    for (const raw of list as BlobEntry[]) {
-      let mood = raw.mood
-      const blob = (raw as { blob_json?: string }).blob_json
-      if (blob) {
-        try {
-          const parsed = JSON.parse(blob)
-          mood = parsed.mood ?? mood
-          const updated = parsed.updated_at ?? raw.updated_at
-          if (updated && new Date(updated).getTime() < weekAgo) continue
-        } catch {
-          /* ignore */
-        }
-      }
+    for (const raw of list) {
+      const updated = raw.updated_at ?? raw.client_updated_at
+      if (updated && new Date(updated).getTime() < weekAgo) continue
+      const mood = Array.isArray(raw.moods) && raw.moods.length > 0 ? raw.moods[0] : null
       if (!mood) continue
       counts[mood] = (counts[mood] ?? 0) + 1
       total += 1

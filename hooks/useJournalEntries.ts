@@ -1,55 +1,73 @@
 'use client'
 
 /**
- * useJournalEntries — fetch + search + filter for the Browse and Calendar tabs.
+ * useJournalEntries — fetch + search + filter for the Browse and Calendar
+ * tabs. Consumes the real backend `JournalEntryOut` response shape from
+ * `GET /api/journal/entries` (see backend/routes/journal.py::list_entries
+ * and backend/schemas/journal.py::JournalEntryOut).
  *
- * Entries are stored as metadata + opaque encrypted content. This hook never
- * decrypts; callers that need plaintext (entry detail view) must call
- * decryptContent() themselves.
+ * Titles are decrypted eagerly (they are short) so the list view can
+ * render them. Content stays as an opaque EncryptedPayload until the
+ * entry detail view decrypts it.
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { decryptPayload, type EncryptedPayload } from '@/lib/crypto/journal'
 
 export interface JournalEntrySummary {
   id: string
   title: string
   mood: string
   tags: string[]
-  wordCount?: number
   createdAt: string
   updatedAt: string
-  /** Opaque envelope. Do NOT render in list views. */
-  encryptedContent?: string
+  /** Opaque encrypted content payload. Do NOT render in list views. */
+  encryptedContent: EncryptedPayload | null
 }
 
 interface RawEntry {
   id?: string
-  blob_json?: string
+  encrypted_title?: EncryptedPayload | Record<string, unknown> | null
+  encrypted_content?: EncryptedPayload | Record<string, unknown> | null
+  moods?: string[] | null
+  tags?: string[] | null
+  client_updated_at?: string
   created_at?: string
   updated_at?: string
-  title?: string
-  mood?: string
-  tags?: string[]
-  content?: string
 }
 
-function parseEntry(raw: RawEntry): JournalEntrySummary | null {
-  let payload: Record<string, unknown> = {}
-  if (raw.blob_json) {
-    try {
-      payload = JSON.parse(raw.blob_json)
-    } catch {
-      payload = {}
-    }
+function coercePayload(value: unknown): EncryptedPayload | null {
+  if (!value || typeof value !== 'object') return null
+  const v = value as Record<string, unknown>
+  if (typeof v.ciphertext !== 'string' || typeof v.iv !== 'string') return null
+  return {
+    ciphertext: v.ciphertext,
+    iv: v.iv,
+    salt: typeof v.salt === 'string' ? v.salt : '',
+    auth_tag: typeof v.auth_tag === 'string' ? v.auth_tag : '',
+    algorithm: typeof v.algorithm === 'string' ? v.algorithm : 'AES-GCM',
+    key_version: typeof v.key_version === 'string' ? v.key_version : undefined,
   }
-  const title = (payload.title as string) ?? raw.title ?? 'Untitled reflection'
-  const mood = (payload.mood as string) ?? raw.mood ?? ''
-  const tags = (payload.tags as string[]) ?? raw.tags ?? []
-  const encryptedContent = (payload.content as string) ?? raw.content ?? ''
-  const createdAt = (payload.created_at as string) ?? raw.created_at ?? new Date().toISOString()
-  const updatedAt = (payload.updated_at as string) ?? raw.updated_at ?? createdAt
-  const id = (payload.id as string) ?? raw.id ?? `${createdAt}-${title.slice(0, 8)}`
-  return { id, title, mood, tags, encryptedContent, createdAt, updatedAt }
+}
+
+async function parseEntry(raw: RawEntry): Promise<JournalEntrySummary | null> {
+  const id = raw.id
+  if (!id) return null
+  const encryptedTitle = coercePayload(raw.encrypted_title)
+  const encryptedContent = coercePayload(raw.encrypted_content)
+  const title = encryptedTitle ? await decryptPayload(encryptedTitle) : ''
+  const createdAt = raw.created_at ?? raw.client_updated_at ?? new Date().toISOString()
+  const updatedAt = raw.updated_at ?? createdAt
+  const mood = Array.isArray(raw.moods) && raw.moods.length > 0 ? raw.moods[0] : ''
+  return {
+    id,
+    title: title || 'Untitled reflection',
+    mood,
+    tags: Array.isArray(raw.tags) ? raw.tags : [],
+    encryptedContent,
+    createdAt,
+    updatedAt,
+  }
 }
 
 export function useJournalEntries() {
@@ -63,17 +81,17 @@ export function useJournalEntries() {
     setIsLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/journal/entries?limit=50&offset=0')
+      const res = await fetch('/api/journal/entries?limit=50')
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
       const list: RawEntry[] = Array.isArray(data)
         ? data
-        : Array.isArray(data?.entries)
-          ? data.entries
-          : Array.isArray(data?.items)
-            ? data.items
-            : []
-      const parsed = list.map(parseEntry).filter(Boolean) as JournalEntrySummary[]
+        : Array.isArray((data as { entries?: unknown })?.entries)
+          ? ((data as { entries: RawEntry[] }).entries)
+          : []
+      const parsed = (await Promise.all(list.map(parseEntry))).filter(
+        (e): e is JournalEntrySummary => e !== null
+      )
       parsed.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
       setEntries(parsed)
     } catch (e) {

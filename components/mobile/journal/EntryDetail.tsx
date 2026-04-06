@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { decryptContent } from '@/lib/crypto/journal'
+import { decryptPayload } from '@/lib/crypto/journal'
 import { findMood } from './constants'
 import { WordReveal } from './WordReveal'
 import type { JournalEntrySummary } from '@/hooks/useJournalEntries'
@@ -31,7 +31,7 @@ export const EntryDetail: React.FC<Props> = ({ entry, onBack }) => {
 
   useEffect(() => {
     let cancelled = false
-    decryptContent(entry.encryptedContent ?? '').then((text) => {
+    decryptPayload(entry.encryptedContent).then((text) => {
       if (!cancelled) {
         setPlain(text)
         setDecrypting(false)

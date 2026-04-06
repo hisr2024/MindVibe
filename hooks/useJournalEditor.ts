@@ -6,14 +6,17 @@
  * Behaviour:
  *  - Holds title / content / mood / tags state.
  *  - Debounces auto-save at 3 seconds of inactivity.
- *  - Encrypts content client-side (lib/crypto/journal) before any network hop.
- *  - On network failure, enqueues metadata into the offline sync queue.
- *  - Restores any pending prompt from localStorage['journal_prefill'] so that
- *    the KIAAN → Journal hand-off surfaces as a first-person prompt banner.
+ *  - Encrypts title + content client-side (lib/crypto/journal) into the
+ *    backend's EncryptedPayload shape, then POSTs to /api/journal/entries
+ *    using the real JournalEntryCreate contract
+ *    (see backend/schemas/journal.py and backend/routes/journal.py).
+ *  - On network failure, falls back to the offline sync queue.
+ *  - Restores any pending prompt from localStorage['journal_prefill'] so
+ *    that the KIAAN → Journal hand-off surfaces as a prompt banner.
  */
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { encryptContent } from '@/lib/crypto/journal'
+import { encryptPayload } from '@/lib/crypto/journal'
 import { queueOfflineOperation } from '@/lib/offline/syncService'
 
 export type SaveState = 'idle' | 'saving' | 'saved' | 'error'
@@ -90,30 +93,34 @@ export function useJournalEditor(): UseJournalEditorReturn {
 
     const nowIso = new Date().toISOString()
     try {
-      const encryptedContent = await encryptContent(content)
-      const payload = {
-        type: 'journal_entry',
-        id: entryIdRef.current,
-        title: title || 'Untitled reflection',
-        content: encryptedContent,
+      const [titlePayload, contentPayload] = await Promise.all([
+        title ? encryptPayload(title) : Promise.resolve(null),
+        encryptPayload(content),
+      ])
+
+      const body = {
+        entry_id: entryIdRef.current,
+        title: titlePayload,
+        content: contentPayload,
+        moods: mood ? [mood] : [],
         tags,
-        mood,
-        created_at: nowIso,
-        updated_at: nowIso,
+        client_updated_at: nowIso,
       }
 
-      const response = await fetch('/api/journal/blob', {
+      const response = await fetch('/api/journal/entries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ blob_json: JSON.stringify(payload) }),
+        body: JSON.stringify(body),
       })
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
 
       lastSavedBodyRef.current = content
       setSaveState('saved')
     } catch (err) {
-      // Fall through to offline queue. Metadata only — content stays on device
-      // until a successful sync round-trip.
+      // Offline fallback. Persist metadata only — plaintext stays on the
+      // device until a successful sync round-trip. The offline sync service
+      // is hardcoded to the legacy /journal/blob endpoint but that is
+      // acceptable as a last-resort persistence layer.
       try {
         queueOfflineOperation('journal', 'create', entryIdRef.current, {
           title,
