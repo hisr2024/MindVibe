@@ -10,7 +10,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Play, Bookmark, Share2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Play, Pause, Bookmark, Share2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { SanskritReveal } from '@/components/mobile/vibe/SanskritReveal'
@@ -36,7 +36,16 @@ export default function VerseReaderPage() {
   const params = useParams()
   const router = useRouter()
   const { triggerHaptic } = useHapticFeedback()
-  const { play, setQueue } = usePlayerStore()
+  const play = usePlayerStore(s => s.play)
+  const pause = usePlayerStore(s => s.pause)
+  const stop = usePlayerStore(s => s.stop)
+  const setQueue = usePlayerStore(s => s.setQueue)
+  const isPlaying = usePlayerStore(s => s.isPlaying)
+  const currentTrack = usePlayerStore(s => s.currentTrack)
+
+  // Is THIS verse currently the active track?
+  const isThisVerseActive = !!currentTrack?.id?.startsWith(`gita-voice-${chapterNum}-${verseNum}-`)
+  const isThisVersePlaying = isThisVerseActive && isPlaying
 
   // Parse chapter-verse from URL (e.g. "2-47")
   const [chapterNum, verseNum] = useMemo(() => {
@@ -83,9 +92,34 @@ export default function VerseReaderPage() {
     setTranslitVisible(false)
   }, [chapterNum, verseNum])
 
+  // Stop playback automatically whenever the user navigates to a new verse
+  // — no more "runs on its own that I can't stop".
+  useEffect(() => {
+    stop()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chapterNum, verseNum])
+
+  // When the user picks a different voice, stop the current playback so
+  // the next tap on Listen synthesizes with the newly chosen voice.
+  const handleSelectVoice = useCallback((voiceId: string) => {
+    setSelectedVoice(voiceId)
+    if (isThisVerseActive) stop()
+    triggerHaptic('selection')
+  }, [isThisVerseActive, stop, triggerHaptic])
+
   const handlePlay = useCallback(() => {
     if (!verse || !chapter) return
     triggerHaptic('medium')
+    // Toggle: if this verse is already playing, pause it.
+    if (isThisVersePlaying) {
+      pause()
+      return
+    }
+    // If paused on this verse, resume.
+    if (isThisVerseActive && !isPlaying) {
+      play()
+      return
+    }
     const cfg = getGitaVoiceConfig(selectedVoice)
     const voiceStyle = cfg.style as GitaVoiceStyle
     const speed = cfg.speed
@@ -113,7 +147,7 @@ export default function VerseReaderPage() {
     }
     setQueue([track], 0)
     play(track)
-  }, [verse, chapter, chapterNum, verseNum, selectedVoice, triggerHaptic, setQueue, play])
+  }, [verse, chapter, chapterNum, verseNum, selectedVoice, isThisVersePlaying, isThisVerseActive, isPlaying, triggerHaptic, setQueue, play, pause])
 
   const handleSave = useCallback(() => {
     triggerHaptic('medium')
@@ -267,7 +301,7 @@ export default function VerseReaderPage() {
         <div className="mb-5">
           <GitaVoiceSelector
             selectedVoiceId={selectedVoice}
-            onSelect={setSelectedVoice}
+            onSelect={handleSelectVoice}
           />
         </div>
 
@@ -284,8 +318,12 @@ export default function VerseReaderPage() {
             }}
             whileTap={{ scale: 0.97 }}
           >
-            <Play size={16} fill={chapter.color} />
-            <span className="text-[13px]">Listen</span>
+            {isThisVersePlaying ? (
+              <Pause size={16} fill={chapter.color} />
+            ) : (
+              <Play size={16} fill={chapter.color} />
+            )}
+            <span className="text-[13px]">{isThisVersePlaying ? 'Pause' : isThisVerseActive ? 'Resume' : 'Listen'}</span>
           </motion.button>
 
           <motion.button
