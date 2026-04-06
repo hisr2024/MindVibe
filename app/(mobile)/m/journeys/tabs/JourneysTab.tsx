@@ -8,6 +8,7 @@
 'use client'
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import type {
@@ -260,6 +261,19 @@ export function JourneysTab({
   const detailEnemy = detailTemplate?.primary_enemy_tags[0] as EnemyType | undefined
   const detailInfo = detailEnemy ? ENEMY_INFO[detailEnemy] : null
 
+  // BUG-11 (root cause): the sheet uses position: fixed, but JourneysScreen
+  // wraps every tab in a Framer Motion <motion.div> with transform/opacity
+  // animations. A transformed ancestor creates a new containing block, which
+  // re-anchors `position: fixed` children to that ancestor instead of the
+  // viewport — so the sheet's `bottom: 0` landed ABOVE the tab bar rather
+  // than at the physical bottom of the screen. Rendering the sheet via a
+  // React portal to document.body escapes the transformed ancestor so
+  // `fixed` anchors to the viewport as expected.
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
+  useEffect(() => {
+    if (typeof document !== 'undefined') setPortalTarget(document.body)
+  }, [])
+
   return (
     <div className="px-4 pb-6 space-y-5">
       {/* Enemy filter pills */}
@@ -389,11 +403,10 @@ export function JourneysTab({
         )}
       </section>
 
-      {/* Template Detail Modal — BUG-10/11/12: portal-style layering.
-          Outer wrapper is pointer-events-none so the scroll container behind
-          is never indirectly blocked; backdrop + sheet each explicitly
-          re-enable pointer events. z-[60] keeps it above the fixed tab bar
-          (z-20). */}
+      {/* Template Detail Modal — portaled to document.body so `position: fixed`
+          anchors to the viewport (not the transformed motion.div ancestor
+          in JourneysScreen). z-[60] keeps it above the fixed tab bar (z-20). */}
+      {portalTarget && createPortal(
       <AnimatePresence>
         {detailTemplate && (
           <div
@@ -606,7 +619,9 @@ export function JourneysTab({
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      portalTarget,
+      )}
 
       {/* Max Journeys Sheet */}
       <MaxJourneysSheet
