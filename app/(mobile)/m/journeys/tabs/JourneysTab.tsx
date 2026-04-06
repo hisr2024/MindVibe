@@ -7,7 +7,7 @@
 
 'use client'
 
-import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import type {
@@ -106,11 +106,27 @@ export function JourneysTab({
   const [error, setError] = useState<string | null>(null)
   const [showMaxSheet, setShowMaxSheet] = useState(false)
 
+  // BUG-03: synchronous re-entry guard. Two rapid taps before React commits
+  // state both passed the old `if (startingId) return` check and fired two
+  // concurrent POSTs. A ref update is synchronous and survives across renders.
+  const isStartingRef = useRef<boolean>(false)
+
   // Template detail modal state
   const [detailTemplate, setDetailTemplate] = useState<JourneyTemplate | null>(null)
   const [selectedPace, setSelectedPace] = useState<PaceOption>('daily')
   // FIX BUG 1+5: Separate modal error state so errors show INSIDE the modal
   const [modalError, setModalError] = useState<string | null>(null)
+
+  // BUG-03: fresh idempotency key per opened template. Retries for the same
+  // template use the same key (backend deduplicates within 60s), while a
+  // different template gets a new key so a genuine second journey can start.
+  const idempotencyKey = useMemo(
+    () =>
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `journey-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    [detailTemplate?.id],
+  )
 
   const activeCount = dashboard?.active_journeys.filter((j) => j.status === 'active').length ?? 0
   const canStart = activeCount < 5
@@ -124,80 +140,110 @@ export function JourneysTab({
 
   const handleStart = useCallback(
     async (templateId: string) => {
-      if (startingId) return
+      // BUG-03: synchronous guard — state updates are async, a ref is not.
+      if (isStartingRef.current) return
       if (!canStart) {
         setDetailTemplate(null)
         setShowMaxSheet(true)
         return
       }
+      isStartingRef.current = true
       setStartingId(templateId)
       setModalError(null)
       triggerHaptic('medium')
 
       const personalization: PersonalizationSettings = { pace: selectedPace }
 
-      // 15s timeout guard so a hung request can never spin forever.
+      // BUG-05: single AbortController drives both the 15s timeout and the
+      // in-flight fetch. `timedOut` is flipped INSIDE the timeout callback,
+      // before abort() propagates, so the catch block classifies the error
+      // correctly (previously the flag was set after Promise.race resolved,
+      // mislabelling real network errors as "Request timed out").
+      const controller = new AbortController()
       let timedOut = false
       const timeoutHandle = setTimeout(() => {
         timedOut = true
+        controller.abort()
       }, 15_000)
 
       try {
-        const journey = await Promise.race([
-          journeyEngineService.startJourney({
-            template_id: templateId,
-            personalization,
-          }),
-          new Promise<never>((_, reject) =>
-            setTimeout(
-              () => reject(new Error('REQUEST_TIMEOUT')),
-              15_000,
-            ),
-          ),
-        ])
+        const journey = await journeyEngineService.startJourney(
+          { template_id: templateId, personalization },
+          { signal: controller.signal, idempotencyKey },
+        )
         clearTimeout(timeoutHandle)
-        triggerHaptic('success')
 
-        // Close modal FIRST so the heavy sheet stops painting over the
-        // navigating page, then prefetch + navigate on the next frame so
-        // the exit animation actually starts before the route change.
+        // BUG-06 + BUG-17: prefetch, navigate, then close the modal on the
+        // next microtask. Using requestAnimationFrame (~16ms) previously raced
+        // the 280ms Framer Motion exit animation, unmounting the sheet
+        // mid-animation and flickering. Navigating first commits the route,
+        // and the haptic only fires once we're on the way.
         const destination = `/m/journeys/${journey.journey_id}`
         router.prefetch(destination)
-        setDetailTemplate(null)
-        requestAnimationFrame(() => {
-          router.push(destination)
-        })
+        await router.push(destination)
+        setTimeout(() => setDetailTemplate(null), 0)
         onRefresh()
+        triggerHaptic('success')
       } catch (err) {
         clearTimeout(timeoutHandle)
         triggerHaptic('error')
-        if (err instanceof JourneyEngineError && err.isMaxJourneysError()) {
+
+        const isAbort =
+          err instanceof Error &&
+          (err.name === 'AbortError' || err.message === 'REQUEST_TIMEOUT')
+        const isAuth =
+          err instanceof JourneyEngineError && err.code === 'AUTH_REQUIRED'
+        const isMax =
+          err instanceof JourneyEngineError && err.isMaxJourneysError()
+        const isOffline =
+          typeof navigator !== 'undefined' && !navigator.onLine
+
+        if (isMax) {
+          // BUG-04: refresh dashboard so canStart recomputes from fresh data
+          // before we show the MaxJourneys sheet.
           setDetailTemplate(null)
+          try {
+            await Promise.resolve(onRefresh())
+          } catch {
+            /* swallow refresh errors — MaxJourneys sheet is still the right UX */
+          }
           setShowMaxSheet(true)
-        } else if (
-          timedOut ||
-          (err instanceof Error && err.message === 'REQUEST_TIMEOUT')
-        ) {
+        } else if (isAbort && timedOut) {
           setModalError(
             'Request timed out. Check your connection and try again.',
           )
-        } else if (
-          typeof navigator !== 'undefined' &&
-          !navigator.onLine
-        ) {
-          setModalError('No internet connection. Please reconnect and try again.')
-        } else {
+        } else if (isAbort) {
+          setModalError('Request was cancelled. Please try again.')
+        } else if (isAuth) {
+          setModalError('Session expired. Please log in and try again.')
+        } else if (isOffline) {
           setModalError(
-            err instanceof JourneyEngineError
-              ? err.message
-              : 'Failed to start journey. Please try again.',
+            'No internet connection. Please reconnect and try again.',
           )
+        } else if (err instanceof JourneyEngineError) {
+          if (err.statusCode === 403) {
+            setModalError('Permission denied. Try refreshing the page.')
+          } else if (err.statusCode === 404) {
+            setModalError(
+              'This journey template was not found. Please choose another.',
+            )
+          } else if (err.statusCode === 422) {
+            setModalError('Invalid journey configuration. Please try again.')
+          } else if (err.statusCode >= 500) {
+            setModalError('Server error. Please try again in a moment.')
+          } else {
+            setModalError(err.message)
+          }
+        } else {
+          setModalError('Failed to start journey. Please try again.')
         }
       } finally {
+        clearTimeout(timeoutHandle)
+        isStartingRef.current = false
         setStartingId(null)
       }
     },
-    [startingId, canStart, triggerHaptic, selectedPace, router, onRefresh],
+    [canStart, triggerHaptic, selectedPace, router, onRefresh, idempotencyKey],
   )
 
   const handleTemplateCardTap = (template: JourneyTemplate) => {
@@ -343,60 +389,69 @@ export function JourneysTab({
         )}
       </section>
 
-      {/* Template Detail Modal */}
+      {/* Template Detail Modal — BUG-10/11/12: portal-style layering.
+          Outer wrapper is pointer-events-none so the scroll container behind
+          is never indirectly blocked; backdrop + sheet each explicitly
+          re-enable pointer events. z-[60] keeps it above the fixed tab bar
+          (z-20). */}
       <AnimatePresence>
         {detailTemplate && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end justify-center"
-            onClick={() => setDetailTemplate(null)}
+          <div
+            className="fixed inset-0 pointer-events-none"
+            style={{ zIndex: 60 }}
           >
-            {/* Backdrop — solid, no backdrop-blur (kills mobile fps) */}
-            <div className="absolute inset-0 bg-black/70" />
+            {/* Backdrop */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 bg-black/75 pointer-events-auto"
+              onClick={(e) => {
+                // Only close on a direct tap of the backdrop itself.
+                // Never close mid-start (user's tap is being processed).
+                if (
+                  e.target === e.currentTarget &&
+                  !isStartingRef.current
+                ) {
+                  setDetailTemplate(null)
+                }
+              }}
+            />
 
             {/* Sheet — critically-damped tween, GPU-composited */}
             <motion.div
+              key="sheet"
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'tween', duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="relative w-full max-h-[85vh] overflow-y-auto rounded-t-3xl"
+              className="absolute inset-x-0 bottom-0 rounded-t-3xl pointer-events-auto overflow-y-auto"
               style={{
                 background: detailInfo
                   ? `linear-gradient(170deg, rgba(${detailInfo.colorRGB},0.1), rgba(5,7,20,0.99) 40%)`
                   : 'rgba(5,7,20,0.99)',
                 borderTop: detailInfo ? `2px solid ${detailInfo.color}40` : '2px solid rgba(212,160,23,0.3)',
-                paddingBottom: 'env(safe-area-inset-bottom, 16px)',
+                // BUG-09: dvh respects iOS Safari's dynamic toolbar; vh was
+                // stale on landscape and clipped the Begin button off-screen.
+                maxHeight:
+                  'min(92dvh, calc(100dvh - env(safe-area-inset-top, 44px)))',
+                // BUG-12: safe-area padding on all sides, not just bottom.
+                paddingBottom:
+                  'max(env(safe-area-inset-bottom, 0px), 16px)',
+                paddingLeft: 'env(safe-area-inset-left, 0px)',
+                paddingRight: 'env(safe-area-inset-right, 0px)',
+                // BUG-13: contain scroll momentum to the sheet on Android
+                // and prevent touch gestures from chaining to the page.
+                overscrollBehavior: 'contain',
+                touchAction: 'pan-y',
+                backfaceVisibility: 'hidden',
+                WebkitOverflowScrolling: 'touch',
                 willChange: 'transform',
                 transform: 'translate3d(0, 0, 0)',
-                WebkitOverflowScrolling: 'touch',
-                overscrollBehavior: 'contain',
               }}
-              onClick={(e) => e.stopPropagation()}
             >
-              {/* Full-sheet "starting" overlay — confirms tap immediately */}
-              {startingId === detailTemplate.id && (
-                <div
-                  className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3"
-                  style={{ background: 'rgba(5,7,20,0.94)' }}
-                >
-                  <div
-                    className="text-4xl"
-                    style={{
-                      color: '#F0C040',
-                      fontFamily: '"Noto Sans Devanagari", sans-serif',
-                      animation: 'spin 2s linear infinite',
-                    }}
-                  >
-                    {'\u0950'}
-                  </div>
-                  <p className="text-xs text-[#B8AE98] font-ui">
-                    Beginning your journey...
-                  </p>
-                </div>
-              )}
               {/* Handle */}
               <div className="flex justify-center pt-3 pb-2">
                 <div className="w-10 h-1 rounded-full bg-white/20" />
@@ -509,12 +564,19 @@ export function JourneysTab({
                   </div>
                 )}
 
-                {/* Start button */}
+                {/* Start button — BUG-14: explicit type="button" (no form
+                    submission), touch-action: manipulation (removes the
+                    300ms tap delay on older Android WebView), and a 48px
+                    minimum hit target for WCAG 2.5.5. */}
                 <button
+                  type="button"
                   onClick={() => handleStart(detailTemplate.id)}
-                  disabled={!!startingId}
-                  className="w-full rounded-xl py-3.5 text-sm font-ui font-bold text-[#050714] active:scale-[0.97] transition-transform disabled:opacity-50"
+                  disabled={startingId === detailTemplate.id}
+                  className="w-full rounded-xl text-sm font-ui font-bold text-[#050714] active:scale-[0.97] transition-transform disabled:opacity-60"
                   style={{
+                    minHeight: 48,
+                    padding: '14px 16px',
+                    touchAction: 'manipulation',
                     background: detailInfo
                       ? `linear-gradient(135deg, ${detailInfo.color}cc, ${detailInfo.color})`
                       : 'linear-gradient(135deg, #D4A017cc, #D4A017)',
@@ -523,20 +585,43 @@ export function JourneysTab({
                       : '0 4px 20px rgba(212,160,23,0.35)',
                   }}
                 >
-                  {startingId === detailTemplate.id
-                    ? 'Starting...'
-                    : `Begin ${detailTemplate.duration_days}-Day Journey`}
+                  {startingId === detailTemplate.id ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span
+                        className="inline-block"
+                        style={{
+                          fontFamily: '"Noto Sans Devanagari", sans-serif',
+                          animation: 'spin 1.5s linear infinite',
+                        }}
+                      >
+                        {'\u0950'}
+                      </span>
+                      Starting…
+                    </span>
+                  ) : (
+                    `Begin ${detailTemplate.duration_days}-Day Journey`
+                  )}
                 </button>
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
       {/* Max Journeys Sheet */}
       <MaxJourneysSheet
         isOpen={showMaxSheet}
-        onClose={() => setShowMaxSheet(false)}
+        onClose={() => {
+          setShowMaxSheet(false)
+          // BUG-04: after the user dismisses the Max Journeys sheet (likely
+          // after completing one elsewhere), refresh dashboard so canStart
+          // recomputes and the Begin button becomes tappable again.
+          try {
+            onRefresh()
+          } catch {
+            /* refresh errors are non-fatal here */
+          }
+        }}
       />
     </div>
   )
