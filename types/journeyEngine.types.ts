@@ -306,6 +306,12 @@ export interface DashboardResponse {
   enemy_progress: EnemyProgressResponse[];
   recommended_templates: Record<string, unknown>[];
   today_steps: StepResponse[];
+  /** Authoritative active-journey count from the backend. Always prefer
+   *  this over `active_journeys.length` for the "N/5" indicator so the
+   *  dashboard never disagrees with the start-journey limit check. */
+  active_count: number;
+  /** Maximum concurrently active journeys allowed (currently 5). */
+  max_active: number;
 }
 
 // Alias for backwards compatibility

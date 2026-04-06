@@ -129,8 +129,14 @@ export function JourneysTab({
     [detailTemplate?.id],
   )
 
-  const activeCount = dashboard?.active_journeys.filter((j) => j.status === 'active').length ?? 0
-  const canStart = activeCount < 5
+  // Trust the backend-authoritative count. Previously we re-filtered the
+  // list by status here, which compounded the bug where the dashboard list
+  // could be empty (orphaned templates) while the DB count was still 5,
+  // permanently trapping the user behind the MaxJourneysSheet blocker.
+  const activeJourneys = dashboard?.active_journeys ?? []
+  const maxActive = dashboard?.max_active ?? 5
+  const activeCount = dashboard?.active_count ?? activeJourneys.length
+  const canStart = activeCount < maxActive
 
   const filteredTemplates = useMemo(() => {
     if (!selectedEnemy) return templates
@@ -323,7 +329,7 @@ export function JourneysTab({
         })}
         <div className="flex-shrink-0 flex items-center pl-1">
           <span className="text-[9px] text-[#6B6355] font-ui whitespace-nowrap">
-            {activeCount}/5
+            {activeCount}/{maxActive}
           </span>
         </div>
       </div>
@@ -338,13 +344,13 @@ export function JourneysTab({
       {/* Active Journeys */}
       {isLoading ? (
         <JourneyCardSkeleton count={2} />
-      ) : dashboard && dashboard.active_journeys.length > 0 ? (
+      ) : activeJourneys.length > 0 ? (
         <section>
           <p className="text-[11px] uppercase tracking-[0.12em] text-[#6B6355] font-ui mb-2">
-            Active Journeys
+            Your Active Battles
           </p>
           <div className="space-y-3">
-            {dashboard.active_journeys.map((journey, i) => (
+            {activeJourneys.map((journey, i) => (
               <ActiveJourneyCardMobile
                 key={journey.journey_id}
                 journey={journey}
@@ -623,7 +629,9 @@ export function JourneysTab({
       portalTarget,
       )}
 
-      {/* Max Journeys Sheet */}
+      {/* Max Journeys Sheet — now lists the active journeys with Pause
+          buttons so the user can unblock themselves without leaving the
+          sheet (previously they had no exit and were permanently trapped). */}
       <MaxJourneysSheet
         isOpen={showMaxSheet}
         onClose={() => {
@@ -635,6 +643,15 @@ export function JourneysTab({
             onRefresh()
           } catch {
             /* refresh errors are non-fatal here */
+          }
+        }}
+        activeJourneys={activeJourneys}
+        maxActive={maxActive}
+        onAfterPause={async () => {
+          try {
+            await Promise.resolve(onRefresh())
+          } catch {
+            /* refresh errors are non-fatal — sheet stays open */
           }
         }}
       />
