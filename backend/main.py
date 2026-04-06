@@ -607,6 +607,35 @@ async def startup():
         )
         _startup_status["background_tasks"].append(_task)
 
+        # Step 4b: Seed journey templates if missing. Without these rows the
+        # mobile journey catalog renders empty and POST /journeys 404s — the
+        # entire Sad-Ripu flow appears broken even when the backend is up.
+        async def _seed_journey_templates_background() -> None:
+            startup_logger.info("\n🔧 Ensuring journey templates exist...")
+            try:
+                from backend.scripts.seed_journey_templates import (
+                    seed_journey_templates,
+                )
+
+                await _asyncio.wait_for(
+                    seed_journey_templates(existing_engine=engine),
+                    timeout=_STARTUP_DB_TIMEOUT,
+                )
+                startup_logger.info("✅ Journey templates ready")
+            except _asyncio.TimeoutError:
+                startup_logger.error(
+                    f"⚠️ Journey template seeding timed out after {_STARTUP_DB_TIMEOUT}s"
+                )
+            except Exception as seed_error:
+                startup_logger.info(
+                    f"⚠️ Journey template seeding had issues: {seed_error}"
+                )
+
+        _task_jt = _asyncio.create_task(
+            _seed_journey_templates_background(), name="seed_journey_templates"
+        )
+        _startup_status["background_tasks"].append(_task_jt)
+
         # Step 5: Run data retention cleanup (background — non-critical,
         # purge expired soft-deleted chat data without blocking startup)
         async def _data_retention_background() -> None:

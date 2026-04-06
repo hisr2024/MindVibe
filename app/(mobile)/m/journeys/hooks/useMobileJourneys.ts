@@ -20,6 +20,36 @@ import type {
   JourneyResponse,
 } from '@/types/journeyEngine.types'
 
+// BUG-07: Offline catalog used when /templates fails AND we have no cached
+// templates. IDs/slugs MUST match backend/scripts/seed_journey_templates.py
+// so a journey started from this fallback resolves once the backend recovers.
+const FALLBACK_TEMPLATES: JourneyTemplate[] = [
+  { id: 'krodha-beginner-14', slug: 'krodha-beginner-14', title: 'Cooling the Fire',
+    description: 'A 14-day practice to transform anger into clarity through Gita wisdom.',
+    primary_enemy_tags: ['krodha'], duration_days: 14, difficulty: 2,
+    is_featured: true, is_free: true, icon_name: 'flame', color_theme: '#E63946' },
+  { id: 'kama-beginner-21', slug: 'kama-beginner-21', title: 'Taming Desire',
+    description: 'A 21-day journey to understand and release the wanting mind.',
+    primary_enemy_tags: ['kama'], duration_days: 21, difficulty: 2,
+    is_featured: true, is_free: true, icon_name: 'heart', color_theme: '#F77F00' },
+  { id: 'lobha-beginner-14', slug: 'lobha-beginner-14', title: 'The Open Hand',
+    description: 'A 14-day practice of sacred abundance and generous giving.',
+    primary_enemy_tags: ['lobha'], duration_days: 14, difficulty: 2,
+    is_featured: true, is_free: true, icon_name: 'hand', color_theme: '#FCBF49' },
+  { id: 'moha-intermediate-21', slug: 'moha-intermediate-21', title: 'Lifting the Veil',
+    description: 'A 21-day journey through the fog of illusion toward clarity.',
+    primary_enemy_tags: ['moha'], duration_days: 21, difficulty: 3,
+    is_featured: true, is_free: true, icon_name: 'eye', color_theme: '#9D4EDD' },
+  { id: 'mada-beginner-14', slug: 'mada-beginner-14', title: 'The Humble Warrior',
+    description: 'A 14-day practice of dissolving ego through sacred humility.',
+    primary_enemy_tags: ['mada'], duration_days: 14, difficulty: 2,
+    is_featured: true, is_free: true, icon_name: 'crown', color_theme: '#06A77D' },
+  { id: 'matsara-beginner-14', slug: 'matsara-beginner-14', title: 'Celebrating Others',
+    description: 'A 14-day journey from comparison and envy toward sympathetic joy.',
+    primary_enemy_tags: ['matsarya'], duration_days: 14, difficulty: 2,
+    is_featured: true, is_free: true, icon_name: 'sparkles', color_theme: '#1D8FE1' },
+]
+
 interface UseMobileJourneysResult {
   dashboard: DashboardResponse | null
   templates: JourneyTemplate[]
@@ -79,8 +109,12 @@ export function useMobileJourneys(isAuthenticated: boolean): UseMobileJourneysRe
       if (result && '_fallback' in result && (result as { _fallback?: boolean })._fallback) {
         if (templates.length === 0) {
           console.warn('[Journeys] Templates endpoint returned fallback — backend may be down')
+          // BUG-07: hand the user a usable offline catalog instead of an
+          // empty list. IDs match the backend seed, so Begin still works
+          // once the backend recovers.
+          setTemplates(FALLBACK_TEMPLATES)
           setError(
-            'Journey catalog is temporarily unavailable. Pull down to retry.',
+            'Journey catalog is temporarily unavailable. Showing offline catalog.',
           )
         }
         return
@@ -98,8 +132,10 @@ export function useMobileJourneys(isAuthenticated: boolean): UseMobileJourneysRe
         err instanceof Error ? err.message : err,
       )
       if (templates.length === 0) {
+        // BUG-07: surface fallback so the user can still browse the catalog.
+        setTemplates(FALLBACK_TEMPLATES)
         setError(
-          'Unable to load journey templates. Pull down to retry or check your connection.',
+          'Unable to load journey templates. Showing offline catalog — pull down to retry.',
         )
       }
     }
