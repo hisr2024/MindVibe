@@ -79,6 +79,7 @@ export async function GET(request: NextRequest) {
   const mode = searchParams.get('mode') || 'single'
   const sanskrit = searchParams.get('sanskrit') || ''
   const translation = searchParams.get('translation') || ''
+  const voiceId = searchParams.get('voice_id') || ''
 
   if (!text) {
     return NextResponse.json(
@@ -102,15 +103,18 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // For Sanskrit text, try the divine shloka endpoint first
-    if (language === 'sa') {
+    // For Sanskrit text, try the divine shloka endpoint first — but ONLY
+    // when no specific voice_id was requested. The shloka endpoint uses a
+    // hardcoded provider voice and would silently override the user's
+    // voice selection (this was the root cause of "only one voice works").
+    if (language === 'sa' && !voiceId) {
       const shlokaResult = await tryShlokaSynthesis(request, sanitizedText)
       if (shlokaResult) return shlokaResult
     }
 
     // Standard synthesis via backend
     const audioResponse = await synthesizeViaBackend(
-      request, sanitizedText, ttsLanguage, voiceType, effectiveSpeed
+      request, sanitizedText, ttsLanguage, voiceType, effectiveSpeed, voiceId
     )
     if (audioResponse) return audioResponse
 
@@ -241,17 +245,20 @@ async function synthesizeViaBackend(
   language: string,
   voiceType: string,
   speed: number,
+  voiceId?: string,
 ): Promise<NextResponse | null> {
   try {
+    const body: Record<string, unknown> = {
+      text,
+      language,
+      voice_type: voiceType,
+      speed,
+    }
+    if (voiceId) body.voice_id = voiceId
     const response = await fetch(`${BACKEND_URL}/api/voice/synthesize`, {
       method: 'POST',
       headers: proxyHeaders(request, 'POST'),
-      body: JSON.stringify({
-        text,
-        language,
-        voice_type: voiceType,
-        speed,
-      }),
+      body: JSON.stringify(body),
       signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS),
     })
 

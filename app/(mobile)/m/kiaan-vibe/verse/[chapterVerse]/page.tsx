@@ -22,6 +22,7 @@ import {
   getGitaMobileChapter,
   VOICE_TO_STYLE_MAP,
   VOICE_TO_SPEED_MAP,
+  getGitaVoiceConfig,
 } from '@/lib/kiaan-vibe/gita-library'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
@@ -85,8 +86,9 @@ export default function VerseReaderPage() {
   const handlePlay = useCallback(() => {
     if (!verse || !chapter) return
     triggerHaptic('medium')
-    const voiceStyle = (VOICE_TO_STYLE_MAP[selectedVoice] || 'divine') as GitaVoiceStyle
-    const speed = VOICE_TO_SPEED_MAP[selectedVoice]
+    const cfg = getGitaVoiceConfig(selectedVoice)
+    const voiceStyle = cfg.style as GitaVoiceStyle
+    const speed = cfg.speed
     const track = createVerseTrack(
       chapterNum,
       verseNum,
@@ -96,6 +98,8 @@ export default function VerseReaderPage() {
       'sa',
       voiceStyle,
       speed,
+      selectedVoice,
+      cfg.gender,
     )
     track.gitaData = {
       chapter: chapterNum,

@@ -176,14 +176,49 @@ function playViaBrowserTTS(
   utterance.rate = meta.rate ?? 0.9
   utterance.pitch = meta.pitch ?? 1.0
 
-  // Try to select the best available voice for the language
+  // Try to select the best available voice for the language.
+  //
+  // For divine Gita voices we want each of the 4 personas to map to an
+  // audibly distinct browser voice (different gender, different speaker)
+  // even when premium TTS is unavailable. Without this, all 4 voice pills
+  // collapse to the first matching system voice and feel identical.
   const voices = window.speechSynthesis.getVoices()
   const langPrefix = utterance.lang.split('-')[0]
   const matchingVoices = voices.filter(v => v.lang.startsWith(langPrefix))
   if (matchingVoices.length > 0) {
+    const persona = meta.voiceId || ''
+    const gender = meta.voiceGender
+    // Heuristic: identify voices by gendered name keywords commonly used by
+    // platform speech engines (Google, Microsoft, Apple). This is not 100%
+    // reliable but works for the major desktop/mobile browsers.
+    const MALE_HINTS = /\b(male|man|david|alex|daniel|fred|guy|prabhat|madhur|arvind|krishna|adam|josh|clyde|deep|baritone|ravi|hari|kumar)\b/i
+    const FEMALE_HINTS = /\b(female|woman|samantha|victoria|zira|susan|karen|moira|tessa|veena|swara|neerja|sarah|rachel|nova|priya|maitreyi|meera)\b/i
+    const isMale = (v: SpeechSynthesisVoice) => MALE_HINTS.test(v.name)
+    const isFemale = (v: SpeechSynthesisVoice) => FEMALE_HINTS.test(v.name)
+
     // Prefer non-local (cloud/neural) voices for better quality
-    const cloudVoice = matchingVoices.find(v => !v.localService)
-    utterance.voice = cloudVoice || matchingVoices[0]
+    const ranked = [...matchingVoices].sort((a, b) => Number(a.localService) - Number(b.localService))
+
+    let pick: SpeechSynthesisVoice | undefined
+    if (gender === 'male') {
+      pick = ranked.find(isMale) || ranked.find(v => !isFemale(v))
+    } else if (gender === 'female') {
+      pick = ranked.find(isFemale) || ranked.find(v => !isMale(v))
+    }
+
+    // For 'divine-saraswati' / 'elevenlabs-nova' (both female) we still
+    // need TWO different female voices. Pick a different index per persona.
+    if (pick && persona) {
+      const sameGender = ranked.filter(v => (gender === 'male' ? isMale(v) || !isFemale(v) : isFemale(v) || !isMale(v)))
+      if (sameGender.length > 1) {
+        // Stable hash from persona ID → index
+        let h = 0
+        for (let i = 0; i < persona.length; i++) h = (h * 31 + persona.charCodeAt(i)) >>> 0
+        pick = sameGender[h % sameGender.length]
+      }
+    }
+
+    utterance.voice = pick || ranked[0]
   }
 
   utterance.onend = () => {

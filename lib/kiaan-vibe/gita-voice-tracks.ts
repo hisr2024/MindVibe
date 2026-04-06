@@ -93,6 +93,8 @@ export function createVerseTrack(
   language: string,
   voiceStyle: GitaVoiceStyle = 'divine',
   speed?: number,
+  voiceId?: string,
+  voiceGender?: 'male' | 'female',
 ): Track {
   const chapterMeta = GITA_CHAPTERS_META.find(c => c.number === chapter)
   const langInfo = SUPPORTED_LANGUAGES[language]
@@ -111,14 +113,16 @@ export function createVerseTrack(
   }
 
   // Build API URL for audio synthesis
-  const apiUrl = `/api/voice/gita?${new URLSearchParams({
+  const apiParams: Record<string, string> = {
     chapter: chapter.toString(),
     verse: verseNumber.toString(),
     language,
     style: voiceStyle,
     speed: (speed || styleParams.speed).toString(),
     text: synthesisText,
-  }).toString()}`
+  }
+  if (voiceId) apiParams.voice_id = voiceId
+  const apiUrl = `/api/voice/gita?${new URLSearchParams(apiParams).toString()}`
 
   // Map language codes to BCP-47 for browser Speech Synthesis
   const speechLangMap: Record<string, string> = {
@@ -151,6 +155,8 @@ export function createVerseTrack(
       language: speechLangMap[language] || 'en-US',
       rate: speed || styleParams.speed,
       pitch: 1.0,
+      voiceId,
+      voiceGender,
     },
   }
 }
