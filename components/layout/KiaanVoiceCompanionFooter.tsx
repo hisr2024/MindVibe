@@ -107,6 +107,9 @@ export function KiaanVoiceCompanionFooter() {
   // Pages where wake word should not auto-start (they have their own voice)
   const isVoiceConflictPage = pathname === '/companion' || pathname === '/kiaan/chat'
 
+  // Subscribe to Vibe Player state — wake word must not listen during playback
+  const playerIsPlaying = usePlayerStore(s => s.isPlaying)
+
   // ── Vibe Player Coordination ──
   // Pause Vibe Player when Voice Companion needs audio (listening or speaking)
   const pauseVibePlayer = useCallback(() => {
@@ -158,15 +161,27 @@ export function KiaanVoiceCompanionFooter() {
   })
 
   // ── Auto-start wake word on mount (if not on conflict page) ──
+  // Wake word must NOT listen while the Vibe Player is actively playing audio,
+  // otherwise the browser audio session ducks/interrupts playback. This effect
+  // re-runs when playerIsPlaying toggles, re-arming the mic only during silence.
   useEffect(() => {
     if (!mounted || !wakeWordSupported || isVoiceConflictPage) return
-    if (mode === 'dormant' && !isWakeWordListening) {
+    if (mode !== 'dormant') return
+
+    // GUARD: do not arm mic while Vibe Player is playing. Stop any active
+    // listening so the audio session fully releases the microphone.
+    if (playerIsPlaying) {
+      if (isWakeWordListening) stopWakeWordListening()
+      return
+    }
+
+    if (!isWakeWordListening) {
       const timer = setTimeout(() => {
         if (mountedRef.current) startWakeWordListening()
       }, 1000) // Small delay to let page settle
       return () => clearTimeout(timer)
     }
-  }, [mounted, wakeWordSupported, isVoiceConflictPage, mode, isWakeWordListening, startWakeWordListening])
+  }, [mounted, wakeWordSupported, isVoiceConflictPage, mode, isWakeWordListening, playerIsPlaying, startWakeWordListening, stopWakeWordListening])
 
   // ── Send Message to KIAAN ──
   const sendMessage = useCallback(async (text: string) => {

@@ -35,6 +35,11 @@ import {
 } from 'lucide-react'
 import { usePlayerStore } from '@/lib/kiaan-vibe/store'
 import { formatDuration } from '@/lib/kiaan-vibe/meditation-library'
+import { GitaVoiceControls } from '@/components/kiaan-vibe-player/GitaVoiceControls'
+import {
+  createChapterTracks,
+  type GitaVoiceStyle,
+} from '@/lib/kiaan-vibe/gita-voice-tracks'
 
 // ============ Component ============
 
@@ -77,7 +82,67 @@ export function FloatingPlayer() {
     clearQueue,
     clearAudioError,
     retryPlayback,
+    setQueue,
+    play,
   } = usePlayerStore()
+
+  // ── Gita voice selector state (active when a Gita track is playing) ──
+  // Track ID format: gita-voice-{chapter}-{verse}-{lang}-{style}
+  const gitaInfo = React.useMemo(() => {
+    const id = currentTrack?.id || ''
+    if (!id.startsWith('gita-voice-')) return null
+    // Skip prefix + support optional 'bilingual-' qualifier
+    const rest = id.replace(/^gita-voice-(bilingual-)?/, '')
+    const parts = rest.split('-')
+    if (parts.length < 4) return null
+    const chapter = parseInt(parts[0], 10)
+    const verse = parseInt(parts[1], 10)
+    const lang = parts[2]
+    const style = parts[3] as GitaVoiceStyle
+    if (isNaN(chapter) || isNaN(verse) || !lang || !style) return null
+    return { chapter, verse, lang, style }
+  }, [currentTrack?.id])
+
+  const isGitaTrack = gitaInfo !== null
+  const [isRebuildingGita, setIsRebuildingGita] = useState(false)
+
+  const rebuildGitaQueue = useCallback(
+    async (lang: string, style: GitaVoiceStyle) => {
+      if (!gitaInfo) return
+      setIsRebuildingGita(true)
+      try {
+        const tracks = await createChapterTracks(gitaInfo.chapter, lang, style)
+        if (tracks.length === 0) return
+        const startIndex = Math.max(
+          0,
+          tracks.findIndex(t => t.id.includes(`-${gitaInfo.verse}-`)),
+        )
+        setQueue(tracks, startIndex)
+        await play(tracks[startIndex])
+      } catch (err) {
+        console.warn('[FloatingPlayer] Gita queue rebuild failed:', err)
+      } finally {
+        setIsRebuildingGita(false)
+      }
+    },
+    [gitaInfo, setQueue, play],
+  )
+
+  const handleGitaLangChange = useCallback(
+    (lang: string) => {
+      if (!gitaInfo) return
+      void rebuildGitaQueue(lang, gitaInfo.style)
+    },
+    [gitaInfo, rebuildGitaQueue],
+  )
+
+  const handleGitaStyleChange = useCallback(
+    (style: GitaVoiceStyle) => {
+      if (!gitaInfo) return
+      void rebuildGitaQueue(gitaInfo.lang, style)
+    },
+    [gitaInfo, rebuildGitaQueue],
+  )
 
   // Calculate progress percentage
   const progress = duration > 0 ? (position / duration) * 100 : 0
@@ -349,6 +414,21 @@ export function FloatingPlayer() {
                 />
               </div>
             </div>
+
+            {/* Gita language + voice style (only when a Gita track is current) */}
+            {isGitaTrack && gitaInfo && (
+              <div
+                className={`mt-2 pt-2 border-t border-white/5 ${isRebuildingGita ? 'opacity-60 pointer-events-none' : ''}`}
+              >
+                <GitaVoiceControls
+                  selectedLang={gitaInfo.lang}
+                  onLangChange={handleGitaLangChange}
+                  selectedStyle={gitaInfo.style}
+                  onStyleChange={handleGitaStyleChange}
+                  compact
+                />
+              </div>
+            )}
 
             {/* Audio Error Display */}
             {audioError && (
