@@ -94,8 +94,9 @@ export function MobileArrivalPhase({ onMoodSelect }: MobileArrivalPhaseProps) {
 
   return (
     <div
-      className="absolute inset-0 flex flex-col items-center overflow-hidden"
+      className="relative w-full flex flex-col items-center overflow-hidden"
       style={{
+        minHeight: '100dvh',
         paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)',
         paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 88px)',
       }}
