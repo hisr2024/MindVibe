@@ -7,7 +7,7 @@
 
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import type {
@@ -32,6 +32,10 @@ interface JourneysTabProps {
   templates: JourneyTemplate[]
   isLoading: boolean
   onRefresh: () => void
+  /** Optional enemy to pre-select filter when user arrives from Battleground tab */
+  initialEnemy?: EnemyType | null
+  /** Called once the initialEnemy has been applied so parent can clear it */
+  onEnemyConsumed?: () => void
 }
 
 type PaceOption = 'daily' | 'every_other_day' | 'weekly'
@@ -50,10 +54,27 @@ function estimateCompletion(duration: number, pace: PaceOption): string {
   return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })
 }
 
-export function JourneysTab({ dashboard, templates, isLoading, onRefresh }: JourneysTabProps) {
+export function JourneysTab({
+  dashboard,
+  templates,
+  isLoading,
+  onRefresh,
+  initialEnemy = null,
+  onEnemyConsumed,
+}: JourneysTabProps) {
   const router = useRouter()
   const { triggerHaptic } = useHapticFeedback()
-  const [selectedEnemy, setSelectedEnemy] = useState<EnemyType | null>(null)
+  const [selectedEnemy, setSelectedEnemy] = useState<EnemyType | null>(initialEnemy)
+
+  // When parent hands us a pre-selected enemy (navigated from Battleground tab),
+  // apply it once then notify the parent to clear its state.
+  useEffect(() => {
+    if (initialEnemy) {
+      setSelectedEnemy(initialEnemy)
+      onEnemyConsumed?.()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialEnemy])
   const [startingId, setStartingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [showMaxSheet, setShowMaxSheet] = useState(false)

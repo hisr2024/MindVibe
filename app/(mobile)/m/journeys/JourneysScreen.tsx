@@ -20,6 +20,7 @@ import { TodayTab } from './tabs/TodayTab'
 import { JourneysTab } from './tabs/JourneysTab'
 import { BattlegroundTab } from './tabs/BattlegroundTab'
 import { WisdomTab } from './tabs/WisdomTab'
+import type { EnemyType } from '@/types/journeyEngine.types'
 
 // =============================================================================
 // TYPES
@@ -48,6 +49,12 @@ export default function JourneysScreen() {
   const { isAuthenticated, loading: authLoading } = useAuth()
   const { triggerHaptic } = useHapticFeedback()
   const [activeTab, setActiveTab] = useState<JourneyTab>('today')
+  const [preselectedEnemy, setPreselectedEnemy] = useState<EnemyType | null>(null)
+
+  const handleNavigateFromBattleground = useCallback((enemy: EnemyType) => {
+    setPreselectedEnemy(enemy)
+    setActiveTab('journeys')
+  }, [])
 
   const {
     dashboard,
@@ -101,7 +108,7 @@ export default function JourneysScreen() {
             Sign in to discover guided journeys through the six inner enemies of the Bhagavad Gita.
           </p>
           <Link
-            href="/onboarding"
+            href="/m/onboarding"
             className="inline-block rounded-xl px-8 py-3 font-ui font-medium text-[#050714] text-sm"
             style={{
               background: 'linear-gradient(135deg, #c8943a, #e8b54a, #f0c96d)',
@@ -178,10 +185,16 @@ export default function JourneysScreen() {
                 templates={templates}
                 isLoading={showLoading}
                 onRefresh={handleRefresh}
+                initialEnemy={preselectedEnemy}
+                onEnemyConsumed={() => setPreselectedEnemy(null)}
               />
             )}
             {activeTab === 'battleground' && (
-              <BattlegroundTab dashboard={dashboard} isLoading={showLoading} />
+              <BattlegroundTab
+                dashboard={dashboard}
+                isLoading={showLoading}
+                onNavigateToJourneys={handleNavigateFromBattleground}
+              />
             )}
             {activeTab === 'wisdom' && <WisdomTab />}
           </motion.div>
