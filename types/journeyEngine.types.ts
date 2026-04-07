@@ -245,6 +245,8 @@ export interface StepResponse {
   completed_at: string | null;
   available_to_complete: boolean;
   next_available_at: string | null;
+  /** Real-life scenario tying the day's teaching to a modern context. */
+  modern_example?: string | null;
 }
 
 // Alias for backwards compatibility

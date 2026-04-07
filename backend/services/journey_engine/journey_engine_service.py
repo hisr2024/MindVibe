@@ -164,6 +164,7 @@ class DailyStep:
     completed_at: datetime | None
     available_to_complete: bool = True
     next_available_at: datetime | None = None
+    modern_example: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -183,6 +184,7 @@ class DailyStep:
             "completed_at": self.completed_at.isoformat() if self.completed_at else None,
             "available_to_complete": self.available_to_complete,
             "next_available_at": self.next_available_at.isoformat() if self.next_available_at else None,
+            "modern_example": self.modern_example,
         }
 
 
@@ -912,12 +914,28 @@ class JourneyEngineService:
 
         return journey
 
+    # Legacy placeholder strings that used to be written into
+    # kiaan_step_json when no JourneyTemplateStep existed. Any step_state
+    # carrying these is re-generated on next read so existing users who
+    # hit the bug don't stay stuck with the bad snapshot forever.
+    _LEGACY_PLACEHOLDER_TEACHINGS = frozenset({
+        "",
+        "Continue your journey with mindfulness.",
+    })
+
     async def _get_or_create_step_state(
         self,
         journey: UserJourney,
         day_index: int,
     ) -> UserJourneyStepState:
-        """Get existing step state or create new one with AI content."""
+        """Get existing step state or create new one with AI content.
+
+        If an existing state carries a legacy placeholder snapshot
+        (written before the template-step seeder landed), we refresh it
+        in place using the now-available template step. This heals users
+        who opened day N before content existed without requiring manual
+        DB surgery.
+        """
         query = select(UserJourneyStepState).where(
             UserJourneyStepState.user_journey_id == journey.id,
             UserJourneyStepState.day_index == day_index,
@@ -925,16 +943,37 @@ class JourneyEngineService:
         result = await self.db.execute(query)
         step_state = result.scalar_one_or_none()
 
-        if step_state:
-            return step_state
-
-        # Create new step state
         template = await self.get_template(journey.journey_template_id)
         template_step = None
         for step in template.steps:
             if step.day_index == day_index:
                 template_step = step
                 break
+
+        if step_state is not None:
+            cached = step_state.kiaan_step_json or {}
+            cached_teaching = (cached.get("teaching") or "").strip()
+            has_modern = bool(cached.get("modern_example"))
+            is_stale = (
+                cached_teaching in self._LEGACY_PLACEHOLDER_TEACHINGS
+                or not has_modern
+            )
+            if is_stale and template_step is not None:
+                logger.info(
+                    "[_get_or_create_step_state] Refreshing stale snapshot "
+                    "for user_journey=%s day=%s (had placeholder=%s)",
+                    journey.id, day_index, cached_teaching[:40],
+                )
+                refreshed = await self._generate_step_content(
+                    template=template,
+                    template_step=template_step,
+                    day_index=day_index,
+                    personalization=journey.personalization or {},
+                )
+                step_state.kiaan_step_json = refreshed
+                step_state.verse_refs = refreshed.get("verse_refs", [])
+                await self.db.flush()
+            return step_state
 
         # Generate KIAAN content (placeholder - integrate with KIAAN service)
         kiaan_json = await self._generate_step_content(
@@ -1036,53 +1075,184 @@ class JourneyEngineService:
         """
         Generate step content using template hints.
 
-        In production, this integrates with KIAAN for AI generation.
+        If the template has a seeded step row for this day, we use its
+        teaching / reflection / practice / verse_refs. Otherwise we build
+        a meaningful fallback from ENEMY_METADATA + ModernExamplesDB —
+        never a generic "Continue your journey with mindfulness" string.
         """
+        enemy_tag = (template.primary_enemy_tags or ["general"])[0]
+
+        # Always attach a real-life scenario from ModernExamplesDB, keyed
+        # deterministically by day_index so each day feels different.
+        modern_example = self._pick_modern_example(enemy_tag, day_index)
+
         # Use template step hints if available
         if template_step:
             verse_refs = template_step.static_verse_refs or []
-            verse_selector = template_step.verse_selector or {}
-
             return {
                 "step_title": template_step.step_title or f"Day {day_index}",
-                "today_focus": (template.primary_enemy_tags or ["general"])[0],
+                "today_focus": enemy_tag,
                 "verse_refs": verse_refs,
                 "teaching": template_step.teaching_hint or "",
                 "guided_reflection": [
-                    template_step.reflection_prompt or "Reflect on today's teaching."
+                    template_step.reflection_prompt
+                    or "Reflect on today's teaching."
                 ],
                 "practice": {
                     "name": "Daily Practice",
                     "instructions": [
-                        template_step.practice_prompt or "Take 5 minutes for mindful reflection."
+                        template_step.practice_prompt
+                        or "Take 5 minutes for mindful reflection."
                     ],
-                    "duration_minutes": personalization.get("time_budget_minutes", 10),
+                    "duration_minutes": personalization.get(
+                        "time_budget_minutes", 10
+                    ),
                 },
-                "micro_commitment": "I commit to being mindful of this teaching today.",
+                "micro_commitment": (
+                    "I commit to being mindful of this teaching today."
+                ),
                 "check_in_prompt": {
                     "scale": "0-10",
-                    "label": "How present do you feel with today's teaching?",
+                    "label": (
+                        "How present do you feel with today's teaching?"
+                    ),
                 },
                 "safety_note": template_step.safety_notes,
+                "modern_example": modern_example,
             }
 
-        # Fallback for missing template step
+        # Loud warning — a template with no steps is a seeding bug, not
+        # expected runtime behaviour. Surface it in logs so ops can fix.
+        logger.warning(
+            "[_generate_step_content] Falling back to enemy-derived content: "
+            "template_id=%s slug=%s day_index=%s has no JourneyTemplateStep. "
+            "Run seed_journey_template_steps to populate.",
+            template.id,
+            getattr(template, "slug", "?"),
+            day_index,
+        )
+
+        return self._build_enemy_fallback_content(
+            enemy_tag=enemy_tag,
+            day_index=day_index,
+            personalization=personalization,
+            modern_example=modern_example,
+        )
+
+    def _pick_modern_example(
+        self, enemy_tag: str, day_index: int
+    ) -> str | None:
+        """Deterministically pick a real-life scenario for this enemy/day."""
+        try:
+            from backend.services.journey_engine.modern_examples import (
+                get_examples_db,
+            )
+            db = get_examples_db()
+            examples = db.get_examples(enemy_tag)
+            if not examples:
+                return None
+            pick = examples[(day_index - 1) % len(examples)]
+            return (
+                f"{pick.scenario} — {pick.how_enemy_manifests} "
+                f"Antidote: {pick.practical_antidote}"
+            )
+        except Exception as e:
+            logger.debug(
+                "_pick_modern_example failed for %s d%s: %s",
+                enemy_tag, day_index, e,
+            )
+            return None
+
+    def _build_enemy_fallback_content(
+        self,
+        enemy_tag: str,
+        day_index: int,
+        personalization: dict,
+        modern_example: str | None,
+    ) -> dict[str, Any]:
+        """
+        Build meaningful per-day content when no JourneyTemplateStep exists.
+
+        Draws teaching stems, antidote names, and the key verse reference
+        from template_generator.ENEMY_METADATA so each enemy still gets a
+        Gita-grounded experience instead of the generic placeholder that
+        used to appear here.
+        """
+        try:
+            from backend.services.journey_engine.template_generator import (
+                ENEMY_METADATA,
+                EnemyType,
+            )
+            try:
+                enemy = EnemyType(enemy_tag.lower())
+                meta = ENEMY_METADATA[enemy]
+            except (ValueError, KeyError):
+                meta = None
+        except Exception:
+            meta = None
+
+        if meta is not None:
+            english = meta["english"]
+            antidote = (meta["antidotes"] or ["mindfulness"])[0]
+            themes = meta["themes"] or []
+            theme_for_day = (
+                themes[(day_index - 1) % len(themes)] if themes else "awareness"
+            )
+            verse_refs = [meta["key_verse"]]
+            teaching = (
+                f"Day {day_index}: today we work with {english}. "
+                f"The Gita points us toward {antidote} as the antidote. "
+                f"Focus today on {theme_for_day}."
+            )
+            reflection = (
+                f"Where did {english} arise today, and what would "
+                f"{antidote} have looked like in that moment?"
+            )
+            practice = (
+                f"When {english} arises, pause for three breaths and "
+                f"silently name {antidote}. Choose one small action "
+                f"aligned with it."
+            )
+            check_in_label = f"How steady did you feel with {english} today?"
+            step_title = f"Day {day_index}: Working with {english}"
+        else:
+            # Truly unknown enemy — minimal but still non-generic content.
+            verse_refs = []
+            teaching = (
+                f"Day {day_index}: today we continue the inner work with "
+                "steadiness. The Gita teaches that the witness is always "
+                "available beneath every passing state."
+            )
+            reflection = (
+                "What did you notice about the movements of your mind today?"
+            )
+            practice = (
+                "Sit for five minutes, observe the breath, and let each "
+                "thought pass without following it."
+            )
+            check_in_label = "How present did you feel today?"
+            step_title = f"Day {day_index}"
+
         return {
-            "step_title": f"Day {day_index}",
-            "today_focus": "general",
-            "verse_refs": [],
-            "teaching": "Continue your journey with mindfulness.",
-            "guided_reflection": ["What insights arose today?"],
+            "step_title": step_title,
+            "today_focus": enemy_tag,
+            "verse_refs": verse_refs,
+            "teaching": teaching,
+            "guided_reflection": [reflection],
             "practice": {
-                "name": "Reflection",
-                "instructions": ["Spend 5 minutes in quiet reflection."],
-                "duration_minutes": 5,
+                "name": "Daily Practice",
+                "instructions": [practice],
+                "duration_minutes": personalization.get(
+                    "time_budget_minutes", 10
+                ),
             },
-            "micro_commitment": "I commit to mindful awareness today.",
-            "check_in_prompt": {
-                "scale": "0-10",
-                "label": "How mindful were you today?",
-            },
+            "micro_commitment": (
+                "I commit to one conscious response instead of one "
+                "automatic reaction today."
+            ),
+            "check_in_prompt": {"scale": "0-10", "label": check_in_label},
+            "safety_note": None,
+            "modern_example": modern_example,
         }
 
     async def _build_daily_step(
@@ -1111,6 +1281,20 @@ class JourneyEngineService:
         else:
             available_to_complete, next_available_at = await self._check_time_gate(journey)
 
+        # modern_example: prefer the snapshot, otherwise derive fresh from
+        # the enemy tag so already-stored states that pre-date this field
+        # still show a real-life scenario on the mobile view.
+        modern_example = kiaan_json.get("modern_example")
+        if not modern_example:
+            template = getattr(journey, "template", None)
+            enemy_tags = (
+                (template.primary_enemy_tags or []) if template else []
+            )
+            if enemy_tags:
+                modern_example = self._pick_modern_example(
+                    enemy_tags[0], step_state.day_index
+                )
+
         return DailyStep(
             step_id=step_state.id,
             journey_id=journey.id,
@@ -1128,6 +1312,7 @@ class JourneyEngineService:
             completed_at=step_state.completed_at,
             available_to_complete=available_to_complete,
             next_available_at=next_available_at,
+            modern_example=modern_example,
         )
 
     async def _get_verse(self, chapter: int, verse: int) -> dict[str, Any] | None:

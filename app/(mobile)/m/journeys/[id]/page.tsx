@@ -541,6 +541,27 @@ export default function MobileJourneyDetailPage() {
               </section>
             )}
 
+            {/* Real-life modern example — grounds the teaching in a
+                concrete scenario so the Gita wisdom connects to the
+                user's actual day. Previously this was not surfaced at
+                all, leaving every journey's step view looking generic. */}
+            {step.modern_example && (
+              <section className="relative overflow-hidden rounded-2xl border border-amber-500/20 bg-amber-950/10">
+                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-amber-400 to-orange-500" />
+                <div className="p-5 pl-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider">
+                      Real Life
+                    </span>
+                  </div>
+                  <p className="text-white/90 text-sm leading-relaxed">
+                    {step.modern_example}
+                  </p>
+                </div>
+              </section>
+            )}
+
             {/* Micro commitment */}
             {step.micro_commitment && (
               <div className="rounded-2xl border border-cyan-500/20 bg-cyan-950/10 p-4">

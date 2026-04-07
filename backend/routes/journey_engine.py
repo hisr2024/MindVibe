@@ -238,6 +238,8 @@ class StepResponse(BaseModel):
     completed_at: str | None
     available_to_complete: bool = True
     next_available_at: str | None = None
+    # Real-life scenario tying the day's teaching to a concrete modern context.
+    modern_example: str | None = None
 
 
 class EnemyInfo(BaseModel):
@@ -755,6 +757,7 @@ async def get_current_step(
             completed_at=step.completed_at.isoformat() if step.completed_at else None,
             available_to_complete=step.available_to_complete,
             next_available_at=step.next_available_at.isoformat() if step.next_available_at else None,
+            modern_example=step.modern_example,
         )
     except JourneyNotFoundError as e:
         logger.warning(f"Journey not found for current step: {e}")
@@ -802,6 +805,7 @@ async def get_step(
             completed_at=step.completed_at.isoformat() if step.completed_at else None,
             available_to_complete=step.available_to_complete,
             next_available_at=step.next_available_at.isoformat() if step.next_available_at else None,
+            modern_example=step.modern_example,
         )
     except JourneyNotFoundError as e:
         logger.warning(f"Journey not found for step: {e}")
