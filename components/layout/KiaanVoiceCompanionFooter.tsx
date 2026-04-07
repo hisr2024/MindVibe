@@ -20,7 +20,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 
-import { useWakeWord } from '@/hooks/useWakeWord'
+import { useWakeWord, findStopPhrase } from '@/hooks/useWakeWord'
 import { useHandsFreeMode } from '@/hooks/useHandsFreeMode'
 import { useEnhancedVoiceOutput } from '@/hooks/useEnhancedVoiceOutput'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -34,6 +34,9 @@ import { detectToolSuggestion, type ToolSuggestion } from '@/utils/voice/ecosyst
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 type FooterMode = 'dormant' | 'listening' | 'responding' | 'expanded'
+
+/** Idle timeout (ms) — if no speech in 'listening' after a response, end session quietly. */
+const IDLE_TIMEOUT_MS = 12_000
 
 interface CompanionMessage {
   id: string
@@ -100,6 +103,8 @@ export function KiaanVoiceCompanionFooter() {
   const inputRef = useRef<HTMLInputElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const autoCollapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingFarewellRef = useRef<boolean>(false)
   const wakeWordWasActiveRef = useRef(false)
   const vibePlayerWasPlayingRef = useRef(false)
   const modeRef = useRef<FooterMode>(mode)
@@ -138,6 +143,11 @@ export function KiaanVoiceCompanionFooter() {
     return () => {
       mountedRef.current = false
       if (autoCollapseTimerRef.current) clearTimeout(autoCollapseTimerRef.current)
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current)
+        idleTimerRef.current = null
+      }
+      pendingFarewellRef.current = false
     }
   }, [])
 
@@ -290,16 +300,53 @@ export function KiaanVoiceCompanionFooter() {
   const addLocalFallbackRef = useRef(addLocalFallback)
   useEffect(() => { addLocalFallbackRef.current = addLocalFallback })
 
+  // ── Session Termination ──
+  // Ends the active voice session. On 'user-stop' (stop-word detected), speaks
+  // a brief farewell then goes dormant. On 'idle' (no speech in N seconds),
+  // exits silently. The existing mode==='dormant' effect handles cleanup.
+  const endVoiceSession = useCallback((reason: 'user-stop' | 'idle') => {
+    if (autoCollapseTimerRef.current) {
+      clearTimeout(autoCollapseTimerRef.current)
+      autoCollapseTimerRef.current = null
+    }
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current)
+      idleTimerRef.current = null
+    }
+
+    if (reason === 'user-stop') {
+      // Set flag BEFORE speak() so handleTTSEnd routes to dormant on completion
+      pendingFarewellRef.current = true
+      setMode('responding')
+      speakRef.current?.('Goodbye. Say Hey KIAAN whenever you need me.')
+    } else {
+      setMode('dormant')
+    }
+  }, [])
+
   // ── TTS Voice Output ──
   const handleTTSEnd = useCallback(() => {
     if (!mountedRef.current) return
-    // After speech ends, schedule auto-collapse
-    autoCollapseTimerRef.current = setTimeout(() => {
-      if (mountedRef.current && modeRef.current === 'responding') {
-        setMode('dormant')
+
+    // Path A: farewell TTS just finished → go dormant
+    if (pendingFarewellRef.current) {
+      pendingFarewellRef.current = false
+      setMode('dormant')
+      return
+    }
+
+    // Path B: normal response TTS finished → re-listen (multi-turn)
+    if (modeRef.current !== 'responding') return
+    setMode('listening')
+
+    // Idle safety net: end session if user stays silent
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
+    idleTimerRef.current = setTimeout(() => {
+      if (mountedRef.current && modeRef.current === 'listening') {
+        endVoiceSession('idle')
       }
-    }, 3000)
-  }, [])
+    }, IDLE_TIMEOUT_MS)
+  }, [endVoiceSession])
 
   const handleTTSStart = useCallback(() => {
     // Cancel any pending auto-collapse when new speech starts
@@ -331,8 +378,22 @@ export function KiaanVoiceCompanionFooter() {
   // ── Hands-Free Mode (VAD + STT) ──
   const handleTranscript = useCallback((text: string) => {
     if (!mountedRef.current || !text.trim()) return
+
+    // User spoke — clear idle timeout
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current)
+      idleTimerRef.current = null
+    }
+
+    // Stop-word interception: end session before any API call
+    const stopPhrase = findStopPhrase(text)
+    if (stopPhrase) {
+      endVoiceSession('user-stop')
+      return
+    }
+
     sendMessage(text)
-  }, [sendMessage])
+  }, [sendMessage, endVoiceSession])
 
   const handleBargeIn = useCallback(() => {
     cancelTTS()
@@ -395,6 +456,14 @@ export function KiaanVoiceCompanionFooter() {
     }
   }, [mode, isHandsFreeActive, deactivateHandsFree, wakeWordSupported, isWakeWordListening, isVoiceConflictPage, startWakeWordListening, resumeVibePlayer])
 
+  // Clear idle timer the moment VAD detects speech onset (before transcript arrives)
+  useEffect(() => {
+    if (handsFreeState === 'hearing' && idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current)
+      idleTimerRef.current = null
+    }
+  }, [handsFreeState])
+
   // ── User Actions ──
 
   const handleShankhaPress = useCallback(() => {
@@ -414,6 +483,11 @@ export function KiaanVoiceCompanionFooter() {
   }, [mode, triggerHaptic, deactivateHandsFree])
 
   const handleClose = useCallback(() => {
+    pendingFarewellRef.current = false
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current)
+      idleTimerRef.current = null
+    }
     cancelTTS()
     deactivateHandsFree()
     if (autoCollapseTimerRef.current) {
