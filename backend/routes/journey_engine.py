@@ -170,6 +170,14 @@ class TemplateResponse(BaseModel):
     is_free: bool
     icon_name: str | None
     color_theme: str | None
+    # Sacred enrichment fields (derived from primary enemy tag).
+    # Optional so older tests / callers that construct TemplateResponse
+    # directly continue to type-check; endpoints populate them via
+    # _template_to_response() below.
+    gita_verse_ref: dict[str, int] | None = None
+    gita_verse_text: str | None = None
+    modern_context: str | None = None
+    transformation_promise: str | None = None
 
 
 class TemplateListResponse(BaseModel):
@@ -219,6 +227,18 @@ class VerseContent(BaseModel):
     theme: str | None
 
 
+class ModernExampleOut(BaseModel):
+    """Modern real-life example surfaced with a daily step."""
+
+    category: str
+    scenario: str
+    how_enemy_manifests: str
+    gita_verse_ref: dict[str, int]
+    gita_wisdom: str
+    practical_antidote: str
+    reflection_question: str
+
+
 class StepResponse(BaseModel):
     """Response model for a daily step."""
 
@@ -238,6 +258,16 @@ class StepResponse(BaseModel):
     completed_at: str | None
     available_to_complete: bool = True
     next_available_at: str | None = None
+    # Flattened sacred fields for the 4-block day-content UI. Derived from
+    # the first entry of verses[] + guided_reflection, and from
+    # ModernExamplesDB keyed by (primary enemy, day_index). All optional so
+    # existing callers keep working; endpoints populate via _step_to_response.
+    verse_ref: dict[str, int] | None = None
+    verse_sanskrit: str | None = None
+    verse_transliteration: str | None = None
+    verse_translation: str | None = None
+    reflection_prompt: str | None = None
+    modern_example: ModernExampleOut | None = None
 
 
 class EnemyInfo(BaseModel):
@@ -334,6 +364,217 @@ async def get_examples_db() -> ModernExamplesDB:
 
 
 # =============================================================================
+# SACRED ENRICHMENT HELPERS
+# =============================================================================
+# The Journey Engine already stores teaching, verses, practice, etc. on every
+# step, and ENEMY_METADATA has the primary verse per enemy. What the mobile UI
+# needs additionally are flattened, enemy-anchored sacred fields (verse in
+# Devanagari + transliteration + English, modern real-life mirror, and a
+# transformation promise) surfaced on the same response. The data already
+# exists — this layer just projects it into the shape the client expects.
+
+# Sanskrit / transliteration / translation / modern-context / promise keyed by
+# the canonical enemy tag. Content is intentionally conservative and taken
+# from the Bhagavad Gita — never invented. For enemies where the step already
+# returns a verses[] array with full sanskrit + transliteration, the step
+# builder prefers that live data over these fallbacks.
+_ENEMY_SACRED: dict[str, dict[str, Any]] = {
+    "kama": {
+        "verse_ref": {"chapter": 3, "verse": 37},
+        "verse_sanskrit": "काम एष क्रोध एष रजोगुणसमुद्भवः\nमहाशनो महापाप्मा विद्ध्येनमिह वैरिणम्",
+        "verse_transliteration": "kāma eṣa krodha eṣa rajo-guṇa-samudbhavaḥ\nmahāśano mahā-pāpmā viddhyenam iha vairiṇam",
+        "verse_translation": "It is desire, it is anger, born of the mode of passion — all-devouring and greatly sinful. Know this to be the enemy here in this world.",
+        "modern_context": "Endless scrolling, compulsive shopping, relationship obsession, chasing the next hit that never satisfies.",
+        "transformation_promise": "Nishkama Karma — action without craving for the fruit.",
+    },
+    "krodha": {
+        "verse_ref": {"chapter": 2, "verse": 63},
+        "verse_sanskrit": "क्रोधाद्भवति संमोहः संमोहात्स्मृतिविभ्रमः\nस्मृतिभ्रंशाद् बुद्धिनाशो बुद्धिनाशात्प्रणश्यति",
+        "verse_transliteration": "krodhād bhavati sammohaḥ sammohāt smṛti-vibhramaḥ\nsmṛti-bhraṁśād buddhi-nāśo buddhi-nāśāt praṇaśyati",
+        "verse_translation": "From anger arises delusion; from delusion, bewilderment of memory; from the loss of memory, the destruction of discrimination; and when discrimination is lost, one perishes.",
+        "modern_context": "Road rage, social media outrage, reactive arguments, the ten-second flash that ruins a relationship.",
+        "transformation_promise": "Viveka — the pause of discrimination before reaction.",
+    },
+    "lobha": {
+        "verse_ref": {"chapter": 14, "verse": 17},
+        "verse_sanskrit": "लोभः प्रवृत्तिरारम्भः कर्मणामशमः स्पृहा\nरजस्येतानि जायन्ते विवृद्धे भरतर्षभ",
+        "verse_transliteration": "lobhaḥ pravṛttir ārambhaḥ karmaṇām aśamaḥ spṛhā\nrajasy etāni jāyante vivṛddhe bharatarṣabha",
+        "verse_translation": "Greed, ceaseless activity, the undertaking of works, restlessness and craving — these arise when the mode of passion grows, O best of the Bharatas.",
+        "modern_context": "Hoarding, financial anxiety, never feeling 'enough', grasping that cannot be satisfied.",
+        "transformation_promise": "Dana — generous giving without expectation.",
+    },
+    "moha": {
+        "verse_ref": {"chapter": 2, "verse": 52},
+        "verse_sanskrit": "यदा ते मोहकलिलं बुद्धिर्व्यतितरिष्यति\nतदा गन्तासि निर्वेदं श्रोतव्यस्य श्रुतस्य च",
+        "verse_transliteration": "yadā te moha-kalilaṁ buddhir vyatitariṣyati\ntadā gantāsi nirvedaṁ śrotavyasya śrutasya ca",
+        "verse_translation": "When your intellect crosses beyond the thicket of delusion, then you shall become indifferent to all that has been heard and all that is yet to be heard.",
+        "modern_context": "Toxic relationships, identity attachment, fear of change, mistaking the temporary for the real.",
+        "transformation_promise": "Viveka-Vairagya — discrimination and loving detachment.",
+    },
+    "mada": {
+        "verse_ref": {"chapter": 16, "verse": 4},
+        "verse_sanskrit": "दम्भो दर्पोऽभिमानश्च क्रोधः पारुष्यमेव च\nअज्ञानं चाभिजातस्य पार्थ सम्पदमासुरीम्",
+        "verse_transliteration": "dambho darpo 'bhimānaś ca krodhaḥ pāruṣyam eva ca\najñānaṁ cābhijātasya pārtha sampadam āsurīm",
+        "verse_translation": "Hypocrisy, arrogance, self-conceit, anger, harshness and ignorance — these, O Pārtha, are the marks of one born with the demoniac qualities.",
+        "modern_context": "Arrogance, inability to accept feedback, needing to be right, the inflated self that forgets its true nature.",
+        "transformation_promise": "Namrata — genuine humility, seeing the Self in all.",
+    },
+    "matsarya": {
+        "verse_ref": {"chapter": 12, "verse": 13},
+        "verse_sanskrit": "अद्वेष्टा सर्वभूतानां मैत्रः करुण एव च\nनिर्ममो निरहङ्कारः समदुःखसुखः क्षमी",
+        "verse_transliteration": "adveṣṭā sarva-bhūtānāṁ maitraḥ karuṇa eva ca\nnirmamo nirahaṅkāraḥ sama-duḥkha-sukhaḥ kṣamī",
+        "verse_translation": "He who hates no creature, who is friendly and compassionate, free from attachment and egoism, balanced in pleasure and pain, and forgiving — he is dear to Me.",
+        "modern_context": "Social media comparison, jealousy of colleagues, resentment when others shine.",
+        "transformation_promise": "Mudita — sympathetic joy in others' success.",
+    },
+}
+
+# Accept alternate spelling used in some template tags.
+_ENEMY_SACRED["matsara"] = _ENEMY_SACRED["matsarya"]
+
+
+def _sacred_for_enemy(enemy_tag: str | None) -> dict[str, Any] | None:
+    if not enemy_tag:
+        return None
+    return _ENEMY_SACRED.get(enemy_tag.lower())
+
+
+def _template_to_response(t: Any) -> TemplateResponse:
+    """Project a domain template into a TemplateResponse with sacred fields."""
+    tags = t.primary_enemy_tags or []
+    sacred = _sacred_for_enemy(tags[0] if tags else None)
+    return TemplateResponse(
+        id=t.id,
+        slug=t.slug,
+        title=t.title,
+        description=t.description,
+        primary_enemy_tags=tags,
+        duration_days=t.duration_days,
+        difficulty=t.difficulty,
+        is_featured=t.is_featured,
+        is_free=t.is_free,
+        icon_name=t.icon_name,
+        color_theme=t.color_theme,
+        gita_verse_ref=sacred["verse_ref"] if sacred else None,
+        gita_verse_text=sacred["verse_sanskrit"] if sacred else None,
+        modern_context=sacred["modern_context"] if sacred else None,
+        transformation_promise=sacred["transformation_promise"] if sacred else None,
+    )
+
+
+# Module-level singleton so we don't rebuild the examples list per request.
+_modern_examples_singleton: ModernExamplesDB | None = None
+
+
+def _modern_examples() -> ModernExamplesDB:
+    global _modern_examples_singleton
+    if _modern_examples_singleton is None:
+        _modern_examples_singleton = ModernExamplesDB()
+    return _modern_examples_singleton
+
+
+def _pick_modern_example(
+    enemy_tag: str | None, day_index: int
+) -> ModernExampleOut | None:
+    """Deterministically pick a modern example for (enemy, day)."""
+    if not enemy_tag:
+        return None
+    try:
+        examples = _modern_examples().get_examples(enemy_tag.lower())
+    except Exception:  # pragma: no cover — defensive
+        return None
+    if not examples:
+        return None
+    ex = examples[max(0, day_index - 1) % len(examples)]
+    return ModernExampleOut(
+        category=ex.category,
+        scenario=ex.scenario,
+        how_enemy_manifests=ex.how_enemy_manifests,
+        gita_verse_ref=ex.gita_verse_ref,
+        gita_wisdom=ex.gita_wisdom,
+        practical_antidote=ex.practical_antidote,
+        reflection_question=ex.reflection_question,
+    )
+
+
+def _step_to_response(
+    step: Any, *, enemy_tag: str | None = None
+) -> StepResponse:
+    """Project a domain step into a StepResponse with sacred flattening.
+
+    Args:
+        step: Domain step object from JourneyEngineService.
+        enemy_tag: Optional explicit enemy tag (used by dashboard where the
+            step's parent journey's primary enemy is already known). If not
+            provided we fall back to the sacred defaults keyed by the verse
+            chapter — safe because every step always has at least one verse.
+    """
+    verses = [
+        VerseContent(
+            chapter=v["chapter"],
+            verse=v["verse"],
+            sanskrit=v.get("sanskrit"),
+            hindi=v.get("hindi"),
+            english=v["english"],
+            transliteration=v.get("transliteration"),
+            theme=v.get("theme"),
+        )
+        for v in step.verses
+    ]
+
+    first_verse = verses[0] if verses else None
+    sacred = _sacred_for_enemy(enemy_tag)
+
+    # Prefer live verse content from the step; fall back to the canonical
+    # enemy verse so the UI never shows an empty block.
+    verse_ref: dict[str, int] | None = None
+    verse_sanskrit: str | None = None
+    verse_translit: str | None = None
+    verse_translation: str | None = None
+
+    if first_verse is not None:
+        verse_ref = {"chapter": first_verse.chapter, "verse": first_verse.verse}
+        verse_sanskrit = first_verse.sanskrit
+        verse_translit = first_verse.transliteration
+        verse_translation = first_verse.english
+
+    if sacred is not None:
+        verse_ref = verse_ref or sacred["verse_ref"]
+        verse_sanskrit = verse_sanskrit or sacred["verse_sanskrit"]
+        verse_translit = verse_translit or sacred["verse_transliteration"]
+        verse_translation = verse_translation or sacred["verse_translation"]
+
+    reflection_prompt = (
+        step.guided_reflection[0] if step.guided_reflection else None
+    )
+
+    return StepResponse(
+        step_id=step.step_id,
+        journey_id=step.journey_id,
+        day_index=step.day_index,
+        step_title=step.step_title,
+        teaching=step.teaching,
+        guided_reflection=step.guided_reflection,
+        practice=step.practice,
+        verse_refs=step.verse_refs,
+        verses=verses,
+        micro_commitment=step.micro_commitment,
+        check_in_prompt=step.check_in_prompt,
+        safety_note=step.safety_note,
+        is_completed=step.is_completed,
+        completed_at=step.completed_at.isoformat() if step.completed_at else None,
+        available_to_complete=step.available_to_complete,
+        next_available_at=step.next_available_at.isoformat() if step.next_available_at else None,
+        verse_ref=verse_ref,
+        verse_sanskrit=verse_sanskrit,
+        verse_transliteration=verse_translit,
+        verse_translation=verse_translation,
+        reflection_prompt=reflection_prompt,
+        modern_example=_pick_modern_example(enemy_tag, step.day_index),
+    )
+
+
+# =============================================================================
 # TEMPLATE ENDPOINTS
 # =============================================================================
 
@@ -363,22 +604,7 @@ async def list_templates(
     )
 
     return TemplateListResponse(
-        templates=[
-            TemplateResponse(
-                id=t.id,
-                slug=t.slug,
-                title=t.title,
-                description=t.description,
-                primary_enemy_tags=t.primary_enemy_tags or [],
-                duration_days=t.duration_days,
-                difficulty=t.difficulty,
-                is_featured=t.is_featured,
-                is_free=t.is_free,
-                icon_name=t.icon_name,
-                color_theme=t.color_theme,
-            )
-            for t in templates
-        ],
+        templates=[_template_to_response(t) for t in templates],
         total=total,
         limit=limit,
         offset=offset,
@@ -393,19 +619,7 @@ async def get_template(
     """Get a specific template by ID."""
     try:
         template = await service.get_template(template_id)
-        return TemplateResponse(
-            id=template.id,
-            slug=template.slug,
-            title=template.title,
-            description=template.description,
-            primary_enemy_tags=template.primary_enemy_tags or [],
-            duration_days=template.duration_days,
-            difficulty=template.difficulty,
-            is_featured=template.is_featured,
-            is_free=template.is_free,
-            icon_name=template.icon_name,
-            color_theme=template.color_theme,
-        )
+        return _template_to_response(template)
     except TemplateNotFoundError as e:
         logger.warning(f"Template not found: {e}")
         raise HTTPException(status_code=404, detail={"error": "TEMPLATE_NOT_FOUND", "message": "Journey template not found."})
@@ -419,19 +633,7 @@ async def get_template_by_slug(
     """Get a template by its slug."""
     try:
         template = await service.get_template_by_slug(slug)
-        return TemplateResponse(
-            id=template.id,
-            slug=template.slug,
-            title=template.title,
-            description=template.description,
-            primary_enemy_tags=template.primary_enemy_tags or [],
-            duration_days=template.duration_days,
-            difficulty=template.difficulty,
-            is_featured=template.is_featured,
-            is_free=template.is_free,
-            icon_name=template.icon_name,
-            color_theme=template.color_theme,
-        )
+        return _template_to_response(template)
     except TemplateNotFoundError as e:
         logger.warning(f"Template not found by slug: {e}")
         raise HTTPException(status_code=404, detail={"error": "TEMPLATE_NOT_FOUND", "message": "Journey template not found."})
@@ -727,35 +929,16 @@ async def get_current_step(
         if step is None:
             return None
 
-        return StepResponse(
-            step_id=step.step_id,
-            journey_id=step.journey_id,
-            day_index=step.day_index,
-            step_title=step.step_title,
-            teaching=step.teaching,
-            guided_reflection=step.guided_reflection,
-            practice=step.practice,
-            verse_refs=step.verse_refs,
-            verses=[
-                VerseContent(
-                    chapter=v["chapter"],
-                    verse=v["verse"],
-                    sanskrit=v.get("sanskrit"),
-                    hindi=v.get("hindi"),
-                    english=v["english"],
-                    transliteration=v.get("transliteration"),
-                    theme=v.get("theme"),
-                )
-                for v in step.verses
-            ],
-            micro_commitment=step.micro_commitment,
-            check_in_prompt=step.check_in_prompt,
-            safety_note=step.safety_note,
-            is_completed=step.is_completed,
-            completed_at=step.completed_at.isoformat() if step.completed_at else None,
-            available_to_complete=step.available_to_complete,
-            next_available_at=step.next_available_at.isoformat() if step.next_available_at else None,
-        )
+        # Look up the journey's primary enemy so the step response can surface
+        # the right modern example + sacred fallbacks. Failure is non-fatal.
+        enemy_tag: str | None = None
+        try:
+            stats = await service.get_journey(user_id, journey_id)
+            enemy_tag = stats.primary_enemies[0] if stats.primary_enemies else None
+        except Exception:  # pragma: no cover — defensive
+            pass
+
+        return _step_to_response(step, enemy_tag=enemy_tag)
     except JourneyNotFoundError as e:
         logger.warning(f"Journey not found for current step: {e}")
         raise HTTPException(status_code=404, detail={"error": "JOURNEY_NOT_FOUND", "message": "Journey not found."})
@@ -774,35 +957,14 @@ async def get_step(
     try:
         step = await service.get_step(user_id, journey_id, day_index)
 
-        return StepResponse(
-            step_id=step.step_id,
-            journey_id=step.journey_id,
-            day_index=step.day_index,
-            step_title=step.step_title,
-            teaching=step.teaching,
-            guided_reflection=step.guided_reflection,
-            practice=step.practice,
-            verse_refs=step.verse_refs,
-            verses=[
-                VerseContent(
-                    chapter=v["chapter"],
-                    verse=v["verse"],
-                    sanskrit=v.get("sanskrit"),
-                    hindi=v.get("hindi"),
-                    english=v["english"],
-                    transliteration=v.get("transliteration"),
-                    theme=v.get("theme"),
-                )
-                for v in step.verses
-            ],
-            micro_commitment=step.micro_commitment,
-            check_in_prompt=step.check_in_prompt,
-            safety_note=step.safety_note,
-            is_completed=step.is_completed,
-            completed_at=step.completed_at.isoformat() if step.completed_at else None,
-            available_to_complete=step.available_to_complete,
-            next_available_at=step.next_available_at.isoformat() if step.next_available_at else None,
-        )
+        enemy_tag: str | None = None
+        try:
+            stats = await service.get_journey(user_id, journey_id)
+            enemy_tag = stats.primary_enemies[0] if stats.primary_enemies else None
+        except Exception:  # pragma: no cover
+            pass
+
+        return _step_to_response(step, enemy_tag=enemy_tag)
     except JourneyNotFoundError as e:
         logger.warning(f"Journey not found for step: {e}")
         raise HTTPException(status_code=404, detail={"error": "JOURNEY_NOT_FOUND", "message": "Journey not found."})
@@ -915,6 +1077,13 @@ async def get_dashboard(
             max_active=5,
         )
 
+    # Map journey_id -> primary enemy tag so today_steps can surface the
+    # right sacred fallbacks and modern example without a second DB hit.
+    _journey_enemy_map: dict[str, str | None] = {
+        j.journey_id: (j.primary_enemies[0] if j.primary_enemies else None)
+        for j in dashboard.active_journeys
+    }
+
     return DashboardResponse(
         active_journeys=[
             JourneyResponse(
@@ -952,34 +1121,9 @@ async def get_dashboard(
         ],
         recommended_templates=dashboard.recommended_templates,
         today_steps=[
-            StepResponse(
-                step_id=s.step_id,
-                journey_id=s.journey_id,
-                day_index=s.day_index,
-                step_title=s.step_title,
-                teaching=s.teaching,
-                guided_reflection=s.guided_reflection,
-                practice=s.practice,
-                verse_refs=s.verse_refs,
-                verses=[
-                    VerseContent(
-                        chapter=v["chapter"],
-                        verse=v["verse"],
-                        sanskrit=v.get("sanskrit"),
-                        hindi=v.get("hindi"),
-                        english=v["english"],
-                        transliteration=v.get("transliteration"),
-                        theme=v.get("theme"),
-                    )
-                    for v in s.verses
-                ],
-                micro_commitment=s.micro_commitment,
-                check_in_prompt=s.check_in_prompt,
-                safety_note=s.safety_note,
-                is_completed=s.is_completed,
-                completed_at=s.completed_at.isoformat() if s.completed_at else None,
-                available_to_complete=s.available_to_complete,
-                next_available_at=s.next_available_at.isoformat() if s.next_available_at else None,
+            _step_to_response(
+                s,
+                enemy_tag=_journey_enemy_map.get(s.journey_id),
             )
             for s in dashboard.today_steps
         ],

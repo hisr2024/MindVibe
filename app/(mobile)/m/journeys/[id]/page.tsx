@@ -483,6 +483,65 @@ export default function MobileJourneyDetailPage() {
               </section>
             )}
 
+            {/* ═══════════════════════════════════════════════════════════
+                BLOCK 3: Modern Real-Life Example
+                "I recognise myself in this." — the mirror that makes
+                ancient wisdom immediately relevant. Rendered only when
+                the backend supplies modern_example (deterministically
+                picked per enemy + day_index). ─────────────────────── */}
+            {step.modern_example && (
+              <section
+                className="relative overflow-hidden rounded-2xl"
+                style={{
+                  background:
+                    'linear-gradient(145deg, rgba(22,26,66,0.85), rgba(17,20,53,0.98))',
+                  border: enemyInfo
+                    ? `1px solid rgba(${enemyInfo.colorRGB},0.22)`
+                    : '1px solid rgba(212,160,23,0.22)',
+                  borderLeft: enemyInfo
+                    ? `3px solid rgba(${enemyInfo.colorRGB},0.65)`
+                    : '3px solid rgba(212,160,23,0.65)',
+                  borderTopLeftRadius: 0,
+                  borderBottomLeftRadius: 0,
+                }}
+              >
+                <div className="p-5">
+                  <div
+                    className="font-ui uppercase mb-2"
+                    style={{
+                      fontSize: 9,
+                      letterSpacing: '0.14em',
+                      color: enemyInfo?.color ?? '#D4A017',
+                    }}
+                  >
+                    {'\u2726'} In Today&apos;s World
+                  </div>
+
+                  <div className="font-divine italic text-[#EDE8DC] leading-snug mb-2 text-base">
+                    {step.modern_example.scenario}
+                  </div>
+
+                  <div className="font-sacred italic text-[#B8AE98] leading-relaxed text-sm mb-3">
+                    {step.modern_example.how_enemy_manifests}
+                  </div>
+
+                  <div
+                    className="my-2"
+                    style={{
+                      height: 1,
+                      background: enemyInfo
+                        ? `linear-gradient(90deg, transparent, rgba(${enemyInfo.colorRGB},0.32), transparent)`
+                        : 'linear-gradient(90deg, transparent, rgba(212,160,23,0.32), transparent)',
+                    }}
+                  />
+
+                  <div className="font-sacred italic text-[#EDE8DC] leading-relaxed text-sm">
+                    {step.modern_example.practical_antidote}
+                  </div>
+                </div>
+              </section>
+            )}
+
             {/* Guided Reflection */}
             {step.guided_reflection?.length > 0 && (
               <section className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-purple-950/10">
