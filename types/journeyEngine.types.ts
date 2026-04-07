@@ -190,6 +190,12 @@ export interface JourneyTemplate {
   is_free: boolean;
   icon_name: string | null;
   color_theme: string | null;
+  /** Sacred enrichment — derived server-side from the primary enemy tag.
+   *  All four are optional so older API deployments keep working. */
+  gita_verse_ref?: { chapter: number; verse: number } | null;
+  gita_verse_text?: string | null;
+  modern_context?: string | null;
+  transformation_promise?: string | null;
 }
 
 // =============================================================================
@@ -228,6 +234,19 @@ export interface VerseContent {
   theme: string | null;
 }
 
+/** Modern real-life example surfaced with a daily step. Mirrors backend
+ *  ModernExampleOut. Named StepModernExample to avoid colliding with the
+ *  existing ModernExample alias exported below. */
+export interface StepModernExample {
+  category: string;
+  scenario: string;
+  how_enemy_manifests: string;
+  gita_verse_ref: { chapter: number; verse: number };
+  gita_wisdom: string;
+  practical_antidote: string;
+  reflection_question: string;
+}
+
 export interface StepResponse {
   step_id: string;
   journey_id: string;
@@ -245,6 +264,15 @@ export interface StepResponse {
   completed_at: string | null;
   available_to_complete: boolean;
   next_available_at: string | null;
+  /** Flattened sacred fields — optional because older deployments
+   *  won't return them. UI must tolerate absence and fall back to
+   *  the existing verses[] array. */
+  verse_ref?: { chapter: number; verse: number } | null;
+  verse_sanskrit?: string | null;
+  verse_transliteration?: string | null;
+  verse_translation?: string | null;
+  reflection_prompt?: string | null;
+  modern_example?: StepModernExample | null;
 }
 
 // Alias for backwards compatibility

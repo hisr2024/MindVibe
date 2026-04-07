@@ -1,15 +1,32 @@
 /**
  * JourneyTemplateCard — Template card for browsing and starting new journeys.
- * Shows enemy Devanagari, duration badge, difficulty, and sacred symbol.
+ *
+ * This card is the "sacred shop window" for the षड्रिपु Journeys catalog.
+ * Beyond the basic title / duration / difficulty, it surfaces the three
+ * things a user needs to see in 3 seconds to recognise a journey as theirs:
+ *   1. Real-life modern context   (the mirror)
+ *   2. Bhagavad Gita verse anchor  (the wisdom)
+ *   3. Transformation promise      (the becoming)
+ *
+ * Props (kept stable for JourneysTab.tsx consumer):
+ *   template     — JourneyTemplate (now includes optional gita_verse_ref,
+ *                                   gita_verse_text, modern_context,
+ *                                   transformation_promise)
+ *   onStart      — (templateId) => void
+ *   isStarting   — boolean
+ *   disabled?    — boolean
+ *   index?       — number (for staggered motion)
  */
 
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
+import { useState } from 'react'
 import type { JourneyTemplate, EnemyType } from '@/types/journeyEngine.types'
 import { ENEMY_INFO, getDifficultyLabel } from '@/types/journeyEngine.types'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
-import { EnemySacredSymbol } from '@/components/journey/EnemySacredSymbol'
+import { EnemySVGFallback } from '@/components/mobile/journeys/EnemySVGFallback'
 
 interface JourneyTemplateCardProps {
   template: JourneyTemplate
@@ -27,105 +44,285 @@ export function JourneyTemplateCard({
   index = 0,
 }: JourneyTemplateCardProps) {
   const { triggerHaptic } = useHapticFeedback()
+  const [imageFailed, setImageFailed] = useState(false)
+
   const primaryEnemy = template.primary_enemy_tags[0] as EnemyType | undefined
   const info = primaryEnemy ? ENEMY_INFO[primaryEnemy] : null
   const accentColor = info?.color ?? '#D4A017'
   const rgb = info?.colorRGB ?? '212,160,23'
+
+  // Sacred enrichment — prefer template-level data, fall back to the
+  // canonical enemy metadata. Everything here is optional, so we gate
+  // each block on truthiness to keep the card graceful if the backend
+  // hasn't been redeployed yet.
+  const verseRef = template.gita_verse_ref ?? info?.keyVerse ?? null
+  const verseSanskrit = template.gita_verse_text ?? null
+  const verseTranslit = info?.keyVerseText ?? null
+  const modernContext = template.modern_context ?? info?.modernContext ?? null
+  const transformation = template.transformation_promise ?? info?.conqueredBy ?? null
+
+  const handleStart = () => {
+    if (disabled || isStarting) return
+    triggerHaptic('medium')
+    onStart(template.id)
+  }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.06 }}
-      whileTap={{ scale: 0.97 }}
-      className="relative overflow-hidden rounded-2xl"
+      whileTap={{ scale: 0.98 }}
+      className="relative overflow-hidden rounded-2xl flex flex-col"
       style={{
-        border: `1px solid rgba(${rgb},0.15)`,
-        background: `linear-gradient(160deg, rgba(${rgb},0.1), rgba(5,7,20,0.98))`,
+        border: `1px solid rgba(${rgb},0.22)`,
+        borderTop: `2px solid ${accentColor}`,
+        background:
+          'linear-gradient(145deg, rgba(22,26,66,0.96), rgba(17,20,53,0.99))',
       }}
     >
-      {/* Sacred symbol watermark */}
-      {primaryEnemy && (
-        <div className="absolute top-2 right-2">
-          <EnemySacredSymbol enemy={primaryEnemy} size={40} opacity={0.08} />
-        </div>
-      )}
+      {/* ── HERO ─────────────────────────────────────────────────────── */}
+      <div
+        className="relative overflow-hidden"
+        style={{
+          height: 96,
+          background: info
+            ? `linear-gradient(135deg, rgba(${rgb},0.35), rgba(${rgb},0.08))`
+            : 'linear-gradient(135deg, rgba(212,160,23,0.3), rgba(212,160,23,0.08))',
+        }}
+      >
+        {/* AI hero image if available — fails silently to gradient + SVG */}
+        {!imageFailed && (
+          <Image
+            src={`/images/journeys/templates/journey-${template.id}.webp`}
+            alt=""
+            fill
+            sizes="(max-width: 768px) 50vw, 200px"
+            className="object-cover opacity-40"
+            onError={() => setImageFailed(true)}
+          />
+        )}
 
-      <div className="relative p-3.5">
-        {/* Header: Devanagari + badges */}
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex items-center gap-2">
-            {info && (
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{
-                  background: `linear-gradient(135deg, rgba(${rgb},0.3), rgba(${rgb},0.1))`,
-                }}
-              >
-                <span
-                  className="text-sm leading-none"
-                  style={{
-                    fontFamily: '"Noto Sans Devanagari", sans-serif',
-                    color: accentColor,
-                  }}
-                >
-                  {info.devanagari.charAt(0)}
-                </span>
-              </div>
-            )}
-            <div>
-              <div
-                className="text-[10px] font-ui font-medium"
-                style={{ color: accentColor }}
-              >
-                {info?.devanagari ?? 'Journey'} {info?.name ?? ''}
-              </div>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-[9px] text-white/50 font-ui">
-                  {template.duration_days} days
-                </span>
-                <span className="text-[9px] text-white/40 font-ui">
-                  {getDifficultyLabel(template.difficulty)}
-                </span>
-              </div>
-            </div>
+        {/* SVG fallback symbol (always rendered underneath as watermark) */}
+        {primaryEnemy && (
+          <div className="absolute top-2 right-2 opacity-30 pointer-events-none">
+            <EnemySVGFallback enemyId={primaryEnemy} color={accentColor} size={44} />
           </div>
-          {template.is_free && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 font-ui">
-              Free
+        )}
+
+        {/* Sanskrit overlay */}
+        {info && (
+          <div className="absolute bottom-1.5 left-2.5 flex items-baseline gap-1.5">
+            <span
+              style={{
+                fontFamily: '"Noto Sans Devanagari", sans-serif',
+                fontSize: 22,
+                fontWeight: 500,
+                color: accentColor,
+                textShadow: `0 0 16px rgba(${rgb},0.55)`,
+                lineHeight: 1,
+              }}
+            >
+              {info.devanagari}
             </span>
-          )}
-        </div>
+            <span
+              className="font-divine italic text-white/70"
+              style={{ fontSize: 11 }}
+            >
+              {info.name}
+            </span>
+          </div>
+        )}
 
-        {/* Title + description */}
-        <h3 className="text-[13px] font-ui font-semibold text-[#EDE8DC] line-clamp-2 mb-1">
-          {template.title}
-        </h3>
-        <p className="text-[11px] text-[#B8AE98] font-ui line-clamp-2 mb-3">
-          {template.description || 'Begin your journey of inner transformation'}
-        </p>
-
-        {/* Duration badge (top-right) */}
-        <div className="absolute top-3 right-3">
-          <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-[#D4A017]/15 text-[#D4A017] font-ui font-medium">
+        {/* Duration / difficulty pills */}
+        <div className="absolute top-2 left-2 flex gap-1">
+          <span
+            className="font-ui"
+            style={{
+              fontSize: 8,
+              padding: '2px 6px',
+              borderRadius: 6,
+              background: 'rgba(5,7,20,0.78)',
+              border: `1px solid rgba(${rgb},0.35)`,
+              color: accentColor,
+              letterSpacing: '0.06em',
+            }}
+          >
             {template.duration_days}d
+          </span>
+          <span
+            className="font-ui"
+            style={{
+              fontSize: 8,
+              padding: '2px 6px',
+              borderRadius: 6,
+              background: 'rgba(5,7,20,0.78)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: '#B8AE98',
+            }}
+          >
+            {getDifficultyLabel(template.difficulty)}
           </span>
         </div>
 
-        {/* Start button */}
+        {template.is_free && (
+          <span
+            className="absolute top-2 right-12 font-ui"
+            style={{
+              fontSize: 8,
+              padding: '2px 6px',
+              borderRadius: 6,
+              background: 'rgba(16,185,129,0.15)',
+              border: '1px solid rgba(16,185,129,0.35)',
+              color: '#6EE7B7',
+            }}
+          >
+            Free
+          </span>
+        )}
+      </div>
+
+      {/* ── BODY ─────────────────────────────────────────────────────── */}
+      <div className="p-3 flex flex-col gap-2 flex-1">
+        <h3
+          className="font-divine italic text-[#EDE8DC] leading-tight line-clamp-2"
+          style={{ fontSize: 15 }}
+        >
+          {template.title}
+        </h3>
+
+        {template.description && (
+          <p
+            className="font-sacred italic text-[#B8AE98] leading-snug line-clamp-2"
+            style={{ fontSize: 11 }}
+          >
+            {template.description}
+          </p>
+        )}
+
+        {/* ── REAL-LIFE HOOK ─────────────────────────────────────────── */}
+        {modernContext && (
+          <div
+            style={{
+              padding: '6px 8px',
+              background: `rgba(${rgb},0.07)`,
+              border: `1px solid rgba(${rgb},0.2)`,
+              borderLeft: `2px solid ${accentColor}`,
+              borderRadius: '0 8px 8px 0',
+            }}
+          >
+            <div
+              className="font-ui uppercase"
+              style={{
+                fontSize: 7,
+                color: accentColor,
+                letterSpacing: '0.12em',
+                marginBottom: 2,
+              }}
+            >
+              Today this looks like
+            </div>
+            <div
+              className="font-sacred italic text-[#B8AE98] leading-snug line-clamp-2"
+              style={{ fontSize: 10 }}
+            >
+              {modernContext}
+            </div>
+          </div>
+        )}
+
+        {/* ── GITA VERSE ─────────────────────────────────────────────── */}
+        {(verseRef || verseSanskrit || verseTranslit) && (
+          <div
+            style={{
+              padding: '6px 8px',
+              background:
+                'linear-gradient(100deg, rgba(212,160,23,0.08), rgba(17,20,53,0.6))',
+              border: '1px solid rgba(212,160,23,0.18)',
+              borderLeft: '2px solid rgba(212,160,23,0.6)',
+              borderRadius: '0 8px 8px 0',
+            }}
+          >
+            {verseRef && (
+              <div
+                className="font-ui uppercase"
+                style={{
+                  fontSize: 7,
+                  color: '#D4A017',
+                  letterSpacing: '0.12em',
+                  marginBottom: 2,
+                }}
+              >
+                {`\u2726 BG ${verseRef.chapter}.${verseRef.verse}`}
+              </div>
+            )}
+            {verseSanskrit && (
+              <div
+                style={{
+                  fontFamily: '"Noto Sans Devanagari", sans-serif',
+                  fontSize: 11,
+                  color: '#F0C040',
+                  lineHeight: 1.6,
+                }}
+                className="line-clamp-1"
+              >
+                {verseSanskrit.split('\n')[0]}
+              </div>
+            )}
+            {verseTranslit && (
+              <div
+                className="font-sacred italic line-clamp-1"
+                style={{ fontSize: 9, color: '#6B6355' }}
+              >
+                {verseTranslit}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── TRANSFORMATION PROMISE ─────────────────────────────────── */}
+        {transformation && (
+          <div className="flex items-center gap-1.5">
+            <span
+              className="inline-flex items-center justify-center flex-shrink-0"
+              style={{
+                width: 16,
+                height: 16,
+                borderRadius: '50%',
+                background: `rgba(${rgb},0.18)`,
+                border: `1px solid rgba(${rgb},0.35)`,
+                fontSize: 9,
+                color: accentColor,
+              }}
+            >
+              →
+            </span>
+            <span
+              className="font-sacred italic text-[#B8AE98] leading-snug line-clamp-1"
+              style={{ fontSize: 10 }}
+            >
+              Conquered by{' '}
+              <span style={{ color: accentColor }}>{transformation}</span>
+            </span>
+          </div>
+        )}
+
+        {/* ── CTA ───────────────────────────────────────────────────── */}
         <button
-          onClick={() => {
-            triggerHaptic('medium')
-            onStart(template.id)
-          }}
+          type="button"
+          onClick={handleStart}
           disabled={isStarting || disabled}
-          className="w-full rounded-lg py-2 text-[11px] font-ui font-semibold text-[#050714] transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full rounded-lg py-2 font-ui font-semibold text-[#050714] transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed mt-auto"
           style={{
+            fontSize: 11,
+            touchAction: 'manipulation',
             background: `linear-gradient(135deg, ${accentColor}cc, ${accentColor})`,
             boxShadow: `0 2px 8px rgba(${rgb},0.25)`,
           }}
         >
-          {isStarting ? 'Starting...' : 'View Journey \u2192'}
+          {isStarting
+            ? 'Starting...'
+            : `Begin ${template.duration_days}-Day Journey \u2192`}
         </button>
       </div>
     </motion.div>
