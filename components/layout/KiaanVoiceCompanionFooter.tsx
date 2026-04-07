@@ -15,7 +15,7 @@
  * device-adaptive (GPU/NPU), 29 languages, 5-phase conversation model.
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -105,6 +105,9 @@ export function KiaanVoiceCompanionFooter() {
   const autoCollapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingFarewellRef = useRef<boolean>(false)
+  const sessionEndingRef = useRef<boolean>(false)
+  const suppressNextTTSEndRef = useRef<boolean>(false)
+  const inflightControllerRef = useRef<AbortController | null>(null)
   const wakeWordWasActiveRef = useRef(false)
   const vibePlayerWasPlayingRef = useRef(false)
   const modeRef = useRef<FooterMode>(mode)
@@ -148,6 +151,12 @@ export function KiaanVoiceCompanionFooter() {
         idleTimerRef.current = null
       }
       pendingFarewellRef.current = false
+      sessionEndingRef.current = false
+      suppressNextTTSEndRef.current = false
+      if (inflightControllerRef.current) {
+        inflightControllerRef.current.abort()
+        inflightControllerRef.current = null
+      }
     }
   }, [])
 
@@ -155,6 +164,10 @@ export function KiaanVoiceCompanionFooter() {
   const handleWakeWordDetected = useCallback((_phrase: string) => {
     if (!mountedRef.current) return
     triggerHaptic('medium')
+    // New session — clear any stale session-end guards from a previous turn
+    sessionEndingRef.current = false
+    pendingFarewellRef.current = false
+    suppressNextTTSEndRef.current = false
     setMode('listening')
     setError(null)
     // Hands-free mode will be activated by the mode change effect
@@ -209,7 +222,13 @@ export function KiaanVoiceCompanionFooter() {
     setError(null)
     setMode('responding')
 
+    // Abort any prior in-flight request so endVoiceSession / new turns
+    // can never be raced by a stale response.
+    if (inflightControllerRef.current) {
+      inflightControllerRef.current.abort()
+    }
     const controller = new AbortController()
+    inflightControllerRef.current = controller
     const timeout = setTimeout(() => controller.abort(), 15000)
 
     try {
@@ -227,6 +246,12 @@ export function KiaanVoiceCompanionFooter() {
 
       if (response.ok) {
         const data = await response.json()
+
+        // If the session was ended while this request was in flight, drop the
+        // response entirely — do not setMessages, do not speak over the farewell.
+        if (sessionEndingRef.current || controller.signal.aborted) {
+          return
+        }
 
         if (data?.response && mountedRef.current) {
           const companionMsg: CompanionMessage = {
@@ -249,13 +274,20 @@ export function KiaanVoiceCompanionFooter() {
         }
       }
 
-      // API failed or returned no response — use local fallback
-      addLocalFallbackRef.current(text.trim())
+      // API failed or returned no response — use local fallback (unless session ended)
+      if (!sessionEndingRef.current && !controller.signal.aborted) {
+        addLocalFallbackRef.current(text.trim())
+      }
     } catch {
-      // Network error or timeout — use local fallback
-      addLocalFallbackRef.current(text.trim())
+      // Network error / timeout / abort — only fall back if session is still alive
+      if (!sessionEndingRef.current && !controller.signal.aborted) {
+        addLocalFallbackRef.current(text.trim())
+      }
     } finally {
       clearTimeout(timeout)
+      if (inflightControllerRef.current === controller) {
+        inflightControllerRef.current = null
+      }
       if (mountedRef.current) setIsProcessing(false)
     }
   }, [isProcessing, sessionId, language]) // speak via speakRef, addLocalFallback via addLocalFallbackRef
@@ -304,7 +336,11 @@ export function KiaanVoiceCompanionFooter() {
   // Ends the active voice session. On 'user-stop' (stop-word detected), speaks
   // a brief farewell then goes dormant. On 'idle' (no speech in N seconds),
   // exits silently. The existing mode==='dormant' effect handles cleanup.
+  // Idempotent: subsequent calls before a new session begins are no-ops.
   const endVoiceSession = useCallback((reason: 'user-stop' | 'idle') => {
+    if (sessionEndingRef.current) return
+    sessionEndingRef.current = true
+
     if (autoCollapseTimerRef.current) {
       clearTimeout(autoCollapseTimerRef.current)
       autoCollapseTimerRef.current = null
@@ -314,8 +350,20 @@ export function KiaanVoiceCompanionFooter() {
       idleTimerRef.current = null
     }
 
+    // Always abort any in-flight network response so it cannot speak after us.
+    if (inflightControllerRef.current) {
+      inflightControllerRef.current.abort()
+      inflightControllerRef.current = null
+    }
+
     if (reason === 'user-stop') {
-      // Set flag BEFORE speak() so handleTTSEnd routes to dormant on completion
+      // Cancel any prior TTS first. cancelTTS fires onEnd synchronously, but
+      // suppressNextTTSEndRef tells handleTTSEnd to ignore that fire so it
+      // doesn't arm a stray idle timer or transition to listening.
+      suppressNextTTSEndRef.current = true
+      cancelTTSRef.current?.()
+      // Now set the farewell flag and speak. The next onEnd belongs to the
+      // farewell utterance and will route Path A → dormant.
       pendingFarewellRef.current = true
       setMode('responding')
       speakRef.current?.('Goodbye. Say Hey KIAAN whenever you need me.')
@@ -328,6 +376,14 @@ export function KiaanVoiceCompanionFooter() {
   const handleTTSEnd = useCallback(() => {
     if (!mountedRef.current) return
 
+    // Suppressed end (e.g. from cancelTTS inside endVoiceSession):
+    // consume the flag and do nothing — the farewell speak() that follows
+    // will fire its own onEnd which routes via Path A.
+    if (suppressNextTTSEndRef.current) {
+      suppressNextTTSEndRef.current = false
+      return
+    }
+
     // Path A: farewell TTS just finished → go dormant
     if (pendingFarewellRef.current) {
       pendingFarewellRef.current = false
@@ -335,11 +391,18 @@ export function KiaanVoiceCompanionFooter() {
       return
     }
 
-    // Path B: normal response TTS finished → re-listen (multi-turn)
-    if (modeRef.current !== 'responding') return
-    setMode('listening')
+    // Path B: normal response TTS finished → re-listen (multi-turn).
+    // Use functional setMode so we read the latest committed mode, avoiding
+    // any stale modeRef race between render and post-render effect sync.
+    let didEnter = false
+    setMode(prev => {
+      if (prev !== 'responding') return prev
+      didEnter = true
+      return 'listening'
+    })
+    if (!didEnter) return
 
-    // Idle safety net: end session if user stays silent
+    // Idle safety net: end session if user stays silent for IDLE_TIMEOUT_MS
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
     idleTimerRef.current = setTimeout(() => {
       if (mountedRef.current && modeRef.current === 'listening') {
@@ -373,7 +436,14 @@ export function KiaanVoiceCompanionFooter() {
   // Stable ref for speak — breaks circular dependency between sendMessage,
   // addLocalFallback, and useEnhancedVoiceOutput declaration order.
   const speakRef = useRef(speak)
-  useEffect(() => { speakRef.current = speak; modeRef.current = mode })
+  const cancelTTSRef = useRef(cancelTTS)
+  useEffect(() => {
+    speakRef.current = speak
+    cancelTTSRef.current = cancelTTS
+  })
+  // Sync modeRef synchronously after commit (before paint) so any callback
+  // reading modeRef.current after a setMode sees the latest value.
+  useLayoutEffect(() => { modeRef.current = mode }, [mode])
 
   // ── Hands-Free Mode (VAD + STT) ──
   const handleTranscript = useCallback((text: string) => {
@@ -439,6 +509,8 @@ export function KiaanVoiceCompanionFooter() {
   // When mode becomes 'dormant', deactivate hands-free and resume wake word
   useEffect(() => {
     if (mode === 'dormant') {
+      // A fully-dormant footer is a clean slate for the next session.
+      sessionEndingRef.current = false
       if (isHandsFreeActive) {
         deactivateHandsFree()
       }
@@ -456,13 +528,10 @@ export function KiaanVoiceCompanionFooter() {
     }
   }, [mode, isHandsFreeActive, deactivateHandsFree, wakeWordSupported, isWakeWordListening, isVoiceConflictPage, startWakeWordListening, resumeVibePlayer])
 
-  // Clear idle timer the moment VAD detects speech onset (before transcript arrives)
-  useEffect(() => {
-    if (handsFreeState === 'hearing' && idleTimerRef.current) {
-      clearTimeout(idleTimerRef.current)
-      idleTimerRef.current = null
-    }
-  }, [handsFreeState])
+  // NOTE: Idle timer is cleared in handleTranscript on real speech.
+  // We deliberately do NOT clear it on handsFreeState='hearing' because VAD
+  // can fire on background noise (onVADMisfire path) which would otherwise
+  // strand the session with no idle protection.
 
   // ── User Actions ──
 
@@ -470,10 +539,24 @@ export function KiaanVoiceCompanionFooter() {
     triggerHaptic('medium')
 
     if (mode === 'dormant') {
+      // New session — clear stale guards left over from a previous session
+      sessionEndingRef.current = false
+      pendingFarewellRef.current = false
+      suppressNextTTSEndRef.current = false
       setMode('listening')
       setError(null)
     } else if (mode === 'listening') {
-      // Stop listening, go back to dormant
+      // Stop listening, go back to dormant. Clean up any armed timers/refs.
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current)
+        idleTimerRef.current = null
+      }
+      pendingFarewellRef.current = false
+      suppressNextTTSEndRef.current = false
+      if (inflightControllerRef.current) {
+        inflightControllerRef.current.abort()
+        inflightControllerRef.current = null
+      }
       deactivateHandsFree()
       setMode('dormant')
     } else if (mode === 'responding' || mode === 'expanded') {
@@ -484,9 +567,15 @@ export function KiaanVoiceCompanionFooter() {
 
   const handleClose = useCallback(() => {
     pendingFarewellRef.current = false
+    suppressNextTTSEndRef.current = false
+    sessionEndingRef.current = true
     if (idleTimerRef.current) {
       clearTimeout(idleTimerRef.current)
       idleTimerRef.current = null
+    }
+    if (inflightControllerRef.current) {
+      inflightControllerRef.current.abort()
+      inflightControllerRef.current = null
     }
     cancelTTS()
     deactivateHandsFree()
