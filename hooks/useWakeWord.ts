@@ -82,6 +82,37 @@ function findWakePhrase(transcript: string): string | null {
 }
 
 // ---------------------------------------------------------------------------
+// Stop phrase detection (Alexa/Siri-style session termination)
+// ---------------------------------------------------------------------------
+
+/** Phrases that end the active KIAAN voice session. */
+const STOP_PHRASES = [
+  'stop kiaan',    'stop listening',  'stop',
+  'goodbye kiaan', 'good bye',        'goodbye',
+  'bye bye',       'bye kiaan',       'bye',
+  'thanks kiaan',  'thank you kiaan',
+  "that's all",    'that is all',
+  'end session',   'exit kiaan',      'cancel kiaan',
+] as const
+
+/**
+ * Returns the matched stop phrase, or null. Word-boundary regex prevents
+ * "stopwatch", "maybe later", "goodbyes are hard" false positives.
+ * Sorted longest-first so "goodbye kiaan" wins over "goodbye" wins over "bye".
+ */
+export function findStopPhrase(transcript: string): string | null {
+  const normalized = transcript.toLowerCase().trim()
+  if (!normalized) return null
+  const sorted = [...STOP_PHRASES].sort((a, b) => b.length - a.length)
+  for (const phrase of sorted) {
+    const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const re = new RegExp(`(^|\\b)${escaped}(\\b|$)`, 'i')
+    if (re.test(normalized)) return phrase
+  }
+  return null
+}
+
+// ---------------------------------------------------------------------------
 // Hook
 // ---------------------------------------------------------------------------
 
