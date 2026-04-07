@@ -24,6 +24,7 @@ import {
   JourneyEngineError,
 } from '@/services/journeyEngineService'
 import { ActiveJourneyCardMobile } from '../components/ActiveJourneyCardMobile'
+import { ActiveJourneyActions } from '../components/ActiveJourneyActions'
 import { JourneyTemplateCard } from '../components/JourneyTemplateCard'
 import { JourneyCardSkeleton } from '../skeletons/JourneyCardSkeleton'
 import { MaxJourneysSheet } from '../components/MaxJourneysSheet'
@@ -351,11 +352,13 @@ export function JourneysTab({
           </p>
           <div className="space-y-3">
             {activeJourneys.map((journey, i) => (
-              <ActiveJourneyCardMobile
-                key={journey.journey_id}
-                journey={journey}
-                index={i}
-              />
+              <div key={journey.journey_id} className="space-y-1.5">
+                <ActiveJourneyCardMobile journey={journey} index={i} />
+                <ActiveJourneyActions
+                  journey={journey}
+                  onChanged={onRefresh}
+                />
+              </div>
             ))}
           </div>
         </section>
@@ -366,6 +369,43 @@ export function JourneysTab({
           <p className="text-[11px] text-[#6B6355] font-ui mt-1">
             Begin the inner war below.
           </p>
+          {activeCount > 0 && (
+            /* TRAP STATE — backend reports >0 active journeys but none are
+               visible in the list. Give the user a direct recovery action
+               instead of making them hit the 5/5 limit first. */
+            <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-900/10 p-3">
+              <p className="text-[11px] text-amber-200 font-ui mb-2">
+                Server reports {activeCount} active but none visible.
+              </p>
+              <button
+                type="button"
+                onClick={async () => {
+                  triggerHaptic('medium')
+                  try {
+                    await journeyEngineService.fixStuckJourneys()
+                    triggerHaptic('success')
+                    onRefresh()
+                  } catch (err) {
+                    triggerHaptic('error')
+                    setError(
+                      err instanceof JourneyEngineError
+                        ? err.message
+                        : 'Could not clear stuck journeys.',
+                    )
+                  }
+                }}
+                className="w-full rounded-lg py-2.5 text-[12px] font-ui font-semibold text-[#050714]"
+                style={{
+                  background:
+                    'linear-gradient(135deg, #D4A017cc, #D4A017)',
+                  touchAction: 'manipulation',
+                  minHeight: 44,
+                }}
+              >
+                Clear stuck slots
+              </button>
+            </div>
+          )}
         </div>
       )}
 

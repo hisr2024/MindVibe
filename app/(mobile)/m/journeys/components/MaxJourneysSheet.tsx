@@ -26,9 +26,11 @@ interface MaxJourneysSheetProps {
   onClose: () => void
   activeJourneys: JourneyResponse[]
   maxActive: number
-  /** Called after a successful pause so the parent can refresh the dashboard. */
+  /** Called after a successful pause/abandon/recovery so the parent can refresh the dashboard. */
   onAfterPause: () => Promise<void> | void
 }
+
+type BusyAction = 'pause' | 'abandon' | null
 
 export function MaxJourneysSheet({
   isOpen,
@@ -39,13 +41,20 @@ export function MaxJourneysSheet({
 }: MaxJourneysSheetProps) {
   const router = useRouter()
   const { triggerHaptic } = useHapticFeedback()
-  const [pausingId, setPausingId] = useState<string | null>(null)
-  const [pauseError, setPauseError] = useState<string | null>(null)
+  const [busyId, setBusyId] = useState<string | null>(null)
+  const [busyAction, setBusyAction] = useState<BusyAction>(null)
+  const [confirmAbandonId, setConfirmAbandonId] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [isFixing, setIsFixing] = useState(false)
+  const [fixMessage, setFixMessage] = useState<string | null>(null)
+
+  const isBusy = busyId !== null || isFixing
 
   const handlePause = async (journeyId: string) => {
-    if (pausingId) return
-    setPausingId(journeyId)
-    setPauseError(null)
+    if (isBusy) return
+    setBusyId(journeyId)
+    setBusyAction('pause')
+    setActionError(null)
     triggerHaptic('medium')
     try {
       await journeyEngineService.pauseJourney(journeyId)
@@ -58,13 +67,71 @@ export function MaxJourneysSheet({
         err instanceof JourneyEngineError
           ? err.message
           : 'Could not pause this journey. Please try again.'
-      setPauseError(message)
+      setActionError(message)
     } finally {
-      setPausingId(null)
+      setBusyId(null)
+      setBusyAction(null)
+    }
+  }
+
+  const handleAbandon = async (journeyId: string) => {
+    if (isBusy) return
+    setBusyId(journeyId)
+    setBusyAction('abandon')
+    setActionError(null)
+    triggerHaptic('medium')
+    try {
+      await journeyEngineService.abandonJourney(journeyId)
+      await onAfterPause()
+      triggerHaptic('success')
+      setConfirmAbandonId(null)
+      onClose()
+    } catch (err) {
+      triggerHaptic('error')
+      const message =
+        err instanceof JourneyEngineError
+          ? err.message
+          : 'Could not close this journey. Please try again.'
+      setActionError(message)
+    } finally {
+      setBusyId(null)
+      setBusyAction(null)
+    }
+  }
+
+  const handleFixStuck = async () => {
+    if (isBusy) return
+    setIsFixing(true)
+    setActionError(null)
+    setFixMessage(null)
+    triggerHaptic('medium')
+    try {
+      const res = await journeyEngineService.fixStuckJourneys()
+      const cleared =
+        (res.force_cleared ?? 0) + (res.orphaned_cleaned ?? 0)
+      setFixMessage(
+        cleared > 0
+          ? `Cleared ${cleared} stuck journey${cleared === 1 ? '' : 's'}. You can start a new one.`
+          : 'Slots are clean. You can start a new journey.',
+      )
+      await onAfterPause()
+      triggerHaptic('success')
+      // Auto-dismiss after the user can read the confirmation
+      setTimeout(() => onClose(), 900)
+    } catch (err) {
+      triggerHaptic('error')
+      const message =
+        err instanceof JourneyEngineError
+          ? err.message
+          : 'Could not clear stuck journeys. Please try again.'
+      setActionError(message)
+    } finally {
+      setIsFixing(false)
     }
   }
 
   const handleContinue = (journeyId: string) => {
+    if (isBusy) return
     triggerHaptic('light')
     router.push(`/m/journeys/${journeyId}`)
     onClose()
@@ -120,19 +187,50 @@ export function MaxJourneysSheet({
                 Your active journeys — pause one to continue
               </p>
 
-              {pauseError && (
+              {actionError && (
                 <div className="rounded-xl border border-red-500/30 bg-red-900/20 px-3 py-2 mb-3">
                   <p className="text-[11px] text-red-300 font-ui text-center">
-                    {pauseError}
+                    {actionError}
+                  </p>
+                </div>
+              )}
+
+              {fixMessage && (
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-900/20 px-3 py-2 mb-3">
+                  <p className="text-[11px] text-emerald-300 font-ui text-center">
+                    {fixMessage}
                   </p>
                 </div>
               )}
 
               {activeJourneys.length === 0 ? (
-                <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] py-5 text-center">
-                  <p className="text-xs text-[#6B6355] font-ui italic">
-                    Refreshing your journeys&hellip;
+                /* TRAP STATE — backend says the user is at max but returned
+                   an empty list. Without a recovery action they would be
+                   permanently locked out of starting new journeys. */
+                <div className="rounded-xl border border-amber-500/30 bg-amber-900/10 p-4 text-center">
+                  <div className="text-2xl mb-2">{'\u26A0\uFE0F'}</div>
+                  <p className="text-sm text-[#EDE8DC] font-ui font-semibold mb-1">
+                    Journey slots are stuck
                   </p>
+                  <p className="text-[11px] text-[#B8AE98] font-ui leading-relaxed mb-3">
+                    The server reports {maxActive} active journeys but none are
+                    visible. Tap below to clear the stuck slots and continue.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleFixStuck}
+                    disabled={isFixing}
+                    className="w-full rounded-xl py-3 text-sm font-ui font-bold text-[#050714] active:scale-[0.97] transition-transform disabled:opacity-60"
+                    style={{
+                      background:
+                        'linear-gradient(135deg, #D4A017cc, #D4A017)',
+                      boxShadow: '0 4px 20px rgba(212,160,23,0.35)',
+                      touchAction: 'manipulation',
+                      minHeight: 48,
+                    }}
+                  >
+                    {isFixing ? 'Clearing stuck slots\u2026' : 'Clear stuck journeys'}
+                  </button>
                 </div>
               ) : (
                 <ul className="space-y-2">
@@ -143,19 +241,23 @@ export function MaxJourneysSheet({
                     const info = enemy ? ENEMY_INFO[enemy] : null
                     const color = info?.color ?? '#D4A017'
                     const rgb = info?.colorRGB ?? '212,160,23'
-                    const isPausing = pausingId === journey.journey_id
+                    const isThisBusy = busyId === journey.journey_id
+                    const isPausing = isThisBusy && busyAction === 'pause'
+                    const isAbandoning = isThisBusy && busyAction === 'abandon'
+                    const needsConfirm = confirmAbandonId === journey.journey_id
                     const progress = Math.round(journey.progress_percentage)
 
                     return (
                       <li
                         key={journey.journey_id}
-                        className="rounded-xl flex items-center gap-3 p-3"
+                        className="rounded-xl p-3"
                         style={{
                           background: `linear-gradient(145deg, rgba(${rgb},0.12), rgba(5,7,20,0.95))`,
                           border: `1px solid rgba(${rgb},0.2)`,
                           borderLeft: `3px solid ${color}`,
                         }}
                       >
+                       <div className="flex items-center gap-3">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-0.5">
                             {info && (
@@ -194,10 +296,10 @@ export function MaxJourneysSheet({
                           <button
                             type="button"
                             onClick={() => handleContinue(journey.journey_id)}
-                            disabled={isPausing}
+                            disabled={isBusy}
                             className="px-3 h-8 rounded-full text-[10px] font-ui font-semibold disabled:opacity-50"
                             style={{
-                              minWidth: 72,
+                              minWidth: 84,
                               background: `rgba(${rgb},0.18)`,
                               border: `1px solid ${color}80`,
                               color,
@@ -209,20 +311,89 @@ export function MaxJourneysSheet({
                           <button
                             type="button"
                             onClick={() => handlePause(journey.journey_id)}
-                            disabled={isPausing}
+                            disabled={isBusy}
                             className="px-3 h-8 rounded-full text-[10px] font-ui text-[#B8AE98] bg-white/5 border border-white/10 disabled:opacity-50"
                             style={{
-                              minWidth: 72,
+                              minWidth: 84,
                               touchAction: 'manipulation',
                             }}
                           >
                             {isPausing ? 'Pausing\u2026' : 'Pause'}
                           </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              triggerHaptic('light')
+                              setActionError(null)
+                              setConfirmAbandonId(
+                                needsConfirm ? null : journey.journey_id,
+                              )
+                            }}
+                            disabled={isBusy}
+                            className="px-3 h-8 rounded-full text-[10px] font-ui text-red-300 bg-red-900/15 border border-red-500/25 disabled:opacity-50"
+                            style={{
+                              minWidth: 84,
+                              touchAction: 'manipulation',
+                            }}
+                          >
+                            {isAbandoning ? 'Closing\u2026' : 'Close'}
+                          </button>
                         </div>
+                       </div>
+
+                        {needsConfirm && (
+                          <div className="mt-3 rounded-lg bg-red-900/20 border border-red-500/30 p-2.5">
+                            <p className="text-[11px] text-red-200 font-ui text-center mb-2">
+                              Permanently close this journey? Your progress
+                              will be preserved but it won&apos;t appear in
+                              your active battles.
+                            </p>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setConfirmAbandonId(null)}
+                                disabled={isBusy}
+                                className="flex-1 h-9 rounded-lg text-[11px] font-ui text-[#B8AE98] bg-white/5 border border-white/10 disabled:opacity-50"
+                                style={{ touchAction: 'manipulation' }}
+                              >
+                                Keep
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleAbandon(journey.journey_id)
+                                }
+                                disabled={isBusy}
+                                className="flex-1 h-9 rounded-lg text-[11px] font-ui font-semibold text-red-200 bg-red-700/40 border border-red-500/40 disabled:opacity-60"
+                                style={{ touchAction: 'manipulation' }}
+                              >
+                                {isAbandoning ? 'Closing\u2026' : 'Close permanently'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </li>
                     )
                   })}
                 </ul>
+              )}
+
+              {/* Always-available recovery link for edge cases where the
+                  list is populated but the real offender is a phantom row. */}
+              {activeJourneys.length > 0 && (
+                <div className="mt-4 text-center">
+                  <button
+                    type="button"
+                    onClick={handleFixStuck}
+                    disabled={isBusy}
+                    className="text-[10px] text-[#6B6355] font-ui underline disabled:opacity-50"
+                    style={{ touchAction: 'manipulation' }}
+                  >
+                    {isFixing
+                      ? 'Clearing stuck slots\u2026'
+                      : 'Something wrong? Clear stuck slots'}
+                  </button>
+                </div>
               )}
             </div>
 
