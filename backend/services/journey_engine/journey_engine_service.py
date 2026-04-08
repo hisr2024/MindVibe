@@ -271,6 +271,18 @@ class EnemyProgress:
     last_practice: datetime | None
     mastery_level: int  # 0-100
 
+    # Active journey progress (Battleground per-journey display). 0 when
+    # the user has no active journey for this enemy; otherwise the
+    # rounded completion % (days_completed / duration_days * 100) of the
+    # most-recent active journey targeting this enemy. Surfaced so the
+    # Battleground radar + enemy cards can show the user exactly how far
+    # into their current journey they are, not just the long-term
+    # weighted mastery level.
+    active_journey_progress_pct: int = 0
+    active_journey_id: str | None = None
+    active_journey_day: int = 0
+    active_journey_total_days: int = 0
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "enemy": self.enemy,
@@ -282,6 +294,10 @@ class EnemyProgress:
             "best_streak": self.best_streak,
             "last_practice": self.last_practice.isoformat() if self.last_practice else None,
             "mastery_level": self.mastery_level,
+            "active_journey_progress_pct": self.active_journey_progress_pct,
+            "active_journey_id": self.active_journey_id,
+            "active_journey_day": self.active_journey_day,
+            "active_journey_total_days": self.active_journey_total_days,
         }
 
 
@@ -1481,6 +1497,39 @@ class JourneyEngineService:
             # Calculate mastery level (simplified)
             mastery = min(100, (completed * 30) + (total_days * 2))
 
+            # Active journey progress for the Battleground display.
+            # Picks the most-recently-created active journey targeting
+            # this enemy (users rarely run parallel journeys against the
+            # same enemy; if they do we surface the newest one). The
+            # progress % is computed from completed step states so it
+            # matches the Journey detail page's progress bar exactly.
+            active_for_enemy = [
+                j for j in enemy_journeys
+                if j.status == UserJourneyStatus.ACTIVE.value
+            ]
+            active_for_enemy.sort(
+                key=lambda j: j.created_at or datetime.min,
+                reverse=True,
+            )
+            active_journey_progress_pct = 0
+            active_journey_id: str | None = None
+            active_journey_day = 0
+            active_journey_total_days = 0
+            if active_for_enemy:
+                active = active_for_enemy[0]
+                total = (
+                    active.template.duration_days
+                    if active.template and active.template.duration_days
+                    else 14
+                )
+                done = days_by_journey.get(active.id, 0)
+                active_journey_progress_pct = (
+                    min(100, round((done / total) * 100)) if total > 0 else 0
+                )
+                active_journey_id = active.id
+                active_journey_day = active.current_day_index or 1
+                active_journey_total_days = total
+
             progress_list.append(EnemyProgress(
                 enemy=enemy,
                 enemy_label=ENEMY_LABELS.get(enemy, enemy.title()),
@@ -1491,6 +1540,10 @@ class JourneyEngineService:
                 best_streak=0,
                 last_practice=None,
                 mastery_level=mastery,
+                active_journey_progress_pct=active_journey_progress_pct,
+                active_journey_id=active_journey_id,
+                active_journey_day=active_journey_day,
+                active_journey_total_days=active_journey_total_days,
             ))
 
         return progress_list

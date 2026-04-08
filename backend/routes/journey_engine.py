@@ -296,6 +296,15 @@ class EnemyProgressResponse(BaseModel):
     best_streak: int
     last_practice: str | None
     mastery_level: int
+    # Active-journey progress for Battleground rendering. 0 when no
+    # active journey exists for this enemy, else the % completion of
+    # the most-recent active journey targeting this enemy. Lets the
+    # radar + enemy cards show "Day 3 of 14 · 21%" instead of the
+    # long-term weighted mastery figure.
+    active_journey_progress_pct: int = 0
+    active_journey_id: str | None = None
+    active_journey_day: int = 0
+    active_journey_total_days: int = 0
 
 
 class DashboardResponse(BaseModel):
@@ -1274,6 +1283,10 @@ async def get_dashboard(
                 best_streak=ep.best_streak,
                 last_practice=ep.last_practice.isoformat() if ep.last_practice else None,
                 mastery_level=ep.mastery_level,
+                active_journey_progress_pct=ep.active_journey_progress_pct,
+                active_journey_id=ep.active_journey_id,
+                active_journey_day=ep.active_journey_day,
+                active_journey_total_days=ep.active_journey_total_days,
             )
             for ep in dashboard.enemy_progress
         ],

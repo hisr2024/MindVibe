@@ -492,3 +492,182 @@ async def test_get_enemy_progress_uses_selectinload(monkeypatch):
         "MissingGreenlet in the async session and the route handler "
         "silently returns an empty dashboard."
     )
+
+
+# ============================================================================
+# Battleground active-journey-progress contract
+# ============================================================================
+#
+# The Battleground must reflect the percentage of the user's CURRENT
+# active journey for each enemy, not just the long-term mastery_level.
+# These tests pin the EnemyProgress contract so the /dashboard response
+# always carries enough data for the radar + enemy cards + detail sheet
+# to render "Day 3 of 14 · 21%" without a second round trip.
+# ============================================================================
+
+
+def test_enemy_progress_dataclass_has_active_journey_fields():
+    """EnemyProgress must expose the four active-journey fields so the
+    route layer can serialise them to the frontend.
+    """
+    from dataclasses import fields
+
+    from backend.services.journey_engine.journey_engine_service import (
+        EnemyProgress,
+    )
+
+    field_names = {f.name for f in fields(EnemyProgress)}
+    assert "active_journey_progress_pct" in field_names
+    assert "active_journey_id" in field_names
+    assert "active_journey_day" in field_names
+    assert "active_journey_total_days" in field_names
+
+
+def test_enemy_progress_to_dict_includes_active_journey_fields():
+    """EnemyProgress.to_dict must include active-journey fields so
+    snapshot / debug endpoints don't silently drop them.
+    """
+    from backend.services.journey_engine.journey_engine_service import (
+        EnemyProgress,
+    )
+
+    ep = EnemyProgress(
+        enemy="krodha",
+        enemy_label="Anger",
+        journeys_started=1,
+        journeys_completed=0,
+        total_days_practiced=3,
+        current_streak=0,
+        best_streak=0,
+        last_practice=None,
+        mastery_level=6,
+        active_journey_progress_pct=21,
+        active_journey_id="j-abc",
+        active_journey_day=3,
+        active_journey_total_days=14,
+    )
+    d = ep.to_dict()
+    assert d["active_journey_progress_pct"] == 21
+    assert d["active_journey_id"] == "j-abc"
+    assert d["active_journey_day"] == 3
+    assert d["active_journey_total_days"] == 14
+
+
+def test_enemy_progress_response_accepts_active_journey_fields():
+    """Pydantic EnemyProgressResponse must accept the active-journey
+    fields without raising — if the schema ever drifts from the
+    dataclass, the /dashboard endpoint would 500 on the mapping call.
+    """
+    # The route module pulls in cryptography via the encrypted-journal
+    # dependency chain, which can fail in bare test environments with
+    # a Rust pyo3 panic (not a normal Exception). Catch BaseException
+    # so the skip works even for pyo3_runtime.PanicException. The CI
+    # environment has cryptography fully installed and runs this test
+    # live; this only skips when running pytest outside a venv.
+    try:
+        from backend.routes.journey_engine import EnemyProgressResponse
+    except BaseException as e:  # noqa: BLE001
+        pytest.skip(f"routes.journey_engine not importable in this env: {e}")
+
+    r = EnemyProgressResponse(
+        enemy="krodha",
+        enemy_label="Anger",
+        journeys_started=1,
+        journeys_completed=0,
+        total_days_practiced=3,
+        current_streak=0,
+        best_streak=0,
+        last_practice=None,
+        mastery_level=6,
+        active_journey_progress_pct=21,
+        active_journey_id="j-abc",
+        active_journey_day=3,
+        active_journey_total_days=14,
+    )
+    assert r.active_journey_progress_pct == 21
+    assert r.active_journey_day == 3
+    assert r.active_journey_total_days == 14
+
+    # And the fields must be optional for enemies with no active journey.
+    r_empty = EnemyProgressResponse(
+        enemy="mada",
+        enemy_label="Pride",
+        journeys_started=0,
+        journeys_completed=0,
+        total_days_practiced=0,
+        current_streak=0,
+        best_streak=0,
+        last_practice=None,
+        mastery_level=0,
+    )
+    assert r_empty.active_journey_progress_pct == 0
+    assert r_empty.active_journey_id is None
+
+
+@pytest.mark.asyncio
+async def test_get_enemy_progress_computes_active_journey_pct():
+    """_get_enemy_progress must compute the correct % for an active
+    journey. Constructs a fake ``all_journeys`` list and stubs the
+    day-count query, then verifies the krodha progress % matches the
+    expected days_completed / duration_days calculation.
+    """
+    import uuid
+    from datetime import datetime
+
+    from backend.services.journey_engine.journey_engine_service import (
+        JourneyEngineService,
+        UserJourneyStatus,
+    )
+
+    mock_db = AsyncMock()
+    service = JourneyEngineService(mock_db)
+
+    # Fake an active 14-day krodha journey on Day 3 with 3 completed days.
+    journey_id = str(uuid.uuid4())
+    fake_template = MagicMock()
+    fake_template.primary_enemy_tags = ["krodha"]
+    fake_template.duration_days = 14
+    fake_template.slug = "anger-beginner-14"
+
+    fake_journey = MagicMock()
+    fake_journey.id = journey_id
+    fake_journey.status = UserJourneyStatus.ACTIVE.value
+    fake_journey.current_day_index = 3
+    fake_journey.template = fake_template
+    fake_journey.created_at = datetime(2026, 1, 1)
+
+    # Build two execute() responses: one for the journeys query, one for
+    # the batched day-count query.
+    journeys_scalars = MagicMock()
+    journeys_scalars.all.return_value = [fake_journey]
+
+    journeys_result = MagicMock()
+    journeys_result.scalars.return_value = journeys_scalars
+
+    days_result = MagicMock()
+    days_result.all.return_value = [(journey_id, 3)]
+
+    execute_calls = iter([journeys_result, days_result])
+
+    async def fake_execute(*_args, **_kwargs):
+        return next(execute_calls)
+
+    service.db.execute = fake_execute
+
+    progress = await service._get_enemy_progress("user-123")
+
+    krodha = next(p for p in progress if p.enemy == "krodha")
+    assert krodha.active_journey_progress_pct == 21, (
+        "3 days / 14 total = 21%"
+    )
+    assert krodha.active_journey_id == journey_id
+    assert krodha.active_journey_day == 3
+    assert krodha.active_journey_total_days == 14
+
+    # Dormant enemies must report zeroed active-journey fields without
+    # breaking the radar fallback to mastery_level.
+    kama = next(p for p in progress if p.enemy == "kama")
+    assert kama.active_journey_progress_pct == 0
+    assert kama.active_journey_id is None
+    assert kama.active_journey_day == 0
+    assert kama.active_journey_total_days == 0

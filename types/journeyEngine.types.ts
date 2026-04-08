@@ -292,6 +292,18 @@ export interface EnemyProgressResponse {
   best_streak: number;
   last_practice: string | null;
   mastery_level: number;
+  /**
+   * Percentage complete of the user's CURRENT active journey targeting
+   * this enemy (0 when no active journey). Used by the Battleground
+   * radar + enemy cards to surface the "you are X% into your journey"
+   * signal that matches the progress bar on the Journey detail page.
+   * Separate from mastery_level, which is a long-term weighted metric
+   * across all journeys the user has ever started for this enemy.
+   */
+  active_journey_progress_pct?: number;
+  active_journey_id?: string | null;
+  active_journey_day?: number;
+  active_journey_total_days?: number;
 }
 
 // Alias for backwards compatibility
