@@ -28,6 +28,7 @@ import {
   useRef,
   useEffect,
   useCallback,
+  type ReactNode,
 } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -58,6 +59,30 @@ export interface ChatMessage {
   timestamp: string
   status?: 'sending' | 'sent' | 'error' | 'queued'
   summary?: string
+}
+
+// P4-34: Exhaustive-switch helper — if a new status is added to the union
+// and a case is forgotten, TypeScript will error at compile time instead of
+// silently rendering nothing.
+function renderMessageStatus(status: ChatMessage['status']): ReactNode {
+  switch (status) {
+    case 'sending':
+      return <Loader2 className="w-3 h-3 text-[#d4a44c]/50 animate-spin" />
+    case 'sent':
+      return <Check className="w-3 h-3 text-emerald-400/70" />
+    case 'error':
+      return <AlertCircle className="w-3 h-3 text-red-400" />
+    case 'queued':
+      return <span className="text-[9px] text-[#d4a44c]/40">Queued</span>
+    case undefined:
+      return null
+    default: {
+      // Compile-time exhaustiveness check
+      const _exhaustive: never = status
+      void _exhaustive
+      return null
+    }
+  }
 }
 
 export interface MobileKiaanChatProps {
@@ -96,6 +121,12 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
     const [showScrollButton, setShowScrollButton] = useState(false)
     const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null)
     const [copiedId, setCopiedId] = useState<string | null>(null)
+    // P1-19: Defer welcome/messages branch until after client mount to avoid
+    // hydration mismatch when storage-restored messages differ from SSR output.
+    // The canonical "is mounted on client" pattern — one setState on first paint.
+    const [hasMounted, setHasMounted] = useState(false)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    useEffect(() => { setHasMounted(true) }, [])
 
     const messagesContainerRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -283,7 +314,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
         >
           <div className="px-4 py-4 space-y-4">
             {/* Divine welcome when empty */}
-            {messages.length === 0 && (
+            {hasMounted && messages.length === 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -319,10 +350,11 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
 
                 {/* Suggested prompts */}
                 <div className="space-y-2.5 w-full max-w-xs">
+                  {/* P2-24: Inline literals instead of dangerouslySetInnerHTML — safer + simpler */}
                   {[
-                    { text: "I'm feeling anxious about...", icon: "&#x1F9D8;" },
-                    { text: "Help me find inner peace...", icon: "&#x1F54A;" },
-                    { text: "Guide me with Gita wisdom...", icon: "&#x1F4D6;" },
+                    { text: "I'm feeling anxious about...", icon: '\u{1F9D8}' },
+                    { text: 'Help me find inner peace...', icon: '\u{1F54A}' },
+                    { text: 'Guide me with Gita wisdom...', icon: '\u{1F4D6}' },
                   ].map((prompt, index) => (
                     <motion.button
                       key={`prompt-${index}`}
@@ -336,7 +368,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                       }}
                       className="w-full px-4 py-3.5 bg-gradient-to-r from-white/[0.03] to-[#d4a44c]/[0.03] border border-[#d4a44c]/10 rounded-2xl text-left text-sm text-white/70 active:scale-[0.98] transition-transform hover:border-[#d4a44c]/25"
                     >
-                      <span dangerouslySetInnerHTML={{ __html: prompt.icon }} className="mr-2" />
+                      <span className="mr-2" aria-hidden="true">{prompt.icon}</span>
                       {prompt.text}
                     </motion.button>
                   ))}
@@ -345,7 +377,8 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
             )}
 
             {/* Chat messages */}
-            <AnimatePresence mode="popLayout">
+            {/* P3-30: 'wait' mode + initial={false} avoids layout thrash on rapid sends */}
+            <AnimatePresence mode="wait" initial={false}>
               {messages.map((message) => (
                 <motion.div
                   key={message.id}
@@ -402,18 +435,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                       <span className={`text-[10px] ${message.sender === 'assistant' ? 'text-[#d4a44c]/40' : 'text-white/70'}`}>
                         {formatTime(message.timestamp)}
                       </span>
-                      {message.status === 'sending' && (
-                        <Loader2 className="w-3 h-3 text-[#d4a44c]/50 animate-spin" />
-                      )}
-                      {message.status === 'sent' && (
-                        <Check className="w-3 h-3 text-emerald-400/70" />
-                      )}
-                      {message.status === 'error' && (
-                        <AlertCircle className="w-3 h-3 text-red-400" />
-                      )}
-                      {message.status === 'queued' && (
-                        <span className="text-[9px] text-[#d4a44c]/40">Queued</span>
-                      )}
+                      {renderMessageStatus(message.status)}
                     </div>
                   </motion.div>
 
@@ -495,9 +517,10 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
                 </div>
                 <div className="pt-2 flex items-center gap-2">
                   <div className="flex gap-1">
+                    {/* P0-6: Stable string keys prevent AnimatePresence reconciliation thrash */}
                     {[0, 1, 2].map((i) => (
                       <motion.span
-                        key={i}
+                        key={`typing-dot-${i}`}
                         animate={{ y: [0, -5, 0], opacity: [0.4, 1, 0.4] }}
                         transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.2, ease: 'easeInOut' }}
                         className="w-1.5 h-1.5 rounded-full bg-[#d4a44c]"

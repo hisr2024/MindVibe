@@ -88,18 +88,25 @@ export function FloatingPlayer() {
 
   // ── Gita voice selector state (active when a Gita track is playing) ──
   // Track ID format: gita-voice-{chapter}-{verse}-{lang}-{style}
+  // Optional 'bilingual-' qualifier: gita-voice-bilingual-{chapter}-{verse}-{lang}-{style}
+  // P0-3: Strict regex validation + observability on unrecognized ids so
+  // malformed ids fail loudly instead of silently spinning forever.
   const gitaInfo = React.useMemo(() => {
     const id = currentTrack?.id || ''
     if (!id.startsWith('gita-voice-')) return null
-    // Skip prefix + support optional 'bilingual-' qualifier
-    const rest = id.replace(/^gita-voice-(bilingual-)?/, '')
-    const parts = rest.split('-')
-    if (parts.length < 4) return null
-    const chapter = parseInt(parts[0], 10)
-    const verse = parseInt(parts[1], 10)
-    const lang = parts[2]
-    const style = parts[3] as GitaVoiceStyle
-    if (isNaN(chapter) || isNaN(verse) || !lang || !style) return null
+    // Groups: 1=chapter, 2=verse, 3=lang, 4=style (style may contain dashes)
+    const match = id.match(/^gita-voice-(?:bilingual-)?(\d+)-(\d+)-([a-z]{2,3})-(.+)$/i)
+    if (!match) {
+      if (typeof console !== 'undefined') {
+        console.warn('[FloatingPlayer] Unrecognized gita track id:', id)
+      }
+      return null
+    }
+    const chapter = parseInt(match[1], 10)
+    const verse = parseInt(match[2], 10)
+    const lang = match[3]
+    const style = match[4] as GitaVoiceStyle
+    if (Number.isNaN(chapter) || Number.isNaN(verse) || !lang || !style) return null
     return { chapter, verse, lang, style }
   }, [currentTrack?.id])
 

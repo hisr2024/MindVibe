@@ -130,6 +130,11 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
   const recognitionRef = useRef<SpeechRecognitionService | null>(null)
   const lastDetectionTimeRef = useRef(0)
   const isListeningRef = useRef(false)
+  // Track restart + resume setTimeout handles so unmount cleanup can cancel
+  // them explicitly. Without this, pending restarts can queue up during rapid
+  // route changes or recognition restart loops and fire post-unmount.
+  const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Stable callback ref
   const onWakeWordDetectedRef = useRef(onWakeWordDetected)
@@ -230,8 +235,11 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
             return
           }
 
-          // Small delay before restart to avoid rapid restart loops
-          setTimeout(() => {
+          // Small delay before restart to avoid rapid restart loops.
+          // Track the timer handle so unmount cleanup can cancel it.
+          if (restartTimerRef.current) clearTimeout(restartTimerRef.current)
+          restartTimerRef.current = setTimeout(() => {
+            restartTimerRef.current = null
             if (!mountedRef.current || !isListeningRef.current) return
             if (!recognitionRef.current) return
 
@@ -264,6 +272,9 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
   // ---------------------------------------------------------------------------
   const stopWakeWordListening = useCallback(() => {
     isListeningRef.current = false
+    // Cancel any pending restart/resume so we don't re-arm after an explicit stop
+    if (restartTimerRef.current) { clearTimeout(restartTimerRef.current); restartTimerRef.current = null }
+    if (resumeTimerRef.current) { clearTimeout(resumeTimerRef.current); resumeTimerRef.current = null }
     if (recognitionRef.current) {
       recognitionRef.current.stop()
     }
@@ -279,20 +290,25 @@ export function useWakeWord(options: UseWakeWordOptions = {}): UseWakeWordReturn
     if (!mountedRef.current) return
     if (!wakeWordSupported) return
 
-    // Small delay to ensure main STT has fully released the recognition slot
-    setTimeout(() => {
+    // Small delay to ensure main STT has fully released the recognition slot.
+    // Track the handle so unmount/stop can cancel it.
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current)
+    resumeTimerRef.current = setTimeout(() => {
+      resumeTimerRef.current = null
       if (!mountedRef.current) return
       startWakeWordListening()
     }, 300)
   }, [wakeWordSupported, startWakeWordListening])
 
   // ---------------------------------------------------------------------------
-  // Cleanup on unmount — destroy recognition instance
+  // Cleanup on unmount — destroy recognition instance + cancel pending timers
   // ---------------------------------------------------------------------------
   useEffect(() => {
     return () => {
       mountedRef.current = false
       isListeningRef.current = false
+      if (restartTimerRef.current) { clearTimeout(restartTimerRef.current); restartTimerRef.current = null }
+      if (resumeTimerRef.current) { clearTimeout(resumeTimerRef.current); resumeTimerRef.current = null }
       if (recognitionRef.current) {
         recognitionRef.current.destroy()
         recognitionRef.current = null

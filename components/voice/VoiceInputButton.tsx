@@ -91,16 +91,31 @@ export function VoiceInputButton({
   // Derive denied state from permission query OR error
   const isDenied = permission === 'denied' || errorIndicatesDenied
 
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback(async () => {
     if (isListening) {
       stopListening()
-    } else {
-      if (isDenied) {
-        setShowHint(true)
-        return
-      }
-      startListening()
+      return
     }
+    if (isDenied) {
+      // P1-9: Re-query permission first — user may have re-granted via browser settings.
+      // If it was flipped to granted, start listening immediately; otherwise show the hint.
+      if (typeof navigator !== 'undefined' && navigator.permissions?.query) {
+        try {
+          const status = await navigator.permissions.query({ name: 'microphone' as PermissionName })
+          if (status.state === 'granted') {
+            setPermission('granted')
+            setShowHint(false)
+            startListening()
+            return
+          }
+        } catch {
+          // Permissions API not supported — fall through to hint
+        }
+      }
+      setShowHint(true)
+      return
+    }
+    startListening()
   }, [isListening, isDenied, startListening, stopListening])
 
   // Don't render if voice input is not supported at all
@@ -143,10 +158,14 @@ export function VoiceInputButton({
           filled={isListening}
         />
 
-        {/* Denied slash indicator */}
+        {/* Denied slash indicator — P1-8: labelled for screen readers */}
         {isDenied && (
-          <span className="absolute inset-0 flex items-center justify-center">
-            <span className="h-[2px] w-6 rotate-45 bg-[#d4a44c]/70 rounded-full" />
+          <span
+            role="img"
+            aria-label="Microphone permission denied"
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <span aria-hidden="true" className="h-[2px] w-6 rotate-45 bg-[#d4a44c]/70 rounded-full" />
           </span>
         )}
 

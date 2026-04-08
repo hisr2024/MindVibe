@@ -10,7 +10,28 @@ import { useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ShankhaIcon } from '@/components/icons/ShankhaIcon'
+import { useKeyboardVisibility } from '@/hooks/useKeyboardVisibility'
 import type { ToolSuggestion } from '@/utils/voice/ecosystemNavigator'
+
+// P3-31: Hoist inline SVGs to module level so React doesn't re-create them
+// on every panel render. Stable identity enables reconciliation short-circuit.
+const CloseIconSvg = () => (
+  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+  </svg>
+)
+
+const SendIconSvg = () => (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 12h14M12 5l7 7-7 7" />
+  </svg>
+)
+
+const ChevronRightIconSvg = () => (
+  <svg className="w-3.5 h-3.5 text-[#D4A017]/40 group-hover:text-[#D4A017]/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+  </svg>
+)
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -74,6 +95,8 @@ export function ShankhaPanel({
 }: ShankhaPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  // P1-13: Track soft keyboard so the input shifts above it on iOS
+  const { isVisible: keyboardVisible, height: keyboardHeight } = useKeyboardVisibility()
 
   // Auto-scroll messages
   useEffect(() => {
@@ -142,9 +165,7 @@ export function ShankhaPanel({
           whileTap={{ scale: 0.9 }}
           aria-label="Close"
         >
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <CloseIconSvg />
         </motion.button>
       </div>
 
@@ -154,9 +175,10 @@ export function ShankhaPanel({
         {isListening && (
           <div className="text-center py-4">
             <div className="flex items-center justify-center gap-1.5 mb-3">
+              {/* P0-6: Stable string keys */}
               {[0, 1, 2, 3, 4].map(i => (
                 <motion.div
-                  key={i}
+                  key={`listen-bar-${i}`}
                   className="w-[3px] rounded-full"
                   style={{ background: 'linear-gradient(to top, #D4A017, #06B6D4)' }}
                   animate={{ height: handsFreeState === 'hearing' ? [8, 22, 10, 24, 8] : [4, 8, 4, 8, 4] }}
@@ -201,8 +223,9 @@ export function ShankhaPanel({
           <div className="flex justify-start">
             <div className="bg-[rgba(22,26,66,0.8)] rounded-2xl px-4 py-2.5 border border-[#D4A017]/10">
               <div className="flex items-center gap-1.5">
+                {/* P0-6: Stable string keys */}
                 {[0, 1, 2].map(i => (
-                  <div key={i} className="w-1.5 h-1.5 bg-[#D4A017]/60 rounded-full animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />
+                  <div key={`think-dot-${i}`} className="w-1.5 h-1.5 bg-[#D4A017]/60 rounded-full animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />
                 ))}
               </div>
             </div>
@@ -226,9 +249,7 @@ export function ShankhaPanel({
               <p className="text-xs font-medium text-[#EDE8DC] truncate">{toolSuggestion.tool?.name || 'Suggested Tool'}</p>
               <p className="text-[10px] text-[#6B6355] truncate">{toolSuggestion.reason || 'May help with what you shared'}</p>
             </div>
-            <svg className="w-3.5 h-3.5 text-[#D4A017]/40 group-hover:text-[#D4A017]/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            <ChevronRightIconSvg />
           </Link>
         </div>
       )}
@@ -252,9 +273,17 @@ export function ShankhaPanel({
         </div>
       )}
 
-      {/* Text input */}
+      {/* Text input — P1-13: keyboard-aware padding lifts input above soft keyboard on iOS */}
       {isResponding && (
-        <div className="border-t border-white/5 px-3 py-2.5">
+        <div
+          className="border-t border-white/5 px-3 py-2.5"
+          style={{
+            paddingBottom: keyboardVisible
+              ? `max(${keyboardHeight}px, 16px)`
+              : 'max(env(safe-area-inset-bottom, 10px), 10px)',
+            transition: 'padding-bottom 0.22s ease',
+          }}
+        >
           <div className="flex items-center gap-2">
             <input
               ref={inputRef}
@@ -276,9 +305,7 @@ export function ShankhaPanel({
               whileTap={{ scale: 0.9 }}
               aria-label="Send"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
+              <SendIconSvg />
             </motion.button>
             {/* Mic */}
             <motion.button
