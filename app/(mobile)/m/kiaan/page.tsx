@@ -155,10 +155,48 @@ export default function SacredMobileChatPage() {
 
   return (
     <MobileAppShell title="Sakha" showHeader={false} showTabBar={true}>
-      <div className="flex flex-col h-full min-h-0" style={{ background: 'var(--sacred-cosmic-void)' }}>
+      {/*
+        SCROLL FIX (Mobile Chat):
+        The parent chain (<body>, MobileContentWrapper, MobileLayout,
+        MobileAppShell root, <main>) all use `min-height`, never fixed `height`.
+        This means `h-full` (= `height: 100%`) cannot resolve to a concrete
+        pixel value on descendants — the messages container's `flex-1
+        overflow-y-auto` never triggered scroll because its parent chain
+        had no bounded height, so the flex items just grew with content.
+
+        Fix: anchor the chat page wrapper directly to the dynamic viewport
+        (100dvh) minus the fixed bottom tab bar + safe area. This gives the
+        inner `flex-1 overflow-y-auto min-h-0` messages container a concrete
+        parent height, so it correctly scrolls up/down when content overflows.
+
+        `100dvh` also auto-adjusts when the soft keyboard opens on iOS/Android.
+      */}
+      <div
+        className="flex flex-col min-h-0 overflow-hidden w-full relative"
+        style={{
+          background: 'var(--sacred-cosmic-void)',
+          // 80px tab bar + safe area. `100dvh` auto-adjusts when the soft
+          // keyboard opens on iOS/Android. `100vh` is the legacy fallback.
+          height: 'calc(100vh - 80px - env(safe-area-inset-bottom, 0px))',
+          // Modern browsers: prefer dynamic viewport (accounts for browser UI).
+          maxHeight: 'calc(100dvh - 80px - env(safe-area-inset-bottom, 0px))',
+        }}
+      >
+        {/*
+          Sacred background texture — moved OUT of the scroll container so
+          it never interferes with scroll calculations. `pointer-events-none`
+          keeps touch/scroll events reaching the messages list.
+        */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='100' cy='100' r='80' stroke='%23D4A017' fill='none' stroke-width='0.5'/%3E%3Ccircle cx='100' cy='100' r='60' stroke='%23D4A017' fill='none' stroke-width='0.5'/%3E%3Ccircle cx='100' cy='100' r='40' stroke='%23D4A017' fill='none' stroke-width='0.5'/%3E%3C/svg%3E")`,
+            backgroundSize: '200px 200px',
+            backgroundPosition: 'center',
+          }}
+        />
 
         {/* ── Sacred Chat Header ── */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.04]"
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.04] flex-shrink-0 relative z-10"
           style={{ background: 'var(--sacred-yamuna-deep)' }}
         >
           <SakhaMandala size={40} animated glowIntensity="low" />
@@ -178,16 +216,10 @@ export default function SacredMobileChatPage() {
         </div>
 
         {/* ── Messages Area ── */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 min-h-0">
-          {/* Sacred background texture */}
-          <div className="fixed inset-0 pointer-events-none opacity-[0.03]"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='100' cy='100' r='80' stroke='%23D4A017' fill='none' stroke-width='0.5'/%3E%3Ccircle cx='100' cy='100' r='60' stroke='%23D4A017' fill='none' stroke-width='0.5'/%3E%3Ccircle cx='100' cy='100' r='40' stroke='%23D4A017' fill='none' stroke-width='0.5'/%3E%3C/svg%3E")`,
-              backgroundSize: '200px 200px',
-              backgroundPosition: 'center',
-            }}
-          />
-
+        <div
+          className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 space-y-4 min-h-0 relative z-10"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           {/* Conversation starters (when empty) */}
           {messages.length === 0 && !isLoading && (
             <div className="flex flex-col items-center justify-center min-h-[50vh] gap-6">
@@ -282,7 +314,7 @@ export default function SacredMobileChatPage() {
         {/* ── Sacred Chat Input ── */}
         <form
           onSubmit={handleSubmit}
-          className="sacred-chat-input-area px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))]"
+          className="sacred-chat-input-area px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))] flex-shrink-0 relative z-10"
         >
           <div className="flex items-center gap-3">
             <input
