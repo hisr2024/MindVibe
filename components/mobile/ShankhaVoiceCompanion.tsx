@@ -72,9 +72,10 @@ export function ShankhaVoiceCompanion() {
   const panelRef = useRef<HTMLDivElement>(null)
   const fabRef = useRef<HTMLButtonElement>(null) // P1-15: focus return target
   const autoCollapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  // P0-5: Named timer refs so unmount cleanup can clear every outstanding timer
+  // P0-5: Named timer ref so unmount cleanup can clear the pending wake-word
+  // restart timer. Hands-free resume uses effect-scoped cleanup (line 288) so
+  // no separate ref is needed there — React calls the effect cleanup on unmount.
   const wakeWordResumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const handsFreeResumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const wakeWordWasActiveRef = useRef(false)
   const modeRef = useRef<ShankhaMode>(mode)
   // P0-4 / P2-26: In-flight guard + rate limit window + abort controller
@@ -89,10 +90,9 @@ export function ShankhaVoiceCompanion() {
     mountedRef.current = true
     return () => {
       mountedRef.current = false
-      // P0-5: Clear EVERY outstanding timer, not just autoCollapse
+      // P0-5: Clear outstanding component-level timers
       if (autoCollapseTimerRef.current) { clearTimeout(autoCollapseTimerRef.current); autoCollapseTimerRef.current = null }
       if (wakeWordResumeTimerRef.current) { clearTimeout(wakeWordResumeTimerRef.current); wakeWordResumeTimerRef.current = null }
-      if (handsFreeResumeTimerRef.current) { clearTimeout(handsFreeResumeTimerRef.current); handsFreeResumeTimerRef.current = null }
       // Abort any in-flight companion request so no post-unmount state updates fire
       try { abortRef.current?.abort() } catch {}
     }
@@ -434,9 +434,10 @@ export function ShankhaVoiceCompanion() {
         {/* Sound wave rings when listening */}
         {isListening && (
           <>
+            {/* P0-6: Stable string keys for consistency (fixed-length list) */}
             {[0, 1, 2].map(i => (
               <motion.span
-                key={i}
+                key={`ring-${i}`}
                 className="absolute inset-0 rounded-full border pointer-events-none"
                 style={{ borderColor: 'rgba(6,182,212,0.3)' }}
                 initial={{ scale: 1, opacity: 0.6 }}
