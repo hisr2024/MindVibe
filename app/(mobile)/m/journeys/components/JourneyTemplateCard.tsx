@@ -12,6 +12,10 @@
  *   template     — JourneyTemplate (now includes optional gita_verse_ref,
  *                                   gita_verse_text, modern_context,
  *                                   transformation_promise)
+ *   startedInfo? — JourneyResponse | null. When the user already has an
+ *                  active or paused journey for this template, the card
+ *                  surfaces a "Continue → Day N" or "Resume Journey" CTA
+ *                  instead of the default "Begin N-Day Journey →".
  *   onStart      — (templateId) => void
  *   isStarting   — boolean
  *   disabled?    — boolean
@@ -23,7 +27,11 @@
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { useState } from 'react'
-import type { JourneyTemplate, EnemyType } from '@/types/journeyEngine.types'
+import type {
+  JourneyResponse,
+  JourneyTemplate,
+  EnemyType,
+} from '@/types/journeyEngine.types'
 import { ENEMY_INFO, getDifficultyLabel } from '@/types/journeyEngine.types'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { EnemySVGFallback } from '@/components/mobile/journeys/EnemySVGFallback'
@@ -34,6 +42,7 @@ interface JourneyTemplateCardProps {
   isStarting: boolean
   disabled?: boolean
   index?: number
+  startedInfo?: JourneyResponse | null
 }
 
 export function JourneyTemplateCard({
@@ -42,6 +51,7 @@ export function JourneyTemplateCard({
   isStarting,
   disabled,
   index = 0,
+  startedInfo = null,
 }: JourneyTemplateCardProps) {
   const { triggerHaptic } = useHapticFeedback()
   const [imageFailed, setImageFailed] = useState(false)
@@ -50,6 +60,13 @@ export function JourneyTemplateCard({
   const info = primaryEnemy ? ENEMY_INFO[primaryEnemy] : null
   const accentColor = info?.color ?? '#D4A017'
   const rgb = info?.colorRGB ?? '212,160,23'
+
+  // Started-state derivations. When the user already has an active or paused
+  // journey for this template, we change both the top-right pill and the CTA
+  // so the catalog visibly reflects the journey they started — addressing the
+  // "I don't know which journey I started" gap.
+  const isActive = startedInfo?.status === 'active'
+  const isPaused = startedInfo?.status === 'paused'
 
   // Sacred enrichment — prefer template-level data, fall back to the
   // canonical enemy metadata. Everything here is optional, so we gate
@@ -165,7 +182,39 @@ export function JourneyTemplateCard({
           </span>
         </div>
 
-        {template.is_free && (
+        {/* Started badge takes priority over the Free pill — once a user
+            has begun this template, surface their progress instead. */}
+        {isActive ? (
+          <span
+            className="absolute top-2 right-12 font-ui"
+            style={{
+              fontSize: 8,
+              padding: '2px 6px',
+              borderRadius: 6,
+              background: 'rgba(16,185,129,0.18)',
+              border: '1px solid rgba(16,185,129,0.4)',
+              color: '#6EE7B7',
+              letterSpacing: '0.06em',
+            }}
+          >
+            DAY {startedInfo?.current_day ?? 1}
+          </span>
+        ) : isPaused ? (
+          <span
+            className="absolute top-2 right-12 font-ui"
+            style={{
+              fontSize: 8,
+              padding: '2px 6px',
+              borderRadius: 6,
+              background: 'rgba(217,119,6,0.18)',
+              border: '1px solid rgba(217,119,6,0.4)',
+              color: '#FCD34D',
+              letterSpacing: '0.06em',
+            }}
+          >
+            PAUSED
+          </span>
+        ) : template.is_free ? (
           <span
             className="absolute top-2 right-12 font-ui"
             style={{
@@ -179,7 +228,7 @@ export function JourneyTemplateCard({
           >
             Free
           </span>
-        )}
+        ) : null}
       </div>
 
       {/* ── BODY ─────────────────────────────────────────────────────── */}
@@ -312,17 +361,31 @@ export function JourneyTemplateCard({
           type="button"
           onClick={handleStart}
           disabled={isStarting || disabled}
-          className="w-full rounded-lg py-2 font-ui font-semibold text-[#050714] transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed mt-auto"
+          className="w-full rounded-lg py-2 font-ui font-semibold transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed mt-auto"
           style={{
             fontSize: 11,
             touchAction: 'manipulation',
-            background: `linear-gradient(135deg, ${accentColor}cc, ${accentColor})`,
-            boxShadow: `0 2px 8px rgba(${rgb},0.25)`,
+            // Started journeys get a tinted-glass treatment so the CTA reads
+            // as "continue what you started" rather than "start something new".
+            background: isActive || isPaused
+              ? `rgba(${rgb},0.18)`
+              : `linear-gradient(135deg, ${accentColor}cc, ${accentColor})`,
+            border: isActive || isPaused
+              ? `1px solid rgba(${rgb},0.45)`
+              : '1px solid transparent',
+            color: isActive || isPaused ? accentColor : '#050714',
+            boxShadow: isActive || isPaused
+              ? 'none'
+              : `0 2px 8px rgba(${rgb},0.25)`,
           }}
         >
           {isStarting
             ? 'Starting...'
-            : `Begin ${template.duration_days}-Day Journey \u2192`}
+            : isActive
+              ? `Continue \u2192 Day ${startedInfo?.current_day ?? 1}`
+              : isPaused
+                ? 'Resume Journey'
+                : `Begin ${template.duration_days}-Day Journey \u2192`}
         </button>
       </div>
     </motion.div>

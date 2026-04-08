@@ -355,6 +355,11 @@ export interface CompletionResponse {
   journey_complete: boolean;
   next_day: number | null;
   progress_percentage: number;
+  /** Sakha wisdom surfaced after a step is completed. Optional so older
+   *  servers without the field still type-check; UI must tolerate empty
+   *  string and fall back to the legacy "reload journey" behaviour. */
+  ai_response?: string | null;
+  mastery_delta?: number | null;
 }
 
 // Alias for backwards compatibility
