@@ -5,9 +5,11 @@
  * Only loaded for non-INR currencies.
  */
 
+import type { Stripe } from '@stripe/stripe-js'
+
 import { apiFetch } from '@/lib/api'
 
-let stripePromise: Promise<any> | null = null
+let stripePromise: Promise<Stripe | null> | null = null
 
 /**
  * Lazy-load the Stripe.js library.

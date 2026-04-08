@@ -31,7 +31,7 @@ function splitIntoGraphemes(text: string): string[] {
   const IntlAny = Intl as any
   if (typeof Intl !== 'undefined' && IntlAny.Segmenter) {
     const segmenter = new IntlAny.Segmenter('hi', { granularity: 'grapheme' })
-    return Array.from(segmenter.segment(text), (s: any) => s.segment as string)
+    return Array.from(segmenter.segment(text), (s: { segment: string }) => s.segment)
   }
   // Fallback: split on word boundaries so combining marks stay grouped
   return text.split(/(\s+)/).filter(Boolean)

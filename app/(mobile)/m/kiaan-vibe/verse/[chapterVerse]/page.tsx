@@ -20,8 +20,6 @@ import { loadGitaLanguage } from '@/lib/kiaan-vibe/gita'
 import { createVerseTrack, type GitaVoiceStyle } from '@/lib/kiaan-vibe/gita-voice-tracks'
 import {
   getGitaMobileChapter,
-  VOICE_TO_STYLE_MAP,
-  VOICE_TO_SPEED_MAP,
   getGitaVoiceConfig,
 } from '@/lib/kiaan-vibe/gita-library'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'

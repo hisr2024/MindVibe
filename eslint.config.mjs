@@ -33,6 +33,22 @@ const eslintConfig = [
       // Downgrade setState-in-effect to warning: most instances are legitimate
       // patterns (localStorage hydration, route change responses, etc.)
       'react-hooks/set-state-in-effect': 'warn',
+      // eslint-plugin-react-hooks v7 bundles the react-compiler analysis
+      // rules (purity, refs, immutability, etc.). These flag patterns that
+      // are VALID at runtime but that the compiler can't auto-memoize, e.g.
+      // accessing .current on a ref during render to size an SVG, or
+      // reading Date.now() for an animation clock. Downgrading to warnings
+      // keeps the feedback signal without breaking CI on pre-existing code
+      // that uses these intentional patterns.
+      'react-hooks/purity': 'warn',
+      'react-hooks/refs': 'warn',
+      'react-hooks/immutability': 'warn',
+      'react-hooks/set-state-in-render': 'warn',
+      'react-hooks/no-deriving-state-in-effects': 'warn',
+      'react-hooks/preserve-manual-memoization': 'warn',
+      'react-hooks/static-components': 'warn',
+      'react-hooks/globals': 'warn',
+      'react-hooks/error-boundaries': 'warn',
       // App Router uses layout.tsx <head> for fonts, not pages/_document.js
       '@next/next/no-page-custom-font': 'off',
     },
@@ -59,6 +75,12 @@ const eslintConfig = [
       'scripts/**',
       'mobile/react-native/**',
       'native/**',
+      // kiaanverse-mobile is a separate React Native workspace with its own
+      // pnpm-workspace.yaml, its own ESLint configs, and its own CI job
+      // (.github/workflows/mobile-pr-check.yml). Linting it from the main
+      // web-app config triggers react-compiler immutability false-positives
+      // on reanimated shared values and duplicates the mobile CI's work.
+      'kiaanverse-mobile/**',
     ],
   },
 ]

@@ -26,10 +26,6 @@ import type {
   SankalpaSeal,
 } from './types'
 
-const PHASE_ORDER: KarmaResetPhase[] = [
-  'entry', 'context', 'reflection', 'wisdom', 'sankalpa', 'seal',
-]
-
 /** Lotus-bloom clip-path transition */
 const phaseTransition = {
   initial: {
@@ -55,13 +51,6 @@ export function KarmaResetScreen() {
     xpAwarded: 0,
     streakCount: 0,
   })
-
-  const advancePhase = useCallback(() => {
-    const current = PHASE_ORDER.indexOf(phase)
-    if (current < PHASE_ORDER.length - 1) {
-      setPhase(PHASE_ORDER[current + 1])
-    }
-  }, [phase])
 
   const updateSession = useCallback((updates: Partial<KarmaResetSession>) => {
     setSession((prev) => ({ ...prev, ...updates }))

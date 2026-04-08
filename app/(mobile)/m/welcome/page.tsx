@@ -76,7 +76,7 @@ export default function WelcomePage() {
           className="italic text-base text-[#D4A017]/90 leading-relaxed"
           style={{ fontFamily: 'Crimson Text, serif' }}
         >
-          "Even a little of this dharma saves one from great fear."
+          &ldquo;Even a little of this dharma saves one from great fear.&rdquo;
         </p>
         <p className="text-xs text-white/40 mt-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
           — Bhagavad Gita 2.40

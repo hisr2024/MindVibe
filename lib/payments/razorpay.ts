@@ -33,7 +33,7 @@ export async function initiateRazorpayPayment(params: {
   onFailure: (error: string) => void
   onDismiss?: () => void
 }): Promise<void> {
-  const { planId, billing, planName, userName, userEmail, onSuccess, onFailure, onDismiss } = params
+  const { planId, billing, planName, userEmail, onSuccess, onFailure, onDismiss } = params
 
   if (typeof window === 'undefined') {
     onFailure('Payment processing requires a browser environment.')

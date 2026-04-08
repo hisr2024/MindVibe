@@ -25,8 +25,6 @@ import {
   DEVANAGARI_NUMERALS,
   YOGA_TYPE_LABELS,
   YOGA_TYPE_COLORS,
-  VOICE_TO_STYLE_MAP,
-  VOICE_TO_SPEED_MAP,
   getGitaVoiceConfig,
   getGitaMobileChapter,
 } from '@/lib/kiaan-vibe/gita-library'
