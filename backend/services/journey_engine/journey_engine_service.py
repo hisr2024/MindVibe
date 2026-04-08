@@ -58,6 +58,146 @@ logger = logging.getLogger(__name__)
 
 
 # =============================================================================
+# ENEMY-AWARE FALLBACK CONTENT
+# =============================================================================
+# When a journey template has no seeded JourneyTemplateStep rows for a given
+# day (e.g. seed scripts haven't been run for a freshly added template), the
+# old fallback emitted a single hard-coded line: "Continue your journey with
+# mindfulness." That left the day page empty of teaching, verse refs, and any
+# meaningful guidance — exactly the situation reported on Day 1 of the lobha
+# "Open Hand" journey.
+#
+# This table is the safety net: it returns a coherent day of content keyed by
+# the primary enemy tag. Each entry includes the canonical Bhagavad Gita verse
+# ref for that enemy (so _build_daily_step can hydrate verses[] from the
+# gita_verses table when present, and the routes-layer _step_to_response()
+# helper can fall back to _ENEMY_SACRED for the flattened sanskrit fields
+# when the table is unseeded). Content is drawn from the Gita and the
+# established ENEMY_METADATA — nothing invented.
+
+_ENEMY_TEACHING_FALLBACK: dict[str, dict[str, Any]] = {
+    "kama": {
+        "step_title": "Day {day} \u00b7 Naming Desire",
+        "verse_ref": {"chapter": 3, "verse": 37},
+        "teaching": (
+            "Today, notice the wanting mind. Krishna names desire (k\u0101ma) as "
+            "the great enemy in this world \u2014 not because wanting is sinful, but "
+            "because it is insatiable. Each fulfillment births a new craving. Sit "
+            "with one desire today and watch it rise, peak, and pass like a wave. "
+            "You are the ocean, not the wave."
+        ),
+        "reflection": "Which craving is loudest in you right now \u2014 and what is it really asking for?",
+        "practice_name": "Witness the Wanting",
+        "practice_instructions": [
+            "Sit quietly for five minutes.",
+            "Let one desire arise without acting on it.",
+            "Breathe with it. Notice its texture, its urgency, its origin.",
+            "When it softens, return to the breath. That softening is freedom.",
+        ],
+    },
+    "krodha": {
+        "step_title": "Day {day} \u00b7 Cooling the Fire",
+        "verse_ref": {"chapter": 2, "verse": 63},
+        "teaching": (
+            "Today, study your anger before it studies you. Krishna traces the chain: "
+            "from craving \u2014 anger; from anger \u2014 delusion; from delusion \u2014 the "
+            "loss of memory; from lost memory \u2014 the destruction of discrimination; "
+            "and when discrimination is lost, one perishes. The pause between trigger "
+            "and reaction is where wisdom lives. Today, find that pause once."
+        ),
+        "reflection": "Where did anger arise today, and what was the desire underneath it?",
+        "practice_name": "The Sacred Pause",
+        "practice_instructions": [
+            "When irritation rises today, do not speak for 10 seconds.",
+            "Take one slow breath. Then a second.",
+            "Ask: what was I wanting that I did not get?",
+            "Then respond from that knowing, not from the heat.",
+        ],
+    },
+    "lobha": {
+        "step_title": "Day {day} \u00b7 Opening the Hand",
+        "verse_ref": {"chapter": 14, "verse": 17},
+        "teaching": (
+            "Today, examine the grasping hand. Krishna tells us greed (lobha) arises "
+            "when the mode of passion grows \u2014 ceaseless activity, restlessness, the "
+            "craving for more. The antidote is not poverty; it is generosity (d\u0101na). "
+            "Give one thing freely today \u2014 a coin, an hour, a kind word \u2014 with no "
+            "expectation of return. Notice how giving feels different from grasping."
+        ),
+        "reflection": "What do you hold too tightly, and what would it mean to open your hand?",
+        "practice_name": "The Daily Giving",
+        "practice_instructions": [
+            "Choose one thing to give freely today.",
+            "It can be material, time, attention, or kindness.",
+            "Give it with full presence and no expectation of return.",
+            "Afterward, notice the quality of the giving in your chest.",
+        ],
+    },
+    "moha": {
+        "step_title": "Day {day} \u00b7 Lifting the Veil",
+        "verse_ref": {"chapter": 2, "verse": 52},
+        "teaching": (
+            "Today, look at the fog of attachment. Krishna promises that when your "
+            "intellect crosses beyond the thicket of delusion (moha), you become "
+            "indifferent to all that has been heard and all that is yet to be heard. "
+            "Delusion is mistaking the temporary for the permanent \u2014 a relationship, "
+            "a possession, an identity. Today, name one thing you cling to as if it "
+            "were eternal, and let yourself feel its impermanence with tenderness."
+        ),
+        "reflection": "What are you holding as permanent that is, in truth, passing through?",
+        "practice_name": "The Tender Letting",
+        "practice_instructions": [
+            "Name one attachment that causes you suffering.",
+            "Sit with it for three minutes without trying to release it.",
+            "Then, gently, acknowledge: this too is impermanent.",
+            "Feel the freedom that lives just beneath the clinging.",
+        ],
+    },
+    "mada": {
+        "step_title": "Day {day} \u00b7 Dissolving the Ego",
+        "verse_ref": {"chapter": 16, "verse": 4},
+        "teaching": (
+            "Today, watch the inflated self. Krishna lists hypocrisy, arrogance, "
+            "self-conceit, anger, harshness and ignorance as the marks of the demoniac "
+            "qualities. Pride (mada) is the inflation that forgets its true nature \u2014 "
+            "it makes the wave believe it is greater than the ocean. Today, bow inwardly "
+            "to one person you usually feel above. See yourself in them."
+        ),
+        "reflection": "Where did pride speak today, and what was it protecting?",
+        "practice_name": "The Inner Bow",
+        "practice_instructions": [
+            "Choose one person you usually feel superior to.",
+            "Sit quietly and bring them to mind.",
+            "Inwardly bow to them. Acknowledge: we are the same Self.",
+            "Carry that recognition into your next interaction.",
+        ],
+    },
+    "matsarya": {
+        "step_title": "Day {day} \u00b7 Celebrating Others",
+        "verse_ref": {"chapter": 12, "verse": 13},
+        "teaching": (
+            "Today, watch the comparing mind. Krishna says: he who hates no creature, "
+            "who is friendly and compassionate, free from attachment and egoism, "
+            "balanced in pleasure and pain, and forgiving \u2014 he is dear to Me. "
+            "Envy (m\u0101tsarya) is the inability to celebrate another's good. Its "
+            "antidote is mudit\u0101 \u2014 sympathetic joy. Today, celebrate one person's "
+            "success as if it were your own."
+        ),
+        "reflection": "Whose joy is hard for you to celebrate, and what would it cost to celebrate it anyway?",
+        "practice_name": "Mudit\u0101 \u2014 Sympathetic Joy",
+        "practice_instructions": [
+            "Bring to mind one person whose recent success stings.",
+            "Sit with the sting honestly for one minute.",
+            "Then silently wish: may your joy increase, may your path open.",
+            "Notice what shifts in your chest when you mean it.",
+        ],
+    },
+}
+# Alternate spelling that appears in some template tags.
+_ENEMY_TEACHING_FALLBACK["matsara"] = _ENEMY_TEACHING_FALLBACK["matsarya"]
+
+
+# =============================================================================
 # TYPE DEFINITIONS
 # =============================================================================
 
@@ -1066,16 +1206,63 @@ class JourneyEngineService:
                 "safety_note": template_step.safety_notes,
             }
 
-        # Fallback for missing template step
+        # Fallback for missing template step — coherent, enemy-aware content
+        # so the user always sees a real teaching + verse + practice instead
+        # of the old generic "Continue your journey with mindfulness." line.
+        # Verse refs flow into _build_daily_step which hydrates them from the
+        # gita_verses table; if that table is empty, the routes-layer
+        # _step_to_response() helper falls back to _ENEMY_SACRED for the
+        # flattened sanskrit fields. End result: the day page is never empty.
+        primary_tag = (template.primary_enemy_tags or ["general"])[0]
+        fallback = _ENEMY_TEACHING_FALLBACK.get(
+            (primary_tag or "").lower()
+        )
+        if fallback:
+            logger.info(
+                "[_generate_step_content] template_step missing for "
+                "template=%s day=%s — using enemy-aware fallback for %s",
+                template.id, day_index, primary_tag,
+            )
+            return {
+                "step_title": fallback["step_title"].format(day=day_index),
+                "today_focus": primary_tag,
+                "verse_refs": [fallback["verse_ref"]],
+                "teaching": fallback["teaching"],
+                "guided_reflection": [fallback["reflection"]],
+                "practice": {
+                    "name": fallback["practice_name"],
+                    "instructions": fallback["practice_instructions"],
+                    "duration_minutes": personalization.get("time_budget_minutes", 10),
+                },
+                "micro_commitment": "I will carry this teaching into my day.",
+                "check_in_prompt": {
+                    "scale": "0-10",
+                    "label": "How present were you with today's practice?",
+                },
+                "safety_note": None,
+            }
+
+        # Last-resort fallback when even the enemy tag is unrecognised. Still
+        # better than the old hardcoded line because it tells the user the
+        # truth about the state of the content, instead of pretending.
+        logger.warning(
+            "[_generate_step_content] no fallback for enemy=%s "
+            "template=%s day=%s",
+            primary_tag, template.id, day_index,
+        )
         return {
             "step_title": f"Day {day_index}",
             "today_focus": "general",
             "verse_refs": [],
-            "teaching": "Continue your journey with mindfulness.",
-            "guided_reflection": ["What insights arose today?"],
+            "teaching": (
+                "Today's teaching is being prepared. Sit quietly for five "
+                "minutes and bring awareness to whatever inner enemy is "
+                "loudest in you right now. That noticing is itself the practice."
+            ),
+            "guided_reflection": ["What did you notice in yourself today?"],
             "practice": {
-                "name": "Reflection",
-                "instructions": ["Spend 5 minutes in quiet reflection."],
+                "name": "Quiet Sitting",
+                "instructions": ["Sit quietly for five minutes. Watch the breath."],
                 "duration_minutes": 5,
             },
             "micro_commitment": "I commit to mindful awareness today.",
@@ -1083,6 +1270,7 @@ class JourneyEngineService:
                 "scale": "0-10",
                 "label": "How mindful were you today?",
             },
+            "safety_note": None,
         }
 
     async def _build_daily_step(

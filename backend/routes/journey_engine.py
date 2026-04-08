@@ -344,6 +344,13 @@ class CompletionResponse(BaseModel):
     journey_complete: bool
     next_day: int | None
     progress_percentage: float
+    # Sakha wisdom surfaced after completion. Both fields are deterministic
+    # placeholders synthesised from the canonical enemy verse — they are NOT
+    # produced by an LLM. A future task can swap the body of
+    # _build_sakha_response() for a real KIAAN call without changing the
+    # client contract. Empty string + 0 keep older clients happy.
+    ai_response: str = ""
+    mastery_delta: int = 0
 
 
 # =============================================================================
@@ -495,6 +502,70 @@ def _pick_modern_example(
         practical_antidote=ex.practical_antidote,
         reflection_question=ex.reflection_question,
     )
+
+
+def _build_sakha_response(
+    enemy_tag: str | None,
+    *,
+    day_completed: int,
+    total_days: int,
+    journey_complete: bool,
+    has_reflection: bool,
+) -> tuple[str, int]:
+    """Synthesise a deterministic Sakha wisdom response + mastery delta.
+
+    This is intentionally NOT an LLM call. It composes a templated response
+    from the canonical enemy verse so the day-page Sakha card always has
+    something meaningful to show, even with no AI provider configured. The
+    return contract (string + int) is shaped so a future KIAAN integration
+    can be slotted in without changing the endpoint or the client.
+    """
+    sacred = _sacred_for_enemy(enemy_tag) if enemy_tag else None
+    sanskrit_name = (enemy_tag or "the inner enemy").capitalize()
+
+    # Mastery delta: each completed day moves the user roughly one slice
+    # closer to mastery. Floor at 1 so even very long journeys reward today.
+    mastery_delta = max(1, round(100 / max(1, total_days)))
+
+    if journey_complete:
+        if sacred:
+            body = (
+                f"You have walked the full path against {sanskrit_name}. "
+                f"The Gita reminds: \"{sacred['verse_translation']}\" — "
+                f"carry this victory quietly. The war within is never fully "
+                f"won, but today you have proven the enemy is not stronger "
+                f"than you. Return when the next battle calls."
+            )
+        else:
+            body = (
+                f"You have completed your journey. Carry today's stillness "
+                f"into your day. The Gita teaches: even a little of this "
+                f"practice saves you from great fear."
+            )
+        return body, mastery_delta
+
+    opening = (
+        "The reflection you offered has been received."
+        if has_reflection
+        else "Even silent practice is heard."
+    )
+
+    if sacred:
+        body = (
+            f"{opening} You have taken Day {day_completed} on the path "
+            f"against {sanskrit_name}. The Gita reminds: "
+            f"\"{sacred['verse_translation']}\" Carry this stillness into "
+            f"your day. Return tomorrow for the next teaching."
+        )
+    else:
+        body = (
+            f"{opening} You have taken Day {day_completed} of your journey. "
+            f"Every moment of awareness is progress. The Gita teaches: even "
+            f"a little of this practice saves you from great fear. Return "
+            f"tomorrow to continue."
+        )
+
+    return body, mastery_delta
 
 
 def _step_to_response(
@@ -1015,12 +1086,38 @@ async def complete_step(
                 },
             )
 
+        # Sakha wisdom: synthesise a deterministic templated response from
+        # the canonical enemy verse. This is the only place we read the
+        # journey stats post-commit, and the failure path is non-fatal — if
+        # we can't fetch the journey for any reason, the response just falls
+        # back to the empty defaults on CompletionResponse and the client
+        # gracefully degrades to its legacy "reload journey" behaviour.
+        ai_response = ""
+        mastery_delta = 0
+        try:
+            stats = await service.get_journey(user_id, journey_id)
+            enemy_tag = stats.primary_enemies[0] if stats.primary_enemies else None
+            ai_response, mastery_delta = _build_sakha_response(
+                enemy_tag,
+                day_completed=result["day_completed"],
+                total_days=stats.total_days or 1,
+                journey_complete=result["journey_complete"],
+                has_reflection=bool(request.reflection and request.reflection.strip()),
+            )
+        except Exception:  # pragma: no cover — defensive
+            logger.exception(
+                "[complete_step] failed to build sakha response for journey %s",
+                journey_id,
+            )
+
         return CompletionResponse(
             success=result["success"],
             day_completed=result["day_completed"],
             journey_complete=result["journey_complete"],
             next_day=result["next_day"],
             progress_percentage=result["progress_percentage"],
+            ai_response=ai_response,
+            mastery_delta=mastery_delta,
         )
     except JourneyNotFoundError as e:
         logger.warning(f"Journey not found for step completion: {e}")

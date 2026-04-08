@@ -146,6 +146,32 @@ export function JourneysTab({
     )
   }, [templates, selectedEnemy])
 
+  // Lookup of "is this template already an active journey?" keyed by both
+  // template_slug and template_id, since the dashboard's active_journeys
+  // entries currently only carry template_slug. Once populated, the catalog
+  // can render a "Continue → Day N" CTA on the matching card AND
+  // handleTemplateCardTap can navigate directly into the existing journey
+  // instead of opening the start-modal (which would either start a duplicate
+  // or hit the 5/5 limit).
+  //
+  // We depend on `dashboard?.active_journeys` directly (not the
+  // `activeJourneys` local) because the local is a `?? []` expression that
+  // produces a fresh array reference on every render — that would invalidate
+  // this memo every render and defeat the purpose.
+  const activeByTemplate = useMemo(() => {
+    const list = dashboard?.active_journeys ?? []
+    const map = new Map<string, (typeof list)[number]>()
+    for (const j of list) {
+      if (j.template_slug) map.set(j.template_slug, j)
+      // template_id is not on the JourneyResponse shape today, but if a
+      // future server adds it we want this lookup to work without code
+      // changes. Cast through unknown to keep TS strict-mode happy.
+      const tid = (j as unknown as { template_id?: string }).template_id
+      if (tid) map.set(tid, j)
+    }
+    return map
+  }, [dashboard?.active_journeys])
+
   const handleStart = useCallback(
     async (templateId: string) => {
       // BUG-03: synchronous guard — state updates are async, a ref is not.
@@ -188,9 +214,19 @@ export function JourneysTab({
         // and the haptic only fires once we're on the way.
         const destination = `/m/journeys/${journey.journey_id}`
         router.prefetch(destination)
+        // Refresh the dashboard BEFORE navigating so the catalog state the
+        // user returns to already includes the new journey. Without this
+        // await the "Your Active Battles" section + the template card's
+        // "Continue → Day N" affordance can race the back-navigation and
+        // appear to lose the journey the user just started. We swallow
+        // refresh failures because the navigation itself is the priority.
+        try {
+          await Promise.resolve(onRefresh())
+        } catch {
+          /* refresh errors are non-fatal — navigation still proceeds */
+        }
         await router.push(destination)
         setTimeout(() => setDetailTemplate(null), 0)
-        onRefresh()
         triggerHaptic('success')
       } catch (err) {
         clearTimeout(timeoutHandle)
@@ -255,6 +291,19 @@ export function JourneysTab({
   )
 
   const handleTemplateCardTap = (template: JourneyTemplate) => {
+    // If the user already has an active journey for this template, skip the
+    // start-modal entirely and jump straight to the day page. Without this,
+    // tapping an already-active template would either start a duplicate or
+    // (when at 5/5) raise the MaxJourneys sheet — both bad UX.
+    const existing =
+      activeByTemplate.get(template.slug) ??
+      activeByTemplate.get(template.id)
+    if (existing) {
+      triggerHaptic('light')
+      router.push(`/m/journeys/${existing.journey_id}`)
+      return
+    }
+
     if (!canStart) {
       setShowMaxSheet(true)
       return
@@ -427,16 +476,26 @@ export function JourneysTab({
         </p>
         {filteredTemplates.length > 0 ? (
           <div className="grid grid-cols-2 gap-3">
-            {filteredTemplates.map((template, i) => (
-              <JourneyTemplateCard
-                key={template.id}
-                template={template}
-                onStart={() => handleTemplateCardTap(template)}
-                isStarting={startingId === template.id}
-                disabled={!canStart}
-                index={i}
-              />
-            ))}
+            {filteredTemplates.map((template, i) => {
+              const startedInfo =
+                activeByTemplate.get(template.slug) ??
+                activeByTemplate.get(template.id) ??
+                null
+              return (
+                <JourneyTemplateCard
+                  key={template.id}
+                  template={template}
+                  startedInfo={startedInfo}
+                  onStart={() => handleTemplateCardTap(template)}
+                  isStarting={startingId === template.id}
+                  // Active templates remain tappable even when the user is
+                  // at 5/5, because tapping an active card just navigates
+                  // to the existing journey (handled in handleTemplateCardTap).
+                  disabled={!canStart && !startedInfo}
+                  index={i}
+                />
+              )
+            })}
           </div>
         ) : (
           <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-6 text-center">

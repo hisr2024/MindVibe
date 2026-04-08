@@ -63,6 +63,12 @@ export default function MobileJourneyDetailPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [reflection, setReflection] = useState('')
   const [showReflection, setShowReflection] = useState(false)
+  // Sakha wisdom — surfaced after a successful completion. Both default to
+  // null so the card stays hidden until the backend returns ai_response.
+  // If the server is older and omits the field, the legacy "reload + go
+  // back" flow runs and these stay null (no regression).
+  const [aiResponse, setAiResponse] = useState<string | null>(null)
+  const [masteryDelta, setMasteryDelta] = useState<number | null>(null)
 
   const primaryEnemy = journey?.primary_enemies[0] as EnemyType | undefined
   const enemyInfo = primaryEnemy ? ENEMY_INFO[primaryEnemy] : null
@@ -145,6 +151,25 @@ export default function MobileJourneyDetailPage() {
       )
 
       triggerHaptic('success')
+
+      // Sakha wisdom — if the backend supplied a templated response, surface
+      // the wisdom card and keep the user on the page. Tapping "Return to
+      // Journeys" on the card handles navigation. If the field is missing
+      // (older server), fall through to the legacy reload-or-navigate flow
+      // so we never block on a feature that didn't ship.
+      const sakhaText = (result.ai_response ?? '').trim()
+      if (sakhaText) {
+        setAiResponse(sakhaText)
+        setMasteryDelta(result.mastery_delta ?? null)
+        // Mark the step as completed locally so the complete button hides
+        // and the textarea/button section is replaced by the Sakha card.
+        setStep((prev) =>
+          prev
+            ? { ...prev, is_completed: true, available_to_complete: false }
+            : prev,
+        )
+        return
+      }
 
       if (result.journey_complete) {
         router.push('/m/journeys')
@@ -421,6 +446,111 @@ export default function MobileJourneyDetailPage() {
               <h2 className="text-xl font-bold">{step.step_title}</h2>
             </div>
 
+            {/* ═══════════════════════════════════════════════════════════
+                BLOCK 1: Gita Verse (primary, flattened) ──────────────────
+                Renders from the flattened sacred fields the backend's
+                _step_to_response() helper always populates (live verse if
+                seeded, otherwise the canonical _ENEMY_SACRED fallback).
+                The legacy step.verses[] loop further down only renders
+                when the flattened block is unavailable, so the verse is
+                shown exactly once. ─────────────────────────────────────── */}
+            {(step.verse_sanskrit || step.verse_ref) && (
+              <section
+                className="relative overflow-hidden rounded-2xl"
+                style={{
+                  background:
+                    'radial-gradient(ellipse at 50% 0%, rgba(212,160,23,0.12), rgba(17,20,53,0.98))',
+                  border: '1px solid rgba(212,160,23,0.22)',
+                  borderTop: '3px solid rgba(212,160,23,0.7)',
+                }}
+              >
+                <div className="p-5">
+                  {step.verse_ref && (
+                    <div
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg mb-3"
+                      style={{
+                        background: 'rgba(212,160,23,0.1)',
+                        border: '1px solid rgba(212,160,23,0.25)',
+                        fontSize: 9,
+                        color: '#D4A017',
+                        fontFamily: 'Outfit, sans-serif',
+                        letterSpacing: '0.08em',
+                      }}
+                    >
+                      {'\u2726'} BG {step.verse_ref.chapter}.{step.verse_ref.verse}
+                    </div>
+                  )}
+
+                  {step.verse_sanskrit && (
+                    <div
+                      style={{
+                        fontFamily: '"Noto Sans Devanagari", sans-serif',
+                        fontSize: 18,
+                        fontWeight: 500,
+                        color: '#F0C040',
+                        lineHeight: 2.0,
+                        marginBottom: 10,
+                        textShadow: '0 0 20px rgba(212,160,23,0.3)',
+                        whiteSpace: 'pre-line',
+                      }}
+                    >
+                      {step.verse_sanskrit}
+                    </div>
+                  )}
+
+                  {step.verse_sanskrit && step.verse_transliteration && (
+                    <div
+                      style={{
+                        height: 1,
+                        background:
+                          'linear-gradient(90deg, transparent, rgba(212,160,23,0.4), transparent)',
+                        margin: '8px 0',
+                      }}
+                    />
+                  )}
+
+                  {step.verse_transliteration && (
+                    <div
+                      className="font-sacred italic"
+                      style={{
+                        fontSize: 13,
+                        color: '#B8AE98',
+                        lineHeight: 1.7,
+                        marginBottom: 8,
+                        whiteSpace: 'pre-line',
+                      }}
+                    >
+                      {step.verse_transliteration}
+                    </div>
+                  )}
+
+                  {step.verse_translation && step.verse_transliteration && (
+                    <div
+                      style={{
+                        height: 1,
+                        background:
+                          'linear-gradient(90deg, transparent, rgba(212,160,23,0.25), transparent)',
+                        margin: '8px 0',
+                      }}
+                    />
+                  )}
+
+                  {step.verse_translation && (
+                    <div
+                      className="font-sacred italic"
+                      style={{
+                        fontSize: 14,
+                        color: '#EDE8DC',
+                        lineHeight: 1.75,
+                      }}
+                    >
+                      &ldquo;{step.verse_translation}&rdquo;
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
             {/* Teaching */}
             <section className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03]">
               <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[#d4a44c] to-orange-500" />
@@ -429,12 +559,33 @@ export default function MobileJourneyDetailPage() {
                   <BookOpen className="w-4 h-4 text-[#d4a44c]" />
                   <span className="text-xs font-semibold text-[#d4a44c] uppercase tracking-wider">Teaching</span>
                 </div>
+                {/* Detect the legacy hardcoded fallback line and surface a
+                    clear "being prepared" chip instead of silently showing it.
+                    The new enemy-aware fallback in journey_engine_service.py
+                    eliminates this for fresh journeys, but pre-existing
+                    UserJourneyStepState rows persist the old text in
+                    kiaan_step_json — this chip catches those. */}
+                {step.teaching?.startsWith('Continue your journey with mindfulness') && (
+                  <div
+                    className="rounded-lg px-3 py-2 mb-3 text-xs"
+                    style={{
+                      background: 'rgba(217,119,6,0.1)',
+                      border: '1px solid rgba(217,119,6,0.25)',
+                      color: '#FCD34D',
+                      fontFamily: 'Outfit, sans-serif',
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {'\u23F3'} Full teaching content is being prepared for this day.
+                  </div>
+                )}
                 <p className="text-white/90 leading-relaxed">{step.teaching}</p>
               </div>
             </section>
 
-            {/* Verses */}
-            {step.verses?.length > 0 && (
+            {/* Verses (legacy) — only render if the flattened block above
+                is unavailable, so the verse is never duplicated. */}
+            {!step.verse_sanskrit && !step.verse_ref && step.verses?.length > 0 && (
               <section className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-[#d4a44c]" />
@@ -742,8 +893,105 @@ export default function MobileJourneyDetailPage() {
               </div>
             )}
 
-            {/* Already completed */}
-            {step.is_completed && (
+            {/* Sakha wisdom card — animates in after a successful completion
+                when the backend returned ai_response. Replaces the plain
+                "Step Completed" box for the immediate post-completion view. */}
+            <AnimatePresence>
+              {aiResponse && (
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.45 }}
+                  className="relative overflow-hidden rounded-2xl"
+                  style={{
+                    background:
+                      'radial-gradient(ellipse at 50% 0%, rgba(212,160,23,0.12), rgba(17,20,53,0.98))',
+                    border: '1px solid rgba(212,160,23,0.22)',
+                    borderTop: '3px solid rgba(212,160,23,0.7)',
+                  }}
+                >
+                  <div className="p-5">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div
+                        className="w-11 h-11 rounded-full flex items-center justify-center"
+                        style={{
+                          background: 'radial-gradient(#1B4FBB, #050714)',
+                          border: '1.5px solid rgba(212,160,23,0.5)',
+                          fontSize: 18,
+                        }}
+                      >
+                        {'\u0950'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div
+                          className="font-ui uppercase"
+                          style={{
+                            fontSize: 9,
+                            color: '#D4A017',
+                            letterSpacing: '0.14em',
+                          }}
+                        >
+                          Sakha Reflects
+                        </div>
+                        <div
+                          className="font-ui"
+                          style={{ fontSize: 10, color: '#6B6355' }}
+                        >
+                          Your KIAAN companion responds
+                        </div>
+                      </div>
+                      {masteryDelta && masteryDelta > 0 && (
+                        <div
+                          className="font-ui"
+                          style={{
+                            fontSize: 11,
+                            padding: '3px 9px',
+                            borderRadius: 9,
+                            background: 'rgba(16,185,129,0.15)',
+                            border: '1px solid rgba(16,185,129,0.3)',
+                            color: '#6EE7B7',
+                          }}
+                        >
+                          +{masteryDelta} mastery
+                        </div>
+                      )}
+                    </div>
+
+                    <p
+                      className="font-sacred italic"
+                      style={{
+                        fontSize: 15,
+                        color: '#EDE8DC',
+                        lineHeight: 1.85,
+                      }}
+                    >
+                      {aiResponse}
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() => router.push('/m/journeys')}
+                      className="mt-4 w-full rounded-xl py-3 font-ui"
+                      style={{
+                        fontSize: 13,
+                        background: 'rgba(22,26,66,0.5)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        color: '#B8AE98',
+                        touchAction: 'manipulation',
+                        minHeight: 44,
+                      }}
+                    >
+                      Return to Journeys
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Already completed (legacy box) — suppressed while the Sakha
+                card is showing so we don't duplicate the "completed" state. */}
+            {step.is_completed && !aiResponse && (
               <div className="rounded-2xl border border-green-500/30 bg-green-950/20 p-6 text-center">
                 <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto mb-3" />
                 <p className="text-green-400 font-semibold">Step Completed</p>
