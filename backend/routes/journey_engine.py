@@ -1160,17 +1160,78 @@ async def get_dashboard(
     try:
         dashboard = await service.get_dashboard(user_id)
     except Exception as e:
-        logger.error(f"Dashboard error for user {user_id}: {e}", exc_info=True)
-        # Return empty dashboard on error instead of 500
+        # CATASTROPHIC fallback. ``service.get_dashboard`` now wraps every
+        # optional component in its own try/except, so reaching this block
+        # means the core active-journey query itself failed (DB outage,
+        # migration skew, etc.). Previously this handler returned an
+        # all-zeros DashboardResponse, which masked a MissingGreenlet in
+        # _get_enemy_progress and made every started journey invisible.
+        # We still return 200 (shell keeps rendering) BUT we do an
+        # emergency direct query for the active journeys so the user can
+        # see and continue the work they already started.
+        logger.error(
+            f"[dashboard] core failure user={user_id}: {e}", exc_info=True
+        )
+
+        from backend.models import UserJourney, UserJourneyStatus
+        from sqlalchemy import select
+        from sqlalchemy.orm import selectinload
+
+        emergency_journeys: list[JourneyResponse] = []
+        emergency_active_count = 0
+        try:
+            emergency_stmt = (
+                select(UserJourney)
+                .options(selectinload(UserJourney.template))
+                .where(
+                    UserJourney.user_id == user_id,
+                    UserJourney.status == UserJourneyStatus.ACTIVE.value,
+                    UserJourney.deleted_at.is_(None),
+                )
+                .order_by(UserJourney.created_at.desc())
+                .limit(5)
+            )
+            emergency_result = await service.db.execute(emergency_stmt)
+            for row in emergency_result.scalars().all():
+                emergency_active_count += 1
+                template = row.template
+                emergency_journeys.append(
+                    JourneyResponse(
+                        journey_id=row.id,
+                        template_slug=template.slug if template else "unknown",
+                        title=template.title if template else "Your Journey",
+                        status=row.status,
+                        current_day=row.current_day_index,
+                        total_days=template.duration_days if template else 14,
+                        progress_percentage=0.0,
+                        days_completed=0,
+                        started_at=(
+                            row.started_at.isoformat() if row.started_at
+                            else (row.created_at.isoformat() if row.created_at else None)
+                        ),
+                        last_activity=None,
+                        primary_enemies=(
+                            template.primary_enemy_tags if template else []
+                        ),
+                        streak_days=0,
+                    )
+                )
+        except Exception as emerg_e:  # noqa: BLE001
+            logger.error(
+                f"[dashboard] emergency recovery also failed "
+                f"user={user_id}: {emerg_e}",
+                exc_info=True,
+            )
+
         return DashboardResponse(
-            active_journeys=[],
+            active_journeys=emergency_journeys,
             completed_journeys=0,
             total_days_practiced=0,
             current_streak=0,
             enemy_progress=[],
             recommended_templates=[],
             today_steps=[],
-            active_count=0,
+            active_count=emergency_active_count,
             max_active=5,
         )
 

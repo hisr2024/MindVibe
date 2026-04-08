@@ -925,21 +925,51 @@ class JourneyEngineService:
         days_result = await self.db.execute(days_query)
         total_days = days_result.scalar() or 0
 
-        # Get enemy progress
-        enemy_progress = await self._get_enemy_progress(user_id)
+        # RESILIENCE: each optional component is wrapped in its own
+        # try/except so a single failure can no longer wipe the entire
+        # dashboard. Previously an async-lazy-load exception in
+        # ``_get_enemy_progress`` was propagating to the route handler,
+        # which caught it and returned an all-zeros response — making
+        # every started journey invisible to the user.
+        try:
+            enemy_progress = await self._get_enemy_progress(user_id)
+        except Exception as e:  # noqa: BLE001
+            logger.error(
+                f"[get_dashboard] enemy_progress failed user={user_id}: {e}",
+                exc_info=True,
+            )
+            enemy_progress = []
 
-        # Get today's steps for active journeys
         today_steps = []
         for journey_stat in active_journeys:
-            step = await self.get_current_step(user_id, journey_stat.journey_id)
-            if step:
-                today_steps.append(step)
+            try:
+                step = await self.get_current_step(user_id, journey_stat.journey_id)
+                if step:
+                    today_steps.append(step)
+            except Exception as e:  # noqa: BLE001
+                logger.error(
+                    f"[get_dashboard] get_current_step failed "
+                    f"user={user_id} journey={journey_stat.journey_id}: {e}",
+                    exc_info=True,
+                )
 
-        # Get recommended templates
-        recommendations = await self._get_recommendations(user_id, enemy_progress)
+        try:
+            recommendations = await self._get_recommendations(user_id, enemy_progress)
+        except Exception as e:  # noqa: BLE001
+            logger.error(
+                f"[get_dashboard] recommendations failed user={user_id}: {e}",
+                exc_info=True,
+            )
+            recommendations = []
 
-        # Calculate streak
-        streak = await self._calculate_streak(user_id)
+        try:
+            streak = await self._calculate_streak(user_id)
+        except Exception as e:  # noqa: BLE001
+            logger.error(
+                f"[get_dashboard] streak calculation failed user={user_id}: {e}",
+                exc_info=True,
+            )
+            streak = 0
 
         return Dashboard(
             active_journeys=active_journeys,
@@ -1384,24 +1414,58 @@ class JourneyEngineService:
         )
 
     async def _get_enemy_progress(self, user_id: str) -> list[EnemyProgress]:
-        """Calculate progress against each enemy."""
+        """Calculate progress against each enemy.
+
+        BUGFIX: previously this built its own ``select(UserJourney).join(...)``
+        query without ``selectinload(UserJourney.template)``, then accessed
+        ``j.template.primary_enemy_tags`` inside a list comprehension. Async
+        SQLAlchemy raises ``MissingGreenlet`` on implicit lazy loads, which
+        propagated up to ``get_dashboard`` and was silently caught by the
+        route handler, making the dashboard return ``active_count=0`` and
+        an empty ``active_journeys`` list. Users saw "0/5 Active" with their
+        started journeys invisible even though the rows existed in the DB.
+
+        Fix: eager-load the template relationship AND batch the per-journey
+        day-count query into a single GROUP BY instead of running N+1 queries
+        inside the outer 6-enemy loop.
+        """
         enemies = ["kama", "krodha", "lobha", "moha", "mada", "matsarya"]
-        progress_list = []
 
-        for enemy in enemies:
-            # Get journeys targeting this enemy
-            # This is a simplified query - in production, use proper JSON containment
-            journeys_query = (
-                select(UserJourney)
-                .join(JourneyTemplate)
-                .where(
-                    UserJourney.user_id == user_id,
-                    UserJourney.deleted_at.is_(None),
-                )
+        # Single query for all user journeys with template preloaded. Without
+        # selectinload, ``j.template`` below would trigger an async lazy load
+        # and raise MissingGreenlet in production.
+        journeys_query = (
+            select(UserJourney)
+            .options(selectinload(UserJourney.template))
+            .where(
+                UserJourney.user_id == user_id,
+                UserJourney.deleted_at.is_(None),
             )
-            journeys_result = await self.db.execute(journeys_query)
-            all_journeys = journeys_result.scalars().all()
+        )
+        journeys_result = await self.db.execute(journeys_query)
+        all_journeys = journeys_result.scalars().all()
 
+        # Single query for completed-step counts per journey (replaces the
+        # N+1 COUNT inside the inner loop).
+        journey_ids = [j.id for j in all_journeys]
+        days_by_journey: dict[str, int] = {}
+        if journey_ids:
+            days_query = (
+                select(
+                    UserJourneyStepState.user_journey_id,
+                    func.count(UserJourneyStepState.id),
+                )
+                .where(
+                    UserJourneyStepState.user_journey_id.in_(journey_ids),
+                    UserJourneyStepState.completed_at.isnot(None),
+                )
+                .group_by(UserJourneyStepState.user_journey_id)
+            )
+            days_result = await self.db.execute(days_query)
+            days_by_journey = {row[0]: row[1] for row in days_result.all()}
+
+        progress_list: list[EnemyProgress] = []
+        for enemy in enemies:
             enemy_journeys = [
                 j for j in all_journeys
                 if j.template and enemy in (j.template.primary_enemy_tags or [])
@@ -1412,16 +1476,7 @@ class JourneyEngineService:
                 j for j in enemy_journeys
                 if j.status == UserJourneyStatus.COMPLETED.value
             ])
-
-            # Count total practice days for this enemy
-            total_days = 0
-            for j in enemy_journeys:
-                days_query = select(func.count()).where(
-                    UserJourneyStepState.user_journey_id == j.id,
-                    UserJourneyStepState.completed_at.isnot(None),
-                )
-                days_result = await self.db.execute(days_query)
-                total_days += days_result.scalar() or 0
+            total_days = sum(days_by_journey.get(j.id, 0) for j in enemy_journeys)
 
             # Calculate mastery level (simplified)
             mastery = min(100, (completed * 30) + (total_days * 2))
