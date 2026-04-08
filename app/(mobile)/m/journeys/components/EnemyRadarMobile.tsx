@@ -48,12 +48,6 @@ export function EnemyRadarMobile({
   const points = ENEMY_ORDER.map((enemy, i) => getPoint(i, getMastery(enemy), center, maxRadius))
   const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z'
 
-  // Calculate total path length for draw-in animation
-  const pathLength = points.reduce((sum, p, i) => {
-    const next = points[(i + 1) % points.length]
-    return sum + Math.sqrt((next.x - p.x) ** 2 + (next.y - p.y) ** 2)
-  }, 0)
-
   return (
     <div className="relative flex items-center justify-center">
       <svg width={size} height={size}>

@@ -18,7 +18,6 @@ import type {
   KarmaResetContext,
   KarmaWisdomResponse,
   SankalpaSeal,
-  DharmicQualityConfig,
 } from '../types'
 import { DHARMIC_QUALITIES } from '../types'
 

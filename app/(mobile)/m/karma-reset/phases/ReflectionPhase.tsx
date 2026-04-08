@@ -20,7 +20,6 @@ import type {
   KarmaResetContext,
   KarmaReflectionQuestion,
   KarmaReflectionAnswer,
-  KarmaCategory,
 } from '../types'
 import { CATEGORY_COLORS } from '../types'
 

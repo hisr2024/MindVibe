@@ -116,7 +116,7 @@ export default function SubscribePage() {
             Sacred Guarantee
           </h3>
           <p className="sacred-text-ui text-xs text-[var(--sacred-text-secondary)] leading-relaxed">
-            Full refund within 30 days if KIAAN doesn't serve your journey. No questions asked.
+            Full refund within 30 days if KIAAN doesn&apos;t serve your journey. No questions asked.
           </p>
         </div>
       </div>

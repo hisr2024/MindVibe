@@ -8,7 +8,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MobileWordReveal, MobileSentenceReveal } from '@/components/mobile/MobileWordReveal'
+import { MobileSentenceReveal } from '@/components/mobile/MobileWordReveal'
 import { MobileButton } from '@/components/mobile/MobileButton'
 import { SacredOMLoader } from '@/components/sacred/SacredOMLoader'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'

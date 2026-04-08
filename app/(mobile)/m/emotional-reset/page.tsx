@@ -384,7 +384,7 @@ export default function MobileEmotionalResetPage() {
           <motion.div
             key="witness"
             className="relative px-5 pt-2 pb-8"
-            style={{ zIndex: 2, willChange: 'transform, opacity', touchAction: 'manipulation', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' as any }}
+            style={{ zIndex: 2, willChange: 'transform, opacity', touchAction: 'manipulation', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
@@ -664,7 +664,7 @@ export default function MobileEmotionalResetPage() {
           <motion.div
             key="integration"
             className="relative px-5 pt-2 pb-40"
-            style={{ zIndex: 2, willChange: 'transform, opacity', touchAction: 'manipulation', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' as any }}
+            style={{ zIndex: 2, willChange: 'transform, opacity', touchAction: 'manipulation', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}

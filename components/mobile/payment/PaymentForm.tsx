@@ -116,10 +116,10 @@ export function PaymentForm({ currency, onPaymentMethodChange }: PaymentFormProp
       {/* UPI Form */}
       {activeMethod === 'upi' && isINR && (
         <UPIPayment
-          onSubmit={(upiId) => {
+          onSubmit={(_upiId) => {
             // UPI ID verification handled by Razorpay
           }}
-          onAppSelect={(app) => {
+          onAppSelect={(_app) => {
             // Deep link to UPI app handled by Razorpay
           }}
         />
@@ -142,7 +142,7 @@ export function PaymentForm({ currency, onPaymentMethodChange }: PaymentFormProp
             ))}
           </select>
           <p className="sacred-text-ui text-[11px] text-[var(--sacred-text-muted)] mt-2 ml-1">
-            You will be redirected to your bank's secure portal
+            You will be redirected to your bank&apos;s secure portal
           </p>
         </div>
       )}

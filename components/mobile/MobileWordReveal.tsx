@@ -11,7 +11,7 @@
  * designed as a standalone, reusable sacred text reveal.
  */
 
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 
 interface MobileWordRevealProps {

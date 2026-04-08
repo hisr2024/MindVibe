@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
     setError('')
 
     try {
-      const res = await apiFetch('/api/auth/forgot-password', {
+      await apiFetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
           </h2>
           <p className="sacred-text-ui text-sm text-[var(--sacred-text-secondary)] mb-8 max-w-[280px]">
             If an account exists for <span className="text-[var(--sacred-divine-gold-bright)]">{email}</span>,
-            you'll receive a password reset link shortly.
+            you&apos;ll receive a password reset link shortly.
           </p>
           <button
             onClick={() => router.push('/m/auth/login')}

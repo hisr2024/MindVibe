@@ -62,6 +62,6 @@ export function formatPrice(amount: number, currency: CurrencyCode): string {
 /**
  * Get the smallest currency unit multiplier (e.g. paise for INR, cents for USD).
  */
-export function toSmallestUnit(amount: number, currency: CurrencyCode): number {
+export function toSmallestUnit(amount: number, _currency: CurrencyCode): number {
   return Math.round(amount * 100)
 }

@@ -6,7 +6,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { getDailyWisdom } from '@/utils/voice/dailyWisdom'
 import { DailyWisdomCardMobile } from '../components/DailyWisdomCardMobile'
 import { WisdomCardSkeleton } from '../skeletons/WisdomCardSkeleton'
