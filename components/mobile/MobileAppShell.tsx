@@ -51,6 +51,9 @@ const ShankhaVoiceCompanion = dynamic(
   { ssr: false }
 )
 
+// P1-21: Error boundary isolates voice companion failures from the app shell.
+import { ShankhaErrorBoundary } from '@/components/mobile/ShankhaErrorBoundary'
+
 // Tab configuration — sacred icons for Kiaanverse divine mobile experience
 const DEFAULT_TABS: TabItem[] = [
   {
@@ -403,8 +406,12 @@ export const MobileAppShell = forwardRef<HTMLDivElement, MobileAppShellProps>(
         {showTabBar && <MobileVibePlayer />}
 
         {/* Shankha Voice Companion — KIAAN's always-awake voice assistant with
-            wake word detection, Gita wisdom, and ecosystem navigation */}
-        <ShankhaVoiceCompanion />
+            wake word detection, Gita wisdom, and ecosystem navigation.
+            P1-21: Wrapped in an ErrorBoundary so a failing voice hook never
+            crashes the app shell. */}
+        <ShankhaErrorBoundary>
+          <ShankhaVoiceCompanion />
+        </ShankhaErrorBoundary>
 
 
         {/* Tools overlay — slides up from bottom with spiritual wellness tools */}

@@ -17,7 +17,43 @@ import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { useAuth } from '@/hooks/useAuth'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useVoiceInput } from '@/hooks/useVoiceInput'
+import { useLanguage } from '@/hooks/useLanguage'
 import { apiFetch } from '@/lib/api'
+
+// P1-18: BCP-47 locale map for Web Speech API — ensures non-English users
+// get recognition in their chosen language (was hardcoded to 'en').
+// Indic languages benefit significantly from the India accent model.
+const SPEECH_LANG_MAP: Record<string, string> = {
+  en: 'en-IN',
+  hi: 'hi-IN',
+  ta: 'ta-IN',
+  te: 'te-IN',
+  bn: 'bn-IN',
+  mr: 'mr-IN',
+  gu: 'gu-IN',
+  kn: 'kn-IN',
+  ml: 'ml-IN',
+  pa: 'pa-IN',
+  sa: 'sa-IN',
+  es: 'es-ES',
+  fr: 'fr-FR',
+  de: 'de-DE',
+  pt: 'pt-PT',
+  it: 'it-IT',
+  nl: 'nl-NL',
+  pl: 'pl-PL',
+  sv: 'sv-SE',
+  ru: 'ru-RU',
+  ja: 'ja-JP',
+  'zh-CN': 'zh-CN',
+  ko: 'ko-KR',
+  th: 'th-TH',
+  vi: 'vi-VN',
+  id: 'id-ID',
+  ar: 'ar-SA',
+  tr: 'tr-TR',
+  sw: 'sw-KE',
+}
 
 interface CompanionMessage {
   id: string
@@ -30,6 +66,13 @@ export default function MobileCompanionPage() {
   const router = useRouter()
   const { isAuthenticated } = useAuth()
   const { triggerHaptic } = useHapticFeedback()
+  const { language: appLanguage } = useLanguage()
+
+  // P1-18: Derive BCP-47 locale for SpeechRecognition from app language
+  const speechLang = useMemo(
+    () => SPEECH_LANG_MAP[appLanguage] ?? `${appLanguage}-IN`,
+    [appLanguage],
+  )
 
   const [messages, setMessages] = useState<CompanionMessage[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
@@ -57,7 +100,7 @@ export default function MobileCompanionPage() {
     resetTranscript,
     status,
   } = useVoiceInput({
-    language: 'en',
+    language: speechLang,
     onTranscript: onTranscriptCb,
   })
 
@@ -154,8 +197,12 @@ export default function MobileCompanionPage() {
     }
   }, [sessionId, triggerHaptic])
 
-  // Keep ref in sync so the onTranscript callback always calls the latest version
-  handleVoiceMessageRef.current = handleVoiceMessage
+  // P4-35: Sync ref via useEffect instead of mutating during render.
+  // Direct mutation during render is a React anti-pattern that can cause
+  // tearing with concurrent rendering and Strict Mode double-invoke.
+  useEffect(() => {
+    handleVoiceMessageRef.current = handleVoiceMessage
+  }, [handleVoiceMessage])
 
   const toggleRecording = useCallback(() => {
     triggerHaptic('selection')
@@ -282,9 +329,10 @@ export default function MobileCompanionPage() {
             >
               <div className="px-4 py-3 rounded-2xl bg-white/5 border border-white/10">
                 <div className="flex gap-1">
+                  {/* P0-6: Stable string keys */}
                   {[0, 1, 2].map((i) => (
                     <motion.div
-                      key={i}
+                      key={`proc-dot-${i}`}
                       className="w-2 h-2 rounded-full bg-white/40"
                       animate={{ opacity: [0.3, 1, 0.3] }}
                       transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}

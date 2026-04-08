@@ -44,12 +44,16 @@ function isBackendTtsAvailable(): boolean {
   return false
 }
 
+export type TtsMode = 'premium' | 'browser' | 'failed'
+
 export interface UseEnhancedVoiceOutputReturn {
   isSpeaking: boolean
   isPaused: boolean
   isLoading: boolean
   isSupported: boolean
   error: string | null
+  /** Current TTS tier: 'premium' (backend), 'browser' (degraded fallback), 'failed' */
+  ttsMode: TtsMode
   speak: (text: string) => Promise<void>
   pause: () => void
   resume: () => void
@@ -78,6 +82,10 @@ export function useEnhancedVoiceOutput(
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSupported] = useState(() => isSpeechSynthesisSupported())
+  // P1-20: Circuit-breaker observability — surface degraded mode to UI
+  const [ttsMode, setTtsMode] = useState<TtsMode>(() =>
+    useBackendTts ? 'premium' : 'browser'
+  )
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const synthesisRef = useRef<SpeechSynthesisService | null>(null)
@@ -194,10 +202,35 @@ export function useEnhancedVoiceOutput(
           setIsSpeaking(true)
           setIsPaused(false)
           setIsLoading(false)
+          setTtsMode('premium')
           onStartRef.current?.()
         }
 
+        // P0-2: Release blob URL + null handlers BEFORE fireOnEnd to prevent
+        // bounded leak per response (~100-500KB each). On low-memory mobile
+        // devices, ~10 unreleased blobs cause next speak() to silently fail.
+        const releaseAudioResources = () => {
+          audio.onplay = null
+          audio.onpause = null
+          audio.onended = null
+          audio.onerror = null
+          try { audio.removeAttribute('src') } catch {}
+          try { audio.load() } catch {}
+          if (currentUrlRef.current === audioUrl) {
+            URL.revokeObjectURL(audioUrl)
+            currentUrlRef.current = null
+          } else {
+            // Defensive: revoke the local URL even if the ref was rotated
+            try { URL.revokeObjectURL(audioUrl) } catch {}
+          }
+          if (audioRef.current === audio) {
+            audioRef.current = null
+          }
+        }
+
         audio.onended = () => {
+          // Clean up audio pipeline first, then notify listeners
+          releaseAudioResources()
           if (!mountedRef.current) return
           setIsSpeaking(false)
           setIsPaused(false)
@@ -205,6 +238,7 @@ export function useEnhancedVoiceOutput(
         }
 
         audio.onerror = () => {
+          releaseAudioResources()
           if (!mountedRef.current) return
           setError('Audio playback failed')
           setIsSpeaking(false)
@@ -216,10 +250,8 @@ export function useEnhancedVoiceOutput(
         try {
           await audio.play()
         } catch {
-          // Autoplay blocked — clean up dangling handlers before falling through
-          audio.onended = null
-          audio.onerror = null
-          audioRef.current = null
+          // Autoplay blocked — clean up dangling handlers + blob URL
+          releaseAudioResources()
           setIsSpeaking(false)
           setIsLoading(false)
           return false
@@ -247,10 +279,14 @@ export function useEnhancedVoiceOutput(
       const errorMsg = 'Speech synthesis not supported'
       setError(errorMsg)
       setIsLoading(false)
+      setTtsMode('failed')
       onErrorRef.current?.(errorMsg)
       fireOnEnd()
       return
     }
+
+    // P1-20: Signal degraded tier so UI can show a subtle indicator
+    setTtsMode('browser')
 
     synthesisRef.current.speak(text, {
       onStart: () => {
@@ -288,6 +324,8 @@ export function useEnhancedVoiceOutput(
     setError(null)
     setIsLoading(true)
     endFiredRef.current = false
+    // Reset tier optimistically — will be downgraded only if backend fails
+    if (useBackendTts && isBackendTtsAvailable()) setTtsMode('premium')
 
     // Cancel any ongoing speech
     if (audioRef.current) {
@@ -305,7 +343,7 @@ export function useEnhancedVoiceOutput(
       // Fall back to browser synthesis
       playBrowserSynthesis(text)
     }
-  }, [tryBackendTts, playBrowserSynthesis])
+  }, [tryBackendTts, playBrowserSynthesis, useBackendTts])
 
   // Pause
   const pause = useCallback(() => {
@@ -376,6 +414,7 @@ export function useEnhancedVoiceOutput(
     isLoading,
     isSupported,
     error,
+    ttsMode,
     speak,
     pause,
     resume,

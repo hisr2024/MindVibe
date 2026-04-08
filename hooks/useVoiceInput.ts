@@ -256,8 +256,10 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
           setIsListening(false); setStatus('idle'); return
         }
 
-        setStatus('processing')
+        // P1-16: Clear interim transcript BEFORE changing status so the
+        // ghost text from the previous turn doesn't flicker during transition.
         setInterimTranscript('')
+        setStatus('processing')
         setServerProgressMessage('Uploading audio...')
 
         const abort = new AbortController()
