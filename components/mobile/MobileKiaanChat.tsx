@@ -286,7 +286,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
         </div>
 
         {/* Divine KIAAN header */}
-        <div className="relative z-10 px-4 py-3 bg-gradient-to-b from-[#0a0a10] to-transparent">
+        <div className="relative z-10 px-4 py-3 bg-gradient-to-b from-[#0a0a10] to-transparent flex-shrink-0">
           <div className="flex items-center justify-center gap-3">
             <div className="relative">
               <motion.div
@@ -306,11 +306,20 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
           </div>
         </div>
 
-        {/* Messages Container */}
+        {/* Messages Container
+         *
+         * SCROLL FIX: `flex-1 min-h-0` is required so the flex item can
+         * shrink below its intrinsic content height, letting `overflow-y-auto`
+         * trigger vertical scrolling. Without `min-h-0`, flex items default to
+         * `min-height: auto` (= content size), which defeats overflow scrolling
+         * on mobile. `-webkit-overflow-scrolling: touch` enables momentum
+         * scrolling on iOS Safari.
+         */}
         <div
           ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto overscroll-contain relative z-10"
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain relative z-10"
           onScroll={handleScroll}
+          style={{ WebkitOverflowScrolling: 'touch' }}
         >
           <div className="px-4 py-4 space-y-4">
             {/* Divine welcome when empty */}
@@ -563,7 +572,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
         )}
 
         {/* Divine Input area */}
-        <div className="relative z-10 px-4 py-3 bg-gradient-to-t from-[#050507] via-[#050507]/98 to-[#050507]/90 backdrop-blur-xl border-t border-[#d4a44c]/8">
+        <div className="relative z-10 px-4 py-3 bg-gradient-to-t from-[#050507] via-[#050507]/98 to-[#050507]/90 backdrop-blur-xl border-t border-[#d4a44c]/8 flex-shrink-0">
           {/* Voice input indicator */}
           <AnimatePresence>
             {isListening && (
