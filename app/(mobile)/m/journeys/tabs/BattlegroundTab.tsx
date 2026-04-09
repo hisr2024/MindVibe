@@ -29,14 +29,19 @@ export function BattlegroundTab({ dashboard, isLoading, onNavigateToJourneys }: 
     setSelectedEnemy((prev) => (prev === enemy ? null : enemy))
   }
 
-  const getMastery = (enemy: string): number =>
-    dashboard?.enemy_progress.find((p) => p.enemy === enemy)?.mastery_level ?? 0
+  const getEnemyProgress = (enemy: string) =>
+    dashboard?.enemy_progress.find((p) => p.enemy === enemy)
 
   const selectedInfo = selectedEnemy ? ENEMY_INFO[selectedEnemy] : null
   const selectedProgress = selectedEnemy
     ? dashboard?.enemy_progress.find((p) => p.enemy === selectedEnemy)
     : null
   const selectedMastery = selectedProgress?.mastery_level ?? 0
+  const selectedActivePct = selectedProgress?.active_journey_progress_pct ?? 0
+  const selectedActiveDay = selectedProgress?.active_journey_day ?? 0
+  const selectedActiveTotalDays = selectedProgress?.active_journey_total_days ?? 0
+  const hasSelectedActive =
+    selectedActivePct > 0 && selectedActiveTotalDays > 0
 
   const activeJourneyForEnemy = selectedEnemy
     ? dashboard?.active_journeys.find((j) =>
@@ -79,16 +84,22 @@ export function BattlegroundTab({ dashboard, isLoading, onNavigateToJourneys }: 
 
       {/* Enemy cards — 2x3 grid */}
       <div className="grid grid-cols-2 gap-3 mt-5">
-        {ENEMY_ORDER.map((enemy, i) => (
-          <EnemyCard
-            key={enemy}
-            enemy={enemy}
-            mastery={getMastery(enemy)}
-            isSelected={selectedEnemy === enemy}
-            onTap={() => handleEnemyTap(enemy)}
-            index={i}
-          />
-        ))}
+        {ENEMY_ORDER.map((enemy, i) => {
+          const ep = getEnemyProgress(enemy)
+          return (
+            <EnemyCard
+              key={enemy}
+              enemy={enemy}
+              mastery={ep?.mastery_level ?? 0}
+              activeJourneyProgress={ep?.active_journey_progress_pct ?? 0}
+              activeJourneyDay={ep?.active_journey_day ?? 0}
+              activeJourneyTotalDays={ep?.active_journey_total_days ?? 0}
+              isSelected={selectedEnemy === enemy}
+              onTap={() => handleEnemyTap(enemy)}
+              index={i}
+            />
+          )
+        })}
       </div>
 
       {/* Selected enemy detail sheet */}
@@ -143,10 +154,43 @@ export function BattlegroundTab({ dashboard, isLoading, onNavigateToJourneys }: 
                 </div>
               </div>
 
-              {/* Mastery bar */}
+              {/* Active journey progress bar (shown when there's an
+                  active journey for this enemy — the primary signal the
+                  user wants to see grow each day). */}
+              {hasSelectedActive && (
+                <div className="mb-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] text-[#6B6355] font-ui uppercase tracking-[0.12em]">
+                      Current journey
+                    </span>
+                    <span
+                      className="text-[10px] font-ui"
+                      style={{ color: selectedInfo.color }}
+                    >
+                      Day {selectedActiveDay} of {selectedActiveTotalDays} · {selectedActivePct}%
+                    </span>
+                  </div>
+                  <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{
+                        background: `linear-gradient(90deg, ${selectedInfo.color}, ${selectedInfo.color}aa)`,
+                        boxShadow: `0 0 12px rgba(${selectedInfo.colorRGB},0.4)`,
+                      }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${selectedActivePct}%` }}
+                      transition={{ duration: 0.7 }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Mastery bar (long-term weighted across all journeys). */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] text-[#6B6355] font-ui">Your mastery</span>
+                  <span className="text-[10px] text-[#6B6355] font-ui">
+                    {hasSelectedActive ? 'Long-term mastery' : 'Your mastery'}
+                  </span>
                   <span className="text-[10px] font-ui" style={{ color: selectedInfo.color }}>
                     {selectedMastery}% — {getMasteryDescription(selectedMastery)}
                   </span>
@@ -154,7 +198,7 @@ export function BattlegroundTab({ dashboard, isLoading, onNavigateToJourneys }: 
                 <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                   <motion.div
                     className="h-full rounded-full"
-                    style={{ backgroundColor: selectedInfo.color }}
+                    style={{ backgroundColor: selectedInfo.color, opacity: 0.55 }}
                     initial={{ width: 0 }}
                     animate={{ width: `${selectedMastery}%` }}
                     transition={{ duration: 0.6 }}

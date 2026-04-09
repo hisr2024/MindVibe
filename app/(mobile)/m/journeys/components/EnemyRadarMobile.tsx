@@ -1,8 +1,12 @@
 /**
  * EnemyRadarMobile — Touch-interactive SVG hexagonal radar chart.
  *
- * Displays mastery levels for the 6 inner enemies with draw-in animation,
- * tappable endpoint circles, and Devanagari axis labels.
+ * For each enemy the radar prefers the user's CURRENT active-journey
+ * progress (days_completed / duration_days) over the long-term
+ * mastery_level, because that is the number the user watches grow day
+ * by day. When there is no active journey for a given enemy, the
+ * radar falls back to mastery_level so dormant enemies still show
+ * historical progress. This matches the behaviour of EnemyCard.
  */
 
 'use client'
@@ -41,11 +45,24 @@ export function EnemyRadarMobile({
   const maxRadius = size * 0.34
   const levels = 3
 
-  const getMastery = (enemy: string): number =>
-    data.find((p) => p.enemy === enemy)?.mastery_level ?? 0
+  /**
+   * Pick the radar value for an enemy: active journey progress first,
+   * mastery level as fallback. Keeping them on the same 0-100 scale
+   * means the radar polygon reads as "how far along am I in my
+   * current work against each enemy?" — the Battleground's primary
+   * question — while dormant axes still show historical mastery.
+   */
+  const getRadarValue = (enemy: string): number => {
+    const ep = data.find((p) => p.enemy === enemy)
+    if (!ep) return 0
+    const active = ep.active_journey_progress_pct ?? 0
+    return active > 0 ? active : ep.mastery_level
+  }
 
   // Data polygon path
-  const points = ENEMY_ORDER.map((enemy, i) => getPoint(i, getMastery(enemy), center, maxRadius))
+  const points = ENEMY_ORDER.map((enemy, i) =>
+    getPoint(i, getRadarValue(enemy), center, maxRadius),
+  )
   const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z'
 
   return (
@@ -125,8 +142,8 @@ export function EnemyRadarMobile({
 
         {/* Data points (tappable) with pop-in animation */}
         {ENEMY_ORDER.map((enemy, i) => {
-          const mastery = getMastery(enemy)
-          const p = getPoint(i, mastery, center, maxRadius)
+          const value = getRadarValue(enemy)
+          const p = getPoint(i, value, center, maxRadius)
           const info = ENEMY_INFO[enemy]
           const isSelected = selectedEnemy === enemy
           const dimmed = selectedEnemy && selectedEnemy !== enemy
