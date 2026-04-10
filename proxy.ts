@@ -78,6 +78,7 @@ const MOBILE_ROUTE_MAP: Record<string, string> = {
   '/analytics': '/m/analytics',
   '/account': '/m/account',
   '/feedback': '/m/feedback',
+  '/pricing': '/m/subscribe',
 };
 
 function isMobileUserAgent(userAgent: string): boolean {
