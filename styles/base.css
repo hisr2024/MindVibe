@@ -12,8 +12,7 @@
 
   /* ─── Typography ─── */
   /* Core font families and type scale defined in styles/typography.css.
-     next/font injects --font-divine, --font-scripture, --font-display,
-     --font-ui, --font-devanagari on <html>. */
+     Fonts loaded via Google Fonts CDN in app/layout.tsx. */
   --font-sans: var(--font-ui), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
   /* Fluid heading sizes (used by globals.css h1-h4 rules) */

@@ -30,14 +30,13 @@
 /* Base element styles — must be co-located with @tailwind base */
 @layer base {
   :root {
-    /* Legacy aliases — reference next/font CSS variables with static fallbacks.
-       next/font injects --font-divine, --font-scripture, --font-display, --font-ui,
-       --font-devanagari on <html>. These aliases keep old var(--font-cormorant) etc.
+    /* Legacy aliases — map old var names to the unified names defined
+       in styles/typography.css. Keeps existing var(--font-cormorant) etc.
        references working across the codebase. */
-    --font-sacred: var(--font-scripture, 'Crimson Text'), Georgia, 'Times New Roman', serif;
-    --font-cormorant: var(--font-divine, 'Cormorant Garamond'), Georgia, serif;
-    --font-playfair: var(--font-display, 'Playfair Display'), Georgia, serif;
-    --font-outfit: var(--font-ui, 'Outfit'), system-ui, sans-serif;
+    --font-sacred: var(--font-scripture);
+    --font-cormorant: var(--font-divine);
+    --font-playfair: var(--font-display);
+    --font-outfit: var(--font-ui);
   }
 
   html {
@@ -66,13 +65,13 @@
   h1,
   h2,
   h3 {
-    font-family: var(--font-divine, var(--font-cormorant)), Georgia, serif;
+    font-family: var(--font-divine), Georgia, serif;
     color: var(--mv-text-primary);
   }
 
   h4,
   h5 {
-    font-family: var(--font-ui, var(--font-outfit)), system-ui, sans-serif;
+    font-family: var(--font-ui), system-ui, sans-serif;
     color: var(--mv-text-primary);
   }
 

@@ -65,14 +65,14 @@ const config: Config = {
       },
       fontFamily: {
         // Unified Kiaanverse sacred font system
-        // CSS variables injected by next/font on <html>
-        divine: ['var(--font-divine)', '"Cormorant Garamond"', 'Georgia', 'serif'],
-        scripture: ['var(--font-scripture)', '"Crimson Text"', 'Georgia', 'serif'],
-        sacred: ['var(--font-scripture)', '"Crimson Text"', 'Georgia', 'serif'],
-        display: ['var(--font-display)', '"Playfair Display"', 'Georgia', 'serif'],
-        ui: ['var(--font-ui)', 'Outfit', 'system-ui', '-apple-system', 'sans-serif'],
-        sans: ['var(--font-ui)', 'Outfit', 'system-ui', '-apple-system', 'sans-serif'],
-        devanagari: ['var(--font-devanagari)', '"Noto Sans Devanagari"', 'Mangal', '"Arial Unicode MS"', 'sans-serif'],
+        // CSS variables defined in styles/typography.css, fonts loaded via CDN
+        divine: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+        scripture: ['"Crimson Text"', 'Georgia', '"Times New Roman"', 'serif'],
+        sacred: ['"Crimson Text"', 'Georgia', '"Times New Roman"', 'serif'],
+        display: ['"Playfair Display"', 'Georgia', 'serif'],
+        ui: ['Outfit', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Outfit', 'system-ui', '-apple-system', 'sans-serif'],
+        devanagari: ['"Noto Sans Devanagari"', 'Mangal', '"Arial Unicode MS"', 'sans-serif'],
       },
       fontSize: {
         // Unified type scale
