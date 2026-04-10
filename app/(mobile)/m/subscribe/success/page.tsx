@@ -54,8 +54,8 @@ function SuccessContent() {
           }
           updateSubscription(subscription)
         }
-      } catch (err) {
-        console.warn('Could not validate subscription from server', err)
+      } catch {
+        // Subscription validation is non-critical — proceed with URL tier
       } finally {
         setValidated(true)
       }
@@ -74,7 +74,6 @@ function SuccessContent() {
 
   return (
     <SuccessScreen
-      planName={plan?.name || 'Sacred Pro'}
       trialDays={plan?.trialDays || 7}
     />
   )

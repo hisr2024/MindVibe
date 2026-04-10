@@ -14,7 +14,7 @@
  * Legal footer (terms, privacy, auto-renew)
  */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PlanSelector } from '@/components/mobile/payment/PlanSelector'
@@ -49,12 +49,11 @@ export default function SubscribePage() {
   const router = useRouter()
   const [selectedPlan, setSelectedPlan] = useState<PlanId>('pro')
   const [billing, setBilling] = useState<BillingCycle>('annual')
-  const [currency, setCurrency] = useState<CurrencyCode>('USD')
+  const [currency, setCurrency] = useState<CurrencyCode>(() => {
+    if (typeof window === 'undefined') return 'USD'
+    return detectCurrency()
+  })
   const [openFaq, setOpenFaq] = useState<number | null>(null)
-
-  useEffect(() => {
-    setCurrency(detectCurrency())
-  }, [])
 
   const handleContinue = () => {
     if (selectedPlan === 'seeker') {

@@ -49,7 +49,7 @@ export function PlanSelector({ plans, selectedPlan, billing, currency, onSelect 
     <div className="flex flex-col gap-3" role="radiogroup" aria-label="Select a plan">
       {plans.map((plan) => {
         const isSelected = selectedPlan === plan.id
-        const price = plan.price[currency]
+        const price = plan.price[currency] ?? { monthly: 0, annual: 0 }
         const displayPrice = billing === 'annual' ? price.annual : price.monthly
         const isFree = displayPrice === 0
         const annualTotal = price.annual * 12
