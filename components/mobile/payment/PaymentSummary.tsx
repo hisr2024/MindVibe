@@ -68,7 +68,7 @@ export function PaymentSummary({ planName, billing, price, currency, trialDays }
           </span>
         </div>
 
-        {hasTrial && (
+        {hasTrial && trialDays && (
           <div className="flex justify-between">
             <span className="text-[14px] text-emerald-400" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
               {trialDays}-day free trial

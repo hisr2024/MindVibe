@@ -21,7 +21,7 @@
  * user has saved payment methods in their wallet.
  */
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
@@ -57,13 +57,20 @@ function PaymentContent() {
   const isRedirectCancelled = searchParams.get('cancelled') === 'true'
   const [paymentState, setPaymentState] = useState<PaymentState>(isRedirectSuccess ? 'success' : 'idle')
   const [errorMessage, setErrorMessage] = useState(isRedirectCancelled ? 'Payment was cancelled. You can try again when ready.' : '')
+  const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Cleanup redirect timer on unmount
+  useEffect(() => {
+    return () => {
+      if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current)
+    }
+  }, [])
 
   // Handle Stripe redirect success
   useEffect(() => {
     if (isRedirectSuccess) {
       triggerHaptic('success')
-      const timer = setTimeout(() => router.push('/m/subscribe/success?plan=' + planId), 2000)
-      return () => clearTimeout(timer)
+      redirectTimerRef.current = setTimeout(() => router.push('/m/subscribe/success?plan=' + planId), 2000)
     }
   }, [isRedirectSuccess, router, triggerHaptic, planId])
 
@@ -87,7 +94,7 @@ function PaymentContent() {
   const handleStripeSuccess = () => {
     setPaymentState('success')
     triggerHaptic('success')
-    setTimeout(() => router.push('/m/subscribe/success?plan=' + planId), 2000)
+    redirectTimerRef.current = setTimeout(() => router.push('/m/subscribe/success?plan=' + planId), 2000)
   }
 
   const handleStripeError = (msg: string) => {

@@ -16,10 +16,10 @@
  */
 
 import { useEffect, useRef, useCallback } from 'react'
+import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
 
 interface SuccessScreenProps {
-  planName?: string
   trialDays?: number
 }
 
@@ -32,7 +32,7 @@ function ParticleBurst() {
 
   const animate = useCallback(() => {
     const canvas = canvasRef.current
-    if (!canvas || reduceMotion) return
+    if (!canvas || reduceMotion || typeof window === 'undefined') return
 
     const ctx = canvas.getContext('2d')
     if (!ctx) return
@@ -73,6 +73,7 @@ function ParticleBurst() {
 
     let frame = 0
     const maxFrames = 120
+    let rafId = 0
 
     function draw() {
       if (!ctx || !canvas) return
@@ -101,16 +102,19 @@ function ParticleBurst() {
 
       frame++
       if (frame < maxFrames) {
-        requestAnimationFrame(draw)
+        rafId = requestAnimationFrame(draw)
       }
     }
 
     // Delay particles slightly for dramatic effect
     const timer = setTimeout(() => {
-      requestAnimationFrame(draw)
+      rafId = requestAnimationFrame(draw)
     }, 200)
 
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(timer)
+      cancelAnimationFrame(rafId)
+    }
   }, [reduceMotion])
 
   useEffect(() => {
@@ -158,7 +162,7 @@ function WordReveal({ text, delay = 0, className = '' }: { text: string; delay?:
   )
 }
 
-export function SuccessScreen({ planName = 'Sacred Pro', trialDays = 7 }: SuccessScreenProps) {
+export function SuccessScreen({ trialDays = 7 }: SuccessScreenProps) {
   const reduceMotion = useReducedMotion()
 
   // Calculate trial end date
@@ -343,9 +347,9 @@ export function SuccessScreen({ planName = 'Sacred Pro', trialDays = 7 }: Succes
           transition={reduceMotion ? undefined : { delay: 2.0, duration: 0.4 }}
           className="w-full mt-8"
         >
-          <a
+          <Link
             href="/m/journeys"
-            className="block w-full h-[52px] rounded-[26px] flex items-center justify-center text-[15px] font-medium tracking-wide text-[#F8F6F0]"
+            className="w-full h-[52px] rounded-[26px] flex items-center justify-center text-[15px] font-medium tracking-wide text-[#F8F6F0]"
             style={{
               background: 'linear-gradient(135deg, #D4A017, #C89430)',
               fontFamily: 'Outfit, system-ui, sans-serif',
@@ -353,7 +357,7 @@ export function SuccessScreen({ planName = 'Sacred Pro', trialDays = 7 }: Succes
             }}
           >
             Begin Your First Journey &#x2192;
-          </a>
+          </Link>
         </motion.div>
 
         {/* Secondary link */}
@@ -363,13 +367,13 @@ export function SuccessScreen({ planName = 'Sacred Pro', trialDays = 7 }: Succes
           transition={reduceMotion ? undefined : { delay: 2.2, duration: 0.3 }}
           className="mt-3"
         >
-          <a
+          <Link
             href="/m"
             className="text-[13px] text-[#6B6355] hover:text-[#B8AE98] transition-colors"
             style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}
           >
             &#x2190; Return to home
-          </a>
+          </Link>
         </motion.div>
 
         {/* Trial Note */}
