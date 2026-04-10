@@ -1,0 +1,296 @@
+/* =====================================================
+   KIAANVERSE TYPOGRAPHY — Complete Typography System
+   ─────────────────────────────────────────────────────
+   Single source of truth for all typography tokens,
+   semantic utility classes, accessibility features,
+   and responsive scaling.
+
+   Import once in globals.css. All tokens consumed by
+   Tailwind utilities and component CSS.
+   ===================================================== */
+
+/* ═══════════════════════════════════════════════════════
+   1. TOKEN DEFINITIONS — CSS Custom Properties
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* ── USER PREFERENCE SCALING ─────────────────────────── */
+  --text-scale: 1;
+
+  /* ── FONT FAMILIES ───────────────────────────────────── */
+  /* Loaded via Google Fonts CDN in app/layout.tsx.
+     These vars are consumed by Tailwind utilities, .t-* classes,
+     and the T CSS-in-JS objects in lib/design-tokens/typography.ts. */
+  --font-divine:     'Cormorant Garamond', Georgia, serif;
+  --font-scripture:  'Crimson Text', Georgia, 'Times New Roman', serif;
+  --font-display:    'Playfair Display', Georgia, serif;
+  --font-ui:         'Outfit', system-ui, -apple-system, sans-serif;
+  --font-devanagari: 'Noto Sans Devanagari', Mangal, 'Arial Unicode MS', sans-serif;
+
+  /* ── DISPLAY SIZES (Cormorant Garamond) ──────────────── */
+  --text-5xl: calc(40px * var(--text-scale));
+  --text-4xl: calc(36px * var(--text-scale));
+  --text-3xl: calc(28px * var(--text-scale));
+  --text-2xl: calc(24px * var(--text-scale));
+  --text-xl:  calc(20px * var(--text-scale));
+
+  /* ── SACRED BODY (Crimson Text) ──────────────────────── */
+  --text-sacred:    calc(18px * var(--text-scale));
+  --text-sacred-sm: calc(15px * var(--text-scale));
+
+  /* ── UI BODY (Outfit) ────────────────────────────────── */
+  --text-lg:    calc(17px * var(--text-scale));
+  --text-body:  calc(16px * var(--text-scale));
+  --text-sm:    calc(13px * var(--text-scale));
+  --text-xs:    calc(max(12px, 12px * var(--text-scale)));
+  --text-micro: calc(max(10px, 10px * var(--text-scale)));
+
+  /* ── LINE HEIGHTS ────────────────────────────────────── */
+  --lh-tight:      1.10;
+  --lh-snug:       1.25;
+  --lh-normal:     1.50;
+  --lh-relaxed:    1.65;
+  --lh-loose:      1.75;
+  --lh-scripture:  1.85;
+  --lh-devanagari: 2.00;
+  --lh-ui:         1.40;
+
+  /* ── LETTER SPACING ─────────────────────────────────── */
+  --ls-tighter: -0.02em;
+  --ls-tight:   -0.01em;
+  --ls-normal:   0;
+  --ls-wide:     0.02em;
+  --ls-wider:    0.04em;
+  --ls-widest:   0.12em;
+  --ls-sacred:   0.04em;
+
+  /* ── FLUID TYPOGRAPHY FOR HEADINGS ───────────────────── */
+  --text-fluid-hero: clamp(2.5rem, 5vw + 1rem, 4rem);
+  --text-fluid-h1:   clamp(1.75rem, 3vw + 1rem, 3rem);
+  --text-fluid-h2:   clamp(1.5rem, 2vw + 1rem, 2.25rem);
+  --text-fluid-h3:   clamp(1.25rem, 1vw + 1rem, 1.75rem);
+  --text-fluid-body: clamp(1rem, 0.4vw + 0.9rem, 1.125rem);
+}
+
+/* ═══════════════════════════════════════════════════════
+   2. RESPONSIVE SCALING
+   ═══════════════════════════════════════════════════════ */
+
+/* Tablet: slight size increase */
+@media (min-width: 768px) {
+  :root {
+    --text-body:   calc(16px * var(--text-scale));
+    --text-sacred: calc(19px * var(--text-scale));
+    --text-3xl:    calc(30px * var(--text-scale));
+  }
+}
+
+/* Desktop: full scale */
+@media (min-width: 1024px) {
+  :root {
+    --text-5xl:       calc(54px * var(--text-scale));
+    --text-4xl:       calc(42px * var(--text-scale));
+    --text-3xl:       calc(32px * var(--text-scale));
+    --text-2xl:       calc(26px * var(--text-scale));
+    --text-xl:        calc(21px * var(--text-scale));
+    --text-sacred:    calc(20px * var(--text-scale));
+    --text-sacred-sm: calc(16px * var(--text-scale));
+    --text-lg:        calc(18px * var(--text-scale));
+    --text-sm:        calc(14px * var(--text-scale));
+    --text-micro:     calc(max(10px, 11px * var(--text-scale)));
+  }
+}
+
+/* Large screens: bonus size on display */
+@media (min-width: 1440px) {
+  :root {
+    --text-5xl:    calc(56px * var(--text-scale));
+    --text-sacred: calc(22px * var(--text-scale));
+  }
+}
+
+/* Base element defaults (html, body, input) live in base.css and
+   globals.css @layer base — not duplicated here to avoid cascade
+   conflicts. html font-size must remain at browser default (16px)
+   so that rem-based spacing/layout values stay stable when
+   --text-scale changes. Only the --text-* tokens scale. */
+
+/* ═══════════════════════════════════════════════════════
+   3. SEMANTIC UTILITY CLASSES
+   ═══════════════════════════════════════════════════════ */
+
+/* Font-family values use var(--font-*, <static-fallback>) so they resolve
+   to the CSS variable when available, and fall through to the named
+   font + system fallback when not (e.g. if variables are missing). */
+
+/* ── Display (Cormorant Garamond) ──────────────────────── */
+.t-divine-hero {
+  font-family: var(--font-divine, 'Cormorant Garamond'), Georgia, serif;
+  font-size: var(--text-fluid-hero);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.t-divine-h1 {
+  font-family: var(--font-divine, 'Cormorant Garamond'), Georgia, serif;
+  font-size: var(--text-3xl);
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+.t-divine-h2 {
+  font-family: var(--font-divine, 'Cormorant Garamond'), Georgia, serif;
+  font-size: var(--text-2xl);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.t-divine-h3 {
+  font-family: var(--font-divine, 'Cormorant Garamond'), Georgia, serif;
+  font-size: var(--text-xl);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* ── Scripture (Crimson Text) ──────────────────────────── */
+.t-verse {
+  font-family: var(--font-scripture, 'Crimson Text'), Georgia, 'Times New Roman', serif;
+  font-size: var(--text-sacred);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.85;
+  letter-spacing: 0.04em;
+}
+
+.t-scripture {
+  font-family: var(--font-scripture, 'Crimson Text'), Georgia, 'Times New Roman', serif;
+  font-size: var(--text-lg);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.75;
+}
+
+/* ── Hero moments (Playfair Display) ───────────────────── */
+.t-affirmation {
+  font-family: var(--font-display, 'Playfair Display'), Georgia, serif;
+  font-size: var(--text-2xl);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+/* ── UI (Outfit) ───────────────────────────────────────── */
+.t-body {
+  font-family: var(--font-ui, 'Outfit'), system-ui, -apple-system, sans-serif;
+  font-size: var(--text-body);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.t-body-lg {
+  font-family: var(--font-ui, 'Outfit'), system-ui, -apple-system, sans-serif;
+  font-size: var(--text-lg);
+  font-weight: 400;
+  line-height: 1.65;
+}
+
+.t-label {
+  font-family: var(--font-ui, 'Outfit'), system-ui, -apple-system, sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+.t-caption {
+  font-family: var(--font-ui, 'Outfit'), system-ui, -apple-system, sans-serif;
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+.t-micro {
+  font-family: var(--font-ui, 'Outfit'), system-ui, -apple-system, sans-serif;
+  font-size: var(--text-micro);
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ── Devanagari (Sanskrit Unicode) ─────────────────────── */
+.t-devanagari {
+  font-family: var(--font-devanagari, 'Noto Sans Devanagari'), Mangal, 'Arial Unicode MS', sans-serif;
+  font-size: var(--text-sacred);
+  font-weight: 400;
+  line-height: 2.0;
+  letter-spacing: 0.04em;
+}
+
+.t-devanagari-large {
+  font-family: var(--font-devanagari, 'Noto Sans Devanagari'), Mangal, 'Arial Unicode MS', sans-serif;
+  font-size: var(--text-4xl);
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+}
+
+.t-devanagari-sm {
+  font-family: var(--font-devanagari, 'Noto Sans Devanagari'), Mangal, 'Arial Unicode MS', sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 2.0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   5. ACCESSIBILITY — Dyslexia Mode
+   ═══════════════════════════════════════════════════════ */
+
+/* User-toggled via .dyslexia-mode class on <html> or <body>.
+   Persisted in user preferences (localStorage). */
+.dyslexia-mode {
+  /* Increase letter spacing for better character separation */
+  letter-spacing: 0.05em;
+  /* Increase word spacing for better word separation */
+  word-spacing: 0.1em;
+  /* Never justified text — ragged right is easier to track */
+  text-align: left !important;
+}
+
+.dyslexia-mode * {
+  /* Override any justified text throughout the app */
+  text-align: inherit;
+}
+
+.dyslexia-mode .t-verse,
+.dyslexia-mode .t-scripture,
+.dyslexia-mode .text-scripture-verse,
+.dyslexia-mode .text-scripture-body,
+.dyslexia-mode .text-scripture-small {
+  /* Remove italic for body scripture in dyslexia mode */
+  font-style: normal;
+}
+
+/* Increase line height globally in dyslexia mode */
+.dyslexia-mode {
+  --lh-relaxed: 1.80;
+  --lh-loose:   1.85;
+  --lh-scripture: 2.0;
+  --lh-devanagari: 2.2;
+}
+
+/* ═══════════════════════════════════════════════════════
+   6. ACCESSIBILITY — Adjustable Text Size
+   ═══════════════════════════════════════════════════════ */
+
+/* Applied via --text-scale CSS custom property on :root.
+   Values: 1 (normal), 1.125 (large), 1.25 (xlarge)
+   Set via JS: document.documentElement.style.setProperty('--text-scale', value) */
+
+/* Text scale classes (alternative to JS approach) */
+.text-size-normal  { --text-scale: 1; }
+.text-size-large   { --text-scale: 1.125; }
+.text-size-xlarge  { --text-scale: 1.25; }

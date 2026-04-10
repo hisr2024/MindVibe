@@ -65,12 +65,13 @@ const config: Config = {
       },
       fontFamily: {
         // Unified Kiaanverse sacred font system
-        divine: ['"Cormorant Garamond"', 'var(--font-cormorant)', 'Georgia', 'serif'],
-        scripture: ['"Crimson Text"', 'var(--font-sacred)', 'Georgia', 'serif'],
-        sacred: ['"Crimson Text"', 'var(--font-sacred)', 'Georgia', 'serif'],
-        display: ['"Playfair Display"', 'var(--font-playfair)', 'Georgia', 'serif'],
-        ui: ['Outfit', 'var(--font-outfit)', 'system-ui', 'sans-serif'],
-        sans: ['Outfit', 'var(--font-ui)', 'system-ui', '-apple-system', 'sans-serif'],
+        // CSS variables defined in styles/typography.css, fonts loaded via CDN
+        divine: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+        scripture: ['"Crimson Text"', 'Georgia', '"Times New Roman"', 'serif'],
+        sacred: ['"Crimson Text"', 'Georgia', '"Times New Roman"', 'serif'],
+        display: ['"Playfair Display"', 'Georgia', 'serif'],
+        ui: ['Outfit', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Outfit', 'system-ui', '-apple-system', 'sans-serif'],
         devanagari: ['"Noto Sans Devanagari"', 'Mangal', '"Arial Unicode MS"', 'sans-serif'],
       },
       fontSize: {
@@ -80,7 +81,7 @@ const config: Config = {
         'sm': ['13px', { lineHeight: '1.4', letterSpacing: '0.02em' }],
         'base': ['14px', { lineHeight: '1.5' }],
         'body': ['16px', { lineHeight: '1.6' }],
-        'body-lg': ['var(--text-body-lg)', { lineHeight: '1.65' }],
+        'body-lg': ['17px', { lineHeight: '1.65' }],
         'lg': ['17px', { lineHeight: '1.65' }],
         'xl': ['20px', { lineHeight: '1.4' }],
         '2xl': ['24px', { lineHeight: '1.3' }],

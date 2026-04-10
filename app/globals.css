@@ -9,6 +9,7 @@
 @import 'simplebar-react/dist/simplebar.min.css';
 
 /* MindVibe design system partials */
+@import '../styles/typography.css';
 @import '../styles/emotionThemes.css';
 @import '../styles/base.css';
 @import '../styles/components.css';
@@ -29,18 +30,19 @@
 /* Base element styles — must be co-located with @tailwind base */
 @layer base {
   :root {
-    --font-sacred: 'Crimson Text', Georgia, 'Times New Roman', serif;
-    --font-cormorant: 'Cormorant Garamond', Georgia, serif;
-    --font-playfair: 'Playfair Display', Georgia, serif;
-    --font-outfit: 'Outfit', system-ui, sans-serif;
-    --font-devanagari: 'Noto Sans Devanagari', 'Mangal', 'Arial Unicode MS', sans-serif;
+    /* Legacy aliases — map old var names to the unified names defined
+       in styles/typography.css. Keeps existing var(--font-cormorant) etc.
+       references working across the codebase. */
+    --font-sacred: var(--font-scripture);
+    --font-cormorant: var(--font-divine);
+    --font-playfair: var(--font-display);
+    --font-outfit: var(--font-ui);
   }
 
   html {
-    font-family: var(--font-ui, var(--font-outfit)), system-ui, sans-serif;
+    font-family: var(--font-ui), system-ui, sans-serif;
     -webkit-text-size-adjust: auto;
     text-size-adjust: auto;
-    font-size: calc(var(--font-scale, 1) * 100%);
   }
 
   body {
@@ -63,13 +65,13 @@
   h1,
   h2,
   h3 {
-    font-family: var(--font-divine, var(--font-cormorant)), Georgia, serif;
+    font-family: var(--font-divine), Georgia, serif;
     color: var(--mv-text-primary);
   }
 
   h4,
   h5 {
-    font-family: var(--font-ui, var(--font-outfit)), system-ui, sans-serif;
+    font-family: var(--font-ui), system-ui, sans-serif;
     color: var(--mv-text-primary);
   }
 
