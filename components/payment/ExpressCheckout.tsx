@@ -13,13 +13,14 @@
  * IMPORTANT: This component handles two distinct intent types:
  * - PaymentIntent (non-trial): confirmed via stripe.confirmCardPayment()
  * - SetupIntent (trial subscriptions): confirmed via stripe.confirmCardSetup()
- * The intent type is detected from the clientSecret prefix (pi_ vs seti_).
+ * The intent type is passed from the parent via the intentType prop.
  */
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useStripe, PaymentRequestButtonElement } from '@stripe/react-stripe-js'
 import type { PaymentRequest } from '@stripe/stripe-js'
 import { PAYMENT_FLAGS } from '@/lib/feature-flags'
+import { translateStripeError } from '@/lib/payments/errors'
 
 interface ExpressCheckoutProps {
   amount: number
@@ -29,19 +30,6 @@ interface ExpressCheckoutProps {
   intentType: 'payment' | 'setup'
   onSuccess: () => void
   onError: (message: string) => void
-}
-
-function translateStripeError(code?: string): string {
-  const map: Record<string, string> = {
-    card_declined: 'Your card was declined. Please try a different payment method.',
-    insufficient_funds: 'Insufficient funds. Please try a different card.',
-    expired_card: 'Your card has expired. Please use a current card.',
-    incorrect_cvc: 'The security code is incorrect. Please check and try again.',
-    processing_error: 'A temporary error occurred. Please try again.',
-    authentication_required: 'Your bank requires additional verification. Please complete it.',
-    setup_intent_unexpected_state: 'Payment setup failed. Please refresh and try again.',
-  }
-  return map[code ?? ''] ?? 'Payment could not be completed. Please try another method.'
 }
 
 export function ExpressCheckout({
@@ -57,50 +45,20 @@ export function ExpressCheckout({
   const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null)
   const [canPay, setCanPay] = useState<{ applePay?: boolean; googlePay?: boolean } | null>(null)
 
-  // Stable callback for the paymentmethod event handler
-  const handlePaymentMethod = useCallback(
-    async (event: { paymentMethod: { id: string }; complete: (status: string) => void }) => {
-      if (!stripe) {
-        event.complete('fail')
-        onError('Payment processor not ready. Please try again.')
-        return
-      }
+  // Refs to hold the latest values so the event handler always sees
+  // current props without needing to re-register the listener.
+  const clientSecretRef = useRef(clientSecret)
+  const intentTypeRef = useRef(intentType)
+  const onSuccessRef = useRef(onSuccess)
+  const onErrorRef = useRef(onError)
 
-      try {
-        if (intentType === 'setup') {
-          // Trial subscription: confirm SetupIntent to save payment method
-          const { error } = await stripe.confirmCardSetup(clientSecret, {
-            payment_method: event.paymentMethod.id,
-          })
-
-          if (error) {
-            event.complete('fail')
-            onError(translateStripeError(error.code))
-          } else {
-            event.complete('success')
-            onSuccess()
-          }
-        } else {
-          // Non-trial: confirm PaymentIntent to charge immediately
-          const { error } = await stripe.confirmCardPayment(clientSecret, {
-            payment_method: event.paymentMethod.id,
-          })
-
-          if (error) {
-            event.complete('fail')
-            onError(translateStripeError(error.code))
-          } else {
-            event.complete('success')
-            onSuccess()
-          }
-        }
-      } catch {
-        event.complete('fail')
-        onError('Payment failed. Please try again or use a different method.')
-      }
-    },
-    [stripe, clientSecret, intentType, onSuccess, onError],
-  )
+  // Sync refs in an effect to satisfy react-hooks/refs lint rule.
+  useEffect(() => {
+    clientSecretRef.current = clientSecret
+    intentTypeRef.current = intentType
+    onSuccessRef.current = onSuccess
+    onErrorRef.current = onError
+  })
 
   useEffect(() => {
     if (!stripe) return
@@ -139,12 +97,54 @@ export function ExpressCheckout({
     // CRITICAL: Confirm the intent BEFORE calling event.complete().
     // Calling event.complete('success') before confirmation causes the
     // Google Pay sheet to close while payment hasn't actually succeeded.
-    pr.on('paymentmethod', handlePaymentMethod)
+    pr.on('paymentmethod', async (event) => {
+      if (!stripe) {
+        event.complete('fail')
+        onErrorRef.current('Payment processor not ready. Please try again.')
+        return
+      }
 
-    return () => {
-      pr.off('paymentmethod', handlePaymentMethod)
-    }
-  }, [stripe, amount, currency, label, handlePaymentMethod])
+      try {
+        if (intentTypeRef.current === 'setup') {
+          // Trial subscription: confirm SetupIntent to save payment method
+          const { error } = await stripe.confirmCardSetup(
+            clientSecretRef.current,
+            { payment_method: event.paymentMethod.id },
+          )
+
+          if (error) {
+            event.complete('fail')
+            onErrorRef.current(translateStripeError(error.code))
+          } else {
+            event.complete('success')
+            onSuccessRef.current()
+          }
+        } else {
+          // Non-trial: confirm PaymentIntent to charge immediately
+          const { error } = await stripe.confirmCardPayment(
+            clientSecretRef.current,
+            { payment_method: event.paymentMethod.id },
+          )
+
+          if (error) {
+            event.complete('fail')
+            onErrorRef.current(translateStripeError(error.code))
+          } else {
+            event.complete('success')
+            onSuccessRef.current()
+          }
+        }
+      } catch {
+        event.complete('fail')
+        onErrorRef.current('Payment failed. Please try again or use a different method.')
+      }
+    })
+
+    // PaymentRequest does not expose an .off() method in the Stripe.js
+    // type definitions, so we rely on the object being garbage-collected
+    // when the component unmounts (no references are held externally).
+    // The refs pattern above ensures the handler always reads current props.
+  }, [stripe, amount, currency, label])
 
   // Do not render if not available or still checking
   if (!paymentRequest || !canPay) return null
