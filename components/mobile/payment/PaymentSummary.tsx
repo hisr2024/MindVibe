@@ -3,8 +3,9 @@
 /**
  * PaymentSummary — Order breakdown card
  *
- * Shows plan name, billing cycle, price, trial discount,
- * and the "Due today" amount (₹0.00 during trial) in gold.
+ * Shows plan name badge, price/month, billing info,
+ * line items, trial discount, "Due today" in gold,
+ * and post-trial charge info.
  */
 
 import { type CurrencyCode, formatPrice } from '@/lib/payments/currency'
@@ -25,20 +26,30 @@ export function PaymentSummary({ planName, billing, price, currency, trialDays }
   const billingLabel = isAnnual ? 'Annual' : 'Monthly'
 
   return (
-    <div className="rounded-[20px] overflow-hidden border border-[rgba(212,160,23,0.2)] bg-[var(--sacred-gradient-card)]">
+    <div className="rounded-[20px] overflow-hidden border border-[rgba(212,160,23,0.2)] bg-[linear-gradient(145deg,rgba(22,26,66,0.95),rgba(17,20,53,0.98))]">
       {/* Header */}
       <div className="px-5 pt-4 pb-3">
         <div className="flex items-center gap-2 mb-1">
-          <span className="px-2 py-0.5 rounded-md bg-[rgba(212,160,23,0.15)] border border-[rgba(212,160,23,0.25)] sacred-text-ui text-[10px] text-[var(--sacred-divine-gold-bright)] font-medium uppercase tracking-wider">
+          <span
+            className="px-2 py-0.5 rounded-md bg-[rgba(212,160,23,0.15)] border border-[rgba(212,160,23,0.25)] text-[10px] font-medium uppercase tracking-[0.08em]"
+            style={{
+              fontFamily: 'Outfit, system-ui, sans-serif',
+              color: '#F0C040',
+            }}
+          >
             {planName}
           </span>
         </div>
-        <p className="sacred-text-divine text-xl text-[var(--sacred-text-primary)]">
-          {formatPrice(price, currency)}<span className="text-sm text-[var(--sacred-text-muted)]">/month</span>
+        <p
+          className="text-xl text-[#EDE8DC]"
+          style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+        >
+          {formatPrice(price, currency)}
+          <span className="text-sm text-[#6B6355]">/month</span>
         </p>
         {isAnnual && (
-          <p className="sacred-text-ui text-xs text-[var(--sacred-text-muted)] mt-0.5">
-            Billed annually · {formatPrice(totalAmount, currency)}/year
+          <p className="text-[12px] text-[#6B6355] mt-0.5" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
+            Billed annually &middot; {formatPrice(totalAmount, currency)}/year
           </p>
         )}
       </div>
@@ -49,20 +60,20 @@ export function PaymentSummary({ planName, billing, price, currency, trialDays }
       {/* Line items */}
       <div className="px-5 py-3 space-y-2">
         <div className="flex justify-between">
-          <span className="sacred-text-ui text-sm text-[var(--sacred-text-secondary)]">
+          <span className="text-[14px] text-[#B8AE98]" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
             {planName} ({billingLabel})
           </span>
-          <span className="sacred-text-ui text-sm text-[var(--sacred-text-primary)]">
+          <span className="text-[14px] text-[#EDE8DC]" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
             {formatPrice(totalAmount, currency)}
           </span>
         </div>
 
         {hasTrial && (
           <div className="flex justify-between">
-            <span className="sacred-text-ui text-sm text-emerald-400">
+            <span className="text-[14px] text-emerald-400" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
               {trialDays}-day free trial
             </span>
-            <span className="sacred-text-ui text-sm text-emerald-400">
+            <span className="text-[14px] text-emerald-400" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
               -{formatPrice(totalAmount, currency)}
             </span>
           </div>
@@ -70,22 +81,28 @@ export function PaymentSummary({ planName, billing, price, currency, trialDays }
       </div>
 
       {/* Divider */}
-      <div className="sacred-divider mx-5 !my-0" />
+      <div className="h-px bg-[rgba(255,255,255,0.06)] mx-5" />
 
       {/* Total */}
       <div className="px-5 py-3">
         <div className="flex justify-between items-center">
-          <span className="sacred-text-ui text-sm font-medium text-[var(--sacred-text-primary)]">
+          <span className="text-[14px] font-medium text-[#EDE8DC]" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
             Due today
           </span>
-          <span className="sacred-text-divine text-lg text-[var(--sacred-divine-gold-bright)] flex items-center gap-1">
+          <span
+            className="text-lg flex items-center gap-1"
+            style={{
+              fontFamily: '"Cormorant Garamond", Georgia, serif',
+              color: '#F0C040',
+            }}
+          >
             {formatPrice(dueToday, currency)}
-            {hasTrial && <span className="text-xs">✦</span>}
+            {hasTrial && <span className="text-xs">&#10038;</span>}
           </span>
         </div>
         {hasTrial && (
-          <p className="sacred-text-ui text-[11px] text-[var(--sacred-text-muted)] text-right mt-0.5">
-            After {trialDays} days: {formatPrice(totalAmount, currency)}/{isAnnual ? 'year' : 'month'}
+          <p className="text-[11px] text-[#6B6355] text-right mt-0.5" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
+            Then {formatPrice(price, currency)}/month ({formatPrice(totalAmount, currency)}/{isAnnual ? 'year' : 'month'})
           </p>
         )}
       </div>

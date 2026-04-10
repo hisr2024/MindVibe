@@ -1,10 +1,12 @@
 'use client'
 
 /**
- * BillingToggle — Monthly/Annual toggle with "Save 40%" pill
+ * BillingToggle — Pill toggle for Monthly/Annual billing
  *
- * Custom styled toggle, gold thumb when annual selected.
- * Pill badge appears next to Annual label showing savings.
+ * Centered pill with two options. Active pill has gold tint + border.
+ * "Save 40%" gold badge on Annual option.
+ * ARIA: role="radiogroup" with role="radio" options.
+ * Touch target: 44px height minimum.
  */
 
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
@@ -18,54 +20,66 @@ export function BillingToggle({ billing, onToggle }: BillingToggleProps) {
   const { triggerHaptic } = useHapticFeedback()
   const isAnnual = billing === 'annual'
 
-  const handleToggle = () => {
-    triggerHaptic('selection')
-    onToggle(isAnnual ? 'monthly' : 'annual')
-  }
-
   return (
-    <div className="flex items-center justify-center gap-3 py-4">
-      <span className={`sacred-text-ui text-sm transition-colors ${
-        !isAnnual ? 'text-[var(--sacred-text-primary)]' : 'text-[var(--sacred-text-muted)]'
-      }`}>
-        Monthly
-      </span>
-
-      {/* Custom toggle */}
-      <button
-        type="button"
-        role="switch"
-        aria-checked={isAnnual}
-        onClick={handleToggle}
-        className={`relative w-[46px] h-[26px] rounded-full transition-all duration-300 ${
-          isAnnual
-            ? 'bg-gradient-to-r from-[var(--sacred-krishna-blue)] to-[var(--sacred-peacock-teal)]'
-            : 'bg-[rgba(22,26,66,0.8)] border border-[rgba(255,255,255,0.15)]'
-        }`}
+    <div className="flex flex-col items-center gap-2 py-4">
+      <div
+        role="radiogroup"
+        aria-label="Billing frequency"
+        className="inline-flex items-center h-[44px] rounded-full bg-[rgba(22,26,66,0.6)] border border-[rgba(255,255,255,0.08)] p-[3px]"
       >
-        <div
-          className={`absolute top-[3px] w-5 h-5 rounded-full transition-all duration-300 shadow-md ${
-            isAnnual
-              ? 'left-[23px] bg-[var(--sacred-divine-gold)]'
-              : 'left-[3px] bg-[var(--sacred-text-secondary)]'
+        {/* Monthly option */}
+        <button
+          type="button"
+          role="radio"
+          aria-checked={!isAnnual}
+          onClick={() => {
+            triggerHaptic('selection')
+            onToggle('monthly')
+          }}
+          className={`relative h-[38px] px-5 rounded-full text-[14px] font-medium transition-all duration-200 ${
+            !isAnnual
+              ? 'bg-[rgba(212,160,23,0.12)] border border-[rgba(212,160,23,0.4)] text-[#D4A017]'
+              : 'text-[#6B6355] border border-transparent hover:text-[#B8AE98]'
           }`}
-        />
-      </button>
+          style={{ fontFamily: 'Outfit, system-ui, sans-serif', minWidth: '90px' }}
+        >
+          Monthly
+        </button>
 
-      <span className={`sacred-text-ui text-sm transition-colors ${
-        isAnnual ? 'text-[var(--sacred-text-primary)]' : 'text-[var(--sacred-text-muted)]'
-      }`}>
-        Annual
-      </span>
+        {/* Annual option */}
+        <button
+          type="button"
+          role="radio"
+          aria-checked={isAnnual}
+          onClick={() => {
+            triggerHaptic('selection')
+            onToggle('annual')
+          }}
+          className={`relative h-[38px] px-5 rounded-full text-[14px] font-medium transition-all duration-200 flex items-center gap-2 ${
+            isAnnual
+              ? 'bg-[rgba(212,160,23,0.12)] border border-[rgba(212,160,23,0.4)] text-[#D4A017]'
+              : 'text-[#6B6355] border border-transparent hover:text-[#B8AE98]'
+          }`}
+          style={{ fontFamily: 'Outfit, system-ui, sans-serif', minWidth: '90px' }}
+        >
+          Annual
+          <span
+            className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full transition-all ${
+              isAnnual
+                ? 'bg-[rgba(212,160,23,0.2)] text-[#F0C040] border border-[rgba(212,160,23,0.3)]'
+                : 'bg-[rgba(212,160,23,0.08)] text-[#6B6355] border border-[rgba(212,160,23,0.1)]'
+            }`}
+          >
+            Save 40%
+          </span>
+        </button>
+      </div>
 
-      {/* Save badge */}
-      <span className={`text-[10px] sacred-text-ui font-semibold px-2 py-0.5 rounded-full transition-all duration-300 ${
-        isAnnual
-          ? 'bg-[rgba(16,185,129,0.2)] text-emerald-400 border border-emerald-500/20'
-          : 'bg-[rgba(16,185,129,0.1)] text-emerald-500/50 border border-emerald-500/10'
-      }`}>
-        Save 40%
-      </span>
+      {isAnnual && (
+        <p className="text-[11px] text-[#6B6355]" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
+          Billed annually &middot; Cancel anytime
+        </p>
+      )}
     </div>
   )
 }
