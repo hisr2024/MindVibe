@@ -65,13 +65,14 @@ const config: Config = {
       },
       fontFamily: {
         // Unified Kiaanverse sacred font system
-        divine: ['"Cormorant Garamond"', 'var(--font-cormorant)', 'Georgia', 'serif'],
-        scripture: ['"Crimson Text"', 'var(--font-sacred)', 'Georgia', 'serif'],
-        sacred: ['"Crimson Text"', 'var(--font-sacred)', 'Georgia', 'serif'],
-        display: ['"Playfair Display"', 'var(--font-playfair)', 'Georgia', 'serif'],
-        ui: ['Outfit', 'var(--font-outfit)', 'system-ui', 'sans-serif'],
-        sans: ['Outfit', 'var(--font-ui)', 'system-ui', '-apple-system', 'sans-serif'],
-        devanagari: ['"Noto Sans Devanagari"', 'Mangal', '"Arial Unicode MS"', 'sans-serif'],
+        // CSS variables injected by next/font on <html>
+        divine: ['var(--font-divine)', '"Cormorant Garamond"', 'Georgia', 'serif'],
+        scripture: ['var(--font-scripture)', '"Crimson Text"', 'Georgia', 'serif'],
+        sacred: ['var(--font-scripture)', '"Crimson Text"', 'Georgia', 'serif'],
+        display: ['var(--font-display)', '"Playfair Display"', 'Georgia', 'serif'],
+        ui: ['var(--font-ui)', 'Outfit', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['var(--font-ui)', 'Outfit', 'system-ui', '-apple-system', 'sans-serif'],
+        devanagari: ['var(--font-devanagari)', '"Noto Sans Devanagari"', 'Mangal', '"Arial Unicode MS"', 'sans-serif'],
       },
       fontSize: {
         // Unified type scale
@@ -80,7 +81,7 @@ const config: Config = {
         'sm': ['13px', { lineHeight: '1.4', letterSpacing: '0.02em' }],
         'base': ['14px', { lineHeight: '1.5' }],
         'body': ['16px', { lineHeight: '1.6' }],
-        'body-lg': ['var(--text-body-lg)', { lineHeight: '1.65' }],
+        'body-lg': ['17px', { lineHeight: '1.65' }],
         'lg': ['17px', { lineHeight: '1.65' }],
         'xl': ['20px', { lineHeight: '1.4' }],
         '2xl': ['24px', { lineHeight: '1.3' }],

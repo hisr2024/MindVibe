@@ -11,16 +11,16 @@
   --color-surface: #0a0a12;
 
   /* ─── Typography ─── */
-  /* Font family fallbacks — actual font vars are injected by next/font on <html> */
+  /* Core font families and type scale defined in styles/typography.css.
+     next/font injects --font-divine, --font-scripture, --font-display,
+     --font-ui, --font-devanagari on <html>. */
   --font-sans: var(--font-ui), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-sacred: Georgia, 'Times New Roman', serif;
 
-  /* Fluid heading sizes */
+  /* Fluid heading sizes (used by globals.css h1-h4 rules) */
   --text-h1: clamp(2rem, 3vw + 1rem, 2.6rem);
   --text-h2: clamp(1.6rem, 2vw + 1rem, 2.1rem);
   --text-h3: clamp(1.3rem, 1vw + 1rem, 1.6rem);
   --text-h4: clamp(1.125rem, 0.8vw + 0.9rem, 1.25rem);
-  --text-body: clamp(0.9375rem, 0.4vw + 0.9rem, 1rem);
   --text-body-lg: clamp(1rem, 0.5vw + 0.9rem, 1.125rem);
   --text-caption: 0.875rem;
   --text-label: 0.875rem;

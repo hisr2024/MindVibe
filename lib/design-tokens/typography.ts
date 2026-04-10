@@ -122,6 +122,104 @@ export const TYPE_SCALE = {
 
 } as const
 
+// ── CSS-in-JS Style Objects ───────────────────────────────────────────
+// Drop-in style objects for React components. Single source of truth.
+// Usage: <div style={T.verse}>Elevate yourself...</div>
+// CRITICAL: For Sanskrit Unicode, use T.devanagari — NEVER T.verse or T.divineHero.
+
+export const T = {
+
+  // Display — Cormorant Garamond
+  divineHero: {
+    fontFamily: '"Cormorant Garamond", Georgia, serif',
+    fontSize: 40, fontWeight: 300, fontStyle: 'italic' as const,
+    lineHeight: 1.1, letterSpacing: '-0.02em',
+  },
+  divineH1: {
+    fontFamily: '"Cormorant Garamond", Georgia, serif',
+    fontSize: 28, fontWeight: 300, lineHeight: 1.2,
+  },
+  divineH2: {
+    fontFamily: '"Cormorant Garamond", Georgia, serif',
+    fontSize: 24, fontWeight: 400, lineHeight: 1.3,
+  },
+  divineH3: {
+    fontFamily: '"Cormorant Garamond", Georgia, serif',
+    fontSize: 20, fontWeight: 400, lineHeight: 1.4,
+  },
+
+  // Scripture — Crimson Text (the sacred crown setting)
+  verse: {
+    fontFamily: '"Crimson Text", Georgia, "Times New Roman", serif',
+    fontSize: 18, fontWeight: 400, fontStyle: 'italic' as const,
+    lineHeight: 1.85, letterSpacing: '0.04em',
+  },
+  scripture: {
+    fontFamily: '"Crimson Text", Georgia, "Times New Roman", serif',
+    fontSize: 17, fontWeight: 400, fontStyle: 'italic' as const,
+    lineHeight: 1.75,
+  },
+
+  // Hero — Playfair Display (emotional peak moments)
+  affirmation: {
+    fontFamily: '"Playfair Display", Georgia, serif',
+    fontSize: 24, fontWeight: 400, fontStyle: 'italic' as const,
+    lineHeight: 1.3,
+  },
+
+  // UI — Outfit (all interactive elements)
+  body: {
+    fontFamily: 'Outfit, system-ui, -apple-system, sans-serif',
+    fontSize: 16, fontWeight: 400, lineHeight: 1.6,
+  },
+  bodyLarge: {
+    fontFamily: 'Outfit, system-ui, -apple-system, sans-serif',
+    fontSize: 17, fontWeight: 400, lineHeight: 1.65,
+  },
+  label: {
+    fontFamily: 'Outfit, system-ui, -apple-system, sans-serif',
+    fontSize: 13, fontWeight: 500, lineHeight: 1.4,
+    letterSpacing: '0.02em',
+  },
+  caption: {
+    fontFamily: 'Outfit, system-ui, -apple-system, sans-serif',
+    fontSize: 12, fontWeight: 400, lineHeight: 1.4,
+    letterSpacing: '0.02em',
+  },
+  micro: {
+    fontFamily: 'Outfit, system-ui, -apple-system, sans-serif',
+    fontSize: 10, fontWeight: 500, lineHeight: 1.3,
+    letterSpacing: '0.12em', textTransform: 'uppercase' as const,
+  },
+
+  // Devanagari — Sanskrit Unicode (NEVER use Cormorant here)
+  devanagari: {
+    fontFamily: '"Noto Sans Devanagari", Mangal, "Arial Unicode MS", sans-serif',
+    fontSize: 18, fontWeight: 400, lineHeight: 2.0,
+    letterSpacing: '0.04em',
+  },
+  devanagariLarge: {
+    fontFamily: '"Noto Sans Devanagari", Mangal, "Arial Unicode MS", sans-serif',
+    fontSize: 36, fontWeight: 400, lineHeight: 1.4,
+    letterSpacing: '0.06em',
+  },
+  devanagariSmall: {
+    fontFamily: '"Noto Sans Devanagari", Mangal, "Arial Unicode MS", sans-serif',
+    fontSize: 14, fontWeight: 500, lineHeight: 2.0,
+  },
+
+} as const
+
+// ── Adjustable Text Size Constants ────────────────────────────────────
+
+export type TextSize = 'normal' | 'large' | 'xlarge'
+
+export const TEXT_MULTIPLIERS: Record<TextSize, number> = {
+  normal: 1.000,
+  large:  1.125,
+  xlarge: 1.250,
+}
+
 // ── Backward-compatible exports ────────────────────────────────────────
 // These match the old export shape so existing imports don't break.
 

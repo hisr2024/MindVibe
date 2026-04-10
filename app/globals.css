@@ -9,6 +9,7 @@
 @import 'simplebar-react/dist/simplebar.min.css';
 
 /* MindVibe design system partials */
+@import '../styles/typography.css';
 @import '../styles/emotionThemes.css';
 @import '../styles/base.css';
 @import '../styles/components.css';
@@ -29,18 +30,20 @@
 /* Base element styles — must be co-located with @tailwind base */
 @layer base {
   :root {
-    --font-sacred: 'Crimson Text', Georgia, 'Times New Roman', serif;
-    --font-cormorant: 'Cormorant Garamond', Georgia, serif;
-    --font-playfair: 'Playfair Display', Georgia, serif;
-    --font-outfit: 'Outfit', system-ui, sans-serif;
-    --font-devanagari: 'Noto Sans Devanagari', 'Mangal', 'Arial Unicode MS', sans-serif;
+    /* Legacy aliases — reference next/font CSS variables with static fallbacks.
+       next/font injects --font-divine, --font-scripture, --font-display, --font-ui,
+       --font-devanagari on <html>. These aliases keep old var(--font-cormorant) etc.
+       references working across the codebase. */
+    --font-sacred: var(--font-scripture, 'Crimson Text'), Georgia, 'Times New Roman', serif;
+    --font-cormorant: var(--font-divine, 'Cormorant Garamond'), Georgia, serif;
+    --font-playfair: var(--font-display, 'Playfair Display'), Georgia, serif;
+    --font-outfit: var(--font-ui, 'Outfit'), system-ui, sans-serif;
   }
 
   html {
-    font-family: var(--font-ui, var(--font-outfit)), system-ui, sans-serif;
+    font-family: var(--font-ui), system-ui, sans-serif;
     -webkit-text-size-adjust: auto;
     text-size-adjust: auto;
-    font-size: calc(var(--font-scale, 1) * 100%);
   }
 
   body {

@@ -1,6 +1,13 @@
 import './globals.css'
 import type { Viewport } from 'next'
 import { headers } from 'next/headers'
+import {
+  Cormorant_Garamond,
+  Crimson_Text,
+  Playfair_Display,
+  Outfit,
+  Noto_Sans_Devanagari,
+} from 'next/font/google'
 import SiteFooter from './components/SiteFooter'
 import SiteNav from './components/SiteNav'
 import Providers from './providers'
@@ -16,21 +23,70 @@ import { WebVitalsReporter } from '@/components/WebVitalsReporter'
 import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema'
 
 /**
- * Kiaanverse Unified Font Loading — Google Fonts CDN
+ * Kiaanverse Unified Font Loading — next/font/google
  *
- * Five fonts loaded via CDN with display=swap for optimal LCP:
- *   Cormorant Garamond (--font-divine): sacred display, Sanskrit headers
- *   Crimson Text (--font-scripture): Gita verse body, reflective text
- *   Playfair Display (--font-display): hero moments, affirmations
- *   Outfit (--font-ui): all UI text, buttons, navigation
+ * Five fonts loaded via next/font for zero render-blocking and automatic
+ * size-adjust fallbacks that reduce CLS:
+ *   Cormorant Garamond (--font-divine):     sacred display, Sanskrit headers
+ *   Crimson Text (--font-scripture):         Gita verse body, reflective text
+ *   Playfair Display (--font-display):       hero moments, affirmations
+ *   Outfit (--font-ui):                      all UI text, buttons, navigation
  *   Noto Sans Devanagari (--font-devanagari): Sanskrit Unicode rendering
  *
- * CSS variables are defined in globals.css @layer base and consumed
- * by Tailwind utilities (font-divine, font-scripture, font-display, font-ui).
+ * CSS variables are injected on <html> via className and consumed by
+ * Tailwind utilities (font-divine, font-scripture, font-display, font-ui).
  */
 
-/** Google Fonts CDN URL — all five unified fonts in a single request */
-const GOOGLE_FONTS_URL = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap'
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['300', '400', '500'],
+  style: ['normal', 'italic'],
+  variable: '--font-divine',
+  display: 'swap',
+  preload: true,
+  fallback: ['Georgia', 'serif'],
+  adjustFontFallback: true,
+})
+
+const crimson = Crimson_Text({
+  subsets: ['latin'],
+  weight: ['400', '600'],
+  style: ['normal', 'italic'],
+  variable: '--font-scripture',
+  display: 'swap',
+  preload: true,
+  fallback: ['Georgia', 'Times New Roman', 'serif'],
+  adjustFontFallback: true,
+})
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  variable: '--font-ui',
+  display: 'swap',
+  preload: true,
+  fallback: ['system-ui', '-apple-system', 'sans-serif'],
+  adjustFontFallback: true,
+})
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-display',
+  display: 'swap',
+  preload: false,
+  fallback: ['Georgia', 'serif'],
+})
+
+const noto = Noto_Sans_Devanagari({
+  subsets: ['devanagari'],
+  weight: ['400', '500', '600'],
+  variable: '--font-devanagari',
+  display: 'swap',
+  preload: false,
+  fallback: ['Mangal', 'Arial Unicode MS', 'sans-serif'],
+})
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -157,27 +213,18 @@ export default async function RootLayout({
   const nonce = headersList.get('x-nonce') ?? ''
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={[
+        cormorant.variable,
+        crimson.variable,
+        outfit.variable,
+        playfair.variable,
+        noto.variable,
+      ].join(' ')}
+    >
       <head>
-        {/* Preconnect + load unified Kiaanverse font system via Google Fonts CDN */}
-        <link
-          rel="preconnect"
-          href="https://fonts.googleapis.com"
-        />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          as="style"
-          href={GOOGLE_FONTS_URL}
-        />
-        <link
-          rel="stylesheet"
-          href={GOOGLE_FONTS_URL}
-        />
         {/* JSON-LD structured data for search engine rich results */}
         <script
           type="application/ld+json"
