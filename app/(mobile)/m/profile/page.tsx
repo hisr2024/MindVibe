@@ -184,15 +184,16 @@ export default function MobileProfilePage() {
         >
           <motion.button
             whileTap={{ scale: 0.98 }}
-            onClick={() => handleNavigate('/pricing')}
+            onClick={() => handleNavigate('/m/subscribe')}
             className="w-full p-4 rounded-2xl text-left bg-gradient-to-r from-[#d4a44c]/15 via-[#d4a44c]/15 to-pink-500/15 border border-[#d4a44c]/20"
+            aria-label="Upgrade to Sacred Pro plan"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#d4a44c]/20 flex items-center justify-center">
                 <Crown className="w-5 h-5 text-[#d4a44c]" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold">Upgrade to Premium</p>
+                <p className="text-sm font-semibold">Upgrade to Sacred Pro</p>
                 <p className="text-caption text-[var(--mv-text-muted)] mt-0.5">Unlock all journeys and unlimited KIAAN insights</p>
               </div>
               <ChevronRight className="w-5 h-5 text-slate-500" />
