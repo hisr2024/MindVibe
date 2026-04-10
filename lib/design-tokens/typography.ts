@@ -109,7 +109,7 @@ export const TYPE_SCALE = {
   // Body sizes (Crimson Text / Outfit)
   'lg':   { size: 18, mobileSize: 17, lineHeight: 1.65, letterSpacing: '0', weight: 400, font: 'scripture' as const },
   'base': { size: 16, mobileSize: 16, lineHeight: 1.6, letterSpacing: '0', weight: 400, font: 'ui' as const },
-  'sm':   { size: 14, mobileSize: 14, lineHeight: 1.5, letterSpacing: '0.01em', weight: 400, font: 'ui' as const },
+  'sm':   { size: 14, mobileSize: 13, lineHeight: 1.5, letterSpacing: '0.01em', weight: 400, font: 'ui' as const },
 
   // Label / Caption / Micro (Outfit only)
   'label':   { size: 13, mobileSize: 13, lineHeight: 1.4, letterSpacing: '0.02em', weight: 500, font: 'ui' as const },
