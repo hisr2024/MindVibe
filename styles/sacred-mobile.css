@@ -82,30 +82,13 @@
     rgba(212, 160, 23, 0.4) 70%,
     transparent 100%);
 
-  /* ─── UNIFIED DIVINE TYPOGRAPHY ─── */
-  /* Font families */
-  --font-divine: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
-  --font-scripture: var(--font-sacred), 'Crimson Text', Georgia, 'Times New Roman', serif;
-  --font-display: var(--font-playfair), 'Playfair Display', Georgia, serif;
-  --font-ui: var(--font-outfit), 'Outfit', system-ui, -apple-system, sans-serif;
-  --font-devanagari: 'Noto Sans Devanagari', 'Mangal', 'Arial Unicode MS', sans-serif;
+  /* ─── UNIFIED DIVINE TYPOGRAPHY ───
+     Core font/size/line-height/letter-spacing tokens are defined in
+     styles/typography.css (the single source of truth). next/font injects
+     --font-divine, --font-scripture, etc. on <html>.
+     Only sacred-specific legacy aliases remain here. */
 
-  /* Type scale — mobile-first (rem for accessibility scaling) */
-  --text-micro: 0.6875rem;   /* 11px */
-  --text-xs: 0.75rem;        /* 12px */
-  --text-sm: 0.8125rem;      /* 13px */
-  --text-base: 0.875rem;     /* 14px — mobile secondary UI */
-  --text-body: 1rem;          /* 16px — MINIMUM for paragraphs */
-  --text-lg: 1.0625rem;      /* 17px */
-  --text-xl: 1.25rem;        /* 20px */
-  --text-2xl: 1.5rem;        /* 24px */
-  --text-3xl: 1.75rem;       /* 28px */
-  --text-4xl: 2.25rem;       /* 36px */
-  --text-5xl: 2.5rem;        /* 40px */
-  --text-sacred: 1.125rem;   /* 18px — verse body */
-  --text-sacred-sm: 0.9375rem; /* 15px — verse secondary */
-
-  /* Legacy aliases (backward compatibility) */
+  /* Legacy aliases (backward compatibility for sacred components) */
   --sacred-text-xs: var(--text-micro);
   --sacred-text-sm: var(--text-sm);
   --sacred-text-base: var(--text-sacred-sm);
@@ -115,27 +98,8 @@
   --sacred-text-3xl: var(--text-3xl);
   --sacred-text-4xl: 2.625rem;   /* 42px */
   --sacred-text-5xl: var(--text-5xl);
-
-  /* Line heights */
-  --lh-tight: 1.1;
-  --lh-snug: 1.25;
-  --lh-normal: 1.5;
-  --lh-relaxed: 1.65;
-  --lh-loose: 1.75;
-  --lh-scripture: 1.85;
-  --lh-devanagari: 2.0;
-  --lh-ui: 1.4;
   --sacred-line-height-scripture: var(--lh-scripture);
   --sacred-line-height-ui: var(--lh-ui);
-
-  /* Letter spacing */
-  --ls-tighter: -0.02em;
-  --ls-tight: -0.01em;
-  --ls-normal: 0;
-  --ls-wide: 0.02em;
-  --ls-wider: 0.04em;
-  --ls-widest: 0.12em;
-  --ls-sacred: 0.04em;
   --sacred-letter-spacing-divine: var(--ls-wider);
   --sacred-letter-spacing-caps: var(--ls-widest);
 
@@ -145,13 +109,6 @@
   --fw-medium: 500;
   --fw-semibold: 600;
   --fw-bold: 700;
-
-  /* Fluid typography */
-  --text-fluid-hero: clamp(2.5rem, 5vw + 1rem, 4rem);
-  --text-fluid-h1: clamp(1.75rem, 3vw + 1rem, 3rem);
-  --text-fluid-h2: clamp(1.5rem, 2vw + 1rem, 2.25rem);
-  --text-fluid-h3: clamp(1.25rem, 1vw + 1rem, 1.75rem);
-  --text-fluid-body: clamp(1rem, 0.4vw + 0.9rem, 1.125rem);
 
   /* ─── ANIMATION DURATIONS ─── */
   --sacred-duration-instant: 80ms;
@@ -744,36 +701,8 @@
   transform: scale(0.97);
 }
 
-/* ═══════════════════════════════════════════════════════
-   DESKTOP TYPOGRAPHY OVERRIDES
-   ═══════════════════════════════════════════════════════ */
-
-@media (min-width: 1024px) {
-  :root {
-    --text-micro: 0.6875rem;    /* 11px */
-    --text-xs: 0.75rem;         /* 12px */
-    --text-sm: 0.875rem;        /* 14px */
-    --text-base: 1rem;          /* 16px */
-    --text-body: 1rem;          /* 16px */
-    --text-lg: 1.125rem;        /* 18px */
-    --text-xl: 1.3125rem;       /* 21px */
-    --text-2xl: 1.625rem;       /* 26px */
-    --text-3xl: 2rem;           /* 32px */
-    --text-4xl: 2.625rem;       /* 42px */
-    --text-5xl: 3.375rem;       /* 54px */
-    --text-sacred: 1.25rem;     /* 20px */
-    --text-sacred-sm: 1rem;     /* 16px */
-  }
-}
-
-@media (min-width: 1440px) {
-  :root {
-    --text-3xl: 2.25rem;        /* 36px */
-    --text-4xl: 3rem;           /* 48px */
-    --text-5xl: 3.5rem;         /* 56px */
-    --text-sacred: 1.375rem;    /* 22px */
-  }
-}
+/* Desktop typography overrides moved to styles/typography.css
+   (the single source of truth for responsive type scale). */
 
 /* ═══════════════════════════════════════════════════════
    REDUCED MOTION — Respect user preferences

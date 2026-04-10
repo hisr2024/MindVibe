@@ -18,19 +18,19 @@ import { BreadcrumbSchema } from '@/components/seo/BreadcrumbSchema'
 /**
  * Kiaanverse Unified Font Loading — Google Fonts CDN
  *
- * Five fonts loaded via CDN with display=swap for optimal LCP:
- *   Cormorant Garamond (--font-divine): sacred display, Sanskrit headers
- *   Crimson Text (--font-scripture): Gita verse body, reflective text
- *   Playfair Display (--font-display): hero moments, affirmations
- *   Outfit (--font-ui): all UI text, buttons, navigation
- *   Noto Sans Devanagari (--font-devanagari): Sanskrit Unicode rendering
+ * Five fonts loaded via CDN with display=swap for optimal LCP.
+ * CDN is used instead of next/font because the codebase has 50+
+ * hardcoded font-family inline styles (e.g. fontFamily: '"Cormorant
+ * Garamond"') that rely on @font-face rules using the original font
+ * names. next/font registers hashed names which would break these.
  *
- * CSS variables are defined in globals.css @layer base and consumed
- * by Tailwind utilities (font-divine, font-scripture, font-display, font-ui).
+ * CSS variables are defined in styles/typography.css on :root and
+ * consumed by Tailwind utilities (font-divine, font-scripture, etc.)
+ * and the T CSS-in-JS style objects in lib/design-tokens/typography.ts.
  */
 
 /** Google Fonts CDN URL — all five unified fonts in a single request */
-const GOOGLE_FONTS_URL = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap'
+const GOOGLE_FONTS_URL = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap'
 
 export const viewport: Viewport = {
   width: 'device-width',
