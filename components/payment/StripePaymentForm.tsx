@@ -9,18 +9,25 @@
  *
  * Payment methods shown automatically by Stripe based on currency:
  * - INR: Card, UPI, Link
- * - EUR: Card, SEPA Direct Debit, Link
- * - USD/GBP: Card, Link
+ * - EUR: Card, SEPA Direct Debit, PayPal, Link
+ * - USD/GBP: Card, PayPal, Link
  * - Apple Pay / Google Pay: via ExpressCheckout (PaymentRequestButton)
+ *
+ * Intent types:
+ * - Trial subscriptions → SetupIntent (collects payment method for future charges)
+ * - Non-trial subscriptions → PaymentIntent (charges immediately)
+ * The backend returns intent_type ('setup' | 'payment') to guide confirmation.
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { getStripe } from '@/lib/stripe/client'
 import { STRIPE_APPEARANCE } from '@/lib/stripe/appearance'
 import { apiFetch } from '@/lib/api'
 import { ExpressCheckout } from './ExpressCheckout'
 import { SacredOMLoader } from '@/components/sacred/SacredOMLoader'
+import { translateStripeError } from '@/lib/payments/errors'
+import { toSmallestUnit, type CurrencyCode } from '@/lib/payments/currency'
 
 // Map frontend plan IDs to backend tier names
 const PLAN_TIER_MAP: Record<string, string> = {
@@ -33,21 +40,6 @@ const BILLING_MAP: Record<string, string> = {
   annual: 'yearly',
 }
 
-function translateStripeError(code?: string): string {
-  const map: Record<string, string> = {
-    card_declined: 'Your card was declined. Please try a different payment method.',
-    card_declined_insufficient_funds: 'Insufficient funds. Please use a different card.',
-    expired_card: 'Your card has expired. Please use a current card.',
-    incorrect_cvc: 'The security code is incorrect. Please check and try again.',
-    processing_error: 'A temporary error occurred. Please try again.',
-    authentication_required: 'Your bank requires additional verification. Please complete it.',
-    payment_intent_authentication_failure: 'Authentication was not completed. Please try again.',
-    upi_transaction_declined: 'UPI payment declined. Please try another UPI app or card.',
-    payment_method_not_available: 'This payment method is not available. Please use a card.',
-  }
-  return map[code ?? ''] ?? 'Payment could not be completed. Please try again or use a different method.'
-}
-
 // ── OUTER WRAPPER ────────────────────────────────────────────────────────
 
 interface StripePaymentWrapperProps {
@@ -55,6 +47,7 @@ interface StripePaymentWrapperProps {
   billing: string
   currency: string
   planLabel: string
+  planPrice: number
   onSuccess: () => void
   onError: (message: string) => void
 }
@@ -64,11 +57,13 @@ export function StripePaymentWrapper({
   billing,
   currency,
   planLabel,
+  planPrice,
   onSuccess,
   onError,
 }: StripePaymentWrapperProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [subscriptionId, setSubscriptionId] = useState<string | null>(null)
+  const [intentType, setIntentType] = useState<'payment' | 'setup'>('payment')
   const [loading, setLoading] = useState(true)
   const [initError, setInitError] = useState<string | null>(null)
 
@@ -103,6 +98,7 @@ export function StripePaymentWrapper({
         const data = await res.json()
         setClientSecret(data.client_secret)
         setSubscriptionId(data.subscription_id)
+        setIntentType(data.intent_type === 'setup' ? 'setup' : 'payment')
       } catch {
         setInitError('Connection issue. Please refresh and try again.')
       } finally {
@@ -145,6 +141,10 @@ export function StripePaymentWrapper({
       <StripePaymentInner
         currency={currency}
         planLabel={planLabel}
+        planPrice={planPrice}
+        billing={billing}
+        clientSecret={clientSecret}
+        intentType={intentType}
         subscriptionId={subscriptionId || ''}
         onSuccess={onSuccess}
         onError={onError}
@@ -158,6 +158,10 @@ export function StripePaymentWrapper({
 interface StripePaymentInnerProps {
   currency: string
   planLabel: string
+  planPrice: number
+  billing: string
+  clientSecret: string
+  intentType: 'payment' | 'setup'
   subscriptionId: string
   onSuccess: () => void
   onError: (message: string) => void
@@ -166,8 +170,13 @@ interface StripePaymentInnerProps {
 function StripePaymentInner({
   currency,
   planLabel,
+  planPrice,
+  billing,
+  clientSecret,
+  intentType,
   subscriptionId,
   onSuccess,
+  onError,
 }: StripePaymentInnerProps) {
   const stripe = useStripe()
   const elements = useElements()
@@ -176,26 +185,21 @@ function StripePaymentInner({
   const [isComplete, setIsComplete] = useState(false)
   const isINR = currency.toLowerCase() === 'inr'
 
-  const handleExpressPayment = useCallback(async (_paymentMethodId: string) => {
-    if (!stripe || !elements) return
-    setSubmitting(true)
-    setErrorMessage(null)
-
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/m/subscribe/payment?success=true&subscription=${subscriptionId}`,
-      },
-      redirect: 'if_required',
-    })
-
-    if (error) {
-      setErrorMessage(translateStripeError(error.code))
-      setSubmitting(false)
-    } else {
-      onSuccess()
+  // Calculate amount in smallest currency unit for the PaymentRequest button.
+  // For trial subscriptions (intentType === 'setup'), the first charge is 0
+  // but we show the regular price so users know what they're signing up for.
+  const expressAmount = (() => {
+    if (intentType === 'setup') {
+      // Trial: show $0 (first charge is free). Google Pay sheet will show
+      // the plan name which indicates it's a trial setup.
+      return 0
     }
-  }, [stripe, elements, subscriptionId, onSuccess])
+    // Non-trial: show the actual charge amount
+    const price = billing === 'annual' ? planPrice * 12 : planPrice
+    return toSmallestUnit(price, currency.toUpperCase() as CurrencyCode)
+  })()
+
+  const returnUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/m/subscribe/payment?success=true&subscription=${subscriptionId}`
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -211,19 +215,34 @@ function StripePaymentInner({
       return
     }
 
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/m/subscribe/payment?success=true&subscription=${subscriptionId}`,
-      },
-      redirect: 'if_required',
-    })
+    if (intentType === 'setup') {
+      // Trial subscription: confirm SetupIntent
+      const { error } = await stripe.confirmSetup({
+        elements,
+        confirmParams: { return_url: returnUrl },
+        redirect: 'if_required',
+      })
 
-    if (error) {
-      setErrorMessage(translateStripeError(error.code))
-      setSubmitting(false)
+      if (error) {
+        setErrorMessage(translateStripeError(error.code))
+        setSubmitting(false)
+      } else {
+        onSuccess()
+      }
     } else {
-      onSuccess()
+      // Non-trial: confirm PaymentIntent
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: { return_url: returnUrl },
+        redirect: 'if_required',
+      })
+
+      if (error) {
+        setErrorMessage(translateStripeError(error.code))
+        setSubmitting(false)
+      } else {
+        onSuccess()
+      }
     }
   }
 
@@ -231,14 +250,19 @@ function StripePaymentInner({
     <form onSubmit={handleSubmit}>
       {/* Express Checkout (Apple Pay / Google Pay) */}
       <ExpressCheckout
-        amount={0}
+        amount={expressAmount}
         currency={currency}
         label={planLabel}
-        onPaymentMethod={handleExpressPayment}
-        onError={(msg) => setErrorMessage(msg)}
+        clientSecret={clientSecret}
+        intentType={intentType}
+        onSuccess={onSuccess}
+        onError={(msg) => {
+          setErrorMessage(msg)
+          onError(msg)
+        }}
       />
 
-      {/* Stripe PaymentElement — shows cards, UPI (INR), SEPA (EUR), Link */}
+      {/* Stripe PaymentElement — shows cards, UPI (INR), SEPA (EUR), PayPal, Link */}
       <div className="mt-3">
         <p className="sacred-text-ui text-[9px] text-[var(--sacred-divine-gold)] tracking-[0.14em] uppercase mb-2">
           Payment details
@@ -294,8 +318,10 @@ function StripePaymentInner({
       >
         {submitting ? (
           <SacredOMLoader size={24} />
-        ) : (
+        ) : intentType === 'setup' ? (
           'Start My 7-Day Free Trial'
+        ) : (
+          'Complete Payment'
         )}
       </button>
     </form>

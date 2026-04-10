@@ -3,15 +3,15 @@
 /**
  * SecureBadge — SSL + PCI compliance indicator
  *
- * Lock icon + "256-bit SSL · PCI DSS · Razorpay/Stripe"
+ * Lock icon + "256-bit SSL · PCI DSS · Stripe"
  * Muted, centered, bottom of payment screen.
  */
 
 interface SecureBadgeProps {
-  provider?: 'razorpay' | 'stripe'
+  provider?: 'stripe' | 'razorpay'
 }
 
-export function SecureBadge({ provider = 'razorpay' }: SecureBadgeProps) {
+export function SecureBadge({ provider = 'stripe' }: SecureBadgeProps) {
   const providerName = provider === 'razorpay' ? 'Razorpay' : 'Stripe'
 
   return (
