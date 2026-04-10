@@ -15,7 +15,7 @@
  * - INR: Razorpay SDK for UPI/cards, with Stripe fallback
  */
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
@@ -25,7 +25,7 @@ import { SecureBadge } from '@/components/mobile/payment/SecureBadge'
 import { SacredOMLoader } from '@/components/sacred/SacredOMLoader'
 import { StripePaymentWrapper } from '@/components/payment/StripePaymentForm'
 import { getPlanById, type PlanId, type BillingCycle } from '@/lib/payments/subscription'
-import { type CurrencyCode, formatPrice } from '@/lib/payments/currency'
+import { type CurrencyCode } from '@/lib/payments/currency'
 import { initiateRazorpayPayment, verifyRazorpayPayment } from '@/lib/payments/razorpay'
 
 type PaymentState = 'idle' | 'processing' | 'verifying' | 'success' | 'error'
@@ -52,13 +52,20 @@ function PaymentContent() {
   const isRedirectCancelled = searchParams.get('cancelled') === 'true'
   const [paymentState, setPaymentState] = useState<PaymentState>(isRedirectSuccess ? 'success' : 'idle')
   const [errorMessage, setErrorMessage] = useState(isRedirectCancelled ? 'Payment was cancelled. You can try again when ready.' : '')
+  const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Cleanup redirect timer on unmount
+  useEffect(() => {
+    return () => {
+      if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current)
+    }
+  }, [])
 
   // Handle Stripe redirect success
   useEffect(() => {
     if (isRedirectSuccess) {
       triggerHaptic('success')
-      const timer = setTimeout(() => router.push('/m/subscribe/success?plan=' + planId), 2000)
-      return () => clearTimeout(timer)
+      redirectTimerRef.current = setTimeout(() => router.push('/m/subscribe/success?plan=' + planId), 2000)
     }
   }, [isRedirectSuccess, router, triggerHaptic, planId])
 
@@ -86,38 +93,44 @@ function PaymentContent() {
     setErrorMessage('')
     triggerHaptic('medium')
 
-    await initiateRazorpayPayment({
-      planId: plan.id,
-      billing,
-      planName: plan.name,
-      onSuccess: async (response) => {
-        setPaymentState('verifying')
-        const verified = await verifyRazorpayPayment(response)
-        if (verified) {
-          setPaymentState('success')
-          triggerHaptic('success')
-          setTimeout(() => router.push('/m/subscribe/success?plan=' + planId), 2000)
-        } else {
+    try {
+      await initiateRazorpayPayment({
+        planId: plan.id,
+        billing,
+        planName: plan.name,
+        onSuccess: async (response) => {
+          setPaymentState('verifying')
+          const verified = await verifyRazorpayPayment(response)
+          if (verified) {
+            setPaymentState('success')
+            triggerHaptic('success')
+            redirectTimerRef.current = setTimeout(() => router.push('/m/subscribe/success?plan=' + planId), 2000)
+          } else {
+            setPaymentState('error')
+            setErrorMessage('Payment verification failed. Please contact support if you were charged.')
+            triggerHaptic('error')
+          }
+        },
+        onFailure: (error) => {
           setPaymentState('error')
-          setErrorMessage('Payment verification failed. Please contact support if you were charged.')
+          setErrorMessage(error)
           triggerHaptic('error')
-        }
-      },
-      onFailure: (error) => {
-        setPaymentState('error')
-        setErrorMessage(error)
-        triggerHaptic('error')
-      },
-      onDismiss: () => {
-        setPaymentState('idle')
-      },
-    })
+        },
+        onDismiss: () => {
+          setPaymentState('idle')
+        },
+      })
+    } catch {
+      setPaymentState('error')
+      setErrorMessage('Connection issue. Please check your network and try again.')
+      triggerHaptic('error')
+    }
   }
 
   const handleStripeSuccess = () => {
     setPaymentState('success')
     triggerHaptic('success')
-    setTimeout(() => router.push('/m/subscribe/success?plan=' + planId), 2000)
+    redirectTimerRef.current = setTimeout(() => router.push('/m/subscribe/success?plan=' + planId), 2000)
   }
 
   const handleStripeError = (msg: string) => {
