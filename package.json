@@ -38,7 +38,7 @@
     "@react-three/postprocessing": "^3.0.4",
     "@react-three/xr": "^6.6.29",
     "@ricky0123/vad-web": "^0.0.30",
-    "@sentry/nextjs": "^10.45.0",
+    "@sentry/nextjs": "^10.48.0",
     "@stripe/react-stripe-js": "^6.1.0",
     "@stripe/stripe-js": "^9.0.1",
     "@types/three": "^0.183.1",
