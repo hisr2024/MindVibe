@@ -11,8 +11,14 @@
  * Feature highlights -> Secure badge -> Legal note.
  *
  * Payment architecture:
- * - Non-INR: Stripe Elements (PaymentRequestButton + PaymentElement)
- * - INR: Razorpay SDK for UPI/cards, with Stripe fallback
+ * ALL currencies route through Stripe Elements embedded checkout.
+ * - EUR/USD/GBP: Card, PayPal, SEPA (EUR), Link, Google Pay, Apple Pay
+ * - INR: Card, UPI, Link, Google Pay, Apple Pay
+ *
+ * Google Pay and Apple Pay are handled by the PaymentRequestButton
+ * (ExpressCheckout component) rendered above the PaymentElement.
+ * They work on Chrome (Google Pay) and Safari (Apple Pay) when the
+ * user has saved payment methods in their wallet.
  */
 
 import { useState, useEffect, useRef, Suspense } from 'react'
@@ -26,7 +32,6 @@ import { SacredOMLoader } from '@/components/sacred/SacredOMLoader'
 import { StripePaymentWrapper } from '@/components/payment/StripePaymentForm'
 import { getPlanById, type PlanId, type BillingCycle } from '@/lib/payments/subscription'
 import { type CurrencyCode } from '@/lib/payments/currency'
-import { initiateRazorpayPayment, verifyRazorpayPayment } from '@/lib/payments/razorpay'
 
 type PaymentState = 'idle' | 'processing' | 'verifying' | 'success' | 'error'
 
@@ -76,8 +81,6 @@ function PaymentContent() {
 
   const price = plan.price[currency]
   const displayPrice = billing === 'annual' ? price.annual : price.monthly
-  const isINR = currency === 'INR'
-  const provider = isINR ? 'razorpay' : 'stripe'
 
   // Calculate first charge date (7 days from now)
   const firstChargeDate = new Date()
@@ -87,45 +90,6 @@ function PaymentContent() {
     month: 'short',
     year: 'numeric',
   })
-
-  const handleRazorpayPayment = async () => {
-    setPaymentState('processing')
-    setErrorMessage('')
-    triggerHaptic('medium')
-
-    try {
-      await initiateRazorpayPayment({
-        planId: plan.id,
-        billing,
-        planName: plan.name,
-        onSuccess: async (response) => {
-          setPaymentState('verifying')
-          const verified = await verifyRazorpayPayment(response)
-          if (verified) {
-            setPaymentState('success')
-            triggerHaptic('success')
-            redirectTimerRef.current = setTimeout(() => router.push('/m/subscribe/success?plan=' + planId), 2000)
-          } else {
-            setPaymentState('error')
-            setErrorMessage('Payment verification failed. Please contact support if you were charged.')
-            triggerHaptic('error')
-          }
-        },
-        onFailure: (error) => {
-          setPaymentState('error')
-          setErrorMessage(error)
-          triggerHaptic('error')
-        },
-        onDismiss: () => {
-          setPaymentState('idle')
-        },
-      })
-    } catch {
-      setPaymentState('error')
-      setErrorMessage('Connection issue. Please check your network and try again.')
-      triggerHaptic('error')
-    }
-  }
 
   const handleStripeSuccess = () => {
     setPaymentState('success')
@@ -178,7 +142,7 @@ function PaymentContent() {
             Sacred Offering
           </h1>
           <p className="text-[12px] text-[#6B6355] mt-1" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
-            Secure payment &middot; Powered by {provider === 'razorpay' ? 'Razorpay' : 'Stripe'}
+            Secure payment &middot; Powered by Stripe
           </p>
         </div>
 
@@ -228,8 +192,8 @@ function PaymentContent() {
                 Journey Begins &mdash; Welcome
               </span>
             </motion.div>
-          ) : (paymentState === 'processing' || paymentState === 'verifying') && !isINR ? (
-            /* Processing State (Stripe handles its own) */
+          ) : (paymentState === 'processing' || paymentState === 'verifying') ? (
+            /* Processing State */
             <div
               className="flex flex-col items-center gap-3 py-6"
               role="status"
@@ -241,70 +205,15 @@ function PaymentContent() {
                 {loadingMessages[paymentState]}
               </p>
             </div>
-          ) : isINR ? (
-            /* INR: Razorpay SDK */
-            <>
-              <div className="p-4 rounded-[16px] bg-[linear-gradient(145deg,rgba(22,26,66,0.95),rgba(17,20,53,0.98))] border border-[rgba(212,160,23,0.12)]">
-                <p className="text-[12px] text-[#B8AE98] mb-3" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
-                  Pay securely with UPI, cards, or wallets via Razorpay
-                </p>
-                <div className="flex items-center gap-2 mb-3">
-                  {['GPay', 'PhonePe', 'Paytm', 'BHIM'].map((app) => (
-                    <span
-                      key={app}
-                      className="px-2 py-1 rounded-lg bg-[rgba(22,26,66,0.5)] border border-[rgba(255,255,255,0.08)] text-[10px] text-[#6B6355]"
-                      style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}
-                    >
-                      {app}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Error Message */}
-              {errorMessage && (
-                <div
-                  className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20"
-                  role="alert"
-                  aria-live="assertive"
-                >
-                  <p className="text-[12px] text-[#FCA5A5] text-center" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
-                    {errorMessage}
-                  </p>
-                </div>
-              )}
-
-              {/* Pay Button */}
-              <motion.button
-                type="button"
-                onClick={handleRazorpayPayment}
-                disabled={paymentState === 'processing' || paymentState === 'verifying'}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.15 }}
-                className="w-full h-[52px] rounded-[26px] flex items-center justify-center gap-2 mt-4 disabled:opacity-70"
-                style={{
-                  background: 'linear-gradient(135deg, #D4A017, #C89430)',
-                  fontFamily: 'Outfit, system-ui, sans-serif',
-                }}
-                aria-label={plan.trialDays ? 'Start free trial' : 'Complete payment'}
-              >
-                {paymentState === 'processing' || paymentState === 'verifying' ? (
-                  <SacredOMLoader size={24} />
-                ) : (
-                  <span className="text-[15px] font-medium text-[#F8F6F0] tracking-wide">
-                    {plan.trialDays ? 'Begin Sacred Journey \u2192' : 'Complete Offering \u2192'}
-                  </span>
-                )}
-              </motion.button>
-            </>
           ) : (
-            /* Non-INR: Stripe Elements */
+            /* Stripe Elements for ALL currencies (Cards, UPI, SEPA, PayPal, Google Pay, Apple Pay) */
             <>
               <StripePaymentWrapper
                 planId={planId}
                 billing={billing}
                 currency={currency}
                 planLabel={`Kiaanverse ${plan.name}`}
+                planPrice={displayPrice}
                 onSuccess={handleStripeSuccess}
                 onError={handleStripeError}
               />
@@ -342,7 +251,7 @@ function PaymentContent() {
         </div>
 
         {/* Secure Badge */}
-        <SecureBadge provider={provider} />
+        <SecureBadge provider="stripe" />
 
         {/* Cancel note */}
         <p className="text-[11px] text-[#6B6355] text-center mt-2 leading-snug" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>

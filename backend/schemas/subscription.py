@@ -84,7 +84,7 @@ class CheckoutSessionCreate(BaseModel):
     )
     currency: str = Field(
         default="usd",
-        pattern="^(usd|eur|inr)$",
+        pattern="^(usd|eur|inr|gbp)$",
         description="Currency for the checkout session",
     )
     success_url: str | None = None
