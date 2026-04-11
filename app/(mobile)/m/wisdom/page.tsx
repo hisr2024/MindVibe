@@ -132,13 +132,13 @@ export default function MobileWisdomPage() {
   // Navigate to theme exploration
   const handleThemeSelect = useCallback((themeId: string) => {
     triggerHaptic('selection')
-    router.push(`/kiaan-vibe/gita?theme=${themeId}`)
+    router.push(`/m/kiaan-vibe/chapters?theme=${themeId}`)
   }, [router, triggerHaptic])
 
   // Navigate to full Gita explorer
   const handleExploreGita = useCallback(() => {
     triggerHaptic('selection')
-    router.push('/kiaan-vibe/gita')
+    router.push('/m/kiaan-vibe/chapters')
   }, [router, triggerHaptic])
 
   // Handle refresh
@@ -267,7 +267,7 @@ export default function MobileWisdomPage() {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   triggerHaptic('selection')
-                  router.push(`/m/gita/${dailyVerse.chapter}/${dailyVerse.verse}`)
+                  router.push(`/m/kiaan-vibe/verse/${dailyVerse.chapter}-${dailyVerse.verse}`)
                 }}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#d4a44c]/15 text-[#d4a44c] text-xs font-medium"
               >
