@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BillingToggle, PricingCard, PaymentMethodSelector, type PricingTier, type PaymentMethod } from '@/components/pricing'
 import { Card, CardContent } from '@/components/ui'
@@ -13,10 +12,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { apiFetch } from '@/lib/api'
 import { loadRazorpayScript, openRazorpayCheckout, type RazorpayPaymentResponse } from '@/lib/razorpay'
 
-const DivineCelestialBackground = dynamic(
-  () => import('@/components/divine/DivineCelestialBackground').then(mod => mod.DivineCelestialBackground),
-  { ssr: false }
-)
+// DivineCelestialBackground is now rendered globally from ClientLayout
+// and no longer imported per-page.
 
 // ─── Pricing tiers (same as /pricing page) ───────────────────────────────────
 
@@ -442,7 +439,7 @@ export default function StartPage() {
         className="relative flex min-h-[100dvh] flex-col items-center justify-center px-4 text-center"
         aria-label="Welcome"
       >
-        <DivineCelestialBackground />
+        {/* Celestial backdrop rendered globally by ClientLayout */}
 
         <div className="relative z-10 mx-auto max-w-3xl">
           <motion.div

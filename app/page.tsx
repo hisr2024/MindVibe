@@ -16,8 +16,9 @@ import dynamic from 'next/dynamic';
 import { useLanguage } from '@/hooks/useLanguage';
 import { springConfigs } from '@/lib/animations/spring-configs';
 
-// Dynamic imports for framer-motion components to reduce initial bundle size
-const DivineCelestialBackground = dynamic(() => import('@/components/divine/DivineCelestialBackground').then(mod => mod.DivineCelestialBackground), { ssr: false });
+// Dynamic imports for framer-motion components to reduce initial bundle size.
+// DivineCelestialBackground is now rendered globally from ClientLayout, so
+// it is no longer imported here.
 const DivineKrishnaPresence = dynamic(() => import('@/components/divine/DivineKrishnaPresence').then(mod => mod.DivineKrishnaPresence), { ssr: false });
 
 export default function Home() {
@@ -25,10 +26,7 @@ export default function Home() {
 
   return (
     <main className="relative min-h-screen overflow-hidden">
-      {/* Immersive celestial background — fixed, full-screen */}
-      <DivineCelestialBackground />
-
-      {/* Content layer — above the celestial backdrop */}
+      {/* Content layer — the celestial backdrop is rendered by ClientLayout */}
       <div className="relative z-10 mx-auto max-w-6xl space-y-section-lg pb-24 md:pb-16 px-page-x">
 
         {/* === DIVINE ENTRY: Krishna's Presence === */}
