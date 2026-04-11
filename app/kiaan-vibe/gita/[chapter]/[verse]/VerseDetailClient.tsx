@@ -285,7 +285,7 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="animate-spin w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-2 border-[#D4A017] border-t-transparent rounded-full" />
       </div>
     )
   }
@@ -296,7 +296,7 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
         <p className="text-white/70">Verse not found</p>
         <Link
           href={`/kiaan-vibe/gita/${chapterNumber}?lang=${languageCode}`}
-          className="mt-4 inline-block text-orange-400 hover:text-orange-300"
+          className="mt-4 inline-block text-[#D4A017] hover:text-[#F0C040]"
         >
           Back to chapter
         </Link>
@@ -319,7 +319,7 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="px-3 py-1.5 rounded-lg bg-orange-500/20 text-orange-400 font-medium">
+              <span className="px-3 py-1.5 rounded-lg bg-[#D4A017]/15 text-[#D4A017] font-medium">
                 {chapterNumber}.{verseNumber}
               </span>
             </div>
@@ -352,18 +352,25 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-6 rounded-2xl bg-gradient-to-br from-orange-500/10 to-amber-500/5 border border-orange-500/20"
+          className="p-6"
+          style={{
+            background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+            border: '1px solid rgba(212,160,23,0.1)',
+            borderTop: '2px solid rgba(212,160,23,0.45)',
+            borderRadius: '18px',
+          }}
         >
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs uppercase tracking-wider text-orange-400">Sanskrit</p>
+            <p className="text-xs uppercase tracking-wider" style={{ color: '#D4A017' }}>Sanskrit</p>
             <button
               onClick={() => handlePlayVerse(verse.sanskrit || '', 'sanskrit', 'sa')}
               disabled={isLoadingAudio && playingSection === 'sanskrit'}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                playingSection === 'sanskrit'
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/30'
-              } ${isLoadingAudio && playingSection === 'sanskrit' ? 'opacity-70 cursor-wait' : ''}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${isLoadingAudio && playingSection === 'sanskrit' ? 'opacity-70 cursor-wait' : ''}`}
+              style={{
+                border: '1px solid rgba(212,160,23,0.4)',
+                color: '#D4A017',
+                background: playingSection === 'sanskrit' && isPlaying ? 'rgba(212,160,23,0.15)' : 'transparent',
+              }}
               aria-label={playingSection === 'sanskrit' ? 'Stop playing Sanskrit' : 'Play Sanskrit'}
             >
               {isLoadingAudio && playingSection === 'sanskrit' ? (
@@ -384,7 +391,14 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
               )}
             </button>
           </div>
-          <p className="text-xl text-orange-200 font-sanskrit leading-relaxed">
+          <p
+            className="text-xl"
+            style={{
+              fontFamily: '"Noto Sans Devanagari", sans-serif',
+              lineHeight: 2.0,
+              color: '#F0C040',
+            }}
+          >
             {verse.sanskrit}
           </p>
         </motion.div>
@@ -419,7 +433,7 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowAllTranslations(!showAllTranslations)}
-              className="text-xs text-orange-400 hover:text-orange-300"
+              className="text-xs text-[#D4A017] hover:text-[#F0C040]"
             >
               {showAllTranslations ? 'Show current' : 'Show all'}
             </button>
@@ -515,7 +529,10 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
       >
         <Link
           href="/kiaan-vibe/library?category=spiritual"
-          className="flex items-center justify-center gap-2 p-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium hover:from-orange-400 hover:to-amber-400 transition-all"
+          className="flex items-center justify-center gap-2 p-4 rounded-xl text-white font-medium transition-all"
+          style={{
+            background: 'linear-gradient(135deg, #D4A017CC, #D4A01788)',
+          }}
         >
           <Play className="w-5 h-5" />
           Play Meditation Track
