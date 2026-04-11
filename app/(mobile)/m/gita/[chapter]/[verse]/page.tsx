@@ -10,7 +10,7 @@
 
 'use client'
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -37,7 +37,6 @@ import {
 import {
   getGitaMobileChapter,
   getGitaVoiceConfig,
-  GITA_MOBILE_CHAPTERS,
 } from '@/lib/kiaan-vibe/gita-library'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
