@@ -90,7 +90,7 @@ export default function ChapterVersesPage({ params }: PageProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="animate-spin w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-2 border-[#D4A017] border-t-transparent rounded-full" />
       </div>
     )
   }
@@ -108,7 +108,7 @@ export default function ChapterVersesPage({ params }: PageProps) {
         </Link>
 
         <div className="flex items-center gap-2 mb-2">
-          <span className="px-2 py-1 rounded-lg bg-orange-500/20 text-orange-400 text-sm font-medium">
+          <span className="px-2 py-1 rounded-lg bg-[#D4A017]/15 text-[#D4A017] text-sm font-medium">
             Chapter {chapterNumber}
           </span>
           <span className="px-2 py-1 rounded-lg bg-white/10 text-white/60 text-sm flex items-center gap-1">
@@ -139,14 +139,13 @@ export default function ChapterVersesPage({ params }: PageProps) {
         <button
           onClick={handlePlayChapter}
           disabled={isLoadingChapter}
-          className={`
-            flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all
-            ${isCurrentChapter && playerIsPlaying
-              ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
-              : 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-400 border border-orange-500/30 hover:from-orange-500/30 hover:to-amber-500/30'
-            }
-            ${isLoadingChapter ? 'opacity-80 cursor-wait' : ''}
-          `}
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium text-white transition-all ${isLoadingChapter ? 'opacity-80 cursor-wait' : ''}`}
+          style={{
+            background: 'linear-gradient(135deg, #D4A017CC, #D4A01788)',
+            boxShadow: isCurrentChapter && playerIsPlaying
+              ? '0 8px 24px rgba(212, 160, 23, 0.3)'
+              : '0 4px 14px rgba(212, 160, 23, 0.15)',
+          }}
         >
           {isLoadingChapter ? (
             <>
@@ -187,12 +186,12 @@ export default function ChapterVersesPage({ params }: PageProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.03 }}
-                className="group p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-orange-500/30 transition-all"
+                className="group p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#D4A017]/40 transition-all"
               >
                 <div className="flex items-start gap-3">
                   {/* Verse number */}
-                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
-                    <span className="text-sm font-bold text-orange-400">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#D4A017]/15 flex items-center justify-center">
+                    <span className="text-sm font-bold text-[#D4A017]">
                       {verse.verseNumber}
                     </span>
                   </div>
@@ -200,7 +199,14 @@ export default function ChapterVersesPage({ params }: PageProps) {
                   <div className="flex-1 min-w-0">
                     {/* Sanskrit */}
                     {verse.sanskrit && (
-                      <p className="text-orange-300/80 text-sm mb-2 font-sanskrit leading-relaxed">
+                      <p
+                        className="text-sm mb-2"
+                        style={{
+                          fontFamily: '"Noto Sans Devanagari", sans-serif',
+                          lineHeight: 2.0,
+                          color: '#F0C040',
+                        }}
+                      >
                         {verse.sanskrit.length > 150
                           ? verse.sanskrit.slice(0, 150) + '...'
                           : verse.sanskrit}
@@ -214,7 +220,7 @@ export default function ChapterVersesPage({ params }: PageProps) {
                   </div>
 
                   {/* Arrow */}
-                  <ChevronRight className="flex-shrink-0 w-5 h-5 text-white/70 group-hover:text-orange-400 group-hover:translate-x-1 transition-all mt-2" />
+                  <ChevronRight className="flex-shrink-0 w-5 h-5 text-white/70 group-hover:text-[#D4A017] group-hover:translate-x-1 transition-all mt-2" />
                 </div>
               </motion.div>
             </Link>
@@ -228,7 +234,7 @@ export default function ChapterVersesPage({ params }: PageProps) {
           </p>
           <Link
             href={`/kiaan-vibe/gita/${chapterNumber}?lang=en`}
-            className="mt-4 inline-block text-orange-400 hover:text-orange-300"
+            className="mt-4 inline-block text-[#D4A017] hover:text-[#F0C040]"
           >
             View in English
           </Link>
