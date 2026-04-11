@@ -3,9 +3,15 @@
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { IntroOverlay } from '@/components/divine/IntroOverlay'
+import { MobileRouteGuard } from '@/components/mobile/MobileRouteGuard'
 
 const GodParticles = dynamic(
   () => import('@/components/divine/GodParticles').then(mod => mod.GodParticles),
+  { ssr: false }
+)
+
+const DivineCelestialBackground = dynamic(
+  () => import('@/components/divine/DivineCelestialBackground').then(mod => mod.DivineCelestialBackground),
   { ssr: false }
 )
 
@@ -37,6 +43,15 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      {/* Immersive celestial backdrop — fixed, pointer-events-none, renders
+          on every desktop route. Hidden on /m/* mobile routes which have
+          their own shell. Deferred until after first paint to avoid blocking
+          navigation and content rendering. */}
+      {showDecorations && (
+        <MobileRouteGuard>
+          <DivineCelestialBackground />
+        </MobileRouteGuard>
+      )}
       {/* Decorative particles — deferred to avoid blocking navigation */}
       {showDecorations && <GodParticles count={20} />}
       {/* Page transition wrapper — animates content entrance without remounting */}
