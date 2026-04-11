@@ -354,7 +354,15 @@ export default function KarmaResetClient() {
                   transition={springConfigs.smooth}
                 >
                   {/* Quick problems — common life situations */}
-                  <div className="divine-reset-container rounded-3xl p-6 sm:p-8">
+                  <div className="p-6 sm:p-8"
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                    border: '1px solid rgba(212,160,23,0.1)',
+                    borderTop: '2px solid rgba(212,160,23,0.45)',
+                    borderRadius: '18px',
+                    backdropFilter: 'blur(24px) saturate(120%)',
+                    WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+                  }}>
                     <div className="text-center mb-6">
                       <h2 className="text-2xl font-bold kiaan-text-golden mb-2">
                         What are you going through?
@@ -427,7 +435,15 @@ export default function KarmaResetClient() {
               {currentStep === 'input' && (
                 <motion.div
                   key="input"
-                  className="divine-reset-container rounded-3xl p-6 sm:p-8"
+                  className="p-6 sm:p-8"
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                    border: '1px solid rgba(212,160,23,0.1)',
+                    borderTop: '2px solid rgba(212,160,23,0.45)',
+                    borderRadius: '18px',
+                    backdropFilter: 'blur(24px) saturate(120%)',
+                    WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+                  }}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -646,7 +662,15 @@ export default function KarmaResetClient() {
               {currentStep === 'breathing' && deepResponse && (
                 <motion.div
                   key="breathing"
-                  className="divine-reset-container rounded-3xl p-8"
+                  className="p-8"
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                    border: '1px solid rgba(212,160,23,0.1)',
+                    borderTop: '2px solid rgba(212,160,23,0.45)',
+                    borderRadius: '18px',
+                    backdropFilter: 'blur(24px) saturate(120%)',
+                    WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+                  }}
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0 }}
@@ -766,7 +790,15 @@ export default function KarmaResetClient() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -30 }}
                         transition={{ duration: 0.3 }}
-                        className="divine-reset-container rounded-3xl p-6 sm:p-8"
+                        className="p-6 sm:p-8"
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                    border: '1px solid rgba(212,160,23,0.1)',
+                    borderTop: '2px solid rgba(212,160,23,0.45)',
+                    borderRadius: '18px',
+                    backdropFilter: 'blur(24px) saturate(120%)',
+                    WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+                  }}
                       >
                         {/* Phase header */}
                         <div className="flex items-center gap-3 mb-4">
@@ -804,7 +836,15 @@ export default function KarmaResetClient() {
                         </div>
 
                         {/* Phase guidance text */}
-                        <div className="text-sm leading-relaxed text-[#f5f0e8]/80 bg-black/20 rounded-xl p-5 border border-[#d4a44c]/10 font-sacred">
+                        <div
+                          className="text-sm leading-relaxed text-[#f5f0e8]/80 p-5 font-sacred"
+                          style={{
+                            background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                            border: '1px solid rgba(212,160,23,0.1)',
+                            borderTop: '2px solid rgba(212,160,23,0.45)',
+                            borderRadius: '18px',
+                          }}
+                        >
                           {currentPhaseData.guidance}
                         </div>
 
@@ -875,7 +915,15 @@ export default function KarmaResetClient() {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="divine-reset-container rounded-3xl p-6"
+                      className="p-6"
+                      style={{
+                        background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                        border: '1px solid rgba(212,160,23,0.1)',
+                        borderTop: '2px solid rgba(212,160,23,0.45)',
+                        borderRadius: '18px',
+                        backdropFilter: 'blur(24px) saturate(120%)',
+                        WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+                      }}
                     >
                       <div className="flex items-center gap-2 mb-4">
                         <span className="text-lg">{'\u{1F4FF}'}</span>
@@ -887,7 +935,13 @@ export default function KarmaResetClient() {
                         {(deepResponse.deep_guidance?.sadhana ?? []).map((practice, idx) => (
                           <div
                             key={idx}
-                            className="flex items-start gap-3 p-3 rounded-xl bg-black/20 border border-[#d4a44c]/10"
+                            className="flex items-start gap-3 p-3"
+                            style={{
+                              background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                              border: '1px solid rgba(212,160,23,0.1)',
+                              borderTop: '2px solid rgba(212,160,23,0.45)',
+                              borderRadius: '18px',
+                            }}
                           >
                             <span className="h-6 w-6 rounded-full bg-[#d4a44c]/20 text-[#e8b54a] flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
                               {idx + 1}
@@ -909,7 +963,15 @@ export default function KarmaResetClient() {
                       className="space-y-4"
                     >
                       {/* Karmic teaching */}
-                      <div className="divine-reset-container rounded-3xl p-6">
+                      <div className="p-6"
+                      style={{
+                        background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                        border: '1px solid rgba(212,160,23,0.1)',
+                        borderTop: '2px solid rgba(212,160,23,0.45)',
+                        borderRadius: '18px',
+                        backdropFilter: 'blur(24px) saturate(120%)',
+                        WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+                      }}>
                         <div className="flex items-center gap-2 mb-3">
                           <span className="text-lg">{'\u{1F4D6}'}</span>
                           <h3 className="text-base font-semibold text-[#f5f0e8]">
@@ -922,7 +984,15 @@ export default function KarmaResetClient() {
                       </div>
 
                       {/* Guna analysis */}
-                      <div className="divine-reset-container rounded-3xl p-6">
+                      <div className="p-6"
+                      style={{
+                        background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                        border: '1px solid rgba(212,160,23,0.1)',
+                        borderTop: '2px solid rgba(212,160,23,0.45)',
+                        borderRadius: '18px',
+                        backdropFilter: 'blur(24px) saturate(120%)',
+                        WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+                      }}>
                         <div className="flex items-center gap-2 mb-3">
                           <span className="text-lg">{'\u2728'}</span>
                           <h3 className="text-base font-semibold text-[#f5f0e8]">
@@ -936,7 +1006,15 @@ export default function KarmaResetClient() {
 
                       {/* Supporting verses */}
                       {(deepResponse.deep_guidance?.supporting_verses?.length ?? 0) > 0 && (
-                        <div className="divine-reset-container rounded-3xl p-6">
+                        <div className="p-6"
+                      style={{
+                        background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                        border: '1px solid rgba(212,160,23,0.1)',
+                        borderTop: '2px solid rgba(212,160,23,0.45)',
+                        borderRadius: '18px',
+                        backdropFilter: 'blur(24px) saturate(120%)',
+                        WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+                      }}>
                           <div className="flex items-center gap-2 mb-3">
                             <span className="text-lg">{'\u{1F4DC}'}</span>
                             <h3 className="text-base font-semibold text-[#f5f0e8]">
@@ -947,7 +1025,13 @@ export default function KarmaResetClient() {
                             {(deepResponse.deep_guidance?.supporting_verses ?? []).map((sv, idx) => (
                               <div
                                 key={idx}
-                                className="p-3 rounded-xl bg-black/20 border border-[#d4a44c]/10"
+                                className="p-3"
+                                style={{
+                                  background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                                  border: '1px solid rgba(212,160,23,0.1)',
+                                  borderTop: '2px solid rgba(212,160,23,0.45)',
+                                  borderRadius: '18px',
+                                }}
                               >
                                 <p className="text-xs text-[#d4a44c]/60 mb-1">
                                   BG {sv.chapter}.{sv.verse}
@@ -963,7 +1047,15 @@ export default function KarmaResetClient() {
 
                       {/* Validation score */}
                       {deepResponse.kiaan_metadata && (
-                        <div className="divine-reset-container rounded-3xl p-6">
+                        <div className="p-6"
+                      style={{
+                        background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                        border: '1px solid rgba(212,160,23,0.1)',
+                        borderTop: '2px solid rgba(212,160,23,0.45)',
+                        borderRadius: '18px',
+                        backdropFilter: 'blur(24px) saturate(120%)',
+                        WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+                      }}>
                           <div className="flex items-center gap-2 mb-3">
                             <span className="text-lg">{'\u{1F3AF}'}</span>
                             <h3 className="text-base font-semibold text-[#f5f0e8]">
@@ -971,25 +1063,49 @@ export default function KarmaResetClient() {
                             </h3>
                           </div>
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <div className="p-3 rounded-xl bg-black/20 border border-[#d4a44c]/10 text-center">
+                            <div className="p-3 text-center"
+                            style={{
+                              background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                              border: '1px solid rgba(212,160,23,0.1)',
+                              borderTop: '2px solid rgba(212,160,23,0.45)',
+                              borderRadius: '18px',
+                            }}>
                               <p className="text-lg font-bold text-[#e8b54a]">
                                 {deepResponse.kiaan_metadata.compliance_level || 'N/A'}
                               </p>
                               <p className="text-[10px] text-[#f5f0e8]/70 uppercase">Compliance</p>
                             </div>
-                            <div className="p-3 rounded-xl bg-black/20 border border-[#d4a44c]/10 text-center">
+                            <div className="p-3 text-center"
+                            style={{
+                              background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                              border: '1px solid rgba(212,160,23,0.1)',
+                              borderTop: '2px solid rgba(212,160,23,0.45)',
+                              borderRadius: '18px',
+                            }}>
                               <p className="text-lg font-bold text-[#e8b54a]">
                                 {deepResponse.kiaan_metadata.pillars_met}/5
                               </p>
                               <p className="text-[10px] text-[#f5f0e8]/70 uppercase">Pillars Met</p>
                             </div>
-                            <div className="p-3 rounded-xl bg-black/20 border border-[#d4a44c]/10 text-center">
+                            <div className="p-3 text-center"
+                            style={{
+                              background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                              border: '1px solid rgba(212,160,23,0.1)',
+                              borderTop: '2px solid rgba(212,160,23,0.45)',
+                              borderRadius: '18px',
+                            }}>
                               <p className="text-lg font-bold text-[#e8b54a]">
                                 {deepResponse.kiaan_metadata.verses_used}
                               </p>
                               <p className="text-[10px] text-[#f5f0e8]/70 uppercase">Verses Used</p>
                             </div>
-                            <div className="p-3 rounded-xl bg-black/20 border border-[#d4a44c]/10 text-center">
+                            <div className="p-3 text-center"
+                            style={{
+                              background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                              border: '1px solid rgba(212,160,23,0.1)',
+                              borderTop: '2px solid rgba(212,160,23,0.45)',
+                              borderRadius: '18px',
+                            }}>
                               <p className="text-lg font-bold text-[#e8b54a]">
                                 {Math.round((deepResponse.kiaan_metadata.five_pillar_score || 0) * 100)}%
                               </p>

@@ -28,7 +28,15 @@ const periodOptions: { value: AnalyticsPeriod; label: string }[] = [
 
 function ChartSkeleton() {
   return (
-    <div className="rounded-2xl border border-[#d4a44c]/20 bg-black/40 p-6">
+    <div
+      className="p-6"
+      style={{
+        background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+        border: '1px solid rgba(212,160,23,0.1)',
+        borderTop: '2px solid rgba(212,160,23,0.45)',
+        borderRadius: '18px',
+      }}
+    >
       <div className="flex items-center justify-between mb-6">
         <Skeleton height={24} width={150} />
         <Skeleton height={32} width={200} />
@@ -77,7 +85,13 @@ export function MoodTrendChart({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1 }}
-      className={`rounded-2xl border border-[#d4a44c]/20 bg-black/40 p-6 ${className}`}
+      className={`p-6 ${className}`}
+      style={{
+        background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+        border: '1px solid rgba(212,160,23,0.1)',
+        borderTop: '2px solid rgba(212,160,23,0.45)',
+        borderRadius: '18px',
+      }}
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">

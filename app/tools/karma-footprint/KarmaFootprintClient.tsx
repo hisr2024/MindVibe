@@ -280,7 +280,15 @@ export default function KarmaFootprintClient() {
                   The Karma Footprint analyzer helps you reflect on your daily actions and their impact. It&apos;s not about judgment—it&apos;s about awareness and growth.
                 </p>
 
-                <div className="p-3 rounded-xl bg-black/40 border border-[#d4a44c]/15">
+                <div
+                  className="p-3"
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                    border: '1px solid rgba(212,160,23,0.1)',
+                    borderTop: '2px solid rgba(212,160,23,0.45)',
+                    borderRadius: '18px',
+                  }}
+                >
                   <h4 className="text-xs font-semibold text-[#f5f0e8] mb-2">How it works</h4>
                   <p className="text-xs text-[#f5f0e8]/70">
                     Share your day → Get visual feedback → Identify patterns → Grow mindfully

@@ -19,7 +19,15 @@ interface JournalStatisticsProps {
 
 function StatisticsSkeleton() {
   return (
-    <div className="rounded-2xl border border-[#d4a44c]/20 bg-black/40 p-6">
+    <div
+      className="p-6"
+      style={{
+        background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+        border: '1px solid rgba(212,160,23,0.1)',
+        borderTop: '2px solid rgba(212,160,23,0.45)',
+        borderRadius: '18px',
+      }}
+    >
       <Skeleton height={24} width={180} className="mb-6" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[1, 2, 3, 4].map((i) => (
@@ -77,7 +85,13 @@ export function JournalStatistics({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.2 }}
-      className={`rounded-2xl border border-[#d4a44c]/20 bg-black/40 p-6 ${className}`}
+      className={`p-6 ${className}`}
+      style={{
+        background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+        border: '1px solid rgba(212,160,23,0.1)',
+        borderTop: '2px solid rgba(212,160,23,0.45)',
+        borderRadius: '18px',
+      }}
     >
       {/* Header */}
       <h3 className="text-lg font-semibold text-[#f5f0e8] mb-6">

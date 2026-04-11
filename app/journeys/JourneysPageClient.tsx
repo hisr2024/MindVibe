@@ -253,8 +253,18 @@ function ActiveJourneyCard({ journey }: { journey: JourneyResponse }) {
         whileHover={{ scale: 1.02, y: -3 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => triggerHaptic('light')}
-        className="relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm"
-        style={{ borderColor: enemyInfo ? `${enemyInfo.color}25` : undefined }}
+        className="relative overflow-hidden p-4 backdrop-blur-sm"
+        style={{
+          background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+          border: '1px solid rgba(212,160,23,0.1)',
+          borderTop: '2px solid rgba(212,160,23,0.45)',
+          borderRadius: '18px',
+          ...(enemyInfo ? {
+            borderLeftColor: `${enemyInfo.color}25`,
+            borderRightColor: `${enemyInfo.color}25`,
+            borderBottomColor: `${enemyInfo.color}25`,
+          } : {}),
+        }}
       >
         {/* Subtle gradient fill based on progress */}
         {enemyInfo && (
@@ -334,8 +344,18 @@ function TemplateCard({
     <motion.div
       whileHover={{ scale: 1.02, y: -3 }}
       whileTap={{ scale: 0.98 }}
-      className="relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm"
-      style={{ borderColor: enemyInfo ? `${enemyInfo.color}20` : undefined }}
+      className="relative overflow-hidden p-4 backdrop-blur-sm"
+      style={{
+        background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+        border: '1px solid rgba(212,160,23,0.1)',
+        borderTop: '2px solid rgba(212,160,23,0.45)',
+        borderRadius: '18px',
+        ...(enemyInfo ? {
+          borderLeftColor: `${enemyInfo.color}20`,
+          borderRightColor: `${enemyInfo.color}20`,
+          borderBottomColor: `${enemyInfo.color}20`,
+        } : {}),
+      }}
     >
       {/* Top-right glow */}
       {enemyInfo && (
@@ -473,7 +493,13 @@ function StatCard({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
-      className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 sm:p-4 text-center backdrop-blur-sm"
+      className="relative overflow-hidden p-3 sm:p-4 text-center backdrop-blur-sm"
+      style={{
+        background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+        border: '1px solid rgba(212,160,23,0.1)',
+        borderTop: '2px solid rgba(212,160,23,0.45)',
+        borderRadius: '18px',
+      }}
     >
       <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-[0.06]`} />
       <div className="relative">
@@ -649,7 +675,13 @@ export default function JourneysPageClient() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="rounded-2xl border border-[#d4a44c]/20 bg-white/[0.03] backdrop-blur-sm p-8 text-center"
+              className="backdrop-blur-sm p-8 text-center"
+              style={{
+                background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                border: '1px solid rgba(212,160,23,0.1)',
+                borderTop: '2px solid rgba(212,160,23,0.45)',
+                borderRadius: '18px',
+              }}
             >
               <div className="text-5xl mb-4">{'\uD83D\uDE4F'}</div>
               <h3 className="text-lg font-semibold mb-2">Sign In to Begin Your Journey</h3>
@@ -678,7 +710,13 @@ export default function JourneysPageClient() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3 + i * 0.06 }}
-                      className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-4 text-center"
+                      className="p-4 text-center"
+                      style={{
+                        background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                        border: '1px solid rgba(212,160,23,0.1)',
+                        borderTop: '2px solid rgba(212,160,23,0.45)',
+                        borderRadius: '18px',
+                      }}
                     >
                       <div
                         className="mx-auto mb-2 h-10 w-10 rounded-full flex items-center justify-center text-lg"
@@ -911,7 +949,13 @@ export default function JourneysPageClient() {
                   <Link
                     key={step.step_id}
                     href={`/journeys/guided/${step.journey_id}`}
-                    className="flex items-center justify-between p-3 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.07] transition-all"
+                    className="flex items-center justify-between p-3 transition-all hover:opacity-95"
+                    style={{
+                      background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                      border: '1px solid rgba(212,160,23,0.1)',
+                      borderTop: '2px solid rgba(212,160,23,0.45)',
+                      borderRadius: '18px',
+                    }}
                   >
                     <div>
                       <div className="text-sm font-medium text-white">{step.step_title}</div>
@@ -941,7 +985,13 @@ export default function JourneysPageClient() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.1 }}
-                className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4 backdrop-blur-sm"
+                className="p-4 backdrop-blur-sm"
+                style={{
+                  background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                  border: '1px solid rgba(212,160,23,0.1)',
+                  borderTop: '2px solid rgba(212,160,23,0.45)',
+                  borderRadius: '18px',
+                }}
               >
                 <h3 className="text-sm font-semibold mb-3 text-center">
                   Enemy Mastery Radar
@@ -1050,7 +1100,15 @@ export default function JourneysPageClient() {
                     )}
                   </>
                 ) : (
-                  <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-8 text-center">
+                  <div
+                    className="p-8 text-center"
+                    style={{
+                      background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                      border: '1px solid rgba(212,160,23,0.1)',
+                      borderTop: '2px solid rgba(212,160,23,0.45)',
+                      borderRadius: '18px',
+                    }}
+                  >
                     <div className="text-3xl mb-3">{'\uD83D\uDCDA'}</div>
                     <h3 className="text-base font-medium mb-1">No Templates Available</h3>
                     <p className="text-body text-[var(--mv-text-secondary)]">
