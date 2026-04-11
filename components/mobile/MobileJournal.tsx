@@ -268,7 +268,7 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
     return (
       <div
         ref={ref}
-        className={`flex flex-col h-full bg-[#050507] ${className}`}
+        className={`flex flex-col h-full bg-[#050714] ${className}`}
         style={{
           paddingBottom: isKeyboardVisible ? keyboardHeight : 0,
         }}
@@ -609,7 +609,7 @@ export const MobileJournal = forwardRef<HTMLDivElement, MobileJournalProps>(
         {/* Bottom toolbar */}
         <div className="
           px-4 py-3
-          bg-[#050507]/95 backdrop-blur-xl
+          bg-[#050714]/95 backdrop-blur-xl
           border-t border-white/[0.06]
         ">
           <div className="flex items-center justify-between">

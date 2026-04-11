@@ -96,7 +96,7 @@ export default function KarmaFootprintClient() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] px-page-x py-4 md:py-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050714] to-[#120907] px-page-x py-4 md:py-8">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <FadeIn>

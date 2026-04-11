@@ -162,7 +162,7 @@ export function ToolsSheet({ isOpen, onClose, className = '' }: ToolsSheetProps)
             {/* Sheet - z-[65] to be above backdrop - Full height mobile optimized */}
             <motion.div
               ref={sheetRef}
-              className={`overlay-bottom-sheet fixed inset-x-0 bottom-0 flex flex-col overflow-hidden rounded-t-[28px] border-t border-[#d4a44c]/25 bg-gradient-to-b from-[#111118] to-[#050507] shadow-[0_-20px_60px_rgba(0,0,0,0.6)] will-change-transform ${className}`}
+              className={`overlay-bottom-sheet fixed inset-x-0 bottom-0 flex flex-col overflow-hidden rounded-t-[28px] border-t border-[#d4a44c]/25 bg-gradient-to-b from-[#111118] to-[#050714] shadow-[0_-20px_60px_rgba(0,0,0,0.6)] will-change-transform ${className}`}
               style={{
                 zIndex: 65,
                 WebkitBackfaceVisibility: 'hidden',

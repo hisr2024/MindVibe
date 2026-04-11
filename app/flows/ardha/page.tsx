@@ -24,7 +24,7 @@ export default function ArdhaFlow() {
           </ol>
           <div className="rounded-2xl border border-[#d4a44c]/25 bg-black/60 p-3 text-xs text-[#f5f0e8]/80">No accounts • Stored locally</div>
         </div>
-        <div className="space-y-2 rounded-2xl border border-[#d4a44c]/20 bg-[#050507]/80 p-4">
+        <div className="space-y-2 rounded-2xl border border-[#d4a44c]/20 bg-[#050714]/80 p-4">
           <h3 className="text-lg font-semibold">Pillars</h3>
           <ul className="space-y-2 text-sm text-[#f5f0e8]/80">
             {pillars.map(item => (

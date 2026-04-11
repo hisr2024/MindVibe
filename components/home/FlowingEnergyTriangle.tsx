@@ -32,7 +32,7 @@ export function FlowingEnergyTriangle() {
   const [selectedMode, setSelectedMode] = useState<GuidanceMode | null>(null)
 
   return (
-    <div className="space-y-6 rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#050507]/80 to-[#120a07]/90 p-6 shadow-[0_30px_120px_rgba(212,164,76,0.18)] backdrop-blur md:p-8">
+    <div className="space-y-6 rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d0f]/90 via-[#050714]/80 to-[#120a07]/90 p-6 shadow-[0_30px_120px_rgba(212,164,76,0.18)] backdrop-blur md:p-8">
       {/* Header */}
       <div className="space-y-3 text-center">
         <h2 className="text-3xl font-bold bg-gradient-to-r from-[#e8b54a] via-[#ffb347] to-rose-200 bg-clip-text text-transparent md:text-4xl">

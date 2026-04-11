@@ -26,7 +26,7 @@ export type ThemeTokens = {
 }
 
 export const darkTheme: ThemeTokens = {
-  background: 'radial-gradient(circle at 15% 20%, rgba(212,164,76,0.06), transparent 32%), radial-gradient(circle at 80% 0%, rgba(245,240,232,0.04), transparent 40%), linear-gradient(135deg, #050507 0%, #0a0a12 45%, #0d0b08 100%)',
+  background: 'radial-gradient(circle at 15% 20%, rgba(212,164,76,0.06), transparent 32%), radial-gradient(circle at 80% 0%, rgba(245,240,232,0.04), transparent 40%), linear-gradient(135deg, #050714 0%, #0a0a12 45%, #0d0b08 100%)',
   surface: '#0a0a12',
   surfaceSubtle: '#080810',
   surfaceElevated: 'rgba(10,10,18,0.92)',

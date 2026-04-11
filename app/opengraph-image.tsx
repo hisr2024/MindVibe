@@ -11,7 +11,7 @@ export default async function OGImage() {
     (
       <div
         style={{
-          background: 'linear-gradient(135deg, #050507 0%, #0a0a12 40%, #0d0b08 70%, #050507 100%)',
+          background: 'linear-gradient(135deg, #050714 0%, #0a0a12 40%, #0d0b08 70%, #050714 100%)',
           width: '100%',
           height: '100%',
           display: 'flex',

@@ -272,7 +272,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
         ref={ref}
         className={`
           flex flex-col h-full
-          bg-[#050507] relative
+          bg-[#050714] relative
           ${className}
         `}
         style={{
@@ -572,7 +572,7 @@ export const MobileKiaanChat = forwardRef<HTMLDivElement, MobileKiaanChatProps>(
         )}
 
         {/* Divine Input area */}
-        <div className="relative z-10 px-4 py-3 bg-gradient-to-t from-[#050507] via-[#050507]/98 to-[#050507]/90 backdrop-blur-xl border-t border-[#d4a44c]/8 flex-shrink-0">
+        <div className="relative z-10 px-4 py-3 bg-gradient-to-t from-[#050714] via-[#050714]/98 to-[#050714]/90 backdrop-blur-xl border-t border-[#d4a44c]/8 flex-shrink-0">
           {/* Voice input indicator */}
           <AnimatePresence>
             {isListening && (

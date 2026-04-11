@@ -126,7 +126,7 @@ export default function SubscriptionDashboardPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-12">
       {/* Header */}
-      <div className="mb-8 rounded-3xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#0d0d10]/90 via-[#050507]/80 to-[#0f0a08]/90 p-6 shadow-[0_18px_70px_rgba(46,160,255,0.14)] flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-8 rounded-3xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#0d0d10]/90 via-[#050714]/80 to-[#0f0a08]/90 p-6 shadow-[0_18px_70px_rgba(46,160,255,0.14)] flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <KiaanLogo size="md" className="shrink-0" />
         <div className="space-y-1">
           <h1 className="text-3xl font-bold text-[#f5f0e8] mb-1">Subscription</h1>

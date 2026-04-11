@@ -14,7 +14,7 @@
  * - Exit animation uses onTransitionEnd (no setTimeout race condition)
  * - Respects prefers-reduced-motion for accessibility
  *
- * Color scheme: Gold (#d4a44c) on Black (#050507) — rich and divine.
+ * Color scheme: Gold (#d4a44c) on Black (#050714) — rich and divine.
  */
 
 import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'

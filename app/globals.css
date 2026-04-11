@@ -37,6 +37,38 @@
     --font-cormorant: var(--font-divine);
     --font-playfair: var(--font-display);
     --font-outfit: var(--font-ui);
+
+    /* ─── Kiaanverse Sacred Palette ─────────────────────────────────
+       Unified CSS custom properties mirroring the `sacred.*` tokens
+       in tailwind.config.ts. Use these as the single source of truth
+       for the desktop Kiaanverse theme. Mobile (/m/ routes) retains
+       its own tokens in styles/mobile.css + sacred-mobile.css. */
+
+    /* Cosmic void — deepest background layer */
+    --sacred-cosmic-void: #050714;
+    /* Yamuna river depths — primary surface gradient */
+    --sacred-yamuna-deep: #0B0E2A;
+    --sacred-yamuna-mid: #111435;
+    --sacred-yamuna-surface: #161A42;
+    /* Krishna blue — primary accent, CTAs, links */
+    --sacred-krishna-blue: #1B4FBB;
+    --sacred-krishna-glow: #2563EB;
+    /* Peacock feather — secondary accents, highlights */
+    --sacred-peacock-teal: #0E7490;
+    --sacred-peacock-iridescent: #06B6D4;
+    --sacred-peacock-shimmer: #67E8F9;
+    /* Divine gold — sacred moments, celebrations */
+    --sacred-divine-gold: #D4A017;
+    --sacred-divine-gold-bright: #F0C040;
+    --sacred-divine-gold-glow: #FDE68A;
+    /* Saffron — spiritual warmth, offerings */
+    --sacred-saffron-core: #F97316;
+    --sacred-saffron-warm: #FB923C;
+    /* Sacred whites and text hierarchy */
+    --sacred-white: #F8F6F0;
+    --sacred-text-primary: #EDE8DC;
+    --sacred-text-secondary: #B8AE98;
+    --sacred-text-muted: #6B6355;
   }
 
   html {

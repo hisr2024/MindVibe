@@ -622,7 +622,7 @@ export default function JourneysPageClient() {
     return (
       <div className="min-h-screen relative">
         {/* Background */}
-        <div className="fixed inset-0 bg-[#050507] pointer-events-none" />
+        <div className="fixed inset-0 bg-[#050714] pointer-events-none" />
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-[#d4a44c]/[0.04] rounded-full blur-[120px]" />
           <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-[#d4a44c]/[0.03] rounded-full blur-[100px]" />
@@ -723,7 +723,7 @@ export default function JourneysPageClient() {
   if (loading || authLoading) {
     return (
       <div className="min-h-screen relative">
-        <div className="fixed inset-0 bg-[#050507] pointer-events-none" />
+        <div className="fixed inset-0 bg-[#050714] pointer-events-none" />
         <main className="relative z-10 mx-auto max-w-6xl px-page-x lg:px-8 pt-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold">Strengthen Steadiness Within</h1>
@@ -746,7 +746,7 @@ export default function JourneysPageClient() {
   return (
     <div className="min-h-screen relative">
       {/* Deep black background */}
-      <div className="fixed inset-0 bg-[#050507] pointer-events-none" />
+      <div className="fixed inset-0 bg-[#050714] pointer-events-none" />
 
       {/* Ambient floating golden orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">

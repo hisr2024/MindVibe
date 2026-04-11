@@ -671,7 +671,7 @@ export function KiaanVoiceCompanionFooter() {
             initial="hidden"
             animate="visible"
             exit="hidden"
-            className="mb-3 w-[calc(100vw-24px)] max-w-[320px] max-h-[min(420px,calc(100dvh-160px))] overflow-hidden rounded-[20px] border border-[#d4a44c]/20 bg-gradient-to-b from-[#0c0a06]/[0.98] via-[#080808]/95 to-[#050507]/[0.98] shadow-2xl shadow-black/40 backdrop-blur-xl md:max-w-[360px] md:rounded-[24px]"
+            className="mb-3 w-[calc(100vw-24px)] max-w-[320px] max-h-[min(420px,calc(100dvh-160px))] overflow-hidden rounded-[20px] border border-[#d4a44c]/20 bg-gradient-to-b from-[#0c0a06]/[0.98] via-[#080808]/95 to-[#050714]/[0.98] shadow-2xl shadow-black/40 backdrop-blur-xl md:max-w-[360px] md:rounded-[24px]"
             onClick={cancelAutoCollapse}
           >
             {/* Top glow accent */}

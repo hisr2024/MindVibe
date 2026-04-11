@@ -69,7 +69,7 @@ export class MobileErrorBoundary extends Component<Props, State> {
           ref={this.errorContainerRef}
           tabIndex={-1}
           role="alert"
-          className="min-h-screen bg-[#050507] flex flex-col items-center justify-center px-6 text-center outline-none"
+          className="min-h-screen bg-[#050714] flex flex-col items-center justify-center px-6 text-center outline-none"
         >
           {/* Calming animation */}
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#d4a44c]/20 to-amber-500/10 flex items-center justify-center mb-6 animate-pulse">
@@ -128,7 +128,7 @@ export class MobileErrorBoundary extends Component<Props, State> {
  */
 export function MobilePageSkeleton() {
   return (
-    <div className="min-h-screen bg-[#050507] px-4 pt-16 pb-24 animate-pulse">
+    <div className="min-h-screen bg-[#050714] px-4 pt-16 pb-24 animate-pulse">
       {/* Header skeleton */}
       <div className="mb-6">
         <div className="h-4 w-24 bg-white/[0.06] rounded mb-2" />

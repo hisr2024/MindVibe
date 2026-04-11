@@ -211,7 +211,7 @@ export function ToolCard({
       <Link
         href={href}
         onClick={handleTap}
-        className={`group relative block overflow-hidden rounded-[18px] border border-[#d4a44c]/15 bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-4 shadow-mobile-card transition-all duration-200 hover:border-[#d4a44c]/30 hover:shadow-[0_8px_32px_rgba(212,164,76,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050507] active:opacity-95 ${className}`}
+        className={`group relative block overflow-hidden rounded-[18px] border border-[#d4a44c]/15 bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-4 shadow-mobile-card transition-all duration-200 hover:border-[#d4a44c]/30 hover:shadow-[0_8px_32px_rgba(212,164,76,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050714] active:opacity-95 ${className}`}
       >
         {cardContent}
       </Link>

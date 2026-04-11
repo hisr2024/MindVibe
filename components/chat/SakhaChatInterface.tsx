@@ -346,7 +346,7 @@ export function SakhaChatInterface() {
       )}
 
       {/* Input bar */}
-      <div className="border-t border-[#e8b54a]/10 bg-[#050507]/80 px-4 py-3 backdrop-blur-md">
+      <div className="border-t border-[#e8b54a]/10 bg-[#050714]/80 px-4 py-3 backdrop-blur-md">
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <VoiceInputButton
             language={language}
@@ -368,7 +368,7 @@ export function SakhaChatInterface() {
             type="submit"
             disabled={!inputText.trim() || isStreaming}
             aria-label="Send message"
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#d4a44c] text-[#050507] transition-all hover:bg-[#e8b54a] focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50 disabled:opacity-30 disabled:hover:bg-[#d4a44c]"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#d4a44c] text-[#050714] transition-all hover:bg-[#e8b54a] focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50 disabled:opacity-30 disabled:hover:bg-[#d4a44c]"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

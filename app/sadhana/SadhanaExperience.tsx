@@ -43,7 +43,7 @@ export function SadhanaExperience() {
   }, [complete])
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#050507]">
+    <div className="relative min-h-screen overflow-hidden bg-[#050714]">
       {/* Phase-reactive background */}
       <SacredCanvas phase={phase} />
       <GoldenParticles phase={phase} />
