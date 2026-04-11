@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useMemo } from 'react'
-import { MindVibeLockup } from '@/components/branding'
 import { ThemeToggle } from '@/components/ui'
 import { ToolsDropdown } from './ToolsDropdown'
 import { LanguageSelector } from './LanguageSelector'
@@ -16,14 +15,15 @@ export interface DesktopNavProps {
 }
 
 /**
- * DesktopNav component for desktop top navigation.
+ * DesktopNav — Kiaanverse desktop top navigation.
  *
- * Features:
- * - MindVibe logo (preserved, unaltered)
- * - Main nav links: Chat, Sacred Reflections, Wisdom, Insights
- * - Tools dropdown menu with all guidance engines
- * - User profile dropdown
- * - Proper active state indicators
+ * Styled per the P3-E Phase 3 spec:
+ *   - Header: rgba(5,7,20,0.85) with backdrop-filter: blur(20px), 1px gold
+ *     border-bottom rgba(212,160,23,0.1).
+ *   - Logo: "Sakha" in Cormorant Garamond italic, divine-gold (#D4A017).
+ *   - Nav links: Outfit 13px, #B8AE98 at rest, #D4A017 when active.
+ *   - CTA (Subscriptions): gold gradient button.
+ *   - Hamburger dropdown: rgba(11,14,42,0.98) + blur + gold border.
  */
 export function DesktopNav({ className = '' }: DesktopNavProps) {
   const pathname = usePathname()
@@ -31,58 +31,73 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
   const { t } = useLanguage()
 
   // Main navigation links with translations
-  const mainNavLinks = useMemo(() => [
-    { href: '/', label: t('navigation.mainNav.home', 'Home') },
-    { href: '/sadhana', label: t('navigation.features.sadhana', 'Sadhana') },
-    { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN'), purposeDescKey: 'kiaan' },
-    { href: '/companion', label: t('navigation.features.companion', 'Companion'), purposeDescKey: 'kiaan' },
-    { href: '/dashboard', label: t('navigation.mainNav.dashboard', 'Dashboard') },
-    { href: '/journeys', label: t('navigation.features.wisdomJourneys', 'Journeys'), premium: true, purposeDescKey: 'journey' },
-{ href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Sacred Reflections') },
-    { href: '/tools/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
-    { href: '/profile', label: t('navigation.mainNav.profile', 'Profile') },
-    { href: '/account', label: t('navigation.mainNav.account', 'Account') },
-  ], [t])
+  const mainNavLinks = useMemo(
+    () => [
+      { href: '/', label: t('navigation.mainNav.home', 'Home') },
+      { href: '/sadhana', label: t('navigation.features.sadhana', 'Sadhana') },
+      { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN'), purposeDescKey: 'kiaan' },
+      { href: '/companion', label: t('navigation.features.companion', 'Companion'), purposeDescKey: 'kiaan' },
+      { href: '/dashboard', label: t('navigation.mainNav.dashboard', 'Dashboard') },
+      {
+        href: '/journeys',
+        label: t('navigation.features.wisdomJourneys', 'Journeys'),
+        premium: true,
+        purposeDescKey: 'journey',
+      },
+      { href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Sacred Reflections') },
+      { href: '/tools/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
+      { href: '/profile', label: t('navigation.mainNav.profile', 'Profile') },
+      { href: '/account', label: t('navigation.mainNav.account', 'Account') },
+    ],
+    [t],
+  )
 
   // Get tools for mobile menu display
   const allTools = TOOLS_BY_CATEGORY.filter(
-    cat => cat.id === 'guidance' || cat.id === 'karma'
-  ).flatMap(cat => cat.tools)
+    (cat) => cat.id === 'guidance' || cat.id === 'karma',
+  ).flatMap((cat) => cat.tools)
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-slate-950/95 shadow-lg shadow-black/20 backdrop-blur-xl ${className}`}
+      className={`fixed inset-x-0 top-0 z-50 ${className}`}
+      style={{
+        backgroundColor: 'rgba(5, 7, 20, 0.85)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(212, 160, 23, 0.1)',
+      }}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-        {/* Logo */}
+        {/* Logo — Cormorant Garamond italic gold wordmark */}
         <Link
           href="/"
-          className="flex items-center gap-3 text-slate-100 transition hover:text-white"
+          className="font-divine italic transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-[#D4A017] focus:ring-offset-2 focus:ring-offset-[rgba(5,7,20,0.85)]"
+          style={{
+            color: '#D4A017',
+            fontSize: '28px',
+            fontWeight: 500,
+            letterSpacing: '0.02em',
+          }}
           aria-label="Sakha home"
         >
-          <MindVibeLockup
-            theme="sunrise"
-            animated
-            className="drop-shadow-[0_10px_40px_rgba(255,147,89,0.28)]"
-          />
+          Sakha
         </Link>
 
         {/* Desktop Navigation */}
-        <nav
-          className="hidden items-center gap-1 md:flex"
-          aria-label="Primary"
-        >
+        <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
           {mainNavLinks.map((link) => {
             const active = pathname === link.href
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#d4a44c] focus:ring-offset-2 focus:ring-offset-slate-900 flex items-center gap-1 ${
-                  active
-                    ? 'bg-white/10 text-white shadow-lg shadow-[#d4a44c]/20'
-                    : 'text-white/70 hover:bg-white/5 hover:text-white'
-                }`}
+                className="flex items-center gap-1 rounded-full px-3 py-2 font-ui transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#D4A017] focus:ring-offset-2 focus:ring-offset-[rgba(5,7,20,0.85)]"
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  letterSpacing: '0.02em',
+                  color: active ? '#D4A017' : '#B8AE98',
+                }}
               >
                 {link.label}
               </Link>
@@ -96,30 +111,53 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
           {/* Language Selector — dropdown on desktop, auto-hidden below sm */}
           <LanguageSelector variant="dropdown" className="hidden sm:block" />
 
+          {/* CTA: Subscriptions — gold gradient button */}
           <Link
             href="/dashboard/subscription"
-            className="hidden items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/5 hover:text-white sm:inline-flex focus:outline-none focus:ring-2 focus:ring-[#d4a44c] focus:ring-offset-2 focus:ring-offset-slate-900"
+            className="hidden items-center gap-2 rounded-full font-ui transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] sm:inline-flex focus:outline-none focus:ring-2 focus:ring-[#D4A017] focus:ring-offset-2 focus:ring-offset-[rgba(5,7,20,0.85)]"
+            style={{
+              background: 'linear-gradient(135deg, #D4A017 0%, #F0C040 50%, #D4A017 100%)',
+              color: '#050714',
+              fontSize: '13px',
+              fontWeight: 600,
+              letterSpacing: '0.02em',
+              padding: '9px 18px',
+              boxShadow: '0 4px 14px rgba(212, 160, 23, 0.35)',
+            }}
           >
             {t('navigation.mainNav.pricing', 'Subscriptions')}
           </Link>
 
-          {/* Mobile menu button */}
+          {/* Hamburger menu button */}
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="inline-flex items-center justify-center rounded-full border border-white/10 px-3 py-2 text-white/80 md:hidden"
+            className="inline-flex items-center justify-center rounded-full border px-3 py-2 font-ui transition-colors duration-200 md:hidden focus:outline-none focus:ring-2 focus:ring-[#D4A017]"
+            style={{
+              fontSize: '13px',
+              fontWeight: 500,
+              color: '#B8AE98',
+              borderColor: 'rgba(212, 160, 23, 0.3)',
+            }}
             aria-expanded={mobileMenuOpen}
             aria-label={t('navigation.actions.toggleMenu', 'Toggle navigation menu')}
           >
-            <span className="text-sm font-semibold">{t('navigation.actions.menu', 'Menu')}</span>
+            <span>{t('navigation.actions.menu', 'Menu')}</span>
           </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Hamburger dropdown */}
       {mobileMenuOpen && (
         <div
-          className="border-t border-white/5 bg-slate-950/95 px-4 py-3 md:hidden"
+          className="px-4 py-3 md:hidden"
+          style={{
+            backgroundColor: 'rgba(11, 14, 42, 0.98)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderTop: '1px solid rgba(212, 160, 23, 0.3)',
+            borderBottom: '1px solid rgba(212, 160, 23, 0.3)',
+          }}
           aria-label="Mobile navigation"
         >
           <div className="flex flex-col gap-2">
@@ -130,23 +168,39 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`rounded-xl px-3 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#d4a44c] focus:ring-offset-2 focus:ring-offset-slate-900 ${
-                    active
-                      ? 'bg-white/10 text-white'
-                      : 'text-white/80 hover:bg-white/5'
-                  }`}
+                  className="rounded-xl px-3 py-2 font-ui transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#D4A017]"
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    letterSpacing: '0.02em',
+                    color: active ? '#D4A017' : '#B8AE98',
+                  }}
                 >
                   {link.label}
                   {'purposeDescKey' in link && link.purposeDescKey && (
-                    <span className="block text-[10px] font-normal text-white/70 truncate">
+                    <span
+                      className="block font-ui truncate"
+                      style={{ fontSize: '10px', color: 'rgba(184, 174, 152, 0.7)', fontWeight: 400 }}
+                    >
                       {t(`dashboard.tool_desc.${link.purposeDescKey}`, '')}
                     </span>
                   )}
                 </Link>
               )
             })}
-            <div className="border-t border-white/5 pt-2 mt-2">
-              <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white/70">
+            <div
+              className="pt-2 mt-2"
+              style={{ borderTop: '1px solid rgba(212, 160, 23, 0.15)' }}
+            >
+              <span
+                className="px-3 py-1 font-ui uppercase"
+                style={{
+                  fontSize: '11px',
+                  letterSpacing: '0.12em',
+                  fontWeight: 600,
+                  color: '#D4A017',
+                }}
+              >
                 {t('common.buttons.tools', 'Tools')}
               </span>
               {allTools.map((item: ToolConfig) => (
@@ -154,13 +208,17 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
                   key={item.id}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/80 transition hover:bg-white/5"
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 font-ui transition-colors duration-200"
+                  style={{ fontSize: '13px', color: '#B8AE98', fontWeight: 500 }}
                 >
                   <span className="text-base">{item.icon}</span>
                   <span className="min-w-0">
                     <span className="block">{t(`dashboard.tools.${item.id}.title`, item.title)}</span>
                     {item.purposeDescKey && (
-                      <span className="block text-[10px] text-white/70 truncate">
+                      <span
+                        className="block font-ui truncate"
+                        style={{ fontSize: '10px', color: 'rgba(184, 174, 152, 0.7)', fontWeight: 400 }}
+                      >
                         {t(`dashboard.tool_desc.${item.purposeDescKey}`, '')}
                       </span>
                     )}
@@ -168,12 +226,19 @@ export function DesktopNav({ className = '' }: DesktopNavProps) {
                 </Link>
               ))}
             </div>
-            <div className="flex items-center justify-between rounded-xl px-3 py-2 border-t border-white/5 mt-2 pt-2">
-              <span className="text-sm text-white/80">{t('navigation.mainNav.theme', 'Theme')}</span>
+            <div
+              className="flex items-center justify-between rounded-xl px-3 py-2 mt-2 pt-2"
+              style={{ borderTop: '1px solid rgba(212, 160, 23, 0.15)' }}
+            >
+              <span className="font-ui" style={{ fontSize: '13px', color: '#B8AE98', fontWeight: 500 }}>
+                {t('navigation.mainNav.theme', 'Theme')}
+              </span>
               <ThemeToggle />
             </div>
             <div className="flex items-center justify-between rounded-xl px-3 py-2">
-              <span className="text-sm text-white/80">{t('navigation.mainNav.language', 'Language')}</span>
+              <span className="font-ui" style={{ fontSize: '13px', color: '#B8AE98', fontWeight: 500 }}>
+                {t('navigation.mainNav.language', 'Language')}
+              </span>
               <LanguageSelector variant="sheet" />
             </div>
           </div>
