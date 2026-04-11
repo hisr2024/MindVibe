@@ -155,6 +155,7 @@ export default function MobileKarmaLytixPage() {
                 fontFamily: '"Noto Sans Devanagari", sans-serif',
                 fontSize: 10,
                 color: tab === t.id ? '#F0C040' : '#6B6355',
+                lineHeight: 1.5,
               }}
             >
               {t.sa}

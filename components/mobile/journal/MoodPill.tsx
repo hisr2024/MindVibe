@@ -40,6 +40,7 @@ export const MoodPill: React.FC<Props> = ({ mood, isSelected, onSelect }) => (
         fontFamily: '"Noto Sans Devanagari", sans-serif',
         fontSize: 11,
         fontWeight: isSelected ? 500 : 400,
+        lineHeight: 1.5,
       }}
     >
       {mood.sanskrit}

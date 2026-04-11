@@ -17,8 +17,8 @@ import { getPlanById, type PlanId } from '@/lib/payments/subscription'
 
 const tierNames: Record<string, string> = {
   seeker: 'Seeker',
-  pro: 'Sacred Pro',
-  circle: 'Sacred Circle',
+  pro: 'Bhakta',
+  circle: 'Sadhak',
 }
 
 function SuccessContent() {
@@ -43,7 +43,7 @@ function SuccessContent() {
           const subscription: Subscription = {
             id: String(data.id ?? `sub_${planId}`),
             tierId: data.effective_tier ?? data.plan?.tier ?? planId,
-            tierName: data.plan?.name ?? tierNames[planId] ?? 'Sacred Pro',
+            tierName: data.plan?.name ?? tierNames[planId] ?? 'Bhakta',
             status: (data.status as Subscription['status']) ?? 'active',
             currentPeriodEnd: data.current_period_end
               ? new Date(data.current_period_end).toISOString()

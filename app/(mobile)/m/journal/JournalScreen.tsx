@@ -97,6 +97,7 @@ export default function JournalScreen() {
                   fontFamily: '"Noto Sans Devanagari", sans-serif',
                   fontSize: 11,
                   color: active ? '#F0C040' : '#6B6355',
+                  lineHeight: 1.5,
                 }}
               >
                 {t.sa}

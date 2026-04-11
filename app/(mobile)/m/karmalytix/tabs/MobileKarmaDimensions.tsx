@@ -99,7 +99,7 @@ export const MobileKarmaDimensions: React.FC<{ dashboard: KarmaDashboard | null 
                       fontFamily: '"Noto Sans Devanagari", sans-serif',
                       fontSize: 13,
                       color: dim.color,
-                      lineHeight: 1.3,
+                      lineHeight: 2.0,
                     }}
                   >
                     {dim.icon} {dim.sa}

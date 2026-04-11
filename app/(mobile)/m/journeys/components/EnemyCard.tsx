@@ -110,6 +110,7 @@ export function EnemyCard({
             style={{
               fontFamily: '"Noto Sans Devanagari", sans-serif',
               color: `rgba(${info.colorRGB},0.85)`,
+              lineHeight: 1.5,
             }}
           >
             {info.devanagari}

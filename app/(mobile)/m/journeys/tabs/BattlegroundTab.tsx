@@ -133,6 +133,7 @@ export function BattlegroundTab({ dashboard, isLoading, onNavigateToJourneys }: 
                     style={{
                       fontFamily: '"Noto Sans Devanagari", sans-serif',
                       color: selectedInfo.color,
+                      lineHeight: 2.0,
                     }}
                   >
                     {selectedInfo.devanagari}

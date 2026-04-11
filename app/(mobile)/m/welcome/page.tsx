@@ -44,6 +44,7 @@ export default function WelcomePage() {
             color: '#F0C040',
             fontFamily: 'Noto Sans Devanagari, serif',
             textShadow: '0 0 20px rgba(240,192,64,0.6)',
+            lineHeight: 2.0,
           }}
         >
           ॐ

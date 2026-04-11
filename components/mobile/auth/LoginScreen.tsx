@@ -17,9 +17,11 @@ import { SacredOMLoader } from '@/components/sacred/SacredOMLoader'
 
 interface LoginScreenProps {
   onSwitchToSignUp: () => void
+  /** Called after a successful password login, before navigation. Return true to prevent default navigation. */
+  onLoginSuccess?: (user: { id: string; email: string; name?: string }) => boolean
 }
 
-export function LoginScreen({ onSwitchToSignUp }: LoginScreenProps) {
+export function LoginScreen({ onSwitchToSignUp, onLoginSuccess }: LoginScreenProps) {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -74,6 +76,16 @@ export function LoginScreen({ onSwitchToSignUp }: LoginScreenProps) {
       // Store user profile for auth state
       if (data.user) {
         localStorage.setItem('mindvibe_auth_user', JSON.stringify(data.user))
+      }
+
+      // Allow parent to intercept successful login (e.g. to offer biometric registration)
+      if (onLoginSuccess && data.user) {
+        const preventNavigation = onLoginSuccess({
+          id: data.user.id || data.user.user_id || '',
+          email: data.user.email || email,
+          name: data.user.name || data.user.display_name || '',
+        })
+        if (preventNavigation) return
       }
 
       router.push('/m')

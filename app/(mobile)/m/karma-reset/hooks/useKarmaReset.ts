@@ -17,6 +17,10 @@ import {
   getWisdom,
   completeSession,
 } from '../services/karmaResetService'
+import {
+  getPersonalisationContext,
+  buildContextString,
+} from '@/lib/user-context/getPersonalisationContext'
 
 export function useKarmaReset() {
   const [isLoadingQuestion, setIsLoadingQuestion] = useState(false)
@@ -49,7 +53,21 @@ export function useKarmaReset() {
     setIsLoadingWisdom(true)
     setError(null)
     try {
-      const wisdom = await getWisdom(context, reflections)
+      // Enrich context with user's spiritual journey state (best-effort)
+      let enrichedContext = context
+      try {
+        const ctx = await getPersonalisationContext()
+        const enrichment = buildContextString(ctx)
+        if (enrichment) {
+          enrichedContext = {
+            ...context,
+            description: `${context.description} [Spiritual context: ${enrichment}]`,
+          }
+        }
+      } catch {
+        // Personalisation is best-effort — never block the sacred flow
+      }
+      const wisdom = await getWisdom(enrichedContext, reflections)
       return wisdom
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Sakha is momentarily unavailable'

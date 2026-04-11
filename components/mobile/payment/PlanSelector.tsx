@@ -3,11 +3,11 @@
 /**
  * PlanSelector — Sacred 3-tier plan cards
  *
- * Displays Seeker (free), Sacred Pro (featured gold), Sacred Circle (teal).
+ * Displays Seeker (free), Bhakta (featured gold), Sadhak (teal).
  * Each card: badge, plan name + Sanskrit, tagline, trial banner, price,
  * savings note, divider, feature list (checkmark/x), CTA button, note.
  *
- * Sacred Pro: radial gold glow, 2px gold top border, "MOST POPULAR" badge.
+ * Bhakta: radial gold glow, 2px gold top border, "MOST POPULAR" badge.
  * Touch feedback: scale(0.97) 150ms on tap.
  * Accessibility: aria-pressed, role="radio" in radiogroup.
  */
@@ -122,6 +122,7 @@ export function PlanSelector({ plans, selectedPlan, billing, currency, onSelect 
                   style={{
                     fontFamily: '"Noto Sans Devanagari", Mangal, sans-serif',
                     color: plan.color,
+                    lineHeight: 2.0,
                   }}
                 >
                   {plan.sanskrit}

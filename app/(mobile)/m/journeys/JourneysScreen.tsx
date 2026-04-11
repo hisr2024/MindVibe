@@ -145,7 +145,7 @@ export default function JourneysScreen() {
           </Link>
           <div className="text-center">
             <h1 className="text-lg italic text-[#EDE8DC]">
-              <span style={{ fontFamily: '"Noto Sans Devanagari", serif' }}>
+              <span style={{ fontFamily: '"Noto Sans Devanagari", serif', lineHeight: 1.5 }}>
                 {'\u0937\u0921\u094D\u0930\u093F\u092A\u0941'}
               </span>
               <span className="font-divine"> Journeys</span>
