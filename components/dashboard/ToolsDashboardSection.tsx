@@ -23,7 +23,7 @@ export function ToolsDashboardSection() {
         </div>
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-2 rounded-full border border-[#d4a44c]/30 bg-white/10 px-4 py-2 text-xs font-semibold text-[#f5f0e8] shadow-lg shadow-[#d4a44c]/15 transition hover:border-[#d4a44c]/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/60 focus:ring-offset-2 focus:ring-offset-[#050507]"
+          className="inline-flex items-center gap-2 rounded-full border border-[#d4a44c]/30 bg-white/10 px-4 py-2 text-xs font-semibold text-[#f5f0e8] shadow-lg shadow-[#d4a44c]/15 transition hover:border-[#d4a44c]/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/60 focus:ring-offset-2 focus:ring-offset-[#050714]"
         >
           {t('dashboard.returnHome', 'Return to home')}
           <span aria-hidden>→</span>
@@ -52,7 +52,7 @@ export function ToolsDashboardSection() {
                 <Link
                   key={tool.id}
                   href={tool.href}
-                  className="group flex items-center justify-between gap-2 rounded-xl border border-white/5 bg-black/30 px-3 py-2 shadow-[0_10px_30px_rgba(0,0,0,0.25)] transition hover:border-[#d4a44c]/40 hover:bg-black/40 focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/60 focus:ring-offset-2 focus:ring-offset-[#050507]"
+                  className="group flex items-center justify-between gap-2 rounded-xl border border-white/5 bg-black/30 px-3 py-2 shadow-[0_10px_30px_rgba(0,0,0,0.25)] transition hover:border-[#d4a44c]/40 hover:bg-black/40 focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/60 focus:ring-offset-2 focus:ring-offset-[#050714]"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-base">{tool.icon}</span>

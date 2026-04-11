@@ -139,7 +139,7 @@ export function SakhaMessageBubble({
             </p>
           )}
           {showCopied && (
-            <span className="absolute -top-6 right-2 rounded bg-[#d4a44c]/90 px-2 py-0.5 text-[10px] text-[#050507]">
+            <span className="absolute -top-6 right-2 rounded bg-[#d4a44c]/90 px-2 py-0.5 text-[10px] text-[#050714]">
               Copied
             </span>
           )}
@@ -233,7 +233,7 @@ export function SakhaMessageBubble({
         </div>
 
         {showCopied && (
-          <span className="absolute -top-6 left-2 rounded bg-[#d4a44c]/90 px-2 py-0.5 text-[10px] text-[#050507]">
+          <span className="absolute -top-6 left-2 rounded bg-[#d4a44c]/90 px-2 py-0.5 text-[10px] text-[#050714]">
             Copied
           </span>
         )}

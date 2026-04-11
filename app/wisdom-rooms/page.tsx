@@ -195,7 +195,7 @@ export default function WisdomRoomsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050507] to-[#120907] px-page-x py-4 md:py-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#050505] via-[#050714] to-[#120907] px-page-x py-4 md:py-8">
       <div className="max-w-5xl mx-auto space-y-6">
         <header className="rounded-3xl border border-[#d4a44c]/15 bg-[#0d0d10]/85 p-6 md:p-8 shadow-[0_20px_80px_rgba(212,164,76,0.12)]">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

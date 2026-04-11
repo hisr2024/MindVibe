@@ -174,7 +174,7 @@ export default function FeedbackPageClient() {
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-page-x pb-20 pt-2">
       {/* Header */}
-      <section className="rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#050507]/80 to-[#0f0a08]/90 p-8 shadow-[0_20px_80px_rgba(212,164,76,0.12)]">
+      <section className="rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#050714]/80 to-[#0f0a08]/90 p-8 shadow-[0_20px_80px_rgba(212,164,76,0.12)]">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#d4a44c]/15">
             <MessageSquareHeart className="h-5 w-5 text-[#d4a44c]" />
@@ -576,7 +576,7 @@ export default function FeedbackPageClient() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="flex flex-col items-center rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#050507]/80 to-[#0f0a08]/90 p-10 text-center shadow-[0_20px_80px_rgba(212,164,76,0.12)]"
+            className="flex flex-col items-center rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#050714]/80 to-[#0f0a08]/90 p-10 text-center shadow-[0_20px_80px_rgba(212,164,76,0.12)]"
           >
             <motion.div
               initial={{ scale: 0 }}

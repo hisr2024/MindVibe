@@ -6,7 +6,7 @@ export const metadata = {
 export default function PrivacyPage() {
   return (
     <main className="mx-auto max-w-5xl space-y-8 px-page-x pb-16">
-      <section className="rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#050507]/80 to-[#0f0a08]/90 p-8 shadow-[0_20px_80px_rgba(212,164,76,0.12)]">
+      <section className="rounded-3xl border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0d10]/90 via-[#050714]/80 to-[#0f0a08]/90 p-8 shadow-[0_20px_80px_rgba(212,164,76,0.12)]">
         <p className="text-xs uppercase tracking-[0.22em] text-[#f5f0e8]/70">Privacy</p>
         <h1 className="text-3xl font-bold">Confidential by default</h1>
         <p className="mt-4 text-[#f5f0e8]/80">

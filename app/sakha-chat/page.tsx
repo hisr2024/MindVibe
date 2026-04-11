@@ -18,7 +18,7 @@ export default function SakhaChatPage() {
   const router = useRouter()
 
   return (
-    <div className="flex h-dvh flex-col bg-gradient-to-b from-[#050507] via-[#0a0a12] to-[#0f0f18]">
+    <div className="flex h-dvh flex-col bg-gradient-to-b from-[#050714] via-[#0a0a12] to-[#0f0f18]">
       {/* Header */}
       <header className="flex items-center gap-3 border-b border-[#e8b54a]/10 px-4 py-3">
         <button

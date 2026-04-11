@@ -58,7 +58,7 @@ export function PageHeader({
             <button
               type="button"
               onClick={handleBack}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--mv-border)] bg-white/5 text-[var(--mv-text-primary)] transition hover:border-[var(--mv-border-strong)] hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50 focus:ring-offset-2 focus:ring-offset-[#050507]"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--mv-border)] bg-white/5 text-[var(--mv-text-primary)] transition hover:border-[var(--mv-border-strong)] hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50 focus:ring-offset-2 focus:ring-offset-[#050714]"
               aria-label="Go back"
             >
               <svg

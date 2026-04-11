@@ -68,7 +68,7 @@ export function PricingCard({
       ref={cardRef}
       className={`pricing-card relative flex flex-col rounded-3xl border p-6 transition-all duration-300 ease-out ${scaleClass} ${
         tier.highlighted
-          ? 'border-[#d4a44c]/50 bg-gradient-to-br from-[#1a0f08] via-[#050507] to-[#0c0814] shadow-[0_20px_80px_rgba(212,164,76,0.25)] scale-[1.02]'
+          ? 'border-[#d4a44c]/50 bg-gradient-to-br from-[#1a0f08] via-[#050714] to-[#0c0814] shadow-[0_20px_80px_rgba(212,164,76,0.25)] scale-[1.02]'
           : 'border-[#d4a44c]/15 bg-[#0d0d10]/85 hover:border-[#d4a44c]/30'
       }`}
       tabIndex={0}

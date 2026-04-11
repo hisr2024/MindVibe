@@ -34,7 +34,7 @@ export default function ViyogFlow() {
           <div className="rounded-2xl border border-[#d4a44c]/20 bg-black/60 p-3 text-sm text-[#f5f0e8]/80">Share the outcome worry.</div>
         </div>
 
-        <div className="space-y-3 rounded-2xl border border-[#d4a44c]/20 bg-[#050507]/80 p-4">
+        <div className="space-y-3 rounded-2xl border border-[#d4a44c]/20 bg-[#050714]/80 p-4">
           <h3 className="text-lg font-semibold">High-Stress Decision Timer</h3>
           <ul className="space-y-2 text-sm text-[#f5f0e8]/80">
             {timerGuide.map(item => (

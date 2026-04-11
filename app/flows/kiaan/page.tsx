@@ -44,7 +44,7 @@ export default function KiaanFlow() {
           <p className="text-xs text-[#f5f0e8]/70">KIAAN never blocks your message—decline the overlay anytime.</p>
         </div>
 
-        <div className="space-y-3 rounded-2xl border border-[#d4a44c]/20 bg-[#050507]/80 p-4">
+        <div className="space-y-3 rounded-2xl border border-[#d4a44c]/20 bg-[#050714]/80 p-4">
           <h3 className="text-lg font-semibold text-[#f5f0e8]">🎯 Quick responses</h3>
           <ul className="space-y-2 text-sm text-[#f5f0e8]/80">
             {quickResponses.map(item => (

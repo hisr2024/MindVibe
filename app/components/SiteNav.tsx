@@ -56,7 +56,7 @@ export default function SiteNav() {
 
   return (
     <motion.header
-      className="fixed inset-x-0 top-0 z-40 border-b border-[#d4a44c]/10 bg-[#050507]/95 shadow-lg shadow-black/30 backdrop-blur-xl"
+      className="fixed inset-x-0 top-0 z-40 border-b border-[#d4a44c]/10 bg-[#050714]/95 shadow-lg shadow-black/30 backdrop-blur-xl"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={springConfigs.smooth}
@@ -91,7 +91,7 @@ export default function SiteNav() {
                 <Link
                   href={link.href}
                   aria-current={active ? 'page' : undefined}
-                  className={`block rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050507] ${
+                  className={`block rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050714] ${
                     active
                       ? isDivine
                         ? 'border-2 border-[#d4a44c] text-[#e8b54a] shadow-lg shadow-[#d4a44c]/20'
@@ -181,7 +181,7 @@ export default function SiteNav() {
             />
             {/* Mobile menu */}
             <motion.div
-              className="fixed inset-x-0 top-[60px] z-40 max-h-[calc(100vh-60px)] overflow-y-auto border-t border-[#d4a44c]/10 bg-[#050507] px-4 py-4 shadow-xl md:hidden"
+              className="fixed inset-x-0 top-[60px] z-40 max-h-[calc(100vh-60px)] overflow-y-auto border-t border-[#d4a44c]/10 bg-[#050714] px-4 py-4 shadow-xl md:hidden"
               aria-label="Mobile navigation"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -215,7 +215,7 @@ export default function SiteNav() {
                         href={link.href}
                         onClick={() => setOpen(false)}
                         aria-current={active ? 'page' : undefined}
-                        className={`flex min-h-[48px] items-center rounded-xl px-4 py-3 text-base font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050507] ${
+                        className={`flex min-h-[48px] items-center rounded-xl px-4 py-3 text-base font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050714] ${
                           active
                             ? isDivine
                               ? 'border-2 border-[#d4a44c] text-[#e8b54a] shadow-lg shadow-[#d4a44c]/20'

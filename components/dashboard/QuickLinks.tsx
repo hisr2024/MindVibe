@@ -27,7 +27,7 @@ export function QuickLinks({ tools, className = '' }: QuickLinksProps) {
         <Link
           key={tool.id}
           href={tool.href}
-          className="group flex items-center gap-2 rounded-xl border border-[#d4a44c]/20 bg-black/40 px-3 py-2 text-sm font-medium text-[#f5f0e8]/80 transition-all duration-200 hover:border-[#d4a44c]/50 hover:bg-black/60 hover:text-[#f5f0e8] focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50 focus:ring-offset-2 focus:ring-offset-[#050507]"
+          className="group flex items-center gap-2 rounded-xl border border-[#d4a44c]/20 bg-black/40 px-3 py-2 text-sm font-medium text-[#f5f0e8]/80 transition-all duration-200 hover:border-[#d4a44c]/50 hover:bg-black/60 hover:text-[#f5f0e8] focus:outline-none focus:ring-2 focus:ring-[#d4a44c]/50 focus:ring-offset-2 focus:ring-offset-[#050714]"
         >
           <span className="text-base">{tool.icon}</span>
           <span>{tool.title}</span>

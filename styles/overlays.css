@@ -168,7 +168,7 @@
 .intro-overlay__bg {
   position: absolute;
   inset: 0;
-  background-color: #050507;
+  background-color: #050714;
   /* Prevent bg from triggering repaints on content animation */
   contain: strict;
 }

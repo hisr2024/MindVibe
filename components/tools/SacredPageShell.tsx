@@ -55,7 +55,7 @@ export function SacredPageShell({
   rightContent,
 }: SacredPageShellProps) {
   return (
-    <main className="relative min-h-screen bg-gradient-to-b from-[#030305] via-[#050507] to-[#080608] text-white">
+    <main className="relative min-h-screen bg-gradient-to-b from-[#030305] via-[#050714] to-[#080608] text-white">
       {/* Floating golden god particles — divine atmosphere */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden" style={{ zIndex: 1 }} aria-hidden="true">
         {GOLDEN_PARTICLES.map((p) => (

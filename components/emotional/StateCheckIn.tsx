@@ -296,7 +296,7 @@ export function StateCheckIn({ onStateSelect, className = '', enableVoice = true
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#0d0d0f]/90 via-[#050507]/80 to-[#120a07]/90 p-6 shadow-[0_20px_80px_rgba(212,164,76,0.12)]"
+          className="rounded-2xl border border-[#d4a44c]/20 bg-gradient-to-br from-[#0d0d0f]/90 via-[#050714]/80 to-[#120a07]/90 p-6 shadow-[0_20px_80px_rgba(212,164,76,0.12)]"
         >
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">

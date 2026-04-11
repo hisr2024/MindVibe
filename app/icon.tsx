@@ -8,8 +8,8 @@ export default function Icon() {
     (
       <div
         style={{
-          background: 'radial-gradient(circle at 20% 20%, #f0c96d 0%, #d4a44c 40%, #c8943a 70%, #050507 100%)',
-          color: '#050507',
+          background: 'radial-gradient(circle at 20% 20%, #f0c96d 0%, #d4a44c 40%, #c8943a 70%, #050714 100%)',
+          color: '#050714',
           width: '100%',
           height: '100%',
           display: 'flex',

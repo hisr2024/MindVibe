@@ -6,7 +6,7 @@
   color-scheme: dark;
 
   /* ─── Golden Black Theme: Core palette ─── */
-  --color-background: #050507;
+  --color-background: #050714;
   --color-foreground: #f5f0e8;
   --color-surface: #0a0a12;
 
@@ -76,7 +76,7 @@
     radial-gradient(ellipse at 15% 20%, rgba(212, 164, 76, 0.06) 0%, transparent 40%),
     radial-gradient(ellipse at 85% 10%, rgba(212, 164, 76, 0.04) 0%, transparent 45%),
     radial-gradient(ellipse at 50% 80%, rgba(139, 92, 246, 0.02) 0%, transparent 50%),
-    linear-gradient(170deg, #030305 0%, #050507 40%, #080608 70%, #050305 100%);
+    linear-gradient(170deg, #030305 0%, #050714 40%, #080608 70%, #050305 100%);
 
   /* ─── Golden Black: Surfaces ─── */
   --mv-surface: #0a0a12;
@@ -211,7 +211,7 @@ html.light [class*="text-slate-100"] {
 
 html.light [class*="bg-black"],
 html.light [class*="bg-slate-950"],
-html.light [class*="bg-\\[\\#050507\\]"] {
+html.light [class*="bg-\\[\\#050714\\]"] {
   background-color: var(--color-surface) !important;
 }
 

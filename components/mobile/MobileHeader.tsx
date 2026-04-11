@@ -158,7 +158,7 @@ export const MobileHeader = forwardRef<HTMLElement, MobileHeaderProps>(
         >
           {/* Background */}
           <motion.div
-            className="absolute inset-0 bg-[#050507]/90"
+            className="absolute inset-0 bg-[#050714]/90"
             style={{ opacity: backgroundOpacity }}
           />
 

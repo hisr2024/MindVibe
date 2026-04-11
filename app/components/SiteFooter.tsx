@@ -8,7 +8,7 @@ export default function SiteFooter() {
   const { t } = useLanguage()
 
   return (
-    <footer className="border-t border-[#d4a44c]/8 bg-gradient-to-b from-[#080706] to-[#050507]">
+    <footer className="border-t border-[#d4a44c]/8 bg-gradient-to-b from-[#080706] to-[#050714]">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12 sm:px-6 md:flex-row md:items-start md:justify-between lg:px-8">
         <div className="space-y-3 md:max-w-xs">
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-orange-100/80">{t('common.app.name', 'Sakha')}</p>

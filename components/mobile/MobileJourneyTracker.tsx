@@ -215,7 +215,7 @@ export const MobileJourneyTracker = forwardRef<HTMLDivElement, MobileJourneyTrac
     return (
       <div
         ref={ref}
-        className={`flex flex-col h-full bg-[#050507] ${className}`}
+        className={`flex flex-col h-full bg-[#050714] ${className}`}
       >
         {/* Header with progress */}
         <div className="px-4 pt-4 pb-2">
