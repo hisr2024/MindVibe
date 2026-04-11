@@ -14,7 +14,7 @@
  * All sub-components are co-located in this file for self-containment.
  */
 
-import { useState, useCallback, useRef, useEffect, type CSSProperties } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'

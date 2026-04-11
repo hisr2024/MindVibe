@@ -9,12 +9,6 @@
 import { apiFetch } from '@/lib/api'
 import type { UserPersonalisationContext, ActiveJourneyContext } from './types'
 
-const EMPTY_CONTEXT: UserPersonalisationContext = {
-  activeJourneys: [],
-  recentMoods: [],
-  bookmarkedVerses: [],
-}
-
 export async function getPersonalisationContext(): Promise<UserPersonalisationContext> {
   const [journeys, moods, bookmarks] = await Promise.allSettled([
     apiFetch('/api/journey-engine/dashboard').then(r =>

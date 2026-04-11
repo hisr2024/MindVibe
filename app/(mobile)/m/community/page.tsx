@@ -531,7 +531,7 @@ export default function MobileCommunityPage() {
     setIsLoadingRooms(true)
     setError(null)
     try {
-      const response = await apiFetch('/api/community/circles?type=room')
+      const response = await apiFetch('/api/community/circles?limit=20')
       if (response.ok) {
         const data = await response.json()
         const roomsArray = Array.isArray(data) ? data : data.rooms || data.results || []
@@ -550,7 +550,7 @@ export default function MobileCommunityPage() {
   const fetchCircles = useCallback(async () => {
     setIsLoadingCircles(true)
     try {
-      const response = await apiFetch('/api/community/circles?type=circle')
+      const response = await apiFetch('/api/community/circles?limit=20')
       if (response.ok) {
         const data = await response.json()
         const circlesArray = Array.isArray(data) ? data : data.circles || data.results || []
@@ -598,16 +598,12 @@ export default function MobileCommunityPage() {
 
       try {
         if (isJoined) {
-          await apiFetch('/api/community/circles', {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ circle_id: circleId }),
+          await apiFetch(`/api/community/circles/${circleId}/leave`, {
+            method: 'POST',
           })
         } else {
-          await apiFetch('/api/community/circles', {
+          await apiFetch(`/api/community/circles/${circleId}/join`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ circle_id: circleId }),
           })
         }
 

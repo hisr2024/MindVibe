@@ -21,7 +21,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { apiFetch } from '@/lib/api'
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
 
 /* ---------------------------------------------------------------------------
  * Types
@@ -153,6 +153,7 @@ export default function CommunityRoomDetailPage() {
   useEffect(() => {
     if (!roomId || !isAuthenticated) return
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: sync status before async WS handshake
     setStatus('connecting')
     setAlert(null)
 

@@ -26,7 +26,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { apiFetch } from '@/lib/api'
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
 
 const DEFAULT_ROOMS: RoomSummary[] = [
   { id: 'grounding', slug: 'grounding', name: 'Calm Grounding', theme: 'Deep breaths & check-ins' },
