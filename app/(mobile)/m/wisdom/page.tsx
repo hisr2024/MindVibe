@@ -267,7 +267,7 @@ export default function MobileWisdomPage() {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   triggerHaptic('selection')
-                  router.push(`/kiaan-vibe/gita/${dailyVerse.chapter}/${dailyVerse.verse}`)
+                  router.push(`/m/gita/${dailyVerse.chapter}/${dailyVerse.verse}`)
                 }}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#d4a44c]/15 text-[#d4a44c] text-xs font-medium"
               >
