@@ -232,8 +232,20 @@ function KiaanChatPageInner() {
     handleSendMessage(prompt);
   };
 
+  // ─── Recent topics: derived from themeCounts store (no new fetches) ───
+  const recentTopics = useMemo(() => {
+    return Object.entries(themeCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([theme]) => theme)
+  }, [themeCounts])
+
   return (
-    <main className="mx-auto max-w-5xl space-y-4 sm:space-y-6 p-3 sm:p-4 pb-28 sm:pb-24 md:p-8">
+    <main className="mx-auto max-w-5xl p-3 sm:p-4 pb-28 sm:pb-24 md:p-8">
+      {/* ─── Phase 5 layout: 2-column flex — chat panel flex:1 left, context sidebar 320px right.
+           Collapses to 1 column (flex-col) below 1024px. ─── */}
+      <div className="flex flex-col gap-4 lg:flex-row">
+      <div className="flex-1 min-w-0 space-y-4 sm:space-y-6">
       {/* Header */}
       <div
         className="relative z-10 space-y-3 sm:space-y-4 p-4 sm:p-6 shadow-[0_30px_120px_rgba(212,164,76,0.08)] md:p-8"
@@ -483,6 +495,80 @@ function KiaanChatPageInner() {
         <p className="mt-1 text-sm leading-relaxed text-[#e8dcc8]/55 font-sacred">
           {t('kiaan.chat.disclaimer', 'KIAAN is your spiritual companion, sharing reflections drawn from the Bhagavad Gita and ancient wisdom. This is a sacred space for inner peace and self-discovery. For matters beyond the spiritual path, always seek guidance from qualified professionals.')}
         </p>
+      </div>
+      </div>
+      {/* ─── Context sidebar: Verse of the day + Recent topics.
+           width: 320px on desktop, full width below 1024px.
+           Data sources: hardcoded canonical verse (BG 2.47) and themeCounts
+           from useNextStepStore — zero new fetches, zero new API calls. ─── */}
+      <aside className="lg:w-[320px] lg:flex-shrink-0 space-y-4">
+        {/* Verse of the Day — BG 2.47 (canonical, already used as Viyoga reference) */}
+        <div
+          className="p-5"
+          style={{
+            background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+            border: '1px solid rgba(212,160,23,0.1)',
+            borderTop: '2px solid rgba(212,160,23,0.45)',
+            borderRadius: '18px',
+            backdropFilter: 'blur(24px) saturate(120%)',
+            WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+          }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-base">🕉️</span>
+            <span className="font-ui uppercase" style={{ fontSize: '10px', color: '#D4A017', letterSpacing: '0.14em', fontWeight: 600 }}>
+              {t('kiaan.chat.sidebar.verseOfDay', 'Verse of the Day')}
+            </span>
+          </div>
+          <p className="font-sacred text-sm leading-relaxed text-[#e8dcc8]/85 mb-2" lang="sa">
+            कर्मण्येवाधिकारस्ते मा फलेषु कदाचन ।
+            मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्तु अकर्मणि ॥
+          </p>
+          <p className="text-xs leading-relaxed text-[#e8dcc8]/65 italic font-sacred">
+            {t('kiaan.chat.sidebar.verseTranslation', 'You have the right to perform your prescribed duty, but not to the fruits of action. Never consider yourself the cause of the results, nor be attached to inaction.')}
+          </p>
+          <p className="mt-3 text-[11px] text-[#d4a44c]/55 font-mono tracking-widest uppercase">
+            {t('kiaan.chat.sidebar.verseRef', 'Bhagavad Gita 2.47')}
+          </p>
+        </div>
+
+        {/* Recent Topics — derived from themeCounts (zero new fetches) */}
+        <div
+          className="p-5"
+          style={{
+            background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+            border: '1px solid rgba(212,160,23,0.1)',
+            borderTop: '2px solid rgba(212,160,23,0.45)',
+            borderRadius: '18px',
+            backdropFilter: 'blur(24px) saturate(120%)',
+            WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+          }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-base">💭</span>
+            <span className="font-ui uppercase" style={{ fontSize: '10px', color: '#D4A017', letterSpacing: '0.14em', fontWeight: 600 }}>
+              {t('kiaan.chat.sidebar.recentTopics', 'Recent Topics')}
+            </span>
+          </div>
+          {recentTopics.length > 0 ? (
+            <ul className="space-y-2">
+              {recentTopics.map((topic) => (
+                <li
+                  key={topic}
+                  className="flex items-center gap-2 text-xs text-[#e8dcc8]/75"
+                >
+                  <span className="text-[#d4a44c]/50">·</span>
+                  <span className="capitalize">{topic}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-[#e8dcc8]/45 italic font-sacred">
+              {t('kiaan.chat.sidebar.noTopics', 'Start chatting to see topics here.')}
+            </p>
+          )}
+        </div>
+      </aside>
       </div>
     </main>
   );

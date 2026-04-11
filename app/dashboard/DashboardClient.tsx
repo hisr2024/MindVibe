@@ -555,6 +555,10 @@ export default function DashboardClient() {
             />
           </motion.div>
 
+          {/* ─── Main card group: 2-column responsive grid
+                display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;
+                Collapses to 1 column below 1024px via lg: breakpoint. ─── */}
+          <div className="lg:grid lg:gap-4 lg:[grid-template-columns:repeat(auto-fit,minmax(320px,1fr))]">
           {/* ─── Speak to KIAAN (SECONDARY) ─── */}
           <motion.div variants={itemVariants}>
             <Link
@@ -779,6 +783,8 @@ export default function DashboardClient() {
               <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#d4a44c]/20 to-transparent" />
             </div>
           </motion.div>
+          </div>
+          {/* ─── /Main card group grid ─── */}
 
         </motion.div>
       </FadeIn>

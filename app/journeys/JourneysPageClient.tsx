@@ -736,7 +736,10 @@ export default function JourneysPageClient() {
             {templates.length > 0 && (
               <div className="mt-8">
                 <h2 className="text-base font-semibold mb-4">Available Journeys</h2>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {/* ─── Templates grid: 2-column responsive grid
+                     display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;
+                     Collapses to 1 column below 1024px via lg: breakpoint. ─── */}
+                <div className="grid gap-4 lg:[grid-template-columns:repeat(auto-fit,minmax(320px,1fr))]">
                   {templates.slice(0, 6).map((template) => (
                     <TemplateCard
                       key={template.id}
@@ -1073,10 +1076,12 @@ export default function JourneysPageClient() {
                   <EnemyFilter selected={selectedEnemy} onSelect={setSelectedEnemy} />
                 </div>
 
-                {/* Templates grid */}
+                {/* Templates grid: 2-column responsive grid (sacred pattern)
+                     display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;
+                     Collapses to 1 column below 1024px via lg: breakpoint. */}
                 {templates.length > 0 ? (
                   <>
-                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid gap-4 lg:[grid-template-columns:repeat(auto-fit,minmax(320px,1fr))]">
                       {templates.map((template) => (
                         <TemplateCard
                           key={template.id}
