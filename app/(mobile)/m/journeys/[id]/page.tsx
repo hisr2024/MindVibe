@@ -279,7 +279,7 @@ export default function MobileJourneyDetailPage() {
       showTabBar={false}
     >
       {/* Custom header */}
-      <div className="sticky top-0 z-20 bg-[#050507]/95 backdrop-blur-xl border-b border-white/[0.06]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+      <div className="sticky top-0 z-20 bg-[#050714]/95 backdrop-blur-xl border-b border-white/[0.06]" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
         <div className="flex items-center justify-between px-4 py-3">
           <button
             onClick={() => router.push('/m/journeys')}

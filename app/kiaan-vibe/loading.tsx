@@ -4,7 +4,7 @@ export default function KiaanVibeLoading() {
       {/* Vibe header skeleton */}
       <div className="border-b border-slate-800/50 px-6 py-4">
         <div className="mx-auto flex max-w-3xl items-center gap-3">
-          <div className="h-10 w-10 animate-pulse rounded-full bg-gradient-to-br from-orange-500/20 to-amber-500/20" />
+          <div className="h-10 w-10 animate-pulse rounded-full bg-gradient-to-br from-[#D4A017]/20 to-[#E8B54A]/20" />
           <div className="space-y-1.5">
             <div className="h-4 w-28 animate-pulse rounded bg-slate-800" />
             <div className="h-3 w-44 animate-pulse rounded bg-slate-800/50" />
@@ -36,11 +36,11 @@ export default function KiaanVibeLoading() {
           </div>
 
           {/* Verse skeleton */}
-          <div className="animate-pulse rounded-2xl border border-orange-500/10 bg-orange-500/5 p-6">
-            <div className="mb-3 h-4 w-24 rounded bg-orange-500/20" />
+          <div className="animate-pulse rounded-2xl border border-[#D4A017]/10 bg-[#D4A017]/5 p-6">
+            <div className="mb-3 h-4 w-24 rounded bg-[#D4A017]/20" />
             <div className="space-y-2">
-              <div className="h-3 w-full rounded bg-orange-500/10" />
-              <div className="h-3 w-4/5 rounded bg-orange-500/10" />
+              <div className="h-3 w-full rounded bg-[#D4A017]/10" />
+              <div className="h-3 w-4/5 rounded bg-[#D4A017]/10" />
             </div>
           </div>
         </div>
