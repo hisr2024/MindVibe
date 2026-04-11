@@ -38,6 +38,10 @@ import {
   processStep as apiProcessStep,
   completeSession as apiCompleteSession,
 } from '@/lib/api/emotional-reset'
+import {
+  getPersonalisationContext,
+  buildContextString,
+} from '@/lib/user-context/getPersonalisationContext'
 import { springConfigs } from '@/lib/animations/spring-configs'
 
 type Phase = 0 | 1 | 2 | 3 | 4 | 5
@@ -160,8 +164,17 @@ export default function MobileEmotionalResetPage() {
       const sessionData = await startEmotionalReset()
       setSessionId(sessionData.session_id)
 
-      // Process step 1 with user's emotion input
-      const emotionText = `I am feeling ${selectedEmotion.label.toLowerCase()} (${selectedEmotion.sanskrit}) at intensity ${intensity}/5.${userContext ? ` ${userContext}` : ''}`
+      // Fetch personalisation context (non-blocking — falls back to empty)
+      let journeyEnrichment = ''
+      try {
+        const ctx = await getPersonalisationContext()
+        journeyEnrichment = buildContextString(ctx)
+      } catch {
+        // Personalisation is best-effort — never block the sacred flow
+      }
+
+      // Process step 1 with user's emotion input + spiritual context
+      const emotionText = `I am feeling ${selectedEmotion.label.toLowerCase()} (${selectedEmotion.sanskrit}) at intensity ${intensity}/5.${userContext ? ` ${userContext}` : ''}${journeyEnrichment ? ` [Spiritual context: ${journeyEnrichment}]` : ''}`
 
       const stepData = await apiProcessStep(
         sessionData.session_id,
