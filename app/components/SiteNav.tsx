@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation'
 import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ThemeToggle } from '@/components/ui'
-import { MindVibeLockup } from '@/components/branding'
 import { springConfigs, animationVariants } from '@/lib/animations/spring-configs'
 import { useLanguage } from '@/hooks/useLanguage'
 import { LanguageSelector } from '@/components/navigation/LanguageSelector'
@@ -56,24 +55,38 @@ export default function SiteNav() {
 
   return (
     <motion.header
-      className="fixed inset-x-0 top-0 z-40 border-b border-[#d4a44c]/10 bg-[#050714]/95 shadow-lg shadow-black/30 backdrop-blur-xl"
+      className="fixed inset-x-0 top-0 z-40"
+      style={{
+        backgroundColor: 'rgba(5, 7, 20, 0.85)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(212, 160, 23, 0.1)',
+      }}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={springConfigs.smooth}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 pr-16 md:pr-4">
+        {/* Logo — Cormorant Garamond italic gold wordmark */}
         <Link
           href="/"
-          className="flex items-center gap-3 text-slate-100 transition hover:text-white"
+          className="font-divine italic transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A017]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(5,7,20,0.85)]"
+          style={{
+            color: '#D4A017',
+            fontSize: '28px',
+            fontWeight: 500,
+            letterSpacing: '0.02em',
+          }}
           aria-label="Sakha home"
         >
-          <motion.div
+          <motion.span
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={springConfigs.snappy}
+            className="inline-block"
           >
-            <MindVibeLockup theme="sunrise" animated className="drop-shadow-[0_10px_40px_rgba(255,147,89,0.28)]" />
-          </motion.div>
+            Sakha
+          </motion.span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
@@ -91,19 +104,24 @@ export default function SiteNav() {
                 <Link
                   href={link.href}
                   aria-current={active ? 'page' : undefined}
-                  className={`block rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050714] ${
+                  className={`block rounded-full px-3 py-2 font-ui transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A017]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(5,7,20,0.85)] ${
                     active
                       ? isDivine
-                        ? 'border-2 border-[#d4a44c] text-[#e8b54a] shadow-lg shadow-[#d4a44c]/20'
+                        ? 'border-2 border-[#D4A017] text-[#F0C040] shadow-lg shadow-[#D4A017]/20'
                         : isHighlight
-                        ? 'border-2 border-[#d4a44c] text-[#e8b54a] shadow-lg shadow-[#d4a44c]/20'
-                        : 'bg-[#d4a44c]/10 text-white shadow-[0_0_16px_rgba(212,164,76,0.15)]'
+                        ? 'border-2 border-[#D4A017] text-[#F0C040] shadow-lg shadow-[#D4A017]/20'
+                        : 'text-[#D4A017]'
                       : isDivine
-                      ? 'border border-[#d4a44c]/40 text-[#d4a44c]/80 hover:border-[#d4a44c]/60 hover:text-[#e8b54a]'
+                      ? 'border border-[rgba(212,160,23,0.4)] text-[rgba(212,160,23,0.8)] hover:border-[#D4A017] hover:text-[#F0C040]'
                       : isHighlight
-                      ? 'border border-[#d4a44c]/40 text-[#d4a44c]/80 hover:border-[#d4a44c]/60 hover:text-[#e8b54a]'
-                      : 'text-white/60 hover:bg-white/5 hover:text-white/90'
+                      ? 'border border-[rgba(212,160,23,0.4)] text-[rgba(212,160,23,0.8)] hover:border-[#D4A017] hover:text-[#F0C040]'
+                      : 'text-[#B8AE98] hover:text-[#D4A017]'
                   }`}
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    letterSpacing: '0.02em',
+                  }}
                 >
                   <motion.span
                     whileHover={{ scale: 1.05 }}
@@ -122,9 +140,19 @@ export default function SiteNav() {
           {/* Language Selector - Always visible */}
           <LanguageSelector />
 
+          {/* CTA: Subscriptions — gold gradient button */}
           <Link
             href="/dashboard/subscription"
-            className="hidden rounded-full border border-[#d4a44c]/20 px-4 py-2 text-sm font-semibold text-white/70 transition hover:border-[#d4a44c]/40 hover:text-white sm:inline-flex"
+            className="hidden rounded-full font-ui transition-transform duration-200 sm:inline-flex focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A017]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(5,7,20,0.85)]"
+            style={{
+              background: 'linear-gradient(135deg, #D4A017 0%, #F0C040 50%, #D4A017 100%)',
+              color: '#050714',
+              fontSize: '13px',
+              fontWeight: 600,
+              letterSpacing: '0.02em',
+              padding: '9px 18px',
+              boxShadow: '0 4px 14px rgba(212, 160, 23, 0.35)',
+            }}
           >
             <motion.span whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               {t('navigation.mainNav.pricing', 'Subscriptions')}
@@ -132,10 +160,15 @@ export default function SiteNav() {
           </Link>
           <motion.button
             onClick={() => setOpen(value => !value)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 text-white/70 md:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl md:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A017]/60"
+            style={{
+              border: '1px solid rgba(212, 160, 23, 0.3)',
+              backgroundColor: 'rgba(212, 160, 23, 0.05)',
+              color: '#B8AE98',
+            }}
             aria-expanded={open}
             aria-label={t('navigation.actions.toggleMenu', 'Toggle navigation menu')}
-            whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
+            whileHover={{ scale: 1.05, backgroundColor: 'rgba(212, 160, 23, 0.12)' }}
             whileTap={{ scale: 0.95 }}
           >
             <motion.svg
@@ -179,9 +212,17 @@ export default function SiteNav() {
               onClick={() => setOpen(false)}
               aria-hidden="true"
             />
-            {/* Mobile menu */}
+            {/* Mobile menu — Kiaanverse dropdown: rgba(11,14,42,0.98) + blur + gold border */}
             <motion.div
-              className="fixed inset-x-0 top-[60px] z-40 max-h-[calc(100vh-60px)] overflow-y-auto border-t border-[#d4a44c]/10 bg-[#050714] px-4 py-4 shadow-xl md:hidden"
+              className="fixed inset-x-0 top-[60px] z-40 max-h-[calc(100vh-60px)] overflow-y-auto px-4 py-4 md:hidden"
+              style={{
+                backgroundColor: 'rgba(11, 14, 42, 0.98)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                borderTop: '1px solid rgba(212, 160, 23, 0.3)',
+                borderBottom: '1px solid rgba(212, 160, 23, 0.3)',
+                boxShadow: '0 12px 40px rgba(0, 0, 0, 0.5)',
+              }}
               aria-label="Mobile navigation"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -215,23 +256,36 @@ export default function SiteNav() {
                         href={link.href}
                         onClick={() => setOpen(false)}
                         aria-current={active ? 'page' : undefined}
-                        className={`flex min-h-[48px] items-center rounded-xl px-4 py-3 text-base font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050714] ${
+                        className={`flex min-h-[48px] items-center rounded-xl px-4 py-3 font-ui transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A017]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(11,14,42,0.98)] ${
                           active
                             ? isDivine
-                              ? 'border-2 border-[#d4a44c] text-[#e8b54a] shadow-lg shadow-[#d4a44c]/20'
+                              ? 'border-2 border-[#D4A017] text-[#F0C040] shadow-lg shadow-[#D4A017]/20'
                               : isHighlight
-                              ? 'border-2 border-[#d4a44c] text-[#e8b54a] shadow-lg shadow-[#d4a44c]/20'
-                              : 'bg-[#d4a44c]/10 text-white'
+                              ? 'border-2 border-[#D4A017] text-[#F0C040] shadow-lg shadow-[#D4A017]/20'
+                              : 'text-[#D4A017]'
                             : isDivine
-                            ? 'border border-[#d4a44c]/40 text-[#d4a44c]/80 hover:border-[#d4a44c]/60 hover:text-[#e8b54a]'
+                            ? 'border border-[rgba(212,160,23,0.4)] text-[rgba(212,160,23,0.8)] hover:border-[#D4A017] hover:text-[#F0C040]'
                             : isHighlight
-                            ? 'border border-[#d4a44c]/40 text-[#d4a44c]/80 hover:border-[#d4a44c]/60 hover:text-[#e8b54a]'
-                            : 'text-white/70 hover:bg-white/5 hover:text-white'
+                            ? 'border border-[rgba(212,160,23,0.4)] text-[rgba(212,160,23,0.8)] hover:border-[#D4A017] hover:text-[#F0C040]'
+                            : 'text-[#B8AE98] hover:text-[#D4A017]'
                         }`}
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          letterSpacing: '0.02em',
+                        }}
                       >
                         {link.label}
                         {isHighlight && !active && (
-                          <span className="ml-auto rounded-full bg-[#d4a44c]/15 px-2 py-0.5 text-xs text-[#d4a44c]/80">
+                          <span
+                            className="ml-auto rounded-full px-2 py-0.5"
+                            style={{
+                              fontSize: '10px',
+                              fontWeight: 600,
+                              backgroundColor: 'rgba(212, 160, 23, 0.15)',
+                              color: 'rgba(212, 160, 23, 0.9)',
+                            }}
+                          >
                             AI
                           </span>
                         )}
@@ -241,23 +295,30 @@ export default function SiteNav() {
                 })}
 
                 <motion.div
-                  className="my-2 border-t border-white/10"
+                  className="my-2"
+                  style={{ borderTop: '1px solid rgba(212, 160, 23, 0.15)' }}
                   variants={animationVariants.slideUp}
                 />
 
                 <motion.div
-                  className="flex min-h-[48px] items-center justify-between rounded-xl bg-[#d4a44c]/5 px-4 py-3"
+                  className="flex min-h-[48px] items-center justify-between rounded-xl px-4 py-3"
+                  style={{ backgroundColor: 'rgba(212, 160, 23, 0.05)' }}
                   variants={animationVariants.slideUp}
                 >
-                  <span className="text-base font-medium text-white/80">{t('navigation.mainNav.theme', 'Theme')}</span>
+                  <span className="font-ui" style={{ fontSize: '13px', fontWeight: 500, color: '#B8AE98', letterSpacing: '0.02em' }}>
+                    {t('navigation.mainNav.theme', 'Theme')}
+                  </span>
                   <ThemeToggle />
                 </motion.div>
 
                 <motion.div
-                  className="flex min-h-[48px] items-center justify-between rounded-xl bg-[#d4a44c]/5 px-4 py-3"
+                  className="flex min-h-[48px] items-center justify-between rounded-xl px-4 py-3"
+                  style={{ backgroundColor: 'rgba(212, 160, 23, 0.05)' }}
                   variants={animationVariants.slideUp}
                 >
-                  <span className="text-base font-medium text-white/80">{t('navigation.mainNav.language', 'Language')}</span>
+                  <span className="font-ui" style={{ fontSize: '13px', fontWeight: 500, color: '#B8AE98', letterSpacing: '0.02em' }}>
+                    {t('navigation.mainNav.language', 'Language')}
+                  </span>
                   <LanguageSelector variant="sheet" />
                 </motion.div>
 
