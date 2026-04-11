@@ -469,7 +469,7 @@ export default function PricingPage() {
         email: data.user_email || undefined,
       },
       theme: {
-        color: '#f97316',
+        color: '#D4A017',
       },
       handler: async (response: RazorpayPaymentResponse) => {
         try {

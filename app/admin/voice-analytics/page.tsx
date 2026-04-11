@@ -72,7 +72,7 @@ interface EnhancementStats {
 
 import { LANGUAGE_NAMES } from '@/lib/constants/languages'
 
-const COLORS = ['#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6']
+const COLORS = ['#D4A017', '#f59e0b', '#eab308', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6']
 
 export default function AdminVoiceAnalyticsPage() {
   const [overview, setOverview] = useState<VoiceOverview | null>(null)
@@ -333,8 +333,8 @@ export default function AdminVoiceAnalyticsPage() {
             <Area
               type="monotone"
               dataKey="total_queries"
-              stroke="#f97316"
-              fill="#f97316"
+              stroke="#D4A017"
+              fill="#D4A017"
               fillOpacity={0.2}
               name="Queries"
             />
@@ -399,7 +399,7 @@ export default function AdminVoiceAnalyticsPage() {
               <Tooltip
                 contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}
               />
-              <Bar dataKey="value" fill="#f97316" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="value" fill="#D4A017" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

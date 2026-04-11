@@ -147,8 +147,8 @@ export default function AdminKiaanAnalyticsPage() {
             <Area
               type="monotone"
               dataKey="questions"
-              stroke="#f97316"
-              fill="#f97316"
+              stroke="#D4A017"
+              fill="#D4A017"
               fillOpacity={0.2}
               name="Questions"
             />

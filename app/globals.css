@@ -61,9 +61,13 @@
     --sacred-divine-gold: #D4A017;
     --sacred-divine-gold-bright: #F0C040;
     --sacred-divine-gold-glow: #FDE68A;
-    /* Saffron — spiritual warmth, offerings */
-    --sacred-saffron-core: #F97316;
-    --sacred-saffron-warm: #FB923C;
+    /* Saffron — aliased to Divine Gold in Phase 7 for unified desktop palette.
+       The token names are preserved so tailwind utilities (bg-sacred-saffron-core,
+       bg-sacred-saffron-warm) and existing consumers keep working, but the
+       underlying colour resolves to gold for the desktop redesign. Mobile
+       (/m/ routes) retains its own saffron values in styles/sacred-mobile.css. */
+    --sacred-saffron-core: #D4A017;
+    --sacred-saffron-warm: #E8B54A;
     /* Sacred whites and text hierarchy */
     --sacred-white: #F8F6F0;
     --sacred-text-primary: #EDE8DC;

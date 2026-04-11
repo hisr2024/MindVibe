@@ -208,10 +208,10 @@ export default function MobileWisdomRoomsPage() {
 
   return (
     <MobileAppShell title="" showHeader={false} showTabBar={false}>
-      <div className="flex flex-col h-[100dvh] bg-[#050507]">
+      <div className="flex flex-col h-[100dvh] bg-[#050714]">
         {/* Header */}
         <div
-          className="bg-[#050507]/95 backdrop-blur-xl border-b border-white/[0.06]"
+          className="bg-[#050714]/95 backdrop-blur-xl border-b border-white/[0.06]"
           style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
         >
           <div className="flex items-center justify-between px-4 py-3">
@@ -357,7 +357,7 @@ export default function MobileWisdomRoomsPage() {
 
         {/* Input area */}
         <div
-          className="px-4 py-3 bg-[#050507]/95 backdrop-blur-xl border-t border-white/[0.06]"
+          className="px-4 py-3 bg-[#050714]/95 backdrop-blur-xl border-t border-white/[0.06]"
           style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)' }}
         >
           <div className="flex gap-2.5 items-end">

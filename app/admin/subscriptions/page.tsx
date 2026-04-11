@@ -24,7 +24,7 @@ interface SubscriptionAnalytics {
   mrr: number
 }
 
-const COLORS = ['#f97316', '#22c55e', '#8b5cf6', '#06b6d4']
+const COLORS = ['#D4A017', '#22c55e', '#8b5cf6', '#06b6d4']
 
 export default function AdminSubscriptionsPage() {
   const [analytics, setAnalytics] = useState<SubscriptionAnalytics | null>(null)
@@ -132,9 +132,9 @@ export default function AdminSubscriptionsPage() {
               <Line
                 type="monotone"
                 dataKey="revenue"
-                stroke="#f97316"
+                stroke="#D4A017"
                 strokeWidth={2}
-                dot={{ fill: '#f97316' }}
+                dot={{ fill: '#D4A017' }}
               />
             </LineChart>
           </ResponsiveContainer>

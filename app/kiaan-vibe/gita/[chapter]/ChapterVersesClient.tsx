@@ -201,11 +201,7 @@ export default function ChapterVersesPage({ params }: PageProps) {
                     {verse.sanskrit && (
                       <p
                         className="text-sm mb-2"
-                        style={{
-                          fontFamily: '"Noto Sans Devanagari", sans-serif',
-                          lineHeight: 2.0,
-                          color: '#F0C040',
-                        }}
+                        style={{ fontFamily: '"Noto Sans Devanagari", sans-serif', lineHeight: 2.0, color: '#F0C040' }}
                       >
                         {verse.sanskrit.length > 150
                           ? verse.sanskrit.slice(0, 150) + '...'

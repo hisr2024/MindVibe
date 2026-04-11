@@ -393,11 +393,7 @@ export default function VerseDetailClient({ params }: VerseDetailClientProps) {
           </div>
           <p
             className="text-xl"
-            style={{
-              fontFamily: '"Noto Sans Devanagari", sans-serif',
-              lineHeight: 2.0,
-              color: '#F0C040',
-            }}
+            style={{ fontFamily: '"Noto Sans Devanagari", sans-serif', lineHeight: 2.0, color: '#F0C040' }}
           >
             {verse.sanskrit}
           </p>
