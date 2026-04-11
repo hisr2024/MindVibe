@@ -85,7 +85,15 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
 
   if (loading && !refreshing) {
     return (
-      <div className={`rounded-3xl border border-[#d4a44c]/15 bg-black/50 p-6 ${className}`}>
+      <div
+        className={`p-6 ${className}`}
+        style={{
+          background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+          border: '1px solid rgba(212,160,23,0.1)',
+          borderTop: '2px solid rgba(212,160,23,0.45)',
+          borderRadius: '18px',
+        }}
+      >
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#d4a44c]" />
         </div>
@@ -95,7 +103,15 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
 
   if (error || !insightsData) {
     return (
-      <div className={`rounded-3xl border border-red-500/15 bg-black/50 p-6 ${className}`}>
+      <div
+        className={`p-6 ${className}`}
+        style={{
+          background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+          border: '1px solid rgba(239,68,68,0.15)',
+          borderTop: '2px solid rgba(239,68,68,0.45)',
+          borderRadius: '18px',
+        }}
+      >
         <p className="text-red-400 text-center">{error || 'No insights available'}</p>
         <button
           onClick={handleRefresh}

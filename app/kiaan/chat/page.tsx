@@ -235,7 +235,17 @@ function KiaanChatPageInner() {
   return (
     <main className="mx-auto max-w-5xl space-y-4 sm:space-y-6 p-3 sm:p-4 pb-28 sm:pb-24 md:p-8">
       {/* Header */}
-      <div className="kiaan-cosmic-card relative z-10 space-y-3 sm:space-y-4 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-[0_30px_120px_rgba(212,164,76,0.08)] md:p-8">
+      <div
+        className="relative z-10 space-y-3 sm:space-y-4 p-4 sm:p-6 shadow-[0_30px_120px_rgba(212,164,76,0.08)] md:p-8"
+        style={{
+          background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+          border: '1px solid rgba(212,160,23,0.1)',
+          borderTop: '2px solid rgba(212,160,23,0.45)',
+          borderRadius: '18px',
+          backdropFilter: 'blur(24px) saturate(120%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+        }}
+      >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div className="flex-1">
             <h1 className="kiaan-text-golden text-2xl sm:text-3xl font-bold md:text-4xl">
@@ -318,7 +328,17 @@ function KiaanChatPageInner() {
 
       {/* Message Actions - Only show when there are KIAAN responses */}
       {messages.length > 0 && messages[messages.length - 1]?.sender === 'assistant' && (
-        <div className="kiaan-cosmic-card flex flex-wrap items-center justify-between gap-2 rounded-2xl p-3 shadow-[0_10px_40px_rgba(212,164,76,0.06)]">
+        <div
+          className="flex flex-wrap items-center justify-between gap-2 p-3 shadow-[0_10px_40px_rgba(212,164,76,0.06)]"
+          style={{
+            background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+            border: '1px solid rgba(212,160,23,0.1)',
+            borderTop: '2px solid rgba(212,160,23,0.45)',
+            borderRadius: '18px',
+            backdropFilter: 'blur(24px) saturate(120%)',
+            WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+          }}
+        >
           {/* View Mode Toggle */}
           <div className="flex items-center gap-1 rounded-lg border border-[#d4a44c]/15 bg-black/30 p-1">
             <button
@@ -378,7 +398,17 @@ function KiaanChatPageInner() {
       )}
 
       {/* Chat Interface */}
-      <div className="kiaan-cosmic-card rounded-3xl p-4 shadow-[0_30px_120px_rgba(212,164,76,0.06)] md:p-6">
+      <div
+        className="p-4 shadow-[0_30px_120px_rgba(212,164,76,0.06)] md:p-6"
+        style={{
+          background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+          border: '1px solid rgba(212,160,23,0.1)',
+          borderTop: '2px solid rgba(212,160,23,0.45)',
+          borderRadius: '18px',
+          backdropFilter: 'blur(24px) saturate(120%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+        }}
+      >
         <KiaanChat
           messages={messages}
           onSendMessage={handleSendMessage}
@@ -390,7 +420,17 @@ function KiaanChatPageInner() {
 
       {/* Quick Responses - Below KIAAN Chat */}
       {messages.length === 0 && (
-        <div className="kiaan-cosmic-card space-y-4 rounded-3xl p-6 shadow-[0_20px_80px_rgba(212,164,76,0.05)]">
+        <div
+          className="space-y-4 p-6 shadow-[0_20px_80px_rgba(212,164,76,0.05)]"
+          style={{
+            background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+            border: '1px solid rgba(212,160,23,0.1)',
+            borderTop: '2px solid rgba(212,160,23,0.45)',
+            borderRadius: '18px',
+            backdropFilter: 'blur(24px) saturate(120%)',
+            WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+          }}
+        >
           <div className="flex items-center justify-between">
             <h2 className="kiaan-text-golden text-lg font-semibold">{t('kiaan.quickPrompts.title', 'Quick Responses')}</h2>
             <button
@@ -419,7 +459,17 @@ function KiaanChatPageInner() {
       )}
 
       {/* A Sacred Note from KIAAN */}
-      <div className="divine-reset-container rounded-3xl p-5 md:p-6">
+      <div
+        className="p-5 md:p-6"
+        style={{
+          background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+          border: '1px solid rgba(212,160,23,0.1)',
+          borderTop: '2px solid rgba(212,160,23,0.45)',
+          borderRadius: '18px',
+          backdropFilter: 'blur(24px) saturate(120%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+        }}
+      >
         <div className="flex items-center gap-3 mb-3">
           <div className="divine-companion-avatar h-10 w-10 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center">
             <span className="text-sm font-bold text-[#0a0a12]">K</span>

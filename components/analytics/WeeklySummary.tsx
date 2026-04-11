@@ -17,7 +17,15 @@ interface WeeklySummaryProps {
 
 function SummarySkeleton() {
   return (
-    <div className="rounded-2xl border border-[#d4a44c]/20 bg-black/40 p-6">
+    <div
+      className="p-6"
+      style={{
+        background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+        border: '1px solid rgba(212,160,23,0.1)',
+        borderTop: '2px solid rgba(212,160,23,0.45)',
+        borderRadius: '18px',
+      }}
+    >
       <Skeleton height={24} width={180} className="mb-6" />
       <div className="space-y-4">
         <Skeleton height={80} className="rounded-xl" />
@@ -78,7 +86,13 @@ export function WeeklySummary({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.4 }}
-      className={`rounded-2xl border border-[#d4a44c]/20 bg-black/40 p-6 ${className}`}
+      className={`p-6 ${className}`}
+      style={{
+        background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+        border: '1px solid rgba(212,160,23,0.1)',
+        borderTop: '2px solid rgba(212,160,23,0.45)',
+        borderRadius: '18px',
+      }}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
@@ -193,7 +207,13 @@ export function WeeklySummary({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="flex items-start gap-3 rounded-lg border border-[#d4a44c]/10 bg-black/30 p-3"
+                className="flex items-start gap-3 p-3"
+                style={{
+                  background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                  border: '1px solid rgba(212,160,23,0.1)',
+                  borderTop: '2px solid rgba(212,160,23,0.45)',
+                  borderRadius: '18px',
+                }}
               >
                 <span className="text-xl">
                   {insight.icon || insightIcons[insight.type] || '💡'}

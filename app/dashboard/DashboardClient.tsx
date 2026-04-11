@@ -605,10 +605,17 @@ export default function DashboardClient() {
             </Link>
           </motion.div>
 
-          {/* ─── Sacred Spiritual Toolkit (Gold-Black Divine Theme) ─── */}
+          {/* ─── Sacred Spiritual Toolkit (Kiaanverse Sacred Card) ─── */}
           <motion.div variants={itemVariants}>
-            <div className="relative overflow-hidden rounded-[28px] border border-[#d4a44c]/15 bg-gradient-to-br from-[#0d0a06]/90 via-[#080706]/95 to-[#0a0806]/90 p-5 sm:p-6"
-              style={{ boxShadow: '0 12px 48px rgba(212, 164, 76, 0.08), inset 0 1px 0 rgba(212, 164, 76, 0.08)' }}
+            <div
+              className="relative overflow-hidden p-5 sm:p-6"
+              style={{
+                background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                border: '1px solid rgba(212,160,23,0.1)',
+                borderTop: '2px solid rgba(212,160,23,0.45)',
+                borderRadius: '18px',
+                boxShadow: '0 12px 48px rgba(212, 164, 76, 0.08), inset 0 1px 0 rgba(212, 164, 76, 0.08)',
+              }}
             >
               {/* Top golden radiance line */}
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#d4a44c]/40 to-transparent" />

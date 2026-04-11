@@ -261,7 +261,15 @@ export default function ViyogClient() {
               </div>
             )}
             {result.concernAnalysis.effort_redirect && (
-              <div className="p-3 rounded-xl bg-black/30 border border-[#d4a44c]/8 mt-2">
+              <div
+                className="p-3 mt-2"
+                style={{
+                  background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+                  border: '1px solid rgba(212,160,23,0.1)',
+                  borderTop: '2px solid rgba(212,160,23,0.45)',
+                  borderRadius: '18px',
+                }}
+              >
                 <span className="text-[#d4a44c]/50 font-medium text-[10px] uppercase tracking-wider block mb-1">Redirect energy toward</span>
                 <span className="text-[#f5e6c8]/70">{result.concernAnalysis.effort_redirect}</span>
               </div>
