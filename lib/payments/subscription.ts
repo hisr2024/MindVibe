@@ -1,8 +1,11 @@
 /**
  * Subscription plan definitions and helpers
  *
- * Defines the three tiers: Seeker (free), Sacred Pro, Sacred Circle.
+ * Defines the four tiers: Seeker (free), Bhakta, Sadhak, Siddha.
  * Each has multi-currency pricing for monthly/annual billing.
+ *
+ * SINGLE SOURCE OF TRUTH — import plan names from here. Never hardcode
+ * "Sacred Pro" / "Sacred Circle" anywhere; those are deprecated aliases.
  */
 
 import { type CurrencyCode } from './currency'
@@ -59,9 +62,9 @@ export const PLANS: Plan[] = [
   },
   {
     id: 'pro',
-    name: 'Sacred Pro',
-    sanskrit: 'साधक',
-    tagline: 'The complete dharmic companion',
+    name: 'Bhakta',
+    sanskrit: 'भक्त',
+    tagline: 'The devoted seeker\u2019s companion',
     color: '#D4A017',
     featured: true,
     badge: 'MOST POPULAR',
@@ -86,11 +89,11 @@ export const PLANS: Plan[] = [
   },
   {
     id: 'circle',
-    name: 'Sacred Circle',
-    sanskrit: 'परिवार',
-    tagline: 'For families on the dharmic path',
+    name: 'Sadhak',
+    sanskrit: 'साधक',
+    tagline: 'The complete dharmic practice',
     color: '#06B6D4',
-    badge: 'FAMILY',
+    badge: 'COMPLETE',
     trialDays: 7,
     price: {
       INR: { monthly: 399, annual: 233 },
@@ -98,9 +101,9 @@ export const PLANS: Plan[] = [
       EUR: { monthly: 11, annual: 7 },
       GBP: { monthly: 9, annual: 5 },
     },
-    cta: 'Start Family Trial',
+    cta: 'Begin Sacred Journey',
     features: [
-      { name: 'Everything in Sacred Pro' },
+      { name: 'Everything in Bhakta' },
       { name: 'Up to 5 family members' },
       { name: 'Shared family Gita library' },
       { name: 'Family karma dashboard' },

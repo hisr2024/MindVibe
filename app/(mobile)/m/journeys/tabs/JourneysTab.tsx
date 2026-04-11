@@ -370,7 +370,7 @@ export function JourneysTab({
             >
               <span
                 className="text-[10px]"
-                style={{ fontFamily: '"Noto Sans Devanagari", sans-serif' }}
+                style={{ fontFamily: '"Noto Sans Devanagari", sans-serif', lineHeight: 1.5 }}
               >
                 {info.devanagari}
               </span>
@@ -584,6 +584,7 @@ export function JourneysTab({
                       style={{
                         fontFamily: '"Noto Sans Devanagari", sans-serif',
                         color: detailInfo.color,
+                        lineHeight: 2.0,
                       }}
                     >
                       {detailInfo.devanagari}
@@ -710,6 +711,7 @@ export function JourneysTab({
                         style={{
                           fontFamily: '"Noto Sans Devanagari", sans-serif',
                           animation: 'spin 1.5s linear infinite',
+                          lineHeight: 2.0,
                         }}
                       >
                         {'\u0950'}

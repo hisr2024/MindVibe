@@ -58,6 +58,7 @@ export function ActiveJourneyCardMobile({ journey, index = 0 }: ActiveJourneyCar
                       style={{
                         fontFamily: '"Noto Sans Devanagari", sans-serif',
                         color: accentColor,
+                        lineHeight: 1.5,
                       }}
                     >
                       {info.devanagari}

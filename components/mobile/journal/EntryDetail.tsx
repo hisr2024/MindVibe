@@ -109,6 +109,7 @@ export const EntryDetail: React.FC<Props> = ({ entry, onBack }) => {
               style={{
                 fontFamily: '"Noto Sans Devanagari", sans-serif',
                 fontSize: 12,
+                lineHeight: 1.5,
               }}
             >
               {mood.sanskrit}

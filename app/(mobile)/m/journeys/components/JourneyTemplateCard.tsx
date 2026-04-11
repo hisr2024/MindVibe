@@ -137,7 +137,7 @@ export function JourneyTemplateCard({
                 fontWeight: 500,
                 color: accentColor,
                 textShadow: `0 0 16px rgba(${rgb},0.55)`,
-                lineHeight: 1,
+                lineHeight: 1.5,
               }}
             >
               {info.devanagari}
@@ -311,7 +311,7 @@ export function JourneyTemplateCard({
                   fontFamily: '"Noto Sans Devanagari", sans-serif',
                   fontSize: 11,
                   color: '#F0C040',
-                  lineHeight: 1.6,
+                  lineHeight: 2.0,
                 }}
                 className="line-clamp-1"
               >

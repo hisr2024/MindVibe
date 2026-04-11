@@ -118,7 +118,7 @@ export function WisdomTab() {
       >
         <p
           className="text-[10px] text-[#D4A017]/30 font-divine italic"
-          style={{ fontFamily: '"Noto Sans Devanagari", "Cormorant Garamond", serif' }}
+          style={{ fontFamily: '"Noto Sans Devanagari", "Cormorant Garamond", serif', lineHeight: 2.0 }}
         >
           {'\u0905\u092D\u094D\u092F\u093E\u0938\u0947\u0928 \u0924\u0941 \u0915\u094C\u0928\u094D\u0924\u0947\u092F \u0935\u0948\u0930\u093E\u0917\u094D\u092F\u0947\u0923 \u091A \u0917\u0943\u0939\u094D\u092F\u0924\u0947'}
         </p>

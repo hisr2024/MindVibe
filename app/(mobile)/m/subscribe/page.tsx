@@ -7,7 +7,7 @@
  * Header (H1 + Sanskrit + subtitle + trust line) ->
  * Billing toggle (pill, radiogroup) ->
  * Currency selector (auto-detect, manual override) ->
- * Three plan cards (Seeker, Sacred Pro featured, Sacred Circle) ->
+ * Three plan cards (Seeker, Bhakta featured, Sadhak) ->
  * CTA button ->
  * Sacred Guarantee (30-day, shield icon) ->
  * FAQ accordion (5 questions) ->
@@ -88,7 +88,7 @@ export default function SubscribePage() {
           </h1>
           <p
             className="text-[15px] text-[#D4A017] mt-1 text-center"
-            style={{ fontFamily: '"Noto Sans Devanagari", Mangal, sans-serif' }}
+            style={{ fontFamily: '"Noto Sans Devanagari", Mangal, sans-serif', lineHeight: 2.0 }}
           >
             &#x092E;&#x093E;&#x0930;&#x094D;&#x0917; &#x091A;&#x0941;&#x0928;&#x0947;&#x0902;
           </p>
@@ -188,7 +188,7 @@ export default function SubscribePage() {
               </h3>
               <span
                 className="text-[11px] text-[#D4A017]"
-                style={{ fontFamily: '"Noto Sans Devanagari", Mangal, sans-serif' }}
+                style={{ fontFamily: '"Noto Sans Devanagari", Mangal, sans-serif', lineHeight: 1.5 }}
               >
                 &#x0936;&#x094D;&#x0930;&#x0926;&#x094D;&#x0927;&#x093E; &#x0917;&#x093E;&#x0930;&#x0902;&#x091F;&#x0940;
               </span>

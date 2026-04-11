@@ -106,6 +106,7 @@ export default function EditorTab() {
               fontSize: 11,
               color: '#D4A017',
               marginTop: 1,
+              lineHeight: 1.5,
             }}
           >
             आत्म-चिंतन

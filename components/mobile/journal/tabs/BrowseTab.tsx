@@ -51,6 +51,7 @@ export default function BrowseTab() {
             fontSize: 11,
             color: '#D4A017',
             marginTop: 2,
+            lineHeight: 1.5,
           }}
         >
           आत्म-चिंतन

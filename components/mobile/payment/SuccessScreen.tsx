@@ -257,7 +257,7 @@ export function SuccessScreen({ trialDays = 7 }: SuccessScreenProps) {
           </h1>
           <p
             className="text-[15px] text-[#D4A017] mt-1"
-            style={{ fontFamily: '"Noto Sans Devanagari", Mangal, sans-serif' }}
+            style={{ fontFamily: '"Noto Sans Devanagari", Mangal, sans-serif', lineHeight: 2.0 }}
           >
             &#x092F;&#x093E;&#x0924;&#x094D;&#x0930;&#x093E; &#x0906;&#x0930;&#x0902;&#x092D; &#x0939;&#x094B;&#x0924;&#x0940; &#x0939;&#x0948;
           </p>

@@ -267,6 +267,7 @@ export function MaxJourneysSheet({
                                   fontFamily:
                                     '"Noto Sans Devanagari", sans-serif',
                                   color,
+                                  lineHeight: 1.5,
                                 }}
                               >
                                 {info.devanagari}

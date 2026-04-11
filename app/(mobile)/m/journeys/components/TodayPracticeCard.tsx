@@ -53,6 +53,7 @@ export function TodayPracticeCard({ step, primaryEnemy, index = 0 }: TodayPracti
                   style={{
                     fontFamily: '"Noto Sans Devanagari", sans-serif',
                     color: accentColor,
+                    lineHeight: 1.5,
                   }}
                 >
                   {info.devanagari}

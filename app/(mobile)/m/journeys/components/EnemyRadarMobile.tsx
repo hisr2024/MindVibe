@@ -202,7 +202,7 @@ export function EnemyRadarMobile({
                 textAnchor="middle"
                 dominantBaseline="middle"
                 className="text-[11px]"
-                style={{ fontFamily: '"Noto Sans Devanagari", sans-serif' }}
+                style={{ fontFamily: '"Noto Sans Devanagari", sans-serif', lineHeight: 1.5 }}
                 fill={info.color}
               >
                 {info.devanagari}

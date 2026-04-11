@@ -322,6 +322,7 @@ export default function MobileGitaChapterPage() {
                           style={{
                             fontFamily: '"Noto Sans Devanagari", sans-serif',
                             color: '#F0C040',
+                            lineHeight: 2.0,
                           }}
                         >
                           {v.sanskrit.split('\n')[0]?.slice(0, 50)}
