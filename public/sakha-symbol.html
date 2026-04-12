@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sakha — Divine Symbol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Noto+Sans+Devanagari:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --gold: #D4AF37;
+    --gold-light: #F5E27A;
+    --gold-pale: #FFF8DC;
+    --deep-blue: #050A1A;
+    --mid-blue: #0A1535;
+    --teal: #00B4D8;
+    --lotus: #FF6B9D;
+    --white-glow: rgba(255,255,255,0.92);
+    --aura: rgba(212,175,55,0.18);
+
+    /* Responsive mandala size: scales from 260px on tiny phones to 520px on desktop */
+    --mandala-size: min(420px, 82vw, 82vh);
+    --scene-width: min(520px, 94vw);
+  }
+
+  /* ── Desktop overrides ── */
+  @media (min-width: 768px) {
+    :root {
+      --mandala-size: min(460px, 58vw, 72vh);
+      --scene-width: min(580px, 70vw);
+    }
+  }
+  @media (min-width: 1200px) {
+    :root {
+      --mandala-size: min(500px, 40vw, 74vh);
+      --scene-width: min(620px, 50vw);
+    }
+  }
+
+  /* ── Landscape mobile: shrink mandala so text fits ── */
+  @media (max-height: 500px) and (orientation: landscape) {
+    :root {
+      --mandala-size: min(260px, 55vh);
+      --scene-width: min(400px, 90vw);
+    }
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--deep-blue);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    font-family: 'Cormorant Garamond', serif;
+    /* Safe areas for notched phones */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* ── Accessibility: respect reduced motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* ── Cosmos Background ── */
+  .cosmos {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse 80% 80% at 50% 50%,
+      #0E1E45 0%, #070F28 50%, #020710 100%);
+    overflow: hidden;
+  }
+  .cosmos::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 82% 14%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 44% 78%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(2px 2px at 66% 55%, rgba(212,175,55,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 90% 75%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 8% 88%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 35%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 72% 90%, rgba(212,175,55,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 22% 45%, rgba(255,255,255,0.3) 0%, transparent 100%);
+    animation: starfield 25s linear infinite alternate;
+  }
+  @keyframes starfield {
+    0% { opacity: 0.6; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.04); }
+  }
+
+  /* ── Scene container ── */
+  .scene {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    width: var(--scene-width);
+    gap: 0;
+    will-change: transform;
+    transition: transform 0.15s ease-out;
+  }
+
+  /* ── Outer Mandala Glow Ring ── */
+  .mandala-wrap {
+    position: relative;
+    width: var(--mandala-size);
+    height: var(--mandala-size);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Outermost divine aura */
+  .aura-outer {
+    position: absolute;
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+      rgba(212,175,55,0.0) 35%,
+      rgba(212,175,55,0.06) 55%,
+      rgba(212,175,55,0.18) 72%,
+      rgba(212,175,55,0.08) 85%,
+      transparent 100%);
+    animation: aurapulse 4s ease-in-out infinite;
+  }
+  @keyframes aurapulse {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.06); opacity: 1; }
+  }
+
+  /* SVG Mandala */
+  .mandala-svg {
+    position: absolute;
+    width: 100%; height: 100%;
+    animation: mandalaspin 90s linear infinite;
+    filter: drop-shadow(0 0 12px rgba(212,175,55,0.55));
+  }
+  .mandala-svg-rev {
+    position: absolute;
+    width: 78%; height: 78%;
+    animation: mandalaspin 60s linear infinite reverse;
+    filter: drop-shadow(0 0 8px rgba(0,180,216,0.4));
+  }
+  @keyframes mandalaspin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* ── Central OM Symbol ── */
+  .om-stage {
+    position: absolute;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    z-index: 10;
+  }
+
+  /* OM glow bg scales with mandala */
+  .om-glow-bg {
+    position: absolute;
+    width: 42%; height: 42%;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+      rgba(212,175,55,0.28) 0%,
+      rgba(212,175,55,0.10) 45%,
+      transparent 75%);
+    animation: omglow 3.5s ease-in-out infinite;
+  }
+  @keyframes omglow {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.15); opacity: 1; }
+  }
+
+  .om-text {
+    position: relative;
+    font-size: clamp(56px, calc(var(--mandala-size) * 0.22), 110px);
+    line-height: 1;
+    background: linear-gradient(160deg, #FFF8DC 0%, #F5E27A 30%, #D4AF37 55%, #A0792A 80%, #F5E27A 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 20px rgba(212,175,55,0.9)) drop-shadow(0 0 40px rgba(212,175,55,0.5));
+    animation: ombreath 3.5s ease-in-out infinite;
+    font-family: 'Noto Sans Devanagari', serif;
+    user-select: none;
+  }
+  @keyframes ombreath {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 18px rgba(212,175,55,0.8)) drop-shadow(0 0 36px rgba(212,175,55,0.4)); }
+    50% { transform: scale(1.05); filter: drop-shadow(0 0 28px rgba(255,240,120,1)) drop-shadow(0 0 55px rgba(212,175,55,0.7)); }
+  }
+
+  /* Vibration rings — scale with mandala */
+  .vib-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid rgba(212,175,55,0.5);
+    width: 28%; height: 28%;
+    animation: vibexpand 3.5s ease-out infinite;
+    pointer-events: none;
+  }
+  .vib-ring:nth-child(1) { animation-delay: 0s; }
+  .vib-ring:nth-child(2) { animation-delay: 1.16s; }
+  .vib-ring:nth-child(3) { animation-delay: 2.33s; }
+  @keyframes vibexpand {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(2.8); opacity: 0; }
+  }
+
+  /* ── Lotus petals ring ── */
+  .lotus-ring {
+    position: absolute;
+    width: 100%; height: 100%;
+    animation: lotusspin 30s linear infinite reverse;
+  }
+  .lotus-petal {
+    position: absolute;
+    transform-origin: 50% 100%;
+    border-radius: 50% 50% 0 0 / 60% 60% 0 0;
+    filter: blur(0.5px);
+  }
+  @keyframes lotusspin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+
+  /* ── Chakra dots ── */
+  .chakra-dot {
+    position: absolute;
+    width: clamp(5px, 1.8vw, 8px);
+    height: clamp(5px, 1.8vw, 8px);
+    border-radius: 50%;
+    background: radial-gradient(circle, #00E5FF 0%, #0077B6 100%);
+    box-shadow: 0 0 10px #00E5FF, 0 0 20px rgba(0,229,255,0.6);
+    animation: chakrapulse 2s ease-in-out infinite;
+  }
+  @keyframes chakrapulse {
+    0%, 100% { transform: scale(1) translateX(-50%) translateY(-50%); opacity: 0.9; }
+    50% { transform: scale(1.5) translateX(-50%) translateY(-50%); opacity: 1; }
+  }
+
+  /* ── Text below ── */
+  .label-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    margin-top: clamp(-18px, -2.5vw, -8px);
+    gap: 4px;
+    padding: 0 16px;
+    width: 100%;
+  }
+
+  .sakha-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(24px, 6.5vw, 44px);
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    background: linear-gradient(120deg, #FFF8DC 0%, #F5E27A 35%, #D4AF37 60%, #FFF8DC 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    filter: drop-shadow(0 2px 16px rgba(212,175,55,0.5));
+    animation: nameshine 5s ease-in-out infinite;
+    background-size: 200% auto;
+  }
+  @media (min-width: 768px) {
+    .sakha-name {
+      font-size: clamp(36px, 3.5vw, 52px);
+    }
+  }
+  @keyframes nameshine {
+    0% { background-position: 0% center; }
+    50% { background-position: 100% center; }
+    100% { background-position: 0% center; }
+  }
+
+  .tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(12px, 3vw, 18px);
+    letter-spacing: 0.22em;
+    color: rgba(212,175,55,0.75);
+    text-transform: uppercase;
+    margin-top: 2px;
+    text-align: center;
+  }
+  @media (min-width: 768px) {
+    .tagline {
+      font-size: clamp(15px, 1.4vw, 20px);
+      letter-spacing: 0.3em;
+    }
+  }
+
+  .sanskrit {
+    font-family: 'Noto Sans Devanagari', 'Cormorant Garamond', serif;
+    font-size: clamp(10px, 2.6vw, 15px);
+    color: rgba(212,175,55,0.45);
+    margin-top: 8px;
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+  @media (min-width: 768px) {
+    .sanskrit {
+      font-size: clamp(13px, 1.1vw, 16px);
+      margin-top: 12px;
+    }
+  }
+
+  /* Gold divider line */
+  .divider {
+    width: clamp(120px, 40vw, 220px);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.6), rgba(255,240,150,0.9), rgba(212,175,55,0.6), transparent);
+    margin: 10px 0 6px;
+    animation: divglow 3s ease-in-out infinite;
+  }
+  @keyframes divglow {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; box-shadow: 0 0 8px rgba(212,175,55,0.5); }
+  }
+
+  /* ── Floating particles ── */
+  .particle {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: floatup linear infinite;
+    opacity: 0;
+  }
+  @keyframes floatup {
+    0% { transform: translateY(0) translateX(0) scale(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 0.4; }
+    100% { transform: translateY(-100vh) translateX(var(--drift)) scale(0.5); opacity: 0; }
+  }
+
+  /* ── Landscape mobile: side-by-side layout ── */
+  @media (max-height: 500px) and (orientation: landscape) {
+    .scene {
+      flex-direction: row;
+      gap: 24px;
+    }
+    .label-wrap {
+      margin-top: 0;
+      align-items: flex-start;
+      text-align: left;
+    }
+    .label-wrap .tagline,
+    .label-wrap .sanskrit {
+      text-align: left;
+    }
+    .label-wrap .divider {
+      margin-left: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="cosmos"></div>
+
+<!-- Floating divine particles -->
+<div id="particles"></div>
+
+<div class="scene" id="scene">
+
+  <div class="mandala-wrap">
+    <!-- Outer aura glow -->
+    <div class="aura-outer"></div>
+
+    <!-- Lotus petals ring (outermost) -->
+    <div class="lotus-ring" id="lotusRing"></div>
+
+    <!-- Outer rotating mandala -->
+    <svg class="mandala-svg" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="goldRing" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#F5E27A" stop-opacity="0.9"/>
+          <stop offset="60%" stop-color="#D4AF37" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="#A0792A" stop-opacity="0.3"/>
+        </radialGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2.5" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- Main circle rings -->
+      <circle cx="200" cy="200" r="192" stroke="url(#goldRing)" stroke-width="0.8" opacity="0.5"/>
+      <circle cx="200" cy="200" r="182" stroke="#D4AF37" stroke-width="0.4" opacity="0.3"/>
+      <circle cx="200" cy="200" r="170" stroke="#F5E27A" stroke-width="1.2" opacity="0.6" filter="url(#glow)"/>
+
+      <!-- 12-point outer star petals -->
+      <g filter="url(#glow)" opacity="0.55">
+        <path d="M200 8 L210 190 L200 198 L190 190 Z" fill="#D4AF37"/>
+        <path d="M392 200 L210 210 L202 200 L210 190 Z" fill="#D4AF37"/>
+        <path d="M200 392 L190 210 L200 202 L210 210 Z" fill="#D4AF37"/>
+        <path d="M8 200 L190 190 L198 200 L190 210 Z" fill="#D4AF37"/>
+      </g>
+
+      <!-- 8-petal lotus ring at radius 155 -->
+      <g opacity="0.45" filter="url(#glow)">
+        <ellipse cx="200" cy="50" rx="10" ry="26" fill="#D4AF37" transform="rotate(0 200 200)"/>
+        <ellipse cx="200" cy="50" rx="10" ry="26" fill="#D4AF37" transform="rotate(45 200 200)"/>
+        <ellipse cx="200" cy="50" rx="10" ry="26" fill="#D4AF37" transform="rotate(90 200 200)"/>
+        <ellipse cx="200" cy="50" rx="10" ry="26" fill="#D4AF37" transform="rotate(135 200 200)"/>
+        <ellipse cx="200" cy="50" rx="10" ry="26" fill="#D4AF37" transform="rotate(180 200 200)"/>
+        <ellipse cx="200" cy="50" rx="10" ry="26" fill="#D4AF37" transform="rotate(225 200 200)"/>
+        <ellipse cx="200" cy="50" rx="10" ry="26" fill="#D4AF37" transform="rotate(270 200 200)"/>
+        <ellipse cx="200" cy="50" rx="10" ry="26" fill="#D4AF37" transform="rotate(315 200 200)"/>
+      </g>
+
+      <!-- Outer geometric diamond ring -->
+      <g stroke="#F5E27A" stroke-width="0.6" opacity="0.5" fill="none" filter="url(#glow)">
+        <polygon points="200,32 368,200 200,368 32,200"/>
+        <polygon points="200,32 368,200 200,368 32,200" transform="rotate(22.5 200 200)"/>
+        <polygon points="200,32 368,200 200,368 32,200" transform="rotate(45 200 200)"/>
+      </g>
+
+      <!-- Mid decorative circles -->
+      <circle cx="200" cy="200" r="130" stroke="#D4AF37" stroke-width="0.6" opacity="0.4" stroke-dasharray="4 6"/>
+      <circle cx="200" cy="200" r="110" stroke="#F5E27A" stroke-width="0.8" opacity="0.35"/>
+
+      <!-- Teal accents at cardinal points of mid ring -->
+      <circle cx="200" cy="70" r="4" fill="#00E5FF" opacity="0.8" filter="url(#glow)"/>
+      <circle cx="330" cy="200" r="4" fill="#00E5FF" opacity="0.8" filter="url(#glow)"/>
+      <circle cx="200" cy="330" r="4" fill="#00E5FF" opacity="0.8" filter="url(#glow)"/>
+      <circle cx="70" cy="200" r="4" fill="#00E5FF" opacity="0.8" filter="url(#glow)"/>
+    </svg>
+
+    <!-- Inner counter-rotating mandala -->
+    <svg class="mandala-svg-rev" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glow2">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- Sri Yantra-ish triangles -->
+      <g opacity="0.6" filter="url(#glow2)">
+        <!-- Upward triangle (Shiva) -->
+        <polygon points="200,60 340,290 60,290" stroke="#F5E27A" stroke-width="1.5" fill="rgba(212,175,55,0.04)"/>
+        <!-- Downward triangle (Shakti) -->
+        <polygon points="200,340 60,110 340,110" stroke="#00B4D8" stroke-width="1.2" fill="rgba(0,180,216,0.04)"/>
+        <!-- Inner upward -->
+        <polygon points="200,110 300,260 100,260" stroke="#F5E27A" stroke-width="1" fill="rgba(212,175,55,0.05)"/>
+        <!-- Inner downward -->
+        <polygon points="200,290 100,140 300,140" stroke="#00B4D8" stroke-width="0.8" fill="rgba(0,180,216,0.05)"/>
+        <!-- Core star -->
+        <polygon points="200,155 235,215 165,215" stroke="#FFD700" stroke-width="1.2" fill="rgba(255,215,0,0.08)"/>
+        <polygon points="200,245 235,185 165,185" stroke="#00B4D8" stroke-width="1" fill="rgba(0,180,216,0.08)"/>
+      </g>
+
+      <!-- Inner sacred circle -->
+      <circle cx="200" cy="200" r="60" stroke="#D4AF37" stroke-width="1" opacity="0.5"/>
+      <circle cx="200" cy="200" r="45" stroke="#F5E27A" stroke-width="0.8" opacity="0.4" stroke-dasharray="3 5"/>
+
+      <!-- 6-dot hexagonal -->
+      <g fill="#F5E27A" opacity="0.5" filter="url(#glow2)">
+        <circle cx="200" cy="142" r="2.5"/>
+        <circle cx="251" cy="171" r="2.5"/>
+        <circle cx="251" cy="229" r="2.5"/>
+        <circle cx="200" cy="258" r="2.5"/>
+        <circle cx="149" cy="229" r="2.5"/>
+        <circle cx="149" cy="171" r="2.5"/>
+      </g>
+    </svg>
+
+    <!-- Vibration rings from center -->
+    <div class="vib-ring"></div>
+    <div class="vib-ring"></div>
+    <div class="vib-ring"></div>
+
+    <!-- Central OM -->
+    <div class="om-stage">
+      <div class="om-glow-bg"></div>
+      <div class="om-text">&#x0950;</div>
+    </div>
+
+    <!-- Chakra dots placed on the mandala circle -->
+    <div class="chakra-dot" style="left:50%;top:14%;transform:translateX(-50%) translateY(-50%);"></div>
+    <div class="chakra-dot" style="left:84%;top:30%;transform:translateX(-50%) translateY(-50%);animation-delay:0.5s;"></div>
+    <div class="chakra-dot" style="left:84%;top:70%;transform:translateX(-50%) translateY(-50%);animation-delay:1s;"></div>
+    <div class="chakra-dot" style="left:50%;top:86%;transform:translateX(-50%) translateY(-50%);animation-delay:1.5s;"></div>
+    <div class="chakra-dot" style="left:16%;top:70%;transform:translateX(-50%) translateY(-50%);animation-delay:2s;"></div>
+    <div class="chakra-dot" style="left:16%;top:30%;transform:translateX(-50%) translateY(-50%);animation-delay:2.5s;"></div>
+
+  </div><!-- /mandala-wrap -->
+
+  <!-- Text labels -->
+  <div class="label-wrap">
+    <div class="divider"></div>
+    <div class="sakha-name">Sakha</div>
+    <div class="tagline">Your Divine Companion</div>
+    <div class="sanskrit">&#x0938;&#x0916;&#x093E; &#x2014; &#x0924;&#x0935; &#x0926;&#x093F;&#x0935;&#x094D;&#x092F;&#x0903; &#x0938;&#x093E;&#x0925;&#x0940;</div>
+  </div>
+
+</div><!-- /scene -->
+
+<script>
+  (function () {
+    'use strict';
+
+    var scene = document.getElementById('scene');
+    var lotusRing = document.getElementById('lotusRing');
+    var particleWrap = document.getElementById('particles');
+
+    // ── Device detection ──
+    var isMobile = window.matchMedia('(max-width: 767px)').matches;
+    var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ── Lotus petals — fewer on mobile for performance ──
+    var petalCount = isMobile ? 12 : 16;
+    for (var i = 0; i < petalCount; i++) {
+      var p = document.createElement('div');
+      p.className = 'lotus-petal';
+      var angle = (i / petalCount) * 360;
+      var rad = 47;
+      var px = 50 + rad * Math.sin(angle * Math.PI / 180);
+      var py = 50 - rad * Math.cos(angle * Math.PI / 180);
+      var petalH = isMobile ? (24 + (i % 4) * 4) : (30 + (i % 4) * 5);
+      var petalW = isMobile ? (11 + (i % 2) * 3) : (14 + (i % 2) * 4);
+      p.style.cssText =
+        'left:' + px + '%;' +
+        'top:' + py + '%;' +
+        'transform:translate(-50%,-100%) rotate(' + angle + 'deg);' +
+        'opacity:' + (0.3 + (i % 3) * 0.15) + ';' +
+        'height:' + petalH + 'px;' +
+        'width:' + petalW + 'px;' +
+        'background:linear-gradient(180deg,' +
+          'rgba(255,107,157,' + (0.5 + (i % 3) * 0.1) + ') 0%,' +
+          'rgba(212,175,55,0.1) 100%);';
+      lotusRing.appendChild(p);
+    }
+
+    // ── Floating golden motes — fewer on mobile ──
+    var particleCount = isMobile ? 16 : 28;
+    if (!prefersReducedMotion) {
+      for (var j = 0; j < particleCount; j++) {
+        var pt = document.createElement('div');
+        pt.className = 'particle';
+        var size = Math.random() * 3 + 1.5;
+        var isGold = Math.random() > 0.4;
+        pt.style.cssText =
+          'width:' + size + 'px;' +
+          'height:' + size + 'px;' +
+          'left:' + (Math.random() * 100) + 'vw;' +
+          'bottom:' + (Math.random() * 20) + 'vh;' +
+          'background:radial-gradient(circle,' + (isGold ? '#F5E27A' : '#00E5FF') + ',transparent);' +
+          'box-shadow:0 0 ' + (size * 2) + 'px ' + (isGold ? '#D4AF37' : '#00B4D8') + ';' +
+          'animation-duration:' + (8 + Math.random() * 14) + 's;' +
+          'animation-delay:' + (Math.random() * 12) + 's;' +
+          '--drift:' + ((Math.random() - 0.5) * 80) + 'px;';
+        particleWrap.appendChild(pt);
+      }
+    }
+
+    // ── Desktop: mouse parallax ──
+    if (!isMobile && !prefersReducedMotion) {
+      document.addEventListener('mousemove', function (e) {
+        var cx = window.innerWidth / 2;
+        var cy = window.innerHeight / 2;
+        var dx = (e.clientX - cx) / cx;
+        var dy = (e.clientY - cy) / cy;
+        scene.style.transform = 'translate(' + (dx * 6) + 'px,' + (dy * 4) + 'px)';
+      });
+    }
+
+    // ── Mobile: gyroscope tilt parallax (if available) ──
+    if (isMobile && !prefersReducedMotion && window.DeviceOrientationEvent) {
+      var handleOrientation = function (e) {
+        if (e.gamma === null || e.beta === null) return;
+        // gamma: left-right tilt (-90..90), beta: front-back tilt (-180..180)
+        var dx = Math.max(-1, Math.min(1, e.gamma / 30));
+        var dy = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
+        scene.style.transform = 'translate(' + (dx * 5) + 'px,' + (dy * 3) + 'px)';
+      };
+
+      // iOS 13+ requires permission
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        document.body.addEventListener('touchstart', function requestGyro() {
+          DeviceOrientationEvent.requestPermission().then(function (state) {
+            if (state === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation);
+            }
+          }).catch(function () {});
+          document.body.removeEventListener('touchstart', requestGyro);
+        }, { once: true });
+      } else {
+        window.addEventListener('deviceorientation', handleOrientation);
+      }
+    }
+
+    // ── Recalculate on resize (orientation change, etc.) ──
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        isMobile = window.matchMedia('(max-width: 767px)').matches;
+      }, 250);
+    });
+  })();
+</script>
+</body>
+</html>
