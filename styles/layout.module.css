@@ -1,0 +1,24 @@
+/**
+ * Layout Module — AppShell Topbar
+ *
+ * Desktop-only topbar for the app shell (hidden below 1024px).
+ * Mobile navigation is handled by the root layout's SiteNav + MobileNav.
+ */
+
+/* ─── Topbar (desktop only) ─── */
+.topbar {
+  display: none;
+  height: 56px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: #0b0b1a;
+  border-bottom: 1px solid rgba(180, 140, 60, 0.12);
+}
+
+@media (min-width: 1024px) {
+  .topbar {
+    display: flex;
+  }
+}

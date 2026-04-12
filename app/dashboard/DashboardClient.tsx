@@ -139,7 +139,7 @@ export default function DashboardClient() {
   }, [triggerHaptic])
 
   return (
-    <div className="space-y-section-lg">
+    <div className="space-y-section-lg lg:px-6 lg:pb-6">
       <FadeIn>
         <motion.div
           variants={containerVariants}
@@ -558,7 +558,7 @@ export default function DashboardClient() {
           {/* ─── Main card group: 2-column responsive grid
                 display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;
                 Collapses to 1 column below 1024px via lg: breakpoint. ─── */}
-          <div className="lg:grid lg:gap-4 lg:[grid-template-columns:repeat(auto-fit,minmax(320px,1fr))]">
+          <div className="lg:grid lg:grid-cols-[2fr_3fr] lg:gap-5">
           {/* ─── Speak to KIAAN (SECONDARY) ─── */}
           <motion.div variants={itemVariants}>
             <Link
@@ -760,31 +760,33 @@ export default function DashboardClient() {
                 ))}
               </div>
 
-              {/* Other Tools — Compact Grid */}
-              <div className="relative mt-4 grid grid-cols-3 sm:grid-cols-6 gap-2">
-                {OTHER_TOOLS.map((tool) => (
-                  <motion.div key={tool.id} variants={quickActionVariants} initial="rest" whileHover="hover" whileTap="tap">
-                    <Link
-                      href={tool.href}
-                      onClick={handleCardTap}
-                      className="flex flex-col items-center justify-center rounded-[14px] border border-[#d4a44c]/[0.06] bg-gradient-to-br from-[#d4a44c]/[0.03] to-transparent p-2.5 sm:p-3 transition-all duration-300 hover:border-[#d4a44c]/15 active:opacity-90"
-                    >
-                      <div className="mb-1.5 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#d4a44c]/[0.06]">
-                        <span className="text-lg sm:text-xl">{tool.symbol}</span>
-                      </div>
-                      <span className="text-[10px] sm:text-xs font-medium text-[#f5e6c8]/70 text-center leading-tight">{tool.title}</span>
-                      <span className="mt-0.5 text-[8px] sm:text-[9px] text-[#d4a44c]/30 text-center leading-tight">{tool.subtitle}</span>
-                    </Link>
-                  </motion.div>
-                ))}
-              </div>
-
               {/* Bottom golden radiance line */}
               <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#d4a44c]/20 to-transparent" />
             </div>
           </motion.div>
           </div>
           {/* ─── /Main card group grid ─── */}
+
+          {/* ─── Tool Shortcuts Grid ─── */}
+          <motion.div variants={itemVariants}>
+            <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
+              {OTHER_TOOLS.map((tool) => (
+                <motion.div key={tool.id} variants={quickActionVariants} initial="rest" whileHover="hover" whileTap="tap">
+                  <Link
+                    href={tool.href}
+                    onClick={handleCardTap}
+                    className="flex flex-col items-center justify-center rounded-[14px] border border-[#d4a44c]/[0.06] bg-gradient-to-br from-[#d4a44c]/[0.03] to-transparent p-2.5 sm:p-3 transition-all duration-300 hover:border-[#d4a44c]/15 active:opacity-90"
+                  >
+                    <div className="mb-1.5 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#d4a44c]/[0.06]">
+                      <span className="text-lg sm:text-xl">{tool.symbol}</span>
+                    </div>
+                    <span className="text-[10px] sm:text-xs font-medium text-[#f5e6c8]/70 text-center leading-tight">{tool.title}</span>
+                    <span className="mt-0.5 text-[8px] sm:text-[9px] text-[#d4a44c]/30 text-center leading-tight">{tool.subtitle}</span>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
 
         </motion.div>
       </FadeIn>

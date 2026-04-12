@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import CosmicParticles from '@/components/kiaan-ecosystem/CosmicParticles'
 import KrishnaSilhouette from '@/components/kiaan-ecosystem/KrishnaSilhouette'
+import { AppShell } from '@/components/layout/AppShell'
 
 export const metadata = {
   title: 'KIAAN - Your AI Spiritual Guide | Sakha',
@@ -8,14 +9,17 @@ export const metadata = {
 }
 
 /**
- * KIAAN Layout — Divine Cosmic Theme
+ * KIAAN Layout — Divine Cosmic Theme + AppShell
  *
  * Deep black void with golden nebula accents, floating cosmic particles,
  * and a barely-perceptible Krishna silhouette as ambient divine presence.
+ *
+ * Uses the shared AppShell component for Sidebar + Topbar, then wraps
+ * children in a cosmic-themed container for the KIAAN visual identity.
  */
 export default function KiaanLayout({ children }: { children: ReactNode }) {
   return (
-    <main className="kiaan-cosmic-bg min-h-screen text-[#e8dcc8] relative overflow-hidden">
+    <AppShell className="kiaan-cosmic-bg text-[#e8dcc8] relative">
       {/* Cosmic nebula gradients */}
       <div className="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true">
         {/* Golden nebula - top left */}
@@ -35,9 +39,9 @@ export default function KiaanLayout({ children }: { children: ReactNode }) {
       <KrishnaSilhouette position="right" opacity={0.03} />
 
       {/* Content layer */}
-      <div className="relative z-10">
+      <div className="relative z-10 flex-1 min-h-0">
         {children}
       </div>
-    </main>
+    </AppShell>
   )
 }

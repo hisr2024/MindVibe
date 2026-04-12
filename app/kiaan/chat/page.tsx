@@ -241,14 +241,14 @@ function KiaanChatPageInner() {
   }, [themeCounts])
 
   return (
-    <main className="mx-auto max-w-7xl p-3 sm:p-4 pb-28 sm:pb-24 md:p-6 lg:p-8">
-      {/* ─── Phase 5 layout: 2-column flex — chat panel flex:1 left, context sidebar 320px right.
+    <div className="flex flex-col flex-1 min-h-0 p-3 sm:p-4 pb-28 sm:pb-24 md:p-6 lg:p-0 lg:pb-0">
+      {/* ─── 3-panel layout: Sidebar (from layout) | Chat center | Right panel.
            Collapses to 1 column (flex-col) below 1024px. ─── */}
-      <div className="flex flex-col gap-5 lg:flex-row lg:gap-6">
-      <div className="flex-1 min-w-0 space-y-5">
+      <div className="flex flex-col flex-1 min-h-0 gap-5 lg:flex-row lg:gap-0 lg:overflow-hidden">
+      <div className="flex-1 min-w-0 flex flex-col space-y-5 lg:space-y-0 lg:overflow-hidden">
       {/* Header */}
       <div
-        className="relative z-10 space-y-3 sm:space-y-4 p-5 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-6"
+        className="relative z-10 space-y-3 sm:space-y-4 p-5 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-6 lg:shrink-0"
         style={{
           background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
           border: '1px solid rgba(212,160,23,0.1)',
@@ -409,9 +409,9 @@ function KiaanChatPageInner() {
         <NextStepLink suggestion={nextStepSuggestion} />
       )}
 
-      {/* Chat Interface */}
+      {/* Chat Interface — fills remaining height on desktop */}
       <div
-        className="p-4 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-6"
+        className="p-4 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-6 lg:flex-1 lg:min-h-0 lg:flex lg:flex-col lg:p-0 lg:shadow-none"
         style={{
           background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
           border: '1px solid rgba(212,160,23,0.1)',
@@ -427,13 +427,56 @@ function KiaanChatPageInner() {
           onSaveToJournal={handleSaveToJournal}
           isLoading={isLoading}
           viewMode={viewMode}
+          className="lg:!h-full lg:!max-h-full lg:!min-h-0"
         />
       </div>
 
-      {/* Quick Responses - Below KIAAN Chat */}
-      {messages.length === 0 && (
+      {/* Quick Responses — mobile only (moves to right panel on desktop) */}
+      <div className="lg:hidden">
+        {messages.length === 0 && (
+          <div
+            className="space-y-4 p-5 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-6"
+            style={{
+              background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
+              border: '1px solid rgba(212,160,23,0.1)',
+              borderTop: '2px solid rgba(212,160,23,0.45)',
+              borderRadius: '18px',
+              backdropFilter: 'blur(24px) saturate(120%)',
+              WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="kiaan-text-golden text-lg font-semibold">{t('kiaan.quickPrompts.title', 'Quick Responses')}</h2>
+              <button
+                onClick={handleClarityPause}
+                className="rounded-xl border border-[#d4a44c]/30 bg-[#d4a44c]/10 px-4 py-2 text-sm font-semibold text-[#d4a44c] shadow-lg shadow-[#d4a44c]/10 transition-all hover:bg-[#d4a44c]/20 hover:scale-105"
+              >
+                🧘 {t('kiaan.clarityPause.title', 'Clarity Pause')}
+              </button>
+            </div>
+            <div className="grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+              {quickResponses.map((response) => (
+                <button
+                  key={response.id}
+                  onClick={() => handleQuickResponse(response.prompt)}
+                  className="group relative overflow-hidden rounded-2xl border border-[#d4a44c]/12 bg-[#d4a44c]/[0.03] p-4 text-left transition-all hover:border-[#d4a44c]/30 hover:bg-[#d4a44c]/[0.08] hover:shadow-lg hover:shadow-[#d4a44c]/10"
+                >
+                  <div className="flex flex-col gap-2">
+                    <span className="text-2xl">{response.emoji}</span>
+                    <span className="text-sm font-semibold text-[#e8dcc8]">{t(`kiaan.quickPrompts.scenarios.${response.id}.label`, response.text)}</span>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#d4a44c]/5 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* A Sacred Note from KIAAN — mobile only */}
+      <div className="lg:hidden">
         <div
-          className="space-y-4 p-5 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-6"
+          className="p-5 md:p-6"
           style={{
             background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
             border: '1px solid rgba(212,160,23,0.1)',
@@ -443,66 +486,25 @@ function KiaanChatPageInner() {
             WebkitBackdropFilter: 'blur(24px) saturate(120%)',
           }}
         >
-          <div className="flex items-center justify-between">
-            <h2 className="kiaan-text-golden text-lg font-semibold">{t('kiaan.quickPrompts.title', 'Quick Responses')}</h2>
-            <button
-              onClick={handleClarityPause}
-              className="rounded-xl border border-[#d4a44c]/30 bg-[#d4a44c]/10 px-4 py-2 text-sm font-semibold text-[#d4a44c] shadow-lg shadow-[#d4a44c]/10 transition-all hover:bg-[#d4a44c]/20 hover:scale-105"
-            >
-              🧘 {t('kiaan.clarityPause.title', 'Clarity Pause')}
-            </button>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="divine-companion-avatar h-10 w-10 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center">
+              <span className="text-sm font-bold text-[#0a0a12]">K</span>
+            </div>
+            <div>
+              <h2 className="kiaan-text-golden text-lg font-semibold">{t('kiaan.chat.divineFriend', 'Your Divine Friend')}</h2>
+              <p className="text-[10px] text-[#d4a44c]/45 tracking-[0.1em] uppercase">Always by your side</p>
+            </div>
           </div>
-          <div className="grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
-            {quickResponses.map((response) => (
-              <button
-                key={response.id}
-                onClick={() => handleQuickResponse(response.prompt)}
-                className="group relative overflow-hidden rounded-2xl border border-[#d4a44c]/12 bg-[#d4a44c]/[0.03] p-4 text-left transition-all hover:border-[#d4a44c]/30 hover:bg-[#d4a44c]/[0.08] hover:shadow-lg hover:shadow-[#d4a44c]/10"
-              >
-                <div className="flex flex-col gap-2">
-                  <span className="text-2xl">{response.emoji}</span>
-                  <span className="text-sm font-semibold text-[#e8dcc8]">{t(`kiaan.quickPrompts.scenarios.${response.id}.label`, response.text)}</span>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-[#d4a44c]/5 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-              </button>
-            ))}
-          </div>
+          <div className="divine-sacred-thread w-full mb-3" />
+          <p className="mt-1 text-sm leading-relaxed text-[#e8dcc8]/55 font-sacred">
+            {t('kiaan.chat.disclaimer', 'KIAAN is your spiritual companion, sharing reflections drawn from the Bhagavad Gita and ancient wisdom. This is a sacred space for inner peace and self-discovery. For matters beyond the spiritual path, always seek guidance from qualified professionals.')}
+          </p>
         </div>
-      )}
-
-      {/* A Sacred Note from KIAAN */}
-      <div
-        className="p-5 md:p-6"
-        style={{
-          background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
-          border: '1px solid rgba(212,160,23,0.1)',
-          borderTop: '2px solid rgba(212,160,23,0.45)',
-          borderRadius: '18px',
-          backdropFilter: 'blur(24px) saturate(120%)',
-          WebkitBackdropFilter: 'blur(24px) saturate(120%)',
-        }}
-      >
-        <div className="flex items-center gap-3 mb-3">
-          <div className="divine-companion-avatar h-10 w-10 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center">
-            <span className="text-sm font-bold text-[#0a0a12]">K</span>
-          </div>
-          <div>
-            <h2 className="kiaan-text-golden text-lg font-semibold">{t('kiaan.chat.divineFriend', 'Your Divine Friend')}</h2>
-            <p className="text-[10px] text-[#d4a44c]/45 tracking-[0.1em] uppercase">Always by your side</p>
-          </div>
-        </div>
-        <div className="divine-sacred-thread w-full mb-3" />
-        <p className="mt-1 text-sm leading-relaxed text-[#e8dcc8]/55 font-sacred">
-          {t('kiaan.chat.disclaimer', 'KIAAN is your spiritual companion, sharing reflections drawn from the Bhagavad Gita and ancient wisdom. This is a sacred space for inner peace and self-discovery. For matters beyond the spiritual path, always seek guidance from qualified professionals.')}
-        </p>
       </div>
       </div>
-      {/* ─── Context sidebar: Verse of the day + Recent topics.
-           width: 320px on desktop, full width below 1024px.
-           Data sources: hardcoded canonical verse (BG 2.47) and themeCounts
-           from useNextStepStore — zero new fetches, zero new API calls. ─── */}
-      <aside className="lg:w-[320px] lg:flex-shrink-0 space-y-4">
-        {/* Verse of the Day — BG 2.47 (canonical, already used as Viyoga reference) */}
+      {/* ─── Mobile context cards: Verse + Topics (hidden on desktop) ─── */}
+      <div className="space-y-4 lg:hidden">
+        {/* Verse of the Day — BG 2.47 */}
         <div
           className="p-5"
           style={{
@@ -532,7 +534,7 @@ function KiaanChatPageInner() {
           </p>
         </div>
 
-        {/* Recent Topics — derived from themeCounts (zero new fetches) */}
+        {/* Recent Topics */}
         <div
           className="p-5"
           style={{
@@ -568,9 +570,107 @@ function KiaanChatPageInner() {
             </p>
           )}
         </div>
+      </div>
+
+      {/* ─── Desktop right panel: Verse + Topics + Quick Responses + Disclaimer ─── */}
+      <aside
+        className="hidden lg:flex lg:flex-col lg:w-[320px] lg:shrink-0 overflow-y-auto"
+        style={{
+          borderLeft: '1px solid rgba(180, 140, 60, 0.1)',
+          background: 'rgba(13, 13, 31, 0.8)',
+        }}
+      >
+        <div className="flex flex-col p-5 gap-5">
+          {/* Verse of the Day */}
+          <div className="pb-5" style={{ borderBottom: '1px solid rgba(180, 140, 60, 0.1)' }}>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-base">🕉️</span>
+              <span className="font-ui uppercase" style={{ fontSize: '9px', color: 'rgba(212, 160, 23, 0.6)', letterSpacing: '0.18em', fontWeight: 600 }}>
+                {t('kiaan.chat.sidebar.verseOfDay', 'Verse of the Day')}
+              </span>
+            </div>
+            <p className="font-devanagari text-[15px] leading-[1.8] text-[#e8dcc8]/85 mb-2" lang="sa">
+              कर्मण्येवाधिकारस्ते मा फलेषु कदाचन ।{'\n'}
+              मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्तु अकर्मणि ॥
+            </p>
+            <p className="text-[13px] leading-relaxed italic font-sacred" style={{ color: 'rgba(232, 220, 200, 0.6)' }}>
+              {t('kiaan.chat.sidebar.verseTranslation', 'You have the right to perform your prescribed duty, but not to the fruits of action. Never consider yourself the cause of the results, nor be attached to inaction.')}
+            </p>
+            <p className="mt-3 font-ui uppercase" style={{ fontSize: '9px', color: 'rgba(212, 160, 23, 0.5)', letterSpacing: '0.2em', fontWeight: 600 }}>
+              {t('kiaan.chat.sidebar.verseRef', 'Bhagavad Gita 2.47')}
+            </p>
+          </div>
+
+          {/* Recent Topics */}
+          <div className="pb-5" style={{ borderBottom: '1px solid rgba(180, 140, 60, 0.1)' }}>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-base">💭</span>
+              <span className="font-ui uppercase" style={{ fontSize: '9px', color: 'rgba(212, 160, 23, 0.6)', letterSpacing: '0.18em', fontWeight: 600 }}>
+                {t('kiaan.chat.sidebar.recentTopics', 'Recent Topics')}
+              </span>
+            </div>
+            {recentTopics.length > 0 ? (
+              <ul className="space-y-2">
+                {recentTopics.map((topic) => (
+                  <li
+                    key={topic}
+                    className="flex items-center gap-2 text-xs text-[#e8dcc8]/75"
+                  >
+                    <span className="text-[#d4a44c]/50">·</span>
+                    <span className="capitalize">{topic}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-[#e8dcc8]/45 italic font-sacred">
+                {t('kiaan.chat.sidebar.noTopics', 'Start chatting to see topics here.')}
+              </p>
+            )}
+          </div>
+
+          {/* Quick Responses — desktop version */}
+          <div className="pb-5" style={{ borderBottom: '1px solid rgba(180, 140, 60, 0.1)' }}>
+            <span className="font-ui uppercase" style={{ fontSize: '9px', color: 'rgba(212, 160, 23, 0.6)', letterSpacing: '0.18em', fontWeight: 600 }}>
+              {t('kiaan.quickPrompts.title', 'Quick Responses')}
+            </span>
+            <div className="grid grid-cols-2 gap-2 mt-3">
+              {quickResponses.map((response) => (
+                <button
+                  key={response.id}
+                  onClick={() => handleQuickResponse(response.prompt)}
+                  className="group relative overflow-hidden rounded-xl border border-[#d4a44c]/10 bg-[#d4a44c]/[0.03] p-3 text-left transition-all hover:border-[#d4a44c]/25 hover:bg-[#d4a44c]/[0.08]"
+                >
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-lg">{response.emoji}</span>
+                    <span className="text-[11px] font-semibold text-[#e8dcc8]/85 leading-tight">
+                      {t(`kiaan.quickPrompts.scenarios.${response.id}.label`, response.text)}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Divine Friend disclaimer */}
+          <div>
+            <div className="flex items-center gap-2.5 mb-2.5">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#c8943a] via-[#e8b54a] to-[#f0c96d] flex items-center justify-center shrink-0">
+                <span className="text-xs font-bold text-[#0a0a12]">K</span>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-[#e8dcc8]/90">{t('kiaan.chat.divineFriend', 'Your Divine Friend')}</p>
+                <p className="text-[9px] text-[#d4a44c]/40 tracking-[0.1em] uppercase">Always by your side</p>
+              </div>
+            </div>
+            <div className="divine-sacred-thread w-full mb-2.5" />
+            <p className="text-[11px] leading-relaxed text-[#e8dcc8]/45 font-sacred">
+              {t('kiaan.chat.disclaimer', 'KIAAN is your spiritual companion, sharing reflections drawn from the Bhagavad Gita and ancient wisdom. This is a sacred space for inner peace and self-discovery. For matters beyond the spiritual path, always seek guidance from qualified professionals.')}
+            </p>
+          </div>
+        </div>
       </aside>
       </div>
-    </main>
+    </div>
   );
 }
 
