@@ -31,8 +31,8 @@ export function Sidebar() {
     <aside
       className="hidden lg:flex lg:flex-col lg:w-[220px] lg:shrink-0 border-r overflow-y-auto"
       style={{
-        borderColor: 'rgba(180, 140, 60, 0.12)',
-        background: '#0b0b1a',
+        borderColor: 'rgba(212, 160, 23, 0.12)',
+        background: 'rgba(5, 7, 20, 0.95)',
       }}
     >
       <nav className="flex flex-col flex-1 py-5 gap-0.5" aria-label="App navigation">
@@ -49,17 +49,17 @@ export function Sidebar() {
               aria-current={active ? 'page' : undefined}
               className={`relative flex flex-col px-5 py-2.5 font-ui transition-colors duration-200 ${
                 active
-                  ? 'text-[#c8a84b]'
-                  : 'text-[rgba(232,220,200,0.5)] hover:text-[#c8a84b]'
+                  ? 'text-[#D4A017]'
+                  : 'text-[rgba(232,220,200,0.5)] hover:text-[#D4A017]'
               }`}
               style={{
                 fontSize: '13px',
                 letterSpacing: '0.02em',
                 borderLeft: active
-                  ? '2px solid #c8a84b'
+                  ? '2px solid #D4A017'
                   : '2px solid transparent',
                 background: active
-                  ? 'rgba(180, 140, 60, 0.08)'
+                  ? 'rgba(212, 160, 23, 0.08)'
                   : undefined,
               }}
             >
@@ -80,7 +80,7 @@ export function Sidebar() {
       {/* User section — bottom of sidebar */}
       <div
         className="mt-auto px-5 py-4"
-        style={{ borderTop: '1px solid rgba(180, 140, 60, 0.1)' }}
+        style={{ borderTop: '1px solid rgba(212, 160, 23, 0.1)' }}
       >
         <div className="flex items-center gap-3 mb-3">
           <div
@@ -88,7 +88,7 @@ export function Sidebar() {
             style={{
               width: 34,
               height: 34,
-              background: 'linear-gradient(135deg, #c8943a, #e8b54a)',
+              background: 'linear-gradient(135deg, #D4A017, #F0C040)',
             }}
           >
             <span className="text-xs font-bold text-[#0a0a12]">U</span>
@@ -101,9 +101,9 @@ export function Sidebar() {
                 fontSize: '9px',
                 fontWeight: 600,
                 letterSpacing: '0.1em',
-                color: '#c8a84b',
-                background: 'rgba(200, 168, 75, 0.1)',
-                border: '1px solid rgba(200, 168, 75, 0.2)',
+                color: '#D4A017',
+                background: 'rgba(212, 160, 23, 0.1)',
+                border: '1px solid rgba(212, 160, 23, 0.2)',
                 padding: '1px 8px',
                 marginTop: '2px',
               }}

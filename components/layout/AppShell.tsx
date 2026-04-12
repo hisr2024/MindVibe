@@ -46,7 +46,7 @@ export function AppShell({ children, rightPanel, className = '' }: AppShellProps
             <aside
               className="hidden lg:flex lg:flex-col lg:w-[320px] lg:shrink-0 overflow-y-auto"
               style={{
-                borderLeft: '1px solid rgba(180, 140, 60, 0.1)',
+                borderLeft: '1px solid rgba(212, 160, 23, 0.1)',
                 background: 'rgba(13, 13, 31, 0.8)',
               }}
             >

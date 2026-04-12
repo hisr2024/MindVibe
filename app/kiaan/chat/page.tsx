@@ -598,13 +598,13 @@ function KiaanChatPageInner() {
       <aside
         className="hidden lg:flex lg:flex-col lg:w-[320px] lg:shrink-0 overflow-y-auto"
         style={{
-          borderLeft: '1px solid rgba(180, 140, 60, 0.1)',
+          borderLeft: '1px solid rgba(212, 160, 23, 0.1)',
           background: 'rgba(13, 13, 31, 0.8)',
         }}
       >
         <div className="flex flex-col p-5 gap-5">
           {/* Verse of the Day */}
-          <div className="pb-5" style={{ borderBottom: '1px solid rgba(180, 140, 60, 0.1)' }}>
+          <div className="pb-5" style={{ borderBottom: '1px solid rgba(212, 160, 23, 0.1)' }}>
             <div className="flex items-center gap-2 mb-3">
               <span className="text-base">🕉️</span>
               <span className="font-ui uppercase" style={{ fontSize: '9px', color: 'rgba(212, 160, 23, 0.6)', letterSpacing: '0.18em', fontWeight: 600 }}>
@@ -624,7 +624,7 @@ function KiaanChatPageInner() {
           </div>
 
           {/* Recent Topics */}
-          <div className="pb-5" style={{ borderBottom: '1px solid rgba(180, 140, 60, 0.1)' }}>
+          <div className="pb-5" style={{ borderBottom: '1px solid rgba(212, 160, 23, 0.1)' }}>
             <div className="flex items-center gap-2 mb-3">
               <span className="text-base">💭</span>
               <span className="font-ui uppercase" style={{ fontSize: '9px', color: 'rgba(212, 160, 23, 0.6)', letterSpacing: '0.18em', fontWeight: 600 }}>
@@ -651,7 +651,7 @@ function KiaanChatPageInner() {
           </div>
 
           {/* Quick Responses — desktop version */}
-          <div className="pb-5" style={{ borderBottom: '1px solid rgba(180, 140, 60, 0.1)' }}>
+          <div className="pb-5" style={{ borderBottom: '1px solid rgba(212, 160, 23, 0.1)' }}>
             <span className="font-ui uppercase" style={{ fontSize: '9px', color: 'rgba(212, 160, 23, 0.6)', letterSpacing: '0.18em', fontWeight: 600 }}>
               {t('kiaan.quickPrompts.title', 'Quick Responses')}
             </span>
