@@ -43,6 +43,9 @@ export function SakhaSymbol({
 }: SakhaSymbolProps) {
   const resolvedSize = size ?? DEFAULT_SIZES[variant]
 
+  // Hooks must be called unconditionally (Rules of Hooks)
+  const uid = React.useId().replace(/:/g, '')
+
   // Micro: OM-only symbol (petals too small to render)
   if (variant === 'micro' || resolvedSize <= 32) {
     return (
@@ -56,7 +59,7 @@ export function SakhaSymbol({
         style={{ overflow: 'visible', flexShrink: 0 }}
       >
         <defs>
-          <radialGradient id="skMicroGold" cx="40%" cy="35%" r="60%">
+          <radialGradient id={`${uid}-microGold`} cx="40%" cy="35%" r="60%">
             <stop offset="0%" stopColor="#FDE68A" />
             <stop offset="100%" stopColor="#A8760A" />
           </radialGradient>
@@ -71,7 +74,7 @@ export function SakhaSymbol({
           textAnchor="middle" dominantBaseline="middle"
           fontFamily='"Cormorant Garamond", Georgia, serif'
           fontSize="56" fontWeight="300"
-          fill="url(#skMicroGold)"
+          fill={`url(#${uid}-microGold)`}
         >
           ॐ
         </text>
@@ -84,9 +87,6 @@ export function SakhaSymbol({
   const showPeacockFeathers = resolvedSize >= 96
   const showFlute = resolvedSize >= 96
   const showInnerPetals = resolvedSize >= 48
-
-  // Unique ID prefix to avoid conflicts when multiple symbols render
-  const uid = React.useId().replace(/:/g, '')
 
   return (
     <svg
