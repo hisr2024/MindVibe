@@ -28,6 +28,31 @@ export function MobileRouteGuard({ children }: MobileRouteGuardProps) {
 }
 
 /**
+ * AppShellFooterGuard
+ *
+ * Hides footer / bottom-bar children on desktop (lg:) when the current
+ * route uses the AppShell layout (dashboard, kiaan).  On mobile the
+ * children render normally because SiteFooter / MobileNav are still
+ * useful there.
+ *
+ * Why: the AppShell uses `lg:h-screen lg:overflow-hidden` on its <main>,
+ * but the footer sits OUTSIDE <main> as a sibling.  Without hiding it,
+ * the <body> is taller than the viewport and scrolls on desktop.
+ */
+export function AppShellFooterGuard({ children }: { children: ReactNode }) {
+  const pathname = usePathname()
+  const isAppShell =
+    pathname === '/dashboard' || pathname.startsWith('/dashboard/') ||
+    pathname === '/kiaan' || pathname.startsWith('/kiaan/')
+
+  if (isAppShell) {
+    return <div className="lg:hidden">{children}</div>
+  }
+
+  return <>{children}</>
+}
+
+/**
  * MobileContentWrapper
  *
  * On /m/* routes, renders children without the desktop <main> wrapper and its
