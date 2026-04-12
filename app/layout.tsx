@@ -5,6 +5,7 @@ import SiteFooter from './components/SiteFooter'
 import SiteNav from './components/SiteNav'
 import Providers from './providers'
 import { MobileNav } from '@/components/navigation'
+import { AppShellFooterGuard } from '@/components/mobile/MobileRouteGuard'
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
 import { OfflineStatusBanner } from '@/components/OfflineStatusBanner'
 import { KiaanVoiceCompanionFooter } from '@/components/layout/KiaanVoiceCompanionFooter'
@@ -265,15 +266,19 @@ export default async function RootLayout({
             <MobileContentWrapper>
               {children}
             </MobileContentWrapper>
-            {/* Footer, nav, FABs - hidden on /m/* routes where MobileAppShell handles these */}
+            {/* Footer, nav, FABs - hidden on /m/* routes where MobileAppShell handles these.
+                Also hidden on desktop for app-shell routes (dashboard, kiaan) via
+                AppShellFooterGuard to prevent body scroll beneath the h-screen layout. */}
             <MobileRouteGuard>
-              <SiteFooter />
-              {/* Mobile bottom navigation (for standard non /m/* routes) */}
-              <MobileNav />
-              {/* OM floating chat widget */}
-              <ErrorBoundary fallback={null}>
-                <KiaanVoiceCompanionFooter />
-              </ErrorBoundary>
+              <AppShellFooterGuard>
+                <SiteFooter />
+                {/* Mobile bottom navigation (for standard non /m/* routes) */}
+                <MobileNav />
+                {/* OM floating chat widget */}
+                <ErrorBoundary fallback={null}>
+                  <KiaanVoiceCompanionFooter />
+                </ErrorBoundary>
+              </AppShellFooterGuard>
             </MobileRouteGuard>
             {/* BreadcrumbList structured data for SERP display */}
             <BreadcrumbSchema />
