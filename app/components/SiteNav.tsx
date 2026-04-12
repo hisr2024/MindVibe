@@ -8,6 +8,7 @@ import { ThemeToggle } from '@/components/ui'
 import { springConfigs, animationVariants } from '@/lib/animations/spring-configs'
 import { useLanguage } from '@/hooks/useLanguage'
 import { LanguageSelector } from '@/components/navigation/LanguageSelector'
+import { SakhaSymbol } from '@/components/branding/SakhaSymbol'
 
 export default function SiteNav() {
   const pathname = usePathname()
@@ -67,10 +68,10 @@ export default function SiteNav() {
       transition={springConfigs.smooth}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 pr-16 md:pr-4">
-        {/* Logo — Cormorant Garamond italic gold wordmark */}
+        {/* Logo — Sakha symbol + wordmark */}
         <Link
           href="/"
-          className="font-divine italic transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A017]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(5,7,20,0.85)]"
+          className="flex items-center gap-2 font-divine italic transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A017]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(5,7,20,0.85)]"
           style={{
             color: '#D4A017',
             fontSize: '28px',
@@ -79,6 +80,7 @@ export default function SiteNav() {
           }}
           aria-label="Sakha home"
         >
+          <SakhaSymbol variant="icon" size={36} animated={false} />
           <motion.span
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

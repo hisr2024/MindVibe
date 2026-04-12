@@ -13,6 +13,7 @@ import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useDivineConsciousness } from '@/contexts/DivineConsciousnessContext';
 import { useLanguage } from '@/hooks/useLanguage';
+import { SakhaSymbol } from '@/components/branding/SakhaSymbol';
 
 interface DivineGreetingProps {
   userName?: string;
@@ -67,7 +68,7 @@ export function DivineGreeting({
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <span className="text-2xl">{icon}</span>
+        <SakhaSymbol variant="micro" size={28} animated={false} />
         <div>
           <p className="text-white/90 font-light">
             {greetingText}{userName ? `, ${userName}` : ''}

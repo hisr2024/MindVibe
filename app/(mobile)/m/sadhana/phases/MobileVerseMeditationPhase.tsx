@@ -61,7 +61,7 @@ export function MobileVerseMeditationPhase({ verse, onComplete }: MobileVerseMed
   }, [onComplete])
 
   return (
-    <div className="relative min-h-[100dvh] flex flex-col items-center px-5 pt-8 pb-20">
+    <div className="relative min-h-[100dvh] flex flex-col items-center justify-center px-5 pt-8 pb-20" style={{ paddingBottom: 'env(safe-area-inset-bottom, 80px)' }}>
       {/* Skip link */}
       <button
         onClick={handleSkip}
