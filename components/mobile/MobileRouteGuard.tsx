@@ -41,12 +41,29 @@ interface MobileContentWrapperProps {
 export function MobileContentWrapper({ children }: MobileContentWrapperProps) {
   const pathname = usePathname()
   const isMobileRoute = pathname === '/m' || pathname.startsWith('/m/')
+  const isDashboard = pathname === '/dashboard' || pathname.startsWith('/dashboard/')
 
   if (isMobileRoute) {
     return (
       <div id="main-content" className="mobile-app-root">
         {children}
       </div>
+    )
+  }
+
+  /*
+   * Dashboard route gets a full-width flex-row shell on desktop (lg:) so the
+   * Sidebar + scrollable content area can sit side-by-side.  Mobile classes
+   * (below lg:) are identical to the default branch — no mobile change.
+   */
+  if (isDashboard) {
+    return (
+      <main
+        id="main-content"
+        className="flex w-full flex-col gap-6 px-4 pb-28 pt-20 sm:gap-8 sm:px-6 sm:pb-20 md:pb-10 lg:flex-row lg:gap-0 lg:px-0 lg:pb-0 lg:pt-16 lg:h-screen lg:overflow-hidden mobile-content-area"
+      >
+        {children}
+      </main>
     )
   }
 
