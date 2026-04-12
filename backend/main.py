@@ -318,6 +318,13 @@ async def _delayed_start(coro, delay_seconds: int, name: str):
 @app.on_event("startup")
 async def startup():
     try:
+        import time as _time
+
+        startup_logger.info("")
+        startup_logger.info("=" * 80)
+        startup_logger.info("🚀 STARTUP EVENT HANDLER RUNNING")
+        startup_logger.info("=" * 80)
+
         # Step 0: Initialize instance identity and Redis (foundation for scaling)
         import uuid as _uuid
 
@@ -327,6 +334,7 @@ async def startup():
             _settings.INSTANCE_ID = _uuid.uuid4().hex[:12]
         startup_logger.info(f"\n🆔 Instance ID: {_settings.INSTANCE_ID}")
 
+        _step_t0 = _time.monotonic()
         startup_logger.info("\n🔗 Initializing Redis...")
         import asyncio as _asyncio
 
@@ -393,6 +401,20 @@ async def startup():
             startup_logger.warning(
                 "⚠️ Redis not connected — falling back to in-memory (single-instance only)"
             )
+            # Actionable diagnostic when localhost Redis detected in production
+            if _is_production and (
+                "localhost" in (_settings.REDIS_URL or "")
+                or "127.0.0.1" in (_settings.REDIS_URL or "")
+            ):
+                startup_logger.warning(
+                    "⚠️ REDIS_URL points to localhost in production. "
+                    "This usually means the Render Redis service (mindvibe-redis) "
+                    "is not provisioned or REDIS_URL is not being injected. "
+                    "Fix: Render Dashboard → verify mindvibe-redis service exists, "
+                    "then check REDIS_URL env var uses 'fromService' in render.yaml."
+                )
+
+        startup_logger.info(f"   ⏱️ Redis init completed in {_time.monotonic() - _step_t0:.1f}s")
 
         # Start the background reconnect loop (handles both initial failures and
         # mid-run disconnections). Replaces the old 4-retry-then-give-up approach
@@ -448,6 +470,7 @@ async def startup():
         # must exist before SQL migrations that reference them with REFERENCES).
         # Wrapped in asyncio.wait_for to prevent indefinite hangs if the database
         # is slow/unreachable — Render kills containers after health check timeout.
+        _step_t0 = _time.monotonic()
         startup_logger.info("\n🔧 Ensuring ORM tables exist...")
         try:
             async with engine.begin() as conn:
@@ -455,7 +478,7 @@ async def startup():
                     conn.run_sync(Base.metadata.create_all),
                     timeout=_STARTUP_DB_TIMEOUT,
                 )
-            startup_logger.info("✅ Base database schema ready")
+            startup_logger.info(f"✅ Base database schema ready ({_time.monotonic() - _step_t0:.1f}s)")
             _startup_status["database_ready"] = True
         except _asyncio.TimeoutError:
             startup_logger.error(
@@ -472,6 +495,7 @@ async def startup():
         # On fresh databases, ORM create_all already sets up all tables,
         # so migration seed INSERTs may fail if columns differ. This is
         # non-fatal — the app works correctly with ORM-created tables.
+        _step_t0 = _time.monotonic()
         if RUN_MIGRATIONS_ON_STARTUP:
             try:
                 migration_result = await _asyncio.wait_for(
@@ -517,7 +541,10 @@ async def startup():
                     f"⚠️ Migration status check timed out after {_STARTUP_DB_TIMEOUT}s"
                 )
 
+        startup_logger.info(f"   ⏱️ Migrations completed in {_time.monotonic() - _step_t0:.1f}s")
+
         # Step 3: Run manual Python migrations
+        _step_t0 = _time.monotonic()
         startup_logger.info("\n🔧 Running manual migrations...")
         try:
             from backend.core.manual_migrations import run_manual_migrations
@@ -540,7 +567,7 @@ async def startup():
             startup_logger.info(f"⚠️ Manual migrations had issues: {manual_error}")
             # Don't fail startup - manual migrations are supplementary
 
-        startup_logger.info("✅ Database schema ready")
+        startup_logger.info(f"✅ Database schema ready ({_time.monotonic() - _step_t0:.1f}s)")
 
         # Step 3b: Validate email configuration (surface misconfig early)
         startup_logger.info("\n📧 Validating email configuration...")
@@ -766,6 +793,26 @@ async def startup():
             # Don't fail startup - enrichment is supplementary
 
         _startup_status["started"] = True
+
+        # Final startup status banner
+        startup_logger.info("")
+        startup_logger.info("=" * 80)
+        startup_logger.info("✅ MINDVIBE - STARTUP COMPLETE")
+        startup_logger.info("=" * 80)
+        startup_logger.info(
+            f"   Redis:    {'✅ CONNECTED' if _startup_status['redis_connected'] else '❌ NOT CONNECTED (in-memory fallback)'}"
+        )
+        startup_logger.info(
+            f"   Database: {'✅ READY' if _startup_status['database_ready'] else '❌ NOT READY'}"
+        )
+        startup_logger.info(
+            f"   Routes:   {_startup_status['routers_loaded']} registered"
+        )
+        startup_logger.info(
+            f"   KIAAN:    {'✅ OPERATIONAL' if kiaan_router_loaded else '❌ FAILED TO LOAD'}"
+        )
+        startup_logger.info("=" * 80)
+        startup_logger.info("")
 
     except Exception as exc:
         failed_meta = migrations_module.LATEST_MIGRATION_RESULT
@@ -2237,8 +2284,7 @@ startup_logger.info(
 )
 startup_logger.info(
     f"Registered routes: {len(_registered_routes)} | "
-    f"Redis: {'✅' if _startup_status['redis_connected'] else '❌'} | "
-    f"Database: {'✅' if _startup_status['database_ready'] else '⏳ (pending startup)'}"
+    f"Module loading complete — awaiting startup event for DB/Redis init"
 )
 startup_logger.info("=" * 80 + "\n")
 

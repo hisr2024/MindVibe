@@ -24,8 +24,12 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB as _PG_JSONB
 from sqlalchemy.orm import Mapped, mapped_column
+
+# Use JSON with a PostgreSQL variant so the column uses JSONB (with GIN index
+# support) on PostgreSQL but falls back to plain JSON on SQLite / other dialects.
+_JSONB = JSON().with_variant(_PG_JSONB(), "postgresql")
 
 from backend.models.base import Base, SoftDeleteMixin
 
@@ -70,11 +74,11 @@ class WisdomAtom(SoftDeleteMixin, Base):
     sub_category: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     # Context tags (JSONB for GIN index support)
-    mood_tags: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
-    topic_tags: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
-    intent_tags: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    mood_tags: Mapped[list[str]] = mapped_column(_JSONB, nullable=False, default=list)
+    topic_tags: Mapped[list[str]] = mapped_column(_JSONB, nullable=False, default=list)
+    intent_tags: Mapped[list[str]] = mapped_column(_JSONB, nullable=False, default=list)
     phase_tags: Mapped[list[str]] = mapped_column(
-        JSONB, nullable=False, default=list
+        _JSONB, nullable=False, default=list
     )  # connect, listen, guide, empower
 
     # Verse association (if this atom references Gita wisdom)

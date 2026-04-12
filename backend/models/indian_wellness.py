@@ -15,10 +15,15 @@ from sqlalchemy import (
     Text,
     func,
 )
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY as _PG_ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.models.base import Base, SoftDeleteMixin
+
+
+# Cross-dialect helpers: ARRAY(String(N)) on PostgreSQL, JSON on SQLite.
+def _array_of(size: int):
+    return JSON().with_variant(_PG_ARRAY(String(size)), "postgresql")
 
 
 class IndianDataSourceType(str, enum.Enum):
@@ -86,16 +91,16 @@ class IndianWisdomContent(SoftDeleteMixin, Base):
     content: Mapped[str] = mapped_column(Text)
     hindi_content: Mapped[str | None] = mapped_column(Text, nullable=True)
     sanskrit_terms: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(64)), nullable=True
+        _array_of(64), nullable=True
     )
     keywords: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(64)), nullable=True
+        _array_of(64), nullable=True
     )
     practices: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(128)), nullable=True
+        _array_of(128), nullable=True
     )
     benefits: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(256)), nullable=True
+        _array_of(256), nullable=True
     )
     source_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
     source_organization: Mapped[str | None] = mapped_column(String(256), nullable=True)
@@ -132,22 +137,22 @@ class YogaAsanaDB(SoftDeleteMixin, Base):
     )  # beginner, intermediate, advanced
     description: Mapped[str] = mapped_column(Text)
     instructions: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(512)), nullable=True
+        _array_of(512), nullable=True
     )
     benefits: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(256)), nullable=True
+        _array_of(256), nullable=True
     )
     mental_benefits: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(256)), nullable=True
+        _array_of(256), nullable=True
     )
     contraindications: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(256)), nullable=True
+        _array_of(256), nullable=True
     )
     duration_seconds: Mapped[int] = mapped_column(Integer, default=30)
     breath_pattern: Mapped[str | None] = mapped_column(String(256), nullable=True)
     chakra_association: Mapped[str | None] = mapped_column(String(64), nullable=True)
     dosha_balance: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(16)), nullable=True
+        _array_of(16), nullable=True
     )  # vata, pitta, kapha
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
@@ -173,16 +178,16 @@ class PranayamaTechniqueDB(SoftDeleteMixin, Base):
     hindi_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
     description: Mapped[str] = mapped_column(Text)
     instructions: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(512)), nullable=True
+        _array_of(512), nullable=True
     )
     benefits: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(256)), nullable=True
+        _array_of(256), nullable=True
     )
     mental_benefits: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(256)), nullable=True
+        _array_of(256), nullable=True
     )
     contraindications: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(256)), nullable=True
+        _array_of(256), nullable=True
     )
     duration_minutes: Mapped[int] = mapped_column(Integer, default=5)
     breath_ratio: Mapped[str | None] = mapped_column(
@@ -219,13 +224,13 @@ class MeditationPracticeDB(SoftDeleteMixin, Base):
     )  # Vedic, Buddhist, Jain, Tantric
     description: Mapped[str] = mapped_column(Text)
     instructions: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(512)), nullable=True
+        _array_of(512), nullable=True
     )
     benefits: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(256)), nullable=True
+        _array_of(256), nullable=True
     )
     mental_benefits: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(256)), nullable=True
+        _array_of(256), nullable=True
     )
     duration_minutes: Mapped[int] = mapped_column(Integer, default=15)
     posture: Mapped[str | None] = mapped_column(
@@ -262,13 +267,13 @@ class AyurvedicPracticeDB(SoftDeleteMixin, Base):
         String(64), nullable=True
     )  # dinacharya, ritucharya, therapy, body_care
     instructions: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(512)), nullable=True
+        _array_of(512), nullable=True
     )
     benefits: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(256)), nullable=True
+        _array_of(256), nullable=True
     )
     mental_benefits: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(256)), nullable=True
+        _array_of(256), nullable=True
     )
     dosha_effects: Mapped[dict | None] = mapped_column(
         JSON, nullable=True
