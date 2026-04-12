@@ -42,6 +42,7 @@ export function MobileContentWrapper({ children }: MobileContentWrapperProps) {
   const pathname = usePathname()
   const isMobileRoute = pathname === '/m' || pathname.startsWith('/m/')
   const isDashboard = pathname === '/dashboard' || pathname.startsWith('/dashboard/')
+  const isKiaan = pathname === '/kiaan' || pathname.startsWith('/kiaan/')
 
   if (isMobileRoute) {
     return (
@@ -52,11 +53,11 @@ export function MobileContentWrapper({ children }: MobileContentWrapperProps) {
   }
 
   /*
-   * Dashboard route gets a full-width flex-row shell on desktop (lg:) so the
-   * Sidebar + scrollable content area can sit side-by-side.  Mobile classes
-   * (below lg:) are identical to the default branch — no mobile change.
+   * Dashboard & KIAAN routes get a full-width flex-row shell on desktop (lg:)
+   * so the Sidebar + scrollable content area can sit side-by-side.  Mobile
+   * classes (below lg:) are identical to the default branch — no mobile change.
    */
-  if (isDashboard) {
+  if (isDashboard || isKiaan) {
     return (
       <main
         id="main-content"
