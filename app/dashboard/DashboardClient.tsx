@@ -555,61 +555,7 @@ export default function DashboardClient() {
             />
           </motion.div>
 
-          {/* ─── Main card group: 2-column responsive grid
-                display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;
-                Collapses to 1 column below 1024px via lg: breakpoint. ─── */}
-          <div className="lg:grid lg:grid-cols-[2fr_3fr] lg:gap-5">
-          {/* ─── Speak to KIAAN (SECONDARY) ─── */}
-          <motion.div variants={itemVariants}>
-            <Link
-              href="/kiaan/chat"
-              onClick={handleCardTap}
-              className="block"
-            >
-              <motion.div
-                className="overflow-hidden rounded-[24px] bg-gradient-to-br from-orange-900/25 to-amber-900/20 p-4 sm:p-5 shadow-mobile-glow"
-                variants={quickActionVariants}
-                initial="rest"
-                whileHover="hover"
-                whileTap="tap"
-              >
-                <div className="flex items-center gap-4">
-                  <motion.div
-                    className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#d4a44c] to-[#e8b54a] shadow-lg shadow-[#d4a44c]/20"
-                    animate={{
-                      boxShadow: [
-                        '0 0 15px rgba(212, 164, 76, 0.2)',
-                        '0 0 25px rgba(212, 164, 76, 0.35)',
-                        '0 0 15px rgba(212, 164, 76, 0.2)',
-                      ],
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                  >
-                    <span className="text-lg font-bold text-slate-900">K</span>
-                  </motion.div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold">
-                      Your Divine Friend is here
-                    </h3>
-                    <p className="mt-0.5 text-xs text-[#e8b54a]/60">
-                      Talk to KIAAN — voice or text
-                    </p>
-                  </div>
-                  <motion.div
-                    className="flex-shrink-0 text-[#e8b54a]/30"
-                    animate={{ x: [0, 4, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </motion.div>
-                </div>
-              </motion.div>
-            </Link>
-          </motion.div>
-
-          {/* ─── Sacred Spiritual Toolkit (Kiaanverse Sacred Card) ─── */}
+          {/* ─── Sacred Spiritual Toolkit (Kiaanverse Sacred Card) — full width ─── */}
           <motion.div variants={itemVariants}>
             <div
               className="relative overflow-hidden p-5 sm:p-6"
@@ -676,7 +622,7 @@ export default function DashboardClient() {
               </div>
 
               {/* Featured Sacred Tools — Viyoga, Ardha, Relationship Compass */}
-              <div className="relative space-y-2.5">
+              <div className="relative space-y-2.5 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-4">
                 {SACRED_TOOLS.map((tool, idx) => (
                   <motion.div
                     key={tool.id}
@@ -764,8 +710,6 @@ export default function DashboardClient() {
               <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#d4a44c]/20 to-transparent" />
             </div>
           </motion.div>
-          </div>
-          {/* ─── /Main card group grid ─── */}
 
           {/* ─── Tool Shortcuts Grid ─── */}
           <motion.div variants={itemVariants}>
