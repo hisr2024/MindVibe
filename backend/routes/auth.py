@@ -275,7 +275,7 @@ async def signup(request: Request, payload: SignupIn, db: AsyncSession = Depends
                 )
         else:
             logger.error(
-                "Email delivery not configured (EMAIL_PROVIDER != smtp) — "
+                "Email delivery not configured (can_send_email() = False) — "
                 "cannot send verification email for user %s. "
                 "User will remain unverified until email is configured "
                 "and they request a new verification link.",
@@ -838,7 +838,7 @@ async def forgot_password(
     if not can_send_email():
         logger.warning(
             "Password reset requested but email delivery not configured "
-            "(EMAIL_PROVIDER != smtp)"
+            "(can_send_email() = False)"
         )
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -1180,7 +1180,7 @@ async def resend_verification(
     if not can_send_email():
         logger.warning(
             "Verification email resend requested but email delivery not configured "
-            "(EMAIL_PROVIDER != smtp)"
+            "(can_send_email() = False)"
         )
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

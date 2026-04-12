@@ -1,6 +1,7 @@
 """Email service for transactional emails (verification, password reset).
 
 Supports multiple providers via a clean abstraction:
+- Resend (production — sends via Resend HTTP API, recommended)
 - SMTP (production — sends real emails via any SMTP provider)
 - Console (development — prints to logs instead of sending)
 
@@ -20,7 +21,8 @@ from email.mime.text import MIMEText
 logger = logging.getLogger(__name__)
 
 # Configuration from environment
-EMAIL_PROVIDER = os.getenv("EMAIL_PROVIDER", "console")  # console | smtp
+EMAIL_PROVIDER = os.getenv("EMAIL_PROVIDER", "console")  # console | resend | smtp
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 SMTP_HOST = os.getenv("SMTP_HOST", "localhost")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER", "")
@@ -42,11 +44,11 @@ def can_send_email() -> bool:
     (e.g. mandatory email verification before login) because the user will
     never receive the email.
     """
-    if EMAIL_PROVIDER != "smtp":
-        return False
-    if not SMTP_HOST or SMTP_HOST == "localhost":
-        return False
-    return True
+    if EMAIL_PROVIDER == "resend":
+        return bool(RESEND_API_KEY)
+    if EMAIL_PROVIDER == "smtp":
+        return bool(SMTP_HOST and SMTP_HOST != "localhost")
+    return False
 
 
 def validate_email_config() -> list[str]:
@@ -79,6 +81,17 @@ def validate_email_config() -> list[str]:
             )
         else:
             warnings.append(msg)
+    elif EMAIL_PROVIDER == "resend":
+        if not RESEND_API_KEY:
+            warnings.append(
+                "EMAIL_PROVIDER=resend but RESEND_API_KEY is not set. "
+                "Get your API key from https://resend.com/api-keys"
+            )
+        if not EMAIL_FROM_ADDRESS or EMAIL_FROM_ADDRESS == "noreply@kiaanverse.com":
+            warnings.append(
+                "EMAIL_FROM_ADDRESS should use a domain verified in your Resend dashboard. "
+                "See https://resend.com/domains"
+            )
     elif EMAIL_PROVIDER == "smtp":
         if not SMTP_HOST or SMTP_HOST == "localhost":
             warnings.append(
@@ -91,7 +104,7 @@ def validate_email_config() -> list[str]:
                 "Most SMTP providers require authentication."
             )
     else:
-        warnings.append(f"Unknown EMAIL_PROVIDER '{EMAIL_PROVIDER}'. Use 'smtp' or 'console'.")
+        warnings.append(f"Unknown EMAIL_PROVIDER '{EMAIL_PROVIDER}'. Use 'resend', 'smtp', or 'console'.")
 
     return warnings
 
@@ -104,6 +117,8 @@ async def send_email(to: str, subject: str, html_body: str, text_body: str | Non
     """
     if EMAIL_PROVIDER == "console":
         return _send_console(to, subject, html_body, text_body)
+    elif EMAIL_PROVIDER == "resend":
+        return await _send_resend(to, subject, html_body, text_body)
     elif EMAIL_PROVIDER == "smtp":
         return _send_smtp(to, subject, html_body, text_body)
     else:
@@ -121,6 +136,83 @@ def _send_console(to: str, subject: str, html_body: str, text_body: str | None) 
     )
     # Return False so callers know the email was NOT actually delivered.
     # This prevents misleading "verification email sent" responses.
+    return False
+
+
+async def _send_resend(to: str, subject: str, html_body: str, text_body: str | None) -> bool:
+    """Production provider: sends via Resend HTTP API with retry on transient failures."""
+    import asyncio
+
+    import httpx
+
+    payload: dict = {
+        "from": f"{EMAIL_FROM_NAME} <{EMAIL_FROM_ADDRESS}>",
+        "to": [to],
+        "subject": subject,
+        "html": html_body,
+    }
+    if text_body:
+        payload["text"] = text_body
+
+    last_error: Exception | None = None
+    for attempt in range(1, _SMTP_MAX_RETRIES + 1):
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    "https://api.resend.com/emails",
+                    headers={
+                        "Authorization": f"Bearer {RESEND_API_KEY}",
+                        "Content-Type": "application/json",
+                    },
+                    json=payload,
+                )
+                if response.status_code == 200:
+                    data = response.json()
+                    logger.info("Email sent via Resend to %s: %s (id=%s)", to, subject, data.get("id"))
+                    return True
+                elif response.status_code == 429:
+                    last_error = Exception(f"Resend rate limit: {response.text}")
+                    logger.warning(
+                        "Resend rate limited sending to %s (attempt %d/%d)",
+                        to, attempt, _SMTP_MAX_RETRIES,
+                    )
+                elif 500 <= response.status_code < 600:
+                    last_error = Exception(f"Resend server error: {response.status_code} {response.text}")
+                    logger.warning(
+                        "Resend server error sending to %s (attempt %d/%d): %d %s",
+                        to, attempt, _SMTP_MAX_RETRIES, response.status_code, response.text,
+                    )
+                else:
+                    # 4xx client error (bad request, auth failure) — don't retry
+                    logger.error(
+                        "Resend client error sending to %s: %d %s",
+                        to, response.status_code, response.text,
+                    )
+                    return False
+        except httpx.TimeoutException as e:
+            last_error = e
+            logger.warning(
+                "Resend timeout sending to %s (attempt %d/%d): %s",
+                to, attempt, _SMTP_MAX_RETRIES, e,
+            )
+        except httpx.HTTPError as e:
+            last_error = e
+            logger.warning(
+                "Resend HTTP error sending to %s (attempt %d/%d): %s",
+                to, attempt, _SMTP_MAX_RETRIES, e,
+            )
+        except Exception as e:
+            logger.error("Unexpected error sending email via Resend to %s: %s", to, e)
+            return False
+
+        if attempt < _SMTP_MAX_RETRIES:
+            wait = _SMTP_RETRY_DELAY * (2 ** (attempt - 1))
+            await asyncio.sleep(wait)
+
+    logger.error(
+        "Failed to send email via Resend to %s after %d attempts. Last error: %s",
+        to, _SMTP_MAX_RETRIES, last_error,
+    )
     return False
 
 
