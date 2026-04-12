@@ -2,4 +2,5 @@ export { MindVibeLogo, MindVibeIcon, MindVibeWordmark, MindVibeLockup } from './
 export { KrishnaSymbol } from './KrishnaSymbol'
 export { KiaanLogo, KiaanLogoAnimated, KiaanLogoStatic } from './KiaanLogo'
 export { InnerPeaceLogo } from './InnerPeaceLogo'
+export { SakhaSymbol } from './SakhaSymbol'
 export { brandColors, brandGradients, gradientCss, auraRings, motionTokens } from './brandTokens'

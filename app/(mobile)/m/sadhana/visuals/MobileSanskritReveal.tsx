@@ -58,8 +58,15 @@ export function MobileSanskritReveal({
   return (
     <div className={`text-center relative ${className}`}>
       <p
-        className="font-[family-name:var(--font-divine)] text-2xl leading-[1.8] tracking-[0.05em]"
-        style={{ color: '#F0C040' }}
+        className="font-[family-name:var(--font-divine)] text-lg leading-[2.0] tracking-[0.04em]"
+        style={{
+          color: '#F0C040',
+          padding: '0 24px',
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+          width: '100%',
+          boxSizing: 'border-box',
+        }}
       >
         {graphemes.map((grapheme, i) => {
           const isSpace = /^\s+$/.test(grapheme)

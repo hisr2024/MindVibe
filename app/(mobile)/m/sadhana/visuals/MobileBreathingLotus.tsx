@@ -119,12 +119,16 @@ export function MobileBreathingLotus({ pattern, onComplete }: MobileBreathingLot
     }
   }, [pattern, totalCycleDuration])
 
+  // Containment math: outer petal is 110px tall, container is 300px (radius 150px).
+  // Gold ring SVG radius=155 in 320 viewBox ≈ 145px in 300px container coords.
+  // Safe max: (145 * 0.92) / 110 ≈ 1.21. Use 1.08 for comfortable margin.
+  // Hold pulse adds 2% on top → 110 * 1.08 * 1.02 = 121.2px < 145px ✓
   const petalScale = breathPhase === 'inhale' || breathPhase === 'holdIn'
-    ? { scaleX: 1, scaleY: 1.15 }
-    : { scaleX: 0.8, scaleY: 0.85 }
+    ? { scaleX: 1, scaleY: 1.08 }
+    : { scaleX: 0.85, scaleY: 0.65 }
 
   const holdPulse = breathPhase === 'holdIn'
-    ? { scale: [1, 1.03, 1] }
+    ? { scale: [1, 1.02, 1] }
     : {}
 
   const phaseDuration = breathPhase === 'inhale'
@@ -171,8 +175,8 @@ export function MobileBreathingLotus({ pattern, onComplete }: MobileBreathingLot
         />
       </svg>
 
-      {/* Lotus container */}
-      <div className="relative w-[300px] h-[300px]">
+      {/* Lotus container — overflow clipped to gold ring boundary */}
+      <div className="relative w-[300px] h-[300px]" style={{ borderRadius: '50%', overflow: 'hidden' }}>
         {/* Outer petals (8) */}
         {Array.from({ length: 8 }).map((_, i) => {
           const angle = (i * 360) / 8
@@ -192,6 +196,7 @@ export function MobileBreathingLotus({ pattern, onComplete }: MobileBreathingLot
                 ...holdPulse,
               }}
               transition={{
+                type: 'tween',
                 duration: phaseDuration,
                 ease: 'easeInOut',
                 ...(breathPhase === 'holdIn' ? { repeat: Infinity, duration: 0.5 } : {}),
@@ -233,6 +238,7 @@ export function MobileBreathingLotus({ pattern, onComplete }: MobileBreathingLot
                 ...holdPulse,
               }}
               transition={{
+                type: 'tween',
                 duration: phaseDuration,
                 ease: 'easeInOut',
                 delay: 0.08,

@@ -21,6 +21,7 @@ import { SacredDivider } from '@/components/sacred/SacredDivider'
 import { SacredOMLoader } from '@/components/sacred/SacredOMLoader'
 import { VerseRevelation } from '@/components/sacred/VerseRevelation'
 import { OmSymbol } from '@/components/sacred/icons/OmSymbol'
+import { SakhaSymbol } from '@/components/branding/SakhaSymbol'
 import { useAuth } from '@/hooks/useAuth'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -210,7 +211,7 @@ export default function SacredMobileHomePage() {
           className="pt-safe-top flex items-center justify-between"
         >
           <div className="flex items-center gap-2">
-            <OmSymbol width={18} height={18} className="text-[var(--sacred-divine-gold)] opacity-70" />
+            <SakhaSymbol variant="micro" size={28} animated={false} />
             <span className="sacred-text-divine text-lg tracking-wider text-[var(--sacred-text-secondary)]">
               {getGreeting()}
             </span>
