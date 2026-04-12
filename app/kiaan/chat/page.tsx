@@ -241,14 +241,14 @@ function KiaanChatPageInner() {
   }, [themeCounts])
 
   return (
-    <main className="mx-auto max-w-5xl p-3 sm:p-4 pb-28 sm:pb-24 md:p-8">
+    <main className="mx-auto max-w-7xl p-3 sm:p-4 pb-28 sm:pb-24 md:p-6 lg:p-8">
       {/* ─── Phase 5 layout: 2-column flex — chat panel flex:1 left, context sidebar 320px right.
            Collapses to 1 column (flex-col) below 1024px. ─── */}
-      <div className="flex flex-col gap-4 lg:flex-row">
-      <div className="flex-1 min-w-0 space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-5 lg:flex-row lg:gap-6">
+      <div className="flex-1 min-w-0 space-y-5">
       {/* Header */}
       <div
-        className="relative z-10 space-y-3 sm:space-y-4 p-4 sm:p-6 shadow-[0_30px_120px_rgba(212,164,76,0.08)] md:p-8"
+        className="relative z-10 space-y-3 sm:space-y-4 p-5 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-6"
         style={{
           background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
           border: '1px solid rgba(212,160,23,0.1)',
@@ -341,7 +341,7 @@ function KiaanChatPageInner() {
       {/* Message Actions - Only show when there are KIAAN responses */}
       {messages.length > 0 && messages[messages.length - 1]?.sender === 'assistant' && (
         <div
-          className="flex flex-wrap items-center justify-between gap-2 p-3 shadow-[0_10px_40px_rgba(212,164,76,0.06)]"
+          className="flex flex-wrap items-center justify-between gap-2 p-4 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-5"
           style={{
             background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
             border: '1px solid rgba(212,160,23,0.1)',
@@ -411,7 +411,7 @@ function KiaanChatPageInner() {
 
       {/* Chat Interface */}
       <div
-        className="p-4 shadow-[0_30px_120px_rgba(212,164,76,0.06)] md:p-6"
+        className="p-4 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-6"
         style={{
           background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
           border: '1px solid rgba(212,160,23,0.1)',
@@ -433,7 +433,7 @@ function KiaanChatPageInner() {
       {/* Quick Responses - Below KIAAN Chat */}
       {messages.length === 0 && (
         <div
-          className="space-y-4 p-6 shadow-[0_20px_80px_rgba(212,164,76,0.05)]"
+          className="space-y-4 p-5 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-6"
           style={{
             background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
             border: '1px solid rgba(212,160,23,0.1)',

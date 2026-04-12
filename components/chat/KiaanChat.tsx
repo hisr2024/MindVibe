@@ -109,7 +109,7 @@ export function KiaanChat({
 
   return (
     <div
-      className={`relative flex flex-col rounded-3xl divine-reset-container h-[calc(100vh-280px)] max-h-[800px] min-h-[480px] ${className}`}
+      className={`relative flex flex-col rounded-3xl divine-reset-container h-[calc(100vh-280px)] max-h-[800px] lg:max-h-[calc(100vh-300px)] min-h-[480px] ${className}`}
     >
       {/* Chat Header — Sacred Companion */}
       <div className="flex items-center gap-3 border-b border-[#d4a44c]/12 px-4 py-3">
