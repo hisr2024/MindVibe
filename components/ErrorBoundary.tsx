@@ -2,15 +2,7 @@
 
 import React, { Component, ReactNode } from 'react'
 import * as Sentry from '@sentry/nextjs'
-
-/** Detect chunk/module load failures caused by stale deployments. */
-function isChunkLoadError(error: Error): boolean {
-  return (
-    error.name === 'ChunkLoadError' ||
-    /loading chunk [\w.-]+ failed/i.test(error.message) ||
-    /failed to fetch dynamically imported module/i.test(error.message)
-  )
-}
+import { isChunkLoadError, attemptChunkRecovery } from '@/lib/chunk-recovery'
 
 interface Props {
   children: ReactNode
@@ -47,17 +39,7 @@ class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     // Auto-recover from stale chunk errors by reloading once
     if (isChunkLoadError(error)) {
-      try {
-        const KEY = '__chunk_reload'
-        if (!sessionStorage.getItem(KEY)) {
-          sessionStorage.setItem(KEY, '1')
-          window.location.reload()
-          return
-        }
-        sessionStorage.removeItem(KEY)
-      } catch {
-        // sessionStorage unavailable — fall through to normal error UI
-      }
+      if (attemptChunkRecovery()) return
     }
 
     // Report to Sentry for production monitoring

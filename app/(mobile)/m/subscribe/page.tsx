@@ -16,6 +16,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PlanSelector } from '@/components/mobile/payment/PlanSelector'
 import { BillingToggle } from '@/components/mobile/payment/BillingToggle'
@@ -278,13 +279,13 @@ export default function SubscribePage() {
         <footer className="text-center pb-8 pt-2">
           <p className="text-[11px] text-[#6B6355] leading-snug" style={{ fontFamily: 'Outfit, system-ui, sans-serif' }}>
             By continuing, you agree to the{' '}
-            <a href="/terms" className="underline underline-offset-2 hover:text-[#B8AE98] transition-colors">
+            <Link href="/terms" className="underline underline-offset-2 hover:text-[#B8AE98] transition-colors">
               Terms of Service
-            </a>{' '}
+            </Link>{' '}
             and{' '}
-            <a href="/privacy" className="underline underline-offset-2 hover:text-[#B8AE98] transition-colors">
+            <Link href="/privacy" className="underline underline-offset-2 hover:text-[#B8AE98] transition-colors">
               Privacy Policy
-            </a>.
+            </Link>.
             <br />
             Subscriptions auto-renew. Cancel anytime in Settings.
             <br />
