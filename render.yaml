@@ -63,14 +63,16 @@ services:
       # Spiritual wellness data encryption key (must match MINDVIBE_REFLECTION_KEY)
       - key: MINDVIBE_REFLECTION_KEY
         generateValue: true
-      # Email provider: "console" logs emails (dev), "smtp" sends real emails.
-      # Set to "smtp" and configure SMTP_* vars in Render Dashboard to enable
-      # verification emails, password resets, etc.
+      # Email provider: "resend" (recommended), "smtp", or "console" (dev only).
+      # Set RESEND_API_KEY in Render Dashboard > Environment to enable email delivery.
       - key: EMAIL_PROVIDER
-        value: "console"
-      # Auto-disabled when EMAIL_PROVIDER != smtp to prevent user lockout
+        value: "resend"
+      # Email verification — enforced when email delivery is configured
       - key: REQUIRE_EMAIL_VERIFICATION
-        value: "false"
+        value: "true"
+      # Resend API key — set in Render Dashboard (not committed to repo)
+      - key: RESEND_API_KEY
+        value: ""
     healthCheckPath: /health
     # Autoscaling settings — scale to 10 instances for up to 1,000 concurrent users
     scaling:
