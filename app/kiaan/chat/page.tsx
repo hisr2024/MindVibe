@@ -246,9 +246,9 @@ function KiaanChatPageInner() {
            Collapses to 1 column (flex-col) below 1024px. ─── */}
       <div className="flex flex-col flex-1 min-h-0 gap-5 lg:flex-row lg:gap-0 lg:overflow-hidden">
       <div className="flex-1 min-w-0 flex flex-col space-y-5 lg:space-y-0 lg:overflow-hidden">
-      {/* Header */}
+      {/* Header — compact on desktop, card on mobile */}
       <div
-        className="relative z-10 space-y-3 sm:space-y-4 p-5 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-6 lg:shrink-0"
+        className="relative z-10 space-y-3 sm:space-y-4 p-5 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-6 lg:shrink-0 lg:space-y-0 lg:py-2.5 lg:px-5 lg:shadow-none lg:!rounded-none lg:!border-0 lg:!border-b lg:!border-b-[rgba(180,140,60,0.1)]"
         style={{
           background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
           border: '1px solid rgba(212,160,23,0.1)',
@@ -258,45 +258,64 @@ function KiaanChatPageInner() {
           WebkitBackdropFilter: 'blur(24px) saturate(120%)',
         }}
       >
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-          <div className="flex-1">
-            <h1 className="kiaan-text-golden text-2xl sm:text-3xl font-bold md:text-4xl">
+        {/* Desktop: single compact row */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 lg:flex-row lg:items-center lg:gap-3">
+          <div className="flex-1 lg:flex lg:items-center lg:gap-3">
+            <h1 className="kiaan-text-golden text-2xl sm:text-3xl font-bold md:text-4xl lg:text-xl">
               {t('kiaan.chat.title', 'Talk to KIAAN')}
             </h1>
-            <p className="mt-1 sm:mt-2 text-sm text-[#d4a44c]/70 md:text-base">
+            <p className="mt-1 sm:mt-2 text-sm text-[#d4a44c]/70 md:text-base lg:mt-0 lg:text-xs">
               {t('kiaan.chat.subtitle', 'Your calm, privacy-first spiritual companion')}
             </p>
-            <p className="mt-1.5 text-[11px] tracking-wide text-[#d4a44c]/40" data-testid="mode-label">
+            <p className="mt-1.5 text-[11px] tracking-wide text-[#d4a44c]/40 lg:hidden" data-testid="mode-label">
               {t('dashboard.mode_label.prefix', 'You are in:')} {t('dashboard.mode_label.kiaan', 'Companion Mode')}
             </p>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap lg:shrink-0">
+            {/* Privacy — inline on desktop */}
+            <span className="hidden lg:flex items-center gap-1.5 text-[11px] text-[#d4a44c]/50">
+              <span>🔒</span> Private
+            </span>
+            {/* Quota — inline on desktop */}
+            {!quota.loading && quota.limit !== -1 && (
+              <span className={`hidden lg:flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                quota.isExceeded
+                  ? 'bg-red-500/15 text-red-300'
+                  : quota.isWarning
+                    ? 'bg-amber-500/15 text-amber-300'
+                    : 'bg-[#d4a44c]/10 text-[#d4a44c]/70'
+              }`}>
+                💬 {quota.remaining}/{quota.limit}
+              </span>
+            )}
             {/* KIAAN Companion - Conversation Mode */}
             <Link
               href="/companion"
-              className="flex items-center gap-1.5 sm:gap-2 rounded-xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 px-3 sm:px-4 py-2 text-sm font-semibold text-[#e8dcc8] transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/10"
+              className="flex items-center gap-1.5 sm:gap-2 rounded-xl border border-[#d4a44c]/20 bg-[#d4a44c]/5 px-3 sm:px-4 py-2 text-sm font-semibold text-[#e8dcc8] transition-all hover:border-[#d4a44c]/40 hover:bg-[#d4a44c]/10 lg:px-2.5 lg:py-1.5 lg:text-xs lg:rounded-lg"
               title="KIAAN Companion - Talk with KIAAN"
             >
-              <span className="text-lg">🗣️</span>
-              <span className="hidden sm:inline">{t('kiaan.voice.companion', 'KIAAN Companion')}</span>
+              <span className="text-lg lg:text-sm">🗣️</span>
+              <span className="hidden sm:inline lg:hidden">{t('kiaan.voice.companion', 'KIAAN Companion')}</span>
             </Link>
             {/* Language Selector */}
             <LanguageSelector compact />
             <Link
               href="/"
-              className="rounded-xl border border-[#d4a44c]/20 bg-white/5 px-3 sm:px-4 py-2 text-sm font-semibold text-[#e8dcc8] transition-all hover:border-[#d4a44c]/35 hover:bg-white/10"
+              className="rounded-xl border border-[#d4a44c]/20 bg-white/5 px-3 sm:px-4 py-2 text-sm font-semibold text-[#e8dcc8] transition-all hover:border-[#d4a44c]/35 hover:bg-white/10 lg:px-2.5 lg:py-1.5 lg:text-xs lg:rounded-lg"
             >
               ← <span className="hidden sm:inline">{t('navigation.mainNav.home', 'Home')}</span><span className="sm:hidden">{t('navigation.mainNav.home', 'Home')}</span>
             </Link>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 rounded-2xl border border-[#d4a44c]/15 bg-[#d4a44c]/[0.04] px-4 py-3 text-sm text-[#d4a44c]/70">
+        {/* Privacy notice — mobile only (shown inline on desktop above) */}
+        <div className="flex items-center gap-2 rounded-2xl border border-[#d4a44c]/15 bg-[#d4a44c]/[0.04] px-4 py-3 text-sm text-[#d4a44c]/70 lg:hidden">
           <span className="text-lg">🔒</span>
           <span>{t('home.hero.privacy', 'Conversations remain private • a warm, confidential refuge')}</span>
         </div>
 
-        {/* KIAAN Quota Indicator — shows remaining questions, warns at 80% */}
+        {/* KIAAN Quota Indicator — mobile only (shown inline on desktop above) */}
+        <div className="lg:hidden">
         {!quota.loading && quota.limit !== -1 && (
           <div className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-sm ${
             quota.isExceeded
@@ -336,12 +355,13 @@ function KiaanChatPageInner() {
             </div>
           </div>
         )}
+        </div>
       </div>
 
-      {/* Message Actions - Only show when there are KIAAN responses */}
+      {/* Message Actions — desktop: compact inline bar. Mobile: card. */}
       {messages.length > 0 && messages[messages.length - 1]?.sender === 'assistant' && (
         <div
-          className="flex flex-wrap items-center justify-between gap-2 p-4 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-5"
+          className="flex flex-wrap items-center justify-between gap-2 p-4 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-5 lg:shrink-0 lg:p-2 lg:px-4 lg:rounded-none lg:shadow-none lg:border-0"
           style={{
             background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
             border: '1px solid rgba(212,160,23,0.1)',
@@ -404,14 +424,16 @@ function KiaanChatPageInner() {
         </div>
       )}
 
-      {/* Next Step Suggestion */}
-      {messages.length > 0 && messages[messages.length - 1]?.sender === 'assistant' && (
-        <NextStepLink suggestion={nextStepSuggestion} />
-      )}
+      {/* Next Step Suggestion — mobile only, hidden on desktop to save vertical space */}
+      <div className="lg:hidden">
+        {messages.length > 0 && messages[messages.length - 1]?.sender === 'assistant' && (
+          <NextStepLink suggestion={nextStepSuggestion} />
+        )}
+      </div>
 
       {/* Chat Interface — fills remaining height on desktop */}
       <div
-        className="p-4 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-6 lg:flex-1 lg:min-h-0 lg:flex lg:flex-col lg:p-0 lg:shadow-none"
+        className="p-4 shadow-[0_20px_80px_rgba(212,164,76,0.06)] md:p-6 lg:flex-1 lg:min-h-0 lg:flex lg:flex-col lg:p-0 lg:shadow-none lg:!rounded-none lg:!border-0"
         style={{
           background: 'linear-gradient(145deg, rgba(22,26,66,0.95), rgba(17,20,53,0.98))',
           border: '1px solid rgba(212,160,23,0.1)',
