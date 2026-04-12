@@ -1,21 +1,18 @@
 'use client'
 
 /**
- * Sidebar — Kiaanverse navigation sidebar.
+ * Sidebar — Kiaanverse desktop navigation sidebar.
  *
- * Two rendering modes:
- * 1. Desktop (≥1024px): Static sidebar, always visible via `hidden lg:flex`.
- * 2. Mobile drawer: Controlled by `open` / `onClose` props.  The drawer
- *    slides in from the left via CSS transform (styles/layout.module.css).
- *    No JS animation libraries needed.
+ * Visible only at lg (≥1024px) via CSS (`hidden lg:flex`).
+ * On mobile, navigation is handled by the root layout's SiteNav
+ * (hamburger menu) and MobileNav (bottom tab bar).
  *
- * Both modes render the same nav items + user section.
+ * Includes nav items with Sanskrit sub-labels, active state via
+ * usePathname(), and a user section at the bottom.
  */
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect } from 'react'
-import styles from '@/styles/layout.module.css'
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Home', sanskrit: 'गृह' },
@@ -27,20 +24,16 @@ const NAV_ITEMS = [
   { href: '/settings', label: 'Settings', sanskrit: 'व्यवस्था' },
 ] as const
 
-interface SidebarProps {
-  /** Mobile drawer open state. Ignored on desktop (CSS handles visibility). */
-  open?: boolean
-  /** Callback when mobile drawer requests close (backdrop click, nav click). */
-  onClose?: () => void
-}
-
-function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
+export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <div
-      className="flex flex-col h-full overflow-y-auto"
-      style={{ background: '#0b0b1a' }}
+    <aside
+      className="hidden lg:flex lg:flex-col lg:w-[220px] lg:shrink-0 border-r overflow-y-auto"
+      style={{
+        borderColor: 'rgba(180, 140, 60, 0.12)',
+        background: '#0b0b1a',
+      }}
     >
       <nav className="flex flex-col flex-1 py-5 gap-0.5" aria-label="App navigation">
         {NAV_ITEMS.map((item) => {
@@ -53,7 +46,6 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
             <Link
               key={item.href}
               href={item.href}
-              onClick={onNavClick}
               aria-current={active ? 'page' : undefined}
               className={`relative flex flex-col px-5 py-2.5 font-ui transition-colors duration-200 ${
                 active
@@ -122,63 +114,12 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
         </div>
         <Link
           href="/api/auth/signout"
-          onClick={onNavClick}
           className="block text-[11px] font-ui text-[rgba(232,220,200,0.35)] hover:text-[rgba(232,220,200,0.6)] transition-colors"
           style={{ letterSpacing: '0.02em' }}
         >
           Sign out
         </Link>
       </div>
-    </div>
-  )
-}
-
-export function Sidebar({ open = false, onClose }: SidebarProps) {
-  // Close drawer on Escape
-  useEffect(() => {
-    if (!open) return
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose?.()
-    }
-    document.addEventListener('keydown', handleKey)
-    return () => document.removeEventListener('keydown', handleKey)
-  }, [open, onClose])
-
-  // Close drawer on route change
-  const pathname = usePathname()
-  useEffect(() => {
-    if (open) onClose?.()
-  }, [pathname]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  return (
-    <>
-      {/* Desktop sidebar — always visible at lg via CSS */}
-      <aside
-        className="hidden lg:flex lg:flex-col lg:w-[220px] lg:shrink-0 border-r overflow-y-auto"
-        style={{
-          borderColor: 'rgba(180, 140, 60, 0.12)',
-          background: '#0b0b1a',
-        }}
-      >
-        <SidebarContent />
-      </aside>
-
-      {/* Mobile drawer — controlled by open prop */}
-      <div
-        className={styles.drawerBackdrop}
-        data-open={open}
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <div
-        className={styles.drawerPanel}
-        data-open={open}
-        role="dialog"
-        aria-modal={open}
-        aria-label="Navigation menu"
-      >
-        <SidebarContent onNavClick={onClose} />
-      </div>
-    </>
+    </aside>
   )
 }

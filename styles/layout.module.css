@@ -1,43 +1,11 @@
 /**
- * Layout Module — AppShell, Sidebar drawer, Topbar
+ * Layout Module — AppShell Topbar
  *
- * Mobile sidebar uses CSS transform for the drawer animation.
- * Zero JavaScript animation dependencies.
+ * Desktop-only topbar for the app shell (hidden below 1024px).
+ * Mobile navigation is handled by the root layout's SiteNav + MobileNav.
  */
 
-/* ─── Mobile sidebar drawer ─── */
-.drawerBackdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  background: rgba(0, 0, 0, 0.6);
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  pointer-events: none;
-}
-
-.drawerBackdrop[data-open='true'] {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.drawerPanel {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  z-index: 51;
-  width: 260px;
-  transform: translateX(-100%);
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
-}
-
-.drawerPanel[data-open='true'] {
-  transform: translateX(0);
-}
-
-/* ─── Topbar ─── */
+/* ─── Topbar (desktop only) ─── */
 .topbar {
   display: none;
   height: 56px;
@@ -52,23 +20,5 @@
 @media (min-width: 1024px) {
   .topbar {
     display: flex;
-  }
-}
-
-/* Mobile topbar — visible only below lg */
-.topbarMobile {
-  display: flex;
-  height: 56px;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  background: #0b0b1a;
-  border-bottom: 1px solid rgba(180, 140, 60, 0.12);
-}
-
-@media (min-width: 1024px) {
-  .topbarMobile {
-    display: none;
   }
 }

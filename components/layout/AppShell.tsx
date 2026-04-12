@@ -5,18 +5,16 @@
  *
  * Provides:
  *   - Sidebar (220px, desktop only, CSS-hidden on mobile)
- *   - Topbar (56px, OM wordmark + badges; hamburger on mobile)
+ *   - Topbar (56px, desktop only, OM wordmark + SACRED badge + avatar)
  *   - Main content area (flex-1, overflow-y-auto)
  *   - Optional right panel (320px, desktop only)
  *
  * Used in individual route layouts (dashboard, kiaan, etc.) — not in the
  * root layout — so public pages (landing, pricing) are unaffected.
- *
- * Mobile sidebar is a CSS transform drawer, controlled via hamburger icon
- * in the mobile Topbar.
+ * On mobile, navigation is handled by the root layout's SiteNav + MobileNav.
  */
 
-import { useState, useCallback, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
 
@@ -29,24 +27,17 @@ export interface AppShellProps {
 }
 
 export function AppShell({ children, rightPanel, className = '' }: AppShellProps) {
-  const [drawerOpen, setDrawerOpen] = useState(false)
-
-  const toggleDrawer = useCallback(() => {
-    setDrawerOpen((prev) => !prev)
-  }, [])
-
-  const closeDrawer = useCallback(() => {
-    setDrawerOpen(false)
-  }, [])
-
   return (
     <>
-      <Sidebar open={drawerOpen} onClose={closeDrawer} />
+      <Sidebar />
 
       <div className={`flex-1 min-w-0 flex flex-col lg:overflow-hidden ${className}`}>
-        <Topbar onMenuToggle={toggleDrawer} />
+        <Topbar />
 
-        <main className="flex-1 min-h-0 overflow-y-auto lg:flex lg:overflow-hidden">
+        {/* Use <div> instead of <main> — the root layout's MobileContentWrapper
+             already renders the landmark <main> element. Nesting <main> inside
+             <main> is invalid HTML and triggers console warnings. */}
+        <div className="flex-1 min-h-0 overflow-y-auto lg:flex lg:overflow-hidden">
           <div className="flex-1 min-w-0 lg:overflow-y-auto">
             {children}
           </div>
@@ -62,7 +53,7 @@ export function AppShell({ children, rightPanel, className = '' }: AppShellProps
               {rightPanel}
             </aside>
           )}
-        </main>
+        </div>
       </div>
     </>
   )
