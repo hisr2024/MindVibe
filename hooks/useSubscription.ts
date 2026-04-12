@@ -178,6 +178,8 @@ export function useSubscription(): UseSubscriptionResult {
 
   // Debounce ref to coalesce rapid event-driven fetches
   const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+  // Minimum interval between fetches to prevent cascading events from causing redundant API calls
+  const lastFetchRef = useRef<number>(0)
 
   const fetchSubscription = useCallback(async () => {
     setLoading(true)
@@ -222,11 +224,18 @@ export function useSubscription(): UseSubscriptionResult {
   }, [fetchSubscription])
 
   useEffect(() => {
-    // Debounced fetch — coalesces rapid events (auth-changed + storage + subscription-updated)
-    // into a single API call after 300ms of quiet.
+    // Debounced fetch with minimum interval — coalesces rapid cascading events
+    // (auth-changed + storage) into a single API call. The 2-second minimum
+    // interval prevents redundant fetches when multiple events fire in sequence
+    // (e.g. storage event + auth-changed from the same auth state change).
+    const MIN_FETCH_INTERVAL = 2000
+
     const debouncedFetch = () => {
       clearTimeout(debounceRef.current)
       debounceRef.current = setTimeout(() => {
+        const now = Date.now()
+        if (now - lastFetchRef.current < MIN_FETCH_INTERVAL) return
+        lastFetchRef.current = now
         if (mountedRef.current) fetchSubscription()
       }, 300)
     }
@@ -237,13 +246,14 @@ export function useSubscription(): UseSubscriptionResult {
       }
     }
 
-    window.addEventListener('subscription-updated', debouncedFetch)
+    // Note: subscription-updated listener removed — that event is dispatched by
+    // updateSubscription() which writes to localStorage (triggering storage events
+    // cross-tab). Same-tab callers should use refetch() directly instead.
     window.addEventListener('storage', handleStorage)
     window.addEventListener('auth-changed', debouncedFetch)
 
     return () => {
       clearTimeout(debounceRef.current)
-      window.removeEventListener('subscription-updated', debouncedFetch)
       window.removeEventListener('storage', handleStorage)
       window.removeEventListener('auth-changed', debouncedFetch)
     }

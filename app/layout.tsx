@@ -125,23 +125,43 @@ const languageScript = `
 // When Vercel deploys, old cached HTML references chunk hashes that no longer
 // exist on the CDN (404). This listener catches those script-load failures and
 // reloads the page once so the browser fetches fresh HTML with correct chunks.
-// A sessionStorage flag prevents infinite reload loops.
+// Uses a dual-guard strategy (sessionStorage + URL param) to prevent infinite
+// reload loops even when sessionStorage is unavailable (quota exceeded, etc.).
 const chunkErrorRecoveryScript = `
 (function() {
   try {
     var KEY = '__chunk_reload';
+    var PARAM = '__chunk_reloaded';
+
+    // Fallback guard: check URL parameter (survives sessionStorage failures)
+    var url = new URL(window.location.href);
+    if (url.searchParams.has(PARAM)) {
+      url.searchParams.delete(PARAM);
+      history.replaceState(null, '', url.pathname + url.search + url.hash);
+      return;
+    }
+
+    // Primary guard: check sessionStorage
     if (sessionStorage.getItem(KEY)) {
       sessionStorage.removeItem(KEY);
       return;
     }
+
     window.addEventListener('error', function(e) {
       var t = e.target;
       if (
         t && t.tagName === 'SCRIPT' &&
         t.src && t.src.indexOf('/_next/') !== -1
       ) {
-        sessionStorage.setItem(KEY, '1');
-        window.location.reload();
+        try {
+          sessionStorage.setItem(KEY, '1');
+          window.location.reload();
+        } catch (ex) {
+          // sessionStorage failed — use URL param fallback
+          var u = new URL(window.location.href);
+          u.searchParams.set(PARAM, '1');
+          window.location.assign(u.href);
+        }
       }
     }, true);
   } catch (e) {}

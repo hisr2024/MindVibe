@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { KiaanLogo } from '@/src/components/KiaanLogo'
 import { apiFetch } from '@/lib/api'
+import { useReconnectingWebSocket } from '@/hooks/useReconnectingWebSocket'
 
 /**
  * Derive the backend WebSocket URL at runtime.
@@ -52,9 +53,7 @@ export default function WisdomRoomsPage() {
   const [roomMessages, setRoomMessages] = useState<Record<string, RoomMessage[]>>({})
   const [participants, setParticipants] = useState<Record<string, Participant[]>>({})
   const [message, setMessage] = useState('')
-  const [status, setStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected')
   const [alert, setAlert] = useState<string | null>(null)
-  const [socket, setSocket] = useState<WebSocket | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -102,67 +101,49 @@ export default function WisdomRoomsPage() {
     loadRooms()
   }, [isAuthenticated])
 
-  useEffect(() => {
-    if (!activeRoomId || !rooms.length || !isAuthenticated) return
+  // Derive the active room ID for the WebSocket URL
+  const activeRoomConnectId = useMemo(() => {
+    if (!activeRoomId || !rooms.length || !isAuthenticated) return null
     const room = rooms.find(r => r.id === activeRoomId || r.slug === activeRoomId)
-    if (!room) {
-      setStatus('disconnected')
-      return
-    }
-
-    const roomId = room.id || room.slug
-    setStatus('connecting')
-    setAlert(null)
-
-    // Auth is handled via httpOnly cookies sent automatically during WebSocket upgrade
-    const wsBase = getBackendWsUrl()
-    const wsUrl = `${wsBase}/api/rooms/${roomId}/ws`
-    const ws = new WebSocket(wsUrl)
-
-    ws.onopen = () => {
-      setStatus('connected')
-      setAlert(null)
-    }
-
-    ws.onmessage = event => {
-      try {
-        const payload = JSON.parse(event.data)
-        if (payload.type === 'history') {
-          setRoomMessages(prev => ({ ...prev, [roomId]: payload.messages }))
-        }
-        if (payload.type === 'message') {
-          setRoomMessages(prev => ({
-            ...prev,
-            [roomId]: [...(prev[roomId] || []), payload]
-          }))
-        }
-        if (payload.type === 'participants') {
-          setParticipants(prev => ({ ...prev, [roomId]: payload.participants }))
-        }
-        if (payload.type === 'error') {
-          setAlert(payload.message || 'Unable to send message right now')
-        }
-      } catch (error) {
-        console.error('Failed to parse message', error)
-      }
-    }
-
-    ws.onerror = () => {
-      setStatus('disconnected')
-      setAlert('Connection error — trying to reconnect...')
-    }
-
-    ws.onclose = () => {
-      setStatus('disconnected')
-    }
-
-    setSocket(ws)
-
-    return () => {
-      ws.close()
-      setSocket(null)
-    }
+    return room ? (room.id || room.slug) : null
   }, [activeRoomId, rooms, isAuthenticated])
+
+  // Build the WebSocket URL (null when not ready to connect)
+  const wsUrl = useMemo(() => {
+    if (!activeRoomConnectId) return null
+    const wsBase = getBackendWsUrl()
+    return `${wsBase}/api/rooms/${activeRoomConnectId}/ws`
+  }, [activeRoomConnectId])
+
+  const handleWsMessage = useCallback((payload: unknown) => {
+    const data = payload as { type: string; messages?: RoomMessage[]; participants?: Participant[]; message?: string; [key: string]: unknown }
+    if (!activeRoomConnectId) return
+    if (data.type === 'history') {
+      setRoomMessages(prev => ({ ...prev, [activeRoomConnectId]: data.messages || [] }))
+    }
+    if (data.type === 'message') {
+      setRoomMessages(prev => ({
+        ...prev,
+        [activeRoomConnectId]: [...(prev[activeRoomConnectId] || []), data as unknown as RoomMessage]
+      }))
+    }
+    if (data.type === 'participants') {
+      setParticipants(prev => ({ ...prev, [activeRoomConnectId]: data.participants || [] }))
+    }
+    if (data.type === 'error') {
+      setAlert(data.message || 'Unable to send message right now')
+    }
+  }, [activeRoomConnectId])
+
+  const { send: wsSend, status, reconnect, retryAttempt, maxRetries: wsMaxRetries } = useReconnectingWebSocket({
+    url: wsUrl,
+    onMessage: handleWsMessage,
+  })
+
+  // Clear alert when connection is established
+  useEffect(() => {
+    if (status === 'connected') setAlert(null)
+  }, [status])
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -179,13 +160,13 @@ export default function WisdomRoomsPage() {
   const activeMessages = activeRoom ? roomMessages[activeRoom.id || activeRoom.slug] || [] : []
   const activeParticipants = activeRoom ? participants[activeRoom.id || activeRoom.slug] || [] : []
 
-  async function sendMessage() {
+  function sendMessage() {
     if (!message.trim()) return
-    if (status !== 'connected' || !socket) {
+    if (status !== 'connected') {
       setAlert('You are not connected. Please wait while we reconnect to the room.')
       return
     }
-    socket.send(JSON.stringify({ content: message.trim() }))
+    wsSend(JSON.stringify({ content: message.trim() }))
     setMessage('')
   }
 

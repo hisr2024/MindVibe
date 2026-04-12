@@ -11,7 +11,7 @@
  * - Offline graceful degradation
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import {
@@ -25,6 +25,7 @@ import { MobileAppShell } from '@/components/mobile/MobileAppShell'
 import { useAuth } from '@/hooks/useAuth'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 import { apiFetch } from '@/lib/api'
+import { useReconnectingWebSocket } from '@/hooks/useReconnectingWebSocket'
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
 
@@ -67,9 +68,7 @@ export default function MobileWisdomRoomsPage() {
   const [roomMessages, setRoomMessages] = useState<Record<string, RoomMessage[]>>({})
   const [participants, setParticipants] = useState<Record<string, Participant[]>>({})
   const [message, setMessage] = useState('')
-  const [status, setStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected')
   const [alert, setAlert] = useState<string | null>(null)
-  const [socket, setSocket] = useState<WebSocket | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [showParticipants, setShowParticipants] = useState(false)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -117,62 +116,48 @@ export default function MobileWisdomRoomsPage() {
     loadRooms()
   }, [isAuthenticated])
 
-  // WebSocket connection
-  useEffect(() => {
-    if (!activeRoomId || !rooms.length || !isAuthenticated) return
-
+  // Derive the active room ID for WebSocket URL
+  const activeRoomConnectId = useMemo(() => {
+    if (!activeRoomId || !rooms.length || !isAuthenticated) return null
     const room = rooms.find(r => r.id === activeRoomId || r.slug === activeRoomId)
-    if (!room) {
-      setStatus('disconnected')
-      return
-    }
-
-    const roomId = room.id || room.slug
-    setStatus('connecting')
-    setAlert(null)
-
-    const wsUrl = `${apiUrl.replace(/^http/, 'ws')}/api/rooms/${roomId}/ws`
-    const ws = new WebSocket(wsUrl)
-
-    ws.onopen = () => {
-      setStatus('connected')
-      setAlert(null)
-    }
-
-    ws.onmessage = event => {
-      try {
-        const payload = JSON.parse(event.data)
-        if (payload.type === 'history') {
-          setRoomMessages(prev => ({ ...prev, [roomId]: payload.messages }))
-        }
-        if (payload.type === 'message') {
-          setRoomMessages(prev => ({
-            ...prev,
-            [roomId]: [...(prev[roomId] || []), payload],
-          }))
-        }
-        if (payload.type === 'participants') {
-          setParticipants(prev => ({ ...prev, [roomId]: payload.participants }))
-        }
-        if (payload.type === 'error') {
-          setAlert(payload.message || 'Unable to send message')
-        }
-      } catch (error) {
-        console.error('Failed to parse message', error)
-      }
-    }
-
-    ws.onclose = () => {
-      setStatus('disconnected')
-    }
-
-    setSocket(ws)
-
-    return () => {
-      ws.close()
-      setSocket(null)
-    }
+    return room ? (room.id || room.slug) : null
   }, [activeRoomId, rooms, isAuthenticated])
+
+  // Build the WebSocket URL (null when not ready to connect)
+  const wsUrl = useMemo(() => {
+    if (!activeRoomConnectId) return null
+    return `${apiUrl.replace(/^http/, 'ws')}/api/rooms/${activeRoomConnectId}/ws`
+  }, [activeRoomConnectId])
+
+  const handleWsMessage = useCallback((payload: unknown) => {
+    const data = payload as { type: string; messages?: RoomMessage[]; participants?: Participant[]; message?: string; [key: string]: unknown }
+    if (!activeRoomConnectId) return
+    if (data.type === 'history') {
+      setRoomMessages(prev => ({ ...prev, [activeRoomConnectId]: data.messages || [] }))
+    }
+    if (data.type === 'message') {
+      setRoomMessages(prev => ({
+        ...prev,
+        [activeRoomConnectId]: [...(prev[activeRoomConnectId] || []), data as unknown as RoomMessage],
+      }))
+    }
+    if (data.type === 'participants') {
+      setParticipants(prev => ({ ...prev, [activeRoomConnectId]: data.participants || [] }))
+    }
+    if (data.type === 'error') {
+      setAlert(data.message || 'Unable to send message')
+    }
+  }, [activeRoomConnectId])
+
+  const { send: wsSend, status } = useReconnectingWebSocket({
+    url: wsUrl,
+    onMessage: handleWsMessage,
+  })
+
+  // Clear alert when connected
+  useEffect(() => {
+    if (status === 'connected') setAlert(null)
+  }, [status])
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -190,15 +175,15 @@ export default function MobileWisdomRoomsPage() {
 
   const sendMessage = useCallback(() => {
     if (!message.trim()) return
-    if (status !== 'connected' || !socket) {
+    if (status !== 'connected') {
       setAlert('Not connected. Please wait while we reconnect.')
       return
     }
-    socket.send(JSON.stringify({ content: message.trim() }))
+    wsSend(JSON.stringify({ content: message.trim() }))
     setMessage('')
     triggerHaptic('light')
     inputRef.current?.focus()
-  }, [message, status, socket, triggerHaptic])
+  }, [message, status, wsSend, triggerHaptic])
 
   const handleRoomSwitch = (roomId: string) => {
     setActiveRoomId(roomId)

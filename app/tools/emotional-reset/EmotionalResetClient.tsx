@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { EmotionalResetWizard } from '@/components/emotional-reset'
 import { ToolActionCard } from '@/components/tools'
 import { FadeIn } from '@/components/ui'
@@ -42,9 +43,9 @@ export default function EmotionalResetClient() {
           <p className="text-sm text-[#f5f0e8]/75 font-sacred leading-relaxed mb-2">
             A calming 7-step sacred flow to process emotions, find inner peace, and restore your spirit with gentle, divine guidance.
           </p>
-          <a href="/dashboard" className="text-xs text-[#d4a44c]/50 hover:text-[#d4a44c]/70 transition">
+          <Link href="/dashboard" className="text-xs text-[#d4a44c]/50 hover:text-[#d4a44c]/70 transition">
             &larr; Back to dashboard
-          </a>
+          </Link>
         </FadeIn>
 
         {/* Quick Actions — Sacred Paths */}

@@ -10,6 +10,7 @@
 
 import React, { Component, ReactNode } from 'react'
 import { RefreshCw, Home, ArrowLeft } from 'lucide-react'
+import { isChunkLoadError, attemptChunkRecovery } from '@/lib/chunk-recovery'
 
 interface Props {
   children: ReactNode
@@ -36,6 +37,11 @@ export class MobileErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     console.error('MobileErrorBoundary caught error:', error, errorInfo)
+
+    // Auto-recover from stale chunk errors (new deployment invalidated old chunks)
+    if (isChunkLoadError(error)) {
+      if (attemptChunkRecovery()) return
+    }
   }
 
   componentDidUpdate(_prevProps: Props, prevState: State): void {

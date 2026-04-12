@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { apiFetch } from '@/lib/api'
+import { apiFetch, tryRefreshToken } from '@/lib/api'
 
 export interface AuthUser {
   id: string
@@ -34,10 +34,8 @@ interface UseAuthResult {
 // Only store non-sensitive user profile data in localStorage (no tokens!)
 const AUTH_USER_KEY = 'mindvibe_auth_user'
 
-// Shared refresh promise to prevent concurrent refresh token requests.
-// If multiple components detect a 401 and call refreshSession() simultaneously,
-// only the first one makes the actual request; others await the same promise.
-let refreshPromise: Promise<void> | null = null
+// Token refresh is now handled by the shared tryRefreshToken() in lib/api.ts,
+// which uses a module-level promise to deduplicate concurrent refresh requests.
 
 function getStoredUser(): AuthUser | null {
   if (typeof window === 'undefined') return null
@@ -332,35 +330,14 @@ export function useAuth(): UseAuthResult {
   }, [])
 
   const refreshSession = useCallback(async () => {
-    // If a refresh is already in flight, reuse it to prevent race conditions.
-    // Multiple concurrent 401s all share the same refresh request.
-    if (refreshPromise) {
-      return refreshPromise
+    // Delegates to the shared tryRefreshToken() in lib/api.ts which uses a
+    // module-level promise to deduplicate concurrent refresh requests.
+    const success = await tryRefreshToken()
+    if (!success) {
+      clearAuthData()
+      setUser(null)
+      throw new Error('Session refresh failed')
     }
-
-    refreshPromise = (async () => {
-      try {
-        // httpOnly refresh_token cookie is sent automatically
-        const response = await apiFetch('/api/auth/refresh', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        })
-
-        if (!response.ok) {
-          throw new Error('Session refresh failed')
-        }
-        // Backend sets new httpOnly access_token cookie automatically
-      } catch (err) {
-        // Session refresh failed, user needs to re-login
-        clearAuthData()
-        setUser(null)
-        throw err
-      } finally {
-        refreshPromise = null
-      }
-    })()
-
-    return refreshPromise
   }, [])
 
   // Listen for storage changes (cross-tab sync of user profile)
