@@ -20,32 +20,6 @@
     --lotus: #FF6B9D;
     --white-glow: rgba(255,255,255,0.92);
     --aura: rgba(212,175,55,0.18);
-
-    /* Responsive mandala size: scales from 260px on tiny phones to 520px on desktop */
-    --mandala-size: min(420px, 82vw, 82vh);
-    --scene-width: min(520px, 94vw);
-  }
-
-  /* ── Desktop overrides ── */
-  @media (min-width: 768px) {
-    :root {
-      --mandala-size: min(460px, 58vw, 72vh);
-      --scene-width: min(580px, 70vw);
-    }
-  }
-  @media (min-width: 1200px) {
-    :root {
-      --mandala-size: min(500px, 40vw, 74vh);
-      --scene-width: min(620px, 50vw);
-    }
-  }
-
-  /* ── Landscape mobile: shrink mandala so text fits ── */
-  @media (max-height: 500px) and (orientation: landscape) {
-    :root {
-      --mandala-size: min(260px, 55vh);
-      --scene-width: min(400px, 90vw);
-    }
   }
 
   html, body {
@@ -54,11 +28,10 @@
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
     font-family: 'Cormorant Garamond', serif;
-    /* Safe areas for notched phones */
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 
-  /* ── Accessibility: respect reduced motion ── */
+  /* ── Accessibility ── */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
@@ -100,19 +73,18 @@
     position: relative; z-index: 1;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    width: var(--scene-width);
+    width: min(520px, 95vw);
     gap: 0;
     will-change: transform;
-    transition: transform 0.15s ease-out;
+    transition: transform 0.12s ease-out;
   }
 
   /* ── Outer Mandala Glow Ring ── */
   .mandala-wrap {
     position: relative;
-    width: var(--mandala-size);
-    height: var(--mandala-size);
+    width: min(420px, 88vw);
+    height: min(420px, 88vw);
     display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
   }
 
   /* Outermost divine aura */
@@ -156,10 +128,9 @@
     z-index: 10;
   }
 
-  /* OM glow bg scales with mandala */
   .om-glow-bg {
     position: absolute;
-    width: 42%; height: 42%;
+    width: 180px; height: 180px;
     border-radius: 50%;
     background: radial-gradient(circle,
       rgba(212,175,55,0.28) 0%,
@@ -174,7 +145,7 @@
 
   .om-text {
     position: relative;
-    font-size: clamp(56px, calc(var(--mandala-size) * 0.22), 110px);
+    font-size: clamp(72px, 17vw, 100px);
     line-height: 1;
     background: linear-gradient(160deg, #FFF8DC 0%, #F5E27A 30%, #D4AF37 55%, #A0792A 80%, #F5E27A 100%);
     -webkit-background-clip: text;
@@ -190,18 +161,17 @@
     50% { transform: scale(1.05); filter: drop-shadow(0 0 28px rgba(255,240,120,1)) drop-shadow(0 0 55px rgba(212,175,55,0.7)); }
   }
 
-  /* Vibration rings — scale with mandala */
+  /* Vibration rings emanating from OM */
   .vib-ring {
     position: absolute;
     border-radius: 50%;
     border: 1.5px solid rgba(212,175,55,0.5);
-    width: 28%; height: 28%;
     animation: vibexpand 3.5s ease-out infinite;
     pointer-events: none;
   }
-  .vib-ring:nth-child(1) { animation-delay: 0s; }
-  .vib-ring:nth-child(2) { animation-delay: 1.16s; }
-  .vib-ring:nth-child(3) { animation-delay: 2.33s; }
+  .vib-ring:nth-child(1) { width: 120px; height: 120px; animation-delay: 0s; }
+  .vib-ring:nth-child(2) { width: 120px; height: 120px; animation-delay: 1.16s; }
+  .vib-ring:nth-child(3) { width: 120px; height: 120px; animation-delay: 2.33s; }
   @keyframes vibexpand {
     0% { transform: scale(1); opacity: 0.8; }
     100% { transform: scale(2.8); opacity: 0; }
@@ -215,8 +185,11 @@
   }
   .lotus-petal {
     position: absolute;
+    width: 22px; height: 44px;
+    left: 50%; top: 50%;
     transform-origin: 50% 100%;
     border-radius: 50% 50% 0 0 / 60% 60% 0 0;
+    background: linear-gradient(180deg, rgba(255,107,157,0.7) 0%, rgba(255,107,157,0.15) 100%);
     filter: blur(0.5px);
   }
   @keyframes lotusspin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
@@ -224,8 +197,7 @@
   /* ── Chakra dots ── */
   .chakra-dot {
     position: absolute;
-    width: clamp(5px, 1.8vw, 8px);
-    height: clamp(5px, 1.8vw, 8px);
+    width: 8px; height: 8px;
     border-radius: 50%;
     background: radial-gradient(circle, #00E5FF 0%, #0077B6 100%);
     box-shadow: 0 0 10px #00E5FF, 0 0 20px rgba(0,229,255,0.6);
@@ -239,15 +211,13 @@
   /* ── Text below ── */
   .label-wrap {
     display: flex; flex-direction: column; align-items: center;
-    margin-top: clamp(-18px, -2.5vw, -8px);
+    margin-top: clamp(-20px, -3vw, -10px);
     gap: 4px;
-    padding: 0 16px;
-    width: 100%;
   }
 
   .sakha-name {
     font-family: 'Cinzel Decorative', serif;
-    font-size: clamp(24px, 6.5vw, 44px);
+    font-size: clamp(28px, 7vw, 42px);
     font-weight: 400;
     letter-spacing: 0.18em;
     background: linear-gradient(120deg, #FFF8DC 0%, #F5E27A 35%, #D4AF37 60%, #FFF8DC 100%);
@@ -259,11 +229,6 @@
     animation: nameshine 5s ease-in-out infinite;
     background-size: 200% auto;
   }
-  @media (min-width: 768px) {
-    .sakha-name {
-      font-size: clamp(36px, 3.5vw, 52px);
-    }
-  }
   @keyframes nameshine {
     0% { background-position: 0% center; }
     50% { background-position: 100% center; }
@@ -274,39 +239,24 @@
     font-family: 'Cormorant Garamond', serif;
     font-style: italic;
     font-weight: 300;
-    font-size: clamp(12px, 3vw, 18px);
+    font-size: clamp(13px, 3.2vw, 17px);
     letter-spacing: 0.22em;
     color: rgba(212,175,55,0.75);
     text-transform: uppercase;
     margin-top: 2px;
-    text-align: center;
-  }
-  @media (min-width: 768px) {
-    .tagline {
-      font-size: clamp(15px, 1.4vw, 20px);
-      letter-spacing: 0.3em;
-    }
   }
 
   .sanskrit {
     font-family: 'Noto Sans Devanagari', 'Cormorant Garamond', serif;
-    font-size: clamp(10px, 2.6vw, 15px);
+    font-size: clamp(11px, 2.8vw, 14px);
     color: rgba(212,175,55,0.45);
     margin-top: 8px;
     letter-spacing: 0.08em;
-    text-align: center;
-  }
-  @media (min-width: 768px) {
-    .sanskrit {
-      font-size: clamp(13px, 1.1vw, 16px);
-      margin-top: 12px;
-    }
   }
 
   /* Gold divider line */
   .divider {
-    width: clamp(120px, 40vw, 220px);
-    height: 1px;
+    width: 180px; height: 1px;
     background: linear-gradient(90deg, transparent, rgba(212,175,55,0.6), rgba(255,240,150,0.9), rgba(212,175,55,0.6), transparent);
     margin: 10px 0 6px;
     animation: divglow 3s ease-in-out infinite;
@@ -331,24 +281,145 @@
     100% { transform: translateY(-100vh) translateX(var(--drift)) scale(0.5); opacity: 0; }
   }
 
-  /* ── Landscape mobile: side-by-side layout ── */
+  /* ===========================================================
+     RESPONSIVE: MOBILE (320px–767px)
+     =========================================================== */
+
+  /* ── Tiny phones (iPhone SE / 320px) ── */
+  @media (max-width: 374px) {
+    .scene { width: 98vw; }
+    .mandala-wrap { width: min(280px, 85vw); height: min(280px, 85vw); }
+    .om-glow-bg { width: 110px; height: 110px; }
+    .om-text { font-size: 56px; }
+    .vib-ring:nth-child(1),
+    .vib-ring:nth-child(2),
+    .vib-ring:nth-child(3) { width: 80px; height: 80px; }
+    .sakha-name { font-size: 22px; letter-spacing: 0.12em; }
+    .tagline { font-size: 11px; letter-spacing: 0.15em; }
+    .sanskrit { font-size: 10px; }
+    .divider { width: 120px; }
+    .chakra-dot { width: 5px; height: 5px; }
+  }
+
+  /* ── Standard phones (375px–413px) ── */
+  @media (min-width: 375px) and (max-width: 413px) {
+    .mandala-wrap { width: min(340px, 86vw); height: min(340px, 86vw); }
+    .om-glow-bg { width: 140px; height: 140px; }
+    .om-text { font-size: 66px; }
+    .vib-ring:nth-child(1),
+    .vib-ring:nth-child(2),
+    .vib-ring:nth-child(3) { width: 95px; height: 95px; }
+    .sakha-name { font-size: 26px; }
+    .tagline { font-size: 12px; }
+    .divider { width: 150px; }
+    .chakra-dot { width: 6px; height: 6px; }
+  }
+
+  /* ── Large phones (414px–767px) ── */
+  @media (min-width: 414px) and (max-width: 767px) {
+    .mandala-wrap { width: min(380px, 88vw); height: min(380px, 88vw); }
+    .om-glow-bg { width: 160px; height: 160px; }
+    .om-text { font-size: 78px; }
+    .vib-ring:nth-child(1),
+    .vib-ring:nth-child(2),
+    .vib-ring:nth-child(3) { width: 110px; height: 110px; }
+    .chakra-dot { width: 7px; height: 7px; }
+  }
+
+  /* ── Landscape mobile ── */
   @media (max-height: 500px) and (orientation: landscape) {
     .scene {
       flex-direction: row;
-      gap: 24px;
+      width: 96vw;
+      gap: 28px;
     }
+    .mandala-wrap { width: min(260px, 52vh); height: min(260px, 52vh); }
+    .om-glow-bg { width: 100px; height: 100px; }
+    .om-text { font-size: 50px; }
+    .vib-ring:nth-child(1),
+    .vib-ring:nth-child(2),
+    .vib-ring:nth-child(3) { width: 70px; height: 70px; }
     .label-wrap {
       margin-top: 0;
       align-items: flex-start;
-      text-align: left;
     }
-    .label-wrap .tagline,
-    .label-wrap .sanskrit {
-      text-align: left;
-    }
-    .label-wrap .divider {
-      margin-left: 0;
-    }
+    .sakha-name { font-size: 24px; }
+    .tagline { font-size: 11px; text-align: left; }
+    .sanskrit { font-size: 10px; text-align: left; }
+    .divider { width: 120px; }
+    .chakra-dot { width: 5px; height: 5px; }
+  }
+
+  /* ===========================================================
+     RESPONSIVE: TABLET (768px–1023px)
+     =========================================================== */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .scene { width: min(560px, 72vw); }
+    .mandala-wrap { width: min(440px, 56vw); height: min(440px, 56vw); }
+    .om-glow-bg { width: 190px; height: 190px; }
+    .om-text { font-size: 96px; }
+    .vib-ring:nth-child(1),
+    .vib-ring:nth-child(2),
+    .vib-ring:nth-child(3) { width: 130px; height: 130px; }
+    .sakha-name { font-size: 38px; letter-spacing: 0.22em; }
+    .tagline { font-size: 16px; letter-spacing: 0.28em; }
+    .sanskrit { font-size: 13px; margin-top: 10px; }
+    .divider { width: 200px; }
+    .chakra-dot { width: 9px; height: 9px; }
+  }
+
+  /* ===========================================================
+     RESPONSIVE: DESKTOP (1024px–1439px)
+     =========================================================== */
+  @media (min-width: 1024px) and (max-width: 1439px) {
+    .scene { width: min(620px, 48vw); }
+    .mandala-wrap { width: min(480px, 42vw, 72vh); height: min(480px, 42vw, 72vh); }
+    .om-glow-bg { width: 210px; height: 210px; }
+    .om-text { font-size: 104px; }
+    .vib-ring:nth-child(1),
+    .vib-ring:nth-child(2),
+    .vib-ring:nth-child(3) { width: 140px; height: 140px; }
+    .sakha-name { font-size: 44px; letter-spacing: 0.22em; }
+    .tagline { font-size: 18px; letter-spacing: 0.3em; }
+    .sanskrit { font-size: 14px; margin-top: 12px; }
+    .divider { width: 220px; }
+    .chakra-dot { width: 9px; height: 9px; }
+  }
+
+  /* ===========================================================
+     RESPONSIVE: WIDE DESKTOP (1440px+)
+     =========================================================== */
+  @media (min-width: 1440px) {
+    .scene { width: min(700px, 38vw); }
+    .mandala-wrap { width: min(540px, 34vw, 76vh); height: min(540px, 34vw, 76vh); }
+    .om-glow-bg { width: 240px; height: 240px; }
+    .om-text { font-size: 116px; }
+    .vib-ring:nth-child(1),
+    .vib-ring:nth-child(2),
+    .vib-ring:nth-child(3) { width: 160px; height: 160px; }
+    .sakha-name { font-size: 50px; letter-spacing: 0.24em; }
+    .tagline { font-size: 19px; letter-spacing: 0.32em; }
+    .sanskrit { font-size: 15px; margin-top: 14px; letter-spacing: 0.12em; }
+    .divider { width: 260px; }
+    .chakra-dot { width: 10px; height: 10px; }
+  }
+
+  /* ===========================================================
+     RESPONSIVE: ULTRAWIDE (1920px+)
+     =========================================================== */
+  @media (min-width: 1920px) {
+    .scene { width: min(780px, 30vw); }
+    .mandala-wrap { width: min(600px, 28vw, 78vh); height: min(600px, 28vw, 78vh); }
+    .om-glow-bg { width: 270px; height: 270px; }
+    .om-text { font-size: 128px; }
+    .vib-ring:nth-child(1),
+    .vib-ring:nth-child(2),
+    .vib-ring:nth-child(3) { width: 180px; height: 180px; }
+    .sakha-name { font-size: 56px; letter-spacing: 0.26em; }
+    .tagline { font-size: 20px; letter-spacing: 0.35em; }
+    .sanskrit { font-size: 16px; margin-top: 16px; }
+    .divider { width: 300px; }
+    .chakra-dot { width: 11px; height: 11px; }
   }
 </style>
 </head>
@@ -472,7 +543,7 @@
     <!-- Central OM -->
     <div class="om-stage">
       <div class="om-glow-bg"></div>
-      <div class="om-text">&#x0950;</div>
+      <div class="om-text">ॐ</div>
     </div>
 
     <!-- Chakra dots placed on the mandala circle -->
@@ -490,114 +561,97 @@
     <div class="divider"></div>
     <div class="sakha-name">Sakha</div>
     <div class="tagline">Your Divine Companion</div>
-    <div class="sanskrit">&#x0938;&#x0916;&#x093E; &#x2014; &#x0924;&#x0935; &#x0926;&#x093F;&#x0935;&#x094D;&#x092F;&#x0903; &#x0938;&#x093E;&#x0925;&#x0940;</div>
+    <div class="sanskrit">सखा — तव दिव्यः साथी</div>
   </div>
 
 </div><!-- /scene -->
 
 <script>
-  (function () {
-    'use strict';
+  // ── Lotus petals ──
+  const lotusRing = document.getElementById('lotusRing');
+  const isMobile = window.innerWidth < 768;
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const petalCount = isMobile ? 12 : 16;
 
-    var scene = document.getElementById('scene');
-    var lotusRing = document.getElementById('lotusRing');
-    var particleWrap = document.getElementById('particles');
+  for (let i = 0; i < petalCount; i++) {
+    const p = document.createElement('div');
+    p.className = 'lotus-petal';
+    const angle = (i / petalCount) * 360;
+    const rad = 47;
+    const px = 50 + rad * Math.sin(angle * Math.PI / 180);
+    const py = 50 - rad * Math.cos(angle * Math.PI / 180);
+    const petalH = isMobile ? (24 + (i % 4) * 3) : (30 + (i % 4) * 5);
+    const petalW = isMobile ? (12 + (i % 2) * 3) : (14 + (i % 2) * 4);
+    p.style.cssText = `
+      left: ${px}%;
+      top: ${py}%;
+      transform: translate(-50%, -100%) rotate(${angle}deg);
+      opacity: ${0.3 + (i % 3) * 0.15};
+      height: ${petalH}px;
+      width: ${petalW}px;
+      background: linear-gradient(180deg,
+        rgba(255,107,157,${0.5 + (i % 3) * 0.1}) 0%,
+        rgba(212,175,55,0.1) 100%);
+    `;
+    lotusRing.appendChild(p);
+  }
 
-    // ── Device detection ──
-    var isMobile = window.matchMedia('(max-width: 767px)').matches;
-    var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // ── Floating golden motes — fewer on mobile ──
+  const particleWrap = document.getElementById('particles');
+  const particleCount = isMobile ? 14 : 28;
 
-    // ── Lotus petals — fewer on mobile for performance ──
-    var petalCount = isMobile ? 12 : 16;
-    for (var i = 0; i < petalCount; i++) {
-      var p = document.createElement('div');
-      p.className = 'lotus-petal';
-      var angle = (i / petalCount) * 360;
-      var rad = 47;
-      var px = 50 + rad * Math.sin(angle * Math.PI / 180);
-      var py = 50 - rad * Math.cos(angle * Math.PI / 180);
-      var petalH = isMobile ? (24 + (i % 4) * 4) : (30 + (i % 4) * 5);
-      var petalW = isMobile ? (11 + (i % 2) * 3) : (14 + (i % 2) * 4);
-      p.style.cssText =
-        'left:' + px + '%;' +
-        'top:' + py + '%;' +
-        'transform:translate(-50%,-100%) rotate(' + angle + 'deg);' +
-        'opacity:' + (0.3 + (i % 3) * 0.15) + ';' +
-        'height:' + petalH + 'px;' +
-        'width:' + petalW + 'px;' +
-        'background:linear-gradient(180deg,' +
-          'rgba(255,107,157,' + (0.5 + (i % 3) * 0.1) + ') 0%,' +
-          'rgba(212,175,55,0.1) 100%);';
-      lotusRing.appendChild(p);
+  if (!prefersReducedMotion) {
+    for (let i = 0; i < particleCount; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = Math.random() * 3 + 1.5;
+      const isGold = Math.random() > 0.4;
+      p.style.cssText = `
+        width: ${size}px;
+        height: ${size}px;
+        left: ${Math.random() * 100}vw;
+        bottom: ${Math.random() * 20}vh;
+        background: radial-gradient(circle, ${isGold ? '#F5E27A' : '#00E5FF'}, transparent);
+        box-shadow: 0 0 ${size * 2}px ${isGold ? '#D4AF37' : '#00B4D8'};
+        animation-duration: ${8 + Math.random() * 14}s;
+        animation-delay: ${Math.random() * 12}s;
+        --drift: ${(Math.random() - 0.5) * 80}px;
+      `;
+      particleWrap.appendChild(p);
     }
+  }
 
-    // ── Floating golden motes — fewer on mobile ──
-    var particleCount = isMobile ? 16 : 28;
-    if (!prefersReducedMotion) {
-      for (var j = 0; j < particleCount; j++) {
-        var pt = document.createElement('div');
-        pt.className = 'particle';
-        var size = Math.random() * 3 + 1.5;
-        var isGold = Math.random() > 0.4;
-        pt.style.cssText =
-          'width:' + size + 'px;' +
-          'height:' + size + 'px;' +
-          'left:' + (Math.random() * 100) + 'vw;' +
-          'bottom:' + (Math.random() * 20) + 'vh;' +
-          'background:radial-gradient(circle,' + (isGold ? '#F5E27A' : '#00E5FF') + ',transparent);' +
-          'box-shadow:0 0 ' + (size * 2) + 'px ' + (isGold ? '#D4AF37' : '#00B4D8') + ';' +
-          'animation-duration:' + (8 + Math.random() * 14) + 's;' +
-          'animation-delay:' + (Math.random() * 12) + 's;' +
-          '--drift:' + ((Math.random() - 0.5) * 80) + 'px;';
-        particleWrap.appendChild(pt);
-      }
-    }
-
-    // ── Desktop: mouse parallax ──
-    if (!isMobile && !prefersReducedMotion) {
-      document.addEventListener('mousemove', function (e) {
-        var cx = window.innerWidth / 2;
-        var cy = window.innerHeight / 2;
-        var dx = (e.clientX - cx) / cx;
-        var dy = (e.clientY - cy) / cy;
-        scene.style.transform = 'translate(' + (dx * 6) + 'px,' + (dy * 4) + 'px)';
-      });
-    }
-
-    // ── Mobile: gyroscope tilt parallax (if available) ──
-    if (isMobile && !prefersReducedMotion && window.DeviceOrientationEvent) {
-      var handleOrientation = function (e) {
-        if (e.gamma === null || e.beta === null) return;
-        // gamma: left-right tilt (-90..90), beta: front-back tilt (-180..180)
-        var dx = Math.max(-1, Math.min(1, e.gamma / 30));
-        var dy = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
-        scene.style.transform = 'translate(' + (dx * 5) + 'px,' + (dy * 3) + 'px)';
-      };
-
-      // iOS 13+ requires permission
-      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-        document.body.addEventListener('touchstart', function requestGyro() {
-          DeviceOrientationEvent.requestPermission().then(function (state) {
-            if (state === 'granted') {
-              window.addEventListener('deviceorientation', handleOrientation);
-            }
-          }).catch(function () {});
-          document.body.removeEventListener('touchstart', requestGyro);
-        }, { once: true });
-      } else {
-        window.addEventListener('deviceorientation', handleOrientation);
-      }
-    }
-
-    // ── Recalculate on resize (orientation change, etc.) ──
-    var resizeTimer;
-    window.addEventListener('resize', function () {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function () {
-        isMobile = window.matchMedia('(max-width: 767px)').matches;
-      }, 250);
+  // ── Desktop: subtle parallax on mouse ──
+  if (!isMobile && !prefersReducedMotion) {
+    const scene = document.getElementById('scene');
+    document.addEventListener('mousemove', e => {
+      const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+      const dx = (e.clientX - cx) / cx, dy = (e.clientY - cy) / cy;
+      scene.style.transform = `translate(${dx * 6}px, ${dy * 4}px)`;
     });
-  })();
+  }
+
+  // ── Mobile: gyroscope tilt parallax ──
+  if (isMobile && !prefersReducedMotion && window.DeviceOrientationEvent) {
+    const scene = document.getElementById('scene');
+    const handleOrientation = (e) => {
+      if (e.gamma === null || e.beta === null) return;
+      const dx = Math.max(-1, Math.min(1, e.gamma / 30));
+      const dy = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
+      scene.style.transform = `translate(${dx * 5}px, ${dy * 3}px)`;
+    };
+
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      document.body.addEventListener('touchstart', function reqGyro() {
+        DeviceOrientationEvent.requestPermission()
+          .then(state => { if (state === 'granted') window.addEventListener('deviceorientation', handleOrientation); })
+          .catch(() => {});
+        document.body.removeEventListener('touchstart', reqGyro);
+      }, { once: true });
+    } else {
+      window.addEventListener('deviceorientation', handleOrientation);
+    }
+  }
 </script>
 </body>
 </html>
