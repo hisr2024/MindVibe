@@ -46,13 +46,13 @@ export function SakhaSymbol({
   // Hooks must be called unconditionally (Rules of Hooks)
   const uid = React.useId().replace(/:/g, '')
 
-  // Micro: OM-only symbol (petals too small to render)
-  if (variant === 'micro' || resolvedSize <= 32) {
+  // Micro / small: OM-only symbol (petals too small to render at ≤48px)
+  if (variant === 'micro' || resolvedSize <= 48) {
     return (
       <svg
         width={resolvedSize}
         height={resolvedSize}
-        viewBox="0 0 360 360"
+        viewBox="0 0 100 100"
         className={className}
         aria-label="Sakha — The Divine Friend"
         role="img"
@@ -63,17 +63,31 @@ export function SakhaSymbol({
             <stop offset="0%" stopColor="#FDE68A" />
             <stop offset="100%" stopColor="#A8760A" />
           </radialGradient>
+          <radialGradient id={`${uid}-microAura`} cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#D4A017" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#D4A017" stopOpacity="0" />
+          </radialGradient>
         </defs>
+        {/* Subtle outer aura */}
+        <circle cx="50" cy="50" r="48" fill={`url(#${uid}-microAura)`} />
+        {/* Gold border circle */}
         <circle
-          cx="180" cy="180" r="158"
-          fill="rgba(22,26,66,0.5)"
-          stroke="#D4A017" strokeWidth="2" strokeOpacity="0.7"
+          cx="50" cy="50" r="42"
+          fill="rgba(10,15,40,0.9)"
+          stroke="#D4A017" strokeWidth="2" strokeOpacity="0.85"
         />
+        {/* Inner ring accent */}
+        <circle
+          cx="50" cy="50" r="36"
+          fill="none"
+          stroke="#D4A017" strokeWidth="0.5" strokeOpacity="0.3"
+        />
+        {/* OM symbol — large and bold for visibility */}
         <text
-          x="180" y="192"
+          x="50" y="54"
           textAnchor="middle" dominantBaseline="middle"
-          fontFamily='"Cormorant Garamond", Georgia, serif'
-          fontSize="56" fontWeight="300"
+          fontFamily='"Noto Sans Devanagari", "Cormorant Garamond", Georgia, serif'
+          fontSize="38" fontWeight="400"
           fill={`url(#${uid}-microGold)`}
         >
           ॐ
