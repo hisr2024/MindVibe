@@ -34,18 +34,25 @@ LATEST_MIGRATION_RESULT: MigrationResult | None = None
 
 async def _ensure_migrations_table(engine: AsyncEngine) -> None:
     """Create schema_migrations table if it does not exist."""
-    async with engine.begin() as conn:
-        await conn.execute(
-            text(
-                """
-                CREATE TABLE IF NOT EXISTS schema_migrations (
-                    id SERIAL PRIMARY KEY,
-                    filename TEXT UNIQUE NOT NULL,
-                    applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                )
-                """
+    _dialect = engine.dialect.name
+    if _dialect == "sqlite":
+        _ddl = """
+            CREATE TABLE IF NOT EXISTS schema_migrations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                filename TEXT UNIQUE NOT NULL,
+                applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
-        )
+        """
+    else:
+        _ddl = """
+            CREATE TABLE IF NOT EXISTS schema_migrations (
+                id SERIAL PRIMARY KEY,
+                filename TEXT UNIQUE NOT NULL,
+                applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        """
+    async with engine.begin() as conn:
+        await conn.execute(text(_ddl))
 
 
 async def _fetch_applied(engine: AsyncEngine) -> set[str]:

@@ -197,14 +197,22 @@ async def align_journal_entries_schema(engine: AsyncEngine) -> dict:
 async def run_manual_migrations(engine: AsyncEngine) -> dict:
     """
     Run all manual migrations in sequence.
-    
+
     Returns:
         dict with results for each migration
     """
     results = {}
-    
+
+    # Skip PostgreSQL-specific migrations when running on SQLite (local dev / tests)
+    _dialect = engine.dialect.name
+    if _dialect == "sqlite":
+        logger.info("Running manual migrations... (SQLite detected — skipping PG-specific steps)")
+        results['pg_trgm'] = {'success': True, 'message': 'Skipped (SQLite)', 'action': 'skipped'}
+        results['journal_alignment'] = {'success': True, 'message': 'Skipped (SQLite)', 'action': 'skipped'}
+        return results
+
     logger.info("Running manual migrations...")
-    
+
     # Enable pg_trgm extension
     results['pg_trgm'] = await enable_pg_trgm_extension(engine)
     logger.info(f"pg_trgm: {results['pg_trgm']['message']}")

@@ -14,8 +14,11 @@ from sqlalchemy import (
     Text,
     func,
 )
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY as _PG_ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
+
+# ARRAY(String) on PostgreSQL, JSON on SQLite / other dialects
+_ArrayOfStrings = JSON().with_variant(_PG_ARRAY(String), "postgresql")
 
 from backend.models.base import Base, SoftDeleteMixin
 
@@ -128,7 +131,7 @@ class JournalSearchIndex(SoftDeleteMixin, Base):
     user_id: Mapped[str] = mapped_column(
         String(255), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
-    token_hashes: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
+    token_hashes: Mapped[list[str]] = mapped_column(_ArrayOfStrings, default=list)
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now()
     )
