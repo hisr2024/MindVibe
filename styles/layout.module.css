@@ -13,8 +13,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  background: #0b0b1a;
-  border-bottom: 1px solid rgba(180, 140, 60, 0.12);
+  background: rgba(5, 7, 20, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(212, 160, 23, 0.12);
 }
 
 @media (min-width: 1024px) {

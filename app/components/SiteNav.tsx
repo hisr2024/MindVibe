@@ -43,12 +43,12 @@ export default function SiteNav() {
   }, [open])
 
   const links = useMemo(() => [
-    { href: '/', label: t('navigation.mainNav.home', 'Home'), divine: true },
-    { href: '/sadhana', label: t('navigation.features.sadhana', 'Sadhana'), divine: true },
-    { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN'), highlight: true },
+    { href: '/', label: t('navigation.mainNav.home', 'Home') },
+    { href: '/sadhana', label: t('navigation.features.sadhana', 'Sadhana') },
+    { href: '/kiaan/chat', label: t('navigation.features.kiaan', 'KIAAN') },
     { href: '/dashboard', label: t('navigation.mainNav.dashboard', 'Dashboard') },
-    { href: '/journeys', label: t('navigation.features.wisdomJourneys', 'Journeys'), premium: true },
-{ href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Sacred Reflections') },
+    { href: '/journeys', label: t('navigation.features.wisdomJourneys', 'Journeys') },
+    { href: '/sacred-reflections', label: t('navigation.features.sacredReflections', 'Sacred Reflections') },
     { href: '/tools/karmic-tree', label: t('navigation.features.karmicTree', 'Karmic Tree') },
     { href: '/profile', label: t('navigation.mainNav.profile', 'Profile') },
     { href: '/account', label: t('navigation.mainNav.account', 'Account') },
@@ -67,7 +67,7 @@ export default function SiteNav() {
       animate={{ y: 0 }}
       transition={springConfigs.smooth}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 pr-16 md:pr-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 md:px-6">
         {/* Logo — Sakha symbol + wordmark */}
         <Link
           href="/"
@@ -91,11 +91,9 @@ export default function SiteNav() {
           </motion.span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
+        <nav className="hidden items-center gap-1.5 md:flex" aria-label="Primary">
           {links.map((link, index) => {
             const active = link.href === '/' ? pathname === '/' : (pathname === link.href || pathname.startsWith(link.href + '/'))
-            const isHighlight = 'highlight' in link && link.highlight
-            const isDivine = 'divine' in link && link.divine
             return (
               <motion.div
                 key={link.href}
@@ -108,15 +106,7 @@ export default function SiteNav() {
                   aria-current={active ? 'page' : undefined}
                   className={`block rounded-full px-3 py-2 font-ui transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A017]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(5,7,20,0.85)] ${
                     active
-                      ? isDivine
-                        ? 'border-2 border-[#D4A017] text-[#F0C040] shadow-lg shadow-[#D4A017]/20'
-                        : isHighlight
-                        ? 'border-2 border-[#D4A017] text-[#F0C040] shadow-lg shadow-[#D4A017]/20'
-                        : 'text-[#D4A017]'
-                      : isDivine
-                      ? 'border border-[rgba(212,160,23,0.4)] text-[rgba(212,160,23,0.8)] hover:border-[#D4A017] hover:text-[#F0C040]'
-                      : isHighlight
-                      ? 'border border-[rgba(212,160,23,0.4)] text-[rgba(212,160,23,0.8)] hover:border-[#D4A017] hover:text-[#F0C040]'
+                      ? 'text-[#F0C040] border border-[#D4A017]/50'
                       : 'text-[#B8AE98] hover:text-[#D4A017]'
                   }`}
                   style={{
@@ -247,8 +237,6 @@ export default function SiteNav() {
               >
                 {links.map(link => {
                   const active = pathname === link.href
-                  const isHighlight = 'highlight' in link && link.highlight
-                  const isDivine = 'divine' in link && link.divine
                   return (
                     <motion.div
                       key={link.href}
@@ -260,15 +248,7 @@ export default function SiteNav() {
                         aria-current={active ? 'page' : undefined}
                         className={`flex min-h-[48px] items-center rounded-xl px-4 py-3 font-ui transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A017]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgba(11,14,42,0.98)] ${
                           active
-                            ? isDivine
-                              ? 'border-2 border-[#D4A017] text-[#F0C040] shadow-lg shadow-[#D4A017]/20'
-                              : isHighlight
-                              ? 'border-2 border-[#D4A017] text-[#F0C040] shadow-lg shadow-[#D4A017]/20'
-                              : 'text-[#D4A017]'
-                            : isDivine
-                            ? 'border border-[rgba(212,160,23,0.4)] text-[rgba(212,160,23,0.8)] hover:border-[#D4A017] hover:text-[#F0C040]'
-                            : isHighlight
-                            ? 'border border-[rgba(212,160,23,0.4)] text-[rgba(212,160,23,0.8)] hover:border-[#D4A017] hover:text-[#F0C040]'
+                            ? 'text-[#F0C040] border border-[#D4A017]/50'
                             : 'text-[#B8AE98] hover:text-[#D4A017]'
                         }`}
                         style={{
@@ -278,19 +258,6 @@ export default function SiteNav() {
                         }}
                       >
                         {link.label}
-                        {isHighlight && !active && (
-                          <span
-                            className="ml-auto rounded-full px-2 py-0.5"
-                            style={{
-                              fontSize: '10px',
-                              fontWeight: 600,
-                              backgroundColor: 'rgba(212, 160, 23, 0.15)',
-                              color: 'rgba(212, 160, 23, 0.9)',
-                            }}
-                          >
-                            AI
-                          </span>
-                        )}
                       </Link>
                     </motion.div>
                   )

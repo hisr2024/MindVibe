@@ -19,9 +19,17 @@ interface MobileRouteGuardProps {
 export function MobileRouteGuard({ children }: MobileRouteGuardProps) {
   const pathname = usePathname()
   const isMobileRoute = pathname === '/m' || pathname.startsWith('/m/')
+  const isAppShellRoute =
+    pathname === '/dashboard' || pathname.startsWith('/dashboard/') ||
+    pathname === '/kiaan' || pathname.startsWith('/kiaan/')
 
   if (isMobileRoute) {
     return null
+  }
+
+  // Hide SiteNav on desktop for app-shell routes (they have their own Topbar+Sidebar)
+  if (isAppShellRoute) {
+    return <div className="lg:hidden">{children}</div>
   }
 
   return <>{children}</>
@@ -86,7 +94,7 @@ export function MobileContentWrapper({ children }: MobileContentWrapperProps) {
     return (
       <main
         id="main-content"
-        className="flex w-full flex-col gap-6 px-4 pb-28 pt-20 sm:gap-8 sm:px-6 sm:pb-20 md:pb-10 lg:flex-row lg:gap-0 lg:px-0 lg:pb-0 lg:pt-16 lg:h-screen lg:overflow-hidden mobile-content-area"
+        className="flex w-full flex-col gap-6 px-4 pb-28 pt-20 sm:gap-8 sm:px-6 sm:pb-20 md:pb-10 lg:flex-row lg:gap-0 lg:px-0 lg:pb-0 lg:pt-0 lg:h-screen lg:overflow-hidden mobile-content-area"
       >
         {children}
       </main>
