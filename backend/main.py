@@ -570,8 +570,10 @@ async def startup():
                     _email_provider,
                 )
 
-            # Log effective REQUIRE_EMAIL_VERIFICATION state (may have been
-            # auto-disabled by settings validator if email is not configured)
+            # Log effective REQUIRE_EMAIL_VERIFICATION state
+            # Note: this is NOT auto-disabled — it reflects the env var value.
+            # When can_send_email() is False, auth routes skip enforcement
+            # regardless of this setting (checked at request time, not startup).
             startup_logger.info(
                 "   Email verification enforcement: %s",
                 "ENABLED" if _settings.REQUIRE_EMAIL_VERIFICATION else "DISABLED",

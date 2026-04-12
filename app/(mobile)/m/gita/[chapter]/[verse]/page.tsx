@@ -10,7 +10,7 @@
 
 'use client'
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -37,7 +37,6 @@ import {
 import {
   getGitaMobileChapter,
   getGitaVoiceConfig,
-  GITA_MOBILE_CHAPTERS,
 } from '@/lib/kiaan-vibe/gita-library'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
 
@@ -68,7 +67,6 @@ export default function MobileGitaVersePage() {
   const [isLiked, setIsLiked] = useState(false)
   const [copied, setCopied] = useState(false)
   const [selectedVoice, setSelectedVoice] = useState('divine-krishna')
-  const [showLangSheet, setShowLangSheet] = useState(false)
   const [selectedLang, setSelectedLang] = useState('en')
   const [translitVisible, setTranslitVisible] = useState(false)
 
@@ -86,16 +84,14 @@ export default function MobileGitaVersePage() {
     setTranslitVisible(false)
 
     async function load() {
-      const [saData, enData, hiData] = await Promise.all([
+      const [saData, enData] = await Promise.all([
         loadGitaLanguage('sa'),
         loadGitaLanguage('en'),
-        loadGitaLanguage('hi'),
       ])
       if (cancelled) return
 
       const saChapter = saData?.chapters.find(c => c.chapterNumber === chapter)
       const enChapter = enData?.chapters.find(c => c.chapterNumber === chapter)
-      const hiChapter = hiData?.chapters.find(c => c.chapterNumber === chapter)
       const saVerse = saChapter?.verses.find(v => v.verseNumber === verse)
       const enVerse = enChapter?.verses.find(v => v.verseNumber === verse)
 

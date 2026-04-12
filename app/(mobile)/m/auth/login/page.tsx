@@ -52,7 +52,7 @@ function LoginContent() {
 
   const [isBiometricLoading, setIsBiometricLoading] = useState(false)
   const [showBiometricOffer, setShowBiometricOffer] = useState(false)
-  const [hasAttemptedBiometric, setHasAttemptedBiometric] = useState(false)
+  const [, setHasAttemptedBiometric] = useState(false)
   const [biometricLabel, setBiometricLabel] = useState('Sign in with Biometrics')
   const [biometricOfferLoading, setBiometricOfferLoading] = useState(false)
 

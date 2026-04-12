@@ -73,6 +73,14 @@ services:
       # Resend API key — set in Render Dashboard (not committed to repo)
       - key: RESEND_API_KEY
         value: ""
+      # Frontend URL for email verification/reset links (MUST match your deployed frontend)
+      - key: FRONTEND_URL
+        value: "https://www.kiaanverse.com"
+      # Email sender identity (domain must be verified in Resend dashboard)
+      - key: EMAIL_FROM_ADDRESS
+        value: "noreply@kiaanverse.com"
+      - key: EMAIL_FROM_NAME
+        value: "Kiaanverse"
     healthCheckPath: /health
     # Autoscaling settings — scale to 10 instances for up to 1,000 concurrent users
     scaling:
