@@ -14,21 +14,21 @@ interface BadgeProps {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  default: 'bg-[#d4a44c]/10 border-[#d4a44c]/30 text-[#f5f0e8]',
+  default: 'bg-gold-500/10 border-gold-500/30 text-divine-cream',
   success: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-50',
-  warning: 'bg-[#d4a44c]/10 border-[#d4a44c]/30 text-[#f5f0e8]',
+  warning: 'bg-gold-500/10 border-gold-500/30 text-divine-cream',
   danger: 'bg-red-500/10 border-red-500/30 text-red-50',
   info: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-50',
-  premium: 'bg-gradient-to-r from-[#d4a44c]/20 via-[#d4a44c]/20 to-[#d4a44c]/20 border-[#d4a44c]/40 text-[#f5f0e8]',
+  premium: 'bg-gradient-to-r from-gold-500/20 via-gold-500/20 to-gold-500/20 border-gold-500/40 text-divine-cream',
 }
 
 const dotStyles: Record<BadgeVariant, string> = {
-  default: 'bg-[#d4a44c]',
+  default: 'bg-gold-500',
   success: 'bg-emerald-400',
-  warning: 'bg-[#d4a44c]',
+  warning: 'bg-gold-500',
   danger: 'bg-red-400',
   info: 'bg-cyan-400',
-  premium: 'bg-gradient-to-r from-[#d4a44c] to-[#d4a44c]',
+  premium: 'bg-gold-500',
 }
 
 const sizeStyles: Record<BadgeSize, string> = {

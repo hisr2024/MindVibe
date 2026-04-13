@@ -71,6 +71,7 @@ const config: Config = {
         // CSS variables defined in styles/typography.css, fonts loaded via CDN
         divine: ['"Cormorant Garamond"', 'Georgia', 'serif'],
         scripture: ['"Crimson Text"', 'Georgia', '"Times New Roman"', 'serif'],
+        // font-sacred is a legacy alias for font-scripture — both resolve to Crimson Text
         sacred: ['"Crimson Text"', 'Georgia', '"Times New Roman"', 'serif'],
         display: ['"Playfair Display"', 'Georgia', 'serif'],
         ui: ['Outfit', 'system-ui', '-apple-system', 'sans-serif'],

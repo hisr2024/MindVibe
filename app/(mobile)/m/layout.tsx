@@ -69,8 +69,16 @@ export default function MobileLayout({
     <div className="mobile-layout min-h-screen bg-[var(--sacred-cosmic-void,#050714)]">
       <script dangerouslySetInnerHTML={{ __html: colorSchemeInitScript }} />
       <script dangerouslySetInnerHTML={{ __html: fontScaleInitScript }} />
+      <a
+        href="#mobile-main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:rounded-lg focus:bg-[#d4a44c] focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-slate-950"
+      >
+        Skip to content
+      </a>
       <MobileErrorBoundary>
-        {children}
+        <main id="mobile-main-content">
+          {children}
+        </main>
       </MobileErrorBoundary>
     </div>
   )

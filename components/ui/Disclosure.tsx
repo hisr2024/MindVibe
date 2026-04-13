@@ -66,7 +66,7 @@ function AccordionItem({ item }: { item: { id: string; title: string; preview?: 
       className="rounded-2xl border border-[#d4a44c]/15 bg-black/40 overflow-hidden"
     >
       <AccordionPrimitive.Header>
-        <AccordionPrimitive.Trigger className="group flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[#d4a44c]/5">
+        <AccordionPrimitive.Trigger className="group flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[#d4a44c]/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/80 focus-visible:ring-inset rounded-2xl">
           <div className="flex-1">
             <span className="text-sm font-semibold text-[#f5f0e8]">{item.title}</span>
             {item.preview && (
@@ -112,7 +112,7 @@ export function DisclosureItem({ title, preview, children, defaultOpen = false, 
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[#d4a44c]/5"
+        className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[#d4a44c]/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d4a44c]/80 focus-visible:ring-inset rounded-2xl"
       >
         <div className="flex-1">
           <span className="text-sm font-semibold text-[#f5f0e8]">{title}</span>

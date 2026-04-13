@@ -133,8 +133,20 @@ export function SignUpScreen({ onSwitchToLogin }: SignUpScreenProps) {
 
       {/* Error Banner */}
       {error && (
-        <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+        <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20" role="alert">
           <p className="sacred-text-ui text-xs text-red-400 text-center">{error}</p>
+        </div>
+      )}
+
+      {/* Form-level error summary for screen readers */}
+      {Object.keys(fieldErrors).filter(k => fieldErrors[k]).length > 0 && (
+        <div className="sr-only" role="alert" aria-live="assertive">
+          <p>Please fix the following errors:</p>
+          <ul>
+            {Object.entries(fieldErrors).filter(([, v]) => v).map(([key, msg]) => (
+              <li key={key}>{msg}</li>
+            ))}
+          </ul>
         </div>
       )}
 
@@ -211,7 +223,7 @@ export function SignUpScreen({ onSwitchToLogin }: SignUpScreenProps) {
       <PasswordStrengthBar password={password} />
 
       {/* Terms Checkbox */}
-      <label className="flex items-start gap-3 mb-3 cursor-pointer">
+      <label className="group flex items-start gap-3 mb-3 cursor-pointer">
         <input
           type="checkbox"
           checked={termsAccepted}
@@ -219,10 +231,11 @@ export function SignUpScreen({ onSwitchToLogin }: SignUpScreenProps) {
             setTermsAccepted(e.target.checked)
             setFieldErrors(prev => ({ ...prev, terms: '' }))
           }}
-          className="sr-only"
+          className="sr-only peer"
+          aria-required="true"
         />
         <div
-          className={`w-5 h-5 rounded-md border transition-all flex items-center justify-center flex-shrink-0 mt-0.5 ${
+          className={`w-5 h-5 rounded-md border transition-all flex items-center justify-center flex-shrink-0 mt-0.5 peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--sacred-divine-gold)]/80 peer-focus-visible:ring-offset-1 peer-focus-visible:ring-offset-[var(--sacred-cosmic-void)] ${
             termsAccepted
               ? 'bg-[var(--sacred-krishna-blue)] border-[var(--sacred-divine-gold)]'
               : 'bg-[rgba(22,26,66,0.55)] border-[rgba(212,160,23,0.3)]'
@@ -247,15 +260,15 @@ export function SignUpScreen({ onSwitchToLogin }: SignUpScreenProps) {
       )}
 
       {/* Updates Checkbox */}
-      <label className="flex items-start gap-3 mb-6 cursor-pointer">
+      <label className="group flex items-start gap-3 mb-6 cursor-pointer">
         <input
           type="checkbox"
           checked={updatesOptIn}
           onChange={(e) => setUpdatesOptIn(e.target.checked)}
-          className="sr-only"
+          className="sr-only peer"
         />
         <div
-          className={`w-5 h-5 rounded-md border transition-all flex items-center justify-center flex-shrink-0 mt-0.5 ${
+          className={`w-5 h-5 rounded-md border transition-all flex items-center justify-center flex-shrink-0 mt-0.5 peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--sacred-divine-gold)]/80 peer-focus-visible:ring-offset-1 peer-focus-visible:ring-offset-[var(--sacred-cosmic-void)] ${
             updatesOptIn
               ? 'bg-[var(--sacred-krishna-blue)] border-[var(--sacred-divine-gold)]'
               : 'bg-[rgba(22,26,66,0.55)] border-[rgba(212,160,23,0.3)]'

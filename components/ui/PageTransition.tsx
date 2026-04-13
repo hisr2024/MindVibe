@@ -12,6 +12,7 @@
 
 import { motion } from 'framer-motion'
 import type { ReactNode } from 'react'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 interface PageTransitionProps {
   children: ReactNode
@@ -36,6 +37,12 @@ const pageVariants = {
   },
 }
 
+const reducedVariants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+}
+
 const pageTransition = {
   type: 'spring' as const,
   stiffness: 260,
@@ -43,14 +50,20 @@ const pageTransition = {
   mass: 0.8,
 }
 
+const reducedTransition = {
+  duration: 0.01,
+}
+
 export function PageTransition({ children, className = '' }: PageTransitionProps) {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <motion.div
-      variants={pageVariants}
+      variants={prefersReducedMotion ? reducedVariants : pageVariants}
       initial="initial"
       animate="animate"
       exit="exit"
-      transition={pageTransition}
+      transition={prefersReducedMotion ? reducedTransition : pageTransition}
       className={className}
     >
       {children}

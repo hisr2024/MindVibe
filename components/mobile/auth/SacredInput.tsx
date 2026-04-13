@@ -23,11 +23,13 @@ export const SacredAuthInput = forwardRef<HTMLInputElement, SacredInputProps>(
     ref
   ) {
     const [focused, setFocused] = useState(false)
+    const inputId = props.id || label.toLowerCase().replace(/\s+/g, '-')
+    const errorId = error ? `${inputId}-error` : undefined
 
     return (
       <div className="w-full mb-4">
-        <label className="block sacred-text-ui text-xs text-[var(--sacred-text-secondary)] mb-1.5 ml-1">
-          {label}
+        <label htmlFor={inputId} className="block sacred-text-ui text-xs text-[var(--sacred-text-secondary)] mb-1.5 ml-1">
+          {label}{props.required && <span className="ml-0.5 text-[var(--sacred-divine-gold)]" aria-hidden="true">*</span>}
         </label>
         <div
           className={`relative flex items-center rounded-[14px] transition-all duration-300 ${
@@ -40,7 +42,11 @@ export const SacredAuthInput = forwardRef<HTMLInputElement, SacredInputProps>(
         >
           <input
             ref={ref}
+            id={inputId}
             type={type}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={errorId}
+            aria-required={props.required || undefined}
             className={`w-full bg-transparent px-4 py-[13px] text-sm text-[var(--sacred-text-primary)] sacred-text-ui placeholder:text-[var(--sacred-text-muted)] placeholder:italic outline-none ${
               icon ? 'pr-12' : ''
             } ${className}`}
@@ -59,8 +65,7 @@ export const SacredAuthInput = forwardRef<HTMLInputElement, SacredInputProps>(
             <button
               type="button"
               onClick={onIconPress}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[var(--sacred-text-muted)] hover:text-[var(--sacred-divine-gold)] transition-colors"
-              tabIndex={-1}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[var(--sacred-text-muted)] hover:text-[var(--sacred-divine-gold)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--sacred-divine-gold)]/80 rounded"
               aria-label="Toggle visibility"
             >
               {icon}
@@ -68,7 +73,7 @@ export const SacredAuthInput = forwardRef<HTMLInputElement, SacredInputProps>(
           )}
         </div>
         {error && (
-          <p className="sacred-text-ui text-xs text-red-400 mt-1 ml-1">{error}</p>
+          <p id={errorId} className="sacred-text-ui text-xs text-red-400 mt-1 ml-1" role="alert">{error}</p>
         )}
       </div>
     )

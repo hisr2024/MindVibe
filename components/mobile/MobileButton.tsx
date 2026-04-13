@@ -3,6 +3,7 @@
 import { forwardRef, ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { useHapticFeedback } from '@/hooks/useHapticFeedback'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 export interface MobileButtonProps {
   children: ReactNode
@@ -96,6 +97,7 @@ export const MobileButton = forwardRef<HTMLButtonElement, MobileButtonProps>(
     ref
   ) {
     const { triggerHaptic } = useHapticFeedback()
+    const prefersReducedMotion = useReducedMotion()
 
     // Variant styles
     const variantStyles: Record<string, string> = {
@@ -151,10 +153,10 @@ export const MobileButton = forwardRef<HTMLButtonElement, MobileButtonProps>(
       <motion.button
         ref={ref}
         type={type}
-        variants={buttonVariants}
-        initial="rest"
-        whileHover={!isDisabled ? 'hover' : undefined}
-        whileTap={!isDisabled ? 'tap' : undefined}
+        variants={prefersReducedMotion ? undefined : buttonVariants}
+        initial={prefersReducedMotion ? undefined : 'rest'}
+        whileHover={!isDisabled && !prefersReducedMotion ? 'hover' : undefined}
+        whileTap={!isDisabled && !prefersReducedMotion ? 'tap' : undefined}
         className={`
           inline-flex items-center justify-center
           transition-all duration-200
