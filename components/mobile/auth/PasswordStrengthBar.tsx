@@ -11,8 +11,8 @@ interface PasswordStrengthBarProps {
   password: string
 }
 
-function getStrength(password: string): { level: number; label: string; color: string } {
-  if (!password) return { level: 0, label: '', color: 'transparent' }
+function getStrength(password: string): { level: number; label: string; color: string; symbol: string } {
+  if (!password) return { level: 0, label: '', color: 'transparent', symbol: '' }
 
   let score = 0
   if (password.length >= 8) score++
@@ -20,20 +20,20 @@ function getStrength(password: string): { level: number; label: string; color: s
   if (/[0-9]/.test(password)) score++
   if (/[^A-Za-z0-9]/.test(password)) score++
 
-  if (score <= 1) return { level: 1, label: 'Weak', color: '#EF4444' }
-  if (score === 2) return { level: 2, label: 'Fair', color: '#F59E0B' }
-  if (score === 3) return { level: 3, label: 'Good', color: '#D4A017' }
-  return { level: 4, label: 'Strong', color: '#10B981' }
+  if (score <= 1) return { level: 1, label: 'Weak', color: '#EF4444', symbol: '!' }
+  if (score === 2) return { level: 2, label: 'Fair', color: '#F59E0B', symbol: '~' }
+  if (score === 3) return { level: 3, label: 'Good', color: '#D4A017', symbol: '+' }
+  return { level: 4, label: 'Strong', color: '#10B981', symbol: '\u2713' }
 }
 
 export function PasswordStrengthBar({ password }: PasswordStrengthBarProps) {
-  const { level, label, color } = getStrength(password)
+  const { level, label, color, symbol } = getStrength(password)
 
   if (!password) return null
 
   return (
-    <div className="mt-1.5 mb-2 px-1">
-      <div className="flex gap-1 h-[3px] rounded-full overflow-hidden">
+    <div className="mt-1.5 mb-2 px-1" role="status" aria-live="polite" aria-label={label ? `Password strength: ${label}` : undefined}>
+      <div className="flex gap-1 h-[3px] rounded-full overflow-hidden" aria-hidden="true">
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
@@ -45,10 +45,10 @@ export function PasswordStrengthBar({ password }: PasswordStrengthBarProps) {
         ))}
       </div>
       <p
-        className="sacred-text-ui text-[11px] mt-1 text-right transition-colors duration-300"
+        className="sacred-text-ui text-xs mt-1 text-right transition-colors duration-300 font-medium"
         style={{ color }}
       >
-        {label}
+        <span aria-hidden="true">{symbol} </span>{label}
       </p>
     </div>
   )

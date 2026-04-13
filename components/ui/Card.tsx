@@ -26,9 +26,9 @@ interface CardFooterProps {
 }
 
 const variantStyles: Record<CardVariant, string> = {
-  default: 'bg-divine-void/85 border border-[#d4a44c]/15 shadow-[0_15px_60px_rgba(212,164,76,0.10)]',
-  elevated: 'bg-gradient-to-br from-[#0d0b08] via-divine-void to-[#080810] border border-[#d4a44c]/20 shadow-[0_24px_100px_rgba(212,164,76,0.12)]',
-  bordered: 'bg-black/40 border border-[#d4a44c]/20',
+  default: 'bg-divine-void/85 border border-gold-500/15 shadow-[0_15px_60px_rgba(212,164,76,0.10)]',
+  elevated: 'bg-gradient-to-br from-divine-black via-divine-void to-divine-black border border-gold-500/20 shadow-[0_24px_100px_rgba(212,164,76,0.12)]',
+  bordered: 'bg-black/40 border border-gold-500/20',
   ghost: 'bg-transparent',
 }
 

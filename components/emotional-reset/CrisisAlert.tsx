@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect, useRef, useCallback } from 'react'
+
 interface CrisisAlertProps {
   crisisResponse: string
   onAcknowledge: () => void
@@ -9,7 +11,8 @@ interface CrisisAlertProps {
 
 /**
  * Crisis Alert Modal
- * Shows safety resources when crisis is detected during the emotional reset flow
+ * Shows safety resources when crisis is detected during the emotional reset flow.
+ * Includes focus trap, keyboard escape, and clickable crisis hotline links.
  */
 export function CrisisAlert({
   crisisResponse,
@@ -17,6 +20,54 @@ export function CrisisAlert({
   onCloseSession,
   className = '',
 }: CrisisAlertProps) {
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onAcknowledge()
+      return
+    }
+
+    if (e.key === 'Tab' && dialogRef.current) {
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusable.length === 0) return
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+  }, [onAcknowledge])
+
+  useEffect(() => {
+    previousFocusRef.current = document.activeElement as HTMLElement | null
+    document.addEventListener('keydown', handleKeyDown)
+
+    const timer = setTimeout(() => {
+      const target = dialogRef.current?.querySelector<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+      target?.focus()
+    }, 50)
+
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('keydown', handleKeyDown)
+      if (previousFocusRef.current && document.contains(previousFocusRef.current)) {
+        previousFocusRef.current.focus()
+      }
+    }
+  }, [handleKeyDown])
+
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm ${className}`}
@@ -25,7 +76,7 @@ export function CrisisAlert({
       aria-labelledby="crisis-alert-title"
       aria-describedby="crisis-alert-description"
     >
-      <div className="w-full max-w-md space-y-4 rounded-2xl border border-[#d4a44c]/30 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-[0_20px_60px_rgba(212,164,76,0.15)]">
+      <div ref={dialogRef} className="w-full max-w-md space-y-4 rounded-2xl border border-[#d4a44c]/30 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-[0_20px_60px_rgba(212,164,76,0.15)]">
         {/* Header */}
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#d4a44c]/20">
@@ -61,16 +112,16 @@ export function CrisisAlert({
           </p>
           <ul className="space-y-1.5 text-sm text-orange-100/80">
             <li className="flex items-center gap-2">
-              <span className="text-[#d4a44c]">📞</span>
-              <span>Support Line: <strong className="text-orange-50">988</strong></span>
+              <span className="text-[#d4a44c]" aria-hidden="true">📞</span>
+              <span>Support Line: <a href="tel:988" className="text-orange-50 font-bold underline underline-offset-2 hover:text-[#d4a44c] transition-colors">988</a></span>
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-[#d4a44c]">💬</span>
-              <span>Text Support: Text <strong className="text-orange-50">HOME</strong> to 741741</span>
+              <span className="text-[#d4a44c]" aria-hidden="true">💬</span>
+              <span>Text Support: Text <a href="sms:741741&amp;body=HOME" className="text-orange-50 font-bold underline underline-offset-2 hover:text-[#d4a44c] transition-colors">HOME to 741741</a></span>
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-[#d4a44c]">🌍</span>
-              <span>Worldwide: <strong className="text-orange-50">befrienders.org</strong></span>
+              <span className="text-[#d4a44c]" aria-hidden="true">🌍</span>
+              <span>Worldwide: <a href="https://www.befrienders.org" target="_blank" rel="noopener noreferrer" className="text-orange-50 font-bold underline underline-offset-2 hover:text-[#d4a44c] transition-colors">befrienders.org</a></span>
             </li>
           </ul>
         </div>

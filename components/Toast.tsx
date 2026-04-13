@@ -1,5 +1,11 @@
 'use client'
 
+/**
+ * @deprecated Use `import { toast } from '@/components/ui/Toast'` instead.
+ * This legacy Toast has been superseded by the unified toast system which
+ * supports 6 types, action buttons, progress bars, and haptic feedback.
+ */
+
 import { useState, useEffect } from 'react'
 
 interface ToastProps {

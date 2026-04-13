@@ -57,17 +57,16 @@
     --sacred-peacock-teal: #0E7490;
     --sacred-peacock-iridescent: #06B6D4;
     --sacred-peacock-shimmer: #67E8F9;
-    /* Divine gold — sacred moments, celebrations */
-    --sacred-divine-gold: #D4A017;
-    --sacred-divine-gold-bright: #F0C040;
-    --sacred-divine-gold-glow: #FDE68A;
-    /* Saffron — aliased to Divine Gold in Phase 7 for unified desktop palette.
-       The token names are preserved so tailwind utilities (bg-sacred-saffron-core,
-       bg-sacred-saffron-warm) and existing consumers keep working, but the
-       underlying colour resolves to gold for the desktop redesign. Mobile
-       (/m/ routes) retains its own saffron values in styles/sacred-mobile.css. */
-    --sacred-saffron-core: #D4A017;
-    --sacred-saffron-warm: #E8B54A;
+    /* Divine gold — sacred moments, celebrations
+       Aligned to --mv-gold (#d4a44c) as the canonical gold value across
+       the codebase. Prevents token conflict between base.css and globals.css. */
+    --sacred-divine-gold: #d4a44c;
+    --sacred-divine-gold-bright: #f0c96d;
+    --sacred-divine-gold-glow: #f5e6c8;
+    /* Saffron — aliased to Divine Gold for unified desktop palette.
+       Mobile (/m/ routes) retains its own saffron values in sacred-mobile.css. */
+    --sacred-saffron-core: #d4a44c;
+    --sacred-saffron-warm: #e8b54a;
     /* Sacred whites and text hierarchy */
     --sacred-white: #F8F6F0;
     --sacred-text-primary: #EDE8DC;

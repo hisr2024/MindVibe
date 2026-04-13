@@ -141,8 +141,12 @@ function LoginContent() {
       <AuthHeader />
 
       {/* Tab switcher */}
-      <div className="flex rounded-2xl bg-[rgba(22,26,66,0.5)] border border-[rgba(255,255,255,0.06)] p-1 mb-6">
+      <div role="tablist" aria-label="Authentication" className="flex rounded-2xl bg-[rgba(22,26,66,0.5)] border border-[rgba(255,255,255,0.06)] p-1 mb-6">
         <button
+          role="tab"
+          id="tab-signin"
+          aria-selected={activeTab === 'signin'}
+          aria-controls="panel-signin"
           onClick={() => setActiveTab('signin')}
           className={`flex-1 py-2.5 rounded-xl text-sm sacred-text-ui transition-all ${
             activeTab === 'signin'
@@ -153,6 +157,10 @@ function LoginContent() {
           Sign In
         </button>
         <button
+          role="tab"
+          id="tab-create"
+          aria-selected={activeTab === 'create'}
+          aria-controls="panel-create"
           onClick={() => setActiveTab('create')}
           className={`flex-1 py-2.5 rounded-xl text-sm sacred-text-ui transition-all ${
             activeTab === 'create'
@@ -245,12 +253,16 @@ function LoginContent() {
 
       {/* Auth forms */}
       {activeTab === 'signin' ? (
-        <LoginScreen
-          onSwitchToSignUp={() => setActiveTab('create')}
-          onLoginSuccess={handlePasswordLoginSuccess}
-        />
+        <div role="tabpanel" id="panel-signin" aria-labelledby="tab-signin">
+          <LoginScreen
+            onSwitchToSignUp={() => setActiveTab('create')}
+            onLoginSuccess={handlePasswordLoginSuccess}
+          />
+        </div>
       ) : (
-        <SignUpScreen onSwitchToLogin={() => setActiveTab('signin')} />
+        <div role="tabpanel" id="panel-create" aria-labelledby="tab-create">
+          <SignUpScreen onSwitchToLogin={() => setActiveTab('signin')} />
+        </div>
       )}
 
       {/* Biometric Offer Bottom Sheet — shown after successful password login */}
