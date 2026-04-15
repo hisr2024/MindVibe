@@ -1,238 +1,239 @@
 /**
  * app/api/privacy/pdf/route.ts
  *
- * GET /api/privacy/pdf → streams the Privacy Policy as a printable PDF.
+ * GET /api/privacy/pdf → serves the Kiaanverse Privacy Policy as a branded,
+ * print-optimised PDF built with @react-pdf/renderer.
  *
- * Implementation notes:
- *   - Uses the project-native `jspdf` dependency (already shipped) so no new
- *     runtime packages are pulled.
- *   - Generation is synchronous and deterministic; the same MDX source always
- *     yields the same PDF for the same `version` query param.
- *   - Runs at the edge-compatible Node runtime because jspdf needs DOM-like
- *     primitives we polyfill via ArrayBuffer output.
- *   - Sets `Cache-Control: public, max-age=3600, s-maxage=86400` so the CDN
- *     can serve it; users get a fresh copy whenever we cut a new version.
+ * Architecture:
+ *   - Runtime:      Node.js (react-pdf needs streams). Vercel-compatible;
+ *                   explicitly NOT puppeteer.
+ *   - Rendering:    ReactPDF.renderToStream(document) → Node Readable, then
+ *                   bridged to a Web ReadableStream via Node's Readable.toWeb()
+ *                   so the Next.js Response can stream bytes straight to the
+ *                   client with no full-document buffering.
+ *   - Rate limit:   10 requests / 60 s / IP. Uses Upstash Redis REST if the
+ *                   env vars are present (edge/Node safe, no client lib
+ *                   needed), else falls back to an in-process sliding window
+ *                   that protects single-instance deployments.
+ *   - Cache:        `public, max-age=86400` — the policy only changes when we
+ *                   cut a new version.
+ *   - Errors:       500 JSON body `{error, message}` on any failure;
+ *                   429 JSON body on rate-limit breach with Retry-After header.
  *
- * Security:
- *   - Read-only endpoint; no user input is ever logged or echoed beyond the
- *     version string which is validated against /^[\d.]{1,12}$/.
- *   - No authentication required — privacy policy is public information.
+ * Why streaming matters:
+ *   A 14-page branded PDF is ~70 KB. Streaming lets the browser start the
+ *   download dialog immediately and keeps route memory pressure low even
+ *   under burst load.
  */
 
 import { NextResponse } from 'next/server'
-import { jsPDF } from 'jspdf'
-import {
-  formatLastUpdated,
-  getPrivacyDocument,
-  type ContentBlock,
-  type InlineNode,
-} from '@/lib/mdx/privacy'
+import type { NextRequest } from 'next/server'
+import { Readable } from 'node:stream'
+import * as ReactPDF from '@react-pdf/renderer'
+import type { DocumentProps } from '@react-pdf/renderer'
+import { createElement, type ReactElement } from 'react'
+
+import { getPrivacyDocument } from '@/lib/mdx/privacy'
+import { PrivacyPDFDocument } from '@/components/legal/PrivacyPDFDocument'
+
+// ---------------------------------------------------------------------------
+// Next.js route config
+// ---------------------------------------------------------------------------
 
 export const runtime = 'nodejs'
-export const dynamic = 'force-static'
-export const revalidate = 86400
+export const dynamic = 'force-dynamic' // per-request rate limiting
+export const revalidate = 0
 
-const SAFE_VERSION_RE = /^[\d.]{1,12}$/
+// ---------------------------------------------------------------------------
+// Rate limiter — Redis-first with in-memory fallback
+// ---------------------------------------------------------------------------
 
-function flattenInline(nodes: InlineNode[]): string {
-  return nodes
-    .map((node) => {
-      switch (node.type) {
-        case 'link':
-          return `${node.value} (${node.href})`
-        default:
-          return node.value
-      }
+const WINDOW_SECONDS = 60
+const MAX_REQUESTS = 10
+
+interface RateLimitResult {
+  ok: boolean
+  remaining: number
+  resetAtSeconds: number
+}
+
+/** Upstash Redis REST endpoint pair, if configured. */
+const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL ?? ''
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN ?? ''
+const hasRedis = UPSTASH_URL.length > 0 && UPSTASH_TOKEN.length > 0
+
+/**
+ * Execute an Upstash REST command. Returns `null` on any transport or parse
+ * error so the caller can gracefully fall back to the in-memory limiter.
+ */
+async function upstash<T>(command: ReadonlyArray<string | number>): Promise<T | null> {
+  try {
+    const response = await fetch(UPSTASH_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${UPSTASH_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(command),
+      cache: 'no-store',
     })
-    .join('')
-}
-
-function renderBlock(
-  doc: jsPDF,
-  block: ContentBlock,
-  cursor: { y: number },
-  margins: { left: number; right: number; top: number; bottom: number },
-  pageHeight: number,
-  pageWidth: number,
-): void {
-  const ensureSpace = (needed: number) => {
-    if (cursor.y + needed > pageHeight - margins.bottom) {
-      doc.addPage()
-      cursor.y = margins.top
-    }
-  }
-
-  const contentWidth = pageWidth - margins.left - margins.right
-
-  switch (block.type) {
-    case 'h3': {
-      ensureSpace(24)
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(12)
-      doc.setTextColor(40, 40, 40)
-      const lines = doc.splitTextToSize(block.text, contentWidth)
-      doc.text(lines, margins.left, cursor.y)
-      cursor.y += lines.length * 14 + 4
-      break
-    }
-    case 'paragraph': {
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(10.5)
-      doc.setTextColor(55, 55, 55)
-      const text = flattenInline(block.children)
-      const lines = doc.splitTextToSize(text, contentWidth)
-      for (const line of lines) {
-        ensureSpace(14)
-        doc.text(line, margins.left, cursor.y)
-        cursor.y += 14
-      }
-      cursor.y += 6
-      break
-    }
-    case 'table': {
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(9.5)
-      const colCount = block.headers.length
-      const colWidth = contentWidth / colCount
-      ensureSpace(22)
-      block.headers.forEach((header, idx) => {
-        doc.text(header, margins.left + idx * colWidth, cursor.y)
-      })
-      cursor.y += 14
-      doc.setDrawColor(200, 168, 75)
-      doc.line(margins.left, cursor.y - 8, pageWidth - margins.right, cursor.y - 8)
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(9)
-      for (const row of block.rows) {
-        let rowHeight = 0
-        const cellLines = row.map((cell, idx) => {
-          const wrapped = doc.splitTextToSize(cell, colWidth - 6)
-          rowHeight = Math.max(rowHeight, wrapped.length * 12)
-          return { text: wrapped, x: margins.left + idx * colWidth }
-        })
-        ensureSpace(rowHeight + 6)
-        cellLines.forEach((cell) => {
-          doc.text(cell.text, cell.x, cursor.y)
-        })
-        cursor.y += rowHeight + 6
-      }
-      cursor.y += 4
-      break
-    }
-    default: {
-      const _exhaustive: never = block
-      void _exhaustive
-    }
+    if (!response.ok) return null
+    const json = (await response.json()) as { result: T }
+    return json.result
+  } catch {
+    return null
   }
 }
 
-function buildPdf(): ArrayBuffer {
-  const doc = new jsPDF({ unit: 'pt', format: 'letter' })
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const pageHeight = doc.internal.pageSize.getHeight()
-  const margins = { left: 54, right: 54, top: 64, bottom: 64 }
-  const cursor = { y: margins.top }
+/**
+ * Redis fixed-window limiter. Uses INCR + EXPIRE semantics so two concurrent
+ * requests can't both pass because we set EXPIRE only on first INCR (value === 1).
+ */
+async function checkRedisLimit(key: string): Promise<RateLimitResult | null> {
+  const count = await upstash<number>(['INCR', key])
+  if (count === null) return null
+  if (count === 1) {
+    await upstash(['EXPIRE', key, WINDOW_SECONDS])
+  }
+  const ttl = (await upstash<number>(['TTL', key])) ?? WINDOW_SECONDS
+  return {
+    ok: count <= MAX_REQUESTS,
+    remaining: Math.max(0, MAX_REQUESTS - count),
+    resetAtSeconds: ttl < 0 ? WINDOW_SECONDS : ttl,
+  }
+}
 
-  const { frontmatter, sections } = getPrivacyDocument()
+/** In-memory sliding window — survives single-process restarts only. */
+interface MemoryBucket {
+  timestamps: number[]
+}
+const memoryBuckets: Map<string, MemoryBucket> = new Map()
 
-  // Title block
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(22)
-  doc.setTextColor(20, 20, 20)
-  doc.text(frontmatter.title, margins.left, cursor.y)
-  cursor.y += 28
+function checkMemoryLimit(key: string): RateLimitResult {
+  const now = Date.now()
+  const windowMs = WINDOW_SECONDS * 1000
+  const cutoff = now - windowMs
+  const bucket = memoryBuckets.get(key) ?? { timestamps: [] }
+  bucket.timestamps = bucket.timestamps.filter((t) => t > cutoff)
+  bucket.timestamps.push(now)
+  memoryBuckets.set(key, bucket)
 
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(10)
-  doc.setTextColor(120, 120, 120)
-  doc.text(
-    `Version ${frontmatter.version} · Last updated ${formatLastUpdated(
-      frontmatter.lastUpdated,
-    )}`,
-    margins.left,
-    cursor.y,
-  )
-  cursor.y += 16
-  doc.text(
-    `Compliance: ${frontmatter.compliance.join(' · ')}`,
-    margins.left,
-    cursor.y,
-  )
-  cursor.y += 24
+  const count = bucket.timestamps.length
+  const oldest = bucket.timestamps[0] ?? now
+  const resetAt = Math.max(1, Math.ceil((oldest + windowMs - now) / 1000))
+  return {
+    ok: count <= MAX_REQUESTS,
+    remaining: Math.max(0, MAX_REQUESTS - count),
+    resetAtSeconds: resetAt,
+  }
+}
 
-  // Divider
-  doc.setDrawColor(200, 168, 75)
-  doc.line(margins.left, cursor.y, pageWidth - margins.right, cursor.y)
-  cursor.y += 22
+async function checkRateLimit(key: string): Promise<RateLimitResult> {
+  if (hasRedis) {
+    const result = await checkRedisLimit(key)
+    if (result) return result
+  }
+  return checkMemoryLimit(key)
+}
 
-  // Sections
-  for (const section of sections) {
-    if (cursor.y + 48 > pageHeight - margins.bottom) {
-      doc.addPage()
-      cursor.y = margins.top
-    }
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(15)
-    doc.setTextColor(20, 20, 20)
-    const label = section.ordinal
-      ? `${section.ordinal}. ${section.heading}`
-      : section.heading
-    const headingLines = doc.splitTextToSize(
-      label,
-      pageWidth - margins.left - margins.right,
+// ---------------------------------------------------------------------------
+// IP extraction — trusts Vercel / standard proxy headers, falls back to "anon"
+// ---------------------------------------------------------------------------
+
+function extractClientIp(request: NextRequest): string {
+  const forwarded = request.headers.get('x-forwarded-for')
+  if (forwarded) {
+    const first = forwarded.split(',')[0]?.trim()
+    if (first) return first
+  }
+  const real = request.headers.get('x-real-ip')
+  if (real) return real.trim()
+  const cfIp = request.headers.get('cf-connecting-ip')
+  if (cfIp) return cfIp.trim()
+  return 'anon'
+}
+
+// ---------------------------------------------------------------------------
+// Route handler
+// ---------------------------------------------------------------------------
+
+export async function GET(request: NextRequest): Promise<Response> {
+  const ip = extractClientIp(request)
+  const rateKey = `ratelimit:privacy-pdf:${ip}`
+
+  let limit: RateLimitResult
+  try {
+    limit = await checkRateLimit(rateKey)
+  } catch {
+    // Never let the rate limiter itself break the endpoint — fail open to
+    // the in-memory limiter if anything above throws unexpectedly.
+    limit = checkMemoryLimit(rateKey)
+  }
+
+  const rateHeaders: Record<string, string> = {
+    'X-RateLimit-Limit': String(MAX_REQUESTS),
+    'X-RateLimit-Remaining': String(limit.remaining),
+    'X-RateLimit-Reset': String(limit.resetAtSeconds),
+  }
+
+  if (!limit.ok) {
+    return NextResponse.json(
+      {
+        error: 'rate_limited',
+        message:
+          'Too many PDF requests from this IP. Please retry in a minute.',
+      },
+      {
+        status: 429,
+        headers: {
+          ...rateHeaders,
+          'Retry-After': String(limit.resetAtSeconds),
+          'Cache-Control': 'no-store',
+        },
+      },
     )
-    doc.text(headingLines, margins.left, cursor.y)
-    cursor.y += headingLines.length * 18 + 8
-
-    for (const block of section.blocks) {
-      renderBlock(doc, block, cursor, margins, pageHeight, pageWidth)
-    }
-    cursor.y += 8
   }
-
-  // Footer on every page
-  const total = doc.getNumberOfPages()
-  for (let page = 1; page <= total; page += 1) {
-    doc.setPage(page)
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(8)
-    doc.setTextColor(150, 150, 150)
-    doc.text(
-      `Sakha Privacy Policy v${frontmatter.version}  ·  Page ${page} of ${total}`,
-      margins.left,
-      pageHeight - 32,
-    )
-    doc.text(frontmatter.contact.email, pageWidth - margins.right, pageHeight - 32, {
-      align: 'right',
-    })
-  }
-
-  return doc.output('arraybuffer')
-}
-
-export function GET(request: Request): Response {
-  const url = new URL(request.url)
-  const rawVersion = url.searchParams.get('version') ?? ''
-  const version = SAFE_VERSION_RE.test(rawVersion) ? rawVersion : ''
 
   try {
-    const buffer = buildPdf()
-    const filename = `sakha-privacy-policy${version ? `-${version}` : ''}.pdf`
-    return new Response(buffer, {
+    const privacy = getPrivacyDocument()
+    // renderToStream expects a ReactElement<DocumentProps>; our component
+    // returns exactly that (its root is <Document>), but the compile-time
+    // type can't prove that through the intermediate wrapper, so cast narrowly.
+    const element = createElement(PrivacyPDFDocument, {
+      doc: privacy,
+    }) as unknown as ReactElement<DocumentProps>
+    const nodeStream = await ReactPDF.renderToStream(element)
+    const webStream = Readable.toWeb(
+      nodeStream as unknown as Readable,
+    ) as unknown as ReadableStream<Uint8Array>
+
+    return new Response(webStream, {
       status: 200,
       headers: {
+        ...rateHeaders,
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${filename}"`,
-        'Content-Length': String(buffer.byteLength),
-        'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
+        'Content-Disposition':
+          'attachment; filename="kiaanverse-privacy-policy.pdf"',
+        'Cache-Control': 'public, max-age=86400',
         'X-Content-Type-Options': 'nosniff',
+        'X-Privacy-Policy-Version': privacy.frontmatter.version,
       },
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown error'
+    console.error('[api/privacy/pdf] generation failed:', message)
     return NextResponse.json(
-      { error: 'pdf_generation_failed', message },
-      { status: 500 },
+      {
+        error: 'pdf_generation_failed',
+        message,
+      },
+      {
+        status: 500,
+        headers: {
+          ...rateHeaders,
+          'Cache-Control': 'no-store',
+        },
+      },
     )
   }
 }

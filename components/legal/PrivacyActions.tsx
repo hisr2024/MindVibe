@@ -19,18 +19,27 @@ import { useCallback, useEffect, useState } from 'react'
 // ---------------------------------------------------------------------------
 
 interface DownloadPdfButtonProps {
-  /** Query params (e.g. locale or version) forwarded to the PDF endpoint. */
+  /**
+   * Retained for backwards compatibility with older call sites — the server
+   * route now produces a fixed filename (`kiaanverse-privacy-policy.pdf`),
+   * but we still display the version in the tooltip if provided.
+   */
   version?: string
   variant?: 'primary' | 'outline'
   className?: string
 }
+
+const PDF_URL = '/api/privacy/pdf'
+const PDF_FILENAME = 'kiaanverse-privacy-policy.pdf'
 
 export function DownloadPdfButton({
   version,
   variant = 'outline',
   className = '',
 }: DownloadPdfButtonProps) {
-  const [state, setState] = useState<'idle' | 'loading' | 'error'>('idle')
+  const [state, setState] = useState<'idle' | 'loading' | 'error' | 'rate-limited'>(
+    'idle',
+  )
 
   const handleClick = useCallback(
     async (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -38,16 +47,17 @@ export function DownloadPdfButton({
       if (state === 'loading') return
       setState('loading')
       try {
-        const url = version
-          ? `/api/privacy/pdf?version=${encodeURIComponent(version)}`
-          : '/api/privacy/pdf'
-        const response = await fetch(url, { method: 'GET' })
+        const response = await fetch(PDF_URL, { method: 'GET' })
+        if (response.status === 429) {
+          setState('rate-limited')
+          return
+        }
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         const blob = await response.blob()
         const objectUrl = URL.createObjectURL(blob)
         const anchor = document.createElement('a')
         anchor.href = objectUrl
-        anchor.download = `sakha-privacy-policy${version ? `-${version}` : ''}.pdf`
+        anchor.download = PDF_FILENAME
         document.body.appendChild(anchor)
         anchor.click()
         anchor.remove()
@@ -56,10 +66,10 @@ export function DownloadPdfButton({
       } catch {
         setState('error')
         // Fall back to a plain navigation so the user still gets the file.
-        window.location.href = '/api/privacy/pdf'
+        window.location.href = PDF_URL
       }
     },
-    [state, version],
+    [state],
   )
 
   const label =
@@ -67,7 +77,9 @@ export function DownloadPdfButton({
       ? 'Preparing PDF…'
       : state === 'error'
         ? 'Retry download'
-        : 'Download PDF'
+        : state === 'rate-limited'
+          ? 'Try again in a minute'
+          : 'Download PDF'
 
   const baseClass =
     'inline-flex items-center gap-2 rounded-full px-4 py-2 min-h-[44px] text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C8A84B]'
@@ -79,9 +91,14 @@ export function DownloadPdfButton({
 
   return (
     <a
-      href="/api/privacy/pdf"
+      href={PDF_URL}
       onClick={handleClick}
-      aria-label="Download the privacy policy as a PDF"
+      aria-label={
+        version
+          ? `Download the Kiaanverse Privacy Policy (version ${version}) as a PDF`
+          : 'Download the Kiaanverse Privacy Policy as a PDF'
+      }
+      title={version ? `Kiaanverse Privacy Policy v${version}` : undefined}
       aria-busy={state === 'loading'}
       data-state={state}
       className={[baseClass, variantClass, className].join(' ')}
