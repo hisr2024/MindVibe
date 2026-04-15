@@ -1,0 +1,214 @@
+---
+title: "Privacy Policy"
+description: "How Sakha (MindVibe) collects, uses, stores, and protects your sacred spiritual data — written in plain language, with full GDPR, CCPA, Apple, and Google Play compliance."
+lastUpdated: "2026-04-01"
+effectiveDate: "2026-04-01"
+version: "3.2.0"
+canonicalPath: "/privacy"
+compliance:
+  - GDPR
+  - CCPA
+  - Apple
+  - Google Play
+contact:
+  email: "privacy@sakha.ai"
+  dpo: "dpo@sakha.ai"
+  address: "Sakha, Privacy Office, 1 Serene Way, San Francisco, CA 94107"
+---
+
+## 1. Introduction {#introduction}
+
+Sakha ("we", "our", "us") operates the MindVibe spiritual wellness platform and
+the Sakha mobile and web applications (together, the "Service"). We treat your
+data as sacred. This Privacy Policy explains — in plain language — what we
+collect, why we collect it, how we protect it, and the rights you have to
+inspect, export, correct, or erase it.
+
+We comply with the EU General Data Protection Regulation (GDPR), the California
+Consumer Privacy Act (CCPA/CPRA), the Apple App Store privacy requirements, and
+the Google Play Data Safety rules. If local law grants you more rights than
+this policy describes, those local rights prevail.
+
+## 2. Data We Collect {#data-we-collect}
+
+We deliberately collect the minimum data required to guide your spiritual
+journey. We do not sell your data. We never share your reflections, journals,
+or emotional state with advertisers.
+
+### 2.1 Account Data {#account-data}
+
+When you create an account we collect an email address, a hashed password (or
+an OAuth identifier from Apple or Google), and a display name. Email is used
+for essential service messages only.
+
+### 2.2 Journey & Reflection Data {#journey-data}
+
+Your journal entries, reflections, Gita verse bookmarks, and journey progress
+are stored encrypted at rest with AES-256-GCM using a key derived from your
+passphrase. We cannot read this content.
+
+### 2.3 Emotional State Data {#emotional-data}
+
+Mood tags, emotional resets, and KIAAN conversation transcripts are treated as
+the highest privacy tier. They are encrypted in transit (TLS 1.3) and at rest,
+and are never used to train public AI models.
+
+### 2.4 Technical Data {#technical-data}
+
+We collect device type, operating system, app version, crash reports, and
+anonymized performance metrics. Crash reports are scrubbed of personal data
+before upload.
+
+### 2.5 Data We Explicitly Do Not Collect {#never-collect}
+
+| Category | Collected | Notes |
+| --- | --- | --- |
+| Advertising identifiers (IDFA, AAID) | No | Never read, never stored. |
+| Precise location (GPS) | No | Only coarse timezone, for daily reminders. |
+| Contacts | No | Sakha never asks for your address book. |
+| Photos, microphone, camera | Only with consent | Used only for voice companion and profile picture, when you enable them. |
+| Browsing history | No | We do not track you across other sites or apps. |
+
+## 3. How We Use Your Data {#how-we-use}
+
+We use the data described above for the following lawful purposes.
+
+### 3.1 Providing the Service {#providing}
+
+We process your account, journey progress, and reflections so you can continue
+your practice across devices. Legal basis: performance of contract
+(GDPR Art. 6(1)(b)).
+
+### 3.2 Improving the Service {#improving}
+
+We use aggregated, anonymized metrics to understand feature adoption and to
+fix bugs. Legal basis: legitimate interests (GDPR Art. 6(1)(f)).
+
+### 3.3 Sending Essential Communications {#communications}
+
+We send security alerts, password resets, and critical service notices. You
+cannot opt out of these. Marketing emails are strictly opt-in and separate.
+
+## 4. How We Protect Your Data {#protection}
+
+### 4.1 Encryption {#encryption}
+
+All journal and reflection content is encrypted client-side with AES-256-GCM
+before it leaves your device. Keys are derived via PBKDF2 with 600,000
+iterations from your passphrase. We never see your passphrase.
+
+### 4.2 Infrastructure {#infrastructure}
+
+Production services run in SOC 2 Type II audited data centers. Database
+connections are TLS 1.3 only. Secrets are stored in a managed vault; no
+developer has direct access to user content.
+
+### 4.3 Incident Response {#incident-response}
+
+If we suffer a data breach affecting your personal data, we will notify you
+and the relevant authorities within 72 hours, as required by GDPR Art. 33
+and 34.
+
+## 5. Your Rights {#your-rights}
+
+You have the following rights over your data. We respond to every verified
+request within 30 days at no cost.
+
+### 5.1 Access and Portability {#access}
+
+You may download a complete machine-readable export of your account,
+journeys, reflections, and emotional history at any time from
+Settings → Privacy → Export My Data.
+
+### 5.2 Correction {#correction}
+
+You may correct inaccurate personal data directly in the app, or by writing
+to us at privacy@sakha.ai.
+
+### 5.3 Erasure (Right to Be Forgotten) {#erasure}
+
+Settings → Privacy → Delete My Account permanently removes your data within
+30 days. Backups are purged within 90 days. Some anonymized aggregated
+metrics may be retained for integrity and security audits.
+
+### 5.4 Objection and Restriction {#objection}
+
+You may object to processing based on legitimate interests, or ask us to
+restrict processing while a dispute is resolved.
+
+### 5.5 California Rights (CCPA/CPRA) {#california}
+
+California residents have the right to know, delete, correct, and opt-out of
+sale or sharing of personal information. Sakha does not sell or share
+personal information, so the opt-out is automatically honored. You may also
+designate an authorized agent to exercise these rights on your behalf.
+
+## 6. Data Sharing {#data-sharing}
+
+We share data only in the narrow circumstances listed below. We never sell
+your data.
+
+| Recipient | Purpose | Data Shared |
+| --- | --- | --- |
+| Cloud infrastructure providers | Hosting and backups | Encrypted blobs only |
+| Payment processors (Stripe, Apple, Google) | Process subscriptions | Billing details — never journal content |
+| Email delivery (transactional only) | Send password resets and receipts | Email address, message contents |
+| Legal authorities | Only when legally compelled | Minimum necessary, with notice when allowed |
+
+## 7. International Transfers {#international}
+
+If you are in the European Economic Area, the United Kingdom, or Switzerland
+and your data is transferred to the United States, we rely on Standard
+Contractual Clauses approved by the European Commission and on supplementary
+safeguards. You may request a copy of the clauses at privacy@sakha.ai.
+
+## 8. Cookies and Local Storage {#cookies}
+
+We use a small number of first-party cookies and local storage entries that
+are strictly necessary for the Service: a session cookie to keep you signed
+in, a CSRF token, and a preferences key for theme and language. We do not
+use third-party advertising cookies, pixels, or trackers. You can clear
+these at any time from your browser settings without losing your account.
+
+## 9. Data Retention {#retention}
+
+We retain personal data only for as long as we need it to provide the
+Service, to meet our legal obligations, and to defend legal claims.
+Journals and reflections are kept while your account is active and deleted
+within 30 days of account closure. Security logs are retained for 90 days.
+Financial records are retained for 7 years as required by tax law.
+
+## 10. Children's Privacy {#children}
+
+Sakha is intended for users aged 13 and older. We do not knowingly collect
+personal data from children under 13. If we learn that we have collected
+data from a child under 13, we will delete it promptly. Parents may contact
+us at privacy@sakha.ai.
+
+## 11. Platform-Specific Disclosures {#platform-disclosures}
+
+### 11.1 Apple App Store {#apple}
+
+Per Apple's Nutrition Label requirements, Sakha links the following data
+categories to your identity only when you sign in: contact info (email),
+user content (journals, reflections), usage data (app interactions), and
+diagnostics (crash logs). No data is used for tracking.
+
+### 11.2 Google Play {#google-play}
+
+Per the Google Play Data Safety form, Sakha collects personal info, app
+activity, and app info and performance. All data is encrypted in transit.
+You can request deletion at Settings → Privacy → Delete My Account.
+
+## 12. Changes to This Policy {#changes}
+
+We may update this policy to reflect new features or legal requirements. We
+will notify you in the app at least 30 days before material changes take
+effect. Historical versions are available at sakha.ai/privacy/history.
+
+## 13. Contact Us {#contact}
+
+For any privacy question, contact our Data Protection Officer at
+dpo@sakha.ai, or by post at Sakha, Privacy Office, 1 Serene Way, San
+Francisco, CA 94107, USA. If you are in the EU, you may also lodge a
+complaint with your local supervisory authority.
