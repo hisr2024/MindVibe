@@ -792,6 +792,34 @@ async def startup():
             )
             # Don't fail startup - enrichment is supplementary
 
+        # Step 9: Initialize Privacy Scheduler (GDPR hard-delete worker).
+        # Disabled by default — opt-in via PRIVACY_SCHEDULER_ENABLED=true.
+        # On platforms where the API cold-starts often (e.g. Render free
+        # tier), use ``backend/scripts/run_privacy_hard_deletes.py`` from
+        # an external scheduler instead.
+        startup_logger.info("\n🛡️ Initializing Privacy Scheduler...")
+        try:
+            from backend.services.privacy_scheduler import privacy_scheduler
+
+            await privacy_scheduler.start()
+            status = privacy_scheduler.status
+            if status["running"]:
+                startup_logger.info(
+                    "✅ Privacy Scheduler running "
+                    f"(interval={status['interval_seconds']}s)"
+                )
+            else:
+                startup_logger.info(
+                    "ℹ️  Privacy Scheduler disabled "
+                    "(set PRIVACY_SCHEDULER_ENABLED=true to enable)"
+                )
+        except Exception as scheduler_error:
+            startup_logger.info(
+                f"⚠️ Privacy Scheduler initialization had issues: {scheduler_error}"
+            )
+            # Don't fail startup — scheduled deletions can still be run
+            # via the one-shot CLI (scripts/run_privacy_hard_deletes.py).
+
         _startup_status["started"] = True
 
         # Final startup status banner
@@ -859,6 +887,15 @@ async def shutdown():
         startup_logger.info("✅ Gita Practical Wisdom Auto-Enricher stopped")
     except Exception as e:
         startup_logger.info(f"⚠️ Error stopping Gita Auto-Enricher: {e}")
+
+    # Stop Privacy Scheduler (GDPR hard-delete worker)
+    try:
+        from backend.services.privacy_scheduler import privacy_scheduler
+
+        await privacy_scheduler.stop()
+        startup_logger.info("✅ Privacy Scheduler stopped")
+    except Exception as e:
+        startup_logger.info(f"⚠️ Error stopping Privacy Scheduler: {e}")
 
     # Stop legacy scheduler if running
     try:
@@ -1400,6 +1437,16 @@ try:
 except Exception as e:
     _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Compliance router: {e}")
+
+try:
+    from backend.routes.privacy import router as privacy_router
+
+    app.include_router(privacy_router)
+    _startup_status["routers_loaded"] += 1
+    compliance_routers_loaded.append("privacy")
+except Exception as e:
+    _startup_status["routers_failed"] += 1
+    startup_logger.info(f"❌ [ERROR] Failed to load Privacy router: {e}")
 
 if compliance_routers_loaded:
     startup_logger.info(
