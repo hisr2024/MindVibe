@@ -259,3 +259,27 @@ async def get_current_user_flexible(
     All authentication now requires a valid, signed JWT token.
     """
     return await get_current_user(request, db)
+
+
+async def get_current_user_object(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    """Return the full :class:`User` ORM object for the current request.
+
+    Convenience wrapper around :func:`get_current_user` that fetches the
+    row so routers needing attributes like ``email`` or ``full_name``
+    don't have to re-query the database.  Applies the same
+    authentication + email-verification checks as
+    :func:`get_current_user`.
+    """
+    user_id = await get_current_user(request, db)
+    stmt = select(User).where(User.id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+    return user
