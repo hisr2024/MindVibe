@@ -1,7 +1,7 @@
 """Privacy endpoints (v1) — GDPR rights at ``/api/v1/privacy/*``.
 
-This router implements the user-facing surface for:
-
+Endpoints
+---------
 - **POST /api/v1/privacy/export** — queue a data export job
   (GDPR Art. 20 — Right to Portability).
 - **GET  /api/v1/privacy/export** — poll export status / fetch the
@@ -11,21 +11,18 @@ This router implements the user-facing surface for:
 - **POST /api/v1/privacy/delete/cancel** — cancel a pending deletion
   during the grace period.
 
-Design notes
-------------
-* All handlers are **authenticated** via :func:`get_current_user_object`
-  so we have the full ``User`` row available for name/email.
-* Export generation runs as a FastAPI background task; the response
-  returns immediately with ``status="pending"``.
+Design
+------
+* Requests are authenticated via :func:`get_current_user_object` so
+  the full ``User`` row (email, profile) is available to handlers.
+* Export is produced by a FastAPI background task — handlers return
+  immediately with ``status="pending"``.
 * Exports are rate-limited to **1 per 24 hours per user** via
-  :class:`RateLimiter`.  We fail **open** if the rate limiter itself
-  errors — a GDPR right must never be blocked by operational issues.
-* IP addresses are hashed before being logged (``sha256[:16]``) so the
-  audit trail is useful without storing PII.
-* Error messages are compassionate — users exercising GDPR rights are
-  often in a distressed state and deserve clear, non-frightening copy.
+  :class:`RateLimiter`; failures fail **open** so GDPR rights are
+  never blocked by operational issues.
+* IP addresses are SHA-256 hashed before they reach the audit trail.
 
-KIAAN Impact: ✅ NEUTRAL — compliance surface, no KIAAN logic touched.
+KIAAN Impact: ✅ NEUTRAL — compliance surface, no KIAAN coupling.
 """
 
 from __future__ import annotations
@@ -38,7 +35,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request,
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.deps import get_current_user_object, get_db
-from backend.models import User
+from backend.models import PrivacyRequest, User
 from backend.services.privacy_service import PrivacyService
 from backend.services.rate_limiter import RateLimiter
 
@@ -46,19 +43,16 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/privacy", tags=["privacy"])
 
-# One export per user per 24 hours.  Exports are expensive to generate
-# and produce sensitive output — tighter limits reduce attack surface.
 EXPORT_RATE_LIMIT = 1
 EXPORT_WINDOW_SECONDS = 24 * 60 * 60
 
 
 def _ip_hash(request: Request) -> str:
-    """Return a short, non-reversible hash of the caller's IP for audit logs.
+    """Return a short, non-reversible hash of the caller's IP.
 
-    We prefer ``X-Forwarded-For`` when present (behind a proxy) and fall
-    back to ``request.client.host``.  The hash is truncated to 16 hex
-    chars which is still collision-resistant for audit use-cases but
-    does not contain the raw IP.
+    Prefers ``X-Forwarded-For`` when behind a proxy.  Truncated to 16
+    hex chars — plenty to correlate requests in an audit log without
+    preserving the raw address.
     """
     forwarded = request.headers.get("x-forwarded-for")
     if forwarded:
@@ -68,6 +62,21 @@ def _ip_hash(request: Request) -> str:
     else:
         ip = "unknown"
     return hashlib.sha256(ip.encode("utf-8")).hexdigest()[:16]
+
+
+def _display_name(user: User) -> str:
+    """Pick a user-facing name for email copy, never blank."""
+    full_name = getattr(user, "full_name", None)
+    if full_name:
+        return full_name
+    if user.email and "@" in user.email:
+        local = user.email.split("@", 1)[0]
+        return local.replace(".", " ").title() or "Seeker"
+    return "Seeker"
+
+
+def _iso(dt) -> str | None:
+    return dt.isoformat() if dt else None
 
 
 # ─────────────────────────────────────────────
@@ -80,25 +89,18 @@ async def request_export(
     current_user: User = Depends(get_current_user_object),
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """Queue a data export job (Art. 20 — Right to Portability).
-
-    Returns ``202 Accepted``-style payload indicating the request is
-    ``pending``.  The frontend should poll ``GET /api/v1/privacy/export``
-    to observe the status transition to ``ready``.
-
-    Rate limit: 1 request per user per 24 hours.
-    """
+    """Queue a data export job.  Rate-limited to 1 per user per 24 h."""
     service = PrivacyService(db)
     ip_hash = _ip_hash(request)
 
-    # Collapse duplicate requests — if one is already in flight, return it.
+    # Collapse duplicate in-flight requests.
     existing = await service.get_active_export_request(current_user.id)
     if existing:
         return {
             "status": existing.status,
             "message": "An export is already in progress.",
             "request_id": str(existing.id),
-            "created_at": existing.created_at.isoformat(),
+            "created_at": _iso(existing.created_at),
         }
 
     limiter = RateLimiter()
@@ -121,19 +123,11 @@ async def request_export(
         request_type="export",
         ip_hash=ip_hash,
     )
-    # Create the export record (referenced by the background job).
-    export = await service.create_export_record(
-        user_id=current_user.id, ip_hash=ip_hash
-    )
-    await db.commit()
 
-    # The background task opens its own DB session, so we instantiate a
-    # fresh PrivacyService with no bound session.  Passing ``None`` here
-    # is safe because ``export_user_data`` never uses ``self.db``.
     background_tasks.add_task(
         PrivacyService(db).export_user_data,
         user_id=current_user.id,
-        request_id=export.id,
+        request_id=str(privacy_request.id),
         user_email=current_user.email,
     )
 
@@ -144,7 +138,7 @@ async def request_export(
             "when it is ready (usually within 10 minutes)."
         ),
         "request_id": str(privacy_request.id),
-        "created_at": privacy_request.created_at.isoformat(),
+        "created_at": _iso(privacy_request.created_at),
     }
 
 
@@ -156,32 +150,23 @@ async def get_export_status(
     current_user: User = Depends(get_current_user_object),
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """Poll the latest export request and return its status.
-
-    Status values:
-      * ``none``        — user has never requested an export
-      * ``pending``     — queued but not yet started
-      * ``processing``  — export being generated
-      * ``ready``       — signed URL available; expires in 7 days
-      * ``failed``      — generation failed; user can retry
-    """
+    """Poll the latest export request and return its status."""
     service = PrivacyService(db)
-    latest = await service.get_latest_export_request(current_user.id)
-
-    if not latest:
+    latest: PrivacyRequest | None = await service.get_latest_export_request(
+        current_user.id
+    )
+    if latest is None:
         return {"status": "none", "message": "No export requests found."}
 
     response: dict[str, Any] = {
         "status": latest.status,
         "request_id": str(latest.id),
-        "created_at": latest.created_at.isoformat(),
+        "created_at": _iso(latest.created_at),
     }
 
     if latest.status == "ready" and latest.download_url:
         response["download_url"] = latest.download_url
-        response["expires_at"] = (
-            latest.url_expires_at.isoformat() if latest.url_expires_at else None
-        )
+        response["expires_at"] = _iso(latest.url_expires_at)
         response["message"] = (
             "Your export is ready. The download link expires in 7 days."
         )
@@ -190,7 +175,9 @@ async def get_export_status(
             "Your export is being prepared. This usually takes a few minutes."
         )
     elif latest.status == "pending":
-        response["message"] = "Your export is queued and will begin shortly."
+        response["message"] = (
+            "Your export is queued and will begin shortly."
+        )
     elif latest.status == "failed":
         response["message"] = (
             "Your export failed. Please contact privacy@kiaanverse.com."
@@ -209,12 +196,7 @@ async def request_deletion(
     current_user: User = Depends(get_current_user_object),
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """Initiate account deletion with a 30-day grace period (Art. 17).
-
-    The account remains fully usable during the grace period so the user
-    can change their mind.  On the scheduled date, a background job
-    performs the actual soft-delete + hard-delete of sensitive data.
-    """
+    """Initiate account deletion with a 30-day grace period."""
     service = PrivacyService(db)
     ip_hash = _ip_hash(request)
 
@@ -223,11 +205,7 @@ async def request_deletion(
         return {
             "status": existing.status,
             "message": "A deletion request is already pending.",
-            "scheduled_deletion_at": (
-                existing.scheduled_deletion_at.isoformat()
-                if existing.scheduled_deletion_at
-                else None
-            ),
+            "scheduled_deletion_at": _iso(existing.scheduled_deletion_at),
             "request_id": str(existing.id),
         }
 
@@ -239,7 +217,7 @@ async def request_deletion(
 
     scheduled_at = await service.initiate_soft_delete(
         user_id=current_user.id,
-        request_id=privacy_request.id,
+        request_id=str(privacy_request.id),
     )
 
     background_tasks.add_task(
@@ -269,7 +247,7 @@ async def cancel_deletion(
     current_user: User = Depends(get_current_user_object),
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """Cancel an in-progress deletion request during the grace period."""
+    """Cancel an in-progress deletion during the grace period."""
     service = PrivacyService(db)
     cancelled = await service.cancel_soft_delete(current_user.id)
 
@@ -286,20 +264,3 @@ async def cancel_deletion(
             "Your account is fully restored."
         ),
     }
-
-
-def _display_name(user: User) -> str:
-    """Return a user-facing name for email copy.
-
-    Falls back to the email local-part, then to the generic
-    ``"Seeker"`` — we never want to send a blank ``Dear ,`` salutation.
-    """
-    # ``User`` on this backend does not have a ``name`` column; we
-    # derive one from available profile fields.
-    full_name = getattr(user, "full_name", None)
-    if full_name:
-        return full_name
-    if user.email and "@" in user.email:
-        local = user.email.split("@", 1)[0]
-        return local.replace(".", " ").title() or "Seeker"
-    return "Seeker"
