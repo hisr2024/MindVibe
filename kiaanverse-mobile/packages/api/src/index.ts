@@ -132,6 +132,12 @@ export type {
   UserSettings,
 } from './types';
 
+export type {
+  PrivacyExportStatus,
+  PrivacyDeletionStatus,
+  PrivacyStatusResponse,
+} from './hooks';
+
 // TanStack Query hooks
 export {
   queryKeys,
@@ -195,4 +201,8 @@ export {
   useDeleteJournal,
   useUserSettings,
   useUpdateSettings,
+  usePrivacyStatus,
+  useRequestExport,
+  useRequestDeletion,
+  useCancelDeletion,
 } from './hooks';
