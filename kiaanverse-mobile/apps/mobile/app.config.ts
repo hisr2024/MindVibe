@@ -40,6 +40,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: 'kiaanverse',
   userInterfaceStyle: 'automatic',
 
+  updates: {
+    url: 'https://u.expo.dev/cf368c3d-53f0-4979-8267-50405577530b',
+  },
+
+  runtimeVersion: {
+    policy: 'appVersion' as const,
+  },
+
   splash: {
     image: './assets/splash.png',
     resizeMode: 'contain',
@@ -136,12 +144,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   // ---------------------------------------------------------------------------
   plugins: [
     'expo-router',
-    [
-      'expo-font',
-      {
-        fonts: ['./assets/fonts/CrimsonText-Regular.ttf'],
-      },
-    ],
     'expo-splash-screen',
     [
       'expo-notifications',
@@ -181,7 +183,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     apiBaseUrl: process.env.API_BASE_URL ?? 'http://localhost:8000',
     sentryDsn: process.env.SENTRY_DSN ?? '',
     eas: {
-      projectId: process.env.EAS_PROJECT_ID ?? '',
+      projectId: process.env.EAS_PROJECT_ID ?? 'cf368c3d-53f0-4979-8267-50405577530b',
     },
   },
 });

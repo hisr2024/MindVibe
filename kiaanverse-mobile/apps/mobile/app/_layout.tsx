@@ -25,6 +25,7 @@ import { View, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
@@ -257,6 +258,14 @@ function AppContent(): React.JSX.Element {
 export default function RootLayout(): React.JSX.Element {
   const { mode, setMode } = useThemeStore();
   const { locale } = useUserPreferencesStore();
+
+  const [fontsLoaded] = useFonts({
+    'CrimsonText-Regular': require('../assets/fonts/CrimsonText-Regular.ttf'),
+  });
+
+  if (!fontsLoaded) {
+    return <View style={styles.container} />;
+  }
 
   return (
     <GestureHandlerRootView style={styles.container}>
