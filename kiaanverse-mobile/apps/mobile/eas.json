@@ -22,6 +22,9 @@
       },
       "env": {
         "APP_ENV": "staging"
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "production": {
