@@ -202,7 +202,7 @@ export default function PrivacySettingsPage() {
   }, [])
 
   const fetchStatus = useCallback(async () => {
-    const { data } = await apiFetch<PrivacyStatus>('/api/v1/privacy/status')
+    const { data } = await apiFetch<PrivacyStatus>('/api/privacy/status')
     setPrivacyStatus(data || null)
     setLoading(false)
   }, [])
