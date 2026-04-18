@@ -281,6 +281,7 @@ def test_db() -> AsyncGenerator[AsyncSession, None]:
             "DataExportRequest",
             "DeletionRequest",
             "ComplianceAuditLog",
+            "PrivacyRequest",
         ]:
             if hasattr(models, cls_name):
                 cls = getattr(models, cls_name)
