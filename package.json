@@ -43,7 +43,7 @@
     "@stripe/react-stripe-js": "^6.1.0",
     "@stripe/stripe-js": "^9.0.1",
     "@types/three": "^0.183.1",
-    "axios": "^1.14.0",
+    "axios": "^1.15.0",
     "bcryptjs": "file:vendor/bcryptjs",
     "canvas-confetti": "^1.9.4",
     "date-fns": "^2.30.0",
