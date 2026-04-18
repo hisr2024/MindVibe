@@ -40,6 +40,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: 'kiaanverse',
   userInterfaceStyle: 'automatic',
 
+  updates: {
+    url: 'https://u.expo.dev/cf368c3d-53f0-4979-8267-50405577530b',
+  },
+
+  runtimeVersion: {
+    policy: 'appVersion' as const,
+  },
+
   splash: {
     image: './assets/splash.png',
     resizeMode: 'contain',
