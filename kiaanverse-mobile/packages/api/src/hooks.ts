@@ -110,6 +110,7 @@ export const queryKeys = {
   journalEntries: ['journal', 'entries'] as const,
   journalEntry: (id: string) => ['journal', 'entry', id] as const,
   settings: ['settings'] as const,
+  privacyStatus: ['privacy', 'status'] as const,
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -920,6 +921,82 @@ export function useUpdateSettings(): UseMutationResult<UserSettings, Error, Reco
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.settings });
+    },
+  });
+}
+
+
+// ---------------------------------------------------------------------------
+// Privacy (GDPR Art. 15/17/20)
+// ---------------------------------------------------------------------------
+
+export interface PrivacyExportStatus {
+  id: number;
+  status: string;
+  download_token: string | null;
+  expires_at: string | null;
+  file_size_bytes: number | null;
+  created_at: string;
+}
+
+export interface PrivacyDeletionStatus {
+  id: number;
+  status: string;
+  grace_period_days: number;
+  grace_period_ends_at: string | null;
+  created_at: string;
+}
+
+export interface PrivacyStatusResponse {
+  export: PrivacyExportStatus | null;
+  deletion: PrivacyDeletionStatus | null;
+}
+
+export function usePrivacyStatus(): UseQueryResult<PrivacyStatusResponse> {
+  return useQuery({
+    queryKey: queryKeys.privacyStatus,
+    queryFn: async () => {
+      const { data } = await api.privacy.status();
+      return data as PrivacyStatusResponse;
+    },
+  });
+}
+
+export function useRequestExport(): UseMutationResult<PrivacyExportStatus, Error, void> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.privacy.requestExport();
+      return data as PrivacyExportStatus;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.privacyStatus });
+    },
+  });
+}
+
+export function useRequestDeletion(): UseMutationResult<PrivacyDeletionStatus, Error, string | undefined> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (reason?: string) => {
+      const { data } = await api.privacy.requestDeletion(reason);
+      return data as PrivacyDeletionStatus;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.privacyStatus });
+    },
+  });
+}
+
+export function useCancelDeletion(): UseMutationResult<{ status: string; message: string }, Error, void> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.privacy.cancelDeletion();
+      return data as { status: string; message: string };
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.privacyStatus });
     },
   });
 }

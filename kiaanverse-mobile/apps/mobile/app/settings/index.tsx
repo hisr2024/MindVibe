@@ -206,6 +206,15 @@ export default function SettingsScreen(): React.JSX.Element {
           </Text>
         </SettingRow>
         <Divider />
+        <Pressable onPress={() => router.push('/settings/privacy')} style={styles.linkRow}>
+          <Text variant="body" color={colors.text.primary}>
+            Your Privacy & Data
+          </Text>
+          <Text variant="caption" color={colors.text.muted}>
+            Export · Delete
+          </Text>
+        </Pressable>
+        <Divider />
         <Pressable style={styles.linkRow}>
           <Text variant="body" color={colors.text.primary}>
             Privacy Policy

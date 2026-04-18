@@ -175,22 +175,42 @@ export default function PrivacySettingsPage() {
     }
   }, [])
 
-  const fetchExportStatus = useCallback(async () => {
+  const fetchPrivacyStatus = useCallback(async () => {
     try {
-      const res = await apiFetch('/api/privacy/export', { method: 'GET' })
+      const res = await apiFetch('/api/privacy/status', { method: 'GET' })
       if (!res.ok) return
       const data = await res.json()
-      const status: ExportStatus = data.status || 'none'
-      setExportState({
-        status,
-        message: data.message || '',
-        downloadUrl: data.download_url,
-        expiresAt: data.expires_at,
-        requestId: data.request_id,
-      })
-      // Stop polling once we hit a terminal state.
-      if (['ready', 'failed', 'none'].includes(status)) {
-        clearPoll()
+
+      // Export status
+      const exp = data.export
+      if (exp) {
+        const status: ExportStatus = exp.status === 'completed' ? 'ready' : (exp.status || 'none')
+        const downloadUrl = exp.download_token
+          ? `/api/privacy/export?token=${encodeURIComponent(exp.download_token)}`
+          : undefined
+        setExportState({
+          status,
+          message: '',
+          downloadUrl,
+          expiresAt: exp.expires_at,
+          requestId: String(exp.id),
+        })
+        if (['ready', 'failed', 'none'].includes(status)) {
+          clearPoll()
+        }
+      } else {
+        setExportState({ status: 'none', message: '' })
+      }
+
+      // Deletion status
+      const del_ = data.deletion
+      if (del_ && del_.status === 'grace_period') {
+        setDeleteState({
+          status: 'pending_deletion',
+          scheduledDeletionAt: del_.grace_period_ends_at,
+        })
+      } else if (!del_ || del_.status === 'canceled') {
+        setDeleteState({ status: null })
       }
     } catch {
       /* transient — the poll loop will try again */
@@ -199,21 +219,21 @@ export default function PrivacySettingsPage() {
 
   // Initial load.
   useEffect(() => {
-    void fetchExportStatus()
+    void fetchPrivacyStatus()
     return clearPoll
-  }, [fetchExportStatus, clearPoll])
+  }, [fetchPrivacyStatus, clearPoll])
 
   // Start / stop polling based on status.
   useEffect(() => {
     const shouldPoll = ['pending', 'processing'].includes(exportState.status)
     if (shouldPoll && pollIntervalRef.current === null) {
       pollIntervalRef.current = setInterval(() => {
-        void fetchExportStatus()
+        void fetchPrivacyStatus()
       }, POLL_INTERVAL_MS)
     } else if (!shouldPoll) {
       clearPoll()
     }
-  }, [exportState.status, fetchExportStatus, clearPoll])
+  }, [exportState.status, fetchPrivacyStatus, clearPoll])
 
   const handleRequestExport = async () => {
     setExportLoading(true)
@@ -242,11 +262,15 @@ export default function PrivacySettingsPage() {
   const handleDeleteConfirm = async () => {
     setDeleteLoading(true)
     try {
-      const res = await apiFetch('/api/privacy/delete', { method: 'POST' })
+      const res = await apiFetch('/api/privacy/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirm: true }),
+      })
       const data = await res.json().catch(() => ({}))
       setDeleteState({
         status: 'pending_deletion',
-        scheduledDeletionAt: data.scheduled_deletion_at,
+        scheduledDeletionAt: data.grace_period_ends_at,
         message: data.message,
       })
       setShowDeleteModal(false)
@@ -260,7 +284,7 @@ export default function PrivacySettingsPage() {
   const handleCancelDeletion = async () => {
     setCancelLoading(true)
     try {
-      await apiFetch('/api/privacy/delete', { method: 'DELETE' })
+      await apiFetch('/api/privacy/delete', { method: 'PATCH' })
       setDeleteState({ status: 'active' })
     } catch {
       /* best-effort — user can retry */
