@@ -18,7 +18,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   userInterfaceStyle: 'automatic',
 
   updates: {
-    url: process.env.EAS_UPDATE_URL ?? '',
+    url: 'https://u.expo.dev/1f72d91b-2336-4b58-a641-5589317cc36c',
   },
 
   runtimeVersion: {
@@ -133,7 +133,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     apiBaseUrl: process.env.API_BASE_URL ?? 'http://localhost:8000',
     sentryDsn: process.env.SENTRY_DSN ?? '',
     eas: {
-      projectId: process.env.EAS_PROJECT_ID ?? '',
+      projectId: '1f72d91b-2336-4b58-a641-5589317cc36c',
     },
   },
 });
