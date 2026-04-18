@@ -181,7 +181,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     apiBaseUrl: process.env.API_BASE_URL ?? 'http://localhost:8000',
     sentryDsn: process.env.SENTRY_DSN ?? '',
     eas: {
-      projectId: process.env.EAS_PROJECT_ID ?? '',
+      projectId: process.env.EAS_PROJECT_ID ?? 'cf368c3d-53f0-4979-8267-50405577530b',
     },
   },
 });
