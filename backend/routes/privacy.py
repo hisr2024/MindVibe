@@ -22,9 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.deps import get_current_user, get_db
 from backend.models import (
     DataExportRequest,
-    DataExportStatus,
     DeletionRequest,
-    DeletionRequestStatus,
 )
 from backend.services.privacy_service import (
     cancel_deletion,
@@ -141,7 +139,7 @@ async def download_export(
         )
 
     ip_h = hash_ip(_get_client_ip(request))
-    await _audit(db, verified["user_id"], "export_downloaded", ip_h, {
+    await audit_privacy_action(db, verified["user_id"], "export_downloaded", ip_h, {
         "export_id": verified["export_id"],
     })
 
