@@ -1,790 +1,674 @@
-"""PrivacyService — orchestrates GDPR rights (export, deletion) for end users.
+"""GDPR Privacy Service — Art. 15 (access), Art. 17 (erasure), Art. 20 (portability).
 
-This service implements the business logic behind ``/api/v1/privacy/*``:
-
-* **Export (Art. 20)** — queues an async export job, builds a ZIP archive
-  (``account.json`` / ``conversations.json`` / ``practice.json`` /
-  ``subscription.json`` + ``README.txt``), uploads it to an object store
-  (Cloudflare R2 or any S3-compatible endpoint) when configured,
-  generates a pre-signed download URL, and emails the user when ready.
-  The signed URL expires after 7 days (``SIGNED_URL_EXPIRY_SECONDS``).
-  In test / local environments without R2 configured, falls back to
-  an in-app token-based download URL.
-* **Deletion (Art. 17)** — records a deletion request with a 30-day
-  grace period.  The account remains fully usable during the grace
-  period so users can cancel at any time.  A scheduled job calls
-  :meth:`hard_delete_user` on day 30 to cascade-delete all user data
-  + cancel any active Stripe subscription + clear Redis sessions.
-* **Audit** — every state change is persisted on the ``PrivacyRequest``
-  row itself; the caller IP is stored only as a non-reversible
-  SHA-256 hash.
-
-Architecture notes
-------------------
-* ``PrivacyRequest`` is a *single* table that covers both export and
-  deletion lifecycles, distinguished by ``request_type``.  This keeps
-  the compliance-audit report and the scheduler logic simple.
-* The service is **async**-first to match the rest of the MindVibe
-  backend (``AsyncSession``).
-* R2/S3/Stripe/Redis integrations are **optional** — gated by env
-  vars — so the service runs in tests and bare-bones dev with no
-  external infrastructure.
-
-KIAAN Impact: ✅ POSITIVE — trust foundation; no KIAAN coupling.
+Handles:
+  - export_user_data: gathers all 8 user-data tables → JSON → ZIP → signed URL (7d)
+  - initiate_deletion: soft-delete + 30-day grace period (cancelable)
+  - execute_hard_delete: cascade delete across all tables + Redis + Stripe
+  - send_export_ready_email / send_deletion_initiated_email via Resend
 """
 
 from __future__ import annotations
 
 import datetime
+import hashlib
+import hmac
 import io
 import json
 import logging
 import os
-import secrets
 import zipfile
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.core.settings import settings
 from backend.models import (
+    ComplianceAuditLog,
+    DataExportRequest,
+    DataExportStatus,
+    DeletionRequest,
+    DeletionRequestStatus,
     EncryptedBlob,
+    JournalEntry,
+    KiaanChatMessage,
+    KiaanChatSession,
     Mood,
-    PrivacyRequest,
+    Notification,
+    PushSubscription,
+    RefreshToken,
+    Session,
     User,
     UserConsent,
+    UserJourney,
+    UserJourneyProgress,
+    UserJourneyStepState,
     UserProfile,
     UserSubscription,
+    UserProgress,
 )
+from backend.services.email_service import send_email
 
 logger = logging.getLogger(__name__)
 
+EXPORT_SIGNED_URL_EXPIRY_DAYS = 7
+GRACE_PERIOD_DAYS = 30
+RATE_LIMIT_HOURS = 24
 
-# -------------------- Configuration ---------------------------------------
-DELETION_GRACE_DAYS = int(os.getenv("PRIVACY_DELETION_GRACE_DAYS", "30"))
-SIGNED_URL_EXPIRY_SECONDS = int(
-    os.getenv("PRIVACY_EXPORT_URL_TTL_SECONDS", str(7 * 24 * 3600))
-)
-EXPORT_FALLBACK_BASE_URL = os.getenv(
-    "PRIVACY_EXPORT_BASE_URL",
-    "https://kiaanverse.com/api/v1/privacy/export/download",
-)
-SUPPORT_EMAIL = os.getenv("PRIVACY_SUPPORT_EMAIL", "privacy@kiaanverse.com")
-
-# Tables whose rows are cascade-deleted during hard deletion.  The list
-# is intentionally conservative — every table referenced here must have
-# a ``user_id`` foreign key.  Order matters: children first.
-HARD_DELETE_TABLES: tuple[str, ...] = (
-    "privacy_requests",
-    "compliance_audit_logs",
-    "user_consents",
-    "cookie_preferences",
-    "data_export_requests",
-    "deletion_requests",
-    "kiaan_chat_messages",
-    "kiaan_chat_sessions",
-    "chat_messages",
-    "room_participants",
-    "feedback_ratings",
-    "notifications",
-    "notification_preferences",
-    "push_subscriptions",
-    "journal_blobs",
-    "journal_entries",
-    "journal_versions",
-    "moods",
-    "user_journey_step_state",
-    "user_journeys",
-    "user_progress",
-    "user_subscriptions",
-    "user_profiles",
-    "sessions",
-    "refresh_tokens",
-    "password_reset_tokens",
-    "email_verification_tokens",
-    "webauthn_credentials",
-)
+_SIGNING_KEY = settings.SECRET_KEY.encode()
 
 
-def _now() -> datetime.datetime:
-    return datetime.datetime.now(datetime.UTC)
+# ---------------------------------------------------------------------------
+# URL signing (HMAC-SHA256) — download tokens verified without DB lookup
+# ---------------------------------------------------------------------------
+
+def _sign_token(export_id: int, user_id: str, expires_at: datetime.datetime) -> str:
+    payload = f"{export_id}:{user_id}:{int(expires_at.timestamp())}"
+    sig = hmac.new(_SIGNING_KEY, payload.encode(), hashlib.sha256).hexdigest()
+    return f"{payload}:{sig}"
 
 
-# -------------------- Service ---------------------------------------------
-class PrivacyService:
-    """Business logic for GDPR privacy rights.
+def verify_signed_token(token: str) -> dict[str, Any] | None:
+    parts = token.rsplit(":", 1)
+    if len(parts) != 2:
+        return None
+    payload, sig = parts
+    expected = hmac.new(_SIGNING_KEY, payload.encode(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(sig, expected):
+        return None
+    pieces = payload.split(":")
+    if len(pieces) != 3:
+        return None
+    export_id, user_id, exp_ts = pieces
+    if datetime.datetime.now(datetime.UTC).timestamp() > float(exp_ts):
+        return None
+    return {"export_id": int(export_id), "user_id": user_id}
 
-    Constructed per-request with an :class:`AsyncSession`.  Background
-    tasks reuse the app's shared ``SessionLocal`` because FastAPI closes
-    the request session before background callbacks run.
-    """
 
-    def __init__(self, db: AsyncSession) -> None:
-        self.db = db
+# ---------------------------------------------------------------------------
+# Rate-limit check — 1 export per 24h
+# ---------------------------------------------------------------------------
 
-    # ─────────────────────────────────────────
-    # AUDIT LOG / REQUEST RECORDS
-    # ─────────────────────────────────────────
-    async def create_privacy_request(
-        self,
-        user_id: str,
-        request_type: str,  # "export" | "delete"
-        ip_hash: str,
-    ) -> PrivacyRequest:
-        """Create a new ``PrivacyRequest`` row in the ``pending`` state."""
-        if request_type not in {"export", "delete"}:
-            raise ValueError(f"Unsupported request_type: {request_type!r}")
-
-        req = PrivacyRequest(
-            user_id=user_id,
-            request_type=request_type,
-            status="pending",
-            ip_hash=ip_hash,
+async def check_export_rate_limit(db: AsyncSession, user_id: str) -> bool:
+    cutoff = datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=RATE_LIMIT_HOURS)
+    stmt = (
+        select(DataExportRequest)
+        .where(
+            DataExportRequest.user_id == user_id,
+            DataExportRequest.created_at >= cutoff,
         )
-        self.db.add(req)
-        await self.db.commit()
-        await self.db.refresh(req)
-        return req
-
-    async def update_request_status(
-        self,
-        request_id: str,
-        status: str,
-        download_url: str | None = None,
-        url_expires_at: datetime.datetime | None = None,
-        error_message: str | None = None,
-    ) -> PrivacyRequest | None:
-        """Patch a ``PrivacyRequest`` row's status + optional fields."""
-        req = await self.db.get(PrivacyRequest, request_id)
-        if req is None:
-            return None
-        req.status = status
-        if download_url is not None:
-            req.download_url = download_url
-        if url_expires_at is not None:
-            req.url_expires_at = url_expires_at
-        if error_message is not None:
-            req.error_message = error_message[:1000]
-        await self.db.commit()
-        await self.db.refresh(req)
-        return req
-
-    async def get_active_export_request(
-        self, user_id: str
-    ) -> PrivacyRequest | None:
-        """Return the in-flight export (pending/processing) if any."""
-        stmt = (
-            select(PrivacyRequest)
-            .where(
-                PrivacyRequest.user_id == user_id,
-                PrivacyRequest.request_type == "export",
-                PrivacyRequest.status.in_(["pending", "processing"]),
-            )
-            .order_by(PrivacyRequest.created_at.desc())
-        )
-        return (await self.db.execute(stmt)).scalars().first()
-
-    async def get_latest_export_request(
-        self, user_id: str
-    ) -> PrivacyRequest | None:
-        """Return the user's most recent export request (any status)."""
-        stmt = (
-            select(PrivacyRequest)
-            .where(
-                PrivacyRequest.user_id == user_id,
-                PrivacyRequest.request_type == "export",
-            )
-            .order_by(PrivacyRequest.created_at.desc())
-            .limit(1)
-        )
-        return (await self.db.execute(stmt)).scalars().first()
-
-    async def get_active_deletion_request(
-        self, user_id: str
-    ) -> PrivacyRequest | None:
-        """Return any in-flight deletion request."""
-        stmt = (
-            select(PrivacyRequest)
-            .where(
-                PrivacyRequest.user_id == user_id,
-                PrivacyRequest.request_type == "delete",
-                PrivacyRequest.status == "pending_deletion",
-            )
-            .order_by(PrivacyRequest.created_at.desc())
-            .limit(1)
-        )
-        return (await self.db.execute(stmt)).scalars().first()
-
-    # ─────────────────────────────────────────
-    # EXPORT (Art. 20)
-    # ─────────────────────────────────────────
-    async def export_user_data(
-        self,
-        user_id: str,
-        request_id: str,
-        user_email: str | None,
-    ) -> None:
-        """Background task: collect data → ZIP → upload → email.
-
-        Runs with its own session because FastAPI closes the request
-        session before background callbacks execute.  Every failure
-        mode marks the request as ``failed`` with a truncated error
-        message so the user can see a meaningful status instead of a
-        silent hang.
-        """
-        from backend import deps
-
-        session_maker = deps.SessionLocal
-        try:
-            async with session_maker() as session:
-                service = PrivacyService(session)
-                try:
-                    await service.update_request_status(
-                        request_id, status="processing"
-                    )
-
-                    data = await _collect_user_data(session, user_id)
-                    zip_bytes, zip_filename = _build_export_zip(user_id, data)
-
-                    download_url, expires_at = _upload_and_sign(
-                        zip_bytes=zip_bytes,
-                        filename=zip_filename,
-                        user_id=user_id,
-                    )
-
-                    await service.update_request_status(
-                        request_id,
-                        status="ready",
-                        download_url=download_url,
-                        url_expires_at=expires_at,
-                    )
-
-                    if user_email:
-                        await _send_export_ready_email(
-                            to=user_email,
-                            download_url=download_url,
-                            expires_at=expires_at,
-                        )
-                except Exception as e:
-                    logger.exception(
-                        "Export generation failed for user=%s: %s",
-                        user_id,
-                        e,
-                    )
-                    await service.update_request_status(
-                        request_id, status="failed", error_message=str(e)
-                    )
-        except Exception as outer:  # pragma: no cover - defensive
-            logger.exception(
-                "Fatal error in export_user_data for user=%s: %s",
-                user_id,
-                outer,
-            )
-
-    # ─────────────────────────────────────────
-    # DELETION (Art. 17)
-    # ─────────────────────────────────────────
-    async def initiate_soft_delete(
-        self, user_id: str, request_id: str
-    ) -> datetime.datetime:
-        """Schedule account deletion 30 days out.
-
-        The ``User`` row is **not** soft-deleted yet — the account
-        remains usable during the grace period so users can cancel.
-        A scheduled job (``hard_delete_user``) performs the actual
-        cascade-delete on day 30.
-        """
-        scheduled_at = _now() + datetime.timedelta(days=DELETION_GRACE_DAYS)
-
-        user = await self.db.get(User, user_id)
-        if user is None:
-            raise ValueError(f"User {user_id!r} not found")
-
-        req = await self.db.get(PrivacyRequest, request_id)
-        if req is None:
-            raise ValueError(f"PrivacyRequest {request_id!r} not found")
-
-        req.status = "pending_deletion"
-        req.scheduled_deletion_at = scheduled_at
-        await self.db.commit()
-        return scheduled_at
-
-    async def cancel_soft_delete(self, user_id: str) -> bool:
-        """Cancel an in-progress deletion; returns ``True`` on success."""
-        stmt = (
-            select(PrivacyRequest)
-            .where(
-                PrivacyRequest.user_id == user_id,
-                PrivacyRequest.request_type == "delete",
-                PrivacyRequest.status == "pending_deletion",
-            )
-            .order_by(PrivacyRequest.created_at.desc())
-        )
-        req = (await self.db.execute(stmt)).scalars().first()
-        if req is None:
-            return False
-
-        req.status = "cancelled"
-        await self.db.commit()
-        return True
-
-    async def hard_delete_user(self, user_id: str) -> None:
-        """Cascade-delete all user data (called by scheduler on day 30).
-
-        Steps:
-        1. Cancel any active Stripe subscription (optional, guarded).
-        2. Delete rows from every table in ``HARD_DELETE_TABLES``.
-        3. Delete the user row itself.
-        4. Clear session/auth-token keys from Redis (optional, guarded).
-        """
-        await _cancel_stripe_subscription(self.db, user_id)
-
-        # Cascade-delete table rows.  Missing tables are ignored so this
-        # method works across dialects (SQLite test DB won't have every
-        # production table).
-        from sqlalchemy import text
-
-        for table in HARD_DELETE_TABLES:
-            try:
-                await self.db.execute(
-                    text(f"DELETE FROM {table} WHERE user_id = :uid"),  # noqa: S608
-                    {"uid": user_id},
-                )
-            except Exception as e:
-                logger.debug(
-                    "Skipping hard-delete on %s: %s", table, e
-                )
-
-        # Finally delete the user row (use ORM so soft-delete-aware
-        # cascades still fire).
-        user = await self.db.get(User, user_id)
-        if user is not None:
-            await self.db.delete(user)
-
-        await self.db.commit()
-
-        await _clear_redis_sessions(user_id)
-
-    # ─────────────────────────────────────────
-    # EMAILS
-    # ─────────────────────────────────────────
-    async def send_deletion_initiated_email(
-        self,
-        user_email: str | None,
-        user_name: str,
-        scheduled_deletion_at: datetime.datetime,
-    ) -> None:
-        """Notify the user their account is scheduled for deletion."""
-        if not user_email:
-            logger.warning(
-                "send_deletion_initiated_email skipped: no email on user"
-            )
-            return
-
-        try:
-            from backend.services.email_service import send_email
-        except Exception as e:  # pragma: no cover - import guard
-            logger.warning(
-                "Email service unavailable for deletion email: %s", e
-            )
-            return
-
-        scheduled_str = scheduled_deletion_at.strftime("%B %d, %Y")
-        cancel_url = (
-            f"{os.getenv('FRONTEND_URL', 'https://kiaanverse.com')}"
-            "/settings/privacy?cancel_deletion=true"
-        )
-        subject = "Your Kiaanverse Account Deletion Request"
-        html_body = (
-            f"<p>Dear {user_name},</p>"
-            f"<p>We have received your request to delete your Kiaanverse "
-            f"account.</p>"
-            f"<p>Your account and all associated data will be permanently "
-            f"deleted on <strong>{scheduled_str}</strong> (30 days from now).</p>"
-            f"<p>If you change your mind, you can cancel this request at any "
-            f"time before that date by visiting your "
-            f"<a href='{cancel_url}'>Privacy Settings</a>.</p>"
-            f"<p>We are sorry to see you go. Your journey with us has been "
-            f"sacred.</p>"
-            f"<p>— The Kiaanverse Team<br>{SUPPORT_EMAIL}</p>"
-        )
-        text_body = (
-            f"Dear {user_name},\n\n"
-            f"Your Kiaanverse account is scheduled for permanent deletion "
-            f"on {scheduled_str} (30 days from now). You can cancel this "
-            f"at any time before then at {cancel_url}.\n\n"
-            f"— The Kiaanverse Team ({SUPPORT_EMAIL})\n"
-        )
-        try:
-            await send_email(
-                to=user_email,
-                subject=subject,
-                html_body=html_body,
-                text_body=text_body,
-            )
-        except Exception as e:
-            logger.warning("Failed to send deletion email: %s", e)
+        .limit(1)
+    )
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none() is not None
 
 
-# =========================================================================
-# Export helpers
-# =========================================================================
-async def _collect_user_data(
-    session: AsyncSession, user_id: str
-) -> dict[str, Any]:
-    """Collect every user-owned record into a structured dict.
+# ---------------------------------------------------------------------------
+# Audit logging
+# ---------------------------------------------------------------------------
 
-    Uses the ORM (not raw SQL) for portability across dialects.
-    Journal blobs are included **encrypted** — Kiaanverse never
-    decrypts them server-side.
-    """
-    user = await session.get(User, user_id)
-    profile = (
-        await session.execute(
-            select(UserProfile).where(UserProfile.user_id == user_id)
-        )
-    ).scalar_one_or_none()
+async def audit_privacy_action(
+    db: AsyncSession,
+    user_id: str,
+    action: str,
+    ip_hash: str,
+    details: dict[str, Any] | None = None,
+) -> None:
+    db.add(ComplianceAuditLog(
+        user_id=user_id,
+        action=action,
+        resource_type="privacy",
+        resource_id=user_id,
+        details=details,
+        ip_address=ip_hash,
+        severity="info" if "cancel" in action or "export" in action else "warning",
+    ))
+    await db.commit()
 
-    moods = (
-        await session.execute(select(Mood).where(Mood.user_id == user_id))
-    ).scalars().all()
 
-    blobs = (
-        await session.execute(
-            select(EncryptedBlob).where(EncryptedBlob.user_id == user_id)
-        )
-    ).scalars().all()
+def hash_ip(ip: str) -> str:
+    return hashlib.sha256(f"{ip}:{settings.SECRET_KEY}".encode()).hexdigest()[:16]
 
-    consents = (
-        await session.execute(
-            select(UserConsent).where(UserConsent.user_id == user_id)
-        )
-    ).scalars().all()
 
-    try:
-        subscription = (
-            await session.execute(
-                select(UserSubscription).where(
-                    UserSubscription.user_id == user_id
-                )
-            )
-        ).scalar_one_or_none()
-    except Exception:
-        subscription = None
+# ---------------------------------------------------------------------------
+# DATA EXPORT (Art. 15 + Art. 20)
+# ---------------------------------------------------------------------------
 
-    account: dict[str, Any] = {
-        "id": user.id if user else None,
-        "email": user.email if user else None,
-        "locale": user.locale if user else None,
-        "created_at": user.created_at.isoformat()
-        if user and user.created_at
-        else None,
-        "profile": (
+def _serialize_dt(dt: datetime.datetime | None) -> str | None:
+    return dt.isoformat() if dt else None
+
+
+async def _gather_account(db: AsyncSession, user_id: str) -> dict:
+    user = (await db.execute(select(User).where(User.id == user_id))).scalar_one_or_none()
+    profile = (await db.execute(
+        select(UserProfile).where(UserProfile.user_id == user_id)
+    )).scalar_one_or_none()
+    consents = (await db.execute(
+        select(UserConsent).where(UserConsent.user_id == user_id)
+    )).scalars().all()
+    sessions = (await db.execute(
+        select(Session).where(Session.user_id == user_id)
+    )).scalars().all()
+
+    return {
+        "user": {
+            "id": user.id if user else None,
+            "email": user.email if user else None,
+            "locale": user.locale if user else None,
+            "email_verified": user.email_verified if user else None,
+            "is_onboarded": user.is_onboarded if user else None,
+            "created_at": _serialize_dt(user.created_at) if user else None,
+        },
+        "profile": {
+            "full_name": profile.full_name if profile else None,
+            "base_experience": profile.base_experience if profile else None,
+            "created_at": _serialize_dt(profile.created_at) if profile else None,
+        } if profile else None,
+        "consents": [
             {
-                "full_name": profile.full_name,
-                "base_experience": profile.base_experience,
+                "type": c.consent_type.value,
+                "granted": c.granted,
+                "granted_at": _serialize_dt(c.granted_at),
+                "withdrawn_at": _serialize_dt(c.withdrawn_at),
             }
-            if profile
-            else None
-        ),
+            for c in consents
+        ],
+        "sessions": [
+            {
+                "id": s.id,
+                "created_at": _serialize_dt(s.created_at),
+                "last_used_at": _serialize_dt(s.last_used_at),
+                "ip_address": s.ip_address,
+            }
+            for s in sessions
+        ],
     }
 
-    practice = {
+
+async def _gather_conversations(db: AsyncSession, user_id: str) -> dict:
+    messages = (await db.execute(
+        select(KiaanChatMessage)
+        .where(KiaanChatMessage.user_id == user_id)
+        .order_by(KiaanChatMessage.created_at)
+    )).scalars().all()
+    chat_sessions = (await db.execute(
+        select(KiaanChatSession)
+        .where(KiaanChatSession.user_id == user_id)
+        .order_by(KiaanChatSession.started_at)
+    )).scalars().all()
+
+    return {
+        "kiaan_sessions": [
+            {
+                "id": s.id,
+                "started_at": _serialize_dt(s.started_at),
+                "ended_at": _serialize_dt(s.ended_at),
+                "message_count": s.message_count,
+                "initial_mood": s.initial_mood,
+                "language": s.language,
+                "session_summary": s.session_summary,
+            }
+            for s in chat_sessions
+        ],
+        "kiaan_messages": [
+            {
+                "id": m.id,
+                "session_id": m.session_id,
+                "user_message": m.user_message,
+                "kiaan_response": m.kiaan_response,
+                "detected_emotion": m.detected_emotion,
+                "verses_used": m.verses_used,
+                "language": m.language,
+                "created_at": _serialize_dt(m.created_at),
+            }
+            for m in messages
+        ],
+    }
+
+
+async def _gather_practice(db: AsyncSession, user_id: str) -> dict:
+    moods = (await db.execute(
+        select(Mood).where(Mood.user_id == user_id, Mood.deleted_at.is_(None))
+        .order_by(Mood.at)
+    )).scalars().all()
+
+    journeys = (await db.execute(
+        select(UserJourney).where(UserJourney.user_id == user_id)
+    )).scalars().all()
+
+    journal_entries = (await db.execute(
+        select(JournalEntry)
+        .where(JournalEntry.user_id == user_id, JournalEntry.deleted_at.is_(None))
+        .order_by(JournalEntry.created_at)
+    )).scalars().all()
+
+    journal_blobs = (await db.execute(
+        select(EncryptedBlob)
+        .where(EncryptedBlob.user_id == user_id, EncryptedBlob.deleted_at.is_(None))
+    )).scalars().all()
+
+    progress = (await db.execute(
+        select(UserProgress).where(UserProgress.user_id == user_id)
+    )).scalar_one_or_none()
+
+    push_subs = (await db.execute(
+        select(PushSubscription).where(PushSubscription.user_id == user_id)
+    )).scalars().all()
+
+    return {
         "mood_logs": [
             {
                 "id": m.id,
                 "score": m.score,
                 "tags": m.tags,
                 "note": m.note,
-                "at": m.at.isoformat() if m.at else None,
+                "at": _serialize_dt(m.at),
             }
             for m in moods
         ],
+        "journey_entries": [
+            {
+                "id": j.id,
+                "journey_template_id": j.journey_template_id,
+                "status": j.status,
+                "current_day_index": j.current_day_index,
+                "started_at": _serialize_dt(j.started_at),
+                "completed_at": _serialize_dt(j.completed_at),
+            }
+            for j in journeys
+        ],
         "journal_entries_encrypted": [
             {
-                "id": b.id,
-                "encrypted_content": b.blob_json,
-                "created_at": b.created_at.isoformat()
-                if b.created_at
-                else None,
+                "id": e.id,
+                "encrypted_title": e.encrypted_title,
+                "encrypted_content": e.encrypted_content,
+                "encryption_meta": e.encryption_meta,
+                "mood_labels": e.mood_labels,
+                "tag_labels": e.tag_labels,
+                "created_at": _serialize_dt(e.created_at),
+                "_notice": "ENCRYPTED — use your personal encryption key to decrypt",
             }
-            for b in blobs
+            for e in journal_entries
+        ],
+        "journal_blobs_encrypted": [
+            {
+                "id": b.id,
+                "blob_json": b.blob_json,
+                "created_at": _serialize_dt(b.created_at),
+                "_notice": "ENCRYPTED — use your personal encryption key to decrypt",
+            }
+            for b in journal_blobs
+        ],
+        "progress": {
+            "user_id": progress.user_id if progress else None,
+        } if progress else None,
+        "notification_tokens": [
+            {
+                "id": p.id,
+                "platform": p.platform,
+                "device_name": p.device_name,
+                "is_active": p.is_active,
+                "created_at": _serialize_dt(p.created_at),
+            }
+            for p in push_subs
         ],
     }
+
+
+async def _gather_subscription(db: AsyncSession, user_id: str) -> dict:
+    sub = (await db.execute(
+        select(UserSubscription).where(UserSubscription.user_id == user_id)
+    )).scalar_one_or_none()
+
+    if not sub:
+        return {"subscription": None}
 
     return {
-        "account": account,
-        # KIAAN conversations are encrypted at rest via the chat service;
-        # we include the encrypted blobs under journal_entries_encrypted
-        # and expose an empty list here so the file structure is stable.
-        "conversations": [],
-        "practice": practice,
-        "subscription": [
-            {
-                "plan_id": subscription.plan_id,
-                "status": (
-                    subscription.status.value
-                    if subscription.status
-                    else None
-                ),
-            }
-        ]
-        if subscription
-        else [],
-        "consents": [
-            {
-                "type": c.consent_type.value,
-                "granted": c.granted,
-                "granted_at": c.granted_at.isoformat()
-                if c.granted_at
-                else None,
-                "withdrawn_at": c.withdrawn_at.isoformat()
-                if c.withdrawn_at
-                else None,
-            }
-            for c in consents
-        ],
+        "subscription": {
+            "plan_id": sub.plan_id,
+            "status": sub.status.value if sub.status else None,
+            "payment_provider": sub.payment_provider,
+            "current_period_start": _serialize_dt(sub.current_period_start),
+            "current_period_end": _serialize_dt(sub.current_period_end),
+            "cancel_at_period_end": sub.cancel_at_period_end,
+            "created_at": _serialize_dt(sub.created_at),
+            # NO card data, NO stripe_customer_id, NO stripe_subscription_id
+        },
     }
 
 
-def _build_export_zip(user_id: str, data: dict[str, Any]) -> tuple[bytes, str]:
-    """Build the ZIP archive and return (bytes, filename)."""
-    buf = io.BytesIO()
-    date_str = _now().strftime("%Y-%m-%d")
-    filename = f"kiaanverse-data-export-{user_id}-{date_str}.zip"
+_README_CONTENT = """\
+KIAANVERSE DATA EXPORT
+=======================
 
-    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr(
-            "account.json",
-            json.dumps(data["account"], indent=2, default=str),
-        )
-        zf.writestr(
-            "conversations.json",
-            json.dumps(data["conversations"], indent=2, default=str),
-        )
-        zf.writestr(
-            "practice.json",
-            json.dumps(data["practice"], indent=2, default=str),
-        )
-        zf.writestr(
-            "subscription.json",
-            json.dumps(data["subscription"], indent=2, default=str),
-        )
-        zf.writestr(
-            "consents.json",
-            json.dumps(data["consents"], indent=2, default=str),
-        )
-        zf.writestr("README.txt", _build_readme(user_id, date_str))
+This ZIP archive contains all personal data associated with your
+Kiaanverse (Sakha / MindVibe) account, provided under:
 
-    return buf.getvalue(), filename
+  - GDPR Article 15 (Right of Access)
+  - GDPR Article 20 (Right to Data Portability)
 
+Files included:
+  account.json       — Profile, email, sessions, consent records
+  conversations.json — KIAAN chat sessions and messages
+  practice.json      — Mood logs, journey progress, journal entries,
+                        notification tokens
+  subscription.json  — Subscription plan & billing period (NO card data)
 
-def _build_readme(user_id: str, date_str: str) -> str:
-    """Assemble the human-readable README bundled with every export."""
-    return (
-        "KIAANVERSE DATA EXPORT\n"
-        "===========================================\n"
-        f"User ID   : {user_id}\n"
-        f"Date      : {date_str}\n"
-        "Generated : Kiaanverse Privacy System (GDPR Art. 20)\n\n"
-        "FILES IN THIS EXPORT\n"
-        "--------------------\n"
-        "account.json\n"
-        "  Your profile, email, locale, and account metadata.\n\n"
-        "conversations.json\n"
-        "  Your conversation history with the KIAAN companion.\n"
-        "  Sensitive chat content is end-to-end encrypted where\n"
-        "  applicable and included under journal_entries_encrypted.\n\n"
-        "practice.json\n"
-        "  Your mood logs and Nitya Sadhana records.\n\n"
-        "  IMPORTANT — ENCRYPTED JOURNAL ENTRIES:\n"
-        "  The `journey_entries_encrypted` field contains your\n"
-        "  Shadripu Journey journal entries in ENCRYPTED form.\n"
-        "  Kiaanverse cannot read, decrypt, or access the content of\n"
-        "  your journal. Only you hold the key to this sacred space.\n"
-        "  The encrypted data is included here for your records, but\n"
-        "  cannot be read without your personal decryption key.\n\n"
-        "subscription.json\n"
-        "  Your subscription plan history. Payment card data is NEVER\n"
-        "  stored by Kiaanverse — it is held exclusively by Stripe\n"
-        "  (PCI-DSS Level 1 certified).\n\n"
-        "consents.json\n"
-        "  The history of every consent you granted or withdrew.\n\n"
-        "QUESTIONS?\n"
-        "----------\n"
-        f"Email: {SUPPORT_EMAIL}\n"
-        "Response time: within 30 days (GDPR Art. 12(3))\n"
-        "Website: kiaanverse.com/privacy\n"
-    )
+IMPORTANT — ENCRYPTED ENTRIES
+Journal entries and journal blobs are stored in encrypted form.
+The server never has access to your plaintext journal content.
+To read these entries, you need the encryption key stored in your
+browser's local storage.  Fields marked "_notice": "ENCRYPTED" are
+ciphertext and cannot be read without your key.
+
+This export was generated on {date} and the download link expires
+after 7 days.  You may request a new export once every 24 hours.
+
+Questions?  Contact privacy@kiaanverse.com
+"""
 
 
-def _upload_and_sign(
-    zip_bytes: bytes,
-    filename: str,
+async def export_user_data(
+    db: AsyncSession,
     user_id: str,
-) -> tuple[str, datetime.datetime]:
-    """Upload the export to R2/S3 and return ``(signed_url, expires_at)``.
+    ip_hash: str,
+) -> DataExportRequest:
+    """Collect all user data, build ZIP, store, and return export request."""
+    account = await _gather_account(db, user_id)
+    conversations = await _gather_conversations(db, user_id)
+    practice = await _gather_practice(db, user_id)
+    subscription = await _gather_subscription(db, user_id)
 
-    When ``R2_ENDPOINT_URL`` / credentials are **not** configured (or
-    ``boto3`` isn't installed), returns an in-app fallback token URL so
-    local dev and tests remain functional.  The fallback URL is still
-    unguessable (64-char url-safe token) and expires in 7 days.
-    """
-    endpoint = os.environ.get("R2_ENDPOINT_URL")
-    access_key = os.environ.get("R2_ACCESS_KEY_ID")
-    secret_key = os.environ.get("R2_SECRET_ACCESS_KEY")
-    bucket = os.environ.get("R2_BUCKET_NAME", "kiaanverse-exports")
+    today = datetime.date.today().isoformat()
+    zip_name = f"kiaanverse-data-export-{user_id[:8]}-{today}"
 
-    expires_at = _now() + datetime.timedelta(seconds=SIGNED_URL_EXPIRY_SECONDS)
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr(f"{zip_name}/account.json", json.dumps(account, indent=2, default=str))
+        zf.writestr(f"{zip_name}/conversations.json", json.dumps(conversations, indent=2, default=str))
+        zf.writestr(f"{zip_name}/practice.json", json.dumps(practice, indent=2, default=str))
+        zf.writestr(f"{zip_name}/subscription.json", json.dumps(subscription, indent=2, default=str))
+        zf.writestr(f"{zip_name}/README.txt", _README_CONTENT.format(date=today))
 
-    if endpoint and access_key and secret_key:
+    zip_bytes = buf.getvalue()
+
+    upload_dir = os.path.join(settings.UPLOAD_DIR, "privacy_exports", user_id)
+    os.makedirs(upload_dir, exist_ok=True)
+    file_path = os.path.join(upload_dir, f"{zip_name}.zip")
+    with open(file_path, "wb") as f:
+        f.write(zip_bytes)
+
+    expires_at = datetime.datetime.now(datetime.UTC) + datetime.timedelta(
+        days=EXPORT_SIGNED_URL_EXPIRY_DAYS
+    )
+
+    export_req = DataExportRequest(
+        user_id=user_id,
+        status=DataExportStatus.COMPLETED,
+        format="zip",
+        file_path=file_path,
+        file_size_bytes=len(zip_bytes),
+        expires_at=expires_at,
+        completed_at=datetime.datetime.now(datetime.UTC),
+        ip_address=ip_hash,
+    )
+    db.add(export_req)
+    await db.flush()
+    await db.refresh(export_req)
+
+    token = _sign_token(export_req.id, user_id, expires_at)
+    export_req.download_token = token
+    await db.commit()
+    await db.refresh(export_req)
+
+    await audit_privacy_action(db, user_id, "export_completed", ip_hash, {
+        "export_id": export_req.id,
+        "file_size": len(zip_bytes),
+    })
+
+    user = (await db.execute(select(User).where(User.id == user_id))).scalar_one_or_none()
+    if user and user.email:
+        download_url = f"{settings.FRONTEND_URL}/api/privacy/export?token={token}"
+        await send_export_ready_email(user.email, download_url)
+
+    logger.info("Data export completed for user %s (%d bytes)", user_id[:8], len(zip_bytes))
+    return export_req
+
+
+async def get_export_zip_bytes(db: AsyncSession, export_id: int) -> bytes | None:
+    export_req = (await db.execute(
+        select(DataExportRequest).where(DataExportRequest.id == export_id)
+    )).scalar_one_or_none()
+    if not export_req or not export_req.file_path:
+        return None
+    if not os.path.isfile(export_req.file_path):
+        return None
+    with open(export_req.file_path, "rb") as f:
+        return f.read()
+
+
+# ---------------------------------------------------------------------------
+# DELETION (Art. 17)
+# ---------------------------------------------------------------------------
+
+async def initiate_deletion(
+    db: AsyncSession,
+    user_id: str,
+    ip_hash: str,
+    reason: str | None = None,
+) -> DeletionRequest:
+    """Soft-delete day 0 — starts the 30-day grace period."""
+    existing = (await db.execute(
+        select(DeletionRequest).where(DeletionRequest.user_id == user_id)
+    )).scalar_one_or_none()
+
+    if existing and existing.status in (
+        DeletionRequestStatus.PENDING,
+        DeletionRequestStatus.GRACE_PERIOD,
+        DeletionRequestStatus.PROCESSING,
+    ):
+        return existing
+
+    grace_end = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=GRACE_PERIOD_DAYS)
+
+    if existing:
+        # Reuse the row (unique constraint on user_id)
+        existing.status = DeletionRequestStatus.GRACE_PERIOD
+        existing.reason = reason
+        existing.grace_period_days = GRACE_PERIOD_DAYS
+        existing.grace_period_ends_at = grace_end
+        existing.ip_address = ip_hash
+        existing.canceled_at = None
+        existing.completed_at = None
+        req = existing
+    else:
+        req = DeletionRequest(
+            user_id=user_id,
+            status=DeletionRequestStatus.GRACE_PERIOD,
+            reason=reason,
+            grace_period_days=GRACE_PERIOD_DAYS,
+            grace_period_ends_at=grace_end,
+            ip_address=ip_hash,
+        )
+        db.add(req)
+
+    await db.commit()
+    await db.refresh(req)
+
+    await audit_privacy_action(db, user_id, "deletion_initiated", ip_hash, {
+        "grace_period_ends_at": grace_end.isoformat(),
+        "reason": reason,
+    })
+
+    user = (await db.execute(select(User).where(User.id == user_id))).scalar_one_or_none()
+    if user and user.email:
+        await send_deletion_initiated_email(user.email, grace_end)
+
+    logger.info("Deletion initiated for user %s, grace ends %s", user_id[:8], grace_end.isoformat())
+    return req
+
+
+async def cancel_deletion(
+    db: AsyncSession,
+    user_id: str,
+    ip_hash: str,
+) -> DeletionRequest | None:
+    req = (await db.execute(
+        select(DeletionRequest).where(
+            DeletionRequest.user_id == user_id,
+            DeletionRequest.status == DeletionRequestStatus.GRACE_PERIOD,
+        )
+    )).scalar_one_or_none()
+
+    if not req:
+        return None
+
+    req.status = DeletionRequestStatus.CANCELED
+    req.canceled_at = datetime.datetime.now(datetime.UTC)
+    await db.commit()
+    await db.refresh(req)
+
+    await audit_privacy_action(db, user_id, "deletion_canceled", ip_hash)
+    logger.info("Deletion canceled for user %s", user_id[:8])
+    return req
+
+
+async def execute_hard_delete(db: AsyncSession, user_id: str) -> None:
+    """Day-30 hard cascade delete — called by scheduled job."""
+    tables_to_purge = [
+        KiaanChatMessage, KiaanChatSession,
+        JournalEntry, EncryptedBlob,
+        Mood,
+        UserJourneyStepState, UserJourneyProgress, UserJourney,
+        UserConsent, PushSubscription, Notification,
+        RefreshToken, Session,
+        UserProgress, UserProfile,
+    ]
+
+    # Cancel Stripe subscription
+    sub = (await db.execute(
+        select(UserSubscription).where(UserSubscription.user_id == user_id)
+    )).scalar_one_or_none()
+    if sub and sub.stripe_subscription_id:
         try:
-            import boto3
-            from botocore.config import Config
-
-            s3 = boto3.client(
-                "s3",
-                endpoint_url=endpoint,
-                aws_access_key_id=access_key,
-                aws_secret_access_key=secret_key,
-                config=Config(signature_version="s3v4"),
-            )
-            key = f"exports/{user_id}/{filename}"
-            s3.put_object(
-                Bucket=bucket,
-                Key=key,
-                Body=zip_bytes,
-                ContentType="application/zip",
-            )
-            signed_url = s3.generate_presigned_url(
-                "get_object",
-                Params={"Bucket": bucket, "Key": key},
-                ExpiresIn=SIGNED_URL_EXPIRY_SECONDS,
-            )
-            return signed_url, expires_at
+            from backend.services.stripe_service import cancel_subscription
+            await cancel_subscription(db, user_id, cancel_immediately=True)
         except Exception as e:
-            logger.warning(
-                "R2 upload failed — falling back to token URL: %s", e
-            )
+            logger.error("Stripe cancel failed for user %s: %s", user_id[:8], e)
 
-    # Fallback: unguessable token URL.  Download endpoint would be
-    # implemented separately; for now we record the token so the router
-    # can show "ready" state.
-    token = secrets.token_urlsafe(64)
-    return f"{EXPORT_FALLBACK_BASE_URL}?token={token}", expires_at
+    # Delete subscription record
+    await db.execute(delete(UserSubscription).where(UserSubscription.user_id == user_id))
 
+    for model in tables_to_purge:
+        await db.execute(delete(model).where(model.user_id == user_id))
 
-async def _send_export_ready_email(
-    to: str,
-    download_url: str,
-    expires_at: datetime.datetime,
-) -> None:
-    """Best-effort email when the export is ready."""
+    # Delete the user row itself
+    await db.execute(delete(User).where(User.id == user_id))
+
+    # Clean up export files
+    export_dir = os.path.join(settings.UPLOAD_DIR, "privacy_exports", user_id)
+    if os.path.isdir(export_dir):
+        import shutil
+        shutil.rmtree(export_dir, ignore_errors=True)
+
+    # Invalidate Redis sessions
     try:
-        from backend.services.email_service import send_email
-    except Exception as e:  # pragma: no cover - import guard
-        logger.warning("Email service unavailable for export email: %s", e)
-        return
-
-    expires_str = expires_at.strftime("%B %d, %Y")
-    subject = "Your Kiaanverse Data Export is Ready"
-    html_body = (
-        f"<p>Your data export is ready to download.</p>"
-        f"<p><a href='{download_url}'>Download your data</a></p>"
-        f"<p>This link expires on <strong>{expires_str}</strong> "
-        f"(7 days).</p>"
-        f"<p>If you have questions, contact "
-        f"<a href='mailto:{SUPPORT_EMAIL}'>{SUPPORT_EMAIL}</a>.</p>"
-        f"<p>— The Kiaanverse Team</p>"
-    )
-    text_body = (
-        f"Your Kiaanverse data export is ready:\n{download_url}\n\n"
-        f"This link expires on {expires_str}.\n"
-        f"Questions? Email {SUPPORT_EMAIL}.\n"
-    )
-    try:
-        await send_email(to, subject, html_body, text_body)
-    except Exception as e:
-        logger.warning("Failed to send export-ready email: %s", e)
-
-
-# =========================================================================
-# Deletion helpers
-# =========================================================================
-async def _cancel_stripe_subscription(
-    session: AsyncSession, user_id: str
-) -> None:
-    """Best-effort cancellation of the user's active Stripe subscription.
-
-    Stripe is optional — if the library is not installed or
-    ``STRIPE_SECRET_KEY`` is unset, we skip silently.  Cancellation
-    failure is logged but never blocks hard-deletion.
-    """
-    secret = os.environ.get("STRIPE_SECRET_KEY")
-    if not secret:
-        return
-
-    try:
-        import stripe  # type: ignore
-    except Exception:
-        return
-
-    try:
-        stmt = select(UserSubscription).where(
-            UserSubscription.user_id == user_id
-        )
-        subscription = (await session.execute(stmt)).scalar_one_or_none()
-    except Exception as e:
-        logger.debug("Could not query subscription for cancel: %s", e)
-        return
-
-    stripe_sub_id = getattr(subscription, "stripe_subscription_id", None)
-    if not stripe_sub_id:
-        return
-
-    stripe.api_key = secret
-    try:
-        stripe.Subscription.cancel(stripe_sub_id)
-    except Exception as e:
-        logger.warning(
-            "Stripe cancellation failed for user=%s sub=%s: %s",
-            user_id,
-            stripe_sub_id,
-            e,
-        )
-
-
-async def _clear_redis_sessions(user_id: str) -> None:
-    """Best-effort: purge session-like keys for a deleted user."""
-    try:
-        from backend.cache.redis_cache import get_redis_cache
-
+        from backend.cache import get_redis_cache
         cache = await get_redis_cache()
+        if cache.is_connected():
+            await cache.delete(f"session:{user_id}")
+            await cache.delete(f"user:{user_id}")
     except Exception as e:
-        logger.debug("Redis unavailable for session purge: %s", e)
-        return
+        logger.warning("Redis cleanup failed for user %s: %s", user_id[:8], e)
 
-    if not getattr(cache, "is_connected", False):
-        return
-
-    client = cache.get_client()
-    if client is None:
-        return
-
-    import contextlib
-
-    try:
-        # Conservative: delete keys that clearly belong to this user.
-        patterns = (
-            f"session:{user_id}:*",
-            f"refresh:{user_id}:*",
-            f"user:{user_id}:*",
+    # Mark deletion request completed
+    await db.execute(
+        update(DeletionRequest)
+        .where(
+            DeletionRequest.user_id == user_id,
+            DeletionRequest.status.in_([
+                DeletionRequestStatus.GRACE_PERIOD,
+                DeletionRequestStatus.PROCESSING,
+            ]),
         )
-        for pattern in patterns:
-            async for key in client.scan_iter(match=pattern, count=200):
-                with contextlib.suppress(Exception):
-                    await client.delete(key)
-    except Exception as e:
-        logger.warning(
-            "Failed to clear Redis sessions for user=%s: %s", user_id, e
+        .values(
+            status=DeletionRequestStatus.COMPLETED,
+            completed_at=datetime.datetime.now(datetime.UTC),
         )
+    )
+
+    await db.commit()
+    logger.info("Hard delete completed for user %s", user_id[:8])
+
+
+# ---------------------------------------------------------------------------
+# Email helpers (Resend via shared email service)
+# ---------------------------------------------------------------------------
+
+async def send_export_ready_email(email: str, download_url: str) -> bool:
+    subject = "Your Kiaanverse data export is ready"
+    html = f"""\
+<div style="font-family:'Segoe UI',Tahoma,sans-serif;max-width:600px;margin:0 auto;background:#0b0b0f;color:#f5e6d3;padding:40px;border-radius:16px;">
+  <div style="text-align:center;margin-bottom:32px;">
+    <h1 style="color:#ffb347;font-size:28px;margin:0;">Kiaanverse</h1>
+    <p style="color:#f5e6d3aa;font-size:14px;margin-top:8px;">Your data export is ready</p>
+  </div>
+  <p style="line-height:1.7;color:#f5e6d3cc;">
+    Your personal data export has been prepared. Click the button below to download your data as a ZIP file.
+  </p>
+  <div style="text-align:center;margin:32px 0;">
+    <a href="{download_url}"
+       style="display:inline-block;background:#C8A84B;color:#0A0A14;padding:14px 32px;border-radius:12px;font-weight:600;text-decoration:none;font-size:16px;">
+      Download My Data
+    </a>
+  </div>
+  <p style="line-height:1.7;color:#f5e6d3aa;font-size:13px;">
+    This link expires in 7 days. Journal entries are included in encrypted form —
+    you need your personal encryption key to read them.
+  </p>
+  <hr style="border:none;border-top:1px solid #f5e6d322;margin:24px 0;">
+  <p style="color:#f5e6d366;font-size:12px;text-align:center;">
+    GDPR Articles 15 &amp; 20 · Kiaanverse Privacy Team · privacy@kiaanverse.com
+  </p>
+</div>"""
+    text = f"Your Kiaanverse data export is ready. Download: {download_url} (expires in 7 days)"
+    return await send_email(email, subject, html, text)
+
+
+async def send_deletion_initiated_email(email: str, grace_end: datetime.datetime) -> bool:
+    grace_str = grace_end.strftime("%B %d, %Y")
+    cancel_url = f"{settings.FRONTEND_URL}/settings/privacy"
+    subject = "Account deletion initiated — 30-day grace period"
+    html = f"""\
+<div style="font-family:'Segoe UI',Tahoma,sans-serif;max-width:600px;margin:0 auto;background:#0b0b0f;color:#f5e6d3;padding:40px;border-radius:16px;">
+  <div style="text-align:center;margin-bottom:32px;">
+    <h1 style="color:#ffb347;font-size:28px;margin:0;">Kiaanverse</h1>
+    <p style="color:#f5e6d3aa;font-size:14px;margin-top:8px;">Account deletion request</p>
+  </div>
+  <p style="line-height:1.7;color:#f5e6d3cc;">
+    We've received your request to delete your account. A <strong>30-day grace period</strong>
+    has started. Your account will be permanently deleted on <strong>{grace_str}</strong>.
+  </p>
+  <p style="line-height:1.7;color:#f5e6d3cc;">
+    During this period you can cancel the deletion and restore your account:
+  </p>
+  <div style="text-align:center;margin:32px 0;">
+    <a href="{cancel_url}"
+       style="display:inline-block;background:#C8A84B;color:#0A0A14;padding:14px 32px;border-radius:12px;font-weight:600;text-decoration:none;font-size:16px;">
+      Cancel Deletion
+    </a>
+  </div>
+  <p style="line-height:1.7;color:#f5e6d3aa;font-size:13px;">
+    After {grace_str}, all data across all tables will be permanently erased.
+    This action cannot be undone.
+  </p>
+  <hr style="border:none;border-top:1px solid #f5e6d322;margin:24px 0;">
+  <p style="color:#f5e6d366;font-size:12px;text-align:center;">
+    GDPR Article 17 · Kiaanverse Privacy Team · privacy@kiaanverse.com
+  </p>
+</div>"""
+    text = (
+        f"Your Kiaanverse account is scheduled for deletion on {grace_str}. "
+        f"Cancel at: {cancel_url}"
+    )
+    return await send_email(email, subject, html, text)

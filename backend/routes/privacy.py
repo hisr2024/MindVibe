@@ -1,266 +1,249 @@
-"""Privacy endpoints (v1) — GDPR rights at ``/api/v1/privacy/*``.
+"""GDPR Privacy API — Art. 15/17/20 data subject rights.
 
-Endpoints
----------
-- **POST /api/v1/privacy/export** — queue a data export job
-  (GDPR Art. 20 — Right to Portability).
-- **GET  /api/v1/privacy/export** — poll export status / fetch the
-  signed download URL.
-- **POST /api/v1/privacy/delete** — initiate account deletion with a
-  30-day grace period (GDPR Art. 17 — Right to Erasure).
-- **POST /api/v1/privacy/delete/cancel** — cancel a pending deletion
-  during the grace period.
-
-Design
-------
-* Requests are authenticated via :func:`get_current_user_object` so
-  the full ``User`` row (email, profile) is available to handlers.
-* Export is produced by a FastAPI background task — handlers return
-  immediately with ``status="pending"``.
-* Exports are rate-limited to **1 per 24 hours per user** via
-  :class:`RateLimiter`; failures fail **open** so GDPR rights are
-  never blocked by operational issues.
-* IP addresses are SHA-256 hashed before they reach the audit trail.
-
-KIAAN Impact: ✅ NEUTRAL — compliance surface, no KIAAN coupling.
+Endpoints:
+  POST /api/v1/privacy/export  — queue data export (1/24h rate limit)
+  GET  /api/v1/privacy/export  — download ZIP via signed token
+  POST /api/v1/privacy/delete  — initiate 30-day deletion grace period
+  POST /api/v1/privacy/delete/cancel — cancel deletion during grace period
+  GET  /api/v1/privacy/status  — current export/deletion status
 """
 
 from __future__ import annotations
 
-import hashlib
-import logging
-from typing import Any
+import datetime
+from typing import Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi.responses import Response
+from pydantic import BaseModel, Field
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import get_current_user_object, get_db
-from backend.models import PrivacyRequest, User
-from backend.services.privacy_service import PrivacyService
-from backend.services.rate_limiter import RateLimiter
-
-logger = logging.getLogger(__name__)
+from backend.deps import get_current_user, get_db
+from backend.models import (
+    DataExportRequest,
+    DeletionRequest,
+)
+from backend.services.privacy_service import (
+    cancel_deletion,
+    check_export_rate_limit,
+    export_user_data,
+    get_export_zip_bytes,
+    hash_ip,
+    initiate_deletion,
+    verify_signed_token,
+    audit_privacy_action,
+)
 
 router = APIRouter(prefix="/api/v1/privacy", tags=["privacy"])
 
-EXPORT_RATE_LIMIT = 1
-EXPORT_WINDOW_SECONDS = 24 * 60 * 60
+
+# ---------------------------------------------------------------------------
+# Schemas
+# ---------------------------------------------------------------------------
+
+class ExportResponse(BaseModel):
+    id: int
+    status: str
+    download_token: Optional[str] = None
+    expires_at: Optional[datetime.datetime] = None
+    file_size_bytes: Optional[int] = None
+    created_at: datetime.datetime
 
 
-def _ip_hash(request: Request) -> str:
-    """Return a short, non-reversible hash of the caller's IP.
+class DeleteRequest(BaseModel):
+    confirm: bool = Field(..., description="Must be true to confirm deletion")
+    reason: Optional[str] = Field(None, max_length=500)
 
-    Prefers ``X-Forwarded-For`` when behind a proxy.  Truncated to 16
-    hex chars — plenty to correlate requests in an audit log without
-    preserving the raw address.
-    """
-    forwarded = request.headers.get("x-forwarded-for")
+
+class DeleteResponse(BaseModel):
+    id: int
+    status: str
+    grace_period_days: int
+    grace_period_ends_at: Optional[datetime.datetime] = None
+    created_at: datetime.datetime
+
+
+class StatusResponse(BaseModel):
+    export: Optional[ExportResponse] = None
+    deletion: Optional[DeleteResponse] = None
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _get_client_ip(request: Request) -> str:
+    forwarded = request.headers.get("X-Forwarded-For")
     if forwarded:
-        ip = forwarded.split(",")[0].strip()
-    elif request.client and request.client.host:
-        ip = request.client.host
-    else:
-        ip = "unknown"
-    return hashlib.sha256(ip.encode("utf-8")).hexdigest()[:16]
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
 
 
-def _display_name(user: User) -> str:
-    """Pick a user-facing name for email copy, never blank."""
-    full_name = getattr(user, "full_name", None)
-    if full_name:
-        return full_name
-    if user.email and "@" in user.email:
-        local = user.email.split("@", 1)[0]
-        return local.replace(".", " ").title() or "Seeker"
-    return "Seeker"
+# ---------------------------------------------------------------------------
+# POST /api/v1/privacy/export — request data export
+# ---------------------------------------------------------------------------
 
-
-def _iso(dt) -> str | None:
-    return dt.isoformat() if dt else None
-
-
-# ─────────────────────────────────────────────
-# POST /api/v1/privacy/export
-# ─────────────────────────────────────────────
-@router.post("/export")
+@router.post("/export", response_model=ExportResponse, status_code=status.HTTP_202_ACCEPTED)
 async def request_export(
     request: Request,
-    background_tasks: BackgroundTasks,
-    current_user: User = Depends(get_current_user_object),
+    user_id: str = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-) -> dict[str, Any]:
-    """Queue a data export job.  Rate-limited to 1 per user per 24 h."""
-    service = PrivacyService(db)
-    ip_hash = _ip_hash(request)
+):
+    """Request a GDPR data export (Art. 15 + Art. 20). Rate limited to 1 per 24h."""
+    ip = _get_client_ip(request)
+    ip_h = hash_ip(ip)
 
-    # Collapse duplicate in-flight requests.
-    existing = await service.get_active_export_request(current_user.id)
-    if existing:
-        return {
-            "status": existing.status,
-            "message": "An export is already in progress.",
-            "request_id": str(existing.id),
-            "created_at": _iso(existing.created_at),
-        }
-
-    limiter = RateLimiter()
-    allowed = await limiter.check(
-        f"privacy:export:{current_user.id}",
-        limit=EXPORT_RATE_LIMIT,
-        window_seconds=EXPORT_WINDOW_SECONDS,
-    )
-    if not allowed:
+    if await check_export_rate_limit(db, user_id):
+        await audit_privacy_action(db, user_id, "export_rate_limited", ip_h)
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=(
-                "You can request one data export per 24 hours. "
-                "Please try again later."
-            ),
+            detail="You can request one data export every 24 hours. Please try again later.",
         )
 
-    privacy_request = await service.create_privacy_request(
-        user_id=current_user.id,
-        request_type="export",
-        ip_hash=ip_hash,
+    export_req = await export_user_data(db, user_id, ip_h)
+
+    return ExportResponse(
+        id=export_req.id,
+        status=export_req.status.value,
+        download_token=export_req.download_token,
+        expires_at=export_req.expires_at,
+        file_size_bytes=export_req.file_size_bytes,
+        created_at=export_req.created_at,
     )
 
-    background_tasks.add_task(
-        PrivacyService(db).export_user_data,
-        user_id=current_user.id,
-        request_id=str(privacy_request.id),
-        user_email=current_user.email,
-    )
 
-    return {
-        "status": "pending",
-        "message": (
-            "Your data export has been queued. You will receive an email "
-            "when it is ready (usually within 10 minutes)."
-        ),
-        "request_id": str(privacy_request.id),
-        "created_at": _iso(privacy_request.created_at),
-    }
+# ---------------------------------------------------------------------------
+# GET /api/v1/privacy/export?token=... — download the ZIP
+# ---------------------------------------------------------------------------
 
-
-# ─────────────────────────────────────────────
-# GET /api/v1/privacy/export
-# ─────────────────────────────────────────────
 @router.get("/export")
-async def get_export_status(
-    current_user: User = Depends(get_current_user_object),
-    db: AsyncSession = Depends(get_db),
-) -> dict[str, Any]:
-    """Poll the latest export request and return its status."""
-    service = PrivacyService(db)
-    latest: PrivacyRequest | None = await service.get_latest_export_request(
-        current_user.id
-    )
-    if latest is None:
-        return {"status": "none", "message": "No export requests found."}
-
-    response: dict[str, Any] = {
-        "status": latest.status,
-        "request_id": str(latest.id),
-        "created_at": _iso(latest.created_at),
-    }
-
-    if latest.status == "ready" and latest.download_url:
-        response["download_url"] = latest.download_url
-        response["expires_at"] = _iso(latest.url_expires_at)
-        response["message"] = (
-            "Your export is ready. The download link expires in 7 days."
-        )
-    elif latest.status == "processing":
-        response["message"] = (
-            "Your export is being prepared. This usually takes a few minutes."
-        )
-    elif latest.status == "pending":
-        response["message"] = (
-            "Your export is queued and will begin shortly."
-        )
-    elif latest.status == "failed":
-        response["message"] = (
-            "Your export failed. Please contact privacy@kiaanverse.com."
-        )
-
-    return response
-
-
-# ─────────────────────────────────────────────
-# POST /api/v1/privacy/delete
-# ─────────────────────────────────────────────
-@router.post("/delete")
-async def request_deletion(
+async def download_export(
     request: Request,
-    background_tasks: BackgroundTasks,
-    current_user: User = Depends(get_current_user_object),
+    token: str = Query(..., min_length=10),
     db: AsyncSession = Depends(get_db),
-) -> dict[str, Any]:
-    """Initiate account deletion with a 30-day grace period."""
-    service = PrivacyService(db)
-    ip_hash = _ip_hash(request)
+):
+    """Download a data export ZIP using a signed token (expires 7 days)."""
+    verified = verify_signed_token(token)
+    if not verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid or expired download link. Please request a new export.",
+        )
 
-    existing = await service.get_active_deletion_request(current_user.id)
-    if existing:
-        return {
-            "status": existing.status,
-            "message": "A deletion request is already pending.",
-            "scheduled_deletion_at": _iso(existing.scheduled_deletion_at),
-            "request_id": str(existing.id),
-        }
-
-    privacy_request = await service.create_privacy_request(
-        user_id=current_user.id,
-        request_type="delete",
-        ip_hash=ip_hash,
-    )
-
-    scheduled_at = await service.initiate_soft_delete(
-        user_id=current_user.id,
-        request_id=str(privacy_request.id),
-    )
-
-    background_tasks.add_task(
-        service.send_deletion_initiated_email,
-        user_email=current_user.email,
-        user_name=_display_name(current_user),
-        scheduled_deletion_at=scheduled_at,
-    )
-
-    return {
-        "status": "pending_deletion",
-        "message": (
-            "Your account has been scheduled for deletion in 30 days. "
-            "You can cancel this at any time before then."
-        ),
-        "scheduled_deletion_at": scheduled_at.isoformat(),
-        "request_id": str(privacy_request.id),
-        "cancel_url": "/settings/privacy?cancel_deletion=true",
-    }
-
-
-# ─────────────────────────────────────────────
-# POST /api/v1/privacy/delete/cancel
-# ─────────────────────────────────────────────
-@router.post("/delete/cancel")
-async def cancel_deletion(
-    current_user: User = Depends(get_current_user_object),
-    db: AsyncSession = Depends(get_db),
-) -> dict[str, Any]:
-    """Cancel an in-progress deletion during the grace period."""
-    service = PrivacyService(db)
-    cancelled = await service.cancel_soft_delete(current_user.id)
-
-    if not cancelled:
+    zip_bytes = await get_export_zip_bytes(db, verified["export_id"])
+    if not zip_bytes:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No pending deletion request found for your account.",
+            detail="Export file not found. It may have been cleaned up. Please request a new export.",
         )
 
-    return {
-        "status": "active",
-        "message": (
-            "Your deletion request has been cancelled. "
-            "Your account is fully restored."
-        ),
-    }
+    ip_h = hash_ip(_get_client_ip(request))
+    await audit_privacy_action(db, verified["user_id"], "export_downloaded", ip_h, {
+        "export_id": verified["export_id"],
+    })
+
+    return Response(
+        content=zip_bytes,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": f'attachment; filename="kiaanverse-data-export.zip"',
+            "Cache-Control": "no-store",
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# POST /api/v1/privacy/delete — initiate account deletion
+# ---------------------------------------------------------------------------
+
+@router.post("/delete", response_model=DeleteResponse)
+async def request_deletion(
+    request: Request,
+    body: DeleteRequest,
+    user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Initiate account deletion with 30-day grace period (Art. 17)."""
+    if not body.confirm:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Set confirm=true to proceed with account deletion.",
+        )
+
+    ip_h = hash_ip(_get_client_ip(request))
+    req = await initiate_deletion(db, user_id, ip_h, body.reason)
+
+    return DeleteResponse(
+        id=req.id,
+        status=req.status.value,
+        grace_period_days=req.grace_period_days,
+        grace_period_ends_at=req.grace_period_ends_at,
+        created_at=req.created_at,
+    )
+
+
+# ---------------------------------------------------------------------------
+# POST /api/v1/privacy/delete/cancel — cancel deletion during grace period
+# ---------------------------------------------------------------------------
+
+@router.post("/delete/cancel")
+async def cancel_deletion_request(
+    request: Request,
+    user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Cancel account deletion during the 30-day grace period."""
+    ip_h = hash_ip(_get_client_ip(request))
+    req = await cancel_deletion(db, user_id, ip_h)
+
+    if not req:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No active deletion request found to cancel.",
+        )
+
+    return {"status": "canceled", "message": "Account deletion has been canceled. Your account is restored."}
+
+
+# ---------------------------------------------------------------------------
+# GET /api/v1/privacy/status — combined export + deletion status
+# ---------------------------------------------------------------------------
+
+@router.get("/status", response_model=StatusResponse)
+async def get_privacy_status(
+    user_id: str = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get current status of export and deletion requests."""
+    export_req = (await db.execute(
+        select(DataExportRequest)
+        .where(DataExportRequest.user_id == user_id)
+        .order_by(DataExportRequest.created_at.desc())
+        .limit(1)
+    )).scalar_one_or_none()
+
+    deletion_req = (await db.execute(
+        select(DeletionRequest)
+        .where(DeletionRequest.user_id == user_id)
+        .order_by(DeletionRequest.created_at.desc())
+        .limit(1)
+    )).scalar_one_or_none()
+
+    return StatusResponse(
+        export=ExportResponse(
+            id=export_req.id,
+            status=export_req.status.value,
+            download_token=export_req.download_token,
+            expires_at=export_req.expires_at,
+            file_size_bytes=export_req.file_size_bytes,
+            created_at=export_req.created_at,
+        ) if export_req else None,
+        deletion=DeleteResponse(
+            id=deletion_req.id,
+            status=deletion_req.status.value,
+            grace_period_days=deletion_req.grace_period_days,
+            grace_period_ends_at=deletion_req.grace_period_ends_at,
+            created_at=deletion_req.created_at,
+        ) if deletion_req else None,
+    )

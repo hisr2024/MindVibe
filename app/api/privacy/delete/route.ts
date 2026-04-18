@@ -1,26 +1,67 @@
 /**
- * Privacy Deletion BFF Route (v1)
+ * GDPR Account Deletion API Route (Art. 17 — Right to Erasure)
  *
- * One route file, two verbs — the RESTful way:
- *
- *  - POST   → initiate soft-delete (GDPR Art. 17, 30-day grace period)
- *  - DELETE → cancel a pending deletion during the grace period
- *
- * The backend still exposes cancellation as
- * ``POST /api/v1/privacy/delete/cancel`` (FastAPI routers can't reuse
- * the same path for two different semantics), so the DELETE handler
- * here proxies to that subpath.  Clients get a cleaner surface.
- *
- * Uses ``createProxyHandler`` from ``lib/proxy-utils.ts``, which
- * already handles cookie-based auth, CSRF relay,
- * ``X-Forwarded-For`` passthrough, Render cold-start retries, and
- * ``Set-Cookie`` forwarding.
+ * POST  /api/privacy/delete         — initiate 30-day deletion grace period
+ * PATCH /api/privacy/delete          — cancel deletion during grace period
  */
 
-import { createProxyHandler } from '@/lib/proxy-utils'
+import { NextRequest, NextResponse } from 'next/server'
+import { forwardCookies, proxyHeaders, BACKEND_URL } from '@/lib/proxy-utils'
 
-export const POST = createProxyHandler('/api/v1/privacy/delete', 'POST')
-export const DELETE = createProxyHandler(
-  '/api/v1/privacy/delete/cancel',
-  'POST',
-)
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+
+    const backendResponse = await fetch(
+      `${BACKEND_URL}/api/v1/privacy/delete`,
+      {
+        method: 'POST',
+        headers: proxyHeaders(request, 'POST'),
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(30_000),
+      }
+    )
+
+    const data = await backendResponse.json().catch(() => ({}))
+
+    if (backendResponse.status === 401) {
+      return NextResponse.json({ detail: 'Not authenticated' }, { status: 401 })
+    }
+
+    return forwardCookies(
+      backendResponse,
+      NextResponse.json(data, { status: backendResponse.status })
+    )
+  } catch (error) {
+    console.error('[Privacy Delete POST] Error:', error instanceof Error ? error.message : error)
+    return NextResponse.json(
+      { detail: 'Account deletion is temporarily unavailable. Please try again later.' },
+      { status: 503 }
+    )
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const backendResponse = await fetch(
+      `${BACKEND_URL}/api/v1/privacy/delete/cancel`,
+      {
+        method: 'POST',
+        headers: proxyHeaders(request, 'POST'),
+        signal: AbortSignal.timeout(30_000),
+      }
+    )
+
+    const data = await backendResponse.json().catch(() => ({}))
+    return forwardCookies(
+      backendResponse,
+      NextResponse.json(data, { status: backendResponse.status })
+    )
+  } catch (error) {
+    console.error('[Privacy Delete PATCH] Error:', error instanceof Error ? error.message : error)
+    return NextResponse.json(
+      { detail: 'Unable to cancel deletion. Please try again later.' },
+      { status: 503 }
+    )
+  }
+}
