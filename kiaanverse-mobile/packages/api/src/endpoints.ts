@@ -318,4 +318,20 @@ export const api = {
     }) =>
       apiClient.put('/api/notifications/preferences', prefs),
   },
+
+  /** GDPR Privacy (Art. 15/17/20) */
+  privacy: {
+    status: () => apiClient.get('/api/v1/privacy/status'),
+    requestExport: () =>
+      apiClient.post('/api/v1/privacy/export'),
+    downloadExport: (token: string) =>
+      apiClient.get('/api/v1/privacy/export', {
+        params: { token },
+        responseType: 'arraybuffer',
+      }),
+    requestDeletion: (reason?: string) =>
+      apiClient.post('/api/v1/privacy/delete', { confirm: true, reason }),
+    cancelDeletion: () =>
+      apiClient.post('/api/v1/privacy/delete/cancel'),
+  },
 } as const;
