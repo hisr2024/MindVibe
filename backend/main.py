@@ -1401,6 +1401,16 @@ except Exception as e:
     _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load Compliance router: {e}")
 
+try:
+    from backend.routes.privacy import router as privacy_router
+
+    app.include_router(privacy_router)
+    _startup_status["routers_loaded"] += 1
+    compliance_routers_loaded.append("privacy-v1")
+except Exception as e:
+    _startup_status["routers_failed"] += 1
+    startup_logger.info(f"❌ [ERROR] Failed to load Privacy v1 router: {e}")
+
 if compliance_routers_loaded:
     startup_logger.info(
         f"✅ [SUCCESS] Compliance routers loaded: {', '.join(compliance_routers_loaded)}"

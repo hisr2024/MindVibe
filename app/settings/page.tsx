@@ -206,27 +206,12 @@ export default function SettingsPage() {
       </SettingsSection>
 
       {/* Data Management */}
-      <SettingsSection title="Data Management" description="Export or delete your data" className="mb-6">
-        <div className="space-y-4">
-          <Card variant="bordered">
-            <CardContent className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Export All Data</p>
-                <p className="text-caption text-[var(--mv-text-muted)]">Download your journal entries, settings, and chat history</p>
-              </div>
-              <Button variant="outline" size="sm">Export</Button>
-            </CardContent>
-          </Card>
-          <Card variant="bordered">
-            <CardContent className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-red-400">Delete All Data</p>
-                <p className="text-caption text-[var(--mv-text-muted)]">Permanently remove all your data from this device</p>
-              </div>
-              <Button variant="danger" size="sm">Delete</Button>
-            </CardContent>
-          </Card>
-        </div>
+      <SettingsSection title="Data Management" description="Export or delete your data (GDPR)" className="mb-6">
+        <SettingsItem label="Privacy & Data Rights" description="Download your data, delete your account (GDPR Art. 15, 17, 20)">
+          <Link href="/settings/privacy">
+            <Button variant="outline" size="sm">Manage</Button>
+          </Link>
+        </SettingsItem>
       </SettingsSection>
 
       {/* Links */}
