@@ -171,10 +171,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           'Kiaanverse uses Face ID for secure, quick login.',
       },
     ],
-    'expo-secure-store',
-    'expo-task-manager',
-    'expo-crypto',
-    '@shopify/react-native-skia',
   ],
 
   experiments: {
