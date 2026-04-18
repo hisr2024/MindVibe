@@ -157,7 +157,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           'Sakha uses your microphone for voice conversations.',
       },
     ],
-    'expo-speech',
     [
       'expo-camera',
       {
