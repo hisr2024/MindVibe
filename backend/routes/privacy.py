@@ -34,7 +34,7 @@ from backend.services.privacy_service import (
     hash_ip,
     initiate_deletion,
     verify_signed_token,
-    _audit,
+    audit_privacy_action,
 )
 
 router = APIRouter(prefix="/api/v1/privacy", tags=["privacy"])
@@ -97,7 +97,7 @@ async def request_export(
     ip_h = hash_ip(ip)
 
     if await check_export_rate_limit(db, user_id):
-        await _audit(db, user_id, "export_rate_limited", ip_h)
+        await audit_privacy_action(db, user_id, "export_rate_limited", ip_h)
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="You can request one data export every 24 hours. Please try again later.",

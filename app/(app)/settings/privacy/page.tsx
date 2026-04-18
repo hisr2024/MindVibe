@@ -202,10 +202,8 @@ export default function PrivacySettingsPage() {
   }, [])
 
   const fetchStatus = useCallback(async () => {
-    const { data } = await apiFetch<PrivacyStatus>('/api/gdpr/delete-account/status')
-    // Also try the new endpoint
-    const { data: newData } = await apiFetch<PrivacyStatus>('/api/v1/privacy/status')
-    setPrivacyStatus(newData || data || null)
+    const { data } = await apiFetch<PrivacyStatus>('/api/v1/privacy/status')
+    setPrivacyStatus(data || null)
     setLoading(false)
   }, [])
 

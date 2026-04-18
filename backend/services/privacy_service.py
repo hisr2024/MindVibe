@@ -107,7 +107,7 @@ async def check_export_rate_limit(db: AsyncSession, user_id: str) -> bool:
 # Audit logging
 # ---------------------------------------------------------------------------
 
-async def _audit(
+async def audit_privacy_action(
     db: AsyncSession,
     user_id: str,
     action: str,
@@ -123,7 +123,7 @@ async def _audit(
         ip_address=ip_hash,
         severity="info" if "cancel" in action or "export" in action else "warning",
     ))
-    await db.flush()
+    await db.commit()
 
 
 def hash_ip(ip: str) -> str:
@@ -269,10 +269,11 @@ async def _gather_practice(db: AsyncSession, user_id: str) -> dict:
         "journey_entries": [
             {
                 "id": j.id,
-                "journey_id": getattr(j, "journey_id", None),
-                "status": getattr(j, "status", None),
-                "started_at": _serialize_dt(getattr(j, "started_at", None)),
-                "completed_at": _serialize_dt(getattr(j, "completed_at", None)),
+                "journey_template_id": j.journey_template_id,
+                "status": j.status,
+                "current_day_index": j.current_day_index,
+                "started_at": _serialize_dt(j.started_at),
+                "completed_at": _serialize_dt(j.completed_at),
             }
             for j in journeys
         ],
@@ -420,7 +421,7 @@ async def export_user_data(
     await db.commit()
     await db.refresh(export_req)
 
-    await _audit(db, user_id, "export_completed", ip_hash, {
+    await audit_privacy_action(db, user_id, "export_completed", ip_hash, {
         "export_id": export_req.id,
         "file_size": len(zip_bytes),
     })
@@ -458,40 +459,43 @@ async def initiate_deletion(
 ) -> DeletionRequest:
     """Soft-delete day 0 — starts the 30-day grace period."""
     existing = (await db.execute(
-        select(DeletionRequest).where(
-            DeletionRequest.user_id == user_id,
-            DeletionRequest.status.in_([
-                DeletionRequestStatus.PENDING,
-                DeletionRequestStatus.GRACE_PERIOD,
-                DeletionRequestStatus.PROCESSING,
-            ]),
-        )
+        select(DeletionRequest).where(DeletionRequest.user_id == user_id)
     )).scalar_one_or_none()
 
-    if existing:
+    if existing and existing.status in (
+        DeletionRequestStatus.PENDING,
+        DeletionRequestStatus.GRACE_PERIOD,
+        DeletionRequestStatus.PROCESSING,
+    ):
         return existing
 
     grace_end = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=GRACE_PERIOD_DAYS)
-    req = DeletionRequest(
-        user_id=user_id,
-        status=DeletionRequestStatus.GRACE_PERIOD,
-        reason=reason,
-        grace_period_days=GRACE_PERIOD_DAYS,
-        grace_period_ends_at=grace_end,
-        ip_address=ip_hash,
-    )
-    db.add(req)
 
-    # Soft-delete user immediately (blocks login during grace period)
-    await db.execute(
-        update(User)
-        .where(User.id == user_id)
-        .values(deleted_at=datetime.datetime.now(datetime.UTC))
-    )
+    if existing:
+        # Reuse the row (unique constraint on user_id)
+        existing.status = DeletionRequestStatus.GRACE_PERIOD
+        existing.reason = reason
+        existing.grace_period_days = GRACE_PERIOD_DAYS
+        existing.grace_period_ends_at = grace_end
+        existing.ip_address = ip_hash
+        existing.canceled_at = None
+        existing.completed_at = None
+        req = existing
+    else:
+        req = DeletionRequest(
+            user_id=user_id,
+            status=DeletionRequestStatus.GRACE_PERIOD,
+            reason=reason,
+            grace_period_days=GRACE_PERIOD_DAYS,
+            grace_period_ends_at=grace_end,
+            ip_address=ip_hash,
+        )
+        db.add(req)
+
     await db.commit()
     await db.refresh(req)
 
-    await _audit(db, user_id, "deletion_initiated", ip_hash, {
+    await audit_privacy_action(db, user_id, "deletion_initiated", ip_hash, {
         "grace_period_ends_at": grace_end.isoformat(),
         "reason": reason,
     })
@@ -521,15 +525,10 @@ async def cancel_deletion(
 
     req.status = DeletionRequestStatus.CANCELED
     req.canceled_at = datetime.datetime.now(datetime.UTC)
-
-    # Restore user
-    await db.execute(
-        update(User).where(User.id == user_id).values(deleted_at=None)
-    )
     await db.commit()
     await db.refresh(req)
 
-    await _audit(db, user_id, "deletion_canceled", ip_hash)
+    await audit_privacy_action(db, user_id, "deletion_canceled", ip_hash)
     logger.info("Deletion canceled for user %s", user_id[:8])
     return req
 
@@ -587,7 +586,10 @@ async def execute_hard_delete(db: AsyncSession, user_id: str) -> None:
         update(DeletionRequest)
         .where(
             DeletionRequest.user_id == user_id,
-            DeletionRequest.status == DeletionRequestStatus.GRACE_PERIOD,
+            DeletionRequest.status.in_([
+                DeletionRequestStatus.GRACE_PERIOD,
+                DeletionRequestStatus.PROCESSING,
+            ]),
         )
         .values(
             status=DeletionRequestStatus.COMPLETED,
