@@ -3,6 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "main": "expo-router/entry",
+  "expo": {
+    "autolinking": {
+      "exclude": ["expo-in-app-purchases", "expo-font"]
+    },
+    "install": {
+      "exclude": ["expo-in-app-purchases"]
+    }
+  },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -11,7 +19,8 @@
     "lint": "eslint app/ components/ hooks/ services/ utils/",
     "test": "jest --passWithNoTests",
     "format:check": "prettier --check \"app/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\" \"hooks/**/*.{ts,tsx}\" \"services/**/*.{ts,tsx}\" \"utils/**/*.{ts,tsx}\"",
-    "clean": "rm -rf .expo dist node_modules/.cache"
+    "clean": "rm -rf .expo dist node_modules/.cache",
+    "postinstall": "rm -rf ../../node_modules/expo-in-app-purchases"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

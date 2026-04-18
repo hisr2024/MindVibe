@@ -135,5 +135,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     eas: {
       projectId: '1f72d91b-2336-4b58-a641-5589317cc36c',
     },
+    autolinking: {
+      exclude: ['expo-in-app-purchases', 'expo-font'],
+    },
   },
 });
