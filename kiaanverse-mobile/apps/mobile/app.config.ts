@@ -144,12 +144,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   // ---------------------------------------------------------------------------
   plugins: [
     'expo-router',
-    [
-      'expo-font',
-      {
-        fonts: ['./assets/fonts/CrimsonText-Regular.ttf'],
-      },
-    ],
     'expo-splash-screen',
     [
       'expo-notifications',
