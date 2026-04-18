@@ -148,7 +148,7 @@ importers:
         specifier: ^0.0.8
         version: 0.0.8
       '@types/node':
-        specifier: ^25.5.0
+        specifier: ^25.6.0
         version: 25.6.0
       '@types/papaparse':
         specifier: ^5.5.1
