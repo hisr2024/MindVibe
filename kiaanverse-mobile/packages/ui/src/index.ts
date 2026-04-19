@@ -124,6 +124,50 @@ export { useSpeechOutput } from './hooks/useSpeechOutput';
 export { useVoiceRecorder, type TranscribeFn, type TranscriptionResult } from './hooks/useVoiceRecorder';
 
 // ---------------------------------------------------------------------------
+// Sacred motion — screen transitions, press feedback, milestone pulses.
+// ---------------------------------------------------------------------------
+export {
+  // Duration + geometry tokens
+  DIVINE,
+  NATURAL,
+  EXIT,
+  SWIFT,
+  MODAL,
+  PULSE,
+  TAB_CROSSFADE,
+  ENTRANCE_TRANSLATE_Y,
+  ENTER_SCALE_FROM,
+  EXIT_SCALE,
+  PRESS_SCALE,
+  PULSE_SCALE_FROM,
+  PULSE_SCALE_TO,
+  PULSE_OPACITY_FROM,
+  PULSE_RING_COUNT,
+  PULSE_RING_DELAY,
+  // Easing curves
+  easeDivineIn,
+  easeDivineOut,
+  easeLotusBloom,
+  easePeacockShimmer,
+  // Hooks
+  useDivineEntrance,
+  useSacredPress,
+  useGoldenPulse,
+  // Components
+  SacredScrollView,
+  // Types
+  type UseDivineEntranceOptions,
+  type UseDivineEntranceResult,
+  type UseSacredPressOptions,
+  type UseSacredPressResult,
+  type SacredPressHandlers,
+  type HapticStyle,
+  type UseGoldenPulseOptions,
+  type UseGoldenPulseResult,
+  type SacredScrollViewProps,
+} from './motion';
+
+// ---------------------------------------------------------------------------
 // Living Background System (Skia particle field + aurora + muhurta atmosphere)
 // ---------------------------------------------------------------------------
 export {
