@@ -5,71 +5,152 @@
 <style>
 * { margin: 0; padding: 0; }
 body { width: 512px; height: 512px; overflow: hidden; }
-.icon { width: 512px; height: 512px; position: relative; border-radius: 22%; overflow: hidden; }
-.bg { position: absolute; inset: 0; }
-.fg { position: absolute; inset: 0; }
+.icon { width: 512px; height: 512px; position: relative; overflow: hidden; }
 </style>
 </head>
 <body>
 <div class="icon">
-  <!-- Background Layer -->
-  <svg class="bg" width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <radialGradient id="bg-aura" cx="50%" cy="50%" r="70%">
-        <stop offset="0%" stop-color="#1A1520"/>
-        <stop offset="50%" stop-color="#0F1219"/>
-        <stop offset="100%" stop-color="#0B0B0F"/>
-      </radialGradient>
-      <radialGradient id="bg-glow" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="rgba(255, 215, 0, 0.15)"/>
-        <stop offset="50%" stop-color="rgba(255, 147, 89, 0.08)"/>
-        <stop offset="100%" stop-color="rgba(255, 107, 53, 0)"/>
-      </radialGradient>
-    </defs>
-    <rect width="512" height="512" fill="url(#bg-aura)"/>
-    <rect width="512" height="512" fill="url(#bg-glow)"/>
-    <circle cx="256" cy="256" r="180" stroke="rgba(255, 183, 71, 0.1)" stroke-width="1" fill="none"/>
-    <circle cx="256" cy="256" r="220" stroke="rgba(255, 183, 71, 0.05)" stroke-width="1" fill="none"/>
-  </svg>
-  <!-- Foreground Layer -->
-  <svg class="fg" width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="divineGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#FF6B35"/>
-        <stop offset="35%" stop-color="#F7931E"/>
-        <stop offset="70%" stop-color="#FFB347"/>
-        <stop offset="100%" stop-color="#FFD700"/>
-      </linearGradient>
-      <radialGradient id="innerLight" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#FFFEF0"/>
-        <stop offset="40%" stop-color="#FFE4B5"/>
-        <stop offset="100%" stop-color="#FFD700"/>
-      </radialGradient>
-      <linearGradient id="petalGold" x1="50%" y1="100%" x2="50%" y2="0%">
-        <stop offset="0%" stop-color="#F7931E"/>
-        <stop offset="50%" stop-color="#FFB347"/>
-        <stop offset="100%" stop-color="#FFD700"/>
-      </linearGradient>
-      <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
-        <feMerge>
-          <feMergeNode in="coloredBlur"/>
-          <feMergeNode in="SourceGraphic"/>
-        </feMerge>
-      </filter>
-    </defs>
-    <g transform="translate(256, 256)">
-      <path d="M0 -140 C20 -120, 40 -80, 40 -40 C40 -20, 24 0, 0 8 C-24 0, -40 -20, -40 -40 C-40 -80, -20 -120, 0 -140Z" fill="url(#petalGold)" opacity="0.9" filter="url(#softGlow)"/>
-      <path d="M-120 -16 C-100 -36, -60 -48, -20 -40 C-8 -28, 0 -12, 4 4 C-16 12, -52 16, -80 4 C-108 -8, -128 -12, -120 -16Z" fill="url(#divineGradient)" opacity="0.85"/>
-      <path d="M120 -16 C100 -36, 60 -48, 20 -40 C8 -28, 0 -12, -4 4 C16 12, 52 16, 80 4 C108 -8, 128 -12, 120 -16Z" fill="url(#divineGradient)" opacity="0.85"/>
-      <path d="M-100 54 C-80 40, -40 32, -8 44 C0 60, 4 80, 4 100 C-16 108, -60 100, -88 80 C-116 60, -124 56, -100 54Z" fill="url(#petalGold)" opacity="0.75"/>
-      <path d="M100 54 C80 40, 40 32, 8 44 C0 60, -4 80, -4 100 C16 108, 60 100, 88 80 C116 60, 124 56, 100 54Z" fill="url(#petalGold)" opacity="0.75"/>
-      <path d="M0 -80 C14 -60, 24 -24, 24 8 C24 28, 14 44, 0 52 C-14 44, -24 28, -24 8 C-24 -24, -14 -60, 0 -80Z" fill="url(#innerLight)" filter="url(#softGlow)"/>
-      <ellipse cx="0" cy="-4" rx="24" ry="28" fill="url(#innerLight)" opacity="0.95"/>
-      <ellipse cx="0" cy="-8" rx="12" ry="16" fill="#FFFEF5" opacity="0.9"/>
-      <path d="M-56 100 Q0 120, 56 100" stroke="url(#divineGradient)" stroke-width="4" fill="none" opacity="0.5" stroke-linecap="round"/>
-    </g>
-  </svg>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background gradient -->
+    <radialGradient id="bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0D1B3E"/>
+      <stop offset="50%" stop-color="#091230"/>
+      <stop offset="100%" stop-color="#050A1F"/>
+    </radialGradient>
+    <!-- Outer ring glow -->
+    <radialGradient id="outerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="60%" stop-color="transparent"/>
+      <stop offset="80%" stop-color="rgba(30,80,160,0.08)"/>
+      <stop offset="100%" stop-color="rgba(20,50,120,0.15)"/>
+    </radialGradient>
+    <!-- Mandala center glow -->
+    <radialGradient id="centerGlow" cx="50%" cy="50%" r="45%">
+      <stop offset="0%" stop-color="rgba(60,150,220,0.25)"/>
+      <stop offset="40%" stop-color="rgba(40,100,180,0.12)"/>
+      <stop offset="70%" stop-color="rgba(20,60,140,0.05)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    <!-- Inner bright glow -->
+    <radialGradient id="innerGlow" cx="50%" cy="50%" r="20%">
+      <stop offset="0%" stop-color="rgba(200,220,255,0.9)"/>
+      <stop offset="30%" stop-color="rgba(120,180,240,0.4)"/>
+      <stop offset="60%" stop-color="rgba(60,120,200,0.1)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    <!-- Gold accent gradient -->
+    <linearGradient id="goldLine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(200,170,100,0.5)"/>
+      <stop offset="50%" stop-color="rgba(220,190,120,0.7)"/>
+      <stop offset="100%" stop-color="rgba(200,170,100,0.5)"/>
+    </linearGradient>
+    <!-- Teal line color -->
+    <linearGradient id="tealLine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(60,140,200,0.4)"/>
+      <stop offset="50%" stop-color="rgba(80,160,220,0.6)"/>
+      <stop offset="100%" stop-color="rgba(60,140,200,0.4)"/>
+    </linearGradient>
+    <!-- Star of David fill -->
+    <linearGradient id="starFill" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="rgba(80,160,220,0.08)"/>
+      <stop offset="100%" stop-color="rgba(40,100,180,0.04)"/>
+    </linearGradient>
+    <!-- Soft blur for glow effects -->
+    <filter id="softBlur">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+    <filter id="tinyBlur">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+  </defs>
+
+  <!-- Deep navy background -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#outerGlow)"/>
+
+  <!-- Subtle star particles -->
+  <circle cx="80" cy="90" r="1.2" fill="rgba(180,200,240,0.4)"/>
+  <circle cx="420" cy="70" r="1" fill="rgba(180,200,240,0.3)"/>
+  <circle cx="60" cy="380" r="1" fill="rgba(180,200,240,0.3)"/>
+  <circle cx="450" cy="400" r="1.2" fill="rgba(180,200,240,0.35)"/>
+  <circle cx="130" cy="450" r="0.8" fill="rgba(180,200,240,0.25)"/>
+  <circle cx="390" cy="140" r="0.8" fill="rgba(180,200,240,0.25)"/>
+  <circle cx="100" cy="200" r="1" fill="rgba(200,180,100,0.2)"/>
+  <circle cx="400" cy="300" r="1" fill="rgba(200,180,100,0.2)"/>
+
+  <!-- Center glow -->
+  <rect width="512" height="512" fill="url(#centerGlow)"/>
+
+  <!-- Outer circle ring 1 (largest) -->
+  <circle cx="256" cy="256" r="185" fill="none" stroke="rgba(40,80,150,0.15)" stroke-width="1"/>
+
+  <!-- Outer circle ring 2 -->
+  <circle cx="256" cy="256" r="165" fill="none" stroke="rgba(50,100,170,0.2)" stroke-width="1"/>
+
+  <!-- Main mandala circle (dark filled) -->
+  <circle cx="256" cy="256" r="145" fill="rgba(8,16,40,0.7)" stroke="rgba(50,100,180,0.35)" stroke-width="2"/>
+
+  <!-- Inner ring -->
+  <circle cx="256" cy="256" r="125" fill="none" stroke="rgba(60,120,200,0.2)" stroke-width="1"/>
+
+  <!-- Star of David — Triangle pointing UP -->
+  <polygon
+    points="256,146 340,292 172,292"
+    fill="url(#starFill)"
+    stroke="url(#goldLine)"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+  />
+
+  <!-- Star of David — Triangle pointing DOWN -->
+  <polygon
+    points="256,366 172,220 340,220"
+    fill="url(#starFill)"
+    stroke="url(#goldLine)"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+  />
+
+  <!-- Inner hexagon outline (where triangles overlap) -->
+  <polygon
+    points="256,220 298,244 298,292 256,316 214,292 214,244"
+    fill="none"
+    stroke="rgba(80,160,220,0.25)"
+    stroke-width="1"
+  />
+
+  <!-- Inner circle -->
+  <circle cx="256" cy="268" r="55" fill="none" stroke="rgba(60,140,200,0.3)" stroke-width="1"/>
+
+  <!-- Innermost circle -->
+  <circle cx="256" cy="268" r="35" fill="none" stroke="rgba(80,160,220,0.25)" stroke-width="1"/>
+
+  <!-- Center bright dot with glow -->
+  <circle cx="256" cy="268" r="12" fill="url(#innerGlow)" filter="url(#softBlur)"/>
+  <circle cx="256" cy="268" r="5" fill="rgba(220,235,255,0.95)"/>
+  <circle cx="256" cy="268" r="2.5" fill="white"/>
+
+  <!-- Small teal accent dots on outer ring -->
+  <circle cx="256" cy="111" r="4" fill="rgba(60,180,220,0.7)" filter="url(#tinyBlur)"/>
+  <circle cx="256" cy="401" r="4" fill="rgba(60,180,220,0.7)" filter="url(#tinyBlur)"/>
+  <circle cx="111" cy="256" r="4" fill="rgba(60,180,220,0.7)" filter="url(#tinyBlur)"/>
+  <circle cx="401" cy="256" r="4" fill="rgba(60,180,220,0.7)" filter="url(#tinyBlur)"/>
+
+  <!-- Diagonal accent dots -->
+  <circle cx="153" cy="153" r="3" fill="rgba(60,180,220,0.5)" filter="url(#tinyBlur)"/>
+  <circle cx="359" cy="153" r="3" fill="rgba(60,180,220,0.5)" filter="url(#tinyBlur)"/>
+  <circle cx="153" cy="359" r="3" fill="rgba(60,180,220,0.5)" filter="url(#tinyBlur)"/>
+  <circle cx="359" cy="359" r="3" fill="rgba(60,180,220,0.5)" filter="url(#tinyBlur)"/>
+
+  <!-- Small accent dots on star vertices -->
+  <circle cx="256" cy="146" r="3" fill="rgba(60,180,220,0.6)" filter="url(#tinyBlur)"/>
+  <circle cx="340" cy="292" r="3" fill="rgba(60,180,220,0.6)" filter="url(#tinyBlur)"/>
+  <circle cx="172" cy="292" r="3" fill="rgba(60,180,220,0.6)" filter="url(#tinyBlur)"/>
+  <circle cx="256" cy="366" r="3" fill="rgba(60,180,220,0.5)" filter="url(#tinyBlur)"/>
+  <circle cx="172" cy="220" r="3" fill="rgba(60,180,220,0.5)" filter="url(#tinyBlur)"/>
+  <circle cx="340" cy="220" r="3" fill="rgba(60,180,220,0.5)" filter="url(#tinyBlur)"/>
+
+</svg>
 </div>
 </body>
 </html>
