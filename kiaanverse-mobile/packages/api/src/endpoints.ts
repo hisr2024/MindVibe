@@ -84,7 +84,9 @@ export const api = {
       apiClient.get(`/api/journey-engine/templates/${templateId}`),
     list: (status?: string) =>
       apiClient.get('/api/journey-engine/journeys', {
-        ...(status !== undefined ? { params: { status } } : {}),
+        // Backend (routes/journey_engine.py) expects `status_filter`, not
+        // `status`. Sending the wrong key silently disables the filter.
+        ...(status !== undefined ? { params: { status_filter: status } } : {}),
       }),
     get: (journeyId: string) =>
       apiClient.get(`/api/journey-engine/journeys/${journeyId}`),
@@ -95,10 +97,18 @@ export const api = {
     completeStep: (journeyId: string, dayIndex: number) =>
       apiClient.post(
         `/api/journey-engine/journeys/${journeyId}/steps/${dayIndex}/complete`,
+        // Backend declares `request: CompleteStepRequest` as a required
+        // body parameter (even though all its fields are optional). An
+        // empty object keeps FastAPI happy without sending a reflection.
+        {},
       ),
     currentStep: (journeyId: string) =>
       apiClient.get(
         `/api/journey-engine/journeys/${journeyId}/steps/current`,
+      ),
+    step: (journeyId: string, dayIndex: number) =>
+      apiClient.get(
+        `/api/journey-engine/journeys/${journeyId}/steps/${dayIndex}`,
       ),
     pause: (journeyId: string) =>
       apiClient.post(`/api/journey-engine/journeys/${journeyId}/pause`),
