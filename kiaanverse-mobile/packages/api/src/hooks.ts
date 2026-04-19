@@ -297,12 +297,107 @@ export function useGitaChapterDetail(chapterId: number): UseQueryResult<GitaChap
 // Journeys
 // ---------------------------------------------------------------------------
 
+/**
+ * Backend journey-engine response shapes (snake_case from FastAPI).
+ * Kept local — these mirror TemplateResponse / JourneyResponse / DashboardResponse
+ * in backend/routes/journey_engine.py and only exist so we can map them into
+ * the camelCase JourneyTemplate / Journey types the UI consumes.
+ */
+interface RawTemplate {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  primary_enemy_tags: string[];
+  duration_days: number;
+  difficulty: number;
+  is_featured?: boolean;
+  is_free?: boolean;
+  icon_name?: string | null;
+  color_theme?: string | null;
+}
+
+interface RawJourney {
+  journey_id: string;
+  template_slug: string;
+  title: string;
+  status: string;
+  current_day: number;
+  total_days: number;
+  progress_percentage: number;
+  days_completed: number;
+  started_at?: string | null;
+  last_activity?: string | null;
+  primary_enemies: string[];
+  streak_days: number;
+}
+
+interface RawDashboard {
+  active_journeys: RawJourney[];
+  completed_journeys: number;
+  total_days_practiced: number;
+  current_streak: number;
+}
+
+/**
+ * Map backend integer difficulty (1–5) to the string label the UI renders.
+ * 1 → beginner, 2–3 → intermediate, 4–5 → advanced. Defaults to beginner.
+ */
+function _mapDifficulty(d: number | undefined): 'beginner' | 'intermediate' | 'advanced' {
+  if (d === undefined || d <= 1) return 'beginner';
+  if (d <= 3) return 'intermediate';
+  return 'advanced';
+}
+
+function _mapTemplate(t: RawTemplate): JourneyTemplate {
+  const enemy = t.primary_enemy_tags?.[0] ?? '';
+  return {
+    id: t.id,
+    title: t.title,
+    description: t.description ?? '',
+    durationDays: t.duration_days,
+    // The screen's resolveEnemyKey() searches the `category` string for an
+    // enemy name (krodha/bhaya/...), so we surface the primary enemy tag
+    // here. This keeps existing UI logic working without a screen change.
+    category: enemy,
+    // Extras consumed by the discover card via a structural cast.
+    ...({
+      slug: t.slug,
+      difficulty: _mapDifficulty(t.difficulty),
+      primaryEnemyTags: t.primary_enemy_tags ?? [],
+    } as Partial<JourneyTemplate>),
+  };
+}
+
+function _mapJourney(j: RawJourney): Journey {
+  // Map snake_case → camelCase, derive `category` from the first enemy tag
+  // (same convention as templates above), and infer status enum.
+  const status = (
+    ['available', 'active', 'paused', 'completed', 'abandoned'].includes(j.status)
+      ? j.status
+      : 'active'
+  ) as Journey['status'];
+  return {
+    id: j.journey_id,
+    title: j.title,
+    description: '',
+    durationDays: j.total_days,
+    status,
+    currentDay: j.current_day,
+    completedSteps: j.days_completed,
+    category: j.primary_enemies?.[0] ?? '',
+  };
+}
+
 export function useJourneyTemplates(): UseQueryResult<JourneyTemplate[]> {
   return useQuery({
     queryKey: queryKeys.journeyTemplates,
     queryFn: async () => {
+      // Backend returns TemplateListResponse: { templates, total, limit, offset }
       const { data } = await api.journeys.templates();
-      return data as JourneyTemplate[];
+      const raw = data as { templates?: RawTemplate[] } | RawTemplate[];
+      const list = Array.isArray(raw) ? raw : (raw.templates ?? []);
+      return list.map(_mapTemplate);
     },
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
@@ -312,8 +407,11 @@ export function useJourneys(status?: string): UseQueryResult<Journey[]> {
   return useQuery({
     queryKey: queryKeys.journeys(status),
     queryFn: async () => {
+      // Backend returns JourneyListResponse: { journeys, total, limit, offset }
       const { data } = await api.journeys.list(status);
-      return data as Journey[];
+      const raw = data as { journeys?: RawJourney[] } | RawJourney[];
+      const list = Array.isArray(raw) ? raw : (raw.journeys ?? []);
+      return list.map(_mapJourney);
     },
   });
 }
@@ -323,7 +421,7 @@ export function useJourney(journeyId: string): UseQueryResult<Journey> {
     queryKey: queryKeys.journey(journeyId),
     queryFn: async () => {
       const { data } = await api.journeys.get(journeyId);
-      return data as Journey;
+      return _mapJourney(data as RawJourney);
     },
     enabled: journeyId.length > 0,
   });
@@ -334,7 +432,12 @@ export function useJourneyDashboard(): UseQueryResult<DashboardData> {
     queryKey: queryKeys.journeyDashboard,
     queryFn: async () => {
       const { data } = await api.journeys.dashboard();
-      return data as DashboardData;
+      const raw = data as Partial<RawDashboard>;
+      return {
+        activeJourneys: (raw.active_journeys ?? []).map(_mapJourney),
+        completedCount: raw.completed_journeys ?? 0,
+        streakDays: raw.current_streak ?? 0,
+      };
     },
   });
 }
@@ -373,7 +476,7 @@ export function useStartJourney(): UseMutationResult<Journey, Error, string> {
   return useMutation({
     mutationFn: async (templateId: string) => {
       const { data } = await api.journeys.start(templateId);
-      return data as Journey;
+      return _mapJourney(data as RawJourney);
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['journeys'] });
