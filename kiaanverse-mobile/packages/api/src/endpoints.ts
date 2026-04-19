@@ -123,13 +123,25 @@ export const api = {
       ),
   },
 
-  /** Voice input / transcription */
+  /** Voice input / transcription.
+   *  Backend responds with { text, language, confidence, duration, ... }.
+   *  We normalise to { transcript, confidence } so UI hooks
+   *  (useVoiceRecorder) can consume a stable shape. */
   voice: {
-    transcribe: (formData: FormData) =>
-      apiClient.post<{ transcript: string; confidence: number }>(
-        '/api/kiaan/transcribe',
-        formData,
-      ),
+    transcribe: async (formData: FormData) => {
+      const res = await apiClient.post<{
+        text?: string;
+        transcript?: string;
+        confidence?: number;
+      }>('/api/kiaan/transcribe', formData);
+      return {
+        ...res,
+        data: {
+          transcript: res.data.transcript ?? res.data.text ?? '',
+          confidence: res.data.confidence ?? 0,
+        },
+      };
+    },
   },
 
   /** User profile */
@@ -198,28 +210,43 @@ export const api = {
     moodResponse: (mood: string) =>
       apiClient.post('/api/divine/mood-response', { mood }),
   },
-  /** Community — Wisdom circles and social features */
+  /** Community — Wisdom circles and social features.
+   *  Backend exposes posts scoped to a circle only — there is no global
+   *  feed endpoint, so `posts` requires a circleId. Call sites that want
+   *  a cross-circle feed must aggregate client-side. */
   community: {
     circles: () => apiClient.get('/api/community/circles'),
     circle: (circleId: string) => apiClient.get(`/api/community/circles/${circleId}`),
     joinCircle: (circleId: string) => apiClient.post(`/api/community/circles/${circleId}/join`),
     leaveCircle: (circleId: string) => apiClient.post(`/api/community/circles/${circleId}/leave`),
-    posts: (circleId?: string, limit?: number, offset?: number) =>
-      apiClient.get('/api/community/posts', { params: { circle_id: circleId, limit, offset } }),
+    posts: (circleId: string, limit?: number, offset?: number) =>
+      apiClient.get(`/api/community/circles/${circleId}/posts`, {
+        params: { limit, offset },
+      }),
     createPost: (content: string, circleId?: string, tags?: string[]) =>
       apiClient.post('/api/community/posts', { content, circle_id: circleId, tags }),
     reactToPost: (postId: string, reaction: string) =>
       apiClient.post(`/api/community/posts/${postId}/react`, { reaction }),
   },
 
-  /** Wisdom Rooms — Guided group discussions */
+  /** Wisdom Rooms — Guided group discussions.
+   *  The backend mounts the chat-rooms router at `/api/rooms` (not under
+   *  `/api/wisdom/rooms`, which belongs to the wisdom-guide router and has
+   *  no `/rooms` sub-tree). All read endpoints map cleanly; message send
+   *  is WebSocket-only on the backend (`/api/rooms/{id}/ws`), so the REST
+   *  POST is a stub that will be implemented once the WS bridge lands. */
   wisdomRooms: {
-    list: () => apiClient.get('/api/wisdom/rooms'),
-    join: (roomId: string) => apiClient.post(`/api/wisdom/rooms/${roomId}/join`),
+    list: () => apiClient.get('/api/rooms'),
+    join: (roomId: string) => apiClient.post(`/api/rooms/${roomId}/join`),
+    leave: (roomId: string) => apiClient.post(`/api/rooms/${roomId}/leave`),
     messages: (roomId: string, limit?: number, offset?: number) =>
-      apiClient.get(`/api/wisdom/rooms/${roomId}/messages`, { params: { limit, offset } }),
-    sendMessage: (roomId: string, content: string) =>
-      apiClient.post(`/api/wisdom/rooms/${roomId}/messages`, { content }),
+      apiClient.get(`/api/rooms/${roomId}/messages`, { params: { limit, offset } }),
+    /** TODO(backend): POST /api/rooms/{id}/messages does not exist yet —
+     *  messages are sent over the `/api/rooms/{id}/ws` WebSocket. */
+    sendMessage: (_roomId: string, _content: string) =>
+      Promise.reject(
+        new Error('Sending via REST is not supported — use WebSocket at /api/rooms/{id}/ws'),
+      ),
   },
 
   /** Sadhana — Daily sacred practice */
