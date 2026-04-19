@@ -6,8 +6,7 @@
   "expo": {
     "autolinking": {
       "exclude": [
-        "expo-in-app-purchases",
-        "expo-font"
+        "expo-in-app-purchases"
       ]
     },
     "install": {

@@ -1,5 +1,5 @@
 {
   "autolinking": {
-    "exclude": ["expo-font", "expo-in-app-purchases"]
+    "exclude": ["expo-in-app-purchases"]
   }
 }
