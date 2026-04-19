@@ -271,8 +271,17 @@ export const api = {
 
   /** Relationship Compass — Dharma-guided relationship clarity */
   relationship: {
+    // Backend (routes/relationship_compass.py) reads `conflict` (not
+    // `question`) and accepts an optional `relationship_type` /
+    // `analysis_mode`. Sending the wrong key triggers a 400 because the
+    // backend rejects empty conflict text.
     guide: (question: string, context?: string) =>
-      apiClient.post('/api/relationship-compass/guide', { question, context }),
+      apiClient.post('/api/relationship-compass/guide', {
+        conflict: question,
+        context: context ?? '',
+        relationship_type: 'romantic',
+        analysis_mode: 'standard',
+      }),
   },
 
   /** Karma Footprint — Track karmic ripples and impact */
@@ -294,14 +303,30 @@ export const api = {
 
   /** Viyoga — Detachment and letting-go tool */
   viyoga: {
+    // Backend (routes/viyoga.py) reads `sessionId` in camelCase, plus
+    // `mode` and `secularMode` for the v4.0 enhanced pipeline. The
+    // previous snake_case `session_id` was silently dropped, so every
+    // turn started a brand-new conversation on the server.
     chat: (message: string, sessionId?: string) =>
-      apiClient.post('/api/viyoga/chat', { message, session_id: sessionId }),
+      apiClient.post('/api/viyoga/chat', {
+        message,
+        sessionId: sessionId ?? '',
+        mode: 'full',
+        secularMode: true,
+      }),
   },
 
   /** Ardha — Reframing and perspective tool */
   ardha: {
-    reframe: (situation: string, perspective?: string) =>
-      apiClient.post('/api/ardha/reframe', { situation, perspective }),
+    // Backend (routes/ardha.py) reads `thought` (not `situation`) and
+    // requires it non-empty; sending `situation` produced
+    // 400 "thought is required". `depth` defaults to "quick" but we send
+    // it explicitly so the server picks the right Gita pipeline.
+    reframe: (situation: string, _perspective?: string) =>
+      apiClient.post('/api/ardha/reframe', {
+        thought: situation,
+        depth: 'quick',
+      }),
   },
 
   /** Meditation tracks for Vibe Player */
