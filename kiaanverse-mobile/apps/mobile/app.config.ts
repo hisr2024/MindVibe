@@ -96,6 +96,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-router',
     'expo-splash-screen',
     [
+      'expo-build-properties',
+      {
+        android: {
+          targetSdkVersion: 35,
+          compileSdkVersion: 35,
+          enableProguardInReleaseBuilds: true,
+          enableShrinkResourcesInReleaseBuilds: true,
+        },
+      },
+    ],
+    [
       'expo-notifications',
       {
         icon: './assets/notification-icon.png',
