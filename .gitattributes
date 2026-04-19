@@ -1,1 +1,15 @@
 path/to/largefile filter=lfs diff=lfs merge=lfs -text
+
+# Shell scripts MUST use LF line endings regardless of the checkout OS.
+# EAS Build tars the local working tree (not a git clone), so CRLF checkouts
+# on Windows would produce broken scripts like `set -eo pipefail\r` which
+# bash on Linux rejects with "invalid option name".
+*.sh              text eol=lf
+*.bash            text eol=lf
+
+# Other text files that break when CRLF reaches a Linux toolchain.
+*.yml             text eol=lf
+*.yaml            text eol=lf
+Dockerfile        text eol=lf
+.dockerignore     text eol=lf
+.gitignore        text eol=lf
