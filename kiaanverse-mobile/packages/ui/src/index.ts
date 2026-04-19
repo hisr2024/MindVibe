@@ -86,6 +86,37 @@ export { SacredBottomSheet, type SacredBottomSheetProps } from './components/Sac
 export { SacredStepIndicator, type SacredStepIndicatorProps } from './components/SacredStepIndicator';
 
 // ---------------------------------------------------------------------------
+// Sacred web-parity component library
+// (1:1 twins of the Kiaanverse web design system)
+// ---------------------------------------------------------------------------
+export { SacredCard, type SacredCardProps } from './components/SacredCard';
+export {
+  DivineButton,
+  type DivineButtonProps,
+  type DivineButtonVariant,
+} from './components/DivineButton';
+export { SacredInput, type SacredInputProps } from './components/SacredInput';
+export { GoldenDivider, type GoldenDividerProps } from './components/GoldenDivider';
+export { VerseRevelation, type VerseRevelationProps } from './components/VerseRevelation';
+export { OmLoader, type OmLoaderProps } from './components/OmLoader';
+export { SakhaMandala, type SakhaMandalaProps } from './components/SakhaMandala';
+export {
+  DivinePresenceIndicator,
+  type DivinePresenceIndicatorProps,
+} from './components/DivinePresenceIndicator';
+export {
+  SacredProgressRing,
+  type SacredProgressRingProps,
+} from './components/SacredProgressRing';
+export { ShlokaCard, type ShlokaCardProps } from './components/ShlokaCard';
+export {
+  SacredBadge,
+  type SacredBadgeProps,
+  type SacredBadgeTone,
+} from './components/SacredBadge';
+export { SacredChip, type SacredChipProps } from './components/SacredChip';
+
+// ---------------------------------------------------------------------------
 // Hooks (audio / voice)
 // ---------------------------------------------------------------------------
 export { useAudioPlayer } from './hooks/useAudioPlayer';

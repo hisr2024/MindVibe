@@ -36,3 +36,17 @@ export { SacredBottomSheet, type SacredBottomSheetProps } from './SacredBottomSh
 export { DivineBackground, type DivineBackgroundProps, type DivineBackgroundVariant } from './DivineBackground';
 export { GlowCard, type GlowCardProps, type GlowCardVariant } from './GlowCard';
 export { SacredDivider, type SacredDividerProps } from './SacredDivider';
+
+// Sacred web-parity components (1:1 twins of the web design system)
+export { SacredCard, type SacredCardProps } from './SacredCard';
+export { DivineButton, type DivineButtonProps, type DivineButtonVariant } from './DivineButton';
+export { SacredInput, type SacredInputProps } from './SacredInput';
+export { GoldenDivider, type GoldenDividerProps } from './GoldenDivider';
+export { VerseRevelation, type VerseRevelationProps } from './VerseRevelation';
+export { OmLoader, type OmLoaderProps } from './OmLoader';
+export { SakhaMandala, type SakhaMandalaProps } from './SakhaMandala';
+export { DivinePresenceIndicator, type DivinePresenceIndicatorProps } from './DivinePresenceIndicator';
+export { SacredProgressRing, type SacredProgressRingProps } from './SacredProgressRing';
+export { ShlokaCard, type ShlokaCardProps } from './ShlokaCard';
+export { SacredBadge, type SacredBadgeProps, type SacredBadgeTone } from './SacredBadge';
+export { SacredChip, type SacredChipProps } from './SacredChip';
