@@ -272,7 +272,10 @@ export function useGitaTranslations(verseId: string): UseQueryResult<GitaTransla
         return data as GitaTranslationSet;
       }),
     staleTime: 1000 * 60 * 60 * 24,
-    enabled: verseId.length > 0,
+    // Skip while the route params are still resolving — otherwise the first
+    // render fires with "NaN.NaN" because chapter/verse numbers haven't
+    // parsed yet, which the backend rejects with HTTP 400.
+    enabled: verseId.length > 0 && !verseId.includes('NaN') && !verseId.includes('undefined'),
   });
 }
 
@@ -609,6 +612,12 @@ export function useSendWisdomRoomMessage(): UseMutationResult<void, Error, { roo
 // Sadhana
 // ---------------------------------------------------------------------------
 
+// NOTE: backend/routes/sadhana_api.py currently exposes only POST /compose,
+// POST /complete and GET /health. The /daily, /streak and /history GET
+// endpoints the hooks below expect return 405 Method Not Allowed until the
+// backend routes are added. We disable the queries so they don't spam
+// errors on every home-screen render; re-enable once the backend ships
+// those routes.
 export function useSadhanaDaily(): UseQueryResult<SadhanaDaily> {
   return useQuery({
     queryKey: queryKeys.sadhanaDaily,
@@ -616,6 +625,7 @@ export function useSadhanaDaily(): UseQueryResult<SadhanaDaily> {
       const { data } = await api.sadhana.daily();
       return data as SadhanaDaily;
     },
+    enabled: false,
   });
 }
 
@@ -626,6 +636,7 @@ export function useSadhanaStreak(): UseQueryResult<SadhanaStreak> {
       const { data } = await api.sadhana.streak();
       return data as SadhanaStreak;
     },
+    enabled: false,
   });
 }
 
@@ -652,6 +663,8 @@ export function useSadhanaHistory(limit?: number): UseQueryResult<SadhanaRecord[
       return data as SadhanaRecord[];
     },
     staleTime: 1000 * 60 * 5,
+    // See note above useSadhanaDaily — backend route does not exist yet.
+    enabled: false,
   });
 }
 
