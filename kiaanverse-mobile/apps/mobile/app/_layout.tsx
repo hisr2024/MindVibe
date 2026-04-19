@@ -211,39 +211,53 @@ function AppContent(): React.JSX.Element {
       <NotificationToast />
       <ToastContainer />
       <AuthGate>
-        <Stack screenOptions={{ headerShown: false, animation: 'none' }}>
+        {/* Every navigation is a darshan — fade, never slide. Modal presentations
+            still slide from the bottom to signal entering/exiting a ritual space. */}
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: 'fade',
+            animationDuration: 320,
+          }}
+        >
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="onboarding" />
-          <Stack.Screen name="gita" options={{ animation: 'slide_from_right' }} />
-          <Stack.Screen name="wellness" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="gita" />
+          <Stack.Screen name="wellness" />
           <Stack.Screen name="chat" />
-          <Stack.Screen name="subscription" options={{ animation: 'slide_from_bottom', presentation: 'modal' }} />
+          <Stack.Screen
+            name="subscription"
+            options={{ animation: 'slide_from_bottom', presentation: 'modal', animationDuration: 350 }}
+          />
 
-          {/* Sacred Tools — full-screen modal stacks */}
-          <Stack.Screen name="tools" options={{ animation: 'slide_from_right' }} />
+          {/* Sacred Tools */}
+          <Stack.Screen name="tools" />
 
           {/* Sacred Journal */}
-          <Stack.Screen name="journal" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="journal" />
 
           {/* Daily Sadhana */}
-          <Stack.Screen name="sadhana" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="sadhana" />
 
           {/* Community & Wisdom Rooms */}
-          <Stack.Screen name="community" options={{ animation: 'slide_from_right' }} />
-          <Stack.Screen name="wisdom-rooms" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="community" />
+          <Stack.Screen name="wisdom-rooms" />
 
           {/* Karma Footprint */}
-          <Stack.Screen name="karma-footprint" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="karma-footprint" />
 
           {/* Analytics & Deep Insights */}
-          <Stack.Screen name="analytics" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="analytics" />
 
-          {/* KIAAN Vibe Player */}
-          <Stack.Screen name="vibe-player" options={{ animation: 'slide_from_bottom' }} />
+          {/* KIAAN Vibe Player — modal from bottom */}
+          <Stack.Screen
+            name="vibe-player"
+            options={{ animation: 'slide_from_bottom', animationDuration: 350 }}
+          />
 
           {/* Settings */}
-          <Stack.Screen name="settings" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="settings" />
         </Stack>
       </AuthGate>
     </View>
