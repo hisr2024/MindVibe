@@ -10,6 +10,7 @@
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
     "format:check": "pnpm --filter kiaanverse-mobile-app format:check",
+    "postinstall": "node ./apps/mobile/scripts/patch-expo-modules-core.js",
     "clean": "pnpm -r clean"
   },
   "engines": {
