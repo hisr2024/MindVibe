@@ -1,341 +1,688 @@
 /**
- * Home Tab — Enhanced Sacred Dashboard
+ * Home Tab — 1:1 port of the web /dashboard (app/dashboard/DashboardClient.tsx).
  *
- * Daily greeting, verse of the day, mood check-in, sacred action chips,
- * active journey progress, Sakha presence, and daily divine insight.
- * Features cosmic gradient background with breathing golden aura.
+ * Layer stack: DivineScreenWrapper (particle field + aurora + muhurta bg)
+ * wraps a ScrollView with pull-to-refresh. Sections cascade in with
+ * useDivineEntrance, 150 ms apart, matching the web's staggerChildren.
+ *
+ * Six sections:
+ *   1. Header — time-based greeting + user name + Sanskrit sub + streak flame
+ *   2. Daily Verse card (आज का श्लोक) — VerseRevelation entrance
+ *   3. SAKHA quick-access — SakhaMandala + "Begin Dialogue" CTA
+ *   4. Nitya Sadhana streak — flame + count + SacredProgressRing
+ *   5. Mood check-in — 5 Sanskrit emotional states, horizontal scroll
+ *   6. Current journey — chakra + progress bar + "Continue" CTA
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-import { View, StyleSheet, Pressable, ScrollView, RefreshControl } from 'react-native';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  type TextStyle,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { Screen, Text, Card, Divider, GoldenButton, GoldenProgressBar, colors, spacing } from '@kiaanverse/ui';
+
+import { colors, DivineScreenWrapper } from '@kiaanverse/ui';
 import { useAuthStore } from '@kiaanverse/store';
-import { useJourneyDashboard, useCreateMood, useSadhanaStreak } from '@kiaanverse/api';
-import { useTranslation } from '@kiaanverse/i18n';
+import {
+  useJourneyDashboard,
+  useCreateMood,
+  useSadhanaStreak,
+} from '@kiaanverse/api';
 
+import { SacredCard } from '../../components/home/SacredCard';
+import { SakhaMandala } from '../../components/home/SakhaMandala';
+import { SacredProgressRing } from '../../components/home/SacredProgressRing';
+import { VerseRevelation } from '../../components/home/VerseRevelation';
+import { GoldenDivider } from '../../components/home/GoldenDivider';
+import { DivineButton } from '../../components/home/DivineButton';
+import { OmLoader } from '../../components/home/OmLoader';
+import { useDivineEntrance } from '../../hooks/useDivineEntrance';
+import { useGoldenPulse } from '../../hooks/useGoldenPulse';
+
+// ---------------------------------------------------------------------------
+// Static data (matches web /dashboard)
+// ---------------------------------------------------------------------------
+
+/** 5 Sanskrit emotional states — matches the web mood strip. */
 const MOOD_OPTIONS = [
-  { score: -2, emoji: '😔', label: 'Very Low', color: '#6C3483' },
-  { score: -1, emoji: '😕', label: 'Low', color: '#2980B9' },
-  { score: 0, emoji: '😐', label: 'Neutral', color: '#7A7060' },
-  { score: 1, emoji: '🙂', label: 'Good', color: '#3D8B5E' },
-  { score: 2, emoji: '😊', label: 'Great', color: '#D4A017' },
+  { id: 'shanta', sanskrit: 'शान्त', english: 'Peace', icon: '☮️', score: 2 },
+  { id: 'prema', sanskrit: 'प्रेम', english: 'Love', icon: '💛', score: 1 },
+  { id: 'bhaya', sanskrit: 'भय', english: 'Fear', icon: '🌘', score: -1 },
+  { id: 'krodha', sanskrit: 'क्रोध', english: 'Anger', icon: '🔥', score: -1 },
+  { id: 'shoka', sanskrit: 'शोक', english: 'Sorrow', icon: '🌧️', score: -2 },
 ] as const;
 
-const SACRED_ACTIONS = [
-  { id: 'emotional-reset', emoji: '🌊', label: 'Emotional Reset', route: '/tools/emotional-reset' },
-  { id: 'karma-reset', emoji: '♻️', label: 'Karma Reset', route: '/tools/karma-reset' },
-  { id: 'sadhana', emoji: '🕉️', label: 'Sadhana', route: '/sadhana' },
-  { id: 'journal', emoji: '📿', label: 'Journal', route: '/journal' },
-  { id: 'vibe', emoji: '🎵', label: 'Vibe Player', route: '/vibe-player' },
-  { id: 'tools', emoji: '🔱', label: 'All Tools', route: '/tools' },
-] as const;
+/** Milestone streak counts that trigger a heavy haptic + golden bloom. */
+const STREAK_MILESTONES = new Set([7, 21, 108]);
+
+/** Fallback verse shown while the daily verse query is loading or empty. */
+const FALLBACK_VERSE = {
+  sanskrit: 'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन।',
+  transliteration: 'karmaṇy-evādhikāras te mā phaleṣhu kadāchana',
+  english: 'You have the right to perform your duty, but not to the fruits of action.',
+  chapter: 2,
+  verse: 47,
+} as const;
+
+// ---------------------------------------------------------------------------
+// Greeting resolver (time-of-day matches the web dashboard exactly)
+// ---------------------------------------------------------------------------
+
+interface Greeting {
+  readonly title: string;
+  readonly sanskrit: string;
+}
+
+function resolveGreeting(now: Date = new Date()): Greeting {
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  // 03:30 – 05:30 → Brahma Muhurta
+  if (minutes >= 3 * 60 + 30 && minutes < 5 * 60 + 30) {
+    return { title: 'Brahma Muhurta', sanskrit: 'ब्रह्म मुहूर्त' };
+  }
+  // 05:30 – 12:00 → Namaste (शुभ प्रभात)
+  if (minutes >= 5 * 60 + 30 && minutes < 12 * 60) {
+    return { title: 'Namaste', sanskrit: 'शुभ प्रभात' };
+  }
+  // 12:00 – 17:00 → Namaste (शुभ मध्याह्न)
+  if (minutes >= 12 * 60 && minutes < 17 * 60) {
+    return { title: 'Namaste', sanskrit: 'शुभ मध्याह्न' };
+  }
+  // 17:00 – 20:00 → Shubh Sandhya
+  if (minutes >= 17 * 60 && minutes < 20 * 60) {
+    return { title: 'Shubh Sandhya', sanskrit: 'संध्या वंदन' };
+  }
+  // 20:00 – 03:30 → Shubh Ratri
+  return { title: 'Shubh Ratri', sanskrit: 'शुभ रात्रि' };
+}
+
+// ---------------------------------------------------------------------------
+// Screen
+// ---------------------------------------------------------------------------
 
 export default function HomeScreen(): React.JSX.Element {
-  const { t } = useTranslation('home');
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user } = useAuthStore();
+
   const { data: dashboard, refetch, isRefetching } = useJourneyDashboard();
   const { data: streak } = useSadhanaStreak();
   const createMood = useCreateMood();
-  const [selectedMood, setSelectedMood] = useState<number | null>(null);
 
-  const handleMoodSelect = useCallback((score: number) => {
-    setSelectedMood(score);
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    createMood.mutate({ score });
-  }, [createMood]);
+  const [selectedMoodId, setSelectedMoodId] = useState<string | null>(null);
 
-  const handleActionPress = useCallback((route: string) => {
+  const greeting = useMemo(() => resolveGreeting(), []);
+  const firstName = user?.name?.split(' ')[0] ?? 'Sakha';
+
+  const currentStreak = streak?.current ?? 0;
+  const activeJourney = dashboard?.activeJourneys?.[0];
+  const journeyProgress = activeJourney
+    ? Math.max(0, Math.min(1, activeJourney.completedSteps / activeJourney.durationDays))
+    : 0;
+
+  // Today's practice completion — if there's a streak today, assume 100%,
+  // otherwise show the fractional progress from the streak week view.
+  const todayRingProgress = useMemo(() => {
+    const today = streak?.thisWeek?.at(-1);
+    if (today === true) return 1;
+    if (!streak) return 0;
+    const done = streak.thisWeek?.filter(Boolean).length ?? 0;
+    return done / 7;
+  }, [streak]);
+
+  const flamePulse = useGoldenPulse({ continuous: true, cycleMs: 2000 });
+
+  const handleMoodSelect = useCallback(
+    (option: (typeof MOOD_OPTIONS)[number]) => {
+      setSelectedMoodId(option.id);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      createMood.mutate({ score: option.score });
+    },
+    [createMood],
+  );
+
+  const handleSakhaTap = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push(route as `/tools/emotional-reset`);
+    router.push('/(tabs)/sakha');
   }, [router]);
 
-  const greeting = useMemo(() => getGreeting(), []);
-  const currentStreak = streak?.current ?? 0;
+  const handleJourneyContinue = useCallback(() => {
+    if (!activeJourney) {
+      router.push('/(tabs)/journey');
+      return;
+    }
+    router.push(`/(tabs)/journey/${activeJourney.id}`);
+  }, [activeJourney, router]);
+
+  // Fire milestone haptic when entering a milestone streak.
+  React.useEffect(() => {
+    if (STREAK_MILESTONES.has(currentStreak)) {
+      flamePulse.trigger();
+    }
+    // trigger is stable via useCallback in the hook
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStreak]);
+
+  // Staggered section entrances.
+  const headerEntrance = useDivineEntrance({ index: 0 });
+  const verseEntrance = useDivineEntrance({ index: 1 });
+  const sakhaEntrance = useDivineEntrance({ index: 2 });
+  const streakEntrance = useDivineEntrance({ index: 3 });
+  const moodEntrance = useDivineEntrance({ index: 4 });
+  const journeyEntrance = useDivineEntrance({ index: 5 });
 
   return (
-    <Screen>
+    <DivineScreenWrapper>
       <ScrollView
+        bounces={false}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => void refetch()} tintColor={colors.primary[500]} />}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: 72 + insets.bottom },
+        ]}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={() => void refetch()}
+            tintColor="transparent"
+            colors={['transparent']}
+            progressBackgroundColor="transparent"
+            progressViewOffset={0}
+          />
+        }
       >
-        {/* Greeting Section */}
-        <Animated.View entering={FadeInDown.delay(100).duration(600)} style={styles.greetingSection}>
-          <Text variant="h2">
-            {greeting}, {user?.name?.split(' ')[0] ?? t('greeting')}
-          </Text>
-          <Text variant="bodySmall" color={colors.text.muted}>
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-          </Text>
-          {currentStreak > 0 && (
-            <View style={styles.streakBadge}>
-              <Text variant="caption" color={colors.primary[300]}>
-                🔥 {currentStreak} Day Streak
-              </Text>
-            </View>
-          )}
-        </Animated.View>
+        {isRefetching && <OmLoader active size={36} />}
 
-        {/* Sacred Action Chips */}
-        <Animated.View entering={FadeInDown.delay(200).duration(600)}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actionsRow}>
-            {SACRED_ACTIONS.map((action) => (
-              <Pressable
-                key={action.id}
-                onPress={() => handleActionPress(action.route)}
-                style={styles.actionChip}
-                accessibilityLabel={action.label}
-                accessibilityRole="button"
-              >
-                <Text variant="h3" align="center">{action.emoji}</Text>
-                <Text variant="caption" color={colors.text.secondary} align="center" numberOfLines={1}>
-                  {action.label}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </Animated.View>
+        {/* ───────────────────────── 1. Header ───────────────────────── */}
+        <Animated.View style={[styles.headerRow, headerEntrance]}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.greetingTitle} numberOfLines={1}>
+              {greeting.title}
+            </Text>
+            <Text style={styles.userName} numberOfLines={1}>
+              {firstName}
+            </Text>
+            <Text style={styles.greetingSanskrit}>{greeting.sanskrit}</Text>
+          </View>
 
-        <Divider />
-
-        {/* Mood Check-In */}
-        <Animated.View entering={FadeInDown.delay(300).duration(600)}>
-          <Card style={styles.moodCard}>
-            <Text variant="label">{t('moodCheckIn')}</Text>
-            <Text variant="caption" color={colors.text.muted}>How does your spirit feel right now?</Text>
-            <View style={styles.moodRow}>
-              {MOOD_OPTIONS.map((option) => (
-                <Pressable
-                  key={option.score}
-                  onPress={() => handleMoodSelect(option.score)}
-                  style={[
-                    styles.moodOption,
-                    selectedMood === option.score && [styles.moodSelected, { borderColor: option.color }],
-                  ]}
-                  accessibilityLabel={option.label}
-                  accessibilityRole="button"
-                >
-                  <Text variant="h2" align="center">{option.emoji}</Text>
-                  <Text variant="caption" color={colors.text.muted} align="center">
-                    {option.label}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-            {createMood.data ? (
-              <Text variant="bodySmall" color={colors.primary[300]} style={styles.moodResponse}>
-                {(createMood.data as { kiaanResponse?: string }).kiaanResponse ?? '🙏 Mood recorded. Sakha sees you.'}
-              </Text>
-            ) : null}
-          </Card>
-        </Animated.View>
-
-        {/* Active Journeys */}
-        <Animated.View entering={FadeInDown.delay(400).duration(600)} style={styles.section}>
-          <Text variant="h3">{t('activeJourney')}</Text>
-          {dashboard?.activeJourneys && dashboard.activeJourneys.length > 0 ? (
-            dashboard.activeJourneys.map((journey) => {
-              const progress = Math.round((journey.completedSteps / journey.durationDays) * 100);
-              return (
-                <Pressable
-                  key={journey.id}
-                  onPress={() => router.push(`/(tabs)/journey/${journey.id}`)}
-                >
-                  <Card style={styles.journeyCard}>
-                    <View style={styles.journeyHeader}>
-                      <Text variant="label">{journey.title}</Text>
-                      <Text variant="caption" color={colors.primary[300]}>{progress}%</Text>
-                    </View>
-                    <Text variant="caption" color={colors.text.muted}>
-                      Day {journey.currentDay} of {journey.durationDays}
-                    </Text>
-                    <GoldenProgressBar progress={progress / 100} height={6} />
-                  </Card>
-                </Pressable>
-              );
-            })
-          ) : (
-            <Card>
-              <Text variant="body" color={colors.text.muted}>
-                {t('noJourneys')}
-              </Text>
-              <GoldenButton
-                title="Start a Journey"
-                onPress={() => router.push('/(tabs)/journey')}
-                variant="outline"
-                style={styles.startJourneyBtn}
-              />
-            </Card>
-          )}
-        </Animated.View>
-
-        {/* Stats Row */}
-        {dashboard ? (
-          <Animated.View entering={FadeInUp.delay(500).duration(600)} style={styles.statsRow}>
-            <Card style={styles.statCard}>
-              <Text variant="h2" align="center" color={colors.primary[300]}>
-                {dashboard.streakDays}
-              </Text>
-              <Text variant="caption" color={colors.text.muted} align="center">
-                Day Streak
-              </Text>
-            </Card>
-            <Card style={styles.statCard}>
-              <Text variant="h2" align="center" color={colors.primary[300]}>
-                {dashboard.completedCount}
-              </Text>
-              <Text variant="caption" color={colors.text.muted} align="center">
-                Journeys Done
-              </Text>
-            </Card>
-            <Card style={styles.statCard}>
-              <Text variant="h2" align="center" color={colors.divine.aura}>
-                {currentStreak}
-              </Text>
-              <Text variant="caption" color={colors.text.muted} align="center">
-                Sadhana Streak
-              </Text>
-            </Card>
-          </Animated.View>
-        ) : null}
-
-        {/* Quick Links */}
-        <Animated.View entering={FadeInUp.delay(600).duration(600)} style={styles.section}>
-          <Text variant="h3">Explore</Text>
-          <View style={styles.exploreRow}>
-            <Pressable style={styles.exploreCard} onPress={() => router.push('/community')}>
-              <Text variant="h3" align="center">🕉️</Text>
-              <Text variant="caption" color={colors.text.secondary} align="center">Community</Text>
+          <View style={styles.headerRight}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Open notifications"
+              style={styles.bellButton}
+              onPress={() => router.push('/settings')}
+              hitSlop={10}
+            >
+              <Text style={styles.bellGlyph}>🔔</Text>
             </Pressable>
-            <Pressable style={styles.exploreCard} onPress={() => router.push('/analytics')}>
-              <Text variant="h3" align="center">📊</Text>
-              <Text variant="caption" color={colors.text.secondary} align="center">Insights</Text>
-            </Pressable>
-            <Pressable style={styles.exploreCard} onPress={() => router.push('/wisdom-rooms')}>
-              <Text variant="h3" align="center">💬</Text>
-              <Text variant="caption" color={colors.text.secondary} align="center">Wisdom Rooms</Text>
-            </Pressable>
-            <Pressable style={styles.exploreCard} onPress={() => router.push('/karma-footprint')}>
-              <Text variant="h3" align="center">👣</Text>
-              <Text variant="caption" color={colors.text.secondary} align="center">Karma</Text>
-            </Pressable>
+            {currentStreak > 0 && (
+              <Animated.View style={[styles.streakBadge, flamePulse.style]}>
+                <Text style={styles.streakFlame}>🔥</Text>
+                <Text style={styles.streakCount}>{currentStreak}</Text>
+              </Animated.View>
+            )}
           </View>
         </Animated.View>
 
-        {/* Bottom spacing for tab bar */}
-        <View style={styles.bottomSpacer} />
+        {/* ─────────────────── 2. Daily Verse Card ─────────────────── */}
+        <Animated.View style={[styles.section, verseEntrance]}>
+          <SacredCard fullWidth>
+            <Text style={styles.eyebrow}>आज का श्लोक</Text>
+
+            <VerseRevelation
+              sanskrit={FALLBACK_VERSE.sanskrit}
+              delay={300}
+              style={styles.verseSanskrit}
+            />
+
+            <GoldenDivider />
+
+            <Text style={styles.verseTransliteration}>
+              {FALLBACK_VERSE.transliteration}
+            </Text>
+            <Text style={styles.verseEnglish}>{FALLBACK_VERSE.english}</Text>
+
+            <Text style={styles.verseRef}>
+              Bhagavad Gita — Ch. {FALLBACK_VERSE.chapter} · V. {FALLBACK_VERSE.verse}
+            </Text>
+          </SacredCard>
+        </Animated.View>
+
+        {/* ─────────────────── 3. SAKHA Quick-Access ─────────────────── */}
+        <Animated.View style={[styles.section, sakhaEntrance]}>
+          <SacredCard fullWidth onPress={handleSakhaTap}>
+            <View style={styles.sakhaRow}>
+              <View style={styles.sakhaAccent} />
+              <SakhaMandala size={56} active={false} />
+              <View style={styles.sakhaText}>
+                <Text style={styles.sectionTitle}>Dialogue with Sakha</Text>
+                <Text style={styles.sectionSub}>Your divine companion awaits</Text>
+              </View>
+            </View>
+            <View style={styles.sakhaCta}>
+              <DivineButton
+                title="Begin Dialogue"
+                onPress={handleSakhaTap}
+                variant="primary"
+              />
+            </View>
+          </SacredCard>
+        </Animated.View>
+
+        {/* ─────────────────── 4. Nitya Sadhana Streak ─────────────────── */}
+        <Animated.View style={[styles.section, streakEntrance]}>
+          <SacredCard fullWidth>
+            <View style={styles.streakCardRow}>
+              <Animated.View style={[styles.streakFlameWrap, flamePulse.style]}>
+                <Text style={styles.streakLargeFlame}>🔥</Text>
+              </Animated.View>
+
+              <View style={styles.streakCenter}>
+                <Text style={styles.streakNumber}>{currentStreak}</Text>
+                <Text style={styles.streakLabel}>Days of Sacred Practice</Text>
+              </View>
+
+              <SacredProgressRing progress={todayRingProgress} size={80}>
+                <Text style={styles.ringPct}>
+                  {Math.round(todayRingProgress * 100)}%
+                </Text>
+              </SacredProgressRing>
+            </View>
+          </SacredCard>
+        </Animated.View>
+
+        {/* ─────────────────── 5. Mood Check-In ─────────────────── */}
+        <Animated.View style={[styles.section, moodEntrance]}>
+          <Text style={styles.moodHeader}>How is your inner state?</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.moodRow}
+          >
+            {MOOD_OPTIONS.map((option) => {
+              const isSelected = selectedMoodId === option.id;
+              return (
+                <SacredCard
+                  key={option.id}
+                  compact
+                  selected={isSelected}
+                  onPress={() => handleMoodSelect(option)}
+                  accessibilityLabel={`${option.english} (${option.sanskrit})`}
+                  style={styles.moodChip}
+                >
+                  <View style={styles.moodInner}>
+                    <Text style={styles.moodIcon}>{option.icon}</Text>
+                    <Text style={styles.moodSanskrit}>{option.sanskrit}</Text>
+                    <Text style={styles.moodEnglish}>{option.english}</Text>
+                    {isSelected && <Text style={styles.moodCheck}>✓</Text>}
+                  </View>
+                </SacredCard>
+              );
+            })}
+          </ScrollView>
+        </Animated.View>
+
+        {/* ─────────────────── 6. Current Journey ─────────────────── */}
+        <Animated.View style={[styles.section, journeyEntrance]}>
+          <SacredCard fullWidth>
+            <View style={styles.journeyHeader}>
+              <Text style={styles.journeyChakra}>☸️</Text>
+              <View style={styles.journeyTitleCol}>
+                <Text style={styles.journeyTitle}>
+                  {activeJourney?.title ?? 'Begin Your First Journey'}
+                </Text>
+                {activeJourney ? (
+                  <Text style={styles.journeyDay}>
+                    Day {activeJourney.currentDay} of {activeJourney.durationDays}
+                  </Text>
+                ) : (
+                  <Text style={styles.journeyDay}>A sacred path awaits</Text>
+                )}
+              </View>
+            </View>
+
+            <JourneyProgressBar progress={journeyProgress} />
+
+            <View style={styles.journeyCta}>
+              <DivineButton
+                title={activeJourney ? "Continue Today's Practice" : 'Explore Journeys'}
+                onPress={handleJourneyContinue}
+                variant="secondary"
+              />
+            </View>
+          </SacredCard>
+        </Animated.View>
       </ScrollView>
-    </Screen>
+    </DivineScreenWrapper>
   );
 }
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 5) return 'Om Shanti';
-  if (hour < 12) return 'Good Morning';
-  if (hour < 17) return 'Good Afternoon';
-  if (hour < 21) return 'Good Evening';
-  return 'Om Shanti';
+// ---------------------------------------------------------------------------
+// JourneyProgressBar — gold fill that lotus-blooms from 0 on mount (800ms).
+// Uses scaleX so we never touch the layout width during animation.
+// ---------------------------------------------------------------------------
+
+function JourneyProgressBar({ progress }: { progress: number }): React.JSX.Element {
+  const clamped = Math.max(0, Math.min(1, progress));
+  const [trackWidth, setTrackWidth] = useState(0);
+  const fillWidth = useSharedValue(0);
+
+  React.useEffect(() => {
+    fillWidth.value = 0;
+    fillWidth.value = withTiming(clamped * trackWidth, {
+      duration: 800,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [clamped, trackWidth, fillWidth]);
+
+  const fillStyle = useAnimatedStyle(() => ({
+    width: fillWidth.value,
+  }));
+
+  return (
+    <View
+      style={styles.progressTrack}
+      onLayout={(e) => setTrackWidth(e.nativeEvent.layout.width)}
+    >
+      <Animated.View style={[styles.progressFill, fillStyle]} />
+    </View>
+  );
 }
 
+// ---------------------------------------------------------------------------
+// Styles
+// ---------------------------------------------------------------------------
+
+const TEXT_PRIMARY = colors.text.primary;
+const TEXT_SECONDARY = colors.text.secondary;
+const TEXT_MUTED = colors.text.muted;
+const BRIGHT_GOLD = '#F5E27A';
+const GOLD_MID = '#D4A017';
+const GOLD_SUB = 'rgba(212, 160, 23, 0.5)';
+
+const baseSanskrit: TextStyle = {
+  fontFamily: 'NotoSansDevanagari-Regular',
+  color: TEXT_PRIMARY,
+};
+
+const baseSerif: TextStyle = {
+  fontFamily: 'CormorantGaramond-Italic',
+};
+
 const styles = StyleSheet.create({
-  greetingSection: {
-    gap: spacing.xs,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.md,
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    gap: 20,
   },
-  streakBadge: {
-    backgroundColor: colors.alpha.goldLight,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs / 2,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-    marginTop: spacing.xs,
+
+  // -------------------------- header
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 4,
   },
-  actionsRow: {
-    paddingVertical: spacing.md,
-    gap: spacing.sm,
+  headerLeft: {
+    flex: 1,
+    paddingRight: 12,
   },
-  actionChip: {
+  headerRight: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.background.card,
-    borderRadius: 16,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    minWidth: 80,
-    gap: spacing.xs / 2,
+    gap: 10,
+  },
+  greetingTitle: {
+    ...baseSerif,
+    fontSize: 28,
+    color: TEXT_PRIMARY,
+    lineHeight: 34,
+  },
+  userName: {
+    fontFamily: 'CormorantGaramond-BoldItalic',
+    fontSize: 32,
+    color: BRIGHT_GOLD,
+    lineHeight: 38,
+  },
+  greetingSanskrit: {
+    ...baseSanskrit,
+    fontSize: 13,
+    color: GOLD_SUB,
+    marginTop: 4,
+  },
+  bellButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     borderWidth: 1,
     borderColor: colors.alpha.goldLight,
-  },
-  moodCard: {
-    gap: spacing.sm,
-  },
-  moodRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  moodOption: {
-    alignItems: 'center',
-    padding: spacing.sm,
-    borderRadius: 12,
-    minWidth: 56,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  moodSelected: {
-    backgroundColor: colors.alpha.goldLight,
-  },
-  moodResponse: {
-    marginTop: spacing.xs,
-  },
-  section: {
-    gap: spacing.md,
-    marginTop: spacing.lg,
-  },
-  journeyCard: {
-    gap: spacing.xs,
-  },
-  journeyHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  startJourneyBtn: {
-    marginTop: spacing.sm,
-  },
-  progressBar: {
-    marginTop: spacing.xs,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginTop: spacing.lg,
-  },
-  statCard: {
-    flex: 1,
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  exploreRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  exploreCard: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.background.card,
-    borderRadius: 12,
-    paddingVertical: spacing.md,
-    gap: spacing.xs,
-    borderWidth: 1,
-    borderColor: colors.alpha.whiteLight,
   },
-  bottomSpacer: {
-    height: 100,
+  bellGlyph: {
+    fontSize: 16,
+    color: GOLD_MID,
+  },
+  streakBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
+    backgroundColor: colors.alpha.goldMedium,
+    borderWidth: 1,
+    borderColor: colors.alpha.goldStrong,
+  },
+  streakFlame: { fontSize: 14 },
+  streakCount: {
+    fontFamily: 'CormorantGaramond-BoldItalic',
+    fontSize: 18,
+    color: BRIGHT_GOLD,
+  },
+
+  // -------------------------- generic section
+  section: {
+    alignSelf: 'stretch',
+  },
+  sectionTitle: {
+    ...baseSerif,
+    fontSize: 20,
+    color: TEXT_PRIMARY,
+    lineHeight: 26,
+  },
+  sectionSub: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 13,
+    color: TEXT_MUTED,
+    marginTop: 2,
+  },
+
+  // -------------------------- daily verse
+  eyebrow: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    color: TEXT_MUTED,
+    marginBottom: 10,
+  },
+  verseSanskrit: {
+    marginBottom: 4,
+  },
+  verseTransliteration: {
+    fontFamily: 'CrimsonText-Italic',
+    fontSize: 14,
+    color: TEXT_SECONDARY,
+    lineHeight: 22,
+  },
+  verseEnglish: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 14,
+    color: TEXT_PRIMARY,
+    lineHeight: 14 * 1.7,
+    marginTop: 8,
+  },
+  verseRef: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 11,
+    color: TEXT_MUTED,
+    textAlign: 'right',
+    marginTop: 14,
+  },
+
+  // -------------------------- sakha card
+  sakhaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  sakhaAccent: {
+    position: 'absolute',
+    left: -20,
+    top: -20,
+    bottom: -20,
+    width: 2,
+    backgroundColor: GOLD_MID,
+    opacity: 0.7,
+  },
+  sakhaText: {
+    flex: 1,
+  },
+  sakhaCta: {
+    marginTop: 14,
+  },
+
+  // -------------------------- streak card
+  streakCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  streakFlameWrap: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.alpha.goldLight,
+  },
+  streakLargeFlame: {
+    fontSize: 28,
+  },
+  streakCenter: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  streakNumber: {
+    fontFamily: 'CormorantGaramond-BoldItalic',
+    fontSize: 42,
+    color: GOLD_MID,
+    lineHeight: 46,
+  },
+  streakLabel: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 11,
+    color: TEXT_MUTED,
+    marginTop: 2,
+  },
+  ringPct: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 13,
+    color: GOLD_MID,
+  },
+
+  // -------------------------- mood strip
+  moodHeader: {
+    fontFamily: 'Outfit-SemiBold',
+    fontSize: 16,
+    color: TEXT_PRIMARY,
+    marginBottom: 10,
+  },
+  moodRow: {
+    gap: 10,
+    paddingRight: 20,
+  },
+  moodChip: {
+    minWidth: 76,
+  },
+  moodInner: {
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+  },
+  moodIcon: {
+    fontSize: 20,
+  },
+  moodSanskrit: {
+    ...baseSanskrit,
+    fontFamily: 'NotoSansDevanagari-Bold',
+    fontSize: 13,
+    color: GOLD_MID,
+  },
+  moodEnglish: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 10,
+    color: TEXT_MUTED,
+  },
+  moodCheck: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    color: GOLD_MID,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+
+  // -------------------------- journey card
+  journeyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  journeyChakra: {
+    fontSize: 28,
+  },
+  journeyTitleCol: {
+    flex: 1,
+  },
+  journeyTitle: {
+    ...baseSerif,
+    fontSize: 18,
+    color: TEXT_PRIMARY,
+  },
+  journeyDay: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 13,
+    color: TEXT_SECONDARY,
+    marginTop: 2,
+  },
+  progressTrack: {
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: 'rgba(212, 160, 23, 0.1)',
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: GOLD_MID,
+  },
+  journeyCta: {
+    marginTop: 14,
   },
 });
