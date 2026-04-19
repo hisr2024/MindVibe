@@ -192,8 +192,15 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               return;
             }
 
-            // Verify the token is still valid by fetching the user
-            const user = await authService.getCurrentUser();
+            // Verify the token with a 5s hard cap — if the API is slow or
+            // unreachable, fall through to unauthenticated rather than
+            // blocking the splash screen for the full 15s axios timeout.
+            const user = await Promise.race([
+              authService.getCurrentUser(),
+              new Promise<never>((_, reject) =>
+                setTimeout(() => reject(new Error('auth-init-timeout')), 5000),
+              ),
+            ]);
             set((state) => {
               state.status = 'authenticated';
               state.user = user;
@@ -201,7 +208,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               state.isLoading = false;
             });
           } catch {
-            // Token invalid or network error — clear and require re-login
+            // Token invalid, network error, or timeout — clear and re-login.
             await clearTokens();
             set((state) => {
               state.status = 'unauthenticated';

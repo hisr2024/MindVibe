@@ -11,7 +11,9 @@
         "simulator": true
       },
       "env": {
-        "APP_ENV": "development"
+        "APP_ENV": "development",
+        "EXPO_PUBLIC_ENV": "development",
+        "EXPO_PUBLIC_API_BASE_URL": "http://localhost:8000"
       }
     },
     "preview": {
@@ -21,7 +23,9 @@
         "simulator": false
       },
       "env": {
-        "APP_ENV": "staging"
+        "APP_ENV": "staging",
+        "EXPO_PUBLIC_ENV": "staging",
+        "EXPO_PUBLIC_API_BASE_URL": "https://mindvibe-api.onrender.com"
       },
       "android": {
         "buildType": "apk"
@@ -31,7 +35,9 @@
       "autoIncrement": true,
       "channel": "production",
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "EXPO_PUBLIC_ENV": "production",
+        "EXPO_PUBLIC_API_BASE_URL": "https://mindvibe-api.onrender.com"
       }
     }
   },
