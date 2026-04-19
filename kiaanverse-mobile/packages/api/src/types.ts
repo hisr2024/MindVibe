@@ -699,7 +699,10 @@ export interface KarmaResetCompletion {
 export interface RelationshipGuidance {
   question: string;
   guidance: string;
-  verse: { chapter: number; verse: number; text: string; translation: string };
+  // verse is optional because the backend's /guide endpoint surfaces
+  // citations as references only — full sanskrit + translation isn't
+  // always reconstructable client-side.
+  verse?: { chapter: number; verse: number; text: string; translation: string };
   dharma_principles: string[];
   reflection_prompts: string[];
 }
@@ -730,7 +733,9 @@ export interface ViyogaResponse {
 export interface ArdhaReframeResponse {
   original_situation: string;
   reframed_perspective: string;
-  verse: { chapter: number; verse: number; text: string; translation: string };
+  // Optional — the backend returns verse references in the `sources`
+  // array but not always full Sanskrit + translation text.
+  verse?: { chapter: number; verse: number; text: string; translation: string };
   affirmation: string;
 }
 
