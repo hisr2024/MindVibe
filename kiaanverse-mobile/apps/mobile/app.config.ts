@@ -101,6 +101,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         android: {
           targetSdkVersion: 35,
           compileSdkVersion: 35,
+          enableProguardInReleaseBuilds: true,
+          enableShrinkResourcesInReleaseBuilds: true,
         },
       },
     ],
