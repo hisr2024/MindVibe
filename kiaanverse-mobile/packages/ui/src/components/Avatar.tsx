@@ -8,8 +8,11 @@ import { useTheme } from '../theme/useTheme';
 import { colors } from '../tokens/colors';
 
 interface AvatarProps {
-  uri?: string;
-  name?: string;
+  /** Avatar image URL. Prefer `uri`; `imageUrl` is accepted for call-site
+   *  parity with the web component. */
+  uri?: string | undefined;
+  imageUrl?: string | undefined;
+  name?: string | undefined;
   size?: number;
 }
 
@@ -21,14 +24,15 @@ function getInitials(name: string): string {
   return (parts[0]?.slice(0, 2) ?? '').toUpperCase();
 }
 
-export function Avatar({ uri, name = '', size = 40 }: AvatarProps): React.JSX.Element {
+export function Avatar({ uri, imageUrl, name = '', size = 40 }: AvatarProps): React.JSX.Element {
   const { theme } = useTheme();
+  const src = uri ?? imageUrl;
 
-  if (uri) {
+  if (src) {
     return (
       // eslint-disable-next-line jsx-a11y/alt-text -- React Native Image uses accessibilityLabel, not alt
       <Image
-        source={{ uri }}
+        source={{ uri: src }}
         style={[
           styles.image,
           {

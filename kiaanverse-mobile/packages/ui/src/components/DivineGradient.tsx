@@ -65,11 +65,11 @@ function DivineGradientComponent({
         withSequence(
           withTiming(0.4, {
             duration: CYCLE_DURATION,
-            easing: Easing.inOut(Easing.sine),
+            easing: Easing.inOut(Easing.sin),
           }),
           withTiming(0, {
             duration: CYCLE_DURATION,
-            easing: Easing.inOut(Easing.sine),
+            easing: Easing.inOut(Easing.sin),
           }),
         ),
         -1,

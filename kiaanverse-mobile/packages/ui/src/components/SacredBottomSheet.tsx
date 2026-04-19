@@ -57,12 +57,15 @@ function SacredBottomSheetComponent({
 }: SacredBottomSheetProps): React.JSX.Element | null {
   /** Sorted snap points ascending — first is smallest sheet, last is tallest. */
   const sortedSnaps = [...snapPoints].sort((a, b) => a - b);
-  const maxHeight = sortedSnaps[sortedSnaps.length - 1];
+  // `sortedSnaps` is guaranteed non-empty because snapPoints defaults to a
+  // single-item array and the prop is typed `number[]`, but TypeScript's
+  // `noUncheckedIndexedAccess` can't prove that — fall back to SCREEN_HEIGHT/2.
+  const maxHeight: number = sortedSnaps[sortedSnaps.length - 1] ?? SCREEN_HEIGHT / 2;
 
   /** translateY: 0 = fully open (at maxHeight), maxHeight = fully closed. */
-  const translateY = useSharedValue(maxHeight);
-  const backdropOpacity = useSharedValue(0);
-  const contextY = useSharedValue(0);
+  const translateY = useSharedValue<number>(maxHeight);
+  const backdropOpacity = useSharedValue<number>(0);
+  const contextY = useSharedValue<number>(0);
 
   const close = useCallback(() => {
     translateY.value = withSpring(maxHeight, springPresets.sheet);

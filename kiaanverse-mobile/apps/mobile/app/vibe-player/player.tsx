@@ -109,7 +109,10 @@ export default function VibePlayerScreen(): React.JSX.Element {
     void Haptics.selectionAsync();
     const modes = ['off', 'all', 'one'] as const;
     const currentIdx = modes.indexOf(repeatMode);
-    setRepeatMode(modes[(currentIdx + 1) % modes.length]);
+    // `modes[index]` is `T | undefined` under noUncheckedIndexedAccess;
+    // the modulo guarantees a valid index, but TS can't infer that.
+    const nextMode = modes[(currentIdx + 1) % modes.length] ?? 'off';
+    setRepeatMode(nextMode);
   }, [repeatMode, setRepeatMode]);
 
   const handleShuffle = useCallback(() => {

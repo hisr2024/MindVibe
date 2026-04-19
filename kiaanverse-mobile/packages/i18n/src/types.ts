@@ -19,7 +19,16 @@ export type TranslationNamespace =
   | 'errors'
   | 'divine'
   | 'journeys'
-  | 'auth';
+  | 'auth'
+  | 'tools'
+  | 'emotional-reset'
+  | 'karma-reset'
+  | 'journal'
+  | 'sadhana'
+  | 'community'
+  | 'vibe-player'
+  | 'analytics'
+  | 'settings';
 
 /** Nested translation messages — supports one level of nesting */
 export type TranslationMessages = Record<string, string | Record<string, string>>;

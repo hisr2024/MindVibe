@@ -460,14 +460,16 @@ interface RawStep {
 
 function _mapStep(s: RawStep): WisdomJourneyStep {
   const firstVerse = s.verse_refs?.[0];
+  const verseRef = firstVerse ? `${firstVerse.chapter}.${firstVerse.verse}` : undefined;
+  const reflection = (s.guided_reflection ?? []).join('\n\n') || undefined;
   return {
     id: s.step_id,
     dayIndex: s.day_index,
     title: s.step_title,
     type: 'lesson',
     content: s.teaching ?? '',
-    verseRef: firstVerse ? `${firstVerse.chapter}.${firstVerse.verse}` : undefined,
-    reflection: (s.guided_reflection ?? []).join('\n\n') || undefined,
+    ...(verseRef !== undefined ? { verseRef } : {}),
+    ...(reflection !== undefined ? { reflection } : {}),
     isCompleted: s.is_completed,
     // Backend does not expose per-step XP/karma yet — defaults match the
     // mobile UI's placeholder reward copy so the detail card renders.
@@ -732,8 +734,13 @@ export function useEmotionalResetStepData(sessionId: string, stepNumber: number)
 
 export function useStartEmotionalReset(): UseMutationResult<EmotionalResetSession, Error, { emotion: string; intensity: number }> {
   return useMutation({
-    mutationFn: async ({ emotion, intensity }) => {
-      const { data } = await api.emotionalReset.start(emotion, intensity);
+    // Backend `/api/emotional-reset/start` does not consume an emotion /
+    // intensity body — the service derives the starting step from the
+    // session state alone. We still accept them here because the entry
+    // screen captures the user's self-report and persists it into the
+    // local store (useEmotionalResetStore) for downstream steps to read.
+    mutationFn: async (_input) => {
+      const { data } = await api.emotionalReset.start();
       return data as EmotionalResetSession;
     },
   });
@@ -967,7 +974,12 @@ export function useRelationshipCompass(): UseMutationResult<RelationshipCompassR
   return useMutation({
     mutationFn: async ({ question, context }) => {
       const { data } = await api.relationship.guide(question, context);
-      return data as RelationshipCompassResult;
+      // The `/guide` adapter returns the UI-friendly RelationshipGuidance
+      // shape. The legacy RelationshipCompassResult type was based on a
+      // different backend contract that no longer applies; this hook is
+      // kept only for back-compat exports, so we erase the overlap and
+      // cast via `unknown` — no active screen consumes this hook.
+      return data as unknown as RelationshipCompassResult;
     },
   });
 }
@@ -1067,7 +1079,10 @@ export function useViyogaGuide(): UseMutationResult<ViyogaResult, Error, string>
   return useMutation({
     mutationFn: async (message: string) => {
       const { data } = await api.viyoga.chat(message);
-      return data as ViyogaResult;
+      // See useRelationshipCompass: the adapter returns ViyogaResponse, not
+      // ViyogaResult. Legacy hook kept for back-compat exports; no active
+      // screen consumes it.
+      return data as unknown as ViyogaResult;
     },
   });
 }

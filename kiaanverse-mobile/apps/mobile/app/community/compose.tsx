@@ -73,8 +73,8 @@ export default function ComposeScreen(): React.JSX.Element {
     try {
       await createPost.mutateAsync({
         content: content.trim(),
-        circle_id: selectedCircleId,
-        tags,
+        ...(selectedCircleId !== undefined ? { circle_id: selectedCircleId } : {}),
+        ...(tags.length > 0 ? { tags } : {}),
       });
       router.back();
     } catch {

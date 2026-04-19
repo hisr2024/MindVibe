@@ -313,8 +313,24 @@ function createApiClient(): AxiosInstance {
         // True authorization failure — force logout
         await tokenManager.clearTokens();
         tokenManager.onAuthFailure?.();
+        // `code403` is an arbitrary string from the server; normalise to
+        // one of the known AuthErrorCode values, defaulting to UNKNOWN.
+        const KNOWN_AUTH_CODES: ReadonlyArray<import('./errors').AuthErrorCode> = [
+          'INVALID_CREDENTIALS',
+          'EMAIL_NOT_VERIFIED',
+          'EMAIL_TAKEN',
+          'TOKEN_EXPIRED',
+          'NETWORK_ERROR',
+          'VALIDATION_ERROR',
+          'ACCOUNT_LOCKED',
+          'UNKNOWN',
+        ];
+        const authCode: import('./errors').AuthErrorCode =
+          (KNOWN_AUTH_CODES as readonly string[]).includes(code403)
+            ? (code403 as import('./errors').AuthErrorCode)
+            : 'UNKNOWN';
         return Promise.reject(
-          new AuthError('Access denied. Please sign in again.', 403, code403 || 'UNKNOWN'),
+          new AuthError('Access denied. Please sign in again.', 403, authCode),
         );
       }
 

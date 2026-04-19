@@ -90,8 +90,9 @@ export default function SadhanaScreen(): React.JSX.Element {
   const handleNextPhase = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const nextIndex = phaseIndex + 1;
-    if (nextIndex < PHASE_ORDER.length) {
-      setPhase(PHASE_ORDER[nextIndex]);
+    const nextPhase = PHASE_ORDER[nextIndex];
+    if (nextPhase !== undefined) {
+      setPhase(nextPhase);
     }
   }, [phaseIndex]);
 
@@ -107,11 +108,13 @@ export default function SadhanaScreen(): React.JSX.Element {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     try {
+      const trimmedReflection = reflection.trim();
+      const trimmedIntention = intention.trim();
       await completeSadhana.mutateAsync({
-        verse_id: dailyData?.verse_id,
-        reflection: reflection.trim() || undefined,
-        intention: intention.trim() || undefined,
-        mood_score: selectedMood ?? undefined,
+        ...(dailyData?.verse_id !== undefined ? { verse_id: dailyData.verse_id } : {}),
+        ...(trimmedReflection.length > 0 ? { reflection: trimmedReflection } : {}),
+        ...(trimmedIntention.length > 0 ? { intention: trimmedIntention } : {}),
+        ...(selectedMood !== null ? { mood_score: selectedMood } : {}),
       });
     } catch {
       // Allow completion even if server call fails — data will sync later

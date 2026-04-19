@@ -14,7 +14,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { StyleSheet, View, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
@@ -36,7 +36,7 @@ export interface DivineBackgroundProps {
   /** Disable the breathing aura animation. @default false */
   readonly disableAura?: boolean;
   /** Optional style override for the container. */
-  readonly style?: ViewStyle;
+  readonly style?: StyleProp<ViewStyle>;
   readonly children: React.ReactNode;
 }
 

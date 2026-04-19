@@ -299,7 +299,7 @@ export default function MoodTrackingScreen(): React.JSX.Element {
             score: payload.score,
             state: payload.state,
             tags: payload.tags,
-            note: payload.note,
+            ...(payload.note !== undefined ? { note: payload.note } : {}),
             date: payload.date,
             at: new Date().toISOString(),
           });

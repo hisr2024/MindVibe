@@ -14,7 +14,11 @@ export interface User {
   email: string;
   name: string;
   locale: string;
-  subscriptionTier: SubscriptionTier;
+  // Accept both the legacy uppercase tier names (local type alias) and the
+  // lowercase tier names emitted by the backend (see
+  // `./subscription/constants.ts`). This avoids splitting the domain type
+  // across two incompatible spellings of the same concept.
+  subscriptionTier: SubscriptionTier | 'free' | 'bhakta' | 'sadhak' | 'siddha';
   createdAt: string;
 }
 
@@ -699,7 +703,8 @@ export interface KarmaResetCompletion {
 export interface RelationshipGuidance {
   question: string;
   guidance: string;
-  verse: { chapter: number; verse: number; text: string; translation: string };
+  /** Optional — backend does not always surface a single canonical verse. */
+  verse?: { chapter: number; verse: number; text: string; translation: string };
   dharma_principles: string[];
   reflection_prompts: string[];
 }
@@ -730,7 +735,10 @@ export interface ViyogaResponse {
 export interface ArdhaReframeResponse {
   original_situation: string;
   reframed_perspective: string;
-  verse: { chapter: number; verse: number; text: string; translation: string };
+  /** Optional — backend /ardha/reframe returns a text response + bibliographic
+   *  sources (not a single canonical verse), so the card is only shown when
+   *  an adapter can surface one. */
+  verse?: { chapter: number; verse: number; text: string; translation: string };
   affirmation: string;
 }
 

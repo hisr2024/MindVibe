@@ -27,12 +27,14 @@ export interface VerseData {
   readonly verse: number;
   /** Original Sanskrit text in Devanagari script. */
   readonly sanskrit: string;
-  /** Romanized transliteration. */
-  readonly transliteration: string;
+  /** Romanized transliteration (optional — not every API source returns it). */
+  readonly transliteration?: string;
   /** English (or localized) translation. */
   readonly translation: string;
-  /** Speaker of the verse (e.g. "Lord Krishna", "Arjuna", "Sanjaya"). */
-  readonly speaker: string;
+  /** Speaker of the verse (e.g. "Lord Krishna", "Arjuna", "Sanjaya") —
+   *  optional because tool endpoints (ardha, compass) cite verses without
+   *  attribution. */
+  readonly speaker?: string;
   /** Optional commentary text — shown on expand. */
   readonly commentary?: string;
 }

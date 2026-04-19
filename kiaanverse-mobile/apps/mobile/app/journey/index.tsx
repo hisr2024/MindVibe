@@ -90,8 +90,13 @@ const CATEGORY_CHIPS: { key: string; name: string; sanskrit: string; color: stri
 ];
 
 /** Difficulty level display configuration. */
-const DIFFICULTY_CONFIG: Record<string, { label: string; color: string }> = {
-  beginner: { label: 'Beginner', color: '#22c55e' },
+interface DifficultyEntry {
+  readonly label: string;
+  readonly color: string;
+}
+const DIFFICULTY_DEFAULT: DifficultyEntry = { label: 'Beginner', color: '#22c55e' };
+const DIFFICULTY_CONFIG: Record<string, DifficultyEntry> = {
+  beginner: DIFFICULTY_DEFAULT,
   intermediate: { label: 'Intermediate', color: '#f59e0b' },
   advanced: { label: 'Advanced', color: '#ef4444' },
 };
@@ -187,7 +192,7 @@ function TemplateCard({
   const enemy = enemyKey ? ENEMY_INFO[enemyKey] : undefined;
   const accentColor = enemy?.color ?? colors.primary[500];
   const difficulty = resolveDifficulty(item);
-  const diffConfig = DIFFICULTY_CONFIG[difficulty] ?? DIFFICULTY_CONFIG.beginner;
+  const diffConfig: DifficultyEntry = DIFFICULTY_CONFIG[difficulty] ?? DIFFICULTY_DEFAULT;
 
   return (
     <Animated.View entering={FadeInDown.delay(index * 80).duration(500).springify()}>
@@ -425,12 +430,18 @@ function TabPill({
 // Empty State
 // ---------------------------------------------------------------------------
 
+/** Any icon with the lucide-compatible { size, color } signature.
+ *  Using `any` here lets us accept both lucide's `LucideIcon` (which has
+ *  a wide `propTypes` surface) and plain custom components. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type EmptyStateIcon = React.ComponentType<any>;
+
 function EmptyState({
   icon: Icon,
   title,
   subtitle,
 }: {
-  icon: React.ComponentType<{ size: number; color: string }>;
+  icon: EmptyStateIcon;
   title: string;
   subtitle: string;
 }): React.JSX.Element {

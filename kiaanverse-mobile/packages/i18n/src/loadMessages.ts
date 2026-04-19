@@ -99,6 +99,41 @@ const englishMessages: Record<TranslationNamespace, TranslationMessages> = {
     progress: 'Progress',
     completeStep: 'Mark Complete',
   },
+  // Feature-scoped namespaces — each tool/screen can look up its own
+  // strings here. Intentionally sparse: screens supply inline fallbacks
+  // via `t('key', 'English default')`, so absent keys render cleanly.
+  tools: {
+    title: 'Sacred Tools',
+  },
+  'emotional-reset': {
+    title: 'Sacred Emotional Reset',
+    subtitle: 'What are you feeling right now?',
+    intensityLabel: 'How intense is it?',
+    begin: 'Begin Sacred Reset',
+  },
+  'karma-reset': {
+    title: 'Karma Reset',
+  },
+  journal: {
+    title: 'Sacred Journal',
+    newEntry: 'New Entry',
+  },
+  sadhana: {
+    title: 'Nitya Sadhana',
+    streak: 'Day Streak',
+  },
+  community: {
+    title: 'Wisdom Circles',
+  },
+  'vibe-player': {
+    title: 'Vibe Player',
+  },
+  analytics: {
+    title: 'Your Insights',
+  },
+  settings: {
+    title: 'Settings',
+  },
 };
 
 /** Cache for loaded locale bundles */

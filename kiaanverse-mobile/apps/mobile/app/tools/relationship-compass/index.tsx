@@ -40,8 +40,12 @@ export default function RelationshipCompassScreen(): React.JSX.Element {
   const handleSeekGuidance = useCallback(() => {
     if (!question.trim()) return;
 
+    const trimmedContext = context.trim();
     guideMutation.mutate(
-      { question: question.trim(), context: context.trim() || undefined },
+      {
+        question: question.trim(),
+        ...(trimmedContext.length > 0 ? { context: trimmedContext } : {}),
+      },
       {
         onSuccess: (data) => {
           setResult(data);

@@ -68,6 +68,15 @@ export const colors = {
     black: '#000000',
     transparent: 'transparent',
   },
+
+  /** Convenience brand aliases — shortcut tokens for hot-path CTAs and
+   *  callouts. Point at existing palette values so the design system
+   *  remains the single source of truth. */
+  brand: {
+    gold: '#D4A017',
+    goldLight: '#F0C040',
+    goldDark: '#8B6914',
+  },
 } as const;
 
 export type Colors = typeof colors;
