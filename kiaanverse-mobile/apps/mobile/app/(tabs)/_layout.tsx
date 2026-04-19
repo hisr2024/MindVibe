@@ -1,66 +1,38 @@
 /**
- * Tabs Layout — 5-tab bottom navigation with custom golden tab bar.
+ * Tabs Layout — 5-tab bottom navigation for Kiaanverse.
  *
- * Home | Sakha (✦) | Journeys | Gita | Profile
+ *   Home · Chat · Shlokas · Journal · Profile
  *
- * Features:
- * - Custom tab bar with golden active dot + haptic feedback
- * - Fade transitions between tabs
- * - freezeOnBlur preserves tab state (scroll position, form data, chat context)
- *
- * Deep link routes (hidden from tab bar):
- * - verse/[chapter]/[verse] → kiaanverse://verse/:chapter/:verse
- * - journey/[id] → kiaanverse://journey/:id (nested inside journey tab)
+ * - Uses the custom DivineTabBar (gold-accented, dark navy background).
+ * - `freezeOnBlur` preserves tab state (scroll positions, chat history,
+ *   journal drafts) when the user switches tabs.
+ * - Deep-link routes (`/journey/...`, `/verse/...`, `/journal/new`, etc.)
+ *   live outside the (tabs) group and are pushed with the Expo Router
+ *   stack, not rendered in the tab bar.
  */
 
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { useTranslation } from '@kiaanverse/i18n';
-import { CustomTabBar } from '../../components/CustomTabBar';
+
+import { DivineTabBar } from '../../components/navigation/DivineTabBar';
 
 export default function TabsLayout(): React.JSX.Element {
   const { t } = useTranslation('navigation');
 
   return (
     <Tabs
-      tabBar={(props) => <CustomTabBar {...props} />}
+      tabBar={(props) => <DivineTabBar {...props} />}
       screenOptions={{
         headerShown: false,
         freezeOnBlur: true,
       }}
     >
-      <Tabs.Screen
-        name="home"
-        options={{ title: t('home') }}
-      />
-      <Tabs.Screen
-        name="sakha"
-        options={{ title: t('sakha') }}
-      />
-      <Tabs.Screen
-        name="journey"
-        options={{ title: t('journey') }}
-      />
-      <Tabs.Screen
-        name="gita"
-        options={{ title: t('gita') }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{ title: t('profile') }}
-      />
-
-      {/* Deep link screens — hidden from tab bar */}
-      <Tabs.Screen
-        name="verse/[chapter]/[verse]"
-        options={{ href: null }}
-      />
-      {/* New Sakha chat screen (1:1 web port). Hidden from the tab bar
-          until the center tab is officially migrated away from sakha.tsx. */}
-      <Tabs.Screen
-        name="kiaan"
-        options={{ href: null }}
-      />
+      <Tabs.Screen name="index" options={{ title: t('home') }} />
+      <Tabs.Screen name="chat" options={{ title: t('chat') }} />
+      <Tabs.Screen name="shlokas" options={{ title: t('shlokas') }} />
+      <Tabs.Screen name="journal" options={{ title: t('journal') }} />
+      <Tabs.Screen name="profile" options={{ title: t('profile') }} />
     </Tabs>
   );
 }

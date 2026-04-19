@@ -17,7 +17,7 @@
  *   idle/loading → splash screen held
  *   unauthenticated → /(auth)/login
  *   authenticated + !onboarded → /onboarding
- *   authenticated + onboarded → /(tabs)/home
+ *   authenticated + onboarded → /(tabs)
  */
 
 import React, { useEffect, useCallback, useRef } from 'react';
@@ -134,7 +134,7 @@ function AuthGate({ children }: { children: React.ReactNode }): React.JSX.Elemen
     } else if (status === 'authenticated' && !isOnboarded && !inOnboarding) {
       router.replace('/onboarding');
     } else if (status === 'authenticated' && isOnboarded && (inAuthGroup || inOnboarding)) {
-      router.replace('/(tabs)/home');
+      router.replace('/(tabs)');
     }
   }, [status, isOnboarded, hasHydrated, segments, router]);
 

@@ -45,7 +45,7 @@ import {
   type WisdomJourneyStep,
 } from '@kiaanverse/api';
 import { useJourneyStore } from '@kiaanverse/store';
-import { DaySelector } from '../../../components/journey/DaySelector';
+import { DaySelector } from '../../components/journey/DaySelector';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -320,7 +320,7 @@ export default function JourneyDetailScreen(): React.JSX.Element {
 
   const handleContinueStep = useCallback(() => {
     router.push({
-      pathname: '/(tabs)/journey/step/[day]',
+      pathname: '/journey/step/[day]',
       params: { day: String(effectiveSelectedDay), journeyId },
     });
   }, [router, effectiveSelectedDay, journeyId]);

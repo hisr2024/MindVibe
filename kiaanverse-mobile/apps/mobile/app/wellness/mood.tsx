@@ -102,7 +102,7 @@ function MoodDetailCard({ moodId }: { moodId: SpiritualMood }): React.JSX.Elemen
               const ref = moodInfo.linkedVerses[0];
               if (!ref) return;
               const [ch, v] = ref.split('.');
-              router.push(`/(tabs)/verse/${ch}/${v}`);
+              router.push(`/verse/${ch}/${v}`);
             }}
             accessibilityLabel="Read linked verse"
           >

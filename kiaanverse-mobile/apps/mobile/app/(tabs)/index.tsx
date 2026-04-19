@@ -155,15 +155,15 @@ export default function HomeScreen(): React.JSX.Element {
 
   const handleSakhaTap = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push('/(tabs)/sakha');
+    router.push('/(tabs)/chat');
   }, [router]);
 
   const handleJourneyContinue = useCallback(() => {
     if (!activeJourney) {
-      router.push('/(tabs)/journey');
+      router.push('/journey');
       return;
     }
-    router.push(`/(tabs)/journey/${activeJourney.id}`);
+    router.push(`/journey/${activeJourney.id}`);
   }, [activeJourney, router]);
 
   // Fire milestone haptic when entering a milestone streak.

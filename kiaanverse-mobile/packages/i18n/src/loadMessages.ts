@@ -55,10 +55,15 @@ const englishMessages: Record<TranslationNamespace, TranslationMessages> = {
   },
   navigation: {
     home: 'Home',
-    sakha: 'Sakha',
-    journey: 'Journey',
-    gita: 'Gita',
+    chat: 'Chat',
+    shlokas: 'Shlokas',
+    journal: 'Journal',
     profile: 'Profile',
+    // Legacy aliases — kept for any residual consumers (deep-link labels,
+    // notification toasts, analytics) that still reference the old names.
+    sakha: 'Chat',
+    journey: 'Journey',
+    gita: 'Shlokas',
   },
   errors: {
     network: 'Network error. Please check your connection.',
