@@ -5,7 +5,7 @@
  * Features cosmic gradient background and golden-accented chat bubbles.
  */
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   FlatList,
@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Send } from 'lucide-react-native';
+import { useLocalSearchParams } from 'expo-router';
 import { Screen, Text, colors, spacing, radii, useTheme } from '@kiaanverse/ui';
 import { useSendChatMessage } from '@kiaanverse/api';
 import { useTranslation } from '@kiaanverse/i18n';
@@ -36,6 +37,14 @@ export default function SakhaScreen(): React.JSX.Element {
   const { theme } = useTheme();
   const c = theme.colors;
   const sendMessage = useSendChatMessage();
+
+  // Deep-link / intra-app params:
+  //   context?:  pre-filled prompt (e.g. "Please explain BG 2.47: …")
+  //   verseId?:  optional dedupe hint, currently unused in the apply guard
+  //              since we dedupe on the context string itself.
+  const params = useLocalSearchParams<{ context?: string; verseId?: string }>();
+  const lastAppliedContextRef = useRef<string>('');
+
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -47,6 +56,19 @@ export default function SakhaScreen(): React.JSX.Element {
   ]);
   const [sessionId, setSessionId] = useState<string | undefined>();
   const flatListRef = useRef<FlatList<ChatMessage>>(null);
+
+  // Pre-fill the input from route params. Applies whenever the `context`
+  // string actually changes — a fresh navigation from a verse detail screen
+  // always seeds the draft, but spurious re-renders with the same context do
+  // not clobber what the user is typing.
+  useEffect(() => {
+    const context = params.context;
+    if (typeof context !== 'string' || context.length === 0) return;
+    if (lastAppliedContextRef.current === context) return;
+
+    lastAppliedContextRef.current = context;
+    setInput(context);
+  }, [params.context]);
 
   const handleSend = useCallback(async () => {
     const text = input.trim();
