@@ -3,112 +3,96 @@
 <head>
 <meta charset="utf-8">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:wght@300;400;600&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { width: 1080px; height: 1920px; overflow: hidden; font-family: 'Inter', sans-serif; }
+body { width: 1080px; height: 1920px; overflow: hidden; font-family: 'Outfit', sans-serif; }
 .screen {
-  width: 1080px; height: 1920px; background: #050505;
-  display: flex; flex-direction: column; padding: 100px 60px 60px;
+  width: 1080px; height: 1920px; background: #080B1A;
+  display: flex; flex-direction: column; padding: 80px 48px 120px; position: relative;
 }
-.caption { text-align: center; margin-bottom: 50px; }
-.caption-title { font-size: 44px; font-weight: 800; color: #fefefe; margin-bottom: 12px; }
-.caption-sub { font-size: 24px; color: #a0a0a0; }
-/* Mood Ring */
-.mood-ring-area {
-  display: flex; justify-content: center; margin-bottom: 50px; position: relative;
-}
-.mood-ring-glow {
-  position: absolute; width: 400px; height: 400px; top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(15,181,201,0.15), rgba(67,211,232,0.05), transparent);
+.aura {
+  position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 400px;
+  background: radial-gradient(ellipse, rgba(212,160,23,0.1) 0%, transparent 70%);
   border-radius: 50%;
 }
-.mood-ring {
-  width: 320px; height: 320px; border-radius: 50%; position: relative;
-  background: conic-gradient(from 0deg, #0FB5C9, #3B82F6, #C77DFF, #FF6B9D, #FF6B35, #FFD700, #0FB5C9);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 1;
+.header { position: relative; z-index: 2; margin-bottom: 40px; }
+.header-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 400; color: #F5F0E8;
+  margin-bottom: 8px;
 }
-.mood-ring-inner {
-  width: 240px; height: 240px; border-radius: 50%;
-  background: #0B0B0F; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
+.header-sub { font-size: 18px; color: #7A7060; }
+/* Mood selection */
+.mood-section {
+  padding: 32px; border-radius: 16px; margin-bottom: 32px;
+  background: #0D1229; border: 1px solid rgba(212,160,23,0.08);
+  position: relative; z-index: 2;
 }
-.mood-emoji { font-size: 64px; margin-bottom: 8px; }
-.mood-label { font-size: 28px; font-weight: 700; color: #0FB5C9; }
-.mood-time { font-size: 18px; color: #a0a0a0; margin-top: 4px; }
-/* Mood options */
-.moods {
-  display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
-  margin-bottom: 48px;
+.mood-question { font-size: 24px; font-weight: 700; color: #F5F0E8; margin-bottom: 8px; }
+.mood-sub { font-size: 18px; color: #7A7060; margin-bottom: 28px; }
+.moods { display: flex; justify-content: space-between; }
+.mood-item { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.mood-circle {
+  width: 80px; height: 80px; border-radius: 40px;
+  display: flex; align-items: center; justify-content: center; font-size: 36px;
 }
-.mood-option {
-  padding: 16px 28px; border-radius: 20px; font-size: 22px;
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-  color: #e8edf5; display: flex; align-items: center; gap: 10px;
-}
-.mood-option.selected {
-  background: linear-gradient(135deg, rgba(15,181,201,0.2), rgba(67,211,232,0.1));
-  border-color: rgba(15,181,201,0.4); color: #43D3E8;
-}
+.mood-circle.selected { border: 2px solid #D4A017; background: rgba(212,160,23,0.15); }
+.mood-label { font-size: 16px; color: #7A7060; font-weight: 500; }
+.mood-label.selected { color: #D4A017; }
 /* Weekly chart */
 .chart-card {
-  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 24px; padding: 36px 32px;
-  margin-bottom: 32px;
+  padding: 32px; border-radius: 16px; margin-bottom: 24px;
+  background: #0D1229; border: 1px solid rgba(212,160,23,0.06);
+  position: relative; z-index: 2;
 }
-.chart-header {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 28px;
-}
-.chart-title { font-size: 24px; font-weight: 700; color: #fefefe; }
-.chart-period { font-size: 18px; color: #a0a0a0; }
-.chart-bars {
-  display: flex; justify-content: space-between; align-items: flex-end;
-  height: 200px; gap: 12px;
-}
+.chart-header { display: flex; justify-content: space-between; margin-bottom: 28px; }
+.chart-title { font-size: 22px; font-weight: 700; color: #F5F0E8; }
+.chart-period { font-size: 17px; color: #7A7060; }
+.chart-bars { display: flex; justify-content: space-between; align-items: flex-end; height: 200px; gap: 16px; }
 .bar-col { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
-.bar {
-  width: 100%; border-radius: 8px 8px 4px 4px;
-  background: linear-gradient(180deg, #0FB5C9, #3B82F6);
-}
-.bar-label { font-size: 16px; color: #a0a0a0; font-weight: 500; }
-.bar-emoji { font-size: 20px; }
-/* KIAAN insight */
+.bar { width: 100%; border-radius: 6px 6px 3px 3px; }
+.bar-label { font-size: 16px; color: #7A7060; font-weight: 500; }
+.bar-emoji { font-size: 22px; }
+/* Trend insight */
 .trend-card {
-  background: linear-gradient(135deg, rgba(255,107,53,0.08), rgba(255,215,0,0.05));
-  border: 1px solid rgba(255,183,71,0.15); border-radius: 24px;
-  padding: 32px;
+  padding: 28px 32px; border-radius: 16px;
+  background: #0D1229; border: 1px solid rgba(212,160,23,0.12);
+  position: relative; z-index: 2; overflow: hidden; margin-bottom: 24px;
 }
-.trend-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.trend-dot { width: 10px; height: 10px; border-radius: 50%; background: #FFD700; }
-.trend-label { font-size: 16px; font-weight: 700; color: #FFD700; letter-spacing: 1.5px; }
-.trend-text { font-size: 22px; color: #e8edf5; line-height: 1.5; }
+.trend-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #D4A017, #F0C040, transparent); }
+.trend-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.trend-dot { width: 8px; height: 8px; border-radius: 50%; background: #D4A017; }
+.trend-label { font-size: 15px; font-weight: 700; color: #D4A017; letter-spacing: 1.5px; }
+.trend-text { font-size: 20px; color: #C8BFA8; line-height: 1.5; }
+/* Monthly summary */
+.summary {
+  padding: 28px 32px; border-radius: 16px;
+  background: #0D1229; border: 1px solid rgba(212,160,23,0.06);
+  position: relative; z-index: 2; display: flex; gap: 20px;
+}
+.summary-item { flex: 1; text-align: center; }
+.summary-value { font-size: 36px; font-weight: 800; color: #D4A017; margin-bottom: 4px; }
+.summary-label { font-size: 15px; color: #7A7060; }
+.summary-divider { width: 1px; background: rgba(212,160,23,0.08); }
 </style>
 </head>
 <body>
 <div class="screen">
-  <div class="caption">
-    <div class="caption-title">Catch It Before It Catches You</div>
-    <div class="caption-sub">Divine Mood Ring — track your emotional patterns</div>
+  <div class="aura"></div>
+  <div class="header">
+    <div class="header-title">Mood Tracking</div>
+    <div class="header-sub">Catch it before it catches you</div>
   </div>
-  <div class="mood-ring-area">
-    <div class="mood-ring-glow"></div>
-    <div class="mood-ring">
-      <div class="mood-ring-inner">
-        <div class="mood-emoji">😌</div>
-        <div class="mood-label">Peaceful</div>
-        <div class="mood-time">Today, 8:30 AM</div>
-      </div>
+  <div class="mood-section">
+    <div class="mood-question">How are you feeling right now?</div>
+    <div class="mood-sub">Check in with yourself honestly</div>
+    <div class="moods">
+      <div class="mood-item"><div class="mood-circle" style="background:rgba(108,52,131,0.15)">😔</div><div class="mood-label">Very Low</div></div>
+      <div class="mood-item"><div class="mood-circle" style="background:rgba(41,128,185,0.15)">😕</div><div class="mood-label">Low</div></div>
+      <div class="mood-item"><div class="mood-circle" style="background:rgba(122,112,96,0.15)">😐</div><div class="mood-label">Neutral</div></div>
+      <div class="mood-item"><div class="mood-circle" style="background:rgba(61,139,94,0.15)">🙂</div><div class="mood-label">Good</div></div>
+      <div class="mood-item"><div class="mood-circle selected">😊</div><div class="mood-label selected">Great</div></div>
     </div>
-  </div>
-  <div class="moods">
-    <div class="mood-option selected">😌 Peaceful</div>
-    <div class="mood-option">😊 Grateful</div>
-    <div class="mood-option">😔 Heavy</div>
-    <div class="mood-option">😤 Restless</div>
-    <div class="mood-option">🙏 Devotional</div>
-    <div class="mood-option">😢 Sad</div>
   </div>
   <div class="chart-card">
     <div class="chart-header">
@@ -116,20 +100,28 @@ body { width: 1080px; height: 1920px; overflow: hidden; font-family: 'Inter', sa
       <div class="chart-period">Apr 14 — Apr 19</div>
     </div>
     <div class="chart-bars">
-      <div class="bar-col"><div class="bar-emoji">😌</div><div class="bar" style="height:160px"></div><div class="bar-label">Mon</div></div>
-      <div class="bar-col"><div class="bar-emoji">😊</div><div class="bar" style="height:180px"></div><div class="bar-label">Tue</div></div>
-      <div class="bar-col"><div class="bar-emoji">😔</div><div class="bar" style="height:80px; background: linear-gradient(180deg, #C77DFF, #FF6B9D);"></div><div class="bar-label">Wed</div></div>
-      <div class="bar-col"><div class="bar-emoji">😤</div><div class="bar" style="height:60px; background: linear-gradient(180deg, #FF6B35, #F7931E);"></div><div class="bar-label">Thu</div></div>
-      <div class="bar-col"><div class="bar-emoji">🙏</div><div class="bar" style="height:150px"></div><div class="bar-label">Fri</div></div>
-      <div class="bar-col"><div class="bar-emoji">😌</div><div class="bar" style="height:170px"></div><div class="bar-label">Sat</div></div>
+      <div class="bar-col"><div class="bar-emoji">🙂</div><div class="bar" style="height:140px;background:linear-gradient(180deg,#3D8B5E,#2d6b47)"></div><div class="bar-label">Mon</div></div>
+      <div class="bar-col"><div class="bar-emoji">😊</div><div class="bar" style="height:170px;background:linear-gradient(180deg,#D4A017,#8B6914)"></div><div class="bar-label">Tue</div></div>
+      <div class="bar-col"><div class="bar-emoji">😕</div><div class="bar" style="height:70px;background:linear-gradient(180deg,#2980B9,#1a5276)"></div><div class="bar-label">Wed</div></div>
+      <div class="bar-col"><div class="bar-emoji">😔</div><div class="bar" style="height:50px;background:linear-gradient(180deg,#6C3483,#4a235a)"></div><div class="bar-label">Thu</div></div>
+      <div class="bar-col"><div class="bar-emoji">🙂</div><div class="bar" style="height:150px;background:linear-gradient(180deg,#3D8B5E,#2d6b47)"></div><div class="bar-label">Fri</div></div>
+      <div class="bar-col"><div class="bar-emoji">😊</div><div class="bar" style="height:180px;background:linear-gradient(180deg,#D4A017,#8B6914)"></div><div class="bar-label">Sat</div></div>
     </div>
   </div>
   <div class="trend-card">
+    <div class="trend-bar"></div>
     <div class="trend-header">
       <div class="trend-dot"></div>
       <div class="trend-label">KIAAN PATTERN DETECTED</div>
     </div>
-    <div class="trend-text">Your peace drops mid-week. KIAAN suggests a Wednesday Sadhana ritual — 10 minutes of breathwork before work can shift the pattern.</div>
+    <div class="trend-text">Your peace drops mid-week. KIAAN suggests a Wednesday morning Sadhana — 10 minutes of breathwork before work can shift this pattern.</div>
+  </div>
+  <div class="summary">
+    <div class="summary-item"><div class="summary-value">72%</div><div class="summary-label">Good Days</div></div>
+    <div class="summary-divider"></div>
+    <div class="summary-item"><div class="summary-value">14</div><div class="summary-label">Check-ins</div></div>
+    <div class="summary-divider"></div>
+    <div class="summary-item"><div class="summary-value">↑12%</div><div class="summary-label">vs Last Week</div></div>
   </div>
 </div>
 </body>

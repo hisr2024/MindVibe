@@ -3,121 +3,161 @@
 <head>
 <meta charset="utf-8">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:wght@300;400;600&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { width: 1080px; height: 1920px; overflow: hidden; font-family: 'Inter', sans-serif; }
+body { width: 1080px; height: 1920px; overflow: hidden; font-family: 'Outfit', sans-serif; }
 .screen {
-  width: 1080px; height: 1920px; position: relative;
-  background: #050505; display: flex; flex-direction: column;
+  width: 1080px; height: 1920px; background: #080B1A;
+  display: flex; flex-direction: column; position: relative;
 }
-.caption { padding: 100px 80px 50px; text-align: center; }
-.caption-title { font-size: 44px; font-weight: 800; color: #fefefe; margin-bottom: 12px; }
-.caption-sub { font-size: 24px; color: #a0a0a0; }
-.verse-card {
-  margin: 40px 60px; padding: 60px 48px; border-radius: 32px;
-  background: linear-gradient(180deg, rgba(255,107,53,0.08), rgba(255,215,0,0.04));
-  border: 1px solid rgba(255,183,71,0.15);
-  position: relative; overflow: hidden;
-}
-.verse-glow {
-  position: absolute; top: -100px; right: -100px; width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(255,215,0,0.08), transparent);
+.aura {
+  position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 400px;
+  background: radial-gradient(ellipse, rgba(212,160,23,0.12) 0%, transparent 70%);
   border-radius: 50%;
 }
-.verse-chapter {
-  font-size: 18px; font-weight: 700; color: #F7931E;
-  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 24px;
-  position: relative;
+/* Header */
+.header { padding: 80px 48px 24px; position: relative; z-index: 2; }
+.header-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 400; color: #F5F0E8;
+  margin-bottom: 8px;
 }
-.verse-number {
-  font-size: 80px; font-weight: 800;
-  background: linear-gradient(135deg, #FF6B35, #FFD700);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  margin-bottom: 32px; position: relative;
+.header-sub { font-size: 18px; color: #7A7060; }
+/* Search */
+.search {
+  margin: 16px 48px 24px; padding: 18px 24px; border-radius: 24px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  font-size: 20px; color: #7A7060; position: relative; z-index: 2;
 }
-.sanskrit {
-  font-family: 'Crimson Text', serif; font-size: 36px; font-style: italic;
-  color: #FFD700; line-height: 1.6; margin-bottom: 32px; position: relative;
+/* Verse of the day */
+.votd {
+  margin: 0 48px 32px; padding: 32px; border-radius: 16px;
+  background: #0D1229; border: 1px solid rgba(212,160,23,0.12);
+  position: relative; z-index: 2; overflow: hidden;
 }
-.transliteration {
-  font-size: 22px; color: #a0a0a0; font-style: italic;
-  margin-bottom: 32px; line-height: 1.5; position: relative;
+.votd-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #D4A017, #F0C040, transparent); }
+.votd-label { font-size: 16px; color: #D4A017; font-weight: 600; margin-bottom: 16px; }
+.votd-sanskrit {
+  font-family: 'Crimson Text', serif; font-size: 24px; font-style: italic;
+  color: #F0C040; line-height: 1.5; margin-bottom: 12px;
 }
-.translation {
-  font-size: 28px; color: #e8edf5; line-height: 1.6;
-  padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.08);
-  position: relative;
+.votd-translation { font-size: 20px; color: #C8BFA8; line-height: 1.5; margin-bottom: 8px; }
+.votd-ref { font-size: 16px; color: #7A7060; text-align: right; }
+/* Chapter list */
+.chapters { flex: 1; padding: 0 48px; overflow: hidden; position: relative; z-index: 2; }
+.chapter-card {
+  display: flex; align-items: center; gap: 20px;
+  padding: 24px; border-radius: 16px; margin-bottom: 16px;
+  background: #0D1229; border: 1px solid rgba(212,160,23,0.06);
 }
-/* KIAAN insight card */
-.insight-card {
-  margin: 24px 60px; padding: 36px 40px; border-radius: 24px;
-  background: linear-gradient(135deg, rgba(30,58,138,0.15), rgba(37,99,235,0.08));
-  border: 1px solid rgba(106,215,255,0.15);
+.chapter-num {
+  width: 56px; height: 56px; border-radius: 28px; flex-shrink: 0;
+  background: rgba(212,160,23,0.08);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 700; color: #D4A017;
 }
-.insight-header {
-  display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+.chapter-info { flex: 1; }
+.chapter-title { font-size: 22px; font-weight: 700; color: #F5F0E8; margin-bottom: 2px; }
+.chapter-sanskrit {
+  font-family: 'Crimson Text', serif; font-size: 18px; font-style: italic;
+  color: #C8BFA8; margin-bottom: 4px;
 }
-.insight-dot { width: 10px; height: 10px; border-radius: 50%; background: #6ad7ff; }
-.insight-label { font-size: 16px; font-weight: 700; color: #6ad7ff; letter-spacing: 1.5px; }
-.insight-text { font-size: 22px; color: #c2d9ff; line-height: 1.5; }
-/* Actions */
-.actions {
-  display: flex; gap: 16px; margin: 32px 60px; flex-wrap: wrap;
+.chapter-verses { font-size: 16px; color: #7A7060; }
+.chapter-bookmark { font-size: 22px; color: #7A7060; flex-shrink: 0; }
+.chapter-bookmark.saved { color: #D4A017; }
+/* Tab bar */
+.tab-bar {
+  height: 100px; background: rgba(8,11,26,0.95);
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 0 32px; border-top: 1px solid rgba(212,160,23,0.06);
 }
-.action-btn {
-  padding: 18px 32px; border-radius: 16px; font-size: 20px; font-weight: 600;
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-  color: #e8edf5; display: flex; align-items: center; gap: 10px;
-}
-.action-btn.active {
-  background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(255,215,0,0.1));
-  border-color: rgba(255,183,71,0.3); color: #FFD700;
-}
-/* Navigation */
-.nav {
-  margin-top: auto; padding: 24px 60px;
-  display: flex; justify-content: space-between; align-items: center;
-}
-.nav-btn {
-  padding: 18px 36px; border-radius: 16px; font-size: 20px; font-weight: 600;
-  background: rgba(255,255,255,0.06); color: #a0a0a0;
-}
-.nav-progress { font-size: 20px; color: #a0a0a0; font-weight: 600; }
-.bottom-pad { height: 40px; }
+.tab { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.tab-icon { font-size: 28px; color: #7A7060; }
+.tab-icon.active { color: #D4A017; }
+.tab-dot { width: 4px; height: 4px; border-radius: 50%; }
+.tab-dot.active { background: #FFD700; box-shadow: 0 0 8px rgba(255,215,0,0.4); }
+.tab-label { font-size: 14px; color: #7A7060; font-weight: 500; }
+.tab-label.active { color: #D4A017; }
 </style>
 </head>
 <body>
 <div class="screen">
-  <div class="caption">
-    <div class="caption-title">Bhagavad Gita — The Ultimate Life Manual</div>
-    <div class="caption-sub">All 700 verses with KIAAN-powered insights</div>
+  <div class="aura"></div>
+  <div class="header">
+    <div class="header-title">Bhagavad Gita</div>
+    <div class="header-sub">700 verses • 18 chapters • KIAAN-powered insights</div>
   </div>
-  <div class="verse-card">
-    <div class="verse-glow"></div>
-    <div class="verse-chapter">Chapter 2 — Sankhya Yoga</div>
-    <div class="verse-number">Verse 2.47</div>
-    <div class="sanskrit">कर्मण्येवाधिकारस्ते मा फलेषु कदाचन।<br>मा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि॥</div>
-    <div class="transliteration">karmaṇy-evādhikāras te mā phaleṣhu kadāchana<br>mā karma-phala-hetur bhūr mā te saṅgo 'stv akarmaṇi</div>
-    <div class="translation">You have a right to perform your prescribed duties, but you are not entitled to the fruits of your actions. Never consider yourself to be the cause of the results, and never be attached to inaction.</div>
+  <div class="search">🔍  Search verses, chapters, or topics...</div>
+  <div class="votd">
+    <div class="votd-bar"></div>
+    <div class="votd-label">✨ Verse of the Day</div>
+    <div class="votd-sanskrit">कर्मण्येवाधिकारस्ते मा फलेषु कदाचन</div>
+    <div class="votd-translation">"You have a right to perform your duties, but you are not entitled to the fruits of your actions."</div>
+    <div class="votd-ref">— Bhagavad Gita 2.47</div>
   </div>
-  <div class="insight-card">
-    <div class="insight-header">
-      <div class="insight-dot"></div>
-      <div class="insight-label">KIAAN INSIGHT</div>
+  <div class="chapters">
+    <div class="chapter-card">
+      <div class="chapter-num">1</div>
+      <div class="chapter-info">
+        <div class="chapter-title">Arjuna's Dilemma</div>
+        <div class="chapter-sanskrit">अर्जुनविषादयोग</div>
+        <div class="chapter-verses">47 verses</div>
+      </div>
+      <div class="chapter-bookmark saved">🔖</div>
     </div>
-    <div class="insight-text">This verse is the foundation of Karma Yoga. Focus on your effort, not the outcome. When you detach from results, anxiety dissolves and your work becomes worship.</div>
+    <div class="chapter-card">
+      <div class="chapter-num">2</div>
+      <div class="chapter-info">
+        <div class="chapter-title">Transcendental Knowledge</div>
+        <div class="chapter-sanskrit">सांख्ययोग</div>
+        <div class="chapter-verses">72 verses</div>
+      </div>
+      <div class="chapter-bookmark saved">🔖</div>
+    </div>
+    <div class="chapter-card">
+      <div class="chapter-num">3</div>
+      <div class="chapter-info">
+        <div class="chapter-title">Path of Action</div>
+        <div class="chapter-sanskrit">कर्मयोग</div>
+        <div class="chapter-verses">43 verses</div>
+      </div>
+      <div class="chapter-bookmark">🔖</div>
+    </div>
+    <div class="chapter-card">
+      <div class="chapter-num">4</div>
+      <div class="chapter-info">
+        <div class="chapter-title">Path of Knowledge</div>
+        <div class="chapter-sanskrit">ज्ञानकर्मसंन्यासयोग</div>
+        <div class="chapter-verses">42 verses</div>
+      </div>
+      <div class="chapter-bookmark">🔖</div>
+    </div>
+    <div class="chapter-card">
+      <div class="chapter-num">5</div>
+      <div class="chapter-info">
+        <div class="chapter-title">Path of Renunciation</div>
+        <div class="chapter-sanskrit">कर्मसंन्यासयोग</div>
+        <div class="chapter-verses">29 verses</div>
+      </div>
+      <div class="chapter-bookmark">🔖</div>
+    </div>
+    <div class="chapter-card">
+      <div class="chapter-num">6</div>
+      <div class="chapter-info">
+        <div class="chapter-title">Path of Meditation</div>
+        <div class="chapter-sanskrit">ध्यानयोग</div>
+        <div class="chapter-verses">47 verses</div>
+      </div>
+      <div class="chapter-bookmark">🔖</div>
+    </div>
   </div>
-  <div class="actions">
-    <div class="action-btn active">🔖 Bookmarked</div>
-    <div class="action-btn">🔊 Listen</div>
-    <div class="action-btn">📤 Share</div>
+  <div class="tab-bar">
+    <div class="tab"><div class="tab-icon">🏠</div><div class="tab-dot"></div><div class="tab-label">Home</div></div>
+    <div class="tab"><div class="tab-icon">✦</div><div class="tab-dot"></div><div class="tab-label">Sakha</div></div>
+    <div class="tab"><div class="tab-icon">🧭</div><div class="tab-dot"></div><div class="tab-label">Journey</div></div>
+    <div class="tab"><div class="tab-icon active">📖</div><div class="tab-dot active"></div><div class="tab-label active">Gita</div></div>
+    <div class="tab"><div class="tab-icon">👤</div><div class="tab-dot"></div><div class="tab-label">Profile</div></div>
   </div>
-  <div class="nav">
-    <div class="nav-btn">← Verse 2.46</div>
-    <div class="nav-progress">47 / 700</div>
-    <div class="nav-btn">Verse 2.48 →</div>
-  </div>
-  <div class="bottom-pad"></div>
 </div>
 </body>
 </html>

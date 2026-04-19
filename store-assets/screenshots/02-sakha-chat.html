@@ -3,132 +3,129 @@
 <head>
 <meta charset="utf-8">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:wght@300;400;600&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { width: 1080px; height: 1920px; overflow: hidden; font-family: 'Inter', sans-serif; }
+body { width: 1080px; height: 1920px; overflow: hidden; font-family: 'Outfit', sans-serif; }
 .screen {
   width: 1080px; height: 1920px; position: relative;
-  background: #050505;
+  background: linear-gradient(180deg, #080B1A 0%, #0D1229 50%, #131A3D 100%);
   display: flex; flex-direction: column;
 }
-/* Caption area */
-.caption {
-  padding: 100px 80px 50px; text-align: center;
-  background: linear-gradient(180deg, #0B0B0F, #050505);
-}
-.caption-title {
-  font-size: 44px; font-weight: 800; color: #fefefe; margin-bottom: 12px;
-}
-.caption-sub {
-  font-size: 24px; color: #a0a0a0; font-weight: 500;
-}
-/* Chat area */
-.chat {
-  flex: 1; padding: 40px 60px; display: flex; flex-direction: column; gap: 24px;
-  overflow: hidden;
+.aura {
+  position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 400px;
+  background: radial-gradient(ellipse, rgba(212,160,23,0.1) 0%, transparent 70%);
+  border-radius: 50%;
 }
 /* Header */
 .chat-header {
-  display: flex; align-items: center; gap: 20px;
-  padding: 24px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
-  margin-bottom: 16px;
+  padding: 80px 48px 24px; position: relative; z-index: 2;
+  border-bottom: 1px solid rgba(212,160,23,0.06);
 }
+.header-row { display: flex; align-items: center; gap: 20px; }
 .avatar {
-  width: 64px; height: 64px; border-radius: 50%;
-  background: linear-gradient(135deg, #FF6B35, #FFD700);
+  width: 56px; height: 56px; border-radius: 28px;
+  background: linear-gradient(135deg, #D4A017, #F0C040);
+  border: 2px solid rgba(255,215,0,0.4);
+  box-shadow: 0 0 16px rgba(255,215,0,0.2);
   display: flex; align-items: center; justify-content: center;
-  font-size: 28px; color: #0B0B0F; font-weight: 800;
+  font-size: 24px; font-weight: 800; color: #080B1A;
 }
-.header-text {}
-.header-name { font-size: 28px; font-weight: 700; color: #fefefe; }
-.header-status { font-size: 18px; color: #35c48d; font-weight: 500; }
-/* Messages */
-.msg {
-  max-width: 75%; padding: 28px 32px; border-radius: 24px;
-  font-size: 24px; line-height: 1.5;
+.header-info {}
+.header-name {
+  font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 400; color: #F5F0E8;
 }
+.header-status { font-size: 17px; color: #3D8B5E; font-weight: 500; }
+/* Chat */
+.chat { flex: 1; padding: 32px 48px; display: flex; flex-direction: column; gap: 24px; overflow: hidden; position: relative; z-index: 2; }
+.msg { max-width: 78%; padding: 24px 28px; font-size: 24px; line-height: 1.5; }
 .msg-user {
-  align-self: flex-end; background: linear-gradient(135deg, #1E40AF, #3B82F6);
-  color: #fefefe; border-bottom-right-radius: 8px;
-  margin-left: auto;
+  align-self: flex-end; margin-left: auto;
+  background: linear-gradient(135deg, rgba(212,160,23,0.3), rgba(212,160,23,0.08));
+  border: 1px solid rgba(212,160,23,0.16);
+  border-radius: 16px 16px 4px 16px; color: #F5F0E8;
 }
 .msg-sakha {
-  align-self: flex-start; background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08); color: #e8edf5;
-  border-bottom-left-radius: 8px;
+  align-self: flex-start;
+  background: #131A3D; border: 1px solid rgba(212,160,23,0.06);
+  border-radius: 16px 16px 16px 4px; color: #F5F0E8;
 }
 .msg-verse {
-  align-self: flex-start; max-width: 80%;
-  background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(255,215,0,0.08));
-  border: 1px solid rgba(255,183,71,0.2); border-radius: 24px;
-  padding: 28px 32px; border-bottom-left-radius: 8px;
+  align-self: flex-start; max-width: 82%;
+  background: #0D1229; border-radius: 16px 16px 16px 4px;
+  border: 1px solid rgba(212,160,23,0.12); padding: 28px;
+  position: relative; overflow: hidden;
 }
+.verse-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #D4A017, #F0C040, transparent); }
 .verse-sanskrit {
   font-family: 'Crimson Text', serif; font-size: 26px; font-style: italic;
-  color: #FFD700; margin-bottom: 12px; line-height: 1.5;
+  color: #F0C040; margin-bottom: 16px; line-height: 1.5;
 }
-.verse-translation {
-  font-size: 22px; color: #e8edf5; line-height: 1.5; margin-bottom: 8px;
-}
-.verse-ref {
-  font-size: 18px; color: #F7931E; font-weight: 600;
-}
+.verse-translation { font-size: 22px; color: #C8BFA8; line-height: 1.5; margin-bottom: 10px; }
+.verse-ref { font-size: 18px; color: #D4A017; font-weight: 600; }
 .msg-insight {
-  font-size: 22px; color: #a0a0a0; line-height: 1.5;
-  align-self: flex-start; max-width: 80%;
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 24px; padding: 28px 32px; border-bottom-left-radius: 8px;
+  align-self: flex-start; max-width: 82%;
+  background: #0D1229; border-radius: 16px 16px 16px 4px;
+  border: 1px solid rgba(212,160,23,0.08); padding: 28px;
 }
-.insight-label {
-  font-size: 16px; font-weight: 700; color: #6ad7ff;
-  letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px;
+.insight-label { font-size: 15px; font-weight: 700; color: #D4A017; letter-spacing: 1.5px; margin-bottom: 10px; }
+.insight-text { font-size: 22px; color: #C8BFA8; line-height: 1.5; }
+.msg-sakha-action {
+  align-self: flex-start;
+  padding: 18px 28px; border-radius: 16px;
+  background: rgba(212,160,23,0.08); border: 1px solid rgba(212,160,23,0.16);
+  color: #D4A017; font-size: 20px; font-weight: 600;
+  display: flex; align-items: center; gap: 10px;
 }
 /* Input bar */
 .input-bar {
-  padding: 24px 60px 60px; display: flex; gap: 16px; align-items: center;
+  padding: 20px 48px 60px; display: flex; gap: 16px; align-items: center;
+  background: rgba(8,11,26,0.95); border-top: 1px solid rgba(212,160,23,0.06);
+  position: relative; z-index: 2;
 }
 .input-field {
-  flex: 1; height: 72px; border-radius: 36px;
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-  padding: 0 32px; font-size: 22px; color: #a0a0a0;
-  display: flex; align-items: center;
+  flex: 1; height: 64px; border-radius: 24px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  padding: 0 28px; font-size: 20px; color: #7A7060;
+  display: flex; align-items: center; font-family: 'Outfit', sans-serif;
 }
-.mic-btn {
-  width: 72px; height: 72px; border-radius: 50%;
-  background: linear-gradient(135deg, #FF6B35, #FFD700);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 28px;
+.send-btn {
+  width: 56px; height: 56px; border-radius: 28px;
+  background: #D4A017; display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: #080B1A; box-shadow: 0 0 12px rgba(212,160,23,0.3);
 }
 </style>
 </head>
 <body>
 <div class="screen">
-  <div class="caption">
-    <div class="caption-title">Talk to Sakha</div>
-    <div class="caption-sub">Your always-available spiritual friend</div>
-  </div>
-  <div class="chat">
-    <div class="chat-header">
+  <div class="aura"></div>
+  <div class="chat-header">
+    <div class="header-row">
       <div class="avatar">S</div>
-      <div class="header-text">
-        <div class="header-name">Sakha AI</div>
-        <div class="header-status">Online — ready to listen</div>
+      <div class="header-info">
+        <div class="header-name">Sakha</div>
+        <div class="header-status">Your spiritual companion</div>
       </div>
     </div>
+  </div>
+  <div class="chat">
     <div class="msg msg-user">I feel overwhelmed with anger at work. I can't control it anymore.</div>
+    <div class="msg msg-sakha">I hear you, and I want you to know — this anger is not your enemy. It is a signal. Let me share what Krishna told Arjuna about this very struggle...</div>
     <div class="msg-verse">
+      <div class="verse-bar"></div>
       <div class="verse-sanskrit">क्रोधाद्भवति सम्मोहः सम्मोहात्स्मृतिविभ्रमः</div>
       <div class="verse-translation">"From anger comes delusion; from delusion, the wandering of memory..."</div>
       <div class="verse-ref">— Bhagavad Gita 2.63</div>
     </div>
     <div class="msg-insight">
-      <div class="insight-label">KIAAN Insight</div>
-      Krishna tells Arjuna that anger clouds judgment. The first step isn't to suppress it — it's to observe it. Let's try a 2-minute breathing exercise to create space between your feeling and your reaction.
+      <div class="insight-label">KIAAN INSIGHT</div>
+      <div class="insight-text">Krishna teaches that anger clouds judgment. The first step isn't to suppress it — it's to observe it without reacting. Shall we try a 2-minute breathing exercise?</div>
     </div>
+    <div class="msg-sakha-action">🧘 Start Breathing Exercise — 2 min</div>
   </div>
   <div class="input-bar">
     <div class="input-field">Ask Sakha anything...</div>
-    <div class="mic-btn">🎤</div>
+    <div class="send-btn">↑</div>
   </div>
 </div>
 </body>

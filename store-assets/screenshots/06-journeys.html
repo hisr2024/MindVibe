@@ -3,106 +3,170 @@
 <head>
 <meta charset="utf-8">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:wght@300;400;600&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { width: 1080px; height: 1920px; overflow: hidden; font-family: 'Inter', sans-serif; }
+body { width: 1080px; height: 1920px; overflow: hidden; font-family: 'Outfit', sans-serif; }
 .screen {
-  width: 1080px; height: 1920px; background: #050505;
-  display: flex; flex-direction: column; padding: 100px 60px 60px;
+  width: 1080px; height: 1920px;
+  background: linear-gradient(180deg, #080B1A 0%, #0D1229 50%, #131A3D 100%);
+  display: flex; flex-direction: column; padding: 80px 48px 120px; position: relative;
 }
-.caption { text-align: center; margin-bottom: 40px; }
-.caption-title { font-size: 44px; font-weight: 800; color: #fefefe; margin-bottom: 12px; }
-.caption-sub { font-size: 24px; color: #a0a0a0; }
-/* Active journey */
-.active-journey {
-  padding: 40px; border-radius: 28px; margin-bottom: 32px;
-  background: linear-gradient(135deg, rgba(15,181,201,0.1), rgba(67,211,232,0.05));
-  border: 1px solid rgba(15,181,201,0.2); position: relative; overflow: hidden;
-}
-.aj-glow {
-  position: absolute; top: -50px; right: -50px; width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(15,181,201,0.15), transparent);
+.aura {
+  position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 400px;
+  background: radial-gradient(ellipse, rgba(212,160,23,0.1) 0%, transparent 70%);
   border-radius: 50%;
 }
-.aj-label { font-size: 16px; font-weight: 700; color: #43D3E8; letter-spacing: 2px; margin-bottom: 12px; position: relative; }
-.aj-title { font-size: 36px; font-weight: 800; color: #fefefe; margin-bottom: 8px; position: relative; }
-.aj-desc { font-size: 20px; color: #a0a0a0; margin-bottom: 24px; position: relative; }
-.progress-bar { height: 12px; border-radius: 6px; background: rgba(255,255,255,0.08); margin-bottom: 12px; position: relative; }
-.progress-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #0FB5C9, #43D3E8); width: 57%; }
-.progress-text { font-size: 18px; color: #43D3E8; font-weight: 600; position: relative; }
-/* Journey cards */
-.journeys { display: flex; flex-direction: column; gap: 20px; }
-.journey-card {
-  display: flex; gap: 24px; padding: 32px; border-radius: 24px;
-  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+/* Header */
+.header { position: relative; z-index: 2; margin-bottom: 32px; text-align: center; }
+.header-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 44px; font-weight: 400;
+  color: #FFD700; margin-bottom: 8px;
 }
-.j-icon {
-  width: 80px; height: 80px; border-radius: 20px; flex-shrink: 0;
+.header-sub { font-size: 18px; color: #7A7060; }
+/* Progress hero */
+.progress-hero {
   display: flex; align-items: center; justify-content: center;
-  font-size: 36px;
+  margin-bottom: 32px; position: relative; z-index: 2;
 }
-.ji-fire { background: linear-gradient(135deg, rgba(255,107,53,0.2), rgba(255,215,0,0.1)); }
-.ji-calm { background: linear-gradient(135deg, rgba(15,181,201,0.2), rgba(67,211,232,0.1)); }
-.ji-heart { background: linear-gradient(135deg, rgba(255,107,157,0.2), rgba(199,125,255,0.1)); }
-.ji-focus { background: linear-gradient(135deg, rgba(30,64,175,0.2), rgba(59,130,246,0.1)); }
-.ji-star { background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(247,147,30,0.1)); }
-.j-content { flex: 1; }
-.j-title { font-size: 26px; font-weight: 700; color: #fefefe; margin-bottom: 6px; }
-.j-desc { font-size: 19px; color: #a0a0a0; margin-bottom: 10px; line-height: 1.4; }
-.j-meta { display: flex; gap: 20px; }
-.j-tag {
-  font-size: 16px; font-weight: 600; padding: 6px 14px; border-radius: 10px;
-  background: rgba(255,255,255,0.05); color: #a0a0a0;
+.mandala {
+  width: 100px; height: 100px; border-radius: 50%;
+  background: conic-gradient(from 0deg, #D4A017 0deg, #D4A017 108deg, rgba(212,160,23,0.08) 108deg);
+  display: flex; align-items: center; justify-content: center;
+  margin-right: 20px;
 }
+.mandala-inner {
+  width: 72px; height: 72px; border-radius: 50%; background: #0D1229;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 800; color: #D4A017;
+}
+.progress-text { font-size: 20px; color: #C8BFA8; }
+/* Tabs */
+.tabs { display: flex; gap: 12px; margin-bottom: 24px; position: relative; z-index: 2; }
+.tab-pill {
+  padding: 12px 28px; border-radius: 24px; font-size: 18px; font-weight: 600;
+}
+.tab-active { background: #FFD700; color: #080B1A; }
+.tab-inactive { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); }
+/* Enemy chips */
+.enemies { display: flex; gap: 12px; margin-bottom: 28px; overflow: hidden; position: relative; z-index: 2; }
+.enemy-chip {
+  padding: 10px 20px; border-radius: 16px; font-size: 17px; font-weight: 600;
+  white-space: nowrap; display: flex; align-items: center; gap: 8px;
+}
+/* Journey cards */
+.journeys { display: flex; flex-direction: column; gap: 20px; position: relative; z-index: 2; }
+.j-card {
+  padding: 32px; border-radius: 16px;
+  background: #0D1229; border: 1px solid rgba(212,160,23,0.08);
+  position: relative; overflow: hidden;
+}
+.j-accent { position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+.j-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.j-enemy {
+  padding: 6px 14px; border-radius: 10px; font-size: 15px; font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+}
+.j-duration {
+  padding: 6px 14px; border-radius: 10px; font-size: 15px; font-weight: 500;
+  background: rgba(255,255,255,0.05); color: #7A7060;
+  display: flex; align-items: center; gap: 6px;
+}
+.j-title { font-size: 28px; font-weight: 700; color: #F5F0E8; margin-bottom: 6px; }
+.j-desc { font-size: 18px; color: #C8BFA8; margin-bottom: 16px; line-height: 1.4; }
+.j-footer { display: flex; justify-content: space-between; align-items: center; }
+.j-difficulty { padding: 6px 14px; border-radius: 10px; font-size: 15px; font-weight: 600; }
+.j-btn {
+  padding: 14px 32px; border-radius: 16px;
+  background: linear-gradient(135deg, #D4A017, #F0C040);
+  color: #080B1A; font-size: 18px; font-weight: 700;
+  box-shadow: 0 0 12px rgba(212,160,23,0.2);
+}
+/* Tab bar */
+.tab-bar {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 100px;
+  background: rgba(8,11,26,0.95);
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 0 32px; border-top: 1px solid rgba(212,160,23,0.06);
+}
+.tab-nav { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.tab-nav-icon { font-size: 28px; color: #7A7060; }
+.tab-nav-icon.active { color: #D4A017; }
+.tab-nav-dot { width: 4px; height: 4px; border-radius: 50%; }
+.tab-nav-dot.active { background: #FFD700; box-shadow: 0 0 8px rgba(255,215,0,0.4); }
+.tab-nav-label { font-size: 14px; color: #7A7060; font-weight: 500; }
+.tab-nav-label.active { color: #D4A017; }
 </style>
 </head>
 <body>
 <div class="screen">
-  <div class="caption">
-    <div class="caption-title">Spiritual Journeys</div>
-    <div class="caption-sub">Refine life's complexities — one day at a time</div>
+  <div class="aura"></div>
+  <div class="header">
+    <div class="header-title">Sacred Journeys</div>
+    <div class="header-sub">Transform your inner enemies through Vedic wisdom</div>
   </div>
-  <div class="active-journey">
-    <div class="aj-glow"></div>
-    <div class="aj-label">ACTIVE JOURNEY</div>
-    <div class="aj-title">Transform Anger — Krodha Mastery</div>
-    <div class="aj-desc">14-day path to understanding and mastering anger through Gita wisdom</div>
-    <div class="progress-bar"><div class="progress-fill"></div></div>
-    <div class="progress-text">Day 8 of 14 — 57% complete</div>
+  <div class="progress-hero">
+    <div class="mandala"><div class="mandala-inner">30%</div></div>
+    <div class="progress-text">30% mastered — keep walking the path</div>
+  </div>
+  <div class="tabs">
+    <div class="tab-pill tab-active">Discover</div>
+    <div class="tab-pill tab-inactive">Active</div>
+    <div class="tab-pill tab-inactive">Completed</div>
+  </div>
+  <div class="enemies">
+    <div class="enemy-chip" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444">🔥 क्रोध Krodha</div>
+    <div class="enemy-chip" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);color:#3b82f6">😰 भय Bhaya</div>
+    <div class="enemy-chip" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#f59e0b">💛 काम Kama</div>
+    <div class="enemy-chip" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);color:#8b5cf6">🌀 मोह Moha</div>
   </div>
   <div class="journeys">
-    <div class="journey-card">
-      <div class="j-icon ji-calm">🧘</div>
-      <div class="j-content">
-        <div class="j-title">Inner Stillness</div>
-        <div class="j-desc">Build unshakeable calm through daily meditation practice</div>
-        <div class="j-meta"><div class="j-tag">21 Days</div><div class="j-tag">Beginner</div></div>
+    <div class="j-card">
+      <div class="j-accent" style="background:linear-gradient(90deg,#ef4444,transparent)"></div>
+      <div class="j-header">
+        <div class="j-enemy" style="background:rgba(239,68,68,0.1);color:#ef4444">🔥 Krodha</div>
+        <div class="j-duration">🕐 14 Days</div>
+      </div>
+      <div class="j-title">Transform Anger</div>
+      <div class="j-desc">Master the fire within through Krishna's wisdom on emotional control</div>
+      <div class="j-footer">
+        <div class="j-difficulty" style="background:rgba(245,158,11,0.1);color:#f59e0b">Intermediate</div>
+        <div class="j-btn">Begin Journey</div>
       </div>
     </div>
-    <div class="journey-card">
-      <div class="j-icon ji-heart">💜</div>
-      <div class="j-content">
-        <div class="j-title">Forgiveness Path</div>
-        <div class="j-desc">Release resentment and find freedom through compassion</div>
-        <div class="j-meta"><div class="j-tag">14 Days</div><div class="j-tag">Intermediate</div></div>
+    <div class="j-card">
+      <div class="j-accent" style="background:linear-gradient(90deg,#3b82f6,transparent)"></div>
+      <div class="j-header">
+        <div class="j-enemy" style="background:rgba(59,130,246,0.1);color:#3b82f6">😰 Bhaya</div>
+        <div class="j-duration">🕐 21 Days</div>
+      </div>
+      <div class="j-title">Conquer Fear</div>
+      <div class="j-desc">Build fearlessness through Arjuna's journey from doubt to courage</div>
+      <div class="j-footer">
+        <div class="j-difficulty" style="background:rgba(34,197,94,0.1);color:#22c55e">Beginner</div>
+        <div class="j-btn">Begin Journey</div>
       </div>
     </div>
-    <div class="journey-card">
-      <div class="j-icon ji-focus">🎯</div>
-      <div class="j-content">
-        <div class="j-title">Discover Your Dharma</div>
-        <div class="j-desc">Find your true purpose through Krishna's guidance</div>
-        <div class="j-meta"><div class="j-tag">28 Days</div><div class="j-tag">Deep Dive</div></div>
+    <div class="j-card">
+      <div class="j-accent" style="background:linear-gradient(90deg,#8b5cf6,transparent)"></div>
+      <div class="j-header">
+        <div class="j-enemy" style="background:rgba(139,92,246,0.1);color:#8b5cf6">🌀 Moha</div>
+        <div class="j-duration">🕐 28 Days</div>
+      </div>
+      <div class="j-title">Break Delusion</div>
+      <div class="j-desc">See clearly through the fog of attachment and false identity</div>
+      <div class="j-footer">
+        <div class="j-difficulty" style="background:rgba(239,68,68,0.1);color:#ef4444">Advanced</div>
+        <div class="j-btn">Begin Journey</div>
       </div>
     </div>
-    <div class="journey-card">
-      <div class="j-icon ji-star">⭐</div>
-      <div class="j-content">
-        <div class="j-title">Detachment & Freedom</div>
-        <div class="j-desc">Master Vairagya — let go of what binds you</div>
-        <div class="j-meta"><div class="j-tag">14 Days</div><div class="j-tag">Advanced</div></div>
-      </div>
-    </div>
+  </div>
+  <div class="tab-bar">
+    <div class="tab-nav"><div class="tab-nav-icon">🏠</div><div class="tab-nav-dot"></div><div class="tab-nav-label">Home</div></div>
+    <div class="tab-nav"><div class="tab-nav-icon">✦</div><div class="tab-nav-dot"></div><div class="tab-nav-label">Sakha</div></div>
+    <div class="tab-nav"><div class="tab-nav-icon active">🧭</div><div class="tab-nav-dot active"></div><div class="tab-nav-label active">Journey</div></div>
+    <div class="tab-nav"><div class="tab-nav-icon">📖</div><div class="tab-nav-dot"></div><div class="tab-nav-label">Gita</div></div>
+    <div class="tab-nav"><div class="tab-nav-icon">👤</div><div class="tab-nav-dot"></div><div class="tab-nav-label">Profile</div></div>
   </div>
 </div>
 </body>
