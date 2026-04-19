@@ -469,7 +469,11 @@ export function useSendChatMessage(): UseMutationResult<ChatResult, Error, { mes
 // Emotional Reset
 // ---------------------------------------------------------------------------
 
-/** Fetch step-specific data for a given step in an emotional reset session. */
+/** Fetch step-specific data for a given step in an emotional reset session.
+ *  NOTE: backend/routes/emotional_reset.py exposes only POST /step and
+ *  GET /session/{session_id} — there is no GET /step/{n}. Disabled until
+ *  the backend ships a read-only per-step endpoint; screens should render
+ *  step content from the last POST /step response instead. */
 export function useEmotionalResetStepData(sessionId: string, stepNumber: number): UseQueryResult<EmotionalResetStepResponse> {
   return useQuery({
     queryKey: ['emotionalReset', 'step', sessionId, stepNumber] as const,
@@ -477,7 +481,7 @@ export function useEmotionalResetStepData(sessionId: string, stepNumber: number)
       const { data } = await api.emotionalReset.getStep(sessionId, stepNumber);
       return data as EmotionalResetStepResponse;
     },
-    enabled: sessionId.length > 0 && stepNumber > 0,
+    enabled: false,
     staleTime: 1000 * 60 * 5,
   });
 }
@@ -523,13 +527,19 @@ export function useCommunityCircles(): UseQueryResult<CommunityCircle[]> {
   });
 }
 
+// NOTE: backend has no global community feed — posts are scoped to a
+// circle (GET /api/community/circles/{id}/posts). When no circleId is
+// provided, the query is disabled so we don't hit a 404 on every
+// Community-tab render; the UI should show an empty "pick a circle"
+// state. Once a global feed endpoint ships, remove the enabled gate.
 export function useCommunityPosts(circleId?: string): UseQueryResult<CommunityPost[]> {
   return useQuery({
     queryKey: queryKeys.communityPosts(circleId),
     queryFn: async () => {
-      const { data } = await api.community.posts(circleId);
+      const { data } = await api.community.posts(circleId ?? '');
       return data as CommunityPost[];
     },
+    enabled: !!circleId && circleId.length > 0,
   });
 }
 
@@ -574,33 +584,70 @@ export function useReactToPost(): UseMutationResult<void, Error, { postId: strin
 // Wisdom Rooms
 // ---------------------------------------------------------------------------
 
+// Backend (chat_rooms.py) returns { id, slug, name, theme, active_count }.
+// Map it into the WisdomRoom shape the UI renders. `isActive` is true
+// whenever at least one participant is present — the raw rooms table
+// has no explicit "active" flag.
 export function useWisdomRooms(): UseQueryResult<WisdomRoom[]> {
   return useQuery({
     queryKey: queryKeys.wisdomRooms,
     queryFn: async () => {
       const { data } = await api.wisdomRooms.list();
-      return data as WisdomRoom[];
+      const raw = data as Array<{
+        id: string;
+        slug?: string;
+        name?: string;
+        theme?: string;
+        active_count?: number;
+      }>;
+      return raw.map((room): WisdomRoom => ({
+        id: room.id,
+        topic: room.name ?? room.slug ?? 'Wisdom Room',
+        hostName: 'KIAAN',
+        description: room.theme ?? '',
+        participantCount: room.active_count ?? 0,
+        isActive: (room.active_count ?? 0) > 0,
+      }));
     },
   });
 }
 
+// Backend returns messages with fields { id, user_id, content, created_at, ... }.
+// Normalise into the WisdomRoomMessage shape the UI expects.
 export function useWisdomRoomMessages(roomId: string): UseQueryResult<WisdomRoomMessage[]> {
   return useQuery({
     queryKey: queryKeys.wisdomRoomMessages(roomId),
     queryFn: async () => {
       const { data } = await api.wisdomRooms.messages(roomId);
-      return data as WisdomRoomMessage[];
+      const raw = data as Array<{
+        id: string;
+        user_id?: string;
+        sender_name?: string;
+        content: string;
+        created_at?: string;
+      }>;
+      return raw.map((m): WisdomRoomMessage => ({
+        id: m.id,
+        senderId: m.user_id ?? '',
+        senderName: m.sender_name ?? 'Seeker',
+        content: m.content,
+        timestamp: m.created_at ?? new Date().toISOString(),
+      }));
     },
     enabled: roomId.length > 0,
     refetchInterval: 5000,
   });
 }
 
+// NOTE: the backend sends room messages over a WebSocket
+// (`/api/rooms/{id}/ws`) — there is no REST POST endpoint. This
+// mutation is a no-op stub so the chat input stays wired; once the
+// WS bridge lands the real call can replace the stub.
 export function useSendWisdomRoomMessage(): UseMutationResult<void, Error, { roomId: string; content: string }> {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ roomId, content }) => {
-      await api.wisdomRooms.sendMessage(roomId, content);
+    mutationFn: async (_vars) => {
+      /* no-op until WS client is wired */
     },
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.wisdomRoomMessages(variables.roomId) });
@@ -695,6 +742,12 @@ export function useRelationshipGuide(): UseMutationResult<RelationshipGuidance, 
 // Karma Footprint
 // ---------------------------------------------------------------------------
 
+// NOTE: backend/routes/karma_footprint.py exposes only POST /analyze
+// (requires { actions: string[] }) and GET /health. The mobile hook
+// is a GET with no body and expects a completely different response
+// shape ({ total_karma, positive_actions, ripple_effects, ... }).
+// Disabled until the backend adds GET /analyze that returns the
+// dashboard shape the mobile UI renders.
 export function useKarmaFootprint(): UseQueryResult<KarmaFootprintResult> {
   return useQuery({
     queryKey: queryKeys.karmaFootprint,
@@ -703,6 +756,7 @@ export function useKarmaFootprint(): UseQueryResult<KarmaFootprintResult> {
       return data as KarmaFootprintResult;
     },
     staleTime: 1000 * 60 * 10,
+    enabled: false,
   });
 }
 
@@ -710,20 +764,40 @@ export function useKarmaFootprint(): UseQueryResult<KarmaFootprintResult> {
 // Karma Reset
 // ---------------------------------------------------------------------------
 
+// NOTE: backend/routes/karma_reset.py currently exposes only
+// POST /generate and GET /health — the start/step/complete workflow
+// endpoints below do not exist. To avoid breaking the user's ritual
+// flow with 404s, the mutations return a client-side stub session so
+// the Acknowledgment → Understanding → Renewal phases can progress.
+// State is persisted in karmaResetStore on the mobile side.
+// TODO(backend): implement the four-phase workflow endpoints, then
+// re-enable real network calls here.
+function _generateStubSessionId(): string {
+  return `local-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export function useStartKarmaReset(): UseMutationResult<KarmaResetSession, Error, string> {
   return useMutation({
     mutationFn: async (pattern: string) => {
-      const { data } = await api.karmaReset.start(pattern);
-      return data as KarmaResetSession;
+      return {
+        session_id: _generateStubSessionId(),
+        pattern,
+        phase: 1,
+        status: 'active',
+        created_at: new Date().toISOString(),
+      } as unknown as KarmaResetSession;
     },
   });
 }
 
 export function useKarmaResetStep(): UseMutationResult<KarmaResetSession, Error, { sessionId: string; phase: number; data: Record<string, unknown> }> {
   return useMutation({
-    mutationFn: async ({ sessionId, phase, data: stepData }) => {
-      const { data } = await api.karmaReset.step(sessionId, phase, stepData);
-      return data as KarmaResetSession;
+    mutationFn: async ({ sessionId, phase }) => {
+      return {
+        session_id: sessionId,
+        phase,
+        status: 'active',
+      } as unknown as KarmaResetSession;
     },
   });
 }
@@ -731,8 +805,12 @@ export function useKarmaResetStep(): UseMutationResult<KarmaResetSession, Error,
 export function useCompleteKarmaReset(): UseMutationResult<KarmaResetSession, Error, string> {
   return useMutation({
     mutationFn: async (sessionId: string) => {
-      const { data } = await api.karmaReset.complete(sessionId);
-      return data as KarmaResetSession;
+      return {
+        session_id: sessionId,
+        phase: 4,
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+      } as unknown as KarmaResetSession;
     },
   });
 }
@@ -788,6 +866,14 @@ export function useMeditationTracks(category?: string): UseQueryResult<Meditatio
 // Deep Insights & Analytics
 // ---------------------------------------------------------------------------
 
+// NOTE: the three Deep Insights endpoints below do not exist on the
+// backend. Closest equivalents live at different URLs:
+//   /api/analytics/deep-insights     → /api/analytics/advanced/ai-insights
+//   /api/analytics/guna-balance      → /api/analytics/advanced/wellness-score
+//   /api/analytics/emotional-patterns → /api/kiaan/emotional-patterns/extract
+// Response shapes differ too, so we disable the queries rather than
+// silently returning mismatched data. Re-enable after the backend adds
+// the dedicated routes the mobile client expects.
 export function useDeepInsights(): UseQueryResult<DeepInsightsSummary> {
   return useQuery({
     queryKey: queryKeys.deepInsights,
@@ -796,6 +882,7 @@ export function useDeepInsights(): UseQueryResult<DeepInsightsSummary> {
       return data as DeepInsightsSummary;
     },
     staleTime: 1000 * 60 * 15,
+    enabled: false,
   });
 }
 
@@ -807,6 +894,7 @@ export function useGunaBalance(): UseQueryResult<GunaBalance> {
       return data as GunaBalance;
     },
     staleTime: 1000 * 60 * 15,
+    enabled: false,
   });
 }
 
@@ -818,6 +906,7 @@ export function useEmotionalPatterns(days?: number): UseQueryResult<EmotionalPat
       return data as EmotionalPattern[];
     },
     staleTime: 1000 * 60 * 15,
+    enabled: false,
   });
 }
 
@@ -915,6 +1004,10 @@ export function useDeleteJournal(): UseMutationResult<void, Error, string> {
 // Settings
 // ---------------------------------------------------------------------------
 
+// NOTE: backend has no `/api/profile/settings` endpoint — profile routes
+// only expose GET/POST `/api/profile`. Disabled until the backend ships
+// a settings sub-resource; the Settings screen should persist toggles
+// locally (AsyncStorage) in the meantime so it stops spamming 404s.
 export function useUserSettings(): UseQueryResult<UserSettings> {
   return useQuery({
     queryKey: queryKeys.settings,
@@ -922,15 +1015,18 @@ export function useUserSettings(): UseQueryResult<UserSettings> {
       const { data } = await api.settings.get();
       return data as UserSettings;
     },
+    enabled: false,
   });
 }
 
 export function useUpdateSettings(): UseMutationResult<UserSettings, Error, Record<string, unknown>> {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (settings) => {
-      const { data } = await api.settings.update(settings);
-      return data as UserSettings;
+    mutationFn: async (_settings) => {
+      // Swallow — backend endpoint does not exist yet. Return the input
+      // as-if-persisted so optimistic UI keeps working; the next app
+      // launch just rehydrates from whatever local store the screen uses.
+      return _settings as unknown as UserSettings;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.settings });
