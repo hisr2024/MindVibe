@@ -487,24 +487,24 @@ function navigateToNotification(router: AppRouter, data: NotificationData | unde
   try {
     switch (data.type) {
       case 'daily-verse':
-        router.push('/(tabs)/gita');
+        router.push('/(tabs)/shlokas');
         break;
       case 'journey-reminder':
         if (data.journeyId) {
-          router.push(`/(tabs)/journey/${data.journeyId}` as `/(tabs)/journey/${string}`);
+          router.push(`/journey/${data.journeyId}` as `/journey/${string}`);
         } else {
-          router.push('/(tabs)/journey' as '/(tabs)/journey');
+          router.push('/journey' as '/journey');
         }
         break;
       case 'streak-alert':
-        router.push('/(tabs)/home');
+        router.push('/(tabs)');
         break;
       case 'sakha-message':
-        router.push('/(tabs)/sakha');
+        router.push('/(tabs)/chat');
         break;
       case 'milestone':
         if (data.journeyId) {
-          router.push(`/(tabs)/journey/${data.journeyId}` as `/(tabs)/journey/${string}`);
+          router.push(`/journey/${data.journeyId}` as `/journey/${string}`);
         } else {
           router.push('/wellness/karma');
         }

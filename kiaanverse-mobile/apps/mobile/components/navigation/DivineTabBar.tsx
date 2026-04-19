@@ -1,77 +1,103 @@
 /**
- * DivineTabBar — Custom bottom tab bar for the Kiaanverse mobile app.
+ * DivineTabBar — Kiaanverse bottom tab bar (5 sacred doorways).
  *
- * Direct port of the web `components/navigation/MobileNav.tsx` — five
- * sacred doorways: Home · Journeys · KIAAN (center) · Gita · Profile.
+ * Matches kiaanverse.com reference exactly:
+ *   Home · Chat · Shlokas · Journal · Profile
  *
  * Visual specification:
- * - Height: 72 + safe-area bottom inset.
- * - Background: rgba(5,7,20,0.95) — solid (expo-blur is unreliable on
- *   Android; a semi-opaque navy keeps contrast + perf parity).
- * - Top border: 1 px horizontal gradient (transparent → blue → gold →
- *   blue → transparent) — echoes the web divine-threshold border.
- * - Absolute-positioned at the screen bottom, overflow visible so the
- *   elevated center KIAAN tab can extend above the bar.
- * - Haptic feedback (ImpactFeedbackStyle.Light) on tab switches.
+ * - Dark navy background: rgba(5,7,20,0.97).
+ * - Gold horizontal gradient border line at the top (transparent → gold →
+ *   transparent) — echoes the web divine-threshold border.
+ * - 24 × 24 outline SVG glyphs for each tab.
+ * - Active state: icon tints gold (#D4A017), label fades in in gold, and a
+ *   4 px gold dot appears ABOVE the icon (matches the web marker).
+ * - Inactive state: icon rendered at opacity 0.38, label hidden.
+ * - Sacred-spring micro-interactions (~180 ms bounce + settle).
+ * - Haptic impact on tab switch.
  *
- * Tab routing:
- * - Compatible with expo-router's <Tabs tabBar={...} /> slot; consumes
- *   the `BottomTabBarProps` passed by `@react-navigation/bottom-tabs`.
- * - KIAAN tab is detected by route name 'sakha' (aligns with the
- *   existing app router at app/(tabs)/sakha.tsx).
+ * Drop-in for expo-router:
+ * ```tsx
+ * <Tabs tabBar={(props) => <DivineTabBar {...props} />} />
+ * ```
  */
 
-import React, { useCallback } from 'react';
-import { StyleSheet, View, Platform } from 'react-native';
+import React, { useCallback, useEffect } from 'react';
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
-import { TabIcon, type TabRouteName } from './TabIcon';
-import { CenterKiaanTab } from './CenterKiaanTab';
 import { GopuramIcon } from './icons/GopuramIcon';
-import { ChakraColumnIcon } from './icons/ChakraColumnIcon';
+import { ChatMandalasIcon } from './icons/ChatMandalasIcon';
 import { ManuscriptIcon } from './icons/ManuscriptIcon';
+import { ChakraColumnIcon } from './icons/ChakraColumnIcon';
 import { MeditatorIcon } from './icons/MeditatorIcon';
 
-/** Base height of the tab bar content (safe-area inset is added on top). */
-const TAB_BAR_HEIGHT = 72;
+// ---------------------------------------------------------------------------
+// Palette
+// ---------------------------------------------------------------------------
 
-/** Route names that are eligible to render in the bar, in order. */
-const TAB_ORDER: ReadonlyArray<string> = [
-  'home',
-  'journey',
-  'sakha',
-  'gita',
-  'profile',
-];
+const ACTIVE_COLOR = '#D4A017';
+const INACTIVE_COLOR = 'rgba(240,235,225,0.38)';
+const BACKGROUND_COLOR = 'rgba(5,7,20,0.97)';
 
-/** Non-center tab → icon component mapping. */
-const TAB_ICONS: Record<TabRouteName, React.ComponentType<{ size?: number; color?: string }>> = {
-  home: GopuramIcon,
-  journey: ChakraColumnIcon,
-  gita: ManuscriptIcon,
-  profile: MeditatorIcon,
-};
+// ---------------------------------------------------------------------------
+// Tab definition — single source of truth for label + icon.
+// ---------------------------------------------------------------------------
 
-/** Gradient color stops for the top divine-threshold border.
- *  transparent → peacock → gold → peacock → transparent (matches web). */
+type SacredIcon = React.ComponentType<{ size?: number; color?: string }>;
+
+interface SacredTab {
+  /** Route name as declared in app/(tabs)/_layout.tsx. */
+  readonly name: string;
+  /** Fallback label if the screen's `title` option is missing. */
+  readonly label: string;
+  /** 24 × 24 outline glyph. */
+  readonly Icon: SacredIcon;
+}
+
+const TABS: ReadonlyArray<SacredTab> = [
+  { name: 'index', label: 'Home', Icon: GopuramIcon },
+  { name: 'chat', label: 'Chat', Icon: ChatMandalasIcon },
+  { name: 'shlokas', label: 'Shlokas', Icon: ManuscriptIcon },
+  { name: 'journal', label: 'Journal', Icon: ChakraColumnIcon },
+  { name: 'profile', label: 'Profile', Icon: MeditatorIcon },
+] as const;
+
+/** Gold gradient colour stops for the top border. */
 const TOP_BORDER_COLORS: readonly [string, string, string, string, string] = [
   'transparent',
-  'rgba(27,79,187,0.4)',
-  'rgba(212,160,23,0.6)',
-  'rgba(27,79,187,0.4)',
+  'rgba(212,160,23,0.5)',
+  'rgba(212,160,23,0.8)',
+  'rgba(212,160,23,0.5)',
   'transparent',
 ];
 
-/**
- * Custom tab bar. Drop-in replacement for the default Expo Router bar:
- *
- * ```tsx
- * <Tabs tabBar={(props) => <DivineTabBar {...props} />} ... />
- * ```
- */
+/** Base height of the tab bar content (safe-area inset is added on top). */
+const TAB_BAR_HEIGHT = 64;
+/** Active indicator dot diameter. */
+const DOT_SIZE = 4;
+/** Distance between the dot's bottom edge and the icon's top edge. */
+const DOT_GAP = 4;
+
+// ---------------------------------------------------------------------------
+// DivineTabBar
+// ---------------------------------------------------------------------------
+
 export function DivineTabBar({
   state,
   descriptors,
@@ -101,28 +127,12 @@ export function DivineTabBar({
     [navigation],
   );
 
-  // Filter the incoming route list down to the five sacred tabs and
-  // preserve the canonical order (expo-router can inject hidden routes
-  // which we drop here).
-  const visibleRoutes = state.routes.filter((r) => TAB_ORDER.includes(r.name));
-  const orderedRoutes = [...visibleRoutes].sort(
-    (a, b) => TAB_ORDER.indexOf(a.name) - TAB_ORDER.indexOf(b.name),
-  );
-
   return (
     <View
-      style={[
-        styles.container,
-        {
-          height: TAB_BAR_HEIGHT + insets.bottom,
-          paddingBottom: insets.bottom,
-        },
-      ]}
-      // Overflow visible so the center KIAAN tab can elevate above.
-      pointerEvents="box-none"
+      style={[styles.container, { paddingBottom: insets.bottom }]}
       accessibilityRole="tablist"
     >
-      {/* Divine-threshold top border: 1 px horizontal gradient. */}
+      {/* Gold horizontal gradient line — matches kiaanverse.com. */}
       <LinearGradient
         colors={TOP_BORDER_COLORS as unknown as string[]}
         start={{ x: 0, y: 0.5 }}
@@ -130,43 +140,35 @@ export function DivineTabBar({
         style={styles.topBorder}
       />
 
-      <View style={styles.row} pointerEvents="box-none">
-        {orderedRoutes.map((route) => {
-          const index = state.routes.findIndex((r) => r.key === route.key);
-          const isFocused = state.index === index;
+      <View style={styles.row}>
+        {TABS.map((tab, tabIndex) => {
+          // Locate the matching route in the navigator state; if a tab
+          // screen isn't registered (e.g. during route transitions) skip it.
+          const route = state.routes.find((r) => r.name === tab.name);
+          if (!route) return null;
+
+          const routeIndex = state.routes.indexOf(route);
+          const isFocused = state.index === routeIndex;
           const { options } = descriptors[route.key] ?? {};
           const label =
             typeof options?.tabBarLabel === 'string'
               ? options.tabBarLabel
               : typeof options?.title === 'string'
                 ? options.title
-                : route.name;
-
-          if (route.name === 'sakha') {
-            return (
-              <CenterKiaanTab
-                key={route.key}
-                isFocused={isFocused}
-                label={label}
-                onPress={() => handlePress(route, isFocused)}
-                onLongPress={() => handleLongPress(route)}
-              />
-            );
-          }
-
-          const routeName = route.name as TabRouteName;
-          const Icon = TAB_ICONS[routeName];
-          if (!Icon) return null;
+                : tab.label;
 
           return (
-            <TabIcon
+            <TabItem
               key={route.key}
-              routeName={routeName}
               label={label}
+              Icon={tab.Icon}
               isFocused={isFocused}
               onPress={() => handlePress(route, isFocused)}
               onLongPress={() => handleLongPress(route)}
-              Icon={Icon}
+              routeName={tab.name}
+              testID={`tab-${tab.name}`}
+              // Hint to TabItem that the first render should not animate in.
+              initialIndex={tabIndex}
             />
           );
         })}
@@ -177,16 +179,117 @@ export function DivineTabBar({
 
 export default DivineTabBar;
 
+// ---------------------------------------------------------------------------
+// TabItem — single pressable tab with dot + icon + label.
+// ---------------------------------------------------------------------------
+
+interface TabItemProps {
+  readonly label: string;
+  readonly Icon: SacredIcon;
+  readonly isFocused: boolean;
+  readonly onPress: () => void;
+  readonly onLongPress?: () => void;
+  readonly routeName: string;
+  readonly testID?: string;
+  readonly initialIndex: number;
+}
+
+function TabItemInner({
+  label,
+  Icon,
+  isFocused,
+  onPress,
+  onLongPress,
+  testID,
+}: TabItemProps): React.JSX.Element {
+  /** 0 = inactive, 1 = active — drives dot opacity + label fade-in. */
+  const focus = useSharedValue(isFocused ? 1 : 0);
+  /** Drives the icon scale (divine-breath cycle on activation). */
+  const iconScale = useSharedValue(1);
+
+  useEffect(() => {
+    // Sacred-spring for focus transition (~180ms settle).
+    focus.value = withSpring(isFocused ? 1 : 0, {
+      damping: 18,
+      stiffness: 220,
+      mass: 0.8,
+    });
+
+    if (isFocused) {
+      // Divine-breath: one cycle 1.0 → 1.15 → 1.0 (~480ms).
+      iconScale.value = withSequence(
+        withTiming(1.15, { duration: 180, easing: Easing.out(Easing.quad) }),
+        withTiming(1.0, { duration: 300, easing: Easing.inOut(Easing.ease) }),
+      );
+    } else {
+      iconScale.value = withTiming(1.0, { duration: 200 });
+    }
+  }, [isFocused, focus, iconScale]);
+
+  const iconAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: iconScale.value }],
+  }));
+
+  const dotAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: focus.value,
+    transform: [{ scale: focus.value }],
+  }));
+
+  const labelAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: focus.value,
+  }));
+
+  // We swap stroke colour on the JS thread (rgba ↔ hex) because Reanimated
+  // cannot interpolate across those formats without the colour plugin; the
+  // focus spring already carries the visual transition via dot + label.
+  const iconColor = isFocused ? ACTIVE_COLOR : INACTIVE_COLOR;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onLongPress={onLongPress}
+      style={styles.tab}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: isFocused }}
+      accessibilityLabel={label}
+      testID={testID}
+      hitSlop={8}
+    >
+      {/* Reserved slot above the icon — keeps layout height stable. */}
+      <View style={styles.dotSlot} pointerEvents="none">
+        <Animated.View style={[styles.dot, dotAnimatedStyle]} />
+      </View>
+
+      <Animated.View style={iconAnimatedStyle}>
+        <Icon size={24} color={iconColor} />
+      </Animated.View>
+
+      <View style={styles.labelSlot} pointerEvents="none">
+        <Animated.Text
+          numberOfLines={1}
+          style={[styles.label, labelAnimatedStyle]}
+        >
+          {label}
+        </Animated.Text>
+      </View>
+    </Pressable>
+  );
+}
+
+const TabItem = React.memo(TabItemInner);
+
+// ---------------------------------------------------------------------------
+// Styles
+// ---------------------------------------------------------------------------
+
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: BACKGROUND_COLOR,
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(5,7,20,0.95)',
-    // Overflow MUST stay visible so CenterKiaanTab can elevate above.
     overflow: 'visible',
-    // Platform-specific depth to lift the bar above content.
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -208,11 +311,43 @@ const styles = StyleSheet.create({
     height: 1,
   },
   row: {
-    flex: 1,
     flexDirection: 'row',
+    height: TAB_BAR_HEIGHT,
     alignItems: 'stretch',
-    justifyContent: 'space-evenly',
     paddingHorizontal: 4,
-    paddingTop: 8,
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 4,
+  },
+  dotSlot: {
+    height: DOT_SIZE + DOT_GAP,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  dot: {
+    width: DOT_SIZE,
+    height: DOT_SIZE,
+    borderRadius: DOT_SIZE / 2,
+    backgroundColor: ACTIVE_COLOR,
+  },
+  labelSlot: {
+    height: 14,
+    marginTop: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  label: {
+    fontSize: 10,
+    fontFamily: Platform.select({
+      ios: 'Outfit-Medium',
+      android: 'Outfit-Medium',
+      default: 'Outfit-Medium',
+    }),
+    fontWeight: '500',
+    color: ACTIVE_COLOR,
+    letterSpacing: 0.3,
   },
 });

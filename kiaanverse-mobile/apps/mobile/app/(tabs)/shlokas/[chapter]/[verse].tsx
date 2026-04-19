@@ -117,10 +117,10 @@ export default function VerseDetailScreen(): React.JSX.Element {
       v.english,
     ].join('\n');
 
-    // Push directly to the Sakha tab (the visible chat screen) with the
-    // pre-filled context. The sakha screen listens to `context` on mount.
+    // Push directly to the Chat tab (the visible Sakha screen) with the
+    // pre-filled context. The chat screen listens to `context` on mount.
     router.push({
-      pathname: '/(tabs)/sakha',
+      pathname: '/(tabs)/chat',
       params: { context: prefill, verseId: `${v.chapter}.${v.verse}` },
     });
   }, [data, router]);

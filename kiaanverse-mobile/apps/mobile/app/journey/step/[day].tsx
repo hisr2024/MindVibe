@@ -51,7 +51,7 @@ import {
   type WisdomJourneyStep,
 } from '@kiaanverse/api';
 import { useJourneyStore } from '@kiaanverse/store';
-import { StepContent } from '../../../../components/journey/StepContent';
+import { StepContent } from '../../../components/journey/StepContent';
 
 // ---------------------------------------------------------------------------
 // Constants

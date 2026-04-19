@@ -162,7 +162,7 @@ export default function ChapterDetailScreen(): React.JSX.Element {
 
   const navigateToVerse = useCallback(
     (chapter: number, verse: number) => {
-      router.push(`/(tabs)/verse/${chapter}/${verse}`);
+      router.push(`/verse/${chapter}/${verse}`);
     },
     [router],
   );

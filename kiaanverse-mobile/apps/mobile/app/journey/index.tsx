@@ -520,7 +520,7 @@ export default function JourneyScreen(): React.JSX.Element {
   const handleJourneyPress = useCallback(
     (journeyId: string) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      router.push(`/(tabs)/journey/${journeyId}`);
+      router.push(`/journey/${journeyId}`);
     },
     [router],
   );
