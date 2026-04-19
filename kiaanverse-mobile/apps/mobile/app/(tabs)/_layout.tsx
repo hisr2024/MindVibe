@@ -55,6 +55,12 @@ export default function TabsLayout(): React.JSX.Element {
         name="verse/[chapter]/[verse]"
         options={{ href: null }}
       />
+      {/* New Sakha chat screen (1:1 web port). Hidden from the tab bar
+          until the center tab is officially migrated away from sakha.tsx. */}
+      <Tabs.Screen
+        name="kiaan"
+        options={{ href: null }}
+      />
     </Tabs>
   );
 }
