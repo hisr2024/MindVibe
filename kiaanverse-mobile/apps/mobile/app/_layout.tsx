@@ -25,6 +25,7 @@ import { View, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
@@ -154,11 +155,17 @@ function AppContent(): React.JSX.Element {
   const processQueue = useSyncQueueStore((s) => s.processQueue);
   const wasOffline = useRef(false);
 
+  // Load divine typography. Failure is non-fatal — we fall back to system fonts
+  // so the app never gets stuck on splash if a font file is missing.
+  const [fontsLoaded, fontError] = useFonts({
+    'CrimsonText-Regular': require('../assets/fonts/CrimsonText-Regular.ttf'),
+  });
+
   const onLayoutReady = useCallback(async () => {
-    if (status !== 'idle' && status !== 'loading') {
+    if ((status !== 'idle' && status !== 'loading') && (fontsLoaded || fontError)) {
       await SplashScreen.hideAsync();
     }
-  }, [status]);
+  }, [status, fontsLoaded, fontError]);
 
   useEffect(() => {
     const setup = async () => {
@@ -196,7 +203,7 @@ function AppContent(): React.JSX.Element {
     }
   }, [isOnline, processQueue]);
 
-  if (status === 'idle' || status === 'loading') {
+  if (status === 'idle' || status === 'loading' || (!fontsLoaded && !fontError)) {
     return (
       <View style={[styles.loading, { backgroundColor: colors.background.dark }]}>
         <LoadingMandala size={120} />
