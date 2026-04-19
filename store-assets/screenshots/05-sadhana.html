@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { width: 1080px; height: 1920px; overflow: hidden; font-family: 'Inter', sans-serif; }
+.screen {
+  width: 1080px; height: 1920px;
+  background: linear-gradient(180deg, #050505 0%, #0B0B0F 30%, #0F1219 100%);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 100px 60px 60px; position: relative;
+}
+.caption { text-align: center; margin-bottom: 40px; z-index: 10; }
+.caption-title { font-size: 44px; font-weight: 800; color: #fefefe; margin-bottom: 12px; }
+.caption-sub { font-size: 24px; color: #a0a0a0; }
+/* Breathing lotus */
+.lotus-area {
+  position: relative; width: 400px; height: 400px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 40px;
+}
+.breath-ring {
+  position: absolute; border-radius: 50%; border: 2px solid;
+}
+.br1 { width: 400px; height: 400px; border-color: rgba(15,181,201,0.15); }
+.br2 { width: 340px; height: 340px; border-color: rgba(15,181,201,0.25); }
+.br3 { width: 280px; height: 280px; border-color: rgba(15,181,201,0.35); }
+.lotus-center {
+  width: 200px; height: 200px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(15,181,201,0.3), rgba(67,211,232,0.1), transparent);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 2;
+}
+.breath-text { font-size: 32px; font-weight: 700; color: #43D3E8; }
+.breath-timer { font-size: 56px; font-weight: 800; color: #0FB5C9; }
+/* Steps */
+.steps {
+  width: 100%; display: flex; flex-direction: column; gap: 16px;
+  margin-bottom: 40px;
+}
+.step {
+  display: flex; align-items: center; gap: 20px;
+  padding: 24px 28px; border-radius: 20px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+}
+.step.active {
+  background: linear-gradient(135deg, rgba(15,181,201,0.12), rgba(67,211,232,0.06));
+  border-color: rgba(15,181,201,0.3);
+}
+.step.done {
+  opacity: 0.5;
+}
+.step-num {
+  width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700;
+}
+.step-num-pending { background: rgba(255,255,255,0.06); color: #a0a0a0; }
+.step-num-active { background: linear-gradient(135deg, #0FB5C9, #43D3E8); color: #050505; }
+.step-num-done { background: rgba(53,196,141,0.2); color: #35c48d; }
+.step-text { font-size: 24px; font-weight: 600; color: #e8edf5; }
+.step-text-done { color: #a0a0a0; text-decoration: line-through; }
+.step-duration { font-size: 18px; color: #a0a0a0; margin-left: auto; }
+/* Verse of the day */
+.verse-mini {
+  width: 100%; padding: 32px; border-radius: 24px;
+  background: linear-gradient(135deg, rgba(255,107,53,0.08), rgba(255,215,0,0.04));
+  border: 1px solid rgba(255,183,71,0.12); margin-bottom: 32px;
+}
+.verse-mini-label {
+  font-size: 16px; font-weight: 700; color: #F7931E;
+  letter-spacing: 1.5px; margin-bottom: 12px;
+}
+.verse-mini-text {
+  font-family: 'Crimson Text', serif; font-size: 24px; font-style: italic;
+  color: #FFD700; line-height: 1.5;
+}
+/* Streak */
+.streak {
+  display: flex; align-items: center; gap: 16px;
+  padding: 20px 36px; border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(255,215,0,0.06));
+  border: 1px solid rgba(255,183,71,0.2);
+}
+.streak-fire { font-size: 36px; }
+.streak-text { font-size: 24px; font-weight: 700; color: #FFD700; }
+.streak-sub { font-size: 18px; color: #a0a0a0; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="caption">
+    <div class="caption-title">Sadhana — Daily Prevention</div>
+    <div class="caption-sub">Ten minutes that protect your peace all day</div>
+  </div>
+  <div class="lotus-area">
+    <div class="breath-ring br1"></div>
+    <div class="breath-ring br2"></div>
+    <div class="breath-ring br3"></div>
+    <div class="lotus-center">
+      <div class="breath-text">Breathe In</div>
+      <div class="breath-timer">4s</div>
+    </div>
+  </div>
+  <div class="steps">
+    <div class="step done">
+      <div class="step-num step-num-done">✓</div>
+      <div class="step-text step-text-done">Set Intention</div>
+      <div class="step-duration">1 min</div>
+    </div>
+    <div class="step active">
+      <div class="step-num step-num-active">2</div>
+      <div class="step-text">Breathing Lotus</div>
+      <div class="step-duration">3 min</div>
+    </div>
+    <div class="step">
+      <div class="step-num step-num-pending">3</div>
+      <div class="step-text">Verse Meditation</div>
+      <div class="step-duration">3 min</div>
+    </div>
+    <div class="step">
+      <div class="step-num step-num-pending">4</div>
+      <div class="step-text">Reflect & Seal</div>
+      <div class="step-duration">3 min</div>
+    </div>
+  </div>
+  <div class="verse-mini">
+    <div class="verse-mini-label">TODAY'S VERSE</div>
+    <div class="verse-mini-text">"Yoga is the journey of the self, through the self, to the self." — BG 6.20</div>
+  </div>
+  <div class="streak">
+    <div class="streak-fire">🔥</div>
+    <div>
+      <div class="streak-text">14-Day Streak</div>
+      <div class="streak-sub">Your longest yet — keep going!</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+* { margin: 0; padding: 0; }
+body { width: 512px; height: 512px; overflow: hidden; }
+.icon { width: 512px; height: 512px; position: relative; border-radius: 22%; overflow: hidden; }
+.bg { position: absolute; inset: 0; }
+.fg { position: absolute; inset: 0; }
+</style>
+</head>
+<body>
+<div class="icon">
+  <!-- Background Layer -->
+  <svg class="bg" width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="bg-aura" cx="50%" cy="50%" r="70%">
+        <stop offset="0%" stop-color="#1A1520"/>
+        <stop offset="50%" stop-color="#0F1219"/>
+        <stop offset="100%" stop-color="#0B0B0F"/>
+      </radialGradient>
+      <radialGradient id="bg-glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="rgba(255, 215, 0, 0.15)"/>
+        <stop offset="50%" stop-color="rgba(255, 147, 89, 0.08)"/>
+        <stop offset="100%" stop-color="rgba(255, 107, 53, 0)"/>
+      </radialGradient>
+    </defs>
+    <rect width="512" height="512" fill="url(#bg-aura)"/>
+    <rect width="512" height="512" fill="url(#bg-glow)"/>
+    <circle cx="256" cy="256" r="180" stroke="rgba(255, 183, 71, 0.1)" stroke-width="1" fill="none"/>
+    <circle cx="256" cy="256" r="220" stroke="rgba(255, 183, 71, 0.05)" stroke-width="1" fill="none"/>
+  </svg>
+  <!-- Foreground Layer -->
+  <svg class="fg" width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="divineGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#FF6B35"/>
+        <stop offset="35%" stop-color="#F7931E"/>
+        <stop offset="70%" stop-color="#FFB347"/>
+        <stop offset="100%" stop-color="#FFD700"/>
+      </linearGradient>
+      <radialGradient id="innerLight" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#FFFEF0"/>
+        <stop offset="40%" stop-color="#FFE4B5"/>
+        <stop offset="100%" stop-color="#FFD700"/>
+      </radialGradient>
+      <linearGradient id="petalGold" x1="50%" y1="100%" x2="50%" y2="0%">
+        <stop offset="0%" stop-color="#F7931E"/>
+        <stop offset="50%" stop-color="#FFB347"/>
+        <stop offset="100%" stop-color="#FFD700"/>
+      </linearGradient>
+      <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    <g transform="translate(256, 256)">
+      <path d="M0 -140 C20 -120, 40 -80, 40 -40 C40 -20, 24 0, 0 8 C-24 0, -40 -20, -40 -40 C-40 -80, -20 -120, 0 -140Z" fill="url(#petalGold)" opacity="0.9" filter="url(#softGlow)"/>
+      <path d="M-120 -16 C-100 -36, -60 -48, -20 -40 C-8 -28, 0 -12, 4 4 C-16 12, -52 16, -80 4 C-108 -8, -128 -12, -120 -16Z" fill="url(#divineGradient)" opacity="0.85"/>
+      <path d="M120 -16 C100 -36, 60 -48, 20 -40 C8 -28, 0 -12, -4 4 C16 12, 52 16, 80 4 C108 -8, 128 -12, 120 -16Z" fill="url(#divineGradient)" opacity="0.85"/>
+      <path d="M-100 54 C-80 40, -40 32, -8 44 C0 60, 4 80, 4 100 C-16 108, -60 100, -88 80 C-116 60, -124 56, -100 54Z" fill="url(#petalGold)" opacity="0.75"/>
+      <path d="M100 54 C80 40, 40 32, 8 44 C0 60, -4 80, -4 100 C16 108, 60 100, 88 80 C116 60, 124 56, 100 54Z" fill="url(#petalGold)" opacity="0.75"/>
+      <path d="M0 -80 C14 -60, 24 -24, 24 8 C24 28, 14 44, 0 52 C-14 44, -24 28, -24 8 C-24 -24, -14 -60, 0 -80Z" fill="url(#innerLight)" filter="url(#softGlow)"/>
+      <ellipse cx="0" cy="-4" rx="24" ry="28" fill="url(#innerLight)" opacity="0.95"/>
+      <ellipse cx="0" cy="-8" rx="12" ry="16" fill="#FFFEF5" opacity="0.9"/>
+      <path d="M-56 100 Q0 120, 56 100" stroke="url(#divineGradient)" stroke-width="4" fill="none" opacity="0.5" stroke-linecap="round"/>
+    </g>
+  </svg>
+</div>
+</body>
+</html>

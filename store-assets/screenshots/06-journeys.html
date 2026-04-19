@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { width: 1080px; height: 1920px; overflow: hidden; font-family: 'Inter', sans-serif; }
+.screen {
+  width: 1080px; height: 1920px; background: #050505;
+  display: flex; flex-direction: column; padding: 100px 60px 60px;
+}
+.caption { text-align: center; margin-bottom: 40px; }
+.caption-title { font-size: 44px; font-weight: 800; color: #fefefe; margin-bottom: 12px; }
+.caption-sub { font-size: 24px; color: #a0a0a0; }
+/* Active journey */
+.active-journey {
+  padding: 40px; border-radius: 28px; margin-bottom: 32px;
+  background: linear-gradient(135deg, rgba(15,181,201,0.1), rgba(67,211,232,0.05));
+  border: 1px solid rgba(15,181,201,0.2); position: relative; overflow: hidden;
+}
+.aj-glow {
+  position: absolute; top: -50px; right: -50px; width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(15,181,201,0.15), transparent);
+  border-radius: 50%;
+}
+.aj-label { font-size: 16px; font-weight: 700; color: #43D3E8; letter-spacing: 2px; margin-bottom: 12px; position: relative; }
+.aj-title { font-size: 36px; font-weight: 800; color: #fefefe; margin-bottom: 8px; position: relative; }
+.aj-desc { font-size: 20px; color: #a0a0a0; margin-bottom: 24px; position: relative; }
+.progress-bar { height: 12px; border-radius: 6px; background: rgba(255,255,255,0.08); margin-bottom: 12px; position: relative; }
+.progress-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #0FB5C9, #43D3E8); width: 57%; }
+.progress-text { font-size: 18px; color: #43D3E8; font-weight: 600; position: relative; }
+/* Journey cards */
+.journeys { display: flex; flex-direction: column; gap: 20px; }
+.journey-card {
+  display: flex; gap: 24px; padding: 32px; border-radius: 24px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+}
+.j-icon {
+  width: 80px; height: 80px; border-radius: 20px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+}
+.ji-fire { background: linear-gradient(135deg, rgba(255,107,53,0.2), rgba(255,215,0,0.1)); }
+.ji-calm { background: linear-gradient(135deg, rgba(15,181,201,0.2), rgba(67,211,232,0.1)); }
+.ji-heart { background: linear-gradient(135deg, rgba(255,107,157,0.2), rgba(199,125,255,0.1)); }
+.ji-focus { background: linear-gradient(135deg, rgba(30,64,175,0.2), rgba(59,130,246,0.1)); }
+.ji-star { background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(247,147,30,0.1)); }
+.j-content { flex: 1; }
+.j-title { font-size: 26px; font-weight: 700; color: #fefefe; margin-bottom: 6px; }
+.j-desc { font-size: 19px; color: #a0a0a0; margin-bottom: 10px; line-height: 1.4; }
+.j-meta { display: flex; gap: 20px; }
+.j-tag {
+  font-size: 16px; font-weight: 600; padding: 6px 14px; border-radius: 10px;
+  background: rgba(255,255,255,0.05); color: #a0a0a0;
+}
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="caption">
+    <div class="caption-title">Spiritual Journeys</div>
+    <div class="caption-sub">Refine life's complexities — one day at a time</div>
+  </div>
+  <div class="active-journey">
+    <div class="aj-glow"></div>
+    <div class="aj-label">ACTIVE JOURNEY</div>
+    <div class="aj-title">Transform Anger — Krodha Mastery</div>
+    <div class="aj-desc">14-day path to understanding and mastering anger through Gita wisdom</div>
+    <div class="progress-bar"><div class="progress-fill"></div></div>
+    <div class="progress-text">Day 8 of 14 — 57% complete</div>
+  </div>
+  <div class="journeys">
+    <div class="journey-card">
+      <div class="j-icon ji-calm">🧘</div>
+      <div class="j-content">
+        <div class="j-title">Inner Stillness</div>
+        <div class="j-desc">Build unshakeable calm through daily meditation practice</div>
+        <div class="j-meta"><div class="j-tag">21 Days</div><div class="j-tag">Beginner</div></div>
+      </div>
+    </div>
+    <div class="journey-card">
+      <div class="j-icon ji-heart">💜</div>
+      <div class="j-content">
+        <div class="j-title">Forgiveness Path</div>
+        <div class="j-desc">Release resentment and find freedom through compassion</div>
+        <div class="j-meta"><div class="j-tag">14 Days</div><div class="j-tag">Intermediate</div></div>
+      </div>
+    </div>
+    <div class="journey-card">
+      <div class="j-icon ji-focus">🎯</div>
+      <div class="j-content">
+        <div class="j-title">Discover Your Dharma</div>
+        <div class="j-desc">Find your true purpose through Krishna's guidance</div>
+        <div class="j-meta"><div class="j-tag">28 Days</div><div class="j-tag">Deep Dive</div></div>
+      </div>
+    </div>
+    <div class="journey-card">
+      <div class="j-icon ji-star">⭐</div>
+      <div class="j-content">
+        <div class="j-title">Detachment & Freedom</div>
+        <div class="j-desc">Master Vairagya — let go of what binds you</div>
+        <div class="j-meta"><div class="j-tag">14 Days</div><div class="j-tag">Advanced</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

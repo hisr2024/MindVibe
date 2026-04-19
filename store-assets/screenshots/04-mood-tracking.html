@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { width: 1080px; height: 1920px; overflow: hidden; font-family: 'Inter', sans-serif; }
+.screen {
+  width: 1080px; height: 1920px; background: #050505;
+  display: flex; flex-direction: column; padding: 100px 60px 60px;
+}
+.caption { text-align: center; margin-bottom: 50px; }
+.caption-title { font-size: 44px; font-weight: 800; color: #fefefe; margin-bottom: 12px; }
+.caption-sub { font-size: 24px; color: #a0a0a0; }
+/* Mood Ring */
+.mood-ring-area {
+  display: flex; justify-content: center; margin-bottom: 50px; position: relative;
+}
+.mood-ring-glow {
+  position: absolute; width: 400px; height: 400px; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(15,181,201,0.15), rgba(67,211,232,0.05), transparent);
+  border-radius: 50%;
+}
+.mood-ring {
+  width: 320px; height: 320px; border-radius: 50%; position: relative;
+  background: conic-gradient(from 0deg, #0FB5C9, #3B82F6, #C77DFF, #FF6B9D, #FF6B35, #FFD700, #0FB5C9);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1;
+}
+.mood-ring-inner {
+  width: 240px; height: 240px; border-radius: 50%;
+  background: #0B0B0F; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.mood-emoji { font-size: 64px; margin-bottom: 8px; }
+.mood-label { font-size: 28px; font-weight: 700; color: #0FB5C9; }
+.mood-time { font-size: 18px; color: #a0a0a0; margin-top: 4px; }
+/* Mood options */
+.moods {
+  display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
+  margin-bottom: 48px;
+}
+.mood-option {
+  padding: 16px 28px; border-radius: 20px; font-size: 22px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  color: #e8edf5; display: flex; align-items: center; gap: 10px;
+}
+.mood-option.selected {
+  background: linear-gradient(135deg, rgba(15,181,201,0.2), rgba(67,211,232,0.1));
+  border-color: rgba(15,181,201,0.4); color: #43D3E8;
+}
+/* Weekly chart */
+.chart-card {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 24px; padding: 36px 32px;
+  margin-bottom: 32px;
+}
+.chart-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 28px;
+}
+.chart-title { font-size: 24px; font-weight: 700; color: #fefefe; }
+.chart-period { font-size: 18px; color: #a0a0a0; }
+.chart-bars {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  height: 200px; gap: 12px;
+}
+.bar-col { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
+.bar {
+  width: 100%; border-radius: 8px 8px 4px 4px;
+  background: linear-gradient(180deg, #0FB5C9, #3B82F6);
+}
+.bar-label { font-size: 16px; color: #a0a0a0; font-weight: 500; }
+.bar-emoji { font-size: 20px; }
+/* KIAAN insight */
+.trend-card {
+  background: linear-gradient(135deg, rgba(255,107,53,0.08), rgba(255,215,0,0.05));
+  border: 1px solid rgba(255,183,71,0.15); border-radius: 24px;
+  padding: 32px;
+}
+.trend-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.trend-dot { width: 10px; height: 10px; border-radius: 50%; background: #FFD700; }
+.trend-label { font-size: 16px; font-weight: 700; color: #FFD700; letter-spacing: 1.5px; }
+.trend-text { font-size: 22px; color: #e8edf5; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="caption">
+    <div class="caption-title">Catch It Before It Catches You</div>
+    <div class="caption-sub">Divine Mood Ring — track your emotional patterns</div>
+  </div>
+  <div class="mood-ring-area">
+    <div class="mood-ring-glow"></div>
+    <div class="mood-ring">
+      <div class="mood-ring-inner">
+        <div class="mood-emoji">😌</div>
+        <div class="mood-label">Peaceful</div>
+        <div class="mood-time">Today, 8:30 AM</div>
+      </div>
+    </div>
+  </div>
+  <div class="moods">
+    <div class="mood-option selected">😌 Peaceful</div>
+    <div class="mood-option">😊 Grateful</div>
+    <div class="mood-option">😔 Heavy</div>
+    <div class="mood-option">😤 Restless</div>
+    <div class="mood-option">🙏 Devotional</div>
+    <div class="mood-option">😢 Sad</div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-title">This Week</div>
+      <div class="chart-period">Apr 14 — Apr 19</div>
+    </div>
+    <div class="chart-bars">
+      <div class="bar-col"><div class="bar-emoji">😌</div><div class="bar" style="height:160px"></div><div class="bar-label">Mon</div></div>
+      <div class="bar-col"><div class="bar-emoji">😊</div><div class="bar" style="height:180px"></div><div class="bar-label">Tue</div></div>
+      <div class="bar-col"><div class="bar-emoji">😔</div><div class="bar" style="height:80px; background: linear-gradient(180deg, #C77DFF, #FF6B9D);"></div><div class="bar-label">Wed</div></div>
+      <div class="bar-col"><div class="bar-emoji">😤</div><div class="bar" style="height:60px; background: linear-gradient(180deg, #FF6B35, #F7931E);"></div><div class="bar-label">Thu</div></div>
+      <div class="bar-col"><div class="bar-emoji">🙏</div><div class="bar" style="height:150px"></div><div class="bar-label">Fri</div></div>
+      <div class="bar-col"><div class="bar-emoji">😌</div><div class="bar" style="height:170px"></div><div class="bar-label">Sat</div></div>
+    </div>
+  </div>
+  <div class="trend-card">
+    <div class="trend-header">
+      <div class="trend-dot"></div>
+      <div class="trend-label">KIAAN PATTERN DETECTED</div>
+    </div>
+    <div class="trend-text">Your peace drops mid-week. KIAAN suggests a Wednesday Sadhana ritual — 10 minutes of breathwork before work can shift the pattern.</div>
+  </div>
+</div>
+</body>
+</html>

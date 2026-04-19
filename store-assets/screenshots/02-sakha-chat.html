@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { width: 1080px; height: 1920px; overflow: hidden; font-family: 'Inter', sans-serif; }
+.screen {
+  width: 1080px; height: 1920px; position: relative;
+  background: #050505;
+  display: flex; flex-direction: column;
+}
+/* Caption area */
+.caption {
+  padding: 100px 80px 50px; text-align: center;
+  background: linear-gradient(180deg, #0B0B0F, #050505);
+}
+.caption-title {
+  font-size: 44px; font-weight: 800; color: #fefefe; margin-bottom: 12px;
+}
+.caption-sub {
+  font-size: 24px; color: #a0a0a0; font-weight: 500;
+}
+/* Chat area */
+.chat {
+  flex: 1; padding: 40px 60px; display: flex; flex-direction: column; gap: 24px;
+  overflow: hidden;
+}
+/* Header */
+.chat-header {
+  display: flex; align-items: center; gap: 20px;
+  padding: 24px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 16px;
+}
+.avatar {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B35, #FFD700);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; color: #0B0B0F; font-weight: 800;
+}
+.header-text {}
+.header-name { font-size: 28px; font-weight: 700; color: #fefefe; }
+.header-status { font-size: 18px; color: #35c48d; font-weight: 500; }
+/* Messages */
+.msg {
+  max-width: 75%; padding: 28px 32px; border-radius: 24px;
+  font-size: 24px; line-height: 1.5;
+}
+.msg-user {
+  align-self: flex-end; background: linear-gradient(135deg, #1E40AF, #3B82F6);
+  color: #fefefe; border-bottom-right-radius: 8px;
+  margin-left: auto;
+}
+.msg-sakha {
+  align-self: flex-start; background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08); color: #e8edf5;
+  border-bottom-left-radius: 8px;
+}
+.msg-verse {
+  align-self: flex-start; max-width: 80%;
+  background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(255,215,0,0.08));
+  border: 1px solid rgba(255,183,71,0.2); border-radius: 24px;
+  padding: 28px 32px; border-bottom-left-radius: 8px;
+}
+.verse-sanskrit {
+  font-family: 'Crimson Text', serif; font-size: 26px; font-style: italic;
+  color: #FFD700; margin-bottom: 12px; line-height: 1.5;
+}
+.verse-translation {
+  font-size: 22px; color: #e8edf5; line-height: 1.5; margin-bottom: 8px;
+}
+.verse-ref {
+  font-size: 18px; color: #F7931E; font-weight: 600;
+}
+.msg-insight {
+  font-size: 22px; color: #a0a0a0; line-height: 1.5;
+  align-self: flex-start; max-width: 80%;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 24px; padding: 28px 32px; border-bottom-left-radius: 8px;
+}
+.insight-label {
+  font-size: 16px; font-weight: 700; color: #6ad7ff;
+  letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px;
+}
+/* Input bar */
+.input-bar {
+  padding: 24px 60px 60px; display: flex; gap: 16px; align-items: center;
+}
+.input-field {
+  flex: 1; height: 72px; border-radius: 36px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  padding: 0 32px; font-size: 22px; color: #a0a0a0;
+  display: flex; align-items: center;
+}
+.mic-btn {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B35, #FFD700);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="caption">
+    <div class="caption-title">Talk to Sakha</div>
+    <div class="caption-sub">Your always-available spiritual friend</div>
+  </div>
+  <div class="chat">
+    <div class="chat-header">
+      <div class="avatar">S</div>
+      <div class="header-text">
+        <div class="header-name">Sakha AI</div>
+        <div class="header-status">Online — ready to listen</div>
+      </div>
+    </div>
+    <div class="msg msg-user">I feel overwhelmed with anger at work. I can't control it anymore.</div>
+    <div class="msg-verse">
+      <div class="verse-sanskrit">क्रोधाद्भवति सम्मोहः सम्मोहात्स्मृतिविभ्रमः</div>
+      <div class="verse-translation">"From anger comes delusion; from delusion, the wandering of memory..."</div>
+      <div class="verse-ref">— Bhagavad Gita 2.63</div>
+    </div>
+    <div class="msg-insight">
+      <div class="insight-label">KIAAN Insight</div>
+      Krishna tells Arjuna that anger clouds judgment. The first step isn't to suppress it — it's to observe it. Let's try a 2-minute breathing exercise to create space between your feeling and your reaction.
+    </div>
+  </div>
+  <div class="input-bar">
+    <div class="input-field">Ask Sakha anything...</div>
+    <div class="mic-btn">🎤</div>
+  </div>
+</div>
+</body>
+</html>
