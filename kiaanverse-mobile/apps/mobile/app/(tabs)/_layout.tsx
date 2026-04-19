@@ -61,6 +61,13 @@ export default function TabsLayout(): React.JSX.Element {
         name="kiaan"
         options={{ href: null }}
       />
+      {/* Shlokas — 1:1 port of /m/gita (chapters + daily verse + search).
+          Registered as a deep-linkable stack hidden from the tab bar;
+          reachable via router.push('/(tabs)/shlokas'). */}
+      <Tabs.Screen
+        name="shlokas"
+        options={{ href: null }}
+      />
     </Tabs>
   );
 }
