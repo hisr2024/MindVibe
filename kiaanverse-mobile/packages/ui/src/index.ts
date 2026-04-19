@@ -91,3 +91,26 @@ export { SacredStepIndicator, type SacredStepIndicatorProps } from './components
 export { useAudioPlayer } from './hooks/useAudioPlayer';
 export { useSpeechOutput } from './hooks/useSpeechOutput';
 export { useVoiceRecorder, type TranscribeFn, type TranscriptionResult } from './hooks/useVoiceRecorder';
+
+// ---------------------------------------------------------------------------
+// Living Background System (Skia particle field + aurora + muhurta atmosphere)
+// ---------------------------------------------------------------------------
+export {
+  DivineCelestialBackground,
+  type DivineCelestialBackgroundProps,
+  AuroraLayer,
+  type AuroraLayerProps,
+  type AuroraKey,
+  DivineScreenWrapper,
+  type DivineScreenWrapperProps,
+  useTimeOfDay,
+  resolveTimeOfDay,
+  PARTICLE_COUNT_FULL,
+  PARTICLE_COUNT_REDUCED,
+  PARTICLE_COLORS,
+  PARTICLE_COLOR_WEIGHTS,
+  AURORA_LAYERS,
+  TIME_OF_DAY_ATMOSPHERE,
+  TIME_OF_DAY_POLL_INTERVAL,
+  type TimeOfDay,
+} from './background';
