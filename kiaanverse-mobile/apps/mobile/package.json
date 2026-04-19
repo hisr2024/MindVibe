@@ -33,6 +33,7 @@
     "@kiaanverse/api": "workspace:*",
     "@kiaanverse/i18n": "workspace:*",
     "@kiaanverse/store": "workspace:*",
+    "@kiaanverse/theme": "workspace:*",
     "@kiaanverse/ui": "workspace:*",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/netinfo": "^11.3.1",

@@ -13,9 +13,12 @@
       "@kiaan/i18n": ["../../packages/i18n/src"],
       "@kiaan/i18n/*": ["../../packages/i18n/src/*"],
       "@kiaanverse/ui": ["../../packages/ui/src"],
+      "@kiaanverse/ui/*": ["../../packages/ui/src/*"],
       "@kiaanverse/api": ["../../packages/api/src"],
       "@kiaanverse/store": ["../../packages/store/src"],
-      "@kiaanverse/i18n": ["../../packages/i18n/src"]
+      "@kiaanverse/i18n": ["../../packages/i18n/src"],
+      "@kiaanverse/theme": ["../../packages/theme/src"],
+      "@kiaanverse/theme/*": ["../../packages/theme/src/*"]
     }
   },
   "include": ["app/**/*.ts", "app/**/*.tsx", "*.ts", "*.js"],

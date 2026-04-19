@@ -3,6 +3,22 @@
  */
 
 // ---------------------------------------------------------------------------
+// Divine Theme Foundation — cosmic backdrop used on EVERY screen
+// ---------------------------------------------------------------------------
+export {
+  DivineCelestialBackground,
+  type DivineCelestialBackgroundProps,
+} from './DivineCelestialBackground';
+export {
+  SacredGradientBackground,
+  type SacredGradientBackgroundProps,
+} from './SacredGradientBackground';
+export {
+  DivineScreenWrapper,
+  type DivineScreenWrapperProps,
+} from './DivineScreenWrapper';
+
+// ---------------------------------------------------------------------------
 // Tokens (raw primitives)
 // ---------------------------------------------------------------------------
 export { colors, type Colors } from './tokens/colors';
