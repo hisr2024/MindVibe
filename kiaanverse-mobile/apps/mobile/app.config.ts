@@ -93,6 +93,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
 
   plugins: [
+    './plugins/with-expo-modules-core-patch',
     'expo-router',
     'expo-splash-screen',
     [
