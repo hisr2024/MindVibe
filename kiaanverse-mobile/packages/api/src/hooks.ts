@@ -53,6 +53,7 @@ import type {
   ViyogaResponse,
   WeeklyInsight,
   WisdomJourneyDetail,
+  WisdomJourneyStep,
   WisdomRoom,
   WisdomRoomMessage,
 } from './types';
@@ -442,26 +443,136 @@ export function useJourneyDashboard(): UseQueryResult<DashboardData> {
   });
 }
 
-/** Full wisdom journey detail with all steps. */
+/**
+ * Backend step response (GET /journeys/{id}/steps/{day_index}).
+ * Mirrors StepResponse in backend/routes/journey_engine.py.
+ */
+interface RawStep {
+  step_id: string;
+  journey_id: string;
+  day_index: number;
+  step_title: string;
+  teaching: string;
+  guided_reflection?: string[];
+  verse_refs?: Array<{ chapter: number; verse: number }>;
+  is_completed: boolean;
+}
+
+function _mapStep(s: RawStep): WisdomJourneyStep {
+  const firstVerse = s.verse_refs?.[0];
+  return {
+    id: s.step_id,
+    dayIndex: s.day_index,
+    title: s.step_title,
+    type: 'lesson',
+    content: s.teaching ?? '',
+    verseRef: firstVerse ? `${firstVerse.chapter}.${firstVerse.verse}` : undefined,
+    reflection: (s.guided_reflection ?? []).join('\n\n') || undefined,
+    isCompleted: s.is_completed,
+    // Backend does not expose per-step XP/karma yet — defaults match the
+    // mobile UI's placeholder reward copy so the detail card renders.
+    xpReward: 10,
+    karmaReward: 5,
+  };
+}
+
+/**
+ * Full wisdom journey detail with all steps.
+ *
+ * The backend has no bulk "journey with steps" endpoint — it exposes the
+ * journey meta at /journeys/{id} and each step individually at
+ * /journeys/{id}/steps/{day_index}. We compose the two into the shape the
+ * detail + step-player screens render. Steps are fetched with
+ * allSettled so one transient 5xx doesn't blank the whole page.
+ */
 export function useWisdomJourneyDetail(journeyId: string): UseQueryResult<WisdomJourneyDetail> {
   return useQuery({
     queryKey: queryKeys.journeyDetail(journeyId),
     queryFn: async () => {
-      const { data } = await api.journeys.detail(journeyId);
-      return data as WisdomJourneyDetail;
+      const { data: journeyRaw } = await api.journeys.get(journeyId);
+      const j = journeyRaw as RawJourney;
+
+      const total = Math.max(1, j.total_days);
+      const settled = await Promise.allSettled(
+        Array.from({ length: total }, (_, i) =>
+          api.journeys.step(journeyId, i + 1),
+        ),
+      );
+
+      const steps: WisdomJourneyStep[] = settled.map((res, i) => {
+        const dayIndex = i + 1;
+        if (res.status === 'fulfilled') {
+          return _mapStep(res.value.data as RawStep);
+        }
+        // Fallback: keep the day selector usable even if a step fetch
+        // failed — mark completed days based on cumulative progress.
+        return {
+          id: `${j.journey_id}-day-${dayIndex}`,
+          dayIndex,
+          title: `Day ${dayIndex}`,
+          type: 'lesson',
+          content: '',
+          isCompleted: dayIndex <= j.days_completed,
+          xpReward: 10,
+          karmaReward: 5,
+        };
+      });
+
+      const mapped = _mapJourney(j);
+      const detail: WisdomJourneyDetail = {
+        id: mapped.id,
+        title: mapped.title,
+        description: mapped.description,
+        durationDays: mapped.durationDays,
+        status: mapped.status,
+        currentDay: mapped.currentDay,
+        completedSteps: mapped.completedSteps,
+        // The backend enum doesn't map cleanly to JourneyCategory
+        // ('beginner_paths' / 'deep_dives' / '21_day_challenges'), so we
+        // pick the closest bucket from duration. Screens only use this
+        // field for grouping — never for business logic.
+        category: total >= 21 ? '21_day_challenges' : total >= 14 ? 'deep_dives' : 'beginner_paths',
+        difficulty: 'beginner',
+        steps,
+        totalXp: steps.reduce((sum, s) => sum + s.xpReward, 0),
+        earnedXp: steps.filter((s) => s.isCompleted).reduce((sum, s) => sum + s.xpReward, 0),
+      };
+      return detail;
     },
     staleTime: 1000 * 60 * 5,
     enabled: journeyId.length > 0,
   });
 }
 
-/** User progress across all journeys (via dashboard). */
+/**
+ * User progress across all journeys — derived from dashboard active_journeys.
+ * The hook previously cast the DashboardResponse object to an array, which
+ * made every consumer see an empty list. We now project the active journeys
+ * (the only per-journey data the dashboard returns) into UserJourneyProgress.
+ */
 export function useJourneyProgress(): UseQueryResult<UserJourneyProgress[]> {
   return useQuery({
     queryKey: queryKeys.journeyProgress,
     queryFn: async () => {
       const { data } = await api.journeys.dashboard();
-      return data as UserJourneyProgress[];
+      const raw = data as Partial<RawDashboard>;
+      const journeys = raw.active_journeys ?? [];
+      return journeys.map((j): UserJourneyProgress => ({
+        journeyId: j.journey_id,
+        title: j.title,
+        category: (j.total_days >= 21
+          ? '21_day_challenges'
+          : j.total_days >= 14
+            ? 'deep_dives'
+            : 'beginner_paths') as UserJourneyProgress['category'],
+        completedSteps: j.days_completed,
+        totalSteps: j.total_days,
+        earnedXp: j.days_completed * 10,
+        totalXp: j.total_days * 10,
+        status: (['available', 'active', 'paused', 'completed', 'abandoned'].includes(j.status)
+          ? j.status
+          : 'active') as UserJourneyProgress['status'],
+      }));
     },
     staleTime: 1000 * 60 * 5,
   });
@@ -484,12 +595,32 @@ export function useStartJourney(): UseMutationResult<Journey, Error, string> {
   });
 }
 
+/**
+ * Backend completion response (POST /journeys/{id}/steps/{day}/complete).
+ * Mirrors CompletionResponse in backend/routes/journey_engine.py:
+ *   { success, day_completed, journey_complete, next_day,
+ *     progress_percentage, ai_response, mastery_delta }
+ */
+interface RawCompletion {
+  success: boolean;
+  day_completed: number;
+  journey_complete: boolean;
+  next_day: number | null;
+  progress_percentage: number;
+  ai_response?: string;
+  mastery_delta?: number;
+}
+
 export function useCompleteStep(): UseMutationResult<StepResult, Error, { journeyId: string; dayIndex: number }> {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ journeyId, dayIndex }: { journeyId: string; dayIndex: number }) => {
       const { data } = await api.journeys.completeStep(journeyId, dayIndex);
-      return data as StepResult;
+      const raw = data as RawCompletion;
+      return {
+        success: raw.success,
+        progress: raw.progress_percentage ?? 0,
+      };
     },
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.journey(variables.journeyId) });
@@ -504,7 +635,17 @@ export function useCompleteWisdomStep(): UseMutationResult<StepCompletionResult,
   return useMutation({
     mutationFn: async ({ journeyId, dayIndex }: { journeyId: string; dayIndex: number }) => {
       const { data } = await api.journeys.completeStep(journeyId, dayIndex);
-      return data as StepCompletionResult;
+      const raw = data as RawCompletion;
+      // Backend doesn't expose XP/karma as explicit fields yet; the
+      // per-step placeholder rewards (10 XP / 5 karma) match
+      // _mapStep() so the celebration copy stays consistent.
+      return {
+        success: raw.success,
+        xp: 10,
+        karmaPoints: 5,
+        progress: raw.progress_percentage ?? 0,
+        journeyCompleted: raw.journey_complete ?? false,
+      };
     },
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.journeyDetail(variables.journeyId) });
