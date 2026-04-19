@@ -203,7 +203,7 @@ export default function HomeScreen(): React.JSX.Element {
           />
         }
       >
-        {isRefetching && <OmLoader active size={36} />}
+        {isRefetching && <OmLoader size={36} />}
 
         {/* ───────────────────────── 1. Header ───────────────────────── */}
         <Animated.View style={[styles.headerRow, headerEntrance]}>

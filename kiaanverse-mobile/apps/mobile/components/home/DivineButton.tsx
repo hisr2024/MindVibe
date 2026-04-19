@@ -1,16 +1,15 @@
 /**
- * DivineButton — gold gradient CTA button matching the web /dashboard style.
+ * DivineButton — Krishna Aura gradient CTA for the Home screen.
  *
- * Wraps the existing GoldenButton from @kiaanverse/ui so the Home screen
- * uses a single, ceremonial button component with two clear variants:
- *   · primary  → solid gold gradient (Begin Dialogue)
- *   · secondary → outlined gold (Continue Today's Practice)
+ * Delegates to the shared DivineButton in @kiaanverse/ui so the "Begin
+ * Dialogue" and "Continue Today's Practice" CTAs render with the sacred
+ * blue → purple → gold LinearGradient (primary) or the outlined-gold pill
+ * (secondary), with haptics and spring press animation built in.
  */
 
 import React from 'react';
 import { type ViewStyle } from 'react-native';
-import * as Haptics from 'expo-haptics';
-import { GoldenButton } from '@kiaanverse/ui';
+import { DivineButton as UiDivineButton } from '@kiaanverse/ui';
 
 export interface DivineButtonProps {
   readonly title: string;
@@ -27,21 +26,14 @@ export function DivineButton({
   variant = 'primary',
   disabled,
   style,
-  accessibilityHint,
 }: DivineButtonProps): React.JSX.Element {
-  const handlePress = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    onPress();
-  };
-
   return (
-    <GoldenButton
+    <UiDivineButton
       title={title}
-      onPress={handlePress}
-      variant={variant === 'primary' ? 'divine' : 'secondary'}
+      onPress={onPress}
+      variant={variant}
       {...(disabled !== undefined ? { disabled } : {})}
       {...(style !== undefined ? { style } : {})}
-      {...(accessibilityHint !== undefined ? { accessibilityHint } : {})}
     />
   );
 }
