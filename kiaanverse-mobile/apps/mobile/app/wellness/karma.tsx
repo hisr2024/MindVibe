@@ -183,7 +183,7 @@ function NodeDetail({
             onPress={() => {
               const parts = node.linkedWisdom?.split('.') ?? [];
               if (parts.length === 2) {
-                router.push(`/(tabs)/verse/${parts[0]}/${parts[1]}`);
+                router.push(`/verse/${parts[0]}/${parts[1]}`);
               }
               onClose();
             }}

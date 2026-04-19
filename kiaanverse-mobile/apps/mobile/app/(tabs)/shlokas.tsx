@@ -91,7 +91,7 @@ function VerseOfTheDay(): React.JSX.Element | null {
   return (
     <Animated.View entering={FadeInDown.duration(600).springify()} style={styles.vodContainer}>
       <Pressable
-        onPress={() => router.push(`/(tabs)/verse/${v.chapter}/${v.verse}`)}
+        onPress={() => router.push(`/verse/${v.chapter}/${v.verse}`)}
         accessibilityRole="button"
         accessibilityLabel={`Verse of the day: Chapter ${v.chapter}, Verse ${v.verse}`}
       >
@@ -280,7 +280,7 @@ export default function GitaScreen(): React.JSX.Element {
 
   const navigateToVerse = useCallback(
     (chapter: number, verse: number) => {
-      router.push(`/(tabs)/verse/${chapter}/${verse}`);
+      router.push(`/verse/${chapter}/${verse}`);
     },
     [router],
   );
