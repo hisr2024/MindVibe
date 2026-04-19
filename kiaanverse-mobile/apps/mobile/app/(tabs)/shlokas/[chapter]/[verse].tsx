@@ -195,12 +195,20 @@ export default function VerseDetailScreen(): React.JSX.Element {
         showsVerticalScrollIndicator={false}
       >
         <Animated.View entering={FadeInDown.duration(520).springify()}>
-          <ShlokaCard
-            sanskrit={v.sanskrit}
-            transliteration={translit || undefined}
-            meaning={v.english}
-            reference={reference}
-          />
+          {translit ? (
+            <ShlokaCard
+              sanskrit={v.sanskrit}
+              transliteration={translit}
+              meaning={v.english}
+              reference={reference}
+            />
+          ) : (
+            <ShlokaCard
+              sanskrit={v.sanskrit}
+              meaning={v.english}
+              reference={reference}
+            />
+          )}
         </Animated.View>
 
         {v.hindi ? (

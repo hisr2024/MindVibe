@@ -130,7 +130,11 @@ function DailyVerse(): React.JSX.Element {
   if (isLoading || !data?.verse) {
     return (
       <Animated.View entering={FadeIn.duration(400)} style={styles.dailyLoading}>
-        <OmLoader size={56} label={error ? 'The daily verse will return soon…' : undefined} />
+        {error ? (
+          <OmLoader size={56} label="The daily verse will return soon…" />
+        ) : (
+          <OmLoader size={56} />
+        )}
       </Animated.View>
     );
   }
