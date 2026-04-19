@@ -137,6 +137,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     'expo-router',
     [
+      'expo-build-properties',
+      {
+        android: {
+          targetSdkVersion: 35,
+          compileSdkVersion: 35,
+        },
+      },
+    ],
+    [
       'expo-font',
       {
         fonts: ['./assets/fonts/CrimsonText-Regular.ttf'],
