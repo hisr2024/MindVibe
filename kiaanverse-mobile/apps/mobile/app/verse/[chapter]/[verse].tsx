@@ -309,7 +309,7 @@ function PrevNextNav({
 
   const navigate = useCallback(
     (target: { chapter: number; verse: number }) => {
-      router.replace(`/(tabs)/verse/${target.chapter}/${target.verse}`);
+      router.replace(`/verse/${target.chapter}/${target.verse}`);
     },
     [router],
   );
@@ -582,7 +582,7 @@ export default function VerseDetailScreen(): React.JSX.Element {
                 key={rv.verse_id}
                 item={rv}
                 onPress={() =>
-                  router.push(`/(tabs)/verse/${rv.chapter}/${rv.verse}`)
+                  router.push(`/verse/${rv.chapter}/${rv.verse}`)
                 }
               />
             ))}

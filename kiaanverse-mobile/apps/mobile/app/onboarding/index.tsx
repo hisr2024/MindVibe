@@ -225,7 +225,7 @@ export default function OnboardingScreen(): React.JSX.Element {
         })();
       }
 
-      router.replace('/(tabs)/home');
+      router.replace('/(tabs)');
     },
     [
       answers.dailyPracticeTime,

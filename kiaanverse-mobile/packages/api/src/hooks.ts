@@ -53,6 +53,7 @@ import type {
   ViyogaResponse,
   WeeklyInsight,
   WisdomJourneyDetail,
+  WisdomJourneyStep,
   WisdomRoom,
   WisdomRoomMessage,
 } from './types';
@@ -297,12 +298,107 @@ export function useGitaChapterDetail(chapterId: number): UseQueryResult<GitaChap
 // Journeys
 // ---------------------------------------------------------------------------
 
+/**
+ * Backend journey-engine response shapes (snake_case from FastAPI).
+ * Kept local — these mirror TemplateResponse / JourneyResponse / DashboardResponse
+ * in backend/routes/journey_engine.py and only exist so we can map them into
+ * the camelCase JourneyTemplate / Journey types the UI consumes.
+ */
+interface RawTemplate {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  primary_enemy_tags: string[];
+  duration_days: number;
+  difficulty: number;
+  is_featured?: boolean;
+  is_free?: boolean;
+  icon_name?: string | null;
+  color_theme?: string | null;
+}
+
+interface RawJourney {
+  journey_id: string;
+  template_slug: string;
+  title: string;
+  status: string;
+  current_day: number;
+  total_days: number;
+  progress_percentage: number;
+  days_completed: number;
+  started_at?: string | null;
+  last_activity?: string | null;
+  primary_enemies: string[];
+  streak_days: number;
+}
+
+interface RawDashboard {
+  active_journeys: RawJourney[];
+  completed_journeys: number;
+  total_days_practiced: number;
+  current_streak: number;
+}
+
+/**
+ * Map backend integer difficulty (1–5) to the string label the UI renders.
+ * 1 → beginner, 2–3 → intermediate, 4–5 → advanced. Defaults to beginner.
+ */
+function _mapDifficulty(d: number | undefined): 'beginner' | 'intermediate' | 'advanced' {
+  if (d === undefined || d <= 1) return 'beginner';
+  if (d <= 3) return 'intermediate';
+  return 'advanced';
+}
+
+function _mapTemplate(t: RawTemplate): JourneyTemplate {
+  const enemy = t.primary_enemy_tags?.[0] ?? '';
+  return {
+    id: t.id,
+    title: t.title,
+    description: t.description ?? '',
+    durationDays: t.duration_days,
+    // The screen's resolveEnemyKey() searches the `category` string for an
+    // enemy name (krodha/bhaya/...), so we surface the primary enemy tag
+    // here. This keeps existing UI logic working without a screen change.
+    category: enemy,
+    // Extras consumed by the discover card via a structural cast.
+    ...({
+      slug: t.slug,
+      difficulty: _mapDifficulty(t.difficulty),
+      primaryEnemyTags: t.primary_enemy_tags ?? [],
+    } as Partial<JourneyTemplate>),
+  };
+}
+
+function _mapJourney(j: RawJourney): Journey {
+  // Map snake_case → camelCase, derive `category` from the first enemy tag
+  // (same convention as templates above), and infer status enum.
+  const status = (
+    ['available', 'active', 'paused', 'completed', 'abandoned'].includes(j.status)
+      ? j.status
+      : 'active'
+  ) as Journey['status'];
+  return {
+    id: j.journey_id,
+    title: j.title,
+    description: '',
+    durationDays: j.total_days,
+    status,
+    currentDay: j.current_day,
+    completedSteps: j.days_completed,
+    category: j.primary_enemies?.[0] ?? '',
+  };
+}
+
 export function useJourneyTemplates(): UseQueryResult<JourneyTemplate[]> {
   return useQuery({
     queryKey: queryKeys.journeyTemplates,
     queryFn: async () => {
+      // Backend returns TemplateListResponse: { templates, total, limit, offset }
       const { data } = await api.journeys.templates();
-      return data as JourneyTemplate[];
+      const raw = data as { templates?: RawTemplate[] } | RawTemplate[];
+      const list = Array.isArray(raw) ? raw : (raw.templates ?? []);
+      return list.map(_mapTemplate);
     },
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
@@ -312,8 +408,11 @@ export function useJourneys(status?: string): UseQueryResult<Journey[]> {
   return useQuery({
     queryKey: queryKeys.journeys(status),
     queryFn: async () => {
+      // Backend returns JourneyListResponse: { journeys, total, limit, offset }
       const { data } = await api.journeys.list(status);
-      return data as Journey[];
+      const raw = data as { journeys?: RawJourney[] } | RawJourney[];
+      const list = Array.isArray(raw) ? raw : (raw.journeys ?? []);
+      return list.map(_mapJourney);
     },
   });
 }
@@ -323,7 +422,7 @@ export function useJourney(journeyId: string): UseQueryResult<Journey> {
     queryKey: queryKeys.journey(journeyId),
     queryFn: async () => {
       const { data } = await api.journeys.get(journeyId);
-      return data as Journey;
+      return _mapJourney(data as RawJourney);
     },
     enabled: journeyId.length > 0,
   });
@@ -337,13 +436,9 @@ export function useJourneyDashboard(): UseQueryResult<DashboardData> {
       //   { active_journeys, completed_journeys, current_streak, ... }
       // The mobile view-model consumes camelCase with renamed fields.
       const { data } = await api.journeys.dashboard();
-      const raw = (data ?? {}) as {
-        active_journeys?: Journey[];
-        completed_journeys?: number;
-        current_streak?: number;
-      };
+      const raw = data as Partial<RawDashboard>;
       return {
-        activeJourneys: raw.active_journeys ?? [],
+        activeJourneys: (raw.active_journeys ?? []).map(_mapJourney),
         completedCount: raw.completed_journeys ?? 0,
         streakDays: raw.current_streak ?? 0,
       };
@@ -351,30 +446,136 @@ export function useJourneyDashboard(): UseQueryResult<DashboardData> {
   });
 }
 
-/** Full wisdom journey detail with all steps. */
+/**
+ * Backend step response (GET /journeys/{id}/steps/{day_index}).
+ * Mirrors StepResponse in backend/routes/journey_engine.py.
+ */
+interface RawStep {
+  step_id: string;
+  journey_id: string;
+  day_index: number;
+  step_title: string;
+  teaching: string;
+  guided_reflection?: string[];
+  verse_refs?: Array<{ chapter: number; verse: number }>;
+  is_completed: boolean;
+}
+
+function _mapStep(s: RawStep): WisdomJourneyStep {
+  const firstVerse = s.verse_refs?.[0];
+  return {
+    id: s.step_id,
+    dayIndex: s.day_index,
+    title: s.step_title,
+    type: 'lesson',
+    content: s.teaching ?? '',
+    verseRef: firstVerse ? `${firstVerse.chapter}.${firstVerse.verse}` : undefined,
+    reflection: (s.guided_reflection ?? []).join('\n\n') || undefined,
+    isCompleted: s.is_completed,
+    // Backend does not expose per-step XP/karma yet — defaults match the
+    // mobile UI's placeholder reward copy so the detail card renders.
+    xpReward: 10,
+    karmaReward: 5,
+  };
+}
+
+/**
+ * Full wisdom journey detail with all steps.
+ *
+ * The backend has no bulk "journey with steps" endpoint — it exposes the
+ * journey meta at /journeys/{id} and each step individually at
+ * /journeys/{id}/steps/{day_index}. We compose the two into the shape the
+ * detail + step-player screens render. Steps are fetched with
+ * allSettled so one transient 5xx doesn't blank the whole page.
+ */
 export function useWisdomJourneyDetail(journeyId: string): UseQueryResult<WisdomJourneyDetail> {
   return useQuery({
     queryKey: queryKeys.journeyDetail(journeyId),
     queryFn: async () => {
-      const { data } = await api.journeys.detail(journeyId);
-      return data as WisdomJourneyDetail;
+      const { data: journeyRaw } = await api.journeys.get(journeyId);
+      const j = journeyRaw as RawJourney;
+
+      const total = Math.max(1, j.total_days);
+      const settled = await Promise.allSettled(
+        Array.from({ length: total }, (_, i) =>
+          api.journeys.step(journeyId, i + 1),
+        ),
+      );
+
+      const steps: WisdomJourneyStep[] = settled.map((res, i) => {
+        const dayIndex = i + 1;
+        if (res.status === 'fulfilled') {
+          return _mapStep(res.value.data as RawStep);
+        }
+        // Fallback: keep the day selector usable even if a step fetch
+        // failed — mark completed days based on cumulative progress.
+        return {
+          id: `${j.journey_id}-day-${dayIndex}`,
+          dayIndex,
+          title: `Day ${dayIndex}`,
+          type: 'lesson',
+          content: '',
+          isCompleted: dayIndex <= j.days_completed,
+          xpReward: 10,
+          karmaReward: 5,
+        };
+      });
+
+      const mapped = _mapJourney(j);
+      const detail: WisdomJourneyDetail = {
+        id: mapped.id,
+        title: mapped.title,
+        description: mapped.description,
+        durationDays: mapped.durationDays,
+        status: mapped.status,
+        currentDay: mapped.currentDay,
+        completedSteps: mapped.completedSteps,
+        // The backend enum doesn't map cleanly to JourneyCategory
+        // ('beginner_paths' / 'deep_dives' / '21_day_challenges'), so we
+        // pick the closest bucket from duration. Screens only use this
+        // field for grouping — never for business logic.
+        category: total >= 21 ? '21_day_challenges' : total >= 14 ? 'deep_dives' : 'beginner_paths',
+        difficulty: 'beginner',
+        steps,
+        totalXp: steps.reduce((sum, s) => sum + s.xpReward, 0),
+        earnedXp: steps.filter((s) => s.isCompleted).reduce((sum, s) => sum + s.xpReward, 0),
+      };
+      return detail;
     },
     staleTime: 1000 * 60 * 5,
     enabled: journeyId.length > 0,
   });
 }
 
-/** User progress across all journeys (via dashboard).
- *  Backend dashboard returns a single object (not an array) — we extract
- *  the active_journeys list and project it into the UserJourneyProgress
- *  shape the caller expects. */
+/**
+ * User progress across all journeys — derived from dashboard active_journeys.
+ * The hook previously cast the DashboardResponse object to an array, which
+ * made every consumer see an empty list. We now project the active journeys
+ * (the only per-journey data the dashboard returns) into UserJourneyProgress.
+ */
 export function useJourneyProgress(): UseQueryResult<UserJourneyProgress[]> {
   return useQuery({
     queryKey: queryKeys.journeyProgress,
     queryFn: async () => {
       const { data } = await api.journeys.dashboard();
-      const raw = (data ?? {}) as { active_journeys?: unknown[] };
-      return (raw.active_journeys ?? []) as UserJourneyProgress[];
+      const raw = data as Partial<RawDashboard>;
+      const journeys = raw.active_journeys ?? [];
+      return journeys.map((j): UserJourneyProgress => ({
+        journeyId: j.journey_id,
+        title: j.title,
+        category: (j.total_days >= 21
+          ? '21_day_challenges'
+          : j.total_days >= 14
+            ? 'deep_dives'
+            : 'beginner_paths') as UserJourneyProgress['category'],
+        completedSteps: j.days_completed,
+        totalSteps: j.total_days,
+        earnedXp: j.days_completed * 10,
+        totalXp: j.total_days * 10,
+        status: (['available', 'active', 'paused', 'completed', 'abandoned'].includes(j.status)
+          ? j.status
+          : 'active') as UserJourneyProgress['status'],
+      }));
     },
     staleTime: 1000 * 60 * 5,
   });
@@ -389,7 +590,7 @@ export function useStartJourney(): UseMutationResult<Journey, Error, string> {
   return useMutation({
     mutationFn: async (templateId: string) => {
       const { data } = await api.journeys.start(templateId);
-      return data as Journey;
+      return _mapJourney(data as RawJourney);
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['journeys'] });
@@ -397,17 +598,31 @@ export function useStartJourney(): UseMutationResult<Journey, Error, string> {
   });
 }
 
+/**
+ * Backend completion response (POST /journeys/{id}/steps/{day}/complete).
+ * Mirrors CompletionResponse in backend/routes/journey_engine.py:
+ *   { success, day_completed, journey_complete, next_day,
+ *     progress_percentage, ai_response, mastery_delta }
+ */
+interface RawCompletion {
+  success: boolean;
+  day_completed: number;
+  journey_complete: boolean;
+  next_day: number | null;
+  progress_percentage: number;
+  ai_response?: string;
+  mastery_delta?: number;
+}
+
 export function useCompleteStep(): UseMutationResult<StepResult, Error, { journeyId: string; dayIndex: number }> {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ journeyId, dayIndex }: { journeyId: string; dayIndex: number }) => {
       const { data } = await api.journeys.completeStep(journeyId, dayIndex);
-      // Backend CompletionResponse has `progress_percentage`; mobile hook
-      // callers read `progress` — normalise here.
-      const raw = (data ?? {}) as { success?: boolean; progress_percentage?: number; progress?: number };
+      const raw = data as RawCompletion;
       return {
-        success: raw.success ?? true,
-        progress: raw.progress ?? raw.progress_percentage ?? 0,
+        success: raw.success,
+        progress: raw.progress_percentage ?? 0,
       };
     },
     onSuccess: (_data, variables) => {
@@ -417,16 +632,27 @@ export function useCompleteStep(): UseMutationResult<StepResult, Error, { journe
   });
 }
 
-/** Complete a wisdom journey step by day index (returns XP + karma).
- *  Backend CompletionResponse lacks XP / karma fields today; we pass the
- *  raw body through and let TS type-erasure surface the fields that do
- *  exist (success, progress_percentage, day_completed, journey_complete). */
+/**
+ * Complete a wisdom journey step by day index. Returns the per-step
+ * celebration payload the UI renders (XP / karma / journey completion).
+ *
+ * The backend CompletionResponse does not yet include XP or karma fields,
+ * so we pair the real success / progress / journey-complete flags with
+ * the same placeholder rewards (10 XP, 5 karma) used by _mapStep().
+ */
 export function useCompleteWisdomStep(): UseMutationResult<StepCompletionResult, Error, { journeyId: string; dayIndex: number }> {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ journeyId, dayIndex }: { journeyId: string; dayIndex: number }) => {
       const { data } = await api.journeys.completeStep(journeyId, dayIndex);
-      return data as unknown as StepCompletionResult;
+      const raw = data as RawCompletion;
+      return {
+        success: raw.success,
+        xp: 10,
+        karmaPoints: 5,
+        progress: raw.progress_percentage ?? 0,
+        journeyCompleted: raw.journey_complete ?? false,
+      };
     },
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.journeyDetail(variables.journeyId) });
@@ -785,12 +1011,73 @@ export function useRelationshipCompass(): UseMutationResult<RelationshipCompassR
   });
 }
 
-/** Relationship guidance returning extended RelationshipGuidance type. */
+/**
+ * Parse a backend "BG c.v" reference string into chapter/verse numbers.
+ * Returns null if the format isn't recognised.
+ */
+function _parseGitaReference(ref: string | undefined): { chapter: number; verse: number } | null {
+  if (!ref) return null;
+  const match = /BG\s*(\d+)\.(\d+)/i.exec(ref);
+  if (!match) return null;
+  return { chapter: Number(match[1]), verse: Number(match[2]) };
+}
+
+/**
+ * Relationship guidance returning extended RelationshipGuidance type.
+ *
+ * Maps the backend's `compass_guidance` response (routes/relationship_compass.py)
+ * into the screen-expected RelationshipGuidance shape:
+ *   - guidance        ← `response`
+ *   - dharma_principles ← `relationship_teachings.core_principles`
+ *   - reflection_prompts ← derived from compass_guidance sections
+ *   - verse           ← parsed from gita_context.sources[0]
+ */
 export function useRelationshipGuide(): UseMutationResult<RelationshipGuidance, Error, { question: string; context?: string }> {
   return useMutation({
     mutationFn: async ({ question, context }) => {
       const { data } = await api.relationship.guide(question, context);
-      return data as RelationshipGuidance;
+      const raw = data as {
+        response?: string;
+        compass_guidance?: Record<string, unknown> | unknown[];
+        relationship_teachings?: { core_principles?: string[]; key_teaching?: string };
+        gita_context?: { sources?: Array<{ reference?: string; reference_if_any?: string }> };
+        emotion_insight?: string;
+      };
+
+      const ref = raw.gita_context?.sources?.[0];
+      const parsed = _parseGitaReference(ref?.reference ?? ref?.reference_if_any);
+
+      // Pull reflection prompts from any "reflection" / "questions" section
+      // the model produced. Falls back to an empty list if compass_guidance
+      // is shaped as a string body instead of structured sections.
+      const reflectionPrompts: string[] = [];
+      if (raw.compass_guidance && !Array.isArray(raw.compass_guidance)) {
+        for (const [key, value] of Object.entries(raw.compass_guidance)) {
+          if (/reflection|question|prompt/i.test(key) && Array.isArray(value)) {
+            for (const item of value) {
+              if (typeof item === 'string') reflectionPrompts.push(item);
+            }
+          }
+        }
+      }
+
+      const result: RelationshipGuidance = {
+        question,
+        guidance: raw.response ?? raw.relationship_teachings?.key_teaching ?? '',
+        dharma_principles: raw.relationship_teachings?.core_principles ?? [],
+        reflection_prompts: reflectionPrompts,
+        ...(parsed
+          ? {
+              verse: {
+                chapter: parsed.chapter,
+                verse: parsed.verse,
+                text: '',
+                translation: raw.emotion_insight ?? '',
+              },
+            }
+          : {}),
+      };
+      return result;
     },
   });
 }
@@ -885,21 +1172,115 @@ export function useViyogaGuide(): UseMutationResult<ViyogaResult, Error, string>
   });
 }
 
-/** Viyoga chat with session support. */
+/**
+ * Viyoga chat with session support.
+ *
+ * Maps the backend's chat response (routes/viyoga.py) — `assistant`,
+ * `citations`, `karma_yoga_insight` — into the screen-expected
+ * ViyogaResponse shape with `message`, `session_id`, optional `verse`.
+ * The backend doesn't echo the session id, so we round-trip the one
+ * the caller passed in (or empty string for the first turn).
+ */
 export function useViyogaChat(): UseMutationResult<ViyogaResponse, Error, { message: string; sessionId?: string }> {
   return useMutation({
     mutationFn: async ({ message, sessionId }) => {
       const { data } = await api.viyoga.chat(message, sessionId);
-      return data as ViyogaResponse;
+      const raw = data as {
+        assistant?: string;
+        citations?: Array<{ reference_if_any?: string }>;
+        karma_yoga_insight?: { teaching?: string; verse?: string; remedy?: string };
+        error?: string;
+      };
+
+      // Surface server-side validation errors (empty/too-long message)
+      // so the caller's catch block runs the same fallback path it
+      // would for a network failure.
+      if (raw.error) {
+        throw new Error(raw.error);
+      }
+
+      // Prefer the first citation; fall back to the karma-yoga insight
+      // verse string ("BG 2.47"-style) so the optional verse field is
+      // populated even when no citations were attached.
+      const ref =
+        raw.citations?.[0]?.reference_if_any ?? raw.karma_yoga_insight?.verse;
+      const parsed = _parseGitaReference(ref);
+
+      const result: ViyogaResponse = {
+        message: raw.assistant ?? '',
+        session_id: sessionId ?? '',
+        ...(parsed
+          ? {
+              verse: {
+                chapter: parsed.chapter,
+                verse: parsed.verse,
+                text: raw.karma_yoga_insight?.teaching ?? '',
+              },
+            }
+          : {}),
+        ...(raw.karma_yoga_insight?.remedy
+          ? { practice: raw.karma_yoga_insight.remedy }
+          : {}),
+      };
+      return result;
     },
   });
 }
 
+/**
+ * Ardha thought-reframing.
+ *
+ * Maps the backend's `/api/ardha/reframe` response (routes/ardha.py) —
+ * `response`, `sources`, `ardha_analysis` — into the
+ * screen-expected ArdhaReframeResponse:
+ *   - original_situation   ← echo of the caller's situation
+ *   - reframed_perspective ← `response`
+ *   - verse                ← parsed from `sources[0].reference`
+ *   - affirmation          ← derived from the recommended pillar's
+ *                            compliance_test, which is always a short,
+ *                            uplifting Sanskrit-grounded line.
+ */
 export function useArdhaReframe(): UseMutationResult<ArdhaReframeResponse, Error, { situation: string; perspective?: string }> {
   return useMutation({
     mutationFn: async ({ situation, perspective }) => {
       const { data } = await api.ardha.reframe(situation, perspective);
-      return data as ArdhaReframeResponse;
+      const raw = data as {
+        response?: string;
+        sources?: Array<{ reference?: string }>;
+        ardha_analysis?: {
+          pillars?: Array<{
+            sanskrit_name?: string;
+            name?: string;
+            compliance_test?: string;
+          }>;
+          crisis_detected?: boolean;
+        };
+      };
+
+      const parsed = _parseGitaReference(raw.sources?.[0]?.reference);
+      const firstPillar = raw.ardha_analysis?.pillars?.[0];
+      const affirmation =
+        firstPillar?.compliance_test
+        ?? (firstPillar?.sanskrit_name
+          ? `I rest in ${firstPillar.sanskrit_name}.`
+          : 'I am the witness; the storm is not me.');
+
+      const result: ArdhaReframeResponse = {
+        original_situation: situation,
+        reframed_perspective: raw.response ?? '',
+        affirmation,
+        ...(parsed
+          ? {
+              verse: {
+                chapter: parsed.chapter,
+                verse: parsed.verse,
+                text: '',
+                translation: '',
+              },
+            }
+          : {}),
+      };
+      return result;
     },
   });
 }
