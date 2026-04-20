@@ -183,7 +183,7 @@ function NodeDetail({
             onPress={() => {
               const parts = node.linkedWisdom?.split('.') ?? [];
               if (parts.length === 2) {
-                router.push(`/verse/${parts[0]}/${parts[1]}`);
+                router.push(`/(tabs)/shlokas/${parts[0]}/${parts[1]}`);
               }
               onClose();
             }}
