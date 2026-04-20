@@ -51,11 +51,15 @@ import { DaySelector } from '../../components/journey/DaySelector';
 // Constants
 // ---------------------------------------------------------------------------
 
-/** Enemy colors mapped by journey category keyword for theming. */
+/**
+ * Enemy colors mapped by journey category keyword for theming.
+ * Keys match the backend's `EnemyType` enum (six shadripu) — kama, krodha,
+ * lobha, moha, mada, matsarya. Bhaya (fear) is NOT one of the shadripu.
+ */
 const ENEMY_COLORS: Record<string, string> = {
-  krodha: '#ef4444',
-  bhaya: '#3b82f6',
   kama: '#f59e0b',
+  krodha: '#ef4444',
+  lobha: '#10b981',
   moha: '#8b5cf6',
   mada: '#ec4899',
   matsarya: '#06b6d4',
@@ -63,12 +67,12 @@ const ENEMY_COLORS: Record<string, string> = {
 
 /** Sanskrit names for the six inner enemies (shadripu). */
 const ENEMY_SANSKRIT: Record<string, string> = {
-  krodha: '\u0915\u094D\u0930\u094B\u0927',      // Anger
-  bhaya: '\u092D\u092F',                          // Fear
-  kama: '\u0915\u093E\u092E',                     // Desire
-  moha: '\u092E\u094B\u0939',                     // Delusion
-  mada: '\u092E\u0926',                           // Pride
-  matsarya: '\u092E\u093E\u0924\u094D\u0938\u0930\u094D\u092F', // Jealousy
+  kama: '\u0915\u093E\u092E',                                            // Desire
+  krodha: '\u0915\u094D\u0930\u094B\u0927',                            // Anger
+  lobha: '\u0932\u094B\u092D',                                           // Greed
+  moha: '\u092E\u094B\u0939',                                            // Delusion
+  mada: '\u092E\u0926',                                                   // Pride
+  matsarya: '\u092E\u093E\u0924\u094D\u0938\u0930\u094D\u092F',     // Jealousy
 };
 
 /** Status badge styling by journey status. */

@@ -68,11 +68,18 @@ import { useTranslation } from '@kiaanverse/i18n';
 
 type TabKey = 'discover' | 'active' | 'completed';
 
-/** Inner enemy metadata — Sanskrit name, English translation, and accent color. */
+/**
+ * Inner enemy metadata — Sanskrit name, English translation, and accent color.
+ *
+ * The keys here MUST match the backend's `EnemyType` enum (six shadripu):
+ *   kama · krodha · lobha · moha · mada · matsarya
+ *
+ * (Bhaya / fear is NOT one of the shadripu and is intentionally absent.)
+ */
 const ENEMY_INFO: Record<string, { name: string; sanskrit: string; color: string }> = {
-  krodha: { name: 'Anger', sanskrit: 'क्रोध', color: '#ef4444' },
-  bhaya: { name: 'Fear', sanskrit: 'भय', color: '#3b82f6' },
   kama: { name: 'Desire', sanskrit: 'काम', color: '#f59e0b' },
+  krodha: { name: 'Anger', sanskrit: 'क्रोध', color: '#ef4444' },
+  lobha: { name: 'Greed', sanskrit: 'लोभ', color: '#10b981' },
   moha: { name: 'Delusion', sanskrit: 'मोह', color: '#8b5cf6' },
   mada: { name: 'Pride', sanskrit: 'मद', color: '#ec4899' },
   matsarya: { name: 'Envy', sanskrit: 'मत्सर्य', color: '#06b6d4' },
