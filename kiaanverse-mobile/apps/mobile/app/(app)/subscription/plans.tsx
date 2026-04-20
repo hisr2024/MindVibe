@@ -19,6 +19,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -266,6 +267,23 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
             cancelled at least 24 hours before the end of the current period.
             Manage or cancel anytime in your store account.
           </Text>
+          <View style={styles.legalLinkRow}>
+            <TouchableOpacity
+              onPress={() => {
+                void Linking.openURL('https://kiaanverse.com/terms');
+              }}
+            >
+              <Text style={styles.legalLink}>Terms of Service</Text>
+            </TouchableOpacity>
+            <Text style={styles.legalDot}>·</Text>
+            <TouchableOpacity
+              onPress={() => {
+                void Linking.openURL('https://kiaanverse.com/privacy');
+              }}
+            >
+              <Text style={styles.legalLink}>Privacy Policy</Text>
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity onPress={handleRestore} disabled={restoring}>
             <Text style={styles.restoreText}>
               {restoring ? 'Restoring…' : 'Restore purchases'}
@@ -449,6 +467,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Outfit-Medium',
     color: GOLD,
     marginTop: 4,
+  },
+  legalLinkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 2,
+  },
+  legalLink: {
+    fontSize: 12,
+    fontFamily: 'Outfit-Regular',
+    color: 'rgba(240,235,225,0.55)',
+    textDecorationLine: 'underline',
+  },
+  legalDot: {
+    fontSize: 12,
+    color: 'rgba(240,235,225,0.35)',
   },
   stickyBottom: {
     position: 'absolute',

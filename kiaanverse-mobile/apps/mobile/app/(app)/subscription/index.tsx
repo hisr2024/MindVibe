@@ -13,7 +13,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Linking, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import {
@@ -25,6 +25,7 @@ import {
 } from '@kiaanverse/ui';
 import {
   apiClient,
+  openManageSubscription,
   restorePurchases,
   TIER_CONFIGS,
 } from '@kiaanverse/api';
@@ -42,20 +43,9 @@ interface UserSubscriptionResponse {
     price_monthly?: number;
     price_yearly?: number;
     currency?: string;
+    product_id?: string;
   } | null;
   effective_tier: SubscriptionTier | null;
-}
-
-const ANDROID_PACKAGE = 'com.kiaanverse.app';
-
-function manageSubscriptionUrl(productId?: string): string {
-  if (Platform.OS === 'ios') {
-    return 'https://apps.apple.com/account/subscriptions';
-  }
-  if (productId) {
-    return `https://play.google.com/store/account/subscriptions?sku=${productId}&package=${ANDROID_PACKAGE}`;
-  }
-  return 'https://play.google.com/store/account/subscriptions';
 }
 
 export default function MySubscriptionScreen(): React.JSX.Element {
@@ -92,8 +82,8 @@ export default function MySubscriptionScreen(): React.JSX.Element {
 
   const handleManage = useCallback(() => {
     void Haptics.selectionAsync();
-    const url = manageSubscriptionUrl();
-    Linking.openURL(url).catch(() => {
+    const sku = subscription?.plan?.product_id;
+    openManageSubscription(sku).catch(() => {
       Alert.alert(
         'Unable to open store',
         Platform.OS === 'ios'
@@ -101,7 +91,7 @@ export default function MySubscriptionScreen(): React.JSX.Element {
           : 'Please open the Google Play Store → Menu → Subscriptions.',
       );
     });
-  }, []);
+  }, [subscription?.plan?.product_id]);
 
   const handleRestore = useCallback(async () => {
     setRestoring(true);

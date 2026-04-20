@@ -32,7 +32,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider, useTheme, colors, LoadingMandala } from '@kiaanverse/ui';
 import { I18nProvider } from '@kiaanverse/i18n';
-import { api, type SyncQueueItem } from '@kiaanverse/api';
+import {
+  api,
+  type SyncQueueItem,
+  initializeIAP,
+  disconnectIAP,
+  setIapAccountTag,
+} from '@kiaanverse/api';
 import { useAuthStore, useThemeStore, useUserPreferencesStore, useSyncQueueStore, startSyncOnForeground, useSubscriptionStore } from '@kiaanverse/store';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useNotifications } from '../hooks/useNotifications';
@@ -147,7 +153,7 @@ function AuthGate({ children }: { children: React.ReactNode }): React.JSX.Elemen
 
 function AppContent(): React.JSX.Element {
   const { theme } = useTheme();
-  const { status, initialize, checkBiometricAvailability } = useAuthStore();
+  const { status, user, initialize, checkBiometricAvailability } = useAuthStore();
   const hydrateSubscription = useSubscriptionStore((s) => s.hydrate);
   const { isOnline } = useNetworkStatus();
   const pendingCount = useSyncQueueStore((s) => s.queue.length);
@@ -210,6 +216,26 @@ function AppContent(): React.JSX.Element {
     const cleanup = startSyncOnForeground(executeSyncItem);
     return cleanup;
   }, []);
+
+  // Play Billing / StoreKit lifecycle — connect when the user is signed
+  // in so `flushFailedPurchasesCachedAsPendingAndroid` can replay any
+  // purchase cached by Play from a prior crash, and disconnect on logout
+  // to release the native connection. The `setIapAccountTag` call binds
+  // each purchase to the signed-in user so replayed receipts can't be
+  // applied to someone else's account.
+  useEffect(() => {
+    if (status !== 'authenticated') {
+      setIapAccountTag(null);
+      return;
+    }
+    setIapAccountTag(user?.id ?? null);
+    void initializeIAP().catch((err) => {
+      if (__DEV__) console.warn('[iap] initializeIAP failed:', err);
+    });
+    return () => {
+      void disconnectIAP().catch(() => undefined);
+    };
+  }, [status, user?.id]);
 
   // Initialize notification system (channels, handlers, scheduling)
   useNotifications();

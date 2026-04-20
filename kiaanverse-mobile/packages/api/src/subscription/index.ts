@@ -22,6 +22,8 @@ export {
   purchaseSubscription,
   restorePurchases,
   verifyReceipt,
+  setIapAccountTag,
+  openManageSubscription,
   IAPError,
   type IAPProduct,
   type PurchaseResult,
