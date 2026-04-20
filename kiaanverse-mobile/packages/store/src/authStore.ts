@@ -429,10 +429,21 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           isOnboarded: state.isOnboarded,
           biometricEnabled: state.biometricEnabled,
         }),
-        // Mark hydration complete so AuthGate can wait for persisted isOnboarded
-        onRehydrateStorage: () => (state) => {
+        // Mark hydration complete so AuthGate can wait for persisted isOnboarded.
+        // This MUST run in both success and failure paths — if SecureStore is
+        // unreadable on first launch or corrupted we still need to unblock
+        // the AuthGate, otherwise the app is stuck on the splash screen.
+        onRehydrateStorage: () => (state, error) => {
+          if (error) {
+            // Storage read failed — fall through with default state so the
+            // app can continue to (auth)/login rather than hanging.
+            useAuthStore.setState({ hasHydrated: true });
+            return;
+          }
           if (state) {
             state.hasHydrated = true;
+          } else {
+            useAuthStore.setState({ hasHydrated: true });
           }
         },
       },
