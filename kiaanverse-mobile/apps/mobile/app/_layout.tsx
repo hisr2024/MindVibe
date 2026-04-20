@@ -294,6 +294,9 @@ function AppContent(): React.JSX.Element {
 
           {/* Settings */}
           <Stack.Screen name="settings" />
+
+          {/* Profile sub-screens (notifications, language, billing, legal, etc.) */}
+          <Stack.Screen name="(app)" />
         </Stack>
       </AuthGate>
     </View>
