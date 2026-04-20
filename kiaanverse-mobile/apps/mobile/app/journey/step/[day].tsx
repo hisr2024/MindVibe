@@ -59,11 +59,15 @@ import { StepContent } from '../../../components/journey/StepContent';
 
 const MAX_REFLECTION_LENGTH = 5000;
 
-/** Enemy colors for journey theming. */
+/**
+ * Enemy colors for journey theming.
+ * Keys match the backend's `EnemyType` enum (six shadripu) — kama, krodha,
+ * lobha, moha, mada, matsarya. Bhaya (fear) is NOT one of the shadripu.
+ */
 const ENEMY_COLORS: Record<string, string> = {
-  krodha: '#ef4444',
-  bhaya: '#3b82f6',
   kama: '#f59e0b',
+  krodha: '#ef4444',
+  lobha: '#10b981',
   moha: '#8b5cf6',
   mada: '#ec4899',
   matsarya: '#06b6d4',
@@ -92,9 +96,9 @@ const DAY_META: Record<number, { theme: string; focus: string }> = {
  * Falls back to 'divine' if no mapping exists.
  */
 const ENEMY_GRADIENT_VARIANT: Record<string, string> = {
-  krodha: 'release',
-  bhaya: 'peace',
   kama: 'renewal',
+  krodha: 'release',
+  lobha: 'healing',
   moha: 'healing',
   mada: 'divine',
   matsarya: 'peace',
