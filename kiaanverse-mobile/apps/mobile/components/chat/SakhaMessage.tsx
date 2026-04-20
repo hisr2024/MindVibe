@@ -32,7 +32,7 @@ import Animated, {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let MandalaSpin: React.ComponentType<any> | null = null;
 try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports, global-require
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires, global-require
   MandalaSpin = require('@kiaanverse/ui').MandalaSpin ?? null;
 } catch {
   MandalaSpin = null;

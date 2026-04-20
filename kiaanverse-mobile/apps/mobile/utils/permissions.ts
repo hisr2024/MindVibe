@@ -21,7 +21,7 @@
 
 import { Platform } from 'react-native';
 import { Audio } from 'expo-av';
-import * as Camera from 'expo-camera';
+import { Camera } from 'expo-camera';
 import * as Notifications from 'expo-notifications';
 import * as LocalAuthentication from 'expo-local-authentication';
 

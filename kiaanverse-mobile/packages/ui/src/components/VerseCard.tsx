@@ -71,12 +71,12 @@ function VerseCardInner({
     if (hasCommentary) {
       const toExpanded = !expanded;
       setExpanded(toExpanded);
-      // eslint-disable-next-line react-hooks/immutability
+      // Reanimated shared-value mutation — idiomatic worklet pattern.
       commentaryHeight.value = withTiming(toExpanded ? 1 : 0, {
         duration: duration.normal,
         easing: Easing.inOut(Easing.ease),
       });
-      // eslint-disable-next-line react-hooks/immutability
+      // Reanimated shared-value mutation — idiomatic worklet pattern.
       commentaryOpacity.value = withTiming(toExpanded ? 1 : 0, {
         duration: duration.normal,
         easing: Easing.inOut(Easing.ease),

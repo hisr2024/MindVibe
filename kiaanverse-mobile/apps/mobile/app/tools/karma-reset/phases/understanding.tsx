@@ -229,26 +229,26 @@ export default function UnderstandingPhase(): React.JSX.Element {
                     application: apiWisdom.wisdom,
                   }]);
                 } else {
-                  useFallback();
+                  applyFallback();
                 }
                 setIsLoading(false);
               },
               onError: () => {
-                if (!cancelled) useFallback();
+                if (!cancelled) applyFallback();
               },
             },
           );
         } else {
           // No session — use fallback after brief pause for UX feel
           await new Promise((resolve) => setTimeout(resolve, 1200));
-          if (!cancelled) useFallback();
+          if (!cancelled) applyFallback();
         }
       } catch {
-        if (!cancelled) useFallback();
+        if (!cancelled) applyFallback();
       }
     }
 
-    function useFallback(): void {
+    function applyFallback(): void {
       const fallback = FALLBACK_GUIDANCE[patternId ?? 'kama'] ?? FALLBACK_GUIDANCE.kama;
       setGuidance(fallback ?? null);
       if (fallback) {

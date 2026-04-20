@@ -31,9 +31,11 @@ export { createAppQueryClient, createAppPersister } from './queryClient';
 export { gitaCache } from './cache/gitaCache';
 
 // Subscription (4-tier: free/bhakta/sadhak/siddha)
+// NOTE: The lowercase 'SubscriptionTier' from constants.ts is exposed here as
+// 'SubscriptionPlanId' to avoid colliding with the uppercase
+// 'SubscriptionTier' from ./types that the User interface uses.
 export {
-  type SubscriptionTier as VibePlayerTier,
-  type SubscriptionTier,
+  type SubscriptionTier as SubscriptionPlanId,
   type BillingPeriod,
   type TierConfig,
   TIER_CONFIGS,

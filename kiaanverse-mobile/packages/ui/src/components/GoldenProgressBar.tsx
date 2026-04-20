@@ -54,13 +54,13 @@ function GoldenProgressBarInner({
   const shimmerX = useSharedValue(-1);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability
+    // Reanimated shared-value mutation — idiomatic worklet pattern.
     widthValue.value = withSpring(clampedProgress, spring.default);
   }, [clampedProgress, widthValue]);
 
   useEffect(() => {
     if (!shimmer || clampedProgress === 0) return;
-    // eslint-disable-next-line react-hooks/immutability
+    // Reanimated shared-value mutation — idiomatic worklet pattern.
     shimmerX.value = withRepeat(
       withTiming(2, { duration: duration.sacred * 2, easing: Easing.inOut(Easing.ease) }),
       -1,

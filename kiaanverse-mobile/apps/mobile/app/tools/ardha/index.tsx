@@ -24,7 +24,7 @@ import {
   spacing,
 } from '@kiaanverse/ui';
 import { useArdhaReframe } from '@kiaanverse/api';
-import type { ArdhaReframeResponse } from '@kiaanverse/api/src/types';
+import type { ArdhaReframeResponse } from '@kiaanverse/api';
 
 export default function ArdhaScreen(): React.JSX.Element {
   const router = useRouter();

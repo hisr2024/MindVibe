@@ -56,7 +56,7 @@ function DivineBackgroundInner({
 
   useEffect(() => {
     if (disableAura) return;
-    // eslint-disable-next-line react-hooks/immutability
+    // Reanimated shared-value mutation — idiomatic worklet pattern.
     auraOpacity.value = withRepeat(
       withSequence(
         withTiming(1, { duration: SACRED_DURATION, easing: Easing.inOut(Easing.ease) }),

@@ -22,7 +22,7 @@ import Animated, {
   cancelAnimation,
 } from 'react-native-reanimated';
 import { Text, colors, spacing, radii } from '@kiaanverse/ui';
-import type { MeditationTrack } from '@kiaanverse/api/src/types';
+import type { MeditationTrack } from '@kiaanverse/api';
 
 interface TrackCardProps {
   track: MeditationTrack;

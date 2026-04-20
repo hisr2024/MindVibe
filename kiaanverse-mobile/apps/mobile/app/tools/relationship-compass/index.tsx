@@ -26,7 +26,7 @@ import {
 } from '@kiaanverse/ui';
 import { useRelationshipGuide } from '@kiaanverse/api';
 import { useRelationshipStore } from '@kiaanverse/store';
-import type { RelationshipGuidance } from '@kiaanverse/api/src/types';
+import type { RelationshipGuidance } from '@kiaanverse/api';
 
 export default function RelationshipCompassScreen(): React.JSX.Element {
   const router = useRouter();

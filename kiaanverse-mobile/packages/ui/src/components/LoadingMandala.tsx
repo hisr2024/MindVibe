@@ -46,7 +46,7 @@ function LoadingMandalaComponent({
   const rotation = useSharedValue(0);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability
+    // Reanimated shared-value mutation — idiomatic worklet pattern.
     rotation.value = withRepeat(
       withTiming(360, { duration: 8000, easing: Easing.linear }),
       -1,

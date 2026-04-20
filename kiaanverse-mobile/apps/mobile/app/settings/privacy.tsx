@@ -31,7 +31,7 @@ import {
   useRequestDeletion,
   useRequestExport,
 } from '@kiaanverse/api';
-import { API_CONFIG } from '@kiaanverse/api/src/config';
+import { API_CONFIG } from '@kiaanverse/api';
 
 export default function PrivacySettingsScreen(): React.JSX.Element {
   const router = useRouter();

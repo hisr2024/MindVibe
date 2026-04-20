@@ -52,7 +52,7 @@ function GlowCardInner({
 
   useEffect(() => {
     if (variant === 'divine') {
-      // eslint-disable-next-line react-hooks/immutability
+      // Reanimated shared-value mutation — idiomatic worklet pattern.
       glowOpacity.value = withRepeat(
         withSequence(
           withTiming(0.5, { duration: duration.sacred * 2, easing: Easing.inOut(Easing.ease) }),

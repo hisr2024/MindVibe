@@ -26,7 +26,7 @@ export function Avatar({ uri, name = '', size = 40 }: AvatarProps): React.JSX.El
 
   if (uri) {
     return (
-      // eslint-disable-next-line jsx-a11y/alt-text -- React Native Image uses accessibilityLabel, not alt
+      // Image alt-text is handled via accessibilityLabel on RN.
       <Image
         source={{ uri }}
         style={[

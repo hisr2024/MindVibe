@@ -90,10 +90,30 @@ jest.mock('react-native-reanimated', () => {
     withSequence: (...vals: number[]) => vals[0],
     withDelay: (_delay: number, val: number) => val,
     Easing: {
-      inOut: (fn: unknown) => fn,
+      linear: (t: number) => t,
+      ease: (t: number) => t,
+      quad: (t: number) => t,
+      cubic: (t: number) => t,
+      sin: (t: number) => t,
+      circle: (t: number) => t,
+      exp: (t: number) => t,
+      elastic: () => (t: number) => t,
+      back: () => (t: number) => t,
+      bounce: (t: number) => t,
+      bezier: () => (t: number) => t,
+      bezierFn: () => (t: number) => t,
+      steps: () => (t: number) => t,
+      poly: () => (t: number) => t,
+      in: (fn: unknown) => fn,
       out: (fn: unknown) => fn,
-      ease: 0,
+      inOut: (fn: unknown) => fn,
     },
+    // Animated helpers used by GlowCard, SacredStepIndicator, etc.
+    interpolate: (value: number) => value,
+    interpolateColor: (_v: number, _inp: number[], out: string[]) => out[0] ?? '#000000',
+    cancelAnimation: () => undefined,
+    runOnJS: (fn: (...args: unknown[]) => unknown) => fn,
+    runOnUI: (fn: (...args: unknown[]) => unknown) => fn,
   };
 });
 

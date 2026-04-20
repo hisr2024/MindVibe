@@ -57,7 +57,7 @@ function BouncingDot({ delay, color }: { delay: number; color: string }): React.
   const translateY = useSharedValue(0);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability
+    // Reanimated shared-value mutation — idiomatic worklet pattern.
     translateY.value = withDelay(
       delay,
       withRepeat(
@@ -112,7 +112,7 @@ function AnimatedWord({
   const opacity = useSharedValue(0);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability
+    // Reanimated shared-value mutation — idiomatic worklet pattern.
     opacity.value = withDelay(
       index * 40,
       withTiming(1, { duration: duration.fast, easing: Easing.out(Easing.ease) }),

@@ -23,5 +23,16 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'warn',
     'no-console': ['warn', { allow: ['warn', 'error'] }],
   },
+  overrides: [
+    {
+      // Jest mocks legitimately need require() for lazy module resolution.
+      files: ['**/__tests__/**', '**/__mocks__/**', 'jest-setup.ts'],
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
+        '@typescript-eslint/no-require-imports': 'off',
+        'no-console': 'off',
+      },
+    },
+  ],
   ignorePatterns: ['node_modules/', 'dist/', '.expo/', 'coverage/'],
 };

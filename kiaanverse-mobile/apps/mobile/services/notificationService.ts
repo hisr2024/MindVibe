@@ -500,7 +500,7 @@ function navigateToNotification(router: AppRouter, data: NotificationData | unde
         if (data.journeyId) {
           router.push(`/journey/${data.journeyId}` as `/journey/${string}`);
         } else {
-          router.push('/journey' as '/journey');
+          router.push('/journey' as const);
         }
         break;
       case 'streak-alert':
