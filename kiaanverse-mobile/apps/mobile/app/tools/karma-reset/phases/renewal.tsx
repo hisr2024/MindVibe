@@ -211,7 +211,7 @@ export default function RenewalPhase(): React.JSX.Element {
             if (apiBlessing?.blessing && apiBlessing?.verse) {
               setBlessingData(apiBlessing);
             } else {
-              useFallback();
+              applyFallback();
             }
             completeSession();
             setShowBlessing(true);
@@ -219,7 +219,7 @@ export default function RenewalPhase(): React.JSX.Element {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           },
           onError: () => {
-            useFallback();
+            applyFallback();
             completeSession();
             setShowBlessing(true);
             setIsLoading(false);
@@ -229,21 +229,21 @@ export default function RenewalPhase(): React.JSX.Element {
       } else {
         // No session — use fallback after brief sacred pause
         await new Promise((resolve) => setTimeout(resolve, 1500));
-        useFallback();
+        applyFallback();
         completeSession();
         setShowBlessing(true);
         setIsLoading(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     } catch {
-      useFallback();
+      applyFallback();
       completeSession();
       setShowBlessing(true);
       setIsLoading(false);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
 
-    function useFallback(): void {
+    function applyFallback(): void {
       const fallback = FALLBACK_BLESSINGS[patternId ?? 'kama'] ?? FALLBACK_BLESSINGS.kama;
       setBlessingData(fallback ?? null);
     }

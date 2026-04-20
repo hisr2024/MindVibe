@@ -26,7 +26,7 @@ import {
 } from '@kiaanverse/ui';
 import { useRelationshipGuide } from '@kiaanverse/api';
 import { useRelationshipStore } from '@kiaanverse/store';
-import type { RelationshipGuidance } from '@kiaanverse/api/src/types';
+import type { RelationshipGuidance } from '@kiaanverse/api';
 
 export default function RelationshipCompassScreen(): React.JSX.Element {
   const router = useRouter();
@@ -40,8 +40,11 @@ export default function RelationshipCompassScreen(): React.JSX.Element {
   const handleSeekGuidance = useCallback(() => {
     if (!question.trim()) return;
 
+    const payload: { question: string; context?: string } = { question: question.trim() };
+    const trimmedContext = context.trim();
+    if (trimmedContext) payload.context = trimmedContext;
     guideMutation.mutate(
-      { question: question.trim(), context: context.trim() || undefined },
+      payload,
       {
         onSuccess: (data) => {
           setResult(data);
@@ -138,7 +141,9 @@ export default function RelationshipCompassScreen(): React.JSX.Element {
                   chapter: result.verse.chapter,
                   verse: result.verse.verse,
                   sanskrit: result.verse.text,
+                  transliteration: '',
                   translation: result.verse.translation,
+                  speaker: '',
                 }}
               />
             ) : null}

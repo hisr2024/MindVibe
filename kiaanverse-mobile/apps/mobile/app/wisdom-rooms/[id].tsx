@@ -29,8 +29,12 @@ import {
   spacing,
   radii,
 } from '@kiaanverse/ui';
-import { useWisdomRoomMessages, useSendWisdomRoomMessage, useWisdomRooms } from '@kiaanverse/api';
-import type { WisdomRoomMessage } from '@kiaanverse/api/src/types';
+import {
+  useWisdomRoomMessages,
+  useSendWisdomRoomMessage,
+  useWisdomRooms,
+  type WisdomRoomMessage,
+} from '@kiaanverse/api';
 
 export default function WisdomRoomChatScreen(): React.JSX.Element {
   const { id } = useLocalSearchParams<{ id: string }>();

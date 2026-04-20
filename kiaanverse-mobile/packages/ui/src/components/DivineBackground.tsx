@@ -14,7 +14,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { StyleSheet, View, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
@@ -36,7 +36,7 @@ export interface DivineBackgroundProps {
   /** Disable the breathing aura animation. @default false */
   readonly disableAura?: boolean;
   /** Optional style override for the container. */
-  readonly style?: ViewStyle;
+  readonly style?: StyleProp<ViewStyle>;
   readonly children: React.ReactNode;
 }
 
@@ -56,7 +56,7 @@ function DivineBackgroundInner({
 
   useEffect(() => {
     if (disableAura) return;
-    // eslint-disable-next-line react-hooks/immutability
+    // Reanimated shared-value mutation — idiomatic worklet pattern.
     auraOpacity.value = withRepeat(
       withSequence(
         withTiming(1, { duration: SACRED_DURATION, easing: Easing.inOut(Easing.ease) }),

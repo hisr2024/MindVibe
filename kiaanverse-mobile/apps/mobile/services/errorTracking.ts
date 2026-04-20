@@ -48,7 +48,7 @@ let _sentry: SentryLike | null = null;
 function getSentry(): SentryLike | null {
   if (_sentry !== undefined && _sentry !== null) return _sentry;
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
     _sentry = require('@sentry/react-native') as SentryLike;
   } catch {
     _sentry = null;

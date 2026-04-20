@@ -46,7 +46,6 @@ export function GitaFamiliarityStep({
   // Sync thumb position when value or screen dimensions change
   // (e.g. navigating back to this step, or screen rotation)
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability
     thumbX.value = withSpring(value * segmentWidth, { damping: 20, stiffness: 200 });
   }, [value, segmentWidth, thumbX]);
 
@@ -61,7 +60,7 @@ export function GitaFamiliarityStep({
   const handleSelect = useCallback(
     (level: number) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      // eslint-disable-next-line react-hooks/immutability
+      // Reanimated shared-value mutation — the idiomatic worklet pattern.
       thumbX.value = withSpring(level * segmentWidth, { damping: 20, stiffness: 200 });
       onChange(level);
     },

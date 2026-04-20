@@ -92,7 +92,7 @@ function WaveBar({
 
   // Sync JS active prop → shared value so the worklet reacts
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability
+    // Reanimated shared-value mutation — idiomatic worklet pattern.
     isActive.value = withTiming(active ? 1 : 0, {
       duration: motionDuration.fast,
     });
@@ -101,7 +101,7 @@ function WaveBar({
   useEffect(() => {
     if (active) {
       // Reset to phase offset start position
-      // eslint-disable-next-line react-hooks/immutability
+      // Reanimated shared-value mutation — idiomatic worklet pattern.
       progress.value = phase;
 
       // Animate 0→1 repeatedly (represents one sine cycle).

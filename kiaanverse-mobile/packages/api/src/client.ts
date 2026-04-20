@@ -43,6 +43,7 @@ let _sentry: SentryLike | null | undefined;
 function getSentry(): SentryLike | null {
   if (_sentry !== undefined) return _sentry;
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires -- lazy to avoid hard dep
     _sentry = require('@sentry/react-native') as SentryLike;
   } catch {
     _sentry = null;
@@ -313,8 +314,22 @@ function createApiClient(): AxiosInstance {
         // True authorization failure — force logout
         await tokenManager.clearTokens();
         tokenManager.onAuthFailure?.();
+        const knownAuthCodes = [
+          'INVALID_CREDENTIALS',
+          'EMAIL_NOT_VERIFIED',
+          'EMAIL_TAKEN',
+          'TOKEN_EXPIRED',
+          'NETWORK_ERROR',
+          'VALIDATION_ERROR',
+          'ACCOUNT_LOCKED',
+          'UNKNOWN',
+        ] as const;
+        type KnownAuthCode = (typeof knownAuthCodes)[number];
+        const isKnownAuthCode = (v: string): v is KnownAuthCode =>
+          (knownAuthCodes as readonly string[]).includes(v);
+        const authCode: KnownAuthCode = isKnownAuthCode(code403) ? code403 : 'UNKNOWN';
         return Promise.reject(
-          new AuthError('Access denied. Please sign in again.', 403, code403 || 'UNKNOWN'),
+          new AuthError('Access denied. Please sign in again.', 403, authCode),
         );
       }
 

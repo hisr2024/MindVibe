@@ -27,31 +27,31 @@ import { VerseCard } from './VerseCard';
 
 export interface StepContentSection {
   /** Main teaching/lesson text for the day. */
-  readonly teaching?: string;
+  readonly teaching?: string | undefined;
   /** Verse reference string, e.g. "2.47". */
-  readonly verseRef?: string;
+  readonly verseRef?: string | undefined;
   /** Sanskrit text in Devanagari for the verse. */
-  readonly sanskrit?: string;
+  readonly sanskrit?: string | undefined;
   /** Romanized transliteration. */
-  readonly transliteration?: string;
+  readonly transliteration?: string | undefined;
   /** English translation of the verse. */
-  readonly englishTranslation?: string;
+  readonly englishTranslation?: string | undefined;
   /** Hindi translation (toggleable in VerseCard). */
-  readonly hindiTranslation?: string;
+  readonly hindiTranslation?: string | undefined;
   /** Array of guided reflection prompts. */
-  readonly reflectionPrompts?: string[];
+  readonly reflectionPrompts?: string[] | undefined;
   /** Practice name / title. */
-  readonly practiceName?: string;
+  readonly practiceName?: string | undefined;
   /** Practice duration label, e.g. "15 min". */
-  readonly practiceDuration?: string;
+  readonly practiceDuration?: string | undefined;
   /** Numbered practice instructions. */
-  readonly practiceInstructions?: string[];
+  readonly practiceInstructions?: string[] | undefined;
   /** Micro-commitment quote or intention. */
-  readonly microCommitment?: string;
+  readonly microCommitment?: string | undefined;
   /** Safety/trigger notes if applicable. */
-  readonly safetyNotes?: string;
+  readonly safetyNotes?: string | undefined;
   /** Accent color for decorative elements (enemy color). */
-  readonly accentColor?: string;
+  readonly accentColor?: string | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -128,8 +128,8 @@ function PracticeSection({
   instructions,
   delay,
 }: {
-  readonly name?: string;
-  readonly duration?: string;
+  readonly name?: string | undefined;
+  readonly duration?: string | undefined;
   readonly instructions: string[];
   readonly delay: number;
 }): React.JSX.Element {

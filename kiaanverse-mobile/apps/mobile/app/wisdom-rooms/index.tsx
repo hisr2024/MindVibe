@@ -22,8 +22,7 @@ import {
   colors,
   spacing,
 } from '@kiaanverse/ui';
-import { useWisdomRooms } from '@kiaanverse/api';
-import type { WisdomRoom } from '@kiaanverse/api/src/types';
+import { useWisdomRooms, type WisdomRoom } from '@kiaanverse/api';
 
 export default function WisdomRoomsListScreen(): React.JSX.Element {
   const router = useRouter();

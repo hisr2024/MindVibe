@@ -71,11 +71,12 @@ export default function ComposeScreen(): React.JSX.Element {
       .filter((t) => t.length > 0);
 
     try {
-      await createPost.mutateAsync({
+      const payload: { content: string; circle_id?: string; tags?: string[] } = {
         content: content.trim(),
-        circle_id: selectedCircleId,
         tags,
-      });
+      };
+      if (selectedCircleId !== undefined) payload.circle_id = selectedCircleId;
+      await createPost.mutateAsync(payload);
       router.back();
     } catch {
       Alert.alert(

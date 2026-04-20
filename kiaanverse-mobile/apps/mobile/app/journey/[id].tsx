@@ -72,12 +72,18 @@ const ENEMY_SANSKRIT: Record<string, string> = {
 };
 
 /** Status badge styling by journey status. */
-const STATUS_CONFIG: Record<string, { label: string; bgColor: string; textColor: string }> = {
+type StatusConfigEntry = { label: string; bgColor: string; textColor: string };
+const STATUS_CONFIG: Record<string, StatusConfigEntry> = {
   active: { label: 'Active', bgColor: `${colors.semantic.success}20`, textColor: colors.semantic.success },
   paused: { label: 'Paused', bgColor: `${colors.semantic.warning}20`, textColor: colors.semantic.warning },
   completed: { label: 'Completed', bgColor: colors.alpha.goldMedium, textColor: colors.divine.aura },
   abandoned: { label: 'Abandoned', bgColor: `${colors.semantic.error}20`, textColor: colors.semantic.error },
   available: { label: 'Available', bgColor: colors.alpha.whiteLight, textColor: colors.text.muted },
+};
+const STATUS_CONFIG_DEFAULT: StatusConfigEntry = {
+  label: 'Available',
+  bgColor: colors.alpha.whiteLight,
+  textColor: colors.text.muted,
 };
 
 /** Day meta themes for 14-day journeys. */
@@ -310,7 +316,8 @@ export default function JourneyDetailScreen(): React.JSX.Element {
     return data.steps.find((s) => s.dayIndex === effectiveSelectedDay) ?? null;
   }, [data, effectiveSelectedDay]);
 
-  const statusConfig = STATUS_CONFIG[data?.status ?? 'available'] ?? STATUS_CONFIG.available;
+  const statusConfig: StatusConfigEntry =
+    STATUS_CONFIG[data?.status ?? 'available'] ?? STATUS_CONFIG_DEFAULT;
 
   // Handlers
   const handleDaySelect = useCallback((day: number) => {
@@ -521,7 +528,7 @@ export default function JourneyDetailScreen(): React.JSX.Element {
           </>
         ) : (
           <Animated.View entering={FadeInDown.delay(400).duration(400)} style={styles.noStepCard}>
-            <MandalaSpin size={60} color={colors.alpha.goldLight} speed={40000} />
+            <MandalaSpin size={60} color={colors.alpha.goldLight} speed="slow" />
             <Text variant="body" color={colors.text.secondary} align="center">
               No step available for this day yet
             </Text>

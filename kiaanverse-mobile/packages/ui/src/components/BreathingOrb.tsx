@@ -70,7 +70,7 @@ function BreathingOrbComponent({
   /** Countdown seconds remaining in current phase */
   const countdown = useSharedValue(0);
 
-  const phaseLabel = useSharedValue(PHASE_LABELS[0]);
+  const phaseLabel = useSharedValue<(typeof PHASE_LABELS)[number]>(PHASE_LABELS[0]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeRef = useRef(isActive);
   activeRef.current = isActive;
@@ -91,11 +91,12 @@ function BreathingOrbComponent({
     const runPhase = (idx: number) => {
       if (!activeRef.current) return;
 
-      const dur = durations[idx];
+      const dur = durations[idx] ?? 0;
+      const label = PHASE_LABELS[idx] ?? PHASE_LABELS[0];
 
       // Update phase index and label
       phaseIndex.value = idx;
-      phaseLabel.value = PHASE_LABELS[idx];
+      phaseLabel.value = label;
       colorProgress.value = withTiming(idx, { duration: dur, easing: Easing.inOut(Easing.ease) });
       countdown.value = Math.round(dur / 1000);
 

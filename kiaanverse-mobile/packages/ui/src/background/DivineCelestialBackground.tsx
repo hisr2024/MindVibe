@@ -285,7 +285,7 @@ function DivineCelestialBackgroundComponent({
   useEffect(() => {
     startClock(0);
     return () => cancelAnimation(time);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Intentional stale deps — dependencies are stable for lifetime.
   }, []);
 
   // --- AppState: pause when backgrounded, resume on foreground ---
@@ -302,7 +302,7 @@ function DivineCelestialBackgroundComponent({
     };
     const sub = AppState.addEventListener('change', onChange);
     return () => sub.remove();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Intentional stale deps — dependencies are stable for lifetime.
   }, []);
 
   return (

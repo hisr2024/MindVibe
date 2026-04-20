@@ -109,7 +109,8 @@ export default function VibePlayerScreen(): React.JSX.Element {
     void Haptics.selectionAsync();
     const modes = ['off', 'all', 'one'] as const;
     const currentIdx = modes.indexOf(repeatMode);
-    setRepeatMode(modes[(currentIdx + 1) % modes.length]);
+    const nextMode = modes[(currentIdx + 1) % modes.length] ?? 'off';
+    setRepeatMode(nextMode);
   }, [repeatMode, setRepeatMode]);
 
   const handleShuffle = useCallback(() => {

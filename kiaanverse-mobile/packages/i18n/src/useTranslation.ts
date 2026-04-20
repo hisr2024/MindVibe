@@ -15,12 +15,21 @@ export function useTranslation(defaultNamespace?: TranslationNamespace) {
   const context = useContext(I18nContext);
 
   const t = useCallback(
-    (key: string, params?: Record<string, string>): string => {
-      // If key doesn't contain a dot and a default namespace is provided, prefix it
-      if (defaultNamespace && !key.includes('.')) {
-        return context.t(`${defaultNamespace}.${key}`, params);
-      }
-      return context.t(key, params);
+    (
+      key: string,
+      defaultValueOrParams?: string | Record<string, string>,
+      maybeParams?: Record<string, string>,
+    ): string => {
+      const params =
+        typeof defaultValueOrParams === 'object' ? defaultValueOrParams : maybeParams;
+      const fallback =
+        typeof defaultValueOrParams === 'string' ? defaultValueOrParams : undefined;
+      const fullKey =
+        defaultNamespace && !key.includes('.') ? `${defaultNamespace}.${key}` : key;
+      const translated = context.t(fullKey, params);
+      // If translation returned the raw key (missing translation) and a
+      // fallback was provided, use the fallback instead.
+      return translated === fullKey && fallback !== undefined ? fallback : translated;
     },
     [context, defaultNamespace],
   );

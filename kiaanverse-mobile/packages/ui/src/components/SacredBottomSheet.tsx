@@ -57,10 +57,10 @@ function SacredBottomSheetComponent({
 }: SacredBottomSheetProps): React.JSX.Element | null {
   /** Sorted snap points ascending — first is smallest sheet, last is tallest. */
   const sortedSnaps = [...snapPoints].sort((a, b) => a - b);
-  const maxHeight = sortedSnaps[sortedSnaps.length - 1];
+  const maxHeight: number = sortedSnaps[sortedSnaps.length - 1] ?? SCREEN_HEIGHT * 0.4;
 
   /** translateY: 0 = fully open (at maxHeight), maxHeight = fully closed. */
-  const translateY = useSharedValue(maxHeight);
+  const translateY = useSharedValue<number>(maxHeight);
   const backdropOpacity = useSharedValue(0);
   const contextY = useSharedValue(0);
 
@@ -105,7 +105,7 @@ function SacredBottomSheetComponent({
       // Include closed position
       const allSnaps = [...snapTranslateValues, maxHeight];
 
-      let nearestSnap = maxHeight;
+      let nearestSnap: number = maxHeight;
       let minDist = Infinity;
       for (const snap of allSnaps) {
         const dist = Math.abs(currentY - snap);

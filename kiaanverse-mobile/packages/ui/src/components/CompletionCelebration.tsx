@@ -53,12 +53,12 @@ function Particle({ index, visible }: { index: number; visible: boolean }): Reac
 
   useEffect(() => {
     if (visible) {
-      // eslint-disable-next-line react-hooks/immutability
+      // Reanimated shared-value mutation — idiomatic worklet pattern.
       progress.value = withDelay(
         index * 40,
         withSpring(1, { damping: 8, stiffness: 120 }),
       );
-      // eslint-disable-next-line react-hooks/immutability
+      // Reanimated shared-value mutation — idiomatic worklet pattern.
       opacity.value = withDelay(
         index * 40,
         withSequence(
@@ -116,11 +116,11 @@ function CompletionCelebrationInner({
 
   useEffect(() => {
     if (visible) {
-      // eslint-disable-next-line react-hooks/immutability
+      // Reanimated shared-value mutation — idiomatic worklet pattern.
       containerScale.value = withSpring(1, { damping: 12, stiffness: 150 });
-      // eslint-disable-next-line react-hooks/immutability
+      // Reanimated shared-value mutation — idiomatic worklet pattern.
       xpScale.value = withDelay(400, withSpring(1, { damping: 10, stiffness: 200 }));
-      // eslint-disable-next-line react-hooks/immutability
+      // Reanimated shared-value mutation — idiomatic worklet pattern.
       karmaScale.value = withDelay(600, withSpring(1, { damping: 10, stiffness: 200 }));
 
       if (onDismiss) {

@@ -21,7 +21,7 @@ import {
 } from '@kiaanverse/ui';
 import { useMeditationTracks } from '@kiaanverse/api';
 import { useVibePlayerStore } from '@kiaanverse/store';
-import type { MeditationTrack } from '@kiaanverse/api/src/types';
+import type { MeditationTrack } from '@kiaanverse/api';
 import { TrackCard } from '../../components/vibe-player/TrackCard';
 
 type Category = 'all' | 'meditation' | 'chanting' | 'ambient' | 'mantra';

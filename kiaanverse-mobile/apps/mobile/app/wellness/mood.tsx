@@ -102,7 +102,7 @@ function MoodDetailCard({ moodId }: { moodId: SpiritualMood }): React.JSX.Elemen
               const ref = moodInfo.linkedVerses[0];
               if (!ref) return;
               const [ch, v] = ref.split('.');
-              router.push(`/verse/${ch}/${v}`);
+              router.push(`/(tabs)/shlokas/${ch}/${v}`);
             }}
             accessibilityLabel="Read linked verse"
           >
@@ -294,15 +294,16 @@ export default function MoodTrackingScreen(): React.JSX.Element {
           markLogged();
           setRingMood(undefined);
           // Sync to wellness store for offline chart display
-          addMoodEntry({
+          const entry: MoodEntry = {
             id: typeof data.id === 'number' ? data.id : 0,
             score: payload.score,
             state: payload.state,
             tags: payload.tags,
-            note: payload.note,
             date: payload.date,
             at: new Date().toISOString(),
-          });
+          };
+          if (payload.note !== undefined) entry.note = payload.note;
+          addMoodEntry(entry);
         },
       },
     );

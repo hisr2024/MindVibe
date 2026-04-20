@@ -79,7 +79,7 @@ function GoldenButtonInner({
   }));
 
   const handlePressIn = useCallback(() => {
-    // eslint-disable-next-line react-hooks/immutability
+    // Reanimated shared-value mutation — idiomatic worklet pattern.
     scale.value = withSpring(0.96, spring.default);
     if (!isDisabled) {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -87,7 +87,7 @@ function GoldenButtonInner({
   }, [scale, isDisabled]);
 
   const handlePressOut = useCallback(() => {
-    // eslint-disable-next-line react-hooks/immutability
+    // Reanimated shared-value mutation — idiomatic worklet pattern.
     scale.value = withSpring(1, spring.default);
   }, [scale]);
 
@@ -96,7 +96,7 @@ function GoldenButtonInner({
 
   useEffect(() => {
     if (variant === 'divine') {
-      // eslint-disable-next-line react-hooks/immutability
+      // Reanimated shared-value mutation — idiomatic worklet pattern.
       glowOpacity.value = withRepeat(
         withSequence(
           withTiming(0.8, { duration: duration.sacred, easing: Easing.inOut(Easing.ease) }),

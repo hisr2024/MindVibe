@@ -66,7 +66,7 @@ export function I18nProvider({
 
   useEffect(() => {
     let cancelled = false;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState is needed to load translations asynchronously
+    // Async loader setState inside useEffect — required to hydrate translations after mount.
     loadAllNamespaces(locale).then(() => {
       if (cancelled) return;
     });

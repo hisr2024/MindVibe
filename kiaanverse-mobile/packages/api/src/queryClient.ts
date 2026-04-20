@@ -31,6 +31,7 @@ let _sentry: SentryLike | null | undefined;
 function getSentry(): SentryLike | null {
   if (_sentry !== undefined) return _sentry;
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires -- lazy to avoid hard dep
     _sentry = require('@sentry/react-native') as SentryLike;
   } catch {
     _sentry = null;
@@ -94,7 +95,7 @@ export function createAppQueryClient(): QueryClient {
 // AsyncStorage Persister
 // ---------------------------------------------------------------------------
 
-export function createAppPersister() {
+export function createAppPersister(): ReturnType<typeof createAsyncStoragePersister> {
   return createAsyncStoragePersister({
     storage: AsyncStorage,
     key: 'kiaanverse-query-cache',

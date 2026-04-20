@@ -71,14 +71,14 @@ function SakhaAvatarInner({
 
   useEffect(() => {
     // Reset
-    // eslint-disable-next-line react-hooks/immutability
+    // Reanimated shared-value mutation — idiomatic worklet pattern.
     ringRotation.value = 0;
-    // eslint-disable-next-line react-hooks/immutability
+    // Reanimated shared-value mutation — idiomatic worklet pattern.
     ringScale.value = 1;
 
     switch (state) {
       case 'idle': {
-        // eslint-disable-next-line react-hooks/immutability
+        // Reanimated shared-value mutation — idiomatic worklet pattern.
         ringOpacity.value = withRepeat(
           withSequence(
             withTiming(0.7, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
@@ -165,7 +165,7 @@ function SakhaAvatarInner({
 
       {/* Inner avatar */}
       {imageSource ? (
-        // eslint-disable-next-line jsx-a11y/alt-text -- React Native Image uses accessibilityLabel, not alt
+        // Image alt-text is handled via accessibilityLabel on RN.
         <Image
           source={imageSource}
           style={[

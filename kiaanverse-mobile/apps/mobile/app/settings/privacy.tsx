@@ -31,7 +31,7 @@ import {
   useRequestDeletion,
   useRequestExport,
 } from '@kiaanverse/api';
-import { API_CONFIG } from '@kiaanverse/api/src/config';
+import { API_CONFIG } from '@kiaanverse/api';
 
 export default function PrivacySettingsScreen(): React.JSX.Element {
   const router = useRouter();
@@ -168,7 +168,7 @@ export default function PrivacySettingsScreen(): React.JSX.Element {
             disabled={cancelDeletion.isPending}
             style={styles.mt8}
           >
-            <Text variant="caption" color={colors.brand.gold} style={styles.underline}>
+            <Text variant="caption" color={colors.primary[500]} style={styles.underline}>
               {cancelDeletion.isPending ? 'Cancelling…' : 'Cancel deletion request'}
             </Text>
           </Pressable>
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   statusDotActive: {
-    backgroundColor: colors.brand.gold,
+    backgroundColor: colors.primary[500],
   },
   dangerButton: {
     alignItems: 'center',

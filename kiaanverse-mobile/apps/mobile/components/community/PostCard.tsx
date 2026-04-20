@@ -71,7 +71,7 @@ function PostCardInner({ post }: PostCardProps): React.JSX.Element {
       <View style={styles.authorRow}>
         <Avatar
           name={post.authorName}
-          imageUrl={post.authorAvatar}
+          uri={post.authorAvatar}
           size={36}
         />
         <View style={styles.authorInfo}>
