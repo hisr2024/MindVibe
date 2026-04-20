@@ -333,8 +333,20 @@ export function useJourneyDashboard(): UseQueryResult<DashboardData> {
   return useQuery({
     queryKey: queryKeys.journeyDashboard,
     queryFn: async () => {
+      // Backend DashboardResponse uses snake_case fields:
+      //   { active_journeys, completed_journeys, current_streak, ... }
+      // The mobile view-model consumes camelCase with renamed fields.
       const { data } = await api.journeys.dashboard();
-      return data as DashboardData;
+      const raw = (data ?? {}) as {
+        active_journeys?: Journey[];
+        completed_journeys?: number;
+        current_streak?: number;
+      };
+      return {
+        activeJourneys: raw.active_journeys ?? [],
+        completedCount: raw.completed_journeys ?? 0,
+        streakDays: raw.current_streak ?? 0,
+      };
     },
   });
 }
@@ -352,13 +364,17 @@ export function useWisdomJourneyDetail(journeyId: string): UseQueryResult<Wisdom
   });
 }
 
-/** User progress across all journeys (via dashboard). */
+/** User progress across all journeys (via dashboard).
+ *  Backend dashboard returns a single object (not an array) — we extract
+ *  the active_journeys list and project it into the UserJourneyProgress
+ *  shape the caller expects. */
 export function useJourneyProgress(): UseQueryResult<UserJourneyProgress[]> {
   return useQuery({
     queryKey: queryKeys.journeyProgress,
     queryFn: async () => {
       const { data } = await api.journeys.dashboard();
-      return data as UserJourneyProgress[];
+      const raw = (data ?? {}) as { active_journeys?: unknown[] };
+      return (raw.active_journeys ?? []) as UserJourneyProgress[];
     },
     staleTime: 1000 * 60 * 5,
   });
@@ -386,7 +402,13 @@ export function useCompleteStep(): UseMutationResult<StepResult, Error, { journe
   return useMutation({
     mutationFn: async ({ journeyId, dayIndex }: { journeyId: string; dayIndex: number }) => {
       const { data } = await api.journeys.completeStep(journeyId, dayIndex);
-      return data as StepResult;
+      // Backend CompletionResponse has `progress_percentage`; mobile hook
+      // callers read `progress` — normalise here.
+      const raw = (data ?? {}) as { success?: boolean; progress_percentage?: number; progress?: number };
+      return {
+        success: raw.success ?? true,
+        progress: raw.progress ?? raw.progress_percentage ?? 0,
+      };
     },
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.journey(variables.journeyId) });
@@ -395,13 +417,16 @@ export function useCompleteStep(): UseMutationResult<StepResult, Error, { journe
   });
 }
 
-/** Complete a wisdom journey step by day index (returns XP + karma). */
+/** Complete a wisdom journey step by day index (returns XP + karma).
+ *  Backend CompletionResponse lacks XP / karma fields today; we pass the
+ *  raw body through and let TS type-erasure surface the fields that do
+ *  exist (success, progress_percentage, day_completed, journey_complete). */
 export function useCompleteWisdomStep(): UseMutationResult<StepCompletionResult, Error, { journeyId: string; dayIndex: number }> {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ journeyId, dayIndex }: { journeyId: string; dayIndex: number }) => {
       const { data } = await api.journeys.completeStep(journeyId, dayIndex);
-      return data as StepCompletionResult;
+      return data as unknown as StepCompletionResult;
     },
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.journeyDetail(variables.journeyId) });
@@ -426,13 +451,45 @@ export function useCreateMood(): UseMutationResult<MoodResult, Error, MoodCreate
 }
 
 
-/** Karma tree with all nodes. */
+/** Karma tree with all nodes.
+ *  Backend /api/karmic-tree/progress returns a rich ProgressResponse —
+ *  { level, xp, next_level_xp, progress_percent, tree_stage, activity,
+ *    achievements, unlockables, notifications }. The mobile tree screen
+ *  consumes the older { nodes, totalPoints, level } shape; we adapt in
+ *  one place so the UI keeps working without forcing a backend change. */
+const _TREE_STAGE_TO_LEVEL: Record<string, 'seed' | 'sapling' | 'young_tree' | 'mighty_tree' | 'sacred_tree'> = {
+  seed: 'seed',
+  sapling: 'sapling',
+  young: 'young_tree',
+  young_tree: 'young_tree',
+  mighty: 'mighty_tree',
+  mighty_tree: 'mighty_tree',
+  sacred: 'sacred_tree',
+  sacred_tree: 'sacred_tree',
+};
+
 export function useKarmaTree(): UseQueryResult<KarmaTreeResponse> {
   return useQuery({
     queryKey: queryKeys.karmaTree,
     queryFn: async () => {
       const { data } = await api.karma.tree();
-      return data as KarmaTreeResponse;
+      const raw = (data ?? {}) as {
+        xp?: number;
+        tree_stage?: string;
+        achievements?: Array<{ key: string; name: string; unlocked?: boolean; progress?: number; target_value?: number }>;
+      };
+      const stage = _TREE_STAGE_TO_LEVEL[raw.tree_stage ?? 'seed'] ?? 'seed';
+      return {
+        nodes: (raw.achievements ?? []).map((a) => ({
+          id: a.key,
+          name: a.name,
+          unlocked: !!a.unlocked,
+          progress: a.progress ?? 0,
+          target: a.target_value ?? 0,
+        })),
+        totalPoints: raw.xp ?? 0,
+        level: stage,
+      } as unknown as KarmaTreeResponse;
     },
     staleTime: 1000 * 60 * 10,
   });
