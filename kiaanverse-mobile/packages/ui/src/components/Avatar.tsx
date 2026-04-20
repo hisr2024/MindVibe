@@ -8,9 +8,9 @@ import { useTheme } from '../theme/useTheme';
 import { colors } from '../tokens/colors';
 
 interface AvatarProps {
-  uri?: string;
-  name?: string;
-  size?: number;
+  uri?: string | undefined;
+  name?: string | undefined;
+  size?: number | undefined;
 }
 
 function getInitials(name: string): string {

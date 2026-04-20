@@ -146,7 +146,9 @@ export default function ArdhaScreen(): React.JSX.Element {
                     chapter: result.verse.chapter,
                     verse: result.verse.verse,
                     sanskrit: result.verse.text,
+                    transliteration: '',
                     translation: result.verse.translation,
+                    speaker: '',
                   }}
                 />
               </Animated.View>

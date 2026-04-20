@@ -99,7 +99,22 @@ const englishMessages: Record<TranslationNamespace, TranslationMessages> = {
     progress: 'Progress',
     completeStep: 'Mark Complete',
   },
+  tools: {},
+  'emotional-reset': {},
+  'karma-reset': {},
+  journal: {},
+  sadhana: {},
+  community: {},
+  'vibe-player': {},
+  analytics: {},
+  settings: {},
 };
+
+// Now-exhaustive Record<TranslationNamespace, ...>: loadMessages'
+// `englishMessages[namespace]` lookups in this file expect TranslationMessages
+// (not possibly undefined), so these empty objects satisfy the type without
+// shipping English copy for feature-area translations that are loaded from
+// locale bundles in production.
 
 /** Cache for loaded locale bundles */
 const messageCache = new Map<string, TranslationMessages>();

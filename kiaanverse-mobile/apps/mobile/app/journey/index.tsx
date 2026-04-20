@@ -90,11 +90,18 @@ const CATEGORY_CHIPS: { key: string; name: string; sanskrit: string; color: stri
 ];
 
 /** Difficulty level display configuration. */
-const DIFFICULTY_CONFIG: Record<string, { label: string; color: string }> = {
+const DIFFICULTY_CONFIG = {
   beginner: { label: 'Beginner', color: '#22c55e' },
   intermediate: { label: 'Intermediate', color: '#f59e0b' },
   advanced: { label: 'Advanced', color: '#ef4444' },
-};
+} as const;
+
+type DifficultyKey = keyof typeof DIFFICULTY_CONFIG;
+const DIFFICULTY_DEFAULT = DIFFICULTY_CONFIG.beginner;
+
+function getDifficultyConfig(key: string): { label: string; color: string } {
+  return (DIFFICULTY_CONFIG as Record<string, { label: string; color: string }>)[key] ?? DIFFICULTY_DEFAULT;
+}
 
 /** Sacred gold used for titles and accents. */
 const DIVINE_GOLD = '#FFD700';
@@ -187,7 +194,7 @@ function TemplateCard({
   const enemy = enemyKey ? ENEMY_INFO[enemyKey] : undefined;
   const accentColor = enemy?.color ?? colors.primary[500];
   const difficulty = resolveDifficulty(item);
-  const diffConfig = DIFFICULTY_CONFIG[difficulty] ?? DIFFICULTY_CONFIG.beginner;
+  const diffConfig = getDifficultyConfig(difficulty);
 
   return (
     <Animated.View entering={FadeInDown.delay(index * 80).duration(500).springify()}>
@@ -430,7 +437,7 @@ function EmptyState({
   title,
   subtitle,
 }: {
-  icon: React.ComponentType<{ size: number; color: string }>;
+  icon: React.ComponentType<Record<string, unknown>>;
   title: string;
   subtitle: string;
 }): React.JSX.Element {

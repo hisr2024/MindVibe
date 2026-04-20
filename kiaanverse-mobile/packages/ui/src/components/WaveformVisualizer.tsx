@@ -101,19 +101,19 @@ function WaveBar({
           withSequence(
             withTiming(maxH, {
               duration: speed,
-              easing: Easing.inOut(Easing.sine),
+              easing: Easing.inOut(Easing.sin),
             }),
             withTiming(minH + (maxH - minH) * 0.3, {
               duration: speed * 0.7,
-              easing: Easing.inOut(Easing.sine),
+              easing: Easing.inOut(Easing.sin),
             }),
             withTiming(maxH * 0.8, {
               duration: speed * 0.5,
-              easing: Easing.inOut(Easing.sine),
+              easing: Easing.inOut(Easing.sin),
             }),
             withTiming(minH, {
               duration: speed * 0.8,
-              easing: Easing.inOut(Easing.sine),
+              easing: Easing.inOut(Easing.sin),
             }),
           ),
           -1,

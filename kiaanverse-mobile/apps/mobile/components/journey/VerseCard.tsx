@@ -27,15 +27,15 @@ export interface VerseCardProps {
   /** Chapter.Verse reference, e.g. "2.47" */
   readonly verseRef: string;
   /** Sanskrit text in Devanagari script. */
-  readonly sanskrit?: string;
+  readonly sanskrit?: string | undefined;
   /** Romanized transliteration of the Sanskrit. */
-  readonly transliteration?: string;
+  readonly transliteration?: string | undefined;
   /** English translation of the verse. */
-  readonly englishTranslation?: string;
+  readonly englishTranslation?: string | undefined;
   /** Hindi translation of the verse (toggleable). */
-  readonly hindiTranslation?: string;
+  readonly hindiTranslation?: string | undefined;
   /** Accent color for decorative elements. */
-  readonly accentColor?: string;
+  readonly accentColor?: string | undefined;
 }
 
 // ---------------------------------------------------------------------------

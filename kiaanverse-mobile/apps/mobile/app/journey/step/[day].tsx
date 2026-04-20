@@ -211,7 +211,7 @@ function CompletionArea({
     return (
       <Animated.View entering={FadeIn.duration(400)} style={styles.completionArea}>
         <View style={styles.lockedCard}>
-          <MandalaSpin size={48} color={colors.alpha.goldLight} speed={30000} />
+          <MandalaSpin size={48} color={colors.alpha.goldLight} speed="slow" />
           <Text variant="body" color={colors.text.secondary} align="center">
             This step will be available tomorrow
           </Text>

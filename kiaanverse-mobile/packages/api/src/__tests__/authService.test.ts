@@ -23,7 +23,7 @@ function mockAxiosResponse<T>(data: T, status = 200, headers: Record<string, unk
     data,
     status,
     statusText: 'OK',
-    headers,
+    headers: headers as AxiosResponse['headers'],
     config: {} as AxiosResponse['config'],
   };
 }

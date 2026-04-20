@@ -94,7 +94,7 @@ export function createAppQueryClient(): QueryClient {
 // AsyncStorage Persister
 // ---------------------------------------------------------------------------
 
-export function createAppPersister() {
+export function createAppPersister(): ReturnType<typeof createAsyncStoragePersister> {
   return createAsyncStoragePersister({
     storage: AsyncStorage,
     key: 'kiaanverse-query-cache',

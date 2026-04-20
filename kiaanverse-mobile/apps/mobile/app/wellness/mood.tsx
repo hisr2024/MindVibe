@@ -294,15 +294,16 @@ export default function MoodTrackingScreen(): React.JSX.Element {
           markLogged();
           setRingMood(undefined);
           // Sync to wellness store for offline chart display
-          addMoodEntry({
+          const entry: MoodEntry = {
             id: typeof data.id === 'number' ? data.id : 0,
             score: payload.score,
             state: payload.state,
             tags: payload.tags,
-            note: payload.note,
             date: payload.date,
             at: new Date().toISOString(),
-          });
+          };
+          if (payload.note !== undefined) entry.note = payload.note;
+          addMoodEntry(entry);
         },
       },
     );

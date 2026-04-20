@@ -195,4 +195,8 @@ export {
   useDeleteJournal,
   useUserSettings,
   useUpdateSettings,
+  usePrivacyStatus,
+  useRequestExport,
+  useRequestDeletion,
+  useCancelDeletion,
 } from './hooks';

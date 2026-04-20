@@ -26,7 +26,7 @@ import { immer } from 'zustand/middleware/immer';
 import * as SecureStore from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { setTokenManager, authService } from '@kiaanverse/api';
-import type { User, SubscriptionTier } from '@kiaanverse/api';
+import type { User } from '@kiaanverse/api';
 import { secureStoreAdapter } from './persistence';
 
 // React Native/Expo global — always defined at runtime
@@ -148,7 +148,7 @@ const DEV_MOCK_USER: User = {
   email: 'dev@kiaanverse.local',
   name: 'Dev Mode',
   locale: 'en',
-  subscriptionTier: 'SIDDHA' as SubscriptionTier,
+  subscriptionTier: 'SIDDHA',
   createdAt: new Date().toISOString(),
 };
 

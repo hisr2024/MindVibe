@@ -33,6 +33,7 @@ import {
   SacredDivider,
   ConfettiCannon,
   EmotionOrb,
+  type EmotionOrbMood,
   colors,
   spacing,
 } from '@kiaanverse/ui';
@@ -113,7 +114,7 @@ async function decryptContent(encryptedBase64: string): Promise<string> {
 }
 
 /** Map mood tag to EmotionOrb mood prop */
-function moodToOrbMood(mood: string | null): string {
+function moodToOrbMood(mood: string | null): EmotionOrbMood {
   switch (mood) {
     case 'heavy': return 'sad';
     case 'unsettled': return 'anxious';
@@ -141,6 +142,7 @@ export default function NewJournalScreen(): React.JSX.Element {
       const timer = setTimeout(() => setShowSaveSuccess(false), 3000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [showSaveSuccess]);
 
   const handleMoodSelect = useCallback((tag: string) => {

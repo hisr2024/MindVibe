@@ -64,14 +64,22 @@ function _unpackJournalEntry(raw: unknown): {
     (encryptedContent && (encryptedContent as _EncryptedPayloadShape).ciphertext) ?? '';
   const tags = Array.isArray(row.tags) ? (row.tags as string[]) : [];
   const moods = Array.isArray(row.moods) ? (row.moods as string[]) : [];
-  return {
+  const result: {
+    id: string;
+    content_encrypted: string;
+    tags: string[];
+    mood_tag?: string;
+    created_at: string;
+    updated_at?: string;
+  } = {
     id: String(row.id ?? ''),
     content_encrypted: String(ciphertext),
     tags,
-    mood_tag: moods[0],
     created_at: String(row.created_at ?? new Date().toISOString()),
-    updated_at: row.updated_at ? String(row.updated_at) : undefined,
   };
+  if (moods[0] !== undefined) result.mood_tag = moods[0];
+  if (row.updated_at) result.updated_at = String(row.updated_at);
+  return result;
 }
 
 export const api = {

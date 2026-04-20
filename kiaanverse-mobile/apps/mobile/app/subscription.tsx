@@ -60,7 +60,7 @@ interface TierCardProps {
   tier: SubscriptionTier;
   name: string;
   price: string;
-  monthlyEquivalent?: string;
+  monthlyEquivalent?: string | undefined;
   description: string;
   kiaanQuota: string;
   features: string[];

@@ -463,20 +463,22 @@ interface RawStep {
 
 function _mapStep(s: RawStep): WisdomJourneyStep {
   const firstVerse = s.verse_refs?.[0];
-  return {
+  const reflectionText = (s.guided_reflection ?? []).join('\n\n');
+  const step: WisdomJourneyStep = {
     id: s.step_id,
     dayIndex: s.day_index,
     title: s.step_title,
     type: 'lesson',
     content: s.teaching ?? '',
-    verseRef: firstVerse ? `${firstVerse.chapter}.${firstVerse.verse}` : undefined,
-    reflection: (s.guided_reflection ?? []).join('\n\n') || undefined,
     isCompleted: s.is_completed,
     // Backend does not expose per-step XP/karma yet — defaults match the
     // mobile UI's placeholder reward copy so the detail card renders.
     xpReward: 10,
     karmaReward: 5,
   };
+  if (firstVerse) step.verseRef = `${firstVerse.chapter}.${firstVerse.verse}`;
+  if (reflectionText) step.reflection = reflectionText;
+  return step;
 }
 
 /**
