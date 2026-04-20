@@ -160,17 +160,18 @@ function AppContent(): React.JSX.Element {
   const processQueue = useSyncQueueStore((s) => s.processQueue);
   const wasOffline = useRef(false);
 
+  // Hide splash the moment any React tree lays out. Waiting for status to
+  // settle kept the native lantern on screen for up to 8s on a slow auth
+  // bootstrap; users read that as a frozen app. Swapping to LoadingMandala
+  // immediately makes loading legible.
   const onLayoutReady = useCallback(async () => {
-    if (status !== 'idle' && status !== 'loading') {
-      try {
-        await SplashScreen.hideAsync();
-      } catch {
-        // SplashScreen.hideAsync can throw if the native module is missing
-        // or if it's already hidden — swallow so it never prevents the app
-        // from continuing to render the tree below.
-      }
+    try {
+      await SplashScreen.hideAsync();
+    } catch {
+      // hideAsync throws if the native module is missing or the splash is
+      // already hidden — swallow so it never blocks rendering below.
     }
-  }, [status]);
+  }, []);
 
   // Fail-open splash hide: if the auth bootstrap takes too long or silently
   // hangs, force the splash to hide after 8 seconds so the user sees the
@@ -258,7 +259,10 @@ function AppContent(): React.JSX.Element {
 
   if (status === 'idle' || status === 'loading') {
     return (
-      <View style={[styles.loading, { backgroundColor: colors.background.dark }]}>
+      <View
+        style={[styles.loading, { backgroundColor: colors.background.dark }]}
+        onLayout={onLayoutReady}
+      >
         <LoadingMandala size={120} />
       </View>
     );
