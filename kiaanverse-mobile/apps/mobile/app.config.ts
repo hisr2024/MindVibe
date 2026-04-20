@@ -71,6 +71,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'android.permission.USE_FINGERPRINT',
       'android.permission.RECEIVE_BOOT_COMPLETED',
       'android.permission.POST_NOTIFICATIONS',
+      'com.android.vending.BILLING',
     ],
     intentFilters: [
       {
@@ -134,6 +135,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         faceIDPermission:
           'Kiaanverse uses Face ID for secure, quick login.',
+      },
+    ],
+    [
+      'react-native-iap',
+      {
+        paymentProvider: 'Play Store',
       },
     ],
   ],
