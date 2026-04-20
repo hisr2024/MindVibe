@@ -156,15 +156,49 @@ function AppContent(): React.JSX.Element {
 
   const onLayoutReady = useCallback(async () => {
     if (status !== 'idle' && status !== 'loading') {
-      await SplashScreen.hideAsync();
+      try {
+        await SplashScreen.hideAsync();
+      } catch {
+        // SplashScreen.hideAsync can throw if the native module is missing
+        // or if it's already hidden — swallow so it never prevents the app
+        // from continuing to render the tree below.
+      }
     }
   }, [status]);
 
+  // Fail-open splash hide: if the auth bootstrap takes too long or silently
+  // hangs, force the splash to hide after 8 seconds so the user sees the
+  // LoadingMandala fallback instead of a frozen native splash. Without this
+  // guard a slow network + broken token storage would present as a crash.
   useEffect(() => {
+    const timeout = setTimeout(() => {
+      SplashScreen.hideAsync().catch(() => undefined);
+    }, 8000);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    // Each step is isolated so a failure in one (e.g. the biometric probe
+    // on devices without hardware, or a hydrateSubscription storage read
+    // failing on first install) can't block the auth gate from settling.
+    // Without this, status stayed 'idle'/'loading' forever → splash never
+    // hid and the app appeared to be stuck in a reload loop.
     const setup = async () => {
-      await initialize();
-      await checkBiometricAvailability();
-      await hydrateSubscription();
+      try {
+        await initialize();
+      } catch (err) {
+        if (__DEV__) console.warn('[setup] initialize failed:', err);
+      }
+      try {
+        await checkBiometricAvailability();
+      } catch (err) {
+        if (__DEV__) console.warn('[setup] biometric probe failed:', err);
+      }
+      try {
+        await hydrateSubscription();
+      } catch (err) {
+        if (__DEV__) console.warn('[setup] hydrateSubscription failed:', err);
+      }
     };
     void setup();
     // Run once on mount — Zustand actions are stable references
@@ -223,9 +257,11 @@ function AppContent(): React.JSX.Element {
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="onboarding" />
-          <Stack.Screen name="gita" />
           <Stack.Screen name="wellness" />
-          <Stack.Screen name="chat" />
+
+          {/* Wisdom Journeys (14/21-day transformation paths) */}
+          <Stack.Screen name="journey" />
+
           <Stack.Screen
             name="subscription"
             options={{ animation: 'slide_from_bottom', presentation: 'modal', animationDuration: 350 }}
