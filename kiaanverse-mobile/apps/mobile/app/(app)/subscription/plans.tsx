@@ -36,10 +36,12 @@ import {
   OmLoader,
 } from '@kiaanverse/ui';
 import {
+  apiClient,
   getProducts,
   purchaseSubscription,
   restorePurchases,
   TIER_CONFIGS,
+  TIER_RANK,
   type BillingPeriod,
   type IAPProduct,
 } from '@kiaanverse/api';
@@ -74,10 +76,19 @@ const TIER_COPY: Record<
   },
 };
 
+interface CurrentSubscriptionMini {
+  tier: SubscriptionTier;
+  billing: BillingPeriod | null;
+}
+
 export default function SubscriptionPlansScreen(): React.JSX.Element {
   const [billing, setBilling] = useState<BillingPeriod>('monthly');
   const [selected, setSelected] = useState<Exclude<SubscriptionTier, 'free'>>('sadhak');
   const [products, setProducts] = useState<IAPProduct[]>([]);
+  const [current, setCurrent] = useState<CurrentSubscriptionMini>({
+    tier: 'free',
+    billing: null,
+  });
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
@@ -86,8 +97,26 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
     let mounted = true;
     (async () => {
       try {
-        const fetched = await getProducts();
-        if (mounted) setProducts(fetched);
+        const [fetched, currentRes] = await Promise.all([
+          getProducts(),
+          apiClient
+            .get<{
+              effective_tier: SubscriptionTier | null;
+              plan: { tier: SubscriptionTier; billing_period?: BillingPeriod } | null;
+              store_product_id: string | null;
+            }>('/api/subscriptions/current')
+            .catch(() => null),
+        ]);
+
+        if (!mounted) return;
+        setProducts(fetched);
+
+        const data = currentRes?.data;
+        const tier = data?.effective_tier ?? data?.plan?.tier ?? 'free';
+        const billingFromSku = deriveBillingFromSku(data?.store_product_id ?? null);
+        const resolvedBilling: BillingPeriod | null =
+          billingFromSku ?? data?.plan?.billing_period ?? null;
+        setCurrent({ tier, billing: resolvedBilling });
       } catch (err) {
         console.warn('Failed to load IAP products:', err);
       } finally {
@@ -149,11 +178,22 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
     }
   }, []);
 
+  const ctaAction = resolveCtaAction(current, selected, billing);
   const cta = (() => {
     const price = priceFor(selected, billing);
     const period = billing === 'monthly' ? '/month' : '/year';
-    return `Begin with ${TIER_CONFIGS[selected].name} · ${price}${period}`;
+    const name = TIER_CONFIGS[selected].name;
+    if (ctaAction === 'current') return `You are on ${name} · ${price}${period}`;
+    if (ctaAction === 'upgrade') return `Upgrade to ${name} · ${price}${period}`;
+    if (ctaAction === 'downgrade') return `Switch to ${name} · ${price}${period}`;
+    return `Begin with ${name} · ${price}${period}`;
   })();
+  const ctaSub =
+    ctaAction === 'upgrade'
+      ? 'Prorated instantly · Billed via your store account'
+      : ctaAction === 'downgrade'
+      ? 'Takes effect at the end of your current period'
+      : 'Cancel anytime in your store settings';
 
   if (loadingProducts) {
     return (
@@ -299,23 +339,64 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
             <Text style={styles.loadingText}>Opening sacred payment…</Text>
           </View>
         ) : (
-          <TouchableOpacity onPress={handleSubscribe} activeOpacity={0.85}>
+          <TouchableOpacity
+            onPress={handleSubscribe}
+            activeOpacity={0.85}
+            disabled={ctaAction === 'current'}
+          >
             <LinearGradient
               colors={TIER_COPY[selected].gradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={styles.subscribeBtn}
+              style={[
+                styles.subscribeBtn,
+                ctaAction === 'current' && styles.subscribeBtnDisabled,
+              ]}
             >
               <Text style={styles.subscribeBtnText}>{cta}</Text>
-              <Text style={styles.subscribeBtnSub}>
-                Cancel anytime in your store settings
-              </Text>
+              <Text style={styles.subscribeBtnSub}>{ctaSub}</Text>
             </LinearGradient>
           </TouchableOpacity>
         )}
       </View>
     </DivineScreenWrapper>
   );
+}
+
+type CtaAction = 'subscribe' | 'upgrade' | 'downgrade' | 'current';
+
+/**
+ * Decide how to label the CTA based on the user's current plan. Same
+ * sku + same billing period → disabled ("current"). Strictly higher
+ * tier or monthly→yearly on the same tier → upgrade. Anything else
+ * while on a paid tier → downgrade.
+ */
+function resolveCtaAction(
+  current: CurrentSubscriptionMini,
+  selected: Exclude<SubscriptionTier, 'free'>,
+  billing: BillingPeriod,
+): CtaAction {
+  if (current.tier === 'free') return 'subscribe';
+  if (current.tier === selected && current.billing === billing) return 'current';
+
+  const currentRank = TIER_RANK[current.tier];
+  const selectedRank = TIER_RANK[selected];
+  if (selectedRank > currentRank) return 'upgrade';
+  if (
+    selectedRank === currentRank &&
+    current.billing === 'monthly' &&
+    billing === 'yearly'
+  ) {
+    return 'upgrade';
+  }
+  return 'downgrade';
+}
+
+function deriveBillingFromSku(sku: string | null): BillingPeriod | null {
+  if (!sku) return null;
+  if (sku.endsWith('.yearly')) return 'yearly';
+  if (sku.endsWith('.monthly')) return 'monthly';
+  return null;
 }
 
 function featureListFor(tier: SubscriptionTier): string[] {
@@ -498,6 +579,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 14,
     alignItems: 'center',
+  },
+  subscribeBtnDisabled: {
+    opacity: 0.55,
   },
   subscribeBtnText: {
     fontSize: 16,

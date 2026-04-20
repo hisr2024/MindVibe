@@ -131,6 +131,17 @@ class UserSubscription(SoftDeleteMixin, Base):
     razorpay_customer_id: Mapped[str | None] = mapped_column(
         String(128), nullable=True, index=True
     )
+    # Play Billing / StoreKit identifiers. `store_purchase_token` holds the
+    # Play purchaseToken (base64, up to ~4KB) on Android or the StoreKit
+    # originalTransactionId on iOS. `store_product_id` holds the SKU so
+    # upgrade / downgrade flows can reuse it without another round-trip.
+    # Both populated on receipt verification (see mobile_subscription.py).
+    store_product_id: Mapped[str | None] = mapped_column(
+        String(128), nullable=True, index=True
+    )
+    store_purchase_token: Mapped[str | None] = mapped_column(
+        String(4096), nullable=True, index=True
+    )
     payment_provider: Mapped[str] = mapped_column(
         String(32), default="stripe", index=True
     )

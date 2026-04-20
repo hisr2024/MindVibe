@@ -49,10 +49,13 @@ import {
   type PurchaseError,
 } from 'react-native-iap';
 
+import { ReplacementModesAndroid } from 'react-native-iap';
+
 import { apiClient } from '../client';
 import {
   IAP_PRODUCT_IDS,
   TIER_CONFIGS,
+  TIER_RANK,
   type SubscriptionTier,
   type BillingPeriod,
 } from './constants';
@@ -220,7 +223,9 @@ async function verifyWithRetry(
       lastError = err instanceof Error ? err.message : String(err);
     }
     if (attempt < VERIFY_MAX_ATTEMPTS) {
-      await new Promise((r) => setTimeout(r, VERIFY_RETRY_DELAY_MS * attempt));
+      await new Promise<void>((resolve) =>
+        setTimeout(resolve, VERIFY_RETRY_DELAY_MS * attempt),
+      );
     }
   }
   return {
@@ -483,10 +488,22 @@ export async function purchaseSubscription(
 }
 
 /**
- * Android-aware dispatch: picks the correct offerToken (prefer the base
- * plan, fall back to the first available offer) and passes the account
- * tag for server-side receipt binding. On iOS we pass the tag as
- * `appAccountToken` so Apple attaches it to the transaction.
+ * Android-aware dispatch. Responsibilities:
+ * 1. Pick the correct `offerToken` (prefer a base-plan offer over any
+ *    offer tagged as a free trial so upgrades don't silently reset the
+ *    user into a new trial period).
+ * 2. Detect an existing active subscription via
+ *    `getAvailablePurchases()` and, if the user is switching SKUs, add
+ *    `purchaseTokenAndroid` + a policy-correct `replacementModeAndroid`.
+ *    Without this, Play rejects the request with "you already own this
+ *    item". We read from the store locally (not from our backend) so
+ *    the token is always fresh and the flow works offline after init.
+ * 3. Pass the signed-in user id so Play / App Store attach it to the
+ *    transaction, enabling server-side binding of receipts to users.
+ *
+ * iOS doesn't need explicit upgrade args — StoreKit handles it
+ * automatically when all paid SKUs are in the same Subscription Group
+ * in App Store Connect. A one-time store config step, not code.
  */
 async function dispatchSubscriptionRequest(
   sku: string,
@@ -501,9 +518,6 @@ async function dispatchSubscriptionRequest(
     );
     const offers = androidSub?.subscriptionOfferDetails ?? [];
 
-    // Prefer a base-plan offer with no introductory pricing; otherwise
-    // take whatever Play returned first. Play always returns at least
-    // one offer for an active base plan.
     const chosen =
       offers.find(
         (o) =>
@@ -518,19 +532,85 @@ async function dispatchSubscriptionRequest(
       );
     }
 
+    const replacement = await resolveReplacementArgsAndroid(sku);
+
     await requestSubscription({
       sku,
       subscriptionOffers: [{ sku, offerToken: chosen.offerToken }],
+      ...replacement,
       ...(accountTag ? { obfuscatedAccountIdAndroid: accountTag } : {}),
     });
     return;
   }
 
-  // iOS
+  // iOS — relies on the App Store Connect Subscription Group for
+  // upgrade / downgrade behaviour; the client only forwards the account
+  // tag so the user-to-receipt binding is preserved.
   await requestSubscription({
     sku,
     ...(accountTag ? { appAccountToken: accountTag } : {}),
   });
+}
+
+/**
+ * Compute the Play Billing replacement payload for an upgrade or
+ * downgrade. Returns an empty object when the user has no existing
+ * subscription (i.e. a first-time purchase) so `requestSubscription`
+ * can spread it safely in both cases.
+ *
+ * Policy:
+ * - Upgrade (higher tier, or same tier switching monthly→yearly):
+ *   `CHARGE_PRORATED_PRICE` — the new plan starts immediately, the
+ *   user is credited for unused time on the old plan, and billed for
+ *   the prorated remainder of the first period.
+ * - Downgrade (lower tier, or yearly→monthly on the same tier):
+ *   `DEFERRED` — the current plan keeps running until its period end,
+ *   then the new plan takes over. Avoids unexpected refunds and
+ *   matches standard SaaS semantics.
+ */
+async function resolveReplacementArgsAndroid(
+  newSku: string,
+): Promise<
+  | { purchaseTokenAndroid: string; replacementModeAndroid: ReplacementModesAndroid }
+  | Record<string, never>
+> {
+  try {
+    const existingPurchases = await getAvailablePurchases();
+    const existing = existingPurchases.find(
+      (p) => p.productId !== newSku && Boolean(p.purchaseToken),
+    );
+    if (!existing?.purchaseToken) {
+      return {};
+    }
+
+    const newTier = productIdToTier(newSku);
+    const newBilling = productIdToBilling(newSku);
+    const existingTier = productIdToTier(existing.productId);
+    const existingBilling = productIdToBilling(existing.productId);
+
+    const newRank = TIER_RANK[newTier];
+    const existingRank = TIER_RANK[existingTier];
+
+    const isUpgrade =
+      newRank > existingRank ||
+      (newRank === existingRank &&
+        existingBilling === 'monthly' &&
+        newBilling === 'yearly');
+
+    return {
+      purchaseTokenAndroid: existing.purchaseToken,
+      replacementModeAndroid: isUpgrade
+        ? ReplacementModesAndroid.CHARGE_PRORATED_PRICE
+        : ReplacementModesAndroid.DEFERRED,
+    };
+  } catch (err) {
+    // Unable to read active purchases — proceed as a fresh purchase.
+    // Play will surface its own "you already own this item" error if
+    // there really is an active subscription; that's safe and
+    // actionable (user can restore / contact support).
+    console.warn('IAP: resolveReplacementArgsAndroid failed:', err);
+    return {};
+  }
 }
 
 export async function restorePurchases(): Promise<PurchaseResult> {
