@@ -336,6 +336,12 @@ async def verify_mobile_receipt(
             subscription.current_period_end = expires_at
             subscription.cancel_at_period_end = False
             subscription.canceled_at = None
+            # Store receipt identifiers for upgrade/downgrade + webhook lookup.
+            # On Android this is the Play purchaseToken; on iOS it's the
+            # StoreKit originalTransactionId (we keep the base64 receipt as
+            # a fallback for server-to-server verification calls).
+            subscription.store_product_id = payload.product_id
+            subscription.store_purchase_token = payload.receipt
         else:
             subscription = UserSubscription(
                 user_id=user_id,
@@ -345,6 +351,8 @@ async def verify_mobile_receipt(
                 current_period_start=now,
                 current_period_end=expires_at,
                 cancel_at_period_end=False,
+                store_product_id=payload.product_id,
+                store_purchase_token=payload.receipt,
             )
             db.add(subscription)
 

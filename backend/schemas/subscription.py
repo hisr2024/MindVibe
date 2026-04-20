@@ -58,6 +58,13 @@ class UserSubscriptionOut(BaseModel):
     created_at: datetime
     is_developer: bool = False
     effective_tier: SubscriptionTier | None = None
+    # Store receipt identifiers. `store_product_id` is required by the
+    # mobile client to deep-link to the current subscription in the Play
+    # Store and to build a Play Billing upgrade request. The raw
+    # `store_purchase_token` is NOT returned — the mobile client fetches
+    # it locally via `getAvailablePurchases()` so it is never exposed
+    # over the wire and never cached in an HTTP response.
+    store_product_id: str | None = None
 
 
 class UsageStatsOut(BaseModel):
