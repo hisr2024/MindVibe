@@ -240,6 +240,14 @@ export async function getExpoPushToken(): Promise<string | null> {
 
 /**
  * Register the device's Expo push token with the backend.
+ *
+ * Uses POST /api/user/push-token — the Expo-aware endpoint that stores
+ * the token on the User row so the notification dispatcher can send
+ * via the Expo Push API. We deliberately do NOT use
+ * /api/notifications/subscribe (which is web-push only — it accepts
+ * { endpoint, keys } Web Push subscriptions and cannot deliver to an
+ * Expo token even though the POST returns 201).
+ *
  * Skips registration if the same token is already stored.
  * Never throws — push token registration is best-effort.
  */
@@ -252,9 +260,8 @@ export async function registerPushToken(): Promise<void> {
     const storedToken = await SecureStore.getItemAsync(PUSH_TOKEN_KEY);
     if (storedToken === token) return;
 
-    // Register with backend — matches PushSubscriptionIn schema:
-    // { endpoint: string, device_name?: string, platform?: string }
-    await api.notifications.subscribe(token, `Kiaanverse ${Platform.OS}`, Platform.OS);
+    const platform = Platform.OS === 'ios' ? 'ios' : 'android';
+    await api.notifications.registerExpoPushToken(token, platform);
 
     // Store token to avoid duplicate registrations
     await SecureStore.setItemAsync(PUSH_TOKEN_KEY, token);

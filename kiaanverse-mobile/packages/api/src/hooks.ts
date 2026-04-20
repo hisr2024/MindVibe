@@ -432,6 +432,9 @@ export function useJourneyDashboard(): UseQueryResult<DashboardData> {
   return useQuery({
     queryKey: queryKeys.journeyDashboard,
     queryFn: async () => {
+      // Backend DashboardResponse uses snake_case fields:
+      //   { active_journeys, completed_journeys, current_streak, ... }
+      // The mobile view-model consumes camelCase with renamed fields.
       const { data } = await api.journeys.dashboard();
       const raw = data as Partial<RawDashboard>;
       return {
@@ -629,16 +632,20 @@ export function useCompleteStep(): UseMutationResult<StepResult, Error, { journe
   });
 }
 
-/** Complete a wisdom journey step by day index (returns XP + karma). */
+/**
+ * Complete a wisdom journey step by day index. Returns the per-step
+ * celebration payload the UI renders (XP / karma / journey completion).
+ *
+ * The backend CompletionResponse does not yet include XP or karma fields,
+ * so we pair the real success / progress / journey-complete flags with
+ * the same placeholder rewards (10 XP, 5 karma) used by _mapStep().
+ */
 export function useCompleteWisdomStep(): UseMutationResult<StepCompletionResult, Error, { journeyId: string; dayIndex: number }> {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ journeyId, dayIndex }: { journeyId: string; dayIndex: number }) => {
       const { data } = await api.journeys.completeStep(journeyId, dayIndex);
       const raw = data as RawCompletion;
-      // Backend doesn't expose XP/karma as explicit fields yet; the
-      // per-step placeholder rewards (10 XP / 5 karma) match
-      // _mapStep() so the celebration copy stays consistent.
       return {
         success: raw.success,
         xp: 10,
@@ -670,13 +677,45 @@ export function useCreateMood(): UseMutationResult<MoodResult, Error, MoodCreate
 }
 
 
-/** Karma tree with all nodes. */
+/** Karma tree with all nodes.
+ *  Backend /api/karmic-tree/progress returns a rich ProgressResponse —
+ *  { level, xp, next_level_xp, progress_percent, tree_stage, activity,
+ *    achievements, unlockables, notifications }. The mobile tree screen
+ *  consumes the older { nodes, totalPoints, level } shape; we adapt in
+ *  one place so the UI keeps working without forcing a backend change. */
+const _TREE_STAGE_TO_LEVEL: Record<string, 'seed' | 'sapling' | 'young_tree' | 'mighty_tree' | 'sacred_tree'> = {
+  seed: 'seed',
+  sapling: 'sapling',
+  young: 'young_tree',
+  young_tree: 'young_tree',
+  mighty: 'mighty_tree',
+  mighty_tree: 'mighty_tree',
+  sacred: 'sacred_tree',
+  sacred_tree: 'sacred_tree',
+};
+
 export function useKarmaTree(): UseQueryResult<KarmaTreeResponse> {
   return useQuery({
     queryKey: queryKeys.karmaTree,
     queryFn: async () => {
       const { data } = await api.karma.tree();
-      return data as KarmaTreeResponse;
+      const raw = (data ?? {}) as {
+        xp?: number;
+        tree_stage?: string;
+        achievements?: Array<{ key: string; name: string; unlocked?: boolean; progress?: number; target_value?: number }>;
+      };
+      const stage = _TREE_STAGE_TO_LEVEL[raw.tree_stage ?? 'seed'] ?? 'seed';
+      return {
+        nodes: (raw.achievements ?? []).map((a) => ({
+          id: a.key,
+          name: a.name,
+          unlocked: !!a.unlocked,
+          progress: a.progress ?? 0,
+          target: a.target_value ?? 0,
+        })),
+        totalPoints: raw.xp ?? 0,
+        level: stage,
+      } as unknown as KarmaTreeResponse;
     },
     staleTime: 1000 * 60 * 10,
   });

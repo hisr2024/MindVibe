@@ -7,6 +7,73 @@
 
 import { apiClient } from './client';
 
+// ---------------------------------------------------------------------------
+// Journal schema adapters
+//
+// The backend expects an EncryptedPayload object (ciphertext + iv + salt +
+// algorithm), but the mobile side produces a single base64 string with the
+// IV prepended (encryptContent in apps/mobile/app/journal/new.tsx). These
+// helpers pack/unpack between the two shapes so the on-the-wire payload
+// satisfies the Pydantic validator without leaking any plaintext.
+//
+// Our convention — `algorithm: 'AES-GCM-v1-iv-prefixed'` — signals to
+// future readers that the `ciphertext` field carries `iv || ciphertext`
+// concatenated and the standalone `iv` field is intentionally empty.
+// ---------------------------------------------------------------------------
+
+interface _EncryptedPayloadShape {
+  ciphertext: string;
+  iv: string;
+  salt: string;
+  auth_tag?: string | null;
+  algorithm: string;
+  key_version?: string | null;
+}
+
+function _packJournalEntry(entry: {
+  content_encrypted: string;
+  tags?: string[];
+}): Record<string, unknown> {
+  const encryptedContent: _EncryptedPayloadShape = {
+    ciphertext: entry.content_encrypted,
+    iv: '',
+    salt: '',
+    algorithm: 'AES-GCM-v1-iv-prefixed',
+  };
+  return {
+    content: encryptedContent,
+    tags: entry.tags ?? [],
+    client_updated_at: new Date().toISOString(),
+  };
+}
+
+function _unpackJournalEntry(raw: unknown): {
+  id: string;
+  content_encrypted: string;
+  tags: string[];
+  mood_tag?: string;
+  created_at: string;
+  updated_at?: string;
+} {
+  const row = (raw ?? {}) as Record<string, unknown>;
+  const encryptedContent = row.encrypted_content as
+    | _EncryptedPayloadShape
+    | Record<string, unknown>
+    | undefined;
+  const ciphertext =
+    (encryptedContent && (encryptedContent as _EncryptedPayloadShape).ciphertext) ?? '';
+  const tags = Array.isArray(row.tags) ? (row.tags as string[]) : [];
+  const moods = Array.isArray(row.moods) ? (row.moods as string[]) : [];
+  return {
+    id: String(row.id ?? ''),
+    content_encrypted: String(ciphertext),
+    tags,
+    mood_tag: moods[0],
+    created_at: String(row.created_at ?? new Date().toISOString()),
+    updated_at: row.updated_at ? String(row.updated_at) : undefined,
+  };
+}
+
 export const api = {
   auth: {
     login: (email: string, password: string) =>
@@ -56,23 +123,66 @@ export const api = {
       apiClient.get('/api/moods/micro-response', { params: { score } }),
   },
 
-  /** Karma tree */
+  /** Karma tree.
+   *  Backend POST /api/karmic-tree/unlock expects { unlockable_key, source? }.
+   *  The mobile caller passes the achievement key as a single string, so we
+   *  rename on the wire. */
   karma: {
     tree: () => apiClient.get('/api/karmic-tree/progress'),
     achievements: () => apiClient.get('/api/karmic-tree/achievements'),
     unlock: (achievementId: string) =>
-      apiClient.post('/api/karmic-tree/unlock', { achievement_id: achievementId }),
+      apiClient.post('/api/karmic-tree/unlock', {
+        unlockable_key: achievementId,
+        source: 'mobile',
+      }),
   },
 
-  /** Encrypted journal */
+  /** Encrypted journal.
+   *  Backend schema (backend/schemas/journal.py):
+   *    JournalEntryCreate {
+   *      entry_id?, title?: EncryptedPayload,
+   *      content: EncryptedPayload { ciphertext, iv, salt, auth_tag?, algorithm, key_version? },
+   *      moods?, tags?, search_tokens?, client_updated_at: datetime  ← REQUIRED
+   *    }
+   *  Mobile produces an opaque single-string ciphertext with the IV
+   *  prepended (see apps/mobile/app/journal/new.tsx encryptContent). We
+   *  adapt the wire format so the backend validator passes while the
+   *  bytes stay end-to-end opaque to the server. */
   journal: {
-    list: () => apiClient.get('/api/journal/entries'),
-    create: (entry: { content_encrypted: string; tags?: string[] }) =>
-      apiClient.post('/api/journal/entries', entry),
-    get: (entryId: string) =>
-      apiClient.get(`/api/journal/entries/${entryId}`),
-    update: (entryId: string, entry: { content_encrypted: string; tags?: string[] }) =>
-      apiClient.put(`/api/journal/entries/${entryId}`, entry),
+    list: async () => {
+      // Backend returns a bare array; wrap it so the UI keeps its
+      // JournalListResponse { entries, total } contract.
+      const res = await apiClient.get<Array<Record<string, unknown>>>(
+        '/api/journal/entries',
+      );
+      const entries = (res.data ?? []).map(_unpackJournalEntry);
+      return { ...res, data: { entries, total: entries.length } };
+    },
+    create: async (entry: { content_encrypted: string; tags?: string[] }) => {
+      const payload = _packJournalEntry(entry);
+      const res = await apiClient.post<Record<string, unknown>>(
+        '/api/journal/entries',
+        payload,
+      );
+      return { ...res, data: _unpackJournalEntry(res.data) };
+    },
+    get: async (entryId: string) => {
+      const res = await apiClient.get<Record<string, unknown>>(
+        `/api/journal/entries/${entryId}`,
+      );
+      return { ...res, data: _unpackJournalEntry(res.data) };
+    },
+    update: async (
+      entryId: string,
+      entry: { content_encrypted: string; tags?: string[] },
+    ) => {
+      const payload = _packJournalEntry(entry);
+      const res = await apiClient.put<Record<string, unknown>>(
+        `/api/journal/entries/${entryId}`,
+        payload,
+      );
+      return { ...res, data: _unpackJournalEntry(res.data) };
+    },
     remove: (entryId: string) =>
       apiClient.delete(`/api/journal/entries/${entryId}`),
   },
@@ -202,12 +312,24 @@ export const api = {
       }),
   },
 
-  /** Sync (offline batch) */
+  /** Sync (offline batch).
+   *  Backend SyncBatchRequest expects `{ items: SyncItem[], last_sync_timestamp? }`
+   *  and /pull expects `{ last_sync_timestamp: datetime, entity_types: [...] }`.
+   *  We translate on the wire so the queue-flush path (callers supply a bare
+   *  operations array; we also accept a plain timestamp for pull). */
   sync: {
     batch: (operations: Record<string, unknown>[]) =>
-      apiClient.post('/api/sync/batch', { operations }),
-    pull: (lastSyncTimestamp?: number) =>
-      apiClient.post('/api/sync/pull', { since: lastSyncTimestamp }),
+      apiClient.post('/api/sync/batch', { items: operations }),
+    pull: (lastSyncTimestamp?: number | string | null) => {
+      const iso =
+        typeof lastSyncTimestamp === 'number'
+          ? new Date(lastSyncTimestamp).toISOString()
+          : (lastSyncTimestamp ?? new Date(0).toISOString());
+      return apiClient.post('/api/sync/pull', {
+        last_sync_timestamp: iso,
+        entity_types: ['mood', 'journal', 'journey_progress'],
+      });
+    },
     status: () => apiClient.get('/api/sync/status'),
   },
 
@@ -351,8 +473,18 @@ export const api = {
       apiClient.put('/api/profile/settings', settings),
   },
 
-  /** Push notifications */
+  /** Push notifications.
+   *  The web-push /subscribe/unsubscribe endpoints accept Web Push
+   *  subscription objects ({ endpoint, keys }) — feeding them Expo push
+   *  tokens "works" in the sense that it returns 201, but the backend
+   *  can never deliver via Web Push because the endpoint isn't a real
+   *  push URL. The correct endpoint for mobile is /api/user/push-token.
+   *  `registerExpoPushToken` below talks to that route; the older
+   *  `subscribe`/`unsubscribe` are kept for web-push callers only. */
   notifications: {
+    /** Register an Expo Push token for this device. Mobile-only. */
+    registerExpoPushToken: (token: string, platform: 'ios' | 'android') =>
+      apiClient.post('/api/user/push-token', { token, platform }),
     subscribe: (token: string, deviceName?: string, platform?: string) =>
       apiClient.post('/api/notifications/subscribe', {
         endpoint: token,
