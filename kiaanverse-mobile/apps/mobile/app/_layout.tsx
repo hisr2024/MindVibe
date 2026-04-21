@@ -20,7 +20,7 @@
  *   authenticated + onboarded → /(tabs)
  */
 
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -42,10 +42,12 @@ import {
 import { useAuthStore, useThemeStore, useUserPreferencesStore, useSyncQueueStore, startSyncOnForeground, useSubscriptionStore } from '@kiaanverse/store';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { useNotifications } from '../hooks/useNotifications';
+import { useArrivalStatus } from '../hooks/useArrivalStatus';
 import { OfflineBanner } from '../components/common/OfflineBanner';
 import { NotificationToast } from '../components/common/NotificationToast';
 import { ErrorBoundary } from '../components/common/ErrorBoundary';
 import { ToastContainer } from '../components/common/Toast';
+import { SacredArrival } from '../components/common/SacredArrival';
 import { initErrorTracking } from '../services/errorTracking';
 import {
   registerPlaybackService,
@@ -132,6 +134,7 @@ async function executeSyncItem(item: SyncQueueItem): Promise<void> {
 
 function AuthGate({ children }: { children: React.ReactNode }): React.JSX.Element {
   const { status, isOnboarded, hasHydrated } = useAuthStore();
+  const { isLoaded: arrivalLoaded, hasSeenArrival } = useArrivalStatus();
   const segments = useSegments();
   const router = useRouter();
 
@@ -141,18 +144,33 @@ function AuthGate({ children }: { children: React.ReactNode }): React.JSX.Elemen
     // Without this, isOnboarded is stale (false) for a few frames after
     // initialize() resolves, causing a flash redirect to /onboarding.
     if (!hasHydrated) return;
+    // Wait for the arrival flag to load from AsyncStorage before routing so we
+    // don't flash past the ceremony on first launch.
+    if (!arrivalLoaded) return;
 
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboarding = segments[0] === 'onboarding';
+    const inArrival = segments[0] === 'arrival';
 
-    if (status === 'unauthenticated' && !inAuthGroup) {
+    // First-launch darshan: unauthenticated users who have not yet seen the
+    // arrival ceremony are routed into /arrival before the auth door.
+    if (status === 'unauthenticated' && !hasSeenArrival && !inArrival) {
+      router.replace('/arrival');
+      return;
+    }
+
+    if (status === 'unauthenticated' && hasSeenArrival && !inAuthGroup && !inArrival) {
       router.replace('/(auth)/login');
     } else if (status === 'authenticated' && !isOnboarded && !inOnboarding) {
       router.replace('/onboarding');
-    } else if (status === 'authenticated' && isOnboarded && (inAuthGroup || inOnboarding)) {
+    } else if (
+      status === 'authenticated' &&
+      isOnboarded &&
+      (inAuthGroup || inOnboarding || inArrival)
+    ) {
       router.replace('/(tabs)');
     }
-  }, [status, isOnboarded, hasHydrated, segments, router]);
+  }, [status, isOnboarded, hasHydrated, hasSeenArrival, arrivalLoaded, segments, router]);
 
   return <>{children}</>;
 }
@@ -169,6 +187,24 @@ function AppContent(): React.JSX.Element {
   const pendingCount = useSyncQueueStore((s) => s.queue.length);
   const processQueue = useSyncQueueStore((s) => s.processQueue);
   const wasOffline = useRef(false);
+
+  // 7-Act Arrival ceremony. Plays exactly once per device: on first cold start
+  // we overlay the SacredArrival on top of the rest of the tree until it
+  // dismisses itself. The AsyncStorage flag is written by the 5-page /arrival
+  // route after the user explicitly "Begins Your Journey" — so a hard-quit
+  // during the ceremony replays it next launch (intentional).
+  const { isLoaded: arrivalLoaded, hasSeenArrival } = useArrivalStatus();
+  const [ceremonyActive, setCeremonyActive] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!arrivalLoaded) return;
+    setCeremonyActive((prev) => (prev === null ? !hasSeenArrival : prev));
+    // Only the initial load decision drives the overlay — subsequent changes
+    // to hasSeenArrival (e.g. the 5-page ceremony marking it seen) must not
+    // remount the overlay, which would re-play the animation mid-flow.
+  }, [arrivalLoaded, hasSeenArrival]);
+  const handleCeremonyComplete = useCallback(() => {
+    setCeremonyActive(false);
+  }, []);
 
   // Hide splash the moment any React tree lays out. Waiting for status to
   // settle kept the native lantern on screen for up to 8s on a slow auth
@@ -283,6 +319,11 @@ function AppContent(): React.JSX.Element {
         onLayout={onLayoutReady}
       >
         <LoadingMandala size={120} />
+        {ceremonyActive ? (
+          <View style={styles.ceremonyOverlay} pointerEvents="auto">
+            <SacredArrival onComplete={handleCeremonyComplete} />
+          </View>
+        ) : null}
       </View>
     );
   }
@@ -306,6 +347,10 @@ function AppContent(): React.JSX.Element {
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="onboarding" />
+
+          {/* Sacred Arrival — first-launch 5-page darshan before auth */}
+          <Stack.Screen name="arrival" options={{ animationDuration: 400 }} />
+
           <Stack.Screen name="wellness" />
 
           {/* Wisdom Journeys (14/21-day transformation paths) */}
@@ -348,6 +393,16 @@ function AppContent(): React.JSX.Element {
           <Stack.Screen name="(app)" />
         </Stack>
       </AuthGate>
+
+      {/* 7-Act Arrival ceremony — rendered LAST so it sits on top of every
+          other surface during the first cold start. It is a pure overlay:
+          the rest of the tree continues mounting underneath so that once
+          onComplete fires the subsequent route transition is instant. */}
+      {ceremonyActive ? (
+        <View style={styles.ceremonyOverlay} pointerEvents="auto">
+          <SacredArrival onComplete={handleCeremonyComplete} />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -389,5 +444,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  ceremonyOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 9999,
+    elevation: 20,
   },
 });
