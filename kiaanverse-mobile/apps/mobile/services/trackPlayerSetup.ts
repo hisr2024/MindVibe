@@ -60,6 +60,7 @@ export function registerPlaybackService(): void {
     // module uses `module.exports = async function …`, so the CommonJS
     // require returns the ServiceHandler directly; the cast documents the
     // contract (Metro's `require` is typed as `any`).
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     () => require('./playbackService') as unknown as ServiceHandler,
   );
 }
