@@ -1,9 +1,18 @@
 /**
- * Sacred Journal — Entry List Screen
+ * Sacred Journal Hub — tabbed surface combining the daily diary with the
+ * Sacred Journeys engine (षड्रिपु — the six inner enemies).
  *
- * Full-screen immersive layout with FlatList, search, tag filtering,
- * pull-to-refresh, and swipe-to-delete on each entry card. FAB positioned
- * with safe area insets. Long-press on entry opens context menu.
+ * Two tabs:
+ *   1. "Sacred Journal" — the encrypted daily diary. Search, tag-filter,
+ *      swipe-to-delete, long-press-to-edit, pull-to-refresh, FAB for new
+ *      entries. Each entry's body is AES-256-GCM encrypted client-side
+ *      (see apps/mobile/app/journal/new.tsx for key management).
+ *   2. "Journeys" — lightweight hub for active Sacred Journeys with a CTA
+ *      into the full catalog at /journey.
+ *
+ * The diary fuels KarmaLytix: mood tags, category tags, and encrypted
+ * reflections feed the analytics engine (server-side reflection text is
+ * never decrypted — only tags and metadata).
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
@@ -40,44 +49,65 @@ import {
   colors,
   spacing,
 } from '@kiaanverse/ui';
-import { useJournalEntries } from '@kiaanverse/api';
+import { useJournalEntries, useDeleteJournal } from '@kiaanverse/api';
 import type { JournalEntry } from '@kiaanverse/api';
+import { useTranslation } from '@kiaanverse/i18n';
 import { JournalEntryCard } from '../../components/journal/JournalEntryCard';
+import { JourneysView } from '../../components/journal/JourneysView';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.4;
 
-const TAG_FILTERS = ['All', 'Gratitude', 'Reflection', 'Prayer', 'Dream', 'Insight'] as const;
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const HUB_TABS = ['journal', 'journeys'] as const;
+type HubTab = (typeof HUB_TABS)[number];
 
 /**
- * Swipeable journal entry card.
- * Swipe left to reveal delete action. Swipe > 40% triggers haptic + confirmation.
- * Long-press opens context menu with edit/share options.
+ * Category filters for the Sacred Journal. These operate on the entry's
+ * `tags` array since the backend schema does not yet include a dedicated
+ * `category` field — the diary remains the single source of truth.
  */
+const TAG_FILTERS = ['All', 'Gratitude', 'Reflection', 'Prayer', 'Dream', 'Insight'] as const;
+
+// ---------------------------------------------------------------------------
+// SwipeableEntryCard — pan-to-reveal-delete
+// ---------------------------------------------------------------------------
+
+interface SwipeableEntryCardProps {
+  readonly entry: JournalEntry;
+  readonly onPress: (entry: JournalEntry) => void;
+  readonly onDelete: (entry: JournalEntry) => void;
+  readonly onLongPress: (entry: JournalEntry) => void;
+}
+
 function SwipeableEntryCard({
   entry,
   onPress,
   onDelete,
   onLongPress,
-}: {
-  entry: JournalEntry;
-  onPress: (entry: JournalEntry) => void;
-  onDelete: (entry: JournalEntry) => void;
-  onLongPress: (entry: JournalEntry) => void;
-}): React.JSX.Element {
+}: SwipeableEntryCardProps): React.JSX.Element {
   const translateX = useSharedValue(0);
   const deleteOpacity = useSharedValue(0);
 
-  const triggerDeleteConfirmation = useCallback(() => {
+  const resetSwipe = useCallback(() => {
+    translateX.value = withSpring(0, { damping: 20, stiffness: 300 });
+    deleteOpacity.value = withTiming(0, { duration: 200 });
+  }, [translateX, deleteOpacity]);
+
+  const triggerDelete = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     onDelete(entry);
-  }, [entry, onDelete]);
+    // Restore position after confirmation returns so row does not stay open.
+    resetSwipe();
+  }, [entry, onDelete, resetSwipe]);
 
   const panGesture = Gesture.Pan()
     .activeOffsetX([-15, 15])
     .failOffsetY([-10, 10])
     .onUpdate((event) => {
-      // Only allow swipe left (negative x)
       if (event.translationX < 0) {
         translateX.value = event.translationX;
         deleteOpacity.value = Math.min(1, Math.abs(event.translationX) / SWIPE_THRESHOLD);
@@ -85,11 +115,9 @@ function SwipeableEntryCard({
     })
     .onEnd((event) => {
       if (Math.abs(event.translationX) > SWIPE_THRESHOLD) {
-        // Past threshold — snap to reveal and trigger delete
         translateX.value = withTiming(-SCREEN_WIDTH * 0.25, { duration: 200 });
-        runOnJS(triggerDeleteConfirmation)();
+        runOnJS(triggerDelete)();
       } else {
-        // Snap back
         translateX.value = withSpring(0, { damping: 20, stiffness: 300 });
         deleteOpacity.value = withTiming(0, { duration: 200 });
       }
@@ -115,21 +143,15 @@ function SwipeableEntryCard({
 
   return (
     <View style={styles.swipeContainer}>
-      {/* Delete background revealed on swipe */}
       <Animated.View style={[styles.deleteBackground, deleteBackgroundStyle]}>
         <Text variant="body" color={colors.text.primary}>
           Delete
         </Text>
       </Animated.View>
 
-      {/* Swipeable card */}
       <GestureDetector gesture={panGesture}>
         <Animated.View style={cardAnimatedStyle}>
-          <Pressable
-            onPress={handlePress}
-            onLongPress={handleLongPress}
-            delayLongPress={400}
-          >
+          <Pressable onPress={handlePress} onLongPress={handleLongPress} delayLongPress={400}>
             <GlowCard variant="golden">
               <JournalEntryCard entry={entry} onPress={onPress} />
             </GlowCard>
@@ -140,10 +162,48 @@ function SwipeableEntryCard({
   );
 }
 
-export default function JournalListScreen(): React.JSX.Element {
+// ---------------------------------------------------------------------------
+// TabPill — hub-level tab switcher
+// ---------------------------------------------------------------------------
+
+function TabPill({
+  label,
+  isActive,
+  onPress,
+}: {
+  label: string;
+  isActive: boolean;
+  onPress: () => void;
+}): React.JSX.Element {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={[styles.tabPill, isActive && styles.tabPillActive]}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: isActive }}
+    >
+      <Text
+        variant="label"
+        color={isActive ? colors.background.dark : colors.text.muted}
+        align="center"
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// JournalView — search, tag filter, entry list, FAB
+// ---------------------------------------------------------------------------
+
+function JournalView(): React.JSX.Element {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation('journal');
   const { data, isLoading, refetch } = useJournalEntries();
+  const deleteJournal = useDeleteJournal();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTag, setActiveTag] = useState<string>('All');
   const [refreshing, setRefreshing] = useState(false);
@@ -157,8 +217,8 @@ export default function JournalListScreen(): React.JSX.Element {
       const query = searchQuery.toLowerCase();
       result = result.filter(
         (entry) =>
-          (entry.title?.toLowerCase().includes(query)) ||
-          (entry.content_preview?.toLowerCase().includes(query)) ||
+          entry.title?.toLowerCase().includes(query) ||
+          entry.content_preview?.toLowerCase().includes(query) ||
           entry.tags.some((tag) => tag.toLowerCase().includes(query)),
       );
     }
@@ -188,55 +248,48 @@ export default function JournalListScreen(): React.JSX.Element {
   const handleEntryDelete = useCallback(
     (entry: JournalEntry) => {
       Alert.alert(
-        'Delete Reflection',
-        'This reflection will be archived. You can recover it later.',
+        t('deleteTitle', 'Delete Reflection'),
+        t(
+          'deleteMessage',
+          'This reflection will be archived. You can recover it later.',
+        ),
         [
+          { text: t('cancel', 'Cancel'), style: 'cancel' },
           {
-            text: 'Cancel',
-            style: 'cancel',
-            onPress: () => {
-              // Reset swipe state is handled by re-render
-            },
-          },
-          {
-            text: 'Delete',
+            text: t('delete', 'Delete'),
             style: 'destructive',
-            onPress: () => {
+            onPress: async () => {
               void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-              // Soft delete — would call deleteJournal mutation in production
+              try {
+                await deleteJournal.mutateAsync(entry.id);
+              } catch {
+                Alert.alert(
+                  t('deleteErrorTitle', 'Could Not Delete'),
+                  t('deleteErrorMessage', 'Please try again in a moment.'),
+                );
+              }
             },
           },
         ],
       );
     },
-    [],
+    [deleteJournal, t],
   );
 
   const handleEntryLongPress = useCallback(
     (entry: JournalEntry) => {
-      Alert.alert(
-        entry.title ?? 'Reflection',
-        undefined,
-        [
-          {
-            text: 'Edit',
-            onPress: () => {
-              void Haptics.selectionAsync();
-              router.push(`/journal/${entry.id}?edit=true`);
-            },
+      Alert.alert(entry.title ?? t('reflection', 'Reflection'), undefined, [
+        {
+          text: t('edit', 'Edit'),
+          onPress: () => {
+            void Haptics.selectionAsync();
+            router.push(`/journal/${entry.id}?edit=true`);
           },
-          {
-            text: 'Share',
-            onPress: () => {
-              void Haptics.selectionAsync();
-              // Share functionality — would use Share API in production
-            },
-          },
-          { text: 'Cancel', style: 'cancel' },
-        ],
-      );
+        },
+        { text: t('cancel', 'Cancel'), style: 'cancel' },
+      ]);
     },
-    [router],
+    [router, t],
   );
 
   const handleFabPress = useCallback(() => {
@@ -271,97 +324,141 @@ export default function JournalListScreen(): React.JSX.Element {
             {'\u{1FAB7}'}
           </Text>
           <Text variant="body" color={colors.text.muted} align="center">
-            Your sacred reflections await.{'\n'}Begin your first entry.
+            {t('emptyTitle', 'Your sacred reflections await.')}
+          </Text>
+          <Text variant="caption" color={colors.text.muted} align="center">
+            {t(
+              'emptySub',
+              'Begin your first entry. Every reflection is AES-256 encrypted on your device.',
+            )}
+          </Text>
+          <Text variant="caption" color={colors.text.muted} align="center" style={styles.karmaNote}>
+            {t(
+              'karmalytixNote',
+              '🔒 Your reflections power KarmaLytix — private insights, never shared.',
+            )}
           </Text>
         </Animated.View>
       ) : null,
-    [isLoading],
+    [isLoading, t],
   );
+
+  return (
+    <View style={styles.root}>
+      {/* Search */}
+      <View style={styles.searchContainer}>
+        <Input
+          placeholder={t('searchPlaceholder', 'Search reflections...')}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          returnKeyType="search"
+          autoCorrect={false}
+        />
+      </View>
+
+      <SacredDivider />
+
+      {/* Tag filter chips */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tagRow}
+        style={styles.tagScroll}
+      >
+        {TAG_FILTERS.map((tag) => (
+          <Pressable
+            key={tag}
+            onPress={() => handleTagPress(tag)}
+            style={[styles.tagChip, activeTag === tag && styles.tagChipActive]}
+            accessibilityRole="button"
+            accessibilityState={{ selected: activeTag === tag }}
+          >
+            <Text
+              variant="caption"
+              color={activeTag === tag ? colors.background.dark : colors.text.secondary}
+            >
+              {tag}
+            </Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+
+      <SacredTransition isVisible={true}>
+        <FlatList
+          data={filteredEntries}
+          renderItem={renderEntry}
+          keyExtractor={keyExtractor}
+          contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 96 }]}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={renderEmpty}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={colors.primary[500]}
+              colors={[colors.primary[500]]}
+            />
+          }
+        />
+      </SacredTransition>
+
+      {/* FAB */}
+      <Pressable
+        onPress={handleFabPress}
+        style={[styles.fab, { bottom: insets.bottom + spacing.lg }]}
+        accessibilityRole="button"
+        accessibilityLabel={t('newEntry', 'Create new journal entry')}
+      >
+        <Text variant="h2" color={colors.background.dark} align="center">
+          +
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main Screen — tabbed hub
+// ---------------------------------------------------------------------------
+
+export default function JournalHubScreen(): React.JSX.Element {
+  const insets = useSafeAreaInsets();
+  const { t } = useTranslation('journal');
+  const [activeTab, setActiveTab] = useState<HubTab>('journal');
+
+  const handleTabChange = useCallback((tab: HubTab) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setActiveTab(tab);
+  }, []);
 
   return (
     <DivineBackground variant="sacred" style={styles.root}>
       <View style={[styles.container, { paddingTop: insets.top }]}>
-        <GoldenHeader title="Sacred Reflections" />
+        <GoldenHeader title={t('hubTitle', 'Sacred Reflections')} />
 
-        {/* Search */}
-        <View style={styles.searchContainer}>
-          <Input
-            placeholder="Search reflections..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            returnKeyType="search"
-            autoCorrect={false}
+        {/* Hub-level tab switcher */}
+        <View style={styles.hubTabRow}>
+          <TabPill
+            label={t('sacredJournal', 'Sacred Journal')}
+            isActive={activeTab === 'journal'}
+            onPress={() => handleTabChange('journal')}
+          />
+          <TabPill
+            label={t('journeys', 'Journeys')}
+            isActive={activeTab === 'journeys'}
+            onPress={() => handleTabChange('journeys')}
           />
         </View>
 
-        <SacredDivider />
-
-        {/* Tag Filter Chips — horizontal scroll */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tagRow}
-          style={styles.tagScroll}
-        >
-          {TAG_FILTERS.map((tag) => (
-            <Pressable
-              key={tag}
-              onPress={() => handleTagPress(tag)}
-              style={[
-                styles.tagChip,
-                activeTag === tag && styles.tagChipActive,
-              ]}
-              accessibilityRole="button"
-              accessibilityState={{ selected: activeTag === tag }}
-            >
-              <Text
-                variant="caption"
-                color={activeTag === tag ? colors.background.dark : colors.text.secondary}
-              >
-                {tag}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-
-        {/* Entry List with swipe-to-delete */}
-        <SacredTransition isVisible={true}>
-          <FlatList
-            data={filteredEntries}
-            renderItem={renderEntry}
-            keyExtractor={keyExtractor}
-            contentContainerStyle={[
-              styles.listContent,
-              { paddingBottom: insets.bottom + 80 },
-            ]}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={renderEmpty}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={handleRefresh}
-                tintColor={colors.primary[500]}
-                colors={[colors.primary[500]]}
-              />
-            }
-          />
-        </SacredTransition>
-
-        {/* Floating Action Button — positioned with safe area bottom inset */}
-        <Pressable
-          onPress={handleFabPress}
-          style={[styles.fab, { bottom: insets.bottom + spacing.lg }]}
-          accessibilityRole="button"
-          accessibilityLabel="Create new journal entry"
-        >
-          <Text variant="h2" color={colors.background.dark} align="center">
-            +
-          </Text>
-        </Pressable>
+        {activeTab === 'journal' ? <JournalView /> : <JourneysView />}
       </View>
     </DivineBackground>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Styles
+// ---------------------------------------------------------------------------
 
 const styles = StyleSheet.create({
   root: {
@@ -370,6 +467,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+
+  // -- Hub tabs --
+  hubTabRow: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xs,
+  },
+  tabPill: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    borderRadius: 999,
+    backgroundColor: colors.alpha.goldLight,
+    borderWidth: 1,
+    borderColor: colors.alpha.goldMedium,
+  },
+  tabPillActive: {
+    backgroundColor: colors.primary[500],
+    borderColor: colors.primary[500],
+  },
+
+  // -- Journal view --
   searchContainer: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xs,
@@ -399,6 +518,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     gap: spacing.sm,
   },
+
+  // -- Swipeable entry --
   swipeContainer: {
     overflow: 'hidden',
     borderRadius: 12,
@@ -411,15 +532,24 @@ const styles = StyleSheet.create({
     paddingRight: spacing.xl,
     borderRadius: 12,
   },
+
+  // -- Empty state --
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: spacing.xxxl,
+    paddingHorizontal: spacing.lg,
     gap: spacing.md,
   },
   lotusIcon: {
     fontSize: 48,
   },
+  karmaNote: {
+    marginTop: spacing.md,
+    fontStyle: 'italic',
+  },
+
+  // -- FAB --
   fab: {
     position: 'absolute',
     right: spacing.lg,

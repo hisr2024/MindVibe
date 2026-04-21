@@ -299,6 +299,20 @@ export const api = {
     moodTrends: (days?: number) => apiClient.get('/api/analytics/mood-trends', { params: { days } }),
     weeklyInsights: () => apiClient.get('/api/analytics/weekly-summary'),
     achievements: () => apiClient.get('/api/analytics/achievements'),
+    // KarmaLytix Sacred Mirror (PROMPT 4 surface). The structured
+    // six-section reflection (mirror / pattern / gita_echo / growth_edge
+    // / blessing / dynamic_wisdom) arrives nested inside
+    // ``patterns_detected``. When the user has fewer than 3 entries this
+    // week the backend returns ``insufficient_data: true`` with the
+    // remaining count — it never 404s.
+    karmaLytixWeeklyReport: () =>
+      apiClient.get('/api/analytics/weekly-report'),
+    karmaLytixGenerate: (forceRegenerate: boolean = false) =>
+      apiClient.post('/api/analytics/generate', {
+        force_regenerate: forceRegenerate,
+      }),
+    karmaLytixHistory: (limit: number = 12) =>
+      apiClient.get('/api/analytics/history', { params: { limit } }),
   },
 
   /** Subscriptions */

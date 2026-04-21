@@ -22,6 +22,9 @@ from backend.services.karmalytix_prompts import (
     build_karma_insight_prompt,
     select_verses_for_dimensions,
 )
+from backend.services.karmalytix_reflection import (
+    generate_structured_reflection,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +35,14 @@ POSITIVE_MOODS = frozenset(
 NEGATIVE_MOODS = frozenset(
     {"anxious", "sad", "angry", "overwhelmed", "hurt", "guilty", "fearful"}
 )
+
+# Category labels the mobile composer folds into ``tag_labels`` (Prompt 2
+# spec). Kept in sync with ``apps/mobile/app/journal/new.tsx::CATEGORIES``.
+_CATEGORY_LABELS = frozenset({"Gratitude", "Reflection", "Prayer", "Dream", "Shadow"})
+_TIME_TAG_PREFIX = "time:"
+
+# Minimum number of entries before a full Sacred Mirror is generated.
+_MIN_ENTRIES_FOR_REPORT = 3
 
 
 class KarmaLytixService:
@@ -96,8 +107,60 @@ class KarmaLytixService:
             "self_awareness": score.self_awareness,
             "wisdom_integration": score.wisdom_integration,
         }
+
+        # Enrich the metadata summary with the same plaintext signals the
+        # mobile Sacred Mirror already renders client-side. Bookmarks are
+        # counted here so the Claude prompt sees the real number rather
+        # than the client's local guess.
+        enriched_metadata = {
+            **metadata,
+            "verse_bookmarks": bookmarks,
+            "assessment_completed": bool(
+                (assessment_data or {}).get("completed_this_week")
+            ),
+        }
+
+        # Compose the weekly_assessment payload that the Sacred Mirror
+        # prompt consumes. The persistence layer for raw assessment text
+        # currently lives client-side (see the mobile KarmaLytix spec),
+        # so only fields we can infer or receive from the server-side
+        # UserAssessment table are included here.
+        weekly_assessment_payload: dict[str, Any] | None = None
+        if (assessment_data or {}).get("completed_this_week"):
+            weekly_assessment_payload = {
+                "completed_this_week": assessment_data["completed_this_week"],
+            }
+
         verses = await select_verses_for_dimensions(karma_dimensions)
+        structured_reflection = await generate_structured_reflection(
+            period_start=week_start.isoformat(),
+            period_end=week_end.isoformat(),
+            dimensions=karma_dimensions,
+            overall_score=score.overall_score,
+            metadata=enriched_metadata,
+            weekly_assessment=weekly_assessment_payload,
+        )
         insight = await self._generate_kiaan_insight(karma_dimensions, patterns, comparison)
+
+        # Merge the KIAAN gita_echo into the recommended verses list so the
+        # mobile screen always finds at least one verse reference.
+        merged_verses = list(verses)
+        gita_echo = structured_reflection.get("gita_echo")
+        if isinstance(gita_echo, dict) and gita_echo:
+            merged_verses.insert(
+                0,
+                {
+                    "chapter": gita_echo.get("chapter"),
+                    "verse": gita_echo.get("verse"),
+                    "sanskrit": gita_echo.get("sanskrit"),
+                    "theme": gita_echo.get("connection"),
+                },
+            )
+
+        patterns_payload: dict[str, Any] = {
+            "active_count": len([p for p in patterns if p.is_active]),
+            **structured_reflection,
+        }
 
         report = KarmaLytixReport(
             user_id=user_id,
@@ -107,10 +170,10 @@ class KarmaLytixService:
             period_end=week_end,
             karma_dimensions=karma_dimensions,
             overall_karma_score=score.overall_score,
-            journal_metadata_summary=metadata,
+            journal_metadata_summary=enriched_metadata,
             kiaan_insight=insight,
-            recommended_verses=verses,
-            patterns_detected={"active_count": len([p for p in patterns if p.is_active])},
+            recommended_verses=merged_verses,
+            patterns_detected=patterns_payload,
             comparison_to_previous=comparison,
         )
         db.add(report)
@@ -381,7 +444,15 @@ class KarmaLytixService:
     async def _aggregate_journal_metadata(
         self, db: AsyncSession, user_id: str, start: date, end: date
     ) -> dict[str, Any]:
-        """Aggregate journal metadata (mood_labels, tag_labels, timestamps) — never content."""
+        """Aggregate journal metadata (mood_labels, tag_labels, timestamps) — never content.
+
+        In addition to the raw counts, this derives three "dominant" fields
+        used by the Sacred Mirror prompt: dominant_mood, dominant_category,
+        and dominant_time_of_day. Category and time-of-day are sourced from
+        conventional ``tag_labels`` entries: categories match the fixed set
+        (Gratitude/Reflection/Prayer/Dream/Shadow) and time-of-day tags are
+        ``time:<band>`` (brahma / pratah / madhyanha / sandhya / ratri).
+        """
         start_dt, end_dt = self._to_dt_range(start, end)
         result = await db.execute(
             select(JournalEntry).where(
@@ -401,16 +472,34 @@ class KarmaLytixService:
                 "mood_counts": {},
                 "tag_frequencies": {},
                 "unique_tag_count": 0,
+                "top_tags": [],
+                "dominant_mood": None,
+                "dominant_category": None,
+                "dominant_time_of_day": None,
             }
 
         days = {e.created_at.date() for e in entries}
         mood_counts: dict[str, int] = {}
         tag_freq: dict[str, int] = {}
+        category_counts: dict[str, int] = {}
+        time_counts: dict[str, int] = {}
         for e in entries:
             for m in e.mood_labels or []:
                 mood_counts[m] = mood_counts.get(m, 0) + 1
             for t in e.tag_labels or []:
+                if t in _CATEGORY_LABELS:
+                    category_counts[t] = category_counts.get(t, 0) + 1
+                    continue
+                if t.startswith(_TIME_TAG_PREFIX):
+                    band = t[len(_TIME_TAG_PREFIX):]
+                    time_counts[band] = time_counts.get(band, 0) + 1
+                    continue
                 tag_freq[t] = tag_freq.get(t, 0) + 1
+
+        def _top(counts: dict[str, int]) -> str | None:
+            return max(counts, key=counts.get) if counts else None  # type: ignore[arg-type]
+
+        top_tags_sorted = sorted(tag_freq.items(), key=lambda kv: kv[1], reverse=True)[:5]
 
         return {
             "entry_count": len(entries),
@@ -418,6 +507,10 @@ class KarmaLytixService:
             "mood_counts": mood_counts,
             "tag_frequencies": tag_freq,
             "unique_tag_count": len(tag_freq),
+            "top_tags": top_tags_sorted,
+            "dominant_mood": _top(mood_counts),
+            "dominant_category": _top(category_counts),
+            "dominant_time_of_day": _top(time_counts),
         }
 
     async def _get_mood_data(

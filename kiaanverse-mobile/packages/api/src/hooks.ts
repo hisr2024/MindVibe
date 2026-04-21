@@ -36,6 +36,7 @@ import type {
   JournalEntry,
   JournalListResponse,
   KarmaFootprintResult,
+  KarmaLytixWeeklyReport,
   KarmaResetSession,
   KarmaTreeResponse,
   MeditationTrack,
@@ -108,6 +109,8 @@ export const queryKeys = {
   emotionalPatterns: (days?: number) => ['emotionalPatterns', days] as const,
   moodTrends: (days?: number) => ['analytics', 'moodTrends', days] as const,
   weeklyInsights: ['analytics', 'weeklyInsights'] as const,
+  karmaLytixWeeklyReport: ['analytics', 'karmalytix', 'weeklyReport'] as const,
+  karmaLytixHistory: (limit?: number) => ['analytics', 'karmalytix', 'history', limit] as const,
   journalEntries: ['journal', 'entries'] as const,
   journalEntry: (id: string) => ['journal', 'entry', id] as const,
   settings: ['settings'] as const,
@@ -1373,6 +1376,69 @@ export function useWeeklyInsights(): UseQueryResult<WeeklyInsight> {
       return data as WeeklyInsight;
     },
     staleTime: 1000 * 60 * 15,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// KarmaLytix — Sacred Mirror (backend contract in routes/analytics_karmalytix.py)
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch the latest weekly KarmaLytix report. The backend returns
+ * ``insufficient_data=true`` when the user has fewer than 3 entries this
+ * week, so callers should branch on that flag rather than on HTTP status.
+ */
+export function useKarmaLytixWeeklyReport(options?: {
+  enabled?: boolean;
+}): UseQueryResult<KarmaLytixWeeklyReport> {
+  return useQuery({
+    queryKey: queryKeys.karmaLytixWeeklyReport,
+    queryFn: async () => {
+      const { data } = await api.analytics.karmaLytixWeeklyReport();
+      return data as KarmaLytixWeeklyReport;
+    },
+    // The backend caches by ISO week; refetching more than once an hour
+    // wastes Claude tokens without changing the data.
+    staleTime: 1000 * 60 * 60,
+    enabled: options?.enabled ?? true,
+  });
+}
+
+/**
+ * Force-generate a fresh Sacred Mirror. When ``forceRegenerate`` is
+ * ``false`` the backend returns the cached report for this week.
+ */
+export function useGenerateKarmaLytixReport(): UseMutationResult<
+  KarmaLytixWeeklyReport,
+  Error,
+  { forceRegenerate?: boolean } | void
+> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (args) => {
+      const force = args && 'forceRegenerate' in args ? Boolean(args.forceRegenerate) : false;
+      const { data } = await api.analytics.karmaLytixGenerate(force);
+      return data as KarmaLytixWeeklyReport;
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(queryKeys.karmaLytixWeeklyReport, data);
+      void queryClient.invalidateQueries({
+        queryKey: ['analytics', 'karmalytix', 'history'],
+      });
+    },
+  });
+}
+
+export function useKarmaLytixHistory(
+  limit: number = 12,
+): UseQueryResult<KarmaLytixWeeklyReport[]> {
+  return useQuery({
+    queryKey: queryKeys.karmaLytixHistory(limit),
+    queryFn: async () => {
+      const { data } = await api.analytics.karmaLytixHistory(limit);
+      return data as KarmaLytixWeeklyReport[];
+    },
+    staleTime: 1000 * 60 * 30,
   });
 }
 
