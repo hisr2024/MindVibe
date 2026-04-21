@@ -147,7 +147,40 @@ const englishMessages: Record<TranslationNamespace, TranslationMessages> = {
   sadhana: {},
   community: {},
   'vibe-player': {},
-  analytics: {},
+  analytics: {
+    title: 'KarmaLytix',
+    privacyNote: '🔒 Analyzed from metadata only · Your content is never read',
+    viewOverview: 'Overview',
+    viewDimensions: 'Dimensions',
+    viewReflection: 'Sacred Mirror',
+    loading: 'Reading your karma patterns…',
+    emptyTitle: 'Your Sacred Mirror Awaits',
+    emptySubReady:
+      'Let KIAAN illuminate your karmic patterns from this week’s metadata.',
+    emptySubNeedMore:
+      'Write a few more reflections this week, then return here for your sacred mirror.',
+    emptyNote:
+      'Your journal content is never read. KarmaLytix works only from mood labels, tags, and the weekly assessment you complete.',
+    writeReflection: 'Write a Reflection',
+    dharmicAlignment: 'Dharmic Alignment · This Week',
+    outOf100: '/ 100',
+    dimensionsHeading: 'Karma Dimensions',
+    thisWeeksPractice: "This Week's Sacred Practice",
+    statEntries: 'Entries',
+    statDays: 'Days',
+    statVerses: 'Verses',
+    topThemes: 'Top themes:',
+    kiaanReflection: "KIAAN's Sacred Reflection",
+    channelledThrough: 'Channelled through Bhagavad Gita wisdom',
+    dynamicWisdom: 'Dynamic Wisdom',
+    dynamicWisdomPending:
+      'Fresh wisdom for this week’s theme will appear here when the KarmaLytix engine finishes its weekly run.',
+    dynamicWisdomFirstWeek:
+      'Your first week of reflections is being seeded. The dynamic wisdom will arrive once enough metadata has accrued.',
+    dynamicNote: 'Generated fresh each week by KIAAN · Grounded in Gita philosophy',
+    refreshMirror: 'Refresh Sacred Mirror',
+    viewJourneyInsights: 'View Journey Insights',
+  },
   settings: {},
 };
 
