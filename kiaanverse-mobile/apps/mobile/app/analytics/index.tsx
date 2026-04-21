@@ -41,9 +41,13 @@ import {
   spacing,
 } from '@kiaanverse/ui';
 import {
+  useGenerateKarmaLytixReport,
   useJournalEntries,
+  useKarmaLytixWeeklyReport,
   useMoodTrends,
   useWeeklyInsights,
+  type KarmaLytixReflection,
+  type KarmaLytixWeeklyReport,
 } from '@kiaanverse/api';
 import { useGitaStore } from '@kiaanverse/store';
 import { useTranslation } from '@kiaanverse/i18n';
@@ -108,6 +112,47 @@ const REFLECTION_SECTIONS: readonly ReflectionSectionMeta[] = [
 // reflection. Matches the spec's "at least 3 entries" guidance.
 const MIN_ENTRIES_FOR_REPORT = 3;
 
+/**
+ * Merge a server-provided reflection into the local template, keeping the
+ * template's copy for any field Claude didn't return. This mirrors the
+ * backend's ``_normalise_reflection`` so the UI never shows a blank card
+ * even if Claude omits one of the six sections.
+ *
+ * The backend emits ``gita_echo`` as an object ``{chapter, verse, sanskrit,
+ * connection}`` while the local template produces a prose string; here we
+ * flatten the object into a sentence that sits comfortably in the accordion
+ * body above the dedicated verse box.
+ */
+function _mergeServerReflection(
+  server: KarmaLytixReflection & Record<string, unknown>,
+  fallback: ReflectionSections,
+): ReflectionSections {
+  const pickString = (key: Exclude<keyof ReflectionSections, 'gita_echo'>): string => {
+    const value = server[key];
+    if (typeof value === 'string' && value.trim().length > 0) return value;
+    return fallback[key];
+  };
+
+  const gitaEcho = server.gita_echo;
+  const gitaEchoText =
+    gitaEcho &&
+    typeof gitaEcho === 'object' &&
+    typeof gitaEcho.chapter === 'number' &&
+    typeof gitaEcho.verse === 'number' &&
+    typeof gitaEcho.connection === 'string' &&
+    gitaEcho.connection.trim().length > 0
+      ? `Bhagavad Gita ${gitaEcho.chapter}.${gitaEcho.verse} — ${gitaEcho.connection.trim()}`
+      : fallback.gita_echo;
+
+  return {
+    mirror: pickString('mirror'),
+    pattern: pickString('pattern'),
+    gita_echo: gitaEchoText,
+    growth_edge: pickString('growth_edge'),
+    blessing: pickString('blessing'),
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Screen
 // ---------------------------------------------------------------------------
@@ -120,6 +165,18 @@ export default function KarmaLytixScreen(): React.JSX.Element {
   const [expandedSection, setExpandedSection] = useState<keyof ReflectionSections | null>(
     null,
   );
+
+  // -- Server-side Sacred Mirror (preferred when available) ----------------
+  // Falls back to the on-device calculator below whenever the backend
+  // returns ``insufficient_data`` or the request fails (no network, Claude
+  // API down, etc.). The hook never throws — we always have something to
+  // render.
+  const {
+    data: serverReport,
+    refetch: refetchServerReport,
+    isFetching: serverReportFetching,
+  } = useKarmaLytixWeeklyReport();
+  const generateReport = useGenerateKarmaLytixReport();
 
   // -- Metadata sources (journal entries + mood trends + weekly summary) ----
   const { data: journalData, isLoading: journalLoading, refetch: refetchJournal } =
@@ -193,16 +250,79 @@ export default function KarmaLytixScreen(): React.JSX.Element {
     };
   }, [dimensions, overall, previousSnapshot]);
 
-  // -- Reflection sections (client-templated from metadata) -----------------
-  const reflection = useMemo(
+  // -- Reflection sections --------------------------------------------------
+  // Two sources, in priority order:
+  //   1. ``serverReport.patterns_detected`` — Claude-generated six-section
+  //      JSON from /api/analytics/weekly-report (preferred).
+  //   2. ``buildReflectionSections`` — deterministic template derived from
+  //      the same metadata the backend sees (used when the server has no
+  //      report yet, returns insufficient_data, or the request failed).
+  const localReflection = useMemo(
     () => buildReflectionSections({ summary, scores: dimensions, assessment }),
     [summary, dimensions, assessment],
   );
 
-  const recommendedVerse = useMemo(
-    () => getRecommendedVerseRef(summary.dominant_mood),
-    [summary.dominant_mood],
+  const hasServerReflection = Boolean(
+    serverReport &&
+      !serverReport.insufficient_data &&
+      typeof serverReport.patterns_detected?.mirror === 'string',
   );
+
+  const reflection: ReflectionSections = useMemo(() => {
+    if (hasServerReflection) {
+      return _mergeServerReflection(serverReport!.patterns_detected, localReflection);
+    }
+    return localReflection;
+  }, [hasServerReflection, serverReport, localReflection]);
+
+  // Server gita_echo carries the real Sanskrit + Chapter/Verse pair when
+  // Claude has run; fall back to the static lookup otherwise.
+  const recommendedVerse = useMemo(() => {
+    const echo = hasServerReflection ? serverReport!.patterns_detected.gita_echo : undefined;
+    if (echo && typeof echo.chapter === 'number' && typeof echo.verse === 'number') {
+      return {
+        chapter: echo.chapter,
+        verse: echo.verse,
+        note: echo.connection ?? echo.sanskrit ?? '',
+      };
+    }
+    return getRecommendedVerseRef(summary.dominant_mood);
+  }, [hasServerReflection, serverReport, summary.dominant_mood]);
+
+  // Dynamic wisdom is only produced by Claude — surface it only when the
+  // backend returned it. The template never fabricates this section.
+  const dynamicWisdom = hasServerReflection
+    ? (serverReport!.patterns_detected.dynamic_wisdom ?? null)
+    : null;
+
+  // Server-side dimensions take precedence over on-device computation when
+  // present — they reflect the server's authoritative weekly aggregation.
+  const effectiveDimensions: KarmaDimensionScores = useMemo(() => {
+    if (
+      serverReport &&
+      !serverReport.insufficient_data &&
+      serverReport.karma_dimensions &&
+      Object.keys(serverReport.karma_dimensions).length === 5
+    ) {
+      return {
+        emotional_balance: serverReport.karma_dimensions.emotional_balance ?? dimensions.emotional_balance,
+        spiritual_growth: serverReport.karma_dimensions.spiritual_growth ?? dimensions.spiritual_growth,
+        consistency: serverReport.karma_dimensions.consistency ?? dimensions.consistency,
+        self_awareness: serverReport.karma_dimensions.self_awareness ?? dimensions.self_awareness,
+        wisdom_integration: serverReport.karma_dimensions.wisdom_integration ?? dimensions.wisdom_integration,
+      };
+    }
+    return dimensions;
+  }, [serverReport, dimensions]);
+
+  const effectiveOverall = useMemo(() => {
+    if (serverReport && !serverReport.insufficient_data && serverReport.overall_karma_score) {
+      return serverReport.overall_karma_score;
+    }
+    return overall;
+  }, [serverReport, overall]);
+
+  const serverKiaanInsight = serverReport?.kiaan_insight ?? null;
 
   // -- Persist this week's snapshot so next week can render deltas ----------
   const hasEntries = summary.entry_count > 0;
@@ -226,7 +346,12 @@ export default function KarmaLytixScreen(): React.JSX.Element {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     void refetchJournal();
     void refetchMood();
-  }, [refetchJournal, refetchMood]);
+    // Ask the backend for a fresh Sacred Mirror. ``force_regenerate`` stays
+    // false so the server reuses this week's cached report unless the user
+    // explicitly regenerates it elsewhere — avoids burning Claude tokens
+    // on every pull-to-refresh.
+    generateReport.mutate({ forceRegenerate: false });
+  }, [refetchJournal, refetchMood, generateReport]);
 
   const isLoading = journalLoading || moodLoading;
   const hasEnoughData = summary.entry_count >= MIN_ENTRIES_FOR_REPORT;
@@ -300,23 +425,25 @@ export default function KarmaLytixScreen(): React.JSX.Element {
             />
           ) : view === 'overview' ? (
             <OverviewView
-              overall={overall}
-              dimensions={dimensions}
+              overall={effectiveOverall}
+              dimensions={effectiveDimensions}
               deltas={deltas}
               summary={summary}
             />
           ) : view === 'dimensions' ? (
-            <DimensionsView dimensions={dimensions} deltas={deltas} />
+            <DimensionsView dimensions={effectiveDimensions} deltas={deltas} />
           ) : (
             <ReflectionView
               reflection={reflection}
               expanded={expandedSection}
               onToggle={handleSectionToggle}
-              kiaanInsight={weeklyInsight?.summary ?? null}
+              kiaanInsight={serverKiaanInsight ?? weeklyInsight?.summary ?? null}
               topInsight={weeklyInsight?.top_insight ?? null}
               recommendedVerse={recommendedVerse}
               summary={summary}
+              dynamicWisdom={dynamicWisdom}
               onRefresh={handleRefresh}
+              isRefreshing={generateReport.isPending || serverReportFetching}
             />
           )}
 
@@ -549,7 +676,9 @@ function ReflectionView({
   topInsight,
   recommendedVerse,
   summary,
+  dynamicWisdom,
   onRefresh,
+  isRefreshing,
 }: {
   reflection: ReflectionSections;
   expanded: keyof ReflectionSections | null;
@@ -558,7 +687,9 @@ function ReflectionView({
   topInsight: string | null;
   recommendedVerse: { chapter: number; verse: number; note: string };
   summary: KarmaMetadataSummary;
+  dynamicWisdom: string | null;
   onRefresh: () => void;
+  isRefreshing: boolean;
 }): React.JSX.Element {
   const { t } = useTranslation('analytics');
   return (
@@ -637,7 +768,7 @@ function ReflectionView({
         );
       })}
 
-      {/* Dynamic wisdom (backend-only; stub when missing) */}
+      {/* Dynamic wisdom — rendered only when Claude produced fresh text */}
       <SacredCard style={styles.dynamicCard}>
         <Text variant="label" color={colors.primary[500]}>
           {t('dynamicWisdom', 'Dynamic Wisdom')}
@@ -646,17 +777,23 @@ function ReflectionView({
           गतिशील ज्ञान
         </Text>
         <GoldenDivider style={styles.cardDivider} />
-        <Text variant="bodySmall" color={colors.text.secondary}>
-          {summary.dominant_mood
-            ? t(
-                'dynamicWisdomPending',
-                "Fresh wisdom for this week's theme will appear here when the KarmaLytix engine finishes its weekly run.",
-              )
-            : t(
-                'dynamicWisdomFirstWeek',
-                'Your first week of reflections is being seeded. The dynamic wisdom will arrive once enough metadata has accrued.',
-              )}
-        </Text>
+        {dynamicWisdom ? (
+          <Text variant="body" color={colors.text.primary} style={styles.insightBody}>
+            {dynamicWisdom}
+          </Text>
+        ) : (
+          <Text variant="bodySmall" color={colors.text.secondary}>
+            {summary.dominant_mood
+              ? t(
+                  'dynamicWisdomPending',
+                  "Fresh wisdom for this week's theme will appear here when the KarmaLytix engine finishes its weekly run.",
+                )
+              : t(
+                  'dynamicWisdomFirstWeek',
+                  'Your first week of reflections is being seeded. The dynamic wisdom will arrive once enough metadata has accrued.',
+                )}
+          </Text>
+        )}
         <Text variant="caption" color={colors.text.muted} style={styles.dynamicNote}>
           {t('dynamicNote', 'Generated fresh each week by KIAAN · Grounded in Gita philosophy')}
         </Text>
@@ -668,6 +805,7 @@ function ReflectionView({
           title={t('refreshMirror', 'Refresh Sacred Mirror')}
           variant="secondary"
           onPress={onRefresh}
+          loading={isRefreshing}
         />
       </View>
     </View>

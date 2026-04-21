@@ -768,6 +768,71 @@ export interface EmotionalPattern {
 }
 
 // ---------------------------------------------------------------------------
+// KarmaLytix (Sacred Mirror) — /api/analytics/weekly-report response shape.
+//
+// Snake_case throughout to match the Python route's Pydantic model. The
+// ``patterns_detected`` payload carries the six structured reflection
+// sections the mobile KarmaLytix screen renders (see
+// apps/mobile/app/analytics/index.tsx). ``insufficient_data`` is true
+// when fewer than 3 entries exist for the current week.
+// ---------------------------------------------------------------------------
+
+export interface KarmaLytixGitaEcho {
+  chapter: number;
+  verse: number;
+  sanskrit: string;
+  connection?: string;
+}
+
+export interface KarmaLytixReflection {
+  mirror?: string;
+  pattern?: string;
+  gita_echo?: KarmaLytixGitaEcho;
+  growth_edge?: string;
+  blessing?: string;
+  dynamic_wisdom?: string;
+  active_count?: number;
+}
+
+export interface KarmaLytixJournalMetadataSummary {
+  entry_count?: number;
+  journaling_days?: number;
+  mood_counts?: Record<string, number>;
+  tag_frequencies?: Record<string, number>;
+  unique_tag_count?: number;
+  top_tags?: Array<[string, number]>;
+  dominant_mood?: string | null;
+  dominant_category?: string | null;
+  dominant_time_of_day?: string | null;
+  verse_bookmarks?: number;
+  assessment_completed?: boolean;
+}
+
+export interface KarmaLytixComparison {
+  overall_delta?: number;
+  dimension_deltas?: Record<string, number>;
+  is_first_report?: boolean;
+}
+
+export interface KarmaLytixWeeklyReport {
+  id: number | null;
+  report_date: string | null;
+  report_type: string;
+  period_start: string | null;
+  period_end: string | null;
+  karma_dimensions: Record<string, number>;
+  overall_karma_score: number;
+  journal_metadata_summary: KarmaLytixJournalMetadataSummary;
+  kiaan_insight: string | null;
+  recommended_verses: Array<Record<string, unknown>>;
+  patterns_detected: KarmaLytixReflection & Record<string, unknown>;
+  comparison_to_previous: KarmaLytixComparison;
+  insufficient_data: boolean;
+  entries_needed: number;
+  message: string | null;
+}
+
+// ---------------------------------------------------------------------------
 // Journal (extended for mobile)
 // ---------------------------------------------------------------------------
 
