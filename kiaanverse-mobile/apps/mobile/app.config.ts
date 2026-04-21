@@ -60,7 +60,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 
   android: {
     package: 'com.kiaanverse.app',
-    versionCode: 19,
+    versionCode: 20,
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#050507',
