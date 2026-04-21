@@ -247,7 +247,7 @@ function PlayerTrackCardInner({
 
           {/* Right: duration + bookmark button. */}
           <View style={styles.rightCol}>
-            <Text style={styles.duration} pointerEvents="none">
+            <Text style={styles.duration}>
               {formatDuration(track.duration)}
             </Text>
             <Pressable

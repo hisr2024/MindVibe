@@ -52,7 +52,7 @@ const TEXT_MUTED = 'rgba(200,191,168,0.75)';
 
 type TabKey = 'discover' | 'active' | 'completed';
 
-const TABS: ReadonlyArray<{ key: TabKey; label: string }> = [
+const TABS: readonly { key: TabKey; label: string }[] = [
   { key: 'discover', label: 'Discover' },
   { key: 'active', label: 'Active' },
   { key: 'completed', label: 'Completed' },

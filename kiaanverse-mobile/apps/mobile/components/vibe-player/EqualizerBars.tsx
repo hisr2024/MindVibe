@@ -28,7 +28,7 @@ const BAR_GAP = 3;
 const REST_HEIGHT = 4;
 
 /** Per-bar animation tuple: [peak height, rise ms, fall ms]. */
-const BAR_CURVES: ReadonlyArray<readonly [number, number, number]> = [
+const BAR_CURVES: readonly (readonly [number, number, number])[] = [
   [14, 380, 320],
   [18, 320, 420],
   [10, 420, 360],

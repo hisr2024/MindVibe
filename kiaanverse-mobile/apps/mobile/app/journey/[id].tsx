@@ -204,7 +204,7 @@ export default function JourneyDetailScreen(): React.JSX.Element {
             completed={data.completedSteps}
             total={data.durationDays}
             color={ripu?.color ?? GOLD}
-            sanskrit={ripu?.sanskrit}
+            {...(ripu?.sanskrit ? { sanskrit: ripu.sanskrit } : {})}
             size={120}
           />
           <Text style={styles.xpCaption}>

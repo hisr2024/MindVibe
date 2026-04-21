@@ -90,10 +90,10 @@ interface MenuItem {
 
 interface MenuSection {
   readonly title: string;
-  readonly items: ReadonlyArray<MenuItem>;
+  readonly items: readonly MenuItem[];
 }
 
-const MENU_SECTIONS: ReadonlyArray<MenuSection> = [
+const MENU_SECTIONS: readonly MenuSection[] = [
   {
     title: 'Account',
     items: [

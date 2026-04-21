@@ -45,7 +45,6 @@ const DIVINE_OUT = Easing.bezier(0.16, 1, 0.3, 1);
 
 const SACRED_WHITE = '#F5F0E8';
 const TEXT_MUTED = 'rgba(200,191,168,0.7)';
-const DIVINE_GOLD = '#D4A017';
 const CARD_HEIGHT = 96;
 const ICON_CIRCLE = 44;
 const LEFT_STRIPE_WIDTH = 3;
@@ -234,7 +233,7 @@ function ToolCardInner({
           </View>
 
           {/* Chevron */}
-          <Text style={styles.chevron} pointerEvents="none">
+          <Text style={styles.chevron}>
             ›
           </Text>
         </Pressable>
