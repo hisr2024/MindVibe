@@ -42,13 +42,11 @@ import Reanimated, {
 
 // @kiaanverse/ui — read packages/ui/src/index.ts first, use only what exists.
 import {
-  Screen,
+  DivineScreenWrapper,
   GoldenDivider,
   OmLoader,
   SacredProgressRing,
   VerseRevelation,
-  // The following are consumed by zone 6 (wired in Part 3.6):
-  // GlowCard,
 } from '@kiaanverse/ui';
 
 // @kiaanverse/store
@@ -76,6 +74,9 @@ const INDIGO = '#161A42';
 const WHITE = '#F0EBE1';
 const SECONDARY = '#C8BFA8';
 const MUTED = '#7A7060';
+/** Krishna Aura + Peacock — used by the Vibe banner's blue gradients. */
+const KRISHNA = '#1B4FBB';
+const PEACOCK = '#0E7490';
 
 /** Staggered zone entrance delays (ms) — spec §animation. */
 const ZONE_DELAY = {
@@ -86,8 +87,8 @@ const ZONE_DELAY = {
   vibe: 560,
 } as const;
 
-/** ease-divine-in — soft start, confident finish. */
-const easeDivineIn = Easing.bezier(0.0, 0.8, 0.2, 1.0);
+/** lotus-bloom — organic expansion, soft overshoot (divine.css parity). */
+const easeLotusBloom = Easing.bezier(0.22, 1.0, 0.36, 1.0);
 
 // ── Time-based greeting helper ─────────────────────────────────────────────
 /**
@@ -321,11 +322,11 @@ function GreetingHero(): React.JSX.Element {
   React.useEffect(() => {
     opacity.value = withDelay(
       ZONE_DELAY.greeting,
-      withTiming(1, { duration: 500, easing: easeDivineIn }),
+      withTiming(1, { duration: 500, easing: easeLotusBloom }),
     );
     translateY.value = withDelay(
       ZONE_DELAY.greeting,
-      withTiming(0, { duration: 500, easing: easeDivineIn }),
+      withTiming(0, { duration: 500, easing: easeLotusBloom }),
     );
   }, [opacity, translateY]);
 
@@ -384,11 +385,11 @@ function DailyVerseCard(): React.JSX.Element {
   React.useEffect(() => {
     opacity.value = withDelay(
       ZONE_DELAY.verse,
-      withTiming(1, { duration: 500, easing: easeDivineIn }),
+      withTiming(1, { duration: 500, easing: easeLotusBloom }),
     );
     translateY.value = withDelay(
       ZONE_DELAY.verse,
-      withTiming(0, { duration: 500, easing: easeDivineIn }),
+      withTiming(0, { duration: 500, easing: easeLotusBloom }),
     );
   }, [opacity, translateY]);
 
@@ -552,11 +553,11 @@ function ToolsRail(): React.JSX.Element {
   React.useEffect(() => {
     opacity.value = withDelay(
       ZONE_DELAY.tools,
-      withTiming(1, { duration: 400, easing: easeDivineIn }),
+      withTiming(1, { duration: 400, easing: easeLotusBloom }),
     );
     translateY.value = withDelay(
       ZONE_DELAY.tools,
-      withTiming(0, { duration: 400, easing: easeDivineIn }),
+      withTiming(0, { duration: 400, easing: easeLotusBloom }),
     );
   }, [opacity, translateY]);
 
@@ -647,11 +648,11 @@ function SadhanaStreakCard(): React.JSX.Element {
   React.useEffect(() => {
     opacity.value = withDelay(
       ZONE_DELAY.sadhana,
-      withTiming(1, { duration: 400, easing: easeDivineIn }),
+      withTiming(1, { duration: 400, easing: easeLotusBloom }),
     );
     translateY.value = withDelay(
       ZONE_DELAY.sadhana,
-      withTiming(0, { duration: 400, easing: easeDivineIn }),
+      withTiming(0, { duration: 400, easing: easeLotusBloom }),
     );
   }, [opacity, translateY]);
 
@@ -742,16 +743,93 @@ function SadhanaStreakCard(): React.JSX.Element {
   );
 }
 
+// ── ZONE 6: KIAAN Vibe Banner ─────────────────────────────────────────────
+function KiaanVibeBanner(): React.JSX.Element {
+  // Zone 6 entrance — 560ms stagger after Zone 1.
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(12);
+
+  React.useEffect(() => {
+    opacity.value = withDelay(
+      ZONE_DELAY.vibe,
+      withTiming(1, { duration: 400, easing: easeLotusBloom }),
+    );
+    translateY.value = withDelay(
+      ZONE_DELAY.vibe,
+      withTiming(0, { duration: 400, easing: easeLotusBloom }),
+    );
+  }, [opacity, translateY]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  const openVibePlayer = (): void => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+      () => undefined,
+    );
+    router.push('/vibe-player' as never);
+  };
+
+  return (
+    <Reanimated.View style={animStyle}>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={openVibePlayer}
+        accessibilityRole="button"
+        accessibilityLabel="Open KIAAN Vibe Player"
+      >
+        <View style={s.vibeBanner}>
+          {/* Left blue glow edge — Krishna Aura → Peacock gradient */}
+          <LinearGradient
+            colors={[KRISHNA, PEACOCK]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={s.vibeLeftGlow}
+          />
+
+          {/* Icon */}
+          <View style={s.vibeIconCircle}>
+            <Text style={s.vibeIcon}>🎵</Text>
+          </View>
+
+          {/* Text */}
+          <View style={s.vibeText}>
+            <Text style={s.vibeName}>KIAAN Vibe Player</Text>
+            <Text style={s.vibeSub}>
+              Mantras · Meditation · Gita Shlokas
+            </Text>
+          </View>
+
+          {/* Play button — Krishna Aura gradient */}
+          <LinearGradient
+            colors={[KRISHNA, PEACOCK]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={s.vibePlayBtn}
+          >
+            <Text style={s.vibePlayIcon}>▶</Text>
+          </LinearGradient>
+        </View>
+      </TouchableOpacity>
+    </Reanimated.View>
+  );
+}
+
 // ── MAIN SCREEN ───────────────────────────────────────────────────────────
 export default function HomeScreen(): React.JSX.Element {
   const scrollRef = useRef<ScrollView>(null);
 
   return (
-    <Screen>
+    // DivineScreenWrapper mounts the Skia particle field + aurora so every
+    // zone floats over the cosmic void. safeArea={false} hands inset
+    // management to DivineHeader, preserving the transparent crown above.
+    <DivineScreenWrapper safeArea={false}>
       {/* ZONE 1: Header — fixed, outside the scroll view. */}
       <DivineHeader />
 
-      {/* Scrollable content — Zones 2–6 fill in Parts 3.2–3.6 */}
+      {/* Scrollable content — Zones 2–6 */}
       <ScrollView
         ref={scrollRef}
         style={s.scroll}
@@ -771,13 +849,13 @@ export default function HomeScreen(): React.JSX.Element {
         {/* ZONE 5 — Sadhana Streak */}
         <SadhanaStreakCard />
 
-        {/* ZONE 6 — KIAAN Vibe Banner (Part 3.6) */}
-        {/* TODO: <KiaanVibeBanner /> */}
+        {/* ZONE 6 — KIAAN Vibe Banner */}
+        <KiaanVibeBanner />
 
         {/* Bottom padding above the tab bar */}
         <View style={s.bottomSpacer} />
       </ScrollView>
-    </Screen>
+    </DivineScreenWrapper>
   );
 }
 
@@ -1126,6 +1204,65 @@ const s = StyleSheet.create({
     fontFamily: 'Outfit-Medium',
     fontSize: 12,
     color: GOLD,
+  },
+
+  // Zone 6 — KIAAN Vibe Banner
+  vibeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(22,26,66,0.95)',
+    borderWidth: 1,
+    borderColor: 'rgba(27,79,187,0.3)',
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 16,
+    height: 72,
+  },
+  vibeLeftGlow: {
+    width: 3,
+    height: '100%',
+  },
+  vibeIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(27,79,187,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(27,79,187,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 12,
+  },
+  vibeIcon: {
+    fontSize: 20,
+  },
+  vibeText: {
+    flex: 1,
+  },
+  vibeName: {
+    fontFamily: 'CormorantGaramond-Italic',
+    fontSize: 17,
+    color: WHITE,
+  },
+  vibeSub: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 11,
+    color: MUTED,
+    marginTop: 2,
+  },
+  vibePlayBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  vibePlayIcon: {
+    fontSize: 14,
+    color: WHITE,
+    // Optical centering — the ▶ glyph has a left-heavy mass.
+    marginLeft: 2,
   },
 
   // Scroll
