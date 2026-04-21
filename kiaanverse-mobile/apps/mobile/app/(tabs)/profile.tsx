@@ -1,108 +1,141 @@
 /**
- * Profile Tab — 1:1 port of kiaanverse.com/m/profile
+ * Profile Tab — The Seeker's Identity
  *
- * Avatar + name + email, subscription tier badge, stats row
- * (streak · journeys · verses), menu sections (Account, Subscription,
- * Sacred Tools, Support, Legal), and sign-out.
+ * Layout (top → bottom):
+ *
+ *   ┌──────────────────────────────────────────────┐
+ *   │  Gradient hero (150 px)                       │
+ *   │    • 80 px avatar with breathing gold ring    │
+ *   │    • Name / email                             │
+ *   │    • Animated TierBadge (per tier motion)     │
+ *   ├──────────────────────────────────────────────┤
+ *   │  3-column stats card                          │
+ *   │    [🔥 Streak] │ [☸ Journeys] │ [📖 Verses]   │
+ *   ├──────────────────────────────────────────────┤
+ *   │  Menu sections (Account, Subscription, …)     │
+ *   ├──────────────────────────────────────────────┤
+ *   │  Sign Out                                     │
+ *   └──────────────────────────────────────────────┘
+ *
+ * Stats numbers flow from the existing /api/user/me endpoint. We keep
+ * the tier mapping aligned with the store's `SubscriptionTier` union so
+ * the hero, badge, and downstream subscription screens never drift.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
   Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import {
   DivineScreenWrapper,
-  SacredCard,
   GoldenDivider,
   OmLoader,
+  SacredCard,
 } from '@kiaanverse/ui';
 import { apiClient } from '@kiaanverse/api';
-import { useAuthStore } from '@kiaanverse/store';
+import { useAuthStore, type SubscriptionTier } from '@kiaanverse/store';
 
-// ── Types ──────────────────────────────────────────────────
+import { ProfileHero, StatsRow } from '../../components/profile';
+
+// React Native / Expo global — always defined at runtime.
+declare const __DEV__: boolean;
+
+const SACRED_WHITE = '#F5F0E8';
+const TEXT_MUTED = 'rgba(240,235,225,0.4)';
+const GOLD = '#D4A017';
+
 interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  profile_photo_url?: string;
-  subscription_tier: 'free' | 'sadhak' | 'siddha';
-  streak_days: number;
-  journeys_completed: number;
-  verses_read: number;
-  language: string;
-  created_at: string;
+  readonly id: string;
+  readonly name: string;
+  readonly email: string;
+  readonly profile_photo_url?: string | null;
+  readonly subscription_tier: SubscriptionTier;
+  readonly streak_days: number;
+  readonly journeys_completed: number;
+  readonly verses_read: number;
+  readonly language?: string;
+  readonly created_at?: string;
 }
 
-// ── Menu structure ─────────────────────────────────────────
-const MENU_SECTIONS: ReadonlyArray<{
-  title: string;
-  items: ReadonlyArray<{
-    label: string;
-    route: string;
-    icon: string;
-    gold?: boolean;
-  }>;
-}> = [
+/**
+ * The backend's `subscription_tier` string originates from an enum that
+ * will occasionally emit unknown values during schema migrations. We
+ * coerce here so the UI never crashes on an unexpected string.
+ */
+function toSubscriptionTier(raw: unknown): SubscriptionTier {
+  switch (raw) {
+    case 'free':
+    case 'bhakta':
+    case 'sadhak':
+    case 'siddha':
+      return raw;
+    default:
+      return 'free';
+  }
+}
+
+interface MenuItem {
+  readonly label: string;
+  readonly route: string;
+  readonly icon: string;
+  readonly gold?: boolean;
+}
+
+interface MenuSection {
+  readonly title: string;
+  readonly items: ReadonlyArray<MenuItem>;
+}
+
+const MENU_SECTIONS: ReadonlyArray<MenuSection> = [
   {
     title: 'Account',
     items: [
-      { label: 'Edit Profile',    route: '/(app)/edit-profile',      icon: '✦' },
-      { label: 'Change Password', route: '/(app)/change-password',   icon: '🔒' },
-      { label: 'Language',        route: '/(app)/language-settings', icon: '🌐' },
-      { label: 'Notifications',   route: '/(app)/notifications',     icon: '🔔' },
+      { label: 'Edit Profile', route: '/(app)/edit-profile', icon: '✦' },
+      { label: 'Change Password', route: '/(app)/change-password', icon: '🔒' },
+      { label: 'Language', route: '/(app)/language-settings', icon: '🌐' },
+      { label: 'Notifications', route: '/(app)/notifications', icon: '🔔' },
     ],
   },
   {
     title: 'Subscription',
     items: [
-      { label: 'My Subscription', route: '/(app)/subscription',       icon: '✦', gold: true },
-      { label: 'Upgrade Plan',    route: '/(app)/subscription/plans', icon: '⬆', gold: true },
-      { label: 'Billing History', route: '/(app)/billing-history',    icon: '📋' },
+      { label: 'My Subscription', route: '/(app)/subscription', icon: '✦', gold: true },
+      { label: 'Upgrade Plan', route: '/(app)/subscription/plans', icon: '⬆', gold: true },
+      { label: 'Billing History', route: '/(app)/billing-history', icon: '📋' },
     ],
   },
   {
     title: 'Sacred Tools',
     items: [
-      { label: 'My Journeys',     route: '/(tabs)/journal',         icon: '🗺' },
-      { label: 'Karma Footprint', route: '/(app)/karma-footprint',  icon: '☸' },
-      { label: 'KarmaLytix',      route: '/(app)/karmalytix',       icon: '📊' },
+      { label: 'My Journeys', route: '/journey', icon: '🗺' },
+      { label: 'Karma Footprint', route: '/karma-footprint', icon: '☸' },
+      { label: 'KarmaLytix', route: '/analytics', icon: '📊' },
     ],
   },
   {
     title: 'Support',
     items: [
-      { label: 'Help Center', route: '/(app)/help',    icon: '❓' },
-      { label: 'Contact Us',  route: '/(app)/contact', icon: '✉' },
+      { label: 'Help Center', route: '/(app)/help', icon: '❓' },
+      { label: 'Contact Us', route: '/(app)/contact', icon: '✉' },
       { label: 'Rate the App', route: 'external:rate', icon: '⭐' },
     ],
   },
   {
     title: 'Legal',
     items: [
-      { label: 'Privacy Policy',   route: '/(app)/privacy',      icon: '📄' },
-      { label: 'Terms of Service', route: '/(app)/terms',        icon: '📄' },
-      { label: 'Data & Privacy',   route: '/(app)/data-privacy', icon: '🛡' },
+      { label: 'Privacy Policy', route: '/(app)/privacy', icon: '📄' },
+      { label: 'Terms of Service', route: '/(app)/terms', icon: '📄' },
+      { label: 'Data & Privacy', route: '/(app)/data-privacy', icon: '🛡' },
     ],
   },
 ];
-
-const TIER_CONFIG: Record<
-  UserProfile['subscription_tier'],
-  { label: string; color: string; bg: string }
-> = {
-  free:   { label: 'Free Seeker', color: 'rgba(240,235,225,0.5)', bg: 'rgba(255,255,255,0.05)' },
-  sadhak: { label: 'Sadhak',      color: '#D4A017',               bg: 'rgba(212,160,23,0.12)' },
-  siddha: { label: 'Siddha',      color: '#F5E27A',               bg: 'rgba(245,226,122,0.15)' },
-};
 
 export default function ProfileScreen(): React.JSX.Element {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -111,21 +144,32 @@ export default function ProfileScreen(): React.JSX.Element {
   const logout = useAuthStore((s) => s.logout);
 
   useEffect(() => {
-    void fetchProfile();
+    let alive = true;
+    (async () => {
+      try {
+        const { data } = await apiClient.get<UserProfile>('/api/user/me');
+        if (alive) setProfile(data);
+      } catch (e) {
+        if (__DEV__) console.error('Profile fetch error:', e);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
   }, []);
 
-  const fetchProfile = async () => {
-    try {
-      const { data } = await apiClient.get<UserProfile>('/api/user/me');
-      setProfile(data);
-    } catch (e) {
-      console.error('Profile fetch error:', e);
-    } finally {
-      setLoading(false);
+  const handleMenuPress = useCallback((route: string) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (route.startsWith('external:')) {
+      // External links (e.g., store rating) — hooked up in a later pass.
+      return;
     }
-  };
+    router.push(route as never);
+  }, []);
 
-  const handleSignOut = () => {
+  const handleSignOut = useCallback(() => {
     Alert.alert(
       'Sign Out',
       'Are you sure you want to sign out of Kiaanverse?',
@@ -136,25 +180,13 @@ export default function ProfileScreen(): React.JSX.Element {
           style: 'destructive',
           onPress: async () => {
             setSigningOut(true);
-            // authStore.logout() invalidates the backend session, clears both
-            // tokens from SecureStore, and resets the Zustand state to
-            // `unauthenticated` so gated components re-render correctly.
             await logout();
             router.replace('/(auth)/login');
           },
         },
       ],
     );
-  };
-
-  const handleMenuPress = (route: string) => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (route.startsWith('external:')) {
-      // TODO: handle external links (Rate app → Play Store / App Store)
-      return;
-    }
-    router.push(route as never);
-  };
+  }, [logout]);
 
   if (loading) {
     return (
@@ -166,89 +198,79 @@ export default function ProfileScreen(): React.JSX.Element {
     );
   }
 
-  const tier = TIER_CONFIG[profile?.subscription_tier ?? 'free'];
+  const tier: SubscriptionTier = profile
+    ? toSubscriptionTier(profile.subscription_tier)
+    : 'free';
 
   return (
     <DivineScreenWrapper>
       <ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={styles.scrollContent}
       >
-        {/* ── AVATAR SECTION ── */}
-        <View style={styles.avatarSection}>
-          <View style={styles.avatarWrapper}>
-            {profile?.profile_photo_url ? (
-              <Image source={{ uri: profile.profile_photo_url }} style={styles.avatar} />
-            ) : (
-              <LinearGradient colors={['#1B4FBB', '#0E7490']} style={styles.avatarPlaceholder}>
-                <Text style={styles.avatarInitial}>
-                  {profile?.name?.charAt(0)?.toUpperCase() ?? 'S'}
-                </Text>
-              </LinearGradient>
-            )}
-            {/* Gold ring around avatar */}
-            <View style={styles.avatarRing} />
-          </View>
+        <ProfileHero
+          name={profile?.name ?? 'Sacred Seeker'}
+          email={profile?.email ?? undefined}
+          photoUrl={profile?.profile_photo_url ?? null}
+          tier={tier}
+          topInset={52}
+        />
 
-          <Text style={styles.name}>{profile?.name ?? 'Sacred Seeker'}</Text>
-          <Text style={styles.email}>{profile?.email}</Text>
-
-          {/* Subscription tier badge */}
-          <View style={[styles.tierBadge, { backgroundColor: tier.bg }]}>
-            <Text style={[styles.tierText, { color: tier.color }]}>✦ {tier.label}</Text>
-          </View>
+        <View style={styles.statsWrap}>
+          <StatsRow
+            streakDays={profile?.streak_days ?? 0}
+            journeys={profile?.journeys_completed ?? 0}
+            verses={profile?.verses_read ?? 0}
+          />
         </View>
 
-        {/* ── STATS ROW ── */}
-        <SacredCard style={styles.statsCard}>
-          <StatItem value={profile?.streak_days ?? 0}         label="Day Streak"  unit="🔥" />
-          <View style={styles.statDivider} />
-          <StatItem value={profile?.journeys_completed ?? 0}  label="Journeys"    unit="☸" />
-          <View style={styles.statDivider} />
-          <StatItem value={profile?.verses_read ?? 0}         label="Verses Read" unit="📖" />
-        </SacredCard>
-
-        {/* ── MENU SECTIONS ── */}
         {MENU_SECTIONS.map((section) => (
           <View key={section.title} style={styles.section}>
             <Text style={styles.sectionTitle}>{section.title}</Text>
-            <SacredCard style={styles.sectionCard}>
+            <SacredCard
+              style={styles.sectionCard}
+              contentStyle={styles.sectionCardContent}
+            >
               {section.items.map((item, idx) => (
                 <React.Fragment key={item.route}>
                   <TouchableOpacity
                     style={styles.menuItem}
                     onPress={() => handleMenuPress(item.route)}
                     activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={item.label}
                   >
                     <Text style={styles.menuIcon}>{item.icon}</Text>
-                    <Text style={[styles.menuLabel, item.gold && { color: '#D4A017' }]}>
+                    <Text
+                      style={[styles.menuLabel, item.gold ? styles.menuLabelGold : null]}
+                    >
                       {item.label}
                     </Text>
                     <Text style={styles.menuChevron}>›</Text>
                   </TouchableOpacity>
-                  {idx < section.items.length - 1 && (
-                    <GoldenDivider style={{ marginHorizontal: 16 }} />
-                  )}
+                  {idx < section.items.length - 1 ? (
+                    <GoldenDivider style={styles.menuDivider} />
+                  ) : null}
                 </React.Fragment>
               ))}
             </SacredCard>
           </View>
         ))}
 
-        {/* ── SIGN OUT ── */}
         <TouchableOpacity
           style={styles.signOutBtn}
           onPress={handleSignOut}
           disabled={signingOut}
+          accessibilityRole="button"
+          accessibilityLabel="Sign out"
         >
           <Text style={styles.signOutText}>
             {signingOut ? 'Signing out…' : 'Sign Out'}
           </Text>
         </TouchableOpacity>
 
-        {/* Member since */}
-        {profile?.created_at && (
+        {profile?.created_at ? (
           <Text style={styles.memberSince}>
             Sacred seeker since{' '}
             {new Date(profile.created_at).toLocaleDateString('en-US', {
@@ -256,150 +278,95 @@ export default function ProfileScreen(): React.JSX.Element {
               year: 'numeric',
             })}
           </Text>
-        )}
+        ) : null}
       </ScrollView>
     </DivineScreenWrapper>
   );
 }
 
-function StatItem({
-  value,
-  label,
-  unit,
-}: {
-  value: number;
-  label: string;
-  unit: string;
-}): React.JSX.Element {
-  return (
-    <View style={styles.stat}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statUnit}>{unit}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
-}
-
-const GOLD = '#D4A017';
 const styles = StyleSheet.create({
-  scroll: { flex: 1 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  avatarSection: { alignItems: 'center', paddingTop: 60, paddingBottom: 24 },
-  avatarWrapper: { position: 'relative', marginBottom: 12 },
-  avatar: { width: 80, height: 80, borderRadius: 40 },
-  avatarPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 120,
+  },
+  center: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarInitial: {
-    fontSize: 32,
-    fontFamily: 'CormorantGaramond-BoldItalic',
-    color: '#fff',
-  },
-  avatarRing: {
-    position: 'absolute',
-    top: -3,
-    left: -3,
-    right: -3,
-    bottom: -3,
-    borderRadius: 43,
-    borderWidth: 1.5,
-    borderColor: 'rgba(212,160,23,0.5)',
-  },
-  name: {
-    fontSize: 22,
-    fontFamily: 'CormorantGaramond-BoldItalic',
-    color: '#F0EBE1',
-    marginBottom: 4,
-  },
-  email: {
-    fontSize: 13,
-    fontFamily: 'Outfit-Regular',
-    color: 'rgba(240,235,225,0.45)',
-    marginBottom: 10,
-  },
-  tierBadge: {
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(212,160,23,0.2)',
-  },
-  tierText: {
-    fontSize: 12,
-    fontFamily: 'Outfit-SemiBold',
-    letterSpacing: 0.08,
-  },
-  statsCard: {
-    flexDirection: 'row',
+  statsWrap: {
+    marginTop: 8,
     marginHorizontal: 16,
-    marginBottom: 24,
-    padding: 16,
+    marginBottom: 20,
   },
-  stat: { flex: 1, alignItems: 'center' },
-  statValue: {
-    fontSize: 26,
-    fontFamily: 'CormorantGaramond-BoldItalic',
-    color: GOLD,
+  section: {
+    marginHorizontal: 16,
+    marginBottom: 16,
   },
-  statUnit: { fontSize: 14, marginTop: -4 },
-  statLabel: {
-    fontSize: 11,
-    fontFamily: 'Outfit-Regular',
-    color: 'rgba(240,235,225,0.45)',
-    marginTop: 2,
-  },
-  statDivider: { width: 1, backgroundColor: 'rgba(212,160,23,0.15)' },
-  section: { marginHorizontal: 16, marginBottom: 16 },
   sectionTitle: {
-    fontSize: 11,
     fontFamily: 'Outfit-SemiBold',
-    color: 'rgba(240,235,225,0.4)',
-    letterSpacing: 0.12,
-    textTransform: 'uppercase',
+    fontSize: 11,
+    color: TEXT_MUTED,
+    letterSpacing: 1.4,
     marginBottom: 8,
     paddingLeft: 4,
   },
-  sectionCard: { padding: 0, overflow: 'hidden' },
+  sectionCard: {
+    width: '100%',
+  },
+  sectionCardContent: {
+    padding: 0,
+    overflow: 'hidden',
+  },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
-  menuIcon: { fontSize: 16, width: 28 },
+  menuIcon: {
+    fontSize: 16,
+    width: 28,
+    color: SACRED_WHITE,
+  },
   menuLabel: {
     flex: 1,
-    fontSize: 15,
     fontFamily: 'Outfit-Regular',
-    color: '#F0EBE1',
+    fontSize: 15,
+    color: SACRED_WHITE,
+  },
+  menuLabelGold: {
+    color: GOLD,
+    fontFamily: 'Outfit-Medium',
   },
   menuChevron: {
     fontSize: 20,
-    color: 'rgba(240,235,225,0.3)',
+    color: 'rgba(240,235,225,0.35)',
     fontWeight: '300',
+  },
+  menuDivider: {
+    marginHorizontal: 16,
   },
   signOutBtn: {
     marginHorizontal: 16,
     marginTop: 8,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(239,68,68,0.25)',
+    borderColor: 'rgba(239,68,68,0.28)',
     alignItems: 'center',
-    backgroundColor: 'rgba(239,68,68,0.05)',
+    backgroundColor: 'rgba(239,68,68,0.06)',
   },
   signOutText: {
-    fontSize: 15,
     fontFamily: 'Outfit-Medium',
+    fontSize: 15,
     color: '#EF4444',
   },
   memberSince: {
-    fontSize: 11,
     fontFamily: 'Outfit-Regular',
+    fontSize: 11,
     color: 'rgba(240,235,225,0.25)',
     textAlign: 'center',
     marginTop: 16,
