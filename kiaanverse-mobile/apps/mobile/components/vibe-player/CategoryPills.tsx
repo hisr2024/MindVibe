@@ -33,7 +33,7 @@ export type FilterKey =
   | 'binaural';
 
 /** Display label + ordering for every pill. */
-const PILLS: ReadonlyArray<{ key: FilterKey; label: string }> = [
+const PILLS: readonly { key: FilterKey; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'mantras', label: 'Mantras' },
   { key: 'meditation', label: 'Meditation' },

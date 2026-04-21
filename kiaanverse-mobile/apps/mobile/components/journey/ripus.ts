@@ -90,7 +90,7 @@ export const RIPUS: Readonly<Record<RipuKey, Ripu>> = {
 };
 
 /** Ordered list — used for horizontal-scroll filter rendering. */
-export const RIPU_ORDER: ReadonlyArray<RipuKey> = [
+export const RIPU_ORDER: readonly RipuKey[] = [
   'krodha',
   'bhaya',
   'kama',

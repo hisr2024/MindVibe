@@ -20,7 +20,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -63,7 +62,7 @@ type PhaseKey =
   | 'movement'
   | 'gratitude';
 
-const PHASE_ORDER: ReadonlyArray<PhaseKey> = [
+const PHASE_ORDER: readonly PhaseKey[] = [
   'arrival',
   'stillness',
   'wisdom',
@@ -254,9 +253,12 @@ export default function NityaSadhanaScreen(): React.JSX.Element {
         completed={completedIndices}
       />
 
+      {/* `padding` behavior works reliably on both platforms; `height` on
+          Android fights the soft-keyboard insets and causes layout jumps
+          mid-phase transition. */}
       <KeyboardAvoidingView
         style={styles.body}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior="padding"
         keyboardVerticalOffset={0}
       >
         <PhaseCeremony phaseKey={phase}>{renderPhase()}</PhaseCeremony>

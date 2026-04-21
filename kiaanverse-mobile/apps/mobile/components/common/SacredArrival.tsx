@@ -332,7 +332,6 @@ function SacredArrivalInner({ onComplete }: SacredArrivalProps): React.JSX.Eleme
       <Animated.Text
         allowFontScaling={false}
         style={[styles.invocation, invocationStyle]}
-        pointerEvents="none"
       >
         {INVOCATION}
       </Animated.Text>
