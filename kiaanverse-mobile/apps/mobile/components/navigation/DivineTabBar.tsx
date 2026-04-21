@@ -42,7 +42,7 @@ import * as Haptics from 'expo-haptics';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { GopuramIcon } from './icons/GopuramIcon';
-import { ChatMandalasIcon } from './icons/ChatMandalasIcon';
+import { LotusDialogIcon } from './icons/LotusDialogIcon';
 import { ManuscriptIcon } from './icons/ManuscriptIcon';
 import { ChakraColumnIcon } from './icons/ChakraColumnIcon';
 import { MeditatorIcon } from './icons/MeditatorIcon';
@@ -52,8 +52,9 @@ import { MeditatorIcon } from './icons/MeditatorIcon';
 // ---------------------------------------------------------------------------
 
 const ACTIVE_COLOR = '#D4A017';
-const INACTIVE_COLOR = 'rgba(240,235,225,0.38)';
+const INACTIVE_COLOR = 'rgba(240,235,225,0.35)';
 const BACKGROUND_COLOR = 'rgba(5,7,20,0.97)';
+const GLOW_COLOR = 'rgba(212,160,23,0.08)';
 
 // ---------------------------------------------------------------------------
 // Tab definition — single source of truth for label + icon.
@@ -72,18 +73,22 @@ interface SacredTab {
 
 const TABS: ReadonlyArray<SacredTab> = [
   { name: 'index', label: 'Home', Icon: GopuramIcon },
-  { name: 'chat', label: 'Chat', Icon: ChatMandalasIcon },
+  { name: 'chat', label: 'Chat', Icon: LotusDialogIcon },
   { name: 'shlokas', label: 'Shlokas', Icon: ManuscriptIcon },
   { name: 'journal', label: 'Journal', Icon: ChakraColumnIcon },
   { name: 'profile', label: 'Profile', Icon: MeditatorIcon },
 ] as const;
 
-/** Gold gradient colour stops for the top border. */
+/**
+ * Gold-with-peacock gradient colour stops for the top border. The blue
+ * shoulders echo the Krishna-aura gradient used by primary CTAs and make
+ * the central gold hotspot read as a threshold, not just a hairline.
+ */
 const TOP_BORDER_COLORS: readonly [string, string, string, string, string] = [
   'transparent',
-  'rgba(212,160,23,0.5)',
-  'rgba(212,160,23,0.8)',
-  'rgba(212,160,23,0.5)',
+  'rgba(27,79,187,0.35)',
+  'rgba(212,160,23,0.7)',
+  'rgba(27,79,187,0.35)',
   'transparent',
 ];
 
@@ -107,14 +112,15 @@ export function DivineTabBar({
 
   const handlePress = useCallback(
     (route: { key: string; name: string }, isFocused: boolean) => {
+      // Haptic fires in TabItem synchronously with the press-scale spring so
+      // the bounce and the thump land on the same frame. We keep navigation
+      // here so the event plumbing stays in one place.
       const event = navigation.emit({
         type: 'tabPress',
         target: route.key,
         canPreventDefault: true,
       });
       if (isFocused || event.defaultPrevented) return;
-
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       navigation.navigate(route.name);
     },
     [navigation],
@@ -202,51 +208,84 @@ function TabItemInner({
   onLongPress,
   testID,
 }: TabItemProps): React.JSX.Element {
-  /** 0 = inactive, 1 = active — drives dot opacity + label fade-in. */
-  const focus = useSharedValue(isFocused ? 1 : 0);
-  /** Drives the icon scale (divine-breath cycle on activation). */
+  /** Whole-tab press bounce (1.0 → 0.88 → 1.0). */
+  const pressScale = useSharedValue(1);
+  /** Icon scale: rests at 1.0, pops to 1.12 on activation. */
   const iconScale = useSharedValue(1);
+  /** Indicator dot: scales from 0 → 1.2 → 1.0 with a gold overshoot. */
+  const dotScale = useSharedValue(isFocused ? 1 : 0);
+  /** Dot opacity — matches dot visibility without blocking the spring. */
+  const dotOpacity = useSharedValue(isFocused ? 1 : 0);
+  /** Radial glow behind the icon, 32px, 8%-gold. */
+  const glowOpacity = useSharedValue(isFocused ? 1 : 0);
+  /** Active label fades in synchronously with the dot. */
+  const labelOpacity = useSharedValue(isFocused ? 1 : 0);
 
   useEffect(() => {
-    // Sacred-spring for focus transition (~180ms settle).
-    focus.value = withSpring(isFocused ? 1 : 0, {
-      damping: 18,
-      stiffness: 220,
-      mass: 0.8,
-    });
-
     if (isFocused) {
-      // Divine-breath: one cycle 1.0 → 1.15 → 1.0 (~480ms).
+      // Icon pops once on activation, then rests.
       iconScale.value = withSequence(
-        withTiming(1.15, { duration: 180, easing: Easing.out(Easing.quad) }),
-        withTiming(1.0, { duration: 300, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1.12, { duration: 200, easing: Easing.out(Easing.quad) }),
+        withSpring(1.0, { damping: 14, stiffness: 160, mass: 0.9 }),
       );
+      // Indicator overshoots then settles — the "opening of the threshold".
+      dotScale.value = withSequence(
+        withTiming(1.2, { duration: 180, easing: Easing.out(Easing.cubic) }),
+        withSpring(1.0, { damping: 10, stiffness: 180, mass: 0.8 }),
+      );
+      dotOpacity.value = withTiming(1, { duration: 180 });
+      glowOpacity.value = withTiming(1, { duration: 300 });
+      labelOpacity.value = withTiming(1, { duration: 200 });
     } else {
       iconScale.value = withTiming(1.0, { duration: 200 });
+      dotScale.value = withTiming(0, { duration: 150 });
+      dotOpacity.value = withTiming(0, { duration: 150 });
+      glowOpacity.value = withTiming(0, { duration: 200 });
+      labelOpacity.value = withTiming(0, { duration: 150 });
     }
-  }, [isFocused, focus, iconScale]);
+  }, [isFocused, iconScale, dotScale, dotOpacity, glowOpacity, labelOpacity]);
+
+  const handlePressIn = useCallback(() => {
+    // Tap-feedback bounce. We run it in onPress rather than in the navigate
+    // path so even blocked taps (already-focused tab) still give a hint of
+    // response to the user.
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
+    pressScale.value = withSequence(
+      withSpring(0.88, { damping: 12, stiffness: 200, mass: 0.7 }),
+      withSpring(1.0, { damping: 10, stiffness: 150, mass: 0.8 }),
+    );
+  }, [pressScale]);
+
+  const tabAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pressScale.value }],
+  }));
 
   const iconAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: iconScale.value }],
   }));
 
   const dotAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: focus.value,
-    transform: [{ scale: focus.value }],
+    opacity: dotOpacity.value,
+    transform: [{ scale: dotScale.value }],
   }));
 
   const labelAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: focus.value,
+    opacity: labelOpacity.value,
   }));
 
-  // We swap stroke colour on the JS thread (rgba ↔ hex) because Reanimated
-  // cannot interpolate across those formats without the colour plugin; the
-  // focus spring already carries the visual transition via dot + label.
+  const glowAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+  }));
+
+  // Icon colour is swapped on the JS thread — Reanimated can't interpolate
+  // rgba ↔ hex without the colour plugin, and the focus transitions are
+  // already carried visually by the dot / label / glow values.
   const iconColor = isFocused ? ACTIVE_COLOR : INACTIVE_COLOR;
 
   return (
     <Pressable
       onPress={onPress}
+      onPressIn={handlePressIn}
       onLongPress={onLongPress}
       style={styles.tab}
       accessibilityRole="tab"
@@ -255,23 +294,31 @@ function TabItemInner({
       testID={testID}
       hitSlop={8}
     >
-      {/* Reserved slot above the icon — keeps layout height stable. */}
-      <View style={styles.dotSlot} pointerEvents="none">
-        <Animated.View style={[styles.dot, dotAnimatedStyle]} />
-      </View>
+      <Animated.View style={[styles.tabInner, tabAnimatedStyle]}>
+        {/* Reserved slot above the icon — keeps layout height stable. */}
+        <View style={styles.dotSlot} pointerEvents="none">
+          <Animated.View style={[styles.dot, dotAnimatedStyle]} />
+        </View>
 
-      <Animated.View style={iconAnimatedStyle}>
-        <Icon size={24} color={iconColor} />
+        {/* Icon + glow underlay. Glow sits behind the glyph via absolute
+            positioning in a square slot so it never resizes as the icon
+            scales — the glow is a steady aura, not a shadow. */}
+        <View style={styles.iconSlot} pointerEvents="none">
+          <Animated.View style={[styles.iconGlow, glowAnimatedStyle]} />
+          <Animated.View style={iconAnimatedStyle}>
+            <Icon size={22} color={iconColor} />
+          </Animated.View>
+        </View>
+
+        <View style={styles.labelSlot} pointerEvents="none">
+          <Animated.Text
+            numberOfLines={1}
+            style={[styles.label, labelAnimatedStyle]}
+          >
+            {label}
+          </Animated.Text>
+        </View>
       </Animated.View>
-
-      <View style={styles.labelSlot} pointerEvents="none">
-        <Animated.Text
-          numberOfLines={1}
-          style={[styles.label, labelAnimatedStyle]}
-        >
-          {label}
-        </Animated.Text>
-      </View>
     </Pressable>
   );
 }
@@ -322,6 +369,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingTop: 4,
   },
+  tabInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   dotSlot: {
     height: DOT_SIZE + DOT_GAP,
     alignItems: 'center',
@@ -332,15 +383,44 @@ const styles = StyleSheet.create({
     height: DOT_SIZE,
     borderRadius: DOT_SIZE / 2,
     backgroundColor: ACTIVE_COLOR,
+    shadowColor: ACTIVE_COLOR,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  iconSlot: {
+    width: 36,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconGlow: {
+    position: 'absolute',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: GLOW_COLOR,
+    // A soft outer halo on iOS; Android's elevation draws ring-like shadows
+    // on solid surfaces, so we skip it there.
+    ...Platform.select({
+      ios: {
+        shadowColor: ACTIVE_COLOR,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.35,
+        shadowRadius: 10,
+      },
+      default: {},
+    }),
   },
   labelSlot: {
-    height: 14,
-    marginTop: 2,
+    height: 12,
+    marginTop: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   label: {
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: Platform.select({
       ios: 'Outfit-Medium',
       android: 'Outfit-Medium',
@@ -348,6 +428,6 @@ const styles = StyleSheet.create({
     }),
     fontWeight: '500',
     color: ACTIVE_COLOR,
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
 });
