@@ -41,7 +41,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         'Kiaanverse uses Face ID for secure, quick login.',
       NSCameraUsageDescription:
         'Kiaanverse may use your camera for future features.',
-      UIBackgroundModes: ['fetch', 'remote-notification'],
+      // 'audio' keeps the AVAudioSession alive when the screen locks or the
+      // user backgrounds the app — required for Vibe Player lock-screen
+      // controls and for audio to continue during meditation sessions.
+      UIBackgroundModes: ['fetch', 'remote-notification', 'audio'],
     },
     config: {
       usesNonExemptEncryption: false,
@@ -72,6 +75,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'android.permission.RECEIVE_BOOT_COMPLETED',
       'android.permission.POST_NOTIFICATIONS',
       'com.android.vending.BILLING',
+      // Required by react-native-track-player to run the media-playback
+      // foreground service on Android 14+ (targetSdk 34). Without this the
+      // audio session is killed the moment the user leaves the app.
+      'android.permission.FOREGROUND_SERVICE',
+      'android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK',
     ],
     intentFilters: [
       {
