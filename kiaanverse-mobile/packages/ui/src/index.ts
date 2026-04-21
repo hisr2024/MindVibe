@@ -153,6 +153,8 @@ export {
   useDivineEntrance,
   useSacredPress,
   useGoldenPulse,
+  useVerseRevelation,
+  useBreathingAura,
   // Components
   SacredScrollView,
   // Types
@@ -164,6 +166,11 @@ export {
   type HapticStyle,
   type UseGoldenPulseOptions,
   type UseGoldenPulseResult,
+  type UseVerseRevelationOptions,
+  type UseVerseRevelationResult,
+  type VerseRevelationTextProps,
+  type UseBreathingAuraOptions,
+  type UseBreathingAuraResult,
   type SacredScrollViewProps,
 } from './motion';
 
