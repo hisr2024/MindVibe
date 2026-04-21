@@ -116,6 +116,33 @@ const englishMessages: Record<TranslationNamespace, TranslationMessages> = {
     deleteMessage: 'This reflection will be archived. You can recover it later.',
     deleteErrorTitle: 'Could Not Delete',
     deleteErrorMessage: 'Please try again in a moment.',
+
+    // New-entry composer
+    newEntryTitle: 'Sacred Reflection',
+    privacyNote: '🔒 Your words are encrypted on this device · Never read by Kiaanverse',
+    moodSectionLabel: 'How is your inner state right now?',
+    categorySectionLabel: 'This reflection is a…',
+    tagsSectionLabel: 'Themes present today',
+    reflectionSectionLabel: 'Your sacred reflection',
+    encryptedLabel: '🔒 Encrypted on this device',
+    bodyPlaceholder: 'Begin your sacred reflection… Write freely. This space is yours alone.',
+    sealReflection: 'Seal this Reflection',
+    emptyBodyTitle: 'Sacred space awaits',
+    emptyBodyMessage: 'Please write your reflection before saving.',
+    missingMoodTitle: 'How are you feeling?',
+    missingMoodMessage: 'Please select your current mood.',
+    saveErrorTitle: 'Could Not Save',
+    saveErrorMessage: 'Your reflection could not be saved right now. Please try again.',
+
+    // Weekly assessment
+    assessmentTitle: '🌀 Weekly Sacred Assessment',
+    assessmentSub:
+      'These answers are plaintext and power your KarmaLytix analysis. They are NOT encrypted — choose your words accordingly.',
+    q1Label: 'What was your greatest dharmic challenge this week?',
+    q2Label: 'Which Gita teaching felt most alive this week?',
+    q3Label: 'How consistent was your practice? (1–5)',
+    q4Label: 'What pattern are you noticing in yourself?',
+    q5Label: 'What sankalpa do you carry into next week?',
   },
   sadhana: {},
   community: {},
