@@ -2317,6 +2317,27 @@ except Exception as e:
     _startup_status["routers_failed"] += 1
     startup_logger.info(f"❌ [ERROR] Failed to load KarmaLytix router: {e}")
 
+# Load KarmaLytix analytics router (PROMPT 4 surface — structured Sacred Mirror)
+startup_logger.info(
+    "\n[KarmaLytix Analytics] Attempting to import analytics-karmalytix router..."
+)
+try:
+    from backend.routes.analytics_karmalytix import (
+        router as analytics_karmalytix_router,
+    )
+
+    app.include_router(analytics_karmalytix_router)
+    _startup_status["routers_loaded"] += 1
+    startup_logger.info("✅ [SUCCESS] KarmaLytix analytics router loaded")
+    startup_logger.info("   • GET    /api/analytics/weekly-report - Latest Sacred Mirror")
+    startup_logger.info("   • POST   /api/analytics/generate - Force-generate weekly report")
+    startup_logger.info("   • GET    /api/analytics/history - Last N weekly reports")
+except Exception as e:
+    _startup_status["routers_failed"] += 1
+    startup_logger.info(
+        f"❌ [ERROR] Failed to load KarmaLytix analytics router: {e}"
+    )
+
 # Count actual registered API routes to populate startup status.
 # This is more reliable than tracking each try/except individually since
 # it reflects the true state of what FastAPI has registered.
