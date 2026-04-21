@@ -7,8 +7,10 @@
  *   breathes continuously. When `streaming` is true, breathing intensity
  *   doubles (halo expands + opacity swells).
  * - Title: "Sakha" — CormorantGaramond-Italic 20 px #D4A017.
- * - Sub:   "The Paramatma is listening" — Outfit 11 px muted, italic.
- * - Right: voice/audio toggle + language selector (minimal sacred icons).
+ * - Sub (idle):      "परमात्मा is listening" — Devanagari + Outfit italic.
+ * - Sub (streaming): "Reflecting on dharma…" — Outfit italic.
+ *   The subtitle cross-fades between the two states on the streaming flip.
+ * - Right: voice/audio toggle + clear-conversation button.
  * - Bottom border: thin golden divider (no center mark).
  *
  * On SAKHA response complete the parent can call `pulse()` on the ref to
@@ -32,7 +34,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Path, Line, Circle as SvgCircle } from 'react-native-svg';
+import Svg, { Path, Line } from 'react-native-svg';
 
 // Lazy-load MandalaSpin so missing versions don't crash the render.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -63,8 +65,8 @@ export interface ChatHeaderProps {
   readonly streaming: boolean;
   /** Voice / TTS toggle handler. */
   readonly onToggleVoice?: () => void;
-  /** Language selector handler. */
-  readonly onOpenLanguage?: () => void;
+  /** Clear-conversation handler (shown as a trash-like glyph). */
+  readonly onClearConversation?: () => void;
   /** Whether voice output is currently enabled (drives icon tint). */
   readonly voiceEnabled?: boolean;
 }
@@ -80,19 +82,24 @@ function MicIcon({ color }: { color: string }): React.JSX.Element {
   );
 }
 
-function GlobeIcon({ color }: { color: string }): React.JSX.Element {
+function BroomIcon({ color }: { color: string }): React.JSX.Element {
   return (
     <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-      <SvgCircle cx={12} cy={12} r={9} />
-      <Line x1={3} y1={12} x2={21} y2={12} />
-      <Path d="M12 3 a13 13 0 0 1 0 18 a13 13 0 0 1 0 -18" />
+      {/* Stem */}
+      <Line x1={16} y1={4} x2={8} y2={12} />
+      {/* Brush bounds */}
+      <Path d="M5 19 L12 12 L19 19 Z" />
+      {/* Bristles */}
+      <Line x1={9} y1={15} x2={8} y2={19} />
+      <Line x1={12} y1={14} x2={12} y2={20} />
+      <Line x1={15} y1={15} x2={16} y2={19} />
     </Svg>
   );
 }
 
 export const ChatHeader = forwardRef<ChatHeaderHandle, ChatHeaderProps>(
   function ChatHeader(
-    { streaming, onToggleVoice, onOpenLanguage, voiceEnabled = false },
+    { streaming, onToggleVoice, onClearConversation, voiceEnabled = false },
     ref,
   ) {
     const insets = useSafeAreaInsets();
@@ -103,6 +110,8 @@ export const ChatHeader = forwardRef<ChatHeaderHandle, ChatHeaderProps>(
     const haloOpacity = useSharedValue(0.35);
     /** One-shot pulse ring (0 → 1 → 0 in ~900 ms) triggered by `pulse()`. */
     const pulsePhase = useSharedValue(0);
+    /** Cross-fade between the two subtitles (0 = listening, 1 = reflecting). */
+    const subtitleFade = useSharedValue(streaming ? 1 : 0);
 
     useEffect(() => {
       breath.value = withRepeat(
@@ -120,7 +129,11 @@ export const ChatHeader = forwardRef<ChatHeaderHandle, ChatHeaderProps>(
         duration: 280,
         easing: Easing.out(Easing.ease),
       });
-    }, [streaming, haloOpacity]);
+      subtitleFade.value = withTiming(streaming ? 1 : 0, {
+        duration: 320,
+        easing: Easing.inOut(Easing.ease),
+      });
+    }, [streaming, haloOpacity, subtitleFade]);
 
     useImperativeHandle(ref, () => ({
       pulse: () => {
@@ -146,6 +159,13 @@ export const ChatHeader = forwardRef<ChatHeaderHandle, ChatHeaderProps>(
     const pulseStyle = useAnimatedStyle(() => ({
       opacity: pulsePhase.value * 0.6,
       transform: [{ scale: 1 + pulsePhase.value * 1.2 }],
+    }));
+
+    const subtitleListeningStyle = useAnimatedStyle(() => ({
+      opacity: 1 - subtitleFade.value,
+    }));
+    const subtitleReflectingStyle = useAnimatedStyle(() => ({
+      opacity: subtitleFade.value,
     }));
 
     const mandalaSpeed = streaming ? 'fast' : 'slow';
@@ -189,12 +209,25 @@ export const ChatHeader = forwardRef<ChatHeaderHandle, ChatHeaderProps>(
             <Animated.Text style={styles.title} numberOfLines={1}>
               Sakha
             </Animated.Text>
-            <Animated.Text style={styles.subtitle} numberOfLines={1}>
-              The Paramatma is listening
-            </Animated.Text>
+            <View style={styles.subtitleStack}>
+              <Animated.Text
+                style={[styles.subtitle, subtitleListeningStyle]}
+                numberOfLines={1}
+                accessibilityLabel="Paramatma is listening"
+              >
+                <Animated.Text style={styles.subtitleSanskrit}>परमात्मा </Animated.Text>
+                is listening
+              </Animated.Text>
+              <Animated.Text
+                style={[styles.subtitle, styles.subtitleOverlay, subtitleReflectingStyle]}
+                numberOfLines={1}
+              >
+                Reflecting on dharma…
+              </Animated.Text>
+            </View>
           </View>
 
-          {/* Right: voice + language */}
+          {/* Right: voice toggle + clear-conversation */}
           <View style={styles.actions}>
             <Pressable
               onPress={onToggleVoice}
@@ -206,13 +239,13 @@ export const ChatHeader = forwardRef<ChatHeaderHandle, ChatHeaderProps>(
               <MicIcon color={voiceEnabled ? GOLD : GOLD_MUTED} />
             </Pressable>
             <Pressable
-              onPress={onOpenLanguage}
+              onPress={onClearConversation}
               accessibilityRole="button"
-              accessibilityLabel="Change language"
+              accessibilityLabel="Clear conversation"
               hitSlop={8}
               style={styles.iconButton}
             >
-              <GlobeIcon color={GOLD_MUTED} />
+              <BroomIcon color={GOLD_MUTED} />
             </Pressable>
           </View>
         </View>
@@ -289,12 +322,28 @@ const styles = StyleSheet.create({
     color: GOLD,
     letterSpacing: 0.4,
   },
+  subtitleStack: {
+    marginTop: 2,
+    minHeight: 16,
+    justifyContent: 'center',
+  },
   subtitle: {
     fontFamily: 'Outfit-Regular',
     fontSize: 11,
     color: TEXT_MUTED,
     fontStyle: 'italic',
-    marginTop: 2,
+  },
+  subtitleOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+  subtitleSanskrit: {
+    fontFamily: 'NotoSansDevanagari-Regular',
+    fontSize: 11,
+    color: TEXT_MUTED,
+    fontStyle: 'normal',
   },
   actions: {
     flexDirection: 'row',
