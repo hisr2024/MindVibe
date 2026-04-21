@@ -1,365 +1,362 @@
 /**
- * KIAAN Vibe Player — Full-Screen Player
+ * KIAAN Vibe — Full-Screen Player (Sacred Sound Sanctuary)
  *
- * Dark background with mandala decoration, track artwork, animated
- * waveform visualizer, playback controls (prev/play/next), progress
- * bar, volume slider, repeat and shuffle toggles, and queue indicator.
+ * The player is the app's most immersive audio moment. Nothing is a
+ * photograph: the album art is sacred geometry; the progress bar is a
+ * gold-shimmer pill; the transport uses a Krishna-aura play button.
+ *
+ * Layout:
+ *   ┌────────────────────────────────────────────────┐
+ *   │  ← Back                                        │
+ *   ├────────────────────────────────────────────────┤
+ *   │                                                │
+ *   │          SacredGeometryArt (≈50 % of screen)   │
+ *   │                                                │
+ *   ├────────────────────────────────────────────────┤
+ *   │  Track title (CormorantGaramond)                │
+ *   │  Sanskrit (NotoSansDevanagari DIVINE_GOLD)      │
+ *   │  Category (Outfit TEXT_MUTED)                   │
+ *   ├────────────────────────────────────────────────┤
+ *   │  PlayerProgressBar (drag = TrackPlayer.seekTo)  │
+ *   ├────────────────────────────────────────────────┤
+ *   │  PlaybackControls (5 icons, 56 px play)         │
+ *   ├────────────────────────────────────────────────┤
+ *   │  ShlokaCompanion (collapsible while paused)     │
+ *   └────────────────────────────────────────────────┘
+ *
+ * Audio integration:
+ *   - useProgress() from react-native-track-player drives the progress
+ *     bar when RNTP is the playback source.
+ *   - On pause/play and seek, we call into the store AND TrackPlayer so
+ *     lock-screen + AirPods state stays in sync with the UI.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
-import Animated, {
-  FadeIn,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-  withSequence,
-  cancelAnimation,
-} from 'react-native-reanimated';
-import { useRouter } from 'expo-router';
-import * as Haptics from 'expo-haptics';
+import React, { useCallback, useMemo } from 'react';
 import {
-  Screen,
+  Pressable,
+  StyleSheet,
   Text,
-  colors,
-  spacing,
-  radii,
-} from '@kiaanverse/ui';
-import { useVibePlayerStore } from '@kiaanverse/store';
+  View,
+  useWindowDimensions,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { DivineBackground } from '@kiaanverse/ui';
+import { useVibePlayerStore, type RepeatMode } from '@kiaanverse/store';
+import TrackPlayer, { useProgress } from 'react-native-track-player';
 
-/** Format seconds to M:SS string */
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
+import {
+  PlaybackControls,
+  PlayerProgressBar,
+  SacredGeometryArt,
+  ShlokaCompanion,
+  type SacredCategory,
+} from '../../components/vibe-player';
+import {
+  pause as bridgePause,
+  resume as bridgeResume,
+  seekTo as bridgeSeekTo,
+} from '../../components/vibe-player/trackPlayerBridge';
+
+const SACRED_WHITE = '#F5F0E8';
+const TEXT_MUTED = 'rgba(200,191,168,0.7)';
+const GOLD = '#D4A017';
+
+/** Ensure the `MeditationTrack.category` strings map onto the art's
+ *  closed SacredCategory union. Anything unknown falls back to 'mantra'. */
+function toSacredCategory(raw?: string): SacredCategory {
+  switch (raw) {
+    case 'mantra':
+    case 'meditation':
+    case 'chanting':
+    case 'ambient':
+    case 'binaural':
+      return raw;
+    default:
+      return 'mantra';
+  }
 }
 
-/** Number of waveform bars in the visualizer */
-const BAR_COUNT = 20;
-
-function WaveformBar({ index, isPlaying }: { index: number; isPlaying: boolean }) {
-  const height = useSharedValue(8);
-
-  useEffect(() => {
-    if (isPlaying) {
-      const baseDelay = index * 50;
-      height.value = withRepeat(
-        withSequence(
-          withTiming(8 + Math.random() * 32, { duration: 300 + baseDelay }),
-          withTiming(4 + Math.random() * 12, { duration: 200 + baseDelay }),
-        ),
-        -1,
-        true,
-      );
-    } else {
-      cancelAnimation(height);
-      height.value = withTiming(8, { duration: 300 });
-    }
-  }, [isPlaying, height, index]);
-
-  const barStyle = useAnimatedStyle(() => ({
-    height: height.value,
-  }));
-
-  return <Animated.View style={[styles.waveBar, barStyle]} />;
+/** Best-effort mapping from arbitrary category → human-readable label. */
+function categoryLabel(raw: string): string {
+  if (!raw) return '';
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
 }
 
 export default function VibePlayerScreen(): React.JSX.Element {
   const router = useRouter();
-  const {
-    currentTrack,
-    isPlaying,
-    progress,
-    volume,
-    repeatMode,
-    isShuffled,
-    queue,
-    togglePlay,
-    nextTrack,
-    prevTrack,
-    setVolume,
-    setRepeatMode,
-    toggleShuffle,
-  } = useVibePlayerStore();
+  const { height } = useWindowDimensions();
 
-  const currentTime = useMemo(
-    () => (currentTrack ? progress * currentTrack.duration : 0),
-    [progress, currentTrack],
-  );
+  const currentTrack = useVibePlayerStore((s) => s.currentTrack);
+  const isPlaying = useVibePlayerStore((s) => s.isPlaying);
+  const repeatMode = useVibePlayerStore((s) => s.repeatMode);
+  const togglePlay = useVibePlayerStore((s) => s.togglePlay);
+  const nextTrack = useVibePlayerStore((s) => s.nextTrack);
+  const prevTrack = useVibePlayerStore((s) => s.prevTrack);
+  const setRepeatMode = useVibePlayerStore((s) => s.setRepeatMode);
 
-  const totalTime = currentTrack?.duration ?? 0;
+  // Live playback position from RNTP. While RNTP isn't loaded (e.g. the
+  // user navigated to the player with no track), these stay at 0 and
+  // the progress bar reflects that.
+  const { position, duration } = useProgress();
+
+  // Bookmark is component-local for now — see library screen rationale.
+  const [isBookmarked, setBookmarked] = React.useState(false);
 
   const handleTogglePlay = useCallback(() => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     togglePlay();
-  }, [togglePlay]);
+    if (isPlaying) void bridgePause();
+    else void bridgeResume();
+  }, [isPlaying, togglePlay]);
 
   const handleNext = useCallback(() => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     nextTrack();
+    void TrackPlayer.skipToNext().catch(() => undefined);
   }, [nextTrack]);
 
   const handlePrev = useCallback(() => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     prevTrack();
+    void TrackPlayer.skipToPrevious().catch(() => undefined);
   }, [prevTrack]);
 
   const handleRepeatCycle = useCallback(() => {
-    void Haptics.selectionAsync();
-    const modes = ['off', 'all', 'one'] as const;
-    const currentIdx = modes.indexOf(repeatMode);
-    const nextMode = modes[(currentIdx + 1) % modes.length] ?? 'off';
-    setRepeatMode(nextMode);
+    const next = nextRepeatMode(repeatMode);
+    setRepeatMode(next);
   }, [repeatMode, setRepeatMode]);
 
-  const handleShuffle = useCallback(() => {
-    void Haptics.selectionAsync();
-    toggleShuffle();
-  }, [toggleShuffle]);
+  const handleSeek = useCallback((seconds: number) => {
+    void bridgeSeekTo(seconds);
+  }, []);
 
-  const repeatLabel = repeatMode === 'one' ? '1' : repeatMode === 'all' ? 'A' : '-';
+  const handleToggleBookmark = useCallback(() => {
+    setBookmarked((b) => !b);
+  }, []);
+
+  const displayDuration = duration > 0 ? duration : currentTrack?.duration ?? 0;
+
+  // Album art occupies ~50 % of the screen height, clamped to a circle
+  // whose diameter never exceeds the screen width so the mandala never
+  // crops its outer ring.
+  const artSize = useMemo(() => {
+    const targetSize = Math.min(height * 0.5, 360);
+    return Math.max(220, targetSize);
+  }, [height]);
+
+  const category = currentTrack
+    ? toSacredCategory((currentTrack as { category?: string }).category)
+    : 'mantra';
+
+  const categoryDisplay = currentTrack
+    ? categoryLabel(
+        (currentTrack as { category?: string }).category ?? 'Meditation',
+      )
+    : '';
 
   if (!currentTrack) {
     return (
-      <Screen>
-        <View style={styles.emptyContainer}>
-          <Text variant="body" color={colors.text.muted} align="center">
-            No track loaded. Select a track from the library.
+      <DivineBackground variant="sacred" style={styles.root}>
+        <View style={styles.emptyWrap}>
+          <Text style={styles.emptyText}>
+            No track loaded. Choose one from the library to begin.
           </Text>
-          <Pressable onPress={() => router.back()} style={styles.backLink}>
-            <Text variant="label" color={colors.primary[300]}>
-              Go to Library
-            </Text>
+          <Pressable
+            onPress={() => router.back()}
+            style={styles.backLink}
+            accessibilityRole="button"
+            accessibilityLabel="Back to library"
+          >
+            <Text style={styles.backLinkText}>← Go to library</Text>
           </Pressable>
         </View>
-      </Screen>
+      </DivineBackground>
     );
   }
 
   return (
-    <Screen edges={['top']}>
-      <Animated.View entering={FadeIn.duration(600)} style={styles.container}>
+    <DivineBackground variant="sacred" style={styles.root}>
+      <View style={styles.container}>
         {/* Back button */}
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Text variant="label" color={colors.text.secondary}>
-            {'\u2190'} Back
-          </Text>
-        </Pressable>
+        <View style={styles.topBar}>
+          <Pressable
+            onPress={() => router.back()}
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            hitSlop={12}
+            style={styles.backBtn}
+          >
+            <Text style={styles.backBtnText}>←</Text>
+          </Pressable>
+        </View>
 
-        {/* Artwork placeholder */}
-        <View style={styles.artworkContainer}>
-          <View style={styles.artwork}>
-            <Text style={styles.mandalaIcon}>{'\u2638'}</Text>
-          </View>
+        {/* Sacred-geometry album art */}
+        <View style={[styles.artSection, { height: artSize + 24 }]}>
+          <SacredGeometryArt
+            category={category}
+            isPlaying={isPlaying}
+            size={artSize}
+          />
         </View>
 
         {/* Track info */}
-        <Text variant="h3" color={colors.text.primary} align="center">
-          {currentTrack.title}
-        </Text>
-        <Text variant="body" color={colors.text.secondary} align="center">
-          {currentTrack.artist}
-        </Text>
-
-        {/* Waveform visualizer */}
-        <View style={styles.waveformContainer}>
-          {Array.from({ length: BAR_COUNT }).map((_, i) => (
-            <WaveformBar key={i} index={i} isPlaying={isPlaying} />
-          ))}
+        <View style={styles.infoBlock}>
+          <Text style={styles.trackTitle} numberOfLines={2}>
+            {currentTrack.title}
+          </Text>
+          {/* The artist field often holds the Sanskrit name in the seed
+              content. Render it in Devanagari typography regardless so
+              the track header always reads as a sacred invocation. */}
+          {currentTrack.artist ? (
+            <Text style={styles.trackSanskrit} numberOfLines={1}>
+              {currentTrack.artist}
+            </Text>
+          ) : null}
+          {categoryDisplay ? (
+            <Text style={styles.trackCategory}>{categoryDisplay}</Text>
+          ) : null}
         </View>
 
         {/* Progress bar */}
         <View style={styles.progressSection}>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
-          </View>
-          <View style={styles.timeRow}>
-            <Text variant="caption" color={colors.text.muted}>
-              {formatTime(currentTime)}
-            </Text>
-            <Text variant="caption" color={colors.text.muted}>
-              {formatTime(totalTime)}
-            </Text>
-          </View>
+          <PlayerProgressBar
+            position={position}
+            duration={displayDuration}
+            onSeek={handleSeek}
+          />
         </View>
 
-        {/* Main controls */}
-        <View style={styles.controlsRow}>
-          <Pressable onPress={handlePrev} style={styles.controlButton} accessibilityLabel="Previous">
-            <Text style={styles.controlIcon}>{'\u23EE'}</Text>
-          </Pressable>
-          <Pressable onPress={handleTogglePlay} style={styles.playButton} accessibilityLabel={isPlaying ? 'Pause' : 'Play'}>
-            <Text style={styles.playIcon}>{isPlaying ? '\u23F8' : '\u25B6'}</Text>
-          </Pressable>
-          <Pressable onPress={handleNext} style={styles.controlButton} accessibilityLabel="Next">
-            <Text style={styles.controlIcon}>{'\u23ED'}</Text>
-          </Pressable>
+        {/* Controls */}
+        <View style={styles.controlsSection}>
+          <PlaybackControls
+            isPlaying={isPlaying}
+            repeatMode={repeatMode}
+            isBookmarked={isBookmarked}
+            onPrev={handlePrev}
+            onTogglePlay={handleTogglePlay}
+            onNext={handleNext}
+            onCycleRepeat={handleRepeatCycle}
+            onToggleBookmark={handleToggleBookmark}
+          />
         </View>
 
-        {/* Secondary controls */}
-        <View style={styles.secondaryRow}>
-          <Pressable onPress={handleRepeatCycle} style={styles.secondaryButton}>
-            <Text
-              variant="caption"
-              color={repeatMode !== 'off' ? colors.primary[500] : colors.text.muted}
-            >
-              Repeat {repeatLabel}
-            </Text>
-          </Pressable>
-
-          <Pressable onPress={handleShuffle} style={styles.secondaryButton}>
-            <Text
-              variant="caption"
-              color={isShuffled ? colors.primary[500] : colors.text.muted}
-            >
-              Shuffle
-            </Text>
-          </Pressable>
-
-          <View style={styles.secondaryButton}>
-            <Text variant="caption" color={colors.text.muted}>
-              Queue ({queue.length})
-            </Text>
-          </View>
+        {/* Shloka companion — expands while playing, collapses while paused */}
+        <View style={styles.companionWrap}>
+          <ShlokaCompanion
+            expanded={isPlaying}
+            sanskrit="ॐ नमो भगवते वासुदेवाय"
+            transliteration="oṁ namo bhagavate vāsudevāya"
+            meaning="Salutations to the Supreme Lord Vāsudeva — the one who dwells in all beings."
+            reference="Śrīmad-Bhāgavatam 1.1.1"
+          />
         </View>
-
-        {/* Volume */}
-        <View style={styles.volumeRow}>
-          <Text variant="caption" color={colors.text.muted}>
-            Vol
-          </Text>
-          <View style={styles.volumeTrack}>
-            <View style={[styles.volumeFill, { width: `${volume * 100}%` }]} />
-          </View>
-        </View>
-      </Animated.View>
-    </Screen>
+      </View>
+    </DivineBackground>
   );
 }
 
+function nextRepeatMode(current: RepeatMode): RepeatMode {
+  switch (current) {
+    case 'off':
+      return 'all';
+    case 'all':
+      return 'one';
+    case 'one':
+      return 'off';
+  }
+}
+
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.md,
-    gap: spacing.md,
-    backgroundColor: colors.background.dark,
+    paddingHorizontal: 20,
+    paddingTop: 52,
+    paddingBottom: 28,
+    gap: 14,
   },
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.md,
-  },
-  backButton: {
-    alignSelf: 'flex-start',
-    paddingVertical: spacing.xs,
-  },
-  backLink: {
-    paddingVertical: spacing.sm,
-  },
-  artworkContainer: {
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-  },
-  artwork: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    backgroundColor: colors.background.surface,
-    borderWidth: 2,
-    borderColor: colors.alpha.goldMedium,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mandalaIcon: {
-    fontSize: 64,
-    color: colors.primary[500],
-  },
-  waveformContainer: {
+  topBar: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    height: 48,
-    gap: 3,
+    alignItems: 'center',
   },
-  waveBar: {
-    width: 4,
-    backgroundColor: colors.primary[500],
-    borderRadius: 2,
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.3)',
+    backgroundColor: 'rgba(212,160,23,0.06)',
+  },
+  backBtnText: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 20,
+    color: GOLD,
+    // Optical centering.
+    marginTop: -2,
+  },
+  artSection: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoBlock: {
+    alignItems: 'center',
+    gap: 2,
+  },
+  trackTitle: {
+    fontFamily: 'CormorantGaramond-BoldItalic',
+    fontSize: 22,
+    color: SACRED_WHITE,
+    textAlign: 'center',
+    letterSpacing: 0.4,
+  },
+  trackSanskrit: {
+    fontFamily: 'NotoSansDevanagari-Regular',
+    fontSize: 14,
+    // 14 × 2.0 = 28
+    lineHeight: 28,
+    color: GOLD,
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  trackCategory: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 12,
+    color: TEXT_MUTED,
+    textAlign: 'center',
+    marginTop: 2,
+    letterSpacing: 0.6,
   },
   progressSection: {
-    gap: spacing.xxs,
+    marginTop: 6,
   },
-  progressTrack: {
-    height: 4,
-    backgroundColor: colors.alpha.whiteLight,
-    borderRadius: 2,
-    overflow: 'hidden',
+  controlsSection: {
+    marginTop: 4,
   },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.primary[500],
-    borderRadius: 2,
+  companionWrap: {
+    marginTop: 6,
   },
-  timeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  controlsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.xl,
-    paddingVertical: spacing.sm,
-  },
-  controlButton: {
-    width: 48,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  controlIcon: {
-    fontSize: 28,
-    color: colors.text.primary,
-  },
-  playButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: colors.primary[500],
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  playIcon: {
-    fontSize: 28,
-    color: colors.background.dark,
-  },
-  secondaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  secondaryButton: {
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-  },
-  volumeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-  },
-  volumeTrack: {
+  emptyWrap: {
     flex: 1,
-    height: 4,
-    backgroundColor: colors.alpha.whiteLight,
-    borderRadius: 2,
-    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    gap: 16,
   },
-  volumeFill: {
-    height: '100%',
-    backgroundColor: colors.primary[300],
-    borderRadius: 2,
+  emptyText: {
+    fontFamily: 'CrimsonText-Italic',
+    fontSize: 15,
+    color: TEXT_MUTED,
+    textAlign: 'center',
+  },
+  backLink: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  backLinkText: {
+    fontFamily: 'Outfit-SemiBold',
+    fontSize: 14,
+    color: GOLD,
+    letterSpacing: 0.3,
   },
 });
