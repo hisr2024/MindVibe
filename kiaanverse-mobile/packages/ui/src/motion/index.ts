@@ -1,6 +1,7 @@
 /**
  * Sacred Motion — unified public surface for all screen transitions,
- * pressable feedback, milestone pulses, and custom scroll chrome.
+ * pressable feedback, milestone pulses, custom scroll chrome, and
+ * continuous breath animations.
  *
  * Everything here mirrors the motion language used on kiaanverse.com/m/
  * (web styles/divine.css + Framer Motion configs). Components and screens
@@ -50,6 +51,19 @@ export {
   type UseGoldenPulseOptions,
   type UseGoldenPulseResult,
 } from './useGoldenPulse';
+
+export {
+  useVerseRevelation,
+  type UseVerseRevelationOptions,
+  type UseVerseRevelationResult,
+  type VerseRevelationTextProps,
+} from './useVerseRevelation';
+
+export {
+  useBreathingAura,
+  type UseBreathingAuraOptions,
+  type UseBreathingAuraResult,
+} from './useBreathingAura';
 
 export {
   SacredScrollView,

@@ -1,112 +1,120 @@
 /**
- * Daily Sadhana Screen — The main sacred practice flow.
+ * Nitya Sadhana — The Daily Sacred Practice.
  *
- * Guides the user through a multi-phase spiritual practice: greeting,
- * mood check, verse contemplation, reflection, intention, and completion.
- * Tracks streak and awards karma points upon finishing.
+ * Ceremony, not checklist. Six phases unfold one at a time in a full-
+ * screen immersive cycle:
+ *
+ *   I.   Arrival       Pranayama (BreathingOrb, 4-7-8, 3 cycles)
+ *   II.  Stillness     Dhyana (silent mandala, 60 s minimum sit)
+ *   III. Wisdom        Shravana (ShlokaCard + "Ask Sakha")
+ *   IV.  Reflection    Manana (SacredInput journal entry)
+ *   V.   Movement      Asana (Surya Namaskar, 3 min timer)
+ *   VI.  Gratitude     Kritajñata (mood + gratitude statement)
+ *
+ * Between phases, `PhaseCeremony` runs a 1.4 s lotus-bloom transition.
+ * When the final phase completes we fire CompletionCelebration with
+ * XP + streak numbers pulled from the existing sadhana API, then
+ * settle into a "completed" card that routes the user back.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-import { View, StyleSheet, TextInput, ScrollView } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import {
-  Screen,
-  Text,
-  GoldenButton,
-  GoldenHeader,
-  GoldenProgressBar,
-  colors,
-  spacing,
+  CompletionCelebration,
+  DivineBackground,
+  DivineButton,
 } from '@kiaanverse/ui';
 import {
+  useCompleteSadhana,
   useSadhanaDaily,
   useSadhanaStreak,
-  useCompleteSadhana,
-  useProfile,
 } from '@kiaanverse/api';
-import { SadhanaPhaseFlow } from '../../components/sadhana/SadhanaPhaseFlow';
-import { StreakFlame } from '../../components/sadhana/StreakFlame';
 
-export type SadhanaPhase =
-  | 'greeting'
-  | 'mood_check'
-  | 'verse_contemplation'
+import { LotusProgressHeader } from '../../components/sadhana/LotusProgressHeader';
+import { PhaseCeremony } from '../../components/sadhana/PhaseCeremony';
+import {
+  ArrivalPhase,
+  GratitudePhase,
+  MovementPhase,
+  ReflectionPhase,
+  StillnessPhase,
+  WisdomPhase,
+} from '../../components/sadhana/phases';
+
+const SACRED_WHITE = '#F5F0E8';
+const GOLD = '#D4A017';
+const TEXT_MUTED = 'rgba(240,235,225,0.6)';
+
+type PhaseKey =
+  | 'arrival'
+  | 'stillness'
+  | 'wisdom'
   | 'reflection'
-  | 'intention'
-  | 'complete';
+  | 'movement'
+  | 'gratitude';
 
-const PHASE_ORDER: SadhanaPhase[] = [
-  'greeting',
-  'mood_check',
-  'verse_contemplation',
+const PHASE_ORDER: ReadonlyArray<PhaseKey> = [
+  'arrival',
+  'stillness',
+  'wisdom',
   'reflection',
-  'intention',
-  'complete',
+  'movement',
+  'gratitude',
 ];
 
-const MOOD_OPTIONS = [
-  { emoji: '😔', label: 'Heavy', score: 1 },
-  { emoji: '😕', label: 'Unsettled', score: 2 },
-  { emoji: '😐', label: 'Neutral', score: 3 },
-  { emoji: '🙂', label: 'Peaceful', score: 4 },
-  { emoji: '😊', label: 'Blissful', score: 5 },
-] as const;
-
-export default function SadhanaScreen(): React.JSX.Element {
+export default function NityaSadhanaScreen(): React.JSX.Element {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { data: profile } = useProfile();
+
   const { data: dailyData } = useSadhanaDaily();
   const { data: streakData } = useSadhanaStreak();
   const completeSadhana = useCompleteSadhana();
 
-  const [phase, setPhase] = useState<SadhanaPhase>('greeting');
-  const [selectedMood, setSelectedMood] = useState<number | null>(null);
+  const [phase, setPhase] = useState<PhaseKey>('arrival');
+  const [completed, setCompleted] = useState<Set<PhaseKey>>(() => new Set());
   const [reflection, setReflection] = useState('');
-  const [intention, setIntention] = useState('');
+  const [mood, setMood] = useState<number | null>(null);
+  const [gratitude, setGratitude] = useState('');
+  const [ceremonyDone, setCeremonyDone] = useState(false);
+
+  const phaseIndex = PHASE_ORDER.indexOf(phase);
+  const completedIndices = useMemo(
+    () => {
+      const indices = new Set<number>();
+      for (const k of completed) {
+        indices.add(PHASE_ORDER.indexOf(k));
+      }
+      return indices;
+    },
+    [completed],
+  );
 
   const streak = streakData?.current ?? 0;
-  const userName = profile?.name ?? 'Seeker';
 
-  const todayFormatted = useMemo(() => {
-    return new Date().toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
+  const advance = useCallback((from: PhaseKey) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setCompleted((prev) => {
+      const next = new Set(prev);
+      next.add(from);
+      return next;
     });
+    const idx = PHASE_ORDER.indexOf(from);
+    const nextPhase = PHASE_ORDER[idx + 1];
+    if (nextPhase) setPhase(nextPhase);
   }, []);
 
-  const phaseIndex = useMemo(
-    () => PHASE_ORDER.indexOf(phase),
-    [phase],
-  );
-
-  const progress = useMemo(
-    () => (phaseIndex + 1) / PHASE_ORDER.length,
-    [phaseIndex],
-  );
-
-  const handleNextPhase = useCallback(() => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const nextIndex = phaseIndex + 1;
-    const nextPhase = PHASE_ORDER[nextIndex];
-    if (nextPhase !== undefined) {
-      setPhase(nextPhase);
-    }
-  }, [phaseIndex]);
-
-  const handleMoodSelect = useCallback(
-    (score: number) => {
-      void Haptics.selectionAsync();
-      setSelectedMood(score);
-    },
-    [],
-  );
-
-  const handleComplete = useCallback(async () => {
+  const handleFinalComplete = useCallback(async () => {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
     try {
       const payload: {
         verse_id?: string;
@@ -114,131 +122,256 @@ export default function SadhanaScreen(): React.JSX.Element {
         intention?: string;
         mood_score?: number;
       } = {};
-      if (dailyData?.verse_id !== undefined) payload.verse_id = dailyData.verse_id;
       const reflectionTrimmed = reflection.trim();
+      const gratitudeTrimmed = gratitude.trim();
+      if (dailyData?.verse_id) payload.verse_id = dailyData.verse_id;
       if (reflectionTrimmed) payload.reflection = reflectionTrimmed;
-      const intentionTrimmed = intention.trim();
-      if (intentionTrimmed) payload.intention = intentionTrimmed;
-      if (selectedMood !== null) payload.mood_score = selectedMood;
+      if (gratitudeTrimmed) payload.intention = gratitudeTrimmed;
+      if (mood !== null) payload.mood_score = mood;
       await completeSadhana.mutateAsync(payload);
     } catch {
-      // Allow completion even if server call fails — data will sync later
+      // Allow the ceremony to close even if the network request fails —
+      // the user's offline record is preserved client-side and will
+      // sync on the next queued attempt.
     }
+    // Fire the ceremonial finale: heavy haptic + petals fill.
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    setCompleted((prev) => {
+      const next = new Set(prev);
+      next.add('gratitude');
+      return next;
+    });
+    setCeremonyDone(true);
+  }, [completeSadhana, dailyData, gratitude, mood, reflection]);
 
-    setPhase('complete');
-  }, [completeSadhana, dailyData, reflection, intention, selectedMood]);
+  const renderPhase = useCallback(() => {
+    switch (phase) {
+      case 'arrival':
+        return <ArrivalPhase onComplete={() => advance('arrival')} />;
+      case 'stillness':
+        return <StillnessPhase onComplete={() => advance('stillness')} />;
+      case 'wisdom':
+        return <WisdomPhase onComplete={() => advance('wisdom')} />;
+      case 'reflection':
+        return (
+          <ReflectionPhase
+            value={reflection}
+            onChange={setReflection}
+            onComplete={() => advance('reflection')}
+          />
+        );
+      case 'movement':
+        return <MovementPhase onComplete={() => advance('movement')} />;
+      case 'gratitude':
+        return (
+          <GratitudePhase
+            mood={mood}
+            onChangeMood={setMood}
+            gratitude={gratitude}
+            onChangeGratitude={setGratitude}
+            onComplete={handleFinalComplete}
+            isCompleting={completeSadhana.isPending}
+          />
+        );
+    }
+  }, [
+    phase,
+    reflection,
+    mood,
+    gratitude,
+    advance,
+    handleFinalComplete,
+    completeSadhana.isPending,
+  ]);
 
-  const handleReturn = useCallback(() => {
-    router.back();
-  }, [router]);
-
-  const handleViewHistory = useCallback(() => {
-    router.push('/sadhana/history');
-  }, [router]);
-
-  // If sadhana already completed today, show completion state
-  const alreadyCompleted = dailyData?.completed === true;
-
-  const streakDisplay = (
-    <View style={styles.streakRow}>
-      <StreakFlame streak={streak} size={32} />
-      <Text variant="caption" color={colors.text.secondary}>
-        {todayFormatted}
-      </Text>
-    </View>
-  );
-
-  const rightAction = (
-    <Text
-      variant="caption"
-      color={colors.primary[500]}
-      onPress={handleViewHistory}
-    >
-      History
-    </Text>
-  );
+  // ---------------------------------------------------------------------------
+  // Completion view
+  // ---------------------------------------------------------------------------
+  if (ceremonyDone) {
+    return (
+      <DivineBackground variant="sacred" style={styles.root}>
+        <CompletionCelebration
+          visible
+          xp={54}
+          karmaPoints={21}
+          message={
+            streak > 0
+              ? `Nitya Sadhana complete. Streak: ${streak + 1} days.`
+              : 'Nitya Sadhana complete. Your streak begins today.'
+          }
+          duration={4800}
+        />
+        <View
+          style={[styles.completedBlock, { paddingTop: insets.top + 40 }]}
+        >
+          <Text style={styles.om} allowFontScaling={false}>
+            ॐ
+          </Text>
+          <Text style={styles.completedTitle}>The Sadhana Is Sealed</Text>
+          <Text style={styles.completedSanskrit}>कार्य सिद्धम्</Text>
+          <Text style={styles.completedBody}>
+            Every phase has been offered. Return tomorrow to begin again.
+          </Text>
+          <View style={styles.completedCta}>
+            <DivineButton
+              title="Return to Home"
+              variant="primary"
+              onPress={() => router.replace('/(tabs)')}
+            />
+          </View>
+        </View>
+      </DivineBackground>
+    );
+  }
 
   return (
-    <Screen>
-      <GoldenHeader
-        title="Daily Sadhana"
-        onBack={() => router.back()}
-        rightAction={rightAction}
-      />
-
-      {/* Progress bar */}
-      <View style={styles.progressContainer}>
-        <GoldenProgressBar progress={progress} />
+    <DivineBackground variant="sacred" style={styles.root}>
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+        <Pressable
+          onPress={() => router.back()}
+          style={styles.backBtn}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+          hitSlop={12}
+        >
+          <Text style={styles.backBtnText}>←</Text>
+        </Pressable>
+        <View style={styles.titleCol}>
+          <Text style={styles.sectionTag} allowFontScaling={false}>
+            NITYA SADHANA
+          </Text>
+          <Text style={styles.title}>Daily Sacred Practice</Text>
+        </View>
+        <View style={styles.streakPill}>
+          <Text style={styles.streakFlame}>🔥</Text>
+          <Text style={styles.streakCount}>{streak}</Text>
+        </View>
       </View>
 
-      {streakDisplay}
+      <LotusProgressHeader
+        total={PHASE_ORDER.length}
+        current={phaseIndex}
+        completed={completedIndices}
+      />
 
-      <ScrollView
-        style={styles.flex}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        style={styles.body}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
-        {alreadyCompleted && phase !== 'complete' ? (
-          <Animated.View entering={FadeIn.duration(500)} style={styles.completedBanner}>
-            <Text variant="h2" align="center">{'✅'}</Text>
-            <Text variant="body" color={colors.text.primary} align="center">
-              Your Sadhana for today is already complete.
-            </Text>
-            <Text variant="caption" color={colors.text.muted} align="center">
-              Come back tomorrow for your next practice.
-            </Text>
-            <GoldenButton
-              title="View History"
-              onPress={handleViewHistory}
-              variant="divine"
-            />
-          </Animated.View>
-        ) : (
-          <SadhanaPhaseFlow
-            phase={phase}
-            userName={userName}
-            moodOptions={MOOD_OPTIONS}
-            selectedMood={selectedMood}
-            onMoodSelect={handleMoodSelect}
-            verseData={dailyData}
-            reflection={reflection}
-            onReflectionChange={setReflection}
-            intention={intention}
-            onIntentionChange={setIntention}
-            onNextPhase={handleNextPhase}
-            onComplete={handleComplete}
-            onReturn={handleReturn}
-            isCompleting={completeSadhana.isPending}
-            streak={streak}
-          />
-        )}
-      </ScrollView>
-    </Screen>
+        <PhaseCeremony phaseKey={phase}>{renderPhase()}</PhaseCeremony>
+      </KeyboardAvoidingView>
+    </DivineBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  progressContainer: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xs,
+  root: {
+    flex: 1,
   },
-  streakRow: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
+    paddingHorizontal: 16,
+    paddingBottom: 6,
+    gap: 12,
   },
-  scrollContent: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.bottomInset,
-    gap: spacing.lg,
-  },
-  completedBanner: {
-    gap: spacing.md,
-    paddingVertical: spacing.xxl,
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.35)',
+    backgroundColor: 'rgba(17,20,53,0.7)',
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backBtnText: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 20,
+    color: GOLD,
+    marginTop: -2,
+  },
+  titleCol: {
+    flex: 1,
+    gap: 2,
+  },
+  sectionTag: {
+    fontFamily: 'Outfit-SemiBold',
+    fontSize: 10,
+    color: TEXT_MUTED,
+    letterSpacing: 1.8,
+  },
+  title: {
+    fontFamily: 'CormorantGaramond-BoldItalic',
+    fontSize: 20,
+    color: SACRED_WHITE,
+    letterSpacing: 0.3,
+  },
+  streakPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.35)',
+    backgroundColor: 'rgba(212,160,23,0.1)',
+  },
+  streakFlame: {
+    fontSize: 14,
+  },
+  streakCount: {
+    fontFamily: 'Outfit-SemiBold',
+    fontSize: 13,
+    color: GOLD,
+  },
+  body: {
+    flex: 1,
+  },
+  completedBlock: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    gap: 10,
+  },
+  om: {
+    fontFamily: 'NotoSansDevanagari-Regular',
+    fontSize: 80,
+    lineHeight: 90,
+    color: GOLD,
+    textShadowColor: 'rgba(212,160,23,0.45)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 24,
+    marginBottom: 12,
+  },
+  completedTitle: {
+    fontFamily: 'CormorantGaramond-BoldItalic',
+    fontSize: 28,
+    color: SACRED_WHITE,
+    textAlign: 'center',
+    letterSpacing: 0.4,
+  },
+  completedSanskrit: {
+    fontFamily: 'NotoSansDevanagari-Regular',
+    fontSize: 28,
+    lineHeight: 44,
+    color: GOLD,
+    textAlign: 'center',
+  },
+  completedBody: {
+    fontFamily: 'CrimsonText-Italic',
+    fontSize: 15,
+    color: TEXT_MUTED,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginTop: 6,
+    maxWidth: 300,
+  },
+  completedCta: {
+    alignSelf: 'stretch',
+    marginTop: 'auto',
+    marginBottom: 40,
   },
 });
