@@ -490,6 +490,121 @@ function DailyVerseCard(): React.JSX.Element {
   );
 }
 
+// ── ZONE 4: Tools Quick Rail ──────────────────────────────────────────────
+/** Five sacred instruments + catalog exit. `as const` freezes the tuple so
+ *  TypeScript narrows `tool.route` to a valid expo-router string literal. */
+const QUICK_TOOLS = [
+  {
+    id: 'emotional-reset',
+    name: 'Emotional Reset',
+    skt: 'भावनात्मक',
+    icon: '🔥',
+    color: '#EF4444',
+    route: '/tools/emotional-reset',
+  },
+  {
+    id: 'ardha',
+    name: 'Ardha',
+    skt: 'अर्थ',
+    icon: '💡',
+    color: '#F59E0B',
+    route: '/tools/ardha',
+  },
+  {
+    id: 'karma-reset',
+    name: 'Karma Reset',
+    skt: 'कर्म',
+    icon: '☸',
+    color: '#8B5CF6',
+    route: '/tools/karma-reset',
+  },
+  {
+    id: 'viyoga',
+    name: 'Viyoga',
+    skt: 'वियोग',
+    icon: '🌊',
+    color: '#0E7490',
+    route: '/tools/viyoga',
+  },
+  {
+    id: 'all',
+    name: 'All Tools',
+    skt: 'सर्व',
+    icon: '✦',
+    color: GOLD,
+    route: '/tools',
+  },
+] as const;
+
+function ToolsRail(): React.JSX.Element {
+  // Zone 4 entrance — 360ms stagger after Zone 1.
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(12);
+
+  React.useEffect(() => {
+    opacity.value = withDelay(
+      ZONE_DELAY.tools,
+      withTiming(1, { duration: 400, easing: easeDivineIn }),
+    );
+    translateY.value = withDelay(
+      ZONE_DELAY.tools,
+      withTiming(0, { duration: 400, easing: easeDivineIn }),
+    );
+  }, [opacity, translateY]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  const openTool = (route: string): void => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+      () => undefined,
+    );
+    // expo-router typed-routes treat string literals as unions of known
+    // paths; `as never` satisfies that contract without loosening to `any`.
+    router.push(route as never);
+  };
+
+  return (
+    <Reanimated.View style={[s.railSection, animStyle]}>
+      <Text style={s.railHeader}>Sacred Tools</Text>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={s.railScroll}
+      >
+        {QUICK_TOOLS.map((tool) => (
+          <TouchableOpacity
+            key={tool.id}
+            style={s.toolChip}
+            onPress={() => openTool(tool.route)}
+            activeOpacity={0.75}
+            accessibilityRole="button"
+            accessibilityLabel={`${tool.name} tool`}
+          >
+            {/* Left color accent — 3px vertical semantic stripe */}
+            <View
+              style={[s.toolChipAccent, { backgroundColor: tool.color }]}
+            />
+
+            <View style={s.toolChipContent}>
+              <Text style={s.toolChipIcon}>{tool.icon}</Text>
+              <View>
+                <Text style={s.toolChipName}>{tool.name}</Text>
+                <Text style={[s.toolChipSkt, { color: tool.color }]}>
+                  {tool.skt}
+                </Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </Reanimated.View>
+  );
+}
+
 // ── MAIN SCREEN ───────────────────────────────────────────────────────────
 export default function HomeScreen(): React.JSX.Element {
   const scrollRef = useRef<ScrollView>(null);
@@ -513,8 +628,8 @@ export default function HomeScreen(): React.JSX.Element {
         {/* ZONE 3 — Daily Verse Card */}
         <DailyVerseCard />
 
-        {/* ZONE 4 — Tools Quick Rail (Part 3.4) */}
-        {/* TODO: <ToolsRail /> */}
+        {/* ZONE 4 — Tools Quick Rail */}
+        <ToolsRail />
 
         {/* ZONE 5 — Sadhana Streak (Part 3.5) */}
         {/* TODO: <SadhanaStreakCard /> */}
@@ -753,6 +868,58 @@ const s = StyleSheet.create({
   verseLoader: {
     paddingVertical: 24,
     alignItems: 'center',
+  },
+
+  // Zone 4 — Tools Quick Rail
+  railSection: {
+    marginBottom: 16,
+  },
+  railHeader: {
+    fontFamily: 'Outfit-SemiBold',
+    fontSize: 11,
+    color: MUTED,
+    // 0.15em at 11px ≈ 1.65pt
+    letterSpacing: 1.65,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+  },
+  railScroll: {
+    paddingRight: 16,
+    gap: 8,
+  },
+  toolChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(22,26,66,0.9)',
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.12)',
+    borderRadius: 20,
+    overflow: 'hidden',
+    height: 52,
+  },
+  toolChipAccent: {
+    width: 3,
+    height: '100%',
+  },
+  toolChipContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+  },
+  toolChipIcon: {
+    fontSize: 18,
+  },
+  toolChipName: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 12,
+    color: WHITE,
+  },
+  toolChipSkt: {
+    fontFamily: 'NotoSansDevanagari-Regular',
+    fontSize: 10,
+    // 2.0x line-height for Devanagari matra clearance.
+    lineHeight: 20,
   },
 
   // Scroll
