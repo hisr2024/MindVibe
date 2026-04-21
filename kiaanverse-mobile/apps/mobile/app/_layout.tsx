@@ -47,9 +47,19 @@ import { NotificationToast } from '../components/common/NotificationToast';
 import { ErrorBoundary } from '../components/common/ErrorBoundary';
 import { ToastContainer } from '../components/common/Toast';
 import { initErrorTracking } from '../services/errorTracking';
+import {
+  registerPlaybackService,
+  setupTrackPlayer,
+} from '../services/trackPlayerSetup';
 
 // Register background tasks at module level (required by expo-task-manager)
 import '../services/backgroundTasks';
+
+// Register the TrackPlayer headless JS service at module load. MUST run before
+// any React tree mounts, otherwise lock-screen / Bluetooth / headphone remote
+// events have no handler when the UI tree tears down (the exact moment the
+// user needs them).
+registerPlaybackService();
 
 // Initialize error tracking before any providers mount
 initErrorTracking();
@@ -205,6 +215,15 @@ function AppContent(): React.JSX.Element {
         await hydrateSubscription();
       } catch (err) {
         if (__DEV__) console.warn('[setup] hydrateSubscription failed:', err);
+      }
+      try {
+        // Allocate the native audio session up front so the first tap on a
+        // Vibe Player track starts immediately. setupTrackPlayer() is
+        // idempotent and swallows its own errors, so a failure here cannot
+        // block auth bootstrap.
+        await setupTrackPlayer();
+      } catch (err) {
+        if (__DEV__) console.warn('[setup] setupTrackPlayer failed:', err);
       }
     };
     void setup();
