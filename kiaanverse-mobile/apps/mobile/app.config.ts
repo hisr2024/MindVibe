@@ -11,7 +11,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Kiaanverse',
   slug: 'kiaanverse',
-  version: '1.1.0',
+  version: '1.2.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
   scheme: 'kiaanverse',
@@ -60,7 +60,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 
   android: {
     package: 'com.kiaanverse.app',
-    versionCode: 18,
+    versionCode: 19,
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#050507',
