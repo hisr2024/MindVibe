@@ -45,13 +45,19 @@ import {
   Screen,
   GoldenDivider,
   OmLoader,
+  SacredProgressRing,
   VerseRevelation,
-  // The following are consumed by zones 4–6 (wired in Parts 3.4–3.6):
-  // SacredCard, GlowCard, ShlokaCard, SacredProgressRing, DivineButton,
+  // The following are consumed by zone 6 (wired in Part 3.6):
+  // GlowCard,
 } from '@kiaanverse/ui';
 
 // @kiaanverse/store
-import { useAuthStore, useGitaStore } from '@kiaanverse/store';
+import {
+  useAuthStore,
+  useGitaStore,
+  useSadhanaStore,
+  type SadhanaPhase,
+} from '@kiaanverse/store';
 
 // @kiaanverse/api — streak comes from the API (SadhanaStreak.current), not from
 // the Zustand sadhanaStore (which only holds the in-flight ritual phase). The
@@ -63,6 +69,8 @@ const GOLD = '#D4A017';
 const GOLD_SHIMMER = 'rgba(245, 226, 122, 0.35)';
 /** Gold at ~50% alpha — used for the Sanskrit sub-greeting. */
 const GOLD_MUTED = '#D4A01780';
+/** Gold at ~44% alpha — used for the sadhana Sanskrit caption. */
+const GOLD_DIM = '#D4A01770';
 const COSMIC = '#050714';
 const INDIGO = '#161A42';
 const WHITE = '#F0EBE1';
@@ -605,6 +613,135 @@ function ToolsRail(): React.JSX.Element {
   );
 }
 
+// ── ZONE 5: Sadhana Streak Card ───────────────────────────────────────────
+/**
+ * Sadhana phase order — mirrors the phaseOrder constant in sadhanaStore.
+ * Kept here because the store does not export it; the home card needs it
+ * to compute "N of 6" completion from the single current-phase string.
+ */
+const SADHANA_PHASE_ORDER: readonly SadhanaPhase[] = [
+  'greeting',
+  'mood_check',
+  'verse_contemplation',
+  'reflection',
+  'intention',
+  'complete',
+] as const;
+
+function SadhanaStreakCard(): React.JSX.Element {
+  // Streak comes from the API (SadhanaStreak.current), not the Zustand
+  // sadhanaStore — that store only tracks the in-flight ritual phase.
+  const { data: streakData } = useSadhanaStreak();
+  const streak = streakData?.current ?? 0;
+
+  const currentPhase = useSadhanaStore((st) => st.phase);
+  const currentIdx = SADHANA_PHASE_ORDER.indexOf(currentPhase);
+  const completedPhases = currentIdx < 0 ? 0 : currentIdx + 1;
+  const totalPhases = SADHANA_PHASE_ORDER.length;
+  const progress = completedPhases / totalPhases;
+
+  // Zone 5 entrance — 480ms stagger after Zone 1.
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(12);
+
+  React.useEffect(() => {
+    opacity.value = withDelay(
+      ZONE_DELAY.sadhana,
+      withTiming(1, { duration: 400, easing: easeDivineIn }),
+    );
+    translateY.value = withDelay(
+      ZONE_DELAY.sadhana,
+      withTiming(0, { duration: 400, easing: easeDivineIn }),
+    );
+  }, [opacity, translateY]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  // Flame flicker — infinite scale pulse on the UI thread.
+  const flamePulse = useSharedValue(1);
+  React.useEffect(() => {
+    flamePulse.value = withRepeat(
+      withSequence(
+        withTiming(1.15, {
+          duration: 600,
+          easing: Easing.bezier(0.45, 0.05, 0.55, 0.95),
+        }),
+        withTiming(1.0, {
+          duration: 600,
+          easing: Easing.bezier(0.45, 0.05, 0.55, 0.95),
+        }),
+      ),
+      -1,
+      false,
+    );
+  }, [flamePulse]);
+  const flameStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: flamePulse.value }],
+  }));
+
+  const continueSadhana = (): void => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+      () => undefined,
+    );
+    router.push('/sadhana' as never);
+  };
+
+  return (
+    <Reanimated.View style={[s.streakCardWrapper, animStyle]}>
+      {/* Gold top shimmer edge */}
+      <LinearGradient
+        colors={[
+          'transparent',
+          'rgba(212,160,23,0.4)',
+          'rgba(240,192,64,0.8)',
+          'rgba(212,160,23,0.4)',
+          'transparent',
+        ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={s.streakCardTopBar}
+      />
+
+      <View style={s.streakCardRow}>
+        {/* Left: flame + streak number + caption */}
+        <View style={s.streakLeft}>
+          <Reanimated.View style={flameStyle}>
+            <Text style={s.streakFlame}>🔥</Text>
+          </Reanimated.View>
+          <Text style={s.streakNumber}>{streak}</Text>
+          <Text style={s.streakLabel}>{'Days of Sacred\nPractice'}</Text>
+          <Text style={s.streakSkt}>नित्य साधना</Text>
+        </View>
+
+        {/* Vertical gold divider */}
+        <View style={s.streakDivider} />
+
+        {/* Right: progress ring + continue button */}
+        <View style={s.streakRight}>
+          <SacredProgressRing
+            progress={progress}
+            size={88}
+            label={`${completedPhases}/${totalPhases}`}
+            caption="Phases"
+          />
+          <TouchableOpacity
+            style={s.sadhanaBtn}
+            onPress={continueSadhana}
+            activeOpacity={0.75}
+            accessibilityRole="button"
+            accessibilityLabel="Continue sadhana"
+          >
+            <Text style={s.sadhanaBtnText}>Continue →</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Reanimated.View>
+  );
+}
+
 // ── MAIN SCREEN ───────────────────────────────────────────────────────────
 export default function HomeScreen(): React.JSX.Element {
   const scrollRef = useRef<ScrollView>(null);
@@ -631,8 +768,8 @@ export default function HomeScreen(): React.JSX.Element {
         {/* ZONE 4 — Tools Quick Rail */}
         <ToolsRail />
 
-        {/* ZONE 5 — Sadhana Streak (Part 3.5) */}
-        {/* TODO: <SadhanaStreakCard /> */}
+        {/* ZONE 5 — Sadhana Streak */}
+        <SadhanaStreakCard />
 
         {/* ZONE 6 — KIAAN Vibe Banner (Part 3.6) */}
         {/* TODO: <KiaanVibeBanner /> */}
@@ -920,6 +1057,75 @@ const s = StyleSheet.create({
     fontSize: 10,
     // 2.0x line-height for Devanagari matra clearance.
     lineHeight: 20,
+  },
+
+  // Zone 5 — Sadhana Streak Card
+  streakCardWrapper: {
+    marginBottom: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(22,26,66,0.95)',
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.12)',
+  },
+  streakCardTopBar: {
+    height: 2,
+  },
+  streakCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    gap: 16,
+  },
+  streakLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  streakFlame: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  streakNumber: {
+    fontFamily: 'CormorantGaramond-BoldItalic',
+    fontSize: 52,
+    color: GOLD,
+    lineHeight: 56,
+  },
+  streakLabel: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 11,
+    color: MUTED,
+    lineHeight: 16,
+    marginTop: 2,
+  },
+  streakSkt: {
+    fontFamily: 'NotoSansDevanagari-Regular',
+    fontSize: 11,
+    color: GOLD_DIM,
+    // 2.0x line-height for Devanagari matra clearance.
+    lineHeight: 22,
+    marginTop: 2,
+  },
+  streakDivider: {
+    width: 1,
+    height: 80,
+    backgroundColor: 'rgba(212,160,23,0.15)',
+  },
+  streakRight: {
+    alignItems: 'center',
+    gap: 10,
+  },
+  sadhanaBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.3)',
+  },
+  sadhanaBtnText: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 12,
+    color: GOLD,
   },
 
   // Scroll
