@@ -20,7 +20,24 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import * as SecureStore from 'expo-secure-store';
 import { API_CONFIG } from '@kiaanverse/api';
+
+/**
+ * SecureStore key under which the authStore persists the access JWT.
+ * Duplicated here (rather than imported) because the chat components belong
+ * to the mobile app, which should not depend on the store package for a
+ * single constant. If the key ever changes in authStore.ts, update here too.
+ */
+const ACCESS_TOKEN_STORAGE_KEY = 'kiaanverse_access_token';
+
+async function readAccessTokenFromSecureStore(): Promise<string | null> {
+  try {
+    return await SecureStore.getItemAsync(ACCESS_TOKEN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
 
 /** Message record kept in component state. */
 export interface SakhaStreamMessage {
@@ -77,9 +94,18 @@ function createMessageId(prefix: 'user' | 'assistant'): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/** Compassionate error message used when the SSE pipe breaks. */
+/**
+ * Compassionate error copy used when the SSE pipe breaks. We differentiate
+ * by transport failure mode so the user can take the right next step (sign
+ * in, retry after cold-start, check network) instead of every failure
+ * looking like a generic "please try again".
+ */
 const CONNECTION_ERROR_TEXT =
   'My connection to the cosmic network wavered. Please ask again.';
+const AUTH_ERROR_TEXT =
+  'Your session has expired. Please sign in again to continue our dialogue.';
+const COLD_START_TEXT =
+  'I am waking from deep meditation (server cold start). Please ask again in a moment.';
 
 export function useSakhaStream(
   options: UseSakhaStreamOptions = {},
@@ -152,15 +178,31 @@ export function useSakhaStream(
       setMessages((prev) => [...prev, userMsg, assistantMsg]);
       setStreaming(true);
 
-      // 3. Resolve bearer token, if any.
+      // 3. Resolve bearer token. Prefer the caller-supplied getter (tests,
+      // custom flows) and otherwise fall back to the access token the
+      // authStore persisted to SecureStore. Without this fallback the SSE
+      // request went out unauthenticated — the backend rejected it with 401
+      // and the UI showed the "connection wavered" error even though the
+      // network and backend were both healthy.
       let token: string | null = null;
-      if (getAccessToken) {
-        try {
+      try {
+        if (getAccessToken) {
           const resolved = await getAccessToken();
           token = resolved ?? null;
-        } catch {
-          token = null;
+        } else {
+          token = await readAccessTokenFromSecureStore();
         }
+      } catch {
+        token = null;
+      }
+
+      if (typeof __DEV__ !== 'undefined' && __DEV__) {
+        // eslint-disable-next-line no-console
+        console.log(
+          `[SakhaStream] POST ${baseUrl ?? API_CONFIG.baseURL}/api/chat/message/stream  auth=${
+            token ? 'Bearer ***' : 'NONE'
+          }`,
+        );
       }
 
       // 4. Open the streaming XHR.
@@ -188,7 +230,13 @@ export function useSakhaStream(
         streamCompleteCallbackRef.current?.();
       };
 
-      const finishStreamingFailure = (): void => {
+      const finishStreamingFailure = (reason: 'network' | 'auth' | 'server' | 'cold_start'): void => {
+        const errorText =
+          reason === 'auth'
+            ? AUTH_ERROR_TEXT
+            : reason === 'cold_start'
+              ? COLD_START_TEXT
+              : CONNECTION_ERROR_TEXT;
         const id = assistantIdRef.current;
         if (id) {
           setMessages((prev) =>
@@ -196,14 +244,20 @@ export function useSakhaStream(
               m.id === id
                 ? {
                     ...m,
-                    text: m.text.length > 0 ? m.text : CONNECTION_ERROR_TEXT,
+                    text: m.text.length > 0 ? m.text : errorText,
                     isStreaming: false,
                   }
                 : m,
             ),
           );
         }
-        setError(CONNECTION_ERROR_TEXT);
+        if (typeof __DEV__ !== 'undefined' && __DEV__) {
+          // eslint-disable-next-line no-console
+          console.error(
+            `[SakhaStream] failed (${reason}) status=${xhr.status} response=${xhr.responseText?.slice(0, 200) ?? ''}`,
+          );
+        }
+        setError(errorText);
         setStreaming(false);
         xhrRef.current = null;
       };
@@ -212,7 +266,16 @@ export function useSakhaStream(
         // 3 = LOADING (incremental responseText is available).
         if (xhr.readyState !== 3 && xhr.readyState !== 4) return;
         if (xhr.readyState === 4 && xhr.status >= 400) {
-          finishStreamingFailure();
+          // Translate the HTTP status into the most useful recovery hint:
+          //   401 → sign in again; 502/503/504 → cold-start retry; else → generic.
+          const status = xhr.status;
+          if (status === 401 || status === 403) {
+            finishStreamingFailure('auth');
+          } else if (status === 502 || status === 503 || status === 504) {
+            finishStreamingFailure('cold_start');
+          } else {
+            finishStreamingFailure('server');
+          }
           return;
         }
 
@@ -259,8 +322,8 @@ export function useSakhaStream(
         }
       };
 
-      xhr.onerror = () => finishStreamingFailure();
-      xhr.ontimeout = () => finishStreamingFailure();
+      xhr.onerror = () => finishStreamingFailure('network');
+      xhr.ontimeout = () => finishStreamingFailure('cold_start');
       xhr.onabort = () => {
         // Aborts set isStreaming false silently — no error toast.
         setMessages((prev) =>
@@ -279,7 +342,7 @@ export function useSakhaStream(
           }),
         );
       } catch {
-        finishStreamingFailure();
+        finishStreamingFailure('network');
       }
     },
     [appendAssistantText, baseUrl, getAccessToken, sessionId, streaming],
