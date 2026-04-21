@@ -1,58 +1,625 @@
 /**
- * Home Tab — daily spiritual practice entry point.
+ * Home Tab — The Sacred Court
  *
- * Composed from @kiaanverse/ui primitives and real state sources:
- *  - useGitaStore              → verse-of-the-day reference (persisted, 24 h)
- *  - useGitaVerse(chapter,v)   → verse content (offline-first TanStack cache)
- *  - useSadhanaStreak          → current streak count (API)
- *  - useSadhanaStore           → today's phase in the 6-step sadhana flow
- *  - useMoodStore              → whether today's mood was already logged
+ * Six-zone cinematic home screen composed on top of the Divine design system.
+ * Every element is alive — the OM breathes, the avatar aura pulses, the verse
+ * reveals word by word, the streak flame flickers — but all animation runs on
+ * the UI thread via Reanimated worklets so the JS thread stays free for user
+ * interaction.
  *
- * Sections:
- *  1. GoldenHeader — time-of-day greeting (Brahma / Pratah / Madhyanha / Sandhya / Ratri)
- *  2. Daily Shloka card (OmLoader while loading)
- *  3. Streak ring + lotus bloom of sadhana progress
- *  4. Horizontal tool chips
- *  5. KIAAN Vibe Player mini-banner
+ *   ZONE 1  Divine Header (this file)        ┐
+ *   ZONE 2  Time-based Greeting Hero         │  staggered entrance
+ *   ZONE 3  Daily Verse Card                 │  120ms between each
+ *   ZONE 4  Tools Quick Rail                 │  zone, lotus-bloom
+ *   ZONE 5  Sadhana Streak + Progress Ring   │  easing, NATURAL
+ *   ZONE 6  KIAAN Vibe Mini Banner           ┘  duration (320ms)
+ *
+ * Particle field + aurora are rendered by DivineScreenWrapper at the
+ * navigator level — every zone floats over the cosmic void.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useRef } from 'react';
 import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
   View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import Reanimated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
 
+// @kiaanverse/ui — read packages/ui/src/index.ts first, use only what exists.
 import {
-  Screen,
-  SacredCard,
-  GlowCard,
+  DivineScreenWrapper,
   GoldenDivider,
-  ShlokaCard,
-  SacredProgressRing,
-  GoldenHeader,
-  LotusProgress,
   OmLoader,
-  SacredChip,
+  SacredProgressRing,
+  VerseRevelation,
 } from '@kiaanverse/ui';
+
+// @kiaanverse/store
 import {
-  useMoodStore,
-  useSadhanaStore,
+  useAuthStore,
   useGitaStore,
+  useSadhanaStore,
   type SadhanaPhase,
 } from '@kiaanverse/store';
-import { useTranslation } from '@kiaanverse/i18n';
+
+// @kiaanverse/api — streak comes from the API (SadhanaStreak.current), not from
+// the Zustand sadhanaStore (which only holds the in-flight ritual phase). The
+// verse-of-the-day is resolved by useGitaStore + useGitaVerse(chapter, verse).
 import { useGitaVerse, useSadhanaStreak } from '@kiaanverse/api';
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
+// ── Design tokens ──────────────────────────────────────────────────────────
+const GOLD = '#D4A017';
+const GOLD_SHIMMER = 'rgba(245, 226, 122, 0.35)';
+/** Gold at ~50% alpha — used for the Sanskrit sub-greeting. */
+const GOLD_MUTED = '#D4A01780';
+/** Gold at ~44% alpha — used for the sadhana Sanskrit caption. */
+const GOLD_DIM = '#D4A01770';
+const COSMIC = '#050714';
+const INDIGO = '#161A42';
+const WHITE = '#F0EBE1';
+const SECONDARY = '#C8BFA8';
+const MUTED = '#7A7060';
+/** Krishna Aura + Peacock — used by the Vibe banner's blue gradients. */
+const KRISHNA = '#1B4FBB';
+const PEACOCK = '#0E7490';
 
-/** Sadhana phase order — mirrors the phaseOrder constant in sadhanaStore. */
+/** Staggered zone entrance delays (ms) — spec §animation. */
+const ZONE_DELAY = {
+  greeting: 120,
+  verse: 240,
+  tools: 360,
+  sadhana: 480,
+  vibe: 560,
+} as const;
+
+/** lotus-bloom — organic expansion, soft overshoot (divine.css parity). */
+const easeLotusBloom = Easing.bezier(0.22, 1.0, 0.36, 1.0);
+
+// ── Time-based greeting helper ─────────────────────────────────────────────
+/**
+ * Resolve the muhurta-appropriate greeting.
+ *
+ * Windows (local time):
+ *   03:30–05:30  Brahma Muhurta  · ब्रह्म मुहूर्त
+ *   05:30–12:00  Namaste         · शुभ प्रभात
+ *   12:00–17:00  Namaste         · शुभ मध्याह्न
+ *   17:00–20:00  Shubh Sandhya   · शुभ संध्या
+ *   20:00–03:30  Shubh Ratri     · शुभ रात्रि
+ */
+function getGreeting(): { readonly line1: string; readonly skt: string } {
+  const now = new Date();
+  const h = now.getHours() + now.getMinutes() / 60;
+  if (h >= 3.5 && h < 5.5) {
+    return { line1: 'Brahma Muhurta', skt: 'ब्रह्म मुहूर्त' };
+  }
+  if (h >= 5.5 && h < 12) {
+    return { line1: 'Namaste', skt: 'शुभ प्रभात' };
+  }
+  if (h >= 12 && h < 17) {
+    return { line1: 'Namaste', skt: 'शुभ मध्याह्न' };
+  }
+  if (h >= 17 && h < 20) {
+    return { line1: 'Shubh Sandhya', skt: 'शुभ संध्या' };
+  }
+  return { line1: 'Shubh Ratri', skt: 'शुभ रात्रि' };
+}
+
+// ── OM Breathing — scale 1.0 → 1.06 → 1.0, opacity 0.6 → 1.0, 4s cycle ────
+function OmBreath(): React.JSX.Element {
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(0.7);
+
+  React.useEffect(() => {
+    scale.value = withRepeat(
+      withSequence(
+        withTiming(1.06, {
+          duration: 2000,
+          easing: Easing.bezier(0.45, 0.05, 0.55, 0.95),
+        }),
+        withTiming(1.0, {
+          duration: 2000,
+          easing: Easing.bezier(0.45, 0.05, 0.55, 0.95),
+        }),
+      ),
+      -1,
+      false,
+    );
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(1.0, { duration: 2000 }),
+        withTiming(0.6, { duration: 2000 }),
+      ),
+      -1,
+      false,
+    );
+  }, [opacity, scale]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Reanimated.View style={animStyle}>
+      <Text style={s.omSymbol}>ॐ</Text>
+    </Reanimated.View>
+  );
+}
+
+// ── Avatar with divine-breath aura + streak flame badge ───────────────────
+function UserAvatar({
+  initial,
+  streak,
+}: {
+  readonly initial: string;
+  readonly streak: number;
+}): React.JSX.Element {
+  const auraScale = useSharedValue(1);
+  const auraOpacity = useSharedValue(0.3);
+
+  React.useEffect(() => {
+    auraScale.value = withRepeat(
+      withSequence(
+        withTiming(1.12, {
+          duration: 2000,
+          easing: Easing.bezier(0.45, 0.05, 0.55, 0.95),
+        }),
+        withTiming(1.0, {
+          duration: 2000,
+          easing: Easing.bezier(0.45, 0.05, 0.55, 0.95),
+        }),
+      ),
+      -1,
+      false,
+    );
+    auraOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0.5, { duration: 2000 }),
+        withTiming(0.2, { duration: 2000 }),
+      ),
+      -1,
+      false,
+    );
+  }, [auraOpacity, auraScale]);
+
+  const auraStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: auraScale.value }],
+    opacity: auraOpacity.value,
+  }));
+
+  return (
+    <View style={s.avatarContainer}>
+      {/* Gold breathing aura behind avatar */}
+      <Reanimated.View style={[s.avatarAura, auraStyle]} pointerEvents="none" />
+      {/* Avatar circle */}
+      <View style={s.avatar}>
+        <Text style={s.avatarInitial}>{initial}</Text>
+      </View>
+      {/* Streak flame badge — only when streak is active */}
+      {streak > 0 ? (
+        <View style={s.streakBadge}>
+          <Text style={s.streakBadgeText}>🔥</Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+// ── ZONE 1: DIVINE HEADER ─────────────────────────────────────────────────
+function DivineHeader(): React.JSX.Element {
+  const user = useAuthStore((st) => st.user);
+  const { data: streakData } = useSadhanaStreak();
+  const streak = streakData?.current ?? 0;
+  const initial = (user?.name ?? 'S').charAt(0).toUpperCase();
+  const insets = useSafeAreaInsets();
+
+  const openProfile = (): void => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+      () => undefined,
+    );
+    router.push('/(tabs)/profile');
+  };
+
+  return (
+    <View style={[s.header, { paddingTop: insets.top + 8 }]}>
+      <View style={s.headerRow}>
+        {/* Left: OM breathing */}
+        <OmBreath />
+
+        {/* Center: Wordmark — Sanskrit OM glyph + Cormorant italic wordmark */}
+        <View style={s.wordmark} pointerEvents="none">
+          <Text style={s.wordmarkText} numberOfLines={1}>
+            <Text style={s.wordmarkOm}>ॐ </Text>
+            Kiaanverse
+          </Text>
+        </View>
+
+        {/* Right: Avatar with streak badge */}
+        <TouchableOpacity
+          onPress={openProfile}
+          accessibilityRole="button"
+          accessibilityLabel="Open profile"
+          hitSlop={8}
+        >
+          <UserAvatar initial={initial} streak={streak} />
+        </TouchableOpacity>
+      </View>
+
+      {/* Gold gradient divider — sits directly below the header row */}
+      <GoldenDivider />
+    </View>
+  );
+}
+
+// ── Gold shimmer sweep — sweeps once on mount, then every 8 seconds ───────
+function GoldShimmer({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}): React.JSX.Element {
+  const translateX = useSharedValue(-200);
+
+  React.useEffect(() => {
+    const sweep = (): void => {
+      translateX.value = -200;
+      translateX.value = withTiming(400, {
+        duration: 1200,
+        easing: Easing.bezier(0.25, 0.1, 0.0, 1.0),
+      });
+    };
+    sweep();
+    const interval = setInterval(sweep, 8000);
+    return () => clearInterval(interval);
+  }, [translateX]);
+
+  const shimmerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
+
+  return (
+    <View style={s.shimmerClip}>
+      {children}
+      {/* Shimmer overlay — 120px wide gradient sweeping across the text. */}
+      <Reanimated.View
+        pointerEvents="none"
+        style={[StyleSheet.absoluteFill, shimmerStyle]}
+      >
+        <LinearGradient
+          colors={['transparent', GOLD_SHIMMER, 'transparent']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={s.shimmerGradient}
+        />
+      </Reanimated.View>
+    </View>
+  );
+}
+
+// ── ZONE 2: Greeting Hero ─────────────────────────────────────────────────
+function GreetingHero(): React.JSX.Element {
+  const user = useAuthStore((st) => st.user);
+  const { line1, skt } = getGreeting();
+
+  // Staggered entrance — Zone 2 enters 120ms after Zone 1.
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(12);
+
+  React.useEffect(() => {
+    opacity.value = withDelay(
+      ZONE_DELAY.greeting,
+      withTiming(1, { duration: 500, easing: easeLotusBloom }),
+    );
+    translateY.value = withDelay(
+      ZONE_DELAY.greeting,
+      withTiming(0, { duration: 500, easing: easeLotusBloom }),
+    );
+  }, [opacity, translateY]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  return (
+    <Reanimated.View style={[s.greetingZone, animStyle]}>
+      {/* Line 1: Muhurta greeting */}
+      <Text style={s.greetingLine1}>{line1}</Text>
+
+      {/* Line 2: User name with sweeping gold shimmer */}
+      <GoldShimmer>
+        <Text style={s.greetingName}>
+          {user?.name ?? 'Sacred Seeker'}
+        </Text>
+      </GoldShimmer>
+
+      {/* Line 3: Sanskrit translation at 50% gold */}
+      <Text style={s.greetingSkt}>{skt}</Text>
+    </Reanimated.View>
+  );
+}
+
+// ── ZONE 3: Daily Verse Card ──────────────────────────────────────────────
+/** Fallback verse while the gitaStore finishes hydrating (BG 2.47). */
+const FALLBACK_VOD = { chapter: 2, verse: 47 } as const;
+
+function DailyVerseCard(): React.JSX.Element {
+  // Verse-of-the-day reference lives in the persisted gitaStore. Derive the
+  // chapter/verse eagerly with a fallback so the API hook always has real
+  // inputs — avoids a conditional-hook trap on first launch.
+  const vodChapter = useGitaStore((st) => st.vodChapter);
+  const vodVerse = useGitaStore((st) => st.vodVerse);
+  const refreshVerseOfTheDay = useGitaStore((st) => st.refreshVerseOfTheDay);
+  const bookmarkedVerseIds = useGitaStore((st) => st.bookmarkedVerseIds);
+  const toggleBookmark = useGitaStore((st) => st.toggleBookmark);
+
+  React.useEffect(() => {
+    // Idempotent — no-op if vodDate matches today. Safe to call on every mount.
+    refreshVerseOfTheDay();
+  }, [refreshVerseOfTheDay]);
+
+  const chapter = vodChapter ?? FALLBACK_VOD.chapter;
+  const verseNum = vodVerse ?? FALLBACK_VOD.verse;
+  const { data: verse, isLoading } = useGitaVerse(chapter, verseNum);
+
+  const isBookmarked = verse ? bookmarkedVerseIds.includes(verse.id) : false;
+
+  // Zone 3 entrance — 240ms stagger after Zone 1.
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(12);
+
+  React.useEffect(() => {
+    opacity.value = withDelay(
+      ZONE_DELAY.verse,
+      withTiming(1, { duration: 500, easing: easeLotusBloom }),
+    );
+    translateY.value = withDelay(
+      ZONE_DELAY.verse,
+      withTiming(0, { duration: 500, easing: easeLotusBloom }),
+    );
+  }, [opacity, translateY]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  const askSakha = (): void => {
+    if (!verse) return;
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+      () => undefined,
+    );
+    router.push({
+      pathname: '/(tabs)/chat',
+      params: {
+        preload: `Tell me more about Bhagavad Gita ${verse.chapter}.${verse.verse}`,
+      },
+    });
+  };
+
+  const bookmark = (): void => {
+    if (!verse) return;
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+      () => undefined,
+    );
+    toggleBookmark(verse.id);
+  };
+
+  return (
+    <Reanimated.View style={[s.verseCardWrapper, animStyle]}>
+      {/* 2px gold shimmer top edge — transparent → gold → transparent. */}
+      <LinearGradient
+        colors={[
+          'transparent',
+          'rgba(212,160,23,0.4)',
+          'rgba(240,192,64,0.8)',
+          'rgba(212,160,23,0.4)',
+          'transparent',
+        ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={s.verseCardTopBar}
+      />
+
+      <View style={s.verseCardBody}>
+        {/* Label — "Today's Shloka" in Devanagari */}
+        <Text style={s.verseLabel}>आज का श्लोक</Text>
+
+        {isLoading || !verse ? (
+          <View style={s.verseLoader}>
+            <OmLoader size={36} />
+          </View>
+        ) : (
+          <>
+            {/* Sanskrit — word-by-word reveal on the UI thread via
+                VerseRevelation (shared package primitive). 80ms stagger,
+                300ms delay before the first word lifts in. */}
+            <VerseRevelation
+              text={verse.sanskrit}
+              textStyle={s.verseSanskrit}
+              containerStyle={s.verseSanskritFlow}
+              delay={300}
+              staggerMs={80}
+            />
+
+            {/* Gold divider with centered lotus mark ✦ */}
+            <View style={s.verseDividerRow}>
+              <View style={s.verseDividerLine} />
+              <Text style={s.verseDividerLotus}>✦</Text>
+              <View style={s.verseDividerLine} />
+            </View>
+
+            <Text style={s.verseTranslit}>{verse.transliteration}</Text>
+            <Text style={s.verseMeaning}>{verse.translation}</Text>
+            <Text style={s.verseRef}>
+              {`Bhagavad Gita — Ch. ${verse.chapter} · V. ${verse.verse}`}
+            </Text>
+
+            <View style={s.verseActions}>
+              <TouchableOpacity
+                style={s.verseAskBtn}
+                onPress={askSakha}
+                accessibilityRole="button"
+                accessibilityLabel="Ask Sakha about this verse"
+              >
+                <Text style={s.verseAskBtnText}>Ask Sakha →</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={s.verseBookmarkBtn}
+                onPress={bookmark}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  isBookmarked ? 'Remove bookmark' : 'Bookmark this verse'
+                }
+                accessibilityState={{ selected: isBookmarked }}
+              >
+                <Text style={s.verseBookmarkIcon}>
+                  {isBookmarked ? '🔖' : '🏷️'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+      </View>
+    </Reanimated.View>
+  );
+}
+
+// ── ZONE 4: Tools Quick Rail ──────────────────────────────────────────────
+/** Five sacred instruments + catalog exit. `as const` freezes the tuple so
+ *  TypeScript narrows `tool.route` to a valid expo-router string literal. */
+const QUICK_TOOLS = [
+  {
+    id: 'emotional-reset',
+    name: 'Emotional Reset',
+    skt: 'भावनात्मक',
+    icon: '🔥',
+    color: '#EF4444',
+    route: '/tools/emotional-reset',
+  },
+  {
+    id: 'ardha',
+    name: 'Ardha',
+    skt: 'अर्थ',
+    icon: '💡',
+    color: '#F59E0B',
+    route: '/tools/ardha',
+  },
+  {
+    id: 'karma-reset',
+    name: 'Karma Reset',
+    skt: 'कर्म',
+    icon: '☸',
+    color: '#8B5CF6',
+    route: '/tools/karma-reset',
+  },
+  {
+    id: 'viyoga',
+    name: 'Viyoga',
+    skt: 'वियोग',
+    icon: '🌊',
+    color: '#0E7490',
+    route: '/tools/viyoga',
+  },
+  {
+    id: 'all',
+    name: 'All Tools',
+    skt: 'सर्व',
+    icon: '✦',
+    color: GOLD,
+    route: '/tools',
+  },
+] as const;
+
+function ToolsRail(): React.JSX.Element {
+  // Zone 4 entrance — 360ms stagger after Zone 1.
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(12);
+
+  React.useEffect(() => {
+    opacity.value = withDelay(
+      ZONE_DELAY.tools,
+      withTiming(1, { duration: 400, easing: easeLotusBloom }),
+    );
+    translateY.value = withDelay(
+      ZONE_DELAY.tools,
+      withTiming(0, { duration: 400, easing: easeLotusBloom }),
+    );
+  }, [opacity, translateY]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  const openTool = (route: string): void => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+      () => undefined,
+    );
+    // expo-router typed-routes treat string literals as unions of known
+    // paths; `as never` satisfies that contract without loosening to `any`.
+    router.push(route as never);
+  };
+
+  return (
+    <Reanimated.View style={[s.railSection, animStyle]}>
+      <Text style={s.railHeader}>Sacred Tools</Text>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={s.railScroll}
+      >
+        {QUICK_TOOLS.map((tool) => (
+          <TouchableOpacity
+            key={tool.id}
+            style={s.toolChip}
+            onPress={() => openTool(tool.route)}
+            activeOpacity={0.75}
+            accessibilityRole="button"
+            accessibilityLabel={`${tool.name} tool`}
+          >
+            {/* Left color accent — 3px vertical semantic stripe */}
+            <View
+              style={[s.toolChipAccent, { backgroundColor: tool.color }]}
+            />
+
+            <View style={s.toolChipContent}>
+              <Text style={s.toolChipIcon}>{tool.icon}</Text>
+              <View>
+                <Text style={s.toolChipName}>{tool.name}</Text>
+                <Text style={[s.toolChipSkt, { color: tool.color }]}>
+                  {tool.skt}
+                </Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </Reanimated.View>
+  );
+}
+
+// ── ZONE 5: Sadhana Streak Card ───────────────────────────────────────────
+/**
+ * Sadhana phase order — mirrors the phaseOrder constant in sadhanaStore.
+ * Kept here because the store does not export it; the home card needs it
+ * to compute "N of 6" completion from the single current-phase string.
+ */
 const SADHANA_PHASE_ORDER: readonly SadhanaPhase[] = [
   'greeting',
   'mood_check',
@@ -62,331 +629,650 @@ const SADHANA_PHASE_ORDER: readonly SadhanaPhase[] = [
   'complete',
 ] as const;
 
-/** Fallback daily verse — BG 2.47 — used before the store hydrates. */
-const FALLBACK_VOD = { chapter: 2, verse: 47 } as const;
+function SadhanaStreakCard(): React.JSX.Element {
+  // Streak comes from the API (SadhanaStreak.current), not the Zustand
+  // sadhanaStore — that store only tracks the in-flight ritual phase.
+  const { data: streakData } = useSadhanaStreak();
+  const streak = streakData?.current ?? 0;
 
-// ---------------------------------------------------------------------------
-// Greeting
-// ---------------------------------------------------------------------------
+  const currentPhase = useSadhanaStore((st) => st.phase);
+  const currentIdx = SADHANA_PHASE_ORDER.indexOf(currentPhase);
+  const completedPhases = currentIdx < 0 ? 0 : currentIdx + 1;
+  const totalPhases = SADHANA_PHASE_ORDER.length;
+  const progress = completedPhases / totalPhases;
 
-interface Greeting {
-  readonly titleKey: string;
-  readonly titleFallback: string;
-  readonly sanskritKey: string;
-  readonly sanskritFallback: string;
-}
+  // Zone 5 entrance — 480ms stagger after Zone 1.
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(12);
 
-function resolveGreeting(now: Date = new Date()): Greeting {
-  const minutes = now.getHours() * 60 + now.getMinutes();
-  // Brahma Muhurta: 03:30 – 05:30
-  if (minutes >= 3 * 60 + 30 && minutes < 5 * 60 + 30) {
-    return {
-      titleKey: 'greetings.brahma',
-      titleFallback: 'Brahma Muhurta',
-      sanskritKey: 'greetings.brahmaSanskrit',
-      sanskritFallback: 'ब्रह्म मुहूर्त',
-    };
-  }
-  // Pratah: 05:30 – 12:00
-  if (minutes >= 5 * 60 + 30 && minutes < 12 * 60) {
-    return {
-      titleKey: 'greetings.pratah',
-      titleFallback: 'Shubh Prabhat',
-      sanskritKey: 'greetings.pratahSanskrit',
-      sanskritFallback: 'शुभ प्रभात',
-    };
-  }
-  // Madhyanha: 12:00 – 17:00
-  if (minutes >= 12 * 60 && minutes < 17 * 60) {
-    return {
-      titleKey: 'greetings.madhyanha',
-      titleFallback: 'Shubh Madhyanha',
-      sanskritKey: 'greetings.madhyanhaSanskrit',
-      sanskritFallback: 'शुभ मध्याह्न',
-    };
-  }
-  // Sandhya: 17:00 – 20:00
-  if (minutes >= 17 * 60 && minutes < 20 * 60) {
-    return {
-      titleKey: 'greetings.sandhya',
-      titleFallback: 'Shubh Sandhya',
-      sanskritKey: 'greetings.sandhyaSanskrit',
-      sanskritFallback: 'संध्या वंदन',
-    };
-  }
-  // Ratri: 20:00 – 03:30
-  return {
-    titleKey: 'greetings.ratri',
-    titleFallback: 'Shubh Ratri',
-    sanskritKey: 'greetings.ratriSanskrit',
-    sanskritFallback: 'शुभ रात्रि',
+  React.useEffect(() => {
+    opacity.value = withDelay(
+      ZONE_DELAY.sadhana,
+      withTiming(1, { duration: 400, easing: easeLotusBloom }),
+    );
+    translateY.value = withDelay(
+      ZONE_DELAY.sadhana,
+      withTiming(0, { duration: 400, easing: easeLotusBloom }),
+    );
+  }, [opacity, translateY]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  // Flame flicker — infinite scale pulse on the UI thread.
+  const flamePulse = useSharedValue(1);
+  React.useEffect(() => {
+    flamePulse.value = withRepeat(
+      withSequence(
+        withTiming(1.15, {
+          duration: 600,
+          easing: Easing.bezier(0.45, 0.05, 0.55, 0.95),
+        }),
+        withTiming(1.0, {
+          duration: 600,
+          easing: Easing.bezier(0.45, 0.05, 0.55, 0.95),
+        }),
+      ),
+      -1,
+      false,
+    );
+  }, [flamePulse]);
+  const flameStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: flamePulse.value }],
+  }));
+
+  const continueSadhana = (): void => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+      () => undefined,
+    );
+    router.push('/sadhana' as never);
   };
-}
-
-// ---------------------------------------------------------------------------
-// Screen
-// ---------------------------------------------------------------------------
-
-export default function HomeScreen(): React.JSX.Element {
-  const router = useRouter();
-  const { t } = useTranslation('home');
-
-  // Stores (Zustand) — pick narrow slices to minimize re-renders.
-  const loggedToday = useMoodStore((s) => s.loggedToday);
-  const currentPhase = useSadhanaStore((s) => s.phase);
-  const vodChapter = useGitaStore((s) => s.vodChapter);
-  const vodVerse = useGitaStore((s) => s.vodVerse);
-  const refreshVerseOfTheDay = useGitaStore((s) => s.refreshVerseOfTheDay);
-
-  // Ensure the verse-of-the-day is selected for today (no-op if fresh).
-  useEffect(() => {
-    refreshVerseOfTheDay();
-  }, [refreshVerseOfTheDay]);
-
-  // Resolve verse ref — gitaStore persists async, so fall back until ready.
-  const chapter = vodChapter ?? FALLBACK_VOD.chapter;
-  const verse = vodVerse ?? FALLBACK_VOD.verse;
-
-  // API queries
-  const { data: streak } = useSadhanaStreak();
-  const { data: verseData, isLoading: verseLoading } = useGitaVerse(chapter, verse);
-
-  const currentStreak = streak?.current ?? 0;
-
-  // Greeting
-  const greeting = useMemo(() => resolveGreeting(), []);
-  const greetingTitle = t(greeting.titleKey, greeting.titleFallback);
-  const greetingSanskrit = t(greeting.sanskritKey, greeting.sanskritFallback);
-
-  // Sadhana phase → 0..1 progress driving the lotus bloom.
-  const phaseProgress = useMemo(() => {
-    const idx = SADHANA_PHASE_ORDER.indexOf(currentPhase);
-    if (idx < 0) return 0;
-    return (idx + 1) / SADHANA_PHASE_ORDER.length;
-  }, [currentPhase]);
-
-  const tools = useMemo(
-    () => [
-      { label: t('tools.emotionalReset', 'Emotional Reset'), route: '/tools/emotional-reset' },
-      { label: t('tools.ardha', 'Ardha Reframe'), route: '/tools/ardha' },
-      { label: t('tools.karmaReset', 'Karma Reset'), route: '/tools/karma-reset' },
-      { label: t('tools.viyoga', 'Viyoga Guide'), route: '/tools/viyoga' },
-      { label: t('tools.allTools', 'All Tools'), route: '/tools' },
-    ] as const,
-    [t],
-  );
-
-  const goTo = useCallback(
-    (route: string, style: Haptics.ImpactFeedbackStyle = Haptics.ImpactFeedbackStyle.Light) => {
-      void Haptics.impactAsync(style).catch(() => {
-        // Haptics unavailable (simulator / tests) — silent.
-      });
-      router.push(route as never);
-    },
-    [router],
-  );
 
   return (
-    <Screen>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* 1. Greeting ---------------------------------------------------- */}
-        <GoldenHeader title={greetingTitle} />
-        <Text style={styles.greetingSanskrit}>{greetingSanskrit}</Text>
+    <Reanimated.View style={[s.streakCardWrapper, animStyle]}>
+      {/* Gold top shimmer edge */}
+      <LinearGradient
+        colors={[
+          'transparent',
+          'rgba(212,160,23,0.4)',
+          'rgba(240,192,64,0.8)',
+          'rgba(212,160,23,0.4)',
+          'transparent',
+        ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={s.streakCardTopBar}
+      />
 
-        {/* 2. Daily verse ------------------------------------------------- */}
-        <View style={styles.section}>
-          {verseLoading || !verseData ? (
-            <View style={styles.verseLoader}>
-              <OmLoader size={48} label={t('loadingVerse', 'Revealing today\'s verse…')} />
-            </View>
-          ) : (
-            <ShlokaCard
-              sanskrit={verseData.sanskrit}
-              {...(verseData.transliteration
-                ? { transliteration: verseData.transliteration }
-                : {})}
-              meaning={verseData.translation}
-              reference={`Bhagavad Gita ${verseData.chapter}.${verseData.verse}`}
-            />
-          )}
+      <View style={s.streakCardRow}>
+        {/* Left: flame + streak number + caption */}
+        <View style={s.streakLeft}>
+          <Reanimated.View style={flameStyle}>
+            <Text style={s.streakFlame}>🔥</Text>
+          </Reanimated.View>
+          <Text style={s.streakNumber}>{streak}</Text>
+          <Text style={s.streakLabel}>{'Days of Sacred\nPractice'}</Text>
+          <Text style={s.streakSkt}>नित्य साधना</Text>
         </View>
 
-        <GoldenDivider style={styles.divider} />
+        {/* Vertical gold divider */}
+        <View style={s.streakDivider} />
 
-        {/* 3. Streak + Sadhana progress ---------------------------------- */}
-        <SacredCard style={styles.sadhanaCard}>
-          <View style={styles.sadhanaRow}>
-            <SacredProgressRing
-              progress={phaseProgress}
-              size={88}
-              label={currentStreak}
-              caption={t('dayStreak', 'day streak')}
-            />
-            <View style={styles.sadhanaRight}>
-              <LotusProgress progress={phaseProgress} size={96} />
-              <Text style={styles.phaseLabel}>
-                {t(
-                  `sadhana.phase.${currentPhase}`,
-                  currentPhase.replace(/_/g, ' '),
-                )}
-              </Text>
-            </View>
-          </View>
-          {loggedToday ? (
-            <Text style={styles.loggedHint}>
-              {t('moodLogged', 'Mood logged for today')}
-            </Text>
-          ) : null}
-        </SacredCard>
-
-        {/* 4. Tool chips ------------------------------------------------- */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.toolsScroll}
-          contentContainerStyle={styles.toolsRow}
-        >
-          {tools.map((tool) => (
-            <SacredChip
-              key={tool.route}
-              label={tool.label}
-              onPress={() => goTo(tool.route)}
-            />
-          ))}
-        </ScrollView>
-
-        {/* 5. KIAAN Vibe mini-banner ------------------------------------ */}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('vibePlayer.title', 'KIAAN Vibe Player')}
-          onPress={() => goTo('/vibe-player', Haptics.ImpactFeedbackStyle.Medium)}
-          style={styles.vibePressable}
-        >
-          <GlowCard variant="golden">
-            <View style={styles.vibeRow}>
-              <Text style={styles.vibeGlyph}>🎵</Text>
-              <View style={styles.vibeText}>
-                <Text style={styles.vibeTitle}>
-                  {t('vibePlayer.title', 'KIAAN Vibe Player')}
-                </Text>
-                <Text style={styles.vibeSubtitle}>
-                  {t('vibePlayer.subtitle', 'Sacred sound journeys for inner stillness')}
-                </Text>
-              </View>
-              <Text style={styles.vibeChevron}>›</Text>
-            </View>
-          </GlowCard>
-        </Pressable>
-      </ScrollView>
-    </Screen>
+        {/* Right: progress ring + continue button */}
+        <View style={s.streakRight}>
+          <SacredProgressRing
+            progress={progress}
+            size={88}
+            label={`${completedPhases}/${totalPhases}`}
+            caption="Phases"
+          />
+          <TouchableOpacity
+            style={s.sadhanaBtn}
+            onPress={continueSadhana}
+            activeOpacity={0.75}
+            accessibilityRole="button"
+            accessibilityLabel="Continue sadhana"
+          >
+            <Text style={s.sadhanaBtnText}>Continue →</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Reanimated.View>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Styles
-// ---------------------------------------------------------------------------
+// ── ZONE 6: KIAAN Vibe Banner ─────────────────────────────────────────────
+function KiaanVibeBanner(): React.JSX.Element {
+  // Zone 6 entrance — 560ms stagger after Zone 1.
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(12);
 
-const GOLD = '#D4A017';
-const GOLD_SUB = 'rgba(212, 160, 23, 0.55)';
-const TEXT_MUTED = '#7A7060';
-const TEXT_PRIMARY = '#F5F0E8';
+  React.useEffect(() => {
+    opacity.value = withDelay(
+      ZONE_DELAY.vibe,
+      withTiming(1, { duration: 400, easing: easeLotusBloom }),
+    );
+    translateY.value = withDelay(
+      ZONE_DELAY.vibe,
+      withTiming(0, { duration: 400, easing: easeLotusBloom }),
+    );
+  }, [opacity, translateY]);
 
-const styles = StyleSheet.create({
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 100,
-    gap: 16,
-  },
-  greetingSanskrit: {
-    fontFamily: 'NotoSansDevanagari-Regular',
-    fontSize: 13,
-    color: GOLD_SUB,
-    textAlign: 'center',
-    marginTop: -4,
-  },
+  const animStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
 
-  section: {
-    alignSelf: 'stretch',
-  },
-  verseLoader: {
-    alignItems: 'center',
-    paddingVertical: 24,
-  },
+  const openVibePlayer = (): void => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(
+      () => undefined,
+    );
+    router.push('/vibe-player' as never);
+  };
 
-  divider: {
-    marginVertical: 4,
-  },
+  return (
+    <Reanimated.View style={animStyle}>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={openVibePlayer}
+        accessibilityRole="button"
+        accessibilityLabel="Open KIAAN Vibe Player"
+      >
+        <View style={s.vibeBanner}>
+          {/* Left blue glow edge — Krishna Aura → Peacock gradient */}
+          <LinearGradient
+            colors={[KRISHNA, PEACOCK]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={s.vibeLeftGlow}
+          />
 
-  sadhanaCard: {
-    alignSelf: 'stretch',
+          {/* Icon */}
+          <View style={s.vibeIconCircle}>
+            <Text style={s.vibeIcon}>🎵</Text>
+          </View>
+
+          {/* Text */}
+          <View style={s.vibeText}>
+            <Text style={s.vibeName}>KIAAN Vibe Player</Text>
+            <Text style={s.vibeSub}>
+              Mantras · Meditation · Gita Shlokas
+            </Text>
+          </View>
+
+          {/* Play button — Krishna Aura gradient */}
+          <LinearGradient
+            colors={[KRISHNA, PEACOCK]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={s.vibePlayBtn}
+          >
+            <Text style={s.vibePlayIcon}>▶</Text>
+          </LinearGradient>
+        </View>
+      </TouchableOpacity>
+    </Reanimated.View>
+  );
+}
+
+// ── MAIN SCREEN ───────────────────────────────────────────────────────────
+export default function HomeScreen(): React.JSX.Element {
+  const scrollRef = useRef<ScrollView>(null);
+
+  return (
+    // DivineScreenWrapper mounts the Skia particle field + aurora so every
+    // zone floats over the cosmic void. safeArea={false} hands inset
+    // management to DivineHeader, preserving the transparent crown above.
+    <DivineScreenWrapper safeArea={false}>
+      {/* ZONE 1: Header — fixed, outside the scroll view. */}
+      <DivineHeader />
+
+      {/* Scrollable content — Zones 2–6 */}
+      <ScrollView
+        ref={scrollRef}
+        style={s.scroll}
+        contentContainerStyle={s.scrollContent}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
+        {/* ZONE 2 — Greeting Hero */}
+        <GreetingHero />
+
+        {/* ZONE 3 — Daily Verse Card */}
+        <DailyVerseCard />
+
+        {/* ZONE 4 — Tools Quick Rail */}
+        <ToolsRail />
+
+        {/* ZONE 5 — Sadhana Streak */}
+        <SadhanaStreakCard />
+
+        {/* ZONE 6 — KIAAN Vibe Banner */}
+        <KiaanVibeBanner />
+
+        {/* Bottom padding above the tab bar */}
+        <View style={s.bottomSpacer} />
+      </ScrollView>
+    </DivineScreenWrapper>
+  );
+}
+
+// ── STYLES ────────────────────────────────────────────────────────────────
+const s = StyleSheet.create({
+  // Header
+  header: {
+    paddingHorizontal: 20,
+    paddingBottom: 8,
+    backgroundColor: 'transparent',
   },
-  sadhanaRow: {
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    justifyContent: 'space-between',
+    paddingBottom: 10,
   },
-  sadhanaRight: {
+  omSymbol: {
+    fontFamily: 'NotoSansDevanagari-Bold',
+    fontSize: 18,
+    color: GOLD,
+    lineHeight: 28,
+  },
+  wordmark: {
     flex: 1,
     alignItems: 'center',
-    gap: 6,
   },
-  phaseLabel: {
+  wordmarkText: {
+    fontFamily: 'CormorantGaramond-Italic',
+    fontSize: 20,
+    color: WHITE,
+    // 0.08em at 20px = 1.6pt
+    letterSpacing: 1.6,
+  },
+  wordmarkOm: {
+    fontFamily: 'NotoSansDevanagari-Regular',
+    fontSize: 20,
+    color: WHITE,
+  },
+
+  // Avatar
+  avatarContainer: {
+    position: 'relative',
+    width: 44,
+    height: 44,
+  },
+  avatarAura: {
+    position: 'absolute',
+    top: -6,
+    left: -6,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: GOLD,
+  },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: INDIGO,
+    borderWidth: 1.5,
+    borderColor: GOLD,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarInitial: {
+    fontFamily: 'CormorantGaramond-BoldItalic',
+    fontSize: 18,
+    color: GOLD,
+  },
+  streakBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -4,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: COSMIC,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: GOLD,
+  },
+  streakBadgeText: {
+    fontSize: 10,
+  },
+
+  // Zone 2 — Greeting Hero
+  greetingZone: {
+    marginTop: 16,
+    marginBottom: 20,
+    // Left-aligned, paddingH matches the 20 in the spec (ScrollView content
+    // is 16; the extra 4 aligns the left edge with the header OM glyph).
+    paddingHorizontal: 4,
+  },
+  greetingLine1: {
+    fontFamily: 'CormorantGaramond-Italic',
+    fontSize: 34,
+    color: WHITE,
+    lineHeight: 40,
+  },
+  greetingName: {
+    fontFamily: 'CormorantGaramond-BoldItalic',
+    fontSize: 34,
+    color: GOLD,
+    lineHeight: 40,
+  },
+  greetingSkt: {
+    fontFamily: 'NotoSansDevanagari-Regular',
+    fontSize: 13,
+    color: GOLD_MUTED,
+    // Devanagari glyphs need ~2x line-height for clean matra rendering.
+    lineHeight: 26,
+    marginTop: 4,
+  },
+
+  // Shimmer overlay for the user name
+  shimmerClip: {
+    overflow: 'hidden',
+    alignSelf: 'flex-start',
+  },
+  shimmerGradient: {
+    flex: 1,
+    width: 120,
+  },
+
+  // Zone 3 — Daily Verse Card
+  verseCardWrapper: {
+    marginBottom: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(22,26,66,0.95)',
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.12)',
+  },
+  verseCardTopBar: {
+    height: 2,
+  },
+  verseCardBody: {
+    padding: 16,
+  },
+  verseLabel: {
+    fontFamily: 'NotoSansDevanagari-Regular',
+    fontSize: 10,
+    color: MUTED,
+    // 0.15em at 10px = 1.5pt
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+  },
+  verseSanskritFlow: {
+    marginBottom: 4,
+  },
+  verseSanskrit: {
+    fontFamily: 'NotoSansDevanagari-Bold',
+    fontSize: 16,
+    color: GOLD,
+    // Devanagari needs 2.0x line-height for matra clearance.
+    lineHeight: 32,
+    fontWeight: '700',
+  },
+  verseDividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
+    gap: 8,
+  },
+  verseDividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(212,160,23,0.3)',
+  },
+  verseDividerLotus: {
+    fontSize: 10,
+    color: GOLD,
+  },
+  verseTranslit: {
+    fontFamily: 'CrimsonText-Italic',
+    fontSize: 14,
+    color: SECONDARY,
+    // 1.8x line-height keeps the italic IAST breathing room.
+    lineHeight: 25,
+    marginBottom: 6,
+  },
+  verseMeaning: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 14,
+    color: WHITE,
+    lineHeight: 24,
+    marginBottom: 8,
+  },
+  verseRef: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 11,
+    color: MUTED,
+    textAlign: 'right',
+    marginBottom: 12,
+  },
+  verseActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  verseAskBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.35)',
+  },
+  verseAskBtnText: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 13,
+    color: GOLD,
+  },
+  verseBookmarkBtn: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  verseBookmarkIcon: {
+    fontSize: 18,
+  },
+  verseLoader: {
+    paddingVertical: 24,
+    alignItems: 'center',
+  },
+
+  // Zone 4 — Tools Quick Rail
+  railSection: {
+    marginBottom: 16,
+  },
+  railHeader: {
+    fontFamily: 'Outfit-SemiBold',
+    fontSize: 11,
+    color: MUTED,
+    // 0.15em at 11px ≈ 1.65pt
+    letterSpacing: 1.65,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+  },
+  railScroll: {
+    paddingRight: 16,
+    gap: 8,
+  },
+  toolChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(22,26,66,0.9)',
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.12)',
+    borderRadius: 20,
+    overflow: 'hidden',
+    height: 52,
+  },
+  toolChipAccent: {
+    width: 3,
+    height: '100%',
+  },
+  toolChipContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+  },
+  toolChipIcon: {
+    fontSize: 18,
+  },
+  toolChipName: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 12,
+    color: WHITE,
+  },
+  toolChipSkt: {
+    fontFamily: 'NotoSansDevanagari-Regular',
+    fontSize: 10,
+    // 2.0x line-height for Devanagari matra clearance.
+    lineHeight: 20,
+  },
+
+  // Zone 5 — Sadhana Streak Card
+  streakCardWrapper: {
+    marginBottom: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(22,26,66,0.95)',
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.12)',
+  },
+  streakCardTopBar: {
+    height: 2,
+  },
+  streakCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    gap: 16,
+  },
+  streakLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  streakFlame: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  streakNumber: {
+    fontFamily: 'CormorantGaramond-BoldItalic',
+    fontSize: 52,
+    color: GOLD,
+    lineHeight: 56,
+  },
+  streakLabel: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 11,
+    color: MUTED,
+    lineHeight: 16,
+    marginTop: 2,
+  },
+  streakSkt: {
+    fontFamily: 'NotoSansDevanagari-Regular',
+    fontSize: 11,
+    color: GOLD_DIM,
+    // 2.0x line-height for Devanagari matra clearance.
+    lineHeight: 22,
+    marginTop: 2,
+  },
+  streakDivider: {
+    width: 1,
+    height: 80,
+    backgroundColor: 'rgba(212,160,23,0.15)',
+  },
+  streakRight: {
+    alignItems: 'center',
+    gap: 10,
+  },
+  sadhanaBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.3)',
+  },
+  sadhanaBtnText: {
     fontFamily: 'Outfit-Medium',
     fontSize: 12,
     color: GOLD,
-    textTransform: 'capitalize',
-    letterSpacing: 0.4,
-  },
-  loggedHint: {
-    fontFamily: 'Outfit-Regular',
-    fontSize: 11,
-    color: TEXT_MUTED,
-    textAlign: 'center',
-    marginTop: 12,
-    letterSpacing: 0.3,
   },
 
-  toolsScroll: {
-    alignSelf: 'stretch',
-  },
-  toolsRow: {
-    gap: 8,
-    paddingVertical: 4,
-    paddingRight: 16,
-  },
-
-  vibePressable: {
-    alignSelf: 'stretch',
-  },
-  vibeRow: {
+  // Zone 6 — KIAAN Vibe Banner
+  vibeBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    backgroundColor: 'rgba(22,26,66,0.95)',
+    borderWidth: 1,
+    borderColor: 'rgba(27,79,187,0.3)',
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 16,
+    height: 72,
   },
-  vibeGlyph: {
-    fontSize: 28,
+  vibeLeftGlow: {
+    width: 3,
+    height: '100%',
+  },
+  vibeIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(27,79,187,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(27,79,187,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 12,
+  },
+  vibeIcon: {
+    fontSize: 20,
   },
   vibeText: {
     flex: 1,
   },
-  vibeTitle: {
-    fontFamily: 'CormorantGaramond-BoldItalic',
-    fontSize: 18,
-    color: TEXT_PRIMARY,
+  vibeName: {
+    fontFamily: 'CormorantGaramond-Italic',
+    fontSize: 17,
+    color: WHITE,
   },
-  vibeSubtitle: {
+  vibeSub: {
     fontFamily: 'Outfit-Regular',
-    fontSize: 12,
-    color: TEXT_MUTED,
+    fontSize: 11,
+    color: MUTED,
     marginTop: 2,
   },
-  vibeChevron: {
-    fontSize: 22,
-    color: GOLD,
-    fontWeight: '700',
+  vibePlayBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  vibePlayIcon: {
+    fontSize: 14,
+    color: WHITE,
+    // Optical centering — the ▶ glyph has a left-heavy mass.
+    marginLeft: 2,
+  },
+
+  // Scroll
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+  },
+  bottomSpacer: {
+    height: 100,
   },
 });
