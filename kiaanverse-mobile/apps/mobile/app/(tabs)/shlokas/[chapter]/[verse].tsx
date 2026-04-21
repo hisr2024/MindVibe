@@ -26,7 +26,8 @@ import {
   View,
 } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { ChevronLeft, Share2, Sparkles } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
+import { Bookmark, BookmarkCheck, ChevronLeft, Share2, Sparkles } from 'lucide-react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -69,6 +70,10 @@ export default function VerseDetailScreen(): React.JSX.Element {
   const verseId = paramsValid ? `${chapterNum}.${verseNum}` : '';
 
   const addRecentlyViewed = useGitaStore((s) => s.addRecentlyViewed);
+  const toggleBookmark = useGitaStore((s) => s.toggleBookmark);
+  const isBookmarked = useGitaStore((s) =>
+    verseId.length > 0 && s.bookmarkedVerseIds.includes(verseId),
+  );
 
   const { data, isLoading, error, refetch } = useGitaVerseDetail(
     paramsValid ? chapterNum : 0,
@@ -79,6 +84,18 @@ export default function VerseDetailScreen(): React.JSX.Element {
   useEffect(() => {
     if (paramsValid) addRecentlyViewed({ chapter: chapterNum, verse: verseNum });
   }, [addRecentlyViewed, chapterNum, paramsValid, verseNum]);
+
+  const handleToggleBookmark = useCallback(() => {
+    if (!paramsValid || verseId.length === 0) return;
+    void Haptics.impactAsync(
+      isBookmarked
+        ? Haptics.ImpactFeedbackStyle.Light
+        : Haptics.ImpactFeedbackStyle.Medium,
+    ).catch(() => {
+      // Haptics unavailable (simulator / tests) — silent.
+    });
+    toggleBookmark(verseId);
+  }, [isBookmarked, paramsValid, toggleBookmark, verseId]);
 
   const handleShare = useCallback(async () => {
     if (!data?.verse) return;
@@ -185,6 +202,8 @@ export default function VerseDetailScreen(): React.JSX.Element {
         title={reference}
         subtitle={v.theme ? v.theme.replace(/_/g, ' ') : undefined}
         onBack={() => router.back()}
+        isBookmarked={isBookmarked}
+        onToggleBookmark={handleToggleBookmark}
       />
 
       <ScrollView
@@ -309,9 +328,17 @@ interface HeaderProps {
   readonly title: string;
   readonly subtitle?: string | undefined;
   readonly onBack: () => void;
+  readonly isBookmarked?: boolean;
+  readonly onToggleBookmark?: () => void;
 }
 
-function Header({ title, subtitle, onBack }: HeaderProps): React.JSX.Element {
+function Header({
+  title,
+  subtitle,
+  onBack,
+  isBookmarked,
+  onToggleBookmark,
+}: HeaderProps): React.JSX.Element {
   return (
     <View style={styles.header}>
       <Pressable
@@ -333,7 +360,24 @@ function Header({ title, subtitle, onBack }: HeaderProps): React.JSX.Element {
           </Text>
         ) : null}
       </View>
-      <View style={styles.headerSpacer} />
+      {onToggleBookmark ? (
+        <Pressable
+          onPress={onToggleBookmark}
+          accessibilityRole="button"
+          accessibilityLabel={isBookmarked ? 'Remove bookmark' : 'Bookmark this verse'}
+          accessibilityState={{ selected: isBookmarked ?? false }}
+          hitSlop={12}
+          style={styles.backButton}
+        >
+          {isBookmarked ? (
+            <BookmarkCheck size={20} color={GOLD} fill={GOLD} />
+          ) : (
+            <Bookmark size={20} color={GOLD} />
+          )}
+        </Pressable>
+      ) : (
+        <View style={styles.headerSpacer} />
+      )}
     </View>
   );
 }

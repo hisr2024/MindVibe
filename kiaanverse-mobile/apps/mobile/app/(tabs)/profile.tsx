@@ -17,7 +17,6 @@ import {
   Alert,
 } from 'react-native';
 import { router } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -27,6 +26,7 @@ import {
   OmLoader,
 } from '@kiaanverse/ui';
 import { apiClient } from '@kiaanverse/api';
+import { useAuthStore } from '@kiaanverse/store';
 
 // ── Types ──────────────────────────────────────────────────
 interface UserProfile {
@@ -108,6 +108,7 @@ export default function ProfileScreen(): React.JSX.Element {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [signingOut, setSigningOut] = useState(false);
+  const logout = useAuthStore((s) => s.logout);
 
   useEffect(() => {
     void fetchProfile();
@@ -135,8 +136,10 @@ export default function ProfileScreen(): React.JSX.Element {
           style: 'destructive',
           onPress: async () => {
             setSigningOut(true);
-            await SecureStore.deleteItemAsync('auth_token');
-            await SecureStore.deleteItemAsync('refresh_token');
+            // authStore.logout() invalidates the backend session, clears both
+            // tokens from SecureStore, and resets the Zustand state to
+            // `unauthenticated` so gated components re-render correctly.
+            await logout();
             router.replace('/(auth)/login');
           },
         },
