@@ -20,7 +20,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { KarmaCategorySelector } from '../KarmaCategorySelector';
 import { KarmaWeightSelector } from '../KarmaWeightSelector';

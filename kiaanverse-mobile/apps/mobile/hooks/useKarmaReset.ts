@@ -1,37 +1,40 @@
 /**
  * useKarmaReset — State + API orchestration hook for the 6-phase flow.
  *
- * Wraps the three service calls (reflect, wisdom, complete) with
- * loading/error state. Any API failure resolves to `null` with the
- * error surfaced via `error` — consumers decide whether to show a
- * retry affordance or proceed with local fallback data.
+ * Wraps the three service calls (`reflect`, `wisdom`, `complete`) with
+ * loading state. Because `karmaResetService` is total — every call
+ * resolves with usable content via local fallbacks when the backend
+ * is unreachable — this hook never surfaces an error to the UI; the
+ * ritual always completes.
  *
- * Mirrors `app/(mobile)/m/karma-reset/hooks/useKarmaReset.ts`.
+ * Mirrors `app/(mobile)/m/karma-reset/hooks/useKarmaReset.ts` but
+ * trades the web's error-and-retry surface for an offline-first
+ * fallback path that's more appropriate on mobile.
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import {
+  completeSession,
   getReflectionQuestion,
   getWisdom,
-  completeSession,
 } from '../services/karmaResetService';
 import type {
-  KarmaResetContext,
-  KarmaReflectionQuestion,
-  KarmaReflectionAnswer,
-  KarmaWisdomResponse,
   KarmaCompleteResponse,
+  KarmaReflectionAnswer,
+  KarmaReflectionQuestion,
+  KarmaResetContext,
+  KarmaWisdomResponse,
 } from '../components/karma-reset/types';
 
 interface UseKarmaResetValue {
   fetchReflectionQuestion: (
     context: KarmaResetContext,
     questionIndex: 0 | 1 | 2,
-  ) => Promise<KarmaReflectionQuestion | null>;
+  ) => Promise<KarmaReflectionQuestion>;
   fetchWisdom: (
     context: KarmaResetContext,
     reflections: KarmaReflectionAnswer[],
-  ) => Promise<KarmaWisdomResponse | null>;
+  ) => Promise<KarmaWisdomResponse>;
   finishSession: (
     sessionId: string,
     sankalpaSigned: boolean,
@@ -40,32 +43,21 @@ interface UseKarmaResetValue {
   isLoadingQuestion: boolean;
   isLoadingWisdom: boolean;
   isCompleting: boolean;
-  error: string | null;
-  clearError: () => void;
 }
 
 export function useKarmaReset(): UseKarmaResetValue {
   const [isLoadingQuestion, setIsLoadingQuestion] = useState(false);
   const [isLoadingWisdom, setIsLoadingWisdom] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const fetchReflectionQuestion = useCallback(
     async (
       context: KarmaResetContext,
       questionIndex: 0 | 1 | 2,
-    ): Promise<KarmaReflectionQuestion | null> => {
+    ): Promise<KarmaReflectionQuestion> => {
       setIsLoadingQuestion(true);
-      setError(null);
       try {
         return await getReflectionQuestion(context, questionIndex);
-      } catch (err) {
-        const msg =
-          err instanceof Error
-            ? err.message
-            : 'Unable to get reflection question';
-        setError(msg);
-        return null;
       } finally {
         setIsLoadingQuestion(false);
       }
@@ -77,18 +69,10 @@ export function useKarmaReset(): UseKarmaResetValue {
     async (
       context: KarmaResetContext,
       reflections: KarmaReflectionAnswer[],
-    ): Promise<KarmaWisdomResponse | null> => {
+    ): Promise<KarmaWisdomResponse> => {
       setIsLoadingWisdom(true);
-      setError(null);
       try {
         return await getWisdom(context, reflections);
-      } catch (err) {
-        const msg =
-          err instanceof Error
-            ? err.message
-            : 'Sakha is momentarily unavailable';
-        setError(msg);
-        return null;
       } finally {
         setIsLoadingWisdom(false);
       }
@@ -109,23 +93,12 @@ export function useKarmaReset(): UseKarmaResetValue {
           sankalpaSigned,
           actionDharmaCommitted,
         );
-      } catch {
-        // The ceremony plays even when the network fails — return a
-        // local-only success so the user always reaches the seal.
-        return {
-          success: true,
-          xpAwarded: 25,
-          streakCount: 1,
-          message: 'Your karma has been met with dharma.',
-        };
       } finally {
         setIsCompleting(false);
       }
     },
     [],
   );
-
-  const clearError = useCallback(() => setError(null), []);
 
   return {
     fetchReflectionQuestion,
@@ -134,7 +107,5 @@ export function useKarmaReset(): UseKarmaResetValue {
     isLoadingQuestion,
     isLoadingWisdom,
     isCompleting,
-    error,
-    clearError,
   };
 }

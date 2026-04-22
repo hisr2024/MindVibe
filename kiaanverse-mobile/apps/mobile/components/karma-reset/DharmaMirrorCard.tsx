@@ -10,12 +10,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, {
-  FadeIn,
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import type { KarmaCategory } from './types';
 import { CATEGORY_COLORS } from './types';
 

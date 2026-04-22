@@ -62,7 +62,7 @@ export function WisdomPhase({
   onComplete,
   onActionsChange,
 }: WisdomPhaseProps): React.JSX.Element {
-  const { fetchWisdom, isLoadingWisdom, error } = useKarmaReset();
+  const { fetchWisdom, isLoadingWisdom } = useKarmaReset();
   const [wisdom, setWisdom] = useState<KarmaWisdomResponse | null>(null);
   const [loadingMsg, setLoadingMsg] = useState(0);
   const fetchedRef = useRef(false);
@@ -75,12 +75,10 @@ export function WisdomPhase({
     fetchedRef.current = true;
     const load = async () => {
       const result = await fetchWisdom(context, reflections);
-      if (result) {
-        setWisdom(result);
-        void Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Success,
-        );
-      }
+      setWisdom(result);
+      void Haptics.notificationAsync(
+        Haptics.NotificationFeedbackType.Success,
+      );
     };
     void load();
   }, [context, reflections, fetchWisdom]);
@@ -114,14 +112,6 @@ export function WisdomPhase({
     onComplete(wisdom);
   }, [wisdom, onComplete]);
 
-  const handleRetry = useCallback(async () => {
-    const result = await fetchWisdom(context, reflections);
-    if (result) {
-      setWisdom(result);
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-  }, [fetchWisdom, context, reflections]);
-
   return (
     <ScrollView
       contentContainerStyle={styles.scrollContent}
@@ -153,20 +143,6 @@ export function WisdomPhase({
               </View>
             ))}
           </View>
-
-          {error && !isLoadingWisdom ? (
-            <View style={styles.errorColumn}>
-              <Text style={styles.errorText}>{error}</Text>
-              <Pressable
-                onPress={handleRetry}
-                style={styles.retryButton}
-                accessibilityRole="button"
-                accessibilityLabel="Retry fetching wisdom"
-              >
-                <Text style={styles.retryLabel}>Try Again</Text>
-              </Pressable>
-            </View>
-          ) : null}
 
           {isLoadingWisdom ? (
             <Animated.View
@@ -307,27 +283,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#B8AE98',
     fontStyle: 'italic',
-  },
-  errorColumn: {
-    alignItems: 'center',
-    gap: 10,
-  },
-  errorText: {
-    fontSize: 14,
-    color: '#F97316',
-    fontStyle: 'italic',
-    textAlign: 'center',
-  },
-  retryButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(212,160,23,0.35)',
-  },
-  retryLabel: {
-    fontSize: 13,
-    color: '#D4A017',
   },
   loadingRow: {
     alignItems: 'center',

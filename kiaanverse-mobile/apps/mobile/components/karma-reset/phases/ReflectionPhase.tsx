@@ -89,7 +89,7 @@ export function ReflectionPhase({
   context,
   onComplete,
 }: ReflectionPhaseProps): React.JSX.Element {
-  const { fetchReflectionQuestion, isLoadingQuestion, error } = useKarmaReset();
+  const { fetchReflectionQuestion, isLoadingQuestion } = useKarmaReset();
 
   const [questionIndex, setQuestionIndex] = useState(0);
   const [currentQuestion, setCurrentQuestion] =
@@ -109,7 +109,7 @@ export function ReflectionPhase({
         context,
         questionIndex as 0 | 1 | 2,
       );
-      if (!cancelled && q) setCurrentQuestion(q);
+      if (!cancelled) setCurrentQuestion(q);
     };
     void load();
     return () => {
@@ -177,14 +177,6 @@ export function ReflectionPhase({
     shadowRadius: 20 + 16 * glow.value,
   }));
 
-  const handleRetry = useCallback(async () => {
-    const q = await fetchReflectionQuestion(
-      context,
-      questionIndex as 0 | 1 | 2,
-    );
-    if (q) setCurrentQuestion(q);
-  }, [fetchReflectionQuestion, context, questionIndex]);
-
   return (
     <KeyboardAvoidingView
       style={styles.root}
@@ -210,32 +202,14 @@ export function ReflectionPhase({
           <Text style={styles.avatarLabel}>Sakha is with you</Text>
         </View>
 
-        {/* Loading / error / question */}
+        {/* Loading / question */}
         {isLoadingQuestion || !currentQuestion ? (
           <Animated.View
             entering={FadeIn.duration(300)}
             style={styles.loadingColumn}
           >
-            {error && !isLoadingQuestion ? (
-              <>
-                <Text style={styles.errorText}>{error}</Text>
-                <Pressable
-                  onPress={handleRetry}
-                  style={styles.retryButton}
-                  accessibilityRole="button"
-                  accessibilityLabel="Try fetching the question again"
-                >
-                  <Text style={styles.retryLabel}>Try Again</Text>
-                </Pressable>
-              </>
-            ) : (
-              <>
-                <ActivityIndicator size="small" color="#D4A017" />
-                <Text style={styles.loadingText}>
-                  Sakha is contemplating...
-                </Text>
-              </>
-            )}
+            <ActivityIndicator size="small" color="#D4A017" />
+            <Text style={styles.loadingText}>Sakha is contemplating...</Text>
           </Animated.View>
         ) : (
           <Animated.View
@@ -426,23 +400,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#B8AE98',
     fontStyle: 'italic',
-  },
-  errorText: {
-    fontSize: 14,
-    color: '#F97316',
-    fontStyle: 'italic',
-    textAlign: 'center',
-  },
-  retryButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(212,160,23,0.35)',
-  },
-  retryLabel: {
-    fontSize: 13,
-    color: '#D4A017',
   },
   questionCard: {
     backgroundColor: 'rgba(17,20,53,0.98)',

@@ -18,6 +18,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  withSequence,
   withTiming,
   Easing,
 } from 'react-native-reanimated';
@@ -110,14 +111,19 @@ export function KarmaResetScreen(): React.JSX.Element {
   );
 
   // Fade-in every time `phase` changes — gives the illusion of a
-  // smooth "clip-path" sweep like the web version.
+  // smooth "clip-path" sweep like the web version. `withSequence`
+  // ensures the 0 frame actually paints before the timing animates
+  // back to 1 (a bare `value = 0; value = withTiming(1)` would coalesce
+  // and skip the fade).
   const fade = useSharedValue(1);
   useEffect(() => {
-    fade.value = 0;
-    fade.value = withTiming(1, {
-      duration: 600,
-      easing: Easing.bezier(0, 0.8, 0.2, 1),
-    });
+    fade.value = withSequence(
+      withTiming(0, { duration: 0 }),
+      withTiming(1, {
+        duration: 600,
+        easing: Easing.bezier(0, 0.8, 0.2, 1),
+      }),
+    );
   }, [phase, fade]);
 
   const fadeStyle = useAnimatedStyle(() => ({ opacity: fade.value }));
