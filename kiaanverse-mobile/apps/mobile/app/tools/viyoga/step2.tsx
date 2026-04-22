@@ -129,7 +129,7 @@ function IntensitySlider({ value, onChange }: IntensitySliderProps): React.JSX.E
 
 export default function ViyogaStep2(): React.JSX.Element {
   const insets = useSafeAreaInsets();
-  const { updateAnswer, submitFlow, status } = useSacredFlow('viyoga');
+  const { updateAnswer, status } = useSacredFlow('viyoga');
 
   const [separatedFrom, setSeparatedFrom] = useState('');
   const [intensity, setIntensity] = useState<number>(DEFAULT_INTENSITY.value);
@@ -147,9 +147,7 @@ export default function ViyogaStep2(): React.JSX.Element {
     updateAnswer('intensity', currentPoint.eng);
     updateAnswer('wish_to_say', wishToSay.trim());
 
-    // Fire-and-forget — submitFlow flips status to 'calling'. The actual
-    // Sakha call fires on the loading screen, which owns the lifecycle.
-    void submitFlow();
+    // The loading screen owns the Sakha call — we just hand control.
     router.push('/tools/viyoga/loading' as never);
   };
 
