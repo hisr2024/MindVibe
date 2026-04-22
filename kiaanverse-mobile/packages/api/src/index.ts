@@ -30,6 +30,17 @@ export { createAppQueryClient, createAppPersister } from './queryClient';
 // Gita verse cache (offline-first)
 export { gitaCache } from './cache/gitaCache';
 
+// Ardha — response parser + canonical pillar metadata (shared with UI)
+export {
+  parseArdhaResponse,
+  humaniseEmotion,
+  ARDHA_SECTIONS,
+  ARDHA_SECTION_KEYS,
+  type ArdhaSectionKey,
+  type ArdhaSectionMeta,
+  type ParsedArdhaSection,
+} from './ardha/parser';
+
 // Subscription (4-tier: free/bhakta/sadhak/siddha)
 // NOTE: The lowercase 'SubscriptionTier' from constants.ts is exposed here as
 // 'SubscriptionPlanId' to avoid colliding with the uppercase
@@ -124,6 +135,7 @@ export type {
   ViyogaResponse,
   ArdhaResult,
   ArdhaReframeResponse,
+  ArdhaStructuredResponse,
   DeepInsight,
   DeepInsightsSummary,
   GunaBalance,
@@ -192,6 +204,7 @@ export {
   useViyogaGuide,
   useViyogaChat,
   useArdhaReframe,
+  useArdhaStructuredReframe,
   useMeditationTracks,
   useDeepInsights,
   useGunaBalance,

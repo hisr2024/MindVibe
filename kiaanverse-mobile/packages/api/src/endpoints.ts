@@ -471,6 +471,25 @@ export const api = {
         thought: situation,
         depth: 'quick',
       }),
+    /**
+     * Structured reframe call used by the 2-screen Ardha flow
+     * (tools/ardha/index.tsx → tools/ardha/result.tsx). Returns the full
+     * backend payload — raw `response`, `ardha_analysis`, `compliance`,
+     * `sources` — so the client can parse it into the 5-pillar accordion.
+     *
+     * `sessionId` opts the caller into the backend's session memory
+     * (routes/ardha.py stores up to 10 turns under that id) so a follow-up
+     * reframe can build on the previous one.
+     */
+    reframeStructured: (
+      thought: string,
+      opts?: { depth?: 'quick' | 'deep' | 'quantum'; sessionId?: string },
+    ) =>
+      apiClient.post('/api/ardha/reframe', {
+        thought,
+        depth: opts?.depth ?? 'quick',
+        ...(opts?.sessionId ? { sessionId: opts.sessionId } : {}),
+      }),
   },
 
   /** Meditation tracks for Vibe Player */
