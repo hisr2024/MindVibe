@@ -132,13 +132,13 @@ export default function ArdhaResultScreen(): React.JSX.Element {
   }, [router]);
 
   const handleJournal = useCallback(() => {
-    if (!payload) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push({
-      pathname: '/journal/new',
-      params: { seed: payload.fullText, source: 'ardha' },
-    });
-  }, [payload, router]);
+    // journal/new.tsx doesn't currently read a seed param, so we route
+    // there plainly rather than promising a pre-fill that doesn't happen.
+    // The Copy button above is the explicit path to carry the reframe
+    // text into any journal, chat, or notes app.
+    router.push('/journal/new');
+  }, [router]);
 
   const handleReframeAgain = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -153,6 +153,12 @@ export default function ArdhaResultScreen(): React.JSX.Element {
 
   const sections = payload.sections;
   const analysis = payload.analysis;
+  // Crisis path: backend returns a compassionate support message with no
+  // pillar headings. Rendering it inside the accordion buries it behind
+  // a chevron under an unrelated "Dharma Alignment" label — show it
+  // directly instead, and hide the Expand/Collapse/Full-Text controls
+  // that don't apply to a single plain paragraph.
+  const isCrisis = analysis.crisisDetected;
 
   return (
     <DivineBackground variant="cosmic" style={styles.root}>
@@ -207,7 +213,7 @@ export default function ArdhaResultScreen(): React.JSX.Element {
             </View>
           </View>
 
-          <View style={styles.controlsRow}>
+          <View style={[styles.controlsRow, isCrisis && styles.hidden]}>
             {[
               { key: 'expand', label: 'Expand All', onPress: handleExpandAll },
               { key: 'collapse', label: 'Collapse All', onPress: handleCollapseAll },
@@ -231,8 +237,12 @@ export default function ArdhaResultScreen(): React.JSX.Element {
             ))}
           </View>
 
-          {/* Sections OR full text */}
-          {expandMode === 'full_text' ? (
+          {/* Sections OR full text OR crisis body */}
+          {isCrisis ? (
+            <View style={styles.crisisBlock}>
+              <Text style={styles.crisisBody}>{payload.fullText}</Text>
+            </View>
+          ) : expandMode === 'full_text' ? (
             <View style={styles.fullTextBlock}>
               <Text style={styles.fullTextBody}>{payload.fullText}</Text>
             </View>
@@ -297,14 +307,20 @@ export default function ArdhaResultScreen(): React.JSX.Element {
             <Text style={styles.analysisHeader}>ARDHA Analysis</Text>
           </View>
 
-          {analysis.detected ? (
+          {analysis.detected && !isCrisis ? (
             <View style={styles.detectedRow}>
               <Text style={styles.detectedLabel}>Detected: </Text>
               <Text style={styles.detectedValue}>{analysis.detected}</Text>
             </View>
           ) : null}
 
-          {analysis.pillars.length > 0 ? (
+          {isCrisis ? (
+            <Text style={styles.crisisCareLine}>
+              ARDHA has paused reframing. What you are feeling deserves direct,
+              compassionate support — please reach out to the people and helplines
+              listed above.
+            </Text>
+          ) : analysis.pillars.length > 0 ? (
             analysis.pillars.map((pillar, i) => (
               <View key={`${pillar.badge}-${i}`} style={styles.analysisPillarRow}>
                 <View style={styles.analysisPillarBadge}>
@@ -334,7 +350,7 @@ export default function ArdhaResultScreen(): React.JSX.Element {
             </Text>
           )}
 
-          {payload.compliance.maxScore > 0 ? (
+          {!isCrisis && payload.compliance.maxScore > 0 ? (
             <Text style={styles.complianceLine}>
               Compliance {payload.compliance.score}/{payload.compliance.maxScore}
               {payload.fallback ? ' · template fallback' : ''}
@@ -538,6 +554,29 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: colors.text.primary,
   },
+
+  // ── Crisis render ──────────────────────────────────────────────────
+  // Plain paragraph style with a soft warning tint, no accordion.
+  crisisBlock: {
+    backgroundColor: 'rgba(192,57,43,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(192,57,43,0.35)',
+    borderRadius: radii.md,
+    padding: spacing.md,
+  },
+  crisisBody: {
+    fontFamily: fontFamily.body,
+    fontSize: 15,
+    lineHeight: 24,
+    color: colors.text.primary,
+  },
+  crisisCareLine: {
+    fontFamily: fontFamily.scriptureItalic,
+    fontSize: 13,
+    lineHeight: 20,
+    color: colors.text.secondary,
+  },
+  hidden: { display: 'none' },
 
   emptyBlock: {
     paddingVertical: spacing.lg,
