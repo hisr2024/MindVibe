@@ -53,6 +53,7 @@ export {
   setIapAccountTag,
   openManageSubscription,
   IAPError,
+  isSubscriptionUnavailableError,
   type IAPProduct,
   type PurchaseResult,
 } from './subscription';

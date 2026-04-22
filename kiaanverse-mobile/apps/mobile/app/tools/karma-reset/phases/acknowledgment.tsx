@@ -55,6 +55,23 @@ import { KarmaPhaseTracker } from '../../../../components/karma-reset/KarmaPhase
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+/**
+ * Two-column card grid width.
+ *
+ *   SCREEN_WIDTH − (horizontal padding × 2) − (column gap)
+ *   ─────────────────────────────────────────────────────── = card width
+ *                         2
+ *
+ * Uses the UI kit tokens so the calculation tracks design changes:
+ * `spacing.lg` is the outer ScrollView padding on each side and
+ * `spacing.sm` is the gap between the two columns, matching the
+ * grid container's `gap`. Using a concrete pixel width (rather than
+ * `width: '47%'` inside a nested Animated.View wrapper, which
+ * previously resolved against the wrapper's intrinsic width) guarantees
+ * the cards are wide enough for Devanagari script and line up flush.
+ */
+const CARD_WIDTH = Math.floor((SCREEN_WIDTH - spacing.lg * 2 - spacing.sm) / 2);
+
 // ---------------------------------------------------------------------------
 // Shadripu — The Six Enemies of the Mind
 // ---------------------------------------------------------------------------
@@ -62,45 +79,51 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const KARMIC_PATTERNS: readonly KarmicPattern[] = [
   {
     id: 'kama',
-    sanskrit: 'काम (Kāma)',
+    sanskrit: 'काम',
+    romanName: 'Kāma',
     english: 'Desire / Attachment',
     icon: '🔥',
     description: 'Clinging to outcomes, people, or possessions that bind the soul',
   },
   {
     id: 'krodha',
-    sanskrit: 'क्रोध (Krodha)',
+    sanskrit: 'क्रोध',
+    romanName: 'Krodha',
     english: 'Anger',
     icon: '⚡',
     description: 'Reactive fury that clouds judgment and harms sacred bonds',
   },
   {
     id: 'lobha',
-    sanskrit: 'लोभ (Lobha)',
+    sanskrit: 'लोभ',
+    romanName: 'Lobha',
     english: 'Greed',
     icon: '💰',
     description: 'Insatiable wanting that leaves the soul perpetually empty',
   },
   {
     id: 'moha',
-    sanskrit: 'मोह (Moha)',
+    sanskrit: 'मोह',
+    romanName: 'Moha',
     english: 'Delusion',
     icon: '🌀',
     description: 'Confusion about what is real, mistaking the transient for eternal',
   },
   {
     id: 'mada',
-    sanskrit: 'मद (Mada)',
+    sanskrit: 'मद',
+    romanName: 'Mada',
     english: 'Pride',
     icon: '👑',
     description: 'Ego-driven superiority that separates you from the divine in others',
   },
   {
     id: 'matsarya',
-    sanskrit: 'मात्सर्य (Mātsarya)',
+    sanskrit: 'मात्सर्य',
+    romanName: 'Mātsarya',
     english: 'Jealousy',
     icon: '🐍',
-    description: 'Resentment of another\'s fortune that poisons your own peace',
+    description: "Resentment of another's fortune that poisons your own peace",
   },
 ] as const;
 
@@ -196,17 +219,23 @@ export default function AcknowledgmentPhase(): React.JSX.Element {
 
           <SacredDivider />
 
-          {/* Pattern grid -- 2 columns of sacred cards */}
+          {/* Pattern grid — 2 columns of sacred cards.
+              The outer Animated.View carries the computed width so the
+              staggered entrance animation and the card itself share the
+              same footprint — preventing the Sanskrit text from wrapping
+              mid-word on narrow phones. */}
           <Animated.View entering={FadeIn.duration(600).delay(300)} style={styles.grid}>
             {KARMIC_PATTERNS.map((pattern, index) => (
               <Animated.View
                 key={pattern.id}
                 entering={FadeInDown.duration(400).delay(300 + index * 80)}
+                style={{ width: CARD_WIDTH }}
               >
                 <KarmicPatternCard
                   pattern={pattern}
                   isSelected={selectedPatternId === pattern.id}
                   onSelect={handleSelect}
+                  style={{ width: CARD_WIDTH }}
                 />
               </Animated.View>
             ))}

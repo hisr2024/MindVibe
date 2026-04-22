@@ -28,7 +28,7 @@ import {
   spacing,
   radii,
 } from '@kiaanverse/ui';
-import { useViyogaChat } from '@kiaanverse/api';
+import { useViyogaChat, isAuthError, isOfflineError, isApiError } from '@kiaanverse/api';
 
 interface ChatMessage {
   id: string;
@@ -80,20 +80,50 @@ export default function ViyogaScreen(): React.JSX.Element {
         setSessionId(result.session_id);
       }
 
+      // The backend may return an empty `assistant` field when KIAAN chose
+      // not to respond (e.g. safety tripwire). Fall back to a transparent
+      // note so the bubble never renders as empty whitespace.
+      const content =
+        result.message && result.message.trim().length > 0
+          ? result.message
+          : 'I received your words but cannot form a response right now. Please rephrase and try again.';
+
       const assistantMessage: ChatMessage = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
-        content: result.message,
+        content,
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch {
+    } catch (err) {
+      // Surface the real failure mode so the user can act on it — hiding
+      // every error behind the same "please try again" kaomoji masks
+      // auth / network / cold-start issues that feel like the app is broken.
+      let content: string;
+      if (isAuthError(err)) {
+        content =
+          'Your session has expired. Please sign in again to continue the dialogue with Viyoga.';
+      } else if (isOfflineError(err)) {
+        content =
+          'The network is unreachable. Check your connection and try once more.';
+      } else if (isApiError(err) && err.statusCode >= 500) {
+        content =
+          'KIAAN is waking from deep meditation (cold start). Please wait a moment and try again.';
+      } else if (err instanceof Error && err.message) {
+        content = `Viyoga could not respond: ${err.message}`;
+      } else {
+        content = 'Viyoga could not respond right now. Please try again.';
+      }
+
+      // eslint-disable-next-line no-console
+      console.error('[Viyoga] send failed', err);
+
       setMessages((prev) => [
         ...prev,
         {
           id: `error-${Date.now()}`,
           role: 'assistant',
-          content: 'The path to letting go sometimes pauses. Please try sharing again.',
+          content,
           timestamp: Date.now(),
         },
       ]);

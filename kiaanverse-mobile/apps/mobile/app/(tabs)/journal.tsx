@@ -1,18 +1,19 @@
 /**
- * Sacred Journal Hub — tabbed surface combining the daily diary with the
- * Sacred Journeys engine (षड्रिपु — the six inner enemies).
+ * Sacred Reflections — encrypted daily diary.
  *
- * Two tabs:
- *   1. "Sacred Journal" — the encrypted daily diary. Search, tag-filter,
- *      swipe-to-delete, long-press-to-edit, pull-to-refresh, FAB for new
- *      entries. Each entry's body is AES-256-GCM encrypted client-side
- *      (see apps/mobile/app/journal/new.tsx for key management).
- *   2. "Journeys" — lightweight hub for active Sacred Journeys with a CTA
- *      into the full catalog at /journey.
+ * Single-purpose surface: search, tag-filter, swipe-to-delete,
+ * long-press-to-edit, pull-to-refresh, FAB for new entries. Each entry's
+ * body is AES-256-GCM encrypted client-side (see
+ * apps/mobile/app/journal/new.tsx for key management).
+ *
+ * Journeys used to share this tab as a secondary sub-tab; they now live in
+ * their own top-level Journeys tab so the diary stays writing-first.
  *
  * The diary fuels KarmaLytix: mood tags, category tags, and encrypted
  * reflections feed the analytics engine (server-side reflection text is
- * never decrypted — only tags and metadata).
+ * never decrypted — only tags and metadata). A "KarmaLytix" header action
+ * links straight into the analytics surface so users aren't forced to dig
+ * through Profile to find their weekly mirror.
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
@@ -38,6 +39,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   Text,
   Input,
@@ -53,7 +55,6 @@ import { useJournalEntries, useDeleteJournal } from '@kiaanverse/api';
 import type { JournalEntry } from '@kiaanverse/api';
 import { useTranslation } from '@kiaanverse/i18n';
 import { JournalEntryCard } from '../../components/journal/JournalEntryCard';
-import { JourneysView } from '../../components/journal/JourneysView';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.4;
@@ -62,15 +63,68 @@ const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.4;
 // Constants
 // ---------------------------------------------------------------------------
 
-const HUB_TABS = ['journal', 'journeys'] as const;
-type HubTab = (typeof HUB_TABS)[number];
-
 /**
  * Category filters for the Sacred Journal. These operate on the entry's
  * `tags` array since the backend schema does not yet include a dedicated
  * `category` field — the diary remains the single source of truth.
  */
 const TAG_FILTERS = ['All', 'Gratitude', 'Reflection', 'Prayer', 'Dream', 'Insight'] as const;
+
+// ---------------------------------------------------------------------------
+// KarmaLytixBanner — promoted shortcut into the Sacred Mirror surface
+// ---------------------------------------------------------------------------
+
+/**
+ * KarmaLytix banner pinned above the entry list.
+ *
+ * The Sacred Mirror reads exclusively from journal metadata (mood tags,
+ * category tags, the weekly self-assessment) — the encrypted body is never
+ * decrypted server-side. Surfacing that guarantee inline makes the privacy
+ * contract visible at the point of trust, not buried in a settings screen.
+ */
+function KarmaLytixBanner({
+  onPress,
+}: {
+  onPress: () => void;
+}): React.JSX.Element {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel="Open KarmaLytix Sacred Mirror"
+      style={styles.karmaLytixWrap}
+    >
+      <LinearGradient
+        colors={['rgba(212,160,23,0.08)', 'rgba(212,160,23,0.18)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.karmaLytixGradient}
+      >
+        <View style={styles.karmaLytixLeft}>
+          {/* The mirror glyph mirrors the "Sacred Mirror" product name —
+              a small visual cue that costs us zero extra assets. */}
+          <Text style={styles.karmaLytixIcon} accessibilityElementsHidden>
+            {'\u{1FA9E}'}
+          </Text>
+          <View style={styles.karmaLytixTextWrap}>
+            <Text variant="label" color={colors.primary[500]}>
+              KarmaLytix
+            </Text>
+            <Text variant="caption" color={colors.text.secondary} style={styles.karmaLytixSub}>
+              KIAAN analyses your reflections
+            </Text>
+            <Text variant="caption" color={colors.text.muted} style={styles.karmaLytixPrivacy}>
+              {'\u{1F512}'} Metadata only · Content never read
+            </Text>
+          </View>
+        </View>
+        <Text variant="h3" color={colors.primary[500]} style={styles.karmaLytixArrow}>
+          {'›'}
+        </Text>
+      </LinearGradient>
+    </Pressable>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // SwipeableEntryCard — pan-to-reveal-delete
@@ -159,37 +213,6 @@ function SwipeableEntryCard({
         </Animated.View>
       </GestureDetector>
     </View>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// TabPill — hub-level tab switcher
-// ---------------------------------------------------------------------------
-
-function TabPill({
-  label,
-  isActive,
-  onPress,
-}: {
-  label: string;
-  isActive: boolean;
-  onPress: () => void;
-}): React.JSX.Element {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={[styles.tabPill, isActive && styles.tabPillActive]}
-      accessibilityRole="tab"
-      accessibilityState={{ selected: isActive }}
-    >
-      <Text
-        variant="label"
-        color={isActive ? colors.background.dark : colors.text.muted}
-        align="center"
-      >
-        {label}
-      </Text>
-    </Pressable>
   );
 }
 
@@ -297,6 +320,11 @@ function JournalView(): React.JSX.Element {
     router.push('/journal/new');
   }, [router]);
 
+  const handleOpenKarmaLytix = useCallback(() => {
+    void Haptics.selectionAsync();
+    router.push('/analytics');
+  }, [router]);
+
   const handleTagPress = useCallback((tag: string) => {
     void Haptics.selectionAsync();
     setActiveTag(tag);
@@ -390,6 +418,10 @@ function JournalView(): React.JSX.Element {
           keyExtractor={keyExtractor}
           contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 96 }]}
           showsVerticalScrollIndicator={false}
+          // The KarmaLytix banner sits above the entry list and scrolls
+          // with it so it stays out of the way on long diaries but is
+          // immediately visible when the user opens the tab.
+          ListHeaderComponent={<KarmaLytixBanner onPress={handleOpenKarmaLytix} />}
           ListEmptyComponent={renderEmpty}
           refreshControl={
             <RefreshControl
@@ -418,39 +450,22 @@ function JournalView(): React.JSX.Element {
 }
 
 // ---------------------------------------------------------------------------
-// Main Screen — tabbed hub
+// Main Screen — Sacred Reflections with a KarmaLytix shortcut
 // ---------------------------------------------------------------------------
 
-export default function JournalHubScreen(): React.JSX.Element {
+export default function JournalScreen(): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation('journal');
-  const [activeTab, setActiveTab] = useState<HubTab>('journal');
 
-  const handleTabChange = useCallback((tab: HubTab) => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setActiveTab(tab);
-  }, []);
-
+  // KarmaLytix is surfaced inline in the entry list header — see
+  // KarmaLytixBanner above — so this outer screen stays minimal and the
+  // Sacred Mirror CTA appears in the same scroll context as the user's
+  // reflections.
   return (
     <DivineBackground variant="sacred" style={styles.root}>
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <GoldenHeader title={t('hubTitle', 'Sacred Reflections')} />
-
-        {/* Hub-level tab switcher */}
-        <View style={styles.hubTabRow}>
-          <TabPill
-            label={t('sacredJournal', 'Sacred Journal')}
-            isActive={activeTab === 'journal'}
-            onPress={() => handleTabChange('journal')}
-          />
-          <TabPill
-            label={t('journeys', 'Journeys')}
-            isActive={activeTab === 'journeys'}
-            onPress={() => handleTabChange('journeys')}
-          />
-        </View>
-
-        {activeTab === 'journal' ? <JournalView /> : <JourneysView />}
+        <JournalView />
       </View>
     </DivineBackground>
   );
@@ -468,24 +483,45 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // -- Hub tabs --
-  hubTabRow: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.xs,
-  },
-  tabPill: {
-    flex: 1,
-    paddingVertical: spacing.sm,
-    borderRadius: 999,
-    backgroundColor: colors.alpha.goldLight,
+  // -- KarmaLytix banner (sits atop the entry list) --
+  karmaLytixWrap: {
+    marginBottom: spacing.sm,
+    borderRadius: 14,
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.alpha.goldMedium,
   },
-  tabPillActive: {
-    backgroundColor: colors.primary[500],
-    borderColor: colors.primary[500],
+  karmaLytixGradient: {
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  karmaLytixLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  karmaLytixIcon: {
+    fontSize: 28,
+    lineHeight: 32,
+  },
+  karmaLytixTextWrap: {
+    flex: 1,
+    gap: 2,
+  },
+  karmaLytixSub: {
+    marginTop: 2,
+  },
+  karmaLytixPrivacy: {
+    marginTop: 2,
+    fontStyle: 'italic',
+  },
+  karmaLytixArrow: {
+    paddingLeft: spacing.xs,
   },
 
   // -- Journal view --

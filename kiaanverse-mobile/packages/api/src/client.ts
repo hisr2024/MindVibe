@@ -163,10 +163,16 @@ function createApiClient(): AxiosInstance {
     withCredentials: true,
     headers: {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
       'X-Client': 'kiaanverse-mobile',
       'X-Client-Version': '1.0.0',
     },
   });
+
+  if (typeof __DEV__ !== 'undefined' && __DEV__) {
+    // eslint-disable-next-line no-console
+    console.log(`[API] baseURL=${API_CONFIG.baseURL} timeout=${API_CONFIG.timeout}ms`);
+  }
 
   // -----------------------------------------------------------------------
   // Request interceptor: attach JWT + __DEV__ logging
@@ -180,8 +186,13 @@ function createApiClient(): AxiosInstance {
 
       if (typeof __DEV__ !== 'undefined' && __DEV__) {
         (config as RequestConfigWithMeta)._startTime = Date.now();
+        // Include the absolute URL so misconfigured baseURLs are obvious at a
+        // glance, and flag missing auth which is the most common "why does
+        // the chat return fallback text?" root cause.
+        const fullUrl = `${config.baseURL ?? ''}${config.url ?? ''}`;
+        const auth = token ? 'Bearer ***' : 'NONE';
         // eslint-disable-next-line no-console
-        console.log(`→ ${config.method?.toUpperCase()} ${config.url}`);
+        console.log(`→ ${config.method?.toUpperCase()} ${fullUrl}  auth=${auth}`);
       }
 
       return config;
@@ -225,12 +236,25 @@ function createApiClient(): AxiosInstance {
       const originalRequest = error.config as RequestConfigWithMeta | undefined;
       if (!originalRequest) return Promise.reject(wrapAxiosError(error));
 
-      // __DEV__ error logging
+      // __DEV__ error logging — surface the body so callers can see the real
+      // FastAPI detail (e.g. "thought is required") instead of a generic
+      // fallback string from the UI layer.
       if (typeof __DEV__ !== 'undefined' && __DEV__) {
         const duration = originalRequest._startTime ? Date.now() - originalRequest._startTime : 0;
         const status = error.response?.status ?? 'NETWORK';
+        const fullUrl = `${originalRequest.baseURL ?? ''}${originalRequest.url ?? ''}`;
+        let bodyPreview = '';
+        try {
+          const body = error.response?.data;
+          if (body !== undefined) {
+            const serialised = typeof body === 'string' ? body : JSON.stringify(body);
+            bodyPreview = ` body=${serialised.slice(0, 400)}`;
+          }
+        } catch {
+          bodyPreview = '';
+        }
         // eslint-disable-next-line no-console
-        console.log(`← ${status} ${originalRequest.url} (${duration}ms) ERROR`);
+        console.log(`← ${status} ${fullUrl} (${duration}ms) ERROR${bodyPreview}`);
       }
 
       // Don't process errors on the refresh endpoint itself to avoid infinite loops

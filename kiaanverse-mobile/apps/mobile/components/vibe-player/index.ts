@@ -37,3 +37,5 @@ export {
   DailyVerseBanner,
   type DailyVerseBannerProps,
 } from './DailyVerseBanner';
+export { GitaBrowser } from './GitaBrowser';
+export { NowPlayingSection } from './NowPlayingSection';

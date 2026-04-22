@@ -198,20 +198,80 @@ export function useGitaChapter(chapterId: number): UseQueryResult<ChapterDetail>
   });
 }
 
+/**
+ * A verse is considered "placeholder" when the seed corpus has not yet been
+ * populated with real content. The seed generator wrote `sanskrit: "॥ X.Y ॥"`
+ * and `english: "Bhagavad Gita Chapter X, Verse Y teaches wisdom on <theme>."`
+ * for most verses; the backend returns that text verbatim. Treat those rows
+ * as missing so the UI can show a real fallback instead of the generated
+ * copy — otherwise the home screen literally reads
+ * "teaches wisdom on devotion" in place of the shloka.
+ */
+function isPlaceholderVerse(v: {
+  sanskrit?: string | null;
+  english?: string | null;
+  transliteration?: string | null;
+}): boolean {
+  const eng = (v.english ?? '').toLowerCase();
+  const sanskrit = (v.sanskrit ?? '').trim();
+  const translit = (v.transliteration ?? '').trim();
+  if (eng.includes('teaches wisdom on')) return true;
+  if (/^verse \d+\.\d+$/i.test(translit)) return true;
+  // Sanskrit that is just the verse-number marker "॥ 12.6 ॥" — shorter than
+  // any real shloka, contains only digits, the danda character, and spaces.
+  if (/^॥\s*\d+\.\d+\s*॥$/u.test(sanskrit)) return true;
+  return false;
+}
+
+/** Real BG 2.47 used as the last-resort fallback when the requested verse
+ *  is a seed-data placeholder. This is the verse every Gita-reader knows —
+ *  "karmaṇy-evādhikāras te mā phaleṣhu kadāchana". */
+const BG_2_47_FALLBACK: GitaVerse = {
+  id: '2.47',
+  chapter: 2,
+  verse: 47,
+  sanskrit:
+    'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन।\nमा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि॥',
+  transliteration:
+    "karmaṇy-evādhikāras te mā phaleṣhu kadāchana\nmā karma-phala-hetur bhūr mā te saṅgo 'stv akarmaṇi",
+  translation:
+    'You have the right to perform your prescribed duties, but you are not entitled to the fruits of your actions. Never consider yourself to be the cause of the results, nor be attached to inaction.',
+};
+
 export function useGitaVerse(chapter: number, verse: number): UseQueryResult<GitaVerse> {
   return useQuery({
     queryKey: queryKeys.gitaVerse(chapter, verse),
     queryFn: () =>
       fetchWithGitaCache(`verse:${chapter}:${verse}`, async () => {
         const { data } = await api.gita.verse(chapter, verse);
-        const raw = data as { verse: { chapter: number; verse: number; verse_id: string; sanskrit: string; english: string; hindi: string; theme: string } };
+        // The backend may or may not include transliteration (it is in the
+        // Pydantic VerseSummary but not VerseDetail as of today); read it
+        // either way so the UI picks it up once the backend ships it.
+        const raw = data as {
+          verse: {
+            chapter: number;
+            verse: number;
+            verse_id: string;
+            sanskrit: string;
+            english: string;
+            hindi: string;
+            theme: string;
+            transliteration?: string | null;
+          };
+        };
         const v = raw.verse;
+        if (isPlaceholderVerse(v)) {
+          // Remap to BG 2.47 rather than returning the placeholder. The
+          // user sees a real shloka; analytics can still detect the remap
+          // via the returned `id` differing from the requested chapter.verse.
+          return BG_2_47_FALLBACK;
+        }
         return {
           id: v.verse_id,
           chapter: v.chapter,
           verse: v.verse,
           sanskrit: v.sanskrit,
-          transliteration: '',
+          transliteration: v.transliteration ?? '',
           translation: v.english,
         } as GitaVerse;
       }),
@@ -1294,12 +1354,59 @@ export function useArdhaReframe(): UseMutationResult<ArdhaReframeResponse, Error
 // Meditation / Vibe Player
 // ---------------------------------------------------------------------------
 
+/**
+ * Turn whatever the backend returned for `audioUrl` into an absolute URL the
+ * native player can actually fetch. Today the meditation backend returns
+ * relative paths like `"/audio/om-chanting.mp3"` — those are useless on
+ * device because the native HTTP stack has no baseURL to resolve against.
+ *
+ * - absolute `http(s)://` → kept as-is
+ * - empty / missing      → returned as empty string (screen treats as
+ *                          "coming soon" and skips TrackPlayer.add)
+ * - relative             → resolved against API_CONFIG.baseURL so that once
+ *                          the backend mounts a static `/audio/*` route the
+ *                          mobile app automatically starts playing without
+ *                          needing another release.
+ */
+function _normalizeTrackAudioUrl(raw: unknown): string {
+  if (typeof raw !== 'string') return '';
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) return '';
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  // Relative path — prepend the configured API base. Strip a leading slash
+  // so we don't double it when baseURL already ends with one.
+  const base = API_CONFIG.baseURL.replace(/\/$/, '');
+  const path = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  return `${base}${path}`;
+}
+
 export function useMeditationTracks(category?: string): UseQueryResult<MeditationTrack[]> {
   return useQuery({
     queryKey: queryKeys.meditationTracks(category),
     queryFn: async () => {
       const { data } = await api.meditation.tracks(category);
-      return data as MeditationTrack[];
+      const raw = Array.isArray(data) ? data : [];
+      // Normalise `audioUrl` and defensively coerce the other fields — the
+      // backend sometimes ships null / missing values that would otherwise
+      // break TrackPlayer.add() at play time instead of surfacing a clean
+      // "coming soon" message at list-render time.
+      return raw.map((t): MeditationTrack => {
+        const row = t as Record<string, unknown>;
+        return {
+          id: String(row.id ?? ''),
+          title: String(row.title ?? 'Untitled'),
+          artist: String(row.artist ?? 'KIAAN Vibe'),
+          duration: Number(row.duration ?? 0),
+          category: (row.category as MeditationTrack['category']) ?? 'meditation',
+          audioUrl: _normalizeTrackAudioUrl(row.audioUrl ?? row.audio_url),
+          ...(typeof row.artworkUrl === 'string' && row.artworkUrl.length > 0
+            ? { artworkUrl: row.artworkUrl }
+            : {}),
+          ...(typeof row.description === 'string'
+            ? { description: row.description }
+            : {}),
+        };
+      });
     },
     staleTime: 1000 * 60 * 30,
   });

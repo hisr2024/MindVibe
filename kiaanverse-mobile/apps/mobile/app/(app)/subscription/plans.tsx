@@ -39,6 +39,7 @@ import {
 import {
   apiClient,
   getProducts,
+  isSubscriptionUnavailableError,
   purchaseSubscription,
   restorePurchases,
   TIER_CONFIGS,
@@ -162,6 +163,18 @@ export default function SubscriptionPlansScreen(): React.JSX.Element {
         },
         onError: (message) => {
           if (message === 'Purchase cancelled.') return;
+          // Distinguish "Play Store hasn't activated the product yet" from
+          // real purchase failures so users see a reassuring "Coming soon"
+          // rather than a scary "Purchase unsuccessful" on tiers that are
+          // still being configured server-side.
+          if (isSubscriptionUnavailableError(message)) {
+            Alert.alert(
+              'Coming soon 🙏',
+              'This plan will be available very soon. Thank you for your patience.',
+              [{ text: 'OK' }],
+            );
+            return;
+          }
           Alert.alert('Purchase unsuccessful', message);
         },
       });

@@ -61,7 +61,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 
   android: {
     package: 'com.kiaanverse.app',
-    versionCode: 19,
+    versionCode: 20,
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       // COSMIC_VOID — canonical KIAANVERSE cosmic backdrop
@@ -161,7 +161,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
 
   extra: {
-    apiBaseUrl: process.env.API_BASE_URL ?? 'http://localhost:8000',
+    // EAS injects EXPO_PUBLIC_API_BASE_URL at build time; the unprefixed
+    // API_BASE_URL is only visible during config evaluation, not at runtime.
+    // Read both so `Constants.expoConfig.extra.apiBaseUrl` is usable as a
+    // diagnostic if anything ever reads from it. Production fallback is the
+    // Render deployment rather than localhost, so a misconfigured build still
+    // hits a real backend.
+    apiBaseUrl:
+      process.env.EXPO_PUBLIC_API_BASE_URL ??
+      process.env.API_BASE_URL ??
+      'https://mindvibe-api.onrender.com',
     sentryDsn: process.env.SENTRY_DSN ?? '',
     eas: {
       projectId: '1f72d91b-2336-4b58-a641-5589317cc36c',

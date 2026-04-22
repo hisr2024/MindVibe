@@ -40,6 +40,7 @@ import { useSubscriptionStore, type SubscriptionTier } from '@kiaanverse/store';
 import {
   initializeIAP,
   getProducts,
+  isSubscriptionUnavailableError,
   purchaseSubscription,
   restorePurchases,
   type IAPProduct,
@@ -362,6 +363,20 @@ export default function SubscriptionScreen(): React.JSX.Element {
             }
           },
           onError: (errorMsg) => {
+            // "Play Store hasn't activated the product yet" is not a
+            // purchase failure — it's a store configuration gap. Show a
+            // friendlier "coming soon" alert and clear the error status
+            // so the CTA returns to its idle state rather than staying
+            // stuck on a red error banner.
+            if (isSubscriptionUnavailableError(errorMsg)) {
+              setPurchaseStatus('idle');
+              Alert.alert(
+                'Coming soon 🙏',
+                'This plan will be available very soon. Thank you for your patience.',
+                [{ text: 'OK' }],
+              );
+              return;
+            }
             setPurchaseStatus('error', errorMsg);
           },
         });

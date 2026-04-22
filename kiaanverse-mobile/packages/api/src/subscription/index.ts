@@ -25,6 +25,7 @@ export {
   setIapAccountTag,
   openManageSubscription,
   IAPError,
+  isSubscriptionUnavailableError,
   type IAPProduct,
   type PurchaseResult,
   type ReceiptVerificationPayload,
