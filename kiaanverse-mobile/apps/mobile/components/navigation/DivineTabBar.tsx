@@ -1,8 +1,16 @@
 /**
  * DivineTabBar — Kiaanverse bottom tab bar (5 sacred doorways).
  *
- * Matches kiaanverse.com reference exactly:
- *   Home · Chat · Shlokas · Journal · Profile
+ * Tab order:
+ *   Home · Sakha · Journeys · Journal · Profile
+ *
+ * Shlokas used to occupy slot 3; it now lives inside the Vibe Player (via
+ * the Daily Verse banner) and is still reachable through the legacy
+ * `/(tabs)/shlokas/*` routes. Journeys was promoted from a sub-tab of
+ * Journal to its own top-level slot so the षड्रिपु flow is one tap away.
+ * The icon list is recycled from the existing set — ChakraColumn (was
+ * Journal) now signals the journey progression, and Manuscript (was
+ * Shlokas) signals the written journal.
  *
  * Visual specification:
  * - Dark navy background: rgba(5,7,20,0.97).
@@ -73,9 +81,14 @@ interface SacredTab {
 
 const TABS: ReadonlyArray<SacredTab> = [
   { name: 'index', label: 'Home', Icon: GopuramIcon },
-  { name: 'chat', label: 'Chat', Icon: LotusDialogIcon },
-  { name: 'shlokas', label: 'Shlokas', Icon: ManuscriptIcon },
-  { name: 'journal', label: 'Journal', Icon: ChakraColumnIcon },
+  { name: 'chat', label: 'Sakha', Icon: LotusDialogIcon },
+  // ChakraColumn's seven stacked chakras read as progression / ascent —
+  // the visual cue for the षड्रिपु journey sequence.
+  { name: 'journeys', label: 'Journeys', Icon: ChakraColumnIcon },
+  // ManuscriptIcon carries the written / reflection meaning. It was
+  // originally used for Shlokas; now that Shlokas has moved inside the
+  // Vibe Player, the manuscript glyph fits the diary better.
+  { name: 'journal', label: 'Journal', Icon: ManuscriptIcon },
   { name: 'profile', label: 'Profile', Icon: MeditatorIcon },
 ] as const;
 

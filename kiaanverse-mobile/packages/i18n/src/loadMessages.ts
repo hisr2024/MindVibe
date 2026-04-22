@@ -55,8 +55,12 @@ const englishMessages: Record<TranslationNamespace, TranslationMessages> = {
   },
   navigation: {
     home: 'Home',
-    chat: 'Chat',
+    chat: 'Sakha',
+    // `shlokas` is kept for back-compat — the route still exists and is
+    // reachable from the Vibe Player's Daily Verse banner, but it is no
+    // longer a bottom-tab item.
     shlokas: 'Shlokas',
+    journeys: 'Journeys',
     journal: 'Journal',
     profile: 'Profile',
   },

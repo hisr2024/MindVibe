@@ -1,18 +1,19 @@
 /**
- * Sacred Journal Hub — tabbed surface combining the daily diary with the
- * Sacred Journeys engine (षड्रिपु — the six inner enemies).
+ * Sacred Reflections — encrypted daily diary.
  *
- * Two tabs:
- *   1. "Sacred Journal" — the encrypted daily diary. Search, tag-filter,
- *      swipe-to-delete, long-press-to-edit, pull-to-refresh, FAB for new
- *      entries. Each entry's body is AES-256-GCM encrypted client-side
- *      (see apps/mobile/app/journal/new.tsx for key management).
- *   2. "Journeys" — lightweight hub for active Sacred Journeys with a CTA
- *      into the full catalog at /journey.
+ * Single-purpose surface: search, tag-filter, swipe-to-delete,
+ * long-press-to-edit, pull-to-refresh, FAB for new entries. Each entry's
+ * body is AES-256-GCM encrypted client-side (see
+ * apps/mobile/app/journal/new.tsx for key management).
+ *
+ * Journeys used to share this tab as a secondary sub-tab; they now live in
+ * their own top-level Journeys tab so the diary stays writing-first.
  *
  * The diary fuels KarmaLytix: mood tags, category tags, and encrypted
  * reflections feed the analytics engine (server-side reflection text is
- * never decrypted — only tags and metadata).
+ * never decrypted — only tags and metadata). A "KarmaLytix" header action
+ * links straight into the analytics surface so users aren't forced to dig
+ * through Profile to find their weekly mirror.
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
@@ -53,7 +54,6 @@ import { useJournalEntries, useDeleteJournal } from '@kiaanverse/api';
 import type { JournalEntry } from '@kiaanverse/api';
 import { useTranslation } from '@kiaanverse/i18n';
 import { JournalEntryCard } from '../../components/journal/JournalEntryCard';
-import { JourneysView } from '../../components/journal/JourneysView';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.4;
@@ -61,9 +61,6 @@ const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.4;
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
-
-const HUB_TABS = ['journal', 'journeys'] as const;
-type HubTab = (typeof HUB_TABS)[number];
 
 /**
  * Category filters for the Sacred Journal. These operate on the entry's
@@ -159,37 +156,6 @@ function SwipeableEntryCard({
         </Animated.View>
       </GestureDetector>
     </View>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// TabPill — hub-level tab switcher
-// ---------------------------------------------------------------------------
-
-function TabPill({
-  label,
-  isActive,
-  onPress,
-}: {
-  label: string;
-  isActive: boolean;
-  onPress: () => void;
-}): React.JSX.Element {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={[styles.tabPill, isActive && styles.tabPillActive]}
-      accessibilityRole="tab"
-      accessibilityState={{ selected: isActive }}
-    >
-      <Text
-        variant="label"
-        color={isActive ? colors.background.dark : colors.text.muted}
-        align="center"
-      >
-        {label}
-      </Text>
-    </Pressable>
   );
 }
 
@@ -418,39 +384,48 @@ function JournalView(): React.JSX.Element {
 }
 
 // ---------------------------------------------------------------------------
-// Main Screen — tabbed hub
+// Main Screen — Sacred Reflections with a KarmaLytix shortcut
 // ---------------------------------------------------------------------------
 
-export default function JournalHubScreen(): React.JSX.Element {
+export default function JournalScreen(): React.JSX.Element {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { t } = useTranslation('journal');
-  const [activeTab, setActiveTab] = useState<HubTab>('journal');
 
-  const handleTabChange = useCallback((tab: HubTab) => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setActiveTab(tab);
-  }, []);
+  const handleOpenKarmaLytix = useCallback(() => {
+    void Haptics.selectionAsync();
+    // Deep-link to the Sacred Mirror surface. Journal and KarmaLytix share
+    // the same source data (encrypted entries + tags + moods) so this is the
+    // natural companion surface, and the previous hub-tab UX buried it under
+    // Profile → Analytics.
+    router.push('/analytics');
+  }, [router]);
 
   return (
     <DivineBackground variant="sacred" style={styles.root}>
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <GoldenHeader title={t('hubTitle', 'Sacred Reflections')} />
 
-        {/* Hub-level tab switcher */}
-        <View style={styles.hubTabRow}>
-          <TabPill
-            label={t('sacredJournal', 'Sacred Journal')}
-            isActive={activeTab === 'journal'}
-            onPress={() => handleTabChange('journal')}
-          />
-          <TabPill
-            label={t('journeys', 'Journeys')}
-            isActive={activeTab === 'journeys'}
-            onPress={() => handleTabChange('journeys')}
-          />
+        {/* Header-level KarmaLytix shortcut — a single row above the diary
+            list. Styled like a subtle link rather than a primary CTA so it
+            doesn't compete with the "New Entry" FAB below. */}
+        <View style={styles.headerActions}>
+          <Pressable
+            onPress={handleOpenKarmaLytix}
+            accessibilityRole="button"
+            accessibilityLabel={t(
+              'openKarmaLytix',
+              'Open KarmaLytix Sacred Mirror',
+            )}
+            style={styles.karmaLytixLink}
+          >
+            <Text variant="caption" color={colors.primary[500]}>
+              {t('karmaLytixLink', 'KarmaLytix →')}
+            </Text>
+          </Pressable>
         </View>
 
-        {activeTab === 'journal' ? <JournalView /> : <JourneysView />}
+        <JournalView />
       </View>
     </DivineBackground>
   );
@@ -468,24 +443,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // -- Hub tabs --
-  hubTabRow: {
+  // -- Header actions (KarmaLytix shortcut) --
+  headerActions: {
     flexDirection: 'row',
-    gap: spacing.xs,
+    justifyContent: 'flex-end',
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.xs,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.xs,
   },
-  tabPill: {
-    flex: 1,
-    paddingVertical: spacing.sm,
-    borderRadius: 999,
-    backgroundColor: colors.alpha.goldLight,
+  karmaLytixLink: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xxs,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.alpha.goldMedium,
-  },
-  tabPillActive: {
-    backgroundColor: colors.primary[500],
-    borderColor: colors.primary[500],
+    backgroundColor: colors.alpha.goldLight,
   },
 
   // -- Journal view --
