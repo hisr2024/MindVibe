@@ -1,268 +1,180 @@
 /**
- * Viyoga — The Sacred Art of Letting Go
+ * Viyoga — Intro Screen
  *
- * Chat-based detachment guidance tool. Users share what they struggle
- * to release, and KIAAN responds with Gita-rooted wisdom on viyoga
- * (non-attachment). Messages are displayed as chat bubbles with
- * auto-scroll and a bottom input bar.
+ * "The Sacred Space of Longing"
+ *
+ * Golden tear drop breathes with a 2.4s sigh; title + subtitle fade up
+ * over 800ms after a brief pause so the screen arrives gently. The only
+ * action is "Enter this Space", which pushes into the separation-type
+ * selector at /tools/viyoga/step1.
  */
 
-import React, { useState, useCallback, useRef } from 'react';
-import {
-  View,
-  FlatList,
-  StyleSheet,
-  TextInput,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-import { useRouter } from 'expo-router';
-import { Send } from 'lucide-react-native';
-import {
-  Screen,
-  Text,
-  GoldenHeader,
-  colors,
-  spacing,
-  radii,
-} from '@kiaanverse/ui';
-import { useViyogaChat, isAuthError, isOfflineError, isApiError } from '@kiaanverse/api';
+import React, { useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withSequence,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
 
-interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: number;
-}
+// ── Golden tear drop — breathing, glowing ────────────────────────────────
 
-const WELCOME_TIMESTAMP = Date.now();
+function TearDrop(): React.JSX.Element {
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(0.8);
 
-export default function ViyogaScreen(): React.JSX.Element {
-  const router = useRouter();
-  const viyogaMutation = useViyogaChat();
-  const flatListRef = useRef<FlatList<ChatMessage>>(null);
+  useEffect(() => {
+    scale.value = withRepeat(
+      withSequence(
+        withTiming(1.08, { duration: 2400, easing: Easing.bezier(0.45, 0.05, 0.55, 0.95) }),
+        withTiming(1.0, { duration: 2400, easing: Easing.bezier(0.45, 0.05, 0.55, 0.95) }),
+      ),
+      -1,
+      false,
+    );
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(1.0, { duration: 2400 }),
+        withTiming(0.6, { duration: 2400 }),
+      ),
+      -1,
+      false,
+    );
+  }, [scale, opacity]);
 
-  const [input, setInput] = useState('');
-  const [sessionId, setSessionId] = useState<string | undefined>();
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content:
-        'Namaste. I am here to guide you through the sacred practice of Viyoga — non-attachment. ' +
-        'Share what you are struggling to let go of, and together we will find the wisdom within.',
-      timestamp: WELCOME_TIMESTAMP,
-    },
-  ]);
-
-  const handleSend = useCallback(async () => {
-    const text = input.trim();
-    if (!text || viyogaMutation.isPending) return;
-
-    const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: text,
-      timestamp: Date.now(),
-    };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-
-    try {
-      const result = await viyogaMutation.mutateAsync({
-        message: text,
-        ...(sessionId ? { sessionId } : {}),
-      });
-
-      if (!sessionId && result.session_id) {
-        setSessionId(result.session_id);
-      }
-
-      // The backend may return an empty `assistant` field when KIAAN chose
-      // not to respond (e.g. safety tripwire). Fall back to a transparent
-      // note so the bubble never renders as empty whitespace.
-      const content =
-        result.message && result.message.trim().length > 0
-          ? result.message
-          : 'I received your words but cannot form a response right now. Please rephrase and try again.';
-
-      const assistantMessage: ChatMessage = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content,
-        timestamp: Date.now(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err) {
-      // Surface the real failure mode so the user can act on it — hiding
-      // every error behind the same "please try again" kaomoji masks
-      // auth / network / cold-start issues that feel like the app is broken.
-      let content: string;
-      if (isAuthError(err)) {
-        content =
-          'Your session has expired. Please sign in again to continue the dialogue with Viyoga.';
-      } else if (isOfflineError(err)) {
-        content =
-          'The network is unreachable. Check your connection and try once more.';
-      } else if (isApiError(err) && err.statusCode >= 500) {
-        content =
-          'KIAAN is waking from deep meditation (cold start). Please wait a moment and try again.';
-      } else if (err instanceof Error && err.message) {
-        content = `Viyoga could not respond: ${err.message}`;
-      } else {
-        content = 'Viyoga could not respond right now. Please try again.';
-      }
-
-      // eslint-disable-next-line no-console
-      console.error('[Viyoga] send failed', err);
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `error-${Date.now()}`,
-          role: 'assistant',
-          content,
-          timestamp: Date.now(),
-        },
-      ]);
-    }
-  }, [input, sessionId, viyogaMutation]);
-
-  const renderMessage = useCallback(({ item }: { item: ChatMessage }) => (
-    <View
-      style={[
-        styles.bubble,
-        item.role === 'user' ? styles.userBubble : styles.assistantBubble,
-      ]}
-    >
-      <Text variant="body" color={colors.text.primary}>
-        {item.content}
-      </Text>
-    </View>
-  ), []);
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
 
   return (
-    <Screen edges={['top', 'left', 'right']}>
-      <GoldenHeader title="Viyoga" onBack={() => router.back()} />
-
-      <Animated.View entering={FadeInDown.duration(400)} style={styles.intro}>
-        <Text variant="body" color={colors.text.secondary} align="center">
-          The Sacred Art of Letting Go
-        </Text>
-        <Text variant="caption" color={colors.primary[300]} align="center">
-          BG 2.47 — "You have a right to perform your duty, but not to the fruits of action."
-        </Text>
-      </Animated.View>
-
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.chatContainer}
-        keyboardVerticalOffset={100}
-      >
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          renderItem={renderMessage}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.messageList}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-        />
-
-        {viyogaMutation.isPending ? (
-          <View style={styles.typingIndicator}>
-            <Text variant="caption" color={colors.primary[300]}>
-              Seeking wisdom...
-            </Text>
-          </View>
-        ) : null}
-
-        <View style={styles.inputRow}>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Share what you are holding onto..."
-            placeholderTextColor={colors.text.muted}
-            value={input}
-            onChangeText={setInput}
-            multiline
-            maxLength={2000}
-            returnKeyType="send"
-            onSubmitEditing={handleSend}
-          />
-          <Pressable
-            onPress={handleSend}
-            disabled={!input.trim() || viyogaMutation.isPending}
-            style={[styles.sendButton, { opacity: input.trim() ? 1 : 0.4 }]}
-            accessibilityLabel="Share message"
-            accessibilityRole="button"
-          >
-            <Send size={20} color={colors.primary[500]} />
-          </Pressable>
-        </View>
-      </KeyboardAvoidingView>
-    </Screen>
+    <Animated.View style={[s.tearWrap, animStyle]}>
+      <View style={s.tearGlow} />
+      <Text style={s.tearText}>💧</Text>
+    </Animated.View>
   );
 }
 
-const styles = StyleSheet.create({
-  intro: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
-    gap: spacing.xxs,
-  },
-  chatContainer: {
+// ── Screen ───────────────────────────────────────────────────────────────
+
+export default function ViyogaIntro(): React.JSX.Element {
+  const insets = useSafeAreaInsets();
+
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(20);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      opacity.value = withTiming(1, { duration: 800 });
+      translateY.value = withTiming(0, { duration: 800 });
+    }, 300);
+    return () => clearTimeout(t);
+  }, [opacity, translateY]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  const handleBegin = (): void => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push('/tools/viyoga/step1' as never);
+  };
+
+  return (
+    <View style={[s.screen, { paddingTop: insets.top + 24 }]}>
+      <Animated.View style={[s.content, animStyle]}>
+        <TearDrop />
+
+        <Text style={s.titleSkt}>वियोग</Text>
+        <Text style={s.titleEng}>The Sacred Space of Longing</Text>
+        <Text style={s.subtitle}>Even in separation, there is union</Text>
+      </Animated.View>
+
+      <View style={[s.footer, { paddingBottom: insets.bottom + 24 }]}>
+        <TouchableOpacity
+          style={s.beginBtn}
+          onPress={handleBegin}
+          accessibilityRole="button"
+          accessibilityLabel="Enter this Space"
+        >
+          <Text style={s.beginText}>Enter this Space</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+const s = StyleSheet.create({
+  screen: {
     flex: 1,
+    backgroundColor: '#030510',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  messageList: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.md,
-    gap: spacing.sm,
-  },
-  bubble: {
-    maxWidth: '80%',
-    padding: spacing.md,
-    borderRadius: radii.lg,
-  },
-  userBubble: {
-    alignSelf: 'flex-end',
-    backgroundColor: colors.alpha.goldMedium,
-    borderBottomRightRadius: radii.sm,
-  },
-  assistantBubble: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.background.surface,
-    borderBottomLeftRadius: radii.sm,
-  },
-  typingIndicator: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xs,
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    gap: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.alpha.whiteLight,
-    backgroundColor: colors.background.card,
-  },
-  textInput: {
+  content: {
     flex: 1,
-    fontSize: 16,
-    lineHeight: 22,
-    maxHeight: 100,
-    color: colors.text.primary,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radii.xl,
-    backgroundColor: colors.background.surface,
-  },
-  sendButton: {
-    width: 44,
-    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 32,
+  },
+  tearWrap: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 32,
+  },
+  tearGlow: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(212,160,23,0.08)',
+  },
+  tearText: {
+    fontSize: 64,
+  },
+  titleSkt: {
+    fontFamily: 'NotoSansDevanagari-Bold',
+    fontSize: 42,
+    color: '#D4A017',
+    lineHeight: 42 * 1.6,
+    textAlign: 'center',
+  },
+  titleEng: {
+    fontFamily: 'CrimsonText-Italic',
+    fontSize: 20,
+    color: 'rgba(240,235,225,0.9)',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  subtitle: {
+    fontFamily: 'CrimsonText-Italic',
+    fontSize: 15,
+    color: 'rgba(240,235,225,0.45)',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  footer: {
+    width: '100%',
+    paddingHorizontal: 24,
+  },
+  beginBtn: {
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.4)',
+    borderRadius: 28,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  beginText: {
+    fontFamily: 'CormorantGaramond-Italic',
+    fontSize: 18,
+    color: '#D4A017',
   },
 });
