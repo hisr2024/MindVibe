@@ -93,10 +93,10 @@ export interface SessionData {
   themes?: string[]
 }
 
-/** Health check response */
+/** Health check response — shape mirrors backend `/api/emotional-reset/health` */
 export interface HealthCheckResponse {
-  status: 'healthy' | 'unhealthy'
-  service: string
+  status: 'healthy' | 'disabled' | 'unhealthy'
+  feature: string
   version: string
 }
 

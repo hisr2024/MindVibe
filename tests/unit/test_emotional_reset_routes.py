@@ -60,8 +60,18 @@ class TestStepInput:
             StepInput(
                 session_id="test",
                 current_step=1,
-                user_input="x" * 201,  # Over 200 chars
+                user_input="x" * 2001,  # Over 2000 chars
             )
+
+    def test_input_under_max_length_accepted(self):
+        """Rich mobile context (emotion + intensity + free text + journey hints)
+        must fit without 422. Represents a realistic ~700 char payload."""
+        step_input = StepInput(
+            session_id="test",
+            current_step=1,
+            user_input="x" * 700,
+        )
+        assert len(step_input.user_input or "") == 700
 
     def test_step_too_low(self):
         """Test step number below minimum."""

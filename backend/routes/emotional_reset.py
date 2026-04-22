@@ -36,11 +36,17 @@ router = APIRouter(prefix="/api/emotional-reset", tags=["emotional-reset"])
 emotional_reset_service = EmotionalResetService()
 
 
+# Max length for user_input in step 1. Raised from 200 → 2000 to align with the
+# rich mobile flow (emotion + intensity + optional ~500 char context + optional
+# journey enrichment), matching karma_reset / voice / community endpoints.
+USER_INPUT_MAX_LENGTH = 2000
+
+
 class StepInput(BaseModel):
     """Input for processing a step."""
     session_id: str = Field(..., min_length=1, max_length=64)
     current_step: int = Field(..., ge=1, le=7)
-    user_input: str | None = Field(None, max_length=200)
+    user_input: str | None = Field(None, max_length=USER_INPUT_MAX_LENGTH)
 
     @field_validator('user_input')
     @classmethod
@@ -48,8 +54,10 @@ class StepInput(BaseModel):
         """Validate and sanitize user input."""
         if v is not None:
             v = v.strip()
-            if len(v) > 200:
-                raise ValueError("Input must be 200 characters or less")
+            if len(v) > USER_INPUT_MAX_LENGTH:
+                raise ValueError(
+                    f"Input must be {USER_INPUT_MAX_LENGTH} characters or less"
+                )
         return v
 
 

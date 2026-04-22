@@ -107,6 +107,7 @@ export default function MobileEmotionalResetPage() {
   const [aiResponse, setAiResponse] = useState<AIResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [crisis, setCrisis] = useState<string | null>(null)
 
   // Breath state
   const [breathComplete, setBreathComplete] = useState(false)
@@ -158,6 +159,7 @@ export default function MobileEmotionalResetPage() {
     setPhase(2)
     setIsLoading(true)
     setError(null)
+    setCrisis(null)
 
     try {
       // Start an emotional reset session
@@ -173,14 +175,35 @@ export default function MobileEmotionalResetPage() {
         // Personalisation is best-effort — never block the sacred flow
       }
 
-      // Process step 1 with user's emotion input + spiritual context
-      const emotionText = `I am feeling ${selectedEmotion.label.toLowerCase()} (${selectedEmotion.sanskrit}) at intensity ${intensity}/5.${userContext ? ` ${userContext}` : ''}${journeyEnrichment ? ` [Spiritual context: ${journeyEnrichment}]` : ''}`
+      // Process step 1 with user's emotion input + spiritual context.
+      // Defensive clamp: backend caps user_input at 2000 chars
+      // (backend/routes/emotional_reset.py::USER_INPUT_MAX_LENGTH). We trim
+      // each dynamic segment and hard-clip the final payload so a bloated
+      // personalisation context can never trigger a 422.
+      const header = `I am feeling ${selectedEmotion.label.toLowerCase()} (${selectedEmotion.sanskrit}) at intensity ${intensity}/5.`
+      const ctxSegment = userContext ? ` ${userContext.slice(0, 800)}` : ''
+      const journeySegment = journeyEnrichment
+        ? ` [Spiritual context: ${journeyEnrichment.slice(0, 600)}]`
+        : ''
+      const BACKEND_INPUT_LIMIT = 2000
+      const emotionText = `${header}${ctxSegment}${journeySegment}`.slice(0, BACKEND_INPUT_LIMIT)
 
       const stepData = await apiProcessStep(
         sessionData.session_id,
         1,
         emotionText
       )
+
+      // Crisis path: backend returns 200 OK with crisis_detected=true and a
+      // supportive crisis_response string. Render it directly instead of
+      // falling into the generic witness fallback.
+      if (stepData.crisis_detected) {
+        setCrisis(
+          stepData.crisis_response ||
+            'Your wellbeing comes first. If you are in crisis, please reach out to a trusted person or local emergency services.'
+        )
+        return
+      }
 
       // Try to parse as sectioned response
       const guidance = stepData.guidance || ''
@@ -449,8 +472,49 @@ export default function MobileEmotionalResetPage() {
               </MobileCard>
             )}
 
+            {/* Crisis path — safety first. We never advance to breathing from here. */}
+            {crisis && !isLoading && (
+              <MobileCard
+                variant="elevated"
+                className="mb-4 !p-5"
+              >
+                <p
+                  className="mb-3"
+                  style={{
+                    fontSize: '10px',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'var(--sacred-saffron-core, #F97316)',
+                    fontFamily: 'var(--font-ui, Outfit, sans-serif)',
+                  }}
+                >
+                  You are not alone
+                </p>
+                <p
+                  className="leading-relaxed whitespace-pre-line"
+                  style={{
+                    color: 'var(--sacred-text-primary, #EDE8DC)',
+                    fontSize: '15px',
+                    fontFamily: 'var(--font-ui, Outfit, sans-serif)',
+                    lineHeight: 1.7,
+                  }}
+                >
+                  {crisis}
+                </p>
+                <MobileButton
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  onClick={() => router.push('/m')}
+                  className="mt-5"
+                >
+                  Return to Sakha
+                </MobileButton>
+              </MobileCard>
+            )}
+
             {/* AI Response */}
-            {aiResponse && !isLoading && (
+            {!crisis && aiResponse && !isLoading && (
               <div className="space-y-5">
                 {/* WITNESS section */}
                 <div>
