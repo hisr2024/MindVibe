@@ -339,8 +339,8 @@ class TestSessionProcessing:
         mock_result.scalar_one_or_none.return_value = mock_session
         mock_db.execute = AsyncMock(return_value=mock_result)
 
-        # Input too long
-        long_input = "x" * 250
+        # Input too long (limit is 2000 chars)
+        long_input = "x" * 2500
         result = await emotional_reset_service.process_step(
             db=mock_db,
             session_id="test-session",

@@ -1292,12 +1292,12 @@ Keep each section under 25 words. Warm, compassionate. Secular language. No scri
                     "pause_session": True,
                 }
 
-            # Validate input length
-            if len(user_input) > 200:
+            # Validate input length (keep in sync with StepInput.USER_INPUT_MAX_LENGTH)
+            if len(user_input) > 2000:
                 return {
                     "success": False,
                     "error": "input_too_long",
-                    "message": "Please keep your response under 200 characters. 💙",
+                    "message": "Please keep your response under 2000 characters. 💙",
                 }
 
             session.emotions_input = user_input
