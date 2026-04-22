@@ -1,30 +1,42 @@
 /**
  * KIAAN Vibe — Sacred Sound Library
  *
- * Layout (top → bottom):
- *   1. Header — "KIAAN Vibe" + sub-labels.
- *   2. DailyVerseBanner — today's shloka + "Sacred Sound" pointer.
- *   3. CategoryPills — All · Mantras · Meditation · Gita Shlokas · Bhajans · Binaural.
- *   4. FlatList of PlayerTrackCard rows.
+ * Top-level composition:
+ *   1. Header ("KIAAN Vibe" + sub-labels).
+ *   2. Segmented tabs: Library · Gita · Playing.
+ *   3. Active-tab body fills the rest of the screen.
  *
- * Selecting a row:
+ * Tabs:
+ *   - Library — track catalogue. Today's verse banner, category pills,
+ *     scrollable `PlayerTrackCard` list. Tapping a track loads it into
+ *     RNTP and pushes the full-screen player on success.
+ *   - Gita — 18-chapter Bhagavad Gita grid. Tapping a chapter deep-links
+ *     into the existing `/(tabs)/shlokas/{chapter}` stack (still routable
+ *     even though Shlokas is no longer a bottom tab).
+ *   - Playing — current-track summary + "Open full player" CTA, or an
+ *     empty state pointing back to Library when nothing is loaded.
+ *
+ * Selecting a track from Library:
  *   - Updates the zustand `vibePlayerStore` (current track, queue).
  *   - Pushes the tracks into react-native-track-player and starts audio
  *     so the OS-level background service can take over once the user
  *     navigates to the full player (or leaves the app).
- *   - Navigates to `/vibe-player/player`.
+ *   - On success, navigates to `/vibe-player/player`; on failure, shows
+ *     an Alert that explains "coming soon" vs a real playback error.
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
+  Pressable,
   StyleSheet,
   Text,
   View,
   type ListRenderItemInfo,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 import { DivineBackground, LoadingMandala } from '@kiaanverse/ui';
 import { useMeditationTracks } from '@kiaanverse/api';
 import type { MeditationTrack } from '@kiaanverse/api';
@@ -33,12 +45,16 @@ import { useVibePlayerStore, type VibeTrack } from '@kiaanverse/store';
 import {
   CategoryPills,
   DailyVerseBanner,
+  GitaBrowser,
+  NowPlayingSection,
   PlayerTrackCard,
   resolveApiCategory,
   type FilterKey,
 } from '../../components/vibe-player';
 import { playTrack } from '../../components/vibe-player/trackPlayerBridge';
 
+const GOLD = '#D4A017';
+const GOLD_SOFT = 'rgba(212,160,23,0.28)';
 const SACRED_WHITE = '#F5F0E8';
 const TEXT_MUTED = 'rgba(200,191,168,0.7)';
 
@@ -53,12 +69,163 @@ const TODAY_VERSE = {
   reference: 'Bhagavad Gita 2.47',
 } as const;
 
-export default function VibePlayerLibraryScreen(): React.JSX.Element {
-  const router = useRouter();
-  const [filter, setFilter] = useState<FilterKey>('all');
+// ---------------------------------------------------------------------------
+// Segmented tabs
+// ---------------------------------------------------------------------------
 
+type VibeTab = 'library' | 'gita' | 'playing';
+
+const TABS: ReadonlyArray<{ key: VibeTab; label: string }> = [
+  { key: 'library', label: 'Library' },
+  { key: 'gita', label: 'Gita' },
+  { key: 'playing', label: 'Playing' },
+];
+
+function SegmentedTabs({
+  value,
+  onChange,
+}: {
+  value: VibeTab;
+  onChange: (tab: VibeTab) => void;
+}): React.JSX.Element {
+  const handlePress = useCallback(
+    (tab: VibeTab) => {
+      if (tab === value) return;
+      void Haptics.selectionAsync().catch(() => undefined);
+      onChange(tab);
+    },
+    [value, onChange],
+  );
+
+  return (
+    <View style={styles.tabBar} accessibilityRole="tablist">
+      {TABS.map((tab) => {
+        const active = tab.key === value;
+        return (
+          <Pressable
+            key={tab.key}
+            onPress={() => handlePress(tab.key)}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: active }}
+            accessibilityLabel={`${tab.label} tab`}
+            style={[styles.tabPill, active && styles.tabPillActive]}
+          >
+            <Text
+              style={[styles.tabLabel, active && styles.tabLabelActive]}
+              numberOfLines={1}
+            >
+              {tab.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Library — track catalog (extracted so each tab body stays focused)
+// ---------------------------------------------------------------------------
+
+interface LibrarySectionProps {
+  readonly filter: FilterKey;
+  readonly onFilterChange: (key: FilterKey) => void;
+  readonly onTrackPress: (track: MeditationTrack) => void;
+  readonly onDailyVersePress: () => void;
+  readonly currentTrackId: string | undefined;
+  readonly isPlaying: boolean;
+  readonly bookmarks: ReadonlySet<string>;
+  readonly onToggleBookmark: (trackId: string) => void;
+}
+
+function LibrarySection({
+  filter,
+  onFilterChange,
+  onTrackPress,
+  onDailyVersePress,
+  currentTrackId,
+  isPlaying,
+  bookmarks,
+  onToggleBookmark,
+}: LibrarySectionProps): React.JSX.Element {
   const apiCategory = resolveApiCategory(filter);
   const { data: tracks, isLoading } = useMeditationTracks(apiCategory);
+
+  const renderTrack = useCallback(
+    ({ item }: ListRenderItemInfo<MeditationTrack>) => {
+      const isCurrent = currentTrackId === item.id;
+      return (
+        <PlayerTrackCard
+          track={{
+            id: item.id,
+            title: item.title,
+            artist: item.artist,
+            duration: item.duration,
+            category: item.category,
+          }}
+          isCurrent={isCurrent}
+          isPlaying={isCurrent && isPlaying}
+          isBookmarked={bookmarks.has(item.id)}
+          onPress={() => onTrackPress(item)}
+          onToggleBookmark={() => onToggleBookmark(item.id)}
+        />
+      );
+    },
+    [bookmarks, currentTrackId, isPlaying, onTrackPress, onToggleBookmark],
+  );
+
+  const keyExtractor = useCallback((item: MeditationTrack) => item.id, []);
+
+  return (
+    <FlatList
+      data={tracks ?? []}
+      renderItem={renderTrack}
+      keyExtractor={keyExtractor}
+      contentContainerStyle={styles.listContent}
+      showsVerticalScrollIndicator={false}
+      ListHeaderComponent={
+        <View style={styles.listHeaderStack}>
+          <DailyVerseBanner
+            sanskrit={TODAY_VERSE.sanskrit}
+            meaning={TODAY_VERSE.meaning}
+            reference={TODAY_VERSE.reference}
+            onPress={onDailyVersePress}
+          />
+          <CategoryPills value={filter} onChange={onFilterChange} />
+        </View>
+      }
+      ListEmptyComponent={
+        isLoading ? (
+          <View style={styles.stateContainer}>
+            <LoadingMandala size={56} />
+          </View>
+        ) : (
+          <View style={styles.stateContainer}>
+            <Text style={styles.emptyText}>
+              No tracks available in this category yet.
+            </Text>
+          </View>
+        )
+      }
+      ItemSeparatorComponent={ItemSeparator}
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Screen
+// ---------------------------------------------------------------------------
+
+export default function VibePlayerLibraryScreen(): React.JSX.Element {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<VibeTab>('library');
+  const [filter, setFilter] = useState<FilterKey>('all');
+
+  // `tracks` is also read by the Library body via its own hook, but we need
+  // it here so `handleTrackPress` can hydrate the queue with everything the
+  // user currently sees (keeps skip-next aligned with the visible filter).
+  const apiCategory = resolveApiCategory(filter);
+  const { data: tracks } = useMeditationTracks(apiCategory);
 
   const currentTrack = useVibePlayerStore((s) => s.currentTrack);
   const isPlaying = useVibePlayerStore((s) => s.isPlaying);
@@ -106,9 +273,9 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
     (track: MeditationTrack) => {
       // The bridge returns a typed result so we can show the user a real
       // reason when playback fails (unhosted audio, RNTP error) instead of
-      // the previous silent no-op. We still optimistically update the
-      // store + navigate for the happy path so the UI feels instant; on
-      // failure we rewind the store state and stay on this screen.
+      // a silent no-op. We still optimistically update the store + navigate
+      // for the happy path so the UI feels instant; on failure we stay on
+      // this screen and surface the reason.
       const vibeTrack: VibeTrack = {
         id: track.id,
         title: track.title,
@@ -135,17 +302,13 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
           return;
         }
         if (result.reason === 'unavailable') {
-          Alert.alert(
-            'Coming soon',
-            result.message,
-            [{ text: 'OK', style: 'default' }],
-          );
+          Alert.alert('Coming soon', result.message, [
+            { text: 'OK', style: 'default' },
+          ]);
         } else {
-          Alert.alert(
-            'Playback error',
-            result.message,
-            [{ text: 'OK', style: 'default' }],
-          );
+          Alert.alert('Playback error', result.message, [
+            { text: 'OK', style: 'default' },
+          ]);
         }
       });
     },
@@ -153,35 +316,16 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
   );
 
   const handleDailyVersePress = useCallback(() => {
-    // Until the API ships a verse→track binding, open the shlokas tab —
-    // the user can navigate from there to the full verse detail.
-    router.push('/(tabs)/shlokas' as never);
-  }, [router]);
+    // The Daily Verse banner is the canonical shortcut from Vibe into the
+    // Gita reader — flip to the in-screen Gita tab rather than pushing the
+    // standalone shlokas stack so the user stays inside Vibe.
+    void Haptics.selectionAsync().catch(() => undefined);
+    setActiveTab('gita');
+  }, []);
 
-  const renderTrack = useCallback(
-    ({ item }: ListRenderItemInfo<MeditationTrack>) => {
-      const isCurrent = currentTrack?.id === item.id;
-      return (
-        <PlayerTrackCard
-          track={{
-            id: item.id,
-            title: item.title,
-            artist: item.artist,
-            duration: item.duration,
-            category: item.category,
-          }}
-          isCurrent={isCurrent}
-          isPlaying={isCurrent && isPlaying}
-          isBookmarked={bookmarks.has(item.id)}
-          onPress={() => handleTrackPress(item)}
-          onToggleBookmark={() => handleToggleBookmark(item.id)}
-        />
-      );
-    },
-    [bookmarks, currentTrack?.id, handleToggleBookmark, handleTrackPress, isPlaying],
-  );
-
-  const keyExtractor = useCallback((item: MeditationTrack) => item.id, []);
+  const handleSwitchToLibrary = useCallback(() => {
+    setActiveTab('library');
+  }, []);
 
   const headerBlock = useMemo(
     () => (
@@ -199,39 +343,29 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
   return (
     <DivineBackground variant="cosmic" style={styles.root}>
       <View style={styles.safeTop}>
-        <FlatList
-          data={tracks ?? []}
-          renderItem={renderTrack}
-          keyExtractor={keyExtractor}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
-            <View style={styles.headerStack}>
-              {headerBlock}
-              <DailyVerseBanner
-                sanskrit={TODAY_VERSE.sanskrit}
-                meaning={TODAY_VERSE.meaning}
-                reference={TODAY_VERSE.reference}
-                onPress={handleDailyVersePress}
-              />
-              <CategoryPills value={filter} onChange={setFilter} />
-            </View>
-          }
-          ListEmptyComponent={
-            isLoading ? (
-              <View style={styles.stateContainer}>
-                <LoadingMandala size={56} />
-              </View>
-            ) : (
-              <View style={styles.stateContainer}>
-                <Text style={styles.emptyText}>
-                  No tracks available in this category yet.
-                </Text>
-              </View>
-            )
-          }
-          ItemSeparatorComponent={ItemSeparator}
-        />
+        {headerBlock}
+        <SegmentedTabs value={activeTab} onChange={setActiveTab} />
+
+        <View style={styles.tabBody}>
+          {activeTab === 'library' ? (
+            <LibrarySection
+              filter={filter}
+              onFilterChange={setFilter}
+              onTrackPress={handleTrackPress}
+              onDailyVersePress={handleDailyVersePress}
+              currentTrackId={currentTrack?.id}
+              isPlaying={isPlaying}
+              bookmarks={bookmarks}
+              onToggleBookmark={handleToggleBookmark}
+            />
+          ) : null}
+
+          {activeTab === 'gita' ? <GitaBrowser /> : null}
+
+          {activeTab === 'playing' ? (
+            <NowPlayingSection onSwitchToLibrary={handleSwitchToLibrary} />
+          ) : null}
+        </View>
       </View>
     </DivineBackground>
   );
@@ -249,13 +383,10 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 52,
   },
-  headerStack: {
-    gap: 14,
-    paddingBottom: 12,
-  },
   headerBlock: {
     paddingHorizontal: 16,
     gap: 4,
+    paddingBottom: 10,
   },
   title: {
     fontFamily: 'CormorantGaramond-BoldItalic',
@@ -275,9 +406,46 @@ const styles = StyleSheet.create({
     marginTop: 2,
     letterSpacing: 0.4,
   },
+  tabBar: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+  },
+  tabPill: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: GOLD_SOFT,
+    backgroundColor: 'rgba(17,20,53,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabPillActive: {
+    backgroundColor: 'rgba(212,160,23,0.16)',
+    borderColor: GOLD,
+  },
+  tabLabel: {
+    fontFamily: 'Outfit-Regular',
+    fontSize: 13,
+    color: TEXT_MUTED,
+  },
+  tabLabelActive: {
+    fontFamily: 'Outfit-SemiBold',
+    color: GOLD,
+    letterSpacing: 0.3,
+  },
+  tabBody: {
+    flex: 1,
+  },
   listContent: {
     paddingHorizontal: 16,
     paddingBottom: 48,
+  },
+  listHeaderStack: {
+    gap: 14,
+    paddingBottom: 12,
   },
   stateContainer: {
     paddingVertical: 56,
