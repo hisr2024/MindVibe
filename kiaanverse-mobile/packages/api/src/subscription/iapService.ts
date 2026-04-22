@@ -106,6 +106,46 @@ export class IAPError extends Error {
   }
 }
 
+/**
+ * Recognises the "Play Store hasn't activated the product yet" failure
+ * mode. Covers:
+ *   - `E_OFFER_UNAVAILABLE` — our own IAPError when the cached
+ *     SubscriptionAndroid exists but has no offerToken
+ *   - `E_PRODUCT_NOT_FOUND` — raw code from react-native-iap when the
+ *     sku is entirely unknown to Play
+ *   - Message substrings — covers both the IAPError copy above and
+ *     any string relayed via onError callbacks, which only surfaces the
+ *     message (no code) to the UI layer.
+ *
+ * Used by screens to show a "Coming soon" alert rather than the scary
+ * "Purchase unsuccessful" copy when the real reason is store
+ * configuration.
+ */
+export function isSubscriptionUnavailableError(
+  err: unknown,
+): boolean {
+  const code =
+    err instanceof IAPError
+      ? err.code
+      : ((err as { code?: unknown })?.code as string | undefined) ?? '';
+  if (code === 'E_OFFER_UNAVAILABLE' || code === 'E_PRODUCT_NOT_FOUND') return true;
+
+  const message =
+    typeof err === 'string'
+      ? err
+      : err instanceof Error
+        ? err.message
+        : '';
+  return (
+    message.toLowerCase().includes('not available') ||
+    message.includes('E_PRODUCT_NOT_FOUND') ||
+    message.includes('E_OFFER_UNAVAILABLE') ||
+    // react-native-iap sometimes surfaces "SKU not found" on Android when
+    // the sku list passed to getSubscriptions doesn't match what's live.
+    message.toLowerCase().includes('sku not found')
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
