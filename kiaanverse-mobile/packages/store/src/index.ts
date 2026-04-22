@@ -71,5 +71,8 @@ export { useVibePlayerStore, type RepeatMode, type VibeTrack } from './vibePlaye
 // Deep Insights (analytics and emotional intelligence)
 export { useDeepInsightsStore, type DateRange } from './deepInsightsStore';
 
-// Relationship Compass (relationship guidance sessions)
-export { useRelationshipStore } from './relationshipStore';
+// Relationship Compass (relationship guidance sessions + sealed Sambandha Dharma readings)
+export {
+  useRelationshipStore,
+  type SealedCompassReading,
+} from './relationshipStore';
