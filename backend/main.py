@@ -2343,12 +2343,17 @@ startup_logger.info(
     "\n[KIAAN Unified] Attempting to import unified KIAAN router..."
 )
 try:
-    from backend.routes.kiaan import router as kiaan_unified_router
+    from backend.routes.kiaan import (
+        router as kiaan_unified_router,
+        sakha_router as kiaan_sakha_alias_router,
+    )
 
     app.include_router(kiaan_unified_router)
+    app.include_router(kiaan_sakha_alias_router)
     _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] KIAAN unified router loaded")
     startup_logger.info("   • POST   /api/kiaan/chat - Sakha chat")
+    startup_logger.info("   • POST   /api/sakha/chat - compat alias")
     startup_logger.info("   • POST   /api/kiaan/tools/emotional-reset")
     startup_logger.info("   • POST   /api/kiaan/tools/ardha")
     startup_logger.info("   • POST   /api/kiaan/tools/viyoga")

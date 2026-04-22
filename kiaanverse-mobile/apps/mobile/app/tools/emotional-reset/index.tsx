@@ -1,286 +1,393 @@
-/**
- * Emotional Reset Entry Screen
- *
- * Full-screen immersive entry point where the user selects an emotion and
- * intensity before beginning the 6-step sacred healing flow. The layout fills
- * the entire viewport with no ScrollView -- content is vertically distributed
- * using flex. A CrisisDetector overlay appears when intensity >= 9.
- *
- * Layout hierarchy (flat, no unnecessary nesting):
- *   DivineBackground (fills screen) > paddedContent > header / orb / grid / slider / spacer / CTA
- */
-
-import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
-import Animated, {
-  FadeInDown,
-  FadeInUp,
-  SlideInDown,
-} from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Haptics from 'expo-haptics';
-import { useRouter } from 'expo-router';
+'use client'
+import React, { useState, useEffect, useRef } from 'react'
 import {
-  Text,
-  GoldenButton,
-  DivineBackground,
-  EmotionOrb,
-  SacredStepIndicator,
-  MandalaSpin,
-  colors,
-  spacing,
-} from '@kiaanverse/ui';
-import { useTheme } from '@kiaanverse/ui';
-import { useTranslation } from '@kiaanverse/i18n';
-import { useStartEmotionalReset } from '@kiaanverse/api';
-import { useEmotionalResetStore } from '@kiaanverse/store';
-import { EmotionSelector } from '../../../components/emotional-reset/EmotionSelector';
-import { IntensitySlider } from '../../../components/emotional-reset/IntensitySlider';
-import { CrisisDetector } from '../../../components/emotional-reset/CrisisDetector';
+  View, Text, ScrollView, TouchableOpacity,
+  TextInput, StyleSheet, Animated, Easing
+} from 'react-native'
+import { router } from 'expo-router'
+import { LinearGradient } from 'expo-linear-gradient'
+import * as Haptics from 'expo-haptics'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { callKiaanForTool } from '@kiaanverse/api/wisdom/kiaanAIService'
+import { OmLoader } from '@kiaanverse/ui'
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+type Step = 'breathing' | 'emotion' | 'intensity' | 'situation' | 'loading' | 'wisdom'
 
-/**
- * Orb size is 30% of screen width, clamped between 100-160px for usability.
- * This keeps it prominent on small phones while not dominating tablets.
- */
-const ORB_SIZE = Math.max(100, Math.min(160, SCREEN_WIDTH * 0.3));
+const EMOTIONS = [
+  { id:'anger',     label:'Anger',      skt:'क्रोध',  emoji:'🔥', color:'#EF4444' },
+  { id:'fear',      label:'Fear',       skt:'भय',     emoji:'💧', color:'#3B82F6' },
+  { id:'grief',     label:'Grief',      skt:'शोक',    emoji:'🌧', color:'#6B7280' },
+  { id:'anxiety',   label:'Anxiety',    skt:'चिंता',  emoji:'🌀', color:'#8B5CF6' },
+  { id:'confusion', label:'Confusion',  skt:'भ्रम',   emoji:'🌫', color:'#F59E0B' },
+  { id:'despair',   label:'Despair',    skt:'निराशा', emoji:'🌑', color:'#374151' },
+]
 
-export default function EmotionalResetEntryScreen(): React.JSX.Element {
-  const { theme } = useTheme();
-  const c = theme.colors;
-  const insets = useSafeAreaInsets();
-  const router = useRouter();
-  const { t } = useTranslation();
-  const startReset = useStartEmotionalReset();
-  const setSession = useEmotionalResetStore((s) => s.setSession);
+// ── SACRED BREATHING CIRCLE ───────────────────────────────────────────────
+function BreathingCircle({ onComplete }: { onComplete: () => void }) {
+  const [phase, setPhase]    = useState<'inhale'|'hold'|'exhale'>('inhale')
+  const [count, setCount]    = useState(4)
+  const [cycles, setCycles]  = useState(0)
+  const scale = useRef(new Animated.Value(1)).current
+  const opacity = useRef(new Animated.Value(0.6)).current
 
-  const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
-  const [intensity, setIntensity] = useState(5);
-  const [showCrisis, setShowCrisis] = useState(false);
+  useEffect(() => {
+    runPhase('inhale')
+  }, [])
 
-  /** Select an emotion with medium haptic feedback. */
-  const handleEmotionSelect = useCallback((emotion: string) => {
-    setSelectedEmotion(emotion);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  }, []);
+  const runPhase = (p: 'inhale'|'hold'|'exhale') => {
+    setPhase(p)
+    const durations = { inhale:4, hold:7, exhale:8 }
+    const d = durations[p]
+    setCount(d)
 
-  /** Update intensity with light haptic; trigger crisis overlay at >= 9. */
-  const handleIntensityChange = useCallback((value: number) => {
-    setIntensity(value);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (value >= 9) {
-      setShowCrisis(true);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    }
-  }, []);
+    // Animate circle
+    Animated.parallel([
+      Animated.timing(scale, {
+        toValue: p === 'inhale' ? 1.5 : p === 'hold' ? 1.5 : 1.0,
+        duration: d * 1000, useNativeDriver: true,
+        easing: Easing.bezier(0.25, 0.1, 0.0, 1.0),
+      }),
+      Animated.timing(opacity, {
+        toValue: p === 'inhale' ? 1.0 : p === 'hold' ? 0.9 : 0.5,
+        duration: d * 1000, useNativeDriver: true,
+      }),
+    ]).start()
 
-  /** Start the reset session via API, then navigate to step 1. */
-  const handleBeginReset = useCallback(() => {
-    if (!selectedEmotion) return;
+    // Countdown
+    let remaining = d
+    const interval = setInterval(() => {
+      remaining -= 1
+      setCount(remaining)
+      if (remaining <= 0) {
+        clearInterval(interval)
+        if (p === 'inhale') runPhase('hold')
+        else if (p === 'hold') runPhase('exhale')
+        else {
+          // One cycle complete
+          setCycles(c => {
+            const next = c + 1
+            if (next >= 3) {
+              // 3 cycles done — proceed to emotion step
+              setTimeout(onComplete, 500)
+            } else {
+              runPhase('inhale')
+            }
+            return next
+          })
+        }
+      }
+    }, 1000)
 
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    return () => clearInterval(interval)
+  }
 
-    startReset.mutate(
-      { emotion: selectedEmotion, intensity },
-      {
-        onSuccess: (data) => {
-          setSession({
-            id: data.session_id,
-            emotion: selectedEmotion,
-            intensity,
-            startedAt: Date.now(),
-            steps: [
-              'breathing',
-              'visualization',
-              'wisdom',
-              'affirmation',
-              'reflection',
-              'summary',
-            ],
-          });
-          router.push('/tools/emotional-reset/1');
-        },
-      },
-    );
-  }, [selectedEmotion, intensity, startReset, setSession, router]);
+  const PHASE_TEXT = {
+    inhale: { label:'Inhale',  skt:'श्वास लें',   guide:'Breathe in slowly, deeply' },
+    hold:   { label:'Hold',    skt:'रोकें',        guide:'Hold your breath gently' },
+    exhale: { label:'Exhale',  skt:'छोड़ें',       guide:'Release completely, surrender' },
+  }
 
-  const intensityLabel = getIntensityLabel(intensity);
+  const pt = PHASE_TEXT[phase]
 
   return (
-    <DivineBackground variant="cosmic" style={styles.root}>
-      {/* MandalaSpin backdrop for sacred atmosphere */}
-      <View style={styles.mandalaBackdrop}>
-        <MandalaSpin
-          size={SCREEN_WIDTH * 0.85}
-          speed="slow"
-          color={colors.alpha.goldLight}
-          opacity={0.04}
-        />
+    <View style={br.container}>
+      <Text style={br.title}>Sacred Breathing</Text>
+      <Text style={br.skt}>प्राणायाम</Text>
+      <Text style={br.guide}>3 complete cycles to calm your nervous system</Text>
+
+      {/* The breathing circle */}
+      <View style={br.circleContainer}>
+        {/* Outer ring (static) */}
+        <View style={br.outerRing}/>
+        {/* Animated inner circle */}
+        <Animated.View style={[br.innerCircle, {
+          transform: [{ scale }], opacity
+        }]}>
+          <Text style={br.countText}>{count}</Text>
+        </Animated.View>
       </View>
 
-      <View
-        style={[
-          styles.screen,
-          { paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + 16 },
-        ]}
-      >
-        {/* Header - compact title and subtitle */}
-        <Animated.View entering={FadeInDown.duration(500)}>
-          <Text variant="h1" color={colors.divine.aura} align="center">
-            {t('emotionalReset.title', 'Sacred Emotional Reset')}
-          </Text>
-          <Text
-            variant="body"
-            color={c.textSecondary}
-            align="center"
-            style={styles.subtitle}
-          >
-            {t('emotionalReset.subtitle', 'What are you feeling right now?')}
-          </Text>
-        </Animated.View>
+      <Text style={br.phaseLabel}>{pt.label}</Text>
+      <Text style={br.phaseSkt}>{pt.skt}</Text>
+      <Text style={br.phaseGuide}>{pt.guide}</Text>
+      <Text style={br.cycleCount}>Cycle {Math.min(cycles+1,3)} of 3</Text>
+    </View>
+  )
+}
+const br = StyleSheet.create({
+  container:     { alignItems:'center', padding:24 },
+  title:         { fontFamily:'CormorantGaramond-BoldItalic', fontSize:24,
+                   color:'#F0EBE1', marginBottom:4 },
+  skt:           { fontFamily:'NotoSansDevanagari-Regular', fontSize:14,
+                   color:'#D4A017', lineHeight:28, marginBottom:4 },
+  guide:         { fontFamily:'Outfit-Regular', fontSize:13,
+                   color:'rgba(240,235,225,0.5)', textAlign:'center', marginBottom:32 },
+  circleContainer:{ width:180, height:180, alignItems:'center',
+                   justifyContent:'center', marginBottom:24 },
+  outerRing:     { position:'absolute', width:180, height:180, borderRadius:90,
+                   borderWidth:1.5, borderColor:'rgba(212,160,23,0.2)' },
+  innerCircle:   { width:140, height:140, borderRadius:70,
+                   backgroundColor:'rgba(27,79,187,0.25)',
+                   borderWidth:2, borderColor:'rgba(27,79,187,0.6)',
+                   alignItems:'center', justifyContent:'center',
+                   shadowColor:'#1B4FBB', shadowRadius:30, shadowOpacity:0.5,
+                   elevation:8 },
+  countText:     { fontFamily:'CormorantGaramond-BoldItalic',
+                   fontSize:48, color:'#D4A017' },
+  phaseLabel:    { fontFamily:'Outfit-SemiBold', fontSize:18, color:'#F0EBE1' },
+  phaseSkt:      { fontFamily:'NotoSansDevanagari-Regular', fontSize:14,
+                   color:'#D4A017', lineHeight:28, marginTop:2 },
+  phaseGuide:    { fontFamily:'CrimsonText-Italic', fontSize:14,
+                   color:'rgba(240,235,225,0.55)', marginTop:4, textAlign:'center' },
+  cycleCount:    { fontFamily:'Outfit-Regular', fontSize:12,
+                   color:'rgba(240,235,225,0.3)', marginTop:16 },
+})
 
-        {/* Large EmotionOrb - prominent visual anchor */}
-        <Animated.View entering={FadeInDown.delay(100).duration(500)} style={styles.orbCenter}>
-          <EmotionOrb
-            mood={mapEmotionToMood(selectedEmotion)}
-            size={ORB_SIZE}
-            isAnimating={!!selectedEmotion}
-          />
-        </Animated.View>
+// ── MAIN EMOTIONAL RESET SCREEN ───────────────────────────────────────────
+export default function EmotionalResetScreen() {
+  const insets = useSafeAreaInsets()
+  const [step, setStep]           = useState<Step>('breathing')
+  const [emotion, setEmotion]     = useState('')
+  const [intensity, setIntensity] = useState(0)
+  const [situation, setSituation] = useState('')
+  const [wisdom, setWisdom]       = useState('')
+  const [verse, setVerse]         = useState<any>(null)
+  const [loading, setLoading]     = useState(false)
 
-        {/* Step indicator - shows position in overall flow */}
-        <SacredStepIndicator totalSteps={7} currentStep={0} completedSteps={[]} />
+  const handleGetWisdom = async () => {
+    setStep('loading')
+    try {
+      const result = await callKiaanForTool('Emotional Reset', {
+        emotion,
+        intensity: String(intensity),
+        situation,
+      })
+      setWisdom(result.response)
+      setVerse(result.verse)
+      setStep('wisdom')
+    } catch {
+      setWisdom('Sakha is temporarily unreachable. Please try again. 🙏')
+      setStep('wisdom')
+    }
+  }
 
-        {/* Emotion grid - compact 3-column tappable grid */}
-        <Animated.View entering={FadeInDown.delay(200).duration(500)} style={styles.emotionGrid}>
-          <EmotionSelector
-            selectedEmotion={selectedEmotion}
-            onSelect={handleEmotionSelect}
-          />
-        </Animated.View>
+  return (
+    <View style={{ flex:1, backgroundColor:'#050714' }}>
+      <ScrollView contentContainerStyle={{
+        paddingHorizontal:20,
+        paddingTop: insets.top + 16,
+        paddingBottom: insets.bottom + 80,
+      }}>
+        <TouchableOpacity onPress={() => router.back()} style={{ marginBottom:16 }}>
+          <Text style={sc.back}>‹ Back</Text>
+        </TouchableOpacity>
 
-        {/* Intensity slider - animated slide-in only after an emotion is selected */}
-        {selectedEmotion ? (
-          <Animated.View entering={SlideInDown.duration(400).springify()}>
-            <Text
-              variant="label"
-              color={c.textSecondary}
-              style={styles.sectionLabel}
-            >
-              {t('emotionalReset.intensityLabel', 'How intense is it?')}
+        <Text style={[sc.title, { color:'#EF4444' }]}>Emotional Reset</Text>
+        <Text style={sc.skt}>भावनात्मक पुनर्स्थापना</Text>
+        <Text style={sc.sub}>Return to sacred equilibrium</Text>
+
+        {/* Progress dots */}
+        {step !== 'loading' && step !== 'wisdom' && (
+          <View style={sc.progressRow}>
+            {['breathing','emotion','intensity','situation'].map((s,i) => (
+              <View key={s} style={[sc.dot,
+                { backgroundColor: ['breathing','emotion','intensity','situation']
+                  .indexOf(step) >= i ? '#EF4444' : 'rgba(255,255,255,0.1)' }]}/>
+            ))}
+          </View>
+        )}
+
+        {/* STEP: Breathing */}
+        {step === 'breathing' && (
+          <BreathingCircle onComplete={() => setStep('emotion')}/>
+        )}
+
+        {/* STEP: Emotion selection */}
+        {step === 'emotion' && (
+          <View style={sc.card}>
+            <Text style={sc.question}>What emotion is overwhelming you right now?</Text>
+            <View style={sc.emotionGrid}>
+              {EMOTIONS.map(e => (
+                <TouchableOpacity key={e.id}
+                  style={[sc.emotionCard,
+                    emotion === e.id && { borderColor:e.color,
+                      backgroundColor:`${e.color}18` }]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+                    setEmotion(e.id)
+                  }}>
+                  <Text style={sc.emotionEmoji}>{e.emoji}</Text>
+                  <Text style={[sc.emotionLabel,
+                    emotion === e.id && { color:e.color }]}>{e.label}</Text>
+                  <Text style={[sc.emotionSkt,
+                    emotion === e.id && { color:e.color }]}>{e.skt}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <TouchableOpacity style={[sc.nextBtn, !emotion && sc.nextBtnOff]}
+              onPress={() => emotion && setStep('intensity')}
+              disabled={!emotion}>
+              <LinearGradient colors={['#1B4FBB','#0E7490']}
+                style={sc.nextBtnGrad} start={{x:0,y:0}} end={{x:1,y:0}}>
+                <Text style={sc.nextBtnText}>Continue</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* STEP: Intensity */}
+        {step === 'intensity' && (
+          <View style={sc.card}>
+            <Text style={sc.question}>How intense is this feeling? (1–10)</Text>
+            <View style={sc.intensityRow}>
+              {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                <TouchableOpacity key={n}
+                  style={[sc.intensityDot,
+                    intensity === n && { backgroundColor:'#EF4444',
+                      borderColor:'#EF4444' }]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+                    setIntensity(n)
+                  }}>
+                  <Text style={[sc.intensityNum,
+                    intensity === n && { color:'#fff' }]}>{n}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <TouchableOpacity style={[sc.nextBtn, !intensity && sc.nextBtnOff]}
+              onPress={() => intensity && setStep('situation')}
+              disabled={!intensity}>
+              <LinearGradient colors={['#1B4FBB','#0E7490']}
+                style={sc.nextBtnGrad} start={{x:0,y:0}} end={{x:1,y:0}}>
+                <Text style={sc.nextBtnText}>Continue</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* STEP: Situation */}
+        {step === 'situation' && (
+          <View style={sc.card}>
+            <Text style={sc.question}>
+              Describe what triggered this feeling. Share freely — this is your sacred space.
             </Text>
-            <IntensitySlider value={intensity} onChange={handleIntensityChange} />
-            <Text
-              variant="bodySmall"
-              color={colors.primary[300]}
-              align="center"
-              style={styles.intensityLabel}
-            >
-              {intensityLabel}
-            </Text>
-          </Animated.View>
-        ) : null}
-
-        {/* Flexible spacer pushes CTA to bottom edge */}
-        <View style={styles.spacer} />
-
-        {/* Bottom-anchored CTA -- safe area padding applied to parent */}
-        {selectedEmotion ? (
-          <Animated.View entering={FadeInUp.delay(100).duration(400)}>
-            <GoldenButton
-              title={t('emotionalReset.begin', 'Begin Sacred Reset')}
-              onPress={handleBeginReset}
-              variant="divine"
-              loading={startReset.isPending}
-              disabled={!selectedEmotion}
-              testID="begin-reset-btn"
+            <TextInput
+              style={sc.textInput}
+              value={situation}
+              onChangeText={setSituation}
+              placeholder="What happened? How are you feeling?"
+              placeholderTextColor="rgba(240,235,225,0.28)"
+              multiline
+              numberOfLines={5}
+              textAlignVertical="top"
             />
-          </Animated.View>
-        ) : null}
-      </View>
+            <TouchableOpacity style={[sc.nextBtn, !situation.trim() && sc.nextBtnOff]}
+              onPress={handleGetWisdom}
+              disabled={!situation.trim()}>
+              <LinearGradient colors={['#EF4444','#DC2626']}
+                style={sc.nextBtnGrad} start={{x:0,y:0}} end={{x:1,y:0}}>
+                <Text style={sc.nextBtnText}>Receive Sacred Wisdom</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        )}
 
-      {/* Crisis Overlay - fullscreen modal */}
-      {showCrisis ? (
-        <CrisisDetector onDismiss={() => setShowCrisis(false)} />
-      ) : null}
-    </DivineBackground>
-  );
+        {/* Loading */}
+        {step === 'loading' && (
+          <View style={sc.loadingCenter}>
+            <OmLoader size={56} label="Sakha is reflecting on your heart…"/>
+          </View>
+        )}
+
+        {/* Wisdom result */}
+        {step === 'wisdom' && (
+          <View style={sc.wisdomCard}>
+            <Text style={sc.wisdomTitle}>✦ Sakha's Sacred Wisdom</Text>
+            <View style={sc.wisdomDivider}/>
+            <Text style={sc.wisdomText}>{wisdom}</Text>
+            {verse && (
+              <View style={sc.verseBox}>
+                <Text style={sc.verseLabel}>Gita Verse</Text>
+                <Text style={sc.verseSkt}>{verse.sanskrit}</Text>
+                <Text style={sc.verseMeaning}>{verse.meaning}</Text>
+                <Text style={sc.verseRef}>BG {verse.chapter}.{verse.verse}</Text>
+              </View>
+            )}
+            <TouchableOpacity style={sc.resetBtn}
+              onPress={() => {
+                setStep('breathing'); setEmotion(''); setIntensity(0)
+                setSituation(''); setWisdom(''); setVerse(null)
+              }}>
+              <Text style={sc.resetText}>Begin Again</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
+    </View>
+  )
 }
 
-/**
- * Maps an emotion string to one of the 8 EmotionOrb mood values.
- * Falls back to 'peaceful' when no emotion is selected.
- */
-function mapEmotionToMood(
-  emotion: string | null,
-): 'peaceful' | 'joyful' | 'confused' | 'anxious' | 'sad' | 'grateful' | 'angry' | 'hopeful' {
-  if (!emotion) return 'peaceful';
-
-  const moodMap: Record<
-    string,
-    'peaceful' | 'joyful' | 'confused' | 'anxious' | 'sad' | 'grateful' | 'angry' | 'hopeful'
-  > = {
-    anger: 'angry',
-    anxiety: 'anxious',
-    sadness: 'sad',
-    grief: 'sad',
-    fear: 'anxious',
-    confusion: 'confused',
-    loneliness: 'sad',
-    shame: 'anxious',
-    frustration: 'angry',
-    jealousy: 'angry',
-    overwhelm: 'anxious',
-    restlessness: 'confused',
-  };
-
-  return moodMap[emotion] ?? 'peaceful';
-}
-
-/**
- * Returns a poetic label describing the emotional intensity level.
- * Ranges map to spiritual metaphors for water/storm imagery.
- */
-function getIntensityLabel(value: number): string {
-  if (value <= 3) return 'Gentle Ripple';
-  if (value <= 6) return 'Strong Current';
-  if (value <= 9) return 'Tidal Wave';
-  return 'Sacred Storm';
-}
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  mandalaBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 0,
-  },
-  screen: {
-    flex: 1,
-    paddingHorizontal: spacing.lg,
-  },
-  subtitle: {
-    marginTop: spacing.xs,
-  },
-  orbCenter: {
-    alignItems: 'center',
-    marginVertical: spacing.lg,
-  },
-  emotionGrid: {
-    marginTop: spacing.md,
-  },
-  sectionLabel: {
-    marginTop: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  intensityLabel: {
-    marginTop: spacing.sm,
-  },
-  spacer: {
-    flex: 1,
-  },
-});
+const sc = StyleSheet.create({
+  back:          { fontSize:15, color:'rgba(240,235,225,0.45)',
+                   fontFamily:'Outfit-Regular', marginBottom:0 },
+  title:         { fontSize:26, fontFamily:'CormorantGaramond-BoldItalic' },
+  skt:           { fontFamily:'NotoSansDevanagari-Regular', fontSize:14,
+                   color:'#D4A017', lineHeight:28, marginTop:2 },
+  sub:           { fontFamily:'Outfit-Regular', fontSize:13,
+                   color:'rgba(240,235,225,0.45)', marginTop:4, marginBottom:16 },
+  progressRow:   { flexDirection:'row', gap:8, marginBottom:20 },
+  dot:           { flex:1, height:3, borderRadius:2 },
+  card:          { backgroundColor:'rgba(22,26,66,0.92)', borderWidth:1,
+                   borderColor:'rgba(212,160,23,0.12)', borderRadius:16,
+                   padding:20, marginBottom:16 },
+  question:      { fontFamily:'CormorantGaramond-Italic', fontSize:18,
+                   color:'#F0EBE1', lineHeight:26, marginBottom:16 },
+  emotionGrid:   { flexDirection:'row', flexWrap:'wrap', gap:10, marginBottom:16 },
+  emotionCard:   { width:'30%', backgroundColor:'rgba(255,255,255,0.04)',
+                   borderWidth:1, borderColor:'rgba(212,160,23,0.15)',
+                   borderRadius:12, padding:12, alignItems:'center', gap:4 },
+  emotionEmoji:  { fontSize:22 },
+  emotionLabel:  { fontFamily:'Outfit-Medium', fontSize:12,
+                   color:'rgba(240,235,225,0.7)' },
+  emotionSkt:    { fontFamily:'NotoSansDevanagari-Regular', fontSize:10,
+                   color:'rgba(212,160,23,0.6)', lineHeight:20 },
+  intensityRow:  { flexDirection:'row', flexWrap:'wrap', gap:8, marginBottom:16 },
+  intensityDot:  { width:44, height:44, borderRadius:22, borderWidth:1,
+                   borderColor:'rgba(212,160,23,0.25)',
+                   backgroundColor:'rgba(255,255,255,0.05)',
+                   alignItems:'center', justifyContent:'center' },
+  intensityNum:  { fontFamily:'Outfit-SemiBold', fontSize:15,
+                   color:'rgba(240,235,225,0.5)' },
+  textInput:     { backgroundColor:'rgba(5,7,20,0.6)', borderWidth:1,
+                   borderColor:'rgba(212,160,23,0.2)', borderRadius:12,
+                   padding:14, fontSize:15, fontFamily:'CrimsonText-Regular',
+                   color:'#F0EBE1', lineHeight:24, minHeight:120,
+                   textAlignVertical:'top', marginBottom:16 },
+  nextBtn:       { borderRadius:12, overflow:'hidden' },
+  nextBtnOff:    { opacity:0.4 },
+  nextBtnGrad:   { paddingVertical:14, alignItems:'center' },
+  nextBtnText:   { fontFamily:'Outfit-SemiBold', fontSize:16, color:'#fff' },
+  loadingCenter: { alignItems:'center', paddingVertical:64 },
+  wisdomCard:    { backgroundColor:'rgba(22,26,66,0.92)', borderWidth:1,
+                   borderColor:'rgba(212,160,23,0.2)', borderRadius:16, padding:20 },
+  wisdomTitle:   { fontFamily:'Outfit-SemiBold', fontSize:16, color:'#D4A017' },
+  wisdomDivider: { height:1, backgroundColor:'rgba(212,160,23,0.25)',
+                   marginVertical:12 },
+  wisdomText:    { fontFamily:'CrimsonText-Regular', fontSize:16,
+                   color:'#F0EBE1', lineHeight:26, marginBottom:16 },
+  verseBox:      { backgroundColor:'rgba(212,160,23,0.06)', borderWidth:1,
+                   borderColor:'rgba(212,160,23,0.2)', borderRadius:12, padding:14 },
+  verseLabel:    { fontFamily:'Outfit-SemiBold', fontSize:10, color:'#D4A017',
+                   letterSpacing:0.12, textTransform:'uppercase', marginBottom:6 },
+  verseSkt:      { fontFamily:'NotoSansDevanagari-Regular', fontSize:14,
+                   color:'#D4A017', lineHeight:28, marginBottom:6 },
+  verseMeaning:  { fontFamily:'CrimsonText-Regular', fontSize:13,
+                   color:'rgba(240,235,225,0.7)', lineHeight:20 },
+  verseRef:      { fontFamily:'Outfit-Regular', fontSize:10,
+                   color:'rgba(240,235,225,0.35)', marginTop:6, textAlign:'right' },
+  resetBtn:      { marginTop:16, alignItems:'center', paddingVertical:12,
+                   borderRadius:12, borderWidth:1,
+                   borderColor:'rgba(212,160,23,0.2)' },
+  resetText:     { fontFamily:'Outfit-Regular', fontSize:13,
+                   color:'rgba(240,235,225,0.4)' },
+})

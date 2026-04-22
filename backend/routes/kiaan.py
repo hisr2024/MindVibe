@@ -34,10 +34,14 @@ from backend.services.ai_provider import (
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/kiaan", tags=["kiaan"])
+# Compatibility alias — some clients hit `/api/sakha/chat`. It reuses the
+# same handler so behaviour is identical and there is exactly one code path.
+sakha_router = APIRouter(prefix="/api/sakha", tags=["kiaan"])
 
 MAX_MESSAGE_LENGTH = 2000
 MAX_TOOL_FIELD_LENGTH = 1000
 MAX_HISTORY_MESSAGES = 40
+MAX_SYSTEM_CONTEXT_LENGTH = 4000
 
 
 # ── REQUEST / RESPONSE MODELS ────────────────────────────────────────────
@@ -58,6 +62,13 @@ class ChatRequest(BaseModel):
     conversation_history: list[Message] = Field(default_factory=list)
     tool_name: str | None = Field(default=None, max_length=64)
     gita_verse: dict[str, Any] | None = None
+    # Optional extras accepted by some clients. `context` is informational
+    # ("chat" vs "tool"); `system_context` replaces the default Sakha system
+    # prompt wholesale when the caller ships its own curated context.
+    context: str = Field(default="chat", max_length=64)
+    system_context: str | None = Field(
+        default=None, max_length=MAX_SYSTEM_CONTEXT_LENGTH
+    )
 
     @field_validator("conversation_history")
     @classmethod
@@ -103,6 +114,7 @@ async def _run_ai(
     history: list[dict[str, str]] | None = None,
     tool_name: str | None = None,
     gita_verse: dict[str, Any] | None = None,
+    system_override: str | None = None,
 ) -> str:
     """Call the AI provider and translate errors into HTTP responses.
 
@@ -117,6 +129,7 @@ async def _run_ai(
             conversation_history=history or [],
             gita_verse=gita_verse,
             tool_name=tool_name,
+            system_override=system_override,
         )
     except AIProviderNotConfigured as exc:
         logger.error("KIAAN AI not configured: %s", exc)
@@ -139,14 +152,11 @@ async def _run_ai(
 
 
 # ── ENDPOINT 1: Sakha Chat ────────────────────────────────────────────────
-@router.post("/chat", response_model=ChatResponse)
-@limiter.limit(CHAT_RATE_LIMIT)
-async def sakha_chat(
-    request: Request,
+async def _handle_sakha_chat(
     payload: ChatRequest,
-    current_user_id: str = Depends(get_current_user),
+    current_user_id: str,
 ) -> ChatResponse:
-    """Main Sakha chat endpoint consumed by the Android chat screen."""
+    """Shared implementation for the Sakha chat endpoint and its alias."""
     history = [
         {"role": m.role, "content": m.content} for m in payload.conversation_history
     ]
@@ -156,8 +166,31 @@ async def sakha_chat(
         history=history,
         tool_name=payload.tool_name,
         gita_verse=payload.gita_verse,
+        system_override=payload.system_context,
     )
     return ChatResponse(response=response_text, conversation_id=current_user_id)
+
+
+@router.post("/chat", response_model=ChatResponse)
+@limiter.limit(CHAT_RATE_LIMIT)
+async def sakha_chat(
+    request: Request,
+    payload: ChatRequest,
+    current_user_id: str = Depends(get_current_user),
+) -> ChatResponse:
+    """Main Sakha chat endpoint consumed by the Android chat screen."""
+    return await _handle_sakha_chat(payload, current_user_id)
+
+
+@sakha_router.post("/chat", response_model=ChatResponse)
+@limiter.limit(CHAT_RATE_LIMIT)
+async def sakha_chat_alias(
+    request: Request,
+    payload: ChatRequest,
+    current_user_id: str = Depends(get_current_user),
+) -> ChatResponse:
+    """Compat alias at ``/api/sakha/chat`` — identical to ``/api/kiaan/chat``."""
+    return await _handle_sakha_chat(payload, current_user_id)
 
 
 # ── ENDPOINT 2: Emotional Reset ──────────────────────────────────────────

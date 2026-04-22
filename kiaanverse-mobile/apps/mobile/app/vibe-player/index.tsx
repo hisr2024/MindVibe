@@ -69,6 +69,97 @@ const TODAY_VERSE = {
   reference: 'Bhagavad Gita 2.47',
 } as const;
 
+/**
+ * Built-in fallback catalog. Rendered whenever the API has no tracks for
+ * the active filter (empty response, error, or still warming up) so the
+ * Library tab is never a blank spinner. Tracks without a hosted audioUrl
+ * fall through `trackPlayerBridge` as `unavailable` → the UI surfaces a
+ * "Coming soon" alert on tap, which is the correct UX until audio is
+ * hosted.
+ */
+const BUILTIN_TRACKS: readonly MeditationTrack[] = [
+  {
+    id: 'builtin-1',
+    title: 'Sacred Om Chanting',
+    artist: 'ॐ मन्त्र',
+    duration: 600,
+    category: 'mantra',
+    audioUrl: '',
+    description: 'The primordial sound of creation',
+  },
+  {
+    id: 'builtin-2',
+    title: 'Gayatri Mantra',
+    artist: 'गायत्री मन्त्र',
+    duration: 480,
+    category: 'mantra',
+    audioUrl: '',
+    description: 'The universal prayer',
+  },
+  {
+    id: 'builtin-3',
+    title: 'Morning Raaga Meditation',
+    artist: 'प्रभात ध्यान',
+    duration: 900,
+    category: 'meditation',
+    audioUrl: '',
+    description: 'Sunrise sacred sounds',
+  },
+  {
+    id: 'builtin-4',
+    title: 'Bhagavad Gita Ch.2',
+    artist: 'गीता अध्याय २',
+    duration: 1920,
+    category: 'chanting',
+    audioUrl: '',
+    description: 'Sankhya Yoga — wisdom of the eternal',
+  },
+  {
+    id: 'builtin-5',
+    title: 'Tibetan Singing Bowls',
+    artist: 'ध्यान नाद',
+    duration: 1200,
+    category: 'meditation',
+    audioUrl: '',
+    description: 'Sacred resonance for deep meditation',
+  },
+  {
+    id: 'builtin-6',
+    title: 'Krishna Bhajan',
+    artist: 'कृष्ण भजन',
+    duration: 720,
+    category: 'chanting',
+    audioUrl: '',
+    description: 'Devotional songs of the divine',
+  },
+  {
+    id: 'builtin-7',
+    title: 'Forest of Peace',
+    artist: 'शान्ति वन',
+    duration: 1800,
+    category: 'ambient',
+    audioUrl: '',
+    description: '40Hz divine frequency meditation',
+  },
+  {
+    id: 'builtin-8',
+    title: 'Shiva Dhyana',
+    artist: 'शिव ध्यान',
+    duration: 720,
+    category: 'meditation',
+    audioUrl: '',
+    description: 'Sacred meditation for inner stillness',
+  },
+];
+
+/** Filter builtins by the API category string the parent is currently querying. */
+function selectBuiltinTracks(
+  apiCategory: string | undefined,
+): readonly MeditationTrack[] {
+  if (!apiCategory) return BUILTIN_TRACKS;
+  return BUILTIN_TRACKS.filter((t) => t.category === apiCategory);
+}
+
 // ---------------------------------------------------------------------------
 // Segmented tabs
 // ---------------------------------------------------------------------------
@@ -149,7 +240,17 @@ function LibrarySection({
   onToggleBookmark,
 }: LibrarySectionProps): React.JSX.Element {
   const apiCategory = resolveApiCategory(filter);
-  const { data: tracks, isLoading } = useMeditationTracks(apiCategory);
+  const { data: apiTracks, isLoading } = useMeditationTracks(apiCategory);
+
+  // Always render something: prefer real API tracks, fall back to the
+  // built-in catalog when the API returns empty (or hasn't responded yet).
+  const tracks = useMemo<readonly MeditationTrack[]>(
+    () =>
+      apiTracks && apiTracks.length > 0
+        ? apiTracks
+        : selectBuiltinTracks(apiCategory),
+    [apiTracks, apiCategory],
+  );
 
   const renderTrack = useCallback(
     ({ item }: ListRenderItemInfo<MeditationTrack>) => {
@@ -178,7 +279,7 @@ function LibrarySection({
 
   return (
     <FlatList
-      data={tracks ?? []}
+      data={tracks}
       renderItem={renderTrack}
       keyExtractor={keyExtractor}
       contentContainerStyle={styles.listContent}
@@ -224,8 +325,16 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
   // `tracks` is also read by the Library body via its own hook, but we need
   // it here so `handleTrackPress` can hydrate the queue with everything the
   // user currently sees (keeps skip-next aligned with the visible filter).
+  // Mirror LibrarySection's fallback so the queue matches what's rendered.
   const apiCategory = resolveApiCategory(filter);
-  const { data: tracks } = useMeditationTracks(apiCategory);
+  const { data: apiTracks } = useMeditationTracks(apiCategory);
+  const tracks = useMemo<readonly MeditationTrack[]>(
+    () =>
+      apiTracks && apiTracks.length > 0
+        ? apiTracks
+        : selectBuiltinTracks(apiCategory),
+    [apiTracks, apiCategory],
+  );
 
   const currentTrack = useVibePlayerStore((s) => s.currentTrack);
   const isPlaying = useVibePlayerStore((s) => s.isPlaying);

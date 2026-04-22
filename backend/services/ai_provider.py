@@ -119,6 +119,7 @@ async def call_kiaan_ai(
     conversation_history: list[dict[str, Any]] | None = None,
     gita_verse: dict[str, Any] | None = None,
     tool_name: str | None = None,
+    system_override: str | None = None,
 ) -> str:
     """Single entry point for every KIAAN AI call.
 
@@ -132,6 +133,10 @@ async def call_kiaan_ai(
             ``meaning``. Used to anchor the response in scripture.
         tool_name: One of ``Emotional Reset``, ``Ardha``, ``Viyoga``,
             ``Karma Reset``, ``Relationship Compass``, ``KarmaLytix``. Optional.
+        system_override: Optional full replacement for the default KIAAN system
+            prompt. When provided, it is used as the base and ``tool_name`` /
+            ``gita_verse`` are still appended. Lets callers ship their own
+            curated system context (e.g. the mobile client).
 
     Returns:
         The assistant's response as a string. Always non-None, never empty
@@ -145,7 +150,7 @@ async def call_kiaan_ai(
     if not message or not message.strip():
         raise ValueError("message must be a non-empty string")
 
-    system = _build_system_prompt(gita_verse, tool_name)
+    system = _build_system_prompt(gita_verse, tool_name, system_override)
     history = _sanitize_history(conversation_history)
 
     started = time.monotonic()
@@ -188,8 +193,10 @@ async def call_kiaan_ai(
 def _build_system_prompt(
     gita_verse: dict[str, Any] | None,
     tool_name: str | None,
+    system_override: str | None = None,
 ) -> str:
-    parts: list[str] = [KIAAN_SYSTEM_PROMPT]
+    base = system_override if system_override and system_override.strip() else KIAAN_SYSTEM_PROMPT
+    parts: list[str] = [base]
 
     if tool_name:
         context = _TOOL_CONTEXTS.get(
