@@ -39,6 +39,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   Text,
   Input,
@@ -68,6 +69,62 @@ const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.4;
  * `category` field — the diary remains the single source of truth.
  */
 const TAG_FILTERS = ['All', 'Gratitude', 'Reflection', 'Prayer', 'Dream', 'Insight'] as const;
+
+// ---------------------------------------------------------------------------
+// KarmaLytixBanner — promoted shortcut into the Sacred Mirror surface
+// ---------------------------------------------------------------------------
+
+/**
+ * KarmaLytix banner pinned above the entry list.
+ *
+ * The Sacred Mirror reads exclusively from journal metadata (mood tags,
+ * category tags, the weekly self-assessment) — the encrypted body is never
+ * decrypted server-side. Surfacing that guarantee inline makes the privacy
+ * contract visible at the point of trust, not buried in a settings screen.
+ */
+function KarmaLytixBanner({
+  onPress,
+}: {
+  onPress: () => void;
+}): React.JSX.Element {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel="Open KarmaLytix Sacred Mirror"
+      style={styles.karmaLytixWrap}
+    >
+      <LinearGradient
+        colors={['rgba(212,160,23,0.08)', 'rgba(212,160,23,0.18)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.karmaLytixGradient}
+      >
+        <View style={styles.karmaLytixLeft}>
+          {/* The mirror glyph mirrors the "Sacred Mirror" product name —
+              a small visual cue that costs us zero extra assets. */}
+          <Text style={styles.karmaLytixIcon} accessibilityElementsHidden>
+            {'\u{1FA9E}'}
+          </Text>
+          <View style={styles.karmaLytixTextWrap}>
+            <Text variant="label" color={colors.primary[500]}>
+              KarmaLytix
+            </Text>
+            <Text variant="caption" color={colors.text.secondary} style={styles.karmaLytixSub}>
+              KIAAN analyses your reflections
+            </Text>
+            <Text variant="caption" color={colors.text.muted} style={styles.karmaLytixPrivacy}>
+              {'\u{1F512}'} Metadata only · Content never read
+            </Text>
+          </View>
+        </View>
+        <Text variant="h3" color={colors.primary[500]} style={styles.karmaLytixArrow}>
+          {'›'}
+        </Text>
+      </LinearGradient>
+    </Pressable>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // SwipeableEntryCard — pan-to-reveal-delete
@@ -263,6 +320,11 @@ function JournalView(): React.JSX.Element {
     router.push('/journal/new');
   }, [router]);
 
+  const handleOpenKarmaLytix = useCallback(() => {
+    void Haptics.selectionAsync();
+    router.push('/analytics');
+  }, [router]);
+
   const handleTagPress = useCallback((tag: string) => {
     void Haptics.selectionAsync();
     setActiveTag(tag);
@@ -356,6 +418,10 @@ function JournalView(): React.JSX.Element {
           keyExtractor={keyExtractor}
           contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 96 }]}
           showsVerticalScrollIndicator={false}
+          // The KarmaLytix banner sits above the entry list and scrolls
+          // with it so it stays out of the way on long diaries but is
+          // immediately visible when the user opens the tab.
+          ListHeaderComponent={<KarmaLytixBanner onPress={handleOpenKarmaLytix} />}
           ListEmptyComponent={renderEmpty}
           refreshControl={
             <RefreshControl
@@ -389,42 +455,16 @@ function JournalView(): React.JSX.Element {
 
 export default function JournalScreen(): React.JSX.Element {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
   const { t } = useTranslation('journal');
 
-  const handleOpenKarmaLytix = useCallback(() => {
-    void Haptics.selectionAsync();
-    // Deep-link to the Sacred Mirror surface. Journal and KarmaLytix share
-    // the same source data (encrypted entries + tags + moods) so this is the
-    // natural companion surface, and the previous hub-tab UX buried it under
-    // Profile → Analytics.
-    router.push('/analytics');
-  }, [router]);
-
+  // KarmaLytix is surfaced inline in the entry list header — see
+  // KarmaLytixBanner above — so this outer screen stays minimal and the
+  // Sacred Mirror CTA appears in the same scroll context as the user's
+  // reflections.
   return (
     <DivineBackground variant="sacred" style={styles.root}>
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <GoldenHeader title={t('hubTitle', 'Sacred Reflections')} />
-
-        {/* Header-level KarmaLytix shortcut — a single row above the diary
-            list. Styled like a subtle link rather than a primary CTA so it
-            doesn't compete with the "New Entry" FAB below. */}
-        <View style={styles.headerActions}>
-          <Pressable
-            onPress={handleOpenKarmaLytix}
-            accessibilityRole="button"
-            accessibilityLabel={t(
-              'openKarmaLytix',
-              'Open KarmaLytix Sacred Mirror',
-            )}
-            style={styles.karmaLytixLink}
-          >
-            <Text variant="caption" color={colors.primary[500]}>
-              {t('karmaLytixLink', 'KarmaLytix →')}
-            </Text>
-          </Pressable>
-        </View>
-
         <JournalView />
       </View>
     </DivineBackground>
@@ -443,21 +483,45 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // -- Header actions (KarmaLytix shortcut) --
-  headerActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xs,
-    paddingBottom: spacing.xs,
-  },
-  karmaLytixLink: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xxs,
-    borderRadius: 12,
+  // -- KarmaLytix banner (sits atop the entry list) --
+  karmaLytixWrap: {
+    marginBottom: spacing.sm,
+    borderRadius: 14,
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.alpha.goldMedium,
-    backgroundColor: colors.alpha.goldLight,
+  },
+  karmaLytixGradient: {
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  karmaLytixLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  karmaLytixIcon: {
+    fontSize: 28,
+    lineHeight: 32,
+  },
+  karmaLytixTextWrap: {
+    flex: 1,
+    gap: 2,
+  },
+  karmaLytixSub: {
+    marginTop: 2,
+  },
+  karmaLytixPrivacy: {
+    marginTop: 2,
+    fontStyle: 'italic',
+  },
+  karmaLytixArrow: {
+    paddingLeft: spacing.xs,
   },
 
   // -- Journal view --
