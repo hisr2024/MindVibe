@@ -739,6 +739,49 @@ export interface ArdhaReframeResponse {
   affirmation: string;
 }
 
+/**
+ * Structured ARDHA reframe response used by the 2-screen Android flow
+ * (tools/ardha/index.tsx → tools/ardha/result.tsx). Wraps the raw
+ * `/api/ardha/reframe` payload, the parsed 5-pillar sections, and the
+ * compliance-check analysis the result screen renders below the card.
+ */
+export interface ArdhaStructuredResponse {
+  /** Echo of the user's original thought — shown in the Full Text sheet. */
+  thought: string;
+  /** Raw AI response text (used by "Full Text" and "Copy" actions). */
+  fullText: string;
+  /** True when the backend fell back to template rendering (no OpenAI). */
+  fallback: boolean;
+  /** Parsed pillar sections, in canonical order, ready to render. */
+  sections: Array<{
+    key: string;
+    icon: string;
+    label: string;
+    sanskrit: string;
+    content: string;
+  }>;
+  /** ARDHA Analysis block shown below the response card. */
+  analysis: {
+    /** Humanised primary emotion, e.g. "fear of failure". */
+    detected: string;
+    /** Pillars the analyzer recommended for this thought. */
+    pillars: Array<{
+      badge: string;
+      name: string;
+      sanskrit: string;
+      question: string;
+    }>;
+    crisisDetected: boolean;
+  };
+  /** First Gita verse reference from `sources[]`, for the card subtitle. */
+  verseReference?: string;
+  /** Overall compliance score (e.g. 5 / 5). */
+  compliance: {
+    score: number;
+    maxScore: number;
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Deep Insights (extended analytics types)
 // ---------------------------------------------------------------------------

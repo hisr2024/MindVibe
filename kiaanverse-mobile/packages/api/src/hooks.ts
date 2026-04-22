@@ -13,10 +13,12 @@
 import { useQuery, useMutation, useQueryClient, type UseQueryResult, type UseMutationResult } from '@tanstack/react-query';
 import { api } from './endpoints';
 import { gitaCache } from './cache/gitaCache';
+import { parseArdhaResponse, humaniseEmotion } from './ardha/parser';
 import type {
   AnalyticsDashboard,
   ArdhaResult,
   ArdhaReframeResponse,
+  ArdhaStructuredResponse,
   CommunityCircle,
   CommunityPost,
   DeepInsight,
@@ -1344,6 +1346,94 @@ export function useArdhaReframe(): UseMutationResult<ArdhaReframeResponse, Error
               },
             }
           : {}),
+      };
+      return result;
+    },
+  });
+}
+
+/**
+ * Structured ARDHA reframe hook powering the 2-screen Android flow
+ * (tools/ardha/index.tsx → tools/ardha/result.tsx).
+ *
+ * The chat-style `useArdhaReframe` flattens everything to a single string;
+ * this one preserves the 5-pillar structure by parsing the model's
+ * Markdown-ish headings (`## Dharma Alignment`, `**Arpana**`, etc.) into
+ * `sections[]`, and threads through the backend's `ardha_analysis` +
+ * `compliance` blocks unchanged.
+ */
+export function useArdhaStructuredReframe(): UseMutationResult<
+  ArdhaStructuredResponse,
+  Error,
+  { thought: string; depth?: 'quick' | 'deep' | 'quantum'; sessionId?: string }
+> {
+  return useMutation({
+    mutationFn: async (vars: {
+      thought: string;
+      depth?: 'quick' | 'deep' | 'quantum';
+      sessionId?: string;
+    }) => {
+      const { thought, depth, sessionId } = vars;
+      const { data } = await api.ardha.reframeStructured(thought, {
+        ...(depth ? { depth } : {}),
+        ...(sessionId ? { sessionId } : {}),
+      });
+
+      const raw = data as {
+        response?: string;
+        fallback?: boolean;
+        sources?: Array<{ reference?: string; reference_if_any?: string }>;
+        ardha_analysis?: {
+          primary_emotion?: string;
+          detected_emotions?: string[];
+          pillars?: Array<{
+            code?: string;
+            name?: string;
+            sanskrit_name?: string;
+            compliance_test?: string;
+          }>;
+          crisis_detected?: boolean;
+        };
+        compliance?: {
+          score?: number;
+          max_score?: number;
+        };
+      };
+
+      const fullText = raw.response ?? '';
+      const sections = parseArdhaResponse(fullText);
+
+      // Pillars addressed for this specific thought — rendered in the
+      // "ARDHA Analysis" block. The backend already ships `compliance_test`
+      // as a short diagnostic question ("Is outcome mentally released?"),
+      // which is exactly what the screenshot shows.
+      const pillars = (raw.ardha_analysis?.pillars ?? [])
+        .map((p) => ({
+          badge: (p.code ?? '').toUpperCase(),
+          name: p.name ?? '',
+          sanskrit: p.sanskrit_name ?? '',
+          question: p.compliance_test ?? '',
+        }))
+        .filter((p) => p.badge.length > 0 && p.name.length > 0);
+
+      const firstRef =
+        raw.sources?.[0]?.reference ?? raw.sources?.[0]?.reference_if_any;
+
+      const result: ArdhaStructuredResponse = {
+        thought,
+        fullText,
+        fallback: raw.fallback === true,
+        sections,
+        analysis: {
+          detected: humaniseEmotion(raw.ardha_analysis?.primary_emotion),
+          pillars,
+          crisisDetected: raw.ardha_analysis?.crisis_detected === true,
+        },
+        ...(firstRef ? { verseReference: firstRef } : {}),
+        compliance: {
+          score: raw.compliance?.score ?? 0,
+          maxScore: raw.compliance?.max_score ?? 5,
+        },
       };
       return result;
     },
