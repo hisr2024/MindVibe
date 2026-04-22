@@ -2338,6 +2338,27 @@ except Exception as e:
         f"❌ [ERROR] Failed to load KarmaLytix analytics router: {e}"
     )
 
+# Load unified KIAAN router (Sakha chat + 6 sacred tools) — mobile entry point
+startup_logger.info(
+    "\n[KIAAN Unified] Attempting to import unified KIAAN router..."
+)
+try:
+    from backend.routes.kiaan import router as kiaan_unified_router
+
+    app.include_router(kiaan_unified_router)
+    _startup_status["routers_loaded"] += 1
+    startup_logger.info("✅ [SUCCESS] KIAAN unified router loaded")
+    startup_logger.info("   • POST   /api/kiaan/chat - Sakha chat")
+    startup_logger.info("   • POST   /api/kiaan/tools/emotional-reset")
+    startup_logger.info("   • POST   /api/kiaan/tools/ardha")
+    startup_logger.info("   • POST   /api/kiaan/tools/viyoga")
+    startup_logger.info("   • POST   /api/kiaan/tools/karma-reset")
+    startup_logger.info("   • POST   /api/kiaan/tools/relationship-compass")
+    startup_logger.info("   • POST   /api/kiaan/tools/karmalytix")
+except Exception as e:
+    _startup_status["routers_failed"] += 1
+    startup_logger.info(f"❌ [ERROR] Failed to load KIAAN unified router: {e}")
+
 # Count actual registered API routes to populate startup status.
 # This is more reliable than tracking each try/except individually since
 # it reflects the true state of what FastAPI has registered.
