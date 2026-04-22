@@ -150,7 +150,7 @@ export default function ChatScreen() {
   const [input, setInput]       = useState('')
   const [loading, setLoading]   = useState(false)
   const listRef = useRef<FlatList>(null)
-  const history = useRef<Array<{role:string; content:string}>>([])
+  const history = useRef<Array<{role:'user'|'assistant'; content:string}>>([])
 
   const send = useCallback(async (text: string) => {
     const msg = text.trim()
@@ -180,8 +180,8 @@ export default function ChatScreen() {
         id: `s-${Date.now()}`,
         role: 'assistant',
         content: result.response,
-        verse: result.verse,
         timestamp: new Date(),
+        ...(result.verse ? { verse: result.verse } : {}),
       }
       setMessages(prev => [...prev, sakhaMsg])
       history.current.push({ role: 'assistant', content: result.response })

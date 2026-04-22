@@ -6,6 +6,7 @@
       "@/*": ["./app/*"],
       "@kiaanverse/ui": ["../../packages/ui/src"],
       "@kiaanverse/api": ["../../packages/api/src"],
+      "@kiaanverse/api/*": ["../../packages/api/src/*"],
       "@kiaanverse/store": ["../../packages/store/src"],
       "@kiaanverse/i18n": ["../../packages/i18n/src"]
     }

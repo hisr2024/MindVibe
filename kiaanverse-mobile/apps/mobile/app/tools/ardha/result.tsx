@@ -148,7 +148,7 @@ export default function ArdhaResultScreen(): React.JSX.Element {
   if (!payload) {
     // Redirect effect above handles this — return the dark shell so the
     // screen never flashes empty content.
-    return <DivineBackground variant="cosmic" style={styles.root} />;
+    return <DivineBackground variant="cosmic" style={styles.root}><></></DivineBackground>;
   }
 
   const sections = payload.sections;

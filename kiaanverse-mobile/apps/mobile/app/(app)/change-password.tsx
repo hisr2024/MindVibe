@@ -172,7 +172,7 @@ export default function ChangePasswordScreen(): React.JSX.Element {
             autoCapitalize="none"
             autoComplete="new-password"
             textContentType="newPassword"
-            error={previewError ?? undefined}
+            {...(previewError ? { error: previewError } : {})}
             containerStyle={styles.inputGap}
           />
 
