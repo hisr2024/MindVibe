@@ -38,12 +38,22 @@ export type FlowAnswers = Record<string, string>;
  * ("I Get It", "A Different Way to See This", "Try This Right Now",
  * "One Thing You Can Do", "Something to Consider") that mirror the
  * kiaanverse.com/m/viyog layout.
+ *
+ * Downstream screens (meditation, release, fire) read optional fields
+ * populated either by a future structured response or by tasteful
+ * screen-local defaults when absent.
  */
 export interface ViyogaTransmission {
   readonly header: string;
   readonly footer: string;
   readonly sections: ReadonlyArray<{ readonly content: string }>;
   readonly verse: string | null;
+  /** One sentence per meditation screen (meditation.tsx). */
+  readonly meditationScreens: readonly string[];
+  /** Second-line copy under "What do you wish to release?" (release.tsx). */
+  readonly releaseSubtitle: string;
+  /** Three closing lines on the Sacred Fire screen (fire.tsx). */
+  readonly fireLines: readonly string[];
 }
 
 export type FlowAIResponse = ViyogaTransmission | null;
@@ -201,11 +211,39 @@ function shapeTransmission(
     ? `Anchored in ${verse}`
     : 'Even in separation, there is union.';
 
+  // Meditation / release / fire copy — backends today don't structure
+  // these, so we hand the screens the same tasteful defaults they'd
+  // otherwise inline. When the server eventually returns them, the
+  // screens will pick them up automatically.
+  const meditationScreens: readonly string[] = [
+    'The longing you carry is sacred.',
+    'It is not weakness. It is love with nowhere to go.',
+    'Breathe in what you remember.',
+    'You carry it within you. It lives in your bones.',
+    'The separation is real. The connection is also real.',
+    'Distance cannot sever what is written into you.',
+    'You are not uprooted. Your roots stretch everywhere.',
+    'The bond holds. It always holds.',
+    'Breathe out slowly. You are exactly where you are meant to be.',
+  ];
+
+  const releaseSubtitle =
+    'Not the love. Not the memory. But the weight of the pain.';
+
+  const fireLines: readonly string[] = [
+    'Your offering has been received by the Sacred Fire.',
+    'It is released... no longer has power over you.',
+    'What remains is love. Only love.',
+  ];
+
   return {
     header,
     footer,
     sections,
     verse: verse.length > 0 ? verse : null,
+    meditationScreens,
+    releaseSubtitle,
+    fireLines,
   };
 }
 
