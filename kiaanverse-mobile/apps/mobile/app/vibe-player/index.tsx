@@ -17,6 +17,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  Alert,
   FlatList,
   StyleSheet,
   Text,
@@ -103,6 +104,11 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
 
   const handleTrackPress = useCallback(
     (track: MeditationTrack) => {
+      // The bridge returns a typed result so we can show the user a real
+      // reason when playback fails (unhosted audio, RNTP error) instead of
+      // the previous silent no-op. We still optimistically update the
+      // store + navigate for the happy path so the UI feels instant; on
+      // failure we rewind the store state and stay on this screen.
       const vibeTrack: VibeTrack = {
         id: track.id,
         title: track.title,
@@ -115,6 +121,7 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
       play();
       showMiniPlayer();
       if (tracks) hydrateQueue(tracks);
+
       void playTrack({
         id: track.id,
         title: track.title,
@@ -122,8 +129,25 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
         audioUrl: track.audioUrl,
         duration: track.duration,
         artworkUrl: track.artworkUrl ?? null,
+      }).then((result) => {
+        if (result.ok) {
+          router.push('/vibe-player/player');
+          return;
+        }
+        if (result.reason === 'unavailable') {
+          Alert.alert(
+            'Coming soon',
+            result.message,
+            [{ text: 'OK', style: 'default' }],
+          );
+        } else {
+          Alert.alert(
+            'Playback error',
+            result.message,
+            [{ text: 'OK', style: 'default' }],
+          );
+        }
       });
-      router.push('/vibe-player/player');
     },
     [setTrack, play, showMiniPlayer, tracks, hydrateQueue, router],
   );

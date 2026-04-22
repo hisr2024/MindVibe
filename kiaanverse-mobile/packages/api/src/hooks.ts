@@ -1354,12 +1354,59 @@ export function useArdhaReframe(): UseMutationResult<ArdhaReframeResponse, Error
 // Meditation / Vibe Player
 // ---------------------------------------------------------------------------
 
+/**
+ * Turn whatever the backend returned for `audioUrl` into an absolute URL the
+ * native player can actually fetch. Today the meditation backend returns
+ * relative paths like `"/audio/om-chanting.mp3"` — those are useless on
+ * device because the native HTTP stack has no baseURL to resolve against.
+ *
+ * - absolute `http(s)://` → kept as-is
+ * - empty / missing      → returned as empty string (screen treats as
+ *                          "coming soon" and skips TrackPlayer.add)
+ * - relative             → resolved against API_CONFIG.baseURL so that once
+ *                          the backend mounts a static `/audio/*` route the
+ *                          mobile app automatically starts playing without
+ *                          needing another release.
+ */
+function _normalizeTrackAudioUrl(raw: unknown): string {
+  if (typeof raw !== 'string') return '';
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) return '';
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  // Relative path — prepend the configured API base. Strip a leading slash
+  // so we don't double it when baseURL already ends with one.
+  const base = API_CONFIG.baseURL.replace(/\/$/, '');
+  const path = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  return `${base}${path}`;
+}
+
 export function useMeditationTracks(category?: string): UseQueryResult<MeditationTrack[]> {
   return useQuery({
     queryKey: queryKeys.meditationTracks(category),
     queryFn: async () => {
       const { data } = await api.meditation.tracks(category);
-      return data as MeditationTrack[];
+      const raw = Array.isArray(data) ? data : [];
+      // Normalise `audioUrl` and defensively coerce the other fields — the
+      // backend sometimes ships null / missing values that would otherwise
+      // break TrackPlayer.add() at play time instead of surfacing a clean
+      // "coming soon" message at list-render time.
+      return raw.map((t): MeditationTrack => {
+        const row = t as Record<string, unknown>;
+        return {
+          id: String(row.id ?? ''),
+          title: String(row.title ?? 'Untitled'),
+          artist: String(row.artist ?? 'KIAAN Vibe'),
+          duration: Number(row.duration ?? 0),
+          category: (row.category as MeditationTrack['category']) ?? 'meditation',
+          audioUrl: _normalizeTrackAudioUrl(row.audioUrl ?? row.audio_url),
+          ...(typeof row.artworkUrl === 'string' && row.artworkUrl.length > 0
+            ? { artworkUrl: row.artworkUrl }
+            : {}),
+          ...(typeof row.description === 'string'
+            ? { description: row.description }
+            : {}),
+        };
+      });
     },
     staleTime: 1000 * 60 * 30,
   });
