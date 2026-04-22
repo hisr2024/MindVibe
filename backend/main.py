@@ -963,9 +963,11 @@ try:
     from backend.routers import kiaan as kiaan_ai_router
 
     app.include_router(kiaan_ai_router.router)
+    app.include_router(kiaan_ai_router.sakha_router)
     _startup_status["routers_loaded"] += 1
     startup_logger.info("✅ [SUCCESS] KIAAN AI router loaded (provider-agnostic)")
     startup_logger.info("   • POST   /api/kiaan/chat")
+    startup_logger.info("   • POST   /api/sakha/chat  (compat alias)")
     startup_logger.info("   • POST   /api/kiaan/tools/emotional-reset")
     startup_logger.info("   • POST   /api/kiaan/tools/ardha")
     startup_logger.info("   • POST   /api/kiaan/tools/viyoga")

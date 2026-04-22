@@ -40,6 +40,7 @@ async def call_kiaan_ai(
     conversation_history: Optional[List[Dict]] = None,
     gita_verse: Optional[Dict] = None,
     tool_name: Optional[str] = None,
+    system_override: Optional[str] = None,
 ) -> str:
     """
     Single entry point for ALL KIAAN AI calls.
@@ -48,9 +49,13 @@ async def call_kiaan_ai(
 
     To switch to Claude: change AI_PROVIDER=anthropic + AI_MODEL=claude-haiku-4-5
     on Render. Zero code changes needed.
+
+    When `system_override` is provided, it replaces the default KIAAN system
+    prompt wholesale (tool_name and gita_verse are still appended if given).
+    Used by clients that ship their own curated system context.
     """
     history = conversation_history or []
-    system = _build_system(gita_verse, tool_name)
+    system = _build_system(gita_verse, tool_name, system_override)
     trimmed = history[-6:]  # Keep last 6 — controls cost
 
     if AI_PROVIDER == "openai":
@@ -61,8 +66,12 @@ async def call_kiaan_ai(
         raise ValueError(f"Unknown AI_PROVIDER: {AI_PROVIDER}")
 
 
-def _build_system(gita_verse: Optional[Dict], tool_name: Optional[str]) -> str:
-    system = KIAAN_SYSTEM_PROMPT
+def _build_system(
+    gita_verse: Optional[Dict],
+    tool_name: Optional[str],
+    system_override: Optional[str] = None,
+) -> str:
+    system = system_override if system_override else KIAAN_SYSTEM_PROMPT
 
     if tool_name:
         contexts = {

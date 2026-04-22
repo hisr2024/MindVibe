@@ -10,6 +10,9 @@ from backend.services.ai_provider import call_kiaan_ai
 from backend.deps import get_current_user   # existing auth dependency (returns user_id: str)
 
 router = APIRouter(prefix="/api/kiaan", tags=["kiaan"])
+# Compatibility alias — some clients hit /api/sakha/chat. It delegates to the
+# same handler so there is exactly one code path.
+sakha_router = APIRouter(prefix="/api/sakha", tags=["kiaan"])
 
 
 class Message(BaseModel):
@@ -22,6 +25,11 @@ class ChatRequest(BaseModel):
     conversation_history: List[Message] = []
     tool_name: Optional[str] = None
     gita_verse: Optional[dict] = None
+    # Optional fields accepted by some clients — `context` is informational
+    # (e.g. "chat" vs "tool"); `system_context` overrides the default KIAAN
+    # system prompt when the caller ships its own curated context.
+    context: str = "chat"
+    system_context: Optional[str] = None
 
 
 class ToolRequest(BaseModel):
@@ -35,8 +43,7 @@ class ChatResponse(BaseModel):
 
 
 # ── 1. Sakha Chat ──────────────────────────────────────────────────────────
-@router.post("/chat", response_model=ChatResponse)
-async def sakha_chat(req: ChatRequest, user_id: str = Depends(get_current_user)):
+async def _handle_sakha_chat(req: ChatRequest, user_id: str) -> ChatResponse:
     if not req.message.strip():
         raise HTTPException(400, "Message cannot be empty")
     try:
@@ -47,12 +54,24 @@ async def sakha_chat(req: ChatRequest, user_id: str = Depends(get_current_user))
             conversation_history=history,
             gita_verse=req.gita_verse,
             tool_name=req.tool_name,
+            system_override=req.system_context,
         )
         return ChatResponse(response=text, conversation_id=str(user_id))
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(500, str(e))
+
+
+@router.post("/chat", response_model=ChatResponse)
+async def sakha_chat(req: ChatRequest, user_id: str = Depends(get_current_user)):
+    return await _handle_sakha_chat(req, user_id)
+
+
+@sakha_router.post("/chat", response_model=ChatResponse)
+async def sakha_chat_alias(req: ChatRequest, user_id: str = Depends(get_current_user)):
+    """Compatibility alias at /api/sakha/chat — same behaviour as /api/kiaan/chat."""
+    return await _handle_sakha_chat(req, user_id)
 
 
 # ── 2. Emotional Reset ────────────────────────────────────────────────────
