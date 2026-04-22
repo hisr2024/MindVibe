@@ -5,7 +5,30 @@
 // ---------------------------------------------------------------------------
 // Tokens (raw primitives)
 // ---------------------------------------------------------------------------
-export { colors, type Colors } from './tokens/colors';
+export {
+  colors,
+  type Colors,
+  // Canonical KIAANVERSE named constants
+  COSMIC_VOID,
+  YAMUNA_DEEP,
+  SACRED_INDIGO,
+  TEMPLE_SHADOW,
+  DIVINE_GOLD,
+  GOLD_BRIGHT,
+  GOLD_SOFT,
+  KRISHNA_BLUE,
+  PEACOCK_TEAL,
+  PEACOCK_BRIGHT,
+  SACRED_WHITE,
+  TEXT_SECONDARY,
+  TEXT_MUTED,
+  ANGER_RED,
+  FEAR_BLUE,
+  DESIRE_AMBER,
+  GREED_GREEN,
+  DELUSION_PURPLE,
+  PRIDE_PINK,
+} from './tokens/colors';
 export {
   fontFamily,
   fontSize,

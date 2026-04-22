@@ -28,7 +28,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   splash: {
     image: './assets/splash.png',
     resizeMode: 'contain',
-    backgroundColor: '#050507',
+    // COSMIC_VOID — canonical KIAANVERSE cosmic backdrop
+    backgroundColor: '#050714',
   },
 
   ios: {
@@ -63,7 +64,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     versionCode: 19,
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#050507',
+      // COSMIC_VOID — canonical KIAANVERSE cosmic backdrop
+      backgroundColor: '#050714',
     },
     permissions: [
       'android.permission.INTERNET',
@@ -121,7 +123,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'expo-notifications',
       {
         icon: './assets/notification-icon.png',
-        color: '#d4a44c',
+        // DIVINE_GOLD — canonical KIAANVERSE gold accent
+        color: '#D4A017',
       },
     ],
     [
