@@ -26,11 +26,53 @@ export interface VerseRef {
   verse: number;
 }
 
-// Chapter verse counts (1-indexed) for random verse generation
-const CHAPTER_VERSE_COUNTS: Record<number, number> = {
-  1: 47, 2: 72, 3: 43, 4: 42, 5: 29, 6: 47, 7: 30, 8: 28, 9: 34,
-  10: 42, 11: 55, 12: 20, 13: 35, 14: 27, 15: 20, 16: 24, 17: 28, 18: 78,
-};
+/**
+ * Curated list of verses that ship with real Sanskrit + English in the
+ * backend Gita corpus (data/gita/chapters/*.json). Most verses in the seed
+ * corpus are placeholders — `"english": "Bhagavad Gita Chapter X, Verse Y
+ * teaches wisdom on <theme>."` — so a naive random pick across all 700
+ * verses lands on a placeholder ~96 % of the time and the home screen
+ * shows "teaches wisdom on devotion" instead of a real shloka.
+ *
+ * Every entry below was verified against the corpus at the time this list
+ * was added. When the backend ships real translations for the remaining
+ * verses, expand this list (or delete it and pick across all verses).
+ */
+const CURATED_VOD_VERSES: ReadonlyArray<VerseRef> = [
+  { chapter: 1, verse: 1 },
+  { chapter: 1, verse: 47 },
+  { chapter: 2, verse: 14 },
+  { chapter: 2, verse: 47 },
+  { chapter: 2, verse: 48 },
+  { chapter: 2, verse: 56 },
+  { chapter: 2, verse: 62 },
+  { chapter: 2, verse: 63 },
+  { chapter: 2, verse: 70 },
+  { chapter: 3, verse: 19 },
+  { chapter: 3, verse: 35 },
+  { chapter: 4, verse: 38 },
+  { chapter: 5, verse: 21 },
+  { chapter: 6, verse: 5 },
+  { chapter: 6, verse: 17 },
+  { chapter: 6, verse: 35 },
+  { chapter: 12, verse: 13 },
+  { chapter: 12, verse: 14 },
+  { chapter: 16, verse: 1 },
+  { chapter: 16, verse: 2 },
+  { chapter: 16, verse: 3 },
+  { chapter: 18, verse: 45 },
+  { chapter: 18, verse: 46 },
+  { chapter: 18, verse: 48 },
+  { chapter: 18, verse: 66 },
+];
+
+/**
+ * O(1) membership check against the curated list. Used to detect stale
+ * persisted VOD refs saved before the curated list shipped.
+ */
+const CURATED_VOD_KEYS = new Set(
+  CURATED_VOD_VERSES.map((v) => `${v.chapter}.${v.verse}`),
+);
 
 /** Maximum number of recently viewed verses to keep */
 const MAX_RECENTLY_VIEWED = 20;
@@ -75,22 +117,24 @@ function todayString(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-/** Pick a deterministic-ish random verse based on today's date. */
-function pickRandomVerse(): { chapter: number; verse: number } {
+/**
+ * Pick today's verse deterministically from the curated list of verses with
+ * real content. Uses the same date-hash pattern as before so a given calendar
+ * day always resolves to the same verse for all users, but selects only from
+ * CURATED_VOD_VERSES so the home screen never lands on a "teaches wisdom on
+ * devotion" placeholder.
+ */
+function pickDailyVerse(): VerseRef {
   const today = todayString();
-  // Simple hash from date string for deterministic daily selection
   let hash = 0;
   for (let i = 0; i < today.length; i++) {
     hash = (hash * 31 + today.charCodeAt(i)) | 0;
   }
   hash = Math.abs(hash);
-
-  // Pick chapter (1-18)
-  const chapter = (hash % 18) + 1;
-  const maxVerse = CHAPTER_VERSE_COUNTS[chapter] ?? 20;
-  const verse = (hash % maxVerse) + 1;
-
-  return { chapter, verse };
+  const picked = CURATED_VOD_VERSES[hash % CURATED_VOD_VERSES.length];
+  // TypeScript can't prove the modulo index is in-bounds for a readonly
+  // tuple, but CURATED_VOD_VERSES is guaranteed non-empty by construction.
+  return picked ?? { chapter: 2, verse: 47 };
 }
 
 // ---------------------------------------------------------------------------
@@ -128,11 +172,25 @@ export const useGitaStore = create<GitaState & GitaActions>()(
         },
 
         refreshVerseOfTheDay: () => {
-          const { vodDate } = get();
+          const { vodDate, vodChapter, vodVerse } = get();
           const today = todayString();
-          if (vodDate === today) return; // Already fresh
 
-          const { chapter, verse } = pickRandomVerse();
+          // Re-pick when either (a) the stored ref is stale (yesterday's
+          // verse) or (b) the persisted ref was chosen before the curated
+          // list shipped and points at a placeholder verse. Without the
+          // second check, existing users would be stuck on a "teaches
+          // wisdom on devotion" card until midnight.
+          const persistedKey =
+            vodChapter != null && vodVerse != null
+              ? `${vodChapter}.${vodVerse}`
+              : null;
+          const isFreshAndCurated =
+            vodDate === today &&
+            persistedKey !== null &&
+            CURATED_VOD_KEYS.has(persistedKey);
+          if (isFreshAndCurated) return;
+
+          const { chapter, verse } = pickDailyVerse();
           set((state) => {
             state.vodChapter = chapter;
             state.vodVerse = verse;

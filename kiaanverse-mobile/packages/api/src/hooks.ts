@@ -198,20 +198,80 @@ export function useGitaChapter(chapterId: number): UseQueryResult<ChapterDetail>
   });
 }
 
+/**
+ * A verse is considered "placeholder" when the seed corpus has not yet been
+ * populated with real content. The seed generator wrote `sanskrit: "॥ X.Y ॥"`
+ * and `english: "Bhagavad Gita Chapter X, Verse Y teaches wisdom on <theme>."`
+ * for most verses; the backend returns that text verbatim. Treat those rows
+ * as missing so the UI can show a real fallback instead of the generated
+ * copy — otherwise the home screen literally reads
+ * "teaches wisdom on devotion" in place of the shloka.
+ */
+function isPlaceholderVerse(v: {
+  sanskrit?: string | null;
+  english?: string | null;
+  transliteration?: string | null;
+}): boolean {
+  const eng = (v.english ?? '').toLowerCase();
+  const sanskrit = (v.sanskrit ?? '').trim();
+  const translit = (v.transliteration ?? '').trim();
+  if (eng.includes('teaches wisdom on')) return true;
+  if (/^verse \d+\.\d+$/i.test(translit)) return true;
+  // Sanskrit that is just the verse-number marker "॥ 12.6 ॥" — shorter than
+  // any real shloka, contains only digits, the danda character, and spaces.
+  if (/^॥\s*\d+\.\d+\s*॥$/u.test(sanskrit)) return true;
+  return false;
+}
+
+/** Real BG 2.47 used as the last-resort fallback when the requested verse
+ *  is a seed-data placeholder. This is the verse every Gita-reader knows —
+ *  "karmaṇy-evādhikāras te mā phaleṣhu kadāchana". */
+const BG_2_47_FALLBACK: GitaVerse = {
+  id: '2.47',
+  chapter: 2,
+  verse: 47,
+  sanskrit:
+    'कर्मण्येवाधिकारस्ते मा फलेषु कदाचन।\nमा कर्मफलहेतुर्भूर्मा ते सङ्गोऽस्त्वकर्मणि॥',
+  transliteration:
+    "karmaṇy-evādhikāras te mā phaleṣhu kadāchana\nmā karma-phala-hetur bhūr mā te saṅgo 'stv akarmaṇi",
+  translation:
+    'You have the right to perform your prescribed duties, but you are not entitled to the fruits of your actions. Never consider yourself to be the cause of the results, nor be attached to inaction.',
+};
+
 export function useGitaVerse(chapter: number, verse: number): UseQueryResult<GitaVerse> {
   return useQuery({
     queryKey: queryKeys.gitaVerse(chapter, verse),
     queryFn: () =>
       fetchWithGitaCache(`verse:${chapter}:${verse}`, async () => {
         const { data } = await api.gita.verse(chapter, verse);
-        const raw = data as { verse: { chapter: number; verse: number; verse_id: string; sanskrit: string; english: string; hindi: string; theme: string } };
+        // The backend may or may not include transliteration (it is in the
+        // Pydantic VerseSummary but not VerseDetail as of today); read it
+        // either way so the UI picks it up once the backend ships it.
+        const raw = data as {
+          verse: {
+            chapter: number;
+            verse: number;
+            verse_id: string;
+            sanskrit: string;
+            english: string;
+            hindi: string;
+            theme: string;
+            transliteration?: string | null;
+          };
+        };
         const v = raw.verse;
+        if (isPlaceholderVerse(v)) {
+          // Remap to BG 2.47 rather than returning the placeholder. The
+          // user sees a real shloka; analytics can still detect the remap
+          // via the returned `id` differing from the requested chapter.verse.
+          return BG_2_47_FALLBACK;
+        }
         return {
           id: v.verse_id,
           chapter: v.chapter,
           verse: v.verse,
           sanskrit: v.sanskrit,
-          transliteration: '',
+          transliteration: v.transliteration ?? '',
           translation: v.english,
         } as GitaVerse;
       }),
