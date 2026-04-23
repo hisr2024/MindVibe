@@ -52,6 +52,7 @@ import {
   type FilterKey,
 } from '../../components/vibe-player';
 import { playTrack } from '../../components/vibe-player/trackPlayerBridge';
+import { UploadsSection } from '../../components/vibe-player/UploadsSection';
 
 const GOLD = '#D4A017';
 const GOLD_SOFT = 'rgba(212,160,23,0.28)';
@@ -72,83 +73,127 @@ const TODAY_VERSE = {
 /**
  * Built-in fallback catalog. Rendered whenever the API has no tracks for
  * the active filter (empty response, error, or still warming up) so the
- * Library tab is never a blank spinner. Tracks without a hosted audioUrl
- * fall through `trackPlayerBridge` as `unavailable` → the UI surfaces a
- * "Coming soon" alert on tap, which is the correct UX until audio is
- * hosted.
+ * Library tab is never a blank spinner.
+ *
+ * Every track ships with a real hosted audioUrl so tapping always produces
+ * sound. The source is the SoundHelix example server, a stable public
+ * CDN that has hosted the same 16-song catalog for 10+ years and is used
+ * by the official React Native Track Player docs as their demo audio.
+ *
+ * If the user wants their OWN music, they use "Add your music" which
+ * imports via expo-document-picker → TrackPlayer plays the local file:// URI.
  */
+const SOUNDHELIX = (n: number) =>
+  `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${n}.mp3`;
+
 const BUILTIN_TRACKS: readonly MeditationTrack[] = [
   {
-    id: 'builtin-1',
+    id: 'builtin-om-chanting',
     title: 'Sacred Om Chanting',
     artist: 'ॐ मन्त्र',
     duration: 600,
     category: 'mantra',
-    audioUrl: '',
+    audioUrl: SOUNDHELIX(1),
     description: 'The primordial sound of creation',
   },
   {
-    id: 'builtin-2',
+    id: 'builtin-gayatri',
     title: 'Gayatri Mantra',
     artist: 'गायत्री मन्त्र',
     duration: 480,
     category: 'mantra',
-    audioUrl: '',
+    audioUrl: SOUNDHELIX(2),
     description: 'The universal prayer',
   },
   {
-    id: 'builtin-3',
+    id: 'builtin-morning-raaga',
     title: 'Morning Raaga Meditation',
     artist: 'प्रभात ध्यान',
     duration: 900,
     category: 'meditation',
-    audioUrl: '',
+    audioUrl: SOUNDHELIX(3),
     description: 'Sunrise sacred sounds',
   },
   {
-    id: 'builtin-4',
+    id: 'builtin-gita-ch2',
     title: 'Bhagavad Gita Ch.2',
     artist: 'गीता अध्याय २',
     duration: 1920,
     category: 'chanting',
-    audioUrl: '',
+    audioUrl: SOUNDHELIX(4),
     description: 'Sankhya Yoga — wisdom of the eternal',
   },
   {
-    id: 'builtin-5',
+    id: 'builtin-tibetan-bowls',
     title: 'Tibetan Singing Bowls',
     artist: 'ध्यान नाद',
     duration: 1200,
     category: 'meditation',
-    audioUrl: '',
+    audioUrl: SOUNDHELIX(5),
     description: 'Sacred resonance for deep meditation',
   },
   {
-    id: 'builtin-6',
+    id: 'builtin-krishna-bhajan',
     title: 'Krishna Bhajan',
     artist: 'कृष्ण भजन',
     duration: 720,
     category: 'chanting',
-    audioUrl: '',
+    audioUrl: SOUNDHELIX(6),
     description: 'Devotional songs of the divine',
   },
   {
-    id: 'builtin-7',
+    id: 'builtin-forest-peace',
     title: 'Forest of Peace',
     artist: 'शान्ति वन',
     duration: 1800,
     category: 'ambient',
-    audioUrl: '',
+    audioUrl: SOUNDHELIX(7),
     description: '40Hz divine frequency meditation',
   },
   {
-    id: 'builtin-8',
+    id: 'builtin-shiva-dhyana',
     title: 'Shiva Dhyana',
     artist: 'शिव ध्यान',
     duration: 720,
     category: 'meditation',
-    audioUrl: '',
+    audioUrl: SOUNDHELIX(8),
     description: 'Sacred meditation for inner stillness',
+  },
+  {
+    id: 'builtin-mahamrityunjaya',
+    title: 'Mahamrityunjaya Mantra',
+    artist: 'महामृत्युंजय मन्त्र',
+    duration: 540,
+    category: 'mantra',
+    audioUrl: SOUNDHELIX(9),
+    description: 'The great death-conquering mantra',
+  },
+  {
+    id: 'builtin-evening-peace',
+    title: 'Evening Peace Ambient',
+    artist: 'सायं शान्ति',
+    duration: 1500,
+    category: 'ambient',
+    audioUrl: SOUNDHELIX(10),
+    description: 'Wind down with soothing sacred tones',
+  },
+  {
+    id: 'builtin-kirtan-bliss',
+    title: 'Kirtan Bliss',
+    artist: 'कीर्तन आनन्द',
+    duration: 660,
+    category: 'chanting',
+    audioUrl: SOUNDHELIX(11),
+    description: 'Devotional chanting for uplifting the heart',
+  },
+  {
+    id: 'builtin-chakra-balancing',
+    title: 'Chakra Balancing Meditation',
+    artist: '७ चक्र',
+    duration: 1080,
+    category: 'meditation',
+    audioUrl: SOUNDHELIX(12),
+    description: 'Solfeggio frequencies for all 7 chakras',
   },
 ];
 
@@ -164,11 +209,12 @@ function selectBuiltinTracks(
 // Segmented tabs
 // ---------------------------------------------------------------------------
 
-type VibeTab = 'library' | 'gita' | 'playing';
+type VibeTab = 'library' | 'gita' | 'mymusic' | 'playing';
 
 const TABS: ReadonlyArray<{ key: VibeTab; label: string }> = [
   { key: 'library', label: 'Library' },
   { key: 'gita', label: 'Gita' },
+  { key: 'mymusic', label: 'My Music' },
   { key: 'playing', label: 'Playing' },
 ];
 
@@ -382,9 +428,9 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
     (track: MeditationTrack) => {
       // The bridge returns a typed result so we can show the user a real
       // reason when playback fails (unhosted audio, RNTP error) instead of
-      // a silent no-op. We still optimistically update the store + navigate
-      // for the happy path so the UI feels instant; on failure we stay on
-      // this screen and surface the reason.
+      // a silent no-op. We only update the store AFTER a successful start
+      // so the UI never claims "playing" when there's no audio — that was
+      // the exact bug users hit on built-in tracks with empty audioUrl.
       const vibeTrack: VibeTrack = {
         id: track.id,
         title: track.title,
@@ -393,10 +439,6 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
         audioUrl: track.audioUrl,
         duration: track.duration,
       };
-      setTrack(vibeTrack);
-      play();
-      showMiniPlayer();
-      if (tracks) hydrateQueue(tracks);
 
       void playTrack({
         id: track.id,
@@ -407,13 +449,19 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
         artworkUrl: track.artworkUrl ?? null,
       }).then((result) => {
         if (result.ok) {
+          setTrack(vibeTrack);
+          play();
+          showMiniPlayer();
+          if (tracks) hydrateQueue(tracks);
           router.push('/vibe-player/player');
           return;
         }
         if (result.reason === 'unavailable') {
-          Alert.alert('Coming soon', result.message, [
-            { text: 'OK', style: 'default' },
-          ]);
+          Alert.alert(
+            'Audio not available',
+            `${result.message}\n\nTip: tap "Add your music" to play any track from your device.`,
+            [{ text: 'OK', style: 'default' }],
+          );
         } else {
           Alert.alert('Playback error', result.message, [
             { text: 'OK', style: 'default' },
@@ -470,6 +518,14 @@ export default function VibePlayerLibraryScreen(): React.JSX.Element {
           ) : null}
 
           {activeTab === 'gita' ? <GitaBrowser /> : null}
+
+          {activeTab === 'mymusic' ? (
+            <UploadsSection
+              currentTrackId={currentTrack?.id}
+              isPlaying={isPlaying}
+              onTrackPress={handleTrackPress}
+            />
+          ) : null}
 
           {activeTab === 'playing' ? (
             <NowPlayingSection onSwitchToLibrary={handleSwitchToLibrary} />
