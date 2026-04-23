@@ -283,6 +283,7 @@ Supported languages in `res/values-*/`:
 - ✅ Project structure
 - ✅ Build configuration
 - ✅ Theming system
+- ✅ **Nitya Sadhana — adaptive daily practice** (full mobile-parity with kiaanverse.com/m/sadhana)
 
 ### In Development
 - 🔄 Authentication
@@ -297,6 +298,76 @@ Supported languages in `res/values-*/`:
 - [ ] Analytics dashboard
 - [ ] Offline support
 - [ ] Push notifications
+
+## 🕉 Nitya Sadhana — Native Experience
+
+The native Android Nitya Sadhana is the first complete flow shipped in this
+app. It is an exact parity build of the mobile web experience at
+`kiaanverse.com/m/sadhana`, re-implemented in Jetpack Compose for 60fps
+animation, offline-first content, and zero WebView overhead.
+
+### Phase flow
+`Arrival → Breathwork → Verse → Reflection → Intention (Sankalpa) → Completion`
+
+### Source layout
+
+```
+app/src/main/java/com/mindvibe/app/
+├── MainActivity.kt                      # hosts NityaSadhanaHost
+├── ui/theme/
+│   ├── KiaanColors.kt                   # sacred palette (cosmos / gold / mood spheres)
+│   ├── KiaanTypography.kt               # Serif + Devanagari (system-backed)
+│   └── KiaanTheme.kt                    # dark-only Material3 wrapper
+└── sadhana/
+    ├── model/SadhanaModels.kt           # phase/mood/breath/verse/intention types
+    ├── data/
+    │   ├── SadhanaContentProvider.kt    # deterministic offline content
+    │   └── SadhanaRepository.kt         # compose() + complete()
+    ├── viewmodel/SadhanaViewModel.kt    # state machine
+    └── ui/
+        ├── NityaSadhanaHost.kt          # orchestrator + background + crossfade
+        ├── components/
+        │   ├── SacredBackground.kt      # cosmos gradient + twinkling stars
+        │   ├── OmGlyph.kt               # ॐ in pulsing gold ring
+        │   ├── MoodSphere.kt            # selectable glowing sphere
+        │   ├── LotusBreath.kt           # 8-petal breath flower
+        │   └── SacredButton.kt          # gradient pill CTA + gold link
+        └── phases/
+            ├── ArrivalScreen.kt         # 6-sphere mood mandala
+            ├── BreathworkScreen.kt      # pranayama with phase-driven flower
+            ├── VerseScreen.kt           # Gita verse + KIAAN's insight card
+            ├── ReflectionScreen.kt      # journal prompt + text field
+            ├── IntentionScreen.kt       # editable Sankalpa + sealing sphere
+            └── CompletionScreen.kt      # Sacred Offering XP + Walk in Dharma
+```
+
+### Design decisions
+
+- **Offline-first**: `SadhanaContentProvider` ships 6 full compositions
+  (one per mood) with Sanskrit verse, transliteration, English, KIAAN
+  insight, reflection prompt, and dharma intention. The practice begins
+  within 1 second even with no network.
+- **Deterministic per `(mood, timeOfDay)`**: a user who pauses and resumes
+  sees the same verse, not a reshuffled one.
+- **Native animation**: lotus bloom, mood sphere halo pulse, and OM ring
+  glow are all Compose `animateFloatAsState` / `infiniteTransition` —
+  there is no WebView, no Lottie, no image assets to load.
+- **Devanagari support**: `FontFamily.Serif` maps to Noto Serif Devanagari
+  on all supported Android devices, so शान्त / कृतज्ञ / ॐ render natively
+  with no font bundling.
+- **Privacy**: reflections and sankalpa text live only on-device in
+  `DataStore` (keys excluded from cloud backup via `backup_rules.xml`).
+  When the backend `/api/sadhana/compose` and `/api/sadhana/complete`
+  endpoints go live, swap them into `SadhanaRepository` without touching
+  the ViewModel or UI.
+
+### Run it
+
+```bash
+cd mobile/android
+./gradlew :app:installDebug
+adb shell am start -n com.mindvibe.app.debug/com.mindvibe.app.MainActivity
+```
 
 ## 🚢 Building Release APK/AAB
 

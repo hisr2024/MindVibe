@@ -1,7 +1,26 @@
 <resources>
     <!-- App Name -->
     <string name="app_name">MindVibe</string>
-    
+
+    <!-- Nitya Sadhana -->
+    <string name="sadhana_app_name">Nitya Sadhana</string>
+    <string name="sadhana_greeting_morning">Good Morning, dear seeker</string>
+    <string name="sadhana_greeting_afternoon">Welcome back, dear seeker</string>
+    <string name="sadhana_greeting_evening">Peaceful evening, dear seeker</string>
+    <string name="sadhana_greeting_night">Sacred night, dear seeker</string>
+    <string name="sadhana_arrival_title">How do you feel today?</string>
+    <string name="sadhana_arrival_subtitle">Touch the sphere that speaks to you</string>
+    <string name="sadhana_composing">Composing your sacred practice…</string>
+    <string name="sadhana_seal_title">Seal Your Sankalpa</string>
+    <string name="sadhana_seal_commit">I commit to this sankalpa</string>
+    <string name="sadhana_seal_customize">Tap the pencil to customize your intention</string>
+    <string name="sadhana_seal_done">Sankalpa sealed. Walk in dharma.</string>
+    <string name="sadhana_walk_in_dharma">Walk in Dharma</string>
+    <string name="sadhana_view_journal">View Journal Entry</string>
+    <string name="sadhana_sacred_offering">SACRED OFFERING</string>
+    <string name="sadhana_lokah">लोका समस्ता सुखिनो भवन्तु</string>
+    <string name="sadhana_lokah_meaning">May all worlds be at peace</string>
+
     <!-- Common -->
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
