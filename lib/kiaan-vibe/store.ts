@@ -15,6 +15,13 @@ import {
   hasSystemicAudioIssues,
   resetFailureCounter,
 } from './meditation-library'
+import {
+  isSynthUrl,
+  parseSynthUrl,
+  playSynth,
+  unlockAudio,
+  type SynthHandle,
+} from './audio-synth'
 
 // Initial state
 const initialState = {
@@ -50,8 +57,47 @@ function getAudioElement(): HTMLAudioElement {
   if (!audioElement) {
     audioElement = new Audio()
     audioElement.preload = 'metadata'
+    audioElement.crossOrigin = 'anonymous'
   }
   return audioElement
+}
+
+// Active Web Audio synth (for synth:// tracks)
+let activeSynth: SynthHandle | null = null
+
+function stopActiveSynth(): void {
+  if (activeSynth) {
+    try { activeSynth.stop() } catch { /* ignore */ }
+    activeSynth = null
+  }
+}
+
+/**
+ * Synth tracks are open-ended; advertise a virtual 1 hour duration
+ * so the progress bar has a scale and repeat/next still work.
+ */
+const SYNTH_VIRTUAL_DURATION = 3600
+let synthStartTime = 0
+let synthTickInterval: ReturnType<typeof setInterval> | null = null
+
+function startSynthProgress(duration: number) {
+  synthStartTime = Date.now()
+  if (synthTickInterval) clearInterval(synthTickInterval)
+  synthTickInterval = setInterval(() => {
+    const elapsed = (Date.now() - synthStartTime) / 1000
+    usePlayerStore.setState({ position: Math.min(elapsed, duration) })
+    if (elapsed >= duration) {
+      stopSynthProgress()
+      usePlayerStore.getState().next()
+    }
+  }, 500)
+}
+
+function stopSynthProgress() {
+  if (synthTickInterval) {
+    clearInterval(synthTickInterval)
+    synthTickInterval = null
+  }
 }
 
 // Track active blob URLs for cleanup to prevent memory leaks
@@ -272,6 +318,11 @@ export const usePlayerStore = create<PlayerStore>()(
       const state = get()
       const audio = getAudioElement()
 
+      // Unlock AudioContext on every play(). unlockAudio() is idempotent and
+      // this catches the first user gesture on mobile browsers that require
+      // it to start any audio.
+      void unlockAudio()
+
       // Cancel any active browser TTS before starting new playback
       cancelBrowserTTS()
 
@@ -288,6 +339,56 @@ export const usePlayerStore = create<PlayerStore>()(
       }
 
       if (!targetTrack) return
+
+      // ── Synth tracks (Web Audio API) ──
+      // synth://preset URLs are generated in-browser, so they bypass the
+      // <audio> element entirely and are always available.
+      if (isSynthUrl(targetTrack.src)) {
+        // Resuming same synth track
+        const isResumingSynth =
+          !isNewTrack && state.currentTrack?.id === targetTrack.id && activeSynth
+        if (isResumingSynth && activeSynth) {
+          activeSynth.setPaused(false)
+          set({ isPlaying: true, isLoading: false })
+          updateMediaSession(targetTrack)
+          return
+        }
+
+        stopActiveSynth()
+        stopSynthProgress()
+        audio.pause()
+        cleanupBlobUrl()
+
+        const preset = parseSynthUrl(targetTrack.src)
+        if (!preset) {
+          set({ isPlaying: false, isLoading: false, audioError: 'Invalid synth preset' })
+          return
+        }
+        try {
+          activeSynth = playSynth(preset, state.volume)
+          const duration = targetTrack.duration || SYNTH_VIRTUAL_DURATION
+          set({
+            currentTrack: targetTrack,
+            isPlaying: true,
+            isLoading: false,
+            position: 0,
+            duration,
+            audioError: null,
+          })
+          startSynthProgress(duration)
+          markTrackAvailable(targetTrack.id)
+          updateMediaSession(targetTrack)
+        } catch (err) {
+          console.warn('[PlayerStore] Synth start failed:', err)
+          set({ isPlaying: false, isLoading: false, audioError: 'Audio synth failed to start' })
+          markTrackUnavailable(targetTrack.id)
+        }
+        return
+      }
+
+      // Stop any running synth before starting a non-synth track
+      stopActiveSynth()
+      stopSynthProgress()
 
       // If resuming the same track (no new track provided), try to play directly
       const isResuming = !isNewTrack && state.currentTrack?.id === targetTrack.id
@@ -393,6 +494,8 @@ export const usePlayerStore = create<PlayerStore>()(
       const audio = getAudioElement()
       audio.pause()
       cancelBrowserTTS()
+      if (activeSynth) activeSynth.setPaused(true)
+      stopSynthProgress()
       set({ isPlaying: false })
 
       if ('mediaSession' in navigator) {
@@ -415,6 +518,8 @@ export const usePlayerStore = create<PlayerStore>()(
       audio.currentTime = 0
       cancelBrowserTTS()
       cleanupBlobUrl()
+      stopActiveSynth()
+      stopSynthProgress()
       set({ isPlaying: false, position: 0 })
 
       if ('mediaSession' in navigator) {
@@ -487,6 +592,12 @@ export const usePlayerStore = create<PlayerStore>()(
 
     seek: (position: number) => {
       const audio = getAudioElement()
+      // Synth tracks are generative — seeking just advances the virtual clock
+      if (activeSynth) {
+        synthStartTime = Date.now() - position * 1000
+        set({ position })
+        return
+      }
       audio.currentTime = position
       set({ position })
     },
@@ -531,6 +642,8 @@ export const usePlayerStore = create<PlayerStore>()(
       get().stop()
       cleanupBlobUrl()
       cancelBrowserTTS()
+      stopActiveSynth()
+      stopSynthProgress()
       set({
         queue: [],
         queueIndex: 0,
@@ -560,6 +673,7 @@ export const usePlayerStore = create<PlayerStore>()(
       const audio = getAudioElement()
       const clamped = Math.max(0, Math.min(1, volume))
       audio.volume = clamped
+      if (activeSynth) activeSynth.setVolume(clamped)
       set({ volume: clamped, muted: false })
     },
 
@@ -581,8 +695,10 @@ export const usePlayerStore = create<PlayerStore>()(
     toggleMute: () => {
       const audio = getAudioElement()
       const state = get()
-      audio.muted = !state.muted
-      set({ muted: !state.muted })
+      const willMute = !state.muted
+      audio.muted = willMute
+      if (activeSynth) activeSynth.setVolume(willMute ? 0 : state.volume)
+      set({ muted: willMute })
     },
 
     // ============ Error Handling ============
@@ -648,6 +764,47 @@ export const usePlayerStore = create<PlayerStore>()(
 // ============ Audio Event Listeners ============
 
 if (typeof window !== 'undefined') {
+  // Mobile browsers (iOS Safari, Chrome Android) block audio until a user
+  // gesture. Listen for the first pointer/touch interaction anywhere on the
+  // page and unlock the AudioContext, <audio> element, and speechSynthesis.
+  let audioUnlocked = false
+  const handleFirstGesture = () => {
+    if (audioUnlocked) return
+    audioUnlocked = true
+    void unlockAudio()
+    // Prime the <audio> element with a silent play/pause cycle so
+    // subsequent src changes don't require another user gesture.
+    try {
+      const audio = getAudioElement()
+      audio.muted = true
+      const p = audio.play()
+      if (p && typeof p.then === 'function') {
+        p.then(() => {
+          audio.pause()
+          audio.muted = false
+        }).catch(() => { audio.muted = false })
+      } else {
+        audio.muted = false
+      }
+    } catch { /* ignore */ }
+    // Prime speechSynthesis so Gita TTS fallback works without re-prompting
+    try {
+      if ('speechSynthesis' in window) {
+        const warmup = new SpeechSynthesisUtterance('')
+        warmup.volume = 0
+        window.speechSynthesis.speak(warmup)
+        // Some browsers lazily load voices - trigger the voice list load.
+        window.speechSynthesis.getVoices()
+      }
+    } catch { /* ignore */ }
+    window.removeEventListener('pointerdown', handleFirstGesture)
+    window.removeEventListener('touchstart', handleFirstGesture)
+    window.removeEventListener('keydown', handleFirstGesture)
+  }
+  window.addEventListener('pointerdown', handleFirstGesture, { once: false })
+  window.addEventListener('touchstart', handleFirstGesture, { once: false })
+  window.addEventListener('keydown', handleFirstGesture, { once: false })
+
   // Set up audio element event listeners
   const setupAudioListeners = () => {
     const audio = getAudioElement()
