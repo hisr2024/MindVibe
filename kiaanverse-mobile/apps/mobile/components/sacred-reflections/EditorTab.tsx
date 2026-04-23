@@ -42,6 +42,7 @@ import {
   getIsoWeekKey,
   getWritingTimeOfDay,
 } from '../../utils/sacredReflectionEncryption';
+import { WeeklyAssessment } from './WeeklyAssessment';
 
 interface EditorTabProps {
   readonly onSaved: () => void;
@@ -276,6 +277,9 @@ export function EditorTab({ onSaved }: EditorTabProps): React.JSX.Element {
           disabled={isSaving}
           style={styles.cta}
         />
+
+        {/* ---- Weekly Sacred Assessment (appears once per ISO week) ---- */}
+        <WeeklyAssessment />
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -26,6 +26,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Text, colors, spacing } from '@kiaanverse/ui';
@@ -151,10 +152,19 @@ function WeeklyStrip({
 // ---------------------------------------------------------------------------
 
 export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
+  const router = useRouter();
   const { data, isLoading, refetch } = useJournalEntries();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [activeFilter, setActiveFilter] = React.useState<MoodId | 'all'>('all');
   const [refreshing, setRefreshing] = React.useState(false);
+
+  const handleEntryPress = useCallback(
+    (entryId: string) => {
+      void Haptics.selectionAsync();
+      router.push(`/journal/${entryId}`);
+    },
+    [router],
+  );
 
   const entries = useMemo(() => data?.entries ?? [], [data]);
 
@@ -199,37 +209,44 @@ export function BrowseTab({ onOpenEditor }: BrowseTabProps): React.JSX.Element {
         day: 'numeric',
       });
       return (
-        <Animated.View entering={FadeIn.duration(300)} style={styles.entryCard}>
-          <View style={styles.entryHeader}>
-            {mood ? (
-              <View style={styles.entryMood}>
-                <Text style={styles.entryMoodEmoji}>{mood.emoji}</Text>
-                <Text variant="caption" color={mood.color}>
-                  {mood.sanskrit}
-                </Text>
-              </View>
-            ) : null}
-            <Text variant="caption" color={colors.text.muted}>
-              {date}
-            </Text>
-          </View>
-          {item.title ? (
-            <Text variant="h3" color={colors.text.primary} style={styles.entryTitle}>
-              {item.title}
-            </Text>
-          ) : null}
-          <Text
-            variant="caption"
-            color={colors.text.muted}
-            style={styles.entryPreview}
-            numberOfLines={2}
+        <Animated.View entering={FadeIn.duration(300)}>
+          <Pressable
+            onPress={() => handleEntryPress(item.id)}
+            style={styles.entryCard}
+            accessibilityRole="button"
+            accessibilityLabel={`Open reflection ${item.title ?? date}`}
           >
-            {item.content_preview || '(encrypted reflection)'}
-          </Text>
+            <View style={styles.entryHeader}>
+              {mood ? (
+                <View style={styles.entryMood}>
+                  <Text style={styles.entryMoodEmoji}>{mood.emoji}</Text>
+                  <Text variant="caption" color={mood.color}>
+                    {mood.sanskrit}
+                  </Text>
+                </View>
+              ) : null}
+              <Text variant="caption" color={colors.text.muted}>
+                {date}
+              </Text>
+            </View>
+            {item.title ? (
+              <Text variant="h3" color={colors.text.primary} style={styles.entryTitle}>
+                {item.title}
+              </Text>
+            ) : null}
+            <Text
+              variant="caption"
+              color={colors.text.muted}
+              style={styles.entryPreview}
+              numberOfLines={2}
+            >
+              {item.content_preview || '(encrypted reflection)'}
+            </Text>
+          </Pressable>
         </Animated.View>
       );
     },
-    [],
+    [handleEntryPress],
   );
 
   const renderEmpty = !isLoading ? (
