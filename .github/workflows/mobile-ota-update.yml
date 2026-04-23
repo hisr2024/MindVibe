@@ -96,8 +96,12 @@ jobs:
             MSG=$(git log -1 --pretty=%s)
           fi
           echo "Publishing EAS update: $MSG"
+          # The `production` channel must be mapped to the `production` branch
+          # before this runs. One-time setup:
+          #   eas channel:edit production --branch production
+          # Newer eas-cli versions reject --channel and --branch together, so we
+          # publish to the branch only and rely on the pre-configured mapping.
           eas update \
             --branch production \
-            --channel production \
             --message "$MSG" \
             --non-interactive
