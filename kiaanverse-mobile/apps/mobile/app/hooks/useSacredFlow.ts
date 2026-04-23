@@ -1,29 +1,55 @@
 /**
  * useSacredFlow — lightweight state container for multi-step sacred tool flows.
  *
- * Each flow (viyoga, ardha, etc.) owns a bucket of string answers collected
- * across its input screens plus an `aiResponse` the submission screen fills
- * after calling Sakha. Storage is in-memory only — these flows are transient
- * by design (a user should not resume a half-finished reflection after
- * killing the app; they should arrive fresh).
+ * Each flow (viyoga, ardha, karma-reset, emotional-reset, relationship-compass)
+ * owns a bucket of string answers collected across its input screens plus a
+ * response payload the submission screen fills after calling KIAAN.
+ * Storage is in-memory only — these flows are transient by design (a user
+ * should not resume a half-finished reflection after killing the app; they
+ * should arrive fresh).
+ *
+ * Submission:
+ *   - `viyoga` still posts to the dedicated `/api/viyoga/chat` route so the
+ *     existing meditation → release → fire screens keep their richer
+ *     `ViyogaTransmission` (karma_yoga_insight, citations). The structured
+ *     shape is shaped into five accordion sections + screen-local copy
+ *     defaults for the transmission screen.
+ *   - The other four flows call the unified `/api/kiaan/tools/*` surface
+ *     (see `kiaan/client.ts`). They receive a single `response` string
+ *     which is stored as `plainText` on the bucket; the tool's complete
+ *     screen renders it verbatim inside a SakhaResponse card.
  *
  * Usage:
  *   const { answers, updateAnswer, submitFlow, status, flow } =
- *     useSacredFlow('viyoga');
- *   updateAnswer('separation_type', 'divine');
+ *     useSacredFlow('ardha');
+ *   updateAnswer('situation', 'I keep missing deadlines');
+ *   updateAnswer('limiting_belief', "I'm not disciplined enough");
+ *   updateAnswer('fear', 'Everyone will stop trusting me');
  *   await submitFlow();
- *   console.log(flow.aiResponse);
+ *   console.log(flow.plainText); // KIAAN's reframe
  */
 
 import { useCallback } from 'react';
 import { create } from 'zustand';
-import { api } from '@kiaanverse/api';
+import {
+  api,
+  kiaan,
+  isAuthError,
+  isOfflineError,
+  isApiError,
+  type KiaanGitaVerse,
+} from '@kiaanverse/api';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-export type FlowName = 'viyoga' | 'ardha' | 'karma-reset' | 'emotional-reset';
+export type FlowName =
+  | 'viyoga'
+  | 'ardha'
+  | 'karma-reset'
+  | 'emotional-reset'
+  | 'relationship-compass';
 
 export type FlowStatus = 'idle' | 'calling' | 'done' | 'error';
 
@@ -62,14 +88,23 @@ export interface FlowBucket {
   readonly answers: FlowAnswers;
   readonly status: FlowStatus;
   readonly error: string | null;
+  /** Viyoga-only structured transmission. Null for other flows. */
   readonly aiResponse: FlowAIResponse;
+  /** Raw KIAAN response text for ardha / karma-reset / emotional-reset /
+   *  relationship-compass. Null for Viyoga (which uses `aiResponse`). */
+  readonly plainText: string | null;
+  /** Verse the user surfaced from WisdomCore before submitting; echoed to
+   *  the backend so its grounding matches what the user saw. */
+  readonly verse: KiaanGitaVerse | null;
 }
 
 interface SacredFlowState {
   flows: Record<string, FlowBucket>;
   setAnswer: (flow: FlowName, key: string, value: string) => void;
+  setVerse: (flow: FlowName, verse: KiaanGitaVerse | null) => void;
   setStatus: (flow: FlowName, status: FlowStatus, error?: string | null) => void;
   setAIResponse: (flow: FlowName, response: FlowAIResponse) => void;
+  setPlainText: (flow: FlowName, text: string | null) => void;
   reset: (flow: FlowName) => void;
 }
 
@@ -82,6 +117,8 @@ const EMPTY_BUCKET: FlowBucket = {
   status: 'idle',
   error: null,
   aiResponse: null,
+  plainText: null,
+  verse: null,
 };
 
 const useSacredFlowStore = create<SacredFlowState>((set) => ({
@@ -97,6 +134,17 @@ const useSacredFlowStore = create<SacredFlowState>((set) => ({
             ...current,
             answers: { ...current.answers, [key]: value },
           },
+        },
+      };
+    }),
+
+  setVerse: (flow, verse) =>
+    set((state) => {
+      const current = state.flows[flow] ?? EMPTY_BUCKET;
+      return {
+        flows: {
+          ...state.flows,
+          [flow]: { ...current, verse },
         },
       };
     }),
@@ -119,6 +167,17 @@ const useSacredFlowStore = create<SacredFlowState>((set) => ({
         flows: {
           ...state.flows,
           [flow]: { ...current, aiResponse: response },
+        },
+      };
+    }),
+
+  setPlainText: (flow, text) =>
+    set((state) => {
+      const current = state.flows[flow] ?? EMPTY_BUCKET;
+      return {
+        flows: {
+          ...state.flows,
+          [flow]: { ...current, plainText: text },
         },
       };
     }),
@@ -248,6 +307,101 @@ function shapeTransmission(
 }
 
 // ---------------------------------------------------------------------------
+// Unified KIAAN submission — ardha / karma-reset / emotional-reset /
+// relationship-compass. Returns the raw `response` string or throws.
+// ---------------------------------------------------------------------------
+
+/** Pick a string answer, trim, and fall back to `fallback` if empty. */
+function pickAnswer(answers: FlowAnswers, key: string, fallback = ''): string {
+  const v = answers[key];
+  if (typeof v !== 'string') return fallback;
+  const trimmed = v.trim();
+  return trimmed.length > 0 ? trimmed : fallback;
+}
+
+async function submitKiaanTool(
+  flow: Exclude<FlowName, 'viyoga'>,
+  answers: FlowAnswers,
+  verse: KiaanGitaVerse | null,
+): Promise<string> {
+  const v = verse ?? undefined;
+
+  switch (flow) {
+    case 'ardha': {
+      const res = await kiaan.tools.ardha(
+        {
+          situation: pickAnswer(answers, 'situation'),
+          limiting_belief: pickAnswer(answers, 'limiting_belief'),
+          fear: pickAnswer(answers, 'fear'),
+        },
+        v,
+      );
+      return res.response;
+    }
+    case 'karma-reset': {
+      const res = await kiaan.tools.karmaReset(
+        {
+          pattern: pickAnswer(answers, 'pattern'),
+          dimension: pickAnswer(answers, 'dimension', 'action'),
+          dharmic_action: pickAnswer(answers, 'dharmic_action'),
+        },
+        v,
+      );
+      return res.response;
+    }
+    case 'emotional-reset': {
+      const res = await kiaan.tools.emotionalReset(
+        {
+          emotion: pickAnswer(answers, 'emotion', 'overwhelmed'),
+          intensity: pickAnswer(answers, 'intensity', '5'),
+          situation: pickAnswer(answers, 'situation'),
+        },
+        v,
+      );
+      return res.response;
+    }
+    case 'relationship-compass': {
+      const res = await kiaan.tools.relationshipCompass(
+        {
+          challenge: pickAnswer(answers, 'challenge'),
+          relationship_type: pickAnswer(answers, 'relationship_type', 'partner'),
+          core_difficulty: pickAnswer(answers, 'core_difficulty'),
+        },
+        v,
+      );
+      return res.response;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Error → compassionate user-facing string. Callers can still inspect the
+// status sentinel (`AUTH_EXPIRED`) to trigger a sign-in redirect.
+// ---------------------------------------------------------------------------
+
+const AUTH_EXPIRED_SENTINEL = 'AUTH_EXPIRED';
+
+function humaniseError(err: unknown): string {
+  if (isAuthError(err)) return AUTH_EXPIRED_SENTINEL;
+  if (isOfflineError(err))
+    return "Saved. Sakha will reply when you're online.";
+  if (isApiError(err)) {
+    if (err.statusCode === 429)
+      return 'Pause, breathe — too many requests. Try in a minute.';
+    if (err.statusCode === 502 || err.statusCode === 503 || err.statusCode === 504)
+      return 'Sakha is collecting herself. Your words are saved locally; try again.';
+    if (err.statusCode >= 500)
+      return 'Something went wrong. Your words are safe.';
+    if (err.message) return err.message;
+  }
+  if (err instanceof Error && err.message.length > 0) return err.message;
+  return 'Sakha could not respond right now.';
+}
+
+/** Exported so tool screens can detect auth failures and redirect. */
+export const FLOW_AUTH_EXPIRED = AUTH_EXPIRED_SENTINEL;
+
+// ---------------------------------------------------------------------------
 // Hook
 // ---------------------------------------------------------------------------
 
@@ -257,6 +411,7 @@ export interface UseSacredFlowResult {
   readonly error: string | null;
   readonly flow: FlowBucket;
   readonly updateAnswer: (key: string, value: string) => void;
+  readonly setVerse: (verse: KiaanGitaVerse | null) => void;
   readonly submitFlow: () => Promise<void>;
   readonly resetFlow: () => void;
 }
@@ -264,16 +419,21 @@ export interface UseSacredFlowResult {
 /**
  * Access the collected state for a given sacred flow.
  *
- * `submitFlow()` actually fires the backend call for Viyoga (the others
- * are no-op for now and just flip the status machine so a loading screen
- * can show a transitional state). The shaped `aiResponse` lives on the
- * `flow` bucket for the transmission screen to read.
+ * `submitFlow()` routes by flow name:
+ *   - `viyoga` → `/api/viyoga/chat` (rich structured transmission).
+ *   - others  → `/api/kiaan/tools/<tool>` (plain response string).
+ *
+ * Errors are humanised on the bucket's `error` field. The `AUTH_EXPIRED`
+ * sentinel (exported as `FLOW_AUTH_EXPIRED`) lets screens redirect to
+ * sign-in without catching the error themselves.
  */
 export function useSacredFlow(flow: FlowName): UseSacredFlowResult {
   const bucket = useSacredFlowStore((state) => state.flows[flow] ?? EMPTY_BUCKET);
   const setAnswer = useSacredFlowStore((state) => state.setAnswer);
+  const setVerseFn = useSacredFlowStore((state) => state.setVerse);
   const setStatus = useSacredFlowStore((state) => state.setStatus);
   const setAIResponse = useSacredFlowStore((state) => state.setAIResponse);
+  const setPlainText = useSacredFlowStore((state) => state.setPlainText);
   const reset = useSacredFlowStore((state) => state.reset);
 
   const updateAnswer = useCallback(
@@ -283,41 +443,48 @@ export function useSacredFlow(flow: FlowName): UseSacredFlowResult {
     [flow, setAnswer],
   );
 
+  const setVerse = useCallback(
+    (verse: KiaanGitaVerse | null) => {
+      setVerseFn(flow, verse);
+    },
+    [flow, setVerseFn],
+  );
+
   const submitFlow = useCallback(async (): Promise<void> => {
     setStatus(flow, 'calling');
-
-    // Only Viyoga submits to a backend today. Other flows just
-    // acknowledge and return — keeps the API surface consistent so
-    // callers don't branch on flow name.
-    if (flow !== 'viyoga') {
-      setStatus(flow, 'done');
-      return;
-    }
 
     // Read the latest answers directly from the store so we don't hold
     // a stale closure snapshot from render time.
     const latest = useSacredFlowStore.getState().flows[flow] ?? EMPTY_BUCKET;
 
     try {
-      const { data } = await api.viyoga.chat(buildViyogaPrompt(latest.answers));
-      const raw = (data ?? {}) as ViyogaBackendResponse;
+      if (flow === 'viyoga') {
+        const { data } = await api.viyoga.chat(buildViyogaPrompt(latest.answers));
+        const raw = (data ?? {}) as ViyogaBackendResponse;
 
-      if (raw.error) {
-        throw new Error(raw.error);
+        if (raw.error) {
+          throw new Error(raw.error);
+        }
+
+        const transmission = shapeTransmission(raw, latest.answers);
+        setAIResponse(flow, transmission);
+        // Mirror the raw assistant text onto plainText as well so
+        // callers that don't care about the five-section shape can
+        // still access it (e.g. a "copy to journal" affordance).
+        setPlainText(flow, (raw.assistant ?? '').trim());
+        setStatus(flow, 'done');
+        return;
       }
 
-      const transmission = shapeTransmission(raw, latest.answers);
-      setAIResponse(flow, transmission);
+      const text = await submitKiaanTool(flow, latest.answers, latest.verse);
+      setPlainText(flow, text);
       setStatus(flow, 'done');
     } catch (err) {
-      const message =
-        err instanceof Error && err.message.length > 0
-          ? err.message
-          : 'Sakha could not respond right now.';
+      const message = humaniseError(err);
       setStatus(flow, 'error', message);
       throw err;
     }
-  }, [flow, setStatus, setAIResponse]);
+  }, [flow, setStatus, setAIResponse, setPlainText]);
 
   const resetFlow = useCallback(() => {
     reset(flow);
@@ -329,6 +496,7 @@ export function useSacredFlow(flow: FlowName): UseSacredFlowResult {
     error: bucket.error,
     flow: bucket,
     updateAnswer,
+    setVerse,
     submitFlow,
     resetFlow,
   };
