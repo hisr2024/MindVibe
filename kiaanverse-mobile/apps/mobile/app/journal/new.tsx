@@ -37,10 +37,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Crypto from 'expo-crypto';
 import * as Haptics from 'expo-haptics';
-import * as SecureStore from 'expo-secure-store';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import {
   ConfettiCannon,
@@ -56,6 +53,13 @@ import {
 } from '@kiaanverse/ui';
 import { useCreateJournal } from '@kiaanverse/api';
 import { useTranslation } from '@kiaanverse/i18n';
+import {
+  encryptReflection,
+  getIsoWeekKey,
+  getWritingTimeOfDay,
+  loadAssessmentStore,
+  saveAssessmentAnswers,
+} from '../../utils/sacredReflectionEncryption';
 
 // ---------------------------------------------------------------------------
 // Mood / Category / Tag definitions
@@ -104,130 +108,10 @@ const CHALLENGE_OPTIONS = [
   'Anger', 'Fear', 'Attachment', 'Pride', 'Greed', 'Confusion',
 ] as const;
 
-// ---------------------------------------------------------------------------
-// AES-256-GCM encryption (preserved from prior implementation)
-//
-// The key is generated once per device and lives in SecureStore. We use
-// SubtleCrypto when available (Hermes 0.74+ or polyfilled) and fall back to
-// a reversible base64 encoding on older runtimes so the app still functions;
-// the fallback is explicitly NOT secure — detected by the `:` delimiter on
-// read so callers can prompt the user to re-encrypt once SubtleCrypto lands.
-// ---------------------------------------------------------------------------
-
-const ENCRYPTION_KEY_ALIAS = 'mindvibe_journal_key';
-
-const HAS_SUBTLE_CRYPTO =
-  typeof globalThis.crypto !== 'undefined' &&
-  typeof globalThis.crypto.subtle !== 'undefined';
-
-async function getOrCreateEncryptionKey(): Promise<CryptoKey | string> {
-  let keyBase64 = await SecureStore.getItemAsync(ENCRYPTION_KEY_ALIAS);
-  if (!keyBase64) {
-    const keyBytes = await Crypto.getRandomBytesAsync(32);
-    keyBase64 = btoa(String.fromCharCode(...keyBytes));
-    await SecureStore.setItemAsync(ENCRYPTION_KEY_ALIAS, keyBase64);
-  }
-  if (!HAS_SUBTLE_CRYPTO) return keyBase64;
-  const keyBytes = Uint8Array.from(atob(keyBase64), (c) => c.charCodeAt(0));
-  return globalThis.crypto.subtle.importKey(
-    'raw',
-    keyBytes,
-    { name: 'AES-GCM' },
-    false,
-    ['encrypt', 'decrypt'],
-  );
-}
-
-async function encryptContent(content: string): Promise<string> {
-  if (!HAS_SUBTLE_CRYPTO) {
-    const hash = await Crypto.digestStringAsync(
-      Crypto.CryptoDigestAlgorithm.SHA256,
-      content,
-    );
-    return btoa(unescape(encodeURIComponent(content))) + ':' + hash.slice(0, 16);
-  }
-  const key = (await getOrCreateEncryptionKey()) as CryptoKey;
-  const iv = await Crypto.getRandomBytesAsync(12);
-  const encoded = new TextEncoder().encode(content);
-  const encrypted = await globalThis.crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv },
-    key,
-    encoded,
-  );
-  const combined = new Uint8Array(iv.length + new Uint8Array(encrypted).length);
-  combined.set(iv, 0);
-  combined.set(new Uint8Array(encrypted), iv.length);
-  return btoa(String.fromCharCode(...combined));
-}
-
-// ---------------------------------------------------------------------------
-// Weekly Sacred Assessment — local persistence
-// ---------------------------------------------------------------------------
-
-const ASSESSMENT_STORAGE_KEY = 'mindvibe_weekly_assessment_v1';
-
-interface WeeklyAssessmentAnswers {
-  readonly dharmic_challenge: string;
-  readonly gita_teaching: string;
-  readonly consistency_score: number;
-  readonly pattern_noticed: string;
-  readonly sankalpa_for_next_week: string;
-  readonly saved_at: string;
-}
-
-type AssessmentStore = Record<string, WeeklyAssessmentAnswers>;
-
-/**
- * Return an ISO-week key (`YYYY-W##`) for the given date — used as the
- * storage key so each calendar week gets at most one saved assessment.
- */
-function getIsoWeekKey(date: Date): string {
-  // Copy so we don't mutate the caller's date
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  // ISO weeks: Thursday of the current week determines the week-year
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86_400_000) + 1) / 7);
-  return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
-}
-
-async function loadAssessmentStore(): Promise<AssessmentStore> {
-  try {
-    const raw = await AsyncStorage.getItem(ASSESSMENT_STORAGE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as unknown;
-    return typeof parsed === 'object' && parsed !== null ? (parsed as AssessmentStore) : {};
-  } catch {
-    return {};
-  }
-}
-
-async function saveAssessmentAnswers(
-  weekKey: string,
-  answers: Omit<WeeklyAssessmentAnswers, 'saved_at'>,
-): Promise<void> {
-  try {
-    const store = await loadAssessmentStore();
-    store[weekKey] = { ...answers, saved_at: new Date().toISOString() };
-    await AsyncStorage.setItem(ASSESSMENT_STORAGE_KEY, JSON.stringify(store));
-  } catch {
-    // Local-only persistence — swallow errors so the entry save still succeeds.
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Classify wall-clock hour into the five Vedic time bands. */
-function getWritingTimeOfDay(hour: number): string {
-  if (hour >= 3.5 && hour < 5.5) return 'brahma';
-  if (hour >= 5.5 && hour < 12) return 'pratah';
-  if (hour >= 12 && hour < 17) return 'madhyanha';
-  if (hour >= 17 && hour < 20) return 'sandhya';
-  return 'ratri';
-}
+// Encryption, ISO-week keys, time-of-day bucketing, and assessment
+// persistence are centralised in utils/sacredReflectionEncryption — the new
+// 4-tab Sacred Reflections experience shares the same on-device key so
+// entries composed here and there decrypt identically.
 
 /**
  * Merge mood / category / time-of-day / user-selected tags into a single
@@ -347,7 +231,7 @@ export default function NewJournalScreen(): React.JSX.Element {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
-      const contentEncrypted = await encryptContent(body.trim());
+      const contentEncrypted = await encryptReflection(body.trim());
       const tags = buildTagsPayload({
         mood,
         category,

@@ -316,13 +316,18 @@ function JournalView(): React.JSX.Element {
   );
 
   const handleFabPress = useCallback(() => {
+    // FAB now opens the four-tab Sacred Reflections experience (1:1 port
+    // of kiaanverse.com/m/jo). The legacy single-page composer lives on at
+    // /journal/new for deep-links and the sync-queue retry handler.
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push('/journal/new');
+    router.push('/sacred-reflections');
   }, [router]);
 
   const handleOpenKarmaLytix = useCallback(() => {
+    // Route to the dedicated Karmalytix screen (the Dharmic Engine). The
+    // legacy /analytics surface stays reachable for back-compat.
     void Haptics.selectionAsync();
-    router.push('/analytics');
+    router.push('/karmalytix');
   }, [router]);
 
   const handleTagPress = useCallback((tag: string) => {
