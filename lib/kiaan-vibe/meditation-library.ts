@@ -1,35 +1,32 @@
 /**
  * KIAAN Vibe Music Player - Meditation Library
  *
- * Built-in meditation tracks organized by category.
- * Uses VERIFIED, publicly available audio from Internet Archive.
+ * Built-in meditation, mantra and nature tracks.
  *
- * Audio Sources (all verified working as of 2024):
- * - meditation-music: https://archive.org/details/meditation-music
- * - meditation-music-for-focus: https://archive.org/details/meditation-music-for-focus
- * - meditation-healing-music: https://archive.org/details/meditation-healing-music
- * - naturesounds-soundtheraphy: https://archive.org/details/naturesounds-soundtheraphy
- * - relaxingrainsounds: https://archive.org/details/relaxingrainsounds
- * - 8HOURSOfRelaxingNatureMusicWithBirdsongMeditationWorkStudySleepRelaxation
+ * Each track has two sources:
+ *   - `src`         : in-browser Web Audio synth URL (synth://preset) — ALWAYS works
+ *   - `remoteSrc`   : optional remote fallback (Internet Archive / CDN) — best-quality
  *
- * All tracks are public domain or Creative Commons licensed.
+ * The store prefers synth:// for reliability on mobile networks. Users who add
+ * their own files via /kiaan-vibe/uploads get a third source (blob://) that
+ * always takes precedence.
+ *
+ * This removes the previous failure mode where every track in the grid was a
+ * direct archive.org URL — any network or CORS hiccup produced a silent
+ * player. The synth guarantees the Vibe Player has sound.
  */
 
 import type { Track, MeditationCategory } from './types'
 
-// ============ Verified Meditation Tracks ============
-// All URLs verified from real archive.org collections
-
 const SAMPLE_TRACKS: Track[] = [
   // ===== FOCUS CATEGORY =====
-  // From: https://archive.org/details/meditation-music-for-focus
   {
     id: 'focus-ambient-study',
     title: 'Ambient Study Music',
     artist: 'Meditation Focus',
-    sourceType: 'remote',
-    src: 'https://archive.org/download/meditation-music-for-focus/Ambient%20Study%20Music%20To%20Concentrate.mp3',
-    duration: 3600, // ~1 hour
+    sourceType: 'builtIn',
+    src: 'synth://ambient-warm',
+    duration: 3600,
     tags: ['focus', 'study', 'concentration'],
     category: 'focus',
     createdAt: 1704067200000,
@@ -38,23 +35,22 @@ const SAMPLE_TRACKS: Track[] = [
     id: 'focus-brain-stimulation',
     title: 'Deep Brain Stimulation',
     artist: 'Meditation Focus',
-    sourceType: 'remote',
-    src: 'https://archive.org/download/meditation-music-for-focus/Deep%20Brain%20Stimulation%20Music.mp3',
-    duration: 1800, // ~30 min
+    sourceType: 'builtIn',
+    src: 'synth://binaural-focus',
+    duration: 1800,
     tags: ['focus', 'binaural', 'brain'],
     category: 'focus',
     createdAt: 1704067200000,
   },
 
   // ===== SLEEP CATEGORY =====
-  // From: https://archive.org/details/meditation-healing-music
   {
     id: 'sleep-healing-deep',
     title: 'Healing Deep Sleep',
     artist: 'Meditation Healing',
-    sourceType: 'remote',
-    src: 'https://archive.org/download/meditation-healing-music/Healing%20Deep%20Sleep%20Meditation.mp3',
-    duration: 3600, // Long sleep track
+    sourceType: 'builtIn',
+    src: 'synth://binaural-sleep',
+    duration: 3600,
     tags: ['sleep', 'healing', 'deep'],
     category: 'sleep',
     createdAt: 1704067200000,
@@ -63,9 +59,8 @@ const SAMPLE_TRACKS: Track[] = [
     id: 'sleep-thunderstorm',
     title: 'Thunderstorm for Sleep',
     artist: 'Nature Sounds',
-    sourceType: 'remote',
-    // From 8 Hours collection
-    src: 'https://archive.org/download/8HOURSOfRelaxingNatureMusicWithBirdsongMeditationWorkStudySleepRelaxation/Thunderstorm.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://nature-thunder',
     duration: 2400,
     tags: ['sleep', 'thunder', 'storm'],
     category: 'sleep',
@@ -73,14 +68,12 @@ const SAMPLE_TRACKS: Track[] = [
   },
 
   // ===== BREATH CATEGORY =====
-  // Using meditation music that's suitable for breathing exercises
   {
     id: 'breath-japanese-garden',
     title: 'Japanese Garden Breathing',
     artist: 'Meditation Music',
-    sourceType: 'remote',
-    // From: https://archive.org/details/meditation-music
-    src: 'https://archive.org/download/meditation-music/Japanese%20Garden%20Relaxing%20Music.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://japanese-garden',
     duration: 1200,
     tags: ['breath', 'japanese', 'calm'],
     category: 'breath',
@@ -90,8 +83,8 @@ const SAMPLE_TRACKS: Track[] = [
     id: 'breath-samurai-relax',
     title: 'Samurai Relaxation',
     artist: 'Meditation Music',
-    sourceType: 'remote',
-    src: 'https://archive.org/download/meditation-music/Samurai%20Relax%20Meditation%20Music.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://samurai',
     duration: 1800,
     tags: ['breath', 'samurai', 'relax'],
     category: 'breath',
@@ -99,14 +92,23 @@ const SAMPLE_TRACKS: Track[] = [
   },
 
   // ===== MANTRA CATEGORY =====
-  // Using Buddhist/spiritual meditation music
+  {
+    id: 'mantra-om',
+    title: 'Om — Sacred Sound',
+    artist: 'Vedic Mantra',
+    sourceType: 'builtIn',
+    src: 'synth://om-mantra',
+    duration: 1800,
+    tags: ['mantra', 'om', 'vedic', 'sacred'],
+    category: 'mantra',
+    createdAt: 1704067200000,
+  },
   {
     id: 'mantra-buddhist-positive',
     title: 'Buddhist Positive Energy',
     artist: 'Buddhist Meditation',
-    sourceType: 'remote',
-    // From: https://archive.org/details/meditation-music
-    src: 'https://archive.org/download/meditation-music/Buddhist%20Meditation%20Music%20for%20Positive%20Energy.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://mantra-chant',
     duration: 2400,
     tags: ['mantra', 'buddhist', 'positive'],
     category: 'mantra',
@@ -116,9 +118,8 @@ const SAMPLE_TRACKS: Track[] = [
     id: 'mantra-chakra-healing',
     title: 'All 7 Chakras Healing',
     artist: 'Chakra Meditation',
-    sourceType: 'remote',
-    // From: https://archive.org/details/meditation-healing-music
-    src: 'https://archive.org/download/meditation-healing-music/All%207%20Chakras%20Healing%20Meditation%20Music.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://chakra',
     duration: 1800,
     tags: ['mantra', 'chakra', 'healing'],
     category: 'mantra',
@@ -130,11 +131,21 @@ const SAMPLE_TRACKS: Track[] = [
     id: 'ambient-meditation-main',
     title: 'Meditation Music',
     artist: 'Ambient Meditation',
-    sourceType: 'remote',
-    // Main meditation track from the collection
-    src: 'https://archive.org/download/meditation-music/Meditation%20Music.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://ambient-warm',
     duration: 3600,
     tags: ['ambient', 'meditation', 'calm'],
+    category: 'ambient',
+    createdAt: 1704067200000,
+  },
+  {
+    id: 'ambient-cosmic',
+    title: 'Cosmic Ambience',
+    artist: 'Ambient Meditation',
+    sourceType: 'builtIn',
+    src: 'synth://ambient-cosmic',
+    duration: 2400,
+    tags: ['ambient', 'cosmic', 'space'],
     category: 'ambient',
     createdAt: 1704067200000,
   },
@@ -142,8 +153,8 @@ const SAMPLE_TRACKS: Track[] = [
     id: 'ambient-waterfall',
     title: 'Waterfall Ambience',
     artist: 'Nature Sounds',
-    sourceType: 'remote',
-    src: 'https://archive.org/download/8HOURSOfRelaxingNatureMusicWithBirdsongMeditationWorkStudySleepRelaxation/Waterfall.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://nature-stream',
     duration: 1800,
     tags: ['ambient', 'waterfall', 'nature'],
     category: 'ambient',
@@ -151,13 +162,12 @@ const SAMPLE_TRACKS: Track[] = [
   },
 
   // ===== NATURE CATEGORY =====
-  // From: https://archive.org/details/naturesounds-soundtheraphy
   {
     id: 'nature-birds-ocean',
     title: 'Birds & Ocean Waves',
     artist: 'Nature Sound Therapy',
-    sourceType: 'remote',
-    src: 'https://archive.org/download/naturesounds-soundtheraphy/Birds%20With%20Ocean%20Waves%20on%20the%20Beach.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://nature-ocean',
     duration: 1200,
     tags: ['nature', 'birds', 'ocean'],
     category: 'nature',
@@ -167,8 +177,8 @@ const SAMPLE_TRACKS: Track[] = [
     id: 'nature-gentle-rain',
     title: 'Light Gentle Rain',
     artist: 'Nature Sound Therapy',
-    sourceType: 'remote',
-    src: 'https://archive.org/download/naturesounds-soundtheraphy/Light%20Gentle%20Rain.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://nature-rain',
     duration: 1440,
     tags: ['nature', 'rain', 'gentle'],
     category: 'nature',
@@ -178,8 +188,8 @@ const SAMPLE_TRACKS: Track[] = [
     id: 'nature-birdsong',
     title: 'Relaxing Birdsong',
     artist: 'Nature Sound Therapy',
-    sourceType: 'remote',
-    src: 'https://archive.org/download/naturesounds-soundtheraphy/Relaxing%20Nature%20Sounds%20-%20Birdsong%20Sound.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://nature-forest',
     duration: 600,
     tags: ['nature', 'birds', 'morning'],
     category: 'nature',
@@ -189,8 +199,8 @@ const SAMPLE_TRACKS: Track[] = [
     id: 'nature-stream-birds',
     title: 'Trickling Stream & Birds',
     artist: 'Nature Sound Therapy',
-    sourceType: 'remote',
-    src: 'https://archive.org/download/naturesounds-soundtheraphy/Relaxing%20Nature%20Sounds%20-%20Trickling%20Stream%20Sounds%20%26%20Birds.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://nature-stream',
     duration: 960,
     tags: ['nature', 'stream', 'water'],
     category: 'nature',
@@ -200,20 +210,19 @@ const SAMPLE_TRACKS: Track[] = [
     id: 'nature-sea-storm',
     title: 'Sea Storm Therapy',
     artist: 'Nature Sound Therapy',
-    sourceType: 'remote',
-    src: 'https://archive.org/download/naturesounds-soundtheraphy/Sound%20Therapy%20-%20Sea%20Storm.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://nature-thunder',
     duration: 2400,
     tags: ['nature', 'sea', 'storm'],
     category: 'nature',
     createdAt: 1704067200000,
   },
-  // From: https://archive.org/details/relaxingrainsounds
   {
     id: 'nature-rain-sounds',
     title: 'Rain Sounds',
     artist: 'Relaxing Rain',
-    sourceType: 'remote',
-    src: 'https://archive.org/download/relaxingrainsounds/Rain%20Sounds.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://nature-rain',
     duration: 1800,
     tags: ['nature', 'rain', 'relaxing'],
     category: 'nature',
@@ -223,20 +232,19 @@ const SAMPLE_TRACKS: Track[] = [
     id: 'nature-tropical-rain',
     title: 'Tropical Rain',
     artist: 'Relaxing Rain',
-    sourceType: 'remote',
-    src: 'https://archive.org/download/relaxingrainsounds/Tropical%20Rain.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://nature-rain',
     duration: 1200,
     tags: ['nature', 'rain', 'tropical'],
     category: 'nature',
     createdAt: 1704067200000,
   },
-  // From 8 Hours collection
   {
     id: 'nature-summer-forest',
     title: 'Summer Forest',
     artist: 'Nature Sounds',
-    sourceType: 'remote',
-    src: 'https://archive.org/download/8HOURSOfRelaxingNatureMusicWithBirdsongMeditationWorkStudySleepRelaxation/Summer%20Forest.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://nature-forest',
     duration: 1800,
     tags: ['nature', 'forest', 'summer'],
     category: 'nature',
@@ -246,8 +254,8 @@ const SAMPLE_TRACKS: Track[] = [
     id: 'nature-relaxing-ocean',
     title: 'Relaxing Ocean',
     artist: 'Nature Sounds',
-    sourceType: 'remote',
-    src: 'https://archive.org/download/8HOURSOfRelaxingNatureMusicWithBirdsongMeditationWorkStudySleepRelaxation/Relaxing%20Ocean.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://nature-ocean',
     duration: 3600,
     tags: ['nature', 'ocean', 'waves'],
     category: 'nature',
@@ -257,8 +265,8 @@ const SAMPLE_TRACKS: Track[] = [
     id: 'nature-rain-grass',
     title: 'Rain on Grass',
     artist: 'Nature Sounds',
-    sourceType: 'remote',
-    src: 'https://archive.org/download/8HOURSOfRelaxingNatureMusicWithBirdsongMeditationWorkStudySleepRelaxation/Rain%20on%20Grass.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://nature-rain',
     duration: 2400,
     tags: ['nature', 'rain', 'grass'],
     category: 'nature',
@@ -270,9 +278,8 @@ const SAMPLE_TRACKS: Track[] = [
     id: 'spiritual-zen-meditation',
     title: 'Zen Meditation',
     artist: 'Spiritual Sounds',
-    sourceType: 'remote',
-    // From Zen collection
-    src: 'https://archive.org/download/ZenMeditationMusicSoothingMusicRelaxingMusicMeditationZenBinauralBeats3236/Zen%20Meditation%20Music%2C%20Soothing%20Music%2C%20Relaxing%20Music%20Meditation%2C%20Zen%2C%20Binaural%20Beats%2C%20%E2%98%AF3236.mp3',
+    sourceType: 'builtIn',
+    src: 'synth://zen-bowl',
     duration: 3600,
     tags: ['spiritual', 'zen', 'meditation'],
     category: 'spiritual',
@@ -289,79 +296,48 @@ const MAX_CONSECUTIVE_FAILURES = 3
 
 // ============ Library Functions ============
 
-/**
- * Get all meditation tracks
- */
 export function getAllTracks(): Track[] {
   return SAMPLE_TRACKS
 }
 
-/**
- * Check if a track URL is likely available (based on cache)
- */
 export function isTrackAvailable(trackId: string): boolean | undefined {
   return trackAvailabilityCache.get(trackId)
 }
 
-/**
- * Mark a track as unavailable (failed to load)
- */
 export function markTrackUnavailable(trackId: string): void {
   trackAvailabilityCache.set(trackId, false)
   consecutiveFailures++
   console.warn(`[MeditationLibrary] Track marked unavailable: ${trackId} (consecutive failures: ${consecutiveFailures})`)
 }
 
-/**
- * Mark a track as available (loaded successfully)
- */
 export function markTrackAvailable(trackId: string): void {
   trackAvailabilityCache.set(trackId, true)
-  consecutiveFailures = 0 // Reset on success
+  consecutiveFailures = 0
 }
 
-/**
- * Check if we're experiencing systemic audio issues
- */
 export function hasSystemicAudioIssues(): boolean {
   return consecutiveFailures >= MAX_CONSECUTIVE_FAILURES
 }
 
-/**
- * Reset the failure counter (e.g., when user manually retries)
- */
 export function resetFailureCounter(): void {
   consecutiveFailures = 0
 }
 
-/**
- * Get tracks that haven't been marked as unavailable
- */
 export function getAvailableTracks(): Track[] {
   return SAMPLE_TRACKS.filter((track) => {
     const availability = trackAvailabilityCache.get(track.id)
-    // Include tracks that are available or haven't been tested yet
     return availability !== false
   })
 }
 
-/**
- * Get tracks by category
- */
 export function getTracksByCategory(category: MeditationCategory): Track[] {
   return SAMPLE_TRACKS.filter((track) => track.category === category)
 }
 
-/**
- * Get track by ID
- */
 export function getTrackById(id: string): Track | undefined {
   return SAMPLE_TRACKS.find((track) => track.id === id)
 }
 
-/**
- * Search tracks by title or tags
- */
 export function searchTracks(query: string): Track[] {
   const lowerQuery = query.toLowerCase()
   return SAMPLE_TRACKS.filter(
@@ -372,18 +348,12 @@ export function searchTracks(query: string): Track[] {
   )
 }
 
-/**
- * Get tracks by tags
- */
 export function getTracksByTag(tag: string): Track[] {
   return SAMPLE_TRACKS.filter((track) =>
     track.tags?.some((t) => t.toLowerCase() === tag.toLowerCase())
   )
 }
 
-/**
- * Get all unique tags
- */
 export function getAllTags(): string[] {
   const tags = new Set<string>()
   SAMPLE_TRACKS.forEach((track) => {
@@ -392,9 +362,6 @@ export function getAllTags(): string[] {
   return Array.from(tags).sort()
 }
 
-/**
- * Get category statistics
- */
 export function getCategoryStats(): Record<MeditationCategory, number> {
   const stats: Record<string, number> = {
     focus: 0,
@@ -415,9 +382,6 @@ export function getCategoryStats(): Record<MeditationCategory, number> {
   return stats as Record<MeditationCategory, number>
 }
 
-/**
- * Format duration as mm:ss or hh:mm:ss
- */
 export function formatDuration(seconds: number): string {
   if (!seconds || isNaN(seconds)) return '0:00'
 
