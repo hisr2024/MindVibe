@@ -1,30 +1,26 @@
 /**
- * SacredTransition — Page transition wrapper with sacred animation.
+ * SacredTransition — deprecated animation wrapper, now a passthrough.
  *
- * Wraps children in an Animated.View that fades in with a gentle scale-up
- * (0.95 -> 1.0) on enter, and fades out with a scale-down (1.0 -> 0.95)
- * on exit. Uses Reanimated spring physics for a natural, organic feel.
+ * The prior implementation faded + scaled children on every mount /
+ * visibility flip, which made tab entries and phase swaps feel like
+ * re-loading screens. Per product direction ("make the app intuitive
+ * and fluid — no transitions, no re-loads"), the wrapper is kept for
+ * API compatibility but renders children immediately with no animation.
  *
- * Designed as a simple visibility toggle — mount when isVisible transitions
- * to true, and the component handles the enter/exit choreography.
+ * Existing call sites (journal tab, emotional-reset step runner) keep
+ * working unchanged. When `isVisible` is `false` the subtree unmounts
+ * via `null` — same observable contract as before, minus the 300–600 ms
+ * choreography that triggered the "Entering sacred space" feel.
  */
 
-import React, { useEffect } from 'react';
-import { StyleSheet, type ViewStyle } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
-import { spring as springPresets, duration } from '../tokens/motion';
+import React from 'react';
+import { View, StyleSheet, type ViewStyle } from 'react-native';
 
 /** Props for the SacredTransition component. */
 export interface SacredTransitionProps {
-  /** Content to wrap with the transition animation. */
+  /** Content to wrap. Rendered immediately when `isVisible` is true. */
   readonly children: React.ReactNode;
-  /** Whether the content should be visible. */
+  /** Whether the content should be visible. When false, children are unmounted. */
   readonly isVisible: boolean;
   /** Optional container style override. */
   readonly style?: ViewStyle;
@@ -32,57 +28,21 @@ export interface SacredTransitionProps {
   readonly testID?: string;
 }
 
-/** Scale values for enter and exit states. */
-const SCALE_HIDDEN = 0.95;
-const SCALE_VISIBLE = 1.0;
-
 function SacredTransitionComponent({
   children,
   isVisible,
   style,
   testID,
-}: SacredTransitionProps): React.JSX.Element {
-  const opacity = useSharedValue(isVisible ? 1 : 0);
-  const scale = useSharedValue(isVisible ? SCALE_VISIBLE : SCALE_HIDDEN);
-
-  useEffect(() => {
-    if (isVisible) {
-      // Entering: fade in + scale up with spring
-      opacity.value = withTiming(1, {
-        duration: duration.slow,
-        easing: Easing.out(Easing.ease),
-      });
-      scale.value = withSpring(SCALE_VISIBLE, springPresets.default);
-    } else {
-      // Exiting: fade out + scale down
-      opacity.value = withTiming(0, {
-        duration: duration.normal,
-        easing: Easing.in(Easing.ease),
-      });
-      scale.value = withTiming(SCALE_HIDDEN, {
-        duration: duration.normal,
-        easing: Easing.in(Easing.ease),
-      });
-    }
-  }, [isVisible, opacity, scale]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ scale: scale.value }],
-  }));
-
+}: SacredTransitionProps): React.JSX.Element | null {
+  if (!isVisible) return null;
   return (
-    <Animated.View
-      style={[styles.container, animatedStyle, style]}
-      testID={testID}
-      pointerEvents={isVisible ? 'auto' : 'none'}
-    >
+    <View style={[styles.container, style]} testID={testID}>
       {children}
-    </Animated.View>
+    </View>
   );
 }
 
-/** Page transition wrapper with fade + scale spring animation. */
+/** Passthrough wrapper — no animation, no re-entry flash. */
 export const SacredTransition = React.memo(SacredTransitionComponent);
 
 const styles = StyleSheet.create({

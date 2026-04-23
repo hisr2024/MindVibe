@@ -1,33 +1,31 @@
 /**
- * EmotionalResetScreen — Orchestrates the 6-phase sacred ritual on Android.
+ * EmotionalResetScreen — Orchestrates the sacred ritual on Android.
  *
- * Phase order: arrival → mandala → witness → breath → integration → ceremony.
+ * Phase order: mandala → witness → breath → integration → ceremony.
+ *
+ * The prior `arrival` phase (a 1.6 s "Entering sacred space…" loader)
+ * has been removed — it was ceremonial padding, not real work, and it
+ * made the tool feel gated. The mandala phase is now the true entry,
+ * so the user sees the offering surface immediately.
  *
  * Architecture notes:
  *   - Each phase owns the full viewport; the background canvas stays
  *     mounted across transitions so users never "leave" sacred space.
- *   - Phase swaps are animated with a fade-in keyed off `phase` (same
- *     trick as KarmaResetScreen so `withSequence` doesn't coalesce).
+ *   - Phase swaps no longer re-fade the whole layer — each phase
+ *     component controls its own entry choreography. The canvas beneath
+ *     is the continuity.
  *   - All backend wiring lives in this orchestrator — phases receive
  *     typed data + callbacks only.
  *
  * Mirrors the web flow at `app/(mobile)/m/emotional-reset/page.tsx`.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSequence,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { api } from '@kiaanverse/api';
 import { EmotionalResetCanvas } from './visuals/EmotionalResetCanvas';
-import { ArrivalPhase } from './phases/ArrivalPhase';
 import { MandalaPhase } from './phases/MandalaPhase';
 import { WitnessPhase } from './phases/WitnessPhase';
 import { BreathPhase } from './phases/BreathPhase';
@@ -69,7 +67,11 @@ type StartPayload = {
 export function EmotionalResetScreen(): React.JSX.Element {
   const router = useRouter();
 
-  const [phase, setPhase] = useState<EmotionalResetPhase>('arrival');
+  // Phase `arrival` is intentionally skipped — the "Entering sacred space…"
+  // loader added a 1.6 s blocker with no purpose other than ceremony, and
+  // made the ritual feel gated. The mandala phase is now the true entry
+  // point; the canvas underneath fades in on mount, which is enough.
+  const [phase, setPhase] = useState<EmotionalResetPhase>('mandala');
   const [emotion, setEmotion] = useState<EmotionalState | null>(null);
   const [intensity, setIntensity] = useState<number>(0);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -78,22 +80,6 @@ export function EmotionalResetScreen(): React.JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [crisis, setCrisis] = useState<string | null>(null);
   const startedAt = useRef(Date.now());
-
-  // Phase fade-in — same technique as KarmaResetScreen.
-  const fade = useSharedValue(1);
-  useEffect(() => {
-    fade.value = withSequence(
-      withTiming(0, { duration: 0 }),
-      withTiming(1, {
-        duration: 600,
-        easing: Easing.bezier(0, 0.8, 0.2, 1),
-      }),
-    );
-  }, [phase, fade]);
-  const fadeStyle = useAnimatedStyle(() => ({ opacity: fade.value }));
-
-  // Phase 0 → 1
-  const handleArrivalComplete = useCallback(() => setPhase('mandala'), []);
 
   // Phase 1 → 2 (start session + step 1)
   const handleOffer = useCallback(
@@ -192,14 +178,12 @@ export function EmotionalResetScreen(): React.JSX.Element {
       <StatusBar style="light" />
       <EmotionalResetCanvas phase={phase} />
 
-      <Animated.View
-        style={[StyleSheet.absoluteFill, fadeStyle]}
-        key={phase}
-      >
-        {phase === 'arrival' ? (
-          <ArrivalPhase onComplete={handleArrivalComplete} />
-        ) : null}
-
+      {/* Phase swap: plain View instead of a fading Animated.View. Each
+          phase component handles its own entry choreography, so re-fading
+          the whole layer on every phase change just added visible flashes.
+          The canvas behind stays mounted, keeping the "sacred space"
+          unbroken. */}
+      <View style={StyleSheet.absoluteFill}>
         {phase === 'mandala' ? (
           <MandalaPhase onOffer={handleOffer} />
         ) : null}
@@ -240,7 +224,7 @@ export function EmotionalResetScreen(): React.JSX.Element {
             onReturn={handleReturnHome}
           />
         ) : null}
-      </Animated.View>
+      </View>
     </View>
   );
 }
