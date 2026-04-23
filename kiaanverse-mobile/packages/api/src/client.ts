@@ -66,6 +66,55 @@ export function setTokenManager(manager: TokenManager): void {
   tokenManager = manager;
 }
 
+/**
+ * Read the current access token via the registered TokenManager.
+ *
+ * Exposed for transports that bypass the axios interceptor (e.g. SSE over
+ * XHR) and therefore cannot piggy-back on the apiClient's built-in
+ * Authorization header injection. Callers get the exact same token that a
+ * normal apiClient POST would attach, which guarantees the streaming
+ * endpoint sees the same identity as non-streaming chat.
+ *
+ * Returns null when the app is not authenticated, when the token manager
+ * has not been configured yet, or when SecureStore throws.
+ */
+export async function getCurrentAccessToken(): Promise<string | null> {
+  try {
+    const token = await tokenManager.getAccessToken();
+    return token ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Attempt to refresh the access token via the registered TokenManager.
+ * Returns the new access token on success, or null if no refresh token
+ * is available / the refresh call fails. Safe to call when already
+ * unauthenticated — it just returns null.
+ *
+ * Uses a raw axios.post (not `apiClient`) so it bypasses the response
+ * interceptor and can never loop on a refresh that itself returns 401.
+ */
+export async function refreshAccessToken(): Promise<string | null> {
+  try {
+    const refreshToken = await tokenManager.getRefreshToken();
+    if (!refreshToken) return null;
+    const response = await axios.post<RefreshResponse>(
+      `${API_CONFIG.baseURL}/api/auth/refresh`,
+      { refresh_token: refreshToken },
+      { withCredentials: true, timeout: API_CONFIG.timeout },
+    );
+    const newAccess = response.data?.access_token;
+    const newRefresh = response.data?.refresh_token ?? refreshToken;
+    if (!newAccess) return null;
+    await tokenManager.setTokens(newAccess, newRefresh);
+    return newAccess;
+  } catch {
+    return null;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Cookie Extraction Helper
 // ---------------------------------------------------------------------------

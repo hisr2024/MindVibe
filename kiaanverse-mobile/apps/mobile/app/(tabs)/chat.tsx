@@ -42,7 +42,6 @@ import {
   View,
   type ListRenderItemInfo,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 
@@ -66,6 +65,17 @@ const CONVERSATION_CACHE_KEY = 'sakha_chat_conversation_v1';
 /** Max number of messages we keep in the persisted snapshot. */
 const MAX_CACHED_MESSAGES = 60;
 
+/**
+ * Height of the custom DivineTabBar's content (safe-area bottom is added on
+ * top inside the tab bar itself). The tab bar is `position: absolute, bottom:
+ * 0` so it overlays tab screens; we reserve this space on the chat root so
+ * the ChatInput and the InsightFab both sit above it instead of being
+ * covered by the Home / Sakha / Shlokas row.
+ *
+ * Must stay in sync with `TAB_BAR_HEIGHT` in components/navigation/DivineTabBar.tsx.
+ */
+const TAB_BAR_CONTENT_HEIGHT = 64;
+
 interface CachedConversation {
   readonly sessionId: string | null;
   readonly messages: SakhaStreamMessage[];
@@ -77,7 +87,6 @@ const OFFLINE_BANNER_TEXT =
   'You appear to be offline. I will listen as soon as the connection returns.';
 
 export default function ChatScreen(): React.JSX.Element {
-  const insets = useSafeAreaInsets();
   const listRef = useRef<FlatList<SakhaStreamMessage>>(null);
   const headerRef = useRef<ChatHeaderHandle | null>(null);
   const { isOnline } = useNetworkStatus();
@@ -293,7 +302,7 @@ export default function ChatScreen(): React.JSX.Element {
           {/* Offline banner — subtle, does not block the UI. */}
           {!isOnline && (
             <View
-              style={[styles.offlineBanner, { bottom: insets.bottom + 72 }]}
+              style={[styles.offlineBanner, { bottom: 12 }]}
               accessibilityLiveRegion="polite"
               accessibilityLabel={OFFLINE_BANNER_TEXT}
             >
@@ -304,18 +313,21 @@ export default function ChatScreen(): React.JSX.Element {
           {/* Error toast — shown after a failed stream. */}
           {error && isOnline && !streaming && (
             <View
-              style={[styles.offlineBanner, { bottom: insets.bottom + 72 }]}
+              style={[styles.offlineBanner, { bottom: 12 }]}
               accessibilityLiveRegion="polite"
             >
               <Text style={styles.offlineText}>{error}</Text>
             </View>
           )}
 
-          {/* Floating insight FAB — seeds a Gita-rooted reflection prompt. */}
+          {/* Floating insight FAB — seeds a Gita-rooted reflection prompt.
+              Positioned relative to the body's bottom edge, which — thanks
+              to the flex layout and the root's reserved tab-bar space —
+              already sits just above the ChatInput composer. */}
           <InsightFab
             onPress={handleInsightPress}
             hidden={streaming}
-            bottomOffset={insets.bottom + 80}
+            bottomOffset={12}
           />
         </View>
 
@@ -339,6 +351,10 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: BG,
+    // Reserve room for the DivineTabBar that's `position: absolute, bottom:
+    // 0`. Without this the ChatInput renders behind the tab bar and users
+    // have nowhere to type.
+    paddingBottom: TAB_BAR_CONTENT_HEIGHT,
   },
   keyboardAvoider: {
     flex: 1,
