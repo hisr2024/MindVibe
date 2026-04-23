@@ -7,6 +7,28 @@ export { apiClient, setTokenManager } from './client';
 export { api } from './endpoints';
 export { API_CONFIG } from './config';
 
+// Unified KIAAN surface — `/api/kiaan/*` endpoints (see kiaan/client.ts).
+export {
+  kiaan,
+  type KiaanClient,
+  type KiaanMessage,
+  type KiaanGitaVerse,
+  type KiaanChatRequest,
+  type KiaanChatResponse,
+  type KiaanToolRequest,
+  type EmotionalResetInputs as KiaanEmotionalResetInputs,
+  type ArdhaInputs as KiaanArdhaInputs,
+  type ViyogaInputs as KiaanViyogaInputs,
+  type KarmaResetInputs as KiaanKarmaResetInputs,
+  type RelationshipCompassInputs as KiaanRelationshipCompassInputs,
+  type KarmaLytixMetadata as KiaanKarmaLytixMetadata,
+  useKiaanRoomChat,
+  useKiaanVoice,
+  type KiaanRoomChatMessage,
+  type UseKiaanRoomChatResult,
+  type UseKiaanVoiceResult,
+} from './kiaan';
+
 // Error classes and type guards
 export {
   ApiError,
