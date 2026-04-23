@@ -1,0 +1,103 @@
+name: Mobile OTA Update
+
+# Publishes a JavaScript-only EAS Update to the `production` channel on every
+# push to `main` that touches mobile sources.
+#
+# WHY THIS EXISTS:
+#   Without this workflow, merging PRs to `main` does NOT reach installed
+#   APKs/IPAs. `mobile-production-release.yml` only fires on `v*.*.*` tag
+#   pushes (full store submission), so JS-only changes that landed via PR
+#   merge stay invisible on devices until someone manually tags a release.
+#   That's the "merged a new PR but the app shows the old build" symptom.
+#
+# WHAT IT DOES:
+#   `eas update --branch production --channel production` publishes the new
+#   JS bundle. The app's `expo-updates` module (configured in
+#   `apps/mobile/app.config.ts` with `runtimeVersion: { policy: 'appVersion' }`)
+#   downloads it on next cold start and reloads with the fresh code.
+#
+# WHAT IT DOES NOT DO:
+#   Native changes (new permissions, native modules, version bump, app icon,
+#   splash, anything in `app.config.ts` `ios`/`android` blocks) are NOT
+#   shippable as OTA — they require a new APK/IPA via the existing
+#   `mobile-production-release.yml` (push a `v*.*.*` tag).
+#
+#   To skip OTA on a commit that's purely native / non-functional, include
+#   `[skip ota]` in the commit message.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'kiaanverse-mobile/**'
+      - '!kiaanverse-mobile/**/*.md'
+      - '!kiaanverse-mobile/**/README*'
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Update message (defaults to commit subject)'
+        required: false
+        type: string
+
+concurrency:
+  group: mobile-ota-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish EAS Update
+    if: ${{ !contains(github.event.head_commit.message, '[skip ota]') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: kiaanverse-mobile/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: kiaanverse-mobile
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Verify EXPO_TOKEN is set
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::error::EXPO_TOKEN secret is not configured. OTA updates cannot be published."
+            exit 1
+          fi
+
+      - name: Publish OTA update to production channel
+        working-directory: kiaanverse-mobile/apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          INPUT_MESSAGE: ${{ github.event.inputs.message }}
+        run: |
+          if [ -n "$INPUT_MESSAGE" ]; then
+            MSG="$INPUT_MESSAGE"
+          else
+            # Fall back to the commit subject for traceability in EAS dashboard.
+            MSG=$(git log -1 --pretty=%s)
+          fi
+          echo "Publishing EAS update: $MSG"
+          eas update \
+            --branch production \
+            --channel production \
+            --message "$MSG" \
+            --non-interactive
