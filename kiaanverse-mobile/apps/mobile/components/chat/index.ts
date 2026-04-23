@@ -16,6 +16,8 @@ export {
   ConversationStarters,
   type ConversationStartersProps,
 } from './ConversationStarters';
+export { HeroMandala, type HeroMandalaProps } from './HeroMandala';
+export { InsightFab, type InsightFabProps } from './InsightFab';
 export {
   useSakhaStream,
   type SakhaStreamMessage,
